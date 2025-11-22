@@ -52,11 +52,38 @@
 ## Phase 5: Polish & Scale (Weeks 26-36)
 - [ ] Performance optimization
 - [ ] Add more themes (3 for Professional, 10 for Business)
-- [ ] Implement advanced analytics
+- [ ] Implement advanced analytics (see docs/specs/analytics-spec.md)
 - [ ] Build priority support system
-- [ ] Add API for integrations
+- [ ] Implement comment system (Hyvor Talk for MVP, see docs/research/comment-system-strategy.md)
+- [ ] Implement data export (markdown + pictures as zip)
 - [ ] Implement backup/restore functionality
 - [ ] Scale infrastructure as needed
+
+## Future Considerations (Post-Launch)
+
+### Theme System Expansion
+- [ ] Custom CSS override option for advanced users
+- [ ] Theme marketplace (users buy/sell themes)
+- [ ] User-uploadable themes with validation
+- [ ] Theme builder/customizer UI
+- [ ] More color/font customization options
+
+### Migration Tools Expansion
+- [ ] WordPress import tool
+- [ ] Ghost import tool
+- [ ] Medium import tool
+- [ ] Substack import tool
+- [ ] Generic RSS/Atom import
+- [ ] Bulk media migration
+
+### API Access (Paid Add-on)
+- [ ] Public REST API for reading posts
+- [ ] Authenticated API for creating/editing posts
+- [ ] API key management in dashboard
+- [ ] Rate limiting and usage tracking
+- [ ] API documentation and examples
+- [ ] Webhook support for external integrations
+- [ ] SDK/client libraries (JavaScript, Python)
 
 ## Documentation Tasks
 - [ ] Update README.md with project specifics
