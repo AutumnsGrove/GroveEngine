@@ -7,7 +7,7 @@
 - [ ] Implement magic link auth (6-digit email codes via Resend)
 - [ ] Configure Stripe for payments
 - [ ] Set up Resend for email
-- [ ] Check domain availability (grove.com or alternatives)
+- [x] Check domain availability → **DONE: grove.place secured!**
 - [ ] Set up development environment with proper tooling
 - [ ] Configure Tailwind CSS
 - [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)

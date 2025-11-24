@@ -8,11 +8,12 @@ type: project-summary
 
 # Grove Platform - Master Project Summary
 
-**Project:** Grove - Multi-tenant blog platform with social feed  
-**Status:** Specification Complete → Ready for Development  
-**Date:** November 2025  
-**Structure:** 3 Separate Projects (Engine, Website, Social)  
-**Phase:** MVP Development (GroveEngine)
+**Project:** Grove - Multi-tenant blog platform with social feed
+**Status:** Phase 0.1 - Pre-Launch Preparation
+**Domain:** grove.place ✅
+**Date:** November 24, 2025
+**Structure:** 3 Separate Projects (Engine, Website, Social)
+**Phase:** 0.1 → Preparing for MVP Development
 
 ---
 
@@ -68,7 +69,7 @@ The Grove platform has been split into three separate but integrated projects:
 **Purpose:** Social features - feed, voting, reactions, community discovery
 
 **Key Features:**
-- Aggregated feed of opt-in posts (grove.com/feed)
+- Aggregated feed of opt-in posts (grove.place/feed)
 - Voting system (Hacker News style, no public scores)
 - Emoji reactions (Emoji Kitchen + generic)
 - User accounts for social features
@@ -83,7 +84,7 @@ The Grove platform has been split into three separate but integrated projects:
 ## 🎯 Updated Pricing (Revised)
 
 ### Starter Plan: **$12/month**
-- Subdomain: `username.grove.com`
+- Subdomain: `username.grove.place`
 - Up to 250 posts (archived when limit reached, **NOT deleted**)
 - 1 blog theme (choose from 3-5 options)
 - Basic media storage (5GB)
@@ -212,7 +213,7 @@ The Grove platform has been split into three separate but integrated projects:
 - [ ] Create support ticket system
 
 **Success Criteria:**
-- Website live at grove.com
+- Website live at grove.place
 - Automated signup & provisioning works end-to-end
 - Billing system functional
 - Client dashboard usable
@@ -234,7 +235,7 @@ The Grove platform has been split into three separate but integrated projects:
 - [ ] Add moderation tools
 
 **Success Criteria:**
-- Feed live at grove.com/feed
+- Feed live at grove.place/feed
 - Users can vote and react
 - Performance acceptable with 10+ blogs
 - No spam or abuse issues
@@ -357,7 +358,7 @@ The Grove platform has been split into three separate but integrated projects:
 ## 🎯 Next Steps (Immediate)
 
 ### This Week
-1. **Check domain availability** - grove.com or alternatives
+1. ~~**Check domain availability**~~ → **DONE: grove.place secured!**
 2. **Create GroveEngine repo** - Start extracting from autumnsgrove.com
 3. **Set up project structure** - 3 separate repositories
 4. **Review research results** - When subdomain/auth/comment research completes

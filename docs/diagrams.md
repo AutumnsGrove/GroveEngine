@@ -41,7 +41,7 @@ This document contains all Mermaid diagrams for the Grove Platform. Use your pre
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f4e8', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#2d5a2d', 'lineColor': '#2d5a2d', 'secondaryColor': '#f0f7f0', 'tertiaryColor': '#ffffff', 'background': '#ffffff'}}}%%
 flowchart TD
     subgraph signup["Signup Flow"]
-        A[User visits grove.com] --> B[Clicks 'Start Your Blog']
+        A[User visits grove.place] --> B[Clicks 'Start Your Blog']
         B --> C[Selects Plan]
         C --> D[Enters Email & Password]
         D --> E[Verification Email Sent]
@@ -55,7 +55,7 @@ flowchart TD
     end
 
     subgraph login["Login Flow"]
-        L[User visits grove.com/login] --> M[Enters Email & Password]
+        L[User visits grove.place/login] --> M[Enters Email & Password]
         M --> N{Credentials Valid?}
         N -->|Yes| O{Email Verified?}
         N -->|No| P[Show Error Message]
@@ -502,7 +502,7 @@ erDiagram
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#f3e5f5', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#7b1fa2', 'lineColor': '#7b1fa2', 'background': '#ffffff'}}}%%
 flowchart TB
-    subgraph website["Grove Website (grove.com)"]
+    subgraph website["Grove Website (grove.place)"]
         W1[Marketing Pages]
         W2[Client Dashboard]
         W3[Billing Management]
@@ -512,7 +512,7 @@ flowchart TB
         W7[Email Service]
     end
 
-    subgraph engine["GroveEngine (username.grove.com)"]
+    subgraph engine["GroveEngine (username.grove.place)"]
         E1[Blog Frontend]
         E2[Admin Panel]
         E3[Post Editor]
@@ -522,7 +522,7 @@ flowchart TB
         E7[RSS Feed]
     end
 
-    subgraph social["Grove Social (grove.com/feed)"]
+    subgraph social["Grove Social (grove.place/feed)"]
         S1[Community Feed]
         S2[Voting System]
         S3[Reaction System]
@@ -631,7 +631,7 @@ sequenceDiagram
     W-->>C: 30. Redirect to blog admin
     C->>W: 31. Access admin panel
 
-    Note over C,E: Blog is now live at username.grove.com
+    Note over C,E: Blog is now live at username.grove.place
 ```
 
 ---
@@ -642,9 +642,9 @@ sequenceDiagram
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#fff8e1', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#ff8f00', 'lineColor': '#ff8f00', 'background': '#ffffff'}}}%%
 flowchart TD
     subgraph blogs["Individual Blogs"]
-        B1[Blog A<br/>alice.grove.com]
-        B2[Blog B<br/>bob.grove.com]
-        B3[Blog C<br/>carol.grove.com]
+        B1[Blog A<br/>alice.grove.place]
+        B2[Blog B<br/>bob.grove.place]
+        B3[Blog C<br/>carol.grove.place]
     end
 
     subgraph optin["Opt-In Check"]
@@ -1270,7 +1270,7 @@ timeline
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#f1f8e9', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#558b2f', 'lineColor': '#558b2f', 'background': '#ffffff'}}}%%
 flowchart LR
     subgraph starter["Starter - $12/mo"]
-        S1["Subdomain<br/>username.grove.com"]
+        S1["Subdomain<br/>username.grove.place"]
         S2["250 Post Limit<br/>(soft, archives)"]
         S3["5GB Storage"]
         S4["1 Theme"]
@@ -1279,7 +1279,7 @@ flowchart LR
     end
 
     subgraph pro["Professional - $25/mo"]
-        P1["Subdomain<br/>username.grove.com"]
+        P1["Subdomain<br/>username.grove.place"]
         P2["Unlimited Posts"]
         P3["20GB Storage"]
         P4["3 Themes"]

@@ -98,27 +98,27 @@ grove-website/
 
 ### 1. Marketing Pages
 
-**Homepage (`grove.com`):**
+**Homepage (`grove.place`):**
 - Hero section with value proposition
 - Feature highlights (cheap, simple, community-owned)
 - Social proof (testimonials, example blogs)
 - Clear call-to-action ("Start Your Blog")
 - Pricing preview
 
-**Features Page (`grove.com/features`):**
+**Features Page (`grove.place/features`):**
 - Detailed feature list
 - Comparison with competitors
 - Screenshots of admin panel
 - Theme showcase
 - RSS & ownership benefits
 
-**Pricing Page (`grove.com/pricing`):**
+**Pricing Page (`grove.place/pricing`):**
 - Clear tier comparison table
 - FAQ section
 - Money-back guarantee
 - "Most Popular" badge on Professional plan
 
-**Examples Page (`grove.com/examples`):**
+**Examples Page (`grove.place/examples`):**
 - Showcase real client blogs (with permission)
 - Different use cases (personal, portfolio, business)
 - "See it in action" links

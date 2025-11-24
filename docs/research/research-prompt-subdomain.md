@@ -28,7 +28,7 @@ I need detailed technical research on Cloudflare's subdomain capabilities for a 
    - Billing triggers - at what point would I need to upgrade from free tier?
 
 4. DOMAIN STRUCTURE OPTIONS
-   - Pros/cons of: username.grove.com vs grove.com/username
+   - Pros/cons of: username.grove.place vs grove.place/username
    - SSL certificate handling for wildcard subdomains
    - DNS propagation considerations
 

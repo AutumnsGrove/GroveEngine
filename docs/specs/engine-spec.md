@@ -294,7 +294,7 @@ R2_BUCKET=     # Media storage
 KV_NAMESPACE=  # Configuration cache
 
 # Features
-PUBLIC_SITE_URL=https://username.grove.com
+PUBLIC_SITE_URL=https://username.grove.place
 PUBLIC_THEME=default
 PUBLIC_POSTS_PER_PAGE=10
 ```

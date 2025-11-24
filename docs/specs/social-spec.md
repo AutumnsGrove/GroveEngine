@@ -71,7 +71,7 @@ grove-social/
 
 ### 1. The Grove Feed
 
-**Feed URL:** `grove.com/feed`
+**Feed URL:** `grove.place/feed`
 
 **Feed Types:**
 - **All Posts:** Every opt-in post, chronological
