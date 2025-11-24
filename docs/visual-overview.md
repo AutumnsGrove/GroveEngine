@@ -138,9 +138,9 @@ This document contains visual diagrams and charts to help understand the Grove p
 ![User Flow](../assets/visuals/grove-userflow.png)
 
 **Signup Flow:**
-1. Visit grove.com → Choose plan ($12-49/mo)
+1. Visit grove.place → Choose plan ($12-49/mo)
 2. Create account → Enter payment (Stripe)
-3. Choose subdomain (username.grove.com)
+3. Choose subdomain (username.grove.place)
 4. Blog created automatically → Welcome email
 
 **Blog Management:**
@@ -151,7 +151,7 @@ This document contains visual diagrams and charts to help understand the Grove p
 
 **Optional Social Features:**
 1. Enable feed sharing in settings
-2. Posts appear on grove.com/feed
+2. Posts appear on grove.place/feed
 3. Users can vote & react to posts
 
 **Business Plan Extras:**
@@ -164,7 +164,7 @@ This document contains visual diagrams and charts to help understand the Grove p
 ## 6. Quick Project Summary
 
 ### What is Grove?
-A multi-tenant blog platform where users get their own blogs on subdomains (username.grove.com). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can opt-in to share posts, vote, and react with emojis.
+A multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can opt-in to share posts, vote, and react with emojis.
 
 ### Core Value Propositions
 - **Simple & Affordable:** $12-49/month with transparent pricing
@@ -178,9 +178,9 @@ A multi-tenant blog platform where users get their own blogs on subdomains (user
 - 📋 **36-Week Roadmap:** Clear path to $500 MRR
 
 ### Next Steps (Immediate)
-1. **Domain Research:** Check availability for grove.com or alternatives
+1. **Domain Research:** Check availability for grove.place or alternatives
 2. **Repository Setup:** Create `grove-engine` GitHub repository
-3. **Code Extraction:** Extract blog functionality from autumnsgrove.com
+3. **Code Extraction:** Extract blog functionality from autumnsgrove.place
 4. **MVP Build:** Test with Mom's publishing house as first client
 
 ### Key Metrics & Goals

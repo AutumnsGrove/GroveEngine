@@ -133,7 +133,7 @@ This file tracks all development tasks, from current MVP work to future features
 - [ ] Prepare support documentation
 
 **Success Criteria:**
-- [ ] Website live at grove.com
+- [ ] Website live at grove.place
 - [ ] Automated signup & provisioning works
 - [ ] Billing system functional
 - [ ] Client dashboard usable
@@ -157,7 +157,7 @@ This file tracks all development tasks, from current MVP work to future features
 - [ ] Build feed aggregation system
 - [ ] Implement opt-in mechanism for posts
 - [ ] Create feed API endpoints
-- [ ] Build feed UI (grove.com/feed)
+- [ ] Build feed UI (grove.place/feed)
 - [ ] Add pagination & infinite scroll
 - [ ] Implement caching for performance
 
@@ -177,7 +177,7 @@ This file tracks all development tasks, from current MVP work to future features
 - [ ] Implement personalization (future)
 
 **Success Criteria:**
-- [ ] Feed live at grove.com/feed
+- [ ] Feed live at grove.place/feed
 - [ ] Users can vote and react
 - [ ] Performance acceptable with 10+ blogs
 - [ ] No spam or abuse issues
@@ -464,7 +464,7 @@ This file tracks all development tasks, from current MVP work to future features
 5. Document client onboarding process
 
 ### Medium Priority (3-6 Months)
-1. Build main website (grove.com) with signup flow
+1. Build main website (grove.place) with signup flow
 2. Implement subdomain provisioning system
 3. Add 3-5 beta clients (friends/family)
 4. Create basic analytics for client blogs

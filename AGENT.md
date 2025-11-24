@@ -5,7 +5,7 @@
 ---
 
 ## Project Purpose
-Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.com). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
+Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
 
 ## Tech Stack
 - **Language:** TypeScript, JavaScript

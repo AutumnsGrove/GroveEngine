@@ -2,12 +2,13 @@
 project: Grove Platform
 description: Multi-tenant blog platform with social feed
 created: 2025-11-21
-status: Specification Complete → Ready for Development
+status: Phase 0.1 - Pre-Launch Preparation
+domain: grove.place ✅
 ---
 
 # Grove Platform
 
-Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.com). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
+Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
 
 ## 📁 Project Structure
 
@@ -37,10 +38,12 @@ GroveProject/
 
 ## 🎯 Quick Start
 
-**Current Phase:** Build GroveEngine MVP (Weeks 1-4)
+**Current Phase:** Phase 0.1 - Pre-Launch Preparation
+
+**Domain Secured:** grove.place ✅
 
 **Next Steps:**
-1. Check domain availability (grove.com or alternatives)
+1. ~~Check domain availability~~ → **DONE: grove.place secured in Cloudflare!**
 2. Create `grove-engine` GitHub repository
 3. Extract blog functionality from autumnsgrove.com
 4. Build MVP with Mom's publishing house as first client
@@ -99,5 +102,6 @@ See [docs/visual-overview.md](docs/visual-overview.md) for:
 
 ---
 
-**Project Status:** Specification Complete → Ready for Development  
-**Last Updated:** November 2025
+**Project Status:** Phase 0.1 - Pre-Launch Preparation
+**Domain:** grove.place ✅
+**Last Updated:** November 24, 2025
