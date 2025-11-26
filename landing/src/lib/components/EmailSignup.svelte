@@ -46,7 +46,8 @@
 			<polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round" />
 		</svg>
 		<p class="text-grove-800 font-sans font-medium">You're on the list!</p>
-		<p class="text-grove-600 text-sm font-sans mt-1">We'll be in touch when Grove blooms.</p>
+		<p class="text-grove-600 text-sm font-sans mt-1">Check your inbox for a welcome note.</p>
+		<p class="text-grove-500 text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
 	</div>
 {:else}
 	<form onsubmit={handleSubmit} class="w-full max-w-md">
