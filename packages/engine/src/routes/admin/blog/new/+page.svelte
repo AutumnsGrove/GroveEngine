@@ -1,0 +1,635 @@
+<script>
+  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
+  import { browser } from "$app/environment";
+  import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
+  import GutterManager from "$lib/components/admin/GutterManager.svelte";
+  import { api } from "$lib/utils/api.js";
+
+  // Form state
+  let title = $state("");
+  let slug = $state("");
+  let date = $state(new Date().toISOString().split("T")[0]);
+  let description = $state("");
+  let tagsInput = $state("");
+  let font = $state("default");
+  let content = $state("");
+  let gutterItems = $state([]);
+
+  // Editor reference for anchor insertion
+  let editorRef = $state(null);
+
+  // UI state
+  let saving = $state(false);
+  let error = $state(null);
+  let slugManuallyEdited = $state(false);
+  let showGutter = $state(false);
+  let detailsCollapsed = $state(false);
+
+  // Load collapsed state from localStorage
+  onMount(() => {
+    if (browser) {
+      const saved = localStorage.getItem("editor-details-collapsed");
+      if (saved !== null) {
+        detailsCollapsed = saved === "true";
+      }
+    }
+  });
+
+  function toggleDetailsCollapsed() {
+    detailsCollapsed = !detailsCollapsed;
+    if (browser) {
+      localStorage.setItem("editor-details-collapsed", String(detailsCollapsed));
+    }
+  }
+
+  // Auto-generate slug from title
+  $effect(() => {
+    if (!slugManuallyEdited && title) {
+      slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+  });
+
+  function handleSlugInput() {
+    slugManuallyEdited = true;
+  }
+
+  // Parse tags from comma-separated input
+  function parseTags(input) {
+    return input
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+  }
+
+  async function handleSave() {
+    // Validation
+    if (!title.trim()) {
+      error = "Title is required";
+      return;
+    }
+    if (!slug.trim()) {
+      error = "Slug is required";
+      return;
+    }
+    if (!content.trim()) {
+      error = "Content is required";
+      return;
+    }
+
+    error = null;
+    saving = true;
+
+    try {
+      const result = await api.post("/api/posts", {
+        title: title.trim(),
+        slug: slug.trim(),
+        date,
+        description: description.trim(),
+        tags: parseTags(tagsInput),
+        font,
+        markdown_content: content,
+        gutter_content: JSON.stringify(gutterItems),
+      });
+
+      // Clear draft on successful save
+      editorRef?.clearDraft();
+
+      // Redirect to the edit page or blog admin
+      goto(`/admin/blog/edit/${result.slug}`);
+    } catch (err) {
+      error = err.message;
+    } finally {
+      saving = false;
+    }
+  }
+</script>
+
+<div class="new-post-page">
+  <header class="page-header">
+    <div class="header-content">
+      <a href="/admin/blog" class="back-link">&larr; Back to Posts</a>
+      <h1>New Post</h1>
+    </div>
+    <button
+      class="save-btn"
+      onclick={handleSave}
+      disabled={saving}
+    >
+      {saving ? "Saving..." : "Save Post"}
+    </button>
+  </header>
+
+  {#if error}
+    <div class="error-banner">
+      <span class="error-icon">!</span>
+      <span>{error}</span>
+      <button class="error-dismiss" onclick={() => (error = null)}>&times;</button>
+    </div>
+  {/if}
+
+  <div class="editor-layout">
+    <!-- Metadata Panel -->
+    <aside class="metadata-panel" class:collapsed={detailsCollapsed}>
+      <div class="panel-header">
+        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
+        <button
+          class="collapse-details-btn"
+          onclick={toggleDetailsCollapsed}
+          title={detailsCollapsed ? "Expand details" : "Collapse details"}
+          aria-expanded={!detailsCollapsed}
+        >
+          {#if detailsCollapsed}»{:else}«{/if}
+        </button>
+      </div>
+
+      {#if !detailsCollapsed}
+        <div class="panel-content">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              bind:value={title}
+              placeholder="Your Post Title"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="slug">Slug</label>
+            <div class="slug-input-wrapper">
+              <span class="slug-prefix">/blog/</span>
+              <input
+                type="text"
+                id="slug"
+                bind:value={slug}
+                oninput={handleSlugInput}
+                placeholder="your-post-slug"
+                class="form-input slug-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input
+              type="date"
+              id="date"
+              bind:value={date}
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="description">
+              Description
+              <span class="char-count" class:warning={description.length > 160} class:good={description.length >= 120 && description.length <= 160}>
+                {description.length}/160
+              </span>
+            </label>
+            <textarea
+              id="description"
+              bind:value={description}
+              placeholder="A brief summary of your post (120-160 chars for SEO)..."
+              rows="3"
+              class="form-input form-textarea"
+              class:char-warning={description.length > 160}
+            ></textarea>
+            {#if description.length > 160}
+              <span class="form-warning">Description exceeds recommended SEO length</span>
+            {:else if description.length > 0 && description.length < 120}
+              <span class="form-hint">Add {120 - description.length} more chars for optimal SEO</span>
+            {/if}
+          </div>
+
+          <div class="form-group">
+            <label for="tags">Tags</label>
+            <input
+              type="text"
+              id="tags"
+              bind:value={tagsInput}
+              placeholder="tag1, tag2, tag3"
+              class="form-input"
+            />
+            <span class="form-hint">Separate tags with commas</span>
+          </div>
+
+          {#if tagsInput}
+            <div class="tags-preview">
+              {#each parseTags(tagsInput) as tag}
+                <span class="tag-preview">{tag}</span>
+              {/each}
+            </div>
+          {/if}
+
+          <div class="form-group">
+            <label for="font">Font</label>
+            <select id="font" bind:value={font} class="form-input">
+              <option value="default">Default (Site Setting)</option>
+              <option value="alagard">Alagard</option>
+              <option value="cozette">Cozette</option>
+              <option value="atkinson">Atkinson Hyperlegible</option>
+              <option value="opendyslexic">OpenDyslexic</option>
+              <option value="lexend">Lexend</option>
+              <option value="cormorant">Cormorant (Serif)</option>
+              <option value="quicksand">Quicksand</option>
+            </select>
+            <span class="form-hint">Choose a font for this post's content</span>
+          </div>
+        </div>
+      {/if}
+    </aside>
+
+    <!-- Editor Panel -->
+    <main class="editor-main">
+      <div class="editor-with-gutter">
+        <div class="editor-section">
+          <MarkdownEditor
+            bind:this={editorRef}
+            bind:content
+            {saving}
+            onSave={handleSave}
+            draftKey="new-post"
+            previewTitle={title}
+            previewDate={date}
+            previewTags={parseTags(tagsInput)}
+          />
+        </div>
+        {#if showGutter}
+          <aside class="gutter-section">
+            <GutterManager
+              bind:gutterItems
+              availableAnchors={editorRef?.getAvailableAnchors?.() || []}
+              onInsertAnchor={(name) => editorRef?.insertAnchor(name)}
+            />
+          </aside>
+        {/if}
+      </div>
+      <button
+        class="toggle-gutter-btn"
+        onclick={() => (showGutter = !showGutter)}
+        title={showGutter ? "Hide gutter panel" : "Show gutter panel"}
+      >
+        {showGutter ? "Hide Gutter ◀" : "▶ Gutter Content"}
+      </button>
+    </main>
+  </div>
+</div>
+
+<style>
+  .new-post-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 8rem);
+    min-height: 600px;
+  }
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+  }
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .back-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+  .page-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--color-text);
+    transition: color 0.3s ease;
+  }
+  .save-btn {
+    padding: 0.6rem 1.25rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-button);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+  }
+  .save-btn:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+  .save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  /* Error Banner */
+  .error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #ffeef0;
+    border: 1px solid #f85149;
+    border-radius: var(--border-radius-button);
+    color: #cf222e;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+  :global(.dark) .error-banner {
+    background: rgba(248, 81, 73, 0.15);
+    border-color: #f85149;
+    color: #ff7b72;
+  }
+  .error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #cf222e;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  :global(.dark) .error-icon {
+    background: #f85149;
+  }
+  .error-dismiss {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+  }
+  .error-dismiss:hover {
+    opacity: 1;
+  }
+  /* Editor Layout */
+  .editor-layout {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 0;
+  }
+  /* Metadata Panel */
+  .metadata-panel {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--mobile-menu-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    padding: 1.25rem;
+    overflow-y: auto;
+    transition: width 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .metadata-panel.collapsed {
+    width: 50px;
+    padding: 0.75rem 0.5rem;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1.25rem;
+    transition: border-color 0.3s ease;
+  }
+  .metadata-panel.collapsed .panel-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .panel-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    transition: color 0.3s ease;
+  }
+  .metadata-panel.collapsed .panel-title {
+    font-size: 0.7rem;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+  .collapse-details-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    font-family: monospace;
+    transition: all 0.15s ease;
+  }
+  .collapse-details-btn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-primary);
+  }
+  .panel-content {
+    /* Animation for content visibility */
+  }
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: color 0.3s ease;
+  }
+  .form-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    font-size: 0.9rem;
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    transition: border-color 0.2s, background-color 0.3s, color 0.3s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+  .slug-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+    transition: border-color 0.2s, background-color 0.3s;
+  }
+  .slug-input-wrapper:focus-within {
+    border-color: var(--color-primary);
+  }
+  .slug-prefix {
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+    color: var(--color-text-subtle);
+    font-size: 0.85rem;
+    background: var(--color-border);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  .slug-input {
+    border: none;
+    background: transparent;
+    flex: 1;
+  }
+  .slug-input:focus {
+    outline: none;
+  }
+  .form-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    transition: color 0.3s ease;
+  }
+  .form-warning {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: #e07030;
+    transition: color 0.3s ease;
+  }
+  .char-count {
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: var(--color-text-subtle);
+    margin-left: 0.5rem;
+  }
+  .char-count.good {
+    color: var(--accent-success);
+  }
+  .char-count.warning {
+    color: #e07030;
+  }
+  .form-input.char-warning {
+    border-color: #e07030;
+  }
+  .tags-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: -0.5rem;
+  }
+  .tag-preview {
+    padding: 0.2rem 0.6rem;
+    background: var(--tag-bg);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  /* Editor Main */
+  .editor-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .editor-with-gutter {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+  }
+  .editor-section {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .gutter-section {
+    width: 300px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .toggle-gutter-btn {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: #252526;
+    border: 1px solid var(--light-border-primary);
+    border-radius: 4px;
+    color: #8bc48b;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    align-self: flex-end;
+  }
+  .toggle-gutter-btn:hover {
+    background: var(--light-border-primary);
+    color: #a8dca8;
+  }
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .gutter-section {
+      width: 250px;
+    }
+  }
+  @media (max-width: 900px) {
+    .editor-layout {
+      flex-direction: column;
+    }
+    .metadata-panel {
+      width: 100% !important;
+      max-height: none;
+    }
+    .metadata-panel.collapsed {
+      width: 100% !important;
+      padding: 1rem;
+    }
+    .metadata-panel.collapsed .panel-header {
+      flex-direction: row;
+    }
+    .metadata-panel.collapsed .panel-title {
+      writing-mode: horizontal-tb;
+      transform: none;
+      font-size: 1rem;
+    }
+    .new-post-page {
+      height: auto;
+      min-height: auto;
+    }
+    .editor-main {
+      min-height: 500px;
+    }
+    .editor-with-gutter {
+      flex-direction: column;
+    }
+    .gutter-section {
+      width: 100%;
+      max-height: 300px;
+    }
+  }
+</style>

@@ -1,0 +1,70 @@
+# GroveEngine - Cloudflare Pages Configuration
+# Each Grove site runs as its own Cloudflare Pages deployment
+#
+# SETUP INSTRUCTIONS:
+# 1. Replace "your-site-name" with your actual site name
+# 2. Create D1 database: npx wrangler d1 create your-site-posts
+# 3. Create R2 bucket: npx wrangler r2 bucket create your-site-images
+# 4. Create KV namespace: npx wrangler kv:namespace create CACHE
+# 5. Update the IDs below with actual values from creation output
+# 6. Set secrets: npx wrangler secret put SESSION_SECRET (etc.)
+
+name = "your-site-name"
+compatibility_date = "2025-01-01"
+
+# Cloudflare Pages Functions output directory
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# =============================================================================
+# KV Namespace - For caching and rate limiting
+# =============================================================================
+# Create with: npx wrangler kv:namespace create CACHE
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "your-kv-namespace-id"
+
+# =============================================================================
+# R2 Bucket - For image and media storage
+# =============================================================================
+# Create with: npx wrangler r2 bucket create your-site-images
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "your-site-images"
+
+# =============================================================================
+# D1 Database - For posts, pages, settings, and auth
+# =============================================================================
+# Create with: npx wrangler d1 create your-site-posts
+# Run migrations: npx wrangler d1 execute your-site-posts --file=migrations/001_magic_codes.sql
+[[d1_databases]]
+binding = "POSTS_DB"
+database_name = "your-site-posts"
+database_id = "your-database-id"
+
+# =============================================================================
+# Environment Variables (non-sensitive)
+# =============================================================================
+[vars]
+CACHE_TTL_SECONDS = "3600"
+
+# =============================================================================
+# Secrets (set via CLI, not in this file!)
+# =============================================================================
+# Required secrets - set with: npx wrangler secret put SECRET_NAME
+#
+# SESSION_SECRET     - Secret for signing JWT tokens (32+ random chars)
+#                      Generate: openssl rand -hex 32
+#
+# ALLOWED_ADMIN_EMAILS - Comma-separated list of admin emails
+#                        Example: "admin@example.com,owner@example.com"
+#
+# RESEND_API_KEY     - API key for Resend email service (magic codes)
+#                      Get from: https://resend.com
+
+# =============================================================================
+# Cloudflare Pages Notes
+# =============================================================================
+# - Cron triggers are NOT supported in Pages mode
+# - Use Cloudflare Workers for scheduled tasks if needed
+# - Assets are handled automatically by Pages
+# - Custom domains configured in Cloudflare Dashboard

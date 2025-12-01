@@ -1,0 +1,109 @@
+/**
+ * Client-side API utility with automatic CSRF token injection
+ * Provides fetch wrapper with security headers and error handling
+ */
+
+/**
+ * Fetch wrapper with automatic CSRF token injection
+ * @param {string} url - API endpoint URL
+ * @param {RequestInit} options - Fetch options
+ * @returns {Promise<any>} Response JSON
+ * @throws {Error} If request fails
+ */
+export async function apiRequest(url, options = {}) {
+	const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+	// Build headers - don't set Content-Type for FormData (browser sets it with boundary)
+	const headers = {
+		...(csrfToken && { 'X-CSRF-Token': csrfToken }),
+		...options.headers
+	};
+
+	// Only add Content-Type if not FormData
+	if (!(options.body instanceof FormData)) {
+		headers['Content-Type'] = 'application/json';
+	}
+
+	const response = await fetch(url, {
+		...options,
+		headers
+	});
+
+	if (!response.ok) {
+		let errorMessage = 'Request failed';
+		try {
+			const error = await response.json();
+			errorMessage = error.message || errorMessage;
+		} catch {
+			errorMessage = `${response.status} ${response.statusText}`;
+		}
+		throw new Error(errorMessage);
+	}
+
+	// Handle empty responses (204 No Content)
+	if (response.status === 204) {
+		return null;
+	}
+
+	return response.json();
+}
+
+/**
+ * Convenience methods for common HTTP verbs
+ */
+export const api = {
+	/**
+	 * GET request
+	 * @param {string} url - API endpoint
+	 * @param {RequestInit} options - Additional fetch options
+	 */
+	get: (url, options = {}) =>
+		apiRequest(url, { ...options, method: 'GET' }),
+
+	/**
+	 * POST request
+	 * @param {string} url - API endpoint
+	 * @param {any} body - Request body (will be JSON stringified)
+	 * @param {RequestInit} options - Additional fetch options
+	 */
+	post: (url, body, options = {}) =>
+		apiRequest(url, {
+			...options,
+			method: 'POST',
+			body: JSON.stringify(body)
+		}),
+
+	/**
+	 * PUT request
+	 * @param {string} url - API endpoint
+	 * @param {any} body - Request body (will be JSON stringified)
+	 * @param {RequestInit} options - Additional fetch options
+	 */
+	put: (url, body, options = {}) =>
+		apiRequest(url, {
+			...options,
+			method: 'PUT',
+			body: JSON.stringify(body)
+		}),
+
+	/**
+	 * DELETE request
+	 * @param {string} url - API endpoint
+	 * @param {RequestInit} options - Additional fetch options
+	 */
+	delete: (url, options = {}) =>
+		apiRequest(url, { ...options, method: 'DELETE' }),
+
+	/**
+	 * PATCH request
+	 * @param {string} url - API endpoint
+	 * @param {any} body - Request body (will be JSON stringified)
+	 * @param {RequestInit} options - Additional fetch options
+	 */
+	patch: (url, body, options = {}) =>
+		apiRequest(url, {
+			...options,
+			method: 'PATCH',
+			body: JSON.stringify(body)
+		})
+};
