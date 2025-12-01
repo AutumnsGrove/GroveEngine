@@ -2,57 +2,119 @@
 project: Grove Platform
 description: Multi-tenant blog platform with social feed
 created: 2025-11-21
-status: Phase 0.1 - Pre-Launch Preparation
+status: Phase 1 - MVP Development
 domain: grove.place ✅
 ---
 
 # Grove Platform
 
-Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
+A modern, multi-tenant blogging platform where users get their own blogs on subdomains (username.grove.place). Built entirely on Cloudflare infrastructure with SvelteKit, featuring unique gutter annotations, a powerful markdown editor, and an optional community feed.
+
+## 📦 Packages
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| [@groveengine/engine](packages/engine) | 0.1.0 | Multi-tenant blog engine for Cloudflare Workers |
+| [@groveengine/ui](packages/ui) | 0.1.0 | Grove Design System - calm, organic component library |
 
 ## 📁 Project Structure
 
 ```
-GroveProject/
-├── docs/                      # Documentation
+GroveEngine/
+├── packages/
+│   ├── engine/               # @groveengine/engine - Blog engine
+│   │   ├── src/
+│   │   │   ├── lib/          # Core library code
+│   │   │   │   ├── components/   # Svelte components
+│   │   │   │   ├── server/       # Server utilities
+│   │   │   │   └── utils/        # Shared utilities
+│   │   │   └── routes/       # SvelteKit routes (blog, admin, API)
+│   │   └── migrations/       # D1 database migrations
+│   └── ui/                   # @groveengine/ui - Design system
+│       └── src/lib/
+│           ├── components/   # UI components
+│           ├── tokens/       # Design tokens
+│           └── tailwind.preset.js
+├── landing/                  # Marketing site for grove.place
+├── docs/                     # Project documentation
 │   ├── README.md             # Master project summary
-│   ├── visual-overview.md    # Visual diagrams & charts
-│   ├── roadmap.md            # Development roadmap & TODOs
 │   ├── specs/                # Technical specifications
-│   │   ├── engine-spec.md    # GroveEngine (core blog engine)
-│   │   ├── website-spec.md   # Grove Website (marketing & billing)
-│   │   └── social-spec.md    # Grove Social (community feed)
-│   └── research/             # Research & investigation
-│       ├── auth-strategy.md
-│       ├── comment-system-strategy.md
-│       ├── cloudflare-architecture-guide.md
-│       └── domain-search-prompt.md
-├── assets/visuals/           # Generated diagrams & charts
-│   ├── grove-architecture.png
-│   ├── grove-roadmap.png
-│   ├── grove-userflow.png
-│   ├── grove-techstack.png
-│   └── grove-pricing.png
-└── archives/                 # Legacy/backup files
+│   └── research/             # Architecture research
+└── assets/                   # Brand assets & visuals
 ```
 
-## 🎯 Quick Start
+## ✨ Key Features
 
-**Current Phase:** Phase 0.1 - Pre-Launch Preparation
+- **Gutter Annotations** - Unique sidebar annotation system for contextual notes on blog posts
+- **Markdown Editor** - Full-featured editor with live preview, multiple themes, drag-drop images, and Mermaid diagram support
+- **Magic Code Auth** - Passwordless authentication via email verification codes
+- **Multi-Tenant Architecture** - Subdomain-based isolation with per-tenant databases
+- **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
+- **Grove Design System** - Calm, organic UI components with WCAG 2.1 AA accessibility
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Install the engine package
+npm install @groveengine/engine
+
+# Install the UI library
+npm install @groveengine/ui
+```
+
+### Using the Design System
+
+```javascript
+// Import components
+import { Button, Card, Alert } from '@groveengine/ui/components';
+
+// Import styles
+import '@groveengine/ui/styles';
+
+// Use the Tailwind preset in your tailwind.config.js
+import grovePreset from '@groveengine/ui/tailwind';
+
+export default {
+  presets: [grovePreset],
+  // ...
+};
+```
+
+### Using Engine Components
+
+```javascript
+// Import blog components
+import { ContentWithGutter, MarkdownEditor } from '@groveengine/engine';
+
+// Import utilities
+import { parseMarkdown } from '@groveengine/engine/utils/markdown';
+```
+
+## 🎯 Project Status
+
+**Current Phase:** Phase 1 - MVP Development
 
 **Domain Secured:** grove.place ✅
 
-**Next Steps:**
-1. ~~Check domain availability~~ → **DONE: grove.place secured in Cloudflare!**
-2. Create `grove-engine` GitHub repository
-3. Extract blog functionality from autumnsgrove.com
-4. Build MVP with Mom's publishing house as first client
+**Completed:**
+- ✅ Domain secured (grove.place)
+- ✅ Blog engine migrated from AutumnsGrove
+- ✅ NPM packages published (@groveengine/engine, @groveengine/ui)
+- ✅ Multi-tenant database schema designed
+- ✅ Grove Design System created
+- ✅ Landing page deployed
+
+**In Progress:**
+- 🔄 Engine MVP completion
+- 🔄 Admin panel refinement
+- 🔄 First client onboarding
 
 **Key Links:**
 - [Master Project Summary](docs/README.md)
-- [Visual Overview](docs/visual-overview.md)
-- [Development Roadmap](docs/roadmap.md)
 - [Engine Specification](docs/specs/engine-spec.md)
+- [Development Roadmap](docs/roadmap.md)
 
 ## 📊 Visual Overview
 
@@ -102,11 +164,14 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** SvelteKit 2.0+, TypeScript, Tailwind CSS
+- **Frontend:** SvelteKit 2.5+, Svelte 5, TypeScript, Tailwind CSS 3.4+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
 - **Payments:** Stripe
-- **Auth:** Lucia Auth
+- **Auth:** Magic Code (passwordless email authentication)
 - **Email:** Resend
+- **Markdown:** Marked.js, Mermaid diagrams, gray-matter
+- **Testing:** Vitest, Testing Library
+- **Build:** Vite 5.4+, pnpm workspaces
 
 ## 📈 Success Metrics
 
@@ -116,8 +181,69 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 - < 5% monthly churn rate
 - Net Promoter Score > 50
 
+## 🔧 Development
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm 9+
+- Cloudflare account (for deployment)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/AutumnsGrove/GroveEngine.git
+cd GroveEngine
+
+# Install dependencies
+pnpm install
+
+# Start development server (engine)
+cd packages/engine
+pnpm dev
+
+# Start development server (UI)
+cd packages/ui
+pnpm dev
+
+# Start landing page
+cd landing
+pnpm dev
+```
+
+### Testing
+
+```bash
+# Run tests (engine)
+cd packages/engine
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Run security tests
+pnpm test:security
+```
+
+### Building
+
+```bash
+# Build engine package for npm
+cd packages/engine
+pnpm build:package
+
+# Build UI package
+cd packages/ui
+pnpm build
+```
+
+## 📄 License
+
+MIT
+
 ---
 
-**Project Status:** Phase 0.1 - Pre-Launch Preparation
+**Project Status:** Phase 1 - MVP Development
 **Domain:** grove.place ✅
-**Last Updated:** November 24, 2025
+**Last Updated:** December 2025
