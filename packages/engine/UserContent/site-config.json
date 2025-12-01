@@ -1,0 +1,16 @@
+{
+  "owner": {
+    "name": "Your Name",
+    "email": "you@example.com"
+  },
+  "site": {
+    "title": "My Grove Blog",
+    "description": "A beautiful blog powered by GroveEngine",
+    "copyright": "Your Name"
+  },
+  "social": {
+    "twitter": "",
+    "github": "",
+    "mastodon": ""
+  }
+}
