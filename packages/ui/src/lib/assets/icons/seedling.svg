@@ -1,0 +1,17 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Seedling/sprout icon -->
+  <path
+    d="M12 22V10"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M12 10C12 10 12 6 16 3C16 7 14 10 12 10Z"
+    fill="currentColor"
+  />
+  <path
+    d="M12 14C12 14 12 10 8 7C8 11 10 14 12 14Z"
+    fill="currentColor"
+  />
+</svg>
