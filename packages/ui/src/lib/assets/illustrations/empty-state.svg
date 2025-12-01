@@ -1,0 +1,31 @@
+<svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Empty state illustration: A peaceful empty garden scene -->
+
+  <!-- Ground -->
+  <ellipse cx="100" cy="145" rx="80" ry="12" fill="#e2ddd0"/>
+
+  <!-- Small sprout in center -->
+  <g transform="translate(100, 120)">
+    <!-- Pot -->
+    <path d="M-12 0h24l-4 20h-16l-4-20z" fill="#ccb59c"/>
+    <path d="M-8 0h16v3h-16z" fill="#b69575"/>
+
+    <!-- Soil -->
+    <ellipse cx="0" cy="2" rx="10" ry="4" fill="#6f4d39"/>
+
+    <!-- Tiny sprout -->
+    <path d="M0 0v-15" stroke="#16a34a" stroke-width="2" stroke-linecap="round"/>
+    <path d="M0 -10c0 0 0-4 4-7c0 4-2 7-4 7z" fill="#22c55e"/>
+    <path d="M0 -8c0 0 0-3-3-5c0 3 1.5 5 3 5z" fill="#16a34a"/>
+  </g>
+
+  <!-- Decorative falling leaves -->
+  <g opacity="0.4">
+    <path d="M40 30c-2 3-6 4.5-6 7.5s4 5.5 6 9c2-3.5 6-6.5 6-9s-4-4.5-6-7.5z" fill="#86efac" transform="rotate(-15 40 45)"/>
+    <path d="M150 50c-2 3-6 4.5-6 7.5s4 5.5 6 9c2-3.5 6-6.5 6-9s-4-4.5-6-7.5z" fill="#bbf7d0" transform="rotate(20 150 65)"/>
+    <path d="M170 20c-1.5 2-4 3-4 5s2.5 3.5 4 6c1.5-2.5 4-4.5 4-6s-2.5-3-4-5z" fill="#dcfce7" transform="rotate(-10 170 30)"/>
+  </g>
+
+  <!-- Subtitle area indicator (dashed line) -->
+  <line x1="50" y1="155" x2="150" y2="155" stroke="#e0d2c2" stroke-width="1" stroke-dasharray="4 4"/>
+</svg>

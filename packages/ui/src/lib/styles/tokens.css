@@ -1,0 +1,429 @@
+/**
+ * Grove Design System - CSS Custom Properties
+ *
+ * All design tokens as CSS variables for use without Tailwind.
+ * "a place to Be"
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+     COLOR TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Primary: Grove Green */
+  --grove-50: #f0fdf4;
+  --grove-100: #dcfce7;
+  --grove-200: #bbf7d0;
+  --grove-300: #86efac;
+  --grove-400: #4ade80;
+  --grove-500: #22c55e;
+  --grove-600: #16a34a;
+  --grove-700: #15803d;
+  --grove-800: #166534;
+  --grove-900: #14532d;
+  --grove-950: #052e16;
+
+  /* Neutral: Cream */
+  --cream: #fefdfb;
+  --cream-50: #fefdfb;
+  --cream-100: #fdfcf8;
+  --cream-200: #faf8f3;
+  --cream-300: #f5f2ea;
+  --cream-400: #ede9de;
+  --cream-500: #e2ddd0;
+
+  /* Neutral: Bark */
+  --bark: #3d2914;
+  --bark-50: #f9f6f3;
+  --bark-100: #f0e9e1;
+  --bark-200: #e0d2c2;
+  --bark-300: #ccb59c;
+  --bark-400: #b69575;
+  --bark-500: #a57c5a;
+  --bark-600: #8a6347;
+  --bark-700: #6f4d39;
+  --bark-800: #5a3f30;
+  --bark-900: #3d2914;
+  --bark-950: #2a1b0d;
+
+  /* Semantic Colors */
+  --color-primary: var(--grove-600);
+  --color-primary-hover: var(--grove-700);
+  --color-primary-active: var(--grove-800);
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: var(--cream-500);
+  --color-secondary-hover: var(--cream-400);
+  --color-secondary-active: var(--cream-300);
+  --color-secondary-foreground: var(--bark);
+
+  --color-background: var(--cream);
+  --color-foreground: var(--bark);
+  --color-muted: var(--cream-300);
+  --color-muted-foreground: var(--bark-700);
+
+  --color-accent: var(--grove-100);
+  --color-accent-foreground: var(--grove-800);
+
+  --color-border: var(--cream-200);
+  --color-border-strong: var(--cream-400);
+  --color-input: var(--cream-200);
+  --color-ring: var(--grove-500);
+
+  /* Status Colors */
+  --color-success: var(--grove-500);
+  --color-success-light: var(--grove-100);
+  --color-success-foreground: var(--grove-800);
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-foreground: #92400e;
+
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+  --color-error-foreground: #991b1b;
+
+  --color-info: #0ea5e9;
+  --color-info-light: #e0f2fe;
+  --color-info-foreground: #075985;
+
+  /* ═══════════════════════════════════════════════════════════════
+     TYPOGRAPHY TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Font Families */
+  --font-serif: Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Font Sizes */
+  --text-display-lg: 3.5rem;
+  --text-display: 2.5rem;
+  --text-display-sm: 2rem;
+  --text-heading-lg: 1.5rem;
+  --text-heading: 1.25rem;
+  --text-heading-sm: 1.125rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.75rem;
+
+  /* Line Heights */
+  --leading-display: 1.1;
+  --leading-heading: 1.35;
+  --leading-body: 1.75;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SPACING TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-11: 2.75rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-18: 4.5rem;
+  --space-20: 5rem;
+  --space-22: 5.5rem;
+  --space-24: 6rem;
+  --space-30: 7.5rem;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SIZE TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  --size-prose: 65ch;
+  --size-prose-wide: 75ch;
+  --size-prose-narrow: 55ch;
+  --size-container-sm: 640px;
+  --size-container-md: 768px;
+  --size-container-lg: 1024px;
+  --size-container-xl: 1280px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     BORDER TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;
+  --radius: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-grove: 0.75rem;
+  --radius-grove-lg: 1rem;
+  --radius-grove-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Border Width */
+  --border-width: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SHADOW TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  --shadow-grove-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+  --shadow-grove: 0 2px 8px -2px rgb(61 41 20 / 0.08), 0 1px 2px -1px rgb(61 41 20 / 0.04);
+  --shadow-grove-md: 0 4px 12px -4px rgb(61 41 20 / 0.1), 0 2px 4px -2px rgb(61 41 20 / 0.05);
+  --shadow-grove-lg: 0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06);
+  --shadow-grove-xl: 0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08);
+  --shadow-grove-inner: inset 0 1px 2px 0 rgb(61 41 20 / 0.05);
+  --shadow-grove-glow: 0 0 0 3px rgb(22 163 74 / 0.15);
+
+  /* Focus Shadows */
+  --shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
+  --shadow-focus-error: 0 0 0 2px var(--cream), 0 0 0 4px var(--color-error);
+
+  /* ═══════════════════════════════════════════════════════════════
+     ANIMATION TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* Easing */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* ═══════════════════════════════════════════════════════════════
+     Z-INDEX TOKENS
+     ═══════════════════════════════════════════════════════════════ */
+
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-fixed: 200;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE TOKENS (Nature at Night)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root[data-theme='dark'],
+.dark {
+  --cream: #1a1915;
+  --cream-50: #1a1915;
+  --cream-100: #252320;
+  --cream-200: #32302b;
+  --cream-300: #43403a;
+  --cream-400: #5c584f;
+  --cream-500: #777267;
+
+  --bark: #f5f2ea;
+  --bark-50: #2a1b0d;
+  --bark-100: #3d2914;
+  --bark-200: #5a3f30;
+  --bark-300: #6f4d39;
+  --bark-400: #8a6347;
+  --bark-500: #a57c5a;
+  --bark-600: #b69575;
+  --bark-700: #ccb59c;
+  --bark-800: #e0d2c2;
+  --bark-900: #f0e9e1;
+  --bark-950: #f9f6f3;
+
+  --color-background: var(--cream);
+  --color-foreground: var(--bark);
+  --color-muted: var(--cream-300);
+  --color-muted-foreground: var(--bark-300);
+  --color-border: var(--cream-300);
+  --color-border-strong: var(--cream-400);
+  --color-input: var(--cream-300);
+
+  --color-accent: var(--grove-900);
+  --color-accent-foreground: var(--grove-200);
+
+  --shadow-grove-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-grove: 0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+  --shadow-grove-md: 0 4px 12px -4px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+  --shadow-grove-lg: 0 8px 24px -8px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.3);
+  --shadow-grove-xl: 0 16px 48px -16px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes grove-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes grove-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes grove-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grove-fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grove-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes grove-shrink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes grove-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes grove-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes grove-leaf-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% {
+    transform: translateY(100px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes grove-leaf-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes grove-spin-organic {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(100deg); }
+  50% { transform: rotate(180deg); }
+  75% { transform: rotate(260deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes grove-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes grove-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes grove-slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grove-slide-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
