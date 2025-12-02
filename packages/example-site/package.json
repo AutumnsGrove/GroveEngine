@@ -28,7 +28,9 @@
     "vite": "^5.4.10"
   },
   "dependencies": {
+    "@groveengine/engine": "workspace:*",
     "clsx": "^2.1.1",
+    "dompurify": "^3.3.0",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
