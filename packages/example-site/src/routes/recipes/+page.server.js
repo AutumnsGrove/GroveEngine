@@ -1,4 +1,4 @@
-import { getAllRecipes } from '$lib/utils/content.js';
+import { getAllRecipes } from '$lib/data/static-content.js';
 
 export function load() {
 	const recipes = getAllRecipes();

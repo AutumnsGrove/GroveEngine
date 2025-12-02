@@ -16,6 +16,9 @@ This example site is a fictional late-night tea café called "The Midnight Bloom
 ## Live Site
 
 **URL:** https://example.grove.place
+**Status:** ✅ Deployed and Active
+
+The site is automatically deployed via GitHub Actions whenever changes are pushed to the `main` branch that affect `packages/example-site/` or `packages/engine/`.
 
 ## Development
 
@@ -35,18 +38,31 @@ npm run preview
 
 ## Deployment
 
-This site shares infrastructure with the main Grove platform:
+### Automated Deployment
 
-- **KV Namespace:** grove-cache
-- **R2 Bucket:** grove-media
-- **D1 Database:** grove-engine-db
+The site deploys automatically via GitHub Actions (`.github/workflows/deploy-example-site.yml`) when:
+- Changes are pushed to the `main` branch
+- Changes affect `packages/example-site/` or `packages/engine/`
 
-Deploy with:
+You can also trigger a manual deployment from the GitHub Actions tab.
+
+### Manual Deployment
+
+If needed, you can deploy manually:
 
 ```bash
 npm run build
 npx wrangler pages deploy .svelte-kit/cloudflare --project-name=grove-example-site
 ```
+
+### Shared Infrastructure
+
+This site shares infrastructure with the main Grove platform:
+
+- **KV Namespace:** grove-cache (514e91e81cc44d128a82ec6f668303e4)
+- **R2 Bucket:** grove-media
+- **D1 Database:** grove-engine-db (a6394da2-b7a6-48ce-b7fe-b1eb3e730e68)
+- **Cloudflare Pages Project:** grove-example-site
 
 ## Features Demonstrated
 

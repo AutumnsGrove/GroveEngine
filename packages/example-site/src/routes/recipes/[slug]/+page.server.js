@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getRecipe } from '$lib/utils/content.js';
+import { getRecipe } from '$lib/data/static-content.js';
 
 export function load({ params }) {
 	const recipe = getRecipe(params.slug);

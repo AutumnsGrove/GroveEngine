@@ -1,4 +1,4 @@
-import { getPage, getLatestPost, getSiteConfig } from '$lib/utils/content.js';
+import { getPage, getLatestPost, getSiteConfig } from '$lib/data/static-content.js';
 
 export function load() {
 	const homeData = getPage('Home');

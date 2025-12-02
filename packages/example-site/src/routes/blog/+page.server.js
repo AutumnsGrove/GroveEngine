@@ -1,4 +1,4 @@
-import { getAllPosts } from '$lib/utils/content.js';
+import { getAllPosts } from '$lib/data/static-content.js';
 
 export function load() {
 	const posts = getAllPosts();

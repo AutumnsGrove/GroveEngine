@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getPost } from '$lib/utils/content.js';
+import { getPost } from '$lib/data/static-content.js';
 
 export function load({ params }) {
 	const post = getPost(params.slug);
