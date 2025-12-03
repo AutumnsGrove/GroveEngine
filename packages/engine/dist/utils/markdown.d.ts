@@ -121,3 +121,45 @@ export function createContentLoader(config: {
     homeGutter: Object;
     contactGutter: Object;
 }): Object;
+/**
+ * Register a content loader for the site
+ * This should be called by the consuming site to provide access to content
+ * @param {Object} loader - Object with getAllPosts, getSiteConfig, getLatestPost functions
+ */
+export function registerContentLoader(loader: Object): void;
+/**
+ * Get all blog posts
+ * @returns {Array} Array of post objects
+ */
+export function getAllPosts(): any[];
+/**
+ * Get site configuration
+ * @returns {Object} Site config object
+ */
+export function getSiteConfig(): Object;
+/**
+ * Get the latest post
+ * @returns {Object|null} Latest post or null
+ */
+export function getLatestPost(): Object | null;
+/**
+ * Get home page content
+ * @returns {Object|null} Home page data or null
+ */
+export function getHomePage(): Object | null;
+/**
+ * Get a post by its slug
+ * @param {string} slug - The post slug
+ * @returns {Object|null} Post object or null
+ */
+export function getPostBySlug(slug: string): Object | null;
+/**
+ * Get about page content
+ * @returns {Object|null} About page data or null
+ */
+export function getAboutPage(): Object | null;
+/**
+ * Get contact page content
+ * @returns {Object|null} Contact page data or null
+ */
+export function getContactPage(): Object | null;

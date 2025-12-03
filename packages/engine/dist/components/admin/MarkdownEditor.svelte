@@ -4,9 +4,8 @@
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "../../utils/sanitize.js";
   import "../../styles/content.css";
+  import { Button, Input } from '@groveengine/ui';
   import Dialog from "../ui/Dialog.svelte";
-  import Button from "../ui/Button.svelte";
-  import Input from "../ui/Input.svelte";
 
   // Initialize mermaid with grove-themed dark config
   mermaid.initialize({
