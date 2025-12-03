@@ -76,217 +76,6 @@ marked.setOptions({
   breaks: false,
 });
 
-// Use Vite's import.meta.glob to load markdown files at build time
-// This works in both dev and production (including Cloudflare Workers)
-// Path is relative to project root - now using UserContent directory
-
-// Posts - Using absolute path from project root for Cloudflare Pages compatibility
-const modules = import.meta.glob("/UserContent/Posts/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-});
-
-// Recipes
-const recipeModules = import.meta.glob("../../../UserContent/Recipes/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-});
-
-// About
-const aboutModules = import.meta.glob("../../../UserContent/About/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-});
-
-// Home
-const homeModules = import.meta.glob("../../../UserContent/Home/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-});
-
-// Contact
-const contactModules = import.meta.glob("../../../UserContent/Contact/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-});
-
-// Site config
-const siteConfigModule = import.meta.glob(
-  "../../../UserContent/site-config.json",
-  {
-    eager: true,
-  },
-);
-
-/**
- * Get the site configuration
- * @returns {Object} Site configuration object
- */
-export function getSiteConfig() {
-  const entry = Object.entries(siteConfigModule)[0];
-  if (entry) {
-    return entry[1].default || entry[1];
-  }
-  return {
-    owner: { name: "Admin", email: "" },
-    site: { title: "The Grove", description: "", copyright: "AutumnsGrove" },
-    social: {},
-  };
-}
-
-// Load recipe metadata JSON files (step icons, etc.)
-const recipeMetadataModules = import.meta.glob(
-  "../../../UserContent/Recipes/*/gutter/recipe.json",
-  {
-    eager: true,
-  },
-);
-
-// Load gutter manifest files for blog posts
-const gutterManifestModules = import.meta.glob(
-  "../../../UserContent/Posts/*/gutter/manifest.json",
-  {
-    eager: true,
-  },
-);
-
-// Load gutter markdown content files
-const gutterMarkdownModules = import.meta.glob(
-  "../../../UserContent/Posts/*/gutter/*.md",
-  {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  },
-);
-
-// Load gutter image files
-const gutterImageModules = import.meta.glob(
-  "../../../UserContent/Posts/*/gutter/*.{jpg,jpeg,png,gif,webp}",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  },
-);
-
-// Load about page gutter manifest files
-const aboutGutterManifestModules = import.meta.glob(
-  "../../../UserContent/About/*/gutter/manifest.json",
-  {
-    eager: true,
-  },
-);
-
-// Load about page gutter markdown content files
-const aboutGutterMarkdownModules = import.meta.glob(
-  "../../../UserContent/About/*/gutter/*.md",
-  {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  },
-);
-
-// Load about page gutter image files
-const aboutGutterImageModules = import.meta.glob(
-  "../../../UserContent/About/*/gutter/*.{jpg,jpeg,png,gif,webp}",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  },
-);
-
-// Load recipe gutter manifest files
-const recipeGutterManifestModules = import.meta.glob(
-  "../../../UserContent/Recipes/*/gutter/manifest.json",
-  {
-    eager: true,
-  },
-);
-
-// Load recipe gutter markdown content files
-const recipeGutterMarkdownModules = import.meta.glob(
-  "../../../UserContent/Recipes/*/gutter/*.md",
-  {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  },
-);
-
-// Load recipe gutter image files
-const recipeGutterImageModules = import.meta.glob(
-  "../../../UserContent/Recipes/*/gutter/*.{jpg,jpeg,png,gif,webp}",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  },
-);
-
-// Load home page gutter manifest files
-const homeGutterManifestModules = import.meta.glob(
-  "../../../UserContent/Home/*/gutter/manifest.json",
-  {
-    eager: true,
-  },
-);
-
-// Load home page gutter markdown content files
-const homeGutterMarkdownModules = import.meta.glob(
-  "../../../UserContent/Home/*/gutter/*.md",
-  {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  },
-);
-
-// Load home page gutter image files
-const homeGutterImageModules = import.meta.glob(
-  "../../../UserContent/Home/*/gutter/*.{jpg,jpeg,png,gif,webp}",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  },
-);
-
-// Load contact page gutter manifest files
-const contactGutterManifestModules = import.meta.glob(
-  "../../../UserContent/Contact/*/gutter/manifest.json",
-  {
-    eager: true,
-  },
-);
-
-// Load contact page gutter markdown content files
-const contactGutterMarkdownModules = import.meta.glob(
-  "../../../UserContent/Contact/*/gutter/*.md",
-  {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  },
-);
-
-// Load contact page gutter image files
-const contactGutterImageModules = import.meta.glob(
-  "../../../UserContent/Contact/*/gutter/*.{jpg,jpeg,png,gif,webp}",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  },
-);
-
 /**
  * Validates if a string is a valid URL
  * @param {string} urlString - The string to validate as a URL
@@ -299,131 +88,6 @@ function isValidUrl(urlString) {
   } catch {
     return false;
   }
-}
-
-/**
- * Get all markdown posts from the posts directory
- * @returns {Array} Array of post objects with metadata and slug
- */
-export function getAllPosts() {
-  try {
-    const posts = Object.entries(modules)
-      .map(([filepath, content]) => {
-        try {
-          // Extract slug from filepath: ../../../UserContent/Posts/example.md -> example
-          const slug = filepath.split("/").pop().replace(".md", "");
-          const { data } = matter(content);
-
-          return {
-            slug,
-            title: data.title || "Untitled",
-            date: data.date || new Date().toISOString(),
-            tags: data.tags || [],
-            description: data.description || "",
-          };
-        } catch (err) {
-          console.error(`Error processing post ${filepath}:`, err);
-          return null;
-        }
-      })
-      .filter(Boolean)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    return posts;
-  } catch (err) {
-    console.error("Error in getAllPosts:", err);
-    return [];
-  }
-}
-
-/**
- * Get the latest (most recent) post with full content
- * @returns {Object|null} The latest post object with content, or null if no posts exist
- */
-export function getLatestPost() {
-  const posts = getAllPosts();
-  if (posts.length === 0) {
-    return null;
-  }
-  // Get the full post content for the most recent post
-  return getPostBySlug(posts[0].slug);
-}
-
-/**
- * Get all recipes from the recipes directory
- * @returns {Array} Array of recipe objects with metadata and slug
- */
-export function getAllRecipes() {
-  try {
-    const recipes = Object.entries(recipeModules)
-      .map(([filepath, content]) => {
-        try {
-          // Extract slug from filepath: ../../../UserContent/Recipes/example.md -> example
-          const slug = filepath.split("/").pop().replace(".md", "");
-          const { data } = matter(content);
-
-          return {
-            slug,
-            title: data.title || "Untitled Recipe",
-            date: data.date || new Date().toISOString(),
-            tags: data.tags || [],
-            description: data.description || "",
-          };
-        } catch (err) {
-          console.error(`Error processing recipe ${filepath}:`, err);
-          return null;
-        }
-      })
-      .filter(Boolean)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    return recipes;
-  } catch (err) {
-    console.error("Error in getAllRecipes:", err);
-    return [];
-  }
-}
-
-/**
- * Get a single post by slug
- * @param {string} slug - The post slug
- * @returns {Object|null} Post object with content and metadata
- */
-export function getPostBySlug(slug) {
-  // Find the matching module by slug
-  const entry = Object.entries(modules).find(([filepath]) => {
-    const fileSlug = filepath.split("/").pop().replace(".md", "");
-    return fileSlug === slug;
-  });
-
-  if (!entry) {
-    return null;
-  }
-
-  const content = entry[1];
-
-  const { data, content: markdown } = matter(content);
-  let htmlContent = marked.parse(markdown);
-
-  // Process anchor tags in the HTML content
-  htmlContent = processAnchorTags(htmlContent);
-
-  // Extract headers for table of contents
-  const headers = extractHeaders(markdown);
-
-  // Get gutter content for this post
-  const gutterContent = getGutterContent(slug);
-
-  return {
-    slug,
-    title: data.title || "Untitled",
-    date: data.date || new Date().toISOString(),
-    tags: data.tags || [],
-    description: data.description || "",
-    content: htmlContent,
-    headers,
-    gutterContent,
-  };
 }
 
 /**
@@ -479,14 +143,95 @@ export function processAnchorTags(html) {
 }
 
 /**
- * Get gutter content from specified modules
+ * Process Mermaid diagrams in markdown content
+ * @param {string} markdown - The markdown content
+ * @returns {string} Processed markdown with Mermaid diagrams
+ */
+export function processMermaidDiagrams(markdown) {
+  // Replace Mermaid code blocks with special divs that will be processed later
+  return markdown.replace(
+    /```mermaid\n([\s\S]*?)```/g,
+    (match, diagramCode) => {
+      const diagramId = "mermaid-" + Math.random().toString(36).substr(2, 9);
+      return `<div class="mermaid-container" id="${diagramId}" data-diagram="${encodeURIComponent(diagramCode.trim())}"></div>`;
+    },
+  );
+}
+
+/**
+ * Render Mermaid diagrams in the DOM
+ * This should be called after the content is mounted
+ */
+export async function renderMermaidDiagrams() {
+  const containers = document.querySelectorAll(".mermaid-container");
+
+  for (const container of containers) {
+    try {
+      const diagramCode = decodeURIComponent(container.dataset.diagram);
+      const { svg } = await mermaid.render(container.id, diagramCode);
+      // Sanitize SVG output before injecting into DOM to prevent XSS
+      container.innerHTML = sanitizeSVG(svg);
+    } catch (error) {
+      console.error("Error rendering Mermaid diagram:", error);
+      container.innerHTML = '<p class="error">Error rendering diagram</p>';
+    }
+  }
+}
+
+/**
+ * Parse markdown content and convert to HTML
+ * @param {string} markdownContent - The raw markdown content (may include frontmatter)
+ * @returns {Object} Object with data (frontmatter), content (HTML), headers, and raw markdown
+ */
+export function parseMarkdownContent(markdownContent) {
+  const { data, content: markdown } = matter(markdownContent);
+
+  // Process Mermaid diagrams in the content
+  const processedContent = processMermaidDiagrams(markdown);
+  let htmlContent = marked.parse(processedContent);
+
+  // Process anchor tags in the HTML content
+  htmlContent = processAnchorTags(htmlContent);
+
+  // Extract headers for table of contents
+  const headers = extractHeaders(markdown);
+
+  return {
+    data,
+    content: htmlContent,
+    headers,
+    rawMarkdown: markdown,
+  };
+}
+
+/**
+ * Parse markdown content with sanitization (for user-facing pages like home, about, contact)
+ * @param {string} markdownContent - The raw markdown content (may include frontmatter)
+ * @returns {Object} Object with data (frontmatter), content (sanitized HTML), headers
+ */
+export function parseMarkdownContentSanitized(markdownContent) {
+  const { data, content: markdown } = matter(markdownContent);
+  const htmlContent = sanitizeMarkdown(marked.parse(markdown));
+  const headers = extractHeaders(markdown);
+
+  return {
+    data,
+    content: htmlContent,
+    headers,
+  };
+}
+
+/**
+ * Get gutter content from provided modules
+ * This is a utility function that processes gutter manifests, markdown, and images
+ *
  * @param {string} slug - The page/post slug
- * @param {Object} manifestModules - The manifest modules to search
- * @param {Object} markdownModules - The markdown modules to search
- * @param {Object} imageModules - The image modules to search
+ * @param {Object} manifestModules - The manifest modules (from import.meta.glob)
+ * @param {Object} markdownModules - The markdown modules (from import.meta.glob)
+ * @param {Object} imageModules - The image modules (from import.meta.glob)
  * @returns {Array} Array of gutter items with content and position info
  */
-function getGutterContentFromModules(
+export function processGutterContent(
   slug,
   manifestModules,
   markdownModules,
@@ -646,229 +391,55 @@ function getGutterContentFromModules(
 }
 
 /**
- * Get gutter content for a recipe by slug
- * @param {string} slug - The recipe slug
- * @returns {Array} Array of gutter items with content and position info
+ * Process a list of markdown files into post/recipe objects
+ *
+ * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
+ * @returns {Array} Array of post/content objects with metadata and slug
  */
-export function getRecipeGutterContent(slug) {
-  return getGutterContentFromModules(
-    slug,
-    recipeGutterManifestModules,
-    recipeGutterMarkdownModules,
-    recipeGutterImageModules,
-  );
-}
-
-/**
- * Get gutter content for a blog post by slug
- * @param {string} slug - The post slug
- * @returns {Array} Array of gutter items with content and position info
- */
-export function getGutterContent(slug) {
-  return getGutterContentFromModules(
-    slug,
-    gutterManifestModules,
-    gutterMarkdownModules,
-    gutterImageModules,
-  );
-}
-
-/**
- * Get gutter content for the home page
- * @param {string} slug - The page slug (e.g., 'home')
- * @returns {Array} Array of gutter items with content and position info
- */
-export function getHomeGutterContent(slug) {
-  return getGutterContentFromModules(
-    slug,
-    homeGutterManifestModules,
-    homeGutterMarkdownModules,
-    homeGutterImageModules,
-  );
-}
-
-/**
- * Get gutter content for the contact page
- * @param {string} slug - The page slug (e.g., 'contact')
- * @returns {Array} Array of gutter items with content and position info
- */
-export function getContactGutterContent(slug) {
-  return getGutterContentFromModules(
-    slug,
-    contactGutterManifestModules,
-    contactGutterMarkdownModules,
-    contactGutterImageModules,
-  );
-}
-
-/**
- * Get the home page content
- * @returns {Object|null} Home page object with content, metadata, and galleries
- */
-export function getHomePage() {
+export function processMarkdownModules(modules) {
   try {
-    // Find the home.md file
-    const entry = Object.entries(homeModules).find(([filepath]) => {
-      return filepath.includes("home.md");
-    });
+    const items = Object.entries(modules)
+      .map(([filepath, content]) => {
+        try {
+          // Extract slug from filepath: /path/to/Posts/example.md -> example
+          const slug = filepath.split("/").pop().replace(".md", "");
+          const { data } = matter(content);
 
-    if (!entry) {
-      return null;
-    }
+          return {
+            slug,
+            title: data.title || "Untitled",
+            date: data.date || new Date().toISOString(),
+            tags: data.tags || [],
+            description: data.description || "",
+          };
+        } catch (err) {
+          console.error(`Error processing file ${filepath}:`, err);
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    const content = entry[1];
-
-    const { data, content: markdown } = matter(content);
-    const htmlContent = sanitizeMarkdown(marked.parse(markdown));
-
-    // Extract headers for table of contents
-    const headers = extractHeaders(markdown);
-
-    // Get gutter content for the home page
-    const gutterContent = getHomeGutterContent("home");
-
-    return {
-      slug: "home",
-      title: data.title || "Home",
-      description: data.description || "",
-      hero: data.hero || null,
-      galleries: data.galleries || [],
-      content: htmlContent,
-      headers,
-      gutterContent,
-    };
+    return items;
   } catch (err) {
-    console.error("Error in getHomePage:", err);
-    return null;
+    console.error("Error in processMarkdownModules:", err);
+    return [];
   }
 }
 
 /**
- * Get the contact page content
- * @returns {Object|null} Contact page object with content and metadata
+ * Get a single item by slug from modules
+ *
+ * @param {string} slug - The item slug
+ * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
+ * @param {Object} options - Optional configuration
+ * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
+ * @param {Object} options.sidecarModules - Sidecar/metadata modules (for recipes)
+ * @returns {Object|null} Item object with content and metadata
  */
-export function getContactPage() {
-  try {
-    // Find the contact.md file
-    const entry = Object.entries(contactModules).find(([filepath]) => {
-      return filepath.includes("contact.md");
-    });
-
-    if (!entry) {
-      return null;
-    }
-
-    const content = entry[1];
-
-    const { data, content: markdown } = matter(content);
-    const htmlContent = sanitizeMarkdown(marked.parse(markdown));
-
-    // Extract headers for table of contents
-    const headers = extractHeaders(markdown);
-
-    // Get gutter content for the contact page
-    const gutterContent = getContactGutterContent("contact");
-
-    return {
-      slug: "contact",
-      title: data.title || "Contact",
-      description: data.description || "",
-      content: htmlContent,
-      headers,
-      gutterContent,
-    };
-  } catch (err) {
-    console.error("Error in getContactPage:", err);
-    return null;
-  }
-}
-
-/**
- * Get the about page content
- * @returns {Object|null} About page object with content and metadata
- */
-export function getAboutPage() {
-  try {
-    // Find the about.md file
-    const entry = Object.entries(aboutModules).find(([filepath]) => {
-      return filepath.includes("about.md");
-    });
-
-    if (!entry) {
-      return null;
-    }
-
-    const content = entry[1];
-
-    const { data, content: markdown } = matter(content);
-    const htmlContent = sanitizeMarkdown(marked.parse(markdown));
-
-    // Extract headers for table of contents
-    const headers = extractHeaders(markdown);
-
-    // Get gutter content for the about page
-    const gutterContent = getAboutGutterContent("about");
-
-    return {
-      slug: "about",
-      title: data.title || "About",
-      date: data.date || new Date().toISOString(),
-      description: data.description || "",
-      content: htmlContent,
-      headers,
-      gutterContent,
-    };
-  } catch (err) {
-    console.error("Error in getAboutPage:", err);
-    return null;
-  }
-}
-
-/**
- * Get gutter content for the about page
- * @param {string} slug - The page slug (e.g., 'about')
- * @returns {Array} Array of gutter items with content and position info
- */
-export function getAboutGutterContent(slug) {
-  return getGutterContentFromModules(
-    slug,
-    aboutGutterManifestModules,
-    aboutGutterMarkdownModules,
-    aboutGutterImageModules,
-  );
-}
-
-/**
- * Get recipe metadata (step icons, etc.) for a recipe by slug
- * @param {string} slug - The recipe slug
- * @returns {Object|null} Recipe metadata with instruction icons
- */
-export function getRecipeSidecar(slug) {
-  // Find the recipe.json file in the gutter folder
-  // Expected path: ../../../UserContent/Recipes/{slug}/gutter/recipe.json
-  // parts[-3] extracts the recipe folder name from this path structure
-  const entry = Object.entries(recipeMetadataModules).find(([filepath]) => {
-    const parts = filepath.split("/");
-    const folder = parts[parts.length - 3]; // Get the recipe folder name
-    return folder === slug;
-  });
-
-  if (!entry) {
-    return null;
-  }
-
-  // The module is already parsed JSON
-  return entry[1].default || entry[1];
-}
-
-/**
- * Get a single recipe by slug
- * @param {string} slug - The recipe slug
- * @returns {Object|null} Recipe object with content and metadata
- */
-export function getRecipeBySlug(slug) {
+export function getItemBySlug(slug, modules, options = {}) {
   // Find the matching module by slug
-  const entry = Object.entries(recipeModules).find(([filepath]) => {
+  const entry = Object.entries(modules).find(([filepath]) => {
     const fileSlug = filepath.split("/").pop().replace(".md", "");
     return fileSlug === slug;
   });
@@ -877,71 +448,310 @@ export function getRecipeBySlug(slug) {
     return null;
   }
 
-  const content = entry[1];
+  const rawContent = entry[1];
+  const { data, content, headers } = parseMarkdownContent(rawContent);
 
-  const { data, content: markdown } = matter(content);
-
-  // Process Mermaid diagrams in the content
-  const processedContent = processMermaidDiagrams(markdown);
-  let htmlContent = marked.parse(processedContent);
-
-  // Process anchor tags in the HTML content
-  htmlContent = processAnchorTags(htmlContent);
-
-  // Extract headers for table of contents
-  const headers = extractHeaders(markdown);
-
-  // Get sidecar data if available
-  const sidecar = getRecipeSidecar(slug);
-
-  // Get gutter content for this recipe
-  const gutterContent = getRecipeGutterContent(slug);
-
-  return {
+  // Build the result object
+  const result = {
     slug,
-    title: data.title || "Untitled Recipe",
+    title: data.title || "Untitled",
     date: data.date || new Date().toISOString(),
     tags: data.tags || [],
     description: data.description || "",
-    content: htmlContent,
+    content,
     headers,
-    gutterContent,
-    sidecar: sidecar,
+  };
+
+  // Process gutter content if provided
+  if (options.gutterModules) {
+    const { manifest, markdown, images } = options.gutterModules;
+    result.gutterContent = processGutterContent(slug, manifest, markdown, images);
+  }
+
+  // Process sidecar/metadata if provided (for recipes)
+  if (options.sidecarModules) {
+    const sidecarEntry = Object.entries(options.sidecarModules).find(([filepath]) => {
+      const parts = filepath.split("/");
+      const folder = parts[parts.length - 3]; // Get the folder name
+      return folder === slug;
+    });
+
+    if (sidecarEntry) {
+      result.sidecar = sidecarEntry[1].default || sidecarEntry[1];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get a page (home, about, contact) by filename from modules
+ * Uses sanitization for security
+ *
+ * @param {string} filename - The filename to look for (e.g., "home.md", "about.md")
+ * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
+ * @param {Object} options - Optional configuration
+ * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
+ * @param {string} options.slug - Override slug (defaults to filename without .md)
+ * @returns {Object|null} Page object with content and metadata
+ */
+export function getPageByFilename(filename, modules, options = {}) {
+  try {
+    // Find the matching file
+    const entry = Object.entries(modules).find(([filepath]) => {
+      return filepath.includes(filename);
+    });
+
+    if (!entry) {
+      return null;
+    }
+
+    const rawContent = entry[1];
+    const { data, content, headers } = parseMarkdownContentSanitized(rawContent);
+    const slug = options.slug || filename.replace(".md", "");
+
+    // Build the result object
+    const result = {
+      slug,
+      title: data.title || slug.charAt(0).toUpperCase() + slug.slice(1),
+      description: data.description || "",
+      content,
+      headers,
+    };
+
+    // Add optional fields from frontmatter
+    if (data.date) result.date = data.date;
+    if (data.hero) result.hero = data.hero;
+    if (data.galleries) result.galleries = data.galleries;
+
+    // Process gutter content if provided
+    if (options.gutterModules) {
+      const { manifest, markdown, images } = options.gutterModules;
+      result.gutterContent = processGutterContent(slug, manifest, markdown, images);
+    }
+
+    return result;
+  } catch (err) {
+    console.error(`Error in getPageByFilename for ${filename}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Get site configuration from a config module
+ *
+ * @param {Object} configModule - The config module from import.meta.glob
+ * @returns {Object} Site configuration object
+ */
+export function getSiteConfigFromModule(configModule) {
+  const entry = Object.entries(configModule)[0];
+  if (entry) {
+    return entry[1].default || entry[1];
+  }
+  return {
+    owner: { name: "Admin", email: "" },
+    site: { title: "The Grove", description: "", copyright: "AutumnsGrove" },
+    social: {},
   };
 }
 
 /**
- * Process Mermaid diagrams in markdown content
- * @param {string} markdown - The markdown content
- * @returns {string} Processed markdown with Mermaid diagrams
+ * Create a configured content loader with all functions bound to the provided modules
+ * This is the main factory function for creating a content loader in the consuming app
+ *
+ * @param {Object} config - Configuration object with all required modules
+ * @param {Object} config.posts - Post modules from import.meta.glob
+ * @param {Object} config.recipes - Recipe modules from import.meta.glob
+ * @param {Object} config.about - About page modules from import.meta.glob
+ * @param {Object} config.home - Home page modules from import.meta.glob
+ * @param {Object} config.contact - Contact page modules from import.meta.glob
+ * @param {Object} config.siteConfig - Site config module from import.meta.glob
+ * @param {Object} config.postGutter - Post gutter modules { manifest, markdown, images }
+ * @param {Object} config.recipeGutter - Recipe gutter modules { manifest, markdown, images }
+ * @param {Object} config.recipeMetadata - Recipe metadata modules from import.meta.glob
+ * @param {Object} config.aboutGutter - About gutter modules { manifest, markdown, images }
+ * @param {Object} config.homeGutter - Home gutter modules { manifest, markdown, images }
+ * @param {Object} config.contactGutter - Contact gutter modules { manifest, markdown, images }
+ * @returns {Object} Object with all content loader functions
  */
-function processMermaidDiagrams(markdown) {
-  // Replace Mermaid code blocks with special divs that will be processed later
-  return markdown.replace(
-    /```mermaid\n([\s\S]*?)```/g,
-    (match, diagramCode) => {
-      const diagramId = "mermaid-" + Math.random().toString(36).substr(2, 9);
-      return `<div class="mermaid-container" id="${diagramId}" data-diagram="${encodeURIComponent(diagramCode.trim())}"></div>`;
+export function createContentLoader(config) {
+  const {
+    posts = {},
+    recipes = {},
+    about = {},
+    home = {},
+    contact = {},
+    siteConfig = {},
+    postGutter = {},
+    recipeGutter = {},
+    recipeMetadata = {},
+    aboutGutter = {},
+    homeGutter = {},
+    contactGutter = {},
+  } = config;
+
+  return {
+    /**
+     * Get all posts with metadata
+     */
+    getAllPosts() {
+      return processMarkdownModules(posts);
     },
-  );
-}
 
-/**
- * Render Mermaid diagrams in the DOM
- * This should be called after the content is mounted
- */
-export async function renderMermaidDiagrams() {
-  const containers = document.querySelectorAll(".mermaid-container");
+    /**
+     * Get all recipes with metadata
+     */
+    getAllRecipes() {
+      return processMarkdownModules(recipes);
+    },
 
-  for (const container of containers) {
-    try {
-      const diagramCode = decodeURIComponent(container.dataset.diagram);
-      const { svg } = await mermaid.render(container.id, diagramCode);
-      // Sanitize SVG output before injecting into DOM to prevent XSS
-      container.innerHTML = sanitizeSVG(svg);
-    } catch (error) {
-      console.error("Error rendering Mermaid diagram:", error);
-      container.innerHTML = '<p class="error">Error rendering diagram</p>';
-    }
-  }
+    /**
+     * Get the latest (most recent) post with full content
+     */
+    getLatestPost() {
+      const allPosts = processMarkdownModules(posts);
+      if (allPosts.length === 0) {
+        return null;
+      }
+      return this.getPostBySlug(allPosts[0].slug);
+    },
+
+    /**
+     * Get a single post by slug
+     */
+    getPostBySlug(slug) {
+      return getItemBySlug(slug, posts, {
+        gutterModules: postGutter.manifest ? postGutter : undefined,
+      });
+    },
+
+    /**
+     * Get a single recipe by slug
+     */
+    getRecipeBySlug(slug) {
+      return getItemBySlug(slug, recipes, {
+        gutterModules: recipeGutter.manifest ? recipeGutter : undefined,
+        sidecarModules: recipeMetadata,
+      });
+    },
+
+    /**
+     * Get the home page content
+     */
+    getHomePage() {
+      return getPageByFilename("home.md", home, {
+        gutterModules: homeGutter.manifest ? homeGutter : undefined,
+        slug: "home",
+      });
+    },
+
+    /**
+     * Get the about page content
+     */
+    getAboutPage() {
+      return getPageByFilename("about.md", about, {
+        gutterModules: aboutGutter.manifest ? aboutGutter : undefined,
+        slug: "about",
+      });
+    },
+
+    /**
+     * Get the contact page content
+     */
+    getContactPage() {
+      return getPageByFilename("contact.md", contact, {
+        gutterModules: contactGutter.manifest ? contactGutter : undefined,
+        slug: "contact",
+      });
+    },
+
+    /**
+     * Get the site configuration
+     */
+    getSiteConfig() {
+      return getSiteConfigFromModule(siteConfig);
+    },
+
+    /**
+     * Get gutter content for a post
+     */
+    getGutterContent(slug) {
+      if (!postGutter.manifest) return [];
+      return processGutterContent(
+        slug,
+        postGutter.manifest,
+        postGutter.markdown || {},
+        postGutter.images || {},
+      );
+    },
+
+    /**
+     * Get gutter content for a recipe
+     */
+    getRecipeGutterContent(slug) {
+      if (!recipeGutter.manifest) return [];
+      return processGutterContent(
+        slug,
+        recipeGutter.manifest,
+        recipeGutter.markdown || {},
+        recipeGutter.images || {},
+      );
+    },
+
+    /**
+     * Get gutter content for the home page
+     */
+    getHomeGutterContent(slug) {
+      if (!homeGutter.manifest) return [];
+      return processGutterContent(
+        slug,
+        homeGutter.manifest,
+        homeGutter.markdown || {},
+        homeGutter.images || {},
+      );
+    },
+
+    /**
+     * Get gutter content for the about page
+     */
+    getAboutGutterContent(slug) {
+      if (!aboutGutter.manifest) return [];
+      return processGutterContent(
+        slug,
+        aboutGutter.manifest,
+        aboutGutter.markdown || {},
+        aboutGutter.images || {},
+      );
+    },
+
+    /**
+     * Get gutter content for the contact page
+     */
+    getContactGutterContent(slug) {
+      if (!contactGutter.manifest) return [];
+      return processGutterContent(
+        slug,
+        contactGutter.manifest,
+        contactGutter.markdown || {},
+        contactGutter.images || {},
+      );
+    },
+
+    /**
+     * Get recipe sidecar/metadata by slug
+     */
+    getRecipeSidecar(slug) {
+      const entry = Object.entries(recipeMetadata).find(([filepath]) => {
+        const parts = filepath.split("/");
+        const folder = parts[parts.length - 3];
+        return folder === slug;
+      });
+
+      if (!entry) {
+        return null;
+      }
+
+      return entry[1].default || entry[1];
+    },
+  };
 }
