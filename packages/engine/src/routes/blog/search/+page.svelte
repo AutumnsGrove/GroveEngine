@@ -1,7 +1,7 @@
 <script>
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { Card, Badge, Button, Input } from '$lib/components/ui';
+	import { Card, Badge, Button, Input } from '@groveengine/ui';
 
 	let { data } = $props();
 

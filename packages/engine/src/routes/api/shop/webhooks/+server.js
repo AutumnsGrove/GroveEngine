@@ -1,11 +1,11 @@
 import { json, error, text } from "@sveltejs/kit";
-import { createPaymentProvider } from "$lib/payments/index.js";
+import { createPaymentProvider } from "$lib/payments";
 import {
   getOrderBySessionId,
   updateOrderStatus,
   updateCustomer,
   getOrCreateCustomer,
-} from "$lib/payments/shop.js";
+} from "$lib/payments/shop";
 
 /**
  * POST /api/shop/webhooks - Handle Stripe webhooks

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import Button from "$lib/components/ui/Button.svelte";
+  import { Button } from '@groveengine/ui';
   import Dialog from "$lib/components/ui/Dialog.svelte";
   import { toast } from "$lib/components/ui/toast";
   import { api, apiRequest } from "$lib/utils/api.js";

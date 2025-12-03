@@ -11,7 +11,7 @@ I'm separating the GroveEngine and GroveUI packages to eliminate overlap and est
 ## Current State
 
 **GroveEngine** (this repo):
-- Version: 0.1.0
+- Version: 0.1.1
 - Published as: `@autumnsgrove/groveengine` on npm
 - Contains 58 duplicate UI components that are moving to GroveUI
 - Contains domain-specific components (gutter, admin, gallery) that should stay

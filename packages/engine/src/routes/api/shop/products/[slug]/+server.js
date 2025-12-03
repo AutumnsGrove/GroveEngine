@@ -7,7 +7,7 @@ import {
   createVariant,
   updateVariant,
   deleteVariant,
-} from "$lib/payments/shop.js";
+} from "$lib/payments/shop";
 
 /**
  * GET /api/shop/products/[slug] - Get a single product

@@ -8,7 +8,16 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		prerender: {
-			entries: ['*']
+			entries: ['*'],
+			handleHttpError: ({ path, referrer, message }) => {
+				// Ignore 404s for content pages - content is provided by consuming sites
+				if (message.includes('404')) {
+					console.warn(`Prerender skipping ${path}: ${message}`);
+					return;
+				}
+				// Throw other errors
+				throw new Error(message);
+			}
 		}
 	}
 };

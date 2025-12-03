@@ -1,5 +1,5 @@
 <script>
-  import { Card, Skeleton } from "$lib/components/ui";
+  import { Card, Spinner } from '@groveengine/ui';
   import { api } from "$lib/utils/api.js";
 
   let { data } = $props();
@@ -32,7 +32,7 @@
   <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-8">
     <Card title="System Status">
       {#if loading}
-        <Skeleton class="h-8 w-24" />
+        <Spinner />
       {:else if healthStatus?.status === 'healthy'}
         <p class="stat-value healthy">Healthy</p>
       {:else}
@@ -42,7 +42,7 @@
 
     <Card title="GitHub Token">
       {#if loading}
-        <Skeleton class="h-8 w-24" />
+        <Spinner />
       {:else}
         <p class="stat-value" class:healthy={healthStatus?.github_token_configured} class:error={!healthStatus?.github_token_configured}>
           {healthStatus?.github_token_configured ? 'Configured' : 'Missing'}
@@ -52,7 +52,7 @@
 
     <Card title="KV Cache">
       {#if loading}
-        <Skeleton class="h-8 w-24" />
+        <Spinner />
       {:else}
         <p class="stat-value" class:healthy={healthStatus?.kv_configured} class:error={!healthStatus?.kv_configured}>
           {healthStatus?.kv_configured ? 'Connected' : 'Missing'}
@@ -62,7 +62,7 @@
 
     <Card title="D1 Database">
       {#if loading}
-        <Skeleton class="h-8 w-24" />
+        <Spinner />
       {:else}
         <p class="stat-value" class:healthy={healthStatus?.d1_configured} class:error={!healthStatus?.d1_configured}>
           {healthStatus?.d1_configured ? 'Connected' : 'Missing'}

@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop.js";
+import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop";
 
 /**
  * GET /api/shop/orders - List orders for a tenant

@@ -1,6 +1,5 @@
 <script>
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import { Button, Badge } from '@groveengine/ui';
 
   let { data } = $props();
 

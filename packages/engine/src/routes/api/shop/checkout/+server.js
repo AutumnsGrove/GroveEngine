@@ -1,12 +1,12 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import { createPaymentProvider } from "$lib/payments/index.js";
+import { createPaymentProvider } from "$lib/payments";
 import {
   getVariantById,
   getProductById,
   createOrder,
   getOrCreateCustomer,
-} from "$lib/payments/shop.js";
+} from "$lib/payments/shop";
 
 /**
  * POST /api/shop/checkout - Create a Stripe Checkout session

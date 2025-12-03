@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import { getProducts, createProduct, createVariant } from "$lib/payments/shop.js";
+import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 
 /**
  * GET /api/shop/products - List products

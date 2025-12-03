@@ -1,5 +1,5 @@
 <script>
-  import { Button, Skeleton } from "$lib/components/ui";
+  import { Button, Spinner } from '@groveengine/ui';
   import { toast } from "$lib/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
@@ -104,10 +104,7 @@
     <h2>System Health</h2>
     {#if loadingHealth}
       <div class="health-grid">
-        <Skeleton class="h-12 w-full" />
-        <Skeleton class="h-12 w-full" />
-        <Skeleton class="h-12 w-full" />
-        <Skeleton class="h-12 w-full" />
+        <Spinner />
       </div>
     {:else}
       <div class="health-grid">
@@ -160,7 +157,7 @@
     </p>
 
     {#if loadingFont}
-      <Skeleton class="h-64 w-full" />
+      <Spinner />
     {:else}
       <div class="font-selector">
         <label class="font-option" class:selected={currentFont === 'alagard'}>

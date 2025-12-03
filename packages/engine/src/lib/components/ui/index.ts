@@ -1,16 +1,11 @@
-// Wrappers
-export { default as Button } from "./Button.svelte";
-export { default as Card } from "./Card.svelte";
-export { default as Badge } from "./Badge.svelte";
+// Admin-specific UI component wrappers
+// Generic UI components (Button, Card, Badge, Input, Textarea, Skeleton) are now in @groveengine/ui
 export { default as Dialog } from "./Dialog.svelte";
-export { default as Input } from "./Input.svelte";
-export { default as Textarea } from "./Textarea.svelte";
 export { default as Select } from "./Select.svelte";
 export { default as Tabs } from "./Tabs.svelte";
 export { default as Accordion } from "./Accordion.svelte";
 export { default as Sheet } from "./Sheet.svelte";
 export { default as Toast } from "./Toast.svelte";
-export { default as Skeleton } from "./Skeleton.svelte";
 export { default as Table } from "./Table.svelte";
 
 // Toast utilities
@@ -47,37 +42,7 @@ export {
 	Row as TableRow
 } from "./table";
 
-export {
-	Root as SkeletonRoot,
-	Skeleton as SkeletonComponent
-} from "./skeleton";
-
 export { Root as AccordionRoot } from "./accordion";
-
-export {
-	Root as BadgeRoot
-} from "./badge";
-
-export {
-	Root as ButtonRoot
-} from "./button";
-
-export {
-	Root as CardRoot,
-	Header as CardHeader,
-	Title as CardTitle,
-	Description as CardDescription,
-	Content as CardContent,
-	Footer as CardFooter
-} from "./card";
-
-export {
-	Root as InputRoot
-} from "./input";
-
-export {
-	Root as TextareaRoot
-} from "./textarea";
 
 export {
 	Root as SelectRoot,

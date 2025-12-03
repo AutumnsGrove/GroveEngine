@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import { createPaymentProvider } from "$lib/payments/index.js";
+import { createPaymentProvider } from "$lib/payments";
 
 /**
  * Platform billing for tenant subscriptions to GroveEngine

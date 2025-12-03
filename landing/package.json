@@ -25,6 +25,7 @@
     "wrangler": "^3.91.0"
   },
   "dependencies": {
+    "@groveengine/ui": "^0.3.0",
     "resend": "^4.0.0"
   }
 }

@@ -1,6 +1,6 @@
 <script>
 	import InternalsPostViewer from '$lib/components/custom/InternalsPostViewer.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Button } from '@groveengine/ui';
 
 	let { data } = $props();
 </script>

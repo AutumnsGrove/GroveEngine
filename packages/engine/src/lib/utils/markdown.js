@@ -755,3 +755,107 @@ export function createContentLoader(config) {
     },
   };
 }
+
+/**
+ * Registry for site-specific content loaders
+ * Sites must register their content loaders using registerContentLoader()
+ */
+let contentLoader = null;
+
+/**
+ * Register a content loader for the site
+ * This should be called by the consuming site to provide access to content
+ * @param {Object} loader - Object with getAllPosts, getSiteConfig, getLatestPost functions
+ */
+export function registerContentLoader(loader) {
+  contentLoader = loader;
+}
+
+/**
+ * Get all blog posts
+ * @returns {Array} Array of post objects
+ */
+export function getAllPosts() {
+  if (!contentLoader || !contentLoader.getAllPosts) {
+    console.warn('getAllPosts: No content loader registered. Call registerContentLoader() in your site.');
+    return [];
+  }
+  return contentLoader.getAllPosts();
+}
+
+/**
+ * Get site configuration
+ * @returns {Object} Site config object
+ */
+export function getSiteConfig() {
+  if (!contentLoader || !contentLoader.getSiteConfig) {
+    console.warn('getSiteConfig: No content loader registered. Call registerContentLoader() in your site.');
+    return {
+      owner: { name: "Admin", email: "" },
+      site: { title: "GroveEngine Site", description: "", copyright: "" },
+      social: {},
+    };
+  }
+  return contentLoader.getSiteConfig();
+}
+
+/**
+ * Get the latest post
+ * @returns {Object|null} Latest post or null
+ */
+export function getLatestPost() {
+  if (!contentLoader || !contentLoader.getLatestPost) {
+    console.warn('getLatestPost: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getLatestPost();
+}
+
+/**
+ * Get home page content
+ * @returns {Object|null} Home page data or null
+ */
+export function getHomePage() {
+  if (!contentLoader || !contentLoader.getHomePage) {
+    console.warn('getHomePage: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getHomePage();
+}
+
+/**
+ * Get a post by its slug
+ * @param {string} slug - The post slug
+ * @returns {Object|null} Post object or null
+ */
+export function getPostBySlug(slug) {
+  if (!contentLoader || !contentLoader.getPostBySlug) {
+    console.warn('getPostBySlug: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getPostBySlug(slug);
+}
+
+/**
+ * Get about page content
+ * @returns {Object|null} About page data or null
+ */
+export function getAboutPage() {
+  if (!contentLoader || !contentLoader.getAboutPage) {
+    console.warn('getAboutPage: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getAboutPage();
+}
+
+/**
+ * Get contact page content
+ * @returns {Object|null} Contact page data or null
+ */
+export function getContactPage() {
+  if (!contentLoader || !contentLoader.getContactPage) {
+    console.warn('getContactPage: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getContactPage();
+}

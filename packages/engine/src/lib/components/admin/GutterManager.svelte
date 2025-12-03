@@ -1,8 +1,7 @@
 <script>
   import { marked } from "marked";
+  import { Input, Button } from '@groveengine/ui';
   import Dialog from "$lib/components/ui/Dialog.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
   import Select from "$lib/components/ui/Select.svelte";
   import { toast } from "$lib/components/ui/toast";
 
