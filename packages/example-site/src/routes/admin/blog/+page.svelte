@@ -5,7 +5,7 @@
 <div class="admin-blog">
 	<header class="page-header">
 		<h1>Blog Posts</h1>
-		<button class="btn-primary" disabled>+ New Post</button>
+		<a href="/admin/blog/new" class="btn-primary">+ New Post</a>
 	</header>
 
 	<div class="posts-table">
@@ -50,7 +50,7 @@
 		</table>
 	</div>
 
-	<p class="demo-notice">Click "Edit" to test the MarkdownEditor toolbar buttons. This verifies the freeze bug fix.</p>
+	<p class="demo-notice">This is a demo admin panel. Click "Edit" to modify existing posts or "New Post" to create one from scratch.</p>
 </div>
 
 <style>
@@ -79,8 +79,13 @@
 		padding: 0.75rem 1.5rem;
 		border-radius: 6px;
 		font-family: system-ui, sans-serif;
-		cursor: not-allowed;
-		opacity: 0.7;
+		cursor: pointer;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.btn-primary:hover {
+		opacity: 0.9;
 	}
 
 	.posts-table {
