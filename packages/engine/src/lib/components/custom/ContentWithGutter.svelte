@@ -406,16 +406,42 @@
 		DOMPurify
 			? DOMPurify.sanitize(processedContent, {
 					ALLOWED_TAGS: [
+						// Headings
 						'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-						'p', 'a', 'ul', 'ol', 'li', 'blockquote',
-						'code', 'pre', 'strong', 'em', 'img',
-						'table', 'thead', 'tbody', 'tr', 'th', 'td',
-						'br', 'hr', 'div', 'span', 'sup', 'sub',
-						'del', 'ins'
+						// Block elements
+						'p', 'blockquote', 'pre', 'hr', 'br', 'div',
+						// Lists
+						'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+						// Inline elements
+						'a', 'span', 'code', 'strong', 'em', 'b', 'i', 'u',
+						'sup', 'sub', 'del', 'ins', 'mark', 'small', 'abbr',
+						'kbd', 'samp', 'var', 'q', 's',
+						// Tables
+						'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+						// Media
+						'img', 'figure', 'figcaption', 'picture', 'source',
+						// Forms (for task lists)
+						'input', 'label',
+						// Code block copy buttons
+						'button', 'svg', 'path', 'rect', 'g', 'line', 'circle', 'polyline'
 					],
 					ALLOWED_ATTR: [
-						'href', 'src', 'alt', 'title', 'class', 'id',
-						'data-anchor', 'data-language', 'data-line-numbers'
+						// Links and media
+						'href', 'src', 'alt', 'title', 'target', 'rel',
+						// Styling and identification
+						'class', 'id', 'style',
+						// Data attributes for custom functionality
+						'data-anchor', 'data-language', 'data-line-numbers', 'data-code',
+						// Accessibility
+						'aria-label', 'aria-hidden', 'role',
+						// Form elements (for task lists)
+						'type', 'checked', 'disabled',
+						// SVG attributes
+						'viewBox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+						'stroke-linejoin', 'd', 'width', 'height', 'x', 'y', 'x1', 'y1',
+						'x2', 'y2', 'r', 'cx', 'cy', 'points', 'xmlns',
+						// Tables
+						'colspan', 'rowspan', 'scope'
 					],
 					ALLOW_DATA_ATTR: true
 			  })

@@ -12,17 +12,6 @@ export function extractHeaders(markdown: string): any[];
  */
 export function processAnchorTags(html: string): string;
 /**
- * Process Mermaid diagrams in markdown content
- * @param {string} markdown - The markdown content
- * @returns {string} Processed markdown with Mermaid diagrams
- */
-export function processMermaidDiagrams(markdown: string): string;
-/**
- * Render Mermaid diagrams in the DOM
- * This should be called after the content is mounted
- */
-export function renderMermaidDiagrams(): Promise<void>;
-/**
  * Parse markdown content and convert to HTML
  * @param {string} markdownContent - The raw markdown content (may include frontmatter)
  * @returns {Object} Object with data (frontmatter), content (HTML), headers, and raw markdown
