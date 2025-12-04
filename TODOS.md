@@ -119,6 +119,34 @@
 - [ ] Webhook support for external integrations
 - [ ] SDK/client libraries (JavaScript, Python)
 
+## MarkdownEditor Refactoring
+> The MarkdownEditor.svelte is 3000+ lines and needs to be split into manageable pieces.
+> **Bug fix completed (2025-12-04):** Fixed `$derived(() => ...)` patterns causing browser freezes.
+
+### Phase 1: Extract Composables/Stores
+- [ ] Extract slash commands system into `useSlashCommands.svelte.js`
+- [ ] Extract command palette into `useCommandPalette.svelte.js`
+- [ ] Extract snippets manager into `useSnippets.svelte.js`
+- [ ] Extract ambient sounds into `useAmbientSounds.svelte.js`
+- [ ] Extract theme system into `useEditorTheme.svelte.js`
+- [ ] Extract draft/auto-save into `useDraftManager.svelte.js`
+- [ ] Extract writing goals/campfire into `useWritingSession.svelte.js`
+
+### Phase 2: Extract Subcomponents
+- [ ] Create `EditorToolbar.svelte` component
+- [ ] Create `EditorStatusBar.svelte` component
+- [ ] Create `SlashCommandMenu.svelte` component
+- [ ] Create `CommandPalette.svelte` component
+- [ ] Create `SnippetsModal.svelte` component
+- [ ] Create `AmbientSoundPanel.svelte` component
+- [ ] Create `FullPreviewModal.svelte` component
+
+### Phase 3: Styles & Polish
+- [ ] Move CSS to separate `MarkdownEditor.css` or use CSS modules
+- [ ] Consider extracting theme CSS variables to shared file
+- [ ] Add proper TypeScript types for all composables
+- [ ] Add tests for critical editor functions
+
 ## Documentation Tasks
 - [x] Update README.md with project specifics → **DONE: PR #16**
 - [x] Document API/architecture decisions → **DONE: 7 specs in docs/specs/**
