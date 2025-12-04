@@ -24,7 +24,7 @@
 					<td>Dec 1, 2025</td>
 					<td><span class="status published">Published</span></td>
 					<td>
-						<button class="btn-small" disabled>Edit</button>
+						<a href="/admin/blog/edit/why-we-dont-play-music" class="btn-small">Edit</a>
 						<button class="btn-small danger" disabled>Delete</button>
 					</td>
 				</tr>
@@ -33,7 +33,7 @@
 					<td>Nov 28, 2025</td>
 					<td><span class="status published">Published</span></td>
 					<td>
-						<button class="btn-small" disabled>Edit</button>
+						<a href="/admin/blog/edit/our-favorite-midnight-regulars" class="btn-small">Edit</a>
 						<button class="btn-small danger" disabled>Delete</button>
 					</td>
 				</tr>
@@ -42,7 +42,7 @@
 					<td>Nov 15, 2025</td>
 					<td><span class="status published">Published</span></td>
 					<td>
-						<button class="btn-small" disabled>Edit</button>
+						<a href="/admin/blog/edit/the-art-of-brewing-patience" class="btn-small">Edit</a>
 						<button class="btn-small danger" disabled>Delete</button>
 					</td>
 				</tr>
@@ -50,7 +50,7 @@
 		</table>
 	</div>
 
-	<p class="demo-notice">This is a demonstration. In a real admin panel, you would be able to create, edit, and delete blog posts.</p>
+	<p class="demo-notice">Click "Edit" to test the MarkdownEditor toolbar buttons. This verifies the freeze bug fix.</p>
 </div>
 
 <style>
@@ -137,10 +137,25 @@
 		padding: 0.4rem 0.75rem;
 		border-radius: 4px;
 		font-size: 0.85rem;
-		cursor: not-allowed;
-		opacity: 0.7;
 		margin-right: 0.5rem;
 		color: hsl(var(--foreground));
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	a.btn-small {
+		cursor: pointer;
+		opacity: 1;
+	}
+
+	a.btn-small:hover {
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
+	}
+
+	button.btn-small {
+		cursor: not-allowed;
+		opacity: 0.7;
 	}
 
 	.btn-small.danger {
