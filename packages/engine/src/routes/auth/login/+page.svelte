@@ -1,6 +1,6 @@
 <script>
   import { untrack } from 'svelte';
-  import { Button, Input } from '@groveengine/ui';
+  import { Button, Input } from '$lib/ui';
 
   let email = $state('');
   let code = $state('');

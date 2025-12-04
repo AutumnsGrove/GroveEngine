@@ -1,6 +1,6 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
-	import { Card } from '@groveengine/ui';
+	import { Card } from '$lib/ui';
 
 	let { data } = $props();
 </script>

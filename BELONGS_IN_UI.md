@@ -1,14 +1,16 @@
-# Belongs in GroveUI
+# Belongs in UI (src/lib/ui/)
 
 **Quick Reference Guide for Claude Code & Developers**
 
-This document helps you quickly decide if code belongs in the GroveUI package.
+This document helps you quickly decide if code belongs in the UI module.
+
+> **Note**: As of v0.4.0, GroveUI has been merged into GroveEngine. The UI components now live at `packages/engine/src/lib/ui/`. Import from `@autumnsgrove/groveengine/ui` (external) or `$lib/ui` (internal).
 
 ---
 
-## What IS GroveUI?
+## What IS the UI Module?
 
-GroveUI is a **pure design system and UI component library**. It provides:
+The UI module (`src/lib/ui/`) is a **pure design system and UI component library**. It provides:
 - Generic, reusable UI components
 - Design tokens (colors, typography, spacing, animations)
 - Styling utilities and Tailwind presets
@@ -372,17 +374,17 @@ export const colors = {
 
 ## Integration with Other Packages
 
-### GroveUI → Used by → GroveEngine
+### UI Module → Used by → Engine Components
 
-GroveEngine **SHOULD**:
-- Import generic components from GroveUI
+Engine components **SHOULD**:
+- Import generic components from `$lib/ui`
 - Wrap them with domain-specific logic
-- Never modify GroveUI internals
+- Never modify UI internals directly
 
 **Example**:
 ```typescript
-// In GroveEngine
-import { Button, Card } from '@groveengine/ui/ui';
+// In GroveEngine component (e.g., src/lib/components/admin/*)
+import { Button, Card } from '$lib/ui';
 
 // Wrap with domain logic
 export function AdminButton(props) {
@@ -391,18 +393,18 @@ export function AdminButton(props) {
 }
 ```
 
-### GroveUI → Used by → Site Deployments
+### UI Module → Used by → Site Deployments
 
 Sites **SHOULD**:
-- Import UI components from `@groveengine/ui`
+- Import UI components from `@autumnsgrove/groveengine/ui`
 - Use design tokens for custom styling
-- Never modify GroveUI components
+- Never modify UI components
 
 **Example**:
 ```typescript
 // In site-specific code
-import { Button, Card, Input } from '@groveengine/ui/ui';
-import { colors } from '@groveengine/ui/tokens';
+import { Button, Card, Input } from '@autumnsgrove/groveengine/ui';
+import { colors } from '@autumnsgrove/groveengine/ui/tokens';
 
 // Compose for site-specific page
 ```
@@ -411,31 +413,33 @@ import { colors } from '@groveengine/ui/tokens';
 
 ## File Path Patterns
 
-### Typical GroveUI Paths
+### UI Module Paths (packages/engine/src/lib/ui/)
 
 **Components**:
-- `/src/lib/components/ui/*` - Generic UI components
-- `/src/lib/primitives/*` - Low-level primitives
+- `/src/lib/ui/components/ui/*` - Generic UI components (Button, Card, etc.)
+- `/src/lib/ui/components/primitives/*` - Low-level primitives (bits-ui wrappers)
+- `/src/lib/ui/components/gallery/*` - Gallery components
+- `/src/lib/ui/components/charts/*` - Chart components
+- `/src/lib/ui/components/content/*` - Content cards
+- `/src/lib/ui/components/forms/*` - Form components
+- `/src/lib/ui/components/indicators/*` - Status indicators
+- `/src/lib/ui/components/icons/*` - Icon components
+- `/src/lib/ui/components/states/*` - State components (loading, empty, etc.)
 
 **Design System**:
-- `/src/lib/tokens/colors.ts`
-- `/src/lib/tokens/typography.ts`
-- `/src/lib/tokens/spacing.ts`
-- `/src/lib/tokens/animation.ts`
-- `/src/lib/tokens/effects.ts`
+- `/src/lib/ui/tokens/colors.ts`
+- `/src/lib/ui/tokens/typography.ts`
+- `/src/lib/ui/tokens/spacing.ts`
+- `/src/lib/ui/tokens/animation.ts`
+- `/src/lib/ui/tokens/effects.ts`
 
 **Styling**:
-- `/src/lib/styles/grove.css`
-- `/src/lib/styles/tokens.css`
-- `/src/lib/tailwind.preset.js`
-
-**Assets**:
-- `/src/lib/assets/icons/*`
-- `/src/lib/assets/illustrations/*`
-- `/src/lib/assets/patterns/*`
+- `/src/lib/ui/styles/grove.css`
+- `/src/lib/ui/styles/tokens.css`
+- `/src/lib/ui/tailwind.preset.js`
 
 **Utilities**:
-- `/src/lib/utils/cn.ts` - Class name utility
+- `/src/lib/ui/utils/cn.ts` - Class name utility
 
 ---
 
@@ -478,23 +482,19 @@ If any are **NO** → Check if it belongs in GroveEngine or Site-Specific code i
 
 ---
 
-## Version Coupling
+## Version Note
 
-**Important**: GroveUI should be **version-independent** from GroveEngine.
+As of v0.4.0, the UI module is bundled directly in GroveEngine. External consumers use:
+- `@autumnsgrove/groveengine/ui` - Main UI components
+- `@autumnsgrove/groveengine/ui/tokens` - Design tokens
+- `@autumnsgrove/groveengine/ui/styles` - CSS stylesheets
+- `@autumnsgrove/groveengine/ui/tailwind` - Tailwind preset
 
-- GroveUI: `0.3.0` (UI design system version)
-- GroveEngine: `0.3.0` (depends on GroveUI, but versioned separately)
-
-GroveUI can be used by:
-- GroveEngine
-- Other projects completely unrelated to Grove
-- Customer sites directly
-
-This independence is a feature - don't couple versions tightly.
+The deprecated `@groveengine/ui` package is no longer maintained.
 
 ---
 
-**Last Updated**: 2025-12-03
+**Last Updated**: 2025-12-04
 **Related Docs**:
 - `BELONGS_IN_ENGINE.md` (GroveEngine decision guide)
 - `SITE_SPECIFIC_CODE.md` (Site deployment guide)

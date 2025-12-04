@@ -9,7 +9,7 @@
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Button, Input } from '@groveengine/ui';
+	import { Button, Input } from '$lib/ui';
 
 	let { children, data } = $props();
 

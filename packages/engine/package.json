@@ -33,14 +33,57 @@
       "types": "./dist/components/admin/*.svelte.d.ts",
       "svelte": "./dist/components/admin/*.svelte"
     },
-    "./components/gallery/*": {
-      "types": "./dist/components/gallery/*.svelte.d.ts",
-      "svelte": "./dist/components/gallery/*.svelte"
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "svelte": "./dist/ui/index.js",
+      "default": "./dist/ui/index.js"
     },
-    "./components/ui": {
-      "types": "./dist/components/ui/index.d.ts",
-      "svelte": "./dist/components/ui/index.js"
+    "./ui/gallery": {
+      "types": "./dist/ui/components/gallery/index.d.ts",
+      "svelte": "./dist/ui/components/gallery/index.js",
+      "default": "./dist/ui/components/gallery/index.js"
     },
+    "./ui/charts": {
+      "types": "./dist/ui/components/charts/index.d.ts",
+      "svelte": "./dist/ui/components/charts/index.js",
+      "default": "./dist/ui/components/charts/index.js"
+    },
+    "./ui/content": {
+      "types": "./dist/ui/components/content/index.d.ts",
+      "svelte": "./dist/ui/components/content/index.js",
+      "default": "./dist/ui/components/content/index.js"
+    },
+    "./ui/forms": {
+      "types": "./dist/ui/components/forms/index.d.ts",
+      "svelte": "./dist/ui/components/forms/index.js",
+      "default": "./dist/ui/components/forms/index.js"
+    },
+    "./ui/indicators": {
+      "types": "./dist/ui/components/indicators/index.d.ts",
+      "svelte": "./dist/ui/components/indicators/index.js",
+      "default": "./dist/ui/components/indicators/index.js"
+    },
+    "./ui/icons": {
+      "types": "./dist/ui/components/icons/index.d.ts",
+      "svelte": "./dist/ui/components/icons/index.js",
+      "default": "./dist/ui/components/icons/index.js"
+    },
+    "./ui/states": {
+      "types": "./dist/ui/components/states/index.d.ts",
+      "svelte": "./dist/ui/components/states/index.js",
+      "default": "./dist/ui/components/states/index.js"
+    },
+    "./ui/tokens": {
+      "types": "./dist/ui/tokens/index.d.ts",
+      "default": "./dist/ui/tokens/index.js"
+    },
+    "./ui/utils": {
+      "types": "./dist/ui/utils/index.d.ts",
+      "default": "./dist/ui/utils/index.js"
+    },
+    "./ui/styles": "./dist/ui/styles/grove.css",
+    "./ui/styles/*": "./dist/ui/styles/*",
+    "./ui/tailwind": "./dist/ui/tailwind.preset.js",
     "./utils/*": {
       "types": "./dist/utils/*.d.ts",
       "default": "./dist/utils/*.js"
@@ -107,14 +150,13 @@
     "postcss": "^8.5.6",
     "svelte": "^5.1.9",
     "svelte-check": "^4.0.0",
-    "tailwind-variants": "^0.2.1",
+    "tailwind-variants": "^0.3.0",
     "tailwindcss": "^3.4.18",
     "typescript": "^5.6.0",
     "vite": "^5.4.10",
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@groveengine/ui": "^0.3.0",
     "@types/dompurify": "^3.0.5",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",

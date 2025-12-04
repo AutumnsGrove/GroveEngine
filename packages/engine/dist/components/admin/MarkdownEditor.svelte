@@ -3,7 +3,7 @@
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "../../utils/sanitize.js";
   import "../../styles/content.css";
-  import { Button, Input } from '@groveengine/ui';
+  import { Button, Input } from '../../ui';
   import Dialog from "../ui/Dialog.svelte";
 
   // Import composables

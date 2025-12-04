@@ -4,7 +4,7 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { Input, Button } from '@groveengine/ui';
+  import { Input, Button } from '$lib/ui';
   import Dialog from "$lib/components/ui/Dialog.svelte";
   import { toast } from "$lib/components/ui/toast";
   import { api } from "$lib/utils/api.js";

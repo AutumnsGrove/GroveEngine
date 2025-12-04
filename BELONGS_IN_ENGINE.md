@@ -242,17 +242,17 @@ export interface PaymentProvider {
 
 ## Integration with Other Packages
 
-### GroveEngine ← depends on → GroveUI
+### Engine Components → use → UI Module
 
-GroveEngine **SHOULD**:
-- Import generic UI components from `@groveengine/ui`
+Engine components **SHOULD**:
+- Import generic UI components from `$lib/ui`
 - Wrap UI components with domain-specific logic
 - Provide admin-optimized variants
 
 **Example**:
 ```typescript
-// GroveEngine component
-import { Card, Button } from '@groveengine/ui/ui';
+// GroveEngine component (e.g., src/lib/components/admin/*)
+import { Card, Button } from '$lib/ui';
 import { parseMarkdown } from '$lib/utils/markdown';
 
 // Uses UI components + adds domain logic
@@ -261,15 +261,15 @@ import { parseMarkdown } from '$lib/utils/markdown';
 ### GroveEngine ← used by → Site Deployments
 
 Sites **SHOULD**:
-- Import from `@autumnsgrove/groveengine` for features
-- Import from `@groveengine/ui` for UI components
+- Import from `@autumnsgrove/groveengine` for domain features
+- Import from `@autumnsgrove/groveengine/ui` for UI components
 - Keep site-specific code separate
 
 **Example**:
 ```typescript
 // Site-specific route
 import { ContentWithGutter } from '@autumnsgrove/groveengine';
-import { Button } from '@groveengine/ui/ui';
+import { Button } from '@autumnsgrove/groveengine/ui';
 
 // Combine for site-specific page
 ```
@@ -320,7 +320,7 @@ If all are **NO** → Check if it belongs in GroveUI or Site-Specific code inste
 
 ---
 
-**Last Updated**: 2025-12-03
+**Last Updated**: 2025-12-04
 **Related Docs**:
 - `BELONGS_IN_UI.md` (GroveUI decision guide)
 - `SITE_SPECIFIC_CODE.md` (Site deployment guide)

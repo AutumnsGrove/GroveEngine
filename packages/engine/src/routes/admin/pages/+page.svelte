@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge } from '@groveengine/ui';
+  import { Button, Badge } from '$lib/ui';
 
   let { data } = $props();
 

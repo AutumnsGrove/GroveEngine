@@ -1,5 +1,5 @@
 <script>
-  import { Card, Spinner } from '@groveengine/ui';
+  import { Card, Spinner } from '$lib/ui';
   import { api } from "$lib/utils/api.js";
 
   let { data } = $props();

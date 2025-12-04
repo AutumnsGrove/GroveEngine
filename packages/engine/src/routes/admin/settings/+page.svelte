@@ -1,5 +1,5 @@
 <script>
-  import { Button, Spinner } from '@groveengine/ui';
+  import { Button, Spinner } from '$lib/ui';
   import { toast } from "$lib/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 

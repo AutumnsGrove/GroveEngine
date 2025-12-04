@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@autumnsgrove/groveengine": "workspace:*",
-    "@groveengine/ui": "workspace:*",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
     "gray-matter": "^4.0.3",
