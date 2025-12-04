@@ -1,40 +1,10 @@
 <script>
   import { marked } from "marked";
-  import mermaid from "mermaid";
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
   import "$lib/styles/content.css";
   import { Button, Input } from '@groveengine/ui';
   import Dialog from "$lib/components/ui/Dialog.svelte";
-
-  // Initialize mermaid with grove-themed dark config
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: "dark",
-    themeVariables: {
-      primaryColor: "#2d5a2d",
-      primaryTextColor: "#d4d4d4",
-      primaryBorderColor: "#4a7c4a",
-      lineColor: "#8bc48b",
-      secondaryColor: "#1e3a1e",
-      tertiaryColor: "#2a2a2a",
-      background: "#1e1e1e",
-      mainBkg: "#252526",
-      secondBkg: "#1e1e1e",
-      nodeBorder: "#4a7c4a",
-      clusterBkg: "#1a2a1a",
-      titleColor: "#8bc48b",
-      edgeLabelBackground: "#252526",
-    },
-    flowchart: {
-      curve: "basis",
-      padding: 15,
-    },
-    sequence: {
-      actorMargin: 50,
-      boxMargin: 10,
-    },
-  });
 
   // Props
   let {
@@ -303,42 +273,8 @@
   );
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-  // Custom marked renderer for mermaid blocks
-  const renderer = new marked.Renderer();
-  const originalCodeRenderer = renderer.code.bind(renderer);
-
-  renderer.code = function ({ text, lang }) {
-    if (lang === "mermaid") {
-      // Wrap mermaid code in a special container for rendering
-      const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-      return `<div class="mermaid-container"><pre class="mermaid" id="${id}">${text}</pre></div>`;
-    }
-    return originalCodeRenderer({ text, lang });
-  };
-
-  marked.use({ renderer });
 
   let previewHtml = $derived(content ? sanitizeMarkdown(marked.parse(content)) : "");
-
-  // Render mermaid diagrams after preview updates
-  async function renderMermaidDiagrams() {
-    await tick();
-    const mermaidElements = document.querySelectorAll(".preview-content .mermaid, .full-preview-scroll .mermaid");
-    if (mermaidElements.length > 0) {
-      try {
-        await mermaid.run({ nodes: mermaidElements });
-      } catch (e) {
-        console.warn("Mermaid rendering error:", e);
-      }
-    }
-  }
-
-  // Trigger mermaid rendering when preview HTML changes
-  $effect(() => {
-    if (previewHtml && (showPreview || showFullPreview)) {
-      renderMermaidDiagrams();
-    }
-  });
 
   // Reading time estimate (average 200 words per minute)
   let readingTime = $derived(() => {
@@ -533,7 +469,6 @@
     { id: "heading2", label: "Heading 2", insert: "## " },
     { id: "heading3", label: "Heading 3", insert: "### " },
     { id: "code", label: "Code Block", insert: "```\n\n```", cursorOffset: 4 },
-    { id: "mermaid", label: "Mermaid Diagram", insert: "```mermaid\nflowchart TD\n    A[Start] --> B[End]\n```", cursorOffset: 32 },
     { id: "quote", label: "Quote", insert: "> " },
     { id: "list", label: "Bullet List", insert: "- " },
     { id: "numbered", label: "Numbered List", insert: "1. " },
@@ -2609,30 +2544,6 @@
     font-size: 0.75rem;
     color: #6a6a6a;
     font-family: "JetBrains Mono", monospace;
-  }
-  /* Mermaid Diagram Styles */
-  :global(.mermaid-container) {
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background: var(--light-bg-primary);
-    border: 1px solid var(--light-border-primary);
-    border-radius: 8px;
-    overflow-x: auto;
-  }
-  :global(.mermaid) {
-    display: flex;
-    justify-content: center;
-  }
-  :global(.mermaid svg) {
-    max-width: 100%;
-    height: auto;
-  }
-  /* Mermaid error styling */
-  :global(.mermaid-container .error) {
-    color: #e07030;
-    padding: 0.5rem;
-    font-family: monospace;
-    font-size: 0.85rem;
   }
   /* Mode Transitions */
   .editor-container {

@@ -1,14 +1,6 @@
 import { marked } from "marked";
 import matter from "gray-matter";
-import mermaid from "mermaid";
-import { sanitizeSVG, sanitizeMarkdown } from './sanitize.js';
-
-// Configure Mermaid
-mermaid.initialize({
-  startOnLoad: false,
-  theme: "default",
-  securityLevel: "strict",
-});
+import { sanitizeMarkdown } from './sanitize.js';
 
 // Configure marked renderer for GitHub-style code blocks
 const renderer = new marked.Renderer();
@@ -143,42 +135,6 @@ export function processAnchorTags(html) {
 }
 
 /**
- * Process Mermaid diagrams in markdown content
- * @param {string} markdown - The markdown content
- * @returns {string} Processed markdown with Mermaid diagrams
- */
-export function processMermaidDiagrams(markdown) {
-  // Replace Mermaid code blocks with special divs that will be processed later
-  return markdown.replace(
-    /```mermaid\n([\s\S]*?)```/g,
-    (match, diagramCode) => {
-      const diagramId = "mermaid-" + Math.random().toString(36).substr(2, 9);
-      return `<div class="mermaid-container" id="${diagramId}" data-diagram="${encodeURIComponent(diagramCode.trim())}"></div>`;
-    },
-  );
-}
-
-/**
- * Render Mermaid diagrams in the DOM
- * This should be called after the content is mounted
- */
-export async function renderMermaidDiagrams() {
-  const containers = document.querySelectorAll(".mermaid-container");
-
-  for (const container of containers) {
-    try {
-      const diagramCode = decodeURIComponent(container.dataset.diagram);
-      const { svg } = await mermaid.render(container.id, diagramCode);
-      // Sanitize SVG output before injecting into DOM to prevent XSS
-      container.innerHTML = sanitizeSVG(svg);
-    } catch (error) {
-      console.error("Error rendering Mermaid diagram:", error);
-      container.innerHTML = '<p class="error">Error rendering diagram</p>';
-    }
-  }
-}
-
-/**
  * Parse markdown content and convert to HTML
  * @param {string} markdownContent - The raw markdown content (may include frontmatter)
  * @returns {Object} Object with data (frontmatter), content (HTML), headers, and raw markdown
@@ -186,9 +142,7 @@ export async function renderMermaidDiagrams() {
 export function parseMarkdownContent(markdownContent) {
   const { data, content: markdown } = matter(markdownContent);
 
-  // Process Mermaid diagrams in the content
-  const processedContent = processMermaidDiagrams(markdown);
-  let htmlContent = marked.parse(processedContent);
+  let htmlContent = marked.parse(markdown);
 
   // Process anchor tags in the HTML content
   htmlContent = processAnchorTags(htmlContent);
