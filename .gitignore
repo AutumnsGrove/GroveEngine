@@ -5,6 +5,7 @@ __pycache__/
 .claude/
 node_modules/
 build/
+dist/
 .svelte-kit/
 .env
 .env.local
