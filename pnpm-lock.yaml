@@ -57,8 +57,8 @@ importers:
   packages/engine:
     dependencies:
       '@groveengine/ui':
-        specifier: workspace:*
-        version: link:../ui
+        specifier: ^0.3.0
+        version: 0.3.1(svelte@5.45.3)(tailwindcss@3.4.18)
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.2.0
@@ -976,6 +976,12 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@groveengine/ui@0.3.1':
+    resolution: {integrity: sha512-livBINw/Gwwsoy9P+zSIaTSyr42c24VZ9gFDyqxrSaKg8sYzQoY7TgxsrKPeKpTEzxITCZLB1Tmo5l9N16e9Ag==}
+    peerDependencies:
+      svelte: ^5.0.0
+      tailwindcss: ^3.4.0
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -3091,6 +3097,11 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@groveengine/ui@0.3.1(svelte@5.45.3)(tailwindcss@3.4.18)':
+    dependencies:
+      svelte: 5.45.3
+      tailwindcss: 3.4.18
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
