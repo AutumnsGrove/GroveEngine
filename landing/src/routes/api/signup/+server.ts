@@ -3,8 +3,15 @@ import type { RequestHandler } from './$types';
 import { sendWelcomeEmail } from '$lib/email/send';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
+	// Debug logging to identify binding issues
+	console.log('Platform exists:', !!platform);
+	console.log('Platform.env exists:', !!platform?.env);
+	console.log('Platform.env keys:', platform?.env ? Object.keys(platform.env) : 'N/A');
+	console.log('DB binding exists:', !!platform?.env?.DB);
+	console.log('RESEND_API_KEY exists:', !!platform?.env?.RESEND_API_KEY);
+
 	if (!platform?.env?.DB) {
-		console.error('D1 database not available');
+		console.error('D1 database not available - platform:', !!platform, 'env:', !!platform?.env);
 		return json({ error: 'Service temporarily unavailable' }, { status: 503 });
 	}
 
