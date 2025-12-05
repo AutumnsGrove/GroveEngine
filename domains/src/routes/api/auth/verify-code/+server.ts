@@ -74,11 +74,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 		// Create session
 		const session = await createSession(DB, user.id);
 
-		// Set session cookie
+		// Set session cookie - secure only in production (HTTPS)
+		const isProduction = platform.env.SITE_URL?.startsWith('https://') ?? false;
 		cookies.set('session', session.id, {
 			path: '/',
 			httpOnly: true,
-			secure: true,
+			secure: isProduction,
 			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60 // 30 days
 		});

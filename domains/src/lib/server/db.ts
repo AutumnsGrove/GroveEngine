@@ -136,9 +136,20 @@ export interface MagicCode {
 	created_at: string;
 }
 
+/**
+ * Generate a cryptographically secure random code
+ * Uses Web Crypto API instead of Math.random() for security
+ */
+function generateSecureCode(length: number = 6): string {
+	const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluding ambiguous chars (0, O, 1, I)
+	const randomBytes = new Uint8Array(length);
+	crypto.getRandomValues(randomBytes);
+	return Array.from(randomBytes, (byte) => charset[byte % charset.length]).join('');
+}
+
 export async function createMagicCode(db: D1Database, email: string): Promise<MagicCode> {
 	const id = generateId();
-	const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char code
+	const code = generateSecureCode(6);
 	const timestamp = now();
 	const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
@@ -317,6 +328,16 @@ export async function listSearchJobs(
 	};
 }
 
+/**
+ * Update search job status and metrics
+ *
+ * SECURITY NOTE: This function uses dynamic SQL construction, but is safe because:
+ * 1. Field names are hardcoded strings, never from user input
+ * 2. All user-provided values are passed via parameterized queries (?)
+ * 3. The `id` parameter is bound as a parameter, not interpolated
+ *
+ * DO NOT modify this to accept dynamic field names from user input.
+ */
 export async function updateSearchJobStatus(
 	db: D1Database,
 	id: string,
@@ -330,6 +351,7 @@ export async function updateSearchJobStatus(
 		completed_at?: string;
 	}
 ): Promise<void> {
+	// Allowed fields - only these can be updated (whitelist approach)
 	const fields: string[] = ['updated_at = datetime("now")'];
 	const values: (string | number | null)[] = [];
 
