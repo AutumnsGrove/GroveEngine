@@ -6,9 +6,9 @@
 		CardDescription,
 		CardContent,
 		CardFooter
-	} from "$lib/components/primitives/card";
+	} from "$lib/ui/components/primitives/card";
 	import type { Snippet } from "svelte";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 
 	/**
 	 * Card component wrapper providing structured layout with header, content, and footer

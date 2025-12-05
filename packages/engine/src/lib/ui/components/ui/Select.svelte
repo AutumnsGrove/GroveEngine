@@ -4,7 +4,7 @@
 		SelectContent,
 		SelectItem,
 		SelectTrigger
-	} from "$lib/components/primitives/select";
+	} from "$lib/ui/components/primitives/select";
 	import type { Snippet } from "svelte";
 
 	interface Option {

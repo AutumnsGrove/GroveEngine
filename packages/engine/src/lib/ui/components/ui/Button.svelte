@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button as ShadcnButton } from "$lib/components/primitives/button";
+	import { Button as ShadcnButton } from "$lib/ui/components/primitives/button";
 	import type { Snippet } from "svelte";
 	import type { HTMLButtonAttributes } from "svelte/elements";
 

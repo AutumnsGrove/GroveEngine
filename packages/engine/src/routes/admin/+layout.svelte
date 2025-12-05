@@ -1,5 +1,5 @@
 <script>
-  import { Toast } from "$lib/components/ui";
+  import { Toast } from "$lib/ui/components/ui";
 
   let { data, children } = $props();
   let sidebarOpen = $state(false);

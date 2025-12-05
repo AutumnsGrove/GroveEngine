@@ -813,3 +813,28 @@ export function getContactPage() {
   }
   return contentLoader.getContactPage();
 }
+
+/**
+ * Get all recipes
+ * @returns {Array} Array of recipe objects
+ */
+export function getAllRecipes() {
+  if (!contentLoader || !contentLoader.getAllRecipes) {
+    console.warn('getAllRecipes: No content loader registered. Call registerContentLoader() in your site.');
+    return [];
+  }
+  return contentLoader.getAllRecipes();
+}
+
+/**
+ * Get a recipe by its slug
+ * @param {string} slug - The recipe slug
+ * @returns {Object|null} Recipe object or null
+ */
+export function getRecipeBySlug(slug) {
+  if (!contentLoader || !contentLoader.getRecipeBySlug) {
+    console.warn('getRecipeBySlug: No content loader registered. Call registerContentLoader() in your site.');
+    return null;
+  }
+  return contentLoader.getRecipeBySlug(slug);
+}

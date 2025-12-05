@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import { Button } from '$lib/ui';
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import { toast } from "$lib/components/ui/toast";
+  import Dialog from "$lib/ui/components/ui/Dialog.svelte";
+  import { toast } from "$lib/ui/components/ui/toast";
   import { api, apiRequest } from "$lib/utils/api.js";
   import {
     processImage,

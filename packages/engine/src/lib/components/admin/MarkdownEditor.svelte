@@ -4,7 +4,7 @@
   import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
   import "$lib/styles/content.css";
   import { Button, Input } from '$lib/ui';
-  import Dialog from "$lib/components/ui/Dialog.svelte";
+  import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 
   // Import composables
   import {

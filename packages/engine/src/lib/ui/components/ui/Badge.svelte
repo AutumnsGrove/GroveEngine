@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Badge as ShadcnBadge } from "$lib/components/primitives/badge";
+	import { Badge as ShadcnBadge } from "$lib/ui/components/primitives/badge";
 	import type { Snippet } from "svelte";
 
 	type BadgeVariant = "default" | "secondary" | "destructive" | "tag";

@@ -1,6 +1,6 @@
 <script>
   import { Button, Spinner } from '$lib/ui';
-  import { toast } from "$lib/components/ui/toast";
+  import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
   let clearingCache = $state(false);

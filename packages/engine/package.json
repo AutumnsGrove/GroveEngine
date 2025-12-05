@@ -84,17 +84,37 @@
     "./ui/styles": "./dist/ui/styles/grove.css",
     "./ui/styles/*": "./dist/ui/styles/*",
     "./ui/tailwind": "./dist/ui/tailwind.preset.js",
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
+    },
     "./utils/*": {
       "types": "./dist/utils/*.d.ts",
       "default": "./dist/utils/*.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "default": "./dist/auth/index.js"
     },
     "./auth/*": {
       "types": "./dist/auth/*.d.ts",
       "default": "./dist/auth/*.js"
     },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
     "./server/*": {
       "types": "./dist/server/*.d.ts",
       "default": "./dist/server/*.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./config/*": {
+      "types": "./dist/config/*.d.ts",
+      "default": "./dist/config/*.js"
     },
     "./payments": {
       "types": "./dist/payments/index.d.ts",
@@ -160,10 +180,11 @@
     "@types/dompurify": "^3.0.5",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
-    "dompurify": "^3.3.0",
+    "isomorphic-dompurify": "^2.33.0",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
+    "sonner": "^2.0.7",
     "svelte-sonner": "^1.0.7",
     "tailwind-merge": "^3.4.0"
   }

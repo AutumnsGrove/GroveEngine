@@ -4,7 +4,7 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import { Input, Textarea, Button } from '$lib/ui';
-  import { toast } from "$lib/components/ui/toast";
+  import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
   let { data } = $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Skeleton as ShadcnSkeleton } from "$lib/components/primitives/skeleton";
+	import { Skeleton as ShadcnSkeleton } from "$lib/ui/components/primitives/skeleton";
 	import type { HTMLAttributes } from "svelte/elements";
 
 	/**

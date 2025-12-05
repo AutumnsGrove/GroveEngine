@@ -4,7 +4,7 @@
 		TabsContent,
 		TabsList,
 		TabsTrigger
-	} from "$lib/components/primitives/tabs";
+	} from "$lib/ui/components/primitives/tabs";
 	import type { Snippet } from "svelte";
 
 	interface Tab {

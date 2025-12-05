@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Input as ShadcnInput } from "$lib/components/primitives/input";
+	import { Input as ShadcnInput } from "$lib/ui/components/primitives/input";
 	import type { HTMLInputAttributes } from "svelte/elements";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 
 	/**
 	 * Input component wrapper with label, error handling, and validation

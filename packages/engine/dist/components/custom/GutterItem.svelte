@@ -1,6 +1,6 @@
 <script>
-	import Lightbox from '../gallery/Lightbox.svelte';
-	import ImageGallery from '../gallery/ImageGallery.svelte';
+	import Lightbox from '../../ui/components/gallery/Lightbox.svelte';
+	import ImageGallery from '../../ui/components/gallery/ImageGallery.svelte';
 	import { sanitizeHTML } from '../../utils/sanitize.js';
 
 	let { item = {} } = $props();

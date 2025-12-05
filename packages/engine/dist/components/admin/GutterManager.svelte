@@ -1,9 +1,9 @@
 <script>
   import { marked } from "marked";
   import { Input, Button } from '../../ui';
-  import Dialog from "../ui/Dialog.svelte";
-  import Select from "../ui/Select.svelte";
-  import { toast } from "../ui/toast";
+  import Dialog from "../../ui/components/ui/Dialog.svelte";
+  import Select from "../../ui/components/ui/Select.svelte";
+  import { toast } from "../../ui/components/ui/toast";
 
   // Props
   let {

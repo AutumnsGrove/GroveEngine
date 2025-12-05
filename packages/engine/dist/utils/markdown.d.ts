@@ -152,3 +152,14 @@ export function getAboutPage(): Object | null;
  * @returns {Object|null} Contact page data or null
  */
 export function getContactPage(): Object | null;
+/**
+ * Get all recipes
+ * @returns {Array} Array of recipe objects
+ */
+export function getAllRecipes(): any[];
+/**
+ * Get a recipe by its slug
+ * @param {string} slug - The recipe slug
+ * @returns {Object|null} Recipe object or null
+ */
+export function getRecipeBySlug(slug: string): Object | null;

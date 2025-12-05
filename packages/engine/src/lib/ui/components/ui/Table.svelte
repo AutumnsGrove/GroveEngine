@@ -5,7 +5,7 @@
 		TableBody,
 		TableRow,
 		TableCell
-	} from "$lib/components/primitives/table";
+	} from "$lib/ui/components/primitives/table";
 	import type { Snippet } from "svelte";
 
 	/**

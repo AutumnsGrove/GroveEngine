@@ -1,10 +1,9 @@
 /**
  * Centralized sanitization utilities for XSS prevention
- * Uses dompurify for client-side sanitization
- * Note: For Cloudflare Workers, DOM APIs are available so we use client-side dompurify
+ * Uses isomorphic-dompurify for both server-side and client-side sanitization
  */
 
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Sanitize HTML content to prevent XSS attacks

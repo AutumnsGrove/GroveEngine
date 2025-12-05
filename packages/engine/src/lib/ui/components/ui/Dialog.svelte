@@ -6,7 +6,7 @@
 		DialogTitle,
 		DialogDescription,
 		DialogFooter
-	} from "$lib/components/primitives/dialog";
+	} from "$lib/ui/components/primitives/dialog";
 	import type { Snippet } from "svelte";
 
 	/**

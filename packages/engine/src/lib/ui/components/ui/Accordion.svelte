@@ -4,7 +4,7 @@
 		AccordionItem,
 		AccordionTrigger,
 		AccordionContent
-	} from "$lib/components/primitives/accordion";
+	} from "$lib/ui/components/primitives/accordion";
 	import type { Snippet } from "svelte";
 
 	interface AccordionItemConfig {

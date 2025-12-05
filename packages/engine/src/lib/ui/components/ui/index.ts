@@ -23,6 +23,17 @@ export { default as Spinner } from './Spinner.svelte';
 export { default as Table } from './Table.svelte';
 export { default as CollapsibleSection } from './CollapsibleSection.svelte';
 
+// Table sub-components (from primitives)
+export {
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableCell,
+	TableHead,
+	TableFooter,
+	TableCaption,
+} from '$lib/ui/components/primitives/table';
+
 // Toast utility
 export * from './toast.js';
 

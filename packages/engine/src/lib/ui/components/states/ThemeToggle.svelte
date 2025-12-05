@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { themeStore } from '$lib/stores/theme';
+	import { themeStore } from '$lib/ui/stores/theme';
 
 	let { compact = false }: { compact?: boolean } = $props();
 
