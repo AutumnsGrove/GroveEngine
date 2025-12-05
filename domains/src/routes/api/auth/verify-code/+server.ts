@@ -47,13 +47,22 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 			throw error(400, 'User not found');
 		}
 
-		// Check if user is admin
+		// Check if user is admin - ADMIN_EMAILS must be set and include this email
 		const adminEmails = (ADMIN_EMAILS || '')
 			.split(',')
 			.map((e: string) => e.trim().toLowerCase())
 			.filter(Boolean);
 
-		const isAdmin = adminEmails.length === 0 || adminEmails.includes(normalizedEmail);
+		// Security: If ADMIN_EMAILS is not configured, deny admin access entirely
+		if (adminEmails.length === 0) {
+			throw error(403, 'Admin access not configured. Set ADMIN_EMAILS environment variable.');
+		}
+
+		const isAdmin = adminEmails.includes(normalizedEmail);
+
+		if (!isAdmin) {
+			throw error(403, 'You are not authorized to access this admin panel');
+		}
 
 		// Update user's admin status if needed
 		if (isAdmin && !user.is_admin) {

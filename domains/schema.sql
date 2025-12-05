@@ -1,6 +1,16 @@
 -- Domain Finder Schema
 -- Run this against your D1 database to add the domain search tables
 -- These tables extend the existing grove-engine-db schema
+--
+-- IMPORTANT: This schema requires the following tables from the main platform:
+--   - users (id, email, is_admin, created_at, updated_at)
+--   - sessions (id, user_id, expires_at, created_at)
+--   - magic_codes (id, email, code, expires_at, used_at, created_at)
+-- These tables are defined in the main GroveEngine schema.
+--
+-- NOTE: D1 (SQLite) does not enforce foreign key constraints by default.
+-- The REFERENCES clauses are for documentation only. Cascading deletes
+-- must be handled in application code if needed.
 
 -- ============================================================================
 -- Domain Search Jobs
@@ -36,7 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_domain_jobs_client ON domain_search_jobs(client_e
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS domain_results (
     id TEXT PRIMARY KEY,
-    job_id TEXT NOT NULL REFERENCES domain_search_jobs(id) ON DELETE CASCADE,
+    job_id TEXT NOT NULL, -- References domain_search_jobs(id) - FK not enforced by D1
     domain TEXT NOT NULL,
     tld TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'unknown', -- available, registered, unknown

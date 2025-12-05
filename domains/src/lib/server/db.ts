@@ -287,7 +287,8 @@ export async function listSearchJobs(
 	db: D1Database,
 	options?: { limit?: number; offset?: number; status?: SearchStatus }
 ): Promise<{ jobs: DomainSearchJob[]; total: number }> {
-	const limit = options?.limit ?? 20;
+	// Enforce max limit to prevent memory issues
+	const limit = Math.min(options?.limit ?? 20, 100);
 	const offset = options?.offset ?? 0;
 
 	let query = 'SELECT * FROM domain_search_jobs';
@@ -398,7 +399,7 @@ export async function saveDomainResults(
 ): Promise<void> {
 	const timestamp = now();
 
-	// Use a transaction for bulk insert
+	// D1 batch operations are atomic - all succeed or all fail
 	const statements = results.map((result) =>
 		db
 			.prepare(
@@ -421,7 +422,12 @@ export async function saveDomainResults(
 			)
 	);
 
-	await db.batch(statements);
+	try {
+		await db.batch(statements);
+	} catch (err) {
+		console.error(`[saveDomainResults] Failed to save ${results.length} results for job ${jobId}:`, err);
+		throw err;
+	}
 }
 
 export async function getJobResults(
