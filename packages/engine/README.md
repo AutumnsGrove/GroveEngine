@@ -104,6 +104,26 @@ RESEND_API_KEY=re_xxxxx
    npx wrangler pages deploy
    ```
 
+## Fonts
+
+GroveEngine includes self-hosted accessibility-focused fonts in `static/fonts/`. After installing the package, copy the fonts to your project's static directory:
+
+```bash
+# Copy fonts from node_modules to your static folder
+cp -r node_modules/@autumnsgrove/groveengine/static/fonts/ static/fonts/
+```
+
+**Included fonts:**
+- `alagard.ttf` - Pixel art style
+- `AtkinsonHyperlegible-Regular.ttf` - High legibility
+- `CozetteVector.ttf` - Bitmap style
+- `Cormorant-Regular.ttf` - Elegant serif
+- `Lexend-Regular.ttf` - Reading optimized
+- `OpenDyslexic-Regular.otf` - Dyslexia-friendly
+- `Quicksand-Regular.ttf` - Rounded sans-serif
+
+Your `@font-face` declarations should reference `/fonts/fontname.ttf`.
+
 ## Key Components
 
 ### Gutter System
