@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /**
  * GET /api/shop/orders - List orders for a tenant
@@ -20,12 +21,17 @@ export async function GET({ url, platform, locals }) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     const orders = await getOrders(platform.env.POSTS_DB, tenantId, {
       status: url.searchParams.get("status") || undefined,
       paymentStatus: url.searchParams.get("payment_status") || undefined,
@@ -83,12 +89,27 @@ export async function PATCH({ request, platform, locals }) {
       throw error(404, "Order not found");
     }
 
+    // Verify user owns the tenant this order belongs to
+    await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      order.tenant_id,
+      locals.user,
+    );
+
     // Build update query
     const updates = [];
     const params = [];
 
     if (data.status) {
-      const validStatuses = ["pending", "paid", "processing", "shipped", "completed", "canceled", "refunded"];
+      const validStatuses = [
+        "pending",
+        "paid",
+        "processing",
+        "shipped",
+        "completed",
+        "canceled",
+        "refunded",
+      ];
       if (!validStatuses.includes(data.status)) {
         throw error(400, "Invalid status");
       }
@@ -136,13 +157,17 @@ export async function PATCH({ request, platform, locals }) {
     params.push(Math.floor(Date.now() / 1000));
     params.push(data.orderId);
 
-    await platform.env.POSTS_DB
-      .prepare(`UPDATE orders SET ${updates.join(", ")} WHERE id = ?`)
+    await platform.env.POSTS_DB.prepare(
+      `UPDATE orders SET ${updates.join(", ")} WHERE id = ?`,
+    )
       .bind(...params)
       .run();
 
     // Fetch updated order
-    const updatedOrder = await getOrderById(platform.env.POSTS_DB, data.orderId);
+    const updatedOrder = await getOrderById(
+      platform.env.POSTS_DB,
+      data.orderId,
+    );
 
     return json({
       success: true,

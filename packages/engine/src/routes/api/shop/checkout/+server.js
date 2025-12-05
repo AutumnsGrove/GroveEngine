@@ -34,13 +34,9 @@ import {
  * }
  */
 export async function POST({ request, url, platform, locals }) {
-  // CSRF check (optional for checkout - may be called from frontend)
-  // Skip CSRF for public checkout, but validate origin
-  const origin = request.headers.get("origin");
-  if (origin && !origin.includes("grove.place") && !origin.includes("localhost")) {
-    // Allow cross-origin for embedded checkouts in future
-    // For now, log it
-    console.log("Checkout request from origin:", origin);
+  // CSRF check - validate origin for public checkout
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
   }
 
   if (!platform?.env?.POSTS_DB) {
@@ -57,6 +53,16 @@ export async function POST({ request, url, platform, locals }) {
   }
 
   try {
+    // Validate tenant exists (checkout is public, so we just verify existence)
+    const tenant = await platform.env.POSTS_DB.prepare(
+      "SELECT id FROM tenants WHERE id = ?",
+    )
+      .bind(tenantId)
+      .first();
+
+    if (!tenant) {
+      throw error(404, "Store not found");
+    }
     const data = await request.json();
 
     // Validate required fields
@@ -79,12 +85,18 @@ export async function POST({ request, url, platform, locals }) {
         throw error(400, "Invalid item: variantId and quantity required");
       }
 
-      const variant = await getVariantById(platform.env.POSTS_DB, item.variantId);
+      const variant = await getVariantById(
+        platform.env.POSTS_DB,
+        item.variantId,
+      );
       if (!variant) {
         throw error(404, `Variant not found: ${item.variantId}`);
       }
 
-      const product = await getProductById(platform.env.POSTS_DB, variant.productId);
+      const product = await getProductById(
+        platform.env.POSTS_DB,
+        variant.productId,
+      );
       if (!product) {
         throw error(404, `Product not found for variant: ${item.variantId}`);
       }
@@ -100,7 +112,10 @@ export async function POST({ request, url, platform, locals }) {
         variant.inventoryPolicy === "deny" &&
         variant.inventoryQuantity < item.quantity
       ) {
-        throw error(400, `Insufficient inventory for ${product.name} - ${variant.name}`);
+        throw error(
+          400,
+          `Insufficient inventory for ${product.name} - ${variant.name}`,
+        );
       }
 
       // Track product types
@@ -127,7 +142,7 @@ export async function POST({ request, url, platform, locals }) {
     }
 
     // Determine checkout mode
-    const mode = hasSubscription ? "subscription" : (data.mode || "payment");
+    const mode = hasSubscription ? "subscription" : data.mode || "payment";
 
     // Create or get customer
     let customer = null;
@@ -136,7 +151,7 @@ export async function POST({ request, url, platform, locals }) {
         platform.env.POSTS_DB,
         tenantId,
         data.customerEmail,
-        { name: data.customerName }
+        { name: data.customerName },
       );
     }
 
@@ -158,7 +173,7 @@ export async function POST({ request, url, platform, locals }) {
           ...data.metadata,
           checkoutMode: mode,
         },
-      }
+      },
     );
 
     // Initialize Stripe provider
@@ -173,8 +188,9 @@ export async function POST({ request, url, platform, locals }) {
 
     if (platform.env.STRIPE_CONNECT_ENABLED === "true") {
       // Look up tenant's Connect account
-      const connectAccount = await platform.env.POSTS_DB
-        .prepare("SELECT provider_account_id FROM connect_accounts WHERE tenant_id = ? AND status = 'enabled'")
+      const connectAccount = await platform.env.POSTS_DB.prepare(
+        "SELECT provider_account_id FROM connect_accounts WHERE tenant_id = ? AND status = 'enabled'",
+      )
         .bind(tenantId)
         .first();
 
@@ -215,12 +231,13 @@ export async function POST({ request, url, platform, locals }) {
           ...data.metadata,
         },
       },
-      resolveVariant
+      resolveVariant,
     );
 
     // Update order with session ID
-    await platform.env.POSTS_DB
-      .prepare("UPDATE orders SET provider_session_id = ?, updated_at = ? WHERE id = ?")
+    await platform.env.POSTS_DB.prepare(
+      "UPDATE orders SET provider_session_id = ?, updated_at = ? WHERE id = ?",
+    )
       .bind(session.id, Math.floor(Date.now() / 1000), orderId)
       .run();
 

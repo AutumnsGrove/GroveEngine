@@ -19,6 +19,59 @@
 - [x] Fix CI/CD for example site → **DONE: Removed mermaid (crypto issues), fixed wrangler deploy command (2025-12-04)**
 - [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
 
+## Security Audit Fixes (2025-12-05)
+> **PRIORITY: Fix before production deployment.** Audit performed by Claude Code.
+
+### Critical (Fix Immediately)
+- [x] **Tenant authorization bypass** - Add ownership validation to all shop/billing endpoints → **DONE (2025-12-05)**
+  - Added `getVerifiedTenantId()` helper to verify user owns tenant
+  - Applied to: `/api/shop/orders`, `/api/shop/products`, `/api/shop/connect`, `/api/billing`
+- [x] **SameSite cookie** - Change from `Lax` to `Strict` → **DONE (2025-12-05)**
+- [x] **SVG uploads** - Remove `image/svg+xml` from CDN allowed types → **DONE (2025-12-05)**
+- [x] **Shop checkout CSRF** - Enable CSRF validation → **DONE (2025-12-05)**
+  - Added origin validation + tenant existence check
+- [x] **Auth endpoints CSRF** - Add origin-based protection → **DONE (2025-12-05)**
+  - Auth endpoints now use `validateCSRF()` for origin checking
+
+### High Priority
+- [x] **Race condition in magic code** - Use atomic DB update → **DONE (2025-12-05)**
+  - Changed to `UPDATE ... WHERE used = 0` and check `rowsModified`
+- [x] **Public image endpoints** - Add auth checks → **DONE (2025-12-05)**
+  - Added to `/api/images/list` and `/api/images/filters`
+- [ ] **CDN magic byte validation** - Add file signature validation (engine has it, CDN doesn't)
+  - Location: `landing/src/routes/api/admin/cdn/upload/+server.ts`
+- [x] **Order authorization** - Verify order belongs to user's tenant → **DONE (2025-12-05)**
+  - Added tenant ownership check in PATCH handler
+- [ ] **Session duration** - Consider reducing from 7 days to 24 hours
+  - Location: `session.js:8`
+
+### Medium Priority
+- [ ] **Email enumeration timing** - Add consistent delays for non-allowed emails
+  - Location: `send-code/+server.js:169-173`
+- [ ] **CSRF token rotation** - Implement per-session or periodic rotation
+- [ ] **Rate limiting** - Add to image upload, post creation, settings endpoints
+- [ ] **Content-Disposition headers** - Add to R2 uploads for forced download
+- [ ] **Image bomb protection** - Add dimension validation after image load
+- [ ] **JS/CSS CDN uploads** - Force download or remove from allowed types
+
+### Low Priority (Polish)
+- [ ] **Logout CSRF** - Consider requiring POST instead of GET
+- [ ] **Failed attempts cleanup** - Add cleanup for old `failed_attempts` records
+- [ ] **CSP headers** - Add Content-Security-Policy headers in hooks
+- [ ] **Alt text sanitization** - Sanitize before DB storage in CDN patch endpoint
+
+### Already Secure (No Action Needed)
+- [x] DOMPurify sanitization on all `{@html}` usage
+- [x] Magic byte validation on engine image uploads
+- [x] JWT with HMAC-SHA256
+- [x] Rate limiting on magic code requests
+- [x] Constant-time comparison for codes
+- [x] Prototype pollution prevention
+- [x] File size limits enforced
+- [x] Parameterized SQL queries (no injection)
+
+---
+
 ## Phase 1: GroveEngine MVP (Weeks 1-4)
 - [x] Extract blog functionality from autumnsgrove.com → **DONE: Complete migration in PR #14**
 - [x] Implement core blog engine with post creation/editing → **DONE: Full CRUD with MarkdownEditor**

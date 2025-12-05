@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /**
  * Platform billing for tenant subscriptions to GroveEngine
@@ -62,21 +63,25 @@ export async function GET({ url, platform, locals }) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     // Get billing record
-    const billing = await platform.env.POSTS_DB
-      .prepare(
-        `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
+    const billing = await platform.env.POSTS_DB.prepare(
+      `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
                 current_period_start, current_period_end, cancel_at_period_end,
                 trial_end, payment_method_last4, payment_method_brand,
                 created_at, updated_at
-         FROM platform_billing WHERE tenant_id = ?`
-      )
+         FROM platform_billing WHERE tenant_id = ?`,
+    )
       .bind(tenantId)
       .first();
 
@@ -146,12 +151,17 @@ export async function POST({ request, url, platform, locals }) {
     throw error(500, "Payment provider not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     const data = await request.json();
 
     // Validate plan
@@ -166,8 +176,9 @@ export async function POST({ request, url, platform, locals }) {
     const plan = PLANS[data.plan];
 
     // Check for existing billing
-    const existingBilling = await platform.env.POSTS_DB
-      .prepare("SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?")
+    const existingBilling = await platform.env.POSTS_DB.prepare(
+      "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?",
+    )
       .bind(tenantId)
       .first();
 
@@ -238,23 +249,23 @@ export async function POST({ request, url, platform, locals }) {
 
     // Create or update billing record
     if (existingBilling) {
-      await platform.env.POSTS_DB
-        .prepare("UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?")
+      await platform.env.POSTS_DB.prepare(
+        "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
+      )
         .bind(data.plan, Math.floor(Date.now() / 1000), existingBilling.id)
         .run();
     } else {
-      await platform.env.POSTS_DB
-        .prepare(
-          `INSERT INTO platform_billing (id, tenant_id, plan, status, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?)`
-        )
+      await platform.env.POSTS_DB.prepare(
+        `INSERT INTO platform_billing (id, tenant_id, plan, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+      )
         .bind(
           crypto.randomUUID(),
           tenantId,
           data.plan,
           "pending",
           Math.floor(Date.now() / 1000),
-          Math.floor(Date.now() / 1000)
+          Math.floor(Date.now() / 1000),
         )
         .run();
     }
@@ -298,17 +309,23 @@ export async function PATCH({ request, url, platform, locals }) {
     throw error(500, "Payment provider not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     const data = await request.json();
 
     // Get billing record
-    const billing = await platform.env.POSTS_DB
-      .prepare("SELECT * FROM platform_billing WHERE tenant_id = ?")
+    const billing = await platform.env.POSTS_DB.prepare(
+      "SELECT * FROM platform_billing WHERE tenant_id = ?",
+    )
       .bind(tenantId)
       .first();
 
@@ -324,20 +341,19 @@ export async function PATCH({ request, url, platform, locals }) {
       case "cancel":
         await stripe.cancelSubscription(
           billing.provider_subscription_id,
-          data.cancelImmediately === true
+          data.cancelImmediately === true,
         );
 
-        await platform.env.POSTS_DB
-          .prepare(
-            `UPDATE platform_billing SET
+        await platform.env.POSTS_DB.prepare(
+          `UPDATE platform_billing SET
               cancel_at_period_end = ?,
               updated_at = ?
-             WHERE id = ?`
-          )
+             WHERE id = ?`,
+        )
           .bind(
             data.cancelImmediately ? 0 : 1,
             Math.floor(Date.now() / 1000),
-            billing.id
+            billing.id,
           )
           .run();
 
@@ -351,10 +367,9 @@ export async function PATCH({ request, url, platform, locals }) {
       case "resume":
         await stripe.resumeSubscription(billing.provider_subscription_id);
 
-        await platform.env.POSTS_DB
-          .prepare(
-            "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ?"
-          )
+        await platform.env.POSTS_DB.prepare(
+          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ?",
+        )
           .bind(Math.floor(Date.now() / 1000), billing.id)
           .run();
 
@@ -370,14 +385,17 @@ export async function PATCH({ request, url, platform, locals }) {
 
         // For plan changes, we need to update the subscription in Stripe
         // This requires the price ID for the new plan
-        const newPriceId = platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
+        const newPriceId =
+          platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
 
         if (!newPriceId) {
           throw error(500, "Price ID not configured for plan");
         }
 
         // Get current subscription to find the item ID
-        const sub = await stripe.getSubscription(billing.provider_subscription_id);
+        const sub = await stripe.getSubscription(
+          billing.provider_subscription_id,
+        );
         if (!sub) {
           throw error(404, "Subscription not found in Stripe");
         }
@@ -401,11 +419,12 @@ export async function PATCH({ request, url, platform, locals }) {
                 grove_plan: data.plan,
               },
             },
-          }
+          },
         );
 
-        await platform.env.POSTS_DB
-          .prepare("UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?")
+        await platform.env.POSTS_DB.prepare(
+          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
+        )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id)
           .run();
 
@@ -440,10 +459,8 @@ export async function PUT({ url, platform, locals }) {
     throw error(500, "Payment provider not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   const returnUrl = url.searchParams.get("return_url");
   if (!returnUrl) {
@@ -451,9 +468,17 @@ export async function PUT({ url, platform, locals }) {
   }
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     // Get billing record
-    const billing = await platform.env.POSTS_DB
-      .prepare("SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?")
+    const billing = await platform.env.POSTS_DB.prepare(
+      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
+    )
       .bind(tenantId)
       .first();
 
@@ -467,7 +492,7 @@ export async function PUT({ url, platform, locals }) {
 
     const { url: portalUrl } = await stripe.createBillingPortalSession(
       billing.provider_customer_id,
-      returnUrl
+      returnUrl,
     );
 
     return json({

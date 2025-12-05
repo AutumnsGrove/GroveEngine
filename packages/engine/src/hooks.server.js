@@ -1,6 +1,10 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 import { parseSessionCookie, verifySession } from "$lib/auth/session.js";
-import { generateCSRFToken, validateCSRFToken } from "$lib/utils/csrf.js";
+import {
+  generateCSRFToken,
+  validateCSRFToken,
+  validateCSRF,
+} from "$lib/utils/csrf.js";
 import { error } from "@sveltejs/kit";
 
 export async function handle({ event, resolve }) {
@@ -37,11 +41,19 @@ export async function handle({ event, resolve }) {
   event.locals.csrfToken = csrfToken;
 
   // Auto-validate CSRF on state-changing methods
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(event.request.method)) {
-    // Skip CSRF validation for login endpoint (it has its own protection)
-    if (!event.url.pathname.includes('/auth/')) {
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
+    const isAuthEndpoint = event.url.pathname.includes("/auth/");
+
+    if (isAuthEndpoint) {
+      // Auth endpoints use origin-based validation (users don't have CSRF tokens yet)
+      // Rate limiting provides additional protection on these endpoints
+      if (!validateCSRF(event.request)) {
+        throw error(403, "Invalid origin");
+      }
+    } else {
+      // All other endpoints require CSRF token validation
       if (!validateCSRFToken(event.request, csrfToken)) {
-        throw error(403, 'Invalid CSRF token');
+        throw error(403, "Invalid CSRF token");
       }
     }
   }
@@ -49,27 +61,31 @@ export async function handle({ event, resolve }) {
   const response = await resolve(event);
 
   // Set CSRF token cookie if it was just generated
-  if (!cookieHeader || !cookieHeader.includes('csrf_token=')) {
-    const isProduction = event.url.hostname !== 'localhost' && event.url.hostname !== '127.0.0.1';
+  if (!cookieHeader || !cookieHeader.includes("csrf_token=")) {
+    const isProduction =
+      event.url.hostname !== "localhost" && event.url.hostname !== "127.0.0.1";
     const cookieParts = [
       `csrf_token=${csrfToken}`,
-      'Path=/',
-      'Max-Age=604800', // 7 days
-      'SameSite=Lax'
+      "Path=/",
+      "Max-Age=604800", // 7 days
+      "SameSite=Lax",
     ];
 
     if (isProduction) {
-      cookieParts.push('Secure');
+      cookieParts.push("Secure");
     }
 
-    response.headers.append('Set-Cookie', cookieParts.join('; '));
+    response.headers.append("Set-Cookie", cookieParts.join("; "));
   }
 
   // Add security headers
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(), microphone=(), camera=()",
+  );
 
   // Content-Security-Policy
   // Note: 'unsafe-eval' is required for Mermaid diagram rendering
@@ -81,10 +97,10 @@ export async function handle({ event, resolve }) {
     "img-src 'self' https://cdn.autumnsgrove.com data:",
     "font-src 'self'",
     "connect-src 'self' https://api.github.com https://autumnsgrove-sync-posts.m7jv4v7npb.workers.dev https://autumnsgrove-daily-summary.m7jv4v7npb.workers.dev",
-    "frame-ancestors 'none'"
-  ].join('; ');
+    "frame-ancestors 'none'",
+  ].join("; ");
 
-  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set("Content-Security-Policy", csp);
 
   return response;
 }

@@ -40,3 +40,21 @@ export function parseSessionCookie(cookieHeader: string): string | null;
  * @returns {boolean} - Whether the user is allowed
  */
 export function isAllowedAdmin(email: string, allowedList: string): boolean;
+/**
+ * Verify that a user owns/has access to a tenant
+ * @param {Object} db - D1 database instance
+ * @param {string} tenantId - Tenant ID to check
+ * @param {string} userEmail - User's email address
+ * @returns {Promise<boolean>} - Whether the user owns the tenant
+ */
+export function verifyTenantOwnership(db: Object, tenantId: string, userEmail: string): Promise<boolean>;
+/**
+ * Get tenant ID with ownership verification
+ * Throws 403 if user doesn't own the tenant
+ * @param {Object} db - D1 database instance
+ * @param {string} tenantId - Tenant ID from request
+ * @param {Object} user - User object with email
+ * @returns {Promise<string>} - Verified tenant ID
+ * @throws {Error} - If unauthorized
+ */
+export function getVerifiedTenantId(db: Object, tenantId: string, user: Object): Promise<string>;

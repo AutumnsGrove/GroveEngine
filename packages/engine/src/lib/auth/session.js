@@ -54,7 +54,7 @@ export function createSessionCookie(token, isProduction = true) {
     "Path=/",
     `Max-Age=${SESSION_DURATION_SECONDS}`,
     "HttpOnly",
-    "SameSite=Lax",
+    "SameSite=Strict",
   ];
 
   if (isProduction) {
@@ -69,7 +69,7 @@ export function createSessionCookie(token, isProduction = true) {
  * @returns {string} - Cookie header value
  */
 export function clearSessionCookie() {
-  return `${SESSION_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`;
+  return `${SESSION_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict`;
 }
 
 /**
@@ -102,4 +102,66 @@ export function parseSessionCookie(cookieHeader) {
 export function isAllowedAdmin(email, allowedList) {
   const allowed = allowedList.split(",").map((e) => e.trim().toLowerCase());
   return allowed.includes(email.toLowerCase());
+}
+
+/**
+ * Verify that a user owns/has access to a tenant
+ * @param {Object} db - D1 database instance
+ * @param {string} tenantId - Tenant ID to check
+ * @param {string} userEmail - User's email address
+ * @returns {Promise<boolean>} - Whether the user owns the tenant
+ */
+export async function verifyTenantOwnership(db, tenantId, userEmail) {
+  if (!tenantId || !userEmail) {
+    return false;
+  }
+
+  try {
+    const tenant = await db
+      .prepare("SELECT email FROM tenants WHERE id = ?")
+      .bind(tenantId)
+      .first();
+
+    if (!tenant) {
+      return false;
+    }
+
+    // Check if user email matches tenant owner email
+    return tenant.email.toLowerCase() === userEmail.toLowerCase();
+  } catch (error) {
+    console.error("Error verifying tenant ownership:", error);
+    return false;
+  }
+}
+
+/**
+ * Get tenant ID with ownership verification
+ * Throws 403 if user doesn't own the tenant
+ * @param {Object} db - D1 database instance
+ * @param {string} tenantId - Tenant ID from request
+ * @param {Object} user - User object with email
+ * @returns {Promise<string>} - Verified tenant ID
+ * @throws {Error} - If unauthorized
+ */
+export async function getVerifiedTenantId(db, tenantId, user) {
+  if (!tenantId) {
+    const err = new Error("Tenant ID required");
+    err.status = 400;
+    throw err;
+  }
+
+  if (!user?.email) {
+    const err = new Error("Unauthorized");
+    err.status = 401;
+    throw err;
+  }
+
+  const isOwner = await verifyTenantOwnership(db, tenantId, user.email);
+  if (!isOwner) {
+    const err = new Error("Access denied - you do not own this tenant");
+    err.status = 403;
+    throw err;
+  }
+
+  return tenantId;
 }

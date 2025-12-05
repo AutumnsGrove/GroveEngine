@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /**
  * GET /api/shop/connect - Get Connect account status
@@ -14,20 +15,24 @@ export async function GET({ url, platform, locals }) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     // Get Connect account from database
-    const account = await platform.env.POSTS_DB
-      .prepare(
-        `SELECT id, provider_account_id, account_type, status, charges_enabled,
+    const account = await platform.env.POSTS_DB.prepare(
+      `SELECT id, provider_account_id, account_type, status, charges_enabled,
                 payouts_enabled, details_submitted, email, country, default_currency,
                 onboarding_complete, created_at, updated_at
-         FROM connect_accounts WHERE tenant_id = ?`
-      )
+         FROM connect_accounts WHERE tenant_id = ?`,
+    )
       .bind(tenantId)
       .first();
 
@@ -45,31 +50,33 @@ export async function GET({ url, platform, locals }) {
       });
 
       try {
-        const stripeAccount = await stripe.getConnectAccount(account.provider_account_id);
+        const stripeAccount = await stripe.getConnectAccount(
+          account.provider_account_id,
+        );
 
         if (stripeAccount) {
           // Update local status
-          const newStatus = stripeAccount.chargesEnabled && stripeAccount.payoutsEnabled
-            ? "enabled"
-            : stripeAccount.detailsSubmitted
-            ? "restricted"
-            : "pending";
+          const newStatus =
+            stripeAccount.chargesEnabled && stripeAccount.payoutsEnabled
+              ? "enabled"
+              : stripeAccount.detailsSubmitted
+                ? "restricted"
+                : "pending";
 
           if (newStatus !== account.status) {
-            await platform.env.POSTS_DB
-              .prepare(
-                `UPDATE connect_accounts SET
+            await platform.env.POSTS_DB.prepare(
+              `UPDATE connect_accounts SET
                   status = ?, charges_enabled = ?, payouts_enabled = ?,
                   details_submitted = ?, updated_at = ?
-                 WHERE id = ?`
-              )
+                 WHERE id = ?`,
+            )
               .bind(
                 newStatus,
                 stripeAccount.chargesEnabled ? 1 : 0,
                 stripeAccount.payoutsEnabled ? 1 : 0,
                 stripeAccount.detailsSubmitted ? 1 : 0,
                 Math.floor(Date.now() / 1000),
-                account.id
+                account.id,
               )
               .run();
           }
@@ -144,12 +151,17 @@ export async function POST({ request, url, platform, locals }) {
     throw error(500, "Payment provider not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     const data = await request.json();
 
     if (!data.returnUrl || !data.refreshUrl) {
@@ -157,8 +169,9 @@ export async function POST({ request, url, platform, locals }) {
     }
 
     // Check if account already exists
-    const existingAccount = await platform.env.POSTS_DB
-      .prepare("SELECT id, provider_account_id FROM connect_accounts WHERE tenant_id = ?")
+    const existingAccount = await platform.env.POSTS_DB.prepare(
+      "SELECT id, provider_account_id FROM connect_accounts WHERE tenant_id = ?",
+    )
       .bind(tenantId)
       .first();
 
@@ -173,7 +186,7 @@ export async function POST({ request, url, platform, locals }) {
         {
           returnUrl: data.returnUrl,
           refreshUrl: data.refreshUrl,
-        }
+        },
       );
 
       return json({
@@ -197,13 +210,12 @@ export async function POST({ request, url, platform, locals }) {
 
     // Store in database
     const accountDbId = crypto.randomUUID();
-    await platform.env.POSTS_DB
-      .prepare(
-        `INSERT INTO connect_accounts (
+    await platform.env.POSTS_DB.prepare(
+      `INSERT INTO connect_accounts (
           id, tenant_id, provider_account_id, account_type, status,
           email, country, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      )
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
       .bind(
         accountDbId,
         tenantId,
@@ -213,7 +225,7 @@ export async function POST({ request, url, platform, locals }) {
         data.email || locals.user.email || null,
         data.country || "US",
         Math.floor(Date.now() / 1000),
-        Math.floor(Date.now() / 1000)
+        Math.floor(Date.now() / 1000),
       )
       .run();
 
@@ -247,14 +259,20 @@ export async function DELETE({ request, url, platform, locals }) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
-    await platform.env.POSTS_DB
-      .prepare("DELETE FROM connect_accounts WHERE tenant_id = ?")
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
+    await platform.env.POSTS_DB.prepare(
+      "DELETE FROM connect_accounts WHERE tenant_id = ?",
+    )
       .bind(tenantId)
       .run();
 

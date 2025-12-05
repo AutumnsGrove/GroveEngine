@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /**
  * GET /api/shop/products - List products
@@ -13,19 +14,25 @@ import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
  * - offset: number
  */
 export async function GET({ url, platform, locals }) {
+  if (!locals.user) {
+    throw error(401, "Unauthorized");
+  }
+
   if (!platform?.env?.POSTS_DB) {
     throw error(500, "Database not configured");
   }
 
-  // Get tenant ID - in multi-tenant setup, this would come from subdomain
-  // For now, we'll use a query param or default
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
-
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
+
     const products = await getProducts(platform.env.POSTS_DB, tenantId, {
       status: url.searchParams.get("status") || undefined,
       type: url.searchParams.get("type") || undefined,
@@ -86,13 +93,16 @@ export async function POST({ request, platform, locals }) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = locals.tenant?.id;
-  if (!tenantId) {
-    throw error(400, "Tenant ID required");
-  }
-
   try {
     const data = await request.json();
+    const requestedTenantId = data.tenant_id || locals.tenant?.id;
+
+    // Verify user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.POSTS_DB,
+      requestedTenantId,
+      locals.user,
+    );
 
     // Validate required fields
     if (!data.name || !data.slug) {
@@ -102,23 +112,30 @@ export async function POST({ request, platform, locals }) {
     // Validate slug format
     const slugRegex = /^[a-z0-9-]+$/;
     if (!slugRegex.test(data.slug)) {
-      throw error(400, "Slug must contain only lowercase letters, numbers, and hyphens");
+      throw error(
+        400,
+        "Slug must contain only lowercase letters, numbers, and hyphens",
+      );
     }
 
     // Create the product
-    const { id: productId } = await createProduct(platform.env.POSTS_DB, tenantId, {
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      shortDescription: data.shortDescription,
-      type: data.type || "physical",
-      status: data.status || "draft",
-      images: data.images || [],
-      featuredImage: data.featuredImage,
-      category: data.category,
-      tags: data.tags || [],
-      metadata: data.metadata || {},
-    });
+    const { id: productId } = await createProduct(
+      platform.env.POSTS_DB,
+      tenantId,
+      {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        shortDescription: data.shortDescription,
+        type: data.type || "physical",
+        status: data.status || "draft",
+        images: data.images || [],
+        featuredImage: data.featuredImage,
+        category: data.category,
+        tags: data.tags || [],
+        metadata: data.metadata || {},
+      },
+    );
 
     // Create variants if provided
     const variants = data.variants || [];
@@ -135,7 +152,7 @@ export async function POST({ request, platform, locals }) {
           priceAmount: data.price,
           priceCurrency: "usd",
           isDefault: true,
-        }
+        },
       );
       createdVariants.push({ id: variantId, name: "Default" });
     } else {
@@ -163,7 +180,7 @@ export async function POST({ request, platform, locals }) {
             isDefault: variant.isDefault || i === 0,
             position: i,
             metadata: variant.metadata,
-          }
+          },
         );
         createdVariants.push({ id: variantId, name: variant.name });
       }

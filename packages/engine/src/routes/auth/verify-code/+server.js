@@ -48,7 +48,7 @@ function constantTimeCompare(a, b) {
  * @returns {Promise<void>}
  */
 async function artificialDelay() {
-  return new Promise(resolve => setTimeout(resolve, ARTIFICIAL_DELAY_MS));
+  return new Promise((resolve) => setTimeout(resolve, ARTIFICIAL_DELAY_MS));
 }
 
 /**
@@ -60,9 +60,10 @@ async function artificialDelay() {
 async function checkLockout(db, email) {
   try {
     /** @type {FailedAttempt | null} */
-    const attempt = await db.prepare(
-      "SELECT * FROM failed_attempts WHERE email = ?"
-    ).bind(email).first();
+    const attempt = await db
+      .prepare("SELECT * FROM failed_attempts WHERE email = ?")
+      .bind(email)
+      .first();
 
     if (!attempt) {
       return { locked: false };
@@ -92,23 +93,31 @@ async function recordFailedAttempt(db, email) {
 
   try {
     /** @type {FailedAttempt | null} */
-    const existing = await db.prepare(
-      "SELECT * FROM failed_attempts WHERE email = ?"
-    ).bind(email).first();
+    const existing = await db
+      .prepare("SELECT * FROM failed_attempts WHERE email = ?")
+      .bind(email)
+      .first();
 
     if (existing) {
       const newAttempts = existing.attempts + 1;
-      const lockedUntil = newAttempts >= MAX_FAILED_ATTEMPTS ? now + LOCKOUT_DURATION_MS : null;
+      const lockedUntil =
+        newAttempts >= MAX_FAILED_ATTEMPTS ? now + LOCKOUT_DURATION_MS : null;
 
-      await db.prepare(
-        "UPDATE failed_attempts SET attempts = ?, last_attempt = ?, locked_until = ? WHERE email = ?"
-      ).bind(newAttempts, now, lockedUntil, email).run();
+      await db
+        .prepare(
+          "UPDATE failed_attempts SET attempts = ?, last_attempt = ?, locked_until = ? WHERE email = ?",
+        )
+        .bind(newAttempts, now, lockedUntil, email)
+        .run();
 
       return { locked: newAttempts >= MAX_FAILED_ATTEMPTS };
     } else {
-      await db.prepare(
-        "INSERT INTO failed_attempts (email, attempts, last_attempt, locked_until) VALUES (?, 1, ?, NULL)"
-      ).bind(email, now).run();
+      await db
+        .prepare(
+          "INSERT INTO failed_attempts (email, attempts, last_attempt, locked_until) VALUES (?, 1, ?, NULL)",
+        )
+        .bind(email, now)
+        .run();
 
       return { locked: false };
     }
@@ -125,9 +134,10 @@ async function recordFailedAttempt(db, email) {
  */
 async function clearFailedAttempts(db, email) {
   try {
-    await db.prepare(
-      "DELETE FROM failed_attempts WHERE email = ?"
-    ).bind(email).run();
+    await db
+      .prepare("DELETE FROM failed_attempts WHERE email = ?")
+      .bind(email)
+      .run();
   } catch (error) {
     console.warn("Failed to clear attempts:", error);
   }
@@ -175,9 +185,12 @@ export async function POST({ request, platform, url }) {
   const lockout = await checkLockout(GIT_STATS_DB, normalizedEmail);
   if (lockout.locked) {
     const minutes = Math.ceil((lockout.remainingMs || 0) / 60000);
-    return json({
-      error: `Too many failed attempts. Please try again in ${minutes} minute(s).`
-    }, { status: 429 });
+    return json(
+      {
+        error: `Too many failed attempts. Please try again in ${minutes} minute(s).`,
+      },
+      { status: 429 },
+    );
   }
 
   const now = Date.now();
@@ -187,8 +200,10 @@ export async function POST({ request, platform, url }) {
   let result;
   try {
     result = await GIT_STATS_DB.prepare(
-      "SELECT * FROM magic_codes WHERE email = ? AND used = 0 AND expires_at > ?"
-    ).bind(normalizedEmail, now).first();
+      "SELECT * FROM magic_codes WHERE email = ? AND used = 0 AND expires_at > ?",
+    )
+      .bind(normalizedEmail, now)
+      .first();
   } catch (error) {
     console.error("Database error:", error);
     return json({ error: "Verification failed" }, { status: 500 });
@@ -198,16 +213,20 @@ export async function POST({ request, platform, url }) {
   await artificialDelay();
 
   // Check if code matches using constant-time comparison
-  const codeMatches = result && constantTimeCompare(result.code, normalizedCode);
+  const codeMatches =
+    result && constantTimeCompare(result.code, normalizedCode);
 
   if (!result || !codeMatches) {
     // Record failed attempt
     const { locked } = await recordFailedAttempt(GIT_STATS_DB, normalizedEmail);
 
     if (locked) {
-      return json({
-        error: `Too many failed attempts. Please try again in 15 minutes.`
-      }, { status: 429 });
+      return json(
+        {
+          error: `Too many failed attempts. Please try again in 15 minutes.`,
+        },
+        { status: 429 },
+      );
     }
 
     return json({ error: "Invalid or expired code" }, { status: 400 });
@@ -215,15 +234,22 @@ export async function POST({ request, platform, url }) {
 
   // Mark code as used and clear failed attempts
   try {
-    await GIT_STATS_DB.prepare(
-      "UPDATE magic_codes SET used = 1 WHERE id = ?"
-    ).bind(result.id).run();
+    const updateResult = await GIT_STATS_DB.prepare(
+      "UPDATE magic_codes SET used = 1 WHERE id = ? AND used = 0",
+    )
+      .bind(result.id)
+      .run();
+
+    if (!updateResult.meta?.changes || updateResult.meta.changes === 0) {
+      // Code was already used (race condition)
+      return json({ error: "Code has already been used" }, { status: 400 });
+    }
 
     // Clear failed attempts on successful verification
     await clearFailedAttempts(GIT_STATS_DB, normalizedEmail);
   } catch (error) {
     console.error("Database error:", error);
-    // Continue anyway - code was valid
+    return json({ error: "Verification failed" }, { status: 500 });
   }
 
   // Create session
@@ -231,7 +257,8 @@ export async function POST({ request, platform, url }) {
   const token = await createSession(user, SESSION_SECRET);
 
   // Determine if production
-  const isProduction = url.hostname !== "localhost" && !url.hostname.includes("127.0.0.1");
+  const isProduction =
+    url.hostname !== "localhost" && !url.hostname.includes("127.0.0.1");
   const cookie = createSessionCookie(token, isProduction);
 
   return json(
@@ -240,6 +267,6 @@ export async function POST({ request, platform, url }) {
       headers: {
         "Set-Cookie": cookie,
       },
-    }
+    },
   );
 }
