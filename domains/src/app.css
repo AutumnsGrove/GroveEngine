@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		font-family: Georgia, Cambria, 'Times New Roman', serif;
+	}
+
+	body {
+		@apply bg-cream text-bark antialiased;
+	}
+}
+
+@layer components {
+	.btn-primary {
+		@apply bg-domain-600 hover:bg-domain-700 text-white font-sans font-medium
+			px-6 py-3 rounded-lg transition-colors duration-200
+			focus:outline-none focus:ring-2 focus:ring-domain-500 focus:ring-offset-2;
+	}
+
+	.btn-secondary {
+		@apply bg-grove-600 hover:bg-grove-700 text-white font-sans font-medium
+			px-6 py-3 rounded-lg transition-colors duration-200
+			focus:outline-none focus:ring-2 focus:ring-grove-500 focus:ring-offset-2;
+	}
+
+	.btn-ghost {
+		@apply bg-transparent hover:bg-bark/5 text-bark font-sans font-medium
+			px-4 py-2 rounded-lg transition-colors duration-200
+			focus:outline-none focus:ring-2 focus:ring-bark/20;
+	}
+
+	.input-field {
+		@apply w-full px-4 py-3 rounded-lg border border-grove-200
+			focus:border-domain-500 focus:ring-2 focus:ring-domain-500/20
+			focus:outline-none transition-all duration-200
+			bg-white text-bark placeholder:text-bark/40;
+	}
+
+	.card {
+		@apply bg-white rounded-xl border border-grove-200 shadow-sm;
+	}
+
+	.badge {
+		@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium font-sans;
+	}
+
+	.badge-success {
+		@apply bg-grove-100 text-grove-800;
+	}
+
+	.badge-warning {
+		@apply bg-amber-100 text-amber-800;
+	}
+
+	.badge-error {
+		@apply bg-red-100 text-red-800;
+	}
+
+	.badge-info {
+		@apply bg-domain-100 text-domain-800;
+	}
+
+	/* Tab navigation */
+	.tab {
+		@apply px-4 py-2 font-sans text-sm font-medium rounded-lg transition-colors duration-200;
+	}
+
+	.tab-active {
+		@apply bg-domain-100 text-domain-700;
+	}
+
+	.tab-inactive {
+		@apply text-bark/60 hover:text-bark hover:bg-bark/5;
+	}
+}
+
+/* Subtle gradient background for domain pages */
+.domain-gradient {
+	background: linear-gradient(135deg, #f5f3ff 0%, #fefdfb 50%, #f0fdf4 100%);
+}
+
+/* Animation for status indicators */
+@keyframes pulse-slow {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+	animation: pulse-slow 2s ease-in-out infinite;
+}
+
+/* Domain result card hover effect */
+.domain-card {
+	@apply card p-4 transition-all duration-200 hover:shadow-md hover:border-domain-300;
+}
+
+/* Status dot indicator */
+.status-dot {
+	@apply w-2 h-2 rounded-full;
+}
+
+.status-dot-running {
+	@apply bg-domain-500 animate-pulse-slow;
+}
+
+.status-dot-complete {
+	@apply bg-grove-500;
+}
+
+.status-dot-error {
+	@apply bg-red-500;
+}
+
+.status-dot-pending {
+	@apply bg-bark/30;
+}

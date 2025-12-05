@@ -1,0 +1,125 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+</script>
+
+<svelte:head>
+	<title>Grove Domain Finder — AI-Powered Domain Search</title>
+	<meta name="description" content="Find the perfect domain name with AI-powered search. Our swarm of intelligent agents scans thousands of possibilities to find available, memorable domains." />
+</svelte:head>
+
+<main class="min-h-screen flex flex-col">
+	<!-- Hero Section -->
+	<section class="flex-1 flex flex-col items-center justify-center px-6 py-16">
+		<!-- Logo/Brand -->
+		<div class="mb-6">
+			<svg
+				class="w-20 h-20 text-domain-600"
+				viewBox="0 0 100 100"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<!-- Globe with search element -->
+				<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
+				<ellipse cx="50" cy="50" rx="35" ry="15" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3" />
+				<ellipse cx="50" cy="50" rx="15" ry="35" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3" />
+				<circle cx="50" cy="50" r="20" fill="currentColor" fill-opacity="0.15" />
+				<circle cx="50" cy="50" r="10" fill="currentColor" />
+				<!-- Search magnifier -->
+				<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" />
+				<line x1="77" y1="77" x2="88" y2="88" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+			</svg>
+		</div>
+
+		<!-- Title -->
+		<h1 class="text-4xl md:text-5xl font-serif text-bark mb-3 text-center">Domain Finder</h1>
+
+		<!-- Tagline -->
+		<p class="text-xl md:text-2xl text-bark/70 font-serif italic mb-8 text-center">
+			AI-powered domain discovery
+		</p>
+
+		<!-- Decorative divider -->
+		<div class="flex items-center gap-4 mb-8">
+			<div class="w-12 h-px bg-domain-300"></div>
+			<svg class="w-4 h-4 text-domain-400" viewBox="0 0 20 20" fill="currentColor">
+				<circle cx="10" cy="10" r="4" />
+			</svg>
+			<div class="w-12 h-px bg-domain-300"></div>
+		</div>
+
+		<!-- Description -->
+		<div class="max-w-xl text-center mb-12 space-y-4">
+			<p class="text-bark/70 font-sans leading-relaxed">
+				Finding the perfect domain doesn't have to take weeks. Our AI-powered swarm of agents
+				generates creative options, checks availability in real-time, and evaluates each domain
+				for memorability, brandability, and email-friendliness.
+			</p>
+			<p class="text-bark/60 font-sans text-sm">
+				Powered by Claude Sonnet for creative generation and a fleet of Haiku agents for rapid evaluation.
+			</p>
+		</div>
+
+		<!-- How It Works -->
+		<div class="grid md:grid-cols-3 gap-6 max-w-3xl mb-12">
+			<div class="card p-6 text-center">
+				<div class="w-12 h-12 mx-auto mb-4 text-domain-600">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+					</svg>
+				</div>
+				<h3 class="font-serif text-bark mb-2">AI Generation</h3>
+				<p class="text-bark/60 font-sans text-sm">
+					Creative domain suggestions based on your brand, vibe, and preferences
+				</p>
+			</div>
+
+			<div class="card p-6 text-center">
+				<div class="w-12 h-12 mx-auto mb-4 text-grove-600">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+				</div>
+				<h3 class="font-serif text-bark mb-2">Availability Check</h3>
+				<p class="text-bark/60 font-sans text-sm">
+					Real-time RDAP verification against global registries
+				</p>
+			</div>
+
+			<div class="card p-6 text-center">
+				<div class="w-12 h-12 mx-auto mb-4 text-amber-600">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+					</svg>
+				</div>
+				<h3 class="font-serif text-bark mb-2">Smart Scoring</h3>
+				<p class="text-bark/60 font-sans text-sm">
+					Each domain rated on pronounceability, memorability, and brand fit
+				</p>
+			</div>
+		</div>
+
+		<!-- CTA / Login -->
+		{#if data.user}
+			<a href="/admin" class="btn-primary">
+				Open Dashboard
+			</a>
+		{:else}
+			<a href="/admin/login" class="btn-primary">
+				Admin Login
+			</a>
+		{/if}
+	</section>
+
+	<!-- Footer -->
+	<footer class="py-8 text-center">
+		<div class="flex items-center justify-center gap-4 text-sm font-sans text-bark/50">
+			<a href="https://grove.place" class="hover:text-domain-600 transition-colors">
+				Grove
+			</a>
+			<span class="text-domain-300">·</span>
+			<span>Part of the Grove ecosystem</span>
+		</div>
+	</footer>
+</main>
