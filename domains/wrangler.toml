@@ -1,0 +1,22 @@
+name = "grove-domains"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Environment variables for local development
+[vars]
+SITE_NAME = "Grove Domain Finder"
+SITE_URL = "http://localhost:5174"
+
+# D1 Database binding (shared with main platform)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Secrets (configured in Cloudflare Dashboard or via wrangler secret):
+# - RESEND_API_KEY
+# - ADMIN_EMAILS
+# - ANTHROPIC_API_KEY (for domain search)
+# - DOMAIN_WORKER_URL (URL to the domain search worker)
+# Production SITE_URL is set via --var flag in deployment
