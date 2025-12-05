@@ -3,12 +3,18 @@ compatibility_date = "2024-11-24"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
+# D1 Database - needed for migrations and local dev
+# Production binding configured in Cloudflare Dashboard
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
 # Environment variables for local development
 [vars]
 CDN_URL = "http://localhost:5173/cdn"
 
-# Production bindings are configured in Cloudflare Dashboard:
-# - D1 Database: DB -> grove-engine-db
+# Additional production bindings in Cloudflare Dashboard:
 # - R2 Bucket: CDN_BUCKET -> grove-cdn
 # - Secret: RESEND_API_KEY
 # - Secret: ADMIN_EMAILS
