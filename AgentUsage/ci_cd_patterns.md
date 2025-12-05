@@ -368,3 +368,5 @@ Replace `username/repo` with your GitHub repository path. The badge shows green 
 - [Code Quality](code_quality.md) - Linting, formatting, and type checking
 - [Docker Guide](docker_guide.md) - Containerization patterns
 - [Secrets Management](secrets_management.md) - API key security
+- [Cloudflare Guide](cloudflare_guide.md) - Cloudflare deployments and automation
+- [API Usage](api_usage.md) - External API integration patterns

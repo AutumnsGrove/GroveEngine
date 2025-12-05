@@ -11,6 +11,7 @@ This directory contains comprehensive guides for working with AI agents on devel
 | [git_guide.md](git_guide.md) | Git operations, commits, branching, conventional commits | Every session with code changes |
 | [secrets_management.md](secrets_management.md) | API key handling, security patterns | Setting up projects with external APIs |
 | [secrets_advanced.md](secrets_advanced.md) | Advanced secrets patterns, rotation, auditing | Enterprise-grade security implementations |
+| [api_usage.md](api_usage.md) | Respectful public API usage, rate limiting, auth | Integrating external APIs |
 | [house_agents.md](house_agents.md) | Specialized agent usage (research, coding) | Complex searches or multi-file refactoring |
 | [subagent_usage.md](subagent_usage.md) | Creating focused task agents | Breaking down large tasks into subtasks |
 | [research_workflow.md](research_workflow.md) | Codebase analysis patterns | Understanding unfamiliar codebases |
@@ -21,7 +22,10 @@ This directory contains comprehensive guides for working with AI agents on devel
 |-------|-------------|-------------|
 | [db_usage.md](db_usage.md) | SQLite database with database.py interface | Working with databases (MANDATORY) |
 | [uv_usage.md](uv_usage.md) | UV package manager workflows | Python dependency management |
-| [testing_strategies.md](testing_strategies.md) | Test patterns and frameworks | Writing or debugging tests |
+| [testing_python.md](testing_python.md) | Python testing with pytest | Writing Python tests |
+| [testing_javascript.md](testing_javascript.md) | JS/TS testing with Vitest/Jest | Writing JavaScript/TypeScript tests |
+| [testing_go.md](testing_go.md) | Go testing with built-in framework | Writing Go tests |
+| [testing_rust.md](testing_rust.md) | Rust testing with cargo test | Writing Rust tests |
 | [code_quality.md](code_quality.md) | Linting, formatting, standards | Setting up quality checks |
 | [code_style_guide.md](code_style_guide.md) | General code style principles | Writing clean, maintainable code |
 | [project_structure.md](project_structure.md) | Directory layouts, file organization | Starting new projects |
@@ -39,6 +43,7 @@ This directory contains comprehensive guides for working with AI agents on devel
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
+| [cloudflare_guide.md](cloudflare_guide.md) | Cloudflare Workers, KV, R2, D1, MCP server | Deploying to Cloudflare, serverless apps |
 | [docker_guide.md](docker_guide.md) | Container setup and workflows | Dockerizing applications |
 | [ci_cd_patterns.md](ci_cd_patterns.md) | GitHub Actions, automation | Setting up CI/CD pipelines |
 | [database_setup.md](database_setup.md) | Database configuration patterns | Working with databases |
@@ -93,10 +98,10 @@ For new projects, reference these guides in order:
 5. **secrets_management.md** - Configure API keys
 6. **uv_usage.md** (Python) or relevant language guide
 7. **pre_commit_hooks/setup_guide.md** - Set up quality checks
-8. **testing_strategies.md** - Add test framework
+8. **testing_python.md** (Python) or relevant language testing guide
 9. **docker_guide.md** (if needed) - Containerize application
 
 ---
 
-*Last updated: 2025-10-19*
-*Total guides: 20*
+*Last updated: 2025-11-28*
+*Total guides: 25*

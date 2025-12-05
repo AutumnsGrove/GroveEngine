@@ -27,7 +27,7 @@ uv add --dev black ruff
 
 **Prettier/ESLint not found (JavaScript):**
 ```bash
-pnpm add -D prettier eslint
+npm install -D prettier eslint
 ```
 
 **gofmt not found (Go):**
@@ -53,8 +53,8 @@ git commit -m "your message"
 **JavaScript:**
 ```bash
 # Auto-fix formatting
-pnpm exec prettier --write .
-pnpm exec eslint --fix .
+npx prettier --write .
+npx eslint --fix .
 
 # Try commit again
 git commit -m "your message"
@@ -97,7 +97,7 @@ git commit -m "your message"
 ```bash
 # Run tests locally to see failures
 pytest tests/           # Python
-pnpm test               # JavaScript
+npm test                # JavaScript
 go test ./...           # Go
 
 # Fix failing tests
@@ -126,7 +126,7 @@ git push --no-verify
 # Run only fast tests
 # Edit .git/hooks/pre-push and add:
 pytest tests/ -m "not slow"  # Mark slow tests with @pytest.mark.slow
-pnpm test -- --testPathIgnorePatterns=e2e  # Skip E2E tests
+npm test -- --testPathIgnorePatterns=e2e  # Skip E2E tests
 ```
 
 ---
@@ -136,7 +136,7 @@ pnpm test -- --testPathIgnorePatterns=e2e  # Skip E2E tests
 ```bash
 # Manually update deps
 uv sync              # Python
-pnpm install         # JavaScript
+npm install          # JavaScript
 go mod download      # Go
 
 # Check if hook exists

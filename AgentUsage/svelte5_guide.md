@@ -19,11 +19,11 @@ Using Svelte 5 with SvelteKit provides:
 
 ```bash
 # Project Setup
-pnpm dlx sv create my-app  # Create new SvelteKit project
-cd my-app && pnpm install  # Install dependencies
-pnpm run dev               # Start dev server (localhost:5173)
-pnpm run build             # Build for production
-pnpm run preview           # Preview production build
+npx sv create my-app      # Create new SvelteKit project
+cd my-app && npm install  # Install dependencies
+npm run dev               # Start dev server (localhost:5173)
+npm run build             # Build for production
+npm run preview           # Preview production build
 ```
 
 ### Runes Cheatsheet
@@ -858,7 +858,8 @@ export default {
 - **[git_guide.md](git_guide.md)** - Version control workflow
 - **[testing_strategies.md](testing_strategies.md)** - Test organization and patterns
 - **[code_style_guide.md](code_style_guide.md)** - Code formatting guidelines
+- **[cloudflare_guide.md](cloudflare_guide.md)** - Deploying SvelteKit to Cloudflare Pages
 
 ---
 
-*Last updated: 2025-11-21*
+*Last updated: 2025-11-24*

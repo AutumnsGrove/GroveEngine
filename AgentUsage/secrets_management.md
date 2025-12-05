@@ -407,10 +407,12 @@ git commit -m "Add secrets management setup"
 ## Related Guides
 
 - **[secrets_advanced.md](secrets_advanced.md)** - Advanced patterns, testing, rotation
+- **[api_usage.md](api_usage.md)** - Using secrets with external APIs
+- **[cloudflare_guide.md](cloudflare_guide.md)** - Cloudflare API tokens and Worker secrets
 - **[uv_usage.md](uv_usage.md)** - Python package management
 - **[docker_guide.md](docker_guide.md)** - Container secrets management
 - **[ci_cd_patterns.md](ci_cd_patterns.md)** - CI/CD secrets and environment variables
 
 ---
 
-*Last updated: 2025-10-19*
+*Last updated: 2025-11-24*
