@@ -12,6 +12,7 @@
 
 	// UI state
 	let isSubmitting = $state(false);
+	let isCancelling = $state(false);
 	let errorMessage = $state('');
 	let currentJob = $state(data.currentJob);
 	let jobResults = $state(data.jobResults);
@@ -117,6 +118,29 @@
 		if (pollingInterval) {
 			clearInterval(pollingInterval);
 			pollingInterval = null;
+		}
+	}
+
+	async function cancelSearch() {
+		if (!currentJob) return;
+
+		isCancelling = true;
+		try {
+			const response = await fetch('/api/search/cancel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ job_id: currentJob.id })
+			});
+
+			if (response.ok) {
+				currentJob = { ...currentJob, status: 'failed', error: 'Cancelled by user' };
+				stopPolling();
+				stopTimer();
+			}
+		} catch (err) {
+			console.error('Cancel error:', err);
+		} finally {
+			isCancelling = false;
 		}
 	}
 
@@ -381,6 +405,23 @@
 									style="width: {Math.min((currentJob.batch_num / 6) * 100, 100)}%"
 								></div>
 							</div>
+						</div>
+
+						<!-- Cancel button -->
+						<button
+							type="button"
+							onclick={cancelSearch}
+							disabled={isCancelling}
+							class="mt-4 w-full px-4 py-2 text-sm font-sans font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+						>
+							{isCancelling ? 'Cancelling...' : 'Cancel Search'}
+						</button>
+					{/if}
+
+					<!-- Error message -->
+					{#if currentJob.status === 'failed' && currentJob.error}
+						<div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+							<p class="text-sm text-red-700 font-sans">{currentJob.error}</p>
 						</div>
 					{/if}
 				</div>
