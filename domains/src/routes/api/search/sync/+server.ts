@@ -44,11 +44,16 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
 
   try {
     // Fetch all jobs from worker's D1 index
+    console.log(
+      "[Sync] Fetching from:",
+      `${workerUrl}/api/jobs/list?limit=100`,
+    );
     const response = await fetch(`${workerUrl}/api/jobs/list?limit=100`);
+    console.log("[Sync] Response status:", response.status);
     if (!response.ok) {
       const errText = await response.text();
       console.error("[Worker Sync Error]", errText);
-      throw error(500, "Failed to fetch jobs from worker");
+      throw error(500, `Worker returned ${response.status}: ${errText}`);
     }
 
     const data = (await response.json()) as WorkerListResponse;
@@ -67,8 +72,8 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
         const timestamp = now();
         await platform.env.DB.prepare(
           `INSERT INTO domain_search_jobs
-           (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, domains_available, good_results, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, good_results, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
           .bind(
             workerJob.job_id,
@@ -80,7 +85,6 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
             workerJob.status,
             workerJob.batch_num,
             workerJob.domains_checked,
-            0, // domains_available not tracked in worker index
             workerJob.good_results,
             workerJob.created_at,
             timestamp,
@@ -127,6 +131,8 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
     if (err instanceof Error && "status" in err) {
       throw err;
     }
-    throw error(500, "Failed to sync jobs");
+    // Return detailed error for debugging
+    const errMsg = err instanceof Error ? err.message : String(err);
+    throw error(500, `Failed to sync jobs: ${errMsg}`);
   }
 };

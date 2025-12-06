@@ -47,8 +47,8 @@ export const load: PageServerLoad = async ({ platform }) => {
             // Insert missing job
             await platform.env.DB.prepare(
               `INSERT INTO domain_search_jobs
-							 (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, domains_available, good_results, created_at, updated_at)
-							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+							 (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, good_results, created_at, updated_at)
+							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             )
               .bind(
                 workerJob.job_id,
@@ -60,7 +60,6 @@ export const load: PageServerLoad = async ({ platform }) => {
                 workerJob.status,
                 workerJob.batch_num,
                 workerJob.domains_checked,
-                0,
                 workerJob.good_results,
                 workerJob.created_at,
                 now(),

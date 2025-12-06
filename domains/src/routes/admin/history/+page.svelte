@@ -31,6 +31,11 @@
 		syncMessage = null;
 		try {
 			const response = await fetch('/api/search/sync', { method: 'POST' });
+			if (!response.ok) {
+				const errData = await response.json().catch(() => ({}));
+				syncMessage = `Sync failed: ${(errData as {message?: string}).message || response.statusText}`;
+				return;
+			}
 			const result = (await response.json()) as SyncResult;
 			if (result.success) {
 				const parts: string[] = [];
@@ -46,8 +51,8 @@
 			} else {
 				syncMessage = 'Sync failed';
 			}
-		} catch {
-			syncMessage = 'Sync failed';
+		} catch (err) {
+			syncMessage = `Sync failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
 		} finally {
 			syncing = false;
 			setTimeout(() => (syncMessage = null), 5000);
