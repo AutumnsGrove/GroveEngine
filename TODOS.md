@@ -162,6 +162,13 @@
   - Follow-up quiz system when max batches reached
   - Token usage tracking and display
   - Full UI integration with pricing summary, follow-up forms
+- [x] Enhanced domain tool UI with SSE streaming + evaluation details → **DONE (2025-12-06)**
+  - Real-time SSE streaming for live progress updates (with polling fallback)
+  - Multi-provider AI support (Claude, DeepSeek, Kimi, Cloudflare AI)
+  - Expandable domain cards with detailed evaluation scores
+  - Evaluation indicators: pronounceable, memorable, brand fit, email friendly
+  - RDAP metadata display (registrar, expiration date)
+  - Token usage breakdown with cost estimation
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state

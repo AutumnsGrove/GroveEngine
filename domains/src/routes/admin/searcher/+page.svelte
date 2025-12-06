@@ -4,6 +4,18 @@
 	let { data }: { data: PageData } = $props();
 
 	// Types for worker responses
+	interface EvaluationData {
+		pronounceable?: boolean;
+		memorable?: boolean;
+		brand_fit?: boolean;
+		email_friendly?: boolean;
+		notes?: string;
+		rdap_registrar?: string;
+		rdap_expiration?: string;
+		pricing_category?: 'bundled' | 'recommended' | 'standard' | 'premium';
+		renewal_cents?: number;
+	}
+
 	interface DomainResult {
 		domain: string;
 		tld: string;
@@ -11,15 +23,7 @@
 		price_cents?: number;
 		score: number;
 		flags: string[];
-		evaluation_data?: {
-			pronounceable: boolean;
-			memorable: boolean;
-			brand_fit: boolean;
-			email_friendly: boolean;
-			notes: string;
-			pricing_category?: 'bundled' | 'recommended' | 'standard' | 'premium';
-			renewal_cents?: number;
-		};
+		evaluation_data?: EvaluationData;
 		price_display?: string;
 		pricing_category?: string;
 	}
@@ -68,6 +72,17 @@
 		};
 	}
 
+	// SSE status event from worker
+	interface SSEStatusEvent {
+		event: 'status';
+		job_id: string;
+		status: string;
+		batch_num: number;
+		domains_checked: number;
+		domains_available: number;
+		good_results: number;
+	}
+
 	// Form state
 	let businessName = $state('');
 	let domainIdea = $state('');
@@ -88,10 +103,15 @@
 	let followupQuiz = $state<FollowupResponse | null>(null);
 	let followupAnswers = $state<Record<string, string | string[]>>({});
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
+	let eventSource: EventSource | null = null;
+	let useSSE = $state(true); // Try SSE first, fallback to polling
 
 	// Timer state for live elapsed time
 	let elapsedSeconds = $state(0);
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+	// Expanded result state for showing evaluation details
+	let expandedDomains = $state<Set<string>>(new Set());
 
 	const vibeOptions = [
 		{ value: 'professional', label: 'Professional' },
@@ -152,7 +172,7 @@
 
 			if (response.ok && result.success) {
 				currentJob = result.job ?? null;
-				startPolling();
+				startMonitoring();
 			} else {
 				throw new Error(result.error || 'Failed to start search');
 			}
@@ -160,6 +180,72 @@
 			errorMessage = err instanceof Error ? err.message : 'Failed to start search';
 		} finally {
 			isSubmitting = false;
+		}
+	}
+
+	function startSSEStream() {
+		if (!currentJob) return;
+		if (eventSource) {
+			eventSource.close();
+		}
+
+		try {
+			eventSource = new EventSource(`/api/search/stream?job_id=${currentJob.id}`);
+
+			eventSource.onmessage = (event) => {
+				try {
+					const data = JSON.parse(event.data) as SSEStatusEvent;
+					if (data.event === 'status' && currentJob) {
+						// Update job state from SSE
+						currentJob = {
+							...currentJob,
+							status: data.status as typeof currentJob.status,
+							batch_num: data.batch_num,
+							domains_checked: data.domains_checked,
+							domains_available: data.domains_available,
+							good_results: data.good_results,
+						};
+
+						// Check for terminal states
+						if (['complete', 'failed', 'cancelled', 'needs_followup'].includes(data.status)) {
+							stopSSE();
+							stopTimer();
+							handleJobComplete(data.status);
+						}
+					}
+				} catch (err) {
+					console.error('SSE parse error:', err);
+				}
+			};
+
+			eventSource.onerror = () => {
+				console.warn('SSE connection error, falling back to polling');
+				stopSSE();
+				useSSE = false;
+				startPolling();
+			};
+		} catch (err) {
+			console.error('Failed to start SSE:', err);
+			useSSE = false;
+			startPolling();
+		}
+	}
+
+	function stopSSE() {
+		if (eventSource) {
+			eventSource.close();
+			eventSource = null;
+		}
+	}
+
+	async function handleJobComplete(status: string) {
+		// Fetch full results for complete or needs_followup
+		if (status === 'complete' || status === 'needs_followup') {
+			await fetchResults();
+		}
+		// Fetch followup quiz if needed
+		if (status === 'needs_followup') {
+			await fetchFollowup();
 		}
 	}
 
@@ -180,16 +266,7 @@
 					if (currentJob && ['complete', 'failed', 'cancelled', 'needs_followup'].includes(currentJob.status)) {
 						stopPolling();
 						stopTimer();
-
-						// Fetch full results
-						if (currentJob.status === 'complete' || currentJob.status === 'needs_followup') {
-							await fetchResults();
-						}
-
-						// Fetch followup quiz if needed
-						if (currentJob.status === 'needs_followup') {
-							await fetchFollowup();
-						}
+						await handleJobComplete(currentJob.status);
 					}
 				}
 			} catch (err) {
@@ -203,6 +280,19 @@
 			clearInterval(pollingInterval);
 			pollingInterval = null;
 		}
+	}
+
+	function startMonitoring() {
+		if (useSSE) {
+			startSSEStream();
+		} else {
+			startPolling();
+		}
+	}
+
+	function stopMonitoring() {
+		stopSSE();
+		stopPolling();
 	}
 
 	async function fetchResults() {
@@ -258,7 +348,7 @@
 				currentJob = { ...currentJob, status: 'running' };
 				followupQuiz = null;
 				followupAnswers = {};
-				startPolling();
+				startMonitoring();
 				startTimer();
 			}
 		} catch (err) {
@@ -281,7 +371,7 @@
 
 			if (response.ok) {
 				currentJob = { ...currentJob, status: 'cancelled', error: 'Cancelled by user' };
-				stopPolling();
+				stopMonitoring();
 				stopTimer();
 			}
 		} catch (err) {
@@ -393,19 +483,50 @@
 	// Check if form should be disabled
 	const isFormDisabled = $derived(isSubmitting || currentJob?.status === 'running');
 
-	// Start polling and timer if there's an active job
+	// Start monitoring and timer if there's an active job
 	$effect(() => {
 		if (currentJob && (currentJob.status === 'running' || currentJob.status === 'pending')) {
-			startPolling();
+			startMonitoring();
 			startTimer();
 		} else {
 			stopTimer();
 		}
 		return () => {
-			stopPolling();
+			stopMonitoring();
 			stopTimer();
 		};
 	});
+
+	// Toggle expanded state for domain details
+	function toggleExpanded(domain: string) {
+		const newSet = new Set(expandedDomains);
+		if (newSet.has(domain)) {
+			newSet.delete(domain);
+		} else {
+			newSet.add(domain);
+		}
+		expandedDomains = newSet;
+	}
+
+	// Estimate cost based on token usage (Claude pricing)
+	function estimateCost(usage: TokenUsage): string {
+		// Claude 3.5 Sonnet pricing: $3/M input, $15/M output
+		const inputCost = (usage.input_tokens / 1_000_000) * 3;
+		const outputCost = (usage.output_tokens / 1_000_000) * 15;
+		const total = inputCost + outputCost;
+		return `$${total.toFixed(2)}`;
+	}
+
+	// Format expiration date
+	function formatExpiration(dateStr?: string): string {
+		if (!dateStr) return '';
+		try {
+			const date = new Date(dateStr);
+			return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+		} catch {
+			return dateStr;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -736,10 +857,24 @@
 						</div>
 
 						{#if tokenUsage}
-							<div class="mt-4 pt-4 border-t border-grove-200">
+							<div class="mt-4 pt-4 border-t border-grove-200 space-y-2">
 								<div class="flex justify-between text-xs font-sans text-bark/50">
 									<span>API Usage</span>
-									<span>{tokenUsage.total_tokens.toLocaleString()} tokens</span>
+									<span class="font-mono">{tokenUsage.total_tokens.toLocaleString()} tokens</span>
+								</div>
+								<div class="grid grid-cols-2 gap-2 text-xs font-sans">
+									<div class="flex justify-between text-bark/40">
+										<span>Input</span>
+										<span class="font-mono">{tokenUsage.input_tokens.toLocaleString()}</span>
+									</div>
+									<div class="flex justify-between text-bark/40">
+										<span>Output</span>
+										<span class="font-mono">{tokenUsage.output_tokens.toLocaleString()}</span>
+									</div>
+								</div>
+								<div class="flex justify-between text-xs font-sans pt-1 border-t border-grove-100">
+									<span class="text-bark/50">Est. Cost (Claude)</span>
+									<span class="font-mono text-domain-600 font-medium">{estimateCost(tokenUsage)}</span>
 								</div>
 							</div>
 						{/if}
@@ -759,15 +894,22 @@
 								{/if}
 							</span>
 						</div>
-						<div class="max-h-[500px] overflow-y-auto divide-y divide-grove-100">
+						<div class="max-h-[600px] overflow-y-auto divide-y divide-grove-100">
 							{#each jobResults.filter(r => r.status === 'available').sort((a, b) => b.score - a.score) as result}
-								<div class="p-4 hover:bg-grove-50 transition-colors">
-									<div class="flex items-center justify-between">
+								{@const isExpanded = expandedDomains.has(result.domain)}
+								{@const evalData = result.evaluation_data}
+								<div class="hover:bg-grove-50 transition-colors">
+									<!-- Main row - clickable to expand -->
+									<button
+										type="button"
+										onclick={() => toggleExpanded(result.domain)}
+										class="w-full p-4 text-left flex items-center justify-between"
+									>
 										<div class="flex-1 min-w-0">
 											<div class="flex items-center gap-2">
 												<span class="font-mono text-bark font-medium truncate">{result.domain}</span>
-												{#if result.pricing_category || result.evaluation_data?.pricing_category}
-													{@const category = result.pricing_category || result.evaluation_data?.pricing_category}
+												{#if result.pricing_category || evalData?.pricing_category}
+													{@const category = result.pricing_category || evalData?.pricing_category}
 													<span class="flex-shrink-0 px-2 py-0.5 text-xs font-sans rounded-full
 														{category === 'bundled' ? 'bg-grove-100 text-grove-700' :
 														 category === 'recommended' ? 'bg-domain-100 text-domain-700' :
@@ -779,25 +921,116 @@
 											</div>
 											<div class="flex items-center gap-3 mt-1">
 												<span class="text-xs font-sans text-bark/50">Score: {(result.score * 100).toFixed(0)}%</span>
-												{#if result.flags && result.flags.length > 0}
-													<div class="flex gap-1 flex-wrap">
-														{#each result.flags.slice(0, 3) as flag}
-															<span class="text-xs font-sans text-bark/40">{flag}</span>
-														{/each}
+												<!-- Evaluation indicators -->
+												{#if evalData}
+													<div class="flex items-center gap-1.5">
+														{#if evalData.pronounceable}
+															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-grove-100 text-grove-600 text-xs" title="Easy to pronounce">
+																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/><path d="M10 5a1 1 0 011 1v4a1 1 0 01-2 0V6a1 1 0 011-1zm0 8a1 1 0 100 2 1 1 0 000-2z"/></svg>
+															</span>
+														{/if}
+														{#if evalData.memorable}
+															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-domain-100 text-domain-600 text-xs" title="Memorable">
+																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+															</span>
+														{/if}
+														{#if evalData.brand_fit}
+															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 text-xs" title="Good brand fit">
+																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+															</span>
+														{/if}
+														{#if evalData.email_friendly}
+															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs" title="Email-friendly">
+																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+															</span>
+														{/if}
 													</div>
 												{/if}
 											</div>
-											{#if result.evaluation_data?.notes}
-												<p class="text-xs text-bark/50 font-sans mt-1 line-clamp-1">{result.evaluation_data.notes}</p>
+										</div>
+										<div class="text-right flex-shrink-0 ml-4 flex items-center gap-3">
+											<div>
+												<span class="{getPriceClass(result.pricing_category || evalData?.pricing_category)} font-sans font-medium">
+													{result.price_display || formatPrice(result.price_cents)}
+												</span>
+												<span class="text-xs text-bark/40 font-sans block">/year</span>
+											</div>
+											<svg class="w-5 h-5 text-bark/40 transition-transform {isExpanded ? 'rotate-180' : ''}" viewBox="0 0 20 20" fill="currentColor">
+												<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+											</svg>
+										</div>
+									</button>
+
+									<!-- Expanded details -->
+									{#if isExpanded && evalData}
+										<div class="px-4 pb-4 pt-0 border-t border-grove-100 bg-grove-50/50">
+											<div class="grid grid-cols-2 gap-4 mt-3">
+												<!-- Evaluation scores -->
+												<div class="space-y-2">
+													<h4 class="text-xs font-sans font-medium text-bark/70 uppercase tracking-wide">Evaluation</h4>
+													<div class="space-y-1.5">
+														<div class="flex items-center justify-between text-sm font-sans">
+															<span class="text-bark/60">Pronounceable</span>
+															<span class="{evalData.pronounceable ? 'text-grove-600' : 'text-bark/40'}">{evalData.pronounceable ? 'Yes' : 'No'}</span>
+														</div>
+														<div class="flex items-center justify-between text-sm font-sans">
+															<span class="text-bark/60">Memorable</span>
+															<span class="{evalData.memorable ? 'text-grove-600' : 'text-bark/40'}">{evalData.memorable ? 'Yes' : 'No'}</span>
+														</div>
+														<div class="flex items-center justify-between text-sm font-sans">
+															<span class="text-bark/60">Brand Fit</span>
+															<span class="{evalData.brand_fit ? 'text-grove-600' : 'text-bark/40'}">{evalData.brand_fit ? 'Yes' : 'No'}</span>
+														</div>
+														<div class="flex items-center justify-between text-sm font-sans">
+															<span class="text-bark/60">Email Friendly</span>
+															<span class="{evalData.email_friendly ? 'text-grove-600' : 'text-bark/40'}">{evalData.email_friendly ? 'Yes' : 'No'}</span>
+														</div>
+													</div>
+												</div>
+
+												<!-- Pricing & RDAP info -->
+												<div class="space-y-2">
+													<h4 class="text-xs font-sans font-medium text-bark/70 uppercase tracking-wide">Details</h4>
+													<div class="space-y-1.5">
+														{#if evalData.renewal_cents}
+															<div class="flex items-center justify-between text-sm font-sans">
+																<span class="text-bark/60">Renewal</span>
+																<span class="text-bark">{formatPrice(evalData.renewal_cents)}/yr</span>
+															</div>
+														{/if}
+														{#if evalData.rdap_registrar}
+															<div class="flex items-center justify-between text-sm font-sans">
+																<span class="text-bark/60">Registrar</span>
+																<span class="text-bark truncate max-w-[150px]" title={evalData.rdap_registrar}>{evalData.rdap_registrar}</span>
+															</div>
+														{/if}
+														{#if evalData.rdap_expiration}
+															<div class="flex items-center justify-between text-sm font-sans">
+																<span class="text-bark/60">Expires</span>
+																<span class="text-bark">{formatExpiration(evalData.rdap_expiration)}</span>
+															</div>
+														{/if}
+													</div>
+												</div>
+											</div>
+
+											<!-- AI Notes -->
+											{#if evalData.notes}
+												<div class="mt-3 pt-3 border-t border-grove-200">
+													<p class="text-sm text-bark/70 font-sans italic">&ldquo;{evalData.notes}&rdquo;</p>
+												</div>
+											{/if}
+
+											<!-- Flags -->
+											{#if result.flags && result.flags.length > 0}
+												<div class="mt-3 flex flex-wrap gap-1">
+													{#each result.flags as flag}
+														<span class="px-2 py-0.5 text-xs font-sans bg-bark/10 text-bark/60 rounded">{flag}</span>
+													{/each}
+												</div>
 											{/if}
 										</div>
-										<div class="text-right flex-shrink-0 ml-4">
-											<span class="{getPriceClass(result.pricing_category || result.evaluation_data?.pricing_category)} font-sans font-medium">
-												{result.price_display || formatPrice(result.price_cents)}
-											</span>
-											<span class="text-xs text-bark/40 font-sans block">/year</span>
-										</div>
-									</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
