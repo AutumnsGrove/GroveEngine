@@ -124,3 +124,7 @@
 .status-dot-pending {
 	@apply bg-bark/30;
 }
+
+.status-dot-warning {
+	@apply bg-amber-500 animate-pulse-slow;
+}

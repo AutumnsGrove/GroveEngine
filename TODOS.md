@@ -155,6 +155,13 @@
 - [x] Wire up domain search worker to `domains.grove.place` UI → **DONE (2025-12-05)**
   - Worker call implemented in `domains/src/routes/api/search/start/+server.ts`
   - Cancel button added to UI
+- [x] Upgrade domain tool with Durable Objects + live pricing → **DONE (2025-12-06)**
+  - TypeScript rewrite with Durable Objects for persistence
+  - Live pricing from Cloudflare Registrar (cfdomainpricing.com)
+  - Pricing categories: bundled (<=$30), recommended (<=$50), standard, premium
+  - Follow-up quiz system when max batches reached
+  - Token usage tracking and display
+  - Full UI integration with pricing summary, follow-up forms
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state

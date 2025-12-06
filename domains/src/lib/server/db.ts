@@ -229,7 +229,8 @@ export type SearchStatus =
   | "running"
   | "complete"
   | "needs_followup"
-  | "failed";
+  | "failed"
+  | "cancelled";
 
 export interface DomainSearchJob {
   id: string;
@@ -243,6 +244,7 @@ export interface DomainSearchJob {
   status: SearchStatus;
   batch_num: number;
   domains_checked: number;
+  domains_available: number; // Count of available domains found
   good_results: number;
   error: string | null;
   started_at: string | null;
@@ -280,6 +282,7 @@ export async function createSearchJob(
     status: "pending",
     batch_num: 0,
     domains_checked: 0,
+    domains_available: 0,
     good_results: 0,
     error: null,
     started_at: null,
@@ -292,8 +295,8 @@ export async function createSearchJob(
   await db
     .prepare(
       `INSERT INTO domain_search_jobs
-			(id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, good_results, error, started_at, completed_at, duration_seconds, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			(id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, error, started_at, completed_at, duration_seconds, created_at, updated_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       job.id,
@@ -307,6 +310,7 @@ export async function createSearchJob(
       job.status,
       job.batch_num,
       job.domains_checked,
+      job.domains_available,
       job.good_results,
       job.error,
       job.started_at,

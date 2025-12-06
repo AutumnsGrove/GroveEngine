@@ -42,9 +42,9 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
       }
     }
 
-    // Update local job status to failed/cancelled
+    // Update local job status to cancelled
     await updateSearchJobStatus(platform.env.DB, job_id, {
-      status: "failed",
+      status: "cancelled",
       error: "Cancelled by user",
     });
 

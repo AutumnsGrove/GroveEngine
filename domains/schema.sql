@@ -24,9 +24,10 @@ CREATE TABLE IF NOT EXISTS domain_search_jobs (
     tld_preferences TEXT NOT NULL DEFAULT '["com"]', -- JSON array
     vibe TEXT NOT NULL DEFAULT 'professional',
     keywords TEXT,
-    status TEXT NOT NULL DEFAULT 'pending', -- pending, running, complete, needs_followup, failed
+    status TEXT NOT NULL DEFAULT 'pending', -- pending, running, complete, needs_followup, failed, cancelled
     batch_num INTEGER NOT NULL DEFAULT 0,
     domains_checked INTEGER NOT NULL DEFAULT 0,
+    domains_available INTEGER NOT NULL DEFAULT 0, -- Count of available domains found
     good_results INTEGER NOT NULL DEFAULT 0,
     error TEXT,
     started_at TEXT,
