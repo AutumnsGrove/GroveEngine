@@ -181,6 +181,18 @@
     - New endpoints: `/api/jobs/list`, `/api/jobs/recent`, `/api/backfill`
     - History page auto-syncs from worker on load + manual "Sync" button
     - All new jobs are indexed immediately when created
+- [ ] **Job index shows stale data** (2025-12-06)
+  - Status/counts don't update after job completes unless /api/status is polled
+  - **Fix needed**: Sync should also fetch fresh status from each DO
+  - Add tokens (input/output) to job_index schema for history display
+- [ ] **TLD Diversity Feature** (2025-12-06)
+  - Add "Diverse TLDs" toggle to search UI
+  - Modify prompts to encourage varied TLDs when enabled
+  - Expand TLD options in UI beyond current 6 (add .club, .garden, .place, .life, .earth, .green, etc.)
+  - Improve base prompts to be slightly more TLD-diverse by default
+- [ ] **Change default AI to DeepSeek** (2025-12-06)
+  - Update search UI default from 'claude' to 'deepseek'
+  - Update config page defaults
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state
