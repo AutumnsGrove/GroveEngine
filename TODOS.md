@@ -169,6 +169,16 @@
   - Evaluation indicators: pronounceable, memorable, brand fit, email friendly
   - RDAP metadata display (registrar, expiration date)
   - Token usage breakdown with cost estimation
+- [x] AI provider selection in domain search UI → **DONE (2025-12-06)**
+  - Dropdown to select AI model (Claude, DeepSeek, Kimi, Llama 4)
+  - Passes `driver_provider` and `swarm_provider` to worker API
+  - Worker `/api/jobs` endpoint for batch status queries
+- [ ] **BUG: Job ID tracking between worker and D1** (2025-12-06)
+  - Worker creates jobs successfully but UI sometimes shows "failed to start"
+  - Root cause: D1 insert may fail, disconnecting UI from worker job
+  - Partial fix: `INSERT OR REPLACE` + error handling added
+  - **Needs: D1-based job index in worker** to track all job IDs centrally
+  - Then history tab can query worker for any jobs not in local D1
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state
