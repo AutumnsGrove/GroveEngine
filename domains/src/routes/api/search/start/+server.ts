@@ -102,30 +102,36 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
     // Store a local reference in D1 for admin tracking
     // Use the worker's job_id directly to avoid ID mismatch issues
-    await platform.env.DB.prepare(
-      `INSERT INTO domain_search_jobs
-       (id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, started_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-      .bind(
-        workerResult.job_id,
-        clientId,
-        locals.user.email,
-        business_name.trim(),
-        domain_idea?.trim() || null,
-        JSON.stringify(tld_preferences || ["com", "co"]),
-        vibe || "professional",
-        keywords?.trim() || null,
-        "running",
-        0,
-        0,
-        0,
-        0,
-        timestamp,
-        timestamp,
-        timestamp,
+    // Use INSERT OR REPLACE to handle any existing job with the same ID
+    try {
+      await platform.env.DB.prepare(
+        `INSERT OR REPLACE INTO domain_search_jobs
+         (id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, started_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run();
+        .bind(
+          workerResult.job_id,
+          clientId,
+          locals.user.email,
+          business_name.trim(),
+          domain_idea?.trim() || null,
+          JSON.stringify(tld_preferences || ["com", "co"]),
+          vibe || "professional",
+          keywords?.trim() || null,
+          "running",
+          0,
+          0,
+          0,
+          0,
+          timestamp,
+          timestamp,
+          timestamp,
+        )
+        .run();
+    } catch (dbErr) {
+      console.error("[D1 Insert Error]", dbErr);
+      // Continue anyway - the worker has started, we just can't track locally
+    }
 
     return json({
       success: true,
