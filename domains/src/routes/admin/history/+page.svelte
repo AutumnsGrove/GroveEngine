@@ -3,6 +3,57 @@
 
 	let { data }: { data: PageData } = $props();
 
+	let syncing = $state(false);
+	let syncMessage = $state<string | null>(null);
+
+	// Show auto-sync result notification
+	$effect(() => {
+		if (data.syncResult) {
+			const { synced, updated } = data.syncResult;
+			const parts = [];
+			if (synced > 0) parts.push(`${synced} new`);
+			if (updated > 0) parts.push(`${updated} updated`);
+			syncMessage = `Synced: ${parts.join(', ')}`;
+			setTimeout(() => (syncMessage = null), 5000);
+		}
+	});
+
+	interface SyncResult {
+		success: boolean;
+		synced: number;
+		updated: number;
+		skipped: number;
+		total: number;
+	}
+
+	async function manualSync() {
+		syncing = true;
+		syncMessage = null;
+		try {
+			const response = await fetch('/api/search/sync', { method: 'POST' });
+			const result = (await response.json()) as SyncResult;
+			if (result.success) {
+				const parts: string[] = [];
+				if (result.synced > 0) parts.push(`${result.synced} new`);
+				if (result.updated > 0) parts.push(`${result.updated} updated`);
+				if (parts.length > 0) {
+					syncMessage = `Synced: ${parts.join(', ')}`;
+					// Reload the page to show updated data
+					window.location.reload();
+				} else {
+					syncMessage = 'Already up to date';
+				}
+			} else {
+				syncMessage = 'Sync failed';
+			}
+		} catch {
+			syncMessage = 'Sync failed';
+		} finally {
+			syncing = false;
+			setTimeout(() => (syncMessage = null), 5000);
+		}
+	}
+
 	function formatDuration(seconds: number | null): string {
 		if (!seconds) return '-';
 		if (seconds < 60) return `${seconds}s`;
@@ -23,11 +74,16 @@
 
 	function getStatusBadge(status: string): string {
 		switch (status) {
-			case 'running': return 'badge-info';
-			case 'complete': return 'badge-success';
-			case 'failed': return 'badge-error';
-			case 'needs_followup': return 'badge-warning';
-			default: return 'bg-bark/10 text-bark/60';
+			case 'running':
+				return 'badge-info';
+			case 'complete':
+				return 'badge-success';
+			case 'failed':
+				return 'badge-error';
+			case 'needs_followup':
+				return 'badge-warning';
+			default:
+				return 'bg-bark/10 text-bark/60';
 		}
 	}
 </script>
@@ -37,15 +93,46 @@
 </svelte:head>
 
 <div class="space-y-8">
+	<!-- Sync notification -->
+	{#if syncMessage}
+		<div
+			class="fixed top-4 right-4 z-50 bg-grove-600 text-white px-4 py-2 rounded-lg shadow-lg font-sans text-sm animate-fade-in"
+		>
+			{syncMessage}
+		</div>
+	{/if}
+
 	<!-- Page Header -->
 	<div class="flex justify-between items-center">
 		<div>
 			<h1 class="text-2xl font-serif text-bark">Search History</h1>
 			<p class="text-bark/60 font-sans mt-1">All previous domain searches ({data.total} total)</p>
 		</div>
-		<a href="/admin/searcher" class="btn-primary">
-			New Search
-		</a>
+		<div class="flex gap-3">
+			<button onclick={manualSync} disabled={syncing} class="btn-secondary">
+				{#if syncing}
+					<svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+						<circle
+							class="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							stroke-width="4"
+						></circle>
+						<path
+							class="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+						></path>
+					</svg>
+					Syncing...
+				{:else}
+					Sync
+				{/if}
+			</button>
+			<a href="/admin/searcher" class="btn-primary"> New Search </a>
+		</div>
 	</div>
 
 	<!-- Jobs List -->

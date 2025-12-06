@@ -173,12 +173,14 @@
   - Dropdown to select AI model (Claude, DeepSeek, Kimi, Llama 4)
   - Passes `driver_provider` and `swarm_provider` to worker API
   - Worker `/api/jobs` endpoint for batch status queries
-- [ ] **BUG: Job ID tracking between worker and D1** (2025-12-06)
-  - Worker creates jobs successfully but UI sometimes shows "failed to start"
-  - Root cause: D1 insert may fail, disconnecting UI from worker job
-  - Partial fix: `INSERT OR REPLACE` + error handling added
-  - **Needs: D1-based job index in worker** to track all job IDs centrally
-  - Then history tab can query worker for any jobs not in local D1
+- [x] **BUG: Job ID tracking between worker and D1** → **DONE (2025-12-06)**
+  - Worker creates jobs successfully but UI sometimes showed "failed to start"
+  - Root cause: D1 insert could fail, disconnecting UI from worker job
+  - **Fix: Added D1-based job index in worker**
+    - New `job_index` table in worker's D1 for centralized tracking
+    - New endpoints: `/api/jobs/list`, `/api/jobs/recent`, `/api/backfill`
+    - History page auto-syncs from worker on load + manual "Sync" button
+    - All new jobs are indexed immediately when created
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state
