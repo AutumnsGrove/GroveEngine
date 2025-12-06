@@ -552,9 +552,9 @@
 
 	<div class="grid lg:grid-cols-2 gap-8">
 		<!-- Search Form -->
-		<div class="card p-6">
-			<div class="flex items-center justify-between mb-6">
-				<h2 class="font-serif text-lg text-bark">New Search</h2>
+		<div class="card p-4 sm:p-6">
+			<div class="flex items-center justify-between mb-4 sm:mb-6">
+				<h2 class="font-serif text-base sm:text-lg text-bark">New Search</h2>
 				{#if currentJob && !['running', 'pending'].includes(currentJob.status)}
 					<button
 						type="button"
@@ -704,9 +704,9 @@
 		<div class="space-y-6">
 			{#if currentJob}
 				<!-- Status Card -->
-				<div class="card p-6">
-					<div class="flex items-center justify-between mb-4">
-						<h2 class="font-serif text-lg text-bark">Search Status</h2>
+				<div class="card p-4 sm:p-6">
+					<div class="flex items-center justify-between mb-3 sm:mb-4">
+						<h2 class="font-serif text-base sm:text-lg text-bark">Search Status</h2>
 						<div class="flex items-center gap-2">
 							<div class="status-dot {getStatusDot(currentJob.status)}"></div>
 							<span class="text-sm font-sans capitalize {getStatusColor(currentJob.status)}">
@@ -785,8 +785,8 @@
 
 				<!-- Follow-up Quiz -->
 				{#if currentJob.status === 'needs_followup' && followupQuiz}
-					<div class="card p-6">
-						<h2 class="font-serif text-lg text-bark mb-2">Refine Your Search</h2>
+					<div class="card p-4 sm:p-6">
+						<h2 class="font-serif text-base sm:text-lg text-bark mb-2">Refine Your Search</h2>
 						<p class="text-sm text-bark/60 font-sans mb-4">
 							We found {followupQuiz.context.good_found} good domains out of {followupQuiz.context.target} target.
 							Answer these questions to help us find more.
@@ -865,34 +865,34 @@
 
 				<!-- Pricing Summary -->
 				{#if pricingSummary && (currentJob.status === 'complete' || currentJob.status === 'needs_followup')}
-					<div class="card p-6">
-						<h2 class="font-serif text-lg text-bark mb-4">Pricing Summary</h2>
-						<div class="grid grid-cols-2 gap-4">
-							<div class="text-center p-3 bg-grove-50 rounded-lg">
-								<div class="text-2xl font-mono font-bold text-grove-600">{pricingSummary.bundled}</div>
-								<div class="text-xs text-bark/60 font-sans">Bundled (&le;$30/yr)</div>
+					<div class="card p-4 sm:p-6">
+						<h2 class="font-serif text-base sm:text-lg text-bark mb-3 sm:mb-4">Pricing Summary</h2>
+						<div class="grid grid-cols-2 gap-2 sm:gap-4">
+							<div class="text-center p-2 sm:p-3 bg-grove-50 rounded-lg">
+								<div class="text-xl sm:text-2xl font-mono font-bold text-grove-600">{pricingSummary.bundled}</div>
+								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Bundled (&le;$30/yr)</div>
 							</div>
-							<div class="text-center p-3 bg-domain-50 rounded-lg">
-								<div class="text-2xl font-mono font-bold text-domain-600">{pricingSummary.recommended}</div>
-								<div class="text-xs text-bark/60 font-sans">Recommended (&le;$50/yr)</div>
+							<div class="text-center p-2 sm:p-3 bg-domain-50 rounded-lg">
+								<div class="text-xl sm:text-2xl font-mono font-bold text-domain-600">{pricingSummary.recommended}</div>
+								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Recommended (&le;$50/yr)</div>
 							</div>
-							<div class="text-center p-3 bg-bark/5 rounded-lg">
-								<div class="text-2xl font-mono font-bold text-bark/70">{pricingSummary.standard}</div>
-								<div class="text-xs text-bark/60 font-sans">Standard</div>
+							<div class="text-center p-2 sm:p-3 bg-bark/5 rounded-lg">
+								<div class="text-xl sm:text-2xl font-mono font-bold text-bark/70">{pricingSummary.standard}</div>
+								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Standard</div>
 							</div>
-							<div class="text-center p-3 bg-amber-50 rounded-lg">
-								<div class="text-2xl font-mono font-bold text-amber-600">{pricingSummary.premium}</div>
-								<div class="text-xs text-bark/60 font-sans">Premium (&gt;$50/yr)</div>
+							<div class="text-center p-2 sm:p-3 bg-amber-50 rounded-lg">
+								<div class="text-xl sm:text-2xl font-mono font-bold text-amber-600">{pricingSummary.premium}</div>
+								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Premium (&gt;$50/yr)</div>
 							</div>
 						</div>
 
 						{#if tokenUsage}
-							<div class="mt-4 pt-4 border-t border-grove-200 space-y-2">
-								<div class="flex justify-between text-xs font-sans text-bark/50">
+							<div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-grove-200 space-y-1.5 sm:space-y-2">
+								<div class="flex justify-between text-[10px] sm:text-xs font-sans text-bark/50">
 									<span>API Usage</span>
 									<span class="font-mono">{tokenUsage.total_tokens.toLocaleString()} tokens</span>
 								</div>
-								<div class="grid grid-cols-2 gap-2 text-xs font-sans">
+								<div class="grid grid-cols-2 gap-2 text-[10px] sm:text-xs font-sans">
 									<div class="flex justify-between text-bark/40">
 										<span>Input</span>
 										<span class="font-mono">{tokenUsage.input_tokens.toLocaleString()}</span>
@@ -902,7 +902,7 @@
 										<span class="font-mono">{tokenUsage.output_tokens.toLocaleString()}</span>
 									</div>
 								</div>
-								<div class="flex justify-between text-xs font-sans pt-1 border-t border-grove-100">
+								<div class="flex justify-between text-[10px] sm:text-xs font-sans pt-1 border-t border-grove-100">
 									<span class="text-bark/50">Est. Cost (Claude)</span>
 									<span class="font-mono text-domain-600 font-medium">{estimateCost(tokenUsage)}</span>
 								</div>
@@ -914,9 +914,9 @@
 				<!-- Results -->
 				{#if jobResults.length > 0}
 					<div class="card">
-						<div class="p-4 border-b border-grove-200 flex justify-between items-center">
-							<h2 class="font-serif text-lg text-bark">Available Domains</h2>
-							<span class="text-sm text-bark/60 font-sans">
+						<div class="px-3 py-3 sm:p-4 border-b border-grove-200 flex justify-between items-center">
+							<h2 class="font-serif text-base sm:text-lg text-bark">Available Domains</h2>
+							<span class="text-xs sm:text-sm text-bark/60 font-sans">
 								{#if isLoadingResults}
 									Loading...
 								{:else}
@@ -933,14 +933,14 @@
 									<button
 										type="button"
 										onclick={() => toggleExpanded(result.domain)}
-										class="w-full p-4 text-left flex items-center justify-between"
+										class="w-full px-3 py-3 sm:p-4 text-left flex items-start sm:items-center justify-between gap-2"
 									>
 										<div class="flex-1 min-w-0">
-											<div class="flex items-center gap-2">
-												<span class="font-mono text-bark font-medium truncate">{result.domain}</span>
+											<div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+												<span class="font-mono text-bark font-medium text-sm sm:text-base break-all">{result.domain}</span>
 												{#if result.pricing_category || evalData?.pricing_category}
 													{@const category = result.pricing_category || evalData?.pricing_category}
-													<span class="flex-shrink-0 px-2 py-0.5 text-xs font-sans rounded-full
+													<span class="flex-shrink-0 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-sans rounded-full
 														{category === 'bundled' ? 'bg-grove-100 text-grove-700' :
 														 category === 'recommended' ? 'bg-domain-100 text-domain-700' :
 														 category === 'premium' ? 'bg-amber-100 text-amber-700' :
@@ -949,43 +949,40 @@
 													</span>
 												{/if}
 											</div>
-											<div class="flex items-center gap-3 mt-1">
-												<span class="text-xs font-sans text-bark/50">Score: {(result.score * 100).toFixed(0)}%</span>
+											<div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5">
+												<span class="text-[11px] sm:text-xs font-sans text-bark/50">Score: {(result.score * 100).toFixed(0)}%</span>
 												<!-- Evaluation indicators -->
 												{#if evalData}
-													<div class="flex items-center gap-1.5">
+													<div class="flex items-center gap-1">
 														{#if evalData.pronounceable}
-															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-grove-100 text-grove-600 text-xs" title="Easy to pronounce">
-																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/><path d="M10 5a1 1 0 011 1v4a1 1 0 01-2 0V6a1 1 0 011-1zm0 8a1 1 0 100 2 1 1 0 000-2z"/></svg>
+															<span class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-grove-100 text-grove-600" title="Easy to pronounce">
+																<svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/><path d="M10 5a1 1 0 011 1v4a1 1 0 01-2 0V6a1 1 0 011-1zm0 8a1 1 0 100 2 1 1 0 000-2z"/></svg>
 															</span>
 														{/if}
 														{#if evalData.memorable}
-															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-domain-100 text-domain-600 text-xs" title="Memorable">
-																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+															<span class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-domain-100 text-domain-600" title="Memorable">
+																<svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
 															</span>
 														{/if}
 														{#if evalData.brand_fit}
-															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 text-xs" title="Good brand fit">
-																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+															<span class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-amber-100 text-amber-600" title="Good brand fit">
+																<svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
 															</span>
 														{/if}
 														{#if evalData.email_friendly}
-															<span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs" title="Email-friendly">
-																<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+															<span class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-blue-100 text-blue-600" title="Email-friendly">
+																<svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
 															</span>
 														{/if}
 													</div>
 												{/if}
 											</div>
 										</div>
-										<div class="text-right flex-shrink-0 ml-4 flex items-center gap-3">
-											<div>
-												<span class="{getPriceClass(result.pricing_category || evalData?.pricing_category)} font-sans font-medium">
-													{result.price_display || formatPrice(result.price_cents)}
-												</span>
-												<span class="text-xs text-bark/40 font-sans block">/year</span>
-											</div>
-											<svg class="w-5 h-5 text-bark/40 transition-transform {isExpanded ? 'rotate-180' : ''}" viewBox="0 0 20 20" fill="currentColor">
+										<div class="text-right flex-shrink-0 ml-3 sm:ml-4 flex items-center gap-2 sm:gap-3">
+											<span class="{getPriceClass(result.pricing_category || evalData?.pricing_category)} font-sans font-medium text-sm sm:text-base whitespace-nowrap">
+												{result.price_display || formatPrice(result.price_cents)}/yr
+											</span>
+											<svg class="w-5 h-5 text-bark/40 transition-transform flex-shrink-0 {isExpanded ? 'rotate-180' : ''}" viewBox="0 0 20 20" fill="currentColor">
 												<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
 											</svg>
 										</div>
@@ -993,8 +990,8 @@
 
 									<!-- Expanded details -->
 									{#if isExpanded && evalData}
-										<div class="px-4 pb-4 pt-0 border-t border-grove-100 bg-grove-50/50">
-											<div class="grid grid-cols-2 gap-4 mt-3">
+										<div class="px-3 sm:px-4 pb-3 sm:pb-4 pt-0 border-t border-grove-100 bg-grove-50/50">
+											<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
 												<!-- Evaluation scores -->
 												<div class="space-y-2">
 													<h4 class="text-xs font-sans font-medium text-bark/70 uppercase tracking-wide">Evaluation</h4>
