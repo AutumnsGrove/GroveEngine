@@ -14,8 +14,9 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | 0.1.0 | Multi-tenant blog engine for Cloudflare Workers |
-| [example-site](packages/example-site) | - | Demo site showcasing all GroveEngine features |
+| [@autumnsgrove/groveengine](packages/engine) | 0.4.5 | Multi-tenant blog engine for Cloudflare Workers |
+| [example-site](packages/example-site) | 0.1.0 | Demo site showcasing all GroveEngine features |
+| [domains](domains) | 0.1.0 | AI-powered domain search tool for client consultations |
 
 ### Related Projects
 
@@ -31,17 +32,21 @@ GroveEngine/
 │   ├── engine/               # @autumnsgrove/groveengine - Blog engine
 │   │   ├── src/
 │   │   │   ├── lib/          # Core library code
-│   │   │   │   ├── components/   # Svelte components
-│   │   │   │   ├── server/       # Server utilities (auth, db, payments, storage)
-│   │   │   │   └── utils/        # Shared utilities
-│   │   │   └── routes/       # SvelteKit routes (blog, admin, API)
+│   │   │   │   ├── auth/         # JWT and session management
+│   │   │   │   ├── components/   # Svelte components (admin, custom)
+│   │   │   │   ├── payments/     # Stripe payment system
+│   │   │   │   ├── ui/           # 50+ UI components with design system
+│   │   │   │   └── utils/        # 12 utility modules
+│   │   │   └── routes/       # SvelteKit routes (blog, admin, API, auth)
 │   │   └── migrations/       # D1 database migrations (7 migrations)
-│   └── example-site/         # Demo site showcasing engine features
+│   └── example-site/         # Demo site: The Midnight Bloom Tea Café
+├── domains/                  # AI-powered domain search tool (domains.grove.place)
 ├── landing/                  # Marketing site for grove.place
 ├── docs/                     # Project documentation
 │   ├── README.md             # Master project summary
 │   ├── specs/                # Technical specifications (7 specs)
-│   └── research/             # Architecture research
+│   ├── guides/               # Setup and onboarding guides
+│   └── prompts/              # Research and implementation prompts
 ├── AgentUsage/               # 24+ agent workflow guides
 └── assets/                   # Brand assets & visuals
 ```
@@ -51,13 +56,16 @@ GroveEngine/
 ## ✨ Key Features
 
 - **Gutter Annotations** - Unique sidebar annotation system for contextual notes on blog posts
-- **Markdown Editor** - Full-featured editor with live preview, multiple themes, drag-drop images, and Mermaid diagram support
-- **Magic Code Auth** - Passwordless authentication via email verification codes
+- **Markdown Editor** - Full-featured editor with live preview, 7 themes, drag-drop images, slash commands, snippets, and ambient sounds
+- **Magic Code Auth** - Passwordless authentication via 6-digit email codes (Resend)
 - **Multi-Tenant Architecture** - Subdomain-based isolation with per-tenant databases
 - **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
-- **Grove Design System** - Calm, organic UI components with WCAG 2.1 AA accessibility ([separate repo](https://github.com/AutumnsGrove/GroveUI))
-- **CDN Admin Uploader** - R2-powered media upload with AI image analysis
+- **50+ UI Components** - Complete design system with primitives, charts, galleries, and form components
+- **CDN Admin Uploader** - R2-powered media upload with magic byte validation
 - **Stripe Payments** - Payment system with provider abstraction for subscriptions and shop features
+- **E-commerce System** - Full shop infrastructure: products, variants, orders, subscriptions, Connect accounts
+- **AI-Powered Domain Search** - Multi-provider AI (Claude, DeepSeek, Kimi, Llama 4) with live Cloudflare pricing
+- **Accessibility Fonts** - 7 fonts including OpenDyslexic, Atkinson Hyperlegible, and Lexend
 
 ## 🚀 Quick Start
 
@@ -87,20 +95,28 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 
 **Domain Secured:** grove.place ✅
 
+**Live Sites:**
+- [grove.place](https://grove.place) - Landing page with email signup
+- [example.grove.place](https://example.grove.place) - Demo site (The Midnight Bloom Tea Café)
+- [domains.grove.place](https://domains.grove.place) - AI-powered domain search tool
+
 **Completed:**
 - ✅ Domain secured (grove.place)
-- ✅ Blog engine migrated from AutumnsGrove
+- ✅ Blog engine migrated from AutumnsGrove (v0.4.5)
 - ✅ NPM packages published (@autumnsgrove/groveengine)
-- ✅ Multi-tenant database schema designed (7 migrations)
+- ✅ Multi-tenant database schema designed (7 migrations, 25+ tables)
 - ✅ Grove Design System created and split to [GroveUI](https://github.com/AutumnsGrove/GroveUI)
 - ✅ Landing page deployed with "How It Works" section
 - ✅ Stripe payments system with provider abstraction
-- ✅ CDN admin upload system with R2 storage
+- ✅ E-commerce data model complete (products, orders, subscriptions)
+- ✅ CDN admin upload system with R2 storage and magic byte validation
 - ✅ Example site showcasing all features
-- ✅ GitHub Packages publishing configured
+- ✅ AI-powered domain search tool with multi-provider support
+- ✅ Security audit completed (2025-12-05) - critical issues fixed
+- ✅ SSE streaming for real-time domain search updates
 
 **In Progress:**
-- 🔄 Post limits enforcement
+- 🔄 Post limits enforcement (250 for Starter plan)
 - 🔄 First client onboarding (Mom's publishing house)
 - 🔄 Basic analytics implementation
 
@@ -108,6 +124,23 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - [Master Project Summary](docs/README.md)
 - [Engine Specification](docs/specs/engine-spec.md)
 - [Development Roadmap](docs/roadmap.md)
+
+## 🔍 Internal Tools
+
+### Domain Search (domains.grove.place)
+An AI-powered domain discovery tool that speeds up client consultations from 2-3 weeks to 1-2 days.
+
+**Features:**
+- Multi-provider AI swarm (Claude, DeepSeek, Kimi, Llama 4)
+- Real-time SSE streaming for live progress updates
+- Live pricing from Cloudflare Registrar
+- Pricing tiers: bundled (≤$30), recommended (≤$50), standard, premium
+- Expandable cards with domain evaluation scores
+- RDAP metadata (registrar, expiration date)
+- Token usage tracking with cost estimation
+- Follow-up quiz system for refined searches
+
+**Tech:** SvelteKit + Cloudflare Durable Objects + TypeScript
 
 ## 📊 Visual Overview
 
@@ -144,27 +177,40 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 
 ## 🚀 Development Roadmap
 
-**Phase 1:** GroveEngine MVP (Weeks 1-4) - *In Progress*  
-**Phase 2:** Multi-tenant Infrastructure (Weeks 5-9)  
-**Phase 3:** Grove Website (Weeks 10-15)  
-**Phase 4:** Grove Social (Weeks 16-25)  
-**Phase 5:** Polish & Scale (Weeks 26-36)
+**Phase 1:** GroveEngine MVP - *In Progress*
+- Post limits, analytics, first client onboarding
+
+**Phase 2:** Multi-tenant Infrastructure
+- Subdomain routing, tenant isolation, plan management
+
+**Phase 3:** Grove Website
+- Marketing site, billing dashboard, customer portal
+
+**Phase 4:** Grove Social
+- Community feed, post sharing, voting, emoji reactions
+
+**Phase 5:** Polish & Scale
+- Additional themes, advanced analytics, comment system
 
 **Goals:**
 - 10 clients by Month 3
-- 20 clients by Month 6  
+- 20 clients by Month 6
 - $500 MRR by Month 12
 
 ## 🛠️ Tech Stack
 
 - **Frontend:** SvelteKit 2.5+, Svelte 5, TypeScript, Tailwind CSS 3.4+
-- **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
-- **Payments:** Stripe
-- **Auth:** Magic Code (passwordless email authentication)
+- **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage, Durable Objects
+- **Payments:** Stripe (with provider abstraction for future Paddle/LemonSqueezy)
+- **Auth:** Magic Code (6-digit passwordless email authentication via Resend)
 - **Email:** Resend
-- **Markdown:** Marked.js, Mermaid diagrams, gray-matter
-- **Testing:** Vitest, Testing Library
-- **Build:** Vite 5.4+, pnpm workspaces
+- **Markdown:** Marked.js 17+, gray-matter (YAML frontmatter)
+- **Charts:** Chart.js 4.5+
+- **Icons:** Lucide Svelte
+- **UI:** 50+ components with bits-ui primitives
+- **AI Providers:** Claude, DeepSeek, Kimi, Llama 4 (for domain search)
+- **Testing:** Vitest 4.0+, Testing Library, happy-dom
+- **Build:** Vite 5.4+, pnpm 9+ workspaces
 
 ## 📈 Success Metrics
 
@@ -196,12 +242,19 @@ pnpm install
 cd packages/engine
 pnpm dev
 
+# Start with Cloudflare bindings (D1, R2, KV)
+pnpm dev:wrangler
+
 # Start landing page
 cd landing
 pnpm dev
 
 # Start example site
 cd packages/example-site
+pnpm dev
+
+# Start domain search tool
+cd domains
 pnpm dev
 ```
 
@@ -217,6 +270,9 @@ pnpm test:coverage
 
 # Run security tests
 pnpm test:security
+
+# Run tests with UI
+pnpm test:ui
 ```
 
 ### Building
@@ -227,6 +283,17 @@ cd packages/engine
 pnpm build:package
 ```
 
+### Database Migrations
+
+```bash
+# Apply migrations locally
+cd packages/engine
+wrangler d1 migrations apply grove-engine-db --local
+
+# Apply migrations to production
+wrangler d1 migrations apply grove-engine-db --remote
+```
+
 ## 📄 License
 
 MIT
@@ -235,4 +302,5 @@ MIT
 
 **Project Status:** Phase 1 - MVP Development
 **Domain:** grove.place ✅
-**Last Updated:** December 2025
+**Engine Version:** 0.4.5
+**Last Updated:** 2025-12-06
