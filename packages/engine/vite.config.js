@@ -6,6 +6,9 @@ export default defineConfig({
   build: {
     // Disable source maps in production to prevent source code exposure
     sourcemap: false,
+    rollupOptions: {
+      external: ["dompurify"],
+    },
   },
   server: {
     fs: {

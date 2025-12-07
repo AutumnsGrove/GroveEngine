@@ -24,6 +24,7 @@ export async function apiRequest(url, options = {}) {
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
   const headers = {
     ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+    ...(csrfToken && { "csrf-token": csrfToken }), // fallback header
     ...options.headers,
   };
 
