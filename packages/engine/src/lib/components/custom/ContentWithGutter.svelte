@@ -401,10 +401,10 @@
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
 	let DOMPurify = $state(null);
 
-	// Load DOMPurify only in browser
+	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
 	onMount(async () => {
 		if (browser) {
-			const module = await import('isomorphic-dompurify');
+			const module = await import('dompurify');
 			DOMPurify = module.default;
 		}
 	});
