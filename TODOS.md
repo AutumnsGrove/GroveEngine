@@ -239,7 +239,7 @@
 - [x] Showing gutter contents isn't _fully_ working, it _works_ but only if you refresh the website, and have other sidebars collapsed.
       **FIXED (2025-12-07):** Improved gutter button layout and z‑index; gutter contents now show/hide reliably without requiring refresh.
 - [x] WHen submitting post from MarkdownEditor, received "Invalid CSRF token"
-      **FIXED (2025-12-07):** Added CSRF token meta tag injection in `+layout.svelte` and ensured token is passed from `+layout.server.js`; API client now includes token in headers.
+      **FIXED (2025-12-07):** Added CSRF token meta tag injection in `+layout.svelte` and ensured token is passed from `+layout.server.js`; API client now includes token in headers. **DEPLOYED** (awaiting verification on live site).
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
