@@ -9,6 +9,7 @@
 - [x] Set up SvelteKit project with TypeScript → **DONE: SvelteKit 2.5+ with Svelte 5**
 - [x] Configure Cloudflare Workers and D1 database → **DONE: 7 migrations in place**
 - [x] Implement magic link auth (6-digit email codes via Resend) → **DONE**
+- [ ] Implement Google Sign-In (OAuth 2.0 with PKCE) → **PENDING** (based on @docs/Google-signin.md)
 - [x] Configure Stripe for payments → **DONE: Stripe payments system with provider abstraction**
 - [x] Set up Resend for email → **DONE: Used for magic code auth**
 - [x] Check domain availability → **DONE: grove.place secured!**
