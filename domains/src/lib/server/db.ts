@@ -246,6 +246,8 @@ export interface DomainSearchJob {
   domains_checked: number;
   domains_available: number; // Count of available domains found
   good_results: number;
+  input_tokens?: number;
+  output_tokens?: number;
   error: string | null;
   started_at: string | null;
   completed_at: string | null;
@@ -295,8 +297,8 @@ export async function createSearchJob(
   await db
     .prepare(
       `INSERT INTO domain_search_jobs
-			(id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, error, started_at, completed_at, duration_seconds, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  	(id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, input_tokens, output_tokens, error, started_at, completed_at, duration_seconds, created_at, updated_at)
+  	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       job.id,
@@ -312,6 +314,8 @@ export async function createSearchJob(
       job.domains_checked,
       job.domains_available,
       job.good_results,
+      0, // input_tokens default
+      0, // output_tokens default
       job.error,
       job.started_at,
       job.completed_at,
@@ -393,6 +397,8 @@ export async function updateSearchJobStatus(
     batch_num?: number;
     domains_checked?: number;
     good_results?: number;
+    input_tokens?: number;
+    output_tokens?: number;
     error?: string | null;
     started_at?: string;
     completed_at?: string;
@@ -417,6 +423,14 @@ export async function updateSearchJobStatus(
   if (updates.good_results !== undefined) {
     fields.push("good_results = ?");
     values.push(updates.good_results);
+  }
+  if (updates.input_tokens !== undefined) {
+    fields.push("input_tokens = ?");
+    values.push(updates.input_tokens);
+  }
+  if (updates.output_tokens !== undefined) {
+    fields.push("output_tokens = ?");
+    values.push(updates.output_tokens);
   }
   if (updates.error !== undefined) {
     fields.push("error = ?");
