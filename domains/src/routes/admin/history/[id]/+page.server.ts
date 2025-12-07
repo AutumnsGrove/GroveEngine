@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ params, platform }) => {
           job_id: params.id,
           domain: r.domain,
           tld: r.tld,
-          status: r.status,
+          status: r.status as "available" | "registered" | "unknown",
           score: r.score,
           price_cents: r.price_cents,
           price_category: r.pricing_category || r.price_category, // Worker returns pricing_category

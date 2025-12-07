@@ -14,6 +14,30 @@
 	let newDomainIds = $state<Set<string>>(new Set());
 	let domainIdeaStatus = $state<{ available: boolean; checked: boolean; price_cents?: number } | null>(null);
 
+	// Follow-up quiz state
+	let followupQuiz = $state<{
+		job_id: string;
+		questions: Array<{
+			id: string;
+			type: 'text' | 'single_select' | 'multi_select';
+			prompt: string;
+			required: boolean;
+			placeholder?: string;
+			options?: { value: string; label: string }[];
+			default?: string | string[];
+		}>;
+		context: {
+			batches_completed: number;
+			domains_checked: number;
+			good_found: number;
+			target: number;
+		};
+	} | null>(null);
+	let followupAnswers = $state<Record<string, string | string[]>>({});
+	let isFetchingFollowup = $state(false);
+	let isSubmittingFollowup = $state(false);
+	let followupError = $state<string | null>(null);
+
 	// Check if job is running
 	const isRunning = $derived(job && (job.status === 'running' || job.status === 'pending'));
 
@@ -80,7 +104,7 @@
 						// Check for terminal state
 						if (['complete', 'failed', 'cancelled', 'needs_followup'].includes(eventData.status)) {
 							stopMonitoring();
-							fetchFullResults();
+							handleJobCompletion();
 						}
 					}
 				} catch (err) {
@@ -119,7 +143,7 @@
 						job = { ...job, ...result.job };
 						if (['complete', 'failed', 'cancelled', 'needs_followup'].includes(job.status)) {
 							stopMonitoring();
-							fetchFullResults();
+							handleJobCompletion();
 						}
 					}
 				}
@@ -175,6 +199,13 @@
 			}
 		} catch (err) {
 			console.error('Failed to fetch results:', err);
+		}
+	}
+
+	async function handleJobCompletion() {
+		await fetchFullResults();
+		if (job?.status === 'needs_followup') {
+			await fetchFollowupQuiz();
 		}
 	}
 
@@ -241,6 +272,132 @@
 			return 'None specified';
 		}
 	}
+
+	// Fetch follow-up quiz when job status is needs_followup
+	async function fetchFollowupQuiz() {
+		if (!job || job.status !== 'needs_followup') return;
+
+		isFetchingFollowup = true;
+		followupError = null;
+
+		// Set a timeout for the fetch request
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+		try {
+			const response = await fetch(`/api/search/followup?job_id=${job.id}`, {
+				signal: controller.signal
+			});
+			if (response.ok) {
+				const data = await response.json();
+				followupQuiz = data;
+				// Initialize answers with defaults
+				if (data.questions) {
+					data.questions.forEach((q: any) => {
+						if (q.default) {
+							followupAnswers[q.id] = q.default;
+						} else if (q.type === 'multi_select') {
+							followupAnswers[q.id] = [];
+						} else {
+							followupAnswers[q.id] = '';
+						}
+					});
+				}
+			} else {
+				const errorText = await response.text();
+				throw new Error(`Failed to fetch follow-up quiz: ${response.status} ${errorText}`);
+			}
+		} catch (err) {
+			console.error('Failed to fetch follow-up quiz:', err);
+			if (err instanceof Error && err.name === 'AbortError') {
+				followupError = 'Request timed out. Please check your connection and try again.';
+			} else {
+				followupError = err instanceof Error ? err.message : 'Unknown error occurred while loading questions.';
+			}
+		} finally {
+			clearTimeout(timeoutId);
+			isFetchingFollowup = false;
+		}
+	}
+
+	// Validate required fields
+	function validateFollowupAnswers(): boolean {
+		if (!followupQuiz) return false;
+
+		for (const question of followupQuiz.questions) {
+			if (question.required) {
+				const answer = followupAnswers[question.id];
+				if (!answer || (Array.isArray(answer) && answer.length === 0)) {
+					followupError = `Please answer required question: "${question.prompt}"`;
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	// Submit follow-up answers and resume search
+	async function submitFollowupAnswers() {
+		if (!job || !followupQuiz) return;
+
+		if (!validateFollowupAnswers()) {
+			return;
+		}
+
+		isSubmittingFollowup = true;
+		followupError = null;
+
+		// Set a timeout for the resume request
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+		try {
+			const response = await fetch(`/api/search/resume?job_id=${job.id}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ followup_responses: followupAnswers }),
+				signal: controller.signal
+			});
+
+			if (response.ok) {
+				// Update job status to running
+				job = { ...job, status: 'running' };
+				followupQuiz = null;
+				followupAnswers = {};
+				// Restart monitoring
+				startMonitoring();
+				startTimer();
+			} else {
+				const errorText = await response.text();
+				let errorMessage = `Failed to resume search (${response.status})`;
+				try {
+					const errorJson = JSON.parse(errorText);
+					if (errorJson.error) errorMessage = errorJson.error;
+				} catch {
+					if (errorText) errorMessage = errorText;
+				}
+				throw new Error(errorMessage);
+			}
+		} catch (err) {
+			console.error('Failed to submit follow-up answers:', err);
+			if (err instanceof Error && err.name === 'AbortError') {
+				followupError = 'Request timed out. The search may still resume - please check the job status in a moment.';
+			} else {
+				followupError = err instanceof Error ? err.message : 'Unknown error occurred while resuming search.';
+			}
+		} finally {
+			clearTimeout(timeoutId);
+			isSubmittingFollowup = false;
+		}
+	}
+
+	// Automatically fetch follow-up quiz when job status changes to needs_followup
+	$effect(() => {
+		if (job?.status === 'needs_followup' && !followupQuiz && !isFetchingFollowup) {
+			fetchFollowupQuiz();
+		}
+	});
+
 </script>
 
 <style>
@@ -385,6 +542,154 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- Follow-up Quiz -->
+		{#if job.status === 'needs_followup'}
+			<div class="card p-6 border-2 border-amber-200 bg-gradient-to-br from-amber-50/30 to-white">
+				<div class="flex items-start gap-3 mb-4">
+					<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+						<svg class="w-5 h-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<h2 class="font-serif text-lg text-bark">Refine Your Search</h2>
+						<p class="text-sm text-bark/60 font-sans mt-1">We need a bit more information to find the perfect domains for you.</p>
+					</div>
+				</div>
+				
+				{#if isFetchingFollowup}
+					<div class="text-center py-8">
+						<svg class="w-10 h-10 mx-auto animate-spin text-domain-600" viewBox="0 0 24 24" fill="none">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<p class="mt-3 text-bark/60 font-sans">Loading follow-up questions...</p>
+					</div>
+				{:else if followupError}
+					<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+						<p class="text-sm font-sans">{followupError}</p>
+					</div>
+					<button
+						type="button"
+						onclick={fetchFollowupQuiz}
+						class="btn-primary w-full flex items-center justify-center gap-2"
+					>
+						<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+						</svg>
+						Retry Loading Questions
+					</button>
+				{:else if followupQuiz}
+					<div class="space-y-6">
+						<!-- Context summary -->
+						<div class="bg-gradient-to-r from-grove-50 to-domain-50 p-4 rounded-lg border border-grove-200">
+							<div class="flex items-center justify-between">
+								<div>
+									<p class="text-sm font-sans text-bark/70">
+										We found <span class="font-bold text-grove-700">{followupQuiz.context.good_found}</span> good domains out of <span class="font-bold text-domain-700">{followupQuiz.context.target}</span> target.
+									</p>
+									<p class="text-xs text-bark/50 font-sans mt-1">Answer these questions to help us find more.</p>
+								</div>
+								<div class="text-right">
+									<div class="text-xs font-sans text-bark/50">Batches completed</div>
+									<div class="text-lg font-mono font-bold text-domain-600">{followupQuiz.context.batches_completed}/6</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Questions -->
+						<div class="space-y-5">
+							{#each followupQuiz.questions as question, idx}
+								<div class="bg-white p-4 rounded-lg border border-grove-100 shadow-sm">
+									<div class="flex items-start gap-3 mb-3">
+										<div class="flex-shrink-0 w-6 h-6 rounded-full bg-domain-100 text-domain-700 text-xs font-sans font-bold flex items-center justify-center">
+											{idx + 1}
+										</div>
+										<div class="flex-1">
+											<label class="block text-sm font-sans font-medium text-bark mb-1">
+												{question.prompt}
+												{#if question.required}<span class="text-red-500 ml-1">*</span>{/if}
+											</label>
+											{#if question.placeholder}
+												<p class="text-xs text-bark/50 font-sans mb-2">{question.placeholder}</p>
+											{/if}
+										</div>
+									</div>
+
+									{#if question.type === 'text'}
+										<input
+											type="text"
+											class="input-field w-full"
+											placeholder={question.placeholder || 'Type your answer...'}
+											bind:value={followupAnswers[question.id]}
+										/>
+									{:else if question.type === 'single_select' && question.options}
+										<select
+											class="input-field w-full"
+											bind:value={followupAnswers[question.id]}
+										>
+											<option value="">Select an option...</option>
+											{#each question.options as opt}
+												<option value={opt.value}>{opt.label}</option>
+											{/each}
+										</select>
+									{:else if question.type === 'multi_select' && question.options}
+										<div class="flex flex-wrap gap-2">
+											{#each question.options as opt}
+												{@const currentVal = followupAnswers[question.id]}
+												{@const currentArr = Array.isArray(currentVal) ? currentVal : []}
+												{@const selected = currentArr.includes(opt.value)}
+												<button
+													type="button"
+													onclick={() => {
+														const arr = Array.isArray(followupAnswers[question.id]) ? [...followupAnswers[question.id] as string[]] : [];
+														if (arr.includes(opt.value)) {
+															followupAnswers[question.id] = arr.filter((v: string) => v !== opt.value);
+														} else {
+															followupAnswers[question.id] = [...arr, opt.value];
+														}
+													}}
+													class="px-3 py-2 rounded-lg text-sm font-sans transition-all {selected ? 'bg-domain-100 text-domain-700 border-2 border-domain-300 shadow-sm' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10 hover:border-bark/20'}"
+												>
+													{opt.label}
+												</button>
+											{/each}
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+
+						<!-- Submit button -->
+						<div class="pt-4 border-t border-grove-200">
+							<button
+								type="button"
+								onclick={submitFollowupAnswers}
+								disabled={isSubmittingFollowup}
+								class="btn-primary w-full flex items-center justify-center gap-3 py-3 text-base font-medium"
+							>
+								{#if isSubmittingFollowup}
+									<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									Resuming Search...
+								{:else}
+									<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+										<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+									</svg>
+									Continue Search with Refinements
+								{/if}
+							</button>
+							<p class="text-xs text-center text-bark/50 font-sans mt-3">
+								Your search will resume with the additional information you provide.
+							</p>
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
 		<!-- Available Domains -->
 		{#if availableResults.length > 0 || isRunning}

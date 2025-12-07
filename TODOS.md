@@ -206,11 +206,12 @@
   - ✅ Domain idea availability status (checkmark/X)
   - ✅ Stats update in real-time
   - ⚠️ Timezone issue: dates display in UTC (SSR limitation)
-- [ ] **Follow-up Quiz on History Detail Page** (2025-12-06)
+- [x] **Follow-up Quiz on History Detail Page** (2025-12-06) → **DONE (2025-12-06)**
   - When job status is `needs_followup`, show the follow-up quiz questions
   - Fetch from `/api/search/followup?job_id=...`
   - Allow user to submit answers to resume search
-  - Currently follow-up only works on searcher page, not history
+  - Implemented in `domains/src/routes/admin/history/[id]/+page.svelte`
+  - Full UI with validation, loading states, and error handling
 - [x] **Searcher Page Running Job Issue** (2025-12-06)
   - Right panel shows last COMPLETED job, not currently running job
   - Should show running job status or link to it
