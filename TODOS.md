@@ -228,7 +228,9 @@
 - [ ] Within markdown editor, allow for Drafts. These are not _posted_ yet but are saveable and can be posted later, when the user is finished.
 - [ ] Overlapping contents looks very strange - https://ibb.co/FL0JHDZy
 - [ ] Hiding the preview in the editor is also broken
-- [ ] The buttons on the toolbar are still ... entirely broken. When clicked, the editor completely freezes and cannot be resumed unless the browser is FULLY closed. 
+- [ ] The buttons on the toolbar are still ... entirely broken. When clicked, the editor completely freezes and cannot be resumed unless the browser is FULLY closed.
+- [ ] Showing gutter contents isn't _fully_ working, it _works_ but only if you refresh the website, and have other sidebars collapsed.
+- [ ] WHen submitting post from MarkdownEditor, received "Invalid CSRF token"
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
