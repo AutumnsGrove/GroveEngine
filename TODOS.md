@@ -223,6 +223,7 @@
 ### Personal TODOS
 - [ ] Fix markdowneditor side panel not properly collapsing when requested.
 - [ ] In admin page, when creating a blog post, and honestly, just across the admin page, the sidebar needs to be toggleable. It can be ... in the way, at times.
+- [ ] In markdown editor, clicking "forest" does nothing as well as clicking the gutter content button. seems to not work. Might be related to our refactoring of the one file into multiple components.
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
