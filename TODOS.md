@@ -222,9 +222,13 @@
      
 ### Personal TODOS
 - [ ] Fix markdowneditor side panel not properly collapsing when requested.
+      This actually is working, but only if the site is refreshed. Needs to work and have a nice slide animation.
 - [ ] In admin page, when creating a blog post, and honestly, just across the admin page, the sidebar needs to be toggleable. It can be ... in the way, at times.
 - [ ] In markdown editor, clicking "forest" does nothing as well as clicking the gutter content button. seems to not work. Might be related to our refactoring of the one file into multiple components.
 - [ ] Within markdown editor, allow for Drafts. These are not _posted_ yet but are saveable and can be posted later, when the user is finished.
+- [ ] Overlapping contents looks very strange - https://ibb.co/FL0JHDZy
+- [ ] Hiding the preview in the editor is also broken
+- [ ] The buttons on the toolbar are still ... entirely broken. When clicked, the editor completely freezes and cannot be resumed unless the browser is FULLY closed. 
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
