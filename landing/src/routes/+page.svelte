@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 
 	// Get error from URL if present
-	$: error = $page.url.searchParams.get('error');
+	let error = $derived($page.url.searchParams.get('error'));
 
 	let currentSlide = $state(0);
 	const slides = [
