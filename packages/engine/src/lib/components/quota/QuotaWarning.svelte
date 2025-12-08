@@ -6,7 +6,8 @@
    * Can be placed on the post editor or dashboard.
    */
 
-  import type { PreSubmitCheckResult } from '../../groveauth/index.js';
+  import type { PreSubmitCheckResult, AlertVariant } from '../../groveauth/index.js';
+  import { ALERT_VARIANTS } from '../../groveauth/index.js';
 
   interface Props {
     check: PreSubmitCheckResult;
@@ -38,7 +39,7 @@
   );
 
   // Determine variant based on check result
-  const variant = $derived(
+  const variant = $derived<AlertVariant>(
     !isValidCheck ? 'info' :
     check.upgradeRequired ? 'error' :
     check.status.is_in_grace_period ? 'warning' :
@@ -46,29 +47,8 @@
     'info'
   );
 
-  const variantClasses = $derived({
-    error: {
-      container: 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800',
-      icon: 'text-red-500',
-      title: 'text-red-800 dark:text-red-200',
-      text: 'text-red-700 dark:text-red-300',
-      button: 'bg-red-600 hover:bg-red-700 text-white',
-    },
-    warning: {
-      container: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800',
-      icon: 'text-yellow-500',
-      title: 'text-yellow-800 dark:text-yellow-200',
-      text: 'text-yellow-700 dark:text-yellow-300',
-      button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-    },
-    info: {
-      container: 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
-      icon: 'text-blue-500',
-      title: 'text-blue-800 dark:text-blue-200',
-      text: 'text-blue-700 dark:text-blue-300',
-      button: 'bg-blue-600 hover:bg-blue-700 text-white',
-    },
-  }[variant]);
+  // Get variant classes from shared utility
+  const variantClasses = $derived(ALERT_VARIANTS[variant]);
 </script>
 
 {#if isValidCheck && check.showWarning && !dismissed}

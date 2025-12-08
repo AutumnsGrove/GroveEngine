@@ -111,4 +111,99 @@ ON CONFLICT(client_id) DO UPDATE SET
 
 ---
 
+## Rate Limiting Considerations
+
+### API Rate Limits
+
+GroveAuth API calls should be rate-limited to prevent abuse. The client includes subscription caching (5 min TTL by default) which reduces API load.
+
+**Recommended rate limits for GroveAuth endpoints:**
+
+| Endpoint | Rate Limit | Notes |
+|----------|------------|-------|
+| `/token` | 10/min per IP | Prevents brute-force token requests |
+| `/subscription/*` | 60/min per user | Subscription queries |
+| `/subscription/*/post-count` | 30/min per user | Post count updates |
+| `/subscription/*/can-post` | 120/min per user | Pre-submit checks (higher for UX) |
+
+**Client-side caching:**
+
+The GroveAuthClient has built-in subscription caching:
+- Default TTL: 5 minutes (300000ms)
+- Configurable via `cacheTTL` constructor option
+- Automatically invalidated on post count changes
+- Use `client.clearSubscriptionCache(userId)` to manually clear
+
+```typescript
+const client = createGroveAuthClient({
+  clientId: 'your-client-id',
+  clientSecret: env.GROVEAUTH_CLIENT_SECRET,
+  redirectUri: 'https://your-site.com/auth/callback',
+  cacheTTL: 600000, // 10 minutes (optional)
+});
+```
+
+---
+
+## Migration Strategy
+
+### Phase 1: Deploy GroveAuth Changes
+
+1. Run the SQL migration in GroveAuth (see `docs/GROVEAUTH_HANDOFF.md`)
+2. Deploy GroveAuth with new subscription endpoints
+3. Register GroveEngine clients in GroveAuth
+
+### Phase 2: Deploy GroveEngine Integration
+
+1. Set wrangler secrets for each site:
+   ```bash
+   wrangler secret put GROVEAUTH_CLIENT_SECRET
+   ```
+
+2. Update wrangler.toml with GROVEAUTH_URL and GROVEAUTH_REDIRECT_URI
+
+3. Deploy GroveEngine sites:
+   ```bash
+   pnpm deploy
+   ```
+
+### Phase 3: Initial Post Count Sync
+
+After both systems are deployed, sync existing post counts:
+
+```bash
+# 1. Get post counts from GroveEngine
+wrangler d1 execute grove-engine-db --remote --command="
+SELECT t.id, t.email, COUNT(p.id) as post_count
+FROM tenants t
+LEFT JOIN posts p ON p.tenant_id = t.id AND p.status = 'published'
+GROUP BY t.id;
+"
+
+# 2. For each tenant, update their GroveAuth subscription:
+curl -X POST "https://auth.grove.place/subscription/USER_ID/post-count" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"count": POST_COUNT}'
+```
+
+### Phase 4: Enable Enforcement
+
+1. Start with warnings only (grace period always active)
+2. Monitor logs for quota warnings
+3. After 1-2 weeks, enable full enforcement
+4. Send email notifications to users approaching limits
+
+### Rollback Plan
+
+If issues occur, the rollback process is:
+
+1. **Immediate:** Set a feature flag to bypass quota checks
+2. **Short-term:** Revert to previous GroveEngine deployment
+3. **Long-term:** Keep existing magic code auth as fallback
+
+The QuotaWidget/QuotaWarning components gracefully handle missing data with defensive checks, so partial rollbacks won't break the UI.
+
+---
+
 *Last updated: 2025-12-08*

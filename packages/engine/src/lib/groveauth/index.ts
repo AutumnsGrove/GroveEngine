@@ -56,3 +56,13 @@ export {
 } from './limits.js';
 
 export type { QuotaWidgetData, PreSubmitCheckResult } from './limits.js';
+
+// Color utilities
+export {
+  STATUS_COLORS,
+  ALERT_VARIANTS,
+  getStatusColorFromPercentage,
+  getAlertVariantFromColor,
+} from './colors.js';
+
+export type { StatusColor, AlertVariant } from './colors.js';

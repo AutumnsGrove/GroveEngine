@@ -88,11 +88,37 @@ function validateUserId(userId: string): void {
 export class GroveAuthClient {
   private config: Required<GroveAuthConfig>;
 
-  constructor(config: GroveAuthConfig) {
+  /**
+   * In-memory cache for subscription data.
+   * Reduces API calls for frequently accessed subscription info.
+   * Cache entries expire after 5 minutes (configurable via cacheTTL).
+   */
+  private subscriptionCache = new Map<string, { data: SubscriptionResponse; expires: number }>();
+  private cacheTTL: number;
+
+  constructor(config: GroveAuthConfig & { cacheTTL?: number }) {
     this.config = {
       ...config,
       authBaseUrl: config.authBaseUrl || DEFAULT_AUTH_URL,
     };
+    // Default cache TTL: 5 minutes (300000ms)
+    this.cacheTTL = config.cacheTTL ?? 300000;
+  }
+
+  /**
+   * Clear subscription cache for a specific user or all users
+   */
+  clearSubscriptionCache(userId?: string): void {
+    if (userId) {
+      // Clear specific user's cache entries
+      for (const key of this.subscriptionCache.keys()) {
+        if (key.includes(userId)) {
+          this.subscriptionCache.delete(key);
+        }
+      }
+    } else {
+      this.subscriptionCache.clear();
+    }
   }
 
   // ===========================================================================
@@ -284,10 +310,22 @@ export class GroveAuthClient {
   }
 
   /**
-   * Get a specific user's subscription
+   * Get a specific user's subscription (with caching)
+   * @param skipCache - If true, bypasses cache and fetches fresh data
    */
-  async getUserSubscription(accessToken: string, userId: string): Promise<SubscriptionResponse> {
+  async getUserSubscription(accessToken: string, userId: string, skipCache = false): Promise<SubscriptionResponse> {
     validateUserId(userId);
+
+    const cacheKey = `sub:${userId}`;
+
+    // Check cache first (unless explicitly skipped)
+    if (!skipCache) {
+      const cached = this.subscriptionCache.get(cacheKey);
+      if (cached && cached.expires > Date.now()) {
+        return cached.data;
+      }
+    }
+
     const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -303,7 +341,15 @@ export class GroveAuthClient {
       );
     }
 
-    return response.json() as Promise<SubscriptionResponse>;
+    const data = await response.json() as SubscriptionResponse;
+
+    // Cache the result
+    this.subscriptionCache.set(cacheKey, {
+      data,
+      expires: Date.now() + this.cacheTTL,
+    });
+
+    return data;
   }
 
   /**
@@ -331,6 +377,7 @@ export class GroveAuthClient {
 
   /**
    * Increment post count after creating a post
+   * Automatically invalidates subscription cache for this user
    */
   async incrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
     validateUserId(userId);
@@ -352,11 +399,20 @@ export class GroveAuthClient {
       );
     }
 
-    return response.json() as Promise<SubscriptionResponse>;
+    const data = await response.json() as SubscriptionResponse;
+
+    // Update cache with fresh data
+    this.subscriptionCache.set(`sub:${userId}`, {
+      data,
+      expires: Date.now() + this.cacheTTL,
+    });
+
+    return data;
   }
 
   /**
    * Decrement post count after deleting a post
+   * Automatically updates subscription cache for this user
    */
   async decrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
     validateUserId(userId);
@@ -378,11 +434,20 @@ export class GroveAuthClient {
       );
     }
 
-    return response.json() as Promise<SubscriptionResponse>;
+    const data = await response.json() as SubscriptionResponse;
+
+    // Update cache with fresh data
+    this.subscriptionCache.set(`sub:${userId}`, {
+      data,
+      expires: Date.now() + this.cacheTTL,
+    });
+
+    return data;
   }
 
   /**
    * Update post count to a specific value
+   * Automatically updates subscription cache for this user
    */
   async setPostCount(accessToken: string, userId: string, count: number): Promise<SubscriptionResponse> {
     validateUserId(userId);
@@ -404,11 +469,20 @@ export class GroveAuthClient {
       );
     }
 
-    return response.json() as Promise<SubscriptionResponse>;
+    const data = await response.json() as SubscriptionResponse;
+
+    // Update cache with fresh data
+    this.subscriptionCache.set(`sub:${userId}`, {
+      data,
+      expires: Date.now() + this.cacheTTL,
+    });
+
+    return data;
   }
 
   /**
    * Update a user's subscription tier
+   * Automatically updates subscription cache for this user
    */
   async updateTier(accessToken: string, userId: string, tier: SubscriptionTier): Promise<SubscriptionResponse> {
     validateUserId(userId);
@@ -430,7 +504,15 @@ export class GroveAuthClient {
       );
     }
 
-    return response.json() as Promise<SubscriptionResponse>;
+    const data = await response.json() as SubscriptionResponse;
+
+    // Update cache with fresh data
+    this.subscriptionCache.set(`sub:${userId}`, {
+      data,
+      expires: Date.now() + this.cacheTTL,
+    });
+
+    return data;
   }
 }
 

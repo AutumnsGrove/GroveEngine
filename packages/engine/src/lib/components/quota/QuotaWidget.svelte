@@ -7,6 +7,7 @@
    */
 
   import type { QuotaWidgetData } from '../../groveauth/index.js';
+  import { STATUS_COLORS } from '../../groveauth/index.js';
 
   interface Props {
     data: QuotaWidgetData;
@@ -38,33 +39,8 @@
     canPost: true,
   });
 
-  // Computed classes based on status
-  const colorClasses = $derived({
-    green: {
-      bg: 'bg-green-100 dark:bg-green-900/30',
-      fill: 'bg-green-500',
-      badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      text: 'text-green-600 dark:text-green-400',
-    },
-    yellow: {
-      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-      fill: 'bg-yellow-500',
-      badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      text: 'text-yellow-600 dark:text-yellow-400',
-    },
-    red: {
-      bg: 'bg-red-100 dark:bg-red-900/30',
-      fill: 'bg-red-500',
-      badge: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-      text: 'text-red-600 dark:text-red-400',
-    },
-    gray: {
-      bg: 'bg-gray-100 dark:bg-gray-800',
-      fill: 'bg-gray-400',
-      badge: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-      text: 'text-gray-600 dark:text-gray-400',
-    },
-  }[safeData.color]);
+  // Get color classes from shared utility
+  const colorClasses = $derived(STATUS_COLORS[safeData.color]);
 </script>
 
 {#if compact}
