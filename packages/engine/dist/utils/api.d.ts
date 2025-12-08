@@ -3,6 +3,11 @@
  * Provides fetch wrapper with security headers and error handling
  */
 /**
+ * Get CSRF token from cookie or meta tag
+ * @returns {string|null} CSRF token or null if not found
+ */
+export function getCSRFToken(): string | null;
+/**
  * Fetch wrapper with automatic CSRF token injection
  * @param {string} url - API endpoint URL
  * @param {RequestInit} options - Fetch options

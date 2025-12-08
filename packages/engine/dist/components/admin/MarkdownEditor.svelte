@@ -40,6 +40,7 @@
   let cursorLine = $state(1);
   let cursorCol = $state(1);
   let isUpdating = $state(false);
+  let isProgrammaticUpdate = $state(false);  // Flag to skip oninput during toolbar operations
 
   // Image upload state
   let isDragging = $state(false);
@@ -185,7 +186,7 @@
 
   // Cursor position tracking
   function updateCursorPosition() {
-    if (!textareaRef) return;
+    if (!textareaRef || isProgrammaticUpdate) return;  // Skip during programmatic updates
     const pos = textareaRef.selectionStart;
     const textBefore = content.substring(0, pos);
     const lines = textBefore.split("\n");
@@ -326,31 +327,41 @@
   }
 
   // Text manipulation helpers
-  function wrapSelection(before, after) {
+  async function wrapSelection(before, after) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
+    isProgrammaticUpdate = true;
+
     const start = textareaRef.selectionStart;
     const end = textareaRef.selectionEnd;
     const selectedText = content.substring(start, end);
     content = content.substring(0, start) + before + selectedText + after + content.substring(end);
-    setTimeout(() => {
-      textareaRef.selectionStart = start + before.length;
-      textareaRef.selectionEnd = end + before.length;
-      textareaRef.focus();
-      isUpdating = false;
-    }, 0);
+
+    await tick();  // Wait for Svelte to update DOM
+
+    textareaRef.selectionStart = start + before.length;
+    textareaRef.selectionEnd = end + before.length;
+    textareaRef.focus();
+
+    isProgrammaticUpdate = false;
+    isUpdating = false;
   }
 
-  function insertAtCursor(text) {
+  async function insertAtCursor(text) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
+    isProgrammaticUpdate = true;
+
     const start = textareaRef.selectionStart;
     content = content.substring(0, start) + text + content.substring(start);
-    setTimeout(() => {
-      textareaRef.selectionStart = textareaRef.selectionEnd = start + text.length;
-      textareaRef.focus();
-      isUpdating = false;
-    }, 0);
+
+    await tick();  // Wait for Svelte to update DOM
+
+    textareaRef.selectionStart = textareaRef.selectionEnd = start + text.length;
+    textareaRef.focus();
+
+    isProgrammaticUpdate = false;
+    isUpdating = false;
   }
 
   // Toolbar actions
@@ -366,19 +377,24 @@
     insertAtCursor("![alt text](image-url)");
   }
 
-  function insertCodeBlock() {
+  async function insertCodeBlock() {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
+    isProgrammaticUpdate = true;
+
     const start = textareaRef.selectionStart;
     const end = textareaRef.selectionEnd;
     const selectedText = content.substring(start, end);
     const codeBlock = "```\n" + (selectedText || "code here") + "\n```";
     content = content.substring(0, start) + codeBlock + content.substring(end);
-    setTimeout(() => {
-      textareaRef.selectionStart = textareaRef.selectionEnd = start + codeBlock.length;
-      textareaRef.focus();
-      isUpdating = false;
-    }, 0);
+
+    await tick();  // Wait for Svelte to update DOM
+
+    textareaRef.selectionStart = textareaRef.selectionEnd = start + codeBlock.length;
+    textareaRef.focus();
+
+    isProgrammaticUpdate = false;
+    isUpdating = false;
   }
 
   function insertList() {
