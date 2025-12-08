@@ -175,8 +175,23 @@
 		</div>
 	</section>
 
+	<!-- Sign In Section -->
+	<div class="mt-16 text-center">
+		<p class="text-bark/50 text-sm font-sans mb-3">Already have an account?</p>
+		<a
+			href="/auth/login"
+			class="inline-flex items-center gap-2 px-6 py-2.5 bg-grove-600 hover:bg-grove-700 text-white font-sans rounded-lg transition-colors"
+		>
+			<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+				<path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd" />
+				<path fill-rule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clip-rule="evenodd" />
+			</svg>
+			Sign In
+		</a>
+	</div>
+
 	<!-- Footer -->
-	<footer class="mt-20 mb-8 flex flex-col items-center gap-6">
+	<footer class="mt-12 mb-8 flex flex-col items-center gap-6">
 		<!-- Links -->
 		<div class="flex items-center gap-6 text-sm font-sans flex-wrap justify-center">
 			<a
