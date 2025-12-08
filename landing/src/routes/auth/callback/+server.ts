@@ -74,7 +74,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
   try {
     const authBaseUrl =
-      platform?.env?.GROVEAUTH_URL || "https://auth.grove.place";
+      platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
     const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
     const clientSecret = platform?.env?.GROVEAUTH_CLIENT_SECRET || "";
     const redirectUri = `${url.origin}/auth/callback`;
