@@ -16,6 +16,28 @@
 
   let { data, upgradeUrl = '/upgrade', compact = false }: Props = $props();
 
+  // Defensive check for malformed data
+  const isValidData = $derived(
+    data &&
+    typeof data === 'object' &&
+    typeof data.count === 'number' &&
+    typeof data.color === 'string'
+  );
+
+  // Default fallback data for when data is invalid
+  const safeData = $derived(isValidData ? data : {
+    count: 0,
+    limit: null,
+    percentage: null,
+    remaining: null,
+    color: 'gray' as const,
+    statusText: 'Loading...',
+    description: 'Unable to load quota information',
+    showUpgrade: false,
+    tierName: 'Unknown',
+    canPost: true,
+  });
+
   // Computed classes based on status
   const colorClasses = $derived({
     green: {
@@ -42,17 +64,17 @@
       badge: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
       text: 'text-gray-600 dark:text-gray-400',
     },
-  }[data.color]);
+  }[safeData.color]);
 </script>
 
 {#if compact}
   <!-- Compact mode: just the numbers -->
   <div class="flex items-center gap-2 text-sm">
     <span class="font-medium">
-      {data.count}{#if data.limit !== null}<span class="text-gray-400">/{data.limit}</span>{/if}
+      {safeData.count}{#if safeData.limit !== null}<span class="text-gray-400">/{safeData.limit}</span>{/if}
     </span>
     <span class="px-1.5 py-0.5 text-xs rounded {colorClasses.badge}">
-      {data.statusText}
+      {safeData.statusText}
     </span>
   </div>
 {:else}
@@ -61,30 +83,30 @@
     <div class="flex justify-between items-center mb-2">
       <h4 class="font-semibold text-gray-900 dark:text-gray-100">Post Usage</h4>
       <span class="px-2 py-1 text-xs font-medium rounded-full {colorClasses.badge}">
-        {data.statusText}
+        {safeData.statusText}
       </span>
     </div>
 
     <!-- Count display -->
     <div class="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-      {data.count}{#if data.limit !== null}<span class="text-gray-400 dark:text-gray-500">/{data.limit}</span>{/if}
+      {safeData.count}{#if safeData.limit !== null}<span class="text-gray-400 dark:text-gray-500">/{safeData.limit}</span>{/if}
     </div>
 
     <!-- Progress bar -->
-    {#if data.limit !== null && data.percentage !== null}
+    {#if safeData.limit !== null && safeData.percentage !== null}
       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
         <div
           class="h-full rounded-full transition-all duration-300 {colorClasses.fill}"
-          style="width: {Math.min(data.percentage, 100)}%"
+          style="width: {Math.min(safeData.percentage, 100)}%"
         ></div>
       </div>
-      <p class="text-sm {colorClasses.text}">{data.percentage.toFixed(1)}% used</p>
+      <p class="text-sm {colorClasses.text}">{safeData.percentage.toFixed(1)}% used</p>
     {:else}
-      <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited posts with {data.tierName} plan</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited posts with {safeData.tierName} plan</p>
     {/if}
 
     <!-- Upgrade prompt -->
-    {#if data.showUpgrade}
+    {#if safeData.showUpgrade}
       <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
         <p class="text-sm text-blue-800 dark:text-blue-200 mb-2">
           Upgrade for more posts
@@ -102,10 +124,19 @@
     {/if}
 
     <!-- Cannot post warning -->
-    {#if !data.canPost}
+    {#if !safeData.canPost}
       <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800">
         <p class="text-sm text-red-800 dark:text-red-200 font-medium">
           You cannot create new posts until you upgrade or delete existing posts.
+        </p>
+      </div>
+    {/if}
+
+    <!-- Error state for invalid data -->
+    {#if !isValidData}
+      <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Unable to load quota information. Please refresh the page.
         </p>
       </div>
     {/if}

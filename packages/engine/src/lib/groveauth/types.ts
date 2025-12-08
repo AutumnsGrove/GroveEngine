@@ -107,12 +107,31 @@ export interface CanPostResponse {
 // POST LIMIT CONSTANTS
 // =============================================================================
 
+/**
+ * Post limits per subscription tier.
+ *
+ * Business rationale:
+ * - Starter (250 posts): Entry-level tier for hobbyists, personal bloggers,
+ *   and users testing the platform. ~1 post/day for 8 months.
+ * - Professional (2,000 posts): For active content creators, small businesses,
+ *   and dedicated bloggers. ~1 post/day for 5+ years.
+ * - Business (unlimited): For enterprises, agencies, and power users who need
+ *   no restrictions. Includes custom domain support.
+ *
+ * Grace period: When users hit their limit, they have 14 days to upgrade or
+ * delete posts before their account becomes read-only.
+ *
+ * @see docs/implementing-post-limits.md for full specification
+ */
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
-  starter: 250,
-  professional: 2000,
-  business: null, // unlimited
+  starter: 250,       // For hobbyists and personal blogs
+  professional: 2000, // For active bloggers and small businesses
+  business: null,     // Unlimited for enterprises and power users
 };
 
+/**
+ * Human-readable tier names for UI display.
+ */
 export const TIER_NAMES: Record<SubscriptionTier, string> = {
   starter: 'Starter',
   professional: 'Professional',

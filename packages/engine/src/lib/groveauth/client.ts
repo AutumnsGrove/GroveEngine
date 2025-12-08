@@ -60,6 +60,28 @@ export function generateState(): string {
 }
 
 // =============================================================================
+// INPUT VALIDATION
+// =============================================================================
+
+/**
+ * Validate a user ID to prevent injection attacks.
+ * User IDs should only contain safe characters.
+ *
+ * Valid characters: alphanumeric, underscore, hyphen
+ * Max length: 128 characters (UUIDs are 36 chars)
+ */
+const USER_ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
+
+function validateUserId(userId: string): void {
+  if (!userId || typeof userId !== 'string') {
+    throw new GroveAuthError('invalid_user_id', 'User ID is required', 400);
+  }
+  if (!USER_ID_PATTERN.test(userId)) {
+    throw new GroveAuthError('invalid_user_id', 'User ID contains invalid characters', 400);
+  }
+}
+
+// =============================================================================
 // GROVEAUTH CLIENT CLASS
 // =============================================================================
 
@@ -265,7 +287,8 @@ export class GroveAuthClient {
    * Get a specific user's subscription
    */
   async getUserSubscription(accessToken: string, userId: string): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -287,7 +310,8 @@ export class GroveAuthClient {
    * Check if a user can create a new post
    */
   async canUserCreatePost(accessToken: string, userId: string): Promise<CanPostResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}/can-post`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/can-post`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -309,7 +333,8 @@ export class GroveAuthClient {
    * Increment post count after creating a post
    */
   async incrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}/post-count`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -334,7 +359,8 @@ export class GroveAuthClient {
    * Decrement post count after deleting a post
    */
   async decrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}/post-count`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -359,7 +385,8 @@ export class GroveAuthClient {
    * Update post count to a specific value
    */
   async setPostCount(accessToken: string, userId: string, count: number): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}/post-count`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -384,7 +411,8 @@ export class GroveAuthClient {
    * Update a user's subscription tier
    */
   async updateTier(accessToken: string, userId: string, tier: SubscriptionTier): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${userId}/tier`, {
+    validateUserId(userId);
+    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/tier`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${accessToken}`,

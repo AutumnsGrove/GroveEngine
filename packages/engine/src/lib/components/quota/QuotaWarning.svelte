@@ -29,8 +29,17 @@
     onDismiss?.();
   }
 
+  // Defensive check for malformed data
+  const isValidCheck = $derived(
+    check &&
+    typeof check === 'object' &&
+    check.status &&
+    typeof check.status === 'object'
+  );
+
   // Determine variant based on check result
   const variant = $derived(
+    !isValidCheck ? 'info' :
     check.upgradeRequired ? 'error' :
     check.status.is_in_grace_period ? 'warning' :
     check.status.is_at_limit ? 'warning' :
@@ -62,7 +71,7 @@
   }[variant]);
 </script>
 
-{#if check.showWarning && !dismissed}
+{#if isValidCheck && check.showWarning && !dismissed}
   <div class="rounded-lg border p-4 {variantClasses.container}">
     <div class="flex items-start gap-3">
       <!-- Icon -->

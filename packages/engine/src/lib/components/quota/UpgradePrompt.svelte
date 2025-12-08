@@ -29,22 +29,44 @@
     oldestPostDate,
   }: Props = $props();
 
+  // Defensive check for malformed status data
+  const isValidStatus = $derived(
+    status &&
+    typeof status === 'object' &&
+    typeof status.tier === 'string' &&
+    typeof status.post_count === 'number'
+  );
+
+  // Safe status with fallback values
+  const safeStatus = $derived(isValidStatus ? status : {
+    tier: 'starter' as const,
+    post_count: 0,
+    post_limit: 250,
+    posts_remaining: 250,
+    percentage_used: 0,
+    is_at_limit: false,
+    is_in_grace_period: false,
+    grace_period_days_remaining: null,
+    can_create_post: true,
+    upgrade_required: false,
+  });
+
   // Can proceed if in grace period and not expired
   const canProceed = $derived(
-    status.is_in_grace_period &&
-    status.grace_period_days_remaining !== null &&
-    status.grace_period_days_remaining > 0
+    safeStatus.is_in_grace_period &&
+    safeStatus.grace_period_days_remaining !== null &&
+    safeStatus.grace_period_days_remaining > 0
   );
 
   // Tier upgrade path
   const nextTier = $derived(
-    status.tier === 'starter' ? 'professional' :
-    status.tier === 'professional' ? 'business' :
+    safeStatus.tier === 'starter' ? 'professional' :
+    safeStatus.tier === 'professional' ? 'business' :
     null
   );
 
   const nextTierName = $derived(nextTier ? TIER_NAMES[nextTier] : null);
-  const currentTierName = $derived(TIER_NAMES[status.tier]);
+  const currentTierName = $derived(TIER_NAMES[safeStatus.tier] || 'Unknown');
 </script>
 
 {#if open}
@@ -73,23 +95,23 @@
         </div>
 
         <h3 id="upgrade-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {#if status.upgrade_required}
+          {#if safeStatus.upgrade_required}
             Upgrade Required
           {:else}
-            You're at {status.post_count}/{status.post_limit} posts
+            You're at {safeStatus.post_count}/{safeStatus.post_limit} posts
           {/if}
         </h3>
       </div>
 
       <!-- Content -->
       <div class="space-y-4 mb-6">
-        {#if status.upgrade_required}
+        {#if safeStatus.upgrade_required}
           <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
             Your grace period has expired. To continue creating posts, please upgrade your plan or delete some existing posts.
           </p>
-        {:else if status.is_in_grace_period}
+        {:else if safeStatus.is_in_grace_period}
           <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-            You're over your post limit. You have <strong class="text-yellow-600 dark:text-yellow-400">{status.grace_period_days_remaining} days</strong> remaining in your grace period.
+            You're over your post limit. You have <strong class="text-yellow-600 dark:text-yellow-400">{safeStatus.grace_period_days_remaining} days</strong> remaining in your grace period.
           </p>
 
           {#if oldestPostTitle}
