@@ -2,6 +2,15 @@
 
 This guide walks through registering a new website/application as an OAuth client with GroveAuth.
 
+## Important URLs
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **API** (Worker) | `https://auth-api.grove.place` | Token exchange, verification, refresh |
+| **Frontend** (Pages) | `https://auth.grove.place` | Login UI, OAuth redirects |
+
+**Your client code should call `auth-api.grove.place`** for all API operations (token exchange, verify, refresh, logout).
+
 ## Prerequisites
 
 - `wrangler` CLI installed and logged in
