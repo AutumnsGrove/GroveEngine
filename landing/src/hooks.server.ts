@@ -1,57 +1,65 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from "@sveltejs/kit";
 
 interface SessionRow {
-	id: string;
-	user_id: string;
-	expires_at: string;
+  id: string;
+  user_id: string;
+  expires_at: string;
 }
 
 interface UserRow {
-	id: string;
-	email: string;
-	is_admin: number;
+  id: string;
+  email: string;
+  is_admin: number;
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Initialize user as null
-	event.locals.user = null;
+  // Initialize user as null
+  event.locals.user = null;
 
-	// Check for session cookie
-	const sessionId = event.cookies.get('session');
-	if (!sessionId || !event.platform?.env?.DB) {
-		return resolve(event);
-	}
+  // Create a D1 session for consistent reads within this request
+  // This enables read replication while maintaining "read your own writes" consistency
+  if (event.platform?.env?.DB) {
+    event.locals.dbSession = event.platform.env.DB.withSession();
+  }
 
-	try {
-		const db = event.platform.env.DB;
+  // Check for session cookie
+  const sessionId = event.cookies.get("session");
+  if (!sessionId || !event.locals.dbSession) {
+    return resolve(event);
+  }
 
-		// Get session and check if it's valid
-		const session = await db
-			.prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")')
-			.bind(sessionId)
-			.first<SessionRow>();
+  try {
+    const dbSession = event.locals.dbSession;
 
-		if (!session) {
-			// Clear invalid session cookie
-			event.cookies.delete('session', { path: '/' });
-			return resolve(event);
-		}
+    // Get session and check if it's valid using the D1 session
+    const session = await dbSession
+      .prepare(
+        'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")',
+      )
+      .bind(sessionId)
+      .first<SessionRow>();
 
-		// Get user
-		const user = await db
-			.prepare('SELECT * FROM users WHERE id = ?')
-			.bind(session.user_id)
-			.first<UserRow>();
+    if (!session) {
+      // Clear invalid session cookie
+      event.cookies.delete("session", { path: "/" });
+      return resolve(event);
+    }
 
-		if (user) {
-			event.locals.user = {
-				email: user.email,
-				is_admin: user.is_admin === 1
-			};
-		}
-	} catch (error) {
-		console.error('[Auth Hook Error]', error);
-	}
+    // Get user using the same D1 session for consistency
+    const user = await dbSession
+      .prepare("SELECT * FROM users WHERE id = ?")
+      .bind(session.user_id)
+      .first<UserRow>();
 
-	return resolve(event);
+    if (user) {
+      event.locals.user = {
+        email: user.email,
+        is_admin: user.is_admin === 1,
+      };
+    }
+  } catch (error) {
+    console.error("[Auth Hook Error]", error);
+  }
+
+  return resolve(event);
 };

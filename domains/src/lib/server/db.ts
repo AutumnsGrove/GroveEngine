@@ -1,6 +1,10 @@
 // Database operations for the Domain Finder system
 import { MODELS, SEARCH_DEFAULTS } from "$lib/config";
 
+// Type alias for functions that can accept either D1Database or D1DatabaseSession
+// This allows gradual migration to Sessions API without breaking existing code
+type D1DatabaseOrSession = D1Database | D1DatabaseSession;
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -54,7 +58,7 @@ interface UserRow {
 }
 
 export async function getOrCreateUser(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   email: string,
 ): Promise<User> {
   const existing = await db
@@ -89,7 +93,7 @@ export async function getOrCreateUser(
 }
 
 export async function getUserByEmail(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   email: string,
 ): Promise<User | null> {
   const result = await db
@@ -106,7 +110,7 @@ export async function getUserByEmail(
 }
 
 export async function getUserById(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   id: string,
 ): Promise<User | null> {
   const result = await db
@@ -141,7 +145,7 @@ export interface Session {
  * Tokens are stored in the database rather than cookies for better security.
  */
 export async function createSession(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   userId: string,
   tokens?: {
     accessToken: string;
@@ -188,7 +192,7 @@ export async function createSession(
  * Get a session by ID with token information
  */
 export async function getSession(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   sessionId: string,
 ): Promise<Session | null> {
   const result = await db
@@ -204,7 +208,7 @@ export async function getSession(
  * Update session tokens (used after token refresh)
  */
 export async function updateSessionTokens(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   sessionId: string,
   tokens: {
     accessToken: string;
@@ -234,7 +238,9 @@ export async function updateSessionTokens(
 /**
  * Clean up expired sessions (can be called periodically)
  */
-export async function cleanupExpiredSessions(db: D1Database): Promise<number> {
+export async function cleanupExpiredSessions(
+  db: D1DatabaseOrSession,
+): Promise<number> {
   const result = await db
     .prepare('DELETE FROM sessions WHERE expires_at < datetime("now")')
     .run();
@@ -242,7 +248,7 @@ export async function cleanupExpiredSessions(db: D1Database): Promise<number> {
 }
 
 export async function deleteSession(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   sessionId: string,
 ): Promise<void> {
   await db.prepare("DELETE FROM sessions WHERE id = ?").bind(sessionId).run();
@@ -275,7 +281,7 @@ function generateSecureCode(length: number = 6): string {
 }
 
 export async function createMagicCode(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   email: string,
 ): Promise<MagicCode> {
   const id = generateId();
@@ -301,7 +307,7 @@ export async function createMagicCode(
 }
 
 export async function verifyMagicCode(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   email: string,
   code: string,
 ): Promise<boolean> {
@@ -369,7 +375,7 @@ export interface CreateSearchJobInput {
 }
 
 export async function createSearchJob(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   input: CreateSearchJobInput,
 ): Promise<DomainSearchJob> {
   const id = generateId();
@@ -432,7 +438,7 @@ export async function createSearchJob(
 }
 
 export async function getSearchJob(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   id: string,
 ): Promise<DomainSearchJob | null> {
   const result = await db
@@ -443,7 +449,7 @@ export async function getSearchJob(
 }
 
 export async function listSearchJobs(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   options?: { limit?: number; offset?: number; status?: SearchStatus },
 ): Promise<{ jobs: DomainSearchJob[]; total: number }> {
   // Enforce max limit to prevent memory issues
@@ -493,7 +499,7 @@ export async function listSearchJobs(
  * DO NOT modify this to accept dynamic field names from user input.
  */
 export async function updateSearchJobStatus(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   id: string,
   updates: {
     status?: SearchStatus;
@@ -581,7 +587,7 @@ export interface DomainResult {
 }
 
 export async function saveDomainResults(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   jobId: string,
   results: Omit<DomainResult, "id" | "created_at">[],
 ): Promise<void> {
@@ -622,7 +628,7 @@ export async function saveDomainResults(
 }
 
 export async function getJobResults(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   jobId: string,
   options?: { availableOnly?: boolean; minScore?: number },
 ): Promise<DomainResult[]> {
@@ -668,7 +674,7 @@ export interface SearchConfig {
 }
 
 export async function getActiveConfig(
-  db: D1Database,
+  db: D1DatabaseOrSession,
 ): Promise<SearchConfig | null> {
   const result = await db
     .prepare(
@@ -679,7 +685,7 @@ export async function getActiveConfig(
 }
 
 export async function updateConfig(
-  db: D1Database,
+  db: D1DatabaseOrSession,
   updates: Partial<Omit<SearchConfig, "id" | "created_at" | "updated_at">>,
 ): Promise<void> {
   // Get or create active config

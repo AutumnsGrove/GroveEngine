@@ -71,17 +71,23 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Initialize user as null
   event.locals.user = null;
 
+  // Create a D1 session for consistent reads within this request
+  // This enables read replication while maintaining "read your own writes" consistency
+  if (event.platform?.env?.DB) {
+    event.locals.dbSession = event.platform.env.DB.withSession();
+  }
+
   // Check for session cookie
   const sessionId = event.cookies.get("session");
-  if (!sessionId || !event.platform?.env?.DB) {
+  if (!sessionId || !event.locals.dbSession) {
     return resolve(event);
   }
 
   try {
-    const db = event.platform.env.DB;
+    const dbSession = event.locals.dbSession;
 
-    // Get session with token information
-    const session = await getSession(db, sessionId);
+    // Get session with token information using the D1 session
+    const session = await getSession(dbSession, sessionId);
 
     if (!session) {
       // Clear invalid session cookie
@@ -93,7 +99,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (
       session.access_token &&
       session.refresh_token &&
-      isTokenExpiringSoon(session.token_expires_at)
+      isTokenExpiringSoon(session.token_expires_at) &&
+      event.platform?.env
     ) {
       // Token is expiring soon, try to refresh it
       try {
@@ -115,8 +122,12 @@ export const handle: Handle = async ({ event, resolve }) => {
           });
 
           if (response.ok) {
-            const tokens = await response.json();
-            await updateSessionTokens(db, sessionId, {
+            const tokens = (await response.json()) as {
+              access_token: string;
+              refresh_token?: string;
+              expires_in?: number;
+            };
+            await updateSessionTokens(dbSession, sessionId, {
               accessToken: tokens.access_token,
               refreshToken: tokens.refresh_token,
               expiresIn: tokens.expires_in,
@@ -134,8 +145,8 @@ export const handle: Handle = async ({ event, resolve }) => {
       }
     }
 
-    // Get user
-    const user = await getUserById(db, session.user_id);
+    // Get user using the same D1 session for consistency
+    const user = await getUserById(dbSession, session.user_id);
 
     if (user) {
       event.locals.user = {
