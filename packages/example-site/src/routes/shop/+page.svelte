@@ -41,7 +41,7 @@
 	.icon {
 		color: hsl(var(--muted-foreground));
 		opacity: 0.5;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 	}
 
 	h1 {
