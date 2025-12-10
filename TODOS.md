@@ -142,10 +142,11 @@
 >
 > **Likely Issues to Investigate:**
 > - [ ] Is `locals.tenantId` actually being passed to page loaders? (might need to check load function signature)
-> - [ ] Is the `DB` binding configured in Cloudflare Pages dashboard? (might still be using old `POSTS_DB`)
+> - [x] Is the `DB` binding configured in Cloudflare Pages dashboard? → **ADDED, still not working**
 > - [ ] Add console.log debugging to see what's happening at runtime
-> - [ ] Check if the example-site's own loaders are overriding engine's loaders
+> - [ ] Check if the example-site's own loaders are overriding engine's loaders (LIKELY CULPRIT)
 > - [ ] Verify the D1 database ID matches between wrangler.toml and Pages dashboard bindings
+> - [ ] Check if example-site has its own +page.server.js that takes precedence over engine's
 >
 > **Test Tenant Data in D1:**
 > - Tenant ID: `550e8400-e29b-41d4-a716-446655440000`
