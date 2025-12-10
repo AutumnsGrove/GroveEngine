@@ -71,7 +71,12 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // SUBDOMAIN ROUTING
   // =========================================================================
-  const host = event.request.headers.get("host") || "";
+  // Check X-Forwarded-Host first (set by grove-router Worker proxy)
+  // Fall back to host header for direct requests
+  const host =
+    event.request.headers.get("x-forwarded-host") ||
+    event.request.headers.get("host") ||
+    "";
   const subdomain = extractSubdomain(host, event.request, event.url);
 
   // No subdomain = landing page (grove.place)

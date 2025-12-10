@@ -258,6 +258,18 @@ importers:
         specifier: ^5.4.10
         version: 5.4.21(@types/node@20.19.25)
 
+  packages/grove-router:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20241127.0
+        version: 4.20251202.0
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      wrangler:
+        specifier: ^3.99.0
+        version: 3.114.15(@cloudflare/workers-types@4.20251202.0)
+
 packages:
 
   '@acemir/cssom@0.9.24':
