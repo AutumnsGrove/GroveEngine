@@ -153,22 +153,24 @@ Before using any provider, verify:
 
 ## 4. Model Selection
 
-### 4.1 Primary Model: DeepSeek V3
+### 4.1 Primary Model: DeepSeek V3.2
 
-**Why DeepSeek V3:**
-- Open source (MIT license)
+**Model:** [DeepSeek V3.2](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)
+
+**Why DeepSeek V3.2:**
+- Open source ([MIT license](https://huggingface.co/deepseek-ai/DeepSeek-V3.2))
 - Large parameter count = nuanced understanding
 - Strong reasoning capabilities for context-aware moderation
 - Available through privacy-respecting providers
 - No licensing restrictions on commercial use
 
 **Note on Model Origin:**
-DeepSeek V3 is developed by a Chinese company, but the model itself is open source and hosted by US-based providers (Fireworks AI, Groq) with Zero Data Retention. Your content never touches DeepSeek's infrastructure—only the open-source model weights are used, running entirely on US servers with full privacy protections.
+DeepSeek V3.2 is developed by a Chinese company, but the model itself is open source and hosted by US-based providers (Fireworks AI, Groq) with Zero Data Retention. Your content never touches DeepSeek's infrastructure—only the open-source model weights are used, running entirely on US servers with full privacy protections.
 
 **Model Configuration:**
 ```json
 {
-  "model": "deepseek-v3",
+  "model": "deepseek-v3.2",
   "temperature": 0.1,
   "max_tokens": 500,
   "top_p": 0.95
@@ -177,11 +179,16 @@ DeepSeek V3 is developed by a Chinese company, but the model itself is open sour
 
 Low temperature ensures consistent, predictable responses for moderation decisions.
 
-### 4.2 Fallback Model
+### 4.2 Fallback Models
 
-If DeepSeek V3 is unavailable:
-- **Llama 3.1 70B** (Meta, open source)
-- Same provider requirements apply
+If DeepSeek V3.2 is unavailable, use in this order:
+
+| Priority | Model | Provider ID | License |
+|----------|-------|-------------|---------|
+| 1st fallback | [Kimi K2-0905](https://huggingface.co/moonshotai/Kimi-K2-Instruct) | `moonshotai/Kimi-K2-Instruct-0905` (Groq) / `kimi-k2-instruct` (Fireworks) | Modified MIT |
+| 2nd fallback | Llama 3.1 70B | `llama-3.1-70b` | Llama 3.1 License |
+
+Same provider requirements (ZDR, US hosting, SOC 2) apply to all models.
 
 ### 4.3 Cost Estimation
 
@@ -189,24 +196,35 @@ If DeepSeek V3 is unavailable:
 - Average blog post: ~1,000 words ≈ 1,300 tokens
 - System prompt + template: ~400 tokens
 - Model response: ~150 tokens
-- **Total per review: ~1,850 tokens**
+- **Total per review: ~1,850 tokens** (~1,700 input, ~150 output)
 
-**Cost per review by provider:**
+**Model pricing comparison (per million tokens):**
 
-| Provider | Cost per Review |
-|----------|-----------------|
-| Fireworks AI | ~$0.0017 |
-| Groq | ~$0.0012 |
+| Model | Provider | Input | Output |
+|-------|----------|-------|--------|
+| DeepSeek V3.2 | Fireworks | $0.56 | $1.68 |
+| DeepSeek V3.2 | Groq | $0.59 | $0.79 |
+| Kimi K2-0905 | Fireworks | $0.60 | $2.50 |
+| Kimi K2-0905 | Groq | $1.00 | $3.00 |
+| Llama 3.1 70B | Groq | $0.59 | $0.79 |
 
-**Monthly cost projections:**
+**Cost per review by model:**
 
-| Posts/Month | Fireworks AI | Groq |
-|-------------|--------------|------|
-| 1,000 | $1.70 | $1.20 |
-| 10,000 | $17 | $12 |
-| 100,000 | $170 | $120 |
+| Model | Fireworks | Groq |
+|-------|-----------|------|
+| DeepSeek V3.2 | ~$0.0012 | ~$0.0011 |
+| Kimi K2-0905 | ~$0.0014 | ~$0.0022 |
+| Llama 3.1 70B | — | ~$0.0011 |
 
-*Note: Add ~5% overhead for edge case secondary reviews.*
+**Monthly cost projections (using DeepSeek V3.2 on Groq):**
+
+| Posts/Month | Estimated Cost |
+|-------------|----------------|
+| 1,000 | ~$1.10 |
+| 10,000 | ~$11 |
+| 100,000 | ~$110 |
+
+*Note: Add ~5% overhead for edge case secondary reviews. Fallback models may have slightly higher costs.*
 
 ---
 
@@ -220,6 +238,16 @@ If DeepSeek V3 is unavailable:
 | Post edited (significant changes) | Full review | Normal |
 | User report received | Targeted review | High |
 | Pattern detection (spam indicators) | Full review | High |
+
+**Definition of "Significant Changes":**
+A post edit triggers re-review if any of the following occur:
+- Content length changes by more than 25%
+- New images or media added
+- Title changed
+- Content warning added or removed
+- More than 3 paragraphs modified
+
+Minor edits (typo fixes, formatting, link updates) do not trigger re-review.
 
 ### 5.2 What Is NOT Reviewed
 
@@ -284,6 +312,9 @@ POST CONTENT:
 
 Respond in JSON format only.
 ```
+
+**Language Support:**
+This system is currently optimized for **English content**. Multi-language support is planned for future development. Non-English content will still be processed, but accuracy may vary. The underlying model (DeepSeek V3.2) has multilingual capabilities that can assist with translation and context, but manual review guidelines are English-only at this time.
 
 ---
 
@@ -464,6 +495,19 @@ Based on confidence thresholds:
 - No shared memory with main application
 - Separate KV namespace for moderation state
 - Network isolation from user-facing services
+
+### 10.4 API Key Rotation
+
+**Schedule:**
+- Routine rotation: Every 90 days
+- Immediate rotation: If compromise is suspected
+
+**Procedure:**
+1. Generate new API key in provider console
+2. Update key in Cloudflare secrets
+3. Verify moderation service functions correctly
+4. Revoke old API key
+5. Log rotation in audit trail
 
 ---
 

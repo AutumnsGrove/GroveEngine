@@ -105,6 +105,8 @@ We share limited data with trusted service providers who help us operate Grove:
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
 
+**Changes to Providers:** If we add new categories of service providers that process your data, we will notify you via email before the change takes effect.
+
 **Content Moderation Privacy:**
 Post content is processed through privacy-respecting LLM inference providers with **Zero Data Retention (ZDR)** enabled. This means:
 - Your content is never stored by the inference provider

@@ -223,14 +223,15 @@ When we remove content:
 
 **DMCA Takedowns:**
 - Content is removed as required by law
-- No appeal is available for valid DMCA notices
-- You may file a counter-notification if you believe the takedown was improper (see DMCA Policy)
+- Grove's internal appeal process does not apply to DMCA takedowns
+- You may file a counter-notification if you believe the takedown was improper (see [DMCA Policy](./DMCA-POLICY.md))
+- Counter-notifications follow a separate legal process defined by the DMCA, not Grove's appeal system
 
 **Policy-Based Removal:**
 - You may appeal the removal
 - **One appeal per removal**
 - **Maximum 3 appeals per 7-day rolling period**
-- We will respond to appeals within **7 business days**
+- We will respond to appeals within **14 days**
 - Our decision on appeal is final
 
 ### 5.4 Reporting Violations
