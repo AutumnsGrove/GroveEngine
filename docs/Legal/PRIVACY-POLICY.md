@@ -42,7 +42,7 @@ This Privacy Policy explains what data we collect, how we use it, and your right
 **Authentication Data**
 - Session tokens (stored as HTTP-only cookies)
 - Login timestamps
-- IP addresses (temporarily, for rate limiting and security)
+- IP addresses (retained for up to 1 minute for rate limiting, then automatically discarded)
 
 **Usage Data**
 - Pages visited on your blog
@@ -72,6 +72,7 @@ We use your information solely to:
 | Send important updates | Email address |
 | Improve the Service | Aggregated, anonymized usage data |
 | Prevent abuse | IP addresses, rate limiting data |
+| Content moderation | Post content (zero retention, see below) |
 | Respond to support requests | Communications, account info |
 | Comply with legal obligations | As required by law |
 
@@ -100,8 +101,21 @@ We share limited data with trusted service providers who help us operate Grove:
 | **Stripe** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
+| **Fireworks AI / Groq** | Content moderation | Post content (zero data retention) |
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
+
+**Changes to Providers:** If we add new categories of service providers that process your data, we will notify you via email before the change takes effect.
+
+**Content Moderation Privacy:**
+Post content is processed through privacy-respecting LLM inference providers with **Zero Data Retention (ZDR)** enabled. This means:
+- Your content is never stored by the inference provider
+- Your content is never used to train AI models
+- Content is encrypted in transit (TLS 1.2+)
+- Only the moderation decision is retained (not your content)
+- No human reviews your content unless the automated system cannot reach a confident decision
+
+For full technical details, see our [Content Moderation Spec](../Specs/CONTENT-MODERATION.md).
 
 ### 3.3 Legal Requirements
 
@@ -138,7 +152,9 @@ When you delete your account:
 | Authentication codes | 10 minutes (then auto-deleted) |
 | Failed login attempts | Cleared on successful login |
 | Sessions | 7 days (or until logout) |
+| IP addresses | 1 minute (rate limiting only, then discarded) |
 | Rate limiting data | 1 minute |
+| Content moderation queue | Immediate deletion after review |
 | Email signup list | Until you unsubscribe |
 | Payment records | As required by law (typically 7 years) |
 

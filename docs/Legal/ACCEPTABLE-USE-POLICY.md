@@ -67,18 +67,46 @@ Content that attacks, demeans, or incites violence against individuals or groups
 **Note:** Artistic nudity is permitted with appropriate content warnings. See Section 2.1.
 
 ### 1.7 Political Content
-Grove is not a platform for political discourse. The following is prohibited:
-- Political campaigning or advocacy
-- Partisan political commentary
-- Content promoting political candidates or parties
-- Political fundraising
+
+**Prohibited:**
+- Political campaigning for candidates or parties
+- Soliciting votes or political donations
+- Political fundraising or organizing
+- Election misinformation (false claims about voting, election results, or electoral processes)
+
+**Allowed:**
+- Personal political expression and opinions
+- Discussing issues that affect you personally (LGBTQ+ rights, climate, accessibility, healthcare, etc.)
+- Sharing your lived experiences with political or social issues
+
+Grove is a space for authentic self-expression, not political organizing. You can share your perspective and experiences, but this isn't the place to run campaigns or raise political funds.
 
 ### 1.8 AI-Generated Content
-- AI-generated text presented as original writing
-- AI-generated images
-- Deepfakes or synthetic media
 
-Grove is a platform for authentic human expression. If you want to experiment with AI content, please use a platform designed for that purpose.
+**Prohibited:**
+- AI-generated content presented as purely human-created (deceptive use)
+- Deepfakes or harmful synthetic media
+- AI content used to impersonate real people
+
+**Allowed with Labeling:**
+- AI-assisted writing (editing, brainstorming, proofreading) with clear disclosure
+- AI-generated images clearly labeled as AI-created
+- AI tools used as part of your creative process, when disclosed
+
+**Labeling Requirements:**
+If AI tools contributed meaningfully to your content, you must disclose this. Use the content labeling feature in the editor or include a note such as "AI-assisted" or "Created with AI tools." The goal isn't to ban AI—it's to maintain authenticity and transparency with your readers.
+
+**Note:** AI content labeling features are in development. Until implemented, you may disclose AI assistance in your post text (e.g., "Note: Edited with AI assistance").
+
+**Enforcement for Unlabeled AI Content:**
+
+| Offense | Action | Period |
+|---------|--------|--------|
+| 1st violation | Warning | Rolling 7-day window |
+| 2nd violation | Warning | Rolling 7-day window |
+| 3rd violation | 1-week posting suspension | Rolling 7-day window |
+
+This cycle repeats. After accumulating **3 posting suspensions**, you will be permanently banned from posting.
 
 ---
 
@@ -160,8 +188,8 @@ We respond to valid copyright complaints in accordance with the Digital Millenni
 
 **Detection:**
 - User reports
-- Automated scanning (privacy-respecting, anonymized, no human review unless flagged)
-- Manual review of flagged content
+- Automated review using privacy-respecting LLM inference (see [Content Moderation Spec](../Specs/CONTENT-MODERATION.md))
+- Manual review only for edge cases where automated systems cannot reach confident decisions
 
 **Actions We May Take:**
 - Remove the violating content
@@ -195,14 +223,15 @@ When we remove content:
 
 **DMCA Takedowns:**
 - Content is removed as required by law
-- No appeal is available for valid DMCA notices
-- You may file a counter-notification if you believe the takedown was improper (see DMCA Policy)
+- Grove's internal appeal process does not apply to DMCA takedowns
+- You may file a counter-notification if you believe the takedown was improper (see [DMCA Policy](./DMCA-POLICY.md))
+- Counter-notifications follow a separate legal process defined by the DMCA, not Grove's appeal system
 
 **Policy-Based Removal:**
 - You may appeal the removal
 - **One appeal per removal**
 - **Maximum 3 appeals per 7-day rolling period**
-- We will respond to appeals within **7 business days**
+- We will respond to appeals within **14 days**
 - Our decision on appeal is final
 
 ### 5.4 Reporting Violations
@@ -243,8 +272,9 @@ We may update this policy as our community grows and evolves. Significant change
 | Spam/malware | ❌ No | |
 | Impersonation | ❌ No | |
 | Pornography | ❌ No | |
-| Political content | ❌ No | |
-| AI-generated content | ❌ No | |
+| Political campaigning/fundraising | ❌ No | Personal expression allowed |
+| Election misinformation | ❌ No | |
+| AI-generated content (unlabeled) | ❌ No | Labeled AI-assisted content allowed |
 | Copyright infringement | ❌ No | DMCA process applies |
 
 ---
