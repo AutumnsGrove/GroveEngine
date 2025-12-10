@@ -84,13 +84,42 @@
 - [ ] Implement basic analytics
 
 ## Phase 2: Multi-tenant Infrastructure (Weeks 5-9)
-- [ ] Implement subdomain routing system
-- [x] Set up tenant isolation in D1 database → **DONE: Multi-tenant schema designed (migration 005)**
+- [x] Implement subdomain routing system → **DONE (2025-12-10)**
+  - Created `grove-router` Worker to proxy `*.grove.place` requests
+  - Cloudflare Pages doesn't support wildcard custom domains - Worker acts as proxy
+  - Worker routes to correct Pages projects: auth→groveauth-frontend, domains→grove-domains, etc.
+  - Updated `hooks.server.ts` to read `X-Forwarded-Host` header for subdomain detection
+  - D1 tenant lookup working for dynamic subdomains (tested with `dave.grove.place`)
+  - See: `packages/grove-router/`, `docs/WORKER-PROXY-PLAN.md`
+- [x] Set up tenant isolation in D1 database → **DONE: Multi-tenant schema designed (migration 009)**
+  - Tables: `tenants`, `posts`, `pages`, `media`, `tenant_settings`
+  - All content tables have `tenant_id` foreign key for isolation
 - [ ] Build tenant onboarding flow
 - [ ] Implement plan management (Starter/Professional/Business)
 - [ ] Add custom domain support for Business plan
 - [ ] Build tenant admin panel
 - [ ] Implement storage limits per plan
+
+### Multi-tenant Architecture Decision (2025-12-10)
+> **Key Insight:** Move from multi-repo/multi-deploy to single-deploy/multi-tenant (like YouTube).
+>
+> **Current approach (problematic):**
+> - Separate GitHub repo per tenant
+> - Separate Cloudflare Pages deployment per tenant
+> - High operational overhead, doesn't scale
+>
+> **New approach (YouTube model):**
+> - Single `groveengine` Pages deployment serves ALL tenants
+> - Tenant differentiation via subdomain → D1 lookup → runtime content loading
+> - Posts/pages/media stored in D1/R2, loaded dynamically (not static routes)
+> - Same codebase, unique experience based on logged-in user
+>
+> **Concerns to address:**
+> - D1 write limits (1000/min) - need caching strategy
+> - Cost scaling - need usage monitoring and smart caching
+> - Performance - static vs dynamic content tradeoffs
+>
+> **See:** `docs/MULTI-TENANT-ARCHITECTURE.md` (to be created)
 
 ## Phase 3: Grove Website (Weeks 10-15)
 - [x] Create marketing website → **DONE: Landing site deployed at grove.place**
