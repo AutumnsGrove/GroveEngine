@@ -231,7 +231,7 @@ When we remove content:
 - You may appeal the removal
 - **One appeal per removal**
 - **Maximum 3 appeals per 7-day rolling period**
-- We will respond to appeals within **14 days**
+- We will respond to appeals within **14 business days**
 - Our decision on appeal is final
 
 ### 5.4 Reporting Violations

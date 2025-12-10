@@ -164,17 +164,10 @@
 - [ ] Implement signup flow
 - [ ] Add documentation/help center
 
-## Phase 4: Grove Social (Weeks 16-25)
-- [ ] Build community feed system
-- [ ] Implement post sharing between blogs
-- [ ] Add voting system (upvotes/downvotes)
-- [ ] Implement emoji reactions
-- [ ] Build social features UI
-- [ ] Add privacy controls for shared posts
-- [ ] Implement moderation tools
-
-### Content Moderation System (Phase 4)
+## Phase 4: Content Moderation System (Weeks 16-20)
 > **Spec:** See `docs/Specs/CONTENT-MODERATION.md` for full technical specification.
+>
+> **Note:** Content moderation is implemented before social features to ensure blog posts are moderated from the start. This provides a foundation for the more complex moderation needs of social features.
 
 **Implementation Tasks:**
 - [ ] Set up Fireworks AI / Groq accounts with ZDR enabled
@@ -197,11 +190,19 @@
 **Operational Tasks:**
 - [ ] Document moderator vetting and training criteria (Section 8.4)
 - [ ] Create moderator burnout prevention guidelines
-- [ ] Add last-verified dates to provider links in spec
 - [ ] Set up API key rotation reminders (90-day schedule)
 - [ ] Create test suite per Section 14 checklist
 
-## Phase 5: Polish & Scale (Weeks 26-36)
+## Phase 5: Grove Social (Weeks 21-30)
+- [ ] Build community feed system
+- [ ] Implement post sharing between blogs
+- [ ] Add voting system (upvotes/downvotes)
+- [ ] Implement emoji reactions
+- [ ] Build social features UI
+- [ ] Add privacy controls for shared posts
+- [ ] Extend moderation system for social content (comments, reactions)
+
+## Phase 6: Polish & Scale (Weeks 31-41)
 - [ ] Performance optimization
 - [ ] Add more themes (3 for Professional, 10 for Business)
 - [ ] Implement advanced analytics (see docs/specs/analytics-spec.md)

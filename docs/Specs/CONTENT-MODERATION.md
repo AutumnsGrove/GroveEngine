@@ -11,7 +11,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | Specification approved, development starting soon |
-| **Target Phase** | Phase 4 (Social features) |
+| **Target Phase** | Phase 4 (Content Moderation) |
 | **Prerequisites** | Post publishing system, user reporting |
 
 ---
@@ -66,7 +66,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](.
 │              INFERENCE API (Groq or Fireworks AI)                │
 │  - Zero Data Retention enabled                                   │
 │  - TLS 1.2+ encryption in transit                               │
-│  - Model: DeepSeek V3 (open source, MIT license)                │
+│  - Model: DeepSeek V3.2 (open source, MIT license)              │
 │  - No content logged by provider                                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -207,6 +207,13 @@ For posts exceeding ~3,000 words (~4,000 tokens), use smart truncation:
 5. Total input capped at ~5,000 tokens to control costs
 
 This approach maintains moderation accuracy while keeping costs predictable. Very long essays rarely have policy violations only in the middle.
+
+**Limitation Note:** This truncation strategy optimizes for cost while maintaining reasonable accuracy. However, it may miss:
+- Harmful content strategically placed in the middle section
+- Gradual escalation patterns that build across the full text
+- Context-dependent violations where surrounding text matters
+
+If sampled paragraphs show concerning patterns (e.g., borderline scores), the system will trigger a full-content review. Users may also report content that automated review missed, which triggers targeted review of the flagged section.
 
 **Model pricing comparison (per million tokens):**
 
@@ -512,6 +519,19 @@ Based on confidence thresholds:
 - Routine rotation: Every 90 days
 - Immediate rotation: If compromise is suspected
 
+**Responsible Party:** Platform owner (Autumn) or designated technical lead
+
+**Reminder System:**
+- Calendar alert at 80 days (10 days before deadline)
+- Escalating notification at 85 days if not completed
+- Final warning at 89 days
+
+**Missed Rotation Protocol:**
+- If 90-day deadline passes without rotation, trigger immediate security review
+- Rotate key within 24 hours of missed deadline
+- Document reason for delay in audit log
+- If pattern of missed rotations, implement automated rotation tooling
+
 **Procedure:**
 1. Generate new API key in provider console
 2. Update key in Cloudflare secrets
@@ -536,6 +556,8 @@ For full details on how our inference providers handle data:
 - Privacy Policy: https://groq.com/privacy-policy
 - Your Data in GroqCloud: https://console.groq.com/docs/your-data
 - Data Processing Addendum: https://console.groq.com/docs/legal/customer-data-processing-addendum
+
+*Provider links last verified: December 10, 2025*
 
 ### 11.2 Internal Audit Log
 
@@ -578,7 +600,7 @@ If you believe this is an error, no action is needed.
 1. User replies to notification email
 2. Appeal logged in system
 3. Manual review triggered (following Section 8.4 protocol)
-4. Decision communicated within 7 business days
+4. Decision communicated within 14 business days
 5. One appeal per content removal
 
 ---
@@ -598,6 +620,32 @@ This system enforces the [Acceptable Use Policy](../Legal/ACCEPTABLE-USE-POLICY.
 - Category definitions (Section 6)
 - Prompt template (Section 6.2)
 - Severity mappings (Section 7)
+
+### 13.3 Continuous Improvement
+
+To identify and address systemic issues with automated moderation:
+
+**Regular Audits:**
+- Monthly review of appeal outcomes and patterns
+- Identify categories with high appeal success rates (potential false positive patterns)
+- Track edge case frequency by content type
+
+**False Positive Metrics:**
+- Target: < 5% false positive rate (measured by successful appeals)
+- Alert threshold: > 10% appeal success rate for any single category
+- Quarterly reporting on moderation accuracy
+
+**Prompt Refinement Process:**
+1. Identify problematic patterns from appeal data
+2. Draft prompt modifications in staging environment
+3. A/B test new prompts against sample content (historical edge cases)
+4. Require improvement in accuracy metrics before rollout
+5. Document all prompt changes with rationale
+
+**Systemic Issue Response:**
+- If a content type is consistently misclassified, temporarily reduce confidence threshold for that category
+- Escalate to manual review more aggressively until prompt is refined
+- Notify affected users if their content was incorrectly actioned
 
 ---
 
