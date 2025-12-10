@@ -255,8 +255,8 @@ Respond in JSON format only.
 | ≥ 0.95 | Critical | Immediate removal, notify user |
 | ≥ 0.95 | High/Medium | Flag for removal, notify user |
 | ≥ 0.95 | Low | Warning to user, content stays |
-| 0.70 - 0.94 | Any | Flag for review, content stays pending |
-| < 0.70 | Any | **Escalate to edge case handling** |
+| 0.80 - 0.94 | Any | Flag for review, content stays pending |
+| < 0.80 | Any | **Escalate to edge case handling** |
 
 ### 7.2 Automatic Actions
 
@@ -274,7 +274,7 @@ Respond in JSON format only.
 ### 7.3 Edge Case Threshold
 
 Content enters edge case handling when:
-- Confidence < 0.70 for any category
+- Confidence < 0.80 for any category
 - Model returns conflicting signals
 - Content matches multiple categories
 - Model explicitly flags uncertainty
@@ -292,7 +292,7 @@ An "edge case" is content where the automated system cannot make a confident dec
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    EDGE CASE DETECTED                            │
-│  - Confidence < 0.70                                             │
+│  - Confidence < 0.80                                             │
 │  - Conflicting categories                                        │
 │  - Model uncertainty flag                                        │
 └─────────────────────────────────────────────────────────────────┘
@@ -309,7 +309,7 @@ An "edge case" is content where the automated system cannot make a confident dec
                     ▼                   ▼
             ┌─────────────┐     ┌─────────────┐
             │  Resolved   │     │   Still     │
-            │ (conf ≥0.80)│     │  Unclear    │
+            │ (conf ≥0.85)│     │  Unclear    │
             └─────────────┘     └─────────────┘
                     │                   │
                     ▼                   ▼
@@ -321,7 +321,7 @@ An "edge case" is content where the automated system cannot make a confident dec
 Content is escalated for manual review ONLY when:
 
 1. **Two automated reviews disagree** on category
-2. **Both reviews have confidence < 0.70**
+2. **Both reviews have confidence < 0.80**
 3. **Content involves potential legal issues** (CSAM indicators, credible threats)
 4. **Model explicitly cannot determine** if content violates policy
 
@@ -334,10 +334,11 @@ When manual review is required:
    - No user identity, account info, or history
    - Review happens in isolated environment
 
-2. **Review by Autumn only:**
-   - No third-party moderators
-   - No outsourced review services
-   - Single trusted reviewer
+2. **Trusted reviewers only:**
+   - Currently: Autumn (platform owner)
+   - Future: May include vetted, trusted community moderators
+   - No third-party moderation services
+   - No outsourced review
 
 3. **Decision documentation:**
    - Decision recorded (approve/remove/warn)
@@ -425,26 +426,29 @@ Based on confidence thresholds:
 
 ---
 
-## 11. Audit & Transparency
+## 11. Provider Privacy Documentation
 
-### 11.1 Public Transparency Report
+### 11.1 Approved Provider Links
 
-Quarterly publication of:
-- Total posts reviewed
-- Breakdown by outcome (pass/warn/remove)
-- Category distribution (no content)
-- Appeal statistics
-- System accuracy metrics
+For full details on how our inference providers handle data:
+
+**Fireworks AI (Primary)**
+- Privacy Policy: https://fireworks.ai/privacy-policy
+- Zero Data Retention: https://docs.fireworks.ai/guides/security_compliance/data_handling
+- Security & Compliance: https://fireworks.ai/docs/guides/security_compliance/data_security
+
+**Groq (Fallback)**
+- Privacy Policy: https://groq.com/privacy-policy
+- Your Data in GroqCloud: https://console.groq.com/docs/your-data
+- Data Processing Addendum: https://console.groq.com/docs/legal/customer-data-processing-addendum
 
 ### 11.2 Internal Audit Log
 
-For system health monitoring:
+For system health monitoring (no content stored):
 - Review latency metrics
 - API error rates
 - Edge case frequency
 - Manual escalation count
-
-No content is included in audit logs.
 
 ---
 
