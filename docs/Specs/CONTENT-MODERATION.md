@@ -6,6 +6,16 @@
 
 ---
 
+## Implementation Status
+
+| Field | Value |
+|-------|-------|
+| **Status** | Specification approved, development starting soon |
+| **Target Phase** | Phase 4 (Social features) |
+| **Prerequisites** | Post publishing system, user reporting |
+
+---
+
 ## Overview
 
 Grove uses automated content moderation to enforce our [Acceptable Use Policy](../Legal/ACCEPTABLE-USE-POLICY.md) while maintaining strict privacy protections. This system is designed with a **privacy-first architecture**: no human eyes on user data, no retention of content, and fully encrypted processing.
@@ -152,6 +162,9 @@ Before using any provider, verify:
 - Available through privacy-respecting providers
 - No licensing restrictions on commercial use
 
+**Note on Model Origin:**
+DeepSeek V3 is developed by a Chinese company, but the model itself is open source and hosted by US-based providers (Fireworks AI, Groq) with Zero Data Retention. Your content never touches DeepSeek's infrastructure—only the open-source model weights are used, running entirely on US servers with full privacy protections.
+
 **Model Configuration:**
 ```json
 {
@@ -169,6 +182,31 @@ Low temperature ensures consistent, predictable responses for moderation decisio
 If DeepSeek V3 is unavailable:
 - **Llama 3.1 70B** (Meta, open source)
 - Same provider requirements apply
+
+### 4.3 Cost Estimation
+
+**Per-review token usage:**
+- Average blog post: ~1,000 words ≈ 1,300 tokens
+- System prompt + template: ~400 tokens
+- Model response: ~150 tokens
+- **Total per review: ~1,850 tokens**
+
+**Cost per review by provider:**
+
+| Provider | Cost per Review |
+|----------|-----------------|
+| Fireworks AI | ~$0.0017 |
+| Groq | ~$0.0012 |
+
+**Monthly cost projections:**
+
+| Posts/Month | Fireworks AI | Groq |
+|-------------|--------------|------|
+| 1,000 | $1.70 | $1.20 |
+| 10,000 | $17 | $12 |
+| 100,000 | $170 | $120 |
+
+*Note: Add ~5% overhead for edge case secondary reviews.*
 
 ---
 
@@ -227,6 +265,9 @@ IMPORTANT CONTEXT:
 - AI-assisted content is allowed IF labeled; unlabeled AI content is prohibited
 - Artistic nudity is allowed with content warnings
 - Consider context and intent, not just keywords
+- Personal expression about marginalized identities is ALLOWED, including but not limited to:
+  LGBTQ+ issues, disability advocacy, racial justice, religious expression, ethnic identity,
+  and other marginalized communities. These are not "political content" violations.
 
 Review the following post and respond with:
 1. CATEGORY: One of [CLEAR, ILLEGAL_CONTENT, HARASSMENT, HATE_SPEECH, SPAM_MALWARE,

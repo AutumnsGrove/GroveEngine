@@ -96,6 +96,18 @@ Grove is a space for authentic self-expression, not political organizing. You ca
 **Labeling Requirements:**
 If AI tools contributed meaningfully to your content, you must disclose this. Use the content labeling feature in the editor or include a note such as "AI-assisted" or "Created with AI tools." The goal isn't to ban AI—it's to maintain authenticity and transparency with your readers.
 
+**Note:** AI content labeling features are in development. Until implemented, you may disclose AI assistance in your post text (e.g., "Note: Edited with AI assistance").
+
+**Enforcement for Unlabeled AI Content:**
+
+| Offense | Action | Period |
+|---------|--------|--------|
+| 1st violation | Warning | Rolling 7-day window |
+| 2nd violation | Warning | Rolling 7-day window |
+| 3rd violation | 1-week posting suspension | Rolling 7-day window |
+
+This cycle repeats. After accumulating **3 posting suspensions**, you will be permanently banned from posting.
+
 ---
 
 ## 2. Content Requiring Warnings

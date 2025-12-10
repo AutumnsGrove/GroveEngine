@@ -152,6 +152,7 @@ When you delete your account:
 | Sessions | 7 days (or until logout) |
 | IP addresses | 1 minute (rate limiting only, then discarded) |
 | Rate limiting data | 1 minute |
+| Content moderation queue | Immediate deletion after review |
 | Email signup list | Until you unsubscribe |
 | Payment records | As required by law (typically 7 years) |
 
