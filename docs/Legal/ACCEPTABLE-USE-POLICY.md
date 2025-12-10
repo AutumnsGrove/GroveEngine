@@ -176,8 +176,8 @@ We respond to valid copyright complaints in accordance with the Digital Millenni
 
 **Detection:**
 - User reports
-- Automated scanning (privacy-respecting, anonymized, no human review unless flagged)
-- Manual review of flagged content
+- Automated review using privacy-respecting LLM inference (see [Content Moderation Spec](../Specs/CONTENT-MODERATION.md))
+- Manual review only for edge cases where automated systems cannot reach confident decisions
 
 **Actions We May Take:**
 - Remove the violating content

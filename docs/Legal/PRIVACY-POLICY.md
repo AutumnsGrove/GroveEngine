@@ -72,6 +72,7 @@ We use your information solely to:
 | Send important updates | Email address |
 | Improve the Service | Aggregated, anonymized usage data |
 | Prevent abuse | IP addresses, rate limiting data |
+| Content moderation | Post content (zero retention, see below) |
 | Respond to support requests | Communications, account info |
 | Comply with legal obligations | As required by law |
 
@@ -100,8 +101,19 @@ We share limited data with trusted service providers who help us operate Grove:
 | **Stripe** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
+| **Fireworks AI / Groq** | Content moderation | Post content (zero data retention) |
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
+
+**Content Moderation Privacy:**
+Post content is processed through privacy-respecting LLM inference providers with **Zero Data Retention (ZDR)** enabled. This means:
+- Your content is never stored by the inference provider
+- Your content is never used to train AI models
+- Content is encrypted in transit (TLS 1.2+)
+- Only the moderation decision is retained (not your content)
+- No human reviews your content unless the automated system cannot reach a confident decision
+
+For full technical details, see our [Content Moderation Spec](../Specs/CONTENT-MODERATION.md).
 
 ### 3.3 Legal Requirements
 
