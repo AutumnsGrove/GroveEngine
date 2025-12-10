@@ -42,7 +42,7 @@ This Privacy Policy explains what data we collect, how we use it, and your right
 **Authentication Data**
 - Session tokens (stored as HTTP-only cookies)
 - Login timestamps
-- IP addresses (retained for up to 1 minute for rate limiting, then automatically discarded)
+- IP addresses (retained for exactly 1 minute for rate limiting, then automatically discarded)
 
 **Usage Data**
 - Pages visited on your blog
@@ -152,7 +152,7 @@ When you delete your account:
 | Authentication codes | 10 minutes (then auto-deleted) |
 | Failed login attempts | Cleared on successful login |
 | Sessions | 7 days (or until logout) |
-| IP addresses | 1 minute (rate limiting only, then discarded) |
+| IP addresses | Exactly 1 minute (rate limiting only, then discarded) |
 | Rate limiting data | 1 minute |
 | Content moderation queue | Immediate deletion after review |
 | Email signup list | Until you unsubscribe |
