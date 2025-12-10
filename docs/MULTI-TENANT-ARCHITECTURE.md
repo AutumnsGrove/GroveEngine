@@ -200,17 +200,27 @@ tenant_settings (tenant_id, setting_key, setting_value)
    - Could we pre-render popular posts to KV for instant load?
    - Trade-off: complexity vs. latency
 
+   ANSWER: I really like this idea. Yes. How will we determine what is "popular" though?
+   Idea. Maybe we could have new posts sent to KV right off the bat?
+
 2. **Full-text search?**
    - D1 has basic LIKE queries
    - For real search: Cloudflare Vectorize or external service?
+
+   ANSWER: Yes. this is essential. Lets trhy and use Cloudflare Vectorize first, and if it doesnt work we will try something like Mileisearch. I've actully started on adding searching to the websites on my autumnsgrove.com domain but the search doesnt actually _work_.
 
 3. **Custom domains (Business plan)?**
    - Need Worker route for custom domains
    - Or: Cloudflare for SaaS?
 
+   ANSWER: Extend the router. Have it route users to their custom domains.
+   If that won't work, then we can decide again after more thoruough planning.
+
 4. **Rate limiting per tenant?**
    - Prevent one tenant from hogging resources
    - KV-based rate limiting?
+
+   ANSWER: THis sounds like a really great idea but I am entirely unsure of how to execute such a thing. Lets do some research on it and re-discuss it.
 
 ## Files to Create/Modify
 
