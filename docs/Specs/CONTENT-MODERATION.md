@@ -198,6 +198,16 @@ Same provider requirements (ZDR, US hosting, SOC 2) apply to all models.
 - Model response: ~150 tokens
 - **Total per review: ~1,850 tokens** (~1,700 input, ~150 output)
 
+**Long-form content handling (>3,000 words):**
+For posts exceeding ~3,000 words (~4,000 tokens), use smart truncation:
+1. Include full title and first 1,500 words (captures intro/thesis)
+2. Include last 500 words (captures conclusion)
+3. Sample 3 random paragraphs from middle section
+4. If post contains images, include all image alt text
+5. Total input capped at ~5,000 tokens to control costs
+
+This approach maintains moderation accuracy while keeping costs predictable. Very long essays rarely have policy violations only in the middle.
+
 **Model pricing comparison (per million tokens):**
 
 | Model | Provider | Input | Output |

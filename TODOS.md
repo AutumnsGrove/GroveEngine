@@ -173,6 +173,34 @@
 - [ ] Add privacy controls for shared posts
 - [ ] Implement moderation tools
 
+### Content Moderation System (Phase 4)
+> **Spec:** See `docs/Specs/CONTENT-MODERATION.md` for full technical specification.
+
+**Implementation Tasks:**
+- [ ] Set up Fireworks AI / Groq accounts with ZDR enabled
+- [ ] Create isolated Cloudflare Worker for moderation service
+- [ ] Implement encrypted content queue in KV
+- [ ] Build decision engine with confidence threshold routing
+- [ ] Create notification email templates in Resend
+- [ ] Set up anonymous audit logging (no content stored)
+- [ ] Write integration tests with mock API responses
+
+**UI/UX Tasks:**
+- [ ] Add publishing state UI (post → review → published)
+  - Show "Under Review" status while moderation runs (~6-7 seconds)
+  - Display "Published" confirmation when approved
+  - Show "Action Required" if flagged with link to details
+- [ ] Build moderation notification center for users
+- [ ] Create appeal submission form
+- [ ] Add AI content labeling toggle in post editor
+
+**Operational Tasks:**
+- [ ] Document moderator vetting and training criteria (Section 8.4)
+- [ ] Create moderator burnout prevention guidelines
+- [ ] Add last-verified dates to provider links in spec
+- [ ] Set up API key rotation reminders (90-day schedule)
+- [ ] Create test suite per Section 14 checklist
+
 ## Phase 5: Polish & Scale (Weeks 26-36)
 - [ ] Performance optimization
 - [ ] Add more themes (3 for Professional, 10 for Business)
