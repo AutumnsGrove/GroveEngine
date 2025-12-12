@@ -59,7 +59,7 @@ export interface LoginUrlResult {
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = "starter" | "professional" | "business";
+export type SubscriptionTier = "seedling" | "basic" | "professional" | "premium";
 
 export interface UserSubscription {
   id: string;
@@ -111,12 +111,14 @@ export interface CanPostResponse {
  * Post limits per subscription tier.
  *
  * Business rationale:
- * - Starter (250 posts): Entry-level tier for hobbyists, personal bloggers,
- *   and users testing the platform. ~1 post/day for 8 months.
- * - Professional (2,000 posts): For active content creators, small businesses,
- *   and dedicated bloggers. ~1 post/day for 5+ years.
- * - Business (unlimited): For enterprises, agencies, and power users who need
- *   no restrictions. Includes custom domain support.
+ * - Seedling (50 posts): Entry-level tier for curious newcomers testing the
+ *   platform. Low commitment, creates upgrade path.
+ * - Basic (250 posts): For hobbyists and regular bloggers who know they'll
+ *   stick around. ~1 post/day for 8 months.
+ * - Professional (unlimited): For serious bloggers whose blog is part of their
+ *   identity. Includes BYOD (bring your own domain) and full email.
+ * - Premium (unlimited): Full-service tier for professionals. Includes domain
+ *   search, registration, and priority support.
  *
  * Grace period: When users hit their limit, they have 14 days to upgrade or
  * delete posts before their account becomes read-only.
@@ -124,18 +126,20 @@ export interface CanPostResponse {
  * @see docs/implementing-post-limits.md for full specification
  */
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
-  starter: 250, // For hobbyists and personal blogs
-  professional: 2000, // For active bloggers and small businesses
-  business: null, // Unlimited for enterprises and power users
+  seedling: 50,    // For curious newcomers trying blogging
+  basic: 250,      // For hobbyists and regular bloggers
+  professional: null, // Unlimited for serious bloggers
+  premium: null,   // Unlimited for professionals
 };
 
 /**
  * Human-readable tier names for UI display.
  */
 export const TIER_NAMES: Record<SubscriptionTier, string> = {
-  starter: "Starter",
+  seedling: "Seedling",
+  basic: "Basic",
   professional: "Professional",
-  business: "Business",
+  premium: "Premium",
 };
 
 // =============================================================================

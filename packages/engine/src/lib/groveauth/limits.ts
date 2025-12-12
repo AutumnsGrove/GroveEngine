@@ -102,7 +102,7 @@ export function getUpgradeRecommendation(status: SubscriptionStatus): {
 } {
   const tierName = TIER_NAMES[status.tier];
 
-  if (status.tier === 'business') {
+  if (status.tier === 'premium') {
     return {
       recommended: false,
       fromTier: tierName,
@@ -111,8 +111,17 @@ export function getUpgradeRecommendation(status: SubscriptionStatus): {
     };
   }
 
+  if (status.tier === 'professional') {
+    return {
+      recommended: false,
+      fromTier: tierName,
+      toTier: 'Premium',
+      reason: 'You already have unlimited posts. Premium adds domain search and support hours.',
+    };
+  }
+
   if (status.upgrade_required || status.is_at_limit) {
-    const toTier = status.tier === 'starter' ? 'Professional' : 'Business';
+    const toTier = status.tier === 'seedling' ? 'Basic' : 'Professional';
     return {
       recommended: true,
       fromTier: tierName,
@@ -122,7 +131,7 @@ export function getUpgradeRecommendation(status: SubscriptionStatus): {
   }
 
   if (status.percentage_used !== null && status.percentage_used >= 80) {
-    const toTier = status.tier === 'starter' ? 'Professional' : 'Business';
+    const toTier = status.tier === 'seedling' ? 'Basic' : 'Professional';
     return {
       recommended: true,
       fromTier: tierName,
