@@ -5,7 +5,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 
 # Environment variables for local development
 [vars]
-SITE_NAME = "Grove Domain Finder"
+SITE_NAME = "Acorn"
 SITE_URL = "http://localhost:5174"
 GROVEAUTH_URL = "https://auth-api.grove.place"
 
