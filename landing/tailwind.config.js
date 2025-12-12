@@ -21,8 +21,8 @@ export default {
 				bark: '#3d2914'
 			},
 			fontFamily: {
-				serif: ['Quicksand', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
-				sans: ['Quicksand', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+				serif: ['Lexend', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+				sans: ['Lexend', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
 			}
 		}
 	},
