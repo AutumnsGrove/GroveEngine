@@ -178,7 +178,7 @@ The following is generally not considered promotional:
 - Do not claim others' work as your own
 
 ### 4.2 DMCA Process
-We respond to valid copyright complaints in accordance with the Digital Millennium Copyright Act. See our [DMCA Policy](./DMCA-POLICY.md) for details.
+We respond to valid copyright complaints in accordance with the Digital Millennium Copyright Act. See our [DMCA Policy](https://grove.place/legal/dmca) for details.
 
 ---
 
@@ -188,7 +188,7 @@ We respond to valid copyright complaints in accordance with the Digital Millenni
 
 **Detection:**
 - User reports
-- Automated review using privacy-respecting LLM inference (see [Content Moderation Spec](../Specs/CONTENT-MODERATION.md))
+- Automated review using privacy-respecting LLM inference
 - Manual review only for edge cases where automated systems cannot reach confident decisions
 
 **Actions We May Take:**
@@ -224,7 +224,7 @@ When we remove content:
 **DMCA Takedowns:**
 - Content is removed as required by law
 - Grove's internal appeal process does not apply to DMCA takedowns
-- You may file a counter-notification if you believe the takedown was improper (see [DMCA Policy](./DMCA-POLICY.md))
+- You may file a counter-notification if you believe the takedown was improper (see [DMCA Policy](https://grove.place/legal/dmca))
 - Counter-notifications follow a separate legal process defined by the DMCA, not Grove's appeal system
 
 **Policy-Based Removal:**

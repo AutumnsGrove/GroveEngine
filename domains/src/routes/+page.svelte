@@ -114,12 +114,25 @@
 
 	<!-- Footer -->
 	<footer class="py-8 text-center">
-		<div class="flex items-center justify-center gap-4 text-sm font-sans text-bark/50">
+		<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-sans text-bark/50 mb-4">
 			<a href="https://grove.place" class="hover:text-domain-600 transition-colors">
 				Grove
 			</a>
 			<span class="text-domain-300">·</span>
-			<span>Part of the Grove ecosystem</span>
+			<a href="/vision" class="hover:text-domain-600 transition-colors">
+				Vision
+			</a>
+			<span class="text-domain-300">·</span>
+			<a href="/pricing" class="hover:text-domain-600 transition-colors">
+				Pricing
+			</a>
+			<span class="text-domain-300">·</span>
+			<a href="/legal" class="hover:text-domain-600 transition-colors">
+				Legal
+			</a>
+		</div>
+		<div class="text-xs text-bark/40 font-sans">
+			Part of the Grove ecosystem
 		</div>
 	</footer>
 </main>

@@ -131,7 +131,7 @@ Before or after cancellation, you can export all your data:
 ### 5.1 No Refund Situations
 
 Refunds are **not available** in the following situations:
-- Account terminated for violation of our [Terms of Service](./TERMS-OF-SERVICE.md) or [Acceptable Use Policy](./ACCEPTABLE-USE-POLICY.md)
+- Account terminated for violation of our [Terms of Service](https://grove.place/legal/terms) or [Acceptable Use Policy](https://grove.place/legal/acceptable-use)
 - Fraudulent payment or chargeback abuse
 - Requests made more than 90 days after the original payment
 

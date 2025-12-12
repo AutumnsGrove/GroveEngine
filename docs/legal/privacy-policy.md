@@ -115,7 +115,7 @@ Post content is processed through privacy-respecting LLM inference providers wit
 - Only the moderation decision is retained (not your content)
 - No human reviews your content unless the automated system cannot reach a confident decision
 
-For full technical details, see our [Content Moderation Spec](../Specs/CONTENT-MODERATION.md).
+For full technical details, see our Content Moderation Spec in our documentation.
 
 ### 3.3 Legal Requirements
 
