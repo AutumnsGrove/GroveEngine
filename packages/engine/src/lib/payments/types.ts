@@ -404,22 +404,27 @@ export interface ConnectOnboardingResult {
 // PLATFORM BILLING (TENANT SUBSCRIPTIONS)
 // =============================================================================
 
-export type PlanTier = 'starter' | 'professional' | 'business';
+export type PlanTier = 'seedling' | 'basic' | 'professional' | 'premium';
 
 export interface PlatformPlan {
   tier: PlanTier;
   name: string;
   price: Money;
+  yearlyPrice?: Money;       // 15% discount for yearly
   interval: BillingInterval;
   features: string[];
   limits: {
-    posts?: number;
+    posts?: number;          // undefined = unlimited
     storage?: number;        // MB
     customDomain?: boolean;
-    analytics?: boolean;
+    byod?: boolean;          // Bring Your Own Domain
+    email?: 'none' | 'forward' | 'full';
+    analytics?: 'basic' | 'full';
+    supportHours?: number;   // Included support hours (first month)
     shop?: boolean;
   };
   providerPriceId?: string;
+  yearlyPriceId?: string;
 }
 
 export interface TenantBilling {
