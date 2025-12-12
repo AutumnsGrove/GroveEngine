@@ -80,7 +80,7 @@ Grove offers the following subscription plans:
 
 ## 6. Refunds and Cancellation
 
-Please see our [Refund & Cancellation Policy](./REFUND-POLICY.md) for complete details.
+Please see our [Refund & Cancellation Policy](https://grove.place/legal/refund) for complete details.
 
 **Summary:**
 - **Within 14 days:** Full refund available
@@ -98,7 +98,7 @@ You retain all ownership rights to the content you create and publish on Grove (
 By posting User Content, you grant us a limited, non-exclusive license to host, store, display, and distribute your content solely for the purpose of operating the Service. This license ends when you delete your content or close your account.
 
 ### 7.3 Content Restrictions
-Your use of the Service is subject to our [Acceptable Use Policy](./ACCEPTABLE-USE-POLICY.md). You agree not to post content that violates these guidelines.
+Your use of the Service is subject to our [Acceptable Use Policy](https://grove.place/legal/acceptable-use). You agree not to post content that violates these guidelines.
 
 ### 7.4 Content Removal
 We reserve the right to remove content that violates our policies. See our Acceptable Use Policy for our enforcement process and appeal procedures.
@@ -107,7 +107,7 @@ We reserve the right to remove content that violates our policies. See our Accep
 
 ## 8. Data and Privacy
 
-Your privacy is important to us. Please review our [Privacy Policy](./PRIVACY-POLICY.md) to understand how we collect, use, and protect your information.
+Your privacy is important to us. Please review our [Privacy Policy](https://grove.place/legal/privacy) to understand how we collect, use, and protect your information.
 
 **Key Points:**
 - We never sell your data
@@ -129,7 +129,7 @@ The Grove platform code is available under the [GNU Affero General Public Licens
 
 ## 10. DMCA and Copyright
 
-We respect intellectual property rights and respond to valid copyright complaints. Please see our [DMCA Policy](./DMCA-POLICY.md) for information on:
+We respect intellectual property rights and respond to valid copyright complaints. Please see our [DMCA Policy](https://grove.place/legal/dmca) for information on:
 - Filing a takedown notice
 - Counter-notification process
 - Repeat infringer policy
