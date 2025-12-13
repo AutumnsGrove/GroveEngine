@@ -7,46 +7,70 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * Platform billing for tenant subscriptions to GroveEngine
  *
  * Plans:
- * - starter: $12/month - Basic blog
- * - professional: $49/month - Full features
- * - business: $199/month - Custom domain, priority support
+ * - seedling: $8/month - Entry tier
+ * - sapling: $12/month - Hobbyist tier
+ * - oak: $25/month - Serious blogger tier
+ * - evergreen: $35/month - Full-service tier
  */
 
 const PLANS = {
-  starter: {
-    name: "Starter",
+  seedling: {
+    name: "Seedling",
+    price: 800, // $8.00 in cents
+    interval: "month",
+    features: [
+      "50 posts",
+      "1GB Storage",
+      "3 themes + accent color",
+      "Basic analytics",
+      "grove.place subdomain",
+      "Unlimited public comments",
+      "Community support",
+    ],
+  },
+  sapling: {
+    name: "Sapling",
     price: 1200, // $12.00 in cents
     interval: "month",
     features: [
-      "1 Blog",
+      "250 posts",
       "5GB Storage",
+      "10 themes + accent color",
       "Basic analytics",
       "grove.place subdomain",
-    ],
-  },
-  professional: {
-    name: "Professional",
-    price: 4900, // $49.00 in cents
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "25GB Storage",
-      "Advanced analytics",
-      "Shop integration",
+      "Email forwarding (@grove.place)",
+      "Unlimited public comments",
       "Email support",
     ],
   },
-  business: {
-    name: "Business",
-    price: 19900, // $199.00 in cents
+  oak: {
+    name: "Oak",
+    price: 2500, // $25.00 in cents
     interval: "month",
     features: [
-      "Everything in Professional",
+      "Unlimited posts",
+      "20GB Storage",
+      "Theme customizer + community themes",
+      "Full analytics",
+      "BYOD (custom domain)",
+      "Full email (@grove.place)",
+      "Unlimited public comments",
+      "Priority email support",
+    ],
+  },
+  evergreen: {
+    name: "Evergreen",
+    price: 3500, // $35.00 in cents
+    interval: "month",
+    features: [
+      "Unlimited posts",
       "100GB Storage",
-      "Custom domain",
-      "White-label options",
-      "Priority support",
-      "API access",
+      "Theme customizer + custom fonts",
+      "Full analytics",
+      "Domain search + registration included",
+      "Full email (@grove.place)",
+      "Unlimited public comments",
+      "8hrs free support + priority",
     ],
   },
 };
@@ -129,7 +153,7 @@ export async function GET({ url, platform, locals }) {
  *
  * Body:
  * {
- *   plan: 'starter' | 'professional' | 'business'
+ *   plan: 'seedling' | 'sapling' | 'oak' | 'evergreen'
  *   successUrl: string
  *   cancelUrl: string
  * }

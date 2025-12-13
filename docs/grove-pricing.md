@@ -16,19 +16,37 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 
 ## Subscription Tiers
 
-| Feature | Seedling | Sapling | Oak | Evergreen |
-|---------|:--------:|:-------:|:---:|:---------:|
-| **Monthly** | **$8** | **$12** | **$25** | **$35** |
-| **Yearly** | **$82** | **$122** | **$255** | **$357** |
-| Blog Posts | 50 | 250 | Unlimited | Unlimited |
-| Storage | 1 GB | 5 GB | 20 GB | 100 GB |
-| Meadow | ✓ | ✓ | ✓ | ✓ |
-| Custom Domain | — | — | BYOD | ✓ |
-| @grove.place Email | — | Forward | Full | Full |
-| Support | Community | Email | Priority | 8hrs + Priority |
-| **Best For** | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
+| Feature | Free | Seedling | Sapling | Oak | Evergreen |
+|---------|:----:|:--------:|:-------:|:---:|:---------:|
+| **Monthly** | **$0** | **$8** | **$12** | **$25** | **$35** |
+| **Yearly** | — | **$82** | **$122** | **$255** | **$357** |
+| Blog | — | ✓ | ✓ | ✓ | ✓ |
+| Blog Posts | — | 50 | 250 | Unlimited | Unlimited |
+| Storage | — | 1 GB | 5 GB | 20 GB | 100 GB |
+| Themes | — | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
+| Community Themes | — | — | — | ✓ | ✓ |
+| Meadow | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
+| Custom Domain | — | — | — | BYOD | ✓ |
+| @grove.place Email | — | — | Forward | Full | Full |
+| Support | Community | Community | Email | Priority | 8hrs + Priority |
+| **Best For** | *Readers* | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
 
 **Yearly plans save 15%** — pay for 10 months, get 12.
+
+---
+
+## Free Tier
+
+*Browse, engage, and be part of the community.*
+
+Free accounts get:
+- **Meadow access:** Browse the community feed, curate your following, react to posts
+- **Comment on posts:** Leave replies (private) and comments (public) on blogs you follow
+- **Public comment limit:** 20 per week (private replies are rate-limited)
+- **No blog:** Free accounts can't publish posts
+
+Free is for readers and community members. When you're ready to write, upgrade to Seedling.
 
 ---
 
@@ -40,7 +58,9 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - 50 blog posts
 - 1 GB storage for images and media
 - Your blog at `username.grove.place`
+- **3 themes** + custom accent color
 - Access to Meadow (optional community features)
+- **Unlimited comments** on other blogs
 - Community support via documentation
 
 ### Sapling — $12/month
@@ -49,6 +69,7 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - 250 blog posts
 - 5 GB storage
 - Your blog at `username.grove.place`
+- **10 themes** + custom accent color
 - **Email forwarding:** Receive emails at `you@grove.place`
 - Email support
 
@@ -58,6 +79,8 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - **Unlimited** blog posts
 - 20 GB storage
 - **Bring Your Own Domain** — use a domain you already own
+- **Theme customizer** — full control over colors, fonts, layout
+- **Community themes** — browse and import user-created themes
 - **Full email:** Send and receive as `you@grove.place`
 - Full analytics dashboard
 - Priority email support
@@ -69,10 +92,53 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - 100 GB storage
 - **Custom domain included** — we find and register it for you
 - Domain registration included (up to $100/year value)
+- **Theme customizer** + **custom font uploads**
+- **Community themes** — browse and import user-created themes
 - **Full email:** Send and receive as `you@grove.place`
 - Full analytics dashboard
 - **8 hours of support included** (first month)
 - Priority support with faster response times
+
+---
+
+## Themes
+
+Grove offers hand-curated themes that you can customize with your own accent color.
+
+| Tier | Theme Access |
+|------|--------------|
+| Seedling | 3 themes (Grove, Minimal, Night Garden) + custom accent color |
+| Sapling | All 10 themes + custom accent color |
+| Oak | All 10 themes + full theme customizer + community themes |
+| Evergreen | Everything Oak gets + custom font uploads |
+
+**Theme Customizer (Oak+):** Adjust colors, fonts, spacing, layout, and add custom CSS.
+
+**Community Themes (Oak+):** Browse and import themes created by other Grove users.
+
+---
+
+## Vines (Sidebar Links)
+
+Vines are sidebar links that appear alongside your blog posts—perfect for linking to related posts, sources, further reading, or anything you want readers to explore.
+
+Available to all paid tiers. See the [Vines documentation](/help/writing/vines) for more.
+
+---
+
+## Comments
+
+Grove supports two types of interaction on blog posts:
+
+- **Replies (private):** Only the blog author sees these
+- **Comments (public):** Visible to everyone after author approval
+
+| Tier | Public Comments | Private Replies |
+|------|-----------------|-----------------|
+| Free | 20/week | Rate limited |
+| Seedling+ | Unlimited | Unlimited |
+
+Blog authors control who can comment on their posts and moderate all public comments before they appear.
 
 ---
 
@@ -123,14 +189,15 @@ A professional email address for your blog—no extra cost, no separate service 
 
 | Tier | What's Included | Additional Hours |
 |------|-----------------|------------------|
-| Seedling | Documentation & community | $100/hour |
+| Free | Help Center only | — |
+| Seedling | Help Center & community | $100/hour |
 | Sapling | Email support | $100/hour |
 | Oak | Priority email support | $100/hour |
 | Evergreen | 8 hours free (first month) + priority | $75/hour |
 
 ---
 
-## Included in Every Tier
+## Included in Every Paid Tier
 
 - Markdown blog posts with live preview
 - Image hosting with automatic WebP compression
@@ -139,6 +206,7 @@ A professional email address for your blog—no extra cost, no separate service 
 - Meadow access (optional community features)
 - Data export anytime (your content is yours)
 - RSS feed for your blog
+- Vines (sidebar links on posts)
 - No ads, no tracking of your readers
 
 ---

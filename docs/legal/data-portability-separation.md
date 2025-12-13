@@ -24,6 +24,7 @@ When you cancel your subscription (or anytime you request it), you receive a com
 - All blog posts in Markdown format
 - Original images and media files
 - Post metadata (publish dates, tags, status)
+- All comments (both public comments and private replies)
 - Site configuration and settings
 
 **Export Format:**
@@ -33,6 +34,9 @@ grove-export-username-YYYY-MM-DD.zip
 │   ├── 2025-01-15-my-first-post.md
 │   ├── 2025-02-20-another-post.md
 │   └── ...
+├── comments/
+│   ├── comments.json (all public comments)
+│   └── replies.json (all private replies)
 ├── media/
 │   ├── images/
 │   ├── uploads/
@@ -122,6 +126,7 @@ If you use email with your own custom domain (BYOD at Oak tier), that email is e
 | Data Type | Retention Period | Notes |
 |-----------|------------------|-------|
 | Blog posts & media | 90 days | Exportable anytime during this period |
+| Comments & replies | 90 days | Included in data export |
 | Account information | 90 days | For reactivation purposes |
 | Payment history | 7 years | Legal/tax requirements |
 | Domain registration | Indefinite | You own it, registrar maintains records |

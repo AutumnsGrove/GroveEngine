@@ -94,11 +94,18 @@
 - [x] Set up tenant isolation in D1 database → **DONE: Multi-tenant schema designed (migration 009)**
   - Tables: `tenants`, `posts`, `pages`, `media`, `tenant_settings`
   - All content tables have `tenant_id` foreign key for isolation
-- [ ] Build tenant onboarding flow
-- [ ] Implement plan management (Starter/Professional/Business)
-- [ ] Add custom domain support for Business plan
+- [ ] Build tenant onboarding flow → **SPEC READY (2025-12-13)**: `docs/specs/tenant-onboarding-spec.md`
+  - Signup: name, username (=subdomain), verified email, favorite color, interests
+  - Plan selection → Payment via Stripe → Interactive tour (5-10 min, skippable)
+  - Handoff: D1 initialized, site live immediately
+  - Email sequence: welcome, day 3, 7, 30 follow-ups
+- [ ] Implement plan management (Seedling/Sapling/Oak/Evergreen)
+  - **Tiers:** Seedling ($8), Sapling ($12), Oak ($25), Evergreen ($35)
+  - **Free tier** for Meadow-only users (no blog, social features only)
+  - See: `docs/grove-pricing.md`, `docs/internal/pricing-discussions.md`
+- [ ] Add custom domain support for Oak+ (BYOD) and Evergreen (search + registration included)
 - [ ] Build tenant admin panel
-- [ ] Implement storage limits per plan
+- [ ] Implement storage limits per plan (1GB/5GB/20GB/100GB)
 
 ### Multi-tenant Architecture Decision (2025-12-10)
 > **Key Insight:** Move from multi-repo/multi-deploy to single-deploy/multi-tenant (like YouTube).
@@ -157,12 +164,18 @@
 
 ## Phase 3: Grove Website (Weeks 10-15)
 - [x] Create marketing website → **DONE: Landing site deployed at grove.place**
-- [ ] Build pricing page with plan comparison
+- [x] Build pricing page with plan comparison → **DONE (2025-12-13)**: `landing/src/routes/pricing/+page.svelte`
+  - Free/Seedling/Sapling/Oak/Evergreen comparison table
+  - Themes row, Comments row, Vines section
+  - "The Fine Print" with detailed feature explanations
 - [x] Implement billing system with Stripe → **DONE: Stripe payments with provider abstraction (PR #19)**
 - [ ] Add customer portal
 - [x] Build landing page with features → **DONE: "How It Works" and footer links (PR #11)**
-- [ ] Implement signup flow
-- [ ] Add documentation/help center
+- [ ] Implement signup flow (see tenant onboarding spec)
+- [ ] Add documentation/help center → **SPEC READY (2025-12-13)**: `docs/specs/help-center-spec.md`
+  - Built into admin panel, not external docs site
+  - Contextual help buttons (Cloudflare-style) throughout admin UI
+  - SQLite FTS5 search, 9 categories, "Was this helpful?" feedback
 
 ## Phase 4: Content Moderation System (Weeks 16-20)
 > **Spec:** See `docs/Specs/CONTENT-MODERATION.md` for full technical specification.
@@ -204,11 +217,20 @@
 
 ## Phase 6: Polish & Scale (Weeks 31-41)
 - [ ] Performance optimization
-- [ ] Add more themes (3 for Professional, 10 for Business)
+- [ ] Implement theme system → **SPEC READY (2025-12-13)**: `docs/specs/theme-system-spec.md`
+  - 10 hand-curated themes: Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower
+  - Tiered access: Seedling=3, Sapling=10, Oak+=customizer+community themes, Evergreen+=custom fonts
+  - CSS variable system, custom font uploads to R2
 - [ ] Implement advanced analytics (see docs/specs/analytics-spec.md)
 - [ ] Build priority support system
-- [ ] Implement comment system (Hyvor Talk for MVP, see docs/research/comment-system-strategy.md)
-- [ ] Implement data export (markdown + pictures as zip)
+- [ ] Implement comment system → **SPEC READY (2025-12-13)**: `docs/specs/comments-spec.md`
+  - Custom build (NOT Hyvor Talk) - dual-mode system
+  - **Reply** = private message to author (like email)
+  - **Comment** = public, visible to all (requires author approval queue)
+  - Rate limits: Free=20/week public, 50/day private; Paid=unlimited
+  - Integrates with content moderation system
+- [ ] Implement data export (markdown + pictures + comments as zip)
+  - Export format documented in `docs/legal/data-portability-separation.md`
 - [ ] Implement backup/restore functionality
 - [ ] Scale infrastructure as needed
 
@@ -239,11 +261,13 @@
 
 ### Theme System Expansion
 > *Note: UI components are managed in [GroveUI](https://github.com/AutumnsGrove/GroveUI)*
-- [ ] Custom CSS override option for advanced users
-- [ ] Theme marketplace (users buy/sell themes)
-- [ ] User-uploadable themes with validation
-- [ ] Theme builder/customizer UI
-- [ ] More color/font customization options
+> *See: `docs/specs/theme-system-spec.md` for full implementation plan*
+- [x] Define 10 curated themes → **SPEC READY**: Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower
+- [ ] Custom CSS override option for advanced users (Oak+ via customizer)
+- [ ] Theme marketplace (users buy/sell themes) - **DEFERRED** to post-launch
+- [ ] Community theme submission portal (Oak+ can download, authors can submit)
+- [ ] Theme builder/customizer UI (Oak+)
+- [ ] Custom font uploads (Evergreen only, stored in R2)
 
 ### Internal Tools
 - [x] Build domain search worker → **DONE: Deployed and tested via API (2025-12-05)**
