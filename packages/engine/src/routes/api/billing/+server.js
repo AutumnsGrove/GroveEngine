@@ -16,6 +16,46 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * Free users sign up directly without Stripe checkout - they're created
  * with plan='free' in the tenants table but never hit this endpoint.
  * This API is only for paid subscriptions.
+ *
+ * ============================================================================
+ * ENVIRONMENT VARIABLES (Required in Cloudflare Pages / wrangler.toml)
+ * ============================================================================
+ *
+ * STRIPE_SECRET_KEY          - Stripe secret key (sk_live_... or sk_test_...)
+ * STRIPE_WEBHOOK_SECRET      - Webhook signing secret (whsec_...)
+ * STRIPE_PRICE_SEEDLING      - Stripe Price ID for Seedling plan
+ * STRIPE_PRICE_SAPLING       - Stripe Price ID for Sapling plan
+ * STRIPE_PRICE_OAK           - Stripe Price ID for Oak plan
+ * STRIPE_PRICE_EVERGREEN     - Stripe Price ID for Evergreen plan
+ *
+ * ============================================================================
+ * UPGRADE PATHS
+ * ============================================================================
+ *
+ * Free → Paid:
+ *   1. User clicks "Upgrade" from free account
+ *   2. POST /api/billing with selected plan
+ *   3. Creates new Stripe checkout session (no existing customer)
+ *   4. On success, update tenants.plan from 'free' to new plan
+ *
+ * Paid → Higher Tier:
+ *   1. User clicks "Upgrade" from paid account
+ *   2. PATCH /api/billing with action='change_plan', plan=newPlan
+ *   3. Updates existing Stripe subscription (prorated)
+ *   4. Update tenants.plan to new plan
+ *
+ * Paid → Lower Tier:
+ *   1. Same as upgrade (PATCH with change_plan action)
+ *   2. Change takes effect at end of billing period OR immediately (user choice)
+ *
+ * Paid → Cancel:
+ *   1. PATCH /api/billing with action='cancel'
+ *   2. Access continues until current_period_end
+ *   3. After period ends, plan reverts to 'free' (keeps Meadow access)
+ *
+ * Cancel → Resume:
+ *   1. PATCH /api/billing with action='resume' (before period ends)
+ *   2. Subscription continues, cancel_at_period_end set to false
  */
 
 const PLANS = {

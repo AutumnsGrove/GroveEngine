@@ -60,7 +60,40 @@ The username IS the subdomain. This is selected during initial signup.
 - 3-30 characters
 - Lowercase alphanumeric and hyphens only
 - Cannot start or end with hyphen
-- Cannot be reserved words (admin, api, www, mail, etc.)
+- Cannot contain consecutive hyphens (`--`)
+- Cannot be a reserved word (see list below)
+
+**Reserved Words:**
+
+```typescript
+const RESERVED_USERNAMES = [
+  // System routes
+  'admin', 'api', 'app', 'auth', 'login', 'logout', 'signup', 'register',
+  'account', 'settings', 'dashboard', 'billing', 'help', 'support',
+
+  // Infrastructure
+  'www', 'mail', 'email', 'smtp', 'imap', 'pop', 'ftp', 'ssh', 'cdn',
+  'static', 'assets', 'media', 'images', 'files', 'upload', 'uploads',
+
+  // Grove-specific
+  'grove', 'groveplace', 'meadow', 'autumn', 'blog', 'blogs', 'post', 'posts',
+  'feed', 'rss', 'atom', 'sitemap', 'robots', 'favicon',
+
+  // Legal/official
+  'legal', 'terms', 'privacy', 'dmca', 'copyright', 'abuse', 'security',
+  'status', 'docs', 'documentation', 'about', 'contact', 'team',
+
+  // Common reserved
+  'root', 'null', 'undefined', 'test', 'demo', 'example', 'sample',
+  'official', 'verified', 'moderator', 'mod', 'staff', 'employee',
+];
+```
+
+**Validation Regex:**
+```typescript
+const USERNAME_REGEX = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
+// Ensures: starts with letter, no consecutive hyphens, no trailing hyphen
+```
 
 **Availability Checking:**
 - Instant validation as user types (debounced 300ms)

@@ -381,6 +381,100 @@ r2://grove-assets-{username}/fonts/
 └── berkeley-mono.woff
 ```
 
+### 5.5 Font Upload Security
+
+#### Allowed File Formats
+
+| Format | MIME Type | Required |
+|--------|-----------|----------|
+| WOFF2 | `font/woff2` | Yes (primary) |
+| WOFF | `font/woff` | Optional (fallback) |
+
+**NOT Allowed:** TTF, OTF, EOT, SVG fonts (security concerns, larger file sizes)
+
+#### File Validation
+
+```typescript
+interface FontValidation {
+  // Magic byte validation
+  magicBytes: {
+    woff2: [0x77, 0x4F, 0x46, 0x32], // 'wOF2'
+    woff: [0x77, 0x4F, 0x46, 0x46],  // 'wOFF'
+  };
+
+  // Size limits
+  maxFileSize: 500 * 1024; // 500KB per file
+  maxTotalFonts: 4;
+
+  // Name validation
+  maxFamilyNameLength: 64;
+  allowedFamilyNameChars: /^[a-zA-Z0-9\s\-]+$/;
+}
+```
+
+#### Validation Steps
+
+1. **MIME type check:** Reject if not `font/woff2` or `font/woff`
+2. **Magic byte verification:** Read first 4 bytes, verify against known signatures
+3. **File size check:** Reject if > 500KB
+4. **Font parsing:** Attempt to parse font tables to ensure valid structure
+5. **Family name extraction:** Extract and sanitize font-family name
+6. **Sanitize filename:** Remove path traversal, limit to alphanumeric + hyphen
+
+#### Security Considerations
+
+| Risk | Mitigation |
+|------|------------|
+| **Malicious font files** | Magic byte + structural validation |
+| **Path traversal** | Sanitize filenames, use UUID-based storage |
+| **Font bombs (DoS)** | File size limits, parse timeout |
+| **Cross-site scripting** | Serve fonts with `Content-Type: font/woff2`, no inline execution |
+| **Storage abuse** | 500KB × 4 fonts = 2MB max per user, counts against storage quota |
+
+#### License Compliance
+
+Grove does not verify font licenses—this is the user's responsibility.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ ⚠️ Font License Agreement                                        │
+│                                                                  │
+│ By uploading a font, you confirm that you have the right to     │
+│ use this font on your website. This includes:                   │
+│                                                                  │
+│ • Open source fonts (OFL, Apache 2.0, MIT)                      │
+│ • Fonts you've purchased with web license                       │
+│ • Fonts you've created yourself                                 │
+│                                                                  │
+│ Grove is not responsible for font license violations.           │
+│                                                                  │
+│ [  ] I confirm I have the right to use this font                │
+│                                                                  │
+│ [Cancel]  [Upload Font]                                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Upload API
+
+```typescript
+POST /api/admin/fonts
+Content-Type: multipart/form-data
+
+Body: {
+  file: File (WOFF2 or WOFF),
+  family_name: string,
+  category: 'sans-serif' | 'serif' | 'mono' | 'display',
+  license_confirmed: boolean
+}
+
+Response: {
+  success: boolean;
+  font_id: string;
+  family: string;
+  path: string;
+}
+```
+
 ---
 
 ## 6. Community Themes (Oak+)

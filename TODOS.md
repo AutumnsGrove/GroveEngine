@@ -103,6 +103,12 @@
   - **Tiers:** Seedling ($8), Sapling ($12), Oak ($25), Evergreen ($35)
   - **Free tier** for Meadow-only users (no blog, social features only)
   - See: `docs/grove-pricing.md`, `docs/internal/pricing-discussions.md`
+- [ ] Implement Free tier signup and upgrade flow
+  - Free users created directly (no Stripe checkout)
+  - Store `plan='free'` in tenants table
+  - Free → Paid upgrade via `/api/billing` (creates Stripe subscription)
+  - No downgrade from paid to free (cancel = keep until period end)
+  - Rate limits: 20 public comments/week, 50 private replies/day
 - [ ] Add custom domain support for Oak+ (BYOD) and Evergreen (search + registration included)
 - [ ] Build tenant admin panel
 - [ ] Implement storage limits per plan (1GB/5GB/20GB/100GB)
