@@ -49,8 +49,8 @@
 				<!-- The Vision -->
 				<section class="mb-12">
 					<h2 class="text-2xl font-serif text-bark mb-4">The Vision</h2>
-					<p class="text-bark/70 font-sans leading-relaxed italic">
-						A forest of voices. Every user is a tree in the grove. Some are saplings just starting out.
+					<p class="text-bark/70 font-sans leading-relaxed">
+						<em>A forest of voices.</em> Every user is a tree in the grove. Some are saplings just starting out.
 						Some are ancient oaks with deep roots. All are welcome. All have space to grow.
 					</p>
 					<p class="text-bark/70 font-sans leading-relaxed mt-4">
