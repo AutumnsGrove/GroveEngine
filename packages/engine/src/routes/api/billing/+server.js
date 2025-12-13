@@ -7,46 +7,115 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * Platform billing for tenant subscriptions to GroveEngine
  *
  * Plans:
- * - starter: $12/month - Basic blog
- * - professional: $49/month - Full features
- * - business: $199/month - Custom domain, priority support
+ * - seedling: $8/month - Entry tier
+ * - sapling: $12/month - Hobbyist tier
+ * - oak: $25/month - Serious blogger tier
+ * - evergreen: $35/month - Full-service tier
+ *
+ * NOTE: The Free tier (Meadow-only access) does NOT use this billing API.
+ * Free users sign up directly without Stripe checkout - they're created
+ * with plan='free' in the tenants table but never hit this endpoint.
+ * This API is only for paid subscriptions.
+ *
+ * ============================================================================
+ * ENVIRONMENT VARIABLES (Required in Cloudflare Pages / wrangler.toml)
+ * ============================================================================
+ *
+ * STRIPE_SECRET_KEY          - Stripe secret key (sk_live_... or sk_test_...)
+ * STRIPE_WEBHOOK_SECRET      - Webhook signing secret (whsec_...)
+ * STRIPE_PRICE_SEEDLING      - Stripe Price ID for Seedling plan
+ * STRIPE_PRICE_SAPLING       - Stripe Price ID for Sapling plan
+ * STRIPE_PRICE_OAK           - Stripe Price ID for Oak plan
+ * STRIPE_PRICE_EVERGREEN     - Stripe Price ID for Evergreen plan
+ *
+ * ============================================================================
+ * UPGRADE PATHS
+ * ============================================================================
+ *
+ * Free → Paid:
+ *   1. User clicks "Upgrade" from free account
+ *   2. POST /api/billing with selected plan
+ *   3. Creates new Stripe checkout session (no existing customer)
+ *   4. On success, update tenants.plan from 'free' to new plan
+ *
+ * Paid → Higher Tier:
+ *   1. User clicks "Upgrade" from paid account
+ *   2. PATCH /api/billing with action='change_plan', plan=newPlan
+ *   3. Updates existing Stripe subscription (prorated)
+ *   4. Update tenants.plan to new plan
+ *
+ * Paid → Lower Tier:
+ *   1. Same as upgrade (PATCH with change_plan action)
+ *   2. Change takes effect at end of billing period OR immediately (user choice)
+ *
+ * Paid → Cancel:
+ *   1. PATCH /api/billing with action='cancel'
+ *   2. Access continues until current_period_end
+ *   3. After period ends, plan reverts to 'free' (keeps Meadow access)
+ *
+ * Cancel → Resume:
+ *   1. PATCH /api/billing with action='resume' (before period ends)
+ *   2. Subscription continues, cancel_at_period_end set to false
  */
 
 const PLANS = {
-  starter: {
-    name: "Starter",
+  seedling: {
+    name: "Seedling",
+    price: 800, // $8.00 in cents
+    interval: "month",
+    features: [
+      "50 posts",
+      "1GB Storage",
+      "3 themes + accent color",
+      "Basic analytics",
+      "grove.place subdomain",
+      "Unlimited public comments",
+      "Community support",
+    ],
+  },
+  sapling: {
+    name: "Sapling",
     price: 1200, // $12.00 in cents
     interval: "month",
     features: [
-      "1 Blog",
+      "250 posts",
       "5GB Storage",
+      "10 themes + accent color",
       "Basic analytics",
       "grove.place subdomain",
-    ],
-  },
-  professional: {
-    name: "Professional",
-    price: 4900, // $49.00 in cents
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "25GB Storage",
-      "Advanced analytics",
-      "Shop integration",
+      "Email forwarding (@grove.place)",
+      "Unlimited public comments",
       "Email support",
     ],
   },
-  business: {
-    name: "Business",
-    price: 19900, // $199.00 in cents
+  oak: {
+    name: "Oak",
+    price: 2500, // $25.00 in cents
     interval: "month",
     features: [
-      "Everything in Professional",
+      "Unlimited posts",
+      "20GB Storage",
+      "Theme customizer + community themes",
+      "Full analytics",
+      "BYOD (custom domain)",
+      "Full email (@grove.place)",
+      "Unlimited public comments",
+      "Priority email support",
+    ],
+  },
+  evergreen: {
+    name: "Evergreen",
+    price: 3500, // $35.00 in cents
+    interval: "month",
+    features: [
+      "Unlimited posts",
       "100GB Storage",
-      "Custom domain",
-      "White-label options",
-      "Priority support",
-      "API access",
+      "Theme customizer + custom fonts",
+      "Full analytics",
+      "Domain search + registration included",
+      "Full email (@grove.place)",
+      "Unlimited public comments",
+      "8hrs free support + priority",
     ],
   },
 };
@@ -129,7 +198,7 @@ export async function GET({ url, platform, locals }) {
  *
  * Body:
  * {
- *   plan: 'starter' | 'professional' | 'business'
+ *   plan: 'seedling' | 'sapling' | 'oak' | 'evergreen'
  *   successUrl: string
  *   cancelUrl: string
  * }
