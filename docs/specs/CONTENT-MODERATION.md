@@ -50,32 +50,32 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        USER PUBLISHES                            │
+│                        USER PUBLISHES                           │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CONTENT QUEUE (Encrypted)                     │
-│  - Post content extracted                                        │
+│                    CONTENT QUEUE (Encrypted)                    │
+│  - Post content extracted                                       │
 │  - Metadata stripped (no user ID, no IP)                        │
-│  - Assigned anonymous review ID                                  │
+│  - Assigned anonymous review ID                                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│         INFERENCE API (Fireworks AI / Cerebras / Groq)           │
-│  - Zero Data Retention enabled                                   │
+│         INFERENCE API (Fireworks AI / Cerebras / Groq)          │
+│  - Zero Data Retention enabled                                  │
 │  - TLS 1.2+ encryption in transit                               │
 │  - Model: DeepSeek V3.2 (open source, MIT license)              │
-│  - No content logged by provider                                 │
+│  - No content logged by provider                                │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      DECISION ENGINE                             │
-│  - Parse model response                                          │
-│  - Apply confidence thresholds                                   │
-│  - Route to appropriate action                                   │
+│                      DECISION ENGINE                            │
+│  - Parse model response                                         │
+│  - Apply confidence thresholds                                  │
+│  - Route to appropriate action                                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                     ┌─────────┼─────────┐
@@ -87,10 +87,10 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](.
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    IMMEDIATE DELETION                            │
-│  - All review data purged                                        │
-│  - Only decision outcome stored                                  │
-│  - Anonymous audit log (no content)                              │
+│                    IMMEDIATE DELETION                           │
+│  - All review data purged                                       │
+│  - Only decision outcome stored                                 │
+│  - Anonymous audit log (no content)                             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -394,15 +394,15 @@ An "edge case" is content where the automated system cannot make a confident dec
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    EDGE CASE DETECTED                            │
-│  - Confidence < 0.80                                             │
-│  - Conflicting categories                                        │
-│  - Model uncertainty flag                                        │
+│                    EDGE CASE DETECTED                           │
+│  - Confidence < 0.80                                            │
+│  - Conflicting categories                                       │
+│  - Model uncertainty flag                                       │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    SECONDARY REVIEW                              │
+│                    SECONDARY REVIEW                             │
 │  - Re-run with different prompt framing                         │
 │  - Include more context if available                            │
 │  - Use slightly higher temperature (0.3)                        │

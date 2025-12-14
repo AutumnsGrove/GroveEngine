@@ -44,27 +44,27 @@ domains.grove.place  →  domains Pages project
 ┌─────────────────────────────────────────────────────────────────┐
 │                   groveengine Pages Project                     │
 │                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                   hooks.server.ts                        │   │
-│  │                                                          │   │
-│  │  1. Parse hostname → extract subdomain                   │   │
-│  │  2. Check reserved subdomains (auth, admin, api, etc.)   │   │
-│  │  3. Look up tenant in D1 OR route to internal app        │   │
-│  │  4. Set locals.tenant / locals.app context               │   │
-│  │                                                          │   │
-│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                   hooks.server.ts                       │    │
+│  │                                                         │    │
+│  │  1. Parse hostname → extract subdomain                  │    │
+│  │  2. Check reserved subdomains (auth, admin, api, etc.)  │    │
+│  │  3. Look up tenant in D1 OR route to internal app       │    │
+│  │  4. Set locals.tenant / locals.app context              │    │
+│  │                                                         │    │
+│  └─────────────────────────────────────────────────────────┘    │
 │                                │                                │
-│         ┌──────────────────────┼──────────────────────┐        │
-│         │                      │                      │        │
-│         ▼                      ▼                      ▼        │
-│  ┌─────────────┐       ┌─────────────┐       ┌─────────────┐  │
-│  │   Tenant    │       │  Reserved   │       │   Landing   │  │
-│  │   Blogs     │       │    Apps     │       │    Page     │  │
-│  │             │       │             │       │             │  │
-│  │ /[tenant]/  │       │ /apps/      │       │ /           │  │
-│  │  routes     │       │  domains/   │       │ (grove.     │  │
-│  │             │       │  monitor/   │       │  place)     │  │
-│  └─────────────┘       └─────────────┘       └─────────────┘  │
+│         ┌──────────────────────┼──────────────────────┐         │
+│         │                      │                      │         │
+│         ▼                      ▼                      ▼         │
+│  ┌─────────────┐       ┌─────────────┐       ┌─────────────┐    │
+│  │   Tenant    │       │  Reserved   │       │   Landing   │    │
+│  │   Blogs     │       │    Apps     │       │    Page     │    │
+│  │             │       │             │       │             │    │
+│  │ /[tenant]/  │       │ /apps/      │       │ /           │    │
+│  │  routes     │       │  domains/   │       │ (grove.     │    │
+│  │             │       │  monitor/   │       │  place)     │    │
+│  └─────────────┘       └─────────────┘       └─────────────┘    │ 
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```

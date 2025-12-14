@@ -21,21 +21,21 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    grove-router Worker                       │
-│              (catches *.grove.place requests)                │
+│                    grove-router Worker                      │
+│              (catches *.grove.place requests)               │
 └─────────────────────────┬───────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   groveengine Pages                          │
-│                  (single deployment)                         │
+│                   groveengine Pages                         │
+│                  (single deployment)                        │
 ├─────────────────────────────────────────────────────────────┤
-│  hooks.server.ts                                             │
+│  hooks.server.ts                                            │
 │  ├── Extract subdomain from X-Forwarded-Host                │
 │  ├── Look up tenant in D1                                   │
 │  └── Set context: { type: 'tenant', tenant: {...} }         │
 ├─────────────────────────────────────────────────────────────┤
-│  Routes (all tenant-aware)                                   │
+│  Routes (all tenant-aware)                                  │
 │  ├── / (home) → Load tenant's home page from D1             │
 │  ├── /blog → Load tenant's posts from D1                    │
 │  ├── /[slug] → Load specific post/page from D1              │

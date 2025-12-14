@@ -319,18 +319,18 @@ Not everyone writes immediately—some users are setting up, some are finding th
 ```
 ┌─────────────────────────────────────────────┐
 │           Your Year in the Grove            │
-│                   2025                       │
+│                   2025                      │
 ├─────────────────────────────────────────────┤
-│                                              │
+│                                             │
 │  You've been in the Grove for a year now.   │
 │  Your space is ready whenever you are.      │
-│                                              │
+│                                             │
 │  No pressure, no timeline.                  │
 │  Some seeds take longer to sprout.          │
-│                                              │
+│                                             │
 │  When you're ready to share,                │
 │  we'll be here.                             │
-│                                              │
+│                                             │
 └─────────────────────────────────────────────┘
 ```
 
@@ -338,7 +338,7 @@ Not everyone writes immediately—some users are setting up, some are finding th
 ```
 │  You wrote 3 posts this year.               │
 │  Every one of them found readers.           │
-│                                              │
+│                                             │
 │  Quality over quantity—                     │
 │  your words are landing.                    │
 ```
@@ -348,24 +348,24 @@ Not everyone writes immediately—some users are setting up, some are finding th
 ```
 ┌─────────────────────────────────────────────┐
 │           Your Year in the Grove            │
-│                   2025                       │
+│                   2025                      │
 ├─────────────────────────────────────────────┤
-│                                              │
+│                                             │
 │  You wrote 47 posts this year.              │
 │  12 of them really resonated with readers.  │
-│                                              │
+│                                             │
 │  Your readers spent 340 hours               │
 │  with your words.                           │
-│                                              │
+│                                             │
 │  23 people became steady readers—           │
 │  coming back again and again.               │
-│                                              │
+│                                             │
 │  Your most-loved post:                      │
 │  "Why I Garden at Midnight"                 │
-│                                              │
+│                                             │
 │  A post from 2024 that's still growing:     │
 │  "Starting Seeds in Winter"                 │
-│                                              │
+│                                             │
 └─────────────────────────────────────────────┘
 ```
 
@@ -981,8 +981,8 @@ Lightweight, warm, non-intrusive:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  We track reading patterns to help the author understand    │
-│  what resonates. No ads, no cross-site tracking.           │
-│                                                              │
+│  what resonates. No ads, no cross-site tracking.            │
+│                                                             │
 │  [That's fine]  [No thanks]  [Learn more]                   │
 └─────────────────────────────────────────────────────────────┘
 ```
