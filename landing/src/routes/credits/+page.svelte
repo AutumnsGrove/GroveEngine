@@ -253,104 +253,167 @@
 					The typefaces available for Grove blogs. All are open source or free for use.
 				</p>
 
-				<div class="grid gap-3">
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Atkinson Hyperlegible</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Accessibility-focused sans-serif</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+				<div class="grid gap-4">
+					<!-- Atkinson Hyperlegible -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Atkinson Hyperlegible', sans-serif;">
+							Atkinson Hyperlegible
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Atkinson Hyperlegible', sans-serif;">
+							Designed for greater legibility and readability, especially for low vision readers. Every character is distinct and clear.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Braille Institute of America</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://brailleinstitute.org/freefont" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Braille Institute</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Braille Institute</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">OpenDyslexic</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Dyslexia-friendly typeface</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- OpenDyslexic -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'OpenDyslexic', sans-serif;">
+							OpenDyslexic
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'OpenDyslexic', sans-serif;">
+							A typeface designed to mitigate some of the common reading errors caused by dyslexia. Features weighted bottoms to help indicate direction.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Abbie Gonzalez</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://opendyslexic.org" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">OpenDyslexic.org</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Abbie Gonzalez</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Lexend</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Reading-optimized sans-serif</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- Lexend -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Lexend', sans-serif;">
+							Lexend
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Lexend', sans-serif;">
+							A variable font designed to improve reading fluency. Research shows it can increase reading speed by up to 20% for struggling readers.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Bonnie Shaver-Troup & Thomas Jockin</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://www.lexend.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Lexend.com</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Bonnie Shaver-Troup & Thomas Jockin</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Quicksand</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Rounded geometric sans-serif</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- Quicksand -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Quicksand', sans-serif;">
+							Quicksand
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Quicksand', sans-serif;">
+							A geometric sans-serif with rounded terminals. Friendly, modern, and highly readable at any size.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Andrew Paglinawan</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/andrew-paglinawan/QuicksandFamily" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Andrew Paglinawan</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Cormorant</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Elegant display serif</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- Cormorant -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Cormorant', serif;">
+							Cormorant
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Cormorant', serif;">
+							An elegant display serif inspired by Claude Garamond's work. Perfect for long-form reading and fantasy-themed content.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Christian Thalmann (Catharsis Fonts)</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/CatharsisFonts/Cormorant" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Christian Thalmann</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Bodoni Moda</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Classic didone serif</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- Bodoni Moda -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Bodoni Moda', serif;">
+							Bodoni Moda
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Bodoni Moda', serif;">
+							A high-contrast display serif inspired by Giambattista Bodoni's work. Features dramatic thick-thin strokes for elegant, sophisticated headings.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Owen Earl (Indestructible Type)</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/indestructible-type/Bodoni" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Indestructible Type</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">IBM Plex Mono</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Monospace for code</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">SIL OFL 1.1</span>
+					<!-- IBM Plex Mono -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'IBM Plex Mono', monospace;">
+							IBM Plex Mono
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'IBM Plex Mono', monospace;">
+							IBM's open-source monospace typeface designed for technical content and coding. Clean lines with excellent legibility at all sizes.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">IBM</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/IBM/plex" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by IBM</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Cozette</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Bitmap-style monospace</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">MIT</span>
+					<!-- Cozette -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Cozette', monospace;">
+							Cozette
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Cozette', monospace;">
+							A bitmap programming font with excellent readability at small sizes. Perfect for that retro terminal aesthetic.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">slavfox</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/slavfox/Cozette" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">MIT License</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by slavfox</p>
 					</div>
 
-					<div class="card p-4">
-						<div class="flex items-center justify-between flex-wrap gap-2">
-							<div>
-								<span class="font-serif text-foreground">Alagard</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Fantasy pixel font</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">Free</span>
+					<!-- Alagard -->
+					<div class="card p-5">
+						<h3 class="text-2xl text-accent-muted mb-2" style="font-family: 'Alagard', fantasy;">
+							Alagard
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Alagard', fantasy; font-size: 1.1rem;">
+							A medieval-style pixel font perfect for fantasy and game-inspired designs. Adventure awaits.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Hewett Tsoi</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://www.dafont.com/alagard.font" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">DaFont</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">Free for personal and commercial use</span>
 						</div>
-						<p class="text-foreground-muted font-sans text-xs mt-2">by Hewett Tsoi</p>
 					</div>
 				</div>
 			</section>
