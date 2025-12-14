@@ -49,14 +49,24 @@ Instead of showing vote scores or engagement numbers, Rings uses **Resonance Ind
 
 | Signal | Icon | Trigger | Appears After |
 |--------|------|---------|---------------|
-| **Sparked Interest** | 🌱 | Above your personal average engagement | 7 days |
-| **Really Resonated** | 🌿 | Significantly above your average (top 25%) | 7 days |
-| **Community Favorite** | 🌳 | Top 10% of your posts ever | 7 days |
+| **Sparked Interest** | 🌱 | Above your personal average engagement | 7 days after publish |
+| **Really Resonated** | 🌿 | Significantly above your average (top 25%) | 7 days after publish |
+| **Community Favorite** | 🌳 | Top 10% of your posts ever | 7 days after publish |
+
+### Signal Timing
+
+**"7 days after publish"** means 7 days after the post's published_at date. Signals are calculated at that moment using engagement data accumulated up to that point. This creates a consistent evaluation window for all posts.
+
+Example:
+- Post published December 1st at 10:00 AM
+- Signal calculation runs December 8th at 00:00 UTC
+- If triggered, signal appears immediately on December 8th
+- Writers can't game signals by posting at specific times—everyone gets 7 days
 
 ### Design Principles
 
 - **Relative to YOU** - Signals compare to your own baseline, never to others
-- **7-day delay** - Prevents refresh-checking behavior
+- **7-day evaluation window** - Every post gets exactly 7 days to accumulate engagement
 - **Silence is neutral** - No signal means normal, not bad
 - **Nothing negative** - We never show "this underperformed"
 - **Extensible architecture** - New signals can be added without schema changes
@@ -93,8 +103,8 @@ CREATE TABLE resonance_signals (
   metadata TEXT,                 -- JSON for future signal types
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
-  FOREIGN KEY (post_id) REFERENCES posts(id),
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_signals_post ON resonance_signals(post_id);
@@ -108,12 +118,14 @@ CREATE INDEX idx_signals_visible ON resonance_signals(visible_after);
 
 ### Seedling (Basic - $8/month)
 
-**Access:** View counts on recent 5 posts only
+**Access:** View counts on your 5 most recently published posts
 **Retention:** Rolling 30 days
 **Features:**
 - Total views per post (delayed 24hrs)
 - Simple "X views" display
 - No charts, no breakdowns
+
+**"Recent 5 posts"** = your 5 most recently published posts by publish date, regardless of when you wrote them. Scheduled posts count from their publish date, not their creation date.
 
 ### Sapling ($12/month)
 
@@ -277,7 +289,9 @@ A "wrapped" style reflection, but **not** competitive or braggy. Reflective, not
 ### How It Works
 
 **Year 1 (All Paid Tiers):**
-Every paid user automatically receives their first "Year in the Grove" reflection after 12 months on the platform. This is a celebratory milestone—no opt-in required.
+Every paid user automatically receives their first "Year in the Grove" reflection 12 months after their signup date. This is a celebratory milestone—no opt-in required.
+
+**Important:** Reflections are based on your **signup anniversary**, not the calendar year. If you joined in March, your first reflection arrives the following March.
 
 **After Year 1:**
 - **Oak+:** You can choose your reflection frequency in preferences:
@@ -289,7 +303,39 @@ Every paid user automatically receives their first "Year in the Grove" reflectio
 
 **Delivery:** Via email, at the end of your chosen period. Private, personal, celebratory.
 
-### Example
+### Warm Messaging for Non-Posters
+
+Not everyone writes immediately—some users are setting up, some are finding their voice. Reflections adapt:
+
+**If you haven't published yet:**
+```
+┌─────────────────────────────────────────────┐
+│           Your Year in the Grove            │
+│                   2025                       │
+├─────────────────────────────────────────────┤
+│                                              │
+│  You've been in the Grove for a year now.   │
+│  Your space is ready whenever you are.      │
+│                                              │
+│  No pressure, no timeline.                  │
+│  Some seeds take longer to sprout.          │
+│                                              │
+│  When you're ready to share,                │
+│  we'll be here.                             │
+│                                              │
+└─────────────────────────────────────────────┘
+```
+
+**If you published just a few posts:**
+```
+│  You wrote 3 posts this year.               │
+│  Every one of them found readers.           │
+│                                              │
+│  Quality over quantity—                     │
+│  your words are landing.                    │
+```
+
+### Example (Active Writer)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -373,6 +419,15 @@ Since content moderation is automated, monitoring is crucial:
 
 As platform admin, you have **lifetime retention** of aggregate metrics. Individual blog analytics follow tier-based retention rules.
 
+### GDPR Compliance (Platform Admin)
+
+Platform admin access is designed for GDPR compliance:
+- **Aggregates only** - You never see individual user data, only platform-wide totals
+- **No individual blog access** - You cannot view a specific blog's analytics without being the blog owner
+- **Moderation stats are anonymized** - Category breakdowns show patterns, not specific posts
+- **Revenue data is business-critical** - Justifiable for platform operations under legitimate interest
+- **No cross-referencing** - Aggregate data cannot be linked back to individual users
+
 ---
 
 ## Technical Architecture
@@ -431,8 +486,8 @@ CREATE TABLE analytics_events (
   browser_family TEXT,
   country_code TEXT,
 
-  FOREIGN KEY (post_id) REFERENCES posts(id),
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_events_post ON analytics_events(post_id);
@@ -475,8 +530,8 @@ CREATE TABLE analytics_daily (
   country_breakdown TEXT,
 
   UNIQUE(post_id, date),
-  FOREIGN KEY (post_id) REFERENCES posts(id),
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_daily_post ON analytics_daily(post_id);
@@ -513,7 +568,7 @@ CREATE TABLE analytics_blog_stats (
   top_posts TEXT,                  -- JSON array of {post_id, views, engaged}
 
   UNIQUE(blog_id, date),
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_blog_stats_blog ON analytics_blog_stats(blog_id);
@@ -522,26 +577,33 @@ CREATE INDEX idx_blog_stats_date ON analytics_blog_stats(date);
 
 #### Reader Tracking Table (for Return/Steady Readers)
 
-**Important:** This table only tracks **logged-in users**. Anonymous visitors cannot be reliably tracked for return/steady reader metrics due to IP rotation, VPNs, etc. The `user_hash` is a stable SHA-256 hash of the user's ID combined with a secret salt—it never changes for a given user, enabling accurate loyalty tracking.
+**Important:** This table only tracks **logged-in users**. Anonymous visitors cannot be reliably tracked for return/steady reader metrics due to IP rotation, VPNs, etc. The `user_hash` is generated using HMAC-SHA256 (see Security Implementation section).
+
+The `reading_sessions` field stores timestamps of each reading session, enabling accurate "Return Reader" calculations with time windows (e.g., "came back within 30 days").
 
 ```sql
 CREATE TABLE reader_history (
   id TEXT PRIMARY KEY,
   blog_id TEXT NOT NULL,
-  user_hash TEXT NOT NULL,         -- SHA-256(user_id + secret_salt) - stable, logged-in users only
+  user_hash TEXT NOT NULL,         -- HMAC-SHA256(user_id, secret_key) - stable, logged-in users only
   first_read_at INTEGER NOT NULL,
   last_read_at INTEGER NOT NULL,
   total_posts_read INTEGER DEFAULT 1,
+  reading_sessions TEXT,           -- JSON array of timestamps: [1702598400, 1703203200, ...]
   is_steady INTEGER DEFAULT 0,     -- Set to 1 when total_posts_read >= 3
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   UNIQUE(blog_id, user_hash),
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_reader_blog ON reader_history(blog_id);
 CREATE INDEX idx_reader_steady ON reader_history(is_steady);
+CREATE INDEX idx_reader_last_read ON reader_history(last_read_at);
 ```
+
+**Return Reader Calculation:**
+A reader qualifies as a "Return Reader" if they have 2+ entries in `reading_sessions` where at least one pair of sessions is within 30 days of each other. This accurately distinguishes someone who read twice in one day vs someone who genuinely returned weeks later.
 
 #### User Preferences Table
 
@@ -566,7 +628,7 @@ CREATE TABLE analytics_preferences (
 
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER,
-  FOREIGN KEY (blog_id) REFERENCES tenants(id)
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 ```
 
@@ -624,11 +686,18 @@ CREATE INDEX idx_platform_date ON platform_metrics(date);
 ### Collection API (Public)
 
 **Rate Limiting:**
-To prevent abuse and inflated metrics, collection endpoints are rate-limited per session:
+To prevent abuse and inflated metrics, collection endpoints are rate-limited:
+
+**Primary (session-based):**
 - **Pageviews:** 100 per hour per session
 - **Reading progress:** 20 per hour per session
 
-Exceeding limits returns `429 Too Many Requests`.
+**Fallback (IP-based):**
+For users without valid session cookies (bots, scrapers, consent-declined):
+- **Pageviews:** 50 per hour per IP
+- **Reading progress:** Blocked entirely (no session = no tracking)
+
+IP-based limits use a shortened hash of the IP for privacy. Exceeding limits returns `429 Too Many Requests`.
 
 **Track Page View:**
 ```typescript
@@ -826,6 +895,162 @@ Daily cron job removes:
 5. **Aggregation:** Individual sessions not visible to admin
 6. **Automatic Expiry:** Data deleted per retention schedule
 7. **Encryption:** HTTPS only, encrypted at rest
+
+---
+
+## Security Implementation
+
+### User Hash Generation
+
+For logged-in user tracking (Return Readers, Steady Readers), we use HMAC-SHA256 with a secret key and pepper for additional security:
+
+```typescript
+// Generate stable user hash - NEVER changes for a given user
+function generateUserHash(userId: string): string {
+  const secretKey = env.ANALYTICS_HMAC_KEY;    // 256-bit key in Cloudflare secrets
+  const pepper = env.ANALYTICS_PEPPER;          // Additional secret, stored separately
+
+  const message = `${userId}:${pepper}`;
+  return hmacSha256(message, secretKey);
+}
+```
+
+**Key Management:**
+- `ANALYTICS_HMAC_KEY`: 256-bit cryptographic key stored in Cloudflare Workers secrets
+- `ANALYTICS_PEPPER`: Additional secret stored separately (different secret store or environment)
+- Keys are **never rotated** for user hashes (would break reader history linkage)
+- If key compromise is suspected: generate new keys, invalidate all reader_history data, start fresh
+
+**Why HMAC over plain SHA-256:**
+- Even if the pepper leaks, attacker needs the HMAC key to generate valid hashes
+- HMAC is designed for authentication; SHA-256 alone is vulnerable to length extension attacks
+- Two-layer protection: even partial key compromise doesn't expose user IDs
+
+### Visitor Hash Generation (Anonymous)
+
+For anonymous visitors, we use a daily-rotating hash that provides session consistency without long-term tracking:
+
+```typescript
+// Generate daily visitor hash - rotates every 24 hours
+function generateVisitorHash(ip: string, userAgent: string): string {
+  const dailySalt = getDailySalt();  // Rotates at midnight UTC
+  const message = `${ip}:${userAgent}:${dailySalt}`;
+  return sha256(message).substring(0, 16);  // Truncated for privacy
+}
+
+function getDailySalt(): string {
+  const today = new Date().toISOString().split('T')[0];  // YYYY-MM-DD
+  return hmacSha256(today, env.DAILY_SALT_KEY);
+}
+```
+
+**Known Limitation:** Daily rotation means the same visitor across two days appears as two unique visitors. This is intentional—we prioritize privacy over perfect accuracy.
+
+### Export Security
+
+```typescript
+// Export endpoint validation
+function validateExportRequest(query: ExportQuery): ValidationResult {
+  // Date range validation
+  const start = new Date(query.start_date);
+  const end = new Date(query.end_date);
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return { valid: false, error: 'Invalid date format. Use YYYY-MM-DD.' };
+  }
+
+  if (end < start) {
+    return { valid: false, error: 'End date must be after start date.' };
+  }
+
+  // Max range: 1 year for Oak, 5 years for Evergreen
+  const maxDays = user.tier === 'evergreen' ? 1825 : 365;
+  const daysDiff = (end - start) / (1000 * 60 * 60 * 24);
+  if (daysDiff > maxDays) {
+    return { valid: false, error: `Date range exceeds maximum (${maxDays} days).` };
+  }
+
+  // Format validation
+  if (!['csv', 'json'].includes(query.format)) {
+    return { valid: false, error: 'Invalid format. Use csv or json.' };
+  }
+
+  return { valid: true };
+}
+
+// File size limit: 50MB max export
+const MAX_EXPORT_SIZE_BYTES = 50 * 1024 * 1024;
+```
+
+---
+
+## Scaling & Performance
+
+### D1 Database Limits
+
+Cloudflare D1 has row limits:
+- **Free tier:** 100,000 rows per database
+- **Paid tier:** 25,000,000 rows per database
+
+**Estimated Row Counts (per blog, per year):**
+- `analytics_events`: ~100-10,000 rows/day (depends on traffic) → **deleted after aggregation**
+- `analytics_daily`: 365 rows/year per post → ~3,650 rows for 10 posts
+- `analytics_blog_stats`: 365 rows/year
+- `reader_history`: ~1-1,000 rows (steady readers accumulate slowly)
+
+**Scaling Strategy:**
+
+1. **Aggressive Event Cleanup:** Raw events are deleted immediately after daily aggregation. Only aggregated data is retained. This keeps `analytics_events` small (only holds ~48hrs of data at any time).
+
+2. **High-Volume Sampling:** For posts exceeding 1,000 pageviews/day, we sample events instead of recording all:
+   ```typescript
+   // Sample 10% of events for high-volume posts
+   function shouldRecordEvent(postId: string, dailyCount: number): boolean {
+     if (dailyCount < 1000) return true;
+     return Math.random() < 0.1;  // 10% sampling
+   }
+   ```
+   Sampling is noted in `analytics_daily.metadata` so dashboard can show "~10,000 views (estimated)".
+
+3. **Retention Enforcement:** Daily cron strictly enforces tier-based retention. Old data is permanently deleted.
+
+### Cron Schedule & Timing
+
+**Daily Aggregation Cron:** Runs once per day at 00:00 UTC.
+
+**Delay Variability:**
+- Event at 23:59 UTC → processed at 00:00 UTC next day (~1 minute delay)
+- Event at 00:01 UTC → processed at 00:00 UTC next day (~24 hour delay)
+
+**Effective delay: 24-48 hours** depending on when the event occurred. This variability is acceptable—the goal is "not real-time," not precise 24-hour delays.
+
+### Reading Time Estimation
+
+Engaged Readers and Deep Reads metrics depend on accurate reading time estimates:
+
+```typescript
+// Estimate reading time for a post
+function estimateReadingTime(post: Post): number {
+  const WORDS_PER_MINUTE = 200;  // Average adult reading speed
+
+  // Count words in markdown content (strip formatting)
+  const plainText = stripMarkdown(post.markdown_content);
+  const wordCount = plainText.split(/\s+/).filter(w => w.length > 0).length;
+
+  // Add time for images (10 seconds each)
+  const imageCount = (post.markdown_content.match(/!\[/g) || []).length;
+  const imageSeconds = imageCount * 10;
+
+  // Calculate total seconds
+  const readingSeconds = (wordCount / WORDS_PER_MINUTE) * 60;
+  return Math.round(readingSeconds + imageSeconds);
+}
+
+// A "Deep Read" = spent 60%+ of estimated reading time
+function isDeepRead(timeOnPage: number, estimatedTime: number): boolean {
+  return timeOnPage >= estimatedTime * 0.6;
+}
+```
 
 ---
 
