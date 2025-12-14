@@ -41,6 +41,12 @@
 			>
 				Legal
 			</a>
+			<a
+				href="/credits"
+				class="transition-colors {currentPath === '/credits' ? 'text-accent-muted' : 'text-foreground-subtle hover:text-accent-muted'}"
+			>
+				Credits
+			</a>
 		</nav>
 	</div>
 </header>

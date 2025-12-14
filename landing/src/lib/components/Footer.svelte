@@ -27,6 +27,8 @@
 				<a href="/pricing" class="hover:text-accent-muted transition-colors">Pricing</a>
 				<span class="text-divider">·</span>
 				<a href="/legal" class="hover:text-accent-muted transition-colors">Legal</a>
+				<span class="text-divider">·</span>
+				<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
 			</div>
 
 			{#if showExternalLinks}
