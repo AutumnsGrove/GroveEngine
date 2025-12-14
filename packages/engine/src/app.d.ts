@@ -8,11 +8,18 @@ declare global {
     // interface Error {}
 
     interface Locals {
-      /** Authenticated user from session */
+      /** Authenticated user from Heartwood OAuth */
       user: {
+        /** User ID from Heartwood (sub claim) */
+        id: string;
+        /** User's email address */
         email: string;
-        id?: string;
-        is_admin?: boolean;
+        /** User's display name */
+        name?: string;
+        /** Profile picture URL */
+        picture?: string;
+        /** Auth provider (google, github, magic_code) */
+        provider?: string;
       } | null;
 
       /** Routing context based on subdomain */
@@ -42,9 +49,14 @@ declare global {
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
-        SESSION_SECRET: string;
-        RESEND_API_KEY: string;
-        ALLOWED_ADMIN_EMAILS: string;
+        SESSION_SECRET?: string; // Deprecated: was used for magic code auth
+        RESEND_API_KEY?: string; // Optional: for transactional emails
+        ALLOWED_ADMIN_EMAILS?: string;
+
+        // GroveAuth (Heartwood OAuth)
+        GROVEAUTH_URL?: string;
+        GROVEAUTH_CLIENT_ID?: string;
+        GROVEAUTH_CLIENT_SECRET?: string;
 
         // Stripe (optional, for shop features)
         STRIPE_SECRET_KEY?: string;

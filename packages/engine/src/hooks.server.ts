@@ -1,11 +1,19 @@
 import type { Handle } from "@sveltejs/kit";
-import { parseSessionCookie, verifySession } from "$lib/auth/session.js";
 import {
   generateCSRFToken,
   validateCSRFToken,
   validateCSRF,
 } from "$lib/utils/csrf.js";
 import { error } from "@sveltejs/kit";
+
+/**
+ * Parse a specific cookie by name from the cookie header
+ */
+function getCookie(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`${name}=([^;]+)`));
+  return match ? match[1] : null;
+}
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -157,18 +165,43 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // =========================================================================
-  // AUTHENTICATION
+  // AUTHENTICATION (Heartwood OAuth)
   // =========================================================================
   const cookieHeader = event.request.headers.get("cookie");
-  const sessionToken = parseSessionCookie(cookieHeader);
+  const accessToken = getCookie(cookieHeader, "access_token");
 
-  if (sessionToken && event.platform?.env?.SESSION_SECRET) {
-    const user = await verifySession(
-      sessionToken,
-      event.platform.env.SESSION_SECRET,
-    );
-    if (user) {
-      event.locals.user = user;
+  if (accessToken) {
+    try {
+      const authBaseUrl =
+        event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+
+      // Get user info from Heartwood
+      const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (userInfoResponse.ok) {
+        const userInfo = await userInfoResponse.json();
+        event.locals.user = {
+          id: userInfo.sub,
+          email: userInfo.email,
+          name: userInfo.name,
+          picture: userInfo.picture,
+          provider: userInfo.provider,
+        };
+      } else if (userInfoResponse.status === 401) {
+        // Token expired or invalid - try to refresh
+        const refreshToken = getCookie(cookieHeader, "refresh_token");
+        if (refreshToken) {
+          // Token refresh would happen here if needed
+          // For now, user will need to re-login
+          console.log("[Auth] Access token expired, refresh available");
+        }
+      }
+    } catch (err) {
+      console.error("[Auth] Error verifying token:", err);
     }
   }
 

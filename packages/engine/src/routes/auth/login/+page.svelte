@@ -1,112 +1,45 @@
 <script>
   import { untrack } from 'svelte';
-  import { Button, Input } from '$lib/ui';
+  import { Button } from '$lib/ui';
 
-  let email = $state('');
-  let code = $state('');
-  let step = $state('email'); // 'email' or 'code'
-  let loading = $state(false);
   let error = $state('');
-  let message = $state('');
-
-  const errorMessages = {
-    'invalid_code': 'Invalid or expired code. Please try again.',
-    'send_failed': 'Failed to send code. Please try again.',
-    'server_error': 'Server error. Please try again.'
-  };
+  let loading = $state(false);
 
   $effect(() => {
     untrack(() => {
       if (typeof window === 'undefined') return;
       const params = new URLSearchParams(window.location.search);
-      const urlError = params.get('error') || '';
-      error = errorMessages[urlError] || (urlError ? 'An error occurred.' : '');
+      const urlError = params.get('error');
+      if (urlError) {
+        error = urlError;
+      }
     });
   });
 
-  async function handleSendCode(event) {
-    event.preventDefault();
-    if (!email.trim()) return;
-
+  function handleLogin() {
     loading = true;
-    error = '';
-    message = '';
-
-    try {
-      const response = await fetch('/auth/send-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        error = data.error || 'Failed to send code';
-        return;
-      }
-
-      message = 'Code sent! Check your email.';
-      step = 'code';
-    } catch (err) {
-      error = 'Network error. Please try again.';
-    } finally {
-      loading = false;
-    }
-  }
-
-  async function handleVerifyCode(event) {
-    event.preventDefault();
-    const cleanCode = code.replace(/\s/g, '');
-    if (!cleanCode) return;
-
-    loading = true;
-    error = '';
-
-    try {
-      const response = await fetch('/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), code: cleanCode })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        error = data.error || 'Invalid code';
-        return;
-      }
-
-      // Redirect to admin
-      window.location.href = data.redirect || '/admin';
-    } catch (err) {
-      error = 'Network error. Please try again.';
-    } finally {
-      loading = false;
-    }
-  }
-
-  function handleBack() {
-    step = 'email';
-    code = '';
-    error = '';
-    message = '';
+    // Redirect to OAuth login route - it will handle the PKCE flow
+    window.location.href = '/auth/login';
   }
 </script>
 
 <svelte:head>
-  <title>Admin Login - Autumns Grove</title>
+  <title>Admin Login - Grove</title>
 </svelte:head>
 
 <div class="login-container">
   <div class="login-box">
+    <div class="logo">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" fill="currentColor" opacity="0.2"/>
+        <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4zm0 2.18l6 3v5.82c0 4.53-3.13 8.72-6 9.82-2.87-1.1-6-5.29-6-9.82V7.18l6-3z" fill="currentColor"/>
+        <circle cx="12" cy="10" r="3" fill="currentColor"/>
+      </svg>
+    </div>
+
     <h1>Admin Panel</h1>
     <p class="subtitle">
-      {#if step === 'email'}
-        Enter your email to receive a login code
-      {:else}
-        Enter the 6-digit code sent to your email
-      {/if}
+      Sign in with your Grove account to access the admin panel
     </p>
 
     {#if error}
@@ -115,55 +48,26 @@
       </div>
     {/if}
 
-    {#if message}
-      <div class="success">
-        {message}
-      </div>
-    {/if}
-
-    {#if step === 'email'}
-      <form onsubmit={handleSendCode}>
-        <Input
-          type="email"
-          bind:value={email}
-          placeholder="you@example.com"
-          required
-          disabled={loading}
-          autocomplete="email"
-          autocorrect="on"
-        />
-        <Button type="submit" variant="default" size="lg" class="login-btn" disabled={loading}>
-          {#if loading}
-            Sending...
-          {:else}
-            Send Login Code
-          {/if}
-        </Button>
-      </form>
-    {:else}
-      <form onsubmit={handleVerifyCode}>
-        <Input
-          type="text"
-          bind:value={code}
-          placeholder="123456"
-          required
-          disabled={loading}
-          autocomplete="one-time-code"
-          inputmode="numeric"
-          maxlength="6"
-        />
-        <Button type="submit" variant="default" size="lg" class="login-btn" disabled={loading}>
-          {#if loading}
-            Verifying...
-          {:else}
-            Verify Code
-          {/if}
-        </Button>
-        <Button type="button" variant="ghost" class="back-btn" onclick={handleBack} disabled={loading}>
-          Use a different email
-        </Button>
-      </form>
-    {/if}
+    <Button
+      type="button"
+      variant="default"
+      size="lg"
+      class="login-btn"
+      disabled={loading}
+      onclick={handleLogin}
+    >
+      {#if loading}
+        <span class="spinner"></span>
+        Redirecting...
+      {:else}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="btn-icon">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="10 17 15 12 10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Sign in with Grove
+      {/if}
+    </Button>
 
     <p class="footer-text">
       Only authorized administrators can access this panel.
@@ -177,12 +81,12 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f5f5f5;
+    background: var(--background, #f5f5f5);
     padding: 1rem;
   }
 
   .login-box {
-    background: white;
+    background: var(--card, white);
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -191,117 +95,64 @@
     width: 100%;
   }
 
+  .logo {
+    color: var(--primary, #22863a);
+    margin-bottom: 1rem;
+  }
+
   h1 {
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
-    color: #24292e;
+    color: var(--foreground, #24292e);
   }
 
   .subtitle {
-    color: #586069;
+    color: var(--muted-foreground, #586069);
     margin: 0 0 1.5rem 0;
     font-size: 0.95rem;
   }
 
   .error {
-    background: #ffeef0;
-    border: 1px solid #f97583;
-    color: #d73a49;
+    background: hsl(0 84% 60% / 0.1);
+    border: 1px solid hsl(0 84% 60% / 0.3);
+    color: hsl(0 84% 40%);
     padding: 0.75rem 1rem;
     border-radius: 6px;
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
   }
 
-  .success {
-    background: #dcffe4;
-    border: 1px solid #34d058;
-    color: #22863a;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
+  :global(.login-btn) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    padding: 0.875rem 1.5rem !important;
   }
 
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  .btn-icon {
+    flex-shrink: 0;
   }
 
-  input {
-    padding: 0.875rem 1rem;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    font-size: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
   }
 
-  input:focus {
-    outline: none;
-    border-color: #0366d6;
-    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
-  }
-
-  input::placeholder {
-    color: #959da5;
-  }
-
-  input[type="text"] {
-    font-size: 1.5rem;
-    letter-spacing: 0.5rem;
-    font-weight: 500;
-  }
-
-  .login-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #24292e;
-    color: white;
-    padding: 0.875rem 1.5rem;
-    border-radius: 6px;
-    border: none;
-    font-weight: 500;
-    font-size: 1rem;
-    width: 100%;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .login-btn:hover:not(:disabled) {
-    background: #2f363d;
-  }
-
-  .login-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .back-btn {
-    background: transparent;
-    color: #586069;
-    border: none;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  .back-btn:hover:not(:disabled) {
-    color: #24292e;
-  }
-
-  .back-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .footer-text {
     margin: 1.5rem 0 0 0;
-    color: #6a737d;
+    color: var(--muted-foreground, #6a737d);
     font-size: 0.8rem;
   }
 </style>
