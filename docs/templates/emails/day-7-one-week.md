@@ -41,6 +41,7 @@ It's old technology, and it still works beautifully. If you want to share your f
 - [NetNewsWire](https://netnewswire.com/) — Free, open source, and a classic
 - [Reeder](https://reeder.app/) — Apple only, one-time purchase, genuinely excellent
 - [Feedly](https://feedly.com/) — Web-based, works everywhere, free tier available
+- [Inoreader](https://www.inoreader.com/) — Powerful web-based option with great filtering
 
 ---
 
@@ -48,7 +49,7 @@ It's old technology, and it still works beautifully. If you want to share your f
 
 Grove has a shared feed called **Meadow** where posts from across the network can appear. It's entirely opt-in—your posts stay on your blog only unless you explicitly choose to share them.
 
-If you want to be discovered by other Grove readers (or discover other writers), you can enable this in **Settings → Meadow**. You control which posts appear there, and you can change your mind anytime. No pressure either way.
+If you want to be discovered by other Grove readers (or discover other writers), you can enable this in **Settings → Meadow**. When you write a post, you'll see a checkbox to share it to Meadow—it's per-post, so you control exactly what appears there. No pressure either way.
 
 ---
 
