@@ -11,8 +11,6 @@
 ### Medium Priority
 - [ ] **CDN magic byte validation** - Add file signature validation
   - Location: `landing/src/routes/api/admin/cdn/upload/+server.ts`
-- [ ] **Email enumeration timing** - Add consistent delays for non-allowed emails
-  - Location: `send-code/+server.js:169-173`
 - [ ] **CSRF token rotation** - Implement per-session or periodic rotation
 - [ ] **Rate limiting** - Add to image upload, post creation, settings endpoints
 - [ ] **Content-Disposition headers** - Add to R2 uploads for forced download
@@ -55,59 +53,6 @@
 - [ ] Build tenant admin panel
 - [ ] Implement storage limits per plan (1GB/5GB/20GB/100GB)
 
-### Dave Test Tenant - WORKING! (2025-12-14)
-> **Status:** ✅ Multi-tenant routing fully working!
->
-> **Completed (2025-12-14):**
-> - [x] Fixed `POSTS_DB` → `DB` binding mismatch across all routes
-> - [x] Added tenant filtering (`tenant_id`) to all D1 queries
-> - [x] Deployed engine package to `groveengine` Pages project
-> - [x] Created `example` tenant for Midnight Bloom demo
-> - [x] Migrated example-site content to D1
-> - [x] Fixed default font from `alagard` to `lexend`
-> - [x] Removed broken nav links (Recipes, Timeline, Gallery)
->
-> **Remaining:**
-> - [ ] Wire up Heartwood auth (see section below)
-> - [ ] Add super-admin access for testing
-> - [ ] Investigate per-tenant theming (Midnight Bloom purple theme)
-> - [ ] Create Sarah test tenant for multi-tenant validation
-
-### Heartwood Auth Migration
-> **Priority:** HIGH - Blocks admin access for tenants
-> **Auth API:** `auth-api.grove.place` (Worker)
-> **Auth UI:** `auth.grove.place` (Pages)
-
-**Migration Steps:**
-1. [ ] **Update hooks.server.ts** - Replace JWT session verification with Heartwood token validation
-   - Call `auth-api.grove.place/api/validate` to verify tokens
-   - Or decode Heartwood JWTs locally if public key is available
-
-2. [ ] **Replace login routes** - Remove magic code flow
-   - [ ] Delete `auth/send-code/+server.js`
-   - [ ] Delete `auth/verify-code/+server.js`
-   - [ ] Update `auth/login/+page.svelte` to redirect to Heartwood
-
-3. [ ] **Add OAuth callback route**
-   - [ ] Create `auth/callback/+server.js` to handle OAuth redirect
-   - [ ] Exchange authorization code for tokens via GroveAuth client
-   - [ ] Create session cookie with Heartwood tokens
-
-4. [ ] **Update session handling**
-   - [ ] Store Heartwood access_token in session cookie (or use refresh flow)
-   - [ ] Update `verifySession()` to validate Heartwood tokens
-   - [ ] Handle token refresh when expired
-
-5. [ ] **Configure environment**
-   - [ ] Add `GROVEAUTH_CLIENT_ID` secret
-   - [ ] Add `GROVEAUTH_CLIENT_SECRET` secret
-   - [ ] Set redirect URI to `https://{tenant}.grove.place/auth/callback`
-
-6. [ ] **Add super-admin bypass**
-   - [ ] Add `SUPER_ADMIN_EMAILS` env var
-   - [ ] Update `getVerifiedTenantId()` to allow super-admins access to any tenant
-   - [ ] Log super-admin access for audit trail
-
 ### Per-Tenant Theming
 > **Issue:** All tenants currently share the same green theme. Midnight Bloom should have its purple theme back.
 > **Reference:** Old example-site had purple theme defined in `tailwind.config.js` and `+layout.svelte`
@@ -125,10 +70,6 @@
 - [ ] Add `theme_preset` column to `tenants` table
 - [ ] Load preset CSS based on tenant selection
 
-**Immediate Fix (for Midnight Bloom):**
-- [ ] Add theme colors to `example` tenant in D1
-- [ ] Update CSS to read tenant theme from context
-
 **Midnight Bloom Original Theme** (from `example-site/src/app.css`):
 ```css
 /* Light Mode - Late Night Tea Café */
@@ -144,28 +85,6 @@
 --background: 260 20% 8%;         /* Deep night purple */
 --foreground: 40 15% 90%;
 ```
-
-**Files to Update:**
-- `src/routes/+layout.server.ts` - Load theme from tenant
-- `src/routes/+layout.svelte` - Apply theme CSS variables
-- `src/lib/db/schema.sql` - Add theme columns (migration)
-- `src/routes/admin/settings/+page.svelte` - Theme picker UI
-
-### Footer Branding
-> **Issue:** Footer currently says "© 2025 AutumnsGrove. Built with SvelteKit."
-> **Should say:** "Powered by Lattice, from The Grove" with link to grove.place
-
-- [ ] Update footer text in `src/routes/+layout.svelte`
-- [ ] Change from "AutumnsGrove" to "Powered by [Lattice](https://grove.place), from The Grove"
-- [ ] Consider making footer configurable per tenant (some may want custom branding)
-
-### Additional Test Tenants
-> Create more test tenants to validate multi-tenant isolation
-
-- [ ] **Sarah's Garden** (`sarah.grove.place`)
-  - Different theme/colors than Dave
-  - Test font settings isolation
-  - Verify content doesn't leak between tenants
 
 ---
 

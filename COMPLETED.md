@@ -75,8 +75,43 @@
 |------|-----------|-------|
 | Implement subdomain routing system | 2025-12-10 | Created `grove-router` Worker |
 | Set up tenant isolation in D1 database | ✓ | Migration 009, multi-tenant schema |
+| Fix DB binding mismatch (`POSTS_DB` → `DB`) | 2025-12-14 | All engine routes updated |
+| Add tenant filtering to all D1 queries | 2025-12-14 | `tenant_id` WHERE clauses |
+| Deploy engine package to Cloudflare Pages | 2025-12-14 | `groveengine` project |
+| Fix CI/CD to deploy engine (not example-site) | 2025-12-14 | Renamed workflow file |
+| Migrate to Heartwood OAuth | 2025-12-14 | Replaced magic code auth |
+| Update footer branding | 2025-12-14 | "Powered by Lattice, from The Grove" |
+| Fix default font | 2025-12-14 | Changed from `alagard` to `lexend` |
+| Remove broken nav links | 2025-12-14 | Removed Recipes, Timeline, Gallery |
 
 **Architecture Decision (2025-12-10):** Moved from multi-repo/multi-deploy to single-deploy/multi-tenant (YouTube model). See `docs/MULTI-TENANT-ARCHITECTURE.md`.
+
+### Multi-tenant Test Tenants (2025-12-14)
+> **Status:** ✅ All tenants working with full isolation!
+
+| Tenant | Subdomain | Content |
+|--------|-----------|---------|
+| Dave's Digital Garden | `dave.grove.place` | Test tenant |
+| The Midnight Bloom | `example.grove.place` | Demo tea café blog |
+| Sarah's Garden | `sarah.grove.place` | Gardening blog |
+| Jennifer's Apiary | `jennifer.grove.place` | Beekeeping blog |
+
+**See:** `docs/tenant-setup-guide.md` for creating new tenants.
+
+### Heartwood Auth Migration (2025-12-14)
+> **Status:** ✅ Complete - OAuth 2.0 + PKCE replacing magic codes
+
+| Step | Status |
+|------|--------|
+| Create OAuth login route (`/auth/login/+server.ts`) | ✓ |
+| Create OAuth callback route (`/auth/callback/+server.ts`) | ✓ |
+| Update `hooks.server.ts` for Heartwood token validation | ✓ |
+| Update logout to clear all tokens | ✓ |
+| Update login page UI ("Sign in with Grove") | ✓ |
+| Delete old magic code routes (send-code, verify-code) | ✓ |
+| Generate OAuth client credentials | ✓ |
+| Register `groveengine` client in GroveAuth | ✓ |
+| Add all tenant subdomains to redirect URIs | ✓ |
 
 ---
 
@@ -167,4 +202,4 @@
 
 ---
 
-*Last updated: 2025-12-13*
+*Last updated: 2025-12-14*
