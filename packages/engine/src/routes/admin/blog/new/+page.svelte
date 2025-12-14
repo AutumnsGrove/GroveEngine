@@ -232,13 +232,15 @@
             <label for="font">Font</label>
             <select id="font" bind:value={font} class="form-input">
               <option value="default">Default (Site Setting)</option>
-              <option value="alagard">Alagard</option>
-              <option value="cozette">Cozette</option>
+              <option value="lexend">Lexend</option>
               <option value="atkinson">Atkinson Hyperlegible</option>
               <option value="opendyslexic">OpenDyslexic</option>
-              <option value="lexend">Lexend</option>
-              <option value="cormorant">Cormorant (Serif)</option>
               <option value="quicksand">Quicksand</option>
+              <option value="cormorant">Cormorant (Serif)</option>
+              <option value="bodoni-moda">Bodoni Moda (Serif)</option>
+              <option value="ibm-plex-mono">IBM Plex Mono</option>
+              <option value="cozette">Cozette</option>
+              <option value="alagard">Alagard</option>
             </select>
             <span class="form-hint">Choose a font for this post's content</span>
           </div>

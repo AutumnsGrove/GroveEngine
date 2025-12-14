@@ -12,7 +12,9 @@
 		opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
-		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
+		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif"
 	};
 
 	// Get the font stack for this post (null if default)

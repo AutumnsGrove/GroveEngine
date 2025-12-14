@@ -45,7 +45,17 @@ export async function PUT({ request, platform, locals }) {
 
     // Validate font_family value specifically
     if (setting_key === "font_family") {
-      const validFonts = ["alagard", "cozette", "atkinson", "opendyslexic", "lexend", "cormorant", "quicksand"];
+      const validFonts = [
+        "alagard",
+        "cozette",
+        "atkinson",
+        "opendyslexic",
+        "lexend",
+        "cormorant",
+        "quicksand",
+        "ibm-plex-mono",
+        "bodoni-moda",
+      ];
       if (!validFonts.includes(setting_value)) {
         throw error(400, "Invalid font value");
       }
@@ -62,7 +72,7 @@ export async function PUT({ request, platform, locals }) {
       ON CONFLICT(setting_key) DO UPDATE SET
         setting_value = excluded.setting_value,
         updated_at = excluded.updated_at
-    `
+    `,
       )
       .bind(setting_key, setting_value, now)
       .run();

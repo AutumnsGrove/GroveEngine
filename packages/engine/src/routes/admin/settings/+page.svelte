@@ -78,9 +78,11 @@
         opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
-        quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
+        'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif"
       };
-      document.documentElement.style.setProperty('--font-family-main', fontMap[currentFont]);
+      document.documentElement.style.setProperty('--font-family-main', fontMap[currentFont] || fontMap.lexend);
     } catch (error) {
       fontMessage = 'Error: ' + error.message;
     }
@@ -169,7 +171,7 @@
           />
           <div class="font-info">
             <span class="font-name" style="font-family: 'Alagard', sans-serif;">Alagard</span>
-            <span class="font-description">Medieval pixel font (default)</span>
+            <span class="font-description">Medieval pixel font for fantasy vibes</span>
           </div>
         </label>
 
@@ -221,7 +223,7 @@
           />
           <div class="font-info">
             <span class="font-name" style="font-family: 'Lexend', sans-serif;">Lexend</span>
-            <span class="font-description">Modern accessibility font for reading fluency</span>
+            <span class="font-description">Modern accessibility font for reading fluency (default)</span>
           </div>
         </label>
 

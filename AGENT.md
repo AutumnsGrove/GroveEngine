@@ -31,6 +31,13 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Styling:** Tailwind CSS
 - **Package Manager:** pnpm
 
+## Design Standards
+
+### Typography
+- **Default Font:** Lexend — used across all Grove properties (landing, engine, blogs)
+- **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
+- **Available Fonts:** See `packages/engine/static/fonts/` for the full collection
+
 ## Architecture Notes
 - Multi-tenant architecture with subdomain routing
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)

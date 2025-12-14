@@ -44,7 +44,7 @@
 	// Apply font from server-loaded settings
 	$effect(() => {
 		if (typeof document !== 'undefined' && data?.siteSettings?.font_family) {
-			const fontValue = fontMap[data.siteSettings.font_family] || fontMap.alagard;
+			const fontValue = fontMap[data.siteSettings.font_family] || fontMap.lexend;
 			document.documentElement.style.setProperty('--font-family-main', fontValue);
 		}
 	});
