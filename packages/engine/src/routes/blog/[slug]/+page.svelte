@@ -6,15 +6,32 @@
 
 	// Font family mapping - same as in +layout.svelte
 	const fontMap = {
-		alagard: "'Alagard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		cozette: "'Cozette', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Default
+		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Accessibility
 		atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+		luciole: "'Luciole', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		nunito: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Modern Sans
 		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		manrope: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		'instrument-sans': "'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Serifs
+		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif",
+		lora: "'Lora', Georgia, 'Times New Roman', serif",
+		'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
+		merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
+		fraunces: "'Fraunces', Georgia, 'Times New Roman', serif",
+		// Monospace
 		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif"
+		cozette: "'Cozette', 'Courier New', Consolas, monospace",
+		// Display/Special
+		alagard: "'Alagard', fantasy, cursive",
+		calistoga: "'Calistoga', Georgia, serif",
+		caveat: "'Caveat', cursive, sans-serif"
 	};
 
 	// Get the font stack for this post (null if default)

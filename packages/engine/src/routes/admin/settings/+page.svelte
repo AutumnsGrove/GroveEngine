@@ -72,15 +72,26 @@
       fontMessage = 'Font setting saved! Refresh to see changes site-wide.';
       // Apply immediately for preview
       const fontMap = {
-        alagard: "'Alagard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        cozette: "'Cozette', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+        luciole: "'Luciole', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        nunito: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        manrope: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        'instrument-sans': "'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+        'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif",
+        lora: "'Lora', Georgia, 'Times New Roman', serif",
+        'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
+        merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
+        fraunces: "'Fraunces', Georgia, 'Times New Roman', serif",
         'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-        'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif"
+        cozette: "'Cozette', 'Courier New', Consolas, monospace",
+        alagard: "'Alagard', fantasy, cursive",
+        calistoga: "'Calistoga', Georgia, serif",
+        caveat: "'Caveat', cursive, sans-serif"
       };
       document.documentElement.style.setProperty('--font-family-main', fontMap[currentFont] || fontMap.lexend);
     } catch (error) {

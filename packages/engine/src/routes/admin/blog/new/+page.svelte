@@ -232,15 +232,36 @@
             <label for="font">Font</label>
             <select id="font" bind:value={font} class="form-input">
               <option value="default">Default (Site Setting)</option>
-              <option value="lexend">Lexend</option>
-              <option value="atkinson">Atkinson Hyperlegible</option>
-              <option value="opendyslexic">OpenDyslexic</option>
-              <option value="quicksand">Quicksand</option>
-              <option value="cormorant">Cormorant (Serif)</option>
-              <option value="bodoni-moda">Bodoni Moda (Serif)</option>
-              <option value="ibm-plex-mono">IBM Plex Mono</option>
-              <option value="cozette">Cozette</option>
-              <option value="alagard">Alagard</option>
+              <optgroup label="Accessibility">
+                <option value="lexend">Lexend (Default)</option>
+                <option value="atkinson">Atkinson Hyperlegible</option>
+                <option value="opendyslexic">OpenDyslexic</option>
+                <option value="luciole">Luciole</option>
+                <option value="nunito">Nunito</option>
+              </optgroup>
+              <optgroup label="Modern Sans">
+                <option value="quicksand">Quicksand</option>
+                <option value="manrope">Manrope</option>
+                <option value="instrument-sans">Instrument Sans</option>
+                <option value="plus-jakarta-sans">Plus Jakarta Sans</option>
+              </optgroup>
+              <optgroup label="Serifs">
+                <option value="cormorant">Cormorant</option>
+                <option value="bodoni-moda">Bodoni Moda</option>
+                <option value="lora">Lora</option>
+                <option value="eb-garamond">EB Garamond</option>
+                <option value="merriweather">Merriweather</option>
+                <option value="fraunces">Fraunces</option>
+              </optgroup>
+              <optgroup label="Monospace">
+                <option value="ibm-plex-mono">IBM Plex Mono</option>
+                <option value="cozette">Cozette</option>
+              </optgroup>
+              <optgroup label="Display & Special">
+                <option value="alagard">Alagard</option>
+                <option value="calistoga">Calistoga</option>
+                <option value="caveat">Caveat</option>
+              </optgroup>
             </select>
             <span class="form-hint">Choose a font for this post's content</span>
           </div>

@@ -415,6 +415,204 @@
 							<span class="text-foreground-muted">Free for personal and commercial use</span>
 						</div>
 					</div>
+
+					<!-- Calistoga -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Calistoga', serif;">
+							Calistoga
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Calistoga', serif;">
+							A cheerful, space-saving display typeface with an adventurous spirit. Bold statements without aggression.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Yvonne Schüttler, Eben Sorkin</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/nickshanks/Calistoga" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Caveat -->
+					<div class="card p-5">
+						<h3 class="text-2xl text-accent-muted mb-2" style="font-family: 'Caveat', cursive;">
+							Caveat
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Caveat', cursive; font-size: 1.2rem;">
+							Like a conversation written on paper by a friend. Beautiful handwriting with a carefree, personal feel.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Pablo Impallari</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Caveat" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Fraunces -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Fraunces', serif;">
+							Fraunces
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Fraunces', serif;">
+							A variable font with organic warmth and quirky personality. The "softness" axis lets you control how fluid it feels.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Phaedra Charles, Flavia Zimbardi (Undercase Type)</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/undercasetype/Fraunces" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Nunito -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Nunito', sans-serif;">
+							Nunito
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Nunito', sans-serif;">
+							A rounded sans-serif that conveys warmth and approachability. Well-balanced and excellent for accessibility.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Vernon Adams, Jacques Le Bailly</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Nunito" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Luciole -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Luciole', sans-serif;">
+							Luciole
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Luciole', sans-serif;">
+							French for "firefly." Developed specifically for visually impaired people with 12 design criteria for optimal legibility.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">typographies.fr & CTRDV</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://www.luciole-vision.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Luciole Vision</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">Creative Commons Attribution 4.0</span>
+						</div>
+					</div>
+
+					<!-- Merriweather -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Merriweather', serif;">
+							Merriweather
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Merriweather', serif;">
+							A fresh breath of air designed for digital reading. Renaissance warmth meets space-saving proportions.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Eben Sorkin</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/SorkinType/Merriweather" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- EB Garamond -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'EB Garamond', serif;">
+							EB Garamond
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'EB Garamond', serif;">
+							Revival of Claude Garamont's famous 16th-century humanist typeface. Classic literary warmth for settling in with a beloved novel.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Georg Duffner</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://github.com/georgd/EB-Garamond" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">GitHub</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Lora -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Lora', serif;">
+							Lora
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Lora', serif;">
+							The typographic voice of a modern-day story. Contemporary serif with roots in calligraphy for storybook-like warmth.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Cyreal</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Lora" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Plus Jakarta Sans -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+							Plus Jakarta Sans
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+							Contemporary geometric sans with sharp curves. Designed for a city collaboration project, embodying community and cooperation.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Gumpita Rahayu (Tokotype)</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Plus+Jakarta+Sans" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Manrope -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Manrope', sans-serif;">
+							Manrope
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Manrope', sans-serif;">
+							Geometric sans-serif that blends professional tone with friendly, modern feel. Perfect for authoritative but approachable content.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Mikhail Sharanda</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Manrope" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
+
+					<!-- Instrument Sans -->
+					<div class="card p-5">
+						<h3 class="text-xl text-accent-muted mb-2" style="font-family: 'Instrument Sans', sans-serif;">
+							Instrument Sans
+						</h3>
+						<p class="text-foreground-muted leading-relaxed mb-4" style="font-family: 'Instrument Sans', sans-serif;">
+							A highly legible font with a minimalist feel. Clean, geometric, and friendly with variable weight control.
+						</p>
+						<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+							<span class="text-foreground-subtle">Author</span>
+							<span class="text-foreground-muted">Jordan Egstad and others</span>
+							<span class="text-foreground-subtle">Source</span>
+							<a href="https://fonts.google.com/specimen/Instrument+Sans" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Google Fonts</a>
+							<span class="text-foreground-subtle">License</span>
+							<span class="text-foreground-muted">SIL Open Font License 1.1</span>
+						</div>
+					</div>
 				</div>
 			</section>
 

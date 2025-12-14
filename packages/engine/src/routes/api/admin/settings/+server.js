@@ -46,15 +46,32 @@ export async function PUT({ request, platform, locals }) {
     // Validate font_family value specifically
     if (setting_key === "font_family") {
       const validFonts = [
-        "alagard",
-        "cozette",
+        // Default
+        "lexend",
+        // Accessibility
         "atkinson",
         "opendyslexic",
-        "lexend",
-        "cormorant",
+        "luciole",
+        "nunito",
+        // Modern Sans
         "quicksand",
-        "ibm-plex-mono",
+        "manrope",
+        "instrument-sans",
+        "plus-jakarta-sans",
+        // Serifs
+        "cormorant",
         "bodoni-moda",
+        "lora",
+        "eb-garamond",
+        "merriweather",
+        "fraunces",
+        // Monospace
+        "ibm-plex-mono",
+        "cozette",
+        // Display/Special
+        "alagard",
+        "calistoga",
+        "caveat",
       ];
       if (!validFonts.includes(setting_value)) {
         throw error(400, "Invalid font value");

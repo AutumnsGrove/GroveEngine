@@ -30,15 +30,32 @@
 
 	// Font family mapping - maps database values to CSS font stacks
 	const fontMap = {
-		alagard: "'Alagard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		cozette: "'Cozette', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Default
+		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Accessibility
 		atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+		luciole: "'Luciole', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		nunito: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Modern Sans
 		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		manrope: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		'instrument-sans': "'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+		// Serifs
+		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
+		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif",
+		lora: "'Lora', Georgia, 'Times New Roman', serif",
+		'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
+		merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
+		fraunces: "'Fraunces', Georgia, 'Times New Roman', serif",
+		// Monospace
 		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif"
+		cozette: "'Cozette', 'Courier New', Consolas, monospace",
+		// Display/Special
+		alagard: "'Alagard', fantasy, cursive",
+		calistoga: "'Calistoga', Georgia, serif",
+		caveat: "'Caveat', cursive, sans-serif"
 	};
 
 	// Apply font from server-loaded settings
@@ -497,6 +514,83 @@
 	@font-face {
 		font-family: 'Bodoni Moda';
 		src: url('/fonts/BodoniModa-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Calistoga';
+		src: url('/fonts/Calistoga-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Caveat';
+		src: url('/fonts/Caveat-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Fraunces';
+		src: url('/fonts/Fraunces-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Nunito';
+		src: url('/fonts/Nunito-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Luciole';
+		src: url('/fonts/Luciole-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Merriweather';
+		src: url('/fonts/Merriweather-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'EB Garamond';
+		src: url('/fonts/EBGaramond-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Lora';
+		src: url('/fonts/Lora-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Plus Jakarta Sans';
+		src: url('/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Manrope';
+		src: url('/fonts/Manrope-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Instrument Sans';
+		src: url('/fonts/InstrumentSans-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
