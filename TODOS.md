@@ -34,6 +34,15 @@
 
 ## Phase 2: Multi-tenant Infrastructure
 
+### Auth Bug - Login Button Does Nothing
+> **Issue:** On tenant admin pages (e.g., `dave.grove.place/auth/login`), clicking "Sign in with Grove" does nothing.
+> **Root Cause:** Both `+page.svelte` and `+server.ts` exist at `/auth/login`. SvelteKit serves the page component instead of hitting the server route that initiates OAuth.
+>
+> **Fix Options:**
+> - [ ] Move OAuth initiation to `/auth/login/start/+server.ts` and update button to link there
+> - [ ] Or use `<a href="/auth/login" data-sveltekit-reload>` to force server request
+> - [ ] Or rename server route to `/auth/oauth/+server.ts`
+
 - [ ] Build tenant onboarding flow → **SPEC READY**: `docs/specs/tenant-onboarding-spec.md`
   - Signup: name, username (=subdomain), verified email, favorite color, interests
   - Plan selection → Payment via Stripe → Interactive tour (5-10 min, skippable)
