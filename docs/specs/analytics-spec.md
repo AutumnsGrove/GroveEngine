@@ -1,340 +1,548 @@
 ---
 aliases:
 date created: Friday, November 22nd 2025, 12:00:00 pm
-date modified: Friday, November 22nd 2025, 12:00:00 pm
+date modified: Saturday, December 14th 2025, 12:00:00 pm
 tags:
 type: tech-spec
 ---
 
-# Grove Analytics - Technical Specification
+# Rings - Grove Analytics Specification
 
-**Project:** Grove Analytics - Privacy-Focused Blog Analytics
+**Project:** Rings (GroveAnalytics) - Writer-First Analytics
 **Phase:** Phase 5 Enhancement
 **Type:** Analytics System
-**Purpose:** Provide blog owners and platform admin with privacy-respecting usage insights
+**Purpose:** Private insights for writers, platform health for admin—no anxiety, no performance metrics
 
 ---
 
-## Overview
+## Philosophy
 
-Grove Analytics is a privacy-focused analytics system that provides blog owners with meaningful insights into their content performance without invasive tracking. The system collects page views, reading behavior, content performance, and basic technical metrics while respecting user privacy through anonymization and minimal cookie usage.
+> *Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.*
+
+Rings is analytics for writers, not marketers. Traditional analytics breed anxiety: refresh-checking, comparing yourself to others, optimizing for virality instead of authenticity. Grove takes a different path.
 
 ### Core Principles
 
-1. **Privacy-First** - Anonymize data by default, minimal tracking
-2. **Transparency** - Clear consent banner, honest about what's collected
-3. **Value-Focused** - Only collect metrics that provide actionable insights
-4. **Lightweight** - Minimal impact on page load performance
-5. **GDPR-Compliant** - Consent-based, data minimization, user rights
+1. **Private by Default** - Your stats are yours alone. No public view counts, no leaderboards
+2. **Delayed by Design** - All stats are 24 hours delayed. No real-time dopamine hits
+3. **Quality Over Quantity** - Measure what matters: Did people actually read? Did they come back?
+4. **Positive Signals Only** - Show what's working. Silence is neutral, not failure
+5. **Writer Wellness** - Tools to step away, not tools that demand attention
+6. **Extensible** - System designed to add new metrics and signals over time
+
+### What We Don't Do
+
+- No real-time "someone is reading your post NOW" notifications
+- No public follower counts or like counts
+- No comparison to other blogs
+- No "you're down 20% this week" anxiety triggers
+- No heatmaps or session recordings
+- No individual visitor tracking
 
 ---
 
-## Architecture
+## Resonance Indicators
 
-### Tech Stack
-- **Collection:** Cloudflare Workers (edge-based)
-- **Storage:** Cloudflare D1 (per-tenant analytics tables)
-- **Caching:** Cloudflare KV (aggregated stats)
-- **Dashboard:** SvelteKit components in admin panel
-- **Consent:** Custom lightweight banner
+Instead of showing vote scores or engagement numbers, Rings uses **Resonance Indicators**—positive signals that appear only when earned.
 
-### Data Flow
+### Signal System
 
-```
-User Visit → Consent Check → Collect Event → Anonymize → Store in D1 → Aggregate → Dashboard
-```
+| Signal | Icon | Trigger | Appears After |
+|--------|------|---------|---------------|
+| **Sparked Interest** | 🌱 | Above your personal average engagement | 7 days after publish |
+| **Really Resonated** | 🌿 | Significantly above your average (top 25%) | 7 days after publish |
+| **Community Favorite** | 🌳 | Top 10% of your posts ever | 7 days after publish |
 
----
+### Signal Timing
 
-## Metrics Collected
+**"7 days after publish"** means 7 days after the post's published_at date. Signals are calculated at that moment using engagement data accumulated up to that point. This creates a consistent evaluation window for all posts.
 
-### 1. Page Views
+Example:
+- Post published December 1st at 10:00 AM
+- Signal calculation runs December 8th at 00:00 UTC
+- If triggered, signal appears immediately on December 8th
+- Writers can't game signals by posting at specific times—everyone gets 7 days
 
-**What We Track:**
-- Total page views per post
-- Unique visitors (anonymized)
-- Views over time (daily/weekly/monthly)
-- Geographic region (country-level only)
+### Design Principles
 
-**Data Model:**
-```typescript
-interface PageView {
-  id: string;
-  post_id: string;
-  timestamp: number;
+- **Relative to YOU** - Signals compare to your own baseline, never to others
+- **7-day evaluation window** - Every post gets exactly 7 days to accumulate engagement
+- **Silence is neutral** - No signal means normal, not bad
+- **Nothing negative** - We never show "this underperformed"
+- **Extensible architecture** - New signals can be added without schema changes
 
-  // Anonymized visitor tracking
-  visitor_hash: string; // Hash of IP + User Agent + Date (rotates daily)
+### Future Signal Examples (Not For Initial Launch)
 
-  // Source
-  referrer_domain: string | null; // Domain only, no full URL
-  utm_source: string | null;
-  utm_medium: string | null;
-
-  // Device (broad categories)
-  device_type: 'desktop' | 'tablet' | 'mobile';
-
-  // Location (coarse)
-  country_code: string | null;
-}
-```
-
-**Privacy Measures:**
-- IP addresses are hashed with daily salt (not stored raw)
-- Visitor hash rotates daily to prevent long-term tracking
-- No user fingerprinting beyond basic device type
-- Referrer stripped to domain only
-
-### 2. Reading Behavior
-
-**What We Track:**
-- Time on page (rounded to 10-second buckets)
-- Scroll depth percentage (25%, 50%, 75%, 100%)
-- Bounce rate (left within 10 seconds)
-- Completion rate (reached end of post)
-
-**Data Model:**
-```typescript
-interface ReadingSession {
-  id: string;
-  pageview_id: string; // Links to page view
-
-  // Engagement
-  time_on_page: number; // Seconds, rounded
-  max_scroll_depth: number; // 0-100 percentage
-  reached_end: boolean;
-  bounced: boolean;
-
-  // Interaction
-  clicked_internal_link: boolean;
-  clicked_external_link: boolean;
-}
-```
-
-**Privacy Measures:**
-- Aggregated only, no individual session replay
-- No mouse tracking or heatmaps
-- No scroll position history, just max depth
-- Data expires after 90 days
-
-### 3. Content Performance
-
-**Derived Metrics (calculated from raw data):**
-- Most read posts (by views)
-- Best performing posts (by engagement)
-- Popular tags
-- Trending topics (recent momentum)
-- Average reading time per post
-
-**Aggregation Tables:**
-```typescript
-interface PostStats {
-  post_id: string;
-  date: string; // YYYY-MM-DD
-
-  // Volume
-  views: number;
-  unique_visitors: number;
-
-  // Engagement
-  avg_time_on_page: number;
-  avg_scroll_depth: number;
-  bounce_rate: number;
-  completion_rate: number;
-
-  // Sources
-  referrer_breakdown: Record<string, number>; // JSON
-  device_breakdown: Record<string, number>; // JSON
-}
-```
-
-### 4. Technical Metrics
-
-**What We Track:**
-- Device type distribution (desktop/tablet/mobile)
-- Browser family (Chrome, Firefox, Safari, etc.)
-- Page load performance (if available via Performance API)
-- Error rates (JavaScript errors, 404s)
-
-**Data Model:**
-```typescript
-interface TechnicalMetrics {
-  date: string;
-  blog_id: string;
-
-  // Devices
-  desktop_views: number;
-  tablet_views: number;
-  mobile_views: number;
-
-  // Browsers
-  browser_breakdown: Record<string, number>; // JSON
-
-  // Performance (optional, requires consent)
-  avg_page_load_ms: number | null;
-
-  // Errors
-  js_error_count: number;
-  not_found_count: number;
-}
-```
-
-**Privacy Measures:**
-- Browser version not tracked, only family
-- No OS version tracking
-- Performance metrics are averages only
-
----
-
-## Cookie & Consent Strategy
-
-### Consent Banner
-
-A lightweight, non-intrusive banner that appears on first visit:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  We use cookies to understand how you read our blog.        │
-│  No ads, no tracking across sites.                          │
-│                                                              │
-│  [Accept]  [Decline]  [Learn More]                          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Behavior:**
-- Banner appears on first visit only
-- Choice stored in localStorage (no cookie for consent itself)
-- "Learn More" links to privacy policy
-- Banner dismisses after choice
-- Choice remembered for 1 year
-
-### Cookie Usage
-
-**With Consent (Accept):**
-- `grove_visitor` - Anonymized visitor ID
-  - Value: Random UUID
-  - Expiry: Session (cleared on browser close)
-  - Purpose: Distinguish unique visitors
-  - HttpOnly: No (needs JS access)
-  - Secure: Yes
-  - SameSite: Strict
-
-**Without Consent (Decline):**
-- No cookies set
-- Basic page view still counted
-- Unique visitors estimated via IP hash (less accurate)
-- No reading behavior tracked (requires session cookie)
+The system is designed to accommodate custom signals such as:
+- "Readers from new countries" (geographic expansion)
+- "Sparked conversation" (high comment engagement)
+- "Evergreen content" (still getting reads after 6+ months)
+- "Gateway post" (many readers explored your blog after this)
 
 ### Technical Implementation
 
 ```typescript
-// Check consent status
-function hasAnalyticsConsent(): boolean {
-  return localStorage.getItem('grove_analytics_consent') === 'accepted';
+interface ResonanceSignal {
+  id: string;
+  signal_type: string;           // 'sparked_interest' | 'really_resonated' | 'community_favorite' | future types
+  post_id: string;
+  blog_id: string;
+  triggered_at: number;          // When the signal was calculated (not shown until 7 days after post)
+  visible_after: number;         // Timestamp when signal becomes visible to author
+  metadata: Record<string, any>; // Flexible JSON for signal-specific data
 }
 
-// Set consent
-function setAnalyticsConsent(accepted: boolean): void {
-  localStorage.setItem('grove_analytics_consent', accepted ? 'accepted' : 'declined');
-  localStorage.setItem('grove_analytics_consent_date', Date.now().toString());
+// Signals table - designed for extensibility
+CREATE TABLE resonance_signals (
+  id TEXT PRIMARY KEY,
+  signal_type TEXT NOT NULL,
+  post_id TEXT NOT NULL,
+  blog_id TEXT NOT NULL,
+  triggered_at INTEGER NOT NULL,
+  visible_after INTEGER NOT NULL,
+  metadata TEXT,                 -- JSON for future signal types
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
-  if (accepted) {
-    initializeAnalytics();
-  }
-}
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
 
-// Initialize tracking
-function initializeAnalytics(): void {
-  // Set session cookie for visitor tracking
-  const visitorId = crypto.randomUUID();
-  document.cookie = `grove_visitor=${visitorId}; Secure; SameSite=Strict`;
-
-  // Start tracking reading behavior
-  initScrollTracking();
-  initTimeTracking();
-}
+CREATE INDEX idx_signals_post ON resonance_signals(post_id);
+CREATE INDEX idx_signals_blog ON resonance_signals(blog_id);
+CREATE INDEX idx_signals_visible ON resonance_signals(visible_after);
 ```
 
 ---
 
-## Access Control
+## Metrics by Tier
 
-### Blog Owner Access
+### Seedling (Basic - $8/month)
 
-Blog owners can view analytics for their own blog only:
+**Access:** View counts on your 5 most recently published posts
+**Retention:** Rolling 30 days
+**Features:**
+- Total views per post (delayed 24hrs)
+- Simple "X views" display
+- No charts, no breakdowns
 
-**Dashboard Features:**
-- Date range selector (7/30/90 days, custom)
-- Page view trends (line chart)
-- Top posts table
-- Traffic sources breakdown
-- Device distribution
-- Reading engagement metrics
+**"Recent 5 posts"** = your 5 most recently published posts by publish date, regardless of when you wrote them. Scheduled posts count from their publish date, not their creation date.
 
-**Available Data:**
-- All metrics for their blog
-- Historical data (up to 2 years)
-- Export to CSV
+### Sapling ($12/month)
 
-**Restricted:**
-- Cannot see other blogs' data
-- Cannot see platform-wide metrics
-- Cannot see individual visitor data
+**Access:** Core metrics + basic insights
+**Retention:** Rolling 30 days
+**Features:**
+- Everything in Seedling
+- **Engaged Readers** - spent meaningful time AND reached end
+- **Deep Reads** - spent 60%+ of estimated reading time
+- **Finish Rate** - percentage who scrolled to bottom
+- **Return Readers** - came back for another post within 30 days
+- **First Impressions** - this was their entry point to your blog
+- Resonance Indicators (🌱🌿🌳)
+- Basic trend line (views over time)
 
-### Platform Admin Access (You)
+### Oak ($25/month)
 
-Full access to all analytics data:
+**Access:** Full insights + wellness tools
+**Retention:** 1 year default
+**Features:**
+- Everything in Sapling
+- **Reading Journey** - readers who explored more of your blog
+- **Steady Readers** - people who've read 3+ posts total
+- **Posting Calendar** - visual dots for each day you published (different colors per post type)
+- **Quiet Wins** - resurfaces older posts still getting reads
+- **Seasonal Reflection** - after Year 1, choose your frequency (quarterly/bi-annual/annual/never)
+- Referrer breakdown (traffic sources)
+- Device/browser breakdown
+- Country-level geographic data
+- Full charts and visualizations
+- CSV/JSON export
+- **Digest Mode** - disable dashboard, receive weekly email only
+- **Focus Periods** - schedule analytics blackouts
 
-**Dashboard Features:**
-- Platform-wide overview
-- Per-client drill-down
-- Revenue correlation
-- System health metrics
+### Evergreen ($35/month)
 
-**Available Data:**
-- All blog analytics
-- Aggregated platform metrics
-- Client comparison
-- Trend analysis
-
-**Access Termination:**
-- If client contract ends, admin loses access to that client's analytics
-- Client retains access during data export period (30 days)
-- After 30 days, data is deleted
-
-### Public Stats (Very Light)
-
-Minimal public-facing stats on blog posts:
-
-**What's Shown:**
-- Reading time estimate (e.g., "5 min read")
-- *Optionally:* View count (if blog owner enables)
-
-**What's NOT Shown:**
-- No public upvote/downvote counts (per existing decision)
-- No reaction counts
-- No detailed engagement metrics
-- No leaderboards or comparisons
+**Access:** Maximum customization
+**Retention:** Up to 5 years (customizable)
+**Features:**
+- Everything in Oak
+- Custom retention period (1-5 years)
+- **Seasonal Reflection** - continues automatically after Year 1 (all frequency options available)
+- Custom digest frequency (weekly/monthly/quarterly)
+- Priority data export
+- Extended historical analysis
 
 ---
 
-## Database Schema
+## Core Metrics Definitions
 
-### Analytics Events Table (Per-Tenant D1)
+### Engaged Readers
+The intersection of time AND completion. Someone who:
+- Spent at least 60% of the estimated reading time on the page
+- AND scrolled to reach the end of the post
+
+This is the "did they actually read it?" metric. More meaningful than raw views.
+
+### Deep Reads
+Readers who spent meaningful time (60%+ of estimated reading time) regardless of whether they finished. Captures people who read carefully but may have stopped partway through a long piece.
+
+### Finish Rate
+Percentage of readers who scrolled to the bottom of the post. Contextualized internally by post length (a 60% finish rate on a 15-minute read is actually excellent).
+
+### Return Readers
+Logged-in readers who came back to read another post on your blog within 30 days. This is the loyalty metric—building real audience vs viral spikes.
+
+**Logged-in users only.** Anonymous visitors can't be reliably tracked (IP addresses change, VPNs, etc.). Since Grove has a free tier, there's always an incentive to log in. This keeps the metric honest—you're seeing real returning people, not fuzzy estimates.
+
+### First Impressions
+Posts that were someone's first encounter with your blog. High numbers here indicate good entry points—posts that are bringing in new readers.
+
+### Reading Journey
+Readers who explored more of your blog after reading this post. Positive framing of "discovery" rather than cold "bounce rate" language.
+
+### Steady Readers
+People who have read 3+ posts on your blog total. Not subscribers (no social pressure), just people who seem to like what you write. Private metric, of course.
+
+**Logged-in users only.** Same as Return Readers—you can only build a reliable picture of loyalty with logged-in users.
+
+---
+
+## Writer Wellness Features
+
+### Digest Mode (Oak+)
+
+Toggle that **completely disables** the analytics dashboard. When enabled:
+- Dashboard shows: "You're in Digest Mode. Check your email for weekly updates."
+- No charts, no numbers, no way to compulsively check
+- Weekly email summary with key metrics
+- Can be toggled on/off anytime
+
+**Purpose:** For writers who want insights but not the anxiety of checking.
+
+### Focus Periods (Oak+)
+
+Schedule analytics blackouts:
+- **Scheduled:** "Hide my stats every Monday-Thursday"
+- **One-time:** "Hide for the next 2 weeks while I finish this project"
+
+During a focus period:
+- Dashboard shows: "You're in Focus Mode. Stats return [date]."
+- No data is lost, just hidden
+- Can be ended early if needed
+
+**Purpose:** Protect creative time from the distraction of metrics.
+
+### 24-Hour Delay (Platform-Wide)
+
+All stats across all tiers are delayed by 24 hours. This is not a limitation—it's a philosophy:
+- Publish a post, come back tomorrow to see how it did
+- Prevents the "post and obsessively refresh" cycle
+- Encourages reflection over reaction
+
+---
+
+## Posting Calendar (Oak+)
+
+A visual representation of your publishing history:
+
+```
+December 2025
+┌───┬───┬───┬───┬───┬───┬───┐
+│ S │ M │ T │ W │ T │ F │ S │
+├───┼───┼───┼───┼───┼───┼───┤
+│   │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │
+│   │   │ ● │   │   │ ◐ │   │
+├───┼───┼───┼───┼───┼───┼───┤
+│ 7 │ 8 │ 9 │10 │11 │12 │13 │
+│   │ ● │   │   │ ● │   │   │
+└───┴───┴───┴───┴───┴───┴───┘
+
+● Blog post  ◐ Page update  ○ Draft saved
+```
+
+**Design principles:**
+- No streaks, no "you missed X days" guilt
+- Different colors/shapes for post types
+- Just a quiet visual record
+- Click a day to see what you published
+
+---
+
+## Quiet Wins (Oak+)
+
+Weekly or monthly surfacing of older content that's still performing:
+
+> "Your post from March is still finding readers"
+> "Composting Basics has been read 47 times this month—6 months after you wrote it"
+
+**Purpose:**
+- Celebrates the long tail of content
+- Reduces pressure for constant new output
+- Shows that good writing has lasting value
+
+---
+
+## Seasonal Reflection
+
+A "wrapped" style reflection, but **not** competitive or braggy. Reflective, not performative.
+
+### How It Works
+
+**Year 1 (All Paid Tiers):**
+Every paid user automatically receives their first "Year in the Grove" reflection 12 months after their signup date. This is a celebratory milestone—no opt-in required.
+
+**Important:** Reflections are based on your **signup anniversary**, not the calendar year. If you joined in March, your first reflection arrives the following March.
+
+**Data Retention Note:** Even tiers with 30-day rolling retention (Seedling, Sapling) receive their Year 1 reflection. Key annual metrics (total posts, total engaged readers, resonance signals earned) are stored in a separate `reflection_snapshots` table that persists regardless of tier retention limits. This table only stores aggregate totals—no per-post or per-day granularity.
+
+**After Year 1:**
+- **Oak+:** You can choose your reflection frequency in preferences:
+  - Every 3 months (quarterly)
+  - Every 6 months (bi-annual)
+  - Every 12 months (annual)
+  - Never
+- **Evergreen:** Continues automatically (annual by default), with all frequency options available
+
+**Frequency is signup-anchored, not rolling.** If you signed up March 15th and choose quarterly:
+- First reflection: March 15th (Year 1 anniversary)
+- Subsequent reflections: June 15th, September 15th, December 15th, March 15th...
+
+This keeps reflections predictable and aligned with your personal Grove timeline, not arbitrary calendar dates.
+
+**Delivery:** Via email, at the end of your chosen period. Private, personal, celebratory.
+
+### Warm Messaging for Non-Posters
+
+Not everyone writes immediately—some users are setting up, some are finding their voice. Reflections adapt:
+
+**If you haven't published yet:**
+```
+┌─────────────────────────────────────────────┐
+│           Your Year in the Grove            │
+│                   2025                       │
+├─────────────────────────────────────────────┤
+│                                              │
+│  You've been in the Grove for a year now.   │
+│  Your space is ready whenever you are.      │
+│                                              │
+│  No pressure, no timeline.                  │
+│  Some seeds take longer to sprout.          │
+│                                              │
+│  When you're ready to share,                │
+│  we'll be here.                             │
+│                                              │
+└─────────────────────────────────────────────┘
+```
+
+**If you published just a few posts:**
+```
+│  You wrote 3 posts this year.               │
+│  Every one of them found readers.           │
+│                                              │
+│  Quality over quantity—                     │
+│  your words are landing.                    │
+```
+
+### Example (Active Writer)
+
+```
+┌─────────────────────────────────────────────┐
+│           Your Year in the Grove            │
+│                   2025                       │
+├─────────────────────────────────────────────┤
+│                                              │
+│  You wrote 47 posts this year.              │
+│  12 of them really resonated with readers.  │
+│                                              │
+│  Your readers spent 340 hours               │
+│  with your words.                           │
+│                                              │
+│  23 people became steady readers—           │
+│  coming back again and again.               │
+│                                              │
+│  Your most-loved post:                      │
+│  "Why I Garden at Midnight"                 │
+│                                              │
+│  A post from 2024 that's still growing:     │
+│  "Starting Seeds in Winter"                 │
+│                                              │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## Platform Admin Dashboard
+
+As platform owner, you have access to aggregate data for platform health and business decisions. This is **not** about surveilling individual users—it's about understanding how the forest grows.
+
+### Aggregate Platform Metrics
+
+| Metric | Description |
+|--------|-------------|
+| Total Users | Count by tier (Free, Seedling, Sapling, Oak, Evergreen) |
+| Total Posts | All published posts across platform |
+| Posts (24hr) | Published in last 24 hours |
+| Active Blogs | Posted at least once in last 30 days |
+| Avg Posts/Blog | Posts per active blog |
+| Avg Replies/Post | Platform-wide reply average |
+| Total Pageviews | Platform-wide, daily/weekly/monthly |
+
+### Revenue Correlation
+
+| Metric | Description |
+|--------|-------------|
+| Tier Distribution | Pie chart of user counts by tier |
+| MRR by Tier | Revenue breakdown |
+| Upgrade Rate | % moving to higher tiers |
+| Churn by Tier | Cancellation rate per tier |
+| LTV by Tier | Lifetime value estimates |
+| At-Risk Accounts | Low activity + approaching renewal |
+
+### Content Moderation Stats
+
+Since content moderation is automated, monitoring is crucial:
+
+| Metric | Description |
+|--------|-------------|
+| Reviews (24hr) | Posts reviewed in last 24 hours |
+| Pass Rate | % of posts passing automated review |
+| Flag Rate | % flagged for warnings |
+| Escalation Rate | % requiring manual review |
+| Category Breakdown | Which violation types are most common |
+| False Positive Rate | Based on successful appeals |
+| Avg Review Latency | Time from publish to review complete |
+| Appeal Volume | Appeals submitted/resolved |
+
+### Platform Health
+
+| Metric | Description |
+|--------|-------------|
+| Error Rate | API errors, failed requests |
+| Avg Response Time | API performance |
+| Storage Usage | Total R2 usage across tenants |
+| Database Size | D1 usage trends |
+| Uptime | Worker availability |
+
+### Data Retention
+
+As platform admin, you have **lifetime retention** of aggregate metrics. Individual blog analytics follow tier-based retention rules.
+
+### GDPR Compliance (Platform Admin)
+
+Platform admin access is designed for GDPR compliance:
+- **Aggregates only** - You never see individual user data, only platform-wide totals
+- **No individual blog access** - You cannot view a specific blog's analytics without being the blog owner
+- **Moderation stats are anonymized** - Category breakdowns show patterns, not specific posts
+- **Revenue data is business-critical** - Justifiable for platform operations under legitimate interest
+- **No cross-referencing** - Aggregate data cannot be linked back to individual users
+
+---
+
+## Technical Architecture
+
+### Tech Stack
+- **Collection:** Cloudflare Workers (edge-based)
+- **Storage:** Cloudflare D1 (per-tenant analytics tables)
+- **Caching:** Cloudflare KV (aggregated stats, platform metrics)
+- **Dashboard:** SvelteKit components in admin panel
+- **Consent:** Custom lightweight banner
+- **Scheduling:** Cloudflare Cron Triggers (daily aggregation, signal calculation)
+
+### Timezone Handling
+
+**All timestamps are UTC.** This simplifies aggregation and ensures consistent behavior:
+
+- Event timestamps: UTC Unix timestamps
+- Daily aggregation dates: `YYYY-MM-DD` in UTC
+- Signal evaluation ("7 days after publish"): UTC midnight boundaries
+- Visitor hash rotation: UTC midnight
+- Seasonal Reflection delivery: Based on signup date at UTC midnight
+
+**Dashboard display:** Convert to user's local timezone in the UI layer only. Store everything as UTC, display as local.
+
+**Post publish times:** A post published at "December 1st 10:00 AM EST" is stored as `2025-12-01T15:00:00Z`. The 7-day signal window evaluates at `2025-12-08T00:00:00Z` UTC, which covers the full 7 days regardless of timezone.
+
+### KV Caching Strategy
+
+Dashboard data is cached in Cloudflare KV to reduce D1 load:
+
+| Cache Key Pattern | TTL | Invalidation |
+|-------------------|-----|--------------|
+| `rings:blog:{id}:overview` | 1 hour | On new aggregation |
+| `rings:blog:{id}:post:{postId}` | 1 hour | On new aggregation |
+| `rings:blog:{id}:signals` | 24 hours | On signal calculation |
+| `rings:platform:metrics` | 15 minutes | On platform aggregation |
+| `rings:rate:{session}:{endpoint}` | 1 hour | Auto-expire |
+
+**Invalidation Triggers:**
+- Daily aggregation cron invalidates all `overview` and `post` caches for processed blogs
+- Signal calculation cron invalidates `signals` cache for blogs with new signals
+- Tier changes immediately invalidate all caches for that blog
+
+**Cache Warming:**
+- After aggregation, pre-warm the overview cache for active blogs
+- Don't pre-warm individual post caches (on-demand is fine)
+
+**Tier Change Handling:**
+- On upgrade: cache is invalidated, new data available immediately
+- On downgrade: cache is invalidated, dashboard shows tier-appropriate data only
+
+### Data Flow
+
+```
+                              ┌─────────────────┐
+                              │  24hr Delay     │
+                              │  Queue          │
+                              └────────┬────────┘
+                                       │
+User Visit → Consent Check → Collect → │ → Aggregate → Calculate Signals → Dashboard
+                                       │
+                              (events held 24hrs before processing)
+```
+
+### Database Schema
+
+#### Deletion Behavior
+
+All analytics tables use `ON DELETE CASCADE` for foreign keys. When a post or blog is deleted:
+
+**Post Deletion:**
+- All `analytics_events` for that post → deleted
+- All `analytics_daily` for that post → deleted
+- All `resonance_signals` for that post → deleted
+
+**This is intentional.** When a writer deletes a post, they expect all traces removed. Analytics data about a deleted post serves no purpose—the writer can't see it, and retaining it feels invasive.
+
+**Blog/Tenant Deletion:**
+- All analytics tables for that blog → cascade deleted
+- Platform aggregate metrics are NOT affected (they're already anonymized counts)
+
+**Alternative Considered (Soft Delete):**
+We considered `post_deleted_at` soft-delete to preserve platform health metrics, but rejected it:
+- Writers expect deletion to mean deletion
+- Platform metrics don't need per-post granularity
+- Simpler data model, clearer privacy story
+
+#### Analytics Events Table
 
 ```sql
 CREATE TABLE analytics_events (
   id TEXT PRIMARY KEY,
   post_id TEXT NOT NULL,
-  event_type TEXT NOT NULL, -- 'pageview', 'scroll', 'time', 'click'
+  blog_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,        -- 'pageview', 'scroll', 'time', 'complete', 'explore'
   timestamp INTEGER NOT NULL,
+  process_after INTEGER NOT NULL,  -- 24hrs after timestamp (delayed visibility)
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   -- Visitor (anonymized)
-  visitor_hash TEXT NOT NULL,
+  visitor_hash TEXT NOT NULL,      -- Daily rotating hash (for anonymous visitors)
   session_id TEXT,
+  is_logged_in INTEGER DEFAULT 0,  -- For return reader tracking
+  user_hash TEXT,                  -- Stable anonymized hash of user ID (logged-in only)
 
   -- Event data
-  data TEXT, -- JSON for flexible event properties
+  data TEXT,                       -- JSON for flexible event properties
 
   -- Source
   referrer_domain TEXT,
@@ -344,45 +552,64 @@ CREATE TABLE analytics_events (
   -- Device
   device_type TEXT,
   browser_family TEXT,
-  country_code TEXT
+  country_code TEXT,
+
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_analytics_post ON analytics_events(post_id);
-CREATE INDEX idx_analytics_timestamp ON analytics_events(timestamp);
-CREATE INDEX idx_analytics_type ON analytics_events(event_type);
+CREATE INDEX idx_events_post ON analytics_events(post_id);
+CREATE INDEX idx_events_blog ON analytics_events(blog_id);
+CREATE INDEX idx_events_process ON analytics_events(process_after);  -- Platform-wide aggregation queries
+CREATE INDEX idx_events_process_blog ON analytics_events(blog_id, process_after);  -- Per-blog daily aggregation
+CREATE INDEX idx_events_type ON analytics_events(event_type);
+CREATE INDEX idx_events_user ON analytics_events(user_hash);
 ```
 
-### Daily Aggregates Table
+#### Daily Aggregates Table
 
 ```sql
 CREATE TABLE analytics_daily (
   id TEXT PRIMARY KEY,
   post_id TEXT NOT NULL,
-  date TEXT NOT NULL, -- YYYY-MM-DD
+  blog_id TEXT NOT NULL,
+  date TEXT NOT NULL,              -- YYYY-MM-DD
 
   -- Volume
   pageviews INTEGER DEFAULT 0,
   unique_visitors INTEGER DEFAULT 0,
+  logged_in_readers INTEGER DEFAULT 0,
 
   -- Engagement
+  deep_reads INTEGER DEFAULT 0,
+  completions INTEGER DEFAULT 0,
+  engaged_readers INTEGER DEFAULT 0,  -- deep_read AND completion
   avg_time_on_page REAL DEFAULT 0,
   avg_scroll_depth REAL DEFAULT 0,
-  bounce_count INTEGER DEFAULT 0,
-  completion_count INTEGER DEFAULT 0,
+
+  -- Discovery
+  first_impressions INTEGER DEFAULT 0,  -- First-time blog visitors
+  explored_further INTEGER DEFAULT 0,   -- Clicked to another post
 
   -- Breakdowns (JSON)
   referrer_breakdown TEXT,
   device_breakdown TEXT,
+  browser_breakdown TEXT,
   country_breakdown TEXT,
 
-  UNIQUE(post_id, date)
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+
+  UNIQUE(post_id, date),
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_daily_post ON analytics_daily(post_id);
+CREATE INDEX idx_daily_blog ON analytics_daily(blog_id);
 CREATE INDEX idx_daily_date ON analytics_daily(date);
 ```
 
-### Blog-Level Stats Table
+#### Blog-Level Stats Table
 
 ```sql
 CREATE TABLE analytics_blog_stats (
@@ -395,30 +622,159 @@ CREATE TABLE analytics_blog_stats (
   total_unique_visitors INTEGER DEFAULT 0,
   total_posts_viewed INTEGER DEFAULT 0,
 
-  -- Averages
+  -- Engagement
+  total_engaged_readers INTEGER DEFAULT 0,
   avg_time_on_page REAL DEFAULT 0,
   avg_scroll_depth REAL DEFAULT 0,
-  overall_bounce_rate REAL DEFAULT 0,
+  avg_completion_rate REAL DEFAULT 0,
 
-  -- Top content
-  top_posts TEXT, -- JSON array of {post_id, views}
+  -- Loyalty
+  return_readers INTEGER DEFAULT 0,
+  steady_readers INTEGER DEFAULT 0,
+  new_readers INTEGER DEFAULT 0,
 
-  UNIQUE(blog_id, date)
+  -- Content
+  posts_published INTEGER DEFAULT 0,
+  top_posts TEXT,                  -- JSON array of {post_id, views, engaged}
+
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+
+  UNIQUE(blog_id, date),
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_blog_stats_blog ON analytics_blog_stats(blog_id);
 CREATE INDEX idx_blog_stats_date ON analytics_blog_stats(date);
 ```
 
+#### Reader Tracking Table (for Return/Steady Readers)
+
+**Important:** This table only tracks **logged-in users**. Anonymous visitors cannot be reliably tracked for return/steady reader metrics due to IP rotation, VPNs, etc. The `user_hash` is generated using HMAC-SHA256 (see Security Implementation section).
+
+The `reading_sessions` field stores timestamps of each reading session, enabling accurate "Return Reader" calculations with time windows (e.g., "came back within 30 days").
+
+```sql
+CREATE TABLE reader_history (
+  id TEXT PRIMARY KEY,
+  blog_id TEXT NOT NULL,
+  user_hash TEXT NOT NULL,         -- HMAC-SHA256(user_id, secret_key) - stable, logged-in users only
+  first_read_at INTEGER NOT NULL,
+  last_read_at INTEGER NOT NULL,
+  total_posts_read INTEGER DEFAULT 1,
+  reading_sessions TEXT,           -- JSON array of timestamps: [1702598400, 1703203200, ...]
+  is_steady INTEGER DEFAULT 0,     -- Set to 1 when total_posts_read >= 3
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+
+  UNIQUE(blog_id, user_hash),
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_reader_blog ON reader_history(blog_id);
+CREATE INDEX idx_reader_steady ON reader_history(is_steady);
+CREATE INDEX idx_reader_last_read ON reader_history(last_read_at);
+CREATE INDEX idx_reader_user ON reader_history(user_hash);  -- For cross-blog Return Reader queries
+```
+
+**Return Reader Calculation:**
+A reader qualifies as a "Return Reader" if they have 2+ entries in `reading_sessions` where at least one pair of sessions is within 30 days of each other. This accurately distinguishes someone who read twice in one day vs someone who genuinely returned weeks later.
+
+#### User Preferences Table
+
+```sql
+CREATE TABLE analytics_preferences (
+  id TEXT PRIMARY KEY,
+  blog_id TEXT NOT NULL UNIQUE,
+
+  -- Wellness settings
+  digest_mode INTEGER DEFAULT 0,   -- Dashboard disabled
+  digest_frequency TEXT DEFAULT 'weekly',  -- 'weekly', 'monthly', 'quarterly'
+
+  -- Focus periods
+  focus_schedule TEXT,             -- JSON: {"days": ["monday", "tuesday"]} or null
+  focus_until INTEGER,             -- One-time focus end timestamp
+
+  -- Seasonal Reflection (Oak+)
+  reflection_frequency TEXT DEFAULT 'annual',  -- 'quarterly', 'biannual', 'annual', 'never'
+
+  -- Retention
+  custom_retention_years INTEGER CHECK(custom_retention_years >= 1 AND custom_retention_years <= 5),  -- Evergreen only
+
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at INTEGER,
+  FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+```
+
+#### Platform Metrics Table (Admin Only)
+
+```sql
+CREATE TABLE platform_metrics (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL UNIQUE,       -- YYYY-MM-DD
+
+  -- Users
+  total_users INTEGER DEFAULT 0,
+  users_by_tier TEXT,              -- JSON: {"free": 100, "seedling": 50, ...}
+  new_signups INTEGER DEFAULT 0,
+
+  -- Content
+  total_posts INTEGER DEFAULT 0,
+  posts_published_today INTEGER DEFAULT 0,
+  active_blogs INTEGER DEFAULT 0,
+
+  -- Engagement
+  total_pageviews INTEGER DEFAULT 0,
+  avg_replies_per_post REAL DEFAULT 0,
+
+  -- Revenue
+  mrr_total INTEGER DEFAULT 0,     -- In cents
+  mrr_by_tier TEXT,                -- JSON
+  upgrades INTEGER DEFAULT 0,
+  downgrades INTEGER DEFAULT 0,
+  churns INTEGER DEFAULT 0,
+
+  -- Moderation
+  posts_reviewed INTEGER DEFAULT 0,
+  posts_passed INTEGER DEFAULT 0,
+  posts_flagged INTEGER DEFAULT 0,
+  posts_escalated INTEGER DEFAULT 0,
+  moderation_categories TEXT,      -- JSON breakdown
+  appeals_submitted INTEGER DEFAULT 0,
+  appeals_granted INTEGER DEFAULT 0,
+  avg_review_latency_ms INTEGER DEFAULT 0,
+
+  -- Health
+  error_count INTEGER DEFAULT 0,
+  avg_response_time_ms INTEGER DEFAULT 0,
+  storage_used_bytes INTEGER DEFAULT 0
+);
+
+CREATE INDEX idx_platform_date ON platform_metrics(date);
+```
+
 ---
 
 ## API Endpoints
 
-### Collection API (Public, runs on blog)
+### Collection API (Public)
+
+**Rate Limiting:**
+To prevent abuse and inflated metrics, collection endpoints are rate-limited:
+
+**Primary (session-based):**
+- **Pageviews:** 100 per hour per session
+- **Reading progress:** 20 per hour per session
+
+**Fallback (IP-based):**
+For users without valid session cookies (bots, scrapers, consent-declined):
+- **Pageviews:** 50 per hour per IP
+- **Reading progress:** Blocked entirely (no session = no tracking)
+
+IP-based limits use a shortened hash of the IP for privacy. Exceeding limits returns `429 Too Many Requests`.
 
 **Track Page View:**
 ```typescript
-POST /api/analytics/pageview
+POST /api/rings/pageview
 Body: {
   post_id: string;
   referrer?: string;
@@ -430,12 +786,13 @@ Response: { success: boolean; session_id: string }
 
 **Track Reading Progress:**
 ```typescript
-POST /api/analytics/reading
+POST /api/rings/reading
 Body: {
   session_id: string;
-  time_on_page: number;
-  scroll_depth: number;
+  time_on_page: number;       // Seconds
+  scroll_depth: number;       // 0-100
   reached_end: boolean;
+  explored_further: boolean;  // Clicked another post
 }
 Response: { success: boolean }
 ```
@@ -444,200 +801,250 @@ Response: { success: boolean }
 
 **Get Post Analytics:**
 ```typescript
-GET /api/analytics/posts/:postId
+GET /api/rings/posts/:postId
 Query: { start_date: string; end_date: string }
-Auth: Blog owner or admin
+Auth: Blog owner (Sapling+)
 Response: {
   views: number;
-  unique_visitors: number;
-  avg_time: number;
-  avg_scroll: number;
-  bounce_rate: number;
-  daily_data: Array<{date, views, unique}>;
-  referrers: Array<{domain, count}>;
-  devices: {desktop, tablet, mobile};
+  engaged_readers: number;
+  deep_reads: number;
+  finish_rate: number;
+  first_impressions: number;
+  reading_journey: number;
+  signals: Array<{ type: string; triggered_at: number }>;
+  daily_data?: Array<{date, views, engaged}>;  // Oak+
+  referrers?: Array<{domain, count}>;          // Oak+
+  devices?: {desktop, tablet, mobile};         // Oak+
 }
 ```
 
 **Get Blog Overview:**
 ```typescript
-GET /api/analytics/overview
+GET /api/rings/overview
 Query: { start_date: string; end_date: string }
-Auth: Blog owner or admin
+Auth: Blog owner (Seedling+)
 Response: {
   total_views: number;
-  total_unique: number;
-  top_posts: Array<{post_id, title, views}>;
-  trend: 'up' | 'down' | 'stable';
-  trend_percentage: number;
+  return_readers?: number;      // Sapling+
+  steady_readers?: number;      // Oak+
+  recent_posts: Array<{post_id, title, views, signals?}>;
+  quiet_wins?: Array<{post_id, title, recent_views}>;  // Oak+
+  posting_calendar?: Record<string, string[]>;         // Oak+ - date -> post_ids
 }
+```
+
+**Get Preferences:**
+```typescript
+GET /api/rings/preferences
+Auth: Blog owner (Oak+)
+Response: {
+  digest_mode: boolean;
+  digest_frequency: 'weekly' | 'monthly' | 'quarterly';
+  focus_schedule: { days: string[] } | null;
+  focus_until: number | null;
+  reflection_frequency: 'quarterly' | 'biannual' | 'annual' | 'never';
+  custom_retention_years: number | null;  // Evergreen only
+}
+```
+
+**Update Preferences:**
+```typescript
+PUT /api/rings/preferences
+Auth: Blog owner (Oak+)
+Body: {
+  digest_mode?: boolean;
+  digest_frequency?: 'weekly' | 'monthly' | 'quarterly';
+  focus_schedule?: { days: string[] } | null;
+  focus_until?: number | null;
+  reflection_frequency?: 'quarterly' | 'biannual' | 'annual' | 'never';
+  custom_retention_years?: number;  // Evergreen only, 1-5
+}
+Response: { success: boolean }
 ```
 
 **Export Analytics:**
 ```typescript
-GET /api/analytics/export
+GET /api/rings/export
 Query: { start_date: string; end_date: string; format: 'csv' | 'json' }
-Auth: Blog owner only
+Auth: Blog owner (Oak+)
 Response: File download
+
+// Validation: format must be exactly 'csv' or 'json'
+// Invalid format returns 400: { error: 'Invalid format. Use csv or json.' }
+```
+
+**Export Format Schema:**
+
+JSON export structure:
+```json
+{
+  "exported_at": "2025-12-14T00:00:00Z",
+  "blog_id": "blog_123",
+  "date_range": { "start": "2025-01-01", "end": "2025-12-14" },
+  "summary": {
+    "total_views": 12450,
+    "total_engaged_readers": 3200,
+    "total_return_readers": 890,
+    "total_steady_readers": 156
+  },
+  "posts": [
+    {
+      "post_id": "post_abc",
+      "title": "Why I Garden at Midnight",
+      "published_at": "2025-03-15T10:00:00Z",
+      "total_views": 1200,
+      "engaged_readers": 340,
+      "deep_reads": 280,
+      "finish_rate": 0.72,
+      "first_impressions": 450,
+      "signals": ["sparked_interest", "really_resonated"],
+      "daily": [
+        { "date": "2025-03-15", "views": 89, "engaged": 24 },
+        { "date": "2025-03-16", "views": 156, "engaged": 42 }
+      ]
+    }
+  ],
+  "reader_stats": {
+    "return_readers_count": 890,
+    "steady_readers_count": 156
+  }
+}
+```
+
+CSV export columns:
+```
+date,post_id,post_title,views,engaged_readers,deep_reads,finish_rate,first_impressions,referrer_domain,device_type,country_code
+2025-03-15,post_abc,Why I Garden at Midnight,89,24,18,0.68,32,twitter.com,desktop,US
+2025-03-16,post_abc,Why I Garden at Midnight,156,42,35,0.74,67,google.com,mobile,GB
+```
+
+### Platform Admin API
+
+**Get Platform Overview:**
+```typescript
+GET /api/admin/rings/platform
+Query: { start_date: string; end_date: string }
+Auth: Platform admin only
+Response: {
+  users: { total, by_tier, new_signups, growth_rate },
+  content: { total_posts, today, active_blogs },
+  engagement: { pageviews, avg_replies },
+  revenue: { mrr, by_tier, upgrades, downgrades, churns },
+  moderation: { reviewed, passed, flagged, escalated, categories, appeals },
+  health: { errors, response_time, storage }
+}
+```
+
+### API Error Responses
+
+All Rings API endpoints return consistent error responses:
+
+```typescript
+// Error response format
+{
+  error: string;           // Human-readable message
+  code: string;            // Machine-readable error code
+  details?: object;        // Optional additional context
+}
+```
+
+| HTTP Status | Code | Description |
+|-------------|------|-------------|
+| 400 | `invalid_date_range` | Date range invalid or exceeds tier maximum |
+| 400 | `invalid_format` | Export format not 'csv' or 'json' |
+| 400 | `malformed_event` | Event data failed validation |
+| 401 | `unauthorized` | Missing or invalid authentication |
+| 403 | `tier_insufficient` | Feature requires higher tier |
+| 403 | `not_blog_owner` | User doesn't own this blog |
+| 404 | `post_not_found` | Post doesn't exist or was deleted |
+| 404 | `blog_not_found` | Blog doesn't exist |
+| 409 | `outside_retention` | Requested date range outside retention window |
+| 429 | `rate_limited` | Too many requests (includes Retry-After header) |
+| 500 | `aggregation_error` | Internal error during data processing |
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 42
+X-RateLimit-Reset: 1702598400
+Retry-After: 3600  (only on 429)
 ```
 
 ---
 
-## Dashboard UI
+## Cookie & Consent Strategy
 
-### Blog Owner Dashboard
+### Consent Banner
 
-**Overview Page:**
+Lightweight, warm, non-intrusive:
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Analytics                    [Last 30 Days ▼] [Export]     │
-├─────────────────────────────────────────────────────────────┤
+│  We track reading patterns to help the author understand    │
+│  what resonates. No ads, no cross-site tracking.           │
 │                                                              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │  1,234   │  │   892    │  │  3:42    │  │   68%    │    │
-│  │  Views   │  │  Unique  │  │ Avg Time │  │  Scroll  │    │
-│  │  ↑ 12%   │  │  ↑ 8%    │  │  ↑ 15%   │  │  ↓ 3%    │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
-│                                                              │
-│  Page Views Over Time                                        │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │     ╱╲    ╱╲                                         │    │
-│  │   ╱    ╲╱    ╲    ╱╲                                 │    │
-│  │ ╱              ╲╱    ╲                               │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                              │
-│  Top Posts                                                   │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ 1. How to Grow Tomatoes      │ 342 views │ 4:12 avg │    │
-│  │ 2. Garden Planning Guide     │ 289 views │ 5:30 avg │    │
-│  │ 3. Composting Basics         │ 201 views │ 3:45 avg │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                              │
-│  Traffic Sources              Device Breakdown               │
-│  ┌─────────────────┐         ┌─────────────────┐            │
-│  │ Google    45%   │         │ Desktop   62%   │            │
-│  │ Direct    30%   │         │ Mobile    33%   │            │
-│  │ Twitter   15%   │         │ Tablet     5%   │            │
-│  │ Other     10%   │         └─────────────────┘            │
-│  └─────────────────┘                                        │
+│  [That's fine]  [No thanks]  [Learn more]                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Post Detail Page:**
-- Full metrics for single post
-- Daily breakdown chart
-- Reading funnel (viewed → scrolled → completed)
-- Referrer details
-- Comparable posts
+**Behavior:**
+- Appears on first visit only
+- Choice stored in localStorage
+- Remembered for 1 year
+- "Learn more" links to privacy policy
 
-### Admin Dashboard (Platform-Wide)
+### With Consent
 
-Additional sections:
-- Total platform views
-- Views by client
-- Active vs inactive blogs
-- Revenue per view correlation
-- System performance metrics
+- `grove_visitor` cookie (session only, Secure, SameSite=Strict)
+- Full reading behavior tracked
+- More accurate unique visitor counts
 
----
+### Without Consent
 
-## Implementation Phases
-
-### Phase 5a: Basic Analytics (2-3 weeks)
-
-**Scope:**
-- Page view tracking
-- Basic consent banner
-- Simple dashboard with totals
-- Date range selection
-
-**Features:**
-- [ ] Collection Worker endpoint
-- [ ] Consent banner component
-- [ ] Daily aggregation job
-- [ ] Basic dashboard UI
-- [ ] Blog owner access
-
-### Phase 5b: Reading Behavior (1-2 weeks)
-
-**Scope:**
-- Scroll depth tracking
-- Time on page
-- Bounce rate calculation
-- Engagement metrics
-
-**Features:**
-- [ ] Client-side scroll tracker
-- [ ] Time tracking with visibility API
-- [ ] Engagement calculations
-- [ ] Dashboard charts
-
-### Phase 5c: Advanced Features (2 weeks)
-
-**Scope:**
-- Admin platform view
-- Export functionality
-- Performance metrics
-- Historical data
-
-**Features:**
-- [ ] Platform-wide dashboard
-- [ ] CSV/JSON export
-- [ ] Performance tracking
-- [ ] 2-year data retention
+- No cookies set
+- Basic pageview still counted (via IP hash)
+- No reading behavior tracked
+- Unique visitors estimated (less accurate)
 
 ---
 
-## Analytics Tools Research
+## Data Retention
 
-The specific analytics tool choice needs further research. Options to evaluate:
+| Tier | Retention | Notes |
+|------|-----------|-------|
+| Seedling | 30 days rolling | Recent 5 posts only |
+| Sapling | 30 days rolling | Full metrics |
+| Oak | 1 year | Default, full access |
+| Evergreen | 1-5 years | Customizable |
+| Platform Admin | Lifetime | Aggregate only |
 
-### Option 1: Fully Custom (Cloudflare-Native)
+### Automatic Cleanup
 
-**Pros:**
-- Complete control
-- No external dependencies
-- Zero cost (within free tier)
-- Perfect privacy alignment
+Daily cron job removes:
+- Raw events older than tier retention
+- Daily aggregates older than tier retention
+- Reader history entries with no activity in 2 years
 
-**Cons:**
-- 40-60 hours development time
-- Ongoing maintenance
-- No benchmarking
+### Tier Change Behavior
 
-### Option 2: Cloudflare Web Analytics
+**Upgrades (e.g., Sapling → Oak):**
+- New retention period applies immediately
+- Historical data is preserved if within new retention window
+- No backfill—you can only see data from when you had analytics enabled
+- Dashboard immediately shows expanded metrics
 
-**Pros:**
-- Free, built-in
-- Privacy-focused by default
-- Zero development time
-- Automatic edge collection
+**Downgrades (e.g., Oak → Sapling):**
+- **30-day grace period** before data deletion
+- During grace: data still exists but dashboard shows new tier's metrics only
+- After grace: data outside new retention window is permanently deleted
+- Prevents accidental data loss from billing issues
+- Re-upgrading within grace period restores full access
 
-**Cons:**
-- Limited customization
-- No reading behavior
-- Basic metrics only
-- Dashboard outside Grove
-
-### Option 3: Plausible Analytics
-
-**Pros:**
-- Privacy-focused
-- Beautiful dashboard
-- EU-hosted option
-- Open source
-
-**Cons:**
-- $9/month minimum
-- External service
-- Limited customization
-- No reading behavior
-
-### Option 4: Hybrid Approach
-
-Use Cloudflare Web Analytics for basic metrics + custom tracking for reading behavior. Best of both worlds.
-
-**Recommendation:** Start with Cloudflare Web Analytics for basic page views, add custom reading behavior tracking. Evaluate migration to fully custom if more control needed.
+**Cancellation (any tier → Free):**
+- Same 30-day grace period
+- After grace: all analytics data deleted
+- Reader history cleared (user hashes can't be re-linked anyway)
+- Platform aggregate contributions remain (anonymized, not attributable)
 
 ---
 
@@ -647,61 +1054,328 @@ Use Cloudflare Web Analytics for basic metrics + custom tracking for reading beh
 
 1. **Lawful Basis:** Consent (via banner)
 2. **Data Minimization:** Only collect what's needed
-3. **Purpose Limitation:** Only for analytics, no advertising
-4. **Storage Limitation:** 2-year retention, then deletion
-5. **Right to Access:** Export function in dashboard
+3. **Purpose Limitation:** Only for analytics, never advertising
+4. **Storage Limitation:** Tier-based retention, then deletion
+5. **Right to Access:** Export function
 6. **Right to Erasure:** Delete on account closure
-7. **Data Processing Agreement:** Cloudflare acts as processor
-
-### Privacy Policy Updates
-
-Required additions to privacy policy:
-- What analytics data is collected
-- How it's anonymized
-- Cookie usage explanation
-- Consent mechanism
-- Data retention period
-- How to opt out
-- Contact for data requests
+7. **Data Processing Agreement:** Cloudflare as processor
 
 ### Technical Privacy Measures
 
 1. **IP Anonymization:** Hash with daily rotating salt
-2. **Session Cookies Only:** No persistent tracking
-3. **No Cross-Site Tracking:** SameSite=Strict
-4. **Aggregation:** Individual sessions not visible
-5. **Data Expiry:** Automatic deletion after 2 years
-6. **Encryption:** HTTPS only, encrypted at rest
+2. **24-Hour Delay:** No real-time individual tracking
+3. **Session Cookies Only:** No persistent tracking
+4. **No Cross-Site Tracking:** SameSite=Strict
+5. **Aggregation:** Individual sessions not visible to admin
+6. **Automatic Expiry:** Data deleted per retention schedule
+7. **Encryption:** HTTPS only, encrypted at rest
+
+---
+
+## Security Implementation
+
+### User Hash Generation
+
+For logged-in user tracking (Return Readers, Steady Readers), we use HMAC-SHA256 with a secret key and pepper for additional security:
+
+```typescript
+// Generate stable user hash - NEVER changes for a given user
+function generateUserHash(userId: string): string {
+  const secretKey = env.ANALYTICS_HMAC_KEY;    // 256-bit key in Cloudflare secrets
+  const pepper = env.ANALYTICS_PEPPER;          // Additional secret, stored separately
+
+  const message = `${userId}:${pepper}`;
+  return hmacSha256(message, secretKey);
+}
+```
+
+**Key Management:**
+- `ANALYTICS_HMAC_KEY`: 256-bit cryptographic key stored in Cloudflare Workers secrets
+- `ANALYTICS_PEPPER`: Additional secret stored separately (different secret store or environment)
+- Keys are **never rotated** for user hashes (would break reader history linkage)
+- If key compromise is suspected: generate new keys, invalidate all reader_history data, start fresh
+
+**Platform-Wide vs Per-Blog Keys:**
+Keys are **platform-wide**, not per-blog. Rationale:
+- The `user_hash` is scoped to `(blog_id, user_hash)` in the database—same user on different blogs has different records anyway
+- Per-blog keys would require key management per tenant (complexity, rotation nightmares)
+- Cross-blog tracking is already impossible: we only store which users read which blog, never correlate across blogs
+- If an attacker compromises the key, they still can't reverse the hash without the user_id input
+
+**Why HMAC over plain SHA-256:**
+- Even if the pepper leaks, attacker needs the HMAC key to generate valid hashes
+- HMAC is designed for authentication; SHA-256 alone is vulnerable to length extension attacks
+- Two-layer protection: even partial key compromise doesn't expose user IDs
+
+### Visitor Hash Generation (Anonymous)
+
+For anonymous visitors, we use a daily-rotating hash that provides session consistency without long-term tracking:
+
+```typescript
+// Generate daily visitor hash - rotates every 24 hours
+function generateVisitorHash(ip: string, userAgent: string): string {
+  const dailySalt = getDailySalt();  // Rotates at midnight UTC
+  const message = `${ip}:${userAgent}:${dailySalt}`;
+  return sha256(message).substring(0, 16);  // Truncated for privacy
+}
+
+function getDailySalt(): string {
+  const today = new Date().toISOString().split('T')[0];  // YYYY-MM-DD
+  return hmacSha256(today, env.DAILY_SALT_KEY);
+}
+```
+
+**Known Limitations:**
+- Daily rotation means the same visitor across two days appears as two unique visitors. This is intentional—we prioritize privacy over perfect accuracy.
+- **Boundary handling:** At exactly midnight UTC, the salt changes. A visitor active at 23:59:59 and 00:00:01 will have different hashes. This is acceptable—edge cases are rare and the privacy benefit outweighs perfect session continuity.
+
+### Export Security
+
+```typescript
+// Export endpoint validation
+function validateExportRequest(query: ExportQuery): ValidationResult {
+  // Date range validation
+  const start = new Date(query.start_date);
+  const end = new Date(query.end_date);
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return { valid: false, error: 'Invalid date format. Use YYYY-MM-DD.' };
+  }
+
+  if (end < start) {
+    return { valid: false, error: 'End date must be after start date.' };
+  }
+
+  // Max range: 1 year for Oak, 5 years for Evergreen
+  const maxDays = user.tier === 'evergreen' ? 1825 : 365;
+  const daysDiff = (end - start) / (1000 * 60 * 60 * 24);
+  if (daysDiff > maxDays) {
+    return { valid: false, error: `Date range exceeds maximum (${maxDays} days).` };
+  }
+
+  // Format validation
+  if (!['csv', 'json'].includes(query.format)) {
+    return { valid: false, error: 'Invalid format. Use csv or json.' };
+  }
+
+  return { valid: true };
+}
+
+// File size limit: 50MB max export
+const MAX_EXPORT_SIZE_BYTES = 50 * 1024 * 1024;
+```
+
+---
+
+## Scaling & Performance
+
+### D1 Database Limits
+
+Cloudflare D1 has row limits:
+- **Free tier:** 100,000 rows per database
+- **Paid tier:** 25,000,000 rows per database
+
+**Estimated Row Counts (per blog, per year):**
+- `analytics_events`: ~100-10,000 rows/day (depends on traffic) → **deleted after aggregation**
+- `analytics_daily`: 365 rows/year per post → ~3,650 rows for 10 posts
+- `analytics_blog_stats`: 365 rows/year
+- `reader_history`: ~1-1,000 rows (steady readers accumulate slowly)
+
+**Scaling Strategy:**
+
+1. **Aggressive Event Cleanup:** Raw events are deleted immediately after daily aggregation. Only aggregated data is retained. This keeps `analytics_events` small (only holds ~48hrs of data at any time).
+
+2. **High-Volume Sampling:** For posts exceeding 1,000 pageviews/day, we sample events instead of recording all:
+   ```typescript
+   // Sample 10% of events for high-volume posts
+   function shouldRecordEvent(postId: string, dailyCount: number): boolean {
+     if (dailyCount < 1000) return true;
+     return Math.random() < 0.1;  // 10% sampling
+   }
+   ```
+   Sampling is noted in `analytics_daily.metadata` so dashboard can show "~10,000 views (estimated)".
+
+3. **Retention Enforcement:** Daily cron strictly enforces tier-based retention. Old data is permanently deleted.
+
+### Cron Schedule & Timing
+
+**Daily Aggregation Cron:** Runs once per day at 00:00 UTC.
+
+**Delay Variability:**
+- Event at 23:59 UTC → processed at 00:00 UTC next day (~1 minute delay)
+- Event at 00:01 UTC → processed at 00:00 UTC next day (~24 hour delay)
+
+**Effective delay: 24-48 hours** depending on when the event occurred. This variability is acceptable—the goal is "not real-time," not precise 24-hour delays.
+
+### D1 Batching Strategy
+
+Cloudflare D1 has a **30-second hard timeout** per request. Daily aggregation must batch operations to avoid timeouts:
+
+```typescript
+// Process blogs in batches to avoid D1 timeouts
+async function runDailyAggregation(db: D1Database): Promise<void> {
+  const BATCH_SIZE = 50;  // Process 50 blogs at a time
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const blogs = await db.prepare(
+      `SELECT id FROM tenants WHERE analytics_enabled = 1
+       ORDER BY id LIMIT ? OFFSET ?`
+    ).bind(BATCH_SIZE, offset).all();
+
+    if (blogs.results.length === 0) {
+      hasMore = false;
+      break;
+    }
+
+    for (const blog of blogs.results) {
+      await aggregateBlogEvents(db, blog.id);
+    }
+
+    offset += BATCH_SIZE;
+
+    // Yield to event loop between batches
+    await scheduler.wait(100);  // 100ms pause
+  }
+}
+```
+
+**Batch size tuning:**
+- Start with 50 blogs per batch
+- Monitor execution time and adjust
+- If individual blogs have massive event counts, reduce batch size
+- Log batch completion for observability
+
+### Reading Time Estimation
+
+Engaged Readers and Deep Reads metrics depend on accurate reading time estimates:
+
+```typescript
+// Estimate reading time for a post
+function estimateReadingTime(post: Post): number {
+  const WORDS_PER_MINUTE = 200;  // Average adult reading speed
+
+  // Count words in markdown content (strip formatting)
+  const plainText = stripMarkdown(post.markdown_content);
+  const wordCount = plainText.split(/\s+/).filter(w => w.length > 0).length;
+
+  // Add time for images (10 seconds each)
+  const imageCount = (post.markdown_content.match(/!\[/g) || []).length;
+  const imageSeconds = imageCount * 10;
+
+  // Calculate total seconds
+  const readingSeconds = (wordCount / WORDS_PER_MINUTE) * 60;
+  return Math.round(readingSeconds + imageSeconds);
+}
+
+// A "Deep Read" = spent 60%+ of estimated reading time
+function isDeepRead(timeOnPage: number, estimatedTime: number): boolean {
+  return timeOnPage >= estimatedTime * 0.6;
+}
+```
+
+---
+
+## Implementation Phases
+
+### Phase 5a: Core Collection & Basic Dashboard
+
+**Scope:**
+- Event collection with 24hr delay
+- Consent banner
+- Basic view counts (Seedling)
+- Engaged Readers metric (Sapling)
+- Simple dashboard UI
+
+**Deliverables:**
+- [ ] Collection Worker with delay queue
+- [ ] Consent banner component
+- [ ] Daily aggregation cron job
+- [ ] Seedling dashboard (view counts)
+- [ ] Sapling metrics calculations
+
+### Phase 5b: Resonance Indicators & Insights
+
+**Scope:**
+- Signal calculation system
+- Return/Steady reader tracking
+- Reading Journey metric
+- Posting Calendar
+
+**Deliverables:**
+- [ ] Resonance signal calculator
+- [ ] Reader history tracking
+- [ ] First Impressions calculation
+- [ ] Posting Calendar component
+- [ ] Signal display on posts
+
+### Phase 5c: Wellness Features & Export
+
+**Scope:**
+- Digest Mode
+- Focus Periods
+- Export functionality
+- Quiet Wins
+
+**Deliverables:**
+- [ ] Preferences API
+- [ ] Digest email system
+- [ ] Focus mode UI
+- [ ] Export endpoints
+- [ ] Quiet Wins algorithm
+
+### Phase 5d: Platform Admin & Evergreen
+
+**Scope:**
+- Platform admin dashboard
+- Content moderation integration
+- Seasonal Reflection
+- Custom retention
+
+**Deliverables:**
+- [ ] Platform metrics collection
+- [ ] Admin dashboard UI
+- [ ] Moderation stats integration
+- [ ] Seasonal Reflection email
+- [ ] Evergreen customization
 
 ---
 
 ## Success Metrics
 
-**Launch Goals:**
+### Technical Goals
+
 - [ ] < 50ms collection latency
 - [ ] < 1KB tracking script
 - [ ] > 60% consent acceptance rate
 - [ ] < 5% impact on page load
 - [ ] Zero PII in database
+- [ ] 24hr delay consistently enforced
 
-**Usage Goals:**
-- [ ] 80% of blog owners view analytics monthly
-- [ ] Avg 3 dashboard visits per week per owner
-- [ ] < 10% support tickets about analytics
-- [ ] Positive feedback on privacy approach
+### Writer Wellness Goals
+
+- [ ] < 50% of Oak+ users check dashboard daily (less obsessive checking is good)
+- [ ] > 20% of Oak+ users enable Digest Mode or Focus Periods
+- [ ] Positive qualitative feedback on anxiety reduction
+- [ ] No support tickets about "why are my stats low"
+
+### Platform Goals
+
+- [ ] Analytics as upgrade incentive: 15%+ of upgrades mention analytics
+- [ ] Admin dashboard used weekly for platform health checks
+- [ ] Content moderation stats provide actionable insights
 
 ---
 
 ## Future Enhancements
 
-- **Real-time dashboard:** Live visitor count
-- **Content suggestions:** AI-powered topic recommendations
-- **A/B testing:** Test titles/images
-- **Email reports:** Weekly digest to owners
-- **Goal tracking:** Custom conversion events
-- **Cohort analysis:** Returning visitors
-- **Search analytics:** What visitors search for
+- **Writing prompts:** AI-powered suggestions based on what resonates with your readers
+- **A/B testing:** Test titles/images (Evergreen only, privacy-respecting)
+- **Collaborative stats:** Aggregate anonymous insights across willing Grove blogs
+- **Goal setting:** Personal goals, not competitive metrics ("I want to write 2x/week")
+- **Reading recommendations:** "Readers who liked this also read..." to help you understand your audience
 
 ---
 
-*Last Updated: November 2025*
+*Last Updated: December 2025*
