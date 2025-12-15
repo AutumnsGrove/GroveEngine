@@ -83,6 +83,10 @@
 		good_results: number;
 	}
 
+	// Search mode: 'detailed' or 'vibe' (vibe is default - quick and easy!)
+	type SearchMode = 'detailed' | 'vibe';
+	let searchMode = $state<SearchMode>('vibe');
+
 	// Form state
 	let businessName = $state('');
 	let domainIdea = $state('');
@@ -90,6 +94,29 @@
 	let keywords = $state('');
 	let tldPreferences = $state<string[]>(['com', 'co']);
 	let aiProvider = $state('deepseek');
+
+	// Vibe mode state
+	let vibeText = $state('');
+	let isParsingVibe = $state(false);
+	let parsedVibe = $state<{
+		business_name: string;
+		vibe: string;
+		keywords: string;
+		tld_preferences: string[];
+		domain_idea: string | null;
+	} | null>(null);
+	let pendingJobId = $state<string | null>(null);
+	let vibeError = $state('');
+
+	// Example prompts for vibe mode
+	const vibeExamples = [
+		"A modern tech startup called Quantum Labs focusing on AI and machine learning",
+		"Cozy coffee shop called Morning Bloom with artisan, local, and organic vibes",
+		"Freelance graphic designer Jane Smith, creative and minimal aesthetic"
+	];
+
+	// Word count for vibe text
+	const vibeWordCount = $derived(vibeText.trim().split(/\s+/).filter(Boolean).length);
 
 	// UI state
 	let isSubmitting = $state(false);
@@ -555,6 +582,137 @@
 		followupQuiz = null;
 		followupAnswers = {};
 		errorMessage = '';
+		// Also reset vibe mode state
+		parsedVibe = null;
+		pendingJobId = null;
+		vibeError = '';
+	}
+
+	// Vibe API response types
+	interface VibeErrorResponse {
+		success: false;
+		error: string;
+		hint?: string;
+		word_count?: number;
+	}
+
+	interface VibeSuccessResponse {
+		success: true;
+		job_id: string;
+		status: string;
+		parsed: {
+			business_name: string;
+			vibe: string;
+			keywords: string;
+			tld_preferences: string[];
+			domain_idea: string | null;
+		};
+	}
+
+	type VibeResponse = VibeErrorResponse | VibeSuccessResponse;
+
+	// Vibe Mode Functions
+	async function submitVibe() {
+		if (vibeWordCount < 5) {
+			vibeError = `Please add more detail - we need at least 5 words. You have ${vibeWordCount}.`;
+			return;
+		}
+
+		isParsingVibe = true;
+		vibeError = '';
+		parsedVibe = null;
+		pendingJobId = null;
+
+		try {
+			const response = await fetch('/api/vibe', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					vibe_text: vibeText.trim()
+				})
+			});
+
+			const result = (await response.json()) as VibeResponse;
+
+			if (!response.ok || !result.success) {
+				const errorResult = result as VibeErrorResponse;
+				if (errorResult.error === 'word_count_too_low') {
+					vibeError = errorResult.hint || 'Please add more detail.';
+				} else if (errorResult.error === 'parsing_failed') {
+					vibeError = errorResult.hint || "We couldn't understand that. Try adding more detail about your business.";
+				} else {
+					vibeError = errorResult.error || 'Something went wrong. Please try again.';
+				}
+				return;
+			}
+
+			// Success! Store parsed results and job_id
+			parsedVibe = result.parsed;
+			pendingJobId = result.job_id;
+		} catch (err) {
+			vibeError = err instanceof Error ? err.message : 'Failed to process your description';
+		} finally {
+			isParsingVibe = false;
+		}
+	}
+
+	async function startSearchFromVibe() {
+		if (!parsedVibe || !pendingJobId) return;
+
+		isSubmitting = true;
+		errorMessage = '';
+		jobResults = [];
+		pricingSummary = null;
+		tokenUsage = null;
+		followupQuiz = null;
+
+		try {
+			// Use the regular search start endpoint with parsed values
+			const response = await fetch('/api/search/start', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					business_name: parsedVibe.business_name,
+					domain_idea: parsedVibe.domain_idea || null,
+					vibe: parsedVibe.vibe,
+					keywords: parsedVibe.keywords || null,
+					tld_preferences: parsedVibe.tld_preferences,
+					diverse_tlds: false,
+					...(aiProvider !== 'claude' && { ai_provider: aiProvider })
+				})
+			});
+
+			const result = (await response.json()) as { success?: boolean; error?: string; job?: typeof currentJob };
+
+			if (response.ok && result.success) {
+				currentJob = result.job ?? null;
+				// Clear vibe mode state since we're now in search mode
+				parsedVibe = null;
+				pendingJobId = null;
+				vibeText = '';
+				startMonitoring();
+			} else {
+				throw new Error(result.error || 'Failed to start search');
+			}
+		} catch (err) {
+			errorMessage = err instanceof Error ? err.message : 'Failed to start search';
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function clearVibeResults() {
+		parsedVibe = null;
+		pendingJobId = null;
+		vibeError = '';
+	}
+
+	function useExample(example: string) {
+		vibeText = example;
+		// Clear any previous results when using a new example
+		parsedVibe = null;
+		pendingJobId = null;
+		vibeError = '';
 	}
 
 	function startTimer() {
@@ -730,13 +888,243 @@
 				{/if}
 			</div>
 
+			<!-- Search Mode Tabs -->
+			<div class="flex gap-1 p-1 bg-bark/5 rounded-lg mb-6">
+				<button
+					type="button"
+					onclick={() => searchMode = 'vibe'}
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'vibe' ? 'bg-white text-bark shadow-sm' : 'text-bark/60 hover:text-bark/80'}"
+					disabled={isFormDisabled}
+				>
+					Vibe Mode
+				</button>
+				<button
+					type="button"
+					onclick={() => searchMode = 'detailed'}
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'detailed' ? 'bg-white text-bark shadow-sm' : 'text-bark/60 hover:text-bark/80'}"
+					disabled={isFormDisabled}
+				>
+					Detailed
+				</button>
+			</div>
+
 			{#if errorMessage}
 				<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
 					<p class="text-sm font-sans">{errorMessage}</p>
 				</div>
 			{/if}
 
-			<form onsubmit={(e) => { e.preventDefault(); startSearch(); }} class="space-y-6">
+			<!-- Vibe Mode -->
+			{#if searchMode === 'vibe'}
+				<div class="space-y-4">
+					{#if !parsedVibe}
+						<!-- Vibe Input Form -->
+						<div>
+							<label for="vibe_text" class="block text-sm font-sans font-medium text-bark mb-2">
+								Describe your business or project
+							</label>
+							<textarea
+								id="vibe_text"
+								bind:value={vibeText}
+								placeholder="Tell us about your business in a few sentences... What's it called? What does it do? What vibe are you going for?"
+								class="input-field min-h-[120px] resize-y"
+								disabled={isParsingVibe || isFormDisabled}
+							></textarea>
+
+							<!-- Word count indicator -->
+							<div class="flex items-center justify-between mt-2">
+								<span class="text-xs font-sans {vibeWordCount >= 5 ? 'text-grove-600' : 'text-bark/50'}">
+									{vibeWordCount} word{vibeWordCount === 1 ? '' : 's'}
+									{#if vibeWordCount < 5}
+										<span class="text-bark/40">· need {5 - vibeWordCount} more</span>
+									{:else}
+										<span class="text-grove-500">· ready!</span>
+									{/if}
+								</span>
+								{#if vibeText.length > 0}
+									<button
+										type="button"
+										onclick={() => { vibeText = ''; vibeError = ''; }}
+										class="text-xs text-bark/40 hover:text-bark/60 font-sans"
+										disabled={isParsingVibe}
+									>
+										Clear
+									</button>
+								{/if}
+							</div>
+						</div>
+
+						<!-- Error message -->
+						{#if vibeError}
+							<div class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg">
+								<p class="text-sm font-sans">{vibeError}</p>
+							</div>
+						{/if}
+
+						<!-- Example prompts -->
+						<div class="pt-2">
+							<p class="text-xs font-sans text-bark/50 mb-2">Try an example:</p>
+							<div class="flex flex-col gap-2">
+								{#each vibeExamples as example}
+									<button
+										type="button"
+										onclick={() => useExample(example)}
+										class="text-left px-3 py-2 text-sm font-sans text-bark/70 bg-bark/5 hover:bg-bark/10 rounded-lg transition-colors line-clamp-2"
+										disabled={isParsingVibe || isFormDisabled}
+									>
+										"{example}"
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Submit button -->
+						<button
+							type="button"
+							onclick={submitVibe}
+							class="btn-primary w-full flex items-center justify-center gap-2"
+							disabled={isParsingVibe || vibeWordCount < 5 || isFormDisabled}
+						>
+							{#if isParsingVibe}
+								<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								Understanding your vibe...
+							{:else}
+								Find Domains
+							{/if}
+						</button>
+					{:else}
+						<!-- Parsed Results - Editable -->
+						<div class="space-y-4">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-sans font-medium text-bark">Here's what we understood:</h3>
+								<button
+									type="button"
+									onclick={clearVibeResults}
+									class="text-xs text-bark/50 hover:text-bark/70 font-sans"
+								>
+									Start over
+								</button>
+							</div>
+
+							<div class="bg-grove-50 border border-grove-200 rounded-lg p-4 space-y-3">
+								<!-- Business Name -->
+								<div>
+									<label class="block text-xs font-sans text-bark/60 mb-1">Business Name</label>
+									<input
+										type="text"
+										bind:value={parsedVibe.business_name}
+										class="input-field text-sm"
+										disabled={isSubmitting}
+									/>
+								</div>
+
+								<!-- Vibe -->
+								<div>
+									<label class="block text-xs font-sans text-bark/60 mb-1">Vibe</label>
+									<select
+										bind:value={parsedVibe.vibe}
+										class="input-field text-sm"
+										disabled={isSubmitting}
+									>
+										{#each vibeOptions as option}
+											<option value={option.value}>{option.label}</option>
+										{/each}
+									</select>
+								</div>
+
+								<!-- Keywords -->
+								<div>
+									<label class="block text-xs font-sans text-bark/60 mb-1">Keywords</label>
+									<input
+										type="text"
+										bind:value={parsedVibe.keywords}
+										placeholder="comma, separated, keywords"
+										class="input-field text-sm"
+										disabled={isSubmitting}
+									/>
+								</div>
+
+								<!-- Domain Idea -->
+								<div>
+									<label class="block text-xs font-sans text-bark/60 mb-1">Domain Idea (optional)</label>
+									<input
+										type="text"
+										value={parsedVibe.domain_idea || ''}
+										oninput={(e) => { if (parsedVibe) parsedVibe.domain_idea = e.currentTarget.value || null; }}
+										placeholder="e.g., mybusiness.com"
+										class="input-field text-sm"
+										disabled={isSubmitting}
+									/>
+								</div>
+
+								<!-- TLD Preferences -->
+								<div>
+									<label class="block text-xs font-sans text-bark/60 mb-1">TLD Preferences</label>
+									<div class="flex flex-wrap gap-1.5">
+										{#each ['com', 'co', 'io', 'dev', 'app', 'net', 'org', 'ai', 'studio', 'design', 'place'] as tld}
+											<button
+												type="button"
+												onclick={() => {
+													if (!parsedVibe) return;
+													if (parsedVibe.tld_preferences.includes(tld)) {
+														parsedVibe.tld_preferences = parsedVibe.tld_preferences.filter(t => t !== tld);
+													} else {
+														parsedVibe.tld_preferences = [...parsedVibe.tld_preferences, tld];
+													}
+												}}
+												class="px-2 py-1 rounded-full text-xs font-sans transition-colors {parsedVibe.tld_preferences.includes(tld) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
+												disabled={isSubmitting}
+											>
+												.{tld}
+											</button>
+										{/each}
+									</div>
+								</div>
+							</div>
+
+							<!-- AI Provider (keep this available) -->
+							<div>
+								<label for="ai_provider_vibe" class="block text-xs font-sans text-bark/60 mb-1">
+									AI Model
+								</label>
+								<select
+									id="ai_provider_vibe"
+									bind:value={aiProvider}
+									class="input-field text-sm"
+									disabled={isSubmitting}
+								>
+									{#each aiProviderOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<!-- Start Search button -->
+							<button
+								type="button"
+								onclick={startSearchFromVibe}
+								class="btn-primary w-full flex items-center justify-center gap-2"
+								disabled={isSubmitting || !parsedVibe.business_name.trim()}
+							>
+								{#if isSubmitting}
+									<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									Starting Search...
+								{:else}
+									Start Domain Search
+								{/if}
+							</button>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<!-- Detailed Mode (original form) -->
+				<form onsubmit={(e) => { e.preventDefault(); startSearch(); }} class="space-y-6">
 				<!-- Business Name -->
 				<div>
 					<label for="business_name" class="block text-sm font-sans font-medium text-bark mb-2">
@@ -939,6 +1327,7 @@
 					{/if}
 				</button>
 			</form>
+			{/if}
 		</div>
 
 		<!-- Current Job Status -->
