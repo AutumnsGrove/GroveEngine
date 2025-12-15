@@ -214,7 +214,32 @@ Forward Email handles the actual mail server infrastructure. **Research complete
 
 **Key insight:** "Unlimited domains and aliases" means we pay ONE flat fee ($3-9/mo total) regardless of how many Grove users we have. This is extremely cost-effective.
 
-Additional storage: +$3/mo per 10 GB if needed.
+#### Storage Strategy: Use R2, Not Forward Email Storage
+
+**We bypass Forward Email's storage entirely** by using webhooks + R2:
+
+| Provider | 1TB Storage Cost |
+|----------|-----------------|
+| Forward Email | ~$300/mo |
+| Cloudflare R2 | ~$15/mo |
+
+**How it works:**
+1. Disable IMAP Storage on each alias (uncheck in Forward Email dashboard)
+2. Set webhook URL as the recipient instead of forwarding address
+3. Forward Email POSTs full email (raw, headers, attachments) to our Worker
+4. We encrypt and store in R2
+5. Forward Email never stores the email
+
+**Webhook payload includes everything we need:**
+- `raw` — Complete raw email as string
+- `headers` — Parsed headers (from, to, subject, etc.)
+- `attachments` — Array with Buffer values (full attachment data)
+- `recipients` — Who it was sent to
+- `dkim`, `spf`, `dmarc` — Authentication results
+
+**Webhook verification:** Forward Email provides signature verification via `X-Webhook-Signature` header.
+
+**Result:** We only pay Forward Email for SMTP sending ($3/mo), all storage lives in R2 at a fraction of the cost.
 
 #### API Capabilities (Confirmed)
 
@@ -288,18 +313,43 @@ Auth: API token from account dashboard
 ### Data Flow
 
 ```
-Incoming Email:
-[External Sender] → [Forward Email MX] → [Grove Worker] → [Encrypt] → [R2 Storage]
-                                              ↓
-                                        [Index in D1]
-                                              ↓
-                                        [Ivy UI displays]
+INCOMING EMAIL (Webhook-based, no Forward Email storage):
 
-Outgoing Email:
-[Ivy Compose] → [Email Queue (D1)] → [Wait for delay] → [Forward Email SMTP] → [Recipient]
-                       ↓
-              [User can cancel here]
+[External Sender]
+        ↓
+[Forward Email MX receives]
+        ↓
+[Webhook POST to Grove Worker]  ← Contains: raw, headers, attachments, auth results
+        ↓
+[Verify X-Webhook-Signature]
+        ↓
+[Parse & Encrypt with user key]
+        ↓
+[Store in R2]  ←  Email body + attachments (encrypted)
+        ↓
+[Index metadata in D1]  ←  From, to, subject, timestamp (for search)
+        ↓
+[Ivy UI displays]
+
+
+OUTGOING EMAIL (Delayed queue):
+
+[Ivy Compose]
+        ↓
+[Save to D1 Queue]  ←  Status: "pending", scheduled_send_at: now + delay
+        ↓
+[User can cancel here]  ←  Within delay window (1-60 min)
+        ↓
+[Cron/Worker triggers at scheduled time]
+        ↓
+[Send via Forward Email SMTP]
+        ↓
+[Store sent copy in R2]  ←  Our own copy, encrypted
+        ↓
+[Update D1: status = "sent"]
 ```
+
+**Key point:** Forward Email never stores our users' emails. They only relay.
 
 ### Zero-Knowledge Storage
 
@@ -628,7 +678,7 @@ Platform notifications (new followers, reactions, comments) can optionally route
 ### Business
 
 1. ~~**Forward Email costs**~~ — ✅ ANSWERED: $3/mo for unlimited domains/aliases. Scales perfectly for multi-tenant.
-2. **Storage costs** — R2 pricing at scale for email+attachments? (R2 is cheap, likely fine)
+2. ~~**Storage costs**~~ — ✅ ANSWERED: Using R2 instead of Forward Email storage. ~$15/mo per TB vs ~$300/mo. Massive savings at scale.
 3. **Support burden** — Email is complex. What's the support strategy?
 4. **Newsletter approval** — Need to contact Forward Email about bulk sending for Grove's use case
 
@@ -686,11 +736,12 @@ How do we know Ivy is working?
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Forward Email goes down | Users can't send/receive | Monitor closely, have backup provider researched |
+| Forward Email goes down | Can't send/receive temporarily, but **data safe in R2** | Monitor closely, have backup provider researched |
 | Zero-knowledge key loss | User loses all email | Clear warnings, recovery phrase option? |
 | Spam complaints | IP reputation damage | Strict rate limits, abuse monitoring |
 | Feature creep | Never ships | Strict MVP scope, defer aggressively |
 | Complexity | Support burden | Excellent help docs, simple UI |
+| Webhook delivery failure | Incoming email lost | Forward Email retries; implement dead letter queue |
 
 ---
 
