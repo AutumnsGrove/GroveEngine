@@ -87,7 +87,7 @@ These constraints must be clearly communicated during onboarding. The email sele
 - **Send/receive** — Full SMTP/IMAP functionality via Forward Email backend
 - **Multiple recipients** — Send to multiple addresses in one email
 - **Reply/Reply All/Forward** — Standard email actions
-- **Attachments** — Upload and attach files (25MB max per attachment)
+- **Attachments** — Upload and attach files (25MB max per file, 50MB max total per email; counts toward storage quota)
 
 #### Organization
 - **Threaded conversations** — Gmail-style grouping of related messages
@@ -785,6 +785,27 @@ PASSWORD CHANGE:
 - **Recovery phrase**: 24-word BIP39 mnemonic, download at activation
 - **Key regeneration**: Available in settings, CLEARLY warns this deletes all existing email
 - **Export before reset**: Option to download all decrypted emails before key regeneration
+- **"I lost my phrase" flow**: One-time re-key from active session (see below)
+
+#### "I Lost My Recovery Phrase" Flow
+
+If a user is currently logged in but has lost their recovery phrase:
+
+```
+WHILE LOGGED IN (has valid session with decrypted email key):
+
+1. User goes to Settings → Security → "I lost my recovery phrase"
+2. Warning: "This will generate a new recovery phrase. Your old phrase
+   will no longer work. Make sure to save the new one!"
+3. User confirms with password
+4. System generates NEW recovery phrase
+5. Re-encrypts email key with new wrapper key
+6. User MUST download new phrase before continuing
+7. Old phrase is invalidated
+
+KEY POINT: This only works while logged in. The decrypted email key
+exists in the session, so we can re-wrap it without data loss.
+```
 
 **What happens if user loses BOTH password AND recovery phrase:**
 This results in **permanent, irrecoverable data loss**. Grove cannot help—this is intentional and fundamental to zero-knowledge architecture. The encrypted data still exists but is computationally impossible to decrypt without the key.
@@ -834,6 +855,7 @@ CREATE TABLE ivy_settings (
   user_id TEXT PRIMARY KEY,
   email_address TEXT UNIQUE NOT NULL,
   email_selected_at TIMESTAMP NOT NULL,
+  email_locked_at TIMESTAMP NOT NULL,     -- Set when address chosen; immutable after
   encrypted_email_key TEXT NOT NULL,      -- Email key encrypted with user's wrapper key
   unsend_delay_minutes INTEGER DEFAULT 2,
   encrypted_signature TEXT,               -- Encrypted with email key
@@ -887,10 +909,25 @@ CREATE TABLE ivy_contact_form_buffer (
   recipient_user_id TEXT NOT NULL,
   encrypted_submission TEXT NOT NULL,     -- Encrypted with recipient's public key
   source_blog TEXT,
+  source_ip_hash TEXT,                    -- Hashed IP for rate limiting (not stored raw)
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (recipient_user_id) REFERENCES users(id)
 );
+
+-- Newsletter send tracking (for rate limit enforcement)
+CREATE TABLE ivy_newsletter_sends (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  recipient_count INTEGER NOT NULL,
+  sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  postmark_message_id TEXT,               -- For tracking/debugging
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Email address immutability enforcement
+-- Note: email_locked_at is set when user first selects address; cannot be changed after
+-- Support override requires admin action + audit log entry
 ```
 
 ### Indexes
@@ -901,6 +938,8 @@ CREATE INDEX idx_queue_pending ON ivy_email_queue(status, scheduled_send_at);
 CREATE INDEX idx_queue_user ON ivy_email_queue(user_id, status);
 CREATE INDEX idx_buffer_pending ON ivy_webhook_buffer(status, received_at);
 CREATE INDEX idx_contact_pending ON ivy_contact_form_buffer(status, created_at);
+CREATE INDEX idx_contact_ip ON ivy_contact_form_buffer(source_ip_hash, created_at);
+CREATE INDEX idx_newsletter_user ON ivy_newsletter_sends(user_id, sent_at DESC);
 ```
 
 ### Client-Side Schema (IndexedDB)
@@ -1051,6 +1090,56 @@ At 100% quota:
 - **No third-party analytics** — No Google Analytics, no Mixpanel
 - **Data portability** — Users can export all their email data
 
+### HTML Email Rendering (XSS Prevention)
+
+Emails can contain HTML, which creates XSS risk. Defense in depth:
+
+**1. Client-Side Sanitization (DOMPurify)**
+
+```typescript
+// IMPORTANT: DOMPurify runs CLIENT-SIDE only
+// Server-side sanitization has known issues; do it in the browser
+import DOMPurify from 'dompurify';
+
+const DOMPURIFY_CONFIG = {
+  ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3', 'img', 'table', 'tr', 'td', 'th', 'thead', 'tbody'],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
+  ALLOW_DATA_ATTR: false,
+  FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'button'],
+  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+};
+
+function sanitizeEmailHtml(html: string): string {
+  return DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
+}
+```
+
+**2. Sandboxed Iframe**
+
+Email bodies render in a sandboxed iframe:
+
+```html
+<iframe
+  sandbox="allow-same-origin"
+  srcdoc="<!-- sanitized email HTML -->"
+  csp="default-src 'none'; img-src https: data:; style-src 'unsafe-inline';"
+></iframe>
+```
+
+**3. Content Security Policy**
+
+```
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' https: data:;
+  frame-src 'self';
+  frame-ancestors 'self';
+```
+
+**Why client-side only:** Server-side DOMPurify has compatibility issues with Cloudflare Workers and can behave differently than browser DOM. Running sanitization in the browser ensures consistent behavior with actual rendering.
+
 ---
 
 ## Integrations
@@ -1080,6 +1169,65 @@ When someone submits a contact form on a Grove blog:
 - No email configuration for blog owners
 - Contact submissions in same place as other mail
 - Reply threading works naturally
+
+#### Contact Form Spam Prevention
+
+Public contact forms create an abuse vector. Mitigation:
+
+**1. Cloudflare Turnstile (Zero-Friction CAPTCHA)**
+
+```typescript
+// Server-side verification
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      secret: env.TURNSTILE_SECRET_KEY,
+      response: token,
+      remoteip: ip,
+    }),
+  });
+  const result = await response.json();
+  return result.success === true;
+}
+```
+
+**2. IP-Based Rate Limiting**
+
+```typescript
+const CONTACT_FORM_LIMITS = {
+  perIpPerHour: 5,        // Max 5 submissions per IP per hour
+  perRecipientPerDay: 20, // Max 20 submissions to any user per day
+};
+
+async function checkContactFormRateLimit(ipHash: string, recipientId: string): Promise<boolean> {
+  const hourAgo = Date.now() - 60 * 60 * 1000;
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+  // Check IP rate
+  const ipCount = await db.get(`
+    SELECT COUNT(*) as count FROM ivy_contact_form_buffer
+    WHERE source_ip_hash = ? AND created_at > ?
+  `, [ipHash, new Date(hourAgo).toISOString()]);
+
+  if (ipCount.count >= CONTACT_FORM_LIMITS.perIpPerHour) return false;
+
+  // Check recipient rate
+  const recipientCount = await db.get(`
+    SELECT COUNT(*) as count FROM ivy_contact_form_buffer
+    WHERE recipient_user_id = ? AND created_at > ?
+  `, [recipientId, new Date(dayAgo).toISOString()]);
+
+  if (recipientCount.count >= CONTACT_FORM_LIMITS.perRecipientPerDay) return false;
+
+  return true;
+}
+```
+
+**3. User Toggle**
+
+Blog owners can disable contact forms entirely in settings if being targeted.
 
 ### 3. Meadow Notifications
 

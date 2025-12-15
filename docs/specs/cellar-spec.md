@@ -610,6 +610,81 @@ grove-export-{username}-{date}/
 - **3 exports per day** maximum
 - Large exports (>10GB) may take hours—user notified of estimated time
 
+### Export Streaming Implementation
+
+Workers have 128MB memory limit. Large exports (50GB+) must stream directly to R2:
+
+```typescript
+// Stream zip directly to R2 without buffering entire export
+import { ZipWriter } from '@aspect-build/rules_js'; // or similar streaming zip library
+
+async function generateExportChunk(
+  env: Env,
+  userId: string,
+  files: StorageFile[],
+  chunkNumber: number,
+  chunkSizeBytes: number
+): Promise<string> {
+  const r2Key = `exports/${userId}/${Date.now()}/part-${chunkNumber}.zip`;
+
+  // Create a TransformStream for streaming to R2
+  const { readable, writable } = new TransformStream();
+
+  // Start R2 upload with streaming body
+  const uploadPromise = env.R2_BUCKET.put(r2Key, readable, {
+    httpMetadata: { contentType: 'application/zip' },
+  });
+
+  // Create zip writer that streams to the writable side
+  const zipWriter = new ZipWriter(writable);
+
+  let currentSize = 0;
+  for (const file of files) {
+    if (currentSize >= chunkSizeBytes) break;
+
+    // Stream file from R2 → zip → R2 (never fully in memory)
+    const fileData = await env.R2_BUCKET.get(file.r2_key);
+    if (fileData) {
+      await zipWriter.add(file.filename, fileData.body);
+      currentSize += file.size_bytes;
+    }
+  }
+
+  await zipWriter.close();
+  await uploadPromise;
+
+  return r2Key;
+}
+
+// Durable Object for long-running exports (survives Worker timeout)
+export class ExportJob {
+  state: DurableObjectState;
+
+  async processExport(userId: string, format: 'zip' | '7z', chunkSize: number) {
+    // Durable Objects can run for up to 30 seconds per alarm
+    // Schedule sequential alarms to process large exports
+    const files = await this.getFilesForUser(userId);
+    const chunks = this.chunkFiles(files, chunkSize);
+
+    for (let i = 0; i < chunks.length; i++) {
+      await this.state.storage.put('currentChunk', i);
+      await generateExportChunk(this.env, userId, chunks[i], i + 1, chunkSize);
+      // Update progress
+      await this.updateExportProgress(userId, (i + 1) / chunks.length);
+    }
+
+    // Send email with download links
+    await this.sendExportReadyEmail(userId);
+  }
+}
+```
+
+**Key points:**
+- TransformStream pipes data directly from source R2 → zip → destination R2
+- Durable Objects handle exports >30 seconds via alarm chaining
+- Progress tracked in D1 for UI updates
+- Memory usage stays constant regardless of export size
+
 ### Migration Script (Existing Files)
 
 Existing blog files need `storage_files` entries:
