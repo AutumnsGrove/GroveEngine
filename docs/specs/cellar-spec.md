@@ -549,43 +549,165 @@ Custom theme assets appear in Cellar for Oak+ users with custom themes.
 
 ## Data Portability
 
-Cellar is central to Grove's GDPR compliance:
+Cellar is central to Grove's GDPR compliance. Following the **Google Takeout model**.
 
 ### Full Export
 
 Users can request a complete export of all their data:
 
 1. Click "Download All" in Cellar
-2. System generates zip file in background
-3. Zip includes:
-   - All files (organized by product/category)
-   - Metadata JSON (file info, upload dates)
-   - Blog content (markdown)
-   - Ivy emails (if user provides decryption)
-4. User receives email when ready
-5. Download link valid for 7 days
-6. Zip auto-deleted after expiry
+2. **Choose format:**
+   - Zip (default, 1GB chunks)
+   - Zip (5GB chunks)
+   - 7z (better compression, 1GB or 5GB chunks)
+3. System generates archives in background (streamed, not buffered)
+4. **Download links emailed** to user's external email address
+5. Download links valid for 7 days
+6. Archives auto-deleted from R2 after expiry
 
-### Export Contents
+### Export Delivery
+
+**Why email instead of browser download?**
+- Large exports (10GB+) can timeout in browser
+- User doesn't have to wait—they get notified
+- Works even if they close the tab
+- Provides audit trail for GDPR requests
+
+```
+Export Flow:
+1. User clicks "Download All"
+2. Selects format (zip/7z) and chunk size (1GB/5GB)
+3. Job queued → status shows "Preparing..."
+4. Worker streams files into chunks (never loads all in memory)
+5. When complete: email sent with signed download URLs
+6. User downloads from email links at their convenience
+```
+
+### Export File Structure
 
 ```
 grove-export-{username}-{date}/
-├── manifest.json              # Export metadata
-├── blog/
-│   ├── images/
-│   ├── content/
-│   └── metadata.json
-├── email/
-│   ├── inbox/
-│   ├── sent/
-│   ├── attachments/
-│   └── metadata.json
-├── profile/
-│   ├── avatar.webp
-│   ├── banner.webp
-│   └── metadata.json
+├── part-1.zip (or .7z)        # Up to 1GB or 5GB
+│   ├── blog/
+│   │   ├── images/
+│   │   ├── content/
+│   │   └── metadata.json
+│   └── profile/
+│       ├── avatar.webp
+│       └── banner.webp
+├── part-2.zip                 # If needed
+│   └── email/
+│       ├── inbox/
+│       ├── sent/
+│       └── attachments/
+├── manifest.json              # Export metadata (always separate)
 └── README.md                  # Explanation of contents
 ```
+
+### Export Rate Limits
+
+- **1 concurrent export** per user
+- **3 exports per day** maximum
+- Large exports (>10GB) may take hours—user notified of estimated time
+
+### Migration Script (Existing Files)
+
+Existing blog files need `storage_files` entries:
+
+```typescript
+// Migration: populate storage_files from existing R2 objects
+async function migrateExistingFiles() {
+  const bucket = env.R2_BUCKET;
+  let cursor: string | undefined;
+
+  do {
+    const listed = await bucket.list({ cursor, limit: 1000 });
+
+    for (const object of listed.objects) {
+      // Parse R2 key: {user_id}/blog/images/{filename}
+      const [userId, product, category, ...rest] = object.key.split('/');
+      const filename = rest.join('/');
+
+      await db.run(`
+        INSERT OR IGNORE INTO storage_files
+        (id, user_id, r2_key, filename, mime_type, size_bytes, product, category, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        crypto.randomUUID(),
+        userId,
+        object.key,
+        filename,
+        object.httpMetadata?.contentType || 'application/octet-stream',
+        object.size,
+        product,
+        category,
+        object.uploaded.toISOString()
+      ]);
+    }
+
+    cursor = listed.truncated ? listed.cursor : undefined;
+  } while (cursor);
+
+  // Update user_storage totals
+  await db.run(`
+    INSERT INTO user_storage (user_id, tier_gb, used_bytes)
+    SELECT user_id, 0, SUM(size_bytes)
+    FROM storage_files
+    GROUP BY user_id
+    ON CONFLICT (user_id) DO UPDATE SET used_bytes = excluded.used_bytes
+  `);
+}
+```
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+**Quota Calculation:**
+- Tier + add-ons computed correctly
+- Used bytes tracked accurately
+- Threshold warnings triggered at 80%, 95%, 100%
+
+**File Operations:**
+- Upload creates storage_files entry
+- Delete moves to trash (soft delete)
+- Permanent delete removes from R2 and D1
+
+**Export Generation:**
+- Files chunked at correct boundaries
+- 7z compression works
+- Manifest generated correctly
+
+### Integration Tests
+
+**Upload → Storage → Download Flow:**
+- File uploaded → R2 + D1 entry
+- Quota updated atomically
+- Download returns correct file
+
+**Export Flow:**
+- Job queued → processed → email sent
+- Chunked correctly for large exports
+- Signed URLs work and expire
+
+**Add-on Purchase:**
+- Stripe checkout flow
+- Quota increased after payment
+- Cancellation at period end
+
+### End-to-End Tests
+
+- Full export of 10GB+ mailbox
+- Quota enforcement blocks upload
+- Migration script populates existing files
+
+### Load Tests
+
+- 100 concurrent uploads
+- 100GB export streaming
+- File browser with 10k files
 
 ---
 

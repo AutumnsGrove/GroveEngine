@@ -35,13 +35,13 @@ The goal is a mail client that feels like Grove—warm, personal, and respectful
 
 ## Tier Access
 
-| Feature | Free | Sapling ($12) | Oak ($25) | Evergreen ($35) |
-|---------|:----:|:-------------:|:---------:|:---------------:|
-| Ivy Access | — | Read-only | Full | Full |
-| Send Email | — | — | ✓ | ✓ |
-| Receive Email | — | View forwarded | ✓ | ✓ |
-| Newsletter Send | — | — | 2x/week | 2x/week |
-| Storage Pool | — | 5 GB | 20 GB | 100 GB |
+| Feature | Free | Seedling ($8) | Sapling ($12) | Oak ($25) | Evergreen ($35) |
+|---------|:----:|:-------------:|:-------------:|:---------:|:---------------:|
+| Ivy Access | — | — | Read-only | Full | Full |
+| Send Email | — | — | — | ✓ | ✓ |
+| Receive Email | — | — | View forwarded | ✓ | ✓ |
+| Newsletter Send | — | — | — | 2x/week | 5x/week |
+| Storage Pool | — | 1 GB | 5 GB | 20 GB | 100 GB |
 
 ### Sapling (Read-Only)
 
@@ -138,7 +138,8 @@ Oak and Evergreen users can send to their blog subscribers:
 - **Unsubscribe handling** — Automatic unsubscribe links, honor requests
 
 ### Limits
-- **Maximum 2 sends per week** — Prevents spam, encourages thoughtful communication
+- **Oak:** 2 sends per week
+- **Evergreen:** 5 sends per week
 - **No tracking** — No open tracking, no click tracking (privacy-first)
 
 ### What This Is NOT
@@ -162,6 +163,12 @@ For Grove administrators (Autumn):
 - **Send by criteria** — Filter by signup date, last active, etc.
 - **No rate limits** — Admin sends bypass weekly limits
 - **Template system** — Saved templates for common admin communications
+
+### Security Requirements
+- **2FA required** — Admin actions require two-factor authentication
+- **Audit log** — All admin sends logged with timestamp, author, recipient criteria
+- **Preview + confirmation** — Must preview before sending, explicit confirmation
+- **Separate auth level** — Admin mail requires elevated permissions beyond normal admin
 
 ### Architecture Note
 Admin tools should be **extensible**. Build with plugin/module architecture so new admin features can be added without restructuring:
@@ -237,7 +244,38 @@ Forward Email handles the actual mail server infrastructure. **Research complete
 - `recipients` — Who it was sent to
 - `dkim`, `spf`, `dmarc` — Authentication results
 
-**Webhook verification:** Forward Email provides signature verification via `X-Webhook-Signature` header.
+**Webhook verification:** Forward Email provides signature verification via `X-Webhook-Signature` header (HMAC-SHA256).
+
+```typescript
+// Webhook signature verification (constant-time to prevent timing attacks)
+import { timingSafeEqual } from 'crypto';
+
+async function verifyWebhookSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const expectedSig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  const expectedHex = Array.from(new Uint8Array(expectedSig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Constant-time comparison
+  if (signature.length !== expectedHex.length) return false;
+  const sigBytes = encoder.encode(signature);
+  const expectedBytes = encoder.encode(expectedHex);
+  return timingSafeEqual(sigBytes, expectedBytes);
+}
+```
 
 **Result:** We only pay Forward Email for SMTP sending ($3/mo), all storage lives in R2 at a fraction of the cost.
 
@@ -310,41 +348,32 @@ Auth: API token from account dashboard
 - Contact form integration
 - Search indexing (client-side, IndexedDB)
 
-### Resend Integration (Newsletters)
+### Postmark Integration (Newsletters)
 
-**Hybrid architecture:** Forward Email for mailbox, Resend for broadcasts.
+**Hybrid architecture:** Forward Email for mailbox, Postmark for broadcasts.
 
 #### Why Two Providers?
 
 | Use Case | Provider | Why |
 |----------|----------|-----|
 | 1:1 correspondence | Forward Email | Mailbox infrastructure (MX, webhooks, SMTP) |
-| Newsletters/broadcasts | Resend | Purpose-built for bulk, dedicated IPs, deliverability |
+| Newsletters/broadcasts | Postmark | Dedicated Broadcast Stream, excellent deliverability |
 
-Different tools for different jobs. No approval needed from Forward Email for newsletters.
+Different tools for different jobs. Postmark's separate "Broadcast Message Stream" keeps newsletters isolated from transactional mail.
 
-#### Resend Pricing
+#### Postmark Pricing
 
-**Transactional Email (API sends):**
-
-| Plan | Price | Emails/Month | Daily Limit |
-|------|-------|--------------|-------------|
-| Free | $0 | 3,000 | 100/day |
-| Pro | $20/mo | 50,000 | — |
-| Scale | $90/mo | 100,000 | — |
-
-**Marketing Email (Broadcasts):**
-
-| Plan | Price | Contacts | Sends |
-|------|-------|----------|-------|
-| Free | $0 | 1,000 | Unlimited |
-| Starter | $40/mo | 5,000 | Unlimited |
-| Growth | Custom | 10,000+ | Unlimited |
+| Plan | Price | Emails/Month |
+|------|-------|--------------|
+| Free | $0 | 100 |
+| Starter | $15/mo | 10,000 |
+| Growth | $35/mo | 50,000 |
+| Scale | $85/mo | 125,000 |
 
 **For Grove:**
-- Start with Free tier (1,000 contacts, unlimited sends)
-- Move to Starter ($40/mo) when subscriber base grows
-- Marketing pricing is per-contact, not per-send (good for 2x/week newsletters)
+- Start with Starter ($15/mo for 10k emails)
+- Per-email pricing (not per-contact like Resend)
+- 45 days of message history included
 
 #### Newsletter Feature (Oak+)
 
@@ -354,33 +383,34 @@ USER FLOW:
 2. Selects "Send to Subscribers"
 3. Preview shows recipient count
 4. User confirms send
-5. Resend Broadcasts API sends to all subscribers
+5. Postmark Broadcast Stream sends to all subscribers
 6. Copy stored in user's Ivy (encrypted)
 
 LIMITS:
-- Oak/Evergreen only
-- Maximum 2 sends per week (enforced by Grove, not Resend)
+- Oak: 2 sends per week
+- Evergreen: 5 sends per week
 - No tracking pixels, no open tracking (privacy-first)
 - Automatic unsubscribe link in footer
 ```
 
-#### Resend Configuration
+#### Postmark Configuration
 
 ```
-API: api.resend.com
-Auth: API key (stored securely, not in user space)
+API: api.postmarkapp.com
+Auth: Server API token (stored securely, not in user space)
 From: username@grove.place (verified domain)
+Stream: broadcast (separate from transactional)
 ```
 
 #### Cost Projection
 
-| Users with Oak+ | Avg Subscribers | Monthly Cost |
-|-----------------|-----------------|--------------|
-| 10 | 500 | $0 (free tier) |
-| 50 | 2,500 | $40/mo |
-| 200 | 10,000 | ~$80/mo |
+| Users with Oak+ | Avg Subscribers | Sends/Month | Monthly Cost |
+|-----------------|-----------------|-------------|--------------|
+| 10 | 500 | ~4,000 | $15/mo |
+| 50 | 2,500 | ~20,000 | $35/mo |
+| 200 | 10,000 | ~80,000 | $85/mo |
 
-Resend's per-contact pricing scales reasonably for Grove's use case.
+Postmark's per-email pricing scales well and is ~60% cheaper than Resend at scale.
 
 ### Data Flow
 
@@ -435,13 +465,13 @@ OUTGOING EMAIL (Delayed queue):
 [Update D1: status = "sent"]
 
 
-NEWSLETTER/BROADCAST (Oak+ via Resend):
+NEWSLETTER/BROADCAST (Oak+ via Postmark):
 
 [Ivy "Send to Subscribers"]
         ↓
 [Fetch subscriber list]
         ↓
-[Resend Broadcasts API]  ←  Dedicated infrastructure for bulk
+[Postmark Broadcast Stream]  ←  Dedicated infrastructure for bulk
         ↓
 [Store copy in user's Ivy (encrypted)]
 ```
@@ -449,7 +479,134 @@ NEWSLETTER/BROADCAST (Oak+ via Resend):
 **Key points:**
 - Forward Email never stores our users' emails—they only relay
 - D1 buffer ensures no email loss if R2 is temporarily unavailable
-- Resend handles newsletters (separate from 1:1 correspondence)
+- Postmark handles newsletters (separate from 1:1 correspondence)
+
+### Webhook Retry Policy
+
+When processing webhook buffer entries fails:
+
+```typescript
+const RETRY_CONFIG = {
+  maxRetries: 5,
+  backoffMs: [60000, 120000, 240000, 480000, 960000], // 1m, 2m, 4m, 8m, 16m
+  alertAfterFailures: 3,
+};
+
+async function processWebhookWithRetry(bufferId: string) {
+  const entry = await db.get('SELECT * FROM ivy_webhook_buffer WHERE id = ?', bufferId);
+
+  if (entry.retry_count >= RETRY_CONFIG.maxRetries) {
+    // Move to dead letter, alert user
+    await alertUserOfFailedEmail(entry.user_id, entry.id);
+    await db.run('UPDATE ivy_webhook_buffer SET status = ? WHERE id = ?', ['dead_letter', bufferId]);
+    return;
+  }
+
+  try {
+    await processWebhookEntry(entry);
+    await db.run('DELETE FROM ivy_webhook_buffer WHERE id = ?', bufferId);
+  } catch (error) {
+    const nextRetry = RETRY_CONFIG.backoffMs[entry.retry_count];
+    await db.run(`
+      UPDATE ivy_webhook_buffer
+      SET retry_count = retry_count + 1,
+          error_message = ?,
+          status = 'pending'
+      WHERE id = ?
+    `, [error.message, bufferId]);
+
+    // Schedule retry
+    await scheduleRetry(bufferId, nextRetry);
+
+    // Alert after 3 failures
+    if (entry.retry_count + 1 >= RETRY_CONFIG.alertAfterFailures) {
+      await alertUserOfDeliveryIssue(entry.user_id);
+    }
+  }
+}
+```
+
+### Rate Limiting
+
+| Action | Limit | Window |
+|--------|-------|--------|
+| Outgoing email (Oak+) | 100 emails | per hour |
+| Attachment upload | 50 MB | per hour |
+| Newsletter send | 2-5/week | per tier |
+| API requests | 1000 | per hour |
+
+```typescript
+// Rate limit check (using D1 for durability)
+async function checkRateLimit(userId: string, action: string, limit: number, windowMs: number): Promise<boolean> {
+  const windowStart = Date.now() - windowMs;
+  const count = await db.get(`
+    SELECT COUNT(*) as count FROM rate_limits
+    WHERE user_id = ? AND action = ? AND timestamp > ?
+  `, [userId, action, windowStart]);
+
+  return count.count < limit;
+}
+```
+
+### Race Condition Protection
+
+#### Unsend Queue (Optimistic Locking)
+
+```typescript
+// Cancel unsend - uses optimistic locking to prevent race with send worker
+async function cancelUnsend(emailId: string, userId: string): Promise<{ success: boolean }> {
+  const result = await db.run(`
+    UPDATE ivy_email_queue
+    SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND user_id = ? AND status = 'pending'
+  `, [emailId, userId]);
+
+  return { success: result.changes > 0 };
+}
+
+// Send worker - only processes if still pending
+async function processSendQueue() {
+  const pending = await db.all(`
+    SELECT * FROM ivy_email_queue
+    WHERE status = 'pending' AND scheduled_send_at <= CURRENT_TIMESTAMP
+    FOR UPDATE SKIP LOCKED
+  `);
+
+  for (const email of pending) {
+    // Double-check status before sending
+    const current = await db.get('SELECT status FROM ivy_email_queue WHERE id = ?', email.id);
+    if (current.status !== 'pending') continue;
+
+    await sendEmail(email);
+    await db.run('UPDATE ivy_email_queue SET status = ?, sent_at = CURRENT_TIMESTAMP WHERE id = ?',
+      ['sent', email.id]);
+  }
+}
+```
+
+#### Storage Quota (Atomic Check)
+
+```typescript
+// Atomic quota check and update
+async function checkAndReserveQuota(userId: string, sizeBytes: number): Promise<boolean> {
+  return await db.transaction(async (tx) => {
+    const storage = await tx.get(`
+      SELECT tier_gb, additional_gb, used_bytes
+      FROM user_storage WHERE user_id = ? FOR UPDATE
+    `, [userId]);
+
+    const totalQuota = (storage.tier_gb + storage.additional_gb) * 1024 * 1024 * 1024;
+    if (storage.used_bytes + sizeBytes > totalQuota) {
+      return false;
+    }
+
+    await tx.run(`
+      UPDATE user_storage SET used_bytes = used_bytes + ? WHERE user_id = ?
+    `, [sizeBytes, userId]);
+    return true;
+  });
+}
+```
 
 ### Zero-Knowledge Storage
 
@@ -865,6 +1022,126 @@ Platform notifications (new followers, reactions, comments) can optionally route
 
 ---
 
+## Account Deletion
+
+Following Google Takeout model for data export and deletion.
+
+### Export Before Deletion
+
+When a user requests account deletion:
+
+1. **30-day grace period** begins
+2. User receives email to external address (if provided) confirming request
+3. **Full export generated automatically** — Google Takeout style:
+   - Emails chunked into 1GB zip files (or 5GB/7z if user selects)
+   - Download links sent via email (valid 7 days)
+   - Includes: emails, attachments, contacts, settings
+4. User can cancel deletion during grace period
+5. After 30 days: permanent deletion
+
+### Permanent Deletion Process
+
+```
+Day 0:  User requests deletion
+        → Grace period starts
+        → Export job queued
+        → Confirmation email sent
+
+Day 1:  Export complete
+        → Download links emailed to external address
+        → Reminder: "Your Grove data will be deleted in 29 days"
+
+Day 15: Reminder email: "Your Grove data will be deleted in 15 days"
+
+Day 30: Permanent deletion:
+        → D1: All ivy_* tables rows deleted
+        → R2: All user/{user_id}/ivy/* objects deleted
+        → Backups: Marked for exclusion from future restores
+        → Confirmation email: "Your data has been deleted"
+```
+
+### Export File Structure
+
+```
+grove-export-{username}-{date}/
+├── part-1.zip (or .7z)           # Up to 1GB (or 5GB)
+│   ├── emails/
+│   │   ├── inbox/
+│   │   │   └── {thread_id}/
+│   │   │       ├── message-001.eml
+│   │   │       └── message-002.eml
+│   │   ├── sent/
+│   │   └── archive/
+│   └── attachments/
+│       └── {email_id}/
+│           └── {filename}
+├── part-2.zip                    # If needed
+├── contacts.json
+├── settings.json
+├── labels.json
+└── manifest.json                 # Export metadata
+```
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+**Encryption:**
+- Key derivation produces consistent results
+- Encryption/decryption round-trip preserves data
+- Invalid keys fail gracefully
+
+**Webhooks:**
+- Signature verification accepts valid signatures
+- Signature verification rejects invalid/tampered
+- Constant-time comparison (timing attack resistance)
+
+**Unsend Logic:**
+- Cancel within window succeeds
+- Cancel after window fails
+- Race condition handling (concurrent cancel + send)
+
+**Rate Limiting:**
+- Limits enforced correctly
+- Window boundaries handled
+- Different limits per tier
+
+### Integration Tests
+
+**Webhook → Buffer → R2 Flow:**
+- Webhook received → buffer entry created
+- Buffer processed → encrypted in R2
+- Buffer retry on R2 failure
+- Dead letter after max retries
+
+**Send Flow:**
+- Compose → queue → send → sent folder
+- Unsend cancellation
+- Attachment handling
+
+**Quota Enforcement:**
+- Upload blocked at 100%
+- Warning at 80%, 95%
+- Incoming mail not blocked
+
+### End-to-End Tests
+
+- Full send/receive cycle (Forward Email sandbox)
+- Newsletter send (Postmark test mode)
+- Export generation and download
+- Account deletion flow
+
+### Load Tests
+
+- 1000 concurrent webhook deliveries
+- Large attachment handling (25MB)
+- Search performance with 10k emails
+- Export of large mailbox (10GB+)
+
+---
+
 ## Open Questions
 
 ### Technical
@@ -962,13 +1239,13 @@ How do we know Ivy is working?
 - [Forward Email Webhooks](https://forwardemail.net/en/webhook-email-notifications-service) — Webhook setup
 - [GitHub Repository](https://github.com/forwardemail/forwardemail.net) — Open source, self-hostable
 
-### Resend (Newsletters)
-- [Resend](https://resend.com) — Email for developers
-- [Resend Pricing](https://resend.com/pricing) — Transactional and marketing plans
-- [Resend Broadcasts](https://resend.com/blog/send-marketing-emails-with-resend-broadcasts) — Newsletter feature
+### Postmark (Newsletters)
+- [Postmark](https://postmarkapp.com) — Transactional email with broadcast streams
+- [Postmark Pricing](https://postmarkapp.com/pricing) — Per-email pricing
+- [Postmark Broadcast Streams](https://postmarkapp.com/message-streams) — Separate streams for newsletters
 
 ### Cloudflare
-- [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/pricing/)
+- [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/pricing/) — Note: Egress to Workers is FREE
 - [Cloudflare D1 Limits](https://developers.cloudflare.com/d1/platform/limits/)
 
 ### Grove Internal
