@@ -1,3 +1,5 @@
+<img src="landing/static/favicon.svg" alt="Lattice logo" width="28" height="28" align="left" style="margin-right: 8px;">
+
 # Lattice
 
 > **Internal codename:** GroveEngine
