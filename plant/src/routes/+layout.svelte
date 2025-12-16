@@ -35,7 +35,7 @@
 			<div class="flex items-center justify-between">
 				<!-- Logo -->
 				<a href="https://grove.place" class="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-					<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Grove logo" role="img">
 						<!-- Trunk -->
 						<path d="M50 95 Q48 75 50 55" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
 						<!-- Left leaf -->

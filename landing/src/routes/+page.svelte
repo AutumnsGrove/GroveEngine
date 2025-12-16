@@ -66,6 +66,8 @@
 			viewBox="0 0 100 100"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
+			aria-label="Grove logo"
+			role="img"
 		>
 			<style>
 				.sapling-sway {
@@ -75,6 +77,11 @@
 				@keyframes gentle-sway {
 					0%, 100% { transform: rotate(-1deg); }
 					50% { transform: rotate(1deg); }
+				}
+				@media (prefers-reduced-motion: reduce) {
+					.sapling-sway {
+						animation: none;
+					}
 				}
 			</style>
 			<g class="sapling-sway">
