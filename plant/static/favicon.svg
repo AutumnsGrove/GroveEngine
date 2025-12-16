@@ -1,8 +1,10 @@
 <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 4 upward arrows: 3 uniform + 1 taller, centered -->
-  <path d="M15 75V55L5 65M15 55L25 65" stroke="#4ade80" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M38 75V55L28 65M38 55L48 65" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M61 75V55L51 65M61 55L71 65" stroke="#16a34a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Taller one -->
-  <path d="M84 75V25L74 35M84 25L94 35" stroke="#15803d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Linktree-style: asterisk tree with longer trunk -->
+  <!-- Trunk (vertical, longer at bottom) -->
+  <rect x="42" y="5" width="16" height="90" rx="2" fill="#22c55e"/>
+  <!-- Upper diagonal branches -->
+  <rect x="42" y="15" width="16" height="45" rx="2" fill="#22c55e" transform="rotate(-45 50 37)"/>
+  <rect x="42" y="15" width="16" height="45" rx="2" fill="#22c55e" transform="rotate(45 50 37)"/>
+  <!-- Horizontal branches -->
+  <rect x="5" y="30" width="90" height="16" rx="2" fill="#22c55e"/>
 </svg>
