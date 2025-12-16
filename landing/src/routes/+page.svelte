@@ -67,11 +67,13 @@
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<!-- Linktree-style: asterisk tree with longer trunk -->
+			<!-- Linktree-style: 6-point asterisk with longer trunk -->
 			<rect x="42" y="5" width="16" height="90" rx="2" fill="#22c55e"/>
-			<rect x="42" y="15" width="16" height="45" rx="2" fill="#22c55e" transform="rotate(-45 50 37)"/>
-			<rect x="42" y="15" width="16" height="45" rx="2" fill="#22c55e" transform="rotate(45 50 37)"/>
+			<rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-45 50 38)"/>
+			<rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(45 50 38)"/>
 			<rect x="5" y="30" width="90" height="16" rx="2" fill="#22c55e"/>
+			<rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-135 50 38)"/>
+			<rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(135 50 38)"/>
 		</svg>
 	</div>
 
