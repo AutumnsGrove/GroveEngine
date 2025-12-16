@@ -554,5 +554,48 @@ describe('Database Service', () => {
 				}
 			}
 		});
+
+		it('should reject column names with special characters', async () => {
+			const maliciousColumns = [
+				{ 'column; DROP TABLE users;--': 'value' },
+				{ "column' OR '1'='1": 'value' },
+				{ 'column`; DELETE FROM users;`': 'value' },
+				{ '123startswithnumber': 'value' },
+				{ 'has spaces': 'value' },
+				{ 'has-dashes': 'value' }
+			];
+
+			for (const data of maliciousColumns) {
+				await expect(insert(db, 'valid_table', data)).rejects.toThrow(DatabaseError);
+			}
+		});
+
+		it('should allow valid column names', async () => {
+			const validData = [
+				{ email: 'test@example.com' },
+				{ user_name: 'john' },
+				{ firstName: 'John' },
+				{ _private: 'value' },
+				{ column123: 'value' }
+			];
+
+			for (const data of validData) {
+				// Should not throw on validation
+				try {
+					await insert(db, 'users', data);
+				} catch (err) {
+					// Only fail if it's an INVALID_QUERY error (column validation)
+					if (err instanceof DatabaseError && err.code === 'INVALID_QUERY') {
+						throw err;
+					}
+				}
+			}
+		});
+
+		it('should reject column names in update()', async () => {
+			await expect(
+				update(db, 'users', { 'malicious; --': 'value' }, 'id = ?', ['1'])
+			).rejects.toThrow(DatabaseError);
+		});
 	});
 });

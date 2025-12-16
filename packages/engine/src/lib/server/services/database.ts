@@ -274,9 +274,17 @@ export async function batch(
 	statements: Array<{ sql: string; params?: unknown[] }>
 ): Promise<ExecuteResult[]> {
 	try {
-		const prepared = statements.map((stmt) =>
-			db.prepare(stmt.sql).bind(...(stmt.params ?? []))
-		);
+		const prepared = statements.map((stmt, index) => {
+			try {
+				return db.prepare(stmt.sql).bind(...(stmt.params ?? []));
+			} catch (prepareErr) {
+				throw new DatabaseError(
+					`Batch statement ${index + 1}/${statements.length} failed to prepare: ${stmt.sql.slice(0, 100)}`,
+					'INVALID_QUERY',
+					prepareErr
+				);
+			}
+		});
 
 		const results = await db.batch(prepared);
 
@@ -291,7 +299,16 @@ export async function batch(
 			}
 		}));
 	} catch (err) {
-		throw new DatabaseError('Batch operation failed', 'TRANSACTION_FAILED', err);
+		if (err instanceof DatabaseError) {
+			throw err;
+		}
+		// Include statement count for context
+		const stmtSummary = statements.map((s, i) => `${i + 1}: ${s.sql.slice(0, 50)}...`).join('; ');
+		throw new DatabaseError(
+			`Batch operation failed (${statements.length} statements: ${stmtSummary})`,
+			'TRANSACTION_FAILED',
+			err
+		);
 	}
 }
 
@@ -324,17 +341,32 @@ export async function withSession<T>(
 // ============================================================================
 
 /**
- * Valid table name pattern - alphanumeric and underscores only
- * This prevents SQL injection in functions that accept table names
+ * Valid identifier pattern - alphanumeric and underscores only
+ * This prevents SQL injection in functions that accept table/column names
  */
-const VALID_TABLE_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const VALID_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 function validateTableName(table: string): void {
-	if (!VALID_TABLE_NAME.test(table)) {
+	if (!VALID_IDENTIFIER.test(table)) {
 		throw new DatabaseError(
 			`Invalid table name: ${table}. Table names must be alphanumeric with underscores only.`,
 			'INVALID_QUERY'
 		);
+	}
+}
+
+function validateColumnName(column: string): void {
+	if (!VALID_IDENTIFIER.test(column)) {
+		throw new DatabaseError(
+			`Invalid column name: ${column}. Column names must be alphanumeric with underscores only.`,
+			'INVALID_QUERY'
+		);
+	}
+}
+
+function validateColumnNames(columns: string[]): void {
+	for (const column of columns) {
+		validateColumnName(column);
 	}
 }
 
@@ -345,8 +377,8 @@ function validateTableName(table: string): void {
 /**
  * Insert a row and return the generated ID
  *
- * SECURITY: Table name is validated to prevent SQL injection.
- * Only use with hardcoded table names, never user input.
+ * SECURITY: Table and column names are validated to prevent SQL injection.
+ * Only use with hardcoded names, never user input.
  *
  * @example
  * ```ts
@@ -363,6 +395,8 @@ export async function insert(
 	options?: { id?: string }
 ): Promise<string> {
 	validateTableName(table);
+	validateColumnNames(Object.keys(data));
+
 	const id = options?.id ?? generateId();
 	const timestamp = now();
 
@@ -408,8 +442,8 @@ export async function insert(
 /**
  * Update rows matching a condition
  *
- * SECURITY: Table name is validated to prevent SQL injection.
- * Only use with hardcoded table names, never user input.
+ * SECURITY: Table and column names are validated to prevent SQL injection.
+ * Only use with hardcoded names, never user input.
  *
  * @example
  * ```ts
@@ -424,6 +458,8 @@ export async function update(
 	whereParams: unknown[] = []
 ): Promise<number> {
 	validateTableName(table);
+	validateColumnNames(Object.keys(data));
+
 	const dataWithTimestamp = {
 		...data,
 		updated_at: now()
