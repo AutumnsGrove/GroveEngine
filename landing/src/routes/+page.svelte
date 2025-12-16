@@ -62,28 +62,17 @@
 	<!-- Logo/Brand -->
 	<div class="mb-8">
 		<svg
-			class="w-20 h-20 text-accent-muted"
+			class="w-24 h-24"
 			viewBox="0 0 100 100"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<!-- Stylized tree/leaf mark -->
-			<path
-				d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"
-				fill="currentColor"
-				fill-opacity="0.15"
-			/>
-			<path
-				d="M50 20C40 32 30 40 30 55C30 70 38 80 50 80C62 80 70 70 70 55C70 40 60 32 50 20Z"
-				fill="currentColor"
-				fill-opacity="0.3"
-			/>
-			<path
-				d="M50 32C44 40 38 46 38 55C38 64 43 70 50 70C57 70 62 64 62 55C62 46 56 40 50 32Z"
-				fill="currentColor"
-			/>
-			<!-- Stem -->
-			<path d="M50 70V95" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+			<!-- 4 upward arrows: 3 uniform + 1 taller -->
+			<path d="M15 75V55L5 65M15 55L25 65" stroke="#4ade80" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M38 75V55L28 65M38 55L48 65" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M61 75V55L51 65M61 55L71 65" stroke="#16a34a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+			<!-- Taller one -->
+			<path d="M84 75V25L74 35M84 25L94 35" stroke="#15803d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
 		</svg>
 	</div>
 
