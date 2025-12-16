@@ -59,126 +59,31 @@
 		</div>
 	{/if}
 
-	<!-- Logo/Brand - Sapling -->
+	<!-- Logo/Brand -->
 	<div class="mb-8">
 		<svg
-			class="w-24 h-24 text-accent-muted"
+			class="w-20 h-20 text-accent-muted"
 			viewBox="0 0 100 100"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
-			aria-label="Grove logo"
-			role="img"
 		>
-			<style>
-				.sapling-sway {
-					transform-origin: 50px 95px;
-					animation: gentle-sway 4s ease-in-out infinite;
-				}
-				@keyframes gentle-sway {
-					0%, 100% { transform: rotate(-1deg); }
-					50% { transform: rotate(1deg); }
-				}
-				@media (prefers-reduced-motion: reduce) {
-					.sapling-sway {
-						animation: none;
-					}
-				}
-			</style>
-			<g class="sapling-sway">
-				<!-- Trunk -->
-				<path
-					d="M50 95 Q48 70 50 45"
-					stroke="currentColor"
-					stroke-width="4"
-					stroke-linecap="round"
-					fill="none"
-				/>
-
-				<!-- TIER 1: Bottom leaves (3) -->
-				<g transform="translate(35, 62) rotate(-55)">
-					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(50, 58) rotate(5)">
-					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(65, 60) rotate(50)">
-					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
-				</g>
-
-				<!-- TIER 2: Lower-mid leaves (3) -->
-				<g transform="translate(30, 50) rotate(-45)">
-					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(50, 48) rotate(-8)">
-					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(70, 48) rotate(42)">
-					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
-				</g>
-
-				<!-- TIER 3: Mid leaves (3) -->
-				<g transform="translate(28, 38) rotate(-38)">
-					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(50, 36) rotate(3)">
-					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(72, 36) rotate(35)">
-					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
-				</g>
-
-				<!-- TIER 4: Upper leaves (3) -->
-				<g transform="translate(32, 26) rotate(-28)">
-					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(50, 25) rotate(-5)">
-					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(68, 24) rotate(25)">
-					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
-				</g>
-
-				<!-- TIER 5: Crown leaves (3) -->
-				<g transform="translate(38, 14) rotate(-18)">
-					<path d="M0 0C-5 -9 -5 -18 0 -26C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -8 -3.5 -15 0 -21C3.5 -15 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2.2 -10 -2.2 -14 0 -18C2.2 -14 2.2 -10 0 -6Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(50, 12)">
-					<path d="M0 0C-6 -10 -6 -20 0 -28C6 -20 6 -10 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -4C-4 -9 -4 -16 0 -23C4 -16 4 -9 0 -4Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -7C-2.5 -11 -2.5 -16 0 -20C2.5 -16 2.5 -11 0 -7Z" fill="currentColor"/>
-				</g>
-				<g transform="translate(62, 14) rotate(18)">
-					<path d="M0 0C-5 -9 -5 -18 0 -26C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-3.5 -8 -3.5 -15 0 -21C3.5 -15 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2.2 -10 -2.2 -14 0 -18C2.2 -14 2.2 -10 0 -6Z" fill="currentColor"/>
-				</g>
-			</g>
+			<!-- Stylized tree/leaf mark -->
+			<path
+				d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"
+				fill="currentColor"
+				fill-opacity="0.15"
+			/>
+			<path
+				d="M50 20C40 32 30 40 30 55C30 70 38 80 50 80C62 80 70 70 70 55C70 40 60 32 50 20Z"
+				fill="currentColor"
+				fill-opacity="0.3"
+			/>
+			<path
+				d="M50 32C44 40 38 46 38 55C38 64 43 70 50 70C57 70 62 64 62 55C62 46 56 40 50 32Z"
+				fill="currentColor"
+			/>
+			<!-- Stem -->
+			<path d="M50 70V95" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
 		</svg>
 	</div>
 
