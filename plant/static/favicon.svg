@@ -1,22 +1,13 @@
 <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Trunk -->
-  <path d="M50 95 Q48 75 50 55" stroke="#16a34a" stroke-width="4" stroke-linecap="round" fill="none"/>
-  <!-- Left leaf (lower) -->
-  <g transform="translate(28, 62) rotate(-35)">
-    <path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="#16a34a" fill-opacity="0.15"/>
-    <path d="M0 -2C-3.5 -8 -3.5 -14 0 -19C3.5 -14 3.5 -8 0 -2Z" fill="#16a34a" fill-opacity="0.3"/>
-    <path d="M0 -5C-2 -9 -2 -13 0 -16C2 -13 2 -9 0 -5Z" fill="#16a34a"/>
-  </g>
-  <!-- Right leaf (middle) -->
-  <g transform="translate(72, 52) rotate(40)">
-    <path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="#16a34a" fill-opacity="0.15"/>
-    <path d="M0 -3C-4 -9 -4 -16 0 -21C4 -16 4 -9 0 -3Z" fill="#16a34a" fill-opacity="0.3"/>
-    <path d="M0 -6C-2.5 -10 -2.5 -14 0 -17C2.5 -14 2.5 -10 0 -6Z" fill="#16a34a"/>
-  </g>
-  <!-- Top leaf (crown) - largest -->
-  <g transform="translate(50, 30)">
-    <path d="M0 0C-8 -12 -8 -24 0 -32C8 -24 8 -12 0 0Z" fill="#16a34a" fill-opacity="0.15"/>
-    <path d="M0 -4C-5.5 -12 -5.5 -20 0 -27C5.5 -20 5.5 -12 0 -4Z" fill="#16a34a" fill-opacity="0.3"/>
-    <path d="M0 -8C-3.5 -14 -3.5 -20 0 -24C3.5 -20 3.5 -14 0 -8Z" fill="#16a34a"/>
-  </g>
+  <!-- Linktree-style: 6-point asterisk with longer trunk -->
+  <!-- Trunk (vertical, longer at bottom) -->
+  <rect x="42" y="5" width="16" height="90" rx="2" fill="#22c55e"/>
+  <!-- Upper diagonal branches -->
+  <rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-45 50 38)"/>
+  <rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(45 50 38)"/>
+  <!-- Horizontal branches -->
+  <rect x="5" y="30" width="90" height="16" rx="2" fill="#22c55e"/>
+  <!-- Lower diagonal branches -->
+  <rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-135 50 38)"/>
+  <rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(135 50 38)"/>
 </svg>
