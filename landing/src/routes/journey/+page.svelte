@@ -33,6 +33,11 @@
 			? Math.max(...data.snapshots.map((s: any) => s.totalCodeLines))
 			: 0
 	);
+
+	// Filter milestones to only show version releases
+	const milestones = $derived(
+		data.snapshots.filter((s: any) => s.label.startsWith('v'))
+	);
 </script>
 
 <svelte:head>
@@ -200,7 +205,7 @@
 			{/if}
 
 			<!-- Milestones Timeline -->
-			{#if data.snapshots.length > 0}
+			{#if milestones.length > 0}
 			<section class="mb-16">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Milestones</h2>
 
@@ -209,7 +214,7 @@
 					<div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-divider transform md:-translate-x-1/2"></div>
 
 					<div class="space-y-8">
-						{#each data.snapshots as snapshot, i}
+						{#each milestones as snapshot, i}
 							{@const isLeft = i % 2 === 0}
 							<div class="relative flex items-center {isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}">
 								<!-- Dot -->
@@ -220,7 +225,7 @@
 									<div class="card p-4">
 										<div class="text-xs font-mono text-foreground-faint mb-1">{snapshot.date}</div>
 										<div class="font-serif text-accent-muted mb-2">
-											{snapshot.label.startsWith('v') ? snapshot.label : `📌 ${snapshot.label}`}
+											🏷️ {snapshot.label}
 										</div>
 										<div class="text-sm text-foreground-muted font-sans">
 											{formatNumber(snapshot.totalCodeLines)} lines · {formatNumber(snapshot.commits)} commits
