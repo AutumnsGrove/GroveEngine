@@ -19,6 +19,8 @@
 	}: Props = $props();
 
 	// Birch turns brilliant golden yellow in autumn
+	// Trees use 'currentColor' for summer to allow CSS inheritance (e.g., themed containers)
+	// This is intentional for consistency with Logo component and backward compatibility
 	const defaultColor = season === 'autumn' ? autumn.gold : 'currentColor';
 	const foliageColor = color ?? defaultColor;
 
