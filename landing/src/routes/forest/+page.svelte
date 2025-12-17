@@ -36,6 +36,9 @@
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
 
+	// Tree aspect ratio (height = width * ratio) based on tree SVG viewBoxes
+	const TREE_ASPECT_RATIO = 1.23;
+
 	// Tree component types
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
 	const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'birch', 'cherry'];
@@ -338,7 +341,7 @@
 						left: {tree.x}%;
 						top: {tree.y}%;
 						width: {tree.size}px;
-						height: {tree.size * 1.23}px;
+						height: {tree.size * TREE_ASPECT_RATIO}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex + 10};
 						transform: translateX(-50%) translateY(-100%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);

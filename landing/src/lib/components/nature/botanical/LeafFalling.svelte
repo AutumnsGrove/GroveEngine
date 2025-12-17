@@ -18,6 +18,8 @@
 		drift?: number;
 		/** Fall distance in vh units (how far the leaf travels) */
 		fallDistance?: number;
+		/** Seed for deterministic color selection */
+		seed?: number;
 	}
 
 	let {
@@ -29,7 +31,8 @@
 		duration = 5,
 		delay = 0,
 		drift = 30,
-		fallDistance = 40
+		fallDistance = 40,
+		seed = 0
 	}: Props = $props();
 
 	// Color palettes for different leaf types
@@ -39,23 +42,28 @@
 	const cherrySpringColors = [pinks.pink, pinks.rose, pinks.blush, pinks.palePink];
 	const aspenAutumnColors = [autumn.gold, autumn.honey, autumn.straw, autumn.amber];
 
-	// Get default color based on variant and season
+	// Deterministic color selection based on seed
+	function pickFromArray<T>(arr: T[]): T {
+		return arr[seed % arr.length];
+	}
+
+	// Get default color based on variant and season (deterministic)
 	function getDefaultColor(): string {
 		if (variant === 'cherry') {
 			const colors = season === 'autumn' ? cherryAutumnColors : cherrySpringColors;
-			return colors[Math.floor(Math.random() * colors.length)];
+			return pickFromArray(colors);
 		}
 		if (variant === 'aspen') {
 			const colors = season === 'autumn' ? aspenAutumnColors : summerColors;
-			return colors[Math.floor(Math.random() * colors.length)];
+			return pickFromArray(colors);
 		}
 		if (variant === 'pine') {
 			// Pine stays green year-round (evergreen)
-			return summerColors[Math.floor(Math.random() * summerColors.length)];
+			return pickFromArray(summerColors);
 		}
 		// Default (simple, maple)
 		const colors = season === 'autumn' ? autumnColors : summerColors;
-		return colors[Math.floor(Math.random() * colors.length)];
+		return pickFromArray(colors);
 	}
 
 	const leafColor = color ?? getDefaultColor();
@@ -143,5 +151,13 @@
 	.spin {
 		transform-origin: center center;
 		animation: spin calc(var(--fall-duration, 5s) * 0.6) ease-in-out infinite;
+	}
+
+	/* Respect user's motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.fall,
+		.spin {
+			animation: none;
+		}
 	}
 </style>
