@@ -232,7 +232,7 @@
 	<meta name="description" content="Preview and customize Grove nature assets" />
 </svelte:head>
 
-<main class="min-h-screen flex flex-col bg-background">
+<main class="min-h-screen flex flex-col bg-page">
 	<Header />
 
 	<article class="flex-1 px-6 py-8">
@@ -271,7 +271,7 @@
 							id="asset-selector"
 							bind:value={selectedAsset}
 							onchange={onAssetChange}
-							class="w-full px-4 py-2 rounded-lg border border-divider bg-background text-foreground font-sans focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+							class="w-full px-4 py-2 rounded-lg border border-divider bg-surface-elevated text-foreground font-sans focus:outline-none focus:ring-2 focus:ring-accent-subtle"
 							aria-label="Select asset to preview"
 						>
 							{#each categories as category}
@@ -308,7 +308,7 @@
 													bind:value={propValues[prop]}
 													placeholder="#16a34a"
 													pattern="^#[0-9A-Fa-f]{6}$"
-													class="flex-1 px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle invalid:border-red-500"
+													class="flex-1 px-3 py-2 rounded-lg border border-divider bg-surface-elevated text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle invalid:border-red-500"
 													aria-label="{prop} hex color value"
 												/>
 											</div>
@@ -343,7 +343,7 @@
 										<!-- Dropdown for enums -->
 										<select
 											bind:value={propValues[prop]}
-											class="w-full px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+											class="w-full px-3 py-2 rounded-lg border border-divider bg-surface-elevated text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
 											aria-label="Select {prop} option"
 										>
 											<option value={undefined}>Default</option>
@@ -369,7 +369,7 @@
 											type="text"
 											bind:value={propValues[prop]}
 											placeholder="Default"
-											class="w-full px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+											class="w-full px-3 py-2 rounded-lg border border-divider bg-surface-elevated text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
 										/>
 									{/if}
 								</div>

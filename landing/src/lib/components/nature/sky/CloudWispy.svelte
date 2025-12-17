@@ -7,7 +7,7 @@
 	}
 
 	let {
-		class: className = 'w-20 h-4',
+		class: className = 'w-20 h-6',
 		color = 'white',
 		animate = true,
 		speed = 'slow'
@@ -20,31 +20,50 @@
 	}[speed];
 </script>
 
-<!-- Thin wispy cloud / cirrus -->
+<!-- Thin wispy cirrus cloud -->
 <svg
 	class="{className} {animate ? 'drift' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 120 25"
+	viewBox="0 0 120 30"
 	style="--drift-duration: {duration}"
 >
-	<g opacity="0.6">
-		<!-- Wispy strands -->
-		<path
-			fill={color}
-			d="M0 15 Q20 10 40 14 Q60 8 80 12 Q100 6 120 10 L120 14 Q95 10 75 16 Q55 12 35 18 Q15 14 0 18 Z"
-		/>
-		<path
-			fill={color}
-			d="M10 8 Q30 5 50 9 Q70 3 90 7 Q110 2 115 6 L112 10 Q88 6 68 11 Q48 5 28 12 Q12 8 10 12 Z"
-			opacity="0.7"
-		/>
+	<!-- Main wispy cloud body - soft feathery shapes -->
+	<g opacity="0.5">
+		<!-- Central wisp strand with soft cloud-like bulges -->
+		<ellipse fill={color} cx="60" cy="15" rx="50" ry="4" opacity="0.4" />
+
+		<!-- Feathery tendrils extending from main body -->
+		<ellipse fill={color} cx="25" cy="13" rx="18" ry="5" opacity="0.5" />
+		<ellipse fill={color} cx="50" cy="11" rx="15" ry="4" opacity="0.45" />
+		<ellipse fill={color} cx="75" cy="14" rx="20" ry="5" opacity="0.5" />
+		<ellipse fill={color} cx="100" cy="12" rx="15" ry="4" opacity="0.4" />
+
+		<!-- Upper wisps -->
+		<ellipse fill={color} cx="35" cy="8" rx="12" ry="3" opacity="0.35" />
+		<ellipse fill={color} cx="65" cy="7" rx="10" ry="3" opacity="0.3" />
+		<ellipse fill={color} cx="90" cy="9" rx="14" ry="3" opacity="0.35" />
+
+		<!-- Lower tendrils for depth -->
+		<ellipse fill={color} cx="40" cy="18" rx="10" ry="2.5" opacity="0.3" />
+		<ellipse fill={color} cx="70" cy="19" rx="12" ry="3" opacity="0.35" />
+		<ellipse fill={color} cx="95" cy="17" rx="8" ry="2" opacity="0.25" />
+
+		<!-- Fine wispy edges -->
+		<ellipse fill={color} cx="15" cy="14" rx="8" ry="2" opacity="0.25" />
+		<ellipse fill={color} cx="110" cy="13" rx="8" ry="2" opacity="0.25" />
+	</g>
+
+	<!-- Secondary wisp layer for more depth -->
+	<g opacity="0.35">
+		<ellipse fill={color} cx="45" cy="20" rx="25" ry="3" opacity="0.4" />
+		<ellipse fill={color} cx="80" cy="6" rx="20" ry="2.5" opacity="0.35" />
 	</g>
 </svg>
 
 <style>
 	@keyframes drift {
 		0% { transform: translateX(0); }
-		100% { transform: translateX(30px); }
+		100% { transform: translateX(20px); }
 	}
 
 	.drift {
