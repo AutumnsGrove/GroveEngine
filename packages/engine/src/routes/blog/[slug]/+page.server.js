@@ -23,7 +23,7 @@ export async function load({ params, locals, platform }) {
 
         if (post) {
           // Process anchor tags in HTML content (same as filesystem posts)
-          const processedHtml = processAnchorTags(post.html_content || "");
+          const processedHtml = processAnchorTags(/** @type {string} */ (post.html_content) || "");
 
           // Extract headers from HTML for table of contents
           // Note: For D1 posts, we extract from HTML since we don't store raw markdown
@@ -33,7 +33,7 @@ export async function load({ params, locals, platform }) {
           let tags = [];
           if (post.tags) {
             try {
-              tags = JSON.parse(post.tags);
+              tags = JSON.parse(/** @type {string} */ (post.tags));
             } catch (e) {
               console.warn("Failed to parse tags:", e);
               tags = [];
@@ -44,7 +44,7 @@ export async function load({ params, locals, platform }) {
           let gutterContent = [];
           if (post.gutter_content) {
             try {
-              gutterContent = JSON.parse(post.gutter_content);
+              gutterContent = JSON.parse(/** @type {string} */ (post.gutter_content));
               // Process gutter items: convert markdown to HTML for comment/markdown items
               gutterContent = gutterContent.map((/** @type {{ type?: string; content?: string; [key: string]: unknown }} */ item) => {
                 if (
@@ -66,11 +66,11 @@ export async function load({ params, locals, platform }) {
 
           return {
             post: {
-              slug: post.slug,
-              title: post.title,
-              date: post.published_at,
+              slug: /** @type {string} */ (post.slug),
+              title: /** @type {string} */ (post.title),
+              date: /** @type {string} */ (post.published_at),
               tags,
-              description: post.description || "",
+              description: /** @type {string} */ (post.description) || "",
               content: processedHtml,
               headers,
               gutterContent,

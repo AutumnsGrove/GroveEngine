@@ -31,10 +31,10 @@ export async function load({ platform, locals }) {
       if (pageData) {
         // Parse hero JSON
         let hero = null;
-        if (pageData.hero) {
+        if (pageData.hero && typeof pageData.hero === 'string') {
           try {
             hero = JSON.parse(pageData.hero);
-          } catch (e) {
+          } catch (/** @type {unknown} */ e) {
             console.warn("Failed to parse hero for home page:", e);
             hero = null;
           }
@@ -42,18 +42,18 @@ export async function load({ platform, locals }) {
 
         // Generate HTML from markdown if not stored
         let htmlContent = pageData.html_content;
-        if (!htmlContent && pageData.markdown_content) {
+        if (!htmlContent && pageData.markdown_content && typeof pageData.markdown_content === 'string') {
           htmlContent = sanitizeMarkdown(
             /** @type {string} */ (marked.parse(pageData.markdown_content, { async: false })),
           );
         }
 
         // Extract headers from HTML for table of contents
-        const headers = extractHeadersFromHtml(htmlContent || "");
+        const headers = extractHeadersFromHtml(String(htmlContent || ""));
 
         // Safe JSON parsing for gutter content
         let gutterContent = [];
-        if (pageData.gutter_content) {
+        if (pageData.gutter_content && typeof pageData.gutter_content === 'string') {
           try {
             gutterContent = JSON.parse(pageData.gutter_content);
             // Process gutter items: convert markdown to HTML for comment/markdown items
@@ -69,7 +69,7 @@ export async function load({ platform, locals }) {
               }
               return item;
             });
-          } catch (e) {
+          } catch (/** @type {unknown} */ e) {
             console.warn("Failed to parse gutter_content for home page:", e);
             gutterContent = [];
           }
@@ -86,7 +86,7 @@ export async function load({ platform, locals }) {
           font: pageData.font || "default",
         };
       }
-    } catch (err) {
+    } catch (/** @type {unknown} */ err) {
       console.error("D1 fetch error for home page:", err);
       // Fall through to filesystem fallback
     }
@@ -120,17 +120,17 @@ export async function load({ platform, locals }) {
 
       if (post) {
         // Process anchor tags in HTML content (same as individual post pages)
-        const processedHtml = processAnchorTags(post.html_content || "");
+        const processedHtml = processAnchorTags(String(post.html_content || ""));
 
         // Extract headers from HTML for table of contents
         const headers = extractHeadersFromHtml(processedHtml);
 
         // Safe JSON parsing for tags
         let tags = [];
-        if (post.tags) {
+        if (post.tags && typeof post.tags === 'string') {
           try {
             tags = JSON.parse(post.tags);
-          } catch (e) {
+          } catch (/** @type {unknown} */ e) {
             console.warn("Failed to parse tags for latest post:", e);
             tags = [];
           }
@@ -138,7 +138,7 @@ export async function load({ platform, locals }) {
 
         // Safe JSON parsing for gutter content
         let gutterContent = [];
-        if (post.gutter_content) {
+        if (post.gutter_content && typeof post.gutter_content === 'string') {
           try {
             gutterContent = JSON.parse(post.gutter_content);
             // Process gutter items: convert markdown to HTML for comment/markdown items
@@ -154,7 +154,7 @@ export async function load({ platform, locals }) {
               }
               return item;
             });
-          } catch (e) {
+          } catch (/** @type {unknown} */ e) {
             console.warn("Failed to parse gutter_content for latest post:", e);
             gutterContent = [];
           }
@@ -172,7 +172,7 @@ export async function load({ platform, locals }) {
           font: post.font || "default",
         };
       }
-    } catch (err) {
+    } catch (/** @type {unknown} */ err) {
       console.error("D1 fetch error for latest post:", err);
       // Fall through to filesystem fallback
     }

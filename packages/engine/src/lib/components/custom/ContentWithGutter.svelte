@@ -109,12 +109,13 @@
 		const gutterRect = gutterElement.getBoundingClientRect();
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
+		/** @type {string[]} */
 		const newOverflowingAnchors = [];
 		const newPositions = { ...itemPositions };
 
 		// Sort anchors by their position in the document
 		const anchorPositions = uniqueAnchors.map(anchor => {
-			const el = findAnchorElement(anchor, contentBodyElement, headers);
+			const el = findAnchorElement(anchor, contentBodyElement ?? null, headers);
 			if (!el && import.meta.env.DEV) {
 				console.warn(`Anchor element not found for: ${anchor}`);
 			}
@@ -253,6 +254,7 @@
 	// Add IDs to headers and position mobile gutter items
 	$effect(() => {
 		// Track moved elements for cleanup
+		/** @type {Array<{ element: HTMLElement, originalParent: HTMLElement | null, originalNextSibling: Node | null }>} */
 		const movedElements = [];
 
 		untrack(() => {
@@ -263,7 +265,7 @@
 				const headerElements = contentBodyElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
 				headerElements.forEach((el) => {
 					const text = el.textContent?.trim() || '';
-					const matchingHeader = headers.find(h => h.text === text);
+					const matchingHeader = headers.find(/** @param {Header} h */ (h) => h.text === text);
 					if (matchingHeader) {
 						el.id = matchingHeader.id;
 					}
@@ -307,6 +309,7 @@
 	$effect(() => {
 		if (contentBodyElement) {
 			const updateHeight = () => {
+				if (!contentBodyElement) return;
 				// Get the bottom of content-body relative to the article
 				const rect = contentBodyElement.getBoundingClientRect();
 				const articleRect = contentBodyElement.closest('.content-article')?.getBoundingClientRect();
@@ -344,6 +347,10 @@
 	}
 
 	// Inject reference markers into content HTML for overflowing items
+	/**
+	 * @param {string} html
+	 * @param {string[]} overflowKeys
+	 */
 	function injectReferenceMarkers(html, overflowKeys) {
 		if (!overflowKeys || overflowKeys.length === 0 || typeof window === 'undefined') {
 			return html;
@@ -375,9 +382,11 @@
 				}
 				case 'paragraph': {
 					const paragraphs = doc.body.querySelectorAll(':scope > p');
-					const index = parsed.value - 1;
-					if (index >= 0 && index < paragraphs.length) {
-						targetEl = paragraphs[index];
+					if (parsed.value != null && typeof parsed.value === 'number') {
+						const index = parsed.value - 1;
+						if (index >= 0 && index < paragraphs.length) {
+							targetEl = paragraphs[index];
+						}
 					}
 					break;
 				}
@@ -395,7 +404,7 @@
 
 				const link = doc.createElement('a');
 				link.href = `#overflow-${refNum}`;
-				link.textContent = refNum;
+				link.textContent = String(refNum);
 				link.title = `See gutter content for: ${getAnchorLabel(anchor)}`;
 
 				marker.appendChild(link);
@@ -422,6 +431,7 @@
 	let processedContent = $derived(injectReferenceMarkers(content, overflowingAnchorKeys));
 
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
+	/** @type {any} */
 	let DOMPurify = $state(null);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
@@ -433,7 +443,7 @@
 	});
 
 	let sanitizedContent = $derived(
-		DOMPurify
+		DOMPurify && typeof DOMPurify.sanitize === 'function'
 			? DOMPurify.sanitize(processedContent, {
 					ALLOWED_TAGS: [
 						// Headings

@@ -16,6 +16,7 @@
 	 * @prop {string} [href] - Optional link href (renders as anchor element)
 	 * @prop {string} [class] - Additional CSS classes to apply
 	 * @prop {Snippet} [children] - Button content (text/icons/etc)
+	 * @prop {HTMLButtonElement} [ref] - Reference to the underlying button element (bindable)
 	 *
 	 * @example
 	 * <Button variant="primary" size="lg">Save Changes</Button>
@@ -33,6 +34,7 @@
 		href?: string;
 		class?: string;
 		children?: Snippet;
+		ref?: HTMLButtonElement | null;
 	}
 
 	let {
@@ -41,6 +43,7 @@
 		disabled = false,
 		class: className,
 		children,
+		ref = $bindable(null),
 		...restProps
 	}: Props = $props();
 
@@ -68,6 +71,7 @@
 </script>
 
 <ShadcnButton
+	bind:this={ref}
 	variant={shadcnVariant}
 	size={shadcnSize}
 	disabled={disabled}
