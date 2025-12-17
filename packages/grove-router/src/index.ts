@@ -25,18 +25,27 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   auth: "groveauth-frontend.pages.dev",
   admin: "groveauth-frontend.pages.dev",
   login: "groveauth-frontend.pages.dev",
+  heartwood: "groveauth-frontend.pages.dev",
 
-  // Other Pages projects
-  domains: "grove-domains.pages.dev",
+  // Grove internal Pages projects
+  amber: "amber-4x2.pages.dev", // Amber
+  ivy: "ivy-3uv.pages.dev", // Ivy mail client
+  autumn: "autumn-website.pages.dev", // Autumn's Grove
+  example: "grove-example-site.pages.dev", // GroveEngine example
+  plant: "grove-plant.pages.dev", // Grove Plant
   cdn: "grove-landing.pages.dev", // R2 assets
+
+  // Domain management
+  domains: "grove-domains.pages.dev",
+  acorn: "grove-domains.pages.dev",
+
+  // Music
   music: "grovemusic.pages.dev",
+  aria: "grovemusic.pages.dev",
 
   // Workers - proxy to their workers.dev URLs
-  // (Custom domain routes don't take precedence over wildcard routes)
   scout: "scout.m7jv4v7npb.workers.dev",
   "auth-api": "groveauth.m7jv4v7npb.workers.dev",
-
-  // Minecraft control API
   "mc-control": "mc-control.m7jv4v7npb.workers.dev",
 
   // Special handling
