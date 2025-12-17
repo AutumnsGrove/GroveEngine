@@ -282,17 +282,17 @@
 		<!-- Sky background gradient -->
 		<div class="absolute inset-0 transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
-		<!-- Clouds -->
-		<div class="absolute top-8 left-[10%] opacity-60">
+		<!-- Clouds (decorative) -->
+		<div class="absolute top-8 left-[10%] opacity-60" aria-hidden="true">
 			<Cloud class="w-24 h-12" animate={true} speed="slow" />
 		</div>
-		<div class="absolute top-16 right-[15%] opacity-50">
+		<div class="absolute top-16 right-[15%] opacity-50" aria-hidden="true">
 			<Cloud class="w-32 h-16" animate={true} speed="slow" />
 		</div>
 
-		<!-- Distant mountains silhouette -->
-		<div class="absolute inset-x-0 top-16 h-32">
-			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+		<!-- Distant mountains silhouette (decorative) -->
+		<div class="absolute inset-x-0 top-16 h-32" aria-hidden="true">
+			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" role="presentation">
 				<path
 					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
 					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
@@ -304,8 +304,8 @@
 			</svg>
 		</div>
 
-		<!-- Forest container with rolling hills -->
-		<div class="relative w-full h-[70vh] min-h-[500px]">
+		<!-- Forest container with rolling hills (decorative scene) -->
+		<div class="relative w-full h-[70vh] min-h-[500px]" aria-hidden="true" role="presentation">
 			<!-- Falling leaves layer - behind everything -->
 			<FallingLeavesLayer
 				trees={forestTrees}
