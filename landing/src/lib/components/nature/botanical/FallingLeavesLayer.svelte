@@ -5,6 +5,13 @@
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
 
+	// Animation constants
+	const LEAF_OPACITY = { min: 0.4, max: 0.75 } as const;
+	const FALL_DURATION = { min: 8, max: 14 } as const;
+	const FALL_DISTANCE = { min: 25, max: 45 } as const;
+	const DRIFT_RANGE = 60; // -30 to +30
+	const SPAWN_DELAY_MAX = 15;
+
 	interface Tree {
 		id: number;
 		x: number;
@@ -24,6 +31,7 @@
 		delay: number;
 		drift: number;
 		opacity: number;
+		fallDistance: number;
 	}
 
 	interface Props {
@@ -42,11 +50,16 @@
 		season = 'summer',
 		minLeavesPerTree = 2,
 		maxLeavesPerTree = 5,
-		zIndex = 0
+		zIndex = -1
 	}: Props = $props();
 
-	// Map tree types to appropriate leaf variants
-	function getLeafVariant(treeType: TreeType): LeafVariant {
+	// Deterministic hash for pseudo-random distribution (avoids visible patterns)
+	function hashSeed(seed: number): number {
+		return Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+	}
+
+	// Map tree types to appropriate leaf variants (deterministic based on leaf id)
+	function getLeafVariant(treeType: TreeType, leafId: number): LeafVariant {
 		switch (treeType) {
 			case 'cherry':
 				return 'cherry';
@@ -57,8 +70,8 @@
 				return 'pine';
 			case 'logo':
 			default:
-				// Logo and default get a mix of simple and maple
-				return Math.random() > 0.5 ? 'simple' : 'maple';
+				// Logo and default get a mix of simple and maple (deterministic with natural distribution)
+				return Math.floor(hashSeed(leafId)) % 2 === 0 ? 'simple' : 'maple';
 		}
 	}
 
@@ -82,21 +95,22 @@
 			const leafSizeVariation = 6 + treeSizeFactor * 4; // Additional random variation
 
 			for (let i = 0; i < leafCount; i++) {
-				// Spawn leaves around the tree crown area
-				// Offset from tree center, weighted toward the canopy
-				const xOffset = (Math.random() - 0.5) * (tree.size / 12); // Horizontal spread based on tree size
-				const yOffset = Math.random() * (tree.size / 30); // Start higher up in the canopy
+				// Spawn leaves within the tree canopy area (10% below tree anchor point)
+				// Leaves will animate downward from their spawn point
+				const xOffset = (Math.random() - 0.5) * (tree.size / 8); // Horizontal spread based on tree size
 
+				const currentLeafId = leafId++;
 				leaves.push({
-					id: leafId++,
+					id: currentLeafId,
 					x: tree.x + xOffset,
-					y: tree.y - yOffset, // Above the tree base
+					y: tree.y + 10, // 10% below tree position (within canopy)
 					size: baseLeafSize + Math.random() * leafSizeVariation,
-					variant: getLeafVariant(tree.treeType),
-					duration: 6 + Math.random() * 8, // 6-14 seconds to fall
-					delay: Math.random() * 12, // Staggered start over 12 seconds
-					drift: (Math.random() - 0.5) * 80, // -40 to +40 horizontal drift
-					opacity: 0.5 + Math.random() * 0.4 // 0.5-0.9 opacity
+					variant: getLeafVariant(tree.treeType, currentLeafId),
+					duration: FALL_DURATION.min + Math.random() * (FALL_DURATION.max - FALL_DURATION.min),
+					delay: Math.random() * SPAWN_DELAY_MAX,
+					drift: (Math.random() - 0.5) * DRIFT_RANGE,
+					opacity: LEAF_OPACITY.min + Math.random() * (LEAF_OPACITY.max - LEAF_OPACITY.min),
+					fallDistance: FALL_DISTANCE.min + Math.random() * (FALL_DISTANCE.max - FALL_DISTANCE.min)
 				});
 			}
 		}
@@ -131,6 +145,8 @@
 				duration={leaf.duration}
 				delay={leaf.delay}
 				drift={leaf.drift}
+				fallDistance={leaf.fallDistance}
+				seed={leaf.id}
 				animate={true}
 			/>
 		</div>

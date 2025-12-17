@@ -4,6 +4,10 @@
 
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
 
+	// Animation constants
+	// Starting offset ensures leaves begin above viewport for natural entrance
+	const SPAWN_OFFSET_PX = 50;
+
 	interface Props {
 		class?: string;
 		color?: string;
@@ -16,6 +20,10 @@
 		delay?: number;
 		/** Horizontal drift amount (positive = right, negative = left) */
 		drift?: number;
+		/** Fall distance in vh units (how far the leaf travels) */
+		fallDistance?: number;
+		/** Seed for deterministic color selection */
+		seed?: number;
 	}
 
 	let {
@@ -26,7 +34,9 @@
 		variant = 'simple',
 		duration = 5,
 		delay = 0,
-		drift = 30
+		drift = 30,
+		fallDistance = 40,
+		seed = 0
 	}: Props = $props();
 
 	// Color palettes for different leaf types
@@ -36,23 +46,30 @@
 	const cherrySpringColors = [pinks.pink, pinks.rose, pinks.blush, pinks.palePink];
 	const aspenAutumnColors = [autumn.gold, autumn.honey, autumn.straw, autumn.amber];
 
-	// Get default color based on variant and season
+	// Deterministic color selection using pseudo-random distribution
+	// Uses sine-based hash to avoid visible patterns from sequential IDs
+	function pickFromArray<T>(arr: T[]): T {
+		const hash = Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+		return arr[Math.floor(hash) % arr.length];
+	}
+
+	// Get default color based on variant and season (deterministic)
 	function getDefaultColor(): string {
 		if (variant === 'cherry') {
 			const colors = season === 'autumn' ? cherryAutumnColors : cherrySpringColors;
-			return colors[Math.floor(Math.random() * colors.length)];
+			return pickFromArray(colors);
 		}
 		if (variant === 'aspen') {
 			const colors = season === 'autumn' ? aspenAutumnColors : summerColors;
-			return colors[Math.floor(Math.random() * colors.length)];
+			return pickFromArray(colors);
 		}
 		if (variant === 'pine') {
 			// Pine stays green year-round (evergreen)
-			return summerColors[Math.floor(Math.random() * summerColors.length)];
+			return pickFromArray(summerColors);
 		}
 		// Default (simple, maple)
 		const colors = season === 'autumn' ? autumnColors : summerColors;
-		return colors[Math.floor(Math.random() * colors.length)];
+		return pickFromArray(colors);
 	}
 
 	const leafColor = color ?? getDefaultColor();
@@ -63,7 +80,7 @@
 	class="{className} {animate ? 'fall' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 30 35"
-	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px;"
+	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px; --fall-distance: {fallDistance}vh; --spawn-offset: {SPAWN_OFFSET_PX}px;"
 >
 	<g class={animate ? 'spin' : ''}>
 		{#if variant === 'simple'}
@@ -106,17 +123,21 @@
 <style>
 	@keyframes fall {
 		0% {
-			transform: translateY(-10px) translateX(0);
+			/* Start above viewport using spawn offset for natural entrance */
+			transform: translateY(calc(-1 * var(--spawn-offset, 50px))) translateX(0);
 			opacity: 0;
 		}
-		5% {
-			opacity: 0.9;
+		8% {
+			opacity: 0.85;
 		}
-		95% {
-			opacity: 0.6;
+		70% {
+			opacity: 0.7;
+		}
+		90% {
+			opacity: 0.3;
 		}
 		100% {
-			transform: translateY(100vh) translateX(var(--fall-drift, 30px));
+			transform: translateY(var(--fall-distance, 40vh)) translateX(var(--fall-drift, 30px));
 			opacity: 0;
 		}
 	}
@@ -137,5 +158,13 @@
 	.spin {
 		transform-origin: center center;
 		animation: spin calc(var(--fall-duration, 5s) * 0.6) ease-in-out infinite;
+	}
+
+	/* Respect user's motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.fall,
+		.spin {
+			animation: none;
+		}
 	}
 </style>
