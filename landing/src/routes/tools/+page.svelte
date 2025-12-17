@@ -266,11 +266,13 @@
 				<div class="order-2 space-y-6">
 					<!-- Asset Selector -->
 					<div>
-						<label class="block text-sm font-sans text-foreground-muted mb-2">Select Asset</label>
+						<label for="asset-selector" class="block text-sm font-sans text-foreground-muted mb-2">Select Asset</label>
 						<select
+							id="asset-selector"
 							bind:value={selectedAsset}
 							onchange={onAssetChange}
 							class="w-full px-4 py-2 rounded-lg border border-divider bg-background text-foreground font-sans focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+							aria-label="Select asset to preview"
 						>
 							{#each categories as category}
 								<optgroup label={category}>
@@ -299,16 +301,19 @@
 													type="color"
 													bind:value={propValues[prop]}
 													class="w-10 h-10 rounded cursor-pointer border border-divider"
+													aria-label="{prop} color picker"
 												/>
 												<input
 													type="text"
 													bind:value={propValues[prop]}
 													placeholder="#16a34a"
-													class="flex-1 px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+													pattern="^#[0-9A-Fa-f]{6}$"
+													class="flex-1 px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle invalid:border-red-500"
+													aria-label="{prop} hex color value"
 												/>
 											</div>
 											<!-- Color presets -->
-											<div class="flex flex-wrap gap-1">
+											<div class="flex flex-wrap gap-1" role="group" aria-label="Color presets">
 												{#each colorPresets as preset}
 													<button
 														type="button"
@@ -316,6 +321,7 @@
 														class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
 														style="background-color: {preset.value}"
 														title={preset.name}
+														aria-label="Apply {preset.name} color"
 													></button>
 												{/each}
 											</div>
@@ -327,6 +333,7 @@
 												type="checkbox"
 												bind:checked={propValues[prop]}
 												class="w-5 h-5 rounded border-divider text-accent-muted focus:ring-accent-subtle"
+												aria-label="Toggle {prop}"
 											/>
 											<span class="text-sm text-foreground-muted">
 												{propValues[prop] !== false ? 'Enabled' : 'Disabled'}
@@ -337,6 +344,7 @@
 										<select
 											bind:value={propValues[prop]}
 											class="w-full px-3 py-2 rounded-lg border border-divider bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+											aria-label="Select {prop} option"
 										>
 											<option value={undefined}>Default</option>
 											{#each getOptions(prop) as option}
@@ -352,8 +360,9 @@
 											step="0.1"
 											bind:value={propValues[prop]}
 											class="w-full"
+											aria-label="{prop} value"
 										/>
-										<span class="text-xs text-foreground-faint">{propValues[prop] ?? 'Default'}</span>
+										<span class="text-xs text-foreground-faint">{propValues[prop] !== undefined ? propValues[prop].toFixed(1) : '0.5 (default)'}</span>
 									{:else}
 										<!-- Text input fallback -->
 										<input
