@@ -43,13 +43,14 @@
  * @param {WritingSessionOptions} options - Configuration options
  * @returns {WritingSessionManager} Session state and controls
  */
-export function useWritingSession(options = {}) {
+export function useWritingSession(options = /** @type {WritingSessionOptions} */ ({})) {
   const { getWordCount } = options;
 
   // Campfire session state
   let campfire = $state({
     active: false,
-    startTime: null,
+    /** @type {number | null} */
+    startTime: /** @type {number | null} */ (null),
     targetMinutes: 25,
     startWordCount: 0,
   });
@@ -72,6 +73,7 @@ export function useWritingSession(options = {}) {
   }
 
   // Writing goal progress
+  /** @param {number} currentWordCount */
   function getGoalProgress(currentWordCount) {
     if (!goal.enabled) return 0;
     const wordsWritten = currentWordCount - goal.sessionWords;
@@ -79,6 +81,7 @@ export function useWritingSession(options = {}) {
   }
 
   // Words written in campfire session
+  /** @param {number} currentWordCount */
   function getCampfireWords(currentWordCount) {
     return currentWordCount - campfire.startWordCount;
   }

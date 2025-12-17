@@ -149,11 +149,14 @@ export const themes = {
  * Creates an editor theme manager with Svelte 5 runes
  * @returns {EditorThemeManager} Theme state and controls
  */
-export function useEditorTheme() {
-  let currentTheme = $state("grove");
+/** @typedef {keyof typeof themes} ThemeName */
 
+export function useEditorTheme() {
+  let currentTheme = $state(/** @type {ThemeName} */ ("grove"));
+
+  /** @param {string} themeName */
   function applyTheme(themeName) {
-    const theme = themes[themeName];
+    const theme = themes[/** @type {ThemeName} */ (themeName)];
     if (!theme) return;
 
     const root = document.documentElement;
@@ -184,6 +187,7 @@ export function useEditorTheme() {
     }
   }
 
+  /** @param {string} themeName */
   function saveTheme(themeName) {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, themeName);
@@ -192,8 +196,9 @@ export function useEditorTheme() {
     }
   }
 
+  /** @param {string} themeName */
   function setTheme(themeName) {
-    if (!themes[themeName]) return;
+    if (!themes[/** @type {ThemeName} */ (themeName)]) return;
     currentTheme = themeName;
     applyTheme(themeName);
     saveTheme(themeName);

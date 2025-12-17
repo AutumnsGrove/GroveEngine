@@ -13,9 +13,9 @@ const AUTO_SAVE_DELAY = 2000; // 2 seconds
 
 /**
  * @typedef {Object} DraftManagerOptions
- * @property {string|null} draftKey - Unique key for localStorage
- * @property {() => string} getContent - Function to get current content
- * @property {(content: string) => void} setContent - Function to set content
+ * @property {string|null} [draftKey] - Unique key for localStorage
+ * @property {() => string} [getContent] - Function to get current content
+ * @property {(content: string) => void} [setContent] - Function to set content
  * @property {(draft: StoredDraft) => void} [onDraftRestored] - Callback when draft is restored
  * @property {boolean} [readonly] - Whether editor is readonly
  */
@@ -42,13 +42,15 @@ const AUTO_SAVE_DELAY = 2000; // 2 seconds
  * @param {DraftManagerOptions} options - Configuration options
  * @returns {DraftManager} Draft state and controls
  */
-export function useDraftManager(options = {}) {
+export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({})) {
   const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;
 
   let lastSavedContent = $state("");
+  /** @type {ReturnType<typeof setTimeout> | null} */
   let draftSaveTimer = $state(null);
   let hasDraft = $state(false);
   let draftRestorePrompt = $state(false);
+  /** @type {StoredDraft | null} */
   let storedDraft = $state(null);
 
   function saveDraft() {
@@ -111,6 +113,7 @@ export function useDraftManager(options = {}) {
     lastSavedContent = getContent();
   }
 
+  /** @param {string} content */
   function scheduleSave(content) {
     if (!draftKey || readonly) return;
 
@@ -128,6 +131,7 @@ export function useDraftManager(options = {}) {
     }, AUTO_SAVE_DELAY);
   }
 
+  /** @param {string} initialContent */
   function init(initialContent) {
     // Check for existing draft on mount
     if (draftKey) {
@@ -151,6 +155,7 @@ export function useDraftManager(options = {}) {
     return { hasDraft, storedDraft };
   }
 
+  /** @param {string} content */
   function hasUnsavedChanges(content) {
     return content !== lastSavedContent;
   }

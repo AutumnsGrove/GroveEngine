@@ -30,6 +30,7 @@
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		disabled?: boolean;
+		href?: string;
 		class?: string;
 		children?: Snippet;
 	}

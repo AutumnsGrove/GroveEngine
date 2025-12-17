@@ -39,6 +39,7 @@ const SNIPPETS_STORAGE_KEY = "grove-editor-snippets";
  * @returns {SnippetsManager} Snippets state and controls
  */
 export function useSnippets() {
+  /** @type {Snippet[]} */
   let snippets = $state([]);
 
   let modal = $state({
@@ -68,6 +69,7 @@ export function useSnippets() {
     }
   }
 
+  /** @param {string | null} [editId] */
   function openModal(editId = null) {
     if (editId) {
       const snippet = snippets.find((s) => s.id === editId);
@@ -125,6 +127,7 @@ export function useSnippets() {
     closeModal();
   }
 
+  /** @param {string} id */
   function deleteSnippet(id) {
     if (confirm("Delete this snippet?")) {
       snippets = snippets.filter((s) => s.id !== id);

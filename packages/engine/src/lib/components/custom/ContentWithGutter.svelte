@@ -170,6 +170,7 @@
 
 	// Setup resize listener on mount with proper cleanup
 	onMount(() => {
+		/** @type {ReturnType<typeof setTimeout> | undefined} */
 		let resizeTimeoutId;
 		const handleResize = () => {
 			clearTimeout(resizeTimeoutId);
@@ -187,8 +188,9 @@
 
 	// Setup copy button functionality for code blocks
 	onMount(() => {
+		/** @param {Event} event */
 		const handleCopyClick = async (event) => {
-			const button = event.currentTarget;
+			const button = /** @type {HTMLElement} */ (event.currentTarget);
 			const codeText = button.getAttribute('data-code');
 
 			if (!codeText) return;
@@ -203,21 +205,21 @@
 
 				// Update button text and style to show success
 				const copyText = button.querySelector('.copy-text');
-				const originalText = copyText.textContent;
-				copyText.textContent = 'Copied!';
+				const originalText = copyText?.textContent || 'Copy';
+				if (copyText) copyText.textContent = 'Copied!';
 				button.classList.add('copied');
 
 				// Reset after 2 seconds
 				setTimeout(() => {
-					copyText.textContent = originalText;
+					if (copyText) copyText.textContent = originalText;
 					button.classList.remove('copied');
 				}, 2000);
 			} catch (err) {
 				console.error('Failed to copy code:', err);
 				const copyText = button.querySelector('.copy-text');
-				copyText.textContent = 'Failed';
+				if (copyText) copyText.textContent = 'Failed';
 				setTimeout(() => {
-					copyText.textContent = 'Copy';
+					if (copyText) copyText.textContent = 'Copy';
 				}, 2000);
 			}
 		};
@@ -260,7 +262,7 @@
 			if (headers && headers.length > 0) {
 				const headerElements = contentBodyElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
 				headerElements.forEach((el) => {
-					const text = el.textContent.trim();
+					const text = el.textContent?.trim() || '';
 					const matchingHeader = headers.find(h => h.text === text);
 					if (matchingHeader) {
 						el.id = matchingHeader.id;
@@ -364,7 +366,7 @@
 					// Find header by text content
 					const allHeaders = doc.body.querySelectorAll('h1, h2, h3, h4, h5, h6');
 					for (const h of allHeaders) {
-						if (h.textContent.trim() === headerText) {
+						if (h.textContent?.trim() === headerText) {
 							targetEl = h;
 							break;
 						}

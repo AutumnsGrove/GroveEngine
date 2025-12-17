@@ -5,17 +5,43 @@
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
 
+  /**
+   * @typedef {Object} GutterItem
+   * @property {string} type
+   * @property {string} [anchor]
+   * @property {string} [content]
+   * @property {string} [url]
+   * @property {string} [file]
+   * @property {string} [caption]
+   * @property {GalleryImage[]} [images]
+   */
+
+  /**
+   * @typedef {Object} GalleryImage
+   * @property {string} url
+   * @property {string} [alt]
+   * @property {string} [caption]
+   */
+
+  /**
+   * @typedef {Object} CdnImage
+   * @property {string} key
+   * @property {string} url
+   */
+
   // Props
   let {
-    gutterItems = $bindable([]),
-    onInsertAnchor = (anchorName) => {},
-    availableAnchors = [],
+    gutterItems = $bindable(/** @type {GutterItem[]} */ ([])),
+    onInsertAnchor = /** @type {(anchorName: string) => void} */ ((anchorName) => {}),
+    availableAnchors = /** @type {string[]} */ ([]),
   } = $props();
 
   // State
   let showAddModal = $state(false);
+  /** @type {number | null} */
   let editingIndex = $state(null);
   let showImagePicker = $state(false);
+  /** @type {((url: string) => void) | null} */
   let imagePickerCallback = $state(null);
 
   // Form state for add/edit
@@ -24,9 +50,11 @@
   let itemContent = $state("");
   let itemCaption = $state("");
   let itemUrl = $state("");
+  /** @type {GalleryImage[]} */
   let galleryImages = $state([]);
 
   // Image picker state
+  /** @type {CdnImage[]} */
   let cdnImages = $state([]);
   let cdnLoading = $state(false);
   let cdnFilter = $state("");
@@ -46,6 +74,7 @@
     showAddModal = true;
   }
 
+  /** @param {number} index */
   function openEditModal(index) {
     const item = gutterItems[index];
     itemType = item.type;
@@ -65,6 +94,7 @@
   }
 
   function saveItem() {
+    /** @type {GutterItem} */
     const newItem = {
       type: itemType,
       anchor: itemAnchor,
@@ -89,11 +119,16 @@
     closeModal();
   }
 
+  /** @param {number} index */
   function deleteItem(index) {
     gutterItems = gutterItems.filter((_, i) => i !== index);
     toast.success("Gutter item deleted");
   }
 
+  /**
+   * @param {number} index
+   * @param {number} direction
+   */
   function moveItem(index, direction) {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= gutterItems.length) return;
@@ -106,6 +141,7 @@
   }
 
   // Generate anchor name from text
+  /** @param {string} text */
   function generateAnchorName(text) {
     return text
       .toLowerCase()
@@ -138,7 +174,7 @@
 
       if (response.ok) {
         const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-        cdnImages = data.images.filter((img) => {
+        cdnImages = data.images.filter((/** @type {CdnImage} */ img) => {
           const key = img.key.toLowerCase();
           return imageExtensions.some((ext) => key.endsWith(ext));
         });
@@ -152,12 +188,14 @@
     }
   }
 
+  /** @param {(url: string) => void} callback */
   function openImagePicker(callback) {
     imagePickerCallback = callback;
     showImagePicker = true;
     loadCdnImages();
   }
 
+  /** @param {CdnImage} image */
   function selectImage(image) {
     if (imagePickerCallback) {
       imagePickerCallback(image.url);
@@ -181,16 +219,23 @@
     });
   }
 
+  /** @param {number} index */
   function removeGalleryImage(index) {
     galleryImages = galleryImages.filter((_, i) => i !== index);
   }
 
+  /**
+   * @param {number} index
+   * @param {keyof GalleryImage} field
+   * @param {string} value
+   */
   function updateGalleryImage(index, field, value) {
     galleryImages[index][field] = value;
     galleryImages = [...galleryImages];
   }
 
   // Get preview of item content
+  /** @param {GutterItem} item */
   function getItemPreview(item) {
     if (item.type === "comment" && item.content) {
       return item.content.substring(0, 50) + (item.content.length > 50 ? "..." : "");
@@ -204,6 +249,7 @@
     return "";
   }
 
+  /** @param {string} type */
   function getTypeIcon(type) {
     switch (type) {
       case "comment":
@@ -378,14 +424,14 @@
               <Input
                 type="text"
                 value={image.alt}
-                oninput={(e) => updateGalleryImage(i, "alt", e.target.value)}
+                oninput={(/** @type {Event} */ e) => updateGalleryImage(i, "alt", /** @type {HTMLInputElement} */ (e.target).value)}
                 placeholder="Alt text"
                 class="small"
               />
               <Input
                 type="text"
                 value={image.caption}
-                oninput={(e) => updateGalleryImage(i, "caption", e.target.value)}
+                oninput={(/** @type {Event} */ e) => updateGalleryImage(i, "caption", /** @type {HTMLInputElement} */ (e.target).value)}
                 placeholder="Caption"
                 class="small"
               />
