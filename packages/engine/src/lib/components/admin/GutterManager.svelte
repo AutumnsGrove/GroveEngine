@@ -121,7 +121,7 @@
 
   /** @param {number} index */
   function deleteItem(index) {
-    gutterItems = gutterItems.filter((_, i) => i !== index);
+    gutterItems = gutterItems.filter((/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index);
     toast.success("Gutter item deleted");
   }
 
@@ -221,7 +221,7 @@
 
   /** @param {number} index */
   function removeGalleryImage(index) {
-    galleryImages = galleryImages.filter((_, i) => i !== index);
+    galleryImages = galleryImages.filter((/** @type {GalleryImage} */ _, /** @type {number} */ i) => i !== index);
   }
 
   /**
@@ -315,17 +315,19 @@
 </div>
 
 <!-- Add/Edit Modal -->
-<Dialog bind:open={showAddModal}>
-  <h3 slot="title">{editingIndex !== null ? "Edit" : "Add"} Gutter Item</h3>
-
-  <div class="form-group">
-    <label for="item-type">Type</label>
-    <Select id="item-type" bind:value={itemType}>
-      <option value="comment">Comment (Markdown)</option>
-      <option value="photo">Photo</option>
-      <option value="gallery">Image Gallery</option>
-    </Select>
-  </div>
+<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Gutter Item" : "Add Gutter Item"}>
+  {#snippet children()}
+    <div class="form-group">
+      <label for="item-type">Type</label>
+      <Select
+        bind:value={itemType}
+        options={[
+          { value: "comment", label: "Comment (Markdown)" },
+          { value: "photo", label: "Photo" },
+          { value: "gallery", label: "Image Gallery" }
+        ]}
+      />
+    </div>
 
   <div class="form-group">
     <label for="item-anchor">Anchor</label>
@@ -449,20 +451,20 @@
       </button>
     </div>
   {/if}
+  {/snippet}
 
-  <div slot="footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+  {#snippet footer()}
     <Button variant="outline" onclick={closeModal}>Cancel</Button>
     <Button onclick={saveItem}>
       {editingIndex !== null ? "Update" : "Add"} Item
     </Button>
-  </div>
+  {/snippet}
 </Dialog>
 
 <!-- Image Picker Modal -->
-<Dialog bind:open={showImagePicker}>
-  <h3 slot="title">Select Image from CDN</h3>
-
-  <div class="picker-controls">
+<Dialog bind:open={showImagePicker} title="Select Image from CDN">
+  {#snippet children()}
+    <div class="picker-controls">
     <Input
       type="text"
       bind:value={cdnFilter}
@@ -490,10 +492,11 @@
           {/each}
         {/if}
       </div>
+  {/snippet}
 
-  <div slot="footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+  {#snippet footer()}
     <Button variant="outline" onclick={closeImagePicker}>Cancel</Button>
-  </div>
+  {/snippet}
 </Dialog>
 
 <style>

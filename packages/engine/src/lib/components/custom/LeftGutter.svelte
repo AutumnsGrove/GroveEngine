@@ -140,6 +140,7 @@
 			}
 			case 'paragraph': {
 				const paragraphs = contentEl.querySelectorAll('p');
+				if (typeof parsed.value !== 'number') return null;
 				const index = parsed.value - 1; // Convert to 0-based index
 				if (index >= 0 && index < paragraphs.length) {
 					return paragraphs[index];
@@ -171,7 +172,7 @@
 		const anchors = getUniqueAnchors();
 
 		// Sort anchors by their position in the document
-		const anchorPositions = anchors.map(anchor => {
+		const anchorPositions = anchors.map((/** @type {string} */ anchor) => {
 			const el = findAnchorElement(anchor);
 			return {
 				anchor,
@@ -179,9 +180,9 @@
 				element: el,
 				top: el ? el.offsetTop : Infinity
 			};
-		}).sort((a, b) => a.top - b.top);
+		}).sort((/** @type {{ top: number }} */ a, /** @type {{ top: number }} */ b) => a.top - b.top);
 
-		anchorPositions.forEach(({ anchor, key, element }) => {
+		anchorPositions.forEach((/** @type {{ anchor: string; key: string; element: Element | null; top: number }} */ { anchor, key, element }) => {
 			const groupEl = anchorGroupElements[key];
 
 			if (element && groupEl) {

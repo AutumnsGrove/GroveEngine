@@ -24,6 +24,7 @@
   let gutterItems = $state(data.post.gutter_content ? JSON.parse(data.post.gutter_content) : []);
 
   // Editor reference for anchor insertion
+  /** @type {any} */
   let editorRef = $state(null);
 
   // UI state
@@ -61,11 +62,12 @@
   });
 
   // Parse tags from comma-separated input
+  /** @param {string} input */
   function parseTags(input) {
     return input
       .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0);
+      .map((/** @type {string} */ tag) => tag.trim())
+      .filter((/** @type {string} */ tag) => tag.length > 0);
   }
 
   async function handleSave() {
@@ -98,7 +100,7 @@
       toast.success("Post saved successfully!");
       hasUnsavedChanges = false;
     } catch (err) {
-      toast.error(err.message || "Failed to update post");
+      toast.error(err instanceof Error ? err.message : "Failed to update post");
     } finally {
       saving = false;
     }
@@ -119,13 +121,14 @@
       // Redirect to blog admin
       goto("/admin/blog");
     } catch (err) {
-      toast.error(err.message || "Failed to delete post");
+      toast.error(err instanceof Error ? err.message : "Failed to delete post");
     } finally {
       saving = false;
     }
   }
 
   // Warn about unsaved changes
+  /** @param {BeforeUnloadEvent} e */
   function handleBeforeUnload(e) {
     if (hasUnsavedChanges) {
       e.preventDefault();
@@ -346,7 +349,7 @@
             <GutterManager
               bind:gutterItems
               availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-              onInsertAnchor={(name) => editorRef?.insertAnchor(name)}
+              onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
             />
           </aside>
         {/if}

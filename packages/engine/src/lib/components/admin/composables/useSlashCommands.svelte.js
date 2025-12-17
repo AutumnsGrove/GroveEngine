@@ -10,6 +10,8 @@
  * @property {string} insert
  * @property {number} [cursorOffset]
  * @property {boolean} [isSnippet]
+ * @property {boolean} [isAction]
+ * @property {(() => void)} [action]
  */
 
 /**
@@ -39,8 +41,7 @@
  * @property {() => void} close
  * @property {(direction: 'up' | 'down') => void} navigate
  * @property {(index: number) => void} execute
- * @property {(query: string) => void} setQuery
- * @property {(e: KeyboardEvent, cursorPos: number, lineStart: number) => void} handleKeyDown
+ * @property {(key: string, cursorPos: number, content: string) => boolean} shouldTrigger
  */
 
 // Base slash commands definition
@@ -86,8 +87,10 @@ export function useSlashCommands(options = {}) {
   });
 
   // Build full command list including snippets
+  /** @returns {SlashCommand[]} */
   function getAllCommands() {
     const snippets = getSnippets ? getSnippets() : [];
+    /** @type {SlashCommand[]} */
     const snippetCommands = snippets.map((s) => ({
       id: s.id,
       label: `> ${s.name}`,
@@ -95,6 +98,7 @@ export function useSlashCommands(options = {}) {
       isSnippet: true,
     }));
 
+    /** @type {SlashCommand} */
     const newSnippetCommand = {
       id: "newSnippet",
       label: "Create New Snippet...",
@@ -143,8 +147,10 @@ export function useSlashCommands(options = {}) {
     const cmd = filtered[index];
     if (!cmd) return;
 
-    const textareaRef = getTextareaRef();
-    const content = getContent();
+    const textareaRef = getTextareaRef ? getTextareaRef() : null;
+    const content = getContent ? getContent() : '';
+
+    if (!textareaRef || !setContent) return;
 
     // Handle action commands (like "Create New Snippet...")
     if (cmd.isAction && cmd.action) {
