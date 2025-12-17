@@ -149,30 +149,39 @@
 		}
 	}
 
-	// Get appropriate color for tree type and depth
-	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[]): string {
+	// Get appropriate color for tree type and depth (deterministic based on seed)
+	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number): string {
+		// Use seed to pick deterministically from array
+		const pickFromArray = <T>(arr: T[]): T => arr[seed % arr.length];
+
 		if (treeType === 'cherry') {
-			return pickRandom(depthPinks);
+			return pickFromArray(depthPinks);
 		}
 		// Pine stays green even in autumn (evergreen!)
 		if (treeType === 'pine' && isAutumn) {
-			return pickRandom([greens.deepGreen, greens.grove, greens.darkForest]);
+			return pickFromArray([greens.deepGreen, greens.grove, greens.darkForest]);
 		}
-		return pickRandom(depthColors);
+		return pickFromArray(depthColors);
 	}
 
-	// Track mount state for path sampling (needs DOM)
-	let mounted = $state(false);
+	// Base tree data (positions, sizes, types) - generated once on mount
+	interface BaseTree {
+		id: number;
+		x: number;
+		y: number;
+		size: number;
+		treeType: TreeType;
+		trunkColor: string;
+		rotation: number;
+		slopeRotation: number;
+		opacity: number;
+		zIndex: number;
+		brightness: 'dark' | 'mid' | 'light';
+	}
 
-	onMount(() => {
-		mounted = true;
-	});
-
-	// Generate trees along hill curves
-	function generateHillTrees(): Tree[] {
-		if (!mounted) return [];
-
-		const allTrees: Tree[] = [];
+	// Generate base tree positions (called once on mount)
+	function generateBaseTreePositions(): BaseTree[] {
+		const allTrees: BaseTree[] = [];
 		let treeId = 0;
 
 		for (const hill of hillLayers) {
@@ -184,9 +193,6 @@
 				{ jitter: 0.4, startT: 0.08, endT: 0.92 }
 			);
 
-			const depthColors = getDepthColors(hill.brightness);
-			const depthPinks = getDepthPinks(hill.brightness);
-
 			for (const point of points) {
 				const treeType = pickRandom(treeTypes);
 				const size = hill.treeSize.min + Math.random() * (hill.treeSize.max - hill.treeSize.min);
@@ -196,13 +202,13 @@
 					x: point.xPercent,
 					y: point.yPercent,
 					size,
-					color: getTreeColor(treeType, depthColors, depthPinks),
-					trunkColor: pickRandom([bark.bark, bark.warmBark, bark.lightBark]),
 					treeType,
+					trunkColor: pickRandom([bark.bark, bark.warmBark, bark.lightBark]),
 					rotation: (Math.random() - 0.5) * 10,
 					slopeRotation: point.angle,
 					opacity: hill.opacity,
-					zIndex: hill.zIndex
+					zIndex: hill.zIndex,
+					brightness: hill.brightness
 				});
 			}
 		}
@@ -210,8 +216,24 @@
 		return allTrees;
 	}
 
-	// Reactive trees - regenerates when season changes or on mount
-	let forestTrees = $derived(generateHillTrees());
+	// Base trees - stable positions generated once on mount
+	let baseTrees: BaseTree[] = $state([]);
+
+	onMount(() => {
+		baseTrees = generateBaseTreePositions();
+	});
+
+	// Final trees with seasonal colors - derived from base trees and season
+	let forestTrees = $derived(
+		baseTrees.map((tree) => {
+			const depthColors = getDepthColors(tree.brightness);
+			const depthPinks = getDepthPinks(tree.brightness);
+			return {
+				...tree,
+				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id)
+			};
+		})
+	);
 
 	// Toggle season
 	function toggleSeason() {

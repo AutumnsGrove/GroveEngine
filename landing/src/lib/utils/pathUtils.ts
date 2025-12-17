@@ -115,6 +115,7 @@ export function removePathElement(pathElement: SVGPathElement): void {
 /**
  * Sample points from a path string (convenience function)
  * Creates temporary element, samples, then cleans up
+ * Returns empty array during SSR (no document available)
  */
 export function samplePathString(
 	pathD: string,
@@ -126,6 +127,11 @@ export function samplePathString(
 		endT?: number;
 	} = {}
 ): Array<PathPoint & { xPercent: number; yPercent: number }> {
+	// SSR guard - document APIs not available on server
+	if (typeof document === 'undefined') {
+		return [];
+	}
+
 	const pathElement = createPathElement(pathD);
 
 	try {
