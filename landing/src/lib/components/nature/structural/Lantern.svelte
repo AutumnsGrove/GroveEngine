@@ -24,23 +24,33 @@
 <!-- Lantern -->
 <svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 60">
 	{#if variant === 'hanging'}
-		<!-- Hanging hook -->
-		<path fill="none" stroke={frame} stroke-width="2" d="M20 0 Q20 5 15 8 L15 12" />
-		<path fill="none" stroke={frame} stroke-width="2" d="M20 0 Q20 5 25 8 L25 12" />
+		<!-- Top finial (attachment point) -->
+		<circle fill={frame} cx="20" cy="3" r="2.5" />
 
-		<!-- Lantern top -->
-		<polygon fill={frame} points="10,12 20,5 30,12" />
+		<!-- Hanging arms connecting finial to lantern roof -->
+		<path fill="none" stroke={frame} stroke-width="2" d="M17.5 3.5 Q12 7 12 12" />
+		<path fill="none" stroke={frame} stroke-width="2" d="M22.5 3.5 Q28 7 28 12" />
+
+		<!-- Lantern top cap -->
+		<polygon fill={frame} points="10,12 20,6 30,12" />
+
+		<!-- Small decorative cap finial connecting to arms -->
+		<circle fill={frame} cx="20" cy="6" r="1.5" />
 	{:else if variant === 'post'}
 		<!-- Post -->
 		<rect fill={frame} x="17" y="40" width="6" height="20" />
+		<!-- Top finial -->
+		<circle fill={frame} cx="20" cy="9" r="2" />
 		<!-- Lantern top -->
-		<polygon fill={frame} points="10,18 20,10 30,18" />
+		<polygon fill={frame} points="10,18 20,11 30,18" />
 	{:else}
 		<!-- Standing base -->
 		<rect fill={frame} x="12" y="52" width="16" height="4" rx="1" />
 		<rect fill={frame} x="17" y="48" width="6" height="6" />
+		<!-- Top finial -->
+		<circle fill={frame} cx="20" cy="9" r="2" />
 		<!-- Lantern top -->
-		<polygon fill={frame} points="10,18 20,10 30,18" />
+		<polygon fill={frame} points="10,18 20,11 30,18" />
 	{/if}
 
 	<!-- Lantern body frame -->
@@ -63,9 +73,6 @@
 
 	<!-- Bottom cap -->
 	<rect fill={frame} x="8" y="48" width="24" height="3" rx="1" />
-
-	<!-- Top finial -->
-	<circle fill={frame} cx="20" cy="8" r="2" />
 </svg>
 
 <style>

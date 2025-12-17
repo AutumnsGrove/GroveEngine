@@ -9,23 +9,6 @@
 	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
 	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
 
-	// Ground elements
-	import Mushroom from '$lib/components/nature/ground/Mushroom.svelte';
-	import Fern from '$lib/components/nature/ground/Fern.svelte';
-	import Bush from '$lib/components/nature/ground/Bush.svelte';
-	import GrassTuft from '$lib/components/nature/ground/GrassTuft.svelte';
-	import Rock from '$lib/components/nature/ground/Rock.svelte';
-	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
-
-	// Creatures
-	import Firefly from '$lib/components/nature/creatures/Firefly.svelte';
-	import Butterfly from '$lib/components/nature/creatures/Butterfly.svelte';
-	import BirdFlying from '$lib/components/nature/creatures/BirdFlying.svelte';
-	import Bee from '$lib/components/nature/creatures/Bee.svelte';
-
-	// Botanical
-	import LeafFalling from '$lib/components/nature/botanical/LeafFalling.svelte';
-
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
@@ -36,8 +19,6 @@
 		autumn,
 		pinks,
 		autumnReds,
-		earth,
-		natural,
 		type Season
 	} from '$lib/components/nature/palette';
 
@@ -252,32 +233,6 @@
 			<Cloud class="w-32 h-16" animate={true} speed="slow" />
 		</div>
 
-		<!-- Flying creatures (spring/summer) or falling leaves (autumn) -->
-		{#if isAutumn}
-			<div class="absolute top-20 left-1/4" style="--fall-delay: 0s">
-				<LeafFalling class="w-6 h-6" season="autumn" variant="maple" />
-			</div>
-			<div class="absolute top-32 left-1/2" style="--fall-delay: 1s">
-				<LeafFalling class="w-5 h-5" season="autumn" variant="simple" />
-			</div>
-			<div class="absolute top-24 right-1/3" style="--fall-delay: 2s">
-				<LeafFalling class="w-6 h-6" season="autumn" variant="maple" />
-			</div>
-		{:else}
-			<div class="absolute top-24 left-1/4">
-				<BirdFlying class="w-8 h-4" animate={true} />
-			</div>
-			<div class="absolute top-16 right-1/4">
-				<BirdFlying class="w-6 h-3" animate={true} facing="left" />
-			</div>
-			<div class="absolute top-40 left-[15%]">
-				<Butterfly class="w-8 h-8" animate={true} />
-			</div>
-			<div class="absolute top-32 right-[20%]">
-				<Bee class="w-6 h-6" animate={true} />
-			</div>
-		{/if}
-
 		<!-- Distant mountains/hills silhouette -->
 		<div class="absolute inset-x-0 top-20 h-40">
 			<svg class="w-full h-full" viewBox="0 0 1200 160" preserveAspectRatio="none">
@@ -322,39 +277,6 @@
 					{/if}
 				</div>
 			{/each}
-
-			<!-- Ground decorations -->
-			<div class="absolute bottom-[22%] left-[10%] z-[6]">
-				<Mushroom class="w-8 h-10" />
-			</div>
-			<div class="absolute bottom-[18%] left-[25%] z-[6]">
-				<Fern class="w-6 h-10" {season} />
-			</div>
-			<div class="absolute bottom-[20%] right-[30%] z-[6]">
-				<Rock class="w-10 h-6" variant="round" />
-			</div>
-			<div class="absolute bottom-[15%] right-[15%] z-[6]">
-				<Bush class="w-12 h-10" {season} />
-			</div>
-			<div class="absolute bottom-[25%] left-[45%] z-[6]">
-				<GrassTuft class="w-6 h-8" {season} />
-			</div>
-			{#if !isAutumn}
-				<div class="absolute bottom-[22%] right-[45%] z-[6]">
-					<FlowerWild class="w-5 h-8" />
-				</div>
-			{/if}
-
-			<!-- Fireflies -->
-			<div class="absolute bottom-[35%] left-1/4 z-[7]">
-				<Firefly class="w-4 h-4" animate={true} intensity="subtle" />
-			</div>
-			<div class="absolute bottom-[30%] right-1/3 z-[7]">
-				<Firefly class="w-3 h-3" animate={true} intensity="bright" />
-			</div>
-			<div class="absolute bottom-[40%] left-1/2 z-[7]">
-				<Firefly class="w-4 h-4" animate={true} />
-			</div>
 		</div>
 
 		<!-- Ground -->

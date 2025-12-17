@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bark, earth, accents } from '../palette';
+	import { bark, accents } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -19,54 +19,71 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const body = bodyColor ?? bark.bark;
-	const breast = breastColor ?? earth.clay;
-	const beak = beakColor ?? accents.flower.yellow;
+	// American Robin colors
+	const body = bodyColor ?? '#4a4a4a'; // Dark gray-brown upper body
+	const breast = breastColor ?? '#c2410c'; // Bright orange-red breast (amber-600)
+	const beak = beakColor ?? '#f59e0b'; // Yellow-orange beak
+	const legColor = bark.darkBark;
 
 	const scaleX = facing === 'left' ? -1 : 1;
 </script>
 
-<!-- Perched bird -->
+<!-- American Robin - perched -->
 <svg
 	class="{className} {animate ? 'bob' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 50 50"
+	viewBox="0 0 50 55"
 	style="transform: scaleX({scaleX})"
 >
-	<!-- Tail feathers -->
-	<path fill={body} d="M5 28 Q0 32 2 38 Q8 36 12 30 Q8 28 5 28" />
+	<!-- Tail feathers - dark -->
+	<path fill={body} d="M2 30 Q0 34 3 40 Q10 38 14 32 Q8 30 2 30" />
 
-	<!-- Body -->
-	<ellipse fill={body} cx="22" cy="30" rx="15" ry="12" />
+	<!-- Body - dark gray back -->
+	<ellipse fill={body} cx="22" cy="30" rx="14" ry="11" />
 
-	<!-- Wing -->
-	<path fill={bark.darkBark} d="M15 25 Q10 30 12 38 Q20 36 25 28 Q20 24 15 25" opacity="0.7" />
+	<!-- Wing detail - slightly darker -->
+	<path fill="#3a3a3a" d="M12 26 Q8 32 11 38 Q18 36 22 30 Q17 25 12 26" opacity="0.8" />
 
-	<!-- Breast -->
-	<ellipse fill={breast} cx="28" cy="32" rx="8" ry="9" />
+	<!-- Orange-red breast - signature robin color -->
+	<ellipse fill={breast} cx="30" cy="33" rx="9" ry="10" />
+	<!-- Breast highlight -->
+	<ellipse fill={breast} cx="31" cy="31" rx="6" ry="6" opacity="0.9" />
 
-	<!-- Head -->
-	<circle fill={body} cx="35" cy="20" r="10" />
+	<!-- White lower belly -->
+	<ellipse fill="#f5f5f5" cx="30" cy="42" rx="5" ry="3" opacity="0.8" />
 
+	<!-- Head - dark gray -->
+	<circle fill={body} cx="36" cy="20" r="10" />
+
+	<!-- White eye-ring (robin signature) -->
+	<circle fill="white" cx="40" cy="18" r="3.5" />
 	<!-- Eye -->
-	<circle fill="white" cx="38" cy="18" r="3" />
-	<circle fill={bark.darkBark} cx="39" cy="18" r="1.5" />
+	<circle fill="#1a1a1a" cx="40" cy="18" r="2" />
+	<!-- Eye highlight -->
+	<circle fill="white" cx="41" cy="17" r="0.7" />
 
-	<!-- Beak -->
-	<path fill={beak} d="M44 20 L50 22 L44 24 Z" />
+	<!-- White crescent below eye -->
+	<path fill="white" d="M38 22 Q40 23 42 22 Q41 24 39 24 Q38 23 38 22" opacity="0.6" />
 
-	<!-- Legs -->
-	<path fill="none" stroke={bark.warmBark} stroke-width="1.5" d="M20 42 L20 50 M18 48 L22 48" />
-	<path fill="none" stroke={bark.warmBark} stroke-width="1.5" d="M28 42 L28 50 M26 48 L30 48" />
+	<!-- Beak - yellow-orange -->
+	<path fill={beak} d="M45 20 L52 22 L45 24 Z" />
+	<!-- Beak detail line -->
+	<line x1="45" y1="22" x2="50" y2="22" stroke="#b45309" stroke-width="0.5" />
+
+	<!-- Legs - dark -->
+	<g fill="none" stroke={legColor} stroke-width="1.5">
+		<path d="M22 41 L22 50 M20 48 L24 48" />
+		<path d="M28 41 L28 50 M26 48 L30 48" />
+	</g>
 </svg>
 
 <style>
 	@keyframes bob {
 		0%, 100% { transform: translateY(0); }
-		50% { transform: translateY(-2px); }
+		50% { transform: translateY(-1.5px); }
 	}
 
 	.bob {
-		animation: bob 1.5s ease-in-out infinite;
+		animation: bob 2s ease-in-out infinite;
 	}
 </style>
