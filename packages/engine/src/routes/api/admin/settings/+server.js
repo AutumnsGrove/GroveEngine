@@ -19,7 +19,7 @@ export async function PUT({ request, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  const db = platform?.env?.GIT_STATS_DB;
+  const db = /** @type {any} */ (platform?.env)?.GIT_STATS_DB;
   if (!db) {
     throw error(500, "Database not configured");
   }
