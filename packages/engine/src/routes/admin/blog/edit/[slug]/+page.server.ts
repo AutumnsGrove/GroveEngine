@@ -1,8 +1,22 @@
 import { error } from "@sveltejs/kit";
 import { getPostBySlug } from "$lib/utils/markdown.js";
 import matter from "gray-matter";
+import type { PageServerLoad } from "./$types.js";
 
-export async function load({ params, platform, locals }) {
+interface PostRecord {
+  slug: string;
+  title: string;
+  date?: string;
+  tags?: string;
+  description?: string;
+  markdown_content?: string;
+  html_content?: string;
+  gutter_content?: string;
+  last_synced?: string;
+  updated_at?: string;
+}
+
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
   // Auth check happens in admin layout
   const { slug } = params;
   const { tenantId } = locals;
@@ -18,20 +32,20 @@ export async function load({ params, platform, locals }) {
   // Try D1 first
   if (platform?.env?.DB) {
     try {
-      const post = await platform.env.DB.prepare(
+      const post = (await platform.env.DB.prepare(
         `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, last_synced, updated_at
          FROM posts
-         WHERE slug = ? AND tenant_id = ?`,
+         WHERE slug = ? AND tenant_id = ?`
       )
         .bind(slug, tenantId)
-        .first();
+        .first()) as PostRecord | null;
 
       if (post) {
         return {
           source: "d1",
           post: {
             ...post,
-            tags: post.tags ? JSON.parse(/** @type {string} */ (post.tags)) : [],
+            tags: post.tags ? JSON.parse(post.tags as string) : [],
             gutter_content: post.gutter_content || "[]",
           },
         };
@@ -49,7 +63,7 @@ export async function load({ params, platform, locals }) {
       eager: true,
       query: "?raw",
       import: "default",
-    });
+    }) as Record<string, string>;
 
     // Find the matching file
     const entry = Object.entries(modules).find(([filepath]) => {
@@ -63,7 +77,7 @@ export async function load({ params, platform, locals }) {
       throw error(404, "Post not found");
     }
 
-    const rawContent = /** @type {string} */ (entry[1]);
+    const rawContent = entry[1] as string;
     const { data, content: markdownContent } = matter(rawContent);
 
     // TODO: Load gutter content from UserContent/Posts/{slug}/gutter/manifest.json
@@ -72,17 +86,23 @@ export async function load({ params, platform, locals }) {
       source: "filesystem",
       post: {
         slug,
-        title: data.title || "Untitled",
-        date: data.date || new Date().toISOString().split("T")[0],
-        tags: data.tags || [],
-        description: data.description || "",
+        title: (data.title as string) || "Untitled",
+        date: (data.date as string) || new Date().toISOString().split("T")[0],
+        tags: (data.tags as string[]) || [],
+        description: (data.description as string) || "",
         markdown_content: markdownContent,
         gutter_content: "[]",
       },
     };
   } catch (err) {
-    if (err && typeof err === "object" && "status" in err && err.status === 404) throw err;
+    if (
+      err &&
+      typeof err === "object" &&
+      "status" in err &&
+      err.status === 404
+    )
+      throw err;
     console.error("Filesystem fetch error:", err);
     throw error(500, "Failed to fetch post");
   }
-}
+};

@@ -1,11 +1,30 @@
 import { json, error } from "@sveltejs/kit";
 import { parseImageFilename } from "$lib/utils/gallery.js";
+import type { RequestHandler } from "./$types.js";
+
+interface R2ListResult {
+  objects: Array<{ key: string }>;
+  truncated: boolean;
+  cursor?: string;
+}
+
+interface TagRecord {
+  slug: string;
+  name: string;
+  color?: string;
+}
+
+interface CollectionRecord {
+  slug: string;
+  name: string;
+  description?: string;
+}
 
 /**
  * GET /api/images/filters
  * Returns available filter options for the gallery
  */
-export async function GET({ platform, locals }) {
+export const GET: RequestHandler = async ({ platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -15,22 +34,22 @@ export async function GET({ platform, locals }) {
   }
 
   try {
-    const categories = new Set();
-    const years = new Set();
+    const categories = new Set<string>();
+    const years = new Set<string>();
 
     // Scan R2 images for categories and dates
-    let cursor = undefined;
+    let cursor: string | undefined = undefined;
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"];
 
     do {
-      const listResult = await platform.env.IMAGES.list({
+      const listResult: R2ListResult = await platform.env.IMAGES.list({
         cursor: cursor,
         limit: 500,
       });
 
       listResult.objects
         .filter((obj) =>
-          imageExtensions.some((ext) => obj.key.toLowerCase().endsWith(ext)),
+          imageExtensions.some((ext) => obj.key.toLowerCase().endsWith(ext))
         )
         .forEach((obj) => {
           const parsed = parseImageFilename(obj.key);
@@ -49,23 +68,21 @@ export async function GET({ platform, locals }) {
     } while (cursor);
 
     // Fetch tags from D1
-    /** @type {any[]} */
-    let tags = [];
+    let tags: TagRecord[] = [];
     if (platform?.env?.DB) {
       const tagResults = await platform.env.DB.prepare(
-        "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC",
+        "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC"
       ).all();
-      tags = tagResults.results || [];
+      tags = (tagResults.results as TagRecord[]) || [];
     }
 
     // Fetch collections from D1
-    /** @type {any[]} */
-    let collections = [];
+    let collections: CollectionRecord[] = [];
     if (platform?.env?.DB) {
       const collectionResults = await platform.env.DB.prepare(
-        "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC",
+        "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC"
       ).all();
-      collections = collectionResults.results || [];
+      collections = (collectionResults.results as CollectionRecord[]) || [];
     }
 
     return json({
@@ -81,4 +98,4 @@ export async function GET({ platform, locals }) {
     console.error("Filters error:", err);
     throw error(500, "Failed to load filter options");
   }
-}
+};

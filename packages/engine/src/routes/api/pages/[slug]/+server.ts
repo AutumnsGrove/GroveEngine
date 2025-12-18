@@ -3,11 +3,24 @@ import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import type { RequestHandler } from "./$types.js";
+
+interface PageInput {
+  title?: string;
+  markdown_content?: string;
+  description?: string;
+  hero?: string;
+}
 
 /**
  * PUT /api/pages/[slug] - Update an existing page in D1
  */
-export async function PUT({ params, request, platform, locals }) {
+export const PUT: RequestHandler = async ({
+  params,
+  request,
+  platform,
+  locals,
+}) => {
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -35,7 +48,7 @@ export async function PUT({ params, request, platform, locals }) {
   }
 
   try {
-    const data = sanitizeObject(await request.json());
+    const data = sanitizeObject(await request.json()) as PageInput;
 
     // Validate required fields
     if (!data.title || !data.markdown_content) {
@@ -55,7 +68,7 @@ export async function PUT({ params, request, platform, locals }) {
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
       );
     }
 
@@ -65,7 +78,7 @@ export async function PUT({ params, request, platform, locals }) {
 
     // Check if page exists and belongs to tenant
     const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?",
+      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?"
     )
       .bind(slug, tenantId)
       .first();
@@ -75,7 +88,9 @@ export async function PUT({ params, request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
+    const html_content = sanitizeMarkdown(
+      marked.parse(data.markdown_content, { async: false }) as string
+    );
 
     const now = new Date().toISOString();
 
@@ -84,7 +99,7 @@ export async function PUT({ params, request, platform, locals }) {
        SET title = ?, description = ?, markdown_content = ?, html_content = ?, hero = ?, updated_at = ?
        WHERE slug = ? AND tenant_id = ?`;
 
-    const params = [
+    const queryParams = [
       data.title,
       data.description || "",
       data.markdown_content,
@@ -95,9 +110,7 @@ export async function PUT({ params, request, platform, locals }) {
       tenantId,
     ];
 
-    await platform.env.DB.prepare(updateQuery)
-      .bind(...params)
-      .run();
+    await platform.env.DB.prepare(updateQuery).bind(...queryParams).run();
 
     return json({
       success: true,
@@ -105,8 +118,11 @@ export async function PUT({ params, request, platform, locals }) {
       message: "Page updated successfully",
     });
   } catch (err) {
-    if (/** @type {{ status?: number }} */ (err).status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error updating page:", err);
-    throw error(500, err instanceof Error ? err.message : "Failed to update page");
+    throw error(
+      500,
+      err instanceof Error ? err.message : "Failed to update page"
+    );
   }
-}
+};

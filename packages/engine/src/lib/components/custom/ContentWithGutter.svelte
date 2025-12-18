@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { tick, untrack, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import TableOfContents from './TableOfContents.svelte';
@@ -11,14 +11,11 @@
 		getItemsForAnchor,
 		getOrphanItems,
 		findAnchorElement,
-		parseAnchor
-	} from '$lib/utils/gutter.js';
+		parseAnchor,
+		type GutterItem as GutterItemType,
+		type Header
+	} from '$lib/utils/gutter';
 	import '$lib/styles/content.css';
-
-	/**
-	 * @typedef {import('$lib/utils/gutter.js').GutterItem} GutterItem
-	 * @typedef {import('$lib/utils/gutter.js').Header} Header
-	 */
 
 	// Constants for positioning calculations
 	const MIN_GAP = 16; // Minimum gap between items in pixels
@@ -28,8 +25,8 @@
 
 	let {
 		content = '',
-		gutterContent = /** @type {GutterItem[]} */ ([]),
-		headers = /** @type {Header[]} */ ([]),
+		gutterContent = [] as GutterItemType[],
+		headers = [] as Header[],
 		showTableOfContents = true,
 		children
 	} = $props();

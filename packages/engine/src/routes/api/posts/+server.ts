@@ -3,11 +3,33 @@ import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import type { RequestHandler } from "./$types.js";
+
+interface PostRecord {
+  slug: string;
+  title: string;
+  date: string;
+  tags?: string;
+  description?: string;
+  last_synced?: string;
+  updated_at?: string;
+}
+
+interface PostInput {
+  title?: string;
+  slug?: string;
+  markdown_content?: string;
+  date?: string;
+  tags?: string[];
+  description?: string;
+  gutter_content?: string;
+  font?: string;
+}
 
 /**
  * GET /api/posts - List all posts from D1
  */
-export async function GET({ platform, locals }) {
+export const GET: RequestHandler = async ({ platform, locals }) => {
   // Auth check for admin access
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -26,12 +48,12 @@ export async function GET({ platform, locals }) {
       `SELECT slug, title, date, tags, description, last_synced, updated_at
        FROM posts
        WHERE tenant_id = ?
-       ORDER BY date DESC`,
+       ORDER BY date DESC`
     )
       .bind(locals.tenantId)
       .all();
 
-    const posts = result.results.map((/** @type {{ slug: string; title: string; date: string; tags?: string; description?: string }} */ post) => ({
+    const posts = (result.results as PostRecord[]).map((post) => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
@@ -41,12 +63,12 @@ export async function GET({ platform, locals }) {
     console.error("Error fetching posts:", err);
     throw error(500, "Failed to fetch posts");
   }
-}
+};
 
 /**
  * POST /api/posts - Create a new post in D1
  */
-export async function POST({ request, platform, locals }) {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -66,13 +88,13 @@ export async function POST({ request, platform, locals }) {
   }
 
   try {
-    const data = sanitizeObject(await request.json());
+    const data = sanitizeObject(await request.json()) as PostInput;
 
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
       throw error(
         400,
-        "Missing required fields: title, slug, markdown_content",
+        "Missing required fields: title, slug, markdown_content"
       );
     }
 
@@ -90,7 +112,7 @@ export async function POST({ request, platform, locals }) {
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
       );
     }
 
@@ -111,7 +133,7 @@ export async function POST({ request, platform, locals }) {
 
     // Check if slug already exists for this tenant
     const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?",
+      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
     )
       .bind(slug, locals.tenantId)
       .first();
@@ -121,7 +143,9 @@ export async function POST({ request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
+    const html_content = sanitizeMarkdown(
+      marked.parse(data.markdown_content, { async: false }) as string
+    );
 
     // Generate a simple hash of the content
     const encoder = new TextEncoder();
@@ -139,7 +163,7 @@ export async function POST({ request, platform, locals }) {
     const insertQuery = `INSERT INTO posts (slug, title, date, tags, description, markdown_content, html_content, gutter_content, font, file_hash, tenant_id, last_synced, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    const params = [
+    const queryParams = [
       slug,
       data.title,
       data.date || now.split("T")[0],
@@ -156,9 +180,7 @@ export async function POST({ request, platform, locals }) {
       now,
     ];
 
-    await platform.env.DB.prepare(insertQuery)
-      .bind(...params)
-      .run();
+    await platform.env.DB.prepare(insertQuery).bind(...queryParams).run();
 
     return json({
       success: true,
@@ -166,8 +188,8 @@ export async function POST({ request, platform, locals }) {
       message: "Post created successfully",
     });
   } catch (err) {
-    if (/** @type {{ status?: number }} */ (err).status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error creating post:", err);
     throw error(500, "Failed to create post");
   }
-}
+};

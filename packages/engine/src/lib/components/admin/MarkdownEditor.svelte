@@ -1,7 +1,7 @@
 <script>
   import { marked } from "marked";
   import { onMount, tick } from "svelte";
-  import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+  import { sanitizeMarkdown } from "$lib/utils/sanitize";
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";

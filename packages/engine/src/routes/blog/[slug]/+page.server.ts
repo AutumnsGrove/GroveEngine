@@ -2,11 +2,35 @@ import { getPostBySlug, processAnchorTags } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
 import { marked } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
 export const prerender = false;
 
-export async function load({ params, locals, platform }) {
+interface Header {
+  level: number;
+  id: string;
+  text: string;
+}
+
+interface GutterItem {
+  type?: string;
+  content?: string;
+  [key: string]: unknown;
+}
+
+interface PostRecord {
+  slug: string;
+  title: string;
+  description?: string;
+  html_content?: string;
+  gutter_content?: string;
+  tags?: string;
+  status?: string;
+  published_at?: string;
+}
+
+export const load: PageServerLoad = async ({ params, locals, platform }) => {
   const { slug } = params;
   const tenantId = locals?.tenantId;
 
@@ -14,26 +38,28 @@ export async function load({ params, locals, platform }) {
     // Try D1 first for posts created via admin panel
     if (platform?.env?.DB) {
       try {
-        const post = await platform.env.DB.prepare(
+        const post = (await platform.env.DB.prepare(
           `SELECT slug, title, description, html_content, gutter_content, tags, status, published_at
-					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`,
+					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`
         )
           .bind(slug, tenantId)
-          .first();
+          .first()) as PostRecord | null;
 
         if (post) {
           // Process anchor tags in HTML content (same as filesystem posts)
-          const processedHtml = processAnchorTags(/** @type {string} */ (post.html_content) || "");
+          const processedHtml = processAnchorTags(
+            (post.html_content as string) || ""
+          );
 
           // Extract headers from HTML for table of contents
           // Note: For D1 posts, we extract from HTML since we don't store raw markdown
           const headers = extractHeadersFromHtml(processedHtml);
 
           // Safe JSON parsing for tags
-          let tags = [];
+          let tags: string[] = [];
           if (post.tags) {
             try {
-              tags = JSON.parse(/** @type {string} */ (post.tags));
+              tags = JSON.parse(post.tags as string);
             } catch (e) {
               console.warn("Failed to parse tags:", e);
               tags = [];
@@ -41,19 +67,21 @@ export async function load({ params, locals, platform }) {
           }
 
           // Safe JSON parsing for gutter content
-          let gutterContent = [];
+          let gutterContent: GutterItem[] = [];
           if (post.gutter_content) {
             try {
-              gutterContent = JSON.parse(/** @type {string} */ (post.gutter_content));
+              gutterContent = JSON.parse(post.gutter_content as string);
               // Process gutter items: convert markdown to HTML for comment/markdown items
-              gutterContent = gutterContent.map((/** @type {{ type?: string; content?: string; [key: string]: unknown }} */ item) => {
+              gutterContent = gutterContent.map((item: GutterItem) => {
                 if (
                   (item.type === "comment" || item.type === "markdown") &&
                   item.content
                 ) {
                   return {
                     ...item,
-                    content: sanitizeMarkdown(/** @type {string} */ (marked.parse(item.content, { async: false }))),
+                    content: sanitizeMarkdown(
+                      marked.parse(item.content, { async: false }) as string
+                    ),
                   };
                 }
                 return item;
@@ -66,11 +94,11 @@ export async function load({ params, locals, platform }) {
 
           return {
             post: {
-              slug: /** @type {string} */ (post.slug),
-              title: /** @type {string} */ (post.title),
-              date: /** @type {string} */ (post.published_at),
+              slug: post.slug as string,
+              title: post.title as string,
+              date: post.published_at as string,
               tags,
-              description: /** @type {string} */ (post.description) || "",
+              description: (post.description as string) || "",
               content: processedHtml,
               headers,
               gutterContent,
@@ -106,36 +134,30 @@ export async function load({ params, locals, platform }) {
     // If we got here without D1 being available, that's a config issue
     if (!platform?.env?.DB) {
       console.error(
-        "DB binding not available - check Cloudflare Pages D1 bindings",
+        "DB binding not available - check Cloudflare Pages D1 bindings"
       );
     }
     throw error(404, "Post not found");
   } catch (err) {
     // If it's already a SvelteKit error, rethrow it
-    if (/** @type {{ status?: number }} */ (err)?.status) {
+    if ((err as { status?: number })?.status) {
       throw err;
     }
     // Log and rethrow as 500 with message for debugging
     console.error("Blog post load error:", err);
-    throw error(500, `Failed to load post: ${err instanceof Error ? err.message : String(err)}`);
+    throw error(
+      500,
+      `Failed to load post: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
-}
-
-/**
- * @typedef {Object} Header
- * @property {number} level
- * @property {string} id
- * @property {string} text
- */
+};
 
 /**
  * Extract headers from HTML content for table of contents
  * Used for D1 posts where raw markdown isn't stored
- * @param {string} html - The HTML content
- * @returns {Header[]} Array of header objects with level, text, and id
  */
-function extractHeadersFromHtml(html) {
-  const headers = [];
+function extractHeadersFromHtml(html: string): Header[] {
+  const headers: Header[] = [];
   const headerRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[1-6]>/gi;
 
   let match;

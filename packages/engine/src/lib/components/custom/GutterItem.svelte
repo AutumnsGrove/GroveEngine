@@ -1,7 +1,7 @@
 <script>
 	import Lightbox from '$lib/ui/components/gallery/Lightbox.svelte';
 	import ImageGallery from '$lib/ui/components/gallery/ImageGallery.svelte';
-	import { sanitizeHTML } from '$lib/utils/sanitize.js';
+	import { sanitizeHTML } from '$lib/utils/sanitize';
 
 	let { item = {} } = $props();
 

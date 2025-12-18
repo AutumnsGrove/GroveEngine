@@ -4,12 +4,37 @@ import { getPostBySlug } from "$lib/utils/markdown.js";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import type { RequestHandler } from "./$types.js";
+
+interface PostRecord {
+  slug: string;
+  title: string;
+  date?: string;
+  tags?: string;
+  description?: string;
+  markdown_content?: string;
+  html_content?: string;
+  gutter_content?: string;
+  font?: string;
+  last_synced?: string;
+  updated_at?: string;
+}
+
+interface PostInput {
+  title?: string;
+  markdown_content?: string;
+  date?: string;
+  tags?: string[];
+  description?: string;
+  gutter_content?: string;
+  font?: string;
+}
 
 /**
  * GET /api/posts/[slug] - Get a single post
  * Tries D1 first, falls back to filesystem (UserContent)
  */
-export async function GET({ params, platform, locals }) {
+export const GET: RequestHandler = async ({ params, platform, locals }) => {
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -28,20 +53,23 @@ export async function GET({ params, platform, locals }) {
   // Try D1 first
   if (platform?.env?.DB) {
     try {
-      const post = await platform.env.DB.prepare(
+      const post = (await platform.env.DB.prepare(
         `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, font, last_synced, updated_at
          FROM posts
-         WHERE slug = ? AND tenant_id = ?`,
+         WHERE slug = ? AND tenant_id = ?`
       )
         .bind(slug, locals.tenantId)
-        .first();
+        .first()) as PostRecord | null;
 
       if (post) {
         return json({
           source: "d1",
           post: {
             ...post,
-            tags: post.tags && typeof post.tags === 'string' ? JSON.parse(post.tags) : [],
+            tags:
+              post.tags && typeof post.tags === "string"
+                ? JSON.parse(post.tags)
+                : [],
           },
         });
       }
@@ -74,16 +102,21 @@ export async function GET({ params, platform, locals }) {
       },
     });
   } catch (err) {
-    if (/** @type {{ status?: number }} */ (err).status === 404) throw err;
+    if ((err as { status?: number }).status === 404) throw err;
     console.error("Filesystem fetch error:", err);
     throw error(500, "Failed to fetch post");
   }
-}
+};
 
 /**
  * PUT /api/posts/[slug] - Update an existing post in D1
  */
-export async function PUT({ params, request, platform, locals }) {
+export const PUT: RequestHandler = async ({
+  params,
+  request,
+  platform,
+  locals,
+}) => {
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -109,7 +142,7 @@ export async function PUT({ params, request, platform, locals }) {
   }
 
   try {
-    const data = sanitizeObject(await request.json());
+    const data = sanitizeObject(await request.json()) as PostInput;
 
     // Validate required fields
     if (!data.title || !data.markdown_content) {
@@ -129,7 +162,7 @@ export async function PUT({ params, request, platform, locals }) {
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
       );
     }
 
@@ -139,7 +172,7 @@ export async function PUT({ params, request, platform, locals }) {
 
     // Check if post exists for this tenant
     const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?",
+      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
     )
       .bind(slug, locals.tenantId)
       .first();
@@ -149,7 +182,9 @@ export async function PUT({ params, request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
+    const html_content = sanitizeMarkdown(
+      marked.parse(data.markdown_content, { async: false }) as string
+    );
 
     // Generate a simple hash of the content
     const encoder = new TextEncoder();
@@ -168,7 +203,7 @@ export async function PUT({ params, request, platform, locals }) {
        SET title = ?, date = ?, tags = ?, description = ?, markdown_content = ?, html_content = ?, file_hash = ?, gutter_content = ?, font = ?, updated_at = ?
        WHERE slug = ? AND tenant_id = ?`;
 
-    const params = [
+    const queryParams = [
       data.title,
       data.date || now.split("T")[0],
       tags,
@@ -183,9 +218,7 @@ export async function PUT({ params, request, platform, locals }) {
       locals.tenantId,
     ];
 
-    await platform.env.DB.prepare(updateQuery)
-      .bind(...params)
-      .run();
+    await platform.env.DB.prepare(updateQuery).bind(...queryParams).run();
 
     return json({
       success: true,
@@ -193,16 +226,21 @@ export async function PUT({ params, request, platform, locals }) {
       message: "Post updated successfully",
     });
   } catch (err) {
-    if (/** @type {{ status?: number }} */ (err).status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error updating post:", err);
     throw error(500, "Failed to update post");
   }
-}
+};
 
 /**
  * DELETE /api/posts/[slug] - Delete a post from D1
  */
-export async function DELETE({ request, params, platform, locals }) {
+export const DELETE: RequestHandler = async ({
+  request,
+  params,
+  platform,
+  locals,
+}) => {
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -230,7 +268,7 @@ export async function DELETE({ request, params, platform, locals }) {
   try {
     // Check if post exists for this tenant
     const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?",
+      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
     )
       .bind(slug, locals.tenantId)
       .first();
@@ -240,7 +278,7 @@ export async function DELETE({ request, params, platform, locals }) {
     }
 
     await platform.env.DB.prepare(
-      "DELETE FROM posts WHERE slug = ? AND tenant_id = ?",
+      "DELETE FROM posts WHERE slug = ? AND tenant_id = ?"
     )
       .bind(slug, locals.tenantId)
       .run();
@@ -250,8 +288,8 @@ export async function DELETE({ request, params, platform, locals }) {
       message: "Post deleted successfully",
     });
   } catch (err) {
-    if (/** @type {{ status?: number }} */ (err).status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error deleting post:", err);
     throw error(500, "Failed to delete post");
   }
-}
+};
