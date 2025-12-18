@@ -38,6 +38,18 @@
 	const milestones = $derived(
 		data.snapshots.filter((s: any) => s.label.startsWith('v'))
 	);
+
+	// Calculate language breakdown for a given snapshot
+	function getSnapshotBreakdown(snapshot: any) {
+		const total = snapshot.totalCodeLines;
+		if (total === 0) return [];
+		return [
+			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-orange-500' },
+			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-blue-500' },
+			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-yellow-500' },
+			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-pink-500' }
+		];
+	}
 </script>
 
 <svelte:head>
@@ -180,20 +192,26 @@
 					<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Growth Over Time</h2>
 
 					<div class="card p-6">
-						<!-- Simple bar chart -->
+						<!-- Stacked language bar chart -->
 						<div class="space-y-3">
 							{#each data.snapshots as snapshot, i}
 								{@const barWidth = (snapshot.totalCodeLines / maxCodeLines) * 100}
+								{@const breakdown = getSnapshotBreakdown(snapshot)}
 								<div class="flex items-center gap-4">
 									<div class="w-32 text-right flex flex-col">
 										<span class="text-xs font-sans text-foreground-faint">{snapshot.date}</span>
 										<span class="text-xs font-mono text-accent-muted">{snapshot.label}</span>
 									</div>
 									<div class="flex-1 h-6 bg-surface rounded-full overflow-hidden">
-										<div
-											class="h-full bg-gradient-to-r from-accent-muted to-accent-subtle rounded-full transition-all duration-500"
-											style="width: {barWidth}%"
-										></div>
+										<div class="h-full flex" style="width: {barWidth}%">
+											{#each breakdown as lang}
+												<div
+													class="{lang.color} h-full transition-all duration-500"
+													style="width: {lang.pct}%"
+													title="{lang.name}: {lang.pct}%"
+												></div>
+											{/each}
+										</div>
 									</div>
 									<div class="w-20 text-left">
 										<span class="text-xs font-mono text-foreground-muted">{formatNumber(snapshot.totalCodeLines)}</span>
