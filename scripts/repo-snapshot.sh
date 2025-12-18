@@ -8,7 +8,7 @@
 # Usage: ./scripts/repo-snapshot.sh [optional-label]
 # Example: ./scripts/repo-snapshot.sh "post-auth-refactor"
 #
-# CSV Schema (14 columns):
+# CSV Schema (17 columns):
 #   1. timestamp         - YYYY-MM-DD_HH-MM-SS format
 #   2. label             - Snapshot label (version tag or custom name)
 #   3. git_hash          - Short git commit hash
@@ -23,6 +23,9 @@
 #   12. directories      - Total number of directories
 #   13. estimated_tokens - Estimated LLM tokens (~4 chars per token)
 #   14. commits          - Total git commits at this point
+#   15. test_files       - Number of test files (*.test.ts, *.spec.ts, etc.)
+#   16. test_lines       - Total lines in test files
+#   17. bundle_size_kb   - Engine bundle size in KB (0 if build unavailable)
 #
 
 set -e
@@ -118,6 +121,28 @@ echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting JSON files..."
 JSON_FILES=$(count_files "*.json")
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Counting test files..."
+# Count test files (*.test.ts, *.test.js, *.spec.ts, *.spec.js)
+TEST_FILES=0
+TEST_LINES=0
+while IFS= read -r file; do
+    if [ -f "$file" ]; then
+        lines=$(wc -l < "$file" 2>/dev/null | tr -d ' ' || echo 0)
+        TEST_LINES=$((TEST_LINES + lines))
+        TEST_FILES=$((TEST_FILES + 1))
+    fi
+done < <(find . \( -name "*.test.ts" -o -name "*.test.js" -o -name "*.spec.ts" -o -name "*.spec.js" \) ! -path "*/node_modules/*" ! -path "*/.git/*" -type f 2>/dev/null)
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Measuring bundle size..."
+# Try to get bundle size from existing dist folder
+BUNDLE_SIZE_KB=0
+ENGINE_DIST="packages/engine/dist"
+if [ -d "$ENGINE_DIST" ]; then
+    BUNDLE_SIZE_KB=$(du -sk "$ENGINE_DIST" 2>/dev/null | cut -f1 || echo 0)
+fi
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Analyzing code characters..."
@@ -370,11 +395,11 @@ SNAPSHOT
 
 # Create CSV header if file doesn't exist
 if [ ! -f "$CSV_FILE" ]; then
-    echo "timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits" > "$CSV_FILE"
+    echo "timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits,test_files,test_lines,bundle_size_kb" > "$CSV_FILE"
 fi
 
 # Append data row
-echo "${TIMESTAMP},${LABEL},${GIT_HASH},${TOTAL_CODE_LINES},${SVELTE_LINES},${TS_LINES},${JS_LINES},${CSS_LINES},${MD_WORDS},${MD_LINES},${TOTAL_FILES},${TOTAL_DIRS},${ESTIMATED_TOKENS},${GIT_COMMITS}" >> "$CSV_FILE"
+echo "${TIMESTAMP},${LABEL},${GIT_HASH},${TOTAL_CODE_LINES},${SVELTE_LINES},${TS_LINES},${JS_LINES},${CSS_LINES},${MD_WORDS},${MD_LINES},${TOTAL_FILES},${TOTAL_DIRS},${ESTIMATED_TOKENS},${GIT_COMMITS},${TEST_FILES},${TEST_LINES},${BUNDLE_SIZE_KB}" >> "$CSV_FILE"
 
 # ============================================================================
 # OUTPUT SUMMARY
@@ -394,6 +419,10 @@ echo -e "    • ${MD_WORDS_FMT} words of documentation"
 echo -e "    • ~${ESTIMATED_TOKENS_FMT} estimated tokens"
 echo -e "    • ${TOTAL_FILES} files across ${TOTAL_DIRS} directories"
 echo -e "    • ${GIT_COMMITS} commits"
+echo -e "    • ${TEST_FILES} test files (${TEST_LINES} lines)"
+if [ "$BUNDLE_SIZE_KB" -gt 0 ]; then
+echo -e "    • ${BUNDLE_SIZE_KB} KB bundle size"
+fi
 echo ""
 echo -e "  ${CYAN}Tip:${NC} Run with a label to mark milestones:"
 echo -e "       ./scripts/repo-snapshot.sh \"v1.0-release\""

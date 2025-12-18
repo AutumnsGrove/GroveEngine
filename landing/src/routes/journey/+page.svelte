@@ -84,6 +84,28 @@
 			growth: getTsPercentage(latest) - getTsPercentage(first)
 		};
 	});
+
+	// Get max test lines for chart scaling
+	const maxTestLines = $derived(
+		data.snapshots.length > 0
+			? Math.max(...data.snapshots.map((s: any) => s.testLines))
+			: 0
+	);
+
+	// Test coverage progression stats
+	const testProgression = $derived(() => {
+		if (data.snapshots.length < 2) return null;
+		const first = data.snapshots[0];
+		const latest = data.snapshots[data.snapshots.length - 1];
+		return {
+			startFiles: first.testFiles,
+			currentFiles: latest.testFiles,
+			startLines: first.testLines,
+			currentLines: latest.testLines,
+			filesGrowth: latest.testFiles - first.testFiles,
+			linesGrowth: latest.testLines - first.testLines
+		};
+	});
 </script>
 
 <svelte:head>
@@ -312,6 +334,67 @@
 								</div>
 								<div class="w-16 text-left">
 									<span class="text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docWords)}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</section>
+			{/if}
+
+			<!-- Test Coverage -->
+			{#if testProgression() && data.latest.testFiles > 0}
+			<section class="mb-16">
+				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Test Coverage</h2>
+
+				<div class="grid md:grid-cols-2 gap-6">
+					<!-- Test Files Card -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								{data.latest.testFiles}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">test files</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>+{testProgression()?.filesGrowth} since {data.snapshots[0].label}</span>
+							<span>{formatNumber(data.latest.testLines)} lines</span>
+						</div>
+					</div>
+
+					<!-- Test Lines Card -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								{formatNumber(data.latest.testLines)}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">lines of tests</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>+{formatNumber(testProgression()?.linesGrowth || 0)} new lines</span>
+							<span>{Math.round((data.latest.testLines / data.latest.totalCodeLines) * 100)}% of codebase</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Test growth over time -->
+				<div class="card p-6 mt-6">
+					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Test Coverage Growth</h3>
+					<div class="space-y-2">
+						{#each data.snapshots as snapshot, i}
+							{@const barWidth = maxTestLines > 0 ? (snapshot.testLines / maxTestLines) * 100 : 0}
+							<div class="flex items-center gap-3">
+								<div class="w-16 text-right">
+									<span class="text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+								</div>
+								<div class="flex-1 h-4 bg-surface rounded-full overflow-hidden">
+									<div
+										class="h-full bg-violet-500 rounded-full transition-all duration-500"
+										style="width: {barWidth}%"
+									></div>
+								</div>
+								<div class="w-20 text-left">
+									<span class="text-xs font-mono text-foreground-muted">{snapshot.testFiles} / {formatNumber(snapshot.testLines)}</span>
 								</div>
 							</div>
 						{/each}
