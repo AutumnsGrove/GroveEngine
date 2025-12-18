@@ -59,9 +59,9 @@ async function createKey(secret) {
 export async function signJwt(payload, secret) {
   const header = { alg: "HS256", typ: "JWT" };
 
-  const headerEncoded = base64UrlEncode(encoder.encode(JSON.stringify(header)));
+  const headerEncoded = base64UrlEncode(encoder.encode(JSON.stringify(header)).buffer);
   const payloadEncoded = base64UrlEncode(
-    encoder.encode(JSON.stringify(payload)),
+    encoder.encode(JSON.stringify(payload)).buffer,
   );
 
   const message = `${headerEncoded}.${payloadEncoded}`;
@@ -100,8 +100,8 @@ export async function verifyJwt(token, secret) {
     const isValid = await crypto.subtle.verify(
       "HMAC",
       key,
-      signature,
-      encoder.encode(message),
+      signature.buffer,
+      encoder.encode(message).buffer,
     );
 
     if (!isValid) {

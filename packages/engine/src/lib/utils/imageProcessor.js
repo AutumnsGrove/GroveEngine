@@ -77,7 +77,7 @@ function getMaxDimensionForQuality(quality) {
  * @param {number} options.quality - Quality 0-100 (default 80)
  * @param {boolean} options.convertToWebP - Convert to WebP format (default true)
  * @param {boolean} options.fullResolution - Skip resizing (default false)
- * @returns {Promise<{ blob: Blob, width: number, height: number, originalSize: number, processedSize: number }>}
+ * @returns {Promise<{ blob: Blob, width: number, height: number, originalSize: number, processedSize: number, skipped?: boolean, reason?: string }>}
  */
 export async function processImage(file, options = {}) {
   const {
@@ -119,6 +119,9 @@ export async function processImage(file, options = {}) {
   canvas.height = targetHeight;
 
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Failed to get canvas 2d context');
+  }
   ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
   // Convert to blob
@@ -153,12 +156,12 @@ export function generateDatePath() {
 }
 
 /**
- * Generate a clean filename from original name
+ * Generate a clean filename from original name for image files
  * @param {string} originalName - Original filename
  * @param {boolean} useWebP - Whether to use .webp extension
  * @returns {string} Sanitized filename
  */
-export function sanitizeFilename(originalName, useWebP = true) {
+export function sanitizeImageFilename(originalName, useWebP = true) {
   // Get base name without extension
   const lastDot = originalName.lastIndexOf('.');
   const baseName = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;

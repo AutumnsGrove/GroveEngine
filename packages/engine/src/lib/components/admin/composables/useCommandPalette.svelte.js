@@ -103,6 +103,7 @@ export function useCommandPalette(options = {}) {
     }
   }
 
+  /** @param {'up' | 'down'} direction */
   function navigate(direction) {
     const filtered = getFilteredCommands();
     const count = filtered.length;
@@ -115,6 +116,7 @@ export function useCommandPalette(options = {}) {
     }
   }
 
+  /** @param {number} index */
   function execute(index) {
     const filtered = getFilteredCommands();
     const cmd = filtered[index];
@@ -125,6 +127,7 @@ export function useCommandPalette(options = {}) {
     return cmd;
   }
 
+  /** @param {string} query */
   function setQuery(query) {
     state.query = query;
     state.selectedIndex = 0;

@@ -48,7 +48,7 @@ export async function createSession(user, secret) {
 export async function verifySession(token, secret) {
   const payload = await verifyJwt(token, secret);
 
-  if (!payload) {
+  if (!payload || !payload.email) {
     return null;
   }
 

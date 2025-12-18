@@ -42,13 +42,13 @@ export function useSnippets() {
   /** @type {Snippet[]} */
   let snippets = $state([]);
 
-  let modal = $state({
+  let modal = $state(/** @type {SnippetModal} */ ({
     open: false,
     editingId: null,
     name: "",
     content: "",
     trigger: "",
-  });
+  }));
 
   function load() {
     try {

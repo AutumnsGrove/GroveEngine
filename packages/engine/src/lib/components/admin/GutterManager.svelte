@@ -417,7 +417,7 @@
 
   {#if itemType === "gallery"}
     <div class="form-group">
-      <label>Gallery Images</label>
+      <div class="gallery-label">Gallery Images</div>
       <div class="gallery-list">
         {#each galleryImages as image, i (i)}
           <div class="gallery-image-item">
@@ -626,43 +626,13 @@
     text-overflow: ellipsis;
   }
 
-  /* Modal Styles */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-  }
-
-  .modal-content {
-    background: #1e1e1e;
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
-    padding: 1.5rem;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  .modal-content h3 {
-    margin: 0 0 1.25rem 0;
-    color: #d4d4d4;
-    font-size: 1.1rem;
-  }
-
+  /* Form Styles */
   .form-group {
     margin-bottom: 1rem;
   }
 
-  .form-group label {
+  .form-group label,
+  .gallery-label {
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
@@ -683,11 +653,6 @@
   .form-input:focus {
     outline: none;
     border-color: #4a7c4a;
-  }
-
-  .form-input.small {
-    padding: 0.35rem 0.5rem;
-    font-size: 0.8rem;
   }
 
   .form-textarea {
@@ -719,23 +684,6 @@
   .anchor-input-row .form-input,
   .url-input-row .form-input {
     flex: 1;
-  }
-
-  .insert-anchor-btn,
-  .browse-btn {
-    padding: 0.5rem 0.75rem;
-    background: #2d4a2d;
-    color: #a8dca8;
-    border: 1px solid #3d5a3d;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  .insert-anchor-btn:hover,
-  .browse-btn:hover {
-    background: #3d5a3d;
   }
 
   .available-anchors {
@@ -837,49 +785,7 @@
     color: #8bc48b;
   }
 
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #3a3a3a;
-  }
-
-  .cancel-btn,
-  .save-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .cancel-btn {
-    background: transparent;
-    border: 1px solid #3a3a3a;
-    color: #9d9d9d;
-  }
-
-  .cancel-btn:hover {
-    background: #3a3a3a;
-  }
-
-  .save-btn {
-    background: #4a7c4a;
-    border: none;
-    color: #c8f0c8;
-  }
-
-  .save-btn:hover {
-    background: #5a9c5a;
-  }
-
-  /* Image Picker Modal */
-  .image-picker-modal {
-    max-width: 700px;
-  }
-
+  /* Image Picker */
   .picker-controls {
     display: flex;
     gap: 0.5rem;
@@ -888,19 +794,6 @@
 
   .picker-controls .form-input {
     flex: 1;
-  }
-
-  .filter-btn {
-    padding: 0.5rem 1rem;
-    background: #3a3a3a;
-    border: none;
-    border-radius: 4px;
-    color: #d4d4d4;
-    cursor: pointer;
-  }
-
-  .filter-btn:hover {
-    background: #4a4a4a;
   }
 
   .image-grid {

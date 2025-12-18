@@ -19,6 +19,7 @@ export async function GET({ platform }) {
       .prepare("SELECT setting_key, setting_value FROM site_settings")
       .all();
 
+    /** @type {Record<string, any>} */
     const settings = {};
     for (const row of result.results) {
       settings[row.setting_key] = row.setting_value;

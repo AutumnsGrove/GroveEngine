@@ -101,7 +101,7 @@ export async function PUT({ request, platform, locals }) {
       updated_at: now,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err instanceof Error && 'status' in err) throw err;
     console.error("Settings update error:", err);
     throw error(500, "Failed to update setting");
   }

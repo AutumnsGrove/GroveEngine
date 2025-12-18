@@ -5,10 +5,14 @@
  * @returns {Function} Debounced function
  */
 export function debounce(fn, delay = 300) {
-	let timeoutId;
+	/** @type {ReturnType<typeof setTimeout> | null} */
+	let timeoutId = null;
 
-	return function (...args) {
-		clearTimeout(timeoutId);
-		timeoutId = setTimeout(() => fn.apply(this, args), delay);
+	return function (/** @type {any[]} */ ...args) {
+		if (timeoutId !== null) {
+			clearTimeout(timeoutId);
+		}
+		const context = this;
+		timeoutId = setTimeout(() => fn.apply(context, args), delay);
 	};
 }

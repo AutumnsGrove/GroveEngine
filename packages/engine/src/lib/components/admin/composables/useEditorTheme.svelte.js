@@ -178,8 +178,8 @@ export function useEditorTheme() {
   function loadTheme() {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
-      if (stored && themes[stored]) {
-        currentTheme = stored;
+      if (stored && themes[/** @type {ThemeName} */ (stored)]) {
+        currentTheme = /** @type {ThemeName} */ (stored);
         applyTheme(stored);
       }
     } catch (e) {
@@ -199,7 +199,7 @@ export function useEditorTheme() {
   /** @param {string} themeName */
   function setTheme(themeName) {
     if (!themes[/** @type {ThemeName} */ (themeName)]) return;
-    currentTheme = themeName;
+    currentTheme = /** @type {ThemeName} */ (themeName);
     applyTheme(themeName);
     saveTheme(themeName);
   }

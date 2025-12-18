@@ -54,7 +54,7 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
   let storedDraft = $state(null);
 
   function saveDraft() {
-    if (!draftKey || readonly) return;
+    if (!draftKey || readonly || !getContent) return;
 
     const content = getContent();
     try {
@@ -110,7 +110,9 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
 
   function discardDraft() {
     clearDraft();
-    lastSavedContent = getContent();
+    if (getContent) {
+      lastSavedContent = getContent();
+    }
   }
 
   /** @param {string} content */

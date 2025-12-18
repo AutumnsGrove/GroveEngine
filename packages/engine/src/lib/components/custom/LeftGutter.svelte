@@ -66,7 +66,7 @@
 			case 'header':
 				// For headers, use the header ID
 				const headerText = anchor.replace(/^#+\s*/, '');
-				const header = headers.find(h => h.text === headerText);
+				const header = headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
 				return header ? `header:${header.id}` : `header:${anchor}`;
 			case 'paragraph':
 				return `paragraph:${parsed.value}`;
@@ -99,7 +99,7 @@
 	 * @returns {GutterItemType[]}
 	 */
 	function getItemsForAnchor(anchor) {
-		return items.filter(item => item.anchor === anchor);
+		return items.filter((/** @type {GutterItemType} */ item) => item.anchor === anchor);
 	}
 
 	/**
@@ -107,12 +107,12 @@
 	 * @returns {GutterItemType[]}
 	 */
 	function getOrphanItems() {
-		return items.filter(item => {
+		return items.filter((/** @type {GutterItemType} */ item) => {
 			if (!item.anchor) return true;
 			const parsed = parseAnchor(item.anchor);
 			if (parsed.type === 'header') {
 				const headerText = item.anchor.replace(/^#+\s*/, '');
-				return !headers.find(h => h.text === headerText);
+				return !headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
 			}
 			// Paragraph and tag anchors are valid if they have values
 			return parsed.type === 'none';
@@ -122,7 +122,7 @@
 	/**
 	 * Find the DOM element for an anchor
 	 * @param {string} anchor
-	 * @returns {Element | null}
+	 * @returns {HTMLElement | null}
 	 */
 	function findAnchorElement(anchor) {
 		const parsed = parseAnchor(anchor);
@@ -132,7 +132,7 @@
 		switch (parsed.type) {
 			case 'header': {
 				const headerText = anchor.replace(/^#+\s*/, '');
-				const header = headers.find(h => h.text === headerText);
+				const header = headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
 				if (header) {
 					return document.getElementById(header.id);
 				}
@@ -143,12 +143,12 @@
 				if (typeof parsed.value !== 'number') return null;
 				const index = parsed.value - 1; // Convert to 0-based index
 				if (index >= 0 && index < paragraphs.length) {
-					return paragraphs[index];
+					return /** @type {HTMLElement} */ (paragraphs[index]);
 				}
 				return null;
 			}
 			case 'tag': {
-				return contentEl.querySelector(`[data-anchor="${parsed.value}"]`);
+				return /** @type {HTMLElement | null} */ (contentEl.querySelector(`[data-anchor="${parsed.value}"]`));
 			}
 			default:
 				return null;
@@ -166,6 +166,7 @@
 		const bottomPadding = 32; // Padding from bottom of content
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
+		/** @type {string[]} */
 		const newOverflowingAnchors = [];
 
 		// Get all unique anchors that have items
@@ -182,7 +183,7 @@
 			};
 		}).sort((/** @type {{ top: number }} */ a, /** @type {{ top: number }} */ b) => a.top - b.top);
 
-		anchorPositions.forEach((/** @type {{ anchor: string; key: string; element: Element | null; top: number }} */ { anchor, key, element }) => {
+		anchorPositions.forEach((/** @type {{ anchor: string; key: string; element: HTMLElement | null; top: number }} */ { anchor, key, element }) => {
 			const groupEl = anchorGroupElements[key];
 
 			if (element && groupEl) {

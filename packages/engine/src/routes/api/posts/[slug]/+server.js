@@ -41,7 +41,7 @@ export async function GET({ params, platform, locals }) {
           source: "d1",
           post: {
             ...post,
-            tags: post.tags ? JSON.parse(post.tags) : [],
+            tags: post.tags && typeof post.tags === 'string' ? JSON.parse(post.tags) : [],
           },
         });
       }
