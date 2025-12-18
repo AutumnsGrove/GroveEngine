@@ -50,6 +50,40 @@
 			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-pink-500' }
 		];
 	}
+
+	// Calculate TypeScript percentage for a snapshot (TS vs JS only)
+	function getTsPercentage(snapshot: any): number {
+		const scriptLines = snapshot.tsLines + snapshot.jsLines;
+		if (scriptLines === 0) return 0;
+		return Math.round((snapshot.tsLines / scriptLines) * 100);
+	}
+
+	// Get max doc words for chart scaling
+	const maxDocWords = $derived(
+		data.snapshots.length > 0
+			? Math.max(...data.snapshots.map((s: any) => s.docWords))
+			: 0
+	);
+
+	// Calculate code-to-docs ratio (lines of code per 100 words of docs)
+	function getCodeToDocsRatio(snapshot: any): number {
+		if (snapshot.docWords === 0) return 0;
+		return Math.round((snapshot.totalCodeLines / snapshot.docWords) * 100) / 100;
+	}
+
+	// Get first and latest TS percentages for migration stats
+	const tsProgression = $derived(() => {
+		if (data.snapshots.length < 2) return null;
+		const first = data.snapshots[0];
+		const latest = data.snapshots[data.snapshots.length - 1];
+		return {
+			startPct: getTsPercentage(first),
+			currentPct: getTsPercentage(latest),
+			startLabel: first.label,
+			currentLabel: latest.label,
+			growth: getTsPercentage(latest) - getTsPercentage(first)
+		};
+	});
 </script>
 
 <svelte:head>
@@ -159,6 +193,132 @@
 					</div>
 				</div>
 			</section>
+
+			<!-- TypeScript Migration Progress -->
+			{#if tsProgression()}
+			<section class="mb-16">
+				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">TypeScript Migration</h2>
+
+				<div class="card p-6">
+					<!-- Summary stats -->
+					<div class="flex justify-between items-center mb-6">
+						<div class="text-center">
+							<div class="text-2xl font-mono text-yellow-500">{tsProgression()?.startPct}%</div>
+							<div class="text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
+						</div>
+						<div class="flex-1 mx-6 flex items-center gap-2">
+							<div class="flex-1 h-px bg-divider"></div>
+							<div class="text-accent-muted font-mono text-sm">+{tsProgression()?.growth}%</div>
+							<div class="flex-1 h-px bg-divider"></div>
+						</div>
+						<div class="text-center">
+							<div class="text-2xl font-mono text-blue-500">{tsProgression()?.currentPct}%</div>
+							<div class="text-xs text-foreground-faint font-sans">{tsProgression()?.currentLabel}</div>
+						</div>
+					</div>
+
+					<!-- Progress bar timeline -->
+					<div class="space-y-2">
+						{#each data.snapshots as snapshot, i}
+							{@const tsPct = getTsPercentage(snapshot)}
+							<div class="flex items-center gap-3">
+								<div class="w-16 text-right">
+									<span class="text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+								</div>
+								<div class="flex-1 h-4 bg-surface rounded-full overflow-hidden flex">
+									<div
+										class="h-full bg-blue-500 transition-all duration-500"
+										style="width: {tsPct}%"
+										title="TypeScript: {tsPct}%"
+									></div>
+									<div
+										class="h-full bg-yellow-500 transition-all duration-500"
+										style="width: {100 - tsPct}%"
+										title="JavaScript: {100 - tsPct}%"
+									></div>
+								</div>
+								<div class="w-12 text-left">
+									<span class="text-xs font-mono text-blue-400">{tsPct}%</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+
+					<!-- Legend -->
+					<div class="flex justify-center gap-6 mt-4 pt-4 border-t border-default">
+						<div class="flex items-center gap-2">
+							<div class="w-3 h-3 rounded-full bg-blue-500"></div>
+							<span class="text-xs font-sans text-foreground-muted">TypeScript</span>
+						</div>
+						<div class="flex items-center gap-2">
+							<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+							<span class="text-xs font-sans text-foreground-muted">JavaScript</span>
+						</div>
+					</div>
+				</div>
+			</section>
+			{/if}
+
+			<!-- Documentation Growth -->
+			{#if data.snapshots.length > 1}
+			<section class="mb-16">
+				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Documentation</h2>
+
+				<div class="grid md:grid-cols-2 gap-6">
+					<!-- Code to Docs Ratio Card -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								{getCodeToDocsRatio(data.latest)}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">lines of code per doc word</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>{formatNumber(data.latest.totalCodeLines)} lines</span>
+							<span>{formatNumber(data.latest.docWords)} words</span>
+						</div>
+					</div>
+
+					<!-- Doc Pages Estimate -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								~{Math.round(data.latest.docWords / 500)}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">pages of documentation</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>{formatNumber(data.latest.docLines)} lines</span>
+							<span>~500 words/page</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Docs growth over time -->
+				<div class="card p-6 mt-6">
+					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Documentation Growth</h3>
+					<div class="space-y-2">
+						{#each data.snapshots as snapshot, i}
+							{@const barWidth = (snapshot.docWords / maxDocWords) * 100}
+							<div class="flex items-center gap-3">
+								<div class="w-16 text-right">
+									<span class="text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+								</div>
+								<div class="flex-1 h-4 bg-surface rounded-full overflow-hidden">
+									<div
+										class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+										style="width: {barWidth}%"
+									></div>
+								</div>
+								<div class="w-16 text-left">
+									<span class="text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docWords)}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</section>
+			{/if}
 
 			<!-- Token Estimation -->
 			<section class="mb-16">
