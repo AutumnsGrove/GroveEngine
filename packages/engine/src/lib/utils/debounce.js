@@ -1,18 +1,18 @@
 /**
  * Debounce function calls
- * @param {Function} fn - Function to debounce
+ * @template {(...args: any[]) => any} T
+ * @param {T} fn - Function to debounce
  * @param {number} delay - Delay in milliseconds
- * @returns {Function} Debounced function
+ * @returns {(...args: Parameters<T>) => void} Debounced function
  */
 export function debounce(fn, delay = 300) {
 	/** @type {ReturnType<typeof setTimeout> | null} */
 	let timeoutId = null;
 
-	return function (/** @type {any[]} */ ...args) {
+	return (/** @type {Parameters<T>} */ ...args) => {
 		if (timeoutId !== null) {
 			clearTimeout(timeoutId);
 		}
-		const context = this;
-		timeoutId = setTimeout(() => fn.apply(context, args), delay);
+		timeoutId = setTimeout(() => fn(...args), delay);
 	};
 }

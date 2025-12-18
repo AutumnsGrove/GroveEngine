@@ -71,7 +71,7 @@
 </script>
 
 <ShadcnButton
-	bind:this={ref}
+	bind:ref={ref}
 	variant={shadcnVariant}
 	size={shadcnSize}
 	disabled={disabled}

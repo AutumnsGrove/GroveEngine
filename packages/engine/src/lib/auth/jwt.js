@@ -100,8 +100,8 @@ export async function verifyJwt(token, secret) {
     const isValid = await crypto.subtle.verify(
       "HMAC",
       key,
-      signature.buffer,
-      encoder.encode(message).buffer,
+      signature,
+      encoder.encode(message),
     );
 
     if (!isValid) {

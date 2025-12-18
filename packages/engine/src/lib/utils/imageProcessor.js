@@ -69,15 +69,30 @@ function getMaxDimensionForQuality(quality) {
 }
 
 /**
+ * @typedef {Object} ProcessedImageResult
+ * @property {Blob} blob - Processed image blob
+ * @property {number} width - Image width
+ * @property {number} height - Image height
+ * @property {number} originalSize - Original file size
+ * @property {number} processedSize - Processed file size
+ * @property {boolean} [skipped] - Whether processing was skipped
+ * @property {string} [reason] - Reason for skipping
+ */
+
+/**
+ * @typedef {Object} ProcessImageOptions
+ * @property {number} [quality] - Quality 0-100 (default 80)
+ * @property {boolean} [convertToWebP] - Convert to WebP format (default true)
+ * @property {boolean} [fullResolution] - Skip resizing (default false)
+ */
+
+/**
  * Process an image: convert to WebP, adjust quality, strip EXIF
  * Drawing to canvas automatically strips EXIF data including GPS
  *
  * @param {File} file - Original image file
- * @param {Object} options - Processing options
- * @param {number} options.quality - Quality 0-100 (default 80)
- * @param {boolean} options.convertToWebP - Convert to WebP format (default true)
- * @param {boolean} options.fullResolution - Skip resizing (default false)
- * @returns {Promise<{ blob: Blob, width: number, height: number, originalSize: number, processedSize: number, skipped?: boolean, reason?: string }>}
+ * @param {ProcessImageOptions} options - Processing options
+ * @returns {Promise<ProcessedImageResult>}
  */
 export async function processImage(file, options = {}) {
   const {
@@ -128,8 +143,11 @@ export async function processImage(file, options = {}) {
   const mimeType = convertToWebP ? 'image/webp' : file.type;
   const qualityDecimal = quality / 100;
 
-  const blob = await new Promise((resolve) => {
-    canvas.toBlob(resolve, mimeType, qualityDecimal);
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (b) resolve(b);
+      else reject(new Error('Failed to create blob'));
+    }, mimeType, qualityDecimal);
   });
 
   return {
@@ -137,7 +155,7 @@ export async function processImage(file, options = {}) {
     width: targetWidth,
     height: targetHeight,
     originalSize,
-    processedSize: blob.size,
+    processedSize: /** @type {Blob} */ (blob).size,
     skipped: false
   };
 }

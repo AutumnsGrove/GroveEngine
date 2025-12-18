@@ -69,7 +69,7 @@
 	{/if}
 
 	<ShadcnInput
-		bind:this={ref}
+		bind:ref={ref}
 		bind:value
 		{type}
 		{placeholder}

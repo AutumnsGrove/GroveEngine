@@ -48,7 +48,7 @@ export async function apiRequest(url, options = {}) {
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
   /** @type {Record<string, string>} */
   const headers = {
-    ...options.headers,
+    ...(/** @type {Record<string, string>} */ (options.headers || {})),
   };
 
   // Only add Content-Type if not FormData
