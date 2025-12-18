@@ -185,8 +185,9 @@
 							{#each data.snapshots as snapshot, i}
 								{@const barWidth = (snapshot.totalCodeLines / maxCodeLines) * 100}
 								<div class="flex items-center gap-4">
-									<div class="w-24 text-right">
+									<div class="w-32 text-right flex flex-col">
 										<span class="text-xs font-sans text-foreground-faint">{snapshot.date}</span>
+										<span class="text-xs font-mono text-accent-muted">{snapshot.label}</span>
 									</div>
 									<div class="flex-1 h-6 bg-surface rounded-full overflow-hidden">
 										<div
