@@ -1,8 +1,11 @@
 /**
- * OAuth Login - Start authentication flow via Heartwood (GroveAuth)
+ * OAuth Login Start - Initiate authentication flow via Heartwood (GroveAuth)
  *
- * Redirects to GroveAuth with PKCE for secure authentication.
- * After auth, user returns to /auth/callback which sets session cookies.
+ * This route exists separately from the login page to avoid SvelteKit's
+ * routing conflict where +page.svelte takes precedence over +server.ts
+ * for GET requests to the same path.
+ *
+ * Flow: /auth/login (page) -> /auth/login/start (this) -> GroveAuth -> /auth/callback
  */
 
 import { redirect } from "@sveltejs/kit";

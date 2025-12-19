@@ -1,8 +1,8 @@
 /**
  * OAuth Callback - Handle GroveAuth (Heartwood) authentication response
  *
- * Exchanges the authorization code for tokens and sets session cookies
- * for the current tenant subdomain.
+ * Exchanges the authorization code for tokens, fetches user info,
+ * upserts user into D1, and sets session cookies.
  */
 
 import { redirect } from "@sveltejs/kit";
@@ -23,6 +23,16 @@ interface TokenResponse {
 interface ErrorResponse {
   error?: string;
   error_description?: string;
+}
+
+/**
+ * User info response from GroveAuth /userinfo endpoint
+ */
+interface UserInfoResponse {
+  sub: string;           // GroveAuth user ID
+  email: string;         // User's email
+  name?: string;         // Display name
+  picture?: string;      // Avatar URL
 }
 
 /**
@@ -130,6 +140,49 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     }
 
     const tokens = await tokenResponse.json() as TokenResponse;
+
+    // Fetch user info from GroveAuth
+    let userInfo: UserInfoResponse | null = null;
+    try {
+      const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+        },
+      });
+
+      if (userInfoResponse.ok) {
+        userInfo = await userInfoResponse.json() as UserInfoResponse;
+      } else {
+        console.warn("[Auth Callback] Failed to fetch user info:", userInfoResponse.status);
+      }
+    } catch (userInfoErr) {
+      console.warn("[Auth Callback] Error fetching user info:", userInfoErr);
+    }
+
+    // Upsert user into D1 if we have user info and database access
+    if (userInfo && platform?.env?.DB) {
+      try {
+        const userId = crypto.randomUUID();
+        await platform.env.DB.prepare(`
+          INSERT INTO users (id, groveauth_id, email, display_name, avatar_url, last_login_at, login_count, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, unixepoch(), 1, unixepoch(), unixepoch())
+          ON CONFLICT (groveauth_id) DO UPDATE SET
+            email = excluded.email,
+            display_name = excluded.display_name,
+            avatar_url = excluded.avatar_url,
+            last_login_at = unixepoch(),
+            login_count = login_count + 1,
+            updated_at = unixepoch()
+        `)
+          .bind(userId, userInfo.sub, userInfo.email, userInfo.name || null, userInfo.picture || null)
+          .run();
+
+        console.log("[Auth Callback] User upserted:", userInfo.email);
+      } catch (dbErr) {
+        // Log but don't fail auth - user can still proceed
+        console.error("[Auth Callback] Failed to upsert user:", dbErr);
+      }
+    }
 
     // Determine if we're in production
     const isProduction =

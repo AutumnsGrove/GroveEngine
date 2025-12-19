@@ -113,6 +113,17 @@
 | Register `groveengine` client in GroveAuth | ✓ |
 | Add all tenant subdomains to redirect URIs | ✓ |
 
+### Auth Bug Fix & User Registration (2025-12-19)
+> **Status:** ✅ Complete - Login button now works, users stored in D1
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Fix login button doing nothing | ✓ | Moved OAuth to `/auth/login/start/+server.ts` |
+| Create users table migration | ✓ | `migrations/013_users.sql` |
+| Update callback to insert users | ✓ | Fetches `/userinfo`, UPSERTs to D1 |
+| Add `getUserFromSession()` helper | ✓ | In `src/lib/server/services/users.ts` |
+| Export user utilities | ✓ | From `@autumnsgrove/groveengine/services` |
+
 ---
 
 ## Phase 3: Grove Website
