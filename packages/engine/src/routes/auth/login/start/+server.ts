@@ -6,6 +6,11 @@
  * for GET requests to the same path.
  *
  * Flow: /auth/login (page) -> /auth/login/start (this) -> GroveAuth -> /auth/callback
+ *
+ * URL Configuration:
+ * - GROVEAUTH_URL: User-facing login page (e.g., https://auth.grove.place)
+ * - GROVEAUTH_API_URL: API endpoints for token/userinfo (used in callback)
+ * These may be different domains. This route uses GROVEAUTH_URL for the redirect.
  */
 
 import { redirect } from "@sveltejs/kit";

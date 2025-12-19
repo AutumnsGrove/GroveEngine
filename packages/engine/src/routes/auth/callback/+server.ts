@@ -3,10 +3,34 @@
  *
  * Exchanges the authorization code for tokens, fetches user info,
  * upserts user into D1, and sets session cookies.
+ *
+ * Note: This uses GROVEAUTH_API_URL for API calls (token, userinfo).
+ * The login redirect in /auth/login/start uses GROVEAUTH_URL for the user-facing login page.
+ * These may be different domains (e.g., auth.grove.place vs auth-api.grove.place).
  */
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Session cookie duration: 30 days */
+const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 30;
+
+/** Default access token duration: 1 hour */
+const DEFAULT_ACCESS_TOKEN_DURATION = 3600;
+
+/** Auth state cookie duration: 10 minutes (for PKCE flow) */
+const AUTH_STATE_DURATION_SECONDS = 60 * 10;
+
+/** Grove platform domain for cross-subdomain cookies */
+const GROVE_PLATFORM_DOMAIN = ".grove.place";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 /**
  * OAuth token response from GroveAuth
@@ -27,12 +51,28 @@ interface ErrorResponse {
 
 /**
  * User info response from GroveAuth /userinfo endpoint
+ *
+ * Note: We trust this response because it comes directly from our auth server
+ * over HTTPS. Runtime validation is omitted for performance.
  */
 interface UserInfoResponse {
   sub: string;           // GroveAuth user ID
   email: string;         // User's email
   name?: string;         // Display name
   picture?: string;      // Avatar URL
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * Extract username from email for display name fallback
+ */
+function getDisplayNameFromEmail(email: string): string {
+  const username = email.split("@")[0];
+  // Capitalize first letter
+  return username.charAt(0).toUpperCase() + username.slice(1);
 }
 
 /**
@@ -100,14 +140,17 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   cookies.delete("auth_return_to", { path: "/" });
 
   try {
-    const authBaseUrl =
-      platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+    // Use GROVEAUTH_API_URL for API calls, falling back to GROVEAUTH_URL for backwards compatibility
+    const authApiUrl =
+      platform?.env?.GROVEAUTH_API_URL ||
+      platform?.env?.GROVEAUTH_URL ||
+      "https://auth-api.grove.place";
     const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
     const clientSecret = platform?.env?.GROVEAUTH_CLIENT_SECRET || "";
     const redirectUri = `${url.origin}/auth/callback`;
 
     // Exchange code for tokens
-    const tokenResponse = await fetch(`${authBaseUrl}/token`, {
+    const tokenResponse = await fetch(`${authApiUrl}/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -127,7 +170,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
         error: errorData,
-        authBaseUrl,
+        authApiUrl,
         clientId,
         hasSecret: !!clientSecret,
         redirectUri,
@@ -144,7 +187,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     // Fetch user info from GroveAuth
     let userInfo: UserInfoResponse | null = null;
     try {
-      const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
+      const userInfoResponse = await fetch(`${authApiUrl}/userinfo`, {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
         },
@@ -153,16 +196,28 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       if (userInfoResponse.ok) {
         userInfo = await userInfoResponse.json() as UserInfoResponse;
       } else {
-        console.warn("[Auth Callback] Failed to fetch user info:", userInfoResponse.status);
+        console.warn("[Auth Callback] Failed to fetch user info:", {
+          status: userInfoResponse.status,
+          authApiUrl,
+        });
       }
     } catch (userInfoErr) {
-      console.warn("[Auth Callback] Error fetching user info:", userInfoErr);
+      console.warn("[Auth Callback] Error fetching user info:", {
+        error: userInfoErr instanceof Error ? userInfoErr.message : "Unknown error",
+        authApiUrl,
+      });
     }
 
     // Upsert user into D1 if we have user info and database access
+    // Note: Auth succeeds even if DB insert fails - user can still proceed.
+    // The ON CONFLICT clause handles race conditions where multiple requests
+    // try to create the same user simultaneously.
     if (userInfo && platform?.env?.DB) {
       try {
         const userId = crypto.randomUUID();
+        // Use display name from GroveAuth, or fall back to email username for better UX
+        const displayName = userInfo.name || getDisplayNameFromEmail(userInfo.email);
+
         await platform.env.DB.prepare(`
           INSERT INTO users (id, groveauth_id, email, display_name, avatar_url, last_login_at, login_count, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, unixepoch(), 1, unixepoch(), unixepoch())
@@ -174,13 +229,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
             login_count = login_count + 1,
             updated_at = unixepoch()
         `)
-          .bind(userId, userInfo.sub, userInfo.email, userInfo.name || null, userInfo.picture || null)
+          .bind(userId, userInfo.sub, userInfo.email, displayName, userInfo.picture || null)
           .run();
 
         console.log("[Auth Callback] User upserted:", userInfo.email);
       } catch (dbErr) {
-        // Log but don't fail auth - user can still proceed
-        console.error("[Auth Callback] Failed to upsert user:", dbErr);
+        // Log with structured data for debugging, but don't fail auth
+        // User can still proceed - they'll be created on next login
+        console.error("[Auth Callback] Failed to upsert user:", {
+          error: dbErr instanceof Error ? dbErr.message : "Unknown error",
+          groveauth_id: userInfo.sub,
+          email: userInfo.email,
+        });
       }
     }
 
@@ -188,26 +248,31 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     const isProduction =
       url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
 
-    // Set cookies - use .grove.place domain in production for cross-subdomain access
+    // Only set cross-subdomain cookie if we're actually on grove.place
+    // This prevents issues on staging, test, or other deployments
+    const isGrovePlatform = url.hostname.endsWith("grove.place");
+    const cookieDomain = isProduction && isGrovePlatform ? GROVE_PLATFORM_DOMAIN : undefined;
+
+    // Set cookies - use .grove.place domain for cross-subdomain access on platform
     const cookieOptions = {
       path: "/",
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax" as const,
-      ...(isProduction ? { domain: ".grove.place" } : {}),
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
     // Set access token (used for API calls and session verification)
     cookies.set("access_token", tokens.access_token, {
       ...cookieOptions,
-      maxAge: tokens.expires_in || 3600, // Default 1 hour
+      maxAge: tokens.expires_in || DEFAULT_ACCESS_TOKEN_DURATION,
     });
 
     // Set refresh token if provided
     if (tokens.refresh_token) {
       cookies.set("refresh_token", tokens.refresh_token, {
         ...cookieOptions,
-        maxAge: 60 * 60 * 24 * 30, // 30 days
+        maxAge: SESSION_DURATION_SECONDS,
       });
     }
 
@@ -215,7 +280,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     const sessionId = crypto.randomUUID();
     cookies.set("session", sessionId, {
       ...cookieOptions,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: SESSION_DURATION_SECONDS,
     });
 
     // Redirect to the requested destination

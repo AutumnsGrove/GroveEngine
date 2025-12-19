@@ -2,6 +2,9 @@
 -- Database: D1 (SQLite) - grove-engine-db
 -- Run with: wrangler d1 execute grove-engine-db --file=migrations/013_users.sql --remote
 --
+-- DEPENDENCIES: This migration requires the tenants table to exist.
+-- Run order: Must run AFTER 009_create_tenants_only.sql
+--
 -- This migration creates the users table for storing authenticated users.
 -- Different from user_onboarding (signup flow) - this tracks users who have
 -- completed auth and may access tenant admin panels.

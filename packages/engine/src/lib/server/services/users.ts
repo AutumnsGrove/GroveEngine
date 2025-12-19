@@ -130,6 +130,13 @@ export async function getUserFromSession(
 		});
 
 		if (!response.ok) {
+			// Don't log 401s as errors - they're expected for expired tokens
+			if (response.status !== 401) {
+				console.warn('[User Service] GroveAuth returned non-OK status:', {
+					status: response.status,
+					authBaseUrl
+				});
+			}
 			return null;
 		}
 
@@ -144,7 +151,12 @@ export async function getUserFromSession(
 		}
 
 		return user;
-	} catch {
+	} catch (error) {
+		// Log auth failures for security monitoring and debugging
+		console.error('[User Service] Session validation failed:', {
+			error: error instanceof Error ? error.message : 'Unknown error',
+			authBaseUrl
+		});
 		return null;
 	}
 }
