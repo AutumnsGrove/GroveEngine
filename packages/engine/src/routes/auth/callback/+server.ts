@@ -29,6 +29,32 @@ const AUTH_STATE_DURATION_SECONDS = 60 * 10;
 const GROVE_PLATFORM_DOMAIN = ".grove.place";
 
 // ============================================================================
+// Auth Configuration
+// ============================================================================
+
+interface AuthConfig {
+  apiUrl: string;
+  clientId: string;
+  clientSecret: string;
+}
+
+/**
+ * Get typed auth configuration from platform environment
+ * Provides consistent defaults and type safety for auth-related env vars
+ */
+function getAuthConfig(platform: App.Platform | undefined): AuthConfig {
+  return {
+    // API URL for token/userinfo endpoints (may differ from user-facing login URL)
+    apiUrl:
+      platform?.env?.GROVEAUTH_API_URL ||
+      platform?.env?.GROVEAUTH_URL ||
+      "https://auth-api.grove.place",
+    clientId: platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine",
+    clientSecret: platform?.env?.GROVEAUTH_CLIENT_SECRET || "",
+  };
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -68,11 +94,20 @@ interface UserInfoResponse {
 
 /**
  * Extract username from email for display name fallback
+ * Handles common email separators (., _, -) and capitalizes each word
+ *
+ * @example
+ * john.smith@example.com → "John Smith"
+ * john_doe@example.com → "John Doe"
+ * jane-doe@example.com → "Jane Doe"
  */
 function getDisplayNameFromEmail(email: string): string {
   const username = email.split("@")[0];
-  // Capitalize first letter
-  return username.charAt(0).toUpperCase() + username.slice(1);
+  // Split on common separators and capitalize each word
+  return username
+    .split(/[._-]/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 /**
@@ -140,17 +175,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   cookies.delete("auth_return_to", { path: "/" });
 
   try {
-    // Use GROVEAUTH_API_URL for API calls, falling back to GROVEAUTH_URL for backwards compatibility
-    const authApiUrl =
-      platform?.env?.GROVEAUTH_API_URL ||
-      platform?.env?.GROVEAUTH_URL ||
-      "https://auth-api.grove.place";
-    const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
-    const clientSecret = platform?.env?.GROVEAUTH_CLIENT_SECRET || "";
+    // Get typed auth configuration
+    const authConfig = getAuthConfig(platform);
     const redirectUri = `${url.origin}/auth/callback`;
 
     // Exchange code for tokens
-    const tokenResponse = await fetch(`${authApiUrl}/token`, {
+    const tokenResponse = await fetch(`${authConfig.apiUrl}/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -159,8 +189,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
         grant_type: "authorization_code",
         code,
         redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
+        client_id: authConfig.clientId,
+        client_secret: authConfig.clientSecret,
         code_verifier: codeVerifier,
       }),
     });
@@ -170,9 +200,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
         error: errorData,
-        authApiUrl,
-        clientId,
-        hasSecret: !!clientSecret,
+        authApiUrl: authConfig.apiUrl,
+        clientId: authConfig.clientId,
+        hasSecret: !!authConfig.clientSecret,
         redirectUri,
       });
       const debugError =
@@ -187,7 +217,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     // Fetch user info from GroveAuth
     let userInfo: UserInfoResponse | null = null;
     try {
-      const userInfoResponse = await fetch(`${authApiUrl}/userinfo`, {
+      const userInfoResponse = await fetch(`${authConfig.apiUrl}/userinfo`, {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
         },
@@ -198,13 +228,13 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       } else {
         console.warn("[Auth Callback] Failed to fetch user info:", {
           status: userInfoResponse.status,
-          authApiUrl,
+          authApiUrl: authConfig.apiUrl,
         });
       }
     } catch (userInfoErr) {
       console.warn("[Auth Callback] Error fetching user info:", {
         error: userInfoErr instanceof Error ? userInfoErr.message : "Unknown error",
-        authApiUrl,
+        authApiUrl: authConfig.apiUrl,
       });
     }
 
