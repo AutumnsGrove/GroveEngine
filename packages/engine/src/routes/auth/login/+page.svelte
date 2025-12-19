@@ -18,8 +18,9 @@
 
   function handleLogin() {
     loading = true;
-    // Redirect to OAuth login route - it will handle the PKCE flow
-    window.location.href = '/auth/login';
+    // Redirect to OAuth login start route - it will handle the PKCE flow
+    // Uses /start subroute to avoid SvelteKit routing conflict with this page
+    window.location.href = '/auth/login/start';
   }
 </script>
 

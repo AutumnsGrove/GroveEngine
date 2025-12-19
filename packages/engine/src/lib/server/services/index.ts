@@ -129,3 +129,26 @@ export {
 	// Constants
 	CACHE_DEFAULTS
 } from './cache.js';
+
+// ============================================================================
+// Users Service (D1)
+// ============================================================================
+
+export * as users from './users.js';
+export {
+	// Types
+	type User,
+	// Query Functions
+	getUserByGroveAuthId,
+	getUserById,
+	getUserByEmail,
+	getUserByTenantId,
+	// Session Functions
+	getUserFromSession,
+	getUserFromValidatedSession,
+	// Update Functions
+	linkUserToTenant,
+	updateUserDisplayName,
+	deactivateUser,
+	reactivateUser
+} from './users.js';

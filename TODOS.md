@@ -34,26 +34,18 @@
 
 ## Phase 2: Multi-tenant Infrastructure
 
-### User Registration to D1
-> **Issue:** Auth callback exchanges tokens but never inserts users into D1.
-> **Impact:** Can't store user preferences, track subscriptions, or associate content with users.
->
-> **Implementation:**
-> - [ ] Create `users` table migration (id, groveauth_id, email, display_name, created_at, etc.)
-> - [ ] In `/auth/callback/+server.ts`, after token exchange:
->   - Fetch user info from GroveAuth `/userinfo` endpoint
->   - UPSERT user into D1 (create if new, update if existing)
->   - Link user to tenant (for multi-tenant isolation)
-> - [ ] Add `getUserFromSession()` helper for routes needing user data
+### User Registration to D1 ✅
+> **Status:** COMPLETED (2025-12-19)
+> - Created `migrations/013_users.sql` with users table
+> - Updated `/auth/callback/+server.ts` to fetch userinfo and UPSERT user
+> - Added `getUserFromSession()` and related helpers in `src/lib/server/services/users.ts`
+> - Exported from `@autumnsgrove/groveengine/services`
 
-### Auth Bug - Login Button Does Nothing
-> **Issue:** On tenant admin pages (e.g., `dave.grove.place/auth/login`), clicking "Sign in with Grove" does nothing.
-> **Root Cause:** Both `+page.svelte` and `+server.ts` exist at `/auth/login`. SvelteKit serves the page component instead of hitting the server route that initiates OAuth.
->
-> **Fix Options:**
-> - [ ] Move OAuth initiation to `/auth/login/start/+server.ts` and update button to link there
-> - [ ] Or use `<a href="/auth/login" data-sveltekit-reload>` to force server request
-> - [ ] Or rename server route to `/auth/oauth/+server.ts`
+### Auth Bug - Login Button Does Nothing ✅
+> **Status:** FIXED (2025-12-19)
+> - Moved OAuth initiation to `/auth/login/start/+server.ts`
+> - Updated `+page.svelte` to redirect to `/auth/login/start`
+> - Removed conflicting `/auth/login/+server.ts`
 
 - [x] Build tenant onboarding flow → **DEPLOYED**: `plant.grove.place`
   - ✅ Signup: name, username (=subdomain), verified email, favorite color, interests
