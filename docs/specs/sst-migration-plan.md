@@ -1,9 +1,10 @@
 # SST Migration Plan for GroveEngine
 
-> **Status:** Draft - Pending Review
+> **Status:** In Progress - Phases 1 & 2
 > **Created:** 2025-12-20
 > **Updated:** 2025-12-20
 > **Scope:** Migrate GroveEngine to SST for unified infrastructure management
+> **Branch:** `claude/review-sst-spec-jWl03`
 
 ---
 
@@ -207,23 +208,65 @@ const evergreen = new stripe.Product("Evergreen", {
   description: "Enterprise features",
 });
 
-// Prices
+// Prices (from docs/internal/pricing-discussions.md)
+// Monthly prices + Yearly at 15% discount
 const prices = {
   seedling: {
     monthly: new stripe.Price("SeedlingMonthly", {
       product: seedling.id,
       currency: "usd",
-      unitAmount: 800,
+      unitAmount: 800,  // $8/month
       recurring: { interval: "month" },
     }),
     yearly: new stripe.Price("SeedlingYearly", {
       product: seedling.id,
       currency: "usd",
-      unitAmount: 8160,
+      unitAmount: 8200,  // $82/year (15% off)
       recurring: { interval: "year" },
     }),
   },
-  // ... sapling, oak, evergreen
+  sapling: {
+    monthly: new stripe.Price("SaplingMonthly", {
+      product: sapling.id,
+      currency: "usd",
+      unitAmount: 1200,  // $12/month
+      recurring: { interval: "month" },
+    }),
+    yearly: new stripe.Price("SaplingYearly", {
+      product: sapling.id,
+      currency: "usd",
+      unitAmount: 12200,  // $122/year (15% off)
+      recurring: { interval: "year" },
+    }),
+  },
+  oak: {
+    monthly: new stripe.Price("OakMonthly", {
+      product: oak.id,
+      currency: "usd",
+      unitAmount: 2500,  // $25/month
+      recurring: { interval: "month" },
+    }),
+    yearly: new stripe.Price("OakYearly", {
+      product: oak.id,
+      currency: "usd",
+      unitAmount: 25500,  // $255/year (15% off)
+      recurring: { interval: "year" },
+    }),
+  },
+  evergreen: {
+    monthly: new stripe.Price("EvergreenMonthly", {
+      product: evergreen.id,
+      currency: "usd",
+      unitAmount: 3500,  // $35/month
+      recurring: { interval: "month" },
+    }),
+    yearly: new stripe.Price("EvergreenYearly", {
+      product: evergreen.id,
+      currency: "usd",
+      unitAmount: 35700,  // $357/year (15% off)
+      recurring: { interval: "year" },
+    }),
+  },
 };
 ```
 
@@ -601,6 +644,288 @@ Update `package.json` scripts across all packages:
 Delete from engine:
 - `plant/src/lib/server/stripe.ts` STRIPE_PRICES constants
 - Manual webhook verification (SST handles this)
+
+---
+
+## Implementation Guide: Phases 1 & 2
+
+> **Approach:** Migrate slowly, test at each step, keep wrangler.toml files as fallback.
+
+### Step 1: Initialize SST (Foundation)
+
+```bash
+# From monorepo root
+pnpm add sst@latest --save-dev -w
+
+# Initialize SST
+npx sst init
+```
+
+This creates:
+- `sst.config.ts` - Main config file
+- `.sst/` directory (add to .gitignore)
+
+### Step 2: Add Providers
+
+```bash
+npx sst add cloudflare
+npx sst add stripe
+```
+
+### Step 3: Create Base sst.config.ts
+
+```typescript
+/// <reference path="./.sst/platform/config.d.ts" />
+
+export default $config({
+  app(input) {
+    return {
+      name: "grove",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      home: "cloudflare",
+      providers: {
+        cloudflare: true,
+        stripe: {
+          // Test keys for dev/PR, live keys for production
+          apiKey: input?.stage === "production"
+            ? process.env.STRIPE_SECRET_KEY
+            : process.env.STRIPE_TEST_SECRET_KEY,
+        },
+      },
+    };
+  },
+  async run() {
+    const stage = $app.stage;
+    const isProd = stage === "production";
+
+    // =========================================================================
+    // PHASE 1: Import existing Cloudflare resources (NO data loss!)
+    // =========================================================================
+
+    // Import existing D1 database
+    const db = sst.cloudflare.D1.get(
+      "GroveDB",
+      "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+    );
+
+    // Import existing KV namespace
+    const cache = sst.cloudflare.Kv.get(
+      "GroveCache",
+      "514e91e81cc44d128a82ec6f668303e4"
+    );
+
+    // Import existing R2 bucket
+    const media = sst.cloudflare.R2.get("GroveMedia", "grove-media");
+
+    // =========================================================================
+    // PHASE 2: Stripe Products & Prices (greenfield)
+    // =========================================================================
+
+    // --- Products ---
+    const seedlingProduct = new stripe.Product("Seedling", {
+      name: "Seedling Plan",
+      description: "Perfect for personal blogs. 50 posts, 1GB storage.",
+    });
+
+    const saplingProduct = new stripe.Product("Sapling", {
+      name: "Sapling Plan",
+      description: "For growing communities. 250 posts, 5GB storage.",
+    });
+
+    const oakProduct = new stripe.Product("Oak", {
+      name: "Oak Plan",
+      description: "Professional publishing. Unlimited posts, 20GB, BYOD.",
+    });
+
+    const evergreenProduct = new stripe.Product("Evergreen", {
+      name: "Evergreen Plan",
+      description: "Full-service. Unlimited posts, 100GB, domain included.",
+    });
+
+    // --- Prices (monthly + yearly at 15% off) ---
+    const seedlingMonthly = new stripe.Price("SeedlingMonthly", {
+      product: seedlingProduct.id,
+      currency: "usd",
+      unitAmount: 800,  // $8/month
+      recurring: { interval: "month" },
+    });
+
+    const seedlingYearly = new stripe.Price("SeedlingYearly", {
+      product: seedlingProduct.id,
+      currency: "usd",
+      unitAmount: 8200,  // $82/year
+      recurring: { interval: "year" },
+    });
+
+    const saplingMonthly = new stripe.Price("SaplingMonthly", {
+      product: saplingProduct.id,
+      currency: "usd",
+      unitAmount: 1200,  // $12/month
+      recurring: { interval: "month" },
+    });
+
+    const saplingYearly = new stripe.Price("SaplingYearly", {
+      product: saplingProduct.id,
+      currency: "usd",
+      unitAmount: 12200,  // $122/year
+      recurring: { interval: "year" },
+    });
+
+    const oakMonthly = new stripe.Price("OakMonthly", {
+      product: oakProduct.id,
+      currency: "usd",
+      unitAmount: 2500,  // $25/month
+      recurring: { interval: "month" },
+    });
+
+    const oakYearly = new stripe.Price("OakYearly", {
+      product: oakProduct.id,
+      currency: "usd",
+      unitAmount: 25500,  // $255/year
+      recurring: { interval: "year" },
+    });
+
+    const evergreenMonthly = new stripe.Price("EvergreenMonthly", {
+      product: evergreenProduct.id,
+      currency: "usd",
+      unitAmount: 3500,  // $35/month
+      recurring: { interval: "month" },
+    });
+
+    const evergreenYearly = new stripe.Price("EvergreenYearly", {
+      product: evergreenProduct.id,
+      currency: "usd",
+      unitAmount: 35700,  // $357/year
+      recurring: { interval: "year" },
+    });
+
+    // --- Webhook Endpoint ---
+    // For now, keep using existing plant webhook
+    // SST will manage this in Phase 3 when we migrate the apps
+
+    // =========================================================================
+    // PHASE 3 (LATER): SvelteKit Apps
+    // =========================================================================
+    // Will add: Engine, Landing, Plant, Domains workers here
+
+    // =========================================================================
+    // Outputs for debugging
+    // =========================================================================
+    return {
+      dbId: db.id,
+      cacheId: cache.id,
+      mediaName: media.name,
+      // Stripe price IDs (for plant/engine to reference)
+      prices: {
+        seedling: { monthly: seedlingMonthly.id, yearly: seedlingYearly.id },
+        sapling: { monthly: saplingMonthly.id, yearly: saplingYearly.id },
+        oak: { monthly: oakMonthly.id, yearly: oakYearly.id },
+        evergreen: { monthly: evergreenMonthly.id, yearly: evergreenYearly.id },
+      },
+    };
+  },
+});
+```
+
+### Step 4: Update .gitignore
+
+```bash
+echo ".sst" >> .gitignore
+```
+
+### Step 5: Set Required Environment Variables
+
+For local development and CI:
+
+```bash
+# Cloudflare
+export CLOUDFLARE_API_TOKEN="your-api-token"
+
+# Stripe (test keys for dev)
+export STRIPE_TEST_SECRET_KEY="sk_test_xxx"
+
+# Stripe (live keys for production - CI only)
+export STRIPE_SECRET_KEY="sk_live_xxx"
+```
+
+### Step 6: Test SST Dev (Validation Only)
+
+```bash
+# This should complete without errors
+npx sst dev
+
+# Check the outputs
+# - Should show existing resource IDs (not create new ones!)
+# - Should show Stripe price IDs
+```
+
+**⚠️ Important:** At this stage, SST manages Stripe products/prices but we're NOT deploying apps yet. The existing wrangler-based deployment continues to work.
+
+### Step 7: Verify Stripe Products Created
+
+After `sst dev` or `sst deploy --stage dev`:
+1. Check Stripe Dashboard (Test Mode)
+2. Confirm 4 products exist: Seedling, Sapling, Oak, Evergreen
+3. Confirm 8 prices exist (4 monthly + 4 yearly)
+4. Note the price IDs for later use
+
+### Step 8: Update Plant to Use SST Price IDs
+
+Once prices are created, update `plant/src/lib/server/stripe.ts`:
+
+```typescript
+// Before: hardcoded placeholder IDs
+const STRIPE_PRICES = {
+  seedling: { monthly: 'price_xxx', yearly: 'price_yyy' },
+  // ...
+};
+
+// After: Use SST outputs or Resource linking
+// Option A: Environment variables (simpler, works now)
+const STRIPE_PRICES = {
+  seedling: {
+    monthly: env.STRIPE_PRICE_SEEDLING_MONTHLY,
+    yearly: env.STRIPE_PRICE_SEEDLING_YEARLY,
+  },
+  sapling: {
+    monthly: env.STRIPE_PRICE_SAPLING_MONTHLY,
+    yearly: env.STRIPE_PRICE_SAPLING_YEARLY,
+  },
+  oak: {
+    monthly: env.STRIPE_PRICE_OAK_MONTHLY,
+    yearly: env.STRIPE_PRICE_OAK_YEARLY,
+  },
+  evergreen: {
+    monthly: env.STRIPE_PRICE_EVERGREEN_MONTHLY,
+    yearly: env.STRIPE_PRICE_EVERGREEN_YEARLY,
+  },
+};
+
+// Option B: SST Resource linking (Phase 3, when apps are SST-managed)
+// import { Resource } from "sst";
+// const priceId = Resource.SeedlingMonthly.id;
+```
+
+### Validation Checkpoints
+
+After each step, verify:
+
+| Step | Validation |
+|------|------------|
+| 1-2 | `pnpm list sst` shows sst installed |
+| 3 | `sst.config.ts` exists, TypeScript compiles |
+| 4 | `.sst` is in `.gitignore` |
+| 5 | Environment variables are set |
+| 6 | `npx sst dev` completes without errors |
+| 7 | Stripe Dashboard shows products/prices |
+| 8 | Plant checkout flow works with new price IDs |
+
+### Rollback Plan
+
+If anything breaks:
+1. **Cloudflare resources:** Using `.get()` means we import existing resources, not create new ones. No data loss possible.
+2. **Stripe products:** Test mode only until production deploy. Can delete and recreate.
+3. **Deployments:** Keep using `wrangler pages deploy` until Phase 3 is complete.
 
 ---
 
