@@ -697,8 +697,248 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 
 ## Open Questions
 
-1. **Preview Environments**: Do you want PR preview deployments? SST Console offers this.
-2. **Staging Environment**: Do you want a `dev.grove.place` staging subdomain?
+1. ~~**Preview Environments**~~: Yes! PR previews for testing before merge.
+2. ~~**Staging Environment**~~: Yes! Everything has been going straight to production.
+
+---
+
+## Staging & Preview Environment Strategy
+
+### The Problem
+
+Currently: `push to main` → auto-deploy to production → live in minutes
+
+This is fast but risky. No way to test Cloudflare-specific behavior before it hits real users.
+
+### The Solution: SST Stages
+
+SST has built-in support for multiple deployment stages:
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Local Dev     │ ──▶ │    Staging      │ ──▶ │   Production    │
+│   (your machine)│     │ dev.grove.place │     │   grove.place   │
+│   sst dev       │     │ --stage dev     │     │ --stage prod    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+### Stage Configuration
+
+```typescript
+// sst.config.ts
+export default $config({
+  app(input) {
+    return {
+      name: "grove",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      home: "cloudflare",
+      providers: {
+        cloudflare: true,
+        stripe: {
+          // Use test keys for non-production
+          apiKey: input?.stage === "production"
+            ? process.env.STRIPE_SECRET_KEY
+            : process.env.STRIPE_TEST_SECRET_KEY,
+        },
+      },
+    };
+  },
+  async run() {
+    const stage = $app.stage;
+    const isProd = stage === "production";
+
+    // Database: Shared or per-stage
+    const db = isProd
+      ? sst.cloudflare.D1.get("GroveDB", "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68")
+      : new sst.cloudflare.D1("GroveDB"); // Fresh DB for dev/PR
+
+    // Cache: Per-stage (no cross-contamination)
+    const cache = new sst.cloudflare.Kv("GroveCache");
+
+    // Media: Shared in staging, separate in PR previews
+    const media = stage === "production" || stage === "dev"
+      ? sst.cloudflare.R2.get("GroveMedia", "grove-media")
+      : new sst.cloudflare.R2("GroveMedia");
+
+    // Domain varies by stage
+    const getDomain = (name: string) => {
+      if (isProd) return name;
+      if (stage === "dev") return `dev-${name}`;
+      return `${stage}-${name}`; // PR previews: pr-42-grove.place
+    };
+
+    const engine = new sst.cloudflare.Worker("Engine", {
+      // ...
+      domain: isProd
+        ? { name: "*.grove.place", zone: "grove.place" }
+        : { name: `*.${stage}.grove.place`, zone: "grove.place" },
+    });
+
+    // ... rest of config
+  },
+});
+```
+
+### Staging URLs
+
+| Stage | URL Pattern | Use Case |
+|-------|-------------|----------|
+| `production` | `*.grove.place` | Real users |
+| `dev` | `*.dev.grove.place` | Team testing |
+| `pr-42` | `*.pr-42.grove.place` | PR preview |
+
+### Database Strategy
+
+**Option A: Separate databases per stage** (safer)
+```
+production → grove-engine-db (real data)
+dev        → grove-engine-db-dev (test data)
+pr-*       → ephemeral DB (created/destroyed with PR)
+```
+
+**Option B: Shared database, separate by flag** (simpler)
+```
+production → grove-engine-db
+dev        → grove-engine-db (with test tenants marked)
+pr-*       → grove-engine-db (read-only or specific test tenant)
+```
+
+**Recommendation:** Option A for safety. You don't want a staging bug to corrupt production data.
+
+### Stripe Test Mode
+
+SST makes this easy:
+
+```typescript
+// Stripe products are per-stage
+const seedling = new stripe.Product("Seedling", {
+  name: isProd ? "Seedling Plan" : `[${stage}] Seedling Plan`,
+  // ...
+});
+```
+
+**Key insight:** Stripe has test mode and live mode. SST can:
+- Use `sk_test_*` keys for dev/PR stages
+- Use `sk_live_*` keys for production
+- Products/prices are separate between test and live
+
+This means you can test the entire checkout flow without touching real money.
+
+### GitHub Actions Workflow
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+
+      # Determine stage
+      - name: Set stage
+        id: stage
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "stage=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "stage=production" >> $GITHUB_OUTPUT
+          else
+            echo "stage=dev" >> $GITHUB_OUTPUT
+          fi
+
+      # Deploy
+      - name: Deploy to ${{ steps.stage.outputs.stage }}
+        run: npx sst deploy --stage ${{ steps.stage.outputs.stage }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+
+      # Comment PR with preview URL
+      - name: Comment preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🌱 Preview deployed to https://pr-${{ github.event.number }}.grove.place`
+            })
+
+  # Cleanup PR previews when closed
+  cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - name: Remove PR preview
+        run: npx sst remove --stage pr-${{ github.event.number }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+```
+
+### Manual Staging Deployment
+
+For the persistent staging environment:
+
+```bash
+# Deploy to staging
+pnpm run deploy:staging  # sst deploy --stage dev
+
+# Deploy to production (after testing on staging)
+pnpm run deploy:prod     # sst deploy --stage production
+```
+
+### New Workflow
+
+```
+1. Work locally with `sst dev`
+2. Push to feature branch
+3. Open PR → auto-deploys to pr-123.grove.place
+4. Test in PR preview
+5. Merge to main → deploys to production
+   OR
+5. Merge to develop → deploys to dev.grove.place
+6. Manual promote: deploy:prod when ready
+```
+
+### DNS Setup Required
+
+Add these DNS records in Cloudflare:
+
+```
+*.dev.grove.place    CNAME  grove.place  (proxied)
+*.pr-*.grove.place   CNAME  grove.place  (proxied)
+```
+
+Or use a single wildcard that catches all:
+```
+*.grove.place        CNAME  <worker>     (proxied)
+```
+
+The Worker handles stage-based routing internally.
 
 ---
 
