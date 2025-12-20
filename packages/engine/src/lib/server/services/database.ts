@@ -726,15 +726,17 @@ export class TenantDb {
 		let sql = `SELECT * FROM ${table} WHERE ${tenantWhere}`;
 
 		if (options?.orderBy) {
-			// Basic validation for ORDER BY - only allow column names and ASC/DESC
+			// Strict validation for ORDER BY - only allow column names and ASC/DESC
 			const orderParts = options.orderBy.split(/\s+/);
-			if (orderParts.length <= 2) {
-				validateColumnName(orderParts[0]);
-				const direction = orderParts[1]?.toUpperCase();
-				if (!direction || direction === 'ASC' || direction === 'DESC') {
-					sql += ` ORDER BY ${options.orderBy}`;
-				}
+			if (orderParts.length > 2) {
+				throw new DatabaseError(`Invalid ORDER BY clause: too many parts`, 'VALIDATION_ERROR');
 			}
+			validateColumnName(orderParts[0]);
+			const direction = orderParts[1]?.toUpperCase();
+			if (direction && direction !== 'ASC' && direction !== 'DESC') {
+				throw new DatabaseError(`Invalid ORDER BY direction: ${direction}`, 'VALIDATION_ERROR');
+			}
+			sql += ` ORDER BY ${orderParts[0]}${direction ? ` ${direction}` : ''}`;
 		}
 
 		if (options?.limit !== undefined) {

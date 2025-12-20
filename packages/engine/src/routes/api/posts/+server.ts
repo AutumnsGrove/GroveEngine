@@ -130,6 +130,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       throw error(400, `Slug too long (max ${MAX_SLUG_LENGTH} characters)`);
     }
 
+    // Validate gutter_content is valid JSON if provided
+    if (data.gutter_content) {
+      try {
+        const parsed = JSON.parse(data.gutter_content);
+        if (!Array.isArray(parsed)) {
+          throw error(400, "gutter_content must be a JSON array");
+        }
+      } catch (e) {
+        if ((e as { status?: number }).status === 400) throw e;
+        throw error(400, "gutter_content must be valid JSON");
+      }
+    }
+
     // Sanitize slug
     const slug = data.slug
       .toLowerCase()
