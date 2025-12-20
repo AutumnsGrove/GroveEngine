@@ -738,11 +738,15 @@ export class TenantDb {
 		}
 
 		if (options?.limit !== undefined) {
-			sql += ` LIMIT ${Math.max(0, Math.floor(options.limit))}`;
+			// Clamp to reasonable bounds to prevent Infinity or excessive values
+			const limit = Math.max(0, Math.min(Math.floor(options.limit), 1000));
+			sql += ` LIMIT ${limit}`;
 		}
 
 		if (options?.offset !== undefined) {
-			sql += ` OFFSET ${Math.max(0, Math.floor(options.offset))}`;
+			// Clamp to reasonable bounds to prevent Infinity or excessive values
+			const offset = Math.max(0, Math.min(Math.floor(options.offset), 100000));
+			sql += ` OFFSET ${offset}`;
 		}
 
 		return queryMany<T>(this.db, sql, params);

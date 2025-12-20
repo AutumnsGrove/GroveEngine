@@ -13,8 +13,9 @@
    */
 
   // Props
+  /** @type {{ textareaRef?: HTMLTextAreaElement | null, content?: string, readonly?: boolean, onContentChange?: (content: string) => void }} */
   let {
-    textareaRef = null,
+    textareaRef = /** @type {HTMLTextAreaElement | null} */ (null),
     content = $bindable(""),
     readonly = false,
     onContentChange = () => {},
@@ -175,16 +176,48 @@
     }
   }
 
-  // Set up selection monitoring
+  /**
+   * Handle keyboard shortcuts for formatting
+   * @param {KeyboardEvent} e
+   */
+  function handleKeyboardShortcuts(e) {
+    if (!textareaRef || readonly) return;
+    if (document.activeElement !== textareaRef) return;
+
+    const isMod = e.metaKey || e.ctrlKey;
+    if (!isMod) return;
+
+    // Update selection state before applying formatting
+    selectionStart = textareaRef.selectionStart;
+    selectionEnd = textareaRef.selectionEnd;
+
+    // Only apply if there's a selection
+    if (selectionStart === selectionEnd) return;
+
+    switch (e.key.toLowerCase()) {
+      case 'b':
+        e.preventDefault();
+        handleBold();
+        break;
+      case 'i':
+        e.preventDefault();
+        handleItalic();
+        break;
+    }
+  }
+
+  // Set up selection monitoring and keyboard shortcuts
   onMount(() => {
     document.addEventListener("mouseup", handleSelectionChange);
     document.addEventListener("keyup", handleSelectionChange);
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyboardShortcuts);
 
     return () => {
       document.removeEventListener("mouseup", handleSelectionChange);
       document.removeEventListener("keyup", handleSelectionChange);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyboardShortcuts);
     };
   });
 

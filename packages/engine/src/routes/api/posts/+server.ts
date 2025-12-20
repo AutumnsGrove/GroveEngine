@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
-import { getTenantDb, generateId, now } from "$lib/server/services/database.js";
+import { getTenantDb, now } from "$lib/server/services/database.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -164,7 +164,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
 
-    // Insert using TenantDb (automatically adds tenant_id)
+    // Insert using TenantDb (automatically adds tenant_id and generates id)
     await tenantDb.insert('posts', {
       slug,
       title: data.title,
@@ -177,7 +177,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       font: data.font || "default",
       file_hash,
       last_synced: timestamp,
-    }, { id: generateId() });
+    });
 
     return json({
       success: true,
