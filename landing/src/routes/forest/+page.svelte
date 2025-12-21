@@ -16,6 +16,10 @@
 	// Snowfall
 	import SnowfallLayer from '$lib/components/nature/weather/SnowfallLayer.svelte';
 
+	// Winter birds
+	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
+	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
+
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
@@ -376,6 +380,29 @@
 			<!-- Snowfall layer - only in winter -->
 			{#if isWinter}
 				<SnowfallLayer count={80} zIndex={100} enabled={true} />
+			{/if}
+
+			<!-- Winter birds - cardinals and chickadees scattered in the scene -->
+			{#if isWinter}
+				<!-- Cardinal perched in the mid-left area -->
+				<div class="absolute" style="left: 15%; top: 55%; z-index: 25;">
+					<Cardinal class="w-10 h-12" facing="right" />
+				</div>
+				<!-- Chickadee pair on the right side -->
+				<div class="absolute" style="left: 72%; top: 48%; z-index: 22;">
+					<Chickadee class="w-7 h-8" facing="left" />
+				</div>
+				<div class="absolute" style="left: 78%; top: 52%; z-index: 23;">
+					<Chickadee class="w-6 h-7" facing="right" />
+				</div>
+				<!-- Another cardinal further back -->
+				<div class="absolute" style="left: 45%; top: 42%; z-index: 18; opacity: 0.85;">
+					<Cardinal class="w-8 h-10" facing="left" />
+				</div>
+				<!-- Distant chickadee -->
+				<div class="absolute" style="left: 28%; top: 38%; z-index: 15; opacity: 0.7;">
+					<Chickadee class="w-5 h-6" facing="right" />
+				</div>
 			{/if}
 
 			<!-- Rolling hills with trees -->

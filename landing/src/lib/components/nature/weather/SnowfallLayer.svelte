@@ -66,11 +66,17 @@
 			// Start above viewport with staggered heights
 			const y = -5 - Math.random() * 15;
 
-			// Size based on "depth" - smaller = further away
+			// Depth-based sizing algorithm:
+			// depthFactor 0.0 = far away (small, simple dots, lower opacity)
+			// depthFactor 1.0 = close up (large, detailed crystals, higher opacity)
+			// This creates a parallax-like depth effect with smaller background flakes
 			const depthFactor = Math.random();
-			const size = 4 + depthFactor * 12; // 4-16px
+			const size = 4 + depthFactor * 12; // 4-16px range
 
-			// Distant flakes are smaller dots, close ones are detailed crystals
+			// Variant selection based on depth:
+			// - Far (0.0-0.3): tiny dots for distant snow
+			// - Mid (0.3-0.5): simple shapes
+			// - Close (0.5-1.0): detailed crystal/star variants
 			let variant: SnowflakeVariant;
 			if (depthFactor < 0.3) {
 				variant = 'dot';
