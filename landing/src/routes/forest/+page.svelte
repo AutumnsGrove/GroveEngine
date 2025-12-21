@@ -167,8 +167,8 @@
 	// Get hill fill color based on layer and season
 	function getHillColor(layerIndex: number): string {
 		if (isWinter) {
-			// Snowy/frosted hills - cool grays with slight blue tint
-			const colors = ['#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0'];
+			// Snowy hills - back hills cooler/darker, front hills warmer/brighter
+			const colors = [winter.hillDeep, winter.hillMid, winter.hillNear, winter.hillFront];
 			return colors[layerIndex] ?? colors[0];
 		} else if (isAutumn) {
 			const colors = ['#92400e', '#b45309', '#d97706', '#f59e0b'];
@@ -277,6 +277,63 @@
 		});
 	});
 
+	// Winter birds - positioned relative to trees for organic placement
+	interface WinterBird {
+		id: number;
+		type: 'cardinal' | 'chickadee';
+		x: number;
+		y: number;
+		size: number;
+		zIndex: number;
+		opacity: number;
+		facing: 'left' | 'right';
+	}
+
+	// Generate bird positions based on tree locations
+	const winterBirds = $derived.by((): WinterBird[] => {
+		if (baseTrees.length === 0) return [];
+
+		// Select a few trees to place birds near (deterministic selection)
+		const birdTrees = baseTrees
+			.filter((t) => t.treeType !== 'logo') // Don't perch on logo
+			.sort((a, b) => a.id - b.id)
+			.filter((_, i) => [2, 5, 8, 12, 15].includes(i)); // Pick specific indices
+
+		const birds: WinterBird[] = [];
+		let birdId = 0;
+
+		birdTrees.forEach((tree, i) => {
+			// Cardinal on first two selected trees
+			if (i < 2) {
+				birds.push({
+					id: birdId++,
+					type: 'cardinal',
+					// Position slightly to the side of tree crown
+					x: tree.x + (i % 2 === 0 ? -3 : 3),
+					y: tree.y - 8, // Above the base, in the canopy area
+					size: Math.max(8, tree.size * 0.15),
+					zIndex: tree.zIndex + 1,
+					opacity: tree.opacity,
+					facing: i % 2 === 0 ? 'right' : 'left'
+				});
+			} else {
+				// Chickadees on remaining trees
+				birds.push({
+					id: birdId++,
+					type: 'chickadee',
+					x: tree.x + (i % 2 === 0 ? -2 : 2),
+					y: tree.y - 6,
+					size: Math.max(6, tree.size * 0.12),
+					zIndex: tree.zIndex + 1,
+					opacity: tree.opacity,
+					facing: i % 2 === 0 ? 'left' : 'right'
+				});
+			}
+		});
+
+		return birds;
+	});
+
 	// Toggle season (cycles: summer → autumn → winter → summer)
 	function toggleSeason() {
 		if (season === 'summer') {
@@ -382,27 +439,33 @@
 				<SnowfallLayer count={80} zIndex={100} enabled={true} />
 			{/if}
 
-			<!-- Winter birds - cardinals and chickadees scattered in the scene -->
+			<!-- Winter birds - positioned relative to trees -->
 			{#if isWinter}
-				<!-- Cardinal perched in the mid-left area -->
-				<div class="absolute" style="left: 15%; top: 55%; z-index: 25;">
-					<Cardinal class="w-10 h-12" facing="right" />
-				</div>
-				<!-- Chickadee pair on the right side -->
-				<div class="absolute" style="left: 72%; top: 48%; z-index: 22;">
-					<Chickadee class="w-7 h-8" facing="left" />
-				</div>
-				<div class="absolute" style="left: 78%; top: 52%; z-index: 23;">
-					<Chickadee class="w-6 h-7" facing="right" />
-				</div>
-				<!-- Another cardinal further back -->
-				<div class="absolute" style="left: 45%; top: 42%; z-index: 18; opacity: 0.85;">
-					<Cardinal class="w-8 h-10" facing="left" />
-				</div>
-				<!-- Distant chickadee -->
-				<div class="absolute" style="left: 28%; top: 38%; z-index: 15; opacity: 0.7;">
-					<Chickadee class="w-5 h-6" facing="right" />
-				</div>
+				{#each winterBirds as bird (bird.id)}
+					<div
+						class="absolute"
+						style="
+							left: {bird.x}%;
+							top: {bird.y}%;
+							z-index: {bird.zIndex};
+							opacity: {bird.opacity};
+						"
+					>
+						{#if bird.type === 'cardinal'}
+							<Cardinal
+								class="w-{bird.size} h-{bird.size * 1.2}"
+								style="width: {bird.size}px; height: {bird.size * 1.2}px;"
+								facing={bird.facing}
+							/>
+						{:else}
+							<Chickadee
+								class="w-{bird.size} h-{bird.size}"
+								style="width: {bird.size}px; height: {bird.size}px;"
+								facing={bird.facing}
+							/>
+						{/if}
+					</div>
+				{/each}
 			{/if}
 
 			<!-- Rolling hills with trees -->

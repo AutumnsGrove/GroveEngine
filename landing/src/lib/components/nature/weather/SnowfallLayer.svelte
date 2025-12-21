@@ -5,13 +5,6 @@
 
 	type SnowflakeVariant = 'crystal' | 'simple' | 'star' | 'delicate' | 'dot';
 
-	// Animation constants
-	const SNOW_OPACITY = { min: 0.4, max: 0.9 } as const;
-	const FALL_DURATION = { min: 10, max: 18 } as const;
-	const FALL_DISTANCE = { min: 100, max: 120 } as const;
-	const DRIFT_RANGE = 15; // -7.5 to +7.5 vw
-	const SPAWN_DELAY_MAX = 12;
-
 	// Check for reduced motion preference
 	const prefersReducedMotion = browser
 		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -24,13 +17,28 @@
 		zIndex?: number;
 		/** Enable snowfall animation */
 		enabled?: boolean;
+		/** Opacity range for snowflakes (depth affects final value) */
+		opacity?: { min: number; max: number };
+		/** Fall duration range in seconds (slower = gentler snowfall) */
+		fallDuration?: { min: number; max: number };
+		/** Horizontal drift range in vw units (higher = more wind) */
+		driftRange?: number;
+		/** Maximum spawn delay in seconds (staggers initial appearance) */
+		spawnDelay?: number;
 	}
 
 	let {
 		count = 60,
 		zIndex = 50,
-		enabled = true
+		enabled = true,
+		opacity = { min: 0.4, max: 0.9 },
+		fallDuration = { min: 10, max: 18 },
+		driftRange = 15,
+		spawnDelay = 12
 	}: Props = $props();
+
+	// Derived animation constants from props
+	const FALL_DISTANCE = { min: 100, max: 120 } as const;
 
 	// Reduce snowflake count for reduced motion or use fewer for performance
 	const actualCount = prefersReducedMotion ? Math.floor(count / 4) : count;
@@ -76,13 +84,15 @@
 			// Variant selection based on depth:
 			// - Far (0.0-0.3): tiny dots for distant snow
 			// - Mid (0.3-0.5): simple shapes
-			// - Close (0.5-1.0): detailed crystal/star variants
+			// - Close (0.5-1.0): detailed crystal/star/delicate variants (excludes dot)
 			let variant: SnowflakeVariant;
 			if (depthFactor < 0.3) {
 				variant = 'dot';
 			} else if (depthFactor < 0.5) {
 				variant = 'simple';
 			} else {
+				// Use % 4 intentionally to select from first 4 variants (crystal, simple, star, delicate)
+				// This excludes 'dot' which is reserved for distant snowflakes
 				variant = snowflakeVariants[Math.floor(hashSeed(i)) % 4] as SnowflakeVariant;
 			}
 
@@ -92,10 +102,10 @@
 				y,
 				size,
 				variant,
-				duration: FALL_DURATION.min + Math.random() * (FALL_DURATION.max - FALL_DURATION.min),
-				delay: Math.random() * SPAWN_DELAY_MAX,
-				drift: (Math.random() - 0.5) * DRIFT_RANGE,
-				opacity: SNOW_OPACITY.min + depthFactor * (SNOW_OPACITY.max - SNOW_OPACITY.min),
+				duration: fallDuration.min + Math.random() * (fallDuration.max - fallDuration.min),
+				delay: Math.random() * spawnDelay,
+				drift: (Math.random() - 0.5) * driftRange,
+				opacity: opacity.min + depthFactor * (opacity.max - opacity.min),
 				fallDistance: FALL_DISTANCE.min + Math.random() * (FALL_DISTANCE.max - FALL_DISTANCE.min)
 			});
 		}

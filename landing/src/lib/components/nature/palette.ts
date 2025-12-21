@@ -147,7 +147,13 @@ export const winter = {
 	// Bare branch colors
 	bareBranch: '#78716c',     // Gray-brown bare wood
 	frostedBark: '#a8a29e',    // Frost-touched bark
-	coldWood: '#57534e'        // Dark winter wood
+	coldWood: '#57534e',       // Dark winter wood
+
+	// Winter hills (snowy ground, back to front)
+	hillDeep: '#475569',       // Far hills - cool slate
+	hillMid: '#7c8ca3',        // Mid hills - gray-blue
+	hillNear: '#c7d2e0',       // Near hills - pale snow
+	hillFront: '#f1f5f9'       // Front hills - fresh snow
 } as const;
 
 // =============================================================================
