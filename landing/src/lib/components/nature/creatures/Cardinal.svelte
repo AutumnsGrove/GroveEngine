@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bark } from '../palette';
+	import { bark, accents } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -19,10 +19,10 @@
 		facing = 'right'
 	}: Props = $props();
 
-	// Northern Cardinal colors (male)
-	const body = bodyColor ?? '#dc2626'; // Vivid red
-	const mask = maskColor ?? '#1a1a1a'; // Black mask
-	const beak = beakColor ?? '#f97316'; // Orange-red cone beak
+	// Northern Cardinal colors (male) - from palette
+	const body = bodyColor ?? accents.bird.cardinalRed;
+	const mask = maskColor ?? accents.bird.cardinalMask;
+	const beak = beakColor ?? accents.bird.cardinalBeak;
 	const legColor = bark.darkBark;
 
 	const scaleX = facing === 'left' ? -1 : 1;

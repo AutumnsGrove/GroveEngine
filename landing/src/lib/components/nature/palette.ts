@@ -208,6 +208,19 @@ export const accents = {
 		sunset: '#fed7aa',    // Golden hour
 		night: '#1e293b',     // Night sky
 		star: '#fefce8'       // Star/twinkle color
+	},
+	/** Bird colors - winter and year-round species */
+	bird: {
+		cardinalRed: '#dc2626',    // Northern Cardinal vivid red
+		cardinalMask: '#1a1a1a',   // Cardinal black mask
+		cardinalBeak: '#f97316',   // Orange-red cone beak
+		chickadeeCap: '#1a1a1a',   // Black-capped Chickadee cap/bib
+		chickadeeCheek: '#fafafa', // White cheek patch
+		chickadeeBody: '#6b7280',  // Gray back feathers
+		chickadeeBelly: '#fef3c7', // Buff/cream underside
+		robinBody: '#4a4a4a',      // American Robin dark gray-brown
+		robinBreast: '#c2410c',    // American Robin orange-red
+		robinBeak: '#f59e0b'       // Yellow-orange beak
 	}
 } as const;
 

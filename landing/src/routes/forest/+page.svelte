@@ -511,6 +511,7 @@
 					{:else if tree.treeType === 'birch'}
 						<TreeBirch class="w-full h-full" color={tree.color} {season} animate={true} />
 					{:else if tree.treeType === 'cherry'}
+						<!-- TreeCherry handles winter internally: hides blossoms, shows bare branches with snow -->
 						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{/if}
 				</div>

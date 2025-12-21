@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bark } from '../palette';
+	import { bark, accents } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -19,12 +19,12 @@
 		facing = 'right'
 	}: Props = $props();
 
-	// Black-capped Chickadee colors
-	const cap = capColor ?? '#1a1a1a'; // Black cap
-	const cheek = cheekColor ?? '#fafafa'; // White cheeks
-	const body = bodyColor ?? '#6b7280'; // Gray back
-	const belly = '#fef3c7'; // Buff/cream underside
-	const beak = '#1a1a1a'; // Tiny black beak
+	// Black-capped Chickadee colors - from palette
+	const cap = capColor ?? accents.bird.chickadeeCap;
+	const cheek = cheekColor ?? accents.bird.chickadeeCheek;
+	const body = bodyColor ?? accents.bird.chickadeeBody;
+	const belly = accents.bird.chickadeeBelly;
+	const beak = accents.bird.chickadeeCap; // Same black as cap
 	const legColor = bark.darkBark;
 
 	const scaleX = facing === 'left' ? -1 : 1;

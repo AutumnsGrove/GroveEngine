@@ -58,27 +58,39 @@
 		fallDistance: number;
 	}
 
-	// Deterministic hash for natural distribution
-	function hashSeed(seed: number): number {
-		return Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+	// Deterministic hash for natural distribution (returns 0-1 range)
+	// Using different prime multipliers for each property ensures varied but consistent results
+	function hashRandom(seed: number): number {
+		const hash = Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+		return hash - Math.floor(hash); // Fractional part gives 0-1 range
 	}
 
 	// Generate snowflakes across the viewport
+	// All randomization is deterministic to prevent SSR hydration mismatches
 	function generateSnowflakes(): Snowflake[] {
 		const snowflakes: Snowflake[] = [];
 
 		for (let i = 0; i < actualCount; i++) {
+			// Use different seed multipliers for each property to get varied distributions
+			const xRand = hashRandom(i * 7);
+			const yRand = hashRandom(i * 11);
+			const depthRand = hashRandom(i * 13);
+			const durationRand = hashRandom(i * 17);
+			const delayRand = hashRandom(i * 19);
+			const driftRand = hashRandom(i * 23);
+			const distanceRand = hashRandom(i * 29);
+
 			// Distribute across full width with some randomness
-			const x = (i / actualCount) * 100 + (Math.random() - 0.5) * 10;
+			const x = (i / actualCount) * 100 + (xRand - 0.5) * 10;
 
 			// Start above viewport with staggered heights
-			const y = -5 - Math.random() * 15;
+			const y = -5 - yRand * 15;
 
 			// Depth-based sizing algorithm:
 			// depthFactor 0.0 = far away (small, simple dots, lower opacity)
 			// depthFactor 1.0 = close up (large, detailed crystals, higher opacity)
 			// This creates a parallax-like depth effect with smaller background flakes
-			const depthFactor = Math.random();
+			const depthFactor = depthRand;
 			const size = 4 + depthFactor * 12; // 4-16px range
 
 			// Variant selection based on depth:
@@ -93,7 +105,7 @@
 			} else {
 				// Use % 4 intentionally to select from first 4 variants (crystal, simple, star, delicate)
 				// This excludes 'dot' which is reserved for distant snowflakes
-				variant = snowflakeVariants[Math.floor(hashSeed(i)) % 4] as SnowflakeVariant;
+				variant = snowflakeVariants[Math.floor(hashRandom(i) * 4)] as SnowflakeVariant;
 			}
 
 			snowflakes.push({
@@ -102,11 +114,11 @@
 				y,
 				size,
 				variant,
-				duration: fallDuration.min + Math.random() * (fallDuration.max - fallDuration.min),
-				delay: Math.random() * spawnDelay,
-				drift: (Math.random() - 0.5) * driftRange,
+				duration: fallDuration.min + durationRand * (fallDuration.max - fallDuration.min),
+				delay: delayRand * spawnDelay,
+				drift: (driftRand - 0.5) * driftRange,
 				opacity: opacity.min + depthFactor * (opacity.max - opacity.min),
-				fallDistance: FALL_DISTANCE.min + Math.random() * (FALL_DISTANCE.max - FALL_DISTANCE.min)
+				fallDistance: FALL_DISTANCE.min + distanceRand * (FALL_DISTANCE.max - FALL_DISTANCE.min)
 			});
 		}
 
