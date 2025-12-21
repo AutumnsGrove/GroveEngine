@@ -33,7 +33,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   autumn: "autumn-website.pages.dev", // Autumn's Grove
   example: "grove-example-site.pages.dev", // GroveEngine example
   plant: "grove-plant.pages.dev", // Grove Plant
-  cdn: "grove-landing.pages.dev", // R2 assets
+  cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
   // Domain management
   domains: "grove-domains.pages.dev",
@@ -77,6 +77,16 @@ export default {
       const redirectUrl = new URL(request.url);
       redirectUrl.hostname = "grove.place";
       return Response.redirect(redirectUrl.toString(), 301);
+    }
+
+    // Handle R2 custom domain - pass through to R2
+    // R2 doesn't auto-serve index.html, so redirect root to /index.html
+    if (routeTarget === "R2") {
+      if (url.pathname === "/" || url.pathname === "") {
+        return Response.redirect(`${url.origin}/index.html`, 302);
+      }
+      // Pass through to R2 for all other paths
+      return fetch(request);
     }
 
     // Handle unknown subdomains - proxy to groveengine for tenant lookup
