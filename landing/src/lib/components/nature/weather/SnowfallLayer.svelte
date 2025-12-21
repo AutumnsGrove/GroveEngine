@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { winter } from '../palette';
 	import SnowflakeFalling from './SnowflakeFalling.svelte';
 
@@ -10,6 +11,11 @@
 	const FALL_DISTANCE = { min: 100, max: 120 } as const;
 	const DRIFT_RANGE = 15; // -7.5 to +7.5 vw
 	const SPAWN_DELAY_MAX = 12;
+
+	// Check for reduced motion preference
+	const prefersReducedMotion = browser
+		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		: false;
 
 	interface Props {
 		/** Total number of snowflakes */
@@ -25,6 +31,9 @@
 		zIndex = 50,
 		enabled = true
 	}: Props = $props();
+
+	// Reduce snowflake count for reduced motion or use fewer for performance
+	const actualCount = prefersReducedMotion ? Math.floor(count / 4) : count;
 
 	const snowflakeVariants: SnowflakeVariant[] = ['crystal', 'simple', 'star', 'delicate', 'dot'];
 
@@ -50,9 +59,9 @@
 	function generateSnowflakes(): Snowflake[] {
 		const snowflakes: Snowflake[] = [];
 
-		for (let i = 0; i < count; i++) {
+		for (let i = 0; i < actualCount; i++) {
 			// Distribute across full width with some randomness
-			const x = (i / count) * 100 + (Math.random() - 0.5) * 10;
+			const x = (i / actualCount) * 100 + (Math.random() - 0.5) * 10;
 
 			// Start above viewport with staggered heights
 			const y = -5 - Math.random() * 15;

@@ -132,11 +132,11 @@
 		<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
 		<!-- Snow accents in winter -->
 		{#if isWinter}
-			<ellipse fill="#f8fafc" cx="208" cy="5" rx="30" ry="8" opacity="0.7" />
-			<ellipse fill="#f8fafc" cx="50" cy="170" rx="25" ry="6" opacity="0.6" />
-			<ellipse fill="#f8fafc" cx="367" cy="170" rx="25" ry="6" opacity="0.6" />
-			<ellipse fill="#f8fafc" cx="100" cy="340" rx="20" ry="5" opacity="0.5" />
-			<ellipse fill="#f8fafc" cx="316" cy="340" rx="20" ry="5" opacity="0.5" />
+			<ellipse fill={winter.snow} cx="208" cy="5" rx="30" ry="8" opacity="0.7" />
+			<ellipse fill={winter.snow} cx="50" cy="170" rx="25" ry="6" opacity="0.6" />
+			<ellipse fill={winter.snow} cx="367" cy="170" rx="25" ry="6" opacity="0.6" />
+			<ellipse fill={winter.snow} cx="100" cy="340" rx="20" ry="5" opacity="0.5" />
+			<ellipse fill={winter.snow} cx="316" cy="340" rx="20" ry="5" opacity="0.5" />
 		{/if}
 	</svg>
 {/if}

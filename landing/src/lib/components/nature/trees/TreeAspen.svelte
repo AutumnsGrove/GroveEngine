@@ -63,9 +63,9 @@
 		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M50 28 Q44 20 38 15" />
 		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M50 28 Q56 20 62 15" />
 		<!-- Snow accents on branches -->
-		<ellipse fill="#f8fafc" cx="22" cy="37" rx="4" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="78" cy="37" rx="4" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="50" cy="17" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="22" cy="37" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="78" cy="37" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="50" cy="17" rx="3" ry="1" opacity="0.7" />
 	{/if}
 
 	<!-- Individual aspen leaves - round/heart shaped with pointed tips -->

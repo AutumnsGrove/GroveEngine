@@ -243,12 +243,12 @@ export function getSeasonalGreens(season: Season = 'summer') {
  * In winter, cherry trees are bare (no blossoms).
  * @example getCherryColors('autumn') // returns autumnReds palette
  */
-export function getCherryColors(season: Season = 'spring') {
+export function getCherryColors(season: Season = 'spring'): typeof pinks | typeof autumnReds | null {
 	if (season === 'autumn') {
 		return autumnReds;
 	}
 	if (season === 'winter') {
-		// Return null-ish to indicate bare tree
+		// Return null to indicate bare tree (no foliage to render)
 		return null;
 	}
 	return pinks;

@@ -57,11 +57,11 @@
 		<path d="M65 30 Q62 22 58 12" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
 		<path d="M50 50 Q50 35 50 18" stroke={actualTrunkColor} stroke-width="1.5" fill="none"/>
 		<!-- Snow accents on branches -->
-		<ellipse fill="#f8fafc" cx="20" cy="54" rx="5" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="80" cy="54" rx="5" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="35" cy="29" rx="4" ry="1" opacity="0.7" />
-		<ellipse fill="#f8fafc" cx="65" cy="29" rx="4" ry="1" opacity="0.7" />
-		<ellipse fill="#f8fafc" cx="50" cy="18" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="20" cy="54" rx="5" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="80" cy="54" rx="5" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="35" cy="29" rx="4" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="65" cy="29" rx="4" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="50" cy="18" rx="3" ry="1" opacity="0.7" />
 	{/if}
 
 	<!-- Blossom clusters - hidden in winter -->

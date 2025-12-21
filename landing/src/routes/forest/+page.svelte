@@ -151,7 +151,7 @@
 		if (currentSeason === 'autumn') {
 			return [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
 		} else if (currentSeason === 'winter') {
-			// In winter, cherry trees are bare - return transparent/null colors
+			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
 			return [winter.bareBranch, winter.frostedBark, winter.coldWood];
 		} else {
 			if (brightness === 'dark') return [pinks.deepPink, pinks.pink];

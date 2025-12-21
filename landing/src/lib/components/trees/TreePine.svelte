@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Season } from '../nature/palette';
+	import { winter } from '../nature/palette';
 
 	interface Props {
 		class?: string;
@@ -47,16 +48,16 @@
 	<!-- Snow accents in winter -->
 	{#if isWinter}
 		<!-- Snow on branch edges -->
-		<path fill="#f8fafc" d="M50 5 Q55 12 60 18 L40 18 Q45 12 50 5" opacity="0.85" />
-		<path fill="#f8fafc" d="M28 50 Q38 52 50 50 Q62 52 72 50 L65 55 L35 55 Z" opacity="0.7" />
-		<path fill="#f8fafc" d="M18 75 Q35 77 50 75 Q65 77 82 75 L72 82 L28 82 Z" opacity="0.6" />
-		<path fill="#f8fafc" d="M10 105 Q30 107 50 105 Q70 107 90 105 L80 110 L20 110 Z" opacity="0.5" />
+		<path fill={winter.snow} d="M50 5 Q55 12 60 18 L40 18 Q45 12 50 5" opacity="0.85" />
+		<path fill={winter.snow} d="M28 50 Q38 52 50 50 Q62 52 72 50 L65 55 L35 55 Z" opacity="0.7" />
+		<path fill={winter.snow} d="M18 75 Q35 77 50 75 Q65 77 82 75 L72 82 L28 82 Z" opacity="0.6" />
+		<path fill={winter.snow} d="M10 105 Q30 107 50 105 Q70 107 90 105 L80 110 L20 110 Z" opacity="0.5" />
 		<!-- Scattered snow spots -->
-		<ellipse fill="#f8fafc" cx="35" cy="65" rx="4" ry="2" opacity="0.5" />
-		<ellipse fill="#f8fafc" cx="65" cy="68" rx="3" ry="1.5" opacity="0.4" />
-		<ellipse fill="#f8fafc" cx="30" cy="90" rx="5" ry="2" opacity="0.4" />
-		<ellipse fill="#f8fafc" cx="70" cy="92" rx="4" ry="2" opacity="0.45" />
-		<ellipse fill="#f8fafc" cx="50" cy="40" rx="3" ry="1.5" opacity="0.5" />
+		<ellipse fill={winter.snow} cx="35" cy="65" rx="4" ry="2" opacity="0.5" />
+		<ellipse fill={winter.snow} cx="65" cy="68" rx="3" ry="1.5" opacity="0.4" />
+		<ellipse fill={winter.snow} cx="30" cy="90" rx="5" ry="2" opacity="0.4" />
+		<ellipse fill={winter.snow} cx="70" cy="92" rx="4" ry="2" opacity="0.45" />
+		<ellipse fill={winter.snow} cx="50" cy="40" rx="3" ry="1.5" opacity="0.5" />
 	{/if}
 </svg>
 

@@ -68,11 +68,11 @@
 		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M38 28 Q36 22 34 16" />
 		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M62 28 Q64 22 66 16" />
 		<!-- Snow accents on branches -->
-		<ellipse fill="#f8fafc" cx="32" cy="41" rx="4" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="68" cy="41" rx="4" ry="1.5" opacity="0.8" />
-		<ellipse fill="#f8fafc" cx="38" cy="27" rx="3" ry="1" opacity="0.7" />
-		<ellipse fill="#f8fafc" cx="62" cy="27" rx="3" ry="1" opacity="0.7" />
-		<ellipse fill="#f8fafc" cx="50" cy="49" rx="3" ry="1" opacity="0.6" />
+		<ellipse fill={winter.snow} cx="32" cy="41" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="68" cy="41" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="38" cy="27" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="62" cy="27" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="50" cy="49" rx="3" ry="1" opacity="0.6" />
 	{/if}
 
 	<!-- Birch leaves - small serrated ovate leaves (doubled for fullness) -->
