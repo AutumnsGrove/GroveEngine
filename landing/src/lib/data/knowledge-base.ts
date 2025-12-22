@@ -1,13 +1,7 @@
-// Static data for knowledge base - pre-processed from markdown files
-export interface Doc {
-  slug: string;
-  title: string;
-  description?: string;
-  excerpt: string;
-  category: "specs" | "help" | "legal";
-  lastUpdated?: string;
-  readingTime: number;
-}
+import type { Doc } from "$lib/types/docs";
+
+// Re-export for convenience
+export type { Doc } from "$lib/types/docs";
 
 // Technical Specifications
 export const specs: Doc[] = [

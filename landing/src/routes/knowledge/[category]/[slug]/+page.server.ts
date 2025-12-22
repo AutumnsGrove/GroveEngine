@@ -1,5 +1,6 @@
 import { loadDocBySlug } from "$lib/utils/docs-loader";
 import { allDocs } from "$lib/data/knowledge-base";
+import type { DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 
@@ -10,20 +11,22 @@ export const prerender = true;
 // Generate entries for all known documents
 export const entries: EntryGenerator = () => {
   return allDocs.map((doc) => ({
-    category: doc.category === "help" ? "help" : doc.category === "specs" ? "specs" : "legal",
+    category: doc.category,
     slug: doc.slug,
   }));
 };
+
+const validCategories: DocCategory[] = ["specs", "help", "legal"];
 
 export const load: PageServerLoad = async ({ params }) => {
   const { category, slug } = params;
 
   // Validate category
-  if (!["specs", "help", "legal"].includes(category)) {
+  if (!validCategories.includes(category as DocCategory)) {
     throw error(404, "Category not found");
   }
 
-  const doc = loadDocBySlug(slug, category as "specs" | "help" | "legal");
+  const doc = loadDocBySlug(slug, category as DocCategory);
 
   if (!doc) {
     throw error(404, "Document not found");

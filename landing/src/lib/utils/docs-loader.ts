@@ -2,22 +2,17 @@ import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import matter from "gray-matter";
 import { marked } from "marked";
+import type { Doc, DocCategory, DocWithContent } from "$lib/types/docs";
+
+// Re-export types for convenience
+export type { Doc, DocWithContent } from "$lib/types/docs";
 
 // Docs are at project root, not in landing folder
 const DOCS_ROOT = resolve(process.cwd(), "..", "docs");
 
-export interface Doc {
-  slug: string;
-  title: string;
-  description?: string;
-  excerpt: string;
-  category: "specs" | "help" | "legal";
-  lastUpdated?: string;
-  readingTime: number;
-  content?: string;
-  html?: string;
-  /** Internal: full path to the markdown file for content loading */
-  _filePath?: string;
+/** Internal type with file path for content loading */
+interface DocInternal extends Doc {
+  _filePath: string;
 }
 
 function calculateReadingTime(content: string): number {
@@ -39,7 +34,7 @@ function generateExcerpt(content: string): string {
   return excerpt + (firstParagraph.length > 200 ? "..." : "");
 }
 
-function parseDoc(filePath: string, category: "specs" | "help" | "legal"): Doc {
+function parseDoc(filePath: string, category: DocCategory): DocInternal {
   const content = readFileSync(filePath, "utf-8");
   const { data, content: markdownContent } = matter(content);
 
@@ -65,9 +60,9 @@ function parseDoc(filePath: string, category: "specs" | "help" | "legal"): Doc {
 
 function loadDocsFromDir(
   dirPath: string,
-  category: "specs" | "help" | "legal",
-): Doc[] {
-  const docs: Doc[] = [];
+  category: DocCategory,
+): DocInternal[] {
+  const docs: DocInternal[] = [];
 
   function readDirRecursive(currentPath: string) {
     const items = readdirSync(currentPath);
@@ -115,8 +110,8 @@ export function loadAllDocs(): {
 
 export function loadDocBySlug(
   slug: string,
-  category: "specs" | "help" | "legal",
-): Doc | null {
+  category: DocCategory,
+): DocWithContent | null {
   // Sanitize slug to prevent path traversal attacks
   if (
     !slug ||
