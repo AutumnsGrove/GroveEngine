@@ -11,7 +11,7 @@
  */
 
 export interface Env {
-  // No bindings needed - pure proxy worker
+  CDN: R2Bucket;
 }
 
 /**
@@ -52,6 +52,35 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   www: "REDIRECT", // Redirect to root
 };
 
+/**
+ * Get content type based on file extension
+ */
+function getContentType(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase();
+  const types: Record<string, string> = {
+    html: "text/html; charset=utf-8",
+    css: "text/css",
+    js: "application/javascript",
+    json: "application/json",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+    ico: "image/x-icon",
+    ttf: "font/ttf",
+    otf: "font/otf",
+    woff: "font/woff",
+    woff2: "font/woff2",
+    pdf: "application/pdf",
+    mp3: "audio/mpeg",
+    mp4: "video/mp4",
+    webm: "video/webm",
+  };
+  return types[ext || ""] || "application/octet-stream";
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -79,14 +108,30 @@ export default {
       return Response.redirect(redirectUrl.toString(), 301);
     }
 
-    // Handle R2 custom domain - pass through to R2
-    // R2 doesn't auto-serve index.html, so redirect root to /index.html
+    // Handle R2 CDN - serve directly from R2 bucket
     if (routeTarget === "R2") {
-      if (url.pathname === "/" || url.pathname === "") {
-        return Response.redirect(`${url.origin}/index.html`, 302);
+      // Get the object key (strip leading slash)
+      let key = url.pathname.slice(1);
+
+      // Serve index.html for root
+      if (!key || key === "") {
+        key = "index.html";
       }
-      // Pass through to R2 for all other paths
-      return fetch(request);
+
+      const object = await env.CDN.get(key);
+
+      if (!object) {
+        return new Response("Not Found", { status: 404 });
+      }
+
+      // Set appropriate content type
+      const contentType = getContentType(key);
+      const headers = new Headers();
+      headers.set("Content-Type", contentType);
+      headers.set("Cache-Control", "public, max-age=31536000"); // 1 year for immutable assets
+      headers.set("Access-Control-Allow-Origin", "*");
+
+      return new Response(object.body, { headers });
     }
 
     // Handle unknown subdomains - proxy to groveengine for tenant lookup

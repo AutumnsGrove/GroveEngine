@@ -15,4 +15,7 @@ routes = [
   { pattern = "*.grove.place/*", zone_name = "grove.place" }
 ]
 
-# No bindings needed - this is a pure proxy worker
+# R2 binding for CDN
+[[r2_buckets]]
+binding = "CDN"
+bucket_name = "grove-cdn"
