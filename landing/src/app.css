@@ -408,6 +408,7 @@
 .bg-page { background-color: var(--color-background); }
 .bg-surface { background-color: var(--color-surface); }
 .bg-surface-elevated { background-color: var(--color-surface-elevated); }
+.bg-surface-hover { background-color: rgba(128, 128, 128, 0.1); }
 .bg-accent { background-color: var(--color-accent-bg); }
 .bg-error { background-color: var(--color-error-bg); }
 
