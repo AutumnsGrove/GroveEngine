@@ -255,7 +255,10 @@ export const accents = {
 		chickadeeBelly: '#fef3c7', // Buff/cream underside
 		// Robin (spring herald!)
 		robinBody: '#4a4a4a',      // American Robin dark gray-brown
+		robinWing: '#3a3a3a',      // Slightly darker wing
+		robinWingDark: '#2a2a2a',  // Wing shadow detail
 		robinBreast: '#c2410c',    // American Robin orange-red breast
+		robinBreastLight: '#dc5015', // Breast highlight
 		robinBeak: '#f59e0b',      // Yellow-orange beak
 		// Bluebird (spring/summer)
 		bluebirdBody: '#3b82f6',   // Eastern Bluebird vivid blue

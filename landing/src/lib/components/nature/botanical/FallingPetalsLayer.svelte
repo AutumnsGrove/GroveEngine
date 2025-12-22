@@ -69,7 +69,8 @@
 		const petals: Petal[] = [];
 
 		for (let i = 0; i < actualCount; i++) {
-			// Different seed multipliers for varied distributions
+			// Prime number multipliers ensure uncorrelated random distributions
+			// across different properties (avoids visible patterns in petal placement)
 			const xRand = hashRandom(i * 7);
 			const yRand = hashRandom(i * 11);
 			const depthRand = hashRandom(i * 13);

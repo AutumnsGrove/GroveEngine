@@ -23,7 +23,10 @@
 
 	// American Robin colors - from palette
 	const body = bodyColor ?? accents.bird.robinBody;
+	const wing = accents.bird.robinWing;
+	const wingDark = accents.bird.robinWingDark;
 	const breast = breastColor ?? accents.bird.robinBreast;
+	const breastLight = accents.bird.robinBreastLight;
 	const beak = beakColor ?? accents.bird.robinBeak;
 	const legColor = bark.darkBark;
 
@@ -39,19 +42,19 @@
 >
 	<!-- Tail feathers - dark gray-brown -->
 	<path fill={body} d="M5 32 Q2 38 4 46 Q10 44 14 38 Q15 34 11 31 Q7 30 5 32" />
-	<path fill="#3a3a3a" d="M6 34 Q4 40 5 44 Q9 42 11 38" opacity="0.5" />
+	<path fill={wing} d="M6 34 Q4 40 5 44 Q9 42 11 38" opacity="0.5" />
 
 	<!-- Body - dark gray-brown upper -->
 	<ellipse fill={body} cx="22" cy="30" rx="14" ry="11" />
 
 	<!-- Wing - slightly darker with feather details -->
-	<path fill="#3a3a3a" d="M9 26 Q5 32 8 40 Q15 38 19 32 Q17 25 9 26" />
-	<path fill="#2a2a2a" d="M11 30 Q9 34 11 38 Q14 36 15 33 Q13 30 11 30" opacity="0.5" />
+	<path fill={wing} d="M9 26 Q5 32 8 40 Q15 38 19 32 Q17 25 9 26" />
+	<path fill={wingDark} d="M11 30 Q9 34 11 38 Q14 36 15 33 Q13 30 11 30" opacity="0.5" />
 
 	<!-- Breast - iconic orange-red -->
 	<ellipse fill={breast} cx="30" cy="34" rx="9" ry="10" />
 	<!-- Breast highlight -->
-	<ellipse fill="#dc5015" cx="32" cy="32" rx="5" ry="6" opacity="0.4" />
+	<ellipse fill={breastLight} cx="32" cy="32" rx="5" ry="6" opacity="0.4" />
 
 	<!-- Head - dark gray -->
 	<circle fill={body} cx="36" cy="18" r="9" />
