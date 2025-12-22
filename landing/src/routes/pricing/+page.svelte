@@ -204,6 +204,9 @@
 						<p>
 							<strong>Everyone can read Grove blogs—no login required.</strong> All blogs are publicly accessible by default. Meadow (the community feed) requires a free account to browse. Only Evergreen tier users can choose to make their blog require login to view.
 						</p>
+						<p class="mt-2 text-xs text-foreground-faint">
+							When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.
+						</p>
 					</div>
 
 					<div>

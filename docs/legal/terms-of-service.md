@@ -34,9 +34,9 @@ The Service is provided on a subscription basis with different tiers offering va
 
 ### 3.1 Blog Access
 
-**Public by Default:** All Grove blogs are publicly accessible by default. Anyone can visit and read your blog without logging in or creating an account.
+**Public by Default:** All Grove blogs are publicly accessible by default. Anyone can visit and read your blog without logging in or creating an account. When you publish a post, it becomes visible to the public internet unless you have enabled privacy controls.
 
-**Privacy Controls (Evergreen tier only):** Users on the Evergreen subscription tier may choose to require login for blog access. This is an optional feature that restricts blog viewing to logged-in Grove users.
+**Privacy Controls (Evergreen tier only):** Users on the Evergreen subscription tier may choose to require login for blog access. When enabled, this restricts blog viewing to any logged-in Grove user (free or paid accounts). This is a platform-wide access restriction, not individual user permissions. For granular access control (allowing only specific users), contact us about custom plans.
 
 **Meadow Access:** The Meadow community feed requires a free Grove account to browse and interact with.
 

@@ -308,6 +308,73 @@ As product matures and Seedling users upgrade or churn:
 - Search engines can index (with AI crawler blocking per privacy policy)
 - Public sharing enabled
 
+### Security Considerations
+
+**Critical security requirements for private blogs:**
+
+1. **Authentication Checks**
+   - All blog routes must check authentication before serving content
+   - Direct post URLs (`/blog/post-slug`) must redirect to login if private
+   - API endpoints must not return private blog content to unauthenticated requests
+   - Middleware should handle authentication checks, not per-route logic
+
+2. **Content Leakage Prevention**
+   - OpenGraph tags (`og:title`, `og:description`, `og:image`) must not render for private blogs when unauthenticated
+   - RSS feed URLs must return 403 or redirect to login for private blogs
+   - Preview images and thumbnails must not be publicly accessible
+   - Sitemap must exclude private blogs
+   - robots.txt must include `Disallow: /` for private blogs
+
+3. **Metadata Protection**
+   - API responses must not leak private blog metadata (post count, post titles, author info)
+   - Search endpoints must not return results from private blogs for unauthenticated users
+   - Meadow feed must not show posts from private blogs (unless user is logged in)
+
+4. **User Education**
+   - Clear warning in post editor: "This post will be publicly visible"
+   - Confirmation modal when publishing first post: "Your blog is public. Anyone can read this."
+   - Dashboard banner for non-Evergreen users: "Your blog is publicly accessible"
+   - Privacy settings page clearly explains public vs private
+
+5. **CDN and Caching**
+   - Cloudflare cache must not serve private content to unauthenticated users
+   - Cache-Control headers must be `private, no-store` for login-required blogs
+   - Media files (images, videos) must respect blog privacy settings
+   - R2 bucket access must check blog privacy before serving assets
+
+### Implementation Checklist
+
+**Phase 1: Backend (Privacy Controls)**
+- [ ] Add `privacy_mode` field to `blogs` table (`public` | `login_required`)
+- [ ] Create middleware for blog authentication checks
+- [ ] Implement API access control for private blogs
+- [ ] Update RSS feed endpoint to respect privacy settings
+- [ ] Block private blog content from Meadow feed for unauthenticated users
+- [ ] Add privacy checks to media serving (R2 bucket access)
+
+**Phase 2: Frontend (User Experience)**
+- [ ] Build privacy settings UI (Evergreen tier only)
+- [ ] Add "public blog" warning to post editor
+- [ ] Create "first publish" confirmation modal
+- [ ] Add privacy status badge to dashboard
+- [ ] Implement login redirect for private blog URLs
+- [ ] Design "Login Required" page for private blogs
+
+**Phase 3: SEO & Discovery**
+- [ ] Update robots.txt generation to block private blogs
+- [ ] Remove private blogs from sitemap
+- [ ] Strip OpenGraph/meta tags from private blog pages when unauthenticated
+- [ ] Update AI crawler blocking to respect privacy settings
+- [ ] Disable public share links for private blogs
+
+**Phase 4: Testing & Security Audit**
+- [ ] Test unauthenticated access to all private blog routes
+- [ ] Verify OG tags don't leak private content
+- [ ] Test RSS feed access controls
+- [ ] Verify media files respect privacy settings
+- [ ] Test API endpoints for metadata leakage
+- [ ] Perform security audit before launch
+
 ---
 
 ## Open Questions

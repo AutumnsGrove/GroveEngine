@@ -47,6 +47,17 @@ All blogs are publicly accessible by default. You don't need an account to read 
 
 **Privacy option for Evergreen:** Only users on the Evergreen tier can choose to make their blog require login to view. For everyone else, blogs remain publicly accessible.
 
+### What "Public" Means
+
+When you publish a post on Grove (on any tier except Evergreen with privacy enabled), your content is:
+
+- **Visible to anyone** who visits your blog URL
+- **Indexed by search engines** (though AI crawlers are blocked)
+- **Shareable** via direct links
+- **Available via RSS feed** for anyone to subscribe
+
+This is by design. Grove is about sharing your voice with the world. If you need a private blog for client work, internal documentation, or paid memberships, the Evergreen tier provides login-required access controls.
+
 ---
 
 ## Free Tier

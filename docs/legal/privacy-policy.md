@@ -28,6 +28,16 @@ This Privacy Policy explains what data we collect, how we use it, and your right
 - Images and media you upload
 - Comments and reactions (if using Meadow)
 
+**Important: Your Blog is Public by Default**
+
+All Grove blogs are publicly accessible by default. This means:
+- Anyone can visit your blog at `username.grove.place` without logging in
+- Your posts, images, and media are visible to the public internet
+- Search engines can index your content (with AI crawlers blocked per our policy)
+- Your blog has a public RSS feed
+
+Only Evergreen tier users can choose to make their blog require login. For everyone else, **publishing a post makes it publicly accessible**. You should not publish content you want to keep private unless you are on the Evergreen tier and have enabled privacy controls.
+
 **Payment Information**
 - Billing details are processed by Stripe
 - We do not store your credit card numbers
