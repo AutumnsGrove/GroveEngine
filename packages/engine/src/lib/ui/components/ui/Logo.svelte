@@ -62,6 +62,7 @@
 		async function pulse() {
 			while (!cancelled) {
 				await breathValue.set(1);
+				if (cancelled) break;
 				await breathValue.set(0);
 			}
 		}
@@ -73,7 +74,9 @@
 		};
 	});
 
-	// Transform values based on breath (max ~22px expansion)
+	// Expansion values for breathing animation (in SVG units, tied to viewBox 417×512.238)
+	// These are absolute values within the SVG coordinate system, so they scale
+	// proportionally with the logo regardless of rendered size.
 	const expansion = $derived($breathValue * 22);
 	const diagExpansion = $derived($breathValue * 16); // ~16px at 45° angles
 
