@@ -20,6 +20,9 @@
 	import Stump from '$lib/components/nature/ground/Stump.svelte';
 	import Log from '$lib/components/nature/ground/Log.svelte';
 	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
+	import Tulip from '$lib/components/nature/ground/Tulip.svelte';
+	import Crocus from '$lib/components/nature/ground/Crocus.svelte';
+	import Daffodil from '$lib/components/nature/ground/Daffodil.svelte';
 
 	// Creatures
 	import Firefly from '$lib/components/nature/creatures/Firefly.svelte';
@@ -28,6 +31,8 @@
 	import BirdFlying from '$lib/components/nature/creatures/BirdFlying.svelte';
 	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
 	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
+	import Robin from '$lib/components/nature/creatures/Robin.svelte';
+	import Bluebird from '$lib/components/nature/creatures/Bluebird.svelte';
 	import Bee from '$lib/components/nature/creatures/Bee.svelte';
 	import Rabbit from '$lib/components/nature/creatures/Rabbit.svelte';
 	import Deer from '$lib/components/nature/creatures/Deer.svelte';
@@ -53,6 +58,7 @@
 	// Botanical
 	import Leaf from '$lib/components/nature/botanical/Leaf.svelte';
 	import LeafFalling from '$lib/components/nature/botanical/LeafFalling.svelte';
+	import PetalFalling from '$lib/components/nature/botanical/PetalFalling.svelte';
 	import Acorn from '$lib/components/nature/botanical/Acorn.svelte';
 	import PineCone from '$lib/components/nature/botanical/PineCone.svelte';
 	import Berry from '$lib/components/nature/botanical/Berry.svelte';
@@ -91,6 +97,9 @@
 		'Stump': { component: Stump, category: 'Ground', props: ['barkColor', 'ringColor'] },
 		'Log': { component: Log, category: 'Ground', props: ['barkColor'] },
 		'FlowerWild': { component: FlowerWild, category: 'Ground', props: ['petalColor', 'centerColor', 'stemColor', 'animate'] },
+		'Tulip': { component: Tulip, category: 'Ground', props: ['petalColor', 'stemColor', 'variant', 'animate'] },
+		'Crocus': { component: Crocus, category: 'Ground', props: ['petalColor', 'centerColor', 'stemColor', 'variant', 'animate'] },
+		'Daffodil': { component: Daffodil, category: 'Ground', props: ['petalColor', 'trumpetColor', 'stemColor', 'animate'] },
 
 		// Creatures
 		'Firefly': { component: Firefly, category: 'Creatures', props: ['glowColor', 'bodyColor', 'animate', 'intensity'] },
@@ -99,6 +108,8 @@
 		'BirdFlying': { component: BirdFlying, category: 'Creatures', props: ['color', 'animate', 'facing'] },
 		'Cardinal': { component: Cardinal, category: 'Creatures', props: ['bodyColor', 'maskColor', 'beakColor', 'animate', 'facing'] },
 		'Chickadee': { component: Chickadee, category: 'Creatures', props: ['capColor', 'cheekColor', 'bodyColor', 'animate', 'facing'] },
+		'Robin': { component: Robin, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
+		'Bluebird': { component: Bluebird, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
 		'Bee': { component: Bee, category: 'Creatures', props: ['bodyColor', 'stripeColor', 'animate'] },
 		'Rabbit': { component: Rabbit, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
 		'Deer': { component: Deer, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
@@ -124,6 +135,7 @@
 		// Botanical
 		'Leaf': { component: Leaf, category: 'Botanical', props: ['color', 'season', 'variant'] },
 		'LeafFalling': { component: LeafFalling, category: 'Botanical', props: ['color', 'season', 'animate', 'variant'] },
+		'PetalFalling': { component: PetalFalling, category: 'Botanical', props: ['color', 'variant', 'animate', 'opacity'] },
 		'Acorn': { component: Acorn, category: 'Botanical', props: ['capColor', 'nutColor'] },
 		'PineCone': { component: PineCone, category: 'Botanical', props: ['color'] },
 		'Berry': { component: Berry, category: 'Botanical', props: ['berryColor', 'variant'] },
@@ -172,6 +184,7 @@
 		'Rock': ['round', 'flat', 'jagged'],
 		'Leaf': ['oak', 'maple', 'simple', 'aspen'],
 		'LeafFalling': ['simple', 'maple'],
+		'PetalFalling': ['round', 'pointed', 'heart', 'curled', 'tiny'],
 		'Berry': ['cluster', 'single', 'branch'],
 		'Vine': ['tendril', 'ivy', 'flowering'],
 		'Reeds': ['cattail', 'grass'],
@@ -179,6 +192,8 @@
 		'Lattice': ['trellis', 'fence', 'archway'],
 		'FencePost': ['pointed', 'flat', 'round'],
 		'Lantern': ['hanging', 'standing', 'post'],
+		'Tulip': ['red', 'pink', 'yellow', 'purple'],
+		'Crocus': ['purple', 'yellow', 'white'],
 	};
 
 	// State

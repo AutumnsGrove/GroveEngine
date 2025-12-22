@@ -78,6 +78,39 @@ export const natural = {
 // =============================================================================
 
 /**
+ * Spring colors - fresh growth and renewal
+ * Bright yellow-greens of new leaves, soft pastels of early blooms.
+ * Organized dark-to-light for depth layering (darker = far, brighter = near).
+ * Spring feels lighter and more pastel than the saturated summer greens.
+ */
+export const spring = {
+	// Fresh growth greens (yellow-green tint of new leaves)
+	sprout: '#65a30d',        // Dark spring green - distant new growth
+	newLeaf: '#84cc16',       // Classic spring lime - mid-ground
+	freshGreen: '#a3e635',    // Bright yellow-green - foreground
+	budding: '#bef264',       // Pale new leaf
+	tender: '#d9f99d',        // Very pale spring green
+
+	// Sky and atmosphere
+	clearSky: '#7dd3fc',      // Clear spring morning sky
+	softSky: '#bae6fd',       // Pale spring sky
+
+	// Wildflower accents
+	buttercup: '#facc15',     // Bright yellow wildflower
+	daffodil: '#fde047',      // Pale yellow daffodil
+	crocus: '#a78bfa',        // Early spring crocus purple
+	lilac: '#c4b5fd',         // Soft lilac blooms
+	tulipPink: '#f9a8d4',     // Soft tulip pink
+	tulipRed: '#fb7185',      // Bright tulip red
+
+	// Hills and ground
+	hillDeep: '#166534',      // Far spring hills - rich green
+	hillMid: '#22c55e',       // Mid hills - meadow green
+	hillNear: '#86efac',      // Near hills - fresh mint
+	hillFront: '#bbf7d0'      // Front hills - pale spring green
+} as const;
+
+/**
  * Autumn/Fall colors
  * Replaces greens for deciduous trees during autumn season.
  * Organized warm-to-bright for depth layering (dark rust = far, bright gold = near).
@@ -209,18 +242,28 @@ export const accents = {
 		night: '#1e293b',     // Night sky
 		star: '#fefce8'       // Star/twinkle color
 	},
-	/** Bird colors - winter and year-round species */
+	/** Bird colors - winter, spring, and year-round species */
 	bird: {
+		// Cardinal (winter)
 		cardinalRed: '#dc2626',    // Northern Cardinal vivid red
 		cardinalMask: '#1a1a1a',   // Cardinal black mask
 		cardinalBeak: '#f97316',   // Orange-red cone beak
+		// Chickadee (year-round)
 		chickadeeCap: '#1a1a1a',   // Black-capped Chickadee cap/bib
 		chickadeeCheek: '#fafafa', // White cheek patch
 		chickadeeBody: '#6b7280',  // Gray back feathers
 		chickadeeBelly: '#fef3c7', // Buff/cream underside
+		// Robin (spring herald!)
 		robinBody: '#4a4a4a',      // American Robin dark gray-brown
-		robinBreast: '#c2410c',    // American Robin orange-red
-		robinBeak: '#f59e0b'       // Yellow-orange beak
+		robinWing: '#3a3a3a',      // Slightly darker wing
+		robinWingDark: '#2a2a2a',  // Wing shadow detail
+		robinBreast: '#c2410c',    // American Robin orange-red breast
+		robinBreastLight: '#dc5015', // Breast highlight
+		robinBeak: '#f59e0b',      // Yellow-orange beak
+		// Bluebird (spring/summer)
+		bluebirdBody: '#3b82f6',   // Eastern Bluebird vivid blue
+		bluebirdWing: '#2563eb',   // Slightly darker blue wings
+		bluebirdBreast: '#ea580c'  // Rusty orange breast
 	}
 } as const;
 
@@ -233,11 +276,26 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
 /**
  * Get appropriate foliage colors based on season
- * Used by deciduous trees to switch from greens to autumn palette.
+ * Used by deciduous trees to switch from greens to seasonal palette.
+ * Spring uses bright yellow-greens of new growth.
+ * Autumn uses warm oranges and golds.
  * In winter, returns frosted evergreen colors (for pines that keep needles).
+ * @example getSeasonalGreens('spring') // returns spring palette greens
  * @example getSeasonalGreens('autumn') // returns autumn palette
  */
 export function getSeasonalGreens(season: Season = 'summer') {
+	if (season === 'spring') {
+		// Fresh yellow-green spring foliage - mapped to match greens structure
+		return {
+			darkForest: spring.sprout,
+			deepGreen: spring.sprout,
+			grove: spring.newLeaf,
+			meadow: spring.freshGreen,
+			spring: spring.budding,
+			mint: spring.budding,
+			pale: spring.tender
+		};
+	}
 	if (season === 'autumn') {
 		return autumn;
 	}
@@ -257,12 +315,32 @@ export function getSeasonalGreens(season: Season = 'summer') {
 }
 
 /**
+ * Spring cherry blossom colors - extra vibrant for peak bloom
+ * Spring is when cherry blossoms are at their most beautiful.
+ * Slightly brighter and more saturated than the standard pinks.
+ */
+export const springBlossoms = {
+	deepPink: '#ec4899',    // Vibrant deep pink
+	pink: '#f472b6',        // Bright cherry blossom
+	rose: '#f9a8d4',        // Soft rose petals
+	blush: '#fbcfe8',       // Pale blush
+	palePink: '#fce7f3'     // Very pale falling petals
+} as const;
+
+/**
  * Get cherry tree colors based on season
- * Cherry blossoms are pink in spring/summer, turn red in autumn.
- * In winter, cherry trees are bare (no blossoms).
+ * Spring: Extra vibrant pink blossoms (peak bloom!)
+ * Summer: Standard pink blossoms
+ * Autumn: Turn red/crimson like real cherry leaves
+ * Winter: Bare (no blossoms)
+ * @example getCherryColors('spring') // returns springBlossoms (vibrant)
  * @example getCherryColors('autumn') // returns autumnReds palette
  */
-export function getCherryColors(season: Season = 'spring'): typeof pinks | typeof autumnReds | null {
+export function getCherryColors(season: Season = 'spring'): typeof pinks | typeof autumnReds | typeof springBlossoms | null {
+	if (season === 'spring') {
+		// Peak bloom - extra vibrant pinks!
+		return springBlossoms;
+	}
 	if (season === 'autumn') {
 		return autumnReds;
 	}
@@ -316,6 +394,8 @@ export const naturePalette = {
 	bark,
 	earth,
 	natural,
+	spring,
+	springBlossoms,
 	autumn,
 	pinks,
 	autumnReds,
