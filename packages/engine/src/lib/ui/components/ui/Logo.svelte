@@ -7,6 +7,13 @@
 	 * when placed in an accent-colored context, or can be overridden.
 	 *
 	 * The trunk defaults to Grove's classic bark brown (#5d4037).
+	 *
+	 * @example Loading state (breathing animation)
+	 * ```svelte
+	 * <Logo breathing />
+	 * <Logo breathing breathingSpeed="slow" />
+	 * ```
+	 * Note: breathing is intended for single loading indicators, not lists.
 	 */
 
 	import { tweened } from 'svelte/motion';
@@ -25,7 +32,7 @@
 		monochrome?: boolean;
 		/** Add subtle sway animation */
 		animate?: boolean;
-		/** Add breathing animation (for loading states) */
+		/** Add breathing animation (for loading states, not lists) */
 		breathing?: boolean;
 		/** Breathing animation speed - 'slow' (1500ms), 'normal' (800ms), 'fast' (400ms) */
 		breathingSpeed?: BreathingSpeed;
@@ -48,10 +55,16 @@
 		fast: 400      // 0.8s full cycle - urgent
 	} as const;
 
-	// Respect user's reduced motion preference
-	const prefersReducedMotion = browser
-		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-		: false;
+	// Respect user's reduced motion preference (reactive to system changes)
+	const reducedMotionQuery = browser ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+	let prefersReducedMotion = $state(reducedMotionQuery?.matches ?? false);
+
+	$effect(() => {
+		if (!reducedMotionQuery) return;
+		const handler = (e: MediaQueryListEvent) => { prefersReducedMotion = e.matches; };
+		reducedMotionQuery.addEventListener('change', handler);
+		return () => reducedMotionQuery.removeEventListener('change', handler);
+	});
 
 	// Classic bark brown from the nature palette
 	const BARK_BROWN = '#5d4037';
@@ -113,14 +126,10 @@
 	// Build animation classes (sway only, breathing uses transforms)
 	const animationClass = $derived(animate && !breathing ? 'grove-logo-sway' : '');
 
-	// Decomposed foliage paths (8 pieces)
-	// Original path decomposed into: center anchor + 7 branches
-	//
-	// These paths were derived by tracing the original foliage path command-by-command:
-	// Original: "M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872..."
-	// Each branch was isolated by identifying the geometric boundaries where arms meet the center.
-	// The center anchor covers the intersection hub; branches extend outward from there.
-	// If modifying, ensure the pieces align at rest (breathValue=0) to match the original silhouette.
+	// Decomposed foliage paths (8 pieces) for breathing animation
+	// Original path: "M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"
+	// Decomposed by tracing path commands and isolating geometric boundaries where arms meet center.
+	// If modifying, ensure pieces align at rest (breathValue=0) to match the original silhouette.
 
 	// Center anchor - the hub where all branches connect (stays stationary)
 	const centerPath = "M126 173.468 L171.476 124.872 L171.476 173.468 L126 173.468 M245.562 124.872 L290.972 173.268 L245.562 173.268 L245.562 124.872 M126.664 243.97 L171.476 243.97 L171.476 173.468 L126 173.468 L126.664 243.97 M290.252 243.77 L245.562 243.77 L245.562 173.268 L290.972 173.268 L290.252 243.77 M171.476 243.97 L208.519 258.11 L245.562 243.77 L245.562 173.268 L171.476 173.468 L171.476 243.97";
