@@ -61,6 +61,7 @@
 
 	--color-surface: rgba(255, 255, 255, 0.5);
 	--color-surface-elevated: #ffffff;
+	--color-surface-hover: rgba(0, 0, 0, 0.05);
 
 	--color-accent-bg: var(--grove-50);
 	--color-accent-border: var(--grove-200);
@@ -121,6 +122,7 @@
 
 	--color-surface: rgba(37, 35, 32, 0.5);
 	--color-surface-elevated: var(--cream-100);
+	--color-surface-hover: rgba(255, 255, 255, 0.08);
 
 	--color-accent-bg: var(--grove-950);
 	--color-accent-border: var(--grove-900);
@@ -408,6 +410,7 @@
 .bg-page { background-color: var(--color-background); }
 .bg-surface { background-color: var(--color-surface); }
 .bg-surface-elevated { background-color: var(--color-surface-elevated); }
+.bg-surface-hover { background-color: var(--color-surface-hover); }
 .bg-accent { background-color: var(--color-accent-bg); }
 .bg-error { background-color: var(--color-error-bg); }
 
