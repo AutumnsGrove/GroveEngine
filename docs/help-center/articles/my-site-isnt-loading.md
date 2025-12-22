@@ -86,7 +86,7 @@ Custom domain issues have their own quirks. Common culprits:
 - **Domain expired:** Check that your domain registration is current with your registrar.
 - **DNS provider issues:** Sometimes the problem is upstream. Try checking your registrar's status page.
 
-See [Custom Domain Troubleshooting](/help/custom-domain-issues) for more specific guidance.
+If you're still having trouble with your custom domain, [contact us](/support) with your domain name and we'll help you troubleshoot.
 
 ## Still stuck?
 
