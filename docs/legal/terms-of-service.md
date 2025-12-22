@@ -32,6 +32,14 @@ Grove is a multi-tenant blogging platform that provides:
 
 The Service is provided on a subscription basis with different tiers offering varying features and limits.
 
+### 3.1 Blog Access
+
+**Public by Default:** All Grove blogs are publicly accessible by default. Anyone can visit and read your blog without logging in or creating an account.
+
+**Privacy Controls (Evergreen tier only):** Users on the Evergreen subscription tier may choose to require login for blog access. This is an optional feature that restricts blog viewing to logged-in Grove users.
+
+**Meadow Access:** The Meadow community feed requires a free Grove account to browse and interact with.
+
 ---
 
 ## 4. Account Registration
@@ -58,7 +66,7 @@ Grove offers the following subscription plans:
 | Seedling | $8/month ($82/year) | 1GB storage, 50 posts, Meadow access, community support |
 | Sapling | $12/month ($122/year) | 5GB storage, 250 posts, Meadow access, email forwarding, email support |
 | Oak | $25/month ($255/year) | 20GB storage, unlimited posts, Meadow access, BYOD custom domain, full @grove.place email, priority support |
-| Evergreen | $35/month ($357/year) | 100GB storage, unlimited posts, Meadow access, custom domain included, full @grove.place email, 8 hours onboarding + priority support |
+| Evergreen | $35/month ($357/year) | 100GB storage, unlimited posts, Meadow access, custom domain included, privacy controls, full @grove.place email, 8 hours onboarding + priority support |
 
 Yearly plans save 15% — pay for 10 months, get 12.
 

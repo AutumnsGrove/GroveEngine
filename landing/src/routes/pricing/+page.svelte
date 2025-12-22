@@ -200,6 +200,13 @@
 
 				<div class="space-y-6 text-sm font-sans text-foreground-muted">
 					<div>
+						<h3 class="font-medium text-foreground mb-2">Reading Blogs</h3>
+						<p>
+							<strong>Everyone can read Grove blogs—no login required.</strong> All blogs are publicly accessible by default. Meadow (the community feed) requires a free account to browse. Only Evergreen tier users can choose to make their blog require login to view.
+						</p>
+					</div>
+
+					<div>
 						<h3 class="font-medium text-foreground mb-2">Free Accounts</h3>
 						<p>
 							Free accounts get full Meadow access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No blog, no storage. When you're ready to write, upgrade to Seedling.

@@ -19,6 +19,8 @@ The platform should feel like walking through a peaceful forest at golden hour. 
 
 Everyone deserves a voice online. Pricing should never be the barrier that stops someone from sharing their story. The basic tier exists so that anyone who wants to write can afford to write.
 
+**Your writing is for the world.** Grove blogs are publicly accessible by default—no login required, no paywall, no barriers. This is the open web as it should be. (Those who need private blogs for professional use can opt into login-required access at the Evergreen tier.)
+
 ## Ownership
 
 Your words are yours. Your data is yours. You can export everything, anytime. If you leave, you take your roots with you.

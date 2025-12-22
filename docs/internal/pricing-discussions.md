@@ -22,6 +22,7 @@
 | Custom Domain | — | — | BYOD only | ✓ (incl. search) |
 | @grove.place Email | — | Forward only | Full (send/receive) | Full (send/receive) |
 | Domain Registration | — | — | — | Included (up to $100/yr) |
+| Privacy Controls | — | — | — | Login-required option |
 | Support | Community | Email | Priority email | 8hrs free + priority |
 | Analytics | Basic | Basic | Full | Full |
 | **Target User** | *Curious* | *Hobbyists* | *Serious* | *Professional* |
@@ -266,6 +267,49 @@ As product matures and Seedling users upgrade or churn:
 
 ---
 
+## Blog Access & Privacy Controls
+
+### Default Access Model
+
+**Blogs are publicly readable by default.** Anyone can visit a Grove blog and read posts without logging in or creating an account. This is intentional—it aligns with Grove's mission to be a space for authentic expression on the open web.
+
+### What Requires Login
+
+**Meadow (the community feed)** requires a free account:
+- Browsing the community feed
+- Following other blogs
+- Reacting to posts
+- Leaving comments or replies
+
+**Free accounts** provide full Meadow access. No paid tier needed.
+
+### Privacy Controls (Evergreen Only)
+
+**Only Evergreen tier users** can choose to make their blog require login to read. This is a premium feature because:
+
+1. **Most users benefit from public blogs:** Public access is better for discovery, sharing, and building readership
+2. **Privacy has infrastructure costs:** Login-required blogs need additional access control checks on every page load
+3. **It's a professional use case:** Users who need private blogs (client work, paid memberships, internal documentation) are typically professionals willing to pay for the feature
+4. **Maintains Grove's open web ethos:** Keeping this as an opt-in premium feature (rather than default) reinforces that Grove is about sharing, not hiding
+
+### Implementation Notes
+
+**When login-required is enabled:**
+- Blog homepage shows "Login Required" message
+- Individual post URLs redirect to login
+- RSS feed is disabled (or requires authentication)
+- Public sharing is disabled
+- Search engines are blocked via robots.txt
+
+**Default behavior (all other tiers):**
+- Blogs are publicly accessible
+- No login required to read
+- RSS feeds work
+- Search engines can index (with AI crawler blocking per privacy policy)
+- Public sharing enabled
+
+---
+
 ## Open Questions
 
 1. **Support time tracking:** How much time do Evergreen users actually need in month 1?
@@ -289,6 +333,7 @@ As product matures and Seedling users upgrade or churn:
 | Dec 2025 | Set yearly discount at 15% | Industry standard, reduces churn |
 | Dec 2025 | Set post limits (50/250/unlimited) | Creates natural upgrade triggers |
 | Dec 2025 | Domain bundling up to $100/yr | Covers 95%+ of normal domains |
+| Dec 2025 | Privacy controls (Evergreen only) | Blogs publicly readable by default; only Evergreen can require login |
 
 ---
 
