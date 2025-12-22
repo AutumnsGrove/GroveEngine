@@ -11,6 +11,9 @@
 
 	import { tweened } from 'svelte/motion';
 	import { cubicInOut } from 'svelte/easing';
+	import { browser } from '$app/environment';
+
+	type BreathingSpeed = 'slow' | 'normal' | 'fast';
 
 	interface Props {
 		class?: string;
@@ -24,6 +27,8 @@
 		animate?: boolean;
 		/** Add breathing animation (for loading states) */
 		breathing?: boolean;
+		/** Breathing animation speed - 'slow' (1500ms), 'normal' (800ms), 'fast' (400ms) */
+		breathingSpeed?: BreathingSpeed;
 	}
 
 	let {
@@ -32,8 +37,21 @@
 		trunkColor,
 		monochrome = false,
 		animate = false,
-		breathing = false
+		breathing = false,
+		breathingSpeed = 'normal'
 	}: Props = $props();
+
+	// Breathing speed presets (duration per half-cycle in ms)
+	const BREATHING_SPEEDS: Record<BreathingSpeed, number> = {
+		slow: 1500,    // 3s full cycle - calm, meditative
+		normal: 800,   // 1.6s full cycle - balanced
+		fast: 400      // 0.8s full cycle - urgent
+	};
+
+	// Respect user's reduced motion preference
+	const prefersReducedMotion = browser
+		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		: false;
 
 	// Classic bark brown from the nature palette
 	const BARK_BROWN = '#5d4037';
@@ -46,24 +64,27 @@
 
 	// Breathing animation using tweened store
 	const breathValue = tweened(0, {
-		duration: 800,
+		duration: BREATHING_SPEEDS[breathingSpeed],
 		easing: cubicInOut
 	});
 
 	// Animation loop for breathing effect
 	$effect(() => {
-		if (!breathing) {
+		// Disable animation if breathing is off or user prefers reduced motion
+		if (!breathing || prefersReducedMotion) {
 			breathValue.set(0, { duration: 200 });
 			return;
 		}
 
 		let cancelled = false;
+		const duration = BREATHING_SPEEDS[breathingSpeed];
 
 		async function pulse() {
 			while (!cancelled) {
-				await breathValue.set(1);
+				await breathValue.set(1, { duration });
 				if (cancelled) break;
-				await breathValue.set(0);
+				await breathValue.set(0, { duration });
+				if (cancelled) break;
 			}
 		}
 
