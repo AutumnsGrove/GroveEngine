@@ -38,7 +38,7 @@ jobs:
         working-directory: .
 
       - name: Build engine package
-        run: pnpm run build
+        run: pnpm run package
         working-directory: packages/engine
 
       - name: Build
