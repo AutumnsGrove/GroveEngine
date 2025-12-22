@@ -29,10 +29,34 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 | Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
 | Custom Domain | — | — | — | BYOD | ✓ |
 | @grove.place Email | — | — | Forward | Full | Full |
+| Privacy Controls | — | — | — | — | Login-required option |
 | Support | Community | Community | Email | Priority | 8hrs + Priority |
 | **Best For** | *Readers* | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
 
 **Yearly plans save 15%** — pay for 10 months, get 12.
+
+---
+
+## Reading Blogs
+
+**Everyone can read Grove blogs—no login required.**
+
+All blogs are publicly accessible by default. You don't need an account to read someone's writing. Just visit their blog and read.
+
+**Meadow** (the community feed) requires a free account to browse and interact.
+
+**Privacy option for Evergreen:** Only users on the Evergreen tier can choose to make their blog require login to view. For everyone else, blogs remain publicly accessible.
+
+### What "Public" Means
+
+When you publish a post on Grove (on any tier except Evergreen with privacy enabled), your content is:
+
+- **Visible to anyone** who visits your blog URL
+- **Indexed by search engines** (though AI crawlers are blocked)
+- **Shareable** via direct links
+- **Available via RSS feed** for anyone to subscribe
+
+This is by design. Grove is about sharing your voice with the world. If you need a private blog for client work, internal documentation, or paid memberships, the Evergreen tier provides login-required access controls.
 
 ---
 
@@ -95,6 +119,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - **Theme customizer** + **custom font uploads**
 - **Community themes** — browse and import user-created themes
 - **Full email:** Send and receive as `you@grove.place`
+- **Privacy controls:** Option to require login for blog access
 - Full analytics dashboard
 - **8 hours of support included** (first month)
 - Priority support with faster response times

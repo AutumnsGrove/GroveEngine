@@ -22,6 +22,7 @@
 | Custom Domain | — | — | BYOD only | ✓ (incl. search) |
 | @grove.place Email | — | Forward only | Full (send/receive) | Full (send/receive) |
 | Domain Registration | — | — | — | Included (up to $100/yr) |
+| Privacy Controls | — | — | — | Login-required option |
 | Support | Community | Email | Priority email | 8hrs free + priority |
 | Analytics | Basic | Basic | Full | Full |
 | **Target User** | *Curious* | *Hobbyists* | *Serious* | *Professional* |
@@ -266,6 +267,179 @@ As product matures and Seedling users upgrade or churn:
 
 ---
 
+## Blog Access & Privacy Controls
+
+### Default Access Model
+
+**Blogs are publicly readable by default.** Anyone can visit a Grove blog and read posts without logging in or creating an account. This is intentional—it aligns with Grove's mission to be a space for authentic expression on the open web.
+
+### What Requires Login
+
+**Meadow (the community feed)** requires a free account:
+- Browsing the community feed
+- Following other blogs
+- Reacting to posts
+- Leaving comments or replies
+
+**Free accounts** provide full Meadow access. No paid tier needed.
+
+### Privacy Controls (Evergreen Only)
+
+**Only Evergreen tier users** can choose to make their blog require login to read. This is a premium feature because:
+
+1. **Most users benefit from public blogs:** Public access is better for discovery, sharing, and building readership
+2. **Privacy has infrastructure costs:** Login-required blogs need additional access control checks on every page load
+3. **It's a professional use case:** Users who need private blogs (client work, paid memberships, internal documentation) are typically professionals willing to pay for the feature
+4. **Maintains Grove's open web ethos:** Keeping this as an opt-in premium feature (rather than default) reinforces that Grove is about sharing, not hiding
+
+### Implementation Notes
+
+**When login-required is enabled:**
+- Blog homepage shows "Login Required" message
+- Individual post URLs redirect to login
+- RSS feed is **disabled entirely** (authenticated RSS breaks most feed readers)
+- Public sharing is disabled
+- Search engines are blocked via robots.txt
+
+**Default behavior (all other tiers):**
+- Blogs are publicly accessible
+- No login required to read
+- RSS feeds work
+- Search engines can index (with AI crawler blocking per privacy policy)
+- Public sharing enabled
+
+### Downgrade Behavior
+
+**What happens when an Evergreen user with privacy enabled downgrades:**
+
+1. **7-day warning email** sent when downgrade is initiated
+   - Subject: "Your blog will become public in 7 days"
+   - Explains privacy controls will be disabled
+   - Provides option to cancel downgrade
+   - Lists alternatives (export data, delete blog, stay on Evergreen)
+
+2. **On downgrade effective date:**
+   - Privacy mode automatically set to `public`
+   - Blog becomes publicly accessible
+   - RSS feed re-enabled
+   - Search engine indexing re-enabled
+   - Confirmation email sent: "Your blog is now public"
+
+3. **Grace period considerations:**
+   - No grace period for privacy feature (auto-disable on downgrade)
+   - User can upgrade back to Evergreen anytime to re-enable
+   - Privacy setting preserved in database (can be re-enabled if user upgrades again within 30 days)
+
+4. **Edge cases:**
+   - Payment failure during Evergreen subscription: 7-day grace, then auto-disable privacy
+   - Trial period end: Same 7-day warning applies
+   - Admin-initiated downgrade: Immediate email notification, privacy disabled on effective date
+
+### Security Considerations
+
+**Critical security requirements for private blogs:**
+
+1. **Authentication Checks**
+   - All blog routes must check authentication before serving content
+   - Direct post URLs (`/blog/post-slug`) must redirect to login if private
+   - API endpoints must not return private blog content to unauthenticated requests
+   - Middleware should handle authentication checks, not per-route logic
+
+2. **Content Leakage Prevention**
+   - OpenGraph tags (`og:title`, `og:description`, `og:image`) must not render for private blogs when unauthenticated
+   - RSS feed URLs must return 403 or redirect to login for private blogs
+   - Preview images and thumbnails must not be publicly accessible
+   - Sitemap must exclude private blogs
+   - robots.txt must include `Disallow: /` for private blogs
+
+3. **Metadata Protection**
+   - API responses must not leak private blog metadata (post count, post titles, author info)
+   - Search endpoints must not return results from private blogs for unauthenticated users
+   - Meadow feed must not show posts from private blogs (unless user is logged in)
+
+4. **User Education**
+   - Clear warning in post editor: "This post will be publicly visible"
+   - Confirmation modal when publishing first post: "Your blog is public. Anyone can read this."
+   - Dashboard banner for non-Evergreen users: "Your blog is publicly accessible"
+   - Privacy settings page clearly explains public vs private
+
+5. **CDN and Caching**
+   - Cloudflare cache must not serve private content to unauthenticated users
+   - Cache-Control headers must be `private, no-store` for login-required blogs
+   - Media files (images, videos) must respect blog privacy settings
+   - R2 bucket access must check blog privacy before serving assets
+
+6. **Session Security**
+   - Session fixation prevention (regenerate session ID after login)
+   - Secure session cookies (`HttpOnly`, `Secure`, `SameSite=Strict`)
+   - Session timeout for inactive users (30 minutes)
+   - Referrer-Policy header set to `no-referrer` or `same-origin` for private blogs
+
+7. **Enumeration Prevention**
+   - Timing attack mitigation (constant-time responses for private blog checks)
+   - Generic error messages (don't reveal if blog exists when unauthenticated)
+   - Rate limiting on blog access attempts
+   - No metadata leakage through 404 vs 403 differences
+
+8. **Image Hotlinking**
+   - R2 image URLs must validate blog privacy before serving
+   - Signed URLs for private blog images (time-limited)
+   - Referer checking for hotlink prevention
+   - Direct R2 URL access blocked for private blogs
+
+9. **API Versioning**
+   - Privacy controls must be built into API from day one
+   - All API endpoints must check blog privacy before returning data
+   - Future API versions maintain privacy checks
+   - No backwards compatibility issues that bypass privacy
+
+### Implementation Checklist
+
+**Phase 1: Backend (Privacy Controls)**
+- [ ] Add `privacy_mode` field to `blogs` table (`public` | `login_required`)
+- [ ] Create middleware for blog authentication checks
+- [ ] Implement API access control for private blogs
+- [ ] Update RSS feed endpoint to disable for private blogs (no authenticated RSS)
+- [ ] Block private blog content from Meadow feed for unauthenticated users
+- [ ] Add privacy checks to media serving (R2 bucket access)
+- [ ] Implement audit logging for privacy setting changes (who, when, old/new value)
+- [ ] Add rate limiting for blog access attempts (prevent enumeration)
+- [ ] Create tier validation checks (Evergreen-only for privacy controls)
+- [ ] Implement downgrade handler (auto-disable privacy, send emails)
+- [ ] Add billing integration (verify active Evergreen before allowing privacy toggle)
+
+**Phase 2: Frontend (User Experience)**
+- [ ] Build privacy settings UI (Evergreen tier only)
+- [ ] Add "public blog" warning to post editor
+- [ ] Create "first publish" confirmation modal
+- [ ] Add privacy status badge to dashboard
+- [ ] Implement login redirect for private blog URLs
+- [ ] Design "Login Required" page for private blogs
+
+**Phase 3: SEO & Discovery**
+- [ ] Update robots.txt generation to block private blogs
+- [ ] Remove private blogs from sitemap
+- [ ] Strip OpenGraph/meta tags from private blog pages when unauthenticated
+- [ ] Update AI crawler blocking to respect privacy settings
+- [ ] Disable public share links for private blogs
+
+**Phase 4: Testing & Security Audit**
+- [ ] Test unauthenticated access to all private blog routes
+- [ ] Verify OG tags don't leak private content
+- [ ] Test RSS feed disabled for private blogs
+- [ ] Verify media files respect privacy settings (R2 hotlinking)
+- [ ] Test API endpoints for metadata leakage
+- [ ] Test timing attack resistance (constant-time responses)
+- [ ] Verify session fixation prevention
+- [ ] Test Referrer-Policy headers for private blogs
+- [ ] Test downgrade flow (email warnings, auto-disable)
+- [ ] Verify tier validation (non-Evergreen can't enable privacy)
+- [ ] Test audit logging for all privacy changes
+- [ ] Perform penetration testing (OWASP top 10)
+- [ ] Security audit by external reviewer before launch
+
+---
+
 ## Open Questions
 
 1. **Support time tracking:** How much time do Evergreen users actually need in month 1?
@@ -289,6 +463,7 @@ As product matures and Seedling users upgrade or churn:
 | Dec 2025 | Set yearly discount at 15% | Industry standard, reduces churn |
 | Dec 2025 | Set post limits (50/250/unlimited) | Creates natural upgrade triggers |
 | Dec 2025 | Domain bundling up to $100/yr | Covers 95%+ of normal domains |
+| Dec 2025 | Privacy controls (Evergreen only) | Blogs publicly readable by default; only Evergreen can require login |
 
 ---
 
