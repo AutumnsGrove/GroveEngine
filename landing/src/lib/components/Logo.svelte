@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from './nature/palette';
-	import { autumn, winter, greens, bark } from './nature/palette';
+	import { autumn, winter, greens, bark, springBlossoms } from './nature/palette';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -31,13 +31,13 @@
 	const animationClass = $derived(breathing ? 'breathing' : (animate ? 'sway' : ''));
 
 	// Seasonal color mapping for the logo
-	// - Spring: Light spring green (temporary - will refine when spring mode is fully implemented)
+	// - Spring: Blossom pink - celebrating cherry blossom season!
 	// - Summer: Grove brand green
 	// - Autumn: Warm orange tones matching the forest palette
 	// - Winter: Frosted muted green (Logo stays green year-round like an evergreen)
 	const defaultColor = $derived(
-		season === 'spring' ? greens.mint :       // Temporary light spring green
-		season === 'autumn' ? autumn.pumpkin :    // Orange matching autumn forest palette
+		season === 'spring' ? springBlossoms.pink :  // Blossom pink for spring!
+		season === 'autumn' ? autumn.pumpkin :       // Orange matching autumn forest palette
 		season === 'winter' ? winter.winterGreen :
 		greens.grove  // Summer uses Grove brand green
 	);

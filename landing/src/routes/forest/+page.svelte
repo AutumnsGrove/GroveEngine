@@ -21,6 +21,10 @@
 	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
 	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
 
+	// Spring birds
+	import Robin from '$lib/components/nature/creatures/Robin.svelte';
+	import Bluebird from '$lib/components/nature/creatures/Bluebird.svelte';
+
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
@@ -35,10 +39,13 @@
 		pinks,
 		autumnReds,
 		winter,
+		spring,
+		springBlossoms,
 		type Season
 	} from '$lib/components/nature/palette';
 
 	// Season state - using shared store so logo respects forest season
+	const isSpring = $derived($seasonStore === 'spring');
 	const isAutumn = $derived($seasonStore === 'autumn');
 	const isWinter = $derived($seasonStore === 'winter');
 
@@ -135,7 +142,12 @@
 
 	// Get seasonal colors based on depth (takes season explicitly for reactivity)
 	function getDepthColors(brightness: 'dark' | 'mid' | 'light', currentSeason: Season): string[] {
-		if (currentSeason === 'autumn') {
+		if (currentSeason === 'spring') {
+			// Fresh yellow-green spring foliage
+			if (brightness === 'dark') return [spring.sprout, spring.newLeaf];
+			if (brightness === 'mid') return [spring.newLeaf, spring.freshGreen];
+			return [spring.freshGreen, spring.budding, spring.tender];
+		} else if (currentSeason === 'autumn') {
 			if (brightness === 'dark') return [autumn.rust, autumn.ember];
 			if (brightness === 'mid') return [autumn.pumpkin, autumn.amber];
 			return [autumn.gold, autumn.honey, autumn.straw];
@@ -152,7 +164,12 @@
 	}
 
 	function getDepthPinks(brightness: 'dark' | 'mid' | 'light', currentSeason: Season): string[] {
-		if (currentSeason === 'autumn') {
+		if (currentSeason === 'spring') {
+			// Peak cherry blossom season - extra vibrant!
+			if (brightness === 'dark') return [springBlossoms.deepPink, springBlossoms.pink];
+			if (brightness === 'mid') return [springBlossoms.pink, springBlossoms.rose];
+			return [springBlossoms.rose, springBlossoms.blush, springBlossoms.palePink];
+		} else if (currentSeason === 'autumn') {
 			return [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
 		} else if (currentSeason === 'winter') {
 			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
@@ -173,7 +190,12 @@
 		} else if (isAutumn) {
 			const colors = ['#92400e', '#b45309', '#d97706', '#f59e0b'];
 			return colors[layerIndex] ?? colors[0];
+		} else if (isSpring) {
+			// Fresh spring meadow - bright yellow-green hills
+			const colors = [spring.hillDeep, spring.hillMid, spring.hillNear, spring.hillFront];
+			return colors[layerIndex] ?? colors[0];
 		} else {
+			// Summer - rich deep greens
 			const colors = ['#166534', '#15803d', '#22c55e', '#4ade80'];
 			return colors[layerIndex] ?? colors[0];
 		}
@@ -277,10 +299,10 @@
 		});
 	});
 
-	// Winter birds - positioned relative to trees for organic placement
-	interface WinterBird {
+	// Seasonal birds - positioned relative to trees for organic placement
+	interface SeasonalBird {
 		id: number;
-		type: 'cardinal' | 'chickadee';
+		type: 'cardinal' | 'chickadee' | 'robin' | 'bluebird';
 		x: number;
 		y: number;
 		size: number;
@@ -289,8 +311,8 @@
 		facing: 'left' | 'right';
 	}
 
-	// Generate bird positions based on tree locations
-	const winterBirds = $derived.by((): WinterBird[] => {
+	// Generate winter bird positions based on tree locations
+	const winterBirds = $derived.by((): SeasonalBird[] => {
 		if (baseTrees.length === 0) return [];
 
 		// Filter to valid perching trees (no logos, visible x positions)
@@ -314,7 +336,7 @@
 			.filter((t) => !cardinalTrees.includes(t))
 			.filter((_, i) => [1, 4, 7].includes(i));
 
-		const birds: WinterBird[] = [];
+		const birds: SeasonalBird[] = [];
 		let birdId = 0;
 
 		// Place cardinals - one facing each direction
@@ -348,6 +370,65 @@
 		return birds;
 	});
 
+	// Generate spring bird positions - robins and bluebirds herald the season!
+	const springBirds = $derived.by((): SeasonalBird[] => {
+		if (baseTrees.length === 0) return [];
+
+		// Filter to valid perching trees (no logos, visible x positions)
+		const perchableTrees = baseTrees
+			.filter((t) => t.treeType !== 'logo')
+			.filter((t) => t.x > 15 && t.x < 85)
+			.sort((a, b) => a.id - b.id);
+
+		const leftTrees = perchableTrees.filter((t) => t.x < 50);
+		const rightTrees = perchableTrees.filter((t) => t.x >= 50);
+
+		// Select trees for robins - heralds of spring!
+		const robinTrees = [
+			leftTrees[Math.min(1, leftTrees.length - 1)],
+			rightTrees[Math.min(2, rightTrees.length - 1)],
+			leftTrees[Math.min(4, leftTrees.length - 1)]
+		].filter(Boolean);
+
+		// Select trees for bluebirds
+		const bluebirdTrees = perchableTrees
+			.filter((t) => !robinTrees.includes(t))
+			.filter((_, i) => [2, 5].includes(i));
+
+		const birds: SeasonalBird[] = [];
+		let birdId = 0;
+
+		// Place robins
+		robinTrees.forEach((tree, i) => {
+			birds.push({
+				id: birdId++,
+				type: 'robin',
+				x: tree.x + (i % 2 === 0 ? 2 : -2),
+				y: tree.y - 7,
+				size: Math.max(10, tree.size * 0.16),
+				zIndex: tree.zIndex + 1,
+				opacity: tree.opacity,
+				facing: i % 2 === 0 ? 'right' : 'left'
+			});
+		});
+
+		// Place bluebirds
+		bluebirdTrees.forEach((tree, i) => {
+			birds.push({
+				id: birdId++,
+				type: 'bluebird',
+				x: tree.x + (i % 2 === 0 ? -3 : 3),
+				y: tree.y - 6,
+				size: Math.max(8, tree.size * 0.14),
+				zIndex: tree.zIndex + 1,
+				opacity: tree.opacity,
+				facing: i % 2 === 0 ? 'left' : 'right'
+			});
+		});
+
+		return birds;
+	});
+
 	// Toggle season (cycles through: spring → summer → autumn → winter)
 	function toggleSeason() {
 		seasonStore.cycle();
@@ -359,7 +440,7 @@
 	<meta name="description" content="A forest of Grove trees, growing together." />
 </svelte:head>
 
-<main class="min-h-screen flex flex-col transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
+<main class="min-h-screen flex flex-col transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-slate-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
@@ -368,10 +449,23 @@
 			<button
 				onclick={toggleSeason}
 				class="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-110 transition-transform"
-				aria-label={isWinter ? 'Switch to spring/summer' : isAutumn ? 'Switch to winter' : 'Switch to autumn'}
+				aria-label={isSpring ? 'Switch to summer' : isAutumn ? 'Switch to winter' : isWinter ? 'Switch to spring' : 'Switch to autumn'}
 			>
-				{#if isWinter}
-					<!-- Snowflake icon - click to go back to summer -->
+				{#if isSpring}
+					<!-- Cherry blossom icon - spring -->
+					<svg class="w-6 h-6 text-pink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="3" />
+						<path d="M12 2v4" />
+						<path d="M12 18v4" />
+						<path d="M4.93 4.93l2.83 2.83" />
+						<path d="M16.24 16.24l2.83 2.83" />
+						<path d="M2 12h4" />
+						<path d="M18 12h4" />
+						<path d="M4.93 19.07l2.83-2.83" />
+						<path d="M16.24 7.76l2.83-2.83" />
+					</svg>
+				{:else if isWinter}
+					<!-- Snowflake icon - click to go to spring -->
 					<svg class="w-6 h-6 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="12" y1="2" x2="12" y2="22" />
 						<line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
@@ -392,7 +486,7 @@
 						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
 					</svg>
 				{:else}
-					<!-- Flower icon - click to go to autumn -->
+					<!-- Sun/flower icon - summer, click to go to autumn -->
 					<svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1" />
 						<circle cx="12" cy="8" r="2" />
@@ -405,7 +499,7 @@
 		</div>
 
 		<!-- Sky background gradient -->
-		<div class="absolute inset-0 transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
+		<div class="absolute inset-0 transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
 		<!-- Clouds (decorative) -->
 		<div class="absolute top-8 left-[10%] opacity-60" aria-hidden="true">
@@ -420,11 +514,11 @@
 			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" role="presentation">
 				<path
 					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
-					class="transition-colors duration-1000 {isWinter ? 'fill-slate-300/50 dark:fill-slate-600/40' : isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
+					class="transition-colors duration-1000 {isWinter ? 'fill-slate-300/50 dark:fill-slate-600/40' : isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : isSpring ? 'fill-lime-200/40 dark:fill-lime-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
 				/>
 				<path
 					d="M0 120 L0 100 Q200 60 400 85 Q600 110 800 70 Q1000 40 1200 80 L1200 120 Z"
-					class="transition-colors duration-1000 {isWinter ? 'fill-slate-400/40 dark:fill-slate-500/30' : isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
+					class="transition-colors duration-1000 {isWinter ? 'fill-slate-400/40 dark:fill-slate-500/30' : isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : isSpring ? 'fill-lime-300/30 dark:fill-lime-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
 				/>
 			</svg>
 		</div>
@@ -473,6 +567,35 @@
 							/>
 						{:else}
 							<Chickadee
+								class="w-{bird.size} h-{bird.size}"
+								style="width: {bird.size}px; height: {bird.size}px;"
+								facing={bird.facing}
+							/>
+						{/if}
+					</div>
+				{/each}
+			{/if}
+
+			<!-- Spring birds - robins and bluebirds herald the new season! -->
+			{#if isSpring}
+				{#each springBirds as bird (bird.id)}
+					<div
+						class="absolute"
+						style="
+							left: {bird.x}%;
+							top: {bird.y}%;
+							z-index: {bird.zIndex};
+							opacity: {bird.opacity};
+						"
+					>
+						{#if bird.type === 'robin'}
+							<Robin
+								class="w-{bird.size} h-{bird.size * 1.2}"
+								style="width: {bird.size}px; height: {bird.size * 1.2}px;"
+								facing={bird.facing}
+							/>
+						{:else if bird.type === 'bluebird'}
+							<Bluebird
 								class="w-{bird.size} h-{bird.size}"
 								style="width: {bird.size}px; height: {bird.size}px;"
 								facing={bird.facing}
@@ -549,6 +672,23 @@
 			<h2 class="text-2xl font-serif text-foreground text-center mb-8">Forest Palette</h2>
 
 			<div class="grid md:grid-cols-2 gap-8">
+				<!-- Spring Colors -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(spring).slice(0, 9) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+
 				<!-- Summer Greens -->
 				<div>
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
