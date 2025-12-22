@@ -126,7 +126,7 @@ Your privacy is important to us. Please review our [Privacy Policy](https://grov
 The Service, including its design, features, and underlying technology, is owned by us and protected by intellectual property laws. You may not copy, modify, or reverse engineer any part of the Service.
 
 ### 9.2 Open Source
-The Grove platform code is available under the [GNU Affero General Public License v3.0 (AGPL-3.0)](../../LICENSE). This allows you to view and learn from the code while ensuring that any modifications to the platform remain open source.
+The Grove platform code is available under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://github.com/AutumnsGrove/GroveEngine/blob/main/LICENSE). This allows you to view and learn from the code while ensuring that any modifications to the platform remain open source.
 
 ---
 

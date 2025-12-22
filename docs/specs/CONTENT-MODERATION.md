@@ -18,7 +18,7 @@
 
 ## Overview
 
-Grove uses automated content moderation to enforce our [Acceptable Use Policy](../Legal/ACCEPTABLE-USE-POLICY.md) while maintaining strict privacy protections. This system is designed with a **privacy-first architecture**: no human eyes on user data, no retention of content, and fully encrypted processing.
+Grove uses automated content moderation to enforce our [Acceptable Use Policy](/knowledge/legal/acceptable-use-policy) while maintaining strict privacy protections. This system is designed with a **privacy-first architecture**: no human eyes on user data, no retention of content, and fully encrypted processing.
 
 ---
 
@@ -650,7 +650,7 @@ We're sorry for the inconvenience. If you have any questions, please reply to th
 
 ### 13.2 Policy Integration
 
-This system enforces the [Acceptable Use Policy](../Legal/ACCEPTABLE-USE-POLICY.md). Any AUP changes must be reflected in:
+This system enforces the [Acceptable Use Policy](/knowledge/legal/acceptable-use-policy). Any AUP changes must be reflected in:
 - Category definitions (Section 6)
 - Prompt template (Section 6.2)
 - Severity mappings (Section 7)
