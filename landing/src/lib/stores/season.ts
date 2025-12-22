@@ -24,7 +24,12 @@ function getInitialSeason(): Season {
 		return stored as Season;
 	}
 
-	// First visit: default to autumn (Grove's signature season)
+	// Clean up invalid stored value if present
+	if (stored) {
+		localStorage.removeItem(STORAGE_KEY);
+	}
+
+	// First visit (or invalid value): default to autumn (Grove's signature season)
 	return 'autumn';
 }
 

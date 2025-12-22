@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from './nature/palette';
-	import { autumn, winter } from './nature/palette';
+	import { autumn, winter, greens } from './nature/palette';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -18,7 +18,7 @@
 		class: className = 'w-6 h-6',
 		color,
 		trunkColor,
-		season = 'summer',
+		season = 'autumn',  // Default to autumn (Grove's signature season)
 		animate = false,
 		animateEntrance = false,
 		breathing = false
@@ -30,13 +30,16 @@
 	// Build animation class - breathing takes precedence over sway
 	const animationClass = $derived(breathing ? 'breathing' : (animate ? 'sway' : ''));
 
-	// In autumn, default to warm amber/orange tones
-	// In winter, use frosted muted green (Logo stays green year-round like an evergreen)
-	// Use $derived to react to season/color prop changes
+	// Seasonal color mapping for the logo
+	// - Spring: TODO - will use spring palette when implemented (for now, falls through to summer)
+	// - Summer: Grove brand green
+	// - Autumn: Warm amber/orange tones
+	// - Winter: Frosted muted green (Logo stays green year-round like an evergreen)
 	const defaultColor = $derived(
 		season === 'autumn' ? autumn.amber :
 		season === 'winter' ? winter.winterGreen :
-		'currentColor'
+		// Spring falls through to summer colors until spring palette is implemented
+		greens.grove  // Summer (and spring for now) use Grove brand green
 	);
 	const foliageColor = $derived(color ?? defaultColor);
 	const actualTrunkColor = $derived(trunkColor ?? foliageColor);
