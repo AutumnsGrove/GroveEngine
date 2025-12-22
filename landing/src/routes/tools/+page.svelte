@@ -58,6 +58,7 @@
 	// Botanical
 	import Leaf from '$lib/components/nature/botanical/Leaf.svelte';
 	import LeafFalling from '$lib/components/nature/botanical/LeafFalling.svelte';
+	import PetalFalling from '$lib/components/nature/botanical/PetalFalling.svelte';
 	import Acorn from '$lib/components/nature/botanical/Acorn.svelte';
 	import PineCone from '$lib/components/nature/botanical/PineCone.svelte';
 	import Berry from '$lib/components/nature/botanical/Berry.svelte';
@@ -134,6 +135,7 @@
 		// Botanical
 		'Leaf': { component: Leaf, category: 'Botanical', props: ['color', 'season', 'variant'] },
 		'LeafFalling': { component: LeafFalling, category: 'Botanical', props: ['color', 'season', 'animate', 'variant'] },
+		'PetalFalling': { component: PetalFalling, category: 'Botanical', props: ['color', 'variant', 'animate', 'opacity'] },
 		'Acorn': { component: Acorn, category: 'Botanical', props: ['capColor', 'nutColor'] },
 		'PineCone': { component: PineCone, category: 'Botanical', props: ['color'] },
 		'Berry': { component: Berry, category: 'Botanical', props: ['berryColor', 'variant'] },
@@ -182,6 +184,7 @@
 		'Rock': ['round', 'flat', 'jagged'],
 		'Leaf': ['oak', 'maple', 'simple', 'aspen'],
 		'LeafFalling': ['simple', 'maple'],
+		'PetalFalling': ['round', 'pointed', 'heart', 'curled', 'tiny'],
 		'Berry': ['cluster', 'single', 'branch'],
 		'Vine': ['tendril', 'ivy', 'flowering'],
 		'Reeds': ['cattail', 'grass'],

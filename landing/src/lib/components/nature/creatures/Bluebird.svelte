@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bark } from '../palette';
+	import { bark, accents } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -21,12 +21,12 @@
 		facing = 'right'
 	}: Props = $props();
 
-	// Eastern Bluebird colors - vivid blue with rusty breast
-	const body = bodyColor ?? '#3b82f6';      // Bright blue
-	const wing = '#2563eb';                    // Slightly darker blue
-	const breast = breastColor ?? '#ea580c';   // Rusty orange breast
-	const belly = '#fef3c7';                   // Cream/white belly
-	const beak = beakColor ?? '#1a1a1a';       // Dark beak
+	// Eastern Bluebird colors - from palette
+	const body = bodyColor ?? accents.bird.bluebirdBody;
+	const wing = accents.bird.bluebirdWing;
+	const breast = breastColor ?? accents.bird.bluebirdBreast;
+	const belly = accents.bird.chickadeeBelly;  // Cream/white (shared with chickadee)
+	const beak = beakColor ?? '#1a1a1a';
 	const legColor = bark.darkBark;
 
 	const scaleX = facing === 'left' ? -1 : 1;

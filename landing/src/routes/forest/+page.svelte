@@ -14,6 +14,9 @@
 	// Falling leaves
 	import FallingLeavesLayer from '$lib/components/nature/botanical/FallingLeavesLayer.svelte';
 
+	// Falling petals (spring cherry blossoms)
+	import FallingPetalsLayer from '$lib/components/nature/botanical/FallingPetalsLayer.svelte';
+
 	// Snowfall
 	import SnowfallLayer from '$lib/components/nature/weather/SnowfallLayer.svelte';
 
@@ -544,6 +547,19 @@
 					enabled={true}
 					opacity={{ min: 0.6, max: 1 }}
 					spawnDelay={6}
+				/>
+			{/if}
+
+			<!-- Falling petals layer - cherry blossoms in spring -->
+			{#if isSpring}
+				<FallingPetalsLayer
+					count={80}
+					zIndex={100}
+					enabled={true}
+					opacity={{ min: 0.5, max: 0.9 }}
+					fallDuration={{ min: 12, max: 20 }}
+					driftRange={80}
+					spawnDelay={12}
 				/>
 			{/if}
 
