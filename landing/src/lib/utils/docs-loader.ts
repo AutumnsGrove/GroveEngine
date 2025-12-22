@@ -1,18 +1,18 @@
 import { readFileSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
 import matter from "gray-matter";
 import { marked } from "marked";
+import type { Doc, DocCategory, DocWithContent } from "$lib/types/docs";
 
-export interface Doc {
-  slug: string;
-  title: string;
-  description?: string;
-  excerpt: string;
-  category: "specs" | "help" | "legal";
-  lastUpdated?: string;
-  readingTime: number;
-  content?: string;
-  html?: string;
+// Re-export types for convenience
+export type { Doc, DocWithContent } from "$lib/types/docs";
+
+// Docs are at project root, not in landing folder
+const DOCS_ROOT = resolve(process.cwd(), "..", "docs");
+
+/** Internal type with file path for content loading */
+interface DocInternal extends Doc {
+  _filePath: string;
 }
 
 function calculateReadingTime(content: string): number {
@@ -34,7 +34,7 @@ function generateExcerpt(content: string): string {
   return excerpt + (firstParagraph.length > 200 ? "..." : "");
 }
 
-function parseDoc(filePath: string, category: "specs" | "help" | "legal"): Doc {
+function parseDoc(filePath: string, category: DocCategory): DocInternal {
   const content = readFileSync(filePath, "utf-8");
   const { data, content: markdownContent } = matter(content);
 
@@ -54,14 +54,15 @@ function parseDoc(filePath: string, category: "specs" | "help" | "legal"): Doc {
     category,
     lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
     readingTime: calculateReadingTime(markdownContent),
+    _filePath: filePath,
   };
 }
 
 function loadDocsFromDir(
   dirPath: string,
-  category: "specs" | "help" | "legal",
-): Doc[] {
-  const docs: Doc[] = [];
+  category: DocCategory,
+): DocInternal[] {
+  const docs: DocInternal[] = [];
 
   function readDirRecursive(currentPath: string) {
     const items = readdirSync(currentPath);
@@ -70,6 +71,7 @@ function loadDocsFromDir(
       const fullPath = join(currentPath, item);
       const stat = statSync(fullPath);
 
+      // Skip "completed" subdirectory (archived specs)
       if (stat.isDirectory() && item !== "completed") {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
@@ -96,48 +98,60 @@ export function loadAllDocs(): {
   helpArticles: Doc[];
   legalDocs: Doc[];
 } {
-  const specs = loadDocsFromDir("docs/specs", "specs");
-  const helpArticles = loadDocsFromDir("docs/help-center/articles", "help");
-  const legalDocs = loadDocsFromDir("docs/legal", "legal");
+  const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
+  const helpArticles = loadDocsFromDir(
+    join(DOCS_ROOT, "help-center/articles"),
+    "help",
+  );
+  const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
 
   return { specs, helpArticles, legalDocs };
 }
 
 export function loadDocBySlug(
   slug: string,
-  category: "specs" | "help" | "legal",
-): Doc | null {
-  const docs = loadDocsFromDir(
+  category: DocCategory,
+): DocWithContent | null {
+  // Sanitize slug to prevent path traversal attacks
+  if (
+    !slug ||
+    slug.includes("..") ||
+    slug.includes("/") ||
+    slug.includes("\\")
+  ) {
+    return null;
+  }
+
+  const docsPath =
     category === "specs"
-      ? "docs/specs"
+      ? join(DOCS_ROOT, "specs")
       : category === "help"
-        ? "docs/help-center/articles"
-        : "docs/legal",
-    category,
-  );
+        ? join(DOCS_ROOT, "help-center/articles")
+        : join(DOCS_ROOT, "legal");
+
+  const docs = loadDocsFromDir(docsPath, category);
 
   const doc = docs.find((d) => d.slug === slug);
   if (!doc) return null;
 
-  // Load full content for individual pages
-  const filePath =
-    category === "specs"
-      ? `docs/specs/${slug}.md`
-      : category === "help"
-        ? `docs/help-center/articles/${slug}.md`
-        : `docs/legal/${slug}.md`;
+  // Use stored file path to support nested directories
+  const filePath = doc._filePath || join(docsPath, `${slug}.md`);
 
   try {
     const content = readFileSync(filePath, "utf-8");
     const { content: markdownContent } = matter(content);
 
+    // Remove internal _filePath from returned doc
+    const { _filePath, ...docWithoutPath } = doc;
+
     return {
-      ...doc,
+      ...docWithoutPath,
       content: markdownContent,
-      html: marked(markdownContent),
+      html: marked(markdownContent) as string,
     };
   } catch (error) {
+    // Return null on failure - don't serve incomplete content
     console.error(`Error loading full content for ${slug}:`, error);
-    return doc;
+    return null;
   }
 }
