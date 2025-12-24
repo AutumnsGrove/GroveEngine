@@ -225,6 +225,7 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 - [x] Community theme submission portal - **IN FOLIAGE**
 - [x] Theme builder/customizer UI (Oak+) - **IN FOLIAGE**
 - [x] Custom font uploads (Evergreen) - **IN FOLIAGE**
+- [ ] **Midnight Bloom theme** - Add to Foliage as 11th curated theme (purple/plum/amber, late-night tea café vibe)
 - [ ] Theme marketplace (users buy/sell themes) - **DEFERRED** to post-launch
 
 ### Internal Tools
