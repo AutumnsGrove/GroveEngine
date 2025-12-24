@@ -4,7 +4,7 @@ slug: understanding-replies-vs-comments
 category: comments
 order: 1
 keywords: [comments, replies, private, public, moderation, feedback, readers]
-related: [moderating-your-comments, comment-settings, blocking-users]
+related: []
 ---
 
 # Understanding Replies vs. Comments

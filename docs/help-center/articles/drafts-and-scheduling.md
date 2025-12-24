@@ -4,7 +4,7 @@ slug: drafts-and-scheduling
 category: writing
 order: 6
 keywords: [draft, drafts, save, auto-save, schedule, scheduling, publish later, unpublish]
-related: [writing-your-first-post, the-markdown-editor]
+related: [writing-your-first-post]
 ---
 
 # Drafts and Scheduling

@@ -97,7 +97,7 @@ Some features are restricted by subscription tier:
 
 **Why:** Running a platform costs money. Tiered pricing lets Grove exist without ads, data mining, or venture capital pressure.
 
-See [Choosing Your Plan](/help/choosing-your-plan) for details on what each tier includes.
+See [Choosing Your Plan](/knowledge/help/choosing-your-plan) for details on what each tier includes.
 
 ## What if I need something that's limited?
 
@@ -113,7 +113,7 @@ No hard feelings. Use the tool that fits.
 
 ## Limitations vs. bugs
 
-If something isn't working as expected, that might be a bug rather than a limitation. [Contact support](/help/contact-support) and we'll figure out which it is.
+If something isn't working as expected, that might be a bug rather than a limitation. [Contact support](/knowledge/help/contact-support) and we'll figure out which it is.
 
 ---
 

@@ -4,7 +4,7 @@ slug: writing-your-first-post
 category: writing-and-publishing
 order: 1
 keywords: [first post, writing, publish, getting started, new post, create]
-related: [what-is-grove, formatting-your-posts, saving-drafts]
+related: [what-is-grove, formatting-your-posts, drafts-and-scheduling]
 ---
 
 # Writing Your First Post

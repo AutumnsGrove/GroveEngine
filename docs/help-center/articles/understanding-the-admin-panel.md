@@ -4,7 +4,7 @@ slug: understanding-the-admin-panel
 category: getting-started
 order: 3
 keywords: [admin, dashboard, panel, navigation, settings, posts, pages, uploader]
-related: [creating-your-account, writing-your-first-post, site-title-and-description]
+related: [creating-your-account, writing-your-first-post]
 ---
 
 # Understanding the Admin Panel
@@ -51,7 +51,7 @@ Uploaded files are:
 - Available to use in any post or page
 - Organized by upload date
 
-See [Adding Images and Media](/help/adding-images-and-media) for format and size details.
+See [Adding Images and Media](/knowledge/help/adding-images-and-media) for format and size details.
 
 ### Settings
 

@@ -4,7 +4,7 @@ slug: reactions-and-voting
 category: meadow
 order: 3
 keywords: [meadow, reactions, voting, upvote, downvote, emoji, engagement, community]
-related: [what-is-meadow, opting-into-the-feed, your-meadow-profile]
+related: [what-is-meadow, opting-into-the-feed]
 ---
 
 # Reactions and Voting in Meadow

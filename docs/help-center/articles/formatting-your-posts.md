@@ -4,7 +4,7 @@ slug: formatting-your-posts
 category: writing
 order: 2
 keywords: [markdown, formatting, bold, italic, links, lists, headers, code, blockquotes]
-related: [writing-your-first-post, adding-images-and-media, the-markdown-editor]
+related: [writing-your-first-post, adding-images-and-media]
 ---
 
 # Formatting Your Posts
@@ -182,7 +182,7 @@ Footnotes appear at the bottom of your post, linked from where you reference the
 
 ## Images
 
-See [Adding Images and Media](/help/adding-images-and-media) for the full guide. The short version:
+See [Adding Images and Media](/knowledge/help/adding-images-and-media) for the full guide. The short version:
 
 ```markdown
 ![Alt text description](image-url.jpg)

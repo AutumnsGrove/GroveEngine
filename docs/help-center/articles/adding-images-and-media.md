@@ -4,7 +4,7 @@ slug: adding-images-and-media
 category: writing
 order: 3
 keywords: [images, photos, upload, media, pictures, gif, png, jpeg, webp, featured image]
-related: [writing-your-first-post, formatting-your-posts, the-markdown-editor]
+related: [writing-your-first-post, formatting-your-posts]
 ---
 
 # Adding Images and Media
