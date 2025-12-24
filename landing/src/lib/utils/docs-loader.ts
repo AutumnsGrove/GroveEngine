@@ -105,8 +105,8 @@ function loadDocsFromDir(
       const fullPath = join(currentPath, item);
       const stat = statSync(fullPath);
 
-      // Skip "completed" subdirectory (archived specs)
-      if (stat.isDirectory() && item !== "completed") {
+      // Include all subdirectories including "completed" specs
+      if (stat.isDirectory()) {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
         try {
