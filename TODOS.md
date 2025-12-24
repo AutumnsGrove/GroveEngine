@@ -60,7 +60,11 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 - [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
 - [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
 - [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
-- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, simplify grove-router
+- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, evaluate grove-router
+  - [ ] Test all routing without grove-router active
+  - [ ] Verify: cdn.grove.place, auth/admin/login subdomains, www redirect
+  - [ ] If all works: delete `packages/grove-router` entirely
+  - [ ] If gaps exist: document which edge cases still need the router
 
 ### Hybrid Routing Strategy
 

@@ -30,6 +30,24 @@ const PROD_RESOURCES = {
   R2_CDN_BUCKET: "grove-cdn",
 } as const;
 
+// Validate resource ID formats at config load time (fails fast if misconfigured)
+const UUID_REGEX = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+const HEX_ID_REGEX = /^[a-f0-9]{32}$/;
+const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+
+if (!UUID_REGEX.test(PROD_RESOURCES.D1_DATABASE_ID)) {
+  throw new Error(`Invalid D1_DATABASE_ID format: expected UUID, got "${PROD_RESOURCES.D1_DATABASE_ID}"`);
+}
+if (!HEX_ID_REGEX.test(PROD_RESOURCES.KV_NAMESPACE_ID)) {
+  throw new Error(`Invalid KV_NAMESPACE_ID format: expected 32-char hex, got "${PROD_RESOURCES.KV_NAMESPACE_ID}"`);
+}
+if (!BUCKET_NAME_REGEX.test(PROD_RESOURCES.R2_MEDIA_BUCKET)) {
+  throw new Error(`Invalid R2_MEDIA_BUCKET name: "${PROD_RESOURCES.R2_MEDIA_BUCKET}"`);
+}
+if (!BUCKET_NAME_REGEX.test(PROD_RESOURCES.R2_CDN_BUCKET)) {
+  throw new Error(`Invalid R2_CDN_BUCKET name: "${PROD_RESOURCES.R2_CDN_BUCKET}"`);
+}
+
 export default $config({
   app(input) {
     return {
@@ -187,6 +205,14 @@ export default $config({
     // =========================================================================
     // SVELTEKIT APPS
     // =========================================================================
+    //
+    // DNS PREREQUISITES:
+    // Before deploying, ensure these DNS records exist in Cloudflare:
+    // - A/AAAA records for each explicit subdomain (plant, domains, example)
+    // - CNAME for *.grove.place wildcard (for tenant blogs)
+    // - For dev/PR stages: *.dev.grove.place and *.pr-XXX.grove.place wildcards
+    //
+    // SST will fail deployment if domains aren't properly configured in Cloudflare.
 
     /**
      * Helper for stage-based domain names
@@ -194,11 +220,11 @@ export default $config({
      * @returns Full domain like "plant.grove.place" or "plant.dev.grove.place"
      */
     const getDomain = (subdomain: string): string => {
-      // Validate subdomain format (DNS-safe: lowercase alphanumeric and hyphens)
-      if (subdomain && !/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/.test(subdomain)) {
+      // Validate subdomain format: 1+ chars, lowercase alphanumeric, hyphens in middle only
+      if (subdomain && !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(subdomain)) {
         throw new Error(
-          `Invalid subdomain "${subdomain}": must be lowercase alphanumeric with hyphens, ` +
-          `cannot start/end with hyphen`
+          `Invalid subdomain "${subdomain}": must be lowercase alphanumeric, ` +
+          `hyphens allowed in middle only`
         );
       }
 
