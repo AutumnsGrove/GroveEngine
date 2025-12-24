@@ -6,6 +6,43 @@
 
 ---
 
+## 🔥 Immediate: Merge PR & Deploy SST
+
+**Current State (2025-12-24):**
+- ✅ `sst.config.ts` written - unified config for all Cloudflare resources
+- ✅ Router default target bug fixed (was routing to example-site instead of groveengine)
+- ✅ Knowledge base updated with ALL specs (including completed folder)
+- ⚠️ PR #104 has merge conflicts - needs to be resolved before merge
+
+### Commands to Run
+
+```bash
+# 1. Merge this PR (after resolving conflicts in GitHub)
+#    Or locally:
+git checkout main
+git pull origin main
+git merge claude/plan-next-steps-0rjeY
+# Resolve any conflicts, then:
+git push origin main
+
+# 2. Install SST and initialize
+pnpm add -D sst@latest
+pnpm sst install
+
+# 3. Deploy to dev stage first
+pnpm sst deploy --stage dev
+
+# 4. Once verified, deploy to production
+pnpm sst deploy --stage production
+```
+
+### Post-Merge Cleanup
+- [ ] Delete branch `claude/plan-next-steps-0rjeY`
+- [ ] Verify all apps still work after SST migration
+- [ ] Remove old `wrangler.toml` files (Phase 5)
+
+---
+
 ## 🚀 Up Next: SST Migration
 
 > **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
@@ -19,7 +56,7 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 
 ### Implementation Phases
 
-- [ ] **Phase 1: Foundation** - `sst init`, basic config, first Worker migration
+- [x] **Phase 1: Foundation** - `sst.config.ts` created with unified config ✅
 - [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
 - [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
 - [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
