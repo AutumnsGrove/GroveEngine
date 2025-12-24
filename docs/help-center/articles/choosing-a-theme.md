@@ -4,7 +4,7 @@ slug: choosing-a-theme
 category: customization
 order: 1
 keywords: [theme, dark mode, light mode, fonts, appearance, customization, colors, accent]
-related: [custom-accent-colors, understanding-the-admin-panel, choosing-your-plan]
+related: [understanding-the-admin-panel, choosing-your-plan]
 ---
 
 # Choosing a Theme
@@ -66,7 +66,7 @@ Every plan includes accent color customization. This color appears in:
 
 Choose something that feels right. A warm coral, a forest green, a deep purple—whatever represents you.
 
-See [Custom Accent Colors](/help/custom-accent-colors) for tips on choosing colors that work well.
+Choose something that reflects your personality and works well with both light and dark modes.
 
 ## Theme customizer (Oak and above)
 
