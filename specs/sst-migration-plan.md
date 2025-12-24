@@ -1,9 +1,9 @@
 # SST Migration Plan for GroveEngine
 
-> **Status:** Draft - Pending Review
+> **Status:** Active - Ready for Implementation
 > **Created:** 2025-12-20
-> **Updated:** 2025-12-20
-> **Scope:** Migrate GroveEngine to SST for unified infrastructure management
+> **Updated:** 2025-12-24
+> **Scope:** Migrate GroveEngine to SST + Integrate Foliage theming system
 
 ---
 
@@ -15,6 +15,7 @@ Migrate GroveEngine from manual wrangler.toml configuration to SST (sst.dev) for
 - Simplified local development with `sst dev`
 - Multi-stage deployments (dev/staging/production)
 - **Hybrid routing:** Worker wildcards for subdomains + Cloudflare for SaaS for custom domains
+- **Foliage theming:** Integrated per-tenant theme customization with tier-gated features
 
 ---
 
@@ -79,6 +80,7 @@ Based on your current stack and project vision, here are the SST integrations wo
 | **SvelteKit** | adapter-cloudflare | Native SST component |
 | **Stripe** | Manual API calls | Native webhooks, type-safe products/prices |
 | **Cloudflare for SaaS** | grove-router proxy | Eliminate proxy worker for tenant subdomains |
+| **Foliage Theming** | None | Per-tenant themes, community themes, custom fonts |
 
 ### Phase 2: Future Scaling
 
@@ -604,6 +606,218 @@ Delete from engine:
 
 ---
 
+## Phase 6: Foliage Integration
+
+> **Package:** `@autumnsgrove/foliage`
+> **Repository:** https://github.com/AutumnsGrove/Foliage
+
+Foliage is Grove's theming system—providing per-tenant visual customization from accent colors to full theme customizers.
+
+### 6.1 What Foliage Provides
+
+| Feature | Tier Access | Description |
+|---------|-------------|-------------|
+| **10 Curated Themes** | Seedling=3, Sapling+=10 | Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower |
+| **Accent Colors** | All paid | Quick color tinting for links, buttons, hover states |
+| **Theme Customizer** | Oak+ | Full color, typography, and layout customization |
+| **Custom CSS** | Oak+ | Add custom CSS overrides |
+| **Community Themes** | Oak+ | Browse/download themes from other users |
+| **Custom Fonts** | Evergreen | Upload WOFF2 fonts to R2 |
+
+### 6.2 Database Migrations Required
+
+Add 3 new tables (migrations from Foliage repo):
+
+```sql
+-- 001_theme_settings.sql
+CREATE TABLE IF NOT EXISTS theme_settings (
+  tenant_id TEXT PRIMARY KEY,
+  theme_id TEXT NOT NULL DEFAULT 'grove',
+  accent_color TEXT DEFAULT '#4f46e5',
+  customizer_enabled INTEGER DEFAULT 0,
+  custom_colors TEXT,      -- JSON
+  custom_typography TEXT,  -- JSON
+  custom_layout TEXT,      -- JSON
+  custom_css TEXT,
+  community_theme_id TEXT,
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+-- 002_custom_fonts.sql
+CREATE TABLE IF NOT EXISTS custom_fonts (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  family TEXT NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('sans-serif', 'serif', 'mono', 'display')),
+  woff2_path TEXT NOT NULL,
+  woff_path TEXT,
+  file_size INTEGER NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+-- 003_community_themes.sql
+CREATE TABLE IF NOT EXISTS community_themes (
+  id TEXT PRIMARY KEY,
+  creator_tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  tags TEXT,  -- JSON array
+  base_theme TEXT NOT NULL,
+  custom_colors TEXT,
+  custom_typography TEXT,
+  custom_layout TEXT,
+  custom_css TEXT,
+  thumbnail_path TEXT,
+  downloads INTEGER DEFAULT 0,
+  rating_sum INTEGER DEFAULT 0,
+  rating_count INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('draft', 'pending', 'in_review', 'approved', 'featured', 'changes_requested', 'rejected', 'removed')),
+  reviewed_at INTEGER,
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (creator_tenant_id) REFERENCES tenants(id)
+);
+```
+
+### 6.3 SST Configuration for Foliage
+
+```typescript
+// In sst.config.ts run()
+
+// R2 bucket for custom fonts (Evergreen tier)
+const fonts = new sst.cloudflare.R2("FoliageFonts");
+
+// Engine needs access to fonts bucket
+const engine = new sst.cloudflare.SvelteKit("Engine", {
+  path: "packages/engine",
+  link: [db, cache, media, fonts],  // Add fonts bucket
+  environment: {
+    GROVEAUTH_URL: "https://auth.grove.place",
+  },
+});
+```
+
+### 6.4 Engine Integration
+
+**Install Foliage:**
+```bash
+pnpm add @autumnsgrove/foliage -w --filter @autumnsgrove/groveengine
+```
+
+**Layout Server (load tenant theme):**
+```typescript
+// packages/engine/src/routes/+layout.server.ts
+import { loadThemeSettings } from '@autumnsgrove/foliage/server';
+
+export const load = async ({ platform, locals }) => {
+  const tenantId = locals.tenantId;
+
+  // Load theme settings for this tenant
+  const themeSettings = tenantId
+    ? await loadThemeSettings(platform.env.DB, tenantId)
+    : null;
+
+  return {
+    tenant: locals.tenant,
+    themeSettings,
+  };
+};
+```
+
+**Layout Component (apply theme CSS):**
+```svelte
+<!-- packages/engine/src/routes/+layout.svelte -->
+<script lang="ts">
+  import { generateThemeVariables, getTheme } from '@autumnsgrove/foliage';
+  import type { LayoutData } from './$types';
+
+  let { data, children } = $props<{ data: LayoutData }>();
+
+  // Generate CSS variables from theme settings
+  const themeCSS = $derived(() => {
+    if (!data.themeSettings) return '';
+
+    const baseTheme = getTheme(data.themeSettings.themeId);
+    return generateThemeVariables({
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        ...data.themeSettings.customColors,
+        accent: data.themeSettings.accentColor,
+      },
+    });
+  });
+</script>
+
+<svelte:head>
+  {#if themeCSS}
+    {@html `<style>:root { ${themeCSS} }</style>`}
+  {/if}
+</svelte:head>
+
+{@render children()}
+```
+
+**Admin Theme Routes:**
+```
+/admin/themes/           - Theme selector (ThemeSelector component)
+/admin/themes/customize  - Full customizer (ThemeCustomizer, Oak+)
+/admin/themes/community  - Browse community themes (CommunityThemeBrowser, Oak+)
+/admin/themes/fonts      - Font uploads (FontUploader, Evergreen)
+```
+
+### 6.5 API Routes
+
+Create API routes for theme management:
+
+```typescript
+// packages/engine/src/routes/api/themes/+server.ts
+import {
+  loadThemeSettings,
+  saveThemeSettings,
+  updateAccentColor
+} from '@autumnsgrove/foliage/server';
+import { canUseCustomizer } from '@autumnsgrove/foliage';
+
+export const GET = async ({ platform, locals }) => {
+  const settings = await loadThemeSettings(platform.env.DB, locals.tenantId);
+  return json(settings);
+};
+
+export const PATCH = async ({ platform, locals, request }) => {
+  const body = await request.json();
+
+  // Check tier access for customizer features
+  if (body.customColors && !canUseCustomizer(locals.tenant.tier)) {
+    return json({ error: 'Oak+ required for customizer' }, { status: 403 });
+  }
+
+  await saveThemeSettings(platform.env.DB, {
+    tenantId: locals.tenantId,
+    ...body,
+  });
+
+  return json({ success: true });
+};
+```
+
+### 6.6 Foliage Integration Checklist
+
+- [ ] Add `@autumnsgrove/foliage` to engine package.json
+- [ ] Copy migrations to `packages/engine/migrations/` (014, 015, 016)
+- [ ] Add R2 bucket for fonts in sst.config.ts
+- [ ] Update `+layout.server.ts` to load theme settings
+- [ ] Update `+layout.svelte` to apply theme CSS vars
+- [ ] Create `/admin/themes/` routes with Foliage components
+- [ ] Create `/api/themes/` CRUD endpoints
+- [ ] Wire up tier checks for customizer, community, fonts
+- [ ] Test light/dark mode toggle with themes
+
+---
+
 ## Migration Checklist
 
 ### Pre-Migration
@@ -646,6 +860,15 @@ Delete from engine:
 - [ ] Update documentation
 - [ ] Bump engine version (0.7.0?)
 
+### Phase 6: Foliage
+- [ ] Add `@autumnsgrove/foliage` to engine
+- [ ] Run Foliage migrations (theme_settings, custom_fonts, community_themes)
+- [ ] Add R2 bucket for fonts in sst.config.ts
+- [ ] Integrate theme loading in layout
+- [ ] Create `/admin/themes/` routes
+- [ ] Create `/api/themes/` endpoints
+- [ ] Test tier-gated features
+
 ---
 
 ## Risk Mitigation
@@ -684,6 +907,7 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 | Phase 3 | Medium | App configs, test thoroughly |
 | Phase 4 | Low | CI/CD updates |
 | Phase 5 | Low | Cleanup |
+| Phase 6 | Medium | Foliage is ready, just need integration wiring |
 
 ---
 
