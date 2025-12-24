@@ -4,7 +4,7 @@ slug: exporting-your-content
 category: data
 order: 1
 keywords: [export, download, backup, data, portability, markdown, json, leaving, migrate]
-related: [understanding-your-privacy, data-portability, account-deletion]
+related: [understanding-your-privacy, account-deletion]
 ---
 
 # Exporting Your Content

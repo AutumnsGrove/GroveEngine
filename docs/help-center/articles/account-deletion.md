@@ -4,7 +4,7 @@ slug: account-deletion
 category: data
 order: 3
 keywords: [delete, close, cancel, remove, account, data, gdpr, leave, goodbye]
-related: [exporting-your-content, understanding-your-privacy, cancellation-and-refunds]
+related: [exporting-your-content, understanding-your-privacy]
 ---
 
 # Deleting Your Account
@@ -17,7 +17,7 @@ If you decide to leave Grove, you can delete your account and all associated dat
 
 Go to **Settings → Data → Export Data** to download a complete copy of everything.
 
-See [Exporting Your Content](/help/exporting-your-content) for details on what's included.
+See [Exporting Your Content](/knowledge/help/exporting-your-content) for details on what's included.
 
 ## How to delete your account
 

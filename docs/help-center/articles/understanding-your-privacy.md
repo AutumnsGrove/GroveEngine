@@ -4,7 +4,7 @@ slug: understanding-your-privacy
 category: data-and-privacy
 order: 1
 keywords: [privacy, data, tracking, analytics, gdpr, security, personal information]
-related: [exporting-your-data, deleting-your-account, what-is-grove]
+related: [exporting-your-content, account-deletion, what-is-grove]
 ---
 
 # Understanding Your Privacy

@@ -4,7 +4,7 @@ slug: upgrading-or-downgrading
 category: billing
 order: 2
 keywords: [upgrade, downgrade, change plan, switch plan, subscription, billing, tier]
-related: [choosing-your-plan, understanding-your-plan, cancellation-and-refunds]
+related: [choosing-your-plan]
 ---
 
 # Upgrading or Downgrading Your Plan
