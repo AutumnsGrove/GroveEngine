@@ -313,6 +313,16 @@ export const helpArticles: Doc[] = [
     readingTime: 5,
   },
   {
+    slug: "how-grove-protects-your-content",
+    title: "How Grove Protects Your Content from AI Scraping",
+    description: "Shade: Grove's seven-layer defense against AI crawlers and scrapers",
+    excerpt:
+      "Every major AI company sends crawlers across the web to train their models. Grove says no. Here's how our Shade protection system keeps your writing between you and your readers.",
+    category: "help",
+    lastUpdated: "2025-12-25",
+    readingTime: 6,
+  },
+  {
     slug: "your-rss-feed",
     title: "Your RSS Feed",
     description: "How to access and use your blog's RSS feed",
