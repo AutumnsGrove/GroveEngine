@@ -766,7 +766,7 @@
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex + 10};
-						transform: translateX(-50%) translateY(-100%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);
+						transform: translateX(-50%) translateY(-97%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);
 						transform-origin: bottom center;
 						filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 					"
