@@ -92,6 +92,16 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				break;
 			}
 
+			case 'invoice.paid': {
+				await handleInvoicePaid(db, event.data.object as Record<string, unknown>);
+				break;
+			}
+
+			case 'customer.subscription.trial_will_end': {
+				await handleTrialWillEnd(db, event.data.object as Record<string, unknown>);
+				break;
+			}
+
 			default:
 				console.log(`[Webhook] Unhandled event type: ${event.type}`);
 		}
@@ -244,6 +254,77 @@ async function handlePaymentFailed(db: D1Database, invoice: Record<string, unkno
 		.bind(subscriptionId)
 		.run();
 
-	// TODO: Send notification email to user
+	// TODO: Send notification email to user via Resend
 	console.log(`[Webhook] Payment failed for subscription ${subscriptionId}`);
+}
+
+/**
+ * Handle successful invoice payment (recurring billing)
+ */
+async function handleInvoicePaid(db: D1Database, invoice: Record<string, unknown>) {
+	const subscriptionId = invoice.subscription as string;
+	const amountPaid = invoice.amount_paid as number;
+	const invoiceId = invoice.id as string;
+	const periodEnd = invoice.lines?.data?.[0]?.period?.end as number | undefined;
+
+	if (!subscriptionId) return;
+
+	// Update billing record with latest payment info
+	await db
+		.prepare(
+			`UPDATE platform_billing
+			 SET status = 'active',
+			     current_period_end = ?,
+			     updated_at = unixepoch()
+			 WHERE provider_subscription_id = ?`
+		)
+		.bind(periodEnd || null, subscriptionId)
+		.run();
+
+	// Log payment for audit trail
+	console.log(`[Webhook] Invoice ${invoiceId} paid: $${(amountPaid / 100).toFixed(2)} for subscription ${subscriptionId}`);
+
+	// TODO: Send payment confirmation email via Resend
+}
+
+/**
+ * Handle trial ending soon (3 days before trial ends)
+ */
+async function handleTrialWillEnd(db: D1Database, subscription: Record<string, unknown>) {
+	const subscriptionId = subscription.id as string;
+	const trialEnd = subscription.trial_end as number;
+	const customerId = subscription.customer as string;
+
+	// Get tenant info for the email
+	const billing = await db
+		.prepare(
+			`SELECT t.id, t.subdomain, u.email, u.display_name
+			 FROM platform_billing pb
+			 JOIN tenants t ON t.id = pb.tenant_id
+			 JOIN user_onboarding u ON u.id = t.onboarding_id
+			 WHERE pb.provider_subscription_id = ?`
+		)
+		.bind(subscriptionId)
+		.first();
+
+	if (!billing) {
+		console.error(`[Webhook] No tenant found for subscription ${subscriptionId}`);
+		return;
+	}
+
+	const trialEndDate = new Date(trialEnd * 1000).toLocaleDateString('en-US', {
+		weekday: 'long',
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	});
+
+	console.log(`[Webhook] Trial ending soon for ${billing.subdomain}.grove.place on ${trialEndDate}`);
+
+	// TODO: Send "trial ending soon" email via Resend
+	// Email should include:
+	// - Their trial end date
+	// - What happens next (card will be charged)
+	// - Link to manage subscription / cancel if needed
+	// - Reassurance about what they get to keep
 }
