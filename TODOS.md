@@ -73,6 +73,39 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 
 ---
 
+## 🛡️ Shade Implementation (Pre-Launch)
+
+> **Spec:** See `docs/specs/shade-spec.md` for full technical specification.
+> **Philosophy:** Users own their words. In a forest full of harvesters, this grove stays shaded.
+
+### Phase 1: Cloudflare Configuration (Today)
+- [ ] Verify "Block AI Bots" toggle is ON in Cloudflare Dashboard
+- [ ] Enable "Bot Fight Mode"
+- [ ] Check if "AI Labyrinth" is available and enable
+- [x] Subscribe to Dark Visitors for ongoing blocklist updates ✅
+
+### Phase 2: Technical Implementation (This Week)
+- [ ] Deploy comprehensive robots.txt to grove.place
+- [ ] Add `noai, noimageai` meta tags to all pages (root layout)
+- [ ] Set `X-Robots-Tag: noai, noimageai` header via Transform Rules
+- [ ] Configure WAF custom rules (3 of 5 slots):
+  - Rule 1: Block empty/suspicious user agents
+  - Rule 2: Challenge bot-like user agents (except Google, Bing, Yandex, Kagi)
+  - Rule 3: High threat score filtering
+- [ ] Set up rate limiting rules (60/min general, 200/5min crawling)
+
+### Phase 3: Legal & Public Pages
+- [ ] Create and publish `/shade` policy page
+- [ ] Update Terms of Service with AI prohibition language
+- [ ] Add footer link to /shade on all pages
+
+### Phase 4: Post-Launch Monitoring
+- [ ] Set up monitoring dashboard for blocked requests
+- [ ] Document any false positive patterns
+- [ ] Review and adjust rate limits based on real traffic
+
+---
+
 ## Security Audit - Remaining Items
 
 ### Medium Priority

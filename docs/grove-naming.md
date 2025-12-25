@@ -124,6 +124,17 @@ Amber is Grove's unified storage management system. Every file you upload—blog
 
 ---
 
+## Shade
+**AI Content Protection** · `grove.place/shade`
+
+Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.
+
+Shade is Grove's layered defense against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade is a quiet refusal. robots.txt directives, meta tags, rate limiting, WAF rules, and legal documentation, all working together so writers can write without worrying about becoming someone else's training data.
+
+*In a forest full of harvesters, this grove stays shaded.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -140,6 +151,7 @@ Amber is Grove's unified storage management system. Every file you upload—blog
 | **Rings** | Analytics | *(integrated)* |
 | **Ivy** | Email | ivy.grove.place |
 | **Amber** | Storage management | amber.grove.place |
+| **Shade** | AI content protection | grove.place/shade |
 
 ---
 
@@ -161,6 +173,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Rings | GroveAnalytics |
 | Ivy | GroveMail |
 | Amber | GroveStorage |
+| Shade | GroveShade |
 
 ---
 
