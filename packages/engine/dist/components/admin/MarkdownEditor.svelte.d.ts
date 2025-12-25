@@ -27,7 +27,7 @@ declare const MarkdownEditor: import("svelte").Component<{
     clearDraft: () => void;
     getDraftStatus: () => {
         hasDraft: boolean;
-        storedDraft: import("./composables/useDraftManager.svelte.js").StoredDraft | null;
+        storedDraft: import("./composables/useDraftManager.svelte").StoredDraft | null;
     };
 }, "content">;
 type $$ComponentProps = {
