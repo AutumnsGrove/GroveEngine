@@ -48,7 +48,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	// Get GroveAuth configuration
 	const authBaseUrl = platform?.env?.GROVEAUTH_URL || 'https://auth-api.grove.place';
 	const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || 'grove-plant';
-	const redirectUri = `${url.origin}/auth/callback`;
+	// Use canonical URL to avoid cookie domain mismatch between pages.dev and custom domain
+	const appBaseUrl = platform?.env?.PUBLIC_APP_URL || 'https://plant.grove.place';
+	const redirectUri = `${appBaseUrl}/auth/callback`;
 
 	// Generate PKCE values
 	const { verifier, challenge } = await generatePKCE();

@@ -616,26 +616,24 @@
 		<!-- Sky background gradient -->
 		<div class="absolute inset-0 transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
-		<!-- Clouds (decorative) -->
-		<div class="absolute top-8 left-[10%] opacity-60" aria-hidden="true">
-			<Cloud class="w-24 h-12" animate={true} speed="slow" />
+		<!-- Clouds (decorative) - floating across the sky -->
+		<div class="absolute top-6 left-0 opacity-70" aria-hidden="true">
+			<Cloud variant="fluffy" class="w-32 h-16" animate={true} speed="slow" direction="right" />
 		</div>
-		<div class="absolute top-16 right-[15%] opacity-50" aria-hidden="true">
-			<Cloud class="w-32 h-16" animate={true} speed="slow" />
+		<div class="absolute top-12 left-[20%] opacity-50" aria-hidden="true">
+			<Cloud variant="wispy" class="w-28 h-12" animate={true} speed="slow" direction="right" />
 		</div>
-
-		<!-- Distant mountains silhouette (decorative) -->
-		<div class="absolute inset-x-0 top-32 h-32" aria-hidden="true">
-			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" role="presentation">
-				<path
-					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
-					class="transition-colors duration-1000 {isWinter ? 'fill-slate-300/50 dark:fill-slate-600/40' : isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : isSpring ? 'fill-lime-200/40 dark:fill-lime-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
-				/>
-				<path
-					d="M0 120 L0 100 Q200 60 400 85 Q600 110 800 70 Q1000 40 1200 80 L1200 120 Z"
-					class="transition-colors duration-1000 {isWinter ? 'fill-slate-400/40 dark:fill-slate-500/30' : isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : isSpring ? 'fill-lime-300/30 dark:fill-lime-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
-				/>
-			</svg>
+		<div class="absolute top-20 right-0 opacity-65" aria-hidden="true">
+			<Cloud variant="puffy" class="w-36 h-18" animate={true} speed="slow" direction="left" />
+		</div>
+		<div class="absolute top-8 right-[25%] opacity-55" aria-hidden="true">
+			<Cloud variant="scattered" class="w-24 h-10" animate={true} speed="slow" direction="left" />
+		</div>
+		<div class="absolute top-16 left-[45%] opacity-60" aria-hidden="true">
+			<Cloud variant="fluffy" class="w-30 h-14" animate={true} speed="slow" direction="right" />
+		</div>
+		<div class="absolute top-24 left-[65%] opacity-45" aria-hidden="true">
+			<Cloud variant="wispy" class="w-26 h-11" animate={true} speed="slow" direction="right" />
 		</div>
 
 		<!-- Forest container with rolling hills (decorative scene) -->
