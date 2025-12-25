@@ -20,7 +20,8 @@
     "sst:remove": "node scripts/with-secrets.js pnpm exec sst remove"
   },
   "devDependencies": {
-    "sst": "^3.0.0"
+    "sst": "^3.0.0",
+    "wrangler": "^3.90.0"
   },
   "main": "./packages/engine/dist/index.js",
   "types": "./packages/engine/dist/index.d.ts",

@@ -4,7 +4,7 @@ slug: understanding-your-privacy
 category: data-and-privacy
 order: 1
 keywords: [privacy, data, tracking, analytics, gdpr, security, personal information]
-related: [exporting-your-content, account-deletion, what-is-grove]
+related: [how-grove-protects-your-content, exporting-your-content, account-deletion, what-is-grove]
 ---
 
 # Understanding Your Privacy
@@ -99,7 +99,7 @@ This matters more than most people realize. As the web gets scraped into dataset
 
 **An honest caveat:** Some companies (Perplexity being a notable example) have been caught ignoring these protections entirely, bypassing robots.txt and crawler blocks. This is a limitation of how the web works, not something specific to Grove. No website can stop a bad actor who chooses to ignore the rules. What we can promise is that we're using every tool available and staying vigilant as new threats emerge. It's the best protection possible, even if it's not perfect.
 
-**Want to verify?** You can check our [robots.txt](https://grove.place/robots.txt) to see the AI crawlers we block. Technically-minded users can also monitor request headers in browser dev tools to confirm AI user agents are being rejected at the Cloudflare level.
+**Want the full technical details?** See [How Grove Protects Your Content](/help/how-grove-protects-your-content) for a deep dive into our seven-layer protection system, including verification steps for technically-minded users.
 
 *We use AI carefully and transparently for content moderation. We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
 
