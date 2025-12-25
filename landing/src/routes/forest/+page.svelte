@@ -669,7 +669,7 @@
 					zIndex={100}
 					enabled={true}
 					opacity={{ min: 0.5, max: 0.9 }}
-					fallDuration={{ min: 10, max: 16 }}
+					fallDuration={{ min: 16, max: 24 }}
 					driftRange={150}
 					spawnDelay={12}
 				/>

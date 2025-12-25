@@ -73,10 +73,15 @@
 		const style = document.createElement('style');
 		style.id = styleId;
 		// Create dancing, swaying motion with sine wave horizontal movement
+		// Opacity fade-in for gentle appearance
 		style.textContent = `
 			@keyframes ${animId}-fall {
 				0% {
 					transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
+					opacity: 0;
+				}
+				8% {
+					opacity: 1;
 				}
 				12.5% {
 					transform: translateY(${fallDistance * 0.125}vh) translateX(${Math.sin(Math.PI * 0.25 * swayFrequency) * swayAmplitude + drift * 0.125}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.125}deg);
@@ -140,7 +145,7 @@
 	class="petal-wrapper"
 	style="
 		opacity: {opacity};
-		{animate ? `animation: ${animId}-fall ${duration}s ease-in-out ${delay}s infinite;` : ''}
+		{animate ? `animation: ${animId}-fall ${duration}s linear ${delay}s infinite;` : ''}
 	"
 >
 	<svg
