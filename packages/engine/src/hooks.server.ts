@@ -4,7 +4,11 @@ import {
   validateCSRFToken,
   validateCSRF,
 } from "$lib/utils/csrf.js";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
+import {
+  TURNSTILE_COOKIE_NAME,
+  validateVerificationCookie,
+} from "$lib/server/services/turnstile.js";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -71,10 +75,52 @@ function extractSubdomain(
   return null;
 }
 
+/**
+ * Paths that should skip Turnstile verification
+ */
+const TURNSTILE_EXCLUDED_PATHS = [
+  "/verify", // The verification page itself
+  "/api/", // All API routes
+  "/auth/", // Auth routes (OAuth callbacks)
+  "/_app/", // SvelteKit internals
+  "/favicon", // Static assets
+  "/robots.txt",
+  "/sitemap.xml",
+  "/.well-known/",
+];
+
+/**
+ * Check if a path should skip Turnstile verification
+ */
+function shouldSkipTurnstile(pathname: string): boolean {
+  return TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   // Initialize context and user
   event.locals.user = null;
   event.locals.context = { type: "landing" };
+
+  // =========================================================================
+  // TURNSTILE VERIFICATION (Shade)
+  // =========================================================================
+  // Skip verification for excluded paths
+  if (!shouldSkipTurnstile(event.url.pathname)) {
+    const cookieHeader = event.request.headers.get("cookie");
+    const verificationCookie = getCookie(cookieHeader, TURNSTILE_COOKIE_NAME);
+    const secretKey = event.platform?.env?.TURNSTILE_SECRET_KEY;
+
+    // Only enforce if Turnstile is configured (has secret key)
+    if (secretKey) {
+      const isVerified = validateVerificationCookie(verificationCookie ?? undefined, secretKey);
+
+      if (!isVerified) {
+        // Redirect to verification page with return URL
+        const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
+        throw redirect(302, `/verify?return=${returnUrl}`);
+      }
+    }
+  }
 
   // =========================================================================
   // SUBDOMAIN ROUTING

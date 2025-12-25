@@ -66,9 +66,9 @@ No single protection is foolproof. Sophisticated actors fake user agents, ignore
 
 ## 2. Defense Architecture
 
-### 2.1 The Six Layers
+### 2.1 The Seven Layers
 
-Shade implements defense in depth through six complementary layers:
+Shade implements defense in depth through seven complementary layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -125,6 +125,14 @@ Shade implements defense in depth through six complementary layers:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
+│              LAYER 7: TURNSTILE HUMAN VERIFICATION              │
+│  • Cloudflare Turnstile widget (managed mode)                   │
+│  • Server-side token validation                                 │
+│  • Cookie-based verification (7-day expiry)                     │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
 │                    HUMAN READER                                 │
 │              (or very determined bot)                           │
 └─────────────────────────────────────────────────────────────────┘
@@ -140,6 +148,7 @@ Shade implements defense in depth through six complementary layers:
 | robots.txt | Compliant crawlers (GPTBot, some others) | Non-compliant crawlers (Perplexity) | Legal signal |
 | Meta Tags | Emerging standard adoption | Most current scrapers | Future-proofing |
 | Legal Framework | Nothing technical | Nothing technical | Legal standing |
+| Turnstile | Automated scripts, headless browsers | Sophisticated browser automation | Human verification |
 
 ### 2.3 What We Accept
 
@@ -245,6 +254,77 @@ Rate limited. Please wait a moment before continuing.
 ```
 
 Not a hard rejection—a gentle pause.
+
+### 3.6 Turnstile Human Verification
+
+**Location:** Dashboard → Turnstile → Add Widget
+**Availability:** Free tier
+**Status:** Implemented
+
+Turnstile is Cloudflare's human verification system that doesn't require solving puzzles. It runs invisibly for most users, only showing a brief spinner when additional verification is needed.
+
+**Configuration:**
+- Widget Mode: Managed (Cloudflare decides when to challenge)
+- Site Key: Public, goes in client-side code
+- Secret Key: Private, stored as Cloudflare Pages secret
+
+**Implementation Components:**
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| TurnstileWidget.svelte | `src/lib/ui/components/forms/` | Client-side widget |
+| turnstile.ts | `src/lib/server/services/` | Server-side validation |
+| /api/verify/turnstile | `src/routes/api/verify/` | Token verification endpoint |
+| /verify | `src/routes/verify/` | Human-friendly verification page |
+| hooks.server.ts | Root | Site-wide verification check |
+
+**How It Works:**
+
+1. **First Visit:** User hits any protected page without valid cookie
+2. **Redirect:** hooks.server.ts redirects to `/verify?return=<original_url>`
+3. **Challenge:** Turnstile widget runs (invisible for most users)
+4. **Verification:** Token sent to `/api/verify/turnstile`, validated with Cloudflare
+5. **Cookie Set:** `grove_verified` cookie set with HMAC signature (7-day expiry)
+6. **Redirect Back:** User returned to their original destination
+7. **Subsequent Visits:** Cookie validated server-side, no challenge needed
+
+**Cookie Security:**
+```
+Cookie: grove_verified=<timestamp>.<hmac_signature>
+Domain: .grove.place (shared across subdomains)
+Max-Age: 604800 (7 days)
+SameSite: Lax
+Secure: true (production only)
+HttpOnly: false (read by client for UX)
+```
+
+The HMAC signature prevents cookie forgery. Even if an attacker knows the format, they can't generate valid signatures without the secret key.
+
+**Excluded Paths:**
+```typescript
+const TURNSTILE_EXCLUDED_PATHS = [
+  "/verify",      // The verification page itself
+  "/api/",        // All API routes
+  "/auth/",       // OAuth callbacks
+  "/_app/",       // SvelteKit internals
+  "/favicon",     // Static assets
+  "/robots.txt",
+  "/sitemap.xml",
+  "/.well-known/",
+];
+```
+
+**CSP Requirements:**
+```
+script-src: https://challenges.cloudflare.com
+connect-src: https://challenges.cloudflare.com
+frame-src: https://challenges.cloudflare.com
+```
+
+**User Experience:**
+- Most users: Invisible verification, sub-second delay
+- VPN/unusual browser: Brief spinner (2-3 seconds)
+- Bots/scripts: Blocked entirely
 
 ---
 
@@ -628,7 +708,6 @@ Key metrics to track in Dashboard → Security → Events:
 
 ### 10.2 Under Consideration
 
-- **Turnstile Integration** — Invisible human verification on first visit
 - **Request Header Analysis** — Flag requests missing typical browser headers
 - **Community Blocklist** — Shared, auto-updating list of known bad actors
 
@@ -644,23 +723,37 @@ Key metrics to track in Dashboard → Security → Events:
 
 ### Phase 1: Immediate (Pre-Launch)
 
-- [ ] Verify "Block AI Bots" toggle is ON in Cloudflare
-- [ ] Enable "Bot Fight Mode"
-- [ ] Check if "AI Labyrinth" is available and enable
+- [x] Verify "Block AI Bots" toggle is ON in Cloudflare
+- [x] Enable "Bot Fight Mode"
+- [x] Check if "AI Labyrinth" is available and enable
+- [x] Subscribe to Dark Visitors for ongoing blocklist updates
 - [ ] Deploy comprehensive robots.txt
 - [ ] Add noai/noimageai meta tags to all pages
 - [ ] Set X-Robots-Tag header via Transform Rules or Workers
 
-### Phase 2: This Week
+### Phase 2: Turnstile Human Verification ✅
+
+- [x] Create Turnstile widget in Cloudflare Dashboard
+- [x] Add site key to wrangler.toml files
+- [x] Add secret key to Cloudflare Pages (engine, landing, plant, ivy, amber)
+- [x] Implement TurnstileWidget.svelte component
+- [x] Add server-side verification utility (turnstile.ts)
+- [x] Create /api/verify/turnstile endpoint
+- [x] Update CSP to allow challenges.cloudflare.com
+- [x] Add verification page (/verify) for first-time visitors
+- [x] Set grove_verified cookie (7-day expiry)
+- [x] Write help center article (how-grove-protects-your-content.md)
+- [x] Integrate with hooks.server.ts for site-wide verification
+
+### Phase 3: This Week
 
 - [ ] Create and publish /shade page
 - [ ] Update Terms of Service with AI prohibition language
 - [ ] Configure WAF custom rules (use 3 of 5 slots)
 - [ ] Set up rate limiting rules
 
-### Phase 3: Post-Launch
+### Phase 4: Post-Launch
 
-- [ ] Subscribe to Dark Visitors for ongoing blocklist updates
 - [ ] Set up monitoring dashboard for blocked requests
 - [ ] Document any false positive patterns
 - [ ] Review and adjust rate limits based on real traffic

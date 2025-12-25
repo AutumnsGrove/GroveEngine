@@ -39,4 +39,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy packages/engine/.svelte-kit/cloudflare --project-name=groveengine
-          packageManager: npm
+          packageManager: pnpm
