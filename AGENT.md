@@ -25,11 +25,36 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Language:** TypeScript, JavaScript
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
+- **Infrastructure:** SST (resources), Wrangler (app deployment)
 - **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
 - **Package Manager:** pnpm
+
+## Infrastructure & Deployment
+
+### Local Development
+```bash
+# Start any app locally (auto-creates local D1/KV/R2)
+cd landing && pnpm dev      # or wrangler dev
+cd packages/engine && pnpm dev
+```
+
+### SST (Resource Management)
+SST manages shared Cloudflare resources (D1, KV, R2). Apps deploy via wrangler.
+
+```bash
+pnpm sst:dev   # Creates isolated dev resources (for staging)
+pnpm sst:prod  # Imports existing production resources
+```
+
+- **Config:** `sst.config.ts` - all resource definitions
+- **Secrets:** `secrets.json` (gitignored) - Cloudflare API token
+- **Outputs:** `.sst/outputs.json` - deployed resource IDs
+
+### Production Deployment
+Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.
 
 ## Design Standards
 
