@@ -49,10 +49,14 @@
 	// Secondary color for gradient effect
 	const highlightColor = springBlossoms.palePink;
 
-	// Deterministic rotation based on seed
+	// Deterministic rotation based on seed - more dramatic for dancing effect
 	const initialRotation = (seed * 37) % 360;
 	const rotationDirection = seed % 2 === 0 ? 1 : -1;
-	const rotationAmount = 180 + (seed % 180); // 180-360 degrees total rotation
+	const rotationAmount = 360 + (seed % 360); // 360-720 degrees total rotation - more twirling!
+
+	// Dancing sway parameters - create organic horizontal movement
+	const swayAmplitude = 30 + (seed % 40); // 30-70px horizontal sway
+	const swayFrequency = 2 + (seed % 3); // 2-4 complete waves during fall
 
 	// Unique animation name to prevent conflicts
 	const animId = `petal-${seed}`;
@@ -67,27 +71,55 @@
 
 		const style = document.createElement('style');
 		style.id = styleId;
+		// Create dancing, swaying motion with sine wave horizontal movement
 		style.textContent = `
 			@keyframes ${animId}-fall {
 				0% {
 					transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
 				}
+				12.5% {
+					transform: translateY(${fallDistance * 0.125}vh) translateX(${Math.sin(Math.PI * 0.25 * swayFrequency) * swayAmplitude + drift * 0.125}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.125}deg);
+				}
+				25% {
+					transform: translateY(${fallDistance * 0.25}vh) translateX(${Math.sin(Math.PI * 0.5 * swayFrequency) * swayAmplitude + drift * 0.25}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.25}deg);
+				}
+				37.5% {
+					transform: translateY(${fallDistance * 0.375}vh) translateX(${Math.sin(Math.PI * 0.75 * swayFrequency) * swayAmplitude + drift * 0.375}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.375}deg);
+				}
+				50% {
+					transform: translateY(${fallDistance * 0.5}vh) translateX(${Math.sin(Math.PI * swayFrequency) * swayAmplitude + drift * 0.5}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.5}deg);
+				}
+				62.5% {
+					transform: translateY(${fallDistance * 0.625}vh) translateX(${Math.sin(Math.PI * 1.25 * swayFrequency) * swayAmplitude + drift * 0.625}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.625}deg);
+				}
+				75% {
+					transform: translateY(${fallDistance * 0.75}vh) translateX(${Math.sin(Math.PI * 1.5 * swayFrequency) * swayAmplitude + drift * 0.75}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.75}deg);
+				}
+				87.5% {
+					transform: translateY(${fallDistance * 0.875}vh) translateX(${Math.sin(Math.PI * 1.75 * swayFrequency) * swayAmplitude + drift * 0.875}px) rotate(${initialRotation + rotationAmount * rotationDirection * 0.875}deg);
+				}
 				100% {
-					transform: translateY(${fallDistance}vh) translateX(${drift}px) rotate(${initialRotation + rotationAmount * rotationDirection}deg);
+					transform: translateY(${fallDistance}vh) translateX(${Math.sin(Math.PI * 2 * swayFrequency) * swayAmplitude + drift}px) rotate(${initialRotation + rotationAmount * rotationDirection}deg);
 				}
 			}
 			@keyframes ${animId}-flutter {
 				0%, 100% {
 					transform: rotateX(0deg) rotateY(0deg) scale(1);
 				}
-				25% {
-					transform: rotateX(20deg) rotateY(30deg) scale(0.95);
+				16% {
+					transform: rotateX(30deg) rotateY(40deg) scale(0.9);
+				}
+				33% {
+					transform: rotateX(-25deg) rotateY(-35deg) scale(1.08);
 				}
 				50% {
-					transform: rotateX(-15deg) rotateY(-25deg) scale(1.02);
+					transform: rotateX(35deg) rotateY(30deg) scale(0.95);
 				}
-				75% {
-					transform: rotateX(25deg) rotateY(15deg) scale(0.98);
+				66% {
+					transform: rotateX(-30deg) rotateY(-40deg) scale(1.05);
+				}
+				83% {
+					transform: rotateX(25deg) rotateY(35deg) scale(0.92);
 				}
 			}
 		`;

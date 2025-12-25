@@ -136,7 +136,7 @@
 {#if enabled}
 	<!-- Falling petals layer - cherry blossoms drifting on spring breeze -->
 	<div
-		class="fixed inset-0 pointer-events-none overflow-hidden"
+		class="absolute inset-0 pointer-events-none overflow-hidden"
 		style="z-index: {zIndex};"
 		aria-hidden="true"
 	>

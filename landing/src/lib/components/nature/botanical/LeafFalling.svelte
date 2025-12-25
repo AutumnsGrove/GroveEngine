@@ -123,11 +123,8 @@
 <style>
 	@keyframes fall {
 		0% {
-			/* Start above viewport using spawn offset for natural entrance */
-			transform: translateY(calc(-1 * var(--spawn-offset, 50px))) translateX(0);
-			opacity: 0;
-		}
-		8% {
+			/* Start at initial position, fully visible for immediate natural falling */
+			transform: translateY(0) translateX(0);
 			opacity: 0.85;
 		}
 		70% {

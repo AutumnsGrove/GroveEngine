@@ -137,9 +137,9 @@
 </script>
 
 {#if enabled}
-	<!-- Snowfall layer - covers the viewport -->
+	<!-- Snowfall layer - covers the page content area -->
 	<div
-		class="fixed inset-0 pointer-events-none"
+		class="absolute inset-0 pointer-events-none overflow-hidden"
 		style="z-index: {zIndex};"
 	>
 		{#each snowflakes as flake (flake.id)}
