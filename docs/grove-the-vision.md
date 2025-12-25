@@ -36,7 +36,7 @@ Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding o
 
 ## AI Sanctuary
 
-Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning models. [Cloudflare stands at the gate](https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/), and our corner of the web becomes a black hole to external AI.
+Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning models. [Cloudflare stands at the gate](https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/), and our corner of the web becomes a black hole to external AI. Learn more about [how Grove protects your content from AI scraping](https://grove.place/knowledge/help/how-grove-protects-your-content).
 
 This matters more than it might seem. As AI systems vacuum up the public web, genuine human expression becomes fuel for machines that simulate humanity. Grove refuses to participate. What you write here stays here, read by humans, not ingested by algorithms.
 
