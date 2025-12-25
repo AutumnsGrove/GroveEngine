@@ -6,6 +6,30 @@
 
 ---
 
+## 🎉 LAUNCH MILESTONE - First Emails Sent! (2025-12-24)
+
+**HUGE PROGRESS!** Grove has officially launched to the community!
+
+**What happened:**
+- ✅ Created launch email v1 with beautiful autumn forest screenshot
+- ✅ Built script to extract 59 subscriber emails from production database
+- ✅ Sent initial launch email: "I'm finally ready to show you what I've been building"
+- ✅ Created and sent follow-up email v2 with clickable link: "Actually, here's a link you can click"
+- ✅ Improved landing page UX - added vision CTA before email signup
+- ✅ Both emails successfully delivered to all 59 subscribers! 🌲✨
+
+**Next steps:**
+- Monitor subscriber engagement
+- Respond to any replies or questions
+- Continue building toward January launch
+
+**Email documents:**
+- `docs/internal/grove-launch-email-v1.md` - Original launch email
+- `docs/internal/grove-launch-email-v2-followup.md` - Follow-up with clickable link
+- `scripts/get-subscribers.sh` - Subscriber email extraction tool
+
+---
+
 ## ✅ SST Resources Deployed (2025-12-24)
 
 **Current State:**
