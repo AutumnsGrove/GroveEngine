@@ -284,6 +284,10 @@
 		// Use hashed seed to pick deterministically with natural distribution
 		const pickFromArray = <T>(arr: T[]): T => arr[Math.floor(hashSeed(seed)) % arr.length];
 
+		// Logo tree becomes pink in spring to match navbar
+		if (treeType === 'logo' && currentSeason === 'spring') {
+			return pickFromArray(depthPinks);
+		}
 		if (treeType === 'cherry') {
 			return pickFromArray(depthPinks);
 		}
