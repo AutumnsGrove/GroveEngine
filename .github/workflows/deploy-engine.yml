@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'packages/engine/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 jobs:
