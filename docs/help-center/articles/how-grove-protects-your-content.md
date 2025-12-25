@@ -127,8 +127,8 @@ Once verified, you won't see it again for a week. The verification is stored in 
 - [AI Crawler User Agents List](https://www.searchenginejournal.com/ai-crawler-user-agents-list/) — Comprehensive list
 
 **Grove documentation:**
-- [Understanding Your Privacy](/help/understanding-your-privacy) — Broader privacy overview
-- [What is Grove?](/help/what-is-grove) — Our philosophy and values
+- [Understanding Your Privacy](/knowledge/help/understanding-your-privacy) — Broader privacy overview
+- [What is Grove?](/knowledge/help/what-is-grove) — Our philosophy and values
 
 ---
 
