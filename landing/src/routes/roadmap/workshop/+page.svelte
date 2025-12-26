@@ -3,7 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video } from 'lucide-svelte';
 
 	// Components
 	import Logo from '$lib/components/Logo.svelte';
@@ -11,6 +11,56 @@
 
 	// Tools that integrate with Grove
 	const tools = [
+		{
+			name: 'Ivy',
+			tagline: 'Privacy-First Email',
+			description: 'A zero-knowledge email client for your @grove.place address. Client-side encryption means we can\'t read your mail—it\'s yours alone. Threaded conversations, rich text, attachments, and integration with your blog\'s contact forms.',
+			status: 'building',
+			icon: 'mail',
+			domain: 'ivy.grove.place',
+			integration: 'Included with Oak and Evergreen tiers',
+			github: 'https://github.com/AutumnsGrove/Ivy'
+		},
+		{
+			name: 'Amber',
+			tagline: 'Storage Management',
+			description: 'Your Grove storage, made visible. See what\'s using your space, download and export your data, clean up what you don\'t need, and buy more when you need it. Every file you upload—blog images, email attachments, profile pictures—organized in one place.',
+			status: 'building',
+			icon: 'harddrive',
+			domain: 'amber.grove.place',
+			integration: 'Storage dashboard for all Grove users',
+			github: 'https://github.com/AutumnsGrove/Amber'
+		},
+		{
+			name: 'Foliage',
+			tagline: 'Theming Engine',
+			description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
+			status: 'building',
+			icon: 'palette',
+			domain: 'foliage.grove.place',
+			integration: 'Theme customization for all Grove blogs',
+			github: 'https://github.com/AutumnsGrove/Foliage'
+		},
+		{
+			name: 'Heartwood',
+			tagline: 'Centralized Authentication',
+			description: 'One identity, verified and protected, that works across every Grove property. Google OAuth, GitHub, or magic email codes—all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
+			status: 'building',
+			icon: 'shieldcheck',
+			domain: 'heartwood.grove.place',
+			integration: 'Powers authentication for all Grove services',
+			github: 'https://github.com/AutumnsGrove/GroveAuth'
+		},
+		{
+			name: 'Bloom',
+			tagline: 'Remote AI Coding',
+			description: 'Text it and forget it. Send development tasks from your phone, and an AI coding agent handles them on a temporary server that self-destructs when done. Your code syncs to cloud storage before shutdown. Autonomous coding from anywhere.',
+			status: 'building',
+			icon: 'cloud',
+			domain: 'bloom.grove.place',
+			integration: 'Personal serverless development infrastructure',
+			github: 'https://github.com/AutumnsGrove/GroveBloom'
+		},
 		{
 			name: 'Forage',
 			tagline: 'Domain Discovery',
@@ -30,6 +80,34 @@
 			domain: 'mc.grove.place',
 			integration: 'For Grove community members',
 			github: 'https://github.com/AutumnsGrove/GroveMC'
+		},
+		{
+			name: 'Cache',
+			tagline: 'Automated Backups',
+			description: 'Squirrels cache acorns for winter. Cache runs weekly automated backups of every Grove database to cold storage—twelve weeks of history, always available, quietly preserved. When disaster strikes, Cache is already there.',
+			status: 'live',
+			icon: 'archive',
+			integration: 'Internal service protecting all Grove data',
+			github: 'https://github.com/AutumnsGrove/GroveBackups'
+		},
+		{
+			name: 'CDN Uploader',
+			tagline: 'Intelligent Image CLI',
+			description: 'A fast, intelligent CLI for uploading images to Cloudflare R2. Auto-converts to WebP, generates AI descriptions and alt text, deduplicates by content hash, and processes Markdown files to extract and replace image links. Slick and streamlined.',
+			status: 'live',
+			icon: 'upload',
+			integration: 'CLI tool for content creators and developers',
+			github: 'https://github.com/AutumnsGrove/CDNUploader'
+		},
+		{
+			name: 'Nook',
+			tagline: 'Private Video Sharing',
+			description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive—a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
+			status: 'building',
+			icon: 'video',
+			domain: 'nook.grove.place',
+			integration: 'Intimate video sharing for close connections',
+			github: 'https://github.com/AutumnsGrove/Nook'
 		},
 	];
 
@@ -84,10 +162,26 @@
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
 								<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-									{#if tool.icon === 'search'}
+									{#if tool.icon === 'mail'}
+										<Mail class="w-5 h-5" />
+									{:else if tool.icon === 'harddrive'}
+										<HardDrive class="w-5 h-5" />
+									{:else if tool.icon === 'palette'}
+										<Palette class="w-5 h-5" />
+									{:else if tool.icon === 'shieldcheck'}
+										<ShieldCheck class="w-5 h-5" />
+									{:else if tool.icon === 'cloud'}
+										<Cloud class="w-5 h-5" />
+									{:else if tool.icon === 'search'}
 										<Search class="w-5 h-5" />
 									{:else if tool.icon === 'pickaxe'}
 										<Pickaxe class="w-5 h-5" />
+									{:else if tool.icon === 'archive'}
+										<Archive class="w-5 h-5" />
+									{:else if tool.icon === 'upload'}
+										<Upload class="w-5 h-5" />
+									{:else if tool.icon === 'video'}
+										<Video class="w-5 h-5" />
 									{:else if tool.icon === 'book'}
 										<BookOpen class="w-5 h-5" />
 									{/if}
@@ -107,10 +201,12 @@
 						</p>
 
 						<div class="pt-4 border-t border-divider space-y-2">
-							<div class="flex items-center gap-2 text-sm">
-								<span class="text-foreground-faint">Domain:</span>
-								<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted">{tool.domain}</code>
-							</div>
+							{#if tool.domain}
+								<div class="flex items-center gap-2 text-sm">
+									<span class="text-foreground-faint">Domain:</span>
+									<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted">{tool.domain}</code>
+								</div>
+							{/if}
 							<div class="text-sm text-foreground-faint">
 								{tool.integration}
 							</div>
