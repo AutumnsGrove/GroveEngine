@@ -102,7 +102,16 @@ export async function createCheckoutSession(params: {
   if (!response.ok) {
     const error = await response.json();
     console.error("[Stripe] Checkout session creation failed:", error);
-    throw new Error("Failed to create checkout session");
+    console.error("[Stripe] Request params:", {
+      priceId: params.priceId,
+      email: params.customerEmail,
+      mode: "subscription",
+    });
+    // Throw the actual Stripe error message for debugging
+    throw new Error(
+      error.error?.message ||
+        `Stripe API error: ${response.status} ${response.statusText}`,
+    );
   }
 
   const session = (await response.json()) as { id: string; url: string };
