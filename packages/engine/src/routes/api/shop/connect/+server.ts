@@ -107,7 +107,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
           });
         }
       } catch (stripeErr) {
-        console.error("Error fetching Stripe account:", stripeErr instanceof Error ? stripeErr.message : stripeErr);
+        console.error(
+          "Error fetching Stripe account:",
+          stripeErr instanceof Error ? stripeErr.message : stripeErr,
+        );
       }
     }
 
@@ -126,7 +129,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       },
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching Connect account:", err);
     throw error(500, "Failed to fetch Connect account");
   }
@@ -144,7 +147,12 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
  *   businessType?: 'individual' | 'company' | 'non_profit'
  * }
  */
-export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
+export const POST: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -176,18 +184,20 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       locals.user,
     );
 
-    const data = await request.json();
+    const data = (await request.json()) as Record<string, unknown>;
 
-    if (!data.returnUrl || !data.refreshUrl) {
+    const returnUrl = data.returnUrl as string;
+    const refreshUrl = data.refreshUrl as string;
+    if (!returnUrl || !refreshUrl) {
       throw error(400, "Return URL and refresh URL are required");
     }
 
     // Check if account already exists
-    const existingAccount = await platform.env.DB.prepare(
+    const existingAccount = (await platform.env.DB.prepare(
       "SELECT id, provider_account_id FROM connect_accounts WHERE tenant_id = ?",
     )
       .bind(tenantId)
-      .first();
+      .first()) as Record<string, unknown> | undefined;
 
     const stripe = createPaymentProvider("stripe", {
       secretKey: platform.env.STRIPE_SECRET_KEY,
@@ -195,31 +205,31 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
 
     if (existingAccount) {
       // Create new account link for existing account
-      const link = await (stripe as any).createConnectAccountLink(
-        existingAccount.provider_account_id,
+      const link = await (stripe as any).createConnectAccountLink?.(
+        existingAccount.provider_account_id as string,
         {
-          returnUrl: data.returnUrl,
-          refreshUrl: data.refreshUrl,
+          returnUrl,
+          refreshUrl,
         },
       );
 
       return json({
         success: true,
-        onboardingUrl: link.url,
+        onboardingUrl: link?.url || "",
         accountId: existingAccount.provider_account_id,
         isNew: false,
       });
     }
 
     // Create new Connect account
-    const result = await (stripe as any).createConnectAccount({
+    const result = await (stripe as any).createConnectAccount?.({
       tenantId,
-      returnUrl: data.returnUrl,
-      refreshUrl: data.refreshUrl,
+      returnUrl,
+      refreshUrl,
       type: "express",
-      country: data.country || "US",
-      email: data.email || locals.user.email,
-      businessType: data.businessType,
+      country: (data.country as string) || "US",
+      email: (data.email as string) || locals.user?.email,
+      businessType: data.businessType as string | undefined,
     });
 
     // Store in database
@@ -233,11 +243,11 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       .bind(
         accountDbId,
         tenantId,
-        result.accountId,
+        result?.accountId,
         "express",
         "pending",
-        data.email || locals.user.email || null,
-        data.country || "US",
+        (data.email as string) || locals.user?.email || null,
+        (data.country as string) || "US",
         Math.floor(Date.now() / 1000),
         Math.floor(Date.now() / 1000),
       )
@@ -245,12 +255,12 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
 
     return json({
       success: true,
-      onboardingUrl: result.onboardingUrl,
-      accountId: result.accountId,
+      onboardingUrl: result?.onboardingUrl || "",
+      accountId: result?.accountId || "",
       isNew: true,
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error creating Connect account:", err);
     throw error(500, "Failed to create Connect account");
   }
@@ -260,7 +270,12 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
  * DELETE /api/shop/connect - Disconnect Connect account
  * (This doesn't delete the Stripe account, just removes the link)
  */
-export const DELETE: RequestHandler = async ({ request, url, platform, locals }) => {
+export const DELETE: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -299,7 +314,7 @@ export const DELETE: RequestHandler = async ({ request, url, platform, locals })
       message: "Connect account disconnected",
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error disconnecting Connect account:", err);
     throw error(500, "Failed to disconnect Connect account");
   }

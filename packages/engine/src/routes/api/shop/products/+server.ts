@@ -3,6 +3,12 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import type {
+  ProductStatus,
+  ProductType,
+  PricingType,
+  BillingInterval,
+} from "$lib/payments/types";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -44,16 +50,20 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     );
 
     const products = await getProducts(platform.env.DB, tenantId, {
-      status: url.searchParams.get("status") as string | null,
-      type: url.searchParams.get("type") as string | null,
-      category: url.searchParams.get("category") as string | null,
+      status: (url.searchParams.get("status") || undefined) as
+        | ProductStatus
+        | undefined,
+      type: (url.searchParams.get("type") || undefined) as
+        | ProductType
+        | undefined,
+      category: url.searchParams.get("category") || undefined,
       limit: parseInt(url.searchParams.get("limit") || "50"),
       offset: parseInt(url.searchParams.get("offset") || "0"),
     });
 
     return json({ products });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching products:", err);
     throw error(500, "Failed to fetch products");
   }
@@ -105,8 +115,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
-    const data = await request.json();
-    const requestedTenantId = data.tenant_id || locals.tenantId;
+    const data = (await request.json()) as Record<string, unknown>;
+    const requestedTenantId = (data.tenant_id as string) || locals.tenantId;
 
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
@@ -122,7 +132,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate slug format
     const slugRegex = /^[a-z0-9-]+$/;
-    if (!slugRegex.test(data.slug)) {
+    const slugStr = data.slug as string;
+    if (!slugRegex.test(slugStr)) {
       throw error(
         400,
         "Slug must contain only lowercase letters, numbers, and hyphens",
@@ -130,27 +141,23 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Create the product
-    const { id: productId } = await createProduct(
-      platform.env.DB,
-      tenantId,
-      {
-        name: data.name,
-        slug: data.slug,
-        description: data.description,
-        shortDescription: data.shortDescription,
-        type: data.type || "physical",
-        status: data.status || "draft",
-        images: data.images || [],
-        featuredImage: data.featuredImage,
-        category: data.category,
-        tags: data.tags || [],
-        metadata: data.metadata || {},
-      },
-    );
+    const { id: productId } = await createProduct(platform.env.DB, tenantId, {
+      name: data.name as string,
+      slug: slugStr,
+      description: data.description as string | undefined,
+      shortDescription: data.shortDescription as string | undefined,
+      type: ((data.type as string) || "physical") as ProductType,
+      status: ((data.status as string) || "draft") as ProductStatus,
+      images: (data.images as string[]) || [],
+      featuredImage: data.featuredImage as string | undefined,
+      category: data.category as string | undefined,
+      tags: (data.tags as string[]) || [],
+      metadata: (data.metadata as Record<string, string>) || {},
+    });
 
     // Create variants if provided
-    const variants = data.variants || [];
-    const createdVariants = [];
+    const variants = (data.variants as Record<string, unknown>[]) || [];
+    const createdVariants: Array<{ id: string; name: unknown }> = [];
 
     // If no variants provided, create a default one
     if (variants.length === 0 && data.price !== undefined) {
@@ -160,7 +167,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         tenantId,
         {
           name: "Default",
-          priceAmount: data.price,
+          priceAmount: data.price as number,
           priceCurrency: "usd",
           isDefault: true,
         },
@@ -168,29 +175,37 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       createdVariants.push({ id: variantId, name: "Default" });
     } else {
       for (let i = 0; i < variants.length; i++) {
-        const variant = variants[i] as Record<string, unknown>;
+        const variant = variants[i];
         const { id: variantId } = await createVariant(
           platform.env.DB,
           productId,
           tenantId,
           {
-            name: variant.name || `Variant ${i + 1}`,
-            sku: variant.sku,
-            priceAmount: variant.priceAmount,
-            priceCurrency: variant.priceCurrency || "usd",
-            compareAtPrice: variant.compareAtPrice,
-            pricingType: variant.pricingType || "one_time",
-            billingInterval: variant.billingInterval,
-            billingIntervalCount: variant.billingIntervalCount,
-            inventoryQuantity: variant.inventoryQuantity,
-            inventoryPolicy: variant.inventoryPolicy,
-            trackInventory: variant.trackInventory,
-            downloadUrl: variant.downloadUrl,
-            downloadLimit: variant.downloadLimit,
-            requiresShipping: variant.requiresShipping,
-            isDefault: variant.isDefault || i === 0,
+            name: (variant.name as string) || `Variant ${i + 1}`,
+            sku: variant.sku as string | undefined,
+            priceAmount: variant.priceAmount as number | undefined,
+            priceCurrency: (variant.priceCurrency as string) || "usd",
+            compareAtPrice: variant.compareAtPrice as number | undefined,
+            pricingType: ((variant.pricingType as string) ||
+              "one_time") as PricingType,
+            billingInterval: variant.billingInterval as string | undefined as
+              | BillingInterval
+              | undefined,
+            billingIntervalCount: variant.billingIntervalCount as
+              | number
+              | undefined,
+            inventoryQuantity: variant.inventoryQuantity as number | undefined,
+            inventoryPolicy: variant.inventoryPolicy as string | undefined as
+              | "deny"
+              | "continue"
+              | undefined,
+            trackInventory: variant.trackInventory as boolean | undefined,
+            downloadUrl: variant.downloadUrl as string | undefined,
+            downloadLimit: variant.downloadLimit as number | undefined,
+            requiresShipping: variant.requiresShipping as boolean | undefined,
+            isDefault: (variant.isDefault as boolean) || i === 0,
             position: i,
-            metadata: variant.metadata,
+            metadata: variant.metadata as Record<string, string> | undefined,
           },
         );
         createdVariants.push({ id: variantId, name: variant.name });
@@ -201,12 +216,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       success: true,
       product: {
         id: productId,
-        slug: data.slug,
+        slug: slugStr,
         variants: createdVariants,
       },
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error creating product:", err);
     throw error(500, "Failed to create product");
   }

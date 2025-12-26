@@ -10,6 +10,12 @@ import {
   deleteVariant,
 } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import type {
+  ProductStatus,
+  ProductType,
+  PricingType,
+  BillingInterval,
+} from "$lib/payments/types";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -19,7 +25,12 @@ const SHOP_DISABLED_MESSAGE =
 /**
  * GET /api/shop/products/[slug] - Get a single product
  */
-export const GET: RequestHandler = async ({ params, url, platform, locals }) => {
+export const GET: RequestHandler = async ({
+  params,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -46,7 +57,7 @@ export const GET: RequestHandler = async ({ params, url, platform, locals }) => 
 
     return json({ product });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching product:", err);
     throw error(500, "Failed to fetch product");
   }
@@ -57,7 +68,13 @@ export const GET: RequestHandler = async ({ params, url, platform, locals }) => 
  *
  * Body: Same as POST, all fields optional
  */
-export const PATCH: RequestHandler = async ({ params, request, url, platform, locals }) => {
+export const PATCH: RequestHandler = async ({
+  params,
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -93,12 +110,13 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
       throw error(404, "Product not found");
     }
 
-    const data = await request.json();
+    const data = (await request.json()) as Record<string, unknown>;
 
     // Validate slug if changing
-    if (data.slug && data.slug !== params.slug) {
+    const newSlug = data.slug as string | undefined;
+    if (newSlug && newSlug !== params.slug) {
       const slugRegex = /^[a-z0-9-]+$/;
-      if (!slugRegex.test(data.slug)) {
+      if (!slugRegex.test(newSlug)) {
         throw error(
           400,
           "Slug must contain only lowercase letters, numbers, and hyphens",
@@ -108,62 +126,90 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
 
     // Update product
     await updateProduct(platform.env.DB, product.id, {
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      shortDescription: data.shortDescription,
-      type: data.type,
-      status: data.status,
-      images: data.images,
-      featuredImage: data.featuredImage,
-      category: data.category,
-      tags: data.tags,
-      metadata: data.metadata,
+      name: data.name as string | undefined,
+      slug: newSlug,
+      description: data.description as string | undefined,
+      shortDescription: data.shortDescription as string | undefined,
+      type: data.type as string | undefined as ProductType | undefined,
+      status: data.status as string | undefined as ProductStatus | undefined,
+      images: data.images as string[] | undefined,
+      featuredImage: data.featuredImage as string | undefined,
+      category: data.category as string | undefined,
+      tags: data.tags as string[] | undefined,
+      metadata: data.metadata as Record<string, string> | undefined,
     });
 
     // Handle variant updates if provided
     if (data.variants) {
-      for (const variantData of (data.variants as any[])) {
+      const variantsList = data.variants as Array<Record<string, unknown>>;
+      for (const variantData of variantsList) {
         if (variantData.id) {
           // Update existing variant
-          await updateVariant(platform.env.DB, variantData.id, {
-            name: variantData.name,
-            sku: variantData.sku,
-            priceAmount: variantData.priceAmount,
-            compareAtPrice: variantData.compareAtPrice,
-            pricingType: variantData.pricingType,
-            billingInterval: variantData.billingInterval,
-            billingIntervalCount: variantData.billingIntervalCount,
-            inventoryQuantity: variantData.inventoryQuantity,
-            inventoryPolicy: variantData.inventoryPolicy,
-            trackInventory: variantData.trackInventory,
-            downloadUrl: variantData.downloadUrl,
-            downloadLimit: variantData.downloadLimit,
-            requiresShipping: variantData.requiresShipping,
-            isDefault: variantData.isDefault,
-            position: variantData.position,
-            metadata: variantData.metadata,
+          await updateVariant(platform.env.DB, variantData.id as string, {
+            name: variantData.name as string | undefined,
+            sku: variantData.sku as string | undefined,
+            priceAmount: variantData.priceAmount as number | undefined,
+            compareAtPrice: variantData.compareAtPrice as number | undefined,
+            pricingType: variantData.pricingType as string | undefined as
+              | PricingType
+              | undefined,
+            billingInterval: variantData.billingInterval as
+              | string
+              | undefined as BillingInterval | undefined,
+            billingIntervalCount: variantData.billingIntervalCount as
+              | number
+              | undefined,
+            inventoryQuantity: variantData.inventoryQuantity as
+              | number
+              | undefined,
+            inventoryPolicy: variantData.inventoryPolicy as
+              | string
+              | undefined as "deny" | "continue" | undefined,
+            trackInventory: variantData.trackInventory as boolean | undefined,
+            downloadUrl: variantData.downloadUrl as string | undefined,
+            downloadLimit: variantData.downloadLimit as number | undefined,
+            requiresShipping: variantData.requiresShipping as
+              | boolean
+              | undefined,
+            isDefault: variantData.isDefault as boolean | undefined,
+            position: variantData.position as number | undefined,
+            metadata: variantData.metadata as
+              | Record<string, string>
+              | undefined,
           });
         } else if (variantData._action === "create") {
           // Create new variant
           await createVariant(platform.env.DB, product.id, tenantId, {
-            name: variantData.name,
-            sku: variantData.sku,
-            priceAmount: variantData.priceAmount,
-            priceCurrency: variantData.priceCurrency || "usd",
-            compareAtPrice: variantData.compareAtPrice,
-            pricingType: variantData.pricingType || "one_time",
-            billingInterval: variantData.billingInterval,
-            billingIntervalCount: variantData.billingIntervalCount,
-            inventoryQuantity: variantData.inventoryQuantity,
-            inventoryPolicy: variantData.inventoryPolicy,
-            trackInventory: variantData.trackInventory,
-            downloadUrl: variantData.downloadUrl,
-            downloadLimit: variantData.downloadLimit,
-            requiresShipping: variantData.requiresShipping,
-            isDefault: variantData.isDefault,
-            position: variantData.position,
-            metadata: variantData.metadata,
+            name: (variantData.name as string) || "New Variant",
+            sku: variantData.sku as string | undefined,
+            priceAmount: variantData.priceAmount as number | undefined,
+            priceCurrency: (variantData.priceCurrency as string) || "usd",
+            compareAtPrice: variantData.compareAtPrice as number | undefined,
+            pricingType: ((variantData.pricingType as string) ||
+              "one_time") as PricingType,
+            billingInterval: variantData.billingInterval as
+              | string
+              | undefined as BillingInterval | undefined,
+            billingIntervalCount: variantData.billingIntervalCount as
+              | number
+              | undefined,
+            inventoryQuantity: variantData.inventoryQuantity as
+              | number
+              | undefined,
+            inventoryPolicy: variantData.inventoryPolicy as
+              | string
+              | undefined as "deny" | "continue" | undefined,
+            trackInventory: variantData.trackInventory as boolean | undefined,
+            downloadUrl: variantData.downloadUrl as string | undefined,
+            downloadLimit: variantData.downloadLimit as number | undefined,
+            requiresShipping: variantData.requiresShipping as
+              | boolean
+              | undefined,
+            isDefault: variantData.isDefault as boolean | undefined,
+            position: variantData.position as number | undefined,
+            metadata: variantData.metadata as
+              | Record<string, string>
+              | undefined,
           });
         }
       }
@@ -171,7 +217,8 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
 
     // Handle variant deletions
     if (data.deleteVariants) {
-      for (const variantId of (data.deleteVariants as string[])) {
+      const deleteList = data.deleteVariants as string[];
+      for (const variantId of deleteList) {
         await deleteVariant(platform.env.DB, variantId);
       }
     }
@@ -180,7 +227,7 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
     const updatedProduct = await getProductBySlug(
       platform.env.DB,
       tenantId,
-      data.slug || params.slug,
+      newSlug || params.slug,
     );
 
     return json({
@@ -188,7 +235,7 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
       product: updatedProduct,
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error updating product:", err);
     throw error(500, "Failed to update product");
   }
@@ -197,7 +244,13 @@ export const PATCH: RequestHandler = async ({ params, request, url, platform, lo
 /**
  * DELETE /api/shop/products/[slug] - Delete a product
  */
-export const DELETE: RequestHandler = async ({ params, request, url, platform, locals }) => {
+export const DELETE: RequestHandler = async ({
+  params,
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -239,7 +292,7 @@ export const DELETE: RequestHandler = async ({ params, request, url, platform, l
       message: "Product deleted",
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error deleting product:", err);
     throw error(500, "Failed to delete product");
   }

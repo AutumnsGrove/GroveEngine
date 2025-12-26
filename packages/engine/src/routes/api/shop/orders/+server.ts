@@ -3,6 +3,7 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import type { OrderStatus, PaymentStatus } from "$lib/payments/types";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -43,15 +44,19 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     );
 
     const orders = await getOrders(platform.env.DB, tenantId, {
-      status: url.searchParams.get("status") as string | null,
-      paymentStatus: url.searchParams.get("payment_status") as string | null,
+      status: (url.searchParams.get("status") || undefined) as
+        | OrderStatus
+        | undefined,
+      paymentStatus: (url.searchParams.get("payment_status") || undefined) as
+        | PaymentStatus
+        | undefined,
       limit: parseInt(url.searchParams.get("limit") || "50"),
       offset: parseInt(url.searchParams.get("offset") || "0"),
     });
 
     return json({ orders });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching orders:", err);
     throw error(500, "Failed to fetch orders");
   }
@@ -87,31 +92,35 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
-    const data = await request.json();
+    const data = (await request.json()) as Record<string, unknown>;
 
-    if (!data.orderId) {
+    const orderId = data.orderId as string;
+    if (!orderId) {
       throw error(400, "Order ID required");
     }
 
     // Get order to verify it exists
-    const order = await getOrderById(platform.env.DB, data.orderId);
+    const order = await getOrderById(platform.env.DB, orderId);
     if (!order) {
       throw error(404, "Order not found");
     }
 
     // Verify user owns the tenant this order belongs to
+    const orderTenantId =
+      (order as Record<string, any>).tenant_id || order.tenantId;
     await getVerifiedTenantId(
       platform.env.DB,
-      (order as Record<string, any>).tenant_id || order.tenantId,
+      orderTenantId as string,
       locals.user,
     );
 
     // Build update query
-    const updates = [];
-    const params = [];
+    const updates: string[] = [];
+    const params: unknown[] = [];
 
-    if (data.status) {
-      const validStatuses = [
+    const newStatus = data.status as string | undefined;
+    if (newStatus) {
+      const validStatuses: OrderStatus[] = [
         "pending",
         "paid",
         "processing",
@@ -120,20 +129,20 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
         "canceled",
         "refunded",
       ];
-      if (!validStatuses.includes(data.status)) {
+      if (!validStatuses.includes(newStatus as OrderStatus)) {
         throw error(400, "Invalid status");
       }
       updates.push("status = ?");
-      params.push(data.status);
+      params.push(newStatus);
 
       // Set timestamp for specific statuses
-      if (data.status === "shipped") {
+      if (newStatus === "shipped") {
         updates.push("shipped_at = ?");
         params.push(Math.floor(Date.now() / 1000));
-      } else if (data.status === "completed") {
+      } else if (newStatus === "completed") {
         updates.push("fulfilled_at = ?");
         params.push(Math.floor(Date.now() / 1000));
-      } else if (data.status === "canceled") {
+      } else if (newStatus === "canceled") {
         updates.push("canceled_at = ?");
         params.push(Math.floor(Date.now() / 1000));
       }
@@ -141,22 +150,22 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
     if (data.trackingNumber !== undefined) {
       updates.push("tracking_number = ?");
-      params.push(data.trackingNumber);
+      params.push(data.trackingNumber as string | null);
     }
 
     if (data.trackingUrl !== undefined) {
       updates.push("tracking_url = ?");
-      params.push(data.trackingUrl);
+      params.push(data.trackingUrl as string | null);
     }
 
     if (data.shippingCarrier !== undefined) {
       updates.push("shipping_carrier = ?");
-      params.push(data.shippingCarrier);
+      params.push(data.shippingCarrier as string | null);
     }
 
     if (data.internalNotes !== undefined) {
       updates.push("internal_notes = ?");
-      params.push(data.internalNotes);
+      params.push(data.internalNotes as string | null);
     }
 
     if (updates.length === 0) {
@@ -165,7 +174,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
     updates.push("updated_at = ?");
     params.push(Math.floor(Date.now() / 1000));
-    params.push(data.orderId);
+    params.push(orderId);
 
     await platform.env.DB.prepare(
       `UPDATE orders SET ${updates.join(", ")} WHERE id = ?`,
@@ -174,17 +183,14 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
       .run();
 
     // Fetch updated order
-    const updatedOrder = await getOrderById(
-      platform.env.DB,
-      data.orderId,
-    );
+    const updatedOrder = await getOrderById(platform.env.DB, orderId);
 
     return json({
       success: true,
       order: updatedOrder,
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error updating order:", err);
     throw error(500, "Failed to update order");
   }

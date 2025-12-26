@@ -39,7 +39,12 @@ const SHOP_DISABLED_MESSAGE =
  *   orderNumber: string
  * }
  */
-export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
+export const POST: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -73,7 +78,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     if (!tenant) {
       throw error(404, "Store not found");
     }
-    const data = await request.json();
+    const data = (await request.json()) as Record<string, unknown>;
 
     // Validate required fields
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
@@ -85,30 +90,36 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     }
 
     // Validate items and calculate totals
-    const lineItems = [];
+    const lineItems: Array<{
+      productId: string;
+      variantId: string;
+      productName: string;
+      variantName: string;
+      sku?: string;
+      quantity: number;
+      unitPrice: number;
+      requiresShipping: boolean;
+    }> = [];
     let subtotal = 0;
     let hasSubscription = false;
     let hasPhysical = false;
 
-    for (const item of data.items) {
-      if (!item.variantId || !item.quantity || item.quantity < 1) {
+    const items = (data.items as Array<Record<string, unknown>>) || [];
+    for (const item of items) {
+      const variantId = item.variantId as string;
+      const quantity = item.quantity as number;
+      if (!variantId || !quantity || quantity < 1) {
         throw error(400, "Invalid item: variantId and quantity required");
       }
 
-      const variant = await getVariantById(
-        platform.env.DB,
-        item.variantId,
-      );
+      const variant = await getVariantById(platform.env.DB, variantId);
       if (!variant) {
-        throw error(404, `Variant not found: ${item.variantId}`);
+        throw error(404, `Variant not found: ${variantId}`);
       }
 
-      const product = await getProductById(
-        platform.env.DB,
-        variant.productId,
-      );
+      const product = await getProductById(platform.env.DB, variant.productId);
       if (!product) {
-        throw error(404, `Product not found for variant: ${item.variantId}`);
+        throw error(404, `Product not found for variant: ${variantId}`);
       }
 
       // Check product is active
@@ -120,7 +131,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       if (
         variant.inventoryQuantity !== undefined &&
         variant.inventoryPolicy === "deny" &&
-        variant.inventoryQuantity < item.quantity
+        variant.inventoryQuantity < quantity
       ) {
         throw error(
           400,
@@ -136,7 +147,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
         hasPhysical = true;
       }
 
-      const itemTotal = variant.price.amount * item.quantity;
+      const itemTotal = variant.price.amount * quantity;
       subtotal += itemTotal;
 
       lineItems.push({
@@ -145,23 +156,26 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
         productName: product.name,
         variantName: variant.name,
         sku: variant.sku,
-        quantity: item.quantity,
+        quantity,
         unitPrice: variant.price.amount,
         requiresShipping: product.type === "physical",
       });
     }
 
     // Determine checkout mode
-    const mode = hasSubscription ? "subscription" : data.mode || "payment";
+    const mode = hasSubscription
+      ? "subscription"
+      : (data.mode as string) || "payment";
 
     // Create or get customer
     let customer = null;
-    if (data.customerEmail) {
+    const customerEmail = data.customerEmail as string | undefined;
+    if (customerEmail) {
       customer = await getOrCreateCustomer(
         platform.env.DB,
         tenantId,
-        data.customerEmail,
-        { name: data.customerName },
+        customerEmail,
+        { name: data.customerName as string | undefined },
       );
     }
 
@@ -170,17 +184,17 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       platform.env.DB,
       tenantId,
       {
-        customerEmail: data.customerEmail || "guest@checkout",
-        customerName: data.customerName,
+        customerEmail: customerEmail || "guest@checkout",
+        customerName: data.customerName as string | undefined,
         customerId: customer?.id,
         lineItems,
         subtotal,
         taxTotal: 0, // Will be updated by Stripe Tax
         total: subtotal, // Will be updated after tax
         currency: "usd",
-        customerNotes: data.notes,
+        customerNotes: data.notes as string | undefined,
         metadata: {
-          ...data.metadata,
+          ...(data.metadata as Record<string, string>),
           checkoutMode: mode,
         },
       },
@@ -197,19 +211,24 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     let applicationFeeAmount: number | undefined = undefined;
 
     // Optional marketplace mode check
-    if ((platform.env as Record<string, any>).STRIPE_CONNECT_ENABLED === "true") {
+    if (
+      (platform.env as Record<string, any>).STRIPE_CONNECT_ENABLED === "true"
+    ) {
       // Look up tenant's Connect account
-      const connectAccount = await platform.env.DB.prepare(
+      const connectAccount = (await platform.env.DB.prepare(
         "SELECT provider_account_id FROM connect_accounts WHERE tenant_id = ? AND status = 'enabled'",
       )
         .bind(tenantId)
-        .first();
+        .first()) as Record<string, unknown> | undefined;
 
       if (connectAccount) {
-        connectedAccountId = connectAccount.provider_account_id;
+        connectedAccountId = connectAccount.provider_account_id as string;
         // Calculate platform fee (e.g., 5%)
-        const feePercent = parseFloat((platform.env as Record<string, any>).PLATFORM_FEE_PERCENT || "5");
-        applicationFeeAmount = Math.round(subtotal * (feePercent / 100)) ?? undefined;
+        const feePercent = parseFloat(
+          (platform.env as Record<string, any>).PLATFORM_FEE_PERCENT || "5",
+        );
+        applicationFeeAmount =
+          Math.round(subtotal * (feePercent / 100)) ?? undefined;
       }
     }
 
@@ -219,27 +238,35 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     };
 
     // Create Stripe Checkout session
+    const successUrl = data.successUrl as string;
+    const cancelUrl = data.cancelUrl as string;
+    // Map items to CartItem format
+    const cartItems = items.map((item) => ({
+      variantId: item.variantId as string,
+      quantity: item.quantity as number,
+      metadata: (item.metadata as Record<string, string>) || undefined,
+    }));
     const session = await stripe.createCheckoutSession(
-      data.items,
+      cartItems,
       {
         mode,
-        successUrl: `${data.successUrl}?order=${orderNumber}&session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: data.cancelUrl,
-        customerEmail: data.customerEmail,
+        successUrl: `${successUrl}?order=${orderNumber}&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl,
+        customerEmail,
         customerId: customer?.providerCustomerId,
         automaticTax: true, // Enable Stripe Tax
         billingAddressCollection: "required",
         shippingAddressCollection: hasPhysical
           ? { allowedCountries: ["US", "CA", "GB", "AU"] }
           : undefined,
-        allowPromotionCodes: data.allowPromoCodes !== false,
+        allowPromotionCodes: (data.allowPromoCodes as boolean) !== false,
         connectedAccountId,
         applicationFeeAmount,
         metadata: {
           grove_order_id: orderId,
           grove_order_number: orderNumber,
           grove_tenant_id: tenantId,
-          ...data.metadata,
+          ...(data.metadata as Record<string, string>),
         },
       },
       resolveVariant,
@@ -260,9 +287,9 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       orderNumber,
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error creating checkout:", err);
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = err instanceof Error ? err.message : "Unknown error";
     throw error(500, `Failed to create checkout: ${message}`);
   }
 };
@@ -303,7 +330,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       amountTotal: session.amountTotal,
     });
   } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err) throw err;
+    if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching checkout session:", err);
     throw error(500, "Failed to fetch checkout session");
   }

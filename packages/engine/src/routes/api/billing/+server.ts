@@ -244,7 +244,9 @@ export const POST: RequestHandler = async ({
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    const priceId = platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
+    const priceId = (platform.env as Record<string, string>)[
+      `STRIPE_PRICE_${data.plan.toUpperCase()}`
+    ];
 
     const checkoutParams = {
       mode: "subscription",
@@ -450,8 +452,9 @@ export const PATCH: RequestHandler = async ({
           throw error(400, "Invalid plan");
         }
 
-        const newPriceId =
-          platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
+        const newPriceId = (platform.env as Record<string, string>)[
+          `STRIPE_PRICE_${data.plan.toUpperCase()}`
+        ];
 
         if (!newPriceId) {
           throw error(500, "Price ID not configured for plan");

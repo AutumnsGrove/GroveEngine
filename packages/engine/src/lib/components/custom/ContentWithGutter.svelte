@@ -64,7 +64,7 @@
 	 * Helper to get anchor key with headers context
 	 * @param {string} anchor
 	 */
-	function getKey(anchor) {
+	function getKey(anchor: string) {
 		return getAnchorKey(anchor, headers);
 	}
 
@@ -72,16 +72,16 @@
 	 * Get items for a specific anchor
 	 * @param {string} anchor
 	 */
-	function getItems(anchor) {
+	function getItems(anchor: string) {
 		return getItemsForAnchor(gutterContent, anchor);
 	}
 
 	/**
 	 * Generate unique key for a gutter item
-	 * @param {GutterItem} item
+	 * @param {GutterItemType} item
 	 * @param {number} index
 	 */
-	function getItemKey(item, index) {
+	function getItemKey(item: GutterItemType, index: number): string {
 		// Combine item properties to create a unique identifier
 		const parts = [
 			item.type || 'unknown',
@@ -103,16 +103,15 @@
 
 		// Use getBoundingClientRect for accurate relative positioning
 		// This works regardless of offset parent chains and CSS transforms
-		const gutterRect = gutterElement.getBoundingClientRect();
+		const gutterRect = (gutterElement as HTMLElement).getBoundingClientRect();
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
-		/** @type {string[]} */
-		const newOverflowingAnchors = [];
+		const newOverflowingAnchors: string[] = [];
 		const newPositions = { ...itemPositions };
 
 		// Sort anchors by their position in the document
 		const anchorPositions = uniqueAnchors.map(anchor => {
-			const el = findAnchorElement(anchor, contentBodyElement ?? null, headers);
+			const el = findAnchorElement(anchor, (contentBodyElement ?? null) as HTMLElement | null, headers);
 			if (!el && import.meta.env.DEV) {
 				console.warn(`Anchor element not found for: ${anchor}`);
 			}
@@ -168,8 +167,7 @@
 
 	// Setup resize listener on mount with proper cleanup
 	onMount(() => {
-		/** @type {ReturnType<typeof setTimeout> | undefined} */
-		let resizeTimeoutId;
+		let resizeTimeoutId: ReturnType<typeof setTimeout> | undefined;
 		const handleResize = () => {
 			clearTimeout(resizeTimeoutId);
 			resizeTimeoutId = setTimeout(() => {
@@ -186,9 +184,8 @@
 
 	// Setup copy button functionality for code blocks
 	onMount(() => {
-		/** @param {Event} event */
-		const handleCopyClick = async (event) => {
-			const button = /** @type {HTMLElement} */ (event.currentTarget);
+		const handleCopyClick = async (event: Event) => {
+			const button = event.currentTarget as HTMLElement;
 			const codeText = button.getAttribute('data-code');
 
 			if (!codeText) return;
@@ -251,20 +248,19 @@
 	// Add IDs to headers and position mobile gutter items
 	$effect(() => {
 		// Track moved elements for cleanup
-		/** @type {Array<{ element: HTMLElement, originalParent: HTMLElement | null, originalNextSibling: Node | null }>} */
-		const movedElements = [];
+		const movedElements: Array<{ element: HTMLElement; originalParent: HTMLElement | null; originalNextSibling: Node | null }> = [];
 
 		untrack(() => {
 			if (!contentBodyElement) return;
 
 			// First, add IDs to headers
 			if (headers && headers.length > 0) {
-				const headerElements = contentBodyElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-				headerElements.forEach((el) => {
-					const text = el.textContent?.trim() || '';
-					const matchingHeader = headers.find(/** @param {Header} h */ (h) => h.text === text);
+				const headerElements = (contentBodyElement as HTMLElement).querySelectorAll('h1, h2, h3, h4, h5, h6');
+				headerElements.forEach((el: Element) => {
+					const text = (el as HTMLElement).textContent?.trim() || '';
+					const matchingHeader = headers.find((h: Header) => h.text === text);
 					if (matchingHeader) {
-						el.id = matchingHeader.id;
+						(el as HTMLElement).id = matchingHeader.id;
 					}
 				});
 			}
@@ -279,7 +275,7 @@
 				const originalParent = mobileGutterEl.parentElement;
 				const originalNextSibling = mobileGutterEl.nextSibling;
 
-				const targetEl = findAnchorElement(anchor, contentBodyElement, headers);
+				const targetEl = findAnchorElement(anchor, contentBodyElement as HTMLElement, headers);
 
 				if (targetEl) {
 					targetEl.insertAdjacentElement('afterend', mobileGutterEl);
@@ -308,12 +304,13 @@
 			const updateHeight = () => {
 				if (!contentBodyElement) return;
 				// Get the bottom of content-body relative to the article
-				const rect = contentBodyElement.getBoundingClientRect();
-				const articleRect = contentBodyElement.closest('.content-article')?.getBoundingClientRect();
+				const rect = (contentBodyElement as HTMLElement).getBoundingClientRect();
+				const articleEl = (contentBodyElement as HTMLElement).closest('.content-article');
+				const articleRect = articleEl?.getBoundingClientRect();
 				if (articleRect) {
 					contentHeight = rect.bottom - articleRect.top;
 				} else {
-					contentHeight = contentBodyElement.offsetTop + contentBodyElement.offsetHeight;
+					contentHeight = (contentBodyElement as HTMLElement).offsetTop + (contentBodyElement as HTMLElement).offsetHeight;
 				}
 			};
 			updateHeight();
@@ -348,7 +345,7 @@
 	 * @param {string} html
 	 * @param {string[]} overflowKeys
 	 */
-	function injectReferenceMarkers(html, overflowKeys) {
+	function injectReferenceMarkers(html: string, overflowKeys: string[]): string {
 		if (!overflowKeys || overflowKeys.length === 0 || typeof window === 'undefined') {
 			return html;
 		}
