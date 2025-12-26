@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
@@ -81,22 +82,6 @@
 	 * Valid values: 'first-frost' | 'thaw' | 'first-buds' | 'full-bloom' | 'golden-hour' | 'midnight-bloom'
 	 */
 	const currentPhase: PhaseKey = 'thaw';
-
-	// Tree positions for Golden Hour falling leaves - MAGICAL FOREST with 12 trees!
-	const goldenHourTrees = [
-		{ id: 1, x: 3, y: 85, size: 72, treeType: 'pine' as const, zIndex: 1 },
-		{ id: 2, x: 10, y: 85, size: 88, treeType: 'aspen' as const, zIndex: 2 },
-		{ id: 3, x: 18, y: 85, size: 104, treeType: 'birch' as const, zIndex: 2 },
-		{ id: 4, x: 26, y: 85, size: 96, treeType: 'cherry' as const, zIndex: 2 },
-		{ id: 5, x: 35, y: 85, size: 120, treeType: 'logo' as const, zIndex: 3 },
-		{ id: 6, x: 44, y: 85, size: 88, treeType: 'aspen' as const, zIndex: 2 },
-		{ id: 7, x: 52, y: 85, size: 96, treeType: 'birch' as const, zIndex: 2 },
-		{ id: 8, x: 61, y: 85, size: 80, treeType: 'cherry' as const, zIndex: 2 },
-		{ id: 9, x: 70, y: 85, size: 104, treeType: 'aspen' as const, zIndex: 2 },
-		{ id: 10, x: 78, y: 85, size: 88, treeType: 'pine' as const, zIndex: 1 },
-		{ id: 11, x: 86, y: 85, size: 72, treeType: 'birch' as const, zIndex: 2 },
-		{ id: 12, x: 94, y: 85, size: 64, treeType: 'aspen' as const, zIndex: 1 }
-	];
 
 	// Feature definitions for each phase
 	const phases = {
@@ -204,6 +189,120 @@
 		'golden-hour': getPhaseStatus('golden-hour'),
 		'midnight-bloom': getPhaseStatus('midnight-bloom')
 	};
+
+	// =============================================================================
+	// RANDOMIZED TREE GENERATION
+	// =============================================================================
+
+	type TreeType = 'pine' | 'cherry' | 'aspen' | 'birch' | 'logo';
+
+	interface GeneratedTree {
+		id: number;
+		x: number; // percentage from left
+		y: number; // always 85 for grounded trees
+		size: number;
+		treeType: TreeType;
+		opacity: number;
+		zIndex: number;
+	}
+
+	// Tree count ranges per section (grows as grove develops)
+	const TREE_RANGES = {
+		'first-frost': { min: 1, max: 1 },      // Just the beginning - always 1
+		'thaw': { min: 2, max: 4 },              // Growth beginning
+		'first-buds': { min: 3, max: 5 },        // Spring awakening
+		'full-bloom': { min: 5, max: 8 },        // Peak growth!
+		'golden-hour': { min: 8, max: 14 },      // Magical forest
+		'midnight-bloom': { min: 6, max: 10 }    // Silhouetted grove
+	};
+
+	// Available tree types per season
+	const TREE_TYPES_BY_SECTION: Record<PhaseKey, TreeType[]> = {
+		'first-frost': ['logo'],
+		'thaw': ['logo', 'pine', 'birch'],
+		'first-buds': ['logo', 'pine', 'cherry', 'birch'],
+		'full-bloom': ['logo', 'pine', 'cherry', 'birch', 'aspen'],
+		'golden-hour': ['logo', 'pine', 'cherry', 'birch', 'aspen'],
+		'midnight-bloom': ['logo', 'pine', 'cherry', 'birch', 'aspen']
+	};
+
+	// State for dynamically generated trees
+	let thawTrees = $state<GeneratedTree[]>([]);
+	let firstBudsTrees = $state<GeneratedTree[]>([]);
+	let fullBloomTrees = $state<GeneratedTree[]>([]);
+	let goldenHourRandomTrees = $state<GeneratedTree[]>([]);
+	let midnightBloomTrees = $state<GeneratedTree[]>([]);
+
+	/**
+	 * Generate random trees for a given section
+	 */
+	function generateSectionTrees(section: PhaseKey): GeneratedTree[] {
+		const range = TREE_RANGES[section];
+		const availableTypes = TREE_TYPES_BY_SECTION[section];
+		const count = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+
+		const trees: GeneratedTree[] = [];
+		const usedPositions: number[] = [];
+
+		for (let i = 0; i < count; i++) {
+			// Find a position that doesn't overlap too much
+			let x: number;
+			let attempts = 0;
+			do {
+				x = 5 + Math.random() * 88; // 5-93% range to avoid edges
+				attempts++;
+			} while (usedPositions.some(pos => Math.abs(pos - x) < 8) && attempts < 20);
+
+			usedPositions.push(x);
+
+			// Random tree type (but ensure at least one logo tree in larger groves)
+			let treeType: TreeType;
+			if (i === Math.floor(count / 2) && count >= 3) {
+				treeType = 'logo'; // Center tree is logo for larger groves
+			} else {
+				treeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+			}
+
+			// Size varies by distance from center (perspective effect)
+			const distFromCenter = Math.abs(50 - x) / 50;
+			const baseSize = 60 + Math.random() * 50; // 60-110
+			const size = baseSize * (1 - distFromCenter * 0.3); // Smaller towards edges
+
+			// Opacity varies by position (creates depth)
+			const opacity = 0.35 + Math.random() * 0.45; // 0.35-0.8
+
+			// Z-index based on size (larger = more foreground)
+			const zIndex = size > 80 ? 3 : size > 65 ? 2 : 1;
+
+			trees.push({
+				id: i + 1,
+				x,
+				y: 85,
+				size,
+				treeType,
+				opacity,
+				zIndex
+			});
+		}
+
+		// Sort by x position for natural left-to-right appearance
+		return trees.sort((a, b) => a.x - b.x);
+	}
+
+	/**
+	 * Regenerate all trees on mount (called once per page load)
+	 */
+	function regenerateAllTrees() {
+		thawTrees = generateSectionTrees('thaw');
+		firstBudsTrees = generateSectionTrees('first-buds');
+		fullBloomTrees = generateSectionTrees('full-bloom');
+		goldenHourRandomTrees = generateSectionTrees('golden-hour');
+		midnightBloomTrees = generateSectionTrees('midnight-bloom');
+	}
+
+	onMount(() => {
+		regenerateAllTrees();
+	});
 </script>
 
 <svelte:head>
@@ -237,7 +336,6 @@
 	<!-- Navigation Pills -->
 	<nav
 		class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
-		role="navigation"
 		aria-label="Development phases"
 	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">
@@ -311,24 +409,30 @@
 		<section
 			id="thaw"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-slate-200 via-sky-100 to-emerald-100
-				dark:from-slate-800 dark:via-slate-850 dark:to-emerald-950"
+				bg-gradient-to-b from-slate-200 via-sky-100 to-teal-100
+				dark:from-slate-800 dark:via-slate-850 dark:to-teal-950"
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
 				<SnowfallLayer count={20} zIndex={5} enabled opacity={{ min: 0.3, max: 0.6 }} spawnDelay={12} />
 			</div>
 
-			<!-- Three trees now - growth beginning -->
-			<div class="absolute bottom-0 left-[25%] w-28 h-36 opacity-70" aria-hidden="true">
-				<Logo class="w-full h-full" season="winter" animate />
-			</div>
-			<div class="absolute bottom-0 left-[50%] -translate-x-1/2 w-24 h-32 opacity-55" aria-hidden="true">
-				<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
-			</div>
-			<div class="absolute bottom-0 left-[70%] w-20 h-28 opacity-45" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="winter" animate />
-			</div>
+			<!-- Randomized trees - growth beginning -->
+			{#each thawTrees as tree (tree.id)}
+				<div
+					class="absolute bottom-0"
+					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === 'logo'}
+						<Logo class="w-full h-full" season="winter" animate />
+					{:else if tree.treeType === 'pine'}
+						<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" season="winter" animate />
+					{/if}
+				</div>
+			{/each}
 
 			<!-- Early tulips emerging through snow -->
 			<div class="absolute bottom-4 left-[35%] w-6 h-10 opacity-70" aria-hidden="true">
@@ -369,27 +473,32 @@
 		<section
 			id="first-buds"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-emerald-100 via-pink-50 to-lime-100
-				dark:from-emerald-950/40 dark:via-slate-900 dark:to-lime-950/30"
+				bg-gradient-to-b from-teal-50 via-rose-100 to-pink-100
+				dark:from-teal-950/30 dark:via-rose-950/40 dark:to-pink-950/30"
 		>
 			<!-- Spring petals -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
 				<FallingPetalsLayer count={50} zIndex={5} enabled opacity={{ min: 0.4, max: 0.8 }} fallDuration={{ min: 18, max: 26 }} driftRange={120} spawnDelay={10} />
 			</div>
 
-			<!-- Growing grove - 4 trees -->
-			<div class="absolute bottom-0 left-[15%] w-24 h-32 opacity-50" aria-hidden="true">
-				<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
-			</div>
-			<div class="absolute bottom-0 left-[30%] w-28 h-36 opacity-70" aria-hidden="true">
-				<Logo class="w-full h-full" season="spring" animate />
-			</div>
-			<div class="absolute bottom-0 left-[50%] w-24 h-32 opacity-60" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="spring" animate />
-			</div>
-			<div class="absolute bottom-0 left-[70%] w-20 h-28 opacity-50" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="spring" animate />
-			</div>
+			<!-- Randomized spring grove -->
+			{#each firstBudsTrees as tree (tree.id)}
+				<div
+					class="absolute bottom-0"
+					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === 'logo'}
+						<Logo class="w-full h-full" season="spring" animate />
+					{:else if tree.treeType === 'pine'}
+						<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
+					{:else if tree.treeType === 'cherry'}
+						<TreeCherry class="w-full h-full" season="spring" animate />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" season="spring" animate />
+					{/if}
+				</div>
+			{/each}
 
 			<!-- Ivy climbing! -->
 			<div class="absolute bottom-0 left-[40%] w-10 h-20 opacity-70" aria-hidden="true">
@@ -452,8 +561,8 @@
 		<section
 			id="full-bloom"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-lime-100 via-emerald-50 to-sky-100
-				dark:from-lime-950/30 dark:via-slate-900 dark:to-sky-950/30"
+				bg-gradient-to-b from-pink-50 via-green-100 to-yellow-100
+				dark:from-pink-950/20 dark:via-green-950/40 dark:to-yellow-950/30"
 		>
 			<!-- Fireflies in the summer evening -->
 			<div class="absolute top-1/4 left-[15%] opacity-80" aria-hidden="true">
@@ -469,28 +578,26 @@
 				<Firefly class="w-2 h-2" />
 			</div>
 
-			<!-- Full grove - 7 trees (peak growth!) -->
-			<div class="absolute bottom-0 left-[5%] w-20 h-28 opacity-40" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="summer" animate />
-			</div>
-			<div class="absolute bottom-0 left-[15%] w-24 h-32 opacity-50" aria-hidden="true">
-				<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
-			</div>
-			<div class="absolute bottom-0 left-[28%] w-28 h-36 opacity-70" aria-hidden="true">
-				<Logo class="w-full h-full" season="summer" animate />
-			</div>
-			<div class="absolute bottom-0 left-[42%] w-22 h-30 opacity-60" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="summer" animate />
-			</div>
-			<div class="absolute bottom-0 left-[56%] w-20 h-28 opacity-55" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="summer" animate />
-			</div>
-			<div class="absolute bottom-0 left-[70%] w-24 h-32 opacity-50" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="summer" animate />
-			</div>
-			<div class="absolute bottom-0 left-[85%] w-20 h-28 opacity-40" aria-hidden="true">
-				<TreePine class="w-full h-full" season="summer" animate color={greens.grove} />
-			</div>
+			<!-- Randomized full grove (peak growth!) -->
+			{#each fullBloomTrees as tree (tree.id)}
+				<div
+					class="absolute bottom-0"
+					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === 'logo'}
+						<Logo class="w-full h-full" season="summer" animate />
+					{:else if tree.treeType === 'pine'}
+						<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
+					{:else if tree.treeType === 'cherry'}
+						<TreeCherry class="w-full h-full" season="summer" animate />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" season="summer" animate />
+					{:else if tree.treeType === 'aspen'}
+						<TreeAspen class="w-full h-full" season="summer" animate />
+					{/if}
+				</div>
+			{/each}
 
 			<!-- Ivy and flowering vines everywhere -->
 			<div class="absolute bottom-0 left-[22%] w-8 h-16 opacity-60" aria-hidden="true">
@@ -540,12 +647,12 @@
 		<section
 			id="golden-hour"
 			class="relative py-24 px-6 overflow-hidden min-h-[600px]
-				bg-gradient-to-b from-lime-50 via-amber-100 to-orange-200
-				dark:from-emerald-950/30 dark:via-amber-950/40 dark:to-orange-950/50"
+				bg-gradient-to-b from-yellow-50 via-amber-200 to-orange-300
+				dark:from-yellow-950/30 dark:via-amber-950/50 dark:to-orange-950/60"
 		>
-			<!-- MASSIVE Falling autumn leaves - the magic! -->
+			<!-- MASSIVE Falling autumn leaves - the magic! Uses dynamically generated trees -->
 			<FallingLeavesLayer
-				trees={goldenHourTrees}
+				trees={goldenHourRandomTrees.map(t => ({ id: t.id, x: t.x, y: t.y, size: t.size, treeType: t.treeType, zIndex: t.zIndex }))}
 				season="autumn"
 				minLeavesPerTree={5}
 				maxLeavesPerTree={10}
@@ -553,7 +660,7 @@
 			/>
 
 			<!-- Warm sunlight rays (CSS effect) -->
-			<div class="absolute inset-0 bg-gradient-to-br from-amber-200/20 via-transparent to-orange-300/20 pointer-events-none" aria-hidden="true"></div>
+			<div class="absolute inset-0 bg-gradient-to-br from-amber-300/30 via-transparent to-orange-400/25 pointer-events-none" aria-hidden="true"></div>
 
 			<!-- Many lanterns lighting the magical path -->
 			<div class="absolute bottom-8 left-[8%] w-5 h-8 opacity-60" aria-hidden="true">
@@ -572,43 +679,26 @@
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
 
-			<!-- THE MAGICAL FOREST - 12 trees in golden glory -->
-			<div class="absolute bottom-0 left-[2%] w-18 h-26 opacity-40" aria-hidden="true">
-				<TreePine class="w-full h-full" season="autumn" animate color={autumn.goldenOak} />
-			</div>
-			<div class="absolute bottom-0 left-[9%] w-22 h-30 opacity-55" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[16%] w-26 h-34 opacity-65" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[24%] w-24 h-32 opacity-60" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[33%] w-30 h-40 opacity-75" aria-hidden="true">
-				<Logo class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[43%] w-22 h-30 opacity-55" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[52%] w-24 h-32 opacity-60" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[60%] w-20 h-28 opacity-50" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[68%] w-26 h-34 opacity-65" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[77%] w-22 h-30 opacity-55" aria-hidden="true">
-				<TreePine class="w-full h-full" season="autumn" animate color={greens.deepGreen} />
-			</div>
-			<div class="absolute bottom-0 left-[85%] w-18 h-26 opacity-45" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="autumn" animate />
-			</div>
-			<div class="absolute bottom-0 left-[93%] w-16 h-24 opacity-35" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="autumn" animate />
-			</div>
+			<!-- THE MAGICAL FOREST - Randomized autumn trees! -->
+			{#each goldenHourRandomTrees as tree (tree.id)}
+				<div
+					class="absolute bottom-0"
+					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === 'logo'}
+						<Logo class="w-full h-full" season="autumn" animate />
+					{:else if tree.treeType === 'pine'}
+						<TreePine class="w-full h-full" season="autumn" animate color={autumn.gold} />
+					{:else if tree.treeType === 'cherry'}
+						<TreeCherry class="w-full h-full" season="autumn" animate />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" season="autumn" animate />
+					{:else if tree.treeType === 'aspen'}
+						<TreeAspen class="w-full h-full" season="autumn" animate />
+					{/if}
+				</div>
+			{/each}
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
@@ -647,7 +737,7 @@
 		<section
 			id="midnight-bloom"
 			class="relative py-24 px-6 overflow-hidden
-				bg-gradient-to-b from-orange-950/40 via-purple-950 to-slate-950"
+				bg-gradient-to-b from-orange-950/50 via-purple-950 to-slate-950"
 		>
 			<!-- Stars -->
 			<div class="absolute top-12 left-[10%]" aria-hidden="true">
@@ -673,34 +763,27 @@
 				<Lantern class="w-full h-full" variant="hanging" lit animate />
 			</div>
 
-			<!-- Silhouetted trees - many trees in the night (9 total) -->
-			<div class="absolute bottom-0 left-[5%] w-16 h-24 opacity-20" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="winter" color="#1e1b4b" />
-			</div>
-			<div class="absolute bottom-0 left-[15%] w-20 h-28 opacity-30" aria-hidden="true">
-				<TreePine class="w-full h-full" season="winter" color="#1e1b4b" />
-			</div>
-			<div class="absolute bottom-0 left-[25%] w-18 h-26 opacity-25" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="winter" color="#2e1065" />
-			</div>
-			<div class="absolute bottom-0 left-[38%] w-22 h-30 opacity-35" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="winter" color="#3b0764" />
-			</div>
-			<div class="absolute bottom-0 left-[50%] -translate-x-1/2 w-26 h-34 opacity-45" aria-hidden="true">
-				<Logo class="w-full h-full" season="winter" color="#4c1d95" />
-			</div>
-			<div class="absolute bottom-0 left-[62%] w-20 h-28 opacity-30" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="winter" color="#2e1065" />
-			</div>
-			<div class="absolute bottom-0 left-[75%] w-18 h-26 opacity-25" aria-hidden="true">
-				<TreeAspen class="w-full h-full" season="winter" color="#1e1b4b" />
-			</div>
-			<div class="absolute bottom-0 left-[85%] w-16 h-24 opacity-20" aria-hidden="true">
-				<TreePine class="w-full h-full" season="winter" color="#1e1b4b" />
-			</div>
-			<div class="absolute bottom-0 left-[95%] w-14 h-22 opacity-15" aria-hidden="true">
-				<TreeCherry class="w-full h-full" season="winter" color="#2e1065" />
-			</div>
+			<!-- Randomized silhouetted trees in the night -->
+			{#each midnightBloomTrees as tree (tree.id)}
+				{@const nightColor = ['#1e1b4b', '#2e1065', '#3b0764', '#4c1d95'][tree.id % 4]}
+				<div
+					class="absolute bottom-0"
+					style="left: {tree.x}%; width: {tree.size * 0.28}px; height: {tree.size * 0.9}px; opacity: {tree.opacity * 0.5}; z-index: {tree.zIndex};"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === 'logo'}
+						<Logo class="w-full h-full" season="winter" color="#4c1d95" />
+					{:else if tree.treeType === 'pine'}
+						<TreePine class="w-full h-full" season="winter" color={nightColor} />
+					{:else if tree.treeType === 'cherry'}
+						<TreeCherry class="w-full h-full" season="winter" color={nightColor} />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" season="winter" color={nightColor} />
+					{:else if tree.treeType === 'aspen'}
+						<TreeAspen class="w-full h-full" season="winter" color={nightColor} />
+					{/if}
+				</div>
+			{/each}
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
