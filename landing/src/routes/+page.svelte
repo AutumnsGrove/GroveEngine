@@ -101,20 +101,31 @@
 		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
-	<!-- Vision CTA -->
+	<!-- CTA Links -->
 	<div class="text-center max-w-md mb-12">
 		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-6">
 			A quiet corner of the internet where your words can grow.
 		</p>
-		<a
-			href="/vision"
-			class="btn-primary inline-flex items-center gap-2 text-base"
-		>
-			Learn what we're building
-			<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-				<path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
-			</svg>
-		</a>
+		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+			<a
+				href="/about"
+				class="btn-secondary inline-flex items-center gap-2 text-base"
+			>
+				What is Grove?
+				<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+				</svg>
+			</a>
+			<a
+				href="/vision"
+				class="btn-primary inline-flex items-center gap-2 text-base"
+			>
+				Our Vision
+				<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+				</svg>
+			</a>
+		</div>
 	</div>
 
 	<!-- Coming soon text -->
@@ -205,20 +216,6 @@
 		</div>
 	</section>
 
-	<!-- Sign In Section -->
-	<div class="mt-16 text-center">
-		<p class="text-foreground-faint text-sm font-sans mb-3">Already have an account?</p>
-		<a
-			href="/auth/login"
-			class="btn-primary inline-flex items-center gap-2"
-		>
-			<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-				<path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd" />
-				<path fill-rule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clip-rule="evenodd" />
-			</svg>
-			Sign In
-		</a>
-	</div>
 </main>
 
 <!-- Footer with theme toggle -->
