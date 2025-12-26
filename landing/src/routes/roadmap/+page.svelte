@@ -82,13 +82,20 @@
 	 */
 	const currentPhase: PhaseKey = 'thaw';
 
-	// Tree positions for Golden Hour falling leaves (matches the tree positions in the section)
+	// Tree positions for Golden Hour falling leaves - MAGICAL FOREST with 12 trees!
 	const goldenHourTrees = [
-		{ id: 1, x: 15, y: 85, size: 104, treeType: 'aspen' as const, zIndex: 2 },
-		{ id: 2, x: 30, y: 85, size: 120, treeType: 'logo' as const, zIndex: 3 },
-		{ id: 3, x: 45, y: 85, size: 96, treeType: 'cherry' as const, zIndex: 2 },
-		{ id: 4, x: 60, y: 85, size: 88, treeType: 'birch' as const, zIndex: 2 },
-		{ id: 5, x: 75, y: 85, size: 80, treeType: 'pine' as const, zIndex: 1 }
+		{ id: 1, x: 3, y: 85, size: 72, treeType: 'pine' as const, zIndex: 1 },
+		{ id: 2, x: 10, y: 85, size: 88, treeType: 'aspen' as const, zIndex: 2 },
+		{ id: 3, x: 18, y: 85, size: 104, treeType: 'birch' as const, zIndex: 2 },
+		{ id: 4, x: 26, y: 85, size: 96, treeType: 'cherry' as const, zIndex: 2 },
+		{ id: 5, x: 35, y: 85, size: 120, treeType: 'logo' as const, zIndex: 3 },
+		{ id: 6, x: 44, y: 85, size: 88, treeType: 'aspen' as const, zIndex: 2 },
+		{ id: 7, x: 52, y: 85, size: 96, treeType: 'birch' as const, zIndex: 2 },
+		{ id: 8, x: 61, y: 85, size: 80, treeType: 'cherry' as const, zIndex: 2 },
+		{ id: 9, x: 70, y: 85, size: 104, treeType: 'aspen' as const, zIndex: 2 },
+		{ id: 10, x: 78, y: 85, size: 88, treeType: 'pine' as const, zIndex: 1 },
+		{ id: 11, x: 86, y: 85, size: 72, treeType: 'birch' as const, zIndex: 2 },
+		{ id: 12, x: 94, y: 85, size: 64, treeType: 'aspen' as const, zIndex: 1 }
 	];
 
 	// Feature definitions for each phase
@@ -117,7 +124,9 @@
 				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true },
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true },
-				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true }
+				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true },
+				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true },
+				{ name: 'Help Center', description: 'Guidance when you need it', done: true }
 			]
 		},
 		'first-buds': {
@@ -140,7 +149,9 @@
 			features: [
 				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false },
+				{ name: 'Comments', description: 'Replies and thoughtful discussions', done: false },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false },
+				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false },
 				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false },
 				{ name: 'Theme Customizer', description: 'Make it truly yours', done: false },
 				{ name: 'Community Themes', description: 'Share what you create', done: false },
@@ -151,13 +162,13 @@
 			title: 'Golden Hour',
 			subtitle: 'Autumn — Warm light through the canopy',
 			season: 'autumn' as Season,
-			description: 'Everything connected. The grove matures.',
+			description: 'The grove settles into itself. A time for refinement.',
 			features: [
-				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false },
-				{ name: 'Comments', description: 'Replies and public discussions', done: false },
-				{ name: 'Help Center', description: 'Guidance when you need it', done: false },
-				{ name: 'Data Export', description: 'Your words, always portable', done: false },
-				{ name: 'Polish', description: 'Refinement in every detail', done: false }
+				{ name: 'Polish', description: 'Attention to every detail', done: false, major: true },
+				{ name: 'Performance', description: 'Fast everywhere, always', done: false },
+				{ name: 'Accessibility', description: 'Grove for everyone', done: false },
+				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false },
+				{ name: 'Edge Cases', description: 'The small things that matter', done: false }
 			]
 		},
 		'midnight-bloom': {
@@ -525,76 +536,106 @@
 			</div>
 		</section>
 
-		<!-- GOLDEN HOUR -->
+		<!-- GOLDEN HOUR - THE MAGICAL FOREST -->
 		<section
 			id="golden-hour"
-			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-sky-100 via-amber-100 to-orange-100
-				dark:from-sky-950/30 dark:via-slate-900 dark:to-amber-950/40"
+			class="relative py-24 px-6 overflow-hidden min-h-[600px]
+				bg-gradient-to-b from-lime-50 via-amber-100 to-orange-200
+				dark:from-emerald-950/30 dark:via-amber-950/40 dark:to-orange-950/50"
 		>
-			<!-- Falling autumn leaves -->
+			<!-- MASSIVE Falling autumn leaves - the magic! -->
 			<FallingLeavesLayer
 				trees={goldenHourTrees}
 				season="autumn"
-				minLeavesPerTree={3}
-				maxLeavesPerTree={6}
+				minLeavesPerTree={5}
+				maxLeavesPerTree={10}
 				zIndex={5}
 			/>
 
-			<!-- Lanterns lighting the path -->
-			<div class="absolute bottom-8 left-[12%] w-6 h-10 opacity-70" aria-hidden="true">
+			<!-- Warm sunlight rays (CSS effect) -->
+			<div class="absolute inset-0 bg-gradient-to-br from-amber-200/20 via-transparent to-orange-300/20 pointer-events-none" aria-hidden="true"></div>
+
+			<!-- Many lanterns lighting the magical path -->
+			<div class="absolute bottom-8 left-[8%] w-5 h-8 opacity-60" aria-hidden="true">
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
-			<div class="absolute bottom-8 right-[12%] w-6 h-10 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-8 left-[25%] w-6 h-10 opacity-70" aria-hidden="true">
+				<Lantern class="w-full h-full" variant="post" lit animate />
+			</div>
+			<div class="absolute bottom-8 left-[50%] -translate-x-1/2 w-7 h-12 opacity-80" aria-hidden="true">
+				<Lantern class="w-full h-full" variant="hanging" lit animate />
+			</div>
+			<div class="absolute bottom-8 right-[25%] w-6 h-10 opacity-70" aria-hidden="true">
+				<Lantern class="w-full h-full" variant="post" lit animate />
+			</div>
+			<div class="absolute bottom-8 right-[8%] w-5 h-8 opacity-60" aria-hidden="true">
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
 
-			<!-- Mature grove in autumn colors - 8 trees -->
-			<div class="absolute bottom-0 left-[5%] w-20 h-28 opacity-45" aria-hidden="true">
+			<!-- THE MAGICAL FOREST - 12 trees in golden glory -->
+			<div class="absolute bottom-0 left-[2%] w-18 h-26 opacity-40" aria-hidden="true">
 				<TreePine class="w-full h-full" season="autumn" animate color={autumn.goldenOak} />
 			</div>
-			<div class="absolute bottom-0 left-[15%] w-26 h-34 opacity-60" aria-hidden="true">
+			<div class="absolute bottom-0 left-[9%] w-22 h-30 opacity-55" aria-hidden="true">
 				<TreeAspen class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[28%] w-30 h-38 opacity-70" aria-hidden="true">
-				<Logo class="w-full h-full" season="autumn" animate />
+			<div class="absolute bottom-0 left-[16%] w-26 h-34 opacity-65" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[42%] w-24 h-32 opacity-65" aria-hidden="true">
+			<div class="absolute bottom-0 left-[24%] w-24 h-32 opacity-60" aria-hidden="true">
 				<TreeCherry class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[55%] w-22 h-30 opacity-55" aria-hidden="true">
-				<TreeBirch class="w-full h-full" season="autumn" animate />
+			<div class="absolute bottom-0 left-[33%] w-30 h-40 opacity-75" aria-hidden="true">
+				<Logo class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[68%] w-24 h-32 opacity-50" aria-hidden="true">
+			<div class="absolute bottom-0 left-[43%] w-22 h-30 opacity-55" aria-hidden="true">
 				<TreeAspen class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[80%] w-20 h-28 opacity-45" aria-hidden="true">
+			<div class="absolute bottom-0 left-[52%] w-24 h-32 opacity-60" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="autumn" animate />
+			</div>
+			<div class="absolute bottom-0 left-[60%] w-20 h-28 opacity-50" aria-hidden="true">
+				<TreeCherry class="w-full h-full" season="autumn" animate />
+			</div>
+			<div class="absolute bottom-0 left-[68%] w-26 h-34 opacity-65" aria-hidden="true">
+				<TreeAspen class="w-full h-full" season="autumn" animate />
+			</div>
+			<div class="absolute bottom-0 left-[77%] w-22 h-30 opacity-55" aria-hidden="true">
 				<TreePine class="w-full h-full" season="autumn" animate color={greens.deepGreen} />
 			</div>
-			<div class="absolute bottom-0 left-[92%] w-18 h-26 opacity-35" aria-hidden="true">
+			<div class="absolute bottom-0 left-[85%] w-18 h-26 opacity-45" aria-hidden="true">
 				<TreeBirch class="w-full h-full" season="autumn" animate />
+			</div>
+			<div class="absolute bottom-0 left-[93%] w-16 h-24 opacity-35" aria-hidden="true">
+				<TreeAspen class="w-full h-full" season="autumn" animate />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['golden-hour'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium mb-4">
-							<Sun class="w-3.5 h-3.5" />
-							Gathering Light
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200/80 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-sm font-medium mb-4 shadow-sm">
+							<Sparkles class="w-3.5 h-3.5" />
+							Refinement
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['golden-hour'].title}</h2>
-					<p class="text-slate-600 dark:text-slate-300 italic">{phases['golden-hour'].subtitle}</p>
-					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['golden-hour'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-amber-900 dark:text-amber-100 mb-2">{phases['golden-hour'].title}</h2>
+					<p class="text-amber-800/80 dark:text-amber-200/80 italic">{phases['golden-hour'].subtitle}</p>
+					<p class="mt-4 text-amber-900/70 dark:text-amber-100/70 max-w-lg mx-auto">{phases['golden-hour'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
-							<Sun class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
+							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
+						>
+							{#if feature.major}
+								<Sparkles class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else}
+								<Leaf class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+							{/if}
 							<div>
-								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
-								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+								<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
+								<p class="text-sm text-amber-800/70 dark:text-amber-200/70">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
