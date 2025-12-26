@@ -22,8 +22,8 @@ export const PROVIDERS = {
 		role: 'primary',
 		zdr: true, // Zero Data Retention default for open models
 		models: {
-			'deepseek-v3.2': 'accounts/fireworks/models/deepseek-v3-0324',
-			'kimi-k2': 'accounts/fireworks/models/kimi-k2-instruct',
+			'deepseek-v3.2': 'accounts/fireworks/models/deepseek-v3p2',
+			'kimi-k2': 'accounts/fireworks/models/kimi-k2-instruct-0905',
 			'llama-3.1-70b': 'accounts/fireworks/models/llama-v3p1-70b-instruct'
 		}
 	},
@@ -43,8 +43,7 @@ export const PROVIDERS = {
 		role: 'tertiary',
 		zdr: true, // Explicit ZDR toggle
 		models: {
-			'llama-3.3-70b': 'llama-3.3-70b-versatile',
-			'kimi-k2': 'moonshotai/Kimi-K2-Instruct-0905'
+			'llama-3.3-70b': 'llama-3.3-70b-versatile'
 		}
 	}
 };
