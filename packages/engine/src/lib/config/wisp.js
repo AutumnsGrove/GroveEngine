@@ -86,13 +86,17 @@ export const MAX_OUTPUT_TOKENS = {
 	readability: 0 // No AI call needed
 };
 
-/** Rate limiting */
+/**
+ * Rate limiting (burst protection)
+ * Note: Cost cap is the true monthly limit (~1000 requests at current pricing).
+ * Hourly limit prevents abuse bursts, not total monthly usage.
+ */
 export const RATE_LIMIT = {
-	maxRequestsPerHour: 20,
+	maxRequestsPerHour: 10,
 	windowSeconds: 3600
 };
 
-/** Monthly cost cap per user */
+/** Monthly cost cap per user (the true usage limit) */
 export const COST_CAP = {
 	enabled: true,
 	maxCostUSD: 5.0,
