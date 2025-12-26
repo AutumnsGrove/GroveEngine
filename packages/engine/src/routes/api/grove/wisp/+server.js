@@ -135,7 +135,9 @@ export async function POST({ request, platform, locals }) {
 
 	// Monthly cost cap check
 	if (db && COST_CAP.enabled) {
-		const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+		// Use single Date instance to avoid edge case at month boundary
+		const now = new Date();
+		const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 		try {
 			const usage = await db
 				.prepare('SELECT COALESCE(SUM(cost), 0) as monthly_cost FROM wisp_requests WHERE user_id = ? AND created_at > ?')
@@ -153,11 +155,11 @@ export async function POST({ request, platform, locals }) {
 		}
 	}
 
-	// Get API secrets
+	// Get API secrets (validate they are strings, not undefined)
 	const secrets = {
-		FIREWORKS_API_KEY: platform?.env?.FIREWORKS_API_KEY,
-		CEREBRAS_API_KEY: platform?.env?.CEREBRAS_API_KEY,
-		GROQ_API_KEY: platform?.env?.GROQ_API_KEY
+		FIREWORKS_API_KEY: typeof platform?.env?.FIREWORKS_API_KEY === 'string' ? platform.env.FIREWORKS_API_KEY : undefined,
+		CEREBRAS_API_KEY: typeof platform?.env?.CEREBRAS_API_KEY === 'string' ? platform.env.CEREBRAS_API_KEY : undefined,
+		GROQ_API_KEY: typeof platform?.env?.GROQ_API_KEY === 'string' ? platform.env.GROQ_API_KEY : undefined
 	};
 
 	// Check if any inference provider is configured
