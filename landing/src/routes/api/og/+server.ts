@@ -1,20 +1,20 @@
-import satori from 'satori';
-import { html } from 'satori-html';
-import { Resvg } from '@resvg/resvg-js';
-import type { RequestHandler } from './$types';
+import satori from "satori";
+import { html } from "satori-html";
+import { Resvg } from "@cf-wasm/resvg";
+import type { RequestHandler } from "./$types";
 
 /**
  * Escape HTML entities to prevent XSS
  */
 function escapeHtml(text: string): string {
-	const map: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#039;'
-	};
-	return text.replace(/[&<>"']/g, (m) => map[m]);
+  const map: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
 /**
@@ -30,41 +30,47 @@ function escapeHtml(text: string): string {
  * - accent: Optional accent color (hex without #, 3 or 6 chars)
  */
 export const GET: RequestHandler = async ({ url, fetch }) => {
-	// Limit string lengths to prevent DoS and escape HTML to prevent XSS
-	const title = escapeHtml((url.searchParams.get('title') || 'Grove').slice(0, 100));
-	const subtitle = escapeHtml((url.searchParams.get('subtitle') || 'A place to Be.').slice(0, 200));
+  // Limit string lengths to prevent DoS and escape HTML to prevent XSS
+  const title = escapeHtml(
+    (url.searchParams.get("title") || "Grove").slice(0, 100),
+  );
+  const subtitle = escapeHtml(
+    (url.searchParams.get("subtitle") || "A place to Be.").slice(0, 200),
+  );
 
-	// Validate accent color (hex format: 3 or 6 chars, no #)
-	const rawAccent = url.searchParams.get('accent') || '16a34a';
-	const accent = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(rawAccent)
-		? rawAccent
-		: '16a34a'; // Default grove green
+  // Validate accent color (hex format: 3 or 6 chars, no #)
+  const rawAccent = url.searchParams.get("accent") || "16a34a";
+  const accent = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(rawAccent)
+    ? rawAccent
+    : "16a34a"; // Default grove green
 
-	// IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
-	// Load Lexend font from static assets (Cloudflare Workers compatible)
-	const fontUrl = new URL('/fonts/Lexend-Regular.ttf', url.origin);
-	const fontResponse = await fetch(fontUrl.toString());
+  // IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
+  // Load Lexend font from static assets (Cloudflare Workers compatible)
+  const fontUrl = new URL("/fonts/Lexend-Regular.ttf", url.origin);
+  const fontResponse = await fetch(fontUrl.toString());
 
-	if (!fontResponse.ok) {
-		// Return helpful error instead of breaking all OG previews
-		console.error(`Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`);
-		return new Response(
-			`OG Image Error: Font not found at ${fontUrl.toString()}. ` +
-			`Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
-			{
-				status: 500,
-				headers: {
-					'Content-Type': 'text/plain',
-					'X-Error': 'font-load-failed'
-				}
-			}
-		);
-	}
+  if (!fontResponse.ok) {
+    // Return helpful error instead of breaking all OG previews
+    console.error(
+      `Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`,
+    );
+    return new Response(
+      `OG Image Error: Font not found at ${fontUrl.toString()}. ` +
+        `Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "text/plain",
+          "X-Error": "font-load-failed",
+        },
+      },
+    );
+  }
 
-	const fontData = await fontResponse.arrayBuffer();
+  const fontData = await fontResponse.arrayBuffer();
 
-	// Grove logo SVG (simplified asterisk/star shape)
-	const logoSvg = `
+  // Grove logo SVG (simplified asterisk/star shape)
+  const logoSvg = `
 		<svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
 			<path
 				d="M50 0 L55 35 L90 20 L60 50 L90 80 L55 65 L50 100 L45 65 L10 80 L40 50 L10 20 L45 35 Z"
@@ -73,8 +79,8 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		</svg>
 	`;
 
-	// Create the OG image template
-	const markup = html(`
+  // Create the OG image template
+  const markup = html(`
 		<div style="
 			display: flex;
 			width: 1200px;
@@ -136,37 +142,37 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		</div>
 	`);
 
-	// Generate SVG using Satori
-	const svg = await satori(markup, {
-		width: 1200,
-		height: 630,
-		fonts: [
-			{
-				name: 'Lexend',
-				data: fontData,
-				weight: 400,
-				style: 'normal',
-			},
-		],
-	});
+  // Generate SVG using Satori
+  const svg = await satori(markup, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: "Lexend",
+        data: fontData,
+        weight: 400,
+        style: "normal",
+      },
+    ],
+  });
 
-	// Convert SVG to PNG for better social media compatibility
-	const resvg = new Resvg(svg, {
-		fitTo: {
-			mode: 'width',
-			value: 1200,
-		},
-	});
-	const pngData = resvg.render();
-	const pngBuffer = pngData.asPng();
+  // Convert SVG to PNG for better social media compatibility
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: "width",
+      value: 1200,
+    },
+  });
+  const pngData = resvg.render();
+  const pngBuffer = pngData.asPng();
 
-	// Return PNG with appropriate cache headers
-	// 24 hours browser cache, 1 week CDN cache
-	return new Response(pngBuffer, {
-		headers: {
-			'Content-Type': 'image/png',
-			'Cache-Control': 'public, max-age=86400, s-maxage=604800',
-			'X-Generated-At': new Date().toISOString(),
-		},
-	});
+  // Return PNG with appropriate cache headers
+  // 24 hours browser cache, 1 week CDN cache
+  return new Response(pngBuffer, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400, s-maxage=604800",
+      "X-Generated-At": new Date().toISOString(),
+    },
+  });
 };

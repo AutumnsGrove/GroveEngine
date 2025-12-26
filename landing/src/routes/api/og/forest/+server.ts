@@ -1,7 +1,7 @@
-import satori from 'satori';
-import { html } from 'satori-html';
-import { Resvg } from '@resvg/resvg-js';
-import type { RequestHandler } from './$types';
+import satori from "satori";
+import { html } from "satori-html";
+import { Resvg } from "@cf-wasm/resvg";
+import type { RequestHandler } from "./$types";
 
 // Constants for forest generation
 const FOREST_TREE_COUNT = 24;
@@ -11,14 +11,14 @@ const FOREST_LEAF_COUNT = 30;
  * Escape HTML entities to prevent XSS
  */
 function escapeHtml(text: string): string {
-	const map: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#039;'
-	};
-	return text.replace(/[&<>"']/g, (m) => map[m]);
+  const map: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
 /**
@@ -31,69 +31,94 @@ function escapeHtml(text: string): string {
  * - Randomly generated each time for uniqueness
  */
 export const GET: RequestHandler = async ({ url, fetch }) => {
-	// IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
-	// Load Lexend font from static assets (Cloudflare Workers compatible)
-	const fontUrl = new URL('/fonts/Lexend-Regular.ttf', url.origin);
-	const fontResponse = await fetch(fontUrl.toString());
+  // IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
+  // Load Lexend font from static assets (Cloudflare Workers compatible)
+  const fontUrl = new URL("/fonts/Lexend-Regular.ttf", url.origin);
+  const fontResponse = await fetch(fontUrl.toString());
 
-	if (!fontResponse.ok) {
-		// Return helpful error instead of breaking all OG previews
-		console.error(`Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`);
-		return new Response(
-			`OG Image Error: Font not found at ${fontUrl.toString()}. ` +
-			`Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
-			{
-				status: 500,
-				headers: {
-					'Content-Type': 'text/plain',
-					'X-Error': 'font-load-failed'
-				}
-			}
-		);
-	}
+  if (!fontResponse.ok) {
+    // Return helpful error instead of breaking all OG previews
+    console.error(
+      `Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`,
+    );
+    return new Response(
+      `OG Image Error: Font not found at ${fontUrl.toString()}. ` +
+        `Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "text/plain",
+          "X-Error": "font-load-failed",
+        },
+      },
+    );
+  }
 
-	const fontData = await fontResponse.arrayBuffer();
+  const fontData = await fontResponse.arrayBuffer();
 
-	// Autumn color palette
-	const autumnColors = {
-		trees: ['#d97706', '#ea580c', '#dc2626', '#f59e0b', '#b45309'],
-		leaves: ['#fbbf24', '#f59e0b', '#dc2626', '#ea580c', '#b45309'],
-		trunks: ['#78350f', '#451a03', '#57534e']
-	};
+  // Autumn color palette
+  const autumnColors = {
+    trees: ["#d97706", "#ea580c", "#dc2626", "#f59e0b", "#b45309"],
+    leaves: ["#fbbf24", "#f59e0b", "#dc2626", "#ea580c", "#b45309"],
+    trunks: ["#78350f", "#451a03", "#57534e"],
+  };
 
-	// Generate random trees
-	const treeCount = FOREST_TREE_COUNT;
-	const trees: Array<{ x: number; y: number; size: number; color: string; trunkColor: string }> = [];
+  // Generate random trees
+  const treeCount = FOREST_TREE_COUNT;
+  const trees: Array<{
+    x: number;
+    y: number;
+    size: number;
+    color: string;
+    trunkColor: string;
+  }> = [];
 
-	for (let i = 0; i < treeCount; i++) {
-		trees.push({
-			x: 5 + Math.random() * 90, // Random x position (5-95%)
-			y: 20 + Math.random() * 50, // Random y position (ground level variation)
-			size: 30 + Math.random() * 60, // Random size (30-90px)
-			color: autumnColors.trees[Math.floor(Math.random() * autumnColors.trees.length)],
-			trunkColor: autumnColors.trunks[Math.floor(Math.random() * autumnColors.trunks.length)]
-		});
-	}
+  for (let i = 0; i < treeCount; i++) {
+    trees.push({
+      x: 5 + Math.random() * 90, // Random x position (5-95%)
+      y: 20 + Math.random() * 50, // Random y position (ground level variation)
+      size: 30 + Math.random() * 60, // Random size (30-90px)
+      color:
+        autumnColors.trees[
+          Math.floor(Math.random() * autumnColors.trees.length)
+        ],
+      trunkColor:
+        autumnColors.trunks[
+          Math.floor(Math.random() * autumnColors.trunks.length)
+        ],
+    });
+  }
 
-	// Sort by y position for depth effect (back to front)
-	trees.sort((a, b) => a.y - b.y);
+  // Sort by y position for depth effect (back to front)
+  trees.sort((a, b) => a.y - b.y);
 
-	// Generate random falling leaves
-	const leafCount = FOREST_LEAF_COUNT;
-	const leaves: Array<{ x: number; y: number; size: number; color: string; rotation: number }> = [];
+  // Generate random falling leaves
+  const leafCount = FOREST_LEAF_COUNT;
+  const leaves: Array<{
+    x: number;
+    y: number;
+    size: number;
+    color: string;
+    rotation: number;
+  }> = [];
 
-	for (let i = 0; i < leafCount; i++) {
-		leaves.push({
-			x: Math.random() * 100,
-			y: Math.random() * 100,
-			size: 4 + Math.random() * 8,
-			color: autumnColors.leaves[Math.floor(Math.random() * autumnColors.leaves.length)],
-			rotation: Math.random() * 360
-		});
-	}
+  for (let i = 0; i < leafCount; i++) {
+    leaves.push({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 4 + Math.random() * 8,
+      color:
+        autumnColors.leaves[
+          Math.floor(Math.random() * autumnColors.leaves.length)
+        ],
+      rotation: Math.random() * 360,
+    });
+  }
 
-	// Generate tree SVGs
-	const treeSvgs = trees.map((tree, i) => `
+  // Generate tree SVGs
+  const treeSvgs = trees
+    .map(
+      (tree, i) => `
 		<g style="opacity: ${0.6 + Math.random() * 0.4}">
 			<!-- Trunk -->
 			<rect
@@ -110,10 +135,14 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 				fill="${tree.color}"
 			/>
 		</g>
-	`).join('');
+	`,
+    )
+    .join("");
 
-	// Generate leaf SVGs
-	const leafSvgs = leaves.map(leaf => `
+  // Generate leaf SVGs
+  const leafSvgs = leaves
+    .map(
+      (leaf) => `
 		<ellipse
 			cx="${leaf.x}%"
 			cy="${leaf.y}%"
@@ -123,10 +152,12 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 			transform="rotate(${leaf.rotation} ${leaf.x} ${leaf.y})"
 			opacity="0.7"
 		/>
-	`).join('');
+	`,
+    )
+    .join("");
 
-	// Grove logo SVG
-	const logoSvg = `
+  // Grove logo SVG
+  const logoSvg = `
 		<svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
 			<path
 				d="M50 0 L55 35 L90 20 L60 50 L90 80 L55 65 L50 100 L45 65 L10 80 L40 50 L10 20 L45 35 Z"
@@ -135,8 +166,8 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		</svg>
 	`;
 
-	// Create the OG image with forest scene
-	const markup = html(`
+  // Create the OG image with forest scene
+  const markup = html(`
 		<div style="
 			display: flex;
 			width: 1200px;
@@ -220,37 +251,37 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		</div>
 	`);
 
-	// Generate SVG using Satori
-	const svg = await satori(markup, {
-		width: 1200,
-		height: 630,
-		fonts: [
-			{
-				name: 'Lexend',
-				data: fontData,
-				weight: 400,
-				style: 'normal',
-			},
-		],
-	});
+  // Generate SVG using Satori
+  const svg = await satori(markup, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: "Lexend",
+        data: fontData,
+        weight: 400,
+        style: "normal",
+      },
+    ],
+  });
 
-	// Convert SVG to PNG for better social media compatibility
-	const resvg = new Resvg(svg, {
-		fitTo: {
-			mode: 'width',
-			value: 1200,
-		},
-	});
-	const pngData = resvg.render();
-	const pngBuffer = pngData.asPng();
+  // Convert SVG to PNG for better social media compatibility
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: "width",
+      value: 1200,
+    },
+  });
+  const pngData = resvg.render();
+  const pngBuffer = pngData.asPng();
 
-	// Return PNG with stale-while-revalidate for random generation
-	// Serves stale content while regenerating in background
-	return new Response(pngBuffer, {
-		headers: {
-			'Content-Type': 'image/png',
-			'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-			'X-Generated-At': new Date().toISOString(),
-		},
-	});
+  // Return PNG with stale-while-revalidate for random generation
+  // Serves stale content while regenerating in background
+  return new Response(pngBuffer, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+      "X-Generated-At": new Date().toISOString(),
+    },
+  });
 };
