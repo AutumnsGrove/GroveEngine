@@ -135,6 +135,17 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 
 ---
 
+## Wisp
+**Writing Assistant** · *Integrated into editor*
+
+A wisp is a will-o'-the-wisp—a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.
+
+Wisp is Grove's ethical writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Just subtle nudges from a tool that disappears into the background when you don't need it.
+
+All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -152,6 +163,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Ivy** | Email | ivy.grove.place |
 | **Amber** | Storage management | amber.grove.place |
 | **Shade** | AI content protection | grove.place/shade |
+| **Wisp** | Writing assistant | *(integrated)* |
 
 ---
 
@@ -174,6 +186,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Ivy | GroveMail |
 | Amber | GroveStorage |
 | Shade | GroveShade |
+| Wisp | GroveWisp |
 
 ---
 

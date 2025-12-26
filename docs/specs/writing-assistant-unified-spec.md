@@ -1,8 +1,17 @@
-# Grove Writing Assistant - Unified Specification
+# Wisp - Grove Writing Assistant
 
-> **Status:** Draft - Pending naming & vibe check
+> **Status:** Approved - Ready for implementation
 > **Target:** GroveEngine integration
+> **Internal Name:** GroveWisp
 > **Philosophy:** A helper, not a writer
+
+---
+
+## Naming
+
+**Wisp** — like a will-o'-the-wisp in the forest. Light, airy, ephemeral. It appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice.
+
+*A wisp of help. Nothing more, nothing less.*
 
 ---
 
@@ -272,13 +281,13 @@ Always visible: **"a helper, not a writer"**
 ### Endpoint
 
 ```
-POST /api/grove/writing-assist
+POST /api/grove/wisp
 ```
 
 ### Request Schema
 
 ```typescript
-interface WritingAssistRequest {
+interface WispRequest {
   content: string;
   action: 'grammar' | 'tone' | 'readability' | 'all';
   mode?: 'quick' | 'thorough';  // Default: 'quick'
@@ -292,7 +301,7 @@ interface WritingAssistRequest {
 ### Response Schema
 
 ```typescript
-interface WritingAssistResponse {
+interface WispResponse {
   grammar?: GrammarResult;
   tone?: ToneResult;
   readability?: ReadabilityResult;
@@ -321,8 +330,8 @@ interface WritingAssistResponse {
 ## Database Schema
 
 ```sql
--- Track writing assistant usage
-CREATE TABLE IF NOT EXISTS grove_writing_requests (
+-- Track Wisp usage
+CREATE TABLE IF NOT EXISTS wisp_requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id TEXT NOT NULL,
   action TEXT NOT NULL,           -- 'grammar', 'tone', 'readability', 'all'
@@ -337,10 +346,10 @@ CREATE TABLE IF NOT EXISTS grove_writing_requests (
 );
 
 -- Indexes for rate limiting and usage queries
-CREATE INDEX IF NOT EXISTS idx_writing_user_time
-  ON grove_writing_requests(user_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_writing_created
-  ON grove_writing_requests(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wisp_user_time
+  ON wisp_requests(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wisp_created
+  ON wisp_requests(created_at DESC);
 ```
 
 ---
@@ -352,9 +361,10 @@ CREATE INDEX IF NOT EXISTS idx_writing_created
 ```
 Files to create/modify:
 ├── packages/engine/src/lib/config/
-│   └── writing-assist.js          # Model config, provider URLs, pricing
+│   └── wisp.js                    # Model config, provider URLs, pricing
+├── packages/engine/src/lib/server/
+│   └── inference-client.js        # Generic inference client (shared with content-mod)
 ├── packages/engine/src/lib/utils/
-│   └── inference-client.js        # Generic inference client (reuse from content-mod?)
 │   └── readability.js             # Local readability calculations
 ```
 
@@ -369,7 +379,7 @@ Files to create/modify:
 ```
 Files to create:
 ├── packages/engine/src/routes/api/grove/
-│   └── writing-assist/
+│   └── wisp/
 │       └── +server.js             # Main endpoint
 ```
 
@@ -385,8 +395,8 @@ Files to create:
 ```
 Files to create:
 ├── packages/engine/src/lib/components/
-│   └── WritingAssistPanel.svelte  # Main panel component
-│   └── WritingAssistButton.svelte # Toolbar integration button
+│   └── WispPanel.svelte           # Main panel component
+│   └── WispButton.svelte          # Toolbar integration button
 ```
 
 **Key tasks:**
@@ -401,22 +411,23 @@ Files to create:
 ```
 Files to modify:
 ├── packages/engine/src/lib/components/
-│   └── SettingsPanel.svelte       # Add writing assist toggle + mode selector
+│   └── SettingsPanel.svelte       # Add Wisp toggle + mode selector
 ```
 
 **Key tasks:**
-- [ ] Enable/disable toggle
+- [ ] Enable/disable toggle (Wisp OFF by default)
 - [ ] Default mode preference
 - [ ] Usage statistics display
-- [ ] Clear explanation of data flow
+- [ ] Clear explanation of data flow and privacy
 
 ### Phase 5: Migration
 
 For existing AutumnsGrove implementation:
 - [ ] Remove `src/lib/config/ai-models.js`
 - [ ] Remove `src/routes/api/ai/writing-assist/`
-- [ ] Update `AIWritingPanel.svelte` to use engine component
-- [ ] Migrate database table (rename, add new columns)
+- [ ] Replace `AIWritingPanel.svelte` with engine's `WispPanel.svelte`
+- [ ] Migrate database from `ai_writing_requests` to `wisp_requests`
+- [ ] Update any UI references from "AI Writing Assistant" to "Wisp"
 
 ---
 
@@ -458,11 +469,11 @@ Using DeepSeek V3.2 via Fireworks AI:
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-1. **Naming:** What should this feature be called in the Grove ecosystem? (See grove-naming.md)
-2. **Scope:** Should this live at engine level or remain site-specific?
-3. **Sharing:** Should inference client be shared with Content Moderation?
+1. **Naming:** ✅ **Wisp** — light, airy, ephemeral. Like a will-o'-the-wisp. Internal: `GroveWisp`
+2. **Scope:** ✅ Lives at engine level (`packages/engine/`) for all Grove sites
+3. **Sharing:** ✅ Yes — inference client shared with Content Moderation in `src/lib/server/inference-client.js`
 
 ---
 
@@ -474,5 +485,6 @@ Using DeepSeek V3.2 via Fireworks AI:
 
 ---
 
-*Draft created: December 2025*
-*Pending: Naming session, vibe check, implementation*
+*Created: December 2025*
+*Naming approved: December 26, 2025*
+*Status: Ready for implementation*
