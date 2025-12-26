@@ -1,4 +1,5 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import {
@@ -38,7 +39,7 @@ const SHOP_DISABLED_MESSAGE =
  *   orderNumber: string
  * }
  */
-export async function POST({ request, url, platform, locals }) {
+export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -48,7 +49,7 @@ export async function POST({ request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -56,14 +57,14 @@ export async function POST({ request, url, platform, locals }) {
     throw error(500, "Payment provider not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
+  const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
     throw error(400, "Tenant ID required");
   }
 
   try {
     // Validate tenant exists (checkout is public, so we just verify existence)
-    const tenant = await platform.env.POSTS_DB.prepare(
+    const tenant = await platform.env.DB.prepare(
       "SELECT id FROM tenants WHERE id = ?",
     )
       .bind(tenantId)
@@ -95,7 +96,7 @@ export async function POST({ request, url, platform, locals }) {
       }
 
       const variant = await getVariantById(
-        platform.env.POSTS_DB,
+        platform.env.DB,
         item.variantId,
       );
       if (!variant) {
@@ -103,7 +104,7 @@ export async function POST({ request, url, platform, locals }) {
       }
 
       const product = await getProductById(
-        platform.env.POSTS_DB,
+        platform.env.DB,
         variant.productId,
       );
       if (!product) {
@@ -157,7 +158,7 @@ export async function POST({ request, url, platform, locals }) {
     let customer = null;
     if (data.customerEmail) {
       customer = await getOrCreateCustomer(
-        platform.env.POSTS_DB,
+        platform.env.DB,
         tenantId,
         data.customerEmail,
         { name: data.customerName },
@@ -166,7 +167,7 @@ export async function POST({ request, url, platform, locals }) {
 
     // Create order in database (pending state)
     const { id: orderId, orderNumber } = await createOrder(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       {
         customerEmail: data.customerEmail || "guest@checkout",
@@ -192,12 +193,13 @@ export async function POST({ request, url, platform, locals }) {
     });
 
     // Get connected account for this tenant (if marketplace mode)
-    let connectedAccountId = null;
-    let applicationFeeAmount = null;
+    let connectedAccountId: string | null = null;
+    let applicationFeeAmount: number | undefined = undefined;
 
-    if (platform.env.STRIPE_CONNECT_ENABLED === "true") {
+    // Optional marketplace mode check
+    if ((platform.env as Record<string, any>).STRIPE_CONNECT_ENABLED === "true") {
       // Look up tenant's Connect account
-      const connectAccount = await platform.env.POSTS_DB.prepare(
+      const connectAccount = await platform.env.DB.prepare(
         "SELECT provider_account_id FROM connect_accounts WHERE tenant_id = ? AND status = 'enabled'",
       )
         .bind(tenantId)
@@ -206,14 +208,14 @@ export async function POST({ request, url, platform, locals }) {
       if (connectAccount) {
         connectedAccountId = connectAccount.provider_account_id;
         // Calculate platform fee (e.g., 5%)
-        const feePercent = parseFloat(platform.env.PLATFORM_FEE_PERCENT || "5");
-        applicationFeeAmount = Math.round(subtotal * (feePercent / 100));
+        const feePercent = parseFloat((platform.env as Record<string, any>).PLATFORM_FEE_PERCENT || "5");
+        applicationFeeAmount = Math.round(subtotal * (feePercent / 100)) ?? undefined;
       }
     }
 
     // Variant resolver for the provider
-    const resolveVariant = async (variantId) => {
-      return getVariantById(platform.env.POSTS_DB, variantId);
+    const resolveVariant = async (variantId: string) => {
+      return getVariantById(platform.env.DB, variantId);
     };
 
     // Create Stripe Checkout session
@@ -244,7 +246,7 @@ export async function POST({ request, url, platform, locals }) {
     );
 
     // Update order with session ID
-    await platform.env.POSTS_DB.prepare(
+    await platform.env.DB.prepare(
       "UPDATE orders SET provider_session_id = ?, updated_at = ? WHERE id = ?",
     )
       .bind(session.id, Math.floor(Date.now() / 1000), orderId)
@@ -258,16 +260,17 @@ export async function POST({ request, url, platform, locals }) {
       orderNumber,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error creating checkout:", err);
-    throw error(500, `Failed to create checkout: ${err.message}`);
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw error(500, `Failed to create checkout: ${message}`);
   }
-}
+};
 
 /**
  * GET /api/shop/checkout?session_id=xxx - Get checkout session status
  */
-export async function GET({ url, platform }) {
+export const GET: RequestHandler = async ({ url, platform }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -300,8 +303,8 @@ export async function GET({ url, platform }) {
       amountTotal: session.amountTotal,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error fetching checkout session:", err);
     throw error(500, "Failed to fetch checkout session");
   }
-}
+};

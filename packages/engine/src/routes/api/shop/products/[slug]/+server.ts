@@ -1,4 +1,5 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   getProductBySlug,
@@ -8,6 +9,7 @@ import {
   updateVariant,
   deleteVariant,
 } from "$lib/payments/shop";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -17,23 +19,23 @@ const SHOP_DISABLED_MESSAGE =
 /**
  * GET /api/shop/products/[slug] - Get a single product
  */
-export async function GET({ params, url, platform, locals }) {
+export const GET: RequestHandler = async ({ params, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
+  const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
     throw error(400, "Tenant ID required");
   }
 
   try {
     const product = await getProductBySlug(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       params.slug,
     );
@@ -44,18 +46,18 @@ export async function GET({ params, url, platform, locals }) {
 
     return json({ product });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error fetching product:", err);
     throw error(500, "Failed to fetch product");
   }
-}
+};
 
 /**
  * PATCH /api/shop/products/[slug] - Update a product
  *
  * Body: Same as POST, all fields optional
  */
-export async function PATCH({ params, request, url, platform, locals }) {
+export const PATCH: RequestHandler = async ({ params, request, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -70,11 +72,11 @@ export async function PATCH({ params, request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
+  const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
     throw error(400, "Tenant ID required");
   }
@@ -82,7 +84,7 @@ export async function PATCH({ params, request, url, platform, locals }) {
   try {
     // Get existing product
     const product = await getProductBySlug(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       params.slug,
     );
@@ -105,7 +107,7 @@ export async function PATCH({ params, request, url, platform, locals }) {
     }
 
     // Update product
-    await updateProduct(platform.env.POSTS_DB, product.id, {
+    await updateProduct(platform.env.DB, product.id, {
       name: data.name,
       slug: data.slug,
       description: data.description,
@@ -121,10 +123,10 @@ export async function PATCH({ params, request, url, platform, locals }) {
 
     // Handle variant updates if provided
     if (data.variants) {
-      for (const variantData of data.variants) {
+      for (const variantData of (data.variants as any[])) {
         if (variantData.id) {
           // Update existing variant
-          await updateVariant(platform.env.POSTS_DB, variantData.id, {
+          await updateVariant(platform.env.DB, variantData.id, {
             name: variantData.name,
             sku: variantData.sku,
             priceAmount: variantData.priceAmount,
@@ -144,7 +146,7 @@ export async function PATCH({ params, request, url, platform, locals }) {
           });
         } else if (variantData._action === "create") {
           // Create new variant
-          await createVariant(platform.env.POSTS_DB, product.id, tenantId, {
+          await createVariant(platform.env.DB, product.id, tenantId, {
             name: variantData.name,
             sku: variantData.sku,
             priceAmount: variantData.priceAmount,
@@ -169,14 +171,14 @@ export async function PATCH({ params, request, url, platform, locals }) {
 
     // Handle variant deletions
     if (data.deleteVariants) {
-      for (const variantId of data.deleteVariants) {
-        await deleteVariant(platform.env.POSTS_DB, variantId);
+      for (const variantId of (data.deleteVariants as string[])) {
+        await deleteVariant(platform.env.DB, variantId);
       }
     }
 
     // Fetch updated product
     const updatedProduct = await getProductBySlug(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       data.slug || params.slug,
     );
@@ -186,16 +188,16 @@ export async function PATCH({ params, request, url, platform, locals }) {
       product: updatedProduct,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error updating product:", err);
     throw error(500, "Failed to update product");
   }
-}
+};
 
 /**
  * DELETE /api/shop/products/[slug] - Delete a product
  */
-export async function DELETE({ params, request, url, platform, locals }) {
+export const DELETE: RequestHandler = async ({ params, request, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -210,18 +212,18 @@ export async function DELETE({ params, request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
-  const tenantId = url.searchParams.get("tenant_id") || locals.tenant?.id;
+  const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
     throw error(400, "Tenant ID required");
   }
 
   try {
     const product = await getProductBySlug(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       params.slug,
     );
@@ -230,15 +232,15 @@ export async function DELETE({ params, request, url, platform, locals }) {
       throw error(404, "Product not found");
     }
 
-    await deleteProduct(platform.env.POSTS_DB, product.id);
+    await deleteProduct(platform.env.DB, product.id);
 
     return json({
       success: true,
       message: "Product deleted",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error deleting product:", err);
     throw error(500, "Failed to delete product");
   }
-}
+};

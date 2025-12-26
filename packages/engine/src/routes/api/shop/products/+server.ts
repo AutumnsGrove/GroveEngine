@@ -1,4 +1,5 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -18,7 +19,7 @@ const SHOP_DISABLED_MESSAGE =
  * - limit: number
  * - offset: number
  */
-export async function GET({ url, platform, locals }) {
+export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -27,39 +28,36 @@ export async function GET({ url, platform, locals }) {
     throw error(401, "Unauthorized");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
 
-    const products = await getProducts(platform.env.POSTS_DB, tenantId, {
-      status: url.searchParams.get("status") || undefined,
-      type: url.searchParams.get("type") || undefined,
-      category: url.searchParams.get("category") || undefined,
-      limit: url.searchParams.get("limit")
-        ? parseInt(url.searchParams.get("limit"))
-        : 50,
-      offset: url.searchParams.get("offset")
-        ? parseInt(url.searchParams.get("offset"))
-        : 0,
+    const products = await getProducts(platform.env.DB, tenantId, {
+      status: url.searchParams.get("status") as string | null,
+      type: url.searchParams.get("type") as string | null,
+      category: url.searchParams.get("category") as string | null,
+      limit: parseInt(url.searchParams.get("limit") || "50"),
+      offset: parseInt(url.searchParams.get("offset") || "0"),
     });
 
     return json({ products });
   } catch (err) {
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error fetching products:", err);
     throw error(500, "Failed to fetch products");
   }
-}
+};
 
 /**
  * POST /api/shop/products - Create a new product
@@ -87,7 +85,7 @@ export async function GET({ url, platform, locals }) {
  *   }>
  * }
  */
-export async function POST({ request, platform, locals }) {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -102,17 +100,17 @@ export async function POST({ request, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
   try {
     const data = await request.json();
-    const requestedTenantId = data.tenant_id || locals.tenant?.id;
+    const requestedTenantId = data.tenant_id || locals.tenantId;
 
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
@@ -133,7 +131,7 @@ export async function POST({ request, platform, locals }) {
 
     // Create the product
     const { id: productId } = await createProduct(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       tenantId,
       {
         name: data.name,
@@ -157,7 +155,7 @@ export async function POST({ request, platform, locals }) {
     // If no variants provided, create a default one
     if (variants.length === 0 && data.price !== undefined) {
       const { id: variantId } = await createVariant(
-        platform.env.POSTS_DB,
+        platform.env.DB,
         productId,
         tenantId,
         {
@@ -170,9 +168,9 @@ export async function POST({ request, platform, locals }) {
       createdVariants.push({ id: variantId, name: "Default" });
     } else {
       for (let i = 0; i < variants.length; i++) {
-        const variant = variants[i];
+        const variant = variants[i] as Record<string, unknown>;
         const { id: variantId } = await createVariant(
-          platform.env.POSTS_DB,
+          platform.env.DB,
           productId,
           tenantId,
           {
@@ -208,8 +206,8 @@ export async function POST({ request, platform, locals }) {
       },
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error creating product:", err);
     throw error(500, "Failed to create product");
   }
-}
+};

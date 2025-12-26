@@ -6,6 +6,18 @@
 
 ---
 
+## 🔧 Build Error Cleanup (2025-12-26 Morning)
+
+**Status: In Progress - Fixed 24/260 errors (236 remaining)**
+
+- ✅ Fixed vite.config.js, POSTS_DB→DB, locals.tenant→locals.tenantId
+- ✅ Renamed shop API files .js→.ts, added proper type annotations
+- ✅ Fixed GutterItem types, null safety, error handling
+- ✅ **Landing page: 0 errors!** (fixed all 11 type issues)
+- ⏳ Remaining: 236 TypeScript errors in engine package
+
+---
+
 ## 🎉 Plant Signup Flow Working! (2025-12-24 Evening)
 
 **MASSIVE DEBUGGING SESSION!** The plant.grove.place signup flow is now working through to checkout!

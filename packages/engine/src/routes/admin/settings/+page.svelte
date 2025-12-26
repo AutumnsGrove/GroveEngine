@@ -414,10 +414,6 @@
   .health-value.error {
     color: var(--accent-danger);
   }
-  .health-value.loading {
-    color: var(--color-text-subtle);
-    transition: color 0.3s ease;
-  }
   .message {
     padding: 0.75rem 1rem;
     border-radius: var(--border-radius-button);
@@ -543,9 +539,5 @@
     display: flex;
     gap: 0.75rem;
     margin-bottom: 1rem;
-  }
-  .loading-text {
-    color: var(--color-text-muted);
-    font-style: italic;
   }
 </style>

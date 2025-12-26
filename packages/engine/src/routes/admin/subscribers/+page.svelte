@@ -1,11 +1,23 @@
-<script>
-	let { data } = $props();
+<script lang="ts">
+	interface Subscriber {
+		email: string;
+		created_at: string;
+		source: string;
+	}
 
-	let subscribers = $state(data.subscribers || []);
+	interface PageData {
+		subscribers: Subscriber[];
+		totalActive: number;
+		totalUnsubscribed: number;
+	}
+
+	let { data }: { data: PageData } = $props();
+
+	let subscribers: Subscriber[] = $state.snapshot(data.subscribers);
 	let copiedAll = $state(false);
-	let copiedEmail = $state(null);
+	let copiedEmail = $state<string | null>(null);
 
-	function formatDate(dateStr) {
+	function formatDate(dateStr: string): string {
 		return new Date(dateStr).toLocaleDateString('en-US', {
 			month: 'short',
 			day: 'numeric',
@@ -24,7 +36,7 @@
 		}, 2000);
 	}
 
-	async function copyEmail(email) {
+	async function copyEmail(email: string) {
 		await navigator.clipboard.writeText(email);
 		copiedEmail = email;
 		setTimeout(() => {

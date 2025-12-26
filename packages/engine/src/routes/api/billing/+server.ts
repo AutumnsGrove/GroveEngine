@@ -129,13 +129,13 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user
+      locals.user,
     );
 
     const billing = (await platform.env.DB.prepare(
@@ -143,7 +143,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
               current_period_start, current_period_end, cancel_at_period_end,
               trial_end, payment_method_last4, payment_method_brand,
               created_at, updated_at
-       FROM platform_billing WHERE tenant_id = ?`
+       FROM platform_billing WHERE tenant_id = ?`,
     )
       .bind(tenantId)
       .first()) as BillingRecord | null;
@@ -190,7 +190,12 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 /**
  * POST /api/billing - Start subscription checkout
  */
-export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
+export const POST: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -208,13 +213,13 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user
+      locals.user,
     );
 
     const data = (await request.json()) as CheckoutRequest;
@@ -230,7 +235,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     const plan = PLANS[data.plan];
 
     const existingBilling = (await platform.env.DB.prepare(
-      "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?"
+      "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)
       .first()) as { id: string; provider_customer_id: string | null } | null;
@@ -264,7 +269,11 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       },
     };
 
-    const lineItems: Array<{ price?: string; quantity: number; price_data?: object }> = [];
+    const lineItems: Array<{
+      price?: string;
+      quantity: number;
+      price_data?: object;
+    }> = [];
     if (priceId) {
       lineItems.push({ price: priceId, quantity: 1 });
     } else {
@@ -285,7 +294,14 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
     }
 
     const stripeClient = (stripe as { client?: unknown }).client || stripe;
-    const session = await (stripeClient as { request: (path: string, opts: object) => Promise<{ url: string; id: string }> }).request("checkout/sessions", {
+    const session = await (
+      stripeClient as {
+        request: (
+          path: string,
+          opts: object,
+        ) => Promise<{ url: string; id: string }>;
+      }
+    ).request("checkout/sessions", {
       method: "POST",
       params: {
         ...checkoutParams,
@@ -295,14 +311,14 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
 
     if (existingBilling) {
       await platform.env.DB.prepare(
-        "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?"
+        "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
       )
         .bind(data.plan, Math.floor(Date.now() / 1000), existingBilling.id)
         .run();
     } else {
       await platform.env.DB.prepare(
         `INSERT INTO platform_billing (id, tenant_id, plan, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?)`,
       )
         .bind(
           crypto.randomUUID(),
@@ -310,7 +326,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
           data.plan,
           "pending",
           Math.floor(Date.now() / 1000),
-          Math.floor(Date.now() / 1000)
+          Math.floor(Date.now() / 1000),
         )
         .run();
     }
@@ -330,7 +346,12 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
 /**
  * PATCH /api/billing - Update subscription (change plan, cancel, resume)
  */
-export const PATCH: RequestHandler = async ({ request, url, platform, locals }) => {
+export const PATCH: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -348,19 +369,19 @@ export const PATCH: RequestHandler = async ({ request, url, platform, locals }) 
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user
+      locals.user,
     );
 
     const data = (await request.json()) as UpdateRequest;
 
     const billing = (await platform.env.DB.prepare(
-      "SELECT * FROM platform_billing WHERE tenant_id = ?"
+      "SELECT * FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)
       .first()) as BillingRecord | null;
@@ -375,22 +396,29 @@ export const PATCH: RequestHandler = async ({ request, url, platform, locals }) 
 
     switch (data.action) {
       case "cancel":
-        await (stripe as { cancelSubscription: (id: string, immediate: boolean) => Promise<void> }).cancelSubscription(
+        await (
+          stripe as {
+            cancelSubscription: (
+              id: string,
+              immediate: boolean,
+            ) => Promise<void>;
+          }
+        ).cancelSubscription(
           billing.provider_subscription_id,
-          data.cancelImmediately === true
+          data.cancelImmediately === true,
         );
 
         await platform.env.DB.prepare(
           `UPDATE platform_billing SET
             cancel_at_period_end = ?,
             updated_at = ?
-           WHERE id = ? AND tenant_id = ?`
+           WHERE id = ? AND tenant_id = ?`,
         )
           .bind(
             data.cancelImmediately ? 0 : 1,
             Math.floor(Date.now() / 1000),
             billing.id,
-            tenantId
+            tenantId,
           )
           .run();
 
@@ -402,10 +430,12 @@ export const PATCH: RequestHandler = async ({ request, url, platform, locals }) 
         });
 
       case "resume":
-        await (stripe as { resumeSubscription: (id: string) => Promise<void> }).resumeSubscription(billing.provider_subscription_id);
+        await (
+          stripe as { resumeSubscription: (id: string) => Promise<void> }
+        ).resumeSubscription(billing.provider_subscription_id);
 
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?"
+          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
           .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
@@ -427,35 +457,40 @@ export const PATCH: RequestHandler = async ({ request, url, platform, locals }) 
           throw error(500, "Price ID not configured for plan");
         }
 
-        const sub = await (stripe as { getSubscription: (id: string) => Promise<{ items?: { data?: Array<{ id: string }> } } | null> }).getSubscription(
-          billing.provider_subscription_id
-        );
+        const sub = await (
+          stripe as {
+            getSubscription: (
+              id: string,
+            ) => Promise<{ items?: { data?: Array<{ id: string }> } } | null>;
+          }
+        ).getSubscription(billing.provider_subscription_id);
         if (!sub) {
           throw error(404, "Subscription not found in Stripe");
         }
 
         const stripeClient = (stripe as { client?: unknown }).client || stripe;
-        await (stripeClient as { request: (path: string, opts: object) => Promise<unknown> }).request(
-          `subscriptions/${billing.provider_subscription_id}`,
-          {
-            method: "POST",
-            params: {
-              proration_behavior: "create_prorations",
-              items: [
-                {
-                  id: sub.items?.data?.[0]?.id,
-                  price: newPriceId,
-                },
-              ],
-              metadata: {
-                grove_plan: data.plan,
-              },
-            },
+        await (
+          stripeClient as {
+            request: (path: string, opts: object) => Promise<unknown>;
           }
-        );
+        ).request(`subscriptions/${billing.provider_subscription_id}`, {
+          method: "POST",
+          params: {
+            proration_behavior: "create_prorations",
+            items: [
+              {
+                id: sub.items?.data?.[0]?.id,
+                price: newPriceId,
+              },
+            ],
+            metadata: {
+              grove_plan: data.plan,
+            },
+          },
+        });
 
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?"
+          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
@@ -492,7 +527,7 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   const returnUrl = url.searchParams.get("return_url");
   if (!returnUrl) {
@@ -503,11 +538,11 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user
+      locals.user,
     );
 
     const billing = (await platform.env.DB.prepare(
-      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?"
+      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)
       .first()) as { provider_customer_id: string | null } | null;
@@ -520,10 +555,14 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    const { url: portalUrl } = await (stripe as { createBillingPortalSession: (customerId: string, returnUrl: string) => Promise<{ url: string }> }).createBillingPortalSession(
-      billing.provider_customer_id,
-      returnUrl
-    );
+    const { url: portalUrl } = await (
+      stripe as {
+        createBillingPortalSession: (
+          customerId: string,
+          returnUrl: string,
+        ) => Promise<{ url: string }>;
+      }
+    ).createBillingPortalSession(billing.provider_customer_id, returnUrl);
 
     return json({
       success: true,

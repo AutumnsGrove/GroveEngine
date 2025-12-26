@@ -1,4 +1,6 @@
-import { json, error, text } from "@sveltejs/kit";
+import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import type { OrderStatus, PaymentStatus } from "$lib/payments/types";
 import { createPaymentProvider } from "$lib/payments";
 import {
   getOrderBySessionId,
@@ -26,7 +28,7 @@ const SHOP_ECOMMERCE_DISABLED = true;
  * For Stripe Connect (DISABLED):
  * - account.updated - Connected account status changes
  */
-export async function POST({ request, platform }) {
+export const POST: RequestHandler = async ({ request, platform }) => {
   if (!platform?.env?.STRIPE_SECRET_KEY) {
     throw error(500, "Payment provider not configured");
   }
@@ -35,7 +37,7 @@ export async function POST({ request, platform }) {
     throw error(500, "Webhook secret not configured");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -62,7 +64,7 @@ export async function POST({ request, platform }) {
     });
 
     // Store webhook event for idempotency
-    const existingEvent = await platform.env.POSTS_DB.prepare(
+    const existingEvent = await platform.env.DB.prepare(
       "SELECT id FROM webhook_events WHERE provider_event_id = ?",
     )
       .bind(event.providerEventId)
@@ -74,7 +76,7 @@ export async function POST({ request, platform }) {
     }
 
     // Insert webhook event
-    await platform.env.POSTS_DB.prepare(
+    await platform.env.DB.prepare(
       `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
          VALUES (?, ?, ?, ?, ?, ?)`,
     )
@@ -97,7 +99,7 @@ export async function POST({ request, platform }) {
             "Shop disabled, skipping checkout.session.completed for orders",
           );
         } else {
-          await handleCheckoutCompleted(platform.env.POSTS_DB, eventData);
+          await handleCheckoutCompleted(platform.env.DB, eventData);
         }
         break;
 
@@ -105,7 +107,7 @@ export async function POST({ request, platform }) {
         if (SHOP_ECOMMERCE_DISABLED) {
           console.log("Shop disabled, skipping checkout.session.expired");
         } else {
-          await handleCheckoutExpired(platform.env.POSTS_DB, eventData);
+          await handleCheckoutExpired(platform.env.DB, eventData);
         }
         break;
 
@@ -113,7 +115,7 @@ export async function POST({ request, platform }) {
         if (SHOP_ECOMMERCE_DISABLED) {
           console.log("Shop disabled, skipping payment.succeeded");
         } else {
-          await handlePaymentSucceeded(platform.env.POSTS_DB, eventData);
+          await handlePaymentSucceeded(platform.env.DB, eventData);
         }
         break;
 
@@ -121,18 +123,18 @@ export async function POST({ request, platform }) {
         if (SHOP_ECOMMERCE_DISABLED) {
           console.log("Shop disabled, skipping payment.failed");
         } else {
-          await handlePaymentFailed(platform.env.POSTS_DB, eventData);
+          await handlePaymentFailed(platform.env.DB, eventData);
         }
         break;
 
       // Platform billing subscription events - ALWAYS ENABLED
       case "subscription.created":
       case "subscription.updated":
-        await handleSubscriptionUpdated(platform.env.POSTS_DB, eventData);
+        await handleSubscriptionUpdated(platform.env.DB, eventData);
         break;
 
       case "subscription.canceled":
-        await handleSubscriptionCanceled(platform.env.POSTS_DB, eventData);
+        await handleSubscriptionCanceled(platform.env.DB, eventData);
         break;
 
       // Shop e-commerce events - DISABLED
@@ -140,7 +142,7 @@ export async function POST({ request, platform }) {
         if (SHOP_ECOMMERCE_DISABLED) {
           console.log("Shop disabled, skipping refund.created");
         } else {
-          await handleRefundCreated(platform.env.POSTS_DB, eventData);
+          await handleRefundCreated(platform.env.DB, eventData);
         }
         break;
 
@@ -148,7 +150,7 @@ export async function POST({ request, platform }) {
         if (SHOP_ECOMMERCE_DISABLED) {
           console.log("Shop disabled, skipping account.updated (Connect)");
         } else {
-          await handleConnectAccountUpdated(platform.env.POSTS_DB, eventData);
+          await handleConnectAccountUpdated(platform.env.DB, eventData);
         }
         break;
 
@@ -157,7 +159,7 @@ export async function POST({ request, platform }) {
     }
 
     // Mark as processed
-    await platform.env.POSTS_DB.prepare(
+    await platform.env.DB.prepare(
       "UPDATE webhook_events SET processed = 1, processed_at = ? WHERE id = ?",
     )
       .bind(Math.floor(Date.now() / 1000), event.id)
@@ -174,15 +176,15 @@ export async function POST({ request, platform }) {
     }
 
     // Log error but acknowledge receipt to prevent retries
-    return json({ received: true, error: err.message });
+    return json({ received: true, error: err instanceof Error ? err.message : 'Unknown error' });
   }
-}
+};
 
 // =============================================================================
 // EVENT HANDLERS
 // =============================================================================
 
-async function handleCheckoutCompleted(db, sessionData) {
+async function handleCheckoutCompleted(db: any, sessionData: Record<string, any>): Promise<void> {
   const session = sessionData;
 
   // Get order by session ID
@@ -203,8 +205,8 @@ async function handleCheckoutCompleted(db, sessionData) {
 
   // Update order status
   await updateOrderStatus(db, order.id, {
-    status: "paid",
-    paymentStatus: "succeeded",
+    status: "paid" as OrderStatus,
+    paymentStatus: "succeeded" as PaymentStatus,
     providerPaymentId: session.payment_intent || session.subscription,
     paidAt: Math.floor(Date.now() / 1000),
   });
@@ -264,20 +266,20 @@ async function handleCheckoutCompleted(db, sessionData) {
   // TODO: Generate download links for digital products
 }
 
-async function handleCheckoutExpired(db, sessionData) {
+async function handleCheckoutExpired(db: any, sessionData: Record<string, any>): Promise<void> {
   const session = sessionData;
   const order = await getOrderBySessionId(db, session.id);
 
   if (order) {
     await updateOrderStatus(db, order.id, {
-      status: "canceled",
-      paymentStatus: "canceled",
+      status: "canceled" as OrderStatus,
+      paymentStatus: "canceled" as PaymentStatus,
     });
     console.log("Checkout expired, order canceled:", order.id);
   }
 }
 
-async function handlePaymentSucceeded(db, paymentData) {
+async function handlePaymentSucceeded(db: any, paymentData: Record<string, any>): Promise<void> {
   // Payment intent succeeded - order should already be marked paid from checkout.session.completed
   // This is a backup/confirmation
   const paymentIntentId = paymentData.id;
@@ -289,13 +291,13 @@ async function handlePaymentSucceeded(db, paymentData) {
 
   if (order && order.payment_status !== "succeeded") {
     await updateOrderStatus(db, order.id, {
-      paymentStatus: "succeeded",
+      paymentStatus: "succeeded" as PaymentStatus,
       paidAt: Math.floor(Date.now() / 1000),
     });
   }
 }
 
-async function handlePaymentFailed(db, paymentData) {
+async function handlePaymentFailed(db: any, paymentData: Record<string, any>): Promise<void> {
   const paymentIntentId = paymentData.id;
 
   const order = await db
@@ -305,18 +307,18 @@ async function handlePaymentFailed(db, paymentData) {
 
   if (order) {
     await updateOrderStatus(db, order.id, {
-      paymentStatus: "failed",
+      paymentStatus: "failed" as PaymentStatus,
     });
     console.log("Payment failed for order:", order.id);
   }
 }
 
-async function handleSubscriptionUpdated(db, subscriptionData) {
+async function handleSubscriptionUpdated(db: any, subscriptionData: Record<string, any>): Promise<void> {
   const stripeSubId = subscriptionData.id;
   const status = subscriptionData.status;
 
   // Map Stripe status to our status
-  const statusMap = {
+  const statusMap: Record<string, string> = {
     active: "active",
     past_due: "past_due",
     canceled: "canceled",
@@ -325,7 +327,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
     paused: "paused",
   };
 
-  const mappedStatus = statusMap[status] || "active";
+  const mappedStatus = (statusMap[status as string] || "active") as string;
 
   // Update subscription in database
   await db
@@ -370,7 +372,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
     .run();
 }
 
-async function handleSubscriptionCanceled(db, subscriptionData) {
+async function handleSubscriptionCanceled(db: any, subscriptionData: Record<string, any>): Promise<void> {
   const stripeSubId = subscriptionData.id;
 
   await db
@@ -399,7 +401,7 @@ async function handleSubscriptionCanceled(db, subscriptionData) {
     .run();
 }
 
-async function handleRefundCreated(db, refundData) {
+async function handleRefundCreated(db: any, refundData: Record<string, any>): Promise<void> {
   const paymentIntentId = refundData.payment_intent;
   const refundId = refundData.id;
   const amount = refundData.amount;
@@ -440,14 +442,14 @@ async function handleRefundCreated(db, refundData) {
   // Update order status
   const isFullRefund = amount >= order.total;
   await updateOrderStatus(db, order.id, {
-    status: isFullRefund ? "refunded" : order.status,
-    paymentStatus: isFullRefund ? "refunded" : "partially_refunded",
+    status: (isFullRefund ? "refunded" : order.status) as OrderStatus,
+    paymentStatus: (isFullRefund ? "refunded" : "partially_refunded") as PaymentStatus,
   });
 
   console.log("Refund processed for order:", order.id, "Amount:", amount);
 }
 
-async function handleConnectAccountUpdated(db, accountData) {
+async function handleConnectAccountUpdated(db: any, accountData: Record<string, any>): Promise<void> {
   const accountId = accountData.id;
 
   // Determine status

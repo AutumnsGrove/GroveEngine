@@ -1,4 +1,5 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -11,7 +12,7 @@ const SHOP_DISABLED_MESSAGE =
 /**
  * GET /api/shop/connect - Get Connect account status
  */
-export async function GET({ url, platform, locals }) {
+export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -20,23 +21,23 @@ export async function GET({ url, platform, locals }) {
     throw error(401, "Unauthorized");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
 
     // Get Connect account from database
-    const account = await platform.env.POSTS_DB.prepare(
+    const account = await platform.env.DB.prepare(
       `SELECT id, provider_account_id, account_type, status, charges_enabled,
                 payouts_enabled, details_submitted, email, country, default_currency,
                 onboarding_complete, created_at, updated_at
@@ -59,7 +60,7 @@ export async function GET({ url, platform, locals }) {
       });
 
       try {
-        const stripeAccount = await stripe.getConnectAccount(
+        const stripeAccount = await (stripe as any).getConnectAccount?.(
           account.provider_account_id,
         );
 
@@ -73,7 +74,7 @@ export async function GET({ url, platform, locals }) {
                 : "pending";
 
           if (newStatus !== account.status) {
-            await platform.env.POSTS_DB.prepare(
+            await platform.env.DB.prepare(
               `UPDATE connect_accounts SET
                   status = ?, charges_enabled = ?, payouts_enabled = ?,
                   details_submitted = ?, updated_at = ?
@@ -106,7 +107,7 @@ export async function GET({ url, platform, locals }) {
           });
         }
       } catch (stripeErr) {
-        console.error("Error fetching Stripe account:", stripeErr);
+        console.error("Error fetching Stripe account:", stripeErr instanceof Error ? stripeErr.message : stripeErr);
       }
     }
 
@@ -125,11 +126,11 @@ export async function GET({ url, platform, locals }) {
       },
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error fetching Connect account:", err);
     throw error(500, "Failed to fetch Connect account");
   }
-}
+};
 
 /**
  * POST /api/shop/connect - Start Connect onboarding
@@ -143,7 +144,7 @@ export async function GET({ url, platform, locals }) {
  *   businessType?: 'individual' | 'company' | 'non_profit'
  * }
  */
-export async function POST({ request, url, platform, locals }) {
+export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -156,7 +157,7 @@ export async function POST({ request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -165,12 +166,12 @@ export async function POST({ request, url, platform, locals }) {
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
@@ -182,7 +183,7 @@ export async function POST({ request, url, platform, locals }) {
     }
 
     // Check if account already exists
-    const existingAccount = await platform.env.POSTS_DB.prepare(
+    const existingAccount = await platform.env.DB.prepare(
       "SELECT id, provider_account_id FROM connect_accounts WHERE tenant_id = ?",
     )
       .bind(tenantId)
@@ -194,7 +195,7 @@ export async function POST({ request, url, platform, locals }) {
 
     if (existingAccount) {
       // Create new account link for existing account
-      const link = await stripe.createConnectAccountLink(
+      const link = await (stripe as any).createConnectAccountLink(
         existingAccount.provider_account_id,
         {
           returnUrl: data.returnUrl,
@@ -211,7 +212,7 @@ export async function POST({ request, url, platform, locals }) {
     }
 
     // Create new Connect account
-    const result = await stripe.createConnectAccount({
+    const result = await (stripe as any).createConnectAccount({
       tenantId,
       returnUrl: data.returnUrl,
       refreshUrl: data.refreshUrl,
@@ -223,7 +224,7 @@ export async function POST({ request, url, platform, locals }) {
 
     // Store in database
     const accountDbId = crypto.randomUUID();
-    await platform.env.POSTS_DB.prepare(
+    await platform.env.DB.prepare(
       `INSERT INTO connect_accounts (
           id, tenant_id, provider_account_id, account_type, status,
           email, country, created_at, updated_at
@@ -249,17 +250,17 @@ export async function POST({ request, url, platform, locals }) {
       isNew: true,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error creating Connect account:", err);
     throw error(500, "Failed to create Connect account");
   }
-}
+};
 
 /**
  * DELETE /api/shop/connect - Disconnect Connect account
  * (This doesn't delete the Stripe account, just removes the link)
  */
-export async function DELETE({ request, url, platform, locals }) {
+export const DELETE: RequestHandler = async ({ request, url, platform, locals }) => {
   if (SHOP_DISABLED) {
     throw error(503, SHOP_DISABLED_MESSAGE);
   }
@@ -272,22 +273,22 @@ export async function DELETE({ request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
   const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenant?.id;
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
 
-    await platform.env.POSTS_DB.prepare(
+    await platform.env.DB.prepare(
       "DELETE FROM connect_accounts WHERE tenant_id = ?",
     )
       .bind(tenantId)
@@ -298,8 +299,8 @@ export async function DELETE({ request, url, platform, locals }) {
       message: "Connect account disconnected",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err && typeof err === 'object' && 'status' in err) throw err;
     console.error("Error disconnecting Connect account:", err);
     throw error(500, "Failed to disconnect Connect account");
   }
-}
+};

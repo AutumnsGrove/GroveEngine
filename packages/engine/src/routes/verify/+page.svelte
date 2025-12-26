@@ -40,7 +40,7 @@
 					goto(data.returnTo);
 				}, 500);
 			} else {
-				const result = await response.json();
+				const result = (await response.json()) as { message?: string };
 				status = 'error';
 				errorMessage = result.message || 'Verification failed. Please try again.';
 			}

@@ -6,6 +6,11 @@
  * functionality across the site.
  */
 
+import type { GutterItem as MarkdownGutterItem } from "./markdown.js";
+
+// Re-export the GutterItem type from markdown.ts for consistency
+export type GutterItem = MarkdownGutterItem;
+
 /** Anchor types supported by the gutter system */
 export type AnchorType = "none" | "paragraph" | "tag" | "header";
 
@@ -20,15 +25,6 @@ export interface Header {
   id: string;
   text: string;
   level?: number;
-}
-
-/** Gutter item with anchor */
-export interface GutterItem {
-  anchor?: string;
-  type?: string;
-  content?: string;
-  src?: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -91,7 +87,9 @@ export function getAnchorKey(anchor: string, headers: Header[] = []): string {
  * @param items - Array of gutter items
  * @returns Array of unique anchor strings
  */
-export function getUniqueAnchors(items: GutterItem[] | undefined | null): string[] {
+export function getUniqueAnchors(
+  items: GutterItem[] | undefined | null,
+): string[] {
   if (!items) return [];
   const seen = new Set<string>();
   const anchors: string[] = [];
@@ -131,7 +129,7 @@ export function getAnchorLabel(anchor: string): string {
  */
 export function getItemsForAnchor(
   items: GutterItem[] | undefined | null,
-  anchor: string
+  anchor: string,
 ): GutterItem[] {
   if (!items) return [];
   return items.filter((item) => item.anchor === anchor);
@@ -145,7 +143,7 @@ export function getItemsForAnchor(
  */
 export function getOrphanItems(
   items: GutterItem[] | undefined | null,
-  headers: Header[] = []
+  headers: Header[] = [],
 ): GutterItem[] {
   if (!items) return [];
   return items.filter((item) => {
@@ -170,7 +168,7 @@ export function getOrphanItems(
 export function findAnchorElement(
   anchor: string,
   contentEl: HTMLElement | null,
-  headers: Header[] = []
+  headers: Header[] = [],
 ): HTMLElement | null {
   if (!contentEl) return null;
 

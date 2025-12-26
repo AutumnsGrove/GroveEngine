@@ -1,4 +1,8 @@
-import { getPostBySlug, processAnchorTags } from "$lib/utils/markdown.js";
+import {
+  getPostBySlug,
+  processAnchorTags,
+  type GutterItem,
+} from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
 import { marked } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
@@ -11,12 +15,6 @@ interface Header {
   level: number;
   id: string;
   text: string;
-}
-
-interface GutterItem {
-  type?: string;
-  content?: string;
-  [key: string]: unknown;
 }
 
 interface PostRecord {
@@ -40,7 +38,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
       try {
         const post = (await platform.env.DB.prepare(
           `SELECT slug, title, description, html_content, gutter_content, tags, status, published_at
-					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`
+					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`,
         )
           .bind(slug, tenantId)
           .first()) as PostRecord | null;
@@ -48,7 +46,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
         if (post) {
           // Process anchor tags in HTML content (same as filesystem posts)
           const processedHtml = processAnchorTags(
-            (post.html_content as string) || ""
+            (post.html_content as string) || "",
           );
 
           // Extract headers from HTML for table of contents
@@ -80,7 +78,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
                   return {
                     ...item,
                     content: sanitizeMarkdown(
-                      marked.parse(item.content, { async: false }) as string
+                      marked.parse(item.content, { async: false }) as string,
                     ),
                   };
                 }
@@ -134,7 +132,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
     // If we got here without D1 being available, that's a config issue
     if (!platform?.env?.DB) {
       console.error(
-        "DB binding not available - check Cloudflare Pages D1 bindings"
+        "DB binding not available - check Cloudflare Pages D1 bindings",
       );
     }
     throw error(404, "Post not found");
@@ -147,7 +145,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
     console.error("Blog post load error:", err);
     throw error(
       500,
-      `Failed to load post: ${err instanceof Error ? err.message : String(err)}`
+      `Failed to load post: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 };
