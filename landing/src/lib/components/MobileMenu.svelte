@@ -3,11 +3,11 @@
 	import { onMount } from 'svelte';
 	import {
 		Home,
+		Info,
 		Telescope,
 		CreditCard,
 		BookOpen,
 		Trees,
-		Compass,
 		PenLine,
 		Scale,
 		Heart,
@@ -80,11 +80,11 @@
 
 	const navItems: NavItem[] = [
 		{ href: '/', label: 'Home', icon: Home },
+		{ href: '/about', label: 'About', icon: Info },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/pricing', label: 'Pricing', icon: CreditCard },
 		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
 		{ href: '/forest', label: 'Forest', icon: Trees },
-		{ href: '/journey', label: 'Journey', icon: Compass },
 		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true },
 		{ href: '/legal', label: 'Legal', icon: Scale },
 		{ href: '/credits', label: 'Credits', icon: Heart }

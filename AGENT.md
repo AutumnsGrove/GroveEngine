@@ -75,6 +75,13 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 - Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
 - First client: Mom's publishing house
 
+### Key Architecture Documents
+
+| Document | Purpose |
+|----------|---------|
+| `docs/grove-durable-objects-architecture.md` | Durable Objects design for auth, tenant coordination, real-time features, D1 scaling |
+| `docs/specs/analytics-spec.md` | Rings analytics system with privacy-first design and DO integration |
+
 ---
 
 ## Essential Instructions (Always Follow)

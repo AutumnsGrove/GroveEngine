@@ -37,11 +37,11 @@
 	};
 
 	const navItems: NavItem[] = [
+		{ href: '/about', label: 'About' },
 		{ href: '/vision', label: 'Vision' },
 		{ href: '/pricing', label: 'Pricing' },
 		{ href: '/knowledge', label: 'Knowledge' },
 		{ href: '/forest', label: 'Forest' },
-		{ href: '/journey', label: 'Journey' },
 		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', external: true },
 		{ href: '/legal', label: 'Legal' },
 		{ href: '/credits', label: 'Credits' }

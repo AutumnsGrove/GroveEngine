@@ -1,3 +1,12 @@
+---
+title: "Sessions & Cookies: What You Need to Know"
+slug: sessions-and-cookies
+category: data-and-privacy
+order: 2
+keywords: [cookies, session, login, privacy, logout, browser, security, devices]
+related: [understanding-your-privacy, account-deletion]
+---
+
 # Sessions & Cookies: What You Need to Know
 
 ## The Short Version
@@ -33,3 +42,7 @@ Yes! Go to **Settings → Security → Active Sessions** to see every device whe
 ## Why Does My Login Work Across All Grove Sites?
 
 Your session cookie is set for `*.grove.place`, which means it works on your personal site (`you.grove.place`), the main site (`grove.place`), and everywhere else in the Grove ecosystem. One login, access everywhere.
+
+---
+
+*For more about how Grove handles your data, see [Understanding Your Privacy](/knowledge/help/understanding-your-privacy).*

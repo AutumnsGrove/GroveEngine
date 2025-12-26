@@ -366,6 +366,60 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 
 ---
 
+## Durable Objects Implementation (Post-Launch)
+
+> **Spec:** See `docs/grove-durable-objects-architecture.md` for full technical specification.
+> **Priority:** High - Solves auth coordination, D1 write scaling, and enables real-time features.
+> **Philosophy:** DOs are a coordination and caching layer, not a replacement for D1. D1 remains source of truth.
+
+### DO Phase 1: Auth (Heartwood) — HIGHEST PRIORITY
+- [ ] Implement `SessionDO` class with SQLite storage
+- [ ] Update Heartwood OAuth flow to use SessionDO
+- [ ] Update auth middleware in all workers to validate via SessionDO
+- [ ] Add "manage sessions" UI showing active devices
+- [ ] Test cross-subdomain auth
+
+**Expected improvements:**
+- Login time: 15 seconds → 2-3 seconds
+- Session validation: D1 query → DO call (sub-millisecond if cached)
+- "Log out all devices" becomes trivial
+
+### DO Phase 2: Tenant Coordination
+- [ ] Implement `TenantDO` class with SQLite storage
+- [ ] Migrate config loading from D1 to TenantDO
+- [ ] Add per-tenant rate limiting
+- [ ] Set up analytics buffering to TenantDO
+
+**Expected improvements:**
+- Config load: D1 query per request → cached in DO
+- Rate limiting: Works correctly (currently IP-based only)
+- D1 writes: Reduced by ~90% for analytics
+
+### DO Phase 3: Content Coordination
+- [ ] Implement `PostDO` class
+- [ ] Add real-time reactions (atomic, no lost updates)
+- [ ] Add comment WebSocket for live updates
+- [ ] Add presence indicators ("X people viewing")
+
+### DO Phase 4: Meadow Social (After Meadow MVP)
+- [ ] Implement `FeedDO` class (pre-computed personalized feeds)
+- [ ] Implement `NotificationDO` class (aggregated notifications)
+- [ ] Add follow/unfollow with feed updates
+- [ ] Add push notifications via WebSocket
+
+### DO Phase 5: Analytics (Rings Enhancement)
+- [ ] Implement `AnalyticsDO` class (one per tenant per day)
+- [ ] Add real-time dashboard via WebSocket
+- [ ] Implement 60-second flush-to-D1 strategy
+- [ ] Add end-of-day finalization
+- [ ] Privacy: daily hash rotation for visitor deduplication
+
+**Expected improvements:**
+- D1 writes: 87% reduction (10,000 events → ~1,400 batched writes/day)
+- Real-time dashboard: Live updates without polling
+
+---
+
 ## Future Considerations (Post-Launch)
 
 ### Shop Feature (E-commerce) - DEFERRED

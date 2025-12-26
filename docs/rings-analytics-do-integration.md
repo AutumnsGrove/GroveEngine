@@ -1,5 +1,8 @@
 # Rings Analytics: Durable Objects Integration
 
+> **✅ MERGED:** This content has been integrated into `docs/specs/analytics-spec.md` (2025-12-25).
+> This file is kept for reference. The spec is the authoritative source.
+
 ## Context for Agent
 
 This document contains new architectural findings that should be integrated into the Rings project specification. Rings is Grove's privacy-focused analytics system. The core discovery is that Durable Objects provide the missing coordination layer for real-time analytics aggregation, dramatically reducing D1 write load while enabling live dashboards.

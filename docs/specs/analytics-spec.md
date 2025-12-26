@@ -752,6 +752,185 @@ CREATE TABLE platform_metrics (
 CREATE INDEX idx_platform_date ON platform_metrics(date);
 ```
 
+### Durable Objects Architecture (Scale Layer)
+
+> **Full Reference:** See `docs/grove-durable-objects-architecture.md` for complete DO system design.
+
+The base architecture above works well at small scale. For high traffic, Durable Objects provide a coordination layer that dramatically reduces D1 writes while enabling real-time features.
+
+**Key Insight:** DOs aren't replacing D1—they're a *coordination and caching layer* that sits between Workers and D1. D1 remains the source of truth.
+
+#### AnalyticsDO Design
+
+**ID Pattern:** `analytics:{tenantId}:{date}` (e.g., `analytics:alice:2025-12-25`)
+
+One DO per tenant per day provides:
+- **Per-tenant isolation** — Each tenant's analytics in their own DO
+- **Natural partitioning** — No single DO gets too hot
+- **Easy cleanup** — Old data naturally isolated
+- **Simple date queries** — Date is in the ID
+
+#### DO SQLite Storage
+
+```sql
+-- Hourly aggregates (0-23)
+CREATE TABLE hourly (
+  hour INTEGER PRIMARY KEY,
+  page_views INTEGER NOT NULL DEFAULT 0,
+  unique_visitors INTEGER NOT NULL DEFAULT 0,
+  avg_time_on_page REAL,
+  bounce_rate REAL,
+  posts_created INTEGER NOT NULL DEFAULT 0,
+  comments_created INTEGER NOT NULL DEFAULT 0,
+  reactions_given INTEGER NOT NULL DEFAULT 0
+);
+
+-- Per-page stats
+CREATE TABLE pages (
+  path TEXT PRIMARY KEY,
+  views INTEGER NOT NULL DEFAULT 0,
+  unique_views INTEGER NOT NULL DEFAULT 0,
+  avg_time_seconds REAL,
+  entries INTEGER NOT NULL DEFAULT 0,
+  exits INTEGER NOT NULL DEFAULT 0
+);
+
+-- Referrer tracking
+CREATE TABLE referrers (
+  source TEXT PRIMARY KEY,
+  visits INTEGER NOT NULL DEFAULT 0
+);
+
+-- Unique visitor hashes (for deduplication within day)
+CREATE TABLE visitors (
+  hash TEXT PRIMARY KEY,
+  first_seen INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL,
+  page_views INTEGER NOT NULL DEFAULT 1
+);
+
+-- Content performance
+CREATE TABLE content (
+  post_id TEXT PRIMARY KEY,
+  views INTEGER NOT NULL DEFAULT 0,
+  unique_views INTEGER NOT NULL DEFAULT 0,
+  reactions INTEGER NOT NULL DEFAULT 0,
+  comments INTEGER NOT NULL DEFAULT 0,
+  shares INTEGER NOT NULL DEFAULT 0,
+  avg_read_time REAL
+);
+```
+
+#### Event Flow with DOs
+
+```
+Event occurs (page view, reaction, etc.)
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Source DO (TenantDO, PostDO, SessionDO)                                 │
+│  - Captures event with minimal processing                               │
+│  - Forwards to AnalyticsDO                                              │
+└─────────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ AnalyticsDO (id: analytics:{tenantId}:{date})                          │
+│  - Receives all events for this tenant on this day                     │
+│  - Aggregates in memory (page views, unique visitors, etc.)            │
+│  - Updates live dashboard via WebSocket                                │
+│  - Flushes to D1 every 60 seconds                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+         │
+         ▼ (every 60 seconds)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ D1 Database (rings tables)                                              │
+│  - Stores finalized hourly/daily aggregates                            │
+│  - Historical data for reporting                                        │
+│  - Never receives raw events (only aggregates)                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Privacy: Hash Rotation
+
+The visitor hash salt changes daily, ensuring no cross-day tracking:
+
+```typescript
+function getVisitorHash(ip: string, userAgent: string, date: string): string {
+  const salt = `grove-analytics-${date}`;  // Date-based salt
+  return crypto.createHash("sha256")
+    .update(`${salt}:${ip}:${userAgent}`)
+    .digest("hex")
+    .substring(0, 16);
+}
+```
+
+This means:
+- Same visitor on same day = same hash (for unique counting)
+- Same visitor on different day = different hash (no cross-day tracking)
+- Cannot reverse hash to get IP
+
+#### Flush Strategy
+
+```typescript
+class AnalyticsDO extends DurableObject {
+  private async scheduleFlush() {
+    if (this.pendingFlush) return;
+    this.pendingFlush = true;
+    await this.ctx.storage.setAlarm(Date.now() + 60_000);  // 60 seconds
+  }
+
+  async alarm() {
+    await this.flush();
+    this.pendingFlush = false;
+    if (this.eventBuffer.length > 0 || this.hasUnflushedStats()) {
+      await this.scheduleFlush();
+    }
+  }
+}
+```
+
+#### Real-Time Dashboard (WebSocket)
+
+AnalyticsDO supports WebSocket connections for live dashboards:
+
+```typescript
+// Server -> Client
+type ServerMessage =
+  | { type: "init"; stats: FullStats }
+  | { type: "update"; stats: Partial<Stats> }
+  | { type: "event"; event: RecentEvent };
+```
+
+#### Write Reduction Analysis
+
+**Before (Direct D1):**
+- 10,000 page views/day = 10,000 D1 writes
+- 1,000 reactions/day = 1,000 D1 writes
+- Total: 11,000 writes/day
+
+**After (With AnalyticsDO):**
+- 10,000 page views → buffered in DO → 1,440 writes (once per minute)
+- 1,000 reactions → buffered in DO → same flush cycle
+- Plus 1 daily summary write
+- Total: ~1,441 writes/day
+
+**Reduction: 87%**
+
+At scale (100 tenants, 10K views each):
+- Before: 1,100,000 writes/day
+- After: ~144,100 writes/day
+
+#### End-of-Day Finalization
+
+At midnight UTC, the AnalyticsDO finalizes:
+
+1. Final flush to D1
+2. Calculate daily aggregates
+3. Write summary to `daily_stats` table
+4. Clear visitor hashes (privacy)
+5. Close any remaining WebSocket connections
+
 ---
 
 ## API Endpoints
