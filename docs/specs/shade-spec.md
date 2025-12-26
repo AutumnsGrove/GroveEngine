@@ -66,9 +66,9 @@ No single protection is foolproof. Sophisticated actors fake user agents, ignore
 
 ## 2. Defense Architecture
 
-### 2.1 The Seven Layers
+### 2.1 The Eight Layers
 
-Shade implements defense in depth through seven complementary layers:
+Shade implements defense in depth through eight complementary layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -133,6 +133,14 @@ Shade implements defense in depth through seven complementary layers:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
+│              LAYER 8: ARCHIVE SERVICE PROTECTION                │
+│  • Internet Archive / Wayback Machine blocking                  │
+│  • Archive-It and archive crawler prevention                    │
+│  • Retroactive removal of existing archives                     │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
 │                    HUMAN READER                                 │
 │              (or very determined bot)                           │
 └─────────────────────────────────────────────────────────────────┘
@@ -149,6 +157,7 @@ Shade implements defense in depth through seven complementary layers:
 | Meta Tags | Emerging standard adoption | Most current scrapers | Future-proofing |
 | Legal Framework | Nothing technical | Nothing technical | Legal standing |
 | Turnstile | Automated scripts, headless browsers | Sophisticated browser automation | Human verification |
+| Archive Protection | Internet Archive, Archive-It, compliant archive crawlers | Personal archiving tools (Raindrop, Pocket), archive.today | Public archive prevention |
 
 ### 2.3 What We Accept
 
@@ -338,10 +347,12 @@ robots.txt is a **signal, not a barrier**. It's the equivalent of a "Please knoc
 - Major search engines (Google, Bing, Yandex, Kagi)
 - Some AI companies (OpenAI's GPTBot officially respects it)
 - Academic and research crawlers
+- Internet Archive and most legitimate archiving services
 
 **Who ignores robots.txt:**
 - Perplexity (documented by Cloudflare)
 - Many smaller AI companies
+- archive.today / archive.is (explicitly states it acts as "agent of the human user")
 - Any scraper that wants the data badly enough
 
 ### 4.2 Recommended Configuration
@@ -502,6 +513,123 @@ Sitemap: https://grove.place/sitemap.xml
 2. Subscribe to updates for new crawler alerts
 3. Merge with manually curated allowlist (search engines)
 4. Update robots.txt quarterly or when major new crawlers emerge
+
+### 4.4 Archive Service Protection (Layer 8)
+
+Web archiving services preserve snapshots of public websites, sometimes indefinitely. While some users appreciate permanent records of the web, Grove prioritizes user control—if someone deletes their content, it should stay deleted, not preserved in public archives.
+
+#### What Can vs Cannot Be Blocked
+
+**✅ CAN Be Blocked (Automated Archive Crawlers):**
+- Internet Archive / Wayback Machine (`archive.org_bot`, `ia_archiver`)
+- Archive-It (Internet Archive's subscription service)
+- Common Crawl (`CCBot` - serves both AI training and archival purposes)
+- Other automated archiving services that respect robots.txt
+
+**Method:** robots.txt directives (see section 4.2 for implementation)
+
+**Important Caveat:** Blocking archive crawlers is **retroactive**—it removes existing archives, not just prevents future ones.
+
+**❌ CANNOT Be Blocked (Personal Archiving Tools):**
+- Raindrop.io (creates copies when users bookmark pages)
+- Pocket / Instapaper (reading list services)
+- ArchiveBox (self-hosted archiving software)
+- Browser extensions (Save Page As, reading mode, etc.)
+- archive.today / archive.is / archive.ph (explicitly ignores robots.txt)
+
+**Why:** These tools work through normal browser sessions. From the server's perspective, they're indistinguishable from legitimate users viewing pages. The archiving happens client-side or in the user's personal cloud storage.
+
+**Chrome Extensions Team Statement:**
+> "There isn't a way to prevent extensions from running, and this isn't a capability we have traditionally been supportive of. Extensions are installed by the user and the user may want to run them regardless of if the website would like this."
+
+#### Implementation
+
+Add the following to your robots.txt file:
+
+```txt
+# =============================================================================
+# WEB ARCHIVING SERVICES
+# These services crawl and archive web content for public access
+# NOTE: Blocking these will RETROACTIVELY remove existing archives
+# =============================================================================
+
+# Internet Archive / Wayback Machine
+User-agent: archive.org_bot
+Disallow: /
+
+User-agent: ia_archiver
+Disallow: /
+
+# Archive-It (Internet Archive's subscription service)
+User-agent: archive.org
+Disallow: /
+
+User-agent: ArchiveBot
+Disallow: /
+
+User-agent: Archive-It
+Disallow: /
+
+# Common Crawl (also blocks AI training data collection)
+User-agent: CCBot
+Disallow: /
+```
+
+**Note:** `CCBot` (Common Crawl) serves dual purposes—it's used both for archiving and as a training data source for AI models. Blocking it addresses both concerns.
+
+#### What About archive.today?
+
+The archive.today / archive.is / archive.ph network explicitly does NOT respect robots.txt. They state they act "as a direct agent of the human user."
+
+**Options if blocking is critical:**
+1. IP-based blocking via Cloudflare WAF (maintenance burden, not recommended)
+2. Manual DMCA requests on a per-capture basis (time-consuming)
+
+**Recommendation:** Accept that archive.today cannot be practically blocked. Focus on the archiving services we CAN control.
+
+#### Retroactive Archive Removal
+
+**Critical Understanding:** Adding archive crawler blocks to robots.txt removes ALL previous archives from those services, not just prevents future captures.
+
+**For Grove:** Since tenant content hasn't launched yet, this is fine. But document this behavior:
+- Any future changes to archive blocking in robots.txt affect historical archives
+- If a tenant later wants their content archived, removing blocks may not restore old captures
+- This is a feature for user privacy, not a bug—deleted content stays deleted
+
+#### User Education Over Technical Restrictions
+
+**Philosophy:** Rather than fighting the technically impossible battle of blocking personal archiving tools, Grove focuses on:
+
+1. **Clear privacy policies** — Users know what to expect
+2. **User controls for content visibility** — Public, private, unlisted options
+3. **Tenant-level configuration options** — Power users can opt-in to stricter blocking
+4. **Controlling access, not archiving** — If content is legitimately accessible, personal archiving is accepted as normal user behavior
+
+**Bad Approaches (Explicitly Rejected):**
+- ❌ Aggressive JavaScript requirements (breaks accessibility)
+- ❌ Continuous dynamic content changes (terrible UX)
+- ❌ Authentication walls for all content (defeats blogging purpose)
+
+These create more problems than they solve and harm legitimate users more than they prevent determined archiving.
+
+#### Tenant-Level Configuration (Future Enhancement)
+
+Consider allowing individual tenants to opt-in to archive blocking via:
+- Subdomain-specific robots.txt overrides
+- Tenant dashboard configuration option
+- Per-post "Allow archiving" toggle
+
+This gives power users control while maintaining sensible privacy-first defaults.
+
+#### Monitoring
+
+Archive service blocking requires no additional monitoring beyond existing Cloudflare analytics. The Dark Visitors integration (section 4.3) covers emerging archive crawlers along with AI scrapers.
+
+**Summary:**
+- Block what we can (Internet Archive, Archive-It, etc.)
+- Accept what we can't (personal tools, archive.today)
+- Focus on user control and clear communication
+- Prioritize UX and accessibility over impossible-to-enforce restrictions
 
 ---
 
@@ -727,7 +855,7 @@ Key metrics to track in Dashboard → Security → Events:
 - [x] Enable "Bot Fight Mode"
 - [x] Check if "AI Labyrinth" is available and enable
 - [x] Subscribe to Dark Visitors for ongoing blocklist updates
-- [ ] Deploy comprehensive robots.txt
+- [x] Deploy comprehensive robots.txt
 - [ ] Add noai/noimageai meta tags to all pages
 - [ ] Set X-Robots-Tag header via Transform Rules or Workers
 

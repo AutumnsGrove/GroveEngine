@@ -40,7 +40,7 @@
 			icon: 'newspaper',
 			domain: 'clearing.grove.place',
 			stack: 'Python + Cloudflare Workers',
-			github: 'https://github.com/AutumnsGrove/GroveDaily'
+			github: 'https://github.com/AutumnsGrove/AgenticNewspaper'
 		},
 		{
 			name: 'Scout',

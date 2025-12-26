@@ -186,11 +186,44 @@ User-agent: Perplexity-User
 Disallow: /
 
 # =============================================================================
-# COMMON CRAWL (used for ML training datasets)
+# COMMON CRAWL (used for ML training datasets and archiving)
 # =============================================================================
 
 User-agent: CCBot
 Disallow: /
+
+# =============================================================================
+# WEB ARCHIVING SERVICES
+# These services crawl and archive web content for public access
+# NOTE: Blocking these will RETROACTIVELY remove existing archives
+# =============================================================================
+
+# Internet Archive / Wayback Machine
+User-agent: archive.org_bot
+Disallow: /
+
+User-agent: ia_archiver
+Disallow: /
+
+# Archive-It (Internet Archive's subscription service)
+User-agent: archive.org
+Disallow: /
+
+User-agent: ArchiveBot
+Disallow: /
+
+User-agent: Archive-It
+Disallow: /
+
+# Note: CCBot (Common Crawl) is already blocked above - it serves both
+# archiving and AI training purposes
+
+# archive.today / archive.is / archive.ph:
+# Does NOT respect robots.txt - would require IP-based blocking via WAF
+# Not recommended to pursue unless critical
+
+# Personal archiving tools (Raindrop, Pocket, ArchiveBox, browser extensions):
+# CANNOT be blocked via robots.txt - they use normal browser sessions
 
 # =============================================================================
 # MISTRAL

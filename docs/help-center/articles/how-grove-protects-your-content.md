@@ -1,13 +1,13 @@
 ---
-title: "How Grove Protects Your Content from AI Scraping"
+title: "How Grove Protects Your Content from AI Scraping and Archiving"
 slug: how-grove-protects-your-content
 category: data-and-privacy
 order: 2
-keywords: [ai, scraping, protection, bots, crawlers, privacy, shade, content, training data]
+keywords: [ai, scraping, protection, bots, crawlers, privacy, shade, content, training data, archive, wayback machine]
 related: [understanding-your-privacy, what-is-grove, exporting-your-content]
 ---
 
-# How Grove Protects Your Content from AI Scraping
+# How Grove Protects Your Content from AI Scraping and Archiving
 
 Every major AI company sends crawlers across the web, hoovering up text to train their models. Your blog posts, your personal reflections, your creative writing: they become statistical weights in systems that simulate human expression.
 
@@ -57,7 +57,26 @@ We publish a robots.txt file explicitly forbidding AI crawlers. Legitimate crawl
 
 Every page includes `noai` and `noimageai` directives telling crawlers not to use the content for AI training. These are emerging standards that more companies are beginning to respect.
 
-### Layer 7: Legal documentation
+### Layer 7: Human verification
+
+Before accessing Grove content, visitors complete a brief verification check using Cloudflare Turnstile. For most people, this happens invisibly in the background. It ensures readers are real people, not automated scripts.
+
+### Layer 8: Archive service protection
+
+Web archiving services like the Internet Archive preserve snapshots of public websites, sometimes indefinitely. We block archive crawlers so that if you delete content, it stays deleted—not preserved in public archives forever.
+
+**What we block:**
+- Internet Archive / Wayback Machine
+- Archive-It and other automated archive services
+- Common Crawl (also used for AI training)
+
+**What we can't block:**
+- Personal archiving tools (Raindrop, Pocket, browser extensions)
+- Services that ignore robots.txt (like archive.today)
+
+This gives you control: when you delete something, it's gone. Not captured and preserved against your wishes.
+
+### Layer 9: Legal documentation
 
 Our Terms of Service explicitly prohibit using Grove content for AI training. This establishes clear legal standing: you never consented, and we actively refused on your behalf.
 
@@ -79,6 +98,10 @@ No protection is 100% effective. Here's what we can't prevent:
 **Companies that ignore the rules.** Perplexity, for example, has been caught bypassing robots.txt and ignoring crawler blocks. When a company decides to scrape regardless of consent, technical barriers can only slow them down.
 
 **Google's unified crawler.** Google uses the same crawler (Googlebot) for search indexing and AI training. We block Google-Extended (their AI-specific flag), but it's unclear how well Google actually respects this internally. Blocking Googlebot entirely would break search indexing.
+
+**Personal archiving tools.** Services like Raindrop.io, Pocket, and browser extensions work through normal user sessions. From the server's perspective, they look like a real person reading your blog. We can't (and philosophically shouldn't) block legitimate readers from saving content they've accessed. We accept this as normal user behavior.
+
+**Archive services that ignore robots.txt.** The archive.today network explicitly states it acts as "an agent of the human user" and doesn't respect robots.txt. Blocking it would require IP-based filtering with significant maintenance burden.
 
 **Sophisticated actors.** Someone with resources, residential proxies, and determination can scrape almost any public website. This is a limitation of the open web, not Grove specifically.
 
