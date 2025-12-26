@@ -199,12 +199,16 @@
 	interface GeneratedTree {
 		id: number;
 		x: number; // percentage from left
-		y: number; // always 85 for grounded trees
+		y: number; // always near bottom for grounded trees
 		size: number;
+		aspectRatio: number; // height = size * aspectRatio (like /forest)
 		treeType: TreeType;
 		opacity: number;
 		zIndex: number;
 	}
+
+	// Aspect ratio range for natural height variation (matches /forest)
+	const TREE_ASPECT_RATIO_RANGE = { min: 1.0, max: 1.5 };
 
 	// Tree count ranges per section (grows as grove develops)
 	const TREE_RANGES = {
@@ -275,13 +279,14 @@
 
 			// Size based on section's maturity level (grove grows over time!)
 			const sizeRange = TREE_SIZE_RANGES[section];
-			const baseSize = sizeRange.min + Math.random() * (sizeRange.max - sizeRange.min);
-			// Subtle edge reduction (only 10% smaller at edges, not 30%)
-			const distFromCenter = Math.abs(50 - x) / 50;
-			const size = baseSize * (1 - distFromCenter * 0.1);
+			const size = sizeRange.min + Math.random() * (sizeRange.max - sizeRange.min);
+
+			// Randomize aspect ratio for natural height variation (like /forest page)
+			const aspectRatio = TREE_ASPECT_RATIO_RANGE.min +
+				Math.random() * (TREE_ASPECT_RATIO_RANGE.max - TREE_ASPECT_RATIO_RANGE.min);
 
 			// Opacity varies by position (creates depth)
-			const opacity = 0.45 + Math.random() * 0.4; // 0.45-0.85 (brighter overall)
+			const opacity = 0.5 + Math.random() * 0.4; // 0.5-0.9 (good visibility)
 
 			// Z-index based on size (larger = more foreground)
 			const zIndex = size > 130 ? 3 : size > 100 ? 2 : 1;
@@ -289,8 +294,9 @@
 			trees.push({
 				id: i + 1,
 				x,
-				y: 85,
+				y: 92, // Position near bottom (percentage)
 				size,
+				aspectRatio,
 				treeType,
 				opacity,
 				zIndex
@@ -432,8 +438,16 @@
 			<!-- Randomized trees - growth beginning -->
 			{#each thawTrees as tree (tree.id)}
 				<div
-					class="absolute bottom-0"
-					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					class="absolute"
+					style="
+						left: {tree.x}%;
+						top: {tree.y}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%) translateY(-95%);
+					"
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
@@ -496,8 +510,16 @@
 			<!-- Randomized spring grove -->
 			{#each firstBudsTrees as tree (tree.id)}
 				<div
-					class="absolute bottom-0"
-					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					class="absolute"
+					style="
+						left: {tree.x}%;
+						top: {tree.y}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%) translateY(-95%);
+					"
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
@@ -593,8 +615,16 @@
 			<!-- Randomized full grove (peak growth!) -->
 			{#each fullBloomTrees as tree (tree.id)}
 				<div
-					class="absolute bottom-0"
-					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					class="absolute"
+					style="
+						left: {tree.x}%;
+						top: {tree.y}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%) translateY(-95%);
+					"
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
@@ -694,8 +724,16 @@
 			<!-- THE MAGICAL FOREST - Randomized autumn trees! -->
 			{#each goldenHourRandomTrees as tree (tree.id)}
 				<div
-					class="absolute bottom-0"
-					style="left: {tree.x}%; width: {tree.size * 0.3}px; height: {tree.size}px; opacity: {tree.opacity}; z-index: {tree.zIndex};"
+					class="absolute"
+					style="
+						left: {tree.x}%;
+						top: {tree.y}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%) translateY(-95%);
+					"
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
@@ -779,8 +817,16 @@
 			{#each midnightBloomTrees as tree (tree.id)}
 				{@const nightColor = ['#1e1b4b', '#2e1065', '#3b0764', '#4c1d95'][tree.id % 4]}
 				<div
-					class="absolute bottom-0"
-					style="left: {tree.x}%; width: {tree.size * 0.28}px; height: {tree.size * 0.9}px; opacity: {tree.opacity * 0.5}; z-index: {tree.zIndex};"
+					class="absolute"
+					style="
+						left: {tree.x}%;
+						top: {tree.y}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity * 0.6};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%) translateY(-95%);
+					"
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
