@@ -1,8 +1,9 @@
 # TenantDO Implementation Plan (DO Phase 2)
 
-> **Status:** Ready to implement
+> **Status:** Ready to implement (PR feedback addressed)
 > **Priority:** High - Reduces D1 load, enables per-tenant rate limiting
 > **Estimated Effort:** 2-3 days of focused work
+> **Last Updated:** 2025-12-26 (incorporated PR review feedback)
 
 ---
 
@@ -10,10 +11,23 @@
 
 TenantDO is a Durable Object that coordinates per-tenant operations:
 - **Config caching** — Eliminates D1 queries on every request
-- **Rate limiting** — Per-tenant (not just IP-based)
+- **Rate limiting** — Per-tenant (not just IP-based), tier-aware
 - **Analytics buffering** — Reduces D1 writes by ~90%
 
 **ID Pattern:** `tenant:{subdomain}` (e.g., `tenant:alice`, `tenant:midnightbloom`)
+
+---
+
+## PR Review Issues Addressed
+
+| Issue | Severity | Fix |
+|-------|----------|-----|
+| SQL injection in DELETE | Critical | Use parameterized query with placeholders |
+| Fragile base64 encoding | High | Use hex encoding instead |
+| Flawed rate limit window | High | Use fixed time windows (floor to minute) |
+| Analytics data loss risk | High | Soft-delete pattern with `flushed_at` column |
+| Missing tier validation | Medium | Runtime validation with fallback |
+| Hardcoded rate limits | Medium | Tier-based limits map |
 
 ---
 
@@ -49,13 +63,26 @@ TenantDO is a Durable Object that coordinates per-tenant operations:
 
 import { DurableObject } from 'cloudflare:workers';
 
+// Valid tier values - used for runtime validation
+const VALID_TIERS = ['free', 'seedling', 'sapling', 'oak', 'evergreen'] as const;
+type Tier = typeof VALID_TIERS[number];
+
+// Tier-based rate limits (requests per minute)
+const TIER_RATE_LIMITS: Record<Tier, number> = {
+  free: 30,
+  seedling: 60,
+  sapling: 120,
+  oak: 300,
+  evergreen: 600,
+};
+
 export interface TenantConfig {
   id: string;
   subdomain: string;
   displayName: string;
   email: string;
   theme: string | null;
-  tier: 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
+  tier: Tier;
   active: boolean;
   createdAt: number;
 }
@@ -80,6 +107,17 @@ interface TenantDOEnv {
   DB: D1Database;
 }
 
+/**
+ * Validate tier value from D1, fallback to 'free' if invalid
+ */
+function validateTier(tier: unknown): Tier {
+  if (typeof tier === 'string' && VALID_TIERS.includes(tier as Tier)) {
+    return tier as Tier;
+  }
+  console.warn(`[TenantDO] Invalid tier value: ${tier}, defaulting to 'free'`);
+  return 'free';
+}
+
 export class TenantDO extends DurableObject<TenantDOEnv> {
   private initialized = false;
   private config: TenantConfig | null = null;
@@ -96,16 +134,16 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
   private async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Rate limits table
+    // Rate limits table - using fixed time windows
     await this.ctx.storage.sql.exec(`
       CREATE TABLE IF NOT EXISTS rate_limits (
         key TEXT PRIMARY KEY,
         count INTEGER NOT NULL DEFAULT 0,
-        window_start INTEGER NOT NULL
+        window_key TEXT NOT NULL  -- e.g., "2025-12-26T14:30" for minute-based windows
       );
     `);
 
-    // Analytics buffer table
+    // Analytics buffer table with soft-delete support
     await this.ctx.storage.sql.exec(`
       CREATE TABLE IF NOT EXISTS analytics_buffer (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,8 +154,12 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
         timestamp INTEGER NOT NULL,
         referrer TEXT,
         user_agent TEXT,
-        created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+        created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+        flushed_at INTEGER  -- NULL = not flushed, timestamp = flushed (soft delete)
       );
+
+      CREATE INDEX IF NOT EXISTS idx_buffer_unflushed
+        ON analytics_buffer(flushed_at) WHERE flushed_at IS NULL;
     `);
 
     this.initialized = true;
@@ -176,13 +218,13 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
         displayName: result.display_name,
         email: result.email,
         theme: result.theme,
-        tier: result.tier as TenantConfig['tier'],
+        tier: validateTier(result.tier), // Runtime validation
         active: result.active === 1,
         createdAt: result.created_at,
       };
       this.configLoadedAt = now;
 
-      console.log(`[TenantDO] Loaded config for ${subdomain}`);
+      console.log(`[TenantDO] Loaded config for ${subdomain} (tier: ${this.config.tier})`);
       return this.config;
     } catch (err) {
       console.error('[TenantDO] Failed to load config:', err);
@@ -199,63 +241,75 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
   }
 
   /**
-   * Check rate limit for a specific key
+   * Get rate limit based on tenant tier
+   */
+  getRateLimitForTier(): number {
+    const tier = this.config?.tier || 'free';
+    return TIER_RATE_LIMITS[tier];
+  }
+
+  /**
+   * Check rate limit for a specific key using fixed time windows
    */
   async checkRateLimit(
     key: string,
-    limit: number,
-    windowSeconds: number
+    limit?: number, // If not provided, uses tier-based limit
+    windowSeconds: number = 60
   ): Promise<RateLimitResult> {
     await this.initialize();
 
+    // Use tier-based limit if not explicitly provided
+    const effectiveLimit = limit ?? this.getRateLimitForTier();
+
     const now = Date.now();
-    const windowStart = now - windowSeconds * 1000;
+
+    // Use fixed time windows (floor to window boundary)
+    // This ensures consistent resetAt times
+    const windowMs = windowSeconds * 1000;
+    const windowStart = Math.floor(now / windowMs) * windowMs;
+    const windowKey = new Date(windowStart).toISOString();
+    const resetAt = windowStart + windowMs;
 
     // Get current state
     const result = await this.ctx.storage.sql
-      .exec(`SELECT count, window_start FROM rate_limits WHERE key = ?`, key)
+      .exec(`SELECT count, window_key FROM rate_limits WHERE key = ?`, key)
       .toArray();
 
     let count = 0;
-    let currentWindowStart = now;
 
     if (result.length > 0) {
       const row = result[0];
-      if ((row.window_start as number) > windowStart) {
-        // Still in current window
+      if (row.window_key === windowKey) {
+        // Same window, use existing count
         count = row.count as number;
-        currentWindowStart = row.window_start as number;
       }
-      // Else: window expired, will reset
+      // Different window = reset (handled by UPSERT below)
     }
 
-    if (count >= limit) {
+    if (count >= effectiveLimit) {
       return {
         allowed: false,
         remaining: 0,
-        resetAt: currentWindowStart + windowSeconds * 1000,
+        resetAt,
       };
     }
 
-    // Increment count
+    // Increment count using UPSERT
     await this.ctx.storage.sql.exec(
-      `INSERT INTO rate_limits (key, count, window_start) VALUES (?, 1, ?)
+      `INSERT INTO rate_limits (key, count, window_key) VALUES (?, 1, ?)
        ON CONFLICT(key) DO UPDATE SET
          count = CASE
-           WHEN window_start < ? THEN 1
-           ELSE count + 1
+           WHEN window_key = ? THEN count + 1
+           ELSE 1
          END,
-         window_start = CASE
-           WHEN window_start < ? THEN ?
-           ELSE window_start
-         END`,
-      key, now, windowStart, windowStart, now
+         window_key = ?`,
+      key, windowKey, windowKey, windowKey
     );
 
     return {
       allowed: true,
-      remaining: limit - count - 1,
-      resetAt: currentWindowStart + windowSeconds * 1000,
+      remaining: effectiveLimit - count - 1,
+      resetAt,
     };
   }
 
@@ -301,14 +355,19 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
   }
 
   /**
-   * Flush buffered analytics to D1
+   * Flush buffered analytics to D1 using soft-delete pattern
    */
   async flushAnalytics(): Promise<void> {
+    const now = Date.now();
+
+    // Get unflushed events
     const events = await this.ctx.storage.sql
-      .exec(`SELECT * FROM analytics_buffer ORDER BY id LIMIT 1000`)
+      .exec(`SELECT * FROM analytics_buffer WHERE flushed_at IS NULL ORDER BY id LIMIT 1000`)
       .toArray();
 
     if (events.length === 0) {
+      // Cleanup old flushed events (older than 1 hour)
+      await this.cleanupFlushedEvents();
       return;
     }
 
@@ -317,6 +376,9 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
       console.error('[TenantDO] Cannot flush analytics: no config');
       return;
     }
+
+    // Collect IDs for soft-delete
+    const eventIds = events.map((e) => e.id as number);
 
     try {
       // Batch insert into D1 analytics table
@@ -340,21 +402,24 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
 
       await this.env.DB.batch(batch);
 
-      // Delete flushed events
-      const ids = events.map((e) => e.id);
+      // Soft-delete: mark as flushed using parameterized query
+      // Build placeholders for the IN clause
+      const placeholders = eventIds.map(() => '?').join(',');
       await this.ctx.storage.sql.exec(
-        `DELETE FROM analytics_buffer WHERE id IN (${ids.join(',')})`
+        `UPDATE analytics_buffer SET flushed_at = ? WHERE id IN (${placeholders})`,
+        now,
+        ...eventIds
       );
 
       console.log(`[TenantDO] Flushed ${events.length} analytics events for ${config.subdomain}`);
     } catch (err) {
       console.error('[TenantDO] Failed to flush analytics:', err);
-      // Events remain in buffer, will retry on next alarm
+      // Events remain unflushed, will retry on next alarm
     }
 
-    // Check if more events to flush
+    // Check if more unflushed events exist
     const remaining = await this.ctx.storage.sql
-      .exec(`SELECT COUNT(*) as count FROM analytics_buffer`)
+      .exec(`SELECT COUNT(*) as count FROM analytics_buffer WHERE flushed_at IS NULL`)
       .toArray();
 
     if ((remaining[0]?.count as number) > 0) {
@@ -363,16 +428,39 @@ export class TenantDO extends DurableObject<TenantDOEnv> {
   }
 
   /**
+   * Cleanup old flushed events (garbage collection)
+   */
+  private async cleanupFlushedEvents(): Promise<void> {
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+
+    const result = await this.ctx.storage.sql.exec(
+      `DELETE FROM analytics_buffer WHERE flushed_at IS NOT NULL AND flushed_at < ?`,
+      oneHourAgo
+    );
+
+    if (result.rowsWritten > 0) {
+      console.log(`[TenantDO] Cleaned up ${result.rowsWritten} old flushed events`);
+    }
+  }
+
+  /**
    * Get buffered event count (for monitoring)
    */
-  async getBufferCount(): Promise<number> {
+  async getBufferCount(): Promise<{ unflushed: number; total: number }> {
     await this.initialize();
 
-    const result = await this.ctx.storage.sql
+    const unflushed = await this.ctx.storage.sql
+      .exec(`SELECT COUNT(*) as count FROM analytics_buffer WHERE flushed_at IS NULL`)
+      .toArray();
+
+    const total = await this.ctx.storage.sql
       .exec(`SELECT COUNT(*) as count FROM analytics_buffer`)
       .toArray();
 
-    return (result[0]?.count as number) || 0;
+    return {
+      unflushed: (unflushed[0]?.count as number) || 0,
+      total: (total[0]?.count as number) || 0,
+    };
   }
 }
 ```
@@ -518,7 +606,7 @@ else {
   }
 }
 
-// Add helper function for privacy-preserving visitor hash
+// Add helper function for privacy-preserving visitor hash (hex encoding)
 async function generateVisitorHash(request: Request, subdomain: string): Promise<string> {
   const ip = request.headers.get("cf-connecting-ip") || "unknown";
   const ua = request.headers.get("user-agent") || "unknown";
@@ -529,11 +617,11 @@ async function generateVisitorHash(request: Request, subdomain: string): Promise
   const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(data));
   const hashArray = new Uint8Array(hashBuffer);
 
-  let binary = "";
-  for (let i = 0; i < hashArray.length; i++) {
-    binary += String.fromCharCode(hashArray[i]);
-  }
-  return btoa(binary).substring(0, 16); // First 16 chars
+  // Use hex encoding (more robust than base64)
+  return Array.from(hashArray)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .substring(0, 16);
 }
 ```
 
@@ -653,14 +741,33 @@ echo "  3. Verify rate limiting works (spam refresh should hit 429)"
 
 ## Testing Checklist
 
+### Basic Functionality
 - [ ] TenantDO loads config from D1 on first request
 - [ ] Config is cached for subsequent requests (no D1 hit)
 - [ ] Config refreshes after 5 minutes
-- [ ] Rate limiting kicks in after 60 requests/minute
+- [ ] Rate limiting kicks in at tier-appropriate limits
 - [ ] Analytics events are buffered in DO
 - [ ] Analytics flush to D1 every 60 seconds
 - [ ] Cache invalidation works after settings change
 - [ ] Fallback to D1 works if DO binding unavailable
+
+### Edge Cases (from PR review)
+- [ ] Tenant deactivation while DO running (config refresh handles it)
+- [ ] Config refresh during high traffic (stale config returned)
+- [ ] D1 batch failure mid-flush (events remain unflushed, retry on next alarm)
+- [ ] DO eviction/recreation (tables recreated, unflushed events lost - acceptable)
+- [ ] Alarm after hibernation (alarm reschedules correctly)
+- [ ] Buffer overflow scenarios (1000 event limit per flush)
+
+### Rate Limiting Specific
+- [ ] Fixed window resets at correct boundary (not sliding)
+- [ ] Different tiers get different limits (free=30, seedling=60, etc.)
+- [ ] resetAt timestamp is consistent within window
+
+### Analytics Specific
+- [ ] Soft-delete marks events as flushed (not deleted)
+- [ ] Garbage collection removes old flushed events after 1 hour
+- [ ] getBufferCount returns both unflushed and total counts
 
 ---
 
