@@ -216,6 +216,16 @@
 		'midnight-bloom': { min: 6, max: 10 }    // Silhouetted grove
 	};
 
+	// Tree SIZE ranges per section (trees get bigger as grove matures!)
+	const TREE_SIZE_RANGES = {
+		'first-frost': { min: 80, max: 120 },     // Young seedling
+		'thaw': { min: 90, max: 130 },            // Early growth
+		'first-buds': { min: 100, max: 140 },     // Spring vigor
+		'full-bloom': { min: 110, max: 160 },     // Full maturity
+		'golden-hour': { min: 120, max: 180 },    // Majestic forest
+		'midnight-bloom': { min: 100, max: 150 }  // Silhouettes (slightly smaller for mystery)
+	};
+
 	// Available tree types per season
 	const TREE_TYPES_BY_SECTION: Record<PhaseKey, TreeType[]> = {
 		'first-frost': ['logo'],
@@ -263,16 +273,18 @@
 				treeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
 			}
 
-			// Size varies by distance from center (perspective effect)
+			// Size based on section's maturity level (grove grows over time!)
+			const sizeRange = TREE_SIZE_RANGES[section];
+			const baseSize = sizeRange.min + Math.random() * (sizeRange.max - sizeRange.min);
+			// Subtle edge reduction (only 10% smaller at edges, not 30%)
 			const distFromCenter = Math.abs(50 - x) / 50;
-			const baseSize = 60 + Math.random() * 50; // 60-110
-			const size = baseSize * (1 - distFromCenter * 0.3); // Smaller towards edges
+			const size = baseSize * (1 - distFromCenter * 0.1);
 
 			// Opacity varies by position (creates depth)
-			const opacity = 0.35 + Math.random() * 0.45; // 0.35-0.8
+			const opacity = 0.45 + Math.random() * 0.4; // 0.45-0.85 (brighter overall)
 
 			// Z-index based on size (larger = more foreground)
-			const zIndex = size > 80 ? 3 : size > 65 ? 2 : 1;
+			const zIndex = size > 130 ? 3 : size > 100 ? 2 : 1;
 
 			trees.push({
 				id: i + 1,

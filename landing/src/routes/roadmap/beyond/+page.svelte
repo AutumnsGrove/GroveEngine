@@ -3,7 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	// Lucide Icons
-	import { Music, BookOpen, Newspaper, Telescope } from 'lucide-svelte';
+	import { Music, BookOpen, Newspaper, Telescope, Github } from 'lucide-svelte';
 
 	// Components
 	import StarCluster from '$lib/components/nature/sky/StarCluster.svelte';

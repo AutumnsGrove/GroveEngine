@@ -3,7 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe } from 'lucide-svelte';
+	import { Search, Pickaxe, Github } from 'lucide-svelte';
 
 	// Components
 	import Logo from '$lib/components/Logo.svelte';
@@ -24,10 +24,21 @@
 			name: 'Outpost',
 			tagline: 'On-Demand Minecraft',
 			description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
-			status: 'planned',
+			status: 'building',
 			icon: 'pickaxe',
 			domain: 'mc.grove.place',
-			integration: 'For Grove community members'
+			integration: 'For Grove community members',
+			github: 'https://github.com/AutumnsGrove/GroveMC'
+		},
+		{
+			name: 'Treasure Trove',
+			tagline: 'Library Book Discovery',
+			description: 'Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.',
+			status: 'planned',
+			icon: 'book',
+			domain: 'trove.grove.place',
+			integration: 'Standalone tool',
+			github: 'https://github.com/AutumnsGrove/TreasureTrove'
 		}
 	];
 
@@ -110,6 +121,14 @@
 							<div class="text-sm text-foreground-faint">
 								{tool.integration}
 							</div>
+							{#if tool.github}
+								<div class="flex items-center gap-2 text-sm">
+									<Github class="w-4 h-4 text-foreground-faint" />
+									<a href={tool.github} target="_blank" rel="noopener noreferrer" class="text-foreground-faint hover:text-foreground transition-colors">
+										GitHub Repository
+									</a>
+								</div>
+							{/if}
 						</div>
 					</article>
 				{/each}
