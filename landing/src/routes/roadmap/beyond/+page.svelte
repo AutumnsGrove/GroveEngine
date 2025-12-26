@@ -18,7 +18,8 @@
 			status: 'early',
 			icon: 'music',
 			domain: 'aria.grove.place',
-			stack: 'Python + SvelteKit'
+			stack: 'Python + SvelteKit',
+			github: 'https://github.com/AutumnsGrove/GroveMusic'
 		},
 		{
 			name: 'Trove',
@@ -27,12 +28,8 @@
 			status: 'planned',
 			icon: 'book',
 			domain: 'trove.grove.place',
-			stack: 'Python + SvelteKit'
-		,
-			github: 'https://github.com/AutumnsGrove/GroveMusic'
-		,
+			stack: 'Python + SvelteKit',
 			github: 'https://github.com/AutumnsGrove/TreasureTrove'
-			github: 'https://github.com/AutumnsGrove/GroveMusic'
 		},
 		{
 			name: 'The Daily Clearing',
@@ -41,7 +38,8 @@
 			status: 'building',
 			icon: 'newspaper',
 			domain: 'clearing.grove.place',
-			stack: 'Python + Cloudflare Workers'
+			stack: 'Python + Cloudflare Workers',
+			github: 'https://github.com/AutumnsGrove/GroveDaily'
 		},
 		{
 			name: 'Scout',
@@ -50,7 +48,7 @@
 			status: 'building',
 			icon: 'telescope',
 			domain: 'scout.grove.place',
-			stack: 'Python + TypeScript'
+			stack: 'Python + TypeScript',
 			github: 'https://github.com/AutumnsGrove/GroveScout'
 		}
 	];
@@ -154,6 +152,14 @@
 								<span class="text-slate-500">Stack:</span>
 								<span class="text-slate-400">{tool.stack}</span>
 							</div>
+							{#if tool.github}
+								<div class="flex items-center gap-2 text-sm">
+									<Github class="w-4 h-4 text-slate-500" />
+									<a href={tool.github} target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors">
+										GitHub Repository
+									</a>
+								</div>
+							{/if}
 						</div>
 					</article>
 				{/each}
