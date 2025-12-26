@@ -386,6 +386,24 @@ export function pickFrom<T extends Record<string, string>>(
 }
 
 // =============================================================================
+// MIDNIGHT BLOOM PALETTE
+// =============================================================================
+
+/**
+ * Midnight Bloom - the far vision
+ * A late-night tea café palette: deep plums, warm amber, soft golds.
+ * Used for the Midnight Bloom section of the roadmap and future theming.
+ */
+export const midnightBloom = {
+	deepPlum: '#581c87',    // Night sky depth
+	purple: '#7c3aed',      // Soft purple glow
+	violet: '#8b5cf6',      // Lighter accent
+	amber: '#f59e0b',       // Lantern warmth
+	warmCream: '#fef3c7',   // Tea steam, page glow
+	softGold: '#fcd34d'     // Fairy lights
+} as const;
+
+// =============================================================================
 // FULL PALETTE EXPORT
 // =============================================================================
 
@@ -400,7 +418,8 @@ export const naturePalette = {
 	pinks,
 	autumnReds,
 	winter,
-	accents
+	accents,
+	midnightBloom
 } as const;
 
 export default naturePalette;

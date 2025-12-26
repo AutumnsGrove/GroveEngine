@@ -39,21 +39,37 @@
 		winter,
 		pinks,
 		accents,
+		midnightBloom,
 		type Season
 	} from '$lib/components/nature/palette';
 
-	// Current phase marker - update this as Grove progresses
-	// Options: 'first-frost' | 'thaw' | 'first-buds' | 'full-bloom' | 'golden-hour' | 'midnight-bloom'
-	const currentPhase = 'thaw';
+	// =============================================================================
+	// PHASE CONFIGURATION
+	// =============================================================================
 
-	// Midnight Bloom colors (the far vision)
-	const midnightBloom = {
-		deepPlum: '#581c87',
-		purple: '#7c3aed',
-		amber: '#f59e0b',
-		warmCream: '#fef3c7',
-		softGold: '#fcd34d'
-	};
+	/**
+	 * Phase order - the seasonal journey through Grove's development.
+	 * These keys must match the keys in the `phases` object below.
+	 */
+	const PHASE_ORDER = ['first-frost', 'thaw', 'first-buds', 'full-bloom', 'golden-hour', 'midnight-bloom'] as const;
+	type PhaseKey = typeof PHASE_ORDER[number];
+
+	/**
+	 * HOWTO: Update this constant as Grove reaches new phases.
+	 * This controls the "You are here" indicator and phase status styling.
+	 *
+	 * Valid values: 'first-frost' | 'thaw' | 'first-buds' | 'full-bloom' | 'golden-hour' | 'midnight-bloom'
+	 */
+	const currentPhase: PhaseKey = 'thaw';
+
+	// Tree positions for Golden Hour falling leaves (matches the tree positions in the section)
+	const goldenHourTrees = [
+		{ id: 1, x: 15, y: 85, size: 104, treeType: 'aspen' as const, zIndex: 2 },
+		{ id: 2, x: 30, y: 85, size: 120, treeType: 'logo' as const, zIndex: 3 },
+		{ id: 3, x: 45, y: 85, size: 96, treeType: 'cherry' as const, zIndex: 2 },
+		{ id: 4, x: 60, y: 85, size: 88, treeType: 'birch' as const, zIndex: 2 },
+		{ id: 5, x: 75, y: 85, size: 80, treeType: 'pine' as const, zIndex: 1 }
+	];
 
 	// Feature definitions for each phase
 	const phases = {
@@ -139,10 +155,9 @@
 	};
 
 	// Helper to check if a phase is current or past
-	function getPhaseStatus(phaseKey: string): 'past' | 'current' | 'future' {
-		const phaseOrder = ['first-frost', 'thaw', 'first-buds', 'full-bloom', 'golden-hour', 'midnight-bloom'];
-		const currentIndex = phaseOrder.indexOf(currentPhase);
-		const thisIndex = phaseOrder.indexOf(phaseKey);
+	function getPhaseStatus(phaseKey: PhaseKey): 'past' | 'current' | 'future' {
+		const currentIndex = PHASE_ORDER.indexOf(currentPhase);
+		const thisIndex = PHASE_ORDER.indexOf(phaseKey);
 
 		if (thisIndex < currentIndex) return 'past';
 		if (thisIndex === currentIndex) return 'current';
@@ -150,7 +165,7 @@
 	}
 
 	// Pre-computed status for each phase (for use in template)
-	const phaseStatus = {
+	const phaseStatus: Record<PhaseKey, 'past' | 'current' | 'future'> = {
 		'first-frost': getPhaseStatus('first-frost'),
 		'thaw': getPhaseStatus('thaw'),
 		'first-buds': getPhaseStatus('first-buds'),
@@ -189,10 +204,14 @@
 	</section>
 
 	<!-- Navigation Pills -->
-	<nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4">
+	<nav
+		class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
+		role="navigation"
+		aria-label="Development phases"
+	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">
 			{#each Object.entries(phases) as [key, phase]}
-				{@const status = getPhaseStatus(key)}
+				{@const status = getPhaseStatus(key as PhaseKey)}
 				<a
 					href="#{key}"
 					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all
@@ -470,9 +489,13 @@
 				dark:from-orange-950/30 dark:via-slate-900 dark:to-amber-950/30"
 		>
 			<!-- Falling autumn leaves -->
-			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<!-- We'll simulate this with a warm glow for now -->
-			</div>
+			<FallingLeavesLayer
+				trees={goldenHourTrees}
+				season="autumn"
+				minLeavesPerTree={3}
+				maxLeavesPerTree={6}
+				zIndex={5}
+			/>
 
 			<!-- Lanterns lighting the path -->
 			<div class="absolute bottom-8 left-[20%] w-6 h-10 opacity-70" aria-hidden="true">
