@@ -363,6 +363,85 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 ---
 
+## Full Bloom: Wisp — Writing Assistant
+
+> *A helper, not a writer*
+
+**Status:** Implementation complete, pending deployment
+
+Wisp is Grove's ethical AI writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming.
+
+### Implementation Complete
+- [x] Model configuration (DeepSeek V3.2 via Fireworks AI)
+- [x] Inference client with provider fallback cascade
+- [x] Local readability calculations (Flesch-Kincaid)
+- [x] API endpoint (`/api/grove/wisp`)
+- [x] Rate limiting (20 req/hour, $5/month cap)
+- [x] WispPanel UI component with ASCII vibes
+- [x] WispButton toolbar integration
+- [x] Database migration (`014_wisp.sql`)
+- [x] Migration prompt for AutumnsGrove
+
+### Deployment Tasks (Pre-Launch)
+- [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`
+- [ ] Set Fireworks AI API key: `wrangler secret put FIREWORKS_API_KEY`
+- [ ] (Optional) Set backup provider keys: `CEREBRAS_API_KEY`, `GROQ_API_KEY`
+- [ ] Add default settings to D1: `wisp_enabled=false`, `wisp_mode=quick`
+- [ ] Deploy updated GroveEngine package to npm
+- [ ] Run AutumnsGrove migration (see `docs/specs/wisp-migration-prompt.md`)
+
+### AutumnsGrove Migration Tasks
+- [ ] Update component imports to use `WispPanel` from groveengine
+- [ ] Update settings page to Wisp branding
+- [ ] Change API endpoint from `/api/ai/writing-assist` to `/api/grove/wisp`
+- [ ] Update setting keys: `ai_assistant_enabled` → `wisp_enabled`
+- [ ] Remove old files: `AIWritingPanel.svelte`, `ai-models.js`, `api/ai/writing-assist/`
+
+### Testing Checklist
+- [ ] Settings page loads, toggle works
+- [ ] Usage stats display correctly
+- [ ] Grammar analysis returns suggestions
+- [ ] Tone analysis returns traits
+- [ ] Readability calculates locally (no API call)
+- [ ] Apply fix functionality works
+- [ ] Rate limiting enforces correctly
+- [ ] Cost cap warning appears at 80%
+
+### Documentation
+- [x] Unified spec: `docs/specs/writing-assistant-unified-spec.md`
+- [x] Migration guide: `docs/specs/wisp-migration-prompt.md`
+- [x] Grove naming: Added to `docs/grove-naming.md`
+- [ ] User guide for settings panel
+
+### Key Files
+```
+packages/engine/
+├── src/lib/config/wisp.js           # Model config, pricing
+├── src/lib/server/inference-client.js # Shared inference client
+├── src/lib/utils/readability.js      # Local calculations
+├── src/lib/components/WispPanel.svelte
+├── src/lib/components/WispButton.svelte
+├── src/routes/api/grove/wisp/+server.js
+└── migrations/014_wisp.sql
+
+scripts/
+└── wisp-setup.sh                     # Deployment helper script
+```
+
+### Privacy & Philosophy
+- All features OFF by default (opt-in only)
+- Zero Data Retention (ZDR) from all inference providers
+- Content analyzed, never stored
+- Outcome-only retention (scores, not content)
+- User's voice is sacred — we polish, never replace
+
+*Like a will-o'-the-wisp in the forest — light, airy, guiding without forcing.*
+
+---
+
+
+---
+
 ## Research & Investigation
 
 ### Technical Research
