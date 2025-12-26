@@ -5,12 +5,12 @@
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
 
-	// Animation constants
-	const LEAF_OPACITY = { min: 0.4, max: 0.75 } as const;
-	const FALL_DURATION = { min: 8, max: 14 } as const;
-	const FALL_DISTANCE = { min: 12, max: 20 } as const;
-	const DRIFT_RANGE = 60; // -30 to +30
-	const SPAWN_DELAY_MAX = 15;
+	// Animation constants (defaults)
+	const DEFAULT_LEAF_OPACITY = { min: 0.4, max: 0.75 } as const;
+	const DEFAULT_FALL_DURATION = { min: 8, max: 14 } as const;
+	const DEFAULT_FALL_DISTANCE = { min: 12, max: 20 } as const;
+	const DEFAULT_DRIFT_RANGE = 60; // -30 to +30
+	const DEFAULT_SPAWN_DELAY_MAX = 15;
 
 	interface Tree {
 		id: number;
@@ -43,6 +43,12 @@
 		maxLeavesPerTree?: number;
 		/** Base z-index for the leaf layer (should be below trees) */
 		zIndex?: number;
+		/** Override fall distance range (in vh units) - useful for tall sections */
+		fallDistance?: { min: number; max: number };
+		/** Override fall duration range (in seconds) */
+		fallDuration?: { min: number; max: number };
+		/** Maximum spawn delay (in seconds) */
+		spawnDelayMax?: number;
 	}
 
 	let {
@@ -50,7 +56,10 @@
 		season = 'summer',
 		minLeavesPerTree = 2,
 		maxLeavesPerTree = 5,
-		zIndex = -1
+		zIndex = -1,
+		fallDistance = DEFAULT_FALL_DISTANCE,
+		fallDuration = DEFAULT_FALL_DURATION,
+		spawnDelayMax = DEFAULT_SPAWN_DELAY_MAX
 	}: Props = $props();
 
 	// Deterministic hash for pseudo-random distribution (avoids visible patterns)
@@ -108,11 +117,11 @@
 					y: Math.max(0, tree.y + yOffset), // Clamp to not go above viewport
 					size: baseLeafSize + Math.random() * leafSizeVariation,
 					variant: getLeafVariant(tree.treeType, currentLeafId),
-					duration: FALL_DURATION.min + Math.random() * (FALL_DURATION.max - FALL_DURATION.min),
-					delay: Math.random() * SPAWN_DELAY_MAX,
-					drift: (Math.random() - 0.5) * DRIFT_RANGE,
-					opacity: LEAF_OPACITY.min + Math.random() * (LEAF_OPACITY.max - LEAF_OPACITY.min),
-					fallDistance: FALL_DISTANCE.min + Math.random() * (FALL_DISTANCE.max - FALL_DISTANCE.min)
+					duration: fallDuration.min + Math.random() * (fallDuration.max - fallDuration.min),
+					delay: Math.random() * spawnDelayMax,
+					drift: (Math.random() - 0.5) * DEFAULT_DRIFT_RANGE,
+					opacity: DEFAULT_LEAF_OPACITY.min + Math.random() * (DEFAULT_LEAF_OPACITY.max - DEFAULT_LEAF_OPACITY.min),
+					fallDistance: fallDistance.min + Math.random() * (fallDistance.max - fallDistance.min)
 				});
 			}
 		}

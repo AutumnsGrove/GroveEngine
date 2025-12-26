@@ -391,8 +391,8 @@
 				<SnowfallLayer count={40} zIndex={5} enabled opacity={{ min: 0.4, max: 0.8 }} spawnDelay={8} />
 			</div>
 
-			<!-- Single tree - the beginning -->
-			<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-40 opacity-60" aria-hidden="true">
+			<!-- Single tree - the beginning (positioned at 25% to not block waitlist card) -->
+			<div class="absolute bottom-0 left-[25%] -translate-x-1/2 w-32 h-40 opacity-60" aria-hidden="true">
 				<Logo class="w-full h-full" season="winter" animate />
 			</div>
 
@@ -690,12 +690,15 @@
 				dark:from-yellow-950/30 dark:via-amber-950/50 dark:to-orange-950/60"
 		>
 			<!-- MASSIVE Falling autumn leaves - the magic! Uses dynamically generated trees -->
+			<!-- Extended fall distance (80-100vh) so leaves travel the entire section height -->
 			<FallingLeavesLayer
 				trees={goldenHourRandomTrees.map(t => ({ id: t.id, x: t.x, y: t.y, size: t.size, treeType: t.treeType, zIndex: t.zIndex }))}
 				season="autumn"
 				minLeavesPerTree={5}
 				maxLeavesPerTree={10}
 				zIndex={5}
+				fallDistance={{ min: 80, max: 100 }}
+				fallDuration={{ min: 12, max: 20 }}
 			/>
 
 			<!-- Warm sunlight rays (CSS effect) -->
