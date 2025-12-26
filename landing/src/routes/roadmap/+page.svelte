@@ -2,6 +2,18 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
+	// Icons
+	import {
+		MapPin,
+		Check,
+		Circle,
+		Leaf,
+		Sparkle,
+		Flower2,
+		Sun,
+		Sparkles
+	} from 'lucide-svelte';
+
 	// Trees
 	import Logo from '$lib/components/Logo.svelte';
 	import TreePine from '$lib/components/trees/TreePine.svelte';
@@ -220,9 +232,9 @@
 						{status === 'future' ? 'bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:bg-slate-200 dark:hover:bg-slate-700' : ''}"
 				>
 					{#if status === 'current'}
-						<span class="mr-1">📍</span>
+						<MapPin class="inline w-3.5 h-3.5 mr-1" />
 					{:else if status === 'past'}
-						<span class="mr-1">✓</span>
+						<Check class="inline w-3.5 h-3.5 mr-1" />
 					{/if}
 					{phase.title}
 				</a>
@@ -252,8 +264,8 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['first-frost'] === 'past'}
-						<span class="inline-block px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
-							✓ Complete
+						<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+							<Check class="w-3.5 h-3.5" /> Complete
 						</span>
 					{/if}
 					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases['first-frost'].title}</h2>
@@ -264,7 +276,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-							<span class="text-green-500 mt-0.5">✓</span>
+							<Check class="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
 							<div>
 								<span class="font-medium text-foreground">{feature.name}</span>
 								<p class="text-sm text-foreground-muted">{feature.description}</p>
@@ -316,7 +328,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-l-4 border-accent">
-							<span class="text-accent mt-0.5">●</span>
+							<Circle class="w-4 h-4 text-accent mt-0.5 shrink-0 fill-current" />
 							<div>
 								<span class="font-medium text-foreground">{feature.name}</span>
 								<p class="text-sm text-foreground-muted">{feature.description}</p>
@@ -387,11 +399,11 @@
 							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
-								<span class="text-green-500 mt-0.5">🌿</span>
+								<Leaf class="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
 							{:else if feature.icon === 'amber'}
-								<span class="text-amber-500 mt-0.5">✦</span>
+								<Sparkle class="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
 							{:else}
-								<span class="text-foreground-muted mt-0.5">○</span>
+								<Circle class="w-4 h-4 text-foreground-muted mt-0.5 shrink-0" />
 							{/if}
 							<div>
 								<span class="font-medium text-foreground">{feature.name}</span>
@@ -467,9 +479,9 @@
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
 							{#if feature.major}
-								<span class="text-green-500 mt-0.5">🌸</span>
+								<Flower2 class="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
 							{:else}
-								<span class="text-foreground-muted mt-0.5">○</span>
+								<Circle class="w-4 h-4 text-foreground-muted mt-0.5 shrink-0" />
 							{/if}
 							<div>
 								<span class="font-medium text-foreground">{feature.name}</span>
@@ -537,7 +549,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm">
-							<span class="text-amber-500 mt-0.5">◐</span>
+							<Sun class="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
 							<div>
 								<span class="font-medium text-foreground">{feature.name}</span>
 								<p class="text-sm text-foreground-muted">{feature.description}</p>
@@ -588,8 +600,8 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					<span class="inline-block px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
-						✧ The Dream ✧
+					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
+						<Sparkles class="w-3.5 h-3.5" /> The Dream <Sparkles class="w-3.5 h-3.5" />
 					</span>
 					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">{phases['midnight-bloom'].title}</h2>
 					<p class="text-purple-300 italic">{phases['midnight-bloom'].subtitle}</p>
@@ -606,7 +618,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							<span class="text-amber-400 mt-0.5">✦</span>
+							<Sparkle class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>

@@ -2,18 +2,33 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
+	// Icons
+	import { Search, Pickaxe } from 'lucide-svelte';
+
 	// Components
 	import Logo from '$lib/components/Logo.svelte';
 	import Lantern from '$lib/components/nature/structural/Lantern.svelte';
 
+	// Icon component map
+	const iconComponents = { Search, Pickaxe };
+	type IconName = keyof typeof iconComponents;
+
 	// Tools that integrate with Grove
-	const tools = [
+	const tools: Array<{
+		name: string;
+		tagline: string;
+		description: string;
+		status: string;
+		icon: IconName;
+		domain: string;
+		integration: string;
+	}> = [
 		{
 			name: 'Forage',
 			tagline: 'Domain Discovery',
 			description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget—and it returns a curated list of available domains that actually fit.',
 			status: 'building',
-			icon: '🔍',
+			icon: 'Search',
 			domain: 'forage.grove.place',
 			integration: 'Available as an add-on for Evergreen tier, or standalone purchase'
 		},
@@ -22,7 +37,7 @@
 			tagline: 'On-Demand Minecraft',
 			description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
 			status: 'planned',
-			icon: '⛏️',
+			icon: 'Pickaxe',
 			domain: 'mc.grove.place',
 			integration: 'For Grove community members'
 		}
@@ -78,7 +93,9 @@
 					<article class="p-6 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200 dark:border-slate-700">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
-								<span class="text-3xl">{tool.icon}</span>
+								<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+									<svelte:component this={iconComponents[tool.icon]} class="w-5 h-5" />
+								</div>
 								<div>
 									<h2 class="text-xl font-serif text-foreground">{tool.name}</h2>
 									<p class="text-sm text-foreground-muted">{tool.tagline}</p>
