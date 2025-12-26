@@ -31,16 +31,6 @@
 			integration: 'For Grove community members',
 			github: 'https://github.com/AutumnsGrove/GroveMC'
 		},
-		{
-			name: 'Treasure Trove',
-			tagline: 'Library Book Discovery',
-			description: 'Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.',
-			status: 'planned',
-			icon: 'book',
-			domain: 'trove.grove.place',
-			integration: 'Standalone tool',
-			github: 'https://github.com/AutumnsGrove/TreasureTrove'
-		}
 	];
 
 	function getStatusBadge(status: string) {
