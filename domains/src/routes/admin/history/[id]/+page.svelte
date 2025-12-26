@@ -192,8 +192,8 @@
 		try {
 			const response = await fetch(`/api/search/results?job_id=${job.id}`);
 			if (response.ok) {
-				const data = await response.json();
-				if (data.domains) {
+				const data = (await response.json()) as { domains?: unknown };
+				if (Array.isArray(data.domains)) {
 					results = data.domains;
 				}
 			}
@@ -298,7 +298,7 @@
 			console.log(`[History Page] Followup response status: ${response.status}`);
 			
 			if (response.ok) {
-				const data = await response.json();
+				const data = (await response.json()) as { questions?: unknown };
 				console.log(`[History Page] Followup data received:`, data);
 				
 				// Check if the worker returned a valid quiz
@@ -308,7 +308,7 @@
 					return;
 				}
 				
-				followupQuiz = data;
+				followupQuiz = data as typeof followupQuiz;
 				// Initialize answers with defaults
 				if (data.questions) {
 					data.questions.forEach((q: any) => {
@@ -403,7 +403,7 @@
 				followupQuiz = null;
 				followupAnswers = {};
 				// Restart monitoring
-				startMonitoring();
+				startPolling();
 				startTimer();
 			} else {
 				const errorText = await response.text();

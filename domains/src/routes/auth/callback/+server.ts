@@ -126,7 +126,11 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       );
     }
 
-    const tokens = await tokenResponse.json();
+    const tokens = (await tokenResponse.json()) as {
+      access_token: string;
+      refresh_token?: string;
+      expires_in?: number;
+    };
 
     // Get user info
     const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
@@ -143,7 +147,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       );
     }
 
-    const userInfo = await userInfoResponse.json();
+    const userInfo = (await userInfoResponse.json()) as { email: string };
 
     // Create or get user in local DB
     const user = await getOrCreateUser(DB, userInfo.email);

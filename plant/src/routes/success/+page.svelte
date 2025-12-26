@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Check, Loader2, Sparkles, ArrowRight } from 'lucide-svelte';
+	import { Check, Loader2, Sparkles, ArrowRight, X } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -8,59 +8,66 @@
 	let errorMessage = $state<string | null>(null);
 	let tenant = $state<{ subdomain: string } | null>(null);
 
-	onMount(async () => {
-		// If tenant already exists, we're ready
-		if (data.onboarding?.tenantCreated && data.onboarding?.tenantId) {
-			tenant = { subdomain: data.user?.username || '' };
-			status = 'ready';
-			return;
-		}
+	onMount(() => {
+		let interval: ReturnType<typeof setInterval> | null = null;
 
-		// Otherwise, poll for tenant creation (webhook might still be processing)
-		let attempts = 0;
-		const maxAttempts = 30; // 30 seconds max
-
-		const checkTenant = async () => {
-			try {
-				const res = await fetch('/success/check');
-				const result = await res.json();
-
-				if (result.ready) {
-					tenant = { subdomain: result.subdomain };
-					status = 'ready';
-					return true;
-				}
-
-				if (result.creating) {
-					status = 'creating';
-				}
-
-				return false;
-			} catch {
-				return false;
-			}
-		};
-
-		// Initial check
-		if (await checkTenant()) return;
-
-		// Poll every second
-		const interval = setInterval(async () => {
-			attempts++;
-
-			if (await checkTenant()) {
-				clearInterval(interval);
+		// Async initialization
+		(async () => {
+			// If tenant already exists, we're ready
+			if (data.onboarding?.tenantCreated && data.onboarding?.tenantId) {
+				tenant = { subdomain: data.user?.username || '' };
+				status = 'ready';
 				return;
 			}
 
-			if (attempts >= maxAttempts) {
-				clearInterval(interval);
-				status = 'error';
-				errorMessage = 'Setup is taking longer than expected. Please refresh the page or contact support.';
-			}
-		}, 1000);
+			// Otherwise, poll for tenant creation (webhook might still be processing)
+			let attempts = 0;
+			const maxAttempts = 30; // 30 seconds max
 
-		return () => clearInterval(interval);
+			const checkTenant = async () => {
+				try {
+					const res = await fetch('/success/check');
+					const result = (await res.json()) as { ready?: boolean; creating?: boolean; subdomain?: string };
+
+					if (result.ready) {
+						tenant = { subdomain: result.subdomain || '' };
+						status = 'ready';
+						return true;
+					}
+
+					if (result.creating) {
+						status = 'creating';
+					}
+
+					return false;
+				} catch {
+					return false;
+				}
+			};
+
+			// Initial check
+			if (await checkTenant()) return;
+
+			// Poll every second
+			interval = setInterval(async () => {
+				attempts++;
+
+				if (await checkTenant()) {
+					if (interval) clearInterval(interval);
+					return;
+				}
+
+				if (attempts >= maxAttempts) {
+					if (interval) clearInterval(interval);
+					status = 'error';
+					errorMessage = 'Setup is taking longer than expected. Please refresh the page or contact support.';
+				}
+			}, 1000);
+		})();
+
+		return () => {
+			if (interval) clearInterval(interval);
+		};
 	});
 </script>
 

@@ -58,7 +58,7 @@
 
 		try {
 			const res = await fetch(`/api/check-username?username=${encodeURIComponent(trimmed)}`);
-			const result = await res.json();
+			const result = (await res.json()) as { available?: boolean; error?: string; suggestions?: string[] };
 
 			if (result.available) {
 				usernameStatus = 'available';

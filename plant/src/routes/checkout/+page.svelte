@@ -44,7 +44,7 @@
 				headers: { 'Content-Type': 'application/json' }
 			});
 
-			const result = await res.json();
+			const result = (await res.json()) as { url?: string; error?: string };
 
 			if (result.url) {
 				// Redirect to Stripe Checkout

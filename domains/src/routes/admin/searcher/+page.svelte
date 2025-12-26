@@ -475,9 +475,9 @@
 			console.log(`[Frontend] Followup response status: ${response.status}`);
 			
 			if (response.ok) {
-				const data = await response.json();
+				const data = (await response.json()) as { questions?: unknown };
 				console.log(`[Frontend] Followup quiz data received:`, data);
-				
+
 				// Validate the response data
 				if (!data || !data.questions || !Array.isArray(data.questions)) {
 					console.error(`[Frontend] Invalid followup quiz data structure:`, data);
