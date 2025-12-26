@@ -85,7 +85,7 @@
 			name: 'Cache',
 			tagline: 'Automated Backups',
 			description: 'Squirrels cache acorns for winter. Cache runs weekly automated backups of every Grove database to cold storage—twelve weeks of history, always available, quietly preserved. When disaster strikes, Cache is already there.',
-			status: 'live',
+			status: 'building',
 			icon: 'archive',
 			integration: 'Internal service protecting all Grove data',
 			github: 'https://github.com/AutumnsGrove/GroveBackups'
