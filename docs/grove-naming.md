@@ -204,6 +204,17 @@ It's the invisible network beneath everything. You don't see it. You don't think
 
 ---
 
+## Wisp
+**Writing Assistant** · *Integrated into editor*
+
+A wisp is a will-o'-the-wisp—a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.
+
+Wisp is Grove's ethical writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Just subtle nudges from a tool that disappears into the background when you don't need it.
+
+All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -225,6 +236,7 @@ It's the invisible network beneath everything. You don't see it. You don't think
 | **Vineyard** | Asset & tool showcase | *.grove.place/vineyard |
 | **Bloom** | Remote coding infrastructure | bloom.grove.place |
 | **Mycelium** | MCP server | mycelium.grove.place |
+| **Wisp** | Writing assistant | *(integrated)* |
 
 ---
 
@@ -251,6 +263,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Vineyard | GroveShowcase |
 | Bloom | GroveBloom |
 | Mycelium | GroveMCP |
+| Wisp | GroveWisp |
 
 ---
 
