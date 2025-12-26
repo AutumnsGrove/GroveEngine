@@ -15,7 +15,7 @@
 			name: 'Aria',
 			tagline: 'Music Curation',
 			description: 'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
-			status: 'building',
+			status: 'early',
 			icon: 'music',
 			domain: 'aria.grove.place',
 			stack: 'Python + SvelteKit'
@@ -41,8 +41,8 @@
 		{
 			name: 'Scout',
 			tagline: 'Swarming Search',
-			description: 'A search engine that uses a swarming AI approach—multiple agents working together to find and synthesize information. Still early, but the foundation is being laid.',
-			status: 'early',
+			description: 'Scout is an async shopping research tool that eliminates the cognitive overload of deal-hunting. Tell it what you want, walk away, and come back to a clean list of 5 perfect matches.',
+			status: 'building',
 			icon: 'telescope',
 			domain: 'scout.grove.place',
 			stack: 'Python + TypeScript'
