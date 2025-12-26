@@ -19,7 +19,8 @@
 		Mail,
 		HardDrive,
 		Palette,
-		Brush
+		Brush,
+		Wind
 	} from 'lucide-svelte';
 
 	// Trees
@@ -134,6 +135,7 @@
 			description: 'The grove becomes a community. Roots intertwine.',
 			features: [
 				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true },
+				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp' },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false },
 				{ name: 'Comments', description: 'Replies and thoughtful discussions', done: false },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false },
@@ -667,10 +669,13 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm
-							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
+							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}
+							{feature.icon === 'wisp' ? 'border-l-4 border-purple-400' : ''}"
 						>
 							{#if feature.major}
 								<Flower2 class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'wisp'}
+								<Wind class="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
