@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Wind } from 'lucide-svelte';
 
 	// Components
 	import Logo from '$lib/components/Logo.svelte';
@@ -110,6 +110,14 @@
 			integration: 'Intimate video sharing for close connections',
 			github: 'https://github.com/AutumnsGrove/Nook'
 		},
+		{
+			name: 'Wisp',
+			tagline: 'Writing Assistant',
+			description: 'A helper, not a writer. Wisp polishes your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Like a will-o\'-the-wisp in the forest: light, airy, guiding without forcing.',
+			status: 'building',
+			icon: 'wind',
+			integration: 'Integrated into the Grove editor, off by default'
+		},
 	];
 
 	function getStatusBadge(status: string) {
@@ -185,6 +193,8 @@
 										<Upload class="w-5 h-5" />
 									{:else if tool.icon === 'video'}
 										<Video class="w-5 h-5" />
+									{:else if tool.icon === 'wind'}
+										<Wind class="w-5 h-5" />
 									{:else if tool.icon === 'book'}
 										<BookOpen class="w-5 h-5" />
 									{/if}
