@@ -3,7 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen } from 'lucide-svelte';
 
 	// Components
 	import Logo from '$lib/components/Logo.svelte';
@@ -18,7 +18,8 @@
 			status: 'building',
 			icon: 'search',
 			domain: 'forage.grove.place',
-			integration: 'Available as an add-on for Evergreen tier, or standalone purchase'
+			integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
+			github: 'https://github.com/AutumnsGrove/Forage'
 		},
 		{
 			name: 'Outpost',
@@ -97,6 +98,8 @@
 										<Search class="w-5 h-5" />
 									{:else if tool.icon === 'pickaxe'}
 										<Pickaxe class="w-5 h-5" />
+									{:else if tool.icon === 'book'}
+										<BookOpen class="w-5 h-5" />
 									{/if}
 								</div>
 								<div>

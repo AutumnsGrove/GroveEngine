@@ -28,14 +28,19 @@
 			icon: 'book',
 			domain: 'trove.grove.place',
 			stack: 'Python + SvelteKit'
+		,
+			github: 'https://github.com/AutumnsGrove/GroveMusic'
+		,
+			github: 'https://github.com/AutumnsGrove/TreasureTrove'
+			github: 'https://github.com/AutumnsGrove/GroveMusic'
 		},
 		{
-			name: 'The Daily Digest',
+			name: 'The Daily Clearing',
 			tagline: 'Curated News',
 			description: 'Extremely curated newspapers delivered to your inbox. AI-powered research with skeptical analysis, cutting through the noise to surface what actually matters. Thorough, thoughtful, and refreshingly free of clickbait.',
 			status: 'building',
 			icon: 'newspaper',
-			domain: 'digest.grove.place',
+			domain: 'clearing.grove.place',
 			stack: 'Python + Cloudflare Workers'
 		},
 		{
@@ -46,6 +51,7 @@
 			icon: 'telescope',
 			domain: 'scout.grove.place',
 			stack: 'Python + TypeScript'
+			github: 'https://github.com/AutumnsGrove/GroveScout'
 		}
 	];
 
