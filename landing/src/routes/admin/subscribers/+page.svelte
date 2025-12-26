@@ -12,7 +12,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let subscribers = $state<Subscriber[]>(data.subscribers as Subscriber[]);
+	let subscribers = $derived(data.subscribers as Subscriber[]);
 	let copiedAll = $state(false);
 	let copiedEmail = $state<string | null>(null);
 
@@ -78,7 +78,7 @@
 	<header class="bg-white border-b border-grove-200 px-6 py-4">
 		<div class="max-w-6xl mx-auto flex items-center justify-between">
 			<div class="flex items-center gap-4">
-				<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors">
+				<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors" aria-label="Go to home">
 					<svg class="w-8 h-8" viewBox="0 0 100 100" fill="none">
 						<path
 							d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"

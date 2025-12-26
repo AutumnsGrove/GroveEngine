@@ -12,7 +12,7 @@
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-cream">
 	<!-- Logo -->
 	<div class="mb-8">
-		<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors">
+		<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors" aria-label="Go to home">
 			<svg class="w-16 h-16" viewBox="0 0 100 100" fill="none">
 				<path
 					d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"

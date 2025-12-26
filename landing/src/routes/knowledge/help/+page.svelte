@@ -175,6 +175,7 @@
         </svg>
       </a>
     </div>
+    </div>
   </article>
 
   <Footer />

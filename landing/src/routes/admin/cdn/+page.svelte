@@ -18,8 +18,8 @@
 	let { data }: { data: PageData } = $props();
 
 	// State
-	let files = $state<CdnFile[]>(data.files as CdnFile[]);
-	let folders = $state<string[]>(data.folders as string[]);
+	let files = $derived(data.files as CdnFile[]);
+	let folders = $derived(data.folders as string[]);
 	let isDragging = $state(false);
 	let isUploading = $state(false);
 	let uploadProgress = $state<{ name: string; progress: number }[]>([]);
@@ -188,7 +188,7 @@
 	<header class="bg-white border-b border-grove-200 px-6 py-4">
 		<div class="max-w-6xl mx-auto flex items-center justify-between">
 			<div class="flex items-center gap-4">
-				<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors">
+				<a href="/" class="text-grove-600 hover:text-grove-700 transition-colors" aria-label="Go to home">
 					<svg class="w-8 h-8" viewBox="0 0 100 100" fill="none">
 						<path
 							d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"
@@ -226,7 +226,7 @@
 				class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between"
 			>
 				<span class="font-sans text-sm">{errorMessage}</span>
-				<button onclick={() => (errorMessage = '')} class="text-red-500 hover:text-red-700">
+				<button onclick={() => (errorMessage = '')} class="text-red-500 hover:text-red-700" aria-label="Dismiss error">
 					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
 						<path
 							d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
@@ -275,7 +275,7 @@
 				<!-- Folder Selection -->
 				<div class="flex items-center justify-center gap-4 mb-4">
 					<div class="flex items-center gap-2">
-						<label class="text-sm text-bark/60 font-sans">Folder:</label>
+						<label for="folder-select" class="text-sm text-bark/60 font-sans">Folder:</label>
 						{#if showNewFolder}
 							<input
 								type="text"
@@ -294,6 +294,7 @@
 							</button>
 						{:else}
 							<select
+								id="folder-select"
 								bind:value={selectedFolder}
 								class="px-3 py-1.5 text-sm border border-grove-300 rounded-lg focus:border-grove-500 focus:outline-none bg-white"
 							>
