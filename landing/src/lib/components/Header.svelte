@@ -16,9 +16,9 @@
 	let { maxWidth = 'default' }: Props = $props();
 
 	const maxWidthClass = {
-		narrow: 'max-w-2xl',
-		default: 'max-w-3xl',
-		wide: 'max-w-4xl'
+		narrow: 'max-w-3xl',
+		default: 'max-w-4xl',
+		wide: 'max-w-5xl'
 	};
 
 	// Mobile menu state
