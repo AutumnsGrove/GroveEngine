@@ -129,11 +129,11 @@
 	accentColor="f59e0b"
 />
 
-<main class="min-h-screen flex flex-col bg-amber-50 dark:bg-slate-900">
+<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
 	<Header />
 
 	<!-- Hero -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-amber-100 via-amber-50 to-orange-50 dark:from-slate-800 dark:via-slate-900 dark:to-amber-950/20">
+	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950">
 		<!-- Lanterns -->
 		<div class="absolute top-8 left-[15%] opacity-60" aria-hidden="true">
 			<Lantern class="w-8 h-12" variant="hanging" lit animate />
