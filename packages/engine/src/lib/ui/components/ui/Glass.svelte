@@ -76,43 +76,43 @@
 		...restProps
 	}: Props = $props();
 
-	// Background colors per variant
+	// Background colors per variant - warm grove tones, translucent for glass effect
 	const variantClasses: Record<Variant, string> = {
 		// High opacity for sticky headers/navbars (uses background color)
-		surface: "bg-background/95 dark:bg-background/95",
+		surface: "bg-background/90 dark:bg-background/90",
 
 		// Dark overlay for modals/sheets
 		overlay: "bg-black/50 dark:bg-black/60",
 
-		// Medium opacity for content cards
-		card: "bg-white/80 dark:bg-slate-800/70",
+		// Medium opacity for content cards - translucent with grove warmth
+		card: "bg-white/60 dark:bg-emerald-950/25",
 
 		// Light tint for text readability
-		tint: "bg-white/60 dark:bg-slate-900/50",
+		tint: "bg-white/50 dark:bg-emerald-950/20",
 
 		// Accent-colored glass for highlights/callouts
-		accent: "bg-accent/30 dark:bg-accent/20",
+		accent: "bg-accent/25 dark:bg-accent/15",
 
 		// Barely visible, very subtle
-		muted: "bg-white/40 dark:bg-slate-900/30"
+		muted: "bg-white/30 dark:bg-emerald-950/15"
 	};
 
-	// Blur intensity classes
+	// Blur intensity classes - default to medium blur for true glass effect
 	const intensityClasses: Record<Intensity, string> = {
 		none: "",
-		light: "backdrop-blur-sm",      // 4px
-		medium: "backdrop-blur",        // 8px
-		strong: "backdrop-blur-md"      // 12px
+		light: "backdrop-blur",         // 8px
+		medium: "backdrop-blur-md",     // 12px
+		strong: "backdrop-blur-lg"      // 16px
 	};
 
-	// Border classes per variant
+	// Border classes per variant - subtle borders that complement the glass
 	const borderClasses: Record<Variant, string> = {
 		surface: "border-border",
 		overlay: "border-white/10",
-		card: "border-border",
-		tint: "border-white/20 dark:border-slate-700/30",
+		card: "border-white/40 dark:border-emerald-800/25",
+		tint: "border-white/30 dark:border-emerald-800/20",
 		accent: "border-accent/30 dark:border-accent/20",
-		muted: "border-white/10 dark:border-slate-700/20"
+		muted: "border-white/20 dark:border-emerald-800/15"
 	};
 
 	// Shadow classes

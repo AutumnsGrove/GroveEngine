@@ -227,7 +227,7 @@
 			</div>
 
 			<!-- More tools coming -->
-			<div class="text-center mt-12 p-8 rounded-xl bg-amber-100/50 dark:bg-slate-800/50 border border-dashed border-amber-300 dark:border-slate-600">
+			<div class="text-center mt-12 p-8 rounded-xl bg-amber-100/50 dark:bg-amber-950/25 backdrop-blur-md border border-dashed border-amber-300 dark:border-amber-800/30">
 				<p class="text-foreground-muted">
 					More tools are always being dreamed up in the workshop.
 				</p>
