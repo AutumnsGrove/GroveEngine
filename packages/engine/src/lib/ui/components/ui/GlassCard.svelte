@@ -126,7 +126,7 @@
 	const descriptionClass = $derived(
 		variant === "dark"
 			? "text-slate-300"
-			: "text-foreground-muted"
+			: "text-muted-foreground"
 	);
 </script>
 

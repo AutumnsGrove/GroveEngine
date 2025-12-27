@@ -758,16 +758,16 @@
     background-color: rgb(0 0 0 / 0.6);
   }
 
-  /* Glass accent - tinted with accent color */
+  /* Glass accent - tinted with grove green (accent color) */
   .glass-accent {
-    background-color: rgb(22 163 74 / 0.2);
-    border: 1px solid rgb(22 163 74 / 0.3);
+    background-color: color-mix(in srgb, var(--grove-500) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--grove-500) 30%, transparent);
     backdrop-filter: blur(4px);
   }
 
   :is(.dark .glass-accent) {
-    background-color: rgb(22 163 74 / 0.15);
-    border-color: rgb(22 163 74 / 0.2);
+    background-color: color-mix(in srgb, var(--grove-500) 15%, transparent);
+    border-color: color-mix(in srgb, var(--grove-500) 20%, transparent);
   }
 
   /* Glass muted - subtle, barely visible */
@@ -833,5 +833,19 @@
   :is(.dark .glass-hover:hover) {
     background-color: rgb(30 41 59 / 0.75);
     border-color: rgb(71 85 105 / 0.4);
+  }
+
+  /* Reduced motion: disable blur effects for performance/accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .glass,
+    .glass-surface,
+    .glass-overlay,
+    .glass-accent,
+    .glass-muted,
+    .glass-tint,
+    .glass-dark,
+    .glass-frosted {
+      backdrop-filter: none;
+    }
   }
 }

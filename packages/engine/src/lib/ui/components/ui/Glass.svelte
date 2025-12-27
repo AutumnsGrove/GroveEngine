@@ -78,8 +78,8 @@
 
 	// Background colors per variant
 	const variantClasses: Record<Variant, string> = {
-		// High opacity for sticky headers/navbars
-		surface: "bg-surface/95 dark:bg-surface/95",
+		// High opacity for sticky headers/navbars (uses background color)
+		surface: "bg-background/95 dark:bg-background/95",
 
 		// Dark overlay for modals/sheets
 		overlay: "bg-black/50 dark:bg-black/60",
@@ -107,9 +107,9 @@
 
 	// Border classes per variant
 	const borderClasses: Record<Variant, string> = {
-		surface: "border-default",
+		surface: "border-border",
 		overlay: "border-white/10",
-		card: "border-default",
+		card: "border-border",
 		tint: "border-white/20 dark:border-slate-700/30",
 		accent: "border-accent/30 dark:border-accent/20",
 		muted: "border-white/10 dark:border-slate-700/20"
@@ -149,36 +149,10 @@
   - Falls back gracefully to solid backgrounds in older browsers
 -->
 
-{#if element === "div"}
-	<div class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</div>
-{:else if element === "section"}
-	<section class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</section>
-{:else if element === "article"}
-	<article class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</article>
-{:else if element === "aside"}
-	<aside class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</aside>
-{:else if element === "header"}
-	<header class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</header>
-{:else if element === "footer"}
-	<footer class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</footer>
-{:else if element === "nav"}
-	<nav class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</nav>
-{:else if element === "main"}
-	<main class={computedClass} {...restProps}>
-		{#if children}{@render children()}{/if}
-	</main>
-{/if}
+<svelte:element
+	this={element}
+	class={computedClass}
+	{...restProps}
+>
+	{#if children}{@render children()}{/if}
+</svelte:element>
