@@ -73,7 +73,7 @@
 								<span class="supporter-context">former DM, LGBTQIA+ center</span>
 							</div>
 							<p class="supporter-note">
-								My old dungeon master from college who ran Queer Quest—gay D&D out of the LGBTQIA+ center. When I told him about Grove, he sent an incredible message to his communities, championing the vision and encouraging support. That kind of belief in what we're building here means everything.
+								My old dungeon master from college who ran Queer Quest—D&D one-shots hosted at the LGBTQIA+ center. When I told him about Grove, he sent an incredible message to his communities, championing the vision and encouraging support. That kind of belief in what we're building here means everything.
 							</p>
 						</div>
 					</div>
