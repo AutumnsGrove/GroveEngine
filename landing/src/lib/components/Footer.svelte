@@ -1,80 +1,114 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
 	import Logo from './Logo.svelte';
+	import { Github, ExternalLink } from 'lucide-svelte';
+	import { season } from '$lib/stores/season';
 
 	interface Props {
 		maxWidth?: 'narrow' | 'default' | 'wide';
-		showExternalLinks?: boolean;
 	}
 
-	let { maxWidth = 'default', showExternalLinks = false }: Props = $props();
+	let { maxWidth = 'default' }: Props = $props();
 
 	const maxWidthClass = {
 		narrow: 'max-w-2xl',
-		default: 'max-w-3xl',
-		wide: 'max-w-4xl'
+		default: 'max-w-4xl',
+		wide: 'max-w-5xl'
 	};
 </script>
 
-<footer class="py-8 border-t border-default">
+<footer class="py-12 border-t border-default">
 	<div class="{maxWidthClass[maxWidth]} mx-auto px-6">
-		<div class="flex flex-col items-center gap-4">
-			<!-- Navigation Links -->
-			<div class="flex items-center gap-4 text-sm font-sans text-foreground-subtle flex-wrap justify-center">
-				<a href="/" class="hover:text-accent-muted transition-colors">Home</a>
-				<span class="text-divider">·</span>
-				<a href="/vision" class="hover:text-accent-muted transition-colors">Vision</a>
-				<span class="text-divider">·</span>
-				<a href="/pricing" class="hover:text-accent-muted transition-colors">Pricing</a>
-				<span class="text-divider">·</span>
-				<a href="/legal" class="hover:text-accent-muted transition-colors">Legal</a>
-				<span class="text-divider">·</span>
-				<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
+		<!-- Three Column Layout (stacked on mobile) -->
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 mb-10">
+			<!-- Column 1: Grove Brand -->
+			<div class="text-center sm:text-left">
+				<div class="flex items-center gap-2 justify-center sm:justify-start mb-3">
+					<Logo class="w-6 h-6" season={$season} />
+					<span class="text-xl font-serif text-foreground">Grove</span>
+				</div>
+				<p class="text-sm font-sans text-foreground-subtle italic mb-4">
+					A place to Be
+				</p>
+				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
+					A quiet corner of the internet where your words can grow and flourish.
+				</p>
 			</div>
 
-			{#if showExternalLinks}
-				<!-- External Links (for homepage) -->
-				<div class="flex items-center gap-4 text-sm font-sans text-foreground-subtle flex-wrap justify-center">
-					<a
-						href="https://example.grove.place"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="hover:text-accent-muted transition-colors"
-						title="See a live example site built with Grove"
-					>
-						Example Site
-					</a>
-					<span class="text-divider">·</span>
-					<a
-						href="https://autumnsgrove.com/blog"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="hover:text-accent-muted transition-colors"
-						title="Developer's blog and documentation"
-					>
-						Blog
-					</a>
-					<span class="text-divider">·</span>
-					<a
-						href="https://github.com/AutumnsGrove/GroveEngine"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="hover:text-accent-muted transition-colors flex items-center gap-1"
-						title="View the Grove Engine source code"
-					>
-						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-						</svg>
-						GitHub
-					</a>
-				</div>
-			{/if}
+			<!-- Column 2: Resources -->
+			<div class="text-center sm:text-left">
+				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Resources</h3>
+				<ul class="space-y-2.5 text-sm font-sans">
+					<li>
+						<a href="/knowledge" class="text-foreground-subtle hover:text-accent-muted transition-colors">Knowledge Base</a>
+					</li>
+					<li>
+						<a href="/roadmap" class="text-foreground-subtle hover:text-accent-muted transition-colors">Roadmap</a>
+					</li>
+					<li>
+						<a href="/pricing" class="text-foreground-subtle hover:text-accent-muted transition-colors">Pricing</a>
+					</li>
+					<li>
+						<a href="/about" class="text-foreground-subtle hover:text-accent-muted transition-colors">About Grove</a>
+					</li>
+					<li>
+						<a href="/vision" class="text-foreground-subtle hover:text-accent-muted transition-colors">Our Vision</a>
+					</li>
+				</ul>
+			</div>
 
-			<!-- Theme Toggle -->
-			<div class="flex items-center gap-3">
-				<Logo class="w-4 h-4 text-foreground-faint" />
-				<span class="text-xs text-foreground-faint font-sans">Theme</span>
-				<ThemeToggle />
+			<!-- Column 3: Connect -->
+			<div class="text-center sm:text-left">
+				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Connect</h3>
+				<ul class="space-y-2.5 text-sm font-sans">
+					<li>
+						<a href="/contact" class="text-foreground-subtle hover:text-accent-muted transition-colors">Contact</a>
+					</li>
+					<li>
+						<a
+							href="https://autumnsgrove.com/blog"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
+						>
+							Blog
+							<ExternalLink class="w-3 h-3" />
+						</a>
+					</li>
+					<li>
+						<a
+							href="https://github.com/AutumnsGrove/GroveEngine"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
+						>
+							<Github class="w-4 h-4" />
+							GitHub
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<!-- Bottom Bar -->
+		<div class="pt-6 border-t border-default">
+			<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+				<!-- Copyright & Legal Links -->
+				<div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs font-sans text-foreground-subtle">
+					<span>&copy; {new Date().getFullYear()} Autumn's Grove</span>
+					<span class="text-divider hidden sm:inline">·</span>
+					<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
+					<span class="text-divider">·</span>
+					<a href="/legal/privacy" class="hover:text-accent-muted transition-colors">Privacy</a>
+					<span class="text-divider">·</span>
+					<a href="/legal/terms" class="hover:text-accent-muted transition-colors">Terms</a>
+				</div>
+
+				<!-- Theme Toggle -->
+				<div class="flex items-center gap-2">
+					<span class="text-xs text-foreground-faint font-sans">Theme</span>
+					<ThemeToggle />
+				</div>
 			</div>
 		</div>
 	</div>

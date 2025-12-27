@@ -43,9 +43,7 @@
 		{ href: '/pricing', label: 'Pricing' },
 		{ href: '/knowledge', label: 'Knowledge' },
 		{ href: '/forest', label: 'Forest' },
-		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', external: true },
-		{ href: '/legal', label: 'Legal' },
-		{ href: '/credits', label: 'Credits' }
+		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', external: true }
 	];
 
 	function isActive(href: string): boolean {
