@@ -1,6 +1,19 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
+
+	const headers = [
+		{ id: 'supporters', text: 'Supporters & Community', level: 2 },
+		{ id: 'queer-quest', text: 'Queer Quest Circle', level: 3 },
+		{ id: 'home-depot-family', text: 'Home Depot Family', level: 3 },
+		{ id: 'kindred-spirits', text: 'Kindred Spirits', level: 3 },
+		{ id: 'ai-tools', text: 'AI Coding Assistants', level: 2 },
+		{ id: 'tech-stack', text: 'Tech Stack', level: 2 },
+		{ id: 'libraries', text: 'Open Source Libraries', level: 2 },
+		{ id: 'icons', text: 'Icons', level: 2 },
+		{ id: 'fonts', text: 'Fonts', level: 2 }
+	];
 </script>
 
 <svelte:head>
@@ -11,32 +24,144 @@
 <main class="min-h-screen flex flex-col">
 	<Header />
 
-	<!-- Content -->
-	<article class="flex-1 px-6 py-12">
-		<div class="max-w-3xl mx-auto">
-			<!-- Header -->
-			<header class="mb-12 text-center">
-				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">Credits</h1>
-				<p class="text-lg text-foreground-subtle font-sans">
-					The people, projects, and tools that make Grove possible.
+	<!-- Content with TOC -->
+	<div class="flex-1 px-6 py-12">
+		<div class="credits-layout">
+			<!-- Main Content -->
+			<article class="credits-content">
+				<!-- Header -->
+				<header class="mb-12 text-center">
+					<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">Credits</h1>
+					<p class="text-lg text-foreground-subtle font-sans">
+						The people, projects, and tools that make Grove possible.
+					</p>
+					<div class="flex items-center justify-center gap-4 mt-6">
+						<div class="w-12 h-px bg-divider"></div>
+						<svg class="w-4 h-4 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
+							<circle cx="10" cy="10" r="4" />
+						</svg>
+						<div class="w-12 h-px bg-divider"></div>
+					</div>
+				</header>
+
+				<!-- Intro -->
+				<p class="text-foreground-muted font-sans leading-relaxed mb-12 text-center">
+					Grove is built on the shoulders of incredible open source projects, thoughtful design work,
+					and most importantly—the people who believed in this vision from the start.
 				</p>
-				<div class="flex items-center justify-center gap-4 mt-6">
-					<div class="w-12 h-px bg-divider"></div>
-					<svg class="w-4 h-4 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
-						<circle cx="10" cy="10" r="4" />
-					</svg>
-					<div class="w-12 h-px bg-divider"></div>
-				</div>
-			</header>
 
-			<!-- Intro -->
-			<p class="text-foreground-muted font-sans leading-relaxed mb-12 text-center">
-				Grove is built on the shoulders of incredible open source projects and thoughtful design work.
-				This page exists to honor and thank the creators whose work makes ours possible.
-			</p>
+				<!-- Supporters & Community -->
+				<section class="mb-16" id="supporters">
+					<h2 class="text-2xl font-serif text-foreground mb-2">Supporters & Community</h2>
+					<p class="text-foreground-subtle font-sans text-sm mb-8">
+						The people who encouraged, supported, and loved on me while building Grove. This project wouldn't exist without you.
+					</p>
 
-			<!-- AI Coding Tools -->
-			<section class="mb-12">
+					<!-- Queer Quest Circle -->
+					<div class="supporter-circle mb-10" id="queer-quest">
+						<h3 class="text-lg font-serif text-accent-muted mb-4 flex items-center gap-2">
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 2L2 7l10 5 10-5-10-5z"/>
+								<path d="M2 17l10 5 10-5"/>
+								<path d="M2 12l10 5 10-5"/>
+							</svg>
+							Queer Quest Circle
+						</h3>
+						<div class="supporter-card featured">
+							<div class="supporter-header">
+								<span class="supporter-name">Dante</span>
+								<span class="supporter-context">former DM, LGBTQIA+ center</span>
+							</div>
+							<p class="supporter-note">
+								My old dungeon master from college who ran Queer Quest—gay D&D out of the LGBTQIA+ center. When I told him about Grove, he sent an incredible message to his communities, championing the vision and encouraging support. That kind of belief in what we're building here means everything.
+							</p>
+						</div>
+					</div>
+
+					<!-- Home Depot Family -->
+					<div class="supporter-circle mb-10" id="home-depot-family">
+						<h3 class="text-lg font-serif text-accent-muted mb-4 flex items-center gap-2">
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+								<polyline points="9,22 9,12 15,12 15,22"/>
+							</svg>
+							Home Depot Family
+						</h3>
+						<div class="supporter-list">
+							<div class="supporter-card">
+								<div class="supporter-header">
+									<span class="supporter-name">Jonas Delva</span>
+								</div>
+								<p class="supporter-note">
+									Always telling me how blessed he feels, radiating positivity. He said to me: <em>"You are worth so much more than this place. You are needed elsewhere."</em> Made me cry.
+								</p>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Imani Gracious</span>
+								<span class="supporter-desc">— passionate about the vision, helped with feedback and design review</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Nicole Wood</span>
+								<span class="supporter-desc">— my rock and support, so much love in her heart for this project</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Emily Navarro</span>
+								<span class="supporter-desc">— a true believer in what we're building</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Reid Jones</span>
+								<span class="supporter-desc">— huge fan from day one</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Red Reinagel</span>
+								<span class="supporter-desc">— always cheering this project on</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Alex Rylander</span>
+								<span class="supporter-desc">— unwavering support</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Camille</span>
+								<span class="supporter-desc">— extra excited for everything Grove</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Kindred Spirits -->
+					<div class="supporter-circle" id="kindred-spirits">
+						<h3 class="text-lg font-serif text-accent-muted mb-4 flex items-center gap-2">
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+							</svg>
+							Kindred Spirits
+						</h3>
+						<div class="supporter-list">
+							<div class="supporter-item">
+								<span class="supporter-name">Madison & Kyle Hiday</span>
+								<span class="supporter-desc">— sending love and support all the way from Belgium</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Arturo Martinez</span>
+								<span class="supporter-desc">— best friend who keeps me grounded, doesn't feed my ego but still believes in the vision</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Ariana Garcia</span>
+								<span class="supporter-desc">— ray of sunshine on stormy days, excited to learn to code through this open source project</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Trent Ice & Savanna</span>
+								<span class="supporter-desc">— childhood best friend and his partner, huge fans who let me ramble about Durable Objects over Waffle House</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Sean Amaso</span>
+								<span class="supporter-desc">— local artist and high school friend, major supporter</span>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- AI Coding Tools -->
+			<section class="mb-12" id="ai-tools">
 				<h2 class="text-2xl font-serif text-foreground mb-2">AI Coding Assistants</h2>
 				<p class="text-foreground-subtle font-sans text-sm mb-6">
 					The AI tools that helped write and refine Grove's code.
@@ -76,7 +201,7 @@
 			</section>
 
 			<!-- Tech Stack -->
-			<section class="mb-12">
+			<section class="mb-12" id="tech-stack">
 				<h2 class="text-2xl font-serif text-foreground mb-2">Tech Stack</h2>
 				<p class="text-foreground-subtle font-sans text-sm mb-6">
 					The core technologies powering Grove.
@@ -146,7 +271,7 @@
 			</section>
 
 			<!-- Open Source Libraries -->
-			<section class="mb-12">
+			<section class="mb-12" id="libraries">
 				<h2 class="text-2xl font-serif text-foreground mb-2">Open Source Libraries</h2>
 				<p class="text-foreground-subtle font-sans text-sm mb-6">
 					The packages that power Grove's features.
@@ -256,7 +381,7 @@
 			</section>
 
 			<!-- Icons -->
-			<section class="mb-12">
+			<section class="mb-12" id="icons">
 				<h2 class="text-2xl font-serif text-foreground mb-2">Icons</h2>
 				<p class="text-foreground-subtle font-sans text-sm mb-6">
 					The icon set used throughout Grove.
@@ -277,7 +402,7 @@
 			</section>
 
 			<!-- Fonts -->
-			<section class="mb-12">
+			<section class="mb-12" id="fonts">
 				<h2 class="text-2xl font-serif text-foreground mb-2">Fonts</h2>
 				<p class="text-foreground-subtle font-sans text-sm mb-6">
 					The typefaces available for Grove blogs. All are open source or free for use. Click a category to explore.
@@ -733,14 +858,130 @@
 					AutumnsGrove/GroveEngine
 				</a>
 			</section>
+			</article>
+
+			<!-- Table of Contents Sidebar -->
+			<aside class="toc-sidebar">
+				<TableOfContents {headers} />
+			</aside>
 		</div>
-	</article>
+	</div>
+
+	<!-- Mobile TOC -->
+	<MobileTOC {headers} />
 
 	<Footer />
 </main>
 
 <style>
 	.bg-divider { background-color: var(--color-divider); }
+
+	/* Credits page layout with TOC */
+	.credits-layout {
+		display: grid;
+		grid-template-columns: 1fr;
+		max-width: 1200px;
+		margin: 0 auto;
+		gap: 2rem;
+	}
+
+	@media (min-width: 1024px) {
+		.credits-layout {
+			grid-template-columns: 1fr 220px;
+		}
+	}
+
+	.credits-content {
+		max-width: 800px;
+	}
+
+	.toc-sidebar {
+		display: none;
+	}
+
+	@media (min-width: 1024px) {
+		.toc-sidebar {
+			display: block;
+		}
+	}
+
+	/* Supporter styles */
+	.supporter-circle {
+		padding-left: 1rem;
+		border-left: 2px solid var(--color-divider);
+	}
+
+	.supporter-card {
+		background: var(--color-surface-alt);
+		border: 1px solid var(--color-border);
+		border-radius: 0.75rem;
+		padding: 1.25rem;
+		margin-bottom: 1rem;
+	}
+
+	.supporter-card.featured {
+		border-left: 3px solid var(--color-accent);
+	}
+
+	.supporter-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.supporter-name {
+		font-family: var(--font-serif);
+		font-size: 1.1rem;
+		color: var(--color-foreground);
+		font-weight: 500;
+	}
+
+	.supporter-context {
+		font-family: var(--font-sans);
+		font-size: 0.875rem;
+		color: var(--color-foreground-subtle);
+	}
+
+	.supporter-note {
+		font-family: var(--font-sans);
+		font-size: 0.9rem;
+		color: var(--color-foreground-muted);
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	.supporter-note em {
+		color: var(--color-accent-muted);
+		font-style: italic;
+	}
+
+	.supporter-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.supporter-item {
+		font-family: var(--font-sans);
+		font-size: 0.95rem;
+		line-height: 1.5;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--color-divider);
+	}
+
+	.supporter-item:last-child {
+		border-bottom: none;
+	}
+
+	.supporter-item .supporter-name {
+		font-size: 1rem;
+	}
+
+	.supporter-desc {
+		color: var(--color-foreground-muted);
+	}
 
 	/* Font category collapsible styling */
 	.font-category summary::-webkit-details-marker {
