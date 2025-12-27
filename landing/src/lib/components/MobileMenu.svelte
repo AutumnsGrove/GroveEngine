@@ -10,8 +10,6 @@
 		Trees,
 		Map,
 		PenLine,
-		Scale,
-		Heart,
 		X
 	} from 'lucide-svelte';
 
@@ -87,9 +85,7 @@
 		{ href: '/pricing', label: 'Pricing', icon: CreditCard },
 		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
 		{ href: '/forest', label: 'Forest', icon: Trees },
-		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true },
-		{ href: '/legal', label: 'Legal', icon: Scale },
-		{ href: '/credits', label: 'Credits', icon: Heart }
+		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true }
 	];
 
 	function isActive(href: string): boolean {

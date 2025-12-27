@@ -7,6 +7,20 @@
 	import { page } from '$app/stores';
 	import { season } from '$lib/stores/season';
 
+	// Lucide icons
+	import {
+		Map,
+		BookOpen,
+		Sparkles,
+		CircleDollarSign,
+		Leaf,
+		Shield,
+		Users,
+		Download,
+		ArrowRight,
+		MapPin
+	} from 'lucide-svelte';
+
 	// Get error from URL if present
 	let error = $derived($page.url.searchParams.get('error'));
 
@@ -15,36 +29,6 @@
 		season.cycle();
 	}
 
-	let currentSlide = $state(0);
-	const slides = [
-		{
-			title: 'Sign Up',
-			description: 'Create your account in seconds',
-			icon: 'signup'
-		},
-		{
-			title: 'Choose Your Space',
-			description: 'Pick a subdomain or bring your own',
-			icon: 'domain'
-		},
-		{
-			title: 'Start Growing',
-			description: 'Write, publish, flourish',
-			icon: 'blog'
-		}
-	];
-
-	function nextSlide() {
-		currentSlide = (currentSlide + 1) % slides.length;
-	}
-
-	function prevSlide() {
-		currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-	}
-
-	function goToSlide(index: number) {
-		currentSlide = index;
-	}
 </script>
 
 <SEO
@@ -114,20 +98,51 @@
 				class="btn-secondary inline-flex items-center gap-2 text-base"
 			>
 				What is Grove?
-				<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
-				</svg>
+				<Leaf class="w-4 h-4" />
 			</a>
 			<a
 				href="/vision"
 				class="btn-primary inline-flex items-center gap-2 text-base"
 			>
 				Our Vision
-				<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
-				</svg>
+				<ArrowRight class="w-4 h-4" />
 			</a>
 		</div>
+	</div>
+
+	<!-- Quick Links -->
+	<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-12">
+		<a
+			href="/roadmap"
+			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
+		>
+			<Map class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<span>Roadmap</span>
+		</a>
+		<span class="text-divider hidden sm:inline">·</span>
+		<a
+			href="/knowledge"
+			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
+		>
+			<BookOpen class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<span>Knowledge</span>
+		</a>
+		<span class="text-divider hidden sm:inline">·</span>
+		<a
+			href="/forest"
+			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
+		>
+			<Sparkles class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<span>Forest</span>
+		</a>
+		<span class="text-divider hidden sm:inline">·</span>
+		<a
+			href="/pricing"
+			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
+		>
+			<CircleDollarSign class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<span>Pricing</span>
+		</a>
 	</div>
 
 	<!-- Coming soon text -->
@@ -150,80 +165,114 @@
 		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
-	<!-- How It Works - Slide Preview -->
-	<section class="w-full max-w-lg">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-8">How It Works</h2>
-
-		<!-- Slide Container -->
-		<div class="relative bg-surface rounded-2xl border border-default p-8 min-h-[200px]">
-			<!-- Slide Content -->
-			<div class="flex flex-col items-center text-center">
-				<!-- Icon -->
-				<div class="w-16 h-16 mb-4 text-accent-muted">
-					{#if slides[currentSlide].icon === 'signup'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
-						</svg>
-					{:else if slides[currentSlide].icon === 'domain'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-						</svg>
-					{:else if slides[currentSlide].icon === 'blog'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-						</svg>
-					{/if}
+	<!-- Roadmap Preview Card -->
+	<section class="w-full max-w-lg mb-16">
+		<a
+			href="/roadmap"
+			class="block glass-grove rounded-2xl p-6 hover:scale-[1.02] transition-transform group"
+		>
+			<div class="flex items-start justify-between mb-4">
+				<div>
+					<div class="flex items-center gap-2 mb-1">
+						<MapPin class="w-4 h-4 text-accent-muted" />
+						<span class="text-xs font-sans text-foreground-subtle uppercase tracking-wide">Currently</span>
+					</div>
+					<h3 class="text-xl font-serif text-foreground">Thaw</h3>
+					<p class="text-sm font-sans text-foreground-muted italic">The ice begins to crack</p>
 				</div>
-
-				<!-- Step number -->
-				<span class="text-sm font-sans text-accent-subtle mb-2">Step {currentSlide + 1}</span>
-
-				<!-- Title -->
-				<h3 class="text-xl font-serif text-foreground mb-2">{slides[currentSlide].title}</h3>
-
-				<!-- Description -->
-				<p class="text-foreground-subtle font-sans">{slides[currentSlide].description}</p>
+				<ArrowRight class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted group-hover:translate-x-1 transition-all" />
 			</div>
 
-			<!-- Navigation Arrows -->
-			<button
-				onclick={prevSlide}
-				class="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-accent-subtle hover:text-accent-muted transition-colors"
-				aria-label="Previous slide"
-			>
-				<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-				</svg>
-			</button>
-			<button
-				onclick={nextSlide}
-				class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-accent-subtle hover:text-accent-muted transition-colors"
-				aria-label="Next slide"
-			>
-				<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-				</svg>
-			</button>
-		</div>
+			<!-- Progress bar -->
+			<div class="mb-3">
+				<div class="h-2 bg-divider rounded-full overflow-hidden">
+					<div class="h-full bg-accent-muted rounded-full" style="width: 33%"></div>
+				</div>
+			</div>
 
-		<!-- Dot Indicators -->
-		<div class="flex justify-center gap-2 mt-4">
-			{#each slides as _, i}
-				<button
-					onclick={() => goToSlide(i)}
-					class="w-2 h-2 rounded-full transition-colors {currentSlide === i ? 'bg-accent-muted' : 'bg-divider hover:bg-accent-subtle'}"
-					aria-label="Go to slide {i + 1}"
-				></button>
-			{/each}
+			<p class="text-sm font-sans text-foreground-subtle">
+				Grove opens its doors. The first trees take root.
+			</p>
+		</a>
+	</section>
+
+	<!-- Feature Highlights -->
+	<section class="w-full max-w-2xl mb-8">
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-8">What makes Grove different</h2>
+
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<!-- Your Space -->
+			<div class="glass-grove rounded-xl p-5">
+				<div class="flex items-center gap-3 mb-2">
+					<div class="p-2 rounded-lg bg-accent-subtle/20">
+						<Leaf class="w-5 h-5 text-accent-muted" />
+					</div>
+					<h3 class="font-serif text-foreground">Your own subdomain</h3>
+				</div>
+				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
+					yourname.grove.place — a corner of the internet that's truly yours.
+				</p>
+			</div>
+
+			<!-- AI Protection -->
+			<div class="glass-grove rounded-xl p-5">
+				<div class="flex items-center gap-3 mb-2">
+					<div class="p-2 rounded-lg bg-accent-subtle/20">
+						<Shield class="w-5 h-5 text-accent-muted" />
+					</div>
+					<h3 class="font-serif text-foreground">Shade protection</h3>
+				</div>
+				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
+					Your words are not training data. AI crawlers blocked at the gate.
+				</p>
+			</div>
+
+			<!-- Community -->
+			<div class="glass-grove rounded-xl p-5">
+				<div class="flex items-center gap-3 mb-2">
+					<div class="p-2 rounded-lg bg-accent-subtle/20">
+						<Users class="w-5 h-5 text-accent-muted" />
+					</div>
+					<h3 class="font-serif text-foreground">Meadow community</h3>
+				</div>
+				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
+					Optional connection without competition. No algorithms, just friends.
+				</p>
+			</div>
+
+			<!-- Data Freedom -->
+			<div class="glass-grove rounded-xl p-5">
+				<div class="flex items-center gap-3 mb-2">
+					<div class="p-2 rounded-lg bg-accent-subtle/20">
+						<Download class="w-5 h-5 text-accent-muted" />
+					</div>
+					<h3 class="font-serif text-foreground">Your words, always</h3>
+				</div>
+				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
+					Full data export anytime. You own everything you create here.
+				</p>
+			</div>
 		</div>
 	</section>
 
 </main>
 
-<!-- Footer with theme toggle -->
-<Footer showExternalLinks={true} />
+<!-- Footer -->
+<Footer />
 
 <style>
 	/* Background color utilities that need to be scoped */
 	.bg-divider { background-color: var(--color-divider); }
+
+	/* Glass effect for Grove cards */
+	.glass-grove {
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid var(--color-divider);
+	}
+
+	:global(.dark) .glass-grove {
+		background: rgba(30, 41, 59, 0.5);
+	}
 </style>
