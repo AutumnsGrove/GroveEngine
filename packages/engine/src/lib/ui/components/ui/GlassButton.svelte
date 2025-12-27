@@ -58,44 +58,44 @@
 		...restProps
 	}: Props = $props();
 
-	// Base styles shared by all variants
+	// Base styles shared by all variants - medium blur for glass effect
 	const baseClasses = `
 		inline-flex items-center justify-center gap-2
 		font-medium rounded-lg
 		transition-all duration-200
-		backdrop-blur-sm
+		backdrop-blur-md
 		outline-none
 		focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2
 		disabled:opacity-50 disabled:pointer-events-none
 		[&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0
 	`.trim().replace(/\s+/g, ' ');
 
-	// Variant-specific styles
+	// Variant-specific styles - warm grove tones with true glass transparency
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/70 dark:bg-slate-800/60
-			border border-white/30 dark:border-slate-600/30
+			bg-white/60 dark:bg-emerald-950/25
+			border border-white/40 dark:border-emerald-800/25
 			text-foreground
-			hover:bg-white/90 dark:hover:bg-slate-800/80
-			hover:border-white/50 dark:hover:border-slate-500/40
+			hover:bg-white/75 dark:hover:bg-emerald-950/35
+			hover:border-white/50 dark:hover:border-emerald-700/30
 			shadow-sm hover:shadow-md
 		`.trim().replace(/\s+/g, ' '),
 
 		accent: `
-			bg-accent/80 dark:bg-accent/70
+			bg-accent/70 dark:bg-accent/60
 			border border-accent/40 dark:border-accent/30
 			text-white
-			hover:bg-accent/95 dark:hover:bg-accent/85
+			hover:bg-accent/85 dark:hover:bg-accent/75
 			hover:border-accent/60 dark:hover:border-accent/50
 			shadow-sm hover:shadow-md shadow-accent/20
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-slate-900/70 dark:bg-slate-950/80
+			bg-slate-900/50 dark:bg-slate-950/50
 			border border-slate-700/30 dark:border-slate-600/30
 			text-white
-			hover:bg-slate-900/90 dark:hover:bg-slate-950/95
-			hover:border-slate-600/50 dark:hover:border-slate-500/40
+			hover:bg-slate-900/65 dark:hover:bg-slate-950/65
+			hover:border-slate-600/40 dark:hover:border-slate-500/35
 			shadow-md hover:shadow-lg
 		`.trim().replace(/\s+/g, ' '),
 
@@ -103,16 +103,16 @@
 			bg-transparent
 			border border-transparent
 			text-foreground
-			hover:bg-white/50 dark:hover:bg-slate-800/50
-			hover:border-white/20 dark:hover:border-slate-600/20
+			hover:bg-white/40 dark:hover:bg-emerald-950/25
+			hover:border-white/25 dark:hover:border-emerald-800/20
 		`.trim().replace(/\s+/g, ' '),
 
 		outline: `
 			bg-transparent
-			border border-white/40 dark:border-slate-600/40
+			border border-white/40 dark:border-emerald-800/30
 			text-foreground
-			hover:bg-white/30 dark:hover:bg-slate-800/30
-			hover:border-white/60 dark:hover:border-slate-500/50
+			hover:bg-white/25 dark:hover:bg-emerald-950/20
+			hover:border-white/55 dark:hover:border-emerald-700/40
 		`.trim().replace(/\s+/g, ' ')
 	};
 

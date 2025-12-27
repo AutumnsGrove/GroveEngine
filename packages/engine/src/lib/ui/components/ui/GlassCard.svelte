@@ -58,51 +58,51 @@
 		...restProps
 	}: Props = $props();
 
-	// Variant-specific styles
+	// Variant-specific styles - warm grove tones with true glass transparency
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/70 dark:bg-slate-800/60
-			backdrop-blur-sm
+			bg-white/60 dark:bg-emerald-950/25
+			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		accent: `
 			bg-accent/20 dark:bg-accent/15
-			backdrop-blur-sm
+			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-slate-900/60 dark:bg-slate-950/70
-			backdrop-blur-sm
+			bg-slate-900/40 dark:bg-slate-950/40
+			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/40 dark:bg-slate-900/30
-			backdrop-blur-sm
+			bg-white/30 dark:bg-emerald-950/15
+			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/85 dark:bg-slate-800/80
-			backdrop-blur-md
+			bg-white/70 dark:bg-emerald-950/35
+			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
-	// Border colors per variant
+	// Border colors per variant - subtle, warm borders
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/30 dark:border-slate-600/30",
+		default: "border-white/40 dark:border-emerald-800/25",
 		accent: "border-accent/30 dark:border-accent/20",
 		dark: "border-slate-700/30 dark:border-slate-600/30",
-		muted: "border-white/20 dark:border-slate-700/20",
-		frosted: "border-white/40 dark:border-slate-600/40"
+		muted: "border-white/20 dark:border-emerald-800/15",
+		frosted: "border-white/50 dark:border-emerald-800/30"
 	};
 
-	// Hover styles
+	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/85 dark:hover:bg-slate-800/75 hover:shadow-lg hover:border-white/50 dark:hover:border-slate-500/40",
+		default: "hover:bg-white/70 dark:hover:bg-emerald-950/35 hover:shadow-lg hover:border-white/50 dark:hover:border-emerald-700/30",
 		accent: "hover:bg-accent/30 dark:hover:bg-accent/25 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-slate-900/75 dark:hover:bg-slate-950/85 hover:shadow-xl hover:border-slate-600/50",
-		muted: "hover:bg-white/55 dark:hover:bg-slate-900/45 hover:shadow-md hover:border-white/30",
-		frosted: "hover:bg-white/95 dark:hover:bg-slate-800/90 hover:shadow-lg hover:border-white/60"
+		dark: "hover:bg-slate-900/50 dark:hover:bg-slate-950/50 hover:shadow-xl hover:border-slate-600/40",
+		muted: "hover:bg-white/40 dark:hover:bg-emerald-950/25 hover:shadow-md hover:border-white/30",
+		frosted: "hover:bg-white/80 dark:hover:bg-emerald-950/45 hover:shadow-lg hover:border-white/60"
 	};
 
 	const computedClass = $derived(

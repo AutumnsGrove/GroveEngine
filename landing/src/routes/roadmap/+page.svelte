@@ -413,7 +413,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -484,7 +484,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm border-l-4 border-accent shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-accent shadow-sm">
 							<CircleDot class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -570,7 +570,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-buds'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.icon === 'ivy' ? 'border-l-4 border-green-500' : ''}
 							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}"
 						>
@@ -666,7 +666,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
 							{#if feature.major}
@@ -766,7 +766,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
 							{#if feature.major}

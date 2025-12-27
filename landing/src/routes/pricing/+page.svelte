@@ -33,7 +33,7 @@
 			</header>
 
 			<!-- Pricing Table -->
-			<div class="overflow-x-auto mb-8 bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/30 dark:border-slate-700/30 shadow-sm">
+			<div class="overflow-x-auto mb-8 bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-4 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 				<table class="w-full text-left border-collapse">
 					<thead>
 						<tr class="border-b-2 border-default">
@@ -158,7 +158,7 @@
 			</p>
 
 			<!-- Details Box -->
-			<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-white/30 dark:border-slate-700/30 shadow-sm">
+			<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 				<h2 class="text-xl font-serif text-foreground mb-6">The Fine Print</h2>
 
 				<div class="space-y-6 text-sm font-sans text-foreground-muted">
