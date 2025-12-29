@@ -5,6 +5,7 @@
 	// Import all nature assets
 	// Trees
 	import Logo from '$lib/components/Logo.svelte';
+	import { GlassLogo } from '@autumnsgrove/groveengine/ui';
 	import TreePine from '$lib/components/trees/TreePine.svelte';
 	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
 	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
@@ -82,6 +83,7 @@
 	const assets = {
 		// Trees
 		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate', 'animateEntrance', 'breathing'] },
+		'GlassLogo': { component: GlassLogo, category: 'Trees', props: ['variant', 'season', 'animate', 'breathing', 'breathingSpeed', 'monochrome', 'accentColor'] },
 		'TreePine': { component: TreePine, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeCherry': { component: TreeCherry, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeAspen': { component: TreeAspen, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
@@ -174,6 +176,7 @@
 		facing: ['left', 'right'],
 		phase: ['full', 'waning', 'crescent', 'new'],
 		speed: ['slow', 'normal', 'fast'],
+		breathingSpeed: ['slow', 'normal', 'fast'],
 		intensity: ['subtle', 'normal', 'bright'],
 		density: ['sparse', 'normal', 'dense'],
 		direction: ['left', 'right'],
@@ -181,6 +184,7 @@
 
 	// Asset-specific variant options
 	const assetVariants: Record<string, string[]> = {
+		'GlassLogo': ['default', 'accent', 'frosted', 'dark', 'ethereal'],
 		'Rock': ['round', 'flat', 'jagged'],
 		'Leaf': ['oak', 'maple', 'simple', 'aspen'],
 		'LeafFalling': ['simple', 'maple'],

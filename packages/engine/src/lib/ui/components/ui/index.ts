@@ -32,6 +32,7 @@ export { default as GlassCard } from './GlassCard.svelte';
 export { default as GlassConfirmDialog } from './GlassConfirmDialog.svelte';
 export { default as GlassNavbar } from './GlassNavbar.svelte';
 export { default as GlassOverlay } from './GlassOverlay.svelte';
+export { default as GlassLogo } from './GlassLogo.svelte';
 
 // Table sub-components (from primitives)
 export {
