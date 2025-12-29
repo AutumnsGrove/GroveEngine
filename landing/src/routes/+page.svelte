@@ -18,7 +18,8 @@
 		Users,
 		Download,
 		ArrowRight,
-		MapPin
+		MapPin,
+		Sprout
 	} from 'lucide-svelte';
 
 	// Get error from URL if present
@@ -92,6 +93,19 @@
 		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-6">
 			A quiet corner of the internet where your words can grow.
 		</p>
+
+		<!-- Primary CTA: Plant your blog -->
+		<a
+			href="https://plant.grove.place"
+			class="btn-primary inline-flex items-center gap-2 text-base mb-4"
+		>
+			Plant Your Blog
+			<Sprout class="w-4 h-4" />
+		</a>
+		<p class="text-foreground-subtle text-sm font-sans mb-6">
+			Signups aren't open yet, but feel free to look around.
+		</p>
+
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
 			<a
 				href="/about"
@@ -102,7 +116,7 @@
 			</a>
 			<a
 				href="/vision"
-				class="btn-primary inline-flex items-center gap-2 text-base"
+				class="btn-secondary inline-flex items-center gap-2 text-base"
 			>
 				Our Vision
 				<ArrowRight class="w-4 h-4" />
