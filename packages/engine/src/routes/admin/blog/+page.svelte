@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassConfirmDialog } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, toast } from '$lib/ui';
   import { api } from '$lib/utils/api.js';
   import { Trash2 } from 'lucide-svelte';
 
@@ -37,7 +37,7 @@
       postToDelete = null;
     } catch (error) {
       console.error('Failed to delete post:', error);
-      alert('Failed to delete post. Please try again.');
+      toast.error('Failed to delete post', { description: 'Please try again.' });
     } finally {
       deleting = false;
     }
@@ -74,7 +74,7 @@
         {#each data.posts as post (post.slug)}
           <tr>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
                 {post.title}
               </a>
               {#if post.description}
@@ -94,7 +94,7 @@
               {/if}
             </td>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
               <a href="/admin/blog/edit/{post.slug}" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
               <button
                 onclick={() => confirmDelete({ slug: post.slug, title: post.title })}

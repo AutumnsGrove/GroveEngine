@@ -43,39 +43,9 @@
   async function fetchStats() {
     loading = true;
     try {
-      // Fetch posts to calculate stats
-      const posts = await api.get('/api/posts');
-      const postCount = posts.length;
-
-      // Calculate word count from all posts
-      let totalWords = 0;
-      /** @type {Record<string, number>} */
-      const tagCounts = {};
-
-      posts.forEach((/** @type {{ content?: string, tags?: string[] }} */ post) => {
-        if (post.content) {
-          totalWords += post.content.split(/\s+/).filter(Boolean).length;
-        }
-        if (post.tags) {
-          post.tags.forEach((/** @type {string} */ tag) => {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-          });
-        }
-      });
-
-      // Get top 5 tags
-      const topTags = Object.entries(tagCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([tag]) => tag);
-
-      stats = {
-        postCount,
-        totalWords,
-        draftCount: 0, // TODO: implement draft counting
-        topTags,
-        accountAgeDays: 30 // TODO: get from user creation date
-      };
+      // Use dedicated stats endpoint for better performance
+      // Server calculates word count via SQL instead of fetching all content
+      stats = await api.get('/api/stats');
     } catch (error) {
       console.error('Failed to fetch stats:', error);
       stats = {
@@ -93,6 +63,7 @@
     fetchStats();
   });
 
+  /** @param {number} num */
   function formatNumber(num) {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -199,7 +170,7 @@
         <Settings class="w-7 h-7 text-accent-muted" />
         <span class="font-medium text-center text-sm">Settings</span>
       </a>
-      <a href="/" class="action-card glass-action" target="_blank">
+      <a href="/" class="action-card glass-action" target="_blank" rel="noopener noreferrer" aria-label="View your live site (opens in new tab)">
         <Globe class="w-7 h-7 text-accent-muted" />
         <span class="font-medium text-center text-sm">View Site</span>
       </a>
@@ -212,6 +183,7 @@
       href="https://grove.place/roadmap"
       target="_blank"
       rel="noopener noreferrer"
+      aria-label="View Grove roadmap (opens in new tab)"
       class="roadmap-card glass-roadmap"
     >
       <div class="roadmap-header">

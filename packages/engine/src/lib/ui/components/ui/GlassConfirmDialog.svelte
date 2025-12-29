@@ -96,8 +96,13 @@
 	}
 
 	async function handleConfirm() {
-		await onconfirm?.();
-		open = false;
+		try {
+			await onconfirm?.();
+			open = false;
+		} catch (error) {
+			// Don't close on error - let the caller handle it
+			console.error('Confirm action failed:', error);
+		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
