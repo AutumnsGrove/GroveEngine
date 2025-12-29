@@ -9,7 +9,8 @@
 		Tag,
 		TreeDeciduous,
 		Eye,
-		Mail
+		Mail,
+		Newspaper
 	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
@@ -98,7 +99,7 @@
 							rel="noopener noreferrer"
 							class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
 						>
-							<BookOpen class="w-4 h-4" />
+							<Newspaper class="w-4 h-4" />
 							Blog
 							<ExternalLink class="w-3 h-3" />
 						</a>
