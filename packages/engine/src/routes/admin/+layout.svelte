@@ -62,7 +62,7 @@
         onclick={toggleCollapse}
         aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <ChevronLeft class="collapse-icon" class:rotated={sidebarCollapsed} />
+        <ChevronLeft class="collapse-icon{sidebarCollapsed ? ' rotated' : ''}" />
       </button>
       <button class="close-sidebar" onclick={closeSidebar} aria-label="Close menu">
         &times;
