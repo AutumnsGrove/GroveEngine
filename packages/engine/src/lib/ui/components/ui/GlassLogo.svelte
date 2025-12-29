@@ -135,7 +135,7 @@
 	const seasonColors = $derived(season ? seasonalPalettes[season] : null);
 
 	// Glass color schemes per variant, with seasonal override support
-	const variantColors = $derived(() => {
+	const variantColors = $derived.by(() => {
 		// If accentColor is provided, it takes precedence over season
 		if (accentColor) {
 			return {
@@ -215,7 +215,7 @@
 		};
 
 		return baseColors[variant];
-	})();
+	});
 
 	// Breathing animation
 	const breathValue = tweened(0, { easing: cubicInOut });
