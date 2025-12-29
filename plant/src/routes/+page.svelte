@@ -244,7 +244,7 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-3 stagger-children">
+		<div class="grid grid-cols-2 gap-3 pt-3 stagger-children">
 			{#each planPreviews as plan}
 				<a
 					href="https://grove.place/pricing"
@@ -252,7 +252,7 @@
 				>
 					<GlassCard
 						variant={plan.popular ? 'accent' : 'default'}
-						class="relative text-center hover-lift {plan.popular ? 'ring-2 ring-primary/30 mt-3' : ''}"
+						class="relative text-center hover-lift {plan.popular ? 'ring-2 ring-primary/30' : ''}"
 					>
 						{#if plan.popular}
 							<span class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-medium px-3 py-1 rounded-full bg-primary text-white shadow-sm">

@@ -41,8 +41,6 @@
 		actions?: Snippet;
 		/** Callback when logo is clicked */
 		onLogoClick?: () => void;
-		/** Season for logo */
-		season?: 'spring' | 'summer' | 'autumn' | 'winter';
 	}
 
 	let {
@@ -53,8 +51,7 @@
 		class: className,
 		navigation,
 		actions,
-		onLogoClick,
-		season = 'summer'
+		onLogoClick
 	}: Props = $props();
 
 	const maxWidthClass = {
@@ -86,14 +83,13 @@
 				<button
 					onclick={handleLogoClick}
 					class="flex-shrink-0 transition-transform hover:scale-110 active:scale-95"
-					aria-label="Toggle season theme"
-					title="Click to change season"
+					aria-label="Go to homepage"
 				>
-					<Logo class="w-7 h-7" {season} />
+					<Logo class="w-7 h-7" />
 				</button>
 			{:else}
 				<a href={logoHref} class="flex-shrink-0 transition-transform hover:scale-105">
-					<Logo class="w-7 h-7" {season} />
+					<Logo class="w-7 h-7" />
 				</a>
 			{/if}
 
