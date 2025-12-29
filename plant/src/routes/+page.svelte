@@ -8,6 +8,7 @@
 		// Auth icons
 		Mail,
 		LogIn,
+		ChevronDown,
 		// Feature icons
 		Leaf,
 		Shield,
@@ -25,6 +26,9 @@
 		Sparkles,
 		Clock
 	} from 'lucide-svelte';
+
+	// Auth section state
+	let authExpanded = $state(false);
 
 	// Google icon component
 	const GoogleIcon = `<svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -123,14 +127,19 @@
 				AI-free zone
 			</span>
 		</div>
+
+		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5">
+			<Users class="w-4 h-4" />
+			Join 59 writers already on the waitlist
+		</p>
 	</section>
 
 	<!-- Section 2: What You Get -->
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">What you'll get</h2>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-			<GlassCard variant="default" class="flex items-start gap-4">
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<Leaf class="w-5 h-5 text-primary" />
 				</div>
@@ -140,7 +149,7 @@
 				</div>
 			</GlassCard>
 
-			<GlassCard variant="default" class="flex items-start gap-4">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<Shield class="w-5 h-5 text-primary" />
 				</div>
@@ -150,7 +159,7 @@
 				</div>
 			</GlassCard>
 
-			<GlassCard variant="default" class="flex items-start gap-4">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<Palette class="w-5 h-5 text-primary" />
 				</div>
@@ -160,7 +169,7 @@
 				</div>
 			</GlassCard>
 
-			<GlassCard variant="default" class="flex items-start gap-4">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<Rss class="w-5 h-5 text-primary" />
 				</div>
@@ -170,7 +179,7 @@
 				</div>
 			</GlassCard>
 
-			<GlassCard variant="default" class="flex items-start gap-4">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<HardDrive class="w-5 h-5 text-primary" />
 				</div>
@@ -180,7 +189,7 @@
 				</div>
 			</GlassCard>
 
-			<GlassCard variant="default" class="flex items-start gap-4">
+			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
 				<div class="p-2 rounded-lg bg-accent shrink-0">
 					<Download class="w-5 h-5 text-primary" />
 				</div>
@@ -239,27 +248,35 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-3">
+		<div class="grid grid-cols-2 gap-3 stagger-children">
 			{#each planPreviews as plan}
-				<GlassCard
-					variant={plan.popular ? 'accent' : 'default'}
-					class="relative text-center {plan.popular ? 'ring-2 ring-primary/30' : ''}"
+				<a
+					href="https://grove.place/pricing"
+					class="block group"
 				>
-					{#if plan.popular}
-						<span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white">
-							Popular
+					<GlassCard
+						variant={plan.popular ? 'accent' : 'default'}
+						class="relative text-center hover-lift {plan.popular ? 'ring-2 ring-primary/30' : ''}"
+					>
+						{#if plan.popular}
+							<span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white">
+								Popular
+							</span>
+						{/if}
+						<h3 class="font-medium text-foreground mb-1">{plan.name}</h3>
+						<p class="text-2xl font-semibold text-foreground mb-2">
+							${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
+						</p>
+						<ul class="text-xs text-foreground-muted space-y-1 mb-2">
+							{#each plan.highlights as highlight}
+								<li>{highlight}</li>
+							{/each}
+						</ul>
+						<span class="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+							Learn more <ArrowRight class="w-3 h-3" />
 						</span>
-					{/if}
-					<h3 class="font-medium text-foreground mb-1">{plan.name}</h3>
-					<p class="text-2xl font-semibold text-foreground mb-2">
-						${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
-					</p>
-					<ul class="text-xs text-foreground-muted space-y-1">
-						{#each plan.highlights as highlight}
-							<li>{highlight}</li>
-						{/each}
-					</ul>
-				</GlassCard>
+					</GlassCard>
+				</a>
 			{/each}
 		</div>
 
@@ -279,46 +296,64 @@
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Begin your journey</h2>
 
 		<GlassCard variant="frosted" class="max-w-md mx-auto">
-			<p class="text-center text-foreground-muted mb-6">
-				Choose how you'd like to get started. We'll walk you through the rest.
-			</p>
+			{#if !authExpanded}
+				<!-- Collapsed: Get Started button -->
+				<div class="text-center space-y-4">
+					<p class="text-foreground-muted">
+						Ready to plant your blog? We'll walk you through the rest.
+					</p>
+					<button
+						onclick={() => authExpanded = true}
+						class="btn-primary w-full flex items-center justify-center gap-2"
+					>
+						<Sparkles class="w-5 h-5" />
+						Get Started
+						<ChevronDown class="w-4 h-4" />
+					</button>
+				</div>
+			{:else}
+				<!-- Expanded: Auth options -->
+				<p class="text-center text-foreground-muted mb-6">
+					Choose how you'd like to get started.
+				</p>
 
-			<div class="space-y-3">
-				<!-- Google -->
-				<a href="/auth?provider=google" class="btn-auth">
-					{@html GoogleIcon}
-					<span>Continue with Google</span>
-				</a>
+				<div class="space-y-3">
+					<!-- Google -->
+					<a href="/auth?provider=google" class="btn-auth">
+						{@html GoogleIcon}
+						<span>Continue with Google</span>
+					</a>
 
-				<!-- GitHub -->
-				<a href="/auth?provider=github" class="btn-auth">
-					{@html GitHubIcon}
-					<span>Continue with GitHub</span>
-				</a>
+					<!-- GitHub -->
+					<a href="/auth?provider=github" class="btn-auth">
+						{@html GitHubIcon}
+						<span>Continue with GitHub</span>
+					</a>
 
-				<!-- Divider -->
-				<div class="relative my-4">
-					<div class="absolute inset-0 flex items-center">
-						<div class="w-full border-t border-default"></div>
+					<!-- Divider -->
+					<div class="relative my-4">
+						<div class="absolute inset-0 flex items-center">
+							<div class="w-full border-t border-default"></div>
+						</div>
+						<div class="relative flex justify-center text-sm">
+							<span class="px-3 bg-surface-elevated text-foreground-subtle">or</span>
+						</div>
 					</div>
-					<div class="relative flex justify-center text-sm">
-						<span class="px-3 bg-surface-elevated text-foreground-subtle">or</span>
-					</div>
+
+					<!-- Email magic code -->
+					<a href="/auth?provider=email" class="btn-auth">
+						<Mail size={20} />
+						<span>Continue with Email</span>
+					</a>
 				</div>
 
-				<!-- Email magic code -->
-				<a href="/auth?provider=email" class="btn-auth">
-					<Mail size={20} />
-					<span>Continue with Email</span>
-				</a>
-			</div>
-
-			<p class="text-xs text-foreground-subtle text-center mt-6">
-				By continuing, you agree to our
-				<a href="https://grove.place/legal/terms" class="text-primary hover:underline">Terms of Service</a>
-				and
-				<a href="https://grove.place/legal/privacy" class="text-primary hover:underline">Privacy Policy</a>.
-			</p>
+				<p class="text-xs text-foreground-subtle text-center mt-6">
+					By continuing, you agree to our
+					<a href="https://grove.place/legal/terms" class="text-primary hover:underline">Terms of Service</a>
+					and
+					<a href="https://grove.place/legal/privacy" class="text-primary hover:underline">Privacy Policy</a>.
+				</p>
+			{/if}
 		</GlassCard>
 	</section>
 
@@ -332,14 +367,13 @@
 			description="Grove opens its doors. The first trees take root. We're growing carefully, building something meant to last."
 			progress={33}
 			href="https://grove.place/roadmap"
-			external={true}
 			class="max-w-md mx-auto"
 		/>
 	</section>
 
 	<!-- Opening Soon Message -->
 	<section class="text-center space-y-4 pb-4">
-		<div class="flex items-center justify-center gap-2">
+		<div class="flex items-center justify-center gap-2 animate-pulse-subtle">
 			<Sparkles class="w-5 h-5 text-primary" />
 			<span class="text-foreground-muted">Opening soon</span>
 			<Sparkles class="w-5 h-5 text-primary" />
@@ -356,21 +390,3 @@
 		</a>
 	</section>
 </div>
-
-<style>
-	/* Fade in animation */
-	.animate-fade-in {
-		animation: fadeIn 0.5s ease-out;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-</style>
