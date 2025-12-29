@@ -63,6 +63,11 @@
     fetchStats();
   });
 
+  // Get display name for greeting: prefer display_name, fallback to email username
+  const userName = $derived(
+    data.user?.display_name || data.user?.email?.split('@')[0] || 'there'
+  );
+
   /** @param {number} num */
   function formatNumber(num) {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -74,7 +79,7 @@
 <div class="max-w-screen-xl">
   <header class="mb-8">
     <h1 class="m-0 mb-2 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Dashboard</h1>
-    <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-lg transition-colors">Welcome back, Autumn!</p>
+    <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-lg transition-colors">Welcome back, {userName}!</p>
   </header>
 
   <!-- Stats Cards -->

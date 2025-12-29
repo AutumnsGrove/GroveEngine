@@ -98,7 +98,8 @@
               <a href="/admin/blog/edit/{post.slug}" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
               <button
                 onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
-                class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1"
+                disabled={deleting}
+                class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                 aria-label="Delete {post.title}"
               >
                 <Trash2 class="w-3.5 h-3.5" />

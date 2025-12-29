@@ -49,7 +49,15 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     const tenantId = locals.tenantId;
 
     // Get post count and approximate word count using SQL
-    // Word count: count words by splitting on whitespace in markdown_content
+    //
+    // NOTE: Word count is an APPROXIMATION using space counting.
+    // Limitations:
+    // - Multiple consecutive spaces are counted as multiple words
+    // - Markdown syntax (**bold**, [links], etc.) is counted as text
+    // - Code blocks and frontmatter are included
+    //
+    // For accurate counts, consider caching word_count on the posts table
+    // calculated during save (future optimization).
     const statsQuery = `
       SELECT
         COUNT(*) as post_count,
@@ -77,8 +85,9 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
         for (const tag of tags) {
           tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         }
-      } catch {
-        // Skip invalid JSON
+      } catch (err) {
+        // Log invalid JSON for debugging data issues
+        console.warn('Invalid tags JSON in post:', (row as { id?: string }).id, err);
       }
     }
 
