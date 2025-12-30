@@ -209,7 +209,7 @@ export const specs: Doc[] = [
     readingTime: 5,
   },
   {
-    slug: "writing-assistant-unified-spec",
+    slug: "ai-writing-assistant-spec",
     title: "Wisp — Writing Assistant",
     description: "Ethical AI writing tool that polishes without replacing",
     excerpt:
