@@ -45,9 +45,11 @@
 - ✅ Updated DO architecture doc with admin panel extensions
 
 ### Remaining (Debug Locally)
-- [ ] Debug Edit button on blog list (navigation not working)
+- [x] Debug Edit button on blog list (navigation not working) - FIXED
   - Edit route exists at `/admin/blog/edit/[slug]`
-  - Likely tenant context issue - debug with Chrome DevTools
+  - Fixed tenant context issue in admin edit server route
+  - Admin routes now handle missing tenantId gracefully
+  - TableOfContents component clicking also fixed
 
 ---
 

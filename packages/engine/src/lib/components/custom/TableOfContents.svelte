@@ -41,9 +41,20 @@
 	function scrollToHeader(id) {
 		const element = document.getElementById(id);
 		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Calculate offset for sticky headers
+			const offset = 80; // Account for any fixed headers
+			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+			const offsetPosition = elementPosition - offset;
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			});
+			
 			// Update URL hash without jumping
 			history.pushState(null, '', `#${id}`);
+		} else {
+			console.warn(`TableOfContents: Header element not found for ID: ${id}`);
 		}
 	}
 </script>
