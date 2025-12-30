@@ -13,7 +13,6 @@
 		Flower2,
 		Sun,
 		Sparkles,
-		Seedling,
 		Star,
 		Mail,
 		HardDrive,
@@ -606,7 +605,7 @@
 						</span>
 					{:else if phaseStatus['first-buds'] === 'future'}
 						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
-							<Seedling class="w-3.5 h-3.5" />
+							<Sprout class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
 					{/if}
