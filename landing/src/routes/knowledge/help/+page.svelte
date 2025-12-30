@@ -113,6 +113,110 @@
       </div>
     </section>
 
+    <!-- Account & Billing -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-foreground mb-6">Account & Billing</h2>
+      <div class="grid gap-4">
+        {#each articles.filter(a => ['creating-your-account', 'upgrading-or-downgrading', 'account-deletion'].includes(a.slug)) as article}
+          <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold text-foreground mb-2">
+              <a href="/knowledge/help/{article.slug}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                {article.title}
+              </a>
+            </h3>
+            <p class="text-foreground-muted mb-3">{article.excerpt}</p>
+            <div class="flex items-center justify-between">
+              <a href="/knowledge/help/{article.slug}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                Read more
+                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <span class="text-sm text-foreground-subtle">{article.readingTime} min read</span>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </section>
+
+    <!-- Customization -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-foreground mb-6">Customization</h2>
+      <div class="grid gap-4">
+        {#each articles.filter(a => ['understanding-the-admin-panel', 'formatting-your-posts', 'adding-images-and-media', 'choosing-a-theme'].includes(a.slug)) as article}
+          <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold text-foreground mb-2">
+              <a href="/knowledge/help/{article.slug}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                {article.title}
+              </a>
+            </h3>
+            <p class="text-foreground-muted mb-3">{article.excerpt}</p>
+            <div class="flex items-center justify-between">
+              <a href="/knowledge/help/{article.slug}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                Read more
+                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <span class="text-sm text-foreground-subtle">{article.readingTime} min read</span>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </section>
+
+    <!-- Privacy & Security -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-foreground mb-6">Privacy & Security</h2>
+      <div class="grid gap-4">
+        {#each articles.filter(a => ['understanding-your-privacy', 'how-grove-protects-your-content'].includes(a.slug)) as article}
+          <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold text-foreground mb-2">
+              <a href="/knowledge/help/{article.slug}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                {article.title}
+              </a>
+            </h3>
+            <p class="text-foreground-muted mb-3">{article.excerpt}</p>
+            <div class="flex items-center justify-between">
+              <a href="/knowledge/help/{article.slug}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                Read more
+                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <span class="text-sm text-foreground-subtle">{article.readingTime} min read</span>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </section>
+
+    <!-- Support & Resources -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-foreground mb-6">Support & Resources</h2>
+      <div class="grid gap-4">
+        {#each articles.filter(a => ['what-is-meadow', 'your-rss-feed', 'contact-support', 'checking-grove-status', 'browser-compatibility', 'known-limitations'].includes(a.slug)) as article}
+          <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold text-foreground mb-2">
+              <a href="/knowledge/help/{article.slug}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                {article.title}
+              </a>
+            </h3>
+            <p class="text-foreground-muted mb-3">{article.excerpt}</p>
+            <div class="flex items-center justify-between">
+              <a href="/knowledge/help/{article.slug}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                Read more
+                <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <span class="text-sm text-foreground-subtle">{article.readingTime} min read</span>
+            </div>
+          </article>
+        {/each}
+      </div>
+    </section>
+
     <!-- Troubleshooting -->
     <section class="mb-12">
       <h2 class="text-2xl font-semibold text-foreground mb-6">Troubleshooting</h2>
