@@ -57,6 +57,8 @@
 		Moon as MoonIcon,
 		Star
 	} from 'lucide-svelte';
+tt// Wisp icons
+ttWind
 
 	// Import nature assets from engine package
 	import {
