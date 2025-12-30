@@ -30,6 +30,8 @@
 		ShieldCheck,
 		Download,
 		LifeBuoy,
+		Terminal,
+		Network,
 		// First Buds icons
 		TreeDeciduous,
 		// Full Bloom icons
@@ -122,7 +124,9 @@
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
 				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
-				{ name: 'Help Center', description: 'Guidance when you need it', done: true, icon: 'lifebuoy' }
+				{ name: 'Help Center', description: 'Guidance when you need it', done: true, icon: 'lifebuoy' },
+				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: true, icon: 'terminal', internal: true },
+				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true }
 			]
 		},
 		'first-buds': {
@@ -495,7 +499,8 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-accent shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-accent shadow-sm
+							{feature.internal ? 'opacity-75' : ''}">
 							{#if feature.icon === 'userplus'}
 								<UserPlus class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'sprout'}
@@ -514,11 +519,20 @@
 								<Download class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'lifebuoy'}
 								<LifeBuoy class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'terminal'}
+								<Terminal class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'network'}
+								<Network class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{/if}
-							<div>
-								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+									{#if feature.internal}
+										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">Internal</span>
+									{/if}
+								</div>
 								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>

@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -60,6 +60,16 @@
 			domain: 'bloom.grove.place',
 			integration: 'Personal serverless development infrastructure',
 			github: 'https://github.com/AutumnsGrove/GroveBloom'
+		},
+		{
+			name: 'Mycelium',
+			tagline: 'The Wood Wide Web',
+			description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service through a single, unified interface.',
+			status: 'building',
+			icon: 'network',
+			domain: 'mycelium.grove.place',
+			integration: 'MCP server for AI agent integration',
+			github: 'https://github.com/AutumnsGrove/GroveMCP'
 		},
 		{
 			name: 'Forage',
@@ -184,6 +194,8 @@
 										<Upload class="w-5 h-5" />
 									{:else if tool.icon === 'video'}
 										<Video class="w-5 h-5" />
+									{:else if tool.icon === 'network'}
+										<Network class="w-5 h-5" />
 									{:else if tool.icon === 'book'}
 										<BookOpen class="w-5 h-5" />
 									{/if}

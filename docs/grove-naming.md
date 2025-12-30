@@ -21,10 +21,13 @@ A meadow is where the forest opens up. Sunlight reaches the ground. You can see 
 
 Meadow is social media that remembers what "social" means. No public metrics breeding hierarchy. No viral mechanics rewarding the loudest voice. Just a chronological feed of people you chose to follow, with reactions that only the author can see. Encouragement without performance. Connection without competition.
 
+*In development*
+
 ---
 
 ## Forage
 **Domain Discovery** · `forage.grove.place`
+**Repository:** [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)
 
 Before you can plant, you have to search. You walk the forest floor, looking for what you need—something that fits, something that's *available*, something worth bringing home.
 
@@ -34,6 +37,7 @@ Forage is an AI-powered domain hunting tool that turns weeks of frustrating sear
 
 ## Foliage
 **Theming System** · `foliage.grove.place`
+**Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
 
 Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
 
@@ -43,6 +47,7 @@ Foliage is visual customization for your blog—from accent colors to full theme
 
 ## Heartwood
 **Authentication** · `heartwood.grove.place`
+**Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
 
 Cut a tree open and you'll find the heartwood at the center—the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
 
@@ -52,6 +57,7 @@ Heartwood is centralized authentication for the Grove ecosystem. One identity, v
 
 ## Cache
 **Backup System** · *Internal service*
+**Repository:** [AutumnsGrove/GroveBackups](https://github.com/AutumnsGrove/GroveBackups)
 
 Squirrels cache acorns for winter. They bury what matters in safe places, trusting they can return when they need it.
 
@@ -61,6 +67,7 @@ Cache runs weekly automated backups of every Grove database to cold storage. Twe
 
 ## Trove
 **Library Book Discovery** · `trove.grove.place`
+**Repository:** [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove)
 
 A trove is a collection of precious things, gathered and waiting to be discovered.
 
@@ -70,6 +77,7 @@ Point your camera at a library shelf. Trove identifies the books, cross-referenc
 
 ## Outpost
 **Minecraft Server** · `mc.grove.place`
+**Repository:** [AutumnsGrove/GroveMC](https://github.com/AutumnsGrove/GroveMC)
 
 An outpost is where you gather at the edge of the wilderness. A place to rest, regroup, and adventure together.
 
@@ -79,6 +87,7 @@ Outpost is an on-demand Minecraft server for friends. It spins up when someone w
 
 ## Aria
 **Music Curation** · `aria.grove.place`
+**Repository:** [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic)
 
 An aria is a self-contained melody—a single voice carrying emotion through song.
 
@@ -88,6 +97,7 @@ Give Aria a song you love, and it builds a playlist of tracks that share the sam
 
 ## Lattice
 **Core Platform** · `npm: @autumnsgrove/lattice`
+**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
 
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see—it's the thing that holds everything else up.
 
@@ -108,6 +118,7 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 
 ## Ivy
 **Email** · `ivy.grove.place`
+**Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
 
 Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
 
@@ -117,6 +128,7 @@ Ivy is email for Grove. Not a Gmail replacement—a focused, privacy-first mail 
 
 ## Amber
 **Storage Management** · `amber.grove.place`
+**Repository:** [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)
 
 Amber is fossilized tree resin—preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.
 
@@ -163,6 +175,35 @@ Some vineyards showcase mature vines ready for harvest. Others tend young shoots
 
 ---
 
+## Bloom
+**Remote Coding Infrastructure** · `bloom.grove.place`
+**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
+
+A bloom is the brief, brilliant moment when a flower opens—ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+
+Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Send a task from your phone during lunch. Check back later—Bloom worked through it, saved the results, and cleaned up after itself. Infrastructure that exists only when needed, costs almost nothing, and never overstays its welcome.
+
+It blooms, does its work, and fades away. By morning, there's only the code it left behind.
+
+*Brief, brilliant, gone.*
+
+---
+
+## Mycelium
+**MCP Server** · `mycelium.grove.place`
+
+In the forest, mycelium is the wood wide web—invisible fungal threads connecting every tree, sharing nutrients and signals across the entire ecosystem. It's how the forest communicates with itself.
+
+Mycelium is Grove's Model Context Protocol (MCP) server, the communication layer that lets AI agents interact with the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom coding sessions, manage files in Amber, and tap into every Grove service—all through a single, unified interface. Just as forest mycelium supports seedlings that can't yet photosynthesize on their own, Mycelium extends your reach, letting AI agents work on your behalf across the grove.
+
+It's the invisible network beneath everything. You don't see it. You don't think about it. But it's how the whole system stays connected.
+
+*In development. Repository: [AutumnsGrove/GroveMCP](https://github.com/AutumnsGrove/GroveMCP)*
+
+*The forest speaks through its roots.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -182,6 +223,8 @@ Some vineyards showcase mature vines ready for harvest. Others tend young shoots
 | **Shade** | AI content protection | grove.place/shade |
 | **Trails** | Personal roadmaps | username.grove.place/trail |
 | **Vineyard** | Asset & tool showcase | *.grove.place/vineyard |
+| **Bloom** | Remote coding infrastructure | bloom.grove.place |
+| **Mycelium** | MCP server | mycelium.grove.place |
 
 ---
 
@@ -206,6 +249,8 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Shade | GroveShade |
 | Trails | GroveTrails |
 | Vineyard | GroveShowcase |
+| Bloom | GroveBloom |
+| Mycelium | GroveMCP |
 
 ---
 

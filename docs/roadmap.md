@@ -49,6 +49,11 @@ The groundwork laid in stillness. Foundations built when no one was watching.
   - GitHub Actions CI/CD
   - Wrangler deployments
 
+- [x] **Internal Tools** — Development infrastructure
+  - Bloom (GroveBloom) — Remote coding environments on-demand
+  - Mycelium (GroveMCP) — MCP server for AI agent integration
+  - See `docs/specs/mycelium-spec.md` and `docs/grove-mcp-guide.md`
+
 ---
 
 ## Phase 2: Thaw (Current)
