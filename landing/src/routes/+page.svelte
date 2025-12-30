@@ -13,7 +13,7 @@
 		Map,
 		BookOpen,
 		Sparkles,
-		CircleDollarSign,
+		Tag,
 		Leaf,
 		Shield,
 		Users,
@@ -154,7 +154,7 @@
 			href="/pricing"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<CircleDollarSign class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<Tag class="w-4 h-4 group-hover:scale-110 transition-transform" />
 			<span>Pricing</span>
 		</a>
 	</div>

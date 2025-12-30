@@ -7,10 +7,10 @@
 		BookOpen,
 		Map,
 		Tag,
-		TreeDeciduous,
-		Eye,
+		Info,
+		Telescope,
 		Mail,
-		Newspaper
+		PenLine
 	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
@@ -69,13 +69,13 @@
 					</li>
 					<li>
 						<a href="/about" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
-							<TreeDeciduous class="w-4 h-4" />
+							<Info class="w-4 h-4" />
 							About Grove
 						</a>
 					</li>
 					<li>
 						<a href="/vision" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
-							<Eye class="w-4 h-4" />
+							<Telescope class="w-4 h-4" />
 							Our Vision
 						</a>
 					</li>
@@ -99,7 +99,7 @@
 							rel="noopener noreferrer"
 							class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
 						>
-							<Newspaper class="w-4 h-4" />
+							<PenLine class="w-4 h-4" />
 							Blog
 							<ExternalLink class="w-3 h-3" />
 						</a>

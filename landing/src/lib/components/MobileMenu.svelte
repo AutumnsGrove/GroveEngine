@@ -5,12 +5,13 @@
 		Home,
 		Info,
 		Telescope,
-		CreditCard,
+		Tag,
 		BookOpen,
 		Trees,
 		Map,
 		PenLine,
-		X
+		X,
+		Waypoints
 	} from 'lucide-svelte';
 
 	interface Props {
@@ -82,9 +83,10 @@
 		{ href: '/about', label: 'About', icon: Info },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/roadmap', label: 'Roadmap', icon: Map },
-		{ href: '/pricing', label: 'Pricing', icon: CreditCard },
+		{ href: '/pricing', label: 'Pricing', icon: Tag },
 		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
 		{ href: '/forest', label: 'Forest', icon: Trees },
+		{ href: '/contact', label: 'Contact', icon: Waypoints },
 		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true }
 	];
 
