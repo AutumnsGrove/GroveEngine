@@ -4,7 +4,7 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { season } from '$lib/stores/season';
-	import { Menu } from 'lucide-svelte';
+	import { Menu, Home, Info, Telescope, Tag, BookOpen, Trees, Waypoints, PenLine } from 'lucide-svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived($page.url.pathname);
@@ -29,21 +29,22 @@
 		season.cycle();
 	}
 
-	// Navigation items (desktop)
+	// Navigation items (desktop) with icons
 	type NavItem = {
 		href: string;
 		label: string;
+		icon: typeof Home;
 		external?: boolean;
 	};
 
 	const navItems: NavItem[] = [
-		{ href: '/about', label: 'About' },
-		{ href: '/vision', label: 'Vision' },
-		{ href: '/roadmap', label: 'Roadmap' },
-		{ href: '/pricing', label: 'Pricing' },
-		{ href: '/knowledge', label: 'Knowledge' },
-		{ href: '/forest', label: 'Forest' },
-		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', external: true }
+		{ href: '/about', label: 'About', icon: Info },
+		{ href: '/vision', label: 'Vision', icon: Telescope },
+		{ href: '/roadmap', label: 'Roadmap', icon: Map },
+		{ href: '/pricing', label: 'Pricing', icon: Tag },
+		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
+		{ href: '/forest', label: 'Forest', icon: Trees },
+		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true }
 	];
 
 	function isActive(href: string): boolean {
@@ -78,15 +79,17 @@
 		<!-- Desktop navigation -->
 		<nav class="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-sans">
 			{#each navItems as item}
+				{@const Icon = item.icon}
 				<a
 					href={item.href}
 					target={item.external ? '_blank' : undefined}
 					rel={item.external ? 'noopener noreferrer' : undefined}
-					class="transition-colors whitespace-nowrap {isActive(item.href)
+					class="flex items-center gap-2 transition-colors whitespace-nowrap {isActive(item.href)
 						? 'text-accent-muted'
 						: 'text-foreground-subtle hover:text-accent-muted'}"
 				>
-					{item.label}
+					<Icon class="w-4 h-4 flex-shrink-0" />
+					<span>{item.label}</span>
 				</a>
 			{/each}
 			<ThemeToggle />
