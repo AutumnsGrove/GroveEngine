@@ -122,9 +122,35 @@
 								<span class="supporter-name">Alex Rylander</span>
 								<span class="supporter-desc">— unwavering support</span>
 							</div>
+							<div class="supporter-card">
+								<div class="supporter-header">
+									<span class="supporter-name">Camille Jenkins</span>
+									<span class="supporter-context">order picker, wife & mom of 3</span>
+								</div>
+								<p class="supporter-note">
+									One of the best energies around. She has such an amazing personality, is so friendly, and very loving. She loves big, I can tell. She always gives me a hug and is absolutely thrilled to see me bloom.
+								</p>
+							</div>
+							<div class="supporter-card">
+								<div class="supporter-header">
+									<span class="supporter-name">Carmen Herrera</span>
+									<span class="supporter-context">flooring/appliances</span>
+								</div>
+								<p class="supporter-note">
+									A grounding energy in that place. Every time I talk to her I feel more confident about my ambitions and purpose. She is so encouraging, and so very excited for everything in the Grove project. Love her lots. She also might one day get a grove of her own—she wants to have a blog talking about spiritual things!
+								</p>
+							</div>
 							<div class="supporter-item">
-								<span class="supporter-name">Camille</span>
-								<span class="supporter-desc">— extra excited for everything Grove</span>
+								<span class="supporter-name">Stephanie</span>
+								<span class="supporter-desc">— real supportive person, mature perspectives and excited to see me bloom</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Maggie Cuthbertson</span>
+								<span class="supporter-desc">— very supportive, very excited about the Grove, wants to learn how it all works</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Jack Sheckles</span>
+								<span class="supporter-desc">— very excited for me, wants to see me bloom</span>
 							</div>
 						</div>
 					</div>
@@ -157,6 +183,10 @@
 							<div class="supporter-item">
 								<span class="supporter-name">Sean Amaso</span>
 								<span class="supporter-desc">— local artist and high school friend, major supporter</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Ijeoma Odihe</span>
+								<span class="supporter-desc">— such a ray of sunshine on dark days, lovely warm personality</span>
 							</div>
 						</div>
 					</div>
