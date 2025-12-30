@@ -43,17 +43,15 @@
 		class?: string;
 		/** Glass style variant */
 		variant?: GlassVariant;
-		/** Seasonal color theme - overrides default colors */
+		/** Seasonal color theme - defaults to summer */
 		season?: Season;
-		/** Add subtle sway animation */
-		animate?: boolean;
 		/** Add breathing animation (for loading states) */
 		breathing?: boolean;
 		/** Breathing animation speed */
 		breathingSpeed?: BreathingSpeed;
 		/** Whether trunk should match foliage color */
 		monochrome?: boolean;
-		/** Custom accent color (CSS color value) - overrides season */
+		/** Custom accent color (CSS color value) - only applies when season is not set */
 		accentColor?: string;
 		/** Unique ID for SVG filters (auto-generated if not provided) */
 		filterId?: string;
@@ -62,8 +60,7 @@
 	let {
 		class: className = 'w-6 h-6',
 		variant = "default",
-		season,
-		animate = false,
+		season = 'summer',
 		breathing = false,
 		breathingSpeed = 'normal',
 		monochrome = false,
@@ -134,21 +131,9 @@
 	// Get seasonal colors or null if no season specified
 	const seasonColors = $derived(season ? seasonalPalettes[season] : null);
 
-	// Glass color schemes per variant, with seasonal override support
+	// Glass color schemes per variant, using seasonal colors
 	const variantColors = $derived.by(() => {
-		// If accentColor is provided, it takes precedence over season
-		if (accentColor) {
-			return {
-				gradientStart: `${accentColor}cc`,
-				gradientEnd: `${accentColor}99`,
-				highlight: 'rgba(255, 255, 255, 0.6)',
-				shadow: `${accentColor}40`,
-				trunk: monochrome ? `${accentColor}99` : 'rgba(93, 64, 55, 0.8)',
-				glowColor: `${accentColor}50`
-			};
-		}
-
-		// Base colors from variant
+		// Base colors from variant (all variants use seasonal colors now)
 		const baseColors = {
 			default: {
 				gradientStart: seasonColors?.primary ?? 'rgba(255, 255, 255, 0.7)',
@@ -161,15 +146,15 @@
 				glowColor: seasonColors?.glow ?? 'rgba(16, 185, 129, 0.3)'
 			},
 			accent: {
-				// Accent uses seasonal colors if available, otherwise CSS variable
-				gradientStart: seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.8)',
-				gradientEnd: seasonColors?.secondary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)',
+				// Accent uses custom accentColor if provided, otherwise seasonal colors
+				gradientStart: accentColor ? `${accentColor}cc` : (seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.8)'),
+				gradientEnd: accentColor ? `${accentColor}99` : (seasonColors?.secondary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)'),
 				highlight: 'rgba(255, 255, 255, 0.6)',
-				shadow: seasonColors?.shadow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.25)',
+				shadow: accentColor ? `${accentColor}40` : (seasonColors?.shadow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.25)'),
 				trunk: monochrome
-					? (seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)')
+					? (accentColor ? `${accentColor}99` : (seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)'))
 					: 'rgba(93, 64, 55, 0.8)',
-				glowColor: seasonColors?.glow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.3)'
+				glowColor: accentColor ? `${accentColor}50` : (seasonColors?.glow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.3)')
 			},
 			frosted: {
 				// Frosted: more opaque, tinted with season
@@ -260,27 +245,40 @@
 	// Glow intensity for breathing (pulses with breath)
 	const glowIntensity = $derived(4 + $breathValue * 4);
 
-	// Animation class
-	const animationClass = $derived(animate && !breathing ? 'grove-glass-logo-sway' : '');
 
 	// Decomposed foliage paths for breathing animation
-	const centerPath = "M126 173.468 L171.476 124.872 L171.476 173.468 L126 173.468 M245.562 124.872 L290.972 173.268 L245.562 173.268 L245.562 124.872 M126.664 243.97 L171.476 243.97 L171.476 173.468 L126 173.468 L126.664 243.97 M290.252 243.77 L245.562 243.77 L245.562 173.268 L290.972 173.268 L290.252 243.77 M171.476 243.97 L208.519 258.11 L245.562 243.77 L245.562 173.268 L171.476 173.468 L171.476 243.97";
-	const leftBarPath = "M0 173.468 L126 173.468 L126.664 243.97 L0 243.97 Z";
-	const rightBarPath = "M290.972 173.268 L417 173.268 L417 243.77 L290.252 243.77 Z";
-	const topBarPath = "M171.476 0 L245.562 0 L245.562 124.872 L171.476 124.872 Z";
-	const topLeftDiagPath = "M126.068 173.468 L36.446 88.028 L86.037 37.043 L171.476 124.872 Z";
-	const topRightDiagPath = "M245.562 124.872 L331 37.243 L380.552 88.028 L290.972 173.268 Z";
-	const bottomLeftDiagPath = "M126.664 243.97 L36.446 331.601 L86.037 381.192 L208.519 258.11 L171.476 243.97 Z";
-	const bottomRightDiagPath = "M290.252 243.77 L380.435 331.399 L331 381.192 L208.519 258.11 L245.562 243.77 Z";
+	// Each bar extends toward the center so they overlap at rest, forming the complete logo
+	// When expanded, the overlapping regions separate creating the burst effect
+
+	// Left horizontal bar - extends right to center, includes connection wedge
+	const leftBarPath = "M0 173.468 L171.476 173.468 L171.476 243.97 L0 243.97 Z";
+
+	// Right horizontal bar - extends left to center, includes connection wedge
+	const rightBarPath = "M245.562 173.268 L417 173.268 L417 243.77 L245.562 243.77 Z";
+
+	// Top vertical bar - extends down to center, includes connection wedge
+	const topBarPath = "M171.476 0 L245.562 0 L245.562 173.468 L171.476 173.468 Z";
+
+	// Top-left diagonal - arrow with extended inner edge
+	const topLeftDiagPath = "M171.476 173.468 L171.476 124.872 L86.037 37.043 L36.446 88.028 L126 173.468 Z";
+
+	// Top-right diagonal - arrow with extended inner edge
+	const topRightDiagPath = "M245.562 173.268 L245.562 124.872 L331 37.243 L380.552 88.028 L290.972 173.268 Z";
+
+	// Bottom-left diagonal - arrow with extended inner edge to center point
+	const bottomLeftDiagPath = "M171.476 243.97 L208.519 258.11 L86.037 381.192 L36.446 331.601 L126.664 243.97 Z";
+
+	// Bottom-right diagonal - arrow with extended inner edge to center point
+	const bottomRightDiagPath = "M245.562 243.77 L208.519 258.11 L331 381.192 L380.435 331.399 L290.252 243.77 Z";
 
 	// Full foliage path for non-breathing state
 	const fullFoliagePath = "M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z";
 </script>
 
 <svg
-	class="{className} {animationClass}"
+	class={className}
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 417 512.238"
+	viewBox="0 -30 417 542.238"
 	aria-label="Grove logo"
 >
 	<defs>
@@ -337,11 +335,8 @@
 	/>
 
 	{#if breathing}
-		<!-- Decomposed foliage with breathing animation -->
+		<!-- Decomposed foliage with breathing animation - bars expand outward from center -->
 		<g filter="url(#{uniqueId}-glow)">
-			<!-- Center anchor (stationary) -->
-			<path fill="url(#{uniqueId}-foliage-grad)" d={centerPath} />
-
 			<!-- Left horizontal bar -->
 			<g transform={leftTransform}>
 				<path fill="url(#{uniqueId}-foliage-grad)" d={leftBarPath} />
@@ -377,13 +372,6 @@
 				<path fill="url(#{uniqueId}-foliage-grad)" d={bottomRightDiagPath} />
 			</g>
 		</g>
-
-		<!-- Highlight overlay for breathing (simplified) -->
-		<path
-			d={centerPath}
-			fill="url(#{uniqueId}-highlight)"
-			opacity="0.5"
-		/>
 	{:else}
 		<!-- Static foliage with glass effect -->
 		<g filter="url(#{uniqueId}-glow)">
@@ -432,14 +420,3 @@
 	{/if}
 </svg>
 
-<style>
-	@keyframes grove-glass-logo-sway {
-		0%, 100% { transform: rotate(0deg); }
-		50% { transform: rotate(1deg); }
-	}
-
-	.grove-glass-logo-sway {
-		transform-origin: center bottom;
-		animation: grove-glass-logo-sway 4s ease-in-out infinite;
-	}
-</style>

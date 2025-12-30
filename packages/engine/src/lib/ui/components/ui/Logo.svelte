@@ -2,11 +2,18 @@
 	/**
 	 * Grove Logo Component
 	 *
-	 * A logo that respects the user's accent color by default.
-	 * The foliage uses `currentColor` which inherits from --accent-color
-	 * when placed in an accent-colored context, or can be overridden.
+	 * A seasonal logo with beautiful nature-inspired colors.
+	 * Defaults to summer (emerald green) but supports all seasons.
 	 *
 	 * The trunk defaults to Grove's classic bark brown (#5d4037).
+	 *
+	 * @example Basic usage
+	 * ```svelte
+	 * <Logo />  <!-- Summer green by default -->
+	 * <Logo season="spring" />  <!-- Cherry blossom pink -->
+	 * <Logo season="autumn" />  <!-- Warm orange -->
+	 * <Logo season="winter" />  <!-- Frosted green -->
+	 * ```
 	 *
 	 * @example Loading state (breathing animation)
 	 * ```svelte
@@ -20,18 +27,27 @@
 	import { cubicInOut } from 'svelte/easing';
 	import { browser } from '$app/environment';
 
+	type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 	type BreathingSpeed = 'slow' | 'normal' | 'fast';
+
+	// Seasonal color palette - matches GlassLogo for consistency
+	const seasonalColors = {
+		spring: '#f472b6',    // pink-400 - cherry blossom
+		summer: '#10b981',    // emerald-500 - lush growth
+		autumn: '#fb923c',    // orange-400 - warm harvest
+		winter: '#86efac'     // green-300 - frosted evergreen
+	} as const;
 
 	interface Props {
 		class?: string;
-		/** Foliage color - defaults to currentColor (inherits accent) */
+		/** Seasonal color theme - defaults to summer */
+		season?: Season;
+		/** Custom foliage color - overrides season if provided */
 		color?: string;
 		/** Trunk color - defaults to classic bark brown */
 		trunkColor?: string;
 		/** Whether foliage and trunk should be the same color */
 		monochrome?: boolean;
-		/** Add subtle sway animation */
-		animate?: boolean;
 		/** Add breathing animation (for loading states, not lists) */
 		breathing?: boolean;
 		/** Breathing animation speed - 'slow' (1500ms), 'normal' (800ms), 'fast' (400ms) */
@@ -40,10 +56,10 @@
 
 	let {
 		class: className = 'w-6 h-6',
+		season = 'summer',
 		color,
 		trunkColor,
 		monochrome = false,
-		animate = false,
 		breathing = false,
 		breathingSpeed = 'normal'
 	}: Props = $props();
@@ -69,11 +85,11 @@
 	// Classic bark brown from the nature palette
 	const BARK_BROWN = '#5d4037';
 
-	// Compute actual colors
-	const foliageColor = color ?? 'currentColor';
-	const actualTrunkColor = monochrome
+	// Compute actual colors - use custom color if provided, otherwise use seasonal color
+	const foliageColor = $derived(color ?? seasonalColors[season]);
+	const actualTrunkColor = $derived(monochrome
 		? foliageColor
-		: (trunkColor ?? BARK_BROWN);
+		: (trunkColor ?? BARK_BROWN));
 
 	// Breathing animation using tweened store (duration set dynamically in $effect)
 	const breathValue = tweened(0, { easing: cubicInOut });
@@ -123,53 +139,43 @@
 	const bottomLeftTransform = $derived(`translate(${-diagExpansion}, ${diagExpansion})`);
 	const bottomRightTransform = $derived(`translate(${diagExpansion}, ${diagExpansion})`);
 
-	// Build animation classes (sway only, breathing uses transforms)
-	const animationClass = $derived(animate && !breathing ? 'grove-logo-sway' : '');
+	// Decomposed foliage paths for breathing animation
+	// Each bar extends toward the center so they overlap at rest, forming the complete logo
+	// When expanded, the overlapping regions separate creating the burst effect
 
-	// Decomposed foliage paths (8 pieces) for breathing animation
-	// Original path: "M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"
-	// Decomposed by tracing path commands and isolating geometric boundaries where arms meet center.
-	// If modifying, ensure pieces align at rest (breathValue=0) to match the original silhouette.
+	// Left horizontal bar - extends right to center
+	const leftBarPath = "M0 173.468 L171.476 173.468 L171.476 243.97 L0 243.97 Z";
 
-	// Center anchor - the hub where all branches connect (stays stationary)
-	const centerPath = "M126 173.468 L171.476 124.872 L171.476 173.468 L126 173.468 M245.562 124.872 L290.972 173.268 L245.562 173.268 L245.562 124.872 M126.664 243.97 L171.476 243.97 L171.476 173.468 L126 173.468 L126.664 243.97 M290.252 243.77 L245.562 243.77 L245.562 173.268 L290.972 173.268 L290.252 243.77 M171.476 243.97 L208.519 258.11 L245.562 243.77 L245.562 173.268 L171.476 173.468 L171.476 243.97";
+	// Right horizontal bar - extends left to center
+	const rightBarPath = "M245.562 173.268 L417 173.268 L417 243.77 L245.562 243.77 Z";
 
-	// Left horizontal bar
-	const leftBarPath = "M0 173.468 L126 173.468 L126.664 243.97 L0 243.97 Z";
+	// Top vertical bar - extends down to center
+	const topBarPath = "M171.476 0 L245.562 0 L245.562 173.468 L171.476 173.468 Z";
 
-	// Right horizontal bar
-	const rightBarPath = "M290.972 173.268 L417 173.268 L417 243.77 L290.252 243.77 Z";
+	// Top-left diagonal - arrow with extended inner edge
+	const topLeftDiagPath = "M171.476 173.468 L171.476 124.872 L86.037 37.043 L36.446 88.028 L126 173.468 Z";
 
-	// Top vertical bar
-	const topBarPath = "M171.476 0 L245.562 0 L245.562 124.872 L171.476 124.872 Z";
+	// Top-right diagonal - arrow with extended inner edge
+	const topRightDiagPath = "M245.562 173.268 L245.562 124.872 L331 37.243 L380.552 88.028 L290.972 173.268 Z";
 
-	// Top-left diagonal branch (arrow shape)
-	const topLeftDiagPath = "M126.068 173.468 L36.446 88.028 L86.037 37.043 L171.476 124.872 Z";
+	// Bottom-left diagonal - arrow with extended inner edge to center point
+	const bottomLeftDiagPath = "M171.476 243.97 L208.519 258.11 L86.037 381.192 L36.446 331.601 L126.664 243.97 Z";
 
-	// Top-right diagonal branch (arrow shape)
-	const topRightDiagPath = "M245.562 124.872 L331 37.243 L380.552 88.028 L290.972 173.268 Z";
-
-	// Bottom-left diagonal branch (arrow shape)
-	const bottomLeftDiagPath = "M126.664 243.97 L36.446 331.601 L86.037 381.192 L208.519 258.11 L171.476 243.97 Z";
-
-	// Bottom-right diagonal branch (arrow shape)
-	const bottomRightDiagPath = "M290.252 243.77 L380.435 331.399 L331 381.192 L208.519 258.11 L245.562 243.77 Z";
+	// Bottom-right diagonal - arrow with extended inner edge to center point
+	const bottomRightDiagPath = "M245.562 243.77 L208.519 258.11 L331 381.192 L380.435 331.399 L290.252 243.77 Z";
 </script>
 
 <svg
-	class="{className} {animationClass}"
+	class={className}
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 417 512.238"
+	viewBox="0 -30 417 542.238"
 	aria-label="Grove logo"
 >
 	<!-- Trunk (always static) -->
 	<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
 
 	{#if breathing}
-		<!-- Decomposed foliage with breathing animation -->
-
-		<!-- Center anchor (stationary) -->
-		<path fill={foliageColor} d={centerPath}/>
+		<!-- Decomposed foliage with breathing animation - bars expand outward from center -->
 
 		<!-- Left horizontal bar -->
 		<g transform={leftTransform}>
@@ -211,14 +217,3 @@
 	{/if}
 </svg>
 
-<style>
-	@keyframes grove-logo-sway {
-		0%, 100% { transform: rotate(0deg); }
-		50% { transform: rotate(1deg); }
-	}
-
-	.grove-logo-sway {
-		transform-origin: center bottom;
-		animation: grove-logo-sway 4s ease-in-out infinite;
-	}
-</style>
