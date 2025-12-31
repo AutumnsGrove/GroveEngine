@@ -499,6 +499,12 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 ### Internal Tools
 - [ ] Add search queue support (allow multiple concurrent domain searches)
 
+### Vista Pre-requisites
+- [ ] **Add `/health` endpoint to autumnsgrove worker** — Required for Vista health monitoring
+  - Location: autumnsgrove repo (autumnsgrove.dev)
+  - Endpoint should return `{ status: "ok" }` with 200 status code
+  - See `docs/specs/vista-spec.md` for health check standard
+
 ### Personal TODOs
 - [ ] Within markdown editor, allow for Drafts (saveable, postable later)
 
