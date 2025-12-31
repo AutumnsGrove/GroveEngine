@@ -33,6 +33,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   autumn: "autumn-website.pages.dev", // Autumn's Grove
   example: "grove-example-site.pages.dev", // GroveEngine example
   plant: "grove-plant.pages.dev", // Grove Plant
+  vineyard: "vineyard-grove-place.pages.dev", // Vineyard blog
   cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
   // Domain management
@@ -138,8 +139,9 @@ export default {
     // Handle unknown subdomains - proxy to groveengine for tenant lookup
     // (null routes were removed - all special subdomains now have explicit targets)
 
-    // Determine target hostname - default to main groveengine for tenant blogs
-    const targetHostname = routeTarget || "groveengine.pages.dev";
+    // Determine target hostname - default to main engine for tenant blogs
+    // Note: The Pages project is named "groveengine" but deploys to grove-example-site.pages.dev
+    const targetHostname = routeTarget || "grove-example-site.pages.dev";
 
     // Proxy to target
     const targetUrl = new URL(request.url);
