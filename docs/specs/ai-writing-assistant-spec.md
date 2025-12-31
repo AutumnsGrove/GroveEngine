@@ -3,7 +3,7 @@
 > **Status:** Approved - Ready for implementation
 > **Target:** GroveEngine integration
 > **Internal Name:** GroveWisp
-> **Philosophy:** A helper, not a writer
+> **Philosophy:** A helper, not a writer—and sometimes, a good listener
 
 ---
 
@@ -18,6 +18,8 @@
 ## Overview
 
 An ethical AI writing tool that helps users polish their voice without replacing it. The assistant analyzes existing content for grammar, tone, and readability - it will **never** generate, expand, or brainstorm content.
+
+**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say—then organizes *their own words* into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
 
 This specification unifies:
 - The original AI Writing Assistant design (AutumnsGrove)
@@ -174,6 +176,357 @@ interface ReadabilityResult {
 ```
 
 **Why local?** Readability is algorithmic - no AI needed. Saves cost, latency, and privacy concerns.
+
+---
+
+## Fireside Mode
+
+> *A good listener, not a ghostwriter.*
+
+### The Problem
+
+Some people freeze at the blank page. "What do I write? Where do I start?" But those same people have no trouble *talking*—to friends, in group chats, over coffee. The ideas are there. The voice is there. The barrier is the blank page itself.
+
+### The Solution
+
+Fireside is a conversational mode where Wisp asks questions and you answer naturally. Your responses—your words, your voice, your thoughts—get organized into a draft.
+
+The fire doesn't tell the story. It just creates the space where stories emerge.
+
+### Philosophy
+
+| Fireside Does | Fireside Never Does |
+|---------------|---------------------|
+| Ask thoughtful questions | Generate content from nothing |
+| Organize YOUR words into a draft | Add ideas you didn't express |
+| Smooth transitions between your thoughts | Expand beyond what you said |
+| Suggest you elaborate ("tell me more") | Take a position on your behalf |
+| Respect minimal answers with short drafts | Pad low-effort responses into full posts |
+
+**Core constraint:** The output cannot exceed the substance of the input. You get out what you put in.
+
+---
+
+### Conversation Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ✧ Fireside with Wisp                              [×]      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│     ~  ~                                                    │
+│    (    )  sit by the fire                                  │
+│   (      )  and tell me what's on your mind                 │
+│  ~~~~~~~~~~                                                 │
+│                                                             │
+│  ┌─ Wisp ─────────────────────────────────────────────┐     │
+│  │ What's been living in your head lately?            │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ Type your thoughts...                          [↵] │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  ───────────────────────────────────────────────────────    │
+│  ~ a good listener, not a ghostwriter ~                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Mid-conversation:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ✧ Fireside with Wisp                              [×]      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─ Wisp ─────────────────────────────────────────────┐     │
+│  │ What's been living in your head lately?            │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─ You ──────────────────────────────────────────────┐     │
+│  │ honestly ive been thinking about how communities   │     │
+│  │ form online vs irl... theres something different   │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─ Wisp ─────────────────────────────────────────────┐     │
+│  │ Ooh, what feels different about it?                │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─ You ──────────────────────────────────────────────┐     │
+│  │ like... you find people by resonance not proximity │     │
+│  │ which means the connections can be deeper but also │     │
+│  │ more fragile? idk if that makes sense              │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─ Wisp ─────────────────────────────────────────────┐     │
+│  │ That makes total sense. Resonance vs proximity—    │     │
+│  │ that's a really clear way to put it. What makes    │     │
+│  │ those connections feel fragile to you?             │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ Type your thoughts...                          [↵] │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  ───────────────────────────────────────────────────────    │
+│  [ Keep chatting ]                    [ ✦ Ready to draft ]  │
+│                                                             │
+│  ~ a good listener, not a ghostwriter ~                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Draft review:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ✧ Your Draft                                      [×]      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  # Communities Form Differently Online                      │
+│                                                             │
+│  There's something different about how we find each         │
+│  other in digital spaces. It's not proximity—it's           │
+│  resonance. You don't connect with people because           │
+│  they happen to live nearby. You find them because          │
+│  something in what they said echoed something in you.       │
+│                                                             │
+│  That makes the connections deeper in some ways. But        │
+│  also more fragile...                                       │
+│                                                             │
+│  [Your organized thoughts continue...]                      │
+│                                                             │
+│  ───────────────────────────────────────────────────────    │
+│  *~ written fireside with Wisp ~*                           │
+│                                                             │
+│  ───────────────────────────────────────────────────────    │
+│  [ ← Back to chat ]    [ Edit in editor ]    [ Publish ✦ ]  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Starter Prompts
+
+Wisp offers a rotating selection of conversation starters:
+
+**Open & Warm**
+1. "What's been living in your head lately?"
+2. "What surprised you this week?"
+3. "What are you excited about right now?"
+4. "What's something small that made you smile recently?"
+
+**Reflective**
+5. "What's something you've been meaning to write about but haven't found the words for?"
+6. "What would you tell a friend who asked how you're *really* doing?"
+7. "What's a thought you keep turning over?"
+
+**Creative & Playful**
+8. "If you could ramble about anything right now, what would it be?"
+9. "What's something you wish more people understood?"
+10. "What did you learn recently that you can't stop thinking about?"
+
+**Returning Writers**
+11. "It's been a while—what's been happening in your world?"
+12. "What are you working on that you'd love to talk about?"
+
+Users can also skip the prompt and start with their own opening.
+
+---
+
+### Guardrails
+
+Fireside has explicit boundaries to prevent misuse:
+
+#### Hard Refusals
+
+If a user attempts any of the following, Wisp declines and redirects to the conversational process:
+
+| Blocked Request | Wisp Response |
+|-----------------|---------------|
+| "Write me a post about X" | "I can't write for you—but I'd love to hear what *you* think about X. What draws you to it?" |
+| "Expand this into a full post" | "Let's talk through it instead. What's the main thing you want people to take away?" |
+| "Add some stuff about Y" | "I can only work with what you've told me. Want to tell me about Y?" |
+| "Make this sound smarter" | "Your voice is the whole point. What do you actually want to say?" |
+| "What do you think about X?" | "This is your space—what do *you* think?" |
+
+#### Soft Constraints
+
+| Constraint | Implementation |
+|------------|----------------|
+| Minimum conversation depth | "Ready to draft" button hidden until sufficient exchange (~3+ substantive back-and-forths) |
+| Input/output ratio | Draft length proportional to user input; brief answers = brief draft |
+| No opinion injection | Wisp never contributes its own ideas to the content |
+| No padding | Short responses stay short; Wisp won't embellish |
+
+---
+
+### The Transparency Marker
+
+Every post created through Fireside includes a permanent, non-removable attribution:
+
+```
+*~ written fireside with Wisp ~*
+```
+
+**Implementation:**
+- Appended to post content at publish time
+- Stored in post metadata: `fireside_assisted: true`
+- Rendered in italics, positioned after post content
+- Cannot be edited out (enforced in editor)
+- Visible to all readers
+
+**Rationale:** Grove's legal policies require transparency about AI assistance. This marker is honest without being alarming—it acknowledges the process while making clear that the words are the author's.
+
+---
+
+### Data Handling
+
+Fireside follows the same Zero Data Retention policy as all Wisp features:
+
+| Stage | Handling |
+|-------|----------|
+| Conversation in progress | Held in session state only |
+| Draft generation | Content processed, then immediately deleted |
+| After publish/discard | All conversation data purged |
+| What's retained | Only metadata: `fireside_assisted: true`, timestamp |
+
+**Note:** Unlike standard Wisp analysis, Fireside conversations are *not* logged to `wisp_requests` on a per-message basis. Only the final draft generation is logged.
+
+---
+
+### Draft Generation
+
+When the user clicks "Ready to draft," Wisp:
+
+1. Collects all user responses from the conversation
+2. Sends to inference with a specialized prompt:
+
+```
+You are organizing a writer's own words into a cohesive blog post.
+
+RULES:
+- Use ONLY the content the writer provided in their responses
+- Preserve their voice, phrasing, and personality
+- Organize for flow and readability
+- Add minimal transition phrases if needed ("And that's the thing—", "But here's what I keep coming back to—")
+- Do NOT add new ideas, facts, opinions, or content
+- Do NOT expand beyond what was said
+- If the input is brief, the output should be brief
+- Suggest a title based on the main theme
+
+The writer's responses:
+---
+[conversation history - user messages only]
+---
+
+Create a blog post draft from these thoughts.
+```
+
+3. Returns structured response with suggested title and organized content
+4. User reviews, edits, and decides whether to publish
+
+---
+
+### Fireside API
+
+#### New Endpoint
+
+```
+POST /api/grove/wisp/fireside
+```
+
+#### Conversation Message
+
+```typescript
+interface FiresideMessage {
+  role: 'wisp' | 'user';
+  content: string;
+  timestamp: string;
+}
+
+interface FiresideChatRequest {
+  action: 'start' | 'respond' | 'draft';
+  message?: string;              // User's response (for 'respond')
+  conversation?: FiresideMessage[];  // Full history (for 'respond' and 'draft')
+  starterPrompt?: string;        // Optional custom opener (for 'start')
+}
+```
+
+#### Response Types
+
+```typescript
+// For 'start' and 'respond' actions
+interface FiresideChatResponse {
+  reply: string;                 // Wisp's next question
+  canDraft: boolean;             // Whether enough substance exists
+  conversationId: string;        // Session reference
+}
+
+// For 'draft' action
+interface FiresideDraftResponse {
+  title: string;                 // Suggested title
+  content: string;               // Organized post content
+  marker: string;                // "~ written fireside with Wisp ~"
+  meta: {
+    tokensUsed: number;
+    cost: number;
+    model: string;
+  };
+}
+```
+
+---
+
+### Fireside Database Additions
+
+```sql
+-- Track Fireside sessions (not individual messages)
+ALTER TABLE wisp_requests ADD COLUMN fireside_session_id TEXT;
+
+-- Track posts created via Fireside
+ALTER TABLE posts ADD COLUMN fireside_assisted INTEGER DEFAULT 0;
+```
+
+---
+
+### Fireside UI Integration
+
+Fireside is accessed via:
+
+1. **New post → "Start with a conversation"** button
+2. **Wisp panel → "Fireside" tab** (alongside Grammar, Tone, Readability)
+3. **Keyboard shortcut** (TBD, possibly `Cmd/Ctrl + Shift + F`)
+
+The Fireside panel replaces the standard editor when active. User can switch back to traditional editing at any time.
+
+---
+
+### Fireside Implementation Phases
+
+#### Phase F1: Core Conversation
+- [ ] Fireside chat endpoint
+- [ ] Session state management
+- [ ] Basic question-asking logic
+- [ ] Starter prompt rotation
+
+#### Phase F2: Draft Generation
+- [ ] Conversation → draft prompt engineering
+- [ ] Draft preview UI
+- [ ] Transparency marker injection
+- [ ] Metadata tagging
+
+#### Phase F3: Guardrails
+- [ ] Hard refusal detection
+- [ ] Minimum depth threshold
+- [ ] Input/output ratio enforcement
+- [ ] "Write for me" request handling
+
+#### Phase F4: Polish
+- [ ] ASCII art for Fireside states
+- [ ] Mobile-responsive conversation UI
+- [ ] Keyboard navigation
+- [ ] Settings integration (enable/disable Fireside separately)
 
 ---
 
