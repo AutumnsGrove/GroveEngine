@@ -47,6 +47,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   scout: "scout.m7jv4v7npb.workers.dev",
   "auth-api": "groveauth.m7jv4v7npb.workers.dev",
   "mc-control": "mc-control.m7jv4v7npb.workers.dev",
+  mycelium: "mycelium.m7jv4v7npb.workers.dev",
 
   // Special handling
   www: "REDIRECT", // Redirect to root
