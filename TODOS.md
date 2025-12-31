@@ -6,11 +6,11 @@
 
 ---
 
-## 🔧 Shade Routing Fix (2025-12-31)
+## ✅ Shade Routing Fix COMPLETE! (2025-12-31)
 
-**Status: MOSTLY COMPLETE - Turnstile widget shows but verification has an error**
+**Status: COMPLETE - All routing and Turnstile verification working!** 🎉
 
-### Completed
+### What We Fixed
 - ✅ Fixed grove-router default fallback (was using non-existent `groveengine.pages.dev`, now uses `grove-example-site.pages.dev`)
 - ✅ Added missing vineyard route to grove-router SUBDOMAIN_ROUTES
 - ✅ Deployed engine package to groveengine Pages project
@@ -18,12 +18,7 @@
 - ✅ Shade (Turnstile) verification redirects work (visitors get 302 → /verify)
 - ✅ Archived deprecated `packages/example-site` to `_archived/example-site-deprecated-2025-12-31/`
 - ✅ Fixed wisp API build error (renamed +server.js → +server.ts)
-
-### Pending
-- [ ] **Investigate Turnstile verification error** - Widget displays correctly but verification fails
-  - Widget shows on /verify page
-  - Site key is present in response (`0x4AAAAAACI9p49O_VFDy3WA`)
-  - Need to debug the verification API endpoint
+- ✅ Fixed Turnstile CSRF validation error - `/api/verify/turnstile` now uses origin-based validation like auth endpoints (new visitors don't have CSRF tokens yet)
 
 ---
 
