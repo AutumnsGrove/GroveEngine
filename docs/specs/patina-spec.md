@@ -1,29 +1,30 @@
-# Cache - Automated Database Backup System
+# Patina - Automated Database Backup System
 
-> **Internal codename:** GroveBackups
+> **Internal codename:** GrovePatina
 
 ## Project Overview
 
-**Public Name:** Cache
-**Internal Codename:** GroveBackups
-**Location:** `packages/backups/` in GroveEngine monorepo
-**URL:** `backups.grove.place` (optional dashboard)
-**Purpose:** Automated weekly backups of all Grove D1 databases to R2
+**Public Name:** Patina
+**Internal Codename:** GrovePatina
+**Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
+**URL:** `patina.grove.place` (optional dashboard)
+**Purpose:** Automated nightly backups of all Grove D1 databases to R2
 **Stack:** Cloudflare Workers + D1 + R2
 
-*Part of the Grove ecosystem. "Squirrels cache acorns for winter."*
+*Part of the Grove ecosystem. "Age as armor. Time as protection."*
 
 ---
 
 ## 🎯 Goals
 
-1. **Automated weekly backups** of all 9 D1 databases
-2. **SQL dump format** — portable, restorable, human-readable
-3. **12-week retention** with automatic cleanup
-4. **Manual trigger capability** for on-demand backups
-5. **Status dashboard** to view backup history
-6. **Restore documentation** for disaster recovery
-7. **Alerting** on backup failures (integrate with GroveMonitor later)
+1. **Automated nightly backups** of all 6 D1 databases
+2. **Weekly meta-backups** — compress 7 daily backups into one archive
+3. **SQL dump format** — portable, restorable, human-readable
+4. **12-week retention** with automatic cleanup
+5. **Manual trigger capability** for on-demand backups
+6. **Status dashboard** to view backup history
+7. **Restore documentation** for disaster recovery
+8. **Alerting** on backup failures (integrate with GroveMonitor later)
 
 ---
 
@@ -31,14 +32,16 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              Cache System                                   │
+│                             Patina System                                   │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────┐
-│                    grove-backups (Worker)                        │
+│                    grove-patina (Worker)                         │
 │                                                                  │
-│  Cron Trigger: Every Sunday @ 3:00 AM UTC                       │
-│  HTTP Endpoints: /status, /trigger, /download, /restore-guide   │
+│  Cron Triggers:                                                  │
+│    • Nightly @ 3:00 AM UTC — individual DB backups               │
+│    • Weekly (Sunday) @ 4:00 AM UTC — compress to meta-backup     │
+│  HTTP Endpoints: /status, /trigger, /download, /restore-guide    │
 │                                                                  │
 └──────────────────────────────┬───────────────────────────────────┘
                                │
@@ -46,27 +49,33 @@
            │                   │                   │
            ▼                   ▼                   ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   D1 Databases  │  │  grove-backups  │  │  grove-backups  │
-│   (9 total)     │  │     (R2)        │  │     -db (D1)    │
+│   D1 Databases  │  │  grove-patina   │  │  grove-patina   │
+│   (6 total)     │  │     (R2)        │  │     -db (D1)    │
 │                 │  │                 │  │                 │
 │ • groveauth     │  │ Backup Storage  │  │ Backup metadata │
 │ • scout-db      │  │                 │  │ Job history     │
-│ • grove-engine  │  │ /YYYY-MM-DD/    │  │ Alert config    │
-│ • grovemusic    │  │   db-name.sql   │  │                 │
-│ • library-*     │  │                 │  │                 │
-│ • autumnsgrove-*│  │                 │  │                 │
-│ • grove-domain  │  │                 │  │                 │
-│ • your-site     │  │                 │  │                 │
+│ • grove-engine  │  │ /daily/         │  │ Alert config    │
+│ • autumnsgrove- │  │   YYYY-MM-DD/   │  │                 │
+│     posts       │  │   db-name.sql   │  │                 │
+│ • autumnsgrove- │  │                 │  │                 │
+│     git-stats   │  │ /weekly/        │  │                 │
+│ • grove-domain  │  │   YYYY-Www.tar  │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
 
-Backup Flow:
-1. Cron triggers at 3 AM UTC every Sunday
-2. Worker iterates through all 9 databases
+Backup Flow (Nightly):
+1. Cron triggers at 3 AM UTC every night
+2. Worker iterates through all 6 databases
 3. For each DB: export schema + data to SQL
-4. Upload to R2 with date-prefixed path
-5. Log results to grove-backups-db
-6. Clean up backups older than 12 weeks
-7. Send alert if any failures (webhook)
+4. Upload to R2: /daily/YYYY-MM-DD/db-name.sql
+5. Log results to grove-patina-db
+6. Send alert if any failures (webhook)
+
+Meta-Backup Flow (Weekly, Sunday):
+1. Cron triggers at 4 AM UTC (after nightly backup completes)
+2. Collect all 7 daily backups from the past week
+3. Compress into single archive: /weekly/YYYY-Www.tar.gz
+4. Delete daily backups older than 7 days
+5. Delete weekly archives older than 12 weeks
 ```
 
 ---
@@ -74,10 +83,11 @@ Backup Flow:
 ## 📦 Project Structure
 
 ```
-packages/backups/
+Patina/                          # Standalone repository
 ├── src/
 │   ├── index.ts                 # Main worker entry
-│   ├── scheduled.ts             # Cron handler logic
+│   ├── scheduled.ts             # Nightly backup cron handler
+│   ├── weekly.ts                # Weekly meta-backup cron handler
 │   ├── routes/
 │   │   ├── status.ts            # GET /status
 │   │   ├── trigger.ts           # POST /trigger
@@ -86,6 +96,7 @@ packages/backups/
 │   │   └── restore-guide.ts     # GET /restore-guide/:db
 │   ├── lib/
 │   │   ├── exporter.ts          # D1 to SQL export logic
+│   │   ├── compressor.ts        # Weekly archive compression
 │   │   ├── cleanup.ts           # Old backup deletion
 │   │   ├── databases.ts         # Database configuration
 │   │   ├── alerting.ts          # Webhook notifications
@@ -101,7 +112,7 @@ packages/backups/
 
 ---
 
-## 🗄️ Database Schema (grove-backups-db)
+## 🗄️ Database Schema (grove-patina-db)
 
 ```sql
 -- migrations/001_backup_metadata.sql
@@ -198,7 +209,7 @@ export const DATABASES: DatabaseConfig[] = [
     name: 'groveauth',
     id: '45eae4c7-8ae7-4078-9218-8e1677a4360f',
     binding: 'GROVEAUTH_DB',
-    description: 'Authentication, users, sessions, OAuth',
+    description: 'Authentication, users, sessions, OAuth (Heartwood)',
     priority: 'critical',
     estimatedSize: '212 KB',
   },
@@ -214,31 +225,15 @@ export const DATABASES: DatabaseConfig[] = [
     name: 'grove-engine-db',
     id: 'a6394da2-b7a6-48ce-b7fe-b1eb3e730e68',
     binding: 'GROVE_ENGINE_DB',
-    description: 'Core engine, CDN files, signups',
-    priority: 'high',
+    description: 'Core platform: tenants, content, multi-tenant data (Lattice)',
+    priority: 'critical',
     estimatedSize: '180 KB',
-  },
-  {
-    name: 'grovemusic-db',
-    id: 'e1e31ed2-3b1f-4dbd-9435-c9105dadcfa2',
-    binding: 'GROVEMUSIC_DB',
-    description: 'GroveMusic data',
-    priority: 'normal',
-    estimatedSize: '98 KB',
-  },
-  {
-    name: 'library-enhancer-db',
-    id: 'afd1ce4c-618a-430a-bf0f-0a57647a388d',
-    binding: 'LIBRARY_ENHANCER_DB',
-    description: 'Library enhancer data',
-    priority: 'normal',
-    estimatedSize: '679 KB',
   },
   {
     name: 'autumnsgrove-posts',
     id: '510badf3-457a-4892-bf2a-45d4bfd7a7bb',
     binding: 'AUTUMNSGROVE_POSTS_DB',
-    description: 'Blog posts',
+    description: 'AutumnsGrove blog posts',
     priority: 'high',
     estimatedSize: '118 KB',
   },
@@ -246,7 +241,7 @@ export const DATABASES: DatabaseConfig[] = [
     name: 'autumnsgrove-git-stats',
     id: '0ca4036f-93f7-4c8a-98a5-5353263acd44',
     binding: 'AUTUMNSGROVE_GIT_STATS_DB',
-    description: 'Git statistics',
+    description: 'Git statistics for AutumnsGrove',
     priority: 'normal',
     estimatedSize: '335 KB',
   },
@@ -254,34 +249,32 @@ export const DATABASES: DatabaseConfig[] = [
     name: 'grove-domain-jobs',
     id: 'cd493112-a901-4f6d-aadf-a5ca78929557',
     binding: 'GROVE_DOMAIN_JOBS_DB',
-    description: 'Domain search jobs',
+    description: 'Domain search jobs (Forage/Acorn)',
     priority: 'normal',
     estimatedSize: '45 KB',
-  },
-  {
-    name: 'your-site-posts',
-    id: '86342742-7d34-486f-97f0-928136555e1a',
-    binding: 'YOUR_SITE_POSTS_DB',
-    description: 'Site posts',
-    priority: 'normal',
-    estimatedSize: '12 KB',
   },
 ];
 
 // Backup schedule and retention
 export const BACKUP_CONFIG = {
-  // Cron: Every Sunday at 3:00 AM UTC
-  cronSchedule: '0 3 * * 0',
-  
-  // Keep 12 weeks of backups
-  retentionWeeks: 12,
-  
+  // Cron: Every day at 3:00 AM UTC (nightly backups)
+  nightlyCron: '0 3 * * *',
+
+  // Cron: Every Sunday at 4:00 AM UTC (weekly meta-backup)
+  weeklyCron: '0 4 * * 0',
+
+  // Keep 7 days of daily backups (before compression)
+  dailyRetentionDays: 7,
+
+  // Keep 12 weeks of weekly archives
+  weeklyRetentionWeeks: 12,
+
   // R2 bucket name
-  bucketName: 'grove-backups',
-  
+  bucketName: 'grove-patina',
+
   // Max concurrent database exports
   concurrency: 3,
-  
+
   // Timeout per database export (ms)
   exportTimeout: 30000,
 };
@@ -469,7 +462,7 @@ Worker info and documentation.
 ```typescript
 // Response
 {
-  "name": "Cache",
+  "name": "Patina",
   "version": "1.0.0",
   "description": "Automated D1 database backup system for Grove",
   "schedule": "Every Sunday at 3:00 AM UTC",
@@ -681,8 +674,8 @@ export function formatDiscordMessage(result: BackupJobResult): object {
   return {
     embeds: [{
       title: isSuccess
-        ? '✅ Cache Backup Completed'
-        : '⚠️ Cache Backup Partially Failed',
+        ? '✅ Patina Backup Completed'
+        : '⚠️ Patina Backup Partially Failed',
       color: isSuccess ? 0x22c55e : 0xef4444,
       fields: [
         { 
@@ -776,17 +769,20 @@ export async function cleanupOldBackups(
 ## 📝 wrangler.toml
 
 ```toml
-name = "grove-backups"
+name = "grove-patina"
 main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Cron trigger: Every Sunday at 3:00 AM UTC
+# Cron triggers
 [triggers]
-crons = ["0 3 * * 0"]
+crons = [
+  "0 3 * * *",   # Nightly backup at 3:00 AM UTC
+  "0 4 * * 0"    # Weekly meta-backup at 4:00 AM UTC (Sunday)
+]
 
 # ============================================
-# Source D1 Databases (all 9 Grove databases)
+# Source D1 Databases (6 Grove databases)
 # ============================================
 
 [[d1_databases]]
@@ -805,16 +801,6 @@ database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 [[d1_databases]]
-binding = "GROVEMUSIC_DB"
-database_name = "grovemusic-db"
-database_id = "e1e31ed2-3b1f-4dbd-9435-c9105dadcfa2"
-
-[[d1_databases]]
-binding = "LIBRARY_ENHANCER_DB"
-database_name = "library-enhancer-db"
-database_id = "afd1ce4c-618a-430a-bf0f-0a57647a388d"
-
-[[d1_databases]]
 binding = "AUTUMNSGROVE_POSTS_DB"
 database_name = "autumnsgrove-posts"
 database_id = "510badf3-457a-4892-bf2a-45d4bfd7a7bb"
@@ -829,18 +815,13 @@ binding = "GROVE_DOMAIN_JOBS_DB"
 database_name = "grove-domain-jobs"
 database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
 
-[[d1_databases]]
-binding = "YOUR_SITE_POSTS_DB"
-database_name = "your-site-posts"
-database_id = "86342742-7d34-486f-97f0-928136555e1a"
-
 # ============================================
 # Metadata Database (for backup tracking)
 # ============================================
 
 [[d1_databases]]
 binding = "METADATA_DB"
-database_name = "grove-backups-db"
+database_name = "grove-patina-db"
 database_id = "TODO_CREATE_THIS"
 
 # ============================================
@@ -849,7 +830,7 @@ database_id = "TODO_CREATE_THIS"
 
 [[r2_buckets]]
 binding = "BACKUPS"
-bucket_name = "grove-backups"
+bucket_name = "grove-patina"
 
 # ============================================
 # Environment Variables
@@ -870,14 +851,14 @@ ALERT_ON_FAILURE = "true"
 
 ```bash
 # 1. Create the backup R2 bucket
-wrangler r2 bucket create grove-backups
+wrangler r2 bucket create grove-patina
 
 # 2. Create the metadata D1 database
-wrangler d1 create grove-backups-db
+wrangler d1 create grove-patina-db
 # Note the database_id and update wrangler.toml
 
 # 3. Run migrations
-wrangler d1 execute grove-backups-db --file=migrations/001_backup_metadata.sql
+wrangler d1 execute grove-patina-db --file=migrations/001_backup_metadata.sql
 
 # 4. Set Discord webhook (optional)
 wrangler secret put DISCORD_WEBHOOK_URL
@@ -895,13 +876,13 @@ pnpm deploy
 
 ```bash
 # Check status
-curl https://grove-backups.YOUR_SUBDOMAIN.workers.dev/status
+curl https://grove-patina.YOUR_SUBDOMAIN.workers.dev/status
 
 # Trigger manual backup
-curl -X POST https://grove-backups.YOUR_SUBDOMAIN.workers.dev/trigger
+curl -X POST https://grove-patina.YOUR_SUBDOMAIN.workers.dev/trigger
 
 # Tail logs
-wrangler tail grove-backups
+wrangler tail grove-patina
 ```
 
 ---
@@ -909,8 +890,8 @@ wrangler tail grove-backups
 ## 📋 Implementation Checklist
 
 ### Phase 1: Core Infrastructure
-- [ ] Create R2 bucket `grove-backups`
-- [ ] Create D1 database `grove-backups-db`
+- [ ] Create R2 bucket `grove-patina`
+- [ ] Create D1 database `grove-patina-db`
 - [ ] Run migrations
 - [ ] Set up project structure in `packages/backups/`
 
