@@ -6,6 +6,27 @@
 
 ---
 
+## 🔧 Shade Routing Fix (2025-12-31)
+
+**Status: MOSTLY COMPLETE - Turnstile widget shows but verification has an error**
+
+### Completed
+- ✅ Fixed grove-router default fallback (was using non-existent `groveengine.pages.dev`, now uses `grove-example-site.pages.dev`)
+- ✅ Added missing vineyard route to grove-router SUBDOMAIN_ROUTES
+- ✅ Deployed engine package to groveengine Pages project
+- ✅ Engine now properly handles D1 tenant lookup (sarah.grove.place shows "Sarah's Garden" not "Midnight Bloom")
+- ✅ Shade (Turnstile) verification redirects work (visitors get 302 → /verify)
+- ✅ Archived deprecated `packages/example-site` to `_archived/example-site-deprecated-2025-12-31/`
+- ✅ Fixed wisp API build error (renamed +server.js → +server.ts)
+
+### Pending
+- [ ] **Investigate Turnstile verification error** - Widget displays correctly but verification fails
+  - Widget shows on /verify page
+  - Site key is present in response (`0x4AAAAAACI9p49O_VFDy3WA`)
+  - Need to debug the verification API endpoint
+
+---
+
 ## Nature Assets Migration (Future)
 
 > **Note:** The nature components (trees, weather, sky, botanical, creatures, structural) currently live in `landing/src/lib/components/nature/`. These should eventually be moved to the engine package (`packages/engine/src/lib/ui/components/nature/`) so they can be shared across all Grove properties (landing, plant, meadow, engine admin).
