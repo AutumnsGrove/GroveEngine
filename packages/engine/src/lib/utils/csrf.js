@@ -44,7 +44,8 @@ export function validateCSRF(request) {
   }
 
   const origin = request.headers.get("origin");
-  const host = request.headers.get("host");
+  // Check X-Forwarded-Host first (set by grove-router proxy), then fall back to host
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
 
   // Allow same-origin requests
   if (origin) {
@@ -65,9 +66,11 @@ export function validateCSRF(request) {
         return false;
       }
 
+      // Check if origin matches host OR is a *.grove.place subdomain
       const hostMatches = host && originUrl.host === host;
+      const isGroveDomain = originUrl.hostname.endsWith(".grove.place") || originUrl.hostname === "grove.place";
 
-      if (!isLocalhost && !hostMatches) {
+      if (!isLocalhost && !hostMatches && !isGroveDomain) {
         return false;
       }
     } catch {
