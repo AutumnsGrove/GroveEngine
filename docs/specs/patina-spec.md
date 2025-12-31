@@ -467,7 +467,7 @@ Worker info and documentation.
   "description": "Automated D1 database backup system for Grove",
   "schedule": "Every Sunday at 3:00 AM UTC",
   "retention": "12 weeks",
-  "databases": 9,
+  "databases": 6,
   "endpoints": {
     "GET /": "This documentation",
     "GET /status": "Current backup status and recent history",
@@ -491,7 +491,7 @@ Current status and recent backup history.
     "jobId": "550e8400-e29b-41d4-a716-446655440000",
     "date": "2024-12-08",
     "status": "completed",
-    "successful": 9,
+    "successful": 6,
     "failed": 0,
     "totalSize": "2.1 MB",
     "duration": "45s"
@@ -507,7 +507,7 @@ Current status and recent backup history.
     // ... last 10 jobs
   ],
   "storage": {
-    "totalBackups": 108, // 9 DBs × 12 weeks
+    "totalBackups": 72, // 6 DBs × 12 weeks
     "totalSize": "25.2 MB",
     "oldestBackup": "2024-09-15",
     "newestBackup": "2024-12-08"
@@ -560,7 +560,7 @@ Manually trigger a backup.
 {
   "jobId": "550e8400-e29b-41d4-a716-446655440000",
   "status": "started",
-  "databases": 9,
+  "databases": 6,
   "message": "Backup job started. Check /status for progress."
 }
 ```
@@ -569,12 +569,55 @@ Manually trigger a backup.
 
 Download a specific backup file.
 
+**⚠️ Authentication Required**
+
+This endpoint contains sensitive data (user emails, sessions, OAuth tokens) and MUST be protected. Implement one of these authentication methods:
+
+| Method | Description | Use Case |
+|--------|-------------|----------|
+| **Cloudflare Access** (Recommended) | Zero Trust access policy | Dashboard/browser access |
+| **API Key Header** | `X-Patina-Key` header | Automated scripts |
+| **IP Allowlist** | Restrict to known IPs | CI/CD pipelines |
+
+```typescript
+// Authentication implementation
+async function authenticateDownload(request: Request, env: Env): Promise<boolean> {
+  // Method 1: Cloudflare Access JWT (if behind Access)
+  const cfAccessJwt = request.headers.get('Cf-Access-Jwt-Assertion');
+  if (cfAccessJwt) {
+    return await verifyAccessJwt(cfAccessJwt, env.CF_ACCESS_AUD);
+  }
+
+  // Method 2: API Key
+  const apiKey = request.headers.get('X-Patina-Key');
+  if (apiKey && apiKey === env.PATINA_API_KEY) {
+    return true;
+  }
+
+  // Method 3: IP Allowlist (for known infrastructure)
+  const clientIp = request.headers.get('CF-Connecting-IP');
+  if (env.ALLOWED_IPS?.includes(clientIp)) {
+    return true;
+  }
+
+  return false;
+}
+```
+
 ```typescript
 // Example: GET /download/2024-12-08/groveauth
+// Headers: X-Patina-Key: <secret-key>
+// -or- behind Cloudflare Access
 
 // Response: SQL file download
 // Content-Type: application/sql
 // Content-Disposition: attachment; filename="groveauth-2024-12-08.sql"
+
+// Error Response (401 Unauthorized)
+{
+  "error": "unauthorized",
+  "message": "Valid authentication required to download backups"
+}
 ```
 
 ### GET /restore-guide/:db
@@ -633,7 +676,7 @@ Get restore instructions for a specific database.
   "status": "success",
   "timestamp": "2024-12-08T03:01:30Z",
   "summary": {
-    "successful": 9,
+    "successful": 6,
     "failed": 0,
     "totalSize": "2.1 MB",
     "duration": "45s"
@@ -731,22 +774,30 @@ export async function cleanupOldBackups(
   
   for (const backup of expiredBackups.results) {
     try {
-      // Delete from R2
-      await bucket.delete(backup.r2_key);
-      
-      // Mark as deleted in inventory
+      // IMPORTANT: Mark as deleted in D1 FIRST, then delete from R2
+      // This prevents orphaned records if R2 deletion succeeds but D1 fails
+      // (Better to have a "deleted" record pointing to existing file than
+      // an "active" record pointing to deleted file)
+
+      // Step 1: Mark as deleted in inventory
       await metadataDb.prepare(`
-        UPDATE backup_inventory 
-        SET deleted_at = ? 
+        UPDATE backup_inventory
+        SET deleted_at = ?
         WHERE id = ?
       `).bind(Math.floor(Date.now() / 1000), backup.id).run();
-      
+
+      // Step 2: Delete from R2
+      await bucket.delete(backup.r2_key);
+
       results.push({ key: backup.r2_key, success: true });
-      
+
     } catch (error) {
-      results.push({ 
-        key: backup.r2_key, 
-        success: false, 
+      // If D1 update succeeded but R2 delete failed, we have a soft-deleted
+      // record pointing to an existing file - this is acceptable and can be
+      // cleaned up in a subsequent run
+      results.push({
+        key: backup.r2_key,
+        success: false,
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -976,6 +1027,120 @@ wrangler d1 time-travel restore groveauth --bookmark="<bookmark-id>"
 
 ---
 
+## 🚨 Disaster Recovery Runbook (DEFCON 1)
+
+**Scenario: Multiple or ALL databases corrupted/compromised**
+
+### Severity Assessment
+
+| Level | Condition | Response Time |
+|-------|-----------|---------------|
+| **DEFCON 1** | All databases corrupted | Immediate (< 1 hour) |
+| **DEFCON 2** | Critical DBs affected (groveauth, grove-engine) | < 2 hours |
+| **DEFCON 3** | Non-critical DBs affected | < 24 hours |
+
+### Required Access
+
+Before beginning recovery, ensure you have:
+- [ ] Cloudflare dashboard access (owner/admin)
+- [ ] Wrangler CLI authenticated (`wrangler whoami`)
+- [ ] Access to Patina download endpoint (API key or CF Access)
+- [ ] Discord/communication channel for status updates
+
+### Full System Recovery Procedure
+
+**Step 1: Assess the damage (5 minutes)**
+```bash
+# Check which databases are affected
+for db in groveauth scout-db grove-engine-db autumnsgrove-posts autumnsgrove-git-stats grove-domain-jobs; do
+  echo "Checking $db..."
+  wrangler d1 execute $db --command="SELECT COUNT(*) FROM sqlite_master" 2>&1
+done
+```
+
+**Step 2: Identify latest good backups (5 minutes)**
+```bash
+# List available backups
+curl -H "X-Patina-Key: $PATINA_KEY" https://patina.grove.place/list
+
+# Or check R2 directly
+wrangler r2 object list grove-patina --prefix="daily/"
+```
+
+**Step 3: Restore in priority order**
+
+⚠️ **CRITICAL: Restore databases in this exact order** (dependencies matter):
+
+| Order | Database | Priority | Reason |
+|-------|----------|----------|--------|
+| 1 | `groveauth` | Critical | All auth depends on this |
+| 2 | `grove-engine-db` | Critical | Core platform, references auth |
+| 3 | `scout-db` | Critical | References users from groveauth |
+| 4 | `autumnsgrove-posts` | High | Blog content |
+| 5 | `autumnsgrove-git-stats` | Normal | Can be regenerated |
+| 6 | `grove-domain-jobs` | Normal | Transient job data |
+
+```bash
+# Restore groveauth FIRST
+curl -H "X-Patina-Key: $PATINA_KEY" \
+  -o groveauth-restore.sql \
+  https://patina.grove.place/download/YYYY-MM-DD/groveauth
+
+# Review before executing!
+head -50 groveauth-restore.sql
+wrangler d1 execute groveauth --file=groveauth-restore.sql
+
+# Verify restoration
+wrangler d1 execute groveauth --command="SELECT COUNT(*) FROM users"
+
+# Continue with grove-engine-db, then scout-db, etc.
+```
+
+**Step 4: Verify system functionality**
+```bash
+# Test auth endpoints
+curl https://auth.grove.place/health
+
+# Test main application
+curl https://grove.place/api/health
+
+# Check for foreign key violations
+wrangler d1 execute grove-engine-db --command="PRAGMA foreign_key_check"
+```
+
+**Step 5: Post-recovery actions**
+- [ ] Trigger fresh backup of all databases
+- [ ] Review logs for root cause
+- [ ] Post incident report to team
+- [ ] Update runbook if needed
+
+### Expected Recovery Times
+
+| Scenario | Time Estimate | Notes |
+|----------|---------------|-------|
+| Single DB restore | 5-10 minutes | Download + execute |
+| All 6 DBs (sequential) | 30-45 minutes | Including verification |
+| Full system + verification | 1-2 hours | Including health checks |
+
+### If Backups Are Also Corrupted
+
+1. **Check D1 Time Travel first** (30-day window):
+   ```bash
+   wrangler d1 time-travel info groveauth
+   wrangler d1 time-travel restore groveauth --timestamp="YYYY-MM-DDTHH:MM:SSZ"
+   ```
+
+2. **Check weekly archives** in R2:
+   ```bash
+   wrangler r2 object list grove-patina --prefix="weekly/"
+   ```
+
+3. **Contact Cloudflare Support** for D1 recovery assistance
+
+4. **Last resort**: Reconstruct from application logs and external sources
+
+---
+
 ## 🔗 Integration with GroveMonitor
 
 Once GroveMonitor is deployed, add these metrics:
@@ -986,15 +1151,51 @@ const backupMetrics = {
   'backup_last_success_timestamp': lastSuccessfulBackup,
   'backup_last_duration_ms': lastBackupDuration,
   'backup_total_size_bytes': totalBackupSize,
-  'backup_databases_count': 9,
+  'backup_databases_count': 6,
   'backup_failures_24h': failuresInLast24Hours,
 };
 ```
 
-GroveMonitor can then alert if:
-- No successful backup in 8+ days
-- Backup size changed dramatically (possible data loss)
-- Multiple consecutive failures
+### Alert Thresholds
+
+| Alert | Threshold | Rationale |
+|-------|-----------|-----------|
+| **Stale backup** | 8+ days since success | Provides 1-week buffer after weekly retention. Allows for weekend maintenance windows + 1 day grace period. |
+| **Size decrease** | >50% smaller than 7-day average | Significant data loss indicator. Small fluctuations (10-20%) are normal due to session cleanup, etc. |
+| **Size increase** | >200% (2x) larger than 7-day average | Possible data corruption, injection attack, or runaway process. |
+| **Consecutive failures** | 3+ in a row | Single failures may be transient; 3+ indicates systemic issue. |
+
+GroveMonitor alert conditions:
+
+```typescript
+// Alert threshold constants
+const ALERT_THRESHOLDS = {
+  // Days without successful backup before alerting
+  // Rationale: 7-day retention + 1 day grace = 8 days
+  STALE_BACKUP_DAYS: 8,
+
+  // Size change thresholds (as decimal multipliers)
+  // >50% decrease = possible data loss
+  SIZE_DECREASE_THRESHOLD: 0.5,
+  // >200% increase = possible corruption/attack
+  SIZE_INCREASE_THRESHOLD: 2.0,
+
+  // Consecutive failures before escalating
+  CONSECUTIVE_FAILURE_LIMIT: 3,
+};
+
+function shouldAlert(current: BackupMetrics, history: BackupMetrics[]): AlertType | null {
+  const avg7Day = history.slice(0, 7).reduce((sum, m) => sum + m.sizeBytes, 0) / 7;
+
+  if (current.sizeBytes < avg7Day * ALERT_THRESHOLDS.SIZE_DECREASE_THRESHOLD) {
+    return 'size_decrease'; // Possible data loss
+  }
+  if (current.sizeBytes > avg7Day * ALERT_THRESHOLDS.SIZE_INCREASE_THRESHOLD) {
+    return 'size_increase'; // Possible corruption
+  }
+  return null;
+}
+```
 
 ---
 
