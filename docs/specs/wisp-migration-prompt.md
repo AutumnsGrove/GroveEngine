@@ -240,10 +240,17 @@ After migration:
 ## Philosophy Reminder
 
 Wisp is:
-- **A helper, not a writer** - never generates content
+- **A helper, not a writer—and sometimes, a good listener**
 - **Off by default** - user must opt in
 - **Privacy-first** - zero data retention
 - **Ephemeral** - appears when needed, fades when not
+
+**Fireside Mode** (coming soon):
+- Conversational writing for those who freeze at the blank page
+- Wisp asks questions, you answer naturally
+- Your words get organized into a draft
+- Transparency marker: `~ written fireside with Wisp ~`
+- The fire doesn't tell the story—it just creates the space where stories emerge
 
 *Like a will-o'-the-wisp in the forest - light, airy, guiding without forcing.*
 

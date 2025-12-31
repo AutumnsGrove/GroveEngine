@@ -373,13 +373,15 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 ## Full Bloom: Wisp — Writing Assistant
 
-> *A helper, not a writer*
+> *A helper, not a writer—and sometimes, a good listener*
 
 **Status:** Implementation complete, pending deployment
 
 Wisp is Grove's ethical AI writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming.
 
-### Implementation Complete
+**Fireside Mode** extends Wisp for writers who freeze at the blank page. Have a conversation with Wisp, and your words get organized into a draft. The fire doesn't tell the story—it just creates the space where stories emerge. See `docs/specs/ai-writing-assistant-spec.md` for full specification.
+
+### Core Implementation Complete
 - [x] Model configuration (DeepSeek V3.2 via Fireworks AI)
 - [x] Inference client with provider fallback cascade
 - [x] Local readability calculations (Flesch-Kincaid)
@@ -389,6 +391,18 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 - [x] WispButton toolbar integration
 - [x] Database migration (`014_wisp.sql`)
 - [x] Migration prompt for AutumnsGrove
+
+### Fireside Mode (Planned)
+- [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
+- [ ] Session state management
+- [ ] Starter prompt rotation (12 prompts)
+- [ ] Conversation → draft generation
+- [ ] Hard refusal guardrails ("write for me" blocking)
+- [ ] Minimum conversation depth threshold
+- [ ] Transparency marker injection (`~ written fireside with Wisp ~`)
+- [ ] `fireside_assisted` post metadata
+- [ ] Fireside UI panel with ASCII fire art
+- [ ] "Start with a conversation" button in editor
 
 ### Deployment Tasks (Pre-Launch)
 - [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`

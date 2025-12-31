@@ -122,7 +122,7 @@
 		{
 			name: 'Wisp',
 			tagline: 'Writing Assistant',
-			description: 'A helper, not a writer. Wisp polishes your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Like a will-o\'-the-wisp in the forest: light, airy, guiding without forcing.',
+			description: 'A helper, not a writer—and sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page—have a conversation, and your words get organized into a draft. The fire doesn\'t tell the story. It just creates the space where stories emerge.',
 			status: 'building',
 			icon: 'wind',
 			integration: 'Integrated into the Grove editor, off by default'
