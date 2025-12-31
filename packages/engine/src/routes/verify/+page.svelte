@@ -6,7 +6,6 @@
 -->
 
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import TurnstileWidget from '$lib/ui/components/forms/TurnstileWidget.svelte';
 
 	interface Props {
@@ -35,9 +34,10 @@
 
 			if (response.ok) {
 				status = 'success';
-				// Brief pause to show success, then redirect
+				// Brief pause to show success, then do a HARD redirect
+				// (soft navigation via goto won't pick up the new verification cookie)
 				setTimeout(() => {
-					goto(data.returnTo);
+					window.location.href = data.returnTo;
 				}, 500);
 			} else {
 				const result = (await response.json()) as { message?: string };
