@@ -21,6 +21,7 @@
 4. **Cost tracking** across D1, R2, KV, Workers
 5. **Health checks** with uptime monitoring
 6. **Beautiful dashboard** that's actually useful
+7. **Secure by default** — authentication required via Heartwood
 
 ---
 
@@ -45,26 +46,132 @@ Rings tells writers about their readers. Vista tells the grove keeper about the 
  grove-monitor       grove-monitor       vista.grove
     -collector  ───▶      -api       ───▶   .place
    (Cron Worker)       (API Worker)      (Dashboard)
-         │                    │
-         │ Collects from:     │ Stores in:
-         │                    │
-         ▼                    ▼
-  Cloudflare APIs       grove-monitor
-  • Analytics API           -db (D1)
+         │                    │                │
+         │ Collects from:     │ Stores in:     │ Auth via:
+         │                    │                │
+         ▼                    ▼                ▼
+  Cloudflare APIs       grove-monitor      Heartwood
+  • Analytics API           -db (D1)     (auth-api.grove.place)
   • D1 API
   • R2 API              MONITOR_KV
   • Workers API          (real-time)
 
-  Health Checks:        grove-monitor
-  • All *.grove.         -snapshots
-    place sites              (R2)
+  Health Checks:
+  • All *.grove.place
+    sites via /health
 
 Data Flow:
-1. Collector runs every 5 minutes (cron)
-2. Fetches metrics from CF APIs + health checks all endpoints
-3. Stores time-series in D1, real-time in KV
-4. Dashboard reads from API worker
-5. Alerts sent via email on threshold breaches
+1. User visits vista.grove.place → redirected to Heartwood if not authenticated
+2. Heartwood validates admin user → sets grove_session cookie
+3. Collector runs every 5 minutes (cron)
+4. Fetches metrics from CF APIs + health checks all endpoints
+5. Stores time-series in D1, real-time snapshots in KV
+6. Dashboard reads from API worker (requires valid session)
+7. Alerts sent via email on threshold breaches
+```
+
+---
+
+## Security & Authentication
+
+Vista exposes sensitive infrastructure data—database IDs, cost information, system health, and real-time metrics. **Authentication is mandatory**, not optional.
+
+### Heartwood Integration
+
+Vista authenticates through Heartwood (GroveAuth), the centralized authentication system for all Grove services.
+
+**OAuth Client Registration:**
+
+```bash
+# 1. Generate client secret
+CLIENT_SECRET=$(openssl rand -base64 32)
+
+# 2. Set secrets for Vista dashboard
+echo "vista" | wrangler pages secret put GROVEAUTH_CLIENT_ID --project grove-monitor
+echo "$CLIENT_SECRET" | wrangler pages secret put GROVEAUTH_CLIENT_SECRET --project grove-monitor
+echo "https://vista.grove.place/auth/callback" | wrangler pages secret put GROVEAUTH_REDIRECT_URI --project grove-monitor
+
+# 3. Generate base64url hash for database
+SECRET_HASH=$(echo -n "$CLIENT_SECRET" | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '=')
+
+# 4. Register in Heartwood database
+wrangler d1 execute groveauth --remote --command="
+INSERT INTO clients (id, name, client_id, client_secret_hash, redirect_uris, allowed_origins)
+VALUES (
+  '$(uuidgen)',
+  'Vista Dashboard',
+  'vista',
+  '$SECRET_HASH',
+  '[\"https://vista.grove.place/auth/callback\"]',
+  '[\"https://vista.grove.place\"]'
+)"
+```
+
+### Session Validation
+
+The dashboard validates sessions on every request:
+
+```typescript
+// src/hooks.server.ts
+export const handle: Handle = async ({ event, resolve }) => {
+  // Public routes that don't need auth
+  if (event.url.pathname === '/auth/callback') {
+    return resolve(event);
+  }
+
+  // Validate session with Heartwood
+  const response = await fetch('https://auth-api.grove.place/session/validate', {
+    method: 'POST',
+    headers: { Cookie: event.request.headers.get('Cookie') || '' }
+  });
+
+  const { valid, user } = await response.json();
+
+  if (!valid) {
+    // Redirect to Heartwood login
+    const loginUrl = new URL('https://heartwood.grove.place/login');
+    loginUrl.searchParams.set('redirect', event.url.href);
+    return Response.redirect(loginUrl.toString(), 302);
+  }
+
+  // Only allow admin users (you)
+  if (!user.isAdmin) {
+    return new Response('Forbidden: Admin access required', { status: 403 });
+  }
+
+  event.locals.user = user;
+  return resolve(event);
+};
+```
+
+### Access Control
+
+| Role | Access |
+|------|--------|
+| Admin (isAdmin: true) | Full dashboard access |
+| Regular users | Denied (403 Forbidden) |
+| Unauthenticated | Redirected to Heartwood login |
+
+### API Authentication
+
+The API worker also validates sessions for all endpoints:
+
+```typescript
+// packages/api/src/middleware/auth.ts
+export async function requireAuth(request: Request): Promise<User | Response> {
+  const response = await fetch('https://auth-api.grove.place/session/validate', {
+    method: 'POST',
+    headers: { Cookie: request.headers.get('Cookie') || '' }
+  });
+
+  const { valid, user } = await response.json();
+
+  if (!valid || !user.isAdmin) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  return user;
+}
 ```
 
 ---
@@ -98,13 +205,15 @@ GroveMonitor/
 │   │   │   │   ├── alerts.ts
 │   │   │   │   └── costs.ts
 │   │   │   └── middleware/
-│   │   │       └── auth.ts     # Optional: protect dashboard
+│   │   │       └── auth.ts     # Required: Heartwood session validation
 │   │   └── wrangler.toml
 │   │
 │   └── dashboard/              # SvelteKit dashboard UI
 │       ├── src/
+│       │   ├── hooks.server.ts            # Heartwood auth middleware
 │       │   ├── routes/
 │       │   │   ├── +page.svelte           # Overview
+│       │   │   ├── auth/callback/+server.ts  # OAuth callback
 │       │   │   ├── workers/+page.svelte   # Worker details
 │       │   │   ├── databases/+page.svelte # D1 metrics
 │       │   │   ├── storage/+page.svelte   # R2/KV metrics
@@ -253,16 +362,21 @@ CREATE INDEX idx_daily_date ON daily_aggregates(date DESC);
 
 ### Workers (9)
 
-| Service | Endpoint | Health Check Path |
-|---------|----------|-------------------|
-| groveauth | auth.grove.place | /health |
-| scout | scout.grove.place | /health |
-| grove-domain-tool | domains.grove.place | /health |
-| autumnsgrove | autumnsgrove.dev | / |
-| autumnsgrove-daily-summary | (cron only) | N/A |
-| autumnsgrove-sync-posts | (cron only) | N/A |
-| library-enhancer-api | (API) | /health |
-| grove-backup-worker | (cron only) | /status |
+> **Standard:** All HTTP-accessible workers MUST expose `/health` endpoint returning `{ status: "ok" }` with 200 status code.
+
+| Service | Endpoint | Health Check Path | Notes |
+|---------|----------|-------------------|-------|
+| groveauth | auth.grove.place | /health | ✅ Standard |
+| scout | scout.grove.place | /health | ✅ Standard |
+| grove-domain-tool | domains.grove.place | /health | ✅ Standard |
+| autumnsgrove | autumnsgrove.dev | /health | ⚠️ Needs `/health` endpoint |
+| autumnsgrove-daily-summary | (cron only) | — | Cron worker, no HTTP |
+| autumnsgrove-sync-posts | (cron only) | — | Cron worker, no HTTP |
+| library-enhancer-api | (API) | /health | ✅ Standard |
+| grove-backup-worker | (cron only) | — | Cron worker, no HTTP |
+| vista-collector | (cron only) | — | Cron worker, no HTTP |
+
+**Action Required:** Add `/health` endpoint to `autumnsgrove` worker before Vista implementation.
 
 ### D1 Databases (9)
 
@@ -347,11 +461,11 @@ CREATE INDEX idx_daily_date ON daily_aggregates(date DESC);
 
 ```typescript
 const DEFAULT_THRESHOLDS = [
-  // Error rate alerts
+  // Error rate alerts (percentage)
   { metric: 'error_rate', operator: 'gt', value: 5, severity: 'warning' },
   { metric: 'error_rate', operator: 'gt', value: 10, severity: 'critical' },
 
-  // Latency alerts
+  // Latency alerts (milliseconds)
   { metric: 'latency_p95', operator: 'gt', value: 500, severity: 'warning' },
   { metric: 'latency_p95', operator: 'gt', value: 1000, severity: 'critical' },
 
@@ -362,11 +476,18 @@ const DEFAULT_THRESHOLDS = [
   { metric: 'd1_size_bytes', operator: 'gt', value: 8_000_000_000, severity: 'warning' },
   { metric: 'd1_size_bytes', operator: 'gt', value: 9_500_000_000, severity: 'critical' },
 
-  // Cost alerts
-  { metric: 'daily_cost_usd', operator: 'gt', value: 5, severity: 'warning' },
-  { metric: 'daily_cost_usd', operator: 'gt', value: 10, severity: 'critical' },
+  // Cost alerts - based on realistic infrastructure costs
+  // With 9 workers, 9 DBs, 6 R2 buckets, 7 KV namespaces
+  { metric: 'daily_cost_usd', operator: 'gt', value: 15, severity: 'warning' },
+  { metric: 'daily_cost_usd', operator: 'gt', value: 25, severity: 'critical' },
+
+  // Cost spike alerts - percentage increase from 7-day rolling average
+  { metric: 'cost_increase_pct', operator: 'gt', value: 50, severity: 'warning' },
+  { metric: 'cost_increase_pct', operator: 'gt', value: 100, severity: 'critical' },
 ];
 ```
+
+**Cost Threshold Rationale:** With 9+ workers, 9 D1 databases, 6 R2 buckets, and 7 KV namespaces, baseline costs will be higher than a simple app. The $15/$25 thresholds account for normal production workloads. The percentage-based spike detection catches anomalies even if baseline costs are within thresholds.
 
 ### Email Alert Payload (via Resend)
 
@@ -435,35 +556,95 @@ interface AlertEmailPayload {
 
 ---
 
+## Data Retention & Storage Strategy
+
+### Storage Architecture
+
+| Data Type | Storage | Retention | Purpose |
+|-----------|---------|-----------|---------|
+| Time-series metrics | D1 | 90 days | Historical analysis, charts |
+| Health check results | D1 | 90 days | Uptime calculations |
+| Daily aggregates | D1 | 1 year | Cost tracking, trends |
+| Real-time snapshots | KV | 10 min TTL | Dashboard current state |
+| Active incidents | KV | Until resolved | Live alerts |
+| Incident history | D1 | 1 year | Post-mortems |
+
+### Data Volume Estimates
+
+At 5-minute collection intervals across 25+ monitored resources:
+- **~288 collections/day** × 25 resources × 10 metrics = ~72,000 rows/day
+- **~2.16M rows/month** in `metrics` table
+- **~26M rows/year** (before retention cleanup)
+
+### Retention Jobs
+
+The collector worker runs daily cleanup:
+
+```typescript
+// Daily retention cleanup (runs at 3am UTC)
+async function cleanupOldData(db: D1Database) {
+  const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+  const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+
+  // Delete old metrics (90 days)
+  await db.prepare('DELETE FROM metrics WHERE recorded_at < ?').bind(ninetyDaysAgo).run();
+  await db.prepare('DELETE FROM health_checks WHERE checked_at < ?').bind(ninetyDaysAgo).run();
+
+  // Delete old aggregates (1 year)
+  await db.prepare('DELETE FROM daily_aggregates WHERE date < ?').bind(oneYearAgo).run();
+  await db.prepare('DELETE FROM incidents WHERE resolved_at < ?').bind(oneYearAgo).run();
+}
+```
+
+### Performance Optimization
+
+To meet the <2 second dashboard load target with 90 days of data:
+
+1. **Pre-computed aggregates** — Daily rollups calculated at midnight
+2. **KV caching** — Dashboard overview cached in KV with 5-min TTL
+3. **Indexed queries** — All time-range queries use indexed columns
+4. **Pagination** — Historical data paginated, not loaded all at once
+5. **Sparkline sampling** — Charts sample every Nth point for long ranges
+
+---
+
 ## Implementation Phases
 
 ### Phase 1: Core Infrastructure
-- [x] Create D1 database `grove-monitor-db`
-- [x] Create KV namespace `MONITOR_KV`
 - [x] Set up monorepo structure
 - [x] Define database migrations
+- [x] Create wrangler.toml configurations
+- [ ] Create D1 database `grove-monitor-db`
+- [ ] Create KV namespace `MONITOR_KV`
+- [ ] Register Vista as Heartwood OAuth client
 
 ### Phase 2: Data Collection
-- [ ] Implement collector worker with health checks
+- [ ] Add `/health` endpoint to autumnsgrove worker
+- [ ] Implement collector worker with health checks module
 - [ ] Cloudflare Analytics API integration
 - [ ] D1 metrics collection
 - [ ] R2 metrics collection
 - [ ] KV metrics collection
 - [ ] Cron scheduling (every 5 min)
+- [ ] Daily retention cleanup job
 
 ### Phase 3: Alerting
 - [ ] Threshold configuration
 - [ ] Resend email integration
 - [ ] Alert history tracking
 - [ ] Incident management
+- [ ] Cost spike detection (percentage-based)
 
 ### Phase 4: API Layer
 - [ ] Implement all API endpoints
+- [ ] Add Heartwood session validation middleware
 - [ ] Add caching with KV
 - [ ] Historical data queries
 - [ ] Cost calculation logic
 
 ### Phase 5: Dashboard UI
+- [ ] Heartwood OAuth callback handler
+- [ ] Auth redirect flow (hooks.server.ts)
 - [ ] Overview page with service grid
 - [ ] Workers detail pages
 - [ ] Databases page
@@ -472,9 +653,9 @@ interface AlertEmailPayload {
 
 ### Phase 6: Polish
 - [ ] Cost tracking page
-- [ ] Health/uptime page
+- [ ] Health/uptime page (90-day grid)
 - [ ] Mobile responsive design
-- [ ] Performance optimization
+- [ ] Performance optimization (KV caching, pagination)
 - [ ] Documentation
 
 ---
