@@ -189,6 +189,16 @@ export const specs: Doc[] = [
     readingTime: 15,
   },
   {
+    slug: "patina-spec",
+    title: "Patina — Automated Backup System",
+    description: "Nightly database backups with weekly archives and 12-week retention",
+    excerpt:
+      "A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.",
+    category: "specs",
+    lastUpdated: "2025-12-31",
+    readingTime: 20,
+  },
+  {
     slug: "trails-spec",
     title: "Trails — Personal Roadmaps",
     description: "Build in public with beautiful project roadmaps",
