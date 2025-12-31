@@ -41,6 +41,9 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 CACHE_TTL_SECONDS = "3600"
 SITE_NAME = "The Midnight Bloom"
 SITE_URL = "https://example.grove.place"
+# Turnstile (Shade) - human verification
+# Get from: Cloudflare Dashboard → Turnstile → Your Widget
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
 # DEPLOYMENT INSTRUCTIONS
@@ -61,6 +64,10 @@ SITE_URL = "https://example.grove.place"
 #    npx wrangler secret put SESSION_SECRET
 #    npx wrangler secret put ALLOWED_ADMIN_EMAILS
 #    npx wrangler secret put RESEND_API_KEY
+#
+# 5. Set Turnstile secret (required for Shade protection):
+#    npx wrangler secret put TURNSTILE_SECRET_KEY
+#    Get from: Cloudflare Dashboard → Turnstile → Your Widget → Secret Key
 #
 # =============================================================================
 # Notes
