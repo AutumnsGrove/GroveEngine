@@ -405,6 +405,17 @@ export const helpArticles: Doc[] = [
     readingTime: 6,
   },
   {
+    slug: "how-grove-backs-up-your-data",
+    title: "How Grove Backs Up Your Data",
+    description:
+      "Patina: Automated nightly backups with 12-week retention",
+    excerpt:
+      "Every night while you sleep, Grove quietly preserves everything: your posts, your comments, your settings. We call this system Patina. Age as armor.",
+    category: "help",
+    lastUpdated: "2025-12-31",
+    readingTime: 5,
+  },
+  {
     slug: "your-rss-feed",
     title: "Your RSS Feed",
     description: "How to access and use your blog's RSS feed",
