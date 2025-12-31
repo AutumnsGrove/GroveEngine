@@ -379,9 +379,9 @@ importers:
 
   vineyard:
     dependencies:
-      '@autumnsgrove/groveengine':
-        specifier: workspace:*
-        version: link:../packages/engine
+      '@autumnsgrove/vineyard':
+        specifier: link:../../../Vineyard
+        version: link:../../../Vineyard
       lucide-svelte:
         specifier: ^0.460.0
         version: 0.460.1(svelte@5.46.1)
