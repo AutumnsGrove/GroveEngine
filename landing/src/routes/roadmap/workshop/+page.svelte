@@ -337,7 +337,7 @@
 					status: 'building',
 					icon: 'network',
 					integration: 'Architectural pattern for coordination and real-time',
-					spec: '/knowledge/patterns/grove-durable-objects-architecture'
+					spec: '/knowledge/patterns/loom-durable-objects-pattern'
 				},
 			]
 		},
