@@ -9,8 +9,7 @@
 	 * Mobile-first carousel where cards stack on top of each other.
 	 * Supports images out of the box, or custom content via children snippet.
 	 *
-	 * Navigation: touch/swipe, mouse drag, click (arrows/dots).
-	 * Keyboard navigation intentionally omitted for simplicity.
+	 * Navigation: touch/swipe, mouse drag, click (arrows/dots), keyboard (arrow keys).
 	 *
 	 * @example Image carousel
 	 * ```svelte
@@ -190,6 +189,28 @@
 		}
 	}
 
+	// Keyboard navigation
+	function handleKeydown(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'ArrowLeft':
+				event.preventDefault();
+				goPrev();
+				break;
+			case 'ArrowRight':
+				event.preventDefault();
+				goNext();
+				break;
+			case 'Home':
+				event.preventDefault();
+				goTo(0);
+				break;
+			case 'End':
+				event.preventDefault();
+				goTo(totalItems - 1);
+				break;
+		}
+	}
+
 	// Autoplay controls
 	function startAutoplay() {
 		if (!autoplay || totalItems <= 1) return;
@@ -286,7 +307,8 @@
 
 	const containerClass = $derived(
 		cn(
-			"relative overflow-hidden rounded-2xl border p-4",
+			"relative overflow-hidden rounded-2xl border p-4 outline-none",
+			"focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
 			variant !== "minimal" && variantClasses[variant],
 			variant === "minimal" && "p-0",
 			className
@@ -295,11 +317,14 @@
 </script>
 
 {#if totalItems > 0}
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class={containerClass}
 	role="region"
 	aria-label="Image carousel"
 	aria-roledescription="carousel"
+	tabindex="0"
+	onkeydown={handleKeydown}
 	{...restProps}
 >
 	<!-- Cards stack -->
