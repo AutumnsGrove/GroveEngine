@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -122,7 +122,7 @@
 		{
 			name: 'Wisp',
 			tagline: 'Writing Assistant',
-			description: 'A helper, not a writer. Wisp polishes your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Like a will-o\'-the-wisp in the forest: light, airy, guiding without forcing.',
+			description: 'A helper, not a writer—and sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page—have a conversation, and your words get organized into a draft. The fire doesn\'t tell the story. It just creates the space where stories emerge.',
 			status: 'building',
 			icon: 'wind',
 			integration: 'Integrated into the Grove editor, off by default'
@@ -136,6 +136,14 @@
 			domain: 'vista.grove.place',
 			integration: 'Internal infrastructure monitoring for Grove operators',
 			github: 'https://github.com/AutumnsGrove/GroveMonitor'
+		},
+		{
+			name: 'Songbird',
+			tagline: 'Prompt Injection Protection',
+			description: 'A three-layer defense system against prompt injection attacks. Canary detects poison early. Kestrel watches and validates. Robin produces the safe response. Each layer is cheap insurance—together they cost fractions of a cent per request, but protect against compromised AI responses across all Grove AI features.',
+			status: 'building',
+			icon: 'bird',
+			integration: 'Shared pattern for Wisp, Content Moderation, and future AI features'
 		},
 	];
 
@@ -220,6 +228,8 @@
 										<Eye class="w-5 h-5" />
 									{:else if tool.icon === 'book'}
 										<BookOpen class="w-5 h-5" />
+									{:else if tool.icon === 'bird'}
+										<Bird class="w-5 h-5" />
 									{/if}
 								</div>
 								<div>

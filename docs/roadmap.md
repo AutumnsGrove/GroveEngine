@@ -373,13 +373,15 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 ## Full Bloom: Wisp — Writing Assistant
 
-> *A helper, not a writer*
+> *A helper, not a writer—and sometimes, a good listener*
 
 **Status:** Implementation complete, pending deployment
 
 Wisp is Grove's ethical AI writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming.
 
-### Implementation Complete
+**Fireside Mode** extends Wisp for writers who freeze at the blank page. Have a conversation with Wisp, and your words get organized into a draft. The fire doesn't tell the story—it just creates the space where stories emerge. See `docs/specs/ai-writing-assistant-spec.md` for full specification.
+
+### Core Implementation Complete
 - [x] Model configuration (DeepSeek V3.2 via Fireworks AI)
 - [x] Inference client with provider fallback cascade
 - [x] Local readability calculations (Flesch-Kincaid)
@@ -389,6 +391,34 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 - [x] WispButton toolbar integration
 - [x] Database migration (`014_wisp.sql`)
 - [x] Migration prompt for AutumnsGrove
+
+### Fireside Mode (Planned)
+
+**Phase F1: Core Conversation**
+- [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
+- [ ] Session state management (sessionStorage + optional KV recovery)
+- [ ] Starter prompt rotation (12 prompts, pseudorandom algorithm)
+- [ ] Error response handling
+
+**Phase F2: Draft Generation**
+- [ ] Conversation → draft prompt (voice-preserving, minimal transitions)
+- [ ] Draft preview UI
+- [ ] Transparency marker injection (server-side enforced)
+- [ ] Database migration (`015_wisp_fireside.sql`)
+
+**Phase F3: Guardrails**
+- [ ] Two-layer detection: client-side keywords + server-side inference
+- [ ] `canDraft` logic (3+ messages, 150+ tokens)
+- [ ] "Write for me" redirect responses
+
+**Phase F4: Polish**
+- [ ] ASCII fire art (with mobile emoji fallback)
+- [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
+- [ ] Screen reader support (aria-live announcements)
+- [ ] "Start with a conversation" button in editor
+
+**Phase F5: Testing**
+- [ ] Unit tests, integration tests, privacy audit, accessibility audit
 
 ### Deployment Tasks (Pre-Launch)
 - [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`

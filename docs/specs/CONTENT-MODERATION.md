@@ -554,6 +554,22 @@ Based on confidence thresholds:
 4. Revoke old API key
 5. Log rotation in audit trail
 
+### 10.5 Prompt Injection Protection
+
+Content Moderation uses the **Songbird Pattern** — a three-layer defense system against prompt injection attacks:
+
+1. **Canary** — Tripwire detection. Runs a minimal check; if response deviates from expected output, input is poisoned.
+2. **Kestrel** — Semantic validation. Verifies input looks like legitimate blog post content, not embedded instructions.
+3. **Robin** — Production response. The actual moderation classification, only runs after Canary and Kestrel verify safety.
+
+See: `docs/specs/songbird-pattern.md` for full implementation details.
+
+**Content Moderation uses Songbird for:**
+- Every post submitted for automated review
+- User-reported content reviews
+
+Together, Canary and Kestrel cost ~$0.0004 per request — negligible insurance against attackers trying to bypass moderation through prompt injection.
+
 ---
 
 ## 11. Provider Privacy Documentation

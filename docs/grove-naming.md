@@ -227,7 +227,9 @@ A wisp is a will-o'-the-wisp—a gentle, ephemeral light that appears in forests
 
 Wisp is Grove's ethical writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Just subtle nudges from a tool that disappears into the background when you don't need it.
 
-All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer.*
+**Fireside** is a mode of Wisp for writers who freeze at the blank page. Some people can't start writing—but they have no trouble *talking*. Fireside is a conversation that becomes a post. Wisp asks questions, you answer naturally, and your words get organized into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+
+All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer—and sometimes, a good listener.*
 
 ---
 
@@ -253,7 +255,7 @@ All features off by default. Zero data retention. Your words analyzed, never sto
 | **Bloom** | Remote coding infrastructure | bloom.grove.place |
 | **Mycelium** | MCP server | mycelium.grove.place |
 | **Vista** | Infrastructure observability | vista.grove.place |
-| **Wisp** | Writing assistant | *(integrated)* |
+| **Wisp** | Writing assistant (+ Fireside) | *(integrated)* |
 
 ---
 
