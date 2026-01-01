@@ -8,7 +8,7 @@ type: tech-spec
 
 # GroveEngine - Technical Specification
 
-**Package:** `@groveengine/core`
+**Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`
 **Type:** npm Package / SvelteKit Library
 **Purpose:** Powers all individual blog instances with reusable components

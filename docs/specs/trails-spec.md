@@ -438,7 +438,7 @@ Benefits:
 ## Related Specs
 
 - `grove-durable-objects-architecture.md` — DO integration patterns
-- `theme-system-spec.md` — Foliage theming
+- `foliage-project-spec.md` — Foliage theming
 - `grove-naming.md` — Naming system documentation
 
 ---

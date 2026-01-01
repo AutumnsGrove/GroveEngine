@@ -387,8 +387,8 @@ Roadmap:
 ## Related Specs
 
 - `grove-naming.md` — Tool names and philosophy
-- `help-center-spec.md` — Related documentation patterns
-- `theme-system-spec.md` — Foliage integration for Vineyard theming
+- `waystone-spec.md` — Related documentation patterns
+- `foliage-project-spec.md` — Foliage integration for Vineyard theming
 
 ---
 

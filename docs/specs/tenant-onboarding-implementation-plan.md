@@ -489,7 +489,7 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 | File | Change |
 |------|--------|
 | `landing/src/routes/+page.svelte` | Add "Start your blog" CTA linking to create.grove.place |
-| `docs/specs/tenant-onboarding-spec.md` | Update to reflect Heartwood auth approach |
+| `docs/specs/seedbed-spec.md` | Update to reflect Heartwood auth approach |
 
 ---
 

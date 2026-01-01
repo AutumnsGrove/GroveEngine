@@ -319,7 +319,7 @@ Upgrade to any paid plan for unlimited comments.
 
 ### 7.1 Automated Review
 
-All public comments are reviewed by the content moderation system (see `CONTENT-MODERATION.md`) before entering the author's approval queue.
+All public comments are reviewed by the content moderation system (see `thorn-spec.md`) before entering the author's approval queue.
 
 **Flow:**
 ```

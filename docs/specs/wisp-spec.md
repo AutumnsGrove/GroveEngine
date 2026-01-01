@@ -1080,7 +1080,7 @@ Using DeepSeek V3.2 via Fireworks AI:
 
 ## References
 
-- [Content Moderation Spec](/knowledge/specs/CONTENT-MODERATION)
+- [Thorn — Content Moderation](/knowledge/specs/thorn-spec)
 - [Grove Naming Guide](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/grove-naming.md)
 
 ---

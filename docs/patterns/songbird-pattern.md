@@ -445,7 +445,7 @@ Fireside uses Songbird for:
 
 ### Content Moderation
 
-See: `docs/specs/CONTENT-MODERATION.md` → Security section
+See: `docs/specs/thorn-spec.md` → Security section
 
 Content Moderation uses Songbird for:
 - Every post submitted for review

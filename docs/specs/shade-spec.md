@@ -956,7 +956,7 @@ Per Fastly's Q2 2025 Threat Insights Report:
 
 ### Related Grove Specs
 
-- [Content Moderation](/knowledge/specs/CONTENT-MODERATION) — Privacy-first automated moderation
+- [Thorn — Content Moderation](/knowledge/specs/thorn-spec) — Privacy-first automated moderation
 - [Terms of Service](/knowledge/legal/terms-of-service) — Legal framework
 
 ---

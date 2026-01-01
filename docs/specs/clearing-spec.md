@@ -728,7 +728,7 @@ When implementation is ready, use this prompt for the GroveAuth agent:
 ```
 Implement the Status Management feature in the GroveAuth admin panel.
 
-Reference: /docs/specs/status-page-spec.md in the GroveEngine repository
+Reference: /docs/specs/clearing-spec.md in the GroveEngine repository
 
 Key tasks:
 1. Add "Status" section to admin sidebar

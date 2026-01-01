@@ -1,6 +1,6 @@
 # Rings Analytics: Durable Objects Integration
 
-> **✅ MERGED:** This content has been integrated into `docs/specs/analytics-spec.md` (2025-12-25).
+> **✅ MERGED:** This content has been integrated into `docs/specs/rings-spec.md` (2025-12-25).
 > This file is kept for reference. The spec is the authoritative source.
 
 ## Context for Agent
