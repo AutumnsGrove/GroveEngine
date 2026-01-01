@@ -7,9 +7,9 @@
 **Domain:** `bloom.grove.place`
 **Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
 
-A bloom is the brief, brilliant moment when a flower opens—ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+A bloom is the brief, brilliant moment when a flower opens: ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
 
-Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Text it and forget it—Bloom works through it, saves the results, and cleans up after itself.
+Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Text it and forget it. Bloom works through it, saves the results, and cleans up after itself.
 
 ---
 
@@ -194,7 +194,7 @@ Projects to clone and maintain in the workspace. Edit this section to add/remove
 
 ## R2 Storage Strategy
 
-No Hetzner Volume — all persistence through Cloudflare R2.
+No Hetzner Volume; all persistence through Cloudflare R2.
 
 ### Bucket: `bloom-repos`
 

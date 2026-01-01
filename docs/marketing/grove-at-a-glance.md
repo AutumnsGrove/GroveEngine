@@ -4,7 +4,7 @@
 A blogging platform that gives you your own corner of the internet.
 
 **How does it work?**
-You get `yourname.grove.place` — a website that's yours. Write posts, share them, and own everything you create.
+You get `yourname.grove.place`, a website that's yours. Write posts, share them, and own everything you create.
 
 **What makes it different?**
 
@@ -20,10 +20,10 @@ You get `yourname.grove.place` — a website that's yours. Write posts, share th
 Writers who want a home on the internet without the surveillance, manipulation, and noise of social media. People who remember when the web felt personal.
 
 **Is it free to read?**
-Yes. Reading is free. Always. Every Grove blog is publicly accessible — just visit and read, no account needed. You only pay if you want to *write* your own blog.
+Yes. Reading is free. Always. Every Grove blog is publicly accessible. Just visit and read, no account needed. You only pay if you want to *write* your own blog.
 
 **How much does it cost to write?**
-Plans start at $8/month. No hidden catches — just straightforward pricing for a service that respects you.
+Plans start at $8/month. No hidden catches, just straightforward pricing for a service that respects you.
 
 **Where do I start?**
 Visit [grove.place](https://grove.place) and join the waitlist. We're launching soon.

@@ -23,15 +23,15 @@ That's it. You're looking at the editor.
 
 Every post has a few parts:
 
-- **Title** — What shows up at the top of your post and in your blog's post list
-- **Content** — The actual writing (this is where you'll spend most of your time)
-- **Slug** — The URL-friendly version of your title (auto-generated, but you can edit it)
+- **Title**: What shows up at the top of your post and in your blog's post list
+- **Content**: The actual writing (this is where you'll spend most of your time)
+- **Slug**: The URL-friendly version of your title (auto-generated, but you can edit it)
 
 You can also add:
 
-- **Featured image** — Shows at the top of your post and in previews
-- **Excerpt** — A short summary for your blog's listing page
-- **Tags** — Help organize your posts (optional)
+- **Featured image**: Shows at the top of your post and in previews
+- **Excerpt**: A short summary for your blog's listing page
+- **Tags**: Help organize your posts (optional)
 
 ## Writing your content
 
@@ -64,8 +64,8 @@ The post can be three paragraphs. It can be one sentence and a photo. There's no
 
 While you're writing:
 
-- **Draft** — Your post is saved but not visible to anyone. You can come back to it anytime.
-- **Publish** — Your post goes live. Anyone with the link (or browsing your blog) can see it.
+- **Draft**: Your post is saved but not visible to anyone. You can come back to it anytime.
+- **Publish**: Your post goes live. Anyone with the link (or browsing your blog) can see it.
 
 You can switch a published post back to draft if you change your mind. Nothing is permanent.
 

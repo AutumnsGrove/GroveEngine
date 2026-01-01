@@ -9,7 +9,7 @@ related: [writing-your-first-post, adding-images-and-media]
 
 # Formatting Your Posts
 
-Grove uses Markdown for formatting—a simple way to style text that's been around since 2004. If you've used Reddit, GitHub, Discord, or Notion, you've probably seen it before.
+Grove uses Markdown for formatting: a simple way to style text that's been around since 2004. If you've used Reddit, GitHub, Discord, or Notion, you've probably seen it before.
 
 Here's everything you need to make your posts look exactly how you want.
 
@@ -157,7 +157,7 @@ Renders as: ~~crossed out text~~
 - [x] Completed task
 ```
 
-Creates interactive checkboxes—useful for to-do lists or checklists in your posts.
+Creates interactive checkboxes, useful for to-do lists or checklists in your posts.
 
 ### Tables
 

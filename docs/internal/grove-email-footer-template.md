@@ -6,7 +6,7 @@
 
 ## Overview
 
-This footer goes at the bottom of all Grove-related emails. It's the quiet signature — consistent, warm, and honest.
+This footer goes at the bottom of all Grove-related emails. It's the quiet signature: consistent, warm, and honest.
 
 ---
 
@@ -39,7 +39,7 @@ grove.place · step away (unsubscribe)
 - Keep it minimal and centered
 - Muted text color (not bold, not attention-grabbing)
 - The footer should feel like a quiet closing, not a call to action
-- Logo should be crisp at 16px — use the simplified version if needed
+- Logo should be crisp at 16px. Use the simplified version if needed
 
 ---
 
@@ -69,9 +69,9 @@ Logo files are in `docs/internal/email-assets/`:
 
 ## Voice Notes
 
-- "A place to be." — calm, inviting, already established on the landing page
-- "step away (unsubscribe)" — soft but clear, no manipulation, respects the reader's choice
-- The footer shouldn't try to sell anything — it just says "this is Grove, here's the door if you need it"
+- "A place to be.": calm, inviting, already established on the landing page
+- "step away (unsubscribe)": soft but clear, no manipulation, respects the reader's choice
+- The footer shouldn't try to sell anything. It just says "this is Grove, here's the door if you need it"
 
 ---
 

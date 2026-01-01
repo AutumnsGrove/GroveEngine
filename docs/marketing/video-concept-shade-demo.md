@@ -8,7 +8,7 @@
 
 ## Title
 
-**"I Built a Blogging Platform That Blocks AI Crawlers — Here's How"**
+**"I Built a Blogging Platform That Blocks AI Crawlers: Here's How"**
 
 ---
 

@@ -117,7 +117,7 @@ id = "your-kv-id"
 
 **AGENT.md:**
 ```markdown
-# Acorn — Domain Discovery Tool
+# Acorn: Domain Discovery Tool
 
 ## Overview
 

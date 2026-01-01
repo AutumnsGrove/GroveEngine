@@ -91,7 +91,7 @@ Select "Cached images and files" at minimum.
 
 ### Step 4: Disable extensions
 
-Browser extensions—especially ad blockers, privacy tools, and script blockers—can interfere with Grove. Try disabling them temporarily to see if that's the cause.
+Browser extensions, especially ad blockers, privacy tools, and script blockers, can interfere with Grove. Try disabling them temporarily to see if that's the cause.
 
 If an extension is the problem, you can usually whitelist Grove rather than disabling the extension entirely.
 

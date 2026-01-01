@@ -8,7 +8,7 @@
 
 A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.
 
-Clearing is Grove's public status page—transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without needing to contact support.
+Clearing is Grove's public status page: transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without needing to contact support.
 
 ---
 
@@ -31,7 +31,7 @@ Clearing is Grove's public status page—transparent, real-time communication ab
 
 ### Purpose
 
-The Grove Status page provides transparent, real-time communication about platform health. When something goes wrong—or when maintenance is planned—users can check status.grove.place to understand what's happening without needing to contact support.
+The Grove Status page provides transparent, real-time communication about platform health. When something goes wrong, or when maintenance is planned, users can check status.grove.place to understand what's happening without needing to contact support.
 
 ### Goals
 

@@ -25,16 +25,16 @@ Grove handles the technical details—your image is stored securely and served f
 ## What you can upload
 
 **Supported formats:**
-- JPEG — Best for photos
-- PNG — Good for screenshots or images with text
-- GIF — Animated images work
-- WebP — Modern format, smaller file sizes
+- JPEG: Best for photos
+- PNG: Good for screenshots or images with text
+- GIF: Animated images work
+- WebP: Modern format, smaller file sizes
 
 **Size limit:** 10MB per image. That's plenty for most photos. If your image is larger, you'll need to resize it before uploading.
 
 ## Featured images
 
-Each post can have a featured image—the main visual that appears at the top of your post and in previews when you share links.
+Each post can have a featured image: the main visual that appears at the top of your post and in previews when you share links.
 
 To set a featured image:
 
@@ -49,7 +49,7 @@ Featured images show up in:
 
 ## Adding alt text
 
-Alt text describes your image for people who can't see it—screen reader users, people with slow connections, or anyone who has images turned off. It also helps search engines understand your content.
+Alt text describes your image for people who can't see it: screen reader users, people with slow connections, or anyone who has images turned off. It also helps search engines understand your content.
 
 When you upload an image, you can add alt text in the dialog that appears. Keep it brief but descriptive:
 

@@ -13,7 +13,7 @@ Grove saves your work as you write. Here's how drafts work and what to expect.
 
 ## Auto-save while you write
 
-The editor saves to your browser every few seconds. You don't need to do anything—it just happens.
+The editor saves to your browser every few seconds. You don't need to do anything. It just happens.
 
 If you accidentally close the tab, refresh the page, or your browser crashes, your work isn't lost. When you come back, Grove will ask if you want to restore your draft.
 
@@ -23,9 +23,9 @@ This local save is a safety net, not a substitute for the **Save** button. To ac
 
 Every post has two states:
 
-**Draft** — Saved to your account, but not visible to readers. Only you can see it. Take your time, edit it, come back to it later.
+**Draft**: Saved to your account, but not visible to readers. Only you can see it. Take your time, edit it, come back to it later.
 
-**Published** — Live on your blog. Anyone visiting your site can read it.
+**Published**: Live on your blog. Anyone visiting your site can read it.
 
 You can switch between these anytime:
 - Publishing a draft makes it live
@@ -56,7 +56,7 @@ This happens when:
 - Your browser crashed
 - You lost internet connection mid-edit
 
-The auto-save stores your content locally—it's not synced across devices. If you started writing on your laptop but switch to your phone, you'll need to have saved to Grove first.
+The auto-save stores your content locally. It's not synced across devices. If you started writing on your laptop but switch to your phone, you'll need to have saved to Grove first.
 
 ## Publishing your post
 

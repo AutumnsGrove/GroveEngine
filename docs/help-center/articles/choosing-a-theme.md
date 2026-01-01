@@ -15,13 +15,13 @@ Your blog should feel like yours. Grove's theme system gives you meaningful cust
 
 Every Grove blog supports three display modes:
 
-**Light mode** — Clean, bright, easy to read in well-lit environments.
+**Light mode**: Clean, bright, easy to read in well-lit environments.
 
-**Dark mode** — Easier on the eyes at night, uses less battery on OLED screens.
+**Dark mode**: Easier on the eyes at night, uses less battery on OLED screens.
 
-**System** — Automatically matches your visitor's device preference. If their phone is in dark mode, your blog appears in dark mode.
+**System**: Automatically matches your visitor's device preference. If their phone is in dark mode, your blog appears in dark mode.
 
-Most bloggers choose "System" to respect reader preferences. But if your content has a specific vibe—cozy late-night journaling, for instance—picking dark mode explicitly can reinforce that.
+Most bloggers choose "System" to respect reader preferences. But if your content has a specific vibe (cozy late-night journaling, for instance), picking dark mode explicitly can reinforce that.
 
 ## Changing your theme
 
@@ -46,10 +46,10 @@ The default fonts are designed to work well across devices and screen sizes. If 
 
 ### Available fonts include:
 
-- **System fonts** — Fast-loading, familiar, accessible
-- **Serif options** — For a more traditional, literary feel
-- **Sans-serif options** — Clean and modern
-- **Monospace** — For code-heavy or technical blogs
+- **System fonts**: Fast-loading, familiar, accessible
+- **Serif options**: For a more traditional, literary feel
+- **Sans-serif options**: Clean and modern
+- **Monospace**: For code-heavy or technical blogs
 
 Each font is tested for:
 - Readability at various sizes

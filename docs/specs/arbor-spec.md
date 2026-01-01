@@ -6,7 +6,7 @@
 **Internal Name:** GroveArbor
 **Access URL:** `{blog}.grove.place/admin`
 
-An arbor is a garden structure that supports climbing plants—structured, nurturing, and essential for healthy growth. It's where you manage and cultivate your corner of the grove.
+An arbor is a garden structure that supports climbing plants: structured, nurturing, and essential for healthy growth. It's where you manage and cultivate your corner of the grove.
 
 ---
 
@@ -177,7 +177,7 @@ The landing page after login. Intentionally simple.
 - Engagement metrics
 - Revenue numbers
 
-**Rationale**: Dashboards often create anxiety. Grove's dashboard answers "is everything working?" and provides quick shortcuts—nothing more.
+**Rationale**: Dashboards often create anxiety. Grove's dashboard answers "is everything working?" and provides quick shortcuts, nothing more.
 
 ### Blog Posts
 

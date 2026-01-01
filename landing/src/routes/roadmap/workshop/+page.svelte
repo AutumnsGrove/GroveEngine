@@ -95,7 +95,7 @@
 				{
 					name: 'Heartwood',
 					tagline: 'Centralized Authentication',
-					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth, GitHub, or magic email codes—all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
+					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth, GitHub, or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
 					status: 'live',
 					icon: 'shieldcheck',
 					domain: 'heartwood.grove.place',
@@ -125,7 +125,7 @@
 				{
 					name: 'Amber',
 					tagline: 'Storage Management',
-					description: 'Your Grove storage, made visible. See what\'s using your space, download and export your data, clean up what you don\'t need, and buy more when you need it. Every file you upload—blog images, email attachments, profile pictures—organized in one place.',
+					description: 'Your Grove storage, made visible. See what\'s using your space, download and export your data, clean up what you don\'t need, and buy more when you need it. Every file you upload, from blog images to email attachments, organized in one place.',
 					status: 'building',
 					icon: 'harddrive',
 					domain: 'amber.grove.place',
@@ -147,7 +147,7 @@
 				{
 					name: 'Rings',
 					tagline: 'Private Analytics',
-					description: 'Count the rings to learn the story. Rings provides private insights for writers—aggregate page views, popular posts, reader geography—without the anxiety of real-time dashboards. Your growth reflected back to you, not performed for others.',
+					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
 					status: 'planned',
 					icon: 'barchart',
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
@@ -173,7 +173,7 @@
 				{
 					name: 'Wisp',
 					tagline: 'Writing Assistant',
-					description: 'A helper, not a writer—and sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page—have a conversation, and your words get organized into a draft.',
+					description: 'A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.',
 					status: 'planned',
 					icon: 'wind',
 					integration: 'Integrated into the Grove editor, off by default',
@@ -225,7 +225,7 @@
 				{
 					name: 'Ivy',
 					tagline: 'Privacy-First Email',
-					description: 'A zero-knowledge email client for your @grove.place address. Client-side encryption means we can\'t read your mail—it\'s yours alone. Threaded conversations, rich text, attachments, and integration with your blog\'s contact forms.',
+					description: 'A zero-knowledge email client for your @grove.place address. Client-side encryption means we can\'t read your mail. It\'s yours alone. Threaded conversations, rich text, attachments, and integration with your blog\'s contact forms.',
 					status: 'building',
 					icon: 'mail',
 					domain: 'ivy.grove.place',
@@ -247,7 +247,7 @@
 				{
 					name: 'Forage',
 					tagline: 'Domain Discovery',
-					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget—and it returns a curated list of available domains that actually fit.',
+					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit.',
 					status: 'live',
 					icon: 'search',
 					domain: 'forage.grove.place',
@@ -257,7 +257,7 @@
 				{
 					name: 'Nook',
 					tagline: 'Private Video Sharing',
-					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive—a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
+					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
 					status: 'planned',
 					icon: 'video',
 					domain: 'nook.grove.place',
@@ -303,7 +303,7 @@
 				{
 					name: 'Patina',
 					tagline: 'Automated Backups',
-					description: 'A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
+					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
 					status: 'building',
 					icon: 'archive',
 					integration: 'Internal service protecting all Grove data',
@@ -348,7 +348,7 @@
 				{
 					name: 'Seasons',
 					tagline: 'Versioning System',
-					description: 'Each ring records a season—growth in plenty, resilience through hardship. Seasons is Grove\'s versioning system: how Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.',
+					description: 'Each ring records a season: growth in plenty, resilience through hardship. Seasons is Grove\'s versioning system. How Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.',
 					status: 'implemented',
 					icon: 'calendar',
 					integration: 'Version management for Lattice and customer sites',

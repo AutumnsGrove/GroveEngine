@@ -59,7 +59,7 @@ That's all. Back to your regularly scheduled silence from me.
 ## Design Notes
 
 - This is the most "voice-forward" email in the sequence
-- No product features, no calls to action—just encouragement
+- No product features, no calls to action, just encouragement
 - Combats the perfectionism that stops people from posting
 - Reflects Grove's values: authenticity over performance
 - Lighter touch, feels like a note from a friend

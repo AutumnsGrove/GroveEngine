@@ -1,4 +1,4 @@
-# Grove Launch Email — Version 3 (Roadmap Announcement)
+# Grove Launch Email: Version 3 (Roadmap Announcement)
 
 *Created: December 26, 2025*
 
@@ -8,7 +8,7 @@
 
 The roadmap page is live at grove.place/roadmap. It's a visual journey through Grove's development phases, with seasonal theming (snow, petals, falling leaves) and procedural tree generation. This email invites subscribers to explore it.
 
-**The moment:** Grove is in the "Thaw" phase. The roadmap shows where we've been, where we are, and where we're going — all the way to Midnight Bloom (the dream of a physical tea shop).
+**The moment:** Grove is in the "Thaw" phase. The roadmap shows where we've been, where we are, and where we're going, all the way to Midnight Bloom (the dream of a physical tea shop).
 
 **The goal:** Get people to visit and explore the roadmap. Let the page speak for itself.
 
@@ -30,7 +30,7 @@ You'll start in First Frost (the foundations). Right now we're in Thaw. The door
 
 It's the kind of thing you might want to explore slowly.
 
-— Autumn
+- Autumn
 
 ---
 
@@ -46,7 +46,7 @@ It's the kind of thing you might want to explore slowly.
 
 ## Visual Notes
 
-- No screenshot needed — the page IS the visual
+- No screenshot needed. The page IS the visual
 - The roadmap has its own "wow" factor with seasonal animations
 - Let people discover it themselves
 

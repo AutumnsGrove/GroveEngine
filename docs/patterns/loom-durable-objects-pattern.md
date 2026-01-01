@@ -1,4 +1,4 @@
-# Loom — Real-Time Coordination
+# Loom: Real-Time Coordination
 
 > *The framework where Grove's threads come together.*
 
@@ -7,7 +7,7 @@
 **Pattern Type:** Architecture
 **Last Updated:** January 2026
 
-Loom is Grove's coordination layer, built on Cloudflare Durable Objects. It's the invisible structure that makes everything feel seamless—auth that works across all properties, state that stays in sync, real-time features that just work.
+Loom is Grove's coordination layer, built on Cloudflare Durable Objects. It's the invisible structure that makes everything feel seamless: auth that works across all properties, state that stays in sync, real-time features that just work.
 
 ---
 
@@ -15,9 +15,9 @@ Loom is Grove's coordination layer, built on Cloudflare Durable Objects. It's th
 
 This document outlines the integration of Cloudflare Durable Objects into the Grove ecosystem to solve three critical problems:
 
-1. **Auth coordination** — Eliminate janky handoffs between workers, provide instant session validation
-2. **D1 write scaling** — Batch writes to reduce load and costs as user base grows
-3. **Real-time features** — Enable live updates, presence, and notifications for Meadow
+1. **Auth coordination:** Eliminate janky handoffs between workers, provide instant session validation
+2. **D1 write scaling:** Batch writes to reduce load and costs as user base grows
+3. **Real-time features:** Enable live updates, presence, and notifications for Meadow
 
 Durable Objects are not replacing D1. They are a **coordination and caching layer** that sits between your Workers and D1, providing strong consistency, atomic operations, and real-time capabilities.
 
@@ -29,8 +29,8 @@ Durable Objects are not replacing D1. They are a **coordination and caching laye
 
 - **Single-threaded compute instances** with a globally unique ID
 - **Persistent storage** (up to 10GB SQLite per DO) that survives hibernation
-- **Coordination points** — all requests to the same ID route to the same instance
-- **WebSocket capable** — can maintain persistent connections with hibernation
+- **Coordination points:** all requests to the same ID route to the same instance
+- **WebSocket capable:** can maintain persistent connections with hibernation
 
 ### What Durable Objects Are NOT
 
@@ -41,10 +41,10 @@ Durable Objects are not replacing D1. They are a **coordination and caching laye
 ### Lifecycle
 
 1. Request arrives for DO with ID `session:autumn`
-2. If instance exists in memory → routes to it
-3. If hibernated → wakes up, loads storage, processes request
-4. If never existed → creates new instance
-5. After ~10-30 seconds idle → hibernates (storage persists)
+2. If instance exists in memory: routes to it
+3. If hibernated: wakes up, loads storage, processes request
+4. If never existed: creates new instance
+5. After ~10-30 seconds idle: hibernates (storage persists)
 6. Storage persists forever until explicitly deleted
 
 ---
@@ -665,7 +665,7 @@ new_sqlite_classes = ["SessionDO", "TenantDO", "PostDO", "FeedDO", "Notification
 
 ## Implementation Priority
 
-### Phase 1: Auth (Heartwood) — HIGHEST PRIORITY
+### Phase 1: Auth (Heartwood) - HIGHEST PRIORITY
 1. Implement `SessionDO`
 2. Update Heartwood OAuth flow to use SessionDO
 3. Update auth middleware in all workers to validate via SessionDO
@@ -673,8 +673,8 @@ new_sqlite_classes = ["SessionDO", "TenantDO", "PostDO", "FeedDO", "Notification
 5. Test cross-subdomain auth
 
 **Expected improvements:**
-- Login time: 15 seconds → 2-3 seconds
-- Session validation: D1 query → DO call (sub-millisecond if cached)
+- Login time: 15 seconds to 2-3 seconds
+- Session validation: D1 query to DO call (sub-millisecond if cached)
 - "Log out all devices" becomes trivial
 
 ### Phase 2: Tenant Coordination
@@ -684,7 +684,7 @@ new_sqlite_classes = ["SessionDO", "TenantDO", "PostDO", "FeedDO", "Notification
 4. Set up analytics buffering
 
 **Expected improvements:**
-- Config load: D1 query per request → cached in DO
+- Config load: D1 query per request to cached in DO
 - Rate limiting: Works correctly (currently IP-based only)
 - D1 writes: Reduced by ~90% for analytics
 
@@ -836,14 +836,14 @@ async function validateAuth(request: Request, env: Env) {
 ### Comparison: Before and After
 
 **Before (D1 for everything):**
-- 10,000 page views → 10,000 D1 reads for config
-- 1,000 reactions → 1,000 D1 writes
-- Session validation → D1 read every request
+- 10,000 page views: 10,000 D1 reads for config
+- 1,000 reactions: 1,000 D1 writes
+- Session validation: D1 read every request
 
 **After (with DOs):**
-- 10,000 page views → 1 DO call (cached config), 1 D1 write (batched analytics)
-- 1,000 reactions → 1,000 DO calls, 10 D1 writes (batched)
-- Session validation → DO call (sub-ms, often cached in memory)
+- 10,000 page views: 1 DO call (cached config), 1 D1 write (batched analytics)
+- 1,000 reactions: 1,000 DO calls, 10 D1 writes (batched)
+- Session validation: DO call (sub-ms, often cached in memory)
 
 ---
 

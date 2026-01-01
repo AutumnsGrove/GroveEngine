@@ -6,7 +6,7 @@ This guide captures the voice, tone, and approach for writing Grove help documen
 
 ## The Grove Voice
 
-Grove's help documentation should feel like getting advice from a thoughtful friend who happens to know a lot about the platform—not a corporate knowledge base, not a chatbot, not a manual written by committee.
+Grove's help documentation should feel like getting advice from a thoughtful friend who happens to know a lot about the platform, not a corporate knowledge base, not a chatbot, not a manual written by committee.
 
 ### Core Principles
 
@@ -44,7 +44,7 @@ Users reading help articles are often frustrated, confused, or anxious. Acknowle
 
 > "Site outages are stressful. We take them seriously."
 
-> "If you've ever lost a draft to a browser crash, you know the feeling. Grove autosaves every few seconds—you won't lose your work."
+> "If you've ever lost a draft to a browser crash, you know the feeling. Grove autosaves every few seconds, so you won't lose your work."
 
 ### We're transparent about limitations
 Don't hide what Grove can't do. Users respect honesty more than spin:

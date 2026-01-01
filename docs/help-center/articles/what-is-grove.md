@@ -9,13 +9,13 @@ related: [writing-your-first-post, understanding-your-privacy]
 
 # What is Grove?
 
-Grove is a blogging platform for people who want their own space on the internet—without the complexity of self-hosting or the tradeoffs of big tech platforms.
+Grove is a blogging platform for people who want their own space on the internet, without the complexity of self-hosting or the tradeoffs of big tech platforms.
 
 ## The short version
 
 You get a blog. It's yours. You write, we host it, your readers can find you via your own URL. No ads, no algorithms deciding who sees your posts, no tracking your visitors.
 
-**Reading is free. Always.** Every Grove blog is publicly accessible — just visit and read, no account needed. You only pay if you want to write your own blog.
+**Reading is free. Always.** Every Grove blog is publicly accessible. Just visit and read, no account needed. You only pay if you want to write your own blog.
 
 ## What makes Grove different
 
@@ -36,7 +36,7 @@ Grove works well for:
 - **Personal bloggers** who want a home for their thoughts without wrestling with WordPress or paying for features they don't need
 - **Writers** who want to focus on writing, not configuring
 - **People leaving big platforms** who want ownership of their work and respect for their readers' privacy
-- **Anyone who misses the old web**—when having a blog felt personal, not performative
+- **Anyone who misses the old web**: when having a blog felt personal, not performative
 
 ## What Grove isn't
 

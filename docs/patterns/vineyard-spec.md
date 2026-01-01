@@ -7,7 +7,7 @@
 **Target Phase:** Ongoing (each tool implements as ready)
 **Last Updated:** December 2025
 
-A vineyard is where vines are cultivated, each one tended and displayed. Visitors can walk the rows, sample the offerings, understand what grows here. Vineyard is Grove's tool showcase pattern—a consistent way to explore any tool in the ecosystem.
+A vineyard is where vines are cultivated, each one tended and displayed. Visitors can walk the rows, sample the offerings, understand what grows here. Vineyard is Grove's tool showcase pattern: a consistent way to explore any tool in the ecosystem.
 
 Every Grove tool implements a `/vineyard` route on its subdomain. Visit `bloom.grove.place/vineyard` to see what Bloom does. Visit `meadow.grove.place/vineyard` to explore the social layer. One pattern, across the entire ecosystem.
 
@@ -15,7 +15,7 @@ Every Grove tool implements a `/vineyard` route on its subdomain. Visit `bloom.g
 
 ## Overview
 
-Vineyard is a documentation and demo pattern that every Grove tool implements. Rather than a single showcase site, each product gets its own `/vineyard` route on its subdomain—creating a consistent, discoverable way to explore what each tool does, how it works, and where it's headed.
+Vineyard is a documentation and demo pattern that every Grove tool implements. Rather than a single showcase site, each product gets its own `/vineyard` route on its subdomain, creating a consistent, discoverable way to explore what each tool does, how it works, and where it's headed.
 
 ### Why Vineyard?
 

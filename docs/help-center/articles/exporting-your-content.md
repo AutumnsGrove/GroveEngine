@@ -40,7 +40,7 @@ grove-export-yourusername-2025-01-15.zip
 └── README.md
 ```
 
-**Posts** are in Markdown format—the same format many other blogging platforms use. You can open them in any text editor or import them elsewhere.
+**Posts** are in Markdown format, the same format many other blogging platforms use. You can open them in any text editor or import them elsewhere.
 
 **Comments** are in JSON format, including the author name, content, timestamp, and which post they belong to. Both public comments and private replies are included.
 
@@ -52,9 +52,9 @@ grove-export-yourusername-2025-01-15.zip
 
 We use formats that work everywhere:
 
-- **Markdown** for posts (plain text, portable)
-- **JSON** for structured data (comments, settings)
-- **Original formats** for media (JPG, PNG, etc.)
+- **Markdown** for posts: plain text, portable
+- **JSON** for structured data: comments, settings
+- **Original formats** for media: JPG, PNG, etc.
 
 No proprietary formats, no lock-in. Your content works outside of Grove.
 
@@ -81,7 +81,7 @@ No transfer fees. No artificial delays. No "pay to keep your data" schemes.
 
 If you're on Evergreen with a domain included:
 
-- The domain is registered in your name—you own it
+- The domain is registered in your name. You own it
 - Request a transfer authorization code anytime
 - We provide it within 48 hours
 - No transfer fees from our side
@@ -90,4 +90,4 @@ Your domain goes where you go.
 
 ---
 
-*Your content is yours. We mean that literally—take it whenever you want.*
+*Your content is yours. We mean that literally. Take it whenever you want.*

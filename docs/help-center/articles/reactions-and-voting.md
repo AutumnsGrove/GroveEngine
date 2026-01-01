@@ -13,7 +13,7 @@ Meadow has two ways to engage with posts: voting and emoji reactions. Here's how
 
 ## Voting
 
-Every post in Meadow can be upvoted or downvoted. This affects how posts are ranked in the feed, but there's no public score display—you won't see "+47" next to a post.
+Every post in Meadow can be upvoted or downvoted. This affects how posts are ranked in the feed, but there's no public score display. You won't see "+47" next to a post.
 
 **To vote:**
 - Click ▲ to upvote (you found this valuable)
@@ -23,14 +23,14 @@ Every post in Meadow can be upvoted or downvoted. This affects how posts are ran
 **What voting does:**
 - Upvotes push posts higher in "Popular" and "Hot" feeds
 - Downvotes push posts lower
-- Votes are private—no one can see how you voted
+- Votes are private. No one can see how you voted
 - You can't vote on your own posts
 
 **Feed sorting options:**
-- **Newest** — Most recent posts first, no voting influence
-- **Popular** — Highest net score (upvotes minus downvotes)
-- **Hot** — Recent posts that are getting upvotes
-- **Top** — Best posts by time period (today, week, month, year, all-time)
+- **Newest**: Most recent posts first, no voting influence
+- **Popular**: Highest net score (upvotes minus downvotes)
+- **Hot**: Recent posts that are getting upvotes
+- **Top**: Best posts by time period (today, week, month, year, all-time)
 
 Voting is about collective curation, not competition. Good posts rise; less relevant ones fade.
 
@@ -45,7 +45,7 @@ Reactions let you respond to posts with more nuance than an upvote. When you rea
 - 😢 (sad)
 - 😡 (angry)
 
-**Combination emojis:** Grove also has over 100 "emoji kitchen" combinations—creative mashups like ❤️‍🔥 or 🥹. These let you express reactions that don't fit the standard five.
+**Combination emojis:** Grove also has over 100 "emoji kitchen" combinations, creative mashups like ❤️‍🔥 or 🥹. These let you express reactions that don't fit the standard five.
 
 **How reactions display:**
 - The top 5 most-used reactions show on each post
@@ -72,7 +72,7 @@ These limits are generous enough that you'll never hit them in normal use.
 
 ## Who can vote and react?
 
-**Everyone with a Grove account.** Free accounts have full access to voting and reactions in Meadow. You don't need a paid blog plan to participate in the community—just an account.
+**Everyone with a Grove account.** Free accounts have full access to voting and reactions in Meadow. You don't need a paid blog plan to participate in the community, just an account.
 
 ## Can I see who voted or reacted?
 

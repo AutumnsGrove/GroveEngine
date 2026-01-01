@@ -1,4 +1,4 @@
-# Grove Platform — Development Roadmap
+# Grove Platform: Development Roadmap
 
 > **Internal Technical Roadmap**
 >
@@ -23,37 +23,37 @@ The groundwork laid in stillness. Foundations built when no one was watching.
 
 ### Completed
 
-- [x] **Core Engine (Lattice)** — Blog engine extracted from autumnsgrove.com
+- [x] **Core Engine (Lattice):** Blog engine extracted from autumnsgrove.com
   - SvelteKit 2.0 + Svelte 5 runes
   - Cloudflare Workers, D1, KV, R2
   - Markdown editor with live preview
   - Post CRUD, media uploads, RSS feeds
   - Table of contents, gutter links (vines)
 
-- [x] **Authentication (Heartwood)** — Secure OAuth 2.0 + PKCE
+- [x] **Authentication (Heartwood):** Secure OAuth 2.0 + PKCE
   - Google OAuth provider
   - GitHub OAuth provider
   - Magic code email auth via Resend
   - Session management in D1
   - Cross-subdomain cookies
 
-- [x] **Landing Site** — grove.place welcomes visitors
+- [x] **Landing Site:** grove.place welcomes visitors
   - Seasonal theme system
   - Randomized forest generation
   - Email waitlist (59 subscribers at launch)
   - Vision, pricing, roadmap pages
 
-- [x] **Infrastructure** — SST + Cloudflare
+- [x] **Infrastructure:** SST + Cloudflare
   - D1 databases, KV namespaces, R2 buckets
   - Stripe products/prices defined in code
   - GitHub Actions CI/CD
   - Wrangler deployments
 
-- [x] **Internal Tools** — Development infrastructure
-  - Bloom (GroveBloom) — Remote coding environments on-demand
-  - Mycelium (GroveMCP) — MCP server for AI agent integration
-  - Vineyard — Asset & tool showcase pattern for Grove products
-  - Vista (GroveMonitor) — Infrastructure observability dashboard
+- [x] **Internal Tools:** Development infrastructure
+  - Bloom (GroveBloom): Remote coding environments on-demand
+  - Mycelium (GroveMCP): MCP server for AI agent integration
+  - Vineyard: Asset & tool showcase pattern for Grove products
+  - Vista (GroveMonitor): Infrastructure observability dashboard
   - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, `docs/specs/vista-spec.md`, and `docs/grove-mcp-guide.md`
 
 ---
@@ -66,63 +66,63 @@ Grove opens its doors. The first trees take root.
 
 ### Active Work
 
-- [x] **Sign Up Flow** — plant.grove.place
+- [x] **Sign Up Flow:** plant.grove.place
   - Google, GitHub, email auth options
   - Profile creation with username
   - Plan selection (Seedling/Sapling/Oak/Evergreen)
   - Stripe checkout integration
   - Interactive onboarding tour
 
-- [x] **Seedling Tier** — $8/month base offering
+- [x] **Seedling Tier:** $8/month base offering
   - 50 posts, 1 GB storage
   - 3 themes to start
   - username.grove.place subdomain
   - Full Meadow access
 
-- [x] **Markdown Writing** — Clean, focused editor
+- [x] **Markdown Writing:** Clean, focused editor
   - Live preview
   - Drag-and-drop images
   - Vine annotations (margin notes)
 
-- [x] **Image Hosting** — R2-backed media
+- [x] **Image Hosting:** R2-backed media
   - Automatic optimization
   - CDN delivery via cdn.grove.place
   - Alt text support
 
-- [x] **RSS Feed** — Built-in, because it should be
+- [x] **RSS Feed:** Built-in, because it should be
   - Standard RSS 2.0 format
   - Full post content in feed
 
-- [x] **Shade Protection** — AI crawlers blocked
+- [x] **Shade Protection:** AI crawlers blocked
   - Cloudflare Bot Fight Mode
   - robots.txt with comprehensive AI bot list
   - X-Robots-Tag: noai, noimageai
   - Turnstile human verification
 
-- [x] **Data Export** — Your words, always portable
+- [x] **Data Export:** Your words, always portable
   - Markdown + images as zip
   - Full metadata preservation
 
-- [x] **Help Center** — Built into admin panel
+- [x] **Help Center:** Built into admin panel
   - Contextual help buttons
   - SQLite FTS5 search
   - 10 knowledge categories
 
 ### Remaining for Thaw
 
-- [ ] **Launch Signups** — Open plant.grove.place to public
+- [ ] **Launch Signups:** Open plant.grove.place to public
   - Final Stripe webhook testing
   - Welcome email sequence (day 1, 3, 7, 30)
   - Support ticket system ready
 
-- [ ] **First 3-5 Tenants** — Friends & family beta
+- [ ] **First 3-5 Tenants:** Friends & family beta
   - Track actual support time
   - Gather UX feedback
   - Validate pricing model
 
 ### Technical Tasks
 
-- [ ] **🛡️ Patina** — Automated nightly backups
+- [ ] **🛡️ Patina:** Automated nightly backups
   - Nightly SQL dumps of all 6 D1 databases to R2
   - Weekly meta-backups (compress 7 days into archive)
   - 12-week retention for disaster recovery
@@ -145,29 +145,29 @@ New growth appears. The grove finds its voice.
 
 ### Planned Features
 
-- [ ] **Ivy** — Email at @grove.place
+- [ ] **Ivy:** Email at @grove.place
   - Forward emails to personal inbox
   - Custom @username.grove.place addresses
   - Spam filtering via Cloudflare Email Routing
 
-- [ ] **Amber** — Storage dashboard
+- [ ] **Amber:** Storage dashboard
   - See usage across posts and media
   - Visual breakdown by file type
   - Upgrade prompts near limits
 
-- [ ] **Trails** — Personal roadmaps
+- [ ] **Trails:** Personal roadmaps
   - Share your journey publicly
   - Seasonal theming integration
   - Embed in blog posts
   - See `docs/specs/trails-spec.md`
 
-- [ ] **Sapling Tier** — $12/month growth tier
+- [ ] **Sapling Tier:** $12/month growth tier
   - 250 posts, 5 GB storage
   - 10 themes
   - Email forwarding included
   - Priority support
 
-- [ ] **More Themes** — Foliage expansion
+- [ ] **More Themes:** Foliage expansion
   - Minimal, Night Garden, Zine
   - Moodboard, Typewriter, Solarpunk
   - See `@autumnsgrove/foliage`
@@ -190,37 +190,37 @@ The grove becomes a community. Roots intertwine.
 
 ### Planned Features
 
-- [ ] **Meadow** — The social layer
+- [ ] **Meadow:** The social layer
   - Optional community feed
   - Follow favorite blogs
   - No algorithms, just chronological
   - Connection without competition
   - See `docs/specs/social-spec.md`
 
-- [ ] **Comments** — Dual-mode system
+- [ ] **Comments:** Dual-mode system
   - Reply = private message to author
   - Comment = public, requires approval
   - Rate limits: Free 20/week, Paid unlimited
   - See `docs/specs/reeds-spec.md`
 
-- [ ] **Private Reactions** — Encouragement only author sees
+- [ ] **Private Reactions:** Encouragement only author sees
   - Emoji reactions
   - No public counts
   - No engagement metrics
 
-- [ ] **Rings** — Private analytics
+- [ ] **Rings:** Private analytics
   - Your growth, reflected
   - Privacy-first design
   - Daily visitor counts, not identities
   - See `docs/specs/rings-spec.md`
 
-- [ ] **Oak & Evergreen Tiers** — Full control
+- [ ] **Oak & Evergreen Tiers:** Full control
   - Custom domains (BYOD)
   - Theme customizer
   - Custom fonts (Evergreen)
   - Domain search & registration (Evergreen)
 
-- [ ] **Content Moderation** — Keeping the grove safe
+- [ ] **Content Moderation:** Keeping the grove safe
   - AI-assisted review with human escalation
   - Zero data retention on external APIs
   - See `docs/specs/thorn-spec.md`
@@ -244,25 +244,25 @@ The grove settles into itself. A time for refinement.
 
 ### Planned Features
 
-- [ ] **Polish** — Attention to every detail
+- [ ] **Polish:** Attention to every detail
   - Accessibility audit (WCAG AA)
   - Performance optimization
   - Mobile experience refinement
   - Edge case handling
 
-- [ ] **Import Tools** — Bring your words home
+- [ ] **Import Tools:** Bring your words home
   - WordPress import
   - Medium import
   - Substack import
   - Ghost import
   - Generic RSS/Atom
 
-- [ ] **Newsletter Integration** — Email your readers
+- [ ] **Newsletter Integration:** Email your readers
   - Resend-powered delivery
   - Subscriber management
   - Opt-in/opt-out handling
 
-- [ ] **Theme Marketplace** — Community creations
+- [ ] **Theme Marketplace:** Community creations
   - Submit and review process
   - Preview before installing
   - Revenue sharing for creators
@@ -279,7 +279,7 @@ The grove settles into itself. A time for refinement.
 
 ## Phase 6: Midnight Bloom
 
-*"The far horizon — A dream taking shape"*
+*"The far horizon: a dream taking shape"*
 
 Where digital roots meet physical ground. The vision that pulls everything forward.
 
@@ -287,18 +287,18 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 > "A soft glow spilling onto quiet sidewalks after the world has gone still. The kind of third place that becomes a first home. A bloom that opens only in darkness, for those who need it most."
 
-- [ ] **The Cafe** — A late-night tea shop
+- [ ] **The Cafe:** A late-night tea shop
   - Physical space for the sleepless and searching
   - Queer-friendly, trans-friendly
   - QR codes linking blogs to tables
   - Community board for local events
 
-- [ ] **Community Boards** — Physical meets digital
+- [ ] **Community Boards:** Physical meets digital
   - Print local Grove blogs as zines
   - QR codes linking to online versions
   - Monthly featured writers
 
-- [ ] **A Third Place** — That becomes a first home
+- [ ] **A Third Place:** That becomes a first home
   - Workshop events
   - Writing groups
   - Digital literacy classes
@@ -319,7 +319,7 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 > See `docs/grove-durable-objects-architecture.md` for full specification.
 
-**DO Phase 1: Auth (Heartwood)** — Highest Priority
+**DO Phase 1: Auth (Heartwood)** - Highest Priority
 - SessionDO for cross-subdomain auth
 - Expected: Login 15s -> 2-3s, validation sub-millisecond
 
@@ -371,7 +371,7 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 ---
 
-## Full Bloom: Wisp — Writing Assistant
+## Full Bloom: Wisp - Writing Assistant
 
 > *A helper, not a writer—and sometimes, a good listener*
 
@@ -471,9 +471,9 @@ scripts/
 - Zero Data Retention (ZDR) from all inference providers
 - Content analyzed, never stored
 - Outcome-only retention (scores, not content)
-- User's voice is sacred — we polish, never replace
+- User's voice is sacred: we polish, never replace
 
-*Like a will-o'-the-wisp in the forest — light, airy, guiding without forcing.*
+*Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing.*
 
 ---
 

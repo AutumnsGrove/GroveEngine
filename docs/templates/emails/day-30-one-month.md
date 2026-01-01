@@ -25,7 +25,7 @@ Hi {{name}},
 
 It's been a month since you started your blog. That's something.
 
-Whether you've published a dozen posts or just one, whether you've found your rhythm or you're still figuring it out—you showed up. That matters more than most people realize.
+Whether you've published a dozen posts or just one, whether you've found your rhythm or you're still figuring it out, you showed up. That matters more than most people realize.
 
 ---
 
@@ -37,14 +37,14 @@ I'd genuinely love to know: **How's it going?**
 - What's one thing that's been confusing or frustrating?
 - Is there a feature you keep wishing existed?
 
-You can reply to this email with just a sentence or two—doesn't need to be a formal review. I read everything, and your feedback directly shapes what gets built next.
+You can reply to this email with just a sentence or two. Doesn't need to be a formal review. I read everything, and your feedback directly shapes what gets built next.
 
 ---
 
 {{#if is_seedling}}
 ## One more thing
 
-You're on the Seedling plan, which is a great way to start. If you're finding yourself wanting more—more posts, more storage, more themes—**Sapling** unlocks all of that for just a few dollars more.
+You're on the Seedling plan, which is a great way to start. If you're finding yourself wanting more (more posts, more storage, more themes), **Sapling** unlocks all of that for just a few dollars more.
 
 No pressure. Seedling is a real plan, not a trial. But if you're outgrowing it, the upgrade is there: {{upgrade_url}}
 {{/if}}

@@ -4,16 +4,16 @@
 
 **Last Updated:** January 2026
 
-This document defines how Grove's projects are organized—what lives in the monorepo, what gets its own repo, and what stays integrated versus external.
+This document defines how Grove's projects are organized: what lives in the monorepo, what gets its own repo, and what stays integrated versus external.
 
 ---
 
 ## Guiding Principles
 
-1. **Minimize overhead** — Separate repos only when there's a clear benefit
-2. **Follow the data** — If it shares a database, it probably shares a repo
-3. **Consider the consumer** — Who uses this? Grove only, or external devs?
-4. **Deployment lifecycle** — Can it deploy independently? Does it need to?
+1. **Minimize overhead**: Separate repos only when there's a clear benefit
+2. **Follow the data**: If it shares a database, it probably shares a repo
+3. **Consider the consumer**: Who uses this? Grove only, or external devs?
+4. **Deployment lifecycle**: Can it deploy independently? Does it need to?
 
 ---
 
@@ -90,10 +90,10 @@ import { detectInjection } from '@autumnsgrove/lattice/songbird';
 
 We consolidated from two packages (engine + UI) to one because:
 
-1. **Primary consumer is Grove** — Not building for external devs
-2. **Tight coupling** — Shared database schema, tier system, auth
-3. **Overhead is real** — Each package needs CI/CD, changelogs, version coordination
-4. **"Which package?"** — Confusion about where things live
+1. **Primary consumer is Grove**: Not building for external devs
+2. **Tight coupling**: Shared database schema, tier system, auth
+3. **Overhead is real**: Each package needs CI/CD, changelogs, version coordination
+4. **"Which package?"**: Confusion about where things live
 
 ### When to Separate
 
@@ -125,11 +125,11 @@ These are independent services with their own deployment lifecycle, but exclusiv
 
 ### Why These Get Own Repos
 
-- **Different infrastructure** — Workers vs SvelteKit vs Python
-- **Independent deployments** — Can update without touching engine
-- **Separate databases** — Don't share D1 with engine
-- **Different teams** — Could be maintained separately
-- **Security boundaries** — Auth should be isolated
+- **Different infrastructure**: Workers vs SvelteKit vs Python
+- **Independent deployments**: Can update without touching engine
+- **Separate databases**: Don't share D1 with engine
+- **Different teams**: Could be maintained separately
+- **Security boundaries**: Auth should be isolated
 
 ---
 
@@ -287,14 +287,14 @@ When deciding where something should live:
 
 ## Migration: Rename Engine to Lattice
 
-The npm package should be renamed from `@autumnsgrove/groveengine` to `@groveplace/lattice` — matching the domain `grove.place` and the public product name "Lattice".
+The npm package should be renamed from `@autumnsgrove/groveengine` to `@groveplace/lattice`, matching the domain `grove.place` and the public product name "Lattice".
 
 ### Why Rename?
 
-- **Domain match** — `@groveplace` matches `grove.place`
-- **Consistency** — Public name is "Lattice", internal is "GroveEngine"
-- **Clarity** — Imports like `@groveplace/lattice/ui` are clean and professional
-- **Branding** — Clear ownership, memorable package name
+- **Domain match**: `@groveplace` matches `grove.place`
+- **Consistency**: Public name is "Lattice", internal is "GroveEngine"
+- **Clarity**: Imports like `@groveplace/lattice/ui` are clean and professional
+- **Branding**: Clear ownership, memorable package name
 
 ### Prerequisites
 

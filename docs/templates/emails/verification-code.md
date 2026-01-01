@@ -25,7 +25,7 @@ Your code: {{code}} — expires in 5 minutes.
 
 Enter this code to sign in to Grove.
 
-This code expires in 5 minutes. If you didn't request this, you can safely ignore this email—no one can access your account without this code.
+This code expires in 5 minutes. If you didn't request this, you can safely ignore this email. No one can access your account without this code.
 
 **Having trouble?** If the code isn't working (especially on mobile), try clicking this link instead:
 {{magic_link}}
@@ -52,7 +52,7 @@ Signing in to: **{{blog_name}}**
 ## Design Notes
 
 - The code should be the largest, most prominent element
-- Keep the email extremely short—this is a utility email
+- Keep the email extremely short. This is a utility email
 - No marketing, no fluff, just the code
 - Include the blog URL so users know which account they're signing into (helpful for people with multiple blogs)
 - **Security note:** Code removed from subject line to prevent exposure in notification previews. Shorter 5-minute expiration mitigates interception risk.

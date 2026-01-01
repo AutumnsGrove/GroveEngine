@@ -13,7 +13,7 @@ If you decide to leave Grove, you can delete your account and all associated dat
 
 ## Before you delete
 
-**Export your content first.** Once your account is deleted, we can't recover it. If there's anything you want to keep—posts, images, comments—export it before proceeding.
+**Export your content first.** Once your account is deleted, we can't recover it. If there's anything you want to keep (posts, images, comments), export it before proceeding.
 
 Go to **Settings → Data → Export Data** to download a complete copy of everything.
 

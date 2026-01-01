@@ -1,4 +1,4 @@
-# Rings — Private Analytics
+# Rings: Private Analytics
 
 > *Count the rings and you learn the story.*
 
@@ -7,7 +7,7 @@
 **Phase:** Phase 5 Enhancement
 **Last Updated:** December 2025
 
-Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
+Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
 
 Rings is analytics for writers, not marketers. Private insights without the anxiety of real-time dashboards. Your growth reflected back to you, not performed for others.
 
@@ -39,7 +39,7 @@ Rings is analytics for writers, not marketers. Traditional analytics breed anxie
 
 ## Resonance Indicators
 
-Instead of showing vote scores or engagement numbers, Rings uses **Resonance Indicators**—positive signals that appear only when earned.
+Instead of showing vote scores or engagement numbers, Rings uses **Resonance Indicators**: positive signals that appear only when earned.
 
 ### Signal System
 
@@ -353,7 +353,7 @@ Not everyone writes immediately—some users are setting up, some are finding th
 │  Your readers spent 340 hours               │
 │  with your words.                           │
 │                                             │
-│  23 people became steady readers—           │
+│  23 people became steady readers,           │
 │  coming back again and again.               │
 │                                             │
 │  Your most-loved post:                      │
@@ -369,7 +369,7 @@ Not everyone writes immediately—some users are setting up, some are finding th
 
 ## Platform Admin Dashboard
 
-As platform owner, you have access to aggregate data for platform health and business decisions. This is **not** about surveilling individual users—it's about understanding how the forest grows.
+As platform owner, you have access to aggregate data for platform health and business decisions. This is **not** about surveilling individual users. It's about understanding how the forest grows.
 
 ### Aggregate Platform Metrics
 
@@ -507,7 +507,7 @@ All analytics tables use `ON DELETE CASCADE` for foreign keys. When a post or bl
 - All `analytics_daily` for that post → deleted
 - All `resonance_signals` for that post → deleted
 
-**This is intentional.** When a writer deletes a post, they expect all traces removed. Analytics data about a deleted post serves no purpose—the writer can't see it, and retaining it feels invasive.
+**This is intentional.** When a writer deletes a post, they expect all traces removed. Analytics data about a deleted post serves no purpose. The writer can't see it, and retaining it feels invasive.
 
 **Blog/Tenant Deletion:**
 - All analytics tables for that blog → cascade deleted

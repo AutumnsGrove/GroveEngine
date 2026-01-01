@@ -48,11 +48,11 @@ We do use AI internally for content moderation, but intentionally: with zero dat
 
 ## A forest is not a collection of isolated trees.
 
-Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks — the 'wood wide web' that connects an entire forest into a single living organism. The oldest trees nurture the saplings. The dying trees feed the soil for those that come after.
+Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks, the 'wood wide web' that connects an entire forest into a single living organism. The oldest trees nurture the saplings. The dying trees feed the soil for those that come after.
 
 ## Meadow is the roots.
 
-It's optional. Your blog exists independently, complete on its own. But if you choose, you can connect — follow friends, see their posts in a simple chronological feed, leave reactions that only they can see.
+It's optional. Your blog exists independently, complete on its own. But if you choose, you can connect. Follow friends, see their posts in a simple chronological feed, leave reactions that only they can see.
 
 ## What Makes This Different
 

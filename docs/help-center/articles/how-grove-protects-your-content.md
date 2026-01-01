@@ -111,7 +111,7 @@ No protection is 100% effective. Here's what we can't prevent:
 
 ## Why this matters
 
-The web used to be a place of personal expression. Somewhere along the way, that expression became "content"—raw material to be extracted, processed, and monetized without permission.
+The web used to be a place of personal expression. Somewhere along the way, that expression became "content": raw material to be extracted, processed, and monetized without permission.
 
 AI training is the latest and most aggressive form of this extraction. Companies scrape billions of pages, reduce human creativity to statistical patterns, and sell access to the result. Often without attribution, compensation, or consent.
 

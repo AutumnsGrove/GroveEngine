@@ -38,10 +38,10 @@ If you're not familiar: RSS lets people subscribe to your blog in a feed reader.
 It's old technology, and it still works beautifully. If you want to share your feed, that URL is all anyone needs.
 
 **Need a feed reader?** A few good options:
-- [NetNewsWire](https://netnewswire.com/) — Free, open source, and a classic
-- [Reeder](https://reeder.app/) — Apple only, one-time purchase, genuinely excellent
-- [Feedly](https://feedly.com/) — Web-based, works everywhere, free tier available
-- [Inoreader](https://www.inoreader.com/) — Powerful web-based option with great filtering
+- [NetNewsWire](https://netnewswire.com/): Free, open source, and a classic
+- [Reeder](https://reeder.app/): Apple only, one-time purchase, genuinely excellent
+- [Feedly](https://feedly.com/): Web-based, works everywhere, free tier available
+- [Inoreader](https://www.inoreader.com/): Powerful web-based option with great filtering
 
 ---
 

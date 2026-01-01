@@ -240,7 +240,7 @@ After migration:
 ## Philosophy Reminder
 
 Wisp is:
-- **A helper, not a writer—and sometimes, a good listener**
+- **A helper, not a writer, and sometimes, a good listener**
 - **Off by default** - user must opt in
 - **Privacy-first** - zero data retention
 - **Ephemeral** - appears when needed, fades when not

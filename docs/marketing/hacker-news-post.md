@@ -1,4 +1,4 @@
-# Hacker News — Show HN Post
+# Hacker News: Show HN Post
 
 > **Purpose**: Hacker News Show HN submission
 > **Tone**: Technical, direct, with a values punch
@@ -14,7 +14,7 @@
 
 ## Body
 
-**What I built:** Grove — a multi-tenant blogging platform where everyone gets `username.grove.place`. Built on Cloudflare Workers/D1/R2/KV with SvelteKit.
+**What I built:** Grove: a multi-tenant blogging platform where everyone gets `username.grove.place`. Built on Cloudflare Workers/D1/R2/KV with SvelteKit.
 
 **The twist:** It aggressively blocks AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.) using Cloudflare's bot management. Your words are not training data. I even block my own AI tools from scraping user content.
 
@@ -23,7 +23,7 @@
 **Tech stack:** Cloudflare edge infrastructure, SvelteKit 5, TypeScript, Stripe payments, magic code auth, Durable Objects for session management.
 
 **Live components:**
-- forage.grove.place — AI domain search (multi-provider: Claude, DeepSeek, Kimi, Llama 4)
+- forage.grove.place: AI domain search (multi-provider: Claude, DeepSeek, Kimi, Llama 4)
 - Example blog with Shade protection verified working
 - MCP server (mycelium.grove.place) for AI agent integration
 - Full onboarding, admin panel, theme system

@@ -13,7 +13,7 @@ Once you're signed in, the admin panel is your home base. Here's a quick tour of
 
 ## The dashboard
 
-When you first log in, you land on your dashboard. It's intentionally simple—a quick snapshot of your blog's recent activity without overwhelming you with metrics.
+When you first log in, you land on your dashboard. It's intentionally simple: a quick snapshot of your blog's recent activity without overwhelming you with metrics.
 
 What you'll see:
 - Recent posts and their status
@@ -38,7 +38,7 @@ Click any post title to jump into the editor.
 
 ### Pages
 
-Pages are for content that isn't a blog post—your About page, a Contact page, a Now page. They live outside your main feed and are typically linked from your navigation.
+Pages are for content that isn't a blog post: your About page, a Contact page, a Now page. They live outside your main feed and are typically linked from your navigation.
 
 Pages work almost identically to posts, just without dates or feed placement.
 
@@ -78,7 +78,7 @@ The admin panel uses a sidebar on larger screens and a bottom bar on mobile. Eit
 
 A few shortcuts:
 - Click your blog's name in the header to preview your live site
-- The "New Post" button is always visible—no hunting required
+- The "New Post" button is always visible, no hunting required
 - Settings changes save automatically (no "Submit" button to forget)
 
 ## What you won't find
@@ -89,7 +89,7 @@ Grove's admin panel is deliberately minimal. You won't see:
 - Monetization settings
 - Plugin marketplaces
 
-This is intentional. Grove is for writing, not for running a media empire. If you want those features, Grove might not be the right fit—and that's okay.
+This is intentional. Grove is for writing, not for running a media empire. If you want those features, Grove might not be the right fit, and that's okay.
 
 ## Getting comfortable
 

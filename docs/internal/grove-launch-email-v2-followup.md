@@ -1,4 +1,4 @@
-# Grove Launch Email — Version 2 (Follow-up)
+# Grove Launch Email: Version 2 (Follow-up)
 
 *Created: December 24, 2025*
 
@@ -30,7 +30,7 @@ Same invitation. Same forest screenshot. Same vision of a social platform that a
 
 Poke around. Check out the pricing. Tell someone if you like what you see.
 
-— Autumn
+- Autumn
 
 ---
 
@@ -40,15 +40,15 @@ Poke around. Check out the pricing. Tell someone if you like what you see.
 - Don't over-apologize (that's not your voice)
 - Make the link SUPER obvious and clickable
 - Reference the original email so they know what this is about
-- Short and sweet — respect their time
+- Short and sweet, respect their time
 
 ---
 
 ## Implementation
 
 - **Send immediately after the first email** (within hours if possible)
-- **Subject line is key** — "Actually, here's a link you can click" acknowledges the mistake with personality
-- **Make the link unmissable** — bold, clearly formatted, obviously clickable
+- **Subject line is key:** "Actually, here's a link you can click" acknowledges the mistake with personality
+- **Make the link unmissable:** bold, clearly formatted, obviously clickable
 
 ---
 

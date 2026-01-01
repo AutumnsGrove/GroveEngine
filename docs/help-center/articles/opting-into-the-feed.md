@@ -54,7 +54,7 @@ Changed your mind? No problem.
 2. Toggle **Share my posts on Grove feed** to off
 3. Save
 
-Posts already in Meadow will be removed from the feed. Your blog continues as normal—it just stops appearing in the community space.
+Posts already in Meadow will be removed from the feed. Your blog continues as normal. It just stops appearing in the community space.
 
 ## Who can use Meadow
 

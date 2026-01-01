@@ -73,7 +73,7 @@ Questions? Just reply.
 
 ## Design Notes
 
-- Short and transactional—people just want confirmation
+- Short and transactional. People just want confirmation
 - Receipt info clearly formatted for quick scanning
 - "Still there, still yours" is a quiet value reminder
 - Link to downloadable receipt for business users

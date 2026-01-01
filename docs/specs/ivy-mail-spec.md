@@ -1,4 +1,4 @@
-# Ivy — Grove Mail Client Specification
+# Ivy: Grove Mail Client Specification
 
 *Internal planning document*
 
@@ -12,7 +12,7 @@
 
 ### Why "Ivy"?
 
-Ivy grows on lattices—it's the living connection that climbs the framework. Email is the vine that connects people through Grove's infrastructure. The name ties directly to Lattice (the core platform) while evoking organic growth and interconnection.
+Ivy grows on lattices: it's the living connection that climbs the framework. Email is the vine that connects people through Grove's infrastructure. The name ties directly to Lattice (the core platform) while evoking organic growth and interconnection.
 
 | | |
 |---|---|
@@ -120,7 +120,7 @@ const IVY_CONFIG = {
 
 ### Sapling (Read-Only)
 
-Sapling users have email forwarding—mail to `username@grove.place` forwards to their personal inbox. In Ivy, they can:
+Sapling users have email forwarding. Mail to `username@grove.place` forwards to their personal inbox. In Ivy, they can:
 
 - View forwarded emails (read-only archive)
 - See what's been sent to their Grove address
@@ -143,10 +143,10 @@ Full send/receive capabilities:
 
 **Critical constraints:**
 
-1. **One email per user** — Your email matches your username (`username@grove.place`)
-2. **One-time selection** — Once chosen, your email address cannot be changed
-3. **No aliases** — Users cannot create additional addresses (contact@, hello@, etc.)
-4. **One account per user** — No multi-account support; one Grove account = one email
+1. **One email per user**: Your email matches your username (`username@grove.place`)
+2. **One-time selection**: Once chosen, your email address cannot be changed
+3. **No aliases**: Users cannot create additional addresses (contact@, hello@, etc.)
+4. **One account per user**: No multi-account support; one Grove account = one email
 
 These constraints must be clearly communicated during onboarding. The email selection is permanent.
 
@@ -157,19 +157,19 @@ These constraints must be clearly communicated during onboarding. The email sele
 ### Day One (MVP)
 
 #### Core Email Functions
-- **Inbox view** — List of received emails with sender, subject, preview, timestamp
-- **Compose** — Rich text editor with formatting, recipient fields (To, CC, BCC)
-- **Send/receive** — Full SMTP/IMAP functionality via Forward Email backend
-- **Multiple recipients** — Send to multiple addresses in one email
-- **Reply/Reply All/Forward** — Standard email actions
-- **Attachments** — Upload and attach files (25MB max per file, 50MB max total per email; counts toward storage quota)
+- **Inbox view**: List of received emails with sender, subject, preview, timestamp
+- **Compose**: Rich text editor with formatting, recipient fields (To, CC, BCC)
+- **Send/receive**: Full SMTP/IMAP functionality via Forward Email backend
+- **Multiple recipients**: Send to multiple addresses in one email
+- **Reply/Reply All/Forward**: Standard email actions
+- **Attachments**: Upload and attach files (25MB max per file, 50MB max total per email; counts toward storage quota)
 
 #### Organization
-- **Threaded conversations** — Gmail-style grouping of related messages
-- **Labels** — User-created tags for organizing mail (not folders)
-- **Archive** — Remove from inbox without deleting
-- **Delete** — Move to trash, permanent delete after 30 days
-- **Search** — Full-text search across all mail (subject, body, sender, recipient)
+- **Threaded conversations**: Gmail-style grouping of related messages
+- **Labels**: User-created tags for organizing mail (not folders)
+- **Archive**: Remove from inbox without deleting
+- **Delete**: Move to trash, permanent delete after 30 days
+- **Search**: Full-text search across all mail (subject, body, sender, recipient)
 
 #### Unsend (Delayed Sending)
 - Emails are queued, not sent immediately
@@ -180,26 +180,26 @@ These constraints must be clearly communicated during onboarding. The email sele
 - Visual indicator showing time remaining to unsend
 
 #### Integrations
-- **Heartwood auth** — Single sign-on with Grove account
-- **Contact forms → Inbox** — Blog contact form submissions arrive as email threads
-- **Meadow notifications** — Grove platform notifications delivered to Ivy
+- **Heartwood auth**: Single sign-on with Grove account
+- **Contact forms → Inbox**: Blog contact form submissions arrive as email threads
+- **Meadow notifications**: Grove platform notifications delivered to Ivy
 
 ### Later Features
 
 #### Organization (Phase 2)
-- **Folders** — Hierarchical organization in addition to labels
-- **Filters/Rules** — Auto-apply labels, archive, or delete based on criteria
-- **Starred/Flagged** — Quick-mark important messages
+- **Folders**: Hierarchical organization in addition to labels
+- **Filters/Rules**: Auto-apply labels, archive, or delete based on criteria
+- **Starred/Flagged**: Quick-mark important messages
 
 #### Calendar (Phase 2-3)
-- **Google Calendar integration** — Detect ICS attachments, add to calendar
-- **GroveCalendar** — First-party calendar (future Grove product)
+- **Google Calendar integration**: Detect ICS attachments, add to calendar
+- **GroveCalendar**: First-party calendar (future Grove product)
 
 #### Advanced (Phase 3+)
-- **Import from other providers** — Migrate from Gmail, Outlook, etc.
-- **Keyboard shortcuts** — Power user navigation
-- **Offline support** — PWA with local caching
-- **Templates** — Saved email templates for common responses
+- **Import from other providers**: Migrate from Gmail, Outlook, etc.
+- **Keyboard shortcuts**: Power user navigation
+- **Offline support**: PWA with local caching
+- **Templates**: Saved email templates for common responses
 
 ---
 
@@ -208,9 +208,9 @@ These constraints must be clearly communicated during onboarding. The email sele
 Oak and Evergreen users can send to their blog subscribers:
 
 ### Capabilities
-- **Subscriber list access** — Send to people who subscribed to your blog
-- **Bulk send** — Compose once, send to list
-- **Unsubscribe handling** — Automatic unsubscribe links, honor requests
+- **Subscriber list access**: Send to people who subscribed to your blog
+- **Bulk send**: Compose once, send to list
+- **Unsubscribe handling**: Automatic unsubscribe links, honor requests
 
 ### Limits
 - **Oak:** 2 sends per week
@@ -233,17 +233,17 @@ It's simple: write an update, send it to your subscribers, respect their inbox.
 For Grove administrators (Autumn):
 
 ### Current Scope
-- **Send to all users** — Platform announcements
-- **Send by tier** — Target specific subscription levels
-- **Send by criteria** — Filter by signup date, last active, etc.
-- **No rate limits** — Admin sends bypass weekly limits
-- **Template system** — Saved templates for common admin communications
+- **Send to all users**: Platform announcements
+- **Send by tier**: Target specific subscription levels
+- **Send by criteria**: Filter by signup date, last active, etc.
+- **No rate limits**: Admin sends bypass weekly limits
+- **Template system**: Saved templates for common admin communications
 
 ### Security Requirements
-- **2FA required** — Admin actions require two-factor authentication
-- **Audit log** — All admin sends logged with timestamp, author, recipient criteria
-- **Preview + confirmation** — Must preview before sending, explicit confirmation
-- **Separate auth level** — Admin mail requires elevated permissions beyond normal admin
+- **2FA required**: Admin actions require two-factor authentication
+- **Audit log**: All admin sends logged with timestamp, author, recipient criteria
+- **Preview + confirmation**: Must preview before sending, explicit confirmation
+- **Separate auth level**: Admin mail requires elevated permissions beyond normal admin
 
 ### Architecture Note
 Admin tools should be **extensible**. Build with plugin/module architecture so new admin features can be added without restructuring:
@@ -280,7 +280,7 @@ Forward Email handles the actual mail server infrastructure. **Research complete
 
 | Advantage | Details |
 |-----------|---------|
-| **Zero-knowledge** | Encrypted with user's IMAP password—they can't read emails |
+| **Zero-knowledge** | Encrypted with user's IMAP password; they can't read emails |
 | **REST API** | 20 endpoints for messages, folders, contacts, calendars (no IMAP complexity) |
 | **Unlimited domains/aliases** | Flat rate pricing regardless of user count |
 | **Open source** | Fully self-hostable if needed as escape hatch |
@@ -802,7 +802,7 @@ async function checkAndReserveQuota(userId: string, sizeBytes: number): Promise<
 
 ### Zero-Knowledge Storage
 
-**TRUE zero-knowledge**: Grove cannot read ANY of your email data—not bodies, not subjects, not who you're talking to.
+**TRUE zero-knowledge**: Grove cannot read ANY of your email data. Not bodies, not subjects, not who you're talking to.
 
 #### Architecture: Client-Side Everything
 
@@ -1407,13 +1407,13 @@ Platform notifications (new followers, reactions, comments) can optionally route
 
 ### Core Views
 
-1. **Inbox** — Default view, unarchived threads
-2. **Sent** — Emails user has sent
-3. **Drafts** — Unsent compositions
-4. **Archive** — Archived threads
-5. **Trash** — Deleted items (30-day retention)
-6. **Labels** — Filter by user-created labels
-7. **Search** — Full-text search results
+1. **Inbox**: Default view, unarchived threads
+2. **Sent**: Emails user has sent
+3. **Drafts**: Unsent compositions
+4. **Archive**: Archived threads
+5. **Trash**: Deleted items (30-day retention)
+6. **Labels**: Filter by user-created labels
+7. **Search**: Full-text search results
 
 ### Compose Modal
 

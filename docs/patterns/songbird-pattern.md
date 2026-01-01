@@ -1,4 +1,4 @@
-# Songbird — Prompt Injection Protection
+# Songbird: Prompt Injection Protection
 
 > *Three birds, three layers, one defense.*
 
