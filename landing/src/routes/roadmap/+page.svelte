@@ -106,8 +106,8 @@
 			season: 'winter' as Season,
 			description: 'The groundwork has been laid. Foundations built in stillness.',
 			features: [
-				{ name: 'Core Engine', description: 'Lattice powers the grove', done: true },
-				{ name: 'Authentication', description: 'Heartwood keeps you safe', done: true },
+				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true },
+				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
 				{ name: 'Email Waitlist', description: '59 seeds, waiting to sprout', done: true }
 			]
@@ -124,9 +124,9 @@
 				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true, icon: 'penline' },
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
-				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
+				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
-				{ name: 'Help Center', description: 'Guidance when you need it', done: true, icon: 'lifebuoy' },
+				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'lifebuoy' },
 				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: true, icon: 'terminal', internal: true },
 				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: false, icon: 'database', internal: true }
@@ -142,7 +142,7 @@
 				{ name: 'Amber', description: 'See and manage your storage', done: false, icon: 'amber' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
-				{ name: 'More Themes', description: 'Foliage brings color to your corner', done: false, icon: 'palette' }
+				{ name: 'Foliage', description: 'More themes — color for your corner', done: false, icon: 'palette' }
 			]
 		},
 		'full-bloom': {
@@ -153,13 +153,13 @@
 			features: [
 				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true, icon: 'meadow' },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
-				{ name: 'Comments', description: 'Replies and thoughtful discussions', done: false, icon: 'message' },
+				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message' },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
 				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending' },
 				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown' },
-				{ name: 'Theme Customizer', description: 'Make it truly yours', done: false, icon: 'paintbrush' },
+				{ name: 'Canopy', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
-				{ name: 'Content Moderation', description: 'Keeping the grove safe', done: false, icon: 'shield' }
+				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' }
 			]
 		},
 		'golden-hour': {
