@@ -29,7 +29,11 @@ Signups will open shortly after they're back. Almost there.
 
 ---
 
-[Unsubscribe]({{{RESEND_UNSUBSCRIBE_URL}}})
+![Grove]({{LOGO_URL}})
+
+*A place to be.*
+
+[grove.place](https://grove.place) · [step away (unsubscribe)]({{{RESEND_UNSUBSCRIBE_URL}}})
 
 ---
 
