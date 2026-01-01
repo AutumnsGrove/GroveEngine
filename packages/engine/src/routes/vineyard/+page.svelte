@@ -4,6 +4,7 @@
 		Glass,
 		GlassButton,
 		GlassCard,
+		GlassCarousel,
 		GlassConfirmDialog,
 		GlassNavbar,
 		GlassOverlay,
@@ -30,7 +31,7 @@
 		accents, midnightBloom
 	} from '$lib/ui/components/nature/palette';
 	import { grove, cream, bark as barkTokens, status } from '$lib/ui/tokens/colors';
-	import { Sparkles, Palette, Box, Image, ChevronRight, Loader } from 'lucide-svelte';
+	import { Sparkles, Palette, Box, ChevronRight } from 'lucide-svelte';
 
 	// Interactive state for demos
 	let showConfirmDialog = $state(false);
@@ -48,6 +49,16 @@
 	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
 	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('surface');
 	let glassIntensity = $state<'none' | 'light' | 'medium' | 'strong'>('medium');
+	let carouselVariant = $state<'default' | 'frosted' | 'minimal'>('default');
+	let carouselAutoplay = $state(false);
+
+	// Demo slides for the carousel
+	const carouselSlides = [
+		{ title: 'Spring', color: 'from-emerald-400 to-lime-300', icon: '🌸' },
+		{ title: 'Summer', color: 'from-amber-400 to-orange-300', icon: '☀️' },
+		{ title: 'Autumn', color: 'from-orange-500 to-red-400', icon: '🍂' },
+		{ title: 'Winter', color: 'from-slate-400 to-blue-300', icon: '❄️' },
+	];
 
 	function handleConfirm() {
 		confirmResult = 'Confirmed! Yippee!';
@@ -64,6 +75,7 @@
 	const seasons = ['spring', 'summer', 'autumn', 'winter'] as const;
 	const glassVariants = ['surface', 'overlay', 'card', 'tint', 'accent', 'muted'] as const;
 	const glassIntensities = ['none', 'light', 'medium', 'strong'] as const;
+	const carouselVariants = ['default', 'frosted', 'minimal'] as const;
 </script>
 
 <div class="max-w-6xl mx-auto px-6 py-12">
@@ -275,18 +287,40 @@
 				</p>
 			</GlassCard>
 
-			<!-- GlassCarousel - STUB -->
+			<!-- GlassCarousel -->
 			<GlassCard title="GlassCarousel" variant="frosted">
-				<div class="flex items-center gap-2 mb-4">
-					<Badge variant="outline">In Development</Badge>
-				</div>
-				<p class="text-sm text-bark-600 mb-4">A beautiful carousel with glassmorphism navigation controls</p>
-				<div class="h-48 rounded-lg bg-gradient-to-br from-bark-100 to-bark-200 flex items-center justify-center">
-					<div class="text-center text-bark-500">
-						<Image class="w-12 h-12 mx-auto mb-2 opacity-50" />
-						<p class="font-medium">Coming Soon</p>
-						<p class="text-sm">The glassy carousel is being polished...</p>
+				<p class="text-sm text-bark-600 mb-4">Stack-style carousel with swipe, drag, and keyboard navigation</p>
+				<div class="space-y-4">
+					<div class="flex flex-wrap gap-4 items-center">
+						<div class="flex flex-wrap gap-2">
+							<span class="text-sm text-bark-600">Variant:</span>
+							{#each carouselVariants as v}
+								<button
+									class="px-2 py-1 text-xs rounded transition-colors {carouselVariant === v ? 'bg-grove-600 text-white' : 'bg-bark-100 text-bark-700 hover:bg-bark-200'}"
+									onclick={() => carouselVariant = v}
+								>{v}</button>
+							{/each}
+						</div>
+						<label class="flex items-center gap-2 text-sm text-bark-600 cursor-pointer">
+							<input type="checkbox" bind:checked={carouselAutoplay} class="rounded" />
+							Autoplay
+						</label>
 					</div>
+					<GlassCarousel
+						itemCount={carouselSlides.length}
+						variant={carouselVariant}
+						autoplay={carouselAutoplay}
+						autoplayInterval={3000}
+					>
+						{#snippet item(index)}
+							<div class="w-full h-full bg-gradient-to-br {carouselSlides[index].color} flex flex-col items-center justify-center text-white">
+								<span class="text-5xl mb-2">{carouselSlides[index].icon}</span>
+								<span class="text-2xl font-bold">{carouselSlides[index].title}</span>
+								<span class="text-sm opacity-80 mt-1">Slide {index + 1} of {carouselSlides.length}</span>
+							</div>
+						{/snippet}
+					</GlassCarousel>
+					<p class="text-xs text-bark-500">Try swiping, dragging, arrow keys, or click the navigation!</p>
 				</div>
 			</GlassCard>
 		</div>
@@ -598,7 +632,7 @@
 						Built
 					</h4>
 					<ul class="space-y-2 text-sm text-bark-600">
-						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (7 components)</li>
+						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (8 components)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Core UI components (15+ components)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Nature color palettes (12 palettes)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Seasonal theming system</li>
@@ -611,7 +645,7 @@
 						In Progress
 					</h4>
 					<ul class="space-y-2 text-sm text-bark-600">
-						<li class="flex items-center gap-2"><Loader class="w-3 h-3 text-amber-500 animate-spin" /> GlassCarousel component</li>
+						<li class="text-bark-400 italic">Nothing currently - check back soon!</li>
 					</ul>
 				</div>
 				<div>

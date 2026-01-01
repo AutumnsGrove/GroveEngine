@@ -24,12 +24,12 @@
 
 ## Vineyard Component Showcase
 
-### GlassCarousel Completion
-- [ ] **Add GlassCarousel to vineyard showcase** — The carousel component is in a PR but not yet merged
-  - Location: `/packages/engine/src/routes/vineyard/+page.svelte` has a stub placeholder
-  - When merged: Import `GlassCarousel` and replace the "Coming Soon" stub with an interactive demo
-  - Demo should showcase: slide transitions, glassmorphism navigation controls, auto-play toggle
-  - Reference the carousel PR for implementation details
+### ✅ GlassCarousel Completion (2026-01-01)
+- [x] **Add GlassCarousel to vineyard showcase** — Interactive demo added with:
+  - Variant switcher (default/frosted/minimal)
+  - Autoplay toggle
+  - Custom seasonal slide content
+  - Swipe, drag, and keyboard navigation hints
 
 ---
 
