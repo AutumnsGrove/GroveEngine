@@ -612,6 +612,40 @@ export const legalDocs: Doc[] = [
   },
 ];
 
+// Architecture Patterns
+export const patterns: Doc[] = [
+  {
+    slug: "songbird-pattern",
+    title: "Songbird — Prompt Injection Protection",
+    description: "Three-layer defense system against prompt injection attacks",
+    excerpt:
+      "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
+    category: "patterns",
+    lastUpdated: "2025-12-30",
+    readingTime: 12,
+  },
+  {
+    slug: "grove-durable-objects-architecture",
+    title: "Durable Objects Architecture",
+    description: "Cloudflare Durable Objects for auth, scaling, and real-time features",
+    excerpt:
+      "Durable Objects solve three critical problems: auth coordination (eliminate janky handoffs), D1 write scaling (batch writes as user base grows), and real-time features (live updates for Meadow). They're a coordination layer, not a replacement for D1.",
+    category: "patterns",
+    lastUpdated: "2025-12-28",
+    readingTime: 18,
+  },
+  {
+    slug: "vineyard-spec",
+    title: "Vineyard — Tool Showcase Pattern",
+    description: "Consistent documentation and demo pattern for Grove tools",
+    excerpt:
+      "Vineyard is a documentation pattern every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed. A consistent way to showcase the ecosystem.",
+    category: "patterns",
+    lastUpdated: "2025-12-30",
+    readingTime: 5,
+  },
+];
+
 // Marketing Documents
 export const marketingDocs: Doc[] = [
   {
@@ -682,4 +716,5 @@ export const allDocs = [
   ...helpArticles,
   ...legalDocs,
   ...marketingDocs,
+  ...patterns,
 ];
