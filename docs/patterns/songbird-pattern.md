@@ -443,13 +443,18 @@ Fireside uses Songbird for:
 - Every user message in conversation
 - The final draft generation request
 
-### Content Moderation
+### Content Moderation (Thorn)
 
-See: `docs/specs/thorn-spec.md` → Security section
+See: `docs/specs/thorn-spec.md` → Section 10.5 for full implementation details including:
+- `thornKestrelContext` configuration for blog post validation
+- When Songbird runs (and when secondary reviews skip it)
+- Rejection handling and security logging
+- Cost impact analysis
 
 Content Moderation uses Songbird for:
-- Every post submitted for review
+- Every post submitted for automated review
 - User-reported content reviews
+- Pattern detection (spam indicators)
 
 ---
 
