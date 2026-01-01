@@ -44,6 +44,13 @@
 		shieldoff: ShieldOff,
 	};
 
+	function getCardClass(categoryName: string) {
+		if (categoryName === 'Patterns') {
+			return 'p-6 rounded-xl bg-amber-50 dark:bg-amber-950/25 shadow-sm border border-amber-200 dark:border-amber-800/30';
+		}
+		return 'p-6 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200 dark:border-slate-700';
+	}
+
 	interface Tool {
 		name: string;
 		tagline: string;
@@ -99,7 +106,7 @@
 					name: 'Arbor',
 					tagline: 'Admin Panel',
 					description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
-					status: 'building',
+					status: 'live',
 					icon: 'dashboard',
 					domain: '{you}.grove.place/admin',
 					integration: 'Built into every Grove blog',
@@ -436,7 +443,8 @@
 					<div class="grid gap-6 md:grid-cols-2">
 						{#each category.tools as tool}
 							{@const badge = getStatusBadge(tool.status)}
-							<article class="p-6 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200 dark:border-slate-700">
+							{@const cardClass = getCardClass(category.name)}
+							<article class={cardClass}>
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
