@@ -865,16 +865,28 @@ When systemic false positives are identified that resulted in content removal:
 
 ---
 
-## 14. Implementation Checklist
+## 14. Related Specs
 
-### 14.1 Infrastructure Setup
+| Document | Relationship |
+|----------|--------------|
+| [`songbird-pattern.md`](/knowledge/patterns/songbird-pattern) | Prompt injection protection used by Thorn (Canary → Kestrel → Robin) |
+| [`acceptable-use-policy.md`](/knowledge/legal/acceptable-use-policy) | Policy that Thorn enforces |
+| [`shade-spec.md`](/knowledge/specs/shade-spec) | Privacy policy that informs Thorn's zero-retention design |
+| [`grove-durable-objects-architecture.md`](/knowledge/patterns/grove-durable-objects-architecture) | DO patterns for review queue and rate limiting |
+| [`wisp-spec.md`](/knowledge/specs/wisp-spec) | AI writing assistant that also uses Songbird pattern |
+
+---
+
+## 15. Implementation Checklist
+
+### 15.1 Infrastructure Setup
 - [ ] Set up Fireworks AI account with ZDR verified (Primary)
 - [ ] Set up Cerebras account with ZDR verified (Backup)
 - [ ] Configure Groq as tertiary fallback with ZDR enabled
 - [ ] Create isolated Cloudflare Worker for moderation
 - [ ] Implement encrypted queue in KV
 
-### 14.2 Songbird Integration
+### 15.2 Songbird Integration
 - [ ] Implement shared Songbird module (`packages/engine/src/lib/server/songbird.ts`)
 - [ ] Implement Canary check function with expected "SAFE" response
 - [ ] Implement Kestrel check with `thornKestrelContext` configuration
@@ -883,18 +895,18 @@ When systemic false positives are identified that resulted in content removal:
 - [ ] Configure Songbird failure handling (generic error response)
 - [ ] Add monitoring dashboards for Songbird layer pass/fail rates
 
-### 14.3 Core Moderation System
+### 15.3 Core Moderation System
 - [ ] Build decision engine with threshold routing
 - [ ] Implement content classification prompt (Section 6.2)
 - [ ] Create edge case handling flow (Section 8)
 - [ ] Build provider failover logic (Fireworks → Cerebras → Groq)
 
-### 14.4 User Communication
+### 15.4 User Communication
 - [ ] Create notification email templates in Resend
 - [ ] Implement appeal workflow
 - [ ] Build user-facing moderation status page
 
-### 14.5 Operations & Monitoring
+### 15.5 Operations & Monitoring
 - [ ] Set up audit logging (no content)
 - [ ] Write integration tests with mock responses
 - [ ] Document API key rotation procedure
