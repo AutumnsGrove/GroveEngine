@@ -290,7 +290,7 @@ If sampled paragraphs show concerning patterns (e.g., borderline scores), the sy
 | 10,000 | ~$12.00 | ~$4.00 | ~$16.00 |
 | 100,000 | ~$120.00 | ~$40.00 | ~$160.00 |
 
-*Note: Add ~5% overhead for edge case secondary reviews (Robin only—Songbird validation already passed). Fallback to Cerebras/Groq models may have different costs—see pricing table above. Songbird overhead adds ~33% to base moderation cost but provides essential prompt injection protection.*
+*Note: Add ~5% overhead for edge case secondary reviews (Robin only—Songbird validation already passed). Fallback to Cerebras/Groq models may have different costs—see pricing table above. Songbird overhead adds ~25% to total cost (~$0.40 of $1.60) but provides essential prompt injection protection.*
 
 ---
 
@@ -909,9 +909,12 @@ When systemic false positives are identified that resulted in content removal:
 ### 15.5 Operations & Monitoring
 - [ ] Set up audit logging (no content)
 - [ ] Write integration tests with mock responses
+- [ ] Test Songbird failure scenarios for all three layers
+- [ ] Verify security logs contain only hashes, never content
 - [ ] Document API key rotation procedure
 - [ ] Create transparency report template
 - [ ] Set up alerting for high Songbird failure rates (potential attack)
+- [ ] Define thresholds for "repeated Songbird failures" account review trigger
 
 ---
 
