@@ -60,10 +60,10 @@ describe("docs-loader.ts", () => {
       });
 
       it("should load a known spec document", () => {
-        const result = loadDocBySlug("analytics-spec", "specs");
+        const result = loadDocBySlug("rings-spec", "specs");
 
         expect(result).not.toBeNull();
-        expect(result?.slug).toBe("analytics-spec");
+        expect(result?.slug).toBe("rings-spec");
         expect(result?.category).toBe("specs");
       });
 

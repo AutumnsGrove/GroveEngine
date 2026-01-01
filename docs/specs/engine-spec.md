@@ -6,9 +6,7 @@ tags:
 type: tech-spec
 ---
 
-# Lattice - Technical Specification
-
-> **Internal codename:** GroveEngine
+# GroveEngine - Technical Specification
 
 **Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`

@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, Layers, MessageCircle, Shield, BarChart3, Grape } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -63,7 +63,7 @@
 		},
 		{
 			name: 'Mycelium',
-			tagline: 'The Wood Wide Web',
+			tagline: 'MCP Server',
 			description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service through a single, unified interface.',
 			status: 'building',
 			icon: 'network',
@@ -144,6 +144,74 @@
 			status: 'building',
 			icon: 'bird',
 			integration: 'Shared pattern for Wisp, Content Moderation, and future AI features'
+		},
+		{
+			name: 'Arbor',
+			tagline: 'Admin Panel',
+			description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
+			status: 'building',
+			icon: 'dashboard',
+			domain: '{you}.grove.place/admin',
+			integration: 'Built into every Grove blog'
+		},
+		{
+			name: 'Clearing',
+			tagline: 'Status Page',
+			description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
+			status: 'building',
+			icon: 'activity',
+			domain: 'status.grove.place',
+			integration: 'Public platform status for all Grove users',
+			github: 'https://github.com/AutumnsGrove/GroveClear'
+		},
+		{
+			name: 'Seedbed',
+			tagline: 'Tenant Onboarding',
+			description: 'Where new growth begins. Seedbed is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
+			status: 'building',
+			icon: 'userplus',
+			domain: 'create.grove.place',
+			integration: 'Signup and onboarding for new Grove users'
+		},
+		{
+			name: 'Canopy',
+			tagline: 'Theme System',
+			description: 'No two canopies are quite the same. Canopy powers Grove\'s visual customization—from simple accent colors for all users to full theme control for premium tiers. Make it warm, make it bold, make it yours.',
+			status: 'building',
+			icon: 'layers',
+			integration: 'Theme engine powering Foliage and all blog customization'
+		},
+		{
+			name: 'Reeds',
+			tagline: 'Comments System',
+			description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
+			status: 'building',
+			icon: 'message',
+			integration: 'Comments and replies for Grove blogs'
+		},
+		{
+			name: 'Thorn',
+			tagline: 'Content Moderation',
+			description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
+			status: 'building',
+			icon: 'shield',
+			integration: 'Automated moderation for comments and community content'
+		},
+		{
+			name: 'Rings',
+			tagline: 'Private Analytics',
+			description: 'Count the rings to learn the story. Rings provides private insights for writers—aggregate page views, popular posts, reader geography—without the anxiety of real-time dashboards. Your growth reflected back to you, not performed for others.',
+			status: 'building',
+			icon: 'barchart',
+			integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)'
+		},
+		{
+			name: 'Vineyard',
+			tagline: 'Tool Showcase Pattern',
+			description: 'Every vine starts somewhere. Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it\'s headed. One pattern, across the entire ecosystem.',
+			status: 'building',
+			icon: 'grape',
+			integration: 'Documentation pattern implemented by all Grove tools'
 		},
 	];
 
@@ -226,10 +294,24 @@
 										<Wind class="w-5 h-5" />
 									{:else if tool.icon === 'eye'}
 										<Eye class="w-5 h-5" />
-									{:else if tool.icon === 'book'}
-										<BookOpen class="w-5 h-5" />
 									{:else if tool.icon === 'bird'}
 										<Bird class="w-5 h-5" />
+									{:else if tool.icon === 'dashboard'}
+										<LayoutDashboard class="w-5 h-5" />
+									{:else if tool.icon === 'activity'}
+										<Activity class="w-5 h-5" />
+									{:else if tool.icon === 'userplus'}
+										<UserPlus class="w-5 h-5" />
+									{:else if tool.icon === 'layers'}
+										<Layers class="w-5 h-5" />
+									{:else if tool.icon === 'message'}
+										<MessageCircle class="w-5 h-5" />
+									{:else if tool.icon === 'shield'}
+										<Shield class="w-5 h-5" />
+									{:else if tool.icon === 'barchart'}
+										<BarChart3 class="w-5 h-5" />
+									{:else if tool.icon === 'grape'}
+										<Grape class="w-5 h-5" />
 									{/if}
 								</div>
 								<div>

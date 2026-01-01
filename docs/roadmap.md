@@ -201,7 +201,7 @@ The grove becomes a community. Roots intertwine.
   - Reply = private message to author
   - Comment = public, requires approval
   - Rate limits: Free 20/week, Paid unlimited
-  - See `docs/specs/comments-spec.md`
+  - See `docs/specs/reeds-spec.md`
 
 - [ ] **Private Reactions** — Encouragement only author sees
   - Emoji reactions
@@ -212,7 +212,7 @@ The grove becomes a community. Roots intertwine.
   - Your growth, reflected
   - Privacy-first design
   - Daily visitor counts, not identities
-  - See `docs/specs/analytics-spec.md`
+  - See `docs/specs/rings-spec.md`
 
 - [ ] **Oak & Evergreen Tiers** — Full control
   - Custom domains (BYOD)
@@ -223,7 +223,7 @@ The grove becomes a community. Roots intertwine.
 - [ ] **Content Moderation** — Keeping the grove safe
   - AI-assisted review with human escalation
   - Zero data retention on external APIs
-  - See `docs/Specs/CONTENT-MODERATION.md`
+  - See `docs/specs/thorn-spec.md`
 
 ### Technical Implementation
 

@@ -6,8 +6,8 @@ export type { Doc } from "$lib/types/docs";
 // Technical Specifications
 export const specs: Doc[] = [
   {
-    slug: "CONTENT-MODERATION",
-    title: "Automated Content Moderation System",
+    slug: "thorn-spec",
+    title: "Thorn — Content Moderation",
     description:
       "Privacy-first automated content moderation using AI models with zero data retention",
     excerpt:
@@ -17,8 +17,8 @@ export const specs: Doc[] = [
     readingTime: 15,
   },
   {
-    slug: "analytics-spec",
-    title: "Analytics Specification",
+    slug: "rings-spec",
+    title: "Rings — Private Analytics",
     description: "Privacy-respecting analytics system for Grove platform",
     excerpt:
       "Grove Analytics provides insights into blog performance while respecting user privacy. No personal data is collected, and all metrics are aggregated and anonymized.",
@@ -27,8 +27,8 @@ export const specs: Doc[] = [
     readingTime: 8,
   },
   {
-    slug: "comments-spec",
-    title: "Comments System Specification",
+    slug: "reeds-spec",
+    title: "Reeds — Comment System",
     description:
       "Dual-mode comment system with private replies and public comments",
     excerpt:
@@ -38,8 +38,8 @@ export const specs: Doc[] = [
     readingTime: 10,
   },
   {
-    slug: "engine-spec",
-    title: "GroveEngine Technical Specification",
+    slug: "lattice-spec",
+    title: "Lattice — Core Framework",
     description: "Core engine architecture and implementation details",
     excerpt:
       "GroveEngine is the core framework powering the Grove ecosystem. Built on Cloudflare Workers with SvelteKit frontend.",
@@ -48,8 +48,8 @@ export const specs: Doc[] = [
     readingTime: 12,
   },
   {
-    slug: "help-center-spec",
-    title: "Help Center Specification",
+    slug: "waystone-spec",
+    title: "Waystone — Help Center",
     description: "Integrated help system with contextual assistance",
     excerpt:
       "Grove's Help Center is built directly into the platform—no external docs site, no separate logins.",
@@ -58,8 +58,8 @@ export const specs: Doc[] = [
     readingTime: 11,
   },
   {
-    slug: "social-spec",
-    title: "Social Features Specification",
+    slug: "meadow-spec",
+    title: "Meadow — Social Feed",
     description: "Community feed, sharing, voting, and reactions system",
     excerpt:
       "Grove Social enables blogs to share posts to a community feed where users can vote and react with emojis.",
@@ -68,8 +68,8 @@ export const specs: Doc[] = [
     readingTime: 9,
   },
   {
-    slug: "tenant-onboarding-spec",
-    title: "Tenant Onboarding Specification",
+    slug: "seedbed-spec",
+    title: "Seedbed — Tenant Onboarding",
     description: "Multi-step onboarding flow for new Grove users",
     excerpt:
       "Comprehensive onboarding system guiding users through account creation, plan selection, payment, and initial setup.",
@@ -78,8 +78,8 @@ export const specs: Doc[] = [
     readingTime: 7,
   },
   {
-    slug: "theme-system-spec",
-    title: "Theme System Specification",
+    slug: "foliage-project-spec",
+    title: "Foliage — Theme System",
     description: "Customizable themes and visual customization options",
     excerpt:
       "Grove offers 10 hand-curated themes with tiered access based on subscription plans.",
@@ -88,8 +88,8 @@ export const specs: Doc[] = [
     readingTime: 8,
   },
   {
-    slug: "status-page-spec",
-    title: "Status Page Specification",
+    slug: "clearing-spec",
+    title: "Clearing — Status Page",
     description:
       "Public-facing status page for platform health and incident communication",
     excerpt:
@@ -99,8 +99,8 @@ export const specs: Doc[] = [
     readingTime: 12,
   },
   {
-    slug: "admin-panel-spec",
-    title: "Admin Panel Specification",
+    slug: "arbor-spec",
+    title: "Arbor — Admin Panel",
     description: "Content management and site administration interface",
     excerpt:
       "The Grove Admin Panel is where bloggers manage their content, customize their site, and configure settings. Designed to be simple, focused, and get out of the way.",
@@ -129,8 +129,8 @@ export const specs: Doc[] = [
     readingTime: 5,
   },
   {
-    slug: "versioning-spec",
-    title: "Versioning Specification",
+    slug: "seasons-spec",
+    title: "Seasons — Versioning System",
     description: "Semantic versioning strategy and release workflow",
     excerpt:
       "GroveEngine follows Semantic Versioning 2.0.0 for all releases. This document defines how versions are managed and how updates propagate to customer repositories.",
@@ -220,7 +220,7 @@ export const specs: Doc[] = [
     readingTime: 5,
   },
   {
-    slug: "ai-writing-assistant-spec",
+    slug: "wisp-spec",
     title: "Wisp — Writing Assistant",
     description: "Ethical AI writing tool that polishes without replacing",
     excerpt:
@@ -259,16 +259,6 @@ export const specs: Doc[] = [
     category: "specs",
     lastUpdated: "2025-12-01",
     readingTime: 8,
-  },
-  {
-    slug: "foliage-project-spec",
-    title: "Foliage — Theme System Project",
-    description: "Extracted theme system package specification",
-    excerpt:
-      "Foliage is Grove's theme system—providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities.",
-    category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 12,
   },
   {
     slug: "ivy-mail-spec",
@@ -612,6 +602,40 @@ export const legalDocs: Doc[] = [
   },
 ];
 
+// Architecture Patterns
+export const patterns: Doc[] = [
+  {
+    slug: "songbird-pattern",
+    title: "Songbird — Prompt Injection Protection",
+    description: "Three-layer defense system against prompt injection attacks",
+    excerpt:
+      "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
+    category: "patterns",
+    lastUpdated: "2025-12-30",
+    readingTime: 12,
+  },
+  {
+    slug: "grove-durable-objects-architecture",
+    title: "Durable Objects Architecture",
+    description: "Cloudflare Durable Objects for auth, scaling, and real-time features",
+    excerpt:
+      "Durable Objects solve three critical problems: auth coordination (eliminate janky handoffs), D1 write scaling (batch writes as user base grows), and real-time features (live updates for Meadow). They're a coordination layer, not a replacement for D1.",
+    category: "patterns",
+    lastUpdated: "2025-12-28",
+    readingTime: 18,
+  },
+  {
+    slug: "vineyard-spec",
+    title: "Vineyard — Tool Showcase Pattern",
+    description: "Consistent documentation and demo pattern for Grove tools",
+    excerpt:
+      "Vineyard is a documentation pattern every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed. A consistent way to showcase the ecosystem.",
+    category: "patterns",
+    lastUpdated: "2025-12-30",
+    readingTime: 5,
+  },
+];
+
 // Marketing Documents
 export const marketingDocs: Doc[] = [
   {
@@ -682,4 +706,5 @@ export const allDocs = [
   ...helpArticles,
   ...legalDocs,
   ...marketingDocs,
+  ...patterns,
 ];
