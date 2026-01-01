@@ -872,7 +872,7 @@ When systemic false positives are identified that resulted in content removal:
 | [`songbird-pattern.md`](/knowledge/patterns/songbird-pattern) | Prompt injection protection used by Thorn (Canary → Kestrel → Robin) |
 | [`acceptable-use-policy.md`](/knowledge/legal/acceptable-use-policy) | Policy that Thorn enforces |
 | [`shade-spec.md`](/knowledge/specs/shade-spec) | Privacy policy that informs Thorn's zero-retention design |
-| [`grove-durable-objects-architecture.md`](/knowledge/patterns/grove-durable-objects-architecture) | DO patterns for review queue and rate limiting |
+| [`loom-durable-objects-pattern.md`](/knowledge/patterns/loom-durable-objects-pattern) | DO patterns for review queue and rate limiting |
 | [`wisp-spec.md`](/knowledge/specs/wisp-spec) | AI writing assistant that also uses Songbird pattern |
 
 ---
