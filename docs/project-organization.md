@@ -285,4 +285,170 @@ When deciding where something should live:
 
 ---
 
+## Migration: Rename Engine to Lattice
+
+The npm package should be renamed from `@autumnsgrove/groveengine` to `@autumnsgrove/lattice` to match our public naming convention.
+
+### Why Rename?
+
+- **Consistency** — Public name is "Lattice", internal is "GroveEngine"
+- **Clarity** — Imports like `@autumnsgrove/lattice/ui` are cleaner
+- **Branding** — Lattice is the name users see
+
+### Step-by-Step Migration
+
+#### 1. Update the Engine Package
+
+```bash
+# packages/engine/package.json
+```
+
+Change:
+```json
+{
+  "name": "@autumnsgrove/groveengine",
+  ...
+}
+```
+
+To:
+```json
+{
+  "name": "@autumnsgrove/lattice",
+  ...
+}
+```
+
+#### 2. Update All Import Statements
+
+Search and replace across the entire codebase:
+
+| Find | Replace |
+|------|---------|
+| `@autumnsgrove/groveengine` | `@autumnsgrove/lattice` |
+| `from '@autumnsgrove/groveengine` | `from '@autumnsgrove/lattice` |
+
+**Files to check:**
+- `landing/package.json` (dependency)
+- `plant/package.json` (dependency)
+- All `.svelte` and `.ts` files with imports
+- Any `tsconfig.json` paths
+- Documentation files
+
+#### 3. Update Workspace References
+
+```bash
+# In landing/package.json and plant/package.json
+```
+
+Change:
+```json
+{
+  "dependencies": {
+    "@autumnsgrove/groveengine": "workspace:*"
+  }
+}
+```
+
+To:
+```json
+{
+  "dependencies": {
+    "@autumnsgrove/lattice": "workspace:*"
+  }
+}
+```
+
+#### 4. Run Search to Find All References
+
+```bash
+# Find all references to the old name
+grep -r "groveengine" --include="*.json" --include="*.ts" --include="*.svelte" --include="*.md"
+```
+
+#### 5. Update pnpm Workspace
+
+If using pnpm workspaces, update any workspace protocol references.
+
+#### 6. Reinstall Dependencies
+
+```bash
+pnpm install
+```
+
+#### 7. Test the Build
+
+```bash
+pnpm build
+pnpm check
+```
+
+#### 8. Update npm (if published)
+
+If the package is published to npm:
+1. Deprecate `@autumnsgrove/groveengine` with a message pointing to the new name
+2. Publish `@autumnsgrove/lattice` as the new package
+
+```bash
+# Deprecate old package
+npm deprecate @autumnsgrove/groveengine "Renamed to @autumnsgrove/lattice"
+
+# Publish new package
+cd packages/engine
+npm publish --access public
+```
+
+### Checklist
+
+- [ ] Update `packages/engine/package.json` name field
+- [ ] Update `landing/package.json` dependency
+- [ ] Update `plant/package.json` dependency
+- [ ] Search/replace all imports in `.svelte` files
+- [ ] Search/replace all imports in `.ts` files
+- [ ] Update any documentation references
+- [ ] Run `pnpm install`
+- [ ] Run `pnpm build` and verify no errors
+- [ ] Run `pnpm check` for type checking
+- [ ] Test landing site locally
+- [ ] Test plant site locally
+- [ ] Commit with message: `refactor: rename @autumnsgrove/groveengine to @autumnsgrove/lattice`
+
+### Export Path Structure (Post-Rename)
+
+After renaming, the package exports should look like:
+
+```json
+{
+  "name": "@autumnsgrove/lattice",
+  "exports": {
+    ".": "./dist/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./ui/nature": "./dist/ui/nature/index.js",
+    "./ui/glass": "./dist/ui/glass/index.js",
+    "./foliage": "./dist/foliage/index.js",
+    "./thorn": "./dist/thorn/index.js",
+    "./songbird": "./dist/songbird/index.js",
+    "./services": "./dist/services/index.js"
+  }
+}
+```
+
+**Example imports after migration:**
+
+```typescript
+// UI components
+import { GlassCard, Logo } from '@autumnsgrove/lattice/ui';
+import { FallingLeaves, Lantern } from '@autumnsgrove/lattice/ui/nature';
+
+// Feature modules
+import { ThemeSelector, applyTheme } from '@autumnsgrove/lattice/foliage';
+import { validateContent } from '@autumnsgrove/lattice/thorn';
+import { detectInjection } from '@autumnsgrove/lattice/songbird';
+
+// Services
+import { db, auth } from '@autumnsgrove/lattice/services';
+```
+
+---
+
 *This document is the source of truth for where things live. When in doubt, default to the monorepo—extract later if needed.*
