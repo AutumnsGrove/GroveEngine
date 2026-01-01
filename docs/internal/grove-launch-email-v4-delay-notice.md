@@ -29,6 +29,14 @@ Signups will open shortly after they're back. Almost there.
 
 ---
 
+![Grove]({{LOGO_URL}})
+
+*A place to be.*
+
+[grove.place](https://grove.place) · [step away (unsubscribe)]({{{RESEND_UNSUBSCRIBE_URL}}})
+
+---
+
 ## Subject Line Options
 
 1. **A small delay** ← selected
