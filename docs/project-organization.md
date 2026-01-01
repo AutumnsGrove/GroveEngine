@@ -287,13 +287,22 @@ When deciding where something should live:
 
 ## Migration: Rename Engine to Lattice
 
-The npm package should be renamed from `@autumnsgrove/groveengine` to `@autumnsgrove/lattice` to match our public naming convention.
+The npm package should be renamed from `@autumnsgrove/groveengine` to `@groveplace/lattice` — matching the domain `grove.place` and the public product name "Lattice".
 
 ### Why Rename?
 
+- **Domain match** — `@groveplace` matches `grove.place`
 - **Consistency** — Public name is "Lattice", internal is "GroveEngine"
-- **Clarity** — Imports like `@autumnsgrove/lattice/ui` are cleaner
-- **Branding** — Lattice is the name users see
+- **Clarity** — Imports like `@groveplace/lattice/ui` are clean and professional
+- **Branding** — Clear ownership, memorable package name
+
+### Prerequisites
+
+#### Create the npm Organization
+
+1. Go to https://www.npmjs.com/org/create
+2. Create organization named `groveplace`
+3. Organizations are free for public packages
 
 ### Step-by-Step Migration
 
@@ -314,7 +323,7 @@ Change:
 To:
 ```json
 {
-  "name": "@autumnsgrove/lattice",
+  "name": "@groveplace/lattice",
   ...
 }
 ```
@@ -325,8 +334,7 @@ Search and replace across the entire codebase:
 
 | Find | Replace |
 |------|---------|
-| `@autumnsgrove/groveengine` | `@autumnsgrove/lattice` |
-| `from '@autumnsgrove/groveengine` | `from '@autumnsgrove/lattice` |
+| `@autumnsgrove/groveengine` | `@groveplace/lattice` |
 
 **Files to check:**
 - `landing/package.json` (dependency)
@@ -354,7 +362,7 @@ To:
 ```json
 {
   "dependencies": {
-    "@autumnsgrove/lattice": "workspace:*"
+    "@groveplace/lattice": "workspace:*"
   }
 }
 ```
@@ -364,6 +372,7 @@ To:
 ```bash
 # Find all references to the old name
 grep -r "groveengine" --include="*.json" --include="*.ts" --include="*.svelte" --include="*.md"
+grep -r "autumnsgrove" --include="*.json" --include="*.ts" --include="*.svelte"
 ```
 
 #### 5. Update pnpm Workspace
@@ -383,24 +392,24 @@ pnpm build
 pnpm check
 ```
 
-#### 8. Update npm (if published)
-
-If the package is published to npm:
-1. Deprecate `@autumnsgrove/groveengine` with a message pointing to the new name
-2. Publish `@autumnsgrove/lattice` as the new package
+#### 8. Publish to npm
 
 ```bash
-# Deprecate old package
-npm deprecate @autumnsgrove/groveengine "Renamed to @autumnsgrove/lattice"
-
-# Publish new package
+# Publish new package under new org
 cd packages/engine
 npm publish --access public
 ```
 
+If the old package was published:
+```bash
+# Deprecate old package pointing to new name
+npm deprecate @autumnsgrove/groveengine "Moved to @groveplace/lattice"
+```
+
 ### Checklist
 
-- [ ] Update `packages/engine/package.json` name field
+- [ ] Create `groveplace` organization on npm
+- [ ] Update `packages/engine/package.json` name to `@groveplace/lattice`
 - [ ] Update `landing/package.json` dependency
 - [ ] Update `plant/package.json` dependency
 - [ ] Search/replace all imports in `.svelte` files
@@ -411,7 +420,9 @@ npm publish --access public
 - [ ] Run `pnpm check` for type checking
 - [ ] Test landing site locally
 - [ ] Test plant site locally
-- [ ] Commit with message: `refactor: rename @autumnsgrove/groveengine to @autumnsgrove/lattice`
+- [ ] Publish to npm under `@groveplace`
+- [ ] Deprecate old `@autumnsgrove/groveengine` if it existed
+- [ ] Commit with message: `refactor: migrate to @groveplace/lattice`
 
 ### Export Path Structure (Post-Rename)
 
@@ -419,7 +430,7 @@ After renaming, the package exports should look like:
 
 ```json
 {
-  "name": "@autumnsgrove/lattice",
+  "name": "@groveplace/lattice",
   "exports": {
     ".": "./dist/index.js",
     "./ui": "./dist/ui/index.js",
@@ -437,17 +448,27 @@ After renaming, the package exports should look like:
 
 ```typescript
 // UI components
-import { GlassCard, Logo } from '@autumnsgrove/lattice/ui';
-import { FallingLeaves, Lantern } from '@autumnsgrove/lattice/ui/nature';
+import { GlassCard, Logo } from '@groveplace/lattice/ui';
+import { FallingLeaves, Lantern } from '@groveplace/lattice/ui/nature';
 
 // Feature modules
-import { ThemeSelector, applyTheme } from '@autumnsgrove/lattice/foliage';
-import { validateContent } from '@autumnsgrove/lattice/thorn';
-import { detectInjection } from '@autumnsgrove/lattice/songbird';
+import { ThemeSelector, applyTheme } from '@groveplace/lattice/foliage';
+import { validateContent } from '@groveplace/lattice/thorn';
+import { detectInjection } from '@groveplace/lattice/songbird';
 
 // Services
-import { db, auth } from '@autumnsgrove/lattice/services';
+import { db, auth } from '@groveplace/lattice/services';
 ```
+
+### Future Packages
+
+With the `@groveplace` org, you can publish additional packages:
+
+| Package | Purpose |
+|---------|---------|
+| `@groveplace/lattice` | Core engine (UI, themes, services) |
+| `@groveplace/heartwood` | Auth utilities (if needed externally) |
+| `@groveplace/foliage` | Theme package (if extracted later) |
 
 ---
 
