@@ -9,7 +9,7 @@ related: [what-is-grove, upgrading-or-downgrading]
 
 # Choosing Your Plan
 
-**First, the important bit:** Reading Grove blogs is free. Always. Every blog is publicly accessible — just visit and read, no account needed. You only need a plan if you want to *write* your own blog.
+**First, the important bit:** Reading Grove blogs is free. Always. Every blog is publicly accessible. Just visit and read, no account needed. You only need a plan if you want to *write* your own blog.
 
 Grove has a few plans, each designed for different needs. Here's what you get at each level.
 
@@ -17,7 +17,7 @@ Grove has a few plans, each designed for different needs. Here's what you get at
 
 ### Free
 
-**$0/month** — Browse Meadow, comment on posts, explore the community.
+**$0/month**: Browse Meadow, comment on posts, explore the community.
 
 This isn't a blog plan. You can't publish posts on Free. But you can participate in Meadow: upvote posts, leave reactions, reply to others. It's a way to be part of Grove without running a blog yourself.
 
@@ -27,7 +27,7 @@ This isn't a blog plan. You can't publish posts on Free. But you can participate
 
 ### Seedling
 
-**$8/month** — Your first blog.
+**$8/month**: Your first blog.
 
 Everything you need to start writing. No feature walls, no "upgrade to unlock basic functionality." Seedling is a real plan.
 
@@ -40,7 +40,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 
 ### Sapling
 
-**$12/month** — For regular bloggers.
+**$12/month**: For regular bloggers.
 
 More room to grow. If you're posting frequently or building up an archive, Sapling gives you space.
 
@@ -52,7 +52,7 @@ More room to grow. If you're posting frequently or building up an archive, Sapli
 
 ### Oak
 
-**$25/month** — Full control.
+**$25/month**: Full control.
 
 Bring your own domain. Customize your theme fully. This is for bloggers who want their site to feel completely their own.
 
@@ -66,7 +66,7 @@ Bring your own domain. Customize your theme fully. This is for bloggers who want
 
 ### Evergreen
 
-**$35/month** — The complete package.
+**$35/month**: The complete package.
 
 Everything Grove offers, including a domain on us.
 
@@ -85,7 +85,7 @@ Everything Grove offers, including a domain on us.
 
 **Want a custom domain?** That's Oak territory. Bring a domain you already own, or upgrade to Evergreen and we'll register one for you.
 
-**Not sure?** Start with Seedling. It's not a trial—it's a real plan with real features. See how it fits before committing to more.
+**Not sure?** Start with Seedling. It's not a trial; it's a real plan with real features. See how it fits before committing to more.
 
 ## What about the Free tier?
 
@@ -111,4 +111,4 @@ All plans include:
 
 ---
 
-*Questions about which plan fits? [Ask us](/support)—we'll give you an honest answer, even if it's "Seedling is probably enough."*
+*Questions about which plan fits? [Ask us](/support). We'll give you an honest answer, even if it's "Seedling is probably enough."*

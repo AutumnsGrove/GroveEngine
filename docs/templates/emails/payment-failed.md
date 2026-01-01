@@ -23,7 +23,7 @@ Your card didn't go through—here's how to fix it.
 ```markdown
 Hi {{name}},
 
-We tried to charge your card for your Grove subscription, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
+We tried to charge your card for your Grove subscription, but it didn't go through. These things happen: expired cards, bank holds, cosmic rays.
 
 **Your blog is still live.** Nothing's been taken down. You have time to sort this out.
 

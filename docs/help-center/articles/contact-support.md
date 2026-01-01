@@ -15,7 +15,7 @@ When you need help with something the documentation doesn't cover, here's how to
 
 **Email:** [autumnbrown23@pm.me](mailto:autumnbrown23@pm.me)
 
-That's it. No ticket system, no chatbot maze, no "press 1 for billing." Just send an email and a human will read it.
+That's it. No ticket system, no chatbot maze, no "press 1 for billing". Just send an email and a human will read it.
 
 ## Who responds
 

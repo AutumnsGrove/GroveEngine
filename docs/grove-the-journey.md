@@ -66,7 +66,7 @@ AI-powered domain search that turns 2-week searches into 1-2 hours:
 
 - **\$50 for 1 week** → credited as 1 month of Premium
 
-*Setup fees aren't lost — they become subscription credit.*
+*Setup fees aren't lost: they become subscription credit.*
 
 ## The Economics: Why This Works
 
@@ -86,13 +86,13 @@ Cloudflare R2 with CDN caching means infrastructure costs are nearly zero:
 
 Assuming 85% Basic, 10% Pro, 5% Premium:
 
-- **50 users:** \$760/month — approaching current retail income
+- **50 users:** \$760/month, approaching current retail income
 
-- **100 users:** \$1,520/month — exceeds current income
+- **100 users:** \$1,520/month, exceeds current income
 
-- **500 users:** \$7,600/month — financial stability
+- **500 users:** \$7,600/month, financial stability
 
-- **1,000 users:** \$15,200/month — life-changing
+- **1,000 users:** \$15,200/month, life-changing
 
 ## What Made This Possible
 
@@ -108,7 +108,7 @@ Built in a framework (SvelteKit) never used before, in under 3 weeks:
 
 - Building in public (accountability + portfolio)
 
-This isn't "AI replacing developers" — it's ***AI creating developers***. The barrier between idea and implementation collapsed. The work shifted from fighting syntax to building vision.
+This isn't "AI replacing developers." It's ***AI creating developers***. The barrier between idea and implementation collapsed. The work shifted from fighting syntax to building vision.
 
 ## Philosophy: Build With Integrity
 

@@ -1,4 +1,4 @@
-# Grove Launch Email — Version 1
+# Grove Launch Email: Version 1
 
 *Created: December 22, 2025*
 
@@ -8,7 +8,7 @@
 
 This is the first email to the 60 people who signed up for Grove updates. They've been waiting. This is Autumn finally reaching out.
 
-**The moment:** Grove is 90% complete, launching early January 2025. Two strangers at Barnes & Noble talked with Autumn for 2 hours about the project — genuine excitement, not polite interest. That energy is what this email captures.
+**The moment:** Grove is 90% complete, launching early January 2025. Two strangers at Barnes & Noble talked with Autumn for 2 hours about the project. Genuine excitement, not polite interest. That energy is what this email captures.
 
 **The goal:** Make subscribers feel like they're witnessing the next big thing. Give them a reason to explore the site. Encourage word-of-mouth.
 
@@ -34,11 +34,11 @@ I'm launching in early January. The site is live. You can explore it right now.
 
 **→ grove.place**
 
-Look around. Poke at things. Check out the pricing. And if you like what you see — tell someone. Word of mouth is the only marketing Grove has.
+Look around. Poke at things. Check out the pricing. And if you like what you see, tell someone. Word of mouth is the only marketing Grove has.
 
 More soon.
 
-— Autumn
+- Autumn
 
 ---
 
@@ -57,7 +57,7 @@ More soon.
 - **Link:** Make the image clickable, pointing to `grove.place/forest`
 - **Sizing:** Keep it reasonably sized for fast loading and mobile compatibility
 
-The forest page has three seasonal modes (summer, autumn, winter) with procedural tree generation, falling leaves, snowfall, and winter birds. The "You built this??" reaction is real — use it.
+The forest page has three seasonal modes (summer, autumn, winter) with procedural tree generation, falling leaves, snowfall, and winter birds. The "You built this??" reaction is real. Use it.
 
 ---
 
@@ -75,10 +75,10 @@ The "but for real" / "we actually mean it" framing acknowledges that other platf
 ## Sending Options
 
 For 60 subscribers:
-- **Buttondown** — free tier, markdown-friendly, indie-focused
-- **Mailchimp** — free up to 500 contacts
-- **Loops** — newer, clean UI, founder-friendly
-- **BCC from personal email** — it's 60 people, it's personal, it works
+- **Buttondown:** free tier, markdown-friendly, indie-focused
+- **Mailchimp:** free up to 500 contacts
+- **Loops:** newer, clean UI, founder-friendly
+- **BCC from personal email:** it's 60 people, it's personal, it works
 
 ---
 

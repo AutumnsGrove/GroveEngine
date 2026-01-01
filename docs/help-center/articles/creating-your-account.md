@@ -13,7 +13,7 @@ Getting started with Grove takes about a minute. Here's what to expect.
 
 ## How sign-up works
 
-Grove uses Google for authentication. No new password to create or remember—you sign in with your existing Google account.
+Grove uses Google for authentication. No new password to create or remember. You sign in with your existing Google account.
 
 1. Go to [grove.place](https://grove.place) and click **Get Started**
 2. Click **Continue with Google**
@@ -58,7 +58,7 @@ Pick something you're happy with—this becomes your address on the web. Keep it
 
 Once your account is created:
 
-- Your blog is live immediately (though empty)
+- Your blog is live immediately, though empty
 - You can access your admin panel at `yourblog.grove.place/admin`
 - An optional tour walks you through the basics
 
@@ -82,4 +82,4 @@ Your Grove account is tied to a specific Google account. You can't merge account
 
 ---
 
-*Questions about signing up? Something not working? [Reach out](/support)—we'll help you get sorted.*
+*Questions about signing up? Something not working? [Reach out](/support). We'll help you get sorted.*

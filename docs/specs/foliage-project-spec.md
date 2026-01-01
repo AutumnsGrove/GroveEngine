@@ -12,7 +12,7 @@
 
 ## Overview
 
-Foliage is Grove's theme system — providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities: make your blog feel like *yours*.
+Foliage is Grove's theme system, providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities: make your blog feel like *yours*.
 
 This project is extracted from GroveEngine to be:
 1. **Independently testable** — theme logic separate from engine
@@ -79,7 +79,7 @@ Collected during signup (favorite color) or changed in Settings.
 | 9 | **Ocean** | Cool blues, calm | No sidebar | Sapling+ |
 | 10 | **Wildflower** | Colorful, playful | Flexible | Sapling+ |
 
-Seedlings get 3 themes (Grove, Minimal, Night Garden) — representing core archetypes.
+Seedlings get 3 themes (Grove, Minimal, Night Garden), representing core archetypes.
 
 ---
 

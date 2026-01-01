@@ -8,9 +8,9 @@
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
 
-A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place—carefully prepared soil, the right conditions, gentle care until roots take hold.
+A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.
 
-Plant is Grove's onboarding system—the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets users publishing within minutes.
+Plant is Grove's onboarding system: the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets users publishing within minutes.
 
 ---
 
@@ -26,7 +26,7 @@ Plant is Grove's onboarding system—the complete flow for new users from initia
 
 ## Overview
 
-This specification defines the complete onboarding flow for new Grove users—from initial signup through payment, interactive tour, and handoff to their own blog. The goal is a frictionless, welcoming experience that gets users publishing within minutes.
+This specification defines the complete onboarding flow for new Grove users, from initial signup through payment, interactive tour, and handoff to their own blog. The goal is a frictionless, welcoming experience that gets users publishing within minutes.
 
 ---
 
@@ -496,7 +496,7 @@ Hey {name}!
 You've been on Grove for a few days now. How's it feeling?
 
 {if checklist_incomplete}
-I noticed you haven't finished setting up yet. No rush—but if you
+I noticed you haven't finished setting up yet. No rush, but if you
 need help with anything, just reply to this email.
 {/if}
 
@@ -539,7 +539,7 @@ You've published {post_count} posts! That's {word_count} words
 of your voice out in the world.
 {/if}
 
-Thanks for being part of this. I'd love to hear how it's going—
+Thanks for being part of this. I'd love to hear how it's going:
 what's working, what could be better. Just hit reply.
 
 —Autumn

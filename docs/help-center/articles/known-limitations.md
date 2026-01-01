@@ -9,7 +9,7 @@ related: [choosing-your-plan, contact-support, what-is-meadow]
 
 # Known Limitations
 
-Grove is intentionally focused. Some things we don't do—not because we couldn't, but because they'd compromise what Grove is trying to be.
+Grove is intentionally focused. Some things we don't do, not because we couldn't, but because they'd compromise what Grove is trying to be.
 
 Here's what you won't find, and why.
 
@@ -21,7 +21,7 @@ Grove doesn't support:
 - Shopping carts
 - Digital downloads for sale
 
-**Why:** E-commerce adds massive complexity—tax handling, fraud prevention, customer disputes, inventory management. It would pull focus from writing and turn Grove into something it's not.
+**Why:** E-commerce adds massive complexity: tax handling, fraud prevention, customer disputes, inventory management. It would pull focus from writing and turn Grove into something it's not.
 
 **Alternative:** If you need to sell things, use a dedicated platform (Gumroad, Shopify, Ko-fi) and link to it from your Grove blog.
 
@@ -29,7 +29,7 @@ Grove doesn't support:
 
 Your analytics dashboard shows data with a deliberate delay. You won't see live visitor counts or watch numbers tick up in real-time.
 
-**Why:** Real-time analytics create compulsive checking behavior. Refresh, refresh, refresh—did anyone read my post yet? It's anxiety-inducing and doesn't help you write better.
+**Why:** Real-time analytics create compulsive checking behavior. Refresh, refresh, refresh. Did anyone read my post yet? It's anxiety-inducing and doesn't help you write better.
 
 **What you get instead:** Aggregated insights updated periodically. Enough to understand what resonates, not enough to obsess over.
 
@@ -43,7 +43,7 @@ In Meadow, votes exist but the counts are hidden. You can vote on posts, but you
 
 You can't install third-party plugins or extensions. What Grove offers is what Grove offers.
 
-**Why:** Plugins create security vulnerabilities, support nightmares, and inconsistent experiences. They also fragment the user base—suddenly support requests become "I installed this plugin and now..."
+**Why:** Plugins create security vulnerabilities, support nightmares, and inconsistent experiences. They also fragment the user base. Suddenly support requests become "I installed this plugin and now..."
 
 **What you get instead:** A curated, consistent experience. Features Grove adds work for everyone, reliably.
 
@@ -65,7 +65,7 @@ Grove doesn't include:
 
 **Why:** SEO tools encourage writing for algorithms instead of humans. They add cognitive overhead and rarely improve actual writing quality.
 
-**What you get instead:** Grove handles technical SEO basics automatically—proper HTML structure, fast loading, mobile responsiveness. You focus on writing things people want to read.
+**What you get instead:** Grove handles technical SEO basics automatically: proper HTML structure, fast loading, mobile responsiveness. You focus on writing things people want to read.
 
 ## No scheduling (yet)
 

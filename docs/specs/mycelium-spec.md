@@ -7,7 +7,7 @@
 **Domain:** `mycelium.grove.place`
 **Last Updated:** December 2025
 
-Beneath the forest floor, fungal networks connect every tree—sharing nutrients, sending signals, creating a living internet of roots. Mycelium is Grove's Model Context Protocol server, the invisible network connecting AI agents to the entire ecosystem.
+Beneath the forest floor, fungal networks connect every tree, sharing nutrients, sending signals, creating a living internet of roots. Mycelium is Grove's Model Context Protocol server, the invisible network connecting AI agents to the entire ecosystem.
 
 Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service through a single, unified interface. The wood wide web.
 
@@ -15,7 +15,7 @@ Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage 
 
 ## Overview
 
-Mycelium is Grove's Model Context Protocol (MCP) server — the communication network that lets AI agents interact with the entire Grove ecosystem. Just as fungal mycelium networks connect trees in a forest, enabling them to share nutrients and information, Mycelium connects Claude (and other AI assistants) to Lattice, Heartwood, Amber, Bloom, and every other Grove service.
+Mycelium is Grove's Model Context Protocol (MCP) server: the communication network that lets AI agents interact with the entire Grove ecosystem. Just as fungal mycelium networks connect trees in a forest, enabling them to share nutrients and information, Mycelium connects Claude (and other AI assistants) to Lattice, Heartwood, Amber, Bloom, and every other Grove service.
 
 **One sentence:** *"Claude talks to Grove through Mycelium."*
 
@@ -29,7 +29,7 @@ In forests, mycelium is the underground fungal network scientists call the "wood
 - Support seedlings that can't yet reach sunlight
 - Connect the entire ecosystem invisibly
 
-For Grove, Mycelium does the same thing — it's the invisible connective tissue that lets AI agents tap into your entire digital ecosystem through a single, unified interface.
+For Grove, Mycelium does the same thing: it's the invisible connective tissue that lets AI agents tap into your entire digital ecosystem through a single, unified interface.
 
 ---
 

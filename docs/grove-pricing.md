@@ -8,7 +8,7 @@ Grove.place
 
 ## Pricing Philosophy
 
-Grove.place is designed to be **accessible**. The goal is to provide a home for writers and creators at every level—from curious newcomers exploring blogging for the first time, to professionals who need a polished, branded presence.
+Grove.place is designed to be **accessible**. The goal is to provide a home for writers and creators at every level: from curious newcomers exploring blogging for the first time, to professionals who need a polished, branded presence.
 
 Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 
@@ -33,13 +33,13 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 | Support | Community | Community | Email | Priority | 8hrs + Priority |
 | **Best For** | *Readers* | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
 
-**Yearly plans save 15%** — pay for 10 months, get 12.
+**Yearly plans save 15%**: pay for 10 months, get 12.
 
 ---
 
 ## Reading Blogs
 
-**Everyone can read Grove blogs—no login required.**
+**Everyone can read Grove blogs. No login required.**
 
 All blogs are publicly accessible by default. You don't need an account to read someone's writing. Just visit their blog and read.
 
@@ -76,7 +76,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 
 ## What Each Tier Includes
 
-### Seedling — $8/month
+### Seedling: $8/month
 *Try it. See if blogging is for you.*
 
 - 50 blog posts
@@ -87,7 +87,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - **Unlimited comments** on other blogs
 - Community support via documentation
 
-### Sapling — $12/month
+### Sapling: $12/month
 *You blog regularly. This is your space.*
 
 - 250 blog posts
@@ -97,7 +97,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - **Email forwarding:** Receive emails at `you@grove.place`
 - Email support
 
-### Oak — $25/month
+### Oak: $25/month
 *Your blog is part of your identity.*
 
 - **Unlimited** blog posts
@@ -109,7 +109,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - Full analytics dashboard
 - Priority email support
 
-### Evergreen — $35/month
+### Evergreen: $35/month
 *Your blog is your business. We handle everything.*
 
 - **Unlimited** blog posts
@@ -145,7 +145,7 @@ Grove offers hand-curated themes that you can customize with your own accent col
 
 ## Vines (Sidebar Links)
 
-Vines are sidebar links that appear alongside your blog posts—perfect for linking to related posts, sources, further reading, or anything you want readers to explore.
+Vines are sidebar links that appear alongside your blog posts. Perfect for linking to related posts, sources, further reading, or anything you want readers to explore.
 
 Available to all paid tiers. See the [Vines documentation](/help/writing/vines) for more.
 
@@ -183,7 +183,7 @@ Don't have a domain yet? Our AI-powered domain search tool finds the perfect dom
 | 3 Days | $100 | 2 months Evergreen |
 | 1 Week | $50 | 1 month Evergreen |
 
-**Setup fees are credited toward your subscription**—you're not losing money, you're prepaying for service.
+**Setup fees are credited toward your subscription**: you're not losing money, you're prepaying for service.
 
 **Domain registration** (~$20/year for standard domains) is included in your Evergreen subscription for domains up to $100/year. Premium TLDs over $100/year: you cover the difference.
 
@@ -238,7 +238,7 @@ A professional email address for your blog—no extra cost, no separate service 
 
 ## Custom Plans
 
-Need something beyond Evergreen? Multiple domains, white-label options, team collaboration, dedicated support—let's talk.
+Need something beyond Evergreen? Multiple domains, white-label options, team collaboration, dedicated support. Let's talk.
 
 **Contact:** autumnbrown23@pm.me
 

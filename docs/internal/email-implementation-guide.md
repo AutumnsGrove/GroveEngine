@@ -100,7 +100,7 @@ ALTER TABLE user_subscriptions ADD COLUMN email_forwarding_to TEXT;
 
 ### Cost
 
-**$0** — Cloudflare Email Routing is free.
+**$0:** Cloudflare Email Routing is free.
 
 ---
 
@@ -138,7 +138,7 @@ TXT   grove.place    v=spf1 include:spf.forwardemail.net -all
 2. Use subdomains (e.g., mail.grove.place for full mailboxes)
 3. Accept that Basic users use CF, Pro+ users use FE with different MX priority
 
-**Recommended:** Option 1 — Use Forward Email for everything. $3/month covers all users, simpler architecture.
+**Recommended:** Option 1. Use Forward Email for everything. $3/month covers all users, simpler architecture.
 
 ### Provisioning Full Mailbox
 
@@ -199,7 +199,7 @@ Outgoing Mail (SMTP):
 
 ### Cost
 
-**$3/month total** — Covers all Professional and Premium users combined.
+**$3/month total:** Covers all Professional and Premium users combined.
 
 ---
 

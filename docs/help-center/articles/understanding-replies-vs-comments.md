@@ -15,7 +15,7 @@ Grove has two ways for readers to respond to your posts: replies and comments. T
 
 **Replies** are private messages to you. Only you see them.
 
-**Comments** are public. They appear on your post for everyone to read—but only after you approve them.
+**Comments** are public. They appear on your post for everyone to read, but only after you approve them.
 
 ## Replies: Private feedback
 
@@ -41,7 +41,7 @@ When someone leaves a comment:
 3. You approve, reject, or ignore it
 4. Approved comments appear publicly on the post
 
-This gives you control. Your blog isn't a free-for-all—you decide what conversations happen in your space.
+This gives you control. Your blog isn't a free-for-all. You decide what conversations happen in your space.
 
 **Free accounts** can leave up to 20 public comments per week on other blogs.
 
@@ -61,7 +61,7 @@ By keeping replies private by default, readers can reach you without worrying ab
 
 In your admin panel:
 
-**Replies** show up under your post, marked as private. You can read them, but there's nothing to approve—they're just for you.
+**Replies** show up under your post, marked as private. You can read them, but there's nothing to approve. They're just for you.
 
 **Comments** appear in your moderation queue at **Posts → Comments**. New comments wait there until you take action.
 

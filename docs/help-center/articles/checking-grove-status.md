@@ -15,7 +15,7 @@ If something seems off with Grove, here's how to find out what's happening.
 
 Grove's status page lives at **status.grove.place**.
 
-This is where we post updates whenever there's a known issue—outages, slowdowns, scheduled maintenance. If something's wrong on our end, it'll be listed here.
+This is where we post updates whenever there's a known issue: outages, slowdowns, scheduled maintenance. If something's wrong on our end, it'll be listed here.
 
 ## What you'll see
 
@@ -27,10 +27,10 @@ When everything's working normally, you'll see a green banner and all components
 
 If there's an ongoing issue, the page shows:
 
-- **What's affected** — Which parts of Grove are having problems (Blog Engine, CDN, Authentication, etc.)
-- **Current status** — Investigating, Identified, Monitoring, or Resolved
-- **Latest update** — What we know and what we're doing about it
-- **Timeline** — A history of updates since the incident started
+- **What's affected**: Which parts of Grove are having problems (Blog Engine, CDN, Authentication, etc.)
+- **Current status**: Investigating, Identified, Monitoring, or Resolved
+- **Latest update**: What we know and what we're doing about it
+- **Timeline**: A history of updates since the incident started
 
 ### Scheduled maintenance
 
@@ -51,7 +51,7 @@ You can subscribe to status updates via RSS at `status.grove.place/feed`. Add th
 - An incident is resolved
 - Maintenance is scheduled
 
-You can also check your admin panel—active incidents appear in the **Messages** section.
+You can also check your admin panel. Active incidents appear in the **Messages** section.
 
 ## What the components mean
 
@@ -73,7 +73,7 @@ You can also check your admin panel—active incidents appear in the **Messages*
 - Things feel slower than usual
 - Something that worked before suddenly doesn't
 
-If there's an active incident, we already know about it and are working on it. No need to contact support—we'll update the status page as things progress.
+If there's an active incident, we already know about it and are working on it. No need to contact support; we'll update the status page as things progress.
 
 **Contact support if:**
 - The status page shows all operational, but you're still having issues
@@ -93,7 +93,7 @@ We post updates as we learn more. If an incident is marked "Investigating," we'r
 
 ## Historical incidents
 
-The status page shows the past 30 days of incidents. You can see what happened, how long it lasted, and how we handled it. This transparency is intentional—we want you to know our track record.
+The status page shows the past 30 days of incidents. You can see what happened, how long it lasted, and how we handled it. This transparency is intentional: we want you to know our track record.
 
 ---
 

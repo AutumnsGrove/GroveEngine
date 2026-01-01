@@ -54,15 +54,15 @@ Assumptions: 85% Basic (\$12), 10% Pro (\$25), 5% Premium (\$50). Users average 
 
 ## Key Takeaways
 
-1.  **Storage dominates costs (99%+)** — Operations are nearly free with caching
+1.  **Storage dominates costs (99%+)**: Operations are nearly free with caching
 
-2.  **Bandwidth is free** — This is the R2 killer feature for image hosting
+2.  **Bandwidth is free**: This is the R2 killer feature for image hosting
 
-3.  **Caching is essential** — Use custom domains (cdn.grove.place) not r2.dev URLs
+3.  **Caching is essential**: Use custom domains (cdn.grove.place) not r2.dev URLs
 
-4.  **Your margins are excellent** — Charging \$2.40/GB for storage that costs \$0.015/GB
+4.  **Your margins are excellent**: Charging \$2.40/GB for storage that costs \$0.015/GB
 
-5.  **R2 is not your scaling bottleneck** — Payment processing (Stripe ~3%) will cost more
+5.  **R2 is not your scaling bottleneck**: Payment processing (Stripe ~3%) will cost more
 
 ## What Will Actually Cost Money
 

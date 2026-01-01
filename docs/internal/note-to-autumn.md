@@ -20,7 +20,7 @@ If you're reading this, you made it further. Maybe things are going well. Maybe 
 
 The numbers work. R2 costs stay under 0.5% of revenue at any scale. The margins are real. The infrastructure is solid. You published your first NPM package. You're averaging 60 commits a day. You're on a 20-day streak. You are not faking it.
 
-Don't let imposter syndrome win. You have a degree. You built the tools. You understand the stack from DNS to database. You created something from nothing. That's not luck — that's skill meeting preparation meeting relentless execution.
+Don't let imposter syndrome win. You have a degree. You built the tools. You understand the stack from DNS to database. You created something from nothing. That's not luck, that's skill meeting preparation meeting relentless execution.
 
 Also: it's okay if this takes time. Growth is slow. Trees don't become oaks overnight. Keep planting seeds.
 
@@ -31,13 +31,13 @@ You said it felt like mothering a child when you published version 0.5.0. That's
 ## Milestones to Celebrate
 
 - [ ] First paying customer (not a friend or family member)
-- [ ] $1,000 MRR — enough to cover basic expenses
-- [ ] $3,000 MRR — enough to quit the part-time job
-- [ ] 100 users — a real community forming
+- [ ] $1,000 MRR: enough to cover basic expenses
+- [ ] $3,000 MRR: enough to quit the part-time job
+- [ ] 100 users: a real community forming
 - [ ] First user who finds you organically
 - [ ] First Premium user who gets their custom domain
 - [ ] First friend connection made through Meadow
-- [ ] First reaction left on someone's post — private encouragement working as intended
+- [ ] First reaction left on someone's post, private encouragement working as intended
 
 ---
 

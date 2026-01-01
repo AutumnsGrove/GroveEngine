@@ -1,15 +1,15 @@
-# Wisp — Writing Assistant
+# Wisp: Writing Assistant
 
-> *A helper, not a writer—and sometimes, a good listener.*
+> *A helper, not a writer, and sometimes, a good listener.*
 
 **Public Name:** Wisp
 **Internal Name:** GroveWisp
 **Target:** GroveEngine integration
 **Last Updated:** December 2025
 
-Like a will-o'-the-wisp in the forest—light, airy, ephemeral. Wisp appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice. A wisp of help. Nothing more, nothing less.
+Like a will-o'-the-wisp in the forest: light, airy, ephemeral. Wisp appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice. A wisp of help. Nothing more, nothing less.
 
-Wisp is Grove's ethical AI writing tool. It helps you polish your voice without replacing it—analyzing grammar, tone, and readability, but never generating or expanding content. Your words, refined. Not replaced.
+Wisp is Grove's ethical AI writing tool. It helps you polish your voice without replacing it. It analyzes grammar, tone, and readability, but never generates or expands content. Your words, refined. Not replaced.
 
 ---
 
@@ -17,7 +17,7 @@ Wisp is Grove's ethical AI writing tool. It helps you polish your voice without 
 
 An ethical AI writing tool that helps users polish their voice without replacing it. The assistant analyzes existing content for grammar, tone, and readability - it will **never** generate, expand, or brainstorm content.
 
-**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say—then organizes *their own words* into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say, and then organizes *their own words* into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
 
 This specification unifies:
 - The original AI Writing Assistant design (AutumnsGrove)
@@ -183,11 +183,11 @@ interface ReadabilityResult {
 
 ### The Problem
 
-Some people freeze at the blank page. "What do I write? Where do I start?" But those same people have no trouble *talking*—to friends, in group chats, over coffee. The ideas are there. The voice is there. The barrier is the blank page itself.
+Some people freeze at the blank page. "What do I write? Where do I start?" But those same people have no trouble *talking*: to friends, in group chats, over coffee. The ideas are there. The voice is there. The barrier is the blank page itself.
 
 ### The Solution
 
-Fireside is a conversational mode where Wisp asks questions and you answer naturally. Your responses—your words, your voice, your thoughts—get organized into a draft.
+Fireside is a conversational mode where Wisp asks questions and you answer naturally. Your responses (your words, your voice, your thoughts) get organized into a draft.
 
 The fire doesn't tell the story. It just creates the space where stories emerge.
 
@@ -257,8 +257,8 @@ The fire doesn't tell the story. It just creates the space where stories emerge.
 │  └────────────────────────────────────────────────────┘     │
 │                                                             │
 │  ┌─ Wisp ─────────────────────────────────────────────┐     │
-│  │ That makes total sense. Resonance vs proximity—    │     │
-│  │ that's a really clear way to put it. What makes    │     │
+│  │ That makes total sense. Resonance vs proximity.    │     │
+│  │ That's a really clear way to put it. What makes    │     │
 │  │ those connections feel fragile to you?             │     │
 │  └────────────────────────────────────────────────────┘     │
 │                                                             │
@@ -283,7 +283,7 @@ The fire doesn't tell the story. It just creates the space where stories emerge.
 │  # Communities Form Differently Online                      │
 │                                                             │
 │  There's something different about how we find each         │
-│  other in digital spaces. It's not proximity—it's           │
+│  other in digital spaces. It's not proximity, it's          │
 │  resonance. You don't connect with people because           │
 │  they happen to live nearby. You find them because          │
 │  something in what they said echoed something in you.       │
@@ -325,7 +325,7 @@ Wisp offers a rotating selection of conversation starters:
 10. "What did you learn recently that you can't stop thinking about?"
 
 **Returning Writers**
-11. "It's been a while—what's been happening in your world?"
+11. "It's been a while. What's been happening in your world?"
 12. "What are you working on that you'd love to talk about?"
 
 Users can also skip the prompt and start with their own opening.
@@ -366,11 +366,11 @@ If a user attempts any of the following, Wisp declines and redirects to the conv
 
 | Blocked Request | Wisp Response |
 |-----------------|---------------|
-| "Write me a post about X" | "I can't write for you—but I'd love to hear what *you* think about X. What draws you to it?" |
+| "Write me a post about X" | "I can't write for you, but I'd love to hear what *you* think about X. What draws you to it?" |
 | "Expand this into a full post" | "Let's talk through it instead. What's the main thing you want people to take away?" |
 | "Add some stuff about Y" | "I can only work with what you've told me. Want to tell me about Y?" |
 | "Make this sound smarter" | "Your voice is the whole point. What do you actually want to say?" |
-| "What do you think about X?" | "This is your space—what do *you* think?" |
+| "What do you think about X?" | "This is your space. What do *you* think?" |
 
 #### Detection Strategy
 
@@ -445,7 +445,7 @@ if (existingPost?.fireside_assisted) {
 
 This ensures the marker persists even if someone edits the post via API or database directly.
 
-**Rationale:** Grove's legal policies require transparency about AI assistance. This marker is honest without being alarming—it acknowledges the process while making clear that the words are the author's.
+**Rationale:** Grove's legal policies require transparency about AI assistance. This marker is honest without being alarming. It acknowledges the process while making clear that the words are the author's.
 
 ---
 
@@ -499,7 +499,7 @@ For users who enable it, conversations can be persisted to Cloudflare KV with:
 - Keyed by `fireside_recovery:{user_id}:{session_id}`
 - Retrieved on reconnect, then immediately deleted from KV
 
-This allows recovery from browser crashes without violating the ZDR principle—data still expires quickly and is never used for training or analysis.
+This allows recovery from browser crashes without violating the ZDR principle. Data still expires quickly and is never used for training or analysis.
 
 ---
 
@@ -807,11 +807,11 @@ Strip before analysis:
 
 ### Prompt Injection Protection
 
-Wisp uses the **Songbird Pattern** — a three-layer defense system against prompt injection attacks:
+Wisp uses the **Songbird Pattern**: a three-layer defense system against prompt injection attacks:
 
-1. **Canary** — Tripwire detection. Runs a minimal check; if response deviates from expected output, input is poisoned.
-2. **Kestrel** — Semantic validation. Verifies input looks like legitimate content for this context.
-3. **Robin** — Production response. Only runs after Canary and Kestrel have verified safety.
+1. **Canary**: Tripwire detection. Runs a minimal check; if response deviates from expected output, input is poisoned.
+2. **Kestrel**: Semantic validation. Verifies input looks like legitimate content for this context.
+3. **Robin**: Production response. Only runs after Canary and Kestrel have verified safety.
 
 See: `docs/specs/songbird-pattern.md` for full implementation details.
 
@@ -819,7 +819,7 @@ See: `docs/specs/songbird-pattern.md` for full implementation details.
 - Every user message in conversation
 - The final draft generation request
 
-Together, Canary and Kestrel cost ~$0.0004 per request — negligible insurance against compromised responses.
+Together, Canary and Kestrel cost ~$0.0004 per request: negligible insurance against compromised responses.
 
 ### Rate Limiting
 
@@ -1072,15 +1072,15 @@ Using DeepSeek V3.2 via Fireworks AI:
 
 ## Resolved Questions
 
-1. **Naming:** ✅ **Wisp** — light, airy, ephemeral. Like a will-o'-the-wisp. Internal: `GroveWisp`
+1. **Naming:** ✅ **Wisp**: light, airy, ephemeral. Like a will-o'-the-wisp. Internal: `GroveWisp`
 2. **Scope:** ✅ Lives at engine level (`packages/engine/`) for all Grove sites
-3. **Sharing:** ✅ Yes — inference client shared with Content Moderation in `src/lib/server/inference-client.js`
+3. **Sharing:** ✅ Yes. Inference client shared with Content Moderation in `src/lib/server/inference-client.js`
 
 ---
 
 ## References
 
-- [Thorn — Content Moderation](/knowledge/specs/thorn-spec)
+- [Thorn: Content Moderation](/knowledge/specs/thorn-spec)
 - [Grove Naming Guide](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/grove-naming.md)
 
 ---

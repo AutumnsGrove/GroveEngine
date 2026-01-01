@@ -1,4 +1,4 @@
-# Amber — Grove Storage Management Specification
+# Amber: Grove Storage Management Specification
 
 *Internal planning document*
 
@@ -8,11 +8,11 @@
 
 ## Overview
 
-**Amber** is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place.
+**Amber** is Grove's unified storage management system. Every file you upload (blog images, email attachments, profile pictures) is preserved in Amber, organized and accessible from one place.
 
 ### Why "Amber"?
 
-Amber is fossilized tree resin—preserving moments in time, capturing life in suspended animation. Your digital Amber holds your files, keeps them safe, and lets you manage your space as it grows.
+Amber is fossilized tree resin: preserving moments in time, capturing life in suspended animation. Your digital Amber holds your files, keeps them safe, and lets you manage your space as it grows.
 
 | | |
 |---|---|
@@ -22,7 +22,7 @@ Amber is fossilized tree resin—preserving moments in time, capturing life in s
 
 ### Philosophy
 
-Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove—made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
+Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove, made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
 
 - See what's using your space
 - Download and export your data
@@ -62,48 +62,48 @@ The same storage pool is used by:
 ### Day One (MVP)
 
 #### Storage Dashboard
-- **Visual breakdown** — Pie/bar chart showing usage by category
-- **Storage meter** — Current usage vs. quota with percentage
-- **Quota warnings** — Clear indicators at 80%, 95%, 100%
-- **Usage trends** — Simple graph showing storage over time
+- **Visual breakdown:** Pie/bar chart showing usage by category
+- **Storage meter:** Current usage vs. quota with percentage
+- **Quota warnings:** Clear indicators at 80%, 95%, 100%
+- **Usage trends:** Simple graph showing storage over time
 
 #### File Browser
-- **Category views** — Browse by type (images, attachments, documents)
-- **Source views** — Browse by product (Blog files, Ivy attachments)
-- **Search** — Find files by name
-- **Preview** — View images and documents inline
-- **Metadata** — Size, upload date, dimensions (for images)
+- **Category views:** Browse by type (images, attachments, documents)
+- **Source views:** Browse by product (Blog files, Ivy attachments)
+- **Search:** Find files by name
+- **Preview:** View images and documents inline
+- **Metadata:** Size, upload date, dimensions (for images)
 
 #### Export & Download
-- **Single file download** — Download any file directly
-- **Bulk download** — Select multiple files, download as zip
-- **Full export** — Download everything (GDPR compliance)
-- **Export by category** — Download all blog images, all email attachments, etc.
+- **Single file download:** Download any file directly
+- **Bulk download:** Select multiple files, download as zip
+- **Full export:** Download everything (GDPR compliance)
+- **Export by category:** Download all blog images, all email attachments, etc.
 
 #### Storage Management
-- **Delete files** — Remove individual files
-- **Bulk delete** — Select and delete multiple files
-- **Trash** — 30-day retention before permanent deletion
-- **Empty trash** — Immediately reclaim space
+- **Delete files:** Remove individual files
+- **Bulk delete:** Select and delete multiple files
+- **Trash:** 30-day retention before permanent deletion
+- **Empty trash:** Immediately reclaim space
 
 ### Later Features
 
 #### Organization (Phase 2)
-- **Folders** — User-created organization (especially for blog assets)
-- **Tags** — Label files for easier finding
-- **Favorites** — Quick access to frequently used files
-- **Sort options** — By date, size, name, type
+- **Folders:** User-created organization (especially for blog assets)
+- **Tags:** Label files for easier finding
+- **Favorites:** Quick access to frequently used files
+- **Sort options:** By date, size, name, type
 
 #### Optimization (Phase 2)
-- **Image compression** — Automatically optimize uploaded images
-- **Attachment compression** — Compress large email attachments
-- **Duplicate detection** — Identify and merge duplicate files
-- **Cleanup suggestions** — "These files are large and unused"
+- **Image compression:** Automatically optimize uploaded images
+- **Attachment compression:** Compress large email attachments
+- **Duplicate detection:** Identify and merge duplicate files
+- **Cleanup suggestions:** "These files are large and unused"
 
 #### Advanced (Phase 3)
-- **Version history** — For blog content (track changes)
-- **Sharing** — Generate temporary download links
-- **API access** — Programmatic file management
+- **Version history:** For blog content (track changes)
+- **Sharing:** Generate temporary download links
+- **API access:** Programmatic file management
 
 ---
 
@@ -834,23 +834,23 @@ async function migrateExistingFiles() {
 
 ### Technical
 
-1. **Deduplication** — Should we detect and dedupe identical uploads? (Same hash = same R2 object, shared reference)
-2. **Image variants** — Do we store original + resized, or generate on demand?
-3. **Encryption** — Blog files are unencrypted. Should Amber offer encrypted storage option?
-4. **Trash retention** — 30 days standard. Make configurable?
+1. **Deduplication:** Should we detect and dedupe identical uploads? (Same hash = same R2 object, shared reference)
+2. **Image variants:** Do we store original + resized, or generate on demand?
+3. **Encryption:** Blog files are unencrypted. Should Amber offer encrypted storage option?
+4. **Trash retention:** 30 days standard. Make configurable?
 
 ### Product
 
-1. **Folder support** — Users will ask for folders. Worth the complexity?
-2. **Sharing** — Temporary public links for files?
-3. **Collaboration** — Future multi-user Grove accounts?
-4. **Versioning** — Keep old versions of blog content?
+1. **Folder support:** Users will ask for folders. Worth the complexity?
+2. **Sharing:** Temporary public links for files?
+3. **Collaboration:** Future multi-user Grove accounts?
+4. **Versioning:** Keep old versions of blog content?
 
 ### Business
 
-1. **Free tier storage** — Should Free users get any storage for profile images?
-2. **Storage limits** — Are the add-on prices right?
-3. **Enterprise** — Custom storage tiers for business customers?
+1. **Free tier storage:** Should Free users get any storage for profile images?
+2. **Storage limits:** Are the add-on prices right?
+3. **Enterprise:** Custom storage tiers for business customers?
 
 ---
 

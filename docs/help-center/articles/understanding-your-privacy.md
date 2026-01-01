@@ -26,7 +26,7 @@ That's the core of it. We're not building a profile on you. We're not tracking y
 
 **You can see everything we have.**
 
-In your admin panel under **Settings → Data**, you can export a complete copy of everything Grove stores about you. It's your data—you should be able to look at it.
+In your admin panel under **Settings → Data**, you can export a complete copy of everything Grove stores about you. It's your data. You should be able to look at it.
 
 **You can take it and leave.**
 
@@ -38,7 +38,7 @@ This is where Grove is different from most platforms.
 
 **We don't track your visitors.**
 
-There are no analytics scripts following your readers around the web. No cookies tracking them across sites. No fingerprinting. When someone reads your blog and leaves, that's it—they're gone.
+There are no analytics scripts following your readers around the web. No cookies tracking them across sites. No fingerprinting. When someone reads your blog and leaves, that's it. They're gone.
 
 **IP addresses are kept for one minute.**
 

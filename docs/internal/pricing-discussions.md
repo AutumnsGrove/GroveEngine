@@ -83,7 +83,7 @@ Revised thinking: The value delta between Oak ($25) and Evergreen ($50) wasn't j
 
 ### Why Post Limits?
 
-**Seedling (50 posts):** Creates natural upgrade trigger. "You've been writing consistently—time to commit!"
+**Seedling (50 posts):** Creates natural upgrade trigger. "You've been writing consistently, time to commit!"
 
 **Sapling (250 posts):** Generous for hobbyists, but serious bloggers will eventually need more. Natural ceiling for "hobby" vs "serious" distinction.
 
@@ -271,7 +271,7 @@ As product matures and Seedling users upgrade or churn:
 
 ### Default Access Model
 
-**Blogs are publicly readable by default.** Anyone can visit a Grove blog and read posts without logging in or creating an account. This is intentional—it aligns with Grove's mission to be a space for authentic expression on the open web.
+**Blogs are publicly readable by default.** Anyone can visit a Grove blog and read posts without logging in or creating an account. This is intentional: it aligns with Grove's mission to be a space for authentic expression on the open web.
 
 ### What Requires Login
 
@@ -485,7 +485,7 @@ As product matures and Seedling users upgrade or churn:
 
 For users with special needs beyond Evergreen:
 
-> **Custom Plans** — Need something specific? Let's talk. Custom storage, multiple domains, white-label options, team collaboration, dedicated support. Contact autumnbrown23@pm.me.
+> **Custom Plans:** Need something specific? Let's talk. Custom storage, multiple domains, white-label options, team collaboration, dedicated support. Contact autumnbrown23@pm.me.
 
 No public pricing. Handle case-by-case based on actual requirements.
 

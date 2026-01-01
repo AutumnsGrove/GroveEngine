@@ -7,7 +7,7 @@
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
 
-Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward. Waystone is Grove's built-in help center: searchable documentation, contextual help buttons, and a lantern to light your path when you're lost.
+Waystones are the markers travelers leave along forest paths, guiding those who follow, showing the way forward. Waystone is Grove's built-in help center: searchable documentation, contextual help buttons, and a lantern to light your path when you're lost.
 
 ---
 

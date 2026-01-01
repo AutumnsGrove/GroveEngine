@@ -15,7 +15,7 @@ When you log in to Grove, we give your browser a small piece of data called a "s
 
 ## What's a Cookie?
 
-A cookie is just a tiny text file your browser stores. It's like a wristband at a concert — it proves you already showed your ticket at the door. Every time you visit Grove, your browser shows us that wristband, and we let you in without asking for your password again.
+A cookie is just a tiny text file your browser stores. It's like a wristband at a concert. It proves you already showed your ticket at the door. Every time you visit Grove, your browser shows us that wristband, and we let you in without asking for your password again.
 
 ## What Happens If I Delete Cookies?
 
@@ -23,13 +23,13 @@ You'll be logged out. Next time you visit, you'll see the login screen. Just log
 
 ## What If I Block Cookies?
 
-You won't be able to log in at all. Grove needs at least one cookie to remember who you are. There's no way around this — it's how the entire internet handles logins.
+You won't be able to log in at all. Grove needs at least one cookie to remember who you are. There's no way around this. It's how the entire internet handles logins.
 
 If you're using a privacy-focused browser or extension that blocks cookies, you'll need to allow cookies for `grove.place` to use your account.
 
 ## What About Privacy?
 
-Your session cookie only contains a random ID — not your email, password, or any personal information. It's just a key that unlocks your account on our servers. If someone else got your cookie, they could access your account, which is why:
+Your session cookie only contains a random ID, not your email, password, or any personal information. It's just a key that unlocks your account on our servers. If someone else got your cookie, they could access your account, which is why:
 
 1. We mark it "secure" (only sent over HTTPS)
 2. We mark it "HttpOnly" (JavaScript can't read it)

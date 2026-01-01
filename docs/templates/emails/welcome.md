@@ -28,7 +28,7 @@ Welcome to Grove. Your blog is live and waiting for you.
 **Your blog:** {{blog_url}}
 **Your admin panel:** {{blog_url}}/admin
 
-That's really all you need to get started. To sign in, just enter your email and we'll send you a 6-digit code—no password to remember. (If you're on mobile and the code is finicky, there's also a magic link in each email.)
+That's really all you need to get started. To sign in, just enter your email and we'll send you a 6-digit code. No password to remember. (If you're on mobile and the code is finicky, there's also a magic link in each email.)
 
 ---
 
@@ -42,7 +42,7 @@ That's really all you need to get started. To sign in, just enter your email and
 
 ---
 
-Over the next few weeks, I'll send a handful of emails with tips on getting the most out of Grove. Nothing salesy—just genuinely useful stuff. You can unsubscribe anytime.
+Over the next few weeks, I'll send a handful of emails with tips on getting the most out of Grove. Nothing salesy, just genuinely useful stuff. You can unsubscribe anytime.
 
 For now, maybe write something. Doesn't have to be perfect. Doesn't have to be long. Just yours.
 
@@ -63,7 +63,7 @@ Welcome to the grove.
 
 ## Design Notes
 
-- Warm but not overwhelming—don't info-dump
+- Warm but not overwhelming. Don't info-dump
 - Lead with the practical (here's your blog, here's how to log in)
 - Values woven in naturally, not as a manifesto
 - Personal sign-off from Autumn (founder touch)

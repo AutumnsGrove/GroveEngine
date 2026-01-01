@@ -1,4 +1,4 @@
-# Shade — AI Content Protection
+# Shade: AI Content Protection
 
 > *In a forest full of harvesters, this grove stays shaded.*
 
@@ -27,13 +27,13 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 
 Users own their words. What's live is live, what's gone is gone.
 
-Shade is Grove's layered defense system against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade stands as a quiet refusal—protection that works in the background so writers can focus on writing.
+Shade is Grove's layered defense system against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade stands as a quiet refusal. Protection that works in the background so writers can focus on writing.
 
 This specification is designed to be **open and adoptable**. While the implementation details are Cloudflare-specific (because that's what Grove uses), the principles are universal. Any project, startup, or individual who believes users should control their own words can adapt Shade for their stack.
 
 ### Why This Matters
 
-The internet used to be a place of personal expression. Somewhere along the way, that expression became "content"—raw material for training AI models, often without permission, attribution, or compensation.
+The internet used to be a place of personal expression. Somewhere along the way, that expression became "content": raw material for training AI models, often without permission, attribution, or compensation.
 
 Shade is a statement: *Not here. Not this grove.*
 
@@ -43,7 +43,7 @@ Shade is a statement: *Not here. Not this grove.*
 
 ### 1.1 User Sovereignty
 
-- **Users own their words**—Grove is a steward, not an owner
+- **Users own their words**. Grove is a steward, not an owner
 - Content exists to be read by humans, not harvested by machines
 - What a user deletes should stay deleted, not preserved in training datasets
 - Technical access does not constitute consent
@@ -57,7 +57,7 @@ No single protection is foolproof. Sophisticated actors fake user agents, ignore
 
 ### 1.3 Pragmatic Protection
 
-- **95% aggression, 5% grace**—we accept occasional false positives
+- **95% aggression, 5% grace**. We accept occasional false positives
 - Search engine indexing is preserved (discoverability matters)
 - Real humans with unusual browsers may be briefly challenged
 - We protect without becoming a fortress that locks users out
@@ -168,7 +168,7 @@ Shade implements defense in depth through eight complementary layers:
 
 ### 2.3 What We Accept
 
-Some traffic will get through. Shade is not a fortress—it's a filter.
+Some traffic will get through. Shade is not a fortress; it's a filter.
 
 **Traffic that may bypass Shade:**
 - Google's unified crawler (blocking breaks SEO)
@@ -535,7 +535,7 @@ Web archiving services preserve snapshots of public websites, sometimes indefini
 
 **Method:** robots.txt directives (see section 4.2 for implementation)
 
-**Important Caveat:** Blocking archive crawlers is **retroactive**—it removes existing archives, not just prevents future ones.
+**Important Caveat:** Blocking archive crawlers is **retroactive**: it removes existing archives, not just prevents future ones.
 
 **❌ CANNOT Be Blocked (Personal Archiving Tools):**
 - Raindrop.io (creates copies when users bookmark pages)
@@ -596,7 +596,7 @@ The archive.today / archive.is / archive.ph network explicitly does NOT respect 
 
 #### Retroactive Archive Removal
 
-**Critical Understanding:** Adding archive crawler blocks to robots.txt removes ALL previous archives from those services, not just prevents future captures.
+**Critical Understanding:** Adding archive crawler blocks to robots.txt removes all previous archives from those services, not just prevents future captures.
 
 **For Grove:** Since tenant content hasn't launched yet, this is fine. But document this behavior:
 - Any future changes to archive blocking in robots.txt affect historical archives
@@ -956,8 +956,8 @@ Per Fastly's Q2 2025 Threat Insights Report:
 
 ### Related Grove Specs
 
-- [Thorn — Content Moderation](/knowledge/specs/thorn-spec) — Privacy-first automated moderation
-- [Terms of Service](/knowledge/legal/terms-of-service) — Legal framework
+- [Thorn: Content Moderation](/knowledge/specs/thorn-spec): Privacy-first automated moderation
+- [Terms of Service](/knowledge/legal/terms-of-service): Legal framework
 
 ---
 

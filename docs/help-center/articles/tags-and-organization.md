@@ -39,13 +39,13 @@ Tags work best when you're consistent. A few guidelines:
 
 Tags show up in a few places:
 
-- **On your post** — Displayed with the post metadata so readers can see the topic
-- **In your RSS feed** — Subscribers' feed readers can filter by tag
-- **In Meadow** — If you share posts to the community feed, you can filter which tags go to Meadow
+- **On your post**: Displayed with the post metadata so readers can see the topic
+- **In your RSS feed**: Subscribers' feed readers can filter by tag
+- **In Meadow**: If you share posts to the community feed, you can filter which tags go to Meadow
 
 ## Organizing with intention
 
-You don't need a complex system. Some bloggers use just two or three tags across their whole blog. Others use more. What matters is that it helps you—and your readers—find things.
+You don't need a complex system. Some bloggers use just two or three tags across their whole blog. Others use more. What matters is that it helps you and your readers find things.
 
 A few patterns that work:
 

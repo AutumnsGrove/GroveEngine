@@ -9,7 +9,7 @@ related: [understanding-your-privacy, choosing-your-plan, writing-your-first-pos
 
 # What is Meadow?
 
-Meadow is Grove's community feed—a shared space where bloggers can discover each other's work, react to posts, and have conversations.
+Meadow is Grove's community feed: a shared space where bloggers can discover each other's work, react to posts, and have conversations.
 
 Think of it as a cozy town square for Grove writers.
 
@@ -19,20 +19,20 @@ When you publish a post on Grove, you can choose to share it to Meadow. Your pos
 
 **Key points:**
 - Sharing to Meadow is always opt-in, post by post
-- Your blog exists independently—Meadow is just an extra layer
+- Your blog exists independently. Meadow is just an extra layer
 - Readers can discover your work even if they don't know your blog URL
 
 ## What you can do in Meadow
 
 ### Discover posts
 
-Browse what other Grove bloggers are writing. The feed shows recent shared posts from across the community. No algorithm deciding what you see—just chronological posts from real people.
+Browse what other Grove bloggers are writing. The feed shows recent shared posts from across the community. No algorithm deciding what you see, just chronological posts from real people.
 
 ### React to posts
 
 See something you appreciate? Leave a reaction. It's a lightweight way to say "I read this and it resonated" without the pressure of writing a comment.
 
-Reactions are simple and positive—think of them as digital nods of acknowledgment.
+Reactions are simple and positive. Think of them as digital nods of acknowledgment.
 
 ### Reply and discuss
 
@@ -63,7 +63,7 @@ Not interested in community features? That's completely fine.
 - You can disable Meadow entirely in settings
 - Your blog works exactly the same either way
 
-Meadow is additive. It doesn't change how your blog functions—it just adds an optional social layer if you want it.
+Meadow is additive. It doesn't change how your blog functions; it just adds an optional social layer if you want it.
 
 ## Why Meadow exists
 
@@ -77,10 +77,10 @@ It's not trying to be Twitter or a viral content machine. It's more like a writi
 
 The community is small and intentional. A few norms:
 
-- **Read before reacting** — Reactions mean more when they're genuine
-- **Keep replies thoughtful** — Quality over quantity
-- **Support other writers** — Everyone's figuring this out together
-- **Don't spam** — Sharing every post dilutes the feed
+- **Read before reacting**: Reactions mean more when they're genuine
+- **Keep replies thoughtful**: Quality over quantity
+- **Support other writers**: Everyone's figuring this out together
+- **Don't spam**: Sharing every post dilutes the feed
 
 There's no formal moderation system yet. We're trusting that people who choose Grove are here in good faith.
 

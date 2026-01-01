@@ -6,7 +6,7 @@
 
 A soft glow spilling onto quiet sidewalks after the world has gone still. Shelves of dog-eared paperbacks and strange sci-fi tucked between trailing philodendrons. The steam rising from a cup of oolong at 2am, shared across a table with someone who finally feels seen.
 
-It's the place that stays open when everywhere else has closed—a haven for the sleepless, the searching, the queer kids who need somewhere to just exist. Warm wood, mismatched chairs, fairy lights tangled through ceiling beams. A place where conversations bloom in the margins of borrowed books.
+It's the place that stays open when everywhere else has closed, a haven for the sleepless, the searching, the queer kids who need somewhere to just exist. Warm wood, mismatched chairs, fairy lights tangled through ceiling beams. A place where conversations bloom in the margins of borrowed books.
 
 Tea served in ceramic cups made by local artists. A curated shelf of trans authors by the window. Late-night poetry readings that no one has to perform at—just listen, just be. The kind of third place that becomes a first home.
 

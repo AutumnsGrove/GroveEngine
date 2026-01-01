@@ -13,7 +13,7 @@ Your blog has an RSS feed. Here's how to share it and why it matters.
 
 ## What's RSS?
 
-RSS (Really Simple Syndication) lets people subscribe to your blog in a feed reader—apps like Feedly, NetNewsWire, or even Apple News. When you publish something new, it shows up for them automatically. No algorithms deciding who sees what, no social media gatekeeping. They asked for your posts, they get your posts.
+RSS (Really Simple Syndication) lets people subscribe to your blog in a feed reader (apps like Feedly, NetNewsWire, or even Apple News). When you publish something new, it shows up for them automatically. No algorithms deciding who sees what, no social media gatekeeping. They asked for your posts, they get your posts.
 
 ## Finding your feed URL
 
@@ -35,11 +35,11 @@ That's it. Share that link with anyone who wants to subscribe.
 
 Each entry contains:
 
-- **Title** — Your post's title
-- **Link** — Direct URL to the full post
-- **Publication date** — When you published it
-- **Excerpt** — The post description (or first part of content if you didn't set one)
-- **Tags** — Any tags you've added, as categories
+- **Title**: Your post's title
+- **Link**: Direct URL to the full post
+- **Publication date**: When you published it
+- **Excerpt**: The post description (or first part of content if you didn't set one)
+- **Tags**: Any tags you've added, as categories
 
 Your feed includes all your published posts, newest first. Drafts don't appear until you publish them.
 
@@ -57,11 +57,11 @@ A few ways to let readers know:
 
 If someone asks "how do I subscribe?"—here are solid options:
 
-- **Feedly** — Popular, works on web and mobile
-- **NetNewsWire** — Free, Mac and iOS, clean interface
-- **Inoreader** — Powerful, good free tier
-- **Feedbin** — Paid, privacy-focused
-- **Apple News** — Built into Apple devices, supports RSS
+- **Feedly**: Popular, works on web and mobile
+- **NetNewsWire**: Free, Mac and iOS, clean interface
+- **Inoreader**: Powerful, good free tier
+- **Feedbin**: Paid, privacy-focused
+- **Apple News**: Built into Apple devices, supports RSS
 
 There are dozens more. Any RSS reader will work with your Grove feed.
 
@@ -73,7 +73,7 @@ For the curious:
 - **Caching:** Feed updates within an hour of publishing
 - **Encoding:** Proper XML escaping, handles special characters correctly
 
-Your feed URL also works if someone enters just your blog URL into their reader—most will auto-discover the feed.
+Your feed URL also works if someone enters just your blog URL into their reader. Most will auto-discover the feed.
 
 ---
 

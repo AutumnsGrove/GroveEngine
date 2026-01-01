@@ -1,14 +1,14 @@
 # Grove Promo Video Concept
 
-A 30-60 second teaser video for grove.place — designed to be generated with AI video tools.
+A 30-60 second teaser video for grove.place, designed to be generated with AI video tools.
 
 ---
 
 ## Overview
 
 **Duration:** 30-45 seconds
-**Tone:** Calm, warm, inviting — like finding a quiet garden
-**Style:** Soft, organic motion — leaves, gentle growth, natural light
+**Tone:** Calm, warm, inviting. Like finding a quiet garden
+**Style:** Soft, organic motion. Leaves, gentle growth, natural light
 **Color Palette:** Grove green (#16a34a), cream (#fefdfb), warm browns
 
 ---
@@ -21,7 +21,7 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 **Audio:** Gentle ambient nature sounds, soft wind
 
 ### Scene 2: The Problem (0:05 - 0:12)
-**Visual:** Quick flash of chaotic feeds — notifications, algorithmic noise, endless scroll (shown abstractly, blurred/distorted)
+**Visual:** Quick flash of chaotic feeds: notifications, algorithmic noise, endless scroll (shown abstractly, blurred/distorted)
 **Text overlay:** *"...finding your voice can feel impossible."*
 **Audio:** Brief, subtle discordant tone that fades
 
@@ -31,7 +31,7 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 **Audio:** Return to calm ambient sounds
 
 ### Scene 4: The Solution (0:15 - 0:25)
-**Visual:** A beautiful, minimal blog interface materializes organically — like vines growing into shape. Show:
+**Visual:** A beautiful, minimal blog interface materializes organically, like vines growing into shape. Show:
 - A clean writing space
 - A personal domain (e.g., "yourname.grove.place")
 - Words appearing naturally on the page
@@ -52,7 +52,7 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 **Audio:** Piano continues, slightly more hopeful
 
 ### Scene 6: Closing (0:35 - 0:45)
-**Visual:** Pull back to show multiple groves connected by gentle paths — a network of individual spaces. Zoom settles on the Grove logo (the layered leaf/tree mark).
+**Visual:** Pull back to show multiple groves connected by gentle paths, a network of individual spaces. Zoom settles on the Grove logo (the layered leaf/tree mark).
 
 **Text overlay:**
 - "Grove"
@@ -65,10 +65,10 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 
 ## Key Messaging Points
 
-1. **Peace over chaos** — Grove is an escape from algorithmic feeds
-2. **Your space, your rules** — Personal domain, no ads, no tracking
-3. **Simple to start** — Three steps to your own corner of the internet
-4. **Community without noise** — Connected but not overwhelming
+1. **Peace over chaos**: Grove is an escape from algorithmic feeds
+2. **Your space, your rules**: Personal domain, no ads, no tracking
+3. **Simple to start**: Three steps to your own corner of the internet
+4. **Community without noise**: Connected but not overwhelming
 
 ---
 
@@ -93,7 +93,7 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 ## Text/Typography
 
 - Headlines: Serif font (Georgia/Cambria style)
-- Keep text minimal — let visuals tell the story
+- Keep text minimal: let visuals tell the story
 - Fade in/out gently, never snap
 
 ---
@@ -123,13 +123,13 @@ A 30-60 second teaser video for grove.place — designed to be generated with AI
 
 Use this as a starting prompt for AI video tools:
 
-> Create a 45-second promotional video for a blogging platform called "Grove." The style should be calm, organic, and nature-inspired — like a peaceful garden at dawn.
+> Create a 45-second promotional video for a blogging platform called "Grove." The style should be calm, organic, and nature-inspired, like a peaceful garden at dawn.
 >
 > Open with morning light through leaves and a seedling growing. Briefly show abstract chaotic internet imagery (blurred, discordant) before it dissolves into falling leaves.
 >
 > Transition to a clean, minimal blog interface growing organically like vines. Show a simple three-step flow: sign up, choose a domain, start writing.
 >
-> End with multiple connected groves (blogs) forming a gentle network, zooming to a leaf/tree logo with the text "Grove — a place to Be — grove.place"
+> End with multiple connected groves (blogs) forming a gentle network, zooming to a leaf/tree logo with the text "Grove: a place to Be. grove.place"
 >
 > Color palette: forest green (#16a34a), cream (#fefdfb), warm brown. Music: soft ambient piano with nature sounds. Pace: slow, deliberate, calming.
 

@@ -1,4 +1,4 @@
-# Grove Launch Email — Version 4 (Delay Notice)
+# Grove Launch Email: Version 4 (Delay Notice)
 
 *Created: December 31, 2025*
 *Updated: January 1, 2026*
@@ -25,7 +25,7 @@ The IRS is closed until January 5th, so I can't get an EIN to officially start t
 
 Signups will open shortly after they're back. Almost there.
 
-— Autumn
+- Autumn
 
 ---
 
@@ -50,7 +50,7 @@ Signups will open shortly after they're back. Almost there.
 - Honest about the actual reason (IRS closure, EIN)
 - Wry parenthetical acknowledges the frustrating timing
 - Specific date (January 5th) so people know what to expect
-- "Almost there" — confident without overpromising
+- "Almost there": confident without overpromising
 - Respects their inbox
 
 ---

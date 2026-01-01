@@ -229,13 +229,13 @@ type StorageFile = { ... };
 
 ### Starting a New Product
 
-1. **Spec first** — Create spec in `GroveEngine/docs/specs/{product}-spec.md`
-2. **Get approval** — Review spec, iterate on design
-3. **Create repo** — `grove-{product}` following standard structure
-4. **Set up CI** — GitHub Actions for Cloudflare deployment
-5. **Import Lattice** — Add `@autumnsgrove/lattice` dependency
-6. **Build** — Implement against the spec
-7. **Move spec** — Optionally move spec to product repo's `/docs`
+1. **Spec first**: Create spec in `GroveEngine/docs/specs/{product}-spec.md`
+2. **Get approval**: Review spec, iterate on design
+3. **Create repo**: `grove-{product}` following standard structure
+4. **Set up CI**: GitHub Actions for Cloudflare deployment
+5. **Import Lattice**: Add `@autumnsgrove/lattice` dependency
+6. **Build**: Implement against the spec
+7. **Move spec**: Optionally move spec to product repo's `/docs`
 
 ### Making Changes to Lattice
 

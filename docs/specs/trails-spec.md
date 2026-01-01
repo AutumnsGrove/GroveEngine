@@ -8,7 +8,7 @@
 **Tiers:** Sapling ($12/mo) and up
 **Last Updated:** December 2025
 
-Trails wind through the forest, marking where others have walked. They show the journey—not just the destination. Trails is Grove's personal roadmap system, letting you build in public and share the path you're walking.
+Trails wind through the forest, marking where others have walked. They show the journey, not just the destination. Trails is Grove's personal roadmap system, letting you build in public and share the path you're walking.
 
 Whether planning a creative project, outlining upcoming blog content, or tracking progress on a long-term goal, Trails provides a beautiful way to show where you've been, where you are, and where you're headed.
 
@@ -16,7 +16,7 @@ Whether planning a creative project, outlining upcoming blog content, or trackin
 
 ## Overview
 
-Trails lets Grove users create and share personal roadmaps. Whether planning a creative project, outlining upcoming blog content, or building in public, Trails provides a beautiful way to show the journey—where you've been, where you are, and where you're headed.
+Trails lets Grove users create and share personal roadmaps. Whether planning a creative project, outlining upcoming blog content, or building in public, Trails provides a beautiful way to show the journey: where you've been, where you are, and where you're headed.
 
 ### Core Value Proposition
 

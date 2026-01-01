@@ -31,9 +31,9 @@ Day one with your blog. Here's a quick orientation.
 
 Everything lives at **{{blog_url}}/admin**. From there:
 
-- **Posts** — where you write, edit, and publish
-- **Media** — images and files you've uploaded
-- **Settings** — your blog's name, description, and theme
+- **Posts**: where you write, edit, and publish
+- **Media**: images and files you've uploaded
+- **Settings**: your blog's name, description, and theme
 
 That's most of it. We kept it simple on purpose.
 
@@ -54,7 +54,7 @@ It doesn't need to be polished. First posts rarely are. The point is to start.
 
 ## One thing that might help
 
-When you're writing, Grove **autosaves your work** every few seconds—you'll never lose a draft to a browser crash or accidental tab close. And nothing publishes until you're ready. No pressure to finish in one sitting.
+When you're writing, Grove **autosaves your work** every few seconds. You'll never lose a draft to a browser crash or accidental tab close. And nothing publishes until you're ready. No pressure to finish in one sitting.
 
 If you get stuck or something's confusing, the help center is at {{help_url}}, or just reply to this email.
 

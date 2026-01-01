@@ -68,7 +68,7 @@ Something went wrong on our end.
 
 - Refresh the page and try again
 - If it persists, check **status.grove.place** for known issues
-- If there's no incident posted, [contact us](/support)—this is something we need to fix
+- If there's no incident posted, [contact us](/support): this is something we need to fix
 
 ### Slow loading or timing out
 

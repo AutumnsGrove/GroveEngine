@@ -37,7 +37,7 @@ Everything. Your blog stays live, your posts stay published, your readers don't 
 
 ## If you'd rather not continue
 
-No hard feelings—really. You can cancel anytime before {{trial_end_date}} and you won't be charged.
+No hard feelings, really. You can cancel anytime before {{trial_end_date}} and you won't be charged.
 
 **To cancel:** {{manage_subscription_url}}
 
@@ -69,8 +69,8 @@ Just reply to this email. Happy to help with anything.
 ## Design Notes
 
 - Lead with the practical info (when, how much)
-- Reassurance that nothing breaks—continuity is the point
+- Reassurance that nothing breaks. Continuity is the point
 - Make cancellation genuinely easy and guilt-free
 - No manipulation, no "last chance!" urgency
-- Short and scannable—this is a utility email
+- Short and scannable. This is a utility email
 - Personal sign-off maintains warmth without overselling

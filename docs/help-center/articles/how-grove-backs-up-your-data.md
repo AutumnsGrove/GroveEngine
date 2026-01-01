@@ -23,11 +23,11 @@ Patina is Grove's automated backup system. Every night at 3 AM UTC, it creates a
 
 Everything:
 
-- **Your posts** — drafts and published, including all revisions
-- **Your comments** — both public comments and private replies
-- **Your media** — images, files, everything in your storage
-- **Your settings** — theme choices, blog configuration, preferences
-- **Your account** — authentication data, session history
+- **Your posts**: drafts and published, including all revisions
+- **Your comments**: both public comments and private replies
+- **Your media**: images, files, everything in your storage
+- **Your settings**: theme choices, blog configuration, preferences
+- **Your account**: authentication data, session history
 
 If it's in Grove, it's in Patina.
 
@@ -35,15 +35,15 @@ If it's in Grove, it's in Patina.
 
 Patina runs on two rhythms:
 
-**Nightly snapshots** — A fresh backup every 24 hours. These are kept for 7 days, so we can restore to any night in the past week.
+**Nightly snapshots**: A fresh backup every 24 hours. These are kept for 7 days, so we can restore to any night in the past week.
 
-**Weekly archives** — Every Sunday, the week's daily backups are compressed into a single archive. These weekly snapshots are kept for 12 weeks.
+**Weekly archives**: Every Sunday, the week's daily backups are compressed into a single archive. These weekly snapshots are kept for 12 weeks.
 
 That means we can restore your data to any point in the last three months. Most problems are caught within days, but if something slips through, we have you covered.
 
 ## Where backups are stored
 
-All backups live in Cloudflare R2, a cold storage system designed for exactly this purpose. It's separate from the servers that run your blog—if something catastrophic happened to Grove's main infrastructure, your backups would be untouched.
+All backups live in Cloudflare R2, a cold storage system designed for exactly this purpose. It's separate from the servers that run your blog. If something catastrophic happened to Grove's main infrastructure, your backups would be untouched.
 
 The storage is encrypted at rest. Even in cold storage, your words stay private.
 
