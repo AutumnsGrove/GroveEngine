@@ -332,6 +332,30 @@ Wisp offers a rotating selection of conversation starters:
 
 Users can also skip the prompt and start with their own opening.
 
+#### Prompt Rotation Algorithm
+
+Prompts are selected pseudorandomly to feel fresh without true randomness:
+
+```typescript
+function selectStarterPrompt(userId: string, prompts: string[]): string {
+  // Combine user ID with current date for daily rotation
+  const today = new Date().toISOString().slice(0, 10); // "2025-01-01"
+  const seed = hashString(`${userId}:${today}`);
+
+  // Select based on seed, but skip recently used prompts
+  const recentPrompts = getRecentPrompts(userId, 3); // Last 3 used
+  const available = prompts.filter(p => !recentPrompts.includes(p));
+
+  return available[seed % available.length];
+}
+```
+
+This ensures:
+- Same user sees same prompt if they reload the same day
+- Different prompt each day
+- Won't repeat the last 3 prompts used
+- Different users see different prompts on the same day
+
 ---
 
 ### Guardrails
@@ -350,14 +374,42 @@ If a user attempts any of the following, Wisp declines and redirects to the conv
 | "Make this sound smarter" | "Your voice is the whole point. What do you actually want to say?" |
 | "What do you think about X?" | "This is your space—what do *you* think?" |
 
+#### Detection Strategy
+
+Generation requests are detected using a **two-layer approach**:
+
+1. **Client-side pre-flight** (fast, keyword-based):
+   - Pattern matching for common generation phrases: "write me", "generate", "create a post", "expand this", "add more", "make it longer"
+   - Immediate soft warning before sending to server
+   - Reduces unnecessary API calls
+
+2. **Server-side intent classification** (inference-based):
+   - Lightweight classification prompt run before conversation response
+   - Classifies intent as: `conversation`, `generation_request`, `clarification`, `off_topic`
+   - Generation requests trigger redirect response instead of continuation
+   - Logged for guardrail effectiveness analysis
+
+This layered approach catches obvious cases quickly while handling subtle or novel phrasing through inference.
+
 #### Soft Constraints
 
 | Constraint | Implementation |
 |------------|----------------|
-| Minimum conversation depth | "Ready to draft" button hidden until sufficient exchange (~3+ substantive back-and-forths) |
+| Minimum conversation depth | "Ready to draft" button hidden until: **3+ user messages** AND **150+ total user tokens** |
 | Input/output ratio | Draft length proportional to user input; brief answers = brief draft |
 | No opinion injection | Wisp never contributes its own ideas to the content |
 | No padding | Short responses stay short; Wisp won't embellish |
+
+#### canDraft Logic
+
+```typescript
+function canDraft(conversation: FiresideMessage[]): boolean {
+  const userMessages = conversation.filter(m => m.role === 'user');
+  const totalUserTokens = userMessages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
+
+  return userMessages.length >= 3 && totalUserTokens >= 150;
+}
+```
 
 ---
 
@@ -376,6 +428,25 @@ Every post created through Fireside includes a permanent, non-removable attribut
 - Cannot be edited out (enforced in editor)
 - Visible to all readers
 
+**Server-Side Enforcement:**
+
+The marker's immutability is enforced at the API level, not just in the editor UI:
+
+```typescript
+// In POST /api/posts and PUT /api/posts/:slug
+if (existingPost?.fireside_assisted && !content.includes('~ written fireside with Wisp ~')) {
+  // Re-append marker if removed
+  content = content.trim() + '\n\n*~ written fireside with Wisp ~*';
+}
+
+// Prevent clearing the fireside_assisted flag
+if (existingPost?.fireside_assisted) {
+  updates.fireside_assisted = true; // Cannot be unset
+}
+```
+
+This ensures the marker persists even if someone edits the post via API or database directly.
+
 **Rationale:** Grove's legal policies require transparency about AI assistance. This marker is honest without being alarming—it acknowledges the process while making clear that the words are the author's.
 
 ---
@@ -393,6 +464,28 @@ Fireside follows the same Zero Data Retention policy as all Wisp features:
 
 **Note:** Unlike standard Wisp analysis, Fireside conversations are *not* logged to `wisp_requests` on a per-message basis. Only the final draft generation is logged.
 
+#### Conversation Storage
+
+Conversations are stored **client-side only** during the session:
+
+| Storage Layer | Purpose | Lifetime |
+|---------------|---------|----------|
+| **Svelte component state** | Active conversation | Until component unmounts |
+| **sessionStorage** | Tab persistence | Until tab closes |
+| **Optional: Cloudflare KV** | Crash recovery | 15-minute TTL, encrypted |
+
+**Primary approach:** Client-side `sessionStorage` keyed by `fireside_session_{conversationId}`. This survives page refreshes within the same tab but is automatically cleared when the tab closes.
+
+**Crash recovery (optional, off by default):**
+
+For users who enable it, conversations can be persisted to Cloudflare KV with:
+- 15-minute TTL (auto-expires)
+- Encrypted at rest
+- Keyed by `fireside_recovery:{user_id}:{session_id}`
+- Retrieved on reconnect, then immediately deleted from KV
+
+This allows recovery from browser crashes without violating the ZDR principle—data still expires quickly and is never used for training or analysis.
+
 ---
 
 ### Draft Generation
@@ -407,24 +500,30 @@ You are organizing a writer's own words into a cohesive blog post.
 
 RULES:
 - Use ONLY the content the writer provided in their responses
-- Preserve their voice, phrasing, and personality
+- Preserve their voice, phrasing, and personality exactly
 - Organize for flow and readability
-- Add minimal transition phrases if needed ("And that's the thing—", "But here's what I keep coming back to—")
+- AVOID adding transition phrases unless absolutely necessary for clarity
+  - Prefer letting their natural phrasing create flow
+  - If a transition is genuinely needed, use simple connectors ("And", "But", "So")
+  - NEVER add stylized phrases like "And that's the thing—" or "Here's what I keep coming back to—"
 - Do NOT add new ideas, facts, opinions, or content
 - Do NOT expand beyond what was said
-- If the input is brief, the output should be brief
-- Suggest a title based on the main theme
+- Do NOT paraphrase—use their exact words where possible
+- If the input is brief, the output MUST be brief
+- Suggest a title based on the main theme (keep it simple, in their voice)
 
 The writer's responses:
 ---
 [conversation history - user messages only]
 ---
 
-Create a blog post draft from these thoughts.
+Organize these thoughts into a blog post draft. Preserve their voice exactly.
 ```
 
 3. Returns structured response with suggested title and organized content
 4. User reviews, edits, and decides whether to publish
+
+**Important:** The prompt explicitly discourages adding transitions because even subtle additions can alter the writer's voice. The goal is organization, not enhancement.
 
 ---
 
@@ -474,19 +573,46 @@ interface FiresideDraftResponse {
     model: string;
   };
 }
+
+// Error responses
+interface FiresideErrorResponse {
+  error: true;
+  code: 'rate_limit' | 'inference_failure' | 'empty_message' | 'session_expired' | 'generation_blocked' | 'content_too_long';
+  message: string;               // Human-readable error
+  retryAfter?: number;           // Seconds until retry (for rate_limit)
+  redirectPrompt?: string;       // Suggested conversation redirect (for generation_blocked)
+}
 ```
 
 ---
 
 ### Fireside Database Additions
 
+**Migration file:** `packages/engine/migrations/015_wisp_fireside.sql`
+
 ```sql
+-- 015_wisp_fireside.sql
+-- Fireside mode additions for Wisp
+-- Backward compatible: all new columns have defaults
+
 -- Track Fireside sessions (not individual messages)
 ALTER TABLE wisp_requests ADD COLUMN fireside_session_id TEXT;
 
 -- Track posts created via Fireside
 ALTER TABLE posts ADD COLUMN fireside_assisted INTEGER DEFAULT 0;
+
+-- Index for querying fireside posts
+CREATE INDEX IF NOT EXISTS idx_posts_fireside ON posts(fireside_assisted) WHERE fireside_assisted = 1;
+
+-- Note: Existing posts will have fireside_assisted = 0 (the default)
+-- No data migration needed
 ```
+
+**Backward Compatibility:**
+- All new columns have sensible defaults
+- Existing posts automatically have `fireside_assisted = 0`
+- No breaking changes to existing queries
+- Index is conditional (only on fireside posts) for efficiency
 
 ---
 
@@ -496,37 +622,135 @@ Fireside is accessed via:
 
 1. **New post → "Start with a conversation"** button
 2. **Wisp panel → "Fireside" tab** (alongside Grammar, Tone, Readability)
-3. **Keyboard shortcut** (TBD, possibly `Cmd/Ctrl + Shift + F`)
+3. **Keyboard shortcut:** `Cmd/Ctrl + Shift + F`
 
 The Fireside panel replaces the standard editor when active. User can switch back to traditional editing at any time.
+
+---
+
+### Accessibility
+
+#### Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Move focus between input, buttons, and conversation bubbles |
+| `Enter` | Send message (in input) or activate focused button |
+| `Escape` | Close Fireside panel, return to editor |
+| `Cmd/Ctrl + Shift + F` | Toggle Fireside panel |
+| `Arrow Up/Down` | Navigate through conversation history |
+
+#### Screen Reader Support
+
+- Conversation bubbles have `role="log"` with `aria-live="polite"`
+- New messages announced: "Wisp says: [message]" or "You said: [message]"
+- Draft ready state announced: "Your draft is ready. Press Tab to review."
+- Error states clearly announced with `role="alert"`
+
+#### Mobile & Visual Considerations
+
+The ASCII fire art may not render well on all devices. Fallback strategy:
+
+```typescript
+const fireVisual = {
+  desktop: `
+     ~  ~
+    (    )  sit by the fire
+   (      )  and tell me what's on your mind
+  ~~~~~~~~~~`,
+  mobile: `🔥 Fireside with Wisp`,
+  screenReader: 'Fireside conversation mode'
+};
+```
+
+- Detect viewport width for ASCII vs emoji
+- `aria-hidden="true"` on decorative ASCII
+- Separate `aria-label` for screen readers
+
+---
+
+### Security
+
+#### Prompt Injection Protection
+
+Fireside has a unique attack surface: users type free-form text that becomes part of inference prompts. Protection layers:
+
+1. **Input Sanitization:**
+   - Strip control characters and zero-width characters
+   - Limit message length (2000 chars max per message)
+   - Reject messages that are pure whitespace
+
+2. **Prompt Structure:**
+   - User content always wrapped in clear delimiters:
+   ```
+   USER MESSAGE START ---
+   [user content here]
+   --- USER MESSAGE END
+   ```
+   - System instructions placed before and after, never interleaved
+
+3. **Output Validation:**
+   - Verify response structure matches expected schema
+   - Reject responses that contain system-prompt-like patterns
+   - Log anomalies for security review
+
+4. **Rate Limiting:**
+   - Standard Wisp limits apply (20 req/hour)
+   - Additional per-conversation limit: 50 messages max
+   - Prevents abuse through volume
 
 ---
 
 ### Fireside Implementation Phases
 
 #### Phase F1: Core Conversation
-- [ ] Fireside chat endpoint
-- [ ] Session state management
+- [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
+- [ ] Session state management (sessionStorage + optional KV)
 - [ ] Basic question-asking logic
-- [ ] Starter prompt rotation
+- [ ] Starter prompt rotation with pseudorandom algorithm
+- [ ] Error response handling
 
 #### Phase F2: Draft Generation
 - [ ] Conversation → draft prompt engineering
 - [ ] Draft preview UI
-- [ ] Transparency marker injection
-- [ ] Metadata tagging
+- [ ] Transparency marker injection (server-side enforced)
+- [ ] Metadata tagging (`fireside_assisted`)
+- [ ] Database migration (`015_wisp_fireside.sql`)
 
 #### Phase F3: Guardrails
-- [ ] Hard refusal detection
-- [ ] Minimum depth threshold
+- [ ] Client-side keyword pre-flight detection
+- [ ] Server-side intent classification
+- [ ] Minimum depth threshold (`canDraft` logic)
 - [ ] Input/output ratio enforcement
-- [ ] "Write for me" request handling
+- [ ] "Write for me" redirect responses
 
 #### Phase F4: Polish
-- [ ] ASCII art for Fireside states
+- [ ] ASCII art for Fireside states (with mobile/emoji fallback)
 - [ ] Mobile-responsive conversation UI
-- [ ] Keyboard navigation
+- [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
+- [ ] Screen reader support (aria-live, announcements)
 - [ ] Settings integration (enable/disable Fireside separately)
+- [ ] Focus management
+
+#### Phase F5: Testing & Verification
+- [ ] **Unit tests:**
+  - `canDraft` threshold logic
+  - Starter prompt rotation algorithm
+  - Input sanitization
+  - Token estimation
+- [ ] **Integration tests:**
+  - Full conversation → draft flow
+  - Guardrail detection (keyword + inference)
+  - Error response scenarios
+  - Marker persistence on edit
+- [ ] **Privacy audit:**
+  - Verify sessionStorage cleared on tab close
+  - Verify KV TTL expiration
+  - Verify no conversation logging to `wisp_requests`
+- [ ] **Accessibility audit:**
+  - Keyboard-only navigation test
+  - Screen reader announcement verification
+  - Mobile rendering check
 
 ---
 

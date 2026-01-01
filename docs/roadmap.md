@@ -393,16 +393,32 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 - [x] Migration prompt for AutumnsGrove
 
 ### Fireside Mode (Planned)
+
+**Phase F1: Core Conversation**
 - [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
-- [ ] Session state management
-- [ ] Starter prompt rotation (12 prompts)
-- [ ] Conversation → draft generation
-- [ ] Hard refusal guardrails ("write for me" blocking)
-- [ ] Minimum conversation depth threshold
-- [ ] Transparency marker injection (`~ written fireside with Wisp ~`)
-- [ ] `fireside_assisted` post metadata
-- [ ] Fireside UI panel with ASCII fire art
+- [ ] Session state management (sessionStorage + optional KV recovery)
+- [ ] Starter prompt rotation (12 prompts, pseudorandom algorithm)
+- [ ] Error response handling
+
+**Phase F2: Draft Generation**
+- [ ] Conversation → draft prompt (voice-preserving, minimal transitions)
+- [ ] Draft preview UI
+- [ ] Transparency marker injection (server-side enforced)
+- [ ] Database migration (`015_wisp_fireside.sql`)
+
+**Phase F3: Guardrails**
+- [ ] Two-layer detection: client-side keywords + server-side inference
+- [ ] `canDraft` logic (3+ messages, 150+ tokens)
+- [ ] "Write for me" redirect responses
+
+**Phase F4: Polish**
+- [ ] ASCII fire art (with mobile emoji fallback)
+- [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
+- [ ] Screen reader support (aria-live announcements)
 - [ ] "Start with a conversation" button in editor
+
+**Phase F5: Testing**
+- [ ] Unit tests, integration tests, privacy audit, accessibility audit
 
 ### Deployment Tasks (Pre-Launch)
 - [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`
