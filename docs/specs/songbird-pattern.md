@@ -33,7 +33,7 @@ User content that will be processed by an LLM passes through all three layers se
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  🪶 RAVEN — Semantic Validation                             │
+│  🦅 KESTREL — Semantic Validation                           │
 │  ─────────────────────────────────────────────────────────  │
 │  Intelligent comparison. Does the input look like           │
 │  legitimate content for this context? Cross-reference       │
@@ -42,15 +42,15 @@ User content that will be processed by an LLM passes through all three layers se
 │  Cost: ~$0.0003 | Tokens: ~200-400 | Latency: ~100ms       │
 └─────────────────────────────────────────────────────────────┘
                               │
-                         Pass? ───No──→ REJECT (log: raven_failed)
+                         Pass? ───No──→ REJECT (log: kestrel_failed)
                               │
                              Yes
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  🐦 LARK — Production Response                              │
+│  🐦 ROBIN — Production Response                             │
 │  ─────────────────────────────────────────────────────────  │
-│  The actual work. Only runs after Canary and Raven          │
+│  The actual work. Only runs after Canary and Kestrel        │
 │  have verified the input is safe.                           │
 │                                                             │
 │  Cost: varies | Tokens: varies | Latency: varies           │
@@ -69,8 +69,8 @@ User content that will be processed by an LLM passes through all three layers se
 | Layer | What It Catches | Cost | Speed |
 |-------|-----------------|------|-------|
 | **Canary** | Obvious injection attempts that hijack the model | Minimal | Fastest |
-| **Raven** | Subtle attacks that pass keyword filters but produce wrong-shaped output | Low | Fast |
-| **Lark** | N/A (production) — only runs if we trust the input | Varies | Varies |
+| **Kestrel** | Subtle attacks that pass keyword filters but produce wrong-shaped output | Low | Fast |
+| **Robin** | N/A (production) — only runs if we trust the input | Varies | Varies |
 
 The first two layers together cost ~$0.0004 per request. This is negligible insurance compared to the risk of a compromised response.
 
@@ -144,18 +144,18 @@ if (!canaryResult.pass) {
 
 ---
 
-## Layer 2: Raven
+## Layer 2: Kestrel
 
-> *The intelligent observer. Sees patterns others miss.*
+> *The keen-eyed hunter. Watches from above, sees what doesn't belong.*
 
 ### Purpose
 
-Semantically validate that the input looks like legitimate content for this context. The Raven compares against expected patterns and can reference policies.
+Semantically validate that the input looks like legitimate content for this context. The Kestrel compares against expected patterns and can reference policies.
 
 ### Implementation
 
 ```typescript
-const RAVEN_PROMPT = `
+const KESTREL_PROMPT = `
 You are a content validator for a ${contextType} system.
 
 Your job: Determine if the following user content is appropriate input for ${expectedUseCase}.
@@ -180,11 +180,11 @@ Analyze and respond with JSON only:
 }
 `;
 
-async function ravenCheck(
+async function kestrelCheck(
   userContent: string,
-  context: RavenContext
+  context: KestrelContext
 ): Promise<{ pass: boolean; confidence: number; reason: string }> {
-  const response = await inference(RAVEN_PROMPT, {
+  const response = await inference(KESTREL_PROMPT, {
     model: 'deepseek-v3.2',
     max_tokens: 200,
     temperature: 0.1
@@ -205,11 +205,11 @@ async function ravenCheck(
 
 ### Context Configuration
 
-Different features configure Raven differently:
+Different features configure Kestrel differently:
 
 **For Wisp Fireside:**
 ```typescript
-const firesideContext: RavenContext = {
+const firesideContext: KestrelContext = {
   contextType: 'conversational writing assistant',
   expectedUseCase: 'a user sharing their thoughts in a back-and-forth conversation',
   expectedPatterns: `
@@ -228,7 +228,7 @@ const firesideContext: RavenContext = {
 
 **For Content Moderation:**
 ```typescript
-const moderationContext: RavenContext = {
+const moderationContext: KestrelContext = {
   contextType: 'content moderation system',
   expectedUseCase: 'a blog post being reviewed against community guidelines',
   expectedPatterns: `
@@ -247,10 +247,10 @@ const moderationContext: RavenContext = {
 ### Failure Response
 
 ```typescript
-if (!ravenResult.pass) {
-  logSecurityEvent('raven_failed', {
-    confidence: ravenResult.confidence,
-    reason: ravenResult.reason,
+if (!kestrelResult.pass) {
+  logSecurityEvent('kestrel_failed', {
+    confidence: kestrelResult.confidence,
+    reason: kestrelResult.reason,
     contentHash: hashContent(userContent)
   });
 
@@ -264,28 +264,28 @@ if (!ravenResult.pass) {
 
 ---
 
-## Layer 3: Lark
+## Layer 3: Robin
 
-> *The songbird. Now it sings.*
+> *The herald of morning. Time to sing.*
 
 ### Purpose
 
-Execute the actual production inference. This only runs after Canary and Raven have verified the input is safe.
+Execute the actual production inference. This only runs after Canary and Kestrel have verified the input is safe.
 
 ### Implementation
 
-The Lark layer is simply the existing production prompt for each feature:
+The Robin layer is simply the existing production prompt for each feature:
 
 - **Wisp Fireside:** The conversation response or draft generation prompt
 - **Content Moderation:** The moderation classification prompt
 - **Future features:** Their respective production prompts
 
 ```typescript
-async function larkProcess(
+async function robinProcess(
   userContent: string,
   productionPrompt: string
 ): Promise<ProductionResponse> {
-  // Input has been validated by Canary and Raven
+  // Input has been validated by Canary and Kestrel
   // Safe to run production inference
 
   const response = await inference(productionPrompt, {
@@ -307,14 +307,14 @@ interface SongbirdResult<T> {
   success: boolean;
   data?: T;
   error?: {
-    layer: 'canary' | 'raven' | 'lark';
+    layer: 'canary' | 'kestrel' | 'robin';
     code: string;
     message: string;
   };
   metrics: {
     canaryMs: number;
-    ravenMs: number;
-    larkMs?: number;
+    kestrelMs: number;
+    robinMs?: number;
     totalTokens: number;
     totalCost: number;
   };
@@ -322,11 +322,11 @@ interface SongbirdResult<T> {
 
 async function songbirdPipeline<T>(
   userContent: string,
-  ravenContext: RavenContext,
-  larkPrompt: string,
-  larkParser: (response: string) => T
+  kestrelContext: KestrelContext,
+  robinPrompt: string,
+  robinParser: (response: string) => T
 ): Promise<SongbirdResult<T>> {
-  const metrics = { canaryMs: 0, ravenMs: 0, larkMs: 0, totalTokens: 0, totalCost: 0 };
+  const metrics = { canaryMs: 0, kestrelMs: 0, robinMs: 0, totalTokens: 0, totalCost: 0 };
 
   // Layer 1: Canary
   const canaryStart = Date.now();
@@ -343,34 +343,34 @@ async function songbirdPipeline<T>(
     };
   }
 
-  // Layer 2: Raven
-  const ravenStart = Date.now();
-  const ravenResult = await ravenCheck(userContent, ravenContext);
-  metrics.ravenMs = Date.now() - ravenStart;
+  // Layer 2: Kestrel
+  const kestrelStart = Date.now();
+  const kestrelResult = await kestrelCheck(userContent, kestrelContext);
+  metrics.kestrelMs = Date.now() - kestrelStart;
   metrics.totalTokens += 300; // Approximate
   metrics.totalCost += 0.0003;
 
-  if (!ravenResult.pass) {
+  if (!kestrelResult.pass) {
     return {
       success: false,
-      error: { layer: 'raven', code: 'raven_failed', message: 'Validation failed' },
+      error: { layer: 'kestrel', code: 'kestrel_failed', message: 'Validation failed' },
       metrics
     };
   }
 
-  // Layer 3: Lark
-  const larkStart = Date.now();
+  // Layer 3: Robin
+  const robinStart = Date.now();
   try {
-    const response = await inference(larkPrompt, productionConfig);
-    const data = larkParser(response);
-    metrics.larkMs = Date.now() - larkStart;
+    const response = await inference(robinPrompt, productionConfig);
+    const data = robinParser(response);
+    metrics.robinMs = Date.now() - robinStart;
     // Token count and cost vary by production prompt
 
     return { success: true, data, metrics };
   } catch (error) {
     return {
       success: false,
-      error: { layer: 'lark', code: 'inference_failed', message: 'Processing failed' },
+      error: { layer: 'robin', code: 'inference_failed', message: 'Processing failed' },
       metrics
     };
   }
@@ -384,7 +384,7 @@ async function songbirdPipeline<T>(
 | Layer | Tokens (approx) | Cost (DeepSeek V3.2) |
 |-------|-----------------|----------------------|
 | Canary | ~150 | ~$0.0001 |
-| Raven | ~300 | ~$0.0003 |
+| Kestrel | ~300 | ~$0.0003 |
 | **Protection overhead** | **~450** | **~$0.0004** |
 
 For perspective:
@@ -401,10 +401,10 @@ All Songbird events should be logged (without content) for security analysis:
 ```typescript
 interface SongbirdSecurityLog {
   timestamp: string;
-  layer: 'canary' | 'raven' | 'lark';
+  layer: 'canary' | 'kestrel' | 'robin';
   result: 'pass' | 'fail';
   contentHash: string;      // SHA-256 of content, not content itself
-  confidence?: number;      // Raven only
+  confidence?: number;      // Kestrel only
   latencyMs: number;
   feature: 'fireside' | 'moderation' | string;
 }
@@ -438,13 +438,13 @@ Content Moderation uses Songbird for:
 
 - [ ] Create `packages/engine/src/lib/server/songbird.ts`
 - [ ] Implement Canary check function
-- [ ] Implement Raven check with context configuration
+- [ ] Implement Kestrel check with context configuration
 - [ ] Create Songbird pipeline wrapper
 - [ ] Add security logging (no content, hashes only)
 - [ ] Integrate with Wisp Fireside endpoint
 - [ ] Integrate with Content Moderation worker
 - [ ] Add monitoring for failure rates by layer
-- [ ] Document Raven context patterns for each feature
+- [ ] Document Kestrel context patterns for each feature
 
 ---
 
@@ -452,8 +452,8 @@ Content Moderation uses Songbird for:
 
 - **Model flexibility:** Currently hardcoded to DeepSeek V3.2. May allow configuration later.
 - **Caching:** Could cache Canary results for identical content hashes (with TTL).
-- **Adaptive thresholds:** Raven confidence threshold could adjust based on historical data.
-- **Layer 4?:** Post-Lark output validation could be added if needed, but adds latency.
+- **Adaptive thresholds:** Kestrel confidence threshold could adjust based on historical data.
+- **Layer 4?:** Post-Robin output validation could be added if needed, but adds latency.
 
 ---
 
