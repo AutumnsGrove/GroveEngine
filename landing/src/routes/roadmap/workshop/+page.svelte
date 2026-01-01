@@ -9,6 +9,37 @@
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
 
+	// Icon lookup map
+	const icons: Record<string, typeof Mail> = {
+		mail: Mail,
+		harddrive: HardDrive,
+		palette: Palette,
+		shieldcheck: ShieldCheck,
+		cloud: Cloud,
+		search: Search,
+		pickaxe: Pickaxe,
+		archive: Archive,
+		upload: Upload,
+		video: Video,
+		network: Network,
+		wind: Wind,
+		eye: Eye,
+		bird: Bird,
+		dashboard: LayoutDashboard,
+		activity: Activity,
+		userplus: UserPlus,
+		message: MessageCircle,
+		shield: Shield,
+		barchart: BarChart3,
+		grape: Grape,
+		boxes: Boxes,
+		users: Users,
+		map: Map,
+		helpCircle: HelpCircle,
+		calendar: Calendar,
+		shieldoff: ShieldOff,
+	};
+
 	interface Tool {
 		name: string;
 		tagline: string;
@@ -405,61 +436,7 @@
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-											{#if tool.icon === 'mail'}
-												<Mail class="w-5 h-5" />
-											{:else if tool.icon === 'harddrive'}
-												<HardDrive class="w-5 h-5" />
-											{:else if tool.icon === 'palette'}
-												<Palette class="w-5 h-5" />
-											{:else if tool.icon === 'shieldcheck'}
-												<ShieldCheck class="w-5 h-5" />
-											{:else if tool.icon === 'cloud'}
-												<Cloud class="w-5 h-5" />
-											{:else if tool.icon === 'search'}
-												<Search class="w-5 h-5" />
-											{:else if tool.icon === 'pickaxe'}
-												<Pickaxe class="w-5 h-5" />
-											{:else if tool.icon === 'archive'}
-												<Archive class="w-5 h-5" />
-											{:else if tool.icon === 'upload'}
-												<Upload class="w-5 h-5" />
-											{:else if tool.icon === 'video'}
-												<Video class="w-5 h-5" />
-											{:else if tool.icon === 'network'}
-												<Network class="w-5 h-5" />
-											{:else if tool.icon === 'wind'}
-												<Wind class="w-5 h-5" />
-											{:else if tool.icon === 'eye'}
-												<Eye class="w-5 h-5" />
-											{:else if tool.icon === 'bird'}
-												<Bird class="w-5 h-5" />
-											{:else if tool.icon === 'dashboard'}
-												<LayoutDashboard class="w-5 h-5" />
-											{:else if tool.icon === 'activity'}
-												<Activity class="w-5 h-5" />
-											{:else if tool.icon === 'userplus'}
-												<UserPlus class="w-5 h-5" />
-											{:else if tool.icon === 'message'}
-												<MessageCircle class="w-5 h-5" />
-											{:else if tool.icon === 'shield'}
-												<Shield class="w-5 h-5" />
-											{:else if tool.icon === 'barchart'}
-												<BarChart3 class="w-5 h-5" />
-											{:else if tool.icon === 'grape'}
-												<Grape class="w-5 h-5" />
-											{:else if tool.icon === 'boxes'}
-												<Boxes class="w-5 h-5" />
-											{:else if tool.icon === 'users'}
-												<Users class="w-5 h-5" />
-											{:else if tool.icon === 'map'}
-												<Map class="w-5 h-5" />
-											{:else if tool.icon === 'helpCircle'}
-												<HelpCircle class="w-5 h-5" />
-											{:else if tool.icon === 'calendar'}
-												<Calendar class="w-5 h-5" />
-											{:else if tool.icon === 'shieldoff'}
-												<ShieldOff class="w-5 h-5" />
-											{/if}
+											<svelte:component this={icons[tool.icon]} class="w-5 h-5" />
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>
