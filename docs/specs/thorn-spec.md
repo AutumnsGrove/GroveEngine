@@ -68,7 +68,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│            🐤 SONGBIRD: CANARY (Tripwire Detection)              │
+│              SONGBIRD: CANARY (Tripwire Detection)              │
 │  - Minimal prompt: "Can you follow instructions?"               │
 │  - If response ≠ "SAFE", input contains injection               │
 │  - Cost: ~$0.0001 | Latency: ~50ms                              │
@@ -80,7 +80,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│            🦅 SONGBIRD: KESTREL (Semantic Validation)            │
+│             SONGBIRD: KESTREL (Semantic Validation)             │
 │  - Is this genuine blog post content?                           │
 │  - Check for embedded instructions, bypass attempts             │
 │  - Cost: ~$0.0003 | Latency: ~100ms                             │
@@ -92,7 +92,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│       🐦 SONGBIRD: ROBIN (Production Moderation)                 │
+│         SONGBIRD: ROBIN (Production Moderation)                 │
 │         INFERENCE API (Fireworks AI / Cerebras / Groq)          │
 │  - Zero Data Retention enabled                                  │
 │  - TLS 1.2+ encryption in transit                               │
