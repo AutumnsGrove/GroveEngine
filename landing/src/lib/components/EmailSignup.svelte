@@ -9,10 +9,13 @@
 	let status = $state<'idle' | 'loading' | 'success' | 'already_signed_up' | 'error'>('idle');
 	let errorMessage = $state('');
 
+	// Basic email validation - catches obvious mistakes while letting the server do thorough validation
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 
-		if (!email || !email.includes('@')) {
+		if (!email || !emailRegex.test(email)) {
 			status = 'error';
 			errorMessage = 'Please enter a valid email address';
 			return;
