@@ -636,6 +636,16 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
   - Location: autumnsgrove repo (autumnsgrove.dev)
   - Endpoint should return `{ status: "ok" }` with 200 status code
   - See `docs/specs/vista-spec.md` for health check standard
+- [ ] **Refresh Vista repo with updated spec** — Marketing analytics section added (2026-01-02)
+  - Copy updated `docs/specs/vista-spec.md` to GroveMonitor repo
+  - New section: "Marketing & Acquisition Analytics" for QR code/funnel tracking
+  - New tables: `acquisition_events`, `acquisition_daily`
+  - New dashboard page: `/acquisition`
+  - New Phase 7: Marketing Analytics implementation tasks
+- [ ] **Update business card QR URLs with tracking params**
+  - Front QR: `grove.place?ref=card-front`
+  - Back QR: `grove.place/hello?ref=card-back`
+  - See `docs/marketing/business-card-spec.md`
 
 ### Personal TODOs
 - [ ] Within markdown editor, allow for Drafts (saveable, postable later)

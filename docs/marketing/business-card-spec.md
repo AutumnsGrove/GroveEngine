@@ -78,10 +78,13 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 
 ### QR Code (Front)
 
-- **URL:** `https://grove.place`
+- **URL:** `https://grove.place?ref=card-front` (includes tracking param)
+- **Display URL:** grove.place (printed on card, no tracking param visible)
 - **Size:** 0.7" Ã— 0.7" (minimum for reliable scanning)
 - **Style:** Standard black on white, or grove green on cream
 - **Error correction:** Level M or higher
+
+> **Analytics Note:** The `?ref=card-front` parameter enables Vista to track which side of the card drives traffic. See `docs/specs/vista-spec.md` for acquisition analytics.
 
 ---
 
@@ -115,10 +118,13 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 
 ### QR Code (Back)
 
-- **URL:** `https://grove.place/hello`
+- **URL:** `https://grove.place/hello?ref=card-back` (includes tracking param)
+- **Display URL:** grove.place/hello (printed on card, no tracking param visible)
 - **Size:** 0.7" Ã— 0.7"
 - **Style:** Match front side
 - **Error correction:** Level M or higher
+
+> **Analytics Note:** The `?ref=card-back` parameter tracks this specific call-to-action. Combined with front tracking, you can measure which card side converts better.
 
 ---
 
