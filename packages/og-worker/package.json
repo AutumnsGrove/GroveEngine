@@ -1,0 +1,19 @@
+{
+  "name": "grove-og",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dynamic OG image generation service for Grove",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "workers-og": "^0.0.27"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.99.0"
+  }
+}

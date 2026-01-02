@@ -49,6 +49,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   "auth-api": "groveauth.m7jv4v7npb.workers.dev",
   "mc-control": "mc-control.m7jv4v7npb.workers.dev",
   mycelium: "mycelium.m7jv4v7npb.workers.dev",
+  og: "grove-og.m7jv4v7npb.workers.dev", // OG image generation
 
   // Special handling
   www: "REDIRECT", // Redirect to root

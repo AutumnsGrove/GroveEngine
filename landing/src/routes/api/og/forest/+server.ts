@@ -1,23 +1,33 @@
 import type { RequestHandler } from "./$types";
 
 /**
- * Temporary static forest OG image fallback.
+ * Forest-style OG Image Generation Proxy
  *
- * Dynamic forest OG images are broken due to workers-og WASM bundling issues with SvelteKit + Cloudflare Pages.
- * This endpoint redirects to the static OG image until we implement a proper solution.
+ * Redirects to og.grove.place for forest-themed OG images.
+ * Currently uses the same default design; forest-specific theming can be added later.
  *
- * See TODOS.md for details.
+ * See packages/og-worker for the actual implementation.
  */
 export const GET: RequestHandler = async ({ url }) => {
-  // Redirect to static OG image (same as main OG for now)
-  const staticImageUrl = new URL("/og-image.png", url.origin);
+  // Build og.grove.place URL with forest-themed defaults
+  const ogUrl = new URL("https://og.grove.place/");
+
+  // Pass through any custom params, or use forest defaults
+  const title = url.searchParams.get("title") || "The Grove";
+  const subtitle = url.searchParams.get("subtitle") || "Where ideas take root.";
+  const accent = url.searchParams.get("accent") || "16a34a"; // Forest green
+
+  ogUrl.searchParams.set("title", title);
+  ogUrl.searchParams.set("subtitle", subtitle);
+  ogUrl.searchParams.set("accent", accent);
+
   return new Response(null, {
     status: 302,
     headers: {
-      Location: staticImageUrl.toString(),
+      Location: ogUrl.toString(),
       "Cache-Control": "public, max-age=86400, s-maxage=604800",
       "X-Generated-At": new Date().toISOString(),
-      "X-OG-Status": "static-fallback-forest",
+      "X-OG-Status": "proxy-to-worker-forest",
     },
   });
 };

@@ -6,64 +6,55 @@
 
 ---
 
-## 🔧 OG Images & Platform Icons (2026-01-02) — IN PROGRESS
+## ✅ OG Images & Platform Icons COMPLETE! (2026-01-02)
 
-### What We Accomplished
-- ✅ **Static icons deployed and working!** iMessage/iOS will now show Grove logo
-  - `apple-touch-icon.png` (180×180) — for iMessage/iOS
+### What We Built
+- ✅ **Static icons deployed!** iMessage/iOS shows Grove logo
+  - `apple-touch-icon.png` (180×180) — iMessage/iOS
   - `favicon-32x32.png` — browser tabs
   - `icon-192.png`, `icon-512.png` — PWA/Android
   - `site.webmanifest` — PWA manifest
   - `safari-pinned-tab.svg` — Safari pinned tabs
 - ✅ Updated `app.html` with comprehensive icon meta tags
-- ✅ All static icons serving correctly from production
+- ✅ **Dynamic OG images working via dedicated Worker!**
 
-### The OG Image Problem — UNSOLVED
-**Goal:** Dynamic OG images at `/api/og` for social media previews (Discord, Twitter, etc.)
+### The Solution: Separate Cloudflare Worker
 
-**What We Tried:**
-1. **`@cf-wasm/resvg` + `satori`** (original setup)
-   - Builds successfully
-   - Runtime 500 error on Cloudflare Pages
-   - Tried `/workerd` import path → breaks Vite build entirely
+WASM libraries don't bundle with SvelteKit + Cloudflare Pages (Vite can't resolve WASM imports).
+**Solution:** Deploy OG generation as a standalone Worker at `og.grove.place`.
 
-2. **`workers-og`** (Cloudflare-specific package)
-   - Same WASM bundling issue: `Cannot find package 'a' imported from yoga-*.wasm`
-   - Fails during both Vite dev AND production build
-   - Package uses Yoga internally for layout, has same WASM problems
+**Architecture:**
+```
+grove.place/api/og?title=X
+       ↓ 302 redirect
+og.grove.place/?title=X
+       ↓ workers-og
+PNG image (1200×630)
+```
 
-**Root Cause:**
-- WASM modules don't bundle correctly with Vite/SvelteKit for Cloudflare Pages
-- The SSR build step runs in Node.js, which can't resolve WASM imports properly
-- This is a known issue with no clean solution for SvelteKit + Cloudflare Pages
+### Files
+- `packages/og-worker/` — Standalone OG image generation Worker
+  - Uses `workers-og` for image generation
+  - Lexend font from cdn.grove.place
+  - Deployed to `og.grove.place`
+- `landing/src/routes/api/og/+server.ts` — Proxies to og.grove.place
+- `landing/src/routes/api/og/forest/+server.ts` — Forest-themed proxy
+- `packages/grove-router/src/index.ts` — Routes `og.grove.place` to Worker
 
-### Next Steps to Try
-- [ ] **Option A: Separate Cloudflare Worker** — Deploy OG generation as standalone Worker (not Pages)
-  - Workers handle WASM differently than Pages
-  - Would need `og.grove.place` subdomain or similar
-- [ ] **Option B: Pre-generate static OG images** — Generate at build time, not runtime
-  - Less flexible but guaranteed to work
-  - Could use a Node.js script during CI/CD
-- [ ] **Option C: External service** — Cloudinary, imgix, or similar
-  - Offload the problem entirely
-  - Monthly cost consideration
-- [ ] **Option D: Research more** — Find someone who actually got this working
-  - Check SvelteKit Discord, Cloudflare Discord
-  - Look for `vite-plugin-wasm` solutions
+### API
+```
+GET https://og.grove.place/?title=X&subtitle=Y&accent=HEX
+```
+| Param | Default | Description |
+|-------|---------|-------------|
+| title | "Grove" | Main title (max 100 chars) |
+| subtitle | "A place to Be." | Subtitle (max 200 chars) |
+| accent | "16a34a" | Hex color (no #) |
 
-### Files Modified (can be reverted if needed)
-- `landing/src/routes/api/og/+server.ts` — Reverted to static redirect to `/og-image.png`
-- `landing/src/routes/api/og/forest/+server.ts` — Reverted to static redirect to `/og-image.png`
-- `landing/src/routes/api/icons/+server.ts` — Reverted to static icon file mapping
-- `landing/package.json` — Removed `workers-og` dependency
-
-### Current State
-- **Static icons:** ✅ Working in production
-- **Dynamic OG images:** ❌ Reverted to static redirects (working but not dynamic)
-- **OG fallback:** The SEO component falls back to `/og-image.png` (static) if dynamic fails
-
-### Temporary Fix (2026-01-02)
-**Temporary fix:** Removed `workers-og` dependency and reverted OG endpoints to static fallback due to WASM bundling issues with SvelteKit + Cloudflare Pages. This unblocks deployments but leaves dynamic OG images unsolved. The `/api/og` and `/api/og/forest` endpoints now redirect to `/og-image.png`, and `/api/icons` maps to static icon files.
+### Future Improvements
+- [ ] Add more design variants (forest, autumn, seasonal themes)
+- [ ] Add background patterns or illustrations
+- [ ] Per-page customization via SEO component
 
 ---
 
@@ -344,6 +335,42 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 - [ ] **Failed attempts cleanup** - Add cleanup for old `failed_attempts` records
 - [ ] **CSP headers** - Add Content-Security-Policy headers in hooks
 - [ ] **Alt text sanitization** - Sanitize before DB storage in CDN patch endpoint
+
+---
+
+## Rate Limiting Enhancement (Threshold Pattern)
+
+> **Spec:** See `docs/patterns/threshold-pattern.md` for full technical specification.
+> **Priority:** HIGH - Immediate security benefits and abuse prevention.
+
+### Phase 1: Cloudflare Edge Rate Limiting (Days 1-2)
+- [ ] Configure Cloudflare WAF rate limiting rules (Layer 1)
+  - General request limit: 1000 req/min per IP
+  - Auth endpoint limit: 50 req/5min per IP
+  - Upload endpoint limit: 100 req/hour per IP
+  - AI endpoint limit: 500 req/day per IP
+- [ ] Test with synthetic traffic
+
+### Phase 2: Tenant Rate Limiting (Days 3-4)
+- [ ] Add rate limit tables to TenantDO schema
+- [ ] Implement `checkTenantRateLimit()` method
+- [ ] Add tier-based limits (Seedling: 100/min, Oak: 1000/min)
+- [ ] Integrate with router middleware
+- [ ] Add rate limit headers to responses
+
+### Phase 3: User Rate Limiting (Days 5-7)
+- [ ] Add rate limit tables to SessionDO schema
+- [ ] Add abuse state tracking table
+- [ ] Implement `checkUserRateLimit()` method
+- [ ] Implement graduated response system (warning → slowdown → block → ban)
+- [ ] Add shadow ban functionality
+- [ ] Integrate with Heartwood login flow
+
+### Phase 4: Monitoring (Days 8-10)
+- [ ] Add rate limit event logging
+- [ ] Create Vista dashboard component
+- [ ] Configure alert thresholds
+- [ ] Document runbooks for common scenarios
 
 ---
 

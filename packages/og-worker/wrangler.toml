@@ -1,0 +1,14 @@
+name = "grove-og"
+main = "src/index.ts"
+compatibility_date = "2024-12-05"
+
+# Enable workers.dev route for grove-router proxy
+workers_dev = true
+
+# Also route to og.grove.place directly (custom domain)
+routes = [
+  { pattern = "og.grove.place", custom_domain = true }
+]
+
+[vars]
+ENVIRONMENT = "production"
