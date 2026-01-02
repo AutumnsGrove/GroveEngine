@@ -305,7 +305,7 @@
 					name: 'Patina',
 					tagline: 'Automated Backups',
 					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
-					status: 'building',
+					status: 'live',
 					icon: 'archive',
 					integration: 'Internal service protecting all Grove data',
 					github: 'https://github.com/AutumnsGrove/Patina',
