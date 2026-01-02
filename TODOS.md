@@ -52,15 +52,18 @@
   - Look for `vite-plugin-wasm` solutions
 
 ### Files Modified (can be reverted if needed)
-- `landing/src/routes/api/og/+server.ts` — Now uses workers-og (broken)
-- `landing/src/routes/api/og/forest/+server.ts` — Same
-- `landing/src/routes/api/icons/+server.ts` — Same
-- `landing/package.json` — Replaced satori/resvg with workers-og
+- `landing/src/routes/api/og/+server.ts` — Reverted to static redirect to `/og-image.png`
+- `landing/src/routes/api/og/forest/+server.ts` — Reverted to static redirect to `/og-image.png`
+- `landing/src/routes/api/icons/+server.ts` — Reverted to static icon file mapping
+- `landing/package.json` — Removed `workers-og` dependency
 
 ### Current State
 - **Static icons:** ✅ Working in production
-- **Dynamic OG images:** ❌ 500 error, needs different approach
+- **Dynamic OG images:** ❌ Reverted to static redirects (working but not dynamic)
 - **OG fallback:** The SEO component falls back to `/og-image.png` (static) if dynamic fails
+
+### Temporary Fix (2026-01-02)
+**Temporary fix:** Removed `workers-og` dependency and reverted OG endpoints to static fallback due to WASM bundling issues with SvelteKit + Cloudflare Pages. This unblocks deployments but leaves dynamic OG images unsolved. The `/api/og` and `/api/og/forest` endpoints now redirect to `/og-image.png`, and `/api/icons` maps to static icon files.
 
 ---
 

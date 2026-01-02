@@ -171,6 +171,12 @@
 
 ---
 
+## Deployment Fixes (2026-01-02)
+
+| Task | Completed | Notes |
+|------|-----------|-------|
+| Fix GitHub Actions deployment failures (landing site) | 2026-01-02 | Removed `workers-og` dependency causing WASM bundling errors; reverted OG image endpoints to static redirects; unblocked Cloudflare Pages builds. |
+
 ## Legal & Compliance
 
 | Task | Completed | Notes |
@@ -213,4 +219,4 @@
 
 ---
 
-*Last updated: 2025-12-14*
+*Last updated: 2026-01-02*
