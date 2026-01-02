@@ -1,26 +1,28 @@
-# Glass: Grove Design System
+# Prism: Grove Design System
 
-> *Where warm light filters through frosted glass, and every season tells a story.*
+> *Light enters plain and emerges transformed.*
 
-**Public Name:** Glass
-**Internal Name:** GroveGlass
+**Public Name:** Prism
+**Internal Name:** GrovePrism
 **Pattern Type:** UI/UX Design System
 **Applies to:** All Grove properties (Landing, Engine, Lattice, future apps)
 **Last Updated:** January 2026
 
-In the forest, light doesn't arrive harsh and unfiltered. It passes through canopy and mist, softened by leaves and morning dew. Glass panels catch the sun and scatter it gently. Everything feels diffused, warm, alive.
+Step into a cathedral in the forest. Your eyes adjust to the dim sanctuary, and then you look up—massive stained glass windows transforming ordinary sunlight into something that takes your breath away. Color pools on ancient stone. The world outside becomes the world within, changed by its passage through glass.
 
-Grove's design system captures this feeling. Content floats on translucent surfaces. Backgrounds hint at depth without demanding attention. Seasons change the palette. Trees grow differently each visit. It's a UI that breathes.
+A prism doesn't just transmit light. It *transfigures* it. Plain white becomes a spectrum of color. The ordinary becomes extraordinary. That's what Grove's design system does: content floats on translucent surfaces that don't merely display—they transform. Backgrounds hint at depth. Seasons shift the palette. Every visit feels alive.
+
+This is Prism. Glass that tells stories.
 
 ---
 
 ## Overview
 
-The Grove Design Pattern defines a layered visual system built on glassmorphism, seasonal theming, and organic randomization. Every page is a *place* you visit—warm like a midnight tea shop, clear like good documentation.
+The Prism pattern defines a layered visual system built on glassmorphism, seasonal theming, and organic randomization. Every page is a *place* you visit—warm like a midnight tea shop, clear like good documentation.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         THE GROVE LAYER STACK                            │
+│                         THE PRISM LAYER STACK                            │
 └─────────────────────────────────────────────────────────────────────────┘
 
     ┌─────────────────────────────────────────────────────────────────┐
@@ -784,7 +786,7 @@ Location: `landing/src/lib/components/nature/ground/`
 
 ---
 
-## When to Use Grove Design
+## When to Use Prism
 
 | Pattern | Best For |
 |---------|----------|
