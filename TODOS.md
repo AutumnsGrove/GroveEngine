@@ -6,6 +6,64 @@
 
 ---
 
+## 🔧 OG Images & Platform Icons (2026-01-02) — IN PROGRESS
+
+### What We Accomplished
+- ✅ **Static icons deployed and working!** iMessage/iOS will now show Grove logo
+  - `apple-touch-icon.png` (180×180) — for iMessage/iOS
+  - `favicon-32x32.png` — browser tabs
+  - `icon-192.png`, `icon-512.png` — PWA/Android
+  - `site.webmanifest` — PWA manifest
+  - `safari-pinned-tab.svg` — Safari pinned tabs
+- ✅ Updated `app.html` with comprehensive icon meta tags
+- ✅ All static icons serving correctly from production
+
+### The OG Image Problem — UNSOLVED
+**Goal:** Dynamic OG images at `/api/og` for social media previews (Discord, Twitter, etc.)
+
+**What We Tried:**
+1. **`@cf-wasm/resvg` + `satori`** (original setup)
+   - Builds successfully
+   - Runtime 500 error on Cloudflare Pages
+   - Tried `/workerd` import path → breaks Vite build entirely
+
+2. **`workers-og`** (Cloudflare-specific package)
+   - Same WASM bundling issue: `Cannot find package 'a' imported from yoga-*.wasm`
+   - Fails during both Vite dev AND production build
+   - Package uses Yoga internally for layout, has same WASM problems
+
+**Root Cause:**
+- WASM modules don't bundle correctly with Vite/SvelteKit for Cloudflare Pages
+- The SSR build step runs in Node.js, which can't resolve WASM imports properly
+- This is a known issue with no clean solution for SvelteKit + Cloudflare Pages
+
+### Next Steps to Try
+- [ ] **Option A: Separate Cloudflare Worker** — Deploy OG generation as standalone Worker (not Pages)
+  - Workers handle WASM differently than Pages
+  - Would need `og.grove.place` subdomain or similar
+- [ ] **Option B: Pre-generate static OG images** — Generate at build time, not runtime
+  - Less flexible but guaranteed to work
+  - Could use a Node.js script during CI/CD
+- [ ] **Option C: External service** — Cloudinary, imgix, or similar
+  - Offload the problem entirely
+  - Monthly cost consideration
+- [ ] **Option D: Research more** — Find someone who actually got this working
+  - Check SvelteKit Discord, Cloudflare Discord
+  - Look for `vite-plugin-wasm` solutions
+
+### Files Modified (can be reverted if needed)
+- `landing/src/routes/api/og/+server.ts` — Now uses workers-og (broken)
+- `landing/src/routes/api/og/forest/+server.ts` — Same
+- `landing/src/routes/api/icons/+server.ts` — Same
+- `landing/package.json` — Replaced satori/resvg with workers-og
+
+### Current State
+- **Static icons:** ✅ Working in production
+- **Dynamic OG images:** ❌ 500 error, needs different approach
+- **OG fallback:** The SEO component falls back to `/og-image.png` (static) if dynamic fails
+
+---
+
 ## ✅ Shade Routing Fix COMPLETE! (2025-12-31)
 
 **Status: COMPLETE - All routing and Turnstile verification working!** 🎉
