@@ -1,4 +1,10 @@
 <script lang="ts">
+	interface Props {
+		variant?: 'default' | 'dark';
+	}
+
+	let { variant = 'default' }: Props = $props();
+
 	let email = $state('');
 	let status = $state<'idle' | 'loading' | 'success' | 'already_signed_up' | 'error'>('idle');
 	let errorMessage = $state('');
@@ -72,11 +78,11 @@
 				autocomplete="email"
 				bind:value={email}
 				placeholder="your@email.com"
-				class="input-field flex-1"
+				class="{variant === 'dark' ? 'dark-input' : 'input-field'} flex-1"
 				disabled={status === 'loading'}
 				required
 			/>
-			<button type="submit" class="btn-primary whitespace-nowrap" disabled={status === 'loading'}>
+			<button type="submit" class="{variant === 'dark' ? 'dark-btn' : 'btn-primary'} whitespace-nowrap" disabled={status === 'loading'}>
 				{#if status === 'loading'}
 					<span class="inline-flex items-center gap-2">
 						<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -92,10 +98,10 @@
 		</div>
 
 		{#if status === 'error'}
-			<p class="text-error text-sm mt-2 font-sans">{errorMessage}</p>
+			<p class="{variant === 'dark' ? 'text-red-400' : 'text-error'} text-sm mt-2 font-sans">{errorMessage}</p>
 		{/if}
 
-		<p class="text-foreground-faint text-xs mt-3 text-center font-sans">
+		<p class="{variant === 'dark' ? 'text-purple-400/60' : 'text-foreground-faint'} text-xs mt-3 text-center font-sans">
 			No spam, ever. Unsubscribe anytime.
 		</p>
 	</form>
@@ -115,5 +121,54 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+
+	/* Dark variant styles for midnight bloom aesthetic */
+	.dark-input {
+		padding: 0.625rem 1rem;
+		font-size: 0.875rem;
+		border-radius: 0.5rem;
+		background-color: rgba(88, 28, 135, 0.3);
+		border: 1px solid rgba(139, 92, 246, 0.3);
+		color: white;
+		transition: all 0.2s;
+	}
+
+	.dark-input::placeholder {
+		color: rgba(192, 132, 252, 0.5);
+	}
+
+	.dark-input:focus {
+		outline: none;
+		border-color: rgba(251, 191, 36, 0.5);
+		box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+	}
+
+	.dark-input:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.dark-btn {
+		padding: 0.625rem 1.25rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border-radius: 0.5rem;
+		background: linear-gradient(to right, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.9));
+		color: #1e1b4b;
+		border: none;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.dark-btn:hover:not(:disabled) {
+		background: linear-gradient(to right, rgba(251, 191, 36, 1), rgba(245, 158, 11, 1));
+		transform: translateY(-1px);
+	}
+
+	.dark-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
 	}
 </style>
