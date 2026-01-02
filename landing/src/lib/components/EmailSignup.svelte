@@ -123,25 +123,41 @@
 		}
 	}
 
-	/* Dark variant styles for midnight bloom aesthetic */
+	/*
+	 * Dark variant styles for midnight bloom aesthetic (variant="dark")
+	 *
+	 * These styles are defined here rather than as Tailwind classes because:
+	 * 1. Pseudo-selectors like ::placeholder, :focus, :hover, :disabled need CSS
+	 * 2. Complex gradients and box-shadows are cleaner in CSS
+	 * 3. Component-scoped styles keep the dark variant self-contained
+	 *
+	 * Color palette (midnight bloom):
+	 * - purple-800/30 (#581c87 @ 30%) - input background
+	 * - violet-500/30 (#8b5cf6 @ 30%) - input border
+	 * - purple-400/50 (#c084fc @ 50%) - placeholder text
+	 * - amber-400 (#fbbf24) - focus ring, button gradient
+	 * - amber-500 (#f59e0b) - button gradient end
+	 * - indigo-950 (#1e1b4b) - button text (for contrast on amber)
+	 */
+
 	.dark-input {
 		padding: 0.625rem 1rem;
 		font-size: 0.875rem;
 		border-radius: 0.5rem;
-		background-color: rgba(88, 28, 135, 0.3);
-		border: 1px solid rgba(139, 92, 246, 0.3);
+		background-color: rgba(88, 28, 135, 0.3); /* purple-800/30 */
+		border: 1px solid rgba(139, 92, 246, 0.3); /* violet-500/30 */
 		color: white;
 		transition: all 0.2s;
 	}
 
 	.dark-input::placeholder {
-		color: rgba(192, 132, 252, 0.5);
+		color: rgba(192, 132, 252, 0.5); /* purple-400/50 */
 	}
 
 	.dark-input:focus {
 		outline: none;
-		border-color: rgba(251, 191, 36, 0.5);
-		box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+		border-color: rgba(251, 191, 36, 0.5); /* amber-400/50 */
+		box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); /* amber-400/10 */
 	}
 
 	.dark-input:disabled {
@@ -154,8 +170,8 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		border-radius: 0.5rem;
-		background: linear-gradient(to right, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.9));
-		color: #1e1b4b;
+		background: linear-gradient(to right, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.9)); /* amber-400 -> amber-500 */
+		color: #1e1b4b; /* indigo-950 for contrast */
 		border: none;
 		cursor: pointer;
 		transition: all 0.2s;

@@ -310,7 +310,16 @@
 </main>
 
 <style>
-	/* Subtle text glow for emphasis */
+	/*
+	 * Ambient glow effect for amber-highlighted text
+	 *
+	 * Uses :global() because text-amber-300 is a Tailwind utility class
+	 * applied inline. The subtle glow (15% opacity, 20px blur) creates
+	 * a lantern-like warmth on key phrases without overpowering the text.
+	 *
+	 * Matches the midnight bloom aesthetic: warm amber accents against
+	 * deep purple/black backgrounds.
+	 */
 	:global(.text-amber-300) {
 		text-shadow: 0 0 20px rgba(252, 211, 77, 0.15);
 	}
