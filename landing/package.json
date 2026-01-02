@@ -38,7 +38,6 @@
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
-    "resend": "^4.0.0",
-    "workers-og": "^0.0.27"
+    "resend": "^4.0.0"
   }
 }
