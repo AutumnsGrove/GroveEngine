@@ -1,6 +1,9 @@
 ---
-title: "Writing Your First Post"
-slug: writing-your-first-post
+aliases:
+date created: Friday, November 21st 2025, 3:01:54 pm
+date modified: Tuesday, November 26th 2025
+tags:
+type: help-article
 category: writing-and-publishing
 order: 1
 keywords: [first post, writing, publish, getting started, new post, create]

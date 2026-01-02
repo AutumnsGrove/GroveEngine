@@ -1,6 +1,9 @@
 ---
-title: "Understanding the Admin Panel"
-slug: understanding-the-admin-panel
+aliases:
+date created: Friday, November 21st 2025, 3:01:54 pm
+date modified: Tuesday, November 26th 2025
+tags:
+type: help-article
 category: getting-started
 order: 3
 keywords: [admin, dashboard, panel, navigation, settings, posts, pages, uploader]

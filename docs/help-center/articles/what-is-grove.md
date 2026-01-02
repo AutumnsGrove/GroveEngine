@@ -1,6 +1,9 @@
 ---
-title: "What is Grove?"
-slug: what-is-grove
+aliases:
+date created: Friday, November 21st 2025, 3:01:54 pm
+date modified: Tuesday, November 26th 2025
+tags:
+type: help-article
 category: getting-started
 order: 1
 keywords: [grove, about, introduction, what is, blogging, platform]
