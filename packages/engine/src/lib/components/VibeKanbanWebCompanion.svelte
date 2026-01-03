@@ -7,9 +7,9 @@
 	import { dev } from '$app/environment';
 
 	/** @type {HTMLDivElement | null} */
-	let container = $state(null);
+	let container = null;
 	/** @type {import('react-dom/client').Root | null} */
-	let root = $state(null);
+	let root = null;
 
 	onMount(() => {
 		// Only run in development mode
