@@ -535,6 +535,66 @@ export const helpArticles: Doc[] = [
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
+  {
+    slug: "the-markdown-editor",
+    title: "The Markdown Editor",
+    description: "A guide to Grove's writing environment with preview, ambient sounds, and zen mode",
+    excerpt:
+      "Grove's editor is where you'll spend most of your time. Markdown with floating toolbar, live preview, drag-drop images, ambient sounds, zen mode, and autosave.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 5,
+  },
+  {
+    slug: "custom-fonts",
+    title: "Custom Fonts",
+    description: "20 curated fonts including accessibility options, with custom upload for Evergreen",
+    excerpt:
+      "Grove includes 20 fonts—accessibility fonts like Lexend and OpenDyslexic, serifs, sans-serifs, and display faces. Evergreen subscribers can upload their own.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 4,
+  },
+  {
+    slug: "understanding-your-plan",
+    title: "Understanding Your Plan",
+    description: "What's included in each Grove plan and how limits work",
+    excerpt:
+      "Here's what each Grove plan includes—post limits, storage, themes, and features—and what happens when you approach your limits.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 5,
+  },
+  {
+    slug: "data-portability",
+    title: "Data Portability",
+    description: "Taking your Grove content to WordPress, Ghost, Hugo, or anywhere else",
+    excerpt:
+      "Your content belongs to you. Grove exports in standard formats—Markdown and JSON—that work with WordPress, Ghost, Hugo, and other platforms.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 4,
+  },
+  {
+    slug: "groves-vision",
+    title: "Grove's Vision",
+    description: "The philosophy and values behind Grove",
+    excerpt:
+      "The internet used to be a place of personal expression. Grove is a return to something simpler—a forest of voices, a place where your words are yours.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 5,
+  },
+  {
+    slug: "gdpr-and-privacy-rights",
+    title: "GDPR and Privacy Rights",
+    description: "Your data rights under GDPR, CCPA, and similar laws",
+    excerpt:
+      "Whether you're in Europe, California, or anywhere else, you have rights over your personal data. Here's what Grove collects and what you can do about it.",
+    category: "help",
+    lastUpdated: "2026-01-03",
+    readingTime: 5,
+  },
 ];
 
 // Legal Documents
