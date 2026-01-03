@@ -19,7 +19,9 @@ let fontCache: ArrayBuffer | null = null;
 
 async function getFont(): Promise<ArrayBuffer> {
   if (fontCache) return fontCache;
-  const response = await fetch("https://cdn.grove.place/fonts/Lexend-Regular.ttf");
+  const response = await fetch(
+    "https://cdn.grove.place/fonts/Lexend-Regular.ttf",
+  );
   if (!response.ok) throw new Error(`Font fetch failed: ${response.status}`);
   fontCache = await response.arrayBuffer();
   return fontCache;
@@ -123,14 +125,15 @@ function getColors(variant: Variant): ColorScheme {
       };
 
     case "workshop":
+      // Muted workshop - slate base with warm amber accents
       return {
-        bgFrom: autumn.rust,
-        bgTo: autumn.ember,
-        accent: autumn.amber,
+        bgFrom: slate[900],
+        bgTo: slate[800],
+        accent: autumn.gold,
         text: autumn.straw,
         muted: autumn.honey,
-        glass: "rgba(154, 52, 18, 0.6)", // rust with alpha
-        glassBorder: "rgba(217, 119, 6, 0.2)", // amber with alpha
+        glass: "rgba(15, 23, 42, 0.6)", // slate.900 with alpha
+        glassBorder: "rgba(234, 179, 8, 0.2)", // gold with alpha
       };
 
     case "midnight":
@@ -180,12 +183,12 @@ function generateHtml(
 ): string {
   const c = getColors(variant);
 
-  // Simplified preview - just a single text block with truncation
-  const previewSection = preview
-    ? `<div style="display: flex; position: absolute; right: 60px; top: 180px; width: 340px; padding: 20px; background: ${c.glass}; border-radius: 12px; border: 1px solid ${c.glassBorder};">
-        <div style="display: flex; font-size: 18px; color: ${c.muted}; line-height: 1.5;">${preview.slice(0, 180)}${preview.length > 180 ? "..." : ""}</div>
+  // Glass panel on right side (placeholder when no preview, or holds preview content)
+  const rightPanel = preview
+    ? `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; padding: 24px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder};">
+        <div style="display: flex; font-size: 18px; color: ${c.muted}; line-height: 1.6;">${preview.slice(0, 200)}${preview.length > 200 ? "..." : ""}</div>
       </div>`
-    : "";
+    : `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
 
   // Ultra-simplified layout - minimal elements, no gradients, solid bg
   return `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; background: ${c.bgFrom}; padding: 60px; font-family: Lexend; position: relative;">
@@ -194,9 +197,9 @@ function generateHtml(
     <img src="https://grove.place/icon-192.png" width="48" height="48" style="border-radius: 8px;" />
     <div style="display: flex; font-size: 24px; font-weight: 600; color: ${c.accent}; margin-left: 14px;">Grove</div>
   </div>
-  <div style="display: flex; font-size: 56px; font-weight: 700; color: ${c.text}; line-height: 1.15; max-width: ${preview ? "660px" : "1000px"};">${title}</div>
-  <div style="display: flex; font-size: 26px; color: ${c.muted}; margin-top: 16px; line-height: 1.4; max-width: ${preview ? "620px" : "900px"};">${subtitle}</div>
-  ${previewSection}
+  <div style="display: flex; font-size: 56px; font-weight: 700; color: ${c.text}; line-height: 1.15; max-width: 660px;">${title}</div>
+  <div style="display: flex; font-size: 26px; color: ${c.muted}; margin-top: 16px; line-height: 1.4; max-width: 620px;">${subtitle}</div>
+  ${rightPanel}
   <div style="display: flex; position: absolute; bottom: 50px; left: 60px;">
     <div style="display: flex; font-size: 18px; color: ${c.muted};">grove.place</div>
   </div>
@@ -208,7 +211,11 @@ function generateHtml(
 // =============================================================================
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === "/health") {
@@ -227,7 +234,10 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    if (request.method !== "GET" || (url.pathname !== "/" && url.pathname !== "/og")) {
+    if (
+      request.method !== "GET" ||
+      (url.pathname !== "/" && url.pathname !== "/og")
+    ) {
       return new Response("Not found", { status: 404 });
     }
 
@@ -240,7 +250,13 @@ export default {
       const title = escapeHtml(rawTitle.slice(0, 80));
       const subtitle = escapeHtml(rawSubtitle.slice(0, 150));
       const preview = rawPreview ? escapeHtml(rawPreview.slice(0, 400)) : null;
-      const variant = ["default", "forest", "workshop", "midnight", "knowledge"].includes(rawVariant)
+      const variant = [
+        "default",
+        "forest",
+        "workshop",
+        "midnight",
+        "knowledge",
+      ].includes(rawVariant)
         ? (rawVariant as Variant)
         : "default";
 
@@ -250,7 +266,9 @@ export default {
       const response = new ImageResponse(html, {
         width: 1200,
         height: 630,
-        fonts: [{ name: "Lexend", data: fontData, weight: 400, style: "normal" }],
+        fonts: [
+          { name: "Lexend", data: fontData, weight: 400, style: "normal" },
+        ],
       });
 
       const headers = new Headers(response.headers);
@@ -263,8 +281,14 @@ export default {
     } catch (error) {
       console.error("OG error:", error);
       return new Response(
-        JSON.stringify({ error: "Failed", message: error instanceof Error ? error.message : "Unknown" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+        JSON.stringify({
+          error: "Failed",
+          message: error instanceof Error ? error.message : "Unknown",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        },
       );
     }
   },
