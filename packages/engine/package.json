@@ -188,6 +188,8 @@
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.2.9",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.14",
     "autoprefixer": "^10.4.22",
@@ -212,7 +214,10 @@
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "svelte-sonner": "^1.0.7",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "vibe-kanban-web-companion": "^0.0.5"
   }
 }
