@@ -183,12 +183,24 @@ function generateHtml(
 ): string {
   const c = getColors(variant);
 
-  // Glass panel on right side (placeholder when no preview, or holds preview content)
-  const rightPanel = preview
-    ? `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; padding: 24px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder};">
-        <div style="display: flex; font-size: 18px; color: ${c.muted}; line-height: 1.6;">${preview.slice(0, 200)}${preview.length > 200 ? "..." : ""}</div>
-      </div>`
-    : `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
+  // Glass panel on right side with fading text effect
+  let rightPanel: string;
+  if (preview) {
+    // Split into ~4 lines with decreasing opacity for fade effect
+    const line1 = preview.slice(0, 60);
+    const line2 = preview.slice(60, 120);
+    const line3 = preview.slice(120, 170);
+    const line4 = preview.slice(170, 210);
+
+    rightPanel = `<div style="display: flex; flex-direction: column; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; padding: 24px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; overflow: hidden;">
+      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 1;">${line1}</div>
+      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.75;">${line2}</div>
+      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.5;">${line3}</div>
+      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.25;">${line4}</div>
+    </div>`;
+  } else {
+    rightPanel = `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
+  }
 
   // Ultra-simplified layout - minimal elements, no gradients, solid bg
   return `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; background: ${c.bgFrom}; padding: 60px; font-family: Lexend; position: relative;">
@@ -204,6 +216,91 @@ function generateHtml(
     <div style="display: flex; font-size: 18px; color: ${c.muted};">grove.place</div>
   </div>
 </div>`;
+}
+
+// =============================================================================
+// DYNAMIC CONTENT FETCHING
+// =============================================================================
+
+interface PageMeta {
+  title: string | null;
+  description: string | null;
+  preview: string | null;
+}
+
+async function fetchPageMeta(pageUrl: string): Promise<PageMeta> {
+  try {
+    const response = await fetch(pageUrl, {
+      headers: { "User-Agent": "Grove-OG-Bot/1.0" },
+    });
+    if (!response.ok) return { title: null, description: null, preview: null };
+
+    const html = await response.text();
+
+    // Extract meta tags using regex (simple, no DOM parser needed)
+    const getMetaContent = (name: string): string | null => {
+      // Try property="og:X" first
+      const ogMatch = html.match(
+        new RegExp(
+          `<meta[^>]+property=["']og:${name}["'][^>]+content=["']([^"']+)["']`,
+          "i",
+        ),
+      );
+      if (ogMatch) return ogMatch[1];
+
+      // Try name="X"
+      const nameMatch = html.match(
+        new RegExp(
+          `<meta[^>]+name=["']${name}["'][^>]+content=["']([^"']+)["']`,
+          "i",
+        ),
+      );
+      if (nameMatch) return nameMatch[1];
+
+      // Try reversed attribute order
+      const reversedMatch = html.match(
+        new RegExp(
+          `<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["'](?:og:)?${name}["']`,
+          "i",
+        ),
+      );
+      if (reversedMatch) return reversedMatch[1];
+
+      return null;
+    };
+
+    // Get title from og:title or <title> tag
+    const ogTitle = getMetaContent("title");
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const title = ogTitle || (titleMatch ? titleMatch[1].trim() : null);
+
+    // Get description
+    const description = getMetaContent("description");
+
+    // Try to extract preview content from main text
+    // Look for article, main content, or first paragraphs
+    let preview = description;
+    if (!preview) {
+      // Strip scripts and styles, then get text from paragraphs
+      const cleanHtml = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+      const paragraphs = cleanHtml.match(/<p[^>]*>([^<]+)<\/p>/gi);
+      if (paragraphs && paragraphs.length > 0) {
+        const firstParas = paragraphs
+          .slice(0, 3)
+          .map((p) => p.replace(/<[^>]+>/g, "").trim())
+          .filter((p) => p.length > 20)
+          .join(" ");
+        preview = firstParas.slice(0, 300);
+      }
+    }
+
+    return { title, description, preview };
+  } catch (e) {
+    console.error("Failed to fetch page meta:", e);
+    return { title: null, description: null, preview: null };
+  }
 }
 
 // =============================================================================
@@ -242,10 +339,31 @@ export default {
     }
 
     try {
-      const rawTitle = url.searchParams.get("title") || "Grove";
-      const rawSubtitle = url.searchParams.get("subtitle") || "A place to Be.";
+      // Check for dynamic URL fetching
+      const pageUrl = url.searchParams.get("url");
+      let pageMeta: PageMeta | null = null;
+
+      if (pageUrl) {
+        // Validate URL is from grove.place for security
+        try {
+          const parsed = new URL(pageUrl);
+          if (parsed.hostname.endsWith("grove.place")) {
+            pageMeta = await fetchPageMeta(pageUrl);
+          }
+        } catch {
+          // Invalid URL, ignore
+        }
+      }
+
+      // Use fetched meta or fall back to explicit params
+      const rawTitle =
+        url.searchParams.get("title") || pageMeta?.title || "Grove";
+      const rawSubtitle =
+        url.searchParams.get("subtitle") ||
+        pageMeta?.description ||
+        "A place to Be.";
       const rawVariant = url.searchParams.get("variant") || "default";
-      const rawPreview = url.searchParams.get("preview");
+      const rawPreview = url.searchParams.get("preview") || pageMeta?.preview;
 
       const title = escapeHtml(rawTitle.slice(0, 80));
       const subtitle = escapeHtml(rawSubtitle.slice(0, 150));
