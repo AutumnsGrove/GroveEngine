@@ -703,6 +703,129 @@ vista.grove.place  CNAME  grove-monitor.pages.dev
 
 ---
 
+## Marketing & Acquisition Analytics
+
+In addition to infrastructure monitoring, Vista tracks marketing effectiveness and user acquisition metrics. This helps understand how users find Grove and which channels drive signups.
+
+### Acquisition Metrics
+
+| Metric | Source | Purpose |
+|--------|--------|---------|
+| QR code scans | `/hello` page visits with `?ref=card` | Track business card effectiveness |
+| Landing page visits | grove.place pageviews | Overall awareness |
+| Signup funnel | grove.place → plant.grove.place → checkout | Conversion tracking |
+| Email signups | `/api/signup` calls | Waitlist growth |
+| Referral source | `?ref=` or `utm_source` params | Channel attribution |
+
+### Implementation
+
+#### 1. Referrer Tracking
+
+Add `ref` parameter support to key landing pages:
+
+```typescript
+// Track referrer on /hello page load
+// grove.place/hello?ref=card-front or ?ref=card-back
+const ref = url.searchParams.get('ref') || 'direct';
+
+// Log to Vista
+await fetch('https://vista-api.grove.place/track/acquisition', {
+  method: 'POST',
+  body: JSON.stringify({
+    event: 'page_visit',
+    page: '/hello',
+    ref,
+    timestamp: Date.now()
+  })
+});
+```
+
+#### 2. Business Card QR Tracking
+
+QR codes encode URLs with tracking parameters:
+- **Front QR:** `grove.place?ref=card-front`
+- **Back QR:** `grove.place/hello?ref=card-back`
+
+This allows comparing which side of the card drives more engagement.
+
+#### 3. Signup Funnel
+
+Track the full funnel:
+1. `landing_visit` — User lands on grove.place
+2. `hello_visit` — User visits /hello (likely from card)
+3. `email_signup` — User joins waitlist
+4. `plant_visit` — User visits plant.grove.place
+5. `checkout_start` — User begins checkout
+6. `checkout_complete` — User completes payment
+
+#### 4. Database Schema Addition
+
+```sql
+-- migrations/003_acquisition_tracking.sql
+
+-- Acquisition events (marketing analytics)
+CREATE TABLE acquisition_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_type TEXT NOT NULL,           -- 'page_visit', 'email_signup', 'checkout_start', etc.
+  page TEXT,                          -- '/hello', '/pricing', etc.
+  referrer TEXT,                      -- 'card-front', 'card-back', 'hacker-news', 'twitter', etc.
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  visitor_hash TEXT,                  -- Privacy-safe daily rotating hash
+  recorded_at INTEGER NOT NULL
+);
+
+CREATE INDEX idx_acquisition_type_time ON acquisition_events(event_type, recorded_at DESC);
+CREATE INDEX idx_acquisition_referrer ON acquisition_events(referrer, recorded_at DESC);
+
+-- Daily acquisition aggregates
+CREATE TABLE acquisition_daily (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL,                 -- 'YYYY-MM-DD'
+  referrer TEXT NOT NULL,
+  page_visits INTEGER DEFAULT 0,
+  email_signups INTEGER DEFAULT 0,
+  checkout_starts INTEGER DEFAULT 0,
+  checkout_completes INTEGER DEFAULT 0,
+  conversion_rate REAL,               -- signups / visits
+  UNIQUE(date, referrer)
+);
+
+CREATE INDEX idx_acquisition_daily_date ON acquisition_daily(date DESC);
+```
+
+### Dashboard UI: Acquisition (`/acquisition`)
+
+New page in Vista dashboard:
+
+- **Funnel Visualization** — Landing → Email → Plant → Checkout → Paid
+- **Referrer Breakdown** — Bar chart showing which sources drive traffic
+- **QR Code Effectiveness** — Card-front vs card-back comparison
+- **Conversion Rates** — By source and over time
+- **Daily/Weekly/Monthly Trends** — Line charts for each metric
+
+### Privacy Considerations
+
+- No PII stored (email addresses tracked as counts, not values)
+- Visitor hash rotates daily (can't track individuals across days)
+- Aggregates kept for 1 year, raw events for 90 days
+- No third-party analytics (all internal)
+
+### Implementation Phase
+
+Add to **Phase 7: Marketing Analytics** (after Phase 6: Polish):
+
+- [ ] Add `acquisition_events` and `acquisition_daily` tables
+- [ ] Create `/track/acquisition` API endpoint
+- [ ] Add referrer tracking to landing pages (`grove.place`, `/hello`)
+- [ ] Implement funnel tracking middleware
+- [ ] Build `/acquisition` dashboard page
+- [ ] Add QR code comparison widget
+- [ ] Document UTM parameter conventions
+
+---
+
 ## Related Resources
 
 - [Cloudflare Analytics API](https://developers.cloudflare.com/analytics/graphql-api/)
