@@ -6,6 +6,349 @@
 
 ---
 
+## 🪟 Glass Design System Overhaul (2026-01-02) — AUDIT COMPLETE
+
+> **Status:** Audit complete. Implementation plans ready for agent handoff.
+> **Design System Docs:** `docs/patterns/prism-pattern.md`, `.claude/skills/grove-ui-design/SKILL.md`
+> **Components:** 8 glass components in `packages/engine/src/lib/ui/components/ui/Glass*.svelte`
+
+### Current Glass Adoption
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Admin Dashboard | ✅ Excellent | GlassCard stats, glass sidebar |
+| Admin Layout | ✅ Excellent | `glass-sidebar`, `glass-surface` |
+| Vineyard | ✅ Reference | All 8 components demoed |
+| Plant Home | ✅ Good | GlassCard, glass utilities |
+| Landing Home | ⚠️ Partial | Some `glass-grove` usage |
+| Forest | ⚠️ Needs Glass | Nature scene, no glass overlays |
+| Admin Pages (6) | ❌ None | Solid backgrounds throughout |
+| Plant Pages (5) | ❌ None | checkout, plans, profile, success, tour |
+| Domains (9 pages) | ❌ None | Traditional admin styling |
+| Knowledge Base | ❌ None | 10+ pages (dynamic markdown) |
+
+**Overall: 13% full glass, 7% partial, 80% no glass**
+
+---
+
+### 🌲 Landing Site Glass Plan
+
+> **Scope:** Most pages load content from markdown files dynamically. Focus on structural elements and the Forest page.
+
+**Already Glass:**
+- Main hero section uses `glass-grove` utility
+- Pricing table has backdrop-blur treatment
+- Contact page has custom `glass-contact` class
+
+**Needs Review (Structural):**
+- [ ] Navbar consistency across all landing routes
+- [ ] Footer could benefit from subtle glass treatment
+- [ ] Knowledge base article wrapper (if not markdown-controlled)
+
+**Forest Page — HIGH PRIORITY:**
+See dedicated section below.
+
+---
+
+### 🌳 Forest Page Glass Implementation
+
+> **Route:** `landing/src/routes/forest/+page.svelte`
+> **Current State:** Beautiful nature scene with trees, seasonal effects, NO glassmorphism
+> **Goal:** Add glass panels/overlays to enhance readability while preserving the organic feel
+
+**Implementation Tasks:**
+- [ ] Add glass overlay for any text content sections
+- [ ] Consider glass-tint panels for feature callouts
+- [ ] Add glass card for "Visit the Forest" CTA or navigation
+- [ ] Ensure glass doesn't obstruct nature elements (trees should peek through)
+- [ ] Test with all 4 seasons (spring/summer/autumn/winter)
+- [ ] Respect `prefers-reduced-motion` for glass transitions
+
+**Recommended Glass Usage:**
+```svelte
+<!-- Info panels over forest background -->
+<Glass variant="tint" class="p-6 rounded-xl max-w-2xl mx-auto">
+  <h2>Welcome to the Forest</h2>
+  <p>Discover community blogs...</p>
+</Glass>
+
+<!-- Navigation cards -->
+<GlassCard variant="frosted" hoverable>
+  <a href="/forest/explore">Explore Blogs</a>
+</GlassCard>
+```
+
+**Key Consideration:** The forest is about immersion. Use glass sparingly—enhance, don't dominate.
+
+---
+
+### 🌱 Plant (Signup Flow) Glass Implementation
+
+> **Routes:** `plant/src/routes/`
+> **Current State:** Home page has glass, other pages use solid forms
+> **Goal:** Consistent glassmorphism throughout the entire signup journey
+
+**Pages Requiring Glass Treatment:**
+
+#### 1. Profile Page (`/profile`)
+- [ ] Form container → `GlassCard variant="frosted"`
+- [ ] Input fields → glass background (`bg-white/60 backdrop-blur-sm`)
+- [ ] Color picker section → glass panel
+- [ ] Interests selector → glass chips/tags
+
+#### 2. Plans Page (`/plans`)
+- [ ] Plan cards → `GlassCard` with variant per tier
+  - Seedling: `variant="default"`
+  - Sapling: `variant="default"`
+  - Oak: `variant="accent"` (recommended)
+  - Evergreen: `variant="frosted"` (premium feel)
+- [ ] Comparison table → glass container
+- [ ] CTA buttons → `GlassButton`
+
+#### 3. Checkout Page (`/checkout`)
+- [ ] Order summary card → `GlassCard`
+- [ ] Payment form container → glass treatment
+- [ ] Security badges/trust indicators → subtle glass
+
+#### 4. Success Page (`/success`)
+- [ ] Celebration card → `GlassCard variant="accent"`
+- [ ] Next steps list → glass container
+- [ ] Confetti should appear OVER the glass (z-index)
+
+#### 5. Tour Page (`/tour`)
+- [ ] Tour step cards → `GlassCard` with progression
+- [ ] Navigation dots → glass styling
+- [ ] Skip/Next buttons → `GlassButton`
+
+**Shared Patterns for Plant:**
+```svelte
+<!-- Form wrapper pattern -->
+<GlassCard variant="frosted" class="max-w-md mx-auto">
+  <form>
+    <input class="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm ..." />
+  </form>
+</GlassCard>
+
+<!-- Glass input styling -->
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+```
+
+---
+
+### 🔧 Admin Panel Glass Implementation
+
+> **Routes:** `packages/engine/src/routes/admin/`
+> **Current State:** Dashboard excellent, other pages use solid backgrounds
+> **Goal:** Consistent glass treatment across ALL admin pages
+
+**Pages Requiring Glass Treatment:**
+
+#### 1. Blog List (`/admin/blog`)
+- [ ] Table container → glass wrapper
+- [ ] Table header → `glass-surface` (sticky with blur)
+- [ ] Info box → `GlassCard variant="muted"`
+- [ ] Row hover states → subtle glass glow
+- [ ] Action buttons → consider `GlassButton variant="ghost"`
+
+#### 2. Blog Editor (`/admin/blog/edit/[slug]` and `/admin/blog/new`)
+- [ ] Metadata panel → `GlassCard variant="frosted"`
+- [ ] Editor section container → subtle glass background
+- [ ] Gutter panel → glass treatment
+- [ ] Tag badges → translucent glass styling
+- [ ] Error banner → `Glass variant="accent"` with red tint
+
+#### 3. Images/CDN (`/admin/images`)
+- [ ] Drop zone → `Glass variant="tint"` with dashed border
+- [ ] Options panel (collapsible) → `GlassCard`
+- [ ] Upload progress cards → glass with status colors
+- [ ] Gallery section → glass container
+- [ ] Gallery cards → glass overlay on images (subtle)
+
+#### 4. Pages List (`/admin/pages`)
+- [ ] Table container → glass wrapper (same as blog list)
+- [ ] Info box → `GlassCard variant="muted"`
+- [ ] Badge styling → translucent glass
+
+#### 5. Page Editor (`/admin/pages/edit/[slug]`)
+- [ ] Details section → `GlassCard` (collapsible)
+- [ ] Hero fields nested box → glass treatment
+- [ ] Editor container → subtle glass
+
+#### 6. Settings (`/admin/settings`)
+- [ ] Settings sections → `GlassCard` instead of box-shadow cards
+- [ ] Health grid items → small glass cards
+- [ ] Font option cards → `GlassCard variant="default"` with hover
+- [ ] Status indicators → glass backgrounds
+- [ ] Action buttons → `GlassButton`
+
+#### 7. Subscribers (`/admin/subscribers`)
+- [ ] Card container → `GlassCard`
+- [ ] Danger zone → `Glass variant="accent"` with red/pink tint
+- [ ] Table → glass wrapper
+- [ ] Action buttons → `GlassButton variant="ghost"`
+
+**Admin Glass Patterns:**
+```svelte
+<!-- Table wrapper pattern -->
+<GlassCard variant="default" class="overflow-hidden">
+  <table class="w-full">
+    <thead class="glass-surface sticky top-0">
+      ...
+    </thead>
+    <tbody>
+      ...
+    </tbody>
+  </table>
+</GlassCard>
+
+<!-- Settings section pattern -->
+<GlassCard variant="frosted" class="mb-6">
+  <h3 class="text-lg font-semibold mb-4">Section Title</h3>
+  <!-- content -->
+</GlassCard>
+
+<!-- Danger zone pattern -->
+<Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg">
+  <h4 class="text-red-600 dark:text-red-400">Danger Zone</h4>
+  ...
+</Glass>
+```
+
+---
+
+### 📋 Implementation Checklist (For Agent Handoff)
+
+When implementing glass updates, follow this order:
+
+1. **Forest Page** (1 page, high visual impact)
+   - Add glass overlays for text sections
+   - Test all 4 seasons
+   - Verify nature elements visible through glass
+
+2. **Plant Pages** (5 pages, user-facing)
+   - profile → plans → checkout → success → tour
+   - Consistent form styling throughout
+   - Premium feel for payment flow
+
+3. **Admin Panel** (7 pages, daily use)
+   - settings → blog list → blog editor → images → pages → page editor → subscribers
+   - Start with settings (simpler), work up to complex editors
+   - Maintain readability for data-dense views
+
+**Per-Page Checklist:**
+- [ ] Import glass components from `@autumnsgrove/groveengine/ui`
+- [ ] Replace solid containers with GlassCard
+- [ ] Update input styling with glass backgrounds
+- [ ] Test light mode AND dark mode
+- [ ] Verify contrast meets accessibility standards
+- [ ] Check mobile responsiveness
+- [ ] Test with `prefers-reduced-motion`
+
+---
+
+## 🔮 Domains App Glass Overhaul — FUTURE SESSION
+
+> **Scope:** Separate session, not part of current glass overhaul
+> **App:** `domains/` - Domain finder admin tool
+> **Current State:** Traditional clean admin styling, NO glassmorphism
+> **Goal:** Adopt warm Grove glassmorphism while maintaining professional readability
+
+### Context for Future Agent
+
+The Domains app is a professional admin tool for domain discovery. It needs **selective** glass treatment—don't overdo it. Data tables and search results need solid backgrounds for readability.
+
+**9 Pages to Update:**
+1. `+page.svelte` - Landing/hero
+2. `+layout.svelte` - Root layout
+3. `admin/+layout.svelte` - Admin nav with tabs
+4. `admin/+page.svelte` - Dashboard with stats cards, job list
+5. `admin/searcher/+page.svelte` - Main search form (vibe & detailed modes)
+6. `admin/config/+page.svelte` - Configuration settings
+7. `admin/history/+page.svelte` - Search history table
+8. `admin/history/[id]/+page.svelte` - Individual search details
+9. `admin/login/+page.svelte` - Authentication
+
+**Recommended Glass Placement:**
+- ✅ Dashboard stats cards → GlassCard
+- ✅ Search form containers → GlassCard variant="frosted"
+- ✅ Config panels → GlassCard
+- ✅ Navigation header → glass-surface
+- ❌ Data tables → Keep solid (readability critical)
+- ❌ Search results → Keep solid
+- ⚠️ Status indicators → Subtle glass only
+
+**Implementation Notes:**
+```css
+/* Domains glass should be slightly more opaque for professionalism */
+.domains-glass {
+  background: rgba(255, 255, 255, 0.75); /* vs 0.6 for plant */
+  backdrop-filter: blur(10px); /* vs 12px standard */
+  border: 1px solid rgba(44, 140, 126, 0.2); /* domain-teal tint */
+}
+```
+
+**Color Palette:**
+- Primary: `domain-600` (#2c8c7e teal)
+- Background: Gradient `from-purple-50 via-cream to-green-50`
+- Keep existing color scheme, add glass effects
+
+---
+
+## 📚 Design Documentation Gaps — FUTURE SESSION
+
+> **Scope:** Separate session focused on documentation, not UI changes
+> **Current Docs:** `docs/patterns/prism-pattern.md` (excellent), `.claude/skills/grove-ui-design/SKILL.md`
+
+### Missing Documentation
+
+| Document | Purpose | Priority |
+|----------|---------|----------|
+| `COMPONENT-REFERENCE.md` | Visual guide for all 25 UI components with examples | High |
+| `DARK-MODE-GUIDE.md` | Contrast ratios, WCAG compliance, color pairs | High |
+| `SPACING-SYSTEM.md` | When to use gap-6 vs p-6, baseline rhythm | Medium |
+| `ANIMATION-GUIDE.md` | When/why to use each of 13 animations | Medium |
+| `FORM-SYSTEM.md` | Input validation states, error styling, accessibility | Medium |
+| `ICONOGRAPHY.md` | Icon selection process, sizing hierarchy | Low |
+| `BREAKPOINT-STRATEGY.md` | Mobile-first approach documentation | Low |
+
+### What Exists (Strengths)
+
+- **Prism Pattern** (862 lines) — Comprehensive glassmorphism architecture
+- **Grove UI Skill** — Practitioner guide with code examples
+- **Tailwind Preset** — All design tokens defined, custom animations
+- **Content CSS** — Grid system, typography, code blocks
+
+### Implementation Notes for Future Agent
+
+1. Create docs in `docs/design-system/` directory
+2. Use existing Prism pattern as the "source of truth"
+3. Include visual examples (screenshots or ASCII diagrams)
+4. Cross-reference with actual component implementations
+5. Follow Grove's warm, documentation-as-conversation style
+
+**Example Structure for COMPONENT-REFERENCE.md:**
+```markdown
+# Grove Component Reference
+
+## Glass Components
+
+### GlassCard
+**When to use:** Content containers over busy backgrounds
+**Variants:** default, accent, dark, muted, frosted
+
+| Variant | Light Mode | Dark Mode | Use Case |
+|---------|------------|-----------|----------|
+| default | 60% white | 25% emerald | General cards |
+| frosted | 70% white | 35% emerald | Premium feel |
+...
+```
+
+---
+
 ## ✅ OG Images & Platform Icons COMPLETE! (2026-01-02)
 
 ### What We Built
