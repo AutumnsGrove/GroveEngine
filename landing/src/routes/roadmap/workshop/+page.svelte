@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, BookOpen, Boxes, Users, Map, HelpCircle, ShieldOff, FileText, Triangle, Gauge, Radar, Sparkles } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -40,7 +40,6 @@
 		users: Users,
 		map: Map,
 		helpCircle: HelpCircle,
-		shieldoff: ShieldOff,
 		triangle: Triangle,
 		gauge: Gauge,
 		radar: Radar,
@@ -338,7 +337,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'shieldoff',
+					icon: 'shield',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec'
 				},
@@ -418,7 +417,11 @@
 	function getStatusBadge(status: string) {
 		switch (status) {
 			case 'live': return { text: 'Live', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
+			case 'complete': return { text: 'Complete', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
+			case 'integrated': return { text: 'Integrated', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
+			case 'implemented': return { text: 'Implemented', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
 			case 'building': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
+			case 'being implemented': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
 			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' };
 			default: return { text: status, class: 'bg-slate-100 text-slate-600' };
 		}
