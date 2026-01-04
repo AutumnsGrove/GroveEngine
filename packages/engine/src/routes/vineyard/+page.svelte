@@ -41,7 +41,7 @@
 		springFoliage, springSky, wildflowers,
 		cherryBlossoms, cherryBlossomsPeak,
 		autumn, autumnReds, winter,
-		accents, midnightBloom
+		midnightBloom
 	} from '$lib/ui/components/nature/palette';
 	import { grove, cream, bark as barkTokens, status } from '$lib/ui/tokens/colors';
 	import { Sparkles, Palette, Box, ChevronRight, Type } from 'lucide-svelte';
@@ -817,20 +817,6 @@ $ npm run dev
 				<PaletteRow name="Autumn Reds" colors={autumnReds} description="Maple and cherry fall foliage" />
 				<!-- Winter -->
 				<PaletteRow name="Winter" colors={winter} description="Snow, frost, and peaceful quiet" />
-			</div>
-		</div>
-
-		<!-- Accent Palettes -->
-		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Accent Palettes</h3>
-			<p class="text-bark-600 mb-6">Special pops of color for woodland details.</p>
-			<div class="grid gap-6">
-				<PaletteRow name="Mushroom" colors={accents.mushroom} description="Fairy tale forest pops of color" />
-				<PaletteRow name="Firefly" colors={accents.firefly} description="Bioluminescent warm glow" />
-				<PaletteRow name="Berry" colors={accents.berry} description="Rich and saturated berry tones" />
-				<PaletteRow name="Water" colors={accents.water} description="Cool pond and stream reflections" />
-				<PaletteRow name="Sky" colors={accents.sky} description="From dawn to dusk to starlight" />
-				<PaletteRow name="Bird" colors={accents.bird} description="Cardinals, chickadees, robins, and bluebirds" />
 			</div>
 		</div>
 
