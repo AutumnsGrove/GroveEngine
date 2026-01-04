@@ -239,7 +239,13 @@ export const accents = {
 	},
 	/**
 	 * @deprecated Use the top-level `wildflowers` export instead. Will be removed in v1.0.
-	 * Wildflower accents - kept for backward compatibility.
+	 *
+	 * Historical context: Flower colors were originally split between two places:
+	 * - `spring` palette had wildflower accents (crocus, lilac, tulips, buttercup, daffodil)
+	 * - `accents.flower` had generic flower colors (purple, violet, yellow, white, lavender)
+	 *
+	 * This caused confusion and duplicate values. Now unified in the top-level `wildflowers`
+	 * palette which contains all meadow flower colors in one place.
 	 */
 	flower: {
 		purple: wildflowers.purple,

@@ -41,9 +41,7 @@
 		springFoliage, springSky, wildflowers,
 		cherryBlossoms, cherryBlossomsPeak,
 		autumn, autumnReds, winter,
-		accents, midnightBloom,
-		// Deprecated aliases (for reference)
-		spring, pinks, springBlossoms
+		accents, midnightBloom
 	} from '$lib/ui/components/nature/palette';
 	import { grove, cream, bark as barkTokens, status } from '$lib/ui/tokens/colors';
 	import { Sparkles, Palette, Box, ChevronRight, Type } from 'lucide-svelte';
