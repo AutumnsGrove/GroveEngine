@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { untrack } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -7,9 +8,9 @@
 	let syncMessage = $state<string | null>(null);
 
 	// Reactive jobs state for live updates
-	let jobs = $state(data.jobs);
+	let jobs = $state(untrack(() => data.jobs));
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
-	let elapsedTimers: Record<string, number> = {};
+	let elapsedTimers = $state<Record<string, number>>({});
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 	// Show auto-sync result notification
@@ -56,17 +57,29 @@
 
 	function startElapsedTimers() {
 		if (timerInterval) return;
+
 		// Initialize elapsed times for running jobs
-		for (const job of jobs.filter(j => j.status === 'running' || j.status === 'pending')) {
+		// Note: This is called only when runningJobIds.length > 0 (from $effect above),
+		// which is derived from jobs (server-loaded data), so jobs should always be populated
+		const newTimers: Record<string, number> = { ...elapsedTimers };
+		const runningJobs = jobs.filter(j => j.status === 'running' || j.status === 'pending');
+
+		// Defensive: Only initialize if we have jobs with valid start times
+		if (runningJobs.length === 0) return;
+
+		for (const job of runningJobs) {
 			if (job.started_at) {
-				elapsedTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
+				newTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
 			}
 		}
+		elapsedTimers = newTimers;
+
 		timerInterval = setInterval(() => {
+			const updated: Record<string, number> = {};
 			for (const jobId of runningJobIds) {
-				elapsedTimers[jobId] = (elapsedTimers[jobId] || 0) + 1;
+				updated[jobId] = (elapsedTimers[jobId] || 0) + 1;
 			}
-			elapsedTimers = { ...elapsedTimers }; // Trigger reactivity
+			elapsedTimers = { ...elapsedTimers, ...updated };
 		}, 1000);
 	}
 
