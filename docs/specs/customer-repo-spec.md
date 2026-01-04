@@ -1,11 +1,17 @@
 ---
+aliases: []
 date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
+date modified: Saturday, January 4th 2026
 tags:
+  - templates
+  - deployment
+  - cloudflare-workers
 type: tech-spec
 ---
 
 # Customer Repository Specification
+
+Template structure for individual customer blog repositories, each with dedicated Cloudflare resources (D1, KV, R2). Complete isolation means independent deployment, full customization, and customer-managed updates.
 
 **Purpose:** Documents the template structure for customer blog repositories
 **Deployment:** Cloudflare Workers/Pages with D1, KV, and R2

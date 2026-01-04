@@ -2,7 +2,10 @@
 aliases: []
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026
-tags: []
+tags:
+  - backups
+  - disaster-recovery
+  - cloudflare-r2
 type: tech-spec
 ---
 
@@ -10,13 +13,15 @@ type: tech-spec
 
 > *Age as armor. Time as protection.*
 
+Grove's automated backup system running nightly SQL dumps of all D1 databases to R2 cold storage. Weekly meta-backups compress daily layers, maintaining 12 weeks of history ready if you ever need to reach back in time.
+
 **Public Name:** Patina
 **Internal Name:** GrovePatina
 **Domain:** `patina.grove.place`
 **Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
 **Last Updated:** December 2025
 
-A patina forms on copper over time—not decay, but protection. The oxidation becomes armor, beauty emerging from age. Patina is Grove's automated backup system, quietly preserving everything while you sleep.
+A patina forms on copper over time. Not decay, but protection. The oxidation becomes armor, beauty emerging from age. Patina is Grove's automated backup system, quietly preserving everything while you sleep.
 
 Every night, Patina runs automated backups of all Grove D1 databases to R2 cold storage. Weekly archives compress the daily layers. Twelve weeks of history remain quietly preserved, ready if you ever need to reach back in time.
 

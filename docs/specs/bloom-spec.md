@@ -1,6 +1,20 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - remote-coding
+  - infrastructure
+  - ai-agents
+  - hetzner
+type: tech-spec
+---
+
 # Bloom — Remote Coding Infrastructure
 
 > *Brief, brilliant, gone.*
+
+Grove's serverless remote coding infrastructure that spins up temporary VPS instances on-demand. Runs AI coding agents autonomously to complete development tasks, syncs code to R2 storage, then self-destructs. Text it and forget it.
 
 **Public Name:** Bloom
 **Internal Name:** GroveBloom

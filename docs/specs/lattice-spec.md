@@ -1,8 +1,12 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 1st 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - core
+  - sveltekit
+  - npm
+  - cloudflare-workers
 type: tech-spec
 ---
 
@@ -10,12 +14,14 @@ type: tech-spec
 
 > *The framework that supports growth.*
 
+The npm package powering every Grove site. UI components, authentication utilities, markdown rendering, and database patterns—all the infrastructure that makes building on Grove effortless. The invisible framework everything else grows upon.
+
 **Public Name:** Lattice
 **Internal Name:** GroveEngine
 **Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`
 
-A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
+A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. The lattice stays invisible; what matters is everything it supports.
 
 Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns: all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
 

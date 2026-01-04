@@ -1,14 +1,19 @@
 ---
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Thursday, January 2nd 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - mcp
+  - ai-integration
+  - api
 type: tech-spec
 ---
 
 # Mycelium — MCP Server
 
 > *The wood wide web of the Grove ecosystem.*
+
+Grove's Model Context Protocol server connecting AI agents to the entire ecosystem. Through Mycelium, Claude can read blog posts, start Bloom sessions, and manage Amber files. Every Grove service through a single, unified interface.
 
 **Public Name:** Mycelium
 **Internal Name:** GroveMCP
