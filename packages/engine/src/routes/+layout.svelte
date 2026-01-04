@@ -15,7 +15,6 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Button, Input } from '$lib/ui';
-	import VibeKanbanWebCompanion from '$lib/components/VibeKanbanWebCompanion.svelte';
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
@@ -418,7 +417,6 @@
 			</Button>
 		</div>
 	</footer>
-	<VibeKanbanWebCompanion />
 </div>
 {/if}
 
