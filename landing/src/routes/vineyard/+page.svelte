@@ -13,7 +13,8 @@
 		ChevronRight,
 		Palette,
 		MousePointer,
-		Eye
+		Eye,
+		Type
 	} from 'lucide-svelte';
 
 	// Import Glass components
@@ -41,8 +42,23 @@
 		greens, bark, earth, natural, autumn, pinks, autumnReds, accents, spring, springBlossoms, winter, midnightBloom
 	} from '@autumnsgrove/groveengine/ui/nature';
 
+	// Import typography components
+	import {
+		FontProvider,
+		Lexend, Atkinson, OpenDyslexic, Luciole,
+		Nunito, Quicksand, Manrope, InstrumentSans, PlusJakartaSans,
+		Cormorant, BodoniModa, Lora, EBGaramond, Merriweather, Fraunces,
+		IBMPlexMono, Cozette,
+		Alagard, Calistoga, Caveat,
+		fonts,
+		type FontId,
+	} from '@autumnsgrove/groveengine/ui/typography';
+
 	// Section expansion state
-	let expandedSection = $state<'glass' | 'nature' | null>('glass');
+	let expandedSection = $state<'glass' | 'nature' | 'typography' | null>('glass');
+
+	// Typography state
+	let selectedFont = $state<FontId>('alagard');
 
 	// Glass component demos state
 	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('card');
@@ -303,6 +319,10 @@
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<TreeIcon class="w-4 h-4 text-grove-600" />
 					<span>{Object.keys(assets).length} Nature Assets</span>
+				</div>
+				<div class="flex items-center gap-2 text-foreground-muted">
+					<Type class="w-4 h-4 text-grove-600" />
+					<span>20 Font Families</span>
 				</div>
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<Palette class="w-4 h-4 text-grove-600" />
@@ -718,6 +738,218 @@
 								Reset to Defaults
 							</button>
 						</div>
+					</div>
+				</div>
+			{/if}
+		</div>
+	</section>
+
+	<!-- Typography Section -->
+	<section class="py-8 px-6">
+		<div class="max-w-5xl mx-auto">
+			<!-- Section Header -->
+			<button
+				type="button"
+				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
+				onclick={() => expandedSection = expandedSection === 'typography' ? null : 'typography'}
+				aria-expanded={expandedSection === 'typography'}
+				aria-controls="typography-section-content"
+			>
+				<div class="flex items-center gap-3">
+					<div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40">
+						<Type class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+					</div>
+					<div class="text-left">
+						<h2 class="text-xl font-serif text-foreground">Typography</h2>
+						<p class="text-sm text-foreground-muted">20 fonts for every mood - from cozy headers to crisp code</p>
+					</div>
+				</div>
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'typography' ? 'rotate-180' : ''}" aria-hidden="true" />
+			</button>
+
+			{#if expandedSection === 'typography'}
+				<div id="typography-section-content" class="space-y-8 animate-in slide-in-from-top-2 duration-300">
+					<!-- FontProvider (Dynamic Selection) -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;FontProvider&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Dynamic font selection</span>
+						</h3>
+
+						<div class="space-y-4">
+							<div class="flex flex-wrap gap-2">
+								{#each fonts as f}
+									<button
+										class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-foreground hover:bg-slate-200 dark:hover:bg-slate-600'}"
+										onclick={() => selectedFont = f.id as FontId}
+									>{f.name}</button>
+								{/each}
+							</div>
+							<div class="p-6 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-white/60 dark:border-slate-600/60">
+								<FontProvider font={selectedFont} as="p" class="text-2xl text-foreground">
+									The quick brown fox jumps over the lazy dog.
+								</FontProvider>
+								<p class="text-sm text-foreground-muted mt-2">
+									{fonts.find(f => f.id === selectedFont)?.description}
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Display Fonts -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Display & Special Fonts</h3>
+						<p class="text-sm text-foreground-muted mb-4">Eye-catching fonts for headers and special moments</p>
+						<div class="space-y-4">
+							<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg">
+								<Alagard as="h2" class="text-2xl text-purple-900 dark:text-purple-100 mb-2">
+									Welcome to the Fantasy Realm
+								</Alagard>
+								<p class="text-sm text-purple-700 dark:text-purple-300">Alagard - pixel art medieval display font</p>
+							</div>
+							<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/40 dark:to-orange-900/40 rounded-lg">
+								<Calistoga as="h2" class="text-2xl text-amber-900 dark:text-amber-100 mb-2">
+									Friendly Headlines Welcome You
+								</Calistoga>
+								<p class="text-sm text-amber-700 dark:text-amber-300">Calistoga - casual brush serif, warm and inviting</p>
+							</div>
+							<div class="p-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/40 dark:to-pink-900/40 rounded-lg">
+								<Caveat as="h2" class="text-2xl text-rose-900 dark:text-rose-100 mb-2">
+									A personal note just for you...
+								</Caveat>
+								<p class="text-sm text-rose-700 dark:text-rose-300">Caveat - handwritten script, personal and informal</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Serif Fonts -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Serif Fonts</h3>
+						<p class="text-sm text-foreground-muted mb-4">Classic elegance for body text and refined headers</p>
+						<div class="grid md:grid-cols-2 gap-4">
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Cormorant as="h4" class="text-xl text-foreground mb-1">Cormorant</Cormorant>
+								<Cormorant as="p" class="text-foreground-muted text-sm">Elegant display serif inspired by Garamond.</Cormorant>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<BodoniModa as="h4" class="text-xl text-foreground mb-1">Bodoni Moda</BodoniModa>
+								<BodoniModa as="p" class="text-foreground-muted text-sm">High contrast modern serif. Bold and sophisticated.</BodoniModa>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Lora as="h4" class="text-xl text-foreground mb-1">Lora</Lora>
+								<Lora as="p" class="text-foreground-muted text-sm">Well-balanced contemporary serif for body text.</Lora>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<EBGaramond as="h4" class="text-xl text-foreground mb-1">EB Garamond</EBGaramond>
+								<EBGaramond as="p" class="text-foreground-muted text-sm">Revival of classic Garamond. Timeless.</EBGaramond>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Merriweather as="h4" class="text-xl text-foreground mb-1">Merriweather</Merriweather>
+								<Merriweather as="p" class="text-foreground-muted text-sm">Designed for screen reading. Excellent legibility.</Merriweather>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Fraunces as="h4" class="text-xl text-foreground mb-1">Fraunces</Fraunces>
+								<Fraunces as="p" class="text-foreground-muted text-sm">Soft serif with "wonky" optical axes. Warm personality.</Fraunces>
+							</div>
+						</div>
+					</div>
+
+					<!-- Sans-Serif Fonts -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Sans-Serif Fonts</h3>
+						<p class="text-sm text-foreground-muted mb-4">Clean, modern fonts for interfaces and body text</p>
+						<div class="grid md:grid-cols-2 gap-4">
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Lexend as="h4" class="text-xl text-foreground mb-1">Lexend (Default)</Lexend>
+								<Lexend as="p" class="text-foreground-muted text-sm">Modern, highly readable. Grove's default font.</Lexend>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Nunito as="h4" class="text-xl text-foreground mb-1">Nunito</Nunito>
+								<Nunito as="p" class="text-foreground-muted text-sm">Friendly rounded sans-serif. Warm and approachable.</Nunito>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Quicksand as="h4" class="text-xl text-foreground mb-1">Quicksand</Quicksand>
+								<Quicksand as="p" class="text-foreground-muted text-sm">Geometric sans with rounded terminals. Light and modern.</Quicksand>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<Manrope as="h4" class="text-xl text-foreground mb-1">Manrope</Manrope>
+								<Manrope as="p" class="text-foreground-muted text-sm">Professional geometric sans. Clean and contemporary.</Manrope>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<InstrumentSans as="h4" class="text-xl text-foreground mb-1">Instrument Sans</InstrumentSans>
+								<InstrumentSans as="p" class="text-foreground-muted text-sm">Low contrast sans with humanist touches.</InstrumentSans>
+							</div>
+							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
+								<PlusJakartaSans as="h4" class="text-xl text-foreground mb-1">Plus Jakarta Sans</PlusJakartaSans>
+								<PlusJakartaSans as="p" class="text-foreground-muted text-sm">Contemporary geometric sans. Balanced and versatile.</PlusJakartaSans>
+							</div>
+						</div>
+					</div>
+
+					<!-- Monospace Fonts -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Monospace Fonts</h3>
+						<p class="text-sm text-foreground-muted mb-4">For code, terminals, and technical content</p>
+						<div class="space-y-4">
+							<div class="p-4 bg-slate-900 rounded-lg">
+								<IBMPlexMono as="code" class="text-grove-400 block mb-2">
+									// IBM Plex Mono - corporate warmth
+								</IBMPlexMono>
+								<IBMPlexMono as="pre" class="text-slate-100 text-sm">{`function greet(name: string) {
+  console.log(\`Hello, \${name}!\`);
+}
+greet("Grove");`}</IBMPlexMono>
+							</div>
+							<div class="p-4 bg-purple-950 rounded-lg">
+								<Cozette as="code" class="text-purple-400 block mb-2">
+									# Cozette - retro terminal aesthetic
+								</Cozette>
+								<Cozette as="pre" class="text-purple-100 text-sm">{`$ cd ~/grove
+$ npm run dev
+> Server running at localhost:5173`}</Cozette>
+							</div>
+						</div>
+					</div>
+
+					<!-- Accessibility Fonts -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Accessibility Fonts</h3>
+						<p class="text-sm text-foreground-muted mb-4">Designed for maximum readability and inclusion</p>
+						<div class="grid md:grid-cols-3 gap-4">
+							<div class="p-4 bg-grove-50 dark:bg-grove-900/40 rounded-lg border border-grove-200 dark:border-grove-700">
+								<Atkinson as="h4" class="text-lg text-grove-900 dark:text-grove-100 mb-2">Atkinson Hyperlegible</Atkinson>
+								<Atkinson as="p" class="text-grove-700 dark:text-grove-300 text-sm">
+									Designed for low vision readers. Maximum character distinction.
+								</Atkinson>
+							</div>
+							<div class="p-4 bg-blue-50 dark:bg-blue-900/40 rounded-lg border border-blue-200 dark:border-blue-700">
+								<OpenDyslexic as="h4" class="text-lg text-blue-900 dark:text-blue-100 mb-2">OpenDyslexic</OpenDyslexic>
+								<OpenDyslexic as="p" class="text-blue-700 dark:text-blue-300 text-sm">
+									Weighted bottoms reduce letter confusion for dyslexic readers.
+								</OpenDyslexic>
+							</div>
+							<div class="p-4 bg-amber-50 dark:bg-amber-900/40 rounded-lg border border-amber-200 dark:border-amber-700">
+								<Luciole as="h4" class="text-lg text-amber-900 dark:text-amber-100 mb-2">Luciole</Luciole>
+								<Luciole as="p" class="text-amber-700 dark:text-amber-300 text-sm">
+									French accessibility font for visually impaired readers.
+								</Luciole>
+							</div>
+						</div>
+					</div>
+
+					<!-- Usage Example -->
+					<div class="p-6 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-dashed border-purple-300 dark:border-purple-800">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Usage</h3>
+						<IBMPlexMono as="pre" class="p-4 bg-slate-900 rounded-lg text-slate-100 text-sm overflow-x-auto">{`import { Alagard, Caveat, IBMPlexMono } from '@autumnsgrove/groveengine/ui/typography';
+
+// Fantasy game header
+<Alagard as="h1" class="text-4xl">Welcome to the Grove</Alagard>
+
+// Handwritten note feel
+<Caveat as="p" class="text-2xl">A personal touch...</Caveat>
+
+// Code block
+<IBMPlexMono as="code">console.log('hello');</IBMPlexMono>`}</IBMPlexMono>
 					</div>
 				</div>
 			{/if}
