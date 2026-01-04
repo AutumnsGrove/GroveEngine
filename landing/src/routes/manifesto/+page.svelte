@@ -9,7 +9,11 @@
 		Moon,
 		StarCluster,
 		Lantern,
-		Firefly
+		Firefly,
+		Bridge,
+		Acorn,
+		Leaf,
+		TreePine
 	} from '@autumnsgrove/groveengine/ui/nature';
 </script>
 
@@ -73,6 +77,9 @@
 		<div class="absolute top-[60%] left-[30%] opacity-60 pointer-events-none" aria-hidden="true">
 			<Firefly class="w-2 h-2" />
 		</div>
+		<div class="absolute top-[75%] right-[15%] opacity-40 pointer-events-none" aria-hidden="true">
+			<Firefly class="w-2 h-2" />
+		</div>
 
 		<!-- Content -->
 		<div class="relative z-10 px-6 py-20 md:py-28">
@@ -91,15 +98,28 @@
 				</header>
 
 				<!-- The Declarations -->
-				<div class="space-y-16 md:space-y-24 text-center">
+				<div class="space-y-16 md:space-y-20 text-center">
 
-					<!-- Opening -->
-					<section class="space-y-4">
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE GARDEN THAT WAS -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6">
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<Acorn class="w-4 h-4" />
+							<span class="text-xs uppercase tracking-widest">The Garden That Was</span>
+						</div>
 						<p class="text-xl md:text-2xl text-purple-100 font-serif leading-relaxed">
-							We believe the internet was a garden once.
+							The internet used to be a garden.
 						</p>
-						<p class="text-xl md:text-2xl text-purple-100 font-serif leading-relaxed">
-							We believe it can be again.
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							Not a manicured one—a wild one. Full of weird little corners and handmade pages.
+							You could stumble onto someone's space and feel like you'd discovered something.
+							A stranger's thoughts, laid out with care, just for you to find.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/80 font-serif leading-relaxed">
+							I remember that feeling. Finding someone's cozy corner and thinking:
+							<span class="text-amber-300/90 italic">I want something like this.</span>
 						</p>
 					</section>
 
@@ -108,13 +128,192 @@
 						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
 					</div>
 
-					<!-- Ownership - Glass Callout -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE WALLS -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6">
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<span class="text-xs uppercase tracking-widest">The Walls</span>
+						</div>
+						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							Then the walls went up.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							Garden walls, at first. Then higher. Then so high you couldn't see
+							another garden on the horizon. The gardens disappeared into isolated biospheres—
+							entirely self-consuming voids where the only way out was through a gate
+							someone else controlled.
+						</p>
+					</section>
+
+					<!-- Glass Callout - The Loss -->
 					<section class="relative">
 						<div class="bg-purple-900/30 backdrop-blur-md rounded-2xl p-8 md:p-10 border border-purple-700/30 shadow-xl">
 							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-6">
-								We believe your words belong to you—not to platforms that lock them in,
+								Friends scattered to different platforms and became unreachable
+								unless you followed them there. Some I can only talk to on one app—
+								that's the only place they'll respond. Others I've lost entirely.
+								People I met in games, in communities, in spaces that don't exist anymore.
+							</p>
+							<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed mb-6">
+								I had music saved from artists I loved. One song I can still hum
+								but will never hear again—the artist deleted it, lost the file themselves.
+								<span class="text-amber-300/80">Gone.</span> Screenshots from games I played as a kid.
+								Blog posts I'd bookmarked. Proof I existed somewhere, vanished.
+							</p>
+							<p class="text-base md:text-lg text-purple-300/80 font-serif leading-relaxed italic">
+								That's what the walls took. Not just content. Connection. Memory. Proof.
+							</p>
+						</div>
+					</section>
+
+					<!-- Divider -->
+					<div class="flex justify-center">
+						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
+					</div>
+
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE MACHINES -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6">
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<span class="text-xs uppercase tracking-widest">The Machines</span>
+						</div>
+						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							I'm tired of watching my friends get trapped in dopamine slot machines
+							designed to exploit how our minds work.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							I signed up for a platform to see my friends. Instead I got 40,000 strangers
+							the algorithm decided I should see instead. Reels, shorts, infinite scroll—
+							engineered to hijack attention, especially neurodivergent attention.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/80 font-serif leading-relaxed">
+							Platforms that built their empires on our words, then loosened protections
+							for people like us the moment it became profitable.
+						</p>
+						<p class="text-xl md:text-2xl font-serif leading-relaxed mt-8">
+							<span class="text-purple-200">I think that's </span>
+							<span class="text-amber-300">disgusting.</span>
+						</p>
+					</section>
+
+					<!-- Divider -->
+					<div class="flex justify-center">
+						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
+					</div>
+
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE BRIDGE -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6">
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<Bridge class="w-5 h-4" />
+							<span class="text-xs uppercase tracking-widest">The Bridge</span>
+						</div>
+						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
+							Grove is everything that isn't.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							I want to build a bridge—between people and other people,
+							between you and your own data. I want you and your words to hold hands,
+							not be separated by a company's database.
+						</p>
+					</section>
+
+					<!-- Glass Callout - What Grove Is -->
+					<section class="relative">
+						<div class="bg-purple-900/20 backdrop-blur-sm rounded-xl p-8 border border-purple-800/20">
+							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-4">
+								There's a search engine called Kagi. You pay for it. It doesn't show you ads.
+								It doesn't track you. When you search, you just... search.
+							</p>
+							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed mb-4">
+								That's how Grove works.
+							</p>
+							<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+								You pay for a place to write. We don't sell your attention to anyone.
+								Your words are just words. There's the membership, and that's it.
+							</p>
+						</div>
+					</section>
+
+					<!-- Divider -->
+					<div class="flex justify-center">
+						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
+					</div>
+
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE CHOICES -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6">
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<Leaf class="w-4 h-4" />
+							<span class="text-xs uppercase tracking-widest">The Choices</span>
+						</div>
+						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							Grove is text and photos only. That's not a limitation—it's a choice.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							I want people to be intentional about what they post. Short-form video
+							is ruining our attention spans—mine included. So I'm not building another
+							place for content to disappear into an infinite scroll.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/80 font-serif leading-relaxed">
+							No algorithms deciding who sees your words. No engagement metrics
+							breeding outrage. No viral mechanics rewarding the loudest voice.
+						</p>
+						<p class="text-xl md:text-2xl text-purple-100 font-serif leading-relaxed mt-6">
+							Just people, sharing what matters to them.
+						</p>
+					</section>
+
+					<!-- Divider -->
+					<div class="flex justify-center">
+						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
+					</div>
+
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- QUEER-FRIENDLY -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-4">
+						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
+							I believe in <span class="text-amber-300">queer-friendly infrastructure.</span>
+						</p>
+						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							In safe digital spaces, especially when physical ones feel hostile.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							I'm building this because I want somewhere that's intentionally welcoming.
+							Somewhere that won't suddenly decide we're not worth protecting.
+						</p>
+					</section>
+
+					<!-- Divider -->
+					<div class="flex justify-center">
+						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
+					</div>
+
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- OWNERSHIP -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="relative">
+						<div class="bg-purple-900/30 backdrop-blur-md rounded-2xl p-8 md:p-10 border border-purple-700/30 shadow-xl">
+							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-6">
+								Your words belong to you—not to platforms that lock them in,
 								not to algorithms that decide who sees them,
-								not to AI companies that harvest them for machine learning.
+								not to AI companies that harvest them without asking.
+							</p>
+							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed mb-6">
+								At any point, you can download everything. Not just when you leave—
+								<span class="text-amber-300/90">always.</span> Your content lives in standard formats
+								that work anywhere. Markdown files you can take to any platform.
 							</p>
 							<p class="text-xl md:text-2xl font-serif leading-relaxed">
 								<span class="text-amber-300">Your voice remains yours.</span>
@@ -129,78 +328,29 @@
 						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
 					</div>
 
-					<!-- Privacy & Portability -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE CENTURY -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
 					<section class="space-y-6">
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							We believe privacy isn't a premium feature.
-						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							We believe <span class="text-amber-300/90">"free"</span> doesn't mean <span class="text-amber-300/90">"you're the product."</span>
-						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							We believe you should be able to leave and take your roots with you.
-						</p>
-					</section>
-
-					<!-- Divider -->
-					<div class="flex justify-center">
-						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
-					</div>
-
-					<!-- Community - Glass Callout -->
-					<section class="relative">
-						<div class="bg-purple-900/20 backdrop-blur-sm rounded-xl p-8 border border-purple-800/20">
-							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-4">
-								We believe in community without competition.
-							</p>
-							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed mb-4">
-								In feeds without algorithms.
-								<br />
-								In encouragement without performance.
-							</p>
-							<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed mt-6">
-								No metrics breeding outrage.
-								<br />
-								No viral mechanics rewarding the loudest voice.
-								<br />
-								Just people, sharing what matters to them.
-							</p>
+						<div class="flex items-center justify-center gap-3 text-purple-400/60 mb-4">
+							<TreePine class="w-4 h-5" />
+							<span class="text-xs uppercase tracking-widest">The Century</span>
 						</div>
-					</section>
-
-					<!-- Divider -->
-					<div class="flex justify-center">
-						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
-					</div>
-
-					<!-- Queer-Friendly -->
-					<section class="space-y-4">
+						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							Your words could outlive you.
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							On most platforms, they'd vanish the moment you stopped paying—or the moment
+							the company decided to pivot, or shut down, or get acquired.
+						</p>
 						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
-							We believe in <span class="text-amber-300">queer-friendly infrastructure.</span>
+							Here, if you grow with us long enough, your grove earns
+							<span class="text-amber-300/90">Centennial status</span>—your site stays online
+							for a hundred years. Even after you're gone, if you want it to.
 						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							In safe digital spaces, especially when physical ones feel hostile.
-						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							In building something intentionally welcoming.
-						</p>
-					</section>
-
-					<!-- Divider -->
-					<div class="flex justify-center">
-						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
-					</div>
-
-					<!-- Simplicity -->
-					<section class="space-y-4">
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							We believe the technology should disappear.
-						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							That you shouldn't need to fight your tools to create.
-						</p>
-						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-							That simplicity is not the same as simplistic.
+						<p class="text-base md:text-lg text-purple-300/70 font-serif leading-relaxed italic mt-4">
+							A hundred years is roughly how long an oak tree lives.
 						</p>
 					</section>
 
@@ -209,26 +359,10 @@
 						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
 					</div>
 
-					<!-- Open Web -->
-					<section class="space-y-4">
-						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
-							We believe in the <span class="text-amber-300">open web.</span>
-						</p>
-						<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed">
-							In RSS feeds.
-							<br />
-							In markdown files you can take anywhere.
-							<br />
-							In standards that outlast any single platform.
-						</p>
-					</section>
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- BUILDING SLOWLY -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
 
-					<!-- Divider -->
-					<div class="flex justify-center">
-						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
-					</div>
-
-					<!-- Building Slowly - Glass Callout -->
 					<section class="relative">
 						<div class="bg-slate-900/40 backdrop-blur-sm rounded-xl p-8 border border-slate-700/30">
 							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-4">
@@ -247,9 +381,21 @@
 						<div class="w-24 h-px bg-gradient-to-r from-transparent via-purple-700/50 to-transparent"></div>
 					</div>
 
-					<!-- The Heart -->
-					<section class="space-y-6 py-8">
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- THE FEELING -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
+					<section class="space-y-6 py-4">
 						<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
+							When someone signs up for Grove, I want them to feel
+							<span class="text-amber-300/90">empowered.</span>
+						</p>
+						<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
+							Like they've found a launching point for something good.
+							Like they're planting something that could grow for years.
+							Like their words are safe here.
+						</p>
+						<p class="text-xl md:text-2xl text-purple-100 font-serif leading-relaxed mt-6">
 							Grove is not trying to be everything.
 						</p>
 						<p class="text-xl md:text-2xl text-purple-100 font-serif leading-relaxed">
@@ -270,19 +416,23 @@
 						<Lantern class="w-12 h-20" variant="hanging" lit animate />
 					</div>
 
-					<!-- Closing - Major Glass Callout -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+					<!-- CLOSING -->
+					<!-- ═══════════════════════════════════════════════════════════════ -->
+
 					<section class="relative">
 						<div class="bg-gradient-to-b from-purple-900/40 to-slate-900/40 backdrop-blur-md rounded-2xl p-10 md:p-12 border border-purple-600/30 shadow-2xl">
 							<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed mb-6">
-								This is our manifesto.
+								This is my manifesto.
 								<br />
 								Not a pitch. Not a promise of features.
 								<br />
-								A statement of what we believe.
+								A statement of what I believe.
+							</p>
+							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed mb-6">
+								And if you believe it too—
 							</p>
 							<p class="text-xl md:text-2xl text-white font-serif leading-relaxed">
-								If this sounds like home,
-								<br />
 								<span class="text-amber-300">welcome to the Grove.</span>
 							</p>
 						</div>

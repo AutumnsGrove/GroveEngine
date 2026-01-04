@@ -40,7 +40,7 @@
 				'5 GB storage',
 				'10 themes',
 				'Email forwarding',
-				'Priority email support',
+				'Centennial eligible',
 				'Everything in Seedling'
 			],
 			highlight: 'popular',
@@ -57,7 +57,7 @@
 				'20 GB storage',
 				'Theme customizer',
 				'Bring your own domain',
-				'Full email suite',
+				'Centennial eligible',
 				'Priority support'
 			],
 			highlight: 'value',
@@ -74,7 +74,7 @@
 				'100 GB storage',
 				'Custom fonts',
 				'Domain included',
-				'Domain search & registration',
+				'Centennial eligible',
 				'8 hrs/mo dedicated support'
 			],
 			highlight: null,

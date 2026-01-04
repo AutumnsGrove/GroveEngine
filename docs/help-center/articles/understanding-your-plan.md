@@ -21,6 +21,7 @@ Here's what each Grove plan includes—and what happens when you approach your l
 | **Themes** | 3 | 10 | All + customizer | All + custom fonts |
 | **Custom domain** | — | — | BYOD | Included |
 | **Email** | — | Forwarding | Full mailbox | Full mailbox |
+| **Centennial** | — | ✓ | ✓ | ✓ |
 
 ## What counts toward limits
 
@@ -127,6 +128,16 @@ Good for: Professional presence, high-volume media, businesses.
 **Same with storage.** Over the limit? Existing files stay. You just can't upload more.
 
 Grove doesn't delete your content because you downgraded. We want you to stay because you want to, not because you're trapped.
+
+## Centennial status (Sapling+)
+
+After 12 cumulative months on Sapling, Oak, or Evergreen, your grove earns **Centennial status**. This means your site stays online for 100 years from the day you planted it.
+
+- **Automatic:** No application needed. After 12 months, you're in.
+- **Preserved even if you leave:** If you stop paying after earning Centennial, your site becomes a read-only archive. Your words stay online.
+- **Opt-out available:** If you'd rather your site disappear when you leave, you can disable preservation in Settings.
+
+A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.
 
 ---
 
