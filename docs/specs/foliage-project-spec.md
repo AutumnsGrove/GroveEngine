@@ -1,179 +1,134 @@
-# Foliage — Theme System Project Specification
+# Foliage Project Specification
 
-> *Foliage: The leaves, the color, the personality. No two canopies are quite the same.*
+## Overview Section
 
 **Internal Name:** GroveThemes
 **Public Name:** Foliage
 **Repository:** `AutumnsGrove/Foliage`
 **Package:** `@autumnsgrove/foliage`
-**Status:** Package implemented, pending GroveEngine integration
 
----
-
-## Overview
-
-Foliage is Grove's theme system, providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities: make your blog feel like *yours*.
-
-This project is extracted from GroveEngine to be:
-1. **Independently testable** — theme logic separate from engine
-2. **Reusable** — can power theming across Grove properties
-3. **Maintainable** — focused codebase for theme development
-
----
+Foliage is Grove's theme system enabling visual customization from accent colors to full theme customizers. The project is extracted from GroveEngine to be independently testable, reusable across Grove properties, and maintainable as a focused codebase.
 
 ## Design Philosophy
 
-- **Personal expression:** Your blog should reflect your personality
-- **Guardrails:** Even with customization, blogs should remain readable
-- **Progressive enhancement:** More customization unlocks at higher tiers
-- **Community:** Users can share and discover themes (Oak+)
-
----
+- **Personal expression:** Blogs should reflect user personality
+- **Guardrails:** Customization maintains readability standards
+- **Progressive enhancement:** More features unlock at higher subscription tiers
+- **Community:** Users can share and discover themes (Oak+ tier)
 
 ## Tier Access Matrix
 
 | Tier | Themes | Accent Color | Customizer | Community | Custom Fonts |
-|------|:------:|:------------:|:----------:|:---------:|:------------:|
+|------|--------|--------------|-----------|-----------|--------------|
 | **Free** | — | — | — | — | — |
 | **Seedling** | 3 | Custom | — | — | — |
 | **Sapling** | 10 | Custom | — | — | — |
 | **Oak** | 10 | Custom | Full | Import | — |
 | **Evergreen** | 10 | Custom | Full | Import | Upload |
 
----
-
 ## Core Features
 
 ### 1. Accent Color (All Paid Tiers)
 
-A single color tinting interactive elements:
-- Links, buttons, hover states
-- Selection highlights
-- Blockquote borders
-- Code block accents
-
-Collected during signup (favorite color) or changed in Settings.
-
-```css
-:root {
-  --accent-color: #4f46e5;
-  --accent-color-light: color-mix(in srgb, var(--accent-color) 20%, white);
-  --accent-color-dark: color-mix(in srgb, var(--accent-color) 80%, black);
-}
-```
-
----
+Single color tinting interactive elements including links, buttons, hover states, selection highlights, blockquote borders, and code block accents. Collected during signup or changeable in Settings using CSS variables with color-mix for light/dark variants.
 
 ### 2. Curated Themes (10 Total)
 
 | # | Theme | Vibe | Layout | Tier |
 |---|-------|------|--------|------|
-| 1 | **Grove** | Warm, earthy, cozy | Sidebar | Seedling+ |
-| 2 | **Minimal** | Clean, typography-focused | No sidebar | Seedling+ |
-| 3 | **Night Garden** | Dark mode, gentle greens | Sidebar | Seedling+ |
-| 4 | **Zine** | Bold, magazine-style | Grid | Sapling+ |
-| 5 | **Moodboard** | Pinterest-style | Masonry | Sapling+ |
-| 6 | **Typewriter** | Retro, monospace, paper | Centered | Sapling+ |
-| 7 | **Solarpunk** | Bright, optimistic | Full-width | Sapling+ |
-| 8 | **Cozy Cabin** | Warm browns, intimate | Sidebar | Sapling+ |
-| 9 | **Ocean** | Cool blues, calm | No sidebar | Sapling+ |
-| 10 | **Wildflower** | Colorful, playful | Flexible | Sapling+ |
+| 1 | Grove | Warm, earthy, cozy | Sidebar | Seedling+ |
+| 2 | Minimal | Clean, typography-focused | No sidebar | Seedling+ |
+| 3 | Night Garden | Dark mode, gentle greens | Sidebar | Seedling+ |
+| 4 | Zine | Bold, magazine-style | Grid | Sapling+ |
+| 5 | Moodboard | Pinterest-style | Masonry | Sapling+ |
+| 6 | Typewriter | Retro, monospace, paper | Centered | Sapling+ |
+| 7 | Solarpunk | Bright, optimistic | Full-width | Sapling+ |
+| 8 | Cozy Cabin | Warm browns, intimate | Sidebar | Sapling+ |
+| 9 | Ocean | Cool blues, calm | No sidebar | Sapling+ |
+| 10 | Wildflower | Colorful, playful | Flexible | Sapling+ |
 
-Seedlings get 3 themes (Grove, Minimal, Night Garden), representing core archetypes.
-
----
+Seedlings access three core themes (Grove, Minimal, Night Garden) representing fundamental archetypes.
 
 ### 3. Theme Customizer (Oak+)
 
-Full control over appearance:
-
-| Section | Options |
-|---------|---------|
-| **Colors** | Background, text, accents, borders, surfaces |
-| **Typography** | Heading font, body font, sizes, line height |
-| **Layout** | Sidebar yes/no, max width, spacing |
-| **Spacing** | Margins, padding, gap sizes |
-| **Effects** | Border radius, shadows, transitions |
-| **Custom CSS** | Raw CSS for advanced users (max 10KB, validated) |
-
----
+Full control over appearance with sections for:
+- **Colors:** Background, text, accents, borders, surfaces
+- **Typography:** Heading font, body font, sizes, line height
+- **Layout:** Sidebar toggle, max width, spacing
+- **Spacing:** Margins, padding, gap sizes
+- **Effects:** Border radius, shadows, transitions
+- **Custom CSS:** Raw CSS for advanced users (max 10KB, validated)
 
 ### 4. Custom Fonts (Evergreen Only)
 
-Upload up to 4 custom fonts:
+Upload up to 10 custom fonts with specifications:
 - **Formats:** WOFF2 (required), WOFF (optional fallback)
 - **Size limit:** 500KB per file
 - **Storage:** R2 under user's allocation
 - **Validation:** Magic byte verification, font parsing, sanitized names
 
----
-
 ### 5. Community Themes (Oak+)
 
-Users share customizations with the community:
+Users share customizations with the community supporting:
 - Browse and import themes
 - Rating and download tracking
 - Moderation queue for quality
 - Fork and modify support
 - Attribution to original creator
 
----
-
 ## Project Structure
 
 ```
 foliage/
 ├── src/
-│   ├── lib/
-│   │   ├── themes/
-│   │   │   ├── index.ts           # Theme exports
-│   │   │   ├── grove.ts           # Grove theme definition
-│   │   │   ├── minimal.ts
-│   │   │   ├── night-garden.ts
-│   │   │   ├── zine.ts
-│   │   │   ├── moodboard.ts
-│   │   │   ├── typewriter.ts
-│   │   │   ├── solarpunk.ts
-│   │   │   ├── cozy-cabin.ts
-│   │   │   ├── ocean.ts
-│   │   │   └── wildflower.ts
-│   │   ├── components/
-│   │   │   ├── ThemeSelector.svelte
-│   │   │   ├── ThemePreview.svelte
-│   │   │   ├── AccentColorPicker.svelte
-│   │   │   ├── ThemeCustomizer.svelte
-│   │   │   ├── ColorPanel.svelte
-│   │   │   ├── TypographyPanel.svelte
-│   │   │   ├── LayoutPanel.svelte
-│   │   │   ├── CustomCSSEditor.svelte
-│   │   │   └── FontUploader.svelte
-│   │   ├── server/
-│   │   │   ├── theme-loader.ts    # Load theme from D1
-│   │   │   ├── theme-saver.ts     # Save theme settings
-│   │   │   ├── font-validator.ts  # WOFF2 validation
-│   │   │   └── css-validator.ts   # Custom CSS sanitization
-│   │   ├── utils/
-│   │   │   ├── contrast.ts        # WCAG contrast checking
-│   │   │   ├── css-vars.ts        # CSS variable generation
-│   │   │   └── tier-access.ts     # Feature gating by tier
-│   │   └── types.ts               # Theme interfaces
-│   └── index.ts                   # Package entry point
+│ ├── lib/
+│ │ ├── themes/
+│ │ │ ├── index.ts # Theme exports
+│ │ │ ├── grove.ts # Grove theme definition
+│ │ │ ├── minimal.ts
+│ │ │ ├── night-garden.ts
+│ │ │ ├── zine.ts
+│ │ │ ├── moodboard.ts
+│ │ │ ├── typewriter.ts
+│ │ │ ├── solarpunk.ts
+│ │ │ ├── cozy-cabin.ts
+│ │ │ ├── ocean.ts
+│ │ │ └── wildflower.ts
+│ │ ├── components/
+│ │ │ ├── ThemeSelector.svelte
+│ │ │ ├── ThemePreview.svelte
+│ │ │ ├── AccentColorPicker.svelte
+│ │ │ ├── ThemeCustomizer.svelte
+│ │ │ ├── ColorPanel.svelte
+│ │ │ ├── TypographyPanel.svelte
+│ │ │ ├── LayoutPanel.svelte
+│ │ │ ├── CustomCSSEditor.svelte
+│ │ │ └── FontUploader.svelte
+│ │ ├── server/
+│ │ │ ├── theme-loader.ts # Load theme from D1
+│ │ │ ├── theme-saver.ts # Save theme settings
+│ │ │ ├── font-validator.ts # WOFF2 validation
+│ │ │ └── css-validator.ts # Custom CSS sanitization
+│ │ ├── utils/
+│ │ │ ├── contrast.ts # WCAG contrast checking
+│ │ │ ├── css-vars.ts # CSS variable generation
+│ │ │ └── tier-access.ts # Feature gating by tier
+│ │ └── types.ts # Theme interfaces
+│ └── index.ts # Package entry point
 ├── migrations/
-│   ├── 001_theme_settings.sql
-│   ├── 002_custom_fonts.sql
-│   └── 003_community_themes.sql
+│ ├── 001_theme_settings.sql
+│ ├── 002_custom_fonts.sql
+│ └── 003_community_themes.sql
 ├── tests/
-│   ├── themes.test.ts
-│   ├── customizer.test.ts
-│   ├── contrast.test.ts
-│   └── css-validator.test.ts
+│ ├── themes.test.ts
+│ ├── customizer.test.ts
+│ ├── contrast.test.ts
+│ └── css-validator.test.ts
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
 └── README.md
 ```
-
----
 
 ## TypeScript Interfaces
 
@@ -240,8 +195,6 @@ export interface CustomFont {
 export type UserTier = 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
 ```
 
----
-
 ## Database Schema
 
 ### theme_settings
@@ -252,9 +205,9 @@ CREATE TABLE theme_settings (
   theme_id TEXT NOT NULL DEFAULT 'grove',
   accent_color TEXT DEFAULT '#4f46e5',
   customizer_enabled INTEGER DEFAULT 0,
-  custom_colors TEXT,      -- JSON
-  custom_typography TEXT,  -- JSON
-  custom_layout TEXT,      -- JSON
+  custom_colors TEXT, -- JSON
+  custom_typography TEXT, -- JSON
+  custom_layout TEXT, -- JSON
   custom_css TEXT,
   community_theme_id TEXT,
   updated_at INTEGER DEFAULT (unixepoch()),
@@ -291,7 +244,7 @@ CREATE TABLE community_themes (
   creator_tenant_id TEXT NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
-  tags TEXT,  -- JSON array
+  tags TEXT, -- JSON array
   base_theme TEXT NOT NULL,
   custom_colors TEXT,
   custom_typography TEXT,
@@ -313,11 +266,7 @@ CREATE INDEX idx_community_themes_status ON community_themes(status);
 CREATE INDEX idx_community_themes_creator ON community_themes(creator_tenant_id);
 ```
 
----
-
 ## Integration with GroveEngine
-
-Foliage integrates with GroveEngine via:
 
 ### 1. Package Export
 
@@ -357,185 +306,57 @@ export const load = async ({ locals }) => {
 };
 ```
 
----
-
 ## Implementation Phases
 
 ### Phase 1: Foundation (Week 1-2)
-- [ ] Initialize repository with SvelteKit library mode
-- [ ] Set up TypeScript, Vitest, ESLint
-- [ ] Implement CSS variable system
-- [ ] Create `applyThemeVariables()` utility
-- [ ] Build `AccentColorPicker` component
-- [ ] Write theme_settings migration
+
+- Initialize repository with SvelteKit library mode
+- Set up TypeScript, Vitest, ESLint
+- Implement CSS variable system
+- Create `applyThemeVariables()` utility
+- Build `AccentColorPicker` component
+- Write theme_settings migration
 
 ### Phase 2: Curated Themes (Week 3-4)
-- [ ] Design and implement Grove theme (default)
-- [ ] Design and implement Minimal theme
-- [ ] Design and implement Night Garden theme
-- [ ] Build `ThemeSelector` component
-- [ ] Build `ThemePreview` component
-- [ ] Add tier gating logic
+
+- Design and implement Grove theme (default)
+- Design and implement Minimal theme
+- Design and implement Night Garden theme
+- Build `ThemeSelector` component
+- Build `ThemePreview` component
+- Add tier gating logic
 
 ### Phase 3: Remaining Themes (Week 5-6)
-- [ ] Implement Zine, Moodboard, Typewriter
-- [ ] Implement Solarpunk, Cozy Cabin, Ocean, Wildflower
-- [ ] Add theme thumbnails
-- [ ] Complete theme preview functionality
+
+- Implement Zine, Moodboard, Typewriter
+- Implement Solarpunk, Cozy Cabin, Ocean, Wildflower
+- Add theme thumbnails
+- Complete theme preview functionality
 
 ### Phase 4: Customizer (Week 7-9)
-- [ ] Build customizer sidebar UI
-- [ ] Implement live preview
-- [ ] Build ColorPanel component
-- [ ] Build TypographyPanel component
-- [ ] Build LayoutPanel component
-- [ ] Implement CustomCSSEditor with validation
-- [ ] Add reset to default
+
+- Build customizer sidebar UI
+- Implement live preview
+- Build ColorPanel component
+- Build TypographyPanel component
+- Build LayoutPanel component
+- Implement CustomCSSEditor with validation
+- Add reset to default
 
 ### Phase 5: Custom Fonts (Week 10)
-- [ ] Build FontUploader component
-- [ ] Implement WOFF2 validation (magic bytes, parsing)
-- [ ] Add R2 storage integration
-- [ ] Add font limit enforcement (4 per tenant)
+
+- Build FontUploader component
+- Implement WOFF2 validation (magic bytes, parsing)
+- Add R2 storage integration
+- Add font limit enforcement (10 per tenant)
 
 ### Phase 6: Community Themes (Week 11-13)
-- [ ] Build theme sharing flow
-- [ ] Create community theme browser
-- [ ] Implement theme import
-- [ ] Build moderation queue
-- [ ] Add rating and download tracking
 
----
-
-## GroveEngine Integration Implementation
-
-> **Status:** Ready to implement
-> **Prerequisite:** Foliage package published to npm
-
-This section covers integrating `@autumnsgrove/foliage` into GroveEngine for per-tenant theming.
-
-### Infrastructure Requirements
-
-**Database Migrations:**
-Copy Foliage migrations to GroveEngine (renumber as needed):
-- `migrations/014_theme_settings.sql`
-- `migrations/015_custom_fonts.sql`
-- `migrations/016_community_themes.sql`
-
-**R2 Bucket for Custom Fonts:**
-```toml
-# In wrangler.toml (or sst.config.ts when migrated)
-[[r2_buckets]]
-binding = "FONTS_BUCKET"
-bucket_name = "foliage-fonts"
-```
-
-### Layout Integration
-
-**Server-side theme loading:**
-```typescript
-// packages/engine/src/routes/+layout.server.ts
-import { loadThemeSettings } from '@autumnsgrove/foliage/server';
-
-export const load = async ({ platform, locals }) => {
-  const themeSettings = locals.tenantId
-    ? await loadThemeSettings(platform.env.DB, locals.tenantId)
-    : null;
-
-  return {
-    tenant: locals.tenant,
-    themeSettings,
-  };
-};
-```
-
-**Client-side theme application:**
-```svelte
-<!-- packages/engine/src/routes/+layout.svelte -->
-<script lang="ts">
-  import { generateThemeVariables, getTheme } from '@autumnsgrove/foliage';
-
-  let { data, children } = $props();
-
-  const themeCSS = $derived(() => {
-    if (!data.themeSettings) return '';
-    const baseTheme = getTheme(data.themeSettings.themeId);
-    return generateThemeVariables({
-      ...baseTheme,
-      colors: {
-        ...baseTheme.colors,
-        ...data.themeSettings.customColors,
-        accent: data.themeSettings.accentColor,
-      },
-    });
-  });
-</script>
-
-<svelte:head>
-  {#if themeCSS}
-    {@html `<style>:root { ${themeCSS} }</style>`}
-  {/if}
-</svelte:head>
-
-{@render children()}
-```
-
-### Admin Routes
-
-Create theme management pages in engine admin:
-
-| Route | Component | Tier |
-|-------|-----------|------|
-| `/admin/themes` | `ThemeSelector` | All paid |
-| `/admin/themes/customize` | `ThemeCustomizer` | Oak+ |
-| `/admin/themes/community` | `CommunityThemeBrowser` | Oak+ |
-| `/admin/themes/fonts` | `FontUploader` | Evergreen |
-
-### API Routes
-
-```typescript
-// packages/engine/src/routes/api/themes/+server.ts
-import { loadThemeSettings, saveThemeSettings } from '@autumnsgrove/foliage/server';
-import { canUseCustomizer } from '@autumnsgrove/foliage';
-import { json } from '@sveltejs/kit';
-
-export const GET = async ({ platform, locals }) => {
-  const settings = await loadThemeSettings(platform.env.DB, locals.tenantId);
-  return json(settings);
-};
-
-export const PATCH = async ({ platform, locals, request }) => {
-  const body = await request.json();
-
-  // Tier-gate customizer features
-  if (body.customColors && !canUseCustomizer(locals.tenant.tier)) {
-    return json({ error: 'Oak+ required' }, { status: 403 });
-  }
-
-  await saveThemeSettings(platform.env.DB, {
-    tenantId: locals.tenantId,
-    ...body,
-  });
-
-  return json({ success: true });
-};
-```
-
-### Integration Checklist
-
-- [ ] Install: `pnpm add @autumnsgrove/foliage --filter @autumnsgrove/groveengine`
-- [ ] Copy migrations (014, 015, 016) to engine
-- [ ] Run migrations against D1
-- [ ] Create R2 bucket for fonts
-- [ ] Update `+layout.server.ts` to load theme settings
-- [ ] Update `+layout.svelte` to apply theme CSS vars
-- [ ] Create `/admin/themes/` routes with Foliage components
-- [ ] Create `/api/themes/` CRUD endpoints
-- [ ] Wire up tier checks (`canAccessTheme`, `canUseCustomizer`, etc.)
-- [ ] Test light/dark mode toggle with themes
-- [ ] Test Midnight Bloom theme (purple accent for example tenant)
-
----
+- Build theme sharing flow
+- Create community theme browser
+- Implement theme import
+- Build moderation queue
+- Add rating and download tracking
 
 ## Accessibility Requirements
 
@@ -555,11 +376,9 @@ export function meetsWCAGAA(fg: string, bg: string): boolean;
 export function validateThemeContrast(theme: Theme): ValidationResult;
 ```
 
----
-
 ## Custom CSS Security
 
-Restrictions:
+**Restrictions:**
 - No `@import` (prevents external resource loading)
 - No `url()` except safe font sources
 - Max 10KB
@@ -582,15 +401,13 @@ export function validateCustomCSS(css: string): ValidationResult {
 }
 ```
 
----
-
 ## Package.json Template
 
 ```json
 {
   "name": "@autumnsgrove/foliage",
   "version": "0.1.0",
-  "description": "Theming system for Grove — make your blog feel like yours",
+  "description": "Theme system for Grove — personal expression with modern guardrails",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -645,34 +462,28 @@ export function validateCustomCSS(css: string): ValidationResult {
 }
 ```
 
----
-
 ## Repository Initialization Checklist
 
-When creating the Foliage repository:
-
-- [ ] Create `AutumnsGrove/Foliage` on GitHub
-- [ ] Initialize with `pnpm create svelte@latest` (library mode)
-- [ ] Copy this spec to `docs/PROJECT-SPEC.md`
-- [ ] Create `AGENT.md` with project-specific instructions
-- [ ] Set up GitHub Actions for CI
-- [ ] Add AGPL-3.0 license
-- [ ] Create migrations directory
-- [ ] Set up Vitest for testing
-- [ ] Add Svelte 5 type definitions
-- [ ] Configure package exports
-
----
+- Create `AutumnsGrove/Foliage` on GitHub
+- Initialize with `pnpm create svelte@latest` (library mode)
+- Copy this spec to `docs/PROJECT-SPEC.md`
+- Create `AGENT.md` with project-specific instructions
+- Set up GitHub Actions for CI
+- Add AGPL-3.0 license
+- Create migrations directory
+- Set up Vitest for testing
+- Add Svelte 5 type definitions
+- Configure package exports
 
 ## Success Metrics
 
-- [ ] All 10 themes meet WCAG AA contrast
-- [ ] Theme load time < 50ms
-- [ ] Customizer live preview < 100ms latency
-- [ ] Custom CSS validation < 10ms
-- [ ] Font upload validation < 500ms
-- [ ] Zero XSS vulnerabilities in custom CSS
+- All 10 themes meet WCAG AA contrast
+- Theme load time < 50ms
+- Customizer live preview < 100ms latency
+- Custom CSS validation < 10ms
+- Font upload validation < 500ms
+- Zero XSS vulnerabilities in custom CSS
 
 ---
 
-*Foliage enables personal expression while maintaining the quality and accessibility that Grove promises. From simple accent colors to full custom themes, every user can make their space feel like home.*
+**Summary:** Foliage enables personal expression while maintaining quality and accessibility that Grove promises. From simple accent colors to full custom themes, every user can make their space feel like home.
