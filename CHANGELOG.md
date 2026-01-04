@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-01-04
+
+### Added
+- **Glass Design System**: Complete implementation of glassmorphism UI across Forest, Plant, Admin, and Domains pages with browser fallbacks
+- **Typography Components**: New `@autumnsgrove/groveengine/ui/typography` package with scoped font application and showcase
+- **Vineyard Showcase**: New `vineyard.grove.place` site displaying component library and asset gallery
+- **Manifesto Page**: Personal vision page with midnight bloom aesthetic and community values
+- **Workshop Page Reorganization**: Categorized sections with Grove ecosystem tools and patterns
+- **Help Center**: 6 new articles covering browser compatibility, privacy, replies vs comments, formatting, and writing guides
+- **Pattern Library Additions**:
+  - **Songbird Pattern**: Prompt injection protection with multi-layer security (Canary, Kestrel, Robin)
+  - **Prism Pattern**: Glass design system documentation
+  - **Firefly Pattern**: Ephemeral server pattern for real-time features
+  - **Loom Pattern**: Durable Objects coordination system
+- **Vista Analytics Engine**: Privacy-first analytics with Rings integration and threshold monitoring
+- **Onboarding Email Sequence**: Automated welcome series for waitlist signups with Resend integration
+- **Dynamic OG Image Generation**: Standalone Worker for social sharing with glass panels and seasonal themes
+- **Pricing Page Redesign**: Glass aesthetic with tier comparison and accessibility improvements
+
+### Changed
+- **Navigation**: Standardized Lucide icons across all components with consistent naming
+- **Logo System**: Enhanced breathing animation with seasonal variants (summer as default)
+- **Domain Pages**: Unified glass design system with consistent borders and dark mode visibility
+- **Workshop Tools**: Added missing Grove ecosystem tools (Vineyard, Mycelium, Vista, etc.)
+- **Documentation**: Standardized frontmatter across 30+ spec files with Grove naming conventions
+- **Build System**: Improved Svelte 5 reactive patterns and defensive coding practices
+
+### Fixed
+- **Deployment Issues**: Resolved GitHub Actions failures and critical build errors
+- **Accessibility**: Improved keyboard navigation, screen reader support, and mobile responsiveness
+- **Browser Compatibility**: Enhanced glass system fallbacks for older browsers
+- **Routing**: Fixed Shade routing and CSRF validation for Turnstile verification
+- **Documentation Links**: Resolved broken internal links causing prerendering failures
+
+### Breaking Changes
+- **Import Paths**: Nature components now require `@autumnsgrove/groveengine/ui/nature` import instead of local paths
+- **Spec Naming**: All specification files renamed with Grove ecosystem names (affects cross-references)
+
 ## [0.8.0] - 2025-12-29
 
 ### Added
