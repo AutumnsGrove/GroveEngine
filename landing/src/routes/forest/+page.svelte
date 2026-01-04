@@ -18,6 +18,8 @@
 		Cardinal, Chickadee, Robin, Bluebird,
 		// Sky
 		Cloud,
+		// Color palettes
+		spring, autumn, winter, greens, springBlossoms, autumnReds, bark,
 		// Type
 		type Season
 	} from '@autumnsgrove/groveengine/ui/nature';
