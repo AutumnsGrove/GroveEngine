@@ -18,13 +18,12 @@
 		Cardinal, Chickadee, Robin, Bluebird,
 		// Sky
 		Cloud,
-		// Palette
-		greens, bark, autumn, pinks, autumnReds, winter, spring, springBlossoms,
+		// Type
 		type Season
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Import glass components
-	import { Glass, GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { Glass } from '@autumnsgrove/groveengine/ui';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
@@ -783,138 +782,6 @@
 			</Glass>
 		</div>
 	</article>
-
-	<!-- Color Palette Showcase - Below the forest -->
-	<section class="py-12 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-divider">
-		<div class="max-w-4xl mx-auto">
-			<div class="text-center mb-8">
-				<Glass variant="tint" intensity="light" class="inline-block px-8 py-3 rounded-xl">
-					<h2 class="text-2xl font-serif text-foreground">Forest Palette</h2>
-				</Glass>
-			</div>
-
-			<div class="grid md:grid-cols-2 gap-6">
-				<!-- Spring Colors -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(spring).slice(0, 9) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Summer Greens -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(greens) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Autumn Colors -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(autumn) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Winter Colors -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Winter Frost</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(winter) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Cherry/Pink -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Cherry Blossoms</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(pinks) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Bark/Earth -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Bark & Earth</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(bark) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-			</div>
-
-			<!-- Asset viewer link -->
-			<div class="text-center mt-8">
-				<GlassCard variant="frosted" hoverable class="inline-block max-w-xs">
-					<a
-						href="/tools"
-						class="inline-flex items-center gap-2 text-foreground font-sans text-sm"
-					>
-						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
-							<path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
-							<path d="M14.5 17.5 4.5 15" />
-						</svg>
-						Explore All Assets
-					</a>
-				</GlassCard>
-			</div>
-		</div>
-	</section>
 
 	<div class="relative z-10">
 		<Footer />
