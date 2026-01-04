@@ -448,6 +448,17 @@
 						</div>
 					</section>
 
+					<!-- Bridge to Vision -->
+					<section class="pt-12">
+						<a
+							href="/vision"
+							class="group inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-serif text-lg"
+						>
+							<span class="italic">But loss isn't the whole story</span>
+							<span class="group-hover:translate-x-1 transition-transform">→</span>
+						</a>
+					</section>
+
 				</div>
 			</div>
 		</div>
