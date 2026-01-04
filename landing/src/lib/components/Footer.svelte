@@ -12,7 +12,8 @@
 		PenLine,
 		Hammer,
 		Scroll,
-		Grape
+		Grape,
+		Trees
 	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
@@ -67,6 +68,12 @@
 						<a href="/roadmap/workshop" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
 							<Hammer class="w-4 h-4" />
 							Workshop
+						</a>
+					</li>
+					<li>
+						<a href="/forest" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Trees class="w-4 h-4" />
+							Forest
 						</a>
 					</li>
 					<li>

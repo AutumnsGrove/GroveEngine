@@ -38,7 +38,7 @@
 		Pond, LilyPad, Reeds, Stream,
 		Leaf, LeafFalling, PetalFalling, Acorn, PineCone, Berry, DandelionPuff, Vine,
 		Lattice as LatticeStructure, LatticeWithVine, Birdhouse, GardenGate, FencePost, StonePath, Bridge, Lantern,
-		greens, bark, earth, natural, autumn, pinks, autumnReds, accents
+		greens, bark, earth, natural, autumn, pinks, autumnReds, accents, spring, springBlossoms, winter
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Section expansion state
@@ -721,6 +721,207 @@
 					</div>
 				</div>
 			{/if}
+		</div>
+	</section>
+
+	<!-- Color Palette System - Full Grove palette collection -->
+	<section class="py-12 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-divider">
+		<div class="max-w-4xl mx-auto">
+			<div class="text-center mb-8">
+				<Glass variant="tint" intensity="light" class="inline-block px-8 py-3 rounded-xl">
+					<h2 class="text-2xl font-serif text-foreground">Color Palettes</h2>
+					<p class="text-sm text-foreground-muted mt-1">The complete Grove palette system</p>
+				</Glass>
+			</div>
+
+			<div class="grid md:grid-cols-2 gap-6">
+				<!-- Spring Growth -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(spring).slice(0, 9) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Summer Greens -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(greens) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Autumn Colors -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(autumn) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Autumn Reds -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Reds</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(autumnReds) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Winter Frost -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Winter Frost</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(winter) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Cherry Blossoms -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Cherry Blossoms</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(pinks) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Spring Blossoms -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Blossoms</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(springBlossoms) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Bark & Earth -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Bark & Earth</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(bark) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Earth Tones -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Earth Tones</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(earth) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Natural -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Natural</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(natural) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+
+				<!-- Accents -->
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Accents</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(accents) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</Glass>
+			</div>
 		</div>
 	</section>
 
