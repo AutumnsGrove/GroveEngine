@@ -58,7 +58,7 @@
 	let expandedSection = $state<'glass' | 'nature' | 'typography' | null>('glass');
 
 	// Typography state
-	let selectedFont = $state<FontId>('alagard');
+	let selectedFont = $state<FontId>('lexend');
 
 	// Glass component demos state
 	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('card');
@@ -770,14 +770,14 @@
 			{#if expandedSection === 'typography'}
 				<div id="typography-section-content" class="space-y-8 animate-in slide-in-from-top-2 duration-300">
 					<!-- FontProvider (Dynamic Selection) -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex flex-wrap items-center gap-2">
 							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;FontProvider&gt;</code>
 							<span class="text-sm font-normal text-foreground-muted">Dynamic font selection</span>
 						</h3>
 
 						<div class="space-y-4">
-							<div class="flex flex-wrap gap-2">
+							<div class="flex flex-wrap gap-1.5 sm:gap-2">
 								{#each fonts as f}
 									<button
 										class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-foreground hover:bg-slate-200 dark:hover:bg-slate-600'}"
@@ -785,8 +785,15 @@
 									>{f.name}</button>
 								{/each}
 							</div>
-							<div class="p-6 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-white/60 dark:border-slate-600/60">
-								<FontProvider font={selectedFont} as="p" class="text-2xl text-foreground">
+							<div class="p-4 sm:p-6 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-white/60 dark:border-slate-600/60">
+								<div class="flex items-center justify-between mb-3">
+									<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium">
+										<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+										{fonts.find(f => f.id === selectedFont)?.name}
+									</span>
+									<span class="text-xs text-foreground-faint">{fonts.find(f => f.id === selectedFont)?.category}</span>
+								</div>
+								<FontProvider font={selectedFont} as="p" class="text-xl sm:text-2xl text-foreground">
 									The quick brown fox jumps over the lazy dog.
 								</FontProvider>
 								<p class="text-sm text-foreground-muted mt-2">
@@ -797,10 +804,10 @@
 					</div>
 
 					<!-- Display Fonts -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Display & Special Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">Eye-catching fonts for headers and special moments</p>
-						<div class="space-y-4">
+						<div class="space-y-3 sm:space-y-4">
 							<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg">
 								<Alagard as="h2" class="text-2xl text-purple-900 dark:text-purple-100 mb-2">
 									Welcome to the Fantasy Realm
@@ -823,10 +830,10 @@
 					</div>
 
 					<!-- Serif Fonts -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Serif Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">Classic elegance for body text and refined headers</p>
-						<div class="grid md:grid-cols-2 gap-4">
+						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
 							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
 								<Cormorant as="h4" class="text-xl text-foreground mb-1">Cormorant</Cormorant>
 								<Cormorant as="p" class="text-foreground-muted text-sm">Elegant display serif inspired by Garamond.</Cormorant>
@@ -855,10 +862,10 @@
 					</div>
 
 					<!-- Sans-Serif Fonts -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Sans-Serif Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">Clean, modern fonts for interfaces and body text</p>
-						<div class="grid md:grid-cols-2 gap-4">
+						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
 							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
 								<Lexend as="h4" class="text-xl text-foreground mb-1">Lexend (Default)</Lexend>
 								<Lexend as="p" class="text-foreground-muted text-sm">Modern, highly readable. Grove's default font.</Lexend>
@@ -887,10 +894,10 @@
 					</div>
 
 					<!-- Monospace Fonts -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Monospace Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">For code, terminals, and technical content</p>
-						<div class="space-y-4">
+						<div class="space-y-3 sm:space-y-4">
 							<div class="p-4 bg-slate-900 rounded-lg">
 								<IBMPlexMono as="code" class="text-grove-400 block mb-2">
 									// IBM Plex Mono - corporate warmth
@@ -912,10 +919,10 @@ $ npm run dev
 					</div>
 
 					<!-- Accessibility Fonts -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Accessibility Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">Designed for maximum readability and inclusion</p>
-						<div class="grid md:grid-cols-3 gap-4">
+						<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 							<div class="p-4 bg-grove-50 dark:bg-grove-900/40 rounded-lg border border-grove-200 dark:border-grove-700">
 								<Atkinson as="h4" class="text-lg text-grove-900 dark:text-grove-100 mb-2">Atkinson Hyperlegible</Atkinson>
 								<Atkinson as="p" class="text-grove-700 dark:text-grove-300 text-sm">
@@ -938,7 +945,7 @@ $ npm run dev
 					</div>
 
 					<!-- Usage Example -->
-					<div class="p-6 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-dashed border-purple-300 dark:border-purple-800">
+					<div class="p-4 sm:p-6 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-dashed border-purple-300 dark:border-purple-800">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Usage</h3>
 						<IBMPlexMono as="pre" class="p-4 bg-slate-900 rounded-lg text-slate-100 text-sm overflow-x-auto">{`import { Alagard, Caveat, IBMPlexMono } from '@autumnsgrove/groveengine/ui/typography';
 
