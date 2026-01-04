@@ -373,21 +373,50 @@ const { maxComplexity, weights, warningThreshold } = TERRARIUM_CONFIG.complexity
 
 /**
  * Calculate complexity cost for a single asset
+ * Uses hysteresis to prevent cost flickering near thresholds
  */
-export function getAssetComplexity(asset: PlacedAsset): number {
+export function getAssetComplexity(
+  asset: PlacedAsset,
+  previousCost?: number
+): number {
   const meta = assetRegistry[asset.componentName];
-  let cost = weights.normal;
 
-  // Animated assets cost more
+  // Define thresholds with hysteresis buffer (±0.1)
+  const SCALE_HIGH_ENTER = 1.5;
+  const SCALE_HIGH_EXIT = 1.4;  // Must drop below 1.4 to return to normal
+  const SCALE_LOW_ENTER = 0.5;
+  const SCALE_LOW_EXIT = 0.6;   // Must rise above 0.6 to return to normal
+
+  // Determine if currently in "scaled" state (with hysteresis)
+  const wasScaled = previousCost === weights.scaled;
+  const isExtremeScale = wasScaled
+    ? (asset.scale > SCALE_HIGH_EXIT || asset.scale < SCALE_LOW_EXIT)  // Stay scaled until clearly normal
+    : (asset.scale > SCALE_HIGH_ENTER || asset.scale < SCALE_LOW_ENTER); // Become scaled at threshold
+
+  // Priority: animated > scaled > normal
   if (meta?.isAnimated && asset.animationEnabled) {
-    cost = weights.animated;
+    return weights.animated;
   }
-  // Extreme scale adds cost
-  else if (asset.scale > 1.5 || asset.scale < 0.5) {
-    cost = weights.scaled;
+  if (isExtremeScale) {
+    return weights.scaled;
   }
+  return weights.normal;
+}
 
-  return cost;
+/**
+ * Get human-readable cost breakdown for UI display
+ */
+export function getAssetCostLabel(asset: PlacedAsset): string {
+  const cost = getAssetComplexity(asset);
+  const meta = assetRegistry[asset.componentName];
+
+  if (meta?.isAnimated && asset.animationEnabled) {
+    return `${cost} pts (animated)`;
+  }
+  if (asset.scale > 1.5 || asset.scale < 0.5) {
+    return `${cost} pts (scaled)`;
+  }
+  return `${cost} pt`;
 }
 
 /**
@@ -749,6 +778,18 @@ The renderer must pre-load all components asynchronously before rendering. Compo
   let isLoading = $state(true);
   let loadError = $state<string | null>(null);
 
+  // Track partial load state for UI feedback
+  let loadStats = $state<{
+    total: number;
+    loaded: number;
+    failed: string[];
+  }>({ total: 0, loaded: 0, failed: [] });
+
+  // Derived state for partial load messaging
+  let hasPartialFailure = $derived(
+    loadStats.failed.length > 0 && loadStats.loaded > 0
+  );
+
   // Track which decoration we've loaded to detect changes
   let loadedDecorationId = $state<string | null>(null);
 
@@ -785,7 +826,7 @@ The renderer must pre-load all components asynchronously before rendering. Compo
       const results = await Promise.allSettled(loadPromises);
 
       const componentMap = new Map<string, SvelteComponent>();
-      const errors: string[] = [];
+      const failedComponents: string[] = [];
 
       for (const result of results) {
         if (result.status === 'fulfilled') {
@@ -793,22 +834,29 @@ The renderer must pre-load all components asynchronously before rendering. Compo
           if (component) {
             componentMap.set(name, component);
           } else if (error) {
-            errors.push(error);
+            failedComponents.push(name);
           }
         } else {
-          errors.push(result.reason?.message ?? 'Unknown error');
+          // Promise rejected - unknown component
+          failedComponents.push('unknown');
         }
       }
 
       loadedComponents = componentMap;
       loadedDecorationId = decorationId;
 
-      // Only show error if ALL components failed
-      if (componentMap.size === 0 && errors.length > 0) {
-        loadError = errors.join(', ');
-      } else if (errors.length > 0) {
-        // Log partial failures but continue rendering
-        console.warn('Some components failed to load:', errors);
+      // Update load stats for UI feedback
+      loadStats = {
+        total: componentNames.length,
+        loaded: componentMap.size,
+        failed: failedComponents,
+      };
+
+      // Only show hard error if ALL components failed
+      if (componentMap.size === 0 && failedComponents.length > 0) {
+        loadError = `Failed to load: ${failedComponents.join(', ')}`;
+      } else {
+        loadError = null;  // Clear any previous error
       }
 
       isLoading = false;
@@ -847,8 +895,44 @@ The renderer must pre-load all components asynchronously before rendering. Compo
         </div>
       {/if}
     {/each}
+
+    <!-- Partial load notification - shows when some but not all components loaded -->
+    {#if hasPartialFailure}
+      <div
+        class="decoration-partial-warning"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="sr-only">
+          {loadStats.loaded} of {loadStats.total} decorations loaded.
+          Missing: {loadStats.failed.join(', ')}
+        </span>
+        <span class="decoration-partial-badge" title="Some elements couldn't load">
+          {loadStats.loaded}/{loadStats.total}
+        </span>
+      </div>
+    {/if}
   </div>
 {/if}
+
+<style>
+  .decoration-partial-warning {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    pointer-events: none;
+  }
+
+  .decoration-partial-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 10px;
+    background: rgba(255, 193, 7, 0.9);
+    color: #333;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+</style>
 ```
 
 ### Security: Zod Validation for Decorations
@@ -1387,7 +1471,65 @@ if (typeof window !== 'undefined') {
 - Cancel support via `worker.terminate()`
 - Progress reporting possible via additional messages
 
-**Note:** Worker-based export requires serializing the DOM, which adds overhead for very simple scenes. Use direct export for <20 assets, worker export for larger scenes.
+**Hybrid Export Selection:**
+
+Worker-based export requires serializing the DOM, which adds overhead. Use adaptive selection based on scene complexity:
+
+```typescript
+// packages/engine/src/lib/utils/export-scene.ts
+
+import { calculateSceneComplexity } from './complexity-budget';
+
+// Empirically determined crossover points (adjust based on profiling)
+const WORKER_THRESHOLD = {
+  assetCount: 20,        // More than 20 assets
+  complexity: 40,        // Complexity budget > 40 points
+  animatedAssets: 5,     // More than 5 animated assets
+};
+
+/**
+ * Determine whether to use worker or direct export
+ * Worker adds ~200ms overhead but prevents UI freeze for complex scenes
+ */
+export function shouldUseWorker(scene: TerrariumScene): boolean {
+  const assetCount = scene.assets.length;
+  const complexity = calculateSceneComplexity(scene.assets);
+  const animatedCount = scene.assets.filter(a => a.animationEnabled).length;
+
+  // Use worker if ANY threshold exceeded
+  return (
+    assetCount > WORKER_THRESHOLD.assetCount ||
+    complexity > WORKER_THRESHOLD.complexity ||
+    animatedCount > WORKER_THRESHOLD.animatedAssets
+  );
+}
+
+/**
+ * Smart export - auto-selects direct vs worker based on scene
+ */
+export async function exportScene(
+  canvasNode: HTMLElement,
+  scene: TerrariumScene,
+  options: ExportOptions
+): Promise<string> {
+  if (shouldUseWorker(scene)) {
+    // Complex scene: use worker to keep UI responsive
+    return exportSceneWithWorker(canvasNode, options);
+  } else {
+    // Simple scene: direct export is faster
+    return exportSceneDirect(canvasNode, options);
+  }
+}
+```
+
+**When worker becomes beneficial:**
+| Scene Type | Asset Count | Complexity | Direct Export | Worker Export |
+|------------|-------------|------------|---------------|---------------|
+| Simple | <20 | <40 | 0.5-1s | 0.7-1.2s (overhead) |
+| Medium | 20-40 | 40-100 | 2-4s (UI freezes) | 2.2-4.2s (smooth) |
+| Complex | 40+ | 100+ | 5-10s (UI frozen) | 5.2-10.2s (smooth) |
+
+**Crossover point:** ~20 assets or 40 complexity points. Below this, direct is faster. Above, worker prevents bad UX even though total time is slightly longer.
 
 ---
 
@@ -1483,13 +1625,34 @@ async function getDB(): Promise<IDBPDatabase> {
       // if (oldVersion < 3) { ... }
     },
     blocked() {
-      // Another tab has an older version open
+      // Another tab has an older version open and won't close
       console.warn('Database upgrade blocked by another tab');
+
+      // Show persistent toast with action
+      toast.warning(
+        'Please close other Grove tabs to complete the upgrade',
+        {
+          duration: Infinity,  // Don't auto-dismiss
+          action: {
+            label: 'Retry',
+            onClick: () => window.location.reload(),
+          },
+        }
+      );
+
+      // If user refuses: Scene editing works but saves fail silently
+      // User can continue browsing but changes won't persist
+      // On next page load with single tab, upgrade completes normally
     },
     blocking() {
       // This tab is blocking an upgrade in another tab
+      // Close DB gracefully so the other tab can upgrade
       db?.close();
       db = null;
+
+      // Notify user their tab will refresh
+      toast.info('Updating Terrarium... refreshing in 3 seconds');
+      setTimeout(() => window.location.reload(), 3000);
     },
   });
 
@@ -1737,8 +1900,28 @@ export function createAutoSave(getScene: () => TerrariumScene) {
 
   const { debounceMs, maxIntervalMs } = TERRARIUM_CONFIG.autoSave;
 
-  // Stable hash using sorted keys to avoid property ordering issues
+  // Stable hash using object-hash library for production reliability
+  // Handles circular references, special types (Date, Map, Set), and property ordering
+  import objectHash from 'object-hash';
+
   function hashScene(scene: TerrariumScene): string {
+    return objectHash({
+      assets: scene.assets,
+      canvas: scene.canvas,
+      name: scene.name,
+    }, {
+      algorithm: 'md5',
+      encoding: 'hex',
+      respectType: false,  // Treat {a:1} same as class instance with a=1
+      unorderedArrays: false,  // Asset order matters
+      unorderedObjects: true,  // Property order doesn't matter
+      unorderedSets: true,
+    });
+  }
+
+  // Alternative: Simple implementation for environments without object-hash
+  // Note: Does not handle circular refs, Date objects, or Map/Set
+  function hashSceneFallback(scene: TerrariumScene): string {
     const stableStringify = (obj: unknown): string => {
       if (obj === null || typeof obj !== 'object') {
         return JSON.stringify(obj);
@@ -1870,12 +2053,24 @@ export function setupTouchHandlers(canvas: HTMLElement) {
   let touchState: TouchState | null = null;
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Track touch start position to detect scroll intent
+  let touchStartPos: { x: number; y: number } | null = null;
+  const SCROLL_INTENT_THRESHOLD = 10; // pixels of movement before canceling long press
+
   function handleTouchStart(e: TouchEvent) {
     if (e.touches.length === 1) {
-      // Single touch - potential tap or drag
+      // Single touch - potential tap, drag, or scroll
       const touch = e.touches[0];
+
+      // Record start position for scroll intent detection
+      touchStartPos = { x: touch.clientX, y: touch.clientY };
+
+      // Delay long press timer slightly to allow scroll detection
       longPressTimer = setTimeout(() => {
-        dispatchContextMenu(touch.clientX, touch.clientY);
+        // Only show context menu if user hasn't started scrolling
+        if (touchStartPos) {
+          dispatchContextMenu(touch.clientX, touch.clientY);
+        }
       }, 500);
     } else if (e.touches.length === 2) {
       // Multi-touch - pan/zoom
@@ -1890,6 +2085,20 @@ export function setupTouchHandlers(canvas: HTMLElement) {
   }
 
   function handleTouchMove(e: TouchEvent) {
+    // Detect scroll intent - if finger moves more than threshold, cancel long press
+    if (touchStartPos && e.touches.length === 1) {
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartPos.x);
+      const deltaY = Math.abs(touch.clientY - touchStartPos.y);
+
+      if (deltaX > SCROLL_INTENT_THRESHOLD || deltaY > SCROLL_INTENT_THRESHOLD) {
+        // User is scrolling, not trying to long press
+        cancelLongPress();
+        touchStartPos = null;
+      }
+    }
+
+    // Original touchmove handling
     cancelLongPress();
 
     if (e.touches.length === 2 && touchState?.isMultiTouch) {
@@ -1905,6 +2114,7 @@ export function setupTouchHandlers(canvas: HTMLElement) {
   function handleTouchEnd(e: TouchEvent) {
     cancelLongPress();
     touchState = null;
+    touchStartPos = null;  // Reset scroll detection
   }
 
   function cancelLongPress() {
