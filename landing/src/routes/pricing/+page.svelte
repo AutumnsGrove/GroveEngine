@@ -15,6 +15,7 @@
 		Mail,
 		LifeBuoy,
 		CalendarDays,
+		Clock,
 		// Tier header icons
 		Sprout,
 		TreeDeciduous,
@@ -198,6 +199,19 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
+									<Clock class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Centennial
+								</span>
+							</td>
+							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
+							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+						</tr>
+						<tr class="border-b border-subtle bg-surface">
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
 									<LifeBuoy class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Support
 								</span>
@@ -297,6 +311,16 @@
 						<p>
 							Evergreen includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need.
 							After that, priority email support with faster response times.
+						</p>
+					</div>
+
+					<div>
+						<h3 class="font-medium text-foreground mb-2">Centennial (Sapling+)</h3>
+						<p>
+							<strong>Your grove can outlive you.</strong> After 12 cumulative months on Sapling or above, your site earns Centennial status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.
+						</p>
+						<p class="mt-2 text-xs text-foreground-faint">
+							A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.
 						</p>
 					</div>
 

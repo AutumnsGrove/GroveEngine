@@ -48,6 +48,7 @@ More room to grow. If you're posting frequently or building up an archive, Sapli
 - 5 GB storage
 - 10 themes + accent color
 - Email forwarding (`you@grove.place`)
+- **Centennial eligible** — after 12 months, your site stays online for 100 years
 - Everything in Seedling
 
 ### Oak
@@ -98,6 +99,14 @@ You can upgrade or downgrade anytime from **Settings → Plan**.
 When you upgrade, you get immediate access to new features. When you downgrade, you keep access through the end of your current billing period.
 
 If you're over the limits of your new plan (say, you have 100 posts and downgrade to Seedling's 50), your existing content stays. You just can't publish new posts until you're under the limit.
+
+## Centennial: Your grove can outlive you
+
+On Sapling and above, after 12 cumulative months of membership, your grove earns **Centennial status**. Your site stays online for 100 years from the day you planted it—even if you stop paying someday.
+
+A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them. Yours can too.
+
+You can opt out anytime if you'd rather your site not persist. But we think your words are worth keeping.
 
 ## No hidden fees
 

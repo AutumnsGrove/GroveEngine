@@ -6,6 +6,17 @@ export type { Doc } from "$lib/types/docs";
 // Technical Specifications
 export const specs: Doc[] = [
   {
+    slug: "centennial-spec",
+    title: "Centennial — Domain Preservation",
+    description:
+      "100-year domain preservation for long-term Grove members",
+    excerpt:
+      "Some trees outlive the people who planted them. Centennial is Grove's promise that your words can have that same longevity. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years from the day you planted it.",
+    category: "specs",
+    lastUpdated: "2026-01-04",
+    readingTime: 8,
+  },
+  {
     slug: "thorn-spec",
     title: "Thorn — Content Moderation",
     description:

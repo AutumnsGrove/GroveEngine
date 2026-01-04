@@ -29,6 +29,7 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 | Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
 | Custom Domain | — | — | — | BYOD | ✓ |
 | @grove.place Email | — | — | Forward | Full | Full |
+| Centennial Status | — | — | ✓ | ✓ | ✓ |
 | Privacy Controls | — | — | — | — | Login-required option |
 | Support | Community | Community | Email | Priority | 8hrs + Priority |
 | **Best For** | *Readers* | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
@@ -95,6 +96,7 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - Your blog at `username.grove.place`
 - **10 themes** + custom accent color
 - **Email forwarding:** Receive emails at `you@grove.place`
+- **Centennial eligible:** After 12 months, your site stays online for 100 years
 - Email support
 
 ### Oak: $25/month
@@ -195,6 +197,39 @@ When we register a domain for you, **you own it**. If you ever leave Grove:
 - No transfer fees, no hostage situations
 
 See our [Data Portability & Separation Policy](https://grove.place/legal/data-portability) for full details.
+
+---
+
+## Centennial Status
+
+*Some trees outlive the people who planted them.*
+
+Centennial is Grove's promise that your words can have the same longevity. After 12 cumulative months on Sapling tier or above, your grove earns **Centennial status** — your site stays online for 100 years from the day you planted it.
+
+### How It Works
+
+| Path to Centennial | Timeline |
+|-------------------|----------|
+| Yearly subscription (Sapling+) | Instant upon first renewal |
+| Monthly subscription (Sapling+) | After 12 monthly payments |
+| Mixed (upgrade/downgrade) | Cumulative months counted |
+
+### What Centennial Means
+
+- **100-year domain reservation** — Your `name.grove.place` is yours for a century
+- **Content preservation** — Published posts remain publicly accessible
+- **Read-only archive** — If you stop paying, your site becomes a static archive (no new posts, but everything stays online)
+- **Reactivate anytime** — Resume your subscription to regain full access
+
+### Opting Out
+
+Not everyone wants their words to outlive them. Centennial is automatic once earned, but you can:
+
+- **Disable preservation** in account settings
+- **Delete your account** for full removal
+- **Transfer to a successor** (future feature)
+
+For full technical details, see the [Centennial Specification](/knowledge/specs/centennial-spec).
 
 ---
 
