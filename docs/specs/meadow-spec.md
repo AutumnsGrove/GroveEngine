@@ -1,3 +1,11 @@
+---
+aliases: []
+date created: Saturday, January 4th 2026
+date modified: Saturday, January 4th 2026
+tags: []
+type: tech-spec
+---
+
 # Meadow — Social Connection
 
 > *Where the forest opens up and you can see the people around you.*

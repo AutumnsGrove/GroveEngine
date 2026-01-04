@@ -1,3 +1,11 @@
+---
+aliases: []
+date created: Saturday, January 4th 2026
+date modified: Saturday, January 4th 2026
+tags: []
+type: tech-spec
+---
+
 # Centennial — Domain Preservation
 
 > *Some trees outlive the people who planted them.*
@@ -224,7 +232,7 @@ When a Centennial grove becomes archived:
 │  Centennial Status                                  │
 │  ────────────────────────────────────────────────── │
 │                                                     │
-│  ✓ Earned (January 2027)                           │
+│  ✓ Earned (January 2027)                            │
 │                                                     │
 │  Your grove will be preserved until January 2126.   │
 │  Even if you stop paying, your words remain.        │
@@ -256,7 +264,7 @@ Subtle banner on archived groves (visible to visitors):
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  🌳 This grove is preserved as an archive.         │
+│  🌳 This grove is preserved as an archive.          │
 │     Last updated: March 2045                        │
 └─────────────────────────────────────────────────────┘
 ```

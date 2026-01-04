@@ -1,3 +1,11 @@
+---
+aliases: []
+date created: Saturday, January 4th 2026
+date modified: Saturday, January 4th 2026
+tags: []
+type: tech-spec
+---
+
 # Foliage Project Specification
 
 ## Overview Section
