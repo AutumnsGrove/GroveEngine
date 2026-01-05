@@ -96,7 +96,7 @@
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
 				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
-				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'lifebuoy' },
+				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' },
 				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: true, icon: 'terminal', internal: true },
 				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: false, icon: 'database', internal: true }

@@ -146,7 +146,7 @@
 					tagline: 'Help Center',
 					description: 'Integrated help that meets you where you are. Waystone is Grove\'s help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it\'s already there.',
 					status: 'live',
-					icon: 'helpCircle',
+					icon: 'signpost',
 					integration: 'Built into all Grove properties',
 					spec: '/knowledge/specs/waystone-spec'
 				},

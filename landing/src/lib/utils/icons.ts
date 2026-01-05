@@ -102,6 +102,7 @@ import {
   Bird,
   Triangle,
   Terminal,
+  Signpost,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -230,6 +231,7 @@ export const toolIcons = {
   users: Users,
   map: MapPin,
   helpcircle: HelpCircle,
+  signpost: Signpost,
   triangle: Triangle,
   gauge: Gauge,
   radar: Radar,
@@ -263,6 +265,7 @@ export const roadmapFeatureIcons = {
   shieldcheck: ShieldCheck,
   download: Download,
   lifebuoy: HelpCircle,
+  signpost: Signpost,
   terminal: FileText,
   network: Github,
   database: HardDrive,
