@@ -571,10 +571,11 @@ Use these icons consistently across the project:
 | Theming | `Palette` | Customization |
 | Authentication | `ShieldCheck` | Security |
 | Cloud | `Cloud` | Remote/serverless |
-| Search | `Search` | |
+| Search | `SearchCode` | Code/advanced search |
 | Archives | `Archive` | Backups |
 | Upload | `Upload` | |
 | Video | `Video` | |
+| Comments | `MessagesSquare` | User discussions |
 | GitHub | `Github` | External links to GitHub |
 | **States** | | |
 | Success | `Check` | Completed/valid |
@@ -597,11 +598,60 @@ Use these icons consistently across the project:
 | What's New | `Megaphone` | Announcements |
 | Next Steps | `Lightbulb` | Ideas |
 
+### Icon Mapping Tables in Files
+
+Create a consistent icon map at the top of each component/page that uses icons:
+
+```typescript
+// landing/src/lib/utils/icons.ts - Centralized icon registry
+import {
+  Mail, HardDrive, Palette, ShieldCheck, Cloud, SearchCode,
+  Archive, Upload, MessagesSquare, Github, Check, X, Loader2,
+  FileText, Tag, Sprout, Heart, ExternalLink, MapPin, // ... etc
+} from 'lucide-svelte';
+
+export const featureIcons = {
+  mail: Mail,
+  harddrive: HardDrive,
+  palette: Palette,
+  shieldcheck: ShieldCheck,
+  cloud: Cloud,
+  searchcode: SearchCode,
+  // ... all mapped icons
+} as const;
+
+export const stateIcons = {
+  success: Check,
+  error: X,
+  loading: Loader2,
+} as const;
+```
+
+Then use in components:
+
+```svelte
+<script lang="ts">
+  import { featureIcons } from '$lib/utils/icons';
+</script>
+
+{#each features as feature}
+  <svelte:component this={featureIcons[feature.icon]} class="w-5 h-5" />
+{/each}
+```
+
+**Benefits:**
+- Single source of truth for all icons
+- Prevents undefined icon errors
+- Easy to maintain and extend
+- Reusable across entire project
+
 ### Icon Usage Guidelines
 
-1. **Avoid overusing Sparkles** - Reserve for truly mystical/magical contexts
-2. **Be consistent** - Use the same icon for the same concept everywhere
-3. **Semantic meaning** - Choose icons that convey meaning, not just decoration
+1. **Always use icon maps** - Never hardcode icon imports in every component
+2. **Avoid overusing Sparkles** - Reserve for truly mystical/magical contexts
+3. **Be consistent** - Use the same icon for the same concept everywhere
+4. **Semantic meaning** - Choose icons that convey meaning, not just decoration
+5. **Export from central utility** - Use `landing/src/lib/utils/icons.ts` for all icon sets
 
 ### Icon Sizing
 
