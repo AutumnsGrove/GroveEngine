@@ -94,7 +94,7 @@
 					domain: 'grove.place',
 					integration: 'Powers all Grove properties',
 					github: 'https://github.com/AutumnsGrove/GroveEngine',
-					spec: '/docs/specs/lattice-spec'
+					spec: '/knowledge/specs/lattice-spec'
 				},
 			]
 		},
@@ -161,7 +161,7 @@
 					status: 'planned',
 					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
-					spec: '/docs/specs/terrarium-spec'
+					spec: '/knowledge/specs/terrarium-spec'
 				},
 				{
 					name: 'Rings',
