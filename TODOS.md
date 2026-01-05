@@ -567,67 +567,19 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ---
 
-## ✅ SST Resources Deployed (2025-12-24)
+## ❌ SST Removed (2026-01-05)
 
-**Current State:**
-- ✅ `sst.config.ts` manages D1, KV, R2 resources
-- ✅ Dev stage deployed with isolated resources
-- ✅ Secrets management via `secrets.json` (gitignored)
-- ✅ NPM scripts: `pnpm sst:dev`, `pnpm sst:prod`
+> **Decision:** SST was removed from the project. The added complexity wasn't worth it for managing 8 static Stripe price IDs.
+>
+> **What changed:**
+> - Removed `sst.config.ts` and SST dependency
+> - Stripe products/prices now managed directly in Stripe Dashboard
+> - Price IDs configured in `plant/src/lib/server/stripe.ts`
+> - See `docs/STRIPE-SETUP.md` for configuration instructions
+>
+> **Archived:** `_archived/sst-migration-plan-archived-2026-01-05.md`
 
-### Dev Stage Resources Created
-```
-cacheId: 4b650904a144458abd9bdd67318ef05c
-cdnName: grove-dev-grovecdnbucket-bbdbvtaf
-mediaName: grove-dev-grovemediabucket-rcxtoscn
-```
-
-### Quick Commands
-```bash
-# Deploy to dev (creates new isolated resources)
-pnpm sst:dev
-
-# Deploy to production (imports existing resources by ID)
-pnpm sst:prod
-
-# Remove dev stage resources
-pnpm sst:remove --stage dev
-```
-
-### Rollback Plan (if issues)
-Apps still deploy via wrangler.toml - SST only manages resources.
-Production resource IDs are hardcoded in sst.config.ts.
-
----
-
-## 🚀 SST Migration Progress
-
-> **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
-
-SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 resources.
-
-### Implementation Phases
-
-- [x] **Phase 1: Foundation** - `sst.config.ts` with D1/KV/R2 resources ✅
-  - Dev stage deployed with isolated resources
-  - Secrets via `secrets.json`, npm scripts added
-- [x] **Phase 2: Stripe Integration** - Products/prices in code ✅
-  - 4 products (Seedling, Sapling, Oak, Evergreen) created in Stripe test mode
-  - 8 prices (monthly + yearly for each plan) created via SST
-  - Price IDs wired up in `plant/src/lib/server/stripe.ts`
-  - Webhook handler ready at `/api/webhooks/stripe`
-  - **Remaining:** Set secrets in Cloudflare, configure webhook in Stripe Dashboard
-- [ ] **Phase 3: SvelteKit Apps** - DEFERRED (wrangler works fine)
-  - SST lacks `cloudflare.SvelteKit` component
-  - Decision: SST for Stripe + resources, wrangler for app deployment
-- [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
-- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, evaluate grove-router
-  - [ ] Test all routing without grove-router active
-  - [ ] Verify: cdn.grove.place, auth/admin/login subdomains, www redirect
-  - [ ] If all works: delete `packages/grove-router` entirely
-  - [ ] If gaps exist: document which edge cases still need the router
-
-### Hybrid Routing Strategy
+### Hybrid Routing Strategy (Still Valid)
 
 | User Type | Domain | Routing | Cost |
 |-----------|--------|---------|------|
@@ -808,23 +760,21 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 - [x] Build tenant onboarding flow → **DEPLOYED**: `plant.grove.place`
   - ✅ Signup: name, username (=subdomain), verified email, favorite color, interests
   - ✅ Plan selection page with 4 tiers
-  - ✅ Payment via Stripe (SST-generated price IDs wired up)
+  - ✅ Payment via Stripe
   - ✅ Interactive tour (8 steps, skippable)
   - ✅ Email templates ready (welcome, day 1/3/7/30)
   - ⏳ **Config needed:** Set auth/Stripe secrets in Cloudflare Dashboard
 
-### Stripe Integration (plant.grove.place) ✅
-> **Status:** COMPLETE via SST (2025-12-24)
+### Stripe Integration (plant.grove.place)
+> **Status:** Code complete, needs configuration
 > **Location:** `plant/src/lib/server/stripe.ts`
+> **Setup Guide:** `docs/STRIPE-SETUP.md`
 >
-> **Completed:**
-> - [x] Products defined in `sst.config.ts` using `stripe.Product`
-> - [x] 8 prices created (4 plans × monthly/yearly)
-> - [x] Price IDs wired up in plant app
-> - [x] Webhook handler at `/api/webhooks/stripe`
->
-> **Remaining Config (Cloudflare + Stripe Dashboards):**
-> - [ ] Set STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY in Cloudflare
+> **Remaining Config:**
+> - [ ] Create 4 products in Stripe Dashboard (Seedling, Sapling, Oak, Evergreen)
+> - [ ] Create 8 prices (monthly + yearly for each plan)
+> - [ ] Copy price IDs to `plant/src/lib/server/stripe.ts`
+> - [ ] Set STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY in Cloudflare Dashboard
 > - [ ] Create webhook in Stripe Dashboard → get STRIPE_WEBHOOK_SECRET
 > - [ ] Set GROVEAUTH_* secrets for OAuth flow
 - [ ] Implement plan management (Seedling/Sapling/Oak/Evergreen)

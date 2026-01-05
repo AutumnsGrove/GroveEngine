@@ -25,7 +25,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Language:** TypeScript, JavaScript
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
-- **Infrastructure:** SST (resources), Wrangler (app deployment)
+- **Infrastructure:** Wrangler (app deployment)
 - **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
 - **Payments:** Stripe
 - **Email:** Resend
@@ -41,23 +41,15 @@ cd landing && pnpm dev      # or wrangler dev
 cd packages/engine && pnpm dev
 ```
 
-### SST (Stripe + Resources)
-SST is used for **Stripe integration** (Phase 2) and resource documentation. Apps deploy via wrangler.
+### Stripe Configuration
+Stripe products and prices are managed directly in the Stripe Dashboard.
 
-**SST Scope:**
-- ✅ Stripe products/prices as code (creates real Stripe products)
-- ✅ D1/KV/R2 resource definitions (IaC documentation)
-- ✅ Isolated staging resources (`pnpm sst:dev`)
-- ❌ App deployment (no cloudflare.SvelteKit - use wrangler)
+**Setup:**
+1. Create products in [Stripe Dashboard](https://dashboard.stripe.com/products)
+2. Copy price IDs to `plant/src/lib/server/stripe.ts`
+3. Set secrets in Cloudflare Dashboard (STRIPE_SECRET_KEY, etc.)
 
-```bash
-pnpm sst:dev   # Creates isolated dev resources
-pnpm sst:prod  # Imports existing production resources
-```
-
-- **Config:** `sst.config.ts` - Stripe + resource definitions
-- **Secrets:** `secrets.json` (gitignored) - Cloudflare API token
-- **Outputs:** `.sst/outputs.json` - deployed resource IDs
+**Full instructions:** `docs/STRIPE-SETUP.md`
 
 ### Production Deployment
 Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.
