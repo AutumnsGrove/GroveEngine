@@ -40,6 +40,9 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   domains: "grove-domains.pages.dev",
   forage: "grove-domains.pages.dev",
 
+  // Social feed
+  meadow: "grove-meadow.pages.dev",
+
   // Music
   music: "grovemusic.pages.dev",
   aria: "grovemusic.pages.dev",
