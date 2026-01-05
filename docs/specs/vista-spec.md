@@ -106,6 +106,67 @@ Rings tells writers about their readers. Vista tells the grove keeper about the 
 
 ---
 
+## Multi-Tenant Subdomain Architecture
+
+```
+                     How Tenant Routing Works
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                        REQUESTS                              │
+    └─────────────────────────────────────────────────────────────┘
+              │                 │                 │
+    autumn.grove.place  maple.grove.place  pine.grove.place
+              │                 │                 │
+              ▼                 ▼                 ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                   *.grove.place DNS                          │
+    │              (Cloudflare wildcard CNAME)                     │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    Lattice Worker                            │
+    │  ┌─────────────────────────────────────────────────────────┐│
+    │  │ 1. Extract subdomain from Host header                   ││
+    │  │    Host: autumn.grove.place  →  tenant = "autumn"       ││
+    │  │                                                         ││
+    │  │ 2. Look up tenant in grove-engine-db                    ││
+    │  │    SELECT * FROM tenants WHERE subdomain = ?            ││
+    │  │                                                         ││
+    │  │ 3. Route to TenantDO by tenant_id                       ││
+    │  │    env.TENANT_DO.idFromName(tenant.id)                  ││
+    │  └─────────────────────────────────────────────────────────┘│
+    └─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+              ▼               ▼               ▼
+       ┌──────────┐    ┌──────────┐    ┌──────────┐
+       │ TenantDO │    │ TenantDO │    │ TenantDO │
+       │ "autumn" │    │ "maple"  │    │ "pine"   │
+       └────┬─────┘    └────┬─────┘    └────┬─────┘
+            │               │               │
+            ▼               ▼               ▼
+       ┌──────────────────────────────────────────┐
+       │              grove-engine-db              │
+       │  ┌────────────────────────────────────┐  │
+       │  │ tenants   │ posts    │ settings   │  │
+       │  │ ────────  │ ──────── │ ────────── │  │
+       │  │ autumn    │ autumn/* │ autumn/*   │  │
+       │  │ maple     │ maple/*  │ maple/*    │  │
+       │  │ pine      │ pine/*   │ pine/*     │  │
+       │  └────────────────────────────────────┘  │
+       └──────────────────────────────────────────┘
+
+    Each tenant is isolated:
+    • Own subdomain (autumn.grove.place)
+    • Own Durable Object instance
+    • Filtered database access (WHERE tenant_id = ?)
+    • Own R2 storage prefix (/autumn/images/*)
+```
+
+---
+
 ## Architecture
 
 ```
