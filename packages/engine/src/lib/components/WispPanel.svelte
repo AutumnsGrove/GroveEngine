@@ -291,7 +291,6 @@
   {#if isOpen && !isMinimized}
     <aside
       class="wisp-panel"
-      role="complementary"
       aria-label="Wisp writing assistant"
       bind:this={panelRef}
       transition:slide={{ axis: "x", duration: 200 }}

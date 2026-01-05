@@ -151,9 +151,6 @@
 		margin: 0 0 2rem 0;
 		transition: color 0.3s ease;
 	}
-	.cta-button {
-		margin-top: 0.5rem;
-	}
 	.intro {
 		max-width: 700px;
 		margin: 0 auto;

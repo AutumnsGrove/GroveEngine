@@ -643,15 +643,7 @@
 	:global(.dark) .overflow-anchor-label {
 		color: #666;
 	}
-	/* Reference number in overflow label */
-	.overflow-ref-num {
-		color: #2c5f2d;
-		font-weight: 600;
-		margin-right: 0.5rem;
-	}
-	:global(.dark) .overflow-ref-num {
-		color: var(--accent-success);
-	}
+	/* Reference number in overflow label - unused selector removed */
 	/* Reference markers in content (global because they're in @html) */
 	:global(.gutter-ref-marker) {
 		font-size: 0.75em;

@@ -375,8 +375,8 @@
 							<!-- Controls -->
 							<div class="space-y-4">
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="glass-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select id="glass-variant" bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="surface">surface</option>
 										<option value="overlay">overlay</option>
 										<option value="card">card</option>
@@ -386,8 +386,8 @@
 									</select>
 								</div>
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Intensity</label>
-									<select bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="glass-intensity" class="block text-sm font-medium text-foreground mb-2">Intensity</label>
+									<select id="glass-intensity" bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="none">none</option>
 										<option value="light">light</option>
 										<option value="medium">medium</option>
@@ -415,8 +415,8 @@
 
 							<div class="space-y-4">
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select bind:value={buttonVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="button-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select id="button-variant" bind:value={buttonVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="default">default</option>
 										<option value="accent">accent</option>
 										<option value="dark">dark</option>
@@ -425,8 +425,8 @@
 									</select>
 								</div>
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Size</label>
-									<select bind:value={buttonSize} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="button-size" class="block text-sm font-medium text-foreground mb-2">Size</label>
+									<select id="button-size" bind:value={buttonSize} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="sm">sm</option>
 										<option value="md">md</option>
 										<option value="lg">lg</option>
@@ -459,8 +459,8 @@
 
 							<div class="space-y-4">
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select bind:value={cardVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="card-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select id="card-variant" bind:value={cardVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="default">default</option>
 										<option value="accent">accent</option>
 										<option value="dark">dark</option>
@@ -495,8 +495,8 @@
 
 							<div class="space-y-4">
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select bind:value={logoVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="logo-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select id="logo-variant" bind:value={logoVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="default">default</option>
 										<option value="accent">accent</option>
 										<option value="frosted">frosted</option>
@@ -505,8 +505,8 @@
 									</select>
 								</div>
 								<div>
-									<label class="block text-sm font-medium text-foreground mb-2">Season</label>
-									<select bind:value={logoSeason} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+									<label for="logo-season" class="block text-sm font-medium text-foreground mb-2">Season</label>
+									<select id="logo-season" bind:value={logoSeason} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
 										<option value="spring">spring</option>
 										<option value="summer">summer</option>
 										<option value="autumn">autumn</option>
