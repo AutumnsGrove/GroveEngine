@@ -121,7 +121,7 @@
       </div>
     {:else}
       <div class="sidebar-footer-collapsed">
-        <a href="/auth/logout" class="logout-btn-icon" title="Logout">
+        <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
           <LogOut class="logout-icon" />
         </a>
       </div>
@@ -146,28 +146,23 @@
 
   /* Glass sidebar styling */
   .glass-sidebar {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(34, 197, 94, 0.15);
-  }
-
-  :global(.dark) .glass-sidebar {
-    background: rgba(20, 30, 25, 0.92);
-    border-color: rgba(74, 124, 89, 0.25);
+    border: 1px solid var(--grove-overlay-15);
   }
 
   /* Glass surface for mobile header */
   .glass-surface {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   :global(.dark) .glass-surface {
-    background: rgba(30, 41, 59, 0.9);
-    border-color: rgba(71, 85, 105, 0.3);
+    background: var(--slate-glass-bg);
+    border-color: var(--slate-glass-border);
   }
 
   /* Mobile header - hidden on desktop */
@@ -225,7 +220,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--overlay-dark-40);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: 1001;
@@ -261,11 +256,7 @@
     border-radius: var(--border-radius-standard);
     transition: all 0.3s ease;
     overflow-y: auto;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  }
-
-  :global(.dark) .sidebar {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
   }
 
   .sidebar.collapsed {
@@ -274,16 +265,12 @@
 
   .sidebar-header {
     padding: 1.25rem;
-    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+    border-bottom: 1px solid var(--grove-border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
     transition: border-color 0.3s ease;
-  }
-
-  :global(.dark) .sidebar-header {
-    border-color: rgba(74, 124, 89, 0.2);
   }
 
   .sidebar-brand {
@@ -309,7 +296,7 @@
   }
 
   :global(.dark) .admin-label {
-    color: rgba(167, 199, 183, 0.6);
+    color: var(--grove-text-subtle);
   }
 
   :global(.sidebar-logo) {
@@ -353,12 +340,12 @@
   }
 
   .collapse-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--overlay-dark-5);
     color: var(--color-text);
   }
 
   :global(.dark) .collapse-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--overlay-light-10);
   }
 
   .collapse-icon {
@@ -397,17 +384,17 @@
   }
 
   .nav-item:hover {
-    background: rgba(34, 197, 94, 0.08);
+    background: var(--grove-overlay-8);
     color: var(--color-primary);
   }
 
   :global(.dark) .nav-item:hover {
-    background: rgba(74, 222, 128, 0.12);
+    background: var(--grove-overlay-12);
     color: #86efac;
   }
 
   :global(.dark) .nav-item {
-    color: rgba(167, 199, 183, 0.85);
+    color: var(--grove-text-strong);
   }
 
   .nav-item :global(.nav-icon) {
@@ -427,25 +414,21 @@
 
   .sidebar-footer {
     padding: 1rem 1.25rem;
-    border-top: 1px solid rgba(34, 197, 94, 0.1);
+    border-top: 1px solid var(--grove-border-subtle);
     transition: border-color 0.3s ease;
     flex-shrink: 0;
   }
 
-  :global(.dark) .sidebar-footer {
-    border-color: rgba(74, 124, 89, 0.2);
-  }
-
   .sidebar-footer-collapsed {
     padding: 0.75rem;
-    border-top: 1px solid rgba(34, 197, 94, 0.1);
+    border-top: 1px solid var(--grove-border-subtle);
     display: flex;
     justify-content: center;
     flex-shrink: 0;
   }
 
   :global(.dark) .sidebar-footer-collapsed {
-    border-color: rgba(74, 124, 89, 0.2);
+    border-color: var(--grove-border-subtle);
   }
 
   .user-info {
@@ -460,7 +443,7 @@
   }
 
   :global(.dark) .email {
-    color: rgba(167, 199, 183, 0.7);
+    color: var(--grove-text-muted);
   }
 
   .logout-btn {
@@ -469,7 +452,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background: rgba(34, 197, 94, 0.08);
+    background: var(--grove-overlay-8);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -478,17 +461,17 @@
   }
 
   :global(.dark) .logout-btn {
-    background: rgba(74, 222, 128, 0.1);
-    color: rgba(167, 199, 183, 0.85);
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
   }
 
   .logout-btn:hover {
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--grove-overlay-15);
     color: var(--color-primary);
   }
 
   :global(.dark) .logout-btn:hover {
-    background: rgba(74, 222, 128, 0.18);
+    background: var(--grove-overlay-18);
     color: #86efac;
   }
 
@@ -497,7 +480,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
-    background: rgba(34, 197, 94, 0.08);
+    background: var(--grove-overlay-8);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -505,17 +488,17 @@
   }
 
   :global(.dark) .logout-btn-icon {
-    background: rgba(74, 222, 128, 0.1);
-    color: rgba(167, 199, 183, 0.85);
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
   }
 
   .logout-btn-icon:hover {
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--grove-overlay-15);
     color: var(--color-primary);
   }
 
   :global(.dark) .logout-btn-icon:hover {
-    background: rgba(74, 222, 128, 0.18);
+    background: var(--grove-overlay-18);
     color: #86efac;
   }
 

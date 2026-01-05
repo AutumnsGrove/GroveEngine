@@ -289,6 +289,7 @@
                 onclick={() => moveItem(index, -1)}
                 disabled={index === 0}
                 title="Move up"
+                aria-label="Move item up"
               >
                 <ChevronUp class="action-icon" />
               </button>
@@ -297,6 +298,7 @@
                 onclick={() => moveItem(index, 1)}
                 disabled={index === gutterItems.length - 1}
                 title="Move down"
+                aria-label="Move item down"
               >
                 <ChevronDown class="action-icon" />
               </button>
@@ -304,6 +306,7 @@
                 class="action-btn"
                 onclick={() => openEditModal(index)}
                 title="Edit"
+                aria-label="Edit item"
               >
                 <Pencil class="action-icon" />
               </button>
@@ -311,6 +314,7 @@
                 class="action-btn delete"
                 onclick={() => deleteItem(index)}
                 title="Delete"
+                aria-label="Delete item"
               >
                 <X class="action-icon" />
               </button>
@@ -510,16 +514,11 @@
 
 <style>
   .vines-manager {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(34, 197, 94, 0.15);
+    border: 1px solid var(--grove-overlay-15);
     border-radius: 12px;
     overflow: hidden;
-  }
-
-  :global(.dark) .vines-manager {
-    background: rgba(20, 30, 25, 0.92);
-    border-color: rgba(74, 124, 89, 0.25);
   }
 
   .vines-header {
@@ -527,13 +526,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.875rem 1rem;
-    background: rgba(34, 197, 94, 0.05);
-    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
-  }
-
-  :global(.dark) .vines-header {
-    background: rgba(74, 222, 128, 0.08);
-    border-color: rgba(74, 124, 89, 0.2);
+    background: var(--grove-overlay-5);
+    border-bottom: 1px solid var(--grove-border-subtle);
   }
 
   .vines-header h3 {
@@ -552,9 +546,9 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--grove-overlay-10);
     color: var(--color-primary);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    border: 1px solid var(--grove-border);
     border-radius: var(--border-radius-button);
     font-size: 0.8rem;
     font-weight: 500;
@@ -563,19 +557,12 @@
   }
 
   :global(.dark) .add-btn {
-    background: rgba(74, 222, 128, 0.12);
-    border-color: rgba(74, 222, 128, 0.2);
     color: #86efac;
   }
 
   .add-btn:hover {
-    background: rgba(34, 197, 94, 0.18);
-    border-color: rgba(34, 197, 94, 0.35);
-  }
-
-  :global(.dark) .add-btn:hover {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.35);
+    background: var(--grove-overlay-18);
+    border-color: var(--grove-border-strong);
   }
 
   :global(.btn-icon) {
@@ -590,7 +577,7 @@
   }
 
   :global(.dark) .empty-state {
-    color: rgba(167, 199, 183, 0.7);
+    color: var(--grove-text-muted);
   }
 
   .empty-state p {
@@ -603,7 +590,7 @@
   }
 
   :global(.dark) .empty-state .hint {
-    color: rgba(167, 199, 183, 0.5);
+    color: var(--grove-text-subtle);
   }
 
   .vines-list {
@@ -611,25 +598,20 @@
   }
 
   .vine-item {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(34, 197, 94, 0.1);
+    background: var(--glass-bg-medium);
+    border: 1px solid var(--grove-border-subtle);
     border-radius: 8px;
     padding: 0.625rem 0.875rem;
     margin-bottom: 0.5rem;
     transition: border-color 0.15s ease;
   }
 
-  :global(.dark) .vine-item {
-    background: rgba(30, 45, 35, 0.6);
-    border-color: rgba(74, 124, 89, 0.2);
-  }
-
   .vine-item:hover {
-    border-color: rgba(34, 197, 94, 0.25);
+    border-color: var(--grove-overlay-25);
   }
 
   :global(.dark) .vine-item:hover {
-    border-color: rgba(74, 222, 128, 0.3);
+    border-color: var(--grove-overlay-30);
   }
 
   .item-header {
@@ -665,7 +647,7 @@
   }
 
   :global(.dark) .item-anchor {
-    color: rgba(167, 199, 183, 0.8);
+    color: var(--grove-text-strong);
   }
 
   .item-actions {
@@ -687,7 +669,7 @@
   }
 
   :global(.dark) .action-btn {
-    color: rgba(167, 199, 183, 0.5);
+    color: var(--grove-text-subtle);
   }
 
   :global(.action-icon) {
@@ -696,12 +678,12 @@
   }
 
   .action-btn:hover:not(:disabled) {
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--grove-overlay-10);
     color: var(--color-primary);
   }
 
   :global(.dark) .action-btn:hover:not(:disabled) {
-    background: rgba(74, 222, 128, 0.15);
+    background: var(--grove-overlay-15);
     color: #86efac;
   }
 
@@ -730,7 +712,7 @@
   }
 
   :global(.dark) .item-preview {
-    color: rgba(167, 199, 183, 0.5);
+    color: var(--grove-text-subtle);
   }
 
   /* Form Styles - These appear in the Dialog component */
@@ -808,8 +790,8 @@
 
   .anchor-chip {
     padding: 0.2rem 0.5rem;
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: var(--grove-overlay-10);
+    border: 1px solid var(--grove-border);
     border-radius: 12px;
     color: var(--color-text-muted);
     font-size: 0.7rem;
@@ -818,18 +800,12 @@
     transition: all 0.15s ease;
   }
 
-  :global(.dark) .anchor-chip {
-    background: rgba(74, 222, 128, 0.1);
-    border-color: rgba(74, 222, 128, 0.2);
-  }
-
   .anchor-chip:hover {
-    background: rgba(34, 197, 94, 0.2);
+    background: var(--grove-overlay-20);
     color: var(--color-primary);
   }
 
   :global(.dark) .anchor-chip:hover {
-    background: rgba(74, 222, 128, 0.2);
     color: #86efac;
   }
 
@@ -896,7 +872,7 @@
   .add-image-btn {
     padding: 0.5rem;
     background: transparent;
-    border: 1px dashed rgba(34, 197, 94, 0.3);
+    border: 1px dashed var(--grove-overlay-30);
     border-radius: 8px;
     color: var(--color-text-muted);
     cursor: pointer;
@@ -905,20 +881,15 @@
     transition: all 0.15s ease;
   }
 
-  :global(.dark) .add-image-btn {
-    border-color: rgba(74, 222, 128, 0.25);
-  }
-
   .add-image-btn:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
-    background: rgba(34, 197, 94, 0.05);
+    background: var(--grove-overlay-5);
   }
 
   :global(.dark) .add-image-btn:hover {
     border-color: #86efac;
     color: #86efac;
-    background: rgba(74, 222, 128, 0.08);
   }
 
   /* Image Picker */
