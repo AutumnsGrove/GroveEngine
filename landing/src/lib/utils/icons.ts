@@ -1,0 +1,366 @@
+/**
+ * Centralized icon registry for Grove landing.
+ * Single source of truth for all icon usage.
+ *
+ * ✅ DO: Import icons from here in components
+ * ❌ DON'T: Import directly from 'lucide-svelte'
+ *
+ * @example
+ * ```svelte
+ * import { featureIcons, phaseIcons } from '$lib/utils/icons';
+ *
+ * <svelte:component this={featureIcons.mail} class="w-5 h-5" />
+ * ```
+ */
+
+import {
+  // Navigation
+  Home,
+  Info,
+  Telescope,
+  MapPin,
+  CircleDollarSign,
+  BookOpen,
+  Trees,
+  PenLine,
+  // Features
+  Mail,
+  HardDrive,
+  Palette,
+  ShieldCheck,
+  Cloud,
+  SearchCode,
+  Archive,
+  Upload,
+  MessagesSquare,
+  ExternalLink,
+  Github,
+  // Content
+  FileText,
+  Tag,
+  Sprout,
+  Heart,
+  Leaf,
+  Flower2,
+  // States
+  Check,
+  CheckCircle,
+  X,
+  Loader2,
+  AlertTriangle,
+  HelpCircle,
+  Info as InfoIcon,
+  // Phases & Dreams
+  Gem,
+  Sparkles,
+  Star,
+  Moon,
+  // Actions
+  Compass,
+  Megaphone,
+  Lightbulb,
+  Download,
+  Settings,
+  Menu,
+  // Growth indicators
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
+  Activity,
+  Users,
+  ShieldUser,
+  BarChart3,
+  Circle,
+  // Midnight Bloom specific
+  Coffee,
+  QrCode,
+  // Beyond page icons
+  Music,
+  Newspaper,
+} from 'lucide-svelte';
+
+// ============================================================================
+// NAVIGATION ICONS
+// ============================================================================
+/** Icons for main navigation items */
+export const navIcons = {
+  home: Home,
+  about: Info,
+  vision: Telescope,
+  roadmap: MapPin,
+  pricing: CircleDollarSign,
+  knowledge: BookOpen,
+  forest: Trees,
+  blog: PenLine,
+} as const;
+
+// ============================================================================
+// FEATURE ICONS
+// ============================================================================
+/** Icons for features, tools, and services */
+export const featureIcons = {
+  mail: Mail,
+  harddrive: HardDrive,
+  palette: Palette,
+  shieldcheck: ShieldCheck,
+  cloud: Cloud,
+  searchcode: SearchCode,
+  archive: Archive,
+  upload: Upload,
+  messagessquare: MessagesSquare,
+  externallink: ExternalLink,
+  github: Github,
+} as const;
+
+// ============================================================================
+// CONTENT ICONS
+// ============================================================================
+/** Icons for content types and growth concepts */
+export const contentIcons = {
+  filetext: FileText,
+  tag: Tag,
+  sprout: Sprout,
+  heart: Heart,
+  leaf: Leaf,
+  flower2: Flower2,
+  trees: Trees,
+  clock: Clock,
+  trending: TrendingUp,
+  users: Users,
+  shield: ShieldUser,
+  barchart: BarChart3,
+  activity: Activity,
+} as const;
+
+// ============================================================================
+// STATE & FEEDBACK ICONS
+// ============================================================================
+/** Icons for states: success, error, loading, etc. */
+export const stateIcons = {
+  check: Check,
+  checkcircle: CheckCircle,
+  x: X,
+  loader: Loader2,
+  warning: AlertTriangle,
+  help: HelpCircle,
+  info: InfoIcon,
+  circle: Circle, // Fallback/default
+} as const;
+
+// ============================================================================
+// PHASE & DREAM ICONS
+// ============================================================================
+/** Icons for phases, refinement, and mystical/future content */
+export const phaseIcons = {
+  gem: Gem,
+  sparkles: Sparkles,
+  star: Star,
+  moon: Moon,
+  sprout: Sprout,
+} as const;
+
+// ============================================================================
+// ACTION ICONS
+// ============================================================================
+/** Icons for user actions and processes */
+export const actionIcons = {
+  compass: Compass,
+  megaphone: Megaphone,
+  lightbulb: Lightbulb,
+  download: Download,
+  settings: Settings,
+  menu: Menu,
+  trend: TrendingUp,
+  trenddown: TrendingDown,
+  arrow: ArrowRight,
+} as const;
+
+// ============================================================================
+// WORKSHOP & TOOL ICONS (Roadmap workshop page)
+// ============================================================================
+/** Icons specific to tools and workshop features */
+export const toolIcons = {
+  mailbox: Mail,
+  harddrive: HardDrive,
+  palette: Palette,
+  shieldcheck: ShieldCheck,
+  cloud: Cloud,
+  searchcode: SearchCode,
+  pickaxe: SearchCode, // Approximate
+  archive: Archive,
+  upload: Upload,
+  projector: Lightbulb,
+  circuitboard: Github,
+  spool: Circle,
+  binoculars: Telescope,
+  bird: Heart,
+  dashboard: Activity,
+  activity: Activity,
+  landplot: Sprout,
+  messagessquare: MessagesSquare,
+  shielduser: ShieldUser,
+  barchart: BarChart3,
+  grape: Leaf,
+  codesandbox: Github,
+  users: Users,
+  map: MapPin,
+  helpcircle: HelpCircle,
+  triangle: Sparkles,
+  gauge: Clock,
+  radar: Activity,
+  webhook: Lightbulb,
+  terminal: FileText,
+  database: HardDrive,
+  mapplus: MapPin,
+  layers: Circle,
+  pencilruler: PenLine,
+  swatchbook: Palette,
+  brickwallshield: ShieldCheck,
+  wind: Leaf,
+  // Beyond page icons (standalone tools)
+  music: Music,
+  book: BookOpen,
+  newspaper: Newspaper,
+  telescope: Telescope,
+} as const;
+
+// ============================================================================
+// ROADMAP FEATURE ICONS (Main roadmap page)
+// ============================================================================
+/** Icons for features in roadmap phases */
+export const roadmapFeatureIcons = {
+  userplus: Users,
+  sprout: Sprout,
+  globe: Trees,
+  penline: PenLine,
+  imageplus: Upload,
+  rss: FileText,
+  shieldcheck: ShieldCheck,
+  download: Download,
+  lifebuoy: HelpCircle,
+  terminal: FileText,
+  network: Github,
+  database: HardDrive,
+  ivy: Mail,
+  amber: HardDrive,
+  trails: MapPin,
+  tree: Trees,
+  swatchbook: Palette,
+  meadow: Flower2,
+  clock: Clock,
+  message: MessagesSquare,
+  heart: Heart,
+  trending: TrendingUp,
+  crown: Star,
+  paintbrush: Palette,
+  users: Users,
+  shield: ShieldUser,
+  gem: Gem,
+  zap: TrendingUp,
+  accessibility: Info,
+  smartphone: FileText,
+  puzzle: Lightbulb,
+  coffee: Heart,
+  qrcode: Lightbulb,
+  bookopen: BookOpen,
+  home: Home,
+} as const;
+
+// ============================================================================
+// UNIFIED EXPORT
+// ============================================================================
+/** All icons in one map (use specific maps above when possible) */
+export const allIcons = {
+  ...navIcons,
+  ...featureIcons,
+  ...contentIcons,
+  ...stateIcons,
+  ...phaseIcons,
+  ...actionIcons,
+} as const;
+
+/** Type for any icon key in the registry */
+export type IconKey = keyof typeof allIcons;
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get an icon from a specific map by key
+ * @example
+ * ```ts
+ * const icon = getIcon(featureIcons, 'mail');
+ * ```
+ */
+export function getIcon<T extends Record<string, any>>(
+  map: T,
+  key: keyof T | string
+) {
+  return (map as Record<string, any>)[key as string];
+}
+
+/**
+ * Get an icon from the unified map
+ * @example
+ * ```ts
+ * const icon = getIconFromAll('mail');
+ * ```
+ */
+export function getIconFromAll(key: string) {
+  return (allIcons as Record<string, any>)[key];
+}
+
+// ============================================================================
+// COLOR MAPS (Seasonal/Status)
+// ============================================================================
+
+/**
+ * Seasonal icon colors for roadmap phases
+ */
+export const seasonalIconColors = {
+  'first-frost': 'text-blue-500',
+  'thaw': 'text-teal-500',
+  'first-buds': 'text-pink-500',
+  'full-bloom': 'text-green-500',
+  'golden-hour': 'text-amber-500',
+  'midnight-bloom': 'text-purple-300',
+} as const;
+
+/**
+ * Status-based icon colors
+ */
+export const statusIconColors = {
+  live: 'text-green-500',
+  complete: 'text-green-500',
+  integrated: 'text-blue-500',
+  implemented: 'text-blue-500',
+  building: 'text-amber-500',
+  planned: 'text-slate-400',
+  past: 'text-green-500',
+  current: 'text-accent',
+  future: 'text-slate-400',
+} as const;
+
+/**
+ * Get color for a phase
+ * @example
+ * ```ts
+ * const color = getPhaseColor('golden-hour'); // 'text-amber-500'
+ * ```
+ */
+export function getPhaseColor(phase: keyof typeof seasonalIconColors) {
+  return seasonalIconColors[phase];
+}
+
+/**
+ * Get color for a status
+ * @example
+ * ```ts
+ * const color = getStatusColor('building'); // 'text-amber-500'
+ * ```
+ */
+export function getStatusColor(status: keyof typeof statusIconColors) {
+  return statusIconColors[status];
+}

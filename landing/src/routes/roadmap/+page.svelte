@@ -4,58 +4,26 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
-	// Lucide Icons
+	// Centralized icon registry
+	import { roadmapFeatureIcons, seasonalIconColors, getPhaseColor } from '$lib/utils/icons';
+
+	// Additional Lucide icons for hero/nav
 	import {
 		MapPin,
 		Check,
 		CheckCircle,
-		Circle,
-		Flower2,
 		Sun,
 		Sparkles,
 		Star,
-		Mailbox,
-		HardDrive,
-		Palette,
-		MapPinPlus,
-		Coffee,
-		QrCode,
-		BookOpen,
-		Home,
-		// Thaw icons
-		UserPlus,
-		Sprout,
-		Globe,
-		PenLine,
-		ImagePlus,
-		Rss,
-		ShieldCheck,
-		Download,
-		LifeBuoy,
-		Terminal,
-		CircuitBoard,
-		Database,
-		// First Buds icons
+		Flower2,
+		Moon as MoonIcon,
 		TreeDeciduous,
 		SwatchBook,
-		// Full Bloom icons
-		Clock,
-		MessagesSquare,
-		Heart,
-		TrendingUp,
-		Crown,
-		Paintbrush,
-		Users,
-		ShieldUser,
-		// Golden Hour icons
 		Gem,
 		Zap,
 		Accessibility,
 		Smartphone,
-		Puzzle,
-		// Phase badge icons
-		Flower,
-		Moon as MoonIcon
+		Puzzle
 	} from 'lucide-svelte';
 
 	// Import nature assets from engine package
@@ -503,35 +471,13 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-accent shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
 							{feature.internal ? 'opacity-75' : ''}">
-							{#if feature.icon === 'userplus'}
-								<UserPlus class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'sprout'}
-								<Sprout class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'globe'}
-								<Globe class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'penline'}
-								<PenLine class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'imageplus'}
-								<ImagePlus class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'rss'}
-								<Rss class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'shieldcheck'}
-								<ShieldCheck class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'download'}
-								<Download class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'lifebuoy'}
-								<LifeBuoy class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'terminal'}
-								<Terminal class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'network'}
-								<CircuitBoard class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'database'}
-								<Database class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{:else}
-								<Circle class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-							{/if}
+							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
+							<svelte:component
+								this={roadmapFeatureIcons[feature.icon]}
+								class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"
+							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -621,26 +567,28 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-buds'].features as feature}
+						{@const colorMap = {
+							ivy: 'text-green-500',
+							amber: 'text-amber-500',
+							trails: 'text-teal-500',
+							tree: 'text-emerald-500',
+							swatchbook: 'text-violet-500'
+						}}
+						{@const borderMap = {
+							ivy: 'border-l-4 border-green-500',
+							amber: 'border-l-4 border-amber-500',
+							trails: 'border-l-4 border-teal-500',
+							tree: 'border-l-4 border-emerald-500',
+							swatchbook: 'border-l-4 border-violet-500'
+						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{feature.icon === 'ivy' ? 'border-l-4 border-green-500' : ''}
-							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}
-							{feature.icon === 'trails' ? 'border-l-4 border-teal-500' : ''}
-							{feature.icon === 'tree' ? 'border-l-4 border-emerald-500' : ''}
-							{feature.icon === 'swatchbook' ? 'border-l-4 border-violet-500' : ''}"
+							{borderMap[feature.icon] || ''}"
 						>
-							{#if feature.icon === 'ivy'}
-								<Mailbox class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'amber'}
-								<HardDrive class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'trails'}
-								<MapPinPlus class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'tree'}
-								<TreeDeciduous class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'swatchbook'}
-								<SwatchBook class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
-							{:else}
-								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
-							{/if}
+							<!-- Use icon lookup map with feature-specific color -->
+							<svelte:component
+								this={roadmapFeatureIcons[feature.icon]}
+								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+							/>
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
 								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
@@ -726,30 +674,25 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
+						{@const colorMap = {
+							meadow: 'text-green-500',
+							clock: 'text-blue-500',
+							message: 'text-sky-500',
+							heart: 'text-pink-500',
+							trending: 'text-emerald-500',
+							crown: 'text-amber-500',
+							paintbrush: 'text-violet-500',
+							users: 'text-indigo-500',
+							shield: 'text-slate-500'
+						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
-							{#if feature.icon === 'meadow'}
-								<Flower2 class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'clock'}
-								<Clock class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'message'}
-								<MessagesSquare class="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'heart'}
-								<Heart class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'trending'}
-								<TrendingUp class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'crown'}
-								<Crown class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'paintbrush'}
-								<Paintbrush class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'users'}
-								<Users class="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'shield'}
-								<ShieldUser class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
-							{:else}
-								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
-							{/if}
+							<!-- Use icon lookup map with feature-specific color -->
+							<svelte:component
+								this={roadmapFeatureIcons[feature.icon]}
+								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+							/>
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
 								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
@@ -842,22 +785,21 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
+						{@const colorMap = {
+							gem: 'text-amber-600 dark:text-amber-400',
+							zap: 'text-yellow-500',
+							accessibility: 'text-blue-500',
+							smartphone: 'text-slate-600 dark:text-slate-400',
+							puzzle: 'text-purple-500'
+						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
-							{#if feature.icon === 'gem'}
-								<Gem class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'zap'}
-								<Zap class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'accessibility'}
-								<Accessibility class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'smartphone'}
-								<Smartphone class="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'puzzle'}
-								<Puzzle class="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
-							{:else}
-								<Circle class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-							{/if}
+							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
+							<svelte:component
+								this={roadmapFeatureIcons[feature.icon]}
+								class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-500'} mt-0.5 flex-shrink-0"
+							/>
 							<div>
 								<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
 								<p class="text-sm text-amber-800/70 dark:text-amber-200/70">{feature.description}</p>
@@ -949,17 +891,17 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							{#if feature.icon === 'coffee'}
-								<Coffee class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'qrcode'}
-								<QrCode class="w-5 h-5 text-purple-300 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'bookopen'}
-								<BookOpen class="w-5 h-5 text-pink-300 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'home'}
-								<Home class="w-5 h-5 text-amber-300 mt-0.5 flex-shrink-0" />
-							{:else}
-								<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{/if}
+							{@const colorMap = {
+									coffee: 'text-amber-400',
+									qrcode: 'text-purple-300',
+									bookopen: 'text-pink-300',
+									home: 'text-amber-300'
+									}}
+					<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
+					<svelte:component
+									this={roadmapFeatureIcons[feature.icon]}
+									class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-400'} mt-0.5 flex-shrink-0"
+									/>
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>
