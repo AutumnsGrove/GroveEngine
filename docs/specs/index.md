@@ -62,7 +62,6 @@ Grove specifications define the architecture, interfaces, and implementation det
 |---------------|---------|--------|-------------|
 | **[Mycelium](mycelium-spec.md)** | Secret management & rotation | Active | All services |
 | **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
-| **[Renovate](renovate-spec.md)** | Dependency updates & security | Active | GitHub, pnpm |
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
 
 ---

@@ -66,7 +66,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         Client Sites                                 │
+│                         Client Sites                                │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
 │  │AutumnsGrove  │  │ Other Site   │  │ Future Site  │               │
 │  │autumnsgrove. │  │ example.     │  │ another.     │               │
@@ -79,25 +79,25 @@ GroveAuth is a centralized authentication service that handles all authenticatio
           │                 │                 │
           ▼                 ▼                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        GroveAuth Service                             │
-│                       auth.grove.place                               │
-│                                                                      │
+│                        GroveAuth Service                            │
+│                       auth.grove.place                              │
+│                                                                     │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                  │
 │  │   Google    │  │   GitHub    │  │ Magic Code  │                  │
 │  │   OAuth     │  │   OAuth     │  │   (Email)   │                  │
 │  └─────────────┘  └─────────────┘  └─────────────┘                  │
-│                                                                      │
+│                                                                     │
 │  ┌─────────────────────────────────────────────────────┐            │
-│  │              Session & Token Management              │            │
-│  │                                                      │            │
+│  │              Session & Token Management             │            │
+│  │                                                     │            │
 │  │  - JWT creation & signing                           │            │
 │  │  - Token verification endpoint                      │            │
 │  │  - Session storage (D1)                             │            │
 │  └─────────────────────────────────────────────────────┘            │
-│                                                                      │
+│                                                                     │
 │  2. User authenticates via chosen method                            │
 │  3. GroveAuth redirects back with auth code                         │
-│                                                                      │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
           │                 │                 │
           │    4. Site exchanges code for token
@@ -713,19 +713,19 @@ Authorization: Bearer {access_token}
      │─────────────────────────────────────────▶│                                         │
      │                                          │                                         │
      │                                          │ 3. Redirect to Google OAuth             │
-     │                                          │─────────────────────────────────────────▶│
+     │                                          │────────────────────────────────────────▶│
      │                                          │                                         │
      │                                          │                    4. User logs in      │
      │                                          │                       consents          │
      │                                          │                                         │
      │                                          │ 5. Callback with code                   │
-     │                                          │◀─────────────────────────────────────────│
+     │                                          │◀────────────────────────────────────────│
      │                                          │                                         │
      │                                          │ 6. Exchange code for Google tokens      │
-     │                                          │─────────────────────────────────────────▶│
+     │                                          │────────────────────────────────────────▶│
      │                                          │                                         │
      │                                          │ 7. Return tokens + user info            │
-     │                                          │◀─────────────────────────────────────────│
+     │                                          │◀────────────────────────────────────────│
      │                                          │                                         │
      │                                          │ 8. Verify email is in allowlist         │
      │                                          │    Create/update user                   │
@@ -769,7 +769,7 @@ Authorization: Bearer {access_token}
      │                                          │    Store in DB                          │
      │                                          │                                         │
      │                                          │ 4. Send email with code                 │
-     │                                          │─────────────────────────────────────────▶│
+     │                                          │────────────────────────────────────────▶│
      │                                          │                                         │
      │                    5. User receives      │                                         │
      │                       email, enters      │                                         │

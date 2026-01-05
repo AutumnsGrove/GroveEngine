@@ -129,16 +129,6 @@ export const specs: Doc[] = [
     readingTime: 6,
   },
   {
-    slug: "renovate-spec",
-    title: "Renovate Configuration Specification",
-    description: "Automated dependency updates for Grove repositories",
-    excerpt:
-      "Renovate Bot automatically monitors dependencies and opens pull requests when updates are available, ensuring security patches are applied quickly.",
-    category: "specs",
-    lastUpdated: "2025-11-26",
-    readingTime: 5,
-  },
-  {
     slug: "seasons-spec",
     title: "Seasons — Versioning System",
     description: "Semantic versioning strategy and release workflow",
