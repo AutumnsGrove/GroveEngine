@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass, Layers, PencilRuler, SwatchBook } from 'lucide-svelte';
+	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, UserRoundCheck, MessagesSquare, BrickWall } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -14,42 +14,43 @@
 	// 1. Import it from 'lucide-svelte' in the imports above
 	// 2. Add a key-value pair below (key = icon string used in tool data, value = component)
 	// 3. Use the key in any tool's `icon` field
-	const icons: Record<string, typeof Mail> = {
-		mail: Mail,
+	const icons: Record<string, typeof Mailbox> = {
+		mailbox: Mailbox,
 		harddrive: HardDrive,
 		palette: Palette,
 		shieldcheck: ShieldCheck,
 		cloud: Cloud,
-		search: Search,
+		searchcode: SearchCode,
 		pickaxe: Pickaxe,
 		archive: Archive,
 		upload: Upload,
-		video: Video,
-		network: Network,
-		wind: Wind,
-		eye: Eye,
+		projector: Projector,
+		circuitboard: CircuitBoard,
+		spool: Spool,
+		binoculars: Binoculars,
 		bird: Bird,
 		dashboard: LayoutDashboard,
 		activity: Activity,
-		userplus: UserPlus,
-		message: MessageCircle,
-		shield: Shield,
+		landplot: LandPlot,
+		messagessquare: MessagesSquare,
+		shielduser: UserRoundCheck,
 		barchart: BarChart3,
 		grape: Grape,
-		boxes: Boxes,
+		codesandbox: Codesandbox,
 		users: Users,
 		map: Map,
 		helpCircle: HelpCircle,
 		triangle: Triangle,
 		gauge: Gauge,
 		radar: Radar,
-		sparkles: Sparkles,
+		webhook: Webhook,
 		terminal: Terminal,
 		database: Database,
-		compass: Compass,
+		mapplus: MapPinPlus,
 		layers: Layers,
 		pencilruler: PencilRuler,
 		swatchbook: SwatchBook,
+		brickwall: BrickWall,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -88,7 +89,7 @@
 					tagline: 'Core Framework',
 					description: 'The engine that powers the Grove ecosystem. Multi-tenant architecture, Cloudflare-first infrastructure, and shared components that every Grove property builds on. The lattice that supports all growth.',
 					status: 'live',
-					icon: 'boxes',
+					icon: 'codesandbox',
 					domain: 'grove.place',
 					integration: 'Powers all Grove properties',
 					github: 'https://github.com/AutumnsGrove/GroveEngine',
@@ -125,7 +126,7 @@
 					tagline: 'Tenant Onboarding',
 					description: 'Where new growth begins. Plant is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
 					status: 'live',
-					icon: 'userplus',
+					icon: 'landplot',
 					domain: 'plant.grove.place',
 					integration: 'Signup and onboarding for new Grove users',
 					spec: '/knowledge/specs/plant-spec'
@@ -210,7 +211,7 @@
 					tagline: 'Comments System',
 					description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
 					status: 'planned',
-					icon: 'message',
+					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
 					spec: '/knowledge/specs/reeds-spec'
 				},
@@ -219,7 +220,7 @@
 					tagline: 'Content Moderation',
 					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
 					status: 'planned',
-					icon: 'shield',
+					icon: 'shielduser',
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec'
 				},
@@ -238,7 +239,7 @@
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
 					status: 'live',
-					icon: 'compass',
+					icon: 'mapplus',
 					integration: 'Available for all Grove blogs',
 					spec: '/knowledge/specs/trails-spec'
 				},
@@ -253,7 +254,7 @@
 					tagline: 'Privacy-First Email',
 					description: 'A zero-knowledge email client for your @grove.place address. Client-side encryption means we can\'t read your mail. It\'s yours alone. Threaded conversations, rich text, attachments, and integration with your blog\'s contact forms.',
 					status: 'building',
-					icon: 'mail',
+					icon: 'mailbox',
 					domain: 'ivy.grove.place',
 					integration: 'Included with Oak and Evergreen tiers',
 					github: 'https://github.com/AutumnsGrove/Ivy',
@@ -275,7 +276,7 @@
 					tagline: 'Domain Discovery',
 					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.',
 					status: 'live',
-					icon: 'search',
+					icon: 'searchcode',
 					domain: 'forage.grove.place',
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
 					github: 'https://github.com/AutumnsGrove/Forage'
@@ -285,7 +286,7 @@
 					tagline: 'Private Video Sharing',
 					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
 					status: 'planned',
-					icon: 'video',
+					icon: 'projector',
 					domain: 'nook.grove.place',
 					integration: 'Intimate video sharing for close connections',
 					github: 'https://github.com/AutumnsGrove/Nook'
@@ -320,7 +321,7 @@
 					tagline: 'Infrastructure Observability',
 					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',
 					status: 'planned',
-					icon: 'eye',
+					icon: 'binoculars',
 					domain: 'vista.grove.place',
 					integration: 'Internal infrastructure monitoring for Grove operators',
 					github: 'https://github.com/AutumnsGrove/GroveMonitor',
@@ -341,7 +342,7 @@
 					tagline: 'MCP Server',
 					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
 					status: 'building',
-					icon: 'network',
+					icon: 'circuitboard',
 					domain: 'mycelium.grove.place',
 					integration: 'MCP server for AI agent integration',
 					github: 'https://github.com/AutumnsGrove/GroveMCP',
@@ -352,7 +353,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'shieldcheck',
+					icon: 'brickwall',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec'
 				},
@@ -376,7 +377,7 @@
 					tagline: 'Real-Time Coordination',
 					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
 					status: 'integrated',
-					icon: 'network',
+					icon: 'spool',
 					integration: 'Architectural pattern for coordination and real-time',
 					spec: '/knowledge/patterns/loom-durable-objects-pattern'
 				},
@@ -412,7 +413,7 @@
 					tagline: 'Ephemeral Server Pattern',
 					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
 					status: 'implemented',
-					icon: 'sparkles',
+					icon: 'webhook',
 					integration: 'Powers Bloom and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern'
 				},
