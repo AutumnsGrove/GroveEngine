@@ -35,9 +35,9 @@ Seasons is Grove's versioning system: how Lattice evolves, how updates propagate
                   ╭─┤ │ │ 1.0.0 │ │ ├─╮
                  ┌┤ │ │ │       │ │ │ ├┐
                  │├─┤ │ │ 0.x.x │ │ │─┤│    Each ring records a season:
-                 │││ │ │ │      │ │ │ │││
-                 │││ │ │ │  🌱  │ │ │ │││    0.x.x  - seedling growth
-                 └┴┴─┴─┴─┴──────┴─┴─┴─┴┴┘    1.0.0  - first bloom
+                 ││││ │ │       │ │ │ │││
+                 ││││ │ │  🌱   │ │ │ │││    0.x.x  - seedling growth
+                 └┴┴┴─┴─┴───────┴─┴─┴─┴┴┘    1.0.0  - first bloom
                 ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱    2.0.0  - new season begins
              ────────────────────────────
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,9 +197,9 @@ Beta Releases:
 
     1.2.0-beta.1 ──▶ 1.2.0-beta.2 ──▶ 1.2.0-beta.3 ──▶ 1.2.0
          │                │                │             │
-        🔬              🔬              🔬            ✓
-      testing          fixes          final         stable
-                                     polish
+        🔬               🔬               🔬             ✓
+      testing           fixes            final         stable
+                                         polish
 ```
 
 ### Alpha Releases
@@ -317,7 +317,7 @@ Recommended version constraints for customer repositories:
     ┌─────────────────────────────────────────────────────────────┐
     │                                                             │
     │  "dependencies": {                                          │
-    │    "@groveengine/core": "^1.0.0"                           │
+    │    "@groveengine/core": "^1.0.0"                            │
     │  }                     ▲                                    │
     │                        │                                    │
     │                        └── The caret (^) is your friend     │
@@ -337,7 +337,7 @@ Recommended version constraints for customer repositories:
     1.2.3     ───▶    Exactly 1.2.3            ⛔ Avoid
                       │
                       └── Misses security patches!
-
+                      
     *         ───▶    Any version               🚫 Never use
                       │
                       └── Chaos. Breaking changes everywhere.

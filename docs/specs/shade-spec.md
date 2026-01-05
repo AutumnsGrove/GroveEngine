@@ -780,7 +780,7 @@ A dedicated public page that:
 │                   In a forest full of harvesters,                   │
 │                     this grove stays shaded.                        │
 │                                                                     │
-│   ─────────────────────────────────────────────────────────────    │
+│   ─────────────────────────────────────────────────────────────     │
 │                                                                     │
 │   Users own their words.                                            │
 │                                                                     │
@@ -791,19 +791,19 @@ A dedicated public page that:
 │   This applies regardless of robots.txt compliance. The absence     │
 │   of technical barriers does not imply permission.                  │
 │                                                                     │
-│   ─────────────────────────────────────────────────────────────    │
+│   ─────────────────────────────────────────────────────────────     │
 │                                                                     │
 │   What we block:                                                    │
-│   • AI training crawlers (GPTBot, ClaudeBot, CCBot, etc.)          │
+│   • AI training crawlers (GPTBot, ClaudeBot, CCBot, etc.)           │
 │   • Automated scrapers and data harvesters                          │
 │   • Web archiving services (except user-initiated)                  │
 │                                                                     │
 │   What we allow:                                                    │
-│   • Search engine indexing (Google, Bing, Kagi)                    │
+│   • Search engine indexing (Google, Bing, Kagi)                     │
 │   • Human readers (always welcome)                                  │
-│   • RSS feeds (for your subscribers)                               │
+│   • RSS feeds (for your subscribers)                                │
 │                                                                     │
-│   ─────────────────────────────────────────────────────────────    │
+│   ─────────────────────────────────────────────────────────────     │
 │                                                                     │
 │   Questions? concerns@grove.place                                   │
 │   Full policy: grove.place/legal/terms                              │
