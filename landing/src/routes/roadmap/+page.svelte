@@ -14,10 +14,10 @@
 		Sun,
 		Sparkles,
 		Star,
-		Mail,
+		Mailbox,
 		HardDrive,
 		Palette,
-		Compass,
+		MapPinPlus,
 		Coffee,
 		QrCode,
 		BookOpen,
@@ -33,20 +33,20 @@
 		Download,
 		LifeBuoy,
 		Terminal,
-		Network,
+		CircuitBoard,
 		Database,
 		// First Buds icons
 		TreeDeciduous,
 		SwatchBook,
 		// Full Bloom icons
 		Clock,
-		MessageCircle,
+		MessagesSquare,
 		Heart,
 		TrendingUp,
 		Crown,
 		Paintbrush,
 		Users,
-		Shield,
+		ShieldUser,
 		// Golden Hour icons
 		Gem,
 		Zap,
@@ -526,7 +526,7 @@
 							{:else if feature.icon === 'terminal'}
 								<Terminal class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'network'}
-								<Network class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+								<CircuitBoard class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'database'}
 								<Database class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else}
@@ -629,11 +629,11 @@
 							{feature.icon === 'swatchbook' ? 'border-l-4 border-violet-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
-								<Mail class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+								<Mailbox class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'amber'}
 								<HardDrive class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'trails'}
-								<Compass class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+								<MapPinPlus class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'tree'}
 								<TreeDeciduous class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'swatchbook'}
@@ -734,7 +734,7 @@
 							{:else if feature.icon === 'clock'}
 								<Clock class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'message'}
-								<MessageCircle class="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
+								<MessagesSquare class="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'heart'}
 								<Heart class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'trending'}
@@ -746,7 +746,7 @@
 							{:else if feature.icon === 'users'}
 								<Users class="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'shield'}
-								<Shield class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
+								<ShieldUser class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
