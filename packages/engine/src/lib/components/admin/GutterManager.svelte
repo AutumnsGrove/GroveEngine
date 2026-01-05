@@ -955,7 +955,7 @@
   .image-option {
     display: flex;
     flex-direction: column;
-    background: var(--color-bg);
+    background: var(--color-bg-secondary);
     border: 2px solid transparent;
     border-radius: 6px;
     padding: 0.25rem;
