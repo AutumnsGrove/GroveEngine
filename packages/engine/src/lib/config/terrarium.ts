@@ -113,8 +113,9 @@ export const TERRARIUM_CONFIG = {
 	},
 
 	// Phase 1 starter assets (10 components)
+	// Note: All components must exist in packages/engine/src/lib/ui/components/nature/
 	starterAssets: [
-		'TreePine',
+		'TreeAspen',
 		'TreeBirch',
 		'Lattice',
 		'LatticeWithVine',
@@ -124,7 +125,14 @@ export const TERRARIUM_CONFIG = {
 		'Mushroom',
 		'Rock',
 		'Vine'
-	] as const
+	] as const,
+
+	// Magic numbers centralized for maintainability
+	ui: {
+		duplicateOffset: 20, // Pixels to offset duplicated assets
+		exportWaitMs: 150, // Wait time for animations to pause before export
+		filenameMaxLength: 100 // Max sanitized filename length
+	}
 } as const;
 
 export type TerrariumConfig = typeof TERRARIUM_CONFIG;

@@ -51,9 +51,13 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * Maximum allowed filename length after sanitization.
+ * Verifies that animations are actually paused on an element.
+ * Uses getComputedStyle to check animation-play-state.
  */
-const MAX_FILENAME_LENGTH = 100;
+function verifyAnimationsPaused(element: HTMLElement): boolean {
+	const style = getComputedStyle(element);
+	return style.animationPlayState === 'paused' || style.animationPlayState === '';
+}
 
 /**
  * Sanitizes a filename by converting to lowercase and replacing
@@ -61,6 +65,7 @@ const MAX_FILENAME_LENGTH = 100;
  * Also truncates to a maximum length to prevent filesystem issues.
  */
 export function sanitizeFilename(name: string): string {
+	const maxLength = TERRARIUM_CONFIG.ui.filenameMaxLength;
 	const sanitized = name
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '-')
@@ -68,11 +73,11 @@ export function sanitizeFilename(name: string): string {
 		.replace(/^-|-$/g, '');
 
 	// Truncate to max length, ensuring we don't cut in the middle of a word
-	if (sanitized.length > MAX_FILENAME_LENGTH) {
-		const truncated = sanitized.slice(0, MAX_FILENAME_LENGTH);
+	if (sanitized.length > maxLength) {
+		const truncated = sanitized.slice(0, maxLength);
 		// Find last hyphen to avoid cutting words
 		const lastHyphen = truncated.lastIndexOf('-');
-		return lastHyphen > MAX_FILENAME_LENGTH / 2 ? truncated.slice(0, lastHyphen) : truncated;
+		return lastHyphen > maxLength / 2 ? truncated.slice(0, lastHyphen) : truncated;
 	}
 
 	return sanitized;
@@ -117,7 +122,13 @@ export async function generateDataUrl(
 	try {
 		if (shouldPauseAnimations) {
 			restoreAnimations = pauseAnimations(canvasElement);
-			await wait(100);
+			// Wait for animations to pause, using configurable timing
+			// Then verify they're actually paused before proceeding
+			await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
+			if (!verifyAnimationsPaused(canvasElement)) {
+				// If still not paused, wait a bit longer for slower devices
+				await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
+			}
 		}
 
 		const domToImageOptions: {

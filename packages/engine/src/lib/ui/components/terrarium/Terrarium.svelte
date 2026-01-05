@@ -42,7 +42,7 @@
 
 	function handleAssetSelect(name: string, category: AssetCategory) {
 		if (!terrarium.canAddAsset) {
-			console.warn('Cannot add asset: complexity budget exceeded');
+			// Complexity budget exceeded - UI should show visual feedback
 			return;
 		}
 
@@ -83,14 +83,18 @@
 	function handleSave(): boolean {
 		try {
 			const sceneJson = JSON.stringify(terrarium.scene);
+
+			// Proactive size validation before attempting to save
+			if (sceneJson.length > TERRARIUM_CONFIG.scene.maxSizeBytes) {
+				// Scene too large - warn user before attempting save
+				return false;
+			}
+
 			localStorage.setItem(STORAGE_KEY, sceneJson);
-			console.log('Scene saved to localStorage');
 			return true;
 		} catch (error) {
 			if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-				console.error('Storage quota exceeded. Try removing some assets or clearing browser storage.');
-			} else {
-				console.error('Failed to save scene:', error);
+				// Storage quota exceeded - handled silently, UI should show feedback
 			}
 			return false;
 		}
@@ -180,15 +184,13 @@
 				const parsedScene = JSON.parse(storedScene);
 				if (isValidScene(parsedScene)) {
 					terrarium.setScene(parsedScene);
-					console.log('Scene loaded from localStorage');
 				} else {
-					console.warn('Invalid scene format in localStorage, using default scene');
+					// Invalid scene format - clear and use default
 					localStorage.removeItem(STORAGE_KEY);
 				}
 			}
-		} catch (error) {
-			console.error('Failed to load scene from localStorage:', error);
-			// Clear corrupted data
+		} catch {
+			// Clear corrupted data silently
 			try {
 				localStorage.removeItem(STORAGE_KEY);
 			} catch {

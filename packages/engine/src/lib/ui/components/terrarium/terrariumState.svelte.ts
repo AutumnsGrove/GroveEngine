@@ -9,6 +9,10 @@
  *
  * Centralized state management for the Terrarium creative canvas using Svelte 5 runes.
  * Manages scene, assets, selection, and canvas interaction state.
+ *
+ * Note on mutation strategy: Svelte 5 runes track mutations deeply, so we use direct
+ * mutations (push, splice, property assignment) for performance. The setScene function
+ * uses immutable patterns to ensure a clean state when loading external data.
  */
 
 import type {
@@ -95,9 +99,14 @@ export function createTerrariumState() {
 	function addAsset(componentName: string, category: AssetCategory, position: Point): string {
 		// Guard: enforce complexity budget
 		if (!canAddAsset) {
-			console.warn('Cannot add asset: complexity budget exceeded');
 			return '';
 		}
+
+		// Validate position is within canvas bounds
+		const clampedPosition: Point = {
+			x: Math.max(0, Math.min(position.x, scene.canvas.width)),
+			y: Math.max(0, Math.min(position.y, scene.canvas.height))
+		};
 
 		const id = crypto.randomUUID();
 		const maxZ = getMaxZIndex(scene.assets);
@@ -106,7 +115,7 @@ export function createTerrariumState() {
 			id,
 			componentName,
 			category,
-			position: { ...position },
+			position: clampedPosition,
 			scale: TERRARIUM_CONFIG.asset.defaultScale,
 			rotation: 0,
 			zIndex: maxZ + 1,
@@ -156,13 +165,14 @@ export function createTerrariumState() {
 
 		const newId = crypto.randomUUID();
 		const maxZ = getMaxZIndex(scene.assets);
+		const offset = TERRARIUM_CONFIG.ui.duplicateOffset;
 
 		const duplicatedAsset: PlacedAsset = {
 			...asset,
 			id: newId,
 			position: {
-				x: asset.position.x + 20,
-				y: asset.position.y + 20
+				x: asset.position.x + offset,
+				y: asset.position.y + offset
 			},
 			zIndex: maxZ + 1,
 			props: { ...asset.props }
