@@ -37,6 +37,7 @@
 		Database,
 		// First Buds icons
 		TreeDeciduous,
+		SwatchBook,
 		// Full Bloom icons
 		Clock,
 		MessageCircle,
@@ -142,7 +143,7 @@
 				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
-				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'palette' }
+				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook' }
 			]
 		},
 		'full-bloom': {
@@ -625,7 +626,7 @@
 							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}
 							{feature.icon === 'trails' ? 'border-l-4 border-teal-500' : ''}
 							{feature.icon === 'tree' ? 'border-l-4 border-emerald-500' : ''}
-							{feature.icon === 'palette' ? 'border-l-4 border-violet-500' : ''}"
+							{feature.icon === 'swatchbook' ? 'border-l-4 border-violet-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
 								<Mail class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -635,8 +636,8 @@
 								<Compass class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'tree'}
 								<TreeDeciduous class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'palette'}
-								<Palette class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'swatchbook'}
+								<SwatchBook class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}

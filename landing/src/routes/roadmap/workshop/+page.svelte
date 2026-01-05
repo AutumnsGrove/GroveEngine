@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass, Layers } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass, Layers, PencilRuler, SwatchBook } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -48,6 +48,8 @@
 		database: Database,
 		compass: Compass,
 		layers: Layers,
+		pencilruler: PencilRuler,
+		swatchbook: SwatchBook,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -144,7 +146,7 @@
 					tagline: 'Theming Engine',
 					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
 					status: 'complete',
-					icon: 'palette',
+					icon: 'swatchbook',
 					domain: 'foliage.grove.place',
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
@@ -155,7 +157,7 @@
 					tagline: 'Creative Canvas',
 					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
 					status: 'planned',
-					icon: 'layers',
+					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec'
 				},

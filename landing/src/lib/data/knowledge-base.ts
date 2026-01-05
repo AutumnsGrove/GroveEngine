@@ -98,6 +98,16 @@ export const specs: Doc[] = [
     readingTime: 8,
   },
   {
+    slug: "terrarium-spec",
+    title: "Terrarium — Creative Canvas",
+    description: "Visual scene composition tool for blog decorations",
+    excerpt:
+      "A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations.",
+    category: "specs",
+    lastUpdated: "2026-01-05",
+    readingTime: 15,
+  },
+  {
     slug: "clearing-spec",
     title: "Clearing — Status Page",
     description:
