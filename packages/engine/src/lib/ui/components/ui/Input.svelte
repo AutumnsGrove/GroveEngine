@@ -14,6 +14,7 @@
 	 * @prop {boolean} [required=false] - Whether input is required (shows asterisk)
 	 * @prop {boolean} [disabled=false] - Whether input is disabled
 	 * @prop {string} [class] - Additional CSS classes to apply
+	 * @prop {string} [id] - Input ID for label association (auto-generated if not provided)
 	 * @prop {HTMLInputElement} [ref] - Reference to the underlying input element (bindable)
 	 *
 	 * @example
@@ -34,6 +35,7 @@
 		required?: boolean;
 		disabled?: boolean;
 		class?: string;
+		id?: string;
 		ref?: HTMLInputElement | null;
 	}
 
@@ -46,9 +48,14 @@
 		required = false,
 		disabled = false,
 		class: className,
+		id,
 		ref = $bindable(null),
 		...restProps
 	}: Props = $props();
+
+	// Generate unique ID for label association if not provided
+	// svelte-ignore state_referenced_locally - id is intentionally captured at initialization for stable IDs
+	const inputId = id ?? `input-${crypto.randomUUID()}`;
 
 	const inputClass = $derived(
 		cn(
@@ -60,7 +67,7 @@
 
 <div class="flex flex-col gap-1.5">
 	{#if label}
-		<label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+		<label for={inputId} class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 			{label}
 			{#if required}
 				<span class="text-destructive">*</span>
@@ -69,6 +76,7 @@
 	{/if}
 
 	<ShadcnInput
+		id={inputId}
 		bind:ref={ref}
 		bind:value
 		{type}

@@ -80,10 +80,11 @@
 	);
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class={computedClass}
 	role={interactive ? "button" : "presentation"}
-	tabindex={interactive ? 0 : undefined}
+	tabindex={interactive ? 0 : -1}
 	aria-label={interactive ? "Close overlay" : undefined}
 	{...restProps}
 >

@@ -264,6 +264,7 @@
 	<!-- Lightbox modal -->
 	{#if lightboxOpen}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="lightbox-backdrop"
 			onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}
@@ -284,6 +285,7 @@
 			</button>
 
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="lightbox-content"
 				onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}
@@ -291,6 +293,7 @@
 					if (e.key === 'Escape') closeLightbox();
 					if (e.key === 'Enter' || e.key === ' ') closeLightbox();
 				}}
+				role="presentation"
 			>
 				<ZoomableImage
 					src={currentImage.url}

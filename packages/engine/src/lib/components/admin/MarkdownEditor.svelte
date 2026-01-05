@@ -1100,6 +1100,7 @@
   .toolbar-btn.full-preview-btn .key {
     color: #9ac5ff;
   }
+  /* svelte-ignore css-unused-selector */
   .toolbar-divider {
     color: #4a4a4a;
     margin: 0 0.25rem;
