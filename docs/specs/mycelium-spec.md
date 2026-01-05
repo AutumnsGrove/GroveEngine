@@ -11,6 +11,21 @@ type: tech-spec
 
 # Mycelium — MCP Server
 
+```
+                      .  ·  ·  ·  ·  ·  .
+                   ·     ╭───────────╮     ·
+                  ·    ╭─┤  🍄 MCP 🍄 ├─╮    ·
+                 ·   ╭─┤ ╰─────┬─────╯ ├─╮   ·
+                ·  ╭─┤ │ ╭─────┼─────╮ │ ├─╮  ·
+                  ╭┤ │ │ │     │     │ │ │ ├╮
+                  ╰┴─┴─┴─┴─────┴─────┴─┴─┴─┴╯
+                  ╱ ╲   ╱ ╲   ╱ ╲   ╱ ╲   ╱ ╲
+                 ╱   ╲ ╱   ╲ ╱   ╲ ╱   ╲ ╱   ╲
+               ──────────────────────────────────
+              ~~~~~~~~~ the wood wide web ~~~~~~~~~
+              Underground networks connecting all.
+```
+
 > *The wood wide web of the Grove ecosystem.*
 
 Grove's Model Context Protocol server connecting AI agents to the entire ecosystem. Through Mycelium, Claude can read blog posts, start Bloom sessions, and manage Amber files. Every Grove service through a single, unified interface.

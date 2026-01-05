@@ -11,6 +11,23 @@ type: tech-spec
 
 # Patina — Automated Backups
 
+```
+                         .  ·  .  ·  .
+                      ·   time passes   ·
+                     ╭───────────────────╮
+                    ╭┤  ┌─────────────┐  ├╮
+                   ╭┤│  │  2026-01-05 │  │├╮
+                   │││  │  ▓▓▓▓▓▓▓▓▓▓ │  │││
+                   │││  │  ▒▒▒▒▒▒▒▒▒▒ │  │││
+                   │││  │  ░░░░░░░░░░ │  │││
+                   │││  │  ·········· │  │││
+                   ╰┴┴──└─────────────┘──┴┴╯
+                  ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱
+               ──────────────────────────────
+              ~~~~~~~~ oxidation layer ~~~~~~~~
+              Age as armor. Time as protection.
+```
+
 > *Age as armor. Time as protection.*
 
 Grove's automated backup system running nightly SQL dumps of all D1 databases to R2 cold storage. Weekly meta-backups compress daily layers, maintaining 12 weeks of history ready if you ever need to reach back in time.
