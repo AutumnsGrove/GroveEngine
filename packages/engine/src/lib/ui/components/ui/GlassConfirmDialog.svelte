@@ -117,6 +117,14 @@
 			handleCancel();
 		}
 	}
+
+	function handleBackdropKeydown(event: KeyboardEvent) {
+		// Handle Enter and Space to close, consistent with button behavior
+		if (event.key === "Enter" || event.key === " ") {
+			event.preventDefault();
+			handleCancel();
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -126,6 +134,7 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4"
 		onclick={handleBackdropClick}
+		onkeydown={handleBackdropKeydown}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="confirm-dialog-title"

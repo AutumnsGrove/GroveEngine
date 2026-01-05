@@ -18,6 +18,8 @@
 		...restProps
 	}: Props = $props();
 
+	// defaultOpen only sets the initial state (not reactive to prop changes)
+	// svelte-ignore state_referenced_locally
 	let isOpen = $state(defaultOpen);
 
 	// Sync with external open prop if provided

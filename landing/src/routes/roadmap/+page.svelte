@@ -471,11 +471,11 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
+						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
 							{feature.internal ? 'opacity-75' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
-							<svelte:component
-								this={roadmapFeatureIcons[feature.icon]}
+							<IconComponent
 								class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
@@ -567,6 +567,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-buds'].features as feature}
+						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
 						{@const colorMap = {
 							ivy: 'text-green-500',
 							amber: 'text-amber-500',
@@ -585,8 +586,7 @@
 							{borderMap[feature.icon] || ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
-							<svelte:component
-								this={roadmapFeatureIcons[feature.icon]}
+							<IconComponent
 								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
@@ -674,6 +674,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
+						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
 						{@const colorMap = {
 							meadow: 'text-green-500',
 							clock: 'text-blue-500',
@@ -689,8 +690,7 @@
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
-							<svelte:component
-								this={roadmapFeatureIcons[feature.icon]}
+							<IconComponent
 								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
@@ -785,6 +785,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
+						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
 						{@const colorMap = {
 							gem: 'text-amber-600 dark:text-amber-400',
 							zap: 'text-yellow-500',
@@ -796,8 +797,7 @@
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
-							<svelte:component
-								this={roadmapFeatureIcons[feature.icon]}
+							<IconComponent
 								class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-500'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
@@ -890,18 +890,18 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
+						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const colorMap = {
+							coffee: 'text-amber-400',
+							qrcode: 'text-purple-300',
+							bookopen: 'text-pink-300',
+							home: 'text-amber-300'
+						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							{@const colorMap = {
-									coffee: 'text-amber-400',
-									qrcode: 'text-purple-300',
-									bookopen: 'text-pink-300',
-									home: 'text-amber-300'
-									}}
-					<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
-					<svelte:component
-									this={roadmapFeatureIcons[feature.icon]}
-									class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-400'} mt-0.5 flex-shrink-0"
-									/>
+							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
+							<IconComponent
+								class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-400'} mt-0.5 flex-shrink-0"
+							/>
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>

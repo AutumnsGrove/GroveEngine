@@ -14,6 +14,7 @@
 	 * @prop {boolean} [required=false] - Whether textarea is required (shows asterisk)
 	 * @prop {boolean} [disabled=false] - Whether textarea is disabled
 	 * @prop {string} [class] - Additional CSS classes to apply
+	 * @prop {string} [id] - Textarea ID for label association (auto-generated if not provided)
 	 *
 	 * @example
 	 * <Textarea label="Description" bind:value={description} required />
@@ -33,6 +34,7 @@
 		required?: boolean;
 		disabled?: boolean;
 		class?: string;
+		id?: string;
 	}
 
 	let {
@@ -44,8 +46,13 @@
 		required = false,
 		disabled = false,
 		class: className,
+		id,
 		...restProps
 	}: Props = $props();
+
+	// Generate unique ID for label association if not provided
+	// svelte-ignore state_referenced_locally - id is intentionally captured at initialization for stable IDs
+	const textareaId = id ?? `textarea-${crypto.randomUUID()}`;
 
 	const textareaClass = $derived(
 		cn(
@@ -57,7 +64,7 @@
 
 <div class="flex flex-col gap-1.5">
 	{#if label}
-		<label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+		<label for={textareaId} class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 			{label}
 			{#if required}
 				<span class="text-destructive">*</span>
@@ -66,6 +73,7 @@
 	{/if}
 
 	<ShadcnTextarea
+		id={textareaId}
 		bind:value
 		{placeholder}
 		{rows}

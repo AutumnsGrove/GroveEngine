@@ -25,6 +25,7 @@
 
 {#if isOpen}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="lightbox-backdrop"
 		onclick={handleBackdropClick}
@@ -41,10 +42,12 @@
 			</svg>
 		</button>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="lightbox-content"
 			onclick={handleBackdropClick}
 			onkeydown={handleKeydown}
+			role="presentation"
 		>
 			<ZoomableImage {src} {alt} isActive={isOpen} class="lightbox-image" />
 		</div>
