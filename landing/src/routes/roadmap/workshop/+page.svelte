@@ -3,56 +3,11 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
-	// Lucide Icons
-	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, ShieldUser, MessagesSquare, BrickWallShield, Wind } from 'lucide-svelte';
+	// Centralized icon registry - single source of truth for all icons
+	import { toolIcons } from '$lib/utils/icons';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
-
-	// Icon lookup map for tool cards
-	// To add a new icon:
-	// 1. Import it from 'lucide-svelte' in the imports above
-	// 2. Add a key-value pair below (key = icon string used in tool data, value = component)
-	// 3. Use the key in any tool's `icon` field
-	const icons: Record<string, typeof Mailbox> = {
-		mailbox: Mailbox,
-		harddrive: HardDrive,
-		palette: Palette,
-		shieldcheck: ShieldCheck,
-		cloud: Cloud,
-		searchcode: SearchCode,
-		pickaxe: Pickaxe,
-		archive: Archive,
-		upload: Upload,
-		projector: Projector,
-		circuitboard: CircuitBoard,
-		spool: Spool,
-		binoculars: Binoculars,
-		bird: Bird,
-		dashboard: LayoutDashboard,
-		activity: Activity,
-		landplot: LandPlot,
-		messagessquare: MessagesSquare,
-		shielduser: ShieldUser,
-		barchart: BarChart3,
-		grape: Grape,
-		codesandbox: Codesandbox,
-		users: Users,
-		map: Map,
-		helpCircle: HelpCircle,
-		triangle: Triangle,
-		gauge: Gauge,
-		radar: Radar,
-		webhook: Webhook,
-		terminal: Terminal,
-		database: Database,
-		mapplus: MapPinPlus,
-		layers: Layers,
-		pencilruler: PencilRuler,
-		swatchbook: SwatchBook,
-		brickwallshield: BrickWallShield,
-		wind: Wind,
-	};
 
 	function getCardClass(categoryName: string) {
 		if (categoryName === 'Patterns') {
@@ -498,7 +453,7 @@
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-											<svelte:component this={icons[tool.icon]} class="w-5 h-5" />
+											<svelte:component this={toolIcons[tool.icon]} class="w-5 h-5" />
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>

@@ -75,6 +75,9 @@ import {
   // Midnight Bloom specific
   Coffee,
   QrCode,
+  // Beyond page icons
+  Music,
+  Newspaper,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -215,6 +218,11 @@ export const toolIcons = {
   swatchbook: Palette,
   brickwallshield: ShieldCheck,
   wind: Leaf,
+  // Beyond page icons (standalone tools)
+  music: Music,
+  book: BookOpen,
+  newspaper: Newspaper,
+  telescope: Telescope,
 } as const;
 
 // ============================================================================

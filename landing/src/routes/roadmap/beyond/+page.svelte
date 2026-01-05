@@ -3,8 +3,11 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
-	// Lucide Icons
-	import { Music, BookOpen, Newspaper, Telescope, Github } from 'lucide-svelte';
+	// Centralized icon registry - single source of truth for all icons
+	import { toolIcons } from '$lib/utils/icons';
+
+	// Lucide Icons - only for social links
+	import { Github } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';
@@ -121,15 +124,8 @@
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
 								<div class="w-10 h-10 rounded-lg bg-indigo-900/50 flex items-center justify-center text-indigo-400">
-									{#if tool.icon === 'music'}
-										<Music class="w-5 h-5" />
-									{:else if tool.icon === 'book'}
-										<BookOpen class="w-5 h-5" />
-									{:else if tool.icon === 'newspaper'}
-										<Newspaper class="w-5 h-5" />
-									{:else if tool.icon === 'telescope'}
-										<Telescope class="w-5 h-5" />
-									{/if}
+									<!-- Use centralized icon registry -->
+									<svelte:component this={toolIcons[tool.icon]} class="w-5 h-5" />
 								</div>
 								<div>
 									<h2 class="text-xl font-serif text-white">{tool.name}</h2>
