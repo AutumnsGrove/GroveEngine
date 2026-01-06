@@ -64,9 +64,11 @@ Grove runs on Cloudflare infrastructure. Here's what that means:
 | KV | ~$0/month | ~$0.50/month |
 | **Total infrastructure** | **~$8/month** | **~$31/month** |
 
-At 1,000 users paying an average of $11/month, that's $11,000/month in revenue against $8 in infrastructure costs.
+*Note: These are infrastructure costs only. Additional operational costs include payment processing (~3% of revenue via Stripe), email service (~$3/month), domain registration for Evergreen users, and support tools. Total operational overhead runs 5-10% of revenue—still dramatically lower than typical SaaS.*
 
-The margins aren't 10%. They're over 99%.
+At 1,000 users paying an average of $11/month, that's $11,000/month in revenue against ~$800-1,100/month in total costs (infrastructure + operations).
+
+The margins aren't 10%. They're 90%+.
 
 This isn't normal. Most SaaS products spend 30-50% of revenue on infrastructure. Grove's architecture means almost every dollar can go toward sustainability, not servers.
 
@@ -110,6 +112,17 @@ With $500,000 in reserve, earning 4% annually in a simple index fund:
 
 That's not a promise. That's math.
 
+### Structure & Governance
+
+The Reserve isn't just a concept—it needs real structure:
+
+- **Held separately**: Dedicated high-yield savings or index fund account, separate from operating funds
+- **Protected from creditors**: Once Grove incorporates, The Reserve will be structured to survive business disputes
+- **Withdrawal triggers**: Only used for emergencies (sudden revenue drop >50%), succession transitions, or Centennial obligations
+- **Transparency**: Annual public reporting on Reserve status (growing/stable/drawing)
+
+During Phase 1 (current), The Reserve is a line item I'm building toward. By Phase 2, it becomes a legally distinct fund.
+
 ---
 
 ## Succession Planning
@@ -118,10 +131,14 @@ I won't live forever. Neither will Grove in its current form. But your words can
 
 ### The Succession Plan
 
-1. **Legal structure**: Grove will be incorporated with clear succession rules
-2. **Documentation**: Everything about running Grove is documented
-3. **Designated successors**: Trusted people who can take over
-4. **Worst-case protocol**: If no successor, The Reserve funds a managed wind-down (years of static hosting, data export support, then graceful archive)
+1. **Legal structure**: Grove is currently a sole proprietorship. Target: LLC or benefit corporation formation by end of Phase 1 (~500 users), with clear succession rules and Reserve protection built in from day one.
+2. **Documentation**: Everything about running Grove is documented—infrastructure, processes, contacts, credentials. A successor could take over with the docs alone.
+3. **Designated successors**: Trusted people who can take over, identified before Phase 2.
+4. **Worst-case protocol**: If no successor available, The Reserve funds a managed wind-down:
+   - Minimum 3 years notice to all users
+   - Full data export support (API + bulk download)
+   - Static HTML archives uploaded to Internet Archive
+   - Graceful transition, not sudden shutdown
 
 ### What "Succession" Looks Like
 
@@ -138,12 +155,14 @@ Even the worst case honors the Centennial promise.
 
 This document isn't locked away in an investor deck. It's public. You can read it. You can hold me to it.
 
-I'll update this annually with:
+I'll update this document every January with:
 
 - Current user count (ranges, not exact)
 - Reserve status (growing/stable/drawing)
 - Infrastructure costs (actual, not projected)
 - Any changes to the sustainability plan
+
+Updates will be announced on the Grove blog and emailed to Centennial members. This document's edit history is public on GitHub.
 
 No surprises. No hidden pivots. Just honesty about how we're doing.
 
@@ -180,5 +199,4 @@ That's what your support means. That's what we're building together.
 
 ---
 
-*Last updated: January 2026*
-*Status: Pre-launch planning*
+*Last updated: January 2026 · Status: Pre-launch planning*
