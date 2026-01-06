@@ -82,6 +82,36 @@ See dedicated section below.
 
 ---
 
+### 🔍 Safari Reader Mode & Glass Cards
+
+> **Issue:** Safari Reader Mode on iOS strips `backdrop-blur` and translucent backgrounds, making glass card content invisible.
+> **Discovered:** 2026-01-06 while reviewing Vision page Core Values cards
+> **Severity:** Medium — affects content accessibility for users who prefer reader mode
+
+**Problem:**
+- Glass cards use `bg-white/60 backdrop-blur-md` styling
+- Reader mode extracts semantic content and strips most CSS
+- Content inside glass cards becomes unreadable (no background, no contrast)
+
+**Potential Solutions to Research:**
+- [ ] Add `aria-label` or semantic structure that reader mode preserves
+- [ ] Use `<article>` or `<section>` elements that reader mode respects
+- [ ] Add fallback solid background via `@supports not (backdrop-filter: blur(1px))`
+- [ ] Test if `print` media query styles apply in reader mode
+- [ ] Consider `data-reader-*` attributes if Safari supports them
+
+**Pages Affected (glass cards with important content):**
+- `/vision` — Core Values cards (5 cards)
+- `/pricing` — Plan comparison cards
+- `/roadmap` — Feature lists
+- Any future glass-heavy content pages
+
+**Testing:**
+- Safari iOS: Settings → Safari → Show Reader Automatically
+- Safari macOS: View → Show Reader
+
+---
+
 ### 🌱 Plant (Signup Flow) Glass Implementation
 
 > **Routes:** `plant/src/routes/`
