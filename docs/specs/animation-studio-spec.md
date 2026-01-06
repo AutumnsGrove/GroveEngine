@@ -6,20 +6,20 @@ type: tech-spec
 status: draft
 ---
 
-# Animation Studio — Terrarium Extension
+# Bower — Visual Composition Studio
 
 ```
           ┌─────────────────────────────────────────┐
-          │           GRID MATRIX EDITOR            │
+          │              THE BOWER                  │
+          │       (node-graph composition)          │
           │                                         │
           │    [Rock]───────[Vine]───────[Vine]    │
           │       │            │            │       │
-          │       │            │            │       │
+          │       │     tendrils connect    │       │
           │    [Vine]      [Vine]       [Vine]     │
           │       │                                 │
           │    [Vine]                               │
           │                                         │
-          │   ─── connection (timing: 0.3s) ───    │
           └─────────────────────────────────────────┘
                             ↓
           ┌─────────────────────────────────────────┐
@@ -34,11 +34,62 @@ status: draft
           └─────────────────────────────────────────┘
 ```
 
-> *Connect. Time. Jangle. A symphony of nature in motion.*
+> *Arrange with intention. Connect with care.*
 
 **Status:** Draft / Idea Documentation
 **Parent Feature:** Terrarium
 **Location:** Studio mode within Terrarium
+
+---
+
+## Naming
+
+### Primary Recommendation: Bower
+
+**Visual Composition Studio** · `grove.place/bower`
+
+A bower is a shelter made of interwoven branches, or the elaborate structure a bowerbird creates—carefully arranged, visually composed, built from collected elements. It's architecture that grows.
+
+Bower is Grove's visual composition studio. Place elements on a grid, draw connections between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and icons that map your architecture. Whether motion or structure, Bower is where you weave it all together.
+
+The connections themselves are called **tendrils** — the reaching, grasping parts of climbing vines that grab and connect.
+
+*Arrange with intention. Connect with care.*
+
+### Why Bower?
+
+- **Bowerbirds** create intricate structures from collected materials
+- It's about **arrangement**, **composition**, **visual appeal**
+- A bower is *architecture that grows*
+- Natural metaphor that fits the Grove ecosystem
+- Not about trees directly — about what happens in the forest
+
+### Alternative Candidates
+
+| Name | Metaphor | Feeling | Best For |
+|------|----------|---------|----------|
+| **Bower** | Bowerbird's creation | Crafted, intentional | Unified studio (recommended) |
+| **Canopy** | Interlocking branches overhead | Observational, networked | If it's more about viewing than creating |
+| **Weave** | Threading together | Active, textile | If the verb feels more natural |
+| **Tendril** | Reaching vine | Grasping, connecting | For the connections themselves |
+| **Sway** | Trees in wind | Motion, flow | Animation-only mode name |
+| **Fern** | Branching fronds | Structured, fractal | Diagram-only mode name |
+
+### Naming Decision Needed
+
+Choose one:
+- [ ] **Bower** as unified name (animations + diagrams)
+- [ ] **Bower** with sub-modes: **Sway** (animation) + **Fern** (diagrams)
+- [ ] Different name entirely (see alternatives)
+
+---
+
+## Internal Naming
+
+| Public Name | Internal Name |
+|-------------|---------------|
+| Bower | GroveBower |
+| Tendrils (connections) | GroveTendrils |
 
 ---
 
@@ -211,13 +262,13 @@ The rock-and-vines example:
 
 ## Integration with Terrarium
 
-Animation Studio lives **inside** Terrarium as a mode/tab:
+Bower lives **inside** Terrarium as a mode/tab:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  ◎ Terrarium                                                │
 │  ┌──────────────┬──────────────┬──────────────┐            │
-│  │  🎨 Canvas   │  🔗 Studio   │  📦 Export   │            │
+│  │  🎨 Canvas   │  🔗 Bower    │  📦 Export   │            │
 │  └──────────────┴──────────────┴──────────────┘            │
 │                                                             │
 │  [Current mode content here]                                │
@@ -226,7 +277,7 @@ Animation Studio lives **inside** Terrarium as a mode/tab:
 ```
 
 - **Canvas** — Existing Terrarium (static composition + Live preview)
-- **Studio** — Grid Matrix Editor (connections + timing)
+- **Bower** — Node-graph editor (tendrils + timing)
 - **Export** — Export dialog (now supports animation formats)
 
 ---
@@ -267,7 +318,7 @@ Build diagram rendering into the same node-graph foundation:
 - **Text Nodes** — Simple labeled boxes
 - **Custom Components** — Extend with Svelte components
 
-**Connection Types:**
+**Connection Types (Tendrils):**
 - Solid arrows (→)
 - Dashed lines (--)
 - Labeled connections
@@ -282,21 +333,85 @@ Build diagram rendering into the same node-graph foundation:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ◎ Diagram Editor                         [Export ▾]        │
+│  ◎ Bower: Diagrams                        [Export ▾]        │
 ├────────────┬─────────────────────────────────────────────────┤
 │   Palette  │                                                 │
 │  ────────  │    ╭─────────────╮         ╭─────────────╮     │
 │  ▢ Card    │    │   Request   │────────→│   Handler   │     │
-│  ◇ Diamond │    │   ☁ icon    │         │   ⚡ icon   │     │
+│  ◇ Diamond │    │   Cloud     │         │   Zap       │     │
 │  ○ Circle  │    ╰─────────────╯         ╰─────────────╯     │
 │  ─ Line    │          │                        │             │
 │            │          │                        │             │
 │  Icons:    │          ▼                        ▼             │
-│  ☁ ⚡ 📦   │    ╭─────────────╮         ╭─────────────╮     │
-│  🔒 📊 ⚙   │    │  Database   │←────────│   Cache     │     │
-│            │    │   📦 icon   │         │   ⚡ icon   │     │
-│            │    ╰─────────────╯         ╰─────────────╯     │
+│  Cloud     │    ╭─────────────╮         ╭─────────────╮     │
+│  Zap       │    │  Database   │←────────│   Cache     │     │
+│  Database  │    │  Database   │         │   Zap       │     │
+│  Shield    │    ╰─────────────╯         ╰─────────────╯     │
 └────────────┴─────────────────────────────────────────────────┘
+```
+
+### Glassmorphism for Diagram Nodes
+
+Diagram nodes use Grove's glass component system for consistent styling:
+
+```svelte
+<script>
+  import { GlassCard } from '@groveengine/ui/ui';
+  import { Database, Zap, Cloud } from 'lucide-svelte';
+</script>
+
+<!-- Glass card node in diagram -->
+<GlassCard variant="card" hoverable class="w-40">
+  <div class="flex items-center gap-2">
+    <Database class="w-5 h-5" />
+    <span>Database</span>
+  </div>
+</GlassCard>
+```
+
+**Glass Variants for Diagrams:**
+
+| Variant | Use Case |
+|---------|----------|
+| `card` | Standard diagram nodes (80% opacity) |
+| `accent` | Highlighted/selected nodes (30% accent color) |
+| `tint` | Background grouping boxes (60% opacity) |
+| `muted` | Disabled/inactive nodes (40% opacity) |
+
+### Lucide Icon Mapping for Diagrams
+
+Standard icons for common diagram concepts:
+
+```typescript
+// Recommended icon mappings
+const diagramIcons = {
+  // Infrastructure
+  database: Database,
+  server: Server,
+  cloud: Cloud,
+  storage: HardDrive,
+
+  // Actions
+  process: Zap,
+  transform: ArrowRightLeft,
+  filter: Filter,
+
+  // Data
+  input: ArrowDownToLine,
+  output: ArrowUpFromLine,
+  queue: ListOrdered,
+
+  // Control
+  decision: GitBranch,
+  loop: RefreshCw,
+  start: Play,
+  end: Square,
+
+  // Security
+  auth: ShieldCheck,
+  lock: Lock,
+  key: Key,
+} as const;
 ```
 
 ### Output Formats
@@ -370,24 +485,72 @@ packages/engine/src/lib/ui/components/
 
 ## Open Questions
 
-- [ ] Should connections be visible in Live Mode, or hidden during preview?
+### Naming (Decision Needed)
+- [ ] Confirm **Bower** as the name, or choose alternative
+- [ ] Decide if sub-modes need names (Sway for animation, Fern for diagrams)
+
+### Technical
+- [ ] Should tendrils be visible in Live Mode, or hidden during preview?
 - [ ] How to handle circular connections (A→B→C→A)?
 - [ ] Maximum chain depth before performance degrades?
 - [ ] Should there be preset "jiggle patterns" (wave, pulse, random)?
-- [ ] Audio sync possibilities for V2+?
-- [ ] **Naming:** What to call the unified node-graph system? (Walk through Grove needed)
-- [ ] Which Lucide icons to include in starter palette?
+
+### Diagram Editor
 - [ ] Markdown shortcode syntax for embedding diagrams in posts?
 - [ ] Should diagrams support dark/light mode variants?
+- [ ] Starter icon palette — which Lucide icons to include by default?
+
+### Future (V2+)
+- [ ] Audio sync possibilities?
+- [ ] Physics simulation parameters?
+- [ ] Community sharing of bower compositions?
 
 ---
 
-## Tomorrow's Tasks
+## D1 Schema (Draft)
 
-- [ ] **Walk through the Grove** — Find proper names for this system
-- [ ] **Review grove-ui-design skill** — Ensure patterns align
-- [ ] **Expand spec** — Add more detail based on naming/patterns discovered
-- [ ] **Consider Loom integration** — Map out D1 schema for persistence
+For persistence via Loom batch pattern:
+
+```sql
+-- Bower compositions (animations + diagrams)
+CREATE TABLE bower_compositions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'animation' | 'diagram'
+  canvas_settings TEXT, -- JSON
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Nodes in a composition
+CREATE TABLE bower_nodes (
+  id TEXT PRIMARY KEY,
+  composition_id TEXT NOT NULL,
+  component_name TEXT NOT NULL, -- 'Rock', 'Vine', 'GlassCard', etc.
+  position_x REAL NOT NULL,
+  position_y REAL NOT NULL,
+  props TEXT, -- JSON for component-specific props
+  z_index INTEGER DEFAULT 0,
+  FOREIGN KEY (composition_id) REFERENCES bower_compositions(id)
+);
+
+-- Tendrils (connections between nodes)
+CREATE TABLE bower_tendrils (
+  id TEXT PRIMARY KEY,
+  composition_id TEXT NOT NULL,
+  source_node_id TEXT NOT NULL,
+  target_node_id TEXT NOT NULL,
+  duration REAL DEFAULT 0.3, -- seconds (animation only)
+  delay REAL DEFAULT 0, -- seconds (animation only)
+  easing TEXT DEFAULT 'ease-out',
+  line_style TEXT DEFAULT 'solid', -- 'solid' | 'dashed' | 'arrow'
+  label TEXT, -- optional connection label
+  FOREIGN KEY (composition_id) REFERENCES bower_compositions(id),
+  FOREIGN KEY (source_node_id) REFERENCES bower_nodes(id),
+  FOREIGN KEY (target_node_id) REFERENCES bower_nodes(id)
+);
+```
 
 ---
 
@@ -396,9 +559,15 @@ packages/engine/src/lib/ui/components/
 - [[terrarium-spec]] — Parent feature spec
 - [[foliage-spec]] — Blog decoration system (if exists)
 - [[grove-naming]] — Naming philosophy
+- [[docs/scratch/node-graph-studio-naming]] — Naming journey scratchpad
 
 ---
 
 *Draft created: January 6th, 2026*
-*Updated: January 6th, 2026 — Added Diagram Editor concept*
-*Status: Idea documentation — not yet scheduled for implementation*
+*Updated: January 6th, 2026*
+- Added Diagram Editor concept
+- Completed grove walk: recommended **Bower** as name
+- Added glassmorphism patterns and Lucide icon mapping
+- Added D1 schema draft for Loom integration
+
+*Status: Idea documentation — awaiting naming decision*
