@@ -98,7 +98,7 @@
 	}
 </script>
 
-<div class="animate-fade-in">
+<div class="animate-fade-in max-w-5xl mx-auto px-4 py-8">
 	<!-- Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Choose your plan</h1>

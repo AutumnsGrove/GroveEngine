@@ -5,18 +5,11 @@
 
 	let { data, form } = $props();
 
-	// Form state - use $derived for values initialized from props
-	let displayName = $state('');
+	// Form state - initialize from props on first render only
+	let displayName = $state(data.user?.displayName || '');
 	let username = $state('');
 	let favoriteColor = $state<string | null>(null);
 	let selectedInterests = $state<string[]>([]);
-
-	// Initialize displayName from props
-	$effect(() => {
-		if (data.user?.displayName && !displayName) {
-			displayName = data.user.displayName;
-		}
-	});
 
 	// Username validation state
 	let usernameStatus = $state<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
@@ -37,16 +30,20 @@
 		{ id: 'other', label: 'Other', icon: Star }
 	];
 
-	// Color presets
+	// Color presets - curated from Grove nature palette
 	const colorPresets = [
-		{ name: 'Grove Green', value: '142 76% 36%', hex: '#16a34a' },
-		{ name: 'Midnight Purple', value: '340 45% 35%', hex: '#8b3a5c' },
-		{ name: 'Ocean Blue', value: '200 80% 40%', hex: '#1490c7' },
-		{ name: 'Sunset Orange', value: '25 90% 50%', hex: '#f27d0c' },
-		{ name: 'Forest Teal', value: '170 50% 35%', hex: '#2c8c7e' },
-		{ name: 'Berry Pink', value: '330 60% 50%', hex: '#cc4080' },
-		{ name: 'Golden Amber', value: '38 70% 50%', hex: '#d9a520' },
-		{ name: 'Slate Gray', value: '220 15% 45%', hex: '#626f84' }
+		{ name: 'Grove Green', value: '142 76% 36%', hex: '#16a34a' },      // greens.grove
+		{ name: 'Deep Plum', value: '274 79% 32%', hex: '#581c87' },        // midnightBloom.deepPlum
+		{ name: 'Ocean Blue', value: '200 90% 46%', hex: '#0284c7' },       // accents.water.deep
+		{ name: 'Sunset Ember', value: '20 86% 42%', hex: '#c2410c' },      // autumn.ember
+		{ name: 'Cherry Blossom', value: '330 81% 60%', hex: '#ec4899' },   // cherryBlossoms.standard
+		{ name: 'Golden Amber', value: '38 92% 50%', hex: '#d97706' },      // autumn.amber
+		{ name: 'Lavender', value: '271 50% 68%', hex: '#a78bfa' },         // wildflowers.crocus
+		{ name: 'Cardinal Red', value: '0 75% 51%', hex: '#dc2626' },       // accents.bird.cardinalRed
+		{ name: 'Autumn Gold', value: '43 96% 56%', hex: '#eab308' },       // autumn.gold
+		{ name: 'Tulip Pink', value: '330 71% 79%', hex: '#f9a8d4' },       // wildflowers.tulipPink
+		{ name: 'Meadow Green', value: '142 76% 45%', hex: '#22c55e' },     // greens.meadow
+		{ name: 'Violet Purple', value: '271 76% 53%', hex: '#8b5cf6' }     // wildflowers.violet
 	];
 
 	// Check username availability
@@ -104,7 +101,7 @@
 	}
 </script>
 
-<div class="animate-fade-in">
+<div class="animate-fade-in max-w-2xl mx-auto px-4 py-8">
 	<!-- Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Set up your profile</h1>
@@ -197,19 +194,23 @@
 				</label>
 				<p class="text-xs text-foreground-subtle mb-3">This will be your blog's accent color. You can change it later.</p>
 
-				<div class="grid grid-cols-4 gap-2">
+				<div class="grid grid-cols-4 gap-2.5">
 					{#each colorPresets as color}
 						<button
 							type="button"
 							onclick={() => (favoriteColor = favoriteColor === color.value ? null : color.value)}
-							class="aspect-square rounded-lg border-2 transition-all hover:scale-105"
-							class:border-primary={favoriteColor === color.value}
-							class:border-transparent={favoriteColor !== color.value}
+							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative"
+							class:border-white={favoriteColor === color.value}
+							class:shadow-lg={favoriteColor === color.value}
+							class:border-white/30={favoriteColor !== color.value}
+							class:dark:border-slate-700/30={favoriteColor !== color.value}
 							style="background-color: {color.hex}"
 							title={color.name}
 						>
 							{#if favoriteColor === color.value}
-								<Check size={20} class="text-white mx-auto" />
+								<div class="absolute inset-0 flex items-center justify-center">
+									<Check size={24} class="text-white drop-shadow-lg" />
+								</div>
 							{/if}
 						</button>
 					{/each}
@@ -224,16 +225,19 @@
 				</label>
 				<p class="text-xs text-foreground-subtle mb-3">Select all that apply. This helps us personalize your experience.</p>
 
-				<div class="grid grid-cols-2 gap-2">
+				<div class="grid grid-cols-2 gap-3">
 					{#each interests as interest}
 						{@const Icon = interest.icon}
 						<button
 							type="button"
 							onclick={() => toggleInterest(interest.id)}
-							class="flex items-center gap-2 p-3 rounded-lg backdrop-blur-sm border text-left text-sm transition-all {selectedInterests.includes(interest.id) ? 'bg-white/50 dark:bg-slate-800/50 border-primary' : 'bg-white/20 dark:bg-slate-800/20 border-white/30 dark:border-slate-700/30 hover:bg-white/40 dark:hover:bg-slate-800/40'}"
+							class="flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm border text-left text-sm transition-all relative {selectedInterests.includes(interest.id) ? 'bg-white/60 dark:bg-slate-800/60 border-primary border-2 shadow-md' : 'bg-white/30 dark:bg-slate-800/30 border-white/30 dark:border-slate-700/30 hover:bg-white/45 dark:hover:bg-slate-800/45'}"
 						>
-							<Icon class="w-4 h-4" />
-							<span class="text-foreground">{interest.label}</span>
+							<Icon class="w-5 h-5 {selectedInterests.includes(interest.id) ? 'text-primary' : 'text-foreground-muted'}" />
+							<span class="text-foreground font-medium">{interest.label}</span>
+							{#if selectedInterests.includes(interest.id)}
+								<Check size={16} class="text-primary ml-auto" />
+							{/if}
 						</button>
 					{/each}
 				</div>
