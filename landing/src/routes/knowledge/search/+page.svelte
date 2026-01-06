@@ -24,13 +24,13 @@
     filteredResults = results;
   }
 
-  $: categoryCounts = {
+  let categoryCounts = $derived({
     specs: filteredResults.filter(d => d.category === 'specs').length,
     help: filteredResults.filter(d => d.category === 'help').length,
     legal: filteredResults.filter(d => d.category === 'legal').length,
     marketing: filteredResults.filter(d => d.category === 'marketing').length,
     patterns: filteredResults.filter(d => d.category === 'patterns').length
-  };
+  });
 </script>
 
 <SEO
