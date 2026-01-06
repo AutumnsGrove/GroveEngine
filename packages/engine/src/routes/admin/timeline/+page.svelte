@@ -1,6 +1,6 @@
 <script>
 	import { GlassCard } from '$lib/ui';
-	import { Calendar, MapPin, Target, Sparkles, TreePine, Workflow, Map } from 'lucide-svelte';
+	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout } from 'lucide-svelte';
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -16,7 +16,7 @@
 	<GlassCard class="mb-8">
 		<div class="text-center py-8">
 			<div class="mb-4">
-				<Sparkles class="w-16 h-16 text-accent-muted mx-auto" />
+				<Sprout class="w-16 h-16 text-accent-muted mx-auto" />
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in First Buds (Early Spring)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
