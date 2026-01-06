@@ -60,25 +60,36 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   // Check for duplicate events (idempotency)
+  // Only skip if already successfully processed
   const existingEvent = await db
-    .prepare("SELECT id FROM webhook_events WHERE provider_event_id = ?")
+    .prepare(
+      "SELECT id, processed FROM webhook_events WHERE provider_event_id = ?",
+    )
     .bind(event.id)
     .first();
 
-  if (existingEvent) {
-    // Already processed
+  if (existingEvent && existingEvent.processed === 1) {
+    // Already successfully processed
     return json({ received: true, duplicate: true });
   }
 
-  // Store the event
-  const webhookEventId = crypto.randomUUID();
-  await db
-    .prepare(
-      `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
-			 VALUES (?, 'stripe', ?, ?, ?, unixepoch())`,
-    )
-    .bind(webhookEventId, event.id, event.type, payload)
-    .run();
+  // Store the event or reuse existing failed event
+  let webhookEventId: string;
+  if (existingEvent) {
+    // Reuse existing event ID for retry
+    webhookEventId = existingEvent.id as string;
+    console.log(`[Webhook] Retrying event ${event.id}`);
+  } else {
+    // Create new event
+    webhookEventId = crypto.randomUUID();
+    await db
+      .prepare(
+        `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
+         VALUES (?, 'stripe', ?, ?, ?, unixepoch())`,
+      )
+      .bind(webhookEventId, event.id, event.type, payload)
+      .run();
+  }
 
   try {
     // Handle the event
@@ -183,7 +194,12 @@ async function handleCheckoutComplete(
   // Get full session details
   const fullSession = await getCheckoutSession(stripeSecretKey, sessionId);
   const customerId = fullSession.customer as string;
-  const subscriptionId = fullSession.subscription as string;
+
+  // Extract subscription ID (Stripe returns expanded object when using expand[]=subscription)
+  const subscriptionId =
+    typeof fullSession.subscription === "string"
+      ? fullSession.subscription
+      : fullSession.subscription.id;
 
   // Check if tenant already exists
   const existingTenant = await getTenantForOnboarding(db, onboardingId);

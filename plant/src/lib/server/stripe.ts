@@ -75,6 +75,35 @@ export async function createCheckoutSession(params: {
   successUrl: string;
   cancelUrl: string;
 }): Promise<{ sessionId: string; url: string }> {
+  // IMPORTANT: Create customer first (required for Stripe Accounts V2)
+  const customerResponse = await fetch("https://api.stripe.com/v1/customers", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${params.stripeSecretKey}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      email: params.customerEmail,
+      "metadata[onboarding_id]": params.onboardingId,
+      "metadata[username]": params.username,
+    }),
+  });
+
+  if (!customerResponse.ok) {
+    const error = (await customerResponse.json()) as {
+      error?: { message?: string };
+    };
+    console.error("[Stripe] Customer creation failed:", error);
+    throw new Error(
+      error.error?.message ||
+        `Failed to create Stripe customer: ${customerResponse.status}`,
+    );
+  }
+
+  const customer = (await customerResponse.json()) as { id: string };
+  console.log("[Stripe] Created customer:", customer.id);
+
+  // Now create checkout session with customer ID
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
@@ -83,7 +112,7 @@ export async function createCheckoutSession(params: {
     },
     body: new URLSearchParams({
       mode: "subscription",
-      customer_email: params.customerEmail,
+      customer: customer.id, // Use customer ID instead of email
       "line_items[0][price]": params.priceId,
       "line_items[0][quantity]": "1",
       success_url: params.successUrl,
@@ -104,10 +133,9 @@ export async function createCheckoutSession(params: {
     console.error("[Stripe] Checkout session creation failed:", error);
     console.error("[Stripe] Request params:", {
       priceId: params.priceId,
-      email: params.customerEmail,
+      customerId: customer.id,
       mode: "subscription",
     });
-    // Throw the actual Stripe error message for debugging
     throw new Error(
       error.error?.message ||
         `Stripe API error: ${response.status} ${response.statusText}`,
@@ -131,7 +159,7 @@ export async function getCheckoutSession(
   id: string;
   status: string;
   customer: string;
-  subscription: string;
+  subscription: { id: string; status: string } | string;
   metadata: Record<string, string>;
 }> {
   const response = await fetch(
