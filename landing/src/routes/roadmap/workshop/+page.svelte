@@ -288,13 +288,14 @@
 			description: 'Internal infrastructure keeping Grove running',
 			tools: [
 				{
-					name: 'CDN Uploader',
-					tagline: 'Intelligent Image CLI',
-					description: 'A fast, intelligent CLI for uploading images to Cloudflare R2. Auto-converts to WebP, generates AI descriptions and alt text, deduplicates by content hash, and processes Markdown files to extract and replace image links.',
+					name: 'Press',
+					tagline: 'Image Processing CLI',
+					description: 'A press takes something raw and makes it ready. Press converts images to WebP, generates AI descriptions for accessibility, deduplicates by content hash, and uploads to R2. One command, and your images are ready to publish.',
 					status: 'live',
-					icon: 'upload',
+					icon: 'stamp',
 					integration: 'CLI tool for content creators and developers',
-					github: 'https://github.com/AutumnsGrove/CDNUploader'
+					github: 'https://github.com/AutumnsGrove/CDNUploader',
+					spec: '/knowledge/specs/press-spec'
 				},
 				{
 					name: 'Vista',
