@@ -32,16 +32,20 @@
 		);
 	}
 
-	// Additional filtering by tag
-	let filteredPosts = $state([]);
+	// Track search results from ContentSearch
+	let searchResults = $state([]);
 	function handleSearchChange(query, results) {
-		// Apply tag filter on top of search results
-		if (selectedTag) {
-			filteredPosts = results.filter(post => post.tags.includes(selectedTag));
-		} else {
-			filteredPosts = results;
-		}
+		searchResults = results;
 	}
+
+	// Apply tag filtering reactively to prevent race conditions
+	// This ensures filteredPosts updates whenever searchResults OR selectedTag changes
+	let filteredPosts = $derived.by(() => {
+		if (selectedTag) {
+			return searchResults.filter(post => post.tags.includes(selectedTag));
+		}
+		return searchResults;
+	});
 
 	// Update URL when tag filter changes
 	function updateUrl() {

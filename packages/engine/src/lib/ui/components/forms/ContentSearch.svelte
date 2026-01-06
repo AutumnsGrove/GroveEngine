@@ -52,7 +52,7 @@
 	<ContentSearch items={postsWithLowercase} filterFn={filterPost} />
 	```
 -->
-<script lang="ts" generics="T extends Record<string, any>">
+<script lang="ts" generics="T extends Record<string, unknown>">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
@@ -66,8 +66,10 @@
 		searchQuery?: string;
 		/** Placeholder text for search input */
 		placeholder?: string;
-		/** Type of results for screen reader announcements (e.g., "posts", "documents", "items") */
+		/** Type of results for screen reader announcements (singular form, e.g., "post", "document", "match") */
 		resultsType?: string;
+		/** Plural form of resultsType (defaults to resultsType + 's', but override for irregular plurals like "match" → "matches") */
+		resultsTypePlural?: string;
 		/** Whether to sync search query with URL params */
 		syncWithUrl?: boolean;
 		/** URL parameter name for search query */
@@ -94,6 +96,7 @@
 		searchQuery = $bindable(''),
 		placeholder = 'Search...',
 		resultsType = 'result',
+		resultsTypePlural,
 		syncWithUrl = false,
 		queryParam = 'q',
 		debounceDelay = 250,
@@ -260,7 +263,7 @@
 	<!-- Screen reader announcement for search results -->
 	<div id={resultsId} role="status" aria-live="polite" aria-atomic="true" aria-label="Search results" class="sr-only">
 		{#if debouncedQuery}
-			Found {filteredItems.length} {resultsType}{filteredItems.length !== 1 ? 's' : ''} matching "{debouncedQuery}"
+			Found {filteredItems.length} {filteredItems.length === 1 ? resultsType : (resultsTypePlural || resultsType + 's')} matching "{debouncedQuery}"
 		{/if}
 	</div>
 </div>

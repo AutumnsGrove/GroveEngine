@@ -6,7 +6,8 @@
   import { ContentSearch } from '@autumnsgrove/groveengine';
 
   let searchQuery = $state('');
-  let filteredResults = $state([]);
+  // Initialize with all docs to prevent empty state flash on page load
+  let filteredResults = $state(allDocs);
 
   // Filter function for ContentSearch
   function filterDoc(doc, query) {

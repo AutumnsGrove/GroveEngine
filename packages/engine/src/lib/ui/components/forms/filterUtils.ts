@@ -52,7 +52,7 @@ export function textIncludes(text: string, query: string): boolean {
  * <ContentSearch items={posts} filterFn={filterPost} />
  * ```
  */
-export function createTextFilter<T extends Record<string, any>>(
+export function createTextFilter<T extends Record<string, unknown>>(
 	fields: (keyof T)[]
 ): (item: T, query: string) => boolean {
 	return (item: T, query: string) => {
@@ -81,7 +81,7 @@ export function createTextFilter<T extends Record<string, any>>(
  * <ContentSearch items={posts} filterFn={filterPost} />
  * ```
  */
-export function createMultiFieldFilter<T extends Record<string, any>>(
+export function createMultiFieldFilter<T extends Record<string, unknown>>(
 	textFields: (keyof T)[],
 	arrayFields: (keyof T)[] = []
 ): (item: T, query: string) => boolean {
@@ -104,10 +104,10 @@ export function createMultiFieldFilter<T extends Record<string, any>>(
 		const matchesArray = arrayFields.some(field => {
 			const value = item[field];
 			if (Array.isArray(value)) {
-				return value.some(item => {
-					if (typeof item === 'string') {
+				return value.some(element => {
+					if (typeof element === 'string') {
 						// Use includesNormalized to avoid double normalization
-						return includesNormalized(normalizeSearchText(item), normalizedQuery);
+						return includesNormalized(normalizeSearchText(element), normalizedQuery);
 					}
 					return false;
 				});
@@ -139,12 +139,12 @@ export function createMultiFieldFilter<T extends Record<string, any>>(
  * }
  * ```
  */
-export function precomputeLowercaseFields<T extends Record<string, any>>(
+export function precomputeLowercaseFields<T extends Record<string, unknown>>(
 	items: T[],
 	fields: (keyof T)[]
-): (T & Record<string, any>)[] {
+): (T & Record<string, unknown>)[] {
 	return items.map(item => {
-		const computed: Record<string, any> = { ...item };
+		const computed: Record<string, unknown> = { ...item };
 
 		fields.forEach(field => {
 			const value = item[field];
@@ -157,7 +157,7 @@ export function precomputeLowercaseFields<T extends Record<string, any>>(
 			}
 		});
 
-		return computed as T & Record<string, any>;
+		return computed as T & Record<string, unknown>;
 	});
 }
 
@@ -174,7 +174,7 @@ export function precomputeLowercaseFields<T extends Record<string, any>>(
  * // Matches: "jav" in "JavaScript", "scr" in "TypeScript"
  * ```
  */
-export function createFuzzyFilter<T extends Record<string, any>>(
+export function createFuzzyFilter<T extends Record<string, unknown>>(
 	fields: (keyof T)[],
 	minMatchLength = 2
 ): (item: T, query: string) => boolean {
@@ -230,7 +230,7 @@ export function combineFilters<T>(
  * const recentPostsFilter = createDateFilter('publishedAt', new Date('2024-01-01'));
  * ```
  */
-export function createDateFilter<T extends Record<string, any>>(
+export function createDateFilter<T extends Record<string, unknown>>(
 	dateField: keyof T,
 	startDate?: Date,
 	endDate?: Date
