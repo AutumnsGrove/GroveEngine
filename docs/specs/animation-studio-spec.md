@@ -231,6 +231,143 @@ Animation Studio lives **inside** Terrarium as a mode/tab:
 
 ---
 
+## Diagram Editor — Shared Node-Graph Engine
+
+The same node-graph engine that powers Animation Studio can also power a **Grove-styled diagram editor** — a lightweight alternative to Mermaid that renders natively without heavy external libraries.
+
+### The Problem with Mermaid
+
+Mermaid diagrams are powerful but:
+- Heavy rendering library (bloats bundle size)
+- External dependency for what's essentially boxes and arrows
+- Styling doesn't match Grove's aesthetic
+
+### The Solution
+
+Build diagram rendering into the same node-graph foundation:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SHARED NODE-GRAPH ENGINE                     │
+├─────────────────────────────┬───────────────────────────────────┤
+│      Animation Studio       │        Diagram Editor             │
+├─────────────────────────────┼───────────────────────────────────┤
+│  Assets: Nature components  │  Assets: Glass cards + icons      │
+│  Connections: Timing/glue   │  Connections: Arrows/lines        │
+│  Output: Animations         │  Output: Static diagrams          │
+│  Mode: Live preview         │  Mode: Rendered SVG/embed         │
+└─────────────────────────────┴───────────────────────────────────┘
+```
+
+### Diagram Editor Features
+
+**Node Types:**
+- **Glass Cards** — Grove's glassmorphism aesthetic, customizable content
+- **Lucide Icons** — MIT-licensed, tree-shakeable, perfect fit
+- **Text Nodes** — Simple labeled boxes
+- **Custom Components** — Extend with Svelte components
+
+**Connection Types:**
+- Solid arrows (→)
+- Dashed lines (--)
+- Labeled connections
+- Directional/bidirectional
+
+**Diagram Types (potential):**
+- Flowcharts
+- Sequence diagrams
+- Entity relationships
+- Mind maps
+- Architecture diagrams
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ◎ Diagram Editor                         [Export ▾]        │
+├────────────┬─────────────────────────────────────────────────┤
+│   Palette  │                                                 │
+│  ────────  │    ╭─────────────╮         ╭─────────────╮     │
+│  ▢ Card    │    │   Request   │────────→│   Handler   │     │
+│  ◇ Diamond │    │   ☁ icon    │         │   ⚡ icon   │     │
+│  ○ Circle  │    ╰─────────────╯         ╰─────────────╯     │
+│  ─ Line    │          │                        │             │
+│            │          │                        │             │
+│  Icons:    │          ▼                        ▼             │
+│  ☁ ⚡ 📦   │    ╭─────────────╮         ╭─────────────╮     │
+│  🔒 📊 ⚙   │    │  Database   │←────────│   Cache     │     │
+│            │    │   📦 icon   │         │   ⚡ icon   │     │
+│            │    ╰─────────────╯         ╰─────────────╯     │
+└────────────┴─────────────────────────────────────────────────┘
+```
+
+### Output Formats
+
+| Format | Use Case |
+|--------|----------|
+| **Live Svelte** | Renders directly in blog posts, no external deps |
+| **SVG Export** | Clean vectors for docs, READMEs |
+| **PNG Export** | Static images |
+| **Embed Code** | Copy/paste component into posts |
+
+### Icon Integration
+
+[Lucide](https://lucide.dev) icons are:
+- MIT licensed (fully permissive)
+- Tree-shakeable (only import what you use)
+- SVG-based (scales perfectly)
+- 1000+ icons available
+
+```svelte
+<script>
+  import { Cloud, Zap, Database } from 'lucide-svelte';
+</script>
+```
+
+---
+
+## Architecture Patterns
+
+### D1 Batch Calls via Loom
+
+For persistence, wrap diagram/animation data in D1 batch operations using the Loom pattern:
+
+```typescript
+// Example: Save diagram with all nodes and connections in one batch
+await loom.batch([
+  db.insert(diagrams).values({ id, name, userId }),
+  ...nodes.map(node => db.insert(diagramNodes).values(node)),
+  ...connections.map(conn => db.insert(diagramConnections).values(conn))
+]);
+```
+
+Benefits:
+- Single round-trip for complex saves
+- Transactional consistency
+- Efficient for node-graph structures with many relationships
+
+### Shared Engine Components
+
+```
+packages/engine/src/lib/ui/components/
+├── node-graph/                 # Shared foundation
+│   ├── Grid.svelte            # Snap grid system
+│   ├── Connection.svelte      # Line/arrow rendering
+│   ├── Node.svelte            # Base node wrapper
+│   ├── Canvas.svelte          # Pan/zoom canvas
+│   └── types.ts               # Shared types
+│
+├── terrarium/                  # Animation Studio
+│   ├── ...existing...
+│   └── uses node-graph/
+│
+└── diagrams/                   # Diagram Editor (new)
+    ├── DiagramEditor.svelte
+    ├── GlassCard.svelte
+    ├── IconNode.svelte
+    └── uses node-graph/
+```
+
+---
+
 ## Open Questions
 
 - [ ] Should connections be visible in Live Mode, or hidden during preview?
@@ -238,6 +375,19 @@ Animation Studio lives **inside** Terrarium as a mode/tab:
 - [ ] Maximum chain depth before performance degrades?
 - [ ] Should there be preset "jiggle patterns" (wave, pulse, random)?
 - [ ] Audio sync possibilities for V2+?
+- [ ] **Naming:** What to call the unified node-graph system? (Walk through Grove needed)
+- [ ] Which Lucide icons to include in starter palette?
+- [ ] Markdown shortcode syntax for embedding diagrams in posts?
+- [ ] Should diagrams support dark/light mode variants?
+
+---
+
+## Tomorrow's Tasks
+
+- [ ] **Walk through the Grove** — Find proper names for this system
+- [ ] **Review grove-ui-design skill** — Ensure patterns align
+- [ ] **Expand spec** — Add more detail based on naming/patterns discovered
+- [ ] **Consider Loom integration** — Map out D1 schema for persistence
 
 ---
 
@@ -245,8 +395,10 @@ Animation Studio lives **inside** Terrarium as a mode/tab:
 
 - [[terrarium-spec]] — Parent feature spec
 - [[foliage-spec]] — Blog decoration system (if exists)
+- [[grove-naming]] — Naming philosophy
 
 ---
 
 *Draft created: January 6th, 2026*
+*Updated: January 6th, 2026 — Added Diagram Editor concept*
 *Status: Idea documentation — not yet scheduled for implementation*
