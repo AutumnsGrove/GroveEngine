@@ -66,9 +66,24 @@
 		searchQuery?: string;
 		/** Placeholder text for search input */
 		placeholder?: string;
-		/** Type of results for screen reader announcements (singular form, e.g., "post", "document", "match") */
+		/**
+		 * Type of results for screen reader announcements (singular form)
+		 * @example "post" → "Found 1 post" / "Found 5 posts"
+		 * @example "document" → "Found 1 document" / "Found 5 documents"
+		 * @example "match" → Use with resultsTypePlural for "Found 1 match" / "Found 5 matches"
+		 */
 		resultsType?: string;
-		/** Plural form of resultsType (defaults to resultsType + 's', but override for irregular plurals like "match" → "matches") */
+		/**
+		 * Plural form of resultsType (defaults to resultsType + 's')
+		 *
+		 * **Use this for irregular plurals:**
+		 * @example resultsType="match" resultsTypePlural="matches"
+		 * @example resultsType="person" resultsTypePlural="people"
+		 * @example resultsType="child" resultsTypePlural="children"
+		 * @example resultsType="datum" resultsTypePlural="data"
+		 *
+		 * Screen reader will announce: "Found 1 match" / "Found 5 matches"
+		 */
 		resultsTypePlural?: string;
 		/** Whether to sync search query with URL params */
 		syncWithUrl?: boolean;

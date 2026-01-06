@@ -11,6 +11,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    // Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
+    // Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
     exclude: ["workers-og"],
   },
   server: {

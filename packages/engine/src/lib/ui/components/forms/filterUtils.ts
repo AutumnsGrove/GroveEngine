@@ -122,7 +122,16 @@ export function createMultiFieldFilter<T extends Record<string, unknown>>(
 /**
  * Pre-compute lowercase versions of searchable fields for performance
  *
- * Use this for large datasets to avoid repeated toLowerCase() calls during filtering.
+ * **When to use this optimization:**
+ * - **Large datasets (100+ items)**: Repeated toLowerCase() calls during filtering become expensive
+ * - **Frequent searches**: Users actively searching/filtering the same dataset multiple times
+ * - **Multiple searchable fields**: More fields = more normalization = more performance gain
+ * - **Real-time filtering**: When debouncing isn't enough and you need instant results
+ *
+ * **When NOT to use:**
+ * - Small datasets (<50 items): Minimal performance benefit, adds memory overhead
+ * - Static lists that don't change: Consider precomputing at build time instead
+ * - Infrequent searches: The setup cost may outweigh the benefit
  *
  * @param items - Array of items to optimize
  * @param fields - Fields to pre-compute lowercase versions of
@@ -130,13 +139,20 @@ export function createMultiFieldFilter<T extends Record<string, unknown>>(
  *
  * @example
  * ```typescript
- * const optimizedPosts = precomputeLowercaseFields(posts, ['title', 'description']);
- * // Creates: { ...post, titleLower: '...', descriptionLower: '...' }
+ * // In your Svelte component with large dataset (100+ posts)
+ * let postsWithLowercase = $derived.by(() => {
+ *   return precomputeLowercaseFields(posts, ['title', 'description', 'tags']);
+ * });
+ * // Creates: { ...post, titleLower: '...', descriptionLower: '...', tagsLower: [...] }
  *
  * function filterPost(post, query) {
  *   const q = query.toLowerCase();
- *   return post.titleLower.includes(q) || post.descriptionLower.includes(q);
+ *   return post.titleLower.includes(q) ||
+ *          post.descriptionLower.includes(q) ||
+ *          post.tagsLower.some(tag => tag.includes(q));
  * }
+ *
+ * <ContentSearch items={postsWithLowercase} filterFn={filterPost} />
  * ```
  */
 export function precomputeLowercaseFields<T extends Record<string, unknown>>(
@@ -240,7 +256,15 @@ export function createDateFilter<T extends Record<string, unknown>>(
 		const dateValue = item[dateField];
 		if (!dateValue) return false;
 
+		// Validate dateValue is a valid date type before constructing Date
+		if (typeof dateValue !== 'string' && typeof dateValue !== 'number' && !(dateValue instanceof Date)) {
+			return false;
+		}
+
 		const itemDate = new Date(dateValue);
+
+		// Check if the date is valid (invalid dates return NaN for getTime())
+		if (isNaN(itemDate.getTime())) return false;
 
 		if (startDate && itemDate < startDate) return false;
 		if (endDate && itemDate > endDate) return false;
