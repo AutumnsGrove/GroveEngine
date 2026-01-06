@@ -20,6 +20,12 @@
 		return 'p-6 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200 dark:border-slate-700';
 	}
 
+	interface SubComponent {
+		name: string;
+		icon: string;
+		description?: string;
+	}
+
 	interface Tool {
 		name: string;
 		tagline: string;
@@ -30,6 +36,7 @@
 		integration: string;
 		github?: string;
 		spec?: string;
+		subComponents?: SubComponent[];
 	}
 
 	interface Category {
@@ -131,6 +138,20 @@
 					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec'
+				},
+				{
+					name: 'Weave',
+					tagline: 'Visual Composition Studio',
+					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Sway mode) and diagrams (Fern mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
+					status: 'planned',
+					icon: 'splinepointer',
+					integration: 'Animation and diagram creation within Terrarium',
+					spec: '/knowledge/specs/weave-spec',
+					subComponents: [
+						{ name: 'Sway', icon: 'waves', description: 'Animation mode' },
+						{ name: 'Fern', icon: 'waypoints', description: 'Diagram mode' },
+						{ name: 'Thread', icon: 'route', description: 'Connections' }
+					]
 				},
 				{
 					name: 'Rings',
@@ -489,6 +510,22 @@
 										{badge.text}
 									</span>
 								</div>
+
+								{#if tool.subComponents && tool.subComponents.length > 0}
+									<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
+										{#each tool.subComponents as sub}
+											<span
+												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted"
+												title={sub.description}
+												role="listitem"
+												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
+											>
+												<svelte:component this={toolIcons[sub.icon]} class="w-3 h-3" aria-hidden="true" />
+												{sub.name}
+											</span>
+										{/each}
+									</div>
+								{/if}
 
 								<p class="text-foreground-muted mb-4 leading-relaxed">
 									{tool.description}

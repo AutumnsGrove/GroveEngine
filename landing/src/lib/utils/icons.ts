@@ -115,6 +115,10 @@ import {
   Zap,
   Store,
   Stamp,
+  SplinePointer,
+  Waves,
+  Waypoints,
+  Route,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -268,6 +272,11 @@ export const toolIcons = {
   lifebuoy: LifeBuoy,
   // Press - image processing CLI
   stamp: Stamp,
+  // Creative/Composition (Weave)
+  splinepointer: SplinePointer,  // Weave - main icon
+  waves: Waves,                  // Sway - animation mode
+  waypoints: Waypoints,          // Fern - diagram mode
+  route: Route,                  // Thread - connections
 } as const;
 
 // ============================================================================

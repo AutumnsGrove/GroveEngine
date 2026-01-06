@@ -9,7 +9,7 @@ import {
   PenLine,
   Home,
   CircleDollarSign,
-  Waypoints,
+  Send,
   Github,
   ExternalLink,
   Mail,
@@ -42,7 +42,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/pricing", label: "Pricing", icon: CircleDollarSign },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
-  { href: "/contact", label: "Contact", icon: Waypoints },
+  { href: "/contact", label: "Contact", icon: Send },
   {
     href: "https://autumnsgrove.com/blog",
     label: "Blog",
