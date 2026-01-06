@@ -325,10 +325,10 @@ export function createAuth(env: Env) {
       },
     },
 
-    // Rate limiting
+    // Rate limiting (see Appendix D for considerations)
     rateLimit: {
       window: 60, // 1 minute
-      max: 10, // 10 requests per minute per IP
+      max: 20, // 20 requests per minute per IP (increased for shared IPs)
     },
 
     // Trusted origins
@@ -618,31 +618,69 @@ socialProviders: {
 Magic links replace the 6-digit magic codes. Better Auth handles link generation; we configure email delivery via Resend.
 
 ```typescript
-// Already configured in createAuth(), but here's the Resend template:
-const magicLinkEmail = `
-<!DOCTYPE html>
+// Already configured in createAuth(), but here's the full Resend implementation:
+// Note: Includes both HTML and plaintext for email client compatibility
+
+magicLink({
+  sendMagicLink: async ({ email, url }) => {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Grove <noreply@grove.place>",
+        to: email,
+        subject: "Sign in to Grove",
+        // Plaintext version (email best practice - some clients prefer this)
+        text: `Sign in to Grove
+
+Click the link below to sign in. This link expires in 10 minutes.
+
+${url}
+
+If you didn't request this, you can safely ignore this email.
+This link can only be used once.
+
+- Grove`,
+        // HTML version
+        html: `<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
     .container { max-width: 480px; margin: 0 auto; padding: 32px; }
+    .logo { font-size: 24px; font-weight: bold; color: #2d5a27; margin-bottom: 24px; }
     .button {
       display: inline-block;
       background: #2d5a27;
-      color: white;
+      color: white !important;
       padding: 12px 24px;
       border-radius: 8px;
       text-decoration: none;
       margin: 24px 0;
+      font-weight: 500;
     }
     .footer { color: #666; font-size: 14px; margin-top: 32px; }
+    .link-fallback { word-break: break-all; color: #666; font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Sign in to Grove</h1>
+    <div class="logo">Grove</div>
+    <h1 style="margin-top: 0;">Sign in to Grove</h1>
     <p>Click the button below to sign in. This link expires in 10 minutes.</p>
-    <a href="{{url}}" class="button">Sign in to Grove</a>
+    <a href="${url}" class="button">Sign in to Grove</a>
+    <p class="link-fallback">
+      Or copy this link: ${url}
+    </p>
     <p class="footer">
       If you didn't request this, you can safely ignore this email.
       <br>
@@ -650,13 +688,36 @@ const magicLinkEmail = `
     </p>
   </div>
 </body>
-</html>
-`;
+</html>`,
+      }),
+    });
+  },
+  expiresIn: 60 * 10, // 10 minutes
+}),
 ```
+
+> **Email Testing Recommendation**: Test magic link emails with major clients
+> (Gmail, Outlook, Apple Mail, Yahoo) before launch. Use tools like
+> [Litmus](https://litmus.com) or [Email on Acid](https://emailonacid.com)
+> to preview rendering across clients.
 
 #### 2.4 Passkey Configuration
 
 Passkeys are a new capability not available in Heartwood. They provide passwordless, phishing-resistant authentication.
+
+> **Browser Compatibility Note**
+>
+> WebAuthn/Passkeys require:
+> - **HTTPS** (will not work on HTTP, even localhost)
+> - **User gesture** (button click, not automatic)
+> - **Modern browser support**:
+>   - Safari 16+ (macOS Ventura, iOS 16+)
+>   - Chrome 108+
+>   - Firefox 119+
+>   - Edge 108+
+>
+> Passkeys should be offered as an **optional enhancement**, not required.
+> Always provide fallback auth methods (OAuth, magic link).
 
 ```typescript
 // Already configured in createAuth()
@@ -675,15 +736,43 @@ plugins: [
 ],
 ```
 
-**Frontend Passkey Registration:**
+**Frontend Passkey Registration (with graceful degradation):**
 
 ```typescript
 // src/lib/auth/passkey.ts
 import { client } from "$lib/auth/client";
 
+/**
+ * Check if WebAuthn/Passkeys are supported in this browser
+ */
+export function isPasskeySupported(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.PublicKeyCredential !== undefined &&
+    typeof window.PublicKeyCredential === "function"
+  );
+}
+
+/**
+ * Check if platform authenticator (Touch ID, Face ID, Windows Hello) is available
+ */
+export async function isPlatformAuthenticatorAvailable(): Promise<boolean> {
+  if (!isPasskeySupported()) return false;
+
+  try {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch {
+    return false;
+  }
+}
+
 export async function registerPasskey() {
+  if (!isPasskeySupported()) {
+    throw new Error("Passkeys are not supported in this browser");
+  }
+
   const result = await client.passkey.register({
-    name: getDeviceName(), // "MacBook Pro", "iPhone 15", etc.
+    name: getDeviceName(),
   });
 
   if (result.error) {
@@ -694,6 +783,10 @@ export async function registerPasskey() {
 }
 
 export async function authenticateWithPasskey() {
+  if (!isPasskeySupported()) {
+    throw new Error("Passkeys are not supported in this browser");
+  }
+
   const result = await client.passkey.authenticate();
 
   if (result.error) {
@@ -791,27 +884,16 @@ export async function migrateUsers(db: D1Database) {
       )
       .run();
 
-    // Create account record for OAuth provider
-    // Note: We don't have provider info in current schema
-    // This will be populated on next login
-    if (user.groveauth_id) {
-      await db
-        .prepare(`
-          INSERT INTO ba_account (
-            id, user_id, account_id, provider_id, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?)
-          ON CONFLICT DO NOTHING
-        `)
-        .bind(
-          crypto.randomUUID(),
-          user.id,
-          user.groveauth_id,
-          "google", // Assumption: most users are Google OAuth
-          user.created_at || now,
-          now
-        )
-        .run();
-    }
+    // NOTE: We intentionally do NOT create ba_account records during migration.
+    // Heartwood stores provider info in the external GroveAuth service, not in
+    // our D1 database, so we don't know which provider each user used.
+    //
+    // Better Auth will automatically create the correct account record when
+    // users log in for the first time post-migration. It links accounts by
+    // email, so users can log in with any provider and it will link to their
+    // existing user record.
+    //
+    // This approach is safer than guessing providers and ensures accurate data.
 
     console.log(`Migrated user: ${user.email}`);
   }
@@ -819,63 +901,86 @@ export async function migrateUsers(db: D1Database) {
   console.log("User migration complete!");
 }
 
-export async function migrateSessions(db: D1Database, strategy: "clean" | "preserve") {
-  if (strategy === "clean") {
-    console.log("Clean session cutover: All users will need to re-login");
-    // Better Auth will create new sessions on login
-    return;
-  }
-
-  // Preserve strategy: Migrate active sessions
-  // Note: This is complex because session formats differ significantly
-  // Recommended: Use clean cutover during low-traffic period
-
-  const sessions = await db
+export async function validateTenantReferences(db: D1Database): Promise<{
+  valid: number;
+  orphaned: string[];
+}> {
+  // Validate that all tenant_id references point to existing tenants
+  const orphaned = await db
     .prepare(`
-      SELECT s.*, u.id as user_id
-      FROM sessions s
-      JOIN users u ON u.email = s.user_email
-      WHERE s.expires_at > unixepoch()
+      SELECT u.id, u.email, u.tenant_id
+      FROM users u
+      LEFT JOIN tenants t ON t.id = u.tenant_id
+      WHERE u.tenant_id IS NOT NULL AND t.id IS NULL
     `)
-    .all<HeartwordSession & { user_id: string }>();
+    .all<{ id: string; email: string; tenant_id: string }>();
 
-  console.log(`Found ${sessions.results.length} active sessions`);
-
-  for (const session of sessions.results) {
-    const token = crypto.randomUUID(); // Generate new session token
-    const now = Date.now();
-
-    await db
-      .prepare(`
-        INSERT INTO ba_session (
-          id, token, user_id, expires_at, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
-      `)
-      .bind(
-        session.id,
-        token,
-        session.user_id,
-        session.expires_at * 1000, // Convert to milliseconds
-        session.created_at * 1000,
-        now
-      )
-      .run();
+  if (orphaned.results.length > 0) {
+    console.warn("Found users with orphaned tenant references:");
+    for (const user of orphaned.results) {
+      console.warn(`  - ${user.email} references non-existent tenant: ${user.tenant_id}`);
+    }
   }
 
-  console.log("Session migration complete!");
+  const validCount = await db
+    .prepare("SELECT COUNT(*) as count FROM users WHERE tenant_id IS NULL OR tenant_id IN (SELECT id FROM tenants)")
+    .first<{ count: number }>();
+
+  return {
+    valid: validCount?.count ?? 0,
+    orphaned: orphaned.results.map(u => u.email),
+  };
+}
+
+// IMPORTANT: Clean cutover is the ONLY supported migration strategy.
+// Session formats differ too significantly between Heartwood and Better Auth
+// to reliably preserve sessions. Schedule migration during low-traffic period.
+export async function invalidateAllSessions(db: D1Database) {
+  console.log("Invalidating all Heartwood sessions (clean cutover)...");
+  console.log("All users will need to re-login after migration.");
+
+  // Count active sessions for logging
+  const count = await db
+    .prepare("SELECT COUNT(*) as count FROM sessions WHERE expires_at > unixepoch()")
+    .first<{ count: number }>();
+
+  console.log(`Found ${count?.count ?? 0} active sessions that will be invalidated.`);
+
+  // Better Auth will create new sessions on login - no action needed here.
+  // The old sessions table will be cleaned up in Phase 4 (Heartwood Cleanup).
 }
 
 // Run migration
 export async function runMigration(env: Env) {
   const db = env.DB;
 
+  console.log("=== Heartwood → Better Auth Migration ===");
+  console.log("");
+
+  // Step 0: Validate tenant references
+  console.log("Step 0: Validating tenant references...");
+  const validation = await validateTenantReferences(db);
+  console.log(`  Valid users: ${validation.valid}`);
+  if (validation.orphaned.length > 0) {
+    console.warn(`  WARNING: ${validation.orphaned.length} users have orphaned tenant references`);
+    console.warn("  These users will be migrated but their tenant_id will be invalid.");
+    console.warn("  Consider fixing these before migration or setting tenant_id to NULL.");
+  }
+  console.log("");
+
   // Step 1: Migrate users
+  console.log("Step 1: Migrating users...");
   await migrateUsers(db);
+  console.log("");
 
-  // Step 2: Handle sessions (recommend clean cutover)
-  await migrateSessions(db, "clean");
+  // Step 2: Clean session cutover
+  console.log("Step 2: Clean session cutover...");
+  await invalidateAllSessions(db);
+  console.log("");
 
-  console.log("Migration complete! Users will need to re-login.");
+  console.log("=== Migration Complete ===");
+  console.log("All users will need to re-login.");
+  console.log("Better Auth will create account records on first login.");
 }
 ```
 
@@ -987,39 +1092,95 @@ export const {
 <script lang="ts">
   import { client } from "$lib/auth/client";
   import { goto } from "$app/navigation";
+  import { isPasskeySupported } from "$lib/auth/passkey";
 
   let email = "";
   let loading = false;
   let error: string | null = null;
   let magicLinkSent = false;
+  let rateLimitRetryAfter: number | null = null;
+
+  // Check passkey support on mount
+  let passkeyAvailable = false;
+  $effect(() => {
+    passkeyAvailable = isPasskeySupported();
+  });
+
+  /**
+   * Map error codes to user-friendly messages
+   */
+  function getErrorMessage(err: { code?: string; message?: string }): string {
+    switch (err.code) {
+      case "RATE_LIMIT_EXCEEDED":
+        return "Too many attempts. Please wait a moment and try again.";
+      case "INVALID_CREDENTIALS":
+        return "Invalid email or the account doesn't exist.";
+      case "EMAIL_NOT_VERIFIED":
+        return "Please verify your email first.";
+      case "ACCOUNT_LOCKED":
+        return "Account temporarily locked. Try again later.";
+      case "OAUTH_ERROR":
+        return "Sign-in provider error. Please try again or use a different method.";
+      case "NETWORK_ERROR":
+        return "Network error. Check your connection and try again.";
+      default:
+        return err.message || "Something went wrong. Please try again.";
+    }
+  }
+
+  /**
+   * Handle auth errors with rate limit support
+   */
+  function handleError(result: { error?: { code?: string; message?: string; retryAfter?: number } }) {
+    if (result.error) {
+      error = getErrorMessage(result.error);
+      if (result.error.retryAfter) {
+        rateLimitRetryAfter = result.error.retryAfter;
+        // Auto-clear after retry period
+        setTimeout(() => {
+          rateLimitRetryAfter = null;
+        }, result.error.retryAfter * 1000);
+      }
+      loading = false;
+      return true;
+    }
+    return false;
+  }
 
   async function signInWithGoogle() {
     loading = true;
     error = null;
 
-    const result = await client.signIn.social({
-      provider: "google",
-      callbackURL: "/admin",
-    });
+    try {
+      const result = await client.signIn.social({
+        provider: "google",
+        callbackURL: "/admin",
+      });
 
-    if (result.error) {
-      error = result.error.message;
+      if (!handleError(result)) {
+        // Success - user is redirected to Google
+      }
+    } catch (err) {
+      error = "Network error. Check your connection and try again.";
       loading = false;
     }
-    // Otherwise, user is redirected to Google
   }
 
   async function signInWithGitHub() {
     loading = true;
     error = null;
 
-    const result = await client.signIn.social({
-      provider: "github",
-      callbackURL: "/admin",
-    });
+    try {
+      const result = await client.signIn.social({
+        provider: "github",
+        callbackURL: "/admin",
+      });
 
-    if (result.error) {
-      error = result.error.message;
+      if (!handleError(result)) {
+        // Success - user is redirected to GitHub
+      }
+    } catch (err) {
+      error = "Network error. Check your connection and try again.";
       loading = false;
     }
   }
@@ -1033,31 +1194,51 @@ export const {
     loading = true;
     error = null;
 
-    const result = await client.signIn.magicLink({
-      email,
-      callbackURL: "/admin",
-    });
+    try {
+      const result = await client.signIn.magicLink({
+        email,
+        callbackURL: "/admin",
+      });
 
-    if (result.error) {
-      error = result.error.message;
-      loading = false;
-    } else {
-      magicLinkSent = true;
+      if (!handleError(result)) {
+        magicLinkSent = true;
+        loading = false;
+      }
+    } catch (err) {
+      error = "Network error. Check your connection and try again.";
       loading = false;
     }
   }
 
   async function signInWithPasskey() {
+    if (!passkeyAvailable) {
+      error = "Passkeys are not supported in this browser. Try another sign-in method.";
+      return;
+    }
+
     loading = true;
     error = null;
 
-    const result = await client.signIn.passkey();
+    try {
+      const result = await client.signIn.passkey();
 
-    if (result.error) {
-      error = result.error.message;
+      if (!handleError(result)) {
+        goto("/admin");
+      }
+    } catch (err) {
+      // WebAuthn can throw various errors
+      if (err instanceof Error) {
+        if (err.name === "NotAllowedError") {
+          error = "Passkey authentication was cancelled.";
+        } else if (err.name === "SecurityError") {
+          error = "Passkeys require a secure connection (HTTPS).";
+        } else {
+          error = "Passkey error: " + err.message;
+        }
+      } else {
+        error = "Network error. Check your connection and try again.";
+      }
       loading = false;
-    } else {
-      goto("/admin");
     }
   }
 </script>
@@ -1066,7 +1247,12 @@ export const {
   <h1>Sign in to Grove</h1>
 
   {#if error}
-    <div class="error">{error}</div>
+    <div class="error" role="alert">
+      {error}
+      {#if rateLimitRetryAfter}
+        <p class="retry-timer">Try again in {rateLimitRetryAfter} seconds</p>
+      {/if}
+    </div>
   {/if}
 
   {#if magicLinkSent}
@@ -1074,20 +1260,25 @@ export const {
       <h2>Check your email!</h2>
       <p>We sent a magic link to <strong>{email}</strong></p>
       <p>Click the link in the email to sign in.</p>
+      <button onclick={() => { magicLinkSent = false; email = ""; }}>
+        Use a different email
+      </button>
     </div>
   {:else}
     <div class="providers">
-      <button onclick={signInWithGoogle} disabled={loading}>
-        Sign in with Google
+      <button onclick={signInWithGoogle} disabled={loading || rateLimitRetryAfter}>
+        {loading ? "Signing in..." : "Sign in with Google"}
       </button>
 
-      <button onclick={signInWithGitHub} disabled={loading}>
-        Sign in with GitHub
+      <button onclick={signInWithGitHub} disabled={loading || rateLimitRetryAfter}>
+        {loading ? "Signing in..." : "Sign in with GitHub"}
       </button>
 
-      <button onclick={signInWithPasskey} disabled={loading}>
-        Sign in with Passkey
-      </button>
+      {#if passkeyAvailable}
+        <button onclick={signInWithPasskey} disabled={loading || rateLimitRetryAfter}>
+          {loading ? "Signing in..." : "Sign in with Passkey"}
+        </button>
+      {/if}
     </div>
 
     <div class="divider">or</div>
@@ -1097,10 +1288,11 @@ export const {
         type="email"
         bind:value={email}
         placeholder="you@example.com"
-        disabled={loading}
+        disabled={loading || rateLimitRetryAfter}
+        required
       />
-      <button type="submit" disabled={loading}>
-        Send Magic Link
+      <button type="submit" disabled={loading || rateLimitRetryAfter || !email}>
+        {loading ? "Sending..." : "Send Magic Link"}
       </button>
     </form>
   {/if}
@@ -1397,6 +1589,25 @@ git push
 
 *Includes user time to check email and click
 
+### Session Validation Latency (Detailed)
+
+The session validation latency varies based on cache state:
+
+| Scenario | p50 | p95 | p99 | Notes |
+|----------|-----|-----|-----|-------|
+| KV cache hit | 1-2ms | 3ms | 5ms | Optimal path, ~90% of requests |
+| KV cache miss → D1 | 10-15ms | 25ms | 40ms | First request after TTL expiry |
+| Cold start + D1 | 50-80ms | 120ms | 200ms | First request after deploy |
+| KV cache miss + D1 miss | 15-20ms | 30ms | 50ms | Invalid/expired session |
+
+**Complete validation flow includes:**
+1. Cookie parsing (~0.5ms)
+2. KV lookup (~1-2ms cache hit, ~5ms cache miss)
+3. D1 query on cache miss (~10-15ms)
+4. Response serialization (~0.5ms)
+
+**Expected cache hit rate**: >90% under normal traffic patterns
+
 ### Session Caching Behavior
 
 ```
@@ -1440,9 +1651,17 @@ wrangler secret put GITHUB_CLIENT_SECRET
 # Email service (existing)
 wrangler secret put RESEND_API_KEY
 
-# Better Auth (new)
-wrangler secret put BETTER_AUTH_SECRET  # Random 32+ character string
+# Better Auth (new) - CRITICAL: Generate a secure random secret
+# Generate with: openssl rand -base64 32
+# Or: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+wrangler secret put BETTER_AUTH_SECRET
 ```
+
+> **Security Note**: `BETTER_AUTH_SECRET` is used to sign session tokens.
+> - Must be at least 32 characters
+> - Must be cryptographically random (not a passphrase)
+> - Must be unique per environment (don't share between staging/production)
+> - Rotating this secret will invalidate all active sessions
 
 ### Variables
 
@@ -1462,16 +1681,66 @@ GROVEAUTH_URL = "https://auth.grove.place"
 
 ### Pre-Cutover Testing
 
+#### Authentication Flows
 - [ ] Google OAuth flow works in staging
 - [ ] GitHub OAuth flow works in staging
 - [ ] Magic link flow works in staging
-- [ ] Passkey registration works
+- [ ] Magic link email renders correctly in Gmail
+- [ ] Magic link email renders correctly in Outlook
+- [ ] Magic link email renders correctly in Apple Mail
+- [ ] Passkey registration works (Chrome, Safari, Firefox)
 - [ ] Passkey authentication works
+- [ ] Passkey graceful degradation on unsupported browsers
+
+#### Session Management
 - [ ] Session persists across page refreshes
-- [ ] Session persists across subdomains
+- [ ] Session persists across subdomains (*.grove.place)
+- [ ] Session cookie set with correct domain (.grove.place)
+- [ ] Session cookie set with Secure flag in production
+- [ ] Session cookie set with HttpOnly flag
 - [ ] Logout clears session properly
-- [ ] Rate limiting works
+- [ ] Logout invalidates KV cache entry
+
+#### Rate Limiting
+- [ ] Rate limiting works (10 req/min per IP)
+- [ ] Rate limit headers returned correctly
+- [ ] Blocked requests return 429 status
+
+#### Caching
 - [ ] KV caching works (check CloudFlare dashboard)
+- [ ] KV cache invalidated on logout
+- [ ] KV cache TTL respected (5 minutes)
+
+#### Error Handling
+- [ ] OAuth failure returns user-friendly error
+- [ ] Magic link expiration handled gracefully
+- [ ] Invalid session redirects to login
+- [ ] Network errors show retry option
+- [ ] Rate limit exceeded shows countdown
+
+### Integration Testing
+
+- [ ] Session propagation works across all subdomains
+- [ ] Admin routes require authentication
+- [ ] API routes validate session correctly
+- [ ] Tenant ownership validated for protected resources
+- [ ] CSRF protection works with Better Auth
+
+### Load Testing
+
+- [ ] 100 concurrent login attempts succeed
+- [ ] Session validation handles 1000 req/s
+- [ ] KV cache hit rate >90% under load
+- [ ] No D1 connection pool exhaustion
+
+### Security Testing
+
+- [ ] CSRF protection prevents cross-site requests
+- [ ] Session fixation attack prevented
+- [ ] Session tokens are cryptographically random
+- [ ] Sensitive data not logged
+- [ ] OAuth state parameter validated
+- [ ] Redirect URLs validated against allowlist
 
 ### Post-Cutover Monitoring
 
@@ -1479,7 +1748,9 @@ GROVEAUTH_URL = "https://auth.grove.place"
 - [ ] Monitor session validation latency (<10ms p99)
 - [ ] Monitor error rates in Cloudflare dashboard
 - [ ] Check KV cache hit rate (should be >90%)
-- [ ] Verify email delivery rates
+- [ ] Verify email delivery rates via Resend dashboard
+- [ ] Monitor D1 read/write patterns
+- [ ] Alert on authentication error spikes
 
 ---
 
@@ -1487,6 +1758,8 @@ GROVEAUTH_URL = "https://auth.grove.place"
 
 | Day | Action | Owner |
 |-----|--------|-------|
+| -7 | Send user communication: "Auth system maintenance scheduled" | Product |
+| -2 | Send reminder: "Auth maintenance in 2 days, expect brief re-login" | Product |
 | 1 | Run D1 migration (Phase 1.4) | Developer |
 | 1 | Create KV namespace (Phase 1.5) | Developer |
 | 2-3 | Update OAuth redirect URIs (Phase 2) | Developer |
@@ -1494,13 +1767,109 @@ GROVEAUTH_URL = "https://auth.grove.place"
 | 4 | Deploy Better Auth routes (Phase 4.1) | Developer |
 | 4 | Update hooks.server.ts (Phase 4.2) | Developer |
 | 5 | Update login page (Phase 4.4) | Developer |
-| 5 | Deploy to staging, full testing | QA |
-| 6 | Deploy to production (low-traffic window) | Developer |
-| 6-7 | Monitor for issues | Team |
-| 14 | If stable, run Heartwood cleanup | Developer |
+| 5-9 | Deploy to staging, full testing (3-5 days) | QA |
+| 10 | Final staging sign-off | Team |
+| 11 | Deploy to production (low-traffic window: Sunday 2-4am PT) | Developer |
+| 11-17 | Active monitoring period (7 days) | Team |
+| 18 | Review metrics, confirm success criteria met | Team |
+| 25 | If stable, run Heartwood cleanup (Phase 4.5) | Developer |
+
+### Success Criteria (Before Cleanup)
+
+- [ ] Login success rate >99% for 7 consecutive days
+- [ ] No P0/P1 incidents related to authentication
+- [ ] Session validation p99 latency <20ms
+- [ ] KV cache hit rate >85%
+- [ ] Zero data integrity issues reported
+
+### User Communication Templates
+
+**T-7 Days (Initial Notice)**
+> Subject: Scheduled authentication system upgrade
+>
+> Hi [name],
+>
+> We're upgrading Grove's authentication system on [date] to improve login
+> speed and add new security features like passkeys.
+>
+> What to expect:
+> - You'll need to sign in again after the upgrade
+> - Login will be faster (~2 seconds vs. ~15 seconds)
+> - Your data and settings are not affected
+>
+> Questions? Reply to this email.
+
+**T-2 Days (Reminder)**
+> Subject: Reminder: Auth upgrade in 2 days
+>
+> Quick reminder that our authentication upgrade happens on [date].
+> You'll need to re-login afterward, but everything else stays the same.
 
 ---
 
-*Document Version: 1.0*
+## Appendix D: Security Considerations
+
+### Data at Rest
+
+- **D1 encryption**: D1 does not encrypt data at rest by default. OAuth tokens
+  stored in `ba_account` should be considered sensitive. Better Auth encrypts
+  refresh tokens before storage when `BETTER_AUTH_SECRET` is configured.
+
+- **Recommendation**: Do not store raw access tokens longer than necessary.
+  Better Auth's token rotation helps minimize exposure.
+
+### Subdomain Security
+
+- **Tenant validation**: Ensure subdomain-to-tenant mapping is validated
+  server-side. A malicious actor should not be able to access another tenant's
+  data by manipulating subdomain headers.
+
+- **Cookie scope**: Session cookies are scoped to `.grove.place` which means
+  any subdomain can read them. This is intentional for SSO but requires
+  trust in all subdomains.
+
+### Rate Limiting Considerations
+
+The default rate limit of 10 requests per minute per IP may be too restrictive
+for users behind shared IPs (corporate NAT, VPNs, mobile carriers).
+
+**Recommendations**:
+1. Consider increasing to 20 requests per minute
+2. Add per-email rate limiting as secondary control
+3. Implement graduated rate limiting (warn before block)
+4. Exclude authenticated requests from IP-based limits
+
+```typescript
+// Enhanced rate limiting configuration
+rateLimit: {
+  window: 60,
+  max: 20, // Increased from 10
+  // Add per-email limiting for sensitive operations
+  customRules: [
+    {
+      pathPattern: "/api/auth/magic-link",
+      max: 5,
+      window: 300, // 5 per 5 minutes per email
+      keyGenerator: (req) => req.body?.email || req.ip,
+    },
+  ],
+},
+```
+
+### Session Security
+
+- **Rotation**: Sessions are rotated on sensitive operations (password change,
+  privilege escalation). Better Auth handles this automatically.
+
+- **Revocation**: Implement "sign out all devices" functionality using
+  `auth.api.revokeAllSessions()`.
+
+- **Binding**: Consider binding sessions to IP/User-Agent for high-security
+  tenants (configurable per-tenant feature).
+
+---
+
+*Document Version: 1.1*
 *Last Updated: January 2026*
 *Status: Planning*
+*Changelog: v1.1 - Added security considerations, extended timeline, improved testing*
