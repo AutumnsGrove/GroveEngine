@@ -131,9 +131,11 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 **Email** · `ivy.grove.place`
 **Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
 
-Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
+Ivy climbs the lattice, reaching out, intertwining, linking one point to another. But ivy does something else too: what it covers, it conceals. An ivy-covered wall disappears into green. The structure beneath becomes invisible to anyone outside.
 
-Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means we can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means your messages travel along the ivy—connected point to point—but wrapped in leaves that only you can see through. We can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+
+*Connected and concealed.*
 
 ---
 
@@ -226,6 +228,18 @@ Vista is infrastructure observability for the Grove platform. It monitors every 
 Rings tells writers about their readers. Vista tells the grove keeper about the grove itself.
 
 *Where you go to see everything clearly.*
+
+---
+
+## Press
+**Image Processing CLI** · *Developer tool*
+**Repository:** [AutumnsGrove/CDNUploader](https://github.com/AutumnsGrove/CDNUploader)
+
+A press is a tool of transformation. The olive press extracts oil from fruit. The wine press releases juice from grapes. The printing press prepares words for the world. Every press takes something raw and makes it ready.
+
+Press is Grove's image processing CLI. It takes your raw photos and presses them into web-ready form: converted to WebP, described by AI for accessibility, deduplicated by content hash, and uploaded to Cloudflare R2. One command, and your images are ready to publish.
+
+*Raw in. Ready out. Going to press.*
 
 ---
 
@@ -346,6 +360,7 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 | **Bloom** | Remote coding infrastructure | bloom.grove.place |
 | **Mycelium** | MCP server | mycelium.grove.place |
 | **Vista** | Infrastructure observability | vista.grove.place |
+| **Press** | Image processing CLI | *(developer tool)* |
 | **Wisp** | Writing assistant (+ Fireside) | *(integrated)* |
 | **Pantry** | Shop & provisioning | pantry.grove.place |
 | **Nook** | Private video sharing | nook.grove.place |
@@ -382,6 +397,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Bloom | GroveBloom |
 | Mycelium | GroveMCP |
 | Vista | GroveMonitor |
+| Press | GrovePress |
 | Wisp | GroveWisp |
 | Pantry | GroveShop |
 | Nook | GroveNook |
