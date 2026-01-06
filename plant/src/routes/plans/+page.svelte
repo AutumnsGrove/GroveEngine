@@ -17,8 +17,8 @@
 	// Billing cycle toggle
 	let billingCycle = $state<'monthly' | 'yearly'>('monthly');
 
-	// Selected plan
-	let selectedPlan = $state<string | null>(null);
+	// Selected plan - pre-select Seedling since it's the only available tier
+	let selectedPlan = $state<string | null>('seedling');
 
 	// Tier availability states
 	type TierStatus = 'available' | 'coming_soon' | 'future';
@@ -173,7 +173,7 @@
 	</header>
 
 	<!-- Billing toggle -->
-	<div class="flex justify-center">
+	<div class="flex justify-center" role="group" aria-label="Billing frequency">
 		<div
 			class="inline-flex items-center gap-1 p-1.5 rounded-xl
 				bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md
@@ -188,6 +188,7 @@
 				class:text-foreground={billingCycle === 'monthly'}
 				class:text-foreground-muted={billingCycle !== 'monthly'}
 				class:hover:text-foreground={billingCycle !== 'monthly'}
+				aria-pressed={billingCycle === 'monthly'}
 			>
 				Monthly
 			</button>
@@ -200,6 +201,7 @@
 				class:text-foreground={billingCycle === 'yearly'}
 				class:text-foreground-muted={billingCycle !== 'yearly'}
 				class:hover:text-foreground={billingCycle !== 'yearly'}
+				aria-pressed={billingCycle === 'yearly'}
 			>
 				Yearly
 				<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500 text-white font-medium">
@@ -210,7 +212,7 @@
 	</div>
 
 	<!-- Plans grid -->
-	<div class="space-y-4">
+	<div class="space-y-4" role="radiogroup" aria-label="Select a plan">
 		{#each plans as plan (plan.id)}
 			{@const TierIcon = tierIcons[plan.icon]}
 			{@const isAvailable = plan.status === 'available'}
@@ -221,7 +223,7 @@
 			<div class="relative">
 				<!-- Status badge positioned above card -->
 				{#if isComingSoon}
-					<div class="absolute -top-3 left-6 z-20">
+					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
 								bg-amber-500 text-white shadow-lg shadow-amber-500/25"
@@ -231,7 +233,7 @@
 						</span>
 					</div>
 				{:else if isFuture}
-					<div class="absolute -top-3 left-6 z-20">
+					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
 								bg-slate-400 dark:bg-slate-600 text-white shadow-lg"
@@ -245,9 +247,13 @@
 				<button
 					onclick={() => selectPlan(plan)}
 					disabled={!isAvailable}
-					class="w-full text-left transition-all duration-200 {getStatusClasses(plan)}
-						{isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}"
+					class="w-full text-left transition-all duration-200 rounded-xl {getStatusClasses(plan)}
+						{isAvailable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2' : 'cursor-not-allowed'}"
 					type="button"
+					role="radio"
+					aria-checked={isSelected}
+					aria-disabled={!isAvailable}
+					aria-label="{plan.name} plan, ${getPrice(plan)} per month{!isAvailable ? `, ${plan.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
 				>
 					<GlassCard
 						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
@@ -314,8 +320,8 @@
 							<!-- Description -->
 							<p class="text-sm text-foreground-muted mb-4">{plan.description}</p>
 
-							<!-- Features grid -->
-							<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+							<!-- Features grid - responsive: single column on mobile, two on tablet+ -->
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
 								{#each plan.features as feature}
 									<div class="flex items-center gap-2">
 										<Check
