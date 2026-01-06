@@ -27,12 +27,15 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   ExternalLink,
+  LogIn,
   // Features & Content
   Mail,
   HardDrive,
   Palette,
   ShieldCheck,
+  Shield,
   Cloud,
   SearchCode,
   Archive,
@@ -41,6 +44,9 @@ import {
   MessageCircle,
   FileText,
   Tag,
+  Rss,
+  Eye,
+  Github,
   // Nature/Growth (Grove themed)
   Sprout,
   Heart,
@@ -57,6 +63,7 @@ import {
   HelpCircle,
   Info as InfoIcon,
   Circle,
+  Lock,
   // Phases & Special
   Gem,
   Sparkles,
@@ -101,7 +108,10 @@ export const navIcons = {
   arrowLeft: ArrowLeft,
   chevron: ChevronRight,
   chevronLeft: ChevronLeft,
+  chevronDown: ChevronDown,
   external: ExternalLink,
+  login: LogIn,
+  github: Github,
 } as const;
 
 // ============================================================================
@@ -117,6 +127,7 @@ export const stateIcons = {
   help: HelpCircle,
   info: InfoIcon,
   circle: Circle,
+  lock: Lock,
 } as const;
 
 // ============================================================================
@@ -155,6 +166,7 @@ export const featureIcons = {
   harddrive: HardDrive,
   palette: Palette,
   shieldcheck: ShieldCheck,
+  shield: Shield,
   cloud: Cloud,
   searchcode: SearchCode,
   archive: Archive,
@@ -163,6 +175,9 @@ export const featureIcons = {
   externallink: ExternalLink,
   filetext: FileText,
   tag: Tag,
+  rss: Rss,
+  eye: Eye,
+  download: Download,
 } as const;
 
 // ============================================================================
@@ -292,10 +307,25 @@ export {
   Menu,
   Settings,
   ExternalLink,
+  ChevronDown,
+  LogIn,
+  Github,
+  // Features
+  Mail,
+  HardDrive,
+  Palette,
+  Shield,
+  Download,
+  Rss,
+  Eye,
+  MessageCircle,
   // States
   Loader2,
   AlertTriangle,
   HelpCircle,
+  Lock,
+  // Phase/Special
+  Sparkles,
   // Metrics
   Clock,
   TrendingUp,

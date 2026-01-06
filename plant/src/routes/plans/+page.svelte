@@ -1,6 +1,15 @@
 <script lang="ts">
 	// Use centralized icon registry for consistent icons across Grove
-	import { Check } from '@autumnsgrove/groveengine/ui/icons';
+	import {
+		Check,
+		Clock,
+		Lock,
+		ArrowRight,
+		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown
+	} from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
@@ -11,29 +20,42 @@
 	// Selected plan
 	let selectedPlan = $state<string | null>(null);
 
-	// Plan definitions with glass variants
+	// Tier availability states
+	type TierStatus = 'available' | 'coming_soon' | 'future';
+
+	// Tier icon mapping
+	const tierIcons = {
+		seedling: Sprout,
+		sapling: TreeDeciduous,
+		oak: Trees,
+		evergreen: Crown
+	};
+
+	// Plan definitions with availability status
 	const plans = [
 		{
 			id: 'seedling',
 			name: 'Seedling',
-			description: 'Perfect for getting started',
+			tagline: 'Just planted',
+			description: 'Perfect for getting started. A quiet corner to call your own.',
 			monthlyPrice: 8,
 			yearlyPrice: 81.60,
 			features: [
 				'50 posts',
 				'1 GB storage',
-				'3 themes',
+				'3 curated themes',
 				'Meadow access',
 				'RSS feed',
 				'No ads ever'
 			],
-			highlight: null,
-			glassVariant: 'default' as const
+			status: 'available' as TierStatus,
+			icon: 'seedling' as keyof typeof tierIcons
 		},
 		{
 			id: 'sapling',
 			name: 'Sapling',
-			description: 'For growing blogs',
+			tagline: 'Growing strong',
+			description: 'For blogs finding their voice. Room to stretch and grow.',
 			monthlyPrice: 12,
 			yearlyPrice: 122.40,
 			features: [
@@ -44,13 +66,14 @@
 				'Centennial eligible',
 				'Everything in Seedling'
 			],
-			highlight: 'popular',
-			glassVariant: 'default' as const
+			status: 'coming_soon' as TierStatus,
+			icon: 'sapling' as keyof typeof tierIcons
 		},
 		{
 			id: 'oak',
 			name: 'Oak',
-			description: 'Full creative control',
+			tagline: 'Deep roots',
+			description: 'Full creative control. Your blog, your rules.',
 			monthlyPrice: 25,
 			yearlyPrice: 255,
 			features: [
@@ -61,13 +84,14 @@
 				'Centennial eligible',
 				'Priority support'
 			],
-			highlight: 'value',
-			glassVariant: 'accent' as const
+			status: 'future' as TierStatus,
+			icon: 'oak' as keyof typeof tierIcons
 		},
 		{
 			id: 'evergreen',
 			name: 'Evergreen',
-			description: 'The complete package',
+			tagline: 'Always flourishing',
+			description: 'The complete package. Everything Grove has to offer.',
 			monthlyPrice: 35,
 			yearlyPrice: 357,
 			features: [
@@ -78,8 +102,8 @@
 				'Centennial eligible',
 				'8 hrs/mo dedicated support'
 			],
-			highlight: null,
-			glassVariant: 'frosted' as const
+			status: 'future' as TierStatus,
+			icon: 'evergreen' as keyof typeof tierIcons
 		}
 	];
 
@@ -97,130 +121,280 @@
 		const savings = monthlyCost - plan.yearlyPrice;
 		return savings.toFixed(0);
 	}
+
+	// Check if a plan can be selected
+	function canSelect(plan: (typeof plans)[0]) {
+		return plan.status === 'available';
+	}
+
+	// Handle plan selection
+	function selectPlan(plan: (typeof plans)[0]) {
+		if (canSelect(plan)) {
+			selectedPlan = plan.id;
+		}
+	}
+
+	// Get status-specific styling classes
+	function getStatusClasses(plan: (typeof plans)[0]) {
+		switch (plan.status) {
+			case 'available':
+				return selectedPlan === plan.id
+					? 'ring-2 ring-primary ring-offset-2 ring-offset-transparent'
+					: 'hover:ring-1 hover:ring-primary/30';
+			case 'coming_soon':
+				return 'opacity-90';
+			case 'future':
+				return 'opacity-50 grayscale';
+		}
+	}
+
+	// Get overlay content based on status
+	function getOverlayStyle(status: TierStatus) {
+		switch (status) {
+			case 'coming_soon':
+				return 'bg-amber-500/10 dark:bg-amber-500/5';
+			case 'future':
+				return 'bg-slate-500/10 dark:bg-slate-500/10';
+			default:
+				return '';
+		}
+	}
 </script>
 
-<div class="animate-fade-in max-w-5xl mx-auto px-4 py-8">
+<div class="animate-fade-in space-y-8">
 	<!-- Header -->
-	<div class="text-center mb-8">
-		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Choose your plan</h1>
-		<p class="text-foreground-muted">
-			All plans include a 14-day free trial. Cancel anytime.
+	<header class="text-center space-y-3">
+		<h1 class="text-2xl md:text-3xl font-medium text-foreground">
+			Choose how you'd like to grow
+		</h1>
+		<p class="text-foreground-muted max-w-md mx-auto">
+			Every plan includes a 14-day free trial. Your words are always yours.
 		</p>
-	</div>
+	</header>
 
 	<!-- Billing toggle -->
-	<div class="flex justify-center mb-8">
-		<div class="inline-flex items-center gap-3 p-1 rounded-lg bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md border border-white/40 dark:border-emerald-800/25">
+	<div class="flex justify-center">
+		<div
+			class="inline-flex items-center gap-1 p-1.5 rounded-xl
+				bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md
+				border border-white/40 dark:border-emerald-800/25"
+		>
 			<button
 				onclick={() => (billingCycle = 'monthly')}
-				class="px-4 py-2 rounded-md text-sm font-medium transition-all"
-				class:bg-surface-elevated={billingCycle === 'monthly'}
+				class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+				class:bg-white={billingCycle === 'monthly'}
+				class:dark:bg-slate-800={billingCycle === 'monthly'}
+				class:shadow-sm={billingCycle === 'monthly'}
 				class:text-foreground={billingCycle === 'monthly'}
 				class:text-foreground-muted={billingCycle !== 'monthly'}
+				class:hover:text-foreground={billingCycle !== 'monthly'}
 			>
 				Monthly
 			</button>
 			<button
 				onclick={() => (billingCycle = 'yearly')}
-				class="px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2"
-				class:bg-surface-elevated={billingCycle === 'yearly'}
+				class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
+				class:bg-white={billingCycle === 'yearly'}
+				class:dark:bg-slate-800={billingCycle === 'yearly'}
+				class:shadow-sm={billingCycle === 'yearly'}
 				class:text-foreground={billingCycle === 'yearly'}
 				class:text-foreground-muted={billingCycle !== 'yearly'}
+				class:hover:text-foreground={billingCycle !== 'yearly'}
 			>
 				Yearly
-				<span class="text-xs px-1.5 py-0.5 rounded bg-primary text-white">Save 15%</span>
+				<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500 text-white font-medium">
+					Save 15%
+				</span>
 			</button>
 		</div>
 	</div>
 
 	<!-- Plans grid -->
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-		{#each plans as plan}
-			<GlassCard
-				variant={plan.glassVariant}
-				hoverable
-				class="relative cursor-pointer transition-all {selectedPlan === plan.id ? 'ring-2 ring-primary ring-offset-2' : ''}"
-			>
+	<div class="space-y-4">
+		{#each plans as plan (plan.id)}
+			{@const TierIcon = tierIcons[plan.icon]}
+			{@const isAvailable = plan.status === 'available'}
+			{@const isComingSoon = plan.status === 'coming_soon'}
+			{@const isFuture = plan.status === 'future'}
+			{@const isSelected = selectedPlan === plan.id}
+
+			<div class="relative">
+				<!-- Status badge positioned above card -->
+				{#if isComingSoon}
+					<div class="absolute -top-3 left-6 z-20">
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+								bg-amber-500 text-white shadow-lg shadow-amber-500/25"
+						>
+							<Clock class="w-3 h-3" />
+							Coming Soon
+						</span>
+					</div>
+				{:else if isFuture}
+					<div class="absolute -top-3 left-6 z-20">
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+								bg-slate-400 dark:bg-slate-600 text-white shadow-lg"
+						>
+							<Lock class="w-3 h-3" />
+							Future
+						</span>
+					</div>
+				{/if}
+
 				<button
-					onclick={() => (selectedPlan = plan.id)}
-					class="w-full text-left"
+					onclick={() => selectPlan(plan)}
+					disabled={!isAvailable}
+					class="w-full text-left transition-all duration-200 {getStatusClasses(plan)}
+						{isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}"
 					type="button"
 				>
-					{#if plan.highlight === 'popular'}
-						<span
-							class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-primary text-white z-10"
-						>
-							Most Popular
-						</span>
-					{:else if plan.highlight === 'value'}
-						<span
-							class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-grove-700 text-white z-10"
-						>
-							Best Value
-						</span>
-					{/if}
+					<GlassCard
+						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
+						class="relative overflow-hidden {isComingSoon || isFuture ? 'pt-6' : ''}"
+					>
+						<!-- Subtle overlay for unavailable tiers -->
+						{#if !isAvailable}
+							<div
+								class="absolute inset-0 pointer-events-none {getOverlayStyle(plan.status)}"
+							></div>
+						{/if}
 
-					<div class="flex justify-between items-start mb-4">
-						<div>
-							<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
-							<p class="text-sm text-foreground-muted">{plan.description}</p>
-						</div>
-						<div
-							class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 {selectedPlan === plan.id ? 'border-primary bg-primary' : 'border-white/40 dark:border-slate-700/40'}"
-						>
-							{#if selectedPlan === plan.id}
-								<Check size={12} class="text-white" />
+						<div class="relative z-10 p-6">
+							<!-- Plan header: icon, name, price -->
+							<div class="flex items-start justify-between gap-4 mb-4">
+								<div class="flex items-start gap-4">
+									<!-- Tier icon -->
+									<div
+										class="flex-shrink-0 p-3 rounded-xl transition-colors
+											{isAvailable
+											? 'bg-emerald-100/60 dark:bg-emerald-900/40'
+											: isComingSoon
+												? 'bg-amber-100/60 dark:bg-amber-900/30'
+												: 'bg-slate-100/60 dark:bg-slate-800/40'}"
+									>
+										<TierIcon
+											class="w-6 h-6 {isAvailable
+												? 'text-emerald-600 dark:text-emerald-400'
+												: isComingSoon
+													? 'text-amber-600 dark:text-amber-400'
+													: 'text-slate-400 dark:text-slate-500'}"
+										/>
+									</div>
+
+									<!-- Name and tagline -->
+									<div>
+										<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
+										<p
+											class="text-sm {isAvailable
+												? 'text-emerald-600 dark:text-emerald-400'
+												: isComingSoon
+													? 'text-amber-600 dark:text-amber-400'
+													: 'text-foreground-subtle'}"
+										>
+											{plan.tagline}
+										</p>
+									</div>
+								</div>
+
+								<!-- Price -->
+								<div class="text-right flex-shrink-0">
+									<div class="flex items-baseline gap-1">
+										<span class="text-2xl font-semibold text-foreground">${getPrice(plan)}</span>
+										<span class="text-sm text-foreground-muted">/mo</span>
+									</div>
+									{#if billingCycle === 'yearly'}
+										<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+											Save ${getYearlySavings(plan)}/year
+										</p>
+									{/if}
+								</div>
+							</div>
+
+							<!-- Description -->
+							<p class="text-sm text-foreground-muted mb-4">{plan.description}</p>
+
+							<!-- Features grid -->
+							<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+								{#each plan.features as feature}
+									<div class="flex items-center gap-2">
+										<Check
+											class="w-4 h-4 flex-shrink-0 {isAvailable
+												? 'text-emerald-500'
+												: isComingSoon
+													? 'text-amber-500'
+													: 'text-slate-400'}"
+										/>
+										<span class="text-sm text-foreground-muted">{feature}</span>
+									</div>
+								{/each}
+							</div>
+
+							<!-- Selection indicator for available plans -->
+							{#if isAvailable}
+								<div class="mt-4 pt-4 border-t border-white/20 dark:border-slate-700/30">
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-foreground-muted">
+											{isSelected ? 'Selected' : 'Click to select'}
+										</span>
+										<div
+											class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+												{isSelected
+												? 'border-emerald-500 bg-emerald-500'
+												: 'border-slate-300 dark:border-slate-600'}"
+										>
+											{#if isSelected}
+												<Check class="w-3 h-3 text-white" />
+											{/if}
+										</div>
+									</div>
+								</div>
 							{/if}
 						</div>
-					</div>
-
-					<div class="mb-4">
-						<span class="text-3xl font-semibold text-foreground">${getPrice(plan)}</span>
-						<span class="text-foreground-muted">/mo</span>
-						{#if billingCycle === 'yearly'}
-							<p class="text-xs text-success mt-1">
-								Save ${getYearlySavings(plan)}/year
-							</p>
-						{/if}
-					</div>
-
-					<ul class="space-y-2">
-						{#each plan.features as feature}
-							<li class="flex items-center gap-2 text-sm text-foreground-muted">
-								<Check size={16} class="text-primary flex-shrink-0" />
-								<span>{feature}</span>
-							</li>
-						{/each}
-					</ul>
+					</GlassCard>
 				</button>
-			</GlassCard>
+			</div>
 		{/each}
 	</div>
 
 	<!-- Free tier note -->
-	<div class="text-center mt-6">
+	<div class="text-center py-2">
 		<p class="text-sm text-foreground-subtle">
 			Just want to hang out in Meadow?
-			<span class="text-foreground-muted">Free social-only tier coming soon.</span>
+			<span class="text-foreground-muted">Free social-only tier coming with Meadow launch.</span>
 		</p>
 	</div>
 
 	<!-- Continue button -->
-	<form method="POST" class="max-w-md mx-auto mt-8">
+	<form method="POST" class="space-y-4">
 		<input type="hidden" name="plan" value={selectedPlan || ''} />
 		<input type="hidden" name="billingCycle" value={billingCycle} />
-		<button type="submit" disabled={!selectedPlan} class="btn-primary w-full">
-			Continue to Payment
+		<button
+			type="submit"
+			disabled={!selectedPlan}
+			class="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+		>
+			{#if selectedPlan}
+				Continue with {plans.find((p) => p.id === selectedPlan)?.name}
+			{:else}
+				Select a plan to continue
+			{/if}
 		</button>
-		<p class="text-xs text-foreground-subtle text-center mt-3">
-			You won't be charged until after your 14-day trial.
+		<p class="text-xs text-foreground-subtle text-center">
+			You won't be charged until after your 14-day trial. Cancel anytime.
 		</p>
 	</form>
 
-	<!-- Comparison link -->
-	<div class="text-center mt-6">
-		<a href="https://grove.place/pricing" target="_blank" class="text-sm text-primary hover:underline">
-			View full plan comparison →
+	<!-- Full comparison link -->
+	<div class="text-center pb-4">
+		<a
+			href="https://grove.place/pricing"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+		>
+			View full plan comparison
+			<ArrowRight class="w-4 h-4" />
 		</a>
 	</div>
 </div>

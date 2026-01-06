@@ -25,12 +25,13 @@
 		// Journey
 		ArrowRight,
 		Clock,
+		Lock,
 		// Pricing tier icons
 		Sprout,
 		TreeDeciduous,
 		Trees,
 		Crown
-	} from 'lucide-svelte';
+	} from '@autumnsgrove/groveengine/ui/icons';
 	// Auth section state
 	let authExpanded = $state(false);
 
@@ -79,6 +80,9 @@
 		}
 	];
 
+	// Tier availability types
+	type TierStatus = 'available' | 'coming_soon' | 'future';
+
 	// Icon mapping for pricing tiers
 	const planIcons = {
 		sprout: Sprout,
@@ -87,32 +91,39 @@
 		evergreen: Crown
 	};
 
-	// Plan tier summaries for preview cards
+	// Plan tier summaries for preview cards with availability status
 	const planPreviews = [
 		{
 			name: 'Seedling',
+			tagline: 'Just planted',
 			price: 8,
 			highlights: ['50 posts', '1 GB storage', '3 themes'],
-			icon: 'sprout' as keyof typeof planIcons
+			icon: 'sprout' as keyof typeof planIcons,
+			status: 'available' as TierStatus
 		},
 		{
 			name: 'Sapling',
+			tagline: 'Growing strong',
 			price: 12,
 			highlights: ['250 posts', '5 GB storage', 'Email forwarding'],
 			icon: 'sapling' as keyof typeof planIcons,
-			popular: true
+			status: 'coming_soon' as TierStatus
 		},
 		{
 			name: 'Oak',
+			tagline: 'Deep roots',
 			price: 25,
 			highlights: ['Unlimited posts', 'Custom domain', 'Theme customizer'],
-			icon: 'oak' as keyof typeof planIcons
+			icon: 'oak' as keyof typeof planIcons,
+			status: 'future' as TierStatus
 		},
 		{
 			name: 'Evergreen',
+			tagline: 'Always flourishing',
 			price: 35,
 			highlights: ['Everything', '100 GB storage', 'Domain included'],
-			icon: 'evergreen' as keyof typeof planIcons
+			icon: 'evergreen' as keyof typeof planIcons,
+			status: 'future' as TierStatus
 		}
 	];
 </script>
@@ -244,49 +255,98 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-3 pt-3 stagger-children">
+		<div class="grid grid-cols-2 gap-4 stagger-children">
 			{#each planPreviews as plan}
-				<a
-					href="https://grove.place/pricing"
-					class="block group"
-				>
-					<GlassCard
-						variant={plan.popular ? 'accent' : 'default'}
-						class="relative text-center hover-lift {plan.popular ? 'ring-2 ring-primary/30' : ''}"
-					>
-						{#if plan.popular}
-							<span class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-medium px-3 py-1 rounded-full bg-primary text-white shadow-sm">
-								Popular
+				{@const PlanIcon = planIcons[plan.icon]}
+				{@const isAvailable = plan.status === 'available'}
+				{@const isComingSoon = plan.status === 'coming_soon'}
+				{@const isFuture = plan.status === 'future'}
+
+				<div class="relative group">
+					<!-- Status badge -->
+					{#if isComingSoon}
+						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-500 text-white shadow-lg shadow-amber-500/25">
+								<Clock class="w-2.5 h-2.5" />
+								Soon
 							</span>
-						{/if}
-						<!-- Tier Icon -->
-						{@const PlanIcon = planIcons[plan.icon]}
-						<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-3">
-							<PlanIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 						</div>
-						<h3 class="font-medium text-foreground mb-1">{plan.name}</h3>
-						<p class="text-2xl font-semibold text-foreground mb-2">
-							${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
-						</p>
-						<ul class="text-xs text-foreground-muted space-y-1 mb-2">
-							{#each plan.highlights as highlight}
-								<li>{highlight}</li>
-							{/each}
-						</ul>
-						<span class="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-							Learn more <ArrowRight class="w-3 h-3" />
-						</span>
-					</GlassCard>
-				</a>
+					{:else if isFuture}
+						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-400 dark:bg-slate-600 text-white shadow-lg">
+								<Lock class="w-2.5 h-2.5" />
+								Future
+							</span>
+						</div>
+					{/if}
+
+					<a
+						href="/plans"
+						class="block {isFuture ? 'opacity-50 grayscale' : ''} {isComingSoon ? 'opacity-90' : ''}"
+					>
+						<GlassCard
+							variant={isAvailable ? 'default' : 'muted'}
+							class="relative text-center {isAvailable ? 'hover-lift' : ''} {isComingSoon || isFuture ? 'pt-4' : ''}"
+						>
+							<!-- Subtle overlay for unavailable tiers -->
+							{#if isComingSoon}
+								<div class="absolute inset-0 bg-amber-500/5 dark:bg-amber-500/5 rounded-xl pointer-events-none"></div>
+							{:else if isFuture}
+								<div class="absolute inset-0 bg-slate-500/5 dark:bg-slate-500/10 rounded-xl pointer-events-none"></div>
+							{/if}
+
+							<div class="relative z-10">
+								<!-- Tier Icon -->
+								<div
+									class="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3
+										{isAvailable
+										? 'bg-emerald-100/60 dark:bg-emerald-900/40'
+										: isComingSoon
+											? 'bg-amber-100/60 dark:bg-amber-900/30'
+											: 'bg-slate-100/60 dark:bg-slate-800/40'}"
+								>
+									<PlanIcon
+										class="w-5 h-5 {isAvailable
+											? 'text-emerald-600 dark:text-emerald-400'
+											: isComingSoon
+												? 'text-amber-600 dark:text-amber-400'
+												: 'text-slate-400 dark:text-slate-500'}"
+									/>
+								</div>
+
+								<h3 class="font-medium text-foreground">{plan.name}</h3>
+								<p class="text-xs {isAvailable ? 'text-emerald-600 dark:text-emerald-400' : isComingSoon ? 'text-amber-600 dark:text-amber-400' : 'text-foreground-subtle'} mb-2">
+									{plan.tagline}
+								</p>
+
+								<p class="text-2xl font-semibold text-foreground mb-3">
+									${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
+								</p>
+
+								<ul class="text-xs text-foreground-muted space-y-1">
+									{#each plan.highlights as highlight}
+										<li>{highlight}</li>
+									{/each}
+								</ul>
+
+								{#if isAvailable}
+									<span class="mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+										Get started <ArrowRight class="w-3 h-3" />
+									</span>
+								{/if}
+							</div>
+						</GlassCard>
+					</a>
+				</div>
 			{/each}
 		</div>
 
-		<div class="text-center mt-4">
+		<div class="text-center mt-6">
 			<a
-				href="https://grove.place/pricing"
+				href="/plans"
 				class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 			>
-				See full comparison
+				See all plans
 				<ArrowRight class="w-4 h-4" />
 			</a>
 		</div>
