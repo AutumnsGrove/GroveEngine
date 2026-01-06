@@ -609,6 +609,17 @@ export const helpArticles: Doc[] = [
     lastUpdated: "2026-01-03",
     readingTime: 5,
   },
+  {
+    slug: "centennial-status",
+    title: "Centennial Status: Your Grove for 100 Years",
+    description:
+      "How to earn 100-year domain preservation and what it means for your writing",
+    excerpt:
+      "Some trees outlive the people who planted them. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years from the day you planted it.",
+    category: "help",
+    lastUpdated: "2026-01-06",
+    readingTime: 6,
+  },
 ];
 
 // Legal Documents

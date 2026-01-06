@@ -4,7 +4,7 @@ slug: choosing-your-plan
 category: getting-started
 order: 2
 keywords: [plan, pricing, tier, seedling, sapling, oak, evergreen, free, upgrade, subscription]
-related: [what-is-grove, upgrading-or-downgrading]
+related: [what-is-grove, upgrading-or-downgrading, centennial-status]
 ---
 
 # Choosing Your Plan
