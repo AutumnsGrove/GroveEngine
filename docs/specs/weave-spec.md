@@ -80,10 +80,12 @@ The connections themselves are called **threads** — the individual strands you
 
 ## Internal Naming
 
-| Public Name | Internal Name |
-|-------------|---------------|
-| Weave | GroveWeave |
-| Threads (connections) | GroveThreads |
+| Public Name | Internal Name | Icon |
+|-------------|---------------|------|
+| Weave | GroveWeave | `spline-pointer` |
+| Sway (animation) | GroveSway | `waves` |
+| Fern (diagrams) | GroveFern | `waypoints` |
+| Threads (connections) | GroveThreads | `route` |
 
 ---
 

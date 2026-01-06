@@ -10,7 +10,7 @@
 		Map,
 		PenLine,
 		X,
-		Waypoints,
+		Send,
 		Scroll
 	} from 'lucide-svelte';
 
@@ -86,7 +86,7 @@
 		{ href: '/pricing', label: 'Pricing', icon: CircleDollarSign },
 		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
 		{ href: '/forest', label: 'Forest', icon: Trees },
-		{ href: '/contact', label: 'Contact', icon: Waypoints },
+		{ href: '/contact', label: 'Contact', icon: Send },
 		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true }
 	];
 
