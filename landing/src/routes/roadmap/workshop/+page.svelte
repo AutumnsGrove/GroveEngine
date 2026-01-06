@@ -133,6 +133,15 @@
 					spec: '/knowledge/specs/terrarium-spec'
 				},
 				{
+					name: 'Weave',
+					tagline: 'Visual Composition Studio',
+					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Sway mode) and diagrams (Fern mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
+					status: 'planned',
+					icon: 'workflow',
+					integration: 'Animation and diagram creation within Terrarium',
+					spec: '/knowledge/specs/weave-spec'
+				},
+				{
 					name: 'Rings',
 					tagline: 'Private Analytics',
 					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',

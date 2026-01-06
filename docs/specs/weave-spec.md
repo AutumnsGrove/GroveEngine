@@ -40,7 +40,7 @@ type: tech-spec
 
 > *Weave your world together.*
 
-**Status:** Draft / Idea Documentation
+**Status:** Spec Complete
 **Parent Feature:** Terrarium
 **Location:** Studio mode within Terrarium
 
@@ -56,7 +56,7 @@ To weave is to interlace threads into fabric, to bring separate strands together
 
 Weave is Grove's visual composition studio. Place elements on a grid, draw connections between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and icons that map your architecture. Whether motion or structure, Weave is where you bring it all together.
 
-The connections themselves are called **threads** — the reaching, grasping parts of climbing vines that grab and connect.
+The connections themselves are called **threads** — the individual strands you weave together to create the whole.
 
 *Weave your world together.*
 
@@ -89,25 +89,25 @@ The connections themselves are called **threads** — the reaching, grasping par
 
 ## Overview
 
-Animation Studio is an extension of Terrarium that transforms static scene composition into dynamic animation creation. Think of it as a **node-graph editor** (like n8n or LangChain) meets **motion design** — you connect assets with lines, define timing between connections, and watch chains of movement ripple through your scene.
+Weave is an extension of Terrarium that transforms static scene composition into dynamic animation creation and diagram building. Think of it as a **node-graph editor** (like n8n or LangChain) meets **motion design** — you connect assets with threads, define timing between connections, and watch chains of movement ripple through your scene.
 
 ### The Core Idea
 
-1. **Grid Matrix Editor** — A node-graph view where you place assets on a precise grid and draw connections between them
-2. **Live Mode** — The existing Terrarium canvas where animations play out
-3. **Chain Reactions** — Connected assets move together; parent movement propagates to children
+1. **Sway Mode** — Animation with nature assets, timing controls, propagation-based motion
+2. **Fern Mode** — Diagrams with glass cards, Lucide icons, static relationships
+3. **Shared Engine** — Both modes use the same node-graph foundation with threads connecting nodes
 
 ---
 
 ## Two Modes
 
-### Grid Matrix Editor (Studio)
+### Sway Mode (Animation)
 
-The workspace for building animation relationships.
+The workspace for building animated relationships with nature assets.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ◎ Animation Studio                    [Grid: 0.5rem ▾]     │
+│  ◎ Weave: Sway                         [Grid: 0.5rem ▾]     │
 ├────────────┬─────────────────────────────────────────────────┤
 │   Assets   │  · · · · · · · · · · · · · · · · · · · · · ·   │
 │  ────────  │  ·       ·       ·       ·       ·       ·     │
@@ -118,7 +118,7 @@ The workspace for building animation relationships.
 │            │  ·       ·       ·       ·       ·       ·     │
 │            │  · · · · · · · · · · · · · · · · · · · · · ·   │
 ├────────────┴─────────────────────────────────────────────────┤
-│  Connection: Rock → Vine A                                   │
+│  Thread: Rock → Vine A                                       │
 │  Duration: [0.3s____]  Easing: [ease-out ▾]  Delay: [0s___] │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -158,11 +158,11 @@ The existing Terrarium canvas, enhanced to play animations.
 
 ---
 
-## Connection System ("Glue")
+## Thread System
 
-Connections define relationships between assets. When a parent moves, connected children follow.
+Threads define relationships between assets. When a parent moves, connected children follow.
 
-### Connection Properties
+### Thread Properties
 
 | Property | Description | Default |
 |----------|-------------|---------|
@@ -170,7 +170,7 @@ Connections define relationships between assets. When a parent moves, connected 
 | **Delay** | Wait time before child starts moving | 0s |
 | **Easing** | Animation curve (ease-in, ease-out, bounce, etc.) | ease-out |
 
-### Connection Types (V1)
+### Thread Behavior (V1)
 
 For V1, connections use **animation propagation** — parent moves, children follow with configurable delay and easing. No physics simulation.
 
