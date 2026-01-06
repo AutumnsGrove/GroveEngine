@@ -115,6 +115,7 @@ import {
   Zap,
   Store,
   Stamp,
+  SplinePointer,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -268,6 +269,8 @@ export const toolIcons = {
   lifebuoy: LifeBuoy,
   // Press - image processing CLI
   stamp: Stamp,
+  // Creative/Composition (Weave)
+  splinepointer: SplinePointer,
 } as const;
 
 // ============================================================================

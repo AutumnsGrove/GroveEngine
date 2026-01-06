@@ -137,7 +137,7 @@
 					tagline: 'Visual Composition Studio',
 					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Sway mode) and diagrams (Fern mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
 					status: 'planned',
-					icon: 'workflow',
+					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec'
 				},
