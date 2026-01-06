@@ -6,11 +6,11 @@ type: tech-spec
 status: draft
 ---
 
-# Bower — Visual Composition Studio
+# Weave — Visual Composition Studio
 
 ```
           ┌─────────────────────────────────────────┐
-          │              THE BOWER                  │
+          │              THE WEAVE                  │
           │       (node-graph composition)          │
           │                                         │
           │    [Rock]───────[Vine]───────[Vine]    │
@@ -34,7 +34,7 @@ status: draft
           └─────────────────────────────────────────┘
 ```
 
-> *Arrange with intention. Connect with care.*
+> *Weave your world together.*
 
 **Status:** Draft / Idea Documentation
 **Parent Feature:** Terrarium
@@ -44,43 +44,33 @@ status: draft
 
 ## Naming
 
-### Primary Recommendation: Bower
+### Chosen: Weave
 
-**Visual Composition Studio** · `grove.place/bower`
+**Visual Composition Studio** · `grove.place/weave`
 
-A bower is a shelter made of interwoven branches, or the elaborate structure a bowerbird creates—carefully arranged, visually composed, built from collected elements. It's architecture that grows.
+To weave is to interlace threads into fabric, to bring separate strands together into something whole. It's an action — hands moving, patterns forming, creation in motion.
 
-Bower is Grove's visual composition studio. Place elements on a grid, draw connections between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and icons that map your architecture. Whether motion or structure, Bower is where you weave it all together.
+Weave is Grove's visual composition studio. Place elements on a grid, draw connections between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and icons that map your architecture. Whether motion or structure, Weave is where you bring it all together.
 
 The connections themselves are called **tendrils** — the reaching, grasping parts of climbing vines that grab and connect.
 
-*Arrange with intention. Connect with care.*
+*Weave your world together.*
 
-### Why Bower?
+### Why Weave?
 
-- **Bowerbirds** create intricate structures from collected materials
-- It's about **arrangement**, **composition**, **visual appeal**
-- A bower is *architecture that grows*
-- Natural metaphor that fits the Grove ecosystem
-- Not about trees directly — about what happens in the forest
+- **Active verb** — fits the creation/animation context perfectly
+- **Intuitive action** — "weave your scene together" just makes sense
+- **Textile meets nature** — threads through a forest, vines intertwining
+- **Simple and memorable** — easy to say, easy to remember
 
-### Alternative Candidates
+### Other Candidates Considered
 
-| Name | Metaphor | Feeling | Best For |
-|------|----------|---------|----------|
-| **Bower** | Bowerbird's creation | Crafted, intentional | Unified studio (recommended) |
-| **Canopy** | Interlocking branches overhead | Observational, networked | If it's more about viewing than creating |
-| **Weave** | Threading together | Active, textile | If the verb feels more natural |
-| **Tendril** | Reaching vine | Grasping, connecting | For the connections themselves |
-| **Sway** | Trees in wind | Motion, flow | Animation-only mode name |
-| **Fern** | Branching fronds | Structured, fractal | Diagram-only mode name |
-
-### Naming Decision Needed
-
-Choose one:
-- [ ] **Bower** as unified name (animations + diagrams)
-- [ ] **Bower** with sub-modes: **Sway** (animation) + **Fern** (diagrams)
-- [ ] Different name entirely (see alternatives)
+| Name | Why Not |
+|------|---------|
+| **Bower** | More noun-like, less active energy |
+| **Canopy** | Too observational, not creative enough |
+| **Tendril** | Better for the connections themselves |
+| **Sway/Fern** | Good sub-mode names if needed later |
 
 ---
 
@@ -88,7 +78,7 @@ Choose one:
 
 | Public Name | Internal Name |
 |-------------|---------------|
-| Bower | GroveBower |
+| Weave | GroveWeave |
 | Tendrils (connections) | GroveTendrils |
 
 ---
@@ -262,13 +252,13 @@ The rock-and-vines example:
 
 ## Integration with Terrarium
 
-Bower lives **inside** Terrarium as a mode/tab:
+Weave lives **inside** Terrarium as a mode/tab:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  ◎ Terrarium                                                │
 │  ┌──────────────┬──────────────┬──────────────┐            │
-│  │  🎨 Canvas   │  🔗 Bower    │  📦 Export   │            │
+│  │  🎨 Canvas   │  🔗 Weave    │  📦 Export   │            │
 │  └──────────────┴──────────────┴──────────────┘            │
 │                                                             │
 │  [Current mode content here]                                │
@@ -277,7 +267,7 @@ Bower lives **inside** Terrarium as a mode/tab:
 ```
 
 - **Canvas** — Existing Terrarium (static composition + Live preview)
-- **Bower** — Node-graph editor (tendrils + timing)
+- **Weave** — Node-graph editor (tendrils + timing)
 - **Export** — Export dialog (now supports animation formats)
 
 ---
@@ -333,7 +323,7 @@ Build diagram rendering into the same node-graph foundation:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ◎ Bower: Diagrams                        [Export ▾]        │
+│  ◎ Weave: Diagrams                        [Export ▾]        │
 ├────────────┬─────────────────────────────────────────────────┤
 │   Palette  │                                                 │
 │  ────────  │    ╭─────────────╮         ╭─────────────╮     │
@@ -485,8 +475,8 @@ packages/engine/src/lib/ui/components/
 
 ## Open Questions
 
-### Naming (Decision Needed)
-- [ ] Confirm **Bower** as the name, or choose alternative
+### Naming
+- [x] ~~Confirm name~~ → **Weave** chosen
 - [ ] Decide if sub-modes need names (Sway for animation, Fern for diagrams)
 
 ### Technical
@@ -503,7 +493,7 @@ packages/engine/src/lib/ui/components/
 ### Future (V2+)
 - [ ] Audio sync possibilities?
 - [ ] Physics simulation parameters?
-- [ ] Community sharing of bower compositions?
+- [ ] Community sharing of weave compositions?
 
 ---
 
@@ -512,8 +502,8 @@ packages/engine/src/lib/ui/components/
 For persistence via Loom batch pattern:
 
 ```sql
--- Bower compositions (animations + diagrams)
-CREATE TABLE bower_compositions (
+-- Weave compositions (animations + diagrams)
+CREATE TABLE weave_compositions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -524,7 +514,7 @@ CREATE TABLE bower_compositions (
 );
 
 -- Nodes in a composition
-CREATE TABLE bower_nodes (
+CREATE TABLE weave_nodes (
   id TEXT PRIMARY KEY,
   composition_id TEXT NOT NULL,
   component_name TEXT NOT NULL, -- 'Rock', 'Vine', 'GlassCard', etc.
@@ -532,11 +522,11 @@ CREATE TABLE bower_nodes (
   position_y REAL NOT NULL,
   props TEXT, -- JSON for component-specific props
   z_index INTEGER DEFAULT 0,
-  FOREIGN KEY (composition_id) REFERENCES bower_compositions(id)
+  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id)
 );
 
 -- Tendrils (connections between nodes)
-CREATE TABLE bower_tendrils (
+CREATE TABLE weave_tendrils (
   id TEXT PRIMARY KEY,
   composition_id TEXT NOT NULL,
   source_node_id TEXT NOT NULL,
@@ -546,9 +536,9 @@ CREATE TABLE bower_tendrils (
   easing TEXT DEFAULT 'ease-out',
   line_style TEXT DEFAULT 'solid', -- 'solid' | 'dashed' | 'arrow'
   label TEXT, -- optional connection label
-  FOREIGN KEY (composition_id) REFERENCES bower_compositions(id),
-  FOREIGN KEY (source_node_id) REFERENCES bower_nodes(id),
-  FOREIGN KEY (target_node_id) REFERENCES bower_nodes(id)
+  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id),
+  FOREIGN KEY (source_node_id) REFERENCES weave_nodes(id),
+  FOREIGN KEY (target_node_id) REFERENCES weave_nodes(id)
 );
 ```
 
@@ -566,8 +556,8 @@ CREATE TABLE bower_tendrils (
 *Draft created: January 6th, 2026*
 *Updated: January 6th, 2026*
 - Added Diagram Editor concept
-- Completed grove walk: recommended **Bower** as name
+- Completed grove walk, chose **Weave** as name
 - Added glassmorphism patterns and Lucide icon mapping
 - Added D1 schema draft for Loom integration
 
-*Status: Idea documentation — awaiting naming decision*
+*Status: Idea documentation — name decided, ready for implementation planning*
