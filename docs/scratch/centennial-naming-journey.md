@@ -329,4 +329,97 @@ I've walked through the grove. I've explored candidates. But I think I need to u
 
 ---
 
-*Journey status: Exploring. Waiting for more context about the workshop itself.*
+## Part 2: The Real Centennial
+
+*After more conversation, the truth emerged.*
+
+---
+
+### It's Not a Workshop
+
+I had it wrong. Centennial isn't a workshop or a planning tool. It's a **status**. A **covenant**.
+
+**What Centennial actually is:**
+
+1. **Unlocked after 1 year** of paid membership (Sapling+)
+2. **The promise**: Your words live for 100 years, even if you stop paying
+3. **Backed by**: Grove's financial structure, not just good intentions
+
+This changes everything.
+
+---
+
+### The Name Is Already Perfect
+
+Checked `grove-pricing.md`. Centennial is already documented beautifully:
+
+> *"Some trees outlive the people who planted them."*
+>
+> Centennial is Grove's promise that your words can have the same longevity.
+
+The tagline directly addresses the tree-lifespan connection. The copy is warm, clear, and honest.
+
+**The name works because:**
+- It's not asking users to "plan for 100 years"
+- It's saying "your words are guaranteed for 100 years"
+- The tree metaphor is explicit in the tagline
+- It feels like a milestone, an achievement, a gift
+
+---
+
+### The Real Problem Wasn't the Name
+
+When people said "100 years is hard to conceptualize" and "you won't live that long" - they weren't critiquing the *name*. They were asking:
+
+**"How can you promise that?"**
+
+That's not a naming problem. That's a trust problem. And trust requires structure, not rebranding.
+
+---
+
+### The Answer: Grove's Sustainability Model
+
+The name is fine. What was missing was the documentation of *how* the promise is kept:
+
+1. **The Math**: Cloudflare infrastructure costs nearly nothing (~$8/month at 1,000 users)
+2. **The Reserve**: Excess revenue goes into a fund for long-term sustainability
+3. **The Structure**: Grove becomes an entity that can outlive its founder
+4. **The Transparency**: Published numbers, annual updates, no hidden pivots
+
+With $500,000 in reserve earning 4% annually, Grove could run for 50+ years on interest alone.
+
+**That's not a promise. That's math.**
+
+See: `docs/grove-sustainability.md`
+
+---
+
+### Conclusion: Centennial Stays
+
+**The name is right.**
+
+The friction wasn't about the word - it was about credibility. The answer isn't a different name. The answer is showing your work.
+
+When someone asks "how can you guarantee 100 years?" the response is:
+
+1. Here's the infrastructure cost analysis
+2. Here's The Reserve
+3. Here's the succession plan
+4. Here's why the margins make this achievable
+
+The 100-year promise isn't naive optimism. It's engineering.
+
+---
+
+### What We Built Today
+
+- ✅ Confirmed Centennial as the right name
+- ✅ Identified the real problem (credibility, not naming)
+- ✅ Wrote `docs/grove-sustainability.md` - the document that answers "how?"
+- ✅ Connected the financial model to the Centennial promise
+
+---
+
+*Journey status: Complete. The name stays. The story is now told.*
+
+*"Some trees outlive the people who planted them. Grove is how I make sure yours can too."*
