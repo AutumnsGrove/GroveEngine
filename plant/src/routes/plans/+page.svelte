@@ -12,34 +12,62 @@
 	} from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
-	let { data } = $props();
+	// ============================================================================
+	// CONSTANTS
+	// ============================================================================
 
-	// Billing cycle toggle
+	/** Annual billing discount (15% off) */
+	const YEARLY_DISCOUNT = 0.15;
+
+	/** Calculate yearly price with discount */
+	function calculateYearlyPrice(monthlyPrice: number): number {
+		return monthlyPrice * 12 * (1 - YEARLY_DISCOUNT);
+	}
+
+	// ============================================================================
+	// TYPES
+	// ============================================================================
+
+	type TierStatus = 'available' | 'coming_soon' | 'future';
+	type TierIconKey = 'seedling' | 'sapling' | 'oak' | 'evergreen';
+
+	interface Plan {
+		id: string;
+		name: string;
+		tagline: string;
+		description: string;
+		monthlyPrice: number;
+		features: string[];
+		status: TierStatus;
+		icon: TierIconKey;
+	}
+
+	// ============================================================================
+	// STATE
+	// ============================================================================
+
 	let billingCycle = $state<'monthly' | 'yearly'>('monthly');
-
-	// Selected plan - pre-select Seedling since it's the only available tier
+	// Pre-select Seedling since it's the only available tier at launch
 	let selectedPlan = $state<string | null>('seedling');
 
-	// Tier availability states
-	type TierStatus = 'available' | 'coming_soon' | 'future';
+	// ============================================================================
+	// DATA
+	// ============================================================================
 
-	// Tier icon mapping
-	const tierIcons = {
+	const tierIcons: Record<TierIconKey, typeof Sprout> = {
 		seedling: Sprout,
 		sapling: TreeDeciduous,
 		oak: Trees,
 		evergreen: Crown
 	};
 
-	// Plan definitions with availability status
-	const plans = [
+	const plans: Plan[] = [
 		{
 			id: 'seedling',
 			name: 'Seedling',
 			tagline: 'Just planted',
 			description: 'Perfect for getting started. A quiet corner to call your own.',
 			monthlyPrice: 8,
-			yearlyPrice: 81.60,
 			features: [
 				'50 posts',
 				'1 GB storage',
@@ -48,8 +76,8 @@
 				'RSS feed',
 				'No ads ever'
 			],
-			status: 'available' as TierStatus,
-			icon: 'seedling' as keyof typeof tierIcons
+			status: 'available',
+			icon: 'seedling'
 		},
 		{
 			id: 'sapling',
@@ -57,7 +85,6 @@
 			tagline: 'Growing strong',
 			description: 'For blogs finding their voice. Room to stretch and grow.',
 			monthlyPrice: 12,
-			yearlyPrice: 122.40,
 			features: [
 				'250 posts',
 				'5 GB storage',
@@ -66,8 +93,8 @@
 				'Centennial eligible',
 				'Everything in Seedling'
 			],
-			status: 'coming_soon' as TierStatus,
-			icon: 'sapling' as keyof typeof tierIcons
+			status: 'coming_soon',
+			icon: 'sapling'
 		},
 		{
 			id: 'oak',
@@ -75,7 +102,6 @@
 			tagline: 'Deep roots',
 			description: 'Full creative control. Your blog, your rules.',
 			monthlyPrice: 25,
-			yearlyPrice: 255,
 			features: [
 				'Unlimited posts',
 				'20 GB storage',
@@ -84,8 +110,8 @@
 				'Centennial eligible',
 				'Priority support'
 			],
-			status: 'future' as TierStatus,
-			icon: 'oak' as keyof typeof tierIcons
+			status: 'future',
+			icon: 'oak'
 		},
 		{
 			id: 'evergreen',
@@ -93,7 +119,6 @@
 			tagline: 'Always flourishing',
 			description: 'The complete package. Everything Grove has to offer.',
 			monthlyPrice: 35,
-			yearlyPrice: 357,
 			features: [
 				'Unlimited everything',
 				'100 GB storage',
@@ -102,40 +127,74 @@
 				'Centennial eligible',
 				'8 hrs/mo dedicated support'
 			],
-			status: 'future' as TierStatus,
-			icon: 'evergreen' as keyof typeof tierIcons
+			status: 'future',
+			icon: 'evergreen'
 		}
 	];
 
-	// Calculate displayed price
-	function getPrice(plan: (typeof plans)[0]) {
+	// ============================================================================
+	// STATUS COLOR HELPERS
+	// ============================================================================
+
+	/** Color schemes for each tier status */
+	const statusColors = {
+		available: {
+			text: 'text-emerald-600 dark:text-emerald-400',
+			bg: 'bg-emerald-100/60 dark:bg-emerald-900/40',
+			check: 'text-emerald-500',
+			overlay: ''
+		},
+		coming_soon: {
+			text: 'text-amber-600 dark:text-amber-400',
+			bg: 'bg-amber-100/60 dark:bg-amber-900/30',
+			check: 'text-amber-500',
+			overlay: 'bg-amber-500/10 dark:bg-amber-500/5'
+		},
+		future: {
+			text: 'text-foreground-subtle',
+			bg: 'bg-slate-100/60 dark:bg-slate-800/40',
+			check: 'text-slate-400',
+			overlay: 'bg-slate-500/10 dark:bg-slate-500/10'
+		}
+	} as const;
+
+	function getStatusColor(status: TierStatus, shade: keyof (typeof statusColors)['available']) {
+		return statusColors[status][shade];
+	}
+
+	// ============================================================================
+	// PRICE HELPERS
+	// ============================================================================
+
+	function getPrice(plan: Plan): string | number {
 		if (billingCycle === 'yearly') {
-			return (plan.yearlyPrice / 12).toFixed(2);
+			const yearlyPrice = calculateYearlyPrice(plan.monthlyPrice);
+			return (yearlyPrice / 12).toFixed(2);
 		}
 		return plan.monthlyPrice;
 	}
 
-	// Calculate savings for yearly
-	function getYearlySavings(plan: (typeof plans)[0]) {
-		const monthlyCost = plan.monthlyPrice * 12;
-		const savings = monthlyCost - plan.yearlyPrice;
+	function getYearlySavings(plan: Plan): string {
+		const yearlyPrice = calculateYearlyPrice(plan.monthlyPrice);
+		const savings = plan.monthlyPrice * 12 - yearlyPrice;
 		return savings.toFixed(0);
 	}
 
-	// Check if a plan can be selected
-	function canSelect(plan: (typeof plans)[0]) {
+	// ============================================================================
+	// SELECTION HELPERS
+	// ============================================================================
+
+	function canSelect(plan: Plan): boolean {
 		return plan.status === 'available';
 	}
 
-	// Handle plan selection
-	function selectPlan(plan: (typeof plans)[0]) {
+	function selectPlan(plan: Plan): void {
 		if (canSelect(plan)) {
 			selectedPlan = plan.id;
 		}
 	}
 
-	// Get status-specific styling classes
-	function getStatusClasses(plan: (typeof plans)[0]) {
+	function getStatusClasses(plan: Plan): string {
 		switch (plan.status) {
 			case 'available':
 				return selectedPlan === plan.id
@@ -145,18 +204,6 @@
 				return 'opacity-90';
 			case 'future':
 				return 'opacity-50 grayscale';
-		}
-	}
-
-	// Get overlay content based on status
-	function getOverlayStyle(status: TierStatus) {
-		switch (status) {
-			case 'coming_soon':
-				return 'bg-amber-500/10 dark:bg-amber-500/5';
-			case 'future':
-				return 'bg-slate-500/10 dark:bg-slate-500/10';
-			default:
-				return '';
 		}
 	}
 </script>
@@ -262,7 +309,7 @@
 						<!-- Subtle overlay for unavailable tiers -->
 						{#if !isAvailable}
 							<div
-								class="absolute inset-0 pointer-events-none {getOverlayStyle(plan.status)}"
+								class="absolute inset-0 pointer-events-none {getStatusColor(plan.status, 'overlay')}"
 							></div>
 						{/if}
 
@@ -271,33 +318,14 @@
 							<div class="flex items-start justify-between gap-4 mb-4">
 								<div class="flex items-start gap-4">
 									<!-- Tier icon -->
-									<div
-										class="flex-shrink-0 p-3 rounded-xl transition-colors
-											{isAvailable
-											? 'bg-emerald-100/60 dark:bg-emerald-900/40'
-											: isComingSoon
-												? 'bg-amber-100/60 dark:bg-amber-900/30'
-												: 'bg-slate-100/60 dark:bg-slate-800/40'}"
-									>
-										<TierIcon
-											class="w-6 h-6 {isAvailable
-												? 'text-emerald-600 dark:text-emerald-400'
-												: isComingSoon
-													? 'text-amber-600 dark:text-amber-400'
-													: 'text-slate-400 dark:text-slate-500'}"
-										/>
+									<div class="flex-shrink-0 p-3 rounded-xl transition-colors {getStatusColor(plan.status, 'bg')}">
+										<TierIcon class="w-6 h-6 {getStatusColor(plan.status, 'text')}" />
 									</div>
 
 									<!-- Name and tagline -->
 									<div>
 										<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
-										<p
-											class="text-sm {isAvailable
-												? 'text-emerald-600 dark:text-emerald-400'
-												: isComingSoon
-													? 'text-amber-600 dark:text-amber-400'
-													: 'text-foreground-subtle'}"
-										>
+										<p class="text-sm {getStatusColor(plan.status, 'text')}">
 											{plan.tagline}
 										</p>
 									</div>
@@ -324,13 +352,7 @@
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
 								{#each plan.features as feature}
 									<div class="flex items-center gap-2">
-										<Check
-											class="w-4 h-4 flex-shrink-0 {isAvailable
-												? 'text-emerald-500'
-												: isComingSoon
-													? 'text-amber-500'
-													: 'text-slate-400'}"
-										/>
+										<Check class="w-4 h-4 flex-shrink-0 {getStatusColor(plan.status, 'check')}" />
 										<span class="text-sm text-foreground-muted">{feature}</span>
 									</div>
 								{/each}
