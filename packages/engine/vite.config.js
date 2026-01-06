@@ -11,6 +11,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    // Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
+    // Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
     exclude: ["workers-og"],
   },
   server: {
@@ -21,7 +23,8 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.{test,spec}.{js,ts}"],
-    environment: "node",
+    // Use jsdom for component tests, node for server tests
+    environment: "jsdom",
     globals: true,
     coverage: {
       provider: "v8",
@@ -31,6 +34,7 @@ export default defineConfig({
         "src/lib/groveauth/**/*.ts",
         "src/lib/payments/**/*.ts",
         "src/lib/utils/**/*.ts",
+        "src/lib/ui/components/**/*.{ts,svelte}",
       ],
       exclude: ["**/*.test.ts", "**/*.spec.ts", "**/types.ts", "**/index.ts"],
     },
