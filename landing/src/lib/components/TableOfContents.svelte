@@ -38,7 +38,7 @@
   function scrollToHeader(id: string) {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80;
+      const offset = 120; // Account for sticky header + breathing room
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
