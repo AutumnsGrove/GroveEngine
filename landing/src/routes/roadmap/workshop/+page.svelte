@@ -78,7 +78,12 @@
 					icon: 'shieldcheck',
 					domain: 'heartwood.grove.place',
 					integration: 'Powers authentication for all Grove services',
-					github: 'https://github.com/AutumnsGrove/GroveAuth'
+					github: 'https://github.com/AutumnsGrove/GroveAuth',
+					subComponents: [
+						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
+						{ name: 'GitHub', icon: 'github', description: 'GitHub OAuth' },
+						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' }
+					]
 				},
 				{
 					name: 'Arbor',
@@ -88,7 +93,12 @@
 					icon: 'dashboard',
 					domain: '{you}.grove.place/admin',
 					integration: 'Built into every Grove blog',
-					spec: '/knowledge/specs/arbor-spec'
+					spec: '/knowledge/specs/arbor-spec',
+					subComponents: [
+						{ name: 'Posts', icon: 'penline', description: 'Write & edit' },
+						{ name: 'Pages', icon: 'layout', description: 'Static pages' },
+						{ name: 'Media', icon: 'image', description: 'Image gallery' }
+					]
 				},
 				{
 					name: 'Plant',
@@ -144,7 +154,12 @@
 					status: 'planned',
 					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
-					spec: '/knowledge/specs/terrarium-spec'
+					spec: '/knowledge/specs/terrarium-spec',
+					subComponents: [
+						{ name: 'Canvas', icon: 'frame', description: 'Design space' },
+						{ name: 'Assets', icon: 'shapes', description: 'Nature components' },
+						{ name: 'Export', icon: 'share2', description: 'Publish to blog' }
+					]
 				},
 				{
 					name: 'Weave',
@@ -226,7 +241,11 @@
 					status: 'planned',
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
-					spec: '/knowledge/specs/reeds-spec'
+					spec: '/knowledge/specs/reeds-spec',
+					subComponents: [
+						{ name: 'Replies', icon: 'reply', description: 'Private to author' },
+						{ name: 'Comments', icon: 'messagecircle', description: 'Public discussion' }
+					]
 				},
 				{
 					name: 'Thorn',
@@ -344,7 +363,12 @@
 					domain: 'vista.grove.place',
 					integration: 'Internal infrastructure monitoring for Grove operators',
 					github: 'https://github.com/AutumnsGrove/GroveMonitor',
-					spec: '/knowledge/specs/vista-spec'
+					spec: '/knowledge/specs/vista-spec',
+					subComponents: [
+						{ name: 'Workers', icon: 'cpu', description: 'Cloudflare Workers' },
+						{ name: 'Database', icon: 'database', description: 'D1 databases' },
+						{ name: 'Storage', icon: 'harddrive', description: 'R2 & KV' }
+					]
 				},
 				{
 					name: 'Patina',
@@ -374,7 +398,12 @@
 					status: 'live',
 					icon: 'brickwallshield',
 					integration: 'Automatic protection for all Grove blogs',
-					spec: '/knowledge/specs/shade-spec'
+					spec: '/knowledge/specs/shade-spec',
+					subComponents: [
+						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
+						{ name: 'Scraper', icon: 'bug', description: 'Scraper blocking' },
+						{ name: 'Shield', icon: 'shieldcheck', description: 'Content protection' }
+					]
 				},
 			]
 		},

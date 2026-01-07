@@ -140,6 +140,18 @@ import {
   Eye,
   BookOpenCheck,
   Goal,
+  // Additional subicon imports (round 2)
+  Chrome,
+  Wand2,
+  Layout,
+  Image,
+  Reply,
+  Bot,
+  Bug,
+  Cpu,
+  Frame,
+  Shapes,
+  Share2,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -319,6 +331,21 @@ export const toolIcons = {
   eye: Eye,                      // Rings - Views
   bookopencheck: BookOpenCheck,  // Rings - Readers
   goal: Goal,                    // Rings - Resonance
+  // Additional subicons (round 2)
+  chrome: Chrome,                // Heartwood - Google
+  github: Github,                // Heartwood - GitHub
+  wand2: Wand2,                  // Heartwood - Magic
+  penline: PenLine,              // Arbor - Posts
+  layout: Layout,                // Arbor - Pages
+  image: Image,                  // Arbor - Media
+  reply: Reply,                  // Reeds - Replies
+  messagecircle: MessageCircle,  // Reeds - Comments
+  bot: Bot,                      // Shade - Bot
+  bug: Bug,                      // Shade - Scraper
+  cpu: Cpu,                      // Vista - Workers
+  frame: Frame,                  // Terrarium - Canvas
+  shapes: Shapes,                // Terrarium - Assets
+  share2: Share2,                // Terrarium - Export
 } as const;
 
 // ============================================================================
