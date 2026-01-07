@@ -4,16 +4,26 @@
   Evokes: Trees coming together, shared shelter, gathering place
 -->
 <script lang="ts">
+	/**
+	 * Grove Logo: The Gathering
+	 * Three stylized trees leaning inward, forming community
+	 */
 	interface Props {
+		/** CSS classes for sizing and positioning */
 		class?: string;
+		/** Fill color for canopies (defaults to currentColor for easy theming) */
 		color?: string;
+		/** Optional separate color for trunk elements (defaults to color) */
 		trunkColor?: string;
+		/** Accessible name for screen readers (renders SVG title element) */
+		title?: string;
 	}
 
 	let {
 		class: className = 'w-8 h-8',
 		color = 'currentColor',
-		trunkColor
+		trunkColor,
+		title
 	}: Props = $props();
 
 	const trunk = $derived(trunkColor ?? color);
@@ -23,7 +33,10 @@
 	class={className}
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
+	role={title ? 'img' : undefined}
+	aria-label={title}
 >
+	{#if title}<title>{title}</title>{/if}
 	<!-- Three trees leaning toward center, each with organic canopy and trunk -->
 
 	<!-- Left tree - leaning right -->

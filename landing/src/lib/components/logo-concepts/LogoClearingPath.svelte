@@ -4,14 +4,23 @@
   Evokes: Entering a welcoming space, an open invitation
 -->
 <script lang="ts">
+	/**
+	 * Grove Logo: Clearing Path
+	 * A stylized opening/clearing shape—like a doorway into the grove
+	 */
 	interface Props {
+		/** CSS classes for sizing and positioning */
 		class?: string;
+		/** Stroke color (defaults to currentColor for easy theming) */
 		color?: string;
+		/** Accessible name for screen readers (renders SVG title element) */
+		title?: string;
 	}
 
 	let {
 		class: className = 'w-8 h-8',
-		color = 'currentColor'
+		color = 'currentColor',
+		title
 	}: Props = $props();
 </script>
 
@@ -20,7 +29,10 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
 	fill="none"
+	role={title ? 'img' : undefined}
+	aria-label={title}
 >
+	{#if title}<title>{title}</title>{/if}
 	<!-- An arch/doorway shape made of organic, branch-like forms -->
 	<!-- Left side of the arch -->
 	<path

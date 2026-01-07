@@ -4,14 +4,23 @@
   Evokes: Hidden connections, community roots, shared foundation
 -->
 <script lang="ts">
+	/**
+	 * Grove Logo: Mycelium Mark
+	 * Interconnected nodes representing the underground network
+	 */
 	interface Props {
+		/** CSS classes for sizing and positioning */
 		class?: string;
+		/** Fill/stroke color (defaults to currentColor for easy theming) */
 		color?: string;
+		/** Accessible name for screen readers (renders SVG title element) */
+		title?: string;
 	}
 
 	let {
 		class: className = 'w-8 h-8',
-		color = 'currentColor'
+		color = 'currentColor',
+		title
 	}: Props = $props();
 </script>
 
@@ -20,7 +29,10 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
 	fill="none"
+	role={title ? 'img' : undefined}
+	aria-label={title}
 >
+	{#if title}<title>{title}</title>{/if}
 	<!-- Connection lines (draw first, behind nodes) -->
 	<g stroke={color} stroke-width="1.5" stroke-linecap="round">
 		<!-- Central hub connections -->

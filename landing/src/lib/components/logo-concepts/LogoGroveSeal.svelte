@@ -4,14 +4,23 @@
   Evokes: A place, an identity, belonging
 -->
 <script lang="ts">
+	/**
+	 * Grove Logo: Grove Seal
+	 * A rounded seal/badge shape with organic internal elements
+	 */
 	interface Props {
+		/** CSS classes for sizing and positioning */
 		class?: string;
+		/** Stroke color (defaults to currentColor for easy theming) */
 		color?: string;
+		/** Accessible name for screen readers (renders SVG title element) */
+		title?: string;
 	}
 
 	let {
 		class: className = 'w-8 h-8',
-		color = 'currentColor'
+		color = 'currentColor',
+		title
 	}: Props = $props();
 </script>
 
@@ -20,7 +29,10 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
 	fill="none"
+	role={title ? 'img' : undefined}
+	aria-label={title}
 >
+	{#if title}<title>{title}</title>{/if}
 	<!-- Outer ring - the boundary of the grove -->
 	<circle
 		cx="16" cy="16" r="13"

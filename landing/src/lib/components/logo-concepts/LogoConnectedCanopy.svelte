@@ -4,16 +4,26 @@
   Evokes: Looking up through the trees, shelter, community
 -->
 <script lang="ts">
+	/**
+	 * Grove Logo: Connected Canopy
+	 * Three overlapping leaf/canopy shapes creating unity
+	 */
 	interface Props {
+		/** CSS classes for sizing and positioning */
 		class?: string;
+		/** Fill color for canopy (defaults to currentColor for easy theming) */
 		color?: string;
+		/** Optional separate color for trunk element (defaults to color) */
 		trunkColor?: string;
+		/** Accessible name for screen readers (renders SVG title element) */
+		title?: string;
 	}
 
 	let {
 		class: className = 'w-8 h-8',
 		color = 'currentColor',
-		trunkColor
+		trunkColor,
+		title
 	}: Props = $props();
 
 	const trunk = $derived(trunkColor ?? color);
@@ -23,7 +33,10 @@
 	class={className}
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
+	role={title ? 'img' : undefined}
+	aria-label={title}
 >
+	{#if title}<title>{title}</title>{/if}
 	<!-- Three overlapping organic canopy shapes -->
 	<!-- Left canopy - teardrop/leaf shape -->
 	<ellipse
