@@ -158,7 +158,6 @@
 							Coming Soon
 						</span>
 					</div>
-					<span class="sr-only">This plan is coming soon and will be available shortly after launch.</span>
 				{:else if isFuture}
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
@@ -169,7 +168,6 @@
 							Future
 						</span>
 					</div>
-					<span class="sr-only">This plan is planned for a future release.</span>
 				{/if}
 
 				<button
@@ -303,7 +301,8 @@
 			class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 		>
 			View full plan comparison
-			<ArrowRight class="w-4 h-4" />
+			<span class="sr-only">(opens in new tab)</span>
+			<ArrowRight class="w-4 h-4" aria-hidden="true" />
 		</a>
 	</div>
 </div>

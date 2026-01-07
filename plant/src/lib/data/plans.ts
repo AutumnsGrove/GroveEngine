@@ -156,14 +156,20 @@ export function isPlanAvailable(id: string): boolean {
 	return plan?.status === 'available';
 }
 
-/** Get plan previews for landing page cards */
-export function getPlanPreviews(): PlanPreview[] {
+/** Default number of feature highlights to show in previews */
+const DEFAULT_HIGHLIGHT_COUNT = 3;
+
+/**
+ * Get plan previews for landing page cards.
+ * @param highlightCount - Number of features to include (default: 3)
+ */
+export function getPlanPreviews(highlightCount = DEFAULT_HIGHLIGHT_COUNT): PlanPreview[] {
 	return plans.map((plan) => ({
 		id: plan.id,
 		name: plan.name,
 		tagline: plan.tagline,
 		monthlyPrice: plan.monthlyPrice,
-		highlights: plan.features.slice(0, 3),
+		highlights: plan.features.slice(0, highlightCount),
 		status: plan.status
 	}));
 }
