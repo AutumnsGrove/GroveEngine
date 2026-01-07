@@ -176,7 +176,10 @@ EOF
 
     if [ -z "$SUMMARY" ] || [ "$SUMMARY" = "null" ]; then
         echo -e "${RED}Error: Failed to generate summary${NC}"
-        echo -e "${YELLOW}API Response: $RESPONSE${NC}"
+
+        # Extract only error message (avoid logging sensitive data)
+        ERROR_MSG=$(echo "$RESPONSE" | jq -r '.error.message // "Unknown error"' 2>/dev/null || echo "API call failed")
+        echo -e "${YELLOW}Error: $ERROR_MSG${NC}"
 
         # Fallback to basic summary
         SUMMARY="Version $VERSION_TAG includes $FEAT_COUNT new features, $FIX_COUNT bug fixes, and $REFACTOR_COUNT refactoring changes."
@@ -192,10 +195,10 @@ fi
 echo -e "Extracting key changes..."
 
 # Get list of features (limit to 10 most significant)
-FEATURES=$(echo "$COMMITS" | grep "^feat" | head -10 | sed 's/^feat//' | sed 's/^([^)]*): //' || echo "")
+FEATURES=$(echo "$COMMITS" | grep "^feat" | head -10 | sed 's/^feat[^:]*: //' || echo "")
 
 # Get list of fixes (limit to 10)
-FIXES=$(echo "$COMMITS" | grep "^fix" | head -10 | sed 's/^fix//' | sed 's/^([^)]*): //' || echo "")
+FIXES=$(echo "$COMMITS" | grep "^fix" | head -10 | sed 's/^fix[^:]*: //' || echo "")
 
 # ============================================================================
 # GET METADATA

@@ -58,8 +58,13 @@
 						if (response.ok) {
 							return await response.json() as VersionSummary;
 						}
+						// Summary doesn't exist yet (expected for older versions)
 						return null;
-					} catch {
+					} catch (e) {
+						// Log in development to help debugging
+						if (import.meta.env.DEV) {
+							console.warn(`Failed to load summary for ${h.label}:`, e);
+						}
 						return null;
 					}
 				});
