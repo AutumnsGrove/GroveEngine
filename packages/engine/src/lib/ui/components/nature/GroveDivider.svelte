@@ -5,24 +5,18 @@
 
   GroveDivider - A decorative divider featuring alternating Grove logos
 
-  @example Basic usage
-  ```svelte
-  <GroveDivider />                    <!-- 7 logos (default) -->
-  <GroveDivider count={5} />          <!-- 5 logos -->
-  <GroveDivider count={12} size="md" /> <!-- 12 medium logos -->
-  ```
-
-  @example Glass variant
-  ```svelte
-  <GroveDivider glass />                          <!-- Glass logos -->
-  <GroveDivider glass variant="frosted" />        <!-- Frosted glass -->
-  <GroveDivider glass variant="ethereal" breathing /> <!-- Dreamy animated -->
-  ```
-
-  @example Vertical divider
-  ```svelte
-  <GroveDivider vertical count={15} glass />      <!-- Vertical glass divider -->
-  ```
+  Props:
+    count     - Number of logos (default: 7)
+    size      - 'xs' | 'sm' | 'md' | 'lg' (default: 'sm')
+    glass     - Use GlassLogo instead of regular Logo
+    variant   - Glass variant: 'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'
+    vertical  - Display vertically instead of horizontally
+    breathing - Enable breathing animation
+    monochrome - Trunk matches foliage color
+    color     - Custom color override (regular Logo only)
+    season    - Override season (uses seasonStore by default)
+    gap       - Tailwind gap class (default: 'gap-1.5')
+    class     - Additional CSS classes
 -->
 <script lang="ts">
 	import Logo from './Logo.svelte';
