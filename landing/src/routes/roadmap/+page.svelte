@@ -24,6 +24,7 @@
 	const MapPin = navIcons.roadmap;
 	const Check = stateIcons.check;
 	const CheckCircle = stateIcons.checkcircle;
+	const Tag = stateIcons.tag;
 	const Sun = phaseIcons.sun;
 	const Gem = phaseIcons.gem;
 	const MoonIcon = phaseIcons.moon;
