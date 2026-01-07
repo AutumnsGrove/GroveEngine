@@ -1,7 +1,7 @@
 /**
- * Bark - Offensive Content Blocklist
+ * Loam - Offensive Content Blocklist
  *
- * Part of the Bark name protection system.
+ * Part of the Loam name protection system.
  * This file contains terms blocked for violating the Acceptable Use Policy.
  *
  * Sources:
@@ -12,7 +12,7 @@
  * - ADL Hate Symbols Database
  * - SPLC Extremist Files
  *
- * @see docs/specs/bark-spec.md
+ * @see docs/specs/loam-spec.md
  * @module offensive-blocklist
  * @private
  */

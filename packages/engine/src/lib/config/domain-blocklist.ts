@@ -1,10 +1,10 @@
 /**
- * Bark - Domain Blocklist Configuration
+ * Loam - Domain Blocklist Configuration
  *
- * Part of the Bark name protection system.
+ * Part of the Loam name protection system.
  * Comprehensive list of blocked usernames/subdomains organized by category.
  *
- * @see docs/specs/bark-spec.md
+ * @see docs/specs/loam-spec.md
  * @module domain-blocklist
  */
 
@@ -276,7 +276,8 @@ const GROVE_INTERNAL_SERVICES: string[] = [
 	'vines',
 	'arbor',
 	'sway',
-	'fern'
+	'fern',
+	'loam'
 ];
 
 const GROVE_ALIASES: string[] = [
@@ -321,7 +322,8 @@ const GROVE_INTERNAL_CODENAMES: string[] = [
 	'grovearbor',
 	'grovescout',
 	'groveengine',
-	'groveplace'
+	'groveplace',
+	'groveloam'
 ];
 
 // =============================================================================
@@ -542,7 +544,6 @@ const FUTURE_NATURE_GROWING: string[] = [
 	'compost',
 	'humus',
 	'topsoil',
-	'loam',
 	'sprout',
 	'bud',
 	'petal'

@@ -282,11 +282,11 @@ export const specs: Doc[] = [
     readingTime: 15,
   },
   {
-    slug: "bark-spec",
-    title: "Bark — Name Protection",
+    slug: "loam-spec",
+    title: "Loam — Name Protection",
     description: "Username and domain validation system protecting the grove from harm",
     excerpt:
-      "Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. Every tree needs its bark.",
+      "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.",
     category: "specs",
     lastUpdated: "2026-01-07",
     readingTime: 12,

@@ -336,14 +336,14 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 
 ---
 
-## Bark
+## Loam
 **Name Protection** · *Internal service*
 
-Bark is the first thing you touch when you reach for a tree. It's the outer layer that takes the damage, the weathering, the attempts at harm. Beneath it, the living tissue stays safe. Bark doesn't fight back—it simply absorbs what would hurt, and lets the tree keep growing.
+Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow.
 
-Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. No alerts, no drama—just quiet validation that keeps the grove healthy. You'll never think about Bark unless you try to plant something that doesn't belong. And then you'll understand: every tree needs its bark.
+Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. You won't notice it working. That's the point. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.
 
-*The first layer of protection. The last line against harm.*
+*What flourishes starts with what the soil allows.*
 
 ---
 
@@ -379,7 +379,7 @@ Bark is Grove's username and domain validation system. It checks every name agai
 | **Waystone** | Help center | *(integrated)* |
 | **Reeds** | Comments system | *(integrated)* |
 | **Porch** | Front porch conversations | porch.grove.place |
-| **Bark** | Name protection | *(internal)* |
+| **Loam** | Name protection | *(internal)* |
 
 ---
 
@@ -417,7 +417,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Waystone | GroveWaystone |
 | Reeds | GroveReeds |
 | Porch | GrovePorch |
-| Bark | GroveBark |
+| Loam | GroveLoam |
 
 ---
 

@@ -1,23 +1,37 @@
-# Bark
+---
+aliases: []
+date created: Tuesday, January 7th 2026
+date modified: Tuesday, January 7th 2026
+tags:
+  - name-protection
+  - validation
+  - security
+  - content-moderation
+type: tech-spec
+---
 
-> *The first layer of protection. The last line against harm.*
+# Loam — Name Protection
 
-**Name Protection** · *Internal service*
+> *What flourishes starts with what the soil allows.*
 
-**Status:** Draft
-**Last updated:** January 7, 2026
+Grove's username and domain validation system. Comprehensive blocklist policy protecting system integrity, brand trademarks, community safety, and user trust.
+
+**Public Name:** Loam
+**Internal Name:** GroveLoam
+**Version:** 1.0 Draft
+**Last Updated:** January 2026
 
 ---
 
 ## Overview
 
-Bark is the first thing you touch when you reach for a tree. It's the outer layer that takes the damage, the weathering, the attempts at harm. Beneath it, the living tissue stays safe.
+Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow.
 
-Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. No alerts, no drama—just quiet validation that keeps the grove healthy.
+Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. You won't notice it working. That's the point. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.
 
-*Every tree needs its bark.*
+*Every grove needs good earth.*
 
-This document defines the comprehensive domain/username blocklist policy implemented by Bark. It ensures that:
+This document defines the comprehensive domain/username blocklist policy implemented by Loam. It ensures that:
 
 1. **System integrity** — Infrastructure and service names cannot be claimed
 2. **Brand protection** — Grove products and trademarks are reserved
@@ -131,7 +145,7 @@ shade, trails, vineyard, terrarium, weave
 
 #### Internal Services
 ```
-patina, rings, waystone, reeds, press, wisp, thorn
+patina, rings, waystone, reeds, press, wisp, thorn, loam
 ```
 
 #### Service Features/Modes
@@ -151,7 +165,7 @@ treasuretrove, grovemc, grovemusic, seedbed, groveanalytics
 grovemail, grovestorage, groveshade, grovetrails, groveshowcase
 grovebloom, grovemcp, grovemonitor, grovepress, grovewisp
 groveshop, grovenook, groveclear, grovewaystone, grovereeds
-groveporch, grovethorn, grovearbor, grovescout
+groveporch, grovethorn, grovearbor, grovescout, groveloam
 ```
 
 ---
@@ -264,7 +278,7 @@ Names that may become Grove services or features.
 ```
 hollow, glade, thicket, copse, dell, glen, grove-commons
 bower, arbor-day, seedbank, greenhouse, nursery
-mulch, compost, humus, topsoil, loam
+mulch, compost, humus, topsoil
 birdsong, cricket, firefly, moth, owl, fox, deer, rabbit
 moss, lichen, fern, mushroom, fungus, truffle
 stream, brook, creek, pond, spring, well, rain
@@ -400,4 +414,4 @@ This policy implements:
 
 ---
 
-*The grove has room for everyone who comes with good intentions. But some names were never meant to be claimed.*
+*The grove has room for everyone who comes with good intentions. But some names were never meant to take root.*
