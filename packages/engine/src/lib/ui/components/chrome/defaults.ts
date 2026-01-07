@@ -17,6 +17,7 @@ import {
   Grape,
   Footprints,
   Sparkles,
+  Activity,
 } from "lucide-svelte";
 
 // =============================================================================
@@ -91,6 +92,7 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
+  { href: "/clearing", label: "Status", icon: Activity },
 ];
 
 // Connect section (desktop footer)
@@ -118,6 +120,7 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
+  { href: "/clearing", label: "Status", icon: Activity },
 ];
 
 // Connect section (mobile menu)
