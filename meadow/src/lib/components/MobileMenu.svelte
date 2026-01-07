@@ -28,10 +28,16 @@
 	let menuPanelRef: HTMLDivElement | undefined = $state();
 	let previouslyFocusedElement: HTMLElement | null = null;
 
+	// Handle close action
+	function handleClose() {
+		open = false;
+		onClose();
+	}
+
 	// Close on escape key
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && open) {
-			onClose();
+			handleClose();
 		}
 
 		// Focus trap: Tab key cycles within menu
@@ -54,7 +60,7 @@
 		}
 	}
 
-	// Focus management when menu opens/closes
+	// Focus management and body scroll lock when menu opens/closes
 	$effect(() => {
 		if (open) {
 			// Store the previously focused element to restore later
@@ -63,11 +69,22 @@
 			requestAnimationFrame(() => {
 				closeButtonRef?.focus();
 			});
-		} else if (previouslyFocusedElement) {
-			// Restore focus when menu closes
-			previouslyFocusedElement.focus();
-			previouslyFocusedElement = null;
+			// Prevent body scroll
+			document.body.style.overflow = 'hidden';
+		} else {
+			if (previouslyFocusedElement) {
+				// Restore focus when menu closes
+				previouslyFocusedElement.focus();
+				previouslyFocusedElement = null;
+			}
+			// Restore body scroll
+			document.body.style.overflow = '';
 		}
+
+		// Cleanup on unmount: ensure body scroll is always restored
+		return () => {
+			document.body.style.overflow = '';
+		};
 	});
 
 	// Navigation items with icons
@@ -102,8 +119,8 @@
 {#if open}
 	<button
 		type="button"
-		class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity"
-		onclick={onClose}
+		class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity"
+		onclick={handleClose}
 		aria-label="Close menu"
 	></button>
 {/if}
@@ -111,7 +128,7 @@
 <!-- Slide-out panel -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-[70] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
+	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
 		? 'translate-x-0'
 		: 'translate-x-full'}"
 	role="dialog"
@@ -125,7 +142,7 @@
 		<button
 			bind:this={closeButtonRef}
 			type="button"
-			onclick={onClose}
+			onclick={handleClose}
 			class="p-2 -mr-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 			aria-label="Close menu"
 		>
@@ -142,7 +159,7 @@
 				href={item.href}
 				target={item.external ? '_blank' : undefined}
 				rel={item.external ? 'noopener noreferrer' : undefined}
-				onclick={onClose}
+				onclick={handleClose}
 				class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
 					{active
 					? 'bg-accent/10 text-accent-muted'
