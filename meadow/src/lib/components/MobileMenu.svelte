@@ -80,6 +80,11 @@
 			// Restore body scroll
 			document.body.style.overflow = '';
 		}
+
+		// Cleanup on unmount: ensure body scroll is always restored
+		return () => {
+			document.body.style.overflow = '';
+		};
 	});
 
 	// Navigation items with icons

@@ -72,6 +72,11 @@
 			// Restore body scroll
 			document.body.style.overflow = '';
 		}
+
+		// Cleanup on unmount: ensure body scroll is always restored
+		return () => {
+			document.body.style.overflow = '';
+		};
 	});
 
 	const items = navItems || DEFAULT_MOBILE_NAV_ITEMS;
