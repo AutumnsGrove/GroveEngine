@@ -456,7 +456,7 @@
 					tagline: 'Real-Time Coordination',
 					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
 					status: 'integrated',
-					icon: 'filebox',
+					icon: 'spool',
 					integration: 'Architectural pattern for coordination and real-time',
 					spec: '/knowledge/patterns/loom-durable-objects-pattern',
 					subComponents: [
