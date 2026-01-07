@@ -83,9 +83,23 @@ The connections themselves are called **threads** — the individual strands you
 | Public Name | Internal Name | Icon |
 |-------------|---------------|------|
 | Weave | GroveWeave | `spline-pointer` |
-| Sway (animation) | GroveSway | `waves` |
-| Fern (diagrams) | GroveFern | `waypoints` |
+| Breeze (animation) | GroveBreeze | `wind` |
+| Trace (diagrams) | GroveTrace | `waypoints` |
 | Threads (connections) | GroveThreads | `route` |
+
+### Sub-Mode Naming
+
+**Breeze** — *Animation Mode*
+
+A breeze is the invisible force that moves through and makes everything respond. It propagates naturally—a breeze doesn't stop at one leaf. Send a breeze through your scene, and watch motion ripple through every connected element.
+
+*Let it breathe.*
+
+**Trace** — *Diagram Mode*
+
+A trace is a path followed, a line drawn to show where things connect. Rangers trace trails through forests. Fingers trace maps. The eye traces the shape of a leaf, following its veins to understand its structure. Trace reveals the bones beneath.
+
+*Follow the line. See the shape.*
 
 ---
 
@@ -95,21 +109,21 @@ Weave is an extension of Terrarium that transforms static scene composition into
 
 ### The Core Idea
 
-1. **Sway Mode** — Animation with nature assets, timing controls, propagation-based motion
-2. **Fern Mode** — Diagrams with glass cards, Lucide icons, static relationships
+1. **Breeze Mode** — Animation with nature assets, timing controls, propagation-based motion
+2. **Trace Mode** — Diagrams with glass cards, Lucide icons, static relationships
 3. **Shared Engine** — Both modes use the same node-graph foundation with threads connecting nodes
 
 ---
 
 ## Two Modes
 
-### Sway Mode (Animation)
+### Breeze Mode (Animation)
 
-The workspace for building animated relationships with nature assets.
+The workspace for building animated relationships with nature assets. Send a breeze through your scene and watch motion propagate.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ◎ Weave: Sway                         [Grid: 0.5rem ▾]     │
+│  ◎ Weave: Breeze                       [Grid: 0.5rem ▾]     │
 ├────────────┬─────────────────────────────────────────────────┤
 │   Assets   │  · · · · · · · · · · · · · · · · · · · · · ·   │
 │  ────────  │  ·       ·       ·       ·       ·       ·     │
@@ -231,11 +245,11 @@ The rock-and-vines example:
 
 | Format | Use Case | Mode |
 |--------|----------|------|
-| **Blog Import** | Live animation plays on Grove blog (uses Foliage) | Sway |
-| **GIF** | Shareable, loops forever | Sway |
-| **Video (WebM/MP4)** | Higher quality, social sharing | Sway |
-| **PNG Sequence** | Frame-by-frame for external editing | Sway |
-| **SVG** | Scalable vectors for docs, embeds | Fern |
+| **Blog Import** | Live animation plays on Grove blog (uses Foliage) | Breeze |
+| **GIF** | Shareable, loops forever | Breeze |
+| **Video (WebM/MP4)** | Higher quality, social sharing | Breeze |
+| **PNG Sequence** | Frame-by-frame for external editing | Breeze |
+| **SVG** | Scalable vectors for docs, embeds | Trace |
 | **PNG** | Static image export | Both |
 
 ---
@@ -332,7 +346,7 @@ Build diagram rendering into the same node-graph foundation:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ◎ Weave: Diagrams                        [Export ▾]        │
+│  ◎ Weave: Trace                           [Export ▾]        │
 ├────────────┬─────────────────────────────────────────────────┤
 │   Palette  │                                                 │
 │  ────────  │    ╭─────────────╮         ╭─────────────╮     │
@@ -486,8 +500,8 @@ packages/engine/src/lib/ui/components/
 
 ### Naming
 - [x] **Weave** — unified node-graph engine
-- [x] **Sway** — animation sub-mode (nature assets, timing, propagation)
-- [x] **Fern** — diagram sub-mode (glass cards, Lucide icons, static)
+- [x] **Breeze** — animation sub-mode (nature assets, timing, propagation)
+- [x] **Trace** — diagram sub-mode (glass cards, Lucide icons, static)
 - [x] **Threads** — the connections between nodes
 
 ### Technical
@@ -656,7 +670,7 @@ CREATE TABLE weave_threads (
 *Updated: January 6th, 2026*
 - Added Diagram Editor concept (Fern mode)
 - Completed grove walk, chose **Weave** as unified name
-- Sub-modes: **Sway** (animation) + **Fern** (diagrams)
+- Sub-modes: **Breeze** (animation) + **Trace** (diagrams)
 - Added glassmorphism patterns and Lucide icon mapping
 - Added D1 schema draft for Loom integration
 - Decided: markdown shortcode syntax, dark mode default, preset jiggle patterns
