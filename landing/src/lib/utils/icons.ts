@@ -119,6 +119,27 @@ import {
   Waves,
   Waypoints,
   Route,
+  // Subicon additions for workshop features
+  LayoutList,
+  Origami,
+  Feather,
+  ToolCase,
+  CloudCog,
+  Building2,
+  House,
+  ShieldOff,
+  Key,
+  Codepen,
+  FileCode,
+  PaintbrushVertical,
+  SlidersHorizontal,
+  BookType,
+  Component,
+  Lock,
+  Contact,
+  Eye,
+  BookOpenCheck,
+  Goal,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -277,6 +298,27 @@ export const toolIcons = {
   waves: Waves,                  // Sway - animation mode
   waypoints: Waypoints,          // Fern - diagram mode
   route: Route,                  // Thread - connections
+  // Subicons for workshop features
+  layoutlist: LayoutList,        // Lattice - Vines
+  origami: Origami,              // Songbird - Canary
+  feather: Feather,              // Songbird - Kestrel
+  toolcase: ToolCase,            // Songbird - Robin
+  cloudcog: CloudCog,            // Threshold - Edge
+  building2: Building2,          // Threshold - Tenant
+  house: House,                  // Threshold - User
+  shieldoff: ShieldOff,          // Threshold - Endpoint
+  key: Key,                      // Loom - Session
+  codepen: Codepen,              // Loom - Tenant
+  filecode: FileCode,            // Loom - Post
+  paintbrush: PaintbrushVertical, // Foliage - Themes
+  sliders: SlidersHorizontal,    // Foliage - Customizer
+  booktype: BookType,            // Foliage - Fonts
+  component: Component,          // Ivy - Compose
+  lock: Lock,                    // Ivy - Encrypt
+  contact: Contact,              // Ivy - Contacts
+  eye: Eye,                      // Rings - Views
+  bookopencheck: BookOpenCheck,  // Rings - Readers
+  goal: Goal,                    // Rings - Resonance
 } as const;
 
 // ============================================================================

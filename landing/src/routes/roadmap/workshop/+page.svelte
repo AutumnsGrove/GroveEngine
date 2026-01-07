@@ -59,7 +59,10 @@
 					domain: 'grove.place',
 					integration: 'Powers all Grove properties',
 					github: 'https://github.com/AutumnsGrove/GroveEngine',
-					spec: '/knowledge/specs/lattice-spec'
+					spec: '/knowledge/specs/lattice-spec',
+					subComponents: [
+						{ name: 'Vines', icon: 'layoutlist', description: 'Gutter link system' }
+					]
 				},
 			]
 		},
@@ -127,7 +130,12 @@
 					domain: 'foliage.grove.place',
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
-					spec: '/knowledge/specs/foliage-project-spec'
+					spec: '/knowledge/specs/foliage-project-spec',
+					subComponents: [
+						{ name: 'Themes', icon: 'paintbrush', description: 'Curated themes' },
+						{ name: 'Customizer', icon: 'sliders', description: 'Full control' },
+						{ name: 'Fonts', icon: 'booktype', description: 'Custom typography' }
+					]
 				},
 				{
 					name: 'Terrarium',
@@ -159,7 +167,12 @@
 					status: 'planned',
 					icon: 'barchart',
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
-					spec: '/knowledge/specs/rings-spec'
+					spec: '/knowledge/specs/rings-spec',
+					subComponents: [
+						{ name: 'Views', icon: 'eye', description: 'Page views' },
+						{ name: 'Readers', icon: 'bookopencheck', description: 'Engaged readers' },
+						{ name: 'Resonance', icon: 'goal', description: 'Content signals' }
+					]
 				},
 				{
 					name: 'Clearing',
@@ -258,7 +271,12 @@
 					domain: 'ivy.grove.place',
 					integration: 'Included with Oak and Evergreen tiers',
 					github: 'https://github.com/AutumnsGrove/Ivy',
-					spec: '/knowledge/specs/ivy-mail-spec'
+					spec: '/knowledge/specs/ivy-mail-spec',
+					subComponents: [
+						{ name: 'Compose', icon: 'component', description: 'Write emails' },
+						{ name: 'Encrypt', icon: 'lock', description: 'Zero-knowledge' },
+						{ name: 'Contacts', icon: 'contact', description: 'Address book' }
+					]
 				},
 				{
 					name: 'Bloom',
@@ -380,7 +398,12 @@
 					status: 'integrated',
 					icon: 'spool',
 					integration: 'Architectural pattern for coordination and real-time',
-					spec: '/knowledge/patterns/loom-durable-objects-pattern'
+					spec: '/knowledge/patterns/loom-durable-objects-pattern',
+					subComponents: [
+						{ name: 'Session', icon: 'key', description: 'Session management' },
+						{ name: 'Tenant', icon: 'codepen', description: 'Tenant coordination' },
+						{ name: 'Post', icon: 'filecode', description: 'Post interactions' }
+					]
 				},
 				{
 					name: 'Threshold',
@@ -389,7 +412,13 @@
 					status: 'planned',
 					icon: 'gauge',
 					integration: 'Protection layer for all Grove endpoints',
-					spec: '/knowledge/patterns/threshold-pattern'
+					spec: '/knowledge/patterns/threshold-pattern',
+					subComponents: [
+						{ name: 'Edge', icon: 'cloudcog', description: 'Cloudflare protection' },
+						{ name: 'Tenant', icon: 'building2', description: 'Per-tenant limits' },
+						{ name: 'User', icon: 'house', description: 'Per-user limits' },
+						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
+					]
 				},
 				{
 					name: 'Songbird',
@@ -398,7 +427,12 @@
 					status: 'implemented',
 					icon: 'bird',
 					integration: 'Shared pattern for Wisp, Thorn, and future AI features',
-					spec: '/knowledge/patterns/songbird-pattern'
+					spec: '/knowledge/patterns/songbird-pattern',
+					subComponents: [
+						{ name: 'Canary', icon: 'origami', description: 'Tripwire detection' },
+						{ name: 'Kestrel', icon: 'feather', description: 'Semantic validation' },
+						{ name: 'Robin', icon: 'toolcase', description: 'Safe response' }
+					]
 				},
 				{
 					name: 'Sentinel',
