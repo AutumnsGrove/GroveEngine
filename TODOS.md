@@ -6,6 +6,25 @@
 
 ---
 
+## 🌿 Vines Subicons Brainstorm (2026-01-07) — IN PROGRESS
+
+> **Context:** Vines are "gutter widgets" - margin content that climbs alongside posts (comments, photos, galleries).
+> **Current:** GutterManager.svelte implements Comment, Photo, Gallery types
+> **Brainstorming:** What other subicon types should Vines support?
+
+**Ideas to explore:**
+- Content annotation: Footnote, Aside, Callout, Definition
+- Media: Audio, Video, Code snippets, Diagrams (Weave/Fern)
+- Navigation: Related posts, Backlinks, Series nav, External links
+- Interactive: Polls, Reactions, Bookmarks
+
+**Reference files:**
+- `packages/engine/src/lib/components/admin/GutterManager.svelte` - Current implementation
+- `docs/specs/lattice-spec.md` - Gutter links feature docs
+- `docs/scratch/lattice-grove-journey.md` - Lattice/Vines naming rationale
+
+---
+
 ## 🪟 Glass Design System Overhaul (2026-01-02) — AUDIT COMPLETE
 
 > **Status:** Audit complete. Implementation plans ready for agent handoff.

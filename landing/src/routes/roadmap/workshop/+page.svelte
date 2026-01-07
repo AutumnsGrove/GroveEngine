@@ -88,7 +88,8 @@
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'GitHub', icon: 'github', description: 'GitHub OAuth' },
-						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' }
+						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
+						{ name: 'Identity', icon: 'idcard', description: 'Verified identity' }
 					]
 				},
 				{
@@ -164,7 +165,7 @@
 					subComponents: [
 						{ name: 'Canvas', icon: 'frame', description: 'Design space' },
 						{ name: 'Assets', icon: 'shapes', description: 'Nature components' },
-						{ name: 'Export', icon: 'share2', description: 'Publish to blog' }
+						{ name: 'Export', icon: 'imageup', description: 'Publish to blog' }
 					]
 				},
 				{
@@ -238,7 +239,12 @@
 					status: 'planned',
 					icon: 'wind',
 					integration: 'Integrated into the Grove editor, off by default',
-					spec: '/knowledge/specs/wisp-spec'
+					spec: '/knowledge/specs/wisp-spec',
+					subComponents: [
+						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
+						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+					]
 				},
 				{
 					name: 'Reeds',
@@ -260,7 +266,11 @@
 					status: 'planned',
 					icon: 'shielduser',
 					integration: 'Automated moderation for comments and community content',
-					spec: '/knowledge/specs/thorn-spec'
+					spec: '/knowledge/specs/thorn-spec',
+					subComponents: [
+						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+					]
 				},
 				{
 					name: 'Meadow',
@@ -270,7 +280,11 @@
 					icon: 'users',
 					domain: 'meadow.grove.place',
 					integration: 'Optional social layer for Grove blogs',
-					spec: '/knowledge/specs/meadow-spec'
+					spec: '/knowledge/specs/meadow-spec',
+					subComponents: [
+						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
+						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first sharing' }
+					]
 				},
 				{
 					name: 'Trails',
@@ -322,7 +336,10 @@
 					icon: 'searchcode',
 					domain: 'forage.grove.place',
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
-					github: 'https://github.com/AutumnsGrove/Forage'
+					github: 'https://github.com/AutumnsGrove/Forage',
+					subComponents: [
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+					]
 				},
 				{
 					name: 'Nook',
@@ -332,17 +349,23 @@
 					icon: 'projector',
 					domain: 'nook.grove.place',
 					integration: 'Intimate video sharing for close connections',
-					github: 'https://github.com/AutumnsGrove/Nook'
+					github: 'https://github.com/AutumnsGrove/Nook',
+					subComponents: [
+						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
+					]
 				},
 				{
 					name: 'Outpost',
 					tagline: 'On-Demand Minecraft',
 					description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
 					status: 'live',
-					icon: 'pickaxe',
+					icon: 'monitorcloud',
 					domain: 'mc.grove.place',
 					integration: 'For Grove community members',
-					github: 'https://github.com/AutumnsGrove/GroveMC'
+					github: 'https://github.com/AutumnsGrove/GroveMC',
+					subComponents: [
+						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
+					]
 				},
 			]
 		},
@@ -373,7 +396,7 @@
 					subComponents: [
 						{ name: 'Workers', icon: 'cpu', description: 'Cloudflare Workers' },
 						{ name: 'Database', icon: 'database', description: 'D1 databases' },
-						{ name: 'Storage', icon: 'harddrive', description: 'R2 & KV' }
+						{ name: 'Storage', icon: 'refrigerator', description: 'R2 & KV' }
 					]
 				},
 				{
@@ -408,7 +431,7 @@
 					subComponents: [
 						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
 						{ name: 'Scraper', icon: 'bug', description: 'Scraper blocking' },
-						{ name: 'Shield', icon: 'shieldcheck', description: 'Content protection' }
+						{ name: 'Protection', icon: 'brickwallfire', description: 'Complete protection' }
 					]
 				},
 			]
@@ -431,7 +454,7 @@
 					tagline: 'Real-Time Coordination',
 					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
 					status: 'integrated',
-					icon: 'spool',
+					icon: 'filebox',
 					integration: 'Architectural pattern for coordination and real-time',
 					spec: '/knowledge/patterns/loom-durable-objects-pattern',
 					subComponents: [
@@ -449,9 +472,9 @@
 					integration: 'Protection layer for all Grove endpoints',
 					spec: '/knowledge/patterns/threshold-pattern',
 					subComponents: [
-						{ name: 'Edge', icon: 'cloudcog', description: 'Cloudflare protection' },
-						{ name: 'Tenant', icon: 'building2', description: 'Per-tenant limits' },
-						{ name: 'User', icon: 'house', description: 'Per-user limits' },
+						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
+						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
+						{ name: 'User', icon: 'users', description: 'Per-user limits' },
 						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
 					]
 				},
@@ -485,7 +508,10 @@
 					status: 'implemented',
 					icon: 'webhook',
 					integration: 'Powers Bloom and Outpost infrastructure',
-					spec: '/knowledge/patterns/firefly-pattern'
+					spec: '/knowledge/patterns/firefly-pattern',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned' }
+					]
 				},
 				{
 					name: 'Vineyard',

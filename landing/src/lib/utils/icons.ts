@@ -152,6 +152,21 @@ import {
   Frame,
   Shapes,
   Share2,
+  // Additional subicon imports (round 3) - workshop expansion
+  ImageUp,
+  FlameKindling,
+  GlobeLock,
+  Trash2,
+  Rss,
+  SquareAsterisk,
+  IdCard,
+  BadgeCheck,
+  Refrigerator,
+  BrickWallFire,
+  FileBox,
+  ServerCog,
+  SolarPanel,
+  CloudCog as MonitorCloud,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -346,6 +361,21 @@ export const toolIcons = {
   frame: Frame,                  // Terrarium - Canvas
   shapes: Shapes,                // Terrarium - Assets
   share2: Share2,                // Terrarium - Export
+  // Additional subicons (round 3) - workshop expansion
+  imageup: ImageUp,              // Terrarium - Export (alternative)
+  flamekindling: FlameKindling,  // Wisp - Fireside mode
+  globelock: GlobeLock,          // Wisp/Shade/Thorn - Privacy
+  shredder: Trash2,              // ZDR - Zero Data Retention
+  rss: Rss,                      // Meadow - RSS feeds
+  squareasterisk: SquareAsterisk, // Meadow - Opt-in
+  idcard: IdCard,                // Heartwood - Identity
+  badgecheck: BadgeCheck,        // Nook/Outpost - Private access
+  refrigerator: Refrigerator,    // Vista - Storage
+  brickwallfire: BrickWallFire,  // Shade - Complete protection
+  filebox: FileBox,              // Loom - main icon
+  servercog: ServerCog,          // Threshold - Edge
+  solarpanel: SolarPanel,        // Firefly - Solarpunk aligned
+  monitorcloud: MonitorCloud,    // Outpost - main icon
 } as const;
 
 // ============================================================================
