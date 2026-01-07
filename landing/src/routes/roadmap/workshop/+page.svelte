@@ -36,7 +36,7 @@
 		name: string;
 		tagline: string;
 		description: string;
-		status: 'live' | 'building' | 'planned' | 'complete' | 'integrated' | 'implemented' | 'being implemented';
+		status: 'live' | 'building' | 'planned' | 'complete' | 'applied' | 'being implemented';
 		icon: string;
 		domain?: string;
 		integration: string;
@@ -458,7 +458,7 @@
 					name: 'Loom',
 					tagline: 'Real-Time Coordination',
 					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
-					status: 'integrated',
+					status: 'applied',
 					icon: 'spool',
 					integration: 'Architectural pattern for coordination and real-time',
 					spec: '/knowledge/patterns/loom-durable-objects-pattern',
@@ -487,7 +487,7 @@
 					name: 'Songbird',
 					tagline: 'Prompt Injection Protection',
 					description: 'A three-layer defense system against prompt injection attacks. Canary detects poison early. Kestrel watches and validates. Robin produces the safe response. Each layer costs fractions of a cent but protects against compromised AI responses.',
-					status: 'implemented',
+					status: 'applied',
 					icon: 'bird',
 					integration: 'Shared pattern for Wisp, Thorn, and future AI features',
 					spec: '/knowledge/patterns/songbird-pattern',
@@ -511,7 +511,7 @@
 					name: 'Firefly',
 					tagline: 'Ephemeral Server Pattern',
 					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
-					status: 'implemented',
+					status: 'applied',
 					icon: 'webhook',
 					integration: 'Powers Bloom and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern',
@@ -536,8 +536,7 @@
 		switch (status) {
 			case 'live': return { text: 'Live', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
 			case 'complete': return { text: 'Complete', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
-			case 'integrated': return { text: 'Integrated', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
-			case 'implemented': return { text: 'Implemented', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
+			case 'applied': return { text: 'Applied', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
 			case 'building': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
 			case 'being implemented': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
 			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' };
