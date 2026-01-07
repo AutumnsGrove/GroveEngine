@@ -43,9 +43,9 @@ The groundwork laid in stillness. Foundations built when no one was watching.
   - Email waitlist (59 subscribers at launch)
   - Vision, pricing, roadmap pages
 
-- [x] **Infrastructure:** SST + Cloudflare
+- [x] **Infrastructure:** Cloudflare
   - D1 databases, KV namespaces, R2 buckets
-  - Stripe products/prices defined in code
+  - Stripe products/prices via Dashboard
   - GitHub Actions CI/CD
   - Wrangler deployments
 
