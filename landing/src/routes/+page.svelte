@@ -83,7 +83,7 @@
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">Making it official —</span> I'm working through the paperwork needed to properly establish Grove. The pieces are coming together, and signups will open soon. Thanks for your patience.
+				<span class="font-medium">Paperwork settled!</span> All the legal stuff is sorted. Grove opens its doors very soon.
 			</p>
 		</div>
 	</div>
