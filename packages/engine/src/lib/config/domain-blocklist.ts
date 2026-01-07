@@ -340,6 +340,50 @@ const GROVE_INTERNAL_CODENAMES: string[] = [
 	'groveloam'
 ];
 
+/**
+ * Typosquatting variants of critical services
+ * Common misspellings that could be used for phishing/impersonation
+ */
+const GROVE_TYPOSQUATTING: string[] = [
+	// Grove core
+	'grov',
+	'grve',
+	'groce',
+	'grobe',
+	'grpve',
+	'grive',
+	// Meadow
+	'meadw',
+	'meado',
+	'meadwo',
+	'medow',
+	'maedow',
+	// Forage
+	'forrage',
+	'forrge',
+	'forege',
+	'forage-grove',
+	// Heartwood
+	'heartwod',
+	'hartwod',
+	'harwood',
+	'hearwood',
+	'hertwood',
+	// Plant
+	'plat',
+	'palnt',
+	'plnt',
+	// Pantry
+	'pnatry',
+	'pantrey',
+	'patry',
+	// Support/admin
+	'suport',
+	'supprt',
+	'amin',
+	'admn'
+];
+
 // =============================================================================
 // CATEGORY 3: Grove Brand & Trademarks
 // =============================================================================
@@ -633,7 +677,8 @@ export const GROVE_SERVICES: string[] = [
 	...GROVE_PUBLIC_SERVICES,
 	...GROVE_INTERNAL_SERVICES,
 	...GROVE_ALIASES,
-	...GROVE_INTERNAL_CODENAMES
+	...GROVE_INTERNAL_CODENAMES,
+	...GROVE_TYPOSQUATTING
 ];
 
 export const GROVE_TRADEMARKS: string[] = [...GROVE_BRAND, ...GROVE_TIERS, ...GROVE_CONCEPTS];

@@ -685,17 +685,42 @@ const SLUR_SUBSTRINGS: string[] = [
 	'faggot',
 	'tranny',
 	'shemale',
-	// Ableist slurs (4+ chars)
-	'retard',
+	// Ableist slurs (4+ chars) - Note: "retard" handled separately with word boundary check
 	'retarded',
 	'spastic',
-	// Exploitation (4+ chars)
-	'pedo',
+	// Exploitation (4+ chars) - Note: "pedo" handled separately with word boundary check
 	'pedophile',
 	'jailbait',
 	'lolita',
 	'groomer'
 ];
+
+/**
+ * Terms that need word boundary checking to avoid false positives.
+ * Example: "retard" could match "fire-retardant-blog"
+ */
+const BOUNDARY_CHECK_TERMS: string[] = [
+	'retard', // Could match "retardant"
+	'pedo' // Could match "pedometer" (rare, but possible)
+];
+
+/**
+ * Check if a term appears as a word (not embedded in another word)
+ * Uses simple boundary detection: term is at start/end or surrounded by non-letters
+ */
+function hasWordBoundary(text: string, term: string): boolean {
+	const index = text.indexOf(term);
+	if (index === -1) return false;
+
+	const beforeChar = index > 0 ? text[index - 1] : '';
+	const afterChar = index + term.length < text.length ? text[index + term.length] : '';
+
+	// Check if bounded by non-letter characters or string boundaries
+	const beforeOk = !beforeChar || !/[a-z]/.test(beforeChar);
+	const afterOk = !afterChar || !/[a-z]/.test(afterChar);
+
+	return beforeOk && afterOk;
+}
 
 /**
  * Check if a username contains offensive content
@@ -728,6 +753,13 @@ export function containsOffensiveContent(username: string): boolean {
 	// Substring match for severe slurs (catches "badword123" patterns)
 	for (const slur of SLUR_SUBSTRINGS) {
 		if (normalized.includes(slur)) {
+			return true;
+		}
+	}
+
+	// Word boundary check for terms prone to false positives
+	for (const term of BOUNDARY_CHECK_TERMS) {
+		if (hasWordBoundary(normalized, term)) {
 			return true;
 		}
 	}

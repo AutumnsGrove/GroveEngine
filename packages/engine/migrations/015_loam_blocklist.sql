@@ -17,6 +17,12 @@ ALTER TABLE reserved_usernames ADD COLUMN category TEXT;
 -- Add notes column for audit/documentation
 ALTER TABLE reserved_usernames ADD COLUMN notes TEXT;
 
+-- Create index on reason for efficient queries by category
+CREATE INDEX IF NOT EXISTS idx_reserved_reason ON reserved_usernames(reason);
+
+-- Create index on category for admin filtering
+CREATE INDEX IF NOT EXISTS idx_reserved_category ON reserved_usernames(category);
+
 -- =============================================================================
 -- GROVE SERVICES (grove_service)
 -- =============================================================================

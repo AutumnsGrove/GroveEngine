@@ -26,7 +26,8 @@ const IN_PROGRESS_WINDOW_SECONDS = 3600; // 1 hour
 /** Rate limit configuration */
 const RATE_LIMIT = {
 	maxRequests: 30, // Max requests per window
-	windowSeconds: 60 // 1 minute window
+	windowSeconds: 60, // 1 minute window
+	kvBufferSeconds: 60 // Extra TTL buffer to prevent edge cases
 };
 
 interface CheckResult {
@@ -53,12 +54,14 @@ async function checkRateLimit(
 	const now = Math.floor(Date.now() / 1000);
 
 	try {
-		const data = await kv.get(key, 'json') as { count: number; resetAt: number } | null;
+		const data = (await kv.get(key, 'json')) as { count: number; resetAt: number } | null;
 
 		if (!data || now >= data.resetAt) {
 			// New window
 			const newData = { count: 1, resetAt: now + RATE_LIMIT.windowSeconds };
-			await kv.put(key, JSON.stringify(newData), { expirationTtl: RATE_LIMIT.windowSeconds + 60 });
+			await kv.put(key, JSON.stringify(newData), {
+				expirationTtl: RATE_LIMIT.windowSeconds + RATE_LIMIT.kvBufferSeconds
+			});
 			return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1, resetAt: newData.resetAt };
 		}
 
@@ -69,12 +72,26 @@ async function checkRateLimit(
 
 		// Increment counter
 		const newData = { count: data.count + 1, resetAt: data.resetAt };
-		await kv.put(key, JSON.stringify(newData), { expirationTtl: data.resetAt - now + 60 });
+		await kv.put(key, JSON.stringify(newData), {
+			expirationTtl: data.resetAt - now + RATE_LIMIT.kvBufferSeconds
+		});
 		return { allowed: true, remaining: RATE_LIMIT.maxRequests - newData.count, resetAt: data.resetAt };
-	} catch {
-		// On error, allow the request
+	} catch (error) {
+		// Log error but allow the request to prevent blocking users on KV failures
+		console.error('[Rate Limit] KV error:', error);
 		return { allowed: true, remaining: RATE_LIMIT.maxRequests, resetAt: 0 };
 	}
+}
+
+/**
+ * Generate rate limit headers for responses
+ */
+function getRateLimitHeaders(rateLimit: { remaining: number; resetAt: number }): Record<string, string> {
+	return {
+		'X-RateLimit-Limit': String(RATE_LIMIT.maxRequests),
+		'X-RateLimit-Remaining': String(rateLimit.remaining),
+		'X-RateLimit-Reset': String(rateLimit.resetAt)
+	};
 }
 
 /**
@@ -112,83 +129,81 @@ export const GET: RequestHandler = async ({ url, platform, getClientAddress }) =
 	const clientIp = getClientAddress();
 	const kv = platform?.env?.KV as KVNamespace | undefined;
 	const rateLimit = await checkRateLimit(kv, clientIp);
+	const rateLimitHeaders = getRateLimitHeaders(rateLimit);
+
+	// Helper to return JSON with rate limit headers
+	const respond = (data: CheckResult, status = 200, extraHeaders: Record<string, string> = {}) =>
+		json(data, { status, headers: { ...rateLimitHeaders, ...extraHeaders } });
 
 	if (!rateLimit.allowed) {
 		const retryAfter = rateLimit.resetAt - Math.floor(Date.now() / 1000);
-		return json(
-			{ available: false, username: '', error: 'Too many requests. Please try again shortly.' } as CheckResult,
-			{
-				status: 429,
-				headers: {
-					'Retry-After': String(retryAfter),
-					'X-RateLimit-Limit': String(RATE_LIMIT.maxRequests),
-					'X-RateLimit-Remaining': '0',
-					'X-RateLimit-Reset': String(rateLimit.resetAt)
-				}
-			}
+		return respond(
+			{ available: false, username: '', error: 'Too many requests. Please try again shortly.' },
+			429,
+			{ 'Retry-After': String(retryAfter) }
 		);
 	}
 
 	const username = url.searchParams.get('username')?.toLowerCase().trim();
 
 	if (!username) {
-		return json({ available: false, username: '', error: 'Username is required' } as CheckResult);
+		return respond({ available: false, username: '', error: 'Username is required' });
 	}
 
 	// Length validation
 	if (username.length < VALIDATION_CONFIG.minLength) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: `Username must be at least ${VALIDATION_CONFIG.minLength} characters`
-		} as CheckResult);
+		});
 	}
 
 	if (username.length > VALIDATION_CONFIG.maxLength) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: `Username must be ${VALIDATION_CONFIG.maxLength} characters or less`
-		} as CheckResult);
+		});
 	}
 
 	// Pattern validation
 	if (!VALIDATION_CONFIG.pattern.test(username)) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: VALIDATION_CONFIG.patternDescription
-		} as CheckResult);
+		});
 	}
 
 	// Check offensive content first (no suggestions, generic error)
 	if (containsOffensiveContent(username)) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: 'This username is not available'
 			// Intentionally no suggestions for offensive terms
-		} as CheckResult);
+		});
 	}
 
 	// Check blocklist (reserved/trademarked/system names)
 	const blockedReason = isUsernameBlocked(username);
 	if (blockedReason) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: getBlockedMessage(blockedReason),
 			suggestions: generateSuggestions(username, blockedReason)
-		} as CheckResult);
+		});
 	}
 
 	const db = platform?.env?.DB;
 	if (!db) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: 'Service temporarily unavailable'
-		} as CheckResult);
+		});
 	}
 
 	try {
@@ -205,12 +220,12 @@ export const GET: RequestHandler = async ({ url, platform, getClientAddress }) =
 			)
 				? (reserved.reason as BlocklistReason)
 				: 'system';
-			return json({
+			return respond({
 				available: false,
 				username,
 				error: getBlockedMessage(reason),
 				suggestions: generateSuggestions(username, reason)
-			} as CheckResult);
+			});
 		}
 
 		// Check existing tenants
@@ -220,44 +235,46 @@ export const GET: RequestHandler = async ({ url, platform, getClientAddress }) =
 			.first();
 
 		if (existingTenant) {
-			return json({
+			return respond({
 				available: false,
 				username,
 				error: 'This username is already taken',
 				suggestions: generateSuggestions(username, null)
-			} as CheckResult);
+			});
 		}
 
 		// Check in-progress onboarding (someone else might be signing up with this username)
+		// Use calculated timestamp for consistency across database engines
+		const cutoffTimestamp = Math.floor(Date.now() / 1000) - IN_PROGRESS_WINDOW_SECONDS;
 		const inProgress = await db
 			.prepare(
 				`SELECT username FROM user_onboarding
 				 WHERE username = ? AND tenant_id IS NULL
-				 AND created_at > unixepoch() - ?`
+				 AND created_at > ?`
 			)
-			.bind(username, IN_PROGRESS_WINDOW_SECONDS)
+			.bind(username, cutoffTimestamp)
 			.first();
 
 		if (inProgress) {
-			return json({
+			return respond({
 				available: false,
 				username,
 				error: 'This username is currently being registered',
 				suggestions: generateSuggestions(username, null)
-			} as CheckResult);
+			});
 		}
 
 		// Username is available!
-		return json({
+		return respond({
 			available: true,
 			username
-		} as CheckResult);
+		});
 	} catch (error) {
 		console.error('[Check Username] Error:', error);
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: 'Unable to check availability'
-		} as CheckResult);
+		});
 	}
 };

@@ -89,6 +89,38 @@ describe('containsOffensiveContent - Substring Matching', () => {
 });
 
 // =============================================================================
+// containsOffensiveContent - Word Boundary Checking
+// =============================================================================
+
+describe('containsOffensiveContent - Word Boundary Checking', () => {
+	it('should NOT flag legitimate words containing boundary-checked terms', () => {
+		// "retardant" contains "retard" but is a legitimate word
+		expect(containsOffensiveContent('fire-retardant')).toBe(false);
+		expect(containsOffensiveContent('fireretardant')).toBe(false);
+		expect(containsOffensiveContent('flameretardant')).toBe(false);
+	});
+
+	it('should flag offensive terms with word boundaries', () => {
+		// "retard" as standalone or with numbers should be caught
+		expect(containsOffensiveContent('retard')).toBe(true);
+		expect(containsOffensiveContent('retard123')).toBe(true);
+		expect(containsOffensiveContent('123retard')).toBe(true);
+	});
+
+	it('should catch terms at word boundaries', () => {
+		// Numbers don't count as letters, so these should be caught
+		expect(containsOffensiveContent('my-pedo-blog')).toBe(true);
+		expect(containsOffensiveContent('pedo42')).toBe(true);
+	});
+
+	it('should NOT flag pedometer (legitimate word)', () => {
+		// "pedometer" contains "pedo" but is a legitimate word (step counter)
+		expect(containsOffensiveContent('pedometer')).toBe(false);
+		expect(containsOffensiveContent('mypedometer')).toBe(false);
+	});
+});
+
+// =============================================================================
 // containsOffensiveContent - Leetspeak Variants
 // =============================================================================
 
