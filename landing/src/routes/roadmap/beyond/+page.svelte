@@ -53,7 +53,7 @@
 			tagline: 'Library Book Discovery',
 			description: 'Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.',
 			status: 'planned',
-			icon: 'book',
+			icon: 'scan-qr-code',
 			domain: 'trove.grove.place',
 			stack: 'Python + SvelteKit',
 			github: 'https://github.com/AutumnsGrove/TreasureTrove'
@@ -76,7 +76,7 @@
 			tagline: 'Swarming Search',
 			description: 'Scout is an async shopping research tool that eliminates the cognitive overload of deal-hunting. Tell it what you want, walk away, and come back to a clean list of 5 perfect matches.',
 			status: 'building',
-			icon: 'telescope',
+			icon: 'shopping-basket',
 			domain: 'scout.grove.place',
 			stack: 'Python + TypeScript',
 			github: 'https://github.com/AutumnsGrove/GroveScout',
