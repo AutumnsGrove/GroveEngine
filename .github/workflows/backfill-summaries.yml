@@ -5,10 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (show what would be generated without calling API)'
+        description: 'Dry run - just show versions without generating'
         required: false
         default: false
         type: boolean
+  # Temporary: trigger once on push to register the workflow
+  push:
+    paths:
+      - '.github/workflows/backfill-summaries.yml'
 
 permissions:
   contents: write
