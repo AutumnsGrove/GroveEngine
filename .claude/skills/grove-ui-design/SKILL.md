@@ -672,6 +672,116 @@ Then use in components:
 
 ---
 
+## Icon Composition (Building Block Pattern)
+
+**Philosophy:** "The grove doesn't need to be drawn. It just needs to be arranged."
+
+For creating custom logos, illustrations, or decorative elements, compose existing Lucide icons rather than drawing custom SVG from scratch. This ensures visual consistency with the icon system.
+
+### Why This Pattern?
+
+- **Consistency** — Icons match the Lucide aesthetic (24x24 grid, 2px strokes, round caps)
+- **Minimal custom code** — Let Lucide do the heavy lifting
+- **Maintainable** — Updating Lucide updates your compositions
+- **MIT licensed** — All paths come from open-source icons
+
+### How to Extract Lucide Paths
+
+Lucide icons use a 24×24 viewBox with 2px strokes. Extract paths directly from source:
+
+```bash
+# Find icon paths in Lucide source
+curl -s https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/tree-pine.svg
+# Look for the <path d="..." /> elements
+```
+
+**Key Lucide icon paths for Grove compositions:**
+
+```typescript
+// TreePine - conifer silhouette
+const treePine = {
+  canopy: 'm17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z',
+  trunk: 'M12 22v-3'
+};
+
+// TreeDeciduous - deciduous/round tree
+const treeDeciduous = {
+  canopy: 'M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z',
+  trunk: 'M12 19v3'
+};
+
+// Moon - crescent moon
+const moon = 'M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401';
+
+// Flame - campfire/hearth
+const flame = 'M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4';
+```
+
+### Composing with SVG Transforms
+
+Use `<g transform="...">` to position, scale, and rotate icons:
+
+```svelte
+<svg viewBox="0 0 48 32" fill="none">
+  <!-- Left tree (larger, foreground) -->
+  <g transform="translate(2, 4) scale(0.85)"
+     stroke={color} stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d={treePine.canopy} />
+    <path d={treePine.trunk} />
+  </g>
+
+  <!-- Right tree (smaller, background, tilted) -->
+  <g transform="translate(20, 8) scale(0.65) rotate(-5, 12, 12)"
+     stroke={color} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+     opacity="0.7">
+    <path d={treePine.canopy} />
+    <path d={treePine.trunk} />
+  </g>
+
+  <!-- Add simple custom elements sparingly -->
+  <circle cx="30" cy="10" r="1.5" fill={glowColor} opacity="0.8" /> <!-- firefly -->
+  <path d="M2 28h44" stroke={color} stroke-width="1.5" opacity="0.3" /> <!-- ground -->
+</svg>
+```
+
+### Transform Cheatsheet
+
+| Transform | Effect | Example |
+|-----------|--------|---------|
+| `translate(x, y)` | Move origin | `translate(20, 8)` moves icon right 20, down 8 |
+| `scale(s)` | Uniform size | `scale(0.65)` makes icon 65% size |
+| `rotate(deg, cx, cy)` | Rotation around point | `rotate(-5, 12, 12)` tilts 5° around center |
+| Combined | Chain transforms | `translate(20, 8) scale(0.65) rotate(-5, 12, 12)` |
+
+### Example: Grove Logo Compositions
+
+See `/landing/src/lib/components/logo-concepts/` for real implementations:
+
+| Logo | Composition |
+|------|-------------|
+| `LogoFireflyForest` | TreePine + TreeDeciduous + glowing circles |
+| `LogoGatheringHearth` | Two trees angled toward center Flame |
+| `LogoStarlightPines` | Two TreePines + Moon + star circles |
+| `LogoShelter` | Two TreePines forming archway + Moon |
+| `LogoWinterGrove` | TreePines + snow line accents |
+
+### Guidelines
+
+1. **Use Lucide paths as primary structure** — Trees, moon, flame, etc.
+2. **Custom SVG only for simple primitives** — circles (fireflies), lines (ground, snow)
+3. **Maintain Lucide styling** — 2px strokes, round caps/joins, consistent opacity
+4. **Create depth with opacity/scale** — Larger = foreground (opacity 0.9), smaller = background (0.5-0.7)
+5. **Keep viewBox aspect ratios reasonable** — 40×32 or 48×32 for horizontal compositions
+
+### When to Use
+
+- **Logos & branding** — Compose icons into unique marks
+- **Illustrations** — Scene building (forest, sky, etc.)
+- **Custom icons** — When Lucide doesn't have exactly what you need
+- **Seasonal variations** — Same composition, different elements (snow, blossoms)
+
+---
+
 ## Mobile Considerations
 
 ### Overflow Menu Pattern
