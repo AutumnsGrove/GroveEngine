@@ -593,7 +593,7 @@
 							<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-slate-800 dark:to-emerald-950 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-divider">
 								{#if CurrentComponent}
 									{#key selectedAsset + JSON.stringify(propValues)}
-										<svelte:boundary onerror={(e) => componentError = e.message}>
+										<svelte:boundary onerror={(e) => { componentError = e instanceof Error ? e.message : String(e); }}>
 											<CurrentComponent class="w-32 h-32" {...propValues} />
 											{#snippet failed()}
 												<div class="text-center text-red-500 dark:text-red-400">

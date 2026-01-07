@@ -63,7 +63,7 @@
 
 		<!-- Moon -->
 		<div class="absolute top-20 right-[15%] opacity-60 pointer-events-none" aria-hidden="true">
-			<Moon class="w-20 h-20" phase="waning-crescent" />
+			<Moon class="w-20 h-20" phase="waning" />
 		</div>
 
 		<!-- Fireflies - sparse, magical -->

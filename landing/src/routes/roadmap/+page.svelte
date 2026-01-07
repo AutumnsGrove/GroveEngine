@@ -10,8 +10,15 @@
 		getPhaseColor,
 		stateIcons,
 		navIcons,
-		phaseIcons
+		phaseIcons,
+		type RoadmapFeatureIconKey
 	} from '$lib/utils/icons';
+
+	// Type-safe icon getter
+	function getFeatureIcon(icon: string | undefined) {
+		if (!icon) return stateIcons.circle;
+		return roadmapFeatureIcons[icon as RoadmapFeatureIconKey] ?? stateIcons.circle;
+	}
 
 	// Local aliases from centralized registry for cleaner template usage
 	const MapPin = navIcons.roadmap;
@@ -468,7 +475,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const IconComponent = getFeatureIcon(feature.icon)}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
 							{feature.internal ? 'opacity-75' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
@@ -564,7 +571,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-buds'].features as feature}
-						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
 							ivy: 'text-green-500',
 							amber: 'text-amber-500',
@@ -580,11 +587,11 @@
 							swatchbook: 'border-l-4 border-violet-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{borderMap[feature.icon] || ''}"
+							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
-								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -671,7 +678,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
-						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
 							meadow: 'text-green-500',
 							clock: 'text-blue-500',
@@ -688,7 +695,7 @@
 						>
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
-								class="w-5 h-5 {colorMap[feature.icon] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -782,7 +789,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
-						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
 							gem: 'text-amber-600 dark:text-amber-400',
 							zap: 'text-yellow-500',
@@ -795,7 +802,7 @@
 						>
 							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
 							<IconComponent
-								class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-500'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-500'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
 								<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
@@ -887,7 +894,7 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
-						{@const IconComponent = roadmapFeatureIcons[feature.icon]}
+						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
 							coffee: 'text-amber-400',
 							qrcode: 'text-purple-300',
@@ -897,7 +904,7 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
 							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
 							<IconComponent
-								class="w-5 h-5 {colorMap[feature.icon] || 'text-amber-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>

@@ -10,7 +10,7 @@
 export type DocCategory = "specs" | "help" | "legal" | "marketing" | "patterns";
 
 /** Base document metadata (used for listings and static data) */
-export interface Doc {
+export interface Doc extends Record<string, unknown> {
   slug: string;
   title: string;
   description?: string;

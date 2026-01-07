@@ -199,11 +199,7 @@
 						<button
 							type="button"
 							onclick={() => (favoriteColor = favoriteColor === color.value ? null : color.value)}
-							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative"
-							class:border-white={favoriteColor === color.value}
-							class:shadow-lg={favoriteColor === color.value}
-							class:border-white/30={favoriteColor !== color.value}
-							class:dark:border-slate-700/30={favoriteColor !== color.value}
+							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative {favoriteColor === color.value ? 'border-white shadow-lg' : 'border-white/30 dark:border-slate-700/30'}"
 							style="background-color: {color.hex}"
 							title={color.name}
 						>

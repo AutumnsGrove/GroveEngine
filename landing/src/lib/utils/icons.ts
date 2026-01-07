@@ -370,6 +370,12 @@ export const allIcons = {
 /** Type for any icon key in the registry */
 export type IconKey = keyof typeof allIcons;
 
+/** Type for roadmap feature icon keys */
+export type RoadmapFeatureIconKey = keyof typeof roadmapFeatureIcons;
+
+/** Type for tool icon keys */
+export type ToolIconKey = keyof typeof toolIcons;
+
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================

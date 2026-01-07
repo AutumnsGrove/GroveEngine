@@ -2,6 +2,7 @@
 	import '../app.css';
 	// Import theme store from engine to initialize it on page load
 	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { get } from 'svelte/store';
 
 	let { children } = $props();
 
@@ -9,7 +10,7 @@
 	$effect(() => {
 		// Theme store auto-applies the dark class on initialization
 		// This effect ensures the store is subscribed to
-		const _ = $themeStore.resolvedTheme;
+		const _ = get(themeStore.resolvedTheme);
 	});
 </script>
 

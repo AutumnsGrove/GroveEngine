@@ -3,11 +3,17 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
-	import { toolIcons, featureIcons, contentIcons } from '$lib/utils/icons';
+	import { toolIcons, featureIcons, contentIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
 
 	// Use centralized registry for spec/github link icons
 	const FileText = contentIcons.filetext;
 	const Github = featureIcons.github;
+
+	// Type-safe icon getter for tools
+	function getToolIcon(icon: string | undefined) {
+		if (!icon) return stateIcons.circle;
+		return toolIcons[icon as ToolIconKey] ?? stateIcons.circle;
+	}
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -498,7 +504,7 @@
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-											<svelte:component this={toolIcons[tool.icon]} class="w-5 h-5" />
+											<svelte:component this={getToolIcon(tool.icon)} class="w-5 h-5" />
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>
@@ -519,7 +525,7 @@
 												role="listitem"
 												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
 											>
-												<svelte:component this={toolIcons[sub.icon]} class="w-3 h-3" aria-hidden="true" />
+												<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
 												{sub.name}
 											</span>
 										{/each}
