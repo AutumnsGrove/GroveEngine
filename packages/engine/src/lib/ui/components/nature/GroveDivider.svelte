@@ -18,6 +18,11 @@
   <GroveDivider glass variant="frosted" />        <!-- Frosted glass -->
   <GroveDivider glass variant="ethereal" breathing /> <!-- Dreamy animated -->
   ```
+
+  @example Vertical divider
+  ```svelte
+  <GroveDivider vertical count={15} glass />      <!-- Vertical glass divider -->
+  ```
 -->
 <script lang="ts">
 	import Logo from './Logo.svelte';
@@ -48,6 +53,8 @@
 		monochrome?: boolean;
 		/** Custom color override (for regular Logo) */
 		color?: string;
+		/** Display vertically instead of horizontally */
+		vertical?: boolean;
 	}
 
 	let {
@@ -60,7 +67,8 @@
 		variant = 'default',
 		breathing = false,
 		monochrome = false,
-		color
+		color,
+		vertical = false
 	}: Props = $props();
 
 	// Size mappings
@@ -83,7 +91,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center {gap} {className}"
+	class="flex items-center justify-center {gap} {vertical ? 'flex-col' : 'flex-row'} {className}"
 	role="separator"
 	aria-hidden="true"
 >
