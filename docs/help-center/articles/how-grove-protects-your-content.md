@@ -4,7 +4,7 @@ slug: how-grove-protects-your-content
 category: data-and-privacy
 order: 2
 keywords: [ai, scraping, protection, bots, crawlers, privacy, shade, content, training data, archive, wayback machine]
-related: [understanding-your-privacy, what-is-grove, exporting-your-content]
+related: [understanding-your-privacy, what-is-grove, exporting-your-content, centennial-status]
 ---
 
 # How Grove Protects Your Content from AI Scraping and Archiving
