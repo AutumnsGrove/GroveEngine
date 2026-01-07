@@ -116,7 +116,10 @@
 					icon: 'landplot',
 					domain: 'plant.grove.place',
 					integration: 'Signup and onboarding for new Grove users',
-					spec: '/knowledge/specs/plant-spec'
+					spec: '/knowledge/specs/plant-spec',
+					subComponents: [
+						{ name: 'Loam', icon: 'funnel', description: 'Name protection & validation', href: '/knowledge/specs/loam-spec' }
+					]
 				},
 				{
 					name: 'Amber',

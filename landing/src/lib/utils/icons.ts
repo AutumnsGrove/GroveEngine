@@ -122,6 +122,7 @@ import {
   Waves,
   Waypoints,
   Route,
+  Funnel,
   // Subicon additions for workshop features
   LayoutList,
   Origami,
@@ -381,6 +382,8 @@ export const toolIcons = {
   monitorcloud: MonitorCloud,    // Outpost - main icon
   // Lab icons (experimental @lucide/lab)
   bee: BeeIcon,                  // Swarm - agentic swarm mode
+  // Loam - name protection & validation
+  funnel: Funnel,                // Loam - filters valid names
 } as const;
 
 // ============================================================================
