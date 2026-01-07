@@ -3,6 +3,12 @@ import type { PageServerLoad } from "./$types";
 import { getCheckoutSession } from "$lib/server/stripe";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 
+// Helper to extract ID from Stripe expandable fields (string | object)
+function getStripeId(value: string | { id: string } | null | undefined): string | undefined {
+  if (!value) return undefined;
+  return typeof value === 'string' ? value : value.id;
+}
+
 export const load: PageServerLoad = async ({
   url,
   cookies,
@@ -109,8 +115,8 @@ export const load: PageServerLoad = async ({
                   | "oak"
                   | "evergreen",
                 favoriteColor: onboardingData.favorite_color as string | null,
-                stripeCustomerId: session.customer,
-                stripeSubscriptionId: session.subscription,
+                stripeCustomerId: getStripeId(session.customer),
+                stripeSubscriptionId: getStripeId(session.subscription),
               });
             }
           }

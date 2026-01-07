@@ -3,10 +3,16 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
-	import { toolIcons, featureIcons } from '$lib/utils/icons';
+	import { toolIcons, featureIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
 
 	// Use centralized registry for social link icons
 	const Github = featureIcons.github;
+
+	// Type-safe icon getter for tools
+	function getToolIcon(icon: string | undefined) {
+		if (!icon) return stateIcons.circle;
+		return toolIcons[icon as ToolIconKey] ?? stateIcons.circle;
+	}
 
 	// Import nature assets from engine package
 	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';
@@ -124,7 +130,7 @@
 							<div class="flex items-center gap-3">
 								<div class="w-10 h-10 rounded-lg bg-indigo-900/50 flex items-center justify-center text-indigo-400">
 									<!-- Use centralized icon registry -->
-									<svelte:component this={toolIcons[tool.icon]} class="w-5 h-5" />
+									<svelte:component this={getToolIcon(tool.icon)} class="w-5 h-5" />
 								</div>
 								<div>
 									<h2 class="text-xl font-serif text-white">{tool.name}</h2>

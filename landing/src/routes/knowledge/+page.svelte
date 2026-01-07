@@ -8,7 +8,7 @@
 
   let searchQuery = $state('');
 
-  function handleSearch(e) {
+  function handleSearch(e: SubmitEvent) {
     e.preventDefault();
     if (searchQuery.trim()) {
       goto(`/knowledge/search?q=${encodeURIComponent(searchQuery)}`);
@@ -37,7 +37,7 @@
 
     <!-- Search Bar -->
     <div class="max-w-2xl mx-auto mb-12">
-      <form on:submit|preventDefault={handleSearch} class="relative">
+      <form onsubmit={handleSearch} class="relative">
         <input
           type="text"
           bind:value={searchQuery}

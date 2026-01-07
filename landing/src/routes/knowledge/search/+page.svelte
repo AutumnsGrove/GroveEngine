@@ -1,25 +1,25 @@
 <script lang="ts">
-  import { allDocs } from '$lib/data/knowledge-base';
+  import { allDocs, type Doc } from '$lib/data/knowledge-base';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import { ContentSearch } from '@autumnsgrove/groveengine';
 
   let searchQuery = $state('');
   // Initialize with all docs to prevent empty state flash on page load
-  let filteredResults = $state(allDocs);
+  let filteredResults = $state<Doc[]>(allDocs);
 
   // Filter function for ContentSearch
-  function filterDoc(doc, query) {
+  function filterDoc(doc: Doc, query: string): boolean {
     const q = query.toLowerCase();
     return (
       doc.title.toLowerCase().includes(q) ||
       doc.excerpt.toLowerCase().includes(q) ||
-      (doc.description && doc.description.toLowerCase().includes(q))
+      Boolean(doc.description?.toLowerCase().includes(q))
     );
   }
 
   // Handle search results
-  function handleSearchChange(query, results) {
+  function handleSearchChange(query: string, results: Doc[]) {
     filteredResults = results;
   }
 
