@@ -63,6 +63,8 @@
 		LogoStarlightPines,
 		LogoShelter,
 		LogoWinterGrove,
+		// The Mega Forest
+		LogoMegaForest,
 		// The artifact 😂
 		LogoArtifact
 	} from '$lib/components/logo-concepts';
@@ -777,6 +779,72 @@
 								{ name: 'Dawn', class: 'bg-gradient-to-b from-rose-200 to-orange-100' }
 							]}
 						/>
+					</div>
+
+					<!-- THE MEGA FOREST - Panoramic Showcase -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-indigo-900 via-purple-950 to-slate-950 border-2 border-amber-500/50 relative overflow-hidden">
+						<!-- Ambient glow effects -->
+						<div class="absolute inset-0 opacity-30">
+							<div class="absolute top-10 left-1/4 w-32 h-32 bg-amber-400/20 rounded-full blur-3xl"></div>
+							<div class="absolute top-20 right-1/3 w-24 h-24 bg-yellow-300/15 rounded-full blur-2xl"></div>
+							<div class="absolute bottom-10 left-1/2 w-40 h-20 bg-orange-500/20 rounded-full blur-3xl"></div>
+						</div>
+
+						<div class="relative z-10">
+							<div class="flex items-center gap-2 mb-4">
+								<span class="text-2xl">🌲</span>
+								<h3 class="text-xl font-bold text-white">The Mega Forest</h3>
+								<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium">all out</span>
+							</div>
+							<p class="text-sm text-purple-200/80 mb-6">
+								Everything. All at once. A panoramic grove stretching into the distance—<br/>
+								<em class="text-xs text-purple-300/60">Three layers of depth, moonlit sky, scattered fireflies, and a hearth at the heart of it all.</em>
+							</p>
+
+							<!-- Mega Forest Display -->
+							<div class="space-y-6">
+								<!-- Large showcase -->
+								<div class="p-4 rounded-xl bg-gradient-to-b from-indigo-950/80 to-slate-950/80 backdrop-blur-sm border border-purple-500/20">
+									<LogoMegaForest class="w-full h-auto max-h-48" color={greens.grove} glowColor="#fde047" fireColor="#f97316" moonColor="#e2e8f0" title="The Mega Forest" />
+								</div>
+
+								<!-- Color variations -->
+								<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+									<div class="p-3 rounded-lg bg-slate-800/60 backdrop-blur-sm">
+										<LogoMegaForest class="w-full h-auto" color={greens.grove} glowColor="#fde047" fireColor="#f97316" moonColor="#e2e8f0" />
+										<span class="text-xs text-slate-400 block text-center mt-2">Grove Green</span>
+									</div>
+									<div class="p-3 rounded-lg bg-gradient-to-b from-rose-100 to-orange-50">
+										<LogoMegaForest class="w-full h-auto" color={autumn.pumpkin} glowColor="#fbbf24" fireColor="#dc2626" moonColor="#f97316" />
+										<span class="text-xs text-orange-700 block text-center mt-2">Autumn Fire</span>
+									</div>
+									<div class="p-3 rounded-lg bg-gradient-to-b from-slate-100 to-sky-50">
+										<LogoMegaForest class="w-full h-auto" color={winter.frostedPine} glowColor="#e0f2fe" fireColor="#38bdf8" moonColor="#94a3b8" />
+										<span class="text-xs text-slate-600 block text-center mt-2">Winter Frost</span>
+									</div>
+								</div>
+
+								<!-- Stats -->
+								<div class="flex items-center justify-center gap-8 pt-4 border-t border-purple-500/20">
+									<div class="text-center">
+										<span class="text-2xl font-bold text-amber-400">21</span>
+										<span class="text-xs text-purple-300/60 block">Trees</span>
+									</div>
+									<div class="text-center">
+										<span class="text-2xl font-bold text-yellow-400">10</span>
+										<span class="text-xs text-purple-300/60 block">Fireflies</span>
+									</div>
+									<div class="text-center">
+										<span class="text-2xl font-bold text-slate-300">8</span>
+										<span class="text-xs text-purple-300/60 block">Stars</span>
+									</div>
+									<div class="text-center">
+										<span class="text-2xl font-bold text-orange-400">1</span>
+										<span class="text-xs text-purple-300/60 block">Hearth</span>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<!-- The Artifact (Historical Easter Egg) -->

@@ -89,6 +89,9 @@ export { default as LogoStarlightPines } from "./LogoStarlightPines.svelte";
 export { default as LogoShelter } from "./LogoShelter.svelte";
 export { default as LogoWinterGrove } from "./LogoWinterGrove.svelte";
 
+// The Mega Forest - panoramic showcase of everything
+export { default as LogoMegaForest } from "./LogoMegaForest.svelte";
+
 // Re-export Tabler's Linktree icon as a historical artifact 😂
 // "The logo that started the journey"
 export { IconBrandLinktree as LogoArtifact } from "@tabler/icons-svelte";
