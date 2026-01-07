@@ -364,7 +364,7 @@
 					tagline: 'On-Demand Minecraft',
 					description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
 					status: 'live',
-					icon: 'monitorcloud',
+					icon: 'telescope',
 					domain: 'mc.grove.place',
 					integration: 'For Grove community members',
 					github: 'https://github.com/AutumnsGrove/GroveMC',

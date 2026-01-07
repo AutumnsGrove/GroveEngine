@@ -171,6 +171,8 @@ import {
   ServerCog,
   SolarPanel,
   CloudCog as MonitorCloud,
+  ShoppingBasket,
+  ScanQrCode,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -384,6 +386,9 @@ export const toolIcons = {
   bee: BeeIcon,                  // Swarm - agentic swarm mode
   // Loam - name protection & validation
   funnel: Funnel,                // Loam - filters valid names
+  // Scout & Trove
+  'shopping-basket': ShoppingBasket, // Scout - shopping research
+  'scan-qr-code': ScanQrCode,    // Trove - book discovery
 } as const;
 
 // ============================================================================
