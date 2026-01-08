@@ -175,6 +175,13 @@ import {
   ScanQrCode,
   SendToBack,
   Regex,
+  // Icon additions for workshop TOC and tools
+  Pyramid,
+  Blinds,
+  RockingChair,
+  Toolbox,
+  Dock,
+  IdCardLanyard,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -393,6 +400,13 @@ export const toolIcons = {
   // Scout & Trove
   'shopping-basket': ShoppingBasket, // Scout - shopping research
   'scan-qr-code': ScanQrCode,    // Trove - book discovery
+  // Workshop TOC icons
+  pyramid: Pyramid,              // Core Infrastructure TOC
+  blinds: Blinds,                // Shade - AI protection
+  'rocking-chair': RockingChair, // Porch - front porch conversations
+  toolbox: Toolbox,              // Standalone Tools TOC
+  dock: Dock,                    // Operations TOC
+  'id-card-lanyard': IdCardLanyard, // Content & Community TOC
 } as const;
 
 // ============================================================================
