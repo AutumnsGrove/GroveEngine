@@ -175,14 +175,14 @@
 				{
 					name: 'Weave',
 					tagline: 'Visual Composition Studio',
-					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Sway mode) and diagrams (Fern mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
+					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
 					status: 'planned',
 					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
 					subComponents: [
-						{ name: 'Sway', icon: 'waves', description: 'Animation mode' },
-						{ name: 'Fern', icon: 'waypoints', description: 'Diagram mode' },
+						{ name: 'Breeze', icon: 'wind', description: 'Animation mode' },
+						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
 						{ name: 'Thread', icon: 'route', description: 'Connections' }
 					]
 				},
