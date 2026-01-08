@@ -76,20 +76,20 @@ function sanitizeServerSafe(html: string): string {
   sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
   sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, "");
 
-  // Strip javascript: protocol in href/src
+  // Strip javascript: protocol in href/src (with optional leading whitespace)
   sanitized = sanitized.replace(
-    /href\s*=\s*["']javascript:[^"']*["']/gi,
+    /href\s*=\s*["']\s*javascript:[^"']*["']/gi,
     'href="#"',
   );
-  sanitized = sanitized.replace(/src\s*=\s*["']javascript:[^"']*["']/gi, "");
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*javascript:[^"']*["']/gi, "");
 
-  // Strip data: protocol in href/src (except images)
-  sanitized = sanitized.replace(/href\s*=\s*["']data:[^"']*["']/gi, 'href="#"');
-  sanitized = sanitized.replace(/src\s*=\s*["']data:(?!image\/)[^"']*["']/gi, "");
+  // Strip data: protocol in href/src (except images, with optional leading whitespace)
+  sanitized = sanitized.replace(/href\s*=\s*["']\s*data:[^"']*["']/gi, 'href="#"');
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*data:(?!image\/)[^"']*["']/gi, "");
 
-  // Strip vbscript: and other dangerous protocols
-  sanitized = sanitized.replace(/href\s*=\s*["']vbscript:[^"']*["']/gi, 'href="#"');
-  sanitized = sanitized.replace(/src\s*=\s*["']vbscript:[^"']*["']/gi, "");
+  // Strip vbscript: and other dangerous protocols (with optional leading whitespace)
+  sanitized = sanitized.replace(/href\s*=\s*["']\s*vbscript:[^"']*["']/gi, 'href="#"');
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
 
   return sanitized;
 }

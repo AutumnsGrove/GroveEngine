@@ -11,6 +11,12 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  getClientIP,
+  getEndpointLimit
+} from "$lib/server/rate-limits";
 
 // ============================================================================
 // Constants
@@ -127,11 +133,31 @@ function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  // TODO(security): Add server-side rate limiting
-  // Limit: 5 failed auth attempts per 15 minutes per IP
-  // Use Cloudflare Workers rate limiting or KV-based counter
-  // Client-side rate limiting in $lib/groveauth/rate-limit.ts is bypassable
+export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+  // ============================================================================
+  // Rate Limiting (Threshold pattern)
+  // Protects against brute force attacks on auth callback
+  // ============================================================================
+  const kv = platform?.env?.CACHE;
+  if (kv) {
+    const clientIp = getClientIP(request);
+    const limitConfig = getEndpointLimit('auth/callback');
+    const rateLimitKey = buildRateLimitKey('auth/callback', clientIp);
+
+    const { response: rateLimitResponse } = await checkRateLimit({
+      kv,
+      key: rateLimitKey,
+      limit: limitConfig.limit,
+      windowSeconds: limitConfig.windowSeconds,
+      namespace: 'auth-ratelimit'
+    });
+
+    // Return 429 if rate limited
+    if (rateLimitResponse) {
+      console.warn('[Auth Callback] Rate limited:', { ip: clientIp });
+      return rateLimitResponse;
+    }
+  }
 
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
