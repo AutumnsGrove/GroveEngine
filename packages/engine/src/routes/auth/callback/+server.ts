@@ -128,6 +128,11 @@ function getFriendlyErrorMessage(errorCode: string): string {
 }
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+  // TODO(security): Add server-side rate limiting
+  // Limit: 5 failed auth attempts per 15 minutes per IP
+  // Use Cloudflare Workers rate limiting or KV-based counter
+  // Client-side rate limiting in $lib/groveauth/rate-limit.ts is bypassable
+
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const errorParam = url.searchParams.get("error");
@@ -197,13 +202,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.json() as ErrorResponse;
+      // Only log sensitive debugging info in development
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
-        error: errorData,
-        authApiUrl: authConfig.apiUrl,
-        clientId: authConfig.clientId,
-        hasSecret: !!authConfig.clientSecret,
-        redirectUri,
+        error: errorData?.error,
+        // Include detailed debugging info only in development
+        ...(import.meta.env.DEV && {
+          authApiUrl: authConfig.apiUrl,
+          clientId: authConfig.clientId,
+          hasSecret: !!authConfig.clientSecret,
+          redirectUri,
+          errorDescription: errorData?.error_description,
+        })
       });
       const debugError =
         errorData?.error_description ||
@@ -262,14 +272,13 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
           .bind(userId, userInfo.sub, userInfo.email, displayName, userInfo.picture || null)
           .run();
 
-        console.log("[Auth Callback] User upserted:", userInfo.email);
+        console.log("[Auth Callback] User upserted:", userInfo.sub);
       } catch (dbErr) {
         // Log with structured data for debugging, but don't fail auth
         // User can still proceed - they'll be created on next login
         console.error("[Auth Callback] Failed to upsert user:", {
           error: dbErr instanceof Error ? dbErr.message : "Unknown error",
           groveauth_id: userInfo.sub,
-          email: userInfo.email,
         });
       }
     }
