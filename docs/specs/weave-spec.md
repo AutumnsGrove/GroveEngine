@@ -97,9 +97,11 @@ A breeze is the invisible force that moves through and makes everything respond.
 
 **Trace** — *Diagram Mode*
 
-A trace is a path followed, a line drawn to show where things connect. Rangers trace trails through forests. Fingers trace maps. The eye traces the shape of a leaf, following its veins to understand its structure. Trace reveals the bones beneath.
+In the forest, you trace tracks to find where an animal went. You trace a stream to find its source. You trace the veins in a leaf to understand how it grows. Tracing reveals structure that was already there—making the invisible visible, the unclear clear.
 
-*Follow the line. See the shape.*
+Trace is where you diagram. Connect one point to another. Show relationships. Map structure. Make someone understand.
+
+*Follow the path. Reveal the structure.*
 
 ---
 
