@@ -5,8 +5,11 @@
 
 	let { data, form } = $props();
 
+	// Extract initial values (captured once, not reactive - intentional for form fields)
+	const initialDisplayName = data.user?.displayName || '';
+
 	// Form state - initialize from props on first render only
-	let displayName = $state(data.user?.displayName || '');
+	let displayName = $state(initialDisplayName);
 	let username = $state('');
 	let favoriteColor = $state<string | null>(null);
 	let selectedInterests = $state<string[]>([]);
@@ -188,10 +191,10 @@
 			</div>
 
 			<!-- Favorite Color (Optional) -->
-			<div class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20">
-				<label class="block text-sm font-medium text-foreground mb-1.5">
+			<fieldset class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20">
+				<legend class="block text-sm font-medium text-foreground mb-1.5">
 					Favorite Color <span class="text-foreground-subtle">(optional)</span>
-				</label>
+				</legend>
 				<p class="text-xs text-foreground-subtle mb-3">This will be your blog's accent color. You can change it later.</p>
 
 				<div class="grid grid-cols-4 gap-2.5">
@@ -212,13 +215,13 @@
 					{/each}
 				</div>
 				<input type="hidden" name="favoriteColor" value={favoriteColor || ''} />
-			</div>
+			</fieldset>
 
 			<!-- Interests (Optional) -->
-			<div>
-				<label class="block text-sm font-medium text-foreground mb-1.5">
+			<fieldset>
+				<legend class="block text-sm font-medium text-foreground mb-1.5">
 					What brings you to Grove? <span class="text-foreground-subtle">(optional)</span>
-				</label>
+				</legend>
 				<p class="text-xs text-foreground-subtle mb-3">Select all that apply. This helps us personalize your experience.</p>
 
 				<div class="grid grid-cols-2 gap-3">
@@ -238,7 +241,7 @@
 					{/each}
 				</div>
 				<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
-			</div>
+			</fieldset>
 
 			<!-- Form error -->
 			{#if form?.error}

@@ -26,6 +26,7 @@ const AUTO_SAVE_DELAY = 2000; // 2 seconds
  * @property {boolean} draftRestorePrompt
  * @property {StoredDraft|null} storedDraft
  * @property {string} lastSavedContent
+ * @property {"idle" | "saving" | "saved"} saveStatus
  * @property {(initialContent: string) => void} init
  * @property {(content: string) => void} scheduleSave
  * @property {() => void} saveDraft

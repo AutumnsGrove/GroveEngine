@@ -2,6 +2,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // @ts-expect-error - SvelteKit plugin uses older vite types, safe to ignore
   plugins: [sveltekit()],
   build: {
     // Disable source maps in production to prevent source code exposure

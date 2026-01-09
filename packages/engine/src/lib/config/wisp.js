@@ -12,40 +12,50 @@
 // ============================================================================
 
 /**
+ * @typedef {Object} ProviderConfig
+ * @property {string} name
+ * @property {string} baseUrl
+ * @property {string} role
+ * @property {boolean} zdr
+ * @property {Record<string, string>} models
+ */
+
+/**
  * Approved inference providers with ZDR support
  * Order determines fallback priority
+ * @type {Record<string, ProviderConfig>}
  */
 export const PROVIDERS = {
-	fireworks: {
-		name: 'Fireworks AI',
-		baseUrl: 'https://api.fireworks.ai/inference/v1',
-		role: 'primary',
-		zdr: true, // Zero Data Retention default for open models
-		models: {
-			'deepseek-v3.2': 'accounts/fireworks/models/deepseek-v3p2',
-			'kimi-k2': 'accounts/fireworks/models/kimi-k2-instruct-0905',
-			'llama-3.1-70b': 'accounts/fireworks/models/llama-v3p1-70b-instruct'
-		}
-	},
-	cerebras: {
-		name: 'Cerebras',
-		baseUrl: 'https://api.cerebras.ai/v1',
-		role: 'backup',
-		zdr: true, // US-based, zero retention
-		models: {
-			'llama-3.3-70b': 'llama-3.3-70b',
-			'gpt-oss-120b': 'gpt-oss-120b'
-		}
-	},
-	groq: {
-		name: 'Groq',
-		baseUrl: 'https://api.groq.com/openai/v1',
-		role: 'tertiary',
-		zdr: true, // Explicit ZDR toggle
-		models: {
-			'llama-3.3-70b': 'llama-3.3-70b-versatile'
-		}
-	}
+  fireworks: {
+    name: "Fireworks AI",
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    role: "primary",
+    zdr: true, // Zero Data Retention default for open models
+    models: {
+      "deepseek-v3.2": "accounts/fireworks/models/deepseek-v3p2",
+      "kimi-k2": "accounts/fireworks/models/kimi-k2-instruct-0905",
+      "llama-3.1-70b": "accounts/fireworks/models/llama-v3p1-70b-instruct",
+    },
+  },
+  cerebras: {
+    name: "Cerebras",
+    baseUrl: "https://api.cerebras.ai/v1",
+    role: "backup",
+    zdr: true, // US-based, zero retention
+    models: {
+      "llama-3.3-70b": "llama-3.3-70b",
+      "gpt-oss-120b": "gpt-oss-120b",
+    },
+  },
+  groq: {
+    name: "Groq",
+    baseUrl: "https://api.groq.com/openai/v1",
+    role: "tertiary",
+    zdr: true, // Explicit ZDR toggle
+    models: {
+      "llama-3.3-70b": "llama-3.3-70b-versatile",
+    },
+  },
 };
 
 /**
@@ -53,23 +63,24 @@ export const PROVIDERS = {
  * Try in order until one succeeds
  */
 export const MODEL_FALLBACK_CASCADE = [
-	{ provider: 'fireworks', model: 'deepseek-v3.2' },
-	{ provider: 'fireworks', model: 'kimi-k2' },
-	{ provider: 'fireworks', model: 'llama-3.1-70b' },
-	{ provider: 'cerebras', model: 'llama-3.3-70b' },
-	{ provider: 'groq', model: 'llama-3.3-70b' }
+  { provider: "fireworks", model: "deepseek-v3.2" },
+  { provider: "fireworks", model: "kimi-k2" },
+  { provider: "fireworks", model: "llama-3.1-70b" },
+  { provider: "cerebras", model: "llama-3.3-70b" },
+  { provider: "groq", model: "llama-3.3-70b" },
 ];
 
 // ============================================================================
 // Pricing (per million tokens)
 // ============================================================================
 
+/** @type {Record<string, {input: number, output: number}>} */
 export const MODEL_PRICING = {
-	'deepseek-v3.2': { input: 0.56, output: 1.68 },
-	'kimi-k2': { input: 0.60, output: 2.50 },
-	'llama-3.1-70b': { input: 0.90, output: 0.90 },
-	'llama-3.3-70b': { input: 0.59, output: 0.79 },
-	'gpt-oss-120b': { input: 0.25, output: 0.69 }
+  "deepseek-v3.2": { input: 0.56, output: 1.68 },
+  "kimi-k2": { input: 0.6, output: 2.5 },
+  "llama-3.1-70b": { input: 0.9, output: 0.9 },
+  "llama-3.3-70b": { input: 0.59, output: 0.79 },
+  "gpt-oss-120b": { input: 0.25, output: 0.69 },
 };
 
 // ============================================================================
@@ -81,9 +92,9 @@ export const MAX_CONTENT_LENGTH = 50000;
 
 /** Max output tokens by analysis type and mode */
 export const MAX_OUTPUT_TOKENS = {
-	grammar: { quick: 1024, thorough: 2048 },
-	tone: { quick: 512, thorough: 1024 },
-	readability: 0 // No AI call needed
+  grammar: { quick: 1024, thorough: 2048 },
+  tone: { quick: 512, thorough: 1024 },
+  readability: 0, // No AI call needed
 };
 
 /**
@@ -92,15 +103,15 @@ export const MAX_OUTPUT_TOKENS = {
  * Hourly limit prevents abuse bursts, not total monthly usage.
  */
 export const RATE_LIMIT = {
-	maxRequestsPerHour: 10,
-	windowSeconds: 3600
+  maxRequestsPerHour: 10,
+  windowSeconds: 3600,
 };
 
 /** Monthly cost cap per user (the true usage limit) */
 export const COST_CAP = {
-	enabled: true,
-	maxCostUSD: 5.0,
-	warningThreshold: 0.8 // Warn at 80%
+  enabled: true,
+  maxCostUSD: 5.0,
+  warningThreshold: 0.8, // Warn at 80%
 };
 
 // ============================================================================
@@ -111,18 +122,18 @@ export const COST_CAP = {
  * Prompt modes control analysis depth without changing models
  */
 export const PROMPT_MODES = {
-	quick: {
-		name: 'Quick',
-		description: 'Fast essential checks',
-		temperature: 0.1,
-		maxOutputMultiplier: 1
-	},
-	thorough: {
-		name: 'Thorough',
-		description: 'Comprehensive analysis',
-		temperature: 0.2,
-		maxOutputMultiplier: 2
-	}
+  quick: {
+    name: "Quick",
+    description: "Fast essential checks",
+    temperature: 0.1,
+    maxOutputMultiplier: 1,
+  },
+  thorough: {
+    name: "Thorough",
+    description: "Comprehensive analysis",
+    temperature: 0.2,
+    maxOutputMultiplier: 2,
+  },
 };
 
 // ============================================================================
@@ -137,10 +148,11 @@ export const PROMPT_MODES = {
  * @returns {number} Cost in USD (rounded to 6 decimal places to avoid floating point errors)
  */
 export function calculateCost(model, inputTokens, outputTokens) {
-	const pricing = MODEL_PRICING[model] || MODEL_PRICING['deepseek-v3.2'];
-	const cost = (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
-	// Round to 6 decimal places to avoid floating point precision issues
-	return Math.round(cost * 1_000_000) / 1_000_000;
+  const pricing = MODEL_PRICING[model] || MODEL_PRICING["deepseek-v3.2"];
+  const cost =
+    (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
+  // Round to 6 decimal places to avoid floating point precision issues
+  return Math.round(cost * 1_000_000) / 1_000_000;
 }
 
 /**
@@ -150,7 +162,7 @@ export function calculateCost(model, inputTokens, outputTokens) {
  * @returns {string|null} Full model ID or null if not found
  */
 export function getModelId(provider, model) {
-	return PROVIDERS[provider]?.models[model] || null;
+  return PROVIDERS[provider]?.models[model] || null;
 }
 
 /**
@@ -159,7 +171,7 @@ export function getModelId(provider, model) {
  * @returns {object|null} Provider config or null
  */
 export function getProvider(provider) {
-	return PROVIDERS[provider] || null;
+  return PROVIDERS[provider] || null;
 }
 
 /**
@@ -168,8 +180,8 @@ export function getProvider(provider) {
  * @param {'quick'|'thorough'} mode
  * @returns {number}
  */
-export function getMaxTokens(action, mode = 'quick') {
-	const tokens = MAX_OUTPUT_TOKENS[action];
-	if (typeof tokens === 'number') return tokens;
-	return tokens?.[mode] || 1024;
+export function getMaxTokens(action, mode = "quick") {
+  const tokens = MAX_OUTPUT_TOKENS[action];
+  if (typeof tokens === "number") return tokens;
+  return tokens?.[mode] || 1024;
 }

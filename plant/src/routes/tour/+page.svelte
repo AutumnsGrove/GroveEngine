@@ -203,13 +203,16 @@
 				Back
 			</button>
 
-			<div class="flex gap-1">
-				{#each tourStops as _, i}
+			<div class="flex gap-1" role="tablist" aria-label="Tour steps">
+				{#each tourStops as stop, i}
 					<button
 						onclick={() => (currentStep = i)}
 						class="w-2 h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/30 dark:bg-slate-700/30' : ''}"
 						class:bg-primary={i === currentStep}
 						class:w-4={i === currentStep}
+						aria-label="Go to step {i + 1}: {stop.title}"
+						aria-selected={i === currentStep}
+						role="tab"
 					></button>
 				{/each}
 			</div>
