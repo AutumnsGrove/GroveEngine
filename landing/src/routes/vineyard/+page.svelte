@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import { LogoGroveMark } from '$lib/components/logo-concepts';
+	import { LogoGroveMark, LogoSanctuary } from '$lib/components/logo-concepts';
 
 	// Lucide Icons
 	import {
@@ -283,6 +283,83 @@
 
 <main class="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50 via-green-50 to-lime-50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950">
 	<Header />
+
+	<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+	<!-- THE SANCTUARY — Night Forest Logo Concept -->
+	<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+	<section class="relative py-16 px-6 bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950">
+		<div class="max-w-4xl mx-auto text-center">
+			<h2 class="text-3xl md:text-4xl font-serif text-white mb-3">
+				The Sanctuary
+			</h2>
+			<p class="text-indigo-200/80 max-w-lg mx-auto mb-8">
+				"Someone left a light on for you."
+			</p>
+
+			<!-- Large Logo Preview with flame animation -->
+			<div class="flex justify-center mb-10">
+				<div class="p-6 rounded-2xl bg-black/30 backdrop-blur-sm border border-white/10">
+					<LogoSanctuary size="xl" season="summer" flicker title="The Sanctuary" />
+				</div>
+			</div>
+
+			<!-- Seasonal Variants -->
+			<h3 class="text-sm uppercase tracking-widest text-indigo-300/60 mb-4">Seasonal Moods</h3>
+			<div class="flex flex-wrap justify-center items-end gap-8 mb-10">
+				<div class="flex flex-col items-center gap-2">
+					<div class="p-3 rounded-xl bg-[#4a1942]/50 border border-pink-400/20">
+						<LogoSanctuary size="lg" season="spring" flicker flickerSpeed="slow" />
+					</div>
+					<span class="text-pink-300/60 text-xs">Spring</span>
+				</div>
+				<div class="flex flex-col items-center gap-2">
+					<div class="p-3 rounded-xl bg-[#2e1065]/50 border border-amber-400/20">
+						<LogoSanctuary size="lg" season="summer" flicker />
+					</div>
+					<span class="text-amber-300/60 text-xs">Summer</span>
+				</div>
+				<div class="flex flex-col items-center gap-2">
+					<div class="p-3 rounded-xl bg-[#431407]/50 border border-orange-400/20">
+						<LogoSanctuary size="lg" season="autumn" flicker />
+					</div>
+					<span class="text-orange-300/60 text-xs">Autumn</span>
+				</div>
+				<div class="flex flex-col items-center gap-2">
+					<div class="p-3 rounded-xl bg-[#0f172a]/50 border border-blue-400/20">
+						<LogoSanctuary size="lg" season="winter" flicker flickerSpeed="slow" />
+					</div>
+					<span class="text-blue-300/60 text-xs">Winter</span>
+				</div>
+			</div>
+
+			<!-- Size Variants -->
+			<h3 class="text-sm uppercase tracking-widest text-indigo-300/60 mb-4">Sizes</h3>
+			<div class="flex flex-wrap justify-center items-end gap-6 mb-8">
+				<div class="flex flex-col items-center gap-1">
+					<LogoSanctuary size="xl" season="summer" />
+					<span class="text-indigo-300/50 text-xs">xl (128px)</span>
+				</div>
+				<div class="flex flex-col items-center gap-1">
+					<LogoSanctuary size="lg" season="summer" />
+					<span class="text-indigo-300/50 text-xs">lg (96px)</span>
+				</div>
+				<div class="flex flex-col items-center gap-1">
+					<LogoSanctuary size="md" season="summer" />
+					<span class="text-indigo-300/50 text-xs">md (64px)</span>
+				</div>
+				<div class="flex flex-col items-center gap-1">
+					<LogoSanctuary size="sm" season="summer" />
+					<span class="text-indigo-300/50 text-xs">sm (32px)</span>
+				</div>
+			</div>
+
+			<!-- Description -->
+			<p class="text-indigo-200/60 text-sm italic max-w-md mx-auto">
+				A grove of line-art trees within a circular badge, with a glowing flame at center.
+				Evokes warmth, safety, and community gathering in the dark.
+			</p>
+		</div>
+	</section>
 
 	<!-- ═══════════════════════════════════════════════════════════════════════════ -->
 	<!-- THE GROVE MARK — Official Logo Showcase -->
