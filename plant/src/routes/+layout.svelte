@@ -7,6 +7,14 @@
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
 	import type { Component } from 'svelte';
 
+	// Centralized external links to prevent drift
+	const GROVE_LINKS = {
+		HOME: 'https://grove.place',
+		PRICING: 'https://grove.place/pricing',
+		TERMS: 'https://grove.place/legal/terms',
+		PRIVACY: 'https://grove.place/legal/privacy'
+	} as const;
+
 	// Determine current step based on route
 	let currentStep = $derived((() => {
 		const path = page.url.pathname;
@@ -37,23 +45,24 @@
 	}
 
 	// Plant-specific navigation (minimal for onboarding focus)
-	// Cast Lucide icons to Component type for compatibility
+	// Cast Lucide icons to Component type for cross-package compatibility
 	const navItems: NavItem[] = [
-		{ href: 'https://grove.place', label: 'Back to Grove', icon: ArrowLeft as unknown as Component },
-		{ href: 'https://grove.place/pricing', label: 'Pricing', icon: HandCoins as unknown as Component }
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: ArrowLeft as unknown as Component, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins as unknown as Component, external: true }
 	];
 
 	// Mobile menu items (more comprehensive)
 	const mobileNavItems: NavItem[] = [
 		{ href: '/', label: 'Start', icon: Home as unknown as Component },
-		{ href: 'https://grove.place', label: 'Back to Grove', icon: Trees as unknown as Component, external: true },
-		{ href: 'https://grove.place/pricing', label: 'Pricing', icon: HandCoins as unknown as Component, external: true },
-		{ href: 'https://grove.place/legal/terms', label: 'Terms', icon: FileText as unknown as Component, external: true },
-		{ href: 'https://grove.place/legal/privacy', label: 'Privacy', icon: FileText as unknown as Component, external: true }
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: Trees as unknown as Component, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins as unknown as Component, external: true },
+		{ href: GROVE_LINKS.TERMS, label: 'Terms', icon: FileText as unknown as Component, external: true },
+		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: FileText as unknown as Component, external: true }
 	];
 
-	// No additional resource/connect links for plant (keep it focused)
-	const emptyLinks: FooterLink[] = [];
+	// Plant onboarding doesn't need additional menu sections
+	const noResourceLinks: FooterLink[] = [];
+	const noConnectLinks: FooterLink[] = [];
 </script>
 
 <svelte:head>
@@ -78,7 +87,7 @@
 
 				<!-- Brand title - hidden on mobile -->
 				<a
-					href="https://grove.place"
+					href={GROVE_LINKS.HOME}
 					class="hidden sm:block text-lg font-serif text-foreground hover:text-accent-muted transition-colors"
 				>
 					Grove
@@ -156,8 +165,8 @@
 		bind:open={mobileMenuOpen}
 		onClose={() => (mobileMenuOpen = false)}
 		navItems={mobileNavItems}
-		resourceLinks={emptyLinks}
-		connectLinks={emptyLinks}
+		resourceLinks={noResourceLinks}
+		connectLinks={noConnectLinks}
 	/>
 
 	<!-- Main content -->
@@ -171,14 +180,14 @@
 			<div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-foreground-subtle">
 				<p>
 					Already have a blog?
-					<a href="https://grove.place" class="text-accent-muted hover:text-accent transition-colors">
+					<a href={GROVE_LINKS.HOME} class="text-accent-muted hover:text-accent transition-colors">
 						Sign in at Grove
 					</a>
 				</p>
 				<div class="flex items-center gap-4">
-					<a href="https://grove.place/legal/terms" class="hover:text-foreground transition-colors">Terms</a>
-					<a href="https://grove.place/legal/privacy" class="hover:text-foreground transition-colors">Privacy</a>
-					<a href="https://grove.place/pricing" class="hover:text-foreground transition-colors">Pricing</a>
+					<a href={GROVE_LINKS.TERMS} class="hover:text-foreground transition-colors">Terms</a>
+					<a href={GROVE_LINKS.PRIVACY} class="hover:text-foreground transition-colors">Privacy</a>
+					<a href={GROVE_LINKS.PRICING} class="hover:text-foreground transition-colors">Pricing</a>
 				</div>
 			</div>
 		</div>
