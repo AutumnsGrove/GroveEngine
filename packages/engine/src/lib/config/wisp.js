@@ -168,7 +168,7 @@ export function getModelId(provider, model) {
 /**
  * Get provider configuration
  * @param {string} provider - Provider key
- * @returns {object|null} Provider config or null
+ * @returns {ProviderConfig|null} Provider config or null
  */
 export function getProvider(provider) {
   return PROVIDERS[provider] || null;

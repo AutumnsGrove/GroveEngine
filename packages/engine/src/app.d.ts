@@ -67,6 +67,9 @@ declare global {
         STRIPE_SECRET_KEY?: string;
         STRIPE_PUBLISHABLE_KEY?: string;
         STRIPE_WEBHOOK_SECRET?: string;
+
+        // Cloudflare Turnstile (bot protection)
+        TURNSTILE_SECRET_KEY?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

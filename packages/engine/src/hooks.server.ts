@@ -112,11 +112,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     // Only enforce if Turnstile is configured (has secret key)
     if (secretKey) {
-      const isVerified = await validateVerificationCookie(verificationCookie ?? undefined, secretKey);
+      const isVerified = await validateVerificationCookie(
+        verificationCookie ?? undefined,
+        secretKey,
+      );
 
       if (!isVerified) {
         // Redirect to verification page with return URL
-        const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
+        const returnUrl = encodeURIComponent(
+          event.url.pathname + event.url.search,
+        );
         throw redirect(302, `/verify?return=${returnUrl}`);
       }
     }
@@ -224,45 +229,44 @@ export const handle: Handle = async ({ event, resolve }) => {
         {
           method: "POST",
           headers: { Cookie: `grove_session=${groveSession}` },
-        }
+        },
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as Record<string, unknown>;
 
-        // Validate response shape
-        if (!data || typeof data !== 'object') {
-          console.error('[Auth] Invalid SessionDO response: expected object');
-          return;
-        }
-
-        if (typeof data.valid !== 'boolean') {
-          console.error('[Auth] Invalid SessionDO response: valid must be boolean');
-          return;
-        }
-
-        // Validate user object if present
-        if (data.valid && data.user) {
-          const user = data.user;
-          if (
-            typeof user !== 'object' ||
-            typeof user.id !== 'string' ||
-            typeof user.email !== 'string' ||
-            typeof user.name !== 'string' ||
-            typeof user.avatarUrl !== 'string' ||
-            typeof user.isAdmin !== 'boolean'
-          ) {
-            console.error('[Auth] Invalid SessionDO response: user object has invalid fields');
-            return;
+        // Validate response shape and extract user if valid
+        if (
+          data &&
+          typeof data === "object" &&
+          typeof data.valid === "boolean"
+        ) {
+          if (data.valid && data.user) {
+            const user = data.user as Record<string, unknown>;
+            // Only set user if all required fields are valid
+            if (
+              typeof user === "object" &&
+              typeof user.id === "string" &&
+              typeof user.email === "string" &&
+              typeof user.name === "string" &&
+              typeof user.avatarUrl === "string" &&
+              typeof user.isAdmin === "boolean"
+            ) {
+              event.locals.user = {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                picture: user.avatarUrl,
+                isAdmin: user.isAdmin,
+              };
+            } else {
+              console.error(
+                "[Auth] Invalid SessionDO response: user object has invalid fields",
+              );
+            }
           }
-
-          event.locals.user = {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            picture: user.avatarUrl,
-            isAdmin: user.isAdmin,
-          };
+        } else {
+          console.error("[Auth] Invalid SessionDO response: unexpected shape");
         }
       }
     } catch (err) {
@@ -283,33 +287,33 @@ export const handle: Handle = async ({ event, resolve }) => {
         });
 
         if (userInfoResponse.ok) {
-          const userInfo = await userInfoResponse.json();
+          const userInfo = (await userInfoResponse.json()) as Record<
+            string,
+            unknown
+          >;
 
-          // Validate response shape
-          if (!userInfo || typeof userInfo !== 'object') {
-            console.error('[Auth] Invalid userinfo response: expected object');
-            return;
-          }
-
-          // Validate required fields
+          // Validate response shape and set user if valid
           if (
-            typeof userInfo.sub !== 'string' ||
-            typeof userInfo.email !== 'string' ||
-            typeof userInfo.name !== 'string' ||
-            typeof userInfo.picture !== 'string' ||
-            typeof userInfo.provider !== 'string'
+            userInfo &&
+            typeof userInfo === "object" &&
+            typeof userInfo.sub === "string" &&
+            typeof userInfo.email === "string" &&
+            typeof userInfo.name === "string" &&
+            typeof userInfo.picture === "string" &&
+            typeof userInfo.provider === "string"
           ) {
-            console.error('[Auth] Invalid userinfo response: missing or invalid required fields');
-            return;
+            event.locals.user = {
+              id: userInfo.sub,
+              email: userInfo.email,
+              name: userInfo.name,
+              picture: userInfo.picture,
+              provider: userInfo.provider,
+            };
+          } else {
+            console.error(
+              "[Auth] Invalid userinfo response: unexpected shape or missing fields",
+            );
           }
-
-          event.locals.user = {
-            id: userInfo.sub,
-            email: userInfo.email,
-            name: userInfo.name,
-            picture: userInfo.picture,
-            provider: userInfo.provider,
-          };
         }
       } catch (err) {
         console.error("[Auth] JWT fallback error:", err);
