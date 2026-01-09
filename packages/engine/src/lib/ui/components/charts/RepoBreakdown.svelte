@@ -33,9 +33,9 @@
 
   function getTotal() {
     if (mode === 'commits') {
-      return repos.reduce((sum, r) => sum + (r.commits || 1), 0) || 1;
+      return repos.reduce((/** @type {number} */ sum, /** @type {RepoData} */ r) => sum + (r.commits || 1), 0) || 1;
     }
-    return repos.reduce((sum, r) => sum + (r.additions || 0) + (r.deletions || 0), 0) || 1;
+    return repos.reduce((/** @type {number} */ sum, /** @type {RepoData} */ r) => sum + (r.additions || 0) + (r.deletions || 0), 0) || 1;
   }
 
   /** @param {RepoData} repo */
@@ -48,7 +48,7 @@
 
   const total = $derived(getTotal());
   const segments = $derived(
-    repos.map((repo, i) => ({
+    repos.map((/** @type {RepoData} */ repo, /** @type {number} */ i) => ({
       name: repo.name,
       value: getValue(repo),
       percent: (getValue(repo) / total) * 100,

@@ -170,8 +170,9 @@
     insertLinePrefix("### ");
   }
 
+  /** @param {MouseEvent} e */
   function handleClickOutside(e) {
-    if (toolbarRef && !toolbarRef.contains(e.target) && e.target !== textareaRef) {
+    if (toolbarRef && !toolbarRef.contains(/** @type {Node} */ (e.target)) && e.target !== textareaRef) {
       isVisible = false;
     }
   }

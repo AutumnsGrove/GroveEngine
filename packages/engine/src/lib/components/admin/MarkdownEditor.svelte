@@ -369,7 +369,8 @@
   // Scroll sync
   function handleScroll() {
     syncLineNumbersScroll();
-    if (textareaRef && previewRef && showPreview) {
+    // Sync scroll with preview when in split or preview mode
+    if (textareaRef && previewRef && editorMode !== "write") {
       const scrollRatio = textareaRef.scrollTop / (textareaRef.scrollHeight - textareaRef.clientHeight);
       previewRef.scrollTop = scrollRatio * (previewRef.scrollHeight - previewRef.clientHeight);
     }

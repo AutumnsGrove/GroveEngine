@@ -10,6 +10,11 @@
 	let lightboxAlt = $state('');
 	let lightboxCaption = $state('');
 
+	/**
+	 * @param {string} src
+	 * @param {string} alt
+	 * @param {string} [caption]
+	 */
 	function openLightbox(src, alt, caption = '') {
 		lightboxSrc = src;
 		lightboxAlt = alt;
@@ -21,10 +26,13 @@
 		lightboxOpen = false;
 	}
 
-	// Handle clicks on images within markdown content
+	// Handle clicks or keyboard activation on images within markdown content
+	/** @param {Event} event */
 	function handleContentClick(event) {
-		if (event.target.tagName === 'IMG') {
-			openLightbox(event.target.src, event.target.alt);
+		const target = /** @type {HTMLElement} */ (event.target);
+		if (target.tagName === 'IMG') {
+			const img = /** @type {HTMLImageElement} */ (target);
+			openLightbox(img.src, img.alt);
 		}
 	}
 </script>

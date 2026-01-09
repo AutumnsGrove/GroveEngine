@@ -14,6 +14,7 @@
 		isOpen = false;
 	}
 
+	/** @param {string} id */
 	function scrollToHeader(id) {
 		const element = document.getElementById(id);
 		if (element) {
@@ -25,15 +26,17 @@
 	}
 
 	// Handle click outside
+	/** @param {MouseEvent} event */
 	function handleClickOutside(event) {
 		if (isOpen && menuRef && buttonRef) {
-			if (!menuRef.contains(event.target) && !buttonRef.contains(event.target)) {
+			if (!menuRef.contains(/** @type {Node} */ (event.target)) && !buttonRef.contains(/** @type {Node} */ (event.target))) {
 				closeMenu();
 			}
 		}
 	}
 
 	// Handle escape key
+	/** @param {KeyboardEvent} event */
 	function handleKeydown(event) {
 		if (event.key === 'Escape' && isOpen) {
 			closeMenu();

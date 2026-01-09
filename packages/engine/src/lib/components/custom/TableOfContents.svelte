@@ -38,6 +38,7 @@
 		return cleanup;
 	});
 
+	/** @param {string} id */
 	function scrollToHeader(id) {
 		const element = document.getElementById(id);
 		if (element) {

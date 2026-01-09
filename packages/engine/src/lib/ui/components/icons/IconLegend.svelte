@@ -1,9 +1,11 @@
 <script>
 	import CollapsibleSection from '$lib/components/custom/CollapsibleSection.svelte';
 
+	/** @type {{ iconsUsed?: string[] }} */
 	let { iconsUsed = [] } = $props();
 
 	// Map icon keys to their semantic meanings and display names
+	/** @type {Record<string, { name: string, meaning: string }>} */
 	const iconMeanings = {
 		stovetop: { name: 'Stovetop', meaning: 'Cook on stove/pan' },
 		mix: { name: 'Mix', meaning: 'Mix/stir in bowl' },

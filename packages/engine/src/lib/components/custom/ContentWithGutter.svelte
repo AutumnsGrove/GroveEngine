@@ -32,23 +32,17 @@
 	} = $props();
 
 	// References to mobile gutter containers for each anchor
-	/** @type {Record<string, HTMLElement>} */
-	let mobileGutterRefs = $state({});
+	let mobileGutterRefs = $state<Record<string, HTMLElement>>({});
 
 	// Track content height for overflow detection
-	/** @type {HTMLElement | undefined} */
-	let contentBodyElement = $state();
+	let contentBodyElement = $state<HTMLElement | undefined>();
 	let contentHeight = $state(0);
-	/** @type {string[]} */
-	let overflowingAnchorKeys = $state([]);
+	let overflowingAnchorKeys = $state<string[]>([]);
 
 	// Gutter positioning state
-	/** @type {HTMLElement | undefined} */
-	let gutterElement = $state();
-	/** @type {Record<string, number>} */
-	let itemPositions = $state({});
-	/** @type {Record<string, HTMLElement>} */
-	let anchorGroupElements = $state({});
+	let gutterElement = $state<HTMLElement | undefined>();
+	let itemPositions = $state<Record<string, number>>({});
+	let anchorGroupElements = $state<Record<string, HTMLElement>>({});
 
 	// Compute unique anchors once as a derived value (performance optimization)
 	let uniqueAnchors = $derived(getUniqueAnchors(gutterContent));
@@ -427,8 +421,8 @@
 	let processedContent = $derived(injectReferenceMarkers(content, overflowingAnchorKeys));
 
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
-	/** @type {any} */
-	let DOMPurify = $state(null);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let DOMPurify = $state<any>(null);
 	let isPurifyReady = $state(false);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)

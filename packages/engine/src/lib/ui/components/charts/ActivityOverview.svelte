@@ -42,6 +42,7 @@
     const today = new Date();
 
     // Build activity map for quick lookup
+    /** @type {Record<string, number>} */
     const activityMap = {};
     for (const item of data) {
       activityMap[item.activity_date] = item.commit_count;

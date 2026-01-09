@@ -53,17 +53,12 @@ export const themes = {
  * @property {string} currentTheme
  * @property {Record<string, Theme>} themes
  * @property {() => void} loadTheme
- * @property {(themeName: string) => void} setTheme
  */
 
 /**
- * Creates an editor theme manager with Svelte 5 runes
- * @returns {EditorThemeManager} Theme state and controls
- */
-/**
  * Creates an editor theme manager
  * Simplified to always use the Grove theme
- * @returns {Object} Theme state and controls
+ * @returns {EditorThemeManager} Theme state and controls
  */
 export function useEditorTheme() {
   const theme = themes.grove;

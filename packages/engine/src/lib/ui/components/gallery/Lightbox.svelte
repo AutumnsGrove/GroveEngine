@@ -6,6 +6,7 @@
 	 * Lightbox - Full-screen image viewer
 	 * Click to expand images to full size with zoom and pan support
 	 */
+	/** @type {{ src?: string, alt?: string, caption?: string, isOpen?: boolean, onClose?: () => void }} */
 	let { src = '', alt = '', caption = '', isOpen = false, onClose = () => {} } = $props();
 
 	function handleKeydown(/** @type {KeyboardEvent} */ event) {

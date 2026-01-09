@@ -12,6 +12,51 @@
    * @property {(original: string, suggestion: string) => void} onApplyFix - Callback when user applies a fix
    */
 
+  /**
+   * @typedef {Object} GrammarSuggestion
+   * @property {string} original
+   * @property {string} suggestion
+   * @property {string} [reason]
+   * @property {string} [severity]
+   */
+
+  /**
+   * @typedef {Object} ToneTrait
+   * @property {string} trait
+   * @property {number} score
+   */
+
+  /**
+   * @typedef {Object} WispTone
+   * @property {string} [analysis]
+   * @property {ToneTrait[]} [traits]
+   * @property {string[]} [suggestions]
+   */
+
+  /**
+   * @typedef {Object} WispReadability
+   * @property {number} [fleschKincaid]
+   * @property {string} [readingTime]
+   * @property {number} [wordCount]
+   * @property {number} [sentenceCount]
+   * @property {{ average: number, longest: number }} [sentenceStats]
+   * @property {string[]} [suggestions]
+   */
+
+  /**
+   * @typedef {Object} WispMeta
+   * @property {number} [tokensUsed]
+   * @property {number} [cost]
+   */
+
+  /**
+   * @typedef {Object} WispResults
+   * @property {{ overallScore?: number, suggestions?: GrammarSuggestion[] }} [grammar]
+   * @property {WispTone} [tone]
+   * @property {WispReadability} [readability]
+   * @property {WispMeta} [meta]
+   */
+
   /** @type {Props} */
   let {
     content = "",
@@ -27,7 +72,9 @@
 
   // Analysis state
   let isAnalyzing = $state(false);
+  /** @type {string | null} */
   let analysisError = $state(null);
+  /** @type {WispResults | null} */
   let results = $state(null);
   let activeTab = $state("grammar");
   let selectedMode = $state("quick"); // quick or thorough
@@ -87,7 +134,7 @@
   let currentVibe = $derived(() => {
     if (isAnalyzing) return vibes.analyzing;
     if (analysisError) return vibes.error;
-    if (results?.grammar?.overallScore >= 90) return vibes.grammarGood;
+    if ((results?.grammar?.overallScore ?? 0) >= 90) return vibes.grammarGood;
     if (results?.tone) return vibes.toneWarm;
     if (results) return vibes.success;
     return vibes.idle;
@@ -138,6 +185,7 @@
   ];
 
   let vibeIndex = $state(0);
+  /** @type {HTMLElement | null} */
   let panelRef = $state(null);
 
   // Content length status
@@ -161,6 +209,7 @@
   });
 
   // Handle keyboard navigation
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     if (e.key === "Escape" && isOpen) {
       e.preventDefault();
@@ -220,6 +269,7 @@
   }
 
   // Apply a grammar fix
+  /** @param {GrammarSuggestion} suggestion */
   function applyFix(suggestion) {
     onApplyFix(suggestion.original, suggestion.suggestion);
     // Remove from list
@@ -253,6 +303,7 @@
   }
 
   // Severity colors
+  /** @param {string} [severity] */
   function getSeverityClass(severity) {
     switch (severity) {
       case "error": return "severity-error";
@@ -262,6 +313,7 @@
   }
 
   // Format score as visual bar
+  /** @param {number | null | undefined} score */
   function formatScore(score) {
     if (score === null || score === undefined) return "░░░░░░░░░░";
     const filled = Math.round(score / 10);
@@ -427,7 +479,7 @@
                 <span class="score-num">{results.grammar.overallScore ?? "—"}</span>
               </div>
 
-              {#if results.grammar.suggestions?.length > 0}
+              {#if (results.grammar.suggestions?.length ?? 0) > 0}
                 <div class="suggestions">
                   {#each results.grammar.suggestions as suggestion}
                     <div class="suggestion {getSeverityClass(suggestion.severity)}">
@@ -456,7 +508,7 @@
             <div class="tab-content">
               <p class="tone-analysis">{results.tone.analysis}</p>
 
-              {#if results.tone.traits?.length > 0}
+              {#if (results.tone.traits?.length ?? 0) > 0}
                 <div class="traits">
                   {#each results.tone.traits as trait}
                     <div class="trait">
@@ -470,7 +522,7 @@
                 </div>
               {/if}
 
-              {#if results.tone.suggestions?.length > 0}
+              {#if (results.tone.suggestions?.length ?? 0) > 0}
                 <div class="tone-suggestions">
                   {#each results.tone.suggestions as sug}
                     <p class="tone-sug">• {sug}</p>
@@ -500,17 +552,19 @@
                   <span class="stat-label">sentences</span>
                   <span class="stat-value">{results.readability.sentenceCount}</span>
                 </div>
-                <div class="stat">
-                  <span class="stat-label">avg sentence</span>
-                  <span class="stat-value">{results.readability.sentenceStats.average} words</span>
-                </div>
-                <div class="stat">
-                  <span class="stat-label">longest</span>
-                  <span class="stat-value">{results.readability.sentenceStats.longest} words</span>
-                </div>
+                {#if results.readability.sentenceStats}
+                  <div class="stat">
+                    <span class="stat-label">avg sentence</span>
+                    <span class="stat-value">{results.readability.sentenceStats.average} words</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">longest</span>
+                    <span class="stat-value">{results.readability.sentenceStats.longest} words</span>
+                  </div>
+                {/if}
               </div>
 
-              {#if results.readability.suggestions?.length > 0}
+              {#if (results.readability.suggestions?.length ?? 0) > 0}
                 <div class="readability-suggestions">
                   {#each results.readability.suggestions as sug}
                     <p class="read-sug">• {sug}</p>

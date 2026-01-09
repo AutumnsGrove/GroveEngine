@@ -12,10 +12,27 @@
  */
 
 // Rate limiting (Threshold pattern)
-export * from './rate-limits';
+export * from "./rate-limits";
 
 // Logging
-export { createLogger, type LogLevel, type Logger } from './logger';
+export {
+  logAPI,
+  logGitHub,
+  logError,
+  logCache,
+  getLogs,
+  getAllLogs,
+  getLogStats,
+  subscribe,
+  clearLogs,
+} from "./logger";
+export type {
+  LogLevel,
+  LogCategory,
+  LogEntry,
+  LogStats,
+  LogSubscriber,
+} from "./logger";
 
 // Cache utilities (re-export commonly used functions)
-export { rateLimit } from './services/cache';
+export { rateLimit } from "./services/cache";
