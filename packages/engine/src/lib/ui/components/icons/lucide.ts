@@ -90,7 +90,7 @@ import {
   Globe,
   CalendarDays,
   LifeBuoy,
-} from 'lucide-svelte';
+} from "lucide-svelte";
 
 // ============================================================================
 // NAVIGATION ICONS
@@ -268,7 +268,7 @@ export type IconKey = keyof typeof allIcons;
  */
 export function getIcon<T extends Record<string, any>>(
   map: T,
-  key: keyof T | string
+  key: keyof T | string,
 ) {
   return (map as Record<string, any>)[key as string];
 }

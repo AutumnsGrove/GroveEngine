@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
+	import { LogoGroveMark } from '$lib/components/logo-concepts';
 
 	// Lucide Icons
 	import {
@@ -282,6 +283,49 @@
 
 <main class="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50 via-green-50 to-lime-50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950">
 	<Header />
+
+	<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+	<!-- THE GROVE MARK — Official Logo Showcase -->
+	<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+	<section class="relative py-16 px-6 bg-gradient-to-b from-violet-950 via-purple-950 to-indigo-950">
+		<div class="max-w-4xl mx-auto text-center">
+			<h2 class="text-3xl md:text-4xl font-serif text-white mb-3">
+				The Grove Mark
+			</h2>
+			<p class="text-purple-200/80 max-w-lg mx-auto mb-8">
+				"There's a light on. Come home."
+			</p>
+
+			<!-- Large Logo Preview -->
+			<div class="flex justify-center mb-10">
+				<div class="p-6 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+					<LogoGroveMark class="w-64 h-64" title="The Grove Mark" />
+				</div>
+			</div>
+
+			<!-- Size Variants -->
+			<div class="flex flex-wrap justify-center items-end gap-6 mb-8">
+				<div class="flex flex-col items-center gap-1">
+					<LogoGroveMark class="w-16 h-16" />
+					<span class="text-purple-300/50 text-xs">64px</span>
+				</div>
+				<div class="flex flex-col items-center gap-1">
+					<LogoGroveMark class="w-12 h-12" />
+					<span class="text-purple-300/50 text-xs">48px</span>
+				</div>
+				<div class="flex flex-col items-center gap-1">
+					<LogoGroveMark class="w-8 h-8" />
+					<span class="text-purple-300/50 text-xs">32px</span>
+				</div>
+			</div>
+
+			<!-- Description -->
+			<p class="text-purple-200/60 text-sm italic max-w-md mx-auto">
+				A circular window into the grove — seasonal trees, a hanging lantern,
+				stars in the sky, and a campsite scene saying "there's room for you here."
+			</p>
+		</div>
+	</section>
 
 	<!-- Hero Section -->
 	<section class="relative py-16 px-6 overflow-hidden">

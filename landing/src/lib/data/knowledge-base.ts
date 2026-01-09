@@ -284,7 +284,8 @@ export const specs: Doc[] = [
   {
     slug: "loam-spec",
     title: "Loam — Name Protection",
-    description: "Username and domain validation system protecting the grove from harm",
+    description:
+      "Username and domain validation system protecting the grove from harm",
     excerpt:
       "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.",
     category: "specs",
@@ -294,7 +295,8 @@ export const specs: Doc[] = [
   {
     slug: "press-spec",
     title: "Press — Image Processing CLI",
-    description: "CLI tool for WebP conversion, AI descriptions, and CDN upload",
+    description:
+      "CLI tool for WebP conversion, AI descriptions, and CDN upload",
     excerpt:
       "A press takes something raw and makes it ready. Press is Grove's image processing CLI: convert to WebP, generate AI descriptions for accessibility, deduplicate by content hash, and upload to R2. One command, and your images are ready to publish.",
     category: "specs",
@@ -665,8 +667,7 @@ export const helpArticles: Doc[] = [
   {
     slug: "why-some-usernames-arent-available",
     title: "Why Some Usernames Aren't Available",
-    description:
-      "How Grove protects the community through username validation",
+    description: "How Grove protects the community through username validation",
     excerpt:
       "Every name passes through the same earth before taking root. Grove's username system quietly filters reserved terms, impersonation attempts, and harmful content. If your preferred username isn't available, here's why.",
     category: "help",
