@@ -1,4 +1,17 @@
+import type { PageServerLoad } from "./$types";
 import historyData from "../../../static/data/history.csv?raw";
+import {
+  ECOSYSTEM_REPOS,
+  type EcosystemRepo,
+} from "$lib/ecosystem/config";
+import type {
+  EcosystemSummary,
+  EcosystemRepoStats,
+  EcosystemProgressEvent,
+  FormattedRepoStats,
+  FormattedActivityEvent,
+  EcosystemPageData,
+} from "$lib/ecosystem/types";
 
 /**
  * CSV Schema (17 columns):
@@ -157,9 +170,126 @@ function loadSummaries(): Map<string, VersionSummary> {
   return summaries;
 }
 
-export function load() {
+// =============================================================================
+// ECOSYSTEM DATA LOADING
+// =============================================================================
+
+function getRepoConfig(repoName: string): EcosystemRepo | undefined {
+  return ECOSYSTEM_REPOS.find((r) => r.name === repoName);
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "Unknown";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatRepoStats(stats: EcosystemRepoStats): FormattedRepoStats {
+  const config = getRepoConfig(stats.repo_name);
+  return {
+    name: stats.repo_name,
+    path: stats.repo_path,
+    color: config?.color || "bg-gray-500",
+    icon: config?.icon || "Box",
+    category: config?.category || "tools",
+    description: config?.description || "",
+    totalCommits: stats.total_commits,
+    totalReleases: stats.total_releases,
+    commitsLast30Days: stats.commits_last_30_days,
+    commitsLast7Days: stats.commits_last_7_days,
+    featuresCount: stats.features_count,
+    fixesCount: stats.fixes_count,
+    lastCommitDate: stats.last_commit_date,
+    lastReleaseDate: stats.last_release_date,
+    lastReleaseVersion: stats.last_release_version,
+    isActive: stats.is_active === 1,
+    healthScore: stats.health_score,
+  };
+}
+
+function formatActivityEvent(event: EcosystemProgressEvent): FormattedActivityEvent {
+  const config = getRepoConfig(event.repo_name);
+  return {
+    id: event.id,
+    repoName: event.repo_name,
+    repoPath: event.repo_path,
+    eventType: event.event_type,
+    eventId: event.event_id,
+    eventDate: event.event_date,
+    formattedDate: formatDate(event.event_date),
+    title: event.title,
+    description: event.description,
+    url: event.url,
+    commitType: event.commit_type,
+    authorLogin: event.author_login,
+    authorAvatar: event.author_avatar,
+    color: config?.color || "bg-gray-500",
+  };
+}
+
+async function loadEcosystemData(
+  db: D1Database | undefined
+): Promise<EcosystemPageData> {
+  // Return empty data if no database available (local dev without D1)
+  if (!db) {
+    return {
+      summary: null,
+      repos: [],
+      recentActivity: [],
+      lastSyncAt: null,
+    };
+  }
+
+  try {
+    // Load ecosystem summary
+    const summaryResult = await db
+      .prepare("SELECT * FROM ecosystem_summary WHERE id = 1")
+      .first<EcosystemSummary>();
+
+    // Load repo stats
+    const repoStatsResult = await db
+      .prepare("SELECT * FROM ecosystem_repo_stats ORDER BY health_score DESC")
+      .all<EcosystemRepoStats>();
+
+    // Load recent activity (last 50 events)
+    const activityResult = await db
+      .prepare(
+        "SELECT * FROM ecosystem_progress ORDER BY event_date DESC LIMIT 50"
+      )
+      .all<EcosystemProgressEvent>();
+
+    return {
+      summary: summaryResult || null,
+      repos: (repoStatsResult.results || []).map(formatRepoStats),
+      recentActivity: (activityResult.results || []).map(formatActivityEvent),
+      lastSyncAt: summaryResult?.last_sync_at || null,
+    };
+  } catch (err) {
+    // Tables might not exist yet - return empty data
+    console.warn("Failed to load ecosystem data:", err);
+    return {
+      summary: null,
+      repos: [],
+      recentActivity: [],
+      lastSyncAt: null,
+    };
+  }
+}
+
+// =============================================================================
+// MAIN LOAD FUNCTION
+// =============================================================================
+
+export const load: PageServerLoad = async ({ platform }) => {
   const snapshots = parseCSV(historyData);
   const summaries = loadSummaries();
+
+  // Load ecosystem data from D1 (if available)
+  const ecosystem = await loadEcosystemData(platform?.env?.DB);
 
   // Handle empty data gracefully
   if (snapshots.length === 0) {
@@ -169,6 +299,7 @@ export function load() {
       growth: null,
       totalSnapshots: 0,
       summaries: Object.fromEntries(summaries),
+      ecosystem,
     };
   }
 
@@ -192,5 +323,6 @@ export function load() {
     growth,
     totalSnapshots: snapshots.length,
     summaries: Object.fromEntries(summaries),
+    ecosystem,
   };
-}
+};

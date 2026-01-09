@@ -1,0 +1,30 @@
+# Grove Ecosystem Sync Worker
+# Polls GitHub API for activity across all Grove ecosystem repos
+# Stores progress events in D1 for the journey page
+
+name = "grove-ecosystem-sync"
+main = "worker.ts"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+
+# Cron trigger - runs every 6 hours
+# More frequent than needed for UI, but ensures freshness
+[triggers]
+crons = ["0 */6 * * *"]
+
+# D1 Database binding (same as landing page)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# KV for caching GitHub API responses
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "xxx"  # Set after creating the namespace
+
+# Secrets (configured in Cloudflare Dashboard):
+# - GITHUB_TOKEN = ghp_xxx (personal access token with repo read access)
+#
+# To set secrets:
+#   wrangler secret put GITHUB_TOKEN --name grove-ecosystem-sync
