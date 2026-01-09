@@ -41,9 +41,9 @@
 			background: '#4a1942' // deep magenta night
 		},
 		summer: {
-			line: '#d4a574',      // warm gold (default)
-			flame: '#f59e0b',     // amber flame
-			background: '#2e1065' // deep purple night
+			line: '#c9874d',      // warm copper-orange
+			flame: '#f5a623',     // amber-gold flame
+			background: '#3d1952' // deep purple/violet night
 		},
 		autumn: {
 			line: '#d97706',      // burnt copper
@@ -111,10 +111,11 @@
 	}: Props = $props();
 
 	// Compute actual colors - custom colors override seasonal palette
+	// Background uses seasonal palette by default for the full sanctuary effect
 	const palette = $derived(seasonalPalettes[season]);
 	const actualLineColor = $derived(lineColor ?? palette.line);
 	const actualFlameColor = $derived(flameColor ?? palette.flame);
-	const actualBackgroundColor = $derived(backgroundColor ?? 'transparent');
+	const actualBackgroundColor = $derived(backgroundColor ?? palette.background);
 
 	// Compute CSS class - custom class overrides size preset
 	const computedClass = $derived(className ?? sizeClasses[size]);
@@ -195,13 +196,13 @@
 		<circle cx="50" cy="50" r="46" fill={actualBackgroundColor} />
 	{/if}
 
-	<!-- Outer ring -->
+	<!-- Outer ring - bold frame -->
 	<circle
 		cx="50"
 		cy="50"
 		r="46"
 		stroke={actualLineColor}
-		stroke-width="2"
+		stroke-width="2.5"
 		fill="none"
 	/>
 
@@ -222,52 +223,66 @@
 	{/if}
 
 	{#if showStars}
-		<!-- Four-pointed stars scattered in the sky -->
-		<!-- Star 1 (upper left) -->
-		<path d="M22 18 l0 -3 l0 6 m-3 -3 l6 0" stroke={actualLineColor} stroke-width="1" stroke-linecap="round" />
-		<!-- Star 2 (small, left of moon) -->
-		<path d="M62 15 l0 -2 l0 4 m-2 -2 l4 0" stroke={actualLineColor} stroke-width="0.8" stroke-linecap="round" />
-		<!-- Star 3 (right side) -->
-		<path d="M82 35 l0 -2.5 l0 5 m-2.5 -2.5 l5 0" stroke={actualLineColor} stroke-width="0.8" stroke-linecap="round" />
-		<!-- Star 4 (lower left, smaller) -->
-		<path d="M15 32 l0 -2 l0 4 m-2 -2 l4 0" stroke={actualLineColor} stroke-width="0.7" stroke-linecap="round" />
+		<!-- Four-pointed stars scattered in the sky - bolder, more pronounced -->
+		<!-- Star 1 (upper left area) -->
+		<path d="M28 20 l0 -4 l0 8 m-4 -4 l8 0" stroke={actualLineColor} stroke-width="1.5" stroke-linecap="round" />
+		<!-- Star 2 (small, between left star and center) -->
+		<path d="M38 28 l0 -2.5 l0 5 m-2.5 -2.5 l5 0" stroke={actualLineColor} stroke-width="1.2" stroke-linecap="round" />
+		<!-- Star 3 (upper center, near moon) -->
+		<path d="M58 18 l0 -3 l0 6 m-3 -3 l6 0" stroke={actualLineColor} stroke-width="1.2" stroke-linecap="round" />
+		<!-- Star 4 (right side) -->
+		<path d="M80 30 l0 -3.5 l0 7 m-3.5 -3.5 l7 0" stroke={actualLineColor} stroke-width="1.3" stroke-linecap="round" />
+		<!-- Star 5 (small accent, far left) -->
+		<path d="M14 38 l0 -2 l0 4 m-2 -2 l4 0" stroke={actualLineColor} stroke-width="1" stroke-linecap="round" />
 	{/if}
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
-	<!-- TREES (left to right) -->
+	<!-- TREES (left to right) - organic, rounded shapes with overlapping depth -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
-	<!-- Tree 1: Round deciduous (far left) -->
-	<g stroke={actualLineColor} stroke-width="1.5" stroke-linecap="round" fill="none">
-		<!-- Round canopy outline -->
-		<ellipse cx="20" cy="52" rx="9" ry="12" />
+	<!-- Tree 1: Large rounded deciduous (far left, background layer) -->
+	<g stroke={actualLineColor} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		<!-- Cloud-like organic canopy with multiple lobes -->
+		<path d="M8 58
+			Q6 52, 10 48
+			Q8 42, 14 38
+			Q12 32, 20 30
+			Q26 28, 30 34
+			Q34 30, 36 36
+			Q40 38, 38 44
+			Q42 48, 38 54
+			Q40 60, 34 64
+			Q30 68, 22 68
+			Q14 68, 10 64
+			Q6 62, 8 58
+			Z" />
 		<!-- Trunk -->
-		<path d="M20 64 L20 75" />
+		<path d="M22 68 L22 80" stroke-width="2.2" />
 		<!-- Internal branch structure -->
-		<path d="M20 64 L20 48" />
-		<path d="M20 55 L15 48" />
-		<path d="M20 55 L25 48" />
-		<path d="M20 50 L17 44" />
-		<path d="M20 50 L23 44" />
+		<path d="M22 68 L22 50" stroke-width="1.5" />
+		<path d="M22 60 L14 50" stroke-width="1.5" />
+		<path d="M22 60 L30 50" stroke-width="1.5" />
+		<path d="M22 52 L16 42" stroke-width="1.3" />
+		<path d="M22 52 L28 42" stroke-width="1.3" />
 	</g>
 
-	<!-- Tree 2: Tall thin cypress (left-center) -->
-	<g stroke={actualLineColor} stroke-width="1.5" stroke-linecap="round" fill="none">
-		<!-- Narrow pointed canopy -->
-		<path d="M32 75 L32 38 Q32 32, 34 28 Q35 36, 35 42 L35 75" />
-		<!-- Internal veins -->
-		<path d="M33.5 45 L33.5 35" />
-		<path d="M33 50 L31 42" />
-		<path d="M34 50 L36 42" />
-	</g>
-
-	<!-- Tree 3: Small bush/young tree (front left) -->
-	<g stroke={actualLineColor} stroke-width="1.3" stroke-linecap="round" fill="none">
-		<ellipse cx="40" cy="68" rx="5" ry="7" />
-		<path d="M40 75 L40 79" stroke-width="1.5" />
-		<path d="M40 75 L40 65" />
-		<path d="M40 70 L37 65" />
-		<path d="M40 70 L43 65" />
+	<!-- Tree 2: Tall cypress/poplar (left-center, middle layer) -->
+	<g stroke={actualLineColor} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		<!-- Elongated pointed canopy -->
+		<path d="M34 78
+			Q30 72, 32 62
+			Q30 52, 34 42
+			Q32 32, 38 24
+			Q42 32, 40 42
+			Q44 52, 42 62
+			Q44 72, 40 78
+			Z" />
+		<!-- Internal veining -->
+		<path d="M37 70 L37 32" stroke-width="1.5" />
+		<path d="M37 55 L33 48" stroke-width="1.3" />
+		<path d="M37 55 L41 48" stroke-width="1.3" />
+		<path d="M37 45 L34 38" stroke-width="1.2" />
+		<path d="M37 45 L40 38" stroke-width="1.2" />
 	</g>
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
@@ -294,13 +309,11 @@
 		</circle>
 	{/if}
 
-	<g stroke={actualLineColor} stroke-width="1.8" stroke-linecap="round" fill="none">
-		<!-- Gothic arch shape (pointed arch like a cathedral window) -->
-		<path d="M42 80 L42 55 Q42 42, 50 38 Q58 42, 58 55 L58 80" />
-		<!-- Trunk connecting to ground -->
-		<path d="M50 80 L50 85" stroke-width="2" />
-		<!-- Internal arch details -->
-		<path d="M45 75 L45 58 Q45 48, 50 44 Q55 48, 55 58 L55 75" stroke-width="1.2" />
+	<g stroke={actualLineColor} stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		<!-- Gothic arch shape (pointed arch like a cathedral window) - bolder -->
+		<path d="M42 80 L42 52 Q42 40, 50 34 Q58 40, 58 52 L58 80" />
+		<!-- Internal arch details - creates the nested arch effect -->
+		<path d="M45 78 L45 55 Q45 45, 50 40 Q55 45, 55 55 L55 78" stroke-width="1.8" />
 	</g>
 
 	<!-- The flame itself -->
@@ -347,78 +360,100 @@
 	</g>
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
-	<!-- MORE TREES (right side) -->
+	<!-- MORE TREES (right side) - organic, overlapping depth -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
-	<!-- Tree 4: Small shrub (front right) -->
-	<g stroke={actualLineColor} stroke-width="1.3" stroke-linecap="round" fill="none">
-		<ellipse cx="60" cy="70" rx="4" ry="5" />
-		<path d="M60 75 L60 79" stroke-width="1.5" />
-		<path d="M60 75 L60 68" />
-		<path d="M60 72 L58 68" />
-		<path d="M60 72 L62 68" />
+	<!-- Tree 4: Tall cypress/poplar (right-center, middle layer) -->
+	<g stroke={actualLineColor} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		<!-- Elongated pointed canopy -->
+		<path d="M60 78
+			Q56 72, 58 62
+			Q56 52, 60 42
+			Q58 32, 64 24
+			Q68 32, 66 42
+			Q70 52, 68 62
+			Q70 72, 66 78
+			Z" />
+		<!-- Internal veining -->
+		<path d="M63 70 L63 32" stroke-width="1.5" />
+		<path d="M63 55 L59 48" stroke-width="1.3" />
+		<path d="M63 55 L67 48" stroke-width="1.3" />
+		<path d="M63 45 L60 38" stroke-width="1.2" />
+		<path d="M63 45 L66 38" stroke-width="1.2" />
 	</g>
 
-	<!-- Tree 5: Tall striped tree (birch-like, right-center) -->
-	<g stroke={actualLineColor} stroke-width="1.5" stroke-linecap="round" fill="none">
-		<!-- Pointed oval canopy -->
-		<path d="M68 75 Q64 65, 68 42 Q72 32, 72 42 Q76 65, 72 75" />
-		<!-- Horizontal branch lines -->
-		<path d="M66 55 L74 55" stroke-width="1" />
-		<path d="M67 62 L73 62" stroke-width="1" />
-		<path d="M67 48 L73 48" stroke-width="1" />
+	<!-- Tree 5: Large rounded deciduous (far right, background layer) -->
+	<g stroke={actualLineColor} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+		<!-- Cloud-like organic canopy with multiple lobes -->
+		<path d="M72 62
+			Q68 56, 72 50
+			Q70 44, 76 40
+			Q74 34, 82 32
+			Q88 30, 92 36
+			Q96 34, 96 42
+			Q98 48, 94 54
+			Q96 60, 90 64
+			Q86 68, 80 68
+			Q74 68, 72 64
+			Q70 62, 72 62
+			Z" />
 		<!-- Trunk -->
-		<path d="M70 75 L70 80" stroke-width="1.8" />
-	</g>
-
-	<!-- Tree 6: Round deciduous (far right) -->
-	<g stroke={actualLineColor} stroke-width="1.5" stroke-linecap="round" fill="none">
-		<!-- Round canopy -->
-		<ellipse cx="82" cy="56" rx="7" ry="10" />
-		<!-- Trunk -->
-		<path d="M82 66 L82 75" />
-		<!-- Internal branches -->
-		<path d="M82 66 L82 52" />
-		<path d="M82 58 L78 52" />
-		<path d="M82 58 L86 52" />
+		<path d="M82 68 L82 80" stroke-width="2.2" />
+		<!-- Internal branch structure -->
+		<path d="M82 68 L82 50" stroke-width="1.5" />
+		<path d="M82 58 L76 50" stroke-width="1.5" />
+		<path d="M82 58 L88 50" stroke-width="1.5" />
+		<path d="M82 52 L78 44" stroke-width="1.3" />
+		<path d="M82 52 L86 44" stroke-width="1.3" />
 	</g>
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
-	<!-- GROUND LINE -->
+	<!-- GROUND LINE - curved with downward dips at edges -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
+	<!-- Primary ground line - gentle curve dipping at edges -->
 	<path
-		d="M12 80 L88 80"
+		d="M8 82 Q25 79, 50 79 Q75 79, 92 82"
 		stroke={actualLineColor}
-		stroke-width="1.5"
+		stroke-width="2"
 		stroke-linecap="round"
-	/>
-	<!-- Secondary ground line for depth -->
-	<path
-		d="M8 84 L92 84"
-		stroke={actualLineColor}
-		stroke-width="1"
-		stroke-linecap="round"
-		opacity="0.5"
+		fill="none"
 	/>
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
-	<!-- "GROVE" TEXT -->
+	<!-- "GROVE" TEXT WITH ACCENT LINES -->
 	<!-- NOTE: Calistoga is intentionally used here for its unique, warm character. -->
 	<!-- This is the logo wordmark—keep it distinct from body text (Lexend). -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
 	{#if showText}
+		<!-- Accent line above text -->
+		<path
+			d="M30 90 L70 90"
+			stroke={actualLineColor}
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+
 		<text
 			x="50"
-			y="108"
+			y="106"
 			text-anchor="middle"
 			font-family="Calistoga, serif"
-			font-size="16"
+			font-size="15"
 			fill={actualLineColor}
-			letter-spacing="1"
+			letter-spacing="2"
 		>
 			Grove
 		</text>
+
+		<!-- Accent line below text (curved to echo the circle frame) -->
+		<path
+			d="M25 112 Q50 116, 75 112"
+			stroke={actualLineColor}
+			stroke-width="1.5"
+			stroke-linecap="round"
+			fill="none"
+		/>
 	{/if}
 </svg>
