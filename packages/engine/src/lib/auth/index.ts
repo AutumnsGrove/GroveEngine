@@ -7,3 +7,4 @@
  */
 
 export { verifyTenantOwnership, getVerifiedTenantId } from './session.js';
+export type { User, SessionError } from './session.js';

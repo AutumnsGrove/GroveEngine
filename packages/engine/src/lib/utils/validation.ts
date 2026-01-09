@@ -1,10 +1,12 @@
 /**
  * Security validation utilities for file uploads and input sanitization
- * @module lib/utils/validation
  */
 
+/** Supported image MIME types for file signature validation */
+type ImageMimeType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+
 // File signature database for magic byte validation
-const FILE_SIGNATURES = {
+const FILE_SIGNATURES: Record<ImageMimeType, number[][]> = {
   'image/jpeg': [
     [0xFF, 0xD8, 0xFF, 0xE0], // JPEG/JFIF
     [0xFF, 0xD8, 0xFF, 0xE1], // JPEG/Exif
@@ -20,18 +22,15 @@ const FILE_SIGNATURES = {
 
 /**
  * Validates file signature (magic bytes) to prevent MIME type spoofing
- * @param {File} file - The file to validate
- * @param {string} expectedType - Expected MIME type
- * @returns {Promise<boolean>} True if file signature matches expected type
  */
-export async function validateFileSignature(file, expectedType) {
+export async function validateFileSignature(file: File, expectedType: string): Promise<boolean> {
   const buffer = new Uint8Array(await file.arrayBuffer());
-  const signatures = /** @type {number[][] | undefined} */ (FILE_SIGNATURES[/** @type {keyof typeof FILE_SIGNATURES} */ (expectedType)]);
+  const signatures = FILE_SIGNATURES[expectedType as ImageMimeType];
 
   if (!signatures) return false;
 
-  return signatures.some((/** @type {number[]} */ sig) =>
-    sig.every((/** @type {number} */ byte, /** @type {number} */ i) => buffer[i] === byte)
+  return signatures.some((sig) =>
+    sig.every((byte, i) => buffer[i] === byte)
   );
 }
 
@@ -41,21 +40,18 @@ const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
 /**
  * Sanitizes objects to prevent prototype pollution attacks
  * Recursively removes dangerous keys from objects
- * @param {*} obj - Object to sanitize
- * @returns {*} Sanitized object
  */
-export function sanitizeObject(obj) {
+export function sanitizeObject<T>(obj: T): T {
   if (typeof obj !== 'object' || obj === null) return obj;
 
   // Handle arrays specially to preserve array type
   if (Array.isArray(obj)) {
     return Object.freeze(obj.map(item =>
       typeof item === 'object' && item !== null ? sanitizeObject(item) : item
-    ));
+    )) as T;
   }
 
-  /** @type {Record<string, any>} */
-  const sanitized = {};
+  const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {
     // Check for dangerous keys (case-insensitive and with brackets)
@@ -72,16 +68,14 @@ export function sanitizeObject(obj) {
       : value;
   }
 
-  return Object.freeze(sanitized);
+  return Object.freeze(sanitized) as T;
 }
 
 /**
  * Sanitizes filename to prevent injection attacks
  * Removes dangerous characters and keywords
- * @param {string} filename - Filename to sanitize
- * @returns {string} Sanitized filename
  */
-export function sanitizeFilename(filename) {
+export function sanitizeFilename(filename: string): string {
   if (!filename || typeof filename !== 'string') return '';
 
   // Remove or replace dangerous characters
@@ -105,10 +99,8 @@ export function sanitizeFilename(filename) {
 /**
  * Enhanced path traversal prevention
  * Validates that paths don't contain directory traversal attempts
- * @param {string} path - Path to validate
- * @returns {boolean} True if path is safe
  */
-export function validatePath(path) {
+export function validatePath(path: string): boolean {
   if (!path || typeof path !== 'string') return false;
 
   // Prevent path traversal with various encoding tricks
@@ -138,20 +130,16 @@ export function validatePath(path) {
 
 /**
  * Email validation (strengthened)
- * @param {string} email - Email address to validate
- * @returns {boolean} True if email is valid
  */
-export function validateEmail(email) {
+export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) && email.length < 255;
 }
 
 /**
  * URL validation - only allows http/https protocols
- * @param {string} url - URL to validate
- * @returns {boolean} True if URL is valid
  */
-export function validateURL(url) {
+export function validateURL(url: string): boolean {
   try {
     const parsed = new URL(url);
     return ['http:', 'https:'].includes(parsed.protocol);
@@ -162,9 +150,7 @@ export function validateURL(url) {
 
 /**
  * Slug validation - ensures URL-safe slugs
- * @param {string} slug - Slug to validate
- * @returns {boolean} True if slug is valid
  */
-export function validateSlug(slug) {
+export function validateSlug(slug: string): boolean {
   return /^[a-z0-9-]+$/.test(slug) && slug.length > 0 && slug.length < 200;
 }

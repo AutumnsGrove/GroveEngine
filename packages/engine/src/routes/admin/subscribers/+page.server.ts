@@ -1,7 +1,18 @@
 import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ locals, platform }) {
+interface Subscriber {
+  id: number;
+  email: string;
+  created_at: string;
+  unsubscribed_at: string | null;
+}
+
+interface CountResult {
+  count: number;
+}
+
+export const load: PageServerLoad = async ({ locals, platform }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
@@ -16,12 +27,12 @@ export async function load({ locals, platform }) {
 		// Get all email signups (excluding unsubscribed)
 		const activeSubscribers = await DB.prepare(
 			'SELECT * FROM email_signups WHERE unsubscribed_at IS NULL ORDER BY created_at DESC'
-		).all();
+		).all<Subscriber>();
 
 		// Get unsubscribed count
 		const unsubscribedCount = await DB.prepare(
 			'SELECT COUNT(*) as count FROM email_signups WHERE unsubscribed_at IS NOT NULL'
-		).first();
+		).first<CountResult>();
 
 		return {
 			subscribers: activeSubscribers.results || [],
@@ -32,4 +43,4 @@ export async function load({ locals, platform }) {
 		console.error('[Subscribers Error]', err);
 		throw error(500, 'Failed to load subscribers');
 	}
-}
+};

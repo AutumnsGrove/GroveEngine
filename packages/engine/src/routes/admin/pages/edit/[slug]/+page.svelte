@@ -5,7 +5,7 @@
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import { Input, Textarea, Button, GlassCard } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api } from "$lib/utils/api.js";
+  import { api } from "$lib/utils";
 
   /**
    * @typedef {Object} PageData

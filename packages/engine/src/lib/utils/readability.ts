@@ -7,26 +7,23 @@
  * @see docs/specs/writing-assistant-unified-spec.md
  */
 
-/**
- * @typedef {Object} ReadabilityResult
- * @property {number} fleschKincaid - Grade level (e.g., 8.5)
- * @property {string} readingTime - Human-readable time (e.g., "5 min read")
- * @property {number} wordCount - Total words
- * @property {number} sentenceCount - Total sentences
- * @property {Object} sentenceStats - Sentence statistics
- * @property {number} sentenceStats.average - Average words per sentence
- * @property {number} sentenceStats.longest - Longest sentence word count
- * @property {number} sentenceStats.shortest - Shortest sentence word count
- * @property {string[]} suggestions - Improvement suggestions
- */
+export interface ReadabilityResult {
+	fleschKincaid: number;
+	readingTime: string;
+	wordCount: number;
+	sentenceCount: number;
+	sentenceStats: {
+		average: number;
+		longest: number;
+		shortest: number;
+	};
+	suggestions: string[];
+}
 
 /**
  * Calculate readability metrics for content
- *
- * @param {string} content - The text to analyze (can include markdown)
- * @returns {ReadabilityResult}
  */
-export function calculateReadability(content) {
+export function calculateReadability(content: string): ReadabilityResult {
 	// Strip markdown syntax for clean text analysis
 	const text = stripMarkdownForAnalysis(content);
 
@@ -70,11 +67,8 @@ export function calculateReadability(content) {
 
 /**
  * Strip markdown syntax for cleaner readability analysis
- *
- * @param {string} content - Markdown content
- * @returns {string} Plain text
  */
-export function stripMarkdownForAnalysis(content) {
+export function stripMarkdownForAnalysis(content: string): string {
 	return content
 		.replace(/```[\s\S]*?```/g, '') // Remove code blocks
 		.replace(/`[^`]+`/g, '') // Remove inline code
@@ -98,31 +92,23 @@ export function stripMarkdownForAnalysis(content) {
  * For readability scoring purposes, this approximation is sufficient since
  * Flesch-Kincaid is already an estimate and small syllable miscounts don't
  * significantly impact the final grade level calculation.
- *
- * @param {string} word - The word to count syllables for
- * @returns {number} Estimated syllable count
  */
-export function countSyllables(word) {
-	word = word.toLowerCase().replace(/[^a-z]/g, '');
-	if (word.length <= 3) return 1;
+export function countSyllables(word: string): number {
+	let w = word.toLowerCase().replace(/[^a-z]/g, '');
+	if (w.length <= 3) return 1;
 
-	word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-	word = word.replace(/^y/, '');
+	w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+	w = w.replace(/^y/, '');
 
-	const matches = word.match(/[aeiouy]{1,2}/g);
+	const matches = w.match(/[aeiouy]{1,2}/g);
 	return matches ? Math.max(matches.length, 1) : 1;
 }
 
 /**
  * Generate readability improvement suggestions
- *
- * @param {number} grade - Flesch-Kincaid grade level
- * @param {number} avgSentence - Average words per sentence
- * @param {number[]} sentenceLengths - Array of sentence lengths
- * @returns {string[]} Suggestions (max 4)
  */
-function generateSuggestions(grade, avgSentence, sentenceLengths) {
-	const suggestions = [];
+function generateSuggestions(grade: number, avgSentence: number, sentenceLengths: number[]): string[] {
+	const suggestions: string[] = [];
 
 	// Grade level suggestions
 	if (grade > 14) {
@@ -176,11 +162,8 @@ function generateSuggestions(grade, avgSentence, sentenceLengths) {
 
 /**
  * Calculate variance for sentence length variety
- *
- * @param {number[]} numbers - Array of numbers
- * @returns {number} Variance
  */
-function calculateVariance(numbers) {
+function calculateVariance(numbers: number[]): number {
 	if (numbers.length === 0) return 0;
 	const mean = numbers.reduce((a, b) => a + b, 0) / numbers.length;
 	return (
@@ -190,11 +173,8 @@ function calculateVariance(numbers) {
 
 /**
  * Get a human-readable description of the grade level
- *
- * @param {number} grade - Flesch-Kincaid grade level
- * @returns {string} Description
  */
-export function getGradeDescription(grade) {
+export function getGradeDescription(grade: number): string {
 	if (grade <= 5) return 'Elementary school level - very easy to read';
 	if (grade <= 8) return 'Middle school level - easy to read';
 	if (grade <= 10) return 'High school level - fairly easy to read';

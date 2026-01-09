@@ -5,7 +5,7 @@
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
   import { GlassCard, Glass } from '$lib/ui';
-  import { api } from "$lib/utils/api.js";
+  import { api } from "$lib/utils";
 
   // Form state
   let title = $state("");

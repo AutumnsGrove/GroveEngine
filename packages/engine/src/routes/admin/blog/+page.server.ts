@@ -1,30 +1,38 @@
 import { getTenantDb } from "$lib/server/services/database";
+import type { PageServerLoad } from './$types';
 
-/**
- * @typedef {Object} PostRecord
- * @property {string} slug
- * @property {string} title
- * @property {string} [date]
- * @property {string} [tags] - JSON string of tags array
- * @property {string} [description]
- * @property {string} [created_at]
- */
+interface PostRecord {
+  slug: string;
+  title: string;
+  date?: string;
+  /** JSON string of tags array */
+  tags?: string;
+  description?: string;
+  created_at?: string;
+}
+
+interface BlogPost {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  description: string;
+}
 
 /**
  * Fetch posts from D1 database (multi-tenant)
- * @type {import('./$types').PageServerLoad}
  */
-export async function load({ platform, locals }) {
+export const load: PageServerLoad = async ({ platform, locals }) => {
   // Require tenant context
   if (!locals.tenantId) {
     console.error("[Admin Blog] No tenant ID found");
-    return { posts: [] };
+    return { posts: [] as BlogPost[] };
   }
 
   // Require database
   if (!platform?.env?.DB) {
     console.error("[Admin Blog] D1 database not available");
-    return { posts: [] };
+    return { posts: [] as BlogPost[] };
   }
 
   try {
@@ -34,7 +42,7 @@ export async function load({ platform, locals }) {
     });
 
     // Fetch all posts for this tenant, ordered by date descending
-    const postsArray = await tenantDb.queryMany(
+    const postsArray = await tenantDb.queryMany<PostRecord>(
       "posts",
       undefined, // No additional WHERE clause (tenant_id is automatic)
       [],
@@ -42,7 +50,7 @@ export async function load({ platform, locals }) {
     );
 
     // Transform posts - parse tags from JSON string
-    const posts = postsArray.map((/** @type {PostRecord} */ post) => ({
+    const posts: BlogPost[] = postsArray.map((post) => ({
       slug: post.slug,
       title: post.title,
       date: post.date || post.created_at?.split("T")[0] || "",
@@ -53,6 +61,6 @@ export async function load({ platform, locals }) {
     return { posts };
   } catch (error) {
     console.error("[Admin Blog] Error fetching posts:", error);
-    return { posts: [] };
+    return { posts: [] as BlogPost[] };
   }
-}
+};

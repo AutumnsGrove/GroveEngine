@@ -5,10 +5,8 @@
 
 /**
  * Calculate SHA-256 hash of file for duplicate detection
- * @param {File|Blob} file - The file to hash
- * @returns {Promise<string>} Hex string of the hash
  */
-export async function calculateFileHash(file) {
+export async function calculateFileHash(file: File | Blob): Promise<string> {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -17,10 +15,8 @@ export async function calculateFileHash(file) {
 
 /**
  * Load an image from a File object
- * @param {File} file - Image file
- * @returns {Promise<HTMLImageElement>}
  */
-function loadImage(file) {
+function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -37,12 +33,8 @@ function loadImage(file) {
 
 /**
  * Calculate dimensions maintaining aspect ratio
- * @param {number} width - Original width
- * @param {number} height - Original height
- * @param {number} maxDimension - Maximum dimension (width or height)
- * @returns {{ width: number, height: number }}
  */
-function calculateDimensions(width, height, maxDimension) {
+function calculateDimensions(width: number, height: number, maxDimension: number): { width: number; height: number } {
   if (width <= maxDimension && height <= maxDimension) {
     return { width, height };
   }
@@ -57,10 +49,8 @@ function calculateDimensions(width, height, maxDimension) {
 /**
  * Get max dimension based on quality setting
  * Higher quality = larger max dimension
- * @param {number} quality - Quality 0-100
- * @returns {number} Max dimension in pixels
  */
-function getMaxDimensionForQuality(quality) {
+function getMaxDimensionForQuality(quality: number): number {
   if (quality >= 90) return 4096;
   if (quality >= 70) return 2560;
   if (quality >= 50) return 1920;
@@ -68,33 +58,30 @@ function getMaxDimensionForQuality(quality) {
   return 960;
 }
 
-/**
- * @typedef {Object} ProcessedImageResult
- * @property {Blob} blob - Processed image blob
- * @property {number} width - Image width
- * @property {number} height - Image height
- * @property {number} originalSize - Original file size
- * @property {number} processedSize - Processed file size
- * @property {boolean} [skipped] - Whether processing was skipped
- * @property {string} [reason] - Reason for skipping
- */
+export interface ProcessedImageResult {
+  blob: Blob;
+  width: number;
+  height: number;
+  originalSize: number;
+  processedSize: number;
+  skipped?: boolean;
+  reason?: string;
+}
 
-/**
- * @typedef {Object} ProcessImageOptions
- * @property {number} [quality] - Quality 0-100 (default 80)
- * @property {boolean} [convertToWebP] - Convert to WebP format (default true)
- * @property {boolean} [fullResolution] - Skip resizing (default false)
- */
+export interface ProcessImageOptions {
+  /** Quality 0-100 (default 80) */
+  quality?: number;
+  /** Convert to WebP format (default true) */
+  convertToWebP?: boolean;
+  /** Skip resizing (default false) */
+  fullResolution?: boolean;
+}
 
 /**
  * Process an image: convert to WebP, adjust quality, strip EXIF
  * Drawing to canvas automatically strips EXIF data including GPS
- *
- * @param {File} file - Original image file
- * @param {ProcessImageOptions} options - Processing options
- * @returns {Promise<ProcessedImageResult>}
  */
-export async function processImage(file, options = {}) {
+export async function processImage(file: File, options: ProcessImageOptions = {}): Promise<ProcessedImageResult> {
   const {
     quality = 80,
     convertToWebP = true,
@@ -143,7 +130,7 @@ export async function processImage(file, options = {}) {
   const mimeType = convertToWebP ? 'image/webp' : file.type;
   const qualityDecimal = quality / 100;
 
-  const blob = await new Promise((resolve, reject) => {
+  const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((b) => {
       if (b) resolve(b);
       else reject(new Error('Failed to create blob'));
@@ -155,7 +142,7 @@ export async function processImage(file, options = {}) {
     width: targetWidth,
     height: targetHeight,
     originalSize,
-    processedSize: /** @type {Blob} */ (blob).size,
+    processedSize: blob.size,
     skipped: false
   };
 }
@@ -163,9 +150,8 @@ export async function processImage(file, options = {}) {
 /**
  * Generate a date-based path for organizing uploads
  * Format: photos/YYYY/MM/DD/
- * @returns {string} Date-based folder path
  */
-export function generateDatePath() {
+export function generateDatePath(): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -175,11 +161,8 @@ export function generateDatePath() {
 
 /**
  * Generate a clean filename from original name for image files
- * @param {string} originalName - Original filename
- * @param {boolean} useWebP - Whether to use .webp extension
- * @returns {string} Sanitized filename
  */
-export function sanitizeImageFilename(originalName, useWebP = true) {
+export function sanitizeImageFilename(originalName: string, useWebP = true): string {
   // Get base name without extension
   const lastDot = originalName.lastIndexOf('.');
   const baseName = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;
@@ -204,10 +187,8 @@ export function sanitizeImageFilename(originalName, useWebP = true) {
 
 /**
  * Format bytes to human-readable string
- * @param {number} bytes - Size in bytes
- * @returns {string} Formatted size
  */
-export function formatBytes(bytes) {
+export function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
@@ -215,11 +196,8 @@ export function formatBytes(bytes) {
 
 /**
  * Calculate compression ratio
- * @param {number} original - Original size in bytes
- * @param {number} processed - Processed size in bytes
- * @returns {string} Percentage saved
  */
-export function compressionRatio(original, processed) {
+export function compressionRatio(original: number, processed: number): string {
   if (original <= 0) return '0%';
   const saved = ((original - processed) / original) * 100;
   return saved > 0 ? `-${saved.toFixed(0)}%` : `+${Math.abs(saved).toFixed(0)}%`;

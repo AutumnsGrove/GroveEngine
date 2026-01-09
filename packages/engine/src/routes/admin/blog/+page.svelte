@@ -1,6 +1,6 @@
 <script>
   import { Button, Badge, GlassConfirmDialog, GlassCard, toast } from '$lib/ui';
-  import { api } from '$lib/utils/api.js';
+  import { api } from '$lib/utils';
   import { Trash2 } from 'lucide-svelte';
 
   let { data } = $props();

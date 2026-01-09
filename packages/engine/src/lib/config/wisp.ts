@@ -11,21 +11,19 @@
 // Provider Configuration
 // ============================================================================
 
-/**
- * @typedef {Object} ProviderConfig
- * @property {string} name
- * @property {string} baseUrl
- * @property {string} role
- * @property {boolean} zdr
- * @property {Record<string, string>} models
- */
+export interface ProviderConfig {
+  name: string;
+  baseUrl: string;
+  role: 'primary' | 'backup' | 'tertiary';
+  zdr: boolean;
+  models: Record<string, string>;
+}
 
 /**
  * Approved inference providers with ZDR support
  * Order determines fallback priority
- * @type {Record<string, ProviderConfig>}
  */
-export const PROVIDERS = {
+export const PROVIDERS: Record<string, ProviderConfig> = {
   fireworks: {
     name: "Fireworks AI",
     baseUrl: "https://api.fireworks.ai/inference/v1",
@@ -58,11 +56,16 @@ export const PROVIDERS = {
   },
 };
 
+export interface ModelFallback {
+  provider: string;
+  model: string;
+}
+
 /**
  * Model fallback cascade
  * Try in order until one succeeds
  */
-export const MODEL_FALLBACK_CASCADE = [
+export const MODEL_FALLBACK_CASCADE: ModelFallback[] = [
   { provider: "fireworks", model: "deepseek-v3.2" },
   { provider: "fireworks", model: "kimi-k2" },
   { provider: "fireworks", model: "llama-3.1-70b" },
@@ -74,8 +77,12 @@ export const MODEL_FALLBACK_CASCADE = [
 // Pricing (per million tokens)
 // ============================================================================
 
-/** @type {Record<string, {input: number, output: number}>} */
-export const MODEL_PRICING = {
+export interface ModelPricing {
+  input: number;
+  output: number;
+}
+
+export const MODEL_PRICING: Record<string, ModelPricing> = {
   "deepseek-v3.2": { input: 0.56, output: 1.68 },
   "kimi-k2": { input: 0.6, output: 2.5 },
   "llama-3.1-70b": { input: 0.9, output: 0.9 },
@@ -95,7 +102,7 @@ export const MAX_OUTPUT_TOKENS = {
   grammar: { quick: 1024, thorough: 2048 },
   tone: { quick: 512, thorough: 1024 },
   readability: 0, // No AI call needed
-};
+} as const;
 
 /**
  * Rate limiting (burst protection)
@@ -105,18 +112,21 @@ export const MAX_OUTPUT_TOKENS = {
 export const RATE_LIMIT = {
   maxRequestsPerHour: 10,
   windowSeconds: 3600,
-};
+} as const;
 
 /** Monthly cost cap per user (the true usage limit) */
 export const COST_CAP = {
   enabled: true,
   maxCostUSD: 5.0,
   warningThreshold: 0.8, // Warn at 80%
-};
+} as const;
 
 // ============================================================================
 // Prompt Modes
 // ============================================================================
+
+export type AnalysisMode = 'quick' | 'thorough';
+export type AnalysisAction = 'grammar' | 'tone' | 'readability';
 
 /**
  * Prompt modes control analysis depth without changing models
@@ -134,7 +144,7 @@ export const PROMPT_MODES = {
     temperature: 0.2,
     maxOutputMultiplier: 2,
   },
-};
+} as const;
 
 // ============================================================================
 // Helper Functions
@@ -142,12 +152,8 @@ export const PROMPT_MODES = {
 
 /**
  * Calculate cost for token usage
- * @param {string} model - Model key
- * @param {number} inputTokens - Number of input tokens
- * @param {number} outputTokens - Number of output tokens
- * @returns {number} Cost in USD (rounded to 6 decimal places to avoid floating point errors)
  */
-export function calculateCost(model, inputTokens, outputTokens) {
+export function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
   const pricing = MODEL_PRICING[model] || MODEL_PRICING["deepseek-v3.2"];
   const cost =
     (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
@@ -157,30 +163,22 @@ export function calculateCost(model, inputTokens, outputTokens) {
 
 /**
  * Get the model ID for a provider
- * @param {string} provider - Provider key
- * @param {string} model - Model key
- * @returns {string|null} Full model ID or null if not found
  */
-export function getModelId(provider, model) {
+export function getModelId(provider: string, model: string): string | null {
   return PROVIDERS[provider]?.models[model] || null;
 }
 
 /**
  * Get provider configuration
- * @param {string} provider - Provider key
- * @returns {ProviderConfig|null} Provider config or null
  */
-export function getProvider(provider) {
+export function getProvider(provider: string): ProviderConfig | null {
   return PROVIDERS[provider] || null;
 }
 
 /**
  * Get max tokens for an action and mode
- * @param {'grammar'|'tone'|'readability'} action
- * @param {'quick'|'thorough'} mode
- * @returns {number}
  */
-export function getMaxTokens(action, mode = "quick") {
+export function getMaxTokens(action: AnalysisAction, mode: AnalysisMode = "quick"): number {
   const tokens = MAX_OUTPUT_TOKENS[action];
   if (typeof tokens === "number") return tokens;
   return tokens?.[mode] || 1024;

@@ -6,8 +6,27 @@
  * a single "Grove" theme that matches the overall Grove aesthetic.
  */
 
+export interface Theme {
+  name: string;
+  label: string;
+  desc: string;
+  accent: string;
+  accentDim: string;
+  accentBright: string;
+  accentGlow: string;
+  bg: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  border: string;
+  borderAccent: string;
+  text: string;
+  textDim: string;
+  statusBg: string;
+  statusBorder: string;
+}
+
 // Single Grove theme (other themes removed for simplicity)
-export const themes = {
+export const themes: Record<string, Theme> = {
   grove: {
     name: "grove",
     label: "Grove",
@@ -28,45 +47,23 @@ export const themes = {
   },
 };
 
-/**
- * @typedef {Object} Theme
- * @property {string} name
- * @property {string} label
- * @property {string} desc
- * @property {string} accent
- * @property {string} accentDim
- * @property {string} accentBright
- * @property {string} accentGlow
- * @property {string} bg
- * @property {string} bgSecondary
- * @property {string} bgTertiary
- * @property {string} border
- * @property {string} borderAccent
- * @property {string} text
- * @property {string} textDim
- * @property {string} statusBg
- * @property {string} statusBorder
- */
-
-/**
- * @typedef {Object} EditorThemeManager
- * @property {string} currentTheme
- * @property {Record<string, Theme>} themes
- * @property {() => void} loadTheme
- */
+export interface EditorThemeManager {
+  currentTheme: string;
+  themes: Record<string, Theme>;
+  loadTheme: () => void;
+}
 
 /**
  * Creates an editor theme manager
  * Simplified to always use the Grove theme
- * @returns {EditorThemeManager} Theme state and controls
  */
-export function useEditorTheme() {
+export function useEditorTheme(): EditorThemeManager {
   const theme = themes.grove;
 
   /**
    * Apply the Grove theme CSS variables to the document
    */
-  function applyTheme() {
+  function applyTheme(): void {
     const root = document.documentElement;
     root.style.setProperty("--editor-accent", theme.accent);
     root.style.setProperty("--editor-accent-dim", theme.accentDim);
@@ -86,7 +83,7 @@ export function useEditorTheme() {
   /**
    * Load theme (always applies Grove theme)
    */
-  function loadTheme() {
+  function loadTheme(): void {
     applyTheme();
   }
 

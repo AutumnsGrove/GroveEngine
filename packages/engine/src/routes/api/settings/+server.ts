@@ -1,12 +1,22 @@
 import { json } from "@sveltejs/kit";
+import type { RequestHandler } from './$types';
 
 export const prerender = false;
 
+interface SettingRow {
+  setting_key: string;
+  setting_value: string;
+}
+
+interface SiteSettings {
+  font_family: string;
+  [key: string]: string;
+}
+
 /**
  * Public endpoint to retrieve site settings
- * @type {import('./$types').RequestHandler}
  */
-export async function GET({ platform, locals }) {
+export const GET: RequestHandler = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
 
   if (!db) {
@@ -27,14 +37,13 @@ export async function GET({ platform, locals }) {
         "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
       )
       .bind(locals.tenantId)
-      .all();
+      .all<SettingRow>();
 
-    /** @type {Record<string, any>} */
-    const settings = {
+    const settings: SiteSettings = {
       // Default values in case settings don't exist for this tenant
       font_family: "lexend",
     };
-    for (const row of /** @type {any[]} */ (result.results)) {
+    for (const row of result.results || []) {
       settings[row.setting_key] = row.setting_value;
     }
 
@@ -43,8 +52,8 @@ export async function GET({ platform, locals }) {
         "Cache-Control": "public, max-age=300", // 5 minute cache
       },
     });
-  } catch (error) {
-    console.error("Failed to fetch settings:", error);
+  } catch (err) {
+    console.error("Failed to fetch settings:", err);
     return json({ font_family: "lexend" });
   }
-}
+};

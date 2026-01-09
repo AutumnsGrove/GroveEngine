@@ -5,9 +5,8 @@
 
 /**
  * Get CSRF token from cookie or meta tag
- * @returns {string|null} CSRF token or null if not found
  */
-export function getCSRFToken() {
+export function getCSRFToken(): string | null {
   if (typeof document === "undefined") return null; // SSR safety
 
   // Try cookie first
@@ -25,18 +24,15 @@ export function getCSRFToken() {
 
 /**
  * Fetch wrapper with automatic CSRF token injection
- * @param {string} url - API endpoint URL
- * @param {RequestInit} options - Fetch options
- * @returns {Promise<any>} Response JSON
- * @throws {Error} If request fails
  */
-export async function apiRequest(url, options = {}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function apiRequest<T = any>(url: string, options: RequestInit = {}): Promise<T | null> {
   const csrfToken = getCSRFToken();
   const method = options.method?.toUpperCase() || "GET";
   const isStateMutating = ["POST", "PUT", "DELETE", "PATCH"].includes(method);
 
   // Debug logging
-  if (typeof console !== "undefined" && process.env.NODE_ENV !== "production") {
+  if (typeof console !== "undefined" && import.meta.env?.MODE !== "production") {
     console.debug("[apiRequest]", {
       url,
       method,
@@ -46,9 +42,8 @@ export async function apiRequest(url, options = {}) {
   }
 
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
-  /** @type {Record<string, string>} */
-  const headers = {
-    ...(/** @type {Record<string, string>} */ (options.headers || {})),
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string> || {}),
   };
 
   // Only add Content-Type if not FormData
@@ -71,7 +66,7 @@ export async function apiRequest(url, options = {}) {
   if (!response.ok) {
     let errorMessage = "Request failed";
     try {
-      const error = await response.json();
+      const error = await response.json() as { message?: string };
       errorMessage = error.message || errorMessage;
     } catch {
       errorMessage = `${response.status} ${response.statusText}`;
@@ -98,58 +93,38 @@ export async function apiRequest(url, options = {}) {
 /**
  * Convenience methods for common HTTP verbs
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const api = {
-  /**
-   * GET request
-   * @param {string} url - API endpoint
-   * @param {RequestInit} options - Additional fetch options
-   */
-  get: (url, options = {}) => apiRequest(url, { ...options, method: "GET" }),
+  /** GET request */
+  get: <T = any>(url: string, options: RequestInit = {}) =>
+    apiRequest<T>(url, { ...options, method: "GET" }),
 
-  /**
-   * POST request
-   * @param {string} url - API endpoint
-   * @param {any} body - Request body (will be JSON stringified)
-   * @param {RequestInit} options - Additional fetch options
-   */
-  post: (url, body, options = {}) =>
-    apiRequest(url, {
+  /** POST request */
+  post: <T = any>(url: string, body: unknown, options: RequestInit = {}) =>
+    apiRequest<T>(url, {
       ...options,
       method: "POST",
       body: JSON.stringify(body),
     }),
 
-  /**
-   * PUT request
-   * @param {string} url - API endpoint
-   * @param {any} body - Request body (will be JSON stringified)
-   * @param {RequestInit} options - Additional fetch options
-   */
-  put: (url, body, options = {}) =>
-    apiRequest(url, {
+  /** PUT request */
+  put: <T = any>(url: string, body: unknown, options: RequestInit = {}) =>
+    apiRequest<T>(url, {
       ...options,
       method: "PUT",
       body: JSON.stringify(body),
     }),
 
-  /**
-   * DELETE request
-   * @param {string} url - API endpoint
-   * @param {RequestInit} options - Additional fetch options
-   */
-  delete: (url, options = {}) =>
-    apiRequest(url, { ...options, method: "DELETE" }),
+  /** DELETE request */
+  delete: <T = any>(url: string, options: RequestInit = {}) =>
+    apiRequest<T>(url, { ...options, method: "DELETE" }),
 
-  /**
-   * PATCH request
-   * @param {string} url - API endpoint
-   * @param {any} body - Request body (will be JSON stringified)
-   * @param {RequestInit} options - Additional fetch options
-   */
-  patch: (url, body, options = {}) =>
-    apiRequest(url, {
+  /** PATCH request */
+  patch: <T = any>(url: string, body: unknown, options: RequestInit = {}) =>
+    apiRequest<T>(url, {
       ...options,
       method: "PATCH",
       body: JSON.stringify(body),
     }),
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */

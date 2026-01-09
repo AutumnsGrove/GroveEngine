@@ -5,68 +5,64 @@
 
 const AUTO_SAVE_DELAY = 2000; // 2 seconds
 
-/**
- * @typedef {Object} StoredDraft
- * @property {string} content
- * @property {string} savedAt
- */
+export interface StoredDraft {
+  content: string;
+  savedAt: string;
+}
 
-/**
- * @typedef {Object} DraftManagerOptions
- * @property {string|null} [draftKey] - Unique key for localStorage
- * @property {() => string} [getContent] - Function to get current content
- * @property {(content: string) => void} [setContent] - Function to set content
- * @property {(draft: StoredDraft) => void} [onDraftRestored] - Callback when draft is restored
- * @property {boolean} [readonly] - Whether editor is readonly
- */
+export interface DraftManagerOptions {
+  /** Unique key for localStorage */
+  draftKey?: string | null;
+  /** Function to get current content */
+  getContent?: () => string;
+  /** Function to set content */
+  setContent?: (content: string) => void;
+  /** Callback when draft is restored */
+  onDraftRestored?: (draft: StoredDraft) => void;
+  /** Whether editor is readonly */
+  readonly?: boolean;
+}
 
-/**
- * @typedef {Object} DraftManager
- * @property {boolean} hasDraft
- * @property {boolean} draftRestorePrompt
- * @property {StoredDraft|null} storedDraft
- * @property {string} lastSavedContent
- * @property {"idle" | "saving" | "saved"} saveStatus
- * @property {(initialContent: string) => void} init
- * @property {(content: string) => void} scheduleSave
- * @property {() => void} saveDraft
- * @property {() => void} clearDraft
- * @property {() => void} restoreDraft
- * @property {() => void} discardDraft
- * @property {() => {hasDraft: boolean, storedDraft: StoredDraft|null}} getStatus
- * @property {(content: string) => boolean} hasUnsavedChanges
- * @property {() => void} cleanup
- */
+export type SaveStatus = "idle" | "saving" | "saved";
+
+export interface DraftManager {
+  readonly hasDraft: boolean;
+  readonly draftRestorePrompt: boolean;
+  readonly storedDraft: StoredDraft | null;
+  readonly lastSavedContent: string;
+  readonly saveStatus: SaveStatus;
+  init: (initialContent: string) => void;
+  scheduleSave: (content: string) => void;
+  saveDraft: () => void;
+  clearDraft: () => void;
+  restoreDraft: () => void;
+  discardDraft: () => void;
+  getStatus: () => { hasDraft: boolean; storedDraft: StoredDraft | null };
+  hasUnsavedChanges: (content: string) => boolean;
+  cleanup: () => void;
+}
 
 /**
  * Creates a draft manager with Svelte 5 runes
- * @param {DraftManagerOptions} options - Configuration options
- * @returns {DraftManager} Draft state and controls
  */
-export function useDraftManager(
-  options = /** @type {DraftManagerOptions} */ ({}),
-) {
-  const { draftKey, getContent, setContent, onDraftRestored, readonly } =
-    options;
+export function useDraftManager(options: DraftManagerOptions = {}): DraftManager {
+  const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;
 
   let lastSavedContent = $state("");
-  /** @type {ReturnType<typeof setTimeout> | null} */
-  let draftSaveTimer = $state(null);
+  let draftSaveTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let hasDraft = $state(false);
   let draftRestorePrompt = $state(false);
-  /** @type {StoredDraft | null} */
-  let storedDraft = $state(null);
-  let saveStatus = $state(/** @type {"idle" | "saving" | "saved"} */ ("idle"));
-  /** @type {ReturnType<typeof setTimeout> | null} */
-  let savedConfirmTimer = $state(null);
+  let storedDraft = $state<StoredDraft | null>(null);
+  let saveStatus = $state<SaveStatus>("idle");
+  let savedConfirmTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
-  function saveDraft() {
+  function saveDraft(): void {
     if (!draftKey || readonly || !getContent) return;
 
     const content = getContent();
     saveStatus = "saving";
     try {
-      const draft = {
+      const draft: StoredDraft = {
         content,
         savedAt: new Date().toISOString(),
       };
@@ -86,13 +82,13 @@ export function useDraftManager(
     }
   }
 
-  function loadDraft() {
+  function loadDraft(): StoredDraft | null {
     if (!draftKey) return null;
 
     try {
       const stored = localStorage.getItem(`draft:${draftKey}`);
       if (stored) {
-        return JSON.parse(stored);
+        return JSON.parse(stored) as StoredDraft;
       }
     } catch (e) {
       console.warn("Failed to load draft:", e);
@@ -100,7 +96,7 @@ export function useDraftManager(
     return null;
   }
 
-  function clearDraft() {
+  function clearDraft(): void {
     if (!draftKey) return;
 
     try {
@@ -113,7 +109,7 @@ export function useDraftManager(
     }
   }
 
-  function restoreDraft() {
+  function restoreDraft(): void {
     if (storedDraft && setContent) {
       setContent(storedDraft.content);
       lastSavedContent = storedDraft.content;
@@ -124,15 +120,14 @@ export function useDraftManager(
     draftRestorePrompt = false;
   }
 
-  function discardDraft() {
+  function discardDraft(): void {
     clearDraft();
     if (getContent) {
       lastSavedContent = getContent();
     }
   }
 
-  /** @param {string} content */
-  function scheduleSave(content) {
+  function scheduleSave(content: string): void {
     if (!draftKey || readonly) return;
 
     // Clear previous timer
@@ -149,8 +144,7 @@ export function useDraftManager(
     }, AUTO_SAVE_DELAY);
   }
 
-  /** @param {string} initialContent */
-  function init(initialContent) {
+  function init(initialContent: string): void {
     // Check for existing draft on mount
     if (draftKey) {
       const draft = loadDraft();
@@ -163,7 +157,7 @@ export function useDraftManager(
     }
   }
 
-  function cleanup() {
+  function cleanup(): void {
     if (draftSaveTimer) {
       clearTimeout(draftSaveTimer);
     }
@@ -172,12 +166,11 @@ export function useDraftManager(
     }
   }
 
-  function getStatus() {
+  function getStatus(): { hasDraft: boolean; storedDraft: StoredDraft | null } {
     return { hasDraft, storedDraft };
   }
 
-  /** @param {string} content */
-  function hasUnsavedChanges(content) {
+  function hasUnsavedChanges(content: string): boolean {
     return content !== lastSavedContent;
   }
 

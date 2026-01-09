@@ -1,11 +1,27 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import type { RequestHandler } from './$types';
+
+interface ClaudeContentBlock {
+  type: string;
+  text?: string;
+}
+
+interface ClaudeResponse {
+  content?: ClaudeContentBlock[];
+}
+
+interface AnalysisResult {
+  filename: string;
+  description: string;
+  altText: string;
+}
 
 /**
  * AI Image Analysis Endpoint
  * Uses Claude's vision API to generate smart filenames, descriptions, and alt text
  */
-export async function POST({ request, platform, locals }) {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -93,25 +109,25 @@ Respond in this exact JSON format only, no other text:
       throw error(500, "AI analysis failed");
     }
 
-    const result = await response.json();
+    const result = await response.json() as ClaudeResponse;
 
     // Extract the text content from Claude's response
-    const textContent = result.content?.find((/** @type {{ type: string; text?: string }} */ c) => c.type === "text")?.text;
+    const textContent = result.content?.find((c) => c.type === "text")?.text;
     if (!textContent) {
       throw error(500, "Invalid AI response format");
     }
 
     // Parse the JSON response
-    let analysis;
+    let analysis: AnalysisResult;
     try {
       // Try to extract JSON from the response (in case Claude adds extra text)
       const jsonMatch = textContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
+        analysis = JSON.parse(jsonMatch[0]) as AnalysisResult;
       } else {
         throw new Error("No JSON found in response");
       }
-    } catch (parseError) {
+    } catch {
       console.error("Failed to parse AI response:", textContent);
       // Fallback to basic extraction
       analysis = {
@@ -140,4 +156,4 @@ Respond in this exact JSON format only, no other text:
     console.error("Analysis error:", err);
     throw error(500, "Failed to analyze image");
   }
-}
+};

@@ -1,11 +1,16 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "$lib/utils/validation.js";
+import type { RequestHandler } from './$types';
+
+interface DeleteBody {
+  key: string;
+}
 
 /**
  * DELETE endpoint for removing images from CDN (R2)
  * Includes CSRF protection via origin/host header validation
  */
-export async function DELETE({ request, platform, locals }) {
+export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -43,7 +48,7 @@ export async function DELETE({ request, platform, locals }) {
   }
 
   try {
-    const body = sanitizeObject(await request.json());
+    const body = sanitizeObject(await request.json()) as DeleteBody;
     const { key } = body;
 
     if (!key || typeof key !== "string") {
@@ -89,4 +94,4 @@ export async function DELETE({ request, platform, locals }) {
     console.error("Delete error:", err);
     throw error(500, "Failed to delete image");
   }
-}
+};

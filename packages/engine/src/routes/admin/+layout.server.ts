@@ -1,10 +1,23 @@
 import { redirect } from "@sveltejs/kit";
+import type { LayoutServerLoad } from './$types';
 
 // Disable prerendering for all admin routes
 // Admin pages require authentication and should be server-rendered at request time
 export const prerender = false;
 
-export async function load({ locals, url, platform }) {
+interface TenantInfo {
+  id: string;
+  subdomain: string;
+  displayName: string;
+}
+
+interface TenantRow {
+  id: string;
+  subdomain: string;
+  display_name: string;
+}
+
+export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
   if (!locals.user) {
     throw redirect(
       302,
@@ -13,14 +26,14 @@ export async function load({ locals, url, platform }) {
   }
 
   // Load tenant data for the admin panel
-  let tenant = null;
+  let tenant: TenantInfo | null = null;
   if (locals.tenantId && platform?.env?.DB) {
     try {
       const result = await platform.env.DB.prepare(
         `SELECT id, subdomain, display_name FROM tenants WHERE id = ?`,
       )
         .bind(locals.tenantId)
-        .first();
+        .first<TenantRow>();
 
       if (result) {
         tenant = {
@@ -38,4 +51,4 @@ export async function load({ locals, url, platform }) {
     user: locals.user,
     tenant,
   };
-}
+};

@@ -7,7 +7,7 @@
   import { Input, Button, GlassCard } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api } from "$lib/utils/api.js";
+  import { api } from "$lib/utils";
 
   let { data } = $props();
 

@@ -14,7 +14,7 @@
     useEditorTheme,
     themes,
     useDraftManager,
-  } from "./composables/index.js";
+  } from "./composables";
 
   /**
    * @typedef {Object} StoredDraft

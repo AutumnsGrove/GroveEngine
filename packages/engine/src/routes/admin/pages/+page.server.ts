@@ -1,14 +1,23 @@
 import { redirect } from "@sveltejs/kit";
+import type { PageServerLoad } from './$types';
 
-export async function load({ platform, locals }) {
+interface PageRecord {
+  slug: string;
+  title: string;
+  description: string | null;
+  type: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export const load: PageServerLoad = async ({ platform, locals }) => {
   // Check if user is authenticated
   if (!locals.user) {
     throw redirect(302, "/auth/login");
   }
 
   const tenantId = locals.tenantId;
-  /** @type {any[]} */
-  let pages = [];
+  let pages: PageRecord[] = [];
 
   // Try D1 first
   if (platform?.env?.DB) {
@@ -20,7 +29,7 @@ export async function load({ platform, locals }) {
          ORDER BY slug ASC`,
       )
         .bind(tenantId)
-        .all();
+        .all<PageRecord>();
 
       pages = result.results || [];
     } catch (err) {
@@ -31,4 +40,4 @@ export async function load({ platform, locals }) {
   return {
     pages,
   };
-}
+};

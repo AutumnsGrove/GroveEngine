@@ -1,6 +1,6 @@
 <script>
   import { GlassCard, Spinner } from '$lib/ui';
-  import { api } from "$lib/utils/api.js";
+  import { api } from "$lib/utils";
   import {
     FileText,
     Image,

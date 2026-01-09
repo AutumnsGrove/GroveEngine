@@ -1,6 +1,25 @@
 import { error, redirect } from "@sveltejs/kit";
+import type { PageServerLoad } from './$types';
 
-export async function load({ params, platform, locals }) {
+interface PageRecord {
+  slug: string;
+  title: string;
+  description: string | null;
+  type: string;
+  markdown_content: string | null;
+  html_content: string | null;
+  hero: string | null;
+  gutter_content: string | null;
+  font: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+}
+
+interface HeroData {
+  [key: string]: unknown;
+}
+
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
   // Auth check happens in admin layout
   if (!locals.user) {
     throw redirect(302, "/auth/login");
@@ -22,14 +41,14 @@ export async function load({ params, platform, locals }) {
          WHERE slug = ? AND tenant_id = ?`,
       )
         .bind(slug, tenantId)
-        .first();
+        .first<PageRecord>();
 
       if (page) {
         return {
-          source: "d1",
+          source: "d1" as const,
           page: {
             ...page,
-            hero: page.hero ? JSON.parse(/** @type {string} */ (page.hero)) : null,
+            hero: page.hero ? JSON.parse(page.hero) as HeroData : null,
             gutter_content: page.gutter_content || "[]",
           },
         };
@@ -42,4 +61,4 @@ export async function load({ params, platform, locals }) {
 
   // If not found in D1, return error
   throw error(404, "Page not found");
-}
+};

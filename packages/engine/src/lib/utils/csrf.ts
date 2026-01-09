@@ -5,19 +5,15 @@
 
 /**
  * Generate cryptographically secure CSRF token
- * @returns {string} UUID v4 token
  */
-export function generateCSRFToken() {
+export function generateCSRFToken(): string {
   return crypto.randomUUID();
 }
 
 /**
  * Validate CSRF token from request against session token
- * @param {Request} request - The incoming request
- * @param {string} sessionToken - The token stored in the session
- * @returns {boolean}
  */
-export function validateCSRFToken(request, sessionToken) {
+export function validateCSRFToken(request: Request, sessionToken: string): boolean {
   if (!sessionToken) return false;
 
   const headerToken = request.headers.get("x-csrf-token");
@@ -30,10 +26,8 @@ export function validateCSRFToken(request, sessionToken) {
 
 /**
  * Validate CSRF token from request headers (origin-based fallback)
- * @param {Request} request
- * @returns {boolean}
  */
-export function validateCSRF(request) {
+export function validateCSRF(request: Request): boolean {
   // Handle edge cases
   if (!request || typeof request !== "object") {
     return false;

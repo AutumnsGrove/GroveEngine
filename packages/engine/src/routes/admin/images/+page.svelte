@@ -3,14 +3,15 @@
   import { Button, GlassCard, Glass } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api, apiRequest } from "$lib/utils/api.js";
   import {
+    api,
+    apiRequest,
     processImage,
     calculateFileHash,
     generateDatePath,
     formatBytes,
     compressionRatio
-  } from "$lib/utils/imageProcessor.js";
+  } from "$lib/utils";
 
   // Upload options (defaults with AI analysis enabled)
   let quality = $state(80);

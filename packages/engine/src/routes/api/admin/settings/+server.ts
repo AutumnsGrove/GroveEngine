@@ -1,14 +1,19 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
+import type { RequestHandler } from './$types';
 
 export const prerender = false;
 
+interface SettingsBody {
+  setting_key: string;
+  setting_value: string;
+}
+
 /**
  * Admin endpoint to update site settings
- * @type {import('./$types').RequestHandler}
  */
-export async function PUT({ request, platform, locals }) {
+export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -31,7 +36,7 @@ export async function PUT({ request, platform, locals }) {
   }
 
   try {
-    const body = sanitizeObject(await request.json());
+    const body = sanitizeObject(await request.json()) as SettingsBody;
     const { setting_key, setting_value } = body;
 
     // Validate required fields
@@ -101,4 +106,4 @@ export async function PUT({ request, platform, locals }) {
     console.error("Settings update error:", err);
     throw error(500, "Failed to update setting");
   }
-}
+};
