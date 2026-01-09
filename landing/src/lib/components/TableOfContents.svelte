@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
-  import { getToolIcon, type ToolIconKey } from '$lib/utils/icons';
 
   interface Props {
     headers?: Array<{ id: string; text: string; level: number }>;
