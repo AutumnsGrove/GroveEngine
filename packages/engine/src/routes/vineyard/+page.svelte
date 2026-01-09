@@ -771,9 +771,9 @@ $ npm run dev
 		<div class="mb-12">
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Design Tokens</h3>
 			<div class="grid gap-6">
-				<PaletteRow name="Grove" colors={grove} description="Our signature green - growth, life, community" />
-				<PaletteRow name="Cream" colors={cream} description="Warm backgrounds that feel like home" />
-				<PaletteRow name="Bark" colors={barkTokens} description="Grounding browns for text and structure" />
+				{@render PaletteRow({ name: "Grove", colors: grove, description: "Our signature green - growth, life, community" })}
+				{@render PaletteRow({ name: "Cream", colors: cream, description: "Warm backgrounds that feel like home" })}
+				{@render PaletteRow({ name: "Bark", colors: barkTokens, description: "Grounding browns for text and structure" })}
 			</div>
 		</div>
 
@@ -781,10 +781,10 @@ $ npm run dev
 		<div class="mb-12">
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Status Colors</h3>
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-				<StatusSwatch name="Success" color={status.success.DEFAULT} light={status.success.light} />
-				<StatusSwatch name="Warning" color={status.warning.DEFAULT} light={status.warning.light} />
-				<StatusSwatch name="Error" color={status.error.DEFAULT} light={status.error.light} />
-				<StatusSwatch name="Info" color={status.info.DEFAULT} light={status.info.light} />
+				{@render StatusSwatch({ name: "Success", color: status.success.DEFAULT, light: status.success.light })}
+				{@render StatusSwatch({ name: "Warning", color: status.warning.DEFAULT, light: status.warning.light })}
+				{@render StatusSwatch({ name: "Error", color: status.error.DEFAULT, light: status.error.light })}
+				{@render StatusSwatch({ name: "Info", color: status.info.DEFAULT, light: status.info.light })}
 			</div>
 		</div>
 
@@ -793,10 +793,10 @@ $ npm run dev
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Nature Palettes</h3>
 			<p class="text-bark-600 mb-6">Colors drawn from Pacific Northwest forests - atmospheric depth and natural beauty.</p>
 			<div class="grid gap-6">
-				<PaletteRow name="Greens" colors={greens} description="From dark forest depths to pale spring leaves" />
-				<PaletteRow name="Bark" colors={bark} description="Warm wood tones for trunks and structure" />
-				<PaletteRow name="Earth" colors={earth} description="Soil, stone, and grounding elements" />
-				<PaletteRow name="Natural" colors={natural} description="Cream, birch, and soft organic tones" />
+				{@render PaletteRow({ name: "Greens", colors: greens, description: "From dark forest depths to pale spring leaves" })}
+				{@render PaletteRow({ name: "Bark", colors: bark, description: "Warm wood tones for trunks and structure" })}
+				{@render PaletteRow({ name: "Earth", colors: earth, description: "Soil, stone, and grounding elements" })}
+				{@render PaletteRow({ name: "Natural", colors: natural, description: "Cream, birch, and soft organic tones" })}
 			</div>
 		</div>
 
@@ -806,16 +806,16 @@ $ npm run dev
 			<p class="text-bark-600 mb-6">Each season brings its own color story to the grove.</p>
 			<div class="grid gap-6">
 				<!-- Spring -->
-				<PaletteRow name="Spring Foliage" colors={springFoliage} description="Fresh yellow-green growth of new leaves" />
-				<PaletteRow name="Spring Sky" colors={springSky} description="Clear, bright spring atmosphere" />
-				<PaletteRow name="Wildflowers" colors={wildflowers} description="Meadow flowers - yellows, purples, pinks" />
-				<PaletteRow name="Cherry Blossoms" colors={cherryBlossoms} description="Standard summer cherry blossoms" />
-				<PaletteRow name="Cherry Blossoms Peak" colors={cherryBlossomsPeak} description="Extra vibrant spring peak bloom" />
+				{@render PaletteRow({ name: "Spring Foliage", colors: springFoliage, description: "Fresh yellow-green growth of new leaves" })}
+				{@render PaletteRow({ name: "Spring Sky", colors: springSky, description: "Clear, bright spring atmosphere" })}
+				{@render PaletteRow({ name: "Wildflowers", colors: wildflowers, description: "Meadow flowers - yellows, purples, pinks" })}
+				{@render PaletteRow({ name: "Cherry Blossoms", colors: cherryBlossoms, description: "Standard summer cherry blossoms" })}
+				{@render PaletteRow({ name: "Cherry Blossoms Peak", colors: cherryBlossomsPeak, description: "Extra vibrant spring peak bloom" })}
 				<!-- Autumn -->
-				<PaletteRow name="Autumn" colors={autumn} description="Warm golds, ambers, and falling leaves" />
-				<PaletteRow name="Autumn Reds" colors={autumnReds} description="Maple and cherry fall foliage" />
+				{@render PaletteRow({ name: "Autumn", colors: autumn, description: "Warm golds, ambers, and falling leaves" })}
+				{@render PaletteRow({ name: "Autumn Reds", colors: autumnReds, description: "Maple and cherry fall foliage" })}
 				<!-- Winter -->
-				<PaletteRow name="Winter" colors={winter} description="Snow, frost, and peaceful quiet" />
+				{@render PaletteRow({ name: "Winter", colors: winter, description: "Snow, frost, and peaceful quiet" })}
 			</div>
 		</div>
 
@@ -823,7 +823,7 @@ $ npm run dev
 		<div class="mb-12">
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Midnight Bloom</h3>
 			<p class="text-bark-600 mb-6">A late-night tea cafe palette - deep plums, warm amber, and soft golds.</p>
-			<PaletteRow name="Midnight Bloom" colors={midnightBloom} description="The far vision - cozy evening vibes" />
+			{@render PaletteRow({ name: "Midnight Bloom", colors: midnightBloom, description: "The far vision - cozy evening vibes" })}
 		</div>
 	</section>
 
