@@ -42,6 +42,8 @@ declare global {
         STRIPE_PUBLISHABLE_KEY: string;
         STRIPE_WEBHOOK_SECRET: string;
         RESEND_API_KEY: string;
+        /** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
+        PUBLIC_APP_URL?: string;
       };
       context?: {
         waitUntil(promise: Promise<unknown>): void;

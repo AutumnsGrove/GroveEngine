@@ -25,7 +25,7 @@ interface PostRecord {
   gutter_content?: string;
   tags?: string;
   status?: string;
-  published_at?: string;
+  published_at?: number;
 }
 
 export const load: PageServerLoad = async ({ params, locals, platform }) => {
@@ -96,7 +96,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
               title: post.title as string,
               // Convert unix timestamp (seconds) to ISO string for frontend
               date: post.published_at
-                ? new Date((post.published_at as number) * 1000).toISOString()
+                ? new Date(post.published_at * 1000).toISOString()
                 : new Date().toISOString(),
               tags,
               description: (post.description as string) || "",

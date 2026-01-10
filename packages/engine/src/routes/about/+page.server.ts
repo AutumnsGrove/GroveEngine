@@ -1,4 +1,4 @@
-import { getAboutPage } from "$lib/utils/markdown.js";
+import { getAboutPage, type GutterItem } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
 import { marked } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
@@ -11,12 +11,6 @@ interface Header {
   level: number;
   id: string;
   text: string;
-}
-
-interface GutterItem {
-  type?: string;
-  content?: string;
-  [key: string]: unknown;
 }
 
 interface PageData {
@@ -68,9 +62,11 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           typeof pageData.gutter_content === "string"
         ) {
           try {
-            gutterContent = JSON.parse(pageData.gutter_content);
+            const parsedGutter = JSON.parse(
+              pageData.gutter_content,
+            ) as GutterItem[];
             // Process gutter items: convert markdown to HTML
-            gutterContent = gutterContent.map((item: GutterItem) => {
+            gutterContent = parsedGutter.map((item) => {
               if (
                 (item.type === "comment" || item.type === "markdown") &&
                 item.content
