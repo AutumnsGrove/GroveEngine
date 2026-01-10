@@ -24,20 +24,20 @@
 // IMPORTANT: These must be from the SAME Stripe account as your STRIPE_SECRET_KEY
 export const STRIPE_PRICES = {
   seedling: {
-    monthly: "price_REPLACE_WITH_YOUR_SEEDLING_MONTHLY_PRICE_ID",
-    yearly: "price_REPLACE_WITH_YOUR_SEEDLING_YEARLY_PRICE_ID",
+    monthly: "price_1ShXzXRpJ6WVdxl3dwuzZX90",
+    yearly: "price_1ShXzXRpJ6WVdxl38ZgKg4Wk",
   },
   sapling: {
-    monthly: "price_REPLACE_WITH_YOUR_SAPLING_MONTHLY_PRICE_ID",
-    yearly: "price_REPLACE_WITH_YOUR_SAPLING_YEARLY_PRICE_ID",
+    monthly: "price_1ShY0MRpJ6WVdxl33inwSBKH",
+    yearly: "price_1ShY0MRpJ6WVdxl3RI7YAUBK",
   },
   oak: {
-    monthly: "price_REPLACE_WITH_YOUR_OAK_MONTHLY_PRICE_ID",
-    yearly: "price_REPLACE_WITH_YOUR_OAK_YEARLY_PRICE_ID",
+    monthly: "price_1ShY0yRpJ6WVdxl3GRhURSI8",
+    yearly: "price_1ShY0yRpJ6WVdxl38u1qm3EX",
   },
   evergreen: {
-    monthly: "price_REPLACE_WITH_YOUR_EVERGREEN_MONTHLY_PRICE_ID",
-    yearly: "price_REPLACE_WITH_YOUR_EVERGREEN_YEARLY_PRICE_ID",
+    monthly: "price_1ShY1fRpJ6WVdxl3IiVhJ7BQ",
+    yearly: "price_1ShY1fRpJ6WVdxl3rOJXhOkP",
   },
 } as const;
 

@@ -6,7 +6,7 @@
  */
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-const PRICE_ID = "price_1Si3HRRpJ6WVdxl3pckHKLDx"; // Seedling monthly
+const PRICE_ID = "price_1ShXzXRpJ6WVdxl3dwuzZX90"; // Seedling monthly
 
 if (!STRIPE_SECRET_KEY) {
   console.error("❌ STRIPE_SECRET_KEY not set");
