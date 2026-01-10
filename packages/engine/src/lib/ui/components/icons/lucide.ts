@@ -245,7 +245,10 @@ export const authIcons = {
   key: Key,
   link: Link2,
   shield: Shield,
+  shieldcheck: ShieldCheck,
   lock: Lock,
+  mail: Mail,
+  login: LogIn,
 } as const;
 
 // ============================================================================
