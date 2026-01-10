@@ -4,27 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { checkRateLimit, rateLimitHeaders, buildRateLimitKey } from './middleware.js';
-
-// Mock KV implementation
-function createMockKV(): KVNamespace {
-	const store = new Map<string, string>();
-	return {
-		get: vi.fn(async (key: string, type?: string) => {
-			const value = store.get(key);
-			if (!value) return null;
-			if (type === 'json') return JSON.parse(value);
-			return value;
-		}),
-		put: vi.fn(async (key: string, value: string) => {
-			store.set(key, value);
-		}),
-		delete: vi.fn(async (key: string) => {
-			store.delete(key);
-		}),
-		list: vi.fn(),
-		getWithMetadata: vi.fn()
-	} as unknown as KVNamespace;
-}
+import { createMockKV } from './test-utils.js';
 
 describe('checkRateLimit', () => {
 	let mockKV: KVNamespace;
@@ -123,7 +103,7 @@ describe('checkRateLimit', () => {
 		expect(response).toBeDefined();
 		const body = await response!.json();
 		expect(body.error).toBe('rate_limited');
-		expect(body.message).toContain('Too many requests');
+		expect(body.message).toContain('moving faster than we can keep up');
 		expect(body.retryAfter).toBeTypeOf('number');
 		expect(body.resetAt).toBeDefined();
 	});

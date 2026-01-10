@@ -55,13 +55,21 @@ export async function checkTenantRateLimit(
  * ```
  */
 export function categorizeRequest(method: string, pathname: string): RateLimitCategory {
-	// AI endpoints (most expensive)
-	if (pathname.includes('/api/ai/') || pathname.includes('/api/wisp') || pathname.includes('/api/grove/wisp')) {
+	// AI endpoints (most expensive) - use startsWith for robust prefix matching
+	if (
+		pathname.startsWith('/api/ai/') ||
+		pathname.startsWith('/api/wisp') ||
+		pathname.startsWith('/api/grove/wisp')
+	) {
 		return 'ai';
 	}
 
 	// Upload endpoints
-	if (pathname.includes('/api/upload') || pathname.includes('/api/images') || pathname.includes('/api/cdn')) {
+	if (
+		pathname.startsWith('/api/upload') ||
+		pathname.startsWith('/api/images') ||
+		pathname.startsWith('/api/cdn')
+	) {
 		return 'uploads';
 	}
 

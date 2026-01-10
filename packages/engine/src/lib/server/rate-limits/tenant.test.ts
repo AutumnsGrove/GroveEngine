@@ -2,7 +2,7 @@
  * Tests for Tenant Rate Limiting
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
 	checkTenantRateLimit,
 	categorizeRequest,
@@ -10,27 +10,7 @@ import {
 	formatLimit
 } from './tenant.js';
 import { TIER_RATE_LIMITS } from './config.js';
-
-// Mock KV implementation
-function createMockKV(): KVNamespace {
-	const store = new Map<string, string>();
-	return {
-		get: vi.fn(async (key: string, type?: string) => {
-			const value = store.get(key);
-			if (!value) return null;
-			if (type === 'json') return JSON.parse(value);
-			return value;
-		}),
-		put: vi.fn(async (key: string, value: string) => {
-			store.set(key, value);
-		}),
-		delete: vi.fn(async (key: string) => {
-			store.delete(key);
-		}),
-		list: vi.fn(),
-		getWithMetadata: vi.fn()
-	} as unknown as KVNamespace;
-}
+import { createMockKV } from './test-utils.js';
 
 describe('checkTenantRateLimit', () => {
 	let mockKV: KVNamespace;
