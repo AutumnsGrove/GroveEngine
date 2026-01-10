@@ -12,6 +12,15 @@ import type { PageServerLoad, Actions } from './$types';
 
 const AUTH_BASE_URL = 'https://heartwood.grove.place';
 
+// Constants
+const TOTP_CODE_LENGTH = 6;
+const TOTP_CODE_REGEX = /^\d{6}$/;
+
+// Validation helpers
+function isValidTotpCode(code: string | undefined): code is string {
+	return typeof code === 'string' && TOTP_CODE_REGEX.test(code);
+}
+
 // Response types
 interface ErrorResponse {
 	message?: string;
@@ -88,7 +97,7 @@ export const actions: Actions = {
 	deletePasskey: async ({ request, cookies, platform }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(401, { error: 'Not authenticated' });
+			return fail(401, { error: "You'll need to sign in to manage your account settings" });
 		}
 
 		const formData = await request.formData();
@@ -126,7 +135,7 @@ export const actions: Actions = {
 	enableTwoFactor: async ({ cookies, platform }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(401, { error: 'Not authenticated' });
+			return fail(401, { error: "You'll need to sign in to manage your account settings" });
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
@@ -157,14 +166,14 @@ export const actions: Actions = {
 	verifyTwoFactor: async ({ request, cookies, platform }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(401, { error: 'Not authenticated' });
+			return fail(401, { error: "You'll need to sign in to manage your account settings" });
 		}
 
 		const formData = await request.formData();
 		const code = formData.get('code')?.toString();
 
-		if (!code || code.length !== 6) {
-			return fail(400, { error: 'Please enter a valid 6-digit code' });
+		if (!isValidTotpCode(code)) {
+			return fail(400, { error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code` });
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
@@ -196,14 +205,14 @@ export const actions: Actions = {
 	disableTwoFactor: async ({ request, cookies, platform }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(401, { error: 'Not authenticated' });
+			return fail(401, { error: "You'll need to sign in to manage your account settings" });
 		}
 
 		const formData = await request.formData();
 		const code = formData.get('code')?.toString();
 
-		if (!code || code.length !== 6) {
-			return fail(400, { error: 'Please enter a valid 6-digit code' });
+		if (!isValidTotpCode(code)) {
+			return fail(400, { error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code` });
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
@@ -234,7 +243,7 @@ export const actions: Actions = {
 	generateBackupCodes: async ({ cookies, platform }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(401, { error: 'Not authenticated' });
+			return fail(401, { error: "You'll need to sign in to manage your account settings" });
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;

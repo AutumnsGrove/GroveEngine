@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 	const accessToken = cookies.get('access_token');
 
 	if (!accessToken) {
-		return json({ error: 'Not authenticated' }, { status: 401 });
+		return json({ error: "You'll need to sign in to register a passkey" }, { status: 401 });
 	}
 
 	const env = platform?.env as Record<string, string> | undefined;
@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 
 		// Validate credential structure before forwarding
 		if (!isValidCredential(body)) {
-			return json({ error: 'Invalid credential format' }, { status: 400 });
+			return json({ error: "We couldn't process that passkey. Please try again" }, { status: 400 });
 		}
 
 		const response = await fetch(`${authBaseUrl}/api/auth/passkey/verify-registration`, {
