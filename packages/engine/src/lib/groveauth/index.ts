@@ -86,3 +86,14 @@ export {
   withRateLimit,
   DEFAULT_RATE_LIMITS,
 } from './rate-limit.js';
+
+// Validation utilities
+export {
+  isValidTotpCode,
+  isValidCredential,
+  getRequiredEnv,
+  TOTP_CODE_LENGTH,
+  TOTP_CODE_REGEX,
+} from './validation.js';
+
+export type { PasskeyCredential } from './validation.js';

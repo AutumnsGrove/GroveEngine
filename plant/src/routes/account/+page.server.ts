@@ -9,17 +9,14 @@
 
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import {
+	isValidTotpCode,
+	getRequiredEnv,
+	TOTP_CODE_LENGTH
+} from '@autumnsgrove/groveengine/groveauth';
 
-const AUTH_BASE_URL = 'https://heartwood.grove.place';
-
-// Constants
-const TOTP_CODE_LENGTH = 6;
-const TOTP_CODE_REGEX = /^\d{6}$/;
-
-// Validation helpers
-function isValidTotpCode(code: string | undefined): code is string {
-	return typeof code === 'string' && TOTP_CODE_REGEX.test(code);
-}
+/** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
+const DEFAULT_AUTH_URL = 'https://heartwood.grove.place';
 
 // Response types
 interface ErrorResponse {
@@ -53,7 +50,7 @@ export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
 	}
 
 	const env = platform?.env as Record<string, string> | undefined;
-	const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+	const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 	// Fetch account data in parallel
 	const [passkeysRes, twoFactorRes, linkedAccountsRes] = await Promise.allSettled([
@@ -108,7 +105,7 @@ export const actions: Actions = {
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 		try {
 			const response = await fetch(`${authBaseUrl}/api/auth/passkey/delete-passkey`, {
@@ -139,7 +136,7 @@ export const actions: Actions = {
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 		try {
 			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/enable`, {
@@ -177,7 +174,7 @@ export const actions: Actions = {
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 		try {
 			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/verify-totp`, {
@@ -216,7 +213,7 @@ export const actions: Actions = {
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 		try {
 			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/disable`, {
@@ -247,7 +244,7 @@ export const actions: Actions = {
 		}
 
 		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 		try {
 			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/generate-backup-codes`, {

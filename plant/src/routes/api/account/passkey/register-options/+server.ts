@@ -8,8 +8,10 @@
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { getRequiredEnv } from '@autumnsgrove/groveengine/groveauth';
 
-const AUTH_BASE_URL = 'https://heartwood.grove.place';
+/** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
+const DEFAULT_AUTH_URL = 'https://heartwood.grove.place';
 
 export const POST: RequestHandler = async ({ cookies, platform }) => {
 	const accessToken = cookies.get('access_token');
@@ -19,7 +21,7 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
 	}
 
 	const env = platform?.env as Record<string, string> | undefined;
-	const authBaseUrl = env?.AUTH_BASE_URL || AUTH_BASE_URL;
+	const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
 
 	try {
 		const response = await fetch(`${authBaseUrl}/api/auth/passkey/generate-register-options`, {
