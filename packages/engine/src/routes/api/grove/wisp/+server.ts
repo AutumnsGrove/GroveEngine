@@ -25,6 +25,7 @@ import {
 } from "$lib/server/inference-client.js";
 import { calculateReadability } from "$lib/utils/readability.js";
 import { checkRateLimit } from "$lib/server/rate-limits/index.js";
+import { checkFeatureAccess } from "$lib/server/billing.js";
 
 export const prerender = false;
 
@@ -67,6 +68,20 @@ export async function POST({ request, platform, locals }) {
       }
     } catch {
       // If settings table doesn't exist, allow (for initial setup)
+    }
+  }
+
+  // Check subscription access to AI features (after wisp_enabled, before request parsing)
+  if (db && locals.tenantId) {
+    const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
+    if (!featureCheck.allowed) {
+      return json(
+        {
+          error:
+            featureCheck.reason || "AI features require an active subscription",
+        },
+        { status: 403 },
+      );
     }
   }
 

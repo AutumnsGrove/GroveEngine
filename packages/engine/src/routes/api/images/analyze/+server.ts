@@ -7,6 +7,7 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { checkFeatureAccess } from "$lib/server/billing.js";
 
 interface ClaudeContentBlock {
   type: string;
@@ -61,6 +62,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
   } catch (err) {
     throw err;
+  }
+
+  // Check subscription access to AI features
+  const featureCheck = await checkFeatureAccess(
+    platform.env.DB,
+    locals.tenantId,
+    "ai",
+  );
+  if (!featureCheck.allowed) {
+    throw error(
+      403,
+      featureCheck.reason || "AI features require an active subscription",
+    );
   }
 
   // Rate limit expensive AI operations
