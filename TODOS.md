@@ -48,21 +48,23 @@ These are the blockers. Get these done and you're live.
 
 ---
 
-## 💳 Stripe Production Configuration — READY TO SWITCH
+## 💳 Stripe Production Configuration — ✅ COMPLETE!
 
 > **Code:** Complete in `plant/src/lib/server/stripe.ts`
 > **Setup Guide:** `docs/STRIPE-SETUP.md`
+> **Status:** All live price IDs configured, ready for production!
 
-### Remaining Steps
-- [ ] Switch Stripe Dashboard from test mode to live mode
-- [ ] Create 4 products (Seedling $8, Sapling $12, Oak $25, Evergreen $35)
-- [ ] Create 8 prices (monthly + yearly for each tier)
-- [ ] Copy live price IDs to `plant/src/lib/server/stripe.ts`
-- [ ] Set production secrets in Cloudflare Dashboard:
-  - `STRIPE_SECRET_KEY` (live mode)
-  - `STRIPE_PUBLISHABLE_KEY` (live mode)
-  - `STRIPE_WEBHOOK_SECRET` (create new webhook for production URL)
-- [ ] Verify GROVEAUTH_* secrets are set for OAuth flow
+### ✅ Completed
+- [x] Switch Stripe Dashboard from test mode to live mode
+- [x] Create 4 products (Seedling $8, Sapling $12, Oak $25, Evergreen $35)
+- [x] Create 8 prices (monthly + yearly for each tier)
+- [x] Copy live price IDs to `plant/src/lib/server/stripe.ts`
+- [x] Set production secrets in Cloudflare Dashboard
+- [x] Products configured with 14-day trial period
+- [x] Webhook handler ready at `/api/webhooks/stripe`
+
+### 📝 Final Step (When Ready to Accept Payments)
+- [ ] Verify GROVEAUTH_* secrets are set for OAuth flow (required for signup to work)
 
 ---
 
