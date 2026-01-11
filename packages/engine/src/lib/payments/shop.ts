@@ -664,71 +664,112 @@ export async function updateVariant(
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    name: "name",
+    sku: "sku",
+    priceAmount: "price_amount",
+    compareAtPrice: "compare_at_price",
+    pricingType: "pricing_type",
+    billingInterval: "billing_interval",
+    billingIntervalCount: "billing_interval_count",
+    inventoryQuantity: "inventory_quantity",
+    inventoryPolicy: "inventory_policy",
+    trackInventory: "track_inventory",
+    downloadUrl: "download_url",
+    downloadLimit: "download_limit",
+    requiresShipping: "requires_shipping",
+    providerPriceId: "provider_price_id",
+    isDefault: "is_default",
+    position: "position",
+    metadata: "metadata",
+  };
+
   if (data.name !== undefined) {
+    validateUpdateColumn(columnMap.name, VARIANT_UPDATE_COLUMNS);
     updates.push("name = ?");
     params.push(data.name);
   }
   if (data.sku !== undefined) {
+    validateUpdateColumn(columnMap.sku, VARIANT_UPDATE_COLUMNS);
     updates.push("sku = ?");
     params.push(data.sku);
   }
   if (data.priceAmount !== undefined) {
+    validateUpdateColumn(columnMap.priceAmount, VARIANT_UPDATE_COLUMNS);
     updates.push("price_amount = ?");
     params.push(data.priceAmount);
   }
   if (data.compareAtPrice !== undefined) {
+    validateUpdateColumn(columnMap.compareAtPrice, VARIANT_UPDATE_COLUMNS);
     updates.push("compare_at_price = ?");
     params.push(data.compareAtPrice);
   }
   if (data.pricingType !== undefined) {
+    validateUpdateColumn(columnMap.pricingType, VARIANT_UPDATE_COLUMNS);
     updates.push("pricing_type = ?");
     params.push(data.pricingType);
   }
   if (data.billingInterval !== undefined) {
+    validateUpdateColumn(columnMap.billingInterval, VARIANT_UPDATE_COLUMNS);
     updates.push("billing_interval = ?");
     params.push(data.billingInterval);
   }
   if (data.billingIntervalCount !== undefined) {
+    validateUpdateColumn(
+      columnMap.billingIntervalCount,
+      VARIANT_UPDATE_COLUMNS,
+    );
     updates.push("billing_interval_count = ?");
     params.push(data.billingIntervalCount);
   }
   if (data.inventoryQuantity !== undefined) {
+    validateUpdateColumn(columnMap.inventoryQuantity, VARIANT_UPDATE_COLUMNS);
     updates.push("inventory_quantity = ?");
     params.push(data.inventoryQuantity);
   }
   if (data.inventoryPolicy !== undefined) {
+    validateUpdateColumn(columnMap.inventoryPolicy, VARIANT_UPDATE_COLUMNS);
     updates.push("inventory_policy = ?");
     params.push(data.inventoryPolicy);
   }
   if (data.trackInventory !== undefined) {
+    validateUpdateColumn(columnMap.trackInventory, VARIANT_UPDATE_COLUMNS);
     updates.push("track_inventory = ?");
     params.push(data.trackInventory ? 1 : 0);
   }
   if (data.downloadUrl !== undefined) {
+    validateUpdateColumn(columnMap.downloadUrl, VARIANT_UPDATE_COLUMNS);
     updates.push("download_url = ?");
     params.push(data.downloadUrl);
   }
   if (data.downloadLimit !== undefined) {
+    validateUpdateColumn(columnMap.downloadLimit, VARIANT_UPDATE_COLUMNS);
     updates.push("download_limit = ?");
     params.push(data.downloadLimit);
   }
   if (data.requiresShipping !== undefined) {
+    validateUpdateColumn(columnMap.requiresShipping, VARIANT_UPDATE_COLUMNS);
     updates.push("requires_shipping = ?");
     params.push(data.requiresShipping ? 1 : 0);
   }
   if (data.providerPriceId !== undefined) {
+    validateUpdateColumn(columnMap.providerPriceId, VARIANT_UPDATE_COLUMNS);
     updates.push("provider_price_id = ?");
     params.push(data.providerPriceId);
   }
   if (data.isDefault !== undefined) {
+    validateUpdateColumn(columnMap.isDefault, VARIANT_UPDATE_COLUMNS);
     updates.push("is_default = ?");
     params.push(data.isDefault ? 1 : 0);
   }
   if (data.position !== undefined) {
+    validateUpdateColumn(columnMap.position, VARIANT_UPDATE_COLUMNS);
     updates.push("position = ?");
     params.push(data.position);
   }
   if (data.metadata !== undefined) {
+    validateUpdateColumn(columnMap.metadata, VARIANT_UPDATE_COLUMNS);
     updates.push("metadata = ?");
     params.push(JSON.stringify(data.metadata));
   }
@@ -931,19 +972,31 @@ export async function updateOrderStatus(
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    status: "status",
+    paymentStatus: "payment_status",
+    providerPaymentId: "provider_payment_id",
+    paidAt: "paid_at",
+  };
+
   if (data.status !== undefined) {
+    validateUpdateColumn(columnMap.status, ORDER_UPDATE_COLUMNS);
     updates.push("status = ?");
     params.push(data.status);
   }
   if (data.paymentStatus !== undefined) {
+    validateUpdateColumn(columnMap.paymentStatus, ORDER_UPDATE_COLUMNS);
     updates.push("payment_status = ?");
     params.push(data.paymentStatus);
   }
   if (data.providerPaymentId !== undefined) {
+    validateUpdateColumn(columnMap.providerPaymentId, ORDER_UPDATE_COLUMNS);
     updates.push("provider_payment_id = ?");
     params.push(data.providerPaymentId);
   }
   if (data.paidAt !== undefined) {
+    validateUpdateColumn(columnMap.paidAt, ORDER_UPDATE_COLUMNS);
     updates.push("paid_at = ?");
     params.push(data.paidAt);
   }
@@ -1086,31 +1139,55 @@ export async function updateCustomer(
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    name: "name",
+    phone: "phone",
+    providerCustomerId: "provider_customer_id",
+    defaultShippingAddress: "default_shipping_address",
+    defaultBillingAddress: "default_billing_address",
+    totalOrders: "total_orders",
+    totalSpent: "total_spent",
+  };
+
   if (data.name !== undefined) {
+    validateUpdateColumn(columnMap.name, CUSTOMER_UPDATE_COLUMNS);
     updates.push("name = ?");
     params.push(data.name);
   }
   if (data.phone !== undefined) {
+    validateUpdateColumn(columnMap.phone, CUSTOMER_UPDATE_COLUMNS);
     updates.push("phone = ?");
     params.push(data.phone);
   }
   if (data.providerCustomerId !== undefined) {
+    validateUpdateColumn(columnMap.providerCustomerId, CUSTOMER_UPDATE_COLUMNS);
     updates.push("provider_customer_id = ?");
     params.push(data.providerCustomerId);
   }
   if (data.defaultShippingAddress !== undefined) {
+    validateUpdateColumn(
+      columnMap.defaultShippingAddress,
+      CUSTOMER_UPDATE_COLUMNS,
+    );
     updates.push("default_shipping_address = ?");
     params.push(JSON.stringify(data.defaultShippingAddress));
   }
   if (data.defaultBillingAddress !== undefined) {
+    validateUpdateColumn(
+      columnMap.defaultBillingAddress,
+      CUSTOMER_UPDATE_COLUMNS,
+    );
     updates.push("default_billing_address = ?");
     params.push(JSON.stringify(data.defaultBillingAddress));
   }
   if (data.totalOrders !== undefined) {
+    validateUpdateColumn(columnMap.totalOrders, CUSTOMER_UPDATE_COLUMNS);
     updates.push("total_orders = ?");
     params.push(data.totalOrders);
   }
   if (data.totalSpent !== undefined) {
+    validateUpdateColumn(columnMap.totalSpent, CUSTOMER_UPDATE_COLUMNS);
     updates.push("total_spent = ?");
     params.push(data.totalSpent);
   }
