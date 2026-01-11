@@ -29,6 +29,58 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
 
+/** Maximum image dimension (8192px = 8K) */
+const MAX_IMAGE_DIMENSION = 8192;
+
+/** Maximum total pixels (50 megapixels) */
+const MAX_IMAGE_PIXELS = 50_000_000;
+
+/**
+ * Validate image dimensions by parsing file signatures
+ * Prevents extremely large images that could cause memory issues
+ */
+async function validateImageDimensions(
+  file: File,
+  buffer: Uint8Array,
+): Promise<void> {
+  let width = 0;
+  let height = 0;
+
+  // PNG: dimensions at bytes 16-23 (big-endian)
+  if (file.type === "image/png" && buffer.length >= 24) {
+    width =
+      (buffer[16] << 24) | (buffer[17] << 16) | (buffer[18] << 8) | buffer[19];
+    height =
+      (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
+  }
+
+  // GIF: dimensions at bytes 6-9 (little-endian)
+  if (file.type === "image/gif" && buffer.length >= 10) {
+    width = buffer[6] | (buffer[7] << 8);
+    height = buffer[8] | (buffer[9] << 8);
+  }
+
+  // For JPEG and WebP, we rely on file size validation
+  // Full dimension parsing requires walking marker tables (complex)
+  if (file.type === "image/jpeg" || file.type === "image/webp") {
+    // File size already validated (max 10MB), which is a reasonable proxy
+    return;
+  }
+
+  // Validate dimensions if we could parse them
+  if (width > 0 && height > 0) {
+    if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+      throw error(
+        400,
+        `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
+      );
+    }
+    if (width * height > MAX_IMAGE_PIXELS) {
+      throw error(400, "Image has too many pixels (max 50 megapixels)");
+    }
+  }
+}
+
 /**
  * Enhanced Image Upload Endpoint
  * Supports date-based organization, duplicate detection, and AI metadata
@@ -165,6 +217,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         "Invalid file signature - file may be corrupted or spoofed",
       );
     }
+
+    // Validate image dimensions to prevent DoS attacks
+    await validateImageDimensions(file, buffer);
 
     // Check for duplicates if hash provided
     if (hash && platform?.env?.DB) {

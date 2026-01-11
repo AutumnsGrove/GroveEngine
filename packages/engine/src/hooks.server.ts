@@ -419,6 +419,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const csp = [
     "default-src 'self'",
+    "upgrade-insecure-requests",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",

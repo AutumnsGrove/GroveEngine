@@ -142,7 +142,7 @@ export async function POST({ request, platform, locals }) {
     if (response) return response; // 429 with proper headers
   }
 
-  // Monthly cost cap check
+  // Monthly cost cap check (fail-closed: reject if we can't verify limits)
   if (db && COST_CAP.enabled) {
     // Use single Date instance to avoid edge case at month boundary
     const now = new Date();
@@ -151,24 +151,36 @@ export async function POST({ request, platform, locals }) {
       now.getMonth(),
       1,
     ).toISOString();
+
+    let usage: { monthly_cost: number } | null;
     try {
-      const usage = (await db
+      usage = (await db
         .prepare(
           "SELECT COALESCE(SUM(cost), 0) as monthly_cost FROM wisp_requests WHERE user_id = ? AND created_at > ?",
         )
         .bind(locals.user.id, monthStart)
         .first()) as { monthly_cost: number } | null;
+    } catch (err) {
+      // Fail closed: reject request if we can't verify cost limits for safety
+      console.error(
+        "[Wisp] Cost limit check failed - blocking request:",
+        err instanceof Error ? err.message : "Unknown database error",
+      );
+      return json(
+        {
+          error: "Unable to verify usage limits. Please try again.",
+        },
+        { status: 503 },
+      );
+    }
 
-      if (usage && usage.monthly_cost >= COST_CAP.maxCostUSD) {
-        return json(
-          {
-            error: `Monthly usage limit reached ($${COST_CAP.maxCostUSD.toFixed(2)}). Resets on the 1st.`,
-          },
-          { status: 429 },
-        );
-      }
-    } catch {
-      // Table might not exist yet
+    if (usage && usage.monthly_cost >= COST_CAP.maxCostUSD) {
+      return json(
+        {
+          error: `Monthly usage limit reached ($${COST_CAP.maxCostUSD.toFixed(2)}). Resets on the 1st.`,
+        },
+        { status: 429 },
+      );
     }
   }
 
@@ -272,9 +284,13 @@ export async function POST({ request, platform, locals }) {
             context?.slug || null,
           )
           .run();
-      } catch {
-        // Table might not exist yet - non-fatal
-        console.warn("[Wisp] Could not log usage - table may not exist");
+      } catch (err) {
+        // Usage logging is non-fatal - table might not exist yet or DB temporarily unavailable
+        // Request already succeeded, so we log but don't fail
+        console.warn(
+          "[Wisp] Could not log usage:",
+          err instanceof Error ? err.message : "Unknown error",
+        );
       }
     }
 

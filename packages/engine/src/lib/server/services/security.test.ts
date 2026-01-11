@@ -354,46 +354,109 @@ describe("SQL Injection Prevention", () => {
 // ============================================================================
 
 describe("Security Headers", () => {
-  it("should set HSTS header for HTTPS", () => {
-    const hstsHeader = "max-age=31536000; includeSubDomains; preload";
+  // Expected security headers for all Grove applications
+  const EXPECTED_HEADERS = {
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+  };
+
+  /**
+   * Helper to validate security headers on a Response object
+   * Use this in integration tests with actual HTTP responses
+   */
+  function validateSecurityHeaders(headers: Headers): {
+    valid: boolean;
+    missing: string[];
+  } {
+    const missing: string[] = [];
+
+    if (
+      !headers.get("Strict-Transport-Security")?.includes("max-age=31536000")
+    ) {
+      missing.push("Strict-Transport-Security");
+    }
+    if (headers.get("X-Frame-Options") !== "DENY") {
+      missing.push("X-Frame-Options");
+    }
+    if (headers.get("X-Content-Type-Options") !== "nosniff") {
+      missing.push("X-Content-Type-Options");
+    }
+    if (headers.get("Referrer-Policy") !== "strict-origin-when-cross-origin") {
+      missing.push("Referrer-Policy");
+    }
+
+    return { valid: missing.length === 0, missing };
+  }
+
+  it("should have HSTS with 1-year max-age and preload", () => {
+    const hstsHeader = EXPECTED_HEADERS["Strict-Transport-Security"];
     expect(hstsHeader).toContain("max-age=31536000");
     expect(hstsHeader).toContain("includeSubDomains");
+    expect(hstsHeader).toContain("preload");
   });
 
-  it("should set X-Frame-Options to DENY", () => {
-    const xFrameOptions = "DENY";
-    expect(xFrameOptions).toBe("DENY");
+  it("should set X-Frame-Options to DENY to prevent clickjacking", () => {
+    expect(EXPECTED_HEADERS["X-Frame-Options"]).toBe("DENY");
   });
 
-  it("should set X-Content-Type-Options to nosniff", () => {
-    const xContentTypeOptions = "nosniff";
-    expect(xContentTypeOptions).toBe("nosniff");
+  it("should set X-Content-Type-Options to prevent MIME sniffing", () => {
+    expect(EXPECTED_HEADERS["X-Content-Type-Options"]).toBe("nosniff");
   });
 
-  it("should set Referrer-Policy to strict-origin-when-cross-origin", () => {
-    const referrerPolicy = "strict-origin-when-cross-origin";
-    expect(referrerPolicy).toBe("strict-origin-when-cross-origin");
+  it("should set strict Referrer-Policy", () => {
+    expect(EXPECTED_HEADERS["Referrer-Policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
+  });
+
+  it("should validate mock response headers correctly", () => {
+    const mockHeaders = new Headers();
+    mockHeaders.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload",
+    );
+    mockHeaders.set("X-Frame-Options", "DENY");
+    mockHeaders.set("X-Content-Type-Options", "nosniff");
+    mockHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+    const result = validateSecurityHeaders(mockHeaders);
+    expect(result.valid).toBe(true);
+    expect(result.missing).toHaveLength(0);
+  });
+
+  it("should detect missing security headers", () => {
+    const mockHeaders = new Headers();
+    // Only set one header, missing others
+    mockHeaders.set("X-Frame-Options", "DENY");
+
+    const result = validateSecurityHeaders(mockHeaders);
+    expect(result.valid).toBe(false);
+    expect(result.missing).toContain("Strict-Transport-Security");
+    expect(result.missing).toContain("X-Content-Type-Options");
+    expect(result.missing).toContain("Referrer-Policy");
   });
 
   it("should restrict CORS to grove.place domain", () => {
-    const allowedOrigins = [
-      "https://grove.place",
-      "https://example.grove.place",
-    ];
-    const requestOrigin = "https://attacker.com";
+    const validateOrigin = (origin: string): boolean => {
+      return (
+        origin === "https://grove.place" ||
+        origin === "https://www.grove.place" ||
+        /^https:\/\/[\w-]+\.grove\.place$/.test(origin)
+      );
+    };
 
-    const isAllowed = allowedOrigins.some((origin) => origin === requestOrigin);
-    expect(isAllowed).toBe(false);
-  });
+    // Should allow grove.place origins
+    expect(validateOrigin("https://grove.place")).toBe(true);
+    expect(validateOrigin("https://www.grove.place")).toBe(true);
+    expect(validateOrigin("https://alice.grove.place")).toBe(true);
+    expect(validateOrigin("https://my-blog.grove.place")).toBe(true);
 
-  it("should allow CORS for grove.place subdomains", () => {
-    const requestOrigin = "https://alice.grove.place";
-
-    // Subdomains of grove.place are allowed
-    const isAllowed =
-      requestOrigin.endsWith(".grove.place") ||
-      requestOrigin === "https://grove.place";
-    expect(isAllowed).toBe(true);
+    // Should reject external origins
+    expect(validateOrigin("https://attacker.com")).toBe(false);
+    expect(validateOrigin("https://grove.place.evil.com")).toBe(false);
+    expect(validateOrigin("http://grove.place")).toBe(false); // HTTP not allowed
   });
 });
 

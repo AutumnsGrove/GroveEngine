@@ -179,6 +179,24 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 };
 
 /**
+ * Validate required metadata fields
+ */
+function validateMetadata(
+  metadata: Record<string, string> | null | undefined,
+  requiredFields: string[],
+): void {
+  if (!metadata) {
+    throw new Error("Missing metadata in event");
+  }
+
+  for (const field of requiredFields) {
+    if (!metadata[field] || metadata[field].trim() === "") {
+      throw new Error(`Missing or empty required metadata field: ${field}`);
+    }
+  }
+}
+
+/**
  * Handle successful checkout completion
  */
 async function handleCheckoutComplete(
@@ -187,13 +205,20 @@ async function handleCheckoutComplete(
   session: Record<string, unknown>,
 ) {
   const sessionId = session.id as string;
-  const metadata = session.metadata as Record<string, string>;
-  const onboardingId = metadata?.onboarding_id;
+  const metadata = session.metadata as Record<string, string> | undefined;
 
-  if (!onboardingId) {
-    console.error("[Webhook] No onboarding_id in checkout session metadata");
-    return;
+  // Validate required metadata
+  try {
+    validateMetadata(metadata, ["onboarding_id"]);
+  } catch (error) {
+    console.error("[Webhook] Metadata validation failed for checkout session", {
+      sessionId,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
   }
+
+  const onboardingId = metadata!.onboarding_id;
 
   // Get full session details
   const fullSession = await getCheckoutSession(stripeSecretKey, sessionId);

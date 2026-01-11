@@ -46,12 +46,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Check for API key
   const apiKey = platform?.env?.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    throw error(500, "AI analysis not configured - ANTHROPIC_API_KEY not set");
+    console.error("AI analysis failed: ANTHROPIC_API_KEY not configured");
+    throw error(503, "AI analysis service temporarily unavailable");
   }
 
   // Check for database
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    console.error("Database not configured for analyze endpoint");
+    throw error(503, "Service temporarily unavailable");
   }
 
   // Verify tenant ownership
