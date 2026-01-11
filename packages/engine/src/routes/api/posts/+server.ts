@@ -4,6 +4,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -47,15 +48,19 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 
   try {
-    // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
-
-    const posts = await tenantDb.queryMany<PostRecord>(
-      'posts',
-      undefined,
-      [],
-      { orderBy: 'date DESC' }
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
     );
+
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId });
+
+    const posts = await tenantDb.queryMany<PostRecord>("posts", undefined, [], {
+      orderBy: "date DESC",
+    });
 
     // Parse JSON tags field
     const formattedPosts = posts.map((post) => ({
@@ -94,13 +99,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PostInput;
 
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
       throw error(
         400,
-        "Missing required fields: title, slug, markdown_content"
+        "Missing required fields: title, slug, markdown_content",
       );
     }
 
@@ -118,7 +130,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
       );
     }
 
@@ -151,10 +163,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .replace(/^-|-$/g, "");
 
     // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 
     // Check if slug already exists for this tenant
-    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
+    const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (existing) {
       throw error(409, "A post with this slug already exists");
@@ -162,7 +174,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Generate HTML from markdown and sanitize to prevent XSS
     const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string
+      marked.parse(data.markdown_content, { async: false }) as string,
     );
 
     // Generate a simple hash of the content
@@ -178,7 +190,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const tags = JSON.stringify(data.tags || []);
 
     // Insert using TenantDb (automatically adds tenant_id and generates id)
-    await tenantDb.insert('posts', {
+    await tenantDb.insert("posts", {
       slug,
       title: data.title,
       date: data.date || timestamp.split("T")[0],

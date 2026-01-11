@@ -4,6 +4,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PageInput {
@@ -39,6 +40,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PageInput;
 
     // Validate required fields
@@ -93,7 +101,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Use TenantDb for automatic tenant isolation
     const tenantDb = getTenantDb(platform.env.DB, {
-      tenantId: locals.tenantId,
+      tenantId,
     });
 
     // Check if slug already exists for this tenant
