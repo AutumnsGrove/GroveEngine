@@ -72,10 +72,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   // Get return URL
   const returnTo = cookies.get("auth_return_to") || "https://admin.grove.place";
 
-  // Clear auth cookies
-  cookies.delete("auth_state", { path: "/" });
-  cookies.delete("auth_code_verifier", { path: "/" });
-  cookies.delete("auth_return_to", { path: "/" });
+  // Clear auth cookies with proper attributes
+  cookies.delete("auth_state", { path: "/", httpOnly: true, secure: true });
+  cookies.delete("auth_code_verifier", { path: "/", httpOnly: true, secure: true });
+  cookies.delete("auth_return_to", { path: "/", httpOnly: true, secure: true });
 
   try {
     const authBaseUrl =

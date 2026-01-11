@@ -751,6 +751,7 @@ export function shouldReturn304(request: Request, etag: string): boolean {
 
 /**
  * Build response headers for a file
+ * Includes Content-Disposition to prevent XSS from content-type sniffing
  */
 export function buildFileHeaders(
   file: GetFileResult | FileMetadata,
@@ -760,6 +761,25 @@ export function buildFileHeaders(
   headers.set("Content-Type", file.contentType);
   headers.set("Cache-Control", file.cacheControl);
   headers.set("ETag", file.etag);
+
+  // Set Content-Disposition to prevent XSS from content-type sniffing
+  // Force download for dangerous types (script-like), allow inline for safe types
+  const dangerousTypes = [
+    "application/javascript",
+    "text/html",
+    "application/xhtml+xml",
+    "text/xml",
+    "application/xml",
+  ];
+  const shouldForceDownload = dangerousTypes.some((type) =>
+    file.contentType.includes(type),
+  );
+
+  if (shouldForceDownload) {
+    headers.set("Content-Disposition", "attachment");
+  } else {
+    headers.set("Content-Disposition", "inline");
+  }
 
   // Enable CORS for fonts (required for cross-origin font loading)
   if (options?.enableCors || file.contentType.startsWith("font/")) {
