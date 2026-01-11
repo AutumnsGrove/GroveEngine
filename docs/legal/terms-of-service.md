@@ -1,8 +1,8 @@
 # Terms of Service
 
 **Grove Platform**
-**Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Effective Date:** January 11, 2026
+**Last Updated:** January 11, 2026
 
 ---
 
@@ -111,7 +111,17 @@ By posting User Content, you grant us a limited, non-exclusive license to host, 
 ### 7.3 Content Restrictions
 Your use of the Service is subject to our [Acceptable Use Policy](https://grove.place/legal/acceptable-use). You agree not to post content that violates these guidelines.
 
-### 7.4 Content Removal
+### 7.4 AI Training Prohibition
+
+**Automated Data Collection:** You may not use automated means, including but not limited to scrapers, bots, or crawlers, to access, collect, or process content from the Service for the purpose of training artificial intelligence or machine learning models without our express written permission.
+
+**Commercial AI Use:** Content published on Grove is protected under these Terms and may not be incorporated into AI training datasets, language models, or other machine learning systems for commercial purposes.
+
+**Enforcement:** Violations of this prohibition may result in immediate account suspension and legal action, including seeking injunctive relief and damages.
+
+This prohibition applies to both user-generated content and the Service's design, features, and underlying technology.
+
+### 7.5 Content Removal
 We reserve the right to remove content that violates our policies. See our Acceptable Use Policy for our enforcement process and appeal procedures.
 
 ---

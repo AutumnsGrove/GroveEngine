@@ -1,8 +1,8 @@
 # Acceptable Use Policy
 
 **Grove Platform**
-**Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Effective Date:** January 11, 2026
+**Last Updated:** January 11, 2026
 
 ---
 

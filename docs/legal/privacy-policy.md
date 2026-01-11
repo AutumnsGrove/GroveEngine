@@ -1,8 +1,8 @@
 # Privacy Policy
 
 **Grove Platform**
-**Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Effective Date:** January 11, 2026
+**Last Updated:** January 11, 2026
 
 *Note: Privacy controls feature (Evergreen tier) is planned for future release. This policy reflects both current and planned functionality.*
 
