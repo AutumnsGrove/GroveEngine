@@ -46,6 +46,36 @@
 <svelte:head>
 	<title>{data.post.title} - AutumnsGrove</title>
 	<meta name="description" content={data.post.description || data.post.title} />
+
+	<!-- Open Graph metadata for better content detection -->
+	<meta property="og:title" content={data.post.title} />
+	<meta property="og:description" content={data.post.description || data.post.title} />
+	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content={data.post.date} />
+	<meta property="article:author" content={data.post.author} />
+	{#each data.post.tags as tag}
+		<meta property="article:tag" content={tag} />
+	{/each}
+
+	<!-- Twitter Card metadata -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={data.post.title} />
+	<meta name="twitter:description" content={data.post.description || data.post.title} />
+
+	<!-- Schema.org JSON-LD structured data for articles -->
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "BlogPosting",
+		"headline": data.post.title,
+		"description": data.post.description || data.post.title,
+		"author": {
+			"@type": "Person",
+			"name": data.post.author
+		},
+		"datePublished": data.post.date,
+		"dateModified": data.post.date,
+		"keywords": data.post.tags.join(", ")
+	})}<\/script>`}
 </svelte:head>
 
 <div class="post-wrapper" class:has-custom-font={postFont} style:--post-font={postFont}>
@@ -55,11 +85,19 @@
 		headers={data.post.headers || []}
 	>
 		{#snippet children()}
+			<!-- Navigation outside of article header for semantic clarity -->
+			<nav class="article-nav" aria-label="Article navigation">
+				<Button variant="link" href="/blog" class="!p-0 mb-6">&larr; Back to Blog</Button>
+			</nav>
+
+			<!-- Article header with title and metadata -->
 			<header class="content-header">
-				<Button variant="link" href="/blog" class="!p-0 mb-8">&larr; Back to Blog</Button>
-				<h1>{data.post.title}</h1>
-				<div class="post-meta">
-					<time datetime={data.post.date} class="text-gray-600 dark:text-gray-400 transition-colors">
+				<h1 class="article-title">{data.post.title}</h1>
+				<div class="post-meta article-meta">
+					<address class="author-name article-author" rel="author">
+						<span class="author-prefix">By </span><a href="/about" rel="author">{data.post.author}</a>
+					</address>
+					<time datetime={data.post.date} class="entry-date dateline published-date">
 						{new Date(data.post.date).toLocaleDateString('en-US', {
 							year: 'numeric',
 							month: 'long',
@@ -110,5 +148,54 @@
 		align-items: center;
 		gap: 1rem;
 		flex-wrap: wrap;
+	}
+
+	/* Author byline styling for Safari Reader detection */
+	.post-meta .author-name {
+		font-style: normal;
+		color: var(--light-border-secondary);
+		font-weight: 500;
+	}
+
+	:global(.dark) .post-meta .author-name {
+		color: var(--color-text-dark);
+	}
+
+	.post-meta .author-name .author-prefix {
+		font-weight: 400;
+		color: #666;
+	}
+
+	:global(.dark) .post-meta .author-name .author-prefix {
+		color: var(--color-text-muted-dark);
+	}
+
+	.post-meta .author-name a {
+		color: inherit;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.post-meta .author-name a:hover {
+		color: #2c5f2d;
+		text-decoration: underline;
+	}
+
+	:global(.dark) .post-meta .author-name a:hover {
+		color: var(--accent-success);
+	}
+
+	/* Date styling */
+	.post-meta .entry-date {
+		color: #666;
+	}
+
+	:global(.dark) .post-meta .entry-date {
+		color: var(--color-text-muted-dark);
+	}
+
+	/* Article navigation */
+	.article-nav {
+		margin-bottom: 1rem;
 	}
 </style>

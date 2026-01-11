@@ -26,6 +26,7 @@ interface PostRecord {
   tags?: string;
   status?: string;
   published_at?: number;
+  font?: string;
 }
 
 export const load: PageServerLoad = async ({ params, locals, platform }) => {
@@ -37,7 +38,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
     if (platform?.env?.DB) {
       try {
         const post = (await platform.env.DB.prepare(
-          `SELECT slug, title, description, html_content, gutter_content, tags, status, published_at
+          `SELECT slug, title, description, html_content, gutter_content, tags, status, published_at, font
 					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`,
         )
           .bind(slug, tenantId)
@@ -90,6 +91,11 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
             }
           }
 
+          // Get author name from context
+          const context = locals.context;
+          const authorName =
+            context?.type === "tenant" ? context.tenant.name : "Grove Author";
+
           return {
             post: {
               slug: post.slug as string,
@@ -103,7 +109,8 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
               content: processedHtml,
               headers,
               gutterContent,
-              font: "default",
+              font: (post.font as string) || "default",
+              author: authorName,
             },
           };
         }
@@ -121,11 +128,17 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
       const post = getPostBySlug(slug);
 
       if (post) {
-        // Add default font for filesystem posts
+        // Get author name from context
+        const context = locals.context;
+        const authorName =
+          context?.type === "tenant" ? context.tenant.name : "Grove Author";
+
+        // Add default font and author for filesystem posts
         return {
           post: {
             ...post,
             font: "default",
+            author: authorName,
           },
         };
       }
