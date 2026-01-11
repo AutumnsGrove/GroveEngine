@@ -106,7 +106,7 @@ function shouldSkipTurnstile(pathname: string): boolean {
 function needsUnsafeEval(pathname: string): boolean {
   return (
     pathname.startsWith("/admin/") ||
-    pathname.match(/^\/[^/]+$/) || // Root tenant pages like /about
+    /^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
     pathname.includes("/preview")
   );
 }
