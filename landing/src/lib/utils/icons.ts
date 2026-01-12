@@ -408,6 +408,10 @@ export const toolIcons = {
   toolbox: Wrench, // Standalone Tools TOC
   dock: Dock, // Operations TOC
   "id-card-lanyard": IdCardLanyard, // Content & Community TOC
+  // Knowledge base additional icons
+  clock: Clock, // Centennial - domain preservation
+  tag: Tag, // Seasons - versioning
+  globe: Globe, // Website spec
 } as const;
 
 // ============================================================================
