@@ -295,15 +295,18 @@
 		filter: brightness(1.1);
 	}
 
-	/* Selected tag styling - darker version of accent or fallback to green */
+	/* Selected tag styling - uses higher specificity to override accent color */
+	.tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
 	.tags :global(.selected-tag) {
-		background: #2c5f2d !important;
-		border-color: #2c5f2d !important;
-		filter: none !important;
+		background: #2c5f2d;
+		border-color: #2c5f2d;
+		color: white;
+		filter: none;
 	}
 
+	:global(.dark) .tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
 	:global(.dark) .tags :global(.selected-tag) {
-		background: #16a34a !important;
-		border-color: #16a34a !important;
+		background: #16a34a;
+		border-color: #16a34a;
 	}
 </style>
