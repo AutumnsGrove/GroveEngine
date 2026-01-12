@@ -18,7 +18,14 @@ interface TenantRow {
   display_name: string;
 }
 
-export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
+export const load: LayoutServerLoad = async ({
+  locals,
+  url,
+  platform,
+  parent,
+}) => {
+  // Get parent layout data (includes navPages, siteSettings, context)
+  const parentData = await parent();
   // Special case: Example tenant admin is publicly accessible for demos
   // This allows visitors to explore the admin panel without signing in
   const isExampleTenant = locals.tenantId === "example-tenant-001";
@@ -70,6 +77,7 @@ export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
   }
 
   return {
+    ...parentData,
     user: locals.user,
     tenant,
   };
