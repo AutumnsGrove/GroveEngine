@@ -55,6 +55,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           .bind(tenantId)
           .all<NavPage>();
 
+        // Debug: Log nav query results
+        console.log("[Layout] navPages query result:", {
+          tenantId,
+          resultCount: navResult?.results?.length ?? 0,
+          results: navResult?.results,
+        });
+
         if (navResult?.results) {
           navPages = navResult.results;
         }
