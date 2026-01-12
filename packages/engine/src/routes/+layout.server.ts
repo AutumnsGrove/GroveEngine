@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
+import { building } from "$app/environment";
 
 interface SiteSettings {
   font_family: string;
@@ -23,81 +24,84 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
   // Only fetch from database at runtime (not during prerendering)
   // The Cloudflare adapter throws when accessing platform.env during prerendering
-  try {
-    // Check if platform and env exist (they won't during prerendering or if bindings aren't configured)
-    const db = platform?.env?.DB;
-    if (db) {
-      // If we have a tenant context, load tenant-specific settings
-      if (tenantId) {
-        const result = await db
-          .prepare(
-            "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
-          )
-          .bind(tenantId)
-          .all<{ setting_key: string; setting_value: string }>();
-
-        if (result?.results) {
-          for (const row of result.results) {
-            siteSettings[row.setting_key] = row.setting_value;
-          }
-        }
-
-        // Load pages that should appear in navigation
-        // Simplified query for debugging - just get all pages first
-        const navResult = await db
-          .prepare(
-            `SELECT slug, title, show_in_nav FROM pages WHERE tenant_id = ?`,
-          )
-          .bind(tenantId)
-          .all<NavPage & { show_in_nav: number }>();
-
-        console.log("[Layout] ALL pages for tenant:", {
-          tenantId,
-          count: navResult?.results?.length ?? 0,
-          pages: navResult?.results,
-        });
-
-        // Filter in JS instead of SQL for now
-        // Use truthy check instead of strict === 1 (D1 may return different types)
-        if (navResult?.results) {
-          navPages = navResult.results
-            .filter(
-              (p) => p.show_in_nav && p.slug !== "home" && p.slug !== "about",
+  // Must check `building` BEFORE accessing platform.env to avoid the getter throwing
+  if (!building) {
+    try {
+      // Check if platform and env exist (won't exist if bindings aren't configured)
+      const db = platform?.env?.DB;
+      if (db) {
+        // If we have a tenant context, load tenant-specific settings
+        if (tenantId) {
+          const result = await db
+            .prepare(
+              "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
             )
-            .map((p) => ({ slug: p.slug, title: p.title }));
-        }
+            .bind(tenantId)
+            .all<{ setting_key: string; setting_value: string }>();
 
-        // DEBUG: Log what we filtered
-        console.log("[Layout] Filtered navPages:", {
-          count: navPages.length,
-          pages: navPages,
-        });
-      } else {
-        // Fallback to global settings (for landing page or legacy)
-        const result = await db
-          .prepare("SELECT setting_key, setting_value FROM site_settings")
-          .all<{ setting_key: string; setting_value: string }>();
+          if (result?.results) {
+            for (const row of result.results) {
+              siteSettings[row.setting_key] = row.setting_value;
+            }
+          }
 
-        if (result?.results) {
-          for (const row of result.results) {
-            siteSettings[row.setting_key] = row.setting_value;
+          // Load pages that should appear in navigation
+          // Simplified query for debugging - just get all pages first
+          const navResult = await db
+            .prepare(
+              `SELECT slug, title, show_in_nav FROM pages WHERE tenant_id = ?`,
+            )
+            .bind(tenantId)
+            .all<NavPage & { show_in_nav: number }>();
+
+          console.log("[Layout] ALL pages for tenant:", {
+            tenantId,
+            count: navResult?.results?.length ?? 0,
+            pages: navResult?.results,
+          });
+
+          // Filter in JS instead of SQL for now
+          // Use truthy check instead of strict === 1 (D1 may return different types)
+          if (navResult?.results) {
+            navPages = navResult.results
+              .filter(
+                (p) => p.show_in_nav && p.slug !== "home" && p.slug !== "about",
+              )
+              .map((p) => ({ slug: p.slug, title: p.title }));
+          }
+
+          // DEBUG: Log what we filtered
+          console.log("[Layout] Filtered navPages:", {
+            count: navPages.length,
+            pages: navPages,
+          });
+        } else {
+          // Fallback to global settings (for landing page or legacy)
+          const result = await db
+            .prepare("SELECT setting_key, setting_value FROM site_settings")
+            .all<{ setting_key: string; setting_value: string }>();
+
+          if (result?.results) {
+            for (const row of result.results) {
+              siteSettings[row.setting_key] = row.setting_value;
+            }
           }
         }
       }
+    } catch (error) {
+      // If DB bindings aren't configured, gracefully fall back to defaults
+      // This prevents 500 errors when D1 bindings aren't set up in Cloudflare Pages dashboard
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error("Failed to load site settings (using defaults):", message);
     }
-  } catch (error) {
-    // During prerendering or if DB bindings aren't configured, gracefully fall back to defaults
-    // This prevents 500 errors when D1 bindings aren't set up in Cloudflare Pages dashboard
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("Failed to load site settings (using defaults):", message);
   }
 
   console.log("[Layout] FINAL navPages:", navPages);
 
-  // DEBUG: Include debug info in response
+  // DEBUG: Include debug info in response (avoid platform.env access during build)
   const _debug = {
     tenantId: tenantId ?? "NO_TENANT_ID",
-    hasDb: !!platform?.env?.DB,
+    hasDb: building ? "BUILDING" : !!platform?.env?.DB,
     navPagesCount: navPages.length,
   };
 
