@@ -51,6 +51,9 @@ declare global {
         /** GroveAuth Service Binding (Heartwood - fast session validation) */
         AUTH: Fetcher;
 
+        /** TenantDO - Per-tenant Durable Object for config, drafts, analytics */
+        TENANTS: DurableObjectNamespace;
+
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;

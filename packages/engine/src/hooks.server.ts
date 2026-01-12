@@ -9,6 +9,7 @@ import {
   TURNSTILE_COOKIE_NAME,
   validateVerificationCookie,
 } from "$lib/server/services/turnstile.js";
+import type { TenantConfig } from "$lib/durable-objects/TenantDO.js";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -73,6 +74,94 @@ function extractSubdomain(
   }
 
   return null;
+}
+
+/**
+ * Extended tenant info returned from getTenantConfig
+ * Includes both TenantConfig fields and the tenant UUID
+ */
+interface TenantLookupResult extends TenantConfig {
+  id: string; // Tenant UUID from D1
+}
+
+/**
+ * Get tenant config via TenantDO (with caching) or fall back to D1
+ *
+ * TenantDO caches config in memory and DO storage, eliminating most D1 reads.
+ * Falls back to D1 if DO is unavailable or for first-time lookups.
+ */
+async function getTenantConfig(
+  subdomain: string,
+  platform: App.Platform | undefined,
+): Promise<TenantLookupResult | null> {
+  // Fall back to D1 first to get tenant ID (TenantDO doesn't have it)
+  // TODO: Once TenantDO stores tenant ID, try DO first for faster lookups
+  const db = platform?.env?.DB;
+  if (!db) return null;
+
+  try {
+    const tenant = await db
+      .prepare(
+        "SELECT id, subdomain, display_name, email, theme, tier FROM tenants WHERE subdomain = ? AND active = 1",
+      )
+      .bind(subdomain)
+      .first<{
+        id: string;
+        subdomain: string;
+        display_name: string;
+        email: string;
+        theme: string | null;
+        tier: string | null;
+      }>();
+
+    if (!tenant) return null;
+
+    // Return extended tenant info
+    return {
+      id: tenant.id,
+      subdomain: tenant.subdomain,
+      displayName: tenant.display_name,
+      theme: tenant.theme ? JSON.parse(tenant.theme) : null,
+      tier: (tenant.tier as TenantConfig["tier"]) || "seedling",
+      ownerId: tenant.email,
+      limits: getTierLimits(
+        (tenant.tier as TenantConfig["tier"]) || "seedling",
+      ),
+    };
+  } catch (err) {
+    console.error("[Hooks] D1 tenant lookup error:", err);
+    return null;
+  }
+}
+
+/**
+ * Get tier limits based on subscription level
+ */
+function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
+  const limits: Record<TenantConfig["tier"], TenantConfig["limits"]> = {
+    seedling: {
+      postsPerMonth: 10,
+      storageBytes: 100 * 1024 * 1024, // 100MB
+      customDomains: 0,
+    },
+    sapling: {
+      postsPerMonth: 50,
+      storageBytes: 500 * 1024 * 1024, // 500MB
+      customDomains: 1,
+    },
+    oak: {
+      postsPerMonth: 200,
+      storageBytes: 2 * 1024 * 1024 * 1024, // 2GB
+      customDomains: 3,
+    },
+    evergreen: {
+      postsPerMonth: -1, // Unlimited
+      storageBytes: 10 * 1024 * 1024 * 1024, // 10GB
+      customDomains: 10,
+    },
+  };
+
+  return limits[tier];
 }
 
 /**
@@ -199,50 +288,27 @@ export const handle: Handle = async ({ event, resolve }) => {
     // These are handled by separate Workers, shouldn't hit this
     return new Response("Service not found", { status: 404 });
   }
-  // Must be a tenant subdomain - look up in D1
+  // Must be a tenant subdomain - look up via TenantDO or D1
   else {
-    const db = event.platform?.env?.DB;
-    if (!db) {
-      console.error("[Hooks] D1 database not available");
+    const tenant = await getTenantConfig(subdomain, event.platform);
+
+    if (!tenant) {
+      // Subdomain not registered or inactive
       event.locals.context = { type: "not_found", subdomain };
     } else {
-      try {
-        const tenant = await db
-          .prepare(
-            "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
-          )
-          .bind(subdomain)
-          .first<{
-            id: string;
-            subdomain: string;
-            display_name: string;
-            email: string;
-            theme: string | null;
-            plan: string;
-          }>();
-
-        if (!tenant) {
-          // Subdomain not registered or inactive
-          event.locals.context = { type: "not_found", subdomain };
-        } else {
-          // Valid tenant - set context
-          event.locals.context = {
-            type: "tenant",
-            tenant: {
-              id: tenant.id,
-              subdomain: tenant.subdomain,
-              name: tenant.display_name,
-              theme: tenant.theme,
-              ownerId: tenant.email,
-              plan: tenant.plan || "seedling", // Default to seedling if not set
-            },
-          };
-          event.locals.tenantId = tenant.id;
-        }
-      } catch (err) {
-        console.error("[Hooks] Error looking up tenant:", err);
-        event.locals.context = { type: "not_found", subdomain };
-      }
+      // Valid tenant - set context (config from TenantDO cache)
+      event.locals.context = {
+        type: "tenant",
+        tenant: {
+          id: tenant.id,
+          subdomain: tenant.subdomain,
+          name: tenant.displayName,
+          theme: tenant.theme ? JSON.stringify(tenant.theme) : null,
+          ownerId: tenant.ownerId,
+          plan: tenant.tier || "seedling",
+        },
+      };
+      event.locals.tenantId = tenant.id;
     }
   }
 

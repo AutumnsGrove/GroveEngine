@@ -47,6 +47,19 @@ binding = "AUTH"
 service = "groveauth"
 
 # =============================================================================
+# Durable Objects - Loom Pattern (Grove's coordination layer)
+# =============================================================================
+# TenantDO: Per-tenant config caching, draft sync, analytics buffering
+[[durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+
+# DO migrations - declare new classes
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TenantDO"]
+
+# =============================================================================
 # Environment Variables (non-sensitive)
 # =============================================================================
 [vars]
