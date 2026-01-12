@@ -1,12 +1,14 @@
 import {
   getPostBySlug,
   processAnchorTags,
+  extractHeaders,
   type GutterItem,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
-import { marked } from "marked";
+import { marked, type Tokens } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb } from "$lib/server/services/database.js";
+import * as cache from "$lib/server/services/cache.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -31,119 +33,77 @@ interface PostRecord {
   font?: string;
 }
 
-export const load: PageServerLoad = async ({ params, locals, platform }) => {
+/** Cached post data - the fully processed result */
+interface CachedPost {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  description: string;
+  content: string;
+  headers: Header[];
+  gutterContent: GutterItem[];
+  font: string;
+  author: string;
+}
+
+/** Cache configuration */
+const CACHE_TTL_SECONDS = 300; // 5 minutes for KV cache
+
+export const load: PageServerLoad = async ({
+  params,
+  locals,
+  platform,
+  setHeaders,
+}) => {
   const { slug } = params;
   const tenantId = locals?.tenantId;
 
+  // Get author name from context (needed for cache key and response)
+  const context = locals.context;
+  const authorName =
+    context?.type === "tenant" ? context.tenant.name : "Grove Author";
+
+  // Cache key includes tenant for multi-tenant isolation
+  const cacheKey = tenantId ? `blog:${tenantId}:${slug}` : `blog:_:${slug}`;
+
   try {
-    // Try D1 first for posts created via admin panel
-    if (platform?.env?.DB && tenantId) {
-      try {
-        // Use TenantDb for automatic tenant isolation (like the API does)
-        const tenantDb = getTenantDb(platform.env.DB, { tenantId });
+    // Try to get from KV cache first, or compute from D1/filesystem
+    const kv = platform?.env?.CACHE_KV;
+    const db = platform?.env?.DB;
 
-        const post = await tenantDb.queryOne<PostRecord>(
-          "posts",
-          "slug = ? AND status = ?",
-          [slug, "published"],
-        );
+    // If we have KV, use getOrSet pattern for caching
+    if (kv && db && tenantId) {
+      const cachedPost = await cache.getOrSet<CachedPost | null>(kv, cacheKey, {
+        ttl: CACHE_TTL_SECONDS,
+        compute: async () => {
+          return await fetchAndProcessPost(slug, tenantId, db, authorName);
+        },
+      });
 
-        if (post) {
-          // Generate HTML from markdown if html_content is not stored
-          let htmlContent = post.html_content;
-          if (!htmlContent && post.markdown_content) {
-            htmlContent = sanitizeMarkdown(
-              marked.parse(post.markdown_content, { async: false }) as string,
-            );
-          }
+      if (cachedPost) {
+        // Set Cache-Control headers for edge caching (published posts only)
+        setHeaders({
+          "Cache-Control": "public, max-age=300, s-maxage=300",
+          "CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400",
+          Vary: "Cookie",
+        });
 
-          // Process anchor tags in HTML content (same as filesystem posts)
-          const processedHtml = processAnchorTags(htmlContent || "");
-
-          // Extract headers from HTML for table of contents
-          // Note: For D1 posts, we extract from HTML since we don't store raw markdown
-          const headers = extractHeadersFromHtml(processedHtml);
-
-          // Safe JSON parsing for tags
-          let tags: string[] = [];
-          if (post.tags) {
-            try {
-              tags = JSON.parse(post.tags as string);
-            } catch (e) {
-              console.warn("Failed to parse tags:", e);
-              tags = [];
-            }
-          }
-
-          // Safe JSON parsing for gutter content
-          let gutterContent: GutterItem[] = [];
-          if (post.gutter_content) {
-            try {
-              gutterContent = JSON.parse(post.gutter_content as string);
-              // Process gutter items: convert markdown to HTML for comment/markdown items
-              gutterContent = gutterContent.map((item: GutterItem) => {
-                if (
-                  (item.type === "comment" || item.type === "markdown") &&
-                  item.content
-                ) {
-                  return {
-                    ...item,
-                    content: sanitizeMarkdown(
-                      marked.parse(item.content, { async: false }) as string,
-                    ),
-                  };
-                }
-                return item;
-              });
-            } catch (e) {
-              console.warn("Failed to parse gutter_content:", e);
-              gutterContent = [];
-            }
-          }
-
-          // Get author name from context
-          const context = locals.context;
-          const authorName =
-            context?.type === "tenant" ? context.tenant.name : "Grove Author";
-
-          return {
-            post: {
-              slug: post.slug as string,
-              title: post.title as string,
-              // Convert unix timestamp (seconds) to ISO string for frontend
-              date: post.published_at
-                ? new Date(post.published_at * 1000).toISOString()
-                : new Date().toISOString(),
-              tags,
-              description: (post.description as string) || "",
-              content: processedHtml,
-              headers,
-              gutterContent,
-              font: (post.font as string) || "default",
-              author: authorName,
-            },
-          };
-        }
-      } catch (err) {
-        console.error("D1 fetch error:", err);
-        // Fall through to filesystem fallback
+        return { post: cachedPost };
+      }
+    } else if (db && tenantId) {
+      // No KV available, fall back to direct D1 (no caching)
+      const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
+      if (post) {
+        return { post };
       }
     }
 
-    // Fall back to filesystem (UserContent)
-    // Note: This uses gray-matter which requires Buffer (Node.js)
-    // In Cloudflare Workers environment, this will fail
-    // So we only try this if we're NOT in a Workers environment
+    // Fall back to filesystem (UserContent) for local dev
     if (typeof globalThis.Buffer !== "undefined") {
       const post = getPostBySlug(slug);
 
       if (post) {
-        // Get author name from context
-        const context = locals.context;
-        const authorName =
-          context?.type === "tenant" ? context.tenant.name : "Grove Author";
-
-        // Add default font and author for filesystem posts
         return {
           post: {
             ...post,
@@ -154,9 +114,8 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
       }
     }
 
-    // Post not found in D1 or filesystem
-    // If we got here without D1 being available, that's a config issue
-    if (!platform?.env?.DB) {
+    // Post not found
+    if (!db) {
       console.error(
         "DB binding not available - check Cloudflare Pages D1 bindings",
       );
@@ -167,7 +126,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
     if ((err as { status?: number })?.status) {
       throw err;
     }
-    // Log and rethrow as 500 with message for debugging
+    // Log and rethrow as 500
     console.error("Blog post load error:", err);
     throw error(
       500,
@@ -177,21 +136,104 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
 };
 
 /**
- * Extract headers from HTML content for table of contents
- * Used for D1 posts where raw markdown isn't stored
+ * Fetch post from D1 and process it (markdown, headers, gutter content)
+ * This is the "compute" function for cache.getOrSet()
  */
-function extractHeadersFromHtml(html: string): Header[] {
-  const headers: Header[] = [];
-  const headerRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[1-6]>/gi;
+async function fetchAndProcessPost(
+  slug: string,
+  tenantId: string,
+  db: D1Database,
+  authorName: string,
+): Promise<CachedPost | null> {
+  const tenantDb = getTenantDb(db, { tenantId });
 
-  let match;
-  while ((match = headerRegex.exec(html)) !== null) {
-    headers.push({
-      level: parseInt(match[1]),
-      id: match[2],
-      text: match[3].trim(),
-    });
+  const post = await tenantDb.queryOne<PostRecord>(
+    "posts",
+    "slug = ? AND status = ?",
+    [slug, "published"],
+  );
+
+  if (!post) {
+    return null;
   }
 
-  return headers;
+  // Extract headers from markdown for TOC (this generates IDs)
+  const headers = post.markdown_content
+    ? extractHeaders(post.markdown_content)
+    : [];
+
+  // Generate HTML from markdown if not stored
+  let htmlContent = post.html_content;
+  if (!htmlContent && post.markdown_content) {
+    // Create a custom renderer that adds IDs to headings
+    const renderer = new marked.Renderer();
+    renderer.heading = function (token: Tokens.Heading): string {
+      const text = token.text;
+      const level = token.depth;
+      // Generate ID same way as extractHeaders
+      const id = text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      return `<h${level} id="${id}">${text}</h${level}>`;
+    };
+
+    htmlContent = sanitizeMarkdown(
+      marked.parse(post.markdown_content, { async: false, renderer }) as string,
+    );
+  }
+
+  // Process anchor tags
+  const processedHtml = processAnchorTags(htmlContent || "");
+
+  // Parse tags
+  let tags: string[] = [];
+  if (post.tags) {
+    try {
+      tags = JSON.parse(post.tags as string);
+    } catch {
+      tags = [];
+    }
+  }
+
+  // Parse and process gutter content
+  let gutterContent: GutterItem[] = [];
+  if (post.gutter_content) {
+    try {
+      gutterContent = JSON.parse(post.gutter_content as string);
+      gutterContent = gutterContent.map((item: GutterItem) => {
+        if (
+          (item.type === "comment" || item.type === "markdown") &&
+          item.content
+        ) {
+          return {
+            ...item,
+            content: sanitizeMarkdown(
+              marked.parse(item.content, { async: false }) as string,
+            ),
+          };
+        }
+        return item;
+      });
+    } catch {
+      gutterContent = [];
+    }
+  }
+
+  return {
+    slug: post.slug as string,
+    title: post.title as string,
+    date: post.published_at
+      ? new Date(post.published_at * 1000).toISOString()
+      : new Date().toISOString(),
+    tags,
+    description: (post.description as string) || "",
+    content: processedHtml,
+    headers,
+    gutterContent,
+    font: (post.font as string) || "default",
+    author: authorName,
+  };
 }
