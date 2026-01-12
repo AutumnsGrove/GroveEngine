@@ -150,8 +150,11 @@ export const PATCH: RequestHandler = async ({
   platform,
   locals,
 }) => {
-  // Auth check
-  if (!locals.user) {
+  // Example tenant bypass for public demo
+  const isExampleTenant = locals.tenantId === "example-tenant-001";
+
+  // Auth check (skip for example tenant)
+  if (!locals.user && !isExampleTenant) {
     throw error(401, "Unauthorized");
   }
 
@@ -160,8 +163,8 @@ export const PATCH: RequestHandler = async ({
     throw error(401, "Tenant not found");
   }
 
-  // CSRF check
-  if (!validateCSRF(request)) {
+  // CSRF check (skip for example tenant since they don't have session cookies)
+  if (!isExampleTenant && !validateCSRF(request)) {
     throw error(403, "Invalid origin");
   }
 
@@ -176,12 +179,17 @@ export const PATCH: RequestHandler = async ({
   }
 
   try {
-    // Verify the authenticated user owns this tenant
-    const tenantId = await getVerifiedTenantId(
-      platform.env.DB,
-      locals.tenantId,
-      locals.user,
-    );
+    // For example tenant, use tenant ID directly; otherwise verify ownership
+    let tenantId: string;
+    if (isExampleTenant) {
+      tenantId = locals.tenantId;
+    } else {
+      tenantId = await getVerifiedTenantId(
+        platform.env.DB,
+        locals.tenantId,
+        locals.user,
+      );
+    }
 
     const data = sanitizeObject(await request.json()) as PagePatchInput;
 
