@@ -109,6 +109,8 @@
       </thead>
       <tbody>
         {#each data.pages as page (page.slug)}
+          {@const isInNav = page.show_in_nav === 1}
+          {@const canToggle = isInNav || !atLimit}
           <tr>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/{page.slug === 'home' ? '' : page.slug}" target="_blank" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
@@ -122,8 +124,6 @@
               <Badge variant="tag">{page.type}</Badge>
             </td>
             <td class="p-4 text-center border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:hidden">
-              {@const isInNav = page.show_in_nav === 1}
-              {@const canToggle = isInNav || !atLimit}
               <input
                 type="checkbox"
                 checked={isInNav}
