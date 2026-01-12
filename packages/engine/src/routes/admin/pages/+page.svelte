@@ -8,10 +8,13 @@
   /** @type {Record<string, boolean>} */
   let togglingNav = $state({});
 
-  /** @param {string} dateString */
-  function formatDate(dateString) {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
+  /** @param {string | number} dateValue */
+  function formatDate(dateValue) {
+    if (!dateValue) return '-';
+    // Handle unix timestamp in seconds (from SQLite unixepoch())
+    // JavaScript Date expects milliseconds, so multiply by 1000
+    const timestamp = typeof dateValue === 'number' ? dateValue * 1000 : dateValue;
+    return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
