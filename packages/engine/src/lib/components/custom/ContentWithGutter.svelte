@@ -426,11 +426,21 @@
 	let isPurifyReady = $state(false);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
+	// Content is already sanitized server-side, so we mark ready immediately
+	// and re-sanitize once DOMPurify loads (defensive, usually a no-op)
 	onMount(async () => {
 		if (browser) {
-			const module = await import('dompurify');
-			DOMPurify = module.default;
+			// Mark ready immediately so we don't block rendering
+			// Content was already sanitized on the server
 			isPurifyReady = true;
+
+			// Load DOMPurify in the background for additional client-side sanitization
+			try {
+				const module = await import('dompurify');
+				DOMPurify = module.default;
+			} catch (err) {
+				console.warn('DOMPurify failed to load, using server-sanitized content:', err);
+			}
 		}
 	});
 
