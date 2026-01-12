@@ -2,26 +2,27 @@
 	import { onMount } from 'svelte';
 	import { Loader2, CreditCard, ShieldCheck } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
 
 	let { data } = $props();
 
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 
-	// Plan info for display
-	const planNames: Record<string, string> = {
-		seedling: 'Seedling',
-		sapling: 'Sapling',
-		oak: 'Oak',
-		evergreen: 'Evergreen'
-	};
+	// Plan info derived from unified tier config
+	const planNames: Record<string, string> = Object.fromEntries(
+		PAID_TIERS.map((key) => [key, TIERS[key].display.name])
+	);
 
-	const planPrices: Record<string, { monthly: number; yearly: number }> = {
-		seedling: { monthly: 8, yearly: 81.6 },
-		sapling: { monthly: 12, yearly: 122.4 },
-		oak: { monthly: 25, yearly: 255 },
-		evergreen: { monthly: 35, yearly: 357 }
-	};
+	const planPrices: Record<string, { monthly: number; yearly: number }> = Object.fromEntries(
+		PAID_TIERS.map((key) => [
+			key,
+			{
+				monthly: TIERS[key].pricing.monthlyPrice,
+				yearly: TIERS[key].pricing.yearlyPrice
+			}
+		])
+	);
 
 	let planName = $derived(
 		data.onboarding?.planSelected

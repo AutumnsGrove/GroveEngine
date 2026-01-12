@@ -1,87 +1,27 @@
 /**
  * Tier Feature Limits
  *
- * Static feature limits per subscription tier.
- * Defines what each tier can have (storage, posts, nav pages, etc.)
+ * Backward-compatible wrapper around the unified tier config.
+ * Maintains existing exports while delegating to the single source of truth.
  *
- * These are distinct from rate limits (requests per minute).
- * Rate limits control "how fast", feature limits control "how much".
+ * @deprecated Import directly from '../config/tiers.js' for new code.
  */
 
-// ============================================================================
-// Feature Limits by Tier
-// ============================================================================
-
-/**
- * Feature limits per subscription tier.
- * Each tier unlocks progressively more capabilities.
- *
- * Tier mapping:
- * - free: Meadow-only (no blog)
- * - seedling: $8/mo entry tier
- * - sapling: $12/mo mid tier
- * - oak: $25/mo with BYOD domain
- * - evergreen: $35/mo full service
- */
-export const TIER_FEATURE_LIMITS = {
-  free: {
-    posts: 0, // No blog for free tier
-    storage: 0, // No storage
-    themes: 0, // No theme selection
-    navPages: 0, // No navigation customization
-    emailForwarding: false,
-    customDomain: false,
-    themeCustomizer: false,
-    customFonts: false,
-  },
-  seedling: {
-    posts: 50,
-    storage: 1 * 1024 * 1024 * 1024, // 1 GB in bytes
-    themes: 3,
-    navPages: 0, // No custom nav pages at entry tier
-    emailForwarding: false,
-    customDomain: false,
-    themeCustomizer: false,
-    customFonts: false,
-  },
-  sapling: {
-    posts: 250,
-    storage: 5 * 1024 * 1024 * 1024, // 5 GB in bytes
-    themes: 10,
-    navPages: 3, // 3 custom nav pages
-    emailForwarding: true,
-    customDomain: false,
-    themeCustomizer: false,
-    customFonts: false,
-  },
-  oak: {
-    posts: Infinity, // Unlimited
-    storage: 20 * 1024 * 1024 * 1024, // 20 GB in bytes
-    themes: Infinity, // All themes
-    navPages: 5, // 5 custom nav pages
-    emailForwarding: true,
-    customDomain: true, // BYOD
-    themeCustomizer: true,
-    customFonts: false,
-  },
-  evergreen: {
-    posts: Infinity,
-    storage: 100 * 1024 * 1024 * 1024, // 100 GB in bytes
-    themes: Infinity,
-    navPages: 8, // Full nav customization
-    emailForwarding: true,
-    customDomain: true, // Domain included
-    themeCustomizer: true,
-    customFonts: true,
-  },
-} as const;
+import {
+  TIERS,
+  TIER_ORDER,
+  type TierKey,
+  isValidTier as configIsValidTier,
+  formatStorage as configFormatStorage,
+  formatLimit as configFormatLimit,
+} from "../config/tiers.js";
 
 // ============================================================================
-// Types
+// Types (backward compatible)
 // ============================================================================
 
-export type SubscriptionTier = keyof typeof TIER_FEATURE_LIMITS;
-export type FeatureKey = keyof (typeof TIER_FEATURE_LIMITS)["seedling"];
+export type SubscriptionTier = TierKey;
+export type FeatureKey = keyof TierFeatures;
 
 export interface TierFeatures {
   posts: number;
@@ -95,7 +35,31 @@ export interface TierFeatures {
 }
 
 // ============================================================================
-// Helpers
+// Feature Limits (derived from unified config)
+// ============================================================================
+
+/**
+ * Feature limits per subscription tier.
+ * Derived from the unified tier config.
+ */
+export const TIER_FEATURE_LIMITS = Object.fromEntries(
+  TIER_ORDER.map((key) => [
+    key,
+    {
+      posts: TIERS[key].limits.posts,
+      storage: TIERS[key].limits.storage,
+      themes: TIERS[key].limits.themes,
+      navPages: TIERS[key].limits.navPages,
+      emailForwarding: TIERS[key].features.emailForwarding,
+      customDomain: TIERS[key].features.customDomain,
+      themeCustomizer: TIERS[key].features.themeCustomizer,
+      customFonts: TIERS[key].features.customFonts,
+    },
+  ]),
+) as Record<SubscriptionTier, TierFeatures>;
+
+// ============================================================================
+// Helpers (delegate to unified config)
 // ============================================================================
 
 /**
@@ -133,7 +97,7 @@ export function hasFeature(
  * Check if a tier is valid.
  */
 export function isValidTier(tier: string): tier is SubscriptionTier {
-  return tier in TIER_FEATURE_LIMITS;
+  return configIsValidTier(tier);
 }
 
 /**
@@ -142,28 +106,15 @@ export function isValidTier(tier: string): tier is SubscriptionTier {
  */
 export function getNavPageLimit(tier: string): number {
   if (!isValidTier(tier)) return 0;
-  return TIER_FEATURE_LIMITS[tier].navPages;
+  return TIERS[tier].limits.navPages;
 }
 
 /**
  * Format storage size for display.
  */
-export function formatStorage(bytes: number): string {
-  if (bytes === 0) return "0 GB";
-  if (bytes === Infinity) return "Unlimited";
-
-  const gb = bytes / (1024 * 1024 * 1024);
-  if (gb >= 1) return `${gb} GB`;
-
-  const mb = bytes / (1024 * 1024);
-  return `${mb} MB`;
-}
+export const formatStorage = configFormatStorage;
 
 /**
  * Format feature count for display.
  */
-export function formatLimit(count: number): string {
-  if (count === 0) return "None";
-  if (count === Infinity) return "Unlimited";
-  return count.toString();
-}
+export const formatLimit = configFormatLimit;

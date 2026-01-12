@@ -4,6 +4,9 @@
 
   // Centralized icon registry - single source of truth for all icons
   import { pricingIcons } from "$lib/utils/icons";
+
+  // Tier data from unified config
+  let { data } = $props();
 </script>
 
 <SEO
@@ -48,9 +51,9 @@
             <tr class="border-b-2 border-default">
               <th class="py-4 px-3 font-serif text-foreground"></th>
               <th class="py-4 px-3 text-center">
-                <div class="font-serif text-foreground">Free</div>
+                <div class="font-serif text-foreground">{data.free.name}</div>
                 <div class="text-2xl font-sans font-bold text-accent-muted">
-                  $0
+                  ${data.free.monthlyPrice}
                 </div>
               </th>
               <th class="py-4 px-3 text-center">
@@ -62,9 +65,9 @@
                     class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
-                <div class="font-serif text-foreground">Seedling</div>
+                <div class="font-serif text-foreground">{data.seedling.name}</div>
                 <div class="text-2xl font-sans font-bold text-accent-muted">
-                  $8<span class="text-sm font-normal text-foreground-faint"
+                  ${data.seedling.monthlyPrice}<span class="text-sm font-normal text-foreground-faint"
                     >/mo</span
                   >
                 </div>
@@ -78,9 +81,9 @@
                     class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
-                <div class="font-serif text-foreground">Sapling</div>
+                <div class="font-serif text-foreground">{data.sapling.name}</div>
                 <div class="text-2xl font-sans font-bold text-accent-muted">
-                  $12<span class="text-sm font-normal text-foreground-faint"
+                  ${data.sapling.monthlyPrice}<span class="text-sm font-normal text-foreground-faint"
                     >/mo</span
                   >
                 </div>
@@ -94,9 +97,9 @@
                     class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
-                <div class="font-serif text-foreground">Oak</div>
+                <div class="font-serif text-foreground">{data.oak.name}</div>
                 <div class="text-2xl font-sans font-bold text-accent-muted">
-                  $25<span class="text-sm font-normal text-foreground-faint"
+                  ${data.oak.monthlyPrice}<span class="text-sm font-normal text-foreground-faint"
                     >/mo</span
                   >
                 </div>
@@ -110,9 +113,9 @@
                     class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
-                <div class="font-serif text-foreground">Evergreen</div>
+                <div class="font-serif text-foreground">{data.evergreen.name}</div>
                 <div class="text-2xl font-sans font-bold text-accent-muted">
-                  $35<span class="text-sm font-normal text-foreground-faint"
+                  ${data.evergreen.monthlyPrice}<span class="text-sm font-normal text-foreground-faint"
                     >/mo</span
                   >
                 </div>
@@ -166,11 +169,11 @@
                   Blog Posts
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-3 px-3 text-center text-foreground">50</td>
-              <td class="py-3 px-3 text-center text-foreground">250</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
+              <td class="py-3 px-3 text-center text-foreground-faint">{data.free.limits.posts}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.seedling.limits.posts}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.limits.posts}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.limits.posts}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.limits.posts}</td>
             </tr>
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
@@ -182,11 +185,11 @@
                   Storage
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-3 px-3 text-center text-foreground">1 GB</td>
-              <td class="py-3 px-3 text-center text-foreground">5 GB</td>
-              <td class="py-3 px-3 text-center text-foreground">20 GB</td>
-              <td class="py-3 px-3 text-center text-foreground">100 GB</td>
+              <td class="py-3 px-3 text-center text-foreground-faint">{data.free.limits.storage}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.seedling.limits.storage}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.limits.storage}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.limits.storage}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.limits.storage}</td>
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
@@ -198,15 +201,11 @@
                   Themes
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-3 px-3 text-center text-foreground">3 + accent</td>
-              <td class="py-3 px-3 text-center text-foreground">10 + accent</td>
-              <td class="py-3 px-3 text-center text-foreground"
-                >Customizer + Community</td
-              >
-              <td class="py-3 px-3 text-center text-foreground"
-                >Customizer + Community + Fonts</td
-              >
+              <td class="py-3 px-3 text-center text-foreground-faint">{data.free.limits.themes}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.seedling.limits.themes}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.limits.themes}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.limits.themes}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.limits.themes}</td>
             </tr>
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
@@ -218,11 +217,11 @@
                   Nav Pages
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-3 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-3 px-3 text-center text-foreground">3</td>
-              <td class="py-3 px-3 text-center text-foreground">5</td>
-              <td class="py-3 px-3 text-center text-foreground">8</td>
+              <td class="py-3 px-3 text-center text-foreground-faint">{data.free.limits.navPages}</td>
+              <td class="py-3 px-3 text-center text-foreground-faint">{data.seedling.limits.navPages}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.limits.navPages}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.limits.navPages}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.limits.navPages}</td>
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
@@ -275,11 +274,11 @@
                   Public Comments
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground">20/week</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
-              <td class="py-3 px-3 text-center text-foreground">Unlimited</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.free.limits.commentsPerWeek}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.seedling.limits.commentsPerWeek}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.limits.commentsPerWeek}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.limits.commentsPerWeek}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.limits.commentsPerWeek}</td>
             </tr>
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
@@ -359,31 +358,19 @@
                   Support
                 </span>
               </td>
-              <td class="py-3 px-3 text-center text-foreground">Help Center</td>
-              <td class="py-3 px-3 text-center text-foreground">Community</td>
-              <td class="py-3 px-3 text-center text-foreground">Email</td>
-              <td class="py-3 px-3 text-center text-foreground">Priority</td>
-              <td class="py-3 px-3 text-center text-foreground"
-                >8hrs + Priority</td
-              >
+              <td class="py-3 px-3 text-center text-foreground">{data.free.support}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.seedling.support}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.sapling.support}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.oak.support}</td>
+              <td class="py-3 px-3 text-center text-foreground">{data.evergreen.support}</td>
             </tr>
             <tr class="border-b-2 border-default">
               <td class="py-3 px-3 text-foreground-muted italic">Best for</td>
-              <td class="py-3 px-3 text-center text-foreground-subtle italic"
-                >Readers</td
-              >
-              <td class="py-3 px-3 text-center text-foreground-subtle italic"
-                >Curious</td
-              >
-              <td class="py-3 px-3 text-center text-foreground-subtle italic"
-                >Hobbyists</td
-              >
-              <td class="py-3 px-3 text-center text-foreground-subtle italic"
-                >Serious Bloggers</td
-              >
-              <td class="py-3 px-3 text-center text-foreground-subtle italic"
-                >Professionals</td
-              >
+              <td class="py-3 px-3 text-center text-foreground-subtle italic">{data.free.bestFor}</td>
+              <td class="py-3 px-3 text-center text-foreground-subtle italic">{data.seedling.bestFor}</td>
+              <td class="py-3 px-3 text-center text-foreground-subtle italic">{data.sapling.bestFor}</td>
+              <td class="py-3 px-3 text-center text-foreground-subtle italic">{data.oak.bestFor}</td>
+              <td class="py-3 px-3 text-center text-foreground-subtle italic">{data.evergreen.bestFor}</td>
             </tr>
             <tr>
               <td class="py-4 px-3 text-foreground-muted">
@@ -396,18 +383,10 @@
                 </span>
               </td>
               <td class="py-4 px-3 text-center text-foreground-faint">—</td>
-              <td class="py-4 px-3 text-center font-medium text-accent-muted"
-                >$82</td
-              >
-              <td class="py-4 px-3 text-center font-medium text-accent-muted"
-                >$122</td
-              >
-              <td class="py-4 px-3 text-center font-medium text-accent-muted"
-                >$255</td
-              >
-              <td class="py-4 px-3 text-center font-medium text-accent-muted"
-                >$357</td
-              >
+              <td class="py-4 px-3 text-center font-medium text-accent-muted">${data.seedling.yearlyPrice}</td>
+              <td class="py-4 px-3 text-center font-medium text-accent-muted">${data.sapling.yearlyPrice}</td>
+              <td class="py-4 px-3 text-center font-medium text-accent-muted">${data.oak.yearlyPrice}</td>
+              <td class="py-4 px-3 text-center font-medium text-accent-muted">${data.evergreen.yearlyPrice}</td>
             </tr>
           </tbody>
         </table>

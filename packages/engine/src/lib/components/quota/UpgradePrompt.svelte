@@ -14,7 +14,7 @@
 
   import { onMount } from 'svelte';
   import type { SubscriptionStatus } from '../../groveauth/index.js';
-  import { TIER_NAMES } from '../../groveauth/index.js';
+  import { TIERS, getNextTier, formatLimit, type PaidTierKey } from '../../config/tiers.js';
 
   interface Props {
     open: boolean;
@@ -71,16 +71,16 @@
     safeStatus.grace_period_days_remaining > 0
   );
 
-  // Tier upgrade path
-  const nextTier = $derived(
-    safeStatus.tier === 'seedling' ? 'sapling' :
-    safeStatus.tier === 'sapling' ? 'oak' :
-    safeStatus.tier === 'oak' ? 'evergreen' :
-    null
-  );
+  // Tier upgrade path (derived from unified config)
+  const nextTier = $derived(getNextTier(safeStatus.tier as PaidTierKey));
 
-  const nextTierName = $derived(nextTier ? TIER_NAMES[nextTier] : null);
-  const currentTierName = $derived(TIER_NAMES[safeStatus.tier] || 'Unknown');
+  const nextTierName = $derived(nextTier ? TIERS[nextTier].display.name : null);
+  const currentTierName = $derived(TIERS[safeStatus.tier as PaidTierKey]?.display.name || 'Unknown');
+
+  // Get next tier's post limit for display
+  const nextTierPostLimit = $derived(
+    nextTier ? formatLimit(TIERS[nextTier].limits.posts) : null
+  );
 
   /**
    * Get all focusable elements within the modal
@@ -234,17 +234,13 @@
         {/if}
 
         <!-- Tier comparison -->
-        {#if nextTierName}
+        {#if nextTierName && nextTierPostLimit}
           <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
             <div class="flex items-center justify-between">
               <div>
                 <p class="font-medium text-blue-900 dark:text-blue-100">{nextTierName} Plan</p>
                 <p class="text-sm text-blue-700 dark:text-blue-300">
-                  {#if nextTier === 'sapling'}
-                    Up to 250 posts
-                  {:else}
-                    Unlimited posts
-                  {/if}
+                  {nextTierPostLimit === 'Unlimited' ? 'Unlimited posts' : `Up to ${nextTierPostLimit} posts`}
                 </p>
               </div>
               <a

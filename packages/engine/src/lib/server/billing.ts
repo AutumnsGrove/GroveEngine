@@ -4,8 +4,9 @@
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
+import { getTiersWithFeature, type TierKey } from "../config/tiers.js";
 
-export type PlanTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export type PlanTier = TierKey;
 export type SubscriptionStatus =
   | "trialing"
   | "active"
@@ -20,6 +21,17 @@ export interface TenantSubscription {
   isActive: boolean;
   currentPeriodEnd: number | null;
 }
+
+/**
+ * Feature tier requirements derived from unified config.
+ */
+const FEATURE_REQUIREMENTS: Record<string, PlanTier[]> = {
+  ai: getTiersWithFeature("ai"),
+  shop: getTiersWithFeature("shop"),
+  custom_domain: getTiersWithFeature("customDomain"),
+  analytics: getTiersWithFeature("analytics"),
+  email_forwarding: getTiersWithFeature("emailForwarding"),
+};
 
 /**
  * Get tenant's subscription tier and status
@@ -79,15 +91,6 @@ export async function checkFeatureAccess(
   if (!subscription.isActive) {
     return { allowed: false, reason: "Subscription inactive or suspended" };
   }
-
-  // Feature tier requirements
-  const FEATURE_REQUIREMENTS: Record<string, PlanTier[]> = {
-    ai: ["seedling", "sapling", "oak", "evergreen"], // All paid tiers
-    shop: ["sapling", "oak", "evergreen"], // Sapling+
-    custom_domain: ["oak", "evergreen"], // Oak+
-    analytics: ["oak", "evergreen"], // Oak+
-    email_forwarding: ["sapling", "oak", "evergreen"], // Sapling+
-  };
 
   const requiredTiers = FEATURE_REQUIREMENTS[feature];
   if (!requiredTiers) {

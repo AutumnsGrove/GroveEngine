@@ -2,16 +2,13 @@
  * Stripe Configuration and Helpers
  *
  * Contains price IDs for all plans and checkout session creation.
+ * Plan display information is derived from the unified tier config.
  *
  * SETUP INSTRUCTIONS:
  * -------------------
  * 1. Go to Stripe Dashboard → Products (https://dashboard.stripe.com/products)
- * 2. Create 4 products with monthly + yearly prices:
- *    - Seedling: $8/month, $81.60/year (15% discount)
- *    - Sapling: $12/month, $122.40/year
- *    - Oak: $25/month, $255/year
- *    - Evergreen: $35/month, $357/year
- * 3. Copy each price ID (starts with "price_") and paste below
+ * 2. Create 4 products with monthly + yearly prices (see unified config for prices)
+ * 3. Copy each price ID (starts with "price_") and set environment variables
  * 4. Set environment variables in Cloudflare Dashboard:
  *    - STRIPE_SECRET_KEY (sk_test_... or sk_live_...)
  *    - STRIPE_PUBLISHABLE_KEY (pk_test_... or pk_live_...)
@@ -19,6 +16,12 @@
  *
  * See docs/STRIPE-SETUP.md for detailed instructions.
  */
+
+import {
+  TIERS,
+  PAID_TIERS,
+  type PaidTierKey,
+} from "@autumnsgrove/groveengine/config";
 
 // Stripe Price IDs - Get these from your Stripe Dashboard → Products → [Product] → Pricing
 // IMPORTANT: These must be from the SAME Stripe account as your STRIPE_SECRET_KEY
@@ -65,30 +68,21 @@ export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
 }
 
 /**
- * Plan display information
+ * Plan display information (derived from unified tier config)
  */
-export const PLAN_INFO = {
-  seedling: {
-    name: "Seedling",
-    monthlyPrice: 800, // cents
-    yearlyPrice: 8160,
-  },
-  sapling: {
-    name: "Sapling",
-    monthlyPrice: 1200,
-    yearlyPrice: 12240,
-  },
-  oak: {
-    name: "Oak",
-    monthlyPrice: 2500,
-    yearlyPrice: 25500,
-  },
-  evergreen: {
-    name: "Evergreen",
-    monthlyPrice: 3500,
-    yearlyPrice: 35700,
-  },
-} as const;
+export const PLAN_INFO = Object.fromEntries(
+  PAID_TIERS.map((key) => [
+    key,
+    {
+      name: TIERS[key].display.name,
+      monthlyPrice: TIERS[key].pricing.monthlyPriceCents,
+      yearlyPrice: TIERS[key].pricing.yearlyPriceCents,
+    },
+  ]),
+) as Record<
+  PaidTierKey,
+  { name: string; monthlyPrice: number; yearlyPrice: number }
+>;
 
 /**
  * Create a Stripe checkout session

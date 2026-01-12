@@ -4,6 +4,8 @@
  * Type definitions for integrating with GroveAuth service.
  */
 
+import { TIERS, PAID_TIERS, type PaidTierKey } from "../config/tiers.js";
+
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
@@ -147,7 +149,7 @@ export interface LoginUrlResult {
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
+export type SubscriptionTier = PaidTierKey;
 
 export interface UserSubscription {
   id: string;
@@ -192,11 +194,12 @@ export interface CanPostResponse {
 }
 
 // =============================================================================
-// POST LIMIT CONSTANTS
+// POST LIMIT CONSTANTS (derived from unified config)
 // =============================================================================
 
 /**
  * Post limits per subscription tier.
+ * Derived from the unified tier config.
  *
  * Business rationale:
  * - Seedling (50 posts): Entry-level tier for curious newcomers testing the
@@ -213,22 +216,21 @@ export interface CanPostResponse {
  *
  * @see docs/implementing-post-limits.md for full specification
  */
-export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
-  seedling: 50,    // For curious newcomers trying blogging
-  sapling: 250,    // For hobbyists and regular bloggers
-  oak: null,       // Unlimited for serious bloggers
-  evergreen: null, // Unlimited for professionals
-};
+export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> =
+  Object.fromEntries(
+    PAID_TIERS.map((key) => [
+      key,
+      TIERS[key].limits.posts === Infinity ? null : TIERS[key].limits.posts,
+    ]),
+  ) as Record<SubscriptionTier, number | null>;
 
 /**
  * Human-readable tier names for UI display.
+ * Derived from the unified tier config.
  */
-export const TIER_NAMES: Record<SubscriptionTier, string> = {
-  seedling: "Seedling",
-  sapling: "Sapling",
-  oak: "Oak",
-  evergreen: "Evergreen",
-};
+export const TIER_NAMES: Record<SubscriptionTier, string> = Object.fromEntries(
+  PAID_TIERS.map((key) => [key, TIERS[key].display.name]),
+) as Record<SubscriptionTier, string>;
 
 // =============================================================================
 // ERROR TYPES

@@ -1,6 +1,6 @@
 /**
  * Shared plan data for Grove Plant onboarding.
- * Single source of truth for pricing tiers used across landing and plans pages.
+ * Derives from unified tier config for consistency.
  */
 
 import {
@@ -9,16 +9,22 @@ import {
   Trees,
   Crown,
 } from "@autumnsgrove/groveengine/ui/icons";
+import {
+  TIERS,
+  PAID_TIERS,
+  type PaidTierKey,
+  type TierStatus as ConfigTierStatus,
+} from "@autumnsgrove/groveengine/config";
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-/** Tier availability status */
-export type TierStatus = "available" | "coming_soon" | "future";
+/** Tier availability status (re-export from config) */
+export type TierStatus = ConfigTierStatus;
 
 /** Icon keys matching plan IDs */
-export type TierIconKey = "seedling" | "sapling" | "oak" | "evergreen";
+export type TierIconKey = PaidTierKey;
 
 /** Full plan definition with all details */
 export interface Plan {
@@ -55,84 +61,23 @@ export const tierIcons: Record<TierIconKey, typeof Sprout> = {
 };
 
 // ============================================================================
-// PLAN DATA
+// PLAN DATA (derived from unified config)
 // ============================================================================
 
-/** Complete plan definitions */
-export const plans: Plan[] = [
-  {
-    id: "seedling",
-    name: "Seedling",
-    tagline: "Just planted",
-    description:
-      "Perfect for getting started. A quiet corner to call your own.",
-    monthlyPrice: 8,
-    features: [
-      "50 posts",
-      "1 GB storage",
-      "3 curated themes",
-      "Meadow access",
-      "RSS feed",
-      "No ads ever",
-    ],
-    status: "available",
-    icon: "seedling",
-  },
-  {
-    id: "sapling",
-    name: "Sapling",
-    tagline: "Growing strong",
-    description: "For blogs finding their voice. Room to stretch and grow.",
-    monthlyPrice: 12,
-    features: [
-      "250 posts",
-      "5 GB storage",
-      "10 themes",
-      "3 nav pages",
-      "Email forwarding",
-      "Centennial eligible",
-      "Everything in Seedling",
-    ],
-    status: "coming_soon",
-    icon: "sapling",
-  },
-  {
-    id: "oak",
-    name: "Oak",
-    tagline: "Deep roots",
-    description: "Full creative control. Your blog, your rules.",
-    monthlyPrice: 25,
-    features: [
-      "Unlimited posts",
-      "20 GB storage",
-      "Theme customizer",
-      "5 nav pages",
-      "Bring your own domain",
-      "Centennial eligible",
-      "Priority support",
-    ],
-    status: "future",
-    icon: "oak",
-  },
-  {
-    id: "evergreen",
-    name: "Evergreen",
-    tagline: "Always flourishing",
-    description: "The complete package. Everything Grove has to offer.",
-    monthlyPrice: 35,
-    features: [
-      "Unlimited everything",
-      "100 GB storage",
-      "Custom fonts",
-      "8 nav pages",
-      "Domain included",
-      "Centennial eligible",
-      "8 hrs/mo dedicated support",
-    ],
-    status: "future",
-    icon: "evergreen",
-  },
-];
+/** Complete plan definitions derived from unified tier config */
+export const plans: Plan[] = PAID_TIERS.map((key) => {
+  const tier = TIERS[key];
+  return {
+    id: key,
+    name: tier.display.name,
+    tagline: tier.display.tagline,
+    description: tier.display.description,
+    monthlyPrice: tier.pricing.monthlyPrice,
+    features: tier.display.featureStrings,
+    status: tier.status,
+    icon: key,
+  };
+});
 
 /** Valid plan IDs for form validation */
 export const validPlanIds: TierIconKey[] = plans.map((p) => p.id);
