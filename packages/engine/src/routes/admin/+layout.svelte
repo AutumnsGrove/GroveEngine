@@ -112,18 +112,31 @@
     {#if !sidebarCollapsed}
       <div class="sidebar-footer">
         <div class="user-info">
-          <span class="email">{data.user.email}</span>
+          <span class="email">{data.user?.email ?? 'Guest (Demo Mode)'}</span>
         </div>
-        <a href="/auth/logout" class="logout-btn">
-          <LogOut class="logout-icon" />
-          <span>Logout</span>
-        </a>
+        {#if data.user}
+          <a href="/auth/logout" class="logout-btn">
+            <LogOut class="logout-icon" />
+            <span>Logout</span>
+          </a>
+        {:else}
+          <a href="/auth/login" class="logout-btn">
+            <LogOut class="logout-icon" />
+            <span>Sign In</span>
+          </a>
+        {/if}
       </div>
     {:else}
       <div class="sidebar-footer-collapsed">
-        <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
-          <LogOut class="logout-icon" />
-        </a>
+        {#if data.user}
+          <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
+            <LogOut class="logout-icon" />
+          </a>
+        {:else}
+          <a href="/auth/login" class="logout-btn-icon" title="Sign In" aria-label="Sign In">
+            <LogOut class="logout-icon" />
+          </a>
+        {/if}
       </div>
     {/if}
   </aside>
