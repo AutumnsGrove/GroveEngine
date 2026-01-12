@@ -106,7 +106,6 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   console.log("[Layout] FINAL navPages:", navPages);
 
   // DEBUG: Include debug info in response (avoid platform.env access during build)
-  // @ts-expect-error - temporary debug field
   const _debug: Record<string, unknown> = {
     tenantId: tenantId ?? "NO_TENANT_ID",
     hasDb: building ? "BUILDING" : !!platform?.env?.DB,
