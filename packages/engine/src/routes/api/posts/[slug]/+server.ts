@@ -6,7 +6,30 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import * as cache from "$lib/server/services/cache.js";
 import type { RequestHandler } from "./$types.js";
+
+/**
+ * Invalidate blog post caches after create/update/delete
+ * Clears both the single post cache and the post list cache
+ */
+async function invalidatePostCaches(
+  kv: KVNamespace | undefined,
+  tenantId: string,
+  slug: string,
+): Promise<void> {
+  if (!kv) return;
+
+  try {
+    // Invalidate single post cache
+    await cache.del(kv, `blog:${tenantId}:${slug}`);
+    // Invalidate post list cache
+    await cache.del(kv, `blog:list:${tenantId}`);
+  } catch (err) {
+    // Log but don't fail the request - cache invalidation is not critical
+    console.error("[Cache] Failed to invalidate post caches:", err);
+  }
+}
 
 interface PostRecord {
   slug: string;
@@ -261,6 +284,9 @@ export const PUT: RequestHandler = async ({
       [slug],
     );
 
+    // Invalidate caches so readers see the updated content
+    await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);
+
     return json({
       success: true,
       slug,
@@ -327,6 +353,9 @@ export const DELETE: RequestHandler = async ({
 
     // Delete using TenantDb (automatically adds tenant_id to WHERE clause)
     await tenantDb.delete("posts", "slug = ?", [slug]);
+
+    // Invalidate caches so the deleted post disappears from listings
+    await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);
 
     return json({
       success: true,

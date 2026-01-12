@@ -9,6 +9,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
+import * as cache from "$lib/server/services/cache.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -248,6 +249,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       file_hash,
       last_synced: timestamp,
     });
+
+    // Invalidate post list cache so the new post appears in listings
+    if (kv) {
+      try {
+        await cache.del(kv, `blog:list:${tenantId}`);
+      } catch (err) {
+        console.error("[Cache] Failed to invalidate list cache:", err);
+      }
+    }
 
     return json({
       success: true,
