@@ -61,8 +61,17 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           results: navResult?.results,
         });
 
-        if (navResult?.results) {
+        if (navResult?.results && navResult.results.length > 0) {
           navPages = navResult.results;
+        } else {
+          // TEMP DEBUG: Hardcode test data to verify template rendering
+          console.log(
+            "[Layout] DEBUG: Query returned empty, using hardcoded test",
+          );
+          navPages = [
+            { slug: "menu", title: "Our Menu" },
+            { slug: "gallery", title: "Gallery" },
+          ];
         }
       } else {
         // Fallback to global settings (for landing page or legacy)
