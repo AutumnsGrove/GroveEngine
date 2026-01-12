@@ -204,8 +204,7 @@ export default {
     // (null routes were removed - all special subdomains now have explicit targets)
 
     // Determine target hostname - default to main engine for tenant blogs
-    // Note: wrangler.toml says "groveengine" but the Cloudflare Pages project is "grove-example-site"
-    const targetHostname = routeTarget || "grove-example-site.pages.dev";
+    const targetHostname = routeTarget || "groveengine.pages.dev";
 
     // Proxy to target
     const targetUrl = new URL(request.url);
