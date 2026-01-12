@@ -43,35 +43,28 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
         }
 
         // Load pages that should appear in navigation
-        // Exclude 'home' and 'about' since they're hardcoded in the nav
+        // Simplified query for debugging - just get all pages first
         const navResult = await db
           .prepare(
-            `SELECT slug, title FROM pages
-             WHERE tenant_id = ? AND show_in_nav = 1
-               AND slug NOT IN ('home', 'about')
-             ORDER BY nav_order ASC, title ASC`,
+            `SELECT slug, title, show_in_nav FROM pages WHERE tenant_id = ?`,
           )
           .bind(tenantId)
-          .all<NavPage>();
+          .all<NavPage & { show_in_nav: number }>();
 
-        // Debug: Log nav query results
-        console.log("[Layout] navPages query:", {
+        console.log("[Layout] ALL pages for tenant:", {
           tenantId,
-          resultCount: navResult?.results?.length ?? 0,
-          results: navResult?.results,
+          count: navResult?.results?.length ?? 0,
+          pages: navResult?.results,
         });
 
-        if (navResult?.results && navResult.results.length > 0) {
-          navPages = navResult.results;
-        } else {
-          // TEMP DEBUG: Hardcode test data to verify template rendering
-          console.log(
-            "[Layout] DEBUG: Query returned empty, using hardcoded test",
-          );
-          navPages = [
-            { slug: "menu", title: "Our Menu" },
-            { slug: "gallery", title: "Gallery" },
-          ];
+        // Filter in JS instead of SQL for now
+        if (navResult?.results) {
+          navPages = navResult.results
+            .filter(
+              (p) =>
+                p.show_in_nav === 1 && p.slug !== "home" && p.slug !== "about",
+            )
+            .map((p) => ({ slug: p.slug, title: p.title }));
         }
       } else {
         // Fallback to global settings (for landing page or legacy)
@@ -93,21 +86,12 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     console.error("Failed to load site settings (using defaults):", message);
   }
 
-  // TEMP DEBUG: Force hardcoded navPages to verify data flow
-  const finalNavPages =
-    navPages.length > 0
-      ? navPages
-      : [
-          { slug: "menu", title: "DEBUG Menu" },
-          { slug: "gallery", title: "DEBUG Gallery" },
-        ];
-
-  console.log("[Layout] FINAL returning navPages:", finalNavPages);
+  console.log("[Layout] FINAL navPages:", navPages);
 
   return {
     user: locals.user || null,
     context: locals.context as AppContext,
     siteSettings,
-    navPages: finalNavPages,
+    navPages,
   };
 };
