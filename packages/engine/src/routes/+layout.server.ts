@@ -58,14 +58,20 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
         });
 
         // Filter in JS instead of SQL for now
+        // Use truthy check instead of strict === 1 (D1 may return different types)
         if (navResult?.results) {
           navPages = navResult.results
             .filter(
-              (p) =>
-                p.show_in_nav === 1 && p.slug !== "home" && p.slug !== "about",
+              (p) => p.show_in_nav && p.slug !== "home" && p.slug !== "about",
             )
             .map((p) => ({ slug: p.slug, title: p.title }));
         }
+
+        // DEBUG: Log what we filtered
+        console.log("[Layout] Filtered navPages:", {
+          count: navPages.length,
+          pages: navPages,
+        });
       } else {
         // Fallback to global settings (for landing page or legacy)
         const result = await db
