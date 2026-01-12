@@ -7,7 +7,15 @@
  */
 
 /** Document category */
-export type DocCategory = "specs" | "help" | "legal" | "marketing" | "patterns";
+export type DocCategory =
+  | "specs"
+  | "help"
+  | "legal"
+  | "marketing"
+  | "patterns"
+  | "philosophy"
+  | "design"
+  | "developer";
 
 /** Spec subcategories (mirrors workshop page organization) */
 export type SpecCategory =
