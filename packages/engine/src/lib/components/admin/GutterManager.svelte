@@ -48,21 +48,23 @@
   } = $props();
 
   /**
-   * Extract heading level from an anchor string
+   * Extract heading level from an anchor string (capped at 1-6)
    * @param {string | undefined} anchor
-   * @returns {number}
+   * @returns {number} Heading level 1-6, or 0 if not a heading
    */
   function getHeadingLevel(anchor) {
     if (!anchor) return 0;
-    const match = anchor.match(/^#+/);
-    return match ? match[0].length : 0;
+    // Only match valid heading levels (1-6 hash marks)
+    const match = anchor.match(/^#{1,6}/);
+    return match ? Math.min(match[0].length, 6) : 0;
   }
 
   /**
-   * Preprocess anchors into structured data for better performance
-   * @type {ProcessedAnchor[]}
+   * Process a raw anchor string into structured data
+   * @param {string} anchor - The raw anchor string
+   * @returns {ProcessedAnchor}
    */
-  let processedAnchors = $derived(availableAnchors.map(anchor => {
+  function createProcessedAnchor(anchor) {
     const isHeading = anchor.startsWith('#');
     const headingLevel = getHeadingLevel(anchor);
     const isAnchorTag = anchor.startsWith('anchor:');
@@ -76,27 +78,29 @@
         : 'paragraph';
 
     return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
-  }));
+  }
 
   /**
-   * Process a single anchor for display (used in vine list)
+   * Preprocess anchors into structured data for better performance
+   * @type {ProcessedAnchor[]}
+   */
+  let processedAnchors = $derived(availableAnchors.map(createProcessedAnchor));
+
+  /** Default empty anchor for fallback */
+  const emptyAnchor = { raw: '', isHeading: false, headingLevel: 0, isAnchorTag: false, displayText: '', type: 'paragraph' };
+
+  /**
+   * Get processed anchor data for display (checks cache first, then computes)
    * @param {string | undefined} anchor
    * @returns {ProcessedAnchor}
    */
-  function processAnchor(anchor) {
-    const isHeading = anchor?.startsWith('#') || false;
-    const headingLevel = getHeadingLevel(anchor);
-    const isAnchorTag = anchor?.startsWith('anchor:') || false;
-    const displayText = isHeading
-      ? (anchor?.replace(/^#+\s*/, '') || '')
-      : (anchor?.replace('anchor:', '') || anchor || '');
-    const type = isHeading
-      ? `heading level ${headingLevel}`
-      : isAnchorTag
-        ? 'anchor tag'
-        : 'paragraph';
-
-    return { raw: anchor || '', isHeading, headingLevel, isAnchorTag, displayText, type };
+  function getProcessedAnchor(anchor) {
+    if (!anchor) return emptyAnchor;
+    // Try to find in preprocessed cache first
+    const cached = processedAnchors.find(pa => pa.raw === anchor);
+    if (cached) return cached;
+    // Fallback to computing for anchors not in availableAnchors
+    return createProcessedAnchor(anchor);
   }
 
   // State
@@ -331,7 +335,7 @@
   {:else}
     <div class="vines-list" role="list" aria-label="Vine items">
       {#each gutterItems as item, index (index)}
-        {@const anchor = processAnchor(item.anchor)}
+        {@const anchor = getProcessedAnchor(item.anchor)}
         <div class="vine-item" role="listitem">
           <div class="item-header">
             <span class="item-type" aria-hidden="true">
