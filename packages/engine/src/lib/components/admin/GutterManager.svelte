@@ -30,12 +30,74 @@
    * @property {string} url
    */
 
+  /**
+   * @typedef {Object} ProcessedAnchor
+   * @property {string} raw - Original anchor string
+   * @property {boolean} isHeading - Whether this is a heading anchor
+   * @property {number} headingLevel - Heading level (1-6) or 0 if not a heading
+   * @property {boolean} isAnchorTag - Whether this is a custom anchor tag
+   * @property {string} displayText - Human-readable display text
+   * @property {string} type - Anchor type for accessibility labels
+   */
+
   // Props
   let {
     gutterItems = $bindable(/** @type {GutterItem[]} */ ([])),
     onInsertAnchor = /** @type {(anchorName: string) => void} */ ((anchorName) => {}),
     availableAnchors = /** @type {string[]} */ ([]),
   } = $props();
+
+  /**
+   * Extract heading level from an anchor string
+   * @param {string | undefined} anchor
+   * @returns {number}
+   */
+  function getHeadingLevel(anchor) {
+    if (!anchor) return 0;
+    const match = anchor.match(/^#+/);
+    return match ? match[0].length : 0;
+  }
+
+  /**
+   * Preprocess anchors into structured data for better performance
+   * @type {ProcessedAnchor[]}
+   */
+  let processedAnchors = $derived(availableAnchors.map(anchor => {
+    const isHeading = anchor.startsWith('#');
+    const headingLevel = getHeadingLevel(anchor);
+    const isAnchorTag = anchor.startsWith('anchor:');
+    const displayText = isHeading
+      ? anchor.replace(/^#+\s*/, '')
+      : anchor.replace('anchor:', '');
+    const type = isHeading
+      ? `heading level ${headingLevel}`
+      : isAnchorTag
+        ? 'anchor tag'
+        : 'paragraph';
+
+    return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
+  }));
+
+  /**
+   * Process a single anchor for display (used in vine list)
+   * @param {string | undefined} anchor
+   * @returns {ProcessedAnchor}
+   */
+  function processAnchor(anchor) {
+    const isHeading = anchor?.startsWith('#') || false;
+    const headingLevel = getHeadingLevel(anchor);
+    const isAnchorTag = anchor?.startsWith('anchor:') || false;
+    const displayText = isHeading
+      ? (anchor?.replace(/^#+\s*/, '') || '')
+      : (anchor?.replace('anchor:', '') || anchor || '');
+    const type = isHeading
+      ? `heading level ${headingLevel}`
+      : isAnchorTag
+        ? 'anchor tag'
+        : 'paragraph';
+
+    return { raw: anchor || '', isHeading, headingLevel, isAnchorTag, displayText, type };
+  }
 
   // State
   let showAddModal = $state(false);
@@ -267,15 +329,12 @@
       <p class="hint">Add comments, images, or galleries that appear alongside your content.</p>
     </div>
   {:else}
-    <div class="vines-list">
+    <div class="vines-list" role="list" aria-label="Vine items">
       {#each gutterItems as item, index (index)}
-        {@const isHeading = item.anchor?.startsWith('#')}
-        {@const headingLevel = isHeading ? item.anchor?.match(/^#+/)?.[0].length || 0 : 0}
-        {@const isAnchorTag = item.anchor?.startsWith('anchor:')}
-        {@const anchorDisplay = isHeading ? item.anchor?.replace(/^#+\s*/, '') : (isAnchorTag ? item.anchor?.replace('anchor:', '') : item.anchor)}
-        <div class="vine-item">
+        {@const anchor = processAnchor(item.anchor)}
+        <div class="vine-item" role="listitem">
           <div class="item-header">
-            <span class="item-type">
+            <span class="item-type" aria-hidden="true">
               {#if item.type === "comment"}
                 <MessageSquare class="type-icon" />
               {:else if item.type === "photo"}
@@ -288,16 +347,17 @@
             </span>
             <div class="item-anchor-display">
               {#if item.anchor}
-                {#if isHeading}
-                  <span class="anchor-badge heading-badge">H{headingLevel}</span>
-                {:else if isAnchorTag}
-                  <span class="anchor-badge tag-badge">⚓</span>
+                {#if anchor.isHeading}
+                  <span class="anchor-badge heading-badge" aria-hidden="true">H{anchor.headingLevel}</span>
+                {:else if anchor.isAnchorTag}
+                  <span class="anchor-badge tag-badge" aria-hidden="true">⚓</span>
                 {:else}
-                  <span class="anchor-badge para-badge">¶</span>
+                  <span class="anchor-badge para-badge" aria-hidden="true">¶</span>
                 {/if}
-                <span class="item-anchor-text" title={item.anchor}>{anchorDisplay}</span>
+                <span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
+                <span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>
               {:else}
-                <span class="no-anchor-warning">⚠ No anchor set</span>
+                <span class="no-anchor-warning" role="alert">⚠ No anchor set</span>
               {/if}
             </div>
             <div class="item-actions">
@@ -381,33 +441,32 @@
     </span>
   </div>
 
-  {#if availableAnchors.length > 0}
+  {#if processedAnchors.length > 0}
     <div class="available-anchors-section">
-      <span class="anchors-label">Click to select anchor location:</span>
-      <div class="anchor-list">
-        {#each availableAnchors as anchor}
-          {@const isHeading = anchor.startsWith('#')}
-          {@const headingLevel = isHeading ? anchor.match(/^#+/)?.[0].length || 0 : 0}
-          {@const isAnchorTag = anchor.startsWith('anchor:')}
-          {@const displayText = isHeading ? anchor.replace(/^#+\s*/, '') : anchor.replace('anchor:', '')}
+      <span class="anchors-label" id="anchor-selection-label">Click to select anchor location:</span>
+      <div class="anchor-list" role="listbox" aria-labelledby="anchor-selection-label">
+        {#each processedAnchors as anchor}
           <button
             type="button"
             class="anchor-option"
-            class:selected={itemAnchor === anchor}
-            class:heading={isHeading}
-            class:anchor-tag={isAnchorTag}
-            onclick={() => (itemAnchor = anchor)}
+            class:selected={itemAnchor === anchor.raw}
+            class:heading={anchor.isHeading}
+            class:anchor-tag={anchor.isAnchorTag}
+            role="option"
+            aria-selected={itemAnchor === anchor.raw}
+            aria-label="Select {anchor.type}: {anchor.displayText}"
+            onclick={() => (itemAnchor = anchor.raw)}
           >
-            {#if isHeading}
-              <span class="anchor-icon heading-icon">H{headingLevel}</span>
-            {:else if isAnchorTag}
-              <span class="anchor-icon tag-icon">⚓</span>
+            {#if anchor.isHeading}
+              <span class="anchor-icon heading-icon" aria-hidden="true">H{anchor.headingLevel}</span>
+            {:else if anchor.isAnchorTag}
+              <span class="anchor-icon tag-icon" aria-hidden="true">⚓</span>
             {:else}
-              <span class="anchor-icon para-icon">¶</span>
+              <span class="anchor-icon para-icon" aria-hidden="true">¶</span>
             {/if}
-            <span class="anchor-text">{displayText}</span>
-            {#if itemAnchor === anchor}
-              <span class="selected-check">✓</span>
+            <span class="anchor-text">{anchor.displayText}</span>
+            {#if itemAnchor === anchor.raw}
+              <span class="selected-check" aria-hidden="true">✓</span>
             {/if}
           </button>
         {/each}
@@ -1159,5 +1218,18 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* Screen reader only utility */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

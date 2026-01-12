@@ -60,14 +60,20 @@
 			{/if}
 		</figure>
 	{:else if item.type === 'gallery'}
-		<div class="gutter-gallery">
-			<GlassCarousel
-				images={item.images?.map(img => ({ url: img.url, alt: img.alt || 'Gallery image', caption: img.caption }))}
-				variant="frosted"
-				showArrows={false}
-				class="gutter-carousel"
-			/>
-		</div>
+		{#if item.images?.length > 0}
+			<div class="gutter-gallery">
+				<GlassCarousel
+					images={item.images.map(img => ({ url: img.url, alt: img.alt || 'Gallery image', caption: img.caption }))}
+					variant="frosted"
+					showArrows={false}
+					class="gutter-carousel"
+				/>
+			</div>
+		{:else}
+			<div class="gutter-gallery-empty">
+				<span>No images in gallery</span>
+			</div>
+		{/if}
 	{:else if item.type === 'emoji'}
 		<div class="gutter-emoji">
 			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} />
@@ -226,6 +232,26 @@
 	}
 	.gutter-gallery :global(.w-2) {
 		width: 6px;
+	}
+	/* Empty gallery state */
+	.gutter-gallery-empty {
+		padding: 1rem;
+		background: rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px dashed rgba(0, 0, 0, 0.15);
+		border-radius: 10px;
+		text-align: center;
+		max-width: 180px;
+	}
+	.gutter-gallery-empty span {
+		font-size: 0.75rem;
+		color: var(--color-text-subtle, #999);
+		font-style: italic;
+	}
+	:global(.dark) .gutter-gallery-empty {
+		background: rgba(16, 50, 37, 0.3);
+		border-color: rgba(74, 222, 128, 0.2);
 	}
 	/* Emoji styles - with glass background */
 	.gutter-emoji {
