@@ -161,6 +161,30 @@ docs: Update README
 - **Before implementing data persistence** → Use skill: `database-management`
 - **For database.py template** → Use skill: `database-management`
 
+#### ⚠️ CRITICAL: Isolate Database Queries
+**NEVER put multiple independent database queries in the same try/catch block.**
+One failing query will block all subsequent queries, causing cascading failures.
+
+```typescript
+// ❌ BAD - cascading failure pattern
+try {
+  const settings = await db.prepare("SELECT * FROM settings").all();  // If table missing, this fails...
+  const pages = await db.prepare("SELECT * FROM pages").all();        // ...and this NEVER runs!
+} catch (error) {}
+
+// ✅ GOOD - isolated query pattern
+try {
+  const settings = await db.prepare("SELECT * FROM settings").all();
+} catch (error) { /* graceful fallback */ }
+
+try {
+  const pages = await db.prepare("SELECT * FROM pages").all();
+} catch (error) { /* graceful fallback */ }
+```
+
+This lesson learned the hard way: a missing `site_settings` table silently blocked
+the `pages` query for hours because they shared a try/catch block.
+
 ### Research & Analysis
 - **When researching technology decisions** → Use skill: `research-strategy`
 - **When analyzing unfamiliar codebases** → Use skill: `research-strategy`
