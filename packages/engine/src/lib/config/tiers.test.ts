@@ -9,7 +9,6 @@ import {
   TIERS,
   TIER_ORDER,
   PAID_TIERS,
-  TIER_NAMES,
   getTier,
   getTierSafe,
   isValidTier,
@@ -267,18 +266,6 @@ describe("Tier Configuration", () => {
       it("formats numbers as strings", () => {
         expect(formatLimit(50)).toBe("50");
         expect(formatLimit(250)).toBe("250");
-      });
-    });
-  });
-
-  describe("Backward Compatibility", () => {
-    describe("TIER_NAMES", () => {
-      it("has correct display names for all tiers", () => {
-        expect(TIER_NAMES.free).toBe("Free");
-        expect(TIER_NAMES.seedling).toBe("Seedling");
-        expect(TIER_NAMES.sapling).toBe("Sapling");
-        expect(TIER_NAMES.oak).toBe("Oak");
-        expect(TIER_NAMES.evergreen).toBe("Evergreen");
       });
     });
   });

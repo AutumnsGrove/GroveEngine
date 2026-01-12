@@ -68,23 +68,6 @@ export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
 }
 
 /**
- * Plan display information (derived from unified tier config)
- */
-export const PLAN_INFO = Object.fromEntries(
-  PAID_TIERS.map((key) => [
-    key,
-    {
-      name: TIERS[key].display.name,
-      monthlyPrice: TIERS[key].pricing.monthlyPriceCents,
-      yearlyPrice: TIERS[key].pricing.yearlyPriceCents,
-    },
-  ]),
-) as Record<
-  PaidTierKey,
-  { name: string; monthlyPrice: number; yearlyPrice: number }
->;
-
-/**
  * Create a Stripe checkout session
  */
 export async function createCheckoutSession(params: {

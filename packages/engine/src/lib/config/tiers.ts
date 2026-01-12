@@ -513,14 +513,3 @@ export function getNextTier(current: TierKey): TierKey | null {
 export function getTiersWithFeature(feature: keyof TierFeatures): TierKey[] {
   return TIER_ORDER.filter((key) => TIERS[key].features[feature]);
 }
-
-// =============================================================================
-// BACKWARD COMPATIBILITY EXPORTS
-// =============================================================================
-
-/**
- * Tier names for display (backward compatibility).
- */
-export const TIER_NAMES: Record<TierKey, string> = Object.fromEntries(
-  TIER_ORDER.map((k) => [k, TIERS[k].display.name]),
-) as Record<TierKey, string>;
