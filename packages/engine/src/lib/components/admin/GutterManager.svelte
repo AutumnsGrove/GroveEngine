@@ -269,6 +269,10 @@
   {:else}
     <div class="vines-list">
       {#each gutterItems as item, index (index)}
+        {@const isHeading = item.anchor?.startsWith('#')}
+        {@const headingLevel = isHeading ? item.anchor?.match(/^#+/)?.[0].length || 0 : 0}
+        {@const isAnchorTag = item.anchor?.startsWith('anchor:')}
+        {@const anchorDisplay = isHeading ? item.anchor?.replace(/^#+\s*/, '') : (isAnchorTag ? item.anchor?.replace('anchor:', '') : item.anchor)}
         <div class="vine-item">
           <div class="item-header">
             <span class="item-type">
@@ -282,7 +286,20 @@
                 <Pin class="type-icon" />
               {/if}
             </span>
-            <span class="item-anchor" title={item.anchor}>{item.anchor || "No anchor"}</span>
+            <div class="item-anchor-display">
+              {#if item.anchor}
+                {#if isHeading}
+                  <span class="anchor-badge heading-badge">H{headingLevel}</span>
+                {:else if isAnchorTag}
+                  <span class="anchor-badge tag-badge">⚓</span>
+                {:else}
+                  <span class="anchor-badge para-badge">¶</span>
+                {/if}
+                <span class="item-anchor-text" title={item.anchor}>{anchorDisplay}</span>
+              {:else}
+                <span class="no-anchor-warning">⚠ No anchor set</span>
+              {/if}
+            </div>
             <div class="item-actions">
               <button
                 class="action-btn"
@@ -365,17 +382,40 @@
   </div>
 
   {#if availableAnchors.length > 0}
-    <div class="available-anchors">
-      <span class="anchors-label">Available:</span>
-      {#each availableAnchors as anchor}
-        <button
-          type="button"
-          class="anchor-chip"
-          onclick={() => (itemAnchor = anchor)}
-        >
-          {anchor}
-        </button>
-      {/each}
+    <div class="available-anchors-section">
+      <span class="anchors-label">Click to select anchor location:</span>
+      <div class="anchor-list">
+        {#each availableAnchors as anchor}
+          {@const isHeading = anchor.startsWith('#')}
+          {@const headingLevel = isHeading ? anchor.match(/^#+/)?.[0].length || 0 : 0}
+          {@const isAnchorTag = anchor.startsWith('anchor:')}
+          {@const displayText = isHeading ? anchor.replace(/^#+\s*/, '') : anchor.replace('anchor:', '')}
+          <button
+            type="button"
+            class="anchor-option"
+            class:selected={itemAnchor === anchor}
+            class:heading={isHeading}
+            class:anchor-tag={isAnchorTag}
+            onclick={() => (itemAnchor = anchor)}
+          >
+            {#if isHeading}
+              <span class="anchor-icon heading-icon">H{headingLevel}</span>
+            {:else if isAnchorTag}
+              <span class="anchor-icon tag-icon">⚓</span>
+            {:else}
+              <span class="anchor-icon para-icon">¶</span>
+            {/if}
+            <span class="anchor-text">{displayText}</span>
+            {#if itemAnchor === anchor}
+              <span class="selected-check">✓</span>
+            {/if}
+          </button>
+        {/each}
+      </div>
+    </div>
+  {:else}
+    <div class="no-anchors-hint">
+      <p>No anchors found. Add headings to your content or use "Add Anchor" to create custom anchor points.</p>
     </div>
   {/if}
 
@@ -636,18 +676,74 @@
     height: 1rem;
   }
 
-  .item-anchor {
+  .item-anchor-display {
     flex: 1;
-    font-family: monospace;
-    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .anchor-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 16px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .heading-badge {
+    background: rgba(124, 77, 171, 0.15);
+    color: #7c4dab;
+  }
+
+  :global(.dark) .heading-badge {
+    background: rgba(201, 160, 232, 0.15);
+    color: #c9a0e8;
+  }
+
+  .tag-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    font-size: 0.65rem;
+  }
+
+  :global(.dark) .tag-badge {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+
+  .para-badge {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+    font-size: 0.65rem;
+  }
+
+  .item-anchor-text {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.75rem;
     color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  :global(.dark) .item-anchor {
+  :global(.dark) .item-anchor-text {
     color: var(--grove-text-strong);
+  }
+
+  .no-anchor-warning {
+    font-size: 0.7rem;
+    color: #e07030;
+    font-style: italic;
+  }
+
+  :global(.dark) .no-anchor-warning {
+    color: #f0c674;
   }
 
   .item-actions {
@@ -775,38 +871,145 @@
     flex: 1;
   }
 
-  .available-anchors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    align-items: center;
+  /* Improved anchor selection UI */
+  .available-anchors-section {
     margin-bottom: 1rem;
+    background: var(--grove-overlay-5);
+    border: 1px solid var(--grove-border-subtle);
+    border-radius: 10px;
+    padding: 0.75rem;
   }
 
   .anchors-label {
+    display: block;
     font-size: 0.75rem;
     color: var(--color-text-subtle);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
   }
 
-  .anchor-chip {
-    padding: 0.2rem 0.5rem;
-    background: var(--grove-overlay-10);
-    border: 1px solid var(--grove-border);
-    border-radius: 12px;
+  .anchor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .anchor-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--glass-bg-medium, rgba(255, 255, 255, 0.5));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--grove-border-subtle);
+    border-radius: 8px;
     color: var(--color-text-muted);
-    font-size: 0.7rem;
-    font-family: monospace;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.15s ease;
+    text-align: left;
   }
 
-  .anchor-chip:hover {
-    background: var(--grove-overlay-20);
+  .anchor-option:hover {
+    background: var(--grove-overlay-15);
+    border-color: var(--grove-overlay-25);
+    transform: translateX(4px);
+  }
+
+  .anchor-option.selected {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
     color: var(--color-primary);
   }
 
-  :global(.dark) .anchor-chip:hover {
+  :global(.dark) .anchor-option {
+    background: rgba(16, 50, 37, 0.35);
+    border-color: rgba(74, 222, 128, 0.1);
+  }
+
+  :global(.dark) .anchor-option:hover {
+    background: rgba(16, 50, 37, 0.5);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
+
+  :global(.dark) .anchor-option.selected {
+    background: rgba(74, 222, 128, 0.15);
+    border-color: rgba(74, 222, 128, 0.4);
     color: #86efac;
+  }
+
+  .anchor-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .heading-icon {
+    background: rgba(124, 77, 171, 0.15);
+    color: #7c4dab;
+  }
+
+  :global(.dark) .heading-icon {
+    background: rgba(201, 160, 232, 0.15);
+    color: #c9a0e8;
+  }
+
+  .tag-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    font-size: 0.75rem;
+  }
+
+  :global(.dark) .tag-icon {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+
+  .para-icon {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+
+  .anchor-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .selected-check {
+    color: var(--color-primary);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  :global(.dark) .selected-check {
+    color: #86efac;
+  }
+
+  .no-anchors-hint {
+    padding: 1rem;
+    background: var(--grove-overlay-5);
+    border: 1px dashed var(--grove-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .no-anchors-hint p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+    text-align: center;
   }
 
   .image-preview {

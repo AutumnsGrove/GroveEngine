@@ -2,10 +2,12 @@
   import { marked } from "marked";
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "$lib/utils/sanitize";
+  import { extractHeaders } from "$lib/utils/markdown";
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import FloatingToolbar from "./FloatingToolbar.svelte";
+  import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2 } from "lucide-svelte";
   import { browser } from "$app/environment";
 
@@ -23,6 +25,17 @@
    * @property {number} [wordCount]
    */
 
+  /**
+   * @typedef {Object} GutterItemProp
+   * @property {string} type
+   * @property {string} [anchor]
+   * @property {string} [content]
+   * @property {string} [url]
+   * @property {string} [file]
+   * @property {string} [caption]
+   * @property {Array<{url: string, alt?: string, caption?: string}>} [images]
+   */
+
   // Props
   let {
     content = $bindable(""),
@@ -34,6 +47,7 @@
     previewTitle = "",
     previewDate = "",
     previewTags = /** @type {string[]} */ ([]),
+    gutterItems = /** @type {GutterItemProp[]} */ ([]),
   } = $props();
 
   // Core refs and state
@@ -93,6 +107,7 @@
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
   let previewHtml = $derived(content ? sanitizeMarkdown(/** @type {string} */ (marked.parse(content, { async: false }))) : "");
+  let previewHeaders = $derived(content ? extractHeaders(content) : []);
 
   let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);
@@ -743,9 +758,9 @@
 {#if showFullPreview}
   <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview" tabindex="-1" onkeydown={(e) => e.key === 'Escape' && (showFullPreview = false)}>
     <button type="button" class="full-preview-backdrop" onclick={() => (showFullPreview = false)} aria-label="Close preview"></button>
-    <div class="full-preview-container">
+    <div class="full-preview-container" class:has-vines={gutterItems.length > 0}>
       <header class="full-preview-header">
-        <h2>:: full preview</h2>
+        <h2>:: full preview {#if gutterItems.length > 0}<span class="vine-count">({gutterItems.length} vine{gutterItems.length !== 1 ? 's' : ''})</span>{/if}</h2>
         <div class="full-preview-actions">
           <button type="button" class="full-preview-close" onclick={() => (showFullPreview = false)}>
             [<span class="key">c</span>lose]
@@ -753,45 +768,84 @@
         </div>
       </header>
       <div class="full-preview-scroll">
-        <article class="full-preview-article">
-          {#if previewTitle || previewDate || previewTags.length > 0}
-            <header class="content-header">
-              {#if previewTitle}
-                <h1>{previewTitle}</h1>
-              {/if}
-              {#if previewDate || previewTags.length > 0}
-                <div class="post-meta">
-                  {#if previewDate}
-                    <time datetime={previewDate}>
-                      {new Date(previewDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </time>
-                  {/if}
-                  {#if previewTags.length > 0}
-                    <div class="tags">
-                      {#each previewTags as tag}
-                        <span class="tag">{tag}</span>
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
-              {/if}
-            </header>
-          {/if}
-
-          <div class="content-body">
-            {#if previewHtml}
-              {#key previewHtml}
-                <div>{@html previewHtml}</div>
-              {/key}
-            {:else}
-              <p class="preview-placeholder">Start writing to see your content here...</p>
+        {#if gutterItems.length > 0}
+          <!-- Use ContentWithGutter when we have vines -->
+          <ContentWithGutter
+            content={previewHtml}
+            gutterContent={gutterItems}
+            headers={previewHeaders}
+            showTableOfContents={previewHeaders.length > 0}
+          >
+            {#if previewTitle || previewDate || previewTags.length > 0}
+              <header class="content-header">
+                {#if previewTitle}
+                  <h1 class="full-preview-title">{previewTitle}</h1>
+                {/if}
+                {#if previewDate || previewTags.length > 0}
+                  <div class="post-meta">
+                    {#if previewDate}
+                      <time datetime={previewDate}>
+                        {new Date(previewDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </time>
+                    {/if}
+                    {#if previewTags.length > 0}
+                      <div class="tags">
+                        {#each previewTags as tag}
+                          <span class="tag">{tag}</span>
+                        {/each}
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
+              </header>
             {/if}
-          </div>
-        </article>
+          </ContentWithGutter>
+        {:else}
+          <!-- Simple preview without vines -->
+          <article class="full-preview-article">
+            {#if previewTitle || previewDate || previewTags.length > 0}
+              <header class="content-header">
+                {#if previewTitle}
+                  <h1>{previewTitle}</h1>
+                {/if}
+                {#if previewDate || previewTags.length > 0}
+                  <div class="post-meta">
+                    {#if previewDate}
+                      <time datetime={previewDate}>
+                        {new Date(previewDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </time>
+                    {/if}
+                    {#if previewTags.length > 0}
+                      <div class="tags">
+                        {#each previewTags as tag}
+                          <span class="tag">{tag}</span>
+                        {/each}
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
+              </header>
+            {/if}
+
+            <div class="content-body">
+              {#if previewHtml}
+                {#key previewHtml}
+                  <div>{@html previewHtml}</div>
+                {/key}
+              {:else}
+                <p class="preview-placeholder">Start writing to see your content here...</p>
+              {/if}
+            </div>
+          </article>
+        {/if}
       </div>
     </div>
   </div>
@@ -1440,6 +1494,17 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    transition: max-width 0.3s ease;
+  }
+  /* Wider container when vines are present */
+  .full-preview-container.has-vines {
+    max-width: 1400px;
+  }
+  .vine-count {
+    font-weight: 400;
+    color: #7a9a7a;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
   }
   :global(.dark) .full-preview-container {
     background: var(--color-bg-dark, #0d1117);
