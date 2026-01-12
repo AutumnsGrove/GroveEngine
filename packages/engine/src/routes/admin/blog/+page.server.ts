@@ -23,16 +23,26 @@ interface BlogPost {
  * Fetch posts from D1 database (multi-tenant)
  */
 export const load: PageServerLoad = async ({ platform, locals }) => {
+  // Debug: Log what we're receiving
+  console.log("[Admin Blog] tenantId:", locals.tenantId);
+  console.log("[Admin Blog] user:", locals.user?.email ?? "null");
+
   // Require tenant context
   if (!locals.tenantId) {
     console.error("[Admin Blog] No tenant ID found");
-    return { posts: [] as BlogPost[] };
+    return {
+      posts: [] as BlogPost[],
+      debug: { tenantId: null, reason: "no_tenant_id" },
+    };
   }
 
   // Require database
   if (!platform?.env?.DB) {
     console.error("[Admin Blog] D1 database not available");
-    return { posts: [] as BlogPost[] };
+    return {
+      posts: [] as BlogPost[],
+      debug: { tenantId: locals.tenantId, reason: "no_database" },
+    };
   }
 
   try {
@@ -58,9 +68,24 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       description: post.description || "",
     }));
 
-    return { posts };
+    console.log("[Admin Blog] Found", posts.length, "posts");
+    return {
+      posts,
+      debug: {
+        tenantId: locals.tenantId,
+        reason: "success",
+        count: posts.length,
+      },
+    };
   } catch (error) {
     console.error("[Admin Blog] Error fetching posts:", error);
-    return { posts: [] as BlogPost[] };
+    return {
+      posts: [] as BlogPost[],
+      debug: {
+        tenantId: locals.tenantId,
+        reason: "error",
+        error: String(error),
+      },
+    };
   }
 };

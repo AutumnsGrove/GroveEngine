@@ -50,6 +50,14 @@
 </script>
 
 <div class="max-w-screen-xl">
+  <!-- Debug banner - TEMPORARY -->
+  {#if data.debug}
+    <div class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 rounded text-sm font-mono">
+      <strong>Debug:</strong> tenantId={data.debug.tenantId ?? 'null'}, reason={data.debug.reason}, count={data.debug.count ?? 'N/A'}
+      {#if data.debug.error}<br/>Error: {data.debug.error}{/if}
+    </div>
+  {/if}
+
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
       <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Blog Posts</h1>
