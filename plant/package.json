@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@autumnsgrove/groveengine": "workspace:*",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "lucide-svelte": "^0.554.0",
     "resend": "^4.0.0",
     "stripe": "^17.0.0"

@@ -19,14 +19,15 @@
  * ```
  */
 
-import { createStripeProvider } from './stripe/index.js';
-import type { PaymentProvider, PaymentProviderConfig } from './types.js';
+import { createStripeProvider } from "./stripe/index.js";
+import { createLemonSqueezyProvider } from "./lemonsqueezy/index.js";
+import type { PaymentProvider, PaymentProviderConfig } from "./types.js";
 
 // =============================================================================
 // PROVIDER FACTORY
 // =============================================================================
 
-export type ProviderType = 'stripe' | 'paddle' | 'lemonsqueezy';
+export type ProviderType = "stripe" | "paddle" | "lemonsqueezy";
 
 /**
  * Create a payment provider instance
@@ -37,17 +38,17 @@ export type ProviderType = 'stripe' | 'paddle' | 'lemonsqueezy';
  */
 export function createPaymentProvider(
   type: ProviderType,
-  config: PaymentProviderConfig
+  config: PaymentProviderConfig,
 ): PaymentProvider {
   switch (type) {
-    case 'stripe':
+    case "stripe":
       return createStripeProvider(config);
 
-    case 'paddle':
-      throw new Error('Paddle provider not yet implemented');
+    case "paddle":
+      throw new Error("Paddle provider not yet implemented");
 
-    case 'lemonsqueezy':
-      throw new Error('LemonSqueezy provider not yet implemented');
+    case "lemonsqueezy":
+      return createLemonSqueezyProvider(config);
 
     default:
       throw new Error(`Unknown payment provider: ${type}`);
@@ -59,7 +60,7 @@ export function createPaymentProvider(
 // =============================================================================
 
 // All types from the types module
-export * from './types.js';
+export * from "./types.js";
 
 // Stripe-specific exports (for advanced usage)
 export {
@@ -67,7 +68,7 @@ export {
   StripeAPIError,
   StripeProvider,
   createStripeProvider,
-} from './stripe/index.js';
+} from "./stripe/index.js";
 
 export type {
   StripeClientConfig,
@@ -75,4 +76,21 @@ export type {
   StripePrice,
   StripeCheckoutSession,
   StripeEvent,
-} from './stripe/index.js';
+} from "./stripe/index.js";
+
+// Lemon Squeezy-specific exports
+export {
+  LemonSqueezyClient,
+  LemonSqueezyAPIError,
+  LemonSqueezyProvider,
+  createLemonSqueezyProvider,
+} from "./lemonsqueezy/index.js";
+
+export type {
+  LemonSqueezyConfig,
+  LemonSqueezyCheckout,
+  LemonSqueezySubscription,
+  LemonSqueezyCustomer,
+  LemonSqueezyOrder,
+  LemonSqueezyWebhookPayload,
+} from "./lemonsqueezy/index.js";

@@ -129,6 +129,50 @@ These are the blockers. Get these done and you're live.
 
 ---
 
+## 🍋 Lemon Squeezy Migration — IN PROGRESS
+
+> **Migration Guide:** `docs/grove-payment-migration.md`
+> **Status:** Code complete, awaiting product setup in Lemon Squeezy Dashboard
+
+### ✅ Code Implementation Complete
+- [x] Created LemonSqueezyProvider in `packages/engine/src/lib/payments/lemonsqueezy/`
+- [x] Wired up provider factory in `packages/engine/src/lib/payments/index.ts`
+- [x] Created checkout handler at `plant/src/routes/checkout/+server.ts`
+- [x] Created webhook handler at `plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`
+- [x] Created database migration `packages/engine/migrations/019_lemonsqueezy_migration.sql`
+- [x] Removed trial functionality (using full refund policy instead)
+
+### 📋 Dashboard Setup (In Progress)
+- [ ] Create 4 products in Lemon Squeezy Dashboard:
+  - Seedling ($8/month, $81.60/year)
+  - Sapling ($12/month, $122.40/year)
+  - Oak ($25/month, $255/year)
+  - Evergreen ($35/month, $357/year)
+- [ ] Note variant IDs for each product/billing cycle
+- [ ] Create webhook endpoint → get webhook secret
+- [ ] Set environment variables in Cloudflare Dashboard:
+  - `LEMON_SQUEEZY_API_KEY`
+  - `LEMON_SQUEEZY_STORE_ID`
+  - `LEMON_SQUEEZY_WEBHOOK_SECRET`
+  - `LEMON_SQUEEZY_SEEDLING_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_SAPLING_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_OAK_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY` / `_YEARLY`
+
+### 🗃️ Database Migration
+- [ ] Run migration: `wrangler d1 execute grove-engine-db --file=packages/engine/migrations/019_lemonsqueezy_migration.sql --remote`
+
+### 🎨 Product Assets Needed
+- [ ] **Create tree imagery for each tier** — Trees that grow with tiers!
+  - Seedling: Small sprout/seedling
+  - Sapling: Young tree
+  - Oak: Full mature tree
+  - Evergreen: Grand evergreen tree
+- [ ] Upload to Lemon Squeezy product images
+- [ ] Consider using in checkout flow and confirmation emails
+
+---
+
 ## 🚦 Rate Limiting (Threshold) — CORE COMPLETE ✅
 
 > **Spec:** `docs/patterns/threshold-pattern.md`
