@@ -14,28 +14,19 @@
 
 import { writable, get, derived } from "svelte/store";
 import { browser } from "$app/environment";
-import type { Season, RegularSeason } from "../components/nature/palette";
+import {
+  type Season,
+  type RegularSeason,
+  REGULAR_SEASONS,
+  ALL_SEASONS,
+  DEFAULT_SEASON,
+} from "../types/season";
 
 const STORAGE_KEY = "grove-season";
 const LAST_REGULAR_KEY = "grove-last-regular-season";
 
-// Regular season cycle order (midnight is special and not in this cycle)
-const REGULAR_SEASONS: RegularSeason[] = [
-  "spring",
-  "summer",
-  "autumn",
-  "winter",
-];
-const ALL_SEASONS: Season[] = [
-  "spring",
-  "summer",
-  "autumn",
-  "winter",
-  "midnight",
-];
-
 function getInitialSeason(): Season {
-  if (!browser) return "autumn";
+  if (!browser) return DEFAULT_SEASON;
 
   // Check if user has a stored preference
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -49,18 +40,18 @@ function getInitialSeason(): Season {
   }
 
   // First visit (or invalid value): default to autumn (Grove's signature season)
-  return "autumn";
+  return DEFAULT_SEASON;
 }
 
 function getLastRegularSeason(): RegularSeason {
-  if (!browser) return "autumn";
+  if (!browser) return DEFAULT_SEASON;
 
   const stored = localStorage.getItem(LAST_REGULAR_KEY);
   if (stored && REGULAR_SEASONS.includes(stored as RegularSeason)) {
     return stored as RegularSeason;
   }
 
-  return "autumn";
+  return DEFAULT_SEASON;
 }
 
 function createSeasonStore() {

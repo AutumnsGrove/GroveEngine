@@ -23,8 +23,9 @@
 		type Season
 	} from '@autumnsgrove/groveengine/ui/nature';
 
-	// Import glass components
+	// Import glass components and color utilities
 	import { Glass } from '@autumnsgrove/groveengine/ui';
+	import { generateTierColors } from '@autumnsgrove/groveengine/ui/utils';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
@@ -192,82 +193,6 @@
 	// Helper to pick random item from array
 	function pickRandom<T>(arr: T[]): T {
 		return arr[Math.floor(Math.random() * arr.length)];
-	}
-
-	// Color manipulation helpers for generating tier colors
-	function hexToHsl(hex: string): { h: number; s: number; l: number } {
-		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-		if (!result) return { h: 0, s: 0, l: 50 };
-
-		const r = parseInt(result[1], 16) / 255;
-		const g = parseInt(result[2], 16) / 255;
-		const b = parseInt(result[3], 16) / 255;
-
-		const max = Math.max(r, g, b);
-		const min = Math.min(r, g, b);
-		let h = 0, s = 0;
-		const l = (max + min) / 2;
-
-		if (max !== min) {
-			const d = max - min;
-			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-			switch (max) {
-				case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-				case g: h = ((b - r) / d + 2) / 6; break;
-				case b: h = ((r - g) / d + 4) / 6; break;
-			}
-		}
-
-		return { h: h * 360, s: s * 100, l: l * 100 };
-	}
-
-	function hslToHex(h: number, s: number, l: number): string {
-		s /= 100;
-		l /= 100;
-		const a = s * Math.min(l, 1 - l);
-		const f = (n: number) => {
-			const k = (n + h / 30) % 12;
-			const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-			return Math.round(255 * color).toString(16).padStart(2, '0');
-		};
-		return `#${f(0)}${f(8)}${f(4)}`;
-	}
-
-	// Generate tier colors from a base color for the new Logo component
-	// Creates light/dark variants for the 3D tree effect
-	function generateTierColors(baseColor: string): {
-		tier1: { dark: string; light: string };
-		tier2: { dark: string; light: string };
-		tier3: { dark: string; light: string };
-		trunk: { dark: string; light: string };
-	} {
-		const hsl = hexToHsl(baseColor);
-
-		// tier1 (top branches): lighter, more ethereal
-		const tier1 = {
-			dark: hslToHex(hsl.h, Math.min(hsl.s + 5, 100), Math.max(hsl.l - 8, 0)),
-			light: hslToHex(hsl.h, Math.max(hsl.s - 10, 0), Math.min(hsl.l + 25, 95))
-		};
-
-		// tier2 (middle branches): base color variations
-		const tier2 = {
-			dark: hslToHex(hsl.h, hsl.s, Math.max(hsl.l - 12, 0)),
-			light: hslToHex(hsl.h, Math.max(hsl.s - 5, 0), Math.min(hsl.l + 18, 90))
-		};
-
-		// tier3 (bottom branches): darker, more grounded
-		const tier3 = {
-			dark: hslToHex(hsl.h, Math.min(hsl.s + 10, 100), Math.max(hsl.l - 18, 0)),
-			light: hslToHex(hsl.h, hsl.s, Math.min(hsl.l + 10, 85))
-		};
-
-		// trunk: warm brown tones
-		const trunk = {
-			dark: '#3d2914',
-			light: '#5a3f30'
-		};
-
-		return { tier1, tier2, tier3, trunk };
 	}
 
 	// Get seasonal colors based on depth (takes season explicitly for reactivity)

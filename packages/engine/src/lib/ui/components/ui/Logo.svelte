@@ -41,24 +41,18 @@
 	 * <Logo tier1={{ dark: '#ff0000', light: '#ffcccc' }} />
 	 * ```
 	 *
-	 * @example Interactive and animated
+	 * @example Interactive
 	 * ```svelte
 	 * <Logo interactive />  <!-- Hover effects -->
-	 * <Logo breathing />  <!-- Gentle pulse animation -->
 	 * <Logo shadow />  <!-- Drop shadow -->
 	 * ```
 	 */
-
-	import { tweened } from 'svelte/motion';
-	import { cubicInOut } from 'svelte/easing';
-	import { browser } from '$app/environment';
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// TYPES
 	// ─────────────────────────────────────────────────────────────────────────────
 
 	export type Season = 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight';
-	export type BreathingSpeed = 'slow' | 'normal' | 'fast';
 	export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | number;
 
 	/** Color pair for a branch tier (dark side / light side) */
@@ -126,13 +120,6 @@
 		'3xl': 120
 	} as const;
 
-	// Breathing speed presets (ms per half-cycle)
-	const BREATHING_SPEEDS = {
-		slow: 1500,
-		normal: 800,
-		fast: 400
-	} as const;
-
 	// ─────────────────────────────────────────────────────────────────────────────
 	// PROPS
 	// ─────────────────────────────────────────────────────────────────────────────
@@ -172,14 +159,6 @@
 		/** Rotation in degrees. Negative = lean left. Default: -12 */
 		rotation?: number;
 
-		// ── Animation ────────────────────────────────────────────────────────────
-
-		/** Enable breathing/pulse animation */
-		breathing?: boolean;
-
-		/** Speed of breathing animation */
-		breathingSpeed?: BreathingSpeed;
-
 		// ── Effects & Interactivity ──────────────────────────────────────────────
 
 		/** Add subtle drop shadow */
@@ -214,8 +193,6 @@
 		monochromeTrunk = false,
 		size,
 		rotation = -12,
-		breathing = false,
-		breathingSpeed = 'normal',
 		shadow = false,
 		interactive = false,
 		onclick,
@@ -267,53 +244,6 @@
 	});
 
 	// ─────────────────────────────────────────────────────────────────────────────
-	// REDUCED MOTION
-	// ─────────────────────────────────────────────────────────────────────────────
-
-	const reducedMotionQuery = browser ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-	let prefersReducedMotion = $state(reducedMotionQuery?.matches ?? false);
-
-	$effect(() => {
-		if (!reducedMotionQuery) return;
-		const handler = (e: MediaQueryListEvent) => { prefersReducedMotion = e.matches; };
-		reducedMotionQuery.addEventListener('change', handler);
-		return () => reducedMotionQuery.removeEventListener('change', handler);
-	});
-
-	// ─────────────────────────────────────────────────────────────────────────────
-	// BREATHING ANIMATION
-	// ─────────────────────────────────────────────────────────────────────────────
-
-	const breathValue = tweened(0, { easing: cubicInOut });
-
-	$effect(() => {
-		const duration = BREATHING_SPEEDS[breathingSpeed];
-
-		if (!breathing || prefersReducedMotion) {
-			breathValue.set(0, { duration: Math.min(duration / 2, 300) });
-			return;
-		}
-
-		let cancelled = false;
-
-		async function pulse() {
-			while (!cancelled) {
-				await breathValue.set(1, { duration });
-				if (cancelled) break;
-				await breathValue.set(0, { duration });
-				if (cancelled) break;
-			}
-		}
-
-		pulse();
-		return () => { cancelled = true; };
-	});
-
-	// Scale transform for breathing (subtle 1.0 -> 1.05)
-	const breathScale = $derived(1 + $breathValue * 0.05);
-	const breathTransform = $derived(breathing ? `scale(${breathScale})` : '');
-
-	// ─────────────────────────────────────────────────────────────────────────────
 	// SVG PATHS
 	// ─────────────────────────────────────────────────────────────────────────────
 
@@ -360,10 +290,9 @@
 		</defs>
 	{/if}
 
-	<!-- Main tree group with rotation and breathing -->
+	<!-- Main tree group with rotation -->
 	<g
 		transform="rotate({rotation} 50 50)"
-		style={breathTransform ? `transform-origin: 50px 50px; transform: ${breathTransform};` : undefined}
 		filter={shadow ? `url(#${uniqueId}-shadow)` : undefined}
 	>
 		<!-- Tier 1: Top branches -->
