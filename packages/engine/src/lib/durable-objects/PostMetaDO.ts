@@ -15,6 +15,8 @@
  * Split from PostContentDO for optimal hibernation behavior.
  */
 
+import { DEFAULT_TIER, type TierKey } from "../config/tiers.js";
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -28,8 +30,6 @@
  *
  * Values represent daily views required for "popular" status.
  */
-type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
-
 const POPULAR_POST_THRESHOLDS: Record<TierKey, number> = {
   free: 150, // Highest bar (no blog anyway)
   seedling: 100, // Entry tier - standard threshold
@@ -39,12 +39,23 @@ const POPULAR_POST_THRESHOLDS: Record<TierKey, number> = {
 };
 
 /**
- * Get the popular post threshold for a tier, with fallback to seedling
+ * Get the popular post threshold for a tier, with fallback to DEFAULT_TIER
  */
 function getPopularThreshold(tier: string | undefined): number {
   const key = tier as TierKey;
-  return POPULAR_POST_THRESHOLDS[key] ?? POPULAR_POST_THRESHOLDS.seedling;
+  return POPULAR_POST_THRESHOLDS[key] ?? POPULAR_POST_THRESHOLDS[DEFAULT_TIER];
 }
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/**
+ * Maximum rows in view_log table to prevent unbounded growth.
+ * For viral posts, we only need recent views for popular status calculation.
+ * Older views are aggregated into viewCount and don't need individual tracking.
+ */
+const MAX_VIEW_LOG_ROWS = 50_000;
 
 export interface PostMeta {
   tenantId: string;
@@ -435,7 +446,12 @@ export class PostMetaDO implements DurableObject {
     for (const ws of this.connections) {
       try {
         ws.send(payload);
-      } catch {
+      } catch (err) {
+        // Log WebSocket errors for debugging instead of silent swallow
+        console.debug(
+          "[PostMetaDO] WebSocket send failed, removing connection:",
+          err instanceof Error ? err.message : "Unknown error",
+        );
         this.connections.delete(ws);
       }
     }
@@ -478,11 +494,42 @@ export class PostMetaDO implements DurableObject {
       await this.persistMeta();
     }
 
+    // Clean up view_log: remove entries older than 7 days
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     await this.state.storage.sql.exec(
       "DELETE FROM view_log WHERE timestamp < ?",
       cutoff,
     );
+
+    // Enforce max row limit to prevent unbounded growth on viral posts
+    // Keep only the most recent MAX_VIEW_LOG_ROWS entries
+    const countResult = this.state.storage.sql
+      .exec("SELECT COUNT(*) as count FROM view_log")
+      .one();
+    const rowCount = (countResult?.count as number) || 0;
+
+    if (rowCount > MAX_VIEW_LOG_ROWS) {
+      // Delete oldest entries beyond the limit
+      const deleteCount = rowCount - MAX_VIEW_LOG_ROWS;
+      await this.state.storage.sql.exec(
+        `DELETE FROM view_log WHERE id IN (
+          SELECT id FROM view_log ORDER BY timestamp ASC LIMIT ?
+        )`,
+        deleteCount,
+      );
+      console.log(
+        `[PostMetaDO] Trimmed ${deleteCount} old view_log entries (was ${rowCount}, now ${MAX_VIEW_LOG_ROWS})`,
+      );
+    }
+
+    // Clean up stale presence entries
+    const presenceCutoff = Date.now() - 5 * 60 * 1000;
+    for (const [sessionId, lastSeen] of this.presence) {
+      if (lastSeen < presenceCutoff) {
+        this.presence.delete(sessionId);
+      }
+    }
+
     await this.state.storage.setAlarm(Date.now() + 60 * 60 * 1000);
   }
 }

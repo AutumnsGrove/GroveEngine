@@ -276,13 +276,21 @@ export class TenantDO implements DurableObject {
 
   /**
    * Update tenant config
+   *
+   * Uses the same promise lock pattern as handleGetConfig to prevent
+   * race conditions where concurrent updates could clobber each other.
    */
   private async handleUpdateConfig(request: Request): Promise<Response> {
     const updates = (await request.json()) as Partial<TenantConfig>;
 
-    // Merge with existing config
+    // Ensure config is loaded with race condition prevention
     if (!this.config) {
-      await this.refreshConfig();
+      if (!this.refreshPromise) {
+        this.refreshPromise = this.refreshConfig().finally(() => {
+          this.refreshPromise = null;
+        });
+      }
+      await this.refreshPromise;
     }
 
     if (!this.config) {

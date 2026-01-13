@@ -44,6 +44,12 @@ interface Env {
  */
 type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 
+/**
+ * Default tier used when tier is unknown or invalid.
+ * Should match DEFAULT_TIER in packages/engine/src/lib/config/tiers.ts
+ */
+const DEFAULT_TIER: TierKey = "seedling";
+
 interface StorageTierThresholds {
   hotViewThreshold: number; // Views/week to stay HOT
   warmViewThreshold: number; // Views/week to stay WARM
@@ -111,11 +117,11 @@ interface PostRecord {
 }
 
 /**
- * Get storage thresholds for a tier, with fallback to seedling
+ * Get storage thresholds for a tier, with fallback to DEFAULT_TIER
  */
 function getStorageThresholds(tier: string | undefined): StorageTierThresholds {
   const key = tier as TierKey;
-  return STORAGE_THRESHOLDS[key] ?? STORAGE_THRESHOLDS.seedling;
+  return STORAGE_THRESHOLDS[key] ?? STORAGE_THRESHOLDS[DEFAULT_TIER];
 }
 
 interface MigrationResult {

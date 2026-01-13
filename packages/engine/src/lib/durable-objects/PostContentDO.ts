@@ -235,33 +235,71 @@ export class PostContentDO implements DurableObject {
     }
 
     const r2 = this.env.IMAGES;
-    if (r2) {
-      await r2.put(
-        data.r2Key,
-        JSON.stringify({
-          markdownContent: this.content.markdownContent,
-          htmlContent: this.content.htmlContent,
-          gutterContent: this.content.gutterContent,
-        }),
-        { httpMetadata: { contentType: "application/json" } },
-      );
-
-      this.content.markdownContent = "";
-      this.content.htmlContent = "";
-      this.content.gutterContent = "[]";
-      this.content.storageLocation = "cold";
-      this.content.r2Key = data.r2Key;
-
-      await this.persistContent();
-
-      return Response.json({
-        success: true,
-        message: "Migrated to cold storage",
-        r2Key: data.r2Key,
-      });
+    if (!r2) {
+      return new Response("R2 not configured", { status: 500 });
     }
 
-    return new Response("R2 not configured", { status: 500 });
+    // Prepare content payload before modifying state
+    const contentPayload = JSON.stringify({
+      markdownContent: this.content.markdownContent,
+      htmlContent: this.content.htmlContent,
+      gutterContent: this.content.gutterContent,
+    });
+
+    // Upload to R2 with retry logic
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await r2.put(data.r2Key, contentPayload, {
+          httpMetadata: { contentType: "application/json" },
+        });
+
+        // Verify upload succeeded by checking object exists
+        const verification = await r2.head(data.r2Key);
+        if (!verification) {
+          throw new Error("R2 upload verification failed - object not found");
+        }
+
+        // Only clear local content AFTER verified R2 upload
+        this.content.markdownContent = "";
+        this.content.htmlContent = "";
+        this.content.gutterContent = "[]";
+        this.content.storageLocation = "cold";
+        this.content.r2Key = data.r2Key;
+
+        await this.persistContent();
+
+        return Response.json({
+          success: true,
+          message: "Migrated to cold storage",
+          r2Key: data.r2Key,
+        });
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        console.error(
+          `[PostContentDO] R2 upload attempt ${attempt}/${maxRetries} failed:`,
+          lastError.message,
+        );
+
+        if (attempt < maxRetries) {
+          // Exponential backoff: 100ms, 200ms, 400ms
+          await new Promise((resolve) =>
+            setTimeout(resolve, 100 * Math.pow(2, attempt - 1)),
+          );
+        }
+      }
+    }
+
+    // All retries failed - return error without modifying local state
+    return new Response(
+      JSON.stringify({
+        error: "R2 migration failed after retries",
+        details: lastError?.message,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   private async fetchFromR2(key: string): Promise<{
