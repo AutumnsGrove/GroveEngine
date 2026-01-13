@@ -196,8 +196,11 @@ interface TenantLookupResult extends TenantConfig {
 /**
  * Try to get tenant config from TenantDO first, fall back to D1
  *
- * TenantDO caches config in memory, eliminating D1 reads on hot paths.
- * Falls back to D1 if DO unavailable or on first access (to get tenant ID).
+ * TenantDO caches config in memory (including tenant ID), eliminating
+ * D1 reads on hot paths. Falls back to D1 if DO unavailable.
+ *
+ * The X-Tenant-Subdomain header is passed to help TenantDO identify
+ * itself on first access before config is cached.
  */
 async function getTenantConfig(
   subdomain: string,
@@ -206,34 +209,29 @@ async function getTenantConfig(
   const db = platform?.env?.DB;
   if (!db) return null;
 
-  // Try TenantDO first for cached config
+  // Try TenantDO first for cached config (includes tenant ID)
   const tenants = platform?.env?.TENANTS;
   if (tenants) {
     try {
       const doId = tenants.idFromName(`tenant:${subdomain}`);
       const stub = tenants.get(doId);
-      const response = await stub.fetch("https://tenant.internal/config");
+
+      // Pass subdomain header so TenantDO knows its identity on first access
+      const response = await stub.fetch("https://tenant.internal/config", {
+        headers: { "X-Tenant-Subdomain": subdomain },
+      });
 
       if (response.ok) {
         const config = (await response.json()) as TenantConfig & {
           id?: string;
         };
-        // TenantDO returns cached config - we still need tenant ID from D1
-        // For now, fetch ID from D1 (TODO: cache ID in TenantDO)
-        if (config.subdomain) {
-          const tenant = await db
-            .prepare(
-              "SELECT id FROM tenants WHERE subdomain = ? AND active = 1",
-            )
-            .bind(subdomain)
-            .first<{ id: string }>();
 
-          if (tenant) {
-            return {
-              ...config,
-              id: tenant.id,
-            };
-          }
+        // TenantDO now caches tenant ID - no need for separate D1 query
+        if (config.id && config.subdomain) {
+          return {
+            ...config,
+            id: config.id,
+          };
         }
       }
     } catch (err) {

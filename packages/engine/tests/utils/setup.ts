@@ -11,8 +11,68 @@
 import { vi } from "vitest";
 
 // ============================================================================
+// Type Definitions for Mock Data
+// ============================================================================
+
+/** Shape of tenant init/config data */
+interface TenantData {
+  subdomain?: string;
+  displayName?: string;
+  ownerId?: string;
+  tier?: string;
+  [key: string]: unknown;
+}
+
+/** Shape of draft data */
+interface DraftData {
+  deviceId?: string;
+  [key: string]: unknown;
+}
+
+/** Shape of post meta init data */
+interface PostMetaInitData {
+  tenantId?: string;
+  slug?: string;
+  tier?: string;
+}
+
+/** Shape of view tracking data */
+interface ViewData {
+  sessionId?: string;
+}
+
+/** Shape of reaction data */
+interface ReactionData {
+  type?: string;
+  userId?: string;
+}
+
+/** Shape of post content data */
+interface ContentData {
+  [key: string]: unknown;
+}
+
+/** Mock DurableObjectId with equals method */
+interface MockDurableObjectId {
+  name: string;
+  toString: () => string;
+  equals: (other: MockDurableObjectId) => boolean;
+}
+
+// ============================================================================
 // Mock Factories
 // ============================================================================
+
+/**
+ * Create a mock DurableObjectId
+ */
+function createMockId(name: string): MockDurableObjectId {
+  return {
+    name,
+    toString: () => name,
+    equals: (other: MockDurableObjectId) => other.name === name,
+  };
+}
 
 /**
  * Create a mock Durable Object namespace
@@ -21,8 +81,8 @@ function createMockDONamespace() {
   const stubs = new Map<string, MockDurableObjectStub>();
 
   return {
-    idFromName: (name: string) => ({ name, toString: () => name }),
-    get: (id: { name: string }) => {
+    idFromName: (name: string) => createMockId(name),
+    get: (id: MockDurableObjectId) => {
       if (!stubs.has(id.name)) {
         stubs.set(id.name, new MockDurableObjectStub(id.name));
       }
@@ -34,13 +94,27 @@ function createMockDONamespace() {
 
 /**
  * Mock Durable Object Stub
+ *
+ * Implements the DurableObjectStub interface for testing purposes.
+ * The connect() method is stubbed since we don't use WebSocket connections in tests.
  */
 class MockDurableObjectStub {
   private storage = new Map<string, unknown>();
-  private name: string;
+
+  // Required by DurableObjectStub interface
+  readonly id: MockDurableObjectId;
+  readonly name: string;
 
   constructor(name: string) {
     this.name = name;
+    this.id = createMockId(name);
+  }
+
+  /**
+   * Stub for Socket connections (not used in tests)
+   */
+  connect(): never {
+    throw new Error("connect() not implemented in mock - use fetch() instead");
   }
 
   async fetch(request: Request | string): Promise<Response> {
@@ -67,7 +141,7 @@ class MockDurableObjectStub {
     req: Request,
   ): Promise<Response> {
     if (path === "/init" && method === "POST") {
-      const data = await req.json();
+      const data = (await req.json()) as TenantData;
       // Validate required fields
       if (!data.subdomain || !data.displayName || !data.ownerId || !data.tier) {
         return new Response("Missing required fields", { status: 400 });
@@ -91,8 +165,9 @@ class MockDurableObjectStub {
     }
 
     if (path === "/config" && method === "PUT") {
-      const updates = await req.json();
-      const current = this.storage.get("config") || {};
+      const updates = (await req.json()) as TenantData;
+      const current =
+        (this.storage.get("config") as Record<string, unknown>) || {};
       this.storage.set("config", { ...current, ...updates });
       return Response.json({ success: true });
     }
@@ -106,7 +181,7 @@ class MockDurableObjectStub {
       const slug = path.replace("/drafts/", "");
       const draftsMap = (this.storage.get("draftsMap") || {}) as Record<
         string,
-        unknown
+        DraftData
       >;
 
       if (method === "GET") {
@@ -116,7 +191,7 @@ class MockDurableObjectStub {
       }
 
       if (method === "PUT") {
-        const data = await req.json();
+        const data = (await req.json()) as DraftData;
         draftsMap[slug] = {
           ...data,
           lastSaved: Date.now(),
@@ -127,7 +202,7 @@ class MockDurableObjectStub {
         // Update drafts list
         const drafts = Object.entries(draftsMap).map(([s, d]) => ({
           slug: s,
-          ...(d as object),
+          ...d,
         }));
         this.storage.set("drafts", drafts);
 
@@ -150,7 +225,7 @@ class MockDurableObjectStub {
     req: Request,
   ): Promise<Response> {
     if (path === "/meta/init" && method === "POST") {
-      const data = await req.json();
+      const data = (await req.json()) as PostMetaInitData;
       // Validate required fields
       if (!data.tenantId || !data.slug) {
         return new Response("Missing required fields: tenantId and slug", {
@@ -195,7 +270,7 @@ class MockDurableObjectStub {
         | undefined;
       if (!meta) return new Response("Post not initialized", { status: 400 });
 
-      const data = await req.json();
+      const data = (await req.json()) as ViewData;
       const sessionKey = data.sessionId || "anonymous";
       const sessions = (this.storage.get("sessions") || {}) as Record<
         string,
@@ -234,7 +309,7 @@ class MockDurableObjectStub {
         | undefined;
       if (!meta) return new Response("Post not initialized", { status: 400 });
 
-      const data = await req.json();
+      const data = (await req.json()) as ReactionData;
       if (!data.type || !["like", "bookmark"].includes(data.type)) {
         return new Response("Invalid reaction type", { status: 400 });
       }
@@ -269,7 +344,7 @@ class MockDurableObjectStub {
         | undefined;
       if (!meta) return new Response("Post not initialized", { status: 400 });
 
-      const data = await req.json();
+      const data = (await req.json()) as ReactionData;
       if (!data.type || !["like", "bookmark"].includes(data.type)) {
         return new Response("Invalid reaction type", { status: 400 });
       }
@@ -316,7 +391,7 @@ class MockDurableObjectStub {
     }
 
     if (path === "/content" && method === "PUT") {
-      const data = await req.json();
+      const data = (await req.json()) as ContentData;
       this.storage.set("content", data);
       return Response.json({ success: true });
     }

@@ -5,6 +5,7 @@
  * and asserting on DO behavior.
  */
 
+import { expect } from "vitest";
 import { mockEnv } from "./setup.js";
 
 // Get the mock environment from setup.ts

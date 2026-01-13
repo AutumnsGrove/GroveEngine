@@ -26,6 +26,9 @@ interface Env {
   HOT_TO_WARM_DAYS: string;
   WARM_TO_COLD_DAYS: string;
   BATCH_SIZE: string;
+
+  // Secret for manual trigger authentication
+  MIGRATOR_SECRET?: string;
 }
 
 /**
@@ -180,10 +183,18 @@ export default {
 
     // Manual trigger (requires auth in production)
     if (url.pathname === "/run" && request.method === "POST") {
-      // In production, add auth check here
+      // Validate Bearer token against MIGRATOR_SECRET
       const authHeader = request.headers.get("Authorization");
       if (!authHeader?.startsWith("Bearer ")) {
-        return new Response("Unauthorized", { status: 401 });
+        return new Response("Unauthorized: Missing Bearer token", {
+          status: 401,
+        });
+      }
+
+      // Extract and validate the token
+      const token = authHeader.replace("Bearer ", "");
+      if (!env.MIGRATOR_SECRET || token !== env.MIGRATOR_SECRET) {
+        return new Response("Unauthorized: Invalid token", { status: 401 });
       }
 
       try {
