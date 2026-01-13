@@ -69,9 +69,11 @@ for (const doClass of DO_CLASSES) {
   console.log(`📦 Compiling ${doClass.name}.ts...`);
 
   // Compile with esbuild (bundle to inline dependencies like tiers.js)
+  // Use pnpm exec to ensure we use the locally installed esbuild
   const result = spawnSync(
-    "npx",
+    "pnpm",
     [
+      "exec",
       "esbuild",
       sourcePath,
       `--outfile=${outPath}`,
