@@ -227,6 +227,9 @@ export class PostMetaDO implements DurableObject {
         isPopular: false,
       };
       await this.persistMeta();
+
+      // Schedule initial cleanup alarm (with dedup check)
+      await this.ensureAlarmScheduled();
     } else if (data.tier && this.meta.tier !== data.tier) {
       // Update tier if it changed (e.g., tenant upgraded)
       this.meta.tier = data.tier;
@@ -389,6 +392,21 @@ export class PostMetaDO implements DurableObject {
     return Response.json(presence);
   }
 
+  /**
+   * Handle WebSocket connection for real-time presence updates.
+   *
+   * SECURITY NOTE: Anonymous WebSocket access is intentional.
+   * This endpoint provides read-only presence data ("N people reading")
+   * which is public information suitable for any blog visitor. The data
+   * exposed (reader count, reaction counts) is already visible on the
+   * public blog page. No authentication is required because:
+   * - No sensitive data is transmitted
+   * - No state-changing operations are available via WebSocket
+   * - Presence tracking uses anonymous session IDs, not user identities
+   *
+   * If private analytics are needed in the future, that would go through
+   * authenticated API endpoints, not this WebSocket.
+   */
   private handleWebSocket(): Response {
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
@@ -487,6 +505,19 @@ export class PostMetaDO implements DurableObject {
       )
       .one();
     return (result?.count as number) || 0;
+  }
+
+  /**
+   * Ensure an alarm is scheduled (with deduplication).
+   * Prevents redundant setAlarm() calls which waste resources.
+   */
+  private async ensureAlarmScheduled(): Promise<void> {
+    const currentAlarm = await this.state.storage.getAlarm();
+    if (!currentAlarm) {
+      // Schedule cleanup alarm for 1 hour from now
+      await this.state.storage.setAlarm(Date.now() + 60 * 60 * 1000);
+    }
+    // If alarm already exists, don't reschedule (dedup)
   }
 
   async alarm(): Promise<void> {

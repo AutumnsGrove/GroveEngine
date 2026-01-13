@@ -24,3 +24,13 @@ CREATE INDEX IF NOT EXISTS idx_posts_storage_tenant_published
 -- (Already partially covered by idx_post_views_post_time, but this is more specific)
 CREATE INDEX IF NOT EXISTS idx_post_views_recent
   ON post_views(post_id, viewed_at) WHERE viewed_at > 0;
+
+-- =============================================================================
+-- TENANT TIER INDEX FOR MIGRATION JOINS
+-- =============================================================================
+
+-- Index for tenant tier lookups in post-migrator joins
+-- Query pattern: JOIN tenants t ON p.tenant_id = t.id (uses t.plan for tier thresholds)
+-- Optimizes the frequently-joined tier lookup during migration batch processing
+CREATE INDEX IF NOT EXISTS idx_tenants_plan
+  ON tenants(plan);

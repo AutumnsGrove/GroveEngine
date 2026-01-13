@@ -13,7 +13,17 @@
  * Part of the Loom pattern - Grove's coordination layer.
  */
 
-import { TIERS, type TierKey } from "../config/tiers.js";
+import { TIERS, type TierKey, type PaidTierKey } from "../config/tiers.js";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/**
+ * Maximum analytics events to buffer before forcing a flush.
+ * Prevents memory leak if alarm mechanism fails.
+ */
+const MAX_ANALYTICS_BUFFER = 1000;
 
 // ============================================================================
 // Types
@@ -24,7 +34,7 @@ export interface TenantConfig {
   subdomain: string;
   displayName: string;
   theme: Record<string, unknown> | null;
-  tier: "seedling" | "sapling" | "oak" | "evergreen";
+  tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'free' since tenants are paying)
   limits: TierLimits;
   ownerId: string;
 }
@@ -453,8 +463,17 @@ export class TenantDO implements DurableObject {
       timestamp: event.timestamp || Date.now(),
     });
 
-    // If buffer is large, flush immediately
-    if (this.analyticsBuffer.length >= 100) {
+    // Flush conditions:
+    // 1. Normal threshold (100): flush and let alarm reschedule
+    // 2. MAX_ANALYTICS_BUFFER: safety net if alarm mechanism fails
+    if (this.analyticsBuffer.length >= MAX_ANALYTICS_BUFFER) {
+      // Force flush - buffer is dangerously large
+      console.warn(
+        `[TenantDO] Analytics buffer hit max (${MAX_ANALYTICS_BUFFER}), forcing flush`,
+      );
+      await this.flushAnalytics();
+    } else if (this.analyticsBuffer.length >= 100) {
+      // Normal flush threshold
       await this.flushAnalytics();
     } else {
       // Schedule flush via alarm if not already set
