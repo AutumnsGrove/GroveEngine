@@ -196,11 +196,47 @@ pnpm add @jsquash/jxl -w --filter @autumnsgrove/groveengine
 - Size: ~800KB WASM encoder
 - Cloudflare Workers compatible (no dynamic code execution)
 
+#### WASM Bundle Size Consideration
+
+The @jsquash/jxl encoder is ~800KB. **Do not import statically** - use lazy loading:
+
+```typescript
+// ❌ BAD - adds 800KB to main bundle
+import { encode as encodeJxl } from '@jsquash/jxl';
+
+// ✅ GOOD - lazy load only when needed
+let jxlEncoder: typeof import('@jsquash/jxl') | null = null;
+
+async function getJxlEncoder() {
+  if (!jxlEncoder) {
+    jxlEncoder = await import('@jsquash/jxl');
+  }
+  return jxlEncoder;
+}
+
+// Usage in processImage()
+if (targetFormat === 'jxl') {
+  const { encode } = await getJxlEncoder();
+  const encoded = await encode(imageData, options);
+  // ...
+}
+```
+
+This ensures the WASM module only loads when a user actually uploads an image, not on page load.
+
 ### Phase 2: Update imageProcessor.ts
 
 ```typescript
-// New imports
-import { encode as encodeJxl } from '@jsquash/jxl';
+// Type-safe result interface
+export interface ProcessedImageResult {
+  blob: Blob;
+  width: number;
+  height: number;
+  originalSize: number;
+  processedSize: number;
+  format: 'jxl' | 'webp' | 'gif' | 'original';  // Explicit format tracking
+  skipped?: boolean;  // True for GIFs and originals
+}
 
 export interface ProcessImageOptions {
   quality?: number;
@@ -261,9 +297,13 @@ export async function processImage(
   let blob: Blob;
 
   if (targetFormat === 'jxl') {
-    const encoded = await encodeJxl(imageData, {
+    // Adaptive effort: lower on mobile for battery/performance
+    const effort = getAdaptiveEffort();
+
+    const { encode } = await getJxlEncoder();  // Lazy load
+    const encoded = await encode(imageData, {
       quality,
-      effort: 7,        // Balanced speed/compression
+      effort,
       lossless: false,
       progressive: true // Better loading UX
     });
@@ -272,19 +312,39 @@ export async function processImage(
     // WebP fallback via Canvas API
     blob = await canvasToWebP(imageData, quality);
   }
+}
 
-  return {
-    blob,
-    width,
-    height,
-    originalSize: file.size,
-    processedSize: blob.size,
-    format: targetFormat
-  };
+/**
+ * Adaptive effort level based on device capabilities
+ * Higher effort = better compression but slower encoding
+ *
+ * Mobile devices: effort 5 (faster, preserves battery)
+ * Desktop: effort 7 (balanced)
+ * High-end: effort 9 (maximum compression, for power users)
+ */
+function getAdaptiveEffort(): number {
+  // Detect mobile via user agent or screen size
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || window.innerWidth < 768;
+
+  // Check for high-end device (8+ logical cores)
+  const isHighEnd = navigator.hardwareConcurrency >= 8;
+
+  if (isMobile) return 5;
+  if (isHighEnd) return 9;
+  return 7;  // Default balanced
 }
 ```
 
-### Phase 3: Update Upload Endpoint
+**Effort levels explained:**
+
+| Device | Effort | Encoding Time | Compression |
+|--------|--------|---------------|-------------|
+| Mobile | 5 | ~1s | Good |
+| Desktop | 7 | ~2s | Better |
+| High-end | 9 | ~4s | Best |
+
+### Phase 3: Update Upload Endpoint (with Enhanced Validation)
 
 **File:** `packages/engine/src/routes/api/images/upload/+server.ts`
 
@@ -298,14 +358,35 @@ const ALLOWED_TYPES = [
   'image/jxl'  // New
 ];
 
-// Add JXL magic bytes
-const FILE_SIGNATURES: Record<string, number[][]> = {
-  // ... existing ...
-  'image/jxl': [
-    [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20], // Container format
-    [0xFF, 0x0A]  // Codestream format
-  ]
+// Add JXL magic bytes with minimum length validation
+const FILE_SIGNATURES: Record<string, { patterns: number[][]; minLength: number }> = {
+  // ... existing types ...
+  'image/jxl': {
+    patterns: [
+      [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20], // Container format (ISO BMFF)
+      [0xFF, 0x0A]  // Codestream format (naked)
+    ],
+    minLength: 12  // Container needs 12+ bytes, codestream 2+
+  }
 };
+
+/**
+ * Validate file signature with length check
+ */
+function validateMagicBytes(buffer: ArrayBuffer, mimeType: string): boolean {
+  const bytes = new Uint8Array(buffer);
+  const sig = FILE_SIGNATURES[mimeType];
+
+  if (!sig) return false;
+
+  // Check minimum length
+  if (bytes.length < sig.minLength) return false;
+
+  // Check if any pattern matches
+  return sig.patterns.some(pattern =>
+    pattern.every((byte, i) => bytes[i] === byte)
+  );
+}
 
 // Add extension mapping
 const MIME_TO_EXTENSIONS: Record<string, string[]> = {
@@ -314,7 +395,7 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
 };
 ```
 
-### Phase 4: Update Storage Service
+### Phase 4: Update Storage Service (with Security Headers)
 
 **File:** `packages/engine/src/lib/server/services/storage.ts`
 
@@ -330,10 +411,18 @@ const ALLOWED_CONTENT_TYPES = new Set([
   // ... rest unchanged
 ]);
 
-const CACHE_CONTROL: Record<string, string> = {
-  // ... existing ...
-  'image/jxl': 'public, max-age=31536000, immutable'  // New
-};
+/**
+ * Get response headers for serving images
+ * Includes security headers to prevent content sniffing
+ */
+function getImageHeaders(contentType: string): Record<string, string> {
+  return {
+    'Content-Type': contentType,
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'X-Content-Type-Options': 'nosniff',  // Prevent MIME sniffing
+    'Vary': 'Accept'  // For content negotiation caching
+  };
+}
 ```
 
 ### Phase 5: Update Admin UI
@@ -377,7 +466,65 @@ Replace the "Convert to WebP" toggle with a format selector:
 </div>
 ```
 
-### Phase 6: Content Negotiation for Serving
+### Phase 6: Database Schema Update
+
+**File:** D1 migration for `storage_files` table
+
+Track image format for analytics, future cleanup, and migration progress:
+
+```sql
+-- Add format column to track image encoding
+ALTER TABLE storage_files ADD COLUMN image_format TEXT;
+
+-- Create index for format queries
+CREATE INDEX idx_files_format ON storage_files(image_format);
+
+-- Update existing records (all currently WebP or original)
+UPDATE storage_files
+SET image_format = CASE
+  WHEN mime_type = 'image/webp' THEN 'webp'
+  WHEN mime_type = 'image/jpeg' THEN 'jpeg'
+  WHEN mime_type = 'image/png' THEN 'png'
+  WHEN mime_type = 'image/gif' THEN 'gif'
+  ELSE 'unknown'
+END
+WHERE image_format IS NULL;
+```
+
+**Usage in upload handler:**
+
+```typescript
+// When inserting new file record
+await db.prepare(`
+  INSERT INTO storage_files (id, user_id, r2_key, filename, mime_type, size_bytes, image_format, ...)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ...)
+`).bind(id, userId, r2Key, filename, mimeType, sizeBytes, result.format, ...);
+```
+
+**Analytics queries:**
+
+```sql
+-- JXL adoption rate
+SELECT
+  image_format,
+  COUNT(*) as count,
+  ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) as percentage
+FROM storage_files
+WHERE mime_type LIKE 'image/%'
+GROUP BY image_format;
+
+-- Ready for WebP deprecation?
+SELECT COUNT(*) as webp_only_images
+FROM storage_files
+WHERE image_format = 'webp'
+  AND NOT EXISTS (
+    SELECT 1 FROM storage_files jxl
+    WHERE jxl.image_format = 'jxl'
+      AND jxl.filename = storage_files.filename
+  );
+```
+
+### Phase 7: Content Negotiation for Serving
 
 Two approaches:
 
@@ -409,7 +556,8 @@ export async function fetch(request: Request, env: Env) {
         headers: {
           'Content-Type': 'image/jxl',
           'Cache-Control': 'public, max-age=31536000, immutable',
-          'Vary': 'Accept'  // Important for CDN caching
+          'X-Content-Type-Options': 'nosniff',
+          'Vary': 'Accept'  // Critical for CDN caching
         }
       });
     }
@@ -422,6 +570,7 @@ export async function fetch(request: Request, env: Env) {
       headers: {
         'Content-Type': object.httpMetadata?.contentType || 'image/webp',
         'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
         'Vary': 'Accept'
       }
     });
@@ -431,7 +580,36 @@ export async function fetch(request: Request, env: Env) {
 }
 ```
 
-### Phase 7: Gallery Utilities Update
+#### CDN Cache Behavior with Vary: Accept
+
+The `Vary: Accept` header is **critical** for correct CDN caching:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CDN Cache Keys                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Without Vary: Accept (WRONG):                                  │
+│  Cache key: /photos/2026/01/sunset.webp                         │
+│  → First request (Chrome) caches JXL                            │
+│  → Firefox gets JXL (can't decode!)                             │
+│                                                                 │
+│  With Vary: Accept (CORRECT):                                   │
+│  Cache key: /photos/2026/01/sunset.webp + Accept header         │
+│  → Chrome request: cached as JXL variant                        │
+│  → Firefox request: cached as WebP variant                      │
+│  → Both browsers get correct format                             │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Cache hit rate impact:**
+
+- Without negotiation: 100% cache hits (single variant)
+- With negotiation: ~90-95% hits (2 variants per image)
+- Minor tradeoff for universal compatibility
+
+### Phase 8: Gallery Utilities Update
 
 **File:** `packages/engine/src/lib/utils/gallery.ts`
 
@@ -439,6 +617,236 @@ export async function fetch(request: Request, env: Env) {
 // Add .jxl to supported extensions
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.jxl'];
 ```
+
+---
+
+## Error Handling & Monitoring
+
+### JXL-Specific Error Tracking
+
+Track JXL encoding failures separately from general upload errors:
+
+```typescript
+interface JxlMetrics {
+  total_attempts: number;
+  successful_encodes: number;
+  fallback_to_webp: number;
+  encoding_errors: number;
+  avg_encoding_time_ms: number;
+  avg_compression_ratio: number;
+}
+
+// Log encoding result for monitoring
+function logJxlEncoding(result: {
+  success: boolean;
+  fallback: boolean;
+  encodingTimeMs: number;
+  originalSize: number;
+  encodedSize: number;
+  error?: string;
+}) {
+  // Send to analytics (Rings, or external service)
+  console.log(JSON.stringify({
+    event: 'jxl_encoding',
+    ...result,
+    timestamp: new Date().toISOString()
+  }));
+}
+
+// In processImage():
+const startTime = performance.now();
+try {
+  const encoded = await encode(imageData, options);
+  logJxlEncoding({
+    success: true,
+    fallback: false,
+    encodingTimeMs: performance.now() - startTime,
+    originalSize: file.size,
+    encodedSize: encoded.byteLength
+  });
+} catch (error) {
+  logJxlEncoding({
+    success: false,
+    fallback: true,
+    encodingTimeMs: performance.now() - startTime,
+    originalSize: file.size,
+    encodedSize: 0,
+    error: error.message
+  });
+  // Fall back to WebP
+  return processImageAsWebP(file, options);
+}
+```
+
+### Alert Thresholds
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| JXL fallback rate | >30% | >50% |
+| Encoding errors | >5%/hour | >15%/hour |
+| Avg encoding time | >5s | >10s |
+
+---
+
+## Batch Transcoding Strategy
+
+### When to Transcode Existing Images
+
+**Recommendation:** Start with dual-format for new uploads. Transcode existing images only when:
+
+1. JXL adoption reaches >90% of uploads
+2. Storage savings justify R2 egress costs
+3. Firefox ships JXL support (reduces need for WebP fallback)
+
+### Cost-Benefit Analysis
+
+| Factor | Transcode Now | Transcode Later |
+|--------|---------------|-----------------|
+| Storage savings | Immediate 20-30% | Delayed |
+| R2 egress | $0.36/GB to read existing | None |
+| CPU (Workers) | High (batch processing) | Amortized |
+| Complexity | High (queue, progress) | Low |
+| Risk | Medium (bulk changes) | Low |
+
+**Break-even calculation:**
+
+```
+Storage cost: $0.015/GB/month
+Egress cost: $0.36/GB (one-time)
+
+If JXL saves 25% storage:
+- 1GB WebP → 0.75GB JXL
+- Monthly savings: $0.00375/GB
+
+Break-even: $0.36 / $0.00375 = 96 months
+
+Conclusion: NOT worth transcoding existing unless:
+- Storage is constrained
+- Firefox adopts JXL (can drop WebP)
+- User requests export in JXL
+```
+
+### Batch Job Implementation (If Needed)
+
+```typescript
+// Durable Object for batch transcoding
+export class BatchTranscoder {
+  async transcode(batchSize: number = 100) {
+    const images = await this.getWebpOnlyImages(batchSize);
+
+    for (const image of images) {
+      // Read from R2
+      const webpData = await env.IMAGES.get(image.r2_key);
+      if (!webpData) continue;
+
+      // Decode WebP, encode JXL
+      const imageData = await decodeWebP(webpData);
+      const jxlData = await encodeJxl(imageData, { quality: 80, effort: 7 });
+
+      // Store JXL variant
+      const jxlKey = image.r2_key.replace('.webp', '.jxl');
+      await env.IMAGES.put(jxlKey, jxlData);
+
+      // Update database
+      await this.markTranscoded(image.id, jxlKey, jxlData.byteLength);
+
+      // Rate limit to avoid Worker CPU limits
+      await sleep(100);
+    }
+  }
+}
+```
+
+---
+
+## Rollback Plan
+
+### Feature Flag Disable
+
+If JXL causes issues, disable via feature flag:
+
+```typescript
+// In feature flags config
+const FEATURES = {
+  jxl_encoding: {
+    enabled: false,  // Set to false to disable
+    rollout_percentage: 0
+  }
+};
+
+// In imageProcessor
+if (!isFeatureEnabled('jxl_encoding')) {
+  return processImageAsWebP(file, options);
+}
+```
+
+### Handling Existing JXL Images After Rollback
+
+If JXL is disabled, existing JXL images still need to be served:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                 Rollback Scenarios                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Scenario A: Browser supports JXL (Chrome, Safari)              │
+│  → Continue serving JXL images normally                         │
+│  → New uploads fall back to WebP                                │
+│                                                                 │
+│  Scenario B: Browser doesn't support JXL (Firefox)              │
+│  → If dual-format stored: serve WebP fallback                   │
+│  → If JXL-only: on-demand transcode to WebP                     │
+│                                                                 │
+│  Scenario C: Complete JXL deprecation                           │
+│  → Batch transcode all JXL → WebP                               │
+│  → Delete JXL variants                                          │
+│  → Update database records                                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Emergency On-Demand Transcoding
+
+If JXL images exist but need to be served as WebP:
+
+```typescript
+// Worker middleware for emergency fallback
+async function handleImageRequest(request: Request, env: Env) {
+  const url = new URL(request.url);
+  const accept = request.headers.get('Accept') || '';
+
+  // Client wants JXL and we have it? Serve it.
+  if (accept.includes('image/jxl')) {
+    const jxlObject = await env.IMAGES.get(url.pathname);
+    if (jxlObject) return serveImage(jxlObject, 'image/jxl');
+  }
+
+  // Client doesn't support JXL, check for WebP fallback
+  const webpKey = url.pathname.replace('.jxl', '.webp');
+  const webpObject = await env.IMAGES.get(webpKey);
+  if (webpObject) return serveImage(webpObject, 'image/webp');
+
+  // No WebP fallback exists - transcode on demand (expensive!)
+  const jxlObject = await env.IMAGES.get(url.pathname);
+  if (jxlObject && url.pathname.endsWith('.jxl')) {
+    const webpBlob = await transcodeJxlToWebp(jxlObject);
+    // Cache the transcoded version for future requests
+    await env.IMAGES.put(webpKey, webpBlob);
+    return serveImage(webpBlob, 'image/webp');
+  }
+
+  return new Response('Not found', { status: 404 });
+}
+```
+
+### Rollback Checklist
+
+- [ ] Disable `jxl_encoding` feature flag
+- [ ] Monitor error rates (should decrease)
+- [ ] Verify WebP fallback serving works
+- [ ] Check CDN cache invalidation if needed
+- [ ] Communicate to users if visible impact
+- [ ] Schedule post-mortem to identify root cause
 
 ---
 
@@ -708,6 +1116,24 @@ async function benchmarkCompression() {
 
 ---
 
-*Document version: 1.0*
+*Document version: 1.1*
 *Created: 2026-01-13*
+*Updated: 2026-01-13*
 *Author: Claude (AI-assisted research and planning)*
+
+### Changelog
+
+**v1.1** (2026-01-13):
+- Added WASM lazy loading guidance to avoid bundle bloat
+- Added adaptive effort levels for mobile/desktop/high-end devices
+- Added ProcessedImageResult interface with explicit format field
+- Added database schema update with image_format column
+- Added JXL-specific error tracking and monitoring
+- Added CDN cache behavior documentation (Vary: Accept)
+- Added comprehensive rollback plan with feature flags
+- Added batch transcoding cost-benefit analysis
+- Enhanced magic byte validation with length checks
+- Added X-Content-Type-Options security header
+
+**v1.0** (2026-01-13):
+- Initial spec with architecture, implementation plan, and testing strategy
