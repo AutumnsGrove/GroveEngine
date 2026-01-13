@@ -1,6 +1,6 @@
 <script>
 	import Lightbox from '$lib/ui/components/gallery/Lightbox.svelte';
-	import ImageGallery from '$lib/ui/components/gallery/ImageGallery.svelte';
+	import GlassCarousel from '$lib/ui/components/ui/GlassCarousel.svelte';
 	import { sanitizeHTML } from '$lib/utils/sanitize';
 
 	let { item = {} } = $props();
@@ -60,9 +60,20 @@
 			{/if}
 		</figure>
 	{:else if item.type === 'gallery'}
-		<div class="gutter-gallery">
-			<ImageGallery images={item.images} />
-		</div>
+		{#if item.images?.length > 0}
+			<div class="gutter-gallery">
+				<GlassCarousel
+					images={item.images.map(img => ({ url: img.url, alt: img.alt || 'Gallery image', caption: img.caption }))}
+					variant="frosted"
+					showArrows={false}
+					class="gutter-carousel"
+				/>
+			</div>
+		{:else}
+			<div class="gutter-gallery-empty">
+				<span>No images in gallery</span>
+			</div>
+		{/if}
 	{:else if item.type === 'emoji'}
 		<div class="gutter-emoji">
 			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} />
@@ -85,17 +96,34 @@
 		line-height: 1.5;
 	}
 	.gutter-comment {
-		padding: 0.75rem;
-		background: #f8f8f8;
+		padding: 0.875rem 1rem;
+		/* Glass effect */
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.5);
 		border-left: 3px solid #2c5f2d;
-		border-radius: 0 6px 6px 0;
+		border-radius: 0 10px 10px 0;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 		color: var(--light-text-secondary);
-		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+		transition: all 0.3s ease;
+	}
+	.gutter-comment:hover {
+		background: rgba(255, 255, 255, 0.8);
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+		border-left-color: #3a7e3c;
 	}
 	:global(.dark) .gutter-comment {
-		background: var(--light-bg-primary);
+		background: rgba(16, 50, 37, 0.5);
+		border-color: rgba(74, 222, 128, 0.15);
 		border-left-color: var(--accent-success);
 		color: var(--light-text-tertiary);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	}
+	:global(.dark) .gutter-comment:hover {
+		background: rgba(16, 50, 37, 0.6);
+		border-left-color: #5cb85f;
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 	}
 	.gutter-comment :global(p) {
 		margin: 0 0 0.5rem 0;
@@ -112,6 +140,29 @@
 	}
 	.gutter-photo {
 		margin: 0;
+		/* Glass container for photos */
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.4);
+		border-radius: 12px;
+		padding: 0.5rem;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+		transition: all 0.3s ease;
+	}
+	.gutter-photo:hover {
+		background: rgba(255, 255, 255, 0.75);
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+		transform: translateY(-2px);
+	}
+	:global(.dark) .gutter-photo {
+		background: rgba(16, 50, 37, 0.4);
+		border-color: rgba(74, 222, 128, 0.15);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	}
+	:global(.dark) .gutter-photo:hover {
+		background: rgba(16, 50, 37, 0.55);
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 	}
 	.image-button {
 		padding: 0;
@@ -119,17 +170,18 @@
 		background: none;
 		cursor: pointer;
 		display: block;
+		width: 100%;
 	}
 	.image-button:hover img {
-		opacity: 0.9;
+		opacity: 0.95;
 	}
 	.gutter-photo img {
 		width: 100%;
 		max-width: 160px;
 		height: auto;
-		border-radius: 6px;
+		border-radius: 8px;
 		display: block;
-		transition: opacity 0.2s;
+		transition: opacity 0.2s, transform 0.2s;
 	}
 	/* Also constrain images in markdown comments */
 	.gutter-comment :global(img) {
@@ -152,57 +204,80 @@
 		text-align: center;
 		transition: color 0.3s ease;
 	}
-	/* Gallery styles for gutter - compact version */
+	/* Gallery styles for gutter - using GlassCarousel */
 	.gutter-gallery {
 		width: 100%;
-		max-width: 160px;
+		max-width: 180px;
 	}
-	.gutter-gallery :global(.gallery-container) {
-		margin: 0;
+	/* Compact carousel for gutter */
+	.gutter-gallery :global(.gutter-carousel) {
+		padding: 0.5rem;
 	}
-	.gutter-gallery :global(.gallery-image) {
-		max-height: 120px;
+	.gutter-gallery :global([role="region"]) {
+		padding: 0.5rem;
 	}
-	.gutter-gallery :global(.nav-button) {
-		width: 24px;
-		height: 24px;
+	/* Adjust aspect ratio for compact view */
+	.gutter-gallery :global(.relative.w-full) {
+		aspect-ratio: 1/1;
 	}
-	.gutter-gallery :global(.nav-button svg) {
-		width: 12px;
-		height: 12px;
+	/* Smaller navigation dots */
+	.gutter-gallery :global(.flex.items-center.gap-2) {
+		gap: 0.25rem;
 	}
-	.gutter-gallery :global(.nav-prev) {
-		left: 4px;
+	.gutter-gallery :global(.h-2) {
+		height: 6px;
 	}
-	.gutter-gallery :global(.nav-next) {
-		right: 4px;
-	}
-	.gutter-gallery :global(.gallery-info) {
-		padding: 4px;
-	}
-	.gutter-gallery :global(.gallery-progress) {
-		padding: 6px 0 4px;
-	}
-	.gutter-gallery :global(.progress-dot) {
-		width: 8px;
-		height: 8px;
-	}
-	.gutter-gallery :global(.progress-dot.active) {
+	.gutter-gallery :global(.w-6) {
 		width: 16px;
 	}
-	.gutter-gallery :global(.gallery-counter) {
-		font-size: 0.7rem;
-		padding-bottom: 4px;
+	.gutter-gallery :global(.w-2) {
+		width: 6px;
 	}
-	.gutter-gallery :global(.gallery-caption) {
+	/* Empty gallery state */
+	.gutter-gallery-empty {
+		padding: 1rem;
+		background: rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px dashed rgba(0, 0, 0, 0.15);
+		border-radius: 10px;
+		text-align: center;
+		max-width: 180px;
+	}
+	.gutter-gallery-empty span {
 		font-size: 0.75rem;
-		padding: 6px 8px;
+		color: var(--color-text-subtle, #999);
+		font-style: italic;
 	}
-	/* Emoji styles */
+	:global(.dark) .gutter-gallery-empty {
+		background: rgba(16, 50, 37, 0.3);
+		border-color: rgba(74, 222, 128, 0.2);
+	}
+	/* Emoji styles - with glass background */
 	.gutter-emoji {
 		display: flex;
 		justify-content: center;
-		padding: 0.5rem 0;
+		padding: 0.75rem;
+		background: rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		border-radius: 12px;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+		transition: all 0.3s ease;
+	}
+	.gutter-emoji:hover {
+		background: rgba(255, 255, 255, 0.65);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	}
+	:global(.dark) .gutter-emoji {
+		background: rgba(16, 50, 37, 0.35);
+		border-color: rgba(74, 222, 128, 0.12);
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+	}
+	:global(.dark) .gutter-emoji:hover {
+		background: rgba(16, 50, 37, 0.5);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 	}
 	.gutter-emoji img {
 		width: 48px;

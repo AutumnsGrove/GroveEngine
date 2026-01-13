@@ -30,12 +30,78 @@
    * @property {string} url
    */
 
+  /**
+   * @typedef {Object} ProcessedAnchor
+   * @property {string} raw - Original anchor string
+   * @property {boolean} isHeading - Whether this is a heading anchor
+   * @property {number} headingLevel - Heading level (1-6) or 0 if not a heading
+   * @property {boolean} isAnchorTag - Whether this is a custom anchor tag
+   * @property {string} displayText - Human-readable display text
+   * @property {string} type - Anchor type for accessibility labels
+   */
+
   // Props
   let {
     gutterItems = $bindable(/** @type {GutterItem[]} */ ([])),
     onInsertAnchor = /** @type {(anchorName: string) => void} */ ((anchorName) => {}),
     availableAnchors = /** @type {string[]} */ ([]),
   } = $props();
+
+  /**
+   * Extract heading level from an anchor string (capped at 1-6)
+   * @param {string | undefined} anchor
+   * @returns {number} Heading level 1-6, or 0 if not a heading
+   */
+  function getHeadingLevel(anchor) {
+    if (!anchor) return 0;
+    // Only match valid heading levels (1-6 hash marks)
+    const match = anchor.match(/^#{1,6}/);
+    return match ? Math.min(match[0].length, 6) : 0;
+  }
+
+  /**
+   * Process a raw anchor string into structured data
+   * @param {string} anchor - The raw anchor string
+   * @returns {ProcessedAnchor}
+   */
+  function createProcessedAnchor(anchor) {
+    const isHeading = anchor.startsWith('#');
+    const headingLevel = getHeadingLevel(anchor);
+    const isAnchorTag = anchor.startsWith('anchor:');
+    const displayText = isHeading
+      ? anchor.replace(/^#+\s*/, '')
+      : anchor.replace('anchor:', '');
+    const type = isHeading
+      ? `heading level ${headingLevel}`
+      : isAnchorTag
+        ? 'anchor tag'
+        : 'paragraph';
+
+    return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
+  }
+
+  /**
+   * Preprocess anchors into structured data for better performance
+   * @type {ProcessedAnchor[]}
+   */
+  let processedAnchors = $derived(availableAnchors.map(createProcessedAnchor));
+
+  /** Default empty anchor for fallback */
+  const emptyAnchor = { raw: '', isHeading: false, headingLevel: 0, isAnchorTag: false, displayText: '', type: 'paragraph' };
+
+  /**
+   * Get processed anchor data for display (checks cache first, then computes)
+   * @param {string | undefined} anchor
+   * @returns {ProcessedAnchor}
+   */
+  function getProcessedAnchor(anchor) {
+    if (!anchor) return emptyAnchor;
+    // Try to find in preprocessed cache first
+    const cached = processedAnchors.find(pa => pa.raw === anchor);
+    if (cached) return cached;
+    // Fallback to computing for anchors not in availableAnchors
+    return createProcessedAnchor(anchor);
+  }
 
   // State
   let showAddModal = $state(false);
@@ -267,11 +333,12 @@
       <p class="hint">Add comments, images, or galleries that appear alongside your content.</p>
     </div>
   {:else}
-    <div class="vines-list">
+    <div class="vines-list" role="list" aria-label="Vine items">
       {#each gutterItems as item, index (index)}
-        <div class="vine-item">
+        {@const anchor = getProcessedAnchor(item.anchor)}
+        <div class="vine-item" role="listitem">
           <div class="item-header">
-            <span class="item-type">
+            <span class="item-type" aria-hidden="true">
               {#if item.type === "comment"}
                 <MessageSquare class="type-icon" />
               {:else if item.type === "photo"}
@@ -282,7 +349,21 @@
                 <Pin class="type-icon" />
               {/if}
             </span>
-            <span class="item-anchor" title={item.anchor}>{item.anchor || "No anchor"}</span>
+            <div class="item-anchor-display">
+              {#if item.anchor}
+                {#if anchor.isHeading}
+                  <span class="anchor-badge heading-badge" aria-hidden="true">H{anchor.headingLevel}</span>
+                {:else if anchor.isAnchorTag}
+                  <span class="anchor-badge tag-badge" aria-hidden="true">⚓</span>
+                {:else}
+                  <span class="anchor-badge para-badge" aria-hidden="true">¶</span>
+                {/if}
+                <span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
+                <span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>
+              {:else}
+                <span class="no-anchor-warning" role="alert">⚠ No anchor set</span>
+              {/if}
+            </div>
             <div class="item-actions">
               <button
                 class="action-btn"
@@ -364,18 +445,40 @@
     </span>
   </div>
 
-  {#if availableAnchors.length > 0}
-    <div class="available-anchors">
-      <span class="anchors-label">Available:</span>
-      {#each availableAnchors as anchor}
-        <button
-          type="button"
-          class="anchor-chip"
-          onclick={() => (itemAnchor = anchor)}
-        >
-          {anchor}
-        </button>
-      {/each}
+  {#if processedAnchors.length > 0}
+    <div class="available-anchors-section">
+      <span class="anchors-label" id="anchor-selection-label">Click to select anchor location:</span>
+      <div class="anchor-list" role="listbox" aria-labelledby="anchor-selection-label">
+        {#each processedAnchors as anchor}
+          <button
+            type="button"
+            class="anchor-option"
+            class:selected={itemAnchor === anchor.raw}
+            class:heading={anchor.isHeading}
+            class:anchor-tag={anchor.isAnchorTag}
+            role="option"
+            aria-selected={itemAnchor === anchor.raw}
+            aria-label="Select {anchor.type}: {anchor.displayText}"
+            onclick={() => (itemAnchor = anchor.raw)}
+          >
+            {#if anchor.isHeading}
+              <span class="anchor-icon heading-icon" aria-hidden="true">H{anchor.headingLevel}</span>
+            {:else if anchor.isAnchorTag}
+              <span class="anchor-icon tag-icon" aria-hidden="true">⚓</span>
+            {:else}
+              <span class="anchor-icon para-icon" aria-hidden="true">¶</span>
+            {/if}
+            <span class="anchor-text">{anchor.displayText}</span>
+            {#if itemAnchor === anchor.raw}
+              <span class="selected-check" aria-hidden="true">✓</span>
+            {/if}
+          </button>
+        {/each}
+      </div>
+    </div>
+  {:else}
+    <div class="no-anchors-hint">
+      <p>No anchors found. Add headings to your content or use "Add Anchor" to create custom anchor points.</p>
     </div>
   {/if}
 
@@ -636,18 +739,74 @@
     height: 1rem;
   }
 
-  .item-anchor {
+  .item-anchor-display {
     flex: 1;
-    font-family: monospace;
-    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .anchor-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 16px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .heading-badge {
+    background: rgba(124, 77, 171, 0.15);
+    color: #7c4dab;
+  }
+
+  :global(.dark) .heading-badge {
+    background: rgba(201, 160, 232, 0.15);
+    color: #c9a0e8;
+  }
+
+  .tag-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    font-size: 0.65rem;
+  }
+
+  :global(.dark) .tag-badge {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+
+  .para-badge {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+    font-size: 0.65rem;
+  }
+
+  .item-anchor-text {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.75rem;
     color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  :global(.dark) .item-anchor {
+  :global(.dark) .item-anchor-text {
     color: var(--grove-text-strong);
+  }
+
+  .no-anchor-warning {
+    font-size: 0.7rem;
+    color: #e07030;
+    font-style: italic;
+  }
+
+  :global(.dark) .no-anchor-warning {
+    color: #f0c674;
   }
 
   .item-actions {
@@ -775,38 +934,145 @@
     flex: 1;
   }
 
-  .available-anchors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    align-items: center;
+  /* Improved anchor selection UI */
+  .available-anchors-section {
     margin-bottom: 1rem;
+    background: var(--grove-overlay-5);
+    border: 1px solid var(--grove-border-subtle);
+    border-radius: 10px;
+    padding: 0.75rem;
   }
 
   .anchors-label {
+    display: block;
     font-size: 0.75rem;
     color: var(--color-text-subtle);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
   }
 
-  .anchor-chip {
-    padding: 0.2rem 0.5rem;
-    background: var(--grove-overlay-10);
-    border: 1px solid var(--grove-border);
-    border-radius: 12px;
+  .anchor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .anchor-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--glass-bg-medium, rgba(255, 255, 255, 0.5));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--grove-border-subtle);
+    border-radius: 8px;
     color: var(--color-text-muted);
-    font-size: 0.7rem;
-    font-family: monospace;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.15s ease;
+    text-align: left;
   }
 
-  .anchor-chip:hover {
-    background: var(--grove-overlay-20);
+  .anchor-option:hover {
+    background: var(--grove-overlay-15);
+    border-color: var(--grove-overlay-25);
+    transform: translateX(4px);
+  }
+
+  .anchor-option.selected {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
     color: var(--color-primary);
   }
 
-  :global(.dark) .anchor-chip:hover {
+  :global(.dark) .anchor-option {
+    background: rgba(16, 50, 37, 0.35);
+    border-color: rgba(74, 222, 128, 0.1);
+  }
+
+  :global(.dark) .anchor-option:hover {
+    background: rgba(16, 50, 37, 0.5);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
+
+  :global(.dark) .anchor-option.selected {
+    background: rgba(74, 222, 128, 0.15);
+    border-color: rgba(74, 222, 128, 0.4);
     color: #86efac;
+  }
+
+  .anchor-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .heading-icon {
+    background: rgba(124, 77, 171, 0.15);
+    color: #7c4dab;
+  }
+
+  :global(.dark) .heading-icon {
+    background: rgba(201, 160, 232, 0.15);
+    color: #c9a0e8;
+  }
+
+  .tag-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    font-size: 0.75rem;
+  }
+
+  :global(.dark) .tag-icon {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+
+  .para-icon {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+
+  .anchor-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .selected-check {
+    color: var(--color-primary);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  :global(.dark) .selected-check {
+    color: #86efac;
+  }
+
+  .no-anchors-hint {
+    padding: 1rem;
+    background: var(--grove-overlay-5);
+    border: 1px dashed var(--grove-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .no-anchors-hint p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+    text-align: center;
   }
 
   .image-preview {
@@ -956,5 +1222,18 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* Screen reader only utility */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

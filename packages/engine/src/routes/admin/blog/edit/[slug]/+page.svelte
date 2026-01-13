@@ -363,6 +363,7 @@
             previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}
+            {gutterItems}
           />
         </div>
         {#if showGutter}
