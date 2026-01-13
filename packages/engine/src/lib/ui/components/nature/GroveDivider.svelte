@@ -117,7 +117,7 @@
 					class={sizeClasses[size]}
 					season={activeSeason}
 					{variant}
-					{monochromeColor}
+					accentColor={monochromeColor}
 					{monochromeTrunk}
 				/>
 			{:else}
