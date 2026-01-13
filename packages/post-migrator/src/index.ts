@@ -117,11 +117,30 @@ interface PostRecord {
 }
 
 /**
+ * Validate that a string is a valid TierKey
+ */
+function isValidTier(tier: string | undefined | null): tier is TierKey {
+  if (!tier) return false;
+  return tier in STORAGE_THRESHOLDS;
+}
+
+/**
  * Get storage thresholds for a tier, with fallback to DEFAULT_TIER
+ *
+ * This validates the tier at runtime since the value comes from D1
+ * and could theoretically be invalid (e.g., old data, schema mismatch).
  */
 function getStorageThresholds(tier: string | undefined): StorageTierThresholds {
-  const key = tier as TierKey;
-  return STORAGE_THRESHOLDS[key] ?? STORAGE_THRESHOLDS[DEFAULT_TIER];
+  if (isValidTier(tier)) {
+    return STORAGE_THRESHOLDS[tier];
+  }
+  // Log invalid tier for observability (helps catch schema drift)
+  if (tier !== undefined) {
+    console.warn(
+      `[PostMigrator] Unknown tier "${tier}", falling back to "${DEFAULT_TIER}"`,
+    );
+  }
+  return STORAGE_THRESHOLDS[DEFAULT_TIER];
 }
 
 interface MigrationResult {

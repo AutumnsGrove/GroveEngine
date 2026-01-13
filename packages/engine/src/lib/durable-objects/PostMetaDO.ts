@@ -57,6 +57,12 @@ function getPopularThreshold(tier: string | undefined): number {
  */
 const MAX_VIEW_LOG_ROWS = 50_000;
 
+/**
+ * Check view log growth every N inserts.
+ * This prevents unbounded growth between hourly alarms for viral posts.
+ */
+const VIEW_LOG_CHECK_INTERVAL = 100;
+
 export interface PostMeta {
   tenantId: string;
   slug: string;
@@ -104,6 +110,9 @@ export class PostMetaDO implements DurableObject {
 
   private isDirty: boolean = false;
   private lastPersist: number = 0;
+
+  // Track view inserts for inline growth check
+  private viewInsertsSinceCheck: number = 0;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
@@ -262,6 +271,13 @@ export class PostMetaDO implements DurableObject {
         now,
         sessionKey,
       );
+
+      // Inline growth check - prevents unbounded growth between alarms
+      this.viewInsertsSinceCheck++;
+      if (this.viewInsertsSinceCheck >= VIEW_LOG_CHECK_INTERVAL) {
+        await this.trimViewLogIfNeeded();
+        this.viewInsertsSinceCheck = 0;
+      }
 
       this.updatePopularStatus();
       this.broadcast({
@@ -520,6 +536,31 @@ export class PostMetaDO implements DurableObject {
     // If alarm already exists, don't reschedule (dedup)
   }
 
+  /**
+   * Trim view_log if it exceeds MAX_VIEW_LOG_ROWS.
+   * Called both by alarm() (hourly) and inline during view recording (every 100 inserts).
+   * This dual approach prevents unbounded growth on viral posts.
+   */
+  private async trimViewLogIfNeeded(): Promise<void> {
+    const countResult = this.state.storage.sql
+      .exec("SELECT COUNT(*) as count FROM view_log")
+      .one();
+    const rowCount = (countResult?.count as number) || 0;
+
+    if (rowCount > MAX_VIEW_LOG_ROWS) {
+      const deleteCount = rowCount - MAX_VIEW_LOG_ROWS;
+      await this.state.storage.sql.exec(
+        `DELETE FROM view_log WHERE id IN (
+          SELECT id FROM view_log ORDER BY timestamp ASC LIMIT ?
+        )`,
+        deleteCount,
+      );
+      console.log(
+        `[PostMetaDO] Trimmed ${deleteCount} old view_log entries (was ${rowCount}, now ${MAX_VIEW_LOG_ROWS})`,
+      );
+    }
+  }
+
   async alarm(): Promise<void> {
     if (this.isDirty) {
       await this.persistMeta();
@@ -532,26 +573,8 @@ export class PostMetaDO implements DurableObject {
       cutoff,
     );
 
-    // Enforce max row limit to prevent unbounded growth on viral posts
-    // Keep only the most recent MAX_VIEW_LOG_ROWS entries
-    const countResult = this.state.storage.sql
-      .exec("SELECT COUNT(*) as count FROM view_log")
-      .one();
-    const rowCount = (countResult?.count as number) || 0;
-
-    if (rowCount > MAX_VIEW_LOG_ROWS) {
-      // Delete oldest entries beyond the limit
-      const deleteCount = rowCount - MAX_VIEW_LOG_ROWS;
-      await this.state.storage.sql.exec(
-        `DELETE FROM view_log WHERE id IN (
-          SELECT id FROM view_log ORDER BY timestamp ASC LIMIT ?
-        )`,
-        deleteCount,
-      );
-      console.log(
-        `[PostMetaDO] Trimmed ${deleteCount} old view_log entries (was ${rowCount}, now ${MAX_VIEW_LOG_ROWS})`,
-      );
-    }
+    // Enforce max row limit (uses shared helper)
+    await this.trimViewLogIfNeeded();
 
     // Clean up stale presence entries
     const presenceCutoff = Date.now() - 5 * 60 * 1000;

@@ -262,14 +262,27 @@ export class PostContentDO implements DurableObject {
           throw new Error("R2 upload verification failed - object not found");
         }
 
-        // Only clear local content AFTER verified R2 upload
-        this.content.markdownContent = "";
-        this.content.htmlContent = "";
-        this.content.gutterContent = "[]";
-        this.content.storageLocation = "cold";
-        this.content.r2Key = data.r2Key;
+        // Atomic state update: prepare new state, persist, then update memory
+        // This prevents partial state if persistContent() fails
+        const updatedContent: PostContent = {
+          ...this.content,
+          markdownContent: "", // Clear after moving to R2
+          htmlContent: "",
+          gutterContent: "[]",
+          storageLocation: "cold",
+          r2Key: data.r2Key,
+        };
 
-        await this.persistContent();
+        // Persist BEFORE modifying in-memory state (atomic operation)
+        await this.state.storage.sql.exec(
+          "INSERT OR REPLACE INTO content (key, value, updated_at) VALUES (?, ?, ?)",
+          "post_content",
+          JSON.stringify(updatedContent),
+          Date.now(),
+        );
+
+        // Only after successful persistence, update in-memory state
+        this.content = updatedContent;
 
         return Response.json({
           success: true,
