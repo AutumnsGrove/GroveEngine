@@ -189,6 +189,13 @@ The grove becomes a community. Roots intertwine.
 
 ### Planned Features
 
+- [ ] **Shutter:** Web content distillation
+  - Token-efficient web fetching for LLM agents
+  - Built-in prompt injection defense (Canary pattern)
+  - Shared offenders list via D1
+  - Python package (`grove-shutter`) and Cloudflare Worker
+  - See `docs/specs/shutter-spec.md`
+
 - [ ] **Meadow:** The social layer
   - Optional community feed
   - Follow favorite blogs

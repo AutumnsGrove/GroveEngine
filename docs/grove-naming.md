@@ -347,6 +347,18 @@ Loam is Grove's username and domain validation system. Every name passes through
 
 ---
 
+## Shutter
+**Web Content Distillation** · `shutter.grove.place`
+**Repository:** [AutumnsGrove/Shutter](https://github.com/AutumnsGrove/Shutter)
+
+A shutter controls what reaches the lens. Open it, and light floods in—everything, all at once, overwhelming. But a photographer doesn't want everything. They want *the shot*. The shutter opens precisely when needed, captures exactly what's in frame, and closes before the noise can follow.
+
+Shutter is Grove's web content distillation service. Hand it a URL and a question, and it opens briefly—just long enough to capture what you need—then closes, leaving the chaos outside. Your agents get clean, focused content instead of raw HTML noise. Token budgets stay sane. Prompt injection attempts never make it past the aperture.
+
+*Open. Capture. Close.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -380,6 +392,7 @@ Loam is Grove's username and domain validation system. Every name passes through
 | **Reeds** | Comments system | *(integrated)* |
 | **Porch** | Front porch conversations | porch.grove.place |
 | **Loam** | Name protection | *(internal)* |
+| **Shutter** | Web content distillation | shutter.grove.place |
 
 ---
 
@@ -418,6 +431,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Reeds | GroveReeds |
 | Porch | GrovePorch |
 | Loam | GroveLoam |
+| Shutter | GroveShutter |
 
 ---
 
@@ -429,5 +443,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 7, 2026*
+*Last updated: January 13, 2026*
 *Status: Placeholder names, pending launch*

@@ -183,6 +183,8 @@ import {
   Dock,
   IdCardLanyard,
   ListTree,
+  // Shutter - web content distillation
+  Aperture,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -405,6 +407,7 @@ export const toolIcons = {
   // Workshop TOC icons
   pyramid: Pyramid, // Core Infrastructure TOC
   blinds: Blinds, // Shade - AI protection
+  aperture: Aperture, // Shutter - web content distillation
   "rocking-chair": RockingChair, // Porch - front porch conversations
   toolbox: Wrench, // Standalone Tools TOC (legacy)
   wrench: Wrench, // Standalone Tools TOC

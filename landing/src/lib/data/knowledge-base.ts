@@ -370,6 +370,19 @@ export const specs: Doc[] = [
     lastUpdated: "2026-01-04",
     readingTime: 12,
   },
+  {
+    slug: "shutter-spec",
+    title: "Shutter — Web Content Distillation",
+    description:
+      "Token-efficient web fetching with built-in prompt injection defense",
+    excerpt:
+      "A shutter controls what reaches the lens. Shutter is Grove's web content distillation service. Hand it a URL and a question, and it opens briefly—just long enough to capture what you need—then closes, leaving the chaos outside. Your agents get clean, focused content instead of raw HTML noise.",
+    category: "specs",
+    specCategory: "standalone-tools",
+    icon: "aperture",
+    lastUpdated: "2026-01-13",
+    readingTime: 15,
+  },
 
   // ============================================================================
   // OPERATIONS
@@ -1144,7 +1157,7 @@ export const philosophyDocs: Doc[] = [
     excerpt:
       "A forest of voices. Every user is a tree in the grove. These names aren't just branding—they're the language of an ecosystem. Each one draws from the same soil: forests, growth, shelter, connection.",
     category: "philosophy",
-    lastUpdated: "2026-01-07",
+    lastUpdated: "2026-01-13",
     readingTime: 15,
   },
   {
@@ -1242,8 +1255,7 @@ export const developerDocs: Doc[] = [
   {
     slug: "cloudflare-infrastructure",
     title: "Cloudflare Infrastructure",
-    description:
-      "Complete guide to Grove's Cloudflare-first architecture",
+    description: "Complete guide to Grove's Cloudflare-first architecture",
     excerpt:
       "Workers for compute, D1 for databases, KV for caching, R2 for storage. How Grove builds on Cloudflare's edge infrastructure for global performance and cost efficiency.",
     category: "developer",

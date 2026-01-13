@@ -87,6 +87,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[AI Gateway](../grove-ai-gateway-integration.md)** | Central AI observability & per-tenant quota management | **New** | Heartwood, D1, Pricing Tiers |
+| **[Shutter](shutter-spec.md)** | Web content distillation with prompt injection defense | **New** | Mycelium, OpenRouter, D1 |
 
 ### 🛒 Commerce & Community
 
@@ -314,6 +315,7 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-13 | 2.3 | Added Shutter web content distillation spec |
 | 2026-01-06 | 2.2 | Added Echo support ticket spec |
 | 2026-01-06 | 2.1 | Added Pantry spec; added Commerce & Community section |
 | 2026-01-02 | 2.0 | Added Vineyard, Vista LoadTest specs; updated integration matrix |

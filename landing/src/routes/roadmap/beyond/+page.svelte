@@ -39,6 +39,19 @@
 	// Standalone tools - built for personal use, shared with the world
 	const tools: Tool[] = [
 		{
+			name: 'Shutter',
+			tagline: 'Web Content Distillation',
+			description: 'A shutter controls what reaches the lens. Hand it a URL and a question, and it opens briefly—just long enough to capture what you need—then closes, leaving the chaos outside. Your agents get clean, focused content instead of raw HTML noise. Token budgets stay sane. Prompt injection attempts never make it past the aperture.',
+			status: 'building',
+			icon: 'aperture',
+			domain: 'shutter.grove.place',
+			stack: 'Python + Cloudflare Workers',
+			github: 'https://github.com/AutumnsGrove/Shutter',
+			subComponents: [
+				{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+			]
+		},
+		{
 			name: 'Aria',
 			tagline: 'Music Curation',
 			description: 'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
