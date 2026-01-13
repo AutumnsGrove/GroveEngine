@@ -232,13 +232,24 @@ export class TenantDO implements DurableObject {
       .one();
 
     if (stored?.value) {
-      this.config = JSON.parse(stored.value as string);
-      // Also set subdomain from cached config if we don't have it
-      if (this.config?.subdomain && !this.subdomain) {
-        this.subdomain = this.config.subdomain;
+      try {
+        this.config = JSON.parse(stored.value as string);
+        // Also set subdomain from cached config if we don't have it
+        if (this.config?.subdomain && !this.subdomain) {
+          this.subdomain = this.config.subdomain;
+        }
+        this.configLoadedAt = Date.now();
+        return;
+      } catch (err) {
+        // Corrupted cache - clear it and fall through to D1
+        console.warn(
+          "[TenantDO] Failed to parse cached config, clearing:",
+          err instanceof Error ? err.message : err,
+        );
+        await this.state.storage.sql.exec(
+          "DELETE FROM config WHERE key = 'tenant_config'",
+        );
       }
-      this.configLoadedAt = Date.now();
-      return;
     }
 
     // Fall back to D1 - need subdomain to query
@@ -262,11 +273,25 @@ export class TenantDO implements DurableObject {
     if (row) {
       // Build config with tier limits from centralized tiers.ts
       const tier = (row.tier as TenantConfig["tier"]) || "seedling";
+
+      // Safely parse theme JSON (corrupted data shouldn't crash the DO)
+      let theme: Record<string, unknown> | null = null;
+      if (row.theme) {
+        try {
+          theme = JSON.parse(row.theme as string);
+        } catch (err) {
+          console.warn(
+            `[TenantDO] Failed to parse theme JSON for ${this.subdomain}:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
+      }
+
       this.config = {
         id: row.id as string, // Include tenant ID to eliminate hooks.server.ts D1 query
         subdomain: row.subdomain as string,
         displayName: row.displayName as string,
-        theme: row.theme ? JSON.parse(row.theme as string) : null,
+        theme,
         tier,
         ownerId: row.ownerId as string,
         limits: this.getTierLimits(tier),
@@ -380,12 +405,23 @@ export class TenantDO implements DurableObject {
       )
       .toArray();
 
-    const drafts = rows.map((row) => ({
-      slug: row.slug,
-      metadata: JSON.parse(row.metadata as string),
-      lastSaved: row.last_saved,
-      deviceId: row.device_id,
-    }));
+    const drafts = rows.map((row) => {
+      let metadata: DraftMetadata = { title: "Untitled" };
+      try {
+        metadata = JSON.parse(row.metadata as string);
+      } catch (err) {
+        console.warn(
+          `[TenantDO] Failed to parse draft metadata for ${row.slug}:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+      return {
+        slug: row.slug,
+        metadata,
+        lastSaved: row.last_saved,
+        deviceId: row.device_id,
+      };
+    });
 
     return Response.json(drafts);
   }
@@ -402,10 +438,20 @@ export class TenantDO implements DurableObject {
       return new Response("Draft not found", { status: 404 });
     }
 
+    let metadata: DraftMetadata = { title: "Untitled" };
+    try {
+      metadata = JSON.parse(row.metadata as string);
+    } catch (err) {
+      console.warn(
+        `[TenantDO] Failed to parse draft metadata for ${slug}:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+
     return Response.json({
       slug: row.slug,
       content: row.content,
-      metadata: JSON.parse(row.metadata as string),
+      metadata,
       lastSaved: row.last_saved,
       deviceId: row.device_id,
     });
