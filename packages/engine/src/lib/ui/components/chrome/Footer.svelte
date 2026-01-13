@@ -20,6 +20,11 @@
 	import type { FooterLink, MaxWidth, Season } from './types';
 	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS, DIVIDER_VERTICAL } from './defaults';
 
+	// Easter egg: cycle through seasons when clicking the footer logo
+	function handleLogoClick() {
+		seasonStore.cycle();
+	}
+
 	interface Props {
 		resourceLinks?: FooterLink[];
 		connectLinks?: FooterLink[];
@@ -55,7 +60,15 @@
 			<!-- Column 1: Grove Brand (always visible) -->
 			<div class="text-center sm:text-left lg:flex-1">
 				<div class="flex items-center gap-2 justify-center sm:justify-start mb-3">
-					<Logo class="w-6 h-6" season={season || $seasonStore} />
+					<!-- Easter egg: click logo to cycle seasons -->
+					<Logo
+						class="w-6 h-6"
+						season={season || $seasonStore}
+						interactive
+						onclick={handleLogoClick}
+						title="Click for a surprise"
+						ariaLabel="Cycle through seasons"
+					/>
 					<span class="text-xl font-serif text-foreground">Grove</span>
 				</div>
 				<p class="text-sm font-sans text-foreground-subtle italic mb-4">

@@ -163,7 +163,7 @@
 		/** Size preset or pixel value. Overrides class-based sizing. */
 		size?: LogoSize;
 
-		/** Rotation in degrees. Negative = lean left. Default: -12 */
+		/** Rotation in degrees. Negative = lean left. Default: 0 (upright) */
 		rotation?: number;
 
 		// ── Effects ──────────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@
 		variant = 'default',
 		accentColor,
 		size,
-		rotation = -12,
+		rotation = 0,
 		shadow = false,
 		interactive = false,
 		monochromeTrunk = false,

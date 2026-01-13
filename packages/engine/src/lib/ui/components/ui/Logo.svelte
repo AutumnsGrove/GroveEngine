@@ -5,8 +5,8 @@
 	 * A beautifully crafted tree logo with seasonal color palettes,
 	 * 3D depth through light/dark branch splits, and extensive customization.
 	 *
-	 * The logo features three tiers of branches with a gentle -12° rotation
-	 * that gives it an organic, windswept feel.
+	 * The logo features three tiers of branches. By default it stands upright,
+	 * but rotation can be customized for an organic, windswept feel.
 	 *
 	 * ## Seasons
 	 * - `spring` — Rose Gold (cherry blossoms)
@@ -36,7 +36,7 @@
 	 *
 	 * @example Custom rotation and colors
 	 * ```svelte
-	 * <Logo rotation={0} />  <!-- No tilt -->
+	 * <Logo rotation={-12} />  <!-- Gentle windswept tilt -->
 	 * <Logo rotation={-20} />  <!-- More dramatic tilt -->
 	 * <Logo tier1={{ dark: '#ff0000', light: '#ffcccc' }} />
 	 * ```
@@ -158,7 +158,7 @@
 		/** Size preset or pixel value. Overrides class-based sizing. */
 		size?: LogoSize;
 
-		/** Rotation in degrees. Negative = lean left. Default: -12 */
+		/** Rotation in degrees. Negative = lean left. Default: 0 (upright) */
 		rotation?: number;
 
 		// ── Effects & Interactivity ──────────────────────────────────────────────
@@ -194,7 +194,7 @@
 		monochromeColor,
 		monochromeTrunk = false,
 		size,
-		rotation = -12,
+		rotation = 0,
 		shadow = false,
 		interactive = false,
 		onclick,
