@@ -139,7 +139,9 @@ export class LemonSqueezyClient {
       throw new LemonSqueezyAPIError("No checkout URL returned", 500);
     }
 
-    const attrs = data.data.attributes as LemonSqueezyCheckoutAttributes;
+    // Cast through unknown - SDK types don't fully match our interface
+    const attrs = data.data
+      .attributes as unknown as LemonSqueezyCheckoutAttributes;
     return {
       id: data.data.id,
       url: attrs.url,
