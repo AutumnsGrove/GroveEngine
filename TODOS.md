@@ -1277,35 +1277,44 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ## 🚩 Feature Flags System (Infrastructure)
 
-> **Priority:** Medium - Prerequisite for safe feature rollouts
-> **Status:** Not started - Needs research and planning
+> **Spec:** `docs/plans/feature-flags-spec.md`
+> **Priority:** Medium-High - Prerequisite for safe feature rollouts
+> **Status:** Planning complete, ready for implementation
 > **Blocks:** JXL migration gradual rollout, A/B testing
+> **Estimated Effort:** 10-15 hours total
 
 ### Context
 
-Grove currently lacks a feature flag system for controlled rollouts. This is needed for:
-- Safe JXL migration (percentage rollout, quick disable)
-- Future A/B testing
-- Per-tenant feature access
-- Kill switches for new features
+Grove needs controlled rollouts for JXL migration, tier-gated features, and A/B testing. The spec defines a Cloudflare-native solution using D1 + KV hybrid architecture.
 
-### Research Questions
+### Research Complete ✅
 
-- [ ] Evaluate options: D1 table vs KV vs environment variables vs third-party (LaunchDarkly, Statsig)
-- [ ] Determine caching strategy (KV cache of D1 flags? How often to refresh?)
-- [ ] Design API: `isFeatureEnabled(flagName, context?)` with tenant/user context
-- [ ] Plan admin UI for flag management
-- [ ] Consider percentage rollouts and cohort assignment
+- [x] **Architecture decision:** D1 + KV hybrid (D1 for config/admin, KV for fast reads)
+- [x] **Caching strategy:** 60-second TTL in KV, instant invalidation on admin changes
+- [x] **API design:** `isFeatureEnabled()`, `getFeatureValue()`, `getVariant()`
+- [x] **Admin UI plan:** Glass-themed flag editor with rule management
+- [x] **Percentage rollouts:** Deterministic SHA-256 hashing for stable bucketing
 
-### Implementation Tasks (TBD after research)
+### Implementation Tasks
 
-- [ ] Design feature flag schema (D1 or KV)
-- [ ] Implement flag evaluation function
-- [ ] Add admin UI for flag management
-- [ ] Integrate with Rings analytics for rollout monitoring
-- [ ] Document usage patterns for future features
+**Phase 1: Core Infrastructure (4-6 hours)**
+- [ ] Create D1 migration (`feature_flags`, `flag_rules`, `flag_audit_log` tables)
+- [ ] Implement evaluation logic (`packages/engine/src/lib/feature-flags/`)
+- [ ] Add `FLAGS_KV` binding to wrangler.toml
+- [ ] Write unit tests for percentage rollout determinism
 
-### Interim Solution
+**Phase 2: Admin UI (3-4 hours)**
+- [ ] Create `/admin/flags` routes and pages
+- [ ] Build RuleEditor, PercentageSlider, TierSelector components
+- [ ] Add audit log display
+
+**Phase 3: Integration (2-3 hours)**
+- [ ] Create initial flags (jxl_encoding, jxl_kill_switch, meadow_access)
+- [ ] Integrate with image processor for JXL rollout
+- [ ] Add common flag evaluation to server hooks
+- [ ] Connect to Rings analytics for flag exposure tracking
+
+### Interim Solution (Current)
 
 Until feature flags exist, use environment variables in `wrangler.toml`:
 
