@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { ThemeToggle, MobileMenu, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from 'lucide-svelte';
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
 
@@ -38,9 +38,9 @@
 	// Mobile menu state
 	let mobileMenuOpen = $state(false);
 
-	// Toggle season on logo click
+	// Toggle dark/light mode on logo click (matches engine Header pattern)
 	function handleLogoClick() {
-		seasonStore.cycle();
+		themeStore.toggle();
 	}
 
 	// Plant-specific navigation (minimal for onboarding focus)
@@ -73,12 +73,12 @@
 		<div class="max-w-2xl mx-auto flex items-center justify-between">
 			<!-- Logo area -->
 			<div class="flex items-center gap-3">
-				<!-- Logo icon - clickable to toggle season -->
+				<!-- Logo icon - clickable to toggle dark/light mode -->
 				<button
 					onclick={handleLogoClick}
 					class="flex-shrink-0 transition-transform hover:scale-110 active:scale-95"
-					aria-label="Toggle season theme"
-					title="Click to change season"
+					aria-label="Toggle dark or light theme"
+					title="Toggle dark/light mode"
 				>
 					<Logo class="w-7 h-7" season={$seasonStore} />
 				</button>
