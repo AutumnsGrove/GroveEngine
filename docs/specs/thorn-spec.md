@@ -32,14 +32,14 @@ Thorns protect plants from harm without being aggressive. They're natural, prote
            ╰─────────────────────────────────────────╯
                              │
                         ╭────┴────╮
-                       ╱    🌹    ╲
+                       ╱    🌹     ╲
                       ╱ ─────────── ╲
                      │   protected   │
                      │   without     │
                      │   surveillance│
                       ╲             ╱
                        ╲   ╭───╮   ╱
-                        ╲──│🌿│──╱
+                        ╲──│🌿 │──╱
                            ╰───╯
 
         Thorns protect plants from harm
@@ -391,7 +391,7 @@ The model classifies content into the following categories:
         CRITICAL               HIGH                MEDIUM              LOW
      ┄┄┄┄┄┄┄┄┄┄┄┄           ┄┄┄┄┄┄┄┄┄            ┄┄┄┄┄┄┄┄┄          ┄┄┄┄┄┄┄
 
-         🔴                    🟠                   🟡                 🟢
+         🔴                    🟠                    🟡                 🟢
          ╱╲                    ╱╲                   ╱╲                 ╱╲
         ╱  ╲                  ╱  ╲                 ╱  ╲               ╱  ╲
        ╱────╲                ╱────╲               ╱────╲             ╱────╲
@@ -478,7 +478,7 @@ This system is currently optimized for **English content**. Multi-language suppo
  + Notify         Warn       List         └──────────┘
                                               │
                                               ▼
-                                        Resolution
+                                          Resolution
 ```
 
 ### 7.2 Automatic Actions

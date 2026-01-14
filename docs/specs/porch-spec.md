@@ -46,22 +46,22 @@ Phase 1 provides a complete, functional support system using email as the commun
 │   User                                                          │
 │     │                                                           │
 │     ▼                                                           │
-│   ┌─────────────────┐                                          │
+│   ┌─────────────────┐                                           │
 │   │porch.grove.place│  Web interface for starting visits        │
-│   │   (SvelteKit)   │                                          │
-│   └────────┬────────┘                                          │
+│   │   (SvelteKit)   │                                           │
+│   └────────┬────────┘                                           │
 │            │                                                    │
 │            ▼                                                    │
-│   ┌─────────────────┐     ┌──────────────────┐                │
-│   │  Porch Worker   │────▶│   D1 Database    │                │
-│   │                 │     │  (visits, msgs)  │                │
-│   └────────┬────────┘     └──────────────────┘                │
+│   ┌─────────────────┐     ┌──────────────────┐                  │
+│   │  Porch Worker   │────▶│   D1 Database    │                  │
+│   │                 │     │  (visits, msgs)  │                  │
+│   └────────┬────────┘     └──────────────────┘                  │
 │            │                                                    │
 │            ▼                                                    │
-│   ┌─────────────────┐                                          │
-│   │     Resend      │  Email notifications to user & support  │
-│   │   (via Worker)  │                                          │
-│   └─────────────────┘                                          │
+│   ┌─────────────────┐                                           │
+│   │     Resend      │  Email notifications to user & support    │
+│   │   (via Worker)  │                                           │
+│   └─────────────────┘                                           │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -295,23 +295,23 @@ Phase 2 adds an alternative communication channel for users who have Ivy enabled
 │                     PHASE 2: IVY INTEGRATION                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   ┌─────────────────┐                                          │
-│   │porch.grove.place│                                          │
-│   └────────┬────────┘                                          │
+│   ┌─────────────────┐                                           │
+│   │porch.grove.place│                                           │
+│   └────────┬────────┘                                           │
 │            │                                                    │
 │            ▼                                                    │
-│   ┌─────────────────┐     ┌──────────────────┐                │
-│   │  Porch Worker   │────▶│   D1 Database    │                │
-│   │                 │     │                  │                │
-│   └────────┬────────┘     └──────────────────┘                │
+│   ┌─────────────────┐     ┌──────────────────┐                  │
+│   │  Porch Worker   │────▶│   D1 Database    │                  │
+│   │                 │     │                  │                  │
+│   └────────┬────────┘     └──────────────────┘                  │
 │            │                                                    │
-│      ┌─────┴─────┐                                             │
+│      ┌─────┴─────┐                                              │
 │      │           │                                              │
 │      ▼           ▼                                              │
-│   ┌──────┐   ┌──────┐                                          │
-│   │Resend│   │ Ivy  │  Choose based on user preference        │
-│   │      │   │ API  │                                          │
-│   └──────┘   └──────┘                                          │
+│   ┌──────┐   ┌──────┐                                           │
+│   │Resend│   │ Ivy  │  Choose based on user preference          │
+│   │      │   │ API  │                                           │
+│   └──────┘   └──────┘                                           │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
