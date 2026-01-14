@@ -223,31 +223,27 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       marked.parse(data.markdown_content, { async: false }) as string,
     );
 
-    // Generate a simple hash of the content
-    const encoder = new TextEncoder();
-    const contentData = encoder.encode(data.markdown_content);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", contentData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const file_hash = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
     const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
 
+    // Calculate word count and reading time
+    const wordCount = data.markdown_content.split(/\s+/).filter(Boolean).length;
+    const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
+
     // Insert using TenantDb (automatically adds tenant_id and generates id)
+    // Note: created_at and updated_at are auto-added by TenantDb.insert()
     await tenantDb.insert("posts", {
       slug,
       title: data.title,
-      date: data.date || timestamp.split("T")[0],
       tags,
       description: data.description || "",
       markdown_content: data.markdown_content,
       html_content,
       gutter_content: data.gutter_content || "[]",
       font: data.font || "default",
-      file_hash,
-      last_synced: timestamp,
+      status: "draft",
+      word_count: wordCount,
+      reading_time: readingTime,
     });
 
     // Invalidate post list cache so the new post appears in listings

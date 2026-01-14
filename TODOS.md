@@ -6,7 +6,19 @@
 
 ---
 
-# 🔄 CURRENT SESSION (Jan 13, 2026)
+# 🔄 CURRENT SESSION (Jan 14, 2026)
+
+## Bugs Found During Testing 🐛
+
+### Admin Sidebar UI Issues
+- [ ] "Dev" panel in sidebar shows clipped text ("De" only visible)
+- [ ] No clear way to expand collapsed sidebar panels
+- [ ] Consider adding hover-to-expand or click-to-expand behavior
+- **Location:** `packages/engine/src/routes/admin/+layout.svelte` (sidebar component)
+
+---
+
+# 🔄 PREVIOUS SESSION (Jan 13, 2026)
 
 ## Completed This Session ✅
 
