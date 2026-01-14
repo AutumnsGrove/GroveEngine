@@ -125,6 +125,84 @@ docs: Update README
 
 ---
 
+## 🌲 Engine-First Pattern (CRITICAL)
+
+> **The engine exists to prevent duplication. USE IT.**
+
+### The Rule
+**Before implementing ANY utility, component, or pattern in an app:**
+
+```
+1. CHECK: Does the engine already have this?
+   └── YES → Import from @autumnsgrove/groveengine
+   └── NO  → Continue to step 2
+
+2. IMPLEMENT: Add it to the engine FIRST
+   └── packages/engine/src/lib/...
+   └── Export it properly in package.json
+
+3. IMPORT: Then use it from the engine in your app
+   └── import { thing } from '@autumnsgrove/groveengine/...'
+```
+
+### Why This Matters
+We just deleted **11,925 lines** of duplicate code that accumulated because apps implemented their own versions instead of using or extending the engine. Never again.
+
+### What the Engine Provides
+
+| Category | Import Path | Examples |
+|----------|-------------|----------|
+| **UI Components** | `@autumnsgrove/groveengine/ui/chrome` | Header, Footer, Logo |
+| **UI Utilities** | `@autumnsgrove/groveengine/ui/utils` | `cn()` (with tailwind-merge) |
+| **Stores** | `@autumnsgrove/groveengine/ui/stores` | `seasonStore`, `themeStore` |
+| **Nature Components** | `@autumnsgrove/groveengine/ui/nature` | Trees, creatures, palette |
+| **Glass UI** | `@autumnsgrove/groveengine/ui` | GlassCard, GlassButton |
+| **General Utils** | `@autumnsgrove/groveengine/utils` | csrf, sanitize, markdown |
+| **Content** | `@autumnsgrove/groveengine/ui/content` | ContentWithGutter, TOC |
+
+### Common Violations (Don't Do These)
+
+```typescript
+// ❌ BAD - Creating local utilities
+// landing/src/lib/utils/cn.ts
+export function cn(...classes) { return classes.filter(Boolean).join(' '); }
+
+// ✅ GOOD - Import from engine
+import { cn } from '@autumnsgrove/groveengine/ui/utils';
+```
+
+```typescript
+// ❌ BAD - Local store implementations
+// meadow/src/lib/stores/season.ts
+export const season = createSeasonStore();
+
+// ✅ GOOD - Import from engine
+import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+```
+
+```typescript
+// ❌ BAD - Copying components locally
+// landing/src/lib/components/nature/TreePine.svelte
+
+// ✅ GOOD - Import from engine
+import { TreePine } from '@autumnsgrove/groveengine/ui/nature';
+```
+
+### When You Need Something New
+
+1. **Check the engine exports:** `grep -r "export" packages/engine/src/lib/`
+2. **If it doesn't exist:** Add it to the engine, not the app
+3. **Export it properly:** Update `packages/engine/package.json` exports
+4. **Then import it:** Use in your app via `@autumnsgrove/groveengine/...`
+
+### Quick Engine Export Check
+```bash
+# See all engine exports
+cat packages/engine/package.json | grep -A2 '"\./'
+```
+
+---
+
 ## When to Use Skills
 
 **This project uses Claude Code Skills for specialized workflows. Invoke skills using the Skill tool when you encounter these situations:**
@@ -313,5 +391,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2025-12-25*
+*Last updated: 2026-01-14*
 *Model: Claude Opus 4.5*
