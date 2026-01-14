@@ -4,7 +4,7 @@
 	 *
 	 * Shows scheduled maintenance window with affected components.
 	 */
-	import { cn } from '$lib/utils/cn';
+	import { cn } from '@autumnsgrove/groveengine/ui/utils';
 	import type { ScheduledMaintenance, StatusComponent } from '$lib/types/status';
 	import { Calendar, Clock, Wrench } from 'lucide-svelte';
 

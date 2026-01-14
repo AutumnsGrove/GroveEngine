@@ -4,7 +4,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import SEO from '$lib/components/SEO.svelte';
-	import { season } from '$lib/stores/season';
+	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
 
 	// Lucide icons
 	import {
@@ -19,7 +19,7 @@
 
 	// Toggle season on logo click
 	function handleLogoClick() {
-		season.cycle();
+		seasonStore.cycle();
 	}
 
 	// TODO: Add full marketing page with features, social proof, pricing
@@ -47,7 +47,7 @@
 			aria-label="Toggle season theme"
 			title="Click to change season"
 		>
-			<Logo class="w-24 h-24" season={$season} />
+			<Logo class="w-24 h-24" season={$seasonStore} />
 		</button>
 	</div>
 

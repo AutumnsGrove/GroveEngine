@@ -4,7 +4,7 @@
 	 *
 	 * Shows incident title, status, affected components, and timeline of updates.
 	 */
-	import { cn } from '$lib/utils/cn';
+	import { cn } from '@autumnsgrove/groveengine/ui/utils';
 	import { formatTime, formatDuration } from '$lib/utils/date';
 	import type { IncidentStatus, IncidentType, StatusUpdate, StatusComponent } from '$lib/types/status';
 	import { getIncidentStatusLabel } from '$lib/types/status';

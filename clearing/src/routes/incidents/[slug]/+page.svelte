@@ -4,9 +4,9 @@
 	 *
 	 * Shows full incident details with complete timeline.
 	 */
-	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/components/chrome';
+	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
-	import { cn } from '$lib/utils/cn';
+	import { cn } from '@autumnsgrove/groveengine/ui/utils';
 	import { getIncidentStatusLabel } from '$lib/types/status';
 	import type { IncidentStatus } from '$lib/types/status';
 	import {

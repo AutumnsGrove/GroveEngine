@@ -15,7 +15,7 @@
 		Grape,
 		Trees
 	} from 'lucide-svelte';
-	import { season } from '$lib/stores/season';
+	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
 
 	interface Props {
 		maxWidth?: 'narrow' | 'default' | 'wide';
@@ -37,7 +37,7 @@
 			<!-- Column 1: Grove Brand -->
 			<div class="text-center sm:text-left">
 				<div class="flex items-center gap-2 justify-center sm:justify-start mb-3">
-					<Logo class="w-6 h-6" season={$season} />
+					<Logo class="w-6 h-6" season={$seasonStore} />
 					<span class="text-xl font-serif text-foreground">Grove</span>
 				</div>
 				<p class="text-sm font-sans text-foreground-subtle italic mb-4">

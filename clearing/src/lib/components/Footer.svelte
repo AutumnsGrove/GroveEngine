@@ -4,7 +4,7 @@
 	 *
 	 * Minimal footer with links to main Grove site and support.
 	 */
-	import { cn } from '$lib/utils/cn';
+	import { cn } from '@autumnsgrove/groveengine/ui/utils';
 	import { Trees, Mail, ExternalLink } from 'lucide-svelte';
 
 	interface Props {

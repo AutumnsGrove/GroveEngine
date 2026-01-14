@@ -9,7 +9,7 @@
 	 * - Dark mode support
 	 * - Organic, welcoming feel
 	 */
-	import { cn } from '$lib/utils/cn';
+	import { cn } from '@autumnsgrove/groveengine/ui/utils';
 	import type { BackupStatus } from '$lib/server/backups';
 	import {
 		Shield,

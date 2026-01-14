@@ -1,12 +1,13 @@
 <script lang="ts">
 	import '../app.css';
 	import { themeStore, seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+	const { resolvedTheme } = themeStore;
 
 	let { children } = $props();
 
 	// Ensure stores initialize on client
 	$effect(() => {
-		const _ = $themeStore.resolvedTheme;
+		const _ = $resolvedTheme;
 		const __ = $seasonStore;
 	});
 </script>

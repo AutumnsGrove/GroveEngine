@@ -3,7 +3,7 @@
 	import Logo from './Logo.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
-	import { season } from '$lib/stores/season';
+	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
 	import { Menu, Home, Telescope, Tag, BookOpen, Trees, PenLine, MapPin, Scroll } from 'lucide-svelte';
 
 	// Determine current page for highlighting
@@ -26,7 +26,7 @@
 
 	// Toggle season on logo click
 	function handleLogoClick() {
-		season.cycle();
+		seasonStore.cycle();
 	}
 
 	// Navigation items (desktop) with icons
@@ -64,7 +64,7 @@
 				aria-label="Toggle season theme"
 				title="Click to change season"
 			>
-				<Logo class="w-6 h-6" season={$season} />
+				<Logo class="w-6 h-6" season={$seasonStore} />
 			</button>
 
 			<!-- "Grove" text - home link, hidden on mobile -->
