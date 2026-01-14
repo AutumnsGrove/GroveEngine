@@ -2,6 +2,7 @@
 
 > **Status**: Ready for Implementation
 > **Created**: 2026-01-14
+> **Updated**: 2026-01-14 (incorporated PR review feedback)
 > **Purpose**: Comprehensive guide for reorganizing the GroveEngine codebase structure
 
 ---
@@ -47,9 +48,11 @@ This document provides a complete migration plan for reorganizing the GroveEngin
 
 ### Directory Naming Standard
 
-- **Directories**: CamelCase (e.g., `AgentUsage`, `UserContent`)
+- **Code directories**: CamelCase (e.g., `AgentUsage`, `UserContent`, `DurableObjects`)
+- **Documentation directories**: lowercase with hyphens (e.g., `help-center`, `design-system`, `naming-research`)
 - **Date-based paths**: kebab-case with YYYY-MM-DD (e.g., `archived-2026-01-14`)
-- **Documentation dirs**: lowercase with hyphens (e.g., `help-center`, `design-system`)
+
+**Clarification**: Use CamelCase for directories containing code or agent workflows. Use lowercase-with-hyphens for documentation-only directories within `docs/`.
 
 ### File Naming Standard
 
@@ -113,7 +116,23 @@ These files are foundational and must remain at the repository root:
 
 **Location**: `packages/engine/migrations/`
 
-Renumber migrations to eliminate collisions:
+**Step 1: Audit Current State (REQUIRED)**
+
+Before renumbering, dynamically audit the migrations directory:
+
+```bash
+# List all migrations sorted by number prefix
+ls -1 packages/engine/migrations/*.sql | sort -t'_' -k1 -n
+
+# Find duplicates by prefix number
+ls -1 packages/engine/migrations/*.sql | sed 's/.*\/\([0-9]*\)_.*/\1/' | sort | uniq -d
+```
+
+Document the actual collisions found before proceeding. The example below is based on exploration findings, but **verify current state first**.
+
+**Step 2: Renumber to Eliminate Collisions**
+
+Example renumbering (verify against audit results):
 
 ```
 Current                              → New Name
@@ -123,6 +142,13 @@ Current                              → New Name
 018_feature_flags.sql                → 019_feature_flags.sql
 018_storage_tier_indexes.sql         → 020_storage_tier_indexes.sql
 019_lemonsqueezy_migration.sql       → 021_lemonsqueezy_migration.sql
+```
+
+**Step 3: Use `git mv` for History**
+
+```bash
+# Preserve git history when renaming
+git mv packages/engine/migrations/014_wisp_settings.sql packages/engine/migrations/015_wisp_settings.sql
 ```
 
 Also check for duplicate `010_*` migrations and renumber if found.
@@ -168,6 +194,24 @@ Update each package's `tsconfig.json` to extend this base config.
 - `packages/engine/src/lib/ui/components/ui/` → `packages/engine/src/lib/ui/components/glass/`
 - Update all imports referencing this path
 - Update exports in `packages/engine/src/lib/ui/components/index.ts`
+
+**⚠️ Breaking Change Warning**
+
+This rename changes import paths. If the engine package is published to npm:
+
+1. **Before renaming**: Check current published version (`npm view @autumnsgrove/groveengine version`)
+2. **Add backward compatibility** (temporary):
+   ```typescript
+   // In packages/engine/src/lib/ui/components/index.ts
+   // Re-export from new location with old name for transition period
+   export * from './glass';
+   export * as ui from './glass'; // Deprecated alias
+   ```
+3. **Bump minor version** after rename (breaking change = minor bump pre-1.0)
+4. **Document in CHANGELOG.md** with migration instructions
+5. **Remove deprecated alias** in next minor version
+
+**If package is NOT yet published externally**: Skip backward compatibility, just rename.
 
 ---
 
@@ -371,9 +415,35 @@ When implementation is complete:
 
 **Issue**: `landing/` and `meadow/` both contain identical copies of ~200 nature component files. These are already available in the `@autumnsgrove/groveengine` package.
 
+**⚠️ VERIFICATION REQUIRED BEFORE DELETION**
+
+Before deleting any local components, verify the engine package exports them correctly:
+
+```bash
+# Step 1: Check engine package exports
+grep -r "export.*from.*nature" packages/engine/src/lib/ui/index.ts
+grep -r "export.*from.*nature" packages/engine/src/lib/index.ts
+
+# Step 2: Create a test file to verify imports work
+cat > /tmp/test-import.ts << 'EOF'
+// Test that nature components are exported from engine
+import {
+  // Try importing a few key components
+  Sun, Moon, Cloud, Tree, Flower, Bird
+} from '@autumnsgrove/groveengine/ui/nature';
+console.log('Imports work:', { Sun, Moon, Cloud, Tree, Flower, Bird });
+EOF
+
+# Step 3: Attempt to compile (from landing/ directory)
+cd landing && npx tsc --noEmit /tmp/test-import.ts
+```
+
+**Only proceed with deletion if verification passes.**
+
 **Action for `landing/src/lib/components/nature/`**:
 
-1. **DELETE these subdirectories** (after verifying imports work from engine):
+1. **VERIFY** engine package exports work (steps above)
+2. **DELETE these subdirectories** (using `git rm -r` to preserve history):
    - `sky/` (8 components)
    - `trees/` (2 components)
    - `ground/` (11 components)
@@ -383,16 +453,18 @@ When implementation is complete:
    - `botanical/` (10 components)
    - `weather/` (3 components)
 
-2. **KEEP** `palette.ts` (re-exports from engine)
+3. **KEEP** `palette.ts` (re-exports from engine)
 
-3. **UPDATE imports** throughout `landing/` to use:
+4. **UPDATE imports** throughout `landing/` to use:
    ```typescript
    import { ComponentName } from '@autumnsgrove/groveengine/ui/nature';
    ```
 
+5. **RUN BUILD** to verify no broken imports: `cd landing && pnpm build`
+
 **Action for `meadow/src/lib/components/nature/`**:
 
-Same as landing - delete local copies, import from engine package.
+Same as landing - verify first, then delete local copies, import from engine package.
 
 ### Font Declaration Consolidation
 
@@ -407,14 +479,54 @@ Same as landing - delete local copies, import from engine package.
    ```
 4. Apply same pattern to `plant/` and `clearing/`
 
+**⚠️ Performance Note**
+
+CSS `@import` can block parallel font downloads, potentially impacting page load. Consider these alternatives:
+
+**Option A: CSS @import (simpler, slight performance cost)**
+```css
+/* app.css */
+@import "@autumnsgrove/groveengine/ui/styles/fonts.css";
+```
+
+**Option B: HTML link preload (better performance)**
+```html
+<!-- app.html -->
+<link rel="preload" href="/fonts/lexend.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles/fonts.css">
+```
+
+**Option C: JavaScript dynamic import (for code-split scenarios)**
+```typescript
+// +layout.svelte
+onMount(() => import('@autumnsgrove/groveengine/ui/styles/fonts.css'));
+```
+
+**Recommendation**: Start with Option A for simplicity. If Lighthouse audits show font loading issues, migrate to Option B.
+
 ### Relocate `domains/` Directory
 
 **Issue**: `domains/` is a full SvelteKit application sitting at root level with configuration directories.
 
+**Pre-Move Audit**:
+```bash
+# Find all references to domains/ in workspace configs
+grep -r "domains" pnpm-workspace.yaml package.json
+
+# Find any import references
+grep -rn "from.*domains" --include="*.ts" --include="*.js" --include="*.svelte" .
+
+# Check GitHub Actions workflows
+grep -r "domains" .github/workflows/
+```
+
 **Action**:
-- Move `domains/` → `packages/domains/`
-- Update any workspace references in `pnpm-workspace.yaml`
-- Update any import paths
+1. Audit references (commands above)
+2. Move using git: `git mv domains/ packages/domains/`
+3. Update `pnpm-workspace.yaml` if needed
+4. Update any workflow paths in `.github/workflows/`
+5. Update any import paths found in audit
+6. Run `pnpm install` to refresh workspace links
 
 ---
 
@@ -584,12 +696,51 @@ After implementation, verify:
 
 ## Notes for Implementing Agent
 
+### Critical Guidelines
+
 1. **Explore before acting**: Read the current state of each directory before making changes
 2. **Verify imports**: Before deleting duplicate components, verify the engine package exports them correctly
-3. **Update references**: When moving files, grep for references and update them
-4. **Commit incrementally**: Commit after each phase for easier rollback if needed
-5. **Test after each phase**: Run builds/tests to catch issues early
+3. **Use `git mv` for all moves**: Preserve git history by using `git mv source destination` instead of regular mv/rename
+4. **Update references**: When moving files, grep for references and update them
+5. **Commit incrementally**: Commit after each phase for easier rollback if needed
+6. **Test after each phase**: Run builds/tests to catch issues early
+
+### Cross-Reference Verification
+
+After moving documentation files, verify cross-references are updated:
+
+```bash
+# Find broken markdown links (references to moved files)
+grep -rn "\](.*\.md)" docs/ | grep -v node_modules
+
+# Find references to old locations
+grep -rn "docs/scratch" .
+grep -rn "plans/" . --include="*.md" | grep -v "docs/plans"
+```
+
+### TypeScript Compatibility
+
+Ensure `tsconfig.base.json` is compatible with all consumers:
+
+```bash
+# Check TypeScript versions across packages
+grep -r "\"typescript\":" */package.json packages/*/package.json
+
+# Verify moduleResolution compatibility (bundler requires TS 5.0+)
+npx tsc --version
+```
+
+### Rollback Strategy
+
+If issues arise during implementation:
+
+1. **Per-phase rollback**: `git reset --hard HEAD~1` to undo last commit
+2. **Full rollback**: `git reset --hard <commit-before-reorganization>`
+3. **Partial rollback**: Cherry-pick working commits to a new branch
+
+Keep the original branch available until verification is complete.
 
 ---
 
 *This plan was generated 2026-01-14 based on comprehensive codebase exploration.*
+*Updated 2026-01-14 to incorporate PR review feedback.*
