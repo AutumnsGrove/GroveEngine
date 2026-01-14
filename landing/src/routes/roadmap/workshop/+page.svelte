@@ -186,6 +186,21 @@
 					]
 				},
 				{
+					name: 'Curios',
+					tagline: 'Cabinet of Wonders',
+					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
+					status: 'planned',
+					icon: 'amphora',
+					domain: 'curios.grove.place',
+					integration: 'Visitor experience features for all Grove blogs',
+					spec: '/knowledge/specs/curios-spec',
+					subComponents: [
+						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
+						{ name: 'Shrines', icon: 'heart', description: 'Personal dedications' },
+						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
+					]
+				},
+				{
 					name: 'Rings',
 					tagline: 'Private Analytics',
 					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',

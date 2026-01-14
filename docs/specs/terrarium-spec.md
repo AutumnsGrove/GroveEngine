@@ -1780,6 +1780,18 @@ async function migrateToPlaygroundDO(userId: string): Promise<void> {
 - **Custom images** - Drag from user's CDN/gallery
 - **Community decorations** - Browse/share (Oak+)
 
+### Curios Integration
+
+Terrarium provides the editing interface for **Curios** — the visitor experience features like guestbooks, cursors, shrines, and artifacts. See the [Curios Spec](./curios-spec.md) for full details on these features.
+
+Terrarium's role:
+- Provide UI panels for configuring curios
+- Allow placement of curios in scenes
+- Handle curio asset selection and customization
+- Export curio configurations with scenes
+
+The curios themselves (rendering, interactivity, data storage) are handled by the Curios package.
+
 ---
 
 ## Keyboard Shortcuts

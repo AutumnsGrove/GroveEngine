@@ -185,6 +185,10 @@ import {
   ListTree,
   // Shutter - web content distillation
   Aperture,
+  // Curios - cabinet of wonders
+  Amphora,
+  NotebookPen,
+  Shell,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -346,6 +350,10 @@ export const toolIcons = {
   waypoints: Waypoints, // Trace - diagram mode
   route: Route, // Thread - connections
   regex: Regex, // Patterns - design system
+  // Curios - cabinet of wonders
+  amphora: Amphora, // Curios - main icon (cabinet of curiosities)
+  "notebook-pen": NotebookPen, // Curios - Guestbook
+  shell: Shell, // Curios - Artifacts
   // Subicons for workshop features
   layoutlist: LayoutList, // Lattice - Vines
   origami: Origami, // Songbird - Canary

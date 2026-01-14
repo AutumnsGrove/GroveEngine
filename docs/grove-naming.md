@@ -110,6 +110,15 @@ Weave is a node-graph editor within Terrarium for creating animations (Breeze mo
 
 *Weave your world together.*
 
+### Curios
+**Cabinet of Wonders** · `curios.grove.place`
+
+A curio is something unusual and intriguing—a curiosity that makes you pause and look closer. Historically, cabinets of curiosities held natural wonders alongside strange artifacts: shells, fossils, oddities, treasures.
+
+Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme (that's Foliage). Not the editor (that's Terrarium). This is the STUFF. The weird, wonderful, old-web-chaos-energy that says "someone lives here."
+
+*What curiosities will they find?*
+
 ### Rings
 **Analytics** · *Integrated into admin dashboard*
 
@@ -357,6 +366,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Foliage** | Platform | Theming system | foliage.grove.place |
 | **Terrarium** | Platform | Creative canvas | grove.place/terrarium |
 | **Weave** | Platform | Visual composition | *(part of Terrarium)* |
+| **Curios** | Platform | Cabinet of wonders | curios.grove.place |
 | **Rings** | Platform | Analytics | *(integrated)* |
 | **Clearing** | Platform | Status page | status.grove.place |
 | **Waystone** | Platform | Help center | *(integrated)* |
@@ -398,6 +408,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Foliage | GroveThemes |
 | Terrarium | GroveTerrarium |
 | Weave | GroveWeave |
+| Curios | GroveCurios |
 | Rings | GroveAnalytics |
 | Clearing | GroveClear |
 | Waystone | GroveWaystone |
@@ -432,5 +443,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 13, 2026*
+*Last updated: January 13, 2026 — Added Curios*
 *Status: Placeholder names, pending launch*
