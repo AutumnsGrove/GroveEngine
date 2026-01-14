@@ -69,10 +69,12 @@
       </p>
 
       <GlassLegend
-        title="Status"
+        title="Status Legend"
         items={statusLegend}
         layout="inline"
         compact
+        collapsible
+        defaultOpen={false}
         class="max-w-md mx-auto"
       />
     </div>

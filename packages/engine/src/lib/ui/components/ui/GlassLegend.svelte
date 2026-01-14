@@ -2,6 +2,7 @@
 	import type { Snippet, Component } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
+	import { slide } from "svelte/transition";
 
 	/**
 	 * GlassLegend - A compact legend component with glassmorphism styling
@@ -19,6 +20,11 @@
 	 *     { label: 'Planned', description: 'Coming soon', color: 'slate' },
 	 *   ]}
 	 * />
+	 * ```
+	 *
+	 * @example Collapsible legend
+	 * ```svelte
+	 * <GlassLegend title="Legend" items={items} collapsible defaultOpen={false} />
 	 * ```
 	 *
 	 * @example Compact inline legend
@@ -57,6 +63,10 @@
 		showColors?: boolean;
 		/** Compact mode - smaller text and spacing */
 		compact?: boolean;
+		/** Enable collapsible behavior */
+		collapsible?: boolean;
+		/** Initial open state when collapsible (defaults to true) */
+		defaultOpen?: boolean;
 		/** Additional CSS classes */
 		class?: string;
 	}
@@ -68,9 +78,14 @@
 		layout = "stacked",
 		showColors = true,
 		compact = false,
+		collapsible = false,
+		defaultOpen = true,
 		class: className,
 		...restProps
 	}: Props = $props();
+
+	// Collapsible state
+	let isOpen = $state(defaultOpen);
 
 	// Color palette - warm grove tones
 	const colorClasses: Record<ColorKey, string> = {
@@ -109,43 +124,71 @@
 	const itemsClass = $derived(layoutClasses[layout]);
 
 	const textSize = $derived(compact ? "text-xs" : "text-sm");
+
+	function toggle() {
+		isOpen = !isOpen;
+	}
 </script>
 
 <div class={containerClass} {...restProps}>
 	{#if title}
-		<div class="mb-2 {compact ? 'text-xs' : 'text-sm'} font-medium text-foreground-muted">
-			{title}
-		</div>
+		{#if collapsible}
+			<button
+				type="button"
+				onclick={toggle}
+				class="w-full flex items-center justify-between {compact ? 'text-xs' : 'text-sm'} font-medium text-foreground-muted hover:text-foreground transition-colors"
+				aria-expanded={isOpen}
+			>
+				<span>{title}</span>
+				<svg
+					class="w-4 h-4 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+				</svg>
+			</button>
+		{:else}
+			<div class="mb-2 {compact ? 'text-xs' : 'text-sm'} font-medium text-foreground-muted">
+				{title}
+			</div>
+		{/if}
 	{/if}
 
-	<div class={itemsClass}>
-		{#each items as item}
-			<div class="flex items-center gap-2">
-				{#if showColors && (item.color || item.colorClass)}
-					<span
-						class={cn(
-							"rounded-full flex-shrink-0",
-							compact ? "w-2 h-2" : "w-2.5 h-2.5",
-							item.colorClass ?? colorClasses[item.color ?? "slate"]
-						)}
-					></span>
-				{/if}
+	{#if !collapsible || isOpen}
+		<div
+			class="{itemsClass} {collapsible && title ? 'mt-2' : ''}"
+			transition:slide={{ duration: 200 }}
+		>
+			{#each items as item}
+				<div class="flex items-center gap-2">
+					{#if showColors && (item.color || item.colorClass)}
+						<span
+							class={cn(
+								"rounded-full flex-shrink-0",
+								compact ? "w-2 h-2" : "w-2.5 h-2.5",
+								item.colorClass ?? colorClasses[item.color ?? "slate"]
+							)}
+						></span>
+					{/if}
 
-				{#if item.icon}
-					{@const IconComponent = item.icon}
-					<IconComponent class={cn("flex-shrink-0 text-foreground-muted", compact ? "w-3 h-3" : "w-4 h-4")} />
-				{/if}
+					{#if item.icon}
+						{@const IconComponent = item.icon}
+						<IconComponent class={cn("flex-shrink-0 text-foreground-muted", compact ? "w-3 h-3" : "w-4 h-4")} />
+					{/if}
 
-				<span class="{textSize} font-medium text-foreground">
-					{item.label}
-				</span>
-
-				{#if item.description}
-					<span class="{textSize} text-foreground-muted">
-						{item.description}
+					<span class="{textSize} font-medium text-foreground">
+						{item.label}
 					</span>
-				{/if}
-			</div>
-		{/each}
-	</div>
+
+					{#if item.description}
+						<span class="{textSize} text-foreground-muted">
+							{item.description}
+						</span>
+					{/if}
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
