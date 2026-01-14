@@ -319,6 +319,20 @@
 					]
 				},
 				{
+					name: 'Wander',
+					tagline: 'Immersive Discovery',
+					description: 'Step into the forest. A first-person walking experience through the Grove where other people\'s groves float among the trees as living terrariums. Complete with time of day, seasons, weather, and an immersive soundscape. Discovery through presence, not browsing.',
+					status: 'planned',
+					icon: 'earth',
+					domain: 'wander.grove.place',
+					integration: 'Immersive exploration mode for Forests',
+					spec: '/knowledge/specs/wander-spec',
+					subComponents: [
+						{ name: 'Active', icon: 'compass', description: 'WASD exploration' },
+						{ name: 'Drift', icon: 'squiggle', description: 'Passive wandering' }
+					]
+				},
+				{
 					name: 'Trails',
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',

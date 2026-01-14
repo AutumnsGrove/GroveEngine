@@ -189,6 +189,9 @@ import {
   Amphora,
   NotebookPen,
   Shell,
+  // Wander - immersive discovery
+  Earth,
+  Squiggle,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -356,6 +359,9 @@ export const toolIcons = {
   shell: Shell, // Curios - Artifacts
   // Forests - community aggregation
   trees: Trees, // Forests - main icon (many trees together)
+  // Wander - immersive discovery
+  earth: Earth, // Wander - main icon (a world to explore)
+  squiggle: Squiggle, // Wander - Drift mode
   // Subicons for workshop features
   layoutlist: LayoutList, // Lattice - Vines
   origami: Origami, // Songbird - Canary

@@ -208,6 +208,17 @@ Discovery happens through *strolling*—take a random walk through a forest and 
 
 *Many trees, one grove.*
 
+### Wander
+**Immersive Discovery** · `wander.grove.place`
+
+Wander is a verb and a place. To wander is to move without a fixed destination, discovering by being present.
+
+Wander is a first-person walking experience through the Grove. Step into the forest. Trees tower above you. Leaves crunch beneath your feet. Birds call in the distance. And scattered among the ancient oaks, floating softly, are other people's groves—their Terrarium scenes rendered in miniature, glowing with their colors, alive with their creativity. Walk toward one that catches your eye. Step closer. Enter their world.
+
+Complete with time of day, seasons, weather, and an immersive soundscape, Wander transforms community discovery into presence. You're not browsing. You're *there*.
+
+*Step into the forest. See who else calls it home.*
+
 ### Trails
 **Personal Roadmaps** · `username.grove.place/trail`
 
@@ -387,6 +398,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Thorn** | Content | Content moderation | *(internal)* |
 | **Meadow** | Content | Social connection | meadow.grove.place |
 | **Forests** | Content | Community aggregation | {forest}.grove.place |
+| **Wander** | Content | Immersive discovery | wander.grove.place |
 | **Trails** | Content | Personal roadmaps | username.grove.place/trail |
 | **Ivy** | Tools | Email | ivy.grove.place |
 | **Bloom** | Tools | Remote coding | bloom.grove.place |
@@ -430,6 +442,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Thorn | GroveThorn |
 | Meadow | GroveSocial |
 | Forests | GroveForests |
+| Wander | GroveWander |
 | Trails | GroveTrails |
 | Ivy | GroveMail |
 | Bloom | GroveBloom |
@@ -456,5 +469,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 13, 2026 — Added Curios, Forests*
+*Last updated: January 13, 2026 — Added Curios, Forests, Wander*
 *Status: Placeholder names, pending launch*
