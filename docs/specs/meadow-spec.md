@@ -11,7 +11,23 @@ type: tech-spec
 
 # Meadow — Social Connection
 
-> *Where the forest opens up and you can see the people around you.*
+```
+                    the forest opens up here
+                          ☀️
+         .  *  .        .     .        .  *  .
+       🌱      🌿              🌿      🌱
+          \    |    /      \    |    /
+           \   |   /        \   |   /
+    ═══════════════════════════════════════════
+            a gathering place
+         where you can see each other clearly
+    ═══════════════════════════════════════════
+       🌸        ✨       🌿       ✨       🌸
+
+      Pathways connect. No algorithms distract.
+```
+
+> *Connection without algorithms. Gathering without metrics.*
 
 Grove's social layer providing a chronological feed across the network. No public metrics, no viral mechanics. Just genuine connection. Reactions only visible to authors, enabling encouragement without performance anxiety.
 
@@ -23,22 +39,6 @@ Grove's social layer providing a chronological feed across the network. No publi
 A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view.
 
 Meadow is social media that remembers what "social" means. No public metrics breeding hierarchy. No viral mechanics rewarding the loudest voice. Just a chronological feed of people you chose to follow, with reactions that only the author can see. Encouragement without performance. Connection without competition.
-
-```
-                    ~ the forest opens up ~
-
-         .  *  .        .  *  .        .  *  .
-        🌱      🌿     ☀️     🌿      🌱
-           \    |    /    \    |    /
-            \   |   /      \   |   /
-    ─────────────────────────────────────────
-          a clearing where you can see
-           the people around you clearly
-    ─────────────────────────────────────────
-
-    No public metrics.    No viral mechanics.
-    No hierarchy.         Just connection.
-```
 
 ---
 

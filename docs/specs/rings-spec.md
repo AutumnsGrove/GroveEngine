@@ -10,9 +10,26 @@ tags:
 type: tech-spec
 ---
 
-# Rings — Private Analytics
+```
+                        .  *  .
+                    .    ╭───╮    .
+                   *   ╭─┤   ├─╮   *
+                  .  ╭─┤ │   │ ├─╮  .
+                    ╭┤ │ │ 🌱│ │ ├╮
+                   ┌┤│ │ │   │ │ │├┐
+                   │││ │ │   │ │ │││
+                   │││ │ │   │ │ │││
+                   └┴┴─┴─┴───┴─┴─┴┴┘
+                  ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱
+               ──────────────────────
+              ~~~~~~~~~~~~~~~~~~~~~~~~
 
-> *Count the rings and you learn the story.*
+         Count the rings and learn the story.
+```
+
+> *Your growth told through time, not through noise.*
+
+# Rings — Private Analytics
 
 Grove's private analytics system designed for writers, not marketers. Provides meaningful insights without the anxiety of real-time dashboards, featuring 24-hour delayed stats, resonance indicators, and wellness-focused features like Digest Mode and Focus Periods.
 
@@ -24,23 +41,6 @@ Grove's private analytics system designed for writers, not marketers. Provides m
 Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
 
 Rings is analytics for writers, not marketers. Private insights without the anxiety of real-time dashboards. Your growth reflected back to you, not performed for others.
-
-```
-                        .  *  .
-                    .    ╭───╮    .
-                   *   ╭─┤   ├─╮   *
-                  .  ╭─┤ │   │ ├─╮  .
-                    ╭┤ │ │ 🌱│ │ ├╮
-                   ┌┤│ │ │   │ │ │├┐
-                   │││ │ │   │ │ │││
-                   │││ │ │   │ │ │││    Each ring records a season:
-                   └┴┴─┴─┴───┴─┴─┴┴┘    growth in plenty,
-                  ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱    resilience through hardship,
-               ──────────────────────    the quiet accumulation of years.
-              ~~~~~~~~~~~~~~~~~~~~~~~~
-
-            Private. Reflective. Yours alone.
-```
 
 ---
 

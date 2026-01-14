@@ -147,6 +147,158 @@ The workspace for building animated relationships with nature assets. Send a bre
 - Select connections to configure timing/easing
 - Visual hierarchy of parent-child relationships
 
+#### Breeze Editor in Detail
+
+When you open Breeze mode, you're working with:
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│  ◎ Weave: Breeze                   [Preview] [Grid: 32px ▾]  │
+├──────────────┬────────────────────────────────────────────────┤
+│              │                                                │
+│   PALETTE    │        Canvas (Snap to Grid)                   │
+│  ──────────  │                                                │
+│              │                                                │
+│  ┌─ Trees ─┐ │        ╲    /                                  │
+│  │ Pine   ▶│ │         \  /    ⟵ Drag to place asset         │
+│  │ Birch   │ │          \/                                    │
+│  └─────────┘ │        [Tree] ····· connection start          │
+│              │          |  ······                             │
+│  ┌─Creatures┐│        ·····    [Vine A]                       │
+│  │ Butterfly▶│ │        |          |··········                │
+│  │ Firefly  │ │      [Rock]    [Vine B]  [Vine C]            │
+│  │ Bee      │ │        ↑           ↓        ↓                 │
+│  └─────────┘ │      Root        Child    Child                │
+│              │                                                │
+│  ┌─Ground  ─┐│     ─ Connections show with arrows            │
+│  │ Rock    ▶│ │     ─ Drag to adjust node positions          │
+│  │ Mushroom │ │                                                │
+│  └─────────┘ │                                                │
+│              │                                                │
+│     (scroll) │ ┌──────────────────────────────────────────┐   │
+│              │ │  Selected: Rock → Vine A                │   │
+│              │ ├──────────────────────────────────────────┤   │
+│              │ │  Duration:  [0.3s_____]  seconds        │   │
+│              │ │  Delay:     [0.0s_____]  seconds        │   │
+│              │ │  Easing:    [ease-out ▾]                │   │
+│              │ │                                          │   │
+│              │ │  [ Remove Thread ]                       │   │
+│              │ └──────────────────────────────────────────┘   │
+│              │                                                │
+└──────────────┴────────────────────────────────────────────────┘
+```
+
+#### Thread Connection Visualization
+
+When you drag between two assets, a preview line appears:
+
+```
+User drags from [Rock] to [Vine A]:
+
+    Before release:          After release:
+
+    [Rock]----●              [Rock]═══════[Vine A]
+      ↑       ↑
+    source  cursor (dragging)
+
+Result: Thread created with default timing
+        Click on thread line to edit properties
+```
+
+---
+
+### Trace Mode (Diagram)
+
+The workspace for building static relationship diagrams with glass cards and icons.
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│  ◎ Weave: Trace                    [Export] [Grid: 32px ▾]    │
+├──────────────┬────────────────────────────────────────────────┤
+│              │                                                │
+│   PALETTE    │        Diagram Canvas                          │
+│  ──────────  │                                                │
+│              │    ╭──────────────╮      ╭──────────────╮      │
+│  ┌─ Cards ──┐│    │   Request    │─────→│   Handler    │      │
+│  │ Standard ▶│ │    │    Cloud    │      │    Zap       │      │
+│  │ Accent   │ │    ╰──────────────╯      ╰──────────────╯      │
+│  │ Muted    │ │           ↓                     ↓              │
+│  └─────────┘ │    ╭──────────────╮      ╭──────────────╮      │
+│              │    │  Database    │←─────│   Cache      │      │
+│  ┌─ Icons ──┐│    │ Database     │      │   Zap        │      │
+│  │ Cloud   ▶│ │    ╰──────────────╯      ╰──────────────╯      │
+│  │ Database │ │                                                │
+│  │ Zap      │ │    Click cards to edit labels & icons         │
+│  │ Shield   │ │    Arrows show data flow direction            │
+│  │ Server   │ │                                                │
+│  │ Lock     │ │                                                │
+│  └─────────┘ │  ┌──────────────────────────────────────────┐  │
+│              │  │  Selected: Request → Handler            │  │
+│  ┌─ Lines ──┐│  ├──────────────────────────────────────────┤  │
+│  │ Solid ──→│ │  Label: [request_flow__________]           │  │
+│  │ Dashed ---│ │  Style: [Solid arrow ▾]                   │  │
+│  │ Bi-arrow↔│ │                                            │  │
+│  └─────────┘ │  [ Remove Connection ]                      │  │
+│              │  └──────────────────────────────────────────┘  │
+│              │                                                │
+└──────────────┴────────────────────────────────────────────────┘
+```
+
+#### Asset Placement in Trace Mode
+
+```
+Creating a diagram step by step:
+
+1. Drag "Request" card from palette to canvas
+2. Drag "Handler" card → arrange side-by-side
+3. Click Request → select icon (Cloud, Zap, etc.)
+4. Click Handler → select icon
+5. Drag line from Request to Handler
+6. Click the line → set label and style
+
+Result: Clean, labeled relationship diagram
+        Export as SVG or PNG for documentation
+```
+
+---
+
+### Timing & Easing Reference
+
+For Breeze mode animations, understand how timing affects motion:
+
+```
+Duration Controls How Long Animation Plays:
+
+  0.1s (quick):    [Rock] → snap ← vines follow fast
+  0.3s (default):  [Rock] ··· → vines follow naturally
+  1.0s (slow):     [Rock] ····· → graceful, flowing motion
+
+Delay Controls When Child Starts:
+
+  Chain with staggered delays:
+
+  [Parent] moves immediately
+     ↓ (0.1s delay)
+  [Child 1] starts moving
+     ↓ (0.1s delay)
+  [Child 2] starts moving
+     ↓ (0.1s delay)
+  [Child 3] starts moving
+
+  Result: Wave-like ripple effect down the chain
+
+Easing Curves (visual reference):
+
+  ease-in        ease-out       ease-in-out      bounce
+  (slow→fast)    (fast→slow)    (both)           (springy)
+
+     /               \            /\              ⌢⌢⌢
+    /                 \          /  \            ⌢
+   /_______________     \_____  /_____\  _______
+                                            ↑
+                                         exaggerated for visibility
+```
+
 ### Live Mode (Terrarium)
 
 The existing Terrarium canvas, enhanced to play animations.

@@ -12,21 +12,24 @@ type: tech-spec
 # Ivy — Grove Mail Client
 
 ```
-                                               🌿
-                                             ╱
-                              ✉️           🌿
-                            ╱   ╲        ╱
-                          ╱       ╲    🌿
-                        🌿         ╲  ╱
-                      ╱             ╲╱
-                    🌿               │
-                  ╱                  │
-                🌿───────────────────┘
+                           🌿
+                         ╱   ╲
+                       🌿     ✉️ 🌿
+                      ╱         ╲ ╱
+                    🌿           ╲
+                   ╱               ╲
+                 🌿                 ╲
+                ╱                   ╲
+              ╱ climbing the lattice ╲
+             ╱     ┌───────────┐      ╲
+            ╱      │ mailbox   │       ╲
+           ╱       └───────────┘        ╲
+          ────────────────────────────────
 
-               Messages climbing the lattice.
+      Connection grows where presence lives.
 ```
 
-> *The vine that connects people through Grove's infrastructure.*
+> *Where ivy climbs, messages find their way home.*
 
 Grove's first-party mail client for @grove.place email addresses. A focused, privacy-first web interface integrated into the Grove ecosystem for professional blog contact, subscriber communication, and admin messaging.
 

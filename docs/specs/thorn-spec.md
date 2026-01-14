@@ -12,6 +12,31 @@ type: tech-spec
 
 # Thorn — Content Moderation
 
+```
+               🌹  Protected Without Surveillance
+
+           ╭─────────────────────────────────────╮
+           │                                     │
+           │   Every rose has its thorns         │
+           │   for protection, not control.      │
+           │                                     │
+           ╰─────────────────────────────────────╯
+                           │
+                      ╭────┴────╮
+                     ╱    🌹     ╲
+                    ╱─────────────╲
+                   │ Protected     │
+                   │ without       │
+                   │ surveillance  │
+                    ╲             ╱
+                     ╲  ╭─────╮  ╱
+                      ╲─│🌿🌿🌿│─╱
+                        ╰─────╯
+
+           Thorns guard the grove from harm,
+           privacy first, context aware.
+```
+
 > *Every rose has thorns for protection.*
 
 Grove's automated content moderation system enforces acceptable use policies while maintaining strict privacy protections. Designed with zero human surveillance, immediate content deletion after review, and context-aware decisions rather than keyword matching.
@@ -22,30 +47,6 @@ Grove's automated content moderation system enforces acceptable use policies whi
 **Last Updated:** January 2026
 
 Thorns protect plants from harm without being aggressive. They're natural, protective, and guard the grove from harmful content. Thorn is Grove's automated content moderation system: privacy-first, context-aware, and designed to protect without surveillance.
-
-```
-           ╭─────────────────────────────────────────╮
-           │                                         │
-           │    Every rose has its thorns            │
-           │    for protection, not aggression.      │
-           │                                         │
-           ╰─────────────────────────────────────────╯
-                             │
-                        ╭────┴────╮
-                       ╱    🌹     ╲
-                      ╱ ─────────── ╲
-                     │   protected   │
-                     │   without     │
-                     │   surveillance│
-                      ╲             ╱
-                       ╲   ╭───╮   ╱
-                        ╲──│🌿 │──╱
-                           ╰───╯
-
-        Thorns protect plants from harm
-        without being aggressive.
-        Natural. Protective. Private.
-```
 
 ---
 

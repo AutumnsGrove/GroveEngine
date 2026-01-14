@@ -24,10 +24,11 @@ type: tech-spec
                      │              │
               ·  ·  ·│·  ·  ·   ·  ·│·  ·  ·  ·  ·  ·  ·
 
-                     the wood wide web
+            Hidden networks connecting every root.
+            The wood wide web beneath the grove.
 ```
 
-> *The wood wide web of the Grove ecosystem.*
+> *Hidden networks connecting every root.*
 
 ```
                     MCP Protocol Data Flow

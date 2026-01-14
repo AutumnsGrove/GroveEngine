@@ -12,6 +12,26 @@ type: tech-spec
 
 # Seasons — Versioning System
 
+```
+                    🌸 Spring 🌞 Summer 🍂 Autumn ❄️ Winter
+
+                    .  *  .    .  *  .
+                 .      ╭───────╮      .
+                *     ╭─┤ 2.0.0 ├─╮     *
+               .    ╭─┤ │       │ ├─╮    .
+                  ╭─┤ │ │ 1.0.0 │ │ ├─╮
+                 ┌┤ │ │ │       │ │ │ ├┐
+                 │├─┤ │ │ 0.x.x │ │ │─┤│
+                 ││││ │ │       │ │ │ │││
+                 ││││ │ │  🌱   │ │ │ │││
+                 └┴┴┴─┴─┴───────┴─┴─┴─┴┴┘
+                ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱
+             ────────────────────────────
+
+                 Each ring records a season.
+                 Growth in plenty, resilience through hardship.
+```
+
 > *Each ring records a season—growth in plenty, resilience through hardship.*
 
 Grove's semantic versioning system defining how Lattice evolves and updates propagate to customer repositories. Covers major/minor/patch conventions, publishing workflows, breaking change protocols, and the Renovate-powered auto-update pipeline.
@@ -24,27 +44,6 @@ Grove's semantic versioning system defining how Lattice evolves and updates prop
 Seasons mark the passage of time in a forest. Spring brings new growth, summer matures it, autumn harvests, winter rests. Each season builds on the last, each version a new ring in the trunk.
 
 Seasons is Grove's versioning system: how Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.
-
-```
-       Count the rings and learn the story:
-
-                    .  *  .    .  *  .
-                 .      ╭───────╮      .
-                *     ╭─┤ 2.0.0 ├─╮     *
-               .    ╭─┤ │       │ ├─╮    .
-                  ╭─┤ │ │ 1.0.0 │ │ ├─╮
-                 ┌┤ │ │ │       │ │ │ ├┐
-                 │├─┤ │ │ 0.x.x │ │ │─┤│    Each ring records a season:
-                 ││││ │ │       │ │ │ │││
-                 ││││ │ │  🌱   │ │ │ │││    0.x.x  - seedling growth
-                 └┴┴┴─┴─┴───────┴─┴─┴─┴┴┘    1.0.0  - first bloom
-                ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱    2.0.0  - new season begins
-             ────────────────────────────
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-                 Spring → Summer → Autumn → Winter
-                 Each version a new ring in the trunk.
-```
 
 ---
 

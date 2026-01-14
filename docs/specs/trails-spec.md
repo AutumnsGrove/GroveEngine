@@ -11,6 +11,24 @@ type: tech-spec
 
 # Trails — Personal Roadmaps
 
+```
+                    🛤️  The Path Unfolds Before You
+
+                ╭──────────────────────────────────────────╮
+                │                                          │
+                │   FOUNDATION  │  GROWTH  │  POLISH  │ ✨ │
+                │                                          │
+                │   🌱────────🌿────────🌲───────🌳       │
+                │   ✓✓✓       ✓◐○○      ○○      ◇◇      │
+                │               ▲                         │
+                │          you are here                    │
+                │                                          │
+                ╰──────────────────────────────────────────╯
+
+                 The journey through seasons:
+                 From seed to flowering, walking it whole.
+```
+
 > *The path becomes clear by walking it.*
 
 Grove's personal roadmap system for building in public. Lets users create and share project timelines with waypoints, phases, and beautiful nature-themed presentations that show where they've been and where they're headed.
@@ -24,25 +42,6 @@ Grove's personal roadmap system for building in public. Lets users create and sh
 Trails wind through the forest, marking where others have walked. They show the journey, not just the destination. Trails is Grove's personal roadmap system, letting you build in public and share the path you're walking.
 
 Whether planning a creative project, outlining upcoming blog content, or tracking progress on a long-term goal, Trails provides a beautiful way to show where you've been, where you are, and where you're headed.
-
-```
-    The journey through seasons:
-
-    ╭────────────────────────────────────────────────────────────────╮
-    │                                                                │
-    │  FOUNDATION        CORE CONTENT         POLISH       FUTURE    │
-    │                                                                │
-    │       🌱 ─────────────── 🌿 ─────────────── 🌲 ─ ─ ─ ─  🌳      │
-    │       │                  │                  │           :      │
-    │      ✓✓✓               ✓◐○○                ○○          ○○◇     │
-    │                          ▲                                     │
-    │                     you are here                               │
-    │                                                                │
-    ╰────────────────────────────────────────────────────────────────╯
-
-         Seeds planted     Growing          Maturing     Dreaming
-         (complete)        (active)         (soon)       (someday)
-```
 
 ---
 
