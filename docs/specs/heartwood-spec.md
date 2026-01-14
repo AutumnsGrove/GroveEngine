@@ -96,9 +96,9 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 │                        GroveAuth Service                            │
 │                       auth.grove.place                              │
 │                                                                     │
-│  ┌─────────────────────────┐  ┌─────────────────────────┐          │
-│  │      Google OAuth      │  │   Magic Code (Email)    │          │
-│  └─────────────────────────┘  └─────────────────────────┘          │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐           │
+│  │      Google OAuth       │  │   Magic Code (Email)    │           │
+│  └─────────────────────────┘  └─────────────────────────┘           │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────┐            │
 │  │              Session & Token Management             │            │
