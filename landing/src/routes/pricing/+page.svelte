@@ -5,6 +5,27 @@
   // Centralized icon registry - single source of truth for all icons
   import { pricingIcons } from "$lib/utils/icons";
 
+  // Destructure icons for Svelte 5 direct component rendering
+  const {
+    calendardays: CalendarDaysIcon,
+    check: CheckIcon,
+    clock: ClockIcon,
+    crown: CrownIcon,
+    filetext: FileTextIcon,
+    flower2: FlowerIcon,
+    harddrive: HardDriveIcon,
+    lifebuoy: LifebuoyIcon,
+    listTree: ListIcon,
+    mail: MailIcon,
+    messagecircle: MessageCircleIcon,
+    palette: PaletteIcon,
+    penline: PenLineIcon,
+    searchcode: SearchCodeIcon,
+    sprout: SproutIcon,
+    treedeciduous: TreeDeciduousIcon,
+    trees: TreesIcon,
+  } = pricingIcons;
+
   // Tier data from unified config
   let { data } = $props();
 </script>
@@ -60,9 +81,7 @@
                 <div
                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
                 >
-                  <svelte:component
-                    this={pricingIcons.sprout}
-                    class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                  <SproutIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
                 <div class="font-serif text-foreground">{data.seedling.name}</div>
@@ -76,9 +95,7 @@
                 <div
                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
                 >
-                  <svelte:component
-                    this={pricingIcons.treedeciduous}
-                    class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                  <TreeDeciduousIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
                 <div class="font-serif text-foreground">{data.sapling.name}</div>
@@ -92,9 +109,7 @@
                 <div
                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
                 >
-                  <svelte:component
-                    this={pricingIcons.trees}
-                    class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                  <TreesIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
                 <div class="font-serif text-foreground">{data.oak.name}</div>
@@ -108,9 +123,7 @@
                 <div
                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
                 >
-                  <svelte:component
-                    this={pricingIcons.crown}
-                    class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                  <CrownIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
                   />
                 </div>
                 <div class="font-serif text-foreground">{data.evergreen.name}</div>
@@ -126,45 +139,33 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.penline}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <PenLineIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Blog
                 </span>
               </td>
               <td class="py-3 px-3 text-center text-foreground-faint">—</td>
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.filetext}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <FileTextIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Blog Posts
                 </span>
@@ -178,9 +179,7 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.harddrive}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <HardDriveIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Storage
                 </span>
@@ -194,9 +193,7 @@
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.palette}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <PaletteIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Themes
                 </span>
@@ -210,9 +207,7 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.listTree}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <ListIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Nav Pages
                 </span>
@@ -226,50 +221,36 @@
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.flower2}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <FlowerIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Meadow
                 </span>
               </td>
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.messagecircle}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <MessageCircleIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Public Comments
                 </span>
@@ -283,9 +264,7 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.searchcode}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <SearchCodeIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Custom Domain
                 </span>
@@ -295,18 +274,14 @@
               <td class="py-3 px-3 text-center text-foreground-faint">—</td>
               <td class="py-3 px-3 text-center text-foreground">BYOD</td>
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.mail}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <MailIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   @grove.place Email
                 </span>
@@ -320,9 +295,7 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.clock}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <ClockIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Centennial
                 </span>
@@ -330,30 +303,22 @@
               <td class="py-3 px-3 text-center text-foreground-faint">—</td>
               <td class="py-3 px-3 text-center text-foreground-faint">—</td>
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
               <td class="py-3 px-3 text-center text-accent-muted"
-                ><svelte:component
-                  this={pricingIcons.check}
-                  class="w-5 h-5 mx-auto"
+                ><CheckIcon class="w-5 h-5 mx-auto"
                 /></td
               >
             </tr>
             <tr class="border-b border-subtle bg-surface">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.lifebuoy}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <LifebuoyIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Support
                 </span>
@@ -375,9 +340,7 @@
             <tr>
               <td class="py-4 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <svelte:component
-                    this={pricingIcons.calendardays}
-                    class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <CalendarDaysIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
                   Yearly
                 </span>

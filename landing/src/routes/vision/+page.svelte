@@ -6,26 +6,24 @@
 	// Centralized icon registry
 	import { navIcons, contentIcons, actionIcons, toolIcons } from '$lib/utils/icons';
 
-	// SolarPanel icon for solarpunk callout
-	const solarpunkIcon = toolIcons.solarpanel;
+	// Destructured icons for Svelte 5 direct component rendering
+	const VisionIcon = navIcons.vision;
+	const TreesIcon = contentIcons.trees;
+	const SolarpunkIcon = toolIcons.solarpanel;
 
-	// Icon mapping for Core Values cards
-	const coreValueIcons = {
-		accessibility: toolIcons.helpcircle,
-		ownership: actionIcons.download,
-		simplicity: contentIcons.leaf,
-		community: contentIcons.heart,
-		aiSanctuary: toolIcons.brickwallshield, // Same as Shade in Workshop
-	};
+	// Core Values icons
+	const AccessibilityIcon = toolIcons.helpcircle;
+	const OwnershipIcon = actionIcons.download;
+	const SimplicityIcon = contentIcons.leaf;
+	const CommunityIcon = contentIcons.heart;
+	const AiSanctuaryIcon = toolIcons.brickwallshield;
 
-	// Icon mapping for "What Makes This Different" bullets
-	const differenceIcons = {
-		noMetrics: actionIcons.trenddown,
-		noAlgorithm: contentIcons.clock,
-		privateEncouragement: toolIcons.messagessquare,
-		fullControl: actionIcons.settings,
-		openStandards: toolIcons.signpost,
-	};
+	// "What Makes This Different" icons
+	const NoMetricsIcon = actionIcons.trenddown;
+	const NoAlgorithmIcon = contentIcons.clock;
+	const PrivateEncouragementIcon = toolIcons.messagessquare;
+	const FullControlIcon = actionIcons.settings;
+	const OpenStandardsIcon = toolIcons.signpost;
 </script>
 
 <SEO
@@ -68,7 +66,7 @@
 				<!-- The Vision -->
 				<section class="mb-12">
 					<h2 class="text-2xl font-serif text-foreground mb-4 flex items-center gap-2">
-						<svelte:component this={navIcons.vision} class="w-6 h-6 text-accent-subtle" />
+						<VisionIcon class="w-6 h-6 text-accent-subtle" />
 						The Vision
 					</h2>
 					<p class="text-foreground-muted font-sans leading-relaxed">
@@ -88,7 +86,7 @@
 					<div class="grid gap-6">
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<svelte:component this={coreValueIcons.accessibility} class="w-5 h-5 text-accent-subtle" />
+								<AccessibilityIcon class="w-5 h-5 text-accent-subtle" />
 								Accessibility
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed mb-3">
@@ -102,7 +100,7 @@
 
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<svelte:component this={coreValueIcons.ownership} class="w-5 h-5 text-accent-subtle" />
+								<OwnershipIcon class="w-5 h-5 text-accent-subtle" />
 								Ownership
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
@@ -113,7 +111,7 @@
 
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<svelte:component this={coreValueIcons.simplicity} class="w-5 h-5 text-accent-subtle" />
+								<SimplicityIcon class="w-5 h-5 text-accent-subtle" />
 								Simplicity
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
@@ -124,7 +122,7 @@
 
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<svelte:component this={coreValueIcons.community} class="w-5 h-5 text-accent-subtle" />
+								<CommunityIcon class="w-5 h-5 text-accent-subtle" />
 								Community With Care
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
@@ -135,7 +133,7 @@
 
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<svelte:component this={coreValueIcons.aiSanctuary} class="w-5 h-5 text-accent-subtle" />
+								<AiSanctuaryIcon class="w-5 h-5 text-accent-subtle" />
 								AI Sanctuary
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
@@ -157,7 +155,7 @@
 						href="/knowledge/help/what-is-solarpunk"
 						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/90 dark:hover:bg-amber-900/40 rounded-lg border border-amber-200/60 dark:border-amber-800/40 transition-colors"
 					>
-						<svelte:component this={solarpunkIcon} class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+						<SolarpunkIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
 						<span class="text-sm text-foreground-muted group-hover:text-foreground transition-colors">
 							These values reflect <strong class="text-amber-700 dark:text-amber-300">solarpunk</strong> thinking. <span class="text-foreground-subtle group-hover:text-foreground-muted">Learn what that means →</span>
 						</span>
@@ -167,7 +165,7 @@
 				<!-- Meadow Section -->
 				<section class="mb-12">
 					<h2 class="text-2xl font-serif text-foreground mb-4 flex items-center gap-2">
-						<svelte:component this={contentIcons.trees} class="w-6 h-6 text-accent-subtle" />
+						<TreesIcon class="w-6 h-6 text-accent-subtle" />
 						On Community — Meadow
 					</h2>
 
@@ -191,23 +189,23 @@
 					<h3 class="text-lg font-serif text-foreground mb-4">What Makes This Different</h3>
 					<ul class="space-y-3 text-foreground-muted font-sans">
 						<li class="flex items-start gap-3">
-							<svelte:component this={differenceIcons.noMetrics} class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
+							<NoMetricsIcon class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
 							<span><strong>No public metrics.</strong> Follower counts aren't displayed. Like counts don't create hierarchies. Your worth isn't measured by engagement.</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<svelte:component this={differenceIcons.noAlgorithm} class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
+							<NoAlgorithmIcon class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
 							<span><strong>No algorithm.</strong> The feed is chronological. Your friends' posts appear in order. Nothing is hidden or boosted based on "engagement potential."</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<svelte:component this={differenceIcons.privateEncouragement} class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
+							<PrivateEncouragementIcon class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
 							<span><strong>Private encouragement.</strong> Reactions and comments are visible to the author only. Feedback becomes encouragement, not performance.</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<svelte:component this={differenceIcons.fullControl} class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
+							<FullControlIcon class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
 							<span><strong>Full control.</strong> Want to see friends' posts but disable interactions on yours? Fine. Want to hide from discovery entirely? Fine. Every setting is yours to configure.</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<svelte:component this={differenceIcons.openStandards} class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
+							<OpenStandardsIcon class="w-4 h-4 text-accent-subtle mt-1 shrink-0" />
 							<span><strong>Built on open standards.</strong> Your blog isn't locked into Grove. The connections between blogs use the same portable technology that powers podcasts and news readers. If you ever leave, your followers can still follow you wherever you go.</span>
 						</li>
 					</ul>

@@ -164,12 +164,13 @@
 			<div class="grid gap-8 md:grid-cols-2">
 				{#each tools as tool}
 					{@const badge = getStatusBadge(tool.status)}
+					{@const ToolIcon = getToolIcon(tool.icon)}
 					<article class="p-6 rounded-xl bg-slate-800/50 border border-slate-700 backdrop-blur-sm">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
 								<div class="w-10 h-10 rounded-lg bg-indigo-900/50 flex items-center justify-center text-indigo-400">
 									<!-- Use centralized icon registry -->
-									<svelte:component this={getToolIcon(tool.icon)} class="w-5 h-5" />
+									<ToolIcon class="w-5 h-5" />
 								</div>
 								<div>
 									<h2 class="text-xl font-serif text-white">{tool.name}</h2>
@@ -184,6 +185,7 @@
 						{#if tool.subComponents && tool.subComponents.length > 0}
 							<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
 								{#each tool.subComponents as sub}
+									{@const SubIcon = getToolIcon(sub.icon)}
 									<svelte:element
 										this={sub.href ? 'a' : 'span'}
 										href={sub.href}
@@ -192,7 +194,7 @@
 										role="listitem"
 										aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
 									>
-										<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
+										<SubIcon class="w-3 h-3" aria-hidden="true" />
 										{sub.name}
 									</svelte:element>
 								{/each}
