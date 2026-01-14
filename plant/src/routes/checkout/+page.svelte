@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Loader2, CreditCard, ShieldCheck } from 'lucide-svelte';
+	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
 
@@ -63,6 +63,19 @@
 </script>
 
 <div class="animate-fade-in">
+	<!-- Back navigation (only show while loading or on error) -->
+	{#if isLoading || error}
+		<div class="flex items-center gap-2 mb-6">
+			<a
+				href="/plans"
+				class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+			>
+				<ArrowLeft size={16} />
+				Change plan
+			</a>
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Complete your purchase</h1>

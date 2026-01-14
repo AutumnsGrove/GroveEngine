@@ -8,6 +8,8 @@
 	import { plans, tierIcons, type Plan, type TierStatus } from '$lib/data/plans';
 	import { formatPrice, formatYearlySavings, type BillingCycle } from '$lib/utils/pricing';
 
+	let { form } = $props();
+
 	// ============================================================================
 	// STATE
 	// ============================================================================
@@ -323,6 +325,13 @@
 		}}
 		class="space-y-4"
 	>
+		<!-- Form error -->
+		{#if form?.error}
+			<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm">
+				{form.error}
+			</div>
+		{/if}
+
 		<input type="hidden" name="plan" value={selectedPlan || ''} />
 		<input type="hidden" name="billingCycle" value={billingCycle} />
 		<button

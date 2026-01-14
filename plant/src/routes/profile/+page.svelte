@@ -95,6 +95,17 @@
 </script>
 
 <div class="animate-fade-in max-w-2xl mx-auto px-4 py-8">
+	<!-- Back navigation -->
+	<div class="flex items-center gap-2 mb-6">
+		<a
+			href="/auth/logout"
+			class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+		>
+			<X size={16} />
+			Start over with different account
+		</a>
+	</div>
+
 	<!-- Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Set up your profile</h1>

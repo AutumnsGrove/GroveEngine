@@ -70,6 +70,7 @@
         class="collapse-btn"
         onclick={toggleCollapse}
         aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <ChevronLeft class="collapse-icon{sidebarCollapsed ? ' rotated' : ''}" />
       </button>
@@ -79,31 +80,31 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="/admin" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin" class="nav-item" onclick={closeSidebar} title="Dashboard">
         <LayoutDashboard class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Dashboard</span>
       </a>
-      <a href="/admin/blog" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/blog" class="nav-item" onclick={closeSidebar} title="Blog Posts">
         <FileText class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Blog Posts</span>
       </a>
-      <a href="/admin/pages" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/pages" class="nav-item" onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Pages</span>
       </a>
-      <a href="/admin/images" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/images" class="nav-item" onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Images</span>
       </a>
-      <a href="/admin/analytics" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/analytics" class="nav-item" onclick={closeSidebar} title="Analytics">
         <BarChart3 class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Analytics</span>
       </a>
-      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Timeline">
         <Calendar class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Timeline</span>
       </a>
-      <a href="/admin/settings" class="nav-item" onclick={closeSidebar}>
+      <a href="/admin/settings" class="nav-item" onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Settings</span>
       </a>
@@ -335,8 +336,19 @@
   }
 
   .sidebar.collapsed .sidebar-header {
-    justify-content: center;
+    flex-direction: column;
+    gap: 0.75rem;
     padding: 1rem 0.5rem;
+  }
+
+  .sidebar.collapsed .collapse-btn {
+    background: var(--grove-overlay-8);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-button);
+  }
+
+  .sidebar.collapsed .collapse-btn:hover {
+    background: var(--grove-overlay-15);
   }
 
   .collapse-btn {

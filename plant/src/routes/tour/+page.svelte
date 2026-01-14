@@ -157,6 +157,32 @@
 			window.open(currentTourStop.url, '_blank');
 		}
 	}
+
+	// Keyboard navigation
+	function handleKeydown(e: KeyboardEvent) {
+		if (showSkipConfirm) return; // Don't navigate when modal is open
+
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			nextStep();
+		} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			prevStep();
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			if (showSkipConfirm) {
+				showSkipConfirm = false;
+			} else {
+				skipTour();
+			}
+		}
+	}
+
+	onMount(() => {
+		// Add keyboard listener
+		window.addEventListener('keydown', handleKeydown);
+		return () => window.removeEventListener('keydown', handleKeydown);
+	});
 </script>
 
 <div class="animate-fade-in">
@@ -247,13 +273,14 @@
 				Back
 			</button>
 
-			<div class="flex gap-1" role="tablist" aria-label="Tour steps">
+			<div class="flex gap-1.5 md:gap-1" role="tablist" aria-label="Tour steps">
 				{#each tourStops as stop, i}
 					<button
 						onclick={() => (currentStep = i)}
-						class="w-2 h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/30 dark:bg-slate-700/30' : ''}"
+						class="w-3 h-3 md:w-2 md:h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/30 dark:bg-slate-700/30' : ''}"
 						class:bg-primary={i === currentStep}
-						class:w-4={i === currentStep}
+						class:w-5={i === currentStep}
+						class:md:w-4={i === currentStep}
 						aria-label="Go to step {i + 1}: {stop.title}"
 						aria-selected={i === currentStep}
 						role="tab"
@@ -276,10 +303,13 @@
 	</GlassCard>
 	</div>
 
-	<!-- Mobile swipe hint (shown on first step only) -->
-	{#if currentStep === 0}
+	<!-- Mobile navigation hints (shown on first few steps) -->
+	{#if currentStep < 3}
 		<p class="text-center text-xs text-foreground-subtle mt-4 md:hidden">
 			Swipe left or right to navigate
+		</p>
+		<p class="text-center text-xs text-foreground-subtle mt-4 hidden md:block">
+			Use arrow keys to navigate
 		</p>
 	{/if}
 
