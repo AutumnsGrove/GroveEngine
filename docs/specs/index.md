@@ -1,7 +1,7 @@
 ---
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Monday, January 13th 2026
+date modified: Tuesday, January 14th 2026
 tags:
   - specifications
   - architecture
@@ -47,6 +47,8 @@ Grove specifications define the architecture, interfaces, and implementation det
 |---------------|---------|--------|-------------|
 | **[Lattice](lattice-spec.md)** | Core framework & multi-tenant engine | **Active** | All components |
 | **[Engine](engine-spec.md)** | Blog rendering & content management | Active | Lattice, TenantDO |
+| **[Heartwood](heartwood-spec.md)** | Centralized authentication service | **Active** | All services |
+| **[Plant](plant-spec.md)** | Tenant onboarding & signup flow | Planned | Lattice, Heartwood |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
 
@@ -65,6 +67,8 @@ Grove specifications define the architecture, interfaces, and implementation det
 |---------------|---------|--------|-------------|
 | **[Foliage](foliage-project-spec.md)** | Theme system & visual customization | Active | Engine, TenantDO |
 | **[Terrarium](terrarium-spec.md)** | Creative canvas for scene composition | **New** | Foliage, Engine |
+| **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | **New** | Terrarium |
+| **[Curios](curios-spec.md)** | Cabinet of wonders & personal touches | **New** | Engine, Foliage |
 
 ### 🔧 Tools & Services
 
@@ -74,6 +78,12 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Arbor](arbor-spec.md)** | Theme system & customization | Active | Engine, TenantDO |
 | **[Bloom](bloom-spec.md)** | Email newsletter system | Planned | Resend, TenantDO |
 | **[Clearing](clearing-spec.md)** | Data export & migration tools | Active | D1, R2 |
+| **[Forage](forage-spec.md)** | AI-powered domain discovery | Active | Python, MCP |
+| **[Ivy](ivy-mail-spec.md)** | Grove mail client for @grove.place | Planned | Heartwood |
+| **[Loam](loam-spec.md)** | Username & name protection | Active | Plant, D1 |
+| **[Press](press-spec.md)** | Image processing CLI | Active | Amber, R2 |
+| **[Seasons](seasons-spec.md)** | Semantic versioning system | Active | npm, Lattice |
+| **[Versioning](versioning-spec.md)** | npm publishing workflow | Active | npm, Seasons |
 
 ### 🛡️ Security & Operations
 
@@ -81,7 +91,9 @@ Grove specifications define the architecture, interfaces, and implementation det
 |---------------|---------|--------|-------------|
 | **[Mycelium](mycelium-spec.md)** | Secret management & rotation | Active | All services |
 | **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
+| **[Shade](shade-spec.md)** | AI content protection & crawler defense | Active | Cloudflare, Turnstile |
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
+| **[Centennial](centennial-spec.md)** | 100-year domain preservation | Planned | Heartwood, Membership |
 
 ### 🤖 AI & Machine Learning
 
@@ -89,6 +101,8 @@ Grove specifications define the architecture, interfaces, and implementation det
 |---------------|---------|--------|-------------|
 | **[AI Gateway](../grove-ai-gateway-integration.md)** | Central AI observability & per-tenant quota management | **New** | Heartwood, D1, Pricing Tiers |
 | **[Shutter](shutter-spec.md)** | Web content distillation with prompt injection defense | **New** | Mycelium, OpenRouter, D1 |
+| **[Wisp](wisp-spec.md)** | Ethical writing assistant | Planned | Engine, AI Gateway |
+| **[Release Summaries](release-summaries-spec.md)** | Automated LLM release note generation | Active | GitHub Actions, LLM |
 
 ### 🛒 Commerce & Community
 
@@ -99,6 +113,16 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Nook](nook-spec.md)** | Private video sharing | Planned | R2, Heartwood |
 | **[Reeds](reeds-spec.md)** | Comments system | Active | Engine, TenantDO |
 | **[Waystone](waystone-spec.md)** | Help center & documentation | Planned | Engine |
+| **[Forests](forests-spec.md)** | Community aggregators & neighborhoods | **New** | Discovery, Meadow |
+| **[Wander](wander-spec.md)** | First-person grove discovery | **New** | Forests, Terrarium |
+| **[Trails](trails-spec.md)** | Personal roadmaps & build-in-public | Planned | Engine, TenantDO |
+
+### 📚 Reference & Client Sites
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[Customer Repository](customer-repo-spec.md)** | Template structure for customer repos | Reference | All resources |
+| **[Fiction House Publishing](fiction-house-publishing-spec.md)** | Publishing house client site | Client | Engine, Custom |
 
 ---
 
@@ -316,6 +340,7 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
 | 2026-01-13 | 2.3 | Added Shutter web content distillation spec |
 | 2026-01-06 | 2.2 | Added Echo support ticket spec |
 | 2026-01-06 | 2.1 | Added Pantry spec; added Commerce & Community section |
