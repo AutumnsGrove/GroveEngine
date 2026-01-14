@@ -342,7 +342,7 @@ Each specification should include:
 |------|---------|---------|
 | 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
 | 2026-01-13 | 2.3 | Added Shutter web content distillation spec |
-| 2026-01-06 | 2.2 | Added Echo support ticket spec |
+| 2026-01-06 | 2.2 | Added Porch spec (renamed from Echo) |
 | 2026-01-06 | 2.1 | Added Pantry spec; added Commerce & Community section |
 | 2026-01-02 | 2.0 | Added Vineyard, Vista LoadTest specs; updated integration matrix |
 | 2025-12-25 | 1.5 | Added Mycelium, Patina, Renovate specs |
