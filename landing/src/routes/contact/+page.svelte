@@ -42,7 +42,7 @@
 					Grove started as a vision and a dream—a quiet corner of the internet where words could grow without being harvested. Where community means connection, not competition. Where your writing belongs to you.
 				</p>
 				<p class="text-foreground-muted font-sans leading-relaxed mb-4">
-					I'm literally one girl building all of this. Every line of code, every design decision, every word you read here—that's me, usually with a cup of tea and way too many browser tabs open.
+					I'm literally one girl building all of this. Every line of code, every design decision, every word you read here—that's me.
 				</p>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					I'm damn proud of what we're growing here. And I'd love to hear from you.
