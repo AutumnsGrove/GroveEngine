@@ -151,6 +151,16 @@ Current                              → New Name
 git mv packages/engine/migrations/014_wisp_settings.sql packages/engine/migrations/015_wisp_settings.sql
 ```
 
+**Step 4: Verify No Gaps After Renumbering**
+
+```bash
+# Extract all migration numbers and check for gaps
+ls -1 packages/engine/migrations/*.sql | \
+  sed 's/.*\/0*\([0-9]*\)_.*/\1/' | \
+  sort -n | \
+  awk 'NR>1 && $1!=prev+1 {print "Gap between " prev " and " $1} {prev=$1}'
+```
+
 Also check for duplicate `010_*` migrations and renumber if found.
 
 ### Documentation to Create
@@ -436,9 +446,13 @@ EOF
 
 # Step 3: Attempt to compile (from landing/ directory)
 cd landing && npx tsc --noEmit /tmp/test-import.ts
+
+# Step 4: Runtime verification (run from project root)
+cd packages/engine && pnpm build
+node -e "const m = require('./dist/ui/nature'); console.log('Exports:', Object.keys(m).length, 'components')"
 ```
 
-**Only proceed with deletion if verification passes.**
+**Only proceed with deletion if BOTH compile-time AND runtime verification pass.**
 
 **Action for `landing/src/lib/components/nature/`**:
 
@@ -502,7 +516,7 @@ CSS `@import` can block parallel font downloads, potentially impacting page load
 onMount(() => import('@autumnsgrove/groveengine/ui/styles/fonts.css'));
 ```
 
-**Recommendation**: Start with Option A for simplicity. If Lighthouse audits show font loading issues, migrate to Option B.
+**Recommendation**: Use Option B (HTML preload) from the start for better Core Web Vitals. The slight added complexity is worth avoiding font-related layout shifts and blocking behavior. Option A is acceptable for local development or if deployment constraints prevent HTML modifications.
 
 ### Relocate `domains/` Directory
 
@@ -518,7 +532,13 @@ grep -rn "from.*domains" --include="*.ts" --include="*.js" --include="*.svelte" 
 
 # Check GitHub Actions workflows
 grep -r "domains" .github/workflows/
+
+# Check for separate deployment config (wrangler, Cloudflare Pages, etc.)
+ls -la domains/wrangler.toml domains/.cloudflare 2>/dev/null
+cat domains/wrangler.toml 2>/dev/null | grep -E "^name|^route|pages_build"
 ```
+
+**⚠️ Deployment Config Warning**: If `domains/` has its own `wrangler.toml` or Cloudflare Pages config, the deployment pipeline may reference absolute paths. Update deployment scripts and CI/CD after moving.
 
 **Action**:
 1. Audit references (commands above)
@@ -713,9 +733,15 @@ After moving documentation files, verify cross-references are updated:
 # Find broken markdown links (references to moved files)
 grep -rn "\](.*\.md)" docs/ | grep -v node_modules
 
-# Find references to old locations
+# Find references to old locations in markdown
 grep -rn "docs/scratch" .
 grep -rn "plans/" . --include="*.md" | grep -v "docs/plans"
+
+# Find references in code files (TS/JS/Svelte may import from docs or reference paths)
+grep -rn "docs/scratch\|/plans/" --include="*.ts" --include="*.js" --include="*.svelte" .
+
+# Check for hardcoded paths in configs
+grep -rn "docs/\|plans/" --include="*.json" --include="*.yaml" --include="*.toml" . | grep -v node_modules
 ```
 
 ### TypeScript Compatibility
@@ -729,6 +755,29 @@ grep -r "\"typescript\":" */package.json packages/*/package.json
 # Verify moduleResolution compatibility (bundler requires TS 5.0+)
 npx tsc --version
 ```
+
+### Path Aliases (Optional Enhancement)
+
+Consider adding path aliases to `tsconfig.base.json` for cleaner imports after reorganization:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "$lib/*": ["./src/lib/*"],
+      "@grove/ui/*": ["./packages/engine/src/lib/ui/*"],
+      "@grove/types/*": ["./packages/engine/src/lib/types/*"]
+    }
+  }
+}
+```
+
+**Benefits**:
+- Cleaner imports: `import { GlassCard } from '@grove/ui/glass'`
+- Easier refactoring: Change alias target, not every import
+- Self-documenting: Makes package boundaries explicit
+
+**Note**: SvelteKit already provides `$lib` alias. Additional aliases are optional but helpful for cross-package imports.
 
 ### Rollback Strategy
 
