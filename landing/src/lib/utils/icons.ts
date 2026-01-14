@@ -354,6 +354,8 @@ export const toolIcons = {
   amphora: Amphora, // Curios - main icon (cabinet of curiosities)
   "notebook-pen": NotebookPen, // Curios - Guestbook
   shell: Shell, // Curios - Artifacts
+  // Forests - community aggregation
+  trees: Trees, // Forests - main icon (many trees together)
   // Subicons for workshop features
   layoutlist: LayoutList, // Lattice - Vines
   origami: Origami, // Songbird - Canary

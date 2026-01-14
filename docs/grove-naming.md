@@ -197,6 +197,17 @@ Meadow is social media that remembers what "social" means. No public metrics bre
 
 *In development*
 
+### Forests
+**Community Groves** · `{forest}.grove.place`
+
+A forest is many trees growing together. Roots intertwined. Shelter shared. No tree grows alone.
+
+Forests are themed community aggregators—places where like-minded folks gather. Inspired by GeoCities neighborhoods, but with Grove's nature-first naming. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Your foliage appears in that forest's directory, and visitors can wander through finding kindred spirits.
+
+Discovery happens through *strolling*—take a random walk through a forest and discover someone new. No algorithms. No engagement metrics. Just wandering the grove and finding your people.
+
+*Many trees, one grove.*
+
 ### Trails
 **Personal Roadmaps** · `username.grove.place/trail`
 
@@ -375,6 +386,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Reeds** | Content | Comments system | *(integrated)* |
 | **Thorn** | Content | Content moderation | *(internal)* |
 | **Meadow** | Content | Social connection | meadow.grove.place |
+| **Forests** | Content | Community aggregation | {forest}.grove.place |
 | **Trails** | Content | Personal roadmaps | username.grove.place/trail |
 | **Ivy** | Tools | Email | ivy.grove.place |
 | **Bloom** | Tools | Remote coding | bloom.grove.place |
@@ -417,6 +429,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Reeds | GroveReeds |
 | Thorn | GroveThorn |
 | Meadow | GroveSocial |
+| Forests | GroveForests |
 | Trails | GroveTrails |
 | Ivy | GroveMail |
 | Bloom | GroveBloom |
@@ -443,5 +456,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 13, 2026 — Added Curios*
+*Last updated: January 13, 2026 — Added Curios, Forests*
 *Status: Placeholder names, pending launch*

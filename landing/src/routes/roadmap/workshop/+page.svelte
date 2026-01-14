@@ -305,6 +305,20 @@
 					]
 				},
 				{
+					name: 'Forests',
+					tagline: 'Community Groves',
+					description: 'Many trees, one grove. Forests are themed community aggregators—places where like-minded folks gather. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Take a stroll and discover kindred spirits among the trees.',
+					status: 'planned',
+					icon: 'trees',
+					domain: '{forest}.grove.place',
+					integration: 'Community discovery for all Grove users',
+					spec: '/knowledge/specs/forests-spec',
+					subComponents: [
+						{ name: 'Directory', icon: 'users', description: 'Member listings' },
+						{ name: 'Stroll', icon: 'compass', description: 'Random discovery' }
+					]
+				},
+				{
 					name: 'Trails',
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
