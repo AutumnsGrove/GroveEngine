@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from 'lucide-svelte';
-	import { GlassCard, COLOR_PRESETS } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { COLOR_PRESETS } from '@autumnsgrove/groveengine';
 
 	let { data, form } = $props();
 
