@@ -23,7 +23,8 @@
 		GlassCard,
 		GlassLogo,
 		GlassOverlay,
-		GlassCarousel
+		GlassCarousel,
+		GlassLegend
 	} from '@autumnsgrove/groveengine/ui';
 
 	// Import nature assets
@@ -311,7 +312,7 @@
 			<div class="flex flex-wrap justify-center gap-6 text-sm">
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<Layers class="w-4 h-4 text-grove-600" />
-					<span>8 Glass Components</span>
+					<span>9 Glass Components</span>
 				</div>
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<TreeIcon class="w-4 h-4 text-grove-600" />
@@ -541,6 +542,62 @@
 							<GlassCarousel images={carouselImages} variant="frosted" />
 						</div>
 						<p class="text-center text-sm text-foreground-muted mt-4">Swipe, drag, or use arrows to navigate</p>
+					</div>
+
+					<!-- GlassLegend -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassLegend&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Status indicators and color keys</span>
+						</h3>
+
+						<div class="grid md:grid-cols-2 gap-6">
+							<!-- Examples -->
+							<div class="space-y-4">
+								<GlassLegend
+									title="Status Legend"
+									items={[
+										{ label: 'Active', description: 'In production', color: 'green' },
+										{ label: 'New', description: 'Recently added', color: 'amber' },
+										{ label: 'Planned', description: 'Coming soon', color: 'slate' },
+									]}
+									layout="stacked"
+								/>
+
+								<GlassLegend
+									items={[
+										{ label: 'Success', color: 'green' },
+										{ label: 'Warning', color: 'amber' },
+										{ label: 'Error', color: 'red' },
+									]}
+									layout="inline"
+									compact
+								/>
+							</div>
+
+							<!-- Collapsible example -->
+							<div class="space-y-4">
+								<GlassLegend
+									title="Collapsible Legend"
+									items={[
+										{ label: 'Active', description: 'In production', color: 'green' },
+										{ label: 'New', description: 'Recently added', color: 'amber' },
+										{ label: 'Planned', description: 'Coming soon', color: 'slate' },
+										{ label: 'Reference', description: 'Documentation only', color: 'blue' },
+										{ label: 'Client', description: 'Customer-specific', color: 'purple' },
+									]}
+									collapsible
+									defaultOpen={false}
+								/>
+
+								<p class="text-sm text-foreground-muted">
+									Supports <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">stacked</code>,
+									<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">inline</code>, and
+									<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">grid</code> layouts.
+									Optional <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">collapsible</code> mode.
+								</p>
+							</div>
+						</div>
 					</div>
 
 					<!-- More components note -->

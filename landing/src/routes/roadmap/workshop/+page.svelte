@@ -86,6 +86,7 @@
 					domain: 'heartwood.grove.place',
 					integration: 'Powers authentication for all Grove services',
 					github: 'https://github.com/AutumnsGrove/GroveAuth',
+					spec: '/knowledge/specs/heartwood-spec',
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
@@ -244,6 +245,15 @@
 					integration: 'Support and conversation for all Grove users',
 					spec: '/knowledge/specs/porch-spec'
 				},
+				{
+					name: 'Centennial',
+					tagline: 'Domain Preservation',
+					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
+					status: 'planned',
+					icon: 'tree-deciduous',
+					integration: 'Automatic unlock after 12 months of Sapling+ membership',
+					spec: '/knowledge/specs/centennial-spec'
+				},
 			]
 		},
 		{
@@ -383,6 +393,7 @@
 					domain: 'forage.grove.place',
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
 					github: 'https://github.com/AutumnsGrove/Forage',
+					spec: '/knowledge/specs/forage-spec',
 					subComponents: [
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
 						{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
@@ -397,6 +408,7 @@
 					domain: 'nook.grove.place',
 					integration: 'Intimate video sharing for close connections',
 					github: 'https://github.com/AutumnsGrove/Nook',
+					spec: '/knowledge/specs/nook-spec',
 					subComponents: [
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]

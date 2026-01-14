@@ -1,7 +1,7 @@
 ---
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Monday, January 13th 2026
+date modified: Tuesday, January 14th 2026
 tags:
   - specifications
   - architecture
@@ -10,7 +10,9 @@ type: index
 ---
 
 ```
-         🌲
+         /\
+        /  \
+       /____\
          |
       ___|___
      |       |
@@ -41,16 +43,18 @@ Grove specifications define the architecture, interfaces, and implementation det
 
 ## Core Specifications
 
-### 🏗️ Foundation & Infrastructure
+### Foundation & Infrastructure
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Lattice](lattice-spec.md)** | Core framework & multi-tenant engine | **Active** | All components |
 | **[Engine](engine-spec.md)** | Blog rendering & content management | Active | Lattice, TenantDO |
+| **[Heartwood](heartwood-spec.md)** | Centralized authentication service | **Active** | All services |
+| **[Plant](plant-spec.md)** | Tenant onboarding & signup flow | Planned | Lattice, Heartwood |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
 
-### 📊 Monitoring & Analytics
+### Monitoring & Analytics
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -59,14 +63,16 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Vineyard](vineyard-spec.md)** | Vista LoadTest package | **New** | Sentinel, Vista |
 | **[Vista LoadTest](vista-loadtest-spec.md)** | Load testing integration spec | **New** | Sentinel, Vista |
 
-### 🎨 Customization & Theming
+### Customization & Theming
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Foliage](foliage-project-spec.md)** | Theme system & visual customization | Active | Engine, TenantDO |
 | **[Terrarium](terrarium-spec.md)** | Creative canvas for scene composition | **New** | Foliage, Engine |
+| **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | **New** | Terrarium |
+| **[Curios](curios-spec.md)** | Cabinet of wonders & personal touches | **New** | Engine, Foliage |
 
-### 🔧 Tools & Services
+### Tools & Services
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -74,23 +80,33 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Arbor](arbor-spec.md)** | Theme system & customization | Active | Engine, TenantDO |
 | **[Bloom](bloom-spec.md)** | Email newsletter system | Planned | Resend, TenantDO |
 | **[Clearing](clearing-spec.md)** | Data export & migration tools | Active | D1, R2 |
+| **[Forage](forage-spec.md)** | AI-powered domain discovery | Active | Python, MCP |
+| **[Ivy](ivy-mail-spec.md)** | Grove mail client for @grove.place | Planned | Heartwood |
+| **[Loam](loam-spec.md)** | Username & name protection | Active | Plant, D1 |
+| **[Press](press-spec.md)** | Image processing CLI | Active | Amber, R2 |
+| **[Seasons](seasons-spec.md)** | Semantic versioning system | Active | npm, Lattice |
+| **[Versioning](versioning-spec.md)** | npm publishing workflow | Active | npm, Seasons |
 
-### 🛡️ Security & Operations
+### Security & Operations
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Mycelium](mycelium-spec.md)** | Secret management & rotation | Active | All services |
 | **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
+| **[Shade](shade-spec.md)** | AI content protection & crawler defense | Active | Cloudflare, Turnstile |
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
+| **[Centennial](centennial-spec.md)** | 100-year domain preservation | Planned | Heartwood, Membership |
 
-### 🤖 AI & Machine Learning
+### AI & Machine Learning
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[AI Gateway](../grove-ai-gateway-integration.md)** | Central AI observability & per-tenant quota management | **New** | Heartwood, D1, Pricing Tiers |
 | **[Shutter](shutter-spec.md)** | Web content distillation with prompt injection defense | **New** | Mycelium, OpenRouter, D1 |
+| **[Wisp](wisp-spec.md)** | Ethical writing assistant | Planned | Engine, AI Gateway |
+| **[Release Summaries](release-summaries-spec.md)** | Automated LLM release note generation | Active | GitHub Actions, LLM |
 
-### 🛒 Commerce & Community
+### Commerce & Community
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -99,12 +115,22 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Nook](nook-spec.md)** | Private video sharing | Planned | R2, Heartwood |
 | **[Reeds](reeds-spec.md)** | Comments system | Active | Engine, TenantDO |
 | **[Waystone](waystone-spec.md)** | Help center & documentation | Planned | Engine |
+| **[Forests](forests-spec.md)** | Community aggregators & neighborhoods | **New** | Discovery, Meadow |
+| **[Wander](wander-spec.md)** | First-person grove discovery | **New** | Forests, Terrarium |
+| **[Trails](trails-spec.md)** | Personal roadmaps & build-in-public | Planned | Engine, TenantDO |
+
+### Reference & Client Sites
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[Customer Repository](customer-repo-spec.md)** | Template structure for customer repos | Reference | All resources |
+| **[Fiction House Publishing](fiction-house-publishing-spec.md)** | Publishing house client site | Client | Engine, Custom |
 
 ---
 
 ## Specification Details
 
-### 🏗️ Lattice Specification
+### Lattice Specification
 **Core framework & multi-tenant engine**
 
 **Key Components:**
@@ -122,7 +148,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 
 ---
 
-### 📊 Vista Specification  
+### Vista Specification  
 **Infrastructure monitoring dashboard**
 
 ```mermaid
@@ -158,7 +184,7 @@ graph TB
 
 ---
 
-### 📊 Rings Specification
+### Rings Specification
 **Privacy-first analytics system**
 
 **Key Principles:**
@@ -180,7 +206,7 @@ graph TB
 
 ---
 
-### 🔧 Vineyard Specification
+### Vineyard Specification
 **Vista LoadTest package**
 
 **Purpose:** Integration of Sentinel load testing framework with Vista monitoring dashboard.
@@ -194,10 +220,10 @@ graph TB
 **Implementation Status:** **NEW** (Specification complete, implementation planned)
 
 **Integration:**
-- ✅ Sentinel pattern compatibility
-- ✅ Vista dashboard integration
-- ✅ D1 metrics storage
-- ✅ Real-time KV caching
+- [x] Sentinel pattern compatibility
+- [x] Vista dashboard integration
+- [x] D1 metrics storage
+- [x] Real-time KV caching
 
 **Related Documents:**
 - [Sentinel Pattern](../patterns/sentinel-pattern.md) - Load testing framework
@@ -209,22 +235,22 @@ graph TB
 ## Implementation Roadmap
 
 ### Phase 1: Core Infrastructure (Complete)
-- ✅ Lattice framework
-- ✅ Engine blog rendering
-- ✅ Vista monitoring
-- ✅ Rings analytics
+- [x] Lattice framework
+- [x] Engine blog rendering
+- [x] Vista monitoring
+- [x] Rings analytics
 
 ### Phase 2: Security & Scale (Current)
-- 🔄 Threshold rate limiting
-- 🔄 Sentinel load testing
-- 🔄 Vineyard integration
-- 🔄 Mycelium secrets
+- [-] Threshold rate limiting
+- [-] Sentinel load testing
+- [-] Vineyard integration
+- [-] Mycelium secrets
 
 ### Phase 3: Community & Growth (Q1 2026)
-- 📅 Meadow community feed
-- 📅 Bloom newsletters
-- 📅 Arbor theme marketplace
-- 📅 Thorn security scanning
+- [ ] Meadow community feed
+- [ ] Bloom newsletters
+- [ ] Arbor theme marketplace
+- [ ] Thorn security scanning
 
 ---
 
@@ -232,14 +258,14 @@ graph TB
 
 | Specification | Lattice | Vista | Rings | D1 | R2 | DO |
 |---------------|---------|-------|-------|----|----|----|
-| **Lattice** | ✅ Core | ✅ Metrics | ✅ Analytics | ✅ Primary | ✅ Storage | ✅ All DOs |
-| **Vista** | ✅ Metrics | ✅ Core | ✅ Correlation | ✅ Storage | ⚠️ Indirect | ✅ DO metrics |
-| **Rings** | ✅ Integration | ✅ Metrics | ✅ Core | ✅ Storage | ❌ | ✅ PostDO |
-| **Vineyard** | ⚠️ Testing | ✅ Primary | ⚠️ Correlation | ✅ Results | ❌ | ✅ DO tests |
-| **Engine** | ✅ Framework | ✅ Metrics | ✅ Analytics | ✅ Content | ✅ Media | ✅ PostDO |
-| **AI Gateway** | ✅ Framework | ✅ Analytics | ⚠️ Correlation | ✅ Quota tracking | ❌ | ⚠️ TenantDO |
+| **Lattice** | Yes: Core | Yes: Metrics | Yes: Analytics | Yes: Primary | Yes: Storage | Yes: All DOs |
+| **Vista** | Yes: Metrics | Yes: Core | Yes: Correlation | Yes: Storage | Partial: Indirect | Yes: DO metrics |
+| **Rings** | Yes: Integration | Yes: Metrics | Yes: Core | Yes: Storage | No | Yes: PostDO |
+| **Vineyard** | Partial: Testing | Yes: Primary | Partial: Correlation | Yes: Results | No | Yes: DO tests |
+| **Engine** | Yes: Framework | Yes: Metrics | Yes: Analytics | Yes: Content | Yes: Media | Yes: PostDO |
+| **AI Gateway** | Yes: Framework | Yes: Analytics | Partial: Correlation | Yes: Quota tracking | No | Partial: TenantDO |
 
-**Legend:** ✅ Direct integration, ⚠️ Indirect/metrics only, ❌ No integration
+**Legend:** Yes = Direct integration, Partial = Indirect/metrics only, No = No integration
 
 ---
 
@@ -316,8 +342,9 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
 | 2026-01-13 | 2.3 | Added Shutter web content distillation spec |
-| 2026-01-06 | 2.2 | Added Echo support ticket spec |
+| 2026-01-06 | 2.2 | Added Porch spec (renamed from Echo) |
 | 2026-01-06 | 2.1 | Added Pantry spec; added Commerce & Community section |
 | 2026-01-02 | 2.0 | Added Vineyard, Vista LoadTest specs; updated integration matrix |
 | 2025-12-25 | 1.5 | Added Mycelium, Patina, Renovate specs |
