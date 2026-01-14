@@ -390,33 +390,33 @@ The quiz should feel like a beautifully designed terminal app. Monospace fonts, 
 │  DOMAIN FINDER                                      │
 │  ─────────────                                      │
 │                                                     │
-│  Let's find your perfect domain.                   │
-│  This takes about 60 seconds.                      │
+│  Let's find your perfect domain.                    │
+│  This takes about 60 seconds.                       │
 │                                                     │
-│  ▸ Business or project name                        │
+│  ▸ Business or project name                         │
 │    _________________________                        │
 │                                                     │
-│  ▸ Domain in mind? (optional)                      │
+│  ▸ Domain in mind? (optional)                       │
 │    _________________________                        │
 │                                                     │
-│  ▸ Preferred endings                               │
-│    ◉ .com (most recognized)                        │
-│    ○ .co (modern alternative)                      │
-│    ○ .io (tech-focused)                            │
-│    ○ .me (personal brand)                          │
-│    ◉ Open to anything                              │
+│  ▸ Preferred endings                                │
+│    ◉ .com (most recognized)                         │
+│    ○ .co (modern alternative)                       │
+│    ○ .io (tech-focused)                             │
+│    ○ .me (personal brand)                           │
+│    ◉ Open to anything                               │
 │                                                     │
-│  ▸ What vibe fits your brand?                      │
-│    ○ Professional & trustworthy                    │
-│    ● Creative & playful                            │
-│    ○ Minimal & modern                              │
-│    ○ Bold & memorable                              │
-│    ○ Personal & approachable                       │
+│  ▸ What vibe fits your brand?                       │
+│    ○ Professional & trustworthy                     │
+│    ● Creative & playful                             │
+│    ○ Minimal & modern                               │
+│    ○ Bold & memorable                               │
+│    ○ Personal & approachable                        │
 │                                                     │
-│  ▸ Keywords or themes (optional)                   │
+│  ▸ Keywords or themes (optional)                    │
 │    _________________________                        │
 │                                                     │
-│           [ FIND MY DOMAIN ]                       │
+│           [ FIND MY DOMAIN ]                        │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -482,29 +482,29 @@ Example generated questions:
 ```
 ┌──────────────────────────────────────────────────────┐
 │                                                      │
-│  YOUR DOMAINS ARE READY                             │
-│  ──────────────────────                             │
+│  YOUR DOMAINS ARE READY                              │
+│  ──────────────────────                              │
 │                                                      │
-│  We found 27 available options for "Sunrise Bakery" │
+│  We found 27 available options for "Sunrise Bakery"  │
 │                                                      │
-│  ★ TOP PICKS (bundled, no extra cost)               │
+│  ★ TOP PICKS (bundled, no extra cost)                │
 │                                                      │
-│    sunrisebakes.co ............... $12/yr           │
-│    getbakedsunrise.com ........... $15/yr           │
-│    sunrisebakeryatl.com .......... $15/yr           │
+│    sunrisebakes.co ............... $12/yr            │
+│    getbakedsunrise.com ........... $15/yr            │
+│    sunrisebakeryatl.com .......... $15/yr            │
 │                                                      │
-│  ◆ PREMIUM (worth considering)                      │
+│  ◆ PREMIUM (worth considering)                       │
 │                                                      │
-│    sunrisebakery.com ............. $89/yr           │
+│    sunrisebakery.com ............. $89/yr            │
 │                                                      │
-│  ▸ View all 27 options                              │
-│    https://grove.place/domains/abc123              │
+│  ▸ View all 27 options                               │
+│    https://grove.place/domains/abc123                │
 │                                                      │
-│  ▸ Book a call to finalize                          │
-│    https://grove.place/book                         │
+│  ▸ Book a call to finalize                           │
+│    https://grove.place/book                          │
 │                                                      │
-│  ─────────────────────────────────────────────────  │
-│  grove.place • domain setup                         │
+│  ─────────────────────────────────────────────────   │
+│  grove.place • domain setup                          │
 │                                                      │
 └──────────────────────────────────────────────────────┘
 ```
@@ -541,31 +541,31 @@ merged = merge_and_dedupe(results)
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                                                              │
-│  DOMAIN OPTIONS FOR SUNRISE BAKERY                          │
-│  ════════════════════════════════                           │
+│  DOMAIN OPTIONS FOR SUNRISE BAKERY                           │
+│  ════════════════════════════════                            │
 │                                                              │
-│  ★ TOP RECOMMENDATIONS                                      │
-│    Bundled with your package — no extra cost                │
+│  ★ TOP RECOMMENDATIONS                                       │
+│    Bundled with your package — no extra cost                 │
 │                                                              │
-│    DOMAIN                      PRICE     NOTES              │
-│    ───────────────────────────────────────────────          │
-│    sunrisebakes.co             $12/yr    Short, modern      │
-│    getbakedsunrise.com         $15/yr    Action-oriented    │
-│    sunrisebakeryatl.com        $15/yr    Location-specific  │
-│    morningdough.co             $12/yr    Creative wordplay  │
-│    riseandbake.com             $15/yr    Memorable phrase   │
+│    DOMAIN                      PRICE     NOTES               │
+│    ───────────────────────────────────────────────           │
+│    sunrisebakes.co             $12/yr    Short, modern       │
+│    getbakedsunrise.com         $15/yr    Action-oriented     │
+│    sunrisebakeryatl.com        $15/yr    Location-specific   │
+│    morningdough.co             $12/yr    Creative wordplay   │
+│    riseandbake.com             $15/yr    Memorable phrase    │
 │                                                              │
-│  ◆ PREMIUM OPTIONS                                          │
-│    Worth considering if budget allows                       │
+│  ◆ PREMIUM OPTIONS                                           │
+│    Worth considering if budget allows                        │
 │                                                              │
-│    sunrisebakery.com           $89/yr    The gold standard  │
+│    sunrisebakery.com           $89/yr    The gold standard   │
 │                                                              │
-│  ▸ FULL LIST                                                │
-│    25 total options available                               │
-│    View all: https://grove.place/d/abc123                   │
+│  ▸ FULL LIST                                                 │
+│    25 total options available                                │
+│    View all: https://grove.place/d/abc123                    │
 │                                                              │
-│  ─────────────────────────────────────────────────────────  │
-│  Generated by Forage • 2025-XX-XX                         │
+│  ─────────────────────────────────────────────────────────   │
+│  Generated by Forage • 2025-XX-XX                            │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```

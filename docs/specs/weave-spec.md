@@ -153,7 +153,7 @@ When you open Breeze mode, you're working with:
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│  ◎ Weave: Breeze                   [Preview] [Grid: 32px ▾]  │
+│  ◎ Weave: Breeze                   [Preview] [Grid: 32px ▾]   │
 ├──────────────┬────────────────────────────────────────────────┤
 │              │                                                │
 │   PALETTE    │        Canvas (Snap to Grid)                   │
@@ -162,25 +162,25 @@ When you open Breeze mode, you're working with:
 │  ┌─ Trees ─┐ │        ╲    /                                  │
 │  │ Pine   ▶│ │         \  /    ⟵ Drag to place asset         │
 │  │ Birch   │ │          \/                                    │
-│  └─────────┘ │        [Tree] ····· connection start          │
+│  └─────────┘ │        [Tree] ····· connection start           │
 │              │          |  ······                             │
 │  ┌─Creatures┐│        ·····    [Vine A]                       │
 │  │ Butterfly▶│ │        |          |··········                │
-│  │ Firefly  │ │      [Rock]    [Vine B]  [Vine C]            │
-│  │ Bee      │ │        ↑           ↓        ↓                 │
-│  └─────────┘ │      Root        Child    Child                │
+│  │ Firefly │ │        [Rock]    [Vine B]  [Vine C]            │
+│  │ Bee     │ │          ↑           ↓        ↓                │
+│  └─────────┘ │        Root        Child    Child              │
 │              │                                                │
-│  ┌─Ground  ─┐│     ─ Connections show with arrows            │
-│  │ Rock    ▶│ │     ─ Drag to adjust node positions          │
-│  │ Mushroom │ │                                                │
+│  ┌─Ground ─┐ │     ─ Connections show with arrows             │
+│  │ Rock  ▶ │ │     ─ Drag to adjust node positions            │
+│  │ Mushroom│ │                                                │
 │  └─────────┘ │                                                │
 │              │                                                │
 │     (scroll) │ ┌──────────────────────────────────────────┐   │
-│              │ │  Selected: Rock → Vine A                │   │
+│              │ │  Selected: Rock → Vine A                 │   │
 │              │ ├──────────────────────────────────────────┤   │
-│              │ │  Duration:  [0.3s_____]  seconds        │   │
-│              │ │  Delay:     [0.0s_____]  seconds        │   │
-│              │ │  Easing:    [ease-out ▾]                │   │
+│              │ │  Duration:  [0.3s_____]  seconds         │   │
+│              │ │  Delay:     [0.0s_____]  seconds         │   │
+│              │ │  Easing:    [ease-out ▾]                 │   │
 │              │ │                                          │   │
 │              │ │  [ Remove Thread ]                       │   │
 │              │ └──────────────────────────────────────────┘   │
@@ -220,25 +220,25 @@ The workspace for building static relationship diagrams with glass cards and ico
 │  ──────────  │                                                │
 │              │    ╭──────────────╮      ╭──────────────╮      │
 │  ┌─ Cards ──┐│    │   Request    │─────→│   Handler    │      │
-│  │ Standard ▶│ │    │    Cloud    │      │    Zap       │      │
-│  │ Accent   │ │    ╰──────────────╯      ╰──────────────╯      │
-│  │ Muted    │ │           ↓                     ↓              │
-│  └─────────┘ │    ╭──────────────╮      ╭──────────────╮      │
+│  │ Standard▶││    │    Cloud     │      │    Zap       │      │
+│  │ Accent   ││    ╰──────────────╯      ╰──────────────╯      │
+│  │ Muted    ││           ↓                     ↓              │
+│  └──────────┘│    ╭──────────────╮      ╭──────────────╮      │
 │              │    │  Database    │←─────│   Cache      │      │
-│  ┌─ Icons ──┐│    │ Database     │      │   Zap        │      │
-│  │ Cloud   ▶│ │    ╰──────────────╯      ╰──────────────╯      │
-│  │ Database │ │                                                │
-│  │ Zap      │ │    Click cards to edit labels & icons         │
-│  │ Shield   │ │    Arrows show data flow direction            │
-│  │ Server   │ │                                                │
-│  │ Lock     │ │                                                │
+│  ┌─ Icons ─┐ │    │ Database     │      │   Zap        │      │
+│  │ Cloud  ▶│ │    ╰──────────────╯      ╰──────────────╯      │
+│  │ Database│ │                                                │
+│  │ Zap     │ │    Click cards to edit labels & icons          │
+│  │ Shield  │ │    Arrows show data flow direction             │
+│  │ Server  │ │                                                │
+│  │ Lock    │ │                                                │
 │  └─────────┘ │  ┌──────────────────────────────────────────┐  │
-│              │  │  Selected: Request → Handler            │  │
+│              │  │  Selected: Request → Handler             │  │
 │  ┌─ Lines ──┐│  ├──────────────────────────────────────────┤  │
-│  │ Solid ──→│ │  Label: [request_flow__________]           │  │
-│  │ Dashed ---│ │  Style: [Solid arrow ▾]                   │  │
-│  │ Bi-arrow↔│ │                                            │  │
-│  └─────────┘ │  [ Remove Connection ]                      │  │
+│  │ Solid ──→││  │ Label: [request_flow__________]          │  │
+│  │ Dashed---││  │ Style: [Solid arrow ▾]                   │  │
+│  │ Bi-arrow↔││  │                                          │  │
+│  └──────────┘│  [ Remove Connection ]                      │  │
 │              │  └──────────────────────────────────────────┘  │
 │              │                                                │
 └──────────────┴────────────────────────────────────────────────┘
