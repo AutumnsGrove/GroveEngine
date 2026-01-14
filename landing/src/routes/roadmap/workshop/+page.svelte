@@ -329,7 +329,7 @@
 					spec: '/knowledge/specs/wander-spec',
 					subComponents: [
 						{ name: 'Active', icon: 'compass', description: 'WASD exploration' },
-						{ name: 'Drift', icon: 'squiggle', description: 'Passive wandering' }
+						{ name: 'Drift', icon: 'line-squiggle', description: 'Passive wandering' }
 					]
 				},
 				{

@@ -191,7 +191,7 @@ import {
   Shell,
   // Wander - immersive discovery
   Earth,
-  Squiggle,
+  LineSquiggle,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -361,7 +361,7 @@ export const toolIcons = {
   trees: Trees, // Forests - main icon (many trees together)
   // Wander - immersive discovery
   earth: Earth, // Wander - main icon (a world to explore)
-  squiggle: Squiggle, // Wander - Drift mode
+  "line-squiggle": LineSquiggle, // Wander - Drift mode
   // Subicons for workshop features
   layoutlist: LayoutList, // Lattice - Vines
   origami: Origami, // Songbird - Canary
