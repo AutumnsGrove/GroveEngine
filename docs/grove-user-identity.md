@@ -101,7 +101,51 @@ The two systems are orthogonal. Your tier is a product relationship. Your identi
 
 ---
 
-## Implementation Notes
+## Implementation Guide
+
+### Context-Specific Usage
+
+**Public/Anonymous Contexts** (landing pages, marketing, first-touch):
+- Use "Wanderer" generically
+- "Welcome, Wanderer." — first visit to the site
+- "Every Wanderer is a tree in the grove." — vision statement
+
+**Authenticated/Personal Contexts** (dashboard, personal emails):
+- Use the person's actual name
+- "Welcome back, Jordan." — dashboard greeting
+- "Hey {{name}}," — personal email follow-ups
+
+**Email Templates:**
+| Type | Greeting | Rationale |
+|------|----------|-----------|
+| Welcome email | "Welcome, Wanderer." | First touch, establishing Grove identity |
+| Day 1-30 follow-ups | "Hey {{name}}," | Personal relationship, use their name |
+| Payment received | "Hey {{name}}," | Transactional, personal |
+| Subscription confirmation | "You've taken root, {{name}}." | Celebratory, use name |
+
+### In Code
+
+```typescript
+// Public landing page
+<p>Welcome, Wanderer.</p>
+
+// Authenticated dashboard - use actual name
+const userName = data.user?.name || data.user?.email?.split('@')[0] || 'Wanderer';
+<p>Welcome back, {userName}.</p>
+
+// Email template - personal follow-ups
+<p>Hey {{name}},</p>
+```
+
+### Avoid
+
+- Never use "user" or "member" in user-facing text
+- Never use "subscriber" — use "Rooted" or "the Rooted"
+- Don't use "Wanderer" when you have access to the person's actual name in personal contexts
+
+---
+
+## Technical Implementation Notes
 
 - **Pathfinder** functions similarly to the existing "Trusted Admin" role in the database
 - Only the Wayfinder can appoint Pathfinders

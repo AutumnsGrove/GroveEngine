@@ -2,6 +2,11 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// Get display name for greeting: prefer name, fallback to email username
+	const userName = $derived(
+		data.user?.name || data.user?.email?.split('@')[0] || 'Wanderer'
+	);
 </script>
 
 <svelte:head>
@@ -29,7 +34,7 @@
 				</a>
 				<div>
 					<h1 class="text-xl font-serif text-bark">Admin Dashboard</h1>
-					<p class="text-sm text-bark/50 font-sans">Welcome back, Wanderer.</p>
+					<p class="text-sm text-bark/50 font-sans">Welcome back, {userName}.</p>
 				</div>
 			</div>
 		</div>
