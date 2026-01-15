@@ -21,7 +21,7 @@ Your card didn't go through—here's how to fix it.
 ## Body
 
 ```markdown
-Hey Wanderer,
+Hey {{name}},
 
 We tried to charge your card for your Grove subscription, but it didn't go through. These things happen: expired cards, bank holds, cosmic rays.
 

@@ -21,7 +21,7 @@ Thanks for staying rooted in the grove.
 ## Body
 
 ```markdown
-Hey Wanderer,
+Hey {{name}},
 
 Just confirming we received your payment. Thanks for staying rooted with us.
 

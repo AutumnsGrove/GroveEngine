@@ -21,7 +21,7 @@ A few things you might not have found yet.
 ## Body
 
 ```markdown
-Hey Wanderer,
+Hey {{name}},
 
 You've had your tree for a week now. Hope it's starting to feel like home.
 

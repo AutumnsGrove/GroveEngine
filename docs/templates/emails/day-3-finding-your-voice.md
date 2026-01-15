@@ -21,7 +21,7 @@ The only writing rule that actually matters.
 ## Body
 
 ```markdown
-Hey Wanderer,
+Hey {{name}},
 
 Quick thought on writing, in case it's useful.
 

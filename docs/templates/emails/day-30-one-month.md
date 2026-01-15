@@ -21,11 +21,11 @@ Quick check-in and a question.
 ## Body
 
 ```markdown
-Hey Wanderer,
+Hey {{name}},
 
 It's been a month since you planted your tree. That's something.
 
-Whether you've published a dozen posts or just one, whether you've found your rhythm or you're still figuring it out, you're rooted now. That matters more than most people realize.
+Whether you've published a dozen posts or just one, whether you've found your rhythm or you're still figuring it out, you're one of the Rooted now. That matters more than most people realize.
 
 ---
 
