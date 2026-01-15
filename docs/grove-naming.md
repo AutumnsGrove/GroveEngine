@@ -426,6 +426,10 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Patina** | Ops | Backup system | *(internal)* |
 | **Mycelium** | Ops | MCP server | mycelium.grove.place |
 | **Shade** | Ops | AI content protection | grove.place/shade |
+| **Wanderer** | Identity | Everyone who enters | — |
+| **Rooted** | Identity | Subscribers | — |
+| **Pathfinder** | Identity | Trusted guides | *(appointed)* |
+| **Wayfinder** | Identity | Autumn (singular) | — |
 
 ---
 
@@ -483,5 +487,56 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 13, 2026 — Added Curios, Forests, Wander*
+## User Identity
+
+*Who walks the grove?*
+
+Grove doesn't use words like "user" or "member." Those feel transactional. Instead, we use language that reflects how people move through this place.
+
+### Wanderer
+**Everyone who enters the grove.**
+
+A wanderer is anyone who shows up. No account needed. No commitment required. You're exploring, reading, finding your way. Even after taking root, you never stop being a wanderer. The paths wind on.
+
+> "Welcome, Wanderer."
+
+### Rooted
+**Those who've planted their tree.**
+
+When you subscribe and create your blog, you take root. You've chosen this place. Your tree grows here now. Being rooted doesn't mean you stop wandering. You've just found a home to return to.
+
+> "You've taken root. Welcome home."
+
+### Pathfinder
+**Trusted guides appointed by the Wayfinder.**
+
+Pathfinders know the grove's paths by heart. They help wanderers find their way, answer questions, and light the path forward. The Wayfinder appoints Pathfinders based on trust and contribution.
+
+> "Ask a Pathfinder. They'll show you the way."
+
+### Wayfinder
+**Autumn. Singular.**
+
+The Wayfinder tends the grove itself. Where wanderers seek paths, the Wayfinder creates them. There is one Wayfinder.
+
+> "The Wayfinder welcomes you to the grove."
+
+### The Symmetry
+
+**Wanderer** and **Wayfinder** mirror each other:
+- Wanderers are *looking for* the way
+- The Wayfinder is *showing* the way
+
+### Identity vs. Tiers
+
+Subscription tiers (Seedling, Sapling, Oak, Evergreen) describe what you pay.
+Identity (Wanderer, Rooted, Pathfinder) describes who you are.
+
+These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen is a top-tier subscriber. A Pathfinder can be at any tier. Your tier is a product relationship. Your identity is a community relationship.
+
+*For full documentation, see [Grove User Identity](grove-user-identity.md).*
+
+---
+
+*Last updated: January 15, 2026 — Added User Identity, Curios, Forests, Wander*
 *Status: Placeholder names, pending launch*
