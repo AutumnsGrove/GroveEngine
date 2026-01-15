@@ -16,12 +16,18 @@
 - [x] Added `?notice=coming_soon` banner on homepage
 - **To enable:** Set `SIGNUPS_ENABLED = "true"` in Cloudflare Dashboard when LS is verified
 
-### 🖼️ PR #336: JXL Encoding Review Fixes
+### 🖼️ PR #336: JXL Encoding Review Fixes — ✅ MERGED!
 - [x] Added idempotency documentation to migration (`020_jxl_format_tracking.sql`)
 - [x] Removed duplicate `@jsquash/jxl` dependency from root `package.json`
 - [x] Removed unused `getImageData()` function from `imageProcessor.ts`
 - [x] Client now sends format metadata in FormData (`imageFormat`, `originalSize`, `storedSize`)
 - [x] Server persists format metadata to `image_hashes` table
+- [x] PR approved by Claude bot and merged!
+- [x] Migrations ran on production:
+  - `006_image_hashes.sql` - Created image_hashes table
+  - `008_image_hashes_tenant.sql` - Added tenant_id column
+  - `020_jxl_format_tracking.sql` - Added format tracking columns + JXL feature flags
+- [x] Fixed migration schema mismatch (`key` → `id` for feature_flags table)
 
 ### ⏸️ Deferred to Follow-up PR
 - [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server
