@@ -11,51 +11,61 @@ related: [exporting-your-content, account-deletion, understanding-your-privacy]
 
 Your content belongs to you. Not just philosophically—practically. Here's what you can do with your exported Grove data.
 
-## What you get when you export
+## Current export format
 
-Grove exports your data in standard formats:
+Right now, Grove exports your data as a JSON file containing:
 
-- **Posts** — Markdown files with YAML frontmatter
-- **Pages** — Markdown files, same as posts
-- **Images** — Original files (JPEG, PNG, WebP, etc.)
-- **Manifest** — JSON with metadata about your export
+- **Posts** — Title, content (in Markdown), tags, status, dates
+- **Pages** — Any custom pages you've created
+- **Media** — Filenames, URLs, and metadata (visit the URLs to download files)
 
-These aren't proprietary formats. They're the same formats used across the industry. Your writing doesn't need Grove to exist.
+The post and page content is already in Markdown, which works everywhere. The JSON wrapper is temporary—we're building a friendlier format (see below).
 
 ## Moving to another platform
 
 ### WordPress
 
-WordPress can import Markdown files, though you'll need a plugin:
+1. Open your Grove export in a text editor
+2. Find each post's `"content"` field—that's your Markdown
+3. Copy-paste into the WordPress editor, or use a Markdown plugin
 
-1. Install a Markdown import plugin (like "Jekyll Exporter" in reverse, or "WP All Import")
-2. Upload your exported post files
-3. Map the frontmatter fields to WordPress categories/tags
-
-Alternatively, copy-paste from your Markdown files into the WordPress editor. It's tedious for large archives but works for smaller blogs.
+For larger blogs, a simple script can parse the JSON and create individual files. The structure is straightforward.
 
 ### Ghost
 
 Ghost uses Markdown natively:
 
-1. In Ghost admin, go to **Settings → Import/Export**
-2. Ghost expects a specific JSON format, so you may need to convert the frontmatter
-3. Images can be uploaded to Ghost's media library
+1. Parse your Grove export JSON
+2. Transform to Ghost's import format (similar structure, different field names)
+3. Import via **Settings → Import/Export** in Ghost admin
 
-Ghost's import format is JSON-based. You can write a simple script to convert Grove's format, or import posts manually.
+The data shapes are similar. A few lines of code handles the conversion.
 
 ### Hugo, Jekyll, and other static site generators
 
-These are the easiest targets. Static generators typically expect Markdown with frontmatter—exactly what Grove exports.
+Static generators expect Markdown files with frontmatter. To migrate:
 
-1. Copy your posts folder into the generator's content directory
-2. Adjust frontmatter field names if needed (e.g., `tags` vs `categories`)
-3. Copy images to your static/assets folder
+1. Parse your Grove JSON export
+2. Write each post as a separate `.md` file with YAML frontmatter
+3. Download your images from their URLs in the export
 4. Build and deploy
 
 ### Self-hosted solutions
 
-Markdown works anywhere. Open your exported files in any text editor, and your words are right there. No database required, no special software needed.
+The Markdown content in your export works anywhere. Parse the JSON, grab the `content` field from each post, and you have plain text that opens in any editor.
+
+## What's coming
+
+We're building a proper export system with our Amber update:
+
+- **ZIP file** with organized folders (not JSON)
+- **Markdown files** for each post and page
+- **Actual media files** included (not just URLs)
+- **README** explaining everything
+
+No parsing required. Download, unzip, and your content is ready to use anywhere.
+
+This arrives in the next feature season.
 
 ## Your domain comes with you
 
@@ -92,4 +102,4 @@ If you want to leave, take your words and go. We'd rather you left happy than st
 
 ---
 
-*For the technical details of Grove's export format, see [Exporting Your Content](/knowledge/help/exporting-your-content).*
+*For step-by-step export instructions, see [Exporting Your Content](/knowledge/help/exporting-your-content).*
