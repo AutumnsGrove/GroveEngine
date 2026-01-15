@@ -16,6 +16,32 @@ Lattice is the core framework that powers the Grove ecosystem. The name evokes a
 
 ---
 
+## User Identity Terminology
+
+Grove uses specific terms for community members. **Always use these in user-facing text.**
+
+| Identity | Who | Usage |
+|----------|-----|-------|
+| **Wanderer** | Everyone who enters Grove | "Welcome, Wanderer" — default greeting for all users |
+| **Rooted** | Subscribers (paid users) | "You've taken root" — when someone subscribes |
+| **Pathfinder** | Trusted community guides | Appointed by Wayfinder — similar to "Trusted Admins" |
+| **Wayfinder** | Autumn (singular) | The grove keeper — finds and shows the way |
+
+**Key rules:**
+- Never use "user" or "member" in user-facing text — use "Wanderer"
+- Never use "subscriber" in user-facing text — use "Rooted" or "the Rooted"
+- The symmetry: Wanderers *seek* the way, the Wayfinder *shows* the way
+- Identity is separate from subscription tiers (Seedling/Sapling/Oak/Evergreen)
+
+**Examples:**
+- "Welcome, Wanderer." (not "Welcome, user")
+- "Thanks for staying rooted with us." (not "Thanks for being a subscriber")
+- "Ask a Pathfinder—they'll show you the way."
+
+See `docs/grove-user-identity.md` for full documentation.
+
+---
+
 ## Project Purpose
 Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
 

@@ -29,7 +29,7 @@
 				</a>
 				<div>
 					<h1 class="text-xl font-serif text-bark">Admin Dashboard</h1>
-					<p class="text-sm text-bark/50 font-sans">Welcome back, {data.user.email}</p>
+					<p class="text-sm text-bark/50 font-sans">Welcome back, Wanderer.</p>
 				</div>
 			</div>
 		</div>

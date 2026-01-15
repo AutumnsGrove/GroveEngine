@@ -21,9 +21,9 @@ A quick tour of where things live.
 ## Body
 
 ```markdown
-Hi {{name}},
+Hey Wanderer,
 
-Day one with your blog. Here's a quick orientation.
+Day one with your tree. Here's a quick orientation.
 
 ---
 

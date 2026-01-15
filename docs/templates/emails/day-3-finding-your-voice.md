@@ -9,7 +9,7 @@
 ## Subject Line
 
 ```
-On finding your voice
+On finding your way
 ```
 
 ## Preview Text
@@ -21,7 +21,7 @@ The only writing rule that actually matters.
 ## Body
 
 ```markdown
-Hi {{name}},
+Hey Wanderer,
 
 Quick thought on writing, in case it's useful.
 

@@ -34,6 +34,25 @@ Write with the warmth of a midnight tea shop and the clarity of good documentati
 - **Readable** — content-first, decorations enhance, never obstruct
 - **Alive** — subtle animations, seasonal changes, randomization
 
+### User Identity Language
+
+Grove uses specific terms for community members in all UI:
+
+| Term | Who | Use For |
+|------|-----|---------|
+| **Wanderer** | Everyone | Greetings, welcome messages, all users |
+| **Rooted** | Subscribers | Subscription confirmations, thank-yous |
+| **Pathfinder** | Trusted guides | Community leaders (appointed) |
+| **Wayfinder** | Autumn | The grove keeper (singular) |
+
+**In UI text:**
+- "Welcome, Wanderer." (not "Welcome, user")
+- "Welcome back, Wanderer." (dashboard greeting)
+- "You've taken root." (subscription confirmation)
+- "Thanks for staying rooted." (payment received)
+
+See `docs/grove-user-identity.md` for full documentation.
+
 ---
 
 ## Glassmorphism Pattern
