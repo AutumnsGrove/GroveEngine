@@ -92,6 +92,34 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
     usageError = true;
   }
 
+  // Load export counts for size validation in frontend
+  // This prevents users from wasting rate limit quota on oversized exports
+  const MAX_EXPORT_ITEMS = 5000;
+  let exportCounts = { posts: 0, pages: 0, media: 0 };
+  let exportTooLarge = false;
+  try {
+    const [postResult, pageResult, mediaResult] = await Promise.all([
+      platform.env.DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
+        .bind(locals.tenantId)
+        .first<{ count: number }>(),
+      platform.env.DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
+        .bind(locals.tenantId)
+        .first<{ count: number }>(),
+      platform.env.DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
+        .bind(locals.tenantId)
+        .first<{ count: number }>(),
+    ]);
+    exportCounts = {
+      posts: postResult?.count ?? 0,
+      pages: pageResult?.count ?? 0,
+      media: mediaResult?.count ?? 0,
+    };
+    exportTooLarge = Object.values(exportCounts).some(count => count > MAX_EXPORT_ITEMS);
+  } catch (e) {
+    console.error("[Account] Failed to load export counts:", e);
+    // Non-critical - continue without counts
+  }
+
   // Get tier configuration
   const currentPlan = (billing?.plan || tenant?.plan || "seedling") as TierKey;
   const tierConfig = getTier(currentPlan);
@@ -150,6 +178,8 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
         }
       : null,
     usageError,
+    exportCounts,
+    exportTooLarge,
     currentPlan,
     tierConfig: {
       name: tierConfig.display.name,

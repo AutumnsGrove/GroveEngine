@@ -1,16 +1,38 @@
 <script lang="ts">
   import { GlassCard, Button, Spinner } from "$lib/ui";
-  import { Download } from "lucide-svelte";
+  import { Download, AlertTriangle } from "lucide-svelte";
   import type { ExportType } from "./types";
+  import { CONTACT } from "$lib/config/contact";
+
+  interface ExportCounts {
+    posts: number;
+    pages: number;
+    media: number;
+  }
 
   interface Props {
     exportType: ExportType;
     exportingData: boolean;
+    exportCounts: ExportCounts;
+    exportTooLarge: boolean;
     onExport: () => void;
     onExportTypeChange: (type: ExportType) => void;
   }
 
-  let { exportType, exportingData, onExport, onExportTypeChange }: Props = $props();
+  let { exportType, exportingData, exportCounts, exportTooLarge, onExport, onExportTypeChange }: Props = $props();
+
+  // Check if the selected export type would be too large
+  const MAX_EXPORT_ITEMS = 5000;
+  let selectedExportTooLarge = $derived(() => {
+    if (exportType === "full") {
+      return exportCounts.posts > MAX_EXPORT_ITEMS ||
+             exportCounts.pages > MAX_EXPORT_ITEMS ||
+             exportCounts.media > MAX_EXPORT_ITEMS;
+    }
+    if (exportType === "posts") return exportCounts.posts > MAX_EXPORT_ITEMS;
+    if (exportType === "media") return exportCounts.media > MAX_EXPORT_ITEMS;
+    return false;
+  });
 </script>
 
 <GlassCard variant="default" class="mb-6">
@@ -70,12 +92,32 @@
     </label>
   </fieldset>
 
+  <!-- Export size estimate -->
+  <p class="export-estimate">
+    Your export will include approximately {exportCounts.posts} posts, {exportCounts.pages} pages, and {exportCounts.media} media files.
+  </p>
+
+  <!-- Warning for oversized exports -->
+  {#if selectedExportTooLarge()}
+    <div class="export-warning" role="alert">
+      <AlertTriangle class="warning-icon" aria-hidden="true" />
+      <div>
+        <strong>Export too large</strong>
+        <p>
+          This export exceeds our 5,000 item limit. Please contact us at
+          <a href="mailto:{CONTACT.supportEmail}">{CONTACT.supportEmailDisplay}</a>
+          for bulk data exports.
+        </p>
+      </div>
+    </div>
+  {/if}
+
   <Button
     variant="secondary"
     onclick={onExport}
-    disabled={exportingData}
+    disabled={exportingData || selectedExportTooLarge()}
     aria-busy={exportingData}
-    aria-label={exportingData ? "Exporting data..." : "Export data"}
+    aria-label={exportingData ? "Exporting data..." : selectedExportTooLarge() ? "Export disabled - too large" : "Export data"}
   >
     {#if exportingData}
       <span aria-hidden="true"><Spinner size="sm" /></span>
@@ -170,5 +212,48 @@
     width: 1rem;
     height: 1rem;
     margin-right: 0.375rem;
+  }
+
+  .export-estimate {
+    margin: 0 0 1rem 0;
+    padding: 0.75rem 1rem;
+    background: rgba(44, 95, 45, 0.05);
+    border-radius: var(--border-radius-small);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .export-warning {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--border-radius-standard);
+    color: var(--color-text);
+  }
+
+  .export-warning :global(.warning-icon) {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #dc2626;
+  }
+
+  .export-warning strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #dc2626;
+  }
+
+  .export-warning p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .export-warning a {
+    color: var(--color-primary);
   }
 </style>

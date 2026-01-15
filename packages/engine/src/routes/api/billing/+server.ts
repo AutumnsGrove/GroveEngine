@@ -618,8 +618,9 @@ export const PATCH: RequestHandler = async ({
           },
         });
 
+        // Clear cancel_at_period_end when changing plans - user is committing to a new plan
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
+          "UPDATE platform_billing SET plan = ?, cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
@@ -670,16 +671,13 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
     throw error(500, "Payment provider not configured");
   }
 
-  // Accept return_url from either query params (legacy) or body (preferred)
-  let returnUrl = url.searchParams.get("return_url");
-
-  if (!returnUrl) {
-    try {
-      const body = await request.json() as { returnUrl?: string };
-      returnUrl = body.returnUrl || null;
-    } catch {
-      // Body parsing failed, continue with null
-    }
+  // Accept return_url from request body only (standardized approach)
+  let returnUrl: string | null = null;
+  try {
+    const body = await request.json() as { returnUrl?: string };
+    returnUrl = body.returnUrl || null;
+  } catch {
+    // Body parsing failed
   }
 
   if (!returnUrl) {

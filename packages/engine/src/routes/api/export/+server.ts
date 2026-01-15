@@ -183,7 +183,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     if (exportType === "full" || exportType === "media") {
       const mediaCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM image_hashes WHERE tenant_id = ?"
+        "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?"
       ).bind(tenantId).first<{ count: number }>();
 
       if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {

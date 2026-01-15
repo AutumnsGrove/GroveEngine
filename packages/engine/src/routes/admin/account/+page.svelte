@@ -227,6 +227,8 @@
   <DataExportCard
     {exportType}
     {exportingData}
+    exportCounts={data.exportCounts}
+    exportTooLarge={data.exportTooLarge}
     onExport={handleExportData}
     onExportTypeChange={handleExportTypeChange}
   />
