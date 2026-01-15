@@ -1,5 +1,8 @@
 import { defineConfig } from "vitest/config";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { resolve } from "path";
+
+const __dirname = new URL(".", import.meta.url).pathname;
 
 /**
  * Vitest Configuration for GroveEngine
@@ -23,9 +26,15 @@ export default defineConfig({
     },
   },
   resolve: {
+    // Use browser condition for Svelte 5 component testing
+    // Without this, vitest imports svelte/src/index-server.js which lacks mount()
+    conditions: ["browser"],
     alias: {
       $lib: "/src/lib",
       "$lib/*": "/src/lib/*",
+      // SvelteKit virtual modules need stubs for vitest
+      "$app/stores": resolve(__dirname, "tests/mocks/app-stores.ts"),
+      "$app/navigation": resolve(__dirname, "tests/mocks/app-navigation.ts"),
     },
   },
 });

@@ -9,6 +9,7 @@
  */
 
 import { vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
 
 // ============================================================================
 // Type Definitions for Mock Data
