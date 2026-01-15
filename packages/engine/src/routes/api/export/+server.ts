@@ -194,6 +194,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       }
     }
 
+    if (exportType === "full" || exportType === "pages") {
+      const pageCount = await platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?"
+      ).bind(tenantId).first<{ count: number }>();
+
+      if (pageCount && pageCount.count > MAX_EXPORT_ITEMS) {
+        throw error(
+          413,
+          `Export too large (${pageCount.count} pages). Please contact support for bulk data exports.`
+        );
+      }
+    }
+
     // Check rate limit after size validation (so oversized exports don't consume quota)
     const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
     if (!rateLimit.allowed) {

@@ -57,7 +57,7 @@
 - [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
 - [ ] **Export pagination** — Add LIMIT/OFFSET for tenants with 1000+ posts
 - [ ] **Rate limit config** — Move RATE_LIMIT_MAX to shared config/env vars
-- [ ] **Billing rate limiting** — Add rate limits to billing operations (currently exports only)
+- [x] **Billing rate limiting** — Added 20/hour limit to POST, PATCH, PUT handlers
 - [x] **Support email config** — Moved to `$lib/config/contact.ts`
 - [ ] **Focus management** — Return focus to button after actions complete
 
