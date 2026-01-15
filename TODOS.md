@@ -49,10 +49,11 @@
 
 No action needed - current structure works well.
 
-#### 5. Code Discoverability → BUILD TOOLING
+#### 5. Code Discoverability → BUILD TOOLING ✅ (Mostly)
 > **Action:** Create RG aliases/scripts, potentially build a blazing fast search tool
 
-- [ ] Create `scripts/grove-find.sh` with useful RG aliases
+- [x] Create `scripts/grove-find.sh` with useful RG aliases
+- [ ] **FIX:** grove-find.sh has shell compatibility issues in Claude Code sandbox (works in real terminal - needs testing)
 - [ ] Consider building `gf` (grove-find) CLI tool for blazing fast search
 - [ ] Document key file locations in ARCHITECTURE.md
 
@@ -65,13 +66,14 @@ No action needed - current structure works well.
 - [ ] Document planned vs. implemented features clearly
 - [ ] Check Glass usage consistency (desktop TOC needs it!)
 
-#### 7. DB Abstraction → SAFETY LAYER
+#### 7. DB Abstraction → SAFETY LAYER ✅
 > **Goal:** Create abstraction layer to prevent agents from accidentally destroying data
 > **Concern:** Agents running wild DB commands is risky
 
-- [ ] Design safe DB abstraction layer (`packages/engine/src/lib/server/db/`)
-- [ ] Add query validation/sanitization
-- [ ] Add destructive operation safeguards (confirm before DELETE, no DROP without explicit flag)
+- [x] Design safe DB abstraction layer (`packages/engine/src/lib/server/services/database-safety.ts`)
+- [x] Add query validation/sanitization (blocks DDL, stacked queries)
+- [x] Add destructive operation safeguards (row limits, protected tables, WHERE required)
+- [x] Comprehensive test coverage (30 tests in `database-safety.test.ts`)
 - [ ] Create typed query builders for common operations
 - [ ] Document safe patterns in AGENT.md
 
