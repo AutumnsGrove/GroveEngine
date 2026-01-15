@@ -146,14 +146,17 @@ describe("Export Rate Limiting", () => {
   });
 
   it("should include rate limit info in response headers", () => {
+    const limit = RATE_LIMIT_MAX;
     const remaining = 7;
     const resetAt = 1700003600;
 
     const headers = {
+      "X-RateLimit-Limit": limit.toString(),
       "X-RateLimit-Remaining": remaining.toString(),
       "X-RateLimit-Reset": resetAt.toString(),
     };
 
+    expect(headers["X-RateLimit-Limit"]).toBe("10");
     expect(headers["X-RateLimit-Remaining"]).toBe("7");
     expect(headers["X-RateLimit-Reset"]).toBe("1700003600");
   });
@@ -394,9 +397,11 @@ describe("Export Response Headers", () => {
 
   it("should include rate limit headers", () => {
     const headers = new Headers();
+    headers.set("X-RateLimit-Limit", "10");
     headers.set("X-RateLimit-Remaining", "9");
     headers.set("X-RateLimit-Reset", "1705280400");
 
+    expect(headers.get("X-RateLimit-Limit")).toBe("10");
     expect(headers.get("X-RateLimit-Remaining")).toBe("9");
     expect(headers.get("X-RateLimit-Reset")).toBe("1705280400");
   });

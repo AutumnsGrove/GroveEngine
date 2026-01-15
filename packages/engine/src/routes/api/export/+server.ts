@@ -129,9 +129,11 @@ interface ExportRequest {
  * Returns exported data as JSON (for now).
  * Future: Return as ZIP file with markdown files and media.
  *
- * Changed from GET to POST because this endpoint:
- * - Modifies state (rate limit counters, audit logs)
- * - Should be protected by CSRF validation
+ * Uses POST (not GET) because:
+ * 1. Exports are non-idempotent (rate limiting consumes quota)
+ * 2. Prevents accidental triggering via image tags, link prefetch, or browser history
+ * 3. Enables CSRF protection to prevent malicious sites from triggering exports
+ * 4. Audit logs should not be written from GET requests (side effects)
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
@@ -316,6 +318,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json"`,
         "Cache-Control": "no-cache",
+        "X-RateLimit-Limit": RATE_LIMIT_MAX.toString(),
         "X-RateLimit-Remaining": rateLimit.remaining.toString(),
         "X-RateLimit-Reset": rateLimit.resetAt.toString(),
       },

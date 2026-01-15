@@ -2,7 +2,7 @@
   import { GlassCard, Button, Spinner } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
-  import { invalidateAll } from "$app/navigation";
+  import { invalidateAll, beforeNavigate } from "$app/navigation";
   import {
     CreditCard,
     Download,
@@ -29,6 +29,11 @@
   let selectedPlan = $state("");
   let openingPortal = $state(false);
   let exportingData = $state(false);
+
+  // Reset portal state if user navigates back to this page
+  beforeNavigate(() => {
+    openingPortal = false;
+  });
 
   // Computed
   const isTrialing = $derived(data.billing?.status === "trialing");
@@ -72,13 +77,14 @@
     }
 
     cancellingSubscription = true;
+    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "cancel",
         cancelImmediately: false,
       });
       toast.success("Subscription cancelled. Access continues until period end.");
-      await invalidateAll();
+      success = true;
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to cancel subscription"
@@ -86,23 +92,42 @@
     } finally {
       cancellingSubscription = false;
     }
+
+    // Refresh data after state is reset
+    if (success) {
+      try {
+        await invalidateAll();
+      } catch (e) {
+        console.error("Failed to refresh data:", e);
+      }
+    }
   }
 
   // Resume cancelled subscription
   async function handleResume() {
     resumingSubscription = true;
+    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "resume",
       });
       toast.success("Subscription resumed!");
-      await invalidateAll();
+      success = true;
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to resume subscription"
       );
     } finally {
       resumingSubscription = false;
+    }
+
+    // Refresh data after state is reset
+    if (success) {
+      try {
+        await invalidateAll();
+      } catch (e) {
+        console.error("Failed to refresh data:", e);
+      }
     }
   }
 
@@ -127,13 +152,14 @@
 
     changingPlan = true;
     selectedPlan = newPlan;
+    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "change_plan",
         plan: newPlan,
       });
       toast.success(`Plan changed to ${tierInfo?.name}!`);
-      await invalidateAll();
+      success = true;
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to change plan"
@@ -141,6 +167,15 @@
     } finally {
       changingPlan = false;
       selectedPlan = "";
+    }
+
+    // Refresh data after state is reset
+    if (success) {
+      try {
+        await invalidateAll();
+      } catch (e) {
+        console.error("Failed to refresh data:", e);
+      }
     }
   }
 
