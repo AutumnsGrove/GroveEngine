@@ -25,12 +25,15 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 
 | Color | Hex | Usage |
 |-------|-----|-------|
-| **Grove Green** | `#16a34a` | Logo foliage, accents |
-| **Bark Brown** | `#78350f` | Logo trunk |
+| **Grove Green** | `#16a34a` | Accents, summer theme |
+| **Autumn Orange** | `#EA580C` | Accents, autumn theme |
+| **Bark Brown** | `#5C3317` | Logo trunk (see Logo Assets for full palette) |
 | **Cream** | `#fefdfb` | Background (light version) |
 | **Charcoal** | `#1e293b` | Background (dark version) |
 | **Text Dark** | `#374151` | Body text on light bg |
 | **Text Light** | `#f8fafc` | Body text on dark bg |
+
+> **Note:** The logo uses multi-tone colors for 3D depth. See the Logo Assets section for the full seasonal color palettes.
 
 ---
 
@@ -146,13 +149,41 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 
 ## Logo Assets
 
-The Grove logo is an SVG with two parts:
-- **Foliage:** Four-pointed arrow/compass shape (seasonal color)
-- **Trunk:** Rectangular base (bark brown)
+The Grove logo is a stylized tree SVG with 3D depth:
+- **Branches:** Three tiers of triangular branches, each with dark/light halves for depth
+- **Trunk:** Two-tone tapered trunk
 
-For business cards, use the **autumn** seasonal variant (orange: `#ea580c`) or **summer** variant (grove green: `#16a34a`).
+### Seasonal Variants
 
-Logo files location: `landing/src/lib/components/Logo.svelte`
+| Season | Vibe | Recommended For |
+|--------|------|-----------------|
+| **summer** | Sunlit greens, lush vitality | Default, most versatile |
+| **autumn** | Warm reds/golds, harvest warmth | Cozy, inviting feel |
+| **spring** | Rose gold, cherry blossoms | Fresh, hopeful |
+| **winter** | Cool blues, crystalline | Clean, minimal |
+| **midnight** | Purple/pink twilight ðŸŒ™ | Queer fifth season, magic |
+
+For business cards, **autumn** or **summer** are recommended for warmth and approachability.
+
+### Color Reference (Autumn)
+
+| Element | Dark | Light |
+|---------|------|-------|
+| Tier 1 (top) | `#DC2626` | `#FCD34D` |
+| Tier 2 (middle) | `#991B1B` | `#F59E0B` |
+| Tier 3 (bottom) | `#7C2D12` | `#EA580C` |
+| Trunk | `#5C3317` | `#8B4520` |
+
+### Color Reference (Summer)
+
+| Element | Dark | Light |
+|---------|------|-------|
+| Tier 1 (top) | `#15803d` | `#86efac` |
+| Tier 2 (middle) | `#166534` | `#4ade80` |
+| Tier 3 (bottom) | `#14532d` | `#22c55e` |
+| Trunk | `#3d2914` | `#5a3f30` |
+
+Logo source: `packages/engine/src/lib/ui/components/ui/Logo.svelte`
 
 Export as:
 - SVG (vector, preferred)
