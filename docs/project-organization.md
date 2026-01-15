@@ -2,7 +2,7 @@
 
 > *Where everything lives and why.*
 
-**Last Updated:** January 2026
+**Last Updated:** January 15, 2026
 
 This document defines how Grove's projects are organized: what lives in the monorepo, what gets its own repo, and what stays integrated versus external.
 
@@ -24,20 +24,27 @@ Everything that powers the core Grove experience lives here.
 ```
 GroveEngine/
 ├── packages/
-│   └── engine/              # Lattice - the npm package
-│       └── src/lib/
-│           ├── ui/          # UI components (GlassCard, Logo, etc.)
-│           ├── foliage/     # Theme system
-│           ├── thorn/       # Content moderation
-│           ├── songbird/    # Prompt injection protection
-│           ├── rings/       # Analytics
-│           ├── reeds/       # Comments
-│           ├── shade/       # AI protection
-│           ├── trails/      # Personal roadmaps
-│           ├── wisp/        # Writing assistant
-│           └── arbor/       # Admin panel components
+│   ├── engine/              # Lattice - the npm package
+│   │   └── src/lib/
+│   │       ├── ui/          # UI components (GlassCard, Logo, etc.)
+│   │       ├── foliage/     # Theme system
+│   │       ├── thorn/       # Content moderation
+│   │       ├── songbird/    # Prompt injection protection
+│   │       ├── rings/       # Analytics
+│   │       ├── reeds/       # Comments
+│   │       ├── shade/       # AI protection
+│   │       ├── trails/      # Personal roadmaps
+│   │       ├── wisp/        # Writing assistant
+│   │       └── arbor/       # Admin panel components
+│   ├── durable-objects/     # Cloudflare DO implementations
+│   ├── grove-router/        # Subdomain routing worker
+│   ├── og-worker/           # OG image generation worker
+│   └── post-migrator/       # Migration utilities
 ├── landing/                 # grove.place marketing site
 ├── plant/                   # plant.grove.place (onboarding)
+├── meadow/                  # meadow.grove.place (social pre-launch) ✅
+├── clearing/                # status.grove.place (status page) ✅ DEPLOYED
+├── domains/                 # Domain discovery admin tool
 └── docs/                    # Documentation & specs
 ```
 
@@ -56,6 +63,9 @@ GroveEngine/
 | **Arbor** | Admin UI components |
 | **Plant** | Shares D1 database, provisions tenants |
 | **Landing** | Marketing site, same deployment pipeline |
+| **Meadow** | Pre-launch page, simple SvelteKit app, shares tooling |
+| **Clearing** | Status page, shares D1 database, deployed to status.grove.place |
+| **Domains** | Admin tool for domain discovery, internal use only |
 
 ---
 
@@ -67,24 +77,27 @@ We maintain **one npm package** with modular exports:
 
 ```json
 {
-  "name": "@autumnsgrove/lattice",
+  "name": "@autumnsgrove/groveengine",
   "exports": {
     ".": "./dist/index.js",
     "./ui": "./dist/ui/index.js",
-    "./foliage": "./dist/foliage/index.js",
-    "./thorn": "./dist/thorn/index.js",
-    "./songbird": "./dist/songbird/index.js"
+    "./ui/chrome": "./dist/ui/chrome/index.js",
+    "./ui/nature": "./dist/ui/nature/index.js",
+    "./services": "./dist/services/index.js",
+    "./server": "./dist/server/index.js"
   }
 }
 ```
 
 **Usage:**
 ```typescript
-import { GlassCard, Logo } from '@autumnsgrove/lattice/ui';
-import { ThemeSelector, applyTheme } from '@autumnsgrove/lattice/foliage';
-import { validateContent } from '@autumnsgrove/lattice/thorn';
-import { detectInjection } from '@autumnsgrove/lattice/songbird';
+import { GlassCard, Logo } from '@autumnsgrove/groveengine/ui';
+import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+import { seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/stores';
+import { cn } from '@autumnsgrove/groveengine/ui/utils';
 ```
+
+> **Future:** Consider renaming to `@groveplace/lattice` — see "Migration: Rename Engine to Lattice" section below.
 
 ### Why Not Multiple Packages?
 
@@ -109,13 +122,11 @@ Only create a separate npm package if:
 
 ## Separate Repositories: Grove Services
 
-These are independent services with their own deployment lifecycle, but exclusively serve Grove:
+These are independent services with their own deployment lifecycle:
 
 | Public Name | Internal | Domain | Repo | Why Separate |
 |-------------|----------|--------|------|--------------|
 | **Heartwood** | GroveAuth | heartwood.grove.place | AutumnsGrove/GroveAuth | Central auth, Cloudflare Workers |
-| **Meadow** | GroveSocial | meadow.grove.place | AutumnsGrove/GroveSocial | Own app, own database |
-| **Clearing** | GroveClear | status.grove.place | AutumnsGrove/GroveClear | Status page, independent |
 | **Vista** | GroveMonitor | vista.grove.place | AutumnsGrove/GroveMonitor | Observability, internal |
 | **Patina** | GrovePatina | *(internal)* | AutumnsGrove/Patina | Backup service |
 | **Bloom** | GroveBloom | bloom.grove.place | AutumnsGrove/GroveBloom | VPS orchestration (Hetzner) |
@@ -123,7 +134,17 @@ These are independent services with their own deployment lifecycle, but exclusiv
 | **Ivy** | GroveMail | ivy.grove.place | AutumnsGrove/Ivy | Email client |
 | **Amber** | GroveStorage | amber.grove.place | AutumnsGrove/Amber | Storage dashboard |
 
-### Why These Get Own Repos
+### Moved to Monorepo (Decision: Jan 2026)
+
+The following were originally planned as separate repos but moved into GroveEngine for simplicity:
+
+| Service | Reason for Consolidation |
+|---------|-------------------------|
+| **Meadow** | Simple pre-launch page, shares pnpm tooling, no separate DB yet |
+| **Clearing** | Shares D1 database with engine, simpler deployment pipeline |
+| **Domains/Forage** | Internal admin tool, not user-facing |
+
+### Why Separate Repos Make Sense
 
 - **Different infrastructure**: Workers vs SvelteKit vs Python
 - **Independent deployments**: Can update without touching engine
@@ -139,10 +160,11 @@ Products that could exist independently of Grove:
 
 | Public Name | Domain | Repo | Notes |
 |-------------|--------|------|-------|
-| **Forage** | forage.grove.place | AutumnsGrove/Forage | Domain discovery tool |
 | **CDN Uploader** | *(CLI)* | AutumnsGrove/CDNUploader | CLI tool, standalone |
 | **Nook** | nook.grove.place | AutumnsGrove/Nook | Private video sharing |
 | **Outpost** | mc.grove.place | AutumnsGrove/GroveMC | Minecraft server |
+
+> **Note:** Forage (domain discovery tool) is now in the monorepo at `domains/` — it's primarily an internal admin tool.
 
 ---
 
@@ -170,42 +192,48 @@ These are designed to be:
 ## Visual Summary
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    GroveEngine (Monorepo)                    │
-├─────────────────────────────────────────────────────────────┤
-│  packages/engine/     │  landing/        │  plant/          │
-│  └── @autumnsgrove/   │  grove.place     │  plant.grove.    │
-│      lattice          │  marketing       │  place           │
-│      ├── /ui          │                  │  onboarding      │
-│      ├── /foliage     │                  │                  │
-│      ├── /thorn       │                  │                  │
-│      ├── /songbird    │                  │                  │
-│      └── /...         │                  │                  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                      GroveEngine (Monorepo)                          │
+├─────────────────────────────────────────────────────────────────────┤
+│  packages/                                                           │
+│  ├── engine/         @autumnsgrove/groveengine (npm package)        │
+│  │   └── ui, foliage, thorn, songbird, rings, reeds, shade...      │
+│  ├── durable-objects/   Cloudflare DO implementations               │
+│  ├── grove-router/      Subdomain routing worker                    │
+│  ├── og-worker/         OG image generation worker                  │
+│  └── post-migrator/     Migration utilities                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Apps (SvelteKit)                                                    │
+│  ├── landing/        grove.place          Marketing site            │
+│  ├── plant/          plant.grove.place    Onboarding flow           │
+│  ├── meadow/         meadow.grove.place   Social pre-launch ✅      │
+│  ├── clearing/       status.grove.place   Status page ✅ DEPLOYED   │
+│  └── domains/        (internal)           Domain discovery tool     │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                   Grove Services (Own Repos)                 │
-├─────────────────────────────────────────────────────────────┤
-│  GroveAuth    │  GroveSocial  │  GroveClear  │  GroveBloom  │
-│  (Heartwood)  │  (Meadow)     │  (Clearing)  │  (Bloom)     │
-├───────────────┼───────────────┼──────────────┼──────────────┤
-│  GroveMCP     │  Ivy          │  Amber       │  Patina      │
-│  (Mycelium)   │  (Email)      │  (Storage)   │  (Backups)   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Grove Services (Own Repos)                       │
+├─────────────────────────────────────────────────────────────────────┤
+│  GroveAuth     │  GroveMonitor  │  GroveBloom   │  GroveMCP         │
+│  (Heartwood)   │  (Vista)       │  (Bloom)      │  (Mycelium)       │
+├────────────────┼────────────────┼───────────────┼───────────────────┤
+│  Ivy           │  Amber         │  Patina       │                   │
+│  (Email)       │  (Storage)     │  (Backups)    │                   │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                Standalone Products (Own Repos)               │
-├─────────────────────────────────────────────────────────────┤
-│  Forage       │  Nook         │  Outpost     │  CDN         │
-│  (Domains)    │  (Video)      │  (Minecraft) │  Uploader    │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                  Standalone Products (Own Repos)                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  Forage         │  Nook          │  Outpost      │  CDN Uploader    │
+│  (Domains CLI)  │  (Video)       │  (Minecraft)  │                  │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│              Beyond the Grove (Self-Hostable)                │
-├─────────────────────────────────────────────────────────────┤
-│  Aria         │  Trove        │  Daily       │  Scout       │
-│  (Music)      │  (Library)    │  Clearing    │  (Shopping)  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                Beyond the Grove (Self-Hostable)                      │
+├─────────────────────────────────────────────────────────────────────┤
+│  Aria           │  Trove         │  Daily        │  Scout           │
+│  (Music)        │  (Library)     │  Clearing     │  (Shopping)      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -253,10 +281,15 @@ When deciding where something should live:
 
 ## Naming Reference
 
+### In Monorepo (GroveEngine)
+
 | Public Name | Internal Name | Location |
 |-------------|---------------|----------|
 | Lattice | GroveEngine | packages/engine |
 | Plant | Seedbed | plant/ |
+| Meadow | GroveSocial | meadow/ |
+| Clearing | GroveClear | clearing/ |
+| Forage/Domains | GroveDomainTool | domains/ |
 | Foliage | GroveThemes | packages/engine/src/lib/foliage |
 | Thorn | GroveThorn | packages/engine/src/lib/thorn |
 | Songbird | GroveSongbird | packages/engine/src/lib/songbird |
@@ -266,16 +299,18 @@ When deciding where something should live:
 | Trails | GroveTrails | packages/engine/src/lib/trails |
 | Wisp | GroveWisp | packages/engine/src/lib/wisp |
 | Arbor | GroveArbor | packages/engine/src/lib/arbor |
+
+### Separate Repositories
+
+| Public Name | Internal Name | Location |
+|-------------|---------------|----------|
 | Heartwood | GroveAuth | AutumnsGrove/GroveAuth |
-| Meadow | GroveSocial | AutumnsGrove/GroveSocial |
 | Bloom | GroveBloom | AutumnsGrove/GroveBloom |
 | Mycelium | GroveMCP | AutumnsGrove/GroveMCP |
 | Ivy | GroveMail | AutumnsGrove/Ivy |
 | Amber | GroveStorage | AutumnsGrove/Amber |
 | Vista | GroveMonitor | AutumnsGrove/GroveMonitor |
-| Clearing | GroveClear | AutumnsGrove/GroveClear |
 | Patina | GrovePatina | AutumnsGrove/Patina |
-| Forage | GroveDomainTool | AutumnsGrove/Forage |
 | Nook | GroveNook | AutumnsGrove/Nook |
 | Outpost | GroveMC | AutumnsGrove/GroveMC |
 | Aria | GroveMusic | AutumnsGrove/GroveMusic |
@@ -286,6 +321,9 @@ When deciding where something should live:
 ---
 
 ## Migration: Rename Engine to Lattice
+
+> **Status:** 📋 PLANNED (Not Started)
+> **Priority:** Low — Nice-to-have for branding consistency, not blocking launch
 
 The npm package should be renamed from `@autumnsgrove/groveengine` to `@groveplace/lattice`, matching the domain `grove.place` and the public product name "Lattice".
 
