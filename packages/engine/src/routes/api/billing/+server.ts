@@ -603,6 +603,8 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
     throw error(400, "Invalid return URL format");
   }
 
+  const requestedTenantId = url.searchParams.get("tenant_id") || locals.tenantId;
+
   try {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,

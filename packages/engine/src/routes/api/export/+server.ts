@@ -165,23 +165,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       locals.user
     );
 
-    // Check rate limit before processing export
-    const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
-    if (!rateLimit.allowed) {
-      // Calculate human-readable wait time
-      const nowSeconds = Math.floor(Date.now() / 1000);
-      const waitMinutes = Math.ceil((rateLimit.resetAt - nowSeconds) / 60);
-      const waitText = waitMinutes > 60
-        ? `${Math.ceil(waitMinutes / 60)} hour${Math.ceil(waitMinutes / 60) > 1 ? "s" : ""}`
-        : `${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}`;
-      throw error(
-        429,
-        `Export rate limit exceeded. You can export ${RATE_LIMIT_MAX} times per hour. ` +
-          `Try again in ${waitText}.`
-      );
-    }
-
-    // Check export size to prevent memory issues with very large datasets
+    // Check export size BEFORE rate limit (don't consume quota for oversized exports)
     // Tenants with >5000 items should contact support for bulk exports
     const MAX_EXPORT_ITEMS = 5000;
     if (exportType === "full" || exportType === "posts") {
@@ -208,6 +192,22 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           `Export too large (${mediaCount.count} media files). Please contact support for bulk data exports.`
         );
       }
+    }
+
+    // Check rate limit after size validation (so oversized exports don't consume quota)
+    const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
+    if (!rateLimit.allowed) {
+      // Calculate human-readable wait time
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const waitMinutes = Math.ceil((rateLimit.resetAt - nowSeconds) / 60);
+      const waitText = waitMinutes > 60
+        ? `${Math.ceil(waitMinutes / 60)} hour${Math.ceil(waitMinutes / 60) > 1 ? "s" : ""}`
+        : `${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}`;
+      throw error(
+        429,
+        `Export rate limit exceeded. You can export ${RATE_LIMIT_MAX} times per hour. ` +
+          `Try again in ${waitText}.`
+      );
     }
 
     const exportData: {
