@@ -4,21 +4,35 @@ Items identified during PR review that can be addressed in follow-up work.
 
 ---
 
+## Completed
+
+### Component Decomposition ✓
+The account page (`+page.svelte`) was ~1200 lines, now ~315 lines. Extracted:
+- ✓ `SubscriptionCard.svelte` - Plan overview, status badges, cancel/resume
+- ✓ `UsageStatsCard.svelte` - Storage, posts, account age with progress bars
+- ✓ `PaymentMethodCard.svelte` - Payment method display and update button
+- ✓ `DataExportCard.svelte` - Export type selection and download
+- ✓ `ChangePlanCard.svelte` - Plan selection grid
+
+### TypeScript Migration ✓
+All components now use `<script lang="ts">` with proper type definitions:
+- ✓ `types.ts` - Shared TypeScript interfaces
+- ✓ `utils.ts` - Typed helper functions
+
+### Frontend Unit Tests ✓
+Added Vitest tests in `utils.test.ts` (25 tests):
+- ✓ `sanitizeErrorMessage()` helper function
+- ✓ `formatDate()` utility with edge cases
+- ✓ `daysRemaining()` with time mocking
+- ✓ `USAGE_WARNING_THRESHOLD` constant
+
+### Hardcoded Values (Partial) ✓
+- ✓ Extracted 80% warning threshold to `USAGE_WARNING_THRESHOLD` constant
+- ✓ Localization fixed: `toLocaleDateString(undefined, {...})` now uses browser locale
+
+---
+
 ## High Priority
-
-### Component Decomposition
-The account page (`+page.svelte`) is ~1200 lines. Consider extracting:
-- `SubscriptionCard.svelte` - Plan overview, status badges, cancel/resume
-- `UsageStatsCard.svelte` - Storage, posts, account age with progress bars
-- `PaymentMethodCard.svelte` - Payment method display and update button
-- `DataExportCard.svelte` - Export type selection and download
-
-### Frontend Unit Tests
-Add Vitest tests for:
-- `sanitizeErrorMessage()` helper function
-- `formatDate()` and `daysRemaining()` utilities
-- Component state management (loading states, error handling)
-- Export download flow
 
 ### Custom Confirmation Dialogs
 Replace browser `confirm()` dialogs with custom modal components from the design system for consistent glassmorphic UI.
@@ -38,34 +52,12 @@ For tenants with 1000+ posts/media:
 - Consider streaming responses for large datasets
 - Add optional `since` parameter for incremental exports
 
-### Localization
-Replace hardcoded locale in date formatting:
-```typescript
-// Current
-new Date(isoString).toLocaleDateString("en-US", { ... });
-
-// Better
-new Date(isoString).toLocaleDateString(undefined, { ... });
-```
-
 ### Hardcoded Values
 - Move support email (`autumnbrown23@pm.me`) from component to config file
-- Extract magic numbers (80% warning threshold) to constants
 
 ---
 
 ## Low Priority
-
-### TypeScript Migration
-Convert component from JSDoc to `<script lang="ts">` for better type safety:
-```typescript
-// Current (JSDoc)
-/** @param {string | null | undefined} isoString */
-function formatDate(isoString) { ... }
-
-// Better (TypeScript)
-function formatDate(isoString: string | null | undefined): string { ... }
-```
 
 ### Accessibility Enhancements
 - Add focus management after actions complete (return focus to button or status)
