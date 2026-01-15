@@ -148,11 +148,25 @@ function extractTableName(sql: string): string | null {
 
 /**
  * Determine operation type from SQL
+ *
+ * Handles CTEs (WITH ... AS (...) DELETE/UPDATE/SELECT) by extracting
+ * the actual operation from within the CTE structure.
  */
 function getOperationType(
   sql: string,
 ): "INSERT" | "UPDATE" | "DELETE" | "DDL" | "QUERY" {
-  const trimmed = sql.trim().toUpperCase();
+  let trimmed = sql.trim().toUpperCase();
+
+  // Handle CTEs: WITH ... AS (...) <actual_operation>
+  // Extract the operation that follows the CTE definition
+  if (trimmed.startsWith("WITH ")) {
+    // Find the actual operation after the CTE (DELETE, UPDATE, INSERT, SELECT)
+    const cteMatch = trimmed.match(/\)\s*(DELETE|UPDATE|INSERT|SELECT)\b/i);
+    if (cteMatch) {
+      trimmed = cteMatch[1];
+    }
+  }
+
   if (trimmed.startsWith("INSERT")) return "INSERT";
   if (trimmed.startsWith("UPDATE")) return "UPDATE";
   if (trimmed.startsWith("DELETE")) return "DELETE";
@@ -330,56 +344,66 @@ export class SafeDatabase {
 
     // For DELETE/UPDATE, check row limits before executing
     if (operation === "DELETE" || operation === "UPDATE") {
-      // Transform query to count affected rows before execution.
-      //
-      // LIMITATION: This simple regex transformation only works for basic
-      // DELETE/UPDATE statements. Complex queries with subqueries, JOINs,
-      // CTEs, or USING clauses may not be counted correctly. Examples that
-      // won't be properly limited:
-      //   - DELETE FROM logs USING temp WHERE logs.id = temp.id
-      //   - DELETE FROM logs WHERE id IN (SELECT id FROM archive)
-      //   - WITH old AS (...) DELETE FROM logs WHERE ...
-      //
-      // In these cases, the count check will be skipped and a warning logged.
-      const countSql = sql
-        .replace(/^DELETE\s+FROM/i, "SELECT COUNT(*) as count FROM")
-        .replace(
-          /^UPDATE\s+(\w+)\s+SET\s+.*?\s+WHERE/i,
-          "SELECT COUNT(*) as count FROM $1 WHERE",
+      // Detect complex queries that can't be reliably counted
+      // These patterns indicate the row count transformation won't work correctly
+      const isComplexQuery =
+        /\bUSING\b/i.test(sql) || // USING clause (PostgreSQL-style join)
+        /\bJOIN\b/i.test(sql) || // Explicit JOINs
+        /^\s*WITH\b/i.test(sql) || // CTEs (Common Table Expressions)
+        /\(\s*SELECT\b/i.test(sql); // Subqueries
+
+      if (isComplexQuery) {
+        // Skip count check for complex queries - we can't reliably count them
+        console.warn(
+          `[DB SAFETY] Complex ${operation} query detected (subquery/JOIN/CTE/USING). ` +
+            `Row limit enforcement skipped. SQL: ${sql.slice(0, 100)}...`,
         );
+      } else {
+        // Transform query to count affected rows before execution.
+        //
+        // LIMITATION: This simple regex transformation only works for basic
+        // DELETE/UPDATE statements. Complex queries with subqueries, JOINs,
+        // CTEs, or USING clauses are detected above and skipped.
+        const countSql = sql
+          .replace(/^DELETE\s+FROM/i, "SELECT COUNT(*) as count FROM")
+          .replace(
+            /^UPDATE\s+(\w+)\s+SET\s+.*?\s+WHERE/i,
+            "SELECT COUNT(*) as count FROM $1 WHERE",
+          );
 
-      // Only do the count check if we can transform the query
-      if (countSql !== sql) {
-        try {
-          const countResult = await this.db
-            .prepare(countSql)
-            .bind(...params)
-            .first<{ count: number }>();
+        // Only do the count check if we can transform the query
+        if (countSql !== sql) {
+          try {
+            const countResult = await this.db
+              .prepare(countSql)
+              .bind(...params)
+              .first<{ count: number }>();
 
-          const count = countResult?.count ?? 0;
-          const limit =
-            operation === "DELETE"
-              ? this.config.maxDeleteRows
-              : this.config.maxUpdateRows;
+            const count = countResult?.count ?? 0;
+            const limit =
+              operation === "DELETE"
+                ? this.config.maxDeleteRows
+                : this.config.maxUpdateRows;
 
-          if (limit !== -1 && count > limit) {
-            throw new SafetyViolationError(
-              `${operation} would affect ${count} rows, but limit is ${limit}. ` +
-                `Add more specific WHERE conditions or increase the limit.`,
-              "ROW_LIMIT_EXCEEDED",
-              sql,
+            if (limit !== -1 && count > limit) {
+              throw new SafetyViolationError(
+                `${operation} would affect ${count} rows, but limit is ${limit}. ` +
+                  `Add more specific WHERE conditions or increase the limit.`,
+                "ROW_LIMIT_EXCEEDED",
+                sql,
+              );
+            }
+          } catch (err) {
+            // If count check fails, proceed with caution but log the warning
+            if (err instanceof SafetyViolationError) throw err;
+            // Log that we couldn't verify row count - the operation will proceed
+            // but without row limit enforcement
+            console.warn(
+              `[DB SAFETY] Could not verify row count for ${operation} operation. ` +
+                `Proceeding without row limit enforcement. Error:`,
+              err,
             );
           }
-        } catch (err) {
-          // If count check fails, proceed with caution but log the warning
-          if (err instanceof SafetyViolationError) throw err;
-          // Log that we couldn't verify row count - the operation will proceed
-          // but without row limit enforcement
-          console.warn(
-            `[DB SAFETY] Could not verify row count for ${operation} operation. ` +
-              `Proceeding without row limit enforcement. Error:`,
-            err,
-          );
         }
       }
     }

@@ -36,13 +36,19 @@ _grove_check_deps() {
 
     if ! command -v rg &> /dev/null; then
         echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
-        echo -e "  Install with: ${CYAN}brew install ripgrep${NC}"
+        echo -e "  ${CYAN}macOS:${NC}     brew install ripgrep"
+        echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install ripgrep"
+        echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S ripgrep"
+        echo -e "  ${CYAN}Windows:${NC}   scoop install ripgrep  ${YELLOW}(or winget/choco)${NC}"
         missing=1
     fi
 
     if ! command -v fd &> /dev/null; then
         echo -e "${RED}Error: fd is not installed.${NC}"
-        echo -e "  Install with: ${CYAN}brew install fd${NC}"
+        echo -e "  ${CYAN}macOS:${NC}     brew install fd"
+        echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install fd-find  ${YELLOW}(may need: ln -s \$(which fdfind) ~/.local/bin/fd)${NC}"
+        echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S fd"
+        echo -e "  ${CYAN}Windows:${NC}   scoop install fd  ${YELLOW}(or winget/choco)${NC}"
         missing=1
     fi
 

@@ -142,6 +142,73 @@ describe("SafeDatabase - DELETE Operations", () => {
 });
 
 // ============================================================================
+// Known Limitations Tests
+// ============================================================================
+
+describe("SafeDatabase - Known Limitations", () => {
+  /**
+   * IMPORTANT: These tests document known limitations of the row count validation.
+   * Complex queries with subqueries, JOINs, CTEs, or USING clauses cannot have
+   * their row counts accurately predicted by the simple regex transformation.
+   *
+   * In these cases, the operation proceeds with a warning logged.
+   */
+
+  it("logs warning for complex DELETE with subquery (row count not validated)", async () => {
+    const db = createMockD1({ countResult: 5 });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
+
+    // This complex query's row count cannot be validated by the regex transformation
+    // The safety layer will proceed but log a warning
+    await safeDb.execute(
+      "DELETE FROM logs WHERE id IN (SELECT id FROM archive WHERE processed = ?)",
+      [true],
+    );
+
+    // The operation should complete (we can't block what we can't count)
+    // but a warning should be logged about the limitation
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it("logs warning for DELETE with JOIN/USING syntax (row count not validated)", async () => {
+    const db = createMockD1({ countResult: 5 });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
+
+    // USING clause makes this query too complex for simple regex transformation
+    await safeDb.execute(
+      "DELETE FROM logs USING temp_logs WHERE logs.id = temp_logs.id",
+      [],
+    );
+
+    // Warning should be logged about inability to verify row count
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it("handles CTE (WITH clause) queries gracefully", async () => {
+    const db = createMockD1({ countResult: 5 });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
+
+    // CTE syntax cannot be transformed by the simple regex
+    await safeDb.execute(
+      "WITH old_logs AS (SELECT id FROM logs WHERE age > 30) DELETE FROM logs WHERE id IN (SELECT id FROM old_logs)",
+      [],
+    );
+
+    // Should proceed with warning
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+});
+
+// ============================================================================
 // Protected Tables Tests
 // ============================================================================
 

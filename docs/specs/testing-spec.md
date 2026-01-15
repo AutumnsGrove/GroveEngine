@@ -23,7 +23,7 @@ type: tech-spec
         ╰──────────────────────────────────────╯
 ```
 
-> *Testing isn't about finding bugs. It's about building confidence.*
+> _Testing isn't about finding bugs. It's about building confidence._
 
 This spec defines Grove's testing strategy, infrastructure, and the subagent-optimized pattern for achieving comprehensive coverage before v1 launch.
 
@@ -34,12 +34,14 @@ This spec defines Grove's testing strategy, infrastructure, and the subagent-opt
 ### Current State (Jan 2026)
 
 **Test Infrastructure Exists:**
+
 - Vitest configured for engine, landing, plant, clearing, post-migrator
 - ~50 test files across packages
 - Mock environment for Durable Objects, D1, KV
 - Happy-dom for component testing
 
 **Coverage Gaps:**
+
 - Many utility functions untested
 - Most Svelte components lack tests
 - API routes have minimal coverage
@@ -48,6 +50,7 @@ This spec defines Grove's testing strategy, infrastructure, and the subagent-opt
 ### V1 Goal
 
 Before v1 launch, achieve:
+
 - **80%+ line coverage** on critical paths (auth, payments, content)
 - **Unit tests** for all utility functions
 - **Integration tests** for all API endpoints
@@ -59,6 +62,7 @@ Before v1 launch, achieve:
 ## Test Categories
 
 ### 1. Unit Tests
+
 > Test individual functions in isolation
 
 **Scope:** Utility functions, helpers, pure logic
@@ -67,25 +71,26 @@ Before v1 launch, achieve:
 
 ```typescript
 // Example: packages/engine/src/lib/utils/slugify.test.ts
-import { describe, it, expect } from 'vitest';
-import { slugify } from './slugify';
+import { describe, it, expect } from "vitest";
+import { slugify } from "./slugify";
 
-describe('slugify', () => {
-  it('converts spaces to hyphens', () => {
-    expect(slugify('Hello World')).toBe('hello-world');
+describe("slugify", () => {
+  it("converts spaces to hyphens", () => {
+    expect(slugify("Hello World")).toBe("hello-world");
   });
 
-  it('removes special characters', () => {
-    expect(slugify('Hello, World!')).toBe('hello-world');
+  it("removes special characters", () => {
+    expect(slugify("Hello, World!")).toBe("hello-world");
   });
 
-  it('handles unicode characters', () => {
-    expect(slugify('Café au lait')).toBe('cafe-au-lait');
+  it("handles unicode characters", () => {
+    expect(slugify("Café au lait")).toBe("cafe-au-lait");
   });
 });
 ```
 
 ### 2. Component Tests
+
 > Test Svelte components in isolation
 
 **Scope:** Interactive UI components, form elements, complex display logic
@@ -94,24 +99,25 @@ describe('slugify', () => {
 
 ```typescript
 // Example: packages/engine/src/lib/ui/components/ui/GlassCard.test.ts
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/svelte';
-import GlassCard from './GlassCard.svelte';
+import { describe, it, expect } from "vitest";
+import { render } from "@testing-library/svelte";
+import GlassCard from "./GlassCard.svelte";
 
-describe('GlassCard', () => {
-  it('renders with default variant', () => {
+describe("GlassCard", () => {
+  it("renders with default variant", () => {
     const { container } = render(GlassCard);
-    expect(container.querySelector('.glass-card')).toBeTruthy();
+    expect(container.querySelector(".glass-card")).toBeTruthy();
   });
 
-  it('applies frosted variant styles', () => {
-    const { container } = render(GlassCard, { props: { variant: 'frosted' } });
-    expect(container.querySelector('.glass-frosted')).toBeTruthy();
+  it("applies frosted variant styles", () => {
+    const { container } = render(GlassCard, { props: { variant: "frosted" } });
+    expect(container.querySelector(".glass-frosted")).toBeTruthy();
   });
 });
 ```
 
 ### 3. Integration Tests
+
 > Test API endpoints and service interactions
 
 **Scope:** API routes, database operations, external service calls
@@ -120,23 +126,24 @@ describe('GlassCard', () => {
 
 ```typescript
 // Example: packages/engine/tests/integration/auth.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { mockEnv } from '../utils/setup';
+import { describe, it, expect, beforeEach } from "vitest";
+import { mockEnv } from "../utils/setup";
 
-describe('Auth API', () => {
+describe("Auth API", () => {
   beforeEach(() => {
     mockEnv.DB._tables.clear();
   });
 
-  it('creates session on successful login', async () => {
-    const response = await fetch('/api/auth/callback?code=test');
+  it("creates session on successful login", async () => {
+    const response = await fetch("/api/auth/callback?code=test");
     expect(response.status).toBe(302);
-    expect(response.headers.get('set-cookie')).toContain('session=');
+    expect(response.headers.get("set-cookie")).toContain("session=");
   });
 });
 ```
 
 ### 4. E2E Tests
+
 > Test complete user journeys in a real browser
 
 **Scope:** Critical paths (signup, post lifecycle, payment flow)
@@ -145,23 +152,23 @@ describe('Auth API', () => {
 
 ```typescript
 // Example: tests/e2e/signup.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('user can sign up and create first post', async ({ page }) => {
-  await page.goto('/');
-  await page.click('text=Get Started');
+test("user can sign up and create first post", async ({ page }) => {
+  await page.goto("/");
+  await page.click("text=Get Started");
 
   // Complete signup flow
-  await page.fill('[name=email]', 'test@example.com');
-  await page.click('text=Continue with Google');
+  await page.fill("[name=email]", "test@example.com");
+  await page.click("text=Continue with Google");
 
   // Verify dashboard loaded
-  await expect(page.locator('h1')).toContainText('Dashboard');
+  await expect(page.locator("h1")).toContainText("Dashboard");
 
   // Create a post
-  await page.click('text=New Post');
-  await page.fill('[name=title]', 'My First Post');
-  await expect(page.locator('.post-editor')).toBeVisible();
+  await page.click("text=New Post");
+  await page.fill("[name=title]", "My First Post");
+  await expect(page.locator(".post-editor")).toBeVisible();
 });
 ```
 
@@ -244,15 +251,18 @@ packages/engine/
 You are orchestrating test generation for Grove's v1 release.
 
 ## Current Coverage Report
+
 [Insert coverage report here]
 
 ## Priority Order
+
 1. **Critical Path** (auth, payments, security) - MUST have 90%+ coverage
 2. **Core Features** (posts, media, admin) - Target 80%+ coverage
 3. **UI Components** (Glass, forms, layout) - Target 70%+ coverage
 4. **Utilities** (helpers, formatters) - Target 80%+ coverage
 
 ## Your Task
+
 1. Review the coverage report
 2. Identify the 5 highest-priority files lacking tests
 3. For each file, spawn a subagent with this prompt:
@@ -262,6 +272,7 @@ You are orchestrating test generation for Grove's v1 release.
 6. Report results
 
 ## Subagent Spawn Pattern
+
 Use the Task tool with subagent_type="general-purpose" for each file.
 Run up to 5 in parallel to maximize throughput.
 ```
@@ -274,9 +285,11 @@ Run up to 5 in parallel to maximize throughput.
 You are writing tests for a specific file in Grove's codebase.
 
 ## Target File
+
 `{FILE_PATH}`
 
 ## Instructions
+
 1. Read the file thoroughly
 2. Identify all public exports (functions, classes, components)
 3. For each export, write tests that cover:
@@ -291,13 +304,16 @@ You are writing tests for a specific file in Grove's codebase.
 6. Validate the file compiles with `pnpm exec tsc --noEmit {TEST_FILE_PATH}`
 
 ## Output Format
+
 Return a summary:
+
 - File tested: {FILE_PATH}
 - Tests written: N
 - Test file: {TEST_FILE_PATH}
 - Validation: PASS/FAIL
 
 ## Reference: Existing Test Patterns
+
 [Include 1-2 example test files from the codebase for style reference]
 ```
 
@@ -323,6 +339,7 @@ git add -A && git commit -m "test: add comprehensive test coverage via subagent 
 When things go wrong during test generation, follow these protocols:
 
 **If a subagent fails to complete:**
+
 1. Orchestrator collects the error and context
 2. Retry once with a modified prompt (more specific instructions, simpler scope)
 3. If retry fails, mark the file as "needs manual testing"
@@ -330,6 +347,7 @@ When things go wrong during test generation, follow these protocols:
 5. Report all failures in the final summary
 
 **If generated tests fail validation:**
+
 1. Subagent runs `pnpm test <test-file>` after writing
 2. If tests fail, subagent analyzes the error and attempts to fix
 3. Maximum 2 debug/fix attempts before escalating
@@ -338,6 +356,7 @@ When things go wrong during test generation, follow these protocols:
    - Logged in the orchestrator's failure report
 
 **If generated tests are flaky:**
+
 1. Run the test 3 times to detect inconsistency
 2. Flaky tests are flagged with `// FLAKY: Needs investigation` comment
 3. Common causes to check:
@@ -346,6 +365,7 @@ When things go wrong during test generation, follow these protocols:
    - Mock cleanup issues
 
 **Rollback procedure:**
+
 ```bash
 # If test generation causes widespread failures:
 git checkout -- packages/engine/src/  # Revert test files
@@ -364,6 +384,7 @@ git checkout HEAD -- path/to/broken.test.ts
 **Location:** `packages/engine/tests/utils/setup.ts`
 
 Provides mocks for:
+
 - `mockEnv.TENANTS` - Durable Object namespace
 - `mockEnv.POST_META` - Post metadata DO
 - `mockEnv.POST_CONTENT` - Post content DO
@@ -379,12 +400,12 @@ export default defineConfig({
   plugins: [svelte({ hot: false })],
   test: {
     globals: true,
-    environment: 'happy-dom',
-    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
-    setupFiles: ['./tests/utils/setup.ts'],
+    environment: "happy-dom",
+    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    setupFiles: ["./tests/utils/setup.ts"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
     },
   },
 });
@@ -397,6 +418,84 @@ pnpm --filter @autumnsgrove/groveengine add -D \
   @testing-library/svelte \
   @testing-library/jest-dom \
   @playwright/test
+```
+
+### Setting Up Playwright (E2E Tests)
+
+Playwright requires browser binaries to be installed separately from the npm package.
+
+**Initial Setup:**
+
+```bash
+# Install Playwright and browser binaries
+pnpm --filter @autumnsgrove/groveengine add -D @playwright/test
+pnpm exec playwright install
+
+# Install only specific browsers (faster, smaller)
+pnpm exec playwright install chromium  # Just Chrome
+pnpm exec playwright install chromium firefox  # Chrome + Firefox
+```
+
+**Configuration:** Create `playwright.config.ts` in the engine package:
+
+```typescript
+// packages/engine/playwright.config.ts
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests/e2e",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: "html",
+  use: {
+    baseURL: "http://localhost:5173",
+    trace: "on-first-retry",
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "Mobile Safari",
+      use: { ...devices["iPhone 13"] },
+    },
+  ],
+  webServer: {
+    command: "pnpm dev",
+    url: "http://localhost:5173",
+    reuseExistingServer: !process.env.CI,
+  },
+});
+```
+
+**Running E2E Tests:**
+
+```bash
+# Run all E2E tests
+pnpm exec playwright test
+
+# Run with UI mode (great for debugging)
+pnpm exec playwright test --ui
+
+# Run specific test file
+pnpm exec playwright test tests/e2e/signup.spec.ts
+
+# Generate test report
+pnpm exec playwright show-report
+```
+
+**Add to package.json scripts:**
+
+```json
+{
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  }
+}
 ```
 
 ---
@@ -427,8 +526,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -451,43 +550,45 @@ jobs:
 
 ### Critical Path (MUST have tests)
 
-| File | Current | Target | Notes |
-|------|---------|--------|-------|
-| `lib/server/services/auth.ts` | Partial | 90% | Core auth flow |
-| `lib/payments/lemonsqueezy/provider.ts` | None | 90% | Payment processing |
-| `lib/server/rate-limits/*.ts` | ✅ Good | 95% | Already well-tested |
-| `lib/utils/sanitize.ts` | ✅ Good | 95% | Security critical |
-| `lib/groveauth/*.ts` | ✅ Good | 90% | OAuth flow |
+| File                                    | Current | Target | Notes               |
+| --------------------------------------- | ------- | ------ | ------------------- |
+| `lib/server/services/auth.ts`           | Partial | 90%    | Core auth flow      |
+| `lib/payments/lemonsqueezy/provider.ts` | None    | 90%    | Payment processing  |
+| `lib/server/rate-limits/*.ts`           | ✅ Good | 95%    | Already well-tested |
+| `lib/utils/sanitize.ts`                 | ✅ Good | 95%    | Security critical   |
+| `lib/groveauth/*.ts`                    | ✅ Good | 90%    | OAuth flow          |
 
 ### Core Features (Should have tests)
 
-| File | Current | Target | Notes |
-|------|---------|--------|-------|
-| `lib/utils/markdown.ts` | None | 80% | Content rendering |
-| `lib/server/services/posts.ts` | None | 80% | CRUD operations |
-| `lib/server/services/media.ts` | None | 80% | Image handling |
-| `lib/utils/imageProcessor.ts` | None | 80% | Client-side processing |
+| File                           | Current | Target | Notes                  |
+| ------------------------------ | ------- | ------ | ---------------------- |
+| `lib/utils/markdown.ts`        | None    | 80%    | Content rendering      |
+| `lib/server/services/posts.ts` | None    | 80%    | CRUD operations        |
+| `lib/server/services/media.ts` | None    | 80%    | Image handling         |
+| `lib/utils/imageProcessor.ts`  | None    | 80%    | Client-side processing |
 
 ### UI Components (Nice to have)
 
-| Component | Current | Target | Notes |
-|-----------|---------|--------|-------|
-| `GlassCard` | None | 70% | Core UI element |
-| `GlassButton` | None | 70% | Interactive |
-| `Logo` | ✅ Basic | 80% | Season switching |
-| `ContentSearch` | ✅ Basic | 80% | Search functionality |
+| Component       | Current  | Target | Notes                |
+| --------------- | -------- | ------ | -------------------- |
+| `GlassCard`     | None     | 70%    | Core UI element      |
+| `GlassButton`   | None     | 70%    | Interactive          |
+| `Logo`          | ✅ Basic | 80%    | Season switching     |
+| `ContentSearch` | ✅ Basic | 80%    | Search functionality |
 
 ---
 
 ## Success Metrics
 
 **V1 Launch Gate:**
+
 - [ ] All critical path files have 90%+ coverage
 - [ ] All tests pass in CI
 - [ ] No flaky tests (100% deterministic)
 - [ ] E2E tests cover signup and post creation flows
 
 **Post-V1 Goals:**
+
 - [ ] 80% overall line coverage
 - [ ] E2E tests for all user-facing features
 - [ ] Performance benchmarks in CI
@@ -519,4 +620,4 @@ pnpm --filter @autumnsgrove/groveengine test:e2e
 
 ---
 
-*Last Updated: January 2026*
+_Last Updated: January 2026_
