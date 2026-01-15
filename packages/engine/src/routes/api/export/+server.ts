@@ -1,6 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { validateCSRF } from "$lib/utils/csrf.js";
 
 /**
  * Data Export API
@@ -117,29 +118,43 @@ interface MediaRecord {
   uploaded_at: number;
 }
 
+/** Request body for POST /api/export */
+interface ExportRequest {
+  type: ExportType;
+}
+
 /**
- * GET /api/export?type=full|posts|media|pages
+ * POST /api/export
  *
  * Returns exported data as JSON (for now).
  * Future: Return as ZIP file with markdown files and media.
+ *
+ * Changed from GET to POST because this endpoint:
+ * - Modifies state (rate limit counters, audit logs)
+ * - Should be protected by CSRF validation
  */
-export const GET: RequestHandler = async ({ url, platform, locals }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
+  }
+
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
   }
 
   if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
-  const exportType = (url.searchParams.get("type") || "full") as ExportType;
+  const body = (await request.json()) as ExportRequest;
+  const exportType = body.type || "full";
   const validTypes = ["full", "posts", "media", "pages"];
 
   if (!validTypes.includes(exportType)) {
     throw error(400, `Invalid export type. Valid types: ${validTypes.join(", ")}`);
   }
 
-  const requestedTenantId = url.searchParams.get("tenant_id") || locals.tenantId;
+  const requestedTenantId = locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(

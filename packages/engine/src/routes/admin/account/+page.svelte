@@ -176,11 +176,37 @@
   async function handleExportData() {
     exportingData = true;
     try {
-      // The API returns JSON with Content-Disposition header
-      // Open in new window to trigger download
-      const downloadUrl = `/api/export?type=${exportType}`;
-      window.open(downloadUrl, "_blank");
-      toast.success("Data export started. Check your downloads.");
+      // POST to export API with CSRF protection
+      const response = await fetch("/api/export", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ type: exportType }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Export failed (${response.status})`);
+      }
+
+      // Get the JSON response and trigger download
+      const blob = await response.blob();
+      const filename =
+        response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ||
+        `grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json`;
+
+      // Create download link and trigger it
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Data export downloaded successfully.");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to export data"
@@ -512,6 +538,10 @@
       data at any time. We believe in data portability — you should never feel
       locked in.
     </p>
+    <p class="export-format-note">
+      Exports are in JSON format. Media files are listed with download URLs
+      (not bundled in the export).
+    </p>
 
     <fieldset class="export-options">
       <legend class="sr-only">Choose export type</legend>
@@ -622,6 +652,14 @@
     color: var(--color-text-muted);
     font-size: 0.9rem;
     line-height: 1.5;
+  }
+
+  .export-format-note {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.8;
   }
 
   /* Screen reader only - visually hidden but accessible */

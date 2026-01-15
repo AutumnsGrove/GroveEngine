@@ -467,6 +467,15 @@ export const PATCH: RequestHandler = async ({
           throw error(400, "Invalid plan");
         }
 
+        // Validate tier is available for purchase
+        const targetTier = TIERS[data.plan as TierKey];
+        if (!targetTier || targetTier.status !== "available") {
+          throw error(
+            400,
+            `The ${targetTier?.display?.name || data.plan} plan is not currently available`
+          );
+        }
+
         const newPriceId = (platform.env as unknown as Record<string, string>)[
           `STRIPE_PRICE_${data.plan.toUpperCase()}`
         ];

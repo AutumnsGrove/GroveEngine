@@ -51,6 +51,8 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
   }
 
   if (!platform?.env?.DB) {
+    // This is a critical infrastructure failure - fail hard.
+    // Query-level errors below use graceful degradation (billingError, usageError).
     throw error(500, "Database not configured");
   }
 
