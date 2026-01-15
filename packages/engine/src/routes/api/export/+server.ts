@@ -168,11 +168,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Check rate limit before processing export
     const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
     if (!rateLimit.allowed) {
-      const resetDate = new Date(rateLimit.resetAt * 1000).toISOString();
+      // Calculate human-readable wait time
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const waitMinutes = Math.ceil((rateLimit.resetAt - nowSeconds) / 60);
+      const waitText = waitMinutes > 60
+        ? `${Math.ceil(waitMinutes / 60)} hour${Math.ceil(waitMinutes / 60) > 1 ? "s" : ""}`
+        : `${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}`;
       throw error(
         429,
         `Export rate limit exceeded. You can export ${RATE_LIMIT_MAX} times per hour. ` +
-          `Try again after ${resetDate}.`
+          `Try again in ${waitText}.`
       );
     }
 

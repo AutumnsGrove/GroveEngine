@@ -288,6 +288,57 @@ describe("Cancel At Period End", () => {
 });
 
 // ============================================================================
+// Return URL Validation Tests (Open Redirect Prevention)
+// ============================================================================
+
+describe("Billing Portal Return URL Validation", () => {
+  /**
+   * Validate return URL to prevent open redirect attacks.
+   * Must be a grove.place domain or same-origin.
+   */
+  const validateReturnUrl = (returnUrl: string, requestOrigin: string): boolean => {
+    try {
+      const parsedReturn = new URL(returnUrl);
+      const isGroveDomain = parsedReturn.hostname === "grove.place" ||
+        parsedReturn.hostname.endsWith(".grove.place");
+      const isSameOrigin = parsedReturn.origin === requestOrigin;
+      return isGroveDomain || isSameOrigin;
+    } catch {
+      return false;
+    }
+  };
+
+  it("should allow return URLs to grove.place", () => {
+    expect(validateReturnUrl("https://grove.place/admin/account", "https://alice.grove.place")).toBe(true);
+    expect(validateReturnUrl("https://www.grove.place/settings", "https://alice.grove.place")).toBe(true);
+  });
+
+  it("should allow return URLs to subdomains of grove.place", () => {
+    expect(validateReturnUrl("https://alice.grove.place/admin", "https://alice.grove.place")).toBe(true);
+    expect(validateReturnUrl("https://bob.grove.place/account", "https://alice.grove.place")).toBe(true);
+  });
+
+  it("should allow same-origin return URLs", () => {
+    expect(validateReturnUrl("https://alice.grove.place/admin", "https://alice.grove.place")).toBe(true);
+  });
+
+  it("should reject return URLs to external domains", () => {
+    expect(validateReturnUrl("https://evil.com/steal-token", "https://alice.grove.place")).toBe(false);
+    expect(validateReturnUrl("https://grove.place.evil.com/phish", "https://alice.grove.place")).toBe(false);
+    expect(validateReturnUrl("https://attacker.org/redirect", "https://alice.grove.place")).toBe(false);
+  });
+
+  it("should reject return URLs with embedded credentials", () => {
+    expect(validateReturnUrl("https://admin:password@evil.com/", "https://alice.grove.place")).toBe(false);
+  });
+
+  it("should reject malformed URLs", () => {
+    expect(validateReturnUrl("not-a-url", "https://alice.grove.place")).toBe(false);
+    expect(validateReturnUrl("javascript:alert(1)", "https://alice.grove.place")).toBe(false);
+  });
+});
+
+// ============================================================================
 // Proration Tests
 // ============================================================================
 

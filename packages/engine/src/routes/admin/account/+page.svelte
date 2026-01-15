@@ -64,6 +64,24 @@
     return diff > 0 ? diff : 0;
   }
 
+  /**
+   * Sanitize error messages to avoid exposing sensitive provider details.
+   * Filters out Stripe-specific error codes and internal details.
+   */
+  function sanitizeErrorMessage(error: unknown, fallback: string): string {
+    if (!(error instanceof Error)) return fallback;
+    const msg = error.message;
+    // Filter out messages containing provider-specific details
+    if (msg.includes("stripe_") || msg.includes("sk_") || msg.includes("pk_")) {
+      return fallback;
+    }
+    // Filter out internal error codes
+    if (msg.includes("INTERNAL") || msg.includes("500")) {
+      return fallback;
+    }
+    return msg || fallback;
+  }
+
   // Cancel subscription
   async function handleCancel() {
     if (
@@ -77,57 +95,43 @@
     }
 
     cancellingSubscription = true;
-    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "cancel",
         cancelImmediately: false,
       });
       toast.success("Subscription cancelled. Access continues until period end.");
-      success = true;
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to cancel subscription"
-      );
-    } finally {
-      cancellingSubscription = false;
-    }
-
-    // Refresh data after state is reset
-    if (success) {
+      // Refresh data before releasing loading state
       try {
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
       }
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, "Failed to cancel subscription"));
+    } finally {
+      cancellingSubscription = false;
     }
   }
 
   // Resume cancelled subscription
   async function handleResume() {
     resumingSubscription = true;
-    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "resume",
       });
       toast.success("Subscription resumed!");
-      success = true;
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to resume subscription"
-      );
-    } finally {
-      resumingSubscription = false;
-    }
-
-    // Refresh data after state is reset
-    if (success) {
+      // Refresh data before releasing loading state
       try {
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
       }
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, "Failed to resume subscription"));
+    } finally {
+      resumingSubscription = false;
     }
   }
 
@@ -152,30 +156,23 @@
 
     changingPlan = true;
     selectedPlan = newPlan;
-    let success = false;
     try {
       await api.patch("/api/billing", {
         action: "change_plan",
         plan: newPlan,
       });
       toast.success(`Plan changed to ${tierInfo?.name}!`);
-      success = true;
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to change plan"
-      );
-    } finally {
-      changingPlan = false;
-      selectedPlan = "";
-    }
-
-    // Refresh data after state is reset
-    if (success) {
+      // Refresh data before releasing loading state
       try {
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
       }
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, "Failed to change plan"));
+    } finally {
+      changingPlan = false;
+      selectedPlan = "";
     }
   }
 
@@ -196,9 +193,7 @@
         openingPortal = false;
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to open billing portal"
-      );
+      toast.error(sanitizeErrorMessage(error, "Failed to open billing portal"));
       openingPortal = false;
     }
     // Note: Don't reset openingPortal on success - user is navigating away
@@ -243,9 +238,7 @@
 
       toast.success("Data export downloaded successfully.");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to export data"
-      );
+      toast.error(sanitizeErrorMessage(error, "Failed to export data"));
     } finally {
       exportingData = false;
     }

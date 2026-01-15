@@ -573,6 +573,21 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
     throw error(400, "Return URL required");
   }
 
+  // Validate return URL to prevent open redirect attacks
+  try {
+    const parsedReturn = new URL(returnUrl);
+    const isGroveDomain = parsedReturn.hostname === "grove.place" ||
+      parsedReturn.hostname.endsWith(".grove.place");
+    const isSameOrigin = parsedReturn.origin === url.origin;
+
+    if (!isGroveDomain && !isSameOrigin) {
+      throw error(400, "Invalid return URL: must be a grove.place domain");
+    }
+  } catch (e) {
+    if ((e as { status?: number }).status) throw e;
+    throw error(400, "Invalid return URL format");
+  }
+
   try {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
