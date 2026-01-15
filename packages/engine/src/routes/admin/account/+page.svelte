@@ -200,8 +200,8 @@
   <!-- Current Plan Overview -->
   <GlassCard variant="frosted" class="mb-6">
     {#if data.billingError}
-      <div class="error-state">
-        <AlertCircle class="error-icon" />
+      <div class="error-state" role="alert" aria-live="polite">
+        <AlertCircle class="error-icon" aria-hidden="true" />
         <div>
           <p class="error-title">Could not load billing information</p>
           <p class="error-desc">Please try refreshing the page. If the problem persists, contact support.</p>
@@ -217,30 +217,30 @@
           <p class="plan-tagline">{data.tierConfig?.tagline || ""}</p>
         </div>
 
-        <div class="plan-status">
+        <div class="plan-status" role="status" aria-live="polite">
           {#if isTrialing}
-            <span class="status-badge trialing">
-              <Calendar class="status-icon" />
+            <span class="status-badge trialing" aria-label="Subscription status: Trial period">
+              <Calendar class="status-icon" aria-hidden="true" />
               Trial
             </span>
           {:else if isPastDue}
-            <span class="status-badge past-due">
-              <AlertCircle class="status-icon" />
+            <span class="status-badge past-due" aria-label="Subscription status: Payment past due">
+              <AlertCircle class="status-icon" aria-hidden="true" />
               Past Due
             </span>
           {:else if isCancelled}
-            <span class="status-badge cancelled">
-              <X class="status-icon" />
+            <span class="status-badge cancelled" aria-label="Subscription status: Cancelling at period end">
+              <X class="status-icon" aria-hidden="true" />
               Cancelling
             </span>
           {:else if isActive}
-            <span class="status-badge active">
-              <Check class="status-icon" />
+            <span class="status-badge active" aria-label="Subscription status: Active">
+              <Check class="status-icon" aria-hidden="true" />
               Active
             </span>
           {:else}
-            <span class="status-badge inactive">
-              <AlertCircle class="status-icon" />
+            <span class="status-badge inactive" aria-label="Subscription status: {data.billing?.status || 'No subscription'}">
+              <AlertCircle class="status-icon" aria-hidden="true" />
               {data.billing?.status || "No Subscription"}
             </span>
           {/if}
@@ -279,17 +279,19 @@
         {/if}
       </div>
 
-      <div class="plan-actions">
+      <div class="plan-actions" role="group" aria-label="Subscription actions">
         {#if isCancelled}
           <Button
             variant="primary"
             onclick={handleResume}
             disabled={resumingSubscription}
+            aria-busy={resumingSubscription}
+            aria-label={resumingSubscription ? "Resuming subscription..." : "Resume subscription"}
           >
             {#if resumingSubscription}
-              <Spinner size="sm" />
+              <Spinner size="sm" aria-hidden="true" />
             {:else}
-              <RefreshCw class="btn-icon" />
+              <RefreshCw class="btn-icon" aria-hidden="true" />
             {/if}
             Resume Subscription
           </Button>
@@ -298,11 +300,13 @@
             variant="danger"
             onclick={handleCancel}
             disabled={cancellingSubscription}
+            aria-busy={cancellingSubscription}
+            aria-label={cancellingSubscription ? "Cancelling subscription..." : "Cancel subscription"}
           >
             {#if cancellingSubscription}
-              <Spinner size="sm" />
+              <Spinner size="sm" aria-hidden="true" />
             {:else}
-              <X class="btn-icon" />
+              <X class="btn-icon" aria-hidden="true" />
             {/if}
             Cancel Subscription
           </Button>
@@ -322,8 +326,8 @@
   {#if data.usageError}
     <GlassCard variant="default" class="mb-6">
       <h2>Usage</h2>
-      <div class="error-state small">
-        <AlertCircle class="error-icon" />
+      <div class="error-state small" role="alert" aria-live="polite">
+        <AlertCircle class="error-icon" aria-hidden="true" />
         <p class="error-desc">Could not load usage data. Try refreshing the page.</p>
       </div>
     </GlassCard>
@@ -332,35 +336,51 @@
       <h2>Usage</h2>
       <div class="usage-grid">
         <div class="usage-item">
-          <HardDrive class="usage-icon" />
+          <HardDrive class="usage-icon" aria-hidden="true" />
           <div class="usage-info">
-            <span class="usage-label">Storage</span>
+            <span class="usage-label" id="storage-label">Storage</span>
             <span class="usage-value">
               {formatStorage(data.usage.storageUsed)} / {formatStorage(data.usage.storageLimit)}
             </span>
-            <div class="usage-bar">
+            {@const storagePercent = Math.min(100, (data.usage.storageUsed / data.usage.storageLimit) * 100)}
+            <div
+              class="usage-bar"
+              role="progressbar"
+              aria-valuenow={Math.round(storagePercent)}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-labelledby="storage-label"
+            >
               <div
                 class="usage-fill"
-                style:width="{Math.min(100, (data.usage.storageUsed / data.usage.storageLimit) * 100)}%"
-                class:warning={(data.usage.storageUsed / data.usage.storageLimit) > 0.8}
+                style:width="{storagePercent}%"
+                class:warning={storagePercent > 80}
               ></div>
             </div>
           </div>
         </div>
 
         <div class="usage-item">
-          <FileText class="usage-icon" />
+          <FileText class="usage-icon" aria-hidden="true" />
           <div class="usage-info">
-            <span class="usage-label">Posts</span>
+            <span class="usage-label" id="posts-label">Posts</span>
             <span class="usage-value">
               {data.usage.postCount} / {data.usage.postLimit ? formatLimit(data.usage.postLimit) : "Unlimited"}
             </span>
             {#if data.usage.postLimit}
-              <div class="usage-bar">
+              {@const postsPercent = Math.min(100, (data.usage.postCount / data.usage.postLimit) * 100)}
+              <div
+                class="usage-bar"
+                role="progressbar"
+                aria-valuenow={Math.round(postsPercent)}
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-labelledby="posts-label"
+              >
                 <div
                   class="usage-fill"
-                  style:width="{Math.min(100, (data.usage.postCount / data.usage.postLimit) * 100)}%"
-                  class:warning={(data.usage.postCount / data.usage.postLimit) > 0.8}
+                  style:width="{postsPercent}%"
+                  class:warning={postsPercent > 80}
                 ></div>
               </div>
             {/if}
@@ -368,7 +388,7 @@
         </div>
 
         <div class="usage-item">
-          <Calendar class="usage-icon" />
+          <Calendar class="usage-icon" aria-hidden="true" />
           <div class="usage-info">
             <span class="usage-label">Account Age</span>
             <span class="usage-value">{data.usage.accountAge} days</span>
@@ -440,23 +460,27 @@
         Changes are pro-rated based on your billing cycle.
       </p>
 
-      <div class="plan-grid">
+      <div class="plan-grid" role="group" aria-label="Available plans">
         {#each data.availableTiers.filter(t => t.status === 'available') as tier}
+          {@const isProcessing = changingPlan && selectedPlan === tier.id}
           <button
             class="plan-option"
             class:current={tier.isCurrent}
             class:disabled={tier.status === 'coming_soon' || changingPlan}
             onclick={() => handleChangePlan(tier.id)}
             disabled={tier.isCurrent || tier.status === 'coming_soon' || changingPlan}
+            aria-label="{tier.name} plan, ${tier.monthlyPrice} per month{tier.isCurrent ? ' (current plan)' : tier.isUpgrade ? ' (upgrade)' : ' (downgrade)'}"
+            aria-busy={isProcessing}
+            aria-pressed={tier.isCurrent}
           >
             <div class="plan-option-header">
               <span class="plan-option-name">{tier.name}</span>
               {#if tier.isCurrent}
-                <span class="current-badge">Current</span>
+                <span class="current-badge" aria-hidden="true">Current</span>
               {:else if tier.isUpgrade}
-                <ArrowUpRight class="direction-icon upgrade" />
+                <ArrowUpRight class="direction-icon upgrade" aria-hidden="true" />
               {:else}
-                <ArrowDownRight class="direction-icon downgrade" />
+                <ArrowDownRight class="direction-icon downgrade" aria-hidden="true" />
               {/if}
             </div>
 
@@ -465,14 +489,14 @@
               <span class="price-period">/month</span>
             </div>
 
-            <ul class="plan-option-features">
+            <ul class="plan-option-features" aria-label="Plan features">
               {#each tier.features.slice(0, 3) as feature}
                 <li>{feature}</li>
               {/each}
             </ul>
 
-            {#if changingPlan && selectedPlan === tier.id}
-              <Spinner size="sm" />
+            {#if isProcessing}
+              <Spinner size="sm" aria-hidden="true" />
             {/if}
           </button>
         {/each}
@@ -489,7 +513,8 @@
       locked in.
     </p>
 
-    <div class="export-options">
+    <fieldset class="export-options">
+      <legend class="sr-only">Choose export type</legend>
       <label class="export-option">
         <input
           type="radio"
@@ -528,17 +553,19 @@
           <span class="export-desc">All uploaded images and files</span>
         </div>
       </label>
-    </div>
+    </fieldset>
 
     <Button
       variant="secondary"
       onclick={handleExportData}
       disabled={exportingData}
+      aria-busy={exportingData}
+      aria-label={exportingData ? "Exporting data..." : "Export data"}
     >
       {#if exportingData}
-        <Spinner size="sm" />
+        <Spinner size="sm" aria-hidden="true" />
       {:else}
-        <Download class="btn-icon" />
+        <Download class="btn-icon" aria-hidden="true" />
       {/if}
       Export Data
     </Button>
@@ -595,6 +622,19 @@
     color: var(--color-text-muted);
     font-size: 0.9rem;
     line-height: 1.5;
+  }
+
+  /* Screen reader only - visually hidden but accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* Error States */
@@ -1006,6 +1046,8 @@
     flex-direction: column;
     gap: 0.75rem;
     margin-bottom: 1rem;
+    border: none;
+    padding: 0;
   }
 
   .export-option {

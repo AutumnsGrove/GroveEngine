@@ -3,6 +3,7 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
 
 /**
  * Audit log entry for billing operations.
@@ -48,11 +49,8 @@ async function logBillingAudit(
 /**
  * Platform billing for tenant subscriptions to GroveEngine
  *
- * Plans:
- * - seedling: $8/month - Entry tier
- * - sapling: $12/month - Hobbyist tier
- * - oak: $25/month - Serious blogger tier
- * - evergreen: $35/month - Full-service tier
+ * Plans are derived from $lib/config/tiers.ts (single source of truth).
+ * See tiers.ts for current pricing and features.
  */
 
 /** Plan configuration */
@@ -95,67 +93,20 @@ interface UpdateRequest {
   cancelImmediately?: boolean;
 }
 
-const PLANS: Record<string, PlanConfig> = {
-  seedling: {
-    name: "Seedling",
-    price: 800,
-    interval: "month",
-    features: [
-      "50 posts",
-      "1GB Storage",
-      "3 themes + accent color",
-      "Basic analytics",
-      "grove.place subdomain",
-      "Unlimited public comments",
-      "Community support",
-    ],
-  },
-  sapling: {
-    name: "Sapling",
-    price: 1200,
-    interval: "month",
-    features: [
-      "250 posts",
-      "5GB Storage",
-      "10 themes + accent color",
-      "Basic analytics",
-      "grove.place subdomain",
-      "Email forwarding (@grove.place)",
-      "Unlimited public comments",
-      "Email support",
-    ],
-  },
-  oak: {
-    name: "Oak",
-    price: 2500,
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "20GB Storage",
-      "Theme customizer + community themes",
-      "Full analytics",
-      "BYOD (custom domain)",
-      "Full email (@grove.place)",
-      "Unlimited public comments",
-      "Priority email support",
-    ],
-  },
-  evergreen: {
-    name: "Evergreen",
-    price: 3500,
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "100GB Storage",
-      "Theme customizer + custom fonts",
-      "Full analytics",
-      "Domain search + registration included",
-      "Full email (@grove.place)",
-      "Unlimited public comments",
-      "8hrs free support + priority",
-    ],
-  },
-};
+/** Derive PLANS from single source of truth in tiers.ts */
+const PLANS: Record<string, PlanConfig> = Object.fromEntries(
+  Object.entries(TIERS)
+    .filter(([key]) => key !== "free") // Exclude free tier from billing
+    .map(([key, tier]) => [
+      key,
+      {
+        name: tier.display.name,
+        price: tier.pricing.monthlyPriceCents,
+        interval: "month",
+        features: tier.display.featureStrings,
+      },
+    ])
+);
 
 /**
  * GET /api/billing - Get current billing status
