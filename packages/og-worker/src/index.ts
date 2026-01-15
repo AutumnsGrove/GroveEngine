@@ -5,14 +5,15 @@ export interface Env {
 }
 
 function escapeHtml(text: string): string {
+  // Only escape characters that could inject HTML tags
+  // Apostrophes and quotes are safe - Satori renders them as-is
+  // (Satori doesn't interpret HTML entities, so &#039; would show literally)
   const map: Record<string, string> = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
   };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+  return text.replace(/[&<>]/g, (m) => map[m]);
 }
 
 let fontCache: ArrayBuffer | null = null;
