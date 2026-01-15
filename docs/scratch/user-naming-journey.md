@@ -499,3 +499,202 @@ It works as both individual ("welcome, kindred") and collective ("the kindred").
 3. Is the word used casually ("hey fellow rooted!") or just in formal contexts?
 4. Does it need to work on merchandise? ("I'm rooted" on a mug?)
 5. How does it interact with tier names (Seedling, Oak, Evergreen)?
+
+---
+
+# Second Walk: The Wanderer Question
+
+*After PR feedback and more reflection*
+
+## The Tension
+
+There are two energies pulling at this naming:
+
+**ROOTED energy:**
+- Commitment, permanence
+- "I belong here"
+- Putting down roots
+- Connection through soil
+- Staying
+
+**WANDERER energy:**
+- Movement, discovery
+- "I'm exploring"
+- Walking the paths
+- Finding new things
+- Going
+
+These feel like opposites. But are they?
+
+## Tier Names Are Settled
+
+Confirmed from TODOS.md:
+- Seedling ($8) → Sapling ($12) → Oak ($25) → Evergreen ($35)
+
+These are SUBSCRIPTION TIERS, not identity names. They describe your level.
+The user identity is separate—what you ARE, not what you pay.
+
+A Seedling-tier user is still a [____].
+An Evergreen-tier user is still a [____].
+
+## What If Both Are True?
+
+```
+                     🌲 YOUR TREE 🌲
+                    (your blog, your home)
+                           |
+                           |
+    ═══════════════════════════════════════
+             You're ROOTED here.
+         But you still WANDER the grove.
+    ═══════════════════════════════════════
+
+Your tree is where you sleep.
+But you're not a tree—you're the one who tends it.
+And when you're not tending, you're walking.
+Visiting other trees. Finding clearings.
+Gathering in the Meadow.
+```
+
+Maybe the answer is:
+- **Identity** = Wanderer (what you ARE, how you move)
+- **State** = Rooted (you've planted, you have a home)
+- **Activity** = Wandering (what you do in the grove)
+
+"You're a Wanderer who's taken root."
+
+## Testing WANDERER
+
+> "Welcome, Wanderer."
+> "Wanderers of the Grove."
+> "10,000 wanderers, each with their own tree."
+> "We wander. We plant. We grow."
+
+Feeling: Free, exploratory, romantic, journey-focused.
+Implication: The grove is vast. There's always more to discover.
+
+Potential issue: Does "wanderer" imply you DON'T have a home?
+Counter: No—even people with homes can wander. Wandering is a disposition.
+
+## Testing WAYFARER
+
+> "Welcome, Wayfarer."
+> "Wayfarers of the Grove."
+> "We're all wayfarers here."
+
+Feeling: More purposeful than wanderer. A wayfarer is on a journey WITH direction.
+Etymology: "Way" + "farer" = one who travels the way/path.
+
+Wayfarer feels slightly more... intentional. You're not lost. You're finding your way.
+
+## Testing PATHFINDER
+
+> "Welcome, Pathfinder."
+> "Pathfinders of the Grove."
+> "We find paths. We make paths. We share paths."
+
+Feeling: Active, pioneering, generous (you make paths for others).
+Implication: You're not just walking—you're creating routes others can follow.
+
+This could connect to Trails (personal roadmaps): "Pathfinders share their Trails."
+
+## The Inclusivity Question (from PR feedback)
+
+> Does "rooted" unintentionally exclude people who move frequently?
+
+Good point. "Rooted" implies staying put. Some people don't.
+"Wanderer" is actually MORE inclusive—everyone can wander.
+You don't need to stay forever. You're welcome while you're here.
+
+"Wanderers pass through. Some plant trees. All are welcome."
+
+## A New Progression?
+
+| State | Name | Meaning |
+|-------|------|---------|
+| Everyone | **Wanderer** | We're all wanderers in this grove |
+| Has a blog | **Planted** | You've planted your tree (past action) |
+| Subscriber | **Rooted** | You've taken root (deeper commitment) |
+| Longtime | **Pathfinder** / **Elder** | You make paths for others |
+
+Or simpler:
+
+| State | Language |
+|-------|----------|
+| All users | Wanderers |
+| Subscribe action | "Take root" / "Plant yourself" |
+| Longtime | Deep-rooted / Elder / Pathfinder |
+
+## The Combination That's Emerging
+
+What if **Wanderer** is the universal identity?
+
+Everyone in the grove is a Wanderer.
+- Free users wander and explore
+- Subscribers have planted but still wander
+- Even Autumn is a wanderer (the grove keeper who walks the paths)
+
+**The grove is a place for wanderers.**
+
+And then specific STATES layer on top:
+- "Rooted wanderers" = those who've subscribed
+- "Pathfinders" = those who share their trails, guide others
+- "Elders" = deep-rooted, longtime, respected
+
+> "All wanderers are welcome. Some take root. A few become pathfinders."
+
+## New Top Candidates
+
+1. **Wanderer** (universal identity)
+   - Everyone is a wanderer
+   - Inclusive, free, exploratory
+   - Works for casual and formal
+   - "Welcome, Wanderer" / "Fellow wanderers"
+
+2. **Wayfarer** (slightly more purposeful)
+   - Same energy but more intentional
+   - "Finding your way" rather than "aimless"
+   - Slightly more poetic/archaic
+
+3. **Pathfinder** (for established/contributing users)
+   - Those who make paths for others
+   - Could be an earned title, not default
+   - Connects to Trails feature
+
+## What "Rooted" Becomes
+
+If Wanderer is the identity, "rooted" becomes a STATE:
+- "A rooted wanderer" = someone who's planted
+- "Taking root" = the act of subscribing
+- "Deep-rooted" = longtime commitment
+
+You don't STOP being a wanderer when you root.
+You become a wanderer with a home.
+
+## The Tagline Test
+
+> "Grove: A place for wanderers."
+> "Wanderers welcome. Plant your tree."
+> "We're all wanderers here."
+
+vs.
+
+> "Grove: Where the rooted grow."
+> "Take root in the Grove."
+> "Welcome among the Rooted."
+
+The wanderer framing feels more INVITING.
+The rooted framing feels more COMMITTED.
+
+Which is the first impression you want?
+
+## Still Open Questions
+
+1. Is "Wanderer" too common/generic? (D&D, hiking culture, etc.)
+2. Does Wayfarer feel more unique/Grove-specific?
+3. Should Pathfinder be reserved for a special role/status?
+4. Is there a THIRD option that combines rooted AND wandering energy?
+
+---
+
+*Sitting with this. The grove is quiet. The paths wind on.*
