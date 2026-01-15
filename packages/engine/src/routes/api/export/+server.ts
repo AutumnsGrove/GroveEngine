@@ -12,9 +12,73 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  *
  * Privacy Policy Section 5.2 guarantees:
  * "You can export your data (posts, pages, media) at any time in standard formats."
+ *
+ * Rate limiting: 10 exports per hour per tenant to prevent abuse.
  */
 
 export type ExportType = "full" | "posts" | "media" | "pages";
+
+// Rate limiting configuration
+const RATE_LIMIT_MAX = 10; // Max exports per window
+const RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
+
+/**
+ * Check and update rate limit for data exports.
+ * Returns true if within limits, false if rate limited.
+ */
+async function checkRateLimit(
+  kv: KVNamespace | undefined,
+  tenantId: string
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  if (!kv) {
+    // If KV not available, allow but log warning
+    console.warn("[Export] KV not configured, rate limiting disabled");
+    return { allowed: true, remaining: RATE_LIMIT_MAX, resetAt: 0 };
+  }
+
+  const key = `export_ratelimit:${tenantId}`;
+  const now = Math.floor(Date.now() / 1000);
+
+  try {
+    const data = await kv.get(key, "json") as { count: number; windowStart: number } | null;
+
+    if (!data || now - data.windowStart >= RATE_LIMIT_WINDOW_SECONDS) {
+      // New window - reset counter
+      await kv.put(key, JSON.stringify({ count: 1, windowStart: now }), {
+        expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
+      });
+      return {
+        allowed: true,
+        remaining: RATE_LIMIT_MAX - 1,
+        resetAt: now + RATE_LIMIT_WINDOW_SECONDS,
+      };
+    }
+
+    if (data.count >= RATE_LIMIT_MAX) {
+      // Rate limited
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: data.windowStart + RATE_LIMIT_WINDOW_SECONDS,
+      };
+    }
+
+    // Increment counter
+    await kv.put(key, JSON.stringify({ count: data.count + 1, windowStart: data.windowStart }), {
+      expirationTtl: RATE_LIMIT_WINDOW_SECONDS - (now - data.windowStart),
+    });
+
+    return {
+      allowed: true,
+      remaining: RATE_LIMIT_MAX - data.count - 1,
+      resetAt: data.windowStart + RATE_LIMIT_WINDOW_SECONDS,
+    };
+  } catch (e) {
+    console.error("[Export] Rate limit check failed:", e);
+    // On error, allow the request but log it
+    return { allowed: true, remaining: RATE_LIMIT_MAX, resetAt: 0 };
+  }
+}
 
 interface PostRecord {
   id: string;
@@ -83,6 +147,17 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       requestedTenantId,
       locals.user
     );
+
+    // Check rate limit before processing export
+    const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
+    if (!rateLimit.allowed) {
+      const resetDate = new Date(rateLimit.resetAt * 1000).toISOString();
+      throw error(
+        429,
+        `Export rate limit exceeded. You can export ${RATE_LIMIT_MAX} times per hour. ` +
+          `Try again after ${resetDate}.`
+      );
+    }
 
     const exportData: {
       exportedAt: string;
@@ -193,6 +268,32 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       }));
     }
 
+    // Audit log: data export
+    try {
+      await platform.env.DB.prepare(
+        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      )
+        .bind(
+          crypto.randomUUID(),
+          tenantId,
+          "data_export",
+          "export_requested",
+          JSON.stringify({
+            type: exportType,
+            postsCount: exportData.posts?.length ?? 0,
+            pagesCount: exportData.pages?.length ?? 0,
+            mediaCount: exportData.media?.length ?? 0,
+          }),
+          locals.user.email,
+          Math.floor(Date.now() / 1000)
+        )
+        .run();
+    } catch (e) {
+      // Don't fail export if audit logging fails
+      console.error("[Export Audit] Failed to log:", e);
+    }
+
     // Return as JSON with download headers
     return new Response(JSON.stringify(exportData, null, 2), {
       status: 200,
@@ -200,6 +301,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json"`,
         "Cache-Control": "no-cache",
+        "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+        "X-RateLimit-Reset": rateLimit.resetAt.toString(),
       },
     });
   } catch (err) {

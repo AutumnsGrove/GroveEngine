@@ -5,6 +5,47 @@ import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /**
+ * Audit log entry for billing operations.
+ * Logs are stored in the audit_log table for compliance and debugging.
+ */
+interface AuditLogEntry {
+  tenantId: string;
+  action: string;
+  details: Record<string, unknown>;
+  userEmail: string;
+  ipAddress?: string;
+}
+
+/**
+ * Log billing operations for audit trail.
+ * This helps with compliance, debugging, and dispute resolution.
+ */
+async function logBillingAudit(
+  db: D1Database,
+  entry: AuditLogEntry
+): Promise<void> {
+  try {
+    await db.prepare(
+      `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        crypto.randomUUID(),
+        entry.tenantId,
+        "billing",
+        entry.action,
+        JSON.stringify(entry.details),
+        entry.userEmail,
+        Math.floor(Date.now() / 1000)
+      )
+      .run();
+  } catch (e) {
+    // Log error but don't fail the request - audit is secondary to the action
+    console.error("[Billing Audit] Failed to log:", e, entry);
+  }
+}
+
+/**
  * Platform billing for tenant subscriptions to GroveEngine
  *
  * Plans:
@@ -424,6 +465,18 @@ export const PATCH: RequestHandler = async ({
           )
           .run();
 
+        // Audit log: subscription cancelled
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "subscription_cancelled",
+          details: {
+            plan: billing.plan,
+            immediate: data.cancelImmediately === true,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
+
         return json({
           success: true,
           message: data.cancelImmediately
@@ -441,6 +494,17 @@ export const PATCH: RequestHandler = async ({
         )
           .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
+
+        // Audit log: subscription resumed
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "subscription_resumed",
+          details: {
+            plan: billing.plan,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
 
         return json({
           success: true,
@@ -497,6 +561,18 @@ export const PATCH: RequestHandler = async ({
         )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
+
+        // Audit log: plan changed
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "plan_changed",
+          details: {
+            previousPlan: billing.plan,
+            newPlan: data.plan,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
 
         return json({
           success: true,

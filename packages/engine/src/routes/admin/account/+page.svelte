@@ -2,6 +2,7 @@
   import { GlassCard, Button, Spinner } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
+  import { invalidateAll } from "$app/navigation";
   import {
     CreditCard,
     Download,
@@ -28,7 +29,6 @@
   let selectedPlan = $state("");
   let openingPortal = $state(false);
   let exportingData = $state(false);
-  let exportType = $state("full");
 
   // Computed
   const isTrialing = $derived(data.billing?.status === "trialing");
@@ -78,14 +78,14 @@
         cancelImmediately: false,
       });
       toast.success("Subscription cancelled. Access continues until period end.");
-      // Reload the page to refresh data
-      window.location.reload();
+      await invalidateAll();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to cancel subscription"
       );
+    } finally {
+      cancellingSubscription = false;
     }
-    cancellingSubscription = false;
   }
 
   // Resume cancelled subscription
@@ -96,13 +96,14 @@
         action: "resume",
       });
       toast.success("Subscription resumed!");
-      window.location.reload();
+      await invalidateAll();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to resume subscription"
       );
+    } finally {
+      resumingSubscription = false;
     }
-    resumingSubscription = false;
   }
 
   // Change plan
@@ -132,14 +133,15 @@
         plan: newPlan,
       });
       toast.success(`Plan changed to ${tierInfo?.name}!`);
-      window.location.reload();
+      await invalidateAll();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to change plan"
       );
+    } finally {
+      changingPlan = false;
+      selectedPlan = "";
     }
-    changingPlan = false;
-    selectedPlan = "";
   }
 
   // Open billing portal for payment method updates
@@ -152,19 +154,25 @@
         {} // Empty body - the return_url is in the query params
       );
       if (response?.portalUrl) {
+        // Redirect to external billing portal
         window.location.href = response.portalUrl;
       } else {
         toast.error("Could not open billing portal");
+        openingPortal = false;
       }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to open billing portal"
       );
+      openingPortal = false;
     }
-    openingPortal = false;
+    // Note: Don't reset openingPortal on success - user is navigating away
   }
 
   // Export data
+  /** @type {"full" | "posts" | "media"} */
+  let exportType = $state("full");
+
   async function handleExportData() {
     exportingData = true;
     try {
@@ -177,8 +185,9 @@
       toast.error(
         error instanceof Error ? error.message : "Failed to export data"
       );
+    } finally {
+      exportingData = false;
     }
-    exportingData = false;
   }
 </script>
 
@@ -190,44 +199,54 @@
 
   <!-- Current Plan Overview -->
   <GlassCard variant="frosted" class="mb-6">
-    <div class="plan-header">
-      <div class="plan-info">
-        <div class="plan-badge">
-          <Package class="plan-icon" />
-          <span class="plan-name">{data.tierConfig?.name || "Unknown"}</span>
+    {#if data.billingError}
+      <div class="error-state">
+        <AlertCircle class="error-icon" />
+        <div>
+          <p class="error-title">Could not load billing information</p>
+          <p class="error-desc">Please try refreshing the page. If the problem persists, contact support.</p>
         </div>
-        <p class="plan-tagline">{data.tierConfig?.tagline || ""}</p>
       </div>
+    {:else}
+      <div class="plan-header">
+        <div class="plan-info">
+          <div class="plan-badge">
+            <Package class="plan-icon" />
+            <span class="plan-name">{data.tierConfig?.name || "Unknown"}</span>
+          </div>
+          <p class="plan-tagline">{data.tierConfig?.tagline || ""}</p>
+        </div>
 
-      <div class="plan-status">
-        {#if isTrialing}
-          <span class="status-badge trialing">
-            <Calendar class="status-icon" />
-            Trial
-          </span>
-        {:else if isPastDue}
-          <span class="status-badge past-due">
-            <AlertCircle class="status-icon" />
-            Past Due
-          </span>
-        {:else if isCancelled}
-          <span class="status-badge cancelled">
-            <X class="status-icon" />
-            Cancelling
-          </span>
-        {:else if isActive}
-          <span class="status-badge active">
-            <Check class="status-icon" />
-            Active
-          </span>
-        {:else}
-          <span class="status-badge inactive">
-            <AlertCircle class="status-icon" />
-            {data.billing?.status || "No Subscription"}
-          </span>
-        {/if}
+        <div class="plan-status">
+          {#if isTrialing}
+            <span class="status-badge trialing">
+              <Calendar class="status-icon" />
+              Trial
+            </span>
+          {:else if isPastDue}
+            <span class="status-badge past-due">
+              <AlertCircle class="status-icon" />
+              Past Due
+            </span>
+          {:else if isCancelled}
+            <span class="status-badge cancelled">
+              <X class="status-icon" />
+              Cancelling
+            </span>
+          {:else if isActive}
+            <span class="status-badge active">
+              <Check class="status-icon" />
+              Active
+            </span>
+          {:else}
+            <span class="status-badge inactive">
+              <AlertCircle class="status-icon" />
+              {data.billing?.status || "No Subscription"}
+            </span>
+          {/if}
+        </div>
       </div>
-    </div>
+    {/if}
 
     {#if data.billing?.hasSubscription}
       <div class="billing-details">
@@ -289,7 +308,7 @@
           </Button>
         {/if}
       </div>
-    {:else}
+    {:else if !data.billingError}
       <div class="no-subscription">
         <p>No active subscription found.</p>
         <Button variant="primary" href="/plans">
@@ -300,7 +319,15 @@
   </GlassCard>
 
   <!-- Usage Stats -->
-  {#if data.usage}
+  {#if data.usageError}
+    <GlassCard variant="default" class="mb-6">
+      <h2>Usage</h2>
+      <div class="error-state small">
+        <AlertCircle class="error-icon" />
+        <p class="error-desc">Could not load usage data. Try refreshing the page.</p>
+      </div>
+    </GlassCard>
+  {:else if data.usage}
     <GlassCard variant="default" class="mb-6">
       <h2>Usage</h2>
       <div class="usage-grid">
@@ -568,6 +595,50 @@
     color: var(--color-text-muted);
     font-size: 0.9rem;
     line-height: 1.5;
+  }
+
+  /* Error States */
+  .error-state {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--border-radius-standard);
+  }
+
+  .error-state.small {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  :global(.error-icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #dc2626;
+    flex-shrink: 0;
+  }
+
+  .error-state.small :global(.error-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .error-title {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: #dc2626;
+  }
+
+  .error-desc {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .error-state.small .error-desc {
+    font-size: 0.85rem;
   }
 
   /* Plan Header */

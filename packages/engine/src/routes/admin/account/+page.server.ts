@@ -56,6 +56,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
 
   // Load billing information
   let billing: BillingRecord | null = null;
+  let billingError = false;
   try {
     billing = await platform.env.DB.prepare(
       `SELECT id, tenant_id, plan, status, provider_customer_id, provider_subscription_id,
@@ -68,10 +69,12 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
       .first<BillingRecord>();
   } catch (e) {
     console.error("[Account] Failed to load billing:", e);
+    billingError = true;
   }
 
   // Load tenant information for usage stats
   let tenant: TenantRecord | null = null;
+  let usageError = false;
   try {
     tenant = await platform.env.DB.prepare(
       `SELECT id, subdomain, display_name, email, plan, storage_used, storage_limit,
@@ -82,6 +85,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
       .first<TenantRecord>();
   } catch (e) {
     console.error("[Account] Failed to load tenant:", e);
+    usageError = true;
   }
 
   // Get tier configuration
@@ -129,6 +133,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
           customerId: billing.provider_customer_id,
         }
       : null,
+    billingError,
     usage: tenant
       ? {
           storageUsed: tenant.storage_used,
@@ -140,6 +145,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
           ),
         }
       : null,
+    usageError,
     currentPlan,
     tierConfig: {
       name: tierConfig.display.name,
