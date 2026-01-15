@@ -21,9 +21,9 @@ A few things you might not have found yet.
 ## Body
 
 ```markdown
-Hi {{name}},
+Hey {{name}},
 
-You've had your blog for a week now. Hope it's starting to feel like yours.
+You've had your tree for a week now. Hope it's starting to feel like home.
 
 A couple things you might not have discovered yet:
 
@@ -55,7 +55,7 @@ If you want to be discovered by other Grove readers (or discover other writers),
 
 That's all for now. This is the last "getting started" email. From here on, you'll only hear from me if something important changes or you reach out first.
 
-Your blog, your pace.
+Your tree, your pace. Keep wandering.
 
 —Autumn
 ```

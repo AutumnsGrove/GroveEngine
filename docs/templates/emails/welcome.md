@@ -9,21 +9,21 @@
 ## Subject Line
 
 ```
-Welcome to Grove, {{name}}
+Welcome, Wanderer
 ```
 
 ## Preview Text
 
 ```
-Your blog is ready. Let's get you settled in.
+Your tree is planted. Time to take root.
 ```
 
 ## Body
 
 ```markdown
-Hi {{name}},
+Welcome, Wanderer.
 
-Welcome to Grove. Your blog is live and waiting for you.
+Your blog is live and waiting for you. You've planted your tree in the grove.
 
 **Your blog:** {{blog_url}}
 **Your admin panel:** {{blog_url}}/admin
@@ -46,9 +46,10 @@ Over the next few weeks, I'll send a handful of emails with tips on getting the 
 
 For now, maybe write something. Doesn't have to be perfect. Doesn't have to be long. Just yours.
 
-Welcome to the grove.
+Welcome to the grove, Wanderer. Time to take root.
 
 —Autumn
+(The Wayfinder)
 ```
 
 ---

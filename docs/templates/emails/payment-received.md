@@ -15,15 +15,15 @@ Receipt for your Grove subscription
 ## Preview Text
 
 ```
-Thanks for being part of Grove.
+Thanks for staying rooted in the grove.
 ```
 
 ## Body
 
 ```markdown
-Hi {{name}},
+Hey {{name}},
 
-Just confirming we received your payment. Thanks for sticking with us.
+Just confirming we received your payment. Thanks for staying rooted with us.
 
 ---
 

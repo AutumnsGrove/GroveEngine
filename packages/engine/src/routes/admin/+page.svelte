@@ -1,6 +1,6 @@
 <script>
   import { GlassCard, Spinner } from '$lib/ui';
-  import { api } from "$lib/utils";
+  import { api, getUserDisplayName } from "$lib/utils";
   import {
     FileText,
     Image,
@@ -13,7 +13,8 @@
     Clock,
     MapPin,
     ArrowRight,
-    Megaphone
+    Megaphone,
+    TreeDeciduous
   } from 'lucide-svelte';
 
   /**
@@ -63,10 +64,8 @@
     fetchStats();
   });
 
-  // Get display name for greeting: prefer name, fallback to email username
-  const userName = $derived(
-    data.user?.name || data.user?.email?.split('@')[0] || 'there'
-  );
+  // Get display name for greeting (see docs/grove-user-identity.md)
+  const userName = $derived(getUserDisplayName(data.user));
 
   /** @param {number} num */
   function formatNumber(num) {
@@ -78,8 +77,22 @@
 
 <div class="max-w-screen-xl">
   <header class="mb-8">
-    <h1 class="m-0 mb-2 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Dashboard</h1>
-    <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-lg transition-colors">Welcome back, {userName}!</p>
+    <div class="flex items-center gap-3 mb-2">
+      <h1 class="m-0 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Dashboard</h1>
+      <a
+        href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+        style="background: rgba(34, 197, 94, 0.15); color: var(--color-primary);"
+        title="You've planted your tree in the grove"
+        aria-label="Learn about being Rooted in Grove"
+      >
+        <TreeDeciduous class="w-3.5 h-3.5" />
+        <span>Rooted</span>
+      </a>
+    </div>
+    <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-lg transition-colors">Welcome back, {userName}.</p>
   </header>
 
   <!-- Stats Cards -->

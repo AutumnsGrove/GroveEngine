@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { getUserDisplayName } from '@autumnsgrove/groveengine/utils';
 
 	let { data }: { data: PageData } = $props();
+
+	// Get display name for greeting (see docs/grove-user-identity.md)
+	const userName = $derived(getUserDisplayName(data.user));
 </script>
 
 <svelte:head>
@@ -29,7 +33,7 @@
 				</a>
 				<div>
 					<h1 class="text-xl font-serif text-bark">Admin Dashboard</h1>
-					<p class="text-sm text-bark/50 font-sans">Welcome back, {data.user.email}</p>
+					<p class="text-sm text-bark/50 font-sans">Welcome back, {userName}.</p>
 				</div>
 			</div>
 		</div>
