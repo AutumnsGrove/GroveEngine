@@ -55,17 +55,64 @@
 
 **Follow-up items:**
 - [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
-- [ ] **Export pagination** — Add LIMIT/OFFSET for tenants with 1000+ posts
 - [ ] **Rate limit config** — Move RATE_LIMIT_MAX to shared config/env vars
 - [x] **Billing rate limiting** — Added 20/hour limit to POST, PATCH, PUT handlers
 - [x] **Support email config** — Moved to `$lib/config/contact.ts`
 - [ ] **Focus management** — Return focus to button after actions complete
-- [ ] **Standardize export with Amber** — Compare download implementation with Amber's export system and standardize on one approach (fetch+blob+download link vs alternative)
+- [ ] **Proper ZIP export system** — Replace JSON export with Amber-style ZIP (see detailed spec below)
 
 **Deployment checklist:**
 - [ ] `audit_log` table migration ready for production D1
 - [ ] `CACHE_KV` binding configured in wrangler.toml
 - [ ] Stripe webhook handles subscription updates
+
+### 📦 Proper ZIP Export System (Follow-up PR)
+
+> **Reference:** Amber's implementation at `AutumnsGrove/Amber`
+> **Key Files:** `worker/src/services/ExportJobV2.ts`, `worker/src/services/zipStream.ts`
+
+**Current state:** JSON export with metadata URLs (not user-friendly)
+**Goal:** Proper ZIP with markdown files, actual media, and README
+
+**Architecture (from Amber):**
+- Durable Object (`ExportJob`) for chunked processing (avoids Worker timeouts)
+- Streams files from R2 → ZIP → R2 (no memory buffering)
+- Multipart upload for large ZIPs
+- Alarm-driven chunk processing (100 files or 50MB per chunk)
+
+**ZIP Structure:**
+```
+grove-export-username-2026-01-15.zip
+├── manifest.json           # File metadata
+├── README.txt              # User instructions
+├── posts/
+│   ├── 2026-01-15-my-first-post.md
+│   └── ...
+├── pages/
+│   └── about.md
+└── media/
+    ├── sunset.jpg
+    └── ...
+```
+
+**API Flow:**
+1. `POST /api/export` → Start job, return `export_id`
+2. `GET /api/export/:id` → Poll status (`pending` → `processing` → `completed`)
+3. `GET /api/export/:id/download` → Get download URL when complete
+
+**Implementation Tasks:**
+- [ ] Create `tenant_exports` table in D1 (id, tenant_id, status, r2_key, size, file_count, expires_at)
+- [ ] Port `zipStream.ts` from Amber (streaming ZIP creation)
+- [ ] Create `ExportJob` Durable Object (adapt from Amber's ExportJobV2)
+- [ ] Update `/api/export` endpoint to start async job
+- [ ] Add export status polling endpoint
+- [ ] Add export download endpoint (streams from R2)
+- [ ] Update frontend to poll for completion instead of immediate download
+- [ ] Add 7-day expiration cleanup cron
+- [ ] Write posts as `.md` files with YAML frontmatter
+- [ ] Include actual media files (stream from R2)
+
+**Estimated effort:** 8-12 hours (significant, but most logic can be adapted from Amber)
 
 ### ⏸️ Deferred to Follow-up PR
 - [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server

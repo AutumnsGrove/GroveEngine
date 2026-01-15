@@ -13,50 +13,49 @@ Your content belongs to you. Not just philosophically—practically. Here's what
 
 ## What you get when you export
 
-Grove exports your data as a JSON file containing:
+Grove exports your data in standard formats:
 
-- **Posts** — Title, content (in Markdown), tags, status, dates
-- **Pages** — Any custom pages you've created
-- **Media** — Filenames, URLs, and metadata (the actual files are accessible via their URLs)
+- **Posts** — Markdown files with YAML frontmatter
+- **Pages** — Markdown files, same as posts
+- **Images** — Original files (JPEG, PNG, WebP, etc.)
+- **Manifest** — JSON with metadata about your export
 
-The content itself is Markdown, which works everywhere. The JSON wrapper makes it easy to parse and transform into other formats.
+These aren't proprietary formats. They're the same formats used across the industry. Your writing doesn't need Grove to exist.
 
 ## Moving to another platform
 
 ### WordPress
 
-WordPress can import Markdown, though you'll need to convert from Grove's JSON format:
+WordPress can import Markdown files, though you'll need a plugin:
 
-1. Parse the JSON export to extract your posts
-2. Each post's `content` field is already Markdown
-3. Use a Markdown import plugin (like "WP All Import"), or paste into the block editor
+1. Install a Markdown import plugin (like "Jekyll Exporter" in reverse, or "WP All Import")
+2. Upload your exported post files
+3. Map the frontmatter fields to WordPress categories/tags
 
-For smaller blogs, copy-pasting from the JSON file works fine. The Markdown content is right there in plain text.
+Alternatively, copy-paste from your Markdown files into the WordPress editor. It's tedious for large archives but works for smaller blogs.
 
 ### Ghost
 
-Ghost uses Markdown natively and expects JSON imports:
+Ghost uses Markdown natively:
 
-1. Parse your Grove export
-2. Transform it to Ghost's import format (similar structure, different field names)
-3. Import via **Settings → Import/Export** in Ghost admin
+1. In Ghost admin, go to **Settings → Import/Export**
+2. Ghost expects a specific JSON format, so you may need to convert the frontmatter
+3. Images can be uploaded to Ghost's media library
 
-A simple script can handle the conversion. The data shapes are similar.
+Ghost's import format is JSON-based. You can write a simple script to convert Grove's format, or import posts manually.
 
 ### Hugo, Jekyll, and other static site generators
 
-Static generators expect Markdown files with frontmatter. To migrate:
+These are the easiest targets. Static generators typically expect Markdown with frontmatter—exactly what Grove exports.
 
-1. Parse your Grove JSON export
-2. Write each post as a separate `.md` file with YAML frontmatter
-3. Download your images from their URLs
+1. Copy your posts folder into the generator's content directory
+2. Adjust frontmatter field names if needed (e.g., `tags` vs `categories`)
+3. Copy images to your static/assets folder
 4. Build and deploy
-
-A few lines of script can automate the conversion.
 
 ### Self-hosted solutions
 
-The Markdown content in your export works anywhere. Parse the JSON, grab the `content` field from each post, and you have plain text Markdown that opens in any editor.
+Markdown works anywhere. Open your exported files in any text editor, and your words are right there. No database required, no special software needed.
 
 ## Your domain comes with you
 

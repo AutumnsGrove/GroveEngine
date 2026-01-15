@@ -20,50 +20,48 @@ Everything you write on Grove belongs to you. Here's how to get a complete copy 
    - **Posts Only**: Just your blog posts
    - **Media Only**: Just your uploaded images and files
 4. Click **Export Data**
-5. Your browser downloads a JSON file
+5. Wait while we package your files (larger exports take longer)
+6. Download the ZIP file when ready
 
 The page shows an estimate before you export: how many posts, pages, and media files will be included.
 
 ## What's in the export
 
-Your download is a JSON file containing:
+Your download is a ZIP file organized like this:
 
-**Posts** include the title, content (in Markdown), tags, status, publication date, and featured image URL.
-
-**Pages** include any custom pages you've created.
-
-**Media** is a list of your uploaded files with filenames, URLs, sizes, and alt text. The actual image files aren't bundled, but the URLs let you download them.
-
-Example structure:
-```json
-{
-  "exportedAt": "2026-01-15T12:00:00.000Z",
-  "type": "full",
-  "posts": [
-    {
-      "slug": "my-first-post",
-      "title": "My First Post",
-      "content": "# Hello world...",
-      "tags": ["intro", "personal"],
-      "status": "published",
-      "publishedAt": "2026-01-10T10:00:00.000Z"
-    }
-  ],
-  "pages": [...],
-  "media": [
-    {
-      "filename": "sunset.jpg",
-      "url": "https://cdn.grove.place/...",
-      "size": 245000,
-      "mimeType": "image/jpeg"
-    }
-  ]
-}
+```
+grove-export-yourusername-2026-01-15.zip
+├── posts/
+│   ├── 2025-01-15-my-first-post.md
+│   ├── 2025-02-20-another-post.md
+│   └── ...
+├── pages/
+│   └── about.md
+├── media/
+│   └── (your uploaded images)
+├── manifest.json
+└── README.txt
 ```
 
-## Limits
+**Posts** are in Markdown format with YAML frontmatter containing title, tags, and dates. The same format many other blogging platforms use. You can open them in any text editor or import them elsewhere.
 
-**Rate limit**: 10 exports per hour. This prevents abuse while giving you plenty of room for regular use.
+**Pages** are also Markdown files, just like posts.
+
+**Media** includes all images and files you've uploaded. Same filenames, same organization.
+
+**Manifest** is a JSON file with metadata about everything in the export.
+
+## Standard formats only
+
+We use formats that work everywhere:
+
+- **Markdown** for posts and pages: plain text, portable
+- **Original formats** for media: JPG, PNG, WebP, etc.
+- **JSON** for metadata
+
+No proprietary formats, no lock-in. Your content works outside of Grove.
+
+## Limits
 
 **Size limit**: 5,000 items per category (posts, pages, or media). If you have more than that, contact support for a bulk export.
 
@@ -71,7 +69,7 @@ Example structure:
 
 **Regular backups.** Even though we back up your data, having your own copy is smart. Export every few months if it gives you peace of mind.
 
-**Moving to another platform.** If Grove stops being the right fit, your export has everything you need. The JSON format is easy to parse, and your post content is already in Markdown.
+**Moving to another platform.** If Grove stops being the right fit, your export has everything you need. Most blogging platforms can import Markdown files.
 
 **Archiving.** If you're winding down a blog but want to keep the content, export gives you a permanent local copy.
 
