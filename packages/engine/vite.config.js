@@ -8,13 +8,13 @@ export default defineConfig({
     // Disable source maps in production to prevent source code exposure
     sourcemap: false,
     rollupOptions: {
-      external: ["dompurify"],
+      external: ["dompurify", "@jsquash/jxl"],
     },
   },
   optimizeDeps: {
     // Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
     // Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
-    exclude: ["workers-og"],
+    exclude: ["workers-og", "@jsquash/jxl"],
   },
   server: {
     fs: {

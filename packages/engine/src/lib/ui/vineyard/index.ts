@@ -1,31 +1,11 @@
-// @ts-nocheck - @autumnsgrove/vineyard is a local linked package not available in CI
 /**
- * Vineyard Components
- * Re-exports from @autumnsgrove/vineyard package
+ * Vineyard Components (Stub)
  *
- * Usage:
- * import { VineyardLayout, FeatureCard, StatusBadge } from '@autumnsgrove/groveengine/vineyard';
+ * @autumnsgrove/vineyard is not currently published to npm.
+ * This module is a placeholder until the package is available.
+ *
+ * TODO: Re-enable exports when @autumnsgrove/vineyard is published to npm
  */
 
-export {
-  VineyardLayout,
-  FeatureCard,
-  StatusBadge,
-  DemoContainer,
-  CodeExample,
-  TierGate,
-  RoadmapSection,
-} from "@autumnsgrove/vineyard/vineyard";
-
-export type {
-  VineyardStatus,
-  GroveTool,
-  GroveTier,
-  VineyardLayoutProps,
-  FeatureCardProps,
-  StatusBadgeProps,
-  DemoContainerProps,
-  CodeExampleProps,
-  TierGateProps,
-  RoadmapSectionProps,
-} from "@autumnsgrove/vineyard/vineyard";
+// Placeholder exports - re-enable when package is published
+export const VineyardPlaceholder = "Vineyard components coming soon";
