@@ -63,7 +63,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-// Default mobile navigation items (includes Home and Contact)
+// Default mobile navigation items (includes Home)
 export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/manifesto", label: "Manifesto", icon: Scroll },
@@ -72,7 +72,6 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/pricing", label: "Pricing", icon: HandCoins },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
-  { href: "/contact", label: "Contact", icon: Send },
   {
     href: "https://autumnsgrove.com/blog",
     label: "Blog",
@@ -135,8 +134,6 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 ];
 
 // Connect section (mobile menu)
-// Note: Contact appears in both main nav and here for discoverability
-// (matches desktop footer placement)
 export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/contact", label: "Contact", icon: Mail },
