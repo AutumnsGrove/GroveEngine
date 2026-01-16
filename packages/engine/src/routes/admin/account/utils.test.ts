@@ -16,7 +16,9 @@ import {
 
 describe("formatDate", () => {
   it("should format a valid ISO date string", () => {
-    const result = formatDate("2026-01-15T00:00:00.000Z");
+    // Use noon UTC to avoid timezone boundary issues
+    // (midnight UTC shows as previous day in western timezones)
+    const result = formatDate("2026-01-15T12:00:00.000Z");
     // Result depends on locale, but should contain these parts
     expect(result).toContain("2026");
     expect(result).toContain("15");
@@ -113,7 +115,9 @@ describe("sanitizeErrorMessage", () => {
     expect(sanitizeErrorMessage("string error", fallback)).toBe(fallback);
     expect(sanitizeErrorMessage(null, fallback)).toBe(fallback);
     expect(sanitizeErrorMessage(undefined, fallback)).toBe(fallback);
-    expect(sanitizeErrorMessage({ message: "object" }, fallback)).toBe(fallback);
+    expect(sanitizeErrorMessage({ message: "object" }, fallback)).toBe(
+      fallback,
+    );
   });
 
   it("should filter out Stripe API key prefixes (sk_)", () => {
