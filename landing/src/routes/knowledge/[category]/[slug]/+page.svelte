@@ -5,20 +5,26 @@
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import TableOfContents from '$lib/components/TableOfContents.svelte';
+  import { kbCategoryColors, categoryLabels } from '$lib/utils/kb-colors';
+  import type { DocCategory } from '$lib/types/docs';
   import '$lib/styles/content.css';
 
   let { data } = $props();
 
   let doc = $derived(data.doc);
-  let category = $derived($page.params.category);
+  let category = $derived($page.params.category as DocCategory);
   let slug = $derived($page.params.slug);
   let headers = $derived(doc?.headers || []);
 
+  // Get colors for current category (with fallback)
+  let colors = $derived(kbCategoryColors[category] || kbCategoryColors.help);
+
   let categoryTitle = $derived(
-    category === 'specs' ? 'Technical Specifications' :
+    categoryLabels[category] ||
+    (category === 'specs' ? 'Technical Specifications' :
     category === 'help' ? 'Help Center' :
     category === 'patterns' ? 'Architecture Patterns' :
-    category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies'
+    category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies')
   );
 
   /**
@@ -113,27 +119,26 @@
           <!-- Article Header -->
           <header class="content-header">
             <div class="flex items-center gap-3 mb-4 flex-wrap">
-              {#if category === 'specs'}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text">
+              <!-- Seasonal category badge -->
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {colors.badgeBg} {colors.badgeBgDark} {colors.badgeText} {colors.badgeTextDark}">
+                {#if category === 'specs'}
                   Technical Spec
-                </span>
-              {:else if category === 'help'}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                {:else if category === 'help'}
                   Help Article
-                </span>
-              {:else if category === 'patterns'}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                {:else if category === 'patterns'}
                   Architecture Pattern
-                </span>
-              {:else if category === 'marketing'}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                {:else if category === 'marketing'}
                   Marketing
-                </span>
-              {:else}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                {:else if category === 'philosophy'}
+                  Philosophy
+                {:else if category === 'design'}
+                  Design
+                {:else if category === 'developer'}
+                  Developer Guide
+                {:else}
                   Legal Document
-                </span>
-              {/if}
+                {/if}
+              </span>
               {#if doc.lastUpdated}
                 <span class="text-sm text-foreground-subtle">Updated {doc.lastUpdated}</span>
               {/if}
@@ -194,14 +199,14 @@
         <p class="text-xl text-foreground-muted mb-8">
           The document you're looking for doesn't exist or has been moved.
         </p>
-        <div class="flex gap-4 justify-center">
+        <div class="flex gap-4 justify-center flex-wrap">
           <a href="/knowledge" class="px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground-muted transition-colors">
             Knowledge Base Home
           </a>
-          <a href="/knowledge/specs" class="px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
+          <a href="/knowledge/specs" class="px-4 py-2 {kbCategoryColors.specs.badgeBg} {kbCategoryColors.specs.badgeBgDark} {kbCategoryColors.specs.badgeText} {kbCategoryColors.specs.badgeTextDark} rounded-lg hover:opacity-80 transition-colors">
             Browse Specs
           </a>
-          <a href="/knowledge/help" class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors">
+          <a href="/knowledge/help" class="px-4 py-2 {kbCategoryColors.help.badgeBg} {kbCategoryColors.help.badgeBgDark} {kbCategoryColors.help.badgeText} {kbCategoryColors.help.badgeTextDark} rounded-lg hover:opacity-80 transition-colors">
             Browse Help
           </a>
         </div>

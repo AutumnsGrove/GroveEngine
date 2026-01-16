@@ -2,11 +2,13 @@
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import { knowledgeCategoryIcons } from '$lib/utils/icons';
+  import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();
   const docs = $derived(data.philosophyDocs);
 
   const PhilosophyIcon = knowledgeCategoryIcons.philosophy;
+  const colors = kbCategoryColors.philosophy;
 </script>
 
 <SEO
@@ -27,11 +29,11 @@
       <span class="text-foreground">Philosophy</span>
     </nav>
 
-    <!-- Header -->
+    <!-- Header - Midnight Bloom -->
     <div class="mb-12">
       <div class="flex items-center gap-4 mb-4">
-        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-          <PhilosophyIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+        <div class="w-12 h-12 {colors.iconBg} {colors.iconBgDark} rounded-lg flex items-center justify-center">
+          <PhilosophyIcon class="w-6 h-6 {colors.text} {colors.textDark}" />
         </div>
         <h1 class="text-4xl font-bold text-foreground">Philosophy</h1>
       </div>
@@ -48,7 +50,7 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <h2 class="text-xl font-semibold text-foreground mb-2">
-                <a href="/knowledge/philosophy/{doc.slug}" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">
+                <a href="/knowledge/philosophy/{doc.slug}" class="{colors.textHover} {colors.textHoverDark} transition-colors">
                   {doc.title}
                 </a>
               </h2>
@@ -67,14 +69,14 @@
           <div class="flex items-center justify-between">
             <a
               href="/knowledge/philosophy/{doc.slug}"
-              class="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
+              class="inline-flex items-center {colors.text} {colors.textDark} {colors.textHover} {colors.textHoverDark} font-medium transition-colors"
             >
               Read more
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </a>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {colors.badgeBg} {colors.badgeBgDark} {colors.badgeText} {colors.badgeTextDark}">
               Philosophy
             </span>
           </div>
@@ -82,8 +84,8 @@
       {/each}
     </div>
 
-    <!-- About Section -->
-    <div class="mt-12 bg-green-50 dark:bg-green-900/20 rounded-lg p-8 border border-green-200 dark:border-green-800/30">
+    <!-- About Section - Midnight Bloom -->
+    <div class="mt-12 {colors.ctaBg} {colors.ctaBgDark} rounded-lg p-8 border {colors.ctaBorder} {colors.ctaBorderDark}">
       <h3 class="text-xl font-semibold text-foreground mb-2">Why Philosophy Matters</h3>
       <p class="text-foreground-muted mb-4">
         Grove isn't just software. It's a set of beliefs about how the internet should work,

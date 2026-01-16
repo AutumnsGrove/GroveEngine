@@ -1,9 +1,12 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();
   const legalDocs = $derived(data.legalDocs);
+
+  const colors = kbCategoryColors.legal;
 </script>
 
 <SEO
@@ -19,7 +22,7 @@
     <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8">
-      <a href="/knowledge" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Knowledge Base</a>
+      <a href="/knowledge" class="{colors.textHover} {colors.textHoverDark} transition-colors">Knowledge Base</a>
       <span>/</span>
       <span class="text-foreground">Legal & Policies</span>
     </nav>
@@ -40,7 +43,7 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <h2 class="text-xl font-semibold text-foreground mb-2">
-                <a href="/knowledge/legal/{doc.slug}" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                <a href="/knowledge/legal/{doc.slug}" class="{colors.textHover} {colors.textHoverDark} transition-colors">
                   {doc.title}
                 </a>
               </h2>
@@ -59,14 +62,14 @@
           <div class="flex items-center justify-between">
             <a
               href="/knowledge/legal/{doc.slug}"
-              class="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors"
+              class="inline-flex items-center {colors.text} {colors.textDark} {colors.textHover} {colors.textHoverDark} font-medium transition-colors"
             >
               Read document
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </a>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {colors.badgeBg} {colors.badgeBgDark} {colors.badgeText} {colors.badgeTextDark}">
               Legal Document
             </span>
           </div>
@@ -74,13 +77,13 @@
       {/each}
     </div>
 
-    <!-- Contact CTA -->
-    <div class="mt-12 bg-purple-50 dark:bg-purple-900/20 rounded-lg p-8 text-center border border-purple-200 dark:border-purple-800">
+    <!-- Contact CTA - Autumn -->
+    <div class="mt-12 {colors.ctaBg} {colors.ctaBgDark} rounded-lg p-8 text-center border {colors.ctaBorder} {colors.ctaBorderDark}">
       <h3 class="text-xl font-semibold text-foreground mb-2">Questions about our policies?</h3>
       <p class="text-foreground-muted mb-4">
         If you have questions about our terms or policies, or need clarification on anything, please reach out.
       </p>
-      <a href="mailto:autumnbrown23@pm.me" class="inline-flex items-center px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors">
+      <a href="mailto:autumnbrown23@pm.me" class="inline-flex items-center px-4 py-2 {colors.buttonBg} text-white rounded-lg {colors.buttonHover} transition-colors">
         Contact Us
         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

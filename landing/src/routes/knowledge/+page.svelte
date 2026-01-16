@@ -3,6 +3,7 @@
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import { toolIcons, knowledgeCategoryIcons } from '$lib/utils/icons';
+  import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();
   const specs = $derived(data.specs);
@@ -17,6 +18,18 @@
   const PhilosophyIcon = knowledgeCategoryIcons.philosophy;
   const DesignIcon = knowledgeCategoryIcons.design;
   const DeveloperIcon = knowledgeCategoryIcons.developer;
+
+  // Seasonal color references for cleaner templates
+  const colors = {
+    help: kbCategoryColors.help,
+    legal: kbCategoryColors.legal,
+    philosophy: kbCategoryColors.philosophy,
+    design: kbCategoryColors.design,
+    developer: kbCategoryColors.developer,
+    marketing: kbCategoryColors.marketing,
+    specs: kbCategoryColors.specs,
+    patterns: kbCategoryColors.patterns,
+  };
 
   let searchQuery = $state('');
 
@@ -72,11 +85,11 @@
 
     <!-- Categories -->
     <div class="grid md:grid-cols-2 gap-8">
-      <!-- Help Center -->
+      <!-- Help Center - Summer (emerald) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 {colors.help.iconBg} {colors.help.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 {colors.help.text} {colors.help.textDark}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -91,13 +104,13 @@
         <div class="space-y-2 mb-4">
           {#each helpArticles.slice(0, 3) as article}
             <div class="text-sm">
-              <a href="/knowledge/help/{article.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+              <a href="/knowledge/help/{article.slug}" class="{colors.help.text} {colors.help.textDark} {colors.help.textHover} {colors.help.textHoverDark} font-medium transition-colors">
                 {article.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/help" class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+        <a href="/knowledge/help" class="inline-flex items-center {colors.help.text} {colors.help.textDark} {colors.help.textHover} {colors.help.textHoverDark} font-medium transition-colors">
           Browse all articles
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -105,11 +118,11 @@
         </a>
       </div>
 
-      <!-- Legal Documents -->
+      <!-- Legal Documents - Autumn (rust) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 {colors.legal.iconBg} {colors.legal.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 {colors.legal.text} {colors.legal.textDark}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
@@ -124,13 +137,13 @@
         <div class="space-y-2 mb-4">
           {#each legalDocs.slice(0, 3) as doc}
             <div class="text-sm">
-              <a href="/knowledge/legal/{doc.slug}" class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors">
+              <a href="/knowledge/legal/{doc.slug}" class="{colors.legal.text} {colors.legal.textDark} {colors.legal.textHover} {colors.legal.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/legal" class="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors">
+        <a href="/knowledge/legal" class="inline-flex items-center {colors.legal.text} {colors.legal.textDark} {colors.legal.textHover} {colors.legal.textHoverDark} font-medium transition-colors">
           View all policies
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -138,11 +151,11 @@
         </a>
       </div>
 
-      <!-- Philosophy -->
+      <!-- Philosophy - Midnight Bloom (violet) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-4">
-            <PhilosophyIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="w-12 h-12 {colors.philosophy.iconBg} {colors.philosophy.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <PhilosophyIcon class="w-6 h-6 {colors.philosophy.text} {colors.philosophy.textDark}" />
           </div>
           <div>
             <h2 class="text-xl font-semibold text-foreground">Philosophy</h2>
@@ -155,13 +168,13 @@
         <div class="space-y-2 mb-4">
           {#each philosophyDocs.slice(0, 3) as doc}
             <div class="text-sm">
-              <a href="/knowledge/philosophy/{doc.slug}" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors">
+              <a href="/knowledge/philosophy/{doc.slug}" class="{colors.philosophy.text} {colors.philosophy.textDark} {colors.philosophy.textHover} {colors.philosophy.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/philosophy" class="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors">
+        <a href="/knowledge/philosophy" class="inline-flex items-center {colors.philosophy.text} {colors.philosophy.textDark} {colors.philosophy.textHover} {colors.philosophy.textHoverDark} font-medium transition-colors">
           Explore philosophy
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -169,11 +182,11 @@
         </a>
       </div>
 
-      <!-- Design -->
+      <!-- Design - Spring (rose) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center mr-4">
-            <DesignIcon class="w-6 h-6 text-rose-600 dark:text-rose-400" />
+          <div class="w-12 h-12 {colors.design.iconBg} {colors.design.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <DesignIcon class="w-6 h-6 {colors.design.text} {colors.design.textDark}" />
           </div>
           <div>
             <h2 class="text-xl font-semibold text-foreground">Design</h2>
@@ -186,13 +199,13 @@
         <div class="space-y-2 mb-4">
           {#each designDocs.slice(0, 3) as doc}
             <div class="text-sm">
-              <a href="/knowledge/design/{doc.slug}" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors">
+              <a href="/knowledge/design/{doc.slug}" class="{colors.design.text} {colors.design.textDark} {colors.design.textHover} {colors.design.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/design" class="inline-flex items-center text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors">
+        <a href="/knowledge/design" class="inline-flex items-center {colors.design.text} {colors.design.textDark} {colors.design.textHover} {colors.design.textHoverDark} font-medium transition-colors">
           Browse design docs
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -200,11 +213,11 @@
         </a>
       </div>
 
-      <!-- Developer Guides -->
+      <!-- Developer Guides - Winter (slate) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center mr-4">
-            <DeveloperIcon class="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+          <div class="w-12 h-12 {colors.developer.iconBg} {colors.developer.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <DeveloperIcon class="w-6 h-6 {colors.developer.text} {colors.developer.textDark}" />
           </div>
           <div>
             <h2 class="text-xl font-semibold text-foreground">Developer Guides</h2>
@@ -216,15 +229,15 @@
         </p>
         <div class="grid md:grid-cols-3 gap-4 mb-4">
           {#each developerDocs as doc}
-            <div class="text-sm p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
-              <a href="/knowledge/developer/{doc.slug}" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium transition-colors">
+            <div class="text-sm p-3 {colors.developer.cardBg} {colors.developer.cardBgDark} rounded-lg">
+              <a href="/knowledge/developer/{doc.slug}" class="{colors.developer.text} {colors.developer.textDark} {colors.developer.textHover} {colors.developer.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
               <p class="text-foreground-subtle text-xs mt-1">{doc.description}</p>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/developer" class="inline-flex items-center text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium transition-colors">
+        <a href="/knowledge/developer" class="inline-flex items-center {colors.developer.text} {colors.developer.textDark} {colors.developer.textHover} {colors.developer.textHoverDark} font-medium transition-colors">
           View all guides
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -232,11 +245,11 @@
         </a>
       </div>
 
-      <!-- Marketing Documents -->
+      <!-- Marketing Documents - Summer (emerald) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 {colors.marketing.iconBg} {colors.marketing.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 {colors.marketing.text} {colors.marketing.textDark}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
           </div>
@@ -251,13 +264,13 @@
         <div class="space-y-2 mb-4">
           {#each marketingDocs.slice(0, 3) as doc}
             <div class="text-sm">
-              <a href="/knowledge/marketing/{doc.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+              <a href="/knowledge/marketing/{doc.slug}" class="{colors.marketing.text} {colors.marketing.textDark} {colors.marketing.textHover} {colors.marketing.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/marketing" class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+        <a href="/knowledge/marketing" class="inline-flex items-center {colors.marketing.text} {colors.marketing.textDark} {colors.marketing.textHover} {colors.marketing.textHoverDark} font-medium transition-colors">
           View all materials
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -265,11 +278,11 @@
         </a>
       </div>
 
-      <!-- Technical Specifications -->
+      <!-- Technical Specifications - Midnight Bloom (violet) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 {colors.specs.iconBg} {colors.specs.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 {colors.specs.text} {colors.specs.textDark}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
@@ -284,13 +297,13 @@
         <div class="space-y-2 mb-4">
           {#each specs.slice(0, 3) as spec}
             <div class="text-sm">
-              <a href="/knowledge/specs/{spec.slug}" class="text-accent hover:text-accent-muted font-medium transition-colors">
+              <a href="/knowledge/specs/{spec.slug}" class="{colors.specs.text} {colors.specs.textDark} {colors.specs.textHover} {colors.specs.textHoverDark} font-medium transition-colors">
                 {spec.title}
               </a>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/specs" class="inline-flex items-center text-accent hover:text-accent-muted font-medium transition-colors">
+        <a href="/knowledge/specs" class="inline-flex items-center {colors.specs.text} {colors.specs.textDark} {colors.specs.textHover} {colors.specs.textHoverDark} font-medium transition-colors">
           View all specifications
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -298,11 +311,11 @@
         </a>
       </div>
 
-      <!-- Architecture Patterns -->
+      <!-- Architecture Patterns - Amber -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 {colors.patterns.iconBg} {colors.patterns.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 {colors.patterns.text} {colors.patterns.textDark}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
             </svg>
           </div>
@@ -316,8 +329,8 @@
         </p>
         <div class="grid md:grid-cols-3 gap-4 mb-4">
           {#each patterns as pattern}
-            <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
+            <div class="text-sm p-3 {colors.patterns.cardBg} {colors.patterns.cardBgDark} rounded-lg">
+              <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 {colors.patterns.text} {colors.patterns.textDark} {colors.patterns.textHover} {colors.patterns.textHoverDark} font-medium transition-colors group">
                 {#if pattern.icon && toolIcons[pattern.icon as keyof typeof toolIcons]}
                   {@const Icon = toolIcons[pattern.icon as keyof typeof toolIcons]}
                   <div class="flex-shrink-0 w-5 h-5 mt-0.5">
@@ -330,7 +343,7 @@
             </div>
           {/each}
         </div>
-        <a href="/knowledge/patterns" class="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors">
+        <a href="/knowledge/patterns" class="inline-flex items-center {colors.patterns.text} {colors.patterns.textDark} {colors.patterns.textHover} {colors.patterns.textHoverDark} font-medium transition-colors">
           View all patterns
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
