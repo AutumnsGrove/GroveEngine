@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'landing/**'
+      - 'packages/landing/**'
       - 'docs/help-center/**'
       - 'docs/legal/**'
       - 'docs/specs/**'
@@ -17,7 +17,7 @@ on:
 
 defaults:
   run:
-    working-directory: landing
+    working-directory: packages/landing
 
 jobs:
   deploy:
@@ -58,11 +58,11 @@ jobs:
 
       - name: Type check
         run: pnpm check
-        working-directory: landing
+        working-directory: packages/landing
 
       - name: Run tests
         run: pnpm test:run || echo "No tests configured"
-        working-directory: landing
+        working-directory: packages/landing
 
       - name: Run Database Migrations
         uses: cloudflare/wrangler-action@v3
@@ -70,7 +70,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply grove-engine-db --remote
-          workingDirectory: landing
+          workingDirectory: packages/landing
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -78,4 +78,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing
-          workingDirectory: landing
+          workingDirectory: packages/landing

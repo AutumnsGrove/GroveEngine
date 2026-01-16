@@ -85,8 +85,8 @@ jobs:
           TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
           echo "Generating snapshot for: $TAG"
 
-          chmod +x ./scripts/repo-snapshot.sh
-          ./scripts/repo-snapshot.sh "$TAG"
+          chmod +x ./scripts/repo/repo-snapshot.sh
+          ./scripts/repo/repo-snapshot.sh "$TAG"
 
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
 
@@ -100,24 +100,24 @@ jobs:
           echo "Generating release summary for: $TAG"
 
           # Make script executable
-          chmod +x ./scripts/generate-release-summary.sh
+          chmod +x ./scripts/generate/generate-release-summary.sh
 
           # Generate summary (will use previous tag automatically)
-          ./scripts/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
+          ./scripts/generate/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
 
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
         run: |
           # Ensure landing data directory exists
-          mkdir -p landing/static/data
+          mkdir -p packages/landing/static/data
 
           # Copy the history CSV so the /journey page can display it
-          cp snapshots/history.csv landing/static/data/history.csv
+          cp snapshots/history.csv packages/landing/static/data/history.csv
 
           # Copy release summaries so the /roadmap page can display them
           if [ -d snapshots/summaries ]; then
-            mkdir -p landing/static/data/summaries
-            cp -r snapshots/summaries/* landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
+            mkdir -p packages/landing/static/data/summaries
+            cp -r snapshots/summaries/* packages/landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
           fi
 
       - name: Commit and push snapshot
@@ -127,7 +127,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Add snapshot files, summaries, and landing data
-          git add snapshots/ landing/static/data/
+          git add snapshots/ packages/landing/static/data/
 
           # Check if there are changes to commit
           if git diff --staged --quiet; then
@@ -160,22 +160,22 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          chmod +x ./scripts/backfill-summaries.sh
-          chmod +x ./scripts/generate-release-summary.sh
-          ./scripts/backfill-summaries.sh
+          chmod +x ./scripts/deploy/backfill-summaries.sh
+          chmod +x ./scripts/generate/generate-release-summary.sh
+          ./scripts/deploy/backfill-summaries.sh
 
       - name: Sync to landing page
         run: |
-          mkdir -p landing/static/data/summaries
-          cp -r snapshots/summaries/* landing/static/data/summaries/
-          echo "📦 Synced summaries to landing/static/data/summaries/"
-          ls -1 landing/static/data/summaries/
+          mkdir -p packages/landing/static/data/summaries
+          cp -r snapshots/summaries/* packages/landing/static/data/summaries/
+          echo "📦 Synced summaries to packages/landing/static/data/summaries/"
+          ls -1 packages/landing/static/data/summaries/
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add snapshots/summaries/ landing/static/data/summaries/
+          git add snapshots/summaries/ packages/landing/static/data/summaries/
 
           if git diff --staged --quiet; then
             echo "No new summaries generated"

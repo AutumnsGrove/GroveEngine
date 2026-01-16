@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'plant/**'
+      - 'packages/plant/**'
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: plant
+    working-directory: packages/plant
 
 jobs:
   deploy:
@@ -48,11 +48,11 @@ jobs:
 
       - name: Type check
         run: pnpm check
-        working-directory: plant
+        working-directory: packages/plant
 
       - name: Run tests
         run: pnpm test:run || echo "No tests configured"
-        working-directory: plant
+        working-directory: packages/plant
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
