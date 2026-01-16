@@ -26,8 +26,16 @@ These are **confirmed** inaccuracies that need immediate attention:
 | **Stripe → LemonSqueezy** — Payment processor changed | Privacy Policy, Terms of Service, Refund Policy | 🔴 Critical |
 | **Auth uses Better Auth** — Internally upgraded, still branded "Heartwood" | Privacy Policy, `creating-your-account.md`, any signup references | 🟡 Moderate |
 | **Font count** — Claims 20 fonts, now 11 | `custom-fonts.md` | 🟡 Moderate |
-| **Account deletion** — Help article describes UI/flow that doesn't exist yet | `account-deletion.md` | 🔴 Critical |
-| **Unsubscribe flow** — Email unsubscribe implemented | Verify `account-deletion.md` distinguishes email unsub vs account deletion | 🟢 Minor |
+
+### ✅ Recently Resolved (PR #341)
+
+The following issues were addressed in the subscription management PR:
+
+| Issue | Resolution | Status |
+|-------|------------|--------|
+| **Account deletion** — Article described non-existent UI | Updated to support-based flow (email to request deletion) | ✅ Fixed |
+| **Data export** — Export UI didn't exist | Admin "Account & Subscription" page now has "Your Data" section | ✅ Fixed |
+| **Data portability** — Process was unclear | Updated to describe current JSON export + coming Amber improvements | ✅ Fixed |
 
 ### Payment Processor: LemonSqueezy
 Legal docs currently reference Stripe as a third-party service. All payment-related documentation needs updating to reference **LemonSqueezy** instead.
@@ -37,12 +45,6 @@ Auth system uses **Better Auth** internally but is still branded **Heartwood** t
 - Email/password signup references → Wrong (Google only)
 - Multiple auth providers → Partially wrong (only Google currently)
 - Account creation flow → Verify matches current Google OAuth flow
-
-### Account Deletion: Implementation Gap
-The help article `account-deletion.md` describes a full deletion flow (Settings → Account → Danger Zone → Delete Account) but **no API endpoint or UI exists** for this yet. The database schema supports cascading deletes, but the feature isn't wired up. Options:
-- Mark article as "Coming soon"
-- Flag for feature implementation
-- Temporarily remove article
 
 ---
 
@@ -89,7 +91,9 @@ The help article `account-deletion.md` describes a full deletion flow (Settings 
 | Data retention | Privacy policy + actual TTLs in code |
 | Email workflows | `docs/templates/emails/`, Resend dashboard |
 | Payment processor | `packages/engine/src/lib/server/billing/lemonsqueezy/` |
-| Account deletion | No API endpoint exists yet — DB ready via CASCADE |
+| Account deletion | Support-based flow — contact via admin panel |
+| Data export | `packages/engine/src/routes/admin/account/DataExportCard.svelte` |
+| Subscription mgmt | `packages/engine/src/routes/admin/account/` (new in PR #341) |
 
 ### Review Approach
 
@@ -115,12 +119,16 @@ These articles are most likely to be outdated or have user-facing impact:
 - [ ] `upgrading-or-downgrading.md` — Verify the actual flow matches
 - [ ] `centennial-status.md` — Verify earning criteria matches implementation
 
-### Account & Data
-- [ ] `account-deletion.md` — **🔴 CRITICAL**: Article describes UI that doesn't exist yet
-  - Check: Either mark as "Coming soon" or flag for implementation
-  - Check: Distinguish from email unsubscribe (which IS implemented)
-- [ ] `exporting-your-content.md` — Verify export formats match actual exports
-- [ ] `data-portability.md` — Verify domain transfer process
+### Account & Data (Updated in PR #341)
+- [ ] `account-deletion.md` — **✅ Recently updated** — Quick verify support-based flow is accurate
+  - Check: "Account & Subscription → Danger Zone → email link" flow matches
+  - Check: Data retention timelines still accurate
+- [ ] `exporting-your-content.md` — **✅ Recently updated** — Quick verify export UI matches
+  - Check: "Account & Subscription → Your Data" section exists and matches
+  - Check: JSON format description is accurate
+- [ ] `data-portability.md` — **✅ Recently updated** — Quick verify migration guidance
+  - Check: JSON export description matches actual format
+  - Check: "Amber update" timeline reference is appropriate
 
 ### Getting Started
 - [ ] `creating-your-account.md` — **🟡 MODERATE**: Verify matches Heartwood/Google OAuth flow
@@ -290,7 +298,8 @@ docs/
 - [ ] All 6 legal documents verified against implementation
 - [ ] No critical (🔴) issues remaining
 - [ ] Stripe references replaced with LemonSqueezy in legal docs
-- [ ] Account deletion article addressed (updated or flagged for implementation)
+- [x] ~~Account deletion article addressed~~ (resolved in PR #341 — support-based flow)
+- [ ] PR #341 updates verified (account-deletion, exporting-your-content, data-portability)
 - [ ] `last_verified` frontmatter added to reviewed articles
 - [ ] Maintenance process documented and agreed upon
 
@@ -311,3 +320,4 @@ docs/
 |------|--------|-----|
 | 2026-01-15 | Initial plan created | Autumn |
 | 2026-01-15 | Updated after codebase exploration: corrected auth status (Better Auth integrated as Heartwood), font count (11), added 7 missing articles, added account deletion implementation gap, updated verification sources with actual file paths, added review approach section | Claude |
+| 2026-01-16 | Rebased with main after PR #341 merged: marked account-deletion, exporting-your-content, data-portability as recently updated; removed account deletion implementation gap (now support-based flow); added new verification sources for admin account page and data export | Claude |
