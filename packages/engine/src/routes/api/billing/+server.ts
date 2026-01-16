@@ -3,15 +3,127 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
+
+// Rate limiting configuration for billing operations
+// More lenient than export (20/hour) since users may need multiple interactions
+const BILLING_RATE_LIMIT_MAX = 20;
+const BILLING_RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
+
+/**
+ * Check and update rate limit for billing operations.
+ * Prevents abuse of subscription management endpoints.
+ */
+async function checkBillingRateLimit(
+  kv: KVNamespace | undefined,
+  tenantId: string
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  if (!kv) {
+    console.warn("[Billing] KV not configured, rate limiting disabled");
+    return { allowed: true, remaining: BILLING_RATE_LIMIT_MAX, resetAt: 0 };
+  }
+
+  const key = `billing_ratelimit:${tenantId}`;
+  const now = Math.floor(Date.now() / 1000);
+
+  try {
+    const data = await kv.get(key, "json") as { count: number; windowStart: number } | null;
+
+    if (!data || now - data.windowStart >= BILLING_RATE_LIMIT_WINDOW_SECONDS) {
+      await kv.put(key, JSON.stringify({ count: 1, windowStart: now }), {
+        expirationTtl: BILLING_RATE_LIMIT_WINDOW_SECONDS,
+      });
+      return {
+        allowed: true,
+        remaining: BILLING_RATE_LIMIT_MAX - 1,
+        resetAt: now + BILLING_RATE_LIMIT_WINDOW_SECONDS,
+      };
+    }
+
+    if (data.count >= BILLING_RATE_LIMIT_MAX) {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: data.windowStart + BILLING_RATE_LIMIT_WINDOW_SECONDS,
+      };
+    }
+
+    await kv.put(key, JSON.stringify({ count: data.count + 1, windowStart: data.windowStart }), {
+      expirationTtl: BILLING_RATE_LIMIT_WINDOW_SECONDS - (now - data.windowStart),
+    });
+
+    return {
+      allowed: true,
+      remaining: BILLING_RATE_LIMIT_MAX - data.count - 1,
+      resetAt: data.windowStart + BILLING_RATE_LIMIT_WINDOW_SECONDS,
+    };
+  } catch (e) {
+    console.error("[Billing] Rate limit check failed:", e);
+    return { allowed: true, remaining: BILLING_RATE_LIMIT_MAX, resetAt: 0 };
+  }
+}
+
+/**
+ * Audit log entry for billing operations.
+ * Logs are stored in the audit_log table for compliance and debugging.
+ */
+interface AuditLogEntry {
+  tenantId: string;
+  action: string;
+  details: Record<string, unknown>;
+  userEmail: string;
+  ipAddress?: string;
+}
+
+/**
+ * Log billing operations for audit trail.
+ * This helps with compliance, debugging, and dispute resolution.
+ *
+ * IMPORTANT: Audit log failures are non-blocking to prevent billing operations
+ * from failing due to logging issues. However, persistent failures should trigger
+ * alerts in the monitoring system. Look for "[Billing Audit] CRITICAL" in logs.
+ *
+ * Trade-off: We prioritize completing the user's billing action over guaranteed
+ * audit logging. For true compliance-critical operations, consider a separate
+ * job queue that retries failed audit entries.
+ */
+async function logBillingAudit(
+  db: D1Database,
+  entry: AuditLogEntry
+): Promise<void> {
+  try {
+    await db.prepare(
+      `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        crypto.randomUUID(),
+        entry.tenantId,
+        "billing",
+        entry.action,
+        JSON.stringify(entry.details),
+        entry.userEmail,
+        Math.floor(Date.now() / 1000)
+      )
+      .run();
+  } catch (e) {
+    // CRITICAL: Audit log failures need monitoring alerts
+    // This log line should trigger alerts in production monitoring
+    console.error("[Billing Audit] CRITICAL - Failed to log billing action:", {
+      error: e instanceof Error ? e.message : String(e),
+      action: entry.action,
+      tenantId: entry.tenantId,
+      userEmail: entry.userEmail,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
 
 /**
  * Platform billing for tenant subscriptions to GroveEngine
  *
- * Plans:
- * - seedling: $8/month - Entry tier
- * - sapling: $12/month - Hobbyist tier
- * - oak: $25/month - Serious blogger tier
- * - evergreen: $35/month - Full-service tier
+ * Plans are derived from $lib/config/tiers.ts (single source of truth).
+ * See tiers.ts for current pricing and features.
  */
 
 /** Plan configuration */
@@ -54,67 +166,20 @@ interface UpdateRequest {
   cancelImmediately?: boolean;
 }
 
-const PLANS: Record<string, PlanConfig> = {
-  seedling: {
-    name: "Seedling",
-    price: 800,
-    interval: "month",
-    features: [
-      "50 posts",
-      "1GB Storage",
-      "3 themes + accent color",
-      "Basic analytics",
-      "grove.place subdomain",
-      "Unlimited public comments",
-      "Community support",
-    ],
-  },
-  sapling: {
-    name: "Sapling",
-    price: 1200,
-    interval: "month",
-    features: [
-      "250 posts",
-      "5GB Storage",
-      "10 themes + accent color",
-      "Basic analytics",
-      "grove.place subdomain",
-      "Email forwarding (@grove.place)",
-      "Unlimited public comments",
-      "Email support",
-    ],
-  },
-  oak: {
-    name: "Oak",
-    price: 2500,
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "20GB Storage",
-      "Theme customizer + community themes",
-      "Full analytics",
-      "BYOD (custom domain)",
-      "Full email (@grove.place)",
-      "Unlimited public comments",
-      "Priority email support",
-    ],
-  },
-  evergreen: {
-    name: "Evergreen",
-    price: 3500,
-    interval: "month",
-    features: [
-      "Unlimited posts",
-      "100GB Storage",
-      "Theme customizer + custom fonts",
-      "Full analytics",
-      "Domain search + registration included",
-      "Full email (@grove.place)",
-      "Unlimited public comments",
-      "8hrs free support + priority",
-    ],
-  },
-};
+/** Derive PLANS from single source of truth in tiers.ts */
+const PLANS: Record<string, PlanConfig> = Object.fromEntries(
+  Object.entries(TIERS)
+    .filter(([key]) => key !== "free") // Exclude free tier from billing
+    .map(([key, tier]) => [
+      key,
+      {
+        name: tier.display.name,
+        price: tier.pricing.monthlyPriceCents,
+        interval: "month",
+        features: tier.display.featureStrings,
+      },
+    ])
+);
 
 /**
  * GET /api/billing - Get current billing status
@@ -221,6 +286,16 @@ export const POST: RequestHandler = async ({
       requestedTenantId,
       locals.user,
     );
+
+    // Check rate limit before processing
+    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
+    if (!rateLimit.allowed) {
+      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
+      throw error(
+        429,
+        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
+      );
+    }
 
     const data = (await request.json()) as CheckoutRequest;
 
@@ -380,10 +455,24 @@ export const PATCH: RequestHandler = async ({
       locals.user,
     );
 
+    // Check rate limit before processing
+    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
+    if (!rateLimit.allowed) {
+      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
+      throw error(
+        429,
+        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
+      );
+    }
+
     const data = (await request.json()) as UpdateRequest;
 
     const billing = (await platform.env.DB.prepare(
-      "SELECT * FROM platform_billing WHERE tenant_id = ?",
+      `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
+              current_period_start, current_period_end, cancel_at_period_end,
+              trial_end, payment_method_last4, payment_method_brand,
+              created_at, updated_at
+       FROM platform_billing WHERE tenant_id = ?`,
     )
       .bind(tenantId)
       .first()) as BillingRecord | null;
@@ -424,6 +513,18 @@ export const PATCH: RequestHandler = async ({
           )
           .run();
 
+        // Audit log: subscription cancelled
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "subscription_cancelled",
+          details: {
+            plan: billing.plan,
+            immediate: data.cancelImmediately === true,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
+
         return json({
           success: true,
           message: data.cancelImmediately
@@ -442,6 +543,17 @@ export const PATCH: RequestHandler = async ({
           .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
 
+        // Audit log: subscription resumed
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "subscription_resumed",
+          details: {
+            plan: billing.plan,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
+
         return json({
           success: true,
           message: "Subscription resumed",
@@ -450,6 +562,20 @@ export const PATCH: RequestHandler = async ({
       case "change_plan":
         if (!data.plan || !PLANS[data.plan]) {
           throw error(400, "Invalid plan");
+        }
+
+        // Check if already on the target plan (fail fast)
+        if (billing.plan === data.plan) {
+          throw error(400, "You are already on this plan");
+        }
+
+        // Validate tier is available for purchase
+        const targetTier = TIERS[data.plan as TierKey];
+        if (!targetTier || targetTier.status !== "available") {
+          throw error(
+            400,
+            `The ${targetTier?.display?.name || data.plan} plan is not currently available`
+          );
         }
 
         const newPriceId = (platform.env as unknown as Record<string, string>)[
@@ -492,11 +618,24 @@ export const PATCH: RequestHandler = async ({
           },
         });
 
+        // Clear cancel_at_period_end when changing plans - user is committing to a new plan
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
+          "UPDATE platform_billing SET plan = ?, cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
+
+        // Audit log: plan changed
+        await logBillingAudit(platform.env.DB, {
+          tenantId,
+          action: "plan_changed",
+          details: {
+            previousPlan: billing.plan,
+            newPlan: data.plan,
+            subscriptionId: billing.provider_subscription_id,
+          },
+          userEmail: locals.user.email,
+        });
 
         return json({
           success: true,
@@ -514,9 +653,12 @@ export const PATCH: RequestHandler = async ({
 };
 
 /**
- * PUT /api/billing - Get billing portal URL
+ * POST /api/billing/portal - Create billing portal session
+ *
+ * POST is semantically correct here because we're creating a session
+ * on the payment provider's side, not simply retrieving data.
  */
-export const PUT: RequestHandler = async ({ url, platform, locals }) => {
+export const PUT: RequestHandler = async ({ url, request, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -529,13 +671,35 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
     throw error(500, "Payment provider not configured");
   }
 
-  const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenantId;
+  // Accept return_url from request body only (standardized approach)
+  let returnUrl: string | null = null;
+  try {
+    const body = await request.json() as { returnUrl?: string };
+    returnUrl = body.returnUrl || null;
+  } catch {
+    // Body parsing failed
+  }
 
-  const returnUrl = url.searchParams.get("return_url");
   if (!returnUrl) {
     throw error(400, "Return URL required");
   }
+
+  // Validate return URL to prevent open redirect attacks
+  try {
+    const parsedReturn = new URL(returnUrl);
+    const isGroveDomain = parsedReturn.hostname === "grove.place" ||
+      parsedReturn.hostname.endsWith(".grove.place");
+    const isSameOrigin = parsedReturn.origin === url.origin;
+
+    if (!isGroveDomain && !isSameOrigin) {
+      throw error(400, "Invalid return URL: must be a grove.place domain");
+    }
+  } catch (e) {
+    if ((e as { status?: number }).status) throw e;
+    throw error(400, "Invalid return URL format");
+  }
+
+  const requestedTenantId = url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(
@@ -543,6 +707,16 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
       requestedTenantId,
       locals.user,
     );
+
+    // Check rate limit before processing
+    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
+    if (!rateLimit.allowed) {
+      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
+      throw error(
+        429,
+        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
+      );
+    }
 
     const billing = (await platform.env.DB.prepare(
       "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",

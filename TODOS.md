@@ -122,6 +122,216 @@ No action needed - current structure works well.
 - [x] **Back navigation** — Plans page has "Back to profile" link
 - [x] **Tour mobile polish** — Already has swipe gestures, larger touch targets, navigation hints
 
+### 💳 Subscription Management UI ✅ COMPLETE
+- [x] `/admin/account` page with billing, usage, plan changes, data export
+- [x] `/api/billing` endpoints (GET, PATCH, PUT)
+- [x] `/api/export` endpoint (POST with CSRF protection)
+- [x] Security: Open redirect prevention, rate limiting, input validation
+- [x] Component decomposition: Page reduced from 1200 to 315 lines
+- [x] 82 total tests (29 billing + 28 export + 25 utility)
+- [x] TypeScript migration: All components use `<script lang="ts">`
+
+**Follow-up items:**
+- [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
+- [ ] **Rate limit config** — Move RATE_LIMIT_MAX to shared config/env vars
+- [x] **Billing rate limiting** — Added 20/hour limit to POST, PATCH, PUT handlers
+- [x] **Support email config** — Moved to `$lib/config/contact.ts`
+- [ ] **Focus management** — Return focus to button after actions complete
+- [ ] **Proper ZIP export system** — Replace JSON export with Amber-style ZIP (see detailed spec below)
+
+**Deployment checklist:**
+- [ ] `audit_log` table migration ready for production D1
+- [ ] `CACHE_KV` binding configured in wrangler.toml
+- [ ] Stripe webhook handles subscription updates
+
+### 📦 Amber Integration for ZIP Export (Follow-up PR)
+
+> **Status:** Deferred to next feature season (Amber launch)
+> **Pattern:** Service integration (like Heartwood, Forage)
+> **Repos:** `AutumnsGrove/Amber` (storage service), `AutumnsGrove/GroveEngine` (this repo)
+
+---
+
+#### Agent Instructions: Amber-Engine Integration
+
+**Context:** Amber is a file storage service with a sophisticated export system. It needs to be integrated into Engine as an internal service, similar to how Heartwood (auth) and Forage (search) are integrated. Amber should NOT have its own separate R2 bucket—it should use Engine's existing storage infrastructure.
+
+**Your task:** Analyze Amber's codebase, identify the export functionality, and integrate it into Engine so Grove users get proper ZIP exports instead of JSON.
+
+---
+
+**Phase 1: Analyze Amber's Export System**
+
+Read and understand these files in `/home/user/Amber`:
+- `worker/src/services/ExportJobV2.ts` — The Durable Object that orchestrates exports
+- `worker/src/services/zipStream.ts` — Streaming ZIP creation utility
+- `worker/src/index.ts` — API routes (search for `/api/storage/export`)
+- `worker/migrations/schema.sql` — Database schema for `storage_exports` table
+
+Key patterns to understand:
+1. How ExportJobV2 uses alarms for chunked processing (avoids Worker timeouts)
+2. How zipStream.ts creates ZIPs without buffering entire files in memory
+3. How multipart upload streams the ZIP back to R2
+4. The API flow: POST to start → GET to poll status → GET to download
+
+---
+
+**Phase 2: Decide Integration Approach**
+
+Choose ONE of these approaches:
+
+**Option A: Service Binding (Recommended)**
+- Keep Amber as a separate Worker
+- Engine calls Amber via Cloudflare Service Binding (no HTTP overhead)
+- Amber needs access to Engine's R2 bucket via binding
+- Pros: Clean separation, Amber can serve other services later
+- Cons: More wrangler.toml configuration
+
+**Option B: Port to Engine**
+- Copy ExportJobV2 and zipStream.ts into Engine
+- Adapt to Engine's existing storage patterns
+- Pros: Single codebase, simpler deployment
+- Cons: Code duplication if Amber serves other uses
+
+**Option C: Shared Package**
+- Extract export utilities to `@autumnsgrove/groveengine` package
+- Both Amber and Engine import from shared package
+- Pros: DRY, reusable
+- Cons: More package management
+
+Document your chosen approach and reasoning before proceeding.
+
+---
+
+**Phase 3: Implementation Tasks**
+
+Regardless of approach, these changes are needed in Engine:
+
+**Database:**
+- [ ] Create `tenant_exports` migration in `packages/engine/migrations/`
+```sql
+CREATE TABLE tenant_exports (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  export_type TEXT CHECK (export_type IN ('full', 'posts', 'media', 'pages')),
+  status TEXT CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  r2_key TEXT,
+  size_bytes INTEGER,
+  file_count INTEGER,
+  created_at TEXT NOT NULL,
+  completed_at TEXT,
+  expires_at TEXT,
+  error_message TEXT,
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+);
+CREATE INDEX idx_tenant_exports_tenant ON tenant_exports(tenant_id, status);
+CREATE INDEX idx_tenant_exports_expiry ON tenant_exports(status, expires_at);
+```
+
+**API Changes:**
+- [ ] Modify `POST /api/export` to start async job instead of immediate download
+- [ ] Add `GET /api/export/:id` for status polling
+- [ ] Add `GET /api/export/:id/download` for download URL
+- [ ] Keep existing JSON export as fallback during transition
+
+**Frontend Changes:**
+- [ ] Update `DataExportCard.svelte` to show progress states
+- [ ] Add polling logic for export completion
+- [ ] Show "Preparing your export..." with progress indicator
+- [ ] Handle completed state with download button
+
+**Export Content:**
+- [ ] Write posts as `.md` files with YAML frontmatter:
+```yaml
+---
+title: "Post Title"
+slug: "post-slug"
+date: "2026-01-15T10:00:00.000Z"
+tags: ["tag1", "tag2"]
+status: "published"
+---
+
+Post content in Markdown...
+```
+- [ ] Include actual media files (stream from R2, not just URLs)
+- [ ] Generate `manifest.json` with file metadata
+- [ ] Generate `README.txt` with extraction instructions
+
+**Cleanup:**
+- [ ] Add cron job to delete expired exports (7 days)
+- [ ] Log export events for monitoring
+
+---
+
+**Phase 4: Testing**
+
+- [ ] Test small export (<10 files)
+- [ ] Test medium export (100+ files)
+- [ ] Test size limit enforcement (5000 items)
+- [ ] Test rate limiting
+- [ ] Test export with missing R2 files (graceful handling)
+- [ ] Test concurrent exports for same tenant
+- [ ] Test export cancellation/cleanup
+
+---
+
+**Phase 5: Documentation**
+
+- [ ] Update `exporting-your-content.md` to describe ZIP format
+- [ ] Update `data-portability.md` to remove JSON parsing instructions
+- [ ] Remove "What's coming" sections (it's here!)
+
+---
+
+**Reference: Amber's ZIP Structure**
+```
+grove-export-username-2026-01-15.zip
+├── manifest.json           # Complete file metadata
+├── README.txt              # User-friendly instructions
+├── posts/
+│   ├── 2026-01-15-my-first-post.md
+│   └── ...
+├── pages/
+│   └── about.md
+└── media/
+    ├── sunset.jpg
+    └── ...
+```
+
+**Reference: Amber's Key Code Patterns**
+
+Chunked processing (ExportJobV2.ts):
+```typescript
+// Process in chunks to avoid Worker timeout
+const CHUNK_FILE_LIMIT = 100;
+const CHUNK_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+
+async alarm() {
+  // Process next chunk
+  // Schedule next alarm if more work remains
+}
+```
+
+Streaming ZIP (zipStream.ts):
+```typescript
+// No compression for speed (Worker CPU limits)
+const ZIP_CONFIG = {
+  COMPRESSION_LEVEL: 0,
+};
+
+// Stream directly from R2 to ZIP output
+await zipStreamer.addFile({
+  filename: path,
+  data: r2Object.body,  // ReadableStream
+  size: file.size_bytes,
+});
+```
+
+---
+
+**Estimated effort:** 8-12 hours
+**Dependencies:** Amber repo cloned locally at `/home/user/Amber`
+
 ### ⏸️ Deferred to Follow-up PR
 - [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server
   - The `jxl_encoding_metrics` table is ready in migration
