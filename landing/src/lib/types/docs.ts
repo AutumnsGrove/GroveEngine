@@ -26,6 +26,19 @@ export type SpecCategory =
   | "operations"
   | "reference";
 
+/** Help Center sections */
+export type HelpSection =
+  | "getting-started"
+  | "writing-publishing"
+  | "customization"
+  | "community-social"
+  | "account-billing"
+  | "privacy-security"
+  | "ai-features"
+  | "philosophy-vision"
+  | "support-resources"
+  | "troubleshooting";
+
 /** Base document metadata (used for listings and static data) */
 export interface Doc extends Record<string, unknown> {
   slug: string;
@@ -39,6 +52,8 @@ export interface Doc extends Record<string, unknown> {
   icon?: string;
   /** Optional spec subcategory for grouping specs like workshop page */
   specCategory?: SpecCategory;
+  /** Optional help section for grouping help articles */
+  section?: HelpSection;
 }
 
 /** Header extracted from markdown for table of contents */

@@ -1,7 +1,7 @@
-import type { Doc, SpecCategory } from "$lib/types/docs";
+import type { Doc, SpecCategory, HelpSection } from "$lib/types/docs";
 
 // Re-export for convenience
-export type { Doc, SpecCategory } from "$lib/types/docs";
+export type { Doc, SpecCategory, HelpSection } from "$lib/types/docs";
 
 /**
  * Spec category metadata (mirrors workshop page organization)
@@ -48,6 +48,78 @@ export const specCategories: {
     name: "Reference",
     description: "Implementation guides and auxiliary documentation",
     icon: "filecode",
+  },
+];
+
+/**
+ * Help section metadata (mirrors specCategories pattern)
+ * Icons use keys from $lib/utils/icons.ts toolIcons map
+ */
+export const helpSections: {
+  id: HelpSection;
+  name: string;
+  description: string;
+  icon: string;
+}[] = [
+  {
+    id: "getting-started",
+    name: "Getting Started",
+    description: "Begin your Grove journey",
+    icon: "landplot",
+  },
+  {
+    id: "writing-publishing",
+    name: "Writing & Publishing",
+    description: "Create and share your content",
+    icon: "feather",
+  },
+  {
+    id: "customization",
+    name: "Customization",
+    description: "Make Grove feel like yours",
+    icon: "palette",
+  },
+  {
+    id: "community-social",
+    name: "Community & Social",
+    description: "Connect with other writers",
+    icon: "users",
+  },
+  {
+    id: "account-billing",
+    name: "Account & Billing",
+    description: "Manage your subscription",
+    icon: "store",
+  },
+  {
+    id: "privacy-security",
+    name: "Privacy & Security",
+    description: "How we protect you and your content",
+    icon: "shieldcheck",
+  },
+  {
+    id: "ai-features",
+    name: "AI Features",
+    description: "Smart tools that respect your privacy",
+    icon: "bird",
+  },
+  {
+    id: "philosophy-vision",
+    name: "Philosophy & Vision",
+    description: "What Grove believes in",
+    icon: "trees",
+  },
+  {
+    id: "support-resources",
+    name: "Support & Resources",
+    description: "Help when you need it",
+    icon: "lifebuoy",
+  },
+  {
+    id: "troubleshooting",
+    name: "Troubleshooting",
+    description: "Fix common issues",
+    icon: "helpcircle",
   },
 ];
 
@@ -539,6 +611,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove is a multi-tenant blog platform where users get their own blogs on subdomains. Built on Cloudflare infrastructure with SvelteKit.",
     category: "help",
+    section: "getting-started",
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
@@ -550,6 +623,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Most social platforms track every click, scroll, and pause. They feed that data into machine learning models that predict what will keep you engaged longest. Grove works differently.",
     category: "help",
+    section: "philosophy-vision",
     icon: "shield",
     lastUpdated: "2026-01-14",
     readingTime: 8,
@@ -561,6 +635,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Welcome! Let's get your first post published. From your admin panel, click New Post in the sidebar.",
     category: "help",
+    section: "getting-started",
     lastUpdated: "2025-12-13",
     readingTime: 5,
   },
@@ -571,6 +646,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove offers four plans: Seedling ($8), Sapling ($12), Oak ($25), and Evergreen ($35). Each plan includes different features and limits.",
     category: "help",
+    section: "getting-started",
     lastUpdated: "2025-12-01",
     readingTime: 4,
   },
@@ -581,6 +657,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove allows you to save posts as drafts and schedule them to be published at a future date.",
     category: "help",
+    section: "writing-publishing",
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
@@ -591,6 +668,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Tags help organize your content and make it easier for readers to find related posts.",
     category: "help",
+    section: "writing-publishing",
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
@@ -601,6 +679,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "You can export all your blog content including posts, images, and comments as a ZIP file.",
     category: "help",
+    section: "writing-publishing",
     lastUpdated: "2025-12-01",
     readingTime: 2,
   },
@@ -611,6 +690,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "If your site isn't loading, check these common issues: DNS propagation, SSL certificates, and browser cache.",
     category: "help",
+    section: "troubleshooting",
     lastUpdated: "2025-12-01",
     readingTime: 4,
   },
@@ -621,6 +701,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "The Meadow feed allows you to share your posts with the wider Grove community. Participation is optional.",
     category: "help",
+    section: "community-social",
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
@@ -631,6 +712,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Readers can react to your posts with emojis and vote on content in the community feed.",
     category: "help",
+    section: "community-social",
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
@@ -641,6 +723,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove has two types of responses: Replies (private messages to the author) and Comments (public, requiring approval).",
     category: "help",
+    section: "community-social",
     lastUpdated: "2025-12-01",
     readingTime: 4,
   },
@@ -651,6 +734,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove is built with privacy in mind. We don't track you, sell your data, or show ads.",
     category: "help",
+    section: "privacy-security",
     lastUpdated: "2025-12-01",
     readingTime: 5,
   },
@@ -662,6 +746,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Every major AI company sends crawlers across the web to train their models. Grove says no. Here's how our Shade protection system keeps your writing between you and your readers.",
     category: "help",
+    section: "privacy-security",
     lastUpdated: "2025-12-25",
     readingTime: 6,
   },
@@ -673,6 +758,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "When you use AI features on Grove, your words pass through external services. Most AI providers log everything. Grove's AI features work differently. We use Zero Data Retention: your words go in, results come out, everything in between vanishes.",
     category: "help",
+    section: "ai-features",
     lastUpdated: "2026-01-07",
     readingTime: 4,
   },
@@ -684,6 +770,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Some Grove tools use a swarm approach. Instead of one AI assistant working through a task step by step, multiple agents work in parallel, each handling a piece of the problem. Think of it like a research team versus a single researcher.",
     category: "help",
+    section: "ai-features",
     lastUpdated: "2026-01-07",
     readingTime: 4,
   },
@@ -694,6 +781,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Every night while you sleep, Grove quietly preserves everything: your posts, your comments, your settings. We call this system Patina. Age as armor.",
     category: "help",
+    section: "privacy-security",
     lastUpdated: "2025-12-31",
     readingTime: 5,
   },
@@ -704,6 +792,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Every Grove blog has an RSS feed at yourdomain.grove.place/rss.xml",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-01",
     readingTime: 2,
   },
@@ -714,6 +803,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Getting started with Grove takes about a minute. Grove uses Google for authentication—no new password to create or remember.",
     category: "help",
+    section: "account-billing",
     lastUpdated: "2025-12-24",
     readingTime: 3,
   },
@@ -724,6 +814,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Once you're signed in, the admin panel is your home base. Here's a quick tour of what you'll find and where to find it.",
     category: "help",
+    section: "customization",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -734,6 +825,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove uses Markdown for formatting—a simple way to style text that's been around since 2004. Here's everything you need.",
     category: "help",
+    section: "customization",
     lastUpdated: "2025-12-24",
     readingTime: 5,
   },
@@ -744,6 +836,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Images make posts more engaging. Here's how to add them to your Grove blog, including supported formats and size limits.",
     category: "help",
+    section: "customization",
     lastUpdated: "2025-12-24",
     readingTime: 3,
   },
@@ -754,6 +847,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Your blog should feel like yours. Grove's theme system gives you meaningful customization without requiring design expertise.",
     category: "help",
+    section: "customization",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -764,6 +858,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Meadow is Grove's community feed—a shared space where bloggers can discover each other's work, react to posts, and have conversations.",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -774,6 +869,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove is intentionally focused. Some things we don't do—not because we couldn't, but because they'd compromise what Grove is trying to be.",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-24",
     readingTime: 5,
   },
@@ -784,6 +880,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "When you need help with something the documentation doesn't cover, here's how to reach a real person. No ticket system, no chatbot maze.",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-24",
     readingTime: 3,
   },
@@ -794,6 +891,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "If something seems off with Grove, here's how to find out what's happening. Check status.grove.place for real-time updates.",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-24",
     readingTime: 3,
   },
@@ -804,6 +902,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "You can change your Grove plan anytime. Upgrades take effect immediately; downgrades apply at the end of your billing period.",
     category: "help",
+    section: "account-billing",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -814,6 +913,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "If you decide to leave Grove, you can delete your account and all associated data. Export your content first—deletion is permanent.",
     category: "help",
+    section: "account-billing",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -824,6 +924,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove works in all modern browsers. Here's what's supported and what to do if something isn't working right.",
     category: "help",
+    section: "support-resources",
     lastUpdated: "2025-12-24",
     readingTime: 4,
   },
@@ -835,6 +936,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove's editor is where you'll spend most of your time. Markdown with floating toolbar, live preview, drag-drop images, ambient sounds, zen mode, and autosave.",
     category: "help",
+    section: "writing-publishing",
     lastUpdated: "2026-01-03",
     readingTime: 5,
   },
@@ -846,6 +948,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove includes 20 fonts—accessibility fonts like Lexend and OpenDyslexic, serifs, sans-serifs, and display faces. Evergreen subscribers can upload their own.",
     category: "help",
+    section: "customization",
     lastUpdated: "2026-01-03",
     readingTime: 4,
   },
@@ -856,6 +959,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Here's what each Grove plan includes—post limits, storage, themes, and features—and what happens when you approach your limits.",
     category: "help",
+    section: "account-billing",
     lastUpdated: "2026-01-03",
     readingTime: 5,
   },
@@ -867,6 +971,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Your content belongs to you. Grove exports in standard formats—Markdown and JSON—that work with WordPress, Ghost, Hugo, and other platforms.",
     category: "help",
+    section: "privacy-security",
     lastUpdated: "2026-01-03",
     readingTime: 4,
   },
@@ -877,6 +982,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "The internet used to be a place of personal expression. Grove is a return to something simpler—a forest of voices, a place where your words are yours.",
     category: "help",
+    section: "philosophy-vision",
     lastUpdated: "2026-01-03",
     readingTime: 5,
   },
@@ -887,6 +993,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Whether you're in Europe, California, or anywhere else, you have rights over your personal data. Here's what Grove collects and what you can do about it.",
     category: "help",
+    section: "privacy-security",
     lastUpdated: "2026-01-03",
     readingTime: 5,
   },
@@ -898,6 +1005,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Some trees outlive the people who planted them. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years from the day you planted it.",
     category: "help",
+    section: "philosophy-vision",
     lastUpdated: "2026-01-06",
     readingTime: 6,
   },
@@ -908,6 +1016,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Every name passes through the same earth before taking root. Grove's username system quietly filters reserved terms, impersonation attempts, and harmful content. If your preferred username isn't available, here's why.",
     category: "help",
+    section: "account-billing",
     lastUpdated: "2026-01-07",
     readingTime: 4,
   },
@@ -919,6 +1028,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Solarpunk is a vision of the future that's optimistic without being naive. Technology in service of people, not the other way around. Community ownership over corporate extraction. Here's what it means for Grove.",
     category: "help",
+    section: "philosophy-vision",
     lastUpdated: "2026-01-07",
     readingTime: 5,
   },
@@ -930,6 +1040,7 @@ export const helpArticles: Doc[] = [
     excerpt:
       "Grove doesn't call you a 'user' or a 'member.' Those words feel transactional. Instead, we use language that reflects how people actually move through this place.",
     category: "help",
+    section: "community-social",
     lastUpdated: "2026-01-15",
     readingTime: 3,
   },

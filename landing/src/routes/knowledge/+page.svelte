@@ -72,40 +72,7 @@
 
     <!-- Categories -->
     <div class="grid md:grid-cols-2 gap-8">
-      <!-- Technical Specifications -->
-      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-foreground">Technical Specifications</h2>
-            <p class="text-sm text-foreground-subtle">{specs.length} documents</p>
-          </div>
-        </div>
-        <p class="text-foreground-muted mb-4">
-          Detailed technical documentation about Grove's architecture, features, and implementation details.
-        </p>
-        <div class="space-y-2 mb-4">
-          {#each specs.slice(0, 3) as spec}
-            <div class="text-sm">
-              <a href="/knowledge/specs/{spec.slug}" class="text-accent hover:text-accent-muted font-medium transition-colors">
-                {spec.title}
-              </a>
-            </div>
-          {/each}
-        </div>
-        <a href="/knowledge/specs" class="inline-flex items-center text-accent hover:text-accent-muted font-medium transition-colors">
-          View all specifications
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Help Articles -->
+      <!-- Help Center -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
           <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-4">
@@ -165,79 +132,6 @@
         </div>
         <a href="/knowledge/legal" class="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors">
           View all policies
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Marketing Documents -->
-      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-foreground">Marketing & Launch</h2>
-            <p class="text-sm text-foreground-subtle">{marketingDocs.length} documents</p>
-          </div>
-        </div>
-        <p class="text-foreground-muted mb-4">
-          Launch materials, messaging, and copy that tells the Grove story.
-        </p>
-        <div class="space-y-2 mb-4">
-          {#each marketingDocs.slice(0, 3) as doc}
-            <div class="text-sm">
-              <a href="/knowledge/marketing/{doc.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
-                {doc.title}
-              </a>
-            </div>
-          {/each}
-        </div>
-        <a href="/knowledge/marketing" class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
-          View all materials
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Architecture Patterns -->
-      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-foreground">Architecture Patterns</h2>
-            <p class="text-sm text-foreground-subtle">{patterns.length} patterns</p>
-          </div>
-        </div>
-        <p class="text-foreground-muted mb-4">
-          Reusable patterns and architecture decisions that shape how Grove is built. Solutions that work across the ecosystem.
-        </p>
-        <div class="grid md:grid-cols-3 gap-4 mb-4">
-          {#each patterns as pattern}
-            <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
-                {#if pattern.icon && toolIcons[pattern.icon as keyof typeof toolIcons]}
-                  {@const Icon = toolIcons[pattern.icon as keyof typeof toolIcons]}
-                  <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                    <Icon class="w-5 h-5" />
-                  </div>
-                {/if}
-                <span>{pattern.title}</span>
-              </a>
-              <p class="text-foreground-subtle text-xs mt-1">{pattern.description}</p>
-            </div>
-          {/each}
-        </div>
-        <a href="/knowledge/patterns" class="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors">
-          View all patterns
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
@@ -337,6 +231,112 @@
           </svg>
         </a>
       </div>
+
+      <!-- Marketing Documents -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Marketing & Launch</h2>
+            <p class="text-sm text-foreground-subtle">{marketingDocs.length} documents</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Launch materials, messaging, and copy that tells the Grove story.
+        </p>
+        <div class="space-y-2 mb-4">
+          {#each marketingDocs.slice(0, 3) as doc}
+            <div class="text-sm">
+              <a href="/knowledge/marketing/{doc.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+                {doc.title}
+              </a>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/marketing" class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+          View all materials
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Technical Specifications -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Technical Specifications</h2>
+            <p class="text-sm text-foreground-subtle">{specs.length} documents</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Detailed technical documentation about Grove's architecture, features, and implementation details.
+        </p>
+        <div class="space-y-2 mb-4">
+          {#each specs.slice(0, 3) as spec}
+            <div class="text-sm">
+              <a href="/knowledge/specs/{spec.slug}" class="text-accent hover:text-accent-muted font-medium transition-colors">
+                {spec.title}
+              </a>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/specs" class="inline-flex items-center text-accent hover:text-accent-muted font-medium transition-colors">
+          View all specifications
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Architecture Patterns -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Architecture Patterns</h2>
+            <p class="text-sm text-foreground-subtle">{patterns.length} patterns</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Reusable patterns and architecture decisions that shape how Grove is built. Solutions that work across the ecosystem.
+        </p>
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+          {#each patterns as pattern}
+            <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
+                {#if pattern.icon && toolIcons[pattern.icon as keyof typeof toolIcons]}
+                  {@const Icon = toolIcons[pattern.icon as keyof typeof toolIcons]}
+                  <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                    <Icon class="w-5 h-5" />
+                  </div>
+                {/if}
+                <span>{pattern.title}</span>
+              </a>
+              <p class="text-foreground-subtle text-xs mt-1">{pattern.description}</p>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/patterns" class="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors">
+          View all patterns
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
     </div>
 
     <!-- Quick Links -->
@@ -355,17 +355,11 @@
           </svg>
           Why Grove is Different
         </a>
-        <a href="/knowledge/specs/shade-spec" class="px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
-          Shade Protection
-        </a>
         <a href="/contact" class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           Contact Support
-        </a>
-        <a href="/vision" class="px-4 py-2 bg-surface-elevated text-foreground-muted border border-default rounded-lg hover:bg-surface transition-colors">
-          Our Vision
         </a>
       </div>
     </div>
