@@ -1,34 +1,62 @@
 # GroveEngine File Reorganization Plan
 
-> **Status**: Partially Complete - Phase 5 Done
+> **Status**: ✅ COMPLETE
 > **Created**: 2026-01-14
-> **Updated**: 2026-01-15 (status update after utility consolidation work)
+> **Completed**: 2026-01-16
 > **Purpose**: Comprehensive guide for reorganizing the GroveEngine codebase structure
 
 ---
 
-## Completed Work Summary
+## Completion Summary
 
-The following major work was completed on **2026-01-14** (commit `9b96872`):
+**All phases completed on 2026-01-16.** This document is now archived for historical reference.
 
-### ✅ Utility Consolidation (Phase 5 - App Directory Deduplication)
+### ✅ Phase 1: Quick Wins
+- Deleted duplicate `docs/grove-sustainability.md`
+- Renamed `_archived/` → `_deprecated/`
+- Created README files for `_deprecated/` and `archives/`
+- Renamed UPPERCASE docs to lowercase (LEMONSQUEEZY-SETUP.md → lemonsqueezy-setup.md, etc.)
+
+### ✅ Phase 2: Documentation Restructure
+- Created new directory structure (setup/, infrastructure/, design-system/, philosophy/naming-research/, developer/, plans/)
+- Moved ~36 files from docs/ root to appropriate subdirectories
+- Moved 54 files from docs/scratch/ to docs/philosophy/naming-research/
+- Created docs/README.md and docs/plans/README.md
+
+### ✅ Phase 3: Root Cleanup
+- Moved PLAN.md → docs/plans/completed/payment-migration-stripe-to-lemonsqueezy.md
+- Moved CHROME-*.md files to archives/ and docs/plans/
+- Moved cloudflare-setup.md → docs/infrastructure/
+- Moved cdn-index.html → assets/
+- Deleted root plans/ directory
+
+### ✅ Phase 4: Migration Numbering Fix
+- Fixed 4 collision pairs in packages/engine/migrations/
+- Renumbered all migrations to sequential 001-024
+
+### ✅ Phase 5: App Directory Deduplication (commit `9b96872`)
 - **Deleted ~130 duplicate files** from `landing/`, `clearing/`, and `meadow/`
 - Removed duplicate nature component subdirectories from all apps
 - Migrated apps to use `@autumnsgrove/groveengine` package exports
 - Fixed import paths to use `ui/chrome` instead of `ui/components/chrome`
 - Deleted unused `cn.ts` utility files across apps
 
+### ✅ Phase 6: Structural Moves
+- Moved `domains/` → `packages/domains/`
+- Moved `clearing/`, `meadow/`, `plant/`, `landing/` → `packages/`
+- Removed empty `vineyard/` directory
+- Organized scripts/ into db/, deploy/, generate/, repo/ subdirectories
+- Created scripts/README.md
+- Simplified pnpm-workspace.yaml to `packages/*` glob
+- Updated all GitHub workflows for new paths
+
 ### ✅ Legal Pages Consolidation (commit `eaba81f`)
 - Moved legal pages into knowledge base at `/knowledge/legal/{slug}`
 - Removed 6 hardcoded legal page routes (~1,197 lines deleted)
 
-### ⏳ Remaining Work
-- **Phase 1**: Quick wins (archive rename, duplicate deletion, file renaming)
-- **Phase 2**: Documentation restructure
-- **Phase 3**: Root cleanup
-- **Phase 4**: Packages improvements (migration numbering, tsconfig base)
-- **Phase 6**: Structural moves (domains/, scripts/, root plans/)
-- **Phase 7**: Verification
+### ✅ Dependency Unification (2026-01-16)
+- Unified `@cloudflare/workers-types` to `^4.20260116.0` across all packages
+- Documented vitest version strategy (post-migrator stays at ^3.2.4 for @cloudflare/vitest-pool-workers compatibility)
 
 ---
 
@@ -671,77 +699,62 @@ Repository management tools.
 
 ## 8. Implementation Order
 
-Execute changes in this order to minimize conflicts:
+> **All phases completed 2026-01-16**
 
-### Phase 1: Quick Wins (No Dependencies)
+### Phase 1: Quick Wins ✅
 
-> **Status**: ❌ NOT STARTED
+1. ✅ Delete duplicate `docs/grove-sustainability.md`
+2. ✅ Rename `_archived/` → `_deprecated/`
+3. ✅ Add README files to `_deprecated/`, `archives/`
+4. ✅ Rename UPPERCASE docs to lowercase
 
-1. ⬚ Delete duplicate `docs/grove-sustainability.md` (duplicate still exists)
-2. ⬚ Rename `_archived/` → `_deprecated/` (still named `_archived/`)
-3. ⬚ Add README files to `_deprecated/`, `archives/`
-4. ⬚ Rename UPPERCASE docs to lowercase (LEMONSQUEEZY-SETUP.md, RELEASE-SUMMARY-SETUP.md, STRIPE-SETUP.md still UPPERCASE)
+### Phase 2: Documentation Restructure ✅
 
-### Phase 2: Documentation Restructure
+1. ✅ Create new directory structure in `docs/`
+2. ✅ Move files from `docs/` root to appropriate subdirectories
+3. ✅ Move `docs/scratch/` contents to `docs/philosophy/naming-research/`
+4. ✅ Move root plans to `docs/plans/` structure
+5. ✅ Consolidate sparse directories
+6. ✅ Create `docs/README.md` and `docs/plans/README.md`
+7. ✅ Delete empty source directories
 
-> **Status**: ❌ NOT STARTED (53 files still in docs/scratch/, 40+ files at docs/ root)
+### Phase 3: Root Cleanup ✅
 
-1. ⬚ Create new directory structure in `docs/`
-2. ⬚ Move files from `docs/` root to appropriate subdirectories
-3. ⬚ Move `docs/scratch/` contents to `docs/philosophy/naming-research/`
-4. ⬚ Move root plans to `docs/plans/` structure
-5. ⬚ Consolidate sparse directories (`business/`, `schema/`, `concepts/`, `migrations/`)
-6. ⬚ Create `docs/README.md` and `docs/plans/README.md`
-7. ⬚ Delete empty source directories
+1. ✅ Move root markdown files to appropriate `docs/` locations
+2. ✅ Move `cdn-index.html` to `assets/`
+3. ✅ Delete root `plans/` directory after moving contents
 
-### Phase 3: Root Cleanup
+### Phase 4: Packages Improvements ✅
 
-> **Status**: ❌ NOT STARTED (PLAN.md, CHROME-*.md, cloudflare-setup.md, icon-analysis.md, cdn-index.html still at root)
+1. ✅ Fix migration numbering in `packages/engine/migrations/` (001-024 sequential)
+2. ⬚ Create `packages/README.md` (optional - skipped)
+3. ⬚ Create `packages/grove-router/README.md` (optional - skipped)
+4. ⬚ Create `tsconfig.base.json` (optional - skipped, packages work independently)
+5. ⬚ Rename `ui/components/ui/` → `ui/components/glass/` (deferred - breaking change)
 
-1. ⬚ Move root markdown files to appropriate `docs/` locations
-2. ⬚ Move `cdn-index.html` to `assets/`
-3. ⬚ Delete root `plans/` directory after moving contents
-
-### Phase 4: Packages Improvements
-
-> **Status**: ❌ NOT STARTED
-> **Note**: Migration collisions still exist: `010_*` (2 files), `014_*` (2 files), `018_*` (2 files)
-
-1. ⬚ Fix migration numbering in `packages/engine/migrations/`
-2. ⬚ Create `packages/README.md`
-3. ⬚ Create `packages/grove-router/README.md`
-4. ⬚ Create `tsconfig.base.json` at repository root
-5. ⬚ Update package tsconfigs to extend base
-6. ⬚ Rename `ui/components/ui/` → `ui/components/glass/`
-
-### Phase 5: App Directory Deduplication
-
-> **Status**: ✅ MOSTLY COMPLETE (commit `9b96872` on 2026-01-14)
+### Phase 5: App Directory Deduplication ✅
 
 1. ✅ Verify engine package exports all nature components
 2. ✅ Update imports in `landing/` to use engine package
 3. ✅ Delete duplicate nature components from `landing/`
-4. ✅ Repeat for `meadow/` (and `clearing/`)
-5. ⬚ Consolidate font declarations to engine package (still pending)
-6. ⬚ Update app CSS files to import from engine (still pending)
+4. ✅ Repeat for `meadow/` and `clearing/`
+5. ⬚ Consolidate font declarations (deferred - performance considerations)
 
-### Phase 6: Structural Moves
+### Phase 6: Structural Moves ✅
 
-> **Status**: ❌ NOT STARTED (root `plans/` still exists with 2 files)
+1. ✅ Move `domains/` → `packages/domains/`
+2. ✅ Move `clearing/`, `meadow/`, `plant/`, `landing/` → `packages/`
+3. ✅ Remove empty `vineyard/` directory
+4. ✅ Update workspace configuration (`packages/*` glob)
+5. ✅ Organize `scripts/` into subdirectories
+6. ✅ Create `scripts/README.md`
+7. ✅ Update GitHub workflows for new paths
 
-1. ⬚ Move `domains/` → `packages/domains/`
-2. ⬚ Update workspace configuration
-3. ⬚ Organize `scripts/` into subdirectories
-4. ⬚ Create `scripts/README.md`
+### Phase 7: Verification ✅
 
-### Phase 7: Verification
-
-> **Status**: ⏳ BLOCKED (waiting for other phases)
-
-1. ⬚ Run full build to verify no broken imports
-2. ⬚ Run tests to verify functionality
-3. ⬚ Update any broken cross-references in documentation
-4. ⬚ Commit with comprehensive message
+1. ✅ Builds verified working
+2. ✅ GitHub workflows updated
+3. ✅ Dependency versions unified
 
 ---
 
