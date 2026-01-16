@@ -83,8 +83,9 @@ marked.use({ renderer });
 // Re-export types for convenience
 export type { Doc, DocWithContent } from "$lib/types/docs";
 
-// Docs are at project root, not in landing folder
-const DOCS_ROOT = resolve(process.cwd(), "..", "docs");
+// Docs are at project root - landing is now at packages/landing/
+// so we need to go up two levels to reach the repo root
+const DOCS_ROOT = resolve(process.cwd(), "..", "..", "docs");
 
 /** Internal type with file path for content loading */
 interface DocInternal extends Doc {
