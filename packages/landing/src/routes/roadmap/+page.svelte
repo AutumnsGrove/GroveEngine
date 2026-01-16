@@ -104,7 +104,6 @@
 				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
 				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' },
-				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: true, icon: 'terminal', internal: true },
 				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: false, icon: 'database', internal: true }
 			]
@@ -124,6 +123,7 @@
 				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp' },
 				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests' },
 				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch' },
+				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: false, icon: 'terminal', internal: true },
 				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial' }
 			]
 		},
@@ -134,6 +134,7 @@
 			description: 'The grove becomes a community. Roots intertwine.',
 			features: [
 				{ name: 'Meadow', description: 'Social feed — connection without competition', done: false, major: true, icon: 'meadow' },
+				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, major: true, icon: 'terrarium' },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
 				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message' },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
@@ -143,7 +144,6 @@
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
 				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' },
 				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios' },
-				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, icon: 'terrarium' },
 				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave' },
 				{ name: 'Outpost', description: 'Community Minecraft — a server that waits for you', done: false, icon: 'outpost' }
 			]
@@ -613,6 +613,7 @@
 							wisp: 'text-sky-400',
 							forests: 'text-green-600',
 							porch: 'text-orange-400',
+							terminal: 'text-lime-500',
 							centennial: 'text-indigo-500'
 						}}
 						{@const borderMap = {
@@ -625,6 +626,7 @@
 							wisp: 'border-l-4 border-sky-400',
 							forests: 'border-l-4 border-green-600',
 							porch: 'border-l-4 border-orange-400',
+							terminal: 'border-l-4 border-lime-500',
 							centennial: 'border-l-4 border-indigo-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
