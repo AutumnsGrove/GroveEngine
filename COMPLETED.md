@@ -287,4 +287,296 @@
 
 ---
 
-*Last updated: 2026-01-07*
+---
+
+## January 2026 Sessions (Continued)
+
+### Jan 16, 2026 — TODOS Consolidation
+
+- ✅ Consolidated TODOS.md from ~2000 lines to ~340 lines
+- ✅ Created formal Amber ZIP export integration plan (`docs/plans/amber-zip-export-integration.md`)
+- ✅ Moved all historical completed items to COMPLETED.md
+
+### Jan 15, 2026 — V1 Release Planning
+
+**Decisions Made:**
+- Repo/Package Renaming → AT V1 LAUNCH
+- Branch Protection → WEEKLY RELEASES
+- Testing Infrastructure → NOW, BEFORE V1!
+- Repo Structure → KEEP MONO-REPO ✅
+- Code Discoverability → grove-find.sh created ✅
+- Spec Compliance → MERGE SPECS needed
+- DB Abstraction → Safety layer complete ✅
+
+**DB Safety Layer Completed:**
+- ✅ Designed safe DB abstraction layer (`packages/engine/src/lib/server/services/database-safety.ts`)
+- ✅ Added query validation/sanitization (blocks DDL, stacked queries)
+- ✅ Added destructive operation safeguards (row limits, protected tables, WHERE required)
+- ✅ Comprehensive test coverage (30 tests in `database-safety.test.ts`)
+
+### Jan 14, 2026 — SITE IS LIVE! 🎉
+
+**Milestone:** plant.grove.place is working! Users can sign up and get accounts.
+
+**Completed:**
+
+| Task | Status |
+|------|--------|
+| Signup Gate (LS Verification) | ✅ `SIGNUPS_ENABLED` env var added |
+| PR #336: JXL Encoding Review Fixes | ✅ MERGED |
+| Loam Blocklist Updates | ✅ 41 tests pass |
+| Subscription Management UI | ✅ 82 tests total |
+| Admin Sidebar Hover-to-Expand | ✅ Fixed |
+
+**PR #336 Details:**
+- Added idempotency documentation to migration
+- Removed duplicate `@jsquash/jxl` dependency
+- Removed unused `getImageData()` function
+- Client sends format metadata in FormData
+- Server persists format metadata to `image_hashes` table
+- Migrations ran on production (006, 008, 020)
+- Fixed migration schema mismatch (`key` → `id`)
+
+**Subscription Management UI:**
+- `/admin/account` page with billing, usage, plan changes, data export
+- `/api/billing` endpoints (GET, PATCH, PUT)
+- `/api/export` endpoint (POST with CSRF protection)
+- Security: Open redirect prevention, rate limiting, input validation
+- Component decomposition: 1200 → 315 lines
+- 82 total tests (29 billing + 28 export + 25 utility)
+
+### Jan 13, 2026 — Lemon Squeezy Migration
+
+**CODE COMPLETE:**
+- ✅ Created LemonSqueezyProvider in `packages/engine/src/lib/payments/lemonsqueezy/`
+- ✅ Wired up provider factory
+- ✅ Created checkout handler (`plant/src/routes/checkout/+server.ts`)
+- ✅ Created webhook handler (`plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`)
+- ✅ Ran database migration (`019_lemonsqueezy_migration.sql`)
+- ✅ Created all 8 product variants in LS Dashboard
+- ✅ Set all 11 environment variables via wrangler
+- ✅ Created webhook in LS Dashboard
+- ✅ Removed trial functionality (using full refund policy)
+- ✅ Deployed to plant.grove.place
+- ✅ Wrote documentation (`docs/LEMONSQUEEZY-SETUP.md`)
+
+**CI Fixes:**
+- ✅ Fixed missing esbuild dependency for Durable Objects compilation
+- ✅ Fixed TypeScript type casting for LS SDK attributes
+- ✅ All GitHub Actions workflows green
+
+### Jan 12, 2026 — Dynamic Navigation Pages
+
+**Completed:**
+- ✅ Fixed navigation pages not appearing (root cause: `site_settings` table missing)
+- ✅ Navigation toggle checkbox works in admin (`/admin/pages`)
+- ✅ Menu and Gallery pages now appear in navigation bar
+- ✅ Updated AGENT.md with critical lesson about isolating database queries
+
+**Technical Fixes:**
+- Added `building` check before `platform.env` access
+- Used truthy check for `show_in_nav` filter
+- Fixed prerender errors during SvelteKit build
+
+**KEY LESSON: Isolate Database Queries!**
+```typescript
+// ❌ BAD - cascading failure
+try {
+  const a = await db.prepare(...).all();
+  const b = await db.prepare(...).all();
+} catch {}
+
+// ✅ GOOD - isolated failures
+try { const a = await db.prepare(...).all(); } catch {}
+try { const b = await db.prepare(...).all(); } catch {}
+```
+
+---
+
+## Major Features Completed (January 2026)
+
+### 🛡️ Shade Implementation — ✅ COMPLETE
+
+> **Philosophy:** Users own their words. In a forest full of harvesters, this grove stays shaded.
+> **Status:** Free tier protection deployed and effective (blocks 90%+ of AI scrapers)
+
+| Task | Status |
+|------|--------|
+| Subscribe to Dark Visitors | ✅ |
+| Create Turnstile widget | ✅ |
+| TurnstileWidget.svelte component | ✅ |
+| Server-side verification | ✅ |
+| `/api/verify/turnstile` endpoint | ✅ |
+| CSP updated for challenges.cloudflare.com | ✅ |
+| Verification page `/verify` | ✅ |
+| `grove_verified` cookie (7-day expiry) | ✅ |
+| Help center article | ✅ |
+| "Block AI Bots" toggle ON | ✅ |
+| "Bot Fight Mode" enabled | ✅ |
+| Comprehensive robots.txt | ✅ |
+| `noai, noimageai` meta tags | ✅ |
+| `X-Robots-Tag` header | ✅ |
+| `/shade` policy page | ✅ |
+| Footer link to /shade | ✅ |
+
+### 💳 Stripe Production Configuration — ✅ COMPLETE
+
+- ✅ 4 products created (Seedling $8, Sapling $12, Oak $25, Evergreen $35)
+- ✅ 8 prices created (monthly + yearly for each tier)
+- ✅ Live price IDs configured
+- ✅ 14-day trial period configured
+- ✅ Webhook handler ready
+
+### 🚦 Rate Limiting (Threshold) — CORE COMPLETE
+
+> **Spec:** `docs/patterns/threshold-pattern.md`
+
+**Built:**
+- ✅ KV-based rate limiting with tier config
+- ✅ Endpoint-specific rate limits (auth, posts, uploads, AI)
+- ✅ `checkRateLimit()` middleware helper
+- ✅ `checkTenantRateLimit()` for tier-based limiting
+- ✅ Abuse tracking with graduated response
+- ✅ Rate limit headers (`X-RateLimit-*`)
+- ✅ Full test coverage (57 tests)
+- ✅ `getClientIP()` helper
+
+### 📊 Clearing (Status Page) — ✅ DEPLOYED
+
+> **Live at:** https://status.grove.place
+
+**Built:**
+- 7 Svelte components (GlassStatusBanner, GlassStatusCard, etc.)
+- Full routes: status page, incident details, RSS feed
+- D1 queries in `src/lib/server/status.ts`
+- Database migration deployed
+
+### ✅ Glass Design System Overhaul — 100% COMPLETE
+
+> **Design System Docs:** `docs/patterns/prism-pattern.md`
+> **Components:** 8 glass components in `packages/engine/src/lib/ui/components/ui/Glass*.svelte`
+
+| Area | Status |
+|------|--------|
+| Admin Dashboard | ✅ |
+| Admin Layout | ✅ |
+| Vineyard | ✅ |
+| Plant (all pages) | ✅ |
+| Landing (all pages) | ✅ |
+| Forest | ✅ |
+| Admin Pages (all 7) | ✅ |
+| Knowledge Base | ✅ |
+| Domains App | ✅ |
+
+### ✅ OG Images & Platform Icons — COMPLETE
+
+**Static icons deployed:**
+- `apple-touch-icon.png` (180×180)
+- `favicon-32x32.png`
+- `icon-192.png`, `icon-512.png`
+- `site.webmanifest`
+- `safari-pinned-tab.svg`
+
+**Dynamic OG images:**
+- Separate Cloudflare Worker at `og.grove.place`
+- Uses `workers-og` for image generation
+- API: `GET https://og.grove.place/?title=X&subtitle=Y&accent=HEX`
+
+### ✅ Shade Routing Fix — COMPLETE (2025-12-31)
+
+- Fixed grove-router default fallback
+- Added vineyard route to SUBDOMAIN_ROUTES
+- Deployed engine package to groveengine Pages project
+- Fixed Turnstile CSRF validation error
+
+### ✅ GlassCarousel — COMPLETE (2026-01-01)
+
+Added to vineyard showcase with:
+- Variant switcher (default/frosted/minimal)
+- Autoplay toggle
+- Custom seasonal slide content
+- Swipe, drag, and keyboard navigation hints
+
+### ✅ Admin Panel Overhaul — COMPLETE (2025-12-29)
+
+- Applied glassmorphism design to sidebar and content
+- Replaced emojis with Lucide icons
+- Added collapsible sidebar with animations
+- Created `GlassConfirmDialog` component
+- Added inline delete button with confirmation
+- Updated dashboard stats
+- Added "What's New in the Grove" roadmap preview
+- Fixed vine/leaf background visibility
+
+### ✅ Build Error Cleanup — COMPLETE (2025-12-26)
+
+**260 errors fixed → 0 errors across all projects!**
+- Fixed vite.config.js, POSTS_DB→DB, locals.tenant→locals.tenantId
+- Renamed shop API files .js→.ts
+- Fixed GutterItem types, null safety, error handling
+- Fixed all shop API type issues
+- Fixed all Svelte component type issues
+- Fixed all test mock type compatibility
+
+### ✅ Security Audit — CRITICAL ISSUES FIXED (2026-01-08)
+
+> **Audit Report:** `archives/audit-reports/grove-1.0-pre-release-audit.md`
+
+| Issue | Fix |
+|-------|-----|
+| SSR Sanitization Bypass | `sanitizeServerSafe()` regex-based fallback |
+| Blog Posts Not Sanitized | `parseMarkdownContent()` calls `sanitizeMarkdown()` |
+| Recursive Markdown XSS | Recursive content wrapped in `sanitizeMarkdown()` |
+| No Tenant Isolation in R2 | Keys prefixed with `${tenantId}/` |
+| No Ownership on Delete | Verifies tenant prefix before deletion |
+| PII Logged in Production | Logs `userInfo.sub` not email |
+
+### ✅ Email Unsubscribe Flow — COMPLETE (2026-01-01)
+
+- HMAC-SHA256 token generation
+- Unsubscribe page at `/unsubscribe?email=x&token=y`
+- Updated email templates with unsubscribe footer
+- Added `List-Unsubscribe` headers
+
+### ✅ Spring Mode — COMPLETE (2025-12-22)
+
+Full spring mode implemented:
+- Blossom pink logo
+- Spring birds (Robin, Bluebird)
+- Spring flowers (Tulip, Crocus, Daffodil)
+- Fresh yellow-green foliage
+- Spring sky gradients
+- All components registered in asset viewer
+
+### ✅ SST Removed (2026-01-05)
+
+> **Decision:** Complexity not worth it for managing 8 static Stripe price IDs.
+
+- Removed `sst.config.ts` and SST dependency
+- Stripe products/prices managed in Stripe Dashboard
+- Price IDs in `plant/src/lib/server/stripe.ts`
+- Archived: `_archived/sst-migration-plan-archived-2026-01-05.md`
+
+### 🎉 Launch Milestone (2025-12-24)
+
+**Grove officially launched to the community!**
+- Created launch email with autumn forest screenshot
+- Extracted 59 subscriber emails from production
+- Sent initial launch email + follow-up with clickable link
+- Both emails delivered to all 59 subscribers
+
+### Plant Signup Flow Working (2025-12-24)
+
+**Fixed:**
+- OAuth flow (multiple issues)
+- CSRF 403 errors (custom handling for Cloudflare Pages)
+- GitHub Actions workflow for plant deployment
+- Stripe webhook events
+
+**Files created:**
+- `plant/src/hooks.server.ts` - Custom CSRF handling
+- `.github/workflows/deploy-plant.yml` - CI/CD for plant
+
+---
+
+*Last updated: 2026-01-16*
