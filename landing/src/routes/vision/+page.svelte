@@ -1,7 +1,7 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui/ui';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry
