@@ -207,12 +207,13 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
   },
 
   // Patterns - Amber (golden architecture)
+  // Using amber-700 for better contrast accessibility (4.5:1 ratio on white)
   patterns: {
     iconBg: 'bg-amber-100',
     iconBgDark: 'dark:bg-amber-900/30',
-    text: 'text-amber-600',
+    text: 'text-amber-700',
     textDark: 'dark:text-amber-400',
-    textHover: 'hover:text-amber-700',
+    textHover: 'hover:text-amber-800',
     textHoverDark: 'dark:hover:text-amber-300',
     badgeBg: 'bg-amber-100',
     badgeBgDark: 'dark:bg-amber-900/30',
@@ -254,69 +255,6 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
 };
 
 /**
- * Get colors for a specific category
- */
-export function getCategoryColors(category: DocCategory): CategoryColors {
-  return kbCategoryColors[category];
-}
-
-/**
- * Get combined class string for icon background
- */
-export function getIconBgClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.iconBg} ${colors.iconBgDark}`;
-}
-
-/**
- * Get combined class string for text color
- */
-export function getTextClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.text} ${colors.textDark}`;
-}
-
-/**
- * Get combined class string for text with hover
- */
-export function getLinkClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.text} ${colors.textDark} ${colors.textHover} ${colors.textHoverDark}`;
-}
-
-/**
- * Get combined class string for badge
- */
-export function getBadgeClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.badgeBg} ${colors.badgeBgDark} ${colors.badgeText} ${colors.badgeTextDark}`;
-}
-
-/**
- * Get combined class string for CTA section
- */
-export function getCtaClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.ctaBg} ${colors.ctaBgDark} ${colors.ctaBorder} ${colors.ctaBorderDark}`;
-}
-
-/**
- * Get combined class string for card background
- */
-export function getCardBgClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.cardBg} ${colors.cardBgDark}`;
-}
-
-/**
- * Get combined class string for button
- */
-export function getButtonClasses(category: DocCategory): string {
-  const colors = kbCategoryColors[category];
-  return `${colors.buttonBg} ${colors.buttonHover}`;
-}
-
-/**
  * Human-readable category labels
  */
 export const categoryLabels: Record<DocCategory, string> = {
@@ -330,9 +268,3 @@ export const categoryLabels: Record<DocCategory, string> = {
   marketing: 'Marketing & Launch',
 };
 
-/**
- * Get the human-readable label for a category
- */
-export function getCategoryLabel(category: DocCategory): string {
-  return categoryLabels[category];
-}
