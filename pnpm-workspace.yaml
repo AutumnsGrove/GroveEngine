@@ -1,7 +1,2 @@
 packages:
   - 'packages/*'
-  - 'landing'
-  - 'clearing'
-  - 'plant'
-  - 'vineyard'
-  - 'meadow'
