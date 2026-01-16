@@ -104,44 +104,35 @@ Use a **mix approach** for efficiency:
 
 ---
 
-## Phase 1: High-Priority Articles (Do First)
+## Phase 1: High-Priority Articles ✅ COMPLETE (Jan 16, 2026)
 
-These articles are most likely to be outdated or have user-facing impact:
+All 16 high-priority articles reviewed and updated. Changes committed to `claude/update-docs-v1-g3unr`.
 
 ### Customization & Features
-- [ ] `custom-fonts.md` — **KNOWN ISSUE**: Claims 20 fonts, now 11
-- [ ] `choosing-a-theme.md` — Verify theme list matches available themes
-- [ ] `the-markdown-editor.md` — Verify editor features match description
+- [x] `custom-fonts.md` — **FIXED**: Removed non-existent custom font upload feature, added "coming soon" note for Evergreen
+- [x] `choosing-a-theme.md` — **FIXED**: Corrected font availability (all plans get all 10 fonts), updated navigation paths, removed non-existent theme customizer
+- [x] `the-markdown-editor.md` — **✅ VERIFIED**: All features match implementation (no changes needed)
 
 ### Billing & Plans
-- [ ] `choosing-your-plan.md` — Verify tier names, prices, limits
-- [ ] `understanding-your-plan.md` — Verify usage tracking, Centennial criteria
-- [ ] `upgrading-or-downgrading.md` — Verify the actual flow matches
-- [ ] `centennial-status.md` — Verify earning criteria matches implementation
+- [x] `choosing-your-plan.md` — **FIXED**: Corrected font/theme confusion, marked future tiers as "coming soon", added Analytics feature
+- [x] `understanding-your-plan.md` — **FIXED**: Updated tier table (themes → fonts), corrected feature lists to match tiers.ts
+- [x] `upgrading-or-downgrading.md` — **FIXED**: Corrected navigation path (Account vs Settings), fixed upgrade/downgrade tables, removed false font claim
+- [x] `centennial-status.md` — **✅ VERIFIED**: Earning criteria accurate (no changes needed)
 
 ### Account & Data (Updated in PR #341)
-- [ ] `account-deletion.md` — **✅ Recently updated** — Quick verify support-based flow is accurate
-  - Check: "Account & Subscription → Danger Zone → email link" flow matches
-  - Check: Data retention timelines still accurate
-- [ ] `exporting-your-content.md` — **✅ Recently updated** — Quick verify export UI matches
-  - Check: "Account & Subscription → Your Data" section exists and matches
-  - Check: JSON format description is accurate
-- [ ] `data-portability.md` — **✅ Recently updated** — Quick verify migration guidance
-  - Check: JSON export description matches actual format
-  - Check: "Amber update" timeline reference is appropriate
+- [x] `account-deletion.md` — **✅ VERIFIED**: Support-based flow via Danger Zone matches implementation
+- [x] `exporting-your-content.md` — **✅ VERIFIED**: DataExportCard implementation matches article
+- [x] `data-portability.md` — **✅ VERIFIED**: Export format and process accurate
 
 ### Getting Started
-- [ ] `creating-your-account.md` — **🟡 MODERATE**: Verify matches Heartwood/Google OAuth flow
-  - Check: Remove any email/password signup references (Google only)
-  - Check: Verify sign-in flow description is accurate
-  - Check: Note that more auth options coming later
-- [ ] `understanding-the-admin-panel.md` — Verify navigation matches current UI
-- [ ] `wanderers-and-pathfinders.md` — Verify terminology matches implementation
+- [x] `creating-your-account.md` — **✅ VERIFIED**: Google OAuth flow accurate (no changes needed)
+- [x] `understanding-the-admin-panel.md` — **FIXED**: Added Curios, Analytics, Trails sections; separated Account/Settings; updated navigation
+- [x] `wanderers-and-pathfinders.md` — **✅ VERIFIED**: Terminology matches AGENT.md (no changes needed)
 
-### Foundational (Previously Missing from Review)
-- [ ] `what-is-grove.md` — Core explainer, verify feature claims match reality
-- [ ] `writing-your-first-post.md` — Onboarding flow, verify UI matches
-- [ ] `groves-vision.md` — Philosophy doc, verify links and claims
+### Foundational
+- [x] `what-is-grove.md` — **✅ VERIFIED**: All links exist, feature claims accurate
+- [x] `writing-your-first-post.md` — **FIXED**: Corrected sidebar navigation ("Blog Posts"), replaced non-existent fields with actual "Description"
+- [x] `groves-vision.md` — **✅ VERIFIED**: All links exist, philosophy accurate
 
 ---
 
@@ -258,17 +249,18 @@ verified_by: autumn
 
 | Category | Total | Reviewed | Updated | Notes |
 |----------|-------|----------|---------|-------|
-| High-Priority | 16 | 0 | 0 | Phase 1 (includes 3 foundational) |
+| High-Priority | 16 | 16 | 9 | **✅ Phase 1 COMPLETE** — All verified, 9 updated, 7 already accurate |
 | Features | 18 | 0 | 0 | Phase 2 (includes 4 privacy/security) |
 | Troubleshooting | 5 | 0 | 0 | Phase 3 |
 | Legal | 6 | 6 | 3 | **✅ Phase 4 COMPLETE** — Stripe → LemonSqueezy |
-| **Total** | **45** | **6** | **3** | 40 help center + 5 legal (GDPR is help center) |
+| **Total** | **45** | **22** | **12** | 40 help center + 5 legal (GDPR is help center) |
 
 ### Review Session Log
 
 | Date | Articles Reviewed | Issues Found | Notes |
 |------|-------------------|--------------|-------|
-| 2026-01-16 | 6 legal docs | 3 critical (Stripe refs) | Phase 4 complete — all legal docs updated |
+| 2026-01-16 (morning) | 6 legal docs | 3 critical (Stripe refs) | Phase 4 complete — all legal docs updated |
+| 2026-01-16 (afternoon) | 16 high-priority help center | 9 requiring updates | Phase 1 complete — font/theme confusion resolved, navigation paths fixed, non-existent features removed |
 
 ---
 
