@@ -87,6 +87,34 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 - **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
 - **Available Fonts:** See `packages/engine/static/fonts/` for the full collection
 
+### ⚠️ CRITICAL: Tailwind Preset Required
+**All consumer apps MUST use the engine's Tailwind preset.**
+
+The engine provides a shared Tailwind preset (`packages/engine/src/lib/ui/tailwind.preset.js`) that defines:
+- Custom z-index scale (`z-grove-mobile-menu`, `z-grove-fab`, etc.)
+- Grove color palette, typography, animations
+- Shared design tokens and utilities
+
+**Every app's `tailwind.config.js` must include:**
+
+```javascript
+import grovePreset from '../engine/src/lib/ui/tailwind.preset.js';
+
+export default {
+  presets: [grovePreset],
+  content: [
+    './src/**/*.{html,js,svelte,ts}',
+    // REQUIRED: Scan engine components for Tailwind classes
+    '../engine/src/lib/**/*.{html,js,svelte,ts}'
+  ],
+  // ... rest of config
+};
+```
+
+**Why this matters:** Engine components use custom Tailwind utilities like `z-grove-mobile-menu`. Without the preset, Tailwind doesn't know what these classes mean and won't generate CSS for them—causing invisible styling bugs that are hard to debug (elements render but stack incorrectly, animations don't work, etc.).
+
+This lesson learned the hard way: the mobile menu z-index fix (#367) only worked in the engine because other apps weren't importing the preset that defines `z-grove-mobile-menu`.
+
 ## Architecture Notes
 - Multi-tenant architecture with subdomain routing
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)
