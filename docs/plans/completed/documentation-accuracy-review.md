@@ -165,13 +165,15 @@ All 16 high-priority articles reviewed and updated. Changes committed to `claude
 
 ---
 
-## Phase 3: Troubleshooting & Support
+## Phase 3: Troubleshooting & Support ✅ COMPLETE (Jan 16, 2026)
 
-- [ ] `my-site-isnt-loading.md` — Verify troubleshooting steps work
-- [ ] `browser-compatibility.md` — Verify supported browsers list
-- [ ] `checking-grove-status.md` — Verify status page URL
-- [ ] `contact-support.md` — Verify support email/methods
-- [ ] `sessions-and-cookies.md` — Verify cookie information
+All 5 troubleshooting/support articles reviewed. Changes committed to `claude/update-docs-v1-g3unr`.
+
+- [x] `my-site-isnt-loading.md` — **✅ VERIFIED**: All troubleshooting steps accurate (no changes needed)
+- [x] `browser-compatibility.md` — **FIXED**: Removed "Comments and reactions function" (not implemented yet)
+- [x] `checking-grove-status.md` — **FIXED**: Removed non-existent "Messages" section reference, removed Meadow from components table
+- [x] `contact-support.md` — **✅ VERIFIED**: Support email and response times accurate (no changes needed)
+- [x] `sessions-and-cookies.md` — **FIXED**: Removed non-existent "Active Sessions" UI; added to TODOS.md as deferred feature
 
 ---
 
@@ -251,9 +253,9 @@ verified_by: autumn
 |----------|-------|----------|---------|-------|
 | High-Priority | 16 | 16 | 9 | **✅ Phase 1 COMPLETE** — All verified, 9 updated, 7 already accurate |
 | Features | 17 | 17 | 10 | **✅ Phase 2 COMPLETE** — Meadow "Full Bloom" notices, cover images, navigation fixes |
-| Troubleshooting | 5 | 0 | 0 | Phase 3 |
+| Troubleshooting | 5 | 5 | 3 | **✅ Phase 3 COMPLETE** — Comments/Meadow refs removed, Active Sessions UI → TODOS.md |
 | Legal | 6 | 6 | 3 | **✅ Phase 4 COMPLETE** — Stripe → LemonSqueezy |
-| **Total** | **44** | **39** | **22** | 40 help center + 4 legal (GDPR is help center) |
+| **Total** | **44** | **44** | **25** | 40 help center + 4 legal (GDPR is help center) |
 
 ### Review Session Log
 
@@ -263,6 +265,7 @@ verified_by: autumn
 | 2026-01-16 (afternoon) | 16 high-priority help center | 9 requiring updates | Phase 1 complete — font/theme confusion resolved, navigation paths fixed, non-existent features removed |
 | 2026-01-16 (evening) | 3 theme-related docs | Theme/font clarification | Added Foliage (First Buds/Full Bloom) terminology to choosing-a-theme.md, choosing-your-plan.md, upgrading-or-downgrading.md — addresses PR #363 review feedback |
 | 2026-01-16 (evening) | 17 Phase 2 articles | 10 requiring updates | **Phase 2 complete** — Added "Full Bloom" notices to all Meadow/social features, fixed cover images, corrected Account nav path, verified Wisp ZDR implementation |
+| 2026-01-16 (night) | 5 Phase 3 articles | 3 requiring updates | **Phase 3 complete** — Removed unimplemented feature references (comments, Messages section, Meadow status component, Active Sessions UI); added Active Sessions to TODOS.md |
 
 ---
 
@@ -317,3 +320,4 @@ docs/
 | 2026-01-16 | Rebased with main after PR #341 merged: marked account-deletion, exporting-your-content, data-portability as recently updated; removed account deletion implementation gap (now support-based flow); added new verification sources for admin account page and data export | Claude |
 | 2026-01-16 | **Phase 4 Complete:** Updated all 6 legal docs — replaced Stripe → LemonSqueezy in privacy-policy.md, terms-of-service.md; verified refund-policy.md, acceptable-use-policy.md, dmca-policy.md, data-portability-separation.md | Claude |
 | 2026-01-16 | **Phase 2 Complete:** Reviewed all 17 feature articles. Key findings: (1) Meadow/comments not implemented yet → added "Coming in Full Bloom" notices; (2) Featured images don't exist → updated to "Cover images coming soon", added to TODOS.md; (3) Data export is in Account not Settings; (4) Verified Wisp actually uses ZDR providers; (5) Updated why-grove-is-different.md to reflect Meadow features are future | Claude |
+| 2026-01-16 | **Phase 3 Complete:** Reviewed all 5 troubleshooting/support articles. Key findings: (1) browser-compatibility.md mentioned non-existent comments feature; (2) checking-grove-status.md referenced non-existent "Messages" section and listed Meadow as status component; (3) sessions-and-cookies.md described non-existent "Active Sessions" UI → added to TODOS.md as deferred feature | Claude |

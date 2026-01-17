@@ -33,7 +33,6 @@ For readers visiting your blog:
 - Images display
 - Theme renders as intended
 - Navigation works
-- Comments and reactions function
 
 For you in the admin panel:
 - Editor works correctly

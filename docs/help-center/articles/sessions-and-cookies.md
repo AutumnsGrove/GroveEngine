@@ -35,9 +35,11 @@ Your session cookie only contains a random ID, not your email, password, or any 
 2. We mark it "HttpOnly" (JavaScript can't read it)
 3. It expires after 30 days
 
-## Can I See My Active Sessions?
+## Managing Your Session
 
-Yes! Go to **Settings → Security → Active Sessions** to see every device where you're logged in. You can log out of any device from there, or hit "Log out everywhere" if you think something's wrong.
+Currently, Grove doesn't offer a session management interface. If you want to log out of all devices, the safest approach is to log out from your current device—your session cookie is unique to each browser.
+
+If you're concerned about unauthorized access, [contact support](/contact). We can help you secure your account.
 
 ## Why Does My Login Work Across All Grove Sites?
 

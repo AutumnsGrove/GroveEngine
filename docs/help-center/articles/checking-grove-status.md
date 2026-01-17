@@ -51,8 +51,6 @@ You can subscribe to status updates via RSS at `status.grove.place/feed`. Add th
 - An incident is resolved
 - Maintenance is scheduled
 
-You can also check your admin panel. Active incidents appear in the **Messages** section.
-
 ## What the components mean
 
 | Component | What it covers |
@@ -60,7 +58,6 @@ You can also check your admin panel. Active incidents appear in the **Messages**
 | Blog Engine | Publishing, editing, viewing blog posts |
 | CDN | Image and media loading |
 | Authentication | Signing in, session management |
-| Meadow | Community feed, reactions, voting |
 | Payments | Subscription billing, plan changes |
 | API | Backend services powering everything |
 

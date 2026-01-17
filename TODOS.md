@@ -180,6 +180,18 @@
 - [ ] Include cover images in social media previews (og:image meta tags)
 - [ ] Include cover images in RSS feed entries
 
+## Active Sessions Management UI
+> **Found during:** Help center documentation review (Phase 3)
+> **Status:** Not implemented, docs updated to remove reference
+> **Note:** Also mentioned under DO Phase 1 (Heartwood) as "manage sessions" UI
+
+- [ ] Create Settings → Security section in admin panel
+- [ ] Add Active Sessions page showing all logged-in devices
+- [ ] Display device type, browser, location (approximate), and last active time
+- [ ] Allow users to revoke individual sessions
+- [ ] Add "Log out all devices" bulk action
+- [ ] Integrate with Heartwood SessionDO for session management
+
 ## Amber ZIP Export Integration
 > **Plan:** `docs/plans/amber-zip-export-integration.md`
 > **Status:** Plan complete, ready for implementation post-v1
