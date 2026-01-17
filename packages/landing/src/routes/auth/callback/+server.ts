@@ -9,6 +9,50 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 /**
+ * Get client IP from request headers (Cloudflare provides CF-Connecting-IP)
+ */
+function getClientIP(request: Request): string {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown"
+  );
+}
+
+/**
+ * Simple KV-based rate limiting for auth endpoints
+ * Returns true if rate limited, false if allowed
+ */
+async function isRateLimited(
+  kv: KVNamespace,
+  key: string,
+  limit: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  const now = Math.floor(Date.now() / 1000);
+  const windowKey = `ratelimit:${key}:${Math.floor(now / windowSeconds)}`;
+
+  try {
+    const current = await kv.get(windowKey);
+    const count = current ? parseInt(current, 10) : 0;
+
+    if (count >= limit) {
+      return true; // Rate limited
+    }
+
+    // Increment counter with TTL
+    await kv.put(windowKey, String(count + 1), {
+      expirationTtl: windowSeconds,
+    });
+
+    return false;
+  } catch {
+    // On error, allow the request (fail open for auth)
+    return false;
+  }
+}
+
+/**
  * Map error codes to user-friendly messages
  */
 const ERROR_MESSAGES: Record<string, string> = {
@@ -25,11 +69,40 @@ function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  // TODO(security): Add server-side rate limiting
-  // Limit: 5 failed auth attempts per 15 minutes per IP
-  // Use Cloudflare Workers rate limiting or KV-based counter
-  // Client-side rate limiting in $lib/groveauth/rate-limit.ts is bypassable
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
+  // Server-side rate limiting to prevent brute force attacks
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const clientIp = getClientIP(request);
+    const rateLimited = await isRateLimited(
+      kv,
+      `auth-callback:${clientIp}`,
+      10, // 10 attempts
+      900, // per 15 minutes
+    );
+
+    if (rateLimited) {
+      console.warn("[Auth Callback] Rate limited:", { ip: clientIp });
+      return new Response(
+        JSON.stringify({
+          error: "rate_limited",
+          message: "Too many login attempts. Please wait before trying again.",
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": "900",
+          },
+        },
+      );
+    }
+  }
 
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -108,13 +181,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       const errorData = (await tokenResponse.json()) as
         | Record<string, unknown>
         | unknown;
+      // Only log detailed debugging info in development
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
-        error: errorData,
-        authBaseUrl,
-        clientId,
-        hasSecret: !!clientSecret,
-        redirectUri,
+        error:
+          typeof errorData === "object" && errorData !== null
+            ? (errorData as Record<string, unknown>)?.error
+            : "unknown",
+        // Include detailed config only in development to avoid leaking in production logs
+        ...(import.meta.env.DEV && {
+          authBaseUrl,
+          clientId,
+          hasSecret: !!clientSecret,
+          redirectUri,
+        }),
       });
       // Include API error for debugging (temporarily)
       const debugError =
