@@ -134,7 +134,8 @@
 		position: fixed;
 		bottom: 1rem;
 		right: 1rem;
-		/* z-40 equivalent - stays below mobile menu (z-9990+) */
+		/* grove-fab level (40) - stays below mobile menu (9990+) */
+		/* See tailwind.preset.js for the full z-index scale */
 		z-index: 40;
 	}
 	/* Show only on mobile (tablet and desktop have sidebar TOC) */

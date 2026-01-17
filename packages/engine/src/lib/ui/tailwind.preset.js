@@ -279,6 +279,43 @@ export default {
         'grove': '8px',
         'grove-lg': '16px',
       },
+
+      // ─────────────────────────────────────────────────────────────
+      // Z-INDEX SCALE
+      // ─────────────────────────────────────────────────────────────
+      // A semantic z-index system for consistent UI layering.
+      //
+      // Usage: z-grove-sticky, z-grove-modal, z-grove-mobile-menu, etc.
+      //
+      // Hierarchy (lowest to highest):
+      //   base (0)      → Default elements
+      //   raised (10)   → Elevated cards, hover states
+      //   sticky (20)   → Sticky headers, navbars
+      //   dropdown (30) → Dropdowns, popovers, select menus
+      //   fab (40)      → Floating action buttons, mobile TOC
+      //   overlay (50)  → Overlays, backdrops, dimmed backgrounds
+      //   modal (60)    → Modals, dialogs, sheets
+      //   toast (70)    → Toast notifications, snackbars
+      //   tooltip (80)  → Tooltips (highest normal UI)
+      //   mobile-menu (9990/9999) → Mobile navigation (always on top)
+      //
+      // Note: Mobile menu uses high values (9990+) to ensure it
+      // appears above glass elements with backdrop-filter, which
+      // create new stacking contexts.
+      // ─────────────────────────────────────────────────────────────
+      zIndex: {
+        'grove-base': '0',
+        'grove-raised': '10',
+        'grove-sticky': '20',
+        'grove-dropdown': '30',
+        'grove-fab': '40',
+        'grove-overlay': '50',
+        'grove-modal': '60',
+        'grove-toast': '70',
+        'grove-tooltip': '80',
+        'grove-mobile-menu-backdrop': '9990',
+        'grove-mobile-menu': '9999',
+      },
     },
   },
   plugins: [

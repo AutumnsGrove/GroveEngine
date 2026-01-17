@@ -86,8 +86,8 @@
     </ul>
   </nav>
 
-  <!-- Mobile TOC Button - z-40 ensures this stays below mobile menu (z-9990+) -->
-  <div class="lg:hidden fixed bottom-6 right-6 z-40">
+  <!-- Mobile TOC Button - uses grove z-index scale (fab layer, below mobile menu) -->
+  <div class="lg:hidden fixed bottom-6 right-6 z-grove-fab">
     <button
       type="button"
       onclick={() => isOpen = !isOpen}

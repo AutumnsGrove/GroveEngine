@@ -102,20 +102,20 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<!-- Backdrop (mobile only) -->
+<!-- Backdrop (mobile only) - uses grove z-index scale -->
 {#if open}
 	<button
 		type="button"
-		class="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm transition-opacity md:hidden"
+		class="fixed inset-0 z-grove-mobile-menu-backdrop bg-black/50 backdrop-blur-sm transition-opacity md:hidden"
 		onclick={handleClose}
 		aria-label="Close menu"
 	></button>
 {/if}
 
-<!-- Slide-out panel (mobile only) -->
+<!-- Slide-out panel (mobile only) - uses grove z-index scale -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-[9999] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-all duration-300 ease-out flex flex-col md:hidden {open
+	class="fixed top-0 right-0 z-grove-mobile-menu h-full w-64 transform bg-surface border-l border-default shadow-xl transition-all duration-300 ease-out flex flex-col md:hidden {open
 		? 'translate-x-0 visible'
 		: 'translate-x-full invisible'}"
 	role="dialog"
