@@ -44,6 +44,33 @@ If your PR changes user-facing behavior, you should either update the docs in th
 
 ---
 
+## Automated Freshness Checks
+
+A GitHub Actions workflow (`.github/workflows/docs-freshness.yml`) automatically monitors documentation freshness:
+
+**When it runs:**
+- Weekly on Monday mornings (scheduled)
+- On any PR that touches `docs/help-center/` or `docs/legal/`
+- Manually via workflow dispatch
+
+**What it does:**
+- Scans all help center articles for `last_verified` dates
+- Flags articles older than 90 days
+- On PRs: Comments with a list of stale articles
+- On scheduled runs: Creates a GitHub issue if stale docs are found
+
+**Example output:**
+```
+⚠️ Found 3 stale articles
+
+| Article | Status | Last Verified |
+|---------|--------|---------------|
+| choosing-your-plan.md | 95 days | 2026-01-16 |
+| understanding-your-plan.md | 92 days | 2026-01-16 |
+```
+
+---
+
 ## Quarterly Review Process
 
 Every quarter, perform a brief review of high-churn documentation areas:
