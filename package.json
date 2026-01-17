@@ -22,6 +22,7 @@
     "test:clearing": "pnpm --filter grove-clearing test:run"
   },
   "devDependencies": {
+    "sharp": "^0.34.5",
     "wrangler": "^4.54.0"
   },
   "pnpm": {

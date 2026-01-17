@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Generate Logo PNGs for Email Assets
+ * Generate Logo PNGs for All Packages
  *
- * Creates PNG versions of the Grove tree logo for all 5 seasons
- * at 16px, 24px, and 32px sizes for email compatibility.
+ * Creates PNG versions of the Grove tree logo:
+ * - Favicon PNGs for all packages (32x32, 180x180, 192x192, 512x512)
+ * - Seasonal variants for email assets
+ * - Combined seasonal logos for marketing
  *
- * Usage: node scripts/generate-logo-pngs.mjs
+ * Usage: node scripts/generate/generate-logo-pngs.mjs
  */
 
 import sharp from "sharp";
@@ -14,8 +16,18 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = join(__dirname, "../../docs/internal/email-assets");
-const LANDING_STATIC_DIR = join(__dirname, "../../landing/static");
+const ROOT_DIR = join(__dirname, "../..");
+const OUTPUT_DIR = join(ROOT_DIR, "docs/internal/email-assets");
+
+// All packages that need favicon assets
+const PACKAGES = [
+  "packages/landing",
+  "packages/engine",
+  "packages/clearing",
+  "packages/plant",
+  "packages/domains",
+  "packages/meadow",
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEASONAL COLOR PALETTES (from Logo.svelte)
@@ -60,7 +72,7 @@ const SEASONAL_PALETTES = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG PATHS (from Logo.svelte)
+// SVG PATHS (from Logo.svelte - trunk extends to y=100)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PATHS = {
@@ -70,8 +82,8 @@ const PATHS = {
   tier2Light: "M50 20 L50 35 L88 50 Z",
   tier3Dark: "M50 38 L18 68 L50 54 Z",
   tier3Light: "M50 38 L50 54 L82 68 Z",
-  trunkDark: "M50 54 L42 58 L46 92 L50 92 Z",
-  trunkLight: "M50 54 L58 58 L54 92 L50 92 Z",
+  trunkDark: "M50 54 L42 58 L46 100 L50 100 Z",
+  trunkLight: "M50 54 L58 58 L54 100 L50 100 Z",
 };
 
 const ROTATION = -12; // Windswept organic feel
@@ -105,43 +117,66 @@ function generateSvg(season, { rotation = ROTATION } = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PNG GENERATION
+// PNG GENERATION FOR PACKAGES
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SIZES = [16, 24, 32, 512];
+const FAVICON_SIZES = {
+  "favicon-32x32.png": 32,
+  "apple-touch-icon.png": 180,
+  "icon-192.png": 192,
+  "icon-512.png": 512,
+};
+
 const SEASONS = ["spring", "summer", "autumn", "winter", "midnight"];
+const EMAIL_SIZES = [16, 24, 32, 512];
 
-async function generatePng(season, size) {
-  const svg = generateSvg(season);
-  const svgBuffer = Buffer.from(svg);
+async function generatePackageFavicons() {
+  console.log("📦 Generating favicon PNGs for all packages...\n");
 
-  const pngBuffer = await sharp(svgBuffer).resize(size, size).png().toBuffer();
-
-  const filename = `logo-${season}-${size}.png`;
-  const filepath = join(OUTPUT_DIR, filename);
-
-  await writeFile(filepath, pngBuffer);
-  console.log(`  ✓ ${filename}`);
-}
-
-async function generateLandingIcons() {
-  console.log("📱 Generating landing static icons...");
-
-  // Use summer (default) palette for landing icons
+  // Use summer (default) palette for all package favicons
   const svg = generateSvg("summer");
   const svgBuffer = Buffer.from(svg);
 
-  // Generate icon-192.png
-  const png192 = await sharp(svgBuffer).resize(192, 192).png().toBuffer();
-  await writeFile(join(LANDING_STATIC_DIR, "icon-192.png"), png192);
-  console.log("  ✓ icon-192.png");
+  for (const pkg of PACKAGES) {
+    const staticDir = join(ROOT_DIR, pkg, "static");
+    await mkdir(staticDir, { recursive: true });
 
-  // Generate icon-512.png
-  const png512 = await sharp(svgBuffer).resize(512, 512).png().toBuffer();
-  await writeFile(join(LANDING_STATIC_DIR, "icon-512.png"), png512);
-  console.log("  ✓ icon-512.png");
+    console.log(`  ${pkg}:`);
 
-  console.log("");
+    for (const [filename, size] of Object.entries(FAVICON_SIZES)) {
+      const pngBuffer = await sharp(svgBuffer)
+        .resize(size, size)
+        .png()
+        .toBuffer();
+      await writeFile(join(staticDir, filename), pngBuffer);
+      console.log(`    ✓ ${filename} (${size}x${size})`);
+    }
+    console.log("");
+  }
+}
+
+async function generateEmailAssets() {
+  console.log("📧 Generating seasonal email assets...\n");
+
+  await mkdir(OUTPUT_DIR, { recursive: true });
+
+  for (const season of SEASONS) {
+    console.log(`  ${season}:`);
+    const svg = generateSvg(season);
+    const svgBuffer = Buffer.from(svg);
+
+    for (const size of EMAIL_SIZES) {
+      const pngBuffer = await sharp(svgBuffer)
+        .resize(size, size)
+        .png()
+        .toBuffer();
+
+      const filename = `logo-${season}-${size}.png`;
+      await writeFile(join(OUTPUT_DIR, filename), pngBuffer);
+      console.log(`    ✓ ${filename}`);
+    }
+    console.log("");
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -199,24 +234,18 @@ async function generateCombinedLogo(logoSize = 512, overlap = 0) {
   return filepath;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function main() {
   console.log("🌲 Generating Grove tree logo PNGs...\n");
 
-  // Ensure output directories exist
-  await mkdir(OUTPUT_DIR, { recursive: true });
-  await mkdir(LANDING_STATIC_DIR, { recursive: true });
-
-  // Generate landing static icons (summer palette)
-  await generateLandingIcons();
+  // Generate favicon PNGs for all packages
+  await generatePackageFavicons();
 
   // Generate seasonal email assets
-  for (const season of SEASONS) {
-    console.log(`${season}:`);
-    for (const size of SIZES) {
-      await generatePng(season, size);
-    }
-    console.log("");
-  }
+  await generateEmailAssets();
 
   // Generate combined seasonal logos (upright trees, tightly packed)
   // Moderate overlap (55%) - trees close together
@@ -225,11 +254,12 @@ async function main() {
   await generateCombinedLogo(512, Math.round(512 * 0.65));
   console.log("");
 
-  console.log(
-    `✅ Generated ${SEASONS.length * SIZES.length} email PNGs in ${OUTPUT_DIR}`,
-  );
-  console.log(`✅ Generated 2 landing icons in ${LANDING_STATIC_DIR}`);
-  console.log(`✅ Generated 2 combined seasonal logos in ${OUTPUT_DIR}`);
+  // Summary
+  const faviconCount = PACKAGES.length * Object.keys(FAVICON_SIZES).length;
+  const emailCount = SEASONS.length * EMAIL_SIZES.length;
+  console.log(`✅ Generated ${faviconCount} package favicon PNGs`);
+  console.log(`✅ Generated ${emailCount} seasonal email PNGs`);
+  console.log(`✅ Generated 2 combined seasonal logos`);
 }
 
 main().catch(console.error);

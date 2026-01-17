@@ -2,10 +2,26 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-		<link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#16a34a" />
 		<meta name="csrf-token" content="%sveltekit.locals.csrfToken%" />
+
+		<!-- Favicons -->
+		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="32x32" href="%sveltekit.assets%/favicon-32x32.png" />
+
+		<!-- Apple Touch Icon (iOS home screen, iMessage previews) -->
+		<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
+
+		<!-- Safari Pinned Tab -->
+		<link rel="mask-icon" href="%sveltekit.assets%/safari-pinned-tab.svg" color="#16a34a" />
+
+		<!-- PWA Manifest -->
+		<link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
+
+		<!-- Windows -->
+		<meta name="msapplication-TileColor" content="#0f172a" />
+		<meta name="msapplication-config" content="none" />
 		<script>
 			// Prevent flash of incorrect theme by setting theme before hydration
 			(function() {
