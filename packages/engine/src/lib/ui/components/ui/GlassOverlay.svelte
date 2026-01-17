@@ -68,7 +68,7 @@
 
 	const computedClass = $derived(
 		cn(
-			"fixed inset-0 z-50",
+			"fixed inset-0 z-grove-overlay",
 			variantClasses[variant],
 			intensityClasses[intensity],
 			interactive && "cursor-pointer",

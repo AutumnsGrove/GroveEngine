@@ -564,7 +564,7 @@
 
 	<article class="flex-1 relative overflow-hidden">
 		<!-- Season Toggle - Bottom right corner -->
-		<div class="absolute bottom-6 right-6 z-40">
+		<div class="absolute bottom-6 right-6 z-grove-fab">
 			<button
 				onclick={toggleSeason}
 				class="p-3 rounded-full backdrop-blur-md shadow-lg border hover:scale-110 transition-all duration-200 {isMidnight
