@@ -21,7 +21,7 @@
 
 <SEO
 	title="Manifesto — Grove"
-	description="What we believe. A declaration of values for the quiet corners of the internet."
+	description="What I believe. A personal declaration of values for the quiet corners of the internet."
 	url="/manifesto"
 />
 
@@ -31,7 +31,7 @@
 	<!-- The Manifesto -->
 	<article
 		class="flex-1 relative overflow-hidden bg-gradient-to-b from-purple-950 via-slate-950 to-black"
-		aria-label="Grove Manifesto: A declaration of our beliefs, written under the stars"
+		aria-label="Grove Manifesto: A declaration of my beliefs, written under the stars"
 	>
 		<!-- Stars scattered throughout -->
 		<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -90,7 +90,7 @@
 				<header class="text-center mb-16 md:mb-24">
 					<p class="text-purple-400/80 text-sm uppercase tracking-widest mb-4">A Declaration</p>
 					<h1 class="text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-6">
-						What We Believe
+						What I Believe
 					</h1>
 					<div class="flex items-center justify-center gap-4">
 						<div class="w-16 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
@@ -237,7 +237,7 @@
 								That's how Grove works.
 							</p>
 							<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
-								You pay for a place to write. We don't sell your attention to anyone.
+								You pay for a place to write. I don't sell your attention to anyone.
 								Your words are just words. There's the membership, and that's it.
 							</p>
 						</div>
@@ -347,7 +347,7 @@
 							the company decided to pivot, or shut down, or get acquired.
 						</p>
 						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
-							Here, if you grow with us long enough, your grove earns
+							Here, if you grow with Grove long enough, your grove earns
 							<span class="text-amber-300/90">Centennial status</span>—your site stays online
 							for a hundred years. Even after you're gone, if you want it to.
 						</p>
@@ -368,12 +368,12 @@
 					<section class="relative">
 						<div class="bg-slate-900/40 backdrop-blur-sm rounded-xl p-8 border border-slate-700/30">
 							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-4">
-								We are building slowly, with care, without venture capital pressure to enshittify.
+								I'm building this slowly, with care, without venture capital pressure to enshittify.
 							</p>
 							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-								We are a forest, not a factory.
+								Grove is a forest, not a factory.
 								<br />
-								<span class="text-amber-300/80">We grow at the pace of roots.</span>
+								<span class="text-amber-300/80">I grow at the pace of roots.</span>
 							</p>
 						</div>
 					</section>
