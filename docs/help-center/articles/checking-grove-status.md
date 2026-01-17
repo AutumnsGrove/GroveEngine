@@ -5,6 +5,8 @@ category: troubleshooting
 order: 9
 keywords: [status, outage, down, maintenance, incident, issues, problems, not working]
 related: [my-site-isnt-loading, contact-support]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Checking Grove Status
@@ -51,8 +53,6 @@ You can subscribe to status updates via RSS at `status.grove.place/feed`. Add th
 - An incident is resolved
 - Maintenance is scheduled
 
-You can also check your admin panel. Active incidents appear in the **Messages** section.
-
 ## What the components mean
 
 | Component | What it covers |
@@ -60,7 +60,6 @@ You can also check your admin panel. Active incidents appear in the **Messages**
 | Blog Engine | Publishing, editing, viewing blog posts |
 | CDN | Image and media loading |
 | Authentication | Signing in, session management |
-| Meadow | Community feed, reactions, voting |
 | Payments | Subscription billing, plan changes |
 | API | Backend services powering everything |
 

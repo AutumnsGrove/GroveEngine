@@ -8,6 +8,8 @@ category: writing-and-publishing
 order: 1
 keywords: [first post, writing, publish, getting started, new post, create]
 related: [what-is-grove, formatting-your-posts, drafts-and-scheduling]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Writing Your First Post
@@ -17,7 +19,7 @@ Starting a blog can feel like standing in front of a blank page. Here's how to g
 ## Getting to the editor
 
 1. Sign in to your admin panel at `yourblog.grove.place/admin`
-2. Click **Posts** in the sidebar
+2. Click **Blog Posts** in the sidebar
 3. Click **New Post**
 
 That's it. You're looking at the editor.
@@ -27,14 +29,14 @@ That's it. You're looking at the editor.
 Every post has a few parts:
 
 - **Title**: What shows up at the top of your post and in your blog's post list
-- **Content**: The actual writing (this is where you'll spend most of your time)
 - **Slug**: The URL-friendly version of your title (auto-generated, but you can edit it)
+- **Content**: The actual writing (this is where you'll spend most of your time)
 
 You can also add:
 
-- **Featured image**: Shows at the top of your post and in previews
-- **Excerpt**: A short summary for your blog's listing page
+- **Description**: A brief summary for SEO and previews (120-160 characters recommended)
 - **Tags**: Help organize your posts (optional)
+- **Date**: When the post was published (defaults to today)
 
 ## Writing your content
 

@@ -5,6 +5,8 @@ category: billing
 order: 2
 keywords: [upgrade, downgrade, change plan, switch plan, subscription, billing, tier]
 related: [choosing-your-plan]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Upgrading or Downgrading Your Plan
@@ -13,8 +15,8 @@ You can change your Grove plan anytime. Here's how it works.
 
 ## How to change your plan
 
-1. Go to **Settings → Plan** in your admin panel
-2. You'll see your current plan and available options
+1. Go to **Account** in your admin panel
+2. You'll see your current plan and available options under "Your Plan"
 3. Click **Change Plan**
 4. Select your new plan
 5. Confirm the change
@@ -31,9 +33,9 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 
 | Upgrade to | You gain |
 |------------|----------|
-| Seedling → Sapling | 200 more posts, 4 GB storage, 7 themes, email forwarding |
-| Sapling → Oak | Unlimited posts, 15 GB storage, theme customizer, custom domain |
-| Oak → Evergreen | 80 GB more storage, custom fonts, included domain, support hours |
+| Seedling → Sapling | 200 more posts, 4 GB storage, 7 more curated themes (coming in Foliage Full Bloom), email forwarding, Centennial eligibility |
+| Sapling → Oak | Unlimited posts, 15 GB more storage, theme customizer (coming in Foliage Full Bloom), custom domain, Analytics |
+| Oak → Evergreen | 80 GB more storage, custom font uploads (coming in Foliage Full Bloom), domain included (we register it), dedicated support hours |
 
 ## When you downgrade
 
@@ -44,9 +46,10 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 **Example:** You have 100 posts on Sapling (250 limit) and downgrade to Seedling (50 limit). All 100 posts remain published and visible. You just can't create post #101 until you delete or unpublish some.
 
 **Features revert.** When the billing period ends:
-- Theme customizer settings revert to defaults (if downgrading from Oak)
-- Custom domain stops working (if downgrading from Oak)
-- Some fonts become unavailable
+- Theme customizer settings revert to defaults (if downgrading from Oak/Evergreen, once Foliage launches)
+- Custom domain stops working (if downgrading from Oak/Evergreen)
+- Some curated themes become unavailable (if downgrading to Seedling's 3 themes, once Foliage launches)
+- Analytics access is removed (if downgrading from Oak/Evergreen)
 
 ## What happens to my data?
 

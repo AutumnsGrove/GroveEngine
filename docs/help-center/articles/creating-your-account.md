@@ -5,6 +5,8 @@ category: getting-started
 order: 1
 keywords: [account, sign up, register, create account, google, login, authentication]
 related: [what-is-grove, choosing-your-plan, writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Creating Your Account

@@ -5,9 +5,13 @@ category: features
 order: 5
 keywords: [meadow, community, feed, social, reactions, replies, sharing, discovery]
 related: [understanding-your-privacy, choosing-your-plan, writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Meadow?
+
+> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
 
 Meadow is Grove's community feed: a shared space where bloggers can discover each other's work, react to posts, and have conversations.
 

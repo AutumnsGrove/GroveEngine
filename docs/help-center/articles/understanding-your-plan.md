@@ -5,6 +5,8 @@ category: billing
 order: 1
 keywords: [plan, limits, features, storage, posts, what's included, subscription, tier]
 related: [choosing-your-plan, upgrading-or-downgrading, centennial-status]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding Your Plan
@@ -18,7 +20,8 @@ Here's what each Grove plan includes—and what happens when you approach your l
 | **Price** | $8/mo | $12/mo | $25/mo | $35/mo |
 | **Posts** | 50 | 250 | Unlimited | Unlimited |
 | **Storage** | 1 GB | 5 GB | 20 GB | 100 GB |
-| **Themes** | 3 | 10 | All + customizer | All + custom fonts |
+| **Fonts** | All 10 | All 10 | All 10 | All 10 + custom uploads |
+| **Themes** | 3 curated | All 10 | All 10 + customizer | All 10 + customizer |
 | **Custom domain** | — | — | BYOD | Included |
 | **Email** | — | Forwarding | Full mailbox | Full mailbox |
 | **Centennial** | — | ✓ | ✓ | ✓ |
@@ -82,42 +85,48 @@ Regardless of which plan you choose:
 
 The essentials for starting a blog:
 - 50 posts, 1 GB storage
-- 3 themes (Grove, Minimal, Night Garden) plus accent color customization
+- All 10 fonts plus accent color customization
+- 3 curated themes (coming in Foliage)
 - Community support via help documentation
 
 Good for: Trying blogging out, personal journals, occasional posting.
 
-### Sapling ($12/month)
+### Sapling ($12/month) — coming soon
 
 Room to grow:
 - 250 posts, 5 GB storage
-- All 10 themes plus accent color
+- All 10 fonts plus accent color
+- All 10 curated themes (coming in Foliage Full Bloom)
 - Email forwarding to `you@grove.place`
 - Email support
+- Centennial eligible
 
 Good for: Regular bloggers, building an archive, hobbyist writers.
 
-### Oak ($25/month)
+### Oak ($25/month) — coming soon
 
 Full control:
 - Unlimited posts, 20 GB storage
-- Theme customizer (full color and layout control)
-- Community themes (install themes others have created)
+- All 10 fonts plus accent color
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Bring your own domain
 - Full @grove.place email (send and receive)
+- Analytics
 - Priority support
+- Centennial eligible
 
 Good for: Serious bloggers, professionals, anyone who wants a custom domain.
 
-### Evergreen ($35/month)
+### Evergreen ($35/month) — coming soon
 
 Everything:
 - Unlimited posts, 100 GB storage
-- Custom font uploads
+- All 10 fonts plus custom font uploads
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Domain registration included (we find and register it for you)
-- 8 hours of included support time
-- Privacy controls (option to require login)
-- Priority support with faster response
+- 8 hours/month dedicated support time
+- Analytics
+- Centennial eligible
 
 Good for: Professional presence, high-volume media, businesses.
 

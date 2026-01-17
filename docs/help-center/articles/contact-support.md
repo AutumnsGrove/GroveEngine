@@ -5,6 +5,8 @@ category: troubleshooting
 order: 10
 keywords: [support, help, contact, email, response time, assistance]
 related: [my-site-isnt-loading, choosing-your-plan, understanding-your-privacy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Contacting Support

@@ -5,6 +5,8 @@ category: data
 order: 1
 keywords: [export, download, backup, data, portability, markdown, json, leaving, migrate]
 related: [understanding-your-privacy, account-deletion]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Exporting Your Content

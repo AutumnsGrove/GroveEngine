@@ -170,6 +170,28 @@
 
 # 📦 DEFERRED FEATURES
 
+## Cover Images for Blog Posts
+> **Found during:** Help center documentation review (Phase 2)
+> **Status:** Not implemented, docs updated to say "coming soon"
+
+- [ ] Add cover_image_url field to posts table
+- [ ] Add cover image upload UI to blog post editor (admin/blog/new and admin/blog/edit)
+- [ ] Display cover images at top of blog posts
+- [ ] Include cover images in social media previews (og:image meta tags)
+- [ ] Include cover images in RSS feed entries
+
+## Active Sessions Management UI
+> **Found during:** Help center documentation review (Phase 3)
+> **Status:** Not implemented, docs updated to remove reference
+> **Note:** Also mentioned under DO Phase 1 (Heartwood) as "manage sessions" UI
+
+- [ ] Create Settings → Security section in admin panel
+- [ ] Add Active Sessions page showing all logged-in devices
+- [ ] Display device type, browser, location (approximate), and last active time
+- [ ] Allow users to revoke individual sessions
+- [ ] Add "Log out all devices" bulk action
+- [ ] Integrate with Heartwood SessionDO for session management
+
 ## Amber ZIP Export Integration
 > **Plan:** `docs/plans/amber-zip-export-integration.md`
 > **Status:** Plan complete, ready for implementation post-v1

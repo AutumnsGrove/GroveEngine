@@ -1,0 +1,202 @@
+name: Documentation Freshness Check
+
+on:
+  # Run weekly on Monday mornings
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Run on PRs that touch docs
+  pull_request:
+    paths:
+      - 'docs/help-center/articles/**'
+      - 'docs/legal/**'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-docs-freshness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for stale documentation
+        id: check-stale
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Configuration
+          STALE_DAYS=90
+          TODAY=$(date +%s)
+          STALE_FILES=""
+          STALE_COUNT=0
+
+          echo "🔍 Checking documentation freshness (threshold: ${STALE_DAYS} days)"
+          echo ""
+
+          # Check all help center articles
+          for file in docs/help-center/articles/*.md; do
+            if [ -f "$file" ]; then
+              # Extract last_verified date from frontmatter
+              VERIFIED_DATE=$(grep -m1 "^last_verified:" "$file" 2>/dev/null | sed 's/last_verified: *//' || echo "")
+
+              if [ -z "$VERIFIED_DATE" ]; then
+                echo "⚠️  Missing last_verified: $(basename "$file")"
+                STALE_FILES="${STALE_FILES}| $(basename "$file") | Missing | - |\n"
+                STALE_COUNT=$((STALE_COUNT + 1))
+                continue
+              fi
+
+              # Convert date to epoch (handle YYYY-MM-DD format)
+              VERIFIED_EPOCH=$(date -d "$VERIFIED_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$VERIFIED_DATE" +%s 2>/dev/null || echo "0")
+
+              if [ "$VERIFIED_EPOCH" = "0" ]; then
+                echo "⚠️  Invalid date format: $(basename "$file") ($VERIFIED_DATE)"
+                STALE_FILES="${STALE_FILES}| $(basename "$file") | Invalid date | $VERIFIED_DATE |\n"
+                STALE_COUNT=$((STALE_COUNT + 1))
+                continue
+              fi
+
+              # Calculate days since verification
+              DAYS_OLD=$(( (TODAY - VERIFIED_EPOCH) / 86400 ))
+
+              if [ "$DAYS_OLD" -gt "$STALE_DAYS" ]; then
+                echo "📅 Stale (${DAYS_OLD} days): $(basename "$file")"
+                STALE_FILES="${STALE_FILES}| $(basename "$file") | ${DAYS_OLD} days | $VERIFIED_DATE |\n"
+                STALE_COUNT=$((STALE_COUNT + 1))
+              fi
+            fi
+          done
+
+          echo ""
+          echo "================================"
+
+          if [ "$STALE_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $STALE_COUNT stale or problematic articles"
+            echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+            echo "stale_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$STALE_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "has_stale=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All documentation is fresh!"
+            echo "has_stale=false" >> $GITHUB_OUTPUT
+            echo "stale_count=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if stale docs found)
+        if: github.event_name == 'pull_request' && steps.check-stale.outputs.has_stale == 'true'
+        uses: actions/github-script@v7
+        env:
+          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
+          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+        with:
+          script: |
+            const staleCount = process.env.STALE_COUNT;
+            const staleFiles = process.env.STALE_FILES;
+
+            const body = `## 📅 Documentation Freshness Check
+
+            Found **${staleCount}** article(s) that may need review:
+
+            | Article | Status | Last Verified |
+            |---------|--------|---------------|
+            ${staleFiles}
+
+            These articles haven't been verified in over 90 days. Consider updating them as part of this PR or creating a follow-up task.
+
+            ---
+            *See \`docs/help-center/DOCS-MAINTENANCE.md\` for the quarterly review process.*`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue for stale docs (scheduled run only)
+        if: github.event_name == 'schedule' && steps.check-stale.outputs.has_stale == 'true'
+        uses: actions/github-script@v7
+        env:
+          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
+          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+        with:
+          script: |
+            const staleCount = process.env.STALE_COUNT;
+            const staleFiles = process.env.STALE_FILES;
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if there's already an open issue for this
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,maintenance'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Documentation Freshness Review')
+            );
+
+            if (hasExisting) {
+              console.log('Existing freshness review issue found, skipping creation');
+              return;
+            }
+
+            const body = `## 📅 Quarterly Documentation Review Needed
+
+            The automated freshness check found **${staleCount}** article(s) that haven't been verified in over 90 days:
+
+            | Article | Status | Last Verified |
+            |---------|--------|---------------|
+            ${staleFiles}
+
+            ### Review Process
+
+            1. Open each article and verify content matches current implementation
+            2. Check against source of truth files (see \`DOCS-MAINTENANCE.md\`)
+            3. Update \`last_verified\` date in frontmatter when done
+            4. Close this issue when all articles are reviewed
+
+            ### Source of Truth Files
+
+            - Tier limits: \`packages/engine/src/lib/config/tiers.ts\`
+            - Fonts: \`packages/engine/src/lib/config/presets.ts\`
+            - Admin navigation: \`packages/engine/src/routes/admin/+layout.svelte\`
+
+            ---
+            *This issue was automatically created by the docs-freshness workflow.*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📅 Documentation Freshness Review - ${today}`,
+              body: body,
+              labels: ['documentation', 'maintenance']
+            });
+
+      - name: Summary
+        env:
+          HAS_STALE: ${{ steps.check-stale.outputs.has_stale }}
+          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
+          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+        run: |
+          echo "## Documentation Freshness Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$HAS_STALE" = "true" ]; then
+            echo "⚠️ Found **$STALE_COUNT** stale articles" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Article | Status | Last Verified |" >> $GITHUB_STEP_SUMMARY
+            echo "|---------|--------|---------------|" >> $GITHUB_STEP_SUMMARY
+            echo -e "$STALE_FILES" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All documentation is fresh (verified within 90 days)" >> $GITHUB_STEP_SUMMARY
+          fi

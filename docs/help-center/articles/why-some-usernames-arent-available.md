@@ -5,6 +5,8 @@ category: account-setup
 order: 5
 keywords: [username, subdomain, blocked, unavailable, reserved, validation, loam, registration]
 related: [creating-your-account, what-is-grove, understanding-your-privacy, acceptable-use-policy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Why Some Usernames Aren't Available

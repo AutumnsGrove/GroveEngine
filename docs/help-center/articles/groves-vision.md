@@ -5,6 +5,8 @@ category: legal
 order: 1
 keywords: [vision, philosophy, values, why, mission, purpose, about, story]
 related: [what-is-grove, understanding-your-privacy, how-grove-protects-your-content, why-i-built-the-grove]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Grove's Vision

@@ -5,6 +5,8 @@ category: data
 order: 3
 keywords: [delete, close, cancel, remove, account, data, gdpr, leave, goodbye]
 related: [exporting-your-content, understanding-your-privacy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Deleting Your Account

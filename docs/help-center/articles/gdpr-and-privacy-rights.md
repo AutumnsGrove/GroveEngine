@@ -5,6 +5,8 @@ category: data
 order: 3
 keywords: [gdpr, privacy, rights, data protection, ccpa, personal data, deletion, access, europe, california]
 related: [understanding-your-privacy, exporting-your-content, account-deletion, data-portability]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # GDPR and Privacy Rights

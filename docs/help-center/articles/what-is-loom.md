@@ -5,6 +5,8 @@ category: philosophy-vision
 order: 4
 keywords: [loom, durable objects, architecture, infrastructure, technical, how grove works, cloudflare]
 related: [what-is-grove, understanding-your-privacy, how-grove-backs-up-your-data]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Loom?

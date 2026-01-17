@@ -9,6 +9,8 @@ order: 2
 description: Learn about Grove's community identity system - Wanderers, Rooted, Pathfinders, and the Wayfinder
 keywords: [wanderer, pathfinder, wayfinder, rooted, community, identity, member, user]
 related: [what-is-grove, what-is-meadow, groves-vision]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Wanderers and Pathfinders

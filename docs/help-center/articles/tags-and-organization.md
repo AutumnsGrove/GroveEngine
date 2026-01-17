@@ -5,6 +5,8 @@ category: writing
 order: 4
 keywords: [tags, categories, organize, organization, label, filter, sort]
 related: [writing-your-first-post, your-rss-feed]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Tags and Organization

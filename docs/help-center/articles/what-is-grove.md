@@ -8,6 +8,8 @@ category: getting-started
 order: 1
 keywords: [grove, about, introduction, what is, blogging, platform]
 related: [writing-your-first-post, understanding-your-privacy, what-is-loom]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Grove?

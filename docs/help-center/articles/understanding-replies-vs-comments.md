@@ -5,9 +5,13 @@ category: comments
 order: 1
 keywords: [comments, replies, private, public, moderation, feedback, readers]
 related: []
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding Replies vs. Comments
+
+> **Coming in Full Bloom:** The comments and replies system is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
 
 Grove has two ways for readers to respond to your posts: replies and comments. They work differently, and that's intentional.
 
