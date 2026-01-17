@@ -86,8 +86,8 @@
     </ul>
   </nav>
 
-  <!-- Mobile TOC Button -->
-  <div class="lg:hidden fixed bottom-6 right-6 z-50">
+  <!-- Mobile TOC Button - z-40 ensures this stays below mobile menu (z-9990+) -->
+  <div class="lg:hidden fixed bottom-6 right-6 z-40">
     <button
       type="button"
       onclick={() => isOpen = !isOpen}

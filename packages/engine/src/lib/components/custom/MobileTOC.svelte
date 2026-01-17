@@ -134,7 +134,8 @@
 		position: fixed;
 		bottom: 1rem;
 		right: 1rem;
-		z-index: 1000;
+		/* z-40 equivalent - stays below mobile menu (z-9990+) */
+		z-index: 40;
 	}
 	/* Show only on mobile (tablet and desktop have sidebar TOC) */
 	@media (max-width: 768px) {
