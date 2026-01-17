@@ -311,8 +311,9 @@
 	const tier3LightPath = "M50 38 L50 54 L82 68 Z";
 
 	// Trunk (two-tone for depth)
-	const trunkDarkPath = "M50 54 L42 58 L46 92 L50 92 Z";
-	const trunkLightPath = "M50 54 L58 58 L54 92 L50 92 Z";
+	// Trunk extends to y=100 to match viewBox bottom, ensuring tree "sticks" to ground properly
+	const trunkDarkPath = "M50 54 L42 58 L46 100 L50 100 Z";
+	const trunkLightPath = "M50 54 L58 58 L54 100 L50 100 Z";
 </script>
 
 <svg
