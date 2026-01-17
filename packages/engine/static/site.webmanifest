@@ -1,7 +1,7 @@
 {
   "name": "Grove",
   "short_name": "Grove",
-  "description": "A place to Be.",
+  "description": "Grove: a place to Be",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

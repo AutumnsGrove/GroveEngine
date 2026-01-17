@@ -1,7 +1,7 @@
 {
-  "name": "Grove",
-  "short_name": "Grove",
-  "description": "A place to Be.",
+  "name": "Grove Domains",
+  "short_name": "Domains",
+  "description": "Grove domain management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

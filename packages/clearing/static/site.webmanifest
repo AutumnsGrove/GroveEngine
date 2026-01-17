@@ -1,7 +1,7 @@
 {
-  "name": "Grove",
-  "short_name": "Grove",
-  "description": "A place to Be.",
+  "name": "Grove Status",
+  "short_name": "Status",
+  "description": "Grove system status and uptime",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
