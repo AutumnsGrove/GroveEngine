@@ -165,12 +165,16 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
   };
 }
 
+// Categories that should recursively include subdirectories
+const RECURSIVE_CATEGORIES: DocCategory[] = ["specs"];
+
 function loadDocsFromDir(
   dirPath: string,
   category: DocCategory,
 ): DocInternal[] {
   const docs: DocInternal[] = [];
   const seenSlugs = new Set<string>();
+  const shouldRecurse = RECURSIVE_CATEGORIES.includes(category);
 
   function readDirRecursive(currentPath: string) {
     const items = readdirSync(currentPath);
@@ -179,8 +183,9 @@ function loadDocsFromDir(
       const fullPath = join(currentPath, item);
       const stat = statSync(fullPath);
 
-      // Include all subdirectories including "completed" specs
-      if (stat.isDirectory()) {
+      // Only recurse into subdirectories for certain categories (e.g., specs/completed)
+      // Other categories like philosophy have internal scratch folders that shouldn't be public
+      if (stat.isDirectory() && shouldRecurse) {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
         try {
