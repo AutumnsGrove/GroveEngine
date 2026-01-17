@@ -20,6 +20,8 @@ declare global {
         ADMIN_EMAILS: string;
         /** GroveAuth Service Binding (Heartwood - fast session validation) */
         AUTH: Fetcher;
+        /** Optional KV namespace for caching and rate limiting */
+        CACHE_KV?: KVNamespace;
         GROVEAUTH_URL?: string;
         GROVEAUTH_CLIENT_ID?: string;
         GROVEAUTH_CLIENT_SECRET?: string;
