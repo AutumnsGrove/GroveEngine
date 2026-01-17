@@ -105,6 +105,26 @@ jobs:
           # Generate summary (will use previous tag automatically)
           ./scripts/generate/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
 
+      - name: Setup Node.js for NPM size fetch
+        if: steps.snapshot.outcome == 'success'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch NPM package sizes
+        if: steps.snapshot.outcome == 'success'
+        run: |
+          echo "Fetching NPM package sizes from registry..."
+
+          # Fetch fresh NPM metadata (remove any cached version)
+          rm -f scripts/journey/npm-metadata.json
+          curl -s "https://registry.npmjs.org/@autumnsgrove/groveengine" > scripts/journey/npm-metadata.json
+
+          # Run the backfill script to update history.csv with NPM sizes
+          npx tsx scripts/journey/backfill-npm-sizes.ts
+
+          echo "NPM sizes updated in snapshots/history.csv"
+
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
         run: |

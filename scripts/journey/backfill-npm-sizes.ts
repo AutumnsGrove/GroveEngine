@@ -13,6 +13,12 @@
  * Usage:
  *   npx tsx scripts/journey/backfill-npm-sizes.ts           # Run the backfill
  *   npx tsx scripts/journey/backfill-npm-sizes.ts --dry-run # Preview changes only
+ *   npx tsx scripts/journey/backfill-npm-sizes.ts --csv path/to/history.csv  # Custom CSV path
+ *
+ * CSV Path Resolution:
+ *   1. --csv argument (if provided)
+ *   2. snapshots/history.csv (CI/workflow location)
+ *   3. packages/landing/static/data/history.csv (local dev location)
  */
 
 import * as fs from "node:fs";
@@ -24,14 +30,12 @@ import * as https from "node:https";
 // =============================================================================
 
 const GROVE_ROOT = path.resolve(import.meta.dirname, "../..");
-const HISTORY_CSV_PATH = path.join(
-  GROVE_ROOT,
-  "packages/landing/static/data/history.csv",
-);
-const BACKUP_PATH = path.join(
-  GROVE_ROOT,
-  "packages/landing/static/data/history.csv.backup",
-);
+
+// Possible CSV locations (in order of preference)
+const CSV_PATHS = [
+  path.join(GROVE_ROOT, "snapshots/history.csv"),  // CI/workflow location
+  path.join(GROVE_ROOT, "packages/landing/static/data/history.csv"),  // Local dev location
+];
 
 const NPM_PACKAGE_NAME = "@autumnsgrove/groveengine";
 const NPM_REGISTRY_URL = `https://registry.npmjs.org/${NPM_PACKAGE_NAME}`;
@@ -44,6 +48,31 @@ const NPM_CACHE_PATH = path.join(GROVE_ROOT, "scripts/journey/npm-metadata.json"
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run") || args.includes("-n");
 const VERBOSE = args.includes("--verbose") || args.includes("-v");
+
+// Allow custom CSV path via --csv argument
+const csvArgIndex = args.findIndex(a => a === "--csv");
+const CUSTOM_CSV_PATH = csvArgIndex !== -1 ? args[csvArgIndex + 1] : null;
+
+// Find the CSV path to use
+function findHistoryCSV(): string {
+  if (CUSTOM_CSV_PATH) {
+    if (!fs.existsSync(CUSTOM_CSV_PATH)) {
+      throw new Error(`Custom CSV path not found: ${CUSTOM_CSV_PATH}`);
+    }
+    return CUSTOM_CSV_PATH;
+  }
+
+  for (const csvPath of CSV_PATHS) {
+    if (fs.existsSync(csvPath)) {
+      return csvPath;
+    }
+  }
+
+  throw new Error(`No history.csv found. Checked:\n  - ${CSV_PATHS.join("\n  - ")}`);
+}
+
+const HISTORY_CSV_PATH = findHistoryCSV();
+const BACKUP_PATH = HISTORY_CSV_PATH + ".backup";
 
 // =============================================================================
 // NPM Registry Types
