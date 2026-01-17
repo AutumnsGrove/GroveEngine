@@ -110,7 +110,6 @@ Grove opens its doors. The first trees take root.
 ### Remaining for Thaw
 
 - [ ] **Launch Signups:** Open plant.grove.place to public
-  - Final Stripe webhook testing
   - Welcome email sequence (day 1, 3, 7, 30)
   - Support ticket system ready
 
@@ -127,9 +126,11 @@ Grove opens its doors. The first trees take root.
   - 12-week retention for disaster recovery
   - See `docs/specs/patina-spec.md`
 
+- [ ] **🛡️ Security Remediation:** Fix P0/P1 issues before launch
+  - See `docs/plans/planned/1.0-critical-high-remediation.md`
+  - XSS sanitization, tenant isolation, PII removal
+
 - [ ] Debug Edit button on blog list (navigation issue)
-- [ ] Set Stripe secrets in Cloudflare Dashboard
-- [ ] Create Stripe webhook endpoint configuration
 - [ ] Set GROVEAUTH secrets for OAuth flow
 - [ ] Complete Shade WAF rules (3 of 5 slots)
 - [ ] Deploy robots.txt and meta tags
@@ -535,5 +536,5 @@ scripts/
 
 ---
 
-*Last Updated: December 2025*
+*Last Updated: January 2026*
 *Next Review: After first 5 clients are onboarded*
