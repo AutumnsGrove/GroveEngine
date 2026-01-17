@@ -132,7 +132,7 @@
 {#if open}
 	<!-- Backdrop with glass effect -->
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		class="fixed inset-0 z-grove-modal flex items-center justify-center p-4"
 		onclick={handleBackdropClick}
 		onkeydown={handleBackdropKeydown}
 		role="dialog"

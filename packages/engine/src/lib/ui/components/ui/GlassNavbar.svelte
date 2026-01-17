@@ -70,7 +70,7 @@
 
 <header
 	class={cn(
-		"sticky top-0 z-40 py-4 px-6",
+		"sticky top-0 z-grove-sticky py-4 px-6",
 		"bg-white/60 dark:bg-slate-900/60 backdrop-blur-md",
 		"border-b border-white/40 dark:border-slate-700/40",
 		className

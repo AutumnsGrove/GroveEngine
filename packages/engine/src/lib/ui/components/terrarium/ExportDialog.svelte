@@ -137,7 +137,7 @@
 	<!-- Backdrop -->
 	<div
 		class={cn(
-			'fixed inset-0 z-50',
+			'fixed inset-0 z-grove-modal',
 			'bg-black/50 backdrop-blur-sm',
 			'flex items-center justify-center p-4',
 			'animate-in fade-in duration-200'

@@ -84,7 +84,7 @@
   </section>
 
   <!-- Floating TOC Icon Navigation (desktop) - Midnight Bloom -->
-  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3" aria-label="Category navigation">
+  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-3" aria-label="Category navigation">
     {#each categories as category}
       {@const CategoryIcon = getIcon(category.icon)}
       {@const categorySpecs = specsByCategory[category.id] ?? []}
@@ -122,7 +122,7 @@
   </nav>
 
   <!-- Floating TOC Button & Dropdown (mobile) - Midnight Bloom -->
-  <div class="fixed bottom-6 right-6 z-50 lg:hidden">
+  <div class="fixed bottom-6 right-6 z-grove-fab lg:hidden">
     <button
       type="button"
       onclick={() => isMobileTocOpen = !isMobileTocOpen}

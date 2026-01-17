@@ -61,7 +61,7 @@
   </section>
 
   <!-- Floating TOC Icon Navigation (desktop) -->
-  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-2" aria-label="Section navigation">
+  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-2" aria-label="Section navigation">
     {#each sections as section}
       {@const SectionIcon = getIcon(section.icon)}
       {@const sectionArticles = articlesBySection[section.id] ?? []}
@@ -89,7 +89,7 @@
   </nav>
 
   <!-- Floating TOC Button & Dropdown (mobile) -->
-  <div class="fixed bottom-6 right-6 z-50 lg:hidden">
+  <div class="fixed bottom-6 right-6 z-grove-fab lg:hidden">
     <button
       type="button"
       onclick={() => isMobileTocOpen = !isMobileTocOpen}

@@ -685,7 +685,7 @@
 	</section>
 
 	<!-- Floating TOC Icon Navigation with Tools -->
-	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
+	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-3">
 		{#each tocItems as item, itemIndex}
 			{@const categoryTools = categories[itemIndex]?.tools ?? []}
 			{@const ItemIcon = getToolIcon(item.icon)}
@@ -720,7 +720,7 @@
 	</nav>
 
 	<!-- Floating TOC Button & Dropdown with Tools (visible on all screen sizes) -->
-	<div class="fixed bottom-6 right-6 z-50">
+	<div class="fixed bottom-6 right-6 z-grove-fab">
 		<button
 			type="button"
 			onclick={() => isMobileTocOpen = !isMobileTocOpen}
