@@ -55,9 +55,26 @@ CSV_FILE="$SNAPSHOTS_DIR/history.csv"
 echo -e "${CYAN}🌲 GroveEngine Repository Snapshot${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "Gathering statistics..."
 
 cd "$PROJECT_ROOT"
+
+# ============================================================================
+# SHALLOW CLONE CHECK
+# ============================================================================
+# Shallow clones have incomplete git history, which causes commit counts to be
+# wrong. Detect and handle this case to ensure accurate statistics.
+
+if [ -f ".git/shallow" ]; then
+    echo -e "${YELLOW}⚠️  Shallow clone detected - commit count would be inaccurate${NC}"
+    echo -n "  Fetching full history..."
+    if git fetch --unshallow origin 2>/dev/null; then
+        echo -e " ${GREEN}✓${NC}"
+    else
+        echo -e " ${YELLOW}(already complete)${NC}"
+    fi
+fi
+
+echo -e "Gathering statistics..."
 
 # ============================================================================
 # HELPER FUNCTIONS
