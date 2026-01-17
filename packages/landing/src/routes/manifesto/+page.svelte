@@ -21,7 +21,7 @@
 
 <SEO
 	title="Manifesto — Grove"
-	description="What we believe. A declaration of values for the quiet corners of the internet."
+	description="What I believe. A personal declaration of values for the quiet corners of the internet."
 	url="/manifesto"
 />
 
@@ -31,7 +31,7 @@
 	<!-- The Manifesto -->
 	<article
 		class="flex-1 relative overflow-hidden bg-gradient-to-b from-purple-950 via-slate-950 to-black"
-		aria-label="Grove Manifesto: A declaration of our beliefs, written under the stars"
+		aria-label="Grove Manifesto: A declaration of my beliefs, written under the stars"
 	>
 		<!-- Stars scattered throughout -->
 		<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -90,7 +90,7 @@
 				<header class="text-center mb-16 md:mb-24">
 					<p class="text-purple-400/80 text-sm uppercase tracking-widest mb-4">A Declaration</p>
 					<h1 class="text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-6">
-						What We Believe
+						What I Believe
 					</h1>
 					<div class="flex items-center justify-center gap-4">
 						<div class="w-16 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>

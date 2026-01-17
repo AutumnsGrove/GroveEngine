@@ -3,12 +3,12 @@ title: "Grove's Manifesto"
 slug: groves-manifesto
 category: philosophy
 order: 2
-description: What we believe. A declaration of values for the quiet corners of the internet.
+description: What I believe. A personal declaration of values for the quiet corners of the internet.
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
 related: [groves-vision, why-i-built-the-grove, what-is-solarpunk, centennial-status]
 ---
 
-# What We Believe
+# What I Believe
 
 *A Declaration*
 
@@ -60,7 +60,7 @@ There's a search engine called Kagi. You pay for it. It doesn't show you ads. It
 
 That's how Grove works.
 
-You pay for a place to write. We don't sell your attention to anyone. Your words are just words. There's the membership, and that's it.
+You pay for a place to write. I don't sell your attention to anyone. Your words are just words. There's the membership, and that's it.
 
 ---
 
@@ -102,7 +102,7 @@ Your words could outlive you.
 
 On most platforms, they'd vanish the moment you stopped paying—or the moment the company decided to pivot, or shut down, or get acquired.
 
-Here, if you grow with us long enough, your grove earns **Centennial status**—your site stays online for a hundred years. Even after you're gone, if you want it to.
+Here, if you grow with Grove long enough, your grove earns **Centennial status**—your site stays online for a hundred years. Even after you're gone, if you want it to.
 
 *A hundred years is roughly how long an oak tree lives.*
 
@@ -110,11 +110,11 @@ Here, if you grow with us long enough, your grove earns **Centennial status**—
 
 ## Building Slowly
 
-We are building slowly, with care, without venture capital pressure to enshittify.
+I'm building this slowly, with care, without venture capital pressure to enshittify.
 
-We are a forest, not a factory.
+Grove is a forest, not a factory.
 
-**We grow at the pace of roots.**
+**I grow at the pace of roots.**
 
 *This is [solarpunk](/knowledge/help/what-is-solarpunk) thinking.*
 

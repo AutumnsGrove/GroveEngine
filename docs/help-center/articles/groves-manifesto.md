@@ -9,7 +9,7 @@ last_verified: 2026-01-17
 verified_by: claude
 ---
 
-# What We Believe
+# What I Believe
 
 The internet used to be a garden. Not a manicured one—a wild one. Full of weird little corners and handmade pages. You could stumble onto someone's space and feel like you'd discovered something.
 
@@ -17,7 +17,7 @@ Then the walls went up. Platforms became isolated biospheres. Friends scattered 
 
 Grove is everything that isn't.
 
-## What we reject
+## What I reject
 
 ### The machines
 
@@ -29,7 +29,7 @@ Platforms that built their empires on our words, then loosened protections for p
 
 AI companies sending crawlers across the web to feed their models without asking. Your words becoming training data. Your voice becoming a statistic.
 
-## What we believe
+## What I believe
 
 ### Your words are yours
 
@@ -53,13 +53,13 @@ Your words could outlive you. With Centennial status, your grove stays online fo
 
 ### Building slowly
 
-We grow without venture capital pressure to enshittify. We are a forest, not a factory. We grow at the pace of roots.
+I'm building this without venture capital pressure to enshittify. Grove is a forest, not a factory. I grow at the pace of roots.
 
 *This is [solarpunk](/knowledge/help/what-is-solarpunk) thinking.*
 
-## The feeling we're building toward
+## The feeling I'm building toward
 
-When someone signs up for Grove, they should feel empowered. Like they've found a launching point for something good. Like they're planting something that could grow for years. Like their words are safe here.
+When someone signs up for Grove, I want them to feel empowered. Like they've found a launching point for something good. Like they're planting something that could grow for years. Like their words are safe here.
 
 Grove is not trying to be everything. It's trying to be *somewhere*.
 
