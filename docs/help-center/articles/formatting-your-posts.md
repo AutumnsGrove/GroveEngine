@@ -5,6 +5,8 @@ category: writing
 order: 2
 keywords: [markdown, formatting, bold, italic, links, lists, headers, code, blockquotes]
 related: [writing-your-first-post, adding-images-and-media]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Formatting Your Posts

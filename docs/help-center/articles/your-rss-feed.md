@@ -5,6 +5,8 @@ category: writing
 order: 7
 keywords: [rss, feed, subscribe, readers, syndication, atom, feedly, rss reader]
 related: [what-is-grove, writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Your RSS Feed

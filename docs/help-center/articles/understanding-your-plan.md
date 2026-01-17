@@ -5,6 +5,8 @@ category: billing
 order: 1
 keywords: [plan, limits, features, storage, posts, what's included, subscription, tier]
 related: [choosing-your-plan, upgrading-or-downgrading, centennial-status]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding Your Plan

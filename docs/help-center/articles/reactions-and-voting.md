@@ -5,6 +5,8 @@ category: meadow
 order: 3
 keywords: [meadow, reactions, voting, upvote, downvote, emoji, engagement, community]
 related: [what-is-meadow, opting-into-the-feed]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Reactions and Voting in Meadow

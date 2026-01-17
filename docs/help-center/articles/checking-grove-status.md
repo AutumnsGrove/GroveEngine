@@ -5,6 +5,8 @@ category: troubleshooting
 order: 9
 keywords: [status, outage, down, maintenance, incident, issues, problems, not working]
 related: [my-site-isnt-loading, contact-support]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Checking Grove Status

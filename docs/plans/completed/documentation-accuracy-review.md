@@ -221,27 +221,34 @@ Auth system uses Better Auth internally but is branded "Heartwood" externally. O
 
 ---
 
-## Phase 5: Establish Maintenance Process
+## Phase 5: Establish Maintenance Process ✅ COMPLETE (Jan 16, 2026)
 
-After review, establish lightweight process to prevent future drift:
+Maintenance infrastructure established to prevent future documentation drift.
 
-### Recommended Practices
+### Implemented
 
-1. **Feature flag docs** — When adding a feature behind a flag, draft docs but mark as "unreleased"
-2. **PR checklist item** — "Does this change require doc updates?" in PR template
-3. **Quarterly review** — Brief check of high-churn articles (billing, features)
-4. **Version notes** — Add "Last verified: [date]" to article frontmatter
+1. ✅ **Version tracking frontmatter** — Added `last_verified` and `verified_by` to all 41 help center articles
+2. ✅ **PR template** — Created `.github/PULL_REQUEST_TEMPLATE.md` with documentation checklist
+3. ✅ **Maintenance guide** — Created `docs/help-center/DOCS-MAINTENANCE.md` with:
+   - Quarterly review process
+   - High-churn areas to monitor
+   - Source of truth file locations
+   - Common drift patterns to watch for
 
-### Suggested Frontmatter Addition
+### Frontmatter Format
 ```yaml
 ---
 title: Custom Fonts
 slug: custom-fonts
 category: customization
-last_verified: 2026-01-15
-verified_by: autumn
+last_verified: 2026-01-16
+verified_by: claude
 ---
 ```
+
+### Maintenance Artifacts
+- **PR Template**: `.github/PULL_REQUEST_TEMPLATE.md`
+- **Maintenance Guide**: `docs/help-center/DOCS-MAINTENANCE.md`
 
 ---
 
@@ -266,6 +273,7 @@ verified_by: autumn
 | 2026-01-16 (evening) | 3 theme-related docs | Theme/font clarification | Added Foliage (First Buds/Full Bloom) terminology to choosing-a-theme.md, choosing-your-plan.md, upgrading-or-downgrading.md — addresses PR #363 review feedback |
 | 2026-01-16 (evening) | 17 Phase 2 articles | 10 requiring updates | **Phase 2 complete** — Added "Full Bloom" notices to all Meadow/social features, fixed cover images, corrected Account nav path, verified Wisp ZDR implementation |
 | 2026-01-16 (night) | 5 Phase 3 articles | 3 requiring updates | **Phase 3 complete** — Removed unimplemented feature references (comments, Messages section, Meadow status component, Active Sessions UI); added Active Sessions to TODOS.md |
+| 2026-01-16 (night) | Phase 5 maintenance | N/A | **Phase 5 complete** — Added `last_verified` frontmatter to 41 articles, created PR template, created DOCS-MAINTENANCE.md guide |
 
 ---
 
@@ -291,14 +299,14 @@ docs/
 
 ## Success Criteria
 
-- [ ] All 40 help center articles reviewed and updated
+- [x] All 41 help center articles reviewed ✅ (Jan 16, 2026)
 - [x] All 6 legal documents verified against implementation ✅ (Jan 16, 2026)
 - [x] No critical (🔴) issues remaining in legal docs ✅
 - [x] Stripe references replaced with LemonSqueezy in legal docs ✅
 - [x] ~~Account deletion article addressed~~ (resolved in PR #341 — support-based flow)
-- [ ] PR #341 updates verified (account-deletion, exporting-your-content, data-portability)
-- [ ] `last_verified` frontmatter added to reviewed articles
-- [ ] Maintenance process documented and agreed upon
+- [x] PR #341 updates verified (account-deletion, exporting-your-content, data-portability) ✅
+- [x] `last_verified` frontmatter added to all 41 help center articles ✅ (Jan 16, 2026)
+- [x] Maintenance process documented ✅ (DOCS-MAINTENANCE.md + PR template)
 
 ---
 
@@ -321,3 +329,4 @@ docs/
 | 2026-01-16 | **Phase 4 Complete:** Updated all 6 legal docs — replaced Stripe → LemonSqueezy in privacy-policy.md, terms-of-service.md; verified refund-policy.md, acceptable-use-policy.md, dmca-policy.md, data-portability-separation.md | Claude |
 | 2026-01-16 | **Phase 2 Complete:** Reviewed all 17 feature articles. Key findings: (1) Meadow/comments not implemented yet → added "Coming in Full Bloom" notices; (2) Featured images don't exist → updated to "Cover images coming soon", added to TODOS.md; (3) Data export is in Account not Settings; (4) Verified Wisp actually uses ZDR providers; (5) Updated why-grove-is-different.md to reflect Meadow features are future | Claude |
 | 2026-01-16 | **Phase 3 Complete:** Reviewed all 5 troubleshooting/support articles. Key findings: (1) browser-compatibility.md mentioned non-existent comments feature; (2) checking-grove-status.md referenced non-existent "Messages" section and listed Meadow as status component; (3) sessions-and-cookies.md described non-existent "Active Sessions" UI → added to TODOS.md as deferred feature | Claude |
+| 2026-01-16 | **Phase 5 Complete:** Established maintenance process. (1) Added `last_verified` and `verified_by` frontmatter to all 41 help center articles; (2) Created `.github/PULL_REQUEST_TEMPLATE.md` with documentation checklist; (3) Created `docs/help-center/DOCS-MAINTENANCE.md` with quarterly review process, high-churn areas, and source of truth references | Claude |

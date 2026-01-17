@@ -5,6 +5,8 @@ category: customization
 order: 4
 keywords: [fonts, typography, accessibility, dyslexia, readability, customize, appearance]
 related: [choosing-a-theme, the-markdown-editor]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Custom Fonts

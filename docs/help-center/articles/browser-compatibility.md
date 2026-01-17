@@ -5,6 +5,8 @@ category: troubleshooting
 order: 7
 keywords: [browser, chrome, firefox, safari, edge, mobile, compatibility, supported, not working]
 related: [my-site-isnt-loading, known-limitations]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Browser Compatibility

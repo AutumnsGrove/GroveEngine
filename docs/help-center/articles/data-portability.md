@@ -5,6 +5,8 @@ category: data
 order: 2
 keywords: [export, migrate, move, transfer, wordpress, ghost, hugo, markdown, portable, leaving, import]
 related: [exporting-your-content, account-deletion, understanding-your-privacy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Data Portability

@@ -5,6 +5,8 @@ category: features
 order: 5
 keywords: [meadow, community, feed, social, reactions, replies, sharing, discovery]
 related: [understanding-your-privacy, choosing-your-plan, writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Meadow?

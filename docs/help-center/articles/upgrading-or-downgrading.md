@@ -5,6 +5,8 @@ category: billing
 order: 2
 keywords: [upgrade, downgrade, change plan, switch plan, subscription, billing, tier]
 related: [choosing-your-plan]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Upgrading or Downgrading Your Plan

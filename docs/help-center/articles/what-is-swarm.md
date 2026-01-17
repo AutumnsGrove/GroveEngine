@@ -5,6 +5,8 @@ category: features
 order: 4
 keywords: [swarm, agentic, ai, agents, parallel, scout, forage, daily clearing]
 related: [what-is-zdr, what-is-grove, understanding-your-privacy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Swarm and How Does It Work?

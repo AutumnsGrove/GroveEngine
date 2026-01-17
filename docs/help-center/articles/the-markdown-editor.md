@@ -5,6 +5,8 @@ category: writing-and-publishing
 order: 2
 keywords: [editor, markdown, writing, interface, toolbar, preview, zen mode, keyboard shortcuts]
 related: [writing-your-first-post, formatting-your-posts, drafts-and-scheduling]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # The Markdown Editor

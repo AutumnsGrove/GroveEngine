@@ -5,6 +5,8 @@ category: data-and-privacy
 order: 2
 keywords: [ai, scraping, protection, bots, crawlers, privacy, shade, content, training data, archive, wayback machine]
 related: [understanding-your-privacy, what-is-grove, exporting-your-content, centennial-status]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # How Grove Protects Your Content from AI Scraping and Archiving

@@ -5,6 +5,8 @@ category: data-and-privacy
 order: 2
 keywords: [cookies, session, login, privacy, logout, browser, security, devices]
 related: [understanding-your-privacy, account-deletion]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Sessions & Cookies: What You Need to Know

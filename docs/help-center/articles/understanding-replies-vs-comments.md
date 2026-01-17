@@ -5,6 +5,8 @@ category: comments
 order: 1
 keywords: [comments, replies, private, public, moderation, feedback, readers]
 related: []
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding Replies vs. Comments

@@ -5,6 +5,8 @@ category: writing
 order: 6
 keywords: [draft, drafts, save, auto-save, schedule, scheduling, publish later, unpublish]
 related: [writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Drafts and Scheduling

@@ -8,6 +8,8 @@ category: getting-started
 order: 3
 keywords: [admin, dashboard, panel, navigation, settings, posts, pages, uploader]
 related: [creating-your-account, writing-your-first-post]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding the Admin Panel

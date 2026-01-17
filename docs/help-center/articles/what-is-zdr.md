@@ -5,6 +5,8 @@ category: data-and-privacy
 order: 3
 keywords: [zdr, zero data retention, privacy, ai, wisp, thorn, forage, inference, data protection]
 related: [understanding-your-privacy, how-grove-protects-your-content, what-is-grove]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is ZDR and Why Does It Matter?

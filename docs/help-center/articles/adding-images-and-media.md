@@ -5,6 +5,8 @@ category: writing
 order: 3
 keywords: [images, photos, upload, media, pictures, gif, png, jpeg, webp, cover image]
 related: [writing-your-first-post, formatting-your-posts]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Adding Images and Media

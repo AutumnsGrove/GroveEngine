@@ -8,6 +8,8 @@ category: writing-and-publishing
 order: 1
 keywords: [first post, writing, publish, getting started, new post, create]
 related: [what-is-grove, formatting-your-posts, drafts-and-scheduling]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Writing Your First Post

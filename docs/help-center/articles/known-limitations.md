@@ -5,6 +5,8 @@ category: troubleshooting
 order: 8
 keywords: [limitations, features, missing, not supported, ecommerce, analytics, plugins]
 related: [choosing-your-plan, contact-support, what-is-meadow]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Known Limitations

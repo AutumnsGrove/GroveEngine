@@ -5,6 +5,8 @@ category: billing
 order: 5
 keywords: [centennial, 100 years, preservation, legacy, archive, permanent, domain, longevity]
 related: [choosing-your-plan, understanding-your-plan, how-grove-protects-your-content]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Centennial Status

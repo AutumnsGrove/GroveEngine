@@ -5,6 +5,8 @@ category: about
 order: 2
 keywords: [algorithm, twitter, social media, engagement, tracking, privacy, difference, alternative, comparison, manipulation, attention]
 related: [groves-vision, what-is-grove, how-grove-protects-your-content, understanding-your-privacy]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Why Grove is Different

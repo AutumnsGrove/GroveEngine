@@ -5,6 +5,8 @@ category: data-and-privacy
 order: 1
 keywords: [privacy, data, tracking, analytics, gdpr, security, personal information]
 related: [how-grove-protects-your-content, exporting-your-content, account-deletion, what-is-grove]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Understanding Your Privacy

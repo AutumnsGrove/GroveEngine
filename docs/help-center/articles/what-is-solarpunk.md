@@ -5,6 +5,8 @@ category: philosophy
 order: 1
 keywords: [solarpunk, philosophy, values, decentralized, community, sustainable, ethics, principles, vision]
 related: [groves-vision, understanding-your-privacy, data-portability]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # What is Solarpunk?

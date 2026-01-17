@@ -5,6 +5,8 @@ category: data-and-privacy
 order: 3
 keywords: [backup, backups, data, protection, patina, recovery, restore, disaster, safety]
 related: [exporting-your-content, understanding-your-privacy, what-is-grove]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # How Grove Backs Up Your Data

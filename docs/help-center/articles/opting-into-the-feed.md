@@ -5,6 +5,8 @@ category: meadow
 order: 2
 keywords: [meadow, feed, community, share, opt-in, social, public, sharing]
 related: [what-is-grove, what-is-meadow, reactions-and-voting]
+last_verified: 2026-01-16
+verified_by: claude
 ---
 
 # Sharing Posts to Meadow
