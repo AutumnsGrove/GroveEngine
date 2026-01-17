@@ -14,8 +14,8 @@ import { DEFAULT_JOURNEY_CONFIG } from "$lib/curios/journey";
 interface ConfigRow {
   enabled: number;
   github_repo_url: string | null;
-  github_token_encrypted: string | null;
-  openrouter_key_encrypted: string | null;
+  github_token: string | null;
+  openrouter_key: string | null;
   openrouter_model: string;
   snapshot_frequency: string;
   show_language_chart: number;
@@ -61,8 +61,8 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       `SELECT
         enabled,
         github_repo_url,
-        github_token_encrypted,
-        openrouter_key_encrypted,
+        github_token,
+        openrouter_key,
         openrouter_model,
         snapshot_frequency,
         show_language_chart,
@@ -89,7 +89,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     });
   }
 
-  // Transform to camelCase, don't expose encrypted tokens
+  // Transform to camelCase, don't expose tokens in responses
   return json({
     config: {
       enabled: Boolean(config.enabled),
@@ -101,8 +101,8 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       showMilestones: Boolean(config.show_milestones),
       timezone: config.timezone,
       // Indicate if tokens are set without exposing them
-      hasGithubToken: Boolean(config.github_token_encrypted),
-      hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
+      hasGithubToken: Boolean(config.github_token),
+      hasOpenrouterKey: Boolean(config.openrouter_key),
       updatedAt: config.updated_at,
     },
   });
@@ -152,9 +152,9 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
-    // Note: In production, encrypt tokens before storing
-    const githubTokenEncrypted = githubToken?.trim() || null;
-    const openrouterKeyEncrypted = openrouterKey?.trim() || null;
+    // TODO: Encrypt tokens before storing (use Cloudflare Workers secrets or app-layer encryption)
+    const githubTokenValue = githubToken?.trim() || null;
+    const openrouterKeyValue = openrouterKey?.trim() || null;
 
     await db
       .prepare(
@@ -162,8 +162,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
           tenant_id,
           enabled,
           github_repo_url,
-          github_token_encrypted,
-          openrouter_key_encrypted,
+          github_token,
+          openrouter_key,
           openrouter_model,
           snapshot_frequency,
           show_language_chart,
@@ -175,8 +175,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         ON CONFLICT(tenant_id) DO UPDATE SET
           enabled = excluded.enabled,
           github_repo_url = excluded.github_repo_url,
-          github_token_encrypted = COALESCE(excluded.github_token_encrypted, github_token_encrypted),
-          openrouter_key_encrypted = COALESCE(excluded.openrouter_key_encrypted, openrouter_key_encrypted),
+          github_token = COALESCE(excluded.github_token, github_token),
+          openrouter_key = COALESCE(excluded.openrouter_key, openrouter_key),
           openrouter_model = excluded.openrouter_model,
           snapshot_frequency = excluded.snapshot_frequency,
           show_language_chart = excluded.show_language_chart,
@@ -189,8 +189,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         tenantId,
         enabled ? 1 : 0,
         githubRepoUrl?.trim() || null,
-        githubTokenEncrypted,
-        openrouterKeyEncrypted,
+        githubTokenValue,
+        openrouterKeyValue,
         openrouterModel || DEFAULT_JOURNEY_CONFIG.openrouterModel,
         snapshotFrequency || DEFAULT_JOURNEY_CONFIG.snapshotFrequency,
         showLanguageChart !== undefined

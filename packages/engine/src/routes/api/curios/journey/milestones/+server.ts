@@ -8,7 +8,6 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import type { JourneySummaryStats } from "$lib/curios/journey";
 
 interface MilestoneRow {
   id: string;
@@ -19,10 +18,28 @@ interface MilestoneRow {
   summary: string;
   highlights_features: string | null;
   highlights_fixes: string | null;
-  stats: string | null;
+  stats_commits: number | null;
+  stats_features: number | null;
+  stats_fixes: number | null;
+  stats_refactoring: number | null;
+  stats_docs: number | null;
+  stats_tests: number | null;
+  stats_performance: number | null;
   ai_model: string;
   ai_cost_usd: number;
   created_at: number;
+}
+
+/**
+ * Safely parse JSON, returning fallback on error
+ */
+function safeJsonParse<T>(str: string | null, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
 }
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
@@ -69,7 +86,13 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
         summary,
         highlights_features,
         highlights_fixes,
-        stats,
+        stats_commits,
+        stats_features,
+        stats_fixes,
+        stats_refactoring,
+        stats_docs,
+        stats_tests,
+        stats_performance,
         ai_model,
         ai_cost_usd,
         created_at
@@ -97,15 +120,17 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     version: row.version,
     summaryDate: row.summary_date,
     summary: row.summary,
-    highlightsFeatures: row.highlights_features
-      ? (JSON.parse(row.highlights_features) as string[])
-      : [],
-    highlightsFixes: row.highlights_fixes
-      ? (JSON.parse(row.highlights_fixes) as string[])
-      : [],
-    stats: row.stats
-      ? (JSON.parse(row.stats) as JourneySummaryStats)
-      : null,
+    highlightsFeatures: safeJsonParse<string[]>(row.highlights_features, []),
+    highlightsFixes: safeJsonParse<string[]>(row.highlights_fixes, []),
+    stats: {
+      commits: row.stats_commits ?? 0,
+      features: row.stats_features ?? 0,
+      fixes: row.stats_fixes ?? 0,
+      refactoring: row.stats_refactoring ?? 0,
+      docs: row.stats_docs ?? 0,
+      tests: row.stats_tests ?? 0,
+      performance: row.stats_performance ?? 0,
+    },
     aiModel: row.ai_model,
     aiCostUsd: row.ai_cost_usd,
     createdAt: row.created_at,
