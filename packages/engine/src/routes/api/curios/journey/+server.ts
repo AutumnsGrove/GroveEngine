@@ -8,7 +8,12 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import type { LanguageBreakdown } from "$lib/curios/journey";
+import {
+  type LanguageBreakdown,
+  safeJsonParse,
+  DEFAULT_SNAPSHOT_LIMIT,
+  MAX_SNAPSHOT_LIMIT,
+} from "$lib/curios/journey";
 
 interface JourneySnapshotRow {
   id: string;
@@ -54,7 +59,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   }
 
   // Parse query params
-  const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "20"), 100);
+  const limit = Math.min(
+    parseInt(url.searchParams.get("limit") ?? String(DEFAULT_SNAPSHOT_LIMIT)),
+    MAX_SNAPSHOT_LIMIT,
+  );
   const offset = parseInt(url.searchParams.get("offset") ?? "0");
 
   // Query snapshots
@@ -103,9 +111,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     label: row.label,
     gitHash: row.git_hash,
     totalLines: row.total_lines,
-    languageBreakdown: row.language_breakdown
-      ? (JSON.parse(row.language_breakdown) as LanguageBreakdown)
-      : {},
+    languageBreakdown: safeJsonParse<LanguageBreakdown>(
+      row.language_breakdown,
+      {},
+    ),
     docLines: row.doc_lines,
     totalFiles: row.total_files,
     directories: row.directories,

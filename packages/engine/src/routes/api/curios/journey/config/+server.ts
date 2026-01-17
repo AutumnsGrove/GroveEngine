@@ -9,7 +9,11 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { DEFAULT_JOURNEY_CONFIG } from "$lib/curios/journey";
+import {
+  DEFAULT_JOURNEY_CONFIG,
+  isValidGithubRepoUrl,
+  toSqliteBoolean,
+} from "$lib/curios/journey";
 
 interface ConfigRow {
   enabled: number;
@@ -145,6 +149,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "GitHub repository URL is required when enabling Journey");
   }
 
+  // Validate GitHub repo URL format (owner/repo)
+  if (githubRepoUrl?.trim() && !isValidGithubRepoUrl(githubRepoUrl)) {
+    throw error(
+      400,
+      "GitHub repository URL must be in format: owner/repo (e.g., 'AutumnsGrove/GroveEngine')",
+    );
+  }
+
   // Validate snapshot frequency
   const validFrequencies = ["release", "weekly", "monthly", "manual"];
   if (snapshotFrequency && !validFrequencies.includes(snapshotFrequency)) {
@@ -193,27 +205,9 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         openrouterKeyValue,
         openrouterModel || DEFAULT_JOURNEY_CONFIG.openrouterModel,
         snapshotFrequency || DEFAULT_JOURNEY_CONFIG.snapshotFrequency,
-        showLanguageChart !== undefined
-          ? showLanguageChart
-            ? 1
-            : 0
-          : DEFAULT_JOURNEY_CONFIG.showLanguageChart
-            ? 1
-            : 0,
-        showGrowthChart !== undefined
-          ? showGrowthChart
-            ? 1
-            : 0
-          : DEFAULT_JOURNEY_CONFIG.showGrowthChart
-            ? 1
-            : 0,
-        showMilestones !== undefined
-          ? showMilestones
-            ? 1
-            : 0
-          : DEFAULT_JOURNEY_CONFIG.showMilestones
-            ? 1
-            : 0,
+        toSqliteBoolean(showLanguageChart, DEFAULT_JOURNEY_CONFIG.showLanguageChart),
+        toSqliteBoolean(showGrowthChart, DEFAULT_JOURNEY_CONFIG.showGrowthChart),
+        toSqliteBoolean(showMilestones, DEFAULT_JOURNEY_CONFIG.showMilestones),
         timezone || DEFAULT_JOURNEY_CONFIG.timezone,
       )
       .run();

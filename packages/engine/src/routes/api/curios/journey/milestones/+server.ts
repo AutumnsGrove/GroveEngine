@@ -8,6 +8,11 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import {
+  safeJsonParse,
+  DEFAULT_MILESTONE_LIMIT,
+  MAX_MILESTONE_LIMIT,
+} from "$lib/curios/journey";
 
 interface MilestoneRow {
   id: string;
@@ -28,18 +33,6 @@ interface MilestoneRow {
   ai_model: string;
   ai_cost_usd: number;
   created_at: number;
-}
-
-/**
- * Safely parse JSON, returning fallback on error
- */
-function safeJsonParse<T>(str: string | null, fallback: T): T {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return fallback;
-  }
 }
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
@@ -71,7 +64,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   }
 
   // Parse query params
-  const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "10"), 50);
+  const limit = Math.min(
+    parseInt(url.searchParams.get("limit") ?? String(DEFAULT_MILESTONE_LIMIT)),
+    MAX_MILESTONE_LIMIT,
+  );
   const offset = parseInt(url.searchParams.get("offset") ?? "0");
 
   // Query milestones with summaries

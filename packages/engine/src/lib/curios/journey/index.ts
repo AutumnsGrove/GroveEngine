@@ -131,3 +131,63 @@ export const DEFAULT_JOURNEY_CONFIG: Omit<
   showMilestones: true,
   timezone: "America/New_York",
 };
+
+// =============================================================================
+// Validation
+// =============================================================================
+
+/**
+ * Pattern for validating GitHub repository URLs
+ * Accepts: "owner/repo" format
+ */
+export const GITHUB_REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
+
+/**
+ * Validate GitHub repository URL format
+ */
+export function isValidGithubRepoUrl(url: string): boolean {
+  return GITHUB_REPO_PATTERN.test(url.trim());
+}
+
+// =============================================================================
+// Utilities
+// =============================================================================
+
+/**
+ * Safely parse JSON with a fallback value
+ * Prevents crashes from malformed JSON in database columns
+ */
+export function safeJsonParse<T>(str: string | null, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Convert boolean to SQLite integer (0 or 1)
+ */
+export function toSqliteBoolean(
+  val: boolean | undefined,
+  defaultVal: boolean,
+): number {
+  return (val !== undefined ? val : defaultVal) ? 1 : 0;
+}
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+/** Default number of snapshots to return per page */
+export const DEFAULT_SNAPSHOT_LIMIT = 20;
+
+/** Maximum snapshots that can be requested at once */
+export const MAX_SNAPSHOT_LIMIT = 100;
+
+/** Default number of milestones to return per page */
+export const DEFAULT_MILESTONE_LIMIT = 10;
+
+/** Maximum milestones that can be requested at once */
+export const MAX_MILESTONE_LIMIT = 50;

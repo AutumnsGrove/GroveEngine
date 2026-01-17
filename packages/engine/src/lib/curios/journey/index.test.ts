@@ -1,0 +1,187 @@
+import { describe, it, expect } from "vitest";
+import {
+  isValidGithubRepoUrl,
+  safeJsonParse,
+  toSqliteBoolean,
+  GITHUB_REPO_PATTERN,
+  DEFAULT_SNAPSHOT_LIMIT,
+  MAX_SNAPSHOT_LIMIT,
+  DEFAULT_MILESTONE_LIMIT,
+  MAX_MILESTONE_LIMIT,
+} from "./index";
+
+describe("Journey Curio utilities", () => {
+  // ============================================================================
+  // safeJsonParse Tests
+  // ============================================================================
+
+  describe("safeJsonParse", () => {
+    it("returns fallback for null input", () => {
+      expect(safeJsonParse(null, {})).toEqual({});
+      expect(safeJsonParse(null, [])).toEqual([]);
+      expect(safeJsonParse(null, "default")).toBe("default");
+    });
+
+    it("returns fallback for empty string", () => {
+      expect(safeJsonParse("", {})).toEqual({});
+      expect(safeJsonParse("", [])).toEqual([]);
+    });
+
+    it("parses valid JSON correctly", () => {
+      expect(safeJsonParse('{"key": "value"}', {})).toEqual({ key: "value" });
+      expect(safeJsonParse("[1, 2, 3]", [])).toEqual([1, 2, 3]);
+      expect(safeJsonParse('"string"', "")).toBe("string");
+      expect(safeJsonParse("42", 0)).toBe(42);
+      expect(safeJsonParse("true", false)).toBe(true);
+    });
+
+    it("returns fallback for malformed JSON", () => {
+      expect(safeJsonParse("{invalid}", {})).toEqual({});
+      expect(safeJsonParse("[1, 2, 3", [])).toEqual([]);
+      expect(safeJsonParse("undefined", null)).toBe(null);
+      expect(safeJsonParse("not json at all", "fallback")).toBe("fallback");
+    });
+
+    it("handles complex nested JSON", () => {
+      const complexJson = JSON.stringify({
+        svelte: { lines: 1234, pct: 45.2 },
+        typescript: { lines: 5678, pct: 30.1 },
+      });
+      const result = safeJsonParse<Record<string, { lines: number; pct: number }>>(
+        complexJson,
+        {},
+      );
+      expect(result.svelte?.lines).toBe(1234);
+      expect(result.typescript?.pct).toBe(30.1);
+    });
+
+    it("handles JSON with special characters", () => {
+      const jsonWithEscapes = JSON.stringify({ message: 'Hello "World"' });
+      expect(safeJsonParse(jsonWithEscapes, {})).toEqual({
+        message: 'Hello "World"',
+      });
+    });
+
+    it("returns fallback for truncated JSON (database corruption scenario)", () => {
+      expect(safeJsonParse('{"key": "val', {})).toEqual({});
+      expect(safeJsonParse('["item1", "item2', [])).toEqual([]);
+    });
+  });
+
+  // ============================================================================
+  // isValidGithubRepoUrl Tests
+  // ============================================================================
+
+  describe("isValidGithubRepoUrl", () => {
+    it("accepts valid owner/repo format", () => {
+      expect(isValidGithubRepoUrl("owner/repo")).toBe(true);
+      expect(isValidGithubRepoUrl("AutumnsGrove/GroveEngine")).toBe(true);
+      expect(isValidGithubRepoUrl("user123/my-repo")).toBe(true);
+      expect(isValidGithubRepoUrl("org_name/repo_name")).toBe(true);
+    });
+
+    it("accepts repos with dots and dashes", () => {
+      expect(isValidGithubRepoUrl("owner/repo.js")).toBe(true);
+      expect(isValidGithubRepoUrl("owner/my-awesome-repo")).toBe(true);
+      expect(isValidGithubRepoUrl("my.org/repo-name")).toBe(true);
+    });
+
+    it("accepts repos with numbers", () => {
+      expect(isValidGithubRepoUrl("user123/repo456")).toBe(true);
+      expect(isValidGithubRepoUrl("123org/123repo")).toBe(true);
+    });
+
+    it("rejects full URLs", () => {
+      expect(isValidGithubRepoUrl("https://github.com/owner/repo")).toBe(false);
+      expect(isValidGithubRepoUrl("http://github.com/owner/repo")).toBe(false);
+      expect(isValidGithubRepoUrl("github.com/owner/repo")).toBe(false);
+    });
+
+    it("rejects paths with extra segments", () => {
+      expect(isValidGithubRepoUrl("owner/repo/extra")).toBe(false);
+      expect(isValidGithubRepoUrl("owner/repo/tree/main")).toBe(false);
+    });
+
+    it("rejects just owner or just repo", () => {
+      expect(isValidGithubRepoUrl("owner")).toBe(false);
+      expect(isValidGithubRepoUrl("repo")).toBe(false);
+    });
+
+    it("rejects empty strings", () => {
+      expect(isValidGithubRepoUrl("")).toBe(false);
+      expect(isValidGithubRepoUrl("   ")).toBe(false);
+    });
+
+    it("rejects special characters", () => {
+      expect(isValidGithubRepoUrl("owner/repo@v1")).toBe(false);
+      expect(isValidGithubRepoUrl("owner/repo#main")).toBe(false);
+      expect(isValidGithubRepoUrl("owner/repo?ref=main")).toBe(false);
+    });
+
+    it("handles whitespace in input (trimmed)", () => {
+      expect(isValidGithubRepoUrl("  owner/repo  ")).toBe(true);
+      expect(isValidGithubRepoUrl("\towner/repo\n")).toBe(true);
+    });
+
+    it.each([
+      ["owner/repo", true],
+      ["AutumnsGrove/GroveEngine", true],
+      ["my-org/my-repo.js", true],
+      ["https://github.com/owner/repo", false],
+      ["owner", false],
+      ["owner/repo/extra", false],
+      ["", false],
+    ])("validates %s as %s", (input, expected) => {
+      expect(isValidGithubRepoUrl(input)).toBe(expected);
+    });
+  });
+
+  // ============================================================================
+  // toSqliteBoolean Tests
+  // ============================================================================
+
+  describe("toSqliteBoolean", () => {
+    it("returns 1 for true values", () => {
+      expect(toSqliteBoolean(true, false)).toBe(1);
+      expect(toSqliteBoolean(true, true)).toBe(1);
+    });
+
+    it("returns 0 for false values", () => {
+      expect(toSqliteBoolean(false, true)).toBe(0);
+      expect(toSqliteBoolean(false, false)).toBe(0);
+    });
+
+    it("uses default when value is undefined", () => {
+      expect(toSqliteBoolean(undefined, true)).toBe(1);
+      expect(toSqliteBoolean(undefined, false)).toBe(0);
+    });
+
+    it("prioritizes explicit value over default", () => {
+      expect(toSqliteBoolean(true, false)).toBe(1);
+      expect(toSqliteBoolean(false, true)).toBe(0);
+    });
+  });
+
+  // ============================================================================
+  // Constants Tests
+  // ============================================================================
+
+  describe("constants", () => {
+    it("has reasonable snapshot limits", () => {
+      expect(DEFAULT_SNAPSHOT_LIMIT).toBe(20);
+      expect(MAX_SNAPSHOT_LIMIT).toBe(100);
+      expect(DEFAULT_SNAPSHOT_LIMIT).toBeLessThan(MAX_SNAPSHOT_LIMIT);
+    });
+
+    it("has reasonable milestone limits", () => {
+      expect(DEFAULT_MILESTONE_LIMIT).toBe(10);
+      expect(MAX_MILESTONE_LIMIT).toBe(50);
+      expect(DEFAULT_MILESTONE_LIMIT).toBeLessThan(MAX_MILESTONE_LIMIT);
+    });
+
+    it("exports GITHUB_REPO_PATTERN as a regex", () => {
+      expect(GITHUB_REPO_PATTERN).toBeInstanceOf(RegExp);
+      expect(GITHUB_REPO_PATTERN.test("owner/repo")).toBe(true);
+    });
+  });
+});
