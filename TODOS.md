@@ -203,6 +203,15 @@
 - [ ] Add email notifications on job completion
 - [ ] Dashboard widget for job status/history
 
+## Landing Site Migration (Post-Curio Launch)
+> **Current:** grove.place/journey reads from `history.csv` at build time
+> **Future:** Migrate to use Journey Curio API for consistency
+
+- [ ] Create API route in landing to proxy to engine's curio endpoints
+- [ ] Update `+page.server.ts` to fetch from API instead of CSV import
+- [ ] Keep CSV as backup/seed data for the Curio
+- [ ] Deprecate static CSV approach once Curio is stable
+
 ---
 
 # 📦 DEFERRED FEATURES
