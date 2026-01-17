@@ -255,7 +255,7 @@ export function loadDocBySlug(
     patterns: join(DOCS_ROOT, "patterns"),
     legal: join(DOCS_ROOT, "legal"),
     philosophy: join(DOCS_ROOT, "philosophy"),
-    design: join(DOCS_ROOT, "design"),
+    design: join(DOCS_ROOT, "design-system"),
     developer: join(DOCS_ROOT, "developer"),
   };
   const docsPath = categoryPaths[category];
