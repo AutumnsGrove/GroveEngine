@@ -180,6 +180,31 @@
 
 ---
 
+# 🔥 FIREFLY INTEGRATION — JOURNEY CURIO
+
+> **Schema ready:** `journey_jobs` table tracks async Firefly analysis jobs
+> **Status:** Schema complete, awaiting Firefly queue integration
+
+## Automated Snapshot Creation
+- [ ] Wire Firefly queue to trigger on GitHub release webhooks
+- [ ] Implement `analyze` job type for full repo analysis
+- [ ] Implement `summarize` job type for AI-generated release notes
+- [ ] Add progress tracking (0-100%) for long-running jobs
+- [ ] Configure OpenRouter integration for AI summaries
+
+## Job Types
+- **analyze**: Full repo analysis (LOC, language breakdown, test coverage)
+- **backfill**: Regenerate historical snapshots from git history
+- **summarize**: Generate AI release notes via OpenRouter
+
+## Future Enhancements
+- [ ] Add webhook endpoint for GitHub release events
+- [ ] Implement `commits_since_last` delta calculation
+- [ ] Add email notifications on job completion
+- [ ] Dashboard widget for job status/history
+
+---
+
 # 📦 DEFERRED FEATURES
 
 ## Cover Images for Blog Posts
