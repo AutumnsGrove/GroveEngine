@@ -165,22 +165,38 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
   };
 }
 
+// Categories that should recursively include subdirectories.
+// - specs: includes completed specs in specs/completed/
+// - Other categories (philosophy, design, etc.) may contain internal
+//   scratch/draft folders that shouldn't be exposed publicly.
+const RECURSIVE_CATEGORIES: DocCategory[] = ["specs"];
+
 function loadDocsFromDir(
   dirPath: string,
   category: DocCategory,
 ): DocInternal[] {
   const docs: DocInternal[] = [];
   const seenSlugs = new Set<string>();
+  const shouldRecurse = RECURSIVE_CATEGORIES.includes(category);
 
   function readDirRecursive(currentPath: string) {
     const items = readdirSync(currentPath);
 
     for (const item of items) {
       const fullPath = join(currentPath, item);
-      const stat = statSync(fullPath);
 
-      // Include all subdirectories including "completed" specs
-      if (stat.isDirectory()) {
+      // Gracefully handle broken symlinks or inaccessible files
+      let stat;
+      try {
+        stat = statSync(fullPath);
+      } catch {
+        console.warn(`Skipping inaccessible file: ${fullPath}`);
+        continue;
+      }
+
+      // Only recurse into subdirectories for certain categories (e.g., specs/completed)
+      // Other categories like philosophy have internal scratch folders that shouldn't be public
+      if (stat.isDirectory() && shouldRecurse) {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
         try {
@@ -255,7 +271,7 @@ export function loadDocBySlug(
     patterns: join(DOCS_ROOT, "patterns"),
     legal: join(DOCS_ROOT, "legal"),
     philosophy: join(DOCS_ROOT, "philosophy"),
-    design: join(DOCS_ROOT, "design"),
+    design: join(DOCS_ROOT, "design-system"),
     developer: join(DOCS_ROOT, "developer"),
   };
   const docsPath = categoryPaths[category];
