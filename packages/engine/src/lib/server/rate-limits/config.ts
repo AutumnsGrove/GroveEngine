@@ -69,6 +69,10 @@ export const ENDPOINT_RATE_LIMITS = {
   "ai/fireside": { limit: 50, windowSeconds: 86400 },
   "ai/draft": { limit: 20, windowSeconds: 86400 },
 
+  // Data operations (prevents abuse of expensive operations)
+  "export/data": { limit: 10, windowSeconds: 3600 }, // 10 exports per hour
+  "billing/operations": { limit: 20, windowSeconds: 3600 }, // 20 billing actions per hour
+
   // Default for unspecified endpoints
   default: { limit: 100, windowSeconds: 60 },
 } as const;
@@ -95,6 +99,10 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
   "POST:/api/ai/wisp": "ai/wisp",
   "POST:/api/ai/fireside": "ai/fireside",
   "POST:/api/ai/draft": "ai/draft",
+  "POST:/api/export": "export/data",
+  "POST:/api/billing": "billing/operations",
+  "PATCH:/api/billing": "billing/operations",
+  "PUT:/api/billing": "billing/operations",
 };
 
 // ============================================================================

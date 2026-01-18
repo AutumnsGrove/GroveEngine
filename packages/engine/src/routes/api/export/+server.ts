@@ -2,6 +2,11 @@ import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  checkRateLimit,
+  getEndpointLimitByKey,
+  rateLimitHeaders,
+} from "$lib/server/rate-limits/index.js";
 
 /**
  * Data Export API
@@ -14,72 +19,13 @@ import { validateCSRF } from "$lib/utils/csrf.js";
  * Privacy Policy Section 5.2 guarantees:
  * "You can export your data (posts, pages, media) at any time in standard formats."
  *
- * Rate limiting: 10 exports per hour per tenant to prevent abuse.
+ * Rate limiting: 10 exports per hour per tenant (configured in rate-limits/config.ts).
  */
 
 export type ExportType = "full" | "posts" | "media" | "pages";
 
-// Rate limiting configuration
-const RATE_LIMIT_MAX = 10; // Max exports per window
-const RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
-
-/**
- * Check and update rate limit for data exports.
- * Returns true if within limits, false if rate limited.
- */
-async function checkRateLimit(
-  kv: KVNamespace | undefined,
-  tenantId: string
-): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
-  if (!kv) {
-    // If KV not available, allow but log warning
-    console.warn("[Export] KV not configured, rate limiting disabled");
-    return { allowed: true, remaining: RATE_LIMIT_MAX, resetAt: 0 };
-  }
-
-  const key = `export_ratelimit:${tenantId}`;
-  const now = Math.floor(Date.now() / 1000);
-
-  try {
-    const data = await kv.get(key, "json") as { count: number; windowStart: number } | null;
-
-    if (!data || now - data.windowStart >= RATE_LIMIT_WINDOW_SECONDS) {
-      // New window - reset counter
-      await kv.put(key, JSON.stringify({ count: 1, windowStart: now }), {
-        expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
-      });
-      return {
-        allowed: true,
-        remaining: RATE_LIMIT_MAX - 1,
-        resetAt: now + RATE_LIMIT_WINDOW_SECONDS,
-      };
-    }
-
-    if (data.count >= RATE_LIMIT_MAX) {
-      // Rate limited
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: data.windowStart + RATE_LIMIT_WINDOW_SECONDS,
-      };
-    }
-
-    // Increment counter
-    await kv.put(key, JSON.stringify({ count: data.count + 1, windowStart: data.windowStart }), {
-      expirationTtl: RATE_LIMIT_WINDOW_SECONDS - (now - data.windowStart),
-    });
-
-    return {
-      allowed: true,
-      remaining: RATE_LIMIT_MAX - data.count - 1,
-      resetAt: data.windowStart + RATE_LIMIT_WINDOW_SECONDS,
-    };
-  } catch (e) {
-    console.error("[Export] Rate limit check failed:", e);
-    // On error, allow the request but log it
-    return { allowed: true, remaining: RATE_LIMIT_MAX, resetAt: 0 };
-  }
-}
+// Rate limit config is now centralized in $lib/server/rate-limits/config.ts
+const EXPORT_RATE_LIMIT = getEndpointLimitByKey("export/data");
 
 interface PostRecord {
   id: string;
@@ -153,7 +99,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const validTypes = ["full", "posts", "media", "pages"];
 
   if (!validTypes.includes(exportType)) {
-    throw error(400, `Invalid export type. Valid types: ${validTypes.join(", ")}`);
+    throw error(
+      400,
+      `Invalid export type. Valid types: ${validTypes.join(", ")}`,
+    );
   }
 
   const requestedTenantId = locals.tenantId;
@@ -162,7 +111,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user
+      locals.user,
     );
 
     // Check export size BEFORE rate limit (don't consume quota for oversized exports)
@@ -170,57 +119,72 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const MAX_EXPORT_ITEMS = 5000;
     if (exportType === "full" || exportType === "posts") {
       const postCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?"
-      ).bind(tenantId).first<{ count: number }>();
+        "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
+      )
+        .bind(tenantId)
+        .first<{ count: number }>();
 
       if (postCount && postCount.count > MAX_EXPORT_ITEMS) {
         throw error(
           413,
-          `Export too large (${postCount.count} posts). Please contact support for bulk data exports.`
+          `Export too large (${postCount.count} posts). Please contact support for bulk data exports.`,
         );
       }
     }
 
     if (exportType === "full" || exportType === "media") {
       const mediaCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?"
-      ).bind(tenantId).first<{ count: number }>();
+        "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?",
+      )
+        .bind(tenantId)
+        .first<{ count: number }>();
 
       if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {
         throw error(
           413,
-          `Export too large (${mediaCount.count} media files). Please contact support for bulk data exports.`
+          `Export too large (${mediaCount.count} media files). Please contact support for bulk data exports.`,
         );
       }
     }
 
     if (exportType === "full" || exportType === "pages") {
       const pageCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?"
-      ).bind(tenantId).first<{ count: number }>();
+        "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?",
+      )
+        .bind(tenantId)
+        .first<{ count: number }>();
 
       if (pageCount && pageCount.count > MAX_EXPORT_ITEMS) {
         throw error(
           413,
-          `Export too large (${pageCount.count} pages). Please contact support for bulk data exports.`
+          `Export too large (${pageCount.count} pages). Please contact support for bulk data exports.`,
         );
       }
     }
 
     // Check rate limit after size validation (so oversized exports don't consume quota)
-    const rateLimit = await checkRateLimit(platform.env.CACHE_KV, tenantId);
-    if (!rateLimit.allowed) {
-      // Calculate human-readable wait time
-      const nowSeconds = Math.floor(Date.now() / 1000);
-      const waitMinutes = Math.ceil((rateLimit.resetAt - nowSeconds) / 60);
-      const waitText = waitMinutes > 60
-        ? `${Math.ceil(waitMinutes / 60)} hour${Math.ceil(waitMinutes / 60) > 1 ? "s" : ""}`
-        : `${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}`;
-      throw error(
-        429,
-        `Export rate limit exceeded. You can export ${RATE_LIMIT_MAX} times per hour. ` +
-          `Try again in ${waitText}.`
-      );
+    // Uses centralized rate limiting from $lib/server/rate-limits
+    let rateLimitResult = {
+      allowed: true,
+      remaining: EXPORT_RATE_LIMIT.limit,
+      resetAt: 0,
+    };
+
+    if (platform.env.CACHE_KV) {
+      const { result, response } = await checkRateLimit({
+        kv: platform.env.CACHE_KV,
+        key: `export:${tenantId}`,
+        limit: EXPORT_RATE_LIMIT.limit,
+        windowSeconds: EXPORT_RATE_LIMIT.windowSeconds,
+        namespace: "export",
+      });
+      rateLimitResult = result;
+      if (response) {
+        // Return the 429 response from the middleware
+        return response;
+      }
+    } else {
+      console.warn("[Export] KV not configured, rate limiting disabled");
     }
 
     const exportData: {
@@ -269,7 +233,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         `SELECT id, slug, title, description, markdown_content, tags, status,
                 featured_image, published_at, created_at, updated_at
          FROM posts WHERE tenant_id = ?
-         ORDER BY created_at DESC`
+         ORDER BY created_at DESC`,
       )
         .bind(tenantId)
         .all<PostRecord>();
@@ -295,7 +259,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       const pages = await platform.env.DB.prepare(
         `SELECT id, slug, title, description, markdown_content, type, created_at, updated_at
          FROM pages WHERE tenant_id = ?
-         ORDER BY display_order ASC`
+         ORDER BY display_order ASC`,
       )
         .bind(tenantId)
         .all<PageRecord>();
@@ -316,7 +280,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       const media = await platform.env.DB.prepare(
         `SELECT id, filename, original_name, r2_key, url, size, mime_type, alt_text, uploaded_at
          FROM media WHERE tenant_id = ?
-         ORDER BY uploaded_at DESC`
+         ORDER BY uploaded_at DESC`,
       )
         .bind(tenantId)
         .all<MediaRecord>();
@@ -336,7 +300,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     try {
       await platform.env.DB.prepare(
         `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
       )
         .bind(
           crypto.randomUUID(),
@@ -350,7 +314,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
             mediaCount: exportData.media?.length ?? 0,
           }),
           locals.user.email,
-          Math.floor(Date.now() / 1000)
+          Math.floor(Date.now() / 1000),
         )
         .run();
     } catch (e) {
@@ -365,9 +329,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json"`,
         "Cache-Control": "no-cache",
-        "X-RateLimit-Limit": RATE_LIMIT_MAX.toString(),
-        "X-RateLimit-Remaining": rateLimit.remaining.toString(),
-        "X-RateLimit-Reset": rateLimit.resetAt.toString(),
+        ...rateLimitHeaders(rateLimitResult, EXPORT_RATE_LIMIT.limit),
       },
     });
   } catch (err) {

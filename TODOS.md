@@ -135,7 +135,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Update CONTRIBUTING.md with new workflow
 
 ### 3. Code Discoverability Fixes
-- [ ] **FIX:** grove-find.sh has shell compatibility issues in Claude Code sandbox
+- [x] **FIX:** grove-find.sh shell compatibility issues ✅ (Jan 18, 2026)
 - [ ] Consider building `gf` (grove-find) CLI tool for blazing fast search
 - [ ] Document key file locations in ARCHITECTURE.md
 
@@ -145,9 +145,9 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Document planned vs. implemented features clearly
 - [ ] Check Glass usage consistency (desktop TOC needs it!)
 
-### 5. DB Abstraction → REMAINING TASKS
-- [ ] Create typed query builders for common operations
-- [ ] Document safe patterns in AGENT.md
+### 5. DB Abstraction → ✅ COMPLETE
+- [x] Create typed query builders for common operations ✅ (database.ts has 20+ helpers)
+- [x] Document safe patterns in AGENT.md ✅ (lines 315-375: isolation + typed builders)
 
 ---
 
@@ -207,7 +207,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 
 ## Quick Wins
 - [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
-- [ ] **Rate limit config** — Move RATE_LIMIT_MAX to shared config/env vars
+- [x] **Rate limit config** — Consolidated to `$lib/server/rate-limits/config.ts` ✅ (Jan 18, 2026)
 - [ ] **Focus management** — Return focus to button after actions complete
 
 ## Deployment Checklist
