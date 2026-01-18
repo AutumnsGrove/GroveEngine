@@ -15,7 +15,6 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   RATE_LIMIT,
-  COST_CAP,
   calculateCost,
 } from "$lib/config/wisp.js";
 import {
@@ -42,7 +41,30 @@ interface FiresideRequest {
   message?: string;
   conversation?: FiresideMessage[];
   starterPrompt?: string;
+  conversationId?: string;
 }
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Maximum length of a single user message */
+const MAX_MESSAGE_LENGTH = 2000;
+
+/** Minimum number of user messages before drafting is allowed */
+const MIN_MESSAGES_FOR_DRAFT = 3;
+
+/** Minimum estimated tokens from user before drafting is allowed */
+const MIN_TOKENS_FOR_DRAFT = 150;
+
+/** Average characters per token (rough estimate) */
+const CHARS_PER_TOKEN = 4;
+
+/** Max tokens for Wisp's response in conversation */
+const RESPONSE_MAX_TOKENS = 150;
+
+/** Max tokens for draft generation */
+const DRAFT_MAX_TOKENS = 2000;
 
 // ============================================================================
 // Starter Prompts
@@ -104,14 +126,14 @@ function canDraft(conversation: FiresideMessage[]): boolean {
     0
   );
 
-  return userMessages.length >= 3 && totalUserTokens >= 150;
+  return userMessages.length >= MIN_MESSAGES_FOR_DRAFT && totalUserTokens >= MIN_TOKENS_FOR_DRAFT;
 }
 
 /**
- * Rough token estimation (4 chars per token average)
+ * Rough token estimation
  */
 function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+  return Math.ceil(text.length / CHARS_PER_TOKEN);
 }
 
 /**
@@ -130,18 +152,18 @@ function generateConversationId(): string {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return json({ error: "Looks like you're not signed in. Pop back in when you're ready." }, { status: 401 });
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    return json({ error: "Invalid origin" }, { status: 403 });
+    return json({ error: "Something seems off with your request. Mind refreshing the page?" }, { status: 403 });
   }
 
   const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
 
-  // Check if Wisp is enabled
+  // Check if Wisp is enabled (isolated query with explicit error handling)
   if (db) {
     try {
       const settings = await db
@@ -149,29 +171,43 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           "SELECT setting_value FROM site_settings WHERE setting_key = ?"
         )
         .bind("wisp_enabled")
-        .first();
+        .first<{ setting_value: string }>();
 
       if (!settings || settings.setting_value !== "true") {
         return json(
-          { error: "Wisp is disabled. Enable it in Settings." },
+          { error: "Wisp is resting right now. You can wake them in Settings when you're ready." },
           { status: 403 }
         );
       }
-    } catch {
-      // If settings table doesn't exist, allow (for initial setup)
+    } catch (err) {
+      // Log for debugging but allow through for initial setup
+      // (settings table may not exist yet)
+      console.debug(
+        "[Fireside] Settings query failed (may be expected during setup):",
+        err instanceof Error ? err.message : "Unknown error"
+      );
     }
   }
 
-  // Check subscription access to AI features
+  // Check subscription access to AI features (isolated query)
   if (db && locals.tenantId) {
-    const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
-    if (!featureCheck.allowed) {
-      return json(
-        {
-          error:
-            featureCheck.reason || "AI features require an active subscription",
-        },
-        { status: 403 }
+    try {
+      const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
+      if (!featureCheck.allowed) {
+        return json(
+          {
+            error:
+              featureCheck.reason || "AI features require an active subscription",
+          },
+          { status: 403 }
+        );
+      }
+    } catch (err) {
+      // Log billing check failure but fail-open for feature access
+      // (billing issues shouldn't completely block the feature)
+      console.warn(
+        "[Fireside] Feature access check failed:",
+        err instanceof Error ? err.message : "Unknown error"
       );
     }
   }
@@ -181,15 +217,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   try {
     body = await request.json();
   } catch {
-    return json({ error: "Invalid request body" }, { status: 400 });
+    return json({ error: "Hmm, I couldn't quite understand that. Mind trying again?" }, { status: 400 });
   }
 
-  const { action, message, conversation, starterPrompt } = body;
+  const { action, message, conversation, starterPrompt, conversationId } = body;
 
   // Validate action
   if (!["start", "respond", "draft"].includes(action)) {
     return json(
-      { error: "Invalid action. Use: start, respond, or draft" },
+      { error: "That's not something I know how to do yet. Try starting a conversation?" },
       { status: 400 }
     );
   }
@@ -198,7 +234,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!kv) {
     console.error("[Fireside] Rate limiting failed: CACHE_KV not configured");
     return json(
-      { error: "Service temporarily unavailable. Please try again." },
+      { error: "I need a moment to gather myself. Mind waiting a bit and trying again?" },
       { status: 503 }
     );
   }
@@ -231,7 +267,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   const hasProvider = Object.values(secrets).some(Boolean);
   if (!hasProvider) {
-    return json({ error: "AI service not configured" }, { status: 503 });
+    return json({ error: "I'm not quite set up yet. Ask the site owner to configure the AI settings." }, { status: 503 });
   }
 
   try {
@@ -244,7 +280,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         return await handleRespond(message, conversation, secrets);
 
       case "draft":
-        return await handleDraft(conversation, secrets, db, locals.user.id);
+        return await handleDraft(conversation, secrets, db, locals.user.id, conversationId);
 
       default:
         return json({ error: "Invalid action" }, { status: 400 });
@@ -255,7 +291,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       err instanceof Error ? err.message : "Unknown error"
     );
     return json(
-      { error: "Something went wrong. Please try again." },
+      { error: "Oh dear, something got tangled up. Mind trying that again?" },
       { status: 500 }
     );
   }
@@ -288,12 +324,12 @@ async function handleRespond(
   secrets: { FIREWORKS_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string }
 ) {
   if (!message || typeof message !== "string" || !message.trim()) {
-    return json({ error: "No message provided" }, { status: 400 });
+    return json({ error: "I'm listening... but I didn't catch anything. What's on your mind?" }, { status: 400 });
   }
 
-  if (message.length > 2000) {
+  if (message.length > MAX_MESSAGE_LENGTH) {
     return json(
-      { error: "Message too long. Keep it under 2000 characters." },
+      { error: "That's a lot to hold at once. Mind breaking it into a shorter message?" },
       { status: 400 }
     );
   }
@@ -330,7 +366,7 @@ Respond as Wisp with a brief, warm follow-up. Ask a question that helps them go 
   const response = await callInference(
     {
       prompt,
-      maxTokens: 150,
+      maxTokens: RESPONSE_MAX_TOKENS,
       temperature: 0.7,
     },
     secrets
@@ -359,16 +395,17 @@ async function handleDraft(
   conversation: FiresideMessage[] | undefined,
   secrets: { FIREWORKS_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string },
   db: D1Database | undefined,
-  userId: string
+  userId: string,
+  conversationId?: string
 ) {
   if (!conversation || !Array.isArray(conversation) || conversation.length === 0) {
-    return json({ error: "No conversation provided" }, { status: 400 });
+    return json({ error: "I seem to have lost our conversation. Shall we start fresh?" }, { status: 400 });
   }
 
   if (!canDraft(conversation)) {
     return json(
       {
-        error: "Not enough conversation yet. Keep talking a bit more before drafting.",
+        error: "We're just getting started! Tell me a bit more before we shape it into words.",
         canDraft: false,
       },
       { status: 400 }
@@ -409,7 +446,7 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
   const response = await callInference(
     {
       prompt,
-      maxTokens: 2000,
+      maxTokens: DRAFT_MAX_TOKENS,
       temperature: 0.3,
     },
     secrets
@@ -427,7 +464,7 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
   } catch {
     console.warn("[Fireside] Failed to parse draft response:", response.content.substring(0, 200));
     return json(
-      { error: "Failed to generate draft. Please try again." },
+      { error: "I got a bit lost putting that together. Shall we try again?" },
       { status: 500 }
     );
   }
@@ -444,8 +481,8 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
     try {
       await db
         .prepare(
-          `INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost, fireside_session_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           userId,
@@ -455,7 +492,8 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
           response.provider,
           response.usage.input,
           response.usage.output,
-          cost
+          cost,
+          conversationId || null
         )
         .run();
     } catch (err) {

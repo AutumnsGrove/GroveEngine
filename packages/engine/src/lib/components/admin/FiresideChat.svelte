@@ -95,15 +95,15 @@
     inputValue = "";
     error = null;
 
+    // Create the message with a unique timestamp for identification
+    const newMessage: Message = {
+      role: "user",
+      content: userMessage,
+      timestamp: new Date().toISOString(),
+    };
+
     // Add user message to UI immediately
-    messages = [
-      ...messages,
-      {
-        role: "user",
-        content: userMessage,
-        timestamp: new Date().toISOString(),
-      },
-    ];
+    messages = [...messages, newMessage];
 
     // Scroll to bottom
     await tick();
@@ -144,8 +144,8 @@
       scrollToBottom();
     } catch (err) {
       error = err instanceof Error ? err.message : "Something went wrong";
-      // Remove the user message if we failed
-      messages = messages.slice(0, -1);
+      // Remove the specific user message that failed (safer than slice)
+      messages = messages.filter((m) => m.timestamp !== newMessage.timestamp);
     } finally {
       isLoading = false;
       inputElement?.focus();
@@ -165,6 +165,7 @@
         body: JSON.stringify({
           action: "draft",
           conversation: messages,
+          conversationId,
         }),
       });
 
@@ -253,9 +254,7 @@
 
       <div class="draft-content">
         <h1 class="draft-title">{draft.title}</h1>
-        <div class="draft-body">
-          {@html draft.content.replace(/\n/g, "<br>")}
-        </div>
+        <div class="draft-body">{draft.content}</div>
         <p class="draft-marker">{draft.marker}</p>
       </div>
 
@@ -295,13 +294,14 @@
       {/each}
 
       {#if isLoading}
-        <div class="message message-wisp loading">
+        <div class="message message-wisp loading" aria-label="Wisp is thinking">
           <span class="message-role">Wisp</span>
-          <p class="message-content typing">
+          <p class="message-content typing" aria-hidden="true">
             <span class="dot"></span>
             <span class="dot"></span>
             <span class="dot"></span>
           </p>
+          <span class="sr-only">Wisp is thinking...</span>
         </div>
       {/if}
 
@@ -661,6 +661,7 @@
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--grove-text-primary, #e8e8e8);
+    white-space: pre-wrap;
   }
 
   .draft-marker {
@@ -714,6 +715,19 @@
 
   .action-primary:hover {
     background: var(--grove-accent-primary-hover, #3d6b4a);
+  }
+
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* Reduced motion */
