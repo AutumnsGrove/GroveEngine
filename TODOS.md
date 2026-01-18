@@ -206,7 +206,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Track drop-off points for optimization
 
 ## Quick Wins
-- [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
+- [x] **Custom confirmation dialogs** — Already using `GlassConfirmDialog` throughout ✅ (verified Jan 18, 2026)
 - [x] **Rate limit config** — Consolidated to `$lib/server/rate-limits/config.ts` ✅ (Jan 18, 2026)
 - [x] **Focus management** — GlassConfirmDialog now saves/restores focus + focus trapping ✅ (Jan 18, 2026)
 
@@ -239,6 +239,22 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Implement `commits_since_last` delta calculation
 - [ ] Add email notifications on job completion
 - [ ] Dashboard widget for job status/history
+
+## Composable Curio Architecture
+> **Goal:** Journey Curio should be modular—use all components together or just the pieces you need
+> **Context:** Curios can render as pages OR as vines (gutter content), so flexibility is key
+
+- [ ] Split Journey Curio into independent sub-curios:
+  - **Milestones Curio** — Version releases with dates and summaries
+  - **Code Stats Curio** — Lines of code, language breakdown, test coverage
+  - **Timeline Curio** — Full project history visualization
+- [ ] Create composable API that supports:
+  - Fetching all journey data (current behavior)
+  - Fetching just milestones
+  - Fetching just code stats
+  - Fetching just timeline events
+- [ ] Ensure each sub-curio works standalone as a page or vine
+- [ ] Document component composition patterns for other curios
 
 ## Landing Site Migration (Post-Curio Launch)
 > **Current:** grove.place/journey reads from `history.csv` at build time
@@ -291,9 +307,9 @@ Created detailed implementation plans in `docs/plans/planned/`:
 ## Safari Reader Mode & Glass Cards
 > **Issue:** Safari Reader Mode strips `backdrop-blur`, making glass card content invisible
 > **Plan:** `docs/plans/planned/code-quality-optimizations.md` (§1)
-> **Status:** Fallback exists in `domains/src/app.css` but NOT in engine
+> **Status:** Fallback added to engine ✅
 
-- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback to engine
+- [x] Add `@supports not (backdrop-filter: blur(4px))` fallback to engine ✅ (Jan 18, 2026)
 - [ ] Wrap glass card content in semantic `<article>` or `<section>` elements
 - [ ] Test fix in Safari iOS and macOS
 
