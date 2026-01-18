@@ -1,4 +1,4 @@
--- 026_wisp_fireside.sql
+-- 027_wisp_fireside.sql
 -- Fireside mode additions for Wisp
 -- Backward compatible: all new columns have defaults
 
