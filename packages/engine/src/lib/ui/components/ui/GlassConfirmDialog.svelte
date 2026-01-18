@@ -11,6 +11,10 @@
 	 * Perfect for destructive actions like delete, or any action that needs user confirmation.
 	 * Features a glass-effect card over a blurred overlay.
 	 *
+	 * **Focus Management:** This component automatically saves the previously focused element
+	 * when opening and restores focus to it when closing. This ensures keyboard and screen
+	 * reader users maintain their place in the document after dismissing the dialog.
+	 *
 	 * @example Basic confirmation
 	 * ```svelte
 	 * <GlassConfirmDialog
@@ -69,6 +73,34 @@
 		children
 	}: Props = $props();
 
+	// Focus management: track the element that had focus before dialog opened
+	let previouslyFocusedElement: HTMLElement | null = null;
+	let dialogRef: HTMLDivElement | null = null;
+
+	// Save focus when dialog opens, restore when it closes
+	$effect(() => {
+		if (open) {
+			// Save the currently focused element before dialog takes focus
+			previouslyFocusedElement = document.activeElement as HTMLElement | null;
+
+			// Move focus to dialog after render (small delay for transition)
+			setTimeout(() => {
+				dialogRef?.focus();
+			}, 50);
+		} else if (previouslyFocusedElement) {
+			// Restore focus when dialog closes
+			// Use setTimeout to ensure this runs after any DOM updates
+			const elementToFocus = previouslyFocusedElement;
+			setTimeout(() => {
+				// Only restore if element is still in DOM and focusable
+				if (elementToFocus && document.body.contains(elementToFocus)) {
+					elementToFocus.focus();
+				}
+			}, 50);
+			previouslyFocusedElement = null;
+		}
+	});
+
 	// Variant-specific styling
 	const variantConfig = {
 		default: {
@@ -108,6 +140,25 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === "Escape") {
 			handleCancel();
+		}
+
+		// Focus trapping: keep Tab within the dialog
+		if (event.key === "Tab" && dialogRef) {
+			const focusableElements = dialogRef.querySelectorAll<HTMLElement>(
+				'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+			);
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			if (event.shiftKey && document.activeElement === firstElement) {
+				// Shift+Tab from first element: wrap to last
+				event.preventDefault();
+				lastElement?.focus();
+			} else if (!event.shiftKey && document.activeElement === lastElement) {
+				// Tab from last element: wrap to first
+				event.preventDefault();
+				firstElement?.focus();
+			}
 		}
 	}
 
@@ -149,6 +200,7 @@
 
 		<!-- Dialog card -->
 		<div
+			bind:this={dialogRef}
 			class={cn(
 				"relative z-10 w-full max-w-md",
 				"bg-white/80 dark:bg-slate-900/80",
@@ -157,6 +209,7 @@
 				"rounded-2xl shadow-2xl",
 				"overflow-hidden"
 			)}
+			tabindex="-1"
 			transition:scale={{ duration: 150, start: 0.95 }}
 		>
 			<!-- Header with icon -->

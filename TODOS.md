@@ -29,9 +29,9 @@ Created detailed implementation plans in `docs/plans/planned/`:
 **Key Findings from Audit:**
 - ✅ Encryption module exists and is tested (31 test cases) — just needs wiring
 - ✅ Reserved usernames system is **90% complete** (450+ entries, API exists, tests pass)
+- ✅ Safari Reader fallback — ported to `engine/` in PR #389 (Jan 18, 2026)
 - ❌ LemonSqueezy webhooks store full PII with no cleanup mechanism
 - ❌ ~30 unsafe `JSON.parse()` calls need wrapping
-- ❌ Safari Reader fallback exists in `domains/` but not in `engine/`
 - ⚠️ 7 skipped tests due to Svelte 5 reactivity + Vitest timing issues
 
 ---
@@ -208,7 +208,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 ## Quick Wins
 - [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
 - [x] **Rate limit config** — Consolidated to `$lib/server/rate-limits/config.ts` ✅ (Jan 18, 2026)
-- [ ] **Focus management** — Return focus to button after actions complete
+- [x] **Focus management** — GlassConfirmDialog now saves/restores focus + focus trapping ✅ (Jan 18, 2026)
 
 ## Deployment Checklist
 - [ ] `audit_log` table migration ready for production D1
