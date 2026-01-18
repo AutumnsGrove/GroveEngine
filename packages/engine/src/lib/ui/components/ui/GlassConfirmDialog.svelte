@@ -77,16 +77,26 @@
 	let previouslyFocusedElement: HTMLElement | null = null;
 	let dialogRef: HTMLDivElement | null = null;
 
+	// Selector for focusable elements within the dialog (used for focus trap and initial focus)
+	const FOCUSABLE_SELECTOR =
+		'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+	// Delay before moving focus, allows CSS transitions to start (150ms scale transition)
+	// Using 50ms gives the DOM time to render while feeling instant to users
+	const FOCUS_DELAY_MS = 50;
+
 	// Save focus when dialog opens, restore when it closes
 	$effect(() => {
 		if (open) {
 			// Save the currently focused element before dialog takes focus
 			previouslyFocusedElement = document.activeElement as HTMLElement | null;
 
-			// Move focus to dialog after render (small delay for transition)
+			// Focus the first interactive element (Cancel button) for immediate keyboard access
+			// This is better UX than focusing the container - users can act immediately
 			setTimeout(() => {
-				dialogRef?.focus();
-			}, 50);
+				const firstFocusable = dialogRef?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+				firstFocusable?.focus();
+			}, FOCUS_DELAY_MS);
 		} else if (previouslyFocusedElement) {
 			// Restore focus when dialog closes
 			// Use setTimeout to ensure this runs after any DOM updates
@@ -96,7 +106,7 @@
 				if (elementToFocus && document.body.contains(elementToFocus)) {
 					elementToFocus.focus();
 				}
-			}, 50);
+			}, FOCUS_DELAY_MS);
 			previouslyFocusedElement = null;
 		}
 	});
@@ -138,15 +148,16 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		// Early exit if dialog is closed - no need to process keydowns
+		if (!open) return;
+
 		if (event.key === "Escape") {
 			handleCancel();
 		}
 
 		// Focus trapping: keep Tab within the dialog
 		if (event.key === "Tab" && dialogRef) {
-			const focusableElements = dialogRef.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-			);
+			const focusableElements = dialogRef.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
 			const firstElement = focusableElements[0];
 			const lastElement = focusableElements[focusableElements.length - 1];
 
