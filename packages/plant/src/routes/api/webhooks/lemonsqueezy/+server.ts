@@ -92,16 +92,21 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   // (event_name, test_mode, id, type are safe - no PII)
+  // Type guards ensure we only store expected types even if API structure changes
   const payloadToStore = sanitizedPayload
     ? JSON.stringify(sanitizedPayload)
     : JSON.stringify({
         meta: {
-          event_name: eventName,
-          test_mode: event.meta?.test_mode ?? false,
+          event_name: typeof eventName === "string" ? eventName : "unknown",
+          test_mode:
+            typeof event.meta?.test_mode === "boolean"
+              ? event.meta.test_mode
+              : false,
         },
         data: {
-          id: event.data?.id ?? "unknown",
-          type: event.data?.type ?? "unknown",
+          id: typeof event.data?.id === "string" ? event.data.id : "unknown",
+          type:
+            typeof event.data?.type === "string" ? event.data.type : "unknown",
         },
         _sanitization_failed: true,
       });
