@@ -454,6 +454,7 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
 
   // Parse the response
   let draft: { title: string; content: string };
+  let formatWarning: string | undefined;
   try {
     // Try to extract JSON from the response (handle potential markdown wrapping)
     let jsonStr = response.content.trim();
@@ -462,11 +463,13 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
     }
     draft = JSON.parse(jsonStr);
   } catch {
-    console.warn("[Fireside] Failed to parse draft response:", response.content.substring(0, 200));
-    return json(
-      { error: "I got a bit lost putting that together. Shall we try again?" },
-      { status: 500 }
-    );
+    // Fallback: Use the raw response as content instead of losing the conversation
+    console.warn("[Fireside] JSON parse failed, using raw response as fallback");
+    draft = {
+      title: "Untitled",
+      content: response.content.trim(),
+    };
+    formatWarning = "The draft formatting may be a bit rough. Feel free to tidy it up.";
   }
 
   // Calculate cost
@@ -510,6 +513,7 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
     title: draft.title || "Untitled",
     content: draft.content || "",
     marker,
+    warning: formatWarning,
     meta: {
       tokensUsed: response.usage.input + response.usage.output,
       cost,

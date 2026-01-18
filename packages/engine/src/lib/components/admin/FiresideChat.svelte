@@ -44,7 +44,7 @@
 
   // Draft state
   let draftMode = $state(false);
-  let draft = $state<{ title: string; content: string; marker: string } | null>(null);
+  let draft = $state<{ title: string; content: string; marker: string; warning?: string } | null>(null);
   let isDrafting = $state(false);
 
   // Refs
@@ -179,6 +179,7 @@
         title: data.title,
         content: data.content,
         marker: data.marker,
+        warning: data.warning,
       };
       draftMode = true;
     } catch (err) {
@@ -255,6 +256,16 @@
       <div class="draft-content">
         <h1 class="draft-title">{draft.title}</h1>
         <div class="draft-body">{draft.content}</div>
+        <div class="draft-meta">
+          {@const wordCount = draft.content.trim().split(/\s+/).filter(Boolean).length}
+          {@const readingTime = Math.max(1, Math.ceil(wordCount / 200))}
+          <span>{wordCount} words</span>
+          <span class="meta-divider">·</span>
+          <span>~{readingTime} min read</span>
+        </div>
+        {#if draft.warning}
+          <p class="draft-warning">{draft.warning}</p>
+        {/if}
         <p class="draft-marker">{draft.marker}</p>
       </div>
 
@@ -662,6 +673,30 @@
     line-height: 1.7;
     color: var(--grove-text-primary, #e8e8e8);
     white-space: pre-wrap;
+  }
+
+  .draft-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--grove-text-secondary, #a0a0a0);
+  }
+
+  .meta-divider {
+    opacity: 0.5;
+  }
+
+  .draft-warning {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.25);
+    border-radius: var(--grove-radius-md, 8px);
+    color: var(--grove-text-secondary, #a0a0a0);
+    font-size: 0.875rem;
+    font-style: italic;
   }
 
   .draft-marker {
