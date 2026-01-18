@@ -4,63 +4,36 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
+import {
+  checkRateLimit,
+  getEndpointLimitByKey,
+} from "$lib/server/rate-limits/index.js";
 
-// Rate limiting configuration for billing operations
-// More lenient than export (20/hour) since users may need multiple interactions
-const BILLING_RATE_LIMIT_MAX = 20;
-const BILLING_RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
+// Rate limit config is now centralized in $lib/server/rate-limits/config.ts
+const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
 
 /**
- * Check and update rate limit for billing operations.
- * Prevents abuse of subscription management endpoints.
+ * Check billing rate limit using centralized infrastructure.
+ * Returns a 429 response if rate limited, undefined otherwise.
  */
-async function checkBillingRateLimit(
+async function checkBillingRateLimitOrError(
   kv: KVNamespace | undefined,
-  tenantId: string
-): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  tenantId: string,
+): Promise<Response | undefined> {
   if (!kv) {
     console.warn("[Billing] KV not configured, rate limiting disabled");
-    return { allowed: true, remaining: BILLING_RATE_LIMIT_MAX, resetAt: 0 };
+    return undefined;
   }
 
-  const key = `billing_ratelimit:${tenantId}`;
-  const now = Math.floor(Date.now() / 1000);
+  const { response } = await checkRateLimit({
+    kv,
+    key: `billing:${tenantId}`,
+    limit: BILLING_RATE_LIMIT.limit,
+    windowSeconds: BILLING_RATE_LIMIT.windowSeconds,
+    namespace: "billing",
+  });
 
-  try {
-    const data = await kv.get(key, "json") as { count: number; windowStart: number } | null;
-
-    if (!data || now - data.windowStart >= BILLING_RATE_LIMIT_WINDOW_SECONDS) {
-      await kv.put(key, JSON.stringify({ count: 1, windowStart: now }), {
-        expirationTtl: BILLING_RATE_LIMIT_WINDOW_SECONDS,
-      });
-      return {
-        allowed: true,
-        remaining: BILLING_RATE_LIMIT_MAX - 1,
-        resetAt: now + BILLING_RATE_LIMIT_WINDOW_SECONDS,
-      };
-    }
-
-    if (data.count >= BILLING_RATE_LIMIT_MAX) {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: data.windowStart + BILLING_RATE_LIMIT_WINDOW_SECONDS,
-      };
-    }
-
-    await kv.put(key, JSON.stringify({ count: data.count + 1, windowStart: data.windowStart }), {
-      expirationTtl: BILLING_RATE_LIMIT_WINDOW_SECONDS - (now - data.windowStart),
-    });
-
-    return {
-      allowed: true,
-      remaining: BILLING_RATE_LIMIT_MAX - data.count - 1,
-      resetAt: data.windowStart + BILLING_RATE_LIMIT_WINDOW_SECONDS,
-    };
-  } catch (e) {
-    console.error("[Billing] Rate limit check failed:", e);
-    return { allowed: true, remaining: BILLING_RATE_LIMIT_MAX, resetAt: 0 };
-  }
+  return response;
 }
 
 /**
@@ -89,13 +62,14 @@ interface AuditLogEntry {
  */
 async function logBillingAudit(
   db: D1Database,
-  entry: AuditLogEntry
+  entry: AuditLogEntry,
 ): Promise<void> {
   try {
-    await db.prepare(
-      `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    )
+    await db
+      .prepare(
+        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
       .bind(
         crypto.randomUUID(),
         entry.tenantId,
@@ -103,7 +77,7 @@ async function logBillingAudit(
         entry.action,
         JSON.stringify(entry.details),
         entry.userEmail,
-        Math.floor(Date.now() / 1000)
+        Math.floor(Date.now() / 1000),
       )
       .run();
   } catch (e) {
@@ -178,7 +152,7 @@ const PLANS: Record<string, PlanConfig> = Object.fromEntries(
         interval: "month",
         features: tier.display.featureStrings,
       },
-    ])
+    ]),
 );
 
 /**
@@ -287,14 +261,13 @@ export const POST: RequestHandler = async ({
       locals.user,
     );
 
-    // Check rate limit before processing
-    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
-    if (!rateLimit.allowed) {
-      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
-      throw error(
-        429,
-        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
-      );
+    // Check rate limit before processing (centralized in $lib/server/rate-limits)
+    const rateLimitResponse = await checkBillingRateLimitOrError(
+      platform.env.CACHE_KV,
+      tenantId,
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const data = (await request.json()) as CheckoutRequest;
@@ -455,14 +428,13 @@ export const PATCH: RequestHandler = async ({
       locals.user,
     );
 
-    // Check rate limit before processing
-    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
-    if (!rateLimit.allowed) {
-      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
-      throw error(
-        429,
-        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
-      );
+    // Check rate limit before processing (centralized in $lib/server/rate-limits)
+    const rateLimitResponse = await checkBillingRateLimitOrError(
+      platform.env.CACHE_KV,
+      tenantId,
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const data = (await request.json()) as UpdateRequest;
@@ -574,7 +546,7 @@ export const PATCH: RequestHandler = async ({
         if (!targetTier || targetTier.status !== "available") {
           throw error(
             400,
-            `The ${targetTier?.display?.name || data.plan} plan is not currently available`
+            `The ${targetTier?.display?.name || data.plan} plan is not currently available`,
           );
         }
 
@@ -658,7 +630,12 @@ export const PATCH: RequestHandler = async ({
  * POST is semantically correct here because we're creating a session
  * on the payment provider's side, not simply retrieving data.
  */
-export const PUT: RequestHandler = async ({ url, request, platform, locals }) => {
+export const PUT: RequestHandler = async ({
+  url,
+  request,
+  platform,
+  locals,
+}) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -674,7 +651,7 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
   // Accept return_url from request body only (standardized approach)
   let returnUrl: string | null = null;
   try {
-    const body = await request.json() as { returnUrl?: string };
+    const body = (await request.json()) as { returnUrl?: string };
     returnUrl = body.returnUrl || null;
   } catch {
     // Body parsing failed
@@ -687,7 +664,8 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
   // Validate return URL to prevent open redirect attacks
   try {
     const parsedReturn = new URL(returnUrl);
-    const isGroveDomain = parsedReturn.hostname === "grove.place" ||
+    const isGroveDomain =
+      parsedReturn.hostname === "grove.place" ||
       parsedReturn.hostname.endsWith(".grove.place");
     const isSameOrigin = parsedReturn.origin === url.origin;
 
@@ -699,7 +677,8 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
     throw error(400, "Invalid return URL format");
   }
 
-  const requestedTenantId = url.searchParams.get("tenant_id") || locals.tenantId;
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenantId;
 
   try {
     const tenantId = await getVerifiedTenantId(
@@ -708,14 +687,13 @@ export const PUT: RequestHandler = async ({ url, request, platform, locals }) =>
       locals.user,
     );
 
-    // Check rate limit before processing
-    const rateLimit = await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
-    if (!rateLimit.allowed) {
-      const waitMinutes = Math.ceil((rateLimit.resetAt - Math.floor(Date.now() / 1000)) / 60);
-      throw error(
-        429,
-        `Too many billing requests. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
-      );
+    // Check rate limit before processing (centralized in $lib/server/rate-limits)
+    const rateLimitResponse = await checkBillingRateLimitOrError(
+      platform.env.CACHE_KV,
+      tenantId,
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const billing = (await platform.env.DB.prepare(
