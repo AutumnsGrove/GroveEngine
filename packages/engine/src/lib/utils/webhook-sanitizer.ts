@@ -213,6 +213,11 @@ export function sanitizeWebhookPayload(
   const meta = raw.meta as Record<string, unknown>;
   const data = raw.data as Record<string, unknown>;
 
+  // Validate critical field types
+  if (typeof meta.event_name !== "string") {
+    return null; // Invalid payload structure - event_name must be string
+  }
+
   // Sanitize meta
   const sanitizedMeta: Record<string, unknown> = {};
   for (const key of META_WHITELIST) {

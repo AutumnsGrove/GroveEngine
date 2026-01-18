@@ -82,11 +82,20 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   // Store the event or reuse existing failed event
   // Sanitize payload to remove PII before storing (GDPR/PCI DSS compliance)
   const sanitizedPayload = sanitizeWebhookPayload(event);
+  // If sanitization fails, preserve minimal safe data for debugging/audit
+  // (event_name, test_mode, id, type are safe - no PII)
   const payloadToStore = sanitizedPayload
     ? JSON.stringify(sanitizedPayload)
     : JSON.stringify({
-        meta: { event_name: eventName },
-        error: "sanitization_failed",
+        meta: {
+          event_name: eventName,
+          test_mode: event.meta?.test_mode ?? false,
+        },
+        data: {
+          id: event.data?.id ?? "unknown",
+          type: event.data?.type ?? "unknown",
+        },
+        _sanitization_failed: true,
       });
 
   let webhookEventId: string;
