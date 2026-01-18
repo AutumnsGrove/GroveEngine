@@ -52,6 +52,13 @@
   let inputElement: HTMLTextAreaElement;
 
   // ============================================================================
+  // Constants
+  // ============================================================================
+
+  /** Average reading speed in words per minute for reading time estimates */
+  const WORDS_PER_MINUTE = 200;
+
+  // ============================================================================
   // API Calls
   // ============================================================================
 
@@ -261,7 +268,7 @@
         <div class="draft-body">{draft.content}</div>
         <div class="draft-meta">
           {@const wordCount = draft.content.trim().split(/\s+/).filter(Boolean).length}
-          {@const readingTime = Math.max(1, Math.ceil(wordCount / 200))}
+          {@const readingTime = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE))}
           <span>{wordCount} words</span>
           <span class="meta-divider">·</span>
           <span>~{readingTime} min read</span>

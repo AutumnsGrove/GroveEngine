@@ -23,6 +23,7 @@ import {
 } from "$lib/server/inference-client.js";
 import { checkRateLimit } from "$lib/server/rate-limits/index.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
+import { queryOne, execute, DatabaseError } from "$lib/server/services/database.js";
 
 export const prerender = false;
 
@@ -166,12 +167,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Check if Wisp is enabled (isolated query with explicit error handling)
   if (db) {
     try {
-      const settings = await db
-        .prepare(
-          "SELECT setting_value FROM site_settings WHERE setting_key = ?"
-        )
-        .bind("wisp_enabled")
-        .first<{ setting_value: string }>();
+      const settings = await queryOne<{ setting_value: string }>(
+        db,
+        "SELECT setting_value FROM site_settings WHERE setting_key = ?",
+        ["wisp_enabled"]
+      );
 
       if (!settings || settings.setting_value !== "true") {
         return json(
@@ -180,10 +180,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         );
       }
     } catch (err) {
+      // DatabaseError from queryOne wraps the original error
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      const causeMessage = err instanceof DatabaseError && err.cause instanceof Error
+        ? err.cause.message
+        : "";
+
       // Only fail-open if table doesn't exist (initial setup scenario)
       // For all other errors, fail-closed to prevent unauthorized access
-      if (errorMessage.includes("no such table") || errorMessage.includes("SQLITE_ERROR")) {
+      if (
+        errorMessage.includes("no such table") ||
+        causeMessage.includes("no such table") ||
+        errorMessage.includes("SQLITE_ERROR")
+      ) {
         console.debug(
           "[Fireside] Settings table not created yet (expected during setup):",
           errorMessage
@@ -498,15 +507,14 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
     response.usage.output
   );
 
-  // Log usage to database
+  // Log usage to database using typed execute helper
   if (db) {
     try {
-      await db
-        .prepare(
-          `INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost, fireside_session_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        )
-        .bind(
+      await execute(
+        db,
+        `INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost, fireside_session_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
           userId,
           "fireside_draft",
           "thorough",
@@ -516,8 +524,8 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
           response.usage.output,
           cost,
           conversationId || null
-        )
-        .run();
+        ]
+      );
     } catch (err) {
       console.warn(
         "[Fireside] Could not log usage:",
