@@ -85,7 +85,7 @@ jobs:
             if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
               echo ""
               echo "New .svelte files in this PR:"
-              git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- '*.svelte' | head -20 || true
+              git diff --name-only --diff-filter=ARM origin/${{ github.base_ref }}...HEAD -- '*.svelte' | head -20 || true
             fi
           else
             echo "⚠️ Found $((DIFF * -1)) FEWER component(s) than inventory (possible deletion)"
@@ -109,8 +109,8 @@ jobs:
         if: github.event_name == 'pull_request' && steps.count-components.outputs.has_changes == 'true'
         id: find-new-files
         run: |
-          # Get list of new .svelte files in this PR
-          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- 'packages/engine/src/lib/ui/components/**/*.svelte' 2>/dev/null || echo "")
+          # Get list of new/renamed/moved .svelte files in this PR
+          NEW_FILES=$(git diff --name-only --diff-filter=ARM origin/${{ github.base_ref }}...HEAD -- 'packages/engine/src/lib/ui/components/**/*.svelte' 2>/dev/null || echo "")
 
           if [ -n "$NEW_FILES" ]; then
             echo "new_files<<EOF" >> $GITHUB_OUTPUT

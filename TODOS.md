@@ -18,7 +18,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 | Plan | Priority | Est. Effort | Summary |
 |------|----------|-------------|---------|
 | [`encryption-pass.md`](docs/plans/planned/encryption-pass.md) | P1 | 4-6h | Wire AES-256-GCM encryption for GitHub/OpenRouter tokens in Journey Curio |
-| [`security-hardening.md`](docs/plans/planned/security-hardening.md) | P1 | 6-8h | Webhook payload sanitization + 90-day TTL; standardize `safeJsonParse()` usage |
+| [`security-hardening.md`](docs/plans/planned/security-hardening.md) | P1 | 6-8h | Webhook payload sanitization + 120-day TTL; standardize `safeJsonParse()` usage |
 | [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs, focus management |
 | [`documentation-plan.md`](docs/plans/planned/documentation-plan.md) | P2 | 12-16h | Component reference (185 components), dark mode guide, colors, spacing, animation |
 | [`code-quality-optimizations.md`](docs/plans/planned/code-quality-optimizations.md) | P2 | 8-12h | Safari Reader fallback, CSP standardization, DB query isolation audit |

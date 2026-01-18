@@ -148,10 +148,11 @@ If any production data exists with plaintext tokens:
 /**
  * One-time migration to encrypt existing plaintext tokens.
  *
- * Run with: npx wrangler d1 execute grove-engine --file=scripts/migrate-encrypt-tokens.sql
+ * Run with: npx tsx packages/engine/scripts/migrate-encrypt-tokens.ts
  *
- * Note: safeDecryptToken() handles both encrypted and plaintext,
- * so migration can happen gradually.
+ * Note: This TypeScript migration script uses the D1 API to re-encrypt tokens.
+ * safeDecryptToken() handles both encrypted and plaintext, so migration can
+ * happen gradually with no downtime.
  */
 ```
 
