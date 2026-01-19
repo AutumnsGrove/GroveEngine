@@ -2,101 +2,49 @@
 
 ## Token Storage
 
-### Current State (Alpha/Beta)
+### Current State: Encrypted at Rest
 
-API tokens (`github_token`, `openrouter_key`) are currently stored as **plaintext** in the D1 database. This is acceptable for alpha/beta testing but **MUST be addressed before production**.
+API tokens (`github_token`, `openrouter_key`) are **encrypted using AES-256-GCM** before storage in the D1 database. This encryption was implemented in PR #400.
 
-### Mitigation Measures in Place
+**Encryption details:**
+- Algorithm: AES-256-GCM (authenticated encryption)
+- Key: 256-bit (64 hex characters) via `TOKEN_ENCRYPTION_KEY` environment variable
+- IV: 12 bytes, randomly generated per encryption
+- Format: `v1:base64(iv):base64(ciphertext)`
+
+The `v1:` prefix enables future algorithm changes without breaking existing data.
+
+### Security Measures
 
 1. **Tokens never exposed via API**: GET /config returns `hasGithubToken: boolean` instead of the actual token
 2. **Token deletion supported**: Send `"__CLEAR__"` to explicitly delete tokens
-3. **Tenant isolation**: All queries are scoped to tenant_id
+3. **Tenant isolation**: All queries are scoped to `tenant_id`
 4. **Cascade delete**: Tokens are deleted when tenant is removed
+5. **Zero-downtime migration**: `safeDecryptToken` handles both encrypted and legacy plaintext tokens
+6. **Tamper detection**: GCM mode validates integrity (corrupted ciphertext returns null)
 
-### Production Encryption Plan
+### Key Management
 
-Before production deployment, implement one of these approaches:
+For setup and key rotation procedures, see:
+- `docs/security/token-encryption.md` - Complete encryption guide
 
-#### Option 1: Cloudflare Workers Secrets (Recommended)
+**Critical:** If `TOKEN_ENCRYPTION_KEY` is lost, encrypted tokens become unrecoverable. Users would need to re-enter their tokens.
 
-Store tokens in Cloudflare Workers secrets with tenant-scoped naming:
+### Graceful Degradation
 
-```typescript
-// Store: wrangler secret put JOURNEY_TOKEN_tenant123
-// Retrieve: env.JOURNEY_TOKEN_tenant123
-```
+If `TOKEN_ENCRYPTION_KEY` is not set:
+- Tokens are stored as plaintext (with console warning)
+- Existing tokens continue to work
+- On next config save, tokens will be encrypted (if key is then set)
 
-Pros:
-- Managed by Cloudflare infrastructure
-- No encryption code to maintain
-- Automatic rotation support
-
-Cons:
-- Limited to 1MB per secret
-- Requires secret per tenant (may hit limits at scale)
-
-#### Option 2: Application-Layer Encryption
-
-Encrypt tokens using AES-256-GCM before storing in D1:
-
-```typescript
-// packages/engine/src/lib/server/encryption.ts
-import { webcrypto } from 'crypto';
-
-const ENCRYPTION_KEY = env.TOKEN_ENCRYPTION_KEY; // 256-bit key
-
-export async function encryptToken(plaintext: string): Promise<string> {
-  const iv = webcrypto.getRandomValues(new Uint8Array(12));
-  const key = await importKey(ENCRYPTION_KEY);
-  const ciphertext = await webcrypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    new TextEncoder().encode(plaintext)
-  );
-  return `${base64(iv)}:${base64(ciphertext)}`;
-}
-
-export async function decryptToken(encrypted: string): Promise<string> {
-  const [ivStr, ciphertextStr] = encrypted.split(':');
-  const iv = fromBase64(ivStr);
-  const ciphertext = fromBase64(ciphertextStr);
-  const key = await importKey(ENCRYPTION_KEY);
-  const plaintext = await webcrypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    ciphertext
-  );
-  return new TextDecoder().decode(plaintext);
-}
-```
-
-Pros:
-- Works with existing D1 storage
-- No per-tenant limits
-- Single encryption key to manage
-
-Cons:
-- Key rotation requires re-encryption of all tokens
-- Additional code to maintain
-
-#### Migration Steps
-
-1. Add encryption functions to `$lib/server/encryption.ts`
-2. Update config endpoint to encrypt on write, decrypt on read
-3. Create migration script to encrypt existing plaintext tokens
-4. Update column comments to reflect encrypted state
-5. Remove plaintext TODO comments
-
-### Timeline
-
-| Phase | Status | Target |
-|-------|--------|--------|
-| Alpha | Current | Plaintext acceptable |
-| Beta | Planned | Implement encryption |
-| Production | Required | Must be encrypted |
+This enables zero-downtime migration from plaintext to encrypted storage.
 
 ## Related Files
 
-- `packages/engine/migrations/025_journey_curio.sql` - Schema with TODO comments
+- `docs/security/token-encryption.md` - Key setup, rotation, troubleshooting
+- `packages/engine/src/lib/server/encryption.ts` - Encryption implementation
+- `packages/engine/src/lib/server/encryption.test.ts` - Unit tests (35 tests)
+- `packages/engine/src/lib/server/encryption.integration.test.ts` - Integration tests (21 tests)
+- `packages/engine/migrations/025_journey_curio.sql` - Schema definition
 - `packages/engine/src/routes/api/curios/journey/config/+server.ts` - Token handling
-- `packages/engine/src/lib/curios/journey/index.ts` - CLEAR_TOKEN_VALUE constant
+- `packages/engine/src/lib/curios/journey/index.ts` - `CLEAR_TOKEN_VALUE` constant

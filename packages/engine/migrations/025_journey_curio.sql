@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS journey_curio_config (
     tenant_id TEXT PRIMARY KEY,
     enabled INTEGER DEFAULT 0,
     github_repo_url TEXT,                 -- The repository to track (e.g., "owner/repo")
-    github_token TEXT,                    -- GitHub PAT for private repos (TODO: encrypt at app layer)
-    openrouter_key TEXT,                  -- OpenRouter API key (TODO: encrypt at app layer)
+    github_token TEXT,                    -- GitHub PAT for private repos (encrypted at app layer via AES-256-GCM)
+    openrouter_key TEXT,                  -- OpenRouter API key (encrypted at app layer via AES-256-GCM)
     openrouter_model TEXT DEFAULT 'deepseek/deepseek-v3.2',
     snapshot_frequency TEXT DEFAULT 'release',  -- release/weekly/monthly/manual
     show_language_chart INTEGER DEFAULT 1,
@@ -200,9 +200,9 @@ ON journey_jobs(tenant_id, created_at DESC);
 --    - Token estimation (for AI context) correlates better with lines
 --    - Consistent units make growth charts and comparisons meaningful
 --
--- 2. SECURITY: API keys (github_token, openrouter_key) are stored as plaintext.
---    TODO: Implement encryption at application layer before production use.
---    Options: Cloudflare Workers secrets, app-layer AES-256-GCM encryption
+-- 2. SECURITY: API keys (github_token, openrouter_key) are encrypted at rest.
+--    Encryption uses AES-256-GCM via TOKEN_ENCRYPTION_KEY environment variable.
+--    See docs/security/token-encryption.md for key setup and rotation.
 --
 -- 3. JSON stored as TEXT (SQLite doesn't have native JSON type)
 --    - language_breakdown: {"lang": {"lines": N, "pct": N.N}, ...}
