@@ -146,10 +146,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       email: string;
       name?: string;
       display_name?: string;
+      email_verified?: boolean;
     };
     const groveauthId = userinfo.sub || userinfo.id;
     const email = userinfo.email;
     const name = userinfo.name || userinfo.display_name;
+    const emailVerified = userinfo.email_verified === true;
 
     if (!groveauthId || !email) {
       console.error("[Auth Callback] Missing user info:", {
@@ -176,13 +178,28 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       // User already started onboarding
       onboardingId = existingOnboarding.id as string;
 
-      // Update auth timestamp
-      await db
-        .prepare(
-          "UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
-        )
-        .bind(onboardingId)
-        .run();
+      // Update auth timestamp and auto-verify if OAuth provider confirms email
+      if (emailVerified) {
+        await db
+          .prepare(
+            `UPDATE user_onboarding
+             SET auth_completed_at = unixepoch(),
+                 email_verified = CASE WHEN email_verified = 0 THEN 1 ELSE email_verified END,
+                 email_verified_at = CASE WHEN email_verified = 0 THEN unixepoch() ELSE email_verified_at END,
+                 email_verified_via = CASE WHEN email_verified = 0 THEN 'oauth' ELSE email_verified_via END,
+                 updated_at = unixepoch()
+             WHERE id = ?`,
+          )
+          .bind(onboardingId)
+          .run();
+      } else {
+        await db
+          .prepare(
+            "UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
+          )
+          .bind(onboardingId)
+          .run();
+      }
 
       // If they already have a tenant, redirect to their blog
       if (existingOnboarding.tenant_id) {
@@ -200,13 +217,24 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       // Create new onboarding record
       onboardingId = crypto.randomUUID();
 
-      await db
-        .prepare(
-          `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
-					 VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
-        )
-        .bind(onboardingId, groveauthId, email, name || null)
-        .run();
+      // Include email_verified fields if OAuth provider confirms email
+      if (emailVerified) {
+        await db
+          .prepare(
+            `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
+             VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
+          )
+          .bind(onboardingId, groveauthId, email, name || null)
+          .run();
+      } else {
+        await db
+          .prepare(
+            `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
+          )
+          .bind(onboardingId, groveauthId, email, name || null)
+          .run();
+      }
     }
 
     // Set cookies

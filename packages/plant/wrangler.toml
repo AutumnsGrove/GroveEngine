@@ -23,6 +23,13 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 binding = "AUTH"
 service = "groveauth"
 
+# KV Namespace - For rate limiting (email verification, etc.)
+# Create with: npx wrangler kv:namespace create KV
+# Then add the ID below
+[[kv_namespaces]]
+binding = "KV"
+id = "placeholder-create-namespace-and-update"
+
 # Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
 # - GROVEAUTH_URL = https://auth-api.grove.place
 # - GROVEAUTH_CLIENT_ID = grove-plant
