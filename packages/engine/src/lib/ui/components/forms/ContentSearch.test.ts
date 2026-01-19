@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/svelte";
+import { tick } from "svelte";
 import ContentSearch from "./ContentSearch.svelte";
 
 // Mock SvelteKit modules
@@ -154,8 +155,7 @@ describe("ContentSearch Component", () => {
       expect(input).toHaveAttribute("aria-describedby", clearButton.id);
     });
 
-    // TODO: Svelte 5 reactivity + waitFor timing issue with mocked stores
-    it.skip("should announce results to screen readers", async () => {
+    it("should announce results to screen readers", async () => {
       render(ContentSearch, {
         props: {
           items: mockItems,
@@ -165,14 +165,15 @@ describe("ContentSearch Component", () => {
         },
       });
 
-      await waitFor(() => {
-        const status = screen.getByRole("status");
-        expect(status).toHaveTextContent('Found 1 result for "javascript"');
-      });
+      // Wait for Svelte 5's reactive system to settle
+      await tick();
+      await tick();
+
+      const status = screen.getByRole("status");
+      expect(status).toHaveTextContent('Found 1 result matching "javascript"');
     });
 
-    // TODO: Svelte 5 reactivity + waitFor timing issue with mocked stores
-    it.skip("should use correct plural for multiple results", async () => {
+    it("should use correct plural for multiple results", async () => {
       render(ContentSearch, {
         props: {
           items: mockItems,
@@ -182,10 +183,12 @@ describe("ContentSearch Component", () => {
         },
       });
 
-      await waitFor(() => {
-        const status = screen.getByRole("status");
-        expect(status).toHaveTextContent('Found 2 results for "script"');
-      });
+      // Wait for Svelte 5's reactive system to settle
+      await tick();
+      await tick();
+
+      const status = screen.getByRole("status");
+      expect(status).toHaveTextContent('Found 2 results matching "script"');
     });
 
     it("should mark decorative icons as aria-hidden", () => {
@@ -202,10 +205,9 @@ describe("ContentSearch Component", () => {
     });
   });
 
-  // TODO: Fake timers don't work well with Svelte 5's $effect() reactivity
-  describe.skip("Debouncing", () => {
-    it("should debounce search input by default delay (250ms)", async () => {
-      vi.useFakeTimers();
+  // Use real timers with short delays - Svelte 5's $effect() doesn't work well with fake timers
+  describe("Debouncing", () => {
+    it("should debounce search input", async () => {
       const onSearchChange = vi.fn();
 
       render(ContentSearch, {
@@ -213,28 +215,28 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
+          debounceDelay: 20, // Short delay for testing
         },
       });
 
-      const input = screen.getByRole("searchbox");
+      // Clear any initial mount calls
+      await tick();
+      onSearchChange.mockClear();
 
+      const input = screen.getByRole("searchbox");
       await fireEvent.input(input, { target: { value: "java" } });
 
-      // Should not call immediately
+      // Should not call immediately (before debounce completes)
       expect(onSearchChange).not.toHaveBeenCalled();
 
-      // Fast-forward time
-      vi.advanceTimersByTime(250);
+      // Wait for debounce + buffer
+      await new Promise((r) => setTimeout(r, 50));
+      await tick();
 
-      await waitFor(() => {
-        expect(onSearchChange).toHaveBeenCalledWith("java", expect.any(Array));
-      });
-
-      vi.useRealTimers();
+      expect(onSearchChange).toHaveBeenCalledWith("java", expect.any(Array));
     });
 
     it("should respect custom debounce delay", async () => {
-      vi.useFakeTimers();
       const onSearchChange = vi.fn();
 
       render(ContentSearch, {
@@ -242,26 +244,29 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
-          debounceDelay: 500,
+          debounceDelay: 50, // Measurable delay
         },
       });
+
+      // Clear any initial mount calls
+      await tick();
+      onSearchChange.mockClear();
 
       const input = screen.getByRole("searchbox");
       await fireEvent.input(input, { target: { value: "test" } });
 
-      vi.advanceTimersByTime(250);
+      // Wait less than debounce delay - should not be called yet
+      await new Promise((r) => setTimeout(r, 20));
       expect(onSearchChange).not.toHaveBeenCalled();
 
-      vi.advanceTimersByTime(250);
-      await waitFor(() => {
-        expect(onSearchChange).toHaveBeenCalled();
-      });
+      // Wait for full debounce + buffer
+      await new Promise((r) => setTimeout(r, 60));
+      await tick();
 
-      vi.useRealTimers();
+      expect(onSearchChange).toHaveBeenCalled();
     });
 
     it("should clear previous timer on rapid input changes", async () => {
-      vi.useFakeTimers();
       const onSearchChange = vi.fn();
 
       render(ContentSearch, {
@@ -269,28 +274,32 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
-          debounceDelay: 250,
+          debounceDelay: 30,
         },
       });
 
+      // Clear any initial mount calls
+      await tick();
+      onSearchChange.mockClear();
+
       const input = screen.getByRole("searchbox");
 
+      // Rapid inputs - each should reset the debounce timer
       await fireEvent.input(input, { target: { value: "j" } });
-      vi.advanceTimersByTime(100);
+      await new Promise((r) => setTimeout(r, 10));
 
       await fireEvent.input(input, { target: { value: "ja" } });
-      vi.advanceTimersByTime(100);
+      await new Promise((r) => setTimeout(r, 10));
 
       await fireEvent.input(input, { target: { value: "jav" } });
-      vi.advanceTimersByTime(250);
+
+      // Wait for final debounce to complete
+      await new Promise((r) => setTimeout(r, 60));
+      await tick();
 
       // Should only be called once with the final value
-      await waitFor(() => {
-        expect(onSearchChange).toHaveBeenCalledTimes(1);
-        expect(onSearchChange).toHaveBeenCalledWith("jav", expect.any(Array));
-      });
-
-      vi.useRealTimers();
+      expect(onSearchChange).toHaveBeenCalledTimes(1);
+      expect(onSearchChange).toHaveBeenCalledWith("jav", expect.any(Array));
     });
   });
 

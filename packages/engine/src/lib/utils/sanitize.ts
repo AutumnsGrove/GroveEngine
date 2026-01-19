@@ -37,11 +37,26 @@ function sanitizeServerSafe(html: string): string {
 
   let sanitized = html;
 
-  // Strip script tags and their content
+  // Normalize whitespace in tag names to prevent bypass via newlines/tabs
+  // This catches payloads like <scr\nipt> or <scr\tipt>
+  sanitized = sanitized.replace(
+    /<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
+    "<script",
+  );
+  sanitized = sanitized.replace(
+    /<\/([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
+    "</script",
+  );
+
+  // Strip script tags with content (closed tags)
   sanitized = sanitized.replace(
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
     "",
   );
+
+  // Strip unclosed script tags (opening tag without closing)
+  // This catches payloads like <script>alert(1) with no </script>
+  sanitized = sanitized.replace(/<script\b[^>]*>/gi, "");
 
   // Strip iframe tags
   sanitized = sanitized.replace(
@@ -84,11 +99,20 @@ function sanitizeServerSafe(html: string): string {
   sanitized = sanitized.replace(/src\s*=\s*["']\s*javascript:[^"']*["']/gi, "");
 
   // Strip data: protocol in href/src (except images, with optional leading whitespace)
-  sanitized = sanitized.replace(/href\s*=\s*["']\s*data:[^"']*["']/gi, 'href="#"');
-  sanitized = sanitized.replace(/src\s*=\s*["']\s*data:(?!image\/)[^"']*["']/gi, "");
+  sanitized = sanitized.replace(
+    /href\s*=\s*["']\s*data:[^"']*["']/gi,
+    'href="#"',
+  );
+  sanitized = sanitized.replace(
+    /src\s*=\s*["']\s*data:(?!image\/)[^"']*["']/gi,
+    "",
+  );
 
   // Strip vbscript: and other dangerous protocols (with optional leading whitespace)
-  sanitized = sanitized.replace(/href\s*=\s*["']\s*vbscript:[^"']*["']/gi, 'href="#"');
+  sanitized = sanitized.replace(
+    /href\s*=\s*["']\s*vbscript:[^"']*["']/gi,
+    'href="#"',
+  );
   sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
 
   return sanitized;

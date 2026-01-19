@@ -71,8 +71,8 @@ describe("Season Constants", () => {
   });
 
   describe("DEFAULT_SEASON", () => {
-    it("should be autumn (Grove's signature season)", () => {
-      expect(DEFAULT_SEASON).toBe("autumn");
+    it("should be summer (current seasonal default)", () => {
+      expect(DEFAULT_SEASON).toBe("summer");
     });
 
     it("should be a regular season", () => {

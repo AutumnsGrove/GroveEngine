@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   isValidGithubRepoUrl,
-  safeJsonParse,
   safeParseInt,
   toSqliteBoolean,
   GITHUB_REPO_PATTERN,
@@ -11,37 +10,38 @@ import {
   MAX_MILESTONE_LIMIT,
   CLEAR_TOKEN_VALUE,
 } from "./index";
+import { safeParseJson } from "$lib/utils/json";
 
 describe("Journey Curio utilities", () => {
   // ============================================================================
-  // safeJsonParse Tests
+  // safeParseJson Tests
   // ============================================================================
 
-  describe("safeJsonParse", () => {
+  describe("safeParseJson", () => {
     it("returns fallback for null input", () => {
-      expect(safeJsonParse(null, {})).toEqual({});
-      expect(safeJsonParse(null, [])).toEqual([]);
-      expect(safeJsonParse(null, "default")).toBe("default");
+      expect(safeParseJson(null, {})).toEqual({});
+      expect(safeParseJson(null, [])).toEqual([]);
+      expect(safeParseJson(null, "default")).toBe("default");
     });
 
     it("returns fallback for empty string", () => {
-      expect(safeJsonParse("", {})).toEqual({});
-      expect(safeJsonParse("", [])).toEqual([]);
+      expect(safeParseJson("", {})).toEqual({});
+      expect(safeParseJson("", [])).toEqual([]);
     });
 
     it("parses valid JSON correctly", () => {
-      expect(safeJsonParse('{"key": "value"}', {})).toEqual({ key: "value" });
-      expect(safeJsonParse("[1, 2, 3]", [])).toEqual([1, 2, 3]);
-      expect(safeJsonParse('"string"', "")).toBe("string");
-      expect(safeJsonParse("42", 0)).toBe(42);
-      expect(safeJsonParse("true", false)).toBe(true);
+      expect(safeParseJson('{"key": "value"}', {})).toEqual({ key: "value" });
+      expect(safeParseJson("[1, 2, 3]", [])).toEqual([1, 2, 3]);
+      expect(safeParseJson('"string"', "")).toBe("string");
+      expect(safeParseJson("42", 0)).toBe(42);
+      expect(safeParseJson("true", false)).toBe(true);
     });
 
     it("returns fallback for malformed JSON", () => {
-      expect(safeJsonParse("{invalid}", {})).toEqual({});
-      expect(safeJsonParse("[1, 2, 3", [])).toEqual([]);
-      expect(safeJsonParse("undefined", null)).toBe(null);
-      expect(safeJsonParse("not json at all", "fallback")).toBe("fallback");
+      expect(safeParseJson("{invalid}", {})).toEqual({});
+      expect(safeParseJson("[1, 2, 3", [])).toEqual([]);
+      expect(safeParseJson("undefined", null)).toBe(null);
+      expect(safeParseJson("not json at all", "fallback")).toBe("fallback");
     });
 
     it("handles complex nested JSON", () => {
@@ -49,24 +49,23 @@ describe("Journey Curio utilities", () => {
         svelte: { lines: 1234, pct: 45.2 },
         typescript: { lines: 5678, pct: 30.1 },
       });
-      const result = safeJsonParse<Record<string, { lines: number; pct: number }>>(
-        complexJson,
-        {},
-      );
+      const result = safeParseJson<
+        Record<string, { lines: number; pct: number }>
+      >(complexJson, {});
       expect(result.svelte?.lines).toBe(1234);
       expect(result.typescript?.pct).toBe(30.1);
     });
 
     it("handles JSON with special characters", () => {
       const jsonWithEscapes = JSON.stringify({ message: 'Hello "World"' });
-      expect(safeJsonParse(jsonWithEscapes, {})).toEqual({
+      expect(safeParseJson(jsonWithEscapes, {})).toEqual({
         message: 'Hello "World"',
       });
     });
 
     it("returns fallback for truncated JSON (database corruption scenario)", () => {
-      expect(safeJsonParse('{"key": "val', {})).toEqual({});
-      expect(safeJsonParse('["item1", "item2', [])).toEqual([]);
+      expect(safeParseJson('{"key": "val', {})).toEqual({});
+      expect(safeParseJson('["item1", "item2', [])).toEqual([]);
     });
   });
 
