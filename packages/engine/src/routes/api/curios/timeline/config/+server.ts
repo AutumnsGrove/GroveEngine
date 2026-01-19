@@ -9,7 +9,11 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { DEFAULT_TIMELINE_CONFIG } from "$lib/curios/timeline";
+import {
+  DEFAULT_TIMELINE_CONFIG,
+  CLEAR_TOKEN_VALUE,
+} from "$lib/curios/timeline";
+import { encryptToken } from "$lib/server/encryption";
 
 interface ConfigRow {
   enabled: number;
@@ -181,9 +185,42 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       : null;
 
   try {
-    // Note: In production, encrypt tokens before storing
-    const githubTokenEncrypted = githubToken?.trim() || null;
-    const openrouterKeyEncrypted = openrouterKey?.trim() || null;
+    // Encrypt tokens before storing
+    // Token handling: null = preserve existing, "" = clear, "value" = set new
+    const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+
+    // Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, undefined -> null (preserve)
+    let githubTokenForDb: string | null = null;
+    let openrouterKeyForDb: string | null = null;
+
+    if (githubToken === CLEAR_TOKEN_VALUE) {
+      // Explicit clear request - use empty string to trigger CASE NULL
+      githubTokenForDb = "";
+    } else if (githubToken?.trim()) {
+      // New token value - encrypt it
+      const rawToken = githubToken.trim();
+      githubTokenForDb = encryptionKey
+        ? await encryptToken(rawToken, encryptionKey)
+        : rawToken;
+    }
+    // else: null/undefined = preserve existing (COALESCE handles this)
+
+    if (openrouterKey === CLEAR_TOKEN_VALUE) {
+      // Explicit clear request
+      openrouterKeyForDb = "";
+    } else if (openrouterKey?.trim()) {
+      // New token value - encrypt it
+      const rawKey = openrouterKey.trim();
+      openrouterKeyForDb = encryptionKey
+        ? await encryptToken(rawKey, encryptionKey)
+        : rawKey;
+    }
+
+    if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
+      console.warn(
+        "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
+      );
+    }
 
     await db
       .prepare(
@@ -207,8 +244,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         ON CONFLICT(tenant_id) DO UPDATE SET
           enabled = excluded.enabled,
           github_username = excluded.github_username,
-          github_token_encrypted = COALESCE(excluded.github_token_encrypted, github_token_encrypted),
-          openrouter_key_encrypted = COALESCE(excluded.openrouter_key_encrypted, openrouter_key_encrypted),
+          github_token_encrypted = CASE
+            WHEN excluded.github_token_encrypted = '' THEN NULL
+            ELSE COALESCE(excluded.github_token_encrypted, github_token_encrypted)
+          END,
+          openrouter_key_encrypted = CASE
+            WHEN excluded.openrouter_key_encrypted = '' THEN NULL
+            ELSE COALESCE(excluded.openrouter_key_encrypted, openrouter_key_encrypted)
+          END,
           openrouter_model = excluded.openrouter_model,
           voice_preset = excluded.voice_preset,
           custom_system_prompt = excluded.custom_system_prompt,
@@ -224,8 +267,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         tenantId,
         enabled ? 1 : 0,
         githubUsername?.trim() || null,
-        githubTokenEncrypted,
-        openrouterKeyEncrypted,
+        githubTokenForDb,
+        openrouterKeyForDb,
         openrouterModel || DEFAULT_TIMELINE_CONFIG.openrouterModel,
         voicePreset || DEFAULT_TIMELINE_CONFIG.voicePreset,
         customSystemPrompt?.trim() || null,

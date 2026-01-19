@@ -4,7 +4,9 @@ import {
   getAllVoices,
   getOpenRouterModels,
   DEFAULT_TIMELINE_CONFIG,
+  CLEAR_TOKEN_VALUE,
 } from "$lib/curios/timeline";
+import { encryptToken } from "$lib/server/encryption";
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
@@ -19,12 +21,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     };
   }
 
-  // Fetch existing config
+  // Fetch existing config (include token columns to check presence, not values)
   const config = await db
     .prepare(
       `SELECT
         enabled,
         github_username,
+        github_token_encrypted,
+        openrouter_key_encrypted,
         openrouter_model,
         voice_preset,
         custom_system_prompt,
@@ -63,9 +67,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       timezone: config.timezone as string,
       ownerName: config.owner_name as string | null,
       updatedAt: config.updated_at as number,
-      // Note: We don't return encrypted tokens to the client
-      hasGithubToken: false, // Would check if github_token_encrypted is set
-      hasOpenrouterKey: false, // Would check if openrouter_key_encrypted is set
+      // Indicate if tokens are configured (without exposing values)
+      hasGithubToken: Boolean(config.github_token_encrypted),
+      hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
     };
   }
 
@@ -147,10 +151,42 @@ export const actions: Actions = {
       : null;
 
     try {
-      // Upsert config
-      // Note: In production, encrypt tokens before storing
-      const githubTokenEncrypted = githubToken?.trim() || null;
-      const openrouterKeyEncrypted = openrouterKey?.trim() || null;
+      // Encrypt tokens before storing
+      // Token handling: null = preserve existing, "" = clear, "value" = set new
+      const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+
+      // Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, empty -> null (preserve)
+      let githubTokenForDb: string | null = null;
+      let openrouterKeyForDb: string | null = null;
+
+      if (githubToken === CLEAR_TOKEN_VALUE) {
+        // Explicit clear request - use empty string to trigger CASE NULL
+        githubTokenForDb = "";
+      } else if (githubToken?.trim()) {
+        // New token value - encrypt it
+        const rawToken = githubToken.trim();
+        githubTokenForDb = encryptionKey
+          ? await encryptToken(rawToken, encryptionKey)
+          : rawToken;
+      }
+      // else: null/undefined/empty = preserve existing (COALESCE handles this)
+
+      if (openrouterKey === CLEAR_TOKEN_VALUE) {
+        // Explicit clear request
+        openrouterKeyForDb = "";
+      } else if (openrouterKey?.trim()) {
+        // New token value - encrypt it
+        const rawKey = openrouterKey.trim();
+        openrouterKeyForDb = encryptionKey
+          ? await encryptToken(rawKey, encryptionKey)
+          : rawKey;
+      }
+
+      if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
+        console.warn(
+          "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
+        );
+      }
 
       await db
         .prepare(
@@ -174,8 +210,14 @@ export const actions: Actions = {
           ON CONFLICT(tenant_id) DO UPDATE SET
             enabled = excluded.enabled,
             github_username = excluded.github_username,
-            github_token_encrypted = COALESCE(excluded.github_token_encrypted, github_token_encrypted),
-            openrouter_key_encrypted = COALESCE(excluded.openrouter_key_encrypted, openrouter_key_encrypted),
+            github_token_encrypted = CASE
+              WHEN excluded.github_token_encrypted = '' THEN NULL
+              ELSE COALESCE(excluded.github_token_encrypted, github_token_encrypted)
+            END,
+            openrouter_key_encrypted = CASE
+              WHEN excluded.openrouter_key_encrypted = '' THEN NULL
+              ELSE COALESCE(excluded.openrouter_key_encrypted, openrouter_key_encrypted)
+            END,
             openrouter_model = excluded.openrouter_model,
             voice_preset = excluded.voice_preset,
             custom_system_prompt = excluded.custom_system_prompt,
@@ -191,8 +233,8 @@ export const actions: Actions = {
           tenantId,
           enabled ? 1 : 0,
           githubUsername?.trim() || null,
-          githubTokenEncrypted,
-          openrouterKeyEncrypted,
+          githubTokenForDb,
+          openrouterKeyForDb,
           openrouterModel || DEFAULT_TIMELINE_CONFIG.openrouterModel,
           voicePreset || DEFAULT_TIMELINE_CONFIG.voicePreset,
           customSystemPrompt?.trim() || null,
