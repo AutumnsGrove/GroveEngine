@@ -9,11 +9,11 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
-  safeJsonParse,
   safeParseInt,
   DEFAULT_MILESTONE_LIMIT,
   MAX_MILESTONE_LIMIT,
 } from "$lib/curios/journey";
+import { safeJsonParse } from "$lib/utils/json";
 
 interface MilestoneRow {
   id: string;

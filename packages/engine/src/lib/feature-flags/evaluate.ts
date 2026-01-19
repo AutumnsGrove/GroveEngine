@@ -78,8 +78,9 @@ async function loadFlagWithRules(
 /**
  * Safely parse JSON with error handling.
  * Returns null if parsing fails.
+ * Note: Local helper to avoid bundling conflicts with utils/json.ts
  */
-function safeJsonParse<T>(json: string, context: string): T | null {
+function parseJsonSafe<T>(json: string, context: string): T | null {
   try {
     return JSON.parse(json) as T;
   } catch (error) {
@@ -93,11 +94,11 @@ function safeJsonParse<T>(json: string, context: string): T | null {
  * Returns null if JSON parsing fails (rule will be skipped).
  */
 function safeRowToRule(row: FlagRuleRow): FlagRule | null {
-  const ruleValue = safeJsonParse<RuleCondition>(
+  const ruleValue = parseJsonSafe<RuleCondition>(
     row.rule_value,
     `rule ${row.id} rule_value`,
   );
-  const resultValue = safeJsonParse<unknown>(
+  const resultValue = parseJsonSafe<unknown>(
     row.result_value,
     `rule ${row.id} result_value`,
   );
@@ -124,7 +125,7 @@ function safeRowToRule(row: FlagRuleRow): FlagRule | null {
  * Returns a flag with safe defaults if JSON parsing fails.
  */
 function safeRowToFlag(row: FeatureFlagRow, rules: FlagRule[]): FeatureFlag {
-  const defaultValue = safeJsonParse<unknown>(
+  const defaultValue = parseJsonSafe<unknown>(
     row.default_value,
     `flag ${row.id} default_value`,
   );

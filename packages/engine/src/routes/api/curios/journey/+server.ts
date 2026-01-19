@@ -10,11 +10,11 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   type LanguageBreakdown,
-  safeJsonParse,
   safeParseInt,
   DEFAULT_SNAPSHOT_LIMIT,
   MAX_SNAPSHOT_LIMIT,
 } from "$lib/curios/journey";
+import { safeJsonParse } from "$lib/utils/json";
 
 interface JourneySnapshotRow {
   id: string;

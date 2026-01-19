@@ -153,18 +153,7 @@ export function isValidGithubRepoUrl(url: string): boolean {
 // Utilities
 // =============================================================================
 
-/**
- * Safely parse JSON with a fallback value
- * Prevents crashes from malformed JSON in database columns
- */
-export function safeJsonParse<T>(str: string | null, fallback: T): T {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return fallback;
-  }
-}
+// Note: Use safeJsonParse from '$lib/utils/json' for JSON parsing
 
 /**
  * Convert boolean to SQLite integer (0 or 1)
