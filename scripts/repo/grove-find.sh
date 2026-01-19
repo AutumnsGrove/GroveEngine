@@ -348,6 +348,209 @@ gftest() {
 }
 
 # =============================================================================
+# Counting & Metrics Functions
+# =============================================================================
+
+# gf-count-lines - Count lines in files
+# Usage: gf-count-lines [path]
+gf-count-lines() {
+    local path="${1:-$GROVE_ROOT}"
+
+    if [ ! -d "$path" ] && [ ! -f "$path" ]; then
+        echo -e "${RED}Error: Path does not exist: $path${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}📊 Counting lines in: ${path}${NC}\n"
+
+    # If it's a single file, just count it
+    if [ -f "$path" ]; then
+        local lines
+        lines=$(wc -l < "$path" 2>/dev/null | tr -d ' ')
+        echo -e "  Total lines: ${GREEN}${lines}${NC}"
+        return 0
+    fi
+
+    # For directories, count by file type
+    local ts_lines svelte_lines js_lines css_lines md_lines total_lines
+
+    # Count TypeScript lines
+    ts_lines=$(find "$path" -name "*.ts" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        ! -name "*.d.ts" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+    # Count Svelte lines
+    svelte_lines=$(find "$path" -name "*.svelte" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+    # Count JavaScript lines
+    js_lines=$(find "$path" -name "*.js" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+    # Count CSS lines
+    css_lines=$(find "$path" -name "*.css" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+    # Count Markdown lines
+    md_lines=$(find "$path" -name "*.md" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+    total_lines=$((ts_lines + svelte_lines + js_lines + css_lines + md_lines))
+
+    # Format with thousand separators
+    _format_num() {
+        echo "$1" | sed ':a;s/\B[0-9]\{3\}\>$/,&/;ta'
+    }
+
+    echo -e "  ${GREEN}TypeScript:${NC}  $(_format_num $ts_lines) lines"
+    echo -e "  ${GREEN}Svelte:${NC}      $(_format_num $svelte_lines) lines"
+    echo -e "  ${GREEN}JavaScript:${NC}  $(_format_num $js_lines) lines"
+    echo -e "  ${GREEN}CSS:${NC}         $(_format_num $css_lines) lines"
+    echo -e "  ${GREEN}Markdown:${NC}    $(_format_num $md_lines) lines"
+    echo -e "  ${CYAN}────────────────────────${NC}"
+    echo -e "  ${YELLOW}Total:${NC}       $(_format_num $total_lines) lines"
+}
+
+# gf-count-files - Count files by extension
+# Usage: gf-count-files [path]
+gf-count-files() {
+    local path="${1:-$GROVE_ROOT}"
+
+    if [ ! -d "$path" ]; then
+        echo -e "${RED}Error: Path is not a directory: $path${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}📁 Counting files in: ${path}${NC}\n"
+
+    # Use fd if available, otherwise fall back to find
+    local cmd
+    if [ -n "$GROVE_FD" ]; then
+        # Get all files, exclude common directories
+        cmd="$GROVE_FD -t f . \"$path\" --exclude node_modules --exclude .git --exclude dist --exclude .svelte-kit"
+    else
+        cmd="find \"$path\" -type f ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*' ! -path '*/.svelte-kit/*'"
+    fi
+
+    # Get files and extract extensions, then count
+    eval "$cmd" | \
+        sed -n 's/.*\.//p' | \
+        sort | \
+        uniq -c | \
+        sort -rn | \
+        awk '{printf "  %-15s %s files\n", "." $2 ":", $1}'
+
+    # Show total
+    local total
+    total=$(eval "$cmd" | wc -l | tr -d ' ')
+    echo -e "\n  ${YELLOW}Total:${NC}          $total files"
+}
+
+# gf-count-langs - Count files by language/type
+# Usage: gf-count-langs [path]
+gf-count-langs() {
+    local path="${1:-$GROVE_ROOT}"
+
+    if [ ! -d "$path" ]; then
+        echo -e "${RED}Error: Path is not a directory: $path${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}🔤 Counting files by language in: ${path}${NC}\n"
+
+    _count_files() {
+        local pattern="$1"
+        find "$path" -name "$pattern" \
+            ! -path "*/node_modules/*" \
+            ! -path "*/.git/*" \
+            ! -path "*/dist/*" \
+            ! -path "*/.svelte-kit/*" \
+            -type f 2>/dev/null | wc -l | tr -d ' '
+    }
+
+    local ts_files svelte_files js_files css_files md_files json_files toml_files
+    local yaml_files sql_files sh_files total_files
+
+    ts_files=$(_count_files "*.ts")
+    svelte_files=$(_count_files "*.svelte")
+    js_files=$(_count_files "*.js")
+    css_files=$(_count_files "*.css")
+    md_files=$(_count_files "*.md")
+    json_files=$(_count_files "*.json")
+    toml_files=$(_count_files "*.toml")
+    yaml_files=$(_count_files "*.y*ml")
+    sql_files=$(_count_files "*.sql")
+    sh_files=$(_count_files "*.sh")
+
+    total_files=$((ts_files + svelte_files + js_files + css_files + md_files + json_files + toml_files + yaml_files + sql_files + sh_files))
+
+    echo -e "  ${GREEN}TypeScript:${NC}  $ts_files files"
+    echo -e "  ${GREEN}Svelte:${NC}      $svelte_files files"
+    echo -e "  ${GREEN}JavaScript:${NC}  $js_files files"
+    echo -e "  ${GREEN}CSS:${NC}         $css_files files"
+    echo -e "  ${GREEN}Markdown:${NC}    $md_files files"
+    echo -e "  ${GREEN}JSON:${NC}        $json_files files"
+    echo -e "  ${GREEN}TOML:${NC}        $toml_files files"
+    echo -e "  ${GREEN}YAML:${NC}        $yaml_files files"
+    echo -e "  ${GREEN}SQL:${NC}         $sql_files files"
+    echo -e "  ${GREEN}Shell:${NC}       $sh_files files"
+    echo -e "  ${CYAN}────────────────────────${NC}"
+    echo -e "  ${YELLOW}Total:${NC}       $total_files files"
+}
+
+# gf-stats - Combined statistics summary
+# Usage: gf-stats [path]
+gf-stats() {
+    local path="${1:-$GROVE_ROOT}"
+
+    if [ ! -d "$path" ] && [ ! -f "$path" ]; then
+        echo -e "${RED}Error: Path does not exist: $path${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║           Grove Code Statistics Summary                      ║${NC}"
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    echo -e "${YELLOW}Path:${NC} $path\n"
+
+    # If it's a file, just show line count
+    if [ -f "$path" ]; then
+        gf-count-lines "$path"
+        return 0
+    fi
+
+    # For directories, show comprehensive stats
+    echo -e "${PURPLE}═══ Lines of Code ═══${NC}\n"
+    gf-count-lines "$path"
+
+    echo -e "\n${PURPLE}═══ File Counts by Language ═══${NC}\n"
+    gf-count-langs "$path"
+
+    echo -e "\n${PURPLE}═══ File Counts by Extension ═══${NC}\n"
+    gf-count-files "$path"
+}
+
+# =============================================================================
 # Interactive/TUI Functions
 # =============================================================================
 
@@ -374,7 +577,7 @@ gfzf() {
 
 # gfhelp - Show help
 gfhelp() {
-    echo -e "${GREEN}Grove Find - Blazing Fast Code Search${NC}"
+    echo -e "${GREEN}Grove Find - Blazing Fast Code Search & Metrics${NC}"
     echo ""
     echo -e "${CYAN}Core Commands:${NC}"
     echo "  gf \"pattern\"      - General search across codebase"
@@ -394,6 +597,12 @@ gfhelp() {
     echo "  gfspec [name]     - Find spec documents"
     echo "  gftest [name]     - Find test files"
     echo ""
+    echo -e "${CYAN}Counting & Metrics:${NC}"
+    echo "  gf-count-lines [path]  - Count lines of code"
+    echo "  gf-count-files [path]  - Count files by extension"
+    echo "  gf-count-langs [path]  - Count files by language"
+    echo "  gf-stats [path]        - Combined statistics summary"
+    echo ""
     echo -e "${CYAN}Interactive:${NC}"
     echo "  gfzf              - Interactive file finder (requires fzf)"
     echo ""
@@ -401,6 +610,7 @@ gfhelp() {
     echo "  - All searches exclude node_modules, dist, and .git"
     echo "  - Use quotes for patterns with spaces"
     echo "  - Combine with | less for paging through results"
+    echo "  - Counting commands default to GROVE_ROOT if no path given"
 }
 
 # Let user know functions are loaded
