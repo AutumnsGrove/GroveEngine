@@ -1,0 +1,767 @@
+<script lang="ts">
+  import type { PageData, ActionData } from "./$types";
+  import { enhance } from "$app/forms";
+  import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
+  import {
+    Image,
+    Settings2,
+    Cloud,
+    Layout,
+    Palette,
+    ChevronLeft,
+    Save,
+    AlertCircle,
+    CheckCircle2,
+    Tags,
+    FolderOpen,
+    RefreshCw,
+  } from "lucide-svelte";
+
+  const { data, form }: { data: PageData; form: ActionData } = $props();
+
+  // Form state
+  let enabled = $state(data.config?.enabled ?? false);
+  let r2Bucket = $state(data.config?.r2Bucket ?? "");
+  let cdnBaseUrl = $state(data.config?.cdnBaseUrl ?? "");
+  let galleryTitle = $state(data.config?.galleryTitle ?? "");
+  let galleryDescription = $state(data.config?.galleryDescription ?? "");
+  let itemsPerPage = $state(data.config?.itemsPerPage ?? 30);
+  let sortOrder = $state(data.config?.sortOrder ?? "date-desc");
+  let showDescriptions = $state(data.config?.showDescriptions ?? true);
+  let showDates = $state(data.config?.showDates ?? true);
+  let showTags = $state(data.config?.showTags ?? true);
+  let enableLightbox = $state(data.config?.enableLightbox ?? true);
+  let enableSearch = $state(data.config?.enableSearch ?? true);
+  let enableFilters = $state(data.config?.enableFilters ?? true);
+  let gridStyle = $state(data.config?.gridStyle ?? "masonry");
+  let thumbnailSize = $state(data.config?.thumbnailSize ?? "medium");
+  let customCss = $state(data.config?.customCss ?? "");
+
+  // UI state
+  let isSubmitting = $state(false);
+</script>
+
+<svelte:head>
+  <title>Gallery Curio - Admin</title>
+</svelte:head>
+
+<div class="gallery-config">
+  <header class="page-header">
+    <a href="/admin/curios" class="back-link">
+      <ChevronLeft class="back-icon" />
+      <span>Back to Curios</span>
+    </a>
+
+    <div class="header-content">
+      <div class="title-row">
+        <Image class="header-icon" />
+        <h1>Gallery</h1>
+        <Badge variant={enabled ? "default" : "secondary"}>
+          {enabled ? "Enabled" : "Disabled"}
+        </Badge>
+      </div>
+      <p class="subtitle">
+        A beautiful image gallery powered by R2 storage.
+        Display your photos with filtering, tags, and lightbox viewing.
+      </p>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <GlassCard class="stat-card">
+      <Image class="stat-icon" />
+      <div class="stat-content">
+        <span class="stat-value">{data.stats.imageCount}</span>
+        <span class="stat-label">Images</span>
+      </div>
+    </GlassCard>
+
+    <GlassCard class="stat-card">
+      <Tags class="stat-icon" />
+      <div class="stat-content">
+        <span class="stat-value">{data.stats.tagCount}</span>
+        <span class="stat-label">Tags</span>
+      </div>
+    </GlassCard>
+
+    <GlassCard class="stat-card">
+      <FolderOpen class="stat-icon" />
+      <div class="stat-content">
+        <span class="stat-value">{data.stats.collectionCount}</span>
+        <span class="stat-label">Collections</span>
+      </div>
+    </GlassCard>
+  </div>
+
+  {#if form?.error}
+    <div class="alert alert-error">
+      <AlertCircle class="alert-icon" />
+      <span>{form.error}</span>
+    </div>
+  {/if}
+
+  {#if form?.success}
+    <div class="alert alert-success">
+      <CheckCircle2 class="alert-icon" />
+      <span>Configuration saved successfully!</span>
+    </div>
+  {/if}
+
+  <form
+    method="POST"
+    action="?/save"
+    use:enhance={() => {
+      isSubmitting = true;
+      return async ({ update }) => {
+        await update();
+        isSubmitting = false;
+      };
+    }}
+  >
+    <!-- Enable/Disable Toggle -->
+    <GlassCard class="config-section">
+      <div class="section-header">
+        <Settings2 class="section-icon" />
+        <h2>General</h2>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            name="enabled"
+            value="true"
+            bind:checked={enabled}
+            class="toggle-input"
+          />
+          <span class="toggle-switch"></span>
+          <span class="toggle-text">Enable Gallery</span>
+        </label>
+        <p class="field-help">
+          When enabled, the gallery page will be publicly accessible.
+        </p>
+      </div>
+
+      <div class="field-group">
+        <label for="galleryTitle" class="field-label">Gallery Title</label>
+        <input
+          type="text"
+          id="galleryTitle"
+          name="galleryTitle"
+          bind:value={galleryTitle}
+          placeholder="Gallery"
+          class="field-input"
+        />
+        <p class="field-help">
+          The title displayed at the top of your gallery page.
+        </p>
+      </div>
+
+      <div class="field-group">
+        <label for="galleryDescription" class="field-label">Description</label>
+        <textarea
+          id="galleryDescription"
+          name="galleryDescription"
+          bind:value={galleryDescription}
+          placeholder="A collection of photos and memories..."
+          class="field-textarea"
+          rows="2"
+        ></textarea>
+        <p class="field-help">
+          Optional subtitle shown below the gallery title.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- Storage Configuration -->
+    <GlassCard class="config-section">
+      <div class="section-header">
+        <Cloud class="section-icon" />
+        <h2>Storage</h2>
+      </div>
+
+      <div class="field-group">
+        <label for="r2Bucket" class="field-label">R2 Bucket Name</label>
+        <input
+          type="text"
+          id="r2Bucket"
+          name="r2Bucket"
+          bind:value={r2Bucket}
+          placeholder="my-images-bucket"
+          class="field-input"
+        />
+        <p class="field-help">
+          The R2 bucket binding name configured in your wrangler.toml.
+        </p>
+      </div>
+
+      <div class="field-group">
+        <label for="cdnBaseUrl" class="field-label">
+          CDN Base URL
+          <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="cdnBaseUrl"
+          name="cdnBaseUrl"
+          bind:value={cdnBaseUrl}
+          placeholder="https://cdn.example.com"
+          class="field-input"
+          required={enabled}
+        />
+        <p class="field-help">
+          The base URL for your image CDN (e.g., R2 custom domain or Cloudflare Images).
+        </p>
+      </div>
+
+      <div class="sync-section">
+        <a href="/admin/curios/gallery/sync" class="sync-link">
+          <RefreshCw class="sync-icon" />
+          <span>Sync images from R2</span>
+        </a>
+        <p class="field-help">
+          Import new images from your R2 bucket into the gallery database.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- Display Settings -->
+    <GlassCard class="config-section">
+      <div class="section-header">
+        <Layout class="section-icon" />
+        <h2>Display</h2>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="gridStyle" class="field-label">Grid Style</label>
+          <select
+            id="gridStyle"
+            name="gridStyle"
+            bind:value={gridStyle}
+            class="field-select"
+          >
+            {#each data.gridStyles as style}
+              <option value={style.value}>{style.label}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="sortOrder" class="field-label">Sort Order</label>
+          <select
+            id="sortOrder"
+            name="sortOrder"
+            bind:value={sortOrder}
+            class="field-select"
+          >
+            {#each data.sortOrders as order}
+              <option value={order.value}>{order.label}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="thumbnailSize" class="field-label">Thumbnail Size</label>
+          <select
+            id="thumbnailSize"
+            name="thumbnailSize"
+            bind:value={thumbnailSize}
+            class="field-select"
+          >
+            {#each data.thumbnailSizes as size}
+              <option value={size.value}>{size.label}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="itemsPerPage" class="field-label">Items per Page</label>
+          <input
+            type="number"
+            id="itemsPerPage"
+            name="itemsPerPage"
+            bind:value={itemsPerPage}
+            min="10"
+            max="100"
+            class="field-input"
+          />
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- Features -->
+    <GlassCard class="config-section">
+      <div class="section-header">
+        <Palette class="section-icon" />
+        <h2>Features</h2>
+      </div>
+
+      <div class="checkbox-grid">
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="showDescriptions"
+            value="true"
+            bind:checked={showDescriptions}
+          />
+          <span class="checkbox-label">Show descriptions</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="showDates"
+            value="true"
+            bind:checked={showDates}
+          />
+          <span class="checkbox-label">Show dates</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="showTags"
+            value="true"
+            bind:checked={showTags}
+          />
+          <span class="checkbox-label">Show tags</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="enableLightbox"
+            value="true"
+            bind:checked={enableLightbox}
+          />
+          <span class="checkbox-label">Enable lightbox</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="enableSearch"
+            value="true"
+            bind:checked={enableSearch}
+          />
+          <span class="checkbox-label">Enable search</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="enableFilters"
+            value="true"
+            bind:checked={enableFilters}
+          />
+          <span class="checkbox-label">Enable filters</span>
+        </label>
+      </div>
+    </GlassCard>
+
+    <!-- Custom CSS -->
+    <GlassCard class="config-section">
+      <div class="section-header">
+        <Palette class="section-icon" />
+        <h2>Custom Styles</h2>
+      </div>
+
+      <div class="field-group">
+        <label for="customCss" class="field-label">Custom CSS (optional)</label>
+        <textarea
+          id="customCss"
+          name="customCss"
+          bind:value={customCss}
+          placeholder=".gallery-page {
+  /* Your custom styles */
+}"
+          class="field-textarea code"
+          rows="6"
+        ></textarea>
+        <p class="field-help">
+          Add custom CSS to style your gallery. Use with caution.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <GlassButton type="submit" variant="accent" disabled={isSubmitting}>
+        <Save class="button-icon" />
+        {isSubmitting ? "Saving..." : "Save Configuration"}
+      </GlassButton>
+    </div>
+  </form>
+</div>
+
+<style>
+  .gallery-config {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-muted-foreground);
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+
+  .back-link:hover {
+    color: var(--color-foreground);
+  }
+
+  :global(.back-icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  :global(.header-icon) {
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-accent);
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-foreground);
+    margin: 0;
+  }
+
+  .subtitle {
+    color: var(--color-muted-foreground);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  :global(.stat-card) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem !important;
+  }
+
+  :global(.stat-icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-accent);
+    opacity: 0.8;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-foreground);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--color-muted-foreground);
+    margin-top: 0.25rem;
+  }
+
+  /* Alerts */
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+
+  .alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+
+  :global(.alert-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  /* Sections */
+  :global(.config-section) {
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  :global(.section-icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-accent);
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-foreground);
+  }
+
+  /* Form Fields */
+  .field-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .field-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .field-row .field-group {
+    margin-bottom: 0;
+  }
+
+  .field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin-bottom: 0.5rem;
+  }
+
+  .required {
+    color: #ef4444;
+  }
+
+  .field-input,
+  .field-select,
+  .field-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-foreground);
+    font-size: 0.9rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .field-input:focus,
+  .field-select:focus,
+  .field-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb, 22, 163, 74), 0.15);
+  }
+
+  .field-input::placeholder,
+  .field-textarea::placeholder {
+    color: var(--color-muted-foreground);
+    opacity: 0.6;
+  }
+
+  .field-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .field-textarea.code {
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+
+  .field-help {
+    font-size: 0.8rem;
+    color: var(--color-muted-foreground);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+
+  /* Toggle Switch */
+  .toggle-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 3rem;
+    height: 1.5rem;
+    background: var(--color-border);
+    border-radius: 1rem;
+    transition: background 0.2s;
+  }
+
+  .toggle-switch::after {
+    content: "";
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
+  .toggle-input:checked + .toggle-switch {
+    background: var(--color-accent);
+  }
+
+  .toggle-input:checked + .toggle-switch::after {
+    transform: translateX(1.5rem);
+  }
+
+  .toggle-text {
+    font-weight: 500;
+    color: var(--color-foreground);
+  }
+
+  /* Checkbox Grid */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .checkbox-option input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--color-accent);
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+    color: var(--color-foreground);
+  }
+
+  /* Sync Section */
+  .sync-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .sync-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-accent);
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .sync-link:hover {
+    opacity: 0.8;
+  }
+
+  :global(.sync-icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  :global(.button-icon) {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+
+    .checkbox-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .title-row {
+      flex-wrap: wrap;
+    }
+  }
+</style>
