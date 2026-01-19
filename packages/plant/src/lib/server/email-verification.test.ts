@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { normalizeEmail } from "./email-verification";
+import { normalizeEmail, isValidEmailFormat } from "./email-verification";
 
 // Mock sendEmail to prevent actual emails during tests
 vi.mock("./send-email", () => ({
@@ -13,6 +13,36 @@ vi.mock("./send-email", () => ({
 }));
 
 describe("Email Verification Service", () => {
+  describe("isValidEmailFormat", () => {
+    it("should accept valid email addresses", () => {
+      const validEmails = [
+        "test@example.com",
+        "user.name@domain.org",
+        "user+tag@example.co.uk",
+        "a@b.co",
+        "123@456.com",
+      ];
+      validEmails.forEach((email) => {
+        expect(isValidEmailFormat(email)).toBe(true);
+      });
+    });
+
+    it("should reject invalid email addresses", () => {
+      const invalidEmails = [
+        "notanemail",
+        "@nodomain.com",
+        "noat.com",
+        "spaces in@email.com",
+        "missing@tld",
+        "",
+        "   ",
+      ];
+      invalidEmails.forEach((email) => {
+        expect(isValidEmailFormat(email)).toBe(false);
+      });
+    });
+  });
+
   describe("normalizeEmail", () => {
     it("should lowercase email addresses", () => {
       expect(normalizeEmail("Test@Example.COM")).toBe("test@example.com");
@@ -28,6 +58,15 @@ describe("Email Verification Service", () => {
 
     it("should handle mixed case with whitespace", () => {
       expect(normalizeEmail("  TEST@Example.Com  ")).toBe("test@example.com");
+    });
+
+    it("should throw on invalid email format", () => {
+      expect(() => normalizeEmail("notanemail")).toThrow(
+        "Invalid email format",
+      );
+      expect(() => normalizeEmail("missing@tld")).toThrow(
+        "Invalid email format",
+      );
     });
   });
 

@@ -55,8 +55,15 @@ export const load: PageServerLoad = async ({ cookies, platform }) => {
     redirect(302, "/profile");
   }
 
-  // Get rate limit status
-  const rateLimit = await getRateLimitStatus(kv, onboardingId);
+  // Get rate limit status (isolated query - fallback to allowing resend on KV errors)
+  let rateLimit: Awaited<ReturnType<typeof getRateLimitStatus>>;
+  try {
+    rateLimit = await getRateLimitStatus(kv, onboardingId);
+  } catch (err) {
+    console.error("[Verify Email] Failed to check rate limit status:", err);
+    // Fallback: allow resend attempts (security trade-off: better UX vs potential abuse)
+    rateLimit = { canResend: true, remainingResends: 3 };
+  }
 
   // Check if there's an existing unexpired code
   const existingCode = await db

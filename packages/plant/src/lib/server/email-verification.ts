@@ -39,11 +39,27 @@ function generateCode(): string {
   return code;
 }
 
+// Basic email format validation regex
+// Intentionally simple - we're not trying to validate all RFC 5322 edge cases
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Validate email format
+ */
+export function isValidEmailFormat(email: string): boolean {
+  return EMAIL_REGEX.test(email);
+}
+
 /**
  * Normalize email for consistent storage/lookup
+ * Throws if email format is invalid
  */
 export function normalizeEmail(email: string): string {
-  return email.toLowerCase().trim();
+  const normalized = email.toLowerCase().trim();
+  if (!isValidEmailFormat(normalized)) {
+    throw new Error("Invalid email format");
+  }
+  return normalized;
 }
 
 /**
