@@ -37,6 +37,18 @@
 #   gfrecent [days]                # Find recently modified files
 #   gfchanged                      # Find files changed on branch
 #   gftag                          # Find changes between git tags
+#   gfblame                        # Enhanced git blame
+#   gfhistory                      # File commit history
+#   gfpickaxe                      # Find when string was added/removed
+#   gfcommits                      # Recent commits with stats
+#   gfgitstats                     # Project health snapshot
+#   gfbriefing                     # Daily TODO briefing
+#   gfchurn                        # Frequently changed files (hotspots)
+#   gfbranches                     # List branches with info
+#   gfpr                           # PR preparation summary
+#   gfwip                          # Work in progress status
+#   gfstash                        # List stashes with preview
+#   gfreflog                       # Recent reflog entries
 #   gftype                         # Find TypeScript types
 #   gfexport                       # Find module exports
 #   gfauth                         # Find authentication code
@@ -940,6 +952,493 @@ gftag() {
     git -C "$GROVE_ROOT" log --oneline "${from_tag}..${to_tag}" 2>/dev/null | head -20
 }
 
+# gfblame - Enhanced git blame with age info
+# Usage: gfblame <file> [line-range]
+# Examples: gfblame src/app.ts, gfblame src/app.ts 10,20
+gfblame() {
+    local file="$1"
+    local range="${2:-}"
+
+    if [ -z "$file" ]; then
+        echo -e "${YELLOW}Usage: gfblame <file> [start,end]${NC}"
+        echo "Example: gfblame src/lib/utils.ts"
+        echo "Example: gfblame src/lib/utils.ts 10,50"
+        return 1
+    fi
+
+    echo -e "${CYAN}📜 Blame for: ${file}${NC}\n"
+
+    if [ -n "$range" ]; then
+        git -C "$GROVE_ROOT" blame -L "$range" --date=relative --color-by-age "$file" 2>/dev/null
+    else
+        git -C "$GROVE_ROOT" blame --date=relative --color-by-age "$file" 2>/dev/null | head -100
+        echo -e "\n${YELLOW}(Showing first 100 lines. Use gfblame file 1,999 for full file.)${NC}"
+    fi
+}
+
+# gfhistory - Commit history for a specific file
+# Usage: gfhistory <file> [n]
+gfhistory() {
+    local file="$1"
+    local count="${2:-20}"
+
+    if [ -z "$file" ]; then
+        echo -e "${YELLOW}Usage: gfhistory <file> [count]${NC}"
+        echo "Example: gfhistory src/lib/utils.ts"
+        echo "Example: gfhistory src/lib/utils.ts 50"
+        return 1
+    fi
+
+    echo -e "${CYAN}📚 History for: ${file}${NC}\n"
+
+    echo -e "${GREEN}Commits:${NC}"
+    git -C "$GROVE_ROOT" log --oneline -n "$count" --follow -- "$file" 2>/dev/null
+
+    echo -e "\n${GREEN}Change frequency:${NC}"
+    local total
+    total=$(git -C "$GROVE_ROOT" log --oneline --follow -- "$file" 2>/dev/null | wc -l | tr -d ' ')
+    echo "  Total commits touching this file: $total"
+
+    echo -e "\n${GREEN}Contributors:${NC}"
+    git -C "$GROVE_ROOT" log --format='%an' --follow -- "$file" 2>/dev/null | \
+        sort | uniq -c | sort -rn | head -10
+}
+
+# gfpickaxe - Find commits that added/removed a string
+# Usage: gfpickaxe "string" [path]
+# This is INCREDIBLY powerful for finding when something was introduced
+gfpickaxe() {
+    local search="$1"
+    local path="${2:-}"
+
+    if [ -z "$search" ]; then
+        echo -e "${YELLOW}Usage: gfpickaxe \"string\" [path]${NC}"
+        echo "Example: gfpickaxe \"functionName\""
+        echo "Example: gfpickaxe \"TODO\" src/lib/"
+        echo ""
+        echo "This finds commits where the string was ADDED or REMOVED."
+        return 1
+    fi
+
+    echo -e "${CYAN}🔍 Finding commits that added/removed: ${search}${NC}\n"
+
+    if [ -n "$path" ]; then
+        git -C "$GROVE_ROOT" log -S "$search" --oneline --all -- "$path" 2>/dev/null | head -30
+    else
+        git -C "$GROVE_ROOT" log -S "$search" --oneline --all 2>/dev/null | head -30
+    fi
+
+    echo -e "\n${YELLOW}Tip: Use 'git show <hash>' to see the full commit${NC}"
+}
+
+# gfcommits - Recent commits with stats
+# Usage: gfcommits [n]
+gfcommits() {
+    local count="${1:-15}"
+
+    echo -e "${CYAN}📝 Recent ${count} commits${NC}\n"
+
+    git -C "$GROVE_ROOT" log --oneline --stat -n "$count" 2>/dev/null | \
+        grep -v 'node_modules\|pnpm-lock' | head -100
+
+    echo -e "\n${GREEN}Today's commits:${NC}"
+    git -C "$GROVE_ROOT" log --oneline --since="midnight" 2>/dev/null
+
+    echo -e "\n${GREEN}This week:${NC}"
+    local week_count
+    week_count=$(git -C "$GROVE_ROOT" log --oneline --since="1 week ago" 2>/dev/null | wc -l | tr -d ' ')
+    echo "  $week_count commits in the last 7 days"
+}
+
+# gfgitstats - Project health snapshot
+# Usage: gfgitstats
+gfgitstats() {
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║              📸 Project Git Stats Snapshot                    ║${NC}"
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+
+    local branch
+    branch=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
+    echo -e "${GREEN}Current Branch:${NC} $branch"
+
+    echo -e "\n${PURPLE}═══ Commit Stats ═══${NC}"
+    local total_commits
+    total_commits=$(git -C "$GROVE_ROOT" rev-list --count HEAD 2>/dev/null)
+    echo -e "  Total commits: ${YELLOW}$total_commits${NC}"
+
+    local today_commits
+    today_commits=$(git -C "$GROVE_ROOT" log --oneline --since="midnight" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Today: ${GREEN}$today_commits${NC}"
+
+    local week_commits
+    week_commits=$(git -C "$GROVE_ROOT" log --oneline --since="1 week ago" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  This week: ${GREEN}$week_commits${NC}"
+
+    local month_commits
+    month_commits=$(git -C "$GROVE_ROOT" log --oneline --since="1 month ago" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  This month: ${GREEN}$month_commits${NC}"
+
+    echo -e "\n${PURPLE}═══ Branch Stats ═══${NC}"
+    local branch_count
+    branch_count=$(git -C "$GROVE_ROOT" branch -a 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Total branches: $branch_count"
+
+    local local_branches
+    local_branches=$(git -C "$GROVE_ROOT" branch 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Local branches: $local_branches"
+
+    echo -e "\n${PURPLE}═══ Contributors ═══${NC}"
+    git -C "$GROVE_ROOT" shortlog -sn --no-merges 2>/dev/null | head -5
+
+    echo -e "\n${PURPLE}═══ Tag Stats ═══${NC}"
+    local tag_count
+    tag_count=$(git -C "$GROVE_ROOT" tag 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Total tags: $tag_count"
+
+    local latest_tag
+    latest_tag=$(git -C "$GROVE_ROOT" describe --tags --abbrev=0 2>/dev/null || echo "none")
+    echo -e "  Latest tag: ${YELLOW}$latest_tag${NC}"
+
+    # GitHub CLI stats (if available)
+    if command -v gh &> /dev/null; then
+        echo -e "\n${PURPLE}═══ GitHub Stats (via gh) ═══${NC}"
+
+        local open_prs
+        open_prs=$(gh pr list --state open 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "  Open PRs: ${YELLOW}$open_prs${NC}"
+
+        local open_issues
+        open_issues=$(gh issue list --state open 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "  Open issues: ${YELLOW}$open_issues${NC}"
+
+        echo -e "\n${GREEN}Recent PRs:${NC}"
+        gh pr list --limit 5 2>/dev/null || echo "  (unable to fetch)"
+
+        echo -e "\n${GREEN}Recent Issues:${NC}"
+        gh issue list --limit 5 2>/dev/null || echo "  (unable to fetch)"
+    else
+        echo -e "\n${YELLOW}Install GitHub CLI (gh) for PR/issue stats${NC}"
+    fi
+
+    echo -e "\n${PURPLE}═══ Working Directory ═══${NC}"
+    local status_summary
+    status_summary=$(git -C "$GROVE_ROOT" status --short 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$status_summary" -eq 0 ]; then
+        echo -e "  Status: ${GREEN}✓ Clean${NC}"
+    else
+        echo -e "  Status: ${YELLOW}$status_summary uncommitted changes${NC}"
+    fi
+
+    local stash_count
+    stash_count=$(git -C "$GROVE_ROOT" stash list 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Stashes: $stash_count"
+}
+
+# gfbriefing - Daily TODO briefing for agents/developers
+# Usage: gfbriefing
+# Shows oldest TODOs from TODOS.md + oldest TODO comments in code
+gfbriefing() {
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                   🌅 Daily Briefing                           ║${NC}"
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+
+    local today
+    today=$(date +"%A, %B %d, %Y")
+    echo -e "${GREEN}Date:${NC} $today\n"
+
+    # Current git status
+    echo -e "${PURPLE}═══ Current Status ═══${NC}"
+    local branch
+    branch=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
+    echo -e "  Branch: ${YELLOW}$branch${NC}"
+
+    local uncommitted
+    uncommitted=$(git -C "$GROVE_ROOT" status --short 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$uncommitted" -gt 0 ]; then
+        echo -e "  ${YELLOW}⚠ $uncommitted uncommitted changes${NC}"
+    else
+        echo -e "  ${GREEN}✓ Working directory clean${NC}"
+    fi
+
+    # TODOS.md items (oldest first = most neglected!)
+    echo -e "\n${PURPLE}═══ From TODOS.md (Oldest First) ═══${NC}"
+    if [ -f "$GROVE_ROOT/TODOS.md" ]; then
+        # Find unchecked items, show oldest (top of file usually = oldest)
+        grep -n "^\s*- \[ \]" "$GROVE_ROOT/TODOS.md" 2>/dev/null | head -10 | \
+            sed 's/^/  /'
+        echo ""
+
+        local todo_count
+        todo_count=$(grep -c "^\s*- \[ \]" "$GROVE_ROOT/TODOS.md" 2>/dev/null || echo "0")
+        echo -e "  ${YELLOW}Total open items: $todo_count${NC}"
+    else
+        echo -e "  ${YELLOW}No TODOS.md found${NC}"
+    fi
+
+    # Oldest TODO comments in code (by git blame date)
+    echo -e "\n${PURPLE}═══ Oldest TODO Comments in Code ═══${NC}"
+    echo -e "  ${YELLOW}(These have been waiting the longest!)${NC}\n"
+
+    # Find TODOs and get their blame info, sort by date
+    "$GROVE_RG" -n "\bTODO\b" "$GROVE_ROOT" \
+        --glob '!node_modules' --glob '!dist' --glob '!*.md' \
+        --type ts --type js --type svelte 2>/dev/null | \
+        head -20 | while read -r line; do
+            local file
+            file=$(echo "$line" | cut -d: -f1)
+            local linenum
+            linenum=$(echo "$line" | cut -d: -f2)
+            local content
+            content=$(echo "$line" | cut -d: -f3-)
+
+            # Get blame date for this line
+            local blame_info
+            blame_info=$(git -C "$GROVE_ROOT" blame -L "$linenum,$linenum" --date=short "$file" 2>/dev/null | awk '{print $3}')
+
+            if [ -n "$blame_info" ]; then
+                echo -e "  ${GREEN}$blame_info${NC} $file:$linenum"
+                echo -e "    $content" | head -c 80
+                echo ""
+            fi
+        done | head -30
+
+    # Recent activity for context
+    echo -e "\n${PURPLE}═══ Yesterday's Commits ═══${NC}"
+    git -C "$GROVE_ROOT" log --oneline --since="yesterday" --until="midnight" 2>/dev/null | head -5
+    if [ -z "$(git -C "$GROVE_ROOT" log --oneline --since='yesterday' --until='midnight' 2>/dev/null)" ]; then
+        echo -e "  ${YELLOW}No commits yesterday${NC}"
+    fi
+
+    # Files changed recently that might need attention
+    echo -e "\n${PURPLE}═══ Hot Files (Changed This Week) ═══${NC}"
+    git -C "$GROVE_ROOT" log --since="1 week ago" --name-only --pretty=format: 2>/dev/null | \
+        sort | uniq -c | sort -rn | \
+        grep -v '^$\|node_modules\|pnpm-lock\|dist' | \
+        head -10 | \
+        awk '{print "  " $1 " changes: " $2}'
+
+    echo -e "\n${GREEN}Ready to build something great! 🌲${NC}"
+}
+
+# gfchurn - Find files that change most frequently (hotspots)
+# Usage: gfchurn [days]
+gfchurn() {
+    local days="${1:-30}"
+
+    echo -e "${CYAN}🔥 Code Churn: Most frequently changed files (last ${days} days)${NC}\n"
+
+    echo -e "${GREEN}Top 20 Hotspots:${NC}"
+    git -C "$GROVE_ROOT" log --since="${days} days ago" --name-only --pretty=format: 2>/dev/null | \
+        sort | uniq -c | sort -rn | \
+        grep -v '^$\|node_modules\|pnpm-lock\|dist\|\.svelte-kit' | \
+        head -20 | \
+        awk '{printf "  %4d changes: %s\n", $1, $2}'
+
+    echo -e "\n${GREEN}By Directory:${NC}"
+    git -C "$GROVE_ROOT" log --since="${days} days ago" --name-only --pretty=format: 2>/dev/null | \
+        grep -v '^$\|node_modules\|pnpm-lock\|dist' | \
+        sed 's|/[^/]*$||' | \
+        sort | uniq -c | sort -rn | \
+        head -10 | \
+        awk '{printf "  %4d changes: %s/\n", $1, $2}'
+
+    echo -e "\n${YELLOW}Tip: High churn files often have bugs or need refactoring${NC}"
+}
+
+# gfbranches - List branches with useful info
+# Usage: gfbranches
+gfbranches() {
+    echo -e "${CYAN}🌿 Git Branches${NC}\n"
+
+    local current
+    current=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
+
+    echo -e "${GREEN}Current:${NC} ${YELLOW}$current${NC}"
+
+    echo -e "\n${GREEN}Local Branches (by last commit):${NC}"
+    git -C "$GROVE_ROOT" for-each-ref --sort=-committerdate refs/heads/ \
+        --format='  %(refname:short)|%(committerdate:relative)|%(subject)' 2>/dev/null | \
+        head -15 | \
+        while IFS='|' read -r branch date subject; do
+            if [ "$branch" = "$current" ]; then
+                echo -e "  ${YELLOW}* $branch${NC} ($date)"
+            else
+                echo -e "    $branch ($date)"
+            fi
+            echo "      ${subject:0:60}"
+        done
+
+    echo -e "\n${GREEN}Remote Branches:${NC}"
+    git -C "$GROVE_ROOT" branch -r 2>/dev/null | head -10
+
+    # Merged branches that could be deleted
+    echo -e "\n${GREEN}Merged to main (safe to delete):${NC}"
+    git -C "$GROVE_ROOT" branch --merged main 2>/dev/null | grep -v "main\|master\|\*" | head -10 || echo "  (none)"
+}
+
+# gfpr - PR preparation summary
+# Usage: gfpr [base]
+gfpr() {
+    local base="${1:-main}"
+    local current
+    current=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
+
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                    📋 PR Summary                              ║${NC}"
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+
+    echo -e "${GREEN}Branch:${NC} $current → $base"
+
+    # Commits on this branch
+    echo -e "\n${PURPLE}═══ Commits to be merged ═══${NC}"
+    git -C "$GROVE_ROOT" log --oneline "${base}..HEAD" 2>/dev/null
+
+    local commit_count
+    commit_count=$(git -C "$GROVE_ROOT" log --oneline "${base}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "\n  ${YELLOW}Total: $commit_count commits${NC}"
+
+    # Files changed
+    echo -e "\n${PURPLE}═══ Files Changed ═══${NC}"
+    git -C "$GROVE_ROOT" diff --name-status "${base}...HEAD" 2>/dev/null | \
+        grep -v 'pnpm-lock' | head -30
+
+    # Diff stats
+    echo -e "\n${PURPLE}═══ Change Stats ═══${NC}"
+    git -C "$GROVE_ROOT" diff --stat "${base}...HEAD" 2>/dev/null | tail -1
+
+    # Changes by type
+    echo -e "\n${GREEN}By File Type:${NC}"
+    git -C "$GROVE_ROOT" diff --name-only "${base}...HEAD" 2>/dev/null | \
+        grep -v 'pnpm-lock' | \
+        sed -n 's/.*\.//p' | \
+        sort | uniq -c | sort -rn
+
+    # Generate suggested PR description
+    echo -e "\n${PURPLE}═══ Suggested PR Description ═══${NC}"
+    echo -e "${YELLOW}(Copy this as a starting point)${NC}\n"
+
+    echo "## Summary"
+    # Extract commit subjects as bullet points
+    git -C "$GROVE_ROOT" log --format="- %s" "${base}..HEAD" 2>/dev/null | head -10
+
+    echo ""
+    echo "## Files Changed"
+    git -C "$GROVE_ROOT" diff --name-only "${base}...HEAD" 2>/dev/null | \
+        grep -v 'pnpm-lock' | \
+        sed 's/^/- /' | head -15
+
+    echo ""
+    echo "## Test Plan"
+    echo "- [ ] Tested locally"
+    echo "- [ ] No console errors"
+    echo ""
+}
+
+# gfwip - Work in progress status
+# Usage: gfwip
+gfwip() {
+    echo -e "${CYAN}🚧 Work in Progress${NC}\n"
+
+    local branch
+    branch=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
+    echo -e "${GREEN}Branch:${NC} $branch"
+
+    echo -e "\n${PURPLE}═══ Staged Changes ═══${NC}"
+    local staged
+    staged=$(git -C "$GROVE_ROOT" diff --cached --name-status 2>/dev/null)
+    if [ -n "$staged" ]; then
+        echo "$staged" | head -20
+    else
+        echo -e "  ${YELLOW}(nothing staged)${NC}"
+    fi
+
+    echo -e "\n${PURPLE}═══ Unstaged Changes ═══${NC}"
+    local unstaged
+    unstaged=$(git -C "$GROVE_ROOT" diff --name-status 2>/dev/null)
+    if [ -n "$unstaged" ]; then
+        echo "$unstaged" | head -20
+    else
+        echo -e "  ${YELLOW}(no unstaged changes)${NC}"
+    fi
+
+    echo -e "\n${PURPLE}═══ Untracked Files ═══${NC}"
+    local untracked
+    untracked=$(git -C "$GROVE_ROOT" ls-files --others --exclude-standard 2>/dev/null | grep -v 'node_modules\|dist\|\.svelte-kit')
+    if [ -n "$untracked" ]; then
+        echo "$untracked" | head -15
+    else
+        echo -e "  ${YELLOW}(no untracked files)${NC}"
+    fi
+
+    # Summary
+    echo -e "\n${PURPLE}═══ Summary ═══${NC}"
+    local staged_count unstaged_count untracked_count
+    staged_count=$(git -C "$GROVE_ROOT" diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
+    unstaged_count=$(git -C "$GROVE_ROOT" diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+    untracked_count=$(git -C "$GROVE_ROOT" ls-files --others --exclude-standard 2>/dev/null | grep -v 'node_modules\|dist' | wc -l | tr -d ' ')
+
+    echo -e "  Staged:    ${GREEN}$staged_count${NC}"
+    echo -e "  Unstaged:  ${YELLOW}$unstaged_count${NC}"
+    echo -e "  Untracked: ${PURPLE}$untracked_count${NC}"
+
+    if [ "$staged_count" -gt 0 ]; then
+        echo -e "\n${GREEN}Ready to commit!${NC}"
+    fi
+}
+
+# gfstash - List stashes with preview
+# Usage: gfstash [n]
+gfstash() {
+    local show_index="$1"
+
+    echo -e "${CYAN}📦 Git Stashes${NC}\n"
+
+    local stash_count
+    stash_count=$(git -C "$GROVE_ROOT" stash list 2>/dev/null | wc -l | tr -d ' ')
+
+    if [ "$stash_count" -eq 0 ]; then
+        echo -e "${YELLOW}No stashes found${NC}"
+        return 0
+    fi
+
+    if [ -n "$show_index" ]; then
+        # Show specific stash
+        echo -e "${GREEN}Stash $show_index details:${NC}"
+        git -C "$GROVE_ROOT" stash show -p "stash@{$show_index}" 2>/dev/null | head -50
+    else
+        # List all stashes
+        echo -e "${GREEN}Stash List:${NC}"
+        git -C "$GROVE_ROOT" stash list 2>/dev/null
+
+        echo -e "\n${GREEN}Stash Contents Preview:${NC}"
+        local i=0
+        while [ $i -lt "$stash_count" ] && [ $i -lt 5 ]; do
+            echo -e "\n${YELLOW}stash@{$i}:${NC}"
+            git -C "$GROVE_ROOT" stash show "stash@{$i}" 2>/dev/null | head -5
+            i=$((i + 1))
+        done
+
+        echo -e "\n${YELLOW}Use 'gfstash <n>' to see full diff of stash n${NC}"
+        echo -e "${YELLOW}Use 'git stash pop' to apply and remove latest stash${NC}"
+    fi
+}
+
+# gfreflog - Recent reflog entries (recovery helper)
+# Usage: gfreflog [n]
+gfreflog() {
+    local count="${1:-20}"
+
+    echo -e "${CYAN}🔄 Git Reflog (last $count entries)${NC}\n"
+    echo -e "${YELLOW}Use this to recover lost commits or undo mistakes${NC}\n"
+
+    git -C "$GROVE_ROOT" reflog -n "$count" --format='%C(yellow)%h%C(reset) %C(green)%gd%C(reset) %C(blue)%cr%C(reset) %gs' 2>/dev/null
+
+    echo -e "\n${GREEN}Recovery Tips:${NC}"
+    echo "  - git checkout <hash>     # View a past state"
+    echo "  - git branch recover <hash>  # Create branch from past state"
+    echo "  - git reset --hard <hash>    # Restore to past state (DESTRUCTIVE)"
+}
+
 # =============================================================================
 # Type System & Exports
 # =============================================================================
@@ -1122,10 +1621,24 @@ DEVELOPMENT WORKFLOW
   gfenv [var]         Find .env files and env var usage
   gfgrove [ctx]       Find "Grove" references
 
-GIT & RECENT CHANGES
+GIT & HISTORY
   gfrecent [days]     Files modified in last N days (default: 7)
   gfchanged [base]    Files changed on current branch vs main
   gftag [from] [to]   Changes between git tags
+  gfblame <file>      Enhanced git blame with age coloring
+  gfhistory <file>    Commit history for a specific file
+  gfpickaxe "str"     Find when a string was added/removed (POWERFUL!)
+  gfcommits [n]       Recent commits with stats
+  gfchurn [days]      Files that change most often (hotspots)
+  gfbranches          List branches with last commit info
+  gfpr [base]         PR summary with suggested description
+  gfwip               Work in progress (staged/unstaged/untracked)
+  gfstash [n]         List stashes with preview
+  gfreflog [n]        Recent reflog entries (recovery helper)
+
+PROJECT HEALTH
+  gfgitstats          Full project health snapshot (commits, PRs, issues)
+  gfbriefing          Daily TODO briefing (oldest items from TODOS.md + code)
 
 CLOUDFLARE
   gfbind [type]       All CF bindings overview
@@ -1148,9 +1661,11 @@ METRICS
 PRO TIPS
   • All commands accept optional pattern/filter arguments
   • Pipe to `| less` for paging, `| wc -l` for counts
-  • gfrecent 1 → files changed today
-  • gfchanged → great for PR scope review
-  • gfengine → verify engine-first pattern compliance
+  • gfbriefing → Run at session start to see what needs focus
+  • gfpickaxe "function" → Find when a function was added
+  • gfchurn → Find bug-prone hotspots
+  • gfpr → Generate PR description before submitting
+  • gfgitstats → Quick project health check
 AGENT_HELP
 }
 
@@ -1597,6 +2112,20 @@ gfhelp() {
     echo "  gfrecent [days]   - Files modified in last N days (default: 7)"
     echo "  gfchanged [base]  - Files changed on branch vs main"
     echo "  gftag [from] [to] - Changes between git tags"
+    echo "  gfblame <file>    - Enhanced git blame with age coloring"
+    echo "  gfhistory <file>  - Commit history for a file"
+    echo "  gfpickaxe \"str\"   - Find when string was added/removed"
+    echo "  gfcommits [n]     - Recent commits with stats"
+    echo "  gfchurn [days]    - Files that change most (hotspots)"
+    echo "  gfbranches        - List branches with info"
+    echo "  gfpr [base]       - PR preparation summary"
+    echo "  gfwip             - Work in progress status"
+    echo "  gfstash [n]       - List stashes with preview"
+    echo "  gfreflog [n]      - Recent reflog (recovery helper)"
+    echo ""
+    echo -e "${CYAN}Project Health:${NC}"
+    echo "  gfgitstats        - Full project health snapshot"
+    echo "  gfbriefing        - Daily TODO briefing for agents"
     echo ""
     echo -e "${CYAN}Cloudflare/Infrastructure:${NC}"
     echo "  gfbind [type]     - Find CF bindings (D1, KV, R2, DO)"
