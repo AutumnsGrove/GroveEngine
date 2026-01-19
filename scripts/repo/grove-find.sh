@@ -351,9 +351,28 @@ gftest() {
 # Counting & Metrics Functions
 # =============================================================================
 #
-# These functions provide both interactive (formatted output) and scriptable
-# (raw numbers) modes. The scriptable versions (prefixed with _) are used by
-# repo-snapshot.sh to consolidate counting logic in one place.
+# Architecture: Dual-Mode Design
+# --------------------------------
+# These functions provide both interactive and scriptable modes to support
+# different use cases:
+#
+# **Interactive Mode** (user-facing commands):
+#   - gf-count-lines, gf-count-files, gf-count-langs, gf-stats
+#   - Formatted output with colors, labels, and thousand separators
+#   - Designed for terminal display and human readability
+#   - Use for ad-hoc code metrics and exploration
+#
+# **Scriptable Mode** (internal helpers):
+#   - _grove_count_lines_pattern, _grove_count_files_pattern, etc.
+#   - Raw numeric output, no formatting
+#   - Used by repo-snapshot.sh for automated repository metrics
+#   - Consistent exclusions and counting logic across all workflows
+#
+# Benefits:
+#   - Single source of truth for counting algorithms
+#   - Eliminates code duplication between manual and automated workflows
+#   - Easy to test and maintain
+#   - Scriptable functions can be composed in CI/CD pipelines
 #
 # =============================================================================
 
@@ -376,6 +395,9 @@ _grove_format_num() {
 # Returns just the number, no formatting
 # Used by repo-snapshot.sh for repository metrics
 # Performance: Uses find with xargs wc -l for better performance than cat
+#
+# Error handling: Returns 0 if no files match the pattern or on any error.
+# This is intentional - an empty directory should show 0 lines, not an error.
 _grove_count_lines_pattern() {
     local pattern="$1"
     local path="${2:-$GROVE_ROOT}"
@@ -385,9 +407,16 @@ _grove_count_lines_pattern() {
 
     # Use xargs with wc -l, then take the total from the last line
     # wc -l outputs a "total" line when processing multiple files
+    # If no files match, awk returns empty string, fallback to 0
     local result
     result=$(eval "$cmd" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
-    echo "${result:-0}"
+
+    # Explicit fallback: if result is empty or non-numeric, return 0
+    if [ -z "$result" ] || ! [[ "$result" =~ ^[0-9]+$ ]]; then
+        echo "0"
+    else
+        echo "$result"
+    fi
 }
 
 # Internal helper: Count files for a specific pattern (scriptable/quiet mode)
@@ -427,11 +456,21 @@ gf-count-lines() {
     # For directories, count by file type
     local ts_lines svelte_lines js_lines css_lines md_lines total_lines
 
-    # Count TypeScript lines (excluding .d.ts declaration files)
+    # Count TypeScript lines (special handling for .d.ts exclusion)
+    # Why not use _grove_count_lines_pattern?
+    #   - TypeScript requires excluding .d.ts files (auto-generated type definitions)
+    #   - The shared helper doesn't support exclusion patterns
+    #   - Could refactor _grove_count_lines_pattern to accept exclusions, but
+    #     TypeScript is currently the only case that needs this
+    # Decision: Keep explicit until we have multiple exclusion cases
     ts_lines=$(find "$path" -name "*.ts" ! -name "*.d.ts" \
         ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" \
         -type f 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
-    ts_lines=${ts_lines:-0}
+
+    # Explicit empty result handling (same pattern as _grove_count_lines_pattern)
+    if [ -z "$ts_lines" ] || ! [[ "$ts_lines" =~ ^[0-9]+$ ]]; then
+        ts_lines=0
+    fi
 
     # Use shared helper for other file types
     svelte_lines=$(_grove_count_lines_pattern "*.svelte" "$path")
@@ -544,8 +583,84 @@ gf-count-langs() {
     echo -e "  ${YELLOW}Total:${NC}       $total_files files"
 }
 
+# Internal helper: Optimized all-in-one stats gathering
+# Performs a single directory traversal instead of multiple separate scans
+# Returns a tab-separated string with all metrics for gf-stats
+#
+# Performance: O(n) single pass vs O(3n) for separate function calls
+_grove_stats_optimized() {
+    local path="$1"
+
+    # Single find command that processes each file once
+    find "$path" -type f \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        2>/dev/null | awk '
+        # Count files by extension
+        /\.ts$/ && !/\.d\.ts$/ {
+            ts_files++
+            cmd = "wc -l \"" $0 "\" 2>/dev/null"
+            cmd | getline result
+            close(cmd)
+            split(result, parts)
+            ts_lines += parts[1]
+        }
+        /\.svelte$/ {
+            svelte_files++
+            cmd = "wc -l \"" $0 "\" 2>/dev/null"
+            cmd | getline result
+            close(cmd)
+            split(result, parts)
+            svelte_lines += parts[1]
+        }
+        /\.js$/ {
+            js_files++
+            cmd = "wc -l \"" $0 "\" 2>/dev/null"
+            cmd | getline result
+            close(cmd)
+            split(result, parts)
+            js_lines += parts[1]
+        }
+        /\.css$/ {
+            css_files++
+            cmd = "wc -l \"" $0 "\" 2>/dev/null"
+            cmd | getline result
+            close(cmd)
+            split(result, parts)
+            css_lines += parts[1]
+        }
+        /\.md$/ {
+            md_files++
+            cmd = "wc -l \"" $0 "\" 2>/dev/null"
+            cmd | getline result
+            close(cmd)
+            split(result, parts)
+            md_lines += parts[1]
+        }
+        /\.json$/ {json_files++}
+        /\.toml$/ {toml_files++}
+        /\.yml$/ {yaml_files++}
+        /\.yaml$/ {yaml_files++}
+        /\.sql$/ {sql_files++}
+        /\.sh$/ {sh_files++}
+        END {
+            # Output format: ts_lines svelte_lines js_lines css_lines md_lines ts_files svelte_files js_files css_files md_files json_files toml_files yaml_files sql_files sh_files
+            printf "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+                ts_lines+0, svelte_lines+0, js_lines+0, css_lines+0, md_lines+0,
+                ts_files+0, svelte_files+0, js_files+0, css_files+0, md_files+0,
+                json_files+0, toml_files+0, yaml_files+0, sql_files+0, sh_files+0
+        }
+    '
+}
+
 # gf-stats - Combined statistics summary
 # Usage: gf-stats [path]
+#
+# Performance: Uses optimized single-pass directory traversal instead of
+# calling gf-count-lines, gf-count-langs, and gf-count-files separately.
+# This reduces file system operations from O(3n) to O(n).
 gf-stats() {
     local path="${1:-$GROVE_ROOT}"
 
@@ -565,13 +680,45 @@ gf-stats() {
         return 0
     fi
 
-    # For directories, show comprehensive stats
+    # For directories, use optimized single-pass gathering
+    local stats
+    stats=$(_grove_stats_optimized "$path")
+
+    # Parse the tab-separated output
+    IFS=$'\t' read -r ts_lines svelte_lines js_lines css_lines md_lines \
+        ts_files svelte_files js_files css_files md_files \
+        json_files toml_files yaml_files sql_files sh_files <<< "$stats"
+
+    # Calculate totals
+    local total_lines=$((ts_lines + svelte_lines + js_lines + css_lines + md_lines))
+    local total_files=$((ts_files + svelte_files + js_files + css_files + md_files + json_files + toml_files + yaml_files + sql_files + sh_files))
+
+    # Display Lines of Code
     echo -e "${PURPLE}═══ Lines of Code ═══${NC}\n"
-    gf-count-lines "$path"
+    echo -e "  ${GREEN}TypeScript:${NC}  $(_grove_format_num $ts_lines) lines"
+    echo -e "  ${GREEN}Svelte:${NC}      $(_grove_format_num $svelte_lines) lines"
+    echo -e "  ${GREEN}JavaScript:${NC}  $(_grove_format_num $js_lines) lines"
+    echo -e "  ${GREEN}CSS:${NC}         $(_grove_format_num $css_lines) lines"
+    echo -e "  ${GREEN}Markdown:${NC}    $(_grove_format_num $md_lines) lines"
+    echo -e "  ${CYAN}────────────────────────${NC}"
+    echo -e "  ${YELLOW}Total:${NC}       $(_grove_format_num $total_lines) lines"
 
+    # Display File Counts by Language
     echo -e "\n${PURPLE}═══ File Counts by Language ═══${NC}\n"
-    gf-count-langs "$path"
+    echo -e "  ${GREEN}TypeScript:${NC}  $ts_files files"
+    echo -e "  ${GREEN}Svelte:${NC}      $svelte_files files"
+    echo -e "  ${GREEN}JavaScript:${NC}  $js_files files"
+    echo -e "  ${GREEN}CSS:${NC}         $css_files files"
+    echo -e "  ${GREEN}Markdown:${NC}    $md_files files"
+    echo -e "  ${GREEN}JSON:${NC}        $json_files files"
+    echo -e "  ${GREEN}TOML:${NC}        $toml_files files"
+    echo -e "  ${GREEN}YAML:${NC}        $yaml_files files"
+    echo -e "  ${GREEN}SQL:${NC}         $sql_files files"
+    echo -e "  ${GREEN}Shell:${NC}       $sh_files files"
+    echo -e "  ${CYAN}────────────────────────${NC}"
+    echo -e "  ${YELLOW}Total:${NC}       $total_files files"
 
+    # Display Extension Summary
     echo -e "\n${PURPLE}═══ File Counts by Extension ═══${NC}\n"
     gf-count-files "$path"
 }
