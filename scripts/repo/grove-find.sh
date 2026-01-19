@@ -10,6 +10,12 @@
 #   gfi "import"                   # Find imports of a module
 #   gfs                            # Find all Svelte components
 #   gft                            # Find all TypeScript files
+#   gfj                            # Find all JavaScript files
+#   gfcss                          # Find all CSS files
+#   gfmd                           # Find all Markdown files
+#   gfjson                         # Find all JSON files
+#   gftoml                         # Find all TOML files
+#   gfh                            # Find all HTML files
 #   gfr "route"                    # Find route handlers
 #   gfd                            # Find database queries
 #   gfg                            # Find Glass component usage
@@ -262,6 +268,76 @@ gfj() {
         "$GROVE_FD" -e js "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js'
     else
         "$GROVE_FD" -e js . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js' | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gfcss - Find CSS files
+# Usage: gfcss [pattern]
+gfcss() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 CSS files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e css "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css'
+    else
+        "$GROVE_FD" -e css . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css' | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gfmd - Find Markdown files
+# Usage: gfmd [pattern]
+gfmd() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 Markdown files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e md "$pattern" "$GROVE_ROOT" --exclude node_modules
+    else
+        "$GROVE_FD" -e md . "$GROVE_ROOT" --exclude node_modules | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gfjson - Find JSON files
+# Usage: gfjson [pattern]
+gfjson() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 JSON files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e json "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json'
+    else
+        "$GROVE_FD" -e json . "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json' | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gftoml - Find TOML files
+# Usage: gftoml [pattern]
+gftoml() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 TOML files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e toml "$pattern" "$GROVE_ROOT" --exclude node_modules
+    else
+        "$GROVE_FD" -e toml . "$GROVE_ROOT" --exclude node_modules | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gfh - Find HTML files
+# Usage: gfh [pattern]
+gfh() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 HTML files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e html "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude dist
+    else
+        "$GROVE_FD" -e html . "$GROVE_ROOT" --exclude node_modules --exclude dist | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -762,6 +838,11 @@ gfhelp() {
     echo "  gfs [pattern]     - Find Svelte components"
     echo "  gft [pattern]     - Find TypeScript files"
     echo "  gfj [pattern]     - Find JavaScript files"
+    echo "  gfcss [pattern]   - Find CSS files"
+    echo "  gfmd [pattern]    - Find Markdown files"
+    echo "  gfjson [pattern]  - Find JSON files"
+    echo "  gftoml [pattern]  - Find TOML files"
+    echo "  gfh [pattern]     - Find HTML files"
     echo ""
     echo -e "${CYAN}Domain Searches:${NC}"
     echo "  gfr [route]       - Find SvelteKit routes"
