@@ -12,7 +12,7 @@
  */
 
 import type { Commit, GutterComment } from "./voices/types";
-import { safeJsonParse } from "../../utils/json.js";
+import { safeParseJson } from "../../utils/json.js";
 
 // =============================================================================
 // Types
@@ -302,12 +302,12 @@ export async function getHistoricalContext(
       .map((row) => ({
         date: row.summary_date,
         brief: row.context_brief
-          ? safeJsonParse<ContextBrief | null>(row.context_brief, null, {
+          ? safeParseJson<ContextBrief | null>(row.context_brief, null, {
               context: "timeline.contextBrief",
             })
           : null,
         focus: row.detected_focus
-          ? safeJsonParse<DetectedFocus | null>(row.detected_focus, null, {
+          ? safeParseJson<DetectedFocus | null>(row.detected_focus, null, {
               context: "timeline.detectedFocus",
             })
           : null,

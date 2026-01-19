@@ -7,9 +7,9 @@
  */
 
 /**
- * Options for safeJsonParse
+ * Options for safeParseJson
  */
-export interface SafeJsonParseOptions {
+export interface SafeParseJsonOptions {
   /** Suppress console.warn on parse failure (default: false) */
   silent?: boolean;
   /** Context for error logging (e.g., "user.metadata", "draft.content") */
@@ -20,18 +20,21 @@ export interface SafeJsonParseOptions {
  * Safely parse JSON with fallback for corrupted or missing data.
  * Prevents crashes when parsing malformed JSON from external sources.
  *
+ * Note: Named safeParseJson (not safeJsonParse) to avoid bundling conflicts
+ * when Durable Objects are concatenated into _worker.js
+ *
  * @example
- * safeJsonParse('["a","b"]', [])  // Returns ['a', 'b']
- * safeJsonParse('invalid', [])    // Returns []
- * safeJsonParse(null, {})         // Returns {}
+ * safeParseJson('["a","b"]', [])  // Returns ['a', 'b']
+ * safeParseJson('invalid', [])    // Returns []
+ * safeParseJson(null, {})         // Returns {}
  *
  * @example With options
- * safeJsonParse(userJson, {}, { context: 'user.metadata', silent: false })
+ * safeParseJson(userJson, {}, { context: 'user.metadata', silent: false })
  */
-export function safeJsonParse<T>(
+export function safeParseJson<T>(
   str: string | null | undefined,
   fallback: T,
-  options?: SafeJsonParseOptions,
+  options?: SafeParseJsonOptions,
 ): T {
   if (!str) return fallback;
   try {

@@ -13,7 +13,7 @@ import {
   DEFAULT_MILESTONE_LIMIT,
   MAX_MILESTONE_LIMIT,
 } from "$lib/curios/journey";
-import { safeJsonParse } from "$lib/utils/json";
+import { safeParseJson } from "$lib/utils/json";
 
 interface MilestoneRow {
   id: string;
@@ -119,8 +119,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     version: row.version,
     summaryDate: row.summary_date,
     summary: row.summary,
-    highlightsFeatures: safeJsonParse<string[]>(row.highlights_features, []),
-    highlightsFixes: safeJsonParse<string[]>(row.highlights_fixes, []),
+    highlightsFeatures: safeParseJson<string[]>(row.highlights_features, []),
+    highlightsFixes: safeParseJson<string[]>(row.highlights_fixes, []),
     stats: {
       commits: row.stats_commits ?? 0,
       features: row.stats_features ?? 0,

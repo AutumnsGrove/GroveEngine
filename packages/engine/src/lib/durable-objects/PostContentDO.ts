@@ -16,7 +16,7 @@
  * Part of the Loom pattern - Grove's coordination layer.
  */
 
-import { safeJsonParse } from "../utils/json.js";
+import { safeParseJson } from "../utils/json.js";
 
 // ============================================================================
 // Types
@@ -84,7 +84,7 @@ export class PostContentDO implements DurableObject {
       .one();
 
     if (stored?.value) {
-      const parsed = safeJsonParse<PostContent | null>(
+      const parsed = safeParseJson<PostContent | null>(
         stored.value as string,
         null,
         {
@@ -340,7 +340,7 @@ export class PostContentDO implements DurableObject {
       if (!object) return null;
 
       const text = await object.text();
-      return safeJsonParse<{
+      return safeParseJson<{
         markdownContent: string;
         htmlContent: string;
         gutterContent: string;

@@ -4,7 +4,7 @@
  * Utilities for managing products, orders, and customers in D1.
  */
 
-import { safeJsonParse } from "../utils/json.js";
+import { safeParseJson } from "../utils/json.js";
 import type {
   Product,
   ProductBase,
@@ -1218,10 +1218,10 @@ function mapProductRow(row: ProductRow): ProductBase {
     description: row.description || undefined,
     type: row.type as ProductType,
     status: row.status as ProductStatus,
-    images: safeJsonParse<string[]>(row.images, [], {
+    images: safeParseJson<string[]>(row.images, [], {
       context: "product.images",
     }),
-    metadata: safeJsonParse<Record<string, string>>(
+    metadata: safeParseJson<Record<string, string>>(
       row.metadata,
       {},
       { context: "product.metadata" },
@@ -1281,12 +1281,12 @@ function mapOrderRow(row: OrderRow, lineItemRows: LineItemRow[]): Order {
     providerOrderId: row.provider_payment_id || undefined,
     providerSessionId: row.provider_session_id || undefined,
     shippingAddress: row.shipping_address
-      ? safeJsonParse<Address | undefined>(row.shipping_address, undefined, {
+      ? safeParseJson<Address | undefined>(row.shipping_address, undefined, {
           context: "order.shippingAddress",
         })
       : undefined,
     billingAddress: row.billing_address
-      ? safeJsonParse<Address | undefined>(row.billing_address, undefined, {
+      ? safeParseJson<Address | undefined>(row.billing_address, undefined, {
           context: "order.billingAddress",
         })
       : undefined,
@@ -1315,7 +1315,7 @@ function mapLineItemRow(row: LineItemRow): LineItem {
     taxAmount: row.tax_amount
       ? { amount: row.tax_amount, currency: "usd" }
       : undefined,
-    metadata: safeJsonParse<Record<string, string>>(
+    metadata: safeParseJson<Record<string, string>>(
       row.metadata,
       {},
       { context: "lineItem.metadata" },
@@ -1331,21 +1331,21 @@ function mapCustomerRow(row: CustomerRow): Customer {
     name: row.name || undefined,
     phone: row.phone || undefined,
     defaultShippingAddress: row.default_shipping_address
-      ? safeJsonParse<Address | undefined>(
+      ? safeParseJson<Address | undefined>(
           row.default_shipping_address,
           undefined,
           { context: "customer.shippingAddress" },
         )
       : undefined,
     defaultBillingAddress: row.default_billing_address
-      ? safeJsonParse<Address | undefined>(
+      ? safeParseJson<Address | undefined>(
           row.default_billing_address,
           undefined,
           { context: "customer.billingAddress" },
         )
       : undefined,
     providerCustomerId: row.provider_customer_id || undefined,
-    metadata: safeJsonParse<Record<string, string>>(
+    metadata: safeParseJson<Record<string, string>>(
       row.metadata,
       {},
       { context: "customer.metadata" },

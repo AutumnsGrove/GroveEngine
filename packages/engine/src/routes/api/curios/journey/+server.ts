@@ -14,7 +14,7 @@ import {
   DEFAULT_SNAPSHOT_LIMIT,
   MAX_SNAPSHOT_LIMIT,
 } from "$lib/curios/journey";
-import { safeJsonParse } from "$lib/utils/json";
+import { safeParseJson } from "$lib/utils/json";
 
 interface JourneySnapshotRow {
   id: string;
@@ -114,7 +114,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     label: row.label,
     gitHash: row.git_hash,
     totalLines: row.total_lines,
-    languageBreakdown: safeJsonParse<LanguageBreakdown>(
+    languageBreakdown: safeParseJson<LanguageBreakdown>(
       row.language_breakdown,
       {},
     ),
