@@ -16,9 +16,22 @@
 #   gfjson                         # Find all JSON files
 #   gftoml                         # Find all TOML files
 #   gfh                            # Find all HTML files
+#   gfyaml                         # Find all YAML files
+#   gfsh                           # Find all shell scripts
 #   gfr "route"                    # Find route handlers
 #   gfd                            # Find database queries
 #   gfg                            # Find Glass component usage
+#   gftest                         # Find test files
+#   gftodo                         # Find TODO/FIXME/HACK comments
+#   gfconfig                       # Find configuration files
+#   gfstore                        # Find Svelte stores
+#   gfgrove                        # Find "Grove" references
+#   gfbind                         # Find Cloudflare bindings (D1, KV, R2)
+#   gfdo                           # Find Durable Object definitions
+#   gfd1                           # Find D1 database usage
+#   gfr2                           # Find R2 storage usage
+#   gfkv                           # Find KV namespace usage
+#   gfused "Name"                  # Find where a component is used
 #
 # Pro tip: Add to your ~/.bashrc or ~/.zshrc:
 #   source /path/to/GroveEngine/scripts/grove-find.sh
@@ -419,8 +432,340 @@ gftest() {
     if [ -n "$name" ]; then
         "$GROVE_FD" "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | "$GROVE_RG" -i "$name"
     else
-        "$GROVE_FD" "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -30
+        echo -e "\n${GREEN}Test Files (.test.ts, .spec.ts):${NC}"
+        "$GROVE_FD" "\.(test|spec)\.(ts|js)$" "$GROVE_ROOT" --exclude node_modules | head -30
+        echo -e "\n${GREEN}Test Directories:${NC}"
+        "$GROVE_FD" -t d "test|tests|__tests__" "$GROVE_ROOT" --exclude node_modules | head -20
     fi
+}
+
+# gftodo - Find TODO, FIXME, HACK comments
+# Usage: gftodo [type]
+# Examples: gftodo, gftodo FIXME, gftodo HACK
+gftodo() {
+    local type="${1:-}"
+
+    if [ -n "$type" ]; then
+        echo -e "${CYAN}🔍 Finding ${type} comments${NC}"
+        "$GROVE_RG" --color=always -n "\b${type}\b:?" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' \
+           --type ts --type js --type svelte
+    else
+        echo -e "${CYAN}🔍 Finding TODO/FIXME/HACK comments${NC}\n"
+
+        echo -e "${YELLOW}TODOs:${NC}"
+        "$GROVE_RG" --color=always -n "\bTODO\b:?" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' \
+           --type ts --type js --type svelte | head -20
+
+        echo -e "\n${RED}FIXMEs:${NC}"
+        "$GROVE_RG" --color=always -n "\bFIXME\b:?" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' \
+           --type ts --type js --type svelte | head -20
+
+        echo -e "\n${PURPLE}HACKs:${NC}"
+        "$GROVE_RG" --color=always -n "\bHACK\b:?" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' \
+           --type ts --type js --type svelte | head -10
+    fi
+}
+
+# gfconfig - Find configuration files
+# Usage: gfconfig [name]
+gfconfig() {
+    local name="${1:-}"
+    echo -e "${CYAN}🔍 Configuration files${name:+ matching: $name}${NC}\n"
+
+    if [ -n "$name" ]; then
+        "$GROVE_FD" "$name" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "config|rc|\.toml|\.json|\.yaml|\.yml"
+    else
+        echo -e "${GREEN}Build & Bundler Configs:${NC}"
+        "$GROVE_FD" "(vite|svelte|tailwind|postcss|tsconfig|jsconfig)\.config\.(js|ts|mjs)" "$GROVE_ROOT" --exclude node_modules
+
+        echo -e "\n${GREEN}Cloudflare/Wrangler:${NC}"
+        "$GROVE_FD" "wrangler" "$GROVE_ROOT" -e toml --exclude node_modules
+
+        echo -e "\n${GREEN}Package Configs:${NC}"
+        "$GROVE_FD" "package\.json" "$GROVE_ROOT" --exclude node_modules | head -20
+
+        echo -e "\n${GREEN}TypeScript Configs:${NC}"
+        "$GROVE_FD" "tsconfig" "$GROVE_ROOT" -e json --exclude node_modules
+
+        echo -e "\n${GREEN}Other Configs (.rc, .config.*):${NC}"
+        "$GROVE_FD" "\.(eslintrc|prettierrc|npmrc)" "$GROVE_ROOT" --exclude node_modules
+    fi
+}
+
+# gfyaml - Find YAML files (GitHub Actions, etc.)
+# Usage: gfyaml [pattern]
+gfyaml() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 YAML files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e yml -e yaml "$pattern" "$GROVE_ROOT" --exclude node_modules
+    else
+        echo -e "\n${GREEN}GitHub Actions:${NC}"
+        "$GROVE_FD" -e yml -e yaml . "$GROVE_ROOT/.github" 2>/dev/null | head -20
+
+        echo -e "\n${GREEN}Other YAML files:${NC}"
+        "$GROVE_FD" -e yml -e yaml . "$GROVE_ROOT" --exclude node_modules --exclude .github | head -30
+    fi
+}
+
+# gfsh - Find shell scripts
+# Usage: gfsh [pattern]
+gfsh() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 Shell scripts${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e sh -e bash -e zsh "$pattern" "$GROVE_ROOT" --exclude node_modules
+    else
+        "$GROVE_FD" -e sh -e bash -e zsh . "$GROVE_ROOT" --exclude node_modules | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
+# gfstore - Find Svelte stores
+# Usage: gfstore [name]
+gfstore() {
+    local name="${1:-}"
+    echo -e "${CYAN}🔍 Svelte stores${name:+ matching: $name}${NC}\n"
+
+    if [ -n "$name" ]; then
+        "$GROVE_RG" --color=always -n "(writable|readable|derived).*$name|$name.*(writable|readable|derived)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js --type svelte
+    else
+        echo -e "${GREEN}Store Files:${NC}"
+        "$GROVE_FD" "store" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -20
+
+        echo -e "\n${GREEN}Store Definitions (writable/readable/derived):${NC}"
+        "$GROVE_RG" --color=always -n "export\s+(const|let).*=\s*(writable|readable|derived)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js | head -30
+    fi
+}
+
+# gfgrove - Find "Grove" references across the codebase
+# Usage: gfgrove [context]
+# Examples: gfgrove, gfgrove auth, gfgrove engine
+gfgrove() {
+    local context="${1:-}"
+    echo -e "${CYAN}🌲 Searching for Grove references${context:+ with context: $context}${NC}\n"
+
+    if [ -n "$context" ]; then
+        "$GROVE_RG" --color=always -n -i "grove.*$context|$context.*grove" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' --glob '!*.lock'
+    else
+        echo -e "${GREEN}In Code:${NC}"
+        "$GROVE_RG" --color=always -n "\bGrove\b" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!.git' --glob '!*.lock' --glob '!*.md' \
+           --type ts --type js --type svelte | head -30
+
+        echo -e "\n${GREEN}In Documentation:${NC}"
+        "$GROVE_RG" --color=always -n "\bGrove\b" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!.git' \
+           --type md | head -20
+    fi
+}
+
+# gfbind - Find Cloudflare bindings (D1, KV, R2, DO)
+# Usage: gfbind [type]
+# Examples: gfbind, gfbind D1, gfbind KV, gfbind R2
+gfbind() {
+    local type="${1:-}"
+    echo -e "${CYAN}☁️  Finding Cloudflare bindings${type:+ of type: $type}${NC}\n"
+
+    if [ -n "$type" ]; then
+        case "$type" in
+            D1|d1|db)
+                "$GROVE_RG" --color=always -n "(platform\.env\.DB|D1Database|\.prepare\(|\.exec\(|\.batch\()" "$GROVE_ROOT" \
+                   --glob '!node_modules' --glob '!dist' --type ts --type js
+                ;;
+            KV|kv)
+                "$GROVE_RG" --color=always -n "(platform\.env\.\w*KV|KVNamespace|\.get\(|\.put\(|\.delete\(|\.list\()" "$GROVE_ROOT" \
+                   --glob '!node_modules' --glob '!dist' --type ts --type js
+                ;;
+            R2|r2)
+                "$GROVE_RG" --color=always -n "(platform\.env\.\w*BUCKET|R2Bucket|\.put\(|\.get\(|\.head\()" "$GROVE_ROOT" \
+                   --glob '!node_modules' --glob '!dist' --type ts --type js
+                ;;
+            DO|do)
+                "$GROVE_RG" --color=always -n "(DurableObject|\.idFromName\(|\.idFromString\(|\.get\(.*stub)" "$GROVE_ROOT" \
+                   --glob '!node_modules' --glob '!dist' --type ts --type js
+                ;;
+            *)
+                echo -e "${YELLOW}Unknown binding type: $type${NC}"
+                echo "Valid types: D1, KV, R2, DO"
+                ;;
+        esac
+    else
+        echo -e "${GREEN}D1 Database:${NC}"
+        "$GROVE_RG" --color=always -n "platform\.env\.DB|D1Database" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -15
+
+        echo -e "\n${GREEN}KV Namespaces:${NC}"
+        "$GROVE_RG" --color=always -n "KVNamespace|platform\.env\.\w*KV" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -15
+
+        echo -e "\n${GREEN}R2 Buckets:${NC}"
+        "$GROVE_RG" --color=always -n "R2Bucket|platform\.env\.\w*BUCKET" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -15
+
+        echo -e "\n${GREEN}Durable Objects:${NC}"
+        "$GROVE_RG" --color=always -n "DurableObject|\.idFromName\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -15
+    fi
+}
+
+# gfdo - Find Durable Object definitions and usage
+# Usage: gfdo [name]
+gfdo() {
+    local name="${1:-}"
+    echo -e "${CYAN}🔒 Finding Durable Objects${name:+ matching: $name}${NC}\n"
+
+    if [ -n "$name" ]; then
+        "$GROVE_RG" --color=always -n "$name" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | \
+           "$GROVE_RG" -i "durable|DO|stub|idFrom"
+    else
+        echo -e "${GREEN}DO Class Definitions:${NC}"
+        "$GROVE_RG" --color=always -n "export\s+class\s+\w+.*implements\s+DurableObject|extends\s+DurableObject" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts
+
+        echo -e "\n${GREEN}DO Files (by naming convention):${NC}"
+        "$GROVE_FD" -i "do\.|durable" "$GROVE_ROOT" -e ts --exclude node_modules | head -20
+
+        echo -e "\n${GREEN}DO Stub Usage:${NC}"
+        "$GROVE_RG" --color=always -n "\.idFromName\(|\.idFromString\(|\.get\(.*DurableObjectId" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts | head -20
+
+        echo -e "\n${GREEN}Wrangler DO Bindings:${NC}"
+        "$GROVE_RG" --color=always -n "\[durable_objects\]" -A 10 "$GROVE_ROOT" \
+           --glob 'wrangler*.toml' 2>/dev/null | head -30
+    fi
+}
+
+# gfd1 - Find D1 database usage
+# Usage: gfd1 [table-or-pattern]
+gfd1() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🗄️  Finding D1 database usage${pattern:+ matching: $pattern}${NC}\n"
+
+    if [ -n "$pattern" ]; then
+        echo -e "${GREEN}Queries mentioning '$pattern':${NC}"
+        "$GROVE_RG" --color=always -n "(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP).*$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js
+
+        echo -e "\n${GREEN}Schema references:${NC}"
+        "$GROVE_RG" --color=always -n "$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --glob '*.sql' --glob 'schema*' --glob 'migration*'
+    else
+        echo -e "${GREEN}D1 Database Bindings:${NC}"
+        "$GROVE_RG" --color=always -n "platform\.env\.DB|env\.DB|D1Database" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -20
+
+        echo -e "\n${GREEN}Query Operations (.prepare, .exec, .batch):${NC}"
+        "$GROVE_RG" --color=always -n "\.prepare\(|\.exec\(|\.batch\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -30
+
+        echo -e "\n${GREEN}SQL Files:${NC}"
+        "$GROVE_FD" -e sql . "$GROVE_ROOT" --exclude node_modules | head -20
+
+        echo -e "\n${GREEN}Wrangler D1 Config:${NC}"
+        "$GROVE_RG" --color=always -n "\[\[d1_databases\]\]" -A 5 "$GROVE_ROOT" \
+           --glob 'wrangler*.toml' 2>/dev/null
+    fi
+}
+
+# gfr2 - Find R2 storage usage
+# Usage: gfr2 [pattern]
+gfr2() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}📦 Finding R2 storage usage${pattern:+ matching: $pattern}${NC}\n"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_RG" --color=always -n "$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | \
+           "$GROVE_RG" -i "r2|bucket|storage|upload|blob"
+    else
+        echo -e "${GREEN}R2 Bucket Bindings:${NC}"
+        "$GROVE_RG" --color=always -n "R2Bucket|platform\.env\.\w*BUCKET|env\.\w*BUCKET" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -20
+
+        echo -e "\n${GREEN}R2 Operations (.put, .get, .head, .delete, .list):${NC}"
+        "$GROVE_RG" --color=always -n "bucket\.(put|get|head|delete|list)\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -30
+
+        echo -e "\n${GREEN}Upload/Download Patterns:${NC}"
+        "$GROVE_RG" --color=always -n "(upload|download|presigned|signedUrl).*[Rr]2|[Rr]2.*(upload|download)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -20
+
+        echo -e "\n${GREEN}Wrangler R2 Config:${NC}"
+        "$GROVE_RG" --color=always -n "\[\[r2_buckets\]\]" -A 5 "$GROVE_ROOT" \
+           --glob 'wrangler*.toml' 2>/dev/null
+    fi
+}
+
+# gfkv - Find KV namespace usage
+# Usage: gfkv [key-pattern]
+gfkv() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔑 Finding KV namespace usage${pattern:+ matching: $pattern}${NC}\n"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_RG" --color=always -n "$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | \
+           "$GROVE_RG" -i "kv|namespace|cache|session"
+    else
+        echo -e "${GREEN}KV Namespace Bindings:${NC}"
+        "$GROVE_RG" --color=always -n "KVNamespace|platform\.env\.\w*KV|env\.\w*KV" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -20
+
+        echo -e "\n${GREEN}KV Operations (.get, .put, .delete, .list):${NC}"
+        "$GROVE_RG" --color=always -n "\w+KV\.(get|put|delete|list|getWithMetadata)\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -30
+
+        echo -e "\n${GREEN}Cache/Session Patterns:${NC}"
+        "$GROVE_RG" --color=always -n "(cache|session|token).*KV|KV.*(cache|session|token)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -20
+
+        echo -e "\n${GREEN}Wrangler KV Config:${NC}"
+        "$GROVE_RG" --color=always -n "\[\[kv_namespaces\]\]" -A 5 "$GROVE_ROOT" \
+           --glob 'wrangler*.toml' 2>/dev/null
+    fi
+}
+
+# gfused - Find where a component/function is used (imports + usage)
+# Usage: gfused "ComponentName"
+gfused() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${YELLOW}Usage: gfused \"ComponentName\"${NC}"
+        echo -e "Example: gfused GlassCard"
+        return 1
+    fi
+
+    echo -e "${CYAN}🔍 Finding usage of: ${name}${NC}\n"
+
+    echo -e "${GREEN}Imports:${NC}"
+    "$GROVE_RG" --color=always -n "import.*\{[^}]*\b$name\b[^}]*\}|import\s+$name\s+from|import\s+\*\s+as\s+$name" "$GROVE_ROOT" \
+       --glob '!node_modules' --glob '!dist' \
+       --type ts --type js --type svelte | head -25
+
+    echo -e "\n${GREEN}JSX/Svelte Usage (<$name):${NC}"
+    "$GROVE_RG" --color=always -n "<$name[\s/>]" "$GROVE_ROOT" \
+       --glob '!node_modules' --glob '!dist' \
+       --type svelte | head -25
+
+    echo -e "\n${GREEN}Function Calls ($name()):${NC}"
+    "$GROVE_RG" --color=always -n "\b$name\s*\(" "$GROVE_ROOT" \
+       --glob '!node_modules' --glob '!dist' \
+       --type ts --type js --type svelte | \
+       "$GROVE_RG" -v "(function|const|let|var|import|export)\s+$name" | head -25
 }
 
 # =============================================================================
@@ -833,6 +1178,7 @@ gfhelp() {
     echo "  gfc \"Name\"        - Find class/component definitions"
     echo "  gff \"func\"        - Find function definitions"
     echo "  gfi \"module\"      - Find imports of a module"
+    echo "  gfused \"Name\"     - Find where a component/function is used"
     echo ""
     echo -e "${CYAN}File Type Searches:${NC}"
     echo "  gfs [pattern]     - Find Svelte components"
@@ -843,6 +1189,8 @@ gfhelp() {
     echo "  gfjson [pattern]  - Find JSON files"
     echo "  gftoml [pattern]  - Find TOML files"
     echo "  gfh [pattern]     - Find HTML files"
+    echo "  gfyaml [pattern]  - Find YAML files"
+    echo "  gfsh [pattern]    - Find shell scripts"
     echo ""
     echo -e "${CYAN}Domain Searches:${NC}"
     echo "  gfr [route]       - Find SvelteKit routes"
@@ -850,6 +1198,19 @@ gfhelp() {
     echo "  gfg [variant]     - Find Glass component usage"
     echo "  gfspec [name]     - Find spec documents"
     echo "  gftest [name]     - Find test files"
+    echo "  gfconfig [name]   - Find configuration files"
+    echo "  gfstore [name]    - Find Svelte stores"
+    echo ""
+    echo -e "${CYAN}Development Workflow:${NC}"
+    echo "  gftodo [type]     - Find TODO/FIXME/HACK comments"
+    echo "  gfgrove [context] - Find Grove references in codebase"
+    echo ""
+    echo -e "${CYAN}Cloudflare/Infrastructure:${NC}"
+    echo "  gfbind [type]     - Find CF bindings (D1, KV, R2, DO)"
+    echo "  gfdo [name]       - Find Durable Object definitions"
+    echo "  gfd1 [table]      - Find D1 database usage & queries"
+    echo "  gfr2 [pattern]    - Find R2 storage/upload operations"
+    echo "  gfkv [key]        - Find KV namespace usage"
     echo ""
     echo -e "${CYAN}Counting & Metrics:${NC}"
     echo "  gf-count-lines [path]  - Count lines of code"
@@ -864,7 +1225,9 @@ gfhelp() {
     echo "  - All searches exclude node_modules, dist, and .git"
     echo "  - Use quotes for patterns with spaces"
     echo "  - Combine with | less for paging through results"
-    echo "  - Counting commands default to GROVE_ROOT if no path given"
+    echo "  - gftodo FIXME → show only FIXMEs"
+    echo "  - gfbind D1 → show only D1 database usage"
+    echo "  - gfused GlassCard → find everywhere GlassCard is imported/used"
 }
 
 # Let user know functions are loaded
