@@ -6,6 +6,14 @@
 import type { Component } from 'svelte';
 
 /**
+ * Flexible icon type that accepts any Svelte component or lucide-svelte icon.
+ * Uses `unknown` to avoid strict type checking issues with different icon libraries.
+ * Runtime validation is handled by `isValidIcon()`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type IconComponent = Component<{ class?: string }> | (new (...args: any[]) => any) | unknown;
+
+/**
  * Header item for the table of contents
  */
 export interface TOCHeader {
@@ -13,10 +21,10 @@ export interface TOCHeader {
 	id: string;
 	/** Display text for the TOC item */
 	text: string;
-	/** Header level (1-6) for indentation */
-	level: number;
-	/** Optional Svelte component to render as an icon */
-	icon?: Component<{ class?: string }>;
+	/** Header level (1-6) for indentation. Defaults to 2 if not provided */
+	level?: number;
+	/** Optional Svelte component to render as an icon. Validated at runtime via isValidIcon() */
+	icon?: IconComponent;
 }
 
 /**

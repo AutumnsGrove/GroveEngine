@@ -130,7 +130,7 @@
 					{#each headers as header (header.id)}
 						{@const IconComponent = header.icon && isValidIcon(header.icon) ? header.icon : null}
 						<li
-							class="toc-item level-{header.level}"
+							class="toc-item level-{header.level ?? 2}"
 							class:active={activeId === header.id}
 							class:has-icon={!!IconComponent}
 						>
