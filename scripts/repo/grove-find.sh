@@ -68,6 +68,12 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Agent mode - clean output for AI agents
+# Usage: GF_AGENT=1 source scripts/repo/grove-find.sh
+if [ -n "$GF_AGENT" ]; then
+    RED="" GREEN="" YELLOW="" BLUE="" PURPLE="" CYAN="" NC=""
+fi
+
 # =============================================================================
 # Binary Discovery (find tools even if not in PATH)
 # =============================================================================
@@ -129,29 +135,39 @@ _grove_check_deps() {
     local missing=0
 
     if [ -z "$GROVE_RG" ]; then
-        echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
-        echo -e "  ${CYAN}macOS:${NC}     brew install ripgrep"
-        echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install ripgrep"
-        echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S ripgrep"
-        echo -e "  ${CYAN}Windows:${NC}   scoop install ripgrep  ${YELLOW}(or winget/choco)${NC}"
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
+            echo -e "  ${CYAN}macOS:${NC}     brew install ripgrep"
+            echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install ripgrep"
+            echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S ripgrep"
+            echo -e "  ${CYAN}Windows:${NC}   scoop install ripgrep  ${YELLOW}(or winget/choco)${NC}"
+        fi
         missing=1
     else
-        echo -e "${GREEN}✓${NC} Found rg at: ${CYAN}$GROVE_RG${NC}"
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${GREEN}✓${NC} Found rg at: ${CYAN}$GROVE_RG${NC}"
+        fi
     fi
 
     if [ -z "$GROVE_FD" ]; then
-        echo -e "${RED}Error: fd is not installed.${NC}"
-        echo -e "  ${CYAN}macOS:${NC}     brew install fd"
-        echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install fd-find  ${YELLOW}(may need: ln -s \$(which fdfind) ~/.local/bin/fd)${NC}"
-        echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S fd"
-        echo -e "  ${CYAN}Windows:${NC}   scoop install fd  ${YELLOW}(or winget/choco)${NC}"
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${RED}Error: fd is not installed.${NC}"
+            echo -e "  ${CYAN}macOS:${NC}     brew install fd"
+            echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install fd-find  ${YELLOW}(may need: ln -s \$(which fdfind) ~/.local/bin/fd)${NC}"
+            echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S fd"
+            echo -e "  ${CYAN}Windows:${NC}   scoop install fd  ${YELLOW}(or winget/choco)${NC}"
+        fi
         missing=1
     else
-        echo -e "${GREEN}✓${NC} Found fd at: ${CYAN}$GROVE_FD${NC}"
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${GREEN}✓${NC} Found fd at: ${CYAN}$GROVE_FD${NC}"
+        fi
     fi
 
     if [ $missing -eq 1 ]; then
-        echo -e "\n${YELLOW}Some grove-find functions will not work without these tools.${NC}"
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "\n${YELLOW}Some grove-find functions will not work without these tools.${NC}"
+        fi
         return 1
     fi
     return 0
@@ -1115,9 +1131,14 @@ gfcommits() {
 # gfgitstats - Project health snapshot
 # Usage: gfgitstats
 gfgitstats() {
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║              📸 Project Git Stats Snapshot                    ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║              📸 Project Git Stats Snapshot                    ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Project Git Stats Snapshot ==="
+        echo ""
+    fi
 
     local branch
     branch=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
@@ -1200,9 +1221,14 @@ gfgitstats() {
 # Usage: gfbriefing
 # Shows oldest TODOs from TODOS.md + oldest TODO comments in code
 gfbriefing() {
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                   🌅 Daily Briefing                           ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                   🌅 Daily Briefing                           ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Daily Briefing ==="
+        echo ""
+    fi
 
     local today
     today=$(date +"%A, %B %d, %Y")
@@ -1345,9 +1371,14 @@ gfpr() {
     local current
     current=$(git -C "$GROVE_ROOT" branch --show-current 2>/dev/null)
 
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                    📋 PR Summary                              ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                    📋 PR Summary                              ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== PR Summary ==="
+        echo ""
+    fi
 
     echo -e "${GREEN}Branch:${NC} $current → $base"
 
@@ -1651,11 +1682,18 @@ gfengine() {
 # Usage: gfagent
 # This outputs a compact, copy-paste friendly reference
 gfagent() {
-    cat << 'AGENT_HELP'
+    if [ -z "$GF_AGENT" ]; then
+        cat << 'AGENT_HELP_DECORATED'
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                    GROVE-FIND: Agent Quick Reference                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
+AGENT_HELP_DECORATED
+    else
+        echo "=== GROVE-FIND: Agent Quick Reference ==="
+        echo ""
+    fi
+    cat << 'AGENT_HELP'
 CORE SEARCH
   gf "pattern"        Search entire codebase
   gfc "Name"          Find class/component definition
@@ -2053,9 +2091,14 @@ gf-stats() {
         return 1
     fi
 
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║           Grove Code Statistics Summary                      ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║           Grove Code Statistics Summary                      ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Grove Code Statistics Summary ==="
+        echo ""
+    fi
     echo -e "${YELLOW}Path:${NC} $path\n"
 
     # If it's a file, just show line count
@@ -2221,5 +2264,7 @@ gfhelp() {
     echo "  - gfengine → verify engine-first pattern compliance"
 }
 
-# Let user know functions are loaded
-echo -e "${GREEN}✓ Grove Find loaded!${NC} Run ${CYAN}gfhelp${NC} for available commands."
+# Let user know functions are loaded (suppress in agent mode)
+if [ -z "$GF_AGENT" ]; then
+    echo -e "${GREEN}✓ Grove Find loaded!${NC} Run ${CYAN}gfhelp${NC} for available commands."
+fi
