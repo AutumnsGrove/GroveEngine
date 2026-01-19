@@ -5,6 +5,7 @@
  * 1. Encrypt tokens before database storage
  * 2. Indicate token presence without exposing values
  * 3. Handle missing encryption keys gracefully
+ * 4. Support CLEAR_TOKEN_VALUE for explicit token deletion
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -14,43 +15,58 @@ import { encryptToken, isEncryptedToken } from "$lib/server/encryption";
 const TEST_KEY =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
+// Sentinel value for clearing tokens (matches $lib/curios/timeline)
+const CLEAR_TOKEN_VALUE = "__CLEAR__";
+
 /**
  * Simulates the admin page's token processing logic from +page.server.ts
- * This mirrors lines 152-178 of the actual implementation.
+ * This mirrors the 3-state token handling: set/preserve/clear
  */
 async function processAdminFormTokens(
   githubToken: string | null,
   openrouterKey: string | null,
   encryptionKey: string | undefined,
 ): Promise<{
-  githubTokenEncrypted: string | null;
-  openrouterKeyEncrypted: string | null;
+  githubTokenForDb: string | null;
+  openrouterKeyForDb: string | null;
   warnings: string[];
 }> {
   const warnings: string[] = [];
-  const rawGithubToken = githubToken?.trim() || null;
-  const rawOpenrouterKey = openrouterKey?.trim() || null;
 
-  let githubTokenEncrypted = rawGithubToken;
-  let openrouterKeyEncrypted = rawOpenrouterKey;
+  // Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, empty -> null (preserve)
+  let githubTokenForDb: string | null = null;
+  let openrouterKeyForDb: string | null = null;
 
-  if (encryptionKey) {
-    if (rawGithubToken) {
-      githubTokenEncrypted = await encryptToken(rawGithubToken, encryptionKey);
-    }
-    if (rawOpenrouterKey) {
-      openrouterKeyEncrypted = await encryptToken(
-        rawOpenrouterKey,
-        encryptionKey,
-      );
-    }
-  } else if (rawGithubToken || rawOpenrouterKey) {
+  if (githubToken === CLEAR_TOKEN_VALUE) {
+    // Explicit clear request - use empty string to trigger CASE NULL
+    githubTokenForDb = "";
+  } else if (githubToken?.trim()) {
+    // New token value - encrypt it
+    const rawToken = githubToken.trim();
+    githubTokenForDb = encryptionKey
+      ? await encryptToken(rawToken, encryptionKey)
+      : rawToken;
+  }
+  // else: null/undefined/empty = preserve existing (COALESCE handles this)
+
+  if (openrouterKey === CLEAR_TOKEN_VALUE) {
+    // Explicit clear request
+    openrouterKeyForDb = "";
+  } else if (openrouterKey?.trim()) {
+    // New token value - encrypt it
+    const rawKey = openrouterKey.trim();
+    openrouterKeyForDb = encryptionKey
+      ? await encryptToken(rawKey, encryptionKey)
+      : rawKey;
+  }
+
+  if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
     warnings.push(
       "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
     );
   }
 
-  return { githubTokenEncrypted, openrouterKeyEncrypted, warnings };
+  return { githubTokenForDb, openrouterKeyForDb, warnings };
 }
 
 /**
@@ -79,10 +95,10 @@ describe("Admin Page Token Encryption", () => {
         TEST_KEY,
       );
 
-      expect(result.githubTokenEncrypted).not.toBeNull();
-      expect(result.openrouterKeyEncrypted).not.toBeNull();
-      expect(isEncryptedToken(result.githubTokenEncrypted!)).toBe(true);
-      expect(isEncryptedToken(result.openrouterKeyEncrypted!)).toBe(true);
+      expect(result.githubTokenForDb).not.toBeNull();
+      expect(result.openrouterKeyForDb).not.toBeNull();
+      expect(isEncryptedToken(result.githubTokenForDb!)).toBe(true);
+      expect(isEncryptedToken(result.openrouterKeyForDb!)).toBe(true);
       expect(result.warnings).toHaveLength(0);
     });
 
@@ -93,9 +109,9 @@ describe("Admin Page Token Encryption", () => {
         TEST_KEY,
       );
 
-      expect(result.githubTokenEncrypted).not.toBeNull();
-      expect(isEncryptedToken(result.githubTokenEncrypted!)).toBe(true);
-      expect(result.openrouterKeyEncrypted).toBeNull();
+      expect(result.githubTokenForDb).not.toBeNull();
+      expect(isEncryptedToken(result.githubTokenForDb!)).toBe(true);
+      expect(result.openrouterKeyForDb).toBeNull();
       expect(result.warnings).toHaveLength(0);
     });
 
@@ -106,9 +122,9 @@ describe("Admin Page Token Encryption", () => {
         TEST_KEY,
       );
 
-      expect(result.githubTokenEncrypted).toBeNull();
-      expect(result.openrouterKeyEncrypted).not.toBeNull();
-      expect(isEncryptedToken(result.openrouterKeyEncrypted!)).toBe(true);
+      expect(result.githubTokenForDb).toBeNull();
+      expect(result.openrouterKeyForDb).not.toBeNull();
+      expect(isEncryptedToken(result.openrouterKeyForDb!)).toBe(true);
       expect(result.warnings).toHaveLength(0);
     });
 
@@ -123,10 +139,10 @@ describe("Admin Page Token Encryption", () => {
       );
 
       // Tokens stored as plaintext
-      expect(result.githubTokenEncrypted).toBe(githubToken);
-      expect(result.openrouterKeyEncrypted).toBe(openrouterKey);
-      expect(isEncryptedToken(result.githubTokenEncrypted!)).toBe(false);
-      expect(isEncryptedToken(result.openrouterKeyEncrypted!)).toBe(false);
+      expect(result.githubTokenForDb).toBe(githubToken);
+      expect(result.openrouterKeyForDb).toBe(openrouterKey);
+      expect(isEncryptedToken(result.githubTokenForDb!)).toBe(false);
+      expect(isEncryptedToken(result.openrouterKeyForDb!)).toBe(false);
 
       // Warning should be generated
       expect(result.warnings).toHaveLength(1);
@@ -136,8 +152,8 @@ describe("Admin Page Token Encryption", () => {
     it("should not warn when no tokens are provided", async () => {
       const result = await processAdminFormTokens(null, null, undefined);
 
-      expect(result.githubTokenEncrypted).toBeNull();
-      expect(result.openrouterKeyEncrypted).toBeNull();
+      expect(result.githubTokenForDb).toBeNull();
+      expect(result.openrouterKeyForDb).toBeNull();
       expect(result.warnings).toHaveLength(0);
     });
 
@@ -148,19 +164,19 @@ describe("Admin Page Token Encryption", () => {
         TEST_KEY,
       );
 
-      expect(result.githubTokenEncrypted).not.toBeNull();
-      expect(result.openrouterKeyEncrypted).not.toBeNull();
+      expect(result.githubTokenForDb).not.toBeNull();
+      expect(result.openrouterKeyForDb).not.toBeNull();
 
       // Both should be encrypted (trimmed values are non-empty)
-      expect(isEncryptedToken(result.githubTokenEncrypted!)).toBe(true);
-      expect(isEncryptedToken(result.openrouterKeyEncrypted!)).toBe(true);
+      expect(isEncryptedToken(result.githubTokenForDb!)).toBe(true);
+      expect(isEncryptedToken(result.openrouterKeyForDb!)).toBe(true);
     });
 
     it("should treat whitespace-only tokens as null", async () => {
       const result = await processAdminFormTokens("   ", "   ", TEST_KEY);
 
-      expect(result.githubTokenEncrypted).toBeNull();
-      expect(result.openrouterKeyEncrypted).toBeNull();
+      expect(result.githubTokenForDb).toBeNull();
+      expect(result.openrouterKeyForDb).toBeNull();
     });
 
     it("should produce unique ciphertext for same token (random IV)", async () => {
@@ -170,9 +186,42 @@ describe("Admin Page Token Encryption", () => {
       const result2 = await processAdminFormTokens(token, null, TEST_KEY);
 
       // Same token should produce different encrypted output
-      expect(result1.githubTokenEncrypted).not.toBe(
-        result2.githubTokenEncrypted,
+      expect(result1.githubTokenForDb).not.toBe(result2.githubTokenForDb);
+    });
+
+    it("should return empty string for CLEAR_TOKEN_VALUE (explicit clear)", async () => {
+      const result = await processAdminFormTokens(
+        CLEAR_TOKEN_VALUE,
+        CLEAR_TOKEN_VALUE,
+        TEST_KEY,
       );
+
+      // Empty string triggers CASE NULL in SQL
+      expect(result.githubTokenForDb).toBe("");
+      expect(result.openrouterKeyForDb).toBe("");
+      expect(result.warnings).toHaveLength(0);
+    });
+
+    it("should clear only GitHub token when OpenRouter is preserved", async () => {
+      const result = await processAdminFormTokens(
+        CLEAR_TOKEN_VALUE,
+        null, // preserve existing
+        TEST_KEY,
+      );
+
+      expect(result.githubTokenForDb).toBe(""); // clear
+      expect(result.openrouterKeyForDb).toBeNull(); // preserve
+    });
+
+    it("should clear only OpenRouter when GitHub is set new", async () => {
+      const result = await processAdminFormTokens(
+        "ghp_new_token",
+        CLEAR_TOKEN_VALUE,
+        TEST_KEY,
+      );
+
+      expect(isEncryptedToken(result.githubTokenForDb!)).toBe(true); // new encrypted
+      expect(result.openrouterKeyForDb).toBe(""); // clear
     });
   });
 
@@ -250,13 +299,13 @@ describe("Admin Page Token Encryption", () => {
       );
 
       expect(saveResult.warnings).toHaveLength(0);
-      expect(isEncryptedToken(saveResult.githubTokenEncrypted!)).toBe(true);
-      expect(isEncryptedToken(saveResult.openrouterKeyEncrypted!)).toBe(true);
+      expect(isEncryptedToken(saveResult.githubTokenForDb!)).toBe(true);
+      expect(isEncryptedToken(saveResult.openrouterKeyForDb!)).toBe(true);
 
       // Step 2: Simulate DB storage and retrieval
       const mockDbRow = {
-        github_token_encrypted: saveResult.githubTokenEncrypted,
-        openrouter_key_encrypted: saveResult.openrouterKeyEncrypted,
+        github_token_encrypted: saveResult.githubTokenForDb,
+        openrouter_key_encrypted: saveResult.openrouterKeyForDb,
       };
 
       // Step 3: Admin loads page - should see tokens are configured
@@ -277,19 +326,67 @@ describe("Admin Page Token Encryption", () => {
       const saveResult = await processAdminFormTokens(null, null, TEST_KEY);
 
       // New values are null (will trigger COALESCE in SQL to preserve existing)
-      expect(saveResult.githubTokenEncrypted).toBeNull();
-      expect(saveResult.openrouterKeyEncrypted).toBeNull();
+      expect(saveResult.githubTokenForDb).toBeNull();
+      expect(saveResult.openrouterKeyForDb).toBeNull();
 
       // After SQL COALESCE, existing token preserved
       const mockDbRow = {
         github_token_encrypted:
-          saveResult.githubTokenEncrypted ?? existingEncrypted,
-        openrouter_key_encrypted: saveResult.openrouterKeyEncrypted,
+          saveResult.githubTokenForDb ?? existingEncrypted,
+        openrouter_key_encrypted: saveResult.openrouterKeyForDb,
       };
 
       const loadResult = transformConfigForResponse(mockDbRow);
       expect(loadResult.hasGithubToken).toBe(true);
       expect(loadResult.hasOpenrouterKey).toBe(false);
+    });
+
+    it("should clear tokens via CLEAR_TOKEN_VALUE and show as not configured", async () => {
+      // Step 1: Existing tokens in DB
+      const existingGithub = await encryptToken("ghp_existing", TEST_KEY);
+      const existingOpenrouter = await encryptToken("sk-or-existing", TEST_KEY);
+
+      // Verify they exist initially
+      const initialLoad = transformConfigForResponse({
+        github_token_encrypted: existingGithub,
+        openrouter_key_encrypted: existingOpenrouter,
+      });
+      expect(initialLoad.hasGithubToken).toBe(true);
+      expect(initialLoad.hasOpenrouterKey).toBe(true);
+
+      // Step 2: Admin explicitly clears tokens via form
+      const clearResult = await processAdminFormTokens(
+        CLEAR_TOKEN_VALUE,
+        CLEAR_TOKEN_VALUE,
+        TEST_KEY,
+      );
+
+      // Empty strings trigger CASE NULL in SQL
+      expect(clearResult.githubTokenForDb).toBe("");
+      expect(clearResult.openrouterKeyForDb).toBe("");
+
+      // Step 3: Simulate SQL CASE expression behavior
+      // CASE WHEN '' THEN NULL ELSE COALESCE(...) END
+      const simulateCaseNull = (
+        newVal: string | null,
+        existing: string | null,
+      ) => (newVal === "" ? null : (newVal ?? existing));
+
+      const afterClearDb = {
+        github_token_encrypted: simulateCaseNull(
+          clearResult.githubTokenForDb,
+          existingGithub,
+        ),
+        openrouter_key_encrypted: simulateCaseNull(
+          clearResult.openrouterKeyForDb,
+          existingOpenrouter,
+        ),
+      };
+
+      // Step 4: Load shows tokens are gone
+      const afterClearLoad = transformConfigForResponse(afterClearDb);
+      expect(afterClearLoad.hasGithubToken).toBe(false);
+      expect(afterClearLoad.hasOpenrouterKey).toBe(false);
     });
   });
 });
