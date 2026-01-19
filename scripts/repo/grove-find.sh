@@ -1023,9 +1023,9 @@ gfpickaxe() {
     echo -e "${CYAN}🔍 Finding commits that added/removed: ${search}${NC}\n"
 
     if [ -n "$path" ]; then
-        git -C "$GROVE_ROOT" log -S "$search" --oneline --all -- "$path" 2>/dev/null | head -30
+        git -C "$GROVE_ROOT" log -S "$search" --oneline --all -- "$path" 2>/dev/null | /usr/bin/head -30
     else
-        git -C "$GROVE_ROOT" log -S "$search" --oneline --all 2>/dev/null | head -30
+        git -C "$GROVE_ROOT" log -S "$search" --oneline --all 2>/dev/null | /usr/bin/head -30
     fi
 
     echo -e "\n${YELLOW}Tip: Use 'git show <hash>' to see the full commit${NC}"
