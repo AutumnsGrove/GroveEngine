@@ -19,10 +19,11 @@
 	// Simulated typing animation state
 	let cursorVisible = $state(true);
 
+	// Standard terminal cursor blink rate (500ms on/off cycle)
 	$effect(() => {
 		const interval = setInterval(() => {
 			cursorVisible = !cursorVisible;
-		}, 530);
+		}, 500);
 		return () => clearInterval(interval);
 	});
 </script>
@@ -50,7 +51,7 @@
 			<!-- ASCII Art Header -->
 			<pre class="ascii-header" aria-label="Forage ASCII Art Logo">
 ┌─────────────────────────────────────────────┐
-│  🌲 <span class="highlight">Forage</span> - Domain Discovery              │
+│  <span class="tree">*</span> <span class="highlight">Forage</span> - Domain Discovery              │
 │     Find your perfect corner of the web     │
 └─────────────────────────────────────────────┘</pre>
 
@@ -133,6 +134,11 @@
 	:global(.terminal-card) {
 		max-width: 650px;
 		width: 100%;
+		/*
+		 * Terminal font stack: Falls back gracefully to system monospace fonts.
+		 * JetBrains Mono/Fira Code are not bundled - users see them if installed locally,
+		 * otherwise gets SF Mono (macOS), Consolas (Windows), or system monospace.
+		 */
 		font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
 		background: rgba(13, 17, 23, 0.95) !important;
 		border: 1px solid rgba(48, 54, 61, 0.8) !important;
@@ -199,6 +205,10 @@
 	.ascii-header .highlight {
 		color: #7ee787;
 		font-weight: bold;
+	}
+
+	.ascii-header .tree {
+		color: #7ee787;
 	}
 
 	.terminal-line {
@@ -334,6 +344,24 @@
 
 		.feature-line {
 			font-size: 0.8rem;
+		}
+	}
+
+	/* Accessibility: Respect reduced motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.blink {
+			animation: none;
+			opacity: 1;
+		}
+
+		.cursor {
+			/* Keep cursor visible but static */
+			opacity: 1;
+			transition: none;
+		}
+
+		.cursor.visible {
+			opacity: 1;
 		}
 	}
 </style>

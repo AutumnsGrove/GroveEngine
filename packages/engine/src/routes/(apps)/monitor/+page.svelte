@@ -12,6 +12,7 @@
 	 * Full implementation: docs/specs/vista-spec.md
 	 */
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import { Activity, Bell, TrendingUp, HandCoins } from "lucide-svelte";
 </script>
 
 <svelte:head>
@@ -47,7 +48,9 @@
 		<!-- Feature Preview Grid -->
 		<div class="features">
 			<div class="feature">
-				<span class="feature-icon" aria-hidden="true">📊</span>
+				<span class="feature-icon" aria-hidden="true">
+					<Activity class="w-6 h-6" />
+				</span>
 				<div class="feature-text">
 					<span class="feature-title">Real-time Metrics</span>
 					<span class="feature-desc">Requests, errors, latency (p50/p95/p99)</span>
@@ -55,7 +58,9 @@
 			</div>
 
 			<div class="feature">
-				<span class="feature-icon" aria-hidden="true">🔔</span>
+				<span class="feature-icon" aria-hidden="true">
+					<Bell class="w-6 h-6" />
+				</span>
 				<div class="feature-text">
 					<span class="feature-title">Smart Alerting</span>
 					<span class="feature-desc">Email notifications when things go wrong</span>
@@ -63,7 +68,9 @@
 			</div>
 
 			<div class="feature">
-				<span class="feature-icon" aria-hidden="true">📈</span>
+				<span class="feature-icon" aria-hidden="true">
+					<TrendingUp class="w-6 h-6" />
+				</span>
 				<div class="feature-text">
 					<span class="feature-title">90-Day History</span>
 					<span class="feature-desc">GitHub-style uptime contribution grids</span>
@@ -71,7 +78,9 @@
 			</div>
 
 			<div class="feature">
-				<span class="feature-icon" aria-hidden="true">💰</span>
+				<span class="feature-icon" aria-hidden="true">
+					<HandCoins class="w-6 h-6" />
+				</span>
 				<div class="feature-text">
 					<span class="feature-title">Cost Tracking</span>
 					<span class="feature-desc">Per-resource usage and cost breakdown</span>
@@ -80,6 +89,7 @@
 		</div>
 
 		<!-- Service Preview -->
+		<!-- Infrastructure counts snapshot from 2026-01-19. Update periodically as Grove grows. -->
 		<div class="services-preview">
 			<p class="services-label">Monitoring Grove infrastructure:</p>
 			<div class="service-badges">
@@ -121,6 +131,15 @@
 </div>
 
 <style>
+	/*
+	 * CSS Custom Properties Reference:
+	 * --color-bg-primary, --color-bg-secondary: Defined in engine's global CSS (app.css)
+	 * --color-text-primary, --color-text-muted: Theme text colors from Tailwind preset
+	 * --color-accent: Grove green accent (#2c5f2d) from theme
+	 * --color-border: Border color from theme
+	 *
+	 * Fallback values ensure the page renders correctly even if loaded standalone.
+	 */
 	.vista-placeholder {
 		min-height: 100vh;
 		display: flex;
@@ -211,8 +230,10 @@
 	}
 
 	.feature-icon {
-		font-size: 1.5rem;
-		line-height: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-accent, #2c5f2d);
 	}
 
 	.feature-text {
@@ -321,5 +342,17 @@
 	.external-icon {
 		width: 1rem;
 		height: 1rem;
+	}
+
+	/* Accessibility: Respect reduced motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.link {
+			transition: none;
+		}
+
+		/*
+		 * Note: Gossamer mist animation is handled by GlassCard component,
+		 * which respects prefers-reduced-motion internally.
+		 */
 	}
 </style>
