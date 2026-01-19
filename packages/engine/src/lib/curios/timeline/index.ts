@@ -226,3 +226,9 @@ export const DEFAULT_TIMELINE_CONFIG: Omit<
   voicePreset: _DEFAULT_VOICE,
   timezone: "America/New_York",
 };
+
+/**
+ * Sentinel value for explicitly clearing a token via config update.
+ * Send this value to delete an existing token (vs sending empty/null which preserves it).
+ */
+export const CLEAR_TOKEN_VALUE = "__CLEAR__";

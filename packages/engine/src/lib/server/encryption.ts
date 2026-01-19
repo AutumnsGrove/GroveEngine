@@ -4,17 +4,23 @@
  * Provides AES-256-GCM encryption for sensitive data like API tokens.
  * Uses Web Crypto API which is available in Cloudflare Workers.
  *
- * Format: base64(iv):base64(ciphertext)
+ * Format: v1:base64(iv):base64(ciphertext)
+ * - Version: "v1" prefix for future algorithm changes
  * - IV: 12 bytes (96 bits) - recommended for GCM
  * - Key: 32 bytes (256 bits) from TOKEN_ENCRYPTION_KEY secret
+ *
+ * See docs/security/token-encryption.md for setup and key rotation.
  */
+
+// Current encryption version - increment when changing algorithm
+const ENCRYPTION_VERSION = "v1";
 
 /**
  * Encrypts a plaintext string using AES-256-GCM.
  *
  * @param plaintext - The string to encrypt
  * @param keyHex - 64-character hex string (256-bit key)
- * @returns Encrypted string in format "iv:ciphertext" (both base64)
+ * @returns Encrypted string in format "v1:iv:ciphertext" (iv and ciphertext are base64)
  */
 export async function encryptToken(
   plaintext: string,
@@ -34,29 +40,41 @@ export async function encryptToken(
     encoded,
   );
 
-  // Return as base64 iv:ciphertext
-  return `${arrayBufferToBase64(iv)}:${arrayBufferToBase64(ciphertext)}`;
+  // Return as versioned format: v1:base64(iv):base64(ciphertext)
+  return `${ENCRYPTION_VERSION}:${arrayBufferToBase64(iv)}:${arrayBufferToBase64(ciphertext)}`;
 }
 
 /**
  * Decrypts an encrypted token string.
  *
- * @param encrypted - Encrypted string in format "iv:ciphertext"
+ * @param encrypted - Encrypted string in format "v1:iv:ciphertext" or legacy "iv:ciphertext"
  * @param keyHex - 64-character hex string (256-bit key)
  * @returns Decrypted plaintext string
- * @throws If decryption fails (wrong key, tampered data, etc.)
+ * @throws If decryption fails (wrong key, tampered data, unsupported version)
  */
 export async function decryptToken(
   encrypted: string,
   keyHex: string,
 ): Promise<string> {
-  const colonIndex = encrypted.indexOf(":");
-  if (colonIndex === -1) {
-    throw new Error("Invalid encrypted format: missing separator");
-  }
+  const parts = encrypted.split(":");
 
-  const ivBase64 = encrypted.slice(0, colonIndex);
-  const ciphertextBase64 = encrypted.slice(colonIndex + 1);
+  let ivBase64: string;
+  let ciphertextBase64: string;
+
+  if (parts.length === 3 && parts[0] === ENCRYPTION_VERSION) {
+    // Versioned format: v1:iv:ciphertext
+    ivBase64 = parts[1];
+    ciphertextBase64 = parts[2];
+  } else if (parts.length === 2) {
+    // Legacy format: iv:ciphertext (for backwards compatibility)
+    ivBase64 = parts[0];
+    ciphertextBase64 = parts[1];
+  } else if (parts.length === 3 && parts[0].startsWith("v")) {
+    // Unknown version
+    throw new Error(`Unsupported encryption version: ${parts[0]}`);
+  } else {
+    throw new Error("Invalid encrypted format: expected v1:iv:ciphertext");
+  }
 
   const iv = base64ToArrayBuffer(ivBase64);
   const ciphertext = base64ToArrayBuffer(ciphertextBase64);
@@ -73,26 +91,45 @@ export async function decryptToken(
 }
 
 /**
- * Check if a string appears to be encrypted (has the iv:ciphertext format).
+ * Check if a string appears to be encrypted.
  * Used to handle migration from plaintext to encrypted tokens.
+ *
+ * Detects:
+ * - Versioned format: v1:iv:ciphertext (preferred)
+ * - Legacy format: iv:ciphertext (for backwards compatibility)
  */
 export function isEncryptedToken(value: string): boolean {
-  // Encrypted tokens have format: base64:base64
-  // Base64 IV is always 16 chars (12 bytes = 16 base64 chars)
-  const colonIndex = value.indexOf(":");
-  if (colonIndex === -1) return false;
+  const parts = value.split(":");
 
-  const ivPart = value.slice(0, colonIndex);
-  const ciphertextPart = value.slice(colonIndex + 1);
+  // Versioned format: v1:iv:ciphertext
+  if (parts.length === 3 && parts[0] === ENCRYPTION_VERSION) {
+    const ivPart = parts[1];
+    const ciphertextPart = parts[2];
+    // IV should be 16 chars (12 bytes base64), ciphertext at least 24 chars
+    return (
+      ivPart.length === 16 &&
+      ciphertextPart.length >= 24 &&
+      /^[A-Za-z0-9+/=]+$/.test(ivPart) &&
+      /^[A-Za-z0-9+/=]+$/.test(ciphertextPart)
+    );
+  }
 
-  // IV should be 16 chars, ciphertext should be at least 24 chars (16 bytes min + auth tag)
-  // Also check they look like base64
-  return (
-    ivPart.length === 16 &&
-    ciphertextPart.length >= 24 &&
-    /^[A-Za-z0-9+/=]+$/.test(ivPart) &&
-    /^[A-Za-z0-9+/=]+$/.test(ciphertextPart)
-  );
+  // Legacy format: iv:ciphertext (no version prefix)
+  if (parts.length === 2) {
+    const ivPart = parts[0];
+    const ciphertextPart = parts[1];
+    // IV should be 16 chars, ciphertext at least 24 chars
+    // Also ensure first part doesn't look like a version prefix
+    return (
+      ivPart.length === 16 &&
+      !ivPart.startsWith("v") &&
+      ciphertextPart.length >= 24 &&
+      /^[A-Za-z0-9+/=]+$/.test(ivPart) &&
+      /^[A-Za-z0-9+/=]+$/.test(ciphertextPart)
+    );
+  }
+
+  return false;
 }
 
 /**
