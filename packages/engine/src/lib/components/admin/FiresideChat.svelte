@@ -59,6 +59,16 @@
   /** Average reading speed in words per minute for reading time estimates */
   const WORDS_PER_MINUTE = 200;
 
+  /** Calculate word count for content */
+  function getWordCount(content: string): number {
+    return content.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  /** Calculate reading time in minutes */
+  function getReadingTime(content: string): number {
+    return Math.max(1, Math.ceil(getWordCount(content) / WORDS_PER_MINUTE));
+  }
+
   // ============================================================================
   // API Calls
   // ============================================================================
@@ -271,11 +281,9 @@
         <h1 class="draft-title">{draft.title}</h1>
         <div class="draft-body">{draft.content}</div>
         <div class="draft-meta">
-          {@const wordCount = draft.content.trim().split(/\s+/).filter(Boolean).length}
-          {@const readingTime = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE))}
-          <span>{wordCount} words</span>
+          <span>{getWordCount(draft.content)} words</span>
           <span class="meta-divider">·</span>
-          <span>~{readingTime} min read</span>
+          <span>~{getReadingTime(draft.content)} min read</span>
         </div>
         {#if draft.warning}
           <p class="draft-warning">{draft.warning}</p>

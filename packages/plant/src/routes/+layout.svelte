@@ -19,18 +19,20 @@
 		const path = page.url.pathname;
 		if (path === '/') return 1;
 		if (path === '/profile') return 2;
-		if (path === '/plans') return 3;
-		if (path === '/checkout') return 4;
-		if (path === '/success' || path === '/tour') return 5;
+		if (path === '/verify-email') return 3;
+		if (path === '/plans') return 4;
+		if (path === '/checkout') return 5;
+		if (path === '/success' || path === '/tour') return 6;
 		return 1;
 	})());
 
 	const steps = [
 		{ num: 1, label: 'Sign In' },
 		{ num: 2, label: 'Profile' },
-		{ num: 3, label: 'Plan' },
-		{ num: 4, label: 'Payment' },
-		{ num: 5, label: 'Done' }
+		{ num: 3, label: 'Verify' },
+		{ num: 4, label: 'Plan' },
+		{ num: 5, label: 'Payment' },
+		{ num: 6, label: 'Done' }
 	];
 
 	let { children } = $props();
