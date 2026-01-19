@@ -1,5 +1,11 @@
 <script>
-	let { headers = [] } = $props();
+	/**
+	 * @typedef {import('svelte').Component} SvelteComponent
+	 * @typedef {{ id: string; text: string; level: number; icon?: SvelteComponent }} Header
+	 */
+
+	/** @type {{ headers?: Header[], title?: string }} */
+	let { headers = [], title = 'Table of Contents' } = $props();
 
 	let isOpen = $state(false);
 	let menuRef = $state();
@@ -106,19 +112,24 @@
 		<!-- Floating Menu -->
 		{#if isOpen}
 			<div class="toc-menu" bind:this={menuRef}>
-				<h3 class="toc-title">Table of Contents</h3>
+				<h3 class="toc-title">{title}</h3>
 				<ul class="toc-list">
 					{#each headers as header (header.id)}
+						{@const IconComponent = header.icon}
 						<li
 							class="toc-item level-{header.level}"
 							class:active={activeId === header.id}
+							class:has-icon={!!header.icon}
 						>
 							<button
 								type="button"
 								onclick={() => scrollToHeader(header.id)}
 								class="toc-link"
 							>
-								{header.text}
+								{#if IconComponent}
+									<IconComponent class="toc-icon" />
+								{/if}
+								<span>{header.text}</span>
 							</button>
 						</li>
 					{/each}
@@ -219,7 +230,9 @@
 		padding: 0;
 	}
 	.toc-link {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		width: 100%;
 		text-align: left;
 		padding: 0.5rem 0;
@@ -231,6 +244,18 @@
 		font-size: 0.875rem;
 		font-family: inherit;
 		line-height: 1.4;
+	}
+	/* Icon styling */
+	.toc-link :global(.toc-icon) {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+		opacity: 0.7;
+		transition: opacity 0.2s ease;
+	}
+	.toc-item.active .toc-link :global(.toc-icon),
+	.toc-link:hover :global(.toc-icon) {
+		opacity: 1;
 	}
 	:global(.dark) .toc-link {
 		color: rgba(255, 255, 255, 0.7);
