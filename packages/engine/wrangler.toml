@@ -49,6 +49,15 @@ database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 # =============================================================================
+# Workers AI - For Petal image moderation (Llama 4 Scout vision)
+# =============================================================================
+# Used by Petal content moderation system for image classification.
+# Free tier: 10,000 neurons/day. Paid: $0.27/M input, $0.85/M output.
+# @see docs/specs/petal-spec.md
+[ai]
+binding = "AI"
+
+# =============================================================================
 # GroveAuth Service Binding (Heartwood - fast session validation)
 # =============================================================================
 [[services]]

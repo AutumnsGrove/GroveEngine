@@ -7,7 +7,7 @@ import {
   buildRateLimitKey,
   rateLimitHeaders,
 } from "$lib/server/rate-limits/middleware.js";
-import { validateEnv } from "$lib/server/env-validation.js";
+import { validateEnv, hasAnyEnv } from "$lib/server/env-validation.js";
 import {
   ALLOWED_IMAGE_TYPES,
   ALLOWED_TYPES_DISPLAY,
@@ -17,6 +17,7 @@ import {
   isAllowedImageType,
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
+import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -237,6 +238,61 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate image dimensions to prevent DoS attacks
     await validateImageDimensions(file, buffer);
+
+    // ========================================================================
+    // Petal Content Moderation (Layer 1-3)
+    // ========================================================================
+    // Run Petal scan before storing in R2. This checks:
+    // - Layer 1: CSAM detection (MANDATORY)
+    // - Layer 2: Content classification (nudity, violence, etc.)
+    // - Layer 3: Sanity checks (for try-on context)
+    //
+    // If AI binding is not available, Petal will attempt external fallback
+    // (Together.ai) if TOGETHER_API_KEY is configured.
+    const hasPetalProvider =
+      platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
+
+    if (hasPetalProvider) {
+      const petalEnv: PetalEnv = {
+        AI: platform!.env!.AI,
+        DB: db,
+        CACHE_KV: kv,
+        TOGETHER_API_KEY: platform!.env!.TOGETHER_API_KEY as string | undefined,
+      };
+
+      // Determine context from form data (default: general upload)
+      const uploadContext = (formData.get("context") as string) || "general";
+      const petalContext = ["tryon", "profile", "blog"].includes(uploadContext)
+        ? (uploadContext as "tryon" | "profile" | "blog")
+        : "general";
+
+      const petalResult = await scanImage(
+        {
+          imageData: buffer,
+          mimeType: file.type,
+          context: petalContext,
+          userId: locals.user.id,
+          tenantId,
+          hash: hash || undefined,
+        },
+        petalEnv,
+      );
+
+      if (!petalResult.allowed) {
+        // Return user-friendly rejection
+        // IMPORTANT: Never reveal CSAM detection reason
+        return json(
+          {
+            error: true,
+            code: "content_rejected",
+            message: petalResult.message,
+            // Include processing time for debugging (not the reason)
+            processingTimeMs: petalResult.processingTimeMs,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     // Check for duplicates if hash provided
     if (hash && db) {
