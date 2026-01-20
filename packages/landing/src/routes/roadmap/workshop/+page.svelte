@@ -160,16 +160,6 @@
 					spec: '/knowledge/specs/amber-spec'
 				},
 				{
-					name: 'Pantry',
-					tagline: 'Shop & Provisioning',
-					description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
-					status: 'building',
-					icon: 'store',
-					domain: 'pantry.grove.place',
-					integration: 'Shop and provisioning for Wanderers',
-					spec: '/knowledge/specs/pantry-spec'
-				},
-				{
 					name: 'Centennial',
 					tagline: 'Domain Preservation',
 					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
@@ -180,6 +170,16 @@
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
+				},
+				{
+					name: 'Pantry',
+					tagline: 'Shop & Provisioning',
+					description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
+					status: 'planned',
+					icon: 'store',
+					domain: 'pantry.grove.place',
+					integration: 'Shop and provisioning for Wanderers',
+					spec: '/knowledge/specs/pantry-spec'
 				},
 			]
 		},
@@ -204,10 +204,25 @@
 					]
 				},
 				{
+					name: 'Curios',
+					tagline: 'Cabinet of Wonders',
+					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
+					status: 'building',
+					icon: 'amphora',
+					domain: 'curios.grove.place',
+					integration: 'Visitor experience features for all Grove blogs',
+					spec: '/knowledge/specs/curios-spec',
+					subComponents: [
+						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
+						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
+						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
+					]
+				},
+				{
 					name: 'Terrarium',
 					tagline: 'Creative Canvas',
 					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
-					status: 'building',
+					status: 'planned',
 					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec',
@@ -221,7 +236,7 @@
 					name: 'Weave',
 					tagline: 'Visual Composition Studio',
 					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
-					status: 'building',
+					status: 'planned',
 					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
@@ -229,21 +244,6 @@
 						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
 						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
 						{ name: 'Thread', icon: 'route', description: 'Connections' }
-					]
-				},
-				{
-					name: 'Curios',
-					tagline: 'Cabinet of Wonders',
-					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
-					status: 'building',
-					icon: 'amphora',
-					domain: 'curios.grove.place',
-					integration: 'Visitor experience features for all Grove blogs',
-					spec: '/knowledge/specs/curios-spec',
-					subComponents: [
-						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
-						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
-						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
 					]
 				},
 			]
@@ -265,7 +265,7 @@
 					name: 'Porch',
 					tagline: 'Front Porch Conversations',
 					description: 'A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.',
-					status: 'building',
+					status: 'planned',
 					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
 					integration: 'Support and conversation for all Wanderers',
@@ -275,7 +275,7 @@
 					name: 'Rings',
 					tagline: 'Private Analytics',
 					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
-					status: 'building',
+					status: 'planned',
 					icon: 'barchart',
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
 					spec: '/knowledge/specs/rings-spec',
@@ -349,7 +349,7 @@
 					name: 'Reeds',
 					tagline: 'Comments System',
 					description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
-					status: 'building',
+					status: 'planned',
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
 					spec: '/knowledge/specs/reeds-spec',
@@ -362,7 +362,7 @@
 					name: 'Forests',
 					tagline: 'Community Groves',
 					description: 'Many trees, one grove. Forests are themed community aggregators—places where like-minded folks gather. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Take a stroll and discover kindred spirits among the trees.',
-					status: 'building',
+					status: 'planned',
 					icon: 'trees',
 					domain: '{forest}.grove.place',
 					integration: 'Community discovery for all Wanderers',
@@ -377,7 +377,7 @@
 					name: 'Wander',
 					tagline: 'Immersive Discovery',
 					description: 'Step into the forest. A first-person walking experience through the Grove where other people\'s groves float among the trees as living terrariums. Complete with time of day, seasons, weather, and an immersive soundscape. Discovery through presence, not browsing.',
-					status: 'building',
+					status: 'planned',
 					icon: 'earth',
 					domain: 'wander.grove.place',
 					integration: 'Immersive exploration mode for Forests',
@@ -455,20 +455,6 @@
 					]
 				},
 				{
-					name: 'Nook',
-					tagline: 'Private Video Sharing',
-					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
-					status: 'building',
-					icon: 'projector',
-					domain: 'nook.grove.place',
-					integration: 'Intimate video sharing for close connections',
-					github: 'https://github.com/AutumnsGrove/Nook',
-					spec: '/knowledge/specs/nook-spec',
-					subComponents: [
-						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
-					]
-				},
-				{
 					name: 'Gossamer',
 					tagline: 'ASCII Visual Effects',
 					description: 'Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.',
@@ -481,6 +467,20 @@
 						{ name: 'Clouds', icon: 'cloud', description: 'Ambient ASCII backgrounds' },
 						{ name: 'Patterns', icon: 'waves', description: 'Pattern generators' },
 						{ name: 'Canvas', icon: 'frame', description: '2D rendering' }
+					]
+				},
+				{
+					name: 'Nook',
+					tagline: 'Private Video Sharing',
+					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
+					status: 'planned',
+					icon: 'projector',
+					domain: 'nook.grove.place',
+					integration: 'Intimate video sharing for close connections',
+					github: 'https://github.com/AutumnsGrove/Nook',
+					spec: '/knowledge/specs/nook-spec',
+					subComponents: [
+						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
 			]
@@ -539,7 +539,7 @@
 					name: 'Vista',
 					tagline: 'Infrastructure Observability',
 					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',
-					status: 'building',
+					status: 'planned',
 					icon: 'binoculars',
 					domain: 'vista.grove.place',
 					integration: 'Internal infrastructure monitoring for Grove operators',
