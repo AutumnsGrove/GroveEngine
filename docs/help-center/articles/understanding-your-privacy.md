@@ -5,7 +5,7 @@ category: data-and-privacy
 order: 1
 keywords: [privacy, data, tracking, analytics, gdpr, security, personal information]
 related: [how-grove-protects-your-content, exporting-your-content, account-deletion, what-is-grove]
-last_verified: 2026-01-16
+last_verified: 2026-01-20
 verified_by: claude
 ---
 
@@ -73,13 +73,22 @@ You can see trends without surveilling your readers.
 
 ## Content moderation and AI
 
-When we review content for safety (like checking for harmful material), we use AI tools with **zero data retention agreements**. This means:
+Grove uses two automated systems to keep the community safe:
+
+**Thorn** reviews your blog posts and written content against our community guidelines. **Petal** reviews uploaded images for prohibited content.
+
+Both systems use AI tools with **zero data retention agreements**. This means:
 
 - Your content is processed but never stored by the AI provider
 - It's not used to train AI models
 - It's analyzed and forgotten
+- Only the moderation decision is kept (pass, flag, or block), not your content
 
 We chose providers specifically because they offer these guarantees.
+
+**About image moderation:** Petal includes mandatory CSAM (child sexual abuse material) detection as required by federal law. If illegal content is detected, we're legally required to report it to authorities and retain the image hash (a mathematical fingerprint). This is the only exception to our zero-retention policy, and it's a legal requirement for all platforms.
+
+For the full technical details, see [What is ZDR?](/knowledge/help/what-is-zdr)
 
 ## Your writing is invisible to AI crawlers
 
@@ -103,7 +112,7 @@ This matters more than most people realize. As the web gets scraped into dataset
 
 **Want the full technical details?** See [How Grove Protects Your Content](/knowledge/help/how-grove-protects-your-content) for a deep dive into our seven-layer protection system, including verification steps for technically-minded users.
 
-*We use AI carefully and transparently for content moderation. We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
+*We use AI carefully and transparently for content moderation (Thorn for text, Petal for images). We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
 
 ## What we'll never do
 

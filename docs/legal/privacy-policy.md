@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 16, 2026
+**Last Updated:** January 20, 2026
 
 *Note: Privacy controls feature (Evergreen tier) is planned for future release. This policy reflects both current and planned functionality.*
 
@@ -84,11 +84,18 @@ Grove actively blocks all external AI crawlers, machine learning scrapers, and A
 
 **A note on limitations:** Some companies (such as Perplexity) have been documented circumventing crawler blocks and ignoring robots.txt directives entirely. This is a known limitation of all web-based crawler protection, not specific to Grove's implementation. No website can prevent a determined bad actor from scraping content if they choose to ignore industry standards. We implement every technical protection available through Cloudflare and commit to staying current with emerging threats as new circumvention methods are identified.
 
-**Our internal AI use is different:** We do use AI for content moderation (see Section 3.2), but this is fundamentally different from allowing external AI to harvest your content. Our moderation AI:
-- Uses providers with Zero Data Retention
-- Never stores your content
-- Never trains on your writing
-- Processes content only to ensure community safety
+**Our internal AI use is different:** We do use AI for content moderation (see Section 3.2), but this is fundamentally different from allowing external AI to harvest your content. Grove operates two content moderation systems:
+
+- **Thorn** (text content moderation) — Reviews blog posts and written content against our Acceptable Use Policy
+- **Petal** (image content moderation) — Reviews uploaded images for prohibited content, including legally mandated CSAM (child sexual abuse material) detection
+
+Both systems:
+- Use providers with Zero Data Retention (ZDR)
+- Never store your content after processing
+- Never train on your writing or images
+- Process content only to ensure community safety
+
+**One exception:** If Petal's CSAM detection identifies a match, we are legally required to retain the image hash (not the image itself) and report it to the National Center for Missing & Exploited Children (NCMEC) within 24 hours. This is a federal legal requirement under 18 U.S.C. § 2258A that applies to all online platforms. See Section 3.2 for details.
 
 ---
 
@@ -132,21 +139,50 @@ We share limited data with trusted service providers who help us operate Grove:
 | **LemonSqueezy** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
-| **Fireworks AI / Cerebras / Groq** | Content moderation | Post content (zero data retention) |
+| **Fireworks AI / Cerebras / Groq** | Text content moderation (Thorn) | Post content (zero data retention) |
+| **Together.ai / FAL.ai** | Image content moderation (Petal) | Uploaded images (zero data retention) |
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
 
 **Changes to Providers:** If we add new categories of service providers that process your data, we will notify you via email before the change takes effect.
 
 **Content Moderation Privacy:**
-Post content is processed through privacy-respecting LLM inference providers with **Zero Data Retention (ZDR)** enabled. This means:
-- Your content is never stored by the inference provider
-- Your content is never used to train AI models
-- Content is encrypted in transit (TLS 1.2+)
-- Only the moderation decision is retained (not your content)
+
+Grove operates two automated content moderation systems to enforce our Acceptable Use Policy:
+
+**Thorn (Text Content Moderation)**
+- Reviews blog posts and written content
+- Processed through privacy-respecting LLM inference providers
+- **Zero Data Retention (ZDR)** enabled—your text is never stored by the provider
+- Your writing is never used to train AI models
+- Only the moderation decision is retained (pass, flag, or escalate), not your content
 - No human reviews your content unless the automated system cannot reach a confident decision
 
-For full technical details, see our Content Moderation Spec in our documentation.
+**Petal (Image Content Moderation)**
+- Reviews uploaded images (user photos, blog images)
+- Processed through privacy-respecting vision AI providers
+- **Zero Data Retention (ZDR)** enabled—your images are deleted immediately after processing
+- Your images are never used to train AI models
+- Images are encrypted in transit (TLS 1.2+)
+- Only the moderation decision is retained, not the image itself
+
+**CSAM Detection and Legal Reporting (Petal Layer 1)**
+
+Federal law requires all online platforms to detect and report child sexual abuse material (CSAM). Petal includes mandatory CSAM detection as its first processing layer. This detection:
+- Uses industry-standard hash-based detection (PhotoDNA or equivalent)
+- Runs automatically on all uploaded images with no opt-out
+- Does not involve human review of images
+
+**If a CSAM match is detected:**
+- The upload is immediately blocked
+- We are legally required to report the match to the National Center for Missing & Exploited Children (NCMEC) within 24 hours
+- We retain the image hash (a mathematical fingerprint, not the image) and metadata as required by law
+- This is the **one exception** to our Zero Data Retention policy
+- Failure to report is a federal crime under 18 U.S.C. § 2258A
+
+This legal requirement exists to protect children and applies to all platforms that allow image uploads. We take this obligation seriously.
+
+For full technical details, see our Thorn and Petal specifications in our documentation.
 
 ### 3.3 Legal Requirements
 
@@ -185,7 +221,9 @@ When you delete your account:
 | Sessions | 7 days (or until logout) |
 | IP addresses | Exactly 1 minute (rate limiting only, then discarded) |
 | Rate limiting data | 1 minute |
-| Content moderation queue | Immediate deletion after review |
+| Text moderation (Thorn) | Immediate deletion after review; decision retained 90 days |
+| Image moderation (Petal) | Immediate deletion after review; decision retained 90 days |
+| CSAM hash (if match detected) | Permanent (legal requirement for NCMEC reporting) |
 | Email signup list | Until you unsubscribe |
 | Payment records | As required by law (typically 7 years) |
 
@@ -317,6 +355,9 @@ We will respond to privacy-related inquiries within 30 days.
 | Is my data encrypted? | **Yes, in transit and at rest.** |
 | Can AI crawlers access my content? | **No. We block all AI training bots and scrapers.** |
 | Is my writing used to train AI? | **Never. Not by us, not by external AI companies.** |
+| How is my content moderated? | **Automated systems (Thorn for text, Petal for images) with zero data retention.** |
+| Are my images stored? | **No. Images are deleted immediately after moderation review.** |
+| What about CSAM detection? | **Required by law. Hash retained only if match found; reported to NCMEC.** |
 
 ---
 

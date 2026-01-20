@@ -185,16 +185,48 @@
 
 ## 🌸 Petal — Image Content Moderation — IN PROGRESS
 
-> **Spec:** `docs/specs/petal-spec.md` (in progress)
-> **Builds on:** Thorn (text content moderation)
-> **Status:** Spec being written
+> **Spec:** `docs/specs/petal-spec.md`
+> **Builds on:** Thorn (text moderation), Songbird pattern
+> **Cost:** ~$0.0025/image moderation overhead
+> **Branch:** `feature/petal-image-moderation-spec`
 
-Image uploads need moderation before v1 launch. Petal extends Grove's content moderation infrastructure (Thorn handles text) to cover images.
+Four-layer image moderation system: CSAM detection → Content classification → Sanity check → Output verification. Privacy-first with Zero Data Retention (ZDR).
 
-- [ ] Complete Petal spec
-- [ ] Implement image scanning integration
-- [ ] Wire into image upload pipeline
-- [ ] Add admin review UI for flagged content
+### Spec & Planning
+- [x] Complete Petal spec ✅ **DONE Jan 20, 2026**
+- [ ] Review spec with legal (NCMEC reporting requirements)
+
+### Infrastructure Setup
+- [ ] Verify CSAM scanning with primary provider (Together.ai)
+- [ ] Configure ZDR settings with all providers
+- [ ] Create isolated Cloudflare Worker for Petal (`petal.grove.place` or internal)
+- [ ] Set up secure API key storage in Cloudflare secrets
+
+### Layer Implementation
+- [ ] **Layer 1: CSAM Detection** — PhotoDNA hash-based, NCMEC auto-report
+- [ ] **Layer 2: Content Classification** — Vision model (LlamaGuard), category detection
+- [ ] **Layer 3: Sanity Check** — Face detection, quality assessment, screenshot/meme detection
+- [ ] **Layer 4: Output Verification** — Re-classify AI-generated images, retry logic
+
+### Integration (You're here! 🌿)
+- [ ] Wire into Workshop image upload flow
+- [ ] Integrate with Scout Custom Model (user photo uploads)
+- [ ] Integrate with Model Farm generation pipeline
+- [ ] Build rate limiting system (5/session, 20/day, 3 blocks = review)
+- [ ] Implement abuse detection patterns
+
+### User Communication
+- [ ] Design rejection UI components (friendly, not scary)
+- [ ] Write all user-facing rejection messages
+- [ ] Create consent flow dialog (Custom Model enable)
+- [ ] Build session end confirmation (deletion confirmation)
+
+### Operations & Monitoring
+- [ ] Set up security logging (hash only, never images)
+- [ ] Create Petal monitoring dashboard
+- [ ] Write integration tests with mock images
+- [ ] Document NCMEC reporting procedure (internal ops doc)
+- [ ] Set up alerting for high block rates
 
 ---
 
@@ -585,7 +617,7 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-20 (Jan 18-20 sprint — PricingGraft migration complete, PR #408 merged)*
+*Last updated: 2026-01-20 (Petal spec complete, detailed implementation checklist added)*
 
 ---
 

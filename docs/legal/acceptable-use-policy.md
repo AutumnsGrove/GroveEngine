@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 11, 2026
+**Last Updated:** January 20, 2026
 
 ---
 
@@ -23,7 +23,7 @@ Grove is a space for authentic self-expression. We ask that you:
 The following content is **not allowed** on Grove under any circumstances:
 
 ### 1.1 Illegal Content
-- Child sexual abuse material (CSAM)
+- Child sexual abuse material (CSAM) — **automatically detected and reported to authorities** (see Section 5.1)
 - Content that promotes terrorism or violent extremism
 - Content that facilitates illegal activities
 - Content that violates applicable laws
@@ -187,8 +187,34 @@ We respond to valid copyright complaints in accordance with the Digital Millenni
 ### 5.1 How We Enforce These Rules
 
 **Detection:**
+
+Grove uses two automated content moderation systems to detect policy violations:
+
+**Thorn (Text Content Moderation)**
+- Automatically reviews blog posts and written content
+- Uses privacy-respecting LLM inference with Zero Data Retention (ZDR)
+- Your content is processed, a decision is made, and the content is deleted
+- Only the moderation decision is retained, not your writing
+- No human reads your content unless the automated system cannot reach a confident decision
+
+**Petal (Image Content Moderation)**
+- Automatically reviews all uploaded images
+- Uses privacy-respecting vision AI with Zero Data Retention (ZDR)
+- Your images are processed, a decision is made, and the images are deleted
+- Only the moderation decision is retained, not your images
+
+**CSAM Detection (Petal Layer 1)**
+- All uploaded images are automatically scanned for child sexual abuse material (CSAM)
+- Uses industry-standard hash-based detection (PhotoDNA or equivalent)
+- This detection is **mandatory and cannot be disabled**
+- If CSAM is detected:
+  - The upload is immediately blocked
+  - The image hash and metadata are reported to the National Center for Missing & Exploited Children (NCMEC) within 24 hours as required by federal law (18 U.S.C. § 2258A)
+  - The account is flagged for review
+  - We do not notify users why their upload was blocked in CSAM cases
+
+**Additional Detection:**
 - User reports
-- Automated review using privacy-respecting LLM inference
 - Manual review only for edge cases where automated systems cannot reach confident decisions
 
 **Actions We May Take:**
