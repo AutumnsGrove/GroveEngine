@@ -119,6 +119,26 @@ Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, c
 
 *What curiosities will they find?*
 
+### Grafts
+**Feature Customization** · *Operator-configured*
+
+A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
+
+Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
+
+**The Graft Lexicon:**
+- **Graft** — Enable a feature for a tenant
+- **Prune** — Disable a feature
+- **Propagate** — Roll out to a percentage of the grove
+- **Cultivate** — Roll out to everyone
+- **Cultivars** — A/B test variants
+- **Blight** — Emergency kill switch
+- **Took** — The graft is active and working
+
+*"I'll graft it onto your tree at dusk."*
+
+*A graft makes your tree bear fruit no other can.*
+
 ### Gossamer
 **ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
 **Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
@@ -401,6 +421,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Terrarium** | Platform | Creative canvas | grove.place/terrarium |
 | **Weave** | Platform | Visual composition | *(part of Terrarium)* |
 | **Curios** | Platform | Cabinet of wonders | curios.grove.place |
+| **Grafts** | Platform | Feature customization | *(operator-configured)* |
 | **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
 | **Rings** | Platform | Analytics | *(integrated)* |
 | **Clearing** | Platform | Status page | status.grove.place |

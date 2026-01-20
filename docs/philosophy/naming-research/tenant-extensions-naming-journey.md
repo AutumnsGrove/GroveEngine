@@ -323,4 +323,88 @@ Implementation can wait. The groundwork is laid.
 
 ---
 
+## The Graft Lexicon
+
+*A complete vocabulary for the external-facing language of Grafts.*
+
+### Core Terms
+
+| Technical (Internal) | Grove (External) | Example Usage |
+|---------------------|------------------|---------------|
+| Enable feature flag | **Graft** | *"I'll graft it onto your tree"* |
+| Disable feature flag | **Prune** | *"We need to prune that graft"* |
+| Kill switch | **Blight** | *"Trigger blight protection"* |
+| Percentage rollout | **Propagate** | *"Propagate to 25% of the grove"* |
+| Full rollout | **Cultivate** | *"Ready to cultivate across all trees"* |
+| A/B test variants | **Cultivars** | *"Testing two cultivars"* |
+| Flag is active | **Took** | *"The graft took"* |
+| Feature available | **Grafted** | *"JXL is grafted onto your tree"* |
+
+### Time as Intention
+
+Deployments happen with intention, not just timestamps:
+
+| Timing | Meaning |
+|--------|---------|
+| **At dawn** | Fresh start, beginning of cycle |
+| **At dusk** | End of day, settling in |
+| **Under moonlight** | Quiet maintenance, off-hours |
+| **When the leaves turn** | Seasonal/major release |
+
+### The Poetry of Deployment
+
+**Boring SaaS:**
+> "We'll enable the feature flag at 7pm after the deployment window."
+
+**Grove:**
+> "I'll graft it onto your tree at dusk."
+
+---
+
+**Boring SaaS:**
+> "We're doing a 10% rollout to test for regressions."
+
+**Grove:**
+> "Propagating to a few trees first—watching to see if the grafts take."
+
+---
+
+**Boring SaaS:**
+> "Hit the kill switch, the feature is causing errors."
+
+**Grove:**
+> "Blight in the grove. Pruning now."
+
+---
+
+**Boring SaaS:**
+> "The A/B test shows variant B has 15% better conversion."
+
+**Grove:**
+> "Cultivar B is thriving. Ready to propagate."
+
+---
+
+### Internal/External Split
+
+Like **Vines** (external) and **Gutter** (internal), Grafts maintain a separation:
+
+```
+┌─────────────────────────────────────────────┐
+│              EXTERNAL (Users)               │
+│  "Your tree has three grafts: Timeline,    │
+│   Gallery, and JXL encoding. Want me to    │
+│   prune Gallery for now?"                   │
+├─────────────────────────────────────────────┤
+│              INTERNAL (Code)                │
+│  isFeatureEnabled('graft:gallery', ...)    │
+│  feature_flags table                        │
+│  flag_rules table                           │
+└─────────────────────────────────────────────┘
+```
+
+The metaphor is for humans. The code stays practical.
+
+---
+
 *Naming journey by Autumn & Claude, January 2026*

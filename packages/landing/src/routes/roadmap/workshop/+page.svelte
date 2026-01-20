@@ -202,6 +202,22 @@
 					]
 				},
 				{
+					name: 'Grafts',
+					tagline: 'Feature Customization',
+					description: 'A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.',
+					status: 'live',
+					icon: 'git-branch',
+					integration: 'Operator-configured feature customization',
+					subComponents: [
+						{ name: 'Graft', icon: 'mapplus', description: 'Enable a feature' },
+						{ name: 'Prune', icon: 'x', description: 'Disable a feature' },
+						{ name: 'Propagate', icon: 'sprout', description: 'Percentage rollout' },
+						{ name: 'Cultivate', icon: 'trees', description: 'Full rollout' },
+						{ name: 'Cultivars', icon: 'layers', description: 'A/B test variants' },
+						{ name: 'Blight', icon: 'warning', description: 'Emergency kill switch' }
+					]
+				},
+				{
 					name: 'Rings',
 					tagline: 'Private Analytics',
 					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
