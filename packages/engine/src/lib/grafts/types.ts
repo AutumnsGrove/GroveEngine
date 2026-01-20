@@ -10,6 +10,7 @@
  */
 
 import type { FeatureFlagsEnv } from "../feature-flags/types.js";
+import type { TierKey } from "../config/tiers.js";
 
 // =============================================================================
 // GRAFT IDENTIFICATION
@@ -80,7 +81,7 @@ export interface GraftContext {
   tenantId?: string;
 
   /** Optional tier for tier-gated features */
-  tier?: string;
+  tier?: TierKey;
 
   /** Optional feature flags environment for checking flags */
   env?: FeatureFlagsEnv;

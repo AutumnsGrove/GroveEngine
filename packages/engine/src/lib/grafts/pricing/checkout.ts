@@ -54,6 +54,26 @@ export interface CheckoutOptions {
 }
 
 // =============================================================================
+// VALIDATION
+// =============================================================================
+
+/**
+ * Valid pattern for custom data keys.
+ * Allows alphanumeric characters, underscores, and hyphens.
+ */
+const VALID_CUSTOM_DATA_KEY_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+/**
+ * Validate a custom data key to prevent XSS and injection attacks.
+ *
+ * @param key - The key to validate
+ * @returns True if the key is valid
+ */
+function isValidCustomDataKey(key: string): boolean {
+  return VALID_CUSTOM_DATA_KEY_PATTERN.test(key);
+}
+
+// =============================================================================
 // CHECKOUT URL GENERATION
 // =============================================================================
 
@@ -122,9 +142,16 @@ export function getCheckoutUrl(
     url.searchParams.set("checkout[cancel_url]", options.cancelUrl);
   }
 
-  // Add custom data
+  // Add custom data with validation
   if (options.customData) {
     for (const [key, value] of Object.entries(options.customData)) {
+      // Validate key to prevent XSS/injection attacks
+      if (!isValidCustomDataKey(key)) {
+        console.warn(
+          `[checkout] Invalid custom data key "${key}" - must contain only alphanumeric characters, underscores, and hyphens. Skipping.`,
+        );
+        continue;
+      }
       url.searchParams.set(`checkout[custom][${key}]`, value);
     }
   }

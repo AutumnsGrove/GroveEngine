@@ -1,11 +1,8 @@
-<script lang="ts">
+<script lang="ts" module>
 	/**
-	 * PricingTable
-	 *
-	 * Full comparison table showing all tiers side-by-side.
-	 * Glassmorphism styled with Grove aesthetics.
+	 * Module-level constants for PricingTable
+	 * Defined outside component scope for better performance
 	 */
-
 	import {
 		Sprout,
 		TreeDeciduous,
@@ -26,8 +23,27 @@
 		LifeBuoy,
 		CalendarDays,
 	} from "lucide-svelte";
-	import type { PricingTableProps, PricingTier } from "./types.js";
 	import type { TierIcon } from "../../config/tiers.js";
+
+	// Icon components for tier headers - defined at module level for performance
+	const TIER_ICON_MAP: Record<TierIcon, typeof Sprout> = {
+		user: User,
+		sprout: Sprout,
+		"tree-deciduous": TreeDeciduous,
+		trees: Trees,
+		crown: Crown,
+	} as const;
+</script>
+
+<script lang="ts">
+	/**
+	 * PricingTable
+	 *
+	 * Full comparison table showing all tiers side-by-side.
+	 * Glassmorphism styled with Grove aesthetics.
+	 */
+
+	import type { PricingTableProps, PricingTier } from "./types.js";
 
 	let {
 		tiers,
@@ -35,15 +51,6 @@
 		onCheckout,
 		class: className = "",
 	}: PricingTableProps = $props();
-
-	// Icon components for tier headers
-	const tierIconComponents: Record<TierIcon, typeof Sprout> = {
-		user: User,
-		sprout: Sprout,
-		"tree-deciduous": TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
-	};
 
 	// Row definitions for the comparison table
 	type RowType =
@@ -162,16 +169,18 @@
 <div
 	class="overflow-x-auto bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-4 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
 >
-	<table class="w-full text-left border-collapse">
+	<table class="w-full text-left border-collapse" aria-label="Pricing tier comparison">
 		<thead>
 			<tr class="border-b-2 border-default">
 				<!-- Empty header cell for row labels -->
-				<th class="py-4 px-3 font-serif text-foreground"></th>
+				<th scope="col" class="py-4 px-3 font-serif text-foreground">
+					<span class="sr-only">Feature</span>
+				</th>
 
 				<!-- Tier header cells -->
 				{#each tiers as tier}
-					{@const IconComponent = tierIconComponents[tier.icon]}
-					<th class="py-4 px-3 text-center min-w-[120px]">
+					{@const IconComponent = TIER_ICON_MAP[tier.icon]}
+					<th scope="col" aria-label="{tier.name} tier" class="py-4 px-3 text-center min-w-[120px]">
 						{#if tier.monthlyPrice > 0}
 							<div
 								class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
@@ -208,12 +217,12 @@
 					class="border-b border-subtle {rowIndex % 2 === 1 ? 'bg-surface' : ''}"
 				>
 					<!-- Row label -->
-					<td class="py-3 px-3 text-foreground-muted">
+					<th scope="row" class="py-3 px-3 text-foreground-muted font-normal text-left">
 						<span class="inline-flex items-center gap-2">
-							<Icon class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+							<Icon class="w-4 h-4 text-accent-subtle flex-shrink-0" aria-hidden="true" />
 							{row.label}
 						</span>
-					</td>
+					</th>
 
 					<!-- Tier values -->
 					{#each tiers as tier}
@@ -227,9 +236,10 @@
 									: 'text-foreground'}"
 						>
 							{#if rendered.type === "check"}
-								<Check class="w-5 h-5 mx-auto text-accent-muted" />
+								<Check class="w-5 h-5 mx-auto text-accent-muted" aria-hidden="true" />
+								<span class="sr-only">Included</span>
 							{:else if rendered.type === "dash"}
-								—
+								<span aria-label="Not included">—</span>
 							{:else}
 								{rendered.text}
 							{/if}
@@ -240,12 +250,12 @@
 
 			<!-- Yearly price row -->
 			<tr>
-				<td class="py-4 px-3 text-foreground-muted">
+				<th scope="row" class="py-4 px-3 text-foreground-muted font-normal text-left">
 					<span class="inline-flex items-center gap-2">
-						<CalendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+						<CalendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" aria-hidden="true" />
 						Yearly
 					</span>
-				</td>
+				</th>
 				{#each tiers as tier}
 					<td class="py-4 px-3 text-center">
 						{#if tier.monthlyPrice === 0}

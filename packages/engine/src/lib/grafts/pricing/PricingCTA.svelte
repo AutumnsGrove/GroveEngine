@@ -73,6 +73,12 @@
 		// If we have a URL, navigate to it
 		if (checkoutUrl) {
 			window.location.href = checkoutUrl;
+		} else if (!isFree && tier.status === "available") {
+			// Warn developers about missing checkout URL for available paid tiers
+			console.warn(
+				`[PricingCTA] No checkout URL configured for tier "${tier.key}" (${billingPeriod}). ` +
+					`Configure checkout URLs via checkoutUrls prop or LemonSqueezy environment variables.`,
+			);
 		}
 	}
 </script>

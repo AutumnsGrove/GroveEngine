@@ -100,7 +100,7 @@ export async function isGraftEnabled(
     entry.featureFlagId,
     {
       tenantId: context.tenantId,
-      tier: context.tier as import("../config/tiers.js").TierKey | undefined,
+      tier: context.tier,
     },
     context.env,
   );
