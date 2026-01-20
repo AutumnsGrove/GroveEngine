@@ -105,10 +105,10 @@
 			features: [
 				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true },
 				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true },
-				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
 				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true },
+				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true },
 				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' },
 				{ name: 'Email Waitlist', description: '70 seeds, waiting to sprout', done: true }
 			]
