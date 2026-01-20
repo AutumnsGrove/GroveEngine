@@ -1,9 +1,33 @@
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { isValidPlanId, isPlanAvailable, getPlanById } from "$lib/data/plans";
-import type { BillingCycle } from "$lib/utils/pricing";
+import {
+  transformAllTiers,
+  type PricingTier,
+} from "@autumnsgrove/groveengine/grafts/pricing";
+import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/groveengine/config";
 
-const VALID_BILLING_CYCLES: BillingCycle[] = ["monthly", "yearly"];
+// Valid billing cycles for database storage (maps from graft's "annual" to "yearly")
+const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
+type BillingCycle = (typeof VALID_BILLING_CYCLES)[number];
+
+// Transform tiers once at module load (paid tiers only for Plant onboarding)
+const tiers = transformAllTiers({
+  excludeTiers: ["free"],
+});
+
+// Helper functions for validation
+function isValidPlanId(id: string): id is PaidTierKey {
+  return PAID_TIERS.includes(id as PaidTierKey);
+}
+
+function isPlanAvailable(id: string): boolean {
+  const tier = tiers.find((t) => t.key === id);
+  return tier?.status === "available";
+}
+
+function getTierByKey(id: string): PricingTier | undefined {
+  return tiers.find((t) => t.key === id);
+}
 
 export const load: PageServerLoad = async ({ parent }) => {
   const { user, onboarding } = await parent();
@@ -31,6 +55,7 @@ export const load: PageServerLoad = async ({ parent }) => {
   return {
     user,
     onboarding,
+    tiers,
   };
 };
 
@@ -47,9 +72,9 @@ export const actions: Actions = {
 
     // Check plan availability
     if (!isPlanAvailable(plan)) {
-      const selectedPlan = getPlanById(plan);
+      const selectedTier = getTierByKey(plan);
       const statusMessage =
-        selectedPlan?.status === "coming_soon"
+        selectedTier?.status === "coming_soon"
           ? "This plan is coming soon and not yet available."
           : "This plan is not currently available.";
       return fail(400, { error: statusMessage });

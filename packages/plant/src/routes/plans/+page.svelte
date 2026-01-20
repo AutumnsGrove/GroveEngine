@@ -1,27 +1,45 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	// Use centralized icon registry for consistent icons across Grove
 	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
-	// Shared data and utilities
-	import { plans, tierIcons, type Plan, type TierStatus } from '$lib/data/plans';
-	import { formatPrice, formatYearlySavings, type BillingCycle } from '$lib/utils/pricing';
+	// Use graft config for tier data and toggle component
+	import {
+		PricingToggle,
+		type PricingTier,
+		type BillingPeriod,
+		DEFAULT_ANNUAL_SAVINGS,
+		billingPeriodToDbFormat,
+		getMonthlyEquivalentPrice,
+		getYearlySavingsAmount,
+	} from '@autumnsgrove/groveengine/grafts/pricing';
+	import type { TierStatus } from '@autumnsgrove/groveengine/config';
 
-	let { form } = $props();
+	// Shared icon mapping
+	import { tierIcons } from '$lib/ui/tier-icons';
+
+	// Type-safe props
+	import type { PageData, ActionData } from './$types';
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// Plans from server (transformed via graft config)
+	const plans: PricingTier[] = data.tiers;
 
 	// ============================================================================
 	// STATE
 	// ============================================================================
 
-	let billingCycle = $state<BillingCycle>('monthly');
-	// Auto-select first available tier (future-proof if tier availability changes)
+	let billingPeriod = $state<BillingPeriod>('monthly');
+	// Auto-select first available tier
 	let selectedPlan = $state<string | null>(
-		plans.find((p) => p.status === 'available')?.id ?? null
+		plans.find((p: PricingTier) => p.status === 'available')?.key ?? null
 	);
 
 	// Submission state
 	let isSubmitting = $state(false);
+
+	// Map billing period to database format (annual → yearly)
+	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
 
 	// ============================================================================
 	// STATUS COLOR HELPERS
@@ -65,35 +83,23 @@
 	}
 
 	// ============================================================================
-	// PRICE HELPERS
-	// ============================================================================
-
-	function getPrice(plan: Plan): string {
-		return formatPrice(plan.monthlyPrice, billingCycle);
-	}
-
-	function getYearlySavings(plan: Plan): string {
-		return formatYearlySavings(plan.monthlyPrice);
-	}
-
-	// ============================================================================
 	// SELECTION HELPERS
 	// ============================================================================
 
-	function canSelect(plan: Plan): boolean {
-		return plan.status === 'available';
+	function canSelect(tier: PricingTier): boolean {
+		return tier.status === 'available';
 	}
 
-	function selectPlan(plan: Plan): void {
-		if (canSelect(plan)) {
-			selectedPlan = plan.id;
+	function selectPlan(tier: PricingTier): void {
+		if (canSelect(tier)) {
+			selectedPlan = tier.key;
 		}
 	}
 
-	function getStatusClasses(plan: Plan): string {
-		switch (plan.status) {
+	function getStatusClasses(tier: PricingTier): string {
+		switch (tier.status) {
 			case 'available':
-				return selectedPlan === plan.id
+				return selectedPlan === tier.key
 					? 'ring-2 ring-primary ring-offset-2 ring-offset-transparent'
 					: 'hover:ring-1 hover:ring-primary/30';
 			case 'coming_soon':
@@ -128,53 +134,23 @@
 		</p>
 	</header>
 
-	<!-- Billing toggle -->
-	<div class="flex justify-center" role="group" aria-label="Billing frequency">
-		<div
-			class="inline-flex items-center gap-1 p-1.5 rounded-xl
-				bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md
-				border border-white/40 dark:border-emerald-800/25"
-		>
-			<button
-				onclick={() => (billingCycle = 'monthly')}
-				class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
-				class:bg-white={billingCycle === 'monthly'}
-				class:dark:bg-slate-800={billingCycle === 'monthly'}
-				class:shadow-sm={billingCycle === 'monthly'}
-				class:text-foreground={billingCycle === 'monthly'}
-				class:text-foreground-muted={billingCycle !== 'monthly'}
-				class:hover:text-foreground={billingCycle !== 'monthly'}
-				aria-pressed={billingCycle === 'monthly'}
-			>
-				Monthly
-			</button>
-			<button
-				onclick={() => (billingCycle = 'yearly')}
-				class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
-				class:bg-white={billingCycle === 'yearly'}
-				class:dark:bg-slate-800={billingCycle === 'yearly'}
-				class:shadow-sm={billingCycle === 'yearly'}
-				class:text-foreground={billingCycle === 'yearly'}
-				class:text-foreground-muted={billingCycle !== 'yearly'}
-				class:hover:text-foreground={billingCycle !== 'yearly'}
-				aria-pressed={billingCycle === 'yearly'}
-			>
-				Yearly
-				<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500 text-white font-medium">
-					Save 15%
-				</span>
-			</button>
-		</div>
+	<!-- Billing toggle (using shared graft component) -->
+	<div class="flex justify-center">
+		<PricingToggle
+			{billingPeriod}
+			savingsPercent={DEFAULT_ANNUAL_SAVINGS}
+			onPeriodChange={(period) => (billingPeriod = period)}
+		/>
 	</div>
 
 	<!-- Plans grid -->
 	<div class="space-y-4" role="radiogroup" aria-label="Select a plan">
-		{#each plans as plan (plan.id)}
-			{@const TierIcon = tierIcons[plan.icon]}
-			{@const isAvailable = plan.status === 'available'}
-			{@const isComingSoon = plan.status === 'coming_soon'}
-			{@const isFuture = plan.status === 'future'}
-			{@const isSelected = selectedPlan === plan.id}
+		{#each plans as tier (tier.key)}
+			{@const TierIcon = tierIcons[tier.icon]}
+			{@const isAvailable = tier.status === 'available'}
+			{@const isComingSoon = tier.status === 'coming_soon'}
+			{@const isFuture = tier.status === 'future'}
+			{@const isSelected = selectedPlan === tier.key}
 
 			<div class="relative">
 				<!-- Status badge positioned above card -->
@@ -201,15 +177,15 @@
 				{/if}
 
 				<button
-					onclick={() => selectPlan(plan)}
+					onclick={() => selectPlan(tier)}
 					disabled={!isAvailable}
-					class="w-full text-left transition-all duration-200 rounded-xl {getStatusClasses(plan)}
+					class="w-full text-left transition-all duration-200 rounded-xl {getStatusClasses(tier)}
 						{isAvailable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2' : 'cursor-not-allowed'}"
 					type="button"
 					role="radio"
 					aria-checked={isSelected}
 					aria-disabled={!isAvailable}
-					aria-label="{plan.name} plan, ${getPrice(plan)} per month{!isAvailable ? `, ${plan.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
+					aria-label="{tier.name} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
 				>
 					<GlassCard
 						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
@@ -218,7 +194,7 @@
 						<!-- Subtle overlay for unavailable tiers -->
 						{#if !isAvailable}
 							<div
-								class="absolute inset-0 pointer-events-none {getStatusColor(plan.status, 'overlay')}"
+								class="absolute inset-0 pointer-events-none {getStatusColor(tier.status, 'overlay')}"
 							></div>
 						{/if}
 
@@ -227,15 +203,15 @@
 							<div class="flex items-start justify-between gap-4 mb-4">
 								<div class="flex items-start gap-4">
 									<!-- Tier icon -->
-									<div class="flex-shrink-0 p-3 rounded-xl transition-colors {getStatusColor(plan.status, 'bg')}">
-										<TierIcon class="w-6 h-6 {getStatusColor(plan.status, 'text')}" />
+									<div class="flex-shrink-0 p-3 rounded-xl transition-colors {getStatusColor(tier.status, 'bg')}">
+										<TierIcon class="w-6 h-6 {getStatusColor(tier.status, 'text')}" />
 									</div>
 
 									<!-- Name and tagline -->
 									<div>
-										<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
-										<p class="text-sm {getStatusColor(plan.status, 'text')}">
-											{plan.tagline}
+										<h3 class="text-lg font-medium text-foreground">{tier.name}</h3>
+										<p class="text-sm {getStatusColor(tier.status, 'text')}">
+											{tier.tagline}
 										</p>
 									</div>
 								</div>
@@ -243,25 +219,25 @@
 								<!-- Price -->
 								<div class="text-right flex-shrink-0">
 									<div class="flex items-baseline gap-1">
-										<span class="text-2xl font-semibold text-foreground">${getPrice(plan)}</span>
+										<span class="text-2xl font-semibold text-foreground">${getMonthlyEquivalentPrice(tier, billingPeriod)}</span>
 										<span class="text-sm text-foreground-muted">/mo</span>
 									</div>
-									{#if billingCycle === 'yearly'}
+									{#if billingPeriod === 'annual'}
 										<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-											Save ${getYearlySavings(plan)}/year
+											Save ${getYearlySavingsAmount(tier)}/year
 										</p>
 									{/if}
 								</div>
 							</div>
 
-							<!-- Description -->
-							<p class="text-sm text-foreground-muted mb-4">{plan.description}</p>
+							<!-- Best for description -->
+							<p class="text-sm text-foreground-muted mb-4">{tier.bestFor}</p>
 
 							<!-- Features grid - responsive: single column on mobile, two on tablet+ -->
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-								{#each plan.features as feature}
+								{#each tier.featureStrings as feature}
 									<div class="flex items-center gap-2">
-										<Check class="w-4 h-4 flex-shrink-0 {getStatusColor(plan.status, 'check')}" />
+										<Check class="w-4 h-4 flex-shrink-0 {getStatusColor(tier.status, 'check')}" />
 										<span class="text-sm text-foreground-muted">{feature}</span>
 									</div>
 								{/each}
@@ -333,7 +309,7 @@
 		{/if}
 
 		<input type="hidden" name="plan" value={selectedPlan || ''} />
-		<input type="hidden" name="billingCycle" value={billingCycle} />
+		<input type="hidden" name="billingCycle" value={billingCycleForDb} />
 		<button
 			type="submit"
 			disabled={!selectedPlan || isSubmitting}
@@ -343,7 +319,7 @@
 				<Loader2 class="w-5 h-5 animate-spin" />
 				Processing...
 			{:else if selectedPlan}
-				Continue with {plans.find((p) => p.id === selectedPlan)?.name}
+				Continue with {plans.find((p) => p.key === selectedPlan)?.name}
 			{:else}
 				Select a plan to continue
 			{/if}

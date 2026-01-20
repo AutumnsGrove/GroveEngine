@@ -12,6 +12,10 @@ import {
   getDisplayPrice,
   getPriceSuffix,
   formatAnnualAsMonthly,
+  getMonthlyEquivalentPrice,
+  getYearlySavingsAmount,
+  billingPeriodToDbFormat,
+  dbFormatToBillingPeriod,
   DEFAULT_TIER_ORDER,
   DEFAULT_ANNUAL_SAVINGS,
 } from "./config.js";
@@ -295,6 +299,156 @@ describe("Pricing Graft Configuration", () => {
 
       it("handles 0", () => {
         expect(formatAnnualAsMonthly(0)).toBe("$0.00/mo");
+      });
+    });
+
+    describe("getMonthlyEquivalentPrice", () => {
+      it("returns monthly price as string for monthly period", () => {
+        // Seedling: $8/month
+        expect(getMonthlyEquivalentPrice(seedlingTier, "monthly")).toBe("8");
+      });
+
+      it("returns monthly equivalent with 2 decimals for annual period", () => {
+        // Seedling: $81.60/year ÷ 12 = $6.80/month
+        const price = getMonthlyEquivalentPrice(seedlingTier, "annual");
+        expect(price).toBe("6.80");
+      });
+
+      it("returns 2 decimal places for oak tier", () => {
+        // Oak: $255/year ÷ 12 = $21.25/month
+        const oakTier = transformTier("oak", TIERS.oak);
+        const price = getMonthlyEquivalentPrice(oakTier, "annual");
+        expect(price).toBe("21.25");
+      });
+
+      it("returns 2 decimal places for sapling tier", () => {
+        // Sapling: $122.40/year ÷ 12 = $10.20/month
+        const saplingTier = transformTier("sapling", TIERS.sapling);
+        const price = getMonthlyEquivalentPrice(saplingTier, "annual");
+        expect(price).toBe("10.20");
+      });
+
+      it("returns '0' for free tier monthly", () => {
+        expect(getMonthlyEquivalentPrice(freeTier, "monthly")).toBe("0");
+      });
+
+      it("returns '0' for free tier annual", () => {
+        // Free: $0/year ÷ 12 = $0/month (integer, so no decimals)
+        expect(getMonthlyEquivalentPrice(freeTier, "annual")).toBe("0");
+      });
+
+      it("formats annual correctly for evergreen tier", () => {
+        // Evergreen: $357/year ÷ 12 = $29.75/month
+        const evergreenTier = transformTier("evergreen", TIERS.evergreen);
+        const price = getMonthlyEquivalentPrice(evergreenTier, "annual");
+        expect(price).toBe("29.75");
+      });
+    });
+
+    describe("getYearlySavingsAmount", () => {
+      it("calculates savings for seedling tier", () => {
+        // Seedling: $8/month × 12 = $96/year, annual price $81.60
+        // Savings: $96 - $81.60 = $14.40, rounds to "14"
+        const savings = getYearlySavingsAmount(seedlingTier);
+        expect(savings).toBe("14");
+      });
+
+      it("calculates savings for sapling tier", () => {
+        // Sapling: $12/month × 12 = $144/year, annual price $122.40
+        // Savings: $144 - $122.40 = $21.60, rounds to "22"
+        const saplingTier = transformTier("sapling", TIERS.sapling);
+        const savings = getYearlySavingsAmount(saplingTier);
+        expect(savings).toBe("22");
+      });
+
+      it("calculates savings for oak tier", () => {
+        // Oak: $25/month × 12 = $300/year, annual price $255
+        // Savings: $300 - $255 = $45
+        const oakTier = transformTier("oak", TIERS.oak);
+        const savings = getYearlySavingsAmount(oakTier);
+        expect(savings).toBe("45");
+      });
+
+      it("calculates savings for evergreen tier", () => {
+        // Evergreen: $35/month × 12 = $420/year, annual price $357
+        // Savings: $420 - $357 = $63
+        const evergreenTier = transformTier("evergreen", TIERS.evergreen);
+        const savings = getYearlySavingsAmount(evergreenTier);
+        expect(savings).toBe("63");
+      });
+
+      it("returns '0' for free tier", () => {
+        const savings = getYearlySavingsAmount(freeTier);
+        expect(savings).toBe("0");
+      });
+
+      it("returns integer string without decimal places", () => {
+        const savings = getYearlySavingsAmount(seedlingTier);
+        expect(savings).toMatch(/^\d+$/);
+        expect(savings).not.toContain(".");
+      });
+    });
+  });
+
+  describe("Billing Period Utilities", () => {
+    describe("billingPeriodToDbFormat", () => {
+      it("converts 'monthly' to 'monthly'", () => {
+        expect(billingPeriodToDbFormat("monthly")).toBe("monthly");
+      });
+
+      it("converts 'annual' to 'yearly'", () => {
+        expect(billingPeriodToDbFormat("annual")).toBe("yearly");
+      });
+
+      it("is type-safe for BillingPeriod input", () => {
+        // TypeScript should enforce these are the only valid inputs
+        const monthly: "monthly" | "annual" = "monthly";
+        const annual: "monthly" | "annual" = "annual";
+
+        expect(billingPeriodToDbFormat(monthly)).toBe("monthly");
+        expect(billingPeriodToDbFormat(annual)).toBe("yearly");
+      });
+    });
+
+    describe("dbFormatToBillingPeriod", () => {
+      it("converts 'monthly' to 'monthly'", () => {
+        expect(dbFormatToBillingPeriod("monthly")).toBe("monthly");
+      });
+
+      it("converts 'yearly' to 'annual'", () => {
+        expect(dbFormatToBillingPeriod("yearly")).toBe("annual");
+      });
+
+      it("is type-safe for DbBillingCycle input", () => {
+        // TypeScript should enforce these are the only valid inputs
+        const monthly: "monthly" | "yearly" = "monthly";
+        const yearly: "monthly" | "yearly" = "yearly";
+
+        expect(dbFormatToBillingPeriod(monthly)).toBe("monthly");
+        expect(dbFormatToBillingPeriod(yearly)).toBe("annual");
+      });
+    });
+
+    describe("round-trip conversion", () => {
+      it("monthly survives round-trip", () => {
+        const original: "monthly" | "annual" = "monthly";
+        const dbFormat = billingPeriodToDbFormat(original);
+        const backToGraft = dbFormatToBillingPeriod(dbFormat);
+        expect(backToGraft).toBe(original);
+      });
+
+      it("annual survives round-trip", () => {
+        const original: "monthly" | "annual" = "annual";
+        const dbFormat = billingPeriodToDbFormat(original);
+        const backToGraft = dbFormatToBillingPeriod(dbFormat);
+        expect(backToGraft).toBe(original);
+      });
+
+      it("yearly survives round-trip from db side", () => {
+        const original: "monthly" | "yearly" = "yearly";
+        const graftFormat = dbFormatToBillingPeriod(original);
+        const backToDb = billingPeriodToDbFormat(graftFormat);
+        expect(backToDb).toBe(original);
       });
     });
   });

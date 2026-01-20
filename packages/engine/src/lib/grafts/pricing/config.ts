@@ -246,3 +246,105 @@ export function formatAnnualAsMonthly(annualPrice: number): string {
   const monthly = annualPrice / 12;
   return `$${monthly.toFixed(2)}/mo`;
 }
+
+/**
+ * Get the display price value for a tier based on billing period.
+ *
+ * When viewing annual billing, shows the monthly equivalent (annual / 12).
+ * Returns just the numeric value as a string (no $ prefix or /mo suffix),
+ * suitable for flexible UI composition.
+ *
+ * @param tier - Pricing tier
+ * @param period - Billing period
+ * @returns Price value as string (e.g., "5", "4.17")
+ *
+ * @example
+ * ```typescript
+ * const price = getMonthlyEquivalentPrice(seedling, 'monthly'); // "5"
+ * const price = getMonthlyEquivalentPrice(seedling, 'annual');  // "4.25"
+ *
+ * // In Svelte template:
+ * <span>${getMonthlyEquivalentPrice(tier, period)}</span>
+ * <span>/mo</span>
+ * ```
+ */
+export function getMonthlyEquivalentPrice(
+  tier: PricingTier,
+  period: "monthly" | "annual",
+): string {
+  if (period === "annual") {
+    const monthlyEquivalent = tier.annualPrice / 12;
+    // Show clean integers when possible, otherwise 2 decimal places
+    return monthlyEquivalent % 1 === 0
+      ? monthlyEquivalent.toFixed(0)
+      : monthlyEquivalent.toFixed(2);
+  }
+  return tier.monthlyPrice.toString();
+}
+
+/**
+ * Calculate the dollar amount saved per year with annual billing.
+ *
+ * @param tier - Pricing tier
+ * @returns Savings amount as a formatted string (e.g., "12")
+ *
+ * @example
+ * ```typescript
+ * const savings = getYearlySavingsAmount(seedling); // "9"
+ *
+ * // In Svelte template:
+ * <p>Save ${getYearlySavingsAmount(tier)}/year</p>
+ * ```
+ */
+export function getYearlySavingsAmount(tier: PricingTier): string {
+  const fullYearAtMonthly = tier.monthlyPrice * 12;
+  const savings = fullYearAtMonthly - tier.annualPrice;
+  return savings.toFixed(0);
+}
+
+// =============================================================================
+// BILLING PERIOD UTILITIES
+// =============================================================================
+
+/**
+ * Database billing cycle format.
+ * Some systems (like LemonSqueezy webhooks) use "yearly" instead of "annual".
+ */
+export type DbBillingCycle = "monthly" | "yearly";
+
+/**
+ * Convert graft billing period to database format.
+ *
+ * The graft uses "annual" (standard pricing terminology) but databases
+ * and some external systems use "yearly".
+ *
+ * @param period - Billing period from the graft
+ * @returns Database-compatible billing cycle
+ *
+ * @example
+ * ```typescript
+ * const dbCycle = billingPeriodToDbFormat('annual'); // 'yearly'
+ * ```
+ */
+export function billingPeriodToDbFormat(
+  period: "monthly" | "annual",
+): DbBillingCycle {
+  return period === "annual" ? "yearly" : "monthly";
+}
+
+/**
+ * Convert database billing cycle to graft billing period.
+ *
+ * @param dbFormat - Database billing cycle
+ * @returns Graft-compatible billing period
+ *
+ * @example
+ * ```typescript
+ * const period = dbFormatToBillingPeriod('yearly'); // 'annual'
+ * ```
+ */
+export function dbFormatToBillingPeriod(
+  dbFormat: DbBillingCycle,
+): "monthly" | "annual" {
+  return dbFormat === "yearly" ? "annual" : "monthly";
+}

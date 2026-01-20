@@ -55,26 +55,19 @@
 ### 🎨 Quick Backlog
 - [ ] **Gossamer icon** — Choose a better icon (sparkles is buggy/inconsistent)
 
-### 🔐 AUTH MIGRATION AUDIT — CRITICAL
-> **Problem:** `autumn.grove.place` hitting legacy Heartwood, not Better Auth
-> **Symptoms:** Old login UI, wrong `client_id`, stale redirect URIs, DO cold-start slowness
+### 🔐 AUTH MIGRATION AUDIT — ✅ COMPLETE (Jan 20, 2026)
+> **Problem:** `autumn.grove.place` was hitting legacy Heartwood via `autumn-website.pages.dev`
+> **Solution:** Removed special routing, now uses main groveengine like other tenants
 
-**Investigation needed:**
-- [ ] **Find the old login page** — Scan for legacy Heartwood login route (shows email option + wrong Google SVG)
-- [ ] **Trace auth flow in Lattice** — Where does `autumn.grove.place/admin` initiate OAuth?
-- [ ] **Check client registrations** — `client_id=autumnsgrove` pointing to `autumn-website.pages.dev` (WRONG!)
-- [ ] **Verify Better Auth integration** — Is Lattice actually using Better Auth or falling back to legacy?
-- [ ] **Update redirect URIs** — Register `autumn.grove.place` as valid callback, remove stale Pages URLs
-- [ ] **Kill legacy Heartwood login** — Once Better Auth confirmed working, remove/redirect old `/login` route
+**Completed:**
+- [x] **Found the root cause** — grove-router had `autumn: "autumn-website.pages.dev"` hardcoded
+- [x] **Traced auth flow** — Engine uses `client_id=groveengine` with dynamic `redirect_uri`
+- [x] **Updated grove-router** — Removed legacy `autumn` route (commit `07301c2f` on main)
+- [x] **Verified tenant exists** — `autumn-primary` tenant active in D1
+- [x] **Updated OAuth client** — Added `autumn.grove.place` to `groveengine` redirect_uris
+- [x] **Deployed** — grove-router deployed to production
 
-**Debug clues from URL:**
-```
-client_id=autumnsgrove          ← OLD client, not Lattice tenant
-redirect_uri=autumn-website.pages.dev  ← Stale Cloudflare Pages URL
-heartwood.grove.place/login     ← Legacy route, not Better Auth
-```
-
-**Context:** PR migrated Gallery + GitHub Dashboard into Curios, added Grafts pattern, but auth migration incomplete. Better Auth should handle OAuth without the old DO worker handoff slowness.
+**Future improvement:** Consider wildcard redirect URI support (`https://*.grove.place/auth/callback`) to avoid per-tenant OAuth registration. See `docs/specs/heartwood-spec.md` for implementation notes.
 
 ### 📋 Planning Documents Status
 > **All 7 original plans COMPLETE!** See `docs/plans/completed/` for details.
