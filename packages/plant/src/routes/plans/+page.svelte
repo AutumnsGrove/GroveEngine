@@ -10,6 +10,8 @@
 		type BillingPeriod,
 		DEFAULT_ANNUAL_SAVINGS,
 		billingPeriodToDbFormat,
+		getMonthlyEquivalentPrice,
+		getYearlySavingsAmount,
 	} from '@autumnsgrove/groveengine/grafts/pricing';
 	import type { TierStatus } from '@autumnsgrove/groveengine/config';
 
@@ -78,27 +80,6 @@
 
 	function getStatusColor(status: TierStatus, shade: keyof (typeof statusColors)['available']) {
 		return statusColors[status][shade];
-	}
-
-	// ============================================================================
-	// PRICE HELPERS
-	// ============================================================================
-
-	function getPrice(tier: PricingTier): string {
-		if (billingPeriod === 'annual') {
-			// Show monthly equivalent when viewing annual
-			const monthlyEquivalent = tier.annualPrice / 12;
-			return monthlyEquivalent % 1 === 0
-				? monthlyEquivalent.toFixed(0)
-				: monthlyEquivalent.toFixed(2);
-		}
-		return tier.monthlyPrice.toString();
-	}
-
-	function getYearlySavings(tier: PricingTier): string {
-		const fullYear = tier.monthlyPrice * 12;
-		const savings = fullYear - tier.annualPrice;
-		return savings.toFixed(0);
 	}
 
 	// ============================================================================
@@ -204,7 +185,7 @@
 					role="radio"
 					aria-checked={isSelected}
 					aria-disabled={!isAvailable}
-					aria-label="{tier.name} plan, ${getPrice(tier)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
+					aria-label="{tier.name} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
 				>
 					<GlassCard
 						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
@@ -238,12 +219,12 @@
 								<!-- Price -->
 								<div class="text-right flex-shrink-0">
 									<div class="flex items-baseline gap-1">
-										<span class="text-2xl font-semibold text-foreground">${getPrice(tier)}</span>
+										<span class="text-2xl font-semibold text-foreground">${getMonthlyEquivalentPrice(tier, billingPeriod)}</span>
 										<span class="text-sm text-foreground-muted">/mo</span>
 									</div>
 									{#if billingPeriod === 'annual'}
 										<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-											Save ${getYearlySavings(tier)}/year
+											Save ${getYearlySavingsAmount(tier)}/year
 										</p>
 									{/if}
 								</div>

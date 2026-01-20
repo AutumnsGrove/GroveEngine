@@ -247,6 +247,61 @@ export function formatAnnualAsMonthly(annualPrice: number): string {
   return `$${monthly.toFixed(2)}/mo`;
 }
 
+/**
+ * Get the display price value for a tier based on billing period.
+ *
+ * When viewing annual billing, shows the monthly equivalent (annual / 12).
+ * Returns just the numeric value as a string (no $ prefix or /mo suffix),
+ * suitable for flexible UI composition.
+ *
+ * @param tier - Pricing tier
+ * @param period - Billing period
+ * @returns Price value as string (e.g., "5", "4.17")
+ *
+ * @example
+ * ```typescript
+ * const price = getMonthlyEquivalentPrice(seedling, 'monthly'); // "5"
+ * const price = getMonthlyEquivalentPrice(seedling, 'annual');  // "4.25"
+ *
+ * // In Svelte template:
+ * <span>${getMonthlyEquivalentPrice(tier, period)}</span>
+ * <span>/mo</span>
+ * ```
+ */
+export function getMonthlyEquivalentPrice(
+  tier: PricingTier,
+  period: "monthly" | "annual",
+): string {
+  if (period === "annual") {
+    const monthlyEquivalent = tier.annualPrice / 12;
+    // Show clean integers when possible, otherwise 2 decimal places
+    return monthlyEquivalent % 1 === 0
+      ? monthlyEquivalent.toFixed(0)
+      : monthlyEquivalent.toFixed(2);
+  }
+  return tier.monthlyPrice.toString();
+}
+
+/**
+ * Calculate the dollar amount saved per year with annual billing.
+ *
+ * @param tier - Pricing tier
+ * @returns Savings amount as a formatted string (e.g., "12")
+ *
+ * @example
+ * ```typescript
+ * const savings = getYearlySavingsAmount(seedling); // "9"
+ *
+ * // In Svelte template:
+ * <p>Save ${getYearlySavingsAmount(tier)}/year</p>
+ * ```
+ */
+export function getYearlySavingsAmount(tier: PricingTier): string {
+  const fullYearAtMonthly = tier.monthlyPrice * 12;
+  const savings = fullYearAtMonthly - tier.annualPrice;
+  return savings.toFixed(0);
+}
+
 // =============================================================================
 // BILLING PERIOD UTILITIES
 // =============================================================================

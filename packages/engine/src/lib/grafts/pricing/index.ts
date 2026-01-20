@@ -57,6 +57,8 @@ export {
   getDisplayPrice,
   getPriceSuffix,
   formatAnnualAsMonthly,
+  getMonthlyEquivalentPrice,
+  getYearlySavingsAmount,
   billingPeriodToDbFormat,
   dbFormatToBillingPeriod,
   type DbBillingCycle,
