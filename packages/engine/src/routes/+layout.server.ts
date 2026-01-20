@@ -83,6 +83,35 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
             // Pages query failed - log but continue with empty nav
             console.warn("[Layout] navPages query failed:", navError);
           }
+
+          // Load enabled curios for navigation
+          // Each curio type is checked separately to avoid cascading failures
+          // Curios are added after custom pages in nav order
+          try {
+            const timelineResult = await db
+              .prepare(
+                `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
+              )
+              .bind(tenantId)
+              .first<{ enabled: number }>();
+
+            if (timelineResult?.enabled) {
+              navPages.push({ slug: "timeline", title: "Timeline" });
+            }
+          } catch {
+            // Timeline curio table might not exist - that's OK
+          }
+
+          // Future: Add more curios here as they get public routes
+          // try {
+          //   const journeyResult = await db
+          //     .prepare(`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`)
+          //     .bind(tenantId)
+          //     .first<{ enabled: number }>();
+          //   if (journeyResult?.enabled) {
+          //     navPages.push({ slug: "journey", title: "Journey" });
+          //   }
+          // } catch { /* Journey curio table might not exist */ }
         } else {
           // Fallback to global settings (for landing page or legacy)
           try {

@@ -66,8 +66,7 @@
 - [x] **Verified tenant exists** — `autumn-primary` tenant active in D1
 - [x] **Updated OAuth client** — Added `autumn.grove.place` to `groveengine` redirect_uris
 - [x] **Deployed** — grove-router deployed to production
-
-**Future improvement:** Consider wildcard redirect URI support (`https://*.grove.place/auth/callback`) to avoid per-tenant OAuth registration. See `docs/specs/heartwood-spec.md` for implementation notes.
+- [x] **Wildcard redirect URI support** — Implemented in Heartwood! Any `https://{tenant}.grove.place/auth/callback` now works if tenant is active in GroveEngine DB (PR #12, deployed Jan 20, 2026)
 
 ### 🌿 UI GRAFTS: PricingGraft Migration — ✅ COMPLETE (Jan 20, 2026, PR #408)
 > **Goal:** Consolidate duplicated pricing logic into shared graft system
@@ -493,6 +492,9 @@ Four-layer image moderation system: CSAM detection → Content classification �
 - [ ] Finalize tenant onboarding flow
 - [ ] Implement plan management UI
 - [ ] Add custom domain support for Oak+ tiers
+  - ⚠️ **CRITICAL:** CSRF cookie is hardcoded to `Domain=.grove.place` in `hooks.server.ts:517`
+  - Must dynamically set cookie domain for custom domains, or CSRF validation will fail
+  - See: `packages/engine/src/hooks.server.ts` lines 504-521
 - [ ] Implement storage limits per plan
 
 ## Per-Tenant Theming → Foliage Integration
