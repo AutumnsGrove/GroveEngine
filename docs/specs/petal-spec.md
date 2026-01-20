@@ -272,8 +272,13 @@ const scanForCSAM = async (image: Buffer): Promise<CSAMResult> => {
       layer: 'petal_layer1',
     });
 
-    // Flag account for review (do not notify user why)
-    await flagAccountForReview(userId, 'csam_detection');
+    // Flag account with upload block (do not notify user why)
+    // This is a BLOCKING flag - user cannot upload ANY photos until manual review
+    await flagAccountForReview(userId, 'csam_detection', {
+      blockUploads: true,  // Prevents ALL photo uploads
+      requiresManualReview: true,  // Only Wayfinder can clear this
+      notifyUser: false,  // Never reveal detection reason
+    });
 
     return { safe: false, reason: 'CSAM_DETECTED', mustReport: true, hash };
   }
@@ -282,7 +287,50 @@ const scanForCSAM = async (image: Buffer): Promise<CSAMResult> => {
 };
 ```
 
-### 3.3 Provider CSAM Policies
+### 3.3 Account Flagging Policy
+
+When CSAM is detected, the account enters a **blocked state**:
+
+| State | Description |
+|-------|-------------|
+| **Upload blocked** | User cannot upload ANY photos to ANY Grove feature |
+| **Other features** | User can still use non-image features (browsing, text posts) |
+| **Duration** | Until manual review is completed by Wayfinder |
+| **User notification** | Generic "upload failed" message only, never reveals reason |
+
+```typescript
+interface CSAMAccountFlag {
+  userId: string;
+  flagType: 'csam_detection';
+  createdAt: Date;
+
+  // Blocking behavior
+  blockUploads: true;           // Cannot upload photos anywhere
+  requiresManualReview: true;   // Only Wayfinder can clear
+
+  // Review tracking
+  reviewStatus: 'pending' | 'reviewed' | 'cleared' | 'confirmed';
+  reviewedBy?: string;          // Wayfinder ID
+  reviewedAt?: Date;
+  reviewNotes?: string;         // Internal notes only
+}
+
+// On any photo upload attempt
+const canUploadPhoto = async (userId: string): Promise<boolean> => {
+  const flag = await getActiveCSAMFlag(userId);
+  if (flag && flag.blockUploads) {
+    // Generic message - never reveal CSAM flag exists
+    throw new UploadBlockedError('Unable to process uploads at this time.');
+  }
+  return true;
+};
+```
+
+**Review outcomes:**
+- **Cleared** (false positive): Flag removed, user can upload again
+- **Confirmed** (true positive): Account permanently banned, law enforcement notified if required
+
+### 3.5 Provider CSAM Policies
 
 | Provider | CSAM Scanning | Auto-Report | Notes |
 |----------|---------------|-------------|-------|
@@ -294,7 +342,7 @@ const scanForCSAM = async (image: Buffer): Promise<CSAMResult> => {
 
 **If self-hosting or using RunPod:** Integrate PhotoDNA SDK or equivalent BEFORE processing ANY user images.
 
-### 3.4 Legal Requirements
+### 3.6 Legal Requirements
 
 | Requirement | Details |
 |-------------|---------|
@@ -303,7 +351,7 @@ const scanForCSAM = async (image: Buffer): Promise<CSAMResult> => {
 | **Metadata retention** | Required for law enforcement (exception to ZDR) |
 | **Failure to report** | Federal crime under 18 U.S.C. § 2258A |
 
-### 3.5 User Messaging
+### 3.7 User Messaging
 
 CSAM detection triggers a generic rejection. **Never reveal the specific reason.**
 
@@ -667,6 +715,146 @@ Before using any provider for image processing:
 | Any without ZDR | Privacy requirement |
 | Any non-US processing | Jurisdiction concerns |
 
+### 7.4 Provider Failover Strategy
+
+**Layer 1 (CSAM) is legally critical.** If CSAM scanning fails, we cannot process the image. Period.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  PROVIDER FAILOVER: Layer 1 (CSAM) - CRITICAL PATH              │
+│                                                                  │
+│  Together.ai ──fail──→ FAL.ai ──fail──→ Replicate ──fail──→ BLOCK│
+│      │                    │                 │                    │
+│     ok                   ok                ok                    │
+│      │                    │                 │                    │
+│      └────────────────────┴─────────────────┘                    │
+│                           │                                      │
+│                           ▼                                      │
+│                    Continue to Layer 2                           │
+│                                                                  │
+│  ⚠️  ALL PROVIDERS FAIL = BLOCK UPLOAD (cannot skip CSAM scan)  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+```typescript
+interface ProviderHealth {
+  provider: 'together' | 'fal' | 'replicate';
+  healthy: boolean;
+  lastCheck: Date;
+  consecutiveFailures: number;
+  circuitOpen: boolean;  // true = skip this provider
+}
+
+const FAILOVER_CONFIG = {
+  // Circuit breaker settings
+  failureThreshold: 3,      // Failures before circuit opens
+  circuitResetMs: 60_000,   // Try again after 60s
+
+  // Timeout settings
+  csam: {
+    timeout: 5_000,         // 5s timeout for CSAM scan
+    maxRetries: 2,          // Retry twice per provider
+  },
+  classification: {
+    timeout: 10_000,        // 10s timeout for classification
+    maxRetries: 1,          // Retry once per provider
+  },
+};
+
+// Provider priority order (Layer 1 - CSAM)
+const CSAM_PROVIDERS = ['together', 'fal', 'replicate'] as const;
+
+const scanCSAMWithFailover = async (image: Buffer): Promise<CSAMResult> => {
+  for (const provider of CSAM_PROVIDERS) {
+    const health = await getProviderHealth(provider);
+
+    // Skip if circuit is open (provider recently failed)
+    if (health.circuitOpen) {
+      continue;
+    }
+
+    try {
+      const result = await withTimeout(
+        scanCSAM(image, provider),
+        FAILOVER_CONFIG.csam.timeout
+      );
+
+      // Success - reset failure count
+      await updateProviderHealth(provider, { consecutiveFailures: 0 });
+      return result;
+
+    } catch (error) {
+      // Record failure
+      await updateProviderHealth(provider, {
+        consecutiveFailures: health.consecutiveFailures + 1,
+        circuitOpen: health.consecutiveFailures + 1 >= FAILOVER_CONFIG.failureThreshold,
+      });
+
+      // Log but continue to next provider
+      await logSecurityEvent('csam_provider_failure', {
+        provider,
+        error: error.message,
+        failoverAttempt: CSAM_PROVIDERS.indexOf(provider) + 1,
+      });
+    }
+  }
+
+  // ALL providers failed - BLOCK the upload
+  // We cannot process images without CSAM scanning
+  await logSecurityEvent('csam_all_providers_failed', {
+    providers: CSAM_PROVIDERS,
+    action: 'upload_blocked',
+  });
+
+  throw new UploadBlockedError(
+    'We're experiencing technical difficulties. Please try again in a few minutes.'
+  );
+};
+```
+
+**Failover behavior by layer:**
+
+| Layer | On Provider Failure | On All Providers Fail |
+|-------|--------------------|-----------------------|
+| **Layer 1 (CSAM)** | Try next provider | **BLOCK upload** (cannot skip) |
+| **Layer 2 (Classification)** | Try next provider | Block + queue for manual review |
+| **Layer 3 (Sanity)** | Try next provider | Allow with warning flag |
+| **Layer 4 (Output)** | Retry with different seed | Reject gracefully |
+
+**Health check background job:**
+
+```typescript
+// Run every 30 seconds
+const healthCheckJob = async () => {
+  for (const provider of CSAM_PROVIDERS) {
+    const health = await getProviderHealth(provider);
+
+    // If circuit is open and reset time has passed, test it
+    if (health.circuitOpen) {
+      const timeSinceOpen = Date.now() - health.lastCheck.getTime();
+      if (timeSinceOpen > FAILOVER_CONFIG.circuitResetMs) {
+        // Try a health check ping
+        const isHealthy = await pingProvider(provider);
+        if (isHealthy) {
+          await updateProviderHealth(provider, {
+            circuitOpen: false,
+            consecutiveFailures: 0,
+          });
+        }
+      }
+    }
+  }
+};
+```
+
+**Alerting thresholds:**
+
+| Condition | Alert Level | Action |
+|-----------|-------------|--------|
+| 1 provider circuit open | Warning | Notify on-call |
+| 2 providers circuit open | Critical | Page Wayfinder |
+| All providers down >5min | Emergency | Consider maintenance mode |
+
 ---
 
 ## 8. Data Lifecycle
@@ -997,7 +1185,7 @@ When Grove adds profile photos:
 | [`thorn-spec.md`](/knowledge/specs/thorn-spec) | Text content moderation (Petal is the image equivalent) |
 | [`songbird-pattern.md`](/knowledge/patterns/songbird-pattern) | Three-bird protection pattern that Petal extends |
 | [`acceptable-use-policy.md`](/knowledge/legal/acceptable-use-policy) | Policy that Petal helps enforce |
-| Scout MOODBOARD_MODE.md | Feature that first implements Petal |
+| Scout Moodboard Mode (GroveScout repo) | Feature that first implements Petal |
 
 ---
 
@@ -1009,6 +1197,9 @@ When Grove adds profile photos:
 - [ ] Configure ZDR settings with all providers
 - [ ] Create isolated Cloudflare Worker for Petal
 - [ ] Set up secure API key storage
+- [ ] Implement provider failover with circuit breaker
+- [ ] Set up health check background job (30s interval)
+- [ ] Configure alerting thresholds for provider outages
 
 ### 15.2 Layer Implementation
 
