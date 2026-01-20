@@ -30,8 +30,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   // Grove internal Pages projects
   amber: "amber-4x2.pages.dev", // Amber storage
   ivy: "ivy-3uv.pages.dev", // Ivy mail client
-  autumn: "autumn-website.pages.dev", // Autumn's Grove
-  // example subdomain routes to groveengine (tenant in D1)
+  // autumn subdomain now routes to groveengine (tenant in D1) — legacy autumn-website.pages.dev removed
   plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
   vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
   cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
