@@ -10,6 +10,7 @@
 <script>
 	import '../app.css';
 	import '$lib/styles/tokens.css';
+	import '$lib/styles/vine-pattern.css';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
@@ -257,7 +258,7 @@
 	</div>
 </div>
 {:else}
-<div class="layout">
+<div class="layout leaf-pattern">
 	<header>
 		<nav>
 			<!-- TITLE AREA -->
