@@ -25,14 +25,39 @@
 		ArrowRight,
 		Clock,
 		Lock,
-		// Pricing tier icon (only need Sprout for Get Started button)
+		// Pricing tier icons
 		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown,
 		// Notice icon
 		AlertTriangle
 	} from '@autumnsgrove/groveengine/ui/icons';
 
-	// Shared data
-	import { tierIcons, getPlanPreviews } from '$lib/data/plans';
+	// Use graft config for tier data
+	import { transformAllTiers, type PricingTier } from '@autumnsgrove/groveengine/grafts/pricing';
+	import type { TierIcon } from '@autumnsgrove/groveengine/config';
+
+	// Tier icon mapping
+	const tierIcons: Record<TierIcon, typeof Sprout> = {
+		user: Sprout,
+		sprout: Sprout,
+		'tree-deciduous': TreeDeciduous,
+		trees: Trees,
+		crown: Crown,
+	};
+
+	// Get plan previews from graft (paid tiers only, first 3 features as highlights)
+	const allTiers = transformAllTiers({ excludeTiers: ['free'] });
+	const planPreviews = allTiers.map((tier: PricingTier) => ({
+		key: tier.key,
+		name: tier.name,
+		tagline: tier.tagline,
+		monthlyPrice: tier.monthlyPrice,
+		highlights: tier.featureStrings.slice(0, 3),
+		status: tier.status,
+		icon: tier.icon,
+	}));
 
 	// Auth section state
 	let authExpanded = $state(false);
@@ -84,9 +109,6 @@
 			description: 'Your words are yours. Export everything, anytime.'
 		}
 	];
-
-	// Get plan preview data from shared module
-	const planPreviews = getPlanPreviews();
 </script>
 
 <div class="space-y-12 animate-fade-in">
@@ -230,8 +252,8 @@
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
 		<div class="grid grid-cols-2 gap-6 stagger-children">
-			{#each planPreviews as plan}
-				{@const PlanIcon = tierIcons[plan.id]}
+			{#each planPreviews as plan (plan.key)}
+				{@const PlanIcon = tierIcons[plan.icon]}
 				{@const isAvailable = plan.status === 'available'}
 				{@const isComingSoon = plan.status === 'coming_soon'}
 				{@const isFuture = plan.status === 'future'}
