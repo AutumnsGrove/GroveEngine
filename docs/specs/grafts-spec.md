@@ -4,6 +4,7 @@ date created: Monday, January 20th 2026
 date modified: Monday, January 20th 2026
 tags:
   - feature-flags
+  - ui-components
   - configuration
   - cloudflare-workers
 type: tech-spec
@@ -32,23 +33,30 @@ type: tech-spec
 
 > *A graft makes your tree bear fruit no other can.*
 
-Grove's per-tenant feature customization system. Grafts are the deliberate act of joining new capabilities onto existing trees. Not plugins users upload, but trusted configurations the Wayfinder enables for specific groves. Want JXL encoding? Graft it on. Need a beta feature? Graft it on.
+Grove's per-tenant customization system. Grafts are the deliberate act of joining new capabilities onto existing trees. Not plugins users upload, but trusted configurations the Wayfinder enables for specific groves.
+
+There are two types of Grafts:
+
+- **Feature Grafts** control *what* capabilities a tenant receives (flags, rollouts, tier-gating)
+- **UI Grafts** provide *how* those capabilities render (reusable components)
+
+Want JXL encoding? Feature Graft it on. Need a pricing page? Splice in the PricingGraft.
 
 **Public Name:** Grafts
-**Internal Name:** GroveGrafts (feature-flags module)
+**Internal Name:** GroveGrafts
 **Domain:** *Operator-configured*
 **Repository:** Part of [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
 **Last Updated:** January 2026
 
 In orcharding, a graft joins a cutting from one tree onto the rootstock of another. The cutting grows, becomes one with the tree, yet retains what makes it special. One apple tree can bear four different varieties. One grove can serve tenants with entirely different capabilities.
 
-Grafts is Grove's Cloudflare-native feature flag system. It supports boolean flags, percentage rollouts, tier-gated features, and A/B variants. Simple infrastructure that lets operators control exactly which features each tenant receives.
+Feature Grafts decide which branches grow. UI Grafts are the branches themselves. Together, they let any Grove property customize its features and appearance while sharing a common rootstock.
 
 ---
 
 ## The Graft Lexicon
 
-Grove doesn't call them "feature flags." We call them grafts, and the vocabulary follows:
+Grove doesn't call them "feature flags" or "shared components." We call them grafts, and the vocabulary follows:
 
 | Term | Action | Description |
 |------|--------|-------------|
@@ -59,8 +67,10 @@ Grove doesn't call them "feature flags." We call them grafts, and the vocabulary
 | **Cultivars** | A/B variants | Test different varieties of the same feature |
 | **Blight** | Kill switch | Emergency disable, instant effect |
 | **Took** | Status check | The graft is active and working |
+| **Splice** | Attach UI | Add a UI Graft component to a page |
 
 *"I'll graft it onto your tree at dusk."*
+*"Splice the PricingGraft into the landing page."*
 
 ---
 
@@ -72,8 +82,14 @@ Grove doesn't call them "feature flags." We call them grafts, and the vocabulary
 4. **Kill switches** — Instant blight when something goes wrong
 5. **A/B testing** — Cultivar comparisons for product experiments
 6. **Audit logging** — Know who grafted what, and when
+7. **Reusable UI** — Splice consistent components across Grove properties
+8. **Engine-first** — UI Grafts live in `@autumnsgrove/groveengine`, not individual apps
 
 ---
+
+# Part I: Feature Grafts
+
+Feature Grafts are Grove's Cloudflare-native feature flag system. They support boolean flags, percentage rollouts, tier-gated features, and A/B variants. Simple infrastructure that lets operators control exactly which features each tenant receives.
 
 ## Architecture
 
@@ -274,12 +290,12 @@ CREATE INDEX idx_audit_flag ON flag_audit_log(flag_id, changed_at DESC);
 
 ---
 
-## API Usage
+## Feature Graft API
 
 ### Check if a Graft Took
 
 ```typescript
-import { isFeatureEnabled } from '$lib/feature-flags';
+import { isFeatureEnabled } from '@autumnsgrove/groveengine/feature-flags';
 
 // Did the JXL graft take?
 const useJxl = await isFeatureEnabled('jxl_encoding', {
@@ -295,7 +311,7 @@ if (useJxl) {
 ### Get Graft Value with Default
 
 ```typescript
-import { getFeatureValue } from '$lib/feature-flags';
+import { getFeatureValue } from '@autumnsgrove/groveengine/feature-flags';
 
 // Get post limit, defaulting to 50
 const maxPosts = await getFeatureValue('max_posts_override', {
@@ -306,7 +322,7 @@ const maxPosts = await getFeatureValue('max_posts_override', {
 ### Check Cultivar (A/B Variant)
 
 ```typescript
-import { getVariant } from '$lib/feature-flags';
+import { getVariant } from '@autumnsgrove/groveengine/feature-flags';
 
 // Which pricing cultivar?
 const variant = await getVariant('pricing_experiment', {
@@ -319,7 +335,7 @@ const variant = await getVariant('pricing_experiment', {
 ### Batch Evaluation
 
 ```typescript
-import { getFlags } from '$lib/feature-flags';
+import { getFlags } from '@autumnsgrove/groveengine/feature-flags';
 
 // Evaluate multiple grafts at once
 const flags = await getFlags(
@@ -395,7 +411,7 @@ flag:{flag_id}:user:{user_id}            → User-specific
 ### Cache Invalidation
 
 ```typescript
-import { invalidateFlag } from '$lib/feature-flags';
+import { invalidateFlag } from '@autumnsgrove/groveengine/feature-flags';
 
 // When admin updates a graft
 await invalidateFlag('jxl_encoding', env);
@@ -404,28 +420,571 @@ await invalidateFlag('jxl_encoding', env);
 
 ---
 
-## Project Structure
+# Part II: UI Grafts
+
+UI Grafts are reusable, configurable components that can be "spliced" onto any Grove property. They live in `@autumnsgrove/groveengine` and provide consistent UI for common features like pricing, navigation, and footers.
 
 ```
-packages/engine/src/lib/feature-flags/
-├── index.ts              # Public API exports
-├── types.ts              # TypeScript interfaces
-├── evaluate.ts           # Core evaluation logic
-├── percentage.ts         # Deterministic percentage bucketing
-├── rules.ts              # Rule evaluation (tier, tenant, time, etc.)
-├── cache.ts              # KV caching utilities
-├── evaluate.test.ts      # Unit tests
-├── percentage.test.ts    # Percentage distribution tests
-├── rules.test.ts         # Rule evaluation tests
-├── cache.test.ts         # Cache key/invalidation tests
-└── test-utils.ts         # Test helpers
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Feature Grafts vs UI Grafts                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Feature Grafts (flags)              UI Grafts (components)        │
+│   ├── isFeatureEnabled()      ───►    ├── PricingGraft              │
+│   ├── getFeatureValue()               ├── (future: NavGraft)        │
+│   └── rules/tier/percentage           └── (future: FooterGraft)     │
+│                                                                     │
+│   "Is pricing_graft enabled?"         "Render the pricing UI"       │
+│                                                                     │
+│                        ┌───────────┐                                │
+│   Feature Graft ──────►│  checks   │──────► UI Graft renders        │
+│   (optional)           │ isEnabled │        (or not)                │
+│                        └───────────┘                                │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key distinction:** Feature Grafts ask "is X enabled?" UI Grafts answer "render X." A UI Graft can optionally check a Feature Graft before rendering, enabling gradual rollouts of new UI.
+
+---
+
+## UI Graft Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         UI Graft System                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   packages/engine/src/lib/grafts/                                   │
+│   ├── index.ts              # Public exports                        │
+│   ├── types.ts              # Core types (GraftId, GraftContext)    │
+│   ├── registry.ts           # Graft registry & isGraftEnabled()     │
+│   ├── context.svelte.ts     # Svelte context helpers                │
+│   └── pricing/              # PricingGraft (first UI Graft)         │
+│       ├── index.ts          # Pricing exports                       │
+│       ├── types.ts          # Pricing-specific types                │
+│       ├── config.ts         # Tier transformation utilities         │
+│       ├── checkout.ts       # LemonSqueezy URL generation           │
+│       ├── PricingGraft.svelte        # Main orchestrator            │
+│       ├── PricingTable.svelte        # Comparison table             │
+│       ├── PricingCard.svelte         # Individual tier card         │
+│       ├── PricingToggle.svelte       # Monthly/Annual toggle        │
+│       ├── PricingCTA.svelte          # Checkout button              │
+│       └── PricingFineprint.svelte    # Expandable fine print        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                       Graft Registry Flow                           │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   1. Register graft in GRAFT_REGISTRY                               │
+│              ↓                                                      │
+│   2. (Optional) Link to Feature Graft via featureFlagId             │
+│              ↓                                                      │
+│   3. Consumer calls isGraftEnabled() with context                   │
+│              ↓                                                      │
+│   4. If linked, checks Feature Graft system                         │
+│              ↓                                                      │
+│   5. Returns boolean: should this UI render?                        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Configuration
+## The Graft Registry
 
-### wrangler.toml Bindings
+Every UI Graft registers its metadata in a central registry. This enables discovery, versioning, and optional Feature Graft integration.
+
+```typescript
+// packages/engine/src/lib/grafts/registry.ts
+
+import { isFeatureEnabled } from '../feature-flags/index.js';
+import type { GraftId, GraftContext, GraftRegistryEntry } from './types.js';
+
+/**
+ * Registry of all available UI grafts.
+ */
+export const GRAFT_REGISTRY = new Map<GraftId, GraftRegistryEntry>([
+  [
+    'pricing',
+    {
+      id: 'pricing',
+      name: 'Pricing Graft',
+      description: 'Reusable pricing table, cards, and checkout components',
+      featureFlagId: 'pricing_graft', // Optional: link to Feature Graft
+      version: '1.0.0',
+      status: 'stable',
+    },
+  ],
+  // Future grafts register here
+]);
+
+/**
+ * Check if a UI graft should render based on its linked Feature Graft.
+ */
+export async function isGraftEnabled(
+  graftId: GraftId,
+  context: GraftContext,
+): Promise<boolean> {
+  const entry = GRAFT_REGISTRY.get(graftId);
+
+  // Unknown graft - don't render
+  if (!entry) return false;
+
+  // No feature flag linked - always enabled
+  if (!entry.featureFlagId) return true;
+
+  // No env provided - can't check flags, default to enabled
+  if (!context.env) return true;
+
+  // Check the linked Feature Graft
+  return isFeatureEnabled(
+    entry.featureFlagId,
+    { tenantId: context.tenantId, tier: context.tier },
+    context.env,
+  );
+}
+```
+
+### Registry Entry Type
+
+```typescript
+// packages/engine/src/lib/grafts/types.ts
+
+export type GraftId = 'pricing' | 'nav' | 'footer' | 'hero' | (string & {});
+
+export type ProductId = 'grove' | 'scout' | 'daily-clearing' | 'meadow' | (string & {});
+
+export interface GraftRegistryEntry {
+  /** Unique graft identifier */
+  id: GraftId;
+
+  /** Human-readable name */
+  name: string;
+
+  /** Description of what this graft does */
+  description: string;
+
+  /**
+   * Optional feature flag ID that controls this graft's availability.
+   * If specified, isGraftEnabled() checks this flag before allowing render.
+   */
+  featureFlagId?: string;
+
+  /** Semantic version */
+  version: string;
+
+  /** Stability status */
+  status: 'stable' | 'beta' | 'experimental' | 'deprecated';
+}
+
+export interface GraftContext {
+  /** Which product this graft is rendering for */
+  productId: ProductId;
+
+  /** Optional tenant ID for multi-tenant scenarios */
+  tenantId?: string;
+
+  /** Optional tier for tier-gated rendering */
+  tier?: TierKey;
+
+  /** Optional feature flags environment */
+  env?: FeatureFlagsEnv;
+}
+```
+
+---
+
+## PricingGraft: The First UI Graft
+
+PricingGraft provides a complete pricing page solution: tier cards, comparison tables, billing toggles, and checkout buttons. Any Grove property can splice it in with a single import.
+
+### The Problem It Solves
+
+Before PricingGraft, each Grove property duplicated pricing UI:
+
+```
+packages/landing/src/routes/pricing/+page.svelte    → 543 lines
+packages/scout/src/routes/pricing/+page.svelte      → 487 lines (similar)
+packages/meadow/src/routes/pricing/+page.svelte     → 512 lines (similar)
+```
+
+After PricingGraft:
+
+```
+packages/landing/src/routes/pricing/+page.svelte    → 82 lines
+```
+
+An 85% reduction. Same UI, single source of truth.
+
+### Splicing PricingGraft
+
+```svelte
+<!-- packages/landing/src/routes/pricing/+page.svelte -->
+<script lang="ts">
+  import { PricingGraft } from '@autumnsgrove/groveengine/grafts/pricing';
+
+  let { data } = $props();
+</script>
+
+<PricingGraft
+  productId="grove"
+  tiers={data.tiers}
+  showComparison={true}
+  showFineprint={true}
+>
+  {#snippet header()}
+    <h1 class="text-4xl font-display">Find Your Perfect Grove</h1>
+    <p class="text-bark/70">Choose the plan that fits your creative journey</p>
+  {/snippet}
+
+  {#snippet footer()}
+    <p class="text-sm text-foreground-muted">
+      Questions? <a href="/contact">Reach out</a>. We're happy to help.
+    </p>
+  {/snippet}
+</PricingGraft>
+```
+
+### Server-Side Tier Transformation
+
+```typescript
+// packages/landing/src/routes/pricing/+page.server.ts
+import { transformAllTiers } from '@autumnsgrove/groveengine/grafts/pricing';
+
+export function load() {
+  const tiers = transformAllTiers({
+    highlightTier: 'seedling',
+    badges: {
+      seedling: 'Start Here',
+    },
+    // When LemonSqueezy is configured:
+    // checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),
+  });
+
+  return { tiers };
+}
+```
+
+---
+
+## PricingGraft Components
+
+### Component Hierarchy
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        PricingGraft                                 │
+│                     (main orchestrator)                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  {#snippet header()} - Custom header content                │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  PricingToggle - Monthly/Annual billing switch              │   │
+│   │  ┌─────────┐  ┌─────────────┐                               │   │
+│   │  │ Monthly │  │ Annual -15% │                               │   │
+│   │  └─────────┘  └─────────────┘                               │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  PricingTable (if showComparison)                           │   │
+│   │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐   │   │
+│   │  │ Feature  │   Free   │ Seedling │  Sapling │   Oak    │   │   │
+│   │  ├──────────┼──────────┼──────────┼──────────┼──────────┤   │   │
+│   │  │ Posts    │    —     │    50    │   250    │    ∞     │   │   │
+│   │  │ Storage  │    —     │   1 GB   │   5 GB   │  20 GB   │   │   │
+│   │  └──────────┴──────────┴──────────┴──────────┴──────────┘   │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  PricingCard[] (if showCards)                               │   │
+│   │  ┌───────────┐  ┌───────────┐  ┌───────────┐                │   │
+│   │  │ 🌱        │  │ 🌳        │  │ 🌲        │                │   │
+│   │  │ Seedling  │  │ Sapling   │  │ Oak       │                │   │
+│   │  │ $8/mo     │  │ $12/mo    │  │ $25/mo    │                │   │
+│   │  │           │  │           │  │           │                │   │
+│   │  │ [Get Started]│ [Get Started]│[Get Started]│              │   │
+│   │  └───────────┘  └───────────┘  └───────────┘                │   │
+│   │                                                             │   │
+│   │  Each card contains: PricingCTA (checkout button)           │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  PricingFineprint (if showFineprint)                        │   │
+│   │  ▸ About Reading                                            │   │
+│   │  ▸ The Free Tier                                            │   │
+│   │  ▸ Theme Details                                            │   │
+│   │  ...expandable sections                                     │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  {#snippet footer()} - Custom footer content                │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### PricingGraft Props
+
+```typescript
+interface PricingGraftProps extends BaseGraftProps {
+  /** Which product this pricing is for */
+  productId: ProductId;
+
+  /** Tiers to display (transformed for display) */
+  tiers: PricingTier[];
+
+  /** Default billing period selection */
+  defaultPeriod?: BillingPeriod; // 'monthly' | 'annual'
+
+  /** Show the full comparison table */
+  showComparison?: boolean;
+
+  /** Show the fine print section */
+  showFineprint?: boolean;
+
+  /** Show the billing period toggle */
+  showToggle?: boolean;
+
+  /** Show cards instead of/alongside table */
+  showCards?: boolean;
+
+  // Customization snippets (Svelte 5)
+  header?: Snippet;
+  tierBadge?: Snippet<[PricingTier]>;
+  tierFooter?: Snippet<[PricingTier]>;
+  afterTable?: Snippet;
+  footer?: Snippet;
+
+  // Events
+  onCheckout?: (tier: TierKey, period: BillingPeriod) => void;
+  onPeriodChange?: (period: BillingPeriod) => void;
+}
+```
+
+### PricingTier Type
+
+The `transformTier()` and `transformAllTiers()` functions convert raw tier config into this display-ready format:
+
+```typescript
+interface PricingTier {
+  key: TierKey;           // 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen'
+  name: string;           // 'Seedling'
+  tagline: string;        // 'Plant your first seeds'
+  icon: TierIcon;         // 'sprout'
+  status: TierStatus;     // 'available' | 'coming_soon' | 'future' | 'deprecated'
+  bestFor: string;        // 'New writers getting started'
+
+  monthlyPrice: number;   // 8
+  annualPrice: number;    // 81.60
+  annualSavings: number;  // 15 (percentage)
+
+  limits: PricingTierLimits;    // Formatted strings: { posts: '50', storage: '1 GB', ... }
+  features: TierFeatures;       // Booleans: { blog: true, customDomain: false, ... }
+  featureStrings: string[];     // Bullet points for cards
+  supportLevel: string;         // 'Community'
+
+  highlight?: boolean;          // Visual emphasis
+  badge?: string;               // 'Most Popular'
+
+  checkoutUrls: {
+    monthly?: string;
+    annual?: string;
+  };
+}
+```
+
+---
+
+## LemonSqueezy Checkout Integration
+
+PricingGraft integrates with LemonSqueezy for payment processing. The `checkout.ts` module generates secure checkout URLs.
+
+```typescript
+// packages/engine/src/lib/grafts/pricing/checkout.ts
+
+export interface CheckoutConfig {
+  storeId: string;
+  products: Partial<Record<TierKey, {
+    monthlyVariantId?: string;
+    annualVariantId?: string;
+  }>>;
+}
+
+/**
+ * Generate a LemonSqueezy checkout URL.
+ */
+export function getCheckoutUrl(
+  config: CheckoutConfig,
+  tierKey: TierKey,
+  period: BillingPeriod,
+  options?: {
+    email?: string;
+    discountCode?: string;
+    successUrl?: string;
+    cancelUrl?: string;
+    customData?: Record<string, string>;
+  }
+): string | undefined {
+  const product = config.products[tierKey];
+  if (!product) return undefined;
+
+  const variantId = period === 'monthly'
+    ? product.monthlyVariantId
+    : product.annualVariantId;
+
+  if (!variantId) return undefined;
+
+  const url = new URL(
+    `https://${config.storeId}.lemonsqueezy.com/checkout/buy/${variantId}`
+  );
+
+  if (options?.email) {
+    url.searchParams.set('checkout[email]', options.email);
+  }
+  if (options?.discountCode) {
+    url.searchParams.set('checkout[discount_code]', options.discountCode);
+  }
+  // Custom data is validated to prevent XSS
+  if (options?.customData) {
+    for (const [key, value] of Object.entries(options.customData)) {
+      if (/^[a-zA-Z0-9_-]+$/.test(key)) {
+        url.searchParams.set(`checkout[custom][${key}]`, value);
+      }
+    }
+  }
+
+  return url.toString();
+}
+
+/**
+ * Create checkout config from environment variables.
+ */
+export function createCheckoutConfigFromEnv(env: {
+  LEMON_SQUEEZY_STORE_ID?: string;
+  LEMON_SEEDLING_MONTHLY?: string;
+  LEMON_SEEDLING_ANNUAL?: string;
+  // ... other tier variants
+}): CheckoutConfig {
+  return {
+    storeId: env.LEMON_SQUEEZY_STORE_ID ?? '',
+    products: {
+      seedling: {
+        monthlyVariantId: env.LEMON_SEEDLING_MONTHLY,
+        annualVariantId: env.LEMON_SEEDLING_ANNUAL,
+      },
+      // ... other tiers
+    },
+  };
+}
+```
+
+---
+
+## Creating a New UI Graft
+
+To add a new UI Graft (e.g., NavGraft):
+
+### 1. Create the folder structure
+
+```
+packages/engine/src/lib/grafts/nav/
+├── index.ts              # Public exports
+├── types.ts              # Nav-specific types
+├── config.ts             # Configuration helpers
+├── NavGraft.svelte       # Main component
+├── NavItem.svelte        # Child component
+└── NavGraft.test.ts      # Tests
+```
+
+### 2. Register in the graft registry
+
+```typescript
+// packages/engine/src/lib/grafts/registry.ts
+
+GRAFT_REGISTRY.set('nav', {
+  id: 'nav',
+  name: 'Navigation Graft',
+  description: 'Reusable navigation bar with product-specific links',
+  featureFlagId: 'nav_graft', // Optional
+  version: '1.0.0',
+  status: 'beta',
+});
+```
+
+### 3. Add package.json exports
+
+```json
+// packages/engine/package.json
+{
+  "exports": {
+    "./grafts/nav": {
+      "types": "./dist/grafts/nav/index.d.ts",
+      "svelte": "./dist/grafts/nav/index.js",
+      "default": "./dist/grafts/nav/index.js"
+    }
+  }
+}
+```
+
+### 4. Export from the main grafts index
+
+```typescript
+// packages/engine/src/lib/grafts/index.ts
+export * from './nav/index.js';
+```
+
+---
+
+## Package Exports
+
+UI Grafts are exported from `@autumnsgrove/groveengine`:
+
+```json
+{
+  "exports": {
+    "./grafts": {
+      "types": "./dist/grafts/index.d.ts",
+      "svelte": "./dist/grafts/index.js",
+      "default": "./dist/grafts/index.js"
+    },
+    "./grafts/pricing": {
+      "types": "./dist/grafts/pricing/index.d.ts",
+      "svelte": "./dist/grafts/pricing/index.js",
+      "default": "./dist/grafts/pricing/index.js"
+    }
+  }
+}
+```
+
+### Import Patterns
+
+```typescript
+// Core graft utilities
+import { isGraftEnabled, getGraftEntry, GRAFT_REGISTRY } from '@autumnsgrove/groveengine/grafts';
+
+// PricingGraft and utilities
+import {
+  PricingGraft,
+  PricingTable,
+  PricingCard,
+  PricingToggle,
+  transformTier,
+  transformAllTiers,
+  getCheckoutUrl,
+} from '@autumnsgrove/groveengine/grafts/pricing';
+```
+
+---
+
+# Part III: Configuration & Operations
+
+## wrangler.toml Bindings
 
 ```toml
 [[kv_namespaces]]
@@ -438,7 +997,7 @@ database_name = "grove-engine-db"
 database_id = "your-database-id"
 ```
 
-### Environment Interface
+## Environment Interface
 
 ```typescript
 interface FeatureFlagsEnv {
@@ -479,22 +1038,65 @@ When a graft causes problems:
 
 ## Example Grafts
 
-Example configurations showing common graft patterns:
+### Feature Grafts
 
 | Graft ID | Type | Purpose | Example Use |
 |----------|------|---------|-------------|
 | `jxl_encoding` | percentage | JPEG XL image encoding | Propagate to 25% of grove |
 | `jxl_kill_switch` | boolean | Emergency disable for JXL | Blight switch (instant off) |
 | `meadow_access` | tier | Gate Meadow social features | Oak and Evergreen only |
-| `dark_mode_default` | percentage | Dark mode preference rollout | Gradual propagation |
+| `pricing_graft` | boolean | Gate PricingGraft rollout | Gradual UI rollout |
 
-*Check the database for actual current graft states.*
+### UI Grafts
+
+| Graft ID | Status | Purpose | Components |
+|----------|--------|---------|------------|
+| `pricing` | stable | Pricing pages for any Grove property | PricingGraft, PricingTable, PricingCard, etc. |
+| `nav` | planned | Consistent navigation | NavGraft, NavItem |
+| `footer` | planned | Consistent footer | FooterGraft, FooterLinks |
+| `hero` | planned | Customizable hero sections | HeroGraft, HeroContent |
+
+---
+
+## Project Structure
+
+```
+packages/engine/src/lib/
+├── feature-flags/            # Feature Grafts
+│   ├── index.ts              # Public API exports
+│   ├── types.ts              # TypeScript interfaces
+│   ├── evaluate.ts           # Core evaluation logic
+│   ├── percentage.ts         # Deterministic bucketing
+│   ├── rules.ts              # Rule evaluation
+│   ├── cache.ts              # KV caching utilities
+│   └── *.test.ts             # Unit tests
+│
+└── grafts/                   # UI Grafts
+    ├── index.ts              # Public exports
+    ├── types.ts              # Core graft types
+    ├── registry.ts           # Graft registry
+    ├── registry.test.ts      # Registry tests
+    ├── context.svelte.ts     # Svelte context helpers
+    └── pricing/              # PricingGraft
+        ├── index.ts
+        ├── types.ts
+        ├── config.ts
+        ├── config.test.ts
+        ├── checkout.ts
+        ├── checkout.test.ts
+        ├── PricingGraft.svelte
+        ├── PricingTable.svelte
+        ├── PricingCard.svelte
+        ├── PricingToggle.svelte
+        ├── PricingCTA.svelte
+        └── PricingFineprint.svelte
+```
 
 ---
 
 ## Implementation Checklist
 
-### Phase 1: Core Infrastructure (Complete)
+### Phase 1: Feature Graft Infrastructure (Complete)
 - [x] D1 schema migration
 - [x] Type definitions
 - [x] Evaluation logic
@@ -502,7 +1104,7 @@ Example configurations showing common graft patterns:
 - [x] KV caching
 - [x] Unit tests
 
-### Phase 2: Integration (Complete)
+### Phase 2: Feature Graft Integration (Complete)
 - [x] JXL encoding graft
 - [x] Kill switch support
 - [x] SvelteKit hooks integration
@@ -519,15 +1121,41 @@ Example configurations showing common graft patterns:
 - [ ] Cultivar experiment tracking
 - [ ] Conversion metrics per variant
 
+### Phase 5: UI Grafts Infrastructure (Complete)
+- [x] Graft registry system
+- [x] Registry-to-Feature-Graft integration
+- [x] Package exports structure
+- [x] Svelte context helpers
+- [x] Core type definitions
+
+### Phase 6: PricingGraft (Complete)
+- [x] Tier transformation utilities
+- [x] LemonSqueezy checkout integration
+- [x] PricingGraft orchestrator component
+- [x] PricingTable comparison component
+- [x] PricingCard individual tier component
+- [x] PricingToggle billing switch
+- [x] PricingCTA checkout button
+- [x] PricingFineprint expandable sections
+- [x] Landing page migration (543 → 82 lines)
+- [x] Unit tests (74 tests)
+- [x] Accessibility improvements
+
+### Phase 7: Future UI Grafts (Planned)
+- [ ] NavGraft (consistent navigation)
+- [ ] FooterGraft (consistent footer)
+- [ ] HeroGraft (customizable hero sections)
+- [ ] TestimonialGraft (social proof components)
+
 ---
 
 ## Related Documents
 
 - [Feature Flags Planning Spec](../plans/planning/feature-flags-spec.md) — Original technical spec
-- [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for Grafts
+- [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for Feature Grafts
 - [Loom Pattern](../patterns/loom-durable-objects-pattern.md) — DO coordination
-- [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses Grafts for configuration)
+- [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses Feature Grafts for configuration)
 
 ---
 
-*Orchardists have known for centuries: the right graft makes a tree bear fruit it never could alone.*
+*Orchardists have known for centuries: the right graft makes a tree bear fruit it never could alone. The right splice makes a grove feel like home.*
