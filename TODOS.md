@@ -55,6 +55,27 @@
 ### 🎨 Quick Backlog
 - [ ] **Gossamer icon** — Choose a better icon (sparkles is buggy/inconsistent)
 
+### 🔐 AUTH MIGRATION AUDIT — CRITICAL
+> **Problem:** `autumn.grove.place` hitting legacy Heartwood, not Better Auth
+> **Symptoms:** Old login UI, wrong `client_id`, stale redirect URIs, DO cold-start slowness
+
+**Investigation needed:**
+- [ ] **Find the old login page** — Scan for legacy Heartwood login route (shows email option + wrong Google SVG)
+- [ ] **Trace auth flow in Lattice** — Where does `autumn.grove.place/admin` initiate OAuth?
+- [ ] **Check client registrations** — `client_id=autumnsgrove` pointing to `autumn-website.pages.dev` (WRONG!)
+- [ ] **Verify Better Auth integration** — Is Lattice actually using Better Auth or falling back to legacy?
+- [ ] **Update redirect URIs** — Register `autumn.grove.place` as valid callback, remove stale Pages URLs
+- [ ] **Kill legacy Heartwood login** — Once Better Auth confirmed working, remove/redirect old `/login` route
+
+**Debug clues from URL:**
+```
+client_id=autumnsgrove          ← OLD client, not Lattice tenant
+redirect_uri=autumn-website.pages.dev  ← Stale Cloudflare Pages URL
+heartwood.grove.place/login     ← Legacy route, not Better Auth
+```
+
+**Context:** PR migrated Gallery + GitHub Dashboard into Curios, added Grafts pattern, but auth migration incomplete. Better Auth should handle OAuth without the old DO worker handoff slowness.
+
 ### 📋 Planning Documents Status
 > **All 7 original plans COMPLETE!** See `docs/plans/completed/` for details.
 
