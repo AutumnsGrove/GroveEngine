@@ -377,6 +377,19 @@ export const specs: Doc[] = [
     readingTime: 18,
   },
   {
+    slug: "petal-spec",
+    title: "Petal — Image Content Moderation",
+    description:
+      "Privacy-first image moderation with four layers of protection and zero data retention",
+    excerpt:
+      "Petals close to protect what's precious. Petal is Grove's image content moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Privacy by design, safety by default.",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "fan",
+    lastUpdated: "2026-01-20",
+    readingTime: 20,
+  },
+  {
     slug: "meadow-spec",
     title: "Meadow — Social Feed",
     description: "Community feed, sharing, voting, and reactions system",

@@ -209,6 +209,8 @@ import {
   TriangleAlert,
   Unplug,
   Gamepad,
+  // Petal - image content moderation
+  Fan,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -352,6 +354,8 @@ export const toolIcons = {
   swatchbook: SwatchBook,
   brickwallshield: BrickWall,
   wind: Wind,
+  // Petal - image content moderation
+  fan: Fan,
   // Beyond page icons (standalone tools)
   music: Music,
   book: BookOpen,
@@ -521,6 +525,7 @@ export const roadmapFeatureIcons = {
   // First Buds additions
   gossamer: Sparkles, // Gossamer - ASCII visual effects
   wisp: Wind, // Wisp - writing assistant
+  petal: Fan, // Petal - image content moderation
   forests: Trees, // Forests - community groves
   porch: RockingChair, // Porch - support conversations
   centennial: SquaresExclude, // Centennial - 100-year preservation

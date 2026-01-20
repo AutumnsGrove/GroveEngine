@@ -330,6 +330,20 @@
 					]
 				},
 				{
+					name: 'Petal',
+					tagline: 'Image Content Moderation',
+					description: 'Petals close to protect what\'s precious. Petal is Grove\'s image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.',
+					status: 'building',
+					icon: 'fan',
+					integration: 'Image moderation for uploads and AI-generated content',
+					spec: '/knowledge/specs/petal-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+					]
+				},
+				{
 					name: 'Wisp',
 					tagline: 'Writing Assistant',
 					description: 'A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.',
