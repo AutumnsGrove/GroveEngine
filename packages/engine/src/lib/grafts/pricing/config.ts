@@ -246,3 +246,50 @@ export function formatAnnualAsMonthly(annualPrice: number): string {
   const monthly = annualPrice / 12;
   return `$${monthly.toFixed(2)}/mo`;
 }
+
+// =============================================================================
+// BILLING PERIOD UTILITIES
+// =============================================================================
+
+/**
+ * Database billing cycle format.
+ * Some systems (like LemonSqueezy webhooks) use "yearly" instead of "annual".
+ */
+export type DbBillingCycle = "monthly" | "yearly";
+
+/**
+ * Convert graft billing period to database format.
+ *
+ * The graft uses "annual" (standard pricing terminology) but databases
+ * and some external systems use "yearly".
+ *
+ * @param period - Billing period from the graft
+ * @returns Database-compatible billing cycle
+ *
+ * @example
+ * ```typescript
+ * const dbCycle = billingPeriodToDbFormat('annual'); // 'yearly'
+ * ```
+ */
+export function billingPeriodToDbFormat(
+  period: "monthly" | "annual",
+): DbBillingCycle {
+  return period === "annual" ? "yearly" : "monthly";
+}
+
+/**
+ * Convert database billing cycle to graft billing period.
+ *
+ * @param dbFormat - Database billing cycle
+ * @returns Graft-compatible billing period
+ *
+ * @example
+ * ```typescript
+ * const period = dbFormatToBillingPeriod('yearly'); // 'annual'
+ * ```
+ */
+export function dbFormatToBillingPeriod(
+  dbFormat: DbBillingCycle,
+): "monthly" | "annual" {
+  return dbFormat === "yearly" ? "annual" : "monthly";
+}

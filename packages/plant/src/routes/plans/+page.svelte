@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2, Sprout, TreeDeciduous, Trees, Crown } from '@autumnsgrove/groveengine/ui/icons';
+	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	// Use graft config for tier data and toggle component
@@ -8,25 +8,20 @@
 		PricingToggle,
 		type PricingTier,
 		type BillingPeriod,
-		getDisplayPrice,
-		formatAnnualAsMonthly,
 		DEFAULT_ANNUAL_SAVINGS,
+		billingPeriodToDbFormat,
 	} from '@autumnsgrove/groveengine/grafts/pricing';
-	import type { TierStatus, TierIcon } from '@autumnsgrove/groveengine/config';
+	import type { TierStatus } from '@autumnsgrove/groveengine/config';
 
-	let { data, form } = $props();
+	// Shared icon mapping
+	import { tierIcons } from '$lib/ui/tier-icons';
+
+	// Type-safe props
+	import type { PageData, ActionData } from './$types';
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	// Plans from server (transformed via graft config)
-	const plans = data.tiers;
-
-	// Icon mapping at component level
-	const tierIcons: Record<TierIcon, typeof Sprout> = {
-		user: Sprout, // fallback
-		sprout: Sprout,
-		'tree-deciduous': TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
-	};
+	const plans: PricingTier[] = data.tiers;
 
 	// ============================================================================
 	// STATE
@@ -42,7 +37,7 @@
 	let isSubmitting = $state(false);
 
 	// Map billing period to database format (annual → yearly)
-	let billingCycleForDb = $derived(billingPeriod === 'annual' ? 'yearly' : 'monthly');
+	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
 
 	// ============================================================================
 	// STATUS COLOR HELPERS
@@ -343,7 +338,7 @@
 				<Loader2 class="w-5 h-5 animate-spin" />
 				Processing...
 			{:else if selectedPlan}
-				Continue with {plans.find((p: PricingTier) => p.key === selectedPlan)?.name}
+				Continue with {plans.find((p) => p.key === selectedPlan)?.name}
 			{:else}
 				Select a plan to continue
 			{/if}

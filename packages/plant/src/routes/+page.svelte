@@ -25,31 +25,20 @@
 		ArrowRight,
 		Clock,
 		Lock,
-		// Pricing tier icons
 		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown,
 		// Notice icon
 		AlertTriangle
 	} from '@autumnsgrove/groveengine/ui/icons';
 
 	// Use graft config for tier data
 	import { transformAllTiers, type PricingTier } from '@autumnsgrove/groveengine/grafts/pricing';
-	import type { TierIcon } from '@autumnsgrove/groveengine/config';
 
-	// Tier icon mapping
-	const tierIcons: Record<TierIcon, typeof Sprout> = {
-		user: Sprout,
-		sprout: Sprout,
-		'tree-deciduous': TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
-	};
+	// Shared icon mapping
+	import { tierIcons } from '$lib/ui/tier-icons';
 
 	// Get plan previews from graft (paid tiers only, first 3 features as highlights)
 	const allTiers = transformAllTiers({ excludeTiers: ['free'] });
-	const planPreviews = allTiers.map((tier: PricingTier) => ({
+	const planPreviews = allTiers.map((tier) => ({
 		key: tier.key,
 		name: tier.name,
 		tagline: tier.tagline,
