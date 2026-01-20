@@ -128,6 +128,7 @@
 					status: 'live',
 					icon: 'goal',
 					integration: 'Operator-configured feature customization',
+					spec: '/knowledge/specs/grafts-spec',
 					subComponents: [
 						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
 						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },

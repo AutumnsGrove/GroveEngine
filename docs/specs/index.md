@@ -1,7 +1,7 @@
 ---
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Tuesday, January 14th 2026
+date modified: Monday, January 20th 2026
 tags:
   - specifications
   - architecture
@@ -51,6 +51,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | ~~[Engine](engine-spec.md)~~ | ~~Blog rendering & content management~~ | **Deprecated** | *Merged into Lattice* |
 | **[Heartwood](heartwood-spec.md)** | Centralized authentication service | **Active** | All services |
 | **[Plant](plant-spec.md)** | Tenant onboarding & signup flow | Planned | Lattice, Heartwood |
+| **[Grafts](grafts-spec.md)** | Per-tenant feature customization | **Active** | All services |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
 
@@ -262,6 +263,7 @@ graph TB
 | **Rings** | Yes: Integration | Yes: Metrics | Yes: Core | Yes: Storage | No | Yes: PostDO |
 | **Vineyard** | Partial: Testing | Yes: Primary | Partial: Correlation | Yes: Results | No | Yes: DO tests |
 | **Engine** | Yes: Framework | Yes: Metrics | Yes: Analytics | Yes: Content | Yes: Media | Yes: PostDO |
+| **Grafts** | Yes: Core | Partial: Metrics | Partial: Experiments | Yes: Config | No | No |
 | **AI Gateway** | Yes: Framework | Yes: Analytics | Partial: Correlation | Yes: Quota tracking | No | Partial: TenantDO |
 
 **Legend:** Yes = Direct integration, Partial = Indirect/metrics only, No = No integration
@@ -341,6 +343,7 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-20 | 2.5 | Added Grafts spec (feature customization system) |
 | 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
 | 2026-01-13 | 2.3 | Added Shutter web content distillation spec |
 | 2026-01-06 | 2.2 | Added Porch spec (renamed from Echo) |
