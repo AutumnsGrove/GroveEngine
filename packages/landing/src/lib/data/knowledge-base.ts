@@ -1124,6 +1124,8 @@ export const legalDocs: Doc[] = [
 
 // Architecture Patterns
 export const patterns: Doc[] = [
+  // Order: Prism → Loom → Threshold → Firefly → Songbird → Sentinel → Vineyard
+  // (matches workshop page - the source of truth for pattern ordering)
   {
     slug: "prism-pattern",
     title: "Prism — Grove Design System",
@@ -1134,17 +1136,6 @@ export const patterns: Doc[] = [
     icon: "triangle",
     lastUpdated: "2026-01-02",
     readingTime: 20,
-  },
-  {
-    slug: "songbird-pattern",
-    title: "Songbird — Prompt Injection Protection",
-    description: "Three-layer defense system against prompt injection attacks",
-    excerpt:
-      "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
-    category: "patterns",
-    icon: "bird",
-    lastUpdated: "2026-01-01",
-    readingTime: 12,
   },
   {
     slug: "loom-durable-objects-pattern",
@@ -1171,15 +1162,27 @@ export const patterns: Doc[] = [
     readingTime: 15,
   },
   {
-    slug: "vineyard-spec",
-    title: "Vineyard — Tool Showcase Pattern",
-    description: "Consistent documentation and demo pattern for Grove tools",
+    slug: "firefly-pattern",
+    title: "Firefly — Ephemeral Server Pattern",
+    description:
+      "On-demand infrastructure that ignites, illuminates, and fades away",
     excerpt:
-      "Vineyard is a documentation pattern every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed. A consistent way to showcase the ecosystem.",
+      "A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability, full VM capabilities.",
     category: "patterns",
-    icon: "grape",
-    lastUpdated: "2025-12-30",
-    readingTime: 5,
+    icon: "webhook",
+    lastUpdated: "2026-01-01",
+    readingTime: 18,
+  },
+  {
+    slug: "songbird-pattern",
+    title: "Songbird — Prompt Injection Protection",
+    description: "Three-layer defense system against prompt injection attacks",
+    excerpt:
+      "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
+    category: "patterns",
+    icon: "bird",
+    lastUpdated: "2026-01-01",
+    readingTime: 12,
   },
   {
     slug: "sentinel-pattern",
@@ -1194,16 +1197,15 @@ export const patterns: Doc[] = [
     readingTime: 20,
   },
   {
-    slug: "firefly-pattern",
-    title: "Firefly — Ephemeral Server Pattern",
-    description:
-      "On-demand infrastructure that ignites, illuminates, and fades away",
+    slug: "vineyard-spec",
+    title: "Vineyard — Tool Showcase Pattern",
+    description: "Consistent documentation and demo pattern for Grove tools",
     excerpt:
-      "A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability, full VM capabilities.",
+      "Vineyard is a documentation pattern every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed. A consistent way to showcase the ecosystem.",
     category: "patterns",
-    icon: "webhook",
-    lastUpdated: "2026-01-01",
-    readingTime: 18,
+    icon: "grape",
+    lastUpdated: "2025-12-30",
+    readingTime: 5,
   },
 ];
 

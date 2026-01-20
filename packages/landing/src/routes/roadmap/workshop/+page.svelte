@@ -581,6 +581,21 @@
 					]
 				},
 				{
+					name: 'Threshold',
+					tagline: 'Rate Limiting & Abuse Prevention',
+					description: 'The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.',
+					status: 'live',
+					icon: 'gauge',
+					integration: 'Protection layer for all Grove endpoints',
+					spec: '/knowledge/patterns/threshold-pattern',
+					subComponents: [
+						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
+						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
+						{ name: 'User', icon: 'users', description: 'Per-user limits' },
+						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
+					]
+				},
+				{
 					name: 'Firefly',
 					tagline: 'Ephemeral Server Pattern',
 					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
@@ -605,21 +620,6 @@
 						{ name: 'Kestrel', icon: 'feather', description: 'Semantic validation' },
 						{ name: 'Robin', icon: 'toolcase', description: 'Safe response' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
-					]
-				},
-				{
-					name: 'Threshold',
-					tagline: 'Rate Limiting & Abuse Prevention',
-					description: 'The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.',
-					status: 'live',
-					icon: 'gauge',
-					integration: 'Protection layer for all Grove endpoints',
-					spec: '/knowledge/patterns/threshold-pattern',
-					subComponents: [
-						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
-						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
-						{ name: 'User', icon: 'users', description: 'Per-user limits' },
-						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
 					]
 				},
 				{
