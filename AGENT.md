@@ -380,6 +380,7 @@ const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published'
 - **For systematic investigation** → Use skill: `research-strategy`
 
 ### Testing
+- **When deciding what to test or reviewing test quality** → Use skill: `grove-testing`
 - **Before writing JavaScript/TypeScript tests** → Use skill: `javascript-testing`
 - **Before writing Python tests** → Use skill: `python-testing`
 - **Before writing Go tests** → Use skill: `go-testing`
@@ -456,6 +457,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `git-workflows` | Commits, branching, conventional commits |
 | `git-hooks` | Pre-commit hooks setup |
 | `uv-package-manager` | Python dependencies with UV |
+| `grove-testing` | Testing philosophy, what/when to test |
 | `python-testing` | pytest, fixtures, mocking |
 | `javascript-testing` | Vitest/Jest testing |
 | `go-testing` | Go testing patterns |
@@ -518,5 +520,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-17*
+*Last updated: 2026-01-20*
 *Model: Claude Opus 4.5*
