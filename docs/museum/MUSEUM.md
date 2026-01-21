@@ -38,7 +38,13 @@ Lattice is the framework that powers Grove. The name evokes a structure that sup
               │   │ 5.  │   │ 6.  │    │
               │   │PERS │───│COMM │    │
               │   │ONAL │   │UNIT │    │
-              │   └─────┘   └─────┘    │
+              │   └──┬──┘   └──┬──┘    │
+              │      │         │       │
+              │      └────┬────┘       │
+              │       ┌───┴───┐        │
+              │       │  7.   │        │
+              │       │NAMING │        │
+              │       └───────┘        │
               │                        │
               ╰────────────────────────╯
 ```
@@ -124,6 +130,22 @@ The Meadow is where blogs can share posts to a community feed. The Landing welco
 
 ---
 
+### [7. The Naming Wing](./naming/WING.md)
+
+How Grove names things, and why it matters.
+
+Names aren't branding. They're world-building. Every service has a nature metaphor that genuinely fits. Each name was discovered through a walk through the forest, not a brainstorming session with sticky notes.
+
+**Exhibits:**
+- The Philosophy (names as ecosystem language)
+- The Walk (the ritual of discovering names)
+- The Journeys Gallery (50+ naming journeys with rejected ideas, realizations)
+- The Ecosystem Map (40+ services, each with its story)
+
+**Featured Journey:** Loom. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along. But you had to walk to know that."
+
+---
+
 ## The Glossary Alcove
 
 Before you explore, you might want to learn [Grove's vocabulary](./glossary.md).
@@ -149,6 +171,9 @@ Start with [The Seasons](./nature/seasons.md). It shows how five color palettes 
 
 **If you're building something similar:**
 Start with [The Engine Room](./architecture/engine-room.md). It explains the pattern that prevented 11,925 lines of duplicate code.
+
+**If you care about words:**
+Start with [The Naming Wing](./naming/WING.md). See how "Porch" became the support system and why "Loom" stayed Loom.
 
 **If you just want to wander:**
 Pick any wing. They're all connected. You'll find your way.

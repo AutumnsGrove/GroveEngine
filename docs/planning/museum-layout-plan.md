@@ -42,6 +42,11 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
               │ └───────┘  └───────────┘  └───────┘ │
               │                  │                   │
               │           ╭──────┴──────╮            │
+              │           │   NAMING    │            │
+              │           │    WING     │            │
+              │           ╰──────┬──────╯            │
+              │                  │                   │
+              │           ╭──────┴──────╮            │
               │           │  GLOSSARY   │            │
               │           │   ALCOVE    │            │
               │           ╰─────────────╯            │
@@ -216,7 +221,36 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 ---
 
-### 7. The Glossary Alcove
+### 7. The Naming Wing
+
+**Theme:** How Grove names things, and why it matters.
+
+**Location:** `docs/museum/naming/`
+
+| Exhibit | Focus | Key Files |
+|---------|-------|-----------|
+| **The Philosophy** | Why names aren't branding, they're world-building | `docs/philosophy/grove-naming.md` |
+| **The Walk** | The ritual: how names are discovered, not invented | `docs/philosophy/walking-through-the-grove.md` |
+| **The Journeys Gallery** | 50+ naming journeys with ASCII art, rejected ideas, realizations | `docs/philosophy/naming-research/` |
+| **The Ecosystem Map** | 40+ services, each with nature metaphors that fit | `grove-naming.md` ecosystem table |
+
+**Visitor Journey:**
+1. Understand why Grove doesn't use words like "user" or "feature flag"
+2. Learn the philosophy: "The Grove is the place. These are the things you find there."
+3. Walk through a naming journey (Loom, Heartwood, Porch)
+4. See how a name is tested: "Does it complete the tagline naturally?"
+5. Appreciate that rejected names teach as much as chosen ones
+
+**Featured Journeys:**
+- **Loom** - "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
+- **Porch** - Support isn't a ticket system. It's a porch conversation.
+- **Heartwood** - The dense core of a tree. Where trust lives.
+
+**Emotional Goal:** Visitors should feel how naming shapes the entire experience. Words create worlds.
+
+---
+
+### 8. The Glossary Alcove
 
 **Theme:** Grove vocabulary demystified.
 
@@ -274,6 +308,14 @@ docs/museum/
 │   ├── meadow.md                # Community feed
 │   ├── landing.md               # Welcome experience
 │   └── clearing.md              # Status transparency
+├── naming/
+│   ├── WING.md                  # The philosophy of naming
+│   ├── the-walk.md              # The naming ritual
+│   ├── journeys/                # Individual naming journeys
+│   │   ├── loom.md              # Featured: Loom journey
+│   │   ├── porch.md             # Featured: Porch journey
+│   │   └── heartwood.md         # Featured: Heartwood journey
+│   └── ecosystem.md             # The full naming map
 └── glossary.md                  # Grove vocabulary
 ```
 
@@ -302,15 +344,16 @@ Each exhibit should follow the museum-documentation skill structure:
 1. MUSEUM.md (entrance)
 2. Architecture Wing (foundation, engine-room)
 3. Nature Wing (seasons, forest)
-4. Glossary
+4. Naming Wing (philosophy, the-walk, featured journeys)
+5. Glossary
 
 **Phase 2: Trust & Data**
-5. Trust Wing (heartwood, sessions)
-6. Data Wing (filing-cabinet, query-builders)
+6. Trust Wing (heartwood, sessions)
+7. Data Wing (filing-cabinet, query-builders)
 
 **Phase 3: Personalization & Community**
-7. Personalization Wing (grafts, curios)
-8. Community Wing (meadow, landing)
+8. Personalization Wing (grafts, curios)
+9. Community Wing (meadow, landing)
 
 ---
 
@@ -323,6 +366,7 @@ A Wanderer who completes the museum tour should:
 - [ ] Feel the warmth behind nature component choices
 - [ ] Grasp how authentication flows without fear
 - [ ] Appreciate the caching strategy's elegance
+- [ ] Understand why naming matters (words create worlds)
 - [ ] Want to personalize their own blog
 - [ ] Feel welcomed into the Grove community
 
