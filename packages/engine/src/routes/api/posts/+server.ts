@@ -33,6 +33,7 @@ interface PostInput {
   gutter_content?: string;
   font?: string;
   fireside_assisted?: number;
+  status?: "draft" | "published";
 }
 
 /**
@@ -242,7 +243,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       html_content,
       gutter_content: data.gutter_content || "[]",
       font: data.font || "default",
-      status: "draft",
+      status: data.status || "draft",
       word_count: wordCount,
       reading_time: readingTime,
       fireside_assisted: data.fireside_assisted || 0,

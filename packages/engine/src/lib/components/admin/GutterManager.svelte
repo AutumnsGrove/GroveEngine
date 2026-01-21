@@ -5,6 +5,7 @@
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X } from "lucide-svelte";
+  import { debounce } from '$lib/utils/debounce';
 
   /**
    * @typedef {Object} GutterItem
@@ -39,6 +40,32 @@
    * @property {string} displayText - Human-readable display text
    * @property {string} type - Anchor type for accessibility labels
    */
+
+  // Image Cache with TTL - prevents redundant CDN requests on repeated opens
+  const imageCache = new Map();
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  /**
+   * Get cached image URL if still valid
+   * @param {string} key
+   * @returns {string | null}
+   */
+  function getCachedImage(key) {
+    const cached = imageCache.get(key);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.url;
+    }
+    return null;
+  }
+
+  /**
+   * Store image URL in cache with timestamp
+   * @param {string} key
+   * @param {string} url
+   */
+  function setCachedImage(key, url) {
+    imageCache.set(key, { url, timestamp: Date.now() });
+  }
 
   // Props
   let {
@@ -81,23 +108,33 @@
   }
 
   /**
-   * Preprocess anchors into structured data for better performance
-   * @type {ProcessedAnchor[]}
+   * Preprocess anchors into structured data with Map for O(1) lookup
+   * @type {Map<string, ProcessedAnchor>}
    */
-  let processedAnchors = $derived(availableAnchors.map(createProcessedAnchor));
+  let processedAnchorsMap = $derived.by(() => {
+    const map = new Map();
+    for (const anchor of availableAnchors) {
+      const processed = createProcessedAnchor(anchor);
+      map.set(anchor, processed);
+    }
+    return map;
+  });
+
+  /** Array version for rendering the anchor selection list */
+  let processedAnchors = $derived(Array.from(processedAnchorsMap.values()));
 
   /** Default empty anchor for fallback */
   const emptyAnchor = { raw: '', isHeading: false, headingLevel: 0, isAnchorTag: false, displayText: '', type: 'paragraph' };
 
   /**
-   * Get processed anchor data for display (checks cache first, then computes)
+   * Get processed anchor data for display (O(1) Map lookup)
    * @param {string | undefined} anchor
    * @returns {ProcessedAnchor}
    */
   function getProcessedAnchor(anchor) {
     if (!anchor) return emptyAnchor;
-    // Try to find in preprocessed cache first
-    const cached = processedAnchors.find(pa => pa.raw === anchor);
+    // O(1) lookup in Map instead of O(n) find on array
+    const cached = processedAnchorsMap.get(anchor);
     if (cached) return cached;
     // Fallback to computing for anchors not in availableAnchors
     return createProcessedAnchor(anchor);
@@ -125,6 +162,50 @@
   let cdnImages = $state([]);
   let cdnLoading = $state(false);
   let cdnFilter = $state("");
+
+  // Debounced CDN filter to avoid excessive API calls
+  const debouncedFilterRequest = debounce(async (query) => {
+    cdnLoading = true;
+    try {
+      const cacheKey = query ? `cdn_${query}` : 'cdn_root';
+
+      // Check cache first
+      const cachedResult = getCachedImage(cacheKey);
+      if (cachedResult) {
+        try {
+          cdnImages = JSON.parse(cachedResult);
+          cdnLoading = false;
+          return;
+        } catch {
+          // If cache parsing fails, continue to API call
+        }
+      }
+
+      const params = new URLSearchParams();
+      if (query) params.set("prefix", String(query));
+      params.set("limit", "50");
+
+      const response = await fetch(`/api/images/list?${params}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+        const filtered = data.images.filter((/** @type {CdnImage} */ img) => {
+          const key = img.key.toLowerCase();
+          return imageExtensions.some((ext) => key.endsWith(ext));
+        });
+        cdnImages = filtered;
+        // Cache the result
+        setCachedImage(cacheKey, JSON.stringify(filtered));
+      }
+    } catch (err) {
+      toast.error('Failed to load CDN images');
+      console.error("Failed to load CDN images:", err);
+      cdnImages = [];
+    } finally {
+      cdnLoading = false;
+    }
+  }, 300);
 
   function resetForm() {
     itemType = "comment";
@@ -228,31 +309,9 @@
     }
   }
 
-  // CDN Image Picker
-  async function loadCdnImages() {
-    cdnLoading = true;
-    try {
-      const params = new URLSearchParams();
-      if (cdnFilter) params.set("prefix", cdnFilter);
-      params.set("limit", "50");
-
-      const response = await fetch(`/api/images/list?${params}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-        cdnImages = data.images.filter((/** @type {CdnImage} */ img) => {
-          const key = img.key.toLowerCase();
-          return imageExtensions.some((ext) => key.endsWith(ext));
-        });
-      }
-    } catch (err) {
-      toast.error('Failed to load CDN images');
-      console.error("Failed to load CDN images:", err);
-      cdnImages = [];
-    } finally {
-      cdnLoading = false;
-    }
+  // CDN Image Picker - now uses debounced filter request
+  function loadCdnImages() {
+    debouncedFilterRequest(cdnFilter);
   }
 
   /** @param {(url: string) => void} callback */

@@ -80,5 +80,6 @@ export const load: LayoutServerLoad = async ({
     ...parentData,
     user: locals.user,
     tenant,
+    csrfToken: locals.csrfToken,
   };
 };

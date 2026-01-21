@@ -4,18 +4,21 @@ import type { PageServerLoad } from "./$types";
 interface PostRecord {
   slug: string;
   title: string;
-  date?: string;
+  status?: string;
   /** JSON string of tags array */
   tags?: string;
   description?: string;
-  /** Can be ISO string or Unix timestamp (number) */
-  created_at?: string | number;
+  /** Unix timestamp in seconds */
+  published_at?: number;
+  updated_at?: number;
+  created_at?: number;
 }
 
 interface BlogPost {
   slug: string;
   title: string;
-  date: string;
+  status: string;
+  date: string | null;
   tags: string[];
   description: string;
 }
@@ -54,22 +57,29 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
     // Transform posts - parse tags from JSON string
     const posts: BlogPost[] = postsArray.map((post) => {
-      // Handle date - could be ISO string, Unix timestamp, or undefined
-      let date = "";
-      if (post.date) {
-        date = post.date;
+      // Determine which timestamp to use based on post status
+      // For published posts: use published_at
+      // For drafts: use updated_at
+      // Fallback to created_at if needed
+      let timestamp: number | undefined;
+
+      if (post.status === "published" && post.published_at) {
+        timestamp = post.published_at;
+      } else if (post.updated_at) {
+        timestamp = post.updated_at;
       } else if (post.created_at) {
-        // created_at could be Unix timestamp (number) or ISO string
-        if (typeof post.created_at === "number") {
-          date = new Date(post.created_at * 1000).toISOString().split("T")[0];
-        } else if (typeof post.created_at === "string") {
-          date = post.created_at.split("T")[0];
-        }
+        timestamp = post.created_at;
       }
+
+      // Convert Unix timestamp (seconds) to ISO date string (YYYY-MM-DD)
+      const date = timestamp
+        ? new Date(timestamp * 1000).toISOString().split("T")[0]
+        : null;
 
       return {
         slug: post.slug,
         title: post.title,
+        status: post.status || "draft",
         date,
         tags: post.tags ? JSON.parse(post.tags) : [],
         description: post.description || "",

@@ -67,7 +67,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
               current_period_start, current_period_end, cancel_at_period_end,
               trial_end, payment_method_last4, payment_method_brand,
               created_at, updated_at
-       FROM platform_billing WHERE tenant_id = ?`
+       FROM platform_billing WHERE tenant_id = ?`,
     )
       .bind(locals.tenantId)
       .first<BillingRecord>();
@@ -83,7 +83,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
     tenant = await platform.env.DB.prepare(
       `SELECT id, subdomain, display_name, email, plan, storage_used, storage_limit,
               post_count, post_limit, created_at
-       FROM tenants WHERE id = ?`
+       FROM tenants WHERE id = ?`,
     )
       .bind(locals.tenantId)
       .first<TenantRecord>();
@@ -99,13 +99,19 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
   let exportTooLarge = false;
   try {
     const [postResult, pageResult, mediaResult] = await Promise.all([
-      platform.env.DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
+      platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
+      )
         .bind(locals.tenantId)
         .first<{ count: number }>(),
-      platform.env.DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
+      platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?",
+      )
         .bind(locals.tenantId)
         .first<{ count: number }>(),
-      platform.env.DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
+      platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?",
+      )
         .bind(locals.tenantId)
         .first<{ count: number }>(),
     ]);
@@ -114,19 +120,25 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
       pages: pageResult?.count ?? 0,
       media: mediaResult?.count ?? 0,
     };
-    exportTooLarge = Object.values(exportCounts).some(count => count > MAX_EXPORT_ITEMS);
+    exportTooLarge = Object.values(exportCounts).some(
+      (count) => count > MAX_EXPORT_ITEMS,
+    );
   } catch (e) {
     console.error("[Account] Failed to load export counts:", e);
     // Non-critical - continue without counts
   }
 
   // Get tier configuration
-  const currentPlan = (billing?.plan || tenant?.plan || "seedling") as TierKey;
+  // Prioritize billing.plan (source of truth from Stripe) using nullish coalescing
+  const currentPlan = (billing?.plan ?? tenant?.plan ?? "seedling") as TierKey;
   const tierConfig = getTier(currentPlan);
 
   // Get available tiers for plan changes
   const availableTiers = Object.entries(TIERS)
-    .filter(([key, config]) => config.status === "available" || config.status === "coming_soon")
+    .filter(
+      ([key, config]) =>
+        config.status === "available" || config.status === "coming_soon",
+    )
     .map(([key, config]) => ({
       id: key,
       name: config.display.name,
@@ -173,7 +185,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
           postCount: tenant.post_count,
           postLimit: tenant.post_limit,
           accountAge: Math.floor(
-            (Date.now() / 1000 - tenant.created_at) / (24 * 60 * 60)
+            (Date.now() / 1000 - tenant.created_at) / (24 * 60 * 60),
           ),
         }
       : null,

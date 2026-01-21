@@ -23,7 +23,7 @@
     <h2>Usage</h2>
     <div class="error-state small" role="alert" aria-live="polite">
       <AlertCircle class="error-icon" aria-hidden="true" />
-      <p class="error-desc">Could not load usage data. Try refreshing the page.</p>
+      <p class="error-desc">Unable to load usage statistics. Please try again later.</p>
     </div>
   </GlassCard>
 {:else if usage}

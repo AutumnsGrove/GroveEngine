@@ -180,9 +180,9 @@
         <BarChart3 class="w-7 h-7 text-accent-muted" />
         <span class="font-medium text-center text-sm">View Analytics</span>
       </a>
-      <a href="/admin/timeline" class="action-card glass-action">
+      <a href="/admin/curios" class="action-card glass-action">
         <Calendar class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">Timeline</span>
+        <span class="font-medium text-center text-sm">Curios</span>
       </a>
       <a href="/admin/settings" class="action-card glass-action">
         <Settings class="w-7 h-7 text-accent-muted" />

@@ -56,7 +56,9 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
   // Get R2 bucket binding
   // The bucket name in config maps to environment binding
   const bucketName = config.r2_bucket || "IMAGES";
-  const r2Bucket = platform?.env?.[bucketName] as R2Bucket | undefined;
+  const r2Bucket = (platform?.env as Record<string, unknown>)?.[bucketName] as
+    | R2Bucket
+    | undefined;
 
   if (!r2Bucket) {
     throw error(503, `R2 bucket '${bucketName}' not configured`);

@@ -68,7 +68,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "Tenant context required");
   }
 
-  const body = await request.json();
+  const body = (await request.json()) as {
+    name: string;
+    color?: string;
+    description?: string;
+  };
   const { name, color, description } = body;
 
   if (!name || typeof name !== "string") {
@@ -177,7 +181,13 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "Tenant context required");
   }
 
-  const body = await request.json();
+  const body = (await request.json()) as {
+    id: string;
+    name?: string;
+    color?: string;
+    description?: string;
+    sortOrder?: number;
+  };
   const { id, name, color, description, sortOrder } = body;
 
   if (!id) {
@@ -210,7 +220,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
   if (description !== undefined) {
     updates.push("description = ?");
-    params.push(description?.trim() || null);
+    params.push(description?.trim() || "");
   }
 
   if (sortOrder !== undefined) {

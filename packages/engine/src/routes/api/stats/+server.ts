@@ -119,26 +119,26 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     // Continue with empty tags - we can still show post stats and account age
   }
 
-  // Query 3: Get account creation date from users table
+  // Query 3: Get account creation date from tenants table
   let accountAgeDays = 0;
   try {
-    const userQuery = `
-      SELECT created_at FROM users WHERE id = ? LIMIT 1
+    const tenantQuery = `
+      SELECT created_at FROM tenants WHERE id = ? LIMIT 1
     `;
-    const userResult = await db
-      .prepare(userQuery)
-      .bind(locals.user.id)
+    const tenantResult = await db
+      .prepare(tenantQuery)
+      .bind(tenantId)
       .first<UserRow>();
 
-    if (userResult?.created_at) {
-      const createdAt = new Date(userResult.created_at);
+    if (tenantResult?.created_at) {
+      const createdAt = new Date(tenantResult.created_at);
       const now = new Date();
       accountAgeDays = Math.floor(
         (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
       );
     }
   } catch {
-    // User table might not have created_at, use fallback
+    // Tenant table might not have created_at, use fallback
     accountAgeDays = 30;
   }
 

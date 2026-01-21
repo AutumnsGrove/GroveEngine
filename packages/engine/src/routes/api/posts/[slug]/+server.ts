@@ -53,6 +53,7 @@ interface PostInput {
   description?: string;
   gutter_content?: string;
   font?: string;
+  status?: "draft" | "published";
 }
 
 /**
@@ -278,6 +279,7 @@ export const PUT: RequestHandler = async ({
         file_hash,
         gutter_content: data.gutter_content || "[]",
         font: data.font || "default",
+        status: data.status,
         updated_at: timestamp,
       },
       "slug = ?",

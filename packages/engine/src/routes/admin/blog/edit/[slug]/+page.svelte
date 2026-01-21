@@ -20,6 +20,7 @@
   let font = $state("default");
   let content = $state("");
   let gutterItems = $state(/** @type {any[]} */ ([]));
+  let status = $state("draft");
 
   // Sync form state when data changes (e.g., navigating to different post)
   $effect(() => {
@@ -31,6 +32,7 @@
     font = /** @type {any} */ (data.post).font || "default";
     content = data.post.markdown_content || "";
     gutterItems = data.post.gutter_content ? JSON.parse(/** @type {string} */ (data.post.gutter_content)) : [];
+    status = /** @type {any} */ (data.post).status || "draft";
   });
 
   // Editor reference for anchor insertion
@@ -113,6 +115,7 @@
         font,
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
+        status,
       });
 
       // Clear draft on successful save
@@ -326,6 +329,17 @@
               </optgroup>
             </select>
             <span class="form-hint">Choose a font for this post's content</span>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" bind:value={status} class="form-input">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+            <span class="form-hint">
+              {status === "draft" ? "This post will be hidden from public view" : "This post will be visible to all visitors"}
+            </span>
           </div>
 
           <div class="metadata-info">

@@ -150,5 +150,6 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     siteSettings,
     navPages,
     navPageLimit,
+    csrfToken: locals.csrfToken,
   };
 };

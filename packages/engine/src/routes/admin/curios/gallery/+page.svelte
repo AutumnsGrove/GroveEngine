@@ -376,9 +376,7 @@
           id="customCss"
           name="customCss"
           bind:value={customCss}
-          placeholder=".gallery-page {
-  /* Your custom styles */
-}"
+          placeholder={".gallery-page { }"}
           class="field-textarea code"
           rows="6"
         ></textarea>

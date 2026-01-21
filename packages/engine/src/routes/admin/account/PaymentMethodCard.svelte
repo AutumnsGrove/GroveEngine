@@ -43,22 +43,20 @@
   {:else}
     <div class="no-payment">
       <p class="muted">No payment method on file.</p>
-      {#if billing?.customerId}
-        <Button
-          variant="secondary"
-          onclick={onOpenPortal}
-          disabled={openingPortal}
-          aria-busy={openingPortal}
-          aria-label={openingPortal ? "Opening billing portal..." : "Add payment method"}
-        >
-          {#if openingPortal}
-            <span aria-hidden="true"><Spinner size="sm" /></span>
-          {:else}
-            <CreditCard class="btn-icon" aria-hidden="true" />
-          {/if}
-          Add Payment Method
-        </Button>
-      {/if}
+      <Button
+        variant="secondary"
+        onclick={onOpenPortal}
+        disabled={openingPortal}
+        aria-busy={openingPortal}
+        aria-label={openingPortal ? "Opening billing portal..." : "Add payment method"}
+      >
+        {#if openingPortal}
+          <span aria-hidden="true"><Spinner size="sm" /></span>
+        {:else}
+          <CreditCard class="btn-icon" aria-hidden="true" />
+        {/if}
+        Add Payment Method
+      </Button>
     </div>
   {/if}
 

@@ -92,12 +92,19 @@
 
   {#if billing?.hasSubscription}
     <div class="billing-details">
-      <div class="detail-row">
-        <span class="detail-label">Current Period</span>
-        <span class="detail-value">
-          {formatDate(billing?.currentPeriodStart)} — {formatDate(billing?.currentPeriodEnd)}
-        </span>
-      </div>
+      {#if billing?.currentPeriodStart && billing?.currentPeriodEnd}
+        <div class="detail-row">
+          <span class="detail-label">Current Period</span>
+          <span class="detail-value">
+            {formatDate(billing.currentPeriodStart)} — {formatDate(billing.currentPeriodEnd)}
+          </span>
+        </div>
+      {:else if billing?.hasSubscription}
+        <div class="detail-row">
+          <span class="detail-label">Current Period</span>
+          <span class="detail-value muted">Period unavailable</span>
+        </div>
+      {/if}
 
       {#if billing?.currentPeriodEnd}
         {@const days = daysRemaining(billing.currentPeriodEnd)}
@@ -326,6 +333,10 @@
 
   .detail-value.warning {
     color: #ea580c;
+  }
+
+  .detail-value.muted {
+    color: var(--color-text-muted);
   }
 
   .plan-actions {

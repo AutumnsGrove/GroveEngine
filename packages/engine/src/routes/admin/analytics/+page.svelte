@@ -18,7 +18,7 @@
 			<div class="mb-4">
 				<Sprout class="w-16 h-16 text-accent-muted mx-auto" />
 			</div>
-			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in Phase 5</h2>
+			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in Full Bloom (Early Summer)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
 				Rings is Grove's private analytics system designed for writers, not marketers.
 				Meaningful insights without the anxiety of real-time dashboards.

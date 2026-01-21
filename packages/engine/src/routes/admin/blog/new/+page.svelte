@@ -19,6 +19,7 @@
   /** @type {any[]} */
   let gutterItems = $state([]);
   let firesideAssisted = $state(false);
+  let status = $state("draft");
 
   // Editor reference for anchor insertion
   /** @type {any} */
@@ -116,6 +117,7 @@
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
         fireside_assisted: firesideAssisted ? 1 : 0,
+        status,
       });
 
       // Clear draft on successful save
@@ -292,6 +294,17 @@
               </optgroup>
             </select>
             <span class="form-hint">Choose a font for this post's content</span>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" bind:value={status} class="form-input">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+            <span class="form-hint">
+              {status === "draft" ? "This post will be hidden from public view" : "This post will be visible to all visitors"}
+            </span>
           </div>
         </div>
       {/if}

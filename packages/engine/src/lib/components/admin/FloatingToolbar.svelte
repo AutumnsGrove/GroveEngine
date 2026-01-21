@@ -109,7 +109,13 @@
     textareaRef.selectionEnd = selectionEnd + before.length;
     textareaRef.focus();
 
-    isVisible = false;
+    // Defer visibility check to allow selection to update
+    requestAnimationFrame(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.toString().length === 0) {
+        isVisible = false;
+      }
+    });
   }
 
   /**
@@ -139,7 +145,13 @@
     textareaRef.selectionEnd = selectionEnd + prefix.length;
     textareaRef.focus();
 
-    isVisible = false;
+    // Defer visibility check to allow selection to update
+    requestAnimationFrame(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.toString().length === 0) {
+        isVisible = false;
+      }
+    });
   }
 
   function handleBold() {
@@ -209,14 +221,13 @@
 
   // Set up selection monitoring and keyboard shortcuts
   onMount(() => {
-    document.addEventListener("mouseup", handleSelectionChange);
-    document.addEventListener("keyup", handleSelectionChange);
+    // Use selectionchange for more reliable selection tracking (catches programmatic changes)
+    document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyboardShortcuts);
 
     return () => {
-      document.removeEventListener("mouseup", handleSelectionChange);
-      document.removeEventListener("keyup", handleSelectionChange);
+      document.removeEventListener("selectionchange", handleSelectionChange);
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyboardShortcuts);
     };

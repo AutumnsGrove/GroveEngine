@@ -148,10 +148,10 @@
     resetPagination();
   }
 
-  const handleSearchInput = debounce((e: Event) => {
+  const handleSearchInput = (e: Event) => {
     searchQuery = (e.target as HTMLInputElement).value;
     resetPagination();
-  }, 300);
+  };
 
   // Watch for filter changes
   $effect(() => {
@@ -264,7 +264,9 @@
             <Filter class="w-4 h-4" />
             <span>Filters</span>
           </span>
-          <ChevronDown class="w-5 h-5 chevron" class:rotated={filtersExpanded} />
+          <span class="chevron-wrapper" class:rotated={filtersExpanded}>
+            <ChevronDown class="w-5 h-5 chevron" />
+          </span>
         </button>
 
         {#if filtersExpanded}
@@ -275,7 +277,7 @@
                 <div class="search-wrapper">
                   <Search class="w-4 h-4 search-icon" />
                   <Input
-                    type="search"
+                    type="text"
                     placeholder="Search photos..."
                     oninput={handleSearchInput}
                     class="search-input"
@@ -518,12 +520,18 @@
     gap: 0.5rem;
   }
 
-  .chevron {
+  .chevron-wrapper {
+    display: inline-flex;
+    align-items: center;
     transition: transform 0.3s ease;
   }
 
-  .chevron.rotated {
+  .chevron-wrapper.rotated {
     transform: rotate(180deg);
+  }
+
+  .chevron {
+    transition: inherit;
   }
 
   .filter-controls {

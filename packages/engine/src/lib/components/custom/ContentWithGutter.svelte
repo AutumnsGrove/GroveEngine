@@ -276,6 +276,22 @@
 				if (targetEl) {
 					targetEl.insertAdjacentElement('afterend', mobileGutterEl);
 					movedElements.push({ element: mobileGutterEl, originalParent, originalNextSibling });
+				} else {
+					// Fallback: anchor not found - log warning and position after first heading or at end
+					if (import.meta.env.DEV) {
+						const availableAnchors = Array.from(contentEl.querySelectorAll('[id]')).map((el) => el.id);
+						console.warn(`[ContentWithGutter] Mobile gutter anchor not found: ${anchor}`, {
+							anchorKey,
+							availableAnchors: availableAnchors.length > 0 ? availableAnchors : 'none'
+						});
+					}
+
+					// Fallback positioning: after first heading or at end of content
+					const fallbackAnchor = contentEl.querySelector('h1, h2, h3, h4, h5, h6') || contentEl.lastElementChild;
+					if (fallbackAnchor && fallbackAnchor instanceof HTMLElement) {
+						fallbackAnchor.insertAdjacentElement('afterend', mobileGutterEl);
+						movedElements.push({ element: mobileGutterEl, originalParent, originalNextSibling });
+					}
 				}
 			}
 		});

@@ -26,12 +26,12 @@ export interface ImageTag {
 export interface GalleryImage {
   r2_key?: string;
   key?: string;
-  custom_title?: string;
-  custom_date?: string;
-  custom_description?: string;
-  parsed_slug?: string;
-  parsed_date?: string;
-  parsed_category?: string;
+  custom_title?: string | null;
+  custom_date?: string | null;
+  custom_description?: string | null;
+  parsed_slug?: string | null;
+  parsed_date?: string | null;
+  parsed_category?: string | null;
   tags?: ImageTag[];
 }
 
@@ -57,7 +57,10 @@ export function parseImageFilename(r2Key: string): ParsedImageMetadata {
   // Extract slug (remove date prefix if present)
   let slug = nameWithoutExt;
   if (date) {
-    slug = slug.replace(date, "").replace(/^[-_]+/, "").replace(/[-_]+$/, "");
+    slug = slug
+      .replace(date, "")
+      .replace(/^[-_]+/, "")
+      .replace(/[-_]+$/, "");
   }
 
   // Clean up slug (convert underscores to hyphens)
@@ -87,7 +90,9 @@ export function getImageTitle(image: GalleryImage): string {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   }
-  return image.r2_key?.split("/").pop() || image.key?.split("/").pop() || "Untitled";
+  return (
+    image.r2_key?.split("/").pop() || image.key?.split("/").pop() || "Untitled"
+  );
 }
 
 /**
@@ -105,7 +110,10 @@ export function getImageDate(image: GalleryImage): string | null {
  * @param query - Search query
  * @returns Filtered images
  */
-export function searchImages(images: GalleryImage[], query: string): GalleryImage[] {
+export function searchImages(
+  images: GalleryImage[],
+  query: string,
+): GalleryImage[] {
   if (!query) return images;
 
   const lowerQuery = query.toLowerCase();
@@ -135,7 +143,7 @@ export function searchImages(images: GalleryImage[], query: string): GalleryImag
 export function filterImagesByDateRange(
   images: GalleryImage[],
   startDate: string | null,
-  endDate: string | null
+  endDate: string | null,
 ): GalleryImage[] {
   if (!startDate && !endDate) return images;
 
@@ -156,7 +164,10 @@ export function filterImagesByDateRange(
  * @param tagSlugs - Array of tag slugs to filter by
  * @returns Filtered images
  */
-export function filterImagesByTags(images: GalleryImage[], tagSlugs: string[]): GalleryImage[] {
+export function filterImagesByTags(
+  images: GalleryImage[],
+  tagSlugs: string[],
+): GalleryImage[] {
   if (!tagSlugs || tagSlugs.length === 0) return images;
 
   return images.filter((img) => {
@@ -174,7 +185,7 @@ export function filterImagesByTags(images: GalleryImage[], tagSlugs: string[]): 
  */
 export function filterImagesByCategory(
   images: GalleryImage[],
-  category: string | null
+  category: string | null,
 ): GalleryImage[] {
   if (!category) return images;
   return images.filter((img) => img.parsed_category === category);

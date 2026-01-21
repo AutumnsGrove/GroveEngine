@@ -408,8 +408,37 @@ export const POST: RequestHandler = async ({
     );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error creating billing checkout:", err);
-    throw error(500, "Failed to create checkout session");
+
+    // Extract error details for better debugging and user feedback
+    let errorMessage = "Failed to create checkout session";
+    const errorDetails: Record<string, unknown> = {};
+
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      errorDetails.message = err.message;
+
+      // Handle specific Stripe error codes
+      if (err.message.includes("Invalid price")) {
+        errorMessage =
+          "Selected plan is not available. Please try another plan.";
+      } else if (err.message.includes("Customer already exists")) {
+        errorMessage =
+          "This account already has an active subscription. Please contact support.";
+      } else if (err.message.includes("Invalid API key")) {
+        errorMessage = "Payment system error. Please try again later.";
+        errorDetails.severity = "critical";
+      }
+    } else {
+      errorDetails.rawError = String(err);
+    }
+
+    console.error(
+      "[Billing] Checkout creation failed:",
+      errorDetails,
+      err instanceof Error ? err.stack : undefined,
+    );
+
+    throw error(500, errorMessage);
   }
 };
 
@@ -661,8 +690,40 @@ export const PATCH: RequestHandler = async ({
     }
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error updating billing:", err);
-    throw error(500, "Failed to update subscription");
+
+    // Extract error details for better debugging and user feedback
+    let errorMessage = "Failed to update subscription";
+    const errorDetails: Record<string, unknown> = {};
+
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      errorDetails.message = err.message;
+
+      // Handle specific Stripe error codes
+      if (err.message.includes("No such subscription")) {
+        errorMessage =
+          "Subscription not found. Please try refreshing your billing page.";
+      } else if (err.message.includes("Card declined")) {
+        errorMessage =
+          "Payment method declined. Please update your payment method.";
+      } else if (err.message.includes("Authentication required")) {
+        errorMessage =
+          "Additional authentication required. Please contact support.";
+      } else if (err.message.includes("Invalid API key")) {
+        errorMessage = "Payment system error. Please try again later.";
+        errorDetails.severity = "critical";
+      }
+    } else {
+      errorDetails.rawError = String(err);
+    }
+
+    console.error(
+      "[Billing] Subscription update failed:",
+      errorDetails,
+      err instanceof Error ? err.stack : undefined,
+    );
+
+    throw error(500, errorMessage);
   }
 };
 
@@ -770,7 +831,32 @@ export const PUT: RequestHandler = async ({
     );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error creating billing portal:", err);
-    throw error(500, "Failed to create billing portal session");
+
+    // Extract error details for better debugging and user feedback
+    let errorMessage = "Failed to create billing portal session";
+    const errorDetails: Record<string, unknown> = {};
+
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      errorDetails.message = err.message;
+
+      // Handle specific Stripe error codes
+      if (err.message.includes("No such customer")) {
+        errorMessage = "Billing customer not found. Please contact support.";
+      } else if (err.message.includes("Invalid API key")) {
+        errorMessage = "Payment system error. Please try again later.";
+        errorDetails.severity = "critical";
+      }
+    } else {
+      errorDetails.rawError = String(err);
+    }
+
+    console.error(
+      "[Billing] Billing portal creation failed:",
+      errorDetails,
+      err instanceof Error ? err.stack : undefined,
+    );
+
+    throw error(500, errorMessage);
   }
 };

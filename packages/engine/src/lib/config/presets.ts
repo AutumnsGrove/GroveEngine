@@ -85,14 +85,6 @@ export const FONT_PRESETS: FontPreset[] = [
     description: "Accessibility font for low vision readers",
     category: "accessibility",
   },
-  {
-    id: "opendyslexic",
-    name: "OpenDyslexic",
-    family:
-      "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    description: "Accessibility font for dyslexia",
-    category: "accessibility",
-  },
 
   // Sans-serif
   {
@@ -112,6 +104,29 @@ export const FONT_PRESETS: FontPreset[] = [
     category: "sans-serif",
   },
 
+  // Serifs
+  {
+    id: "lora",
+    name: "Lora",
+    family: "'Lora', Georgia, 'Times New Roman', serif",
+    description: "Highly readable serif for body text",
+    category: "sans-serif",
+  },
+  {
+    id: "merriweather",
+    name: "Merriweather",
+    family: "'Merriweather', Georgia, 'Times New Roman', serif",
+    description: "Elegant, professional serif for reading",
+    category: "sans-serif",
+  },
+  {
+    id: "eb-garamond",
+    name: "EB Garamond",
+    family: "'EB Garamond', Georgia, 'Times New Roman', serif",
+    description: "Classic high-elegance serif",
+    category: "sans-serif",
+  },
+
   // Monospace
   {
     id: "ibm-plex-mono",
@@ -120,22 +135,8 @@ export const FONT_PRESETS: FontPreset[] = [
     description: "Clean, highly readable code font",
     category: "monospace",
   },
-  {
-    id: "cozette",
-    name: "Cozette",
-    family: "'Cozette', 'Courier New', Consolas, monospace",
-    description: "Bitmap-style programming font, retro aesthetic",
-    category: "monospace",
-  },
 
   // Display/Special
-  {
-    id: "alagard",
-    name: "Alagard",
-    family: "'Alagard', fantasy, cursive",
-    description: "Medieval pixel font for fantasy vibes",
-    category: "display",
-  },
   {
     id: "calistoga",
     name: "Calistoga",

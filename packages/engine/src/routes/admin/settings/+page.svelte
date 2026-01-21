@@ -15,16 +15,27 @@
    * @property {string} [timestamp]
    */
 
+  /**
+   * @typedef {Object} CacheStats
+   * @property {number} [posts]
+   * @property {number} [pages]
+   * @property {number} [images]
+   * @property {number} [total]
+   */
+
   // Props from parent layout (user data)
   let { data } = $props();
 
-  // Only show system health to platform admins
+  // Only show system health to the Wayfinder (platform owner)
   // Regular blog owners don't need to see infrastructure status
-  const isPlatformAdmin = $derived(data.user?.isAdmin === true);
+  const isPlatformAdmin = $derived(data.isWayfinder === true);
 
   let clearingCache = $state(false);
   let cacheMessage = $state('');
   let showClearCacheDialog = $state(false);
+  /** @type {CacheStats | null} */
+  let cacheStats = $state(null);
+  let loadingCacheStats = $state(false);
   /** @type {HealthStatus | null} */
   let healthStatus = $state(null);
   let loadingHealth = $state(true);
@@ -56,6 +67,17 @@
     showClearCacheDialog = true;
   }
 
+  async function fetchCacheStats() {
+    loadingCacheStats = true;
+    try {
+      cacheStats = await api.get('/api/admin/cache/stats');
+    } catch (error) {
+      console.error('Failed to fetch cache stats:', error);
+      cacheStats = null;
+    }
+    loadingCacheStats = false;
+  }
+
   async function clearCache() {
     clearingCache = true;
     cacheMessage = '';
@@ -63,6 +85,7 @@
     try {
       await api.post('/api/admin/cache/clear', {});
       cacheMessage = 'Cache cleared successfully!';
+      cacheStats = null; // Reset stats after clearing
     } catch (error) {
       cacheMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
     }
@@ -132,6 +155,7 @@
       fetchHealth();
     }
     fetchCurrentSettings();
+    fetchCacheStats();
   });
 </script>
 
@@ -403,9 +427,29 @@
   <GlassCard variant="frosted" class="mb-6">
     <h2>Cache Management</h2>
     <p class="section-description">
-      The site uses KV for caching API responses. Clearing the cache will cause
-      data to be refetched from the source on the next request.
+      The site uses KV for caching API responses. Clearing resets all cached data.
     </p>
+
+    {#if loadingCacheStats}
+      <div class="cache-summary">
+        <Spinner />
+      </div>
+    {:else if cacheStats}
+      <div class="cache-summary">
+        {#if cacheStats.posts}
+          <span class="cache-stat">Posts: {cacheStats.posts}</span>
+        {/if}
+        {#if cacheStats.pages}
+          <span class="cache-stat">Pages: {cacheStats.pages}</span>
+        {/if}
+        {#if cacheStats.images}
+          <span class="cache-stat">Images: {cacheStats.images}</span>
+        {/if}
+        {#if cacheStats.total}
+          <span class="cache-stat total">Total: {cacheStats.total}</span>
+        {/if}
+      </div>
+    {/if}
 
     {#if cacheMessage}
       <div class="message" class:success={cacheMessage.includes('success')} class:error={!cacheMessage.includes('success')}>
@@ -413,13 +457,14 @@
       </div>
     {/if}
 
-    <Button onclick={handleClearCacheClick} variant="danger" disabled={clearingCache}>
-      {clearingCache ? 'Clearing...' : 'Clear All Cache'}
-    </Button>
-
-    <p class="note">
-      Note: The cache clear endpoint needs to be implemented at <code>/api/admin/cache/clear</code>
-    </p>
+    <div class="cache-actions">
+      <Button onclick={handleClearCacheClick} variant="danger" disabled={clearingCache}>
+        {clearingCache ? 'Clearing...' : 'Clear Cache'}
+      </Button>
+      <Button onclick={fetchCacheStats} variant="secondary" disabled={loadingCacheStats}>
+        Refresh Stats
+      </Button>
+    </div>
   </GlassCard>
 
   <GlassCard variant="frosted" class="mb-6">
@@ -687,5 +732,27 @@
   .preset-btn:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+  }
+  /* Cache management styles */
+  .cache-summary {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  .cache-stat {
+    color: var(--color-text);
+    transition: color 0.3s ease;
+  }
+  .cache-stat.total {
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  .cache-actions {
+    display: flex;
+    gap: 0.75rem;
   }
 </style>

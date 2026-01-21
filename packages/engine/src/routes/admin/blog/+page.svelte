@@ -91,7 +91,15 @@
                 <p class="mt-1 mb-0 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">{post.description}</p>
               {/if}
             </td>
-            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-sm transition-[border-color,color] max-md:hidden">{formatDate(post.date)}</td>
+            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-sm transition-[border-color,color] max-md:hidden">
+              {#if post.status === 'published' && post.date}
+                {formatDate(post.date)}
+              {:else if post.status === 'draft'}
+                <span class="text-amber-600 dark:text-amber-400 font-medium">Draft</span>
+              {:else}
+                <span class="text-gray-400 dark:text-gray-500">—</span>
+              {/if}
+            </td>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:hidden">
               {#if post.tags.length > 0}
                 <div class="flex flex-wrap gap-1">
@@ -137,7 +145,6 @@
     <ul>
       <li>Use <strong>+ New Post</strong> to create a new post with the markdown editor</li>
       <li>Use <strong>Edit</strong> links to modify existing posts</li>
-      <li>Posts from <code>UserContent/Posts/</code> are also available (synced via GitHub)</li>
     </ul>
   </GlassCard>
 </div>
