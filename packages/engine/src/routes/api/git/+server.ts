@@ -53,13 +53,31 @@ export const GET: RequestHandler = async ({ platform, locals, request }) => {
     if (response) return response;
 
     // Continue with rate limit headers on success
-    const config = await queryOne<ConfigRow>(
-      db,
-      `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
-       FROM git_dashboard_config
-       WHERE tenant_id = ?`,
-      [tenantId],
-    );
+    let config: ConfigRow | null = null;
+    try {
+      config = await queryOne<ConfigRow>(
+        db,
+        `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
+         FROM git_dashboard_config
+         WHERE tenant_id = ?`,
+        [tenantId],
+      );
+    } catch (err) {
+      // Table may not exist if migration hasn't run yet - return defaults
+      console.warn(
+        "git_dashboard_config query failed, returning defaults:",
+        err,
+      );
+      return json(
+        {
+          config: {
+            ...DEFAULT_GIT_CONFIG,
+            githubUsername: null,
+          },
+        },
+        { headers: rateLimitHeaders(result, READ_LIMIT.limit) },
+      );
+    }
 
     if (!config) {
       return json(
@@ -88,13 +106,25 @@ export const GET: RequestHandler = async ({ platform, locals, request }) => {
   }
 
   // No KV: proceed without rate limiting
-  const config = await queryOne<ConfigRow>(
-    db,
-    `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
-     FROM git_dashboard_config
-     WHERE tenant_id = ?`,
-    [tenantId],
-  );
+  let config: ConfigRow | null = null;
+  try {
+    config = await queryOne<ConfigRow>(
+      db,
+      `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
+       FROM git_dashboard_config
+       WHERE tenant_id = ?`,
+      [tenantId],
+    );
+  } catch (err) {
+    // Table may not exist if migration hasn't run yet - return defaults
+    console.warn("git_dashboard_config query failed, returning defaults:", err);
+    return json({
+      config: {
+        ...DEFAULT_GIT_CONFIG,
+        githubUsername: null,
+      },
+    });
+  }
 
   if (!config) {
     return json({
