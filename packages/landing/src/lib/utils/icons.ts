@@ -215,6 +215,8 @@ import {
   LampCeiling,
   // Greenhouse mode - internal testing
   Warehouse,
+  // Burrow - cross-property access
+  Network,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -479,6 +481,8 @@ export const toolIcons = {
   "lamp-ceiling": LampCeiling, // Lumen - unified AI routing
   // Greenhouse mode - internal testing (Dave mode)
   warehouse: Warehouse, // Grafts - Greenhouse (early access testing)
+  // Burrow - cross-property access
+  network: Network, // Burrow - trusted connections between properties
 } as const;
 
 // ============================================================================
