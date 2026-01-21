@@ -33,73 +33,73 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
       if (db) {
         // If we have a tenant context, load tenant-specific settings
         if (tenantId) {
-          // Site settings query - wrapped separately so it doesn't block nav
-          // IMPORTANT: Each query should be in its own try/catch to prevent cascading failures
-          try {
-            const result = await db
-              .prepare(
-                "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
-              )
-              .bind(tenantId)
-              .all<{ setting_key: string; setting_value: string }>();
-
-            if (result?.results) {
-              for (const row of result.results) {
-                siteSettings[row.setting_key] = row.setting_value;
-              }
-            }
-          } catch (settingsError) {
-            // site_settings table might not exist yet - that's OK, use defaults
-            console.warn("[Layout] site_settings query failed:", settingsError);
-          }
-
-          // Load pages that should appear in navigation
-          try {
-            const navResult = await db
-              .prepare(
-                `SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
-              )
-              .bind(tenantId)
-              .all<NavPage & { show_in_nav: number; nav_order: number }>();
-
-            // Filter: only pages with show_in_nav enabled, excluding hardcoded nav items
-            if (navResult?.results) {
-              // Get tier-based nav page limit
-              const context = locals.context;
-              const plan =
-                context.type === "tenant" ? context.tenant.plan : "seedling";
-              const navLimit = getNavPageLimit(plan);
-
-              navPages = navResult.results
-                .filter(
-                  (p) =>
-                    p.show_in_nav && p.slug !== "home" && p.slug !== "about",
+          // PERFORMANCE: Run independent queries in parallel to reduce latency
+          // Settings, nav pages, and timeline curio are independent - execute concurrently
+          // Each query still has its own error handling to prevent cascading failures
+          const [settingsResult, navResult, timelineResult] = await Promise.all(
+            [
+              // Site settings query
+              db
+                .prepare(
+                  "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
                 )
-                .sort((a, b) => (a.nav_order || 0) - (b.nav_order || 0))
-                .slice(0, navLimit) // Apply tier limit
-                .map((p) => ({ slug: p.slug, title: p.title }));
+                .bind(tenantId)
+                .all<{ setting_key: string; setting_value: string }>()
+                .catch((err) => {
+                  console.warn("[Layout] site_settings query failed:", err);
+                  return null;
+                }),
+
+              // Navigation pages query
+              db
+                .prepare(
+                  `SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
+                )
+                .bind(tenantId)
+                .all<NavPage & { show_in_nav: number; nav_order: number }>()
+                .catch((err) => {
+                  console.warn("[Layout] navPages query failed:", err);
+                  return null;
+                }),
+
+              // Timeline curio config query
+              db
+                .prepare(
+                  `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
+                )
+                .bind(tenantId)
+                .first<{ enabled: number }>()
+                .catch(() => null), // Timeline table might not exist - that's OK
+            ],
+          );
+
+          // Process settings results
+          if (settingsResult?.results) {
+            for (const row of settingsResult.results) {
+              siteSettings[row.setting_key] = row.setting_value;
             }
-          } catch (navError) {
-            // Pages query failed - log but continue with empty nav
-            console.warn("[Layout] navPages query failed:", navError);
           }
 
-          // Load enabled curios for navigation
-          // Each curio type is checked separately to avoid cascading failures
-          // Curios are added after custom pages in nav order
-          try {
-            const timelineResult = await db
-              .prepare(
-                `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
-              )
-              .bind(tenantId)
-              .first<{ enabled: number }>();
+          // Process navigation results
+          if (navResult?.results) {
+            // Get tier-based nav page limit
+            const context = locals.context;
+            const plan =
+              context.type === "tenant" ? context.tenant.plan : "seedling";
+            const navLimit = getNavPageLimit(plan);
 
-            if (timelineResult?.enabled) {
-              navPages.push({ slug: "timeline", title: "Timeline" });
-            }
-          } catch {
-            // Timeline curio table might not exist - that's OK
+            navPages = navResult.results
+              .filter(
+                (p) => p.show_in_nav && p.slug !== "home" && p.slug !== "about",
+              )
+              .sort((a, b) => (a.nav_order || 0) - (b.nav_order || 0))
+              .slice(0, navLimit) // Apply tier limit
+              .map((p) => ({ slug: p.slug, title: p.title }));
+          }
+
+          // Add timeline to nav if enabled
+          if (timelineResult?.enabled) {
+            navPages.push({ slug: "timeline", title: "Timeline" });
           }
 
           // Future: Add more curios here as they get public routes

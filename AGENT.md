@@ -336,6 +336,33 @@ try {
 This lesson learned the hard way: a missing `site_settings` table silently blocked
 the `pages` query for hours because they shared a try/catch block.
 
+#### ⚠️ CRITICAL: Parallelize Independent Queries
+**NEVER run independent database queries sequentially when they can run in parallel.**
+Each D1 query has 100-300ms network latency. Sequential queries stack this latency.
+
+```typescript
+// ❌ BAD - sequential queries (900ms+ for 3 queries)
+const settings = await db.prepare("SELECT * FROM settings").bind(tenantId).all();
+const pages = await db.prepare("SELECT * FROM pages").bind(tenantId).all();
+const config = await db.prepare("SELECT * FROM config").bind(tenantId).first();
+
+// ✅ GOOD - parallel queries with individual error handling (~300ms total)
+const [settings, pages, config] = await Promise.all([
+  db.prepare("SELECT * FROM settings").bind(tenantId).all()
+    .catch(err => { console.warn("Settings failed:", err); return null; }),
+  db.prepare("SELECT * FROM pages").bind(tenantId).all()
+    .catch(err => { console.warn("Pages failed:", err); return null; }),
+  db.prepare("SELECT * FROM config").bind(tenantId).first()
+    .catch(err => null),
+]);
+```
+
+This lesson learned the hard way: sequential queries in layout files caused 4-6 second
+page loads. Parallelizing reduced this to 1.5-2.5 seconds (~60% improvement).
+
+**When to parallelize:** Queries that don't depend on each other's results.
+**When NOT to:** Query B needs Query A's result (e.g., get user, then get user's posts).
+
 #### Typed Query Builders (database.ts)
 **Use the typed helpers in `packages/engine/src/lib/server/services/database.ts`** instead of raw SQL.
 
