@@ -693,6 +693,41 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
+# 🌱 GREENHOUSE MODE (Dev Mode for Tenants)
+
+> **Spec:** `docs/specs/grafts-spec.md` (Part III)
+> **Internal Name:** Dave mode (after the first test tenant)
+> **Builds on:** Existing Grafts infrastructure (Feature Grafts + UI Grafts)
+
+Greenhouse mode is the third layer of Grafts—it enables "dev mode" for tenants, unlocking self-serve graft controls. Instead of requiring operator intervention for every toggle, greenhouse tenants can freely experiment with their own trees.
+
+**Why it matters:** Solves where graft controls live. No separate admin panel needed—controls appear in the tenant's dashboard only when greenhouse mode is enabled.
+
+### Phase 8: Greenhouse Infrastructure
+- [ ] Create `greenhouse_tenants` table migration
+- [ ] Add `greenhouse_only` column to `feature_flags` table
+- [ ] Implement `isInGreenhouse()` API function
+- [ ] Add greenhouse context to feature evaluation logic
+- [ ] Add greenhouse rule type support
+- [ ] Create Wayfinder UI for enrolling tenants in greenhouse mode
+- [ ] Implement transplant workflow (greenhouse → production promotion)
+
+### Phase 9: Self-Serve Graft Controls (The "Dev Mode" UI)
+- [ ] Graft control panel in tenant dashboard (greenhouse-only visibility)
+- [ ] Toggle UI for feature grafts
+- [ ] Parameter adjustment UI for configurable grafts
+- [ ] "Active grafts" overview showing what's enabled
+- [ ] Reset to defaults functionality
+- [ ] Graft discovery UI (browse available grafts to enable)
+- [ ] Experimental features badge/indicator
+
+### Notes
+- Half the infrastructure already exists (Feature Grafts, evaluation logic, KV caching)
+- Main new work: `greenhouse_tenants` table + conditional UI visibility
+- The "Dev Mode Revelation" (see spec): greenhouse mode unlocks self-serve controls for power users
+
+---
+
 # 🖼️ JPEG XL MIGRATION
 
 > **Spec:** `docs/plans/jxl-migration-spec.md`
@@ -803,7 +838,7 @@ The AutumnsGrove Museum transforms archived code into educational exhibits with:
 
 ---
 
-*Last updated: 2026-01-20 (Petal spec complete, detailed implementation checklist added)*
+*Last updated: 2026-01-21 (Added Greenhouse Mode / Dave mode development todo)*
 
 ---
 
