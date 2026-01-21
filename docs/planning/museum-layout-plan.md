@@ -4,6 +4,44 @@
 
 ---
 
+> **Status: Planning**
+>
+> This document outlines the museum structure, exhibits, and agent orchestration model. The museum itself has not been written yet. Currently complete: MUSEUM.md (entrance), glossary.md. All wing exhibits are pending.
+
+---
+
+## Why a Museum?
+
+Traditional documentation answers "how does this work?" Museum documentation answers "why does this exist, and why should I care?"
+
+Most codebases hand you a catalog and wish you luck. API references. Method signatures. Configuration options. Useful for people who already understand the system, useless for everyone else.
+
+Grove was built to have texture. The forest on the landing page isn't decoration—it's a backyard rebuilt in code. The naming system isn't branding—it's world-building. The feature flags aren't just toggles—they're grafts on a living tree.
+
+That texture deserves documentation that preserves it.
+
+**The museum approach:**
+- Walks alongside readers instead of listing facts
+- Explains *why* before *how*
+- Treats the codebase as exhibits worth exploring
+- Acknowledges imperfection and lessons learned
+- Connects technical systems to the feelings they create
+
+**What this replaces:**
+- Dry API references (those live in specs)
+- Implementation details (those live in code comments)
+- Troubleshooting guides (those live in the help center)
+
+**What this creates:**
+- Understanding that sticks
+- Appreciation for design decisions
+- Patterns worth stealing
+- A welcoming entry point for contributors
+
+The museum exists because Grove's architecture is elegant enough to deserve a guided tour, and because the person who built it cried in a parking lot when she realized she'd made something real.
+
+---
+
 ## Overview
 
 The Lattice Museum transforms Grove's codebase into a welcoming experience for Wanderers. Rather than dry API references, we offer curated exhibits that explain *why* things work the way they do.

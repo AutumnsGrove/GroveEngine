@@ -153,7 +153,7 @@ Before you explore, you might want to learn [Grove's vocabulary](./glossary.md).
 | Term | Meaning |
 |------|---------|
 | **Wanderer** | Any visitor to Grove |
-| **Rooted** | Paid subscriber |
+| **Rooted** | Someone who has created a blog (paid) |
 | **Lattice** | The engine that powers everything |
 | **Heartwood** | The authentication system |
 | **Grafts** | Feature flags |

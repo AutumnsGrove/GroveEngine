@@ -19,7 +19,7 @@ How we name the people in Grove.
 | Term | Who They Are | Why This Word |
 |------|--------------|---------------|
 | **Wanderer** | Any visitor to Grove | Everyone starts by wandering, exploring, finding their way |
-| **Rooted** | Paid subscriber | Taking root means committing, staying, growing in place |
+| **Rooted** | Someone who has created a blog (paid) | Taking root means committing, staying, growing in place |
 | **Pathfinder** | Trusted community guide | Helps others find paths through the forest |
 | **Wayfinder** | Autumn (singular) | The grove keeper who shows the way forward |
 
@@ -36,12 +36,12 @@ The levels of commitment, named for growth stages.
 
 | Tier | What It Means | Features |
 |------|---------------|----------|
-| **Seedling** | Free tier | Basic blogging, community access |
-| **Sapling** | First paid tier | Custom domain, more storage |
-| **Oak** | Mid tier | Advanced features, priority support |
+| **Seedling** | Entry tier | Basic blogging, community access |
+| **Sapling** | Growing tier | Custom domain, more storage |
+| **Oak** | Established tier | Advanced features, priority support |
 | **Evergreen** | Highest tier | Everything, forever pricing locked |
 
-**Note:** Tiers are separate from identity. A Seedling is still a Rooted Wanderer if they've taken root.
+**Note:** Creating a blog makes you Rooted. Tiers describe the size of your tree, not whether it exists. All Rooted Wanderers have taken root; tiers reflect how much they've grown.
 
 ---
 
