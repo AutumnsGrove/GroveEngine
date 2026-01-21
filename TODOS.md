@@ -6,6 +6,38 @@
 
 ---
 
+# 🚨 LEGAL COMPLIANCE — BLOCKING FOR PRODUCTION
+
+> **CRITICAL:** These items MUST be completed before launching image uploads to real users.
+
+## NCMEC CyberTipline Integration
+> **Requirement:** 18 U.S.C. § 2258A mandates reporting CSAM to NCMEC within 24 hours
+> **Current State:** Petal (PR #412) has placeholder that queues reports to DB for manual processing
+> **Location:** `packages/engine/src/lib/server/petal/layer1-csam.ts`
+
+- [ ] Register as ESP (Electronic Service Provider) with NCMEC
+- [ ] Implement CyberTipline API integration for automated reporting
+- [ ] Set up secure report metadata storage with encryption
+- [ ] Establish monitoring and alerting for NCMEC queue depth
+- [ ] Document manual review process until automation is complete
+- [ ] Test reporting flow end-to-end in staging environment
+
+**Resources:**
+- NCMEC CyberTipline: https://www.missingkids.org/gethelpnow/cybertipline
+- Cloudflare CSAM Scanning: https://developers.cloudflare.com/images/csam-scanning/
+- PhotoDNA (Microsoft): https://www.microsoft.com/en-us/photodna
+
+## Production Monitoring for Petal
+> **Current State:** Basic logging implemented, needs production monitoring
+
+- [ ] Set up alerts for NCMEC queue items not reported within 12 hours
+- [ ] Monitor provider circuit breaker status
+- [ ] Track high block rates (potential attack or false positives)
+- [ ] Alert on classification parse failures
+- [ ] Dashboard for Petal security events
+
+---
+
 # 🔄 CURRENT SESSION (Jan 18-19, 2026)
 
 ## Completed ✅

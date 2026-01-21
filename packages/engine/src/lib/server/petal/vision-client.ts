@@ -53,12 +53,31 @@ interface ProviderError {
   error: string;
 }
 
-// In-memory provider health tracking (per-isolate)
-const providerHealth: Map<string, PetalProviderHealth> = new Map();
-
 // ============================================================================
 // Provider Health Management
 // ============================================================================
+//
+// CIRCUIT BREAKER LIMITATIONS:
+// ─────────────────────────────────────────────────────────────────────────────
+// The circuit breaker state is stored in-memory per Worker isolate, which means:
+//
+// 1. State is NOT shared across isolates - each isolate has independent state
+// 2. State is lost on cold starts/restarts - providers reset to healthy
+// 3. Multiple isolates may independently fail the same provider
+// 4. No coordination across the fleet for distributed circuit breaking
+//
+// This is acceptable for our use case because:
+// - Provider failures are typically transient (network issues, rate limits)
+// - The retry/failover logic handles individual request failures
+// - False positives (resetting circuit too early) just mean extra retries
+//
+// For high-scale production, consider storing state in KV or Durable Objects
+// to enable coordinated circuit breaking across all Workers.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// In-memory provider health tracking (per-isolate)
+// See limitations above
+const providerHealth: Map<string, PetalProviderHealth> = new Map();
 
 /**
  * Get current health status for a provider
@@ -250,13 +269,19 @@ async function callTogetherAI(
     );
 
     if (!response.ok) {
+      // Log full error server-side for debugging, but don't include in thrown error
+      // to prevent information disclosure
       const errorText = await response.text().catch(() => "Unknown error");
+      console.error("[Petal] Together.ai API error:", {
+        status: response.status,
+        error: errorText.substring(0, 500),
+      });
       throw new PetalError(
         `Together.ai API error: ${response.status}`,
         "PROVIDER_ERROR",
         undefined,
         "together_ai",
-        errorText.substring(0, 200),
+        // Don't include provider error details in thrown error
       );
     }
 
@@ -281,12 +306,14 @@ async function callTogetherAI(
       );
     }
     if (err instanceof PetalError) throw err;
+    // Log full error server-side, but don't include in thrown error
+    console.error("[Petal] Together.ai unexpected error:", err);
     throw new PetalError(
-      `Together.ai error: ${err instanceof Error ? err.message : "Unknown"}`,
+      "Together.ai provider error",
       "PROVIDER_ERROR",
       undefined,
       "together_ai",
-      err,
+      // Don't include error details to prevent information disclosure
     );
   } finally {
     clearTimeout(timeoutId);

@@ -2,12 +2,34 @@
  * Petal Layer 1: CSAM Detection
  *
  * MANDATORY layer - cannot be bypassed. Federal law requires CSAM detection
- * and NCMEC reporting within 24 hours.
+ * and NCMEC reporting within 24 hours (18 U.S.C. § 2258A).
  *
- * This layer coordinates:
+ * CURRENT DETECTION STRATEGY:
+ * ═══════════════════════════════════════════════════════════════════════════
  * 1. Cloudflare CSAM Tool (CDN-level, enabled in dashboard)
- * 2. Vision model classification for potential CSAM flags
- * 3. Account flagging and reporting workflows
+ *    - Runs asynchronously at serve time using fuzzy hashing
+ *    - Must be enabled in Cloudflare Dashboard: Caching > Configuration
+ *
+ * 2. Vision model classification (this file)
+ *    - Upload-time detection using AI vision models
+ *    - Checks for "minor_present" category at ≥0.7 confidence
+ *
+ * ⚠️ PRODUCTION ENHANCEMENT REQUIRED:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * For comprehensive protection, integrate hash-based detection systems:
+ *
+ * - PhotoDNA (Microsoft): https://www.microsoft.com/en-us/photodna
+ *   Industry standard perceptual hash for CSAM detection
+ *
+ * - Cloudflare CSAM Scanning: https://developers.cloudflare.com/images/csam-scanning/
+ *   Built-in PhotoDNA integration for Cloudflare Images
+ *
+ * - Thorn Safer: https://www.thorn.org/safer/
+ *   Additional detection technology
+ *
+ * Vision-only detection may have false negatives. Hash-based detection
+ * catches known CSAM content that AI classification might miss.
+ * ═══════════════════════════════════════════════════════════════════════════
  *
  * @see docs/specs/petal-spec.md Section 3
  */
@@ -169,19 +191,38 @@ export async function hasActiveCSAMFlag(
 }
 
 // ============================================================================
-// NCMEC Reporting (Placeholder)
+// NCMEC Reporting
 // ============================================================================
+//
+// ⚠️  CRITICAL LEGAL NOTICE ⚠️
+// ════════════════════════════════════════════════════════════════════════════
+// This implementation is a PLACEHOLDER ONLY. Before deploying to production
+// with real user uploads, you MUST implement actual NCMEC CyberTipline
+// integration per 18 U.S.C. § 2258A.
+//
+// REQUIREMENTS FOR PRODUCTION:
+// 1. Register as ESP (Electronic Service Provider) with NCMEC
+// 2. Implement CyberTipline API integration
+// 3. Set up secure report metadata storage with encryption
+// 4. Establish monitoring and alerting for the NCMEC queue
+// 5. Document manual review process for queued reports
+//
+// CURRENT BEHAVIOR: Logs detection and stores in database queue for manual
+// processing. This does NOT satisfy legal requirements for automated reporting.
+//
+// See: https://www.missingkids.org/gethelpnow/cybertipline
+// ════════════════════════════════════════════════════════════════════════════
 
 /**
  * Report to NCMEC (National Center for Missing & Exploited Children)
  *
- * Federal law requires reporting within 24 hours.
- * This is a placeholder - actual implementation requires:
- * 1. NCMEC ESP (Electronic Service Provider) registration
- * 2. CyberTipline API integration
- * 3. Secure storage of report metadata
+ * ⚠️ PLACEHOLDER IMPLEMENTATION - NOT FOR PRODUCTION USE ⚠️
  *
- * For now, this logs the requirement and should trigger manual process.
+ * Federal law (18 U.S.C. § 2258A) requires reporting within 24 hours.
+ * This placeholder queues reports for manual processing. Before production
+ * deployment, implement actual CyberTipline API integration.
+ *
+ * @see https://www.missingkids.org/gethelpnow/cybertipline
  */
 export async function queueNCMECReport(
   db: D1Database,
