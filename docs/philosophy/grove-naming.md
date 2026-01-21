@@ -162,12 +162,11 @@ Dave wants to help moderate The Prism? Burrow him in. The passage opens. He arri
 - **Burrow** — A trusted connection between two greenhouse properties
 - **Dig** — Create a burrow (open access)
 - **Fill** — Close a burrow (revoke access)
-- **Den** — A property that accepts incoming burrows
-- **Warrened** — A property with multiple active burrows
+- **Receiving** — A property configured to accept incoming burrows
 - **Surface** — Exit a burrowed session, return to origin
 
 *"I'll dig a burrow to The Prism for you."*
-*"The Kitchen is warrened—five Pathfinders have access."*
+*"Put The Prism in receiving mode."*
 
 *A protected way through.*
 

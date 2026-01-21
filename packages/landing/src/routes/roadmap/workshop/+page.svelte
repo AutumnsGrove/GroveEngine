@@ -150,7 +150,7 @@
 					subComponents: [
 						{ name: 'Dig', icon: 'key', description: 'Open a burrow' },
 						{ name: 'Fill', icon: 'shieldoff', description: 'Revoke access' },
-						{ name: 'Den', icon: 'warehouse', description: 'Property accepting burrows' }
+						{ name: 'Receiving', icon: 'warehouse', description: 'Property accepting burrows' }
 					]
 				},
 				{

@@ -58,12 +58,11 @@ Extending the Graft vocabulary with burrow-specific terms:
 | **Burrow** | Connection | A trusted passage between two greenhouse properties |
 | **Dig** | Create | Open a burrow (establish access) |
 | **Fill** | Close | Close a burrow (revoke access) |
-| **Den** | Property state | A property that accepts incoming burrows |
-| **Warrened** | Property state | A property with multiple active burrows |
+| **Receiving** | Property state | A property configured to accept incoming burrows |
 | **Surface** | Exit | Leave a burrowed session, return to origin |
 
 *"I'll dig a burrow to The Prism for Dave."*
-*"The Kitchen is warrened—five Pathfinders have access."*
+*"Put The Prism in receiving mode."*
 *"Fill that burrow. His moderation privileges have been revoked."*
 
 ---
@@ -116,7 +115,7 @@ Burrow is for **Grove properties**, not personal blogs.
 
 ## The Wayfinder Graft
 
-The Wayfinder has a special graft: `wayfinder_burrow`. This grants universal access to any Grove property, regardless of whether it's configured as a den.
+The Wayfinder has a special graft: `wayfinder_burrow`. This grants universal access to any Grove property, regardless of whether it's configured to receive burrows.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -125,7 +124,7 @@ The Wayfinder has a special graft: `wayfinder_burrow`. This grants universal acc
 │                                                                     │
 │   Regular User Flow:                                                │
 │   ┌─────────────────────────────────────────────────────────────┐   │
-│   │  1. Target property must be configured as a den             │   │
+│   │  1. Target property must be in receiving mode               │   │
 │   │  2. Someone must dig a burrow for the user                  │   │
 │   │  3. User can then access with granted permissions           │   │
 │   └─────────────────────────────────────────────────────────────┘   │
@@ -133,13 +132,13 @@ The Wayfinder has a special graft: `wayfinder_burrow`. This grants universal acc
 │   Wayfinder Flow:                                                   │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │  1. Wayfinder has `wayfinder_burrow` graft (always on)      │   │
-│   │  2. Can burrow into ANY property (den or not)               │   │
+│   │  2. Can burrow into ANY property (receiving or not)         │   │
 │   │  3. Automatically gets full access                          │   │
 │   │  4. No pre-configuration needed                             │   │
 │   └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
 │   This is essential for:                                            │
-│   • Initial setup of new properties as dens                         │
+│   • Initial setup of new properties for receiving                   │
 │   • Emergency access when something breaks                          │
 │   • Routine maintenance of Grove infrastructure                     │
 │                                                                     │
@@ -167,33 +166,33 @@ The Wayfinder has a special graft: `wayfinder_burrow`. This grants universal acc
 }
 ```
 
-### How Wayfinder Enables a Den
+### How Wayfinder Enables Receiving
 
-Before anyone can burrow into a property, the Wayfinder must configure it as a den:
+Before anyone can burrow into a property, the Wayfinder must enable receiving mode:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    DEN CONFIGURATION FLOW                            │
+│                    RECEIVING CONFIGURATION FLOW                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │   1. New property exists (e.g., new Forest "The Greenhouse")        │
-│      └── Not a den yet. No one can burrow in.                       │
+│      └── Not receiving yet. No one can burrow in.                   │
 │                                                                     │
 │   2. Wayfinder burrows in (via wayfinder_burrow graft)              │
-│      └── Universal access, no den required.                         │
+│      └── Universal access, no receiving mode required.              │
 │                                                                     │
-│   3. Wayfinder enables den mode for the property                    │
+│   3. Wayfinder enables receiving mode for the property              │
 │      ┌───────────────────────────────────────────────────────────┐  │
-│      │  POST /api/burrow/configure-den                           │  │
+│      │  POST /api/burrow/configure-receiving                     │  │
 │      │  {                                                        │  │
 │      │    property_id: "the-greenhouse",                         │  │
-│      │    den_enabled: true,                                     │  │
+│      │    receiving_enabled: true,                               │  │
 │      │    max_incoming_permission: "admin",                      │  │
 │      │    allowed_sources: null  // any greenhouse property      │  │
 │      │  }                                                        │  │
 │      └───────────────────────────────────────────────────────────┘  │
 │                                                                     │
-│   4. Property is now a den. Wayfinder can dig burrows for others.   │
+│   4. Property is now receiving. Wayfinder can dig burrows for others│
 │                                                                     │
 │   5. Wayfinder digs burrow for Dave (Pathfinder)                    │
 │      └── Dave can now access The Greenhouse with admin perms.       │
@@ -217,7 +216,7 @@ Forests are community aggregators without traditional accounts. The Prism, The T
 │   Dave (Pathfinder) wants to help moderate The Prism                │
 │                                                                     │
 │   1. Wayfinder digs a burrow: Dave → The Prism                      │
-│   2. The Prism is configured as a den (accepts burrows)             │
+│   2. The Prism is in receiving mode (accepts burrows)               │
 │   3. Dave sees "The Prism" in his arbor under "Your Burrows"        │
 │   4. Dave clicks → burrow handoff → arrives at The Prism admin      │
 │   5. Dave's permissions: Pathfinder → admin access                  │
@@ -497,7 +496,7 @@ CREATE TABLE burrow_endpoints (
   greenhouse_required INTEGER DEFAULT 1,
 
   -- Can this property receive incoming burrows?
-  den_enabled INTEGER DEFAULT 0,
+  receiving_enabled INTEGER DEFAULT 0,
 
   -- Can users from this property initiate burrows?
   dig_enabled INTEGER DEFAULT 0,
@@ -623,15 +622,15 @@ Burrows appear in the user's arbor (admin panel) when they have active connectio
 │                                                                     │
 │  ┌─ Your Burrows ──────────────────────────────────────────────┐    │
 │  │                                                             │    │
-│  │  🌲 The Prism                              [ Enter Den ]    │    │
+│  │  🌲 The Prism                              [ Enter ]        │    │
 │  │     LGBTQ+ community · admin access                         │    │
 │  │     Expires: never                                          │    │
 │  │                                                             │    │
-│  │  🌲 The Terminal                           [ Enter Den ]    │    │
+│  │  🌲 The Terminal                           [ Enter ]        │    │
 │  │     Developer community · admin access                      │    │
 │  │     Expires: 23 days                                        │    │
 │  │                                                             │    │
-│  │  🧪 staging-grove                          [ Enter Den ]    │    │
+│  │  🧪 staging-grove                          [ Enter ]        │    │
 │  │     Test environment · full access                          │    │
 │  │     Expires: never                                          │    │
 │  │                                                             │    │
@@ -654,7 +653,7 @@ Burrows appear in the user's arbor (admin panel) when they have active connectio
 │  ┌─ Burrow Management (Wayfinder) ─────────────────────────────┐    │
 │  │                                                             │    │
 │  │  ┌─ The Prism ────────────────────────────────────────────┐ │    │
-│  │  │  Status: Den (accepting burrows)                       │ │    │
+│  │  │  Status: Receiving (accepting burrows)                 │ │    │
 │  │  │  Active burrows: 5                                     │ │    │
 │  │  │                                                        │ │    │
 │  │  │  ┌────────────────────────────────────────────────┐    │ │    │
@@ -726,7 +725,7 @@ const burrow = await digBurrow({
 ```typescript
 import { createHandoff } from '@autumnsgrove/groveengine/burrow';
 
-// Called when user clicks "Enter Den"
+// Called when user clicks "Enter"
 const { redirectUrl } = await createHandoff({
   burrowId: burrow.id,
   userId: locals.user.id,
@@ -771,22 +770,22 @@ await fillBurrow({
 }, platform.env);
 ```
 
-### Configure Property as Den (Wayfinder Only)
+### Configure Property as Receiving (Wayfinder Only)
 
 ```typescript
-import { configureDen, isWayfinder } from '@autumnsgrove/groveengine/burrow';
+import { configureReceiving, isWayfinder } from '@autumnsgrove/groveengine/burrow';
 
-// Only Wayfinder can configure dens
+// Only Wayfinder can configure receiving mode
 if (!isWayfinder(locals.user)) {
-  throw error(403, 'Only the Wayfinder can configure dens');
+  throw error(403, 'Only the Wayfinder can configure receiving mode');
 }
 
 // Enable a property to accept incoming burrows
-await configureDen({
+await configureReceiving({
   propertyId: 'the-greenhouse',
   propertyType: 'forest',
   propertyName: 'The Greenhouse',
-  denEnabled: true,
+  receivingEnabled: true,
   maxIncomingPermission: 'admin',
   allowedSources: null, // any greenhouse property
   configuredBy: locals.user.id
@@ -798,14 +797,14 @@ await configureDen({
 ```typescript
 import { canWayfinderBurrow } from '@autumnsgrove/groveengine/burrow';
 
-// Wayfinder can burrow anywhere, even non-dens
+// Wayfinder can burrow anywhere, even non-receiving properties
 const hasUniversalAccess = await canWayfinderBurrow(
   locals.user.id,
   platform.env
 );
 
 if (hasUniversalAccess) {
-  // Skip den check, grant full access
+  // Skip receiving check, grant full access
 }
 ```
 
@@ -915,7 +914,7 @@ Burrow sits alongside Greenhouse mode in the Grafts ecosystem.
 - [ ] Create `wayfinder_burrow` feature graft
 - [ ] Implement Wayfinder detection in burrow checks
 - [ ] Add property type classification (property vs. personal grove)
-- [ ] Create `configureDen()` API for Wayfinder
+- [ ] Create `configureReceiving()` API for Wayfinder
 
 ### Phase 1: Database & Types
 - [ ] Create D1 schema migration for burrow tables
@@ -937,7 +936,7 @@ Burrow sits alongside Greenhouse mode in the Grafts ecosystem.
 
 ### Phase 4: Arbor UI Integration
 - [ ] Add "Your Burrows" section to arbor dashboard
-- [ ] Implement "Enter Den" flow with redirect
+- [ ] Implement "Enter" flow with redirect
 - [ ] Add burrow management UI for Wayfinder
 - [ ] Create "Dig New Burrow" form
 
@@ -954,7 +953,7 @@ Burrow sits alongside Greenhouse mode in the Grafts ecosystem.
 - [ ] Set up alerts for suspicious activity
 
 ### Phase 7: Forest Integration
-- [ ] Configure all Forests as dens
+- [ ] Configure all Forests as receiving
 - [ ] Add Forest moderation permissions
 - [ ] Test Pathfinder → Forest admin flow
 - [ ] Document Forest-specific use cases
