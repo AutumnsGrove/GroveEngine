@@ -30,13 +30,15 @@ export function validateCSRFToken(
 /**
  * Validate CSRF token from request headers (origin-based fallback)
  */
-export function validateCSRF(request: Request): boolean {
+export function validateCSRF(request: Request, debug = false): boolean {
   // Handle edge cases
   if (!request || typeof request !== "object") {
+    if (debug) console.log("[validateCSRF] Invalid request object");
     return false;
   }
 
   if (!request.headers || typeof request.headers.get !== "function") {
+    if (debug) console.log("[validateCSRF] Invalid headers");
     return false;
   }
 
@@ -45,6 +47,10 @@ export function validateCSRF(request: Request): boolean {
   const host =
     request.headers.get("x-forwarded-host") || request.headers.get("host");
 
+  if (debug) {
+    console.log("[validateCSRF] Checking:", { origin, host });
+  }
+
   // Allow same-origin requests
   if (origin) {
     try {
@@ -52,6 +58,7 @@ export function validateCSRF(request: Request): boolean {
 
       // Validate protocol (must be http or https)
       if (!["http:", "https:"].includes(originUrl.protocol)) {
+        if (debug) console.log("[validateCSRF] Invalid protocol");
         return false;
       }
 
@@ -61,6 +68,7 @@ export function validateCSRF(request: Request): boolean {
 
       // Require HTTPS for non-localhost
       if (!isLocalhost && originUrl.protocol !== "https:") {
+        if (debug) console.log("[validateCSRF] Non-HTTPS for non-localhost");
         return false;
       }
 
@@ -77,14 +85,28 @@ export function validateCSRF(request: Request): boolean {
       const hostPort = hostUrl?.port || "443"; // host header typically omits default port
       const isSamePort = originPort === hostPort;
 
+      if (debug) {
+        console.log("[validateCSRF] Host comparison:", {
+          originHostname: originUrl.hostname,
+          hostHostname: hostUrl?.hostname,
+          isSameHost,
+          originPort,
+          hostPort,
+          isSamePort,
+        });
+      }
+
       // Only allow same-host AND same-port, or localhost
       if (!isLocalhost && (!isSameHost || !isSamePort)) {
+        if (debug) console.log("[validateCSRF] Host/port mismatch - REJECTING");
         return false;
       }
-    } catch {
+    } catch (e) {
+      if (debug) console.log("[validateCSRF] Error:", e);
       return false;
     }
   }
 
+  if (debug) console.log("[validateCSRF] PASSED");
   return true;
 }

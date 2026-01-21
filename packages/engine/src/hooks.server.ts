@@ -481,14 +481,33 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isAuthEndpoint = event.url.pathname.includes("/auth/");
     // Turnstile verification is like auth - new visitors don't have CSRF tokens
     const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";
-    // SvelteKit form actions (e.g., ?/save) have built-in CSRF protection via origin validation
-    // They don't send the x-csrf-token header, so use origin-based validation instead
-    const isFormAction =
-      event.url.search.includes("?/") || event.url.search.startsWith("/?/");
+    // SvelteKit form actions have built-in CSRF protection via origin validation
+    // Detect via: x-sveltekit-action header OR ?/ URL pattern
+    const isSvelteKitAction =
+      event.request.headers.get("x-sveltekit-action") === "true";
+    const isFormActionUrl = event.url.search.startsWith("?/");
+    const isFormAction = isSvelteKitAction || isFormActionUrl;
+
+    // Debug logging for form actions
+    if (event.url.pathname.includes("/curios/timeline")) {
+      console.log("[CSRF Debug]", {
+        method: event.request.method,
+        pathname: event.url.pathname,
+        search: event.url.search,
+        isSvelteKitAction,
+        isFormActionUrl,
+        isFormAction,
+        origin: event.request.headers.get("origin"),
+        host: event.request.headers.get("host"),
+        xForwardedHost: event.request.headers.get("x-forwarded-host"),
+      });
+    }
 
     if (isAuthEndpoint || isTurnstileEndpoint || isFormAction) {
       // Auth, verification, and form action endpoints use origin-based validation
-      if (!validateCSRF(event.request)) {
+      const debugCsrf = event.url.pathname.includes("/curios/timeline");
+      if (!validateCSRF(event.request, debugCsrf)) {
+        console.log("[CSRF Debug] Origin validation FAILED");
         throw error(403, "Invalid origin");
       }
     } else {
