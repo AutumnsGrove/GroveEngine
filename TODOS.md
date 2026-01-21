@@ -73,7 +73,60 @@
 
 ---
 
-# 🔄 CURRENT SESSION (Jan 18-19, 2026)
+# 🔄 CURRENT SESSION (Jan 21, 2026)
+
+## In Progress 🚧
+
+### Timeline Curio Config Save — 403 CSRF Issue
+> **Problem:** Saving Timeline curio config at `/admin/curios/timeline` returns 403 Forbidden
+> **Status:** CSRF fix deployed but still failing — needs deeper investigation
+
+**Attempted fixes (all deployed to production):**
+- [x] Added toast notifications for feedback (svelte-sonner)
+- [x] Added `x-sveltekit-action` header detection in hooks.server.ts
+- [x] Skipped custom CSRF validation entirely for SvelteKit form actions
+- [ ] **STILL GETTING 403** — Form action not reaching server properly
+
+**Investigation notes:**
+- Network tab shows POST to `?/save` returns 403
+- Cloudflare logs show request reaching grove-example-site.pages.dev internal URL
+- `x-sveltekit-action: "true"` header IS present
+- `origin: https://autumn.grove.place` matches host
+- Custom CSRF middleware should be skipped for form actions
+
+**Next steps to investigate:**
+- [ ] Check if there's ANOTHER CSRF validation layer we missed (route-level?)
+- [ ] Verify hooks.server.ts changes actually deployed (check worker bundle)
+- [ ] Check Cloudflare Access or WAF rules that might be blocking POST
+- [ ] Try adding explicit `?/save` to form action attribute
+- [ ] Check if the route's +page.server.ts has its own CSRF check
+
+**Files involved:**
+- `packages/engine/src/hooks.server.ts` — Custom CSRF middleware
+- `packages/engine/src/routes/admin/curios/timeline/+page.svelte` — Form UI
+- `packages/engine/src/routes/admin/curios/timeline/+page.server.ts` — Form action
+
+## Completed ✅
+
+### CI Build Fix — Petal AI Binding Compatibility
+> **Problem:** Petal PR added Workers AI binding which requires remote Cloudflare auth during prerendering
+> **Solution:** Skip prerendering in CI (entries: []), add handleUnseenRoutes: "ignore"
+
+- [x] Diagnosed wrangler remote proxy auth error during CI builds
+- [x] Updated `svelte.config.js` to skip prerendering when `CI=true`
+- [x] Added `handleUnseenRoutes: "ignore"` to suppress warnings for routes with `prerender = true`
+- [x] Fixed Petal type errors (AI binding, TOGETHER_API_KEY missing from app.d.ts)
+- [x] Fixed ArrayBuffer type casting in petal/logging.ts
+- [x] Fixed FeatureFlagsEnv casting in upload route
+- [x] CI builds now pass ✅
+
+**Commits:**
+- `3ccfd8c6` — fix(build): Skip prerendering in CI to avoid AI binding auth requirement
+- `19a3506f` — fix(types): Add AI binding type and fix Petal type errors
+
+---
+
+# 🔄 PREVIOUS SESSION (Jan 18-19, 2026)
 
 ## Completed ✅
 
