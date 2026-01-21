@@ -6,6 +6,10 @@
  *
  * Design: Resilient fetching - user and contributions are fetched independently.
  * If contributions fail, we still return user data with empty contributions.
+ *
+ * Token resolution (in order):
+ * 1. Tenant-specific token from git_dashboard_config (encrypted)
+ * 2. Global GITHUB_TOKEN env var (fallback)
  */
 
 import { error, json } from "@sveltejs/kit";
@@ -30,6 +34,7 @@ import {
   getClientIP,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
+import { safeDecryptToken } from "$lib/server/encryption";
 
 interface GitStatsResponse {
   user: {
@@ -65,13 +70,51 @@ interface GitStatsResponse {
 // We cache responses in KV to reduce actual API calls, so 60/min is safe.
 const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
 
-export const GET: RequestHandler = async ({ params, platform, request }) => {
+export const GET: RequestHandler = async ({
+  params,
+  platform,
+  request,
+  locals,
+}) => {
   const { username } = params;
+  const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
-  const token = platform?.env?.GITHUB_TOKEN;
+  const tenantId = locals.tenantId;
 
   if (!username || !isValidUsername(username)) {
     throw error(400, "Invalid username");
+  }
+
+  // Resolve token: tenant config first, then global env fallback
+  let token: string | null = null;
+
+  if (db && tenantId) {
+    try {
+      const config = await db
+        .prepare(
+          `SELECT github_token_encrypted FROM git_dashboard_config WHERE tenant_id = ?`,
+        )
+        .bind(tenantId)
+        .first<{ github_token_encrypted: string | null }>();
+
+      if (config?.github_token_encrypted) {
+        const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+        token = await safeDecryptToken(
+          config.github_token_encrypted,
+          encryptionKey,
+        );
+      }
+    } catch (err) {
+      console.warn(
+        "Failed to fetch tenant token, falling back to global:",
+        err,
+      );
+    }
+  }
+
+  // Fallback to global GITHUB_TOKEN
+  if (!token) {
+    token = platform?.env?.GITHUB_TOKEN ?? null;
   }
 
   // Rate limiting by IP (public endpoint)
@@ -101,8 +144,8 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
       if (cached) {
         return json({ ...cached, cached: true }, { headers: getHeaders() });
       }
-    } catch {
-      // Cache read failed, continue with fresh fetch
+    } catch (err) {
+      console.warn(`[Git Stats] Cache read failed for ${username}:`, err);
     }
   }
 
@@ -194,8 +237,8 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
       await kv.put(cacheKey, JSON.stringify(response), {
         expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
       });
-    } catch {
-      // Cache write failed, continue
+    } catch (err) {
+      console.warn(`[Git Stats] Cache write failed for ${username}:`, err);
     }
   }
 

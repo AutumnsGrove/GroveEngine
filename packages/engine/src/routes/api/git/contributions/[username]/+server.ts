@@ -2,7 +2,11 @@
  * Git Contributions API
  *
  * Fetch GitHub contribution calendar via GraphQL.
- * Requires GITHUB_TOKEN for GraphQL API access.
+ * Requires a GitHub token for GraphQL API access.
+ *
+ * Token resolution (in order):
+ * 1. Tenant-specific token from git_dashboard_config (encrypted)
+ * 2. Global GITHUB_TOKEN env var (fallback)
  */
 
 import { error, json } from "@sveltejs/kit";
@@ -21,6 +25,7 @@ import {
   getClientIP,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
+import { safeDecryptToken } from "$lib/server/encryption";
 
 // Rate limit: 60 requests per minute per IP
 // Calls GitHub GraphQL API (5000 points/hour, each query ~1-2 points)
@@ -33,17 +38,54 @@ export const GET: RequestHandler = async ({
   platform,
   url,
   request,
+  locals,
 }) => {
   const { username } = params;
+  const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
-  const token = platform?.env?.GITHUB_TOKEN;
+  const tenantId = locals.tenantId;
 
   if (!username || !isValidUsername(username)) {
     throw error(400, "Invalid username");
   }
 
+  // Resolve token: tenant config first, then global env fallback
+  let token: string | null = null;
+
+  if (db && tenantId) {
+    try {
+      const config = await db
+        .prepare(
+          `SELECT github_token_encrypted FROM git_dashboard_config WHERE tenant_id = ?`,
+        )
+        .bind(tenantId)
+        .first<{ github_token_encrypted: string | null }>();
+
+      if (config?.github_token_encrypted) {
+        const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+        token = await safeDecryptToken(
+          config.github_token_encrypted,
+          encryptionKey,
+        );
+      }
+    } catch (err) {
+      console.warn(
+        "Failed to fetch tenant token, falling back to global:",
+        err,
+      );
+    }
+  }
+
+  // Fallback to global GITHUB_TOKEN
   if (!token) {
-    throw error(503, "Service temporarily unavailable");
+    token = platform?.env?.GITHUB_TOKEN ?? null;
+  }
+
+  if (!token) {
+    throw error(
+      503,
+      "GitHub token not configured. Please set up your GitHub token in the dashboard.",
+    );
   }
 
   // Rate limiting by IP (public endpoint)
@@ -76,8 +118,11 @@ export const GET: RequestHandler = async ({
       if (cached) {
         return json({ ...cached, cached: true }, { headers: getHeaders() });
       }
-    } catch {
-      // Cache read failed, continue with fresh fetch
+    } catch (err) {
+      console.warn(
+        `[Git Contributions] Cache read failed for ${username}:`,
+        err,
+      );
     }
   }
 
@@ -102,8 +147,11 @@ export const GET: RequestHandler = async ({
         await kv.put(cacheKey, JSON.stringify(responseData), {
           expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
         });
-      } catch {
-        // Cache write failed, continue
+      } catch (err) {
+        console.warn(
+          `[Git Contributions] Cache write failed for ${username}:`,
+          err,
+        );
       }
     }
 

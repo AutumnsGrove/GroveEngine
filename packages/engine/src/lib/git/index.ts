@@ -81,6 +81,9 @@ export const DEFAULT_GIT_CONFIG: Omit<GitDashboardConfig, "githubUsername"> = {
 export const GITHUB_API_URL = "https://api.github.com";
 export const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
 
+/** Sentinel value to indicate a token should be cleared (not just preserved) */
+export const CLEAR_TOKEN_VALUE = "__CLEAR_TOKEN__";
+
 const USERNAME_REGEX = /^[a-zA-Z0-9-]+$/;
 const MAX_USERNAME_LENGTH = 39;
 
@@ -162,41 +165,6 @@ query($username: String!) {
             contributionCount
             date
             weekday
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
-/**
- * GraphQL query to fetch a user's recent commit history.
- *
- * Note: We don't filter by author because:
- * 1. We're already limiting to OWNER/COLLABORATOR repos
- * 2. Filtering by author.id requires fetching the user's ID first
- * 3. For a personal dashboard, all commits in their repos are relevant
- */
-export const USER_COMMITS_QUERY = `
-query($username: String!, $limit: Int!) {
-  user(login: $username) {
-    repositories(first: $limit, orderBy: {field: PUSHED_AT, direction: DESC}, ownerAffiliations: [OWNER, COLLABORATOR]) {
-      nodes {
-        name
-        defaultBranchRef {
-          target {
-            ... on Commit {
-              history(first: 100) {
-                nodes {
-                  oid
-                  message
-                  committedDate
-                  additions
-                  deletions
-                }
-              }
-            }
           }
         }
       }
