@@ -48,10 +48,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     };
   }
 
-  // Fetch existing config
-  const config = await db
-    .prepare(
-      `SELECT
+  // PERFORMANCE: Run all queries in parallel (~400ms savings)
+  // Config and all three count queries are independent
+  // Each count query has error handling to gracefully handle missing tables
+  const [config, imageCount, tagCount, collectionCount] = await Promise.all([
+    // Fetch existing config
+    db
+      .prepare(
+        `SELECT
         enabled,
         r2_bucket,
         cdn_base_url,
@@ -71,48 +75,47 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         updated_at
       FROM gallery_curio_config
       WHERE tenant_id = ?`,
-    )
-    .bind(tenantId)
-    .first<ConfigRow>();
+      )
+      .bind(tenantId)
+      .first<ConfigRow>(),
 
-  // Fetch gallery stats with isolated error handling
-  // Each query has its own try/catch to gracefully handle missing tables
-  let imageCount = 0;
-  try {
-    const result = await db
+    // Image count
+    db
       .prepare(
         `SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?`,
       )
       .bind(tenantId)
-      .first<{ count: number }>();
-    imageCount = result?.count ?? 0;
-  } catch (err) {
-    console.warn("Failed to fetch image count:", err);
-  }
+      .first<{ count: number }>()
+      .then((r) => r?.count ?? 0)
+      .catch((err) => {
+        console.warn("Failed to fetch image count:", err);
+        return 0;
+      }),
 
-  let tagCount = 0;
-  try {
-    const result = await db
+    // Tag count
+    db
       .prepare(`SELECT COUNT(*) as count FROM gallery_tags WHERE tenant_id = ?`)
       .bind(tenantId)
-      .first<{ count: number }>();
-    tagCount = result?.count ?? 0;
-  } catch (err) {
-    console.warn("Failed to fetch tag count:", err);
-  }
+      .first<{ count: number }>()
+      .then((r) => r?.count ?? 0)
+      .catch((err) => {
+        console.warn("Failed to fetch tag count:", err);
+        return 0;
+      }),
 
-  let collectionCount = 0;
-  try {
-    const result = await db
+    // Collection count
+    db
       .prepare(
         `SELECT COUNT(*) as count FROM gallery_collections WHERE tenant_id = ?`,
       )
       .bind(tenantId)
-      .first<{ count: number }>();
-    collectionCount = result?.count ?? 0;
-  } catch (err) {
-    console.warn("Failed to fetch collection count:", err);
-  }
+      .first<{ count: number }>()
+      .then((r) => r?.count ?? 0)
+      .catch((err) => {
+        console.warn("Failed to fetch collection count:", err);
+        return 0;
+      }),
+  ]);
 
   // Parse config if exists
   let parsedConfig = null;

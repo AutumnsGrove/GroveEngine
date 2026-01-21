@@ -109,16 +109,28 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
           throw error(404, "Post not found");
         }
 
-        return json({
-          source: "d1",
-          post: {
-            ...post,
-            tags:
-              post.tags && typeof post.tags === "string"
-                ? JSON.parse(post.tags)
-                : [],
+        // PERFORMANCE: Add cache headers for Cloudflare edge caching
+        // Public posts: 5 min cache (reduces D1 queries for popular posts)
+        // Owner access: private, 1 min (ensures fresh content while editing)
+        const cacheControl = isOwner
+          ? "private, max-age=60"
+          : "public, max-age=300";
+
+        return json(
+          {
+            source: "d1",
+            post: {
+              ...post,
+              tags:
+                post.tags && typeof post.tags === "string"
+                  ? JSON.parse(post.tags)
+                  : [],
+            },
           },
-        });
+          {
+            headers: { "Cache-Control": cacheControl },
+          },
+        );
       }
     } catch (err) {
       if ((err as { status?: number }).status === 404) throw err;
@@ -137,18 +149,24 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
     // Reconstruct markdown from the post (we don't have raw markdown stored)
     // For filesystem posts, we return the content without raw markdown
-    return json({
-      source: "filesystem",
-      post: {
-        slug: post.slug,
-        title: post.title,
-        date: post.date,
-        tags: post.tags || [],
-        description: post.description || "",
-        html_content: post.content,
-        markdown_content: null, // Not available from filesystem read
+    // PERFORMANCE: Add cache headers - filesystem posts are always public
+    return json(
+      {
+        source: "filesystem",
+        post: {
+          slug: post.slug,
+          title: post.title,
+          date: post.date,
+          tags: post.tags || [],
+          description: post.description || "",
+          html_content: post.content,
+          markdown_content: null, // Not available from filesystem read
+        },
       },
-    });
+      {
+        headers: { "Cache-Control": "public, max-age=300" },
+      },
+    );
   } catch (err) {
     if ((err as { status?: number }).status === 404) throw err;
     console.error("Filesystem fetch error:", err);

@@ -1,6 +1,5 @@
 import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
-import { verifyTenantOwnership } from "$lib/auth/session.js";
 
 // Disable prerendering for all admin routes
 // Admin pages require authentication and should be server-rendered at request time
@@ -16,6 +15,7 @@ interface TenantRow {
   id: string;
   subdomain: string;
   display_name: string;
+  email: string;
 }
 
 export const load: LayoutServerLoad = async ({
@@ -38,30 +38,27 @@ export const load: LayoutServerLoad = async ({
   }
 
   // Load tenant data for the admin panel
+  // PERFORMANCE: Combined ownership verification and tenant data into single query
+  // Previously: two separate queries to `tenants` table (one for email, one for data)
+  // Now: single query fetches all fields, ownership verified in-memory
   let tenant: TenantInfo | null = null;
   if (locals.tenantId && platform?.env?.DB) {
     try {
-      // Skip ownership verification for example tenant (public demo)
-      if (!isExampleTenant) {
-        // Verify tenant ownership before loading tenant data
-        const isOwner = await verifyTenantOwnership(
-          platform.env.DB,
-          locals.tenantId,
-          locals.user!.email,
-        );
-
-        if (!isOwner) {
-          throw redirect(302, `/?error=access_denied`);
-        }
-      }
-
       const result = await platform.env.DB.prepare(
-        `SELECT id, subdomain, display_name FROM tenants WHERE id = ?`,
+        `SELECT id, subdomain, display_name, email FROM tenants WHERE id = ?`,
       )
         .bind(locals.tenantId)
         .first<TenantRow>();
 
       if (result) {
+        // Skip ownership verification for example tenant (public demo)
+        if (!isExampleTenant) {
+          // Verify ownership in-memory instead of separate query
+          if (result.email.toLowerCase() !== locals.user!.email.toLowerCase()) {
+            throw redirect(302, `/?error=access_denied`);
+          }
+        }
+
         tenant = {
           id: result.id,
           subdomain: result.subdomain,
