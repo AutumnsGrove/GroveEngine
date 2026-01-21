@@ -53,8 +53,8 @@
 ## Pre-Deployment Checklist (Before Enabling Uploads)
 > **From PR #412 reviews** — complete before enabling `image_uploads_enabled` for any tenant
 
-- [ ] **Enable Cloudflare CSAM Scanning Tool** in dashboard (Zone → Security → CSAM Scanning)
-  - Enable for `grove.place` and `cdn.autumnsgrove.com`
+- [x] **Enable Cloudflare CSAM Scanning Tool** in dashboard ✅ Already configured
+  - Enabled for `grove.place` and `cdn.autumnsgrove.com`
 - [ ] **Verify Workers AI binding** in `wrangler.toml`: `[ai]\nbinding = "AI"`
 - [ ] **Set TOGETHER_API_KEY** in Cloudflare secrets (fallback provider)
 - [ ] **Run migrations** on production D1: `030_petal.sql`, `031_petal_upload_gate.sql`
