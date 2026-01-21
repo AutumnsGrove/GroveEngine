@@ -93,9 +93,13 @@
 
 	// Get rotation class based on mode and index
 	function getRotationClass(index: number): string {
+		if (effectiveRotation === 'left-right') {
+			// Alternate left (-90°) and right (90°) for horizontal tilt
+			return index % 2 === 0 ? '-rotate-90' : 'rotate-90';
+		}
+		// up-down mode: alternate upright and upside-down
 		if (index % 2 === 0) return ''; // Even indices: no rotation
-		// Odd indices: apply rotation based on mode
-		return effectiveRotation === 'left-right' ? 'rotate-90' : 'rotate-180';
+		return 'rotate-180'; // Odd indices: upside down
 	}
 
 	const activeSeason = $derived(season ?? $seasonStore);
