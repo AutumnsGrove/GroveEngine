@@ -31,9 +31,15 @@ const PII_PATTERNS: Array<{
   replacement: string;
   name: string;
 }> = [
-  // Credit card numbers (13-19 digits, optionally with spaces/dashes)
+  // Credit card numbers - matches common card formats more precisely:
+  // - Visa: starts with 4 (13 or 16 digits)
+  // - Mastercard: starts with 51-55 or 2221-2720 (16 digits)
+  // - Amex: starts with 34 or 37 (15 digits)
+  // - Discover: starts with 6011, 644-649, or 65 (16 digits)
+  // Allows optional spaces or dashes between groups of 4
   {
-    pattern: /\b(?:\d[ -]*?){13,19}\b/g,
+    pattern:
+      /\b(?:4\d{3}|5[1-5]\d{2}|6(?:011|5\d{2}|4[4-9]\d)|3[47]\d{2}|22[2-9]\d|2[3-6]\d{2}|27[0-1]\d|2720)(?:[ -]?\d{4}){2,3}[ -]?\d{1,4}\b/g,
     replacement: "[CARD]",
     name: "credit_card",
   },

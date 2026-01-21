@@ -30,7 +30,23 @@ import type {
 // TYPES
 // =============================================================================
 
-// Cloudflare AI binding types (simplified - actual types come from @cloudflare/workers-types)
+/**
+ * Cloudflare AI binding types (simplified interfaces)
+ *
+ * These are minimal type definitions for the Cloudflare Workers AI binding.
+ * The full types are available from @cloudflare/workers-types, but we define
+ * simplified versions here to:
+ *
+ * 1. Avoid version coupling with @cloudflare/workers-types
+ * 2. Document exactly what we use from the API
+ * 3. Provide clearer error messages during development
+ *
+ * The `Ai` binding type itself comes from the Workers runtime and is globally
+ * available when deployed to Cloudflare. For local development, use wrangler
+ * which provides the binding automatically.
+ *
+ * @see https://developers.cloudflare.com/workers-ai/configuration/bindings/
+ */
 type AiTextGenerationInput = {
   prompt?: string;
   messages?: Array<{ role: string; content: string }>;

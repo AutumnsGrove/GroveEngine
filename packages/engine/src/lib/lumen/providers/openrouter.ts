@@ -243,7 +243,12 @@ export class OpenRouterProvider implements LumenProvider {
       let inputTokens = 0;
       let outputTokens = 0;
 
-      while (true) {
+      // Safety limit to prevent infinite loops from malformed streams
+      // At ~100 tokens/chunk, 10000 iterations = ~1M tokens (well beyond any model limit)
+      const MAX_ITERATIONS = 10000;
+      let iterations = 0;
+
+      while (iterations++ < MAX_ITERATIONS) {
         const { done, value } = await reader.read();
 
         if (done) {
@@ -292,6 +297,14 @@ export class OpenRouterProvider implements LumenProvider {
             // Skip malformed chunks
           }
         }
+      }
+
+      // If we exited the loop without breaking (hit max iterations), throw error
+      if (iterations >= MAX_ITERATIONS) {
+        throw new ProviderError(
+          this.name,
+          "Stream exceeded maximum iterations - possible malformed response",
+        );
       }
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {

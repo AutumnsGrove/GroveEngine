@@ -302,6 +302,9 @@ export function getModelCost(model: string): { input: number; output: number } {
 
 /**
  * Calculate cost for a request
+ *
+ * Uses 6 decimal places of precision to avoid floating-point errors
+ * while maintaining sub-cent accuracy for billing purposes.
  */
 export function calculateCost(
   model: string,
@@ -311,7 +314,8 @@ export function calculateCost(
   const costs = getModelCost(model);
   const inputCost = (inputTokens / 1_000_000) * costs.input;
   const outputCost = (outputTokens / 1_000_000) * costs.output;
-  return inputCost + outputCost;
+  // Round to 6 decimal places to avoid floating-point precision issues
+  return Math.round((inputCost + outputCost) * 1_000_000) / 1_000_000;
 }
 
 /**

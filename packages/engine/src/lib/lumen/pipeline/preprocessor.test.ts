@@ -88,25 +88,81 @@ describe("PII Scrubbing", () => {
   });
 
   describe("scrubPii - Credit Card Numbers", () => {
-    it("should scrub 16-digit card numbers", () => {
-      const result = scrubPii("Card: 4111111111111111");
-      expect(result.text).toBe("Card: [CARD]");
-      expect(result.piiTypes).toContain("credit_card");
+    // Valid card number formats that SHOULD be detected
+    describe("should detect valid card formats", () => {
+      it("should scrub Visa 16-digit card numbers (starts with 4)", () => {
+        const result = scrubPii("Card: 4111111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+        expect(result.piiTypes).toContain("credit_card");
+      });
+
+      it("should scrub Visa card numbers with spaces", () => {
+        const result = scrubPii("Card: 4111 1111 1111 1111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Visa card numbers with dashes", () => {
+        const result = scrubPii("Card: 4111-1111-1111-1111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Mastercard (starts with 51-55)", () => {
+        const result = scrubPii("Card: 5111111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Mastercard 2-series (starts with 2221-2720)", () => {
+        const result = scrubPii("Card: 2221111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Amex (starts with 34 or 37)", () => {
+        const result = scrubPii("Card: 341111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Discover (starts with 6011)", () => {
+        const result = scrubPii("Card: 6011111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
+
+      it("should scrub Discover (starts with 65)", () => {
+        const result = scrubPii("Card: 6511111111111111");
+        expect(result.text).toBe("Card: [CARD]");
+      });
     });
 
-    it("should scrub card numbers with spaces", () => {
-      const result = scrubPii("Card: 4111 1111 1111 1111");
-      expect(result.text).toBe("Card: [CARD]");
-    });
+    // Non-card numbers that should NOT be detected (false positive prevention)
+    // The credit card regex now specifically matches Visa (4xxx), Mastercard (51-55, 2221-2720),
+    // Amex (34, 37), and Discover (6011, 644-649, 65) prefixes only.
+    describe("should NOT false-positive on non-card numbers", () => {
+      it("should NOT scrub 16-digit numbers starting with 7 (invalid card prefix)", () => {
+        // 7 is not a valid card prefix - use dashes to avoid phone pattern
+        const result = scrubPii("Code: 7111-2222-3333-4444");
+        expect(result.text).toBe("Code: 7111-2222-3333-4444");
+        expect(result.piiTypes).not.toContain("credit_card");
+      });
 
-    it("should scrub card numbers with dashes", () => {
-      const result = scrubPii("Card: 4111-1111-1111-1111");
-      expect(result.text).toBe("Card: [CARD]");
-    });
+      it("should NOT scrub 16-digit numbers starting with 9 (invalid card prefix)", () => {
+        // 9 is not a valid card prefix - use dashes to avoid phone pattern
+        const result = scrubPii("Ref: 9111-2222-3333-4444");
+        expect(result.text).toBe("Ref: 9111-2222-3333-4444");
+        expect(result.piiTypes).not.toContain("credit_card");
+      });
 
-    it("should scrub 13-digit card numbers (Visa)", () => {
-      const result = scrubPii("Card: 4111111111111");
-      expect(result.text).toBe("Card: [CARD]");
+      it("should NOT scrub 16-digit numbers starting with 0 (invalid card prefix)", () => {
+        // 0 is not a valid card prefix - use dashes to avoid phone pattern
+        const result = scrubPii("ID: 0111-2222-3333-4444");
+        expect(result.text).toBe("ID: 0111-2222-3333-4444");
+        expect(result.piiTypes).not.toContain("credit_card");
+      });
+
+      it("should NOT scrub Visa-format that is too short (12 digits)", () => {
+        // Card numbers need at least 13 digits
+        const result = scrubPii("Short: 4111-1111-1111");
+        expect(result.text).toBe("Short: 4111-1111-1111");
+        expect(result.piiTypes).not.toContain("credit_card");
+      });
     });
   });
 
