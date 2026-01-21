@@ -16,8 +16,10 @@ import {
 } from "$lib/git";
 import {
   checkRateLimit,
+  rateLimitHeaders,
   buildRateLimitKey,
   getClientIP,
+  type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 
 // Rate limit: 60 requests per minute (external API, expensive)
@@ -42,18 +44,26 @@ export const GET: RequestHandler = async ({
   }
 
   // Rate limiting by IP (public endpoint)
+  let rateLimitResult: RateLimitResult | null = null;
   if (kv) {
     const clientIP = getClientIP(request);
-    const { response } = await checkRateLimit({
+    const { result, response } = await checkRateLimit({
       kv,
       key: buildRateLimitKey("git/contributions", clientIP),
       ...RATE_LIMIT,
     });
     if (response) return response;
+    rateLimitResult = result;
   }
 
   // Check if client wants activity format (for heatmap)
   const format = url.searchParams.get("format") || "raw";
+
+  // Helper to get response headers
+  const getHeaders = () =>
+    rateLimitResult
+      ? rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit)
+      : undefined;
 
   // Check cache first
   const cacheKey = getCacheKey("contributions", username, { format });
@@ -61,7 +71,7 @@ export const GET: RequestHandler = async ({
     try {
       const cached = await kv.get(cacheKey, "json");
       if (cached) {
-        return json({ ...cached, cached: true });
+        return json({ ...cached, cached: true }, { headers: getHeaders() });
       }
     } catch {
       // Cache read failed, continue with fresh fetch
@@ -94,7 +104,7 @@ export const GET: RequestHandler = async ({
       }
     }
 
-    return json({ ...responseData, cached: false });
+    return json({ ...responseData, cached: false }, { headers: getHeaders() });
   } catch (err) {
     console.error("Failed to fetch GitHub contributions:", err);
     throw error(502, "Unable to fetch contributions. Please try again later.");

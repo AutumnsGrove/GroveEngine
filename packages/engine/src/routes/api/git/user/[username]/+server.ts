@@ -15,8 +15,10 @@ import {
 } from "$lib/git";
 import {
   checkRateLimit,
+  rateLimitHeaders,
   buildRateLimitKey,
   getClientIP,
+  type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 
 // Rate limit: 60 requests per minute (external API)
@@ -31,15 +33,23 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
   }
 
   // Rate limiting by IP (public endpoint)
+  let rateLimitResult: RateLimitResult | null = null;
   if (kv) {
     const clientIP = getClientIP(request);
-    const { response } = await checkRateLimit({
+    const { result, response } = await checkRateLimit({
       kv,
       key: buildRateLimitKey("git/user", clientIP),
       ...RATE_LIMIT,
     });
     if (response) return response;
+    rateLimitResult = result;
   }
+
+  // Helper to get response headers
+  const getHeaders = () =>
+    rateLimitResult
+      ? rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit)
+      : undefined;
 
   // Check cache first
   if (kv) {
@@ -47,7 +57,7 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
       const cacheKey = getCacheKey("user", username);
       const cached = await kv.get(cacheKey, "json");
       if (cached) {
-        return json({ user: cached, cached: true });
+        return json({ user: cached, cached: true }, { headers: getHeaders() });
       }
     } catch {
       // Cache read failed, continue with fresh fetch
@@ -70,7 +80,7 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
       }
     }
 
-    return json({ user, cached: false });
+    return json({ user, cached: false }, { headers: getHeaders() });
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {
       throw error(404, "User not found");
