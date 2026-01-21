@@ -109,12 +109,12 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
           throw error(404, "Post not found");
         }
 
-        // PERFORMANCE: Add cache headers for Cloudflare edge caching
-        // Public posts: 5 min cache (reduces D1 queries for popular posts)
-        // Owner access: private, 1 min (ensures fresh content while editing)
+        // PERFORMANCE: Cache headers for Cloudflare edge caching
+        // Public: 5min cache + 10min stale-while-revalidate (instant responses, background refresh)
+        // Owner: private 1min (fresh content while editing)
         const cacheControl = isOwner
           ? "private, max-age=60"
-          : "public, max-age=300";
+          : "public, max-age=300, stale-while-revalidate=600";
 
         return json(
           {
@@ -149,7 +149,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
     // Reconstruct markdown from the post (we don't have raw markdown stored)
     // For filesystem posts, we return the content without raw markdown
-    // PERFORMANCE: Add cache headers - filesystem posts are always public
+    // PERFORMANCE: Cache headers - filesystem posts are always public
     return json(
       {
         source: "filesystem",
@@ -164,7 +164,9 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
         },
       },
       {
-        headers: { "Cache-Control": "public, max-age=300" },
+        headers: {
+          "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
+        },
       },
     );
   } catch (err) {
