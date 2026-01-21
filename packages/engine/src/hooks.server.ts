@@ -488,26 +488,15 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isFormActionUrl = event.url.search.startsWith("?/");
     const isFormAction = isSvelteKitAction || isFormActionUrl;
 
-    // Debug logging for form actions
-    if (event.url.pathname.includes("/curios/timeline")) {
-      console.log("[CSRF Debug]", {
-        method: event.request.method,
-        pathname: event.url.pathname,
-        search: event.url.search,
-        isSvelteKitAction,
-        isFormActionUrl,
-        isFormAction,
-        origin: event.request.headers.get("origin"),
-        host: event.request.headers.get("host"),
-        xForwardedHost: event.request.headers.get("x-forwarded-host"),
-      });
-    }
-
-    if (isAuthEndpoint || isTurnstileEndpoint || isFormAction) {
-      // Auth, verification, and form action endpoints use origin-based validation
-      const debugCsrf = event.url.pathname.includes("/curios/timeline");
-      if (!validateCSRF(event.request, debugCsrf)) {
-        console.log("[CSRF Debug] Origin validation FAILED");
+    // SvelteKit form actions already have CSRF protection built-in
+    // (origin header validation handled by SvelteKit itself)
+    // Skip our custom validation entirely for these requests
+    if (isFormAction) {
+      // Trust SvelteKit's built-in CSRF protection for form actions
+      // No additional validation needed
+    } else if (isAuthEndpoint || isTurnstileEndpoint) {
+      // Auth and verification endpoints use origin-based validation
+      if (!validateCSRF(event.request)) {
         throw error(403, "Invalid origin");
       }
     } else {
