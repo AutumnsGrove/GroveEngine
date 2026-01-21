@@ -7,7 +7,7 @@ import {
   buildRateLimitKey,
   rateLimitHeaders,
 } from "$lib/server/rate-limits/middleware.js";
-import { validateEnv } from "$lib/server/env-validation.js";
+import { validateEnv, hasAnyEnv } from "$lib/server/env-validation.js";
 import {
   ALLOWED_IMAGE_TYPES,
   ALLOWED_TYPES_DISPLAY,
@@ -17,6 +17,8 @@ import {
   isAllowedImageType,
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
+import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
+import { isFeatureEnabled } from "$lib/feature-flags/index.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -95,6 +97,35 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // CSRF check
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
+  }
+
+  // ========================================================================
+  // Feature Flag Gate: Image Uploads
+  // ========================================================================
+  // Image uploads are DISABLED by default until PhotoDNA hash-based CSAM
+  // detection is integrated. Can be enabled per-tenant for trusted beta users.
+  //
+  // @see migrations/031_petal_upload_gate.sql
+  // @see TODOS.md "NCMEC CyberTipline Integration" section
+  const uploadsEnabled = await isFeatureEnabled(
+    "image_uploads_enabled",
+    {
+      tenantId: locals.tenantId,
+      userId: locals.user.id,
+    },
+    platform?.env as Parameters<typeof isFeatureEnabled>[2],
+  );
+
+  if (!uploadsEnabled) {
+    return json(
+      {
+        error: true,
+        code: "feature_disabled",
+        message:
+          "Image uploads are currently in limited beta. This feature will be available soon!",
+      },
+      { status: 403 },
+    );
   }
 
   // Validate required environment variables (fail-fast with actionable errors)
@@ -237,6 +268,102 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate image dimensions to prevent DoS attacks
     await validateImageDimensions(file, buffer);
+
+    // ========================================================================
+    // Pre-Scan Abuse Detection
+    // ========================================================================
+    // Check if user has too many recent rejected uploads BEFORE running
+    // expensive AI scans. This prevents cost abuse from malicious users
+    // repeatedly uploading violating content.
+    const rejectedKey = buildRateLimitKey("upload/rejected", locals.user.id);
+    const rejectedCheck = await checkRateLimit({
+      kv,
+      key: rejectedKey,
+      limit: 5, // Max 5 rejected uploads per hour before temporary block
+      windowSeconds: 3600,
+      namespace: "upload-abuse",
+    });
+
+    if (rejectedCheck.response) {
+      return json(
+        {
+          error: true,
+          code: "upload_restricted",
+          message:
+            "Upload access temporarily restricted. Please try again later or contact support.",
+        },
+        { status: 429 },
+      );
+    }
+
+    // ========================================================================
+    // Petal Content Moderation (Layer 1-3)
+    // ========================================================================
+    // Run Petal scan before storing in R2. This checks:
+    // - Layer 1: CSAM detection (MANDATORY)
+    // - Layer 2: Content classification (nudity, violence, etc.)
+    // - Layer 3: Sanity checks (for try-on context)
+    //
+    // If AI binding is not available, Petal will attempt external fallback
+    // (Together.ai) if TOGETHER_API_KEY is configured.
+    const hasPetalProvider =
+      platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
+
+    if (hasPetalProvider) {
+      const petalEnv: PetalEnv = {
+        AI: platform!.env!.AI,
+        DB: db,
+        CACHE_KV: kv,
+        TOGETHER_API_KEY: platform!.env!.TOGETHER_API_KEY as string | undefined,
+      };
+
+      // Determine context from form data (default: general upload)
+      const uploadContext = (formData.get("context") as string) || "general";
+      const petalContext = ["tryon", "profile", "blog"].includes(uploadContext)
+        ? (uploadContext as "tryon" | "profile" | "blog")
+        : "general";
+
+      const petalResult = await scanImage(
+        {
+          imageData: buffer,
+          mimeType: file.type,
+          context: petalContext,
+          userId: locals.user.id,
+          tenantId,
+          hash: hash || undefined,
+        },
+        petalEnv,
+      );
+
+      if (!petalResult.allowed) {
+        // Increment rejected uploads counter for abuse detection
+        // This is best-effort - don't block the rejection if it fails
+        try {
+          await checkRateLimit({
+            kv,
+            key: rejectedKey,
+            limit: 5,
+            windowSeconds: 3600,
+            namespace: "upload-abuse",
+          });
+        } catch {
+          // Non-critical - continue with rejection
+        }
+
+        // Return user-friendly rejection
+        // IMPORTANT: Never reveal CSAM detection reason
+        return json(
+          {
+            error: true,
+            code: "content_rejected",
+            message: petalResult.message,
+            // Include processing time for debugging (not the reason)
+            processingTimeMs: petalResult.processingTimeMs,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     // Check for duplicates if hash provided
     if (hash && db) {

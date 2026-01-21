@@ -15,9 +15,11 @@ export interface CloudflareEnv {
   FIREWORKS_API_KEY?: string;
   CEREBRAS_API_KEY?: string;
   GROQ_API_KEY?: string;
+  TOGETHER_API_KEY?: string;
   TURNSTILE_SECRET_KEY?: string;
   AUTH?: Fetcher;
   IMAGES?: R2Bucket;
+  AI?: Ai; // Workers AI binding for Petal image moderation
   [key: string]: unknown;
 }
 
