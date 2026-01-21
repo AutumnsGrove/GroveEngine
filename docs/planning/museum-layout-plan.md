@@ -242,8 +242,8 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 5. Appreciate that rejected names teach as much as chosen ones
 
 **Featured Journeys:**
-- **Loom** - "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
-- **Porch** - Support isn't a ticket system. It's a porch conversation.
+- **Porch** - The origin story. Support isn't a ticket system. It's a porch conversation. This journey created the naming ritual.
+- **Loom** - A retroactive walk that confirmed the name was right. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
 - **Heartwood** - The dense core of a tree. Where trust lives.
 
 **Emotional Goal:** Visitors should feel how naming shapes the entire experience. Words create worlds.

@@ -142,7 +142,7 @@ Names aren't branding. They're world-building. Every service has a nature metaph
 - The Journeys Gallery (50+ naming journeys with rejected ideas, realizations)
 - The Ecosystem Map (40+ services, each with its story)
 
-**Featured Journey:** Loom. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along. But you had to walk to know that."
+**Featured Journey:** Porch. Support isn't a ticket system. It's a porch conversation. You come up the steps, have a seat, and the grove keeper comes out to chat. This journey created the naming ritual.
 
 ---
 
@@ -173,7 +173,7 @@ Start with [The Seasons](./nature/seasons.md). It shows how five color palettes 
 Start with [The Engine Room](./architecture/engine-room.md). It explains the pattern that prevented 11,925 lines of duplicate code.
 
 **If you care about words:**
-Start with [The Naming Wing](./naming/WING.md). See how "Porch" became the support system and why "Loom" stayed Loom.
+Start with [The Naming Wing](./naming/WING.md). See how "Porch" created the naming ritual and why 30 retroactive walks confirmed the names were right.
 
 **If you just want to wander:**
 Pick any wing. They're all connected. You'll find your way.
