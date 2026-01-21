@@ -174,6 +174,7 @@ Columns storing encrypted tokens use the `_encrypted` suffix to indicate they sh
 | `timeline_curio_config` | `openrouter_key_encrypted` | OpenRouter API key |
 | `journey_curio_config` | `github_token_encrypted` | GitHub PAT |
 | `journey_curio_config` | `openrouter_key_encrypted` | OpenRouter API key |
+| `git_dashboard_config` | `github_token_encrypted` | GitHub PAT |
 
 **Note:** During migration, these columns may temporarily hold plaintext. The `_encrypted` suffix means "should be encrypted" not "is encrypted."
 
