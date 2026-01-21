@@ -538,6 +538,19 @@ export const specs: Doc[] = [
     readingTime: 15,
   },
   {
+    slug: "lumen-spec",
+    title: "Lumen — AI Gateway",
+    description:
+      "Unified AI routing layer with task-based provider selection and observability",
+    excerpt:
+      "In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove's unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "lamp-ceiling",
+    lastUpdated: "2026-01-21",
+    readingTime: 18,
+  },
+  {
     slug: "shade-spec",
     title: "Shade — AI Content Protection System",
     description: "Layered defense against AI crawlers and scrapers",
