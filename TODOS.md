@@ -75,6 +75,23 @@
 
 # 🔄 CURRENT SESSION (Jan 21, 2026)
 
+## Completed ✅
+
+### Lattice Museum Planning (PR pending)
+> **Branch:** `claude/plan-museum-layout-x9OpU`
+> **Plan:** `docs/planning/museum-layout-plan.md`
+
+- [x] Created museum-documentation skill for narrative-driven docs
+- [x] Planned 7 wings: Architecture, Nature, Trust, Data, Personalization, Community, Naming
+- [x] Created MUSEUM.md entrance and glossary.md
+- [x] Added agent orchestration model (swarm with orchestrator)
+- [x] Required reading: "Why I Built the Grove" for texture understanding
+- [x] Featured naming journeys: Porch (origin), Lumen (difficult), Loom (returning home)
+
+**Follow-up (no rush, it's gotta look good after all):**
+- [ ] Greptile generated a beautiful sequence diagram for visitor flow — would look great in the plan!
+- [ ] Tier terminology (Seedling/Sapling/Oak/Evergreen) — revisit once pricing is finalized
+
 ## In Progress 🚧
 
 ### Timeline Curio Config Save — 403 CSRF Issue
