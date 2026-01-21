@@ -104,18 +104,20 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 | Exhibit | Focus | Key Files |
 |---------|-------|-----------|
-| **The Forest** | 64 nature SVG components: trees, creatures, weather | `ui/components/nature/` |
+| **The Forest** | 64 SVG components with customizable Svelte props | `ui/components/nature/` |
 | **The Seasons** | Five seasons including Midnight easter egg | `ui/stores/season.ts` |
 | **The Glass Garden** | Glassmorphism design system | `ui/components/ui/Glass*` |
 | **The Typography Gallery** | 10 fonts including accessible options | `ui/components/typography/` |
 
 **Visitor Journey:**
-1. Meet the hand-drawn trees (Cherry, Pine, Aspen, Oak...)
+1. Meet the mathematically-driven trees (Cherry, Pine, Aspen, Oak...)
 2. Discover creatures that bring the forest alive (Bee, Butterfly, Deer...)
 3. Experience seasons changing (Spring → Summer → Autumn → Winter)
 4. Find the Midnight easter egg (queer aesthetic, deep purple)
 5. See how glass surfaces layer over nature backgrounds
 6. Explore accessible font choices (OpenDyslexic, Atkinson Hyperlegible)
+
+**What Makes It Delightful:** The nature system harnesses mathematically-driven SVGs with customizable Svelte props. Each tree, creature, and weather effect can be tuned through component properties, creating organic variety from precise parameters.
 
 **Emotional Goal:** Visitors should feel the warmth and intentionality behind every visual choice.
 
