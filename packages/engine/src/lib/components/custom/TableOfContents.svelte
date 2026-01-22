@@ -102,8 +102,9 @@
 <style>
 	.toc {
 		position: sticky;
-		top: 2rem;
-		max-height: calc(100vh - 4rem);
+		/* Account for sticky navbar height (~64px + some breathing room) */
+		top: 5rem;
+		max-height: calc(100vh - 6rem);
 		overflow-y: auto;
 		padding: 1.25rem;
 		font-size: 0.875rem;
@@ -214,15 +215,31 @@
 	.level-6 .toc-link {
 		padding-left: 4rem;
 	}
-	/* Scrollbar styling */
+	/* Scrollbar styling - hidden by default, visible on hover */
+	.toc {
+		/* Firefox scrollbar hiding */
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+	.toc:hover {
+		scrollbar-color: var(--color-foreground-subtle, rgba(0, 0, 0, 0.2)) transparent;
+	}
+	/* Webkit (Chrome, Safari, Edge) scrollbar styling */
 	.toc::-webkit-scrollbar {
-		width: 4px;
+		width: 6px;
 	}
 	.toc::-webkit-scrollbar-track {
 		background: transparent;
 	}
 	.toc::-webkit-scrollbar-thumb {
-		background: var(--color-foreground-subtle, #ccc);
-		border-radius: 2px;
+		background: transparent;
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+	.toc:hover::-webkit-scrollbar-thumb {
+		background: var(--color-foreground-subtle, rgba(0, 0, 0, 0.2));
+	}
+	:global(.dark) .toc:hover::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.15);
 	}
 </style>
