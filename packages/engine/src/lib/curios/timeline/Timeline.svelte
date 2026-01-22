@@ -168,7 +168,7 @@
 		let withRepoLinks = text;
 		if (githubUsername) {
 			withRepoLinks = text.replace(
-				/^### (.+)$/gm,
+				/^### (?!\[)(.+)$/gm,
 				(match, repoName) => {
 					const cleanName = repoName.trim();
 					return `### [${cleanName}](https://github.com/${githubUsername}/${cleanName})`;
@@ -310,12 +310,14 @@
 									<FolderGit2 size={14} />
 									{summary.repos_active?.join(', ') || 'Unknown'}
 								</span>
-								<span class="changes">
-									<Plus size={14} class="plus-icon" />
-									{summary.total_additions.toLocaleString()}
-									<Minus size={14} class="minus-icon" />
-									{summary.total_deletions.toLocaleString()}
-								</span>
+								{#if summary.total_additions > 0 || summary.total_deletions > 0}
+									<span class="changes">
+										<Plus size={14} class="plus-icon" />
+										{summary.total_additions.toLocaleString()}
+										<Minus size={14} class="minus-icon" />
+										{summary.total_deletions.toLocaleString()}
+									</span>
+								{/if}
 							</div>
 
 							{#if summary.detailed_timeline && isExpanded}

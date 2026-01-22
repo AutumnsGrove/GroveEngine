@@ -168,6 +168,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       });
     }
 
+    // Enrich commits with stats from individual commit details
+    await fetchCommitStats(commits, config.github_username, githubToken);
+
     // ==========================================================================
     // Long-Horizon Context: Get historical context BEFORE generating
     // ==========================================================================
@@ -630,4 +633,40 @@ async function fetchRepoCommitsForDate(
   }
 
   return commits;
+}
+
+/**
+ * Enrich commits with real additions/deletions from individual commit details.
+ * The Commits list API doesn't include stats — we must fetch each commit individually.
+ */
+async function fetchCommitStats(
+  commits: Commit[],
+  username: string,
+  token: string,
+): Promise<void> {
+  for (const commit of commits) {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${username}/${commit.repo}/commits/${commit.sha}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github.v3+json",
+            "User-Agent": "GroveEngine-Timeline-Curio",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const detail = (await response.json()) as GitHubCommitDetail;
+        commit.additions = detail.stats?.additions ?? 0;
+        commit.deletions = detail.stats?.deletions ?? 0;
+      }
+    } catch {
+      // Non-fatal: keep 0 for this commit
+    }
+
+    // Rate limit: 50ms between calls
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
 }
