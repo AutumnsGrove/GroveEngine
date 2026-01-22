@@ -228,8 +228,10 @@
 			<div class="flex items-center gap-3 text-bark-400 dark:text-cream-500">
 				<div
 					class="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"
+					role="status"
+					aria-label="Loading preview"
 				></div>
-				<span class="text-sm">Loading preview...</span>
+				<span class="text-sm" aria-hidden="true">Loading preview...</span>
 			</div>
 		</div>
 	{:else}
@@ -307,10 +309,11 @@
 			{/if}
 		</div>
 
-		<!-- External link indicator -->
+		<!-- External link indicator (decorative, link already has rel and target) -->
 		{#if !disabled && newTab}
 			<div
 				class="absolute top-2 right-2 p-1.5 rounded-md bg-white/80 dark:bg-slate-800/80 opacity-0 group-hover:opacity-100 transition-opacity"
+				aria-hidden="true"
 			>
 				<Icons name="external" size="sm" class="text-bark-400 dark:text-cream-500" />
 			</div>
