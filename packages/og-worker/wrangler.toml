@@ -12,3 +12,8 @@ routes = [
 
 [vars]
 ENVIRONMENT = "production"
+
+# KV namespace for caching OG metadata
+[[kv_namespaces]]
+binding = "OG_CACHE"
+id = "77f9be07d0084992ab1318bea97f3ca2"

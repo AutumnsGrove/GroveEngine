@@ -2,6 +2,7 @@ import { ImageResponse } from "workers-og";
 
 export interface Env {
   ENVIRONMENT: string;
+  OG_CACHE?: KVNamespace;
 }
 
 function escapeHtml(text: string): string {
@@ -349,6 +350,425 @@ async function fetchPageMeta(pageUrl: string): Promise<PageMeta> {
 }
 
 // =============================================================================
+// EXTERNAL OG METADATA FETCHER (for LinkPreview component)
+// =============================================================================
+
+interface OGMetadata {
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  siteName?: string;
+  favicon?: string;
+  domain: string;
+  type?: string;
+  fetchedAt: string;
+}
+
+interface OGFetchResult {
+  success: boolean;
+  data?: OGMetadata;
+  error?: string;
+  errorCode?: string;
+  cached?: boolean;
+}
+
+// Blocked URL patterns for external fetch (security - SSRF protection)
+const BLOCKED_EXTERNAL_PATTERNS = [
+  // Localhost variations
+  /^https?:\/\/localhost/i,
+  /^https?:\/\/127\./,
+  /^https?:\/\/0\./,
+  // Private IP ranges (RFC 1918)
+  /^https?:\/\/10\./,
+  /^https?:\/\/172\.(1[6-9]|2\d|3[01])\./,
+  /^https?:\/\/192\.168\./,
+  // Link-local addresses (RFC 3927)
+  /^https?:\/\/169\.254\./,
+  // Cloud metadata endpoints (AWS, GCP, Azure, DigitalOcean, etc.)
+  /^https?:\/\/169\.254\.169\.254/,
+  /^https?:\/\/metadata\./i,
+  /^https?:\/\/metadata-/i,
+  // IPv6 localhost
+  /^https?:\/\/\[::1\]/,
+  // IPv6 link-local
+  /^https?:\/\/\[fe80:/i,
+  // IPv6 unique local addresses (fc00::/7)
+  /^https?:\/\/\[fc/i,
+  /^https?:\/\/\[fd/i,
+  // Dangerous protocols
+  /^file:/i,
+  /^data:/i,
+];
+
+function isBlockedExternalUrl(urlString: string): boolean {
+  for (const pattern of BLOCKED_EXTERNAL_PATTERNS) {
+    if (pattern.test(urlString)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function extractDomain(url: URL): string {
+  return url.hostname.replace(/^www\./, "");
+}
+
+function resolveExternalUrl(
+  base: URL,
+  relative: string | undefined,
+): string | undefined {
+  if (!relative) return undefined;
+  if (relative.startsWith("//")) {
+    return `${base.protocol}${relative}`;
+  }
+  try {
+    return new URL(relative, base.href).href;
+  } catch {
+    return undefined;
+  }
+}
+
+function decodeHtmlEntities(text: string): string {
+  const entities: Record<string, string> = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&#39;": "'",
+    "&apos;": "'",
+    "&nbsp;": " ",
+  };
+  return text.replace(
+    /&(?:amp|lt|gt|quot|#39|apos|nbsp);/g,
+    (match) => entities[match] || match,
+  );
+}
+
+function extractExternalMetaContent(
+  html: string,
+  property: string,
+): string | undefined {
+  // Try og: property first
+  const ogPatterns = [
+    new RegExp(
+      `<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`,
+      "i",
+    ),
+    new RegExp(
+      `<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${property}["']`,
+      "i",
+    ),
+  ];
+
+  for (const pattern of ogPatterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return decodeHtmlEntities(match[1].trim());
+    }
+  }
+
+  // Try name attribute for non-OG meta tags
+  const namePatterns = [
+    new RegExp(
+      `<meta[^>]+name=["']${property}["'][^>]+content=["']([^"']+)["']`,
+      "i",
+    ),
+    new RegExp(
+      `<meta[^>]+content=["']([^"']+)["'][^>]+name=["']${property}["']`,
+      "i",
+    ),
+  ];
+
+  for (const pattern of namePatterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return decodeHtmlEntities(match[1].trim());
+    }
+  }
+
+  return undefined;
+}
+
+function extractExternalTitle(html: string): string | undefined {
+  const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return match?.[1] ? decodeHtmlEntities(match[1].trim()) : undefined;
+}
+
+function extractExternalFavicon(html: string, baseUrl: URL): string | undefined {
+  const patterns = [
+    /<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']+)["']/i,
+    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut )?icon["']/i,
+    /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return resolveExternalUrl(baseUrl, match[1]);
+    }
+  }
+
+  return `${baseUrl.protocol}//${baseUrl.host}/favicon.ico`;
+}
+
+function parseExternalOGMetadata(
+  html: string,
+  url: URL,
+): Omit<OGMetadata, "fetchedAt"> {
+  return {
+    url: url.href,
+    domain: extractDomain(url),
+    title: extractExternalMetaContent(html, "og:title") || extractExternalTitle(html),
+    description:
+      extractExternalMetaContent(html, "og:description") ||
+      extractExternalMetaContent(html, "description"),
+    image: resolveExternalUrl(url, extractExternalMetaContent(html, "og:image")),
+    imageAlt: extractExternalMetaContent(html, "og:image:alt"),
+    siteName: extractExternalMetaContent(html, "og:site_name"),
+    type: extractExternalMetaContent(html, "og:type"),
+    favicon: extractExternalFavicon(html, url),
+  };
+}
+
+async function handleOGFetch(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>,
+): Promise<Response> {
+  const url = new URL(request.url);
+  const targetUrl = url.searchParams.get("url");
+
+  if (!targetUrl) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Missing url parameter",
+        errorCode: "INVALID_URL",
+      } satisfies OGFetchResult),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Validate URL
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(targetUrl);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Invalid protocol");
+    }
+  } catch {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Invalid URL format",
+        errorCode: "INVALID_URL",
+      } satisfies OGFetchResult),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Check for blocked URLs (security)
+  if (isBlockedExternalUrl(targetUrl)) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "URL is blocked for security reasons",
+        errorCode: "BLOCKED",
+      } satisfies OGFetchResult),
+      {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Check cache first
+  const cacheKey = `og:${targetUrl}`;
+  if (env.OG_CACHE) {
+    try {
+      const cached = await env.OG_CACHE.get(cacheKey, "json");
+      if (cached) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: cached as OGMetadata,
+            cached: true,
+          } satisfies OGFetchResult),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-Cache": "HIT",
+              ...corsHeaders,
+            },
+          },
+        );
+      }
+    } catch {
+      // Cache miss or error, continue to fetch
+    }
+  }
+
+  // Fetch the URL
+  let response: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    response = await fetch(targetUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent":
+          "GroveBot/1.0 (+https://grove.place; Open Graph Fetcher)",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+      },
+      signal: controller.signal,
+      redirect: "follow",
+    });
+
+    clearTimeout(timeoutId);
+  } catch (err) {
+    const isTimeout = err instanceof Error && err.name === "AbortError";
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: isTimeout ? "Request timed out" : "Failed to fetch URL",
+        errorCode: isTimeout ? "TIMEOUT" : "FETCH_FAILED",
+      } satisfies OGFetchResult),
+      {
+        status: isTimeout ? 504 : 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  if (!response.ok) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: `HTTP ${response.status}: ${response.statusText}`,
+        errorCode: "FETCH_FAILED",
+      } satisfies OGFetchResult),
+      {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Check content type
+  const contentType = response.headers.get("content-type") || "";
+  if (
+    !contentType.includes("text/html") &&
+    !contentType.includes("application/xhtml+xml")
+  ) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Response is not HTML",
+        errorCode: "NOT_HTML",
+      } satisfies OGFetchResult),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Read HTML (just the head section for efficiency)
+  let html: string;
+  try {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("No response body");
+    }
+
+    const chunks: Uint8Array[] = [];
+    let totalSize = 0;
+    const maxSize = 512 * 1024; // 512KB max
+
+    while (totalSize < maxSize) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      totalSize += value.length;
+
+      // Check if we've got the </head> tag
+      const decoder = new TextDecoder();
+      const partial = decoder.decode(value, { stream: true });
+      if (partial.includes("</head>")) {
+        reader.cancel();
+        break;
+      }
+    }
+
+    html = new TextDecoder().decode(
+      new Uint8Array(
+        chunks.reduce((acc, chunk) => {
+          const newArr = new Uint8Array(acc.length + chunk.length);
+          newArr.set(acc);
+          newArr.set(chunk, acc.length);
+          return newArr;
+        }, new Uint8Array(0)),
+      ),
+    );
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Failed to read response",
+        errorCode: "PARSE_FAILED",
+      } satisfies OGFetchResult),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
+  }
+
+  // Parse metadata
+  const metadata: OGMetadata = {
+    ...parseExternalOGMetadata(html, parsedUrl),
+    fetchedAt: new Date().toISOString(),
+  };
+
+  // Cache the result (1 hour TTL)
+  if (env.OG_CACHE && metadata.title) {
+    try {
+      await env.OG_CACHE.put(cacheKey, JSON.stringify(metadata), {
+        expirationTtl: 3600,
+      });
+    } catch {
+      // Cache write failed, continue anyway
+    }
+  }
+
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data: metadata,
+      cached: false,
+    } satisfies OGFetchResult),
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Cache": "MISS",
+        "Cache-Control": "public, max-age=300", // Browser cache 5 min
+        ...corsHeaders,
+      },
+    },
+  );
+}
+
+// =============================================================================
 // WORKER HANDLER
 // =============================================================================
 
@@ -376,6 +796,15 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Route: /fetch - External OG metadata fetcher
+    if (url.pathname === "/fetch") {
+      if (request.method !== "GET") {
+        return new Response("Method not allowed", { status: 405 });
+      }
+      return handleOGFetch(request, env, corsHeaders);
+    }
+
+    // Route: / or /og - OG image generation
     if (
       request.method !== "GET" ||
       (url.pathname !== "/" && url.pathname !== "/og")
