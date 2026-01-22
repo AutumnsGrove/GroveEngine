@@ -83,7 +83,7 @@
         </Badge>
       </div>
       <p class="subtitle">
-        A beautiful image gallery powered by R2 storage.
+        A beautiful image gallery powered by Amber storage.
         Display your photos with filtering, tags, and lightbox viewing.
       </p>
     </div>
@@ -203,49 +203,75 @@
         <h2>Storage</h2>
       </div>
 
-      <div class="field-group">
-        <label for="r2Bucket" class="field-label">R2 Bucket Name</label>
-        <input
-          type="text"
-          id="r2Bucket"
-          name="r2Bucket"
-          bind:value={r2Bucket}
-          placeholder="my-images-bucket"
-          class="field-input"
-        />
-        <p class="field-help">
-          The R2 bucket binding name configured in your wrangler.toml.
-        </p>
-      </div>
-
-      <div class="field-group">
-        <label for="cdnBaseUrl" class="field-label">
-          CDN Base URL
-          <span class="required">*</span>
-        </label>
-        <input
-          type="text"
-          id="cdnBaseUrl"
-          name="cdnBaseUrl"
-          bind:value={cdnBaseUrl}
-          placeholder="https://cdn.example.com"
-          class="field-input"
-          required={enabled}
-        />
-        <p class="field-help">
-          The base URL for your image CDN (e.g., R2 custom domain or Cloudflare Images).
-        </p>
-      </div>
-
-      <div class="sync-section">
+      <div class="sync-section-top">
         <a href="/admin/curios/gallery/sync" class="sync-link">
           <RefreshCw class="sync-icon" />
-          <span>Sync images from R2</span>
+          <span>Sync images from Amber</span>
         </a>
         <p class="field-help">
-          Import new images from your R2 bucket into the gallery database.
+          Import new images you've uploaded to your Amber storage into the gallery.
+          This scans for new files and adds them to your gallery database.
         </p>
       </div>
+
+      <!-- Advanced Storage Settings -->
+      <details class="advanced-section">
+        <summary class="advanced-toggle">
+          <AlertCircle class="warning-icon-small" />
+          <span>Advanced Storage Settings</span>
+        </summary>
+
+        <div class="advanced-warning">
+          <AlertCircle class="warning-icon" />
+          <div>
+            <strong>For power users only</strong>
+            <p>
+              These settings are pre-configured for most Wanderers. Changing them
+              incorrectly can break your gallery or cause images not to load.
+              Only modify if you have your own CDN or storage setup.
+            </p>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="cdnBaseUrl" class="field-label">
+            CDN Base URL
+          </label>
+          <input
+            type="text"
+            id="cdnBaseUrl"
+            name="cdnBaseUrl"
+            bind:value={cdnBaseUrl}
+            placeholder="https://cdn.grove.place"
+            class="field-input"
+          />
+          <p class="field-help">
+            Where your images are served from. The default (<code>cdn.grove.place</code>)
+            works for all Wanderers. Only change this if you have your own CDN
+            that you control and can upload to.
+          </p>
+          <p class="field-help field-warning">
+            ⚠️ Using a CDN you don't control will break your images. We can't
+            back up images stored elsewhere, so you're responsible for that storage.
+          </p>
+        </div>
+
+        <div class="field-group">
+          <label for="r2Bucket" class="field-label">Storage Bucket</label>
+          <input
+            type="text"
+            id="r2Bucket"
+            name="r2Bucket"
+            bind:value={r2Bucket}
+            placeholder="grove-media"
+            class="field-input"
+          />
+          <p class="field-help">
+            The Amber storage bucket for your images. Leave this alone unless
+            you have a specific reason to change it.
+          </p>
+        </div>
+      </details>
     </GlassCard>
 
     <!-- Display Settings -->
@@ -728,10 +754,8 @@
   }
 
   /* Sync Section */
-  .sync-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border);
+  .sync-section-top {
+    margin-bottom: 1.5rem;
   }
 
   .sync-link {
@@ -751,6 +775,88 @@
   :global(.sync-icon) {
     width: 1rem;
     height: 1rem;
+  }
+
+  /* Advanced Section */
+  .advanced-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-muted-foreground);
+    padding: 0.5rem 0;
+    list-style: none;
+  }
+
+  .advanced-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .advanced-toggle::after {
+    content: "▸";
+    margin-left: auto;
+    transition: transform 0.2s;
+  }
+
+  .advanced-section[open] .advanced-toggle::after {
+    transform: rotate(90deg);
+  }
+
+  :global(.warning-icon-small) {
+    width: 1rem;
+    height: 1rem;
+    color: #f59e0b;
+  }
+
+  .advanced-warning {
+    display: flex;
+    gap: 0.75rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin: 1rem 0 1.5rem 0;
+  }
+
+  :global(.warning-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .advanced-warning strong {
+    display: block;
+    color: #f59e0b;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .advanced-warning p {
+    font-size: 0.85rem;
+    color: var(--color-muted-foreground);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .field-help code {
+    background: var(--color-muted);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  .field-warning {
+    color: #f59e0b;
   }
 
   /* Form Actions */

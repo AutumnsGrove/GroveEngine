@@ -7,12 +7,12 @@
     {
       id: "gallery",
       name: "Gallery",
-      description: "Beautiful image galleries powered by R2 storage with tags and collections",
+      description: "Beautiful image galleries with tags, collections, and lightbox viewing",
       icon: Image,
       status: "available",
       href: "/admin/curios/gallery",
       features: [
-        "R2-backed image storage",
+        "Amber-powered storage",
         "Tags and collections",
         "Lightbox viewer",
         "Masonry layout"

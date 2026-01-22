@@ -144,8 +144,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   return {
     config: parsedConfig || {
       ...DEFAULT_GALLERY_CONFIG,
-      r2Bucket: null,
-      cdnBaseUrl: null,
+      r2Bucket: "grove-media",
+      cdnBaseUrl: "https://cdn.grove.place",
       galleryTitle: null,
       galleryDescription: null,
       customCss: null,
@@ -191,14 +191,8 @@ export const actions: Actions = {
     const thumbnailSize = formData.get("thumbnailSize") as string;
     const customCss = formData.get("customCss") as string | null;
 
-    // Validate required fields if enabling
-    if (enabled) {
-      if (!cdnBaseUrl?.trim()) {
-        return fail(400, {
-          error: "CDN Base URL is required when enabling Gallery",
-        });
-      }
-    }
+    // Default CDN URL to Grove's CDN if not provided
+    const finalCdnBaseUrl = cdnBaseUrl?.trim() || "https://cdn.grove.place";
 
     // Validate items per page
     const validItemsPerPage = Math.max(10, Math.min(100, itemsPerPage));
@@ -248,8 +242,8 @@ export const actions: Actions = {
         .bind(
           tenantId,
           enabled ? 1 : 0,
-          r2Bucket?.trim() || null,
-          cdnBaseUrl?.trim() || null,
+          r2Bucket?.trim() || "grove-media",
+          finalCdnBaseUrl,
           galleryTitle?.trim() || null,
           galleryDescription?.trim() || null,
           validItemsPerPage,

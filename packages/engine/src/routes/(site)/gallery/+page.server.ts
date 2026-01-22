@@ -134,7 +134,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     throw error(404, "Gallery is not enabled for this site");
   }
 
-  const cdnBaseUrl = config.cdn_base_url || "";
+  const cdnBaseUrl = config.cdn_base_url || "https://cdn.grove.place";
 
   // Fetch images from database
   // ISOLATED: Error handling so missing table doesn't crash the page
