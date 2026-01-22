@@ -143,7 +143,6 @@
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			statusData = await response.json();
 			error = null;
-			lastFetch = new Date();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch status';
 			// Keep old data if available, just show error

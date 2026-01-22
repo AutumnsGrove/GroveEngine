@@ -583,7 +583,11 @@ operationRegistry.set("auth_flows", [
 
   // Simulate rate limit check
   async (_db, kv, _r2, tenantId, index): Promise<OperationResult> => {
-    const ip = `192.168.${index % 256}.${(index * 7) % 256}`;
+    // Use hash-like distribution for more realistic IP patterns
+    // XOR with a prime spreads values better than simple modulo
+    const octet3 = (index ^ 0x5a) % 256;
+    const octet4 = ((index * 31) ^ 0xa5) % 256;
+    const ip = `192.168.${octet3}.${octet4}`;
     const key = `rate_limit:${tenantId}:${ip}`;
     const start = performance.now();
 
