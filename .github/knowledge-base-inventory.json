@@ -1,14 +1,14 @@
 {
   "lastUpdated": "2026-01-22",
   "docs": {
-    "total": 202,
+    "total": 146,
     "breakdown": {
       "specs": 50,
       "help": 42,
       "legal": 6,
-      "marketing": 19,
+      "marketing": 18,
       "patterns": 8,
-      "philosophy": 65,
+      "philosophy": 10,
       "design": 9,
       "exhibit": 3
     },
