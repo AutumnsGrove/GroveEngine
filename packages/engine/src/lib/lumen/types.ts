@@ -92,6 +92,9 @@ export interface LumenRequestOptions {
   /** Enable Songbird prompt injection protection (3-layer pipeline) */
   songbird?: boolean | SongbirdOptions;
 
+  /** Enrich request with distilled web content via Shutter (not yet implemented) */
+  shutter?: ShutterOptions;
+
   /** Additional metadata for logging (no content!) */
   metadata?: Record<string, unknown>;
 }
@@ -298,4 +301,90 @@ export interface SongbirdResult {
     canaryMs?: number;
     kestrelMs?: number;
   };
+}
+
+// =============================================================================
+// SHUTTER TYPES (STUB — not yet implemented)
+// =============================================================================
+
+/**
+ * Options for Shutter web content distillation.
+ *
+ * Shutter fetches a URL and uses a cheap/fast LLM to extract only the
+ * content relevant to a query — giving agents 200 focused tokens instead
+ * of 20,000 raw HTML tokens. Also provides prompt injection defense by
+ * isolating raw page content from the driver model.
+ *
+ * @see https://github.com/AutumnsGrove/Shutter
+ */
+export interface ShutterOptions {
+  /** URL(s) to fetch and distill */
+  urls: string | string[];
+
+  /** What to extract from the page(s) */
+  query: string;
+
+  /** Model tier for extraction (default: "fast") */
+  model?: ShutterModelTier;
+
+  /** Maximum tokens for extracted content per URL (default: 500) */
+  maxTokens?: number;
+
+  /** Timeout in milliseconds (default: 30000) */
+  timeoutMs?: number;
+
+  /** How to inject distilled content into the request */
+  inject?: ShutterInjectMode;
+}
+
+/** Shutter model tiers — speed vs accuracy tradeoff */
+export type ShutterModelTier = "fast" | "accurate" | "research" | "code";
+
+/** How distilled content gets injected into the Lumen request */
+export type ShutterInjectMode =
+  | "prepend" // Add as context before user message (default)
+  | "append" // Add after user message
+  | "system"; // Add as a system message
+
+export interface ShutterResult {
+  /** Distilled content from each URL */
+  extractions: ShutterExtraction[];
+
+  /** Total tokens consumed by the distillation step */
+  totalTokensUsed: number;
+
+  /** Total time for all fetches + distillation */
+  totalMs: number;
+}
+
+export interface ShutterExtraction {
+  /** Source URL */
+  url: string;
+
+  /** Extracted content (null if blocked by injection detection) */
+  extracted: string | null;
+
+  /** Token counts for this extraction */
+  tokensInput: number;
+  tokensOutput: number;
+
+  /** Prompt injection detection result (null if clean) */
+  promptInjection: ShutterInjectionResult | null;
+}
+
+export interface ShutterInjectionResult {
+  /** Whether injection was detected */
+  detected: boolean;
+
+  /** Type of injection pattern */
+  type: string;
+
+  /** Snippet of the offending content */
+  snippet: string;
+
+  /** Confidence score (0.0-1.0) */
+  confidence: number;
+
+  /** Contributing detection signals */
+  signals: string[];
 }

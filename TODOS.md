@@ -651,6 +651,24 @@ Four-layer image moderation system: CSAM detection → Content classification �
 - [ ] The `jxl_encoding_metrics` table is ready in migration
 - [ ] Needs: Client instrumentation + `/api/images/metrics` endpoint
 
+## Shutter Integration — Web Content Distillation for Lumen
+> **Repo:** https://github.com/AutumnsGrove/Shutter
+> **Stubs:** `packages/engine/src/lib/lumen/shutter.ts` (types + placeholder functions ready)
+> **Status:** Python package works, needs Cloudflare Worker port for Lumen integration
+> **Blocker:** API keys removed from the Worker to prevent unauthorized usage — re-enable when ready
+
+Shutter distills web pages into focused, token-efficient context for LLM requests (200 tokens
+instead of 20,000). Also provides prompt injection defense for fetched content.
+
+- [ ] Re-enable Shutter Worker with API key management (currently stripped to prevent credit drain)
+- [ ] Port Python implementation to TypeScript Cloudflare Worker (Shutter v1.5 roadmap)
+- [ ] Implement `runShutter()` in Lumen (replace stub in `shutter.ts`)
+- [ ] Wire fetch chain: Jina Reader → Tavily → basic httpx
+- [ ] Implement Canary heuristics (17 weighted regex patterns) for injection detection
+- [ ] D1 shared offenders list (replaces local SQLite)
+- [ ] Add `shutter` option handling in `LumenClient.run()` pipeline
+- [ ] Tests for Shutter integration path
+
 ---
 
 # 🎨 UI POLISH (Post-Launch OK)

@@ -89,6 +89,12 @@ export type {
   SongbirdOptions,
   KestrelContext,
   SongbirdResult,
+  ShutterOptions,
+  ShutterModelTier,
+  ShutterInjectMode,
+  ShutterResult,
+  ShutterExtraction,
+  ShutterInjectionResult,
 } from "./types.js";
 
 // =============================================================================
@@ -96,6 +102,12 @@ export type {
 // =============================================================================
 
 export { runSongbird } from "./songbird.js";
+
+// =============================================================================
+// SHUTTER (STUB)
+// =============================================================================
+
+export { runShutter, injectShutterContext } from "./shutter.js";
 
 // =============================================================================
 // ERRORS
