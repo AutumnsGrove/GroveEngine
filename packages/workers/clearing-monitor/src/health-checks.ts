@@ -203,7 +203,7 @@ function classifyByLatency(
   if (latencyMs >= LATENCY_THRESHOLDS.PARTIAL_OUTAGE) {
     status = "partial_outage";
   } else if (latencyMs >= LATENCY_THRESHOLDS.DEGRADED) {
-    status = "degraded";
+    status = "partial_outage";
   } else if (latencyMs >= LATENCY_THRESHOLDS.OPERATIONAL) {
     status = "degraded";
   }
