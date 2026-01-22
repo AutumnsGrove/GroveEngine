@@ -46,7 +46,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
 
-  // Check if Wisp is enabled
+  // Guard checks are intentionally sequential: if Wisp is disabled (common during
+  // onboarding), skip the subscription check entirely to avoid a wasted D1 query.
   if (db) {
     try {
       const settings = await db

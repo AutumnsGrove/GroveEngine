@@ -4,17 +4,23 @@
  * Config-driven content moderation that wraps Lumen's moderation task
  * with graduated enforcement and content-type-specific thresholds.
  *
+ * ## Implementation Status
+ *
+ * **Phase: Foundation (scaffolding only)**
+ *
+ * Thorn is NOT yet called in production endpoints. The current PR establishes
+ * the moderation logic and thresholds, which will be integrated in a follow-up:
+ *
+ * - [ ] Hook into post publish flow (on_publish)
+ * - [ ] Hook into comment submission (on_comment)
+ * - [ ] Hook into profile bio updates (on_profile_update)
+ * - [ ] D1 table for moderation events (audit trail)
+ * - [ ] Admin review UI for flagged content
+ *
  * Currently provides:
  * - moderateContent() function wrapping Lumen's .moderate()
  * - Config-driven category/threshold/action mappings
  * - Type definitions for the Thorn domain
- *
- * Future additions:
- * - Integration hooks (on_publish, on_comment, etc.)
- * - Database table for moderation events/history
- * - Appeal workflow
- * - Admin review UI
- * - Graduated enforcement state machine
  *
  * @see docs/specs/thorn-spec.md
  *

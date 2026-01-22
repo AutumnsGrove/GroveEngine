@@ -424,10 +424,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err) {
     console.error("Failed to generate timeline summary:", err);
-    throw error(
-      500,
-      `Generation failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-    );
+    // Don't leak internal error details to the client
+    throw error(500, "Generation failed. Please try again later.");
   }
 };
 

@@ -269,3 +269,87 @@ describe("classifyWithLumen - Request Format", () => {
     expect(callArgs.tenant).toBeUndefined();
   });
 });
+
+// =============================================================================
+// INPUT VALIDATION
+// =============================================================================
+
+describe("classifyWithLumen - Input Validation", () => {
+  it("should reject unsupported MIME types", async () => {
+    const lumen = createMockLumen(
+      '{"category": "appropriate", "confidence": 0.9}',
+    );
+
+    await expect(
+      classifyWithLumen("data", "application/pdf", lumen),
+    ).rejects.toThrow("Unsupported image type");
+
+    await expect(classifyWithLumen("data", "text/html", lumen)).rejects.toThrow(
+      "Unsupported image type",
+    );
+  });
+
+  it("should accept all valid image MIME types", async () => {
+    const validTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/avif",
+    ];
+
+    for (const mimeType of validTypes) {
+      const lumen = createMockLumen(
+        '{"category": "appropriate", "confidence": 0.9}',
+      );
+      // Should not throw
+      await classifyWithLumen("data", mimeType, lumen);
+    }
+  });
+
+  it("should reject empty string image data", async () => {
+    const lumen = createMockLumen(
+      '{"category": "appropriate", "confidence": 0.9}',
+    );
+
+    await expect(classifyWithLumen("", "image/jpeg", lumen)).rejects.toThrow(
+      "Empty image data",
+    );
+  });
+
+  it("should reject empty Uint8Array image data", async () => {
+    const lumen = createMockLumen(
+      '{"category": "appropriate", "confidence": 0.9}',
+    );
+
+    await expect(
+      classifyWithLumen(new Uint8Array(0), "image/jpeg", lumen),
+    ).rejects.toThrow("Empty image data");
+  });
+
+  it("should reject oversized Uint8Array images", async () => {
+    const lumen = createMockLumen(
+      '{"category": "appropriate", "confidence": 0.9}',
+    );
+    // Create an array just over 8MB
+    const oversized = new Uint8Array(8 * 1024 * 1024 + 1);
+
+    await expect(
+      classifyWithLumen(oversized, "image/jpeg", lumen),
+    ).rejects.toThrow("Image too large");
+  });
+
+  it("should not call lumen.run when validation fails", async () => {
+    const lumen = createMockLumen(
+      '{"category": "appropriate", "confidence": 0.9}',
+    );
+
+    try {
+      await classifyWithLumen("", "image/jpeg", lumen);
+    } catch {
+      // Expected
+    }
+
+    expect(lumen.run).not.toHaveBeenCalled();
+  });
+});
