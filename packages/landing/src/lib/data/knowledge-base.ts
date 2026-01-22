@@ -3,6 +3,14 @@ import type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/doc
 // Re-export for convenience
 export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
 
+// Re-export category metadata from the single source of truth
+export {
+  specCategories,
+  helpSections,
+  exhibitWings,
+  categoryMetadata,
+} from "$lib/data/category-metadata";
+
 /**
  * Feature flag to use frontmatter-based document scanning.
  *
@@ -14,126 +22,6 @@ export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/doc
  * Set USE_FRONTMATTER=true in your environment to enable.
  */
 export const USE_FRONTMATTER = process.env.USE_FRONTMATTER === "true";
-
-/**
- * Spec category metadata (mirrors workshop page organization)
- * Icons use keys from $lib/utils/icons.ts toolIcons map
- */
-export const specCategories: {
-  id: SpecCategory;
-  name: string;
-  description: string;
-  icon: string;
-}[] = [
-  {
-    id: "core-infrastructure",
-    name: "Core Infrastructure",
-    description: "The foundation everything grows from",
-    icon: "pyramid",
-  },
-  {
-    id: "platform-services",
-    name: "Platform Services",
-    description: "Essential services that power every Grove blog",
-    icon: "circuitboard",
-  },
-  {
-    id: "content-community",
-    name: "Content & Community",
-    description: "Writing, moderation, and social features",
-    icon: "id-card-lanyard",
-  },
-  {
-    id: "standalone-tools",
-    name: "Standalone Tools",
-    description: "Independent tools that integrate with Grove",
-    icon: "wrench",
-  },
-  {
-    id: "operations",
-    name: "Operations",
-    description: "Internal infrastructure keeping Grove running",
-    icon: "dock",
-  },
-  {
-    id: "reference",
-    name: "Reference",
-    description: "Implementation guides and auxiliary documentation",
-    icon: "filecode",
-  },
-];
-
-/**
- * Help section metadata (mirrors specCategories pattern)
- * Icons use keys from $lib/utils/icons.ts toolIcons map
- */
-export const helpSections: {
-  id: HelpSection;
-  name: string;
-  description: string;
-  icon: string;
-}[] = [
-  {
-    id: "getting-started",
-    name: "Getting Started",
-    description: "Begin your Grove journey",
-    icon: "landplot",
-  },
-  {
-    id: "writing-publishing",
-    name: "Writing & Publishing",
-    description: "Create and share your content",
-    icon: "feather",
-  },
-  {
-    id: "customization",
-    name: "Customization",
-    description: "Make Grove feel like yours",
-    icon: "palette",
-  },
-  {
-    id: "community-social",
-    name: "Community & Social",
-    description: "Connect with other writers",
-    icon: "users",
-  },
-  {
-    id: "account-billing",
-    name: "Account & Billing",
-    description: "Manage your subscription",
-    icon: "store",
-  },
-  {
-    id: "privacy-security",
-    name: "Privacy & Security",
-    description: "How we protect you and your content",
-    icon: "shieldcheck",
-  },
-  {
-    id: "ai-features",
-    name: "AI Features",
-    description: "Smart tools that respect your privacy",
-    icon: "bird",
-  },
-  {
-    id: "philosophy-vision",
-    name: "Philosophy & Vision",
-    description: "What Grove believes in",
-    icon: "trees",
-  },
-  {
-    id: "support-resources",
-    name: "Support & Resources",
-    description: "Help when you need it",
-    icon: "lifebuoy",
-  },
-  {
-    id: "troubleshooting",
-    name: "Troubleshooting",
-    description: "Fix common issues",
-    icon: "helpcircle",
-  },
-];
 
 // Technical Specifications - organized by category like workshop page
 export const specs: Doc[] = [
@@ -1508,67 +1396,6 @@ export const designDocs: Doc[] = [
     category: "design",
     lastUpdated: "2026-01-18",
     readingTime: 9,
-  },
-];
-
-// Developer Documents
-/**
- * Exhibit wing metadata (museum organization)
- * Icons use keys from $lib/utils/icons.ts toolIcons map
- */
-export const exhibitWings: {
-  id: ExhibitWing;
-  name: string;
-  description: string;
-  icon: string;
-}[] = [
-  {
-    id: "entrance",
-    name: "The Entrance",
-    description: "Welcome to the Lattice Museum",
-    icon: "signpost",
-  },
-  {
-    id: "architecture",
-    name: "Architecture Wing",
-    description: "How Grove is built at the infrastructure level",
-    icon: "pyramid",
-  },
-  {
-    id: "nature",
-    name: "Nature Wing",
-    description: "The visual and emotional language of Grove",
-    icon: "trees",
-  },
-  {
-    id: "trust",
-    name: "Trust Wing",
-    description: "Authentication, security, and identity",
-    icon: "shieldcheck",
-  },
-  {
-    id: "data",
-    name: "Data Wing",
-    description: "How information flows and persists",
-    icon: "database",
-  },
-  {
-    id: "personalization",
-    name: "Personalization Wing",
-    description: "Making each blog feel like home",
-    icon: "palette",
-  },
-  {
-    id: "community",
-    name: "Community Wing",
-    description: "The social layer and shared spaces",
-    icon: "users",
-  },
-  {
-    id: "naming",
-    name: "Naming Wing",
-    description: "How Grove names things, and why it matters",
-    icon: "feather",
   },
 ];
 
