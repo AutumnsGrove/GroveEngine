@@ -13,6 +13,24 @@ const config = {
 
   kit: {
     adapter: adapter(),
+
+    // CSRF protection: Trust all *.grove.place subdomains
+    // Required because grove-router proxies requests, causing Origin/Host mismatch
+    // SvelteKit compares Origin header against Host, but behind our proxy the Host
+    // is the internal worker hostname while Origin is the public subdomain.
+    // This tells SvelteKit to trust form submissions from any grove.place subdomain.
+    csrf: {
+      checkOrigin: true,
+      // @ts-ignore - trustedOrigins exists in SvelteKit 2.x but types may lag
+      trustedOrigins: [
+        "https://grove.place",
+        "https://*.grove.place",
+        // Local development
+        "http://localhost:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:5173",
+      ],
+    },
     prerender: {
       // In CI, skip prerendering - the AI binding requires remote auth
       // that's not available in GitHub Actions. At runtime on Cloudflare,
