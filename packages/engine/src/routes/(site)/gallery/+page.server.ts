@@ -98,29 +98,37 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   }
 
   // Check if gallery is enabled for this tenant
-  const config = await db
-    .prepare(
-      `SELECT
-        enabled,
-        r2_bucket,
-        cdn_base_url,
-        gallery_title,
-        gallery_description,
-        items_per_page,
-        sort_order,
-        show_descriptions,
-        show_dates,
-        show_tags,
-        enable_lightbox,
-        enable_search,
-        enable_filters,
-        grid_style,
-        thumbnail_size
-      FROM gallery_curio_config
-      WHERE tenant_id = ?`,
-    )
-    .bind(tenantId)
-    .first<ConfigRow>();
+  // CRITICAL: Wrap in try/catch - if table doesn't exist, treat as not enabled
+  let config: ConfigRow | null = null;
+  try {
+    config = await db
+      .prepare(
+        `SELECT
+          enabled,
+          r2_bucket,
+          cdn_base_url,
+          gallery_title,
+          gallery_description,
+          items_per_page,
+          sort_order,
+          show_descriptions,
+          show_dates,
+          show_tags,
+          enable_lightbox,
+          enable_search,
+          enable_filters,
+          grid_style,
+          thumbnail_size
+        FROM gallery_curio_config
+        WHERE tenant_id = ?`,
+      )
+      .bind(tenantId)
+      .first<ConfigRow>();
+  } catch (err) {
+    console.warn("Gallery config query failed (table may not exist):", err);
+    // Table doesn't exist or query failed - gallery not enabled
+    throw error(404, "Gallery is not enabled for this site");
+  }
 
   if (!config?.enabled) {
     throw error(404, "Gallery is not enabled for this site");
@@ -129,44 +137,52 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   const cdnBaseUrl = config.cdn_base_url || "";
 
   // Fetch images from database
-  const imagesResult = await db
-    .prepare(
-      `SELECT
-        id,
-        r2_key,
-        parsed_date,
-        parsed_category,
-        parsed_slug,
-        custom_title,
-        custom_description,
-        custom_date,
-        alt_text,
-        file_size,
-        uploaded_at,
-        cdn_url,
-        width,
-        height,
-        sort_index,
-        is_featured
-      FROM gallery_images
-      WHERE tenant_id = ?
-      ORDER BY
-        CASE WHEN ? = 'date-asc' THEN COALESCE(custom_date, parsed_date, uploaded_at) END ASC,
-        CASE WHEN ? = 'date-desc' THEN COALESCE(custom_date, parsed_date, uploaded_at) END DESC,
-        CASE WHEN ? = 'title-asc' THEN COALESCE(custom_title, parsed_slug) END ASC,
-        CASE WHEN ? = 'title-desc' THEN COALESCE(custom_title, parsed_slug) END DESC,
-        sort_index DESC`,
-    )
-    .bind(
-      tenantId,
-      config.sort_order,
-      config.sort_order,
-      config.sort_order,
-      config.sort_order,
-    )
-    .all<ImageRow>();
+  // ISOLATED: Error handling so missing table doesn't crash the page
+  let imagesResult: { results: ImageRow[] } = { results: [] };
+  try {
+    imagesResult = await db
+      .prepare(
+        `SELECT
+          id,
+          r2_key,
+          parsed_date,
+          parsed_category,
+          parsed_slug,
+          custom_title,
+          custom_description,
+          custom_date,
+          alt_text,
+          file_size,
+          uploaded_at,
+          cdn_url,
+          width,
+          height,
+          sort_index,
+          is_featured
+        FROM gallery_images
+        WHERE tenant_id = ?
+        ORDER BY
+          CASE WHEN ? = 'date-asc' THEN COALESCE(custom_date, parsed_date, uploaded_at) END ASC,
+          CASE WHEN ? = 'date-desc' THEN COALESCE(custom_date, parsed_date, uploaded_at) END DESC,
+          CASE WHEN ? = 'title-asc' THEN COALESCE(custom_title, parsed_slug) END ASC,
+          CASE WHEN ? = 'title-desc' THEN COALESCE(custom_title, parsed_slug) END DESC,
+          sort_index DESC`,
+      )
+      .bind(
+        tenantId,
+        config.sort_order,
+        config.sort_order,
+        config.sort_order,
+        config.sort_order,
+      )
+      .all<ImageRow>();
+  } catch (err) {
+    console.warn("Gallery images query failed:", err);
+    // Continue with empty results - gallery is enabled but has no images
+  }
 
   // Fetch tags for all images
+  // ISOLATED: Error handling so missing tables don't crash the page
   const imageIds = imagesResult.results.map((img) => img.id);
   const tagsByImageId = new Map<string, GalleryTagRecord[]>();
 
@@ -177,35 +193,40 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
       const batch = imageIds.slice(i, i + batchSize);
       const placeholders = batch.map(() => "?").join(",");
 
-      const tagsResult = await db
-        .prepare(
-          `SELECT
-            git.image_id,
-            gt.id as tag_id,
-            gt.name as tag_name,
-            gt.slug as tag_slug,
-            gt.color as tag_color
-          FROM gallery_image_tags git
-          JOIN gallery_tags gt ON git.tag_id = gt.id
-          WHERE git.image_id IN (${placeholders})`,
-        )
-        .bind(...batch)
-        .all<ImageTagRow>();
+      try {
+        const tagsResult = await db
+          .prepare(
+            `SELECT
+              git.image_id,
+              gt.id as tag_id,
+              gt.name as tag_name,
+              gt.slug as tag_slug,
+              gt.color as tag_color
+            FROM gallery_image_tags git
+            JOIN gallery_tags gt ON git.tag_id = gt.id
+            WHERE git.image_id IN (${placeholders})`,
+          )
+          .bind(...batch)
+          .all<ImageTagRow>();
 
-      for (const row of tagsResult.results) {
-        if (!tagsByImageId.has(row.image_id)) {
-          tagsByImageId.set(row.image_id, []);
+        for (const row of tagsResult.results) {
+          if (!tagsByImageId.has(row.image_id)) {
+            tagsByImageId.set(row.image_id, []);
+          }
+          tagsByImageId.get(row.image_id)!.push({
+            id: row.tag_id,
+            tenantId,
+            name: row.tag_name,
+            slug: row.tag_slug,
+            color: row.tag_color,
+            description: null,
+            sortOrder: 0,
+            createdAt: 0,
+          });
         }
-        tagsByImageId.get(row.image_id)!.push({
-          id: row.tag_id,
-          tenantId,
-          name: row.tag_name,
-          slug: row.tag_slug,
-          color: row.tag_color,
-          description: null,
-          sortOrder: 0,
-          createdAt: 0,
-        });
+      } catch (err) {
+        console.warn("Gallery tags batch query failed:", err);
+        // Continue without tags for this batch
       }
     }
   }
@@ -230,40 +251,49 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   }));
 
   // Fetch all available tags (for filters)
-  const allTagsResult = await db
-    .prepare(
-      `SELECT id, name, slug, color, description, sort_order
-       FROM gallery_tags
-       WHERE tenant_id = ?
-       ORDER BY sort_order, name`,
-    )
-    .bind(tenantId)
-    .all<TagRow>();
+  // ISOLATED: Error handling so missing table doesn't crash the page
+  let tags: GalleryTagRecord[] = [];
+  try {
+    const allTagsResult = await db
+      .prepare(
+        `SELECT id, name, slug, color, description, sort_order
+         FROM gallery_tags
+         WHERE tenant_id = ?
+         ORDER BY sort_order, name`,
+      )
+      .bind(tenantId)
+      .all<TagRow>();
 
-  const tags: GalleryTagRecord[] = allTagsResult.results.map((row) => ({
-    id: row.id,
-    tenantId,
-    name: row.name,
-    slug: row.slug,
-    color: row.color,
-    description: row.description,
-    sortOrder: row.sort_order,
-    createdAt: 0,
-  }));
+    tags = allTagsResult.results.map((row) => ({
+      id: row.id,
+      tenantId,
+      name: row.name,
+      slug: row.slug,
+      color: row.color,
+      description: row.description,
+      sortOrder: row.sort_order,
+      createdAt: 0,
+    }));
+  } catch (err) {
+    console.warn("Gallery all tags query failed:", err);
+    // Continue with empty tags
+  }
 
   // Fetch public collections (for filters)
-  const collectionsResult = await db
-    .prepare(
-      `SELECT id, name, slug, description, cover_image_id, display_order, is_public
-       FROM gallery_collections
-       WHERE tenant_id = ? AND is_public = 1
-       ORDER BY display_order, name`,
-    )
-    .bind(tenantId)
-    .all<CollectionRow>();
+  // ISOLATED: Error handling so missing table doesn't crash the page
+  let collections: GalleryCollectionRecord[] = [];
+  try {
+    const collectionsResult = await db
+      .prepare(
+        `SELECT id, name, slug, description, cover_image_id, display_order, is_public
+         FROM gallery_collections
+         WHERE tenant_id = ? AND is_public = 1
+         ORDER BY display_order, name`,
+      )
+      .bind(tenantId)
+      .all<CollectionRow>();
 
-  const collections: GalleryCollectionRecord[] = collectionsResult.results.map(
-    (row) => ({
+    collections = collectionsResult.results.map((row) => ({
       id: row.id,
       tenantId,
       name: row.name,
@@ -274,8 +304,11 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
       isPublic: Boolean(row.is_public),
       createdAt: 0,
       updatedAt: 0,
-    }),
-  );
+    }));
+  } catch (err) {
+    console.warn("Gallery collections query failed:", err);
+    // Continue with empty collections
+  }
 
   // Extract filter options from images
   const categories = getAvailableCategories(images);
