@@ -135,8 +135,8 @@
                   Philosophy
                 {:else if category === 'design'}
                   Design
-                {:else if category === 'developer'}
-                  Developer Guide
+                {:else if category === 'exhibit'}
+                  Art Exhibit
                 {:else}
                   Legal Document
                 {/if}

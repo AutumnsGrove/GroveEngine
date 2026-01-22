@@ -1654,6 +1654,5 @@ export const allDocs = [
   ...patterns,
   ...philosophyDocs,
   ...designDocs,
-  ...developerDocs,
   ...exhibitDocs,
 ];

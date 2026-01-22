@@ -594,7 +594,6 @@ export const knowledgeCategoryIcons = {
   patterns: Layers,
   philosophy: Trees,
   design: PaintbrushVertical,
-  developer: Terminal,
   exhibit: Frame,
 } as const;
 

@@ -15,7 +15,6 @@ export type DocCategory =
   | "patterns"
   | "philosophy"
   | "design"
-  | "developer"
   | "exhibit";
 
 /** Exhibit wing categories (museum organization) */

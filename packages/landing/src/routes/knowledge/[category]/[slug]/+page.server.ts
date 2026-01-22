@@ -25,7 +25,6 @@ const validCategories: DocCategory[] = [
   "patterns",
   "philosophy",
   "design",
-  "developer",
   "exhibit",
 ];
 
