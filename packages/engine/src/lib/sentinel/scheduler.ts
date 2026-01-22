@@ -386,7 +386,7 @@ async function enableMaintenanceMode(
         Authorization: `Bearer ${config.apiKey}`,
       },
       body: JSON.stringify({
-        runId: `maintenance-${Date.now()}`,
+        runId: `maintenance-${crypto.randomUUID()}`,
         tenantId,
         status: "completed",
         results: {

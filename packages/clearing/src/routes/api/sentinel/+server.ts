@@ -84,7 +84,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     }
 
     // Create incident if requested and error rate warrants it
-    if (report.createIncident && report.results.errorRate > 0.1) {
+    // Threshold matches component degradation threshold (0.05) for consistency
+    if (report.createIncident && report.results.errorRate > 0.05) {
       const incidentId = crypto.randomUUID();
       const slug = `sentinel-${report.runId.slice(0, 8)}-${Date.now()}`;
 

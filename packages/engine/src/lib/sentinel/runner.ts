@@ -16,9 +16,9 @@ import type {
   D1Database,
   KVNamespace,
   R2Bucket,
-} from './types.js';
-import { getOpsPerSecondAt, estimateCloudflareCost } from './profiles.js';
-import { executeOperation, cleanupSentinelData } from './operations.js';
+} from "./types.js";
+import { getOpsPerSecondAt, estimateCloudflareCost } from "./profiles.js";
+import { executeOperation, cleanupSentinelData } from "./operations.js";
 
 // =============================================================================
 // RUNNER CONFIGURATION
@@ -69,6 +69,7 @@ export class SentinelRunner {
   private checkpoints: SentinelCheckpoint[] = [];
   private isRunning = false;
   private isCancelled = false;
+  private currentRunId = "";
 
   constructor(config: RunnerConfig) {
     this.config = {
@@ -83,20 +84,21 @@ export class SentinelRunner {
    */
   async execute(run: SentinelRun): Promise<RunResults> {
     if (this.isRunning) {
-      throw new Error('Runner is already executing a test');
+      throw new Error("Runner is already executing a test");
     }
 
     this.isRunning = true;
     this.isCancelled = false;
     this.metrics = [];
     this.checkpoints = [];
+    this.currentRunId = run.id;
 
     const { db, kv, r2, tenantId } = this.config;
     const { profile } = run;
     const startTime = Date.now();
 
     // Update run status to running
-    await this.updateRunStatus(run.id, 'running', { startedAt: new Date() });
+    await this.updateRunStatus(run.id, "running", { startedAt: new Date() });
 
     try {
       // Calculate total operations and scheduling
@@ -132,7 +134,7 @@ export class SentinelRunner {
           kv,
           r2,
           tenantId,
-          completedOps
+          completedOps,
         );
 
         completedOps += batchResults.completed;
@@ -140,33 +142,53 @@ export class SentinelRunner {
 
         // Record checkpoint if interval passed
         const currentElapsed = (Date.now() - startTime) / 1000;
-        if (currentElapsed - lastCheckpoint >= (this.config.checkpointIntervalSeconds ?? 30)) {
-          await this.recordCheckpoint(run.id, tenantId, currentElapsed, completedOps, failedOps);
+        if (
+          currentElapsed - lastCheckpoint >=
+          (this.config.checkpointIntervalSeconds ?? 30)
+        ) {
+          await this.recordCheckpoint(
+            run.id,
+            tenantId,
+            currentElapsed,
+            completedOps,
+            failedOps,
+          );
           lastCheckpoint = currentElapsed;
         }
 
         // Report progress
-        this.reportProgress(run.id, currentElapsed, profile.targetOperations, completedOps, failedOps);
+        this.reportProgress(
+          run.id,
+          currentElapsed,
+          profile.targetOperations,
+          completedOps,
+          failedOps,
+        );
       }
 
       // Calculate final results
-      const results = this.calculateResults(profile, completedOps, failedOps, startTime);
+      const results = this.calculateResults(
+        profile,
+        completedOps,
+        failedOps,
+        startTime,
+      );
 
       // Update run with results
-      await this.updateRunStatus(run.id, 'completed', {
+      await this.updateRunStatus(run.id, "completed", {
         completedAt: new Date(),
         results,
       });
 
       this.config.onComplete?.(results);
       return results;
-
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      await this.updateRunStatus(run.id, 'failed', { errorMessage: err.message });
+      await this.updateRunStatus(run.id, "failed", {
+        errorMessage: err.message,
+      });
       this.config.onError?.(err);
       throw error;
-
     } finally {
       this.isRunning = false;
 
@@ -198,7 +220,11 @@ export class SentinelRunner {
     count: number;
     systems: TargetSystem[];
   }> {
-    const schedule: Array<{ time: number; count: number; systems: TargetSystem[] }> = [];
+    const schedule: Array<{
+      time: number;
+      count: number;
+      systems: TargetSystem[];
+    }> = [];
     const { durationSeconds, targetSystems, concurrency } = profile;
     const maxBatchSize = this.config.maxBatchSize ?? 50;
 
@@ -215,7 +241,7 @@ export class SentinelRunner {
 
       for (let i = 0; i < batchCount; i++) {
         const batchOps = Math.min(opsPerBatch, ops - i * opsPerBatch);
-        const batchTime = second + (i / batchCount);
+        const batchTime = second + i / batchCount;
 
         schedule.push({
           time: batchTime,
@@ -238,7 +264,7 @@ export class SentinelRunner {
     kv: KVNamespace,
     r2: R2Bucket,
     tenantId: string,
-    baseIndex: number
+    baseIndex: number,
   ): Promise<{ completed: number; failed: number }> {
     const promises: Promise<void>[] = [];
     let completed = 0;
@@ -255,11 +281,13 @@ export class SentinelRunner {
           .then((result) => {
             this.metrics.push({
               id: crypto.randomUUID(),
-              runId: '', // Set by caller
+              runId: this.currentRunId,
               tenantId,
               operationType: system,
               operationName: result.operationName,
-              batchIndex: Math.floor(baseIndex / (this.config.maxBatchSize ?? 50)),
+              batchIndex: Math.floor(
+                baseIndex / (this.config.maxBatchSize ?? 50),
+              ),
               startedAt: operationStartedAt,
               completedAt: new Date(),
               latencyMs: result.latencyMs,
@@ -278,7 +306,7 @@ export class SentinelRunner {
           })
           .catch(() => {
             failed++;
-          })
+          }),
       );
     }
 
@@ -294,12 +322,14 @@ export class SentinelRunner {
     tenantId: string,
     elapsedSeconds: number,
     completedOps: number,
-    failedOps: number
+    failedOps: number,
   ): Promise<void> {
     const recentMetrics = this.metrics.slice(-100);
-    const avgLatency = recentMetrics.length > 0
-      ? recentMetrics.reduce((sum, m) => sum + (m.latencyMs ?? 0), 0) / recentMetrics.length
-      : 0;
+    const avgLatency =
+      recentMetrics.length > 0
+        ? recentMetrics.reduce((sum, m) => sum + (m.latencyMs ?? 0), 0) /
+          recentMetrics.length
+        : 0;
 
     const checkpoint: SentinelCheckpoint = {
       id: crypto.randomUUID(),
@@ -325,7 +355,7 @@ export class SentinelRunner {
           `INSERT INTO sentinel_checkpoints (
             id, run_id, tenant_id, checkpoint_index, recorded_at, elapsed_seconds,
             operations_completed, operations_failed, current_throughput, avg_latency_ms, error_rate
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .bind(
           checkpoint.id,
@@ -338,7 +368,7 @@ export class SentinelRunner {
           checkpoint.operationsFailed,
           checkpoint.currentThroughput,
           checkpoint.avgLatencyMs,
-          checkpoint.errorRate
+          checkpoint.errorRate,
         )
         .run();
     } catch {
@@ -354,12 +384,14 @@ export class SentinelRunner {
     elapsedSeconds: number,
     totalOps: number,
     completedOps: number,
-    failedOps: number
+    failedOps: number,
   ): void {
     const recentMetrics = this.metrics.slice(-50);
-    const avgLatency = recentMetrics.length > 0
-      ? recentMetrics.reduce((sum, m) => sum + (m.latencyMs ?? 0), 0) / recentMetrics.length
-      : 0;
+    const avgLatency =
+      recentMetrics.length > 0
+        ? recentMetrics.reduce((sum, m) => sum + (m.latencyMs ?? 0), 0) /
+          recentMetrics.length
+        : 0;
 
     const progress: RunProgress = {
       runId,
@@ -382,11 +414,11 @@ export class SentinelRunner {
     profile: LoadProfile,
     completedOps: number,
     failedOps: number,
-    startTime: number
+    startTime: number,
   ): RunResults {
     const latencies = this.metrics
-      .filter(m => m.success && m.latencyMs !== undefined)
-      .map(m => m.latencyMs!)
+      .filter((m) => m.success && m.latencyMs !== undefined)
+      .map((m) => m.latencyMs!)
       .sort((a, b) => a - b);
 
     const durationMs = Date.now() - startTime;
@@ -400,35 +432,43 @@ export class SentinelRunner {
     // Calculate error types
     const errorTypes: Record<string, number> = {};
     this.metrics
-      .filter(m => !m.success && m.errorCode)
-      .forEach(m => {
+      .filter((m) => !m.success && m.errorCode)
+      .forEach((m) => {
         errorTypes[m.errorCode!] = (errorTypes[m.errorCode!] || 0) + 1;
       });
 
     // Calculate per-system results
-    const systemResults: Record<string, {
-      operations: number;
-      successes: number;
-      failures: number;
-      avgLatencyMs: number;
-      p95LatencyMs: number;
-    }> = {};
+    const systemResults: Record<
+      string,
+      {
+        operations: number;
+        successes: number;
+        failures: number;
+        avgLatencyMs: number;
+        p95LatencyMs: number;
+      }
+    > = {};
 
     for (const system of profile.targetSystems) {
-      const systemMetrics = this.metrics.filter(m => m.operationType === system);
+      const systemMetrics = this.metrics.filter(
+        (m) => m.operationType === system,
+      );
       const systemLatencies = systemMetrics
-        .filter(m => m.success && m.latencyMs !== undefined)
-        .map(m => m.latencyMs!)
+        .filter((m) => m.success && m.latencyMs !== undefined)
+        .map((m) => m.latencyMs!)
         .sort((a, b) => a - b);
 
       systemResults[system] = {
         operations: systemMetrics.length,
-        successes: systemMetrics.filter(m => m.success).length,
-        failures: systemMetrics.filter(m => !m.success).length,
-        avgLatencyMs: systemLatencies.length > 0
-          ? systemLatencies.reduce((a, b) => a + b, 0) / systemLatencies.length
-          : 0,
-        p95LatencyMs: systemLatencies[Math.floor(systemLatencies.length * 0.95)] ?? 0,
+        successes: systemMetrics.filter((m) => m.success).length,
+        failures: systemMetrics.filter((m) => !m.success).length,
+        avgLatencyMs:
+          systemLatencies.length > 0
+            ? systemLatencies.reduce((a, b) => a + b, 0) /
+              systemLatencies.length
+            : 0,
+        p95LatencyMs:
+          systemLatencies[Math.floor(systemLatencies.length * 0.95)] ?? 0,
       };
     }
 
@@ -438,9 +478,10 @@ export class SentinelRunner {
       totalOperations: completedOps + failedOps,
       successfulOperations: completedOps,
       failedOperations: failedOps,
-      avgLatencyMs: latencies.length > 0
-        ? latencies.reduce((a, b) => a + b, 0) / latencies.length
-        : 0,
+      avgLatencyMs:
+        latencies.length > 0
+          ? latencies.reduce((a, b) => a + b, 0) / latencies.length
+          : 0,
       p50LatencyMs: latencies[p50Index] ?? 0,
       p95LatencyMs: latencies[p95Index] ?? 0,
       p99LatencyMs: latencies[p99Index] ?? 0,
@@ -450,7 +491,10 @@ export class SentinelRunner {
       errorCount: failedOps,
       errorTypes,
       estimatedCostUsd: costEstimate.totalCost,
-      systemResults: systemResults as Record<TargetSystem, RunResults['systemResults'][TargetSystem]>,
+      systemResults: systemResults as Record<
+        TargetSystem,
+        RunResults["systemResults"][TargetSystem]
+      >,
     };
   }
 
@@ -465,37 +509,37 @@ export class SentinelRunner {
       completedAt?: Date;
       results?: RunResults;
       errorMessage?: string;
-    }
+    },
   ): Promise<void> {
-    const updates: string[] = ['status = ?', 'updated_at = ?'];
+    const updates: string[] = ["status = ?", "updated_at = ?"];
     const params: unknown[] = [status, Math.floor(Date.now() / 1000)];
 
     if (extra?.startedAt) {
-      updates.push('started_at = ?');
+      updates.push("started_at = ?");
       params.push(Math.floor(extra.startedAt.getTime() / 1000));
     }
 
     if (extra?.completedAt) {
-      updates.push('completed_at = ?');
+      updates.push("completed_at = ?");
       params.push(Math.floor(extra.completedAt.getTime() / 1000));
     }
 
     if (extra?.results) {
       const r = extra.results;
       updates.push(
-        'total_operations = ?',
-        'successful_operations = ?',
-        'failed_operations = ?',
-        'avg_latency_ms = ?',
-        'p50_latency_ms = ?',
-        'p95_latency_ms = ?',
-        'p99_latency_ms = ?',
-        'max_latency_ms = ?',
-        'min_latency_ms = ?',
-        'throughput_ops_sec = ?',
-        'error_count = ?',
-        'error_types = ?',
-        'estimated_cost_usd = ?'
+        "total_operations = ?",
+        "successful_operations = ?",
+        "failed_operations = ?",
+        "avg_latency_ms = ?",
+        "p50_latency_ms = ?",
+        "p95_latency_ms = ?",
+        "p99_latency_ms = ?",
+        "max_latency_ms = ?",
+        "min_latency_ms = ?",
+        "throughput_ops_sec = ?",
+        "error_count = ?",
+        "error_types = ?",
+        "estimated_cost_usd = ?",
       );
       params.push(
         r.totalOperations,
@@ -510,7 +554,7 @@ export class SentinelRunner {
         r.throughputOpsPerSec,
         r.errorCount,
         JSON.stringify(r.errorTypes),
-        r.estimatedCostUsd
+        r.estimatedCostUsd,
       );
     }
 
@@ -518,7 +562,7 @@ export class SentinelRunner {
 
     try {
       await this.config.db
-        .prepare(`UPDATE sentinel_runs SET ${updates.join(', ')} WHERE id = ?`)
+        .prepare(`UPDATE sentinel_runs SET ${updates.join(", ")} WHERE id = ?`)
         .bind(...params)
         .run();
     } catch {
@@ -530,7 +574,7 @@ export class SentinelRunner {
    * Simple sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -563,9 +607,9 @@ export async function createSentinelRun(
   options?: {
     description?: string;
     scheduledAt?: Date;
-    triggeredBy?: 'manual' | 'scheduled' | 'api';
+    triggeredBy?: "manual" | "scheduled" | "api";
     notes?: string;
-  }
+  },
 ): Promise<SentinelRun> {
   const id = crypto.randomUUID();
   const now = Math.floor(Date.now() / 1000);
@@ -576,7 +620,7 @@ export async function createSentinelRun(
         id, tenant_id, name, description, profile_type, target_operations,
         duration_seconds, concurrency, target_systems, status, scheduled_at,
         triggered_by, notes, config_snapshot, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -588,13 +632,15 @@ export async function createSentinelRun(
       profile.durationSeconds,
       profile.concurrency,
       JSON.stringify(profile.targetSystems),
-      'pending',
-      options?.scheduledAt ? Math.floor(options.scheduledAt.getTime() / 1000) : null,
-      options?.triggeredBy ?? 'manual',
+      "pending",
+      options?.scheduledAt
+        ? Math.floor(options.scheduledAt.getTime() / 1000)
+        : null,
+      options?.triggeredBy ?? "manual",
       options?.notes ?? null,
       JSON.stringify(profile),
       now,
-      now
+      now,
     )
     .run();
 
@@ -604,9 +650,9 @@ export async function createSentinelRun(
     name,
     description: options?.description,
     profile,
-    status: 'pending',
+    status: "pending",
     scheduledAt: options?.scheduledAt,
-    triggeredBy: options?.triggeredBy ?? 'manual',
+    triggeredBy: options?.triggeredBy ?? "manual",
     notes: options?.notes,
     createdAt: new Date(now * 1000),
     updatedAt: new Date(now * 1000),
@@ -618,10 +664,10 @@ export async function createSentinelRun(
  */
 export async function getSentinelRun(
   db: D1Database,
-  runId: string
+  runId: string,
 ): Promise<SentinelRun | null> {
   const row = await db
-    .prepare('SELECT * FROM sentinel_runs WHERE id = ?')
+    .prepare("SELECT * FROM sentinel_runs WHERE id = ?")
     .bind(runId)
     .first<Record<string, unknown>>();
 
@@ -640,29 +686,32 @@ export async function listSentinelRuns(
     status?: RunStatus;
     limit?: number;
     offset?: number;
-  }
+  },
 ): Promise<SentinelRun[]> {
-  let query = 'SELECT * FROM sentinel_runs WHERE tenant_id = ?';
+  let query = "SELECT * FROM sentinel_runs WHERE tenant_id = ?";
   const params: unknown[] = [tenantId];
 
   if (options?.status) {
-    query += ' AND status = ?';
+    query += " AND status = ?";
     params.push(options.status);
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += " ORDER BY created_at DESC";
 
   if (options?.limit) {
-    query += ' LIMIT ?';
+    query += " LIMIT ?";
     params.push(options.limit);
   }
 
   if (options?.offset) {
-    query += ' OFFSET ?';
+    query += " OFFSET ?";
     params.push(options.offset);
   }
 
-  const result = await db.prepare(query).bind(...params).all<Record<string, unknown>>();
+  const result = await db
+    .prepare(query)
+    .bind(...params)
+    .all<Record<string, unknown>>();
   return result.results.map(mapRunRow);
 }
 
@@ -674,11 +723,11 @@ function mapRunRow(row: Record<string, unknown>): SentinelRun {
   const profile: LoadProfile = configSnapshot
     ? JSON.parse(configSnapshot)
     : {
-        type: row.profile_type as LoadProfile['type'],
+        type: row.profile_type as LoadProfile["type"],
         targetOperations: row.target_operations as number,
         durationSeconds: row.duration_seconds as number,
         concurrency: row.concurrency as number,
-        targetSystems: JSON.parse((row.target_systems as string) || '[]'),
+        targetSystems: JSON.parse((row.target_systems as string) || "[]"),
       };
 
   const results: RunResults | undefined = row.total_operations
@@ -694,7 +743,7 @@ function mapRunRow(row: Record<string, unknown>): SentinelRun {
         minLatencyMs: row.min_latency_ms as number,
         throughputOpsPerSec: row.throughput_ops_sec as number,
         errorCount: row.error_count as number,
-        errorTypes: JSON.parse((row.error_types as string) || '{}'),
+        errorTypes: JSON.parse((row.error_types as string) || "{}"),
         estimatedCostUsd: row.estimated_cost_usd as number,
       }
     : undefined;
@@ -706,11 +755,18 @@ function mapRunRow(row: Record<string, unknown>): SentinelRun {
     description: row.description as string | undefined,
     profile,
     status: row.status as RunStatus,
-    scheduledAt: row.scheduled_at ? new Date((row.scheduled_at as number) * 1000) : undefined,
-    startedAt: row.started_at ? new Date((row.started_at as number) * 1000) : undefined,
-    completedAt: row.completed_at ? new Date((row.completed_at as number) * 1000) : undefined,
+    scheduledAt: row.scheduled_at
+      ? new Date((row.scheduled_at as number) * 1000)
+      : undefined,
+    startedAt: row.started_at
+      ? new Date((row.started_at as number) * 1000)
+      : undefined,
+    completedAt: row.completed_at
+      ? new Date((row.completed_at as number) * 1000)
+      : undefined,
     results,
-    triggeredBy: (row.triggered_by as 'manual' | 'scheduled' | 'api') || 'manual',
+    triggeredBy:
+      (row.triggered_by as "manual" | "scheduled" | "api") || "manual",
     notes: row.notes as string | undefined,
     createdAt: new Date((row.created_at as number) * 1000),
     updatedAt: new Date((row.updated_at as number) * 1000),

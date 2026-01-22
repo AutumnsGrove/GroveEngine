@@ -78,7 +78,6 @@
 	let statusData = $state<StatusResponse | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let lastFetch = $state<Date | null>(null);
 	let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
 	// Status configuration

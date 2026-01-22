@@ -104,7 +104,8 @@ function getSpikeOpsPerSecond(
 
   if (elapsedSeconds < spikeStart) {
     // Warmup phase - gradual ramp to base
-    return baseOps * (elapsedSeconds / spikeStart);
+    // Guard against division by zero when warmupSeconds is 0
+    return spikeStart === 0 ? baseOps : baseOps * (elapsedSeconds / spikeStart);
   } else if (elapsedSeconds < spikeEnd) {
     // Spike phase
     return baseOps * spikeMultiplier;
@@ -180,7 +181,11 @@ function getRampOpsPerSecond(
     return endOpsPerSecond;
   } else {
     // Ramp down phase
-    const progress = (elapsedSeconds - rampDownStart) / rampDownSeconds;
+    // Guard against division by zero when rampDownSeconds is 0
+    const progress =
+      rampDownSeconds === 0
+        ? 1
+        : (elapsedSeconds - rampDownStart) / rampDownSeconds;
     return endOpsPerSecond - (endOpsPerSecond - startOpsPerSecond) * progress;
   }
 }

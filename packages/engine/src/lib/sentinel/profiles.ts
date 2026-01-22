@@ -17,7 +17,7 @@ import type {
   OscillationConfig,
   RampConfig,
   TargetSystem,
-} from './types.js';
+} from "./types.js";
 
 // =============================================================================
 // TRAFFIC COMPOSITION (Based on Sentinel Pattern)
@@ -37,13 +37,13 @@ import type {
  * - Comments (7%) - comment operations
  */
 export const TRAFFIC_COMPOSITION = {
-  post_reading: 0.35,      // 35% - dominant activity (view blog posts)
-  blog_browsing: 0.25,     // 25% - discovery behavior (list posts, search)
-  auth_flows: 0.10,        // 10% - login/logout patterns
-  writing_ops: 0.05,       // 5% - content creation (post CRUD)
-  media_ops: 0.10,         // 10% - image uploads/downloads
-  analytics: 0.08,         // 8% - analytics events
-  comments: 0.07,          // 7% - comment operations (future)
+  post_reading: 0.35, // 35% - dominant activity (view blog posts)
+  blog_browsing: 0.25, // 25% - discovery behavior (list posts, search)
+  auth_flows: 0.1, // 10% - login/logout patterns
+  writing_ops: 0.05, // 5% - content creation (post CRUD)
+  media_ops: 0.1, // 10% - image uploads/downloads
+  analytics: 0.08, // 8% - analytics events
+  comments: 0.07, // 7% - comment operations (future)
 } as const;
 
 /**
@@ -51,13 +51,13 @@ export const TRAFFIC_COMPOSITION = {
  */
 export function getSystemWeights(): Map<TargetSystem, number> {
   return new Map<TargetSystem, number>([
-    ['d1_reads', 0.60],        // post_reading + blog_browsing
-    ['d1_writes', 0.05],       // writing_ops
-    ['kv_get', 0.15],          // session checks, caching
-    ['kv_put', 0.05],          // session creation, cache updates
-    ['r2_download', 0.08],     // media serving
-    ['r2_upload', 0.02],       // media uploads
-    ['auth_flows', 0.10],      // authentication
+    ["d1_reads", 0.6], // post_reading + blog_browsing
+    ["d1_writes", 0.05], // writing_ops
+    ["kv_get", 0.15], // session checks, caching
+    ["kv_put", 0.05], // session creation, cache updates
+    ["r2_download", 0.08], // media serving
+    ["r2_upload", 0.02], // media uploads
+    ["auth_flows", 0.1], // authentication
   ]);
 }
 
@@ -94,20 +94,20 @@ export function selectWeightedSystem(systems: TargetSystem[]): TargetSystem {
 // =============================================================================
 
 export interface ThreePhaseConfig {
-  rampUpSeconds: number;      // Phase 1: Users increase from zero to peak
-  peakSeconds: number;        // Phase 2: Sustained maximum load
+  rampUpSeconds: number; // Phase 1: Users increase from zero to peak
+  peakSeconds: number; // Phase 2: Sustained maximum load
   steadyStateSeconds: number; // Phase 3: Moderate load for recovery validation
-  peakMultiplier: number;     // How much higher peak is vs steady state
+  peakMultiplier: number; // How much higher peak is vs steady state
 }
 
 /**
  * Default three-phase configuration based on Sentinel Pattern
  */
 export const DEFAULT_THREE_PHASE: ThreePhaseConfig = {
-  rampUpSeconds: 120,         // 2 minutes ramp-up
-  peakSeconds: 180,           // 3 minutes at peak
-  steadyStateSeconds: 300,    // 5 minutes steady state
-  peakMultiplier: 3,          // Peak is 3x steady state
+  rampUpSeconds: 120, // 2 minutes ramp-up
+  peakSeconds: 180, // 3 minutes at peak
+  steadyStateSeconds: 300, // 5 minutes steady state
+  peakMultiplier: 3, // Peak is 3x steady state
 };
 
 /**
@@ -136,31 +136,47 @@ export function createThreePhaseProfile(options: {
 
   const targetUsersAtPeak = options.targetUsersAtPeak ?? 1000;
   const opsPerUser = options.opsPerUser ?? 10;
-  const peakOpsPerSecond = targetUsersAtPeak * opsPerUser / config.peakSeconds;
+  // Guard against division by zero when peakSeconds is 0
+  const peakOpsPerSecond =
+    config.peakSeconds === 0
+      ? 0
+      : (targetUsersAtPeak * opsPerUser) / config.peakSeconds;
   const steadyOpsPerSecond = peakOpsPerSecond / config.peakMultiplier;
 
-  const totalDuration = config.rampUpSeconds + config.peakSeconds + config.steadyStateSeconds;
+  const totalDuration =
+    config.rampUpSeconds + config.peakSeconds + config.steadyStateSeconds;
   const totalOps = Math.ceil(
     // Ramp-up: average is half of peak
-    (config.rampUpSeconds * peakOpsPerSecond * 0.5) +
-    // Peak: full rate
-    (config.peakSeconds * peakOpsPerSecond) +
-    // Steady state: reduced rate
-    (config.steadyStateSeconds * steadyOpsPerSecond)
+    config.rampUpSeconds * peakOpsPerSecond * 0.5 +
+      // Peak: full rate
+      config.peakSeconds * peakOpsPerSecond +
+      // Steady state: reduced rate
+      config.steadyStateSeconds * steadyOpsPerSecond,
   );
 
   return {
-    type: 'custom',
+    type: "custom",
     targetOperations: totalOps,
     durationSeconds: totalDuration,
     concurrency: options.concurrency ?? Math.min(targetUsersAtPeak, 500),
-    targetSystems: options.targetSystems ?? ['d1_reads', 'd1_writes', 'kv_get', 'auth_flows'],
+    targetSystems: options.targetSystems ?? [
+      "d1_reads",
+      "d1_writes",
+      "kv_get",
+      "auth_flows",
+    ],
     customConfig: {
       loadCurve: [
         { second: 0, opsPerSecond: 0 },
         { second: config.rampUpSeconds, opsPerSecond: peakOpsPerSecond },
-        { second: config.rampUpSeconds + config.peakSeconds, opsPerSecond: peakOpsPerSecond },
-        { second: config.rampUpSeconds + config.peakSeconds + 1, opsPerSecond: steadyOpsPerSecond },
+        {
+          second: config.rampUpSeconds + config.peakSeconds,
+          opsPerSecond: peakOpsPerSecond,
+        },
+        {
+          second: config.rampUpSeconds + config.peakSeconds + 1,
+          opsPerSecond: steadyOpsPerSecond,
+        },
         { second: totalDuration, opsPerSecond: steadyOpsPerSecond },
       ],
     },
@@ -174,19 +190,22 @@ export function createThreePhaseProfile(options: {
 /**
  * Get the target operations per second at a given time point
  */
-export function getOpsPerSecondAt(profile: LoadProfile, elapsedSeconds: number): number {
+export function getOpsPerSecondAt(
+  profile: LoadProfile,
+  elapsedSeconds: number,
+): number {
   const baseOps = profile.targetOperations / profile.durationSeconds;
 
   switch (profile.type) {
-    case 'spike':
+    case "spike":
       return getSpikeOpsPerSecond(profile, elapsedSeconds, baseOps);
-    case 'sustained':
+    case "sustained":
       return baseOps; // Constant rate
-    case 'oscillation':
+    case "oscillation":
       return getOscillationOpsPerSecond(profile, elapsedSeconds, baseOps);
-    case 'ramp':
+    case "ramp":
       return getRampOpsPerSecond(profile, elapsedSeconds);
-    case 'custom':
+    case "custom":
       return getCustomOpsPerSecond(profile, elapsedSeconds);
     default:
       return baseOps;
@@ -196,7 +215,7 @@ export function getOpsPerSecondAt(profile: LoadProfile, elapsedSeconds: number):
 function getSpikeOpsPerSecond(
   profile: LoadProfile,
   elapsedSeconds: number,
-  baseOps: number
+  baseOps: number,
 ): number {
   const config = profile.spikeConfig ?? {
     warmupSeconds: profile.durationSeconds * 0.2,
@@ -211,13 +230,15 @@ function getSpikeOpsPerSecond(
 
   if (elapsedSeconds < spikeStart) {
     // Warmup phase - gradual ramp to base
-    return baseOps * (elapsedSeconds / spikeStart);
+    // Guard against division by zero when warmupSeconds is 0
+    return spikeStart === 0 ? baseOps : baseOps * (elapsedSeconds / spikeStart);
   } else if (elapsedSeconds < spikeEnd) {
     // Spike phase
     return baseOps * spikeMultiplier;
   } else {
     // Cooldown phase - gradual decrease
-    const cooldownProgress = (elapsedSeconds - spikeEnd) / (profile.durationSeconds - spikeEnd);
+    const cooldownProgress =
+      (elapsedSeconds - spikeEnd) / (profile.durationSeconds - spikeEnd);
     return baseOps * (1 - cooldownProgress * 0.5);
   }
 }
@@ -225,13 +246,13 @@ function getSpikeOpsPerSecond(
 function getOscillationOpsPerSecond(
   profile: LoadProfile,
   elapsedSeconds: number,
-  baseOps: number
+  baseOps: number,
 ): number {
   const config = profile.oscillationConfig ?? {
     minOpsPerSecond: baseOps * 0.2,
     maxOpsPerSecond: baseOps * 2,
     periodSeconds: 60,
-    waveform: 'sine' as const,
+    waveform: "sine" as const,
   };
 
   const { minOpsPerSecond, maxOpsPerSecond, periodSeconds, waveform } = config;
@@ -240,27 +261,40 @@ function getOscillationOpsPerSecond(
   const phase = (elapsedSeconds / periodSeconds) * 2 * Math.PI;
 
   switch (waveform) {
-    case 'sine':
+    case "sine":
       return midpoint + amplitude * Math.sin(phase);
-    case 'square':
+    case "square":
       return Math.sin(phase) >= 0 ? maxOpsPerSecond : minOpsPerSecond;
-    case 'sawtooth':
-      return minOpsPerSecond + (maxOpsPerSecond - minOpsPerSecond) * ((elapsedSeconds % periodSeconds) / periodSeconds);
+    case "sawtooth":
+      return (
+        minOpsPerSecond +
+        (maxOpsPerSecond - minOpsPerSecond) *
+          ((elapsedSeconds % periodSeconds) / periodSeconds)
+      );
     default:
       return midpoint;
   }
 }
 
-function getRampOpsPerSecond(profile: LoadProfile, elapsedSeconds: number): number {
+function getRampOpsPerSecond(
+  profile: LoadProfile,
+  elapsedSeconds: number,
+): number {
   const config = profile.rampConfig ?? {
     startOpsPerSecond: 1,
-    endOpsPerSecond: profile.targetOperations / profile.durationSeconds * 2,
+    endOpsPerSecond: (profile.targetOperations / profile.durationSeconds) * 2,
     rampUpSeconds: profile.durationSeconds * 0.3,
     sustainSeconds: profile.durationSeconds * 0.4,
     rampDownSeconds: profile.durationSeconds * 0.3,
   };
 
-  const { startOpsPerSecond, endOpsPerSecond, rampUpSeconds, sustainSeconds, rampDownSeconds } = config;
+  const {
+    startOpsPerSecond,
+    endOpsPerSecond,
+    rampUpSeconds,
+    sustainSeconds,
+    rampDownSeconds,
+  } = config;
   const sustainStart = rampUpSeconds;
   const rampDownStart = sustainStart + sustainSeconds;
 
@@ -278,7 +312,10 @@ function getRampOpsPerSecond(profile: LoadProfile, elapsedSeconds: number): numb
   }
 }
 
-function getCustomOpsPerSecond(profile: LoadProfile, elapsedSeconds: number): number {
+function getCustomOpsPerSecond(
+  profile: LoadProfile,
+  elapsedSeconds: number,
+): number {
   const curve = profile.customConfig?.loadCurve ?? [];
   if (curve.length === 0) return 1;
 
@@ -287,7 +324,10 @@ function getCustomOpsPerSecond(profile: LoadProfile, elapsedSeconds: number): nu
   let nextPoint = curve[curve.length - 1];
 
   for (let i = 0; i < curve.length - 1; i++) {
-    if (curve[i].second <= elapsedSeconds && curve[i + 1].second > elapsedSeconds) {
+    if (
+      curve[i].second <= elapsedSeconds &&
+      curve[i + 1].second > elapsedSeconds
+    ) {
       prevPoint = curve[i];
       nextPoint = curve[i + 1];
       break;
@@ -299,7 +339,10 @@ function getCustomOpsPerSecond(profile: LoadProfile, elapsedSeconds: number): nu
   if (range === 0) return prevPoint.opsPerSecond;
 
   const progress = (elapsedSeconds - prevPoint.second) / range;
-  return prevPoint.opsPerSecond + (nextPoint.opsPerSecond - prevPoint.opsPerSecond) * progress;
+  return (
+    prevPoint.opsPerSecond +
+    (nextPoint.opsPerSecond - prevPoint.opsPerSecond) * progress
+  );
 }
 
 // =============================================================================
@@ -319,11 +362,11 @@ export function createSpikeProfile(options: {
 }): LoadProfile {
   const duration = options.durationSeconds ?? 300; // 5 minutes default
   return {
-    type: 'spike',
+    type: "spike",
     targetOperations: options.targetOperations ?? 10000,
     durationSeconds: duration,
     concurrency: options.concurrency ?? 50,
-    targetSystems: options.targetSystems ?? ['d1_writes', 'd1_reads', 'kv_get'],
+    targetSystems: options.targetSystems ?? ["d1_writes", "d1_reads", "kv_get"],
     spikeConfig: {
       warmupSeconds: duration * 0.15,
       spikeDurationSeconds: duration * 0.3,
@@ -344,11 +387,16 @@ export function createSustainedProfile(options: {
   targetSystems?: TargetSystem[];
 }): LoadProfile {
   return {
-    type: 'sustained',
+    type: "sustained",
     targetOperations: options.targetOperations ?? 50000,
     durationSeconds: options.durationSeconds ?? 600, // 10 minutes default
     concurrency: options.concurrency ?? 100,
-    targetSystems: options.targetSystems ?? ['d1_writes', 'd1_reads', 'kv_get', 'kv_put'],
+    targetSystems: options.targetSystems ?? [
+      "d1_writes",
+      "d1_reads",
+      "kv_get",
+      "kv_put",
+    ],
   };
 }
 
@@ -363,18 +411,19 @@ export function createOscillationProfile(options: {
   targetSystems?: TargetSystem[];
   periodSeconds?: number;
 }): LoadProfile {
-  const baseOps = (options.targetOperations ?? 30000) / (options.durationSeconds ?? 600);
+  const baseOps =
+    (options.targetOperations ?? 30000) / (options.durationSeconds ?? 600);
   return {
-    type: 'oscillation',
+    type: "oscillation",
     targetOperations: options.targetOperations ?? 30000,
     durationSeconds: options.durationSeconds ?? 600,
     concurrency: options.concurrency ?? 50,
-    targetSystems: options.targetSystems ?? ['d1_writes', 'd1_reads'],
+    targetSystems: options.targetSystems ?? ["d1_writes", "d1_reads"],
     oscillationConfig: {
       minOpsPerSecond: baseOps * 0.2,
       maxOpsPerSecond: baseOps * 2.5,
       periodSeconds: options.periodSeconds ?? 60,
-      waveform: 'sine',
+      waveform: "sine",
     },
   };
 }
@@ -392,11 +441,16 @@ export function createRampProfile(options: {
 }): LoadProfile {
   const duration = options.durationSeconds ?? 900; // 15 minutes default
   return {
-    type: 'ramp',
+    type: "ramp",
     targetOperations: options.targetOperations ?? 100000,
     durationSeconds: duration,
     concurrency: options.concurrency ?? 200,
-    targetSystems: options.targetSystems ?? ['d1_writes', 'd1_reads', 'kv_get', 'kv_put'],
+    targetSystems: options.targetSystems ?? [
+      "d1_writes",
+      "d1_reads",
+      "kv_get",
+      "kv_put",
+    ],
     rampConfig: {
       startOpsPerSecond: 1,
       endOpsPerSecond: options.maxOpsPerSecond ?? 500,
@@ -416,11 +470,11 @@ export function createRampProfile(options: {
  */
 export function createSmokeTestProfile(): LoadProfile {
   return {
-    type: 'sustained',
+    type: "sustained",
     targetOperations: 100,
     durationSeconds: 30,
     concurrency: 5,
-    targetSystems: ['d1_reads', 'd1_writes'],
+    targetSystems: ["d1_reads", "d1_writes"],
   };
 }
 
@@ -433,7 +487,7 @@ export function createStressTestProfile(): LoadProfile {
     durationSeconds: 1800, // 30 minutes
     concurrency: 500,
     maxOpsPerSecond: 1000,
-    targetSystems: ['d1_writes', 'd1_reads', 'kv_get', 'kv_put', 'r2_upload'],
+    targetSystems: ["d1_writes", "d1_reads", "kv_get", "kv_put", "r2_upload"],
   });
 }
 
@@ -445,7 +499,7 @@ export function createSoakTestProfile(): LoadProfile {
     targetOperations: 360000, // 100 ops/sec for 1 hour
     durationSeconds: 3600,
     concurrency: 50,
-    targetSystems: ['d1_writes', 'd1_reads', 'kv_get'],
+    targetSystems: ["d1_writes", "d1_reads", "kv_get"],
   });
 }
 
@@ -468,14 +522,20 @@ export function estimateCloudflareCost(profile: LoadProfile): {
   const { targetOperations, targetSystems } = profile;
 
   // Rough distribution assumptions
-  const d1Reads = targetSystems.includes('d1_reads') ? targetOperations * 0.4 : 0;
-  const d1Writes = targetSystems.includes('d1_writes') ? targetOperations * 0.3 : 0;
-  const kvOps = (targetSystems.includes('kv_get') || targetSystems.includes('kv_put'))
-    ? targetOperations * 0.2
+  const d1Reads = targetSystems.includes("d1_reads")
+    ? targetOperations * 0.4
     : 0;
-  const r2Ops = (targetSystems.includes('r2_upload') || targetSystems.includes('r2_download'))
-    ? targetOperations * 0.1
+  const d1Writes = targetSystems.includes("d1_writes")
+    ? targetOperations * 0.3
     : 0;
+  const kvOps =
+    targetSystems.includes("kv_get") || targetSystems.includes("kv_put")
+      ? targetOperations * 0.2
+      : 0;
+  const r2Ops =
+    targetSystems.includes("r2_upload") || targetSystems.includes("r2_download")
+      ? targetOperations * 0.1
+      : 0;
 
   // Cloudflare pricing (approximate, check current pricing)
   // D1: First 25B reads/month free, then $0.001 per million
@@ -483,10 +543,13 @@ export function estimateCloudflareCost(profile: LoadProfile): {
   // KV: First 10M reads/month free, then $0.50 per million
   // R2: First 10M Class A ops free, Class B $0.36 per million
 
-  const d1ReadsCost = Math.max(0, (d1Reads - 25_000_000_000) / 1_000_000 * 0.001);
-  const d1WritesCost = Math.max(0, (d1Writes - 50_000_000) / 1_000_000 * 1);
-  const kvOpsCost = Math.max(0, (kvOps - 10_000_000) / 1_000_000 * 0.50);
-  const r2OpsCost = Math.max(0, (r2Ops - 10_000_000) / 1_000_000 * 0.36);
+  const d1ReadsCost = Math.max(
+    0,
+    ((d1Reads - 25_000_000_000) / 1_000_000) * 0.001,
+  );
+  const d1WritesCost = Math.max(0, ((d1Writes - 50_000_000) / 1_000_000) * 1);
+  const kvOpsCost = Math.max(0, ((kvOps - 10_000_000) / 1_000_000) * 0.5);
+  const r2OpsCost = Math.max(0, ((r2Ops - 10_000_000) / 1_000_000) * 0.36);
 
   const totalCost = d1ReadsCost + d1WritesCost + kvOpsCost + r2OpsCost;
 
@@ -495,7 +558,7 @@ export function estimateCloudflareCost(profile: LoadProfile): {
     `D1 Writes: ${d1Writes.toLocaleString()} ops ($${d1WritesCost.toFixed(4)})`,
     `KV Ops: ${kvOps.toLocaleString()} ops ($${kvOpsCost.toFixed(4)})`,
     `R2 Ops: ${r2Ops.toLocaleString()} ops ($${r2OpsCost.toFixed(4)})`,
-  ].join('\n');
+  ].join("\n");
 
   return {
     d1ReadsCost,

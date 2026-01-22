@@ -47,6 +47,9 @@ interface SentinelDOState {
   metricsBuffer: SentinelMetric[];
   latencies: number[];
 
+  // Retry counter for metrics flush (prevents infinite accumulation on persistent D1 issues)
+  metricsFlushRetries: number;
+
   // WebSocket connections for real-time updates
   // Note: This Set is recreated after hibernation as Sets cannot be serialized
   connections: Set<WebSocket>;
@@ -143,6 +146,7 @@ export class SentinelDO implements DurableObject {
       lastCheckpointAt: Date.now(),
       metricsBuffer: [],
       latencies: [],
+      metricsFlushRetries: 0,
       connections: new Set(),
     };
 
@@ -388,10 +392,22 @@ export class SentinelDO implements DurableObject {
     try {
       await this.env.DB.batch(statements);
       this.log("Flushed metrics", { count: metrics.length });
+      // Reset retry counter on successful flush
+      this.runState.metricsFlushRetries = 0;
     } catch (error) {
       this.log("Failed to flush metrics", { error: String(error) });
-      // Re-add to buffer for retry
-      this.runState.metricsBuffer.push(...metrics);
+      this.runState.metricsFlushRetries++;
+
+      // Re-add to buffer for retry, but discard after max retries to prevent infinite growth
+      const MAX_FLUSH_RETRIES = 3;
+      if (this.runState.metricsFlushRetries < MAX_FLUSH_RETRIES) {
+        this.runState.metricsBuffer.push(...metrics);
+      } else {
+        this.log("Discarding metrics after max retries", {
+          count: metrics.length,
+          retries: this.runState.metricsFlushRetries,
+        });
+      }
     }
   }
 
@@ -530,8 +546,10 @@ export class SentinelDO implements DurableObject {
         );
       if (stored) {
         // Re-initialize connections Set after hibernation - Sets cannot be serialized
+        // Also reset retry counter on load (fresh start after hibernation)
         this.runState = {
           ...stored,
+          metricsFlushRetries: stored.metricsFlushRetries ?? 0,
           connections: new Set(),
         };
       }

@@ -90,7 +90,7 @@ operationRegistry.set("d1_writes", [
         .prepare(
           `INSERT INTO sentinel_test_data (id, tenant_id, data, created_at)
            VALUES (?, ?, ?, ?)
-           ON CONFLICT(id) DO UPDATE SET data = excluded.data, created_at = excluded.created_at`,
+           ON CONFLICT(id) DO UPDATE SET data = excluded.data`,
         )
         .bind(
           id,
@@ -193,7 +193,7 @@ operationRegistry.set("d1_writes", [
     try {
       const statements = [];
       for (let i = 0; i < batchSize; i++) {
-        const id = `${SENTINEL_PREFIX}${tenantId}_batch_${Date.now()}_${index}_${i}`;
+        const id = `${SENTINEL_PREFIX}${tenantId}_batch_${crypto.randomUUID().slice(0, 8)}_${index}_${i}`;
         statements.push(
           db
             .prepare(
