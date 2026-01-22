@@ -187,16 +187,19 @@
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
 				},
-				{
-					name: 'Pantry',
-					tagline: 'Shop & Provisioning',
-					description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
-					status: 'planned',
-					icon: 'store',
-					domain: 'pantry.grove.place',
-					integration: 'Shop and provisioning for Wanderers',
-					spec: '/knowledge/specs/pantry-spec'
-				},
+				// TEMPORARILY HIDDEN: Pantry removed from public Workshop during LemonSqueezy verification
+				// LS was curious about "domain selling" — Pantry's shop concept might complicate verification
+				// Re-enable after LS verification complete (see TODOS.md for context)
+				// {
+				// 	name: 'Pantry',
+				// 	tagline: 'Shop & Provisioning',
+				// 	description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
+				// 	status: 'planned',
+				// 	icon: 'store',
+				// 	domain: 'pantry.grove.place',
+				// 	integration: 'Shop and provisioning for Wanderers',
+				// 	spec: '/knowledge/specs/pantry-spec'
+				// },
 			]
 		},
 		{

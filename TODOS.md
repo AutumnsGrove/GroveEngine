@@ -75,6 +75,44 @@
 
 # 🔄 CURRENT SESSION (Jan 21, 2026)
 
+## Tomorrow's Tasks (Jan 22, 2026)
+
+### 🛡️ PhotoDNA Application — SUBMIT APPLICATION
+> **Status:** Microsoft account created, application form ready to fill
+> **Location:** https://myphotodna.microsoftmoderator.com/Profile
+
+- [ ] Complete PhotoDNA application form
+  - Use legal name (it's a legal vetting process)
+  - Company: Grove / Autumn's Grove LLC
+  - Website: grove.place
+  - Email: autumn@grove.place
+- [ ] Submit and await approval (~1-2 weeks)
+
+### 💳 LemonSqueezy Verification — FILM WALKTHROUGH VIDEO
+> **Status:** BLOCKING - LS requested a walkthrough video explaining the website and concepts
+> **Priority:** HIGH - Payments are gated behind this verification
+
+- [ ] Film walkthrough video of Grove platform
+  - Explain the blog hosting service concept
+  - Show the Workshop (tools being built)
+  - Demonstrate the admin panel / Arbor
+  - Explain pricing tiers (Seedling, Sapling, Oak, Evergreen)
+- [ ] Reply to LemonSqueezy email with video
+- [ ] **Pantry temporarily hidden** from Workshop to simplify "what we sell" narrative
+  - LS was curious about "domain selling" — Pantry's shop/provisioning concept might complicate things
+  - Pantry spec and code remain, just not visible on public Workshop page
+  - Re-enable after LS verification complete
+
+### 📢 Bluesky Communications Pivot
+> **Status:** Grove Bluesky account created: @groveplace.bsky.social
+> **First post:** "thinkin about the grove" (2 likes! 🎉)
+
+- [ ] Consider adapting Email #6 to mention Bluesky as new update channel
+- [ ] Or send Email #7 as a quick "hey, following updates on Bluesky now" note
+- [ ] Start posting Grove updates on Bluesky instead of formal emails
+  - Easier than: planning email → querying subscribers → pasting into Proton Mail
+  - More casual, more frequent, less pressure
+
 ## Completed ✅
 
 ### Lattice Museum Planning (PR pending)
