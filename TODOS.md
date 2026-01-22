@@ -647,6 +647,18 @@ Four-layer image moderation system: CSAM detection → Content classification �
 - [ ] Footer glass treatment
 - [ ] Knowledge base article wrapper
 
+## Floating TOC / Museum Navigation Pattern
+> **Found during:** Art Exhibit section implementation (Jan 22, 2026)
+> **Location:** `packages/landing/src/routes/knowledge/exhibit/+page.svelte`
+
+The Art Exhibit landing page has a delightful floating TOC with hover-reveal navigation pattern. Consider extracting this into the engine as a reusable component.
+
+- [ ] Extract floating TOC pattern into `<MuseumNav>` or `<CategoryNav>` engine component
+- [ ] Parameterize for different category types (exhibit wings, spec categories, help sections)
+- [ ] Support hover-reveal item cards with icon, title, description
+- [ ] Make it a signature Grove navigation pattern for category landing pages
+- [ ] Consider using it for: `/knowledge/specs`, `/knowledge/help`, future category pages
+
 ## Vines Subicons Brainstorm — ON HOLD
 > Brainstorming paused for launch sprint
 

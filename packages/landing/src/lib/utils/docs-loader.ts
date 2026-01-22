@@ -272,7 +272,7 @@ export function loadDocBySlug(
     legal: join(DOCS_ROOT, "legal"),
     philosophy: join(DOCS_ROOT, "philosophy"),
     design: join(DOCS_ROOT, "design-system"),
-    developer: join(DOCS_ROOT, "developer"),
+    exhibit: join(DOCS_ROOT, "museum"),
   };
   const docsPath = categoryPaths[category];
 

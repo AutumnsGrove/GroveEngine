@@ -25,7 +25,7 @@ const validCategories: DocCategory[] = [
   "patterns",
   "philosophy",
   "design",
-  "developer",
+  "exhibit",
 ];
 
 export const load: PageServerLoad = async ({ params }) => {

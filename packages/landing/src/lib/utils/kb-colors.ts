@@ -8,12 +8,12 @@
  * Color Mapping:
  * - Help Center: Summer (Grove green) - emerald
  * - Legal Documents: Autumn (harvest, warmth) - orange
- * - Developer Guides: Winter (frost, cool clarity) - slate
  * - Technical Specs: Midnight Bloom (deep night, focus) - violet
  * - Philosophy: Midnight Bloom (contemplative depth) - violet
  * - Design: Spring (cherry blossoms, fresh creativity) - rose
  * - Patterns: Amber (golden architecture) - amber
  * - Marketing: Summer (growth, outreach) - emerald
+ * - Art Exhibit: Midnight Bloom (museum at night, contemplative) - violet
  */
 
 import type { DocCategory } from '$lib/types/docs';
@@ -112,29 +112,6 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
     cardBg: 'bg-orange-50',
     cardBgDark: 'dark:bg-orange-900/20',
     season: 'Autumn',
-  },
-
-  // Developer Guides - Winter (frost, clarity / slate)
-  developer: {
-    iconBg: 'bg-slate-100',
-    iconBgDark: 'dark:bg-slate-800',
-    text: 'text-slate-600',
-    textDark: 'dark:text-slate-300',
-    textHover: 'hover:text-slate-700',
-    textHoverDark: 'dark:hover:text-slate-200',
-    badgeBg: 'bg-slate-100',
-    badgeBgDark: 'dark:bg-slate-800',
-    badgeText: 'text-slate-700',
-    badgeTextDark: 'dark:text-slate-300',
-    ctaBg: 'bg-slate-50',
-    ctaBgDark: 'dark:bg-slate-800/50',
-    ctaBorder: 'border-slate-200',
-    ctaBorderDark: 'dark:border-slate-700',
-    buttonBg: 'bg-slate-600 dark:bg-slate-500',
-    buttonHover: 'hover:bg-slate-700 dark:hover:bg-slate-600',
-    cardBg: 'bg-slate-50',
-    cardBgDark: 'dark:bg-slate-800/50',
-    season: 'Winter',
   },
 
   // Technical Specs - Midnight Bloom (deep purple / violet)
@@ -252,6 +229,30 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
     cardBgDark: 'dark:bg-emerald-900/20',
     season: 'Summer',
   },
+
+  // Art Exhibit - Midnight Bloom (museum at night, contemplative depth)
+  // Deep violet evokes the museum after hours - curated, thoughtful, dreamy
+  exhibit: {
+    iconBg: 'bg-violet-100',
+    iconBgDark: 'dark:bg-violet-900/30',
+    text: 'text-violet-600',
+    textDark: 'dark:text-violet-400',
+    textHover: 'hover:text-violet-700',
+    textHoverDark: 'dark:hover:text-violet-300',
+    badgeBg: 'bg-violet-100',
+    badgeBgDark: 'dark:bg-violet-900/30',
+    badgeText: 'text-violet-800',
+    badgeTextDark: 'dark:text-violet-300',
+    ctaBg: 'bg-violet-50',
+    ctaBgDark: 'dark:bg-violet-900/20',
+    ctaBorder: 'border-violet-200',
+    ctaBorderDark: 'dark:border-violet-800',
+    buttonBg: 'bg-violet-600 dark:bg-violet-500',
+    buttonHover: 'hover:bg-violet-700 dark:hover:bg-violet-600',
+    cardBg: 'bg-violet-50',
+    cardBgDark: 'dark:bg-violet-900/20',
+    season: 'Midnight',
+  },
 };
 
 /**
@@ -260,11 +261,11 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
 export const categoryLabels: Record<DocCategory, string> = {
   help: 'Help Center',
   legal: 'Legal & Policies',
-  developer: 'Developer Guides',
   specs: 'Technical Specifications',
   philosophy: 'Philosophy',
   design: 'Design',
   patterns: 'Architecture Patterns',
   marketing: 'Marketing & Launch',
+  exhibit: 'Art Exhibit',
 };
 
