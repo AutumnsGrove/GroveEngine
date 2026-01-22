@@ -401,6 +401,48 @@ const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published'
 - **Auto timestamps** - `created_at`/`updated_at` handled automatically
 - **Tenant isolation** - `TenantDb` enforces multi-tenant boundaries
 
+#### ⚠️ CRITICAL: Multi-Tenant Proxy & CSRF Validation
+**SvelteKit's built-in CSRF protection fails behind proxies like grove-router.**
+
+Grove uses a multi-tenant architecture where `*.grove.place` subdomains are routed through
+`grove-router` (a Cloudflare Worker proxy) to the main engine. This causes CSRF failures:
+
+```
+Browser → autumn.grove.place (Origin: https://autumn.grove.place)
+                ↓
+grove-router → sets X-Forwarded-Host: autumn.grove.place
+                ↓
+Engine Worker → sees Host: internal-worker.pages.dev
+                ↓
+SvelteKit CSRF → Origin ≠ Host → 403 Forbidden!
+```
+
+**The fix:** Configure `csrf.trustedOrigins` in `svelte.config.js`:
+
+```javascript
+// packages/engine/svelte.config.js
+kit: {
+  csrf: {
+    checkOrigin: true,
+    trustedOrigins: [
+      "https://grove.place",
+      "https://*.grove.place",  // Wildcards supported!
+      "http://localhost:5173",  // Local dev
+    ],
+  },
+}
+```
+
+This lesson learned the hard way: Timeline Curio config saves returned 403 for 3-4 days
+because SvelteKit compared the browser's `Origin` header against the proxied `Host` header.
+The `X-Forwarded-Host` header was correctly set by grove-router, but SvelteKit's CSRF
+validation doesn't use it — you must explicitly whitelist trusted origins.
+
+**Key insight:** When debugging 403s on form actions behind a proxy:
+1. Check if `Origin` header matches what SvelteKit expects
+2. Look at `X-Forwarded-Host` vs `Host` headers
+3. Configure `csrf.trustedOrigins` for your proxy setup
+
 ### Research & Analysis
 - **When researching technology decisions** → Use skill: `research-strategy`
 - **When analyzing unfamiliar codebases** → Use skill: `research-strategy`
