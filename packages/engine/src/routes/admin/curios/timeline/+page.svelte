@@ -18,7 +18,9 @@
     Eye,
     EyeOff,
     History,
-    Loader2
+    Loader2,
+    Sparkles,
+    XCircle,
   } from "lucide-svelte";
 
   const { data, form }: { data: PageData; form: ActionData } = $props();
@@ -90,6 +92,22 @@
   let isBackfilling = $state(false);
   let backfillResult = $state<{ success: boolean; message: string; stats?: any } | null>(null);
 
+  // Generate summaries state
+  let generateStartDate = $state("");
+  let generateEndDate = $state("");
+  let isGenerating = $state(false);
+  let generateCancelled = $state(false);
+  let generateProgress = $state<{
+    current: number;
+    total: number;
+    currentDate: string;
+    completed: string[];
+    skipped: string[];
+    failed: string[];
+    totalCost: number;
+  } | null>(null);
+  let generateResult = $state<{ success: boolean; message: string } | null>(null);
+
   async function startBackfill() {
     if (!backfillStartDate) {
       toast.error("Start date required", { description: "Pick how far back to go." });
@@ -136,6 +154,117 @@
     } finally {
       isBackfilling = false;
     }
+  }
+
+  /**
+   * Generate AI summaries for a date range.
+   * Calls the generate endpoint for each day sequentially so that
+   * long-horizon context can build up across consecutive days.
+   */
+  async function generateSummaries() {
+    if (!generateStartDate) {
+      toast.error("Start date required", { description: "Pick the first date to generate." });
+      return;
+    }
+
+    isGenerating = true;
+    generateCancelled = false;
+    generateResult = null;
+
+    const start = new Date(generateStartDate + "T00:00:00");
+    const end = generateEndDate
+      ? new Date(generateEndDate + "T00:00:00")
+      : new Date(new Date().toISOString().split("T")[0] + "T00:00:00");
+
+    // Build array of dates
+    const dates: string[] = [];
+    const current = new Date(start);
+    while (current <= end) {
+      dates.push(current.toISOString().split("T")[0]);
+      current.setDate(current.getDate() + 1);
+    }
+
+    generateProgress = {
+      current: 0,
+      total: dates.length,
+      currentDate: "",
+      completed: [],
+      skipped: [],
+      failed: [],
+      totalCost: 0,
+    };
+
+    for (const date of dates) {
+      if (generateCancelled) break;
+
+      generateProgress = {
+        ...generateProgress!,
+        current: generateProgress!.current + 1,
+        currentDate: date,
+      };
+
+      try {
+        const response = await fetch("/api/curios/timeline/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-csrf-token": data.csrfToken ?? "",
+          },
+          body: JSON.stringify({ date }),
+        });
+
+        const result = await response.json() as Record<string, unknown>;
+
+        if (response.ok) {
+          if (result.summary) {
+            generateProgress = {
+              ...generateProgress!,
+              completed: [...generateProgress!.completed, date],
+              totalCost: generateProgress!.totalCost + ((result.usage as Record<string, unknown>)?.cost as number ?? 0),
+            };
+          } else {
+            // No commits for this day
+            generateProgress = {
+              ...generateProgress!,
+              skipped: [...generateProgress!.skipped, date],
+            };
+          }
+        } else {
+          generateProgress = {
+            ...generateProgress!,
+            failed: [...generateProgress!.failed, date],
+          };
+        }
+      } catch {
+        generateProgress = {
+          ...generateProgress!,
+          failed: [...generateProgress!.failed, date],
+        };
+      }
+    }
+
+    const completedCount = generateProgress!.completed.length;
+    const skippedCount = generateProgress!.skipped.length;
+    const failedCount = generateProgress!.failed.length;
+
+    generateResult = {
+      success: failedCount === 0,
+      message: generateCancelled
+        ? `Cancelled. Generated ${completedCount} summaries before stopping.`
+        : `Done! ${completedCount} generated, ${skippedCount} skipped (no commits), ${failedCount} failed.`,
+    };
+
+    if (completedCount > 0) {
+      toast.success("Summaries generated!", {
+        description: `${completedCount} day${completedCount === 1 ? "" : "s"} of timeline entries created. Cost: $${generateProgress!.totalCost.toFixed(4)}`,
+      });
+    }
+
+    isGenerating = false;
+  }
+
+  function cancelGeneration() {
+    generateCancelled = true;
   }
 </script>
 
@@ -601,6 +730,122 @@
       </GlassButton>
     </div>
   </GlassCard>
+
+  <!-- Generate Summaries -->
+  <GlassCard class="config-section generate-section">
+    <div class="section-header">
+      <Sparkles class="section-icon" />
+      <h2>Generate Summaries</h2>
+    </div>
+
+    <p class="generate-description">
+      Generate AI-powered timeline entries for dates with commit activity.
+      Each day uses your OpenRouter key to create a brief summary, detailed timeline, and gutter comments.
+      Days are processed sequentially so context builds across consecutive entries.
+    </p>
+
+    <div class="generate-fields">
+      <div class="field-group">
+        <label for="generateStart" class="field-label">
+          Start Date
+          <span class="required">*</span>
+        </label>
+        <input
+          type="date"
+          id="generateStart"
+          bind:value={generateStartDate}
+          class="field-input"
+          max={new Date().toISOString().split("T")[0]}
+          disabled={isGenerating}
+        />
+        <p class="field-help">First date to generate a summary for.</p>
+      </div>
+
+      <div class="field-group">
+        <label for="generateEnd" class="field-label">End Date</label>
+        <input
+          type="date"
+          id="generateEnd"
+          bind:value={generateEndDate}
+          class="field-input"
+          max={new Date().toISOString().split("T")[0]}
+          disabled={isGenerating}
+        />
+        <p class="field-help">Defaults to today if left empty.</p>
+      </div>
+    </div>
+
+    {#if generateProgress}
+      <div class="generate-progress">
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            style="width: {(generateProgress.current / generateProgress.total) * 100}%"
+          ></div>
+        </div>
+        <div class="progress-details">
+          {#if isGenerating}
+            <span class="progress-current">
+              Generating {generateProgress.currentDate}...
+              ({generateProgress.current}/{generateProgress.total})
+            </span>
+          {:else}
+            <span class="progress-current">
+              Complete ({generateProgress.current}/{generateProgress.total})
+            </span>
+          {/if}
+          <div class="progress-stats">
+            {#if generateProgress.completed.length > 0}
+              <span class="stat-generated">{generateProgress.completed.length} generated</span>
+            {/if}
+            {#if generateProgress.skipped.length > 0}
+              <span class="stat-skipped">{generateProgress.skipped.length} skipped</span>
+            {/if}
+            {#if generateProgress.failed.length > 0}
+              <span class="stat-failed">{generateProgress.failed.length} failed</span>
+            {/if}
+            {#if generateProgress.totalCost > 0}
+              <span class="stat-cost">${generateProgress.totalCost.toFixed(4)}</span>
+            {/if}
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    {#if generateResult && !isGenerating}
+      <div class="alert {generateResult.success ? 'alert-success' : 'alert-error'}">
+        {#if generateResult.success}
+          <CheckCircle2 class="alert-icon" />
+        {:else}
+          <AlertCircle class="alert-icon" />
+        {/if}
+        <span>{generateResult.message}</span>
+      </div>
+    {/if}
+
+    <div class="form-actions">
+      {#if isGenerating}
+        <GlassButton
+          type="button"
+          variant="ghost"
+          onclick={cancelGeneration}
+        >
+          <XCircle class="button-icon" />
+          Cancel
+        </GlassButton>
+      {:else}
+        <GlassButton
+          type="button"
+          variant="accent"
+          disabled={!generateStartDate}
+          onclick={generateSummaries}
+        >
+          <Sparkles class="button-icon" />
+          Generate Summaries
+        </GlassButton>
+      {/if}
+    </div>
+  </GlassCard>
 </div>
 
 <style>
@@ -1002,6 +1247,81 @@
     to { transform: rotate(360deg); }
   }
 
+  /* Generate Section */
+  :global(.generate-section) {
+    margin-top: 1.5rem;
+  }
+
+  .generate-description {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .generate-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .generate-progress {
+    margin: 1.5rem 0;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: var(--grove-overlay-8);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .progress-current {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .progress-stats {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .stat-generated {
+    color: var(--color-success, #22c55e);
+  }
+
+  .stat-skipped {
+    color: var(--color-text-muted);
+  }
+
+  .stat-failed {
+    color: var(--color-error, #ef4444);
+  }
+
+  .stat-cost {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
   @media (max-width: 640px) {
     .voice-grid {
       grid-template-columns: 1fr;
@@ -1012,6 +1332,10 @@
     }
 
     .backfill-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .generate-fields {
       grid-template-columns: 1fr;
     }
   }
