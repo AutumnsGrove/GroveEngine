@@ -117,7 +117,7 @@ function generateSvg(season, { rotation = ROTATION } = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PNG GENERATION FOR PACKAGES
+// PNG GENERATION FOR PACKAGES (CIRCULAR WITH TRANSPARENT CORNERS)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const FAVICON_SIZES = {
@@ -130,12 +130,47 @@ const FAVICON_SIZES = {
 const SEASONS = ["spring", "summer", "autumn", "winter", "midnight"];
 const EMAIL_SIZES = [16, 24, 32, 512];
 
+/**
+ * Generate a circular background SVG with the Grove glassy style.
+ * Returns SVG string with transparent corners.
+ */
+function generateCircularBackgroundSvg(size, season = "summer") {
+  const colors = SEASONAL_PALETTES[season];
+  const circleRadius = Math.round(size * 0.48);
+  const centerX = size / 2;
+  const centerY = size / 2;
+
+  // Use the darkest tier color as base, create gradient toward center
+  const darkColor = colors.tier3.dark;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+  <defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#122a1a" />
+      <stop offset="70%" style="stop-color:#0f2015" />
+      <stop offset="100%" style="stop-color:#0d1a12" />
+    </radialGradient>
+    <radialGradient id="glassHighlight" cx="35%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.06)" />
+      <stop offset="100%" style="stop-color:rgba(255, 255, 255, 0)" />
+    </radialGradient>
+  </defs>
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#circleGradient)" />
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#glassHighlight)" />
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}"
+          fill="none"
+          stroke="rgba(34, 197, 94, 0.12)"
+          stroke-width="${Math.max(1, Math.round(size * 0.01))}" />
+</svg>`;
+}
+
 async function generatePackageFavicons() {
-  console.log("📦 Generating favicon PNGs for all packages...\n");
+  console.log(
+    "📦 Generating favicon PNGs for all packages (circular style)...\n",
+  );
 
   // Use summer (default) palette for all package favicons
-  const svg = generateSvg("summer");
-  const svgBuffer = Buffer.from(svg);
+  const season = "summer";
 
   for (const pkg of PACKAGES) {
     const staticDir = join(ROOT_DIR, pkg, "static");
@@ -144,11 +179,41 @@ async function generatePackageFavicons() {
     console.log(`  ${pkg}:`);
 
     for (const [filename, size] of Object.entries(FAVICON_SIZES)) {
-      const pngBuffer = await sharp(svgBuffer)
-        .resize(size, size)
+      // Generate the tree logo SVG
+      const logoSvg = generateSvg(season);
+      const logoSvgBuffer = Buffer.from(logoSvg);
+
+      // Calculate logo size with padding inside the circle
+      const padding = Math.round(size * 0.15);
+      const logoSize = size - padding * 2;
+
+      // Generate circular background
+      const bgSvg = generateCircularBackgroundSvg(size, season);
+      const bgBuffer = await sharp(Buffer.from(bgSvg)).png().toBuffer();
+
+      // Resize logo
+      const logoBuffer = await sharp(logoSvgBuffer)
+        .resize(logoSize, logoSize)
         .png()
         .toBuffer();
-      await writeFile(join(staticDir, filename), pngBuffer);
+
+      // Composite on transparent canvas
+      const finalBuffer = await sharp({
+        create: {
+          width: size,
+          height: size,
+          channels: 4,
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        },
+      })
+        .composite([
+          { input: bgBuffer, left: 0, top: 0 },
+          { input: logoBuffer, left: padding, top: padding },
+        ])
+        .png()
+        .toBuffer();
+
+      await writeFile(join(staticDir, filename), finalBuffer);
       console.log(`    ✓ ${filename} (${size}x${size})`);
     }
     console.log("");
@@ -325,10 +390,10 @@ async function generateCombinedLogoWithGlassCard(logoSize = 512, overlap = 0) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SOCIAL MEDIA LOGOS (WITH DARK BACKGROUND)
+// SOCIAL MEDIA LOGOS (CIRCULAR WITH TRANSPARENT CORNERS)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Grove-themed dark background - forest at night
+// Grove-themed dark background - forest at night (for the circle fill, not corners)
 const DARK_BG_COLOR = "#0d1a12";
 // Grove green with very light opacity for frosted glass effect
 const GROVE_GREEN_RGB = "34, 197, 94";
@@ -336,7 +401,9 @@ const GROVE_GREEN_RGB = "34, 197, 94";
 const SOCIAL_SIZES = [512, 1024];
 
 async function generateSocialLogos() {
-  console.log("🌙 Generating social media logos with dark background...\n");
+  console.log(
+    "🌙 Generating social media logos (circular, transparent corners)...\n",
+  );
 
   await mkdir(OUTPUT_DIR, { recursive: true });
 
@@ -349,35 +416,34 @@ async function generateSocialLogos() {
       // Calculate dimensions - logo centered in a circle with padding
       const padding = Math.round(size * 0.15); // 15% padding around logo
       const logoSize = size - padding * 2;
-      const circleRadius = Math.round(size * 0.42); // Circle slightly smaller than canvas
+      const circleRadius = Math.round(size * 0.48); // Circle fills most of canvas
       const centerX = size / 2;
       const centerY = size / 2;
 
-      // Create the background with frosted grove-green circle
+      // Create the circular background SVG - NO dark rectangle, just the circle
+      // Corners will be transparent
       const backgroundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
   <defs>
-    <!-- Radial gradient for the frosted circle - grove green, very subtle -->
-    <radialGradient id="frostGradient" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.12)" />
-      <stop offset="70%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.08)" />
-      <stop offset="100%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.04)" />
+    <!-- Radial gradient for the circle - dark grove green, solid center fading to edges -->
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#122a1a" />
+      <stop offset="70%" style="stop-color:#0f2015" />
+      <stop offset="100%" style="stop-color:#0d1a12" />
     </radialGradient>
     <!-- Inner highlight for glass depth -->
     <radialGradient id="glassHighlight" cx="35%" cy="30%" r="50%">
-      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.08)" />
+      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.06)" />
       <stop offset="100%" style="stop-color:rgba(255, 255, 255, 0)" />
     </radialGradient>
   </defs>
-  <!-- Dark background -->
-  <rect width="${size}" height="${size}" fill="${DARK_BG_COLOR}" />
-  <!-- Frosted grove-green circle -->
-  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#frostGradient)" />
+  <!-- Main circle with gradient fill - corners are transparent -->
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#circleGradient)" />
   <!-- Glass highlight overlay -->
   <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#glassHighlight)" />
   <!-- Subtle border -->
   <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}"
           fill="none"
-          stroke="rgba(${GROVE_GREEN_RGB}, 0.15)"
+          stroke="rgba(${GROVE_GREEN_RGB}, 0.12)"
           stroke-width="1" />
 </svg>`;
 
@@ -391,14 +457,18 @@ async function generateSocialLogos() {
         .png()
         .toBuffer();
 
-      // Composite: background + logo centered
-      const finalBuffer = await sharp(backgroundBuffer)
+      // Composite: circular background (transparent corners) + logo centered
+      const finalBuffer = await sharp({
+        create: {
+          width: size,
+          height: size,
+          channels: 4,
+          background: { r: 0, g: 0, b: 0, alpha: 0 }, // Transparent canvas
+        },
+      })
         .composite([
-          {
-            input: logoBuffer,
-            left: padding,
-            top: padding,
-          },
+          { input: backgroundBuffer, left: 0, top: 0 },
+          { input: logoBuffer, left: padding, top: padding },
         ])
         .png()
         .toBuffer();
@@ -446,7 +516,9 @@ async function main() {
   const socialCount = SEASONS.length * SOCIAL_SIZES.length;
   console.log(`✅ Generated ${faviconCount} package favicon PNGs`);
   console.log(`✅ Generated ${emailCount} seasonal email PNGs`);
-  console.log(`✅ Generated ${socialCount} social media PNGs (dark background)`);
+  console.log(
+    `✅ Generated ${socialCount} social media PNGs (dark background)`,
+  );
   console.log(`✅ Generated 2 combined seasonal logos`);
   console.log(`✅ Generated 2 combined seasonal logos with glass card`);
 }
