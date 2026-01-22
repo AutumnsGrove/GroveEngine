@@ -24,42 +24,41 @@ interface HealthCheckResponse {
  * GET /api/health/payments - Payment subsystem health check
  *
  * Shallow health check that verifies:
- * - Stripe API key is configured
- * - Stripe webhook secret is configured
+ * - LemonSqueezy API key is configured
+ * - LemonSqueezy store ID is configured
+ * - LemonSqueezy webhook secret is configured
  *
- * Does NOT make external API calls to Stripe.
- * Used by Sentinel for automated monitoring.
+ * Does NOT make external API calls to LemonSqueezy.
+ * Used by Clearing Monitor for automated monitoring.
  * Unauthenticated - monitoring systems need access.
  */
 export const GET: RequestHandler = async ({ platform }) => {
   const checks: HealthCheckResponse["checks"] = [];
 
-  // Check Stripe API key configuration
-  const hasStripeKey = !!platform?.env?.STRIPE_SECRET_KEY;
+  // Check LemonSqueezy API key configuration
+  const hasApiKey = !!platform?.env?.LEMON_SQUEEZY_API_KEY;
   checks.push({
-    name: "stripe_api_key",
-    status: hasStripeKey ? "pass" : "fail",
-    ...(hasStripeKey ? {} : { error: "Stripe API key not configured" }),
+    name: "lemonsqueezy_api_key",
+    status: hasApiKey ? "pass" : "fail",
+    ...(hasApiKey ? {} : { error: "LemonSqueezy API key not configured" }),
   });
 
-  // Check Stripe webhook secret configuration
-  const hasWebhookSecret = !!platform?.env?.STRIPE_WEBHOOK_SECRET;
+  // Check LemonSqueezy store ID configuration
+  const hasStoreId = !!platform?.env?.LEMON_SQUEEZY_STORE_ID;
   checks.push({
-    name: "stripe_webhook_secret",
+    name: "lemonsqueezy_store_id",
+    status: hasStoreId ? "pass" : "fail",
+    ...(hasStoreId ? {} : { error: "LemonSqueezy store ID not configured" }),
+  });
+
+  // Check LemonSqueezy webhook secret configuration
+  const hasWebhookSecret = !!platform?.env?.LEMON_SQUEEZY_WEBHOOK_SECRET;
+  checks.push({
+    name: "lemonsqueezy_webhook_secret",
     status: hasWebhookSecret ? "pass" : "fail",
     ...(hasWebhookSecret
       ? {}
-      : { error: "Stripe webhook secret not configured" }),
-  });
-
-  // Check Stripe publishable key configuration
-  const hasPublishableKey = !!platform?.env?.STRIPE_PUBLISHABLE_KEY;
-  checks.push({
-    name: "stripe_publishable_key",
-    status: hasPublishableKey ? "pass" : "fail",
-    ...(hasPublishableKey
-      ? {}
-      : { error: "Stripe publishable key not configured" }),
+      : { error: "LemonSqueezy webhook secret not configured" }),
   });
 
   // Determine overall status

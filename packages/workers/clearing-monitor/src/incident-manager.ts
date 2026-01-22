@@ -6,7 +6,7 @@
  */
 
 import type { HealthCheckResult } from "./health-checks";
-import { INCIDENT_THRESHOLDS } from "./config";
+import { INCIDENT_THRESHOLDS, EMAIL_FROM } from "./config";
 import { generateUUID } from "./utils";
 
 /**
@@ -90,7 +90,7 @@ async function sendEmailAlert(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Grove Status <status@grove.place>",
+        from: EMAIL_FROM,
         to: [env.ALERT_EMAIL || "alerts@grove.place"],
         subject,
         text: body,
@@ -192,12 +192,28 @@ async function createIncident(
 }
 
 /**
- * Resolve an existing incident in D1
+ * Resolve an existing incident in D1.
+ * Returns false if the incident no longer exists (e.g., manually deleted).
  */
 async function resolveIncident(
   db: D1Database,
   incidentId: string,
-): Promise<void> {
+): Promise<boolean> {
+  // Verify incident exists before resolving
+  const existing = await db
+    .prepare(
+      `SELECT id FROM status_incidents WHERE id = ? AND status != 'resolved'`,
+    )
+    .bind(incidentId)
+    .first();
+
+  if (!existing) {
+    console.warn(
+      `[Clearing Monitor] Incident ${incidentId} not found or already resolved, skipping`,
+    );
+    return false;
+  }
+
   const now = new Date().toISOString();
   const updateId = generateUUID();
 
@@ -216,6 +232,8 @@ async function resolveIncident(
       )
       .bind(updateId, incidentId, now),
   ]);
+
+  return true;
 }
 
 /**
@@ -261,21 +279,23 @@ export async function processHealthCheckResult(
         `[Clearing Monitor] Resolving incident ${state.activeIncidentId} for ${result.componentName}`,
       );
 
-      await resolveIncident(env.DB, state.activeIncidentId);
+      const resolved = await resolveIncident(env.DB, state.activeIncidentId);
       await updateComponentStatus(env.DB, result.componentId, "operational");
 
-      // Fire-and-forget resolution email
-      void sendEmailAlert(
-        env,
-        `[Grove] Resolved: ${result.componentName} back to operational`,
-        `Service: ${result.componentName}\n` +
-          `Status: Operational\n` +
-          `Time: ${result.timestamp}\n` +
-          `Latency: ${result.latencyMs}ms\n\n` +
-          `The service has recovered and is operating normally.`,
-      ).catch((err) =>
-        console.error("[Clearing Monitor] Email send failed:", err),
-      );
+      // Only send email if the incident was actually resolved
+      if (resolved) {
+        void sendEmailAlert(
+          env,
+          `[Grove] Resolved: ${result.componentName} back to operational`,
+          `Service: ${result.componentName}\n` +
+            `Status: Operational\n` +
+            `Time: ${result.timestamp}\n` +
+            `Latency: ${result.latencyMs}ms\n\n` +
+            `The service has recovered and is operating normally.`,
+        ).catch((err) =>
+          console.error("[Clearing Monitor] Email send failed:", err),
+        );
+      }
 
       state.activeIncidentId = null;
     }
@@ -328,20 +348,24 @@ export async function processHealthCheckResult(
 }
 
 /**
- * Process all health check results
+ * Process all health check results in parallel
  */
 export async function processAllResults(
   env: IncidentEnv,
   results: HealthCheckResult[],
 ): Promise<void> {
-  // Process each result individually (errors shouldn't block others)
-  for (const result of results) {
-    try {
-      await processHealthCheckResult(env, result);
-    } catch (err) {
+  const outcomes = await Promise.allSettled(
+    results.map((result) => processHealthCheckResult(env, result)),
+  );
+
+  for (let i = 0; i < outcomes.length; i++) {
+    const outcome = outcomes[i];
+    if (outcome.status === "rejected") {
       console.error(
-        `[Clearing Monitor] Failed to process ${result.componentName}:`,
-        err instanceof Error ? err.message : String(err),
+        `[Clearing Monitor] Failed to process ${results[i].componentName}:`,
+        outcome.reason instanceof Error
+          ? outcome.reason.message
+          : String(outcome.reason),
       );
     }
   }

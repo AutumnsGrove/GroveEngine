@@ -89,7 +89,7 @@ export async function checkComponent(
     return {
       componentId: config.id,
       componentName: config.name,
-      status: "major_outage",
+      status: ComponentStatus.MAJOR_OUTAGE,
       latencyMs,
       httpStatus: null,
       error: errorMessage,
@@ -112,7 +112,10 @@ async function evaluateDeepCheck(
     return {
       componentId: config.id,
       componentName: config.name,
-      status: response.status >= 500 ? "major_outage" : "partial_outage",
+      status:
+        response.status >= 500
+          ? ComponentStatus.MAJOR_OUTAGE
+          : ComponentStatus.PARTIAL_OUTAGE,
       latencyMs,
       httpStatus: response.status,
       error: `HTTP ${response.status}`,
@@ -141,7 +144,7 @@ async function evaluateDeepCheck(
       return {
         componentId: config.id,
         componentName: config.name,
-        status: "major_outage",
+        status: ComponentStatus.MAJOR_OUTAGE,
         latencyMs,
         httpStatus: response.status,
         error: "Service reports unhealthy",
@@ -153,7 +156,7 @@ async function evaluateDeepCheck(
       return {
         componentId: config.id,
         componentName: config.name,
-        status: "degraded",
+        status: ComponentStatus.DEGRADED,
         latencyMs,
         httpStatus: response.status,
         error: "Service reports degraded",
@@ -168,7 +171,7 @@ async function evaluateDeepCheck(
     return {
       componentId: config.id,
       componentName: config.name,
-      status: "degraded",
+      status: ComponentStatus.DEGRADED,
       latencyMs,
       httpStatus: response.status,
       error: "Invalid JSON response",
@@ -191,7 +194,10 @@ function evaluateShallowCheck(
     return {
       componentId: config.id,
       componentName: config.name,
-      status: httpStatus >= 500 ? "major_outage" : "partial_outage",
+      status:
+        httpStatus >= 500
+          ? ComponentStatus.MAJOR_OUTAGE
+          : ComponentStatus.PARTIAL_OUTAGE,
       latencyMs,
       httpStatus,
       error: `HTTP ${httpStatus}`,

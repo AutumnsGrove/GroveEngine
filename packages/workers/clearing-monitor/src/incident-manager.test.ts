@@ -163,12 +163,42 @@ describe("processHealthCheckResult - State Machine", () => {
       lastCheckAt: "2025-01-01T00:00:00.000Z",
     });
 
+    // Mock the incident existence check (resolveIncident does a SELECT first)
+    const mockStmt = (env.DB.prepare as ReturnType<typeof vi.fn>)();
+    mockStmt.first.mockResolvedValueOnce({ id: "incident-123" });
+
     await processHealthCheckResult(env, createHealthyResult());
 
     // Should have called db.batch for resolution
     expect(env.DB.batch).toHaveBeenCalled();
 
     // Should have cleared activeIncidentId
+    const savedState = JSON.parse(
+      (env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
+    );
+    expect(savedState.activeIncidentId).toBeNull();
+  });
+
+  it("should clear activeIncidentId even if incident was already deleted", async () => {
+    // Prime with active incident that no longer exists in D1
+    (env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      consecutiveFailures: 0,
+      consecutiveSuccesses: 1,
+      activeIncidentId: "deleted-incident",
+      lastStatus: "major_outage",
+      lastCheckAt: "2025-01-01T00:00:00.000Z",
+    });
+
+    // Mock: incident doesn't exist (first() returns null)
+    const mockStmt = (env.DB.prepare as ReturnType<typeof vi.fn>)();
+    mockStmt.first.mockResolvedValueOnce(null);
+
+    await processHealthCheckResult(env, createHealthyResult());
+
+    // Should NOT have called batch (incident doesn't exist)
+    expect(env.DB.batch).not.toHaveBeenCalled();
+
+    // But should still clear activeIncidentId from state
     const savedState = JSON.parse(
       (env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
     );
