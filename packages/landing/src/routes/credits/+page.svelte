@@ -178,7 +178,7 @@
 									<span class="supporter-context">first person to sign up</span>
 								</div>
 								<p class="supporter-note">
-									Day zero. The very first person to believe in this vision enough to actually sign up. That kind of trust and support means everything—it's one thing to encourage from the sidelines, another entirely to be the first one through the door. A ray of sunshine on stormy days, excited to learn to code through this open source project. She's been a supporter for months, and her faith in Grove has been a constant light.
+									Day zero. The first through the door, a ray of sunshine on stormy days. Excited to learn to code—there's a <a href="https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md" target="_blank" rel="noopener noreferrer" class="museum-link">museum</a> waiting for her.
 								</p>
 							</div>
 							<div class="supporter-item">
@@ -838,6 +838,17 @@
 
 	.supporter-desc {
 		color: var(--color-foreground-muted);
+	}
+
+	.museum-link {
+		color: var(--color-accent-muted);
+		text-decoration: none;
+		border-bottom: 1px dotted var(--color-accent-muted);
+		transition: border-color 0.2s ease;
+	}
+
+	.museum-link:hover {
+		border-bottom-style: solid;
 	}
 
 	/* Font category collapsible styling */
