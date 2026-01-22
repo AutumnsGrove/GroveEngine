@@ -100,7 +100,7 @@
           </nav>
 
           <!-- External Source Banner -->
-          <div class="mb-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 to-teal-50 dark:from-slate-800 dark:to-teal-900/30 border border-teal-200 dark:border-teal-800">
+          <div class="mb-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 to-violet-50 dark:from-slate-800 dark:to-violet-900/30 border border-violet-200 dark:border-violet-800">
             <div class="flex items-start gap-4">
               <div class="w-10 h-10 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center flex-shrink-0">
                 <GithubIcon class="w-5 h-5 text-white dark:text-slate-900" />
