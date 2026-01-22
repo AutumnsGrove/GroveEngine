@@ -1631,6 +1631,18 @@ export const exhibitDocs: Doc[] = [
     lastUpdated: "2026-01-22",
     readingTime: 15,
   },
+  {
+    slug: "sister-museum",
+    title: "The Original AutumnsGrove Museum",
+    description: "A living archive of the original AutumnsGrove website",
+    excerpt:
+      "Walk through the source code of what was once a fully functional personal website. See how a real website gets built—not a tutorial's sanitized example, but actual working code that served real pages to real people.",
+    category: "exhibit",
+    exhibitWing: "entrance",
+    icon: "github",
+    lastUpdated: "2026-01-22",
+    readingTime: 10,
+  },
 ];
 
 // Combined export for convenience
