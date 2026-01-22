@@ -1,9 +1,23 @@
 <script lang="ts">
   import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
-  import { Calendar, Sparkles, GitBranch, Construction } from "lucide-svelte";
+  import { Calendar, Sparkles, GitBranch, Construction, Image } from "lucide-svelte";
 
   // Available curios with their status
   const curios = [
+    {
+      id: "gallery",
+      name: "Gallery",
+      description: "Beautiful image galleries powered by R2 storage with tags and collections",
+      icon: Image,
+      status: "available",
+      href: "/admin/curios/gallery",
+      features: [
+        "R2-backed image storage",
+        "Tags and collections",
+        "Lightbox viewer",
+        "Masonry layout"
+      ]
+    },
     {
       id: "timeline",
       name: "Timeline",
