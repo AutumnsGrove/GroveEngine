@@ -506,13 +506,74 @@ async function generateSocialLogos() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Pill background color palettes for each season
+ */
+const PILL_PALETTES = {
+  default: {
+    start: "#152a1d",
+    mid: "#0f2015",
+    end: "#0d1a12",
+    border: GROVE_GREEN_RGB,
+  },
+  spring: {
+    start: "#2d1a24",
+    mid: "#1f1219",
+    end: "#180e14",
+    border: "190, 24, 93", // pink
+  },
+  summer: {
+    start: "#152a1d",
+    mid: "#0f2015",
+    end: "#0d1a12",
+    border: GROVE_GREEN_RGB,
+  },
+  autumn: {
+    start: "#2a1f15",
+    mid: "#201510",
+    end: "#18100c",
+    border: "234, 88, 12", // orange
+  },
+  winter: {
+    start: "#1a1f2a",
+    mid: "#121620",
+    end: "#0c1018",
+    border: "96, 165, 250", // blue
+  },
+  midnight: {
+    start: "#1f1a2a",
+    mid: "#151020",
+    end: "#100c18",
+    border: "168, 85, 247", // purple
+  },
+};
+
+/**
  * Generate a horizontal pill-shaped divider with alternating up/down trees
  * cycling through all 5 seasons twice (10 trees total).
  *
- * Pattern: spring↑ summer↓ autumn↑ winter↓ midnight↑ spring↓ summer↑ autumn↓ winter↑ midnight↓
+ * Pattern: spring↑ summer↓ autumn↑ winter↓ midnight↑ midnight↓ winter↑ autumn↓ summer↑ spring↓
+ *
+ * @param treeHeight - Base tree height for layout calculations
+ * @param treeScale - Scale factor for tree size (1.0 = normal, 1.5 = 50% bigger trees)
+ * @param pillSeason - Season for pill background color (default = dark green)
  */
-async function generateEmailSignatureDivider(treeHeight = 256) {
-  console.log("✉️  Generating email signature divider...\n");
+async function generateEmailSignatureDivider(
+  treeHeight = 256,
+  treeScale = 1.0,
+  pillSeason = "default",
+) {
+  const scaleLabel =
+    treeScale === 1.0 ? "" : `-${Math.round(treeScale * 100)}pct`;
+  const seasonLabel = pillSeason === "default" ? "" : `-${pillSeason}-bg`;
+  const description = [
+    scaleLabel ? `${Math.round(treeScale * 100)}% trees` : null,
+    seasonLabel ? `${pillSeason} bg` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  console.log(
+    `✉️  Generating email signature divider${description ? ` (${description})` : ""}...`,
+  );
 
   await mkdir(OUTPUT_DIRS.dividersSolidDir, { recursive: true });
 
@@ -531,8 +592,8 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
     "spring",
   ];
 
-  // Calculate dimensions
-  const treeWidth = treeHeight; // Trees are square
+  // Calculate dimensions (layout based on base treeHeight)
+  const treeWidth = treeHeight; // Base tree slot is square
   const treeOverlap = Math.round(treeHeight * 0.15); // 15% overlap (negative spacing)
   const horizontalPadding = Math.round(treeHeight * 0.4); // Padding on left/right
   const verticalPadding = Math.round(treeHeight * 0.25); // Padding top/bottom
@@ -542,17 +603,23 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
   const canvasWidth = totalTreesWidth + horizontalPadding * 2;
   const canvasHeight = treeHeight + verticalPadding * 2;
 
+  // Scaled tree dimensions (trees can be bigger than their slots)
+  const scaledTreeSize = Math.round(treeHeight * treeScale);
+
   // Pill shape: rx/ry = half the height for semicircular ends
   const pillRadius = canvasHeight / 2;
+
+  // Get pill colors from seasonal palette
+  const pillColors = PILL_PALETTES[pillSeason] || PILL_PALETTES.default;
 
   // Create the pill-shaped glass background SVG
   const pillBackgroundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
   <defs>
     <!-- Radial-ish gradient for glass depth -->
     <linearGradient id="pillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#152a1d" />
-      <stop offset="50%" style="stop-color:#0f2015" />
-      <stop offset="100%" style="stop-color:#0d1a12" />
+      <stop offset="0%" style="stop-color:${pillColors.start}" />
+      <stop offset="50%" style="stop-color:${pillColors.mid}" />
+      <stop offset="100%" style="stop-color:${pillColors.end}" />
     </linearGradient>
     <!-- Inner highlight for glass effect -->
     <linearGradient id="pillHighlight" x1="0%" y1="0%" x2="0%" y2="40%">
@@ -572,7 +639,7 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
   <rect x="0.5" y="0.5" width="${canvasWidth - 1}" height="${canvasHeight - 1}"
         rx="${pillRadius}" ry="${pillRadius}"
         fill="none"
-        stroke="rgba(${GROVE_GREEN_RGB}, 0.15)"
+        stroke="rgba(${pillColors.border}, 0.15)"
         stroke-width="1" />
 </svg>`;
 
@@ -582,6 +649,7 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
 
   // Generate tree buffers with alternating rotations
   // Straight up (0°) or upside down (180°) - no windswept rotation
+  // Trees are scaled but positioned to stay centered in their original slots
   const treeBuffers = await Promise.all(
     SEASON_ORDER.map(async (season, index) => {
       // Even indices: straight up (0°), Odd indices: upside down (180°)
@@ -590,19 +658,22 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
 
       const svg = generateSvg(season, { rotation });
       return sharp(Buffer.from(svg))
-        .resize(treeWidth, treeHeight)
+        .resize(scaledTreeSize, scaledTreeSize)
         .png()
         .toBuffer();
     }),
   );
+
+  // Calculate offset to center scaled trees in their original slots
+  const scaleOffset = Math.round((scaledTreeSize - treeWidth) / 2);
 
   // Create composite inputs: pill background first, then trees positioned with overlap
   const compositeInputs = [
     { input: pillBuffer, left: 0, top: 0 },
     ...treeBuffers.map((buffer, index) => ({
       input: buffer,
-      left: horizontalPadding + index * effectiveTreeWidth,
-      top: verticalPadding,
+      left: horizontalPadding + index * effectiveTreeWidth - scaleOffset,
+      top: verticalPadding - scaleOffset,
     })),
   ];
 
@@ -620,7 +691,7 @@ async function generateEmailSignatureDivider(treeHeight = 256) {
     .toBuffer();
 
   // Save the divider
-  const filename = `email-signature-divider-${treeHeight}.png`;
+  const filename = `email-signature-divider-${treeHeight}${scaleLabel}${seasonLabel}.png`;
   const filepath = join(OUTPUT_DIRS.dividersSolidDir, filename);
   await writeFile(filepath, finalBuffer);
   console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
@@ -900,8 +971,15 @@ async function main() {
   await generateCombinedLogoWithGlassCard(512, Math.round(512 * 0.65));
   console.log("");
 
-  // Generate email signature divider (high-res at 256px tree height)
-  await generateEmailSignatureDivider();
+  // Generate email signature dividers (high-res at 256px tree height)
+  // Standard size with default background
+  await generateEmailSignatureDivider(256, 1.0, "default");
+  // 125% bigger trees (sweet spot between dense and readable)
+  await generateEmailSignatureDivider(256, 1.25, "default");
+  // Seasonal background variants (125% trees)
+  for (const season of SEASONS) {
+    await generateEmailSignatureDivider(256, 1.25, season);
+  }
   console.log("");
 
   // Generate glass email signature dividers (all 5 variants, high-res)
@@ -916,11 +994,13 @@ async function main() {
   console.log(`   ├── logos/social/       (${socialCount} files)`);
   console.log(`   ├── combined/transparent/ (2 files)`);
   console.log(`   ├── combined/glass-card/  (2 files)`);
-  console.log(`   ├── dividers/solid/     (1 file)`);
+  console.log(
+    `   ├── dividers/solid/     (7 files: default + 150% + 5 seasonal bgs)`,
+  );
   console.log(`   └── dividers/glass/     (5 files)`);
   console.log(`\n✅ Generated ${faviconCount} package favicon PNGs`);
   console.log(
-    `✅ Generated ${emailCount + socialCount + 4 + 6} email assets (organized)`,
+    `✅ Generated ${emailCount + socialCount + 4 + 12} email assets (organized)`,
   );
 }
 
