@@ -76,12 +76,8 @@
 	let loadingMore = $state(false);
 	let expandedCards = $state(new Set<string>());
 
-	// Configure marked for safe rendering
-	$effect(() => {
-		marked.setOptions({
-			breaks: true
-		});
-	});
+	// Marked options for timeline rendering (breaks converts newlines to <br>)
+	const markedOptions = { breaks: true, async: false } as const;
 
 	// Fun rest day messages
 	const REST_DAY_MESSAGES = [
@@ -177,7 +173,7 @@
 		}
 
 		// Parse to HTML and sanitize
-		let html = sanitizeMarkdown(marked.parse(withRepoLinks) as string);
+		let html = sanitizeMarkdown(marked.parse(withRepoLinks, markedOptions) as string);
 
 		// Inject gutter comments after headers
 		for (const [headerName, items] of Object.entries(gutterByHeader)) {
