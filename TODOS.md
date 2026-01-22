@@ -123,7 +123,7 @@
   - LS was curious about "domain selling" — Pantry's shop/provisioning concept might complicate things
   - Pantry spec and code remain, just not visible on public Workshop page
   - Re-enable after LS verification complete
-- [ ] **Pricing simplified to Seedling-only for phase 1** (PR #TBD)
+- [ ] **Pricing simplified to Seedling-only for phase 1** (PR #427)
   - `/pricing` shows only Seedling tier
   - `/pricing/full` has complete 4-tier view
   - Plant page shows only Seedling
