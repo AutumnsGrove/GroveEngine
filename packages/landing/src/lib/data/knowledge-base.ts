@@ -1487,52 +1487,6 @@ export const designDocs: Doc[] = [
 ];
 
 // Developer Documents
-export const developerDocs: Doc[] = [
-  {
-    slug: "multi-tenant-architecture",
-    title: "Multi-Tenant Architecture",
-    description:
-      "How Grove handles multiple blogs on subdomains with shared infrastructure",
-    excerpt:
-      "Each user gets their own subdomain (username.grove.place) while sharing underlying infrastructure. Tenant isolation, data separation, and efficient resource sharing.",
-    category: "developer",
-    lastUpdated: "2026-01-12",
-    readingTime: 15,
-  },
-  {
-    slug: "ai-gateway-integration",
-    title: "AI Gateway Integration",
-    description:
-      "Cloudflare AI Gateway for per-tenant AI quotas and observability",
-    excerpt:
-      "Grove uses Cloudflare AI Gateway to manage AI features across tenants. Per-user quotas, request logging, cost tracking, and graceful degradation when limits are reached.",
-    category: "developer",
-    lastUpdated: "2026-01-12",
-    readingTime: 20,
-  },
-  {
-    slug: "cloudflare-infrastructure",
-    title: "Cloudflare Infrastructure",
-    description: "Complete guide to Grove's Cloudflare-first architecture",
-    excerpt:
-      "Workers for compute, D1 for databases, KV for caching, R2 for storage. How Grove builds on Cloudflare's edge infrastructure for global performance and cost efficiency.",
-    category: "developer",
-    lastUpdated: "2026-01-12",
-    readingTime: 25,
-  },
-  {
-    slug: "ai-development-process",
-    title: "Building with AI: The Grove Development Process",
-    description:
-      "How Grove was built in 50 days using Claude Code, Kilo Code, and AI-assisted development",
-    excerpt:
-      "The complete workflow behind building Grove at speed. How to structure context, work across CLI and web interfaces, maintain quality while moving fast, and think alongside AI instead of just prompting it.",
-    category: "developer",
-    lastUpdated: "2026-01-12",
-    readingTime: 0, // Coming soon
-  },
-];
-
 /**
  * Exhibit wing metadata (museum organization)
  * Icons use keys from $lib/utils/icons.ts toolIcons map

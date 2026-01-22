@@ -6,12 +6,12 @@ describe('kb-colors.ts', () => {
   const allCategories: DocCategory[] = [
     'help',
     'legal',
-    'developer',
     'specs',
     'philosophy',
     'design',
     'patterns',
     'marketing',
+    'exhibit',
   ];
 
   describe('kbCategoryColors', () => {
@@ -69,11 +69,11 @@ describe('kb-colors.ts', () => {
         expect(colors.text).toContain('orange');
       });
 
-      it('should map Developer to Winter (slate)', () => {
-        const colors = kbCategoryColors.developer;
-        expect(colors.season).toBe('Winter');
-        expect(colors.iconBg).toContain('slate');
-        expect(colors.text).toContain('slate');
+      it('should map Exhibit to Midnight (violet)', () => {
+        const colors = kbCategoryColors.exhibit;
+        expect(colors.season).toBe('Midnight');
+        expect(colors.iconBg).toContain('violet');
+        expect(colors.text).toContain('violet');
       });
 
       it('should map Specs to Midnight (violet)', () => {
@@ -180,12 +180,12 @@ describe('kb-colors.ts', () => {
     it('should have human-readable labels', () => {
       expect(categoryLabels.help).toBe('Help Center');
       expect(categoryLabels.legal).toBe('Legal & Policies');
-      expect(categoryLabels.developer).toBe('Developer Guides');
       expect(categoryLabels.specs).toBe('Technical Specifications');
       expect(categoryLabels.philosophy).toBe('Philosophy');
       expect(categoryLabels.design).toBe('Design');
       expect(categoryLabels.patterns).toBe('Architecture Patterns');
       expect(categoryLabels.marketing).toBe('Marketing & Launch');
+      expect(categoryLabels.exhibit).toBe('Art Exhibit');
     });
   });
 
