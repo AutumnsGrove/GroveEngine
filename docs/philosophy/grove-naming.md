@@ -149,6 +149,27 @@ Grafts are per-tenant features that operators enable for specific trees. Not plu
 
 *A graft makes your tree bear fruit no other can.*
 
+### Burrow
+**Cross-Property Access** · *Integrated into Arbor*
+
+In the forest, a burrow is a protected passage beneath the earth. Animals create burrows to move safely between dens, sharing them with family and trusted companions. The passage is invisible from above. You have to know it's there.
+
+Burrow is how you access Grove properties without creating a separate account. When your property and the target are both in greenhouse mode, with matching permissions, you can burrow through with a single click. The connection respects your existing role: Pathfinders get admin access, Rooted Wanderers can contribute, the Wayfinder gets everything. Configure duration from a single day to forever. Full audit trail of who burrowed where.
+
+Dave wants to help moderate The Prism? Burrow him in. The passage opens. He arrives with his permissions intact. When the work is done, fill the burrow, or let it stay open for next time.
+
+**The Burrow Lexicon:**
+- **Burrow** — A trusted connection between two greenhouse properties
+- **Dig** — Create a burrow (open access)
+- **Fill** — Close a burrow (revoke access)
+- **Receiving** — A property configured to accept incoming burrows
+- **Surface** — Exit a burrowed session, return to origin
+
+*"I'll dig a burrow to The Prism for you."*
+*"Put The Prism in receiving mode."*
+
+*A protected way through.*
+
 ### Gossamer
 **ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
 **Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
@@ -443,6 +464,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Weave** | Platform | Visual composition | *(part of Terrarium)* |
 | **Curios** | Platform | Cabinet of wonders | curios.grove.place |
 | **Grafts** | Platform | Feature customization | *(operator-configured)* |
+| **Burrow** | Platform | Cross-property access | *(integrated into Arbor)* |
 | **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
 | **Rings** | Platform | Analytics | *(integrated)* |
 | **Clearing** | Platform | Status page | status.grove.place |
@@ -494,6 +516,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Weave | GroveWeave |
 | Curios | GroveCurios |
 | Grafts | GroveGrafts |
+| Burrow | GroveBurrow |
 | Greenhouse mode | Dave mode[^1] |
 | Gossamer | gossamer (npm) |
 | Rings | GroveAnalytics |
@@ -588,5 +611,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 21, 2026 — Added Greenhouse mode / Dave mode*
+*Last updated: January 21, 2026 — Added Burrow (cross-property access)*
 *Status: Placeholder names, pending launch*
