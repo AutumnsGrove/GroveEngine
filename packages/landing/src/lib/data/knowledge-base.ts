@@ -1,8 +1,17 @@
-import type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
-import { scanDocsCategory } from "$lib/utils/docs-scanner";
+import type {
+  Doc,
+  SpecCategory,
+  HelpSection,
+  ExhibitWing,
+} from "$lib/types/docs";
 
 // Re-export for convenience
-export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
+export type {
+  Doc,
+  SpecCategory,
+  HelpSection,
+  ExhibitWing,
+} from "$lib/types/docs";
 
 // Re-export category metadata from the single source of truth
 export {
@@ -1401,9 +1410,11 @@ export const designDocs: Doc[] = [
 ];
 
 // Art Exhibit Documents (Museum)
-// Loaded from filesystem via docs-scanner.ts - no manual registry needed.
+// Loaded from filesystem via docs-scanner.ts at runtime - SERVER ONLY.
+// Import from $lib/server/docs-scanner in +page.server.ts to get exhibit docs.
 // Just add .md files with proper frontmatter to docs/museum/ and they appear automatically.
-export const exhibitDocs: Doc[] = scanDocsCategory("exhibit");
+// Note: This empty array is a placeholder for client-side - actual data comes from server.
+export const exhibitDocs: Doc[] = [];
 
 // Combined export for convenience
 export const allDocs = [
@@ -1426,7 +1437,7 @@ export const allDocs = [
 // Example usage in page.server.ts:
 //
 //   import { USE_FRONTMATTER } from "$lib/data/knowledge-base";
-//   import { scanAllDocs } from "$lib/utils/docs-scanner";
+//   import { scanAllDocs } from "$lib/server/docs-scanner";
 //   import { specs as hardcodedSpecs } from "$lib/data/knowledge-base";
 //
 //   export async function load() {
