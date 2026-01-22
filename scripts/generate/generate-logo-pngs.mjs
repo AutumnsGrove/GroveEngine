@@ -17,7 +17,23 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "../..");
-const OUTPUT_DIR = join(ROOT_DIR, "docs/internal/email-assets");
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OUTPUT DIRECTORIES (organized structure)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const EMAIL_ASSETS_DIR = join(ROOT_DIR, "docs/internal/email-assets");
+const OUTPUT_DIRS = {
+  // Individual tree logos
+  logosSeasonalDir: join(EMAIL_ASSETS_DIR, "logos/seasonal"),
+  logosSocialDir: join(EMAIL_ASSETS_DIR, "logos/social"),
+  // Combined seasonal rows
+  combinedTransparentDir: join(EMAIL_ASSETS_DIR, "combined/transparent"),
+  combinedGlassCardDir: join(EMAIL_ASSETS_DIR, "combined/glass-card"),
+  // Email signature dividers
+  dividersSolidDir: join(EMAIL_ASSETS_DIR, "dividers/solid"),
+  dividersGlassDir: join(EMAIL_ASSETS_DIR, "dividers/glass"),
+};
 
 // All packages that need favicon assets
 const PACKAGES = [
@@ -223,7 +239,7 @@ async function generatePackageFavicons() {
 async function generateEmailAssets() {
   console.log("📧 Generating seasonal email assets...\n");
 
-  await mkdir(OUTPUT_DIR, { recursive: true });
+  await mkdir(OUTPUT_DIRS.logosSeasonalDir, { recursive: true });
 
   for (const season of SEASONS) {
     console.log(`  ${season}:`);
@@ -237,7 +253,7 @@ async function generateEmailAssets() {
         .toBuffer();
 
       const filename = `logo-${season}-${size}.png`;
-      await writeFile(join(OUTPUT_DIR, filename), pngBuffer);
+      await writeFile(join(OUTPUT_DIRS.logosSeasonalDir, filename), pngBuffer);
       console.log(`    ✓ ${filename}`);
     }
     console.log("");
@@ -250,6 +266,8 @@ async function generateEmailAssets() {
 
 async function generateCombinedLogo(logoSize = 512, overlap = 0) {
   console.log("🎨 Generating combined seasonal logo...");
+
+  await mkdir(OUTPUT_DIRS.combinedTransparentDir, { recursive: true });
 
   // Generate SVG buffers for each season (upright, no windswept rotation)
   const logoBuffers = await Promise.all(
@@ -291,7 +309,7 @@ async function generateCombinedLogo(logoSize = 512, overlap = 0) {
   // Save the combined logo
   const overlapSuffix = overlap > 0 ? `-overlap${overlap}` : "";
   const filename = `logo-seasons-combined-${logoSize}${overlapSuffix}.png`;
-  const filepath = join(OUTPUT_DIR, filename);
+  const filepath = join(OUTPUT_DIRS.combinedTransparentDir, filename);
 
   await writeFile(filepath, combinedBuffer);
   console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
@@ -305,6 +323,8 @@ async function generateCombinedLogo(logoSize = 512, overlap = 0) {
 
 async function generateCombinedLogoWithGlassCard(logoSize = 512, overlap = 0) {
   console.log("🪟 Generating combined seasonal logo with glass card...");
+
+  await mkdir(OUTPUT_DIRS.combinedGlassCardDir, { recursive: true });
 
   // Generate SVG buffers for each season (upright, no windswept rotation)
   const logoBuffers = await Promise.all(
@@ -381,7 +401,7 @@ async function generateCombinedLogoWithGlassCard(logoSize = 512, overlap = 0) {
   // Save the combined logo with glass card
   const overlapSuffix = overlap > 0 ? `-overlap${overlap}` : "";
   const filename = `logo-seasons-combined-${logoSize}${overlapSuffix}-glass.png`;
-  const filepath = join(OUTPUT_DIR, filename);
+  const filepath = join(OUTPUT_DIRS.combinedGlassCardDir, filename);
 
   await writeFile(filepath, combinedBuffer);
   console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
@@ -405,7 +425,7 @@ async function generateSocialLogos() {
     "🌙 Generating social media logos (circular, transparent corners)...\n",
   );
 
-  await mkdir(OUTPUT_DIR, { recursive: true });
+  await mkdir(OUTPUT_DIRS.logosSocialDir, { recursive: true });
 
   for (const season of SEASONS) {
     console.log(`  ${season}:`);
@@ -474,11 +494,381 @@ async function generateSocialLogos() {
         .toBuffer();
 
       const filename = `logo-${season}-${size}-social.png`;
-      await writeFile(join(OUTPUT_DIR, filename), finalBuffer);
+      await writeFile(join(OUTPUT_DIRS.logosSocialDir, filename), finalBuffer);
       console.log(`    ✓ ${filename}`);
     }
     console.log("");
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EMAIL SIGNATURE DIVIDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generate a horizontal pill-shaped divider with alternating up/down trees
+ * cycling through all 5 seasons twice (10 trees total).
+ *
+ * Pattern: spring↑ summer↓ autumn↑ winter↓ midnight↑ spring↓ summer↑ autumn↓ winter↑ midnight↓
+ */
+async function generateEmailSignatureDivider(treeHeight = 256) {
+  console.log("✉️  Generating email signature divider...\n");
+
+  await mkdir(OUTPUT_DIRS.dividersSolidDir, { recursive: true });
+
+  const TREE_COUNT = 10;
+  // Mirror pattern: forward then backward (midnights kiss in the middle!)
+  const SEASON_ORDER = [
+    "spring",
+    "summer",
+    "autumn",
+    "winter",
+    "midnight",
+    "midnight",
+    "winter",
+    "autumn",
+    "summer",
+    "spring",
+  ];
+
+  // Calculate dimensions
+  const treeWidth = treeHeight; // Trees are square
+  const treeOverlap = Math.round(treeHeight * 0.15); // 15% overlap (negative spacing)
+  const horizontalPadding = Math.round(treeHeight * 0.4); // Padding on left/right
+  const verticalPadding = Math.round(treeHeight * 0.25); // Padding top/bottom
+
+  const effectiveTreeWidth = treeWidth - treeOverlap;
+  const totalTreesWidth = treeWidth + effectiveTreeWidth * (TREE_COUNT - 1);
+  const canvasWidth = totalTreesWidth + horizontalPadding * 2;
+  const canvasHeight = treeHeight + verticalPadding * 2;
+
+  // Pill shape: rx/ry = half the height for semicircular ends
+  const pillRadius = canvasHeight / 2;
+
+  // Create the pill-shaped glass background SVG
+  const pillBackgroundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
+  <defs>
+    <!-- Radial-ish gradient for glass depth -->
+    <linearGradient id="pillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#152a1d" />
+      <stop offset="50%" style="stop-color:#0f2015" />
+      <stop offset="100%" style="stop-color:#0d1a12" />
+    </linearGradient>
+    <!-- Inner highlight for glass effect -->
+    <linearGradient id="pillHighlight" x1="0%" y1="0%" x2="0%" y2="40%">
+      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.08)" />
+      <stop offset="100%" style="stop-color:rgba(255, 255, 255, 0)" />
+    </linearGradient>
+  </defs>
+  <!-- Main pill shape -->
+  <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="url(#pillGradient)" />
+  <!-- Glass highlight overlay -->
+  <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="url(#pillHighlight)" />
+  <!-- Subtle border -->
+  <rect x="0.5" y="0.5" width="${canvasWidth - 1}" height="${canvasHeight - 1}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="none"
+        stroke="rgba(${GROVE_GREEN_RGB}, 0.15)"
+        stroke-width="1" />
+</svg>`;
+
+  const pillBuffer = await sharp(Buffer.from(pillBackgroundSvg))
+    .png()
+    .toBuffer();
+
+  // Generate tree buffers with alternating rotations
+  // Straight up (0°) or upside down (180°) - no windswept rotation
+  const treeBuffers = await Promise.all(
+    SEASON_ORDER.map(async (season, index) => {
+      // Even indices: straight up (0°), Odd indices: upside down (180°)
+      const isUpsideDown = index % 2 === 1;
+      const rotation = isUpsideDown ? 180 : 0;
+
+      const svg = generateSvg(season, { rotation });
+      return sharp(Buffer.from(svg))
+        .resize(treeWidth, treeHeight)
+        .png()
+        .toBuffer();
+    }),
+  );
+
+  // Create composite inputs: pill background first, then trees positioned with overlap
+  const compositeInputs = [
+    { input: pillBuffer, left: 0, top: 0 },
+    ...treeBuffers.map((buffer, index) => ({
+      input: buffer,
+      left: horizontalPadding + index * effectiveTreeWidth,
+      top: verticalPadding,
+    })),
+  ];
+
+  // Create transparent canvas and composite all layers
+  const finalBuffer = await sharp({
+    create: {
+      width: canvasWidth,
+      height: canvasHeight,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite(compositeInputs)
+    .png()
+    .toBuffer();
+
+  // Save the divider
+  const filename = `email-signature-divider-${treeHeight}.png`;
+  const filepath = join(OUTPUT_DIRS.dividersSolidDir, filename);
+  await writeFile(filepath, finalBuffer);
+  console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
+
+  return filepath;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GLASS EMAIL SIGNATURE DIVIDERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Glass variant configurations (matching GlassLogo.svelte)
+ */
+const GLASS_VARIANTS = {
+  default: {
+    name: "default",
+    opacityDark: 0.75,
+    opacityLight: 0.5,
+    highlightOpacity: 0.4,
+    glowOpacity: 0.35,
+  },
+  accent: {
+    name: "accent",
+    opacityDark: 0.85,
+    opacityLight: 0.7,
+    highlightOpacity: 0.3,
+    glowOpacity: 0.5,
+  },
+  frosted: {
+    name: "frosted",
+    opacityDark: 0.85,
+    opacityLight: 0.7,
+    highlightOpacity: 0.5,
+    glowOpacity: 0.2,
+  },
+  dark: {
+    name: "dark",
+    // Dark variant uses slate colors instead of seasonal
+    useDarkColors: true,
+    opacityDark: 0.7,
+    opacityLight: 0.6,
+    highlightOpacity: 0.2,
+    glowOpacity: 0.2,
+  },
+  ethereal: {
+    name: "ethereal",
+    opacityDark: 0.4,
+    opacityLight: 0.25,
+    highlightOpacity: 0.35,
+    glowOpacity: 0.5,
+  },
+};
+
+/**
+ * Convert hex color to RGB string (e.g., "#15803d" -> "21, 128, 61")
+ */
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return "128, 128, 128";
+  return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`;
+}
+
+/**
+ * Generate a glass-styled tree SVG with gradients and highlights
+ */
+function generateGlassSvg(
+  season,
+  variant,
+  { rotation = 0, uniqueId = "g" } = {},
+) {
+  const colors = SEASONAL_PALETTES[season];
+  const v = GLASS_VARIANTS[variant];
+
+  // For dark variant, use slate colors
+  const darkColor = v.useDarkColors
+    ? "30, 41, 59"
+    : hexToRgb(colors.tier1.dark);
+  const lightColor = v.useDarkColors
+    ? "15, 23, 42"
+    : hexToRgb(colors.tier1.light);
+  const glowColor = v.useDarkColors
+    ? "100, 116, 139"
+    : hexToRgb(colors.tier2.light);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="${uniqueId}-foliage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(${darkColor}, ${v.opacityDark})" />
+      <stop offset="50%" stop-color="rgba(${lightColor}, ${v.opacityLight})" />
+      <stop offset="100%" stop-color="rgba(${darkColor}, ${v.opacityDark})" />
+    </linearGradient>
+    <linearGradient id="${uniqueId}-highlight" x1="0%" y1="0%" x2="50%" y2="50%">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)" />
+      <stop offset="100%" stop-color="transparent" />
+    </linearGradient>
+    <linearGradient id="${uniqueId}-trunk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(93, 64, 55, 0.7)" />
+      <stop offset="100%" stop-color="rgba(93, 64, 55, 0.5)" />
+    </linearGradient>
+    <filter id="${uniqueId}-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+      <feFlood flood-color="rgba(${glowColor}, ${v.glowOpacity})" />
+      <feComposite in2="blur" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g transform="rotate(${rotation} 50 50)">
+    <!-- Trunk -->
+    <path fill="url(#${uniqueId}-trunk)" d="${PATHS.trunkDark}" />
+    <path fill="url(#${uniqueId}-trunk)" d="${PATHS.trunkLight}" />
+
+    <!-- Foliage with glow -->
+    <g filter="url(#${uniqueId}-glow)">
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier1Dark}" />
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier1Light}" opacity="0.85" />
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier2Dark}" />
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier2Light}" opacity="0.85" />
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier3Dark}" />
+      <path fill="url(#${uniqueId}-foliage)" d="${PATHS.tier3Light}" opacity="0.85" />
+    </g>
+
+    <!-- Highlight overlay -->
+    <g opacity="${v.highlightOpacity}">
+      <path d="${PATHS.tier1Dark}" fill="url(#${uniqueId}-highlight)" />
+      <path d="${PATHS.tier2Dark}" fill="url(#${uniqueId}-highlight)" />
+      <path d="${PATHS.tier3Dark}" fill="url(#${uniqueId}-highlight)" />
+    </g>
+  </g>
+</svg>`;
+}
+
+/**
+ * Generate glass email signature dividers for all variants
+ */
+async function generateGlassEmailSignatureDividers(treeHeight = 256) {
+  console.log("✨ Generating glass email signature dividers...\n");
+
+  await mkdir(OUTPUT_DIRS.dividersGlassDir, { recursive: true });
+
+  const TREE_COUNT = 10;
+  const SEASON_ORDER = [
+    "spring",
+    "summer",
+    "autumn",
+    "winter",
+    "midnight",
+    "midnight",
+    "winter",
+    "autumn",
+    "summer",
+    "spring",
+  ];
+
+  const treeWidth = treeHeight;
+  const treeOverlap = Math.round(treeHeight * 0.15);
+  const horizontalPadding = Math.round(treeHeight * 0.4);
+  const verticalPadding = Math.round(treeHeight * 0.25);
+
+  const effectiveTreeWidth = treeWidth - treeOverlap;
+  const totalTreesWidth = treeWidth + effectiveTreeWidth * (TREE_COUNT - 1);
+  const canvasWidth = totalTreesWidth + horizontalPadding * 2;
+  const canvasHeight = treeHeight + verticalPadding * 2;
+  const pillRadius = canvasHeight / 2;
+
+  for (const [variantName, variant] of Object.entries(GLASS_VARIANTS)) {
+    console.log(`  ${variantName}:`);
+
+    // Pill background - slightly different tint per variant
+    const pillBgColor = variant.useDarkColors ? "#1e293b" : "#0f2015";
+    const pillMidColor = variant.useDarkColors ? "#0f172a" : "#0d1a12";
+    const pillEndColor = variant.useDarkColors ? "#020617" : "#091209";
+
+    const pillBackgroundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
+  <defs>
+    <linearGradient id="pillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:${pillBgColor}" />
+      <stop offset="50%" style="stop-color:${pillMidColor}" />
+      <stop offset="100%" style="stop-color:${pillEndColor}" />
+    </linearGradient>
+    <linearGradient id="pillHighlight" x1="0%" y1="0%" x2="0%" y2="40%">
+      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.1)" />
+      <stop offset="100%" style="stop-color:rgba(255, 255, 255, 0)" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="url(#pillGradient)" />
+  <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="url(#pillHighlight)" />
+  <rect x="0.5" y="0.5" width="${canvasWidth - 1}" height="${canvasHeight - 1}"
+        rx="${pillRadius}" ry="${pillRadius}"
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.1)"
+        stroke-width="1" />
+</svg>`;
+
+    const pillBuffer = await sharp(Buffer.from(pillBackgroundSvg))
+      .png()
+      .toBuffer();
+
+    // Generate glass tree buffers
+    const treeBuffers = await Promise.all(
+      SEASON_ORDER.map(async (season, index) => {
+        const isUpsideDown = index % 2 === 1;
+        const rotation = isUpsideDown ? 180 : 0;
+        const uniqueId = `g${index}`;
+        const svg = generateGlassSvg(season, variantName, {
+          rotation,
+          uniqueId,
+        });
+        return sharp(Buffer.from(svg))
+          .resize(treeWidth, treeHeight)
+          .png()
+          .toBuffer();
+      }),
+    );
+
+    const compositeInputs = [
+      { input: pillBuffer, left: 0, top: 0 },
+      ...treeBuffers.map((buffer, index) => ({
+        input: buffer,
+        left: horizontalPadding + index * effectiveTreeWidth,
+        top: verticalPadding,
+      })),
+    ];
+
+    const finalBuffer = await sharp({
+      create: {
+        width: canvasWidth,
+        height: canvasHeight,
+        channels: 4,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      },
+    })
+      .composite(compositeInputs)
+      .png()
+      .toBuffer();
+
+    const filename = `email-signature-divider-${treeHeight}-glass-${variantName}.png`;
+    await writeFile(join(OUTPUT_DIRS.dividersGlassDir, filename), finalBuffer);
+    console.log(`    ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
+  }
+  console.log("");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -510,17 +900,28 @@ async function main() {
   await generateCombinedLogoWithGlassCard(512, Math.round(512 * 0.65));
   console.log("");
 
+  // Generate email signature divider (high-res at 256px tree height)
+  await generateEmailSignatureDivider();
+  console.log("");
+
+  // Generate glass email signature dividers (all 5 variants, high-res)
+  await generateGlassEmailSignatureDividers();
+
   // Summary
   const faviconCount = PACKAGES.length * Object.keys(FAVICON_SIZES).length;
   const emailCount = SEASONS.length * EMAIL_SIZES.length;
   const socialCount = SEASONS.length * SOCIAL_SIZES.length;
-  console.log(`✅ Generated ${faviconCount} package favicon PNGs`);
-  console.log(`✅ Generated ${emailCount} seasonal email PNGs`);
+  console.log(`\n📁 Output organized into: docs/internal/email-assets/`);
+  console.log(`   ├── logos/seasonal/     (${emailCount} files)`);
+  console.log(`   ├── logos/social/       (${socialCount} files)`);
+  console.log(`   ├── combined/transparent/ (2 files)`);
+  console.log(`   ├── combined/glass-card/  (2 files)`);
+  console.log(`   ├── dividers/solid/     (1 file)`);
+  console.log(`   └── dividers/glass/     (5 files)`);
+  console.log(`\n✅ Generated ${faviconCount} package favicon PNGs`);
   console.log(
-    `✅ Generated ${socialCount} social media PNGs (dark background)`,
+    `✅ Generated ${emailCount + socialCount + 4 + 6} email assets (organized)`,
   );
-  console.log(`✅ Generated 2 combined seasonal logos`);
-  console.log(`✅ Generated 2 combined seasonal logos with glass card`);
 }
 
 main().catch(console.error);
