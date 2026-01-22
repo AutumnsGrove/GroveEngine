@@ -908,6 +908,139 @@ Burrow sits alongside Greenhouse mode in the Grafts ecosystem.
 
 ---
 
+## KV Cache Strategy
+
+Fast access paths require caching. Here's what gets cached, for how long, and when it's invalidated.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                       CACHING LAYERS                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   HANDOFF TOKENS (BURROW_KV)                                        │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Key: burrow:handoff:{token}                                │   │
+│   │  Value: { source, target, user_id, permissions, expires }  │   │
+│   │  TTL: 5 minutes (short-lived, single-use)                   │   │
+│   │  Invalidation: Deleted on first read (consumed)             │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   GREENHOUSE STATUS (FLAGS_KV)                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Key: greenhouse:{tenant_id}                                │   │
+│   │  Value: { enabled: boolean, enrolled_at: timestamp }        │   │
+│   │  TTL: 1 hour                                                │   │
+│   │  Invalidation: On enrollment/unenrollment                   │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   RECEIVING STATUS (BURROW_KV)                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Key: burrow:receiving:{property_id}                        │   │
+│   │  Value: { enabled, max_permission, allowed_sources }        │   │
+│   │  TTL: 15 minutes                                            │   │
+│   │  Invalidation: On configureReceiving() call                 │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   USER BURROW LIST (BURROW_KV)                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Key: burrow:user:{tenant}:{user_id}                        │   │
+│   │  Value: [{ target, permissions, expires_at, status }...]    │   │
+│   │  TTL: 5 minutes                                             │   │
+│   │  Invalidation: On dig, fill, or expiration                  │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   WAYFINDER STATUS (FLAGS_KV)                                       │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Key: graft:wayfinder_burrow:{user_id}                      │   │
+│   │  Value: boolean                                             │   │
+│   │  TTL: 1 hour                                                │   │
+│   │  Invalidation: Rarely changes (graft update)                │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Cache Invalidation Triggers
+
+| Event | Caches Invalidated |
+|-------|-------------------|
+| `digBurrow()` | User burrow list |
+| `fillBurrow()` | User burrow list |
+| `configureReceiving()` | Receiving status |
+| Burrow expiration (cron) | User burrow list |
+| Greenhouse enrollment | Greenhouse status |
+
+### Why These TTLs
+
+- **Handoff tokens (5 min)**: Security-critical. Short window limits interception risk.
+- **Greenhouse status (1 hour)**: Changes rarely. Checked on every burrow initiation.
+- **Receiving status (15 min)**: Moderate change frequency. Balance freshness vs. D1 reads.
+- **User burrow list (5 min)**: Displayed in arbor. Needs timely updates on changes.
+- **Wayfinder status (1 hour)**: Almost never changes. Single user.
+
+---
+
+## Test Strategy
+
+Following the Grove testing philosophy: write tests, not too many, mostly integration.
+
+### Integration Tests (Primary Focus)
+
+Test complete user flows that mirror real usage:
+
+| Flow | What to Test |
+|------|--------------|
+| **Burrow access** | User clicks "Enter" → handoff → arrives at target with correct permissions |
+| **Permission ceiling** | Rooted user + admin burrow → gets contributor (role ceiling applied) |
+| **Expired burrow** | Access attempt after expiration → graceful denial, clear message |
+| **Fill revocation** | Active burrow filled → immediate access denial, audit logged |
+| **Wayfinder override** | Wayfinder burrows into non-receiving property → succeeds |
+| **Receiving configuration** | Enable receiving → property appears in burrow targets |
+
+### Unit Tests (Isolated Logic)
+
+Pure functions that benefit from isolation:
+
+- **Token generation**: HMAC signature correctness, payload structure
+- **Permission calculation**: `min(user_role, burrow_max)` edge cases
+- **Duration handling**: Fixed dates, membership checks, infinite handling
+- **Expiration logic**: Boundary conditions, timezone handling
+
+### Security Tests
+
+Critical paths that must never fail:
+
+- **Token single-use**: Second validation attempt fails
+- **Token expiration**: Validation after TTL fails
+- **Greenhouse requirement**: Non-greenhouse source/target rejected
+- **Permission escalation**: Cannot exceed role or burrow maximum
+- **Rate limiting**: Excessive handoff requests throttled
+
+### What NOT to Test
+
+- Framework routing (SvelteKit handles this)
+- KV/D1 internals (Cloudflare's responsibility)
+- UI component styling (visual regression if needed)
+- Exact audit log format (implementation detail)
+
+### Test Data Patterns
+
+```typescript
+// Use builders for consistent test data
+const testBurrow = buildBurrow({
+  permission: 'admin',
+  duration: 'infinite',
+  status: 'active'
+});
+
+const testHandoff = buildHandoff({
+  burrow: testBurrow,
+  user: { role: 'pathfinder' }
+});
+```
+
+---
+
 ## Implementation Checklist
 
 ### Phase 0: Wayfinder Foundation
