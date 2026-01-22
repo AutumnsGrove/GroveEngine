@@ -45,11 +45,11 @@ export async function checkComponent(
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
 
-  try {
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  // Create abort controller for timeout (outside try so catch can clear it)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
+  try {
     const response = await fetch(config.url, {
       method: config.method,
       signal: controller.signal,
@@ -72,6 +72,7 @@ export async function checkComponent(
     // For shallow checks, just verify HTTP 200
     return evaluateShallowCheck(config, httpStatus, latencyMs, timestamp);
   } catch (err) {
+    clearTimeout(timeoutId);
     const latencyMs = Date.now() - startTime;
 
     // Determine error type
