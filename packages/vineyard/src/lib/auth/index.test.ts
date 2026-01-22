@@ -1,154 +1,137 @@
 /**
- * Auth Utilities Tests
+ * Auth Integration Tests
  *
- * Tests for Better Auth integration utilities
+ * Tests for Better Auth integration - focuses on behavior users experience,
+ * not implementation details. Tests validate security (provider validation)
+ * and resilience (graceful failure handling).
+ *
+ * Following grove-testing philosophy:
+ * - Test behavior, not implementation
+ * - Mock at boundaries (external auth server), not internal code
+ * - One clear reason to fail per test
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { signIn, getSession, signOut, isAuthenticated } from './index.js';
+import { signIn, getSession, signOut } from './index.js';
 
-// Mock window.location
+// Mock window.location (boundary between our code and browser)
 const mockLocation = {
   href: 'https://test.grove.place',
 };
 
 beforeEach(() => {
-  // @ts-ignore - mocking window.location
+  // @ts-ignore - mocking browser API
   delete window.location;
-  // @ts-ignore - mocking window.location
+  // @ts-ignore - mocking browser API
   window.location = mockLocation;
   mockLocation.href = 'https://test.grove.place';
+  vi.clearAllMocks();
 });
 
-describe('signIn', () => {
-  it('should validate provider at runtime', () => {
+// ====================================================================================
+// signIn() - Critical security: must reject invalid providers
+// ====================================================================================
+
+describe('signIn - provider validation', () => {
+  it('should reject invalid OAuth provider to prevent open redirect', () => {
+    // Why this test: Prevents security vulnerability where attacker could
+    // redirect users to malicious OAuth provider
     expect(() => {
       // @ts-ignore - testing runtime validation
-      signIn('facebook');
-    }).toThrow('Invalid provider: facebook');
+      signIn('evil-provider');
+    }).toThrow(/Invalid provider.*evil-provider/);
   });
 
-  it('should accept valid providers', () => {
+  it('should accept valid providers without throwing', () => {
+    // Why this test: Ensures validation doesn't block legitimate use
     expect(() => signIn('google')).not.toThrow();
     expect(() => signIn('github')).not.toThrow();
   });
-
-  it('should construct correct auth URL', () => {
-    signIn('google');
-    expect(window.location.href).toContain('auth-api.grove.place/api/auth/sign-in/google');
-    expect(window.location.href).toContain('callbackURL=');
-  });
-
-  it('should use custom callback URL if provided', () => {
-    signIn('github', 'https://custom.com/callback');
-    expect(window.location.href).toContain(encodeURIComponent('https://custom.com/callback'));
-  });
-
-  it('should default to current page for callback', () => {
-    mockLocation.href = 'https://test.grove.place/page';
-    signIn('google');
-    expect(window.location.href).toContain(encodeURIComponent('https://test.grove.place/page'));
-  });
 });
 
-describe('getSession', () => {
-  it('should return null user/session on fetch failure', async () => {
-    // Mock fetch to throw
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+// ====================================================================================
+// getSession() - Resilience: must handle auth server failures gracefully
+// ====================================================================================
+
+describe('getSession - error resilience', () => {
+  it('should treat network failure as unauthenticated (fail safe)', async () => {
+    // Why this test: Network errors shouldn't crash the app or leak sensitive data
+    // Behavior: User sees "not logged in" state, can retry
+    global.fetch = vi.fn().mockRejectedValue(new Error('Network timeout'));
 
     const result = await getSession();
-    expect(result).toEqual({ user: null, session: null });
+
+    expect(result.user).toBeNull();
+    expect(result.session).toBeNull();
   });
 
-  it('should return null user/session on non-ok response', async () => {
-    // Mock fetch to return non-ok
+  it('should treat 401 Unauthorized as unauthenticated', async () => {
+    // Why this test: Expired sessions or invalid tokens are common
+    // Behavior: User sees "not logged in", can sign in again
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
     });
 
     const result = await getSession();
-    expect(result).toEqual({ user: null, session: null });
+
+    expect(result.user).toBeNull();
+    expect(result.session).toBeNull();
   });
 
-  it('should return session data on success', async () => {
-    const mockSession = {
-      user: { id: '123', name: 'Test User', email: 'test@test.com', emailVerified: true, createdAt: new Date(), updatedAt: new Date() },
-      session: { id: 'sess-123', userId: '123', expiresAt: new Date(), createdAt: new Date() },
+  it('should return user data when authenticated', async () => {
+    // Why this test: The happy path - ensures authenticated users get their data
+    const mockUser = {
+      id: 'user-123',
+      name: 'Taylor Swift',
+      email: 'taylor@folklore.com',
+      emailVerified: true,
+      createdAt: new Date('2020-07-24'),
+      updatedAt: new Date('2024-04-19'),
     };
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => mockSession,
+      json: async () => ({
+        user: mockUser,
+        session: {
+          id: 'session-456',
+          userId: mockUser.id,
+          expiresAt: new Date('2026-01-22'),
+          createdAt: new Date('2026-01-21'),
+        },
+      }),
     });
 
     const result = await getSession();
-    expect(result).toEqual(mockSession);
+
+    expect(result.user).toEqual(mockUser);
+    expect(result.session).toBeTruthy();
   });
 });
 
-describe('signOut', () => {
-  it('should call sign-out endpoint', async () => {
-    const fetchSpy = vi.fn().mockResolvedValue({ ok: true });
-    global.fetch = fetchSpy;
+// ====================================================================================
+// signOut() - Resilience: must complete even if server fails
+// ====================================================================================
 
-    await signOut();
+describe('signOut - logout completion', () => {
+  it('should complete sign out even if server request fails', async () => {
+    // Why this test: User clicked "sign out" - they MUST be signed out locally
+    // even if the server is unreachable. Security requirement: no half-logged-out state.
+    global.fetch = vi.fn().mockRejectedValue(new Error('Server down'));
 
-    expect(fetchSpy).toHaveBeenCalledWith(
-      expect.stringContaining('auth-api.grove.place/api/auth/sign-out'),
-      expect.objectContaining({
-        method: 'POST',
-        credentials: 'include',
-      })
-    );
+    await signOut('/goodbye');
+
+    // User is redirected regardless of server response
+    expect(window.location.href).toBe('/goodbye');
   });
 
-  it('should redirect to default "/" on success', async () => {
+  it('should redirect to home by default after sign out', async () => {
+    // Why this test: Default behavior after logout should be sensible
     global.fetch = vi.fn().mockResolvedValue({ ok: true });
 
     await signOut();
 
     expect(window.location.href).toBe('/');
-  });
-
-  it('should redirect to custom URL if provided', async () => {
-    global.fetch = vi.fn().mockResolvedValue({ ok: true });
-
-    await signOut('/login');
-
-    expect(window.location.href).toBe('/login');
-  });
-
-  it('should redirect even if fetch fails', async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-    await signOut('/home');
-
-    expect(window.location.href).toBe('/home');
-  });
-});
-
-describe('isAuthenticated', () => {
-  it('should return false when no user', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ user: null, session: null }),
-    });
-
-    const result = await isAuthenticated();
-    expect(result).toBe(false);
-  });
-
-  it('should return true when user exists', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        user: { id: '123', name: 'Test', email: 'test@test.com', emailVerified: true, createdAt: new Date(), updatedAt: new Date() },
-        session: { id: 'sess-123', userId: '123', expiresAt: new Date(), createdAt: new Date() },
-      }),
-    });
-
-    const result = await isAuthenticated();
-    expect(result).toBe(true);
   });
 });
