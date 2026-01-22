@@ -15,6 +15,8 @@ const BETTER_AUTH_BASE_URL = 'https://auth-api.grove.place';
  * @param provider - OAuth provider ('google' or 'github')
  * @param callbackURL - Optional callback URL (defaults to current page)
  *
+ * @throws Error if provider is invalid or called outside browser
+ *
  * @example
  * ```typescript
  * import { signIn } from '@autumnsgrove/vineyard/auth';
@@ -29,6 +31,12 @@ const BETTER_AUTH_BASE_URL = 'https://auth-api.grove.place';
 export function signIn(provider: BetterAuthProvider = 'google', callbackURL?: string): void {
   if (typeof window === 'undefined') {
     throw new Error('signIn can only be called in the browser');
+  }
+
+  // Validate provider at runtime (defense in depth)
+  const validProviders: BetterAuthProvider[] = ['google', 'github'];
+  if (!validProviders.includes(provider)) {
+    throw new Error(`Invalid provider: ${provider}. Must be one of: ${validProviders.join(', ')}`);
   }
 
   const redirectUrl = callbackURL || window.location.href;

@@ -133,6 +133,31 @@ Vineyard is designed to be consumed by Grove tools through the `@autumnsgrove/gr
 import { VineyardLayout } from '@autumnsgrove/groveengine/vineyard';
 ```
 
+## Architecture Decisions
+
+### Why Inline Styles Instead of Tailwind Preset?
+
+Vineyard components use scoped `<style>` blocks with CSS custom properties instead of Tailwind classes. This intentional design choice ensures:
+
+1. **Self-Contained**: Components work outside the Grove ecosystem without requiring Tailwind configuration
+2. **Zero Setup**: Consumer apps get styled components immediately, no preset imports needed
+3. **Encapsulation**: Styles are scoped to components, preventing leakage and conflicts
+4. **Portability**: Can be used in non-Tailwind projects or published as standalone package
+
+**For Grove apps**: The engine's Tailwind preset (`packages/engine/src/lib/ui/tailwind.preset.js`) is still required for engine components, but Vineyard components function independently.
+
+**Trade-off**: Slightly larger bundle size compared to Tailwind utility classes, but gains developer experience and portability.
+
+### Font Loading
+
+Vineyard components previously loaded Lexend from Google Fonts (blocking render). This has been removed. Consumer apps should:
+
+```typescript
+import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
+```
+
+The engine provides optimized font loading with preloading and proper fallbacks.
+
 ## License
 
 MIT

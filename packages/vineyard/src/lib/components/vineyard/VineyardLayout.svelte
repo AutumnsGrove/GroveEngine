@@ -43,7 +43,7 @@
   };
 </script>
 
-<div class="vineyard-layout" data-tool={tool}>
+<div class="vineyard-layout" data-tool={tool} lang="en">
   <header class="vineyard-hero">
     <div class="hero-content">
       <div class="hero-badge">
@@ -56,27 +56,38 @@
     <div class="hero-decoration" aria-hidden="true"></div>
   </header>
 
-  <main class="vineyard-content">
+  <main class="vineyard-content" id="main-content" role="main" aria-label="Feature showcase">
     {@render children()}
   </main>
 
-  <footer class="vineyard-footer">
+  <footer class="vineyard-footer" role="contentinfo">
     <div class="footer-content">
       <p class="footer-label">Works well with</p>
-      <div class="related-tools">
+      <nav class="related-tools" aria-label="Related Grove tools">
         {#each relatedTools[tool] as relatedTool}
           <a href="https://{relatedTool}.grove.place/vineyard" class="related-link">
             {relatedTool.charAt(0).toUpperCase() + relatedTool.slice(1)}
           </a>
         {/each}
-      </div>
+      </nav>
       <p class="footer-brand">Part of the Grove ecosystem</p>
     </div>
   </footer>
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
+  /*
+   * Font Loading Note:
+   * This component previously loaded Lexend from Google Fonts, which blocks rendering.
+   * Consumer apps should use the engine's font system instead:
+   *
+   * import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
+   *
+   * Or configure Lexend in your app's font setup. The engine provides optimized
+   * font loading with proper preloading and fallbacks.
+   *
+   * For self-contained use outside Grove, add Lexend to your own font stack.
+   */
 
   .vineyard-layout {
     --grove-amber-50: #fffbeb;
@@ -202,6 +213,17 @@
     background: var(--grove-amber-100);
     border-color: var(--grove-amber-500);
     transform: translateY(-1px);
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .related-link {
+      transition: none;
+    }
+
+    .related-link:hover {
+      transform: none;
+    }
   }
 
   .footer-brand {
