@@ -488,14 +488,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isFormActionUrl = event.url.search.startsWith("?/");
     const isFormAction = isSvelteKitAction || isFormActionUrl;
 
-    // SvelteKit form actions already have CSRF protection built-in
-    // (origin header validation handled by SvelteKit itself)
-    // Skip our custom validation entirely for these requests
-    if (isFormAction) {
-      // Trust SvelteKit's built-in CSRF protection for form actions
-      // No additional validation needed
-    } else if (isAuthEndpoint || isTurnstileEndpoint) {
-      // Auth and verification endpoints use origin-based validation
+    // All form actions and auth endpoints use origin-based validation
+    // (proxy-aware: checks Origin against X-Forwarded-Host, not just Host)
+    // SvelteKit's built-in CSRF is disabled because it doesn't understand
+    // our grove-router proxy setup (compares Origin against internal Host).
+    if (isFormAction || isAuthEndpoint || isTurnstileEndpoint) {
       if (!validateCSRF(event.request)) {
         throw error(403, "Invalid origin");
       }
