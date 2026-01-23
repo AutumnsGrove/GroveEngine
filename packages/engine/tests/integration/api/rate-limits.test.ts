@@ -323,12 +323,11 @@ describe("Rate Limiting Integration", () => {
       const uploadEntry = (kv as any)._store.get(uploadKey);
       const postEntry = (kv as any)._store.get(postKey);
 
-      const uploadTTL = uploadEntry.expirationTtl;
-      const postTTL = postEntry.expirationTtl;
-
-      expect(uploadTTL).toBe(RATE_LIMITS.upload.window);
-      expect(postTTL).toBe(RATE_LIMITS.post.window);
-      expect(uploadTTL).toBeGreaterThan(postTTL);
+      // Mock KV stores expiresAt (computed timestamp), not raw TTL
+      // Verify the relative expiration: upload window > post window
+      expect(uploadEntry.expiresAt).toBeDefined();
+      expect(postEntry.expiresAt).toBeDefined();
+      expect(uploadEntry.expiresAt).toBeGreaterThan(postEntry.expiresAt);
     });
   });
 

@@ -66,17 +66,24 @@ vi.mock("$lib/utils/upload-validation.js", () => ({
   ],
   ALLOWED_TYPES_DISPLAY: "JPEG, PNG, GIF, WebP, JXL",
   FILE_SIGNATURES: {
-    "image/png": [0x89, 0x50, 0x4e, 0x47],
-    "image/jpeg": [0xff, 0xd8, 0xff],
-    "image/gif": [0x47, 0x49, 0x46],
-    "image/webp": [0x52, 0x49, 0x46, 0x46],
+    "image/png": [[0x89, 0x50, 0x4e, 0x47]],
+    "image/jpeg": [
+      [0xff, 0xd8, 0xff, 0xe0],
+      [0xff, 0xd8, 0xff, 0xe1],
+      [0xff, 0xd8, 0xff, 0xdb],
+    ],
+    "image/gif": [
+      [0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
+      [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+    ],
+    "image/webp": [[0x52, 0x49, 0x46, 0x46]],
   },
   MIME_TO_EXTENSIONS: {
-    "image/jpeg": [".jpg", ".jpeg"],
-    "image/png": [".png"],
-    "image/gif": [".gif"],
-    "image/webp": [".webp"],
-    "image/jxl": [".jxl"],
+    "image/jpeg": ["jpg", "jpeg"],
+    "image/png": ["png"],
+    "image/gif": ["gif"],
+    "image/webp": ["webp"],
+    "image/jxl": ["jxl"],
   },
   WEBP_MARKER: [0x57, 0x45, 0x42, 0x50],
   isAllowedImageType: vi.fn((type) =>
@@ -167,37 +174,33 @@ function createWebpFormData(fileBuffer?: Uint8Array): FormData {
 }
 
 // ============================================================================
+// Mock Imports (must come after vi.mock declarations above)
+// ============================================================================
+
+import { validateCSRF } from "$lib/utils/csrf.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
+import { isFeatureEnabled } from "$lib/feature-flags/index.js";
+import { scanImage } from "$lib/server/petal/index.js";
+import { isAllowedImageType } from "$lib/utils/upload-validation.js";
+import { validateEnv } from "$lib/server/env-validation.js";
+
+// ============================================================================
 // Test Mocks Setup
 // ============================================================================
 
-let mockValidateCSRF: ReturnType<typeof vi.fn>;
-let mockGetVerifiedTenantId: ReturnType<typeof vi.fn>;
-let mockCheckRateLimit: ReturnType<typeof vi.fn>;
-let mockBuildRateLimitKey: ReturnType<typeof vi.fn>;
-let mockIsFeatureEnabled: ReturnType<typeof vi.fn>;
-let mockScanImage: ReturnType<typeof vi.fn>;
-let mockIsAllowedImageType: ReturnType<typeof vi.fn>;
+const mockValidateCSRF = vi.mocked(validateCSRF);
+const mockGetVerifiedTenantId = vi.mocked(getVerifiedTenantId);
+const mockCheckRateLimit = vi.mocked(checkRateLimit);
+const mockBuildRateLimitKey = vi.mocked(buildRateLimitKey);
+const mockIsFeatureEnabled = vi.mocked(isFeatureEnabled);
+const mockScanImage = vi.mocked(scanImage);
+const mockIsAllowedImageType = vi.mocked(isAllowedImageType);
 
 beforeEach(() => {
-  // Import mocks
-  const csrf = vi.mocked(require("$lib/utils/csrf.js"));
-  const session = vi.mocked(require("$lib/auth/session.js"));
-  const rateLimits = vi.mocked(
-    require("$lib/server/rate-limits/middleware.js"),
-  );
-  const flags = vi.mocked(require("$lib/feature-flags/index.js"));
-  const petal = vi.mocked(require("$lib/server/petal/index.js"));
-  const validation = vi.mocked(require("$lib/utils/upload-validation.js"));
-
-  // Store references
-  mockValidateCSRF = csrf.validateCSRF;
-  mockGetVerifiedTenantId = session.getVerifiedTenantId;
-  mockCheckRateLimit = rateLimits.checkRateLimit;
-  mockBuildRateLimitKey = rateLimits.buildRateLimitKey;
-  mockIsFeatureEnabled = flags.isFeatureEnabled;
-  mockScanImage = petal.scanImage;
-  mockIsAllowedImageType = validation.isAllowedImageType;
-
   // Reset all mocks
   vi.clearAllMocks();
 
@@ -208,10 +211,12 @@ beforeEach(() => {
     result: { remaining: 49, resetAt: Math.floor(Date.now() / 1000) + 3600 },
     response: null,
   });
-  mockBuildRateLimitKey.mockImplementation((...args) => args.join(":"));
+  mockBuildRateLimitKey.mockImplementation((...args: unknown[]) =>
+    (args as string[]).join(":"),
+  );
   mockIsFeatureEnabled.mockResolvedValue(true);
   mockScanImage.mockResolvedValue({ approved: true });
-  mockIsAllowedImageType.mockImplementation((type) =>
+  mockIsAllowedImageType.mockImplementation((type: unknown) =>
     [
       "image/jpeg",
       "image/png",
@@ -243,9 +248,9 @@ describe("Image Upload Endpoint - Authentication", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(401);
-      expect(error.message).toContain("Unauthorized");
+      expect(error.body.message).toContain("Unauthorized");
     }
   });
 
@@ -265,9 +270,9 @@ describe("Image Upload Endpoint - Authentication", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(403);
-      expect(error.message).toContain("Tenant context required");
+      expect(error.body.message).toContain("Tenant context required");
     }
   });
 
@@ -284,9 +289,9 @@ describe("Image Upload Endpoint - Authentication", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(403);
-      expect(error.message).toContain("Invalid origin");
+      expect(error.body.message).toContain("Invalid origin");
     }
   });
 });
@@ -372,9 +377,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("No file provided");
+      expect(error.body.message).toContain("No file provided");
     }
   });
 
@@ -397,9 +402,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("Invalid file type");
+      expect(error.body.message).toContain("Invalid file type");
     }
   });
 
@@ -420,9 +425,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("does not match content type");
+      expect(error.body.message).toContain("does not match content type");
     }
   });
 
@@ -430,7 +435,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     const formData = new FormData();
     const buffer = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     const blob = new Blob([buffer], { type: "image/png" });
-    const file = new File([blob], "testimage", { type: "image/png" }); // No extension
+    const file = new File([blob], "testimage.", { type: "image/png" }); // Extension resolves to empty string
     formData.append("file", file);
 
     const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
@@ -443,9 +448,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("must have an extension");
+      expect(error.body.message).toContain("must have an extension");
     }
   });
 
@@ -466,9 +471,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("Invalid file name");
+      expect(error.body.message).toContain("Invalid file name");
     }
   });
 
@@ -496,9 +501,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("File too large");
+      expect(error.body.message).toContain("File too large");
     }
   });
 
@@ -517,9 +522,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("Invalid file signature");
+      expect(error.body.message).toContain("Invalid file signature");
     }
   });
 
@@ -544,9 +549,9 @@ describe("Image Upload Endpoint - File Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
+      const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.message).toContain("missing WEBP marker");
+      expect(error.body.message).toContain("missing WEBP marker");
     }
   });
 });
@@ -679,7 +684,7 @@ describe("Image Upload Endpoint - Successful Uploads", () => {
     const data = await response.json();
 
     expect(data.url).toMatch(/^https:\/\/cdn\.grove\.place\//);
-    expect(data.markdown).toContain(`![](${data.url})`);
+    expect(data.markdown).toContain(`![Image](${data.url})`);
     expect(data.html).toContain(`<img src="${data.url}"`);
   });
 
@@ -918,10 +923,8 @@ describe("Image Upload Endpoint - Abuse Detection", () => {
 
 describe("Image Upload Endpoint - Environment Validation", () => {
   it("should return 503 when required environment variables are missing", async () => {
-    const validateEnv = vi.mocked(
-      require("$lib/server/env-validation.js"),
-    ).validateEnv;
-    validateEnv.mockReturnValue({
+    const mockValidateEnv = vi.mocked(validateEnv);
+    mockValidateEnv.mockReturnValue({
       valid: false,
       message: "Missing required environment variables: IMAGES",
     });
@@ -936,9 +939,9 @@ describe("Image Upload Endpoint - Environment Validation", () => {
       await POST(event as any);
       expect.fail("Should have thrown an error");
     } catch (err) {
-      const error = err as { status?: number; message?: string };
-      expect(error.status).toBe(503);
-      expect(error.message).toContain("temporarily unavailable");
+      const httpError = err as { status: number; body: { message: string } };
+      expect(httpError.status).toBe(503);
+      expect(httpError.body.message).toContain("temporarily unavailable");
     }
   });
 });

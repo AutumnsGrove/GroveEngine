@@ -73,7 +73,10 @@ function createMockEvent(
   const pathname = options.pathname || "/";
   const url = new URL(`https://autumn.grove.place${pathname}`);
 
-  const headers = new Map<string, string>([["host", "autumn.grove.place"]]);
+  // Use Headers directly instead of new Request() to avoid
+  // Fetch spec stripping "forbidden" headers (host, cookie, origin)
+  const headers = new Headers();
+  headers.set("host", "autumn.grove.place");
 
   // Add cookies if provided
   let cookieHeader = "";
@@ -86,10 +89,11 @@ function createMockEvent(
     headers.set("cookie", cookieHeader);
   }
 
-  const request = new Request(url, {
+  const request = {
     method,
+    url: url.toString(),
     headers,
-  });
+  } as unknown as Request;
 
   // Mock AUTH service binding
   const mockAuthService = {

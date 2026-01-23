@@ -27,6 +27,7 @@ export interface MockCookies {
 export interface MockPlatformEnv {
   DB: ReturnType<typeof createMockD1>;
   CDN: ReturnType<typeof createMockR2>;
+  IMAGES: ReturnType<typeof createMockR2>;
   CACHE_KV: ReturnType<typeof createMockKV>;
   AUTH?: MockServiceBinding;
   TENANTS?: MockDONamespace;
@@ -169,6 +170,7 @@ export function createMockRequestEvent(
   const env: MockPlatformEnv = {
     DB: createMockD1(),
     CDN: createMockR2(),
+    IMAGES: createMockR2(),
     CACHE_KV: createMockKV(),
     AUTH: createMockServiceBinding(),
     ...platform?.env,

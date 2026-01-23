@@ -166,6 +166,23 @@ function executeSql(
       results = filterRows(results, whereMatch[1], params);
     }
 
+    // Handle ORDER BY
+    const orderMatch = sql.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
+    if (orderMatch) {
+      const col = orderMatch[1];
+      const direction = orderMatch[2]?.toUpperCase() === "DESC" ? -1 : 1;
+      results.sort((a, b) => {
+        const aVal = a[col];
+        const bVal = b[col];
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return 1 * direction;
+        if (bVal == null) return -1 * direction;
+        if (aVal < bVal) return -1 * direction;
+        if (aVal > bVal) return 1 * direction;
+        return 0;
+      });
+    }
+
     // Handle LIMIT
     const limitMatch = sql.match(/LIMIT\s+(\d+)/i);
     if (limitMatch) {
@@ -237,16 +254,15 @@ function executeSql(
       updates[col] = getNextParam();
     }
 
-    // Find and update matching rows
+    // Find and update matching rows using filterRows
+    // paramIndex is now past SET params, pointing to WHERE params
+    const whereParams = params.slice(paramIndex);
+    const matchingRows = filterRows(tableData, whereMatch[1], whereParams);
     let changes = 0;
-    const whereValue = getNextParam();
 
-    for (const row of tableData) {
-      // Simple WHERE id = ? matching
-      if (whereMatch[1].includes("id = ?") && row.id === whereValue) {
-        Object.assign(row, updates);
-        changes++;
-      }
+    for (const row of matchingRows) {
+      Object.assign(row, updates);
+      changes++;
     }
 
     return {
@@ -332,11 +348,31 @@ function filterRows(
     let paramIndex = 0;
 
     for (const condition of conditions) {
-      const match = condition.match(/(\w+)\s*=\s*\?/);
-      if (match) {
-        const col = match[1];
+      const eqMatch = condition.match(/(\w+)\s*=\s*\?/);
+      if (eqMatch) {
+        const col = eqMatch[1];
         const value = params[paramIndex++];
         if (row[col] !== value) {
+          matches = false;
+          break;
+        }
+        continue;
+      }
+      // Handle IS NOT NULL
+      const isNotNullMatch = condition.match(/(\w+)\s+IS\s+NOT\s+NULL/i);
+      if (isNotNullMatch) {
+        const col = isNotNullMatch[1];
+        if (row[col] === null || row[col] === undefined) {
+          matches = false;
+          break;
+        }
+        continue;
+      }
+      // Handle IS NULL
+      const isNullMatch = condition.match(/(\w+)\s+IS\s+NULL/i);
+      if (isNullMatch) {
+        const col = isNullMatch[1];
+        if (row[col] !== null && row[col] !== undefined) {
           matches = false;
           break;
         }

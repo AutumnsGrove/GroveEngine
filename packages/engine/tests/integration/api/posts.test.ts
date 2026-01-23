@@ -182,8 +182,8 @@ describe("Post CRUD Integration", () => {
           tenant_id: "tenant-1",
           slug: "post-one",
           title: "Post One",
-          created_at: now,
-          updated_at: now,
+          created_at: now - 1000,
+          updated_at: now - 1000,
         },
         {
           id: 2,
