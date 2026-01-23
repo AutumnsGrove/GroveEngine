@@ -65,7 +65,7 @@ describe("classifyByLatency", () => {
     expect(result.status).toBe("degraded");
   });
 
-  it("should return partial_outage for >= 1500ms", async () => {
+  it("should cap at degraded for deep checks when service reports healthy", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ status: "healthy" }), {
         status: 200,
@@ -75,21 +75,34 @@ describe("classifyByLatency", () => {
     vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(2000);
 
     const result = await checkComponent(deepComponent);
+    // A healthy service with slow transport is degraded, not an outage
+    expect(result.status).toBe("degraded");
+  });
+
+  it("should return partial_outage for shallow checks with high latency", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("OK", { status: 200 }),
+    );
+    vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(2000);
+
+    const result = await checkComponent(shallowComponent);
+    // Shallow checks have no self-reported status, so latency fully applies
     expect(result.status).toBe("partial_outage");
   });
 
-  it("should never return major_outage from latency alone (reserved for errors)", async () => {
+  it("should never return major_outage or partial_outage from latency when service is healthy", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ status: "healthy" }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),
     );
-    // Even extremely high latency should only be partial_outage
+    // Even extremely high latency caps at degraded for deep checks
     vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(30000);
 
     const result = await checkComponent(deepComponent);
-    expect(result.status).toBe("partial_outage");
+    expect(result.status).toBe("degraded");
+    expect(result.status).not.toBe("partial_outage");
     expect(result.status).not.toBe("major_outage");
   });
 });

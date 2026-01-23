@@ -183,8 +183,18 @@ async function evaluateDeepCheck(
       };
     }
 
-    // Service is healthy, check latency-based status
-    return classifyByLatency(config, latencyMs, response.status, timestamp);
+    // Service is healthy — latency can only downgrade to "degraded" at most.
+    // A healthy service with slow transport is a performance issue, not an outage.
+    const latencyResult = classifyByLatency(
+      config,
+      latencyMs,
+      response.status,
+      timestamp,
+    );
+    if (latencyResult.status === ComponentStatus.PARTIAL_OUTAGE) {
+      latencyResult.status = ComponentStatus.DEGRADED;
+    }
+    return latencyResult;
   } catch {
     // JSON parse error - treat as degraded (service up but malformed response)
     return {
