@@ -86,7 +86,42 @@ export type {
   LumenModerationResponse,
   LumenModerationCategory,
   LumenClientConfig,
+  SongbirdOptions,
+  KestrelContext,
+  SongbirdResult,
+  ShutterOptions,
+  ShutterModelTier,
+  ShutterInjectMode,
+  ShutterResult,
+  ShutterExtraction,
+  ShutterInjectionResult,
+  LumenMcpOptions,
+  LumenMcpToolRef,
+  McpInjectMode,
+  LumenMcpServerConfig,
+  McpTransportType,
+  LumenMcpToolDefinition,
+  LumenMcpResult,
+  LumenMcpToolResult,
 } from "./types.js";
+
+// =============================================================================
+// SONGBIRD
+// =============================================================================
+
+export { runSongbird } from "./songbird.js";
+
+// =============================================================================
+// SHUTTER (STUB)
+// =============================================================================
+
+export { runShutter, injectShutterContext } from "./shutter.js";
+
+// =============================================================================
+// MCP (STUB)
+// =============================================================================
+
+export { McpServerRegistry, runMcpTools, injectMcpContext } from "./mcp.js";
 
 // =============================================================================
 // ERRORS

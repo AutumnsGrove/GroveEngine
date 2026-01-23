@@ -628,6 +628,62 @@ Four-layer image moderation system: CSAM detection → Content classification �
 - [ ] The `jxl_encoding_metrics` table is ready in migration
 - [ ] Needs: Client instrumentation + `/api/images/metrics` endpoint
 
+## Shutter Integration — Web Content Distillation for Lumen
+> **Repo:** https://github.com/AutumnsGrove/Shutter
+> **Stubs:** `packages/engine/src/lib/lumen/shutter.ts` (types + placeholder functions ready)
+> **Status:** Python package works, needs Cloudflare Worker port for Lumen integration
+> **Blocker:** API keys removed from the Worker to prevent unauthorized usage — re-enable when ready
+
+Shutter distills web pages into focused, token-efficient context for LLM requests (200 tokens
+instead of 20,000). Also provides prompt injection defense for fetched content.
+
+- [ ] Re-enable Shutter Worker with API key management (currently stripped to prevent credit drain)
+- [ ] Port Python implementation to TypeScript Cloudflare Worker (Shutter v1.5 roadmap)
+- [ ] Implement `runShutter()` in Lumen (replace stub in `shutter.ts`)
+- [ ] Wire fetch chain: Jina Reader → Tavily → basic httpx
+- [ ] Implement Canary heuristics (17 weighted regex patterns) for injection detection
+- [ ] D1 shared offenders list (replaces local SQLite)
+- [ ] Add `shutter` option handling in `LumenClient.run()` pipeline
+- [ ] Tests for Shutter integration path
+
+## MCP Tool Augmentation for Lumen
+> **Protocol:** https://modelcontextprotocol.io
+> **Stubs:** `packages/engine/src/lib/lumen/mcp.ts` (registry + placeholder functions ready)
+> **Status:** Types and stub module in place, needs full implementation
+> **Separate PR:** This is a standalone feature — implement in its own branch
+
+MCP lets Lumen invoke external tools (Tavily, Context7, custom servers) and inject
+results as context before inference. Clients get tool-augmented responses without
+managing any tool APIs — one key, one interface, many capabilities.
+
+### Infrastructure
+- [ ] Implement `McpServerRegistry` backed by config or D1 (per-tenant server configs)
+- [ ] Add MCP server transport layer (stdio, SSE, HTTP connections)
+- [ ] Implement `runMcpTools()` with parallel execution + combined timeout
+- [ ] Implement `injectMcpContext()` for system/prepend/append injection modes
+- [ ] Wire MCP step into `LumenClient.run()` pipeline (after Shutter, before execute)
+
+### Built-in Servers
+- [ ] Register Tavily search as built-in MCP server (web search augmentation)
+- [ ] Register Context7 as built-in MCP server (library docs lookup)
+- [ ] Consider Exa, Brave Search as additional search providers
+
+### Auto Mode
+- [ ] Implement "auto" tool selection based on task type + `relevantTasks` mapping
+- [ ] Define sensible defaults: research tasks get Tavily, code tasks get Context7, etc.
+
+### Auth & BYOK
+- [ ] Wire `toolKeys` option through to server connections (tenant brings their own keys)
+- [ ] Fallback to Lumen's own keys when tenant keys not provided
+- [ ] Quota tracking for tool calls (count against tenant's usage)
+
+### Testing
+- [ ] Unit tests for McpServerRegistry (register, get, getForTask, list)
+- [ ] Integration tests for tool execution with mocked MCP servers
+- [ ] Tests for context injection modes (system, prepend, append)
+- [ ] Tests for auto mode tool selection
+- [ ] Tests for timeout/error handling (fail-open for tools — don't block inference)
+
 ---
 
 # 🎨 UI POLISH (Post-Launch OK)
