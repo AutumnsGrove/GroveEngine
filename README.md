@@ -13,7 +13,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | 0.9.71 | Lattice — Multi-tenant blog engine with 185 UI components |
+| [@autumnsgrove/groveengine](packages/engine) | [![npm version](https://img.shields.io/npm/v/@autumnsgrove/groveengine.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/groveengine) | Lattice — Multi-tenant blog engine with 185 UI components |
 | [landing](packages/landing) | — | Marketing site at grove.place |
 | [domains](packages/domains) | — | Forage — AI-powered domain discovery tool |
 | [clearing](packages/clearing) | — | Status page & admin dashboard |
