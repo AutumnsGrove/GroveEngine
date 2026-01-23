@@ -19,75 +19,99 @@ jobs:
             const issue = context.payload.issue;
             const title = issue.title.toLowerCase();
             const body = (issue.body || '').toLowerCase();
-            const text = title + ' ' + body;
-            
-            // Component labels
-            const components = {
-              'heartwood': /heartwood|auth|login|session|token/,
-              'lattice': /lattice|core|engine/,
-              'amber': /amber|storage|file|upload/,
-              'foliage': /foliage|theme|style|css/,
-              'ivy': /ivy|mail/,
-              'meadow': /meadow|social/,
-              'shade': /shade|crawler|bot|ai/,
-              'curio': /curio|tweak/,
-              'plant': /plant|signup/,
-              'arbor': /arbor|admin|panel/,
-              'clearing': /clearing|status/,
-              'patina': /patina|backup/,
-              'mycelium': /mycelium|mcp/,
-              'graft': /graft|grafts|featureflag|flag/,
-              'forests': /forests|communities|community/,
-              'lumen': /lumen|gateway/
-            };
-            
-            // Type labels
-            const types = {
-              'bug': /bug|error|crash|fail|broken|issue/,
-              'feature': /feature|add|new|implement/,
-              'enhancement': /enhance|improve|better|optimize/,
-              'documentation': /docs|documentation|readme|guide/,
-              'security': /security|vulnerability|xss|csrf|exploit/
-            };
-            
-            // Priority labels
-            const priorities = {
-              'priority-critical': /critical|urgent|blocker|emergency/,
-              'priority-high': /high priority|important/,
-              'priority-low': /low priority|nice to have|eventually/
-            };
-            
-            const labelsToAdd = [];
-            
-            // Check components
-            for (const [label, pattern] of Object.entries(components)) {
-              if (pattern.test(text)) {
-                labelsToAdd.push(label);
+
+            // --- Component Labels ---
+            // Strategy: Grove proper nouns match anywhere (title or body).
+            // Generic fallback terms only match in the TITLE to prevent over-tagging.
+            const components = [
+              { label: 'heartwood', proper: /\bheartwood\b/, titleFallback: /\b(oauth|authentication)\b/ },
+              { label: 'lattice',   proper: /\blattice\b/,   titleFallback: /\bgroveengine\b/ },
+              { label: 'amber',     proper: /\bamber\b/,     titleFallback: /\b(r2|cdn storage|image storage)\b/ },
+              { label: 'foliage',   proper: /\bfoliage\b/,   titleFallback: /\b(theming|theme system)\b/ },
+              { label: 'ivy',       proper: /\bivy\b/,       titleFallback: /\b(email notifications?|resend)\b/ },
+              { label: 'meadow',    proper: /\bmeadow\b/,    titleFallback: /\b(social feed|federation)\b/ },
+              { label: 'shade',     proper: /\bshade\b/,     titleFallback: /\b(crawler|bot protection|rate limit)\b/ },
+              { label: 'curio',     proper: /\bcurios?\b/,   titleFallback: /\b(gallery|timeline|journey)\b/ },
+              { label: 'plant',     proper: /\bplant\b/,     titleFallback: /\b(signup flow|onboarding)\b/ },
+              { label: 'arbor',     proper: /\barbor\b/,     titleFallback: /\b(admin dashboard|admin panel)\b/ },
+              { label: 'clearing',  proper: /\bclearing\b/,  titleFallback: /\b(status page|uptime monitor)\b/ },
+              { label: 'patina',    proper: /\bpatina\b/,    titleFallback: /\b(backup|data export)\b/ },
+              { label: 'mycelium',  proper: /\bmycelium\b/,  titleFallback: /\b(mcp server|mcp tool)\b/ },
+              { label: 'graft',     proper: /\bgrafts?\b/,   titleFallback: /\b(feature flags?)\b/ },
+              { label: 'forests',   proper: /\bforests\b/,   titleFallback: /\b(communities)\b/ },
+              { label: 'lumen',     proper: /\blumen\b/,     titleFallback: /\b(ai gateway|llm)\b/ },
+              { label: 'petal',     proper: /\bpetal\b/,     titleFallback: /\b(content moderation|csam|photodna)\b/ },
+              { label: 'vine',      proper: /\bvines?\b/,    titleFallback: /\b(margin notes?|gutter content)\b/ },
+            ];
+
+            // --- Type Labels (pick ONE, highest specificity wins) ---
+            // Only matches against the title to avoid false positives from body text.
+            const typesByPriority = [
+              { label: 'security',      pattern: /\b(security|vulnerabilit|xss|csrf)\b/ },
+              { label: 'bug',           pattern: /\b(bug|fix|crash|broken)\b/ },
+              { label: 'feature',       pattern: /\b(feat|feature|implement)\b/ },
+              { label: 'enhancement',   pattern: /\b(enhance|improve|optimize|refactor)\b/ },
+              { label: 'documentation', pattern: /\b(docs?|documentation|guide)\b/ },
+            ];
+
+            // --- Priority Labels (pick ONE, highest wins) ---
+            // Only matches against the title.
+            const prioritiesByRank = [
+              { label: 'priority-critical', pattern: /\b(critical|urgent|blocker)\b/ },
+              { label: 'priority-high',     pattern: /\b(high.?priority|important)\b/ },
+              { label: 'priority-low',      pattern: /\b(low.?priority|nice.to.have|eventually|post.launch)\b/ },
+            ];
+
+            const labelsToAdd = new Set();
+
+            // Check components: proper nouns match in title+body, fallbacks title-only
+            for (const { label, proper, titleFallback } of components) {
+              if (proper.test(title) || proper.test(body)) {
+                labelsToAdd.add(label);
+              } else if (titleFallback.test(title)) {
+                labelsToAdd.add(label);
               }
             }
-            
-            // Check types
-            for (const [label, pattern] of Object.entries(types)) {
-              if (pattern.test(text)) {
-                labelsToAdd.push(label);
+
+            // Cap component labels at 3 max
+            const componentLabels = [...labelsToAdd];
+            if (componentLabels.length > 3) {
+              // Keep only title-matched components
+              labelsToAdd.clear();
+              for (const { label, proper, titleFallback } of components) {
+                if (proper.test(title) || titleFallback.test(title)) {
+                  labelsToAdd.add(label);
+                }
               }
             }
-            
-            // Check priorities
-            for (const [label, pattern] of Object.entries(priorities)) {
-              if (pattern.test(text)) {
-                labelsToAdd.push(label);
+
+            // Check types: pick the first (highest priority) match in title only
+            for (const { label, pattern } of typesByPriority) {
+              if (pattern.test(title)) {
+                labelsToAdd.add(label);
+                break; // Only one type label
               }
             }
-            
+
+            // Check priorities: pick the first (highest rank) match in title only
+            for (const { label, pattern } of prioritiesByRank) {
+              if (pattern.test(title)) {
+                labelsToAdd.add(label);
+                break; // Only one priority label
+              }
+            }
+
             // Add labels if any were found
-            if (labelsToAdd.length > 0) {
+            const labels = [...labelsToAdd];
+            if (labels.length > 0) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                labels: labelsToAdd
+                labels
               });
-              
-              console.log(`Added labels: ${labelsToAdd.join(', ')}`);
+
+              console.log(`Added ${labels.length} labels: ${labels.join(', ')}`);
+            } else {
+              console.log('No labels matched for this issue.');
             }
