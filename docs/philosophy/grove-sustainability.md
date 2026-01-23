@@ -2,7 +2,7 @@
 title: Sustainability
 description: Grove's approach to environmental and social sustainability
 category: philosophy
-lastUpdated: '2026-01-12'
+lastUpdated: '2026-01-23'
 ---
 # How Grove Lasts: A Sustainability Promise
 
@@ -70,7 +70,7 @@ Grove runs on Cloudflare infrastructure. Here's what that means:
 | KV | ~$0/month | ~$0.50/month |
 | **Total infrastructure** | **~$8/month** | **~$31/month** |
 
-*Note: These are infrastructure costs only. Additional operational costs include payment processing (~3% of revenue via Stripe), email service (~$3/month), domain registration for Evergreen users, and support tools. Total operational overhead runs 5-10% of revenue—still dramatically lower than typical SaaS.*
+*Note: These are infrastructure costs only. Additional operational costs include payment processing (~5% of revenue via Lemon Squeezy), email service (~$3/month), domain registration for Evergreen users, and support tools. Total operational overhead runs 5-10% of revenue—still dramatically lower than typical SaaS.*
 
 At 1,000 users paying an average of $11/month, that's $11,000/month in revenue against ~$800-1,100/month in total costs (infrastructure + operations).
 

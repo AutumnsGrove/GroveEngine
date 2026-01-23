@@ -1,0 +1,79 @@
+name: Annual Sustainability Review
+
+on:
+  # Run every January 2nd (giving a day after New Year's)
+  schedule:
+    - cron: '0 12 2 1 *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  create-review-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Check for existing open issue
+        id: check-existing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'sustainability,annual-review'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Annual Sustainability Review')
+            );
+
+            core.setOutput('has_existing', hasExisting.toString());
+
+      - name: Create annual review issue
+        if: steps.check-existing.outputs.has_existing != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const year = new Date().getFullYear();
+
+            const body = `## Annual Sustainability Review — ${year}
+
+            It's January! Time to update the sustainability document with this year's transparency report.
+
+            You promised your community you'd do this every January. Here's the checklist from the document itself:
+
+            ### Transparency Checklist
+
+            - [ ] **Current user count** (ranges, not exact)
+            - [ ] **Reserve status** (growing / stable / drawing)
+            - [ ] **Infrastructure costs** (actual, not projected)
+            - [ ] **Any changes to the sustainability plan**
+
+            ### Where to Update
+
+            - \`docs/philosophy/grove-sustainability.md\` — Main sustainability document
+            - Update the \`lastUpdated\` frontmatter field
+            - Update the "Last updated" line at the bottom of the document
+
+            ### After Updating
+
+            - [ ] Announce on the Grove blog
+            - [ ] Email Centennial members
+            - [ ] Commit with message: \`docs: ${year} annual sustainability review\`
+
+            ---
+
+            *This issue was automatically created by the sustainability-review workflow.*
+            *The promise: "No surprises. No hidden pivots. Just honesty about how we're doing."*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Annual Sustainability Review — ${year}`,
+              body: body,
+              labels: ['sustainability', 'annual-review', 'documentation']
+            });
