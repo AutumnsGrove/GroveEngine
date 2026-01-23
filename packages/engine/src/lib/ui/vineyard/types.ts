@@ -20,6 +20,7 @@ export type GroveTool =
   | "amber"
   | "ivy"
   | "foliage"
+  | "lattice"
   | "meadow"
   | "rings"
   | "trails"

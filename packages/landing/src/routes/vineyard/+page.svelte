@@ -294,7 +294,6 @@
 	url="https://grove.place/vineyard"
 />
 
-<!-- Note: VineyardLayout uses tool="lattice" which isn't in the predefined list, but that's ok - it falls back gracefully -->
 <VineyardLayout tool="lattice" tagline="Building blocks for beautiful Grove experiences" status="ready">
 	<!-- Feature Overview -->
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
