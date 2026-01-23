@@ -118,11 +118,11 @@ export function isEncryptedToken(value: string): boolean {
   if (parts.length === 2) {
     const ivPart = parts[0];
     const ciphertextPart = parts[1];
-    // IV should be 16 chars, ciphertext at least 24 chars
-    // Also ensure first part doesn't look like a version prefix
+    // IV should be 16 chars (12 bytes base64), ciphertext at least 24 chars.
+    // The length check alone distinguishes IVs from version prefixes (e.g. "v1"
+    // is 2 chars, never 16), so no startsWith("v") exclusion is needed.
     return (
       ivPart.length === 16 &&
-      !ivPart.startsWith("v") &&
       ciphertextPart.length >= 24 &&
       /^[A-Za-z0-9+/=]+$/.test(ivPart) &&
       /^[A-Za-z0-9+/=]+$/.test(ciphertextPart)
