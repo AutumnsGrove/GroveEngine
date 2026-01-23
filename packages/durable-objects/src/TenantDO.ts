@@ -593,5 +593,4 @@ export class TenantDO implements DurableObject {
 
 interface Env {
   DB: D1Database;
-  CACHE_KV: KVNamespace;
 }

@@ -1,8 +1,9 @@
 /**
  * Durable Objects Index
  *
- * Exports all DO classes for the Grove Engine.
- * These are injected into _worker.js by scripts/inject-durable-objects.mjs
+ * Type exports for DO classes used by the Grove Engine.
+ * Actual DO instances are hosted in the grove-durable-objects Worker
+ * and referenced via script_name in engine/wrangler.toml.
  *
  * Part of the Loom pattern - Grove's coordination layer.
  */

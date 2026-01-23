@@ -38,11 +38,7 @@ jobs:
         working-directory: .
 
       - name: Type check
-        run: npx tsc --noEmit || echo "No type check configured"
-        working-directory: packages/grove-router
-
-      - name: Run tests
-        run: pnpm test:run || echo "No tests configured"
+        run: npx tsc --noEmit
         working-directory: packages/grove-router
 
       - name: Deploy to Cloudflare Workers

@@ -61,7 +61,7 @@ jobs:
         working-directory: packages/landing
 
       - name: Run tests
-        run: pnpm test:run || echo "No tests configured"
+        run: pnpm test:run
         working-directory: packages/landing
 
       - name: Run Database Migrations

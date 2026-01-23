@@ -51,7 +51,7 @@ jobs:
         working-directory: packages/plant
 
       - name: Run tests
-        run: pnpm test:run || echo "No tests configured"
+        run: pnpm test:run
         working-directory: packages/plant
 
       - name: Deploy to Cloudflare Pages

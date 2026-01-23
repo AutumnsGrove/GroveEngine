@@ -349,6 +349,5 @@ export class PostContentDO implements DurableObject {
 
 interface Env {
   DB: D1Database;
-  CACHE_KV: KVNamespace;
   IMAGES: R2Bucket;
 }
