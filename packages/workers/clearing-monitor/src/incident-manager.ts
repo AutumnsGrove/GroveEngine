@@ -280,34 +280,38 @@ export async function processHealthCheckResult(
     state.consecutiveFailures = 0;
     state.consecutiveSuccesses++;
 
-    // Check if we should resolve an active incident
+    // Update component status after meeting the success threshold
+    // (prevents flapping from a single lucky check)
     if (
-      state.activeIncidentId &&
       state.consecutiveSuccesses >= INCIDENT_THRESHOLDS.SUCCESSES_TO_RESOLVE
     ) {
-      console.log(
-        `[Clearing Monitor] Resolving incident ${state.activeIncidentId} for ${result.componentName}`,
-      );
-
-      const resolved = await resolveIncident(env.DB, state.activeIncidentId);
       await updateComponentStatus(env.DB, result.componentId, "operational");
 
-      // Only send email if the incident was actually resolved
-      if (resolved) {
-        void sendEmailAlert(
-          env,
-          `[Grove] Resolved: ${result.componentName} back to operational`,
-          `Service: ${result.componentName}\n` +
-            `Status: Operational\n` +
-            `Time: ${result.timestamp}\n` +
-            `Latency: ${result.latencyMs}ms\n\n` +
-            `The service has recovered and is operating normally.`,
-        ).catch((err) =>
-          console.error("[Clearing Monitor] Email send failed:", err),
+      // Also resolve any active incident
+      if (state.activeIncidentId) {
+        console.log(
+          `[Clearing Monitor] Resolving incident ${state.activeIncidentId} for ${result.componentName}`,
         );
-      }
 
-      state.activeIncidentId = null;
+        const resolved = await resolveIncident(env.DB, state.activeIncidentId);
+
+        // Only send email if the incident was actually resolved
+        if (resolved) {
+          void sendEmailAlert(
+            env,
+            `[Grove] Resolved: ${result.componentName} back to operational`,
+            `Service: ${result.componentName}\n` +
+              `Status: Operational\n` +
+              `Time: ${result.timestamp}\n` +
+              `Latency: ${result.latencyMs}ms\n\n` +
+              `The service has recovered and is operating normally.`,
+          ).catch((err) =>
+            console.error("[Clearing Monitor] Email send failed:", err),
+          );
+        }
+
+        state.activeIncidentId = null;
+      }
     }
   } else {
     // Reset success counter, increment failure counter
