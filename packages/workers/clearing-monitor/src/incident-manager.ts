@@ -318,8 +318,11 @@ export async function processHealthCheckResult(
     state.consecutiveSuccesses = 0;
     state.consecutiveFailures++;
 
-    // Always update component status in D1
-    await updateComponentStatus(env.DB, result.componentId, result.status);
+    // Only update component status after meeting the degradation threshold
+    // (prevents flapping from a single slow check due to CF-to-CF latency)
+    if (state.consecutiveFailures >= INCIDENT_THRESHOLDS.CHECKS_TO_DEGRADE) {
+      await updateComponentStatus(env.DB, result.componentId, result.status);
+    }
 
     // Check if we should create a new incident
     if (

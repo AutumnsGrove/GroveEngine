@@ -220,10 +220,31 @@ describe("processHealthCheckResult - State Machine", () => {
     expect(env.DB.batch).not.toHaveBeenCalled();
   });
 
-  it("should update component status in D1 for unhealthy results", async () => {
+  it("should NOT update component status on first unhealthy check (debounce)", async () => {
     await processHealthCheckResult(env, createUnhealthyResult());
 
-    // updateComponentStatus should prepare an UPDATE query
+    // First failure should NOT update component status (needs 2 consecutive)
+    const prepareCalls = (env.DB.prepare as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const statusUpdateCalls = prepareCalls.filter((call: string[]) =>
+      call[0].includes("UPDATE status_components"),
+    );
+    expect(statusUpdateCalls.length).toBe(0);
+  });
+
+  it("should update component status after 2 consecutive unhealthy checks", async () => {
+    // Prime with 1 existing failure (next one meets CHECKS_TO_DEGRADE threshold)
+    (env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      consecutiveFailures: 1,
+      consecutiveSuccesses: 0,
+      activeIncidentId: null,
+      lastStatus: "operational",
+      lastCheckAt: "2025-01-01T00:00:00.000Z",
+    });
+
+    await processHealthCheckResult(env, createUnhealthyResult());
+
+    // Now it should update status in D1
     expect(env.DB.prepare).toHaveBeenCalledWith(
       expect.stringContaining("UPDATE status_components"),
     );

@@ -80,6 +80,8 @@ export const LATENCY_THRESHOLDS = {
  * Consecutive failure/success thresholds for incident management
  */
 export const INCIDENT_THRESHOLDS = {
+  /** Number of consecutive non-operational checks before updating status to degraded */
+  CHECKS_TO_DEGRADE: 2,
   /** Number of consecutive failures before creating an incident */
   FAILURES_TO_CREATE: 3,
   /** Number of consecutive successes before resolving an incident */

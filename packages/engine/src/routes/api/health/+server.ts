@@ -32,16 +32,13 @@ interface HealthCheckResponse {
  * Unauthenticated - monitoring systems need access.
  */
 export const GET: RequestHandler = async ({ platform }) => {
-  const checks: HealthCheckResponse["checks"] = [];
   const startTime = Date.now();
 
-  // Check D1 database connectivity
-  const d1Check = await checkD1(platform?.env?.DB);
-  checks.push(d1Check);
-
-  // Check KV connectivity
-  const kvCheck = await checkKV(platform?.env?.CACHE_KV);
-  checks.push(kvCheck);
+  // Run health checks in parallel (independent operations, reduces total latency)
+  const checks = await Promise.all([
+    checkD1(platform?.env?.DB),
+    checkKV(platform?.env?.CACHE_KV),
+  ]);
 
   // Determine overall status
   const failedChecks = checks.filter((c) => c.status === "fail");
