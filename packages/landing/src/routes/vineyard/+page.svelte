@@ -1,19 +1,15 @@
 <script lang="ts">
-	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { VineyardLayout, FeatureCard, StatusBadge } from '@autumnsgrove/groveengine/vineyard';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
 	import {
-		Boxes,
-		Layers,
-		TreePine as TreeIcon,
 		Sparkles,
-		ChevronDown,
-		ChevronRight,
+		TreePine as TreeIcon,
 		Palette,
-		MousePointer,
+		Type,
 		Eye,
-		Type
+		MousePointer
 	} from 'lucide-svelte';
 
 	// Import Glass components
@@ -52,9 +48,6 @@
 		fonts,
 		type FontId,
 	} from '@autumnsgrove/groveengine/ui/typography';
-
-	// Section expansion state
-	let expandedSection = $state<'glass' | 'nature' | 'typography' | null>('glass');
 
 	// Typography state
 	let selectedFont = $state<FontId>('lexend');
@@ -301,933 +294,422 @@
 	url="https://grove.place/vineyard"
 />
 
-<main class="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50 via-green-50 to-lime-50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950">
-	<Header />
-
-	<!-- Hero Section -->
-	<section class="relative py-16 px-6 overflow-hidden">
-		<!-- Background decorations -->
-		<div class="absolute top-8 left-[10%] opacity-30" aria-hidden="true">
-			<Cloud class="w-24 h-10" animate speed="slow" />
-		</div>
-		<div class="absolute top-16 right-[15%] opacity-20" aria-hidden="true">
-			<Cloud variant="wispy" class="w-32 h-12" animate speed="slow" />
-		</div>
-
-		<div class="max-w-4xl mx-auto text-center relative z-10">
-			<!-- Badge -->
-			<div class="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm">
-				<Boxes class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-				<span class="text-sm font-medium text-foreground">Lattice Asset Showcase</span>
-			</div>
-
-			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
-				Everything Lattice Provides
-			</h1>
-			<p class="text-lg text-foreground-muted max-w-2xl mx-auto mb-8">
-				Glass UI components, nature assets, and the building blocks for beautiful Grove experiences.
-				Explore, customize, and see what's possible.
-			</p>
-
-			<!-- Quick stats -->
-			<div class="flex flex-wrap justify-center gap-6 text-sm">
-				<div class="flex items-center gap-2 text-foreground-muted">
-					<Layers class="w-4 h-4 text-grove-600" />
-					<span>9 Glass Components</span>
-				</div>
-				<div class="flex items-center gap-2 text-foreground-muted">
-					<TreeIcon class="w-4 h-4 text-grove-600" />
-					<span>{Object.keys(assets).length} Nature Assets</span>
-				</div>
-				<div class="flex items-center gap-2 text-foreground-muted">
-					<Type class="w-4 h-4 text-grove-600" />
-					<span>10 Font Families</span>
-				</div>
-				<div class="flex items-center gap-2 text-foreground-muted">
-					<Palette class="w-4 h-4 text-grove-600" />
-					<span>4 Seasonal Themes</span>
-				</div>
-			</div>
-		</div>
-	</section>
+<!-- Note: VineyardLayout uses tool="lattice" which isn't in the predefined list, but that's ok - it falls back gracefully -->
+<VineyardLayout tool="lattice" tagline="Building blocks for beautiful Grove experiences" status="ready">
+	<!-- Feature Overview -->
+	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+		<FeatureCard
+			title="Glass Components"
+			description="9 glassmorphism UI elements with blur effects"
+			status="ready"
+			icon="Sparkles"
+		/>
+		<FeatureCard
+			title="Nature Assets"
+			description="{Object.keys(assets).length} SVG components across {categories.length} categories"
+			status="ready"
+			icon="TreePine"
+		/>
+		<FeatureCard
+			title="Typography"
+			description="10 curated font families for every mood"
+			status="ready"
+			icon="Type"
+		/>
+		<FeatureCard
+			title="Color Palettes"
+			description="12 seasonal and nature-inspired palettes"
+			status="ready"
+			icon="Palette"
+		/>
+	</div>
 
 	<!-- Glass Components Section -->
-	<section class="py-8 px-6">
-		<div class="max-w-5xl mx-auto">
-			<!-- Section Header -->
-			<button
-				type="button"
-				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
-				onclick={() => expandedSection = expandedSection === 'glass' ? null : 'glass'}
-				aria-expanded={expandedSection === 'glass'}
-				aria-controls="glass-section-content"
-			>
-				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg bg-grove-100 dark:bg-grove-900/40">
-						<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+	<section class="mb-16">
+		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+			<Sparkles class="w-6 h-6 text-amber-600" />
+			Glass Components
+		</h2>
+
+		<div class="grid gap-6">
+			<!-- Glass Base -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+					<code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;Glass&gt;</code>
+					<span class="text-sm font-normal text-stone-600">Base glass container</span>
+				</h3>
+
+				<div class="grid md:grid-cols-2 gap-6">
+					<div class="bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
+						<Glass
+							variant={glassVariant}
+							intensity={glassIntensity}
+							gossamer={glassGossamerEnabled ? glassGossamerPreset : false}
+							class="p-6 rounded-xl"
+						>
+							<p class="text-stone-800 font-medium">Glass content here</p>
+							<p class="text-sm text-stone-600 mt-1">With {glassVariant} variant</p>
+						</Glass>
 					</div>
-					<div class="text-left">
-						<h2 class="text-xl font-serif text-foreground">Glass Components</h2>
-						<p class="text-sm text-foreground-muted">Glassmorphism UI elements with blur effects</p>
+
+					<div class="space-y-4">
+						<div>
+							<label for="glass-variant" class="block text-sm font-medium mb-2">Variant</label>
+							<select id="glass-variant" bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border bg-white">
+								<option value="surface">surface</option>
+								<option value="overlay">overlay</option>
+								<option value="card">card</option>
+								<option value="tint">tint</option>
+								<option value="accent">accent</option>
+								<option value="muted">muted</option>
+							</select>
+						</div>
+						<div>
+							<label for="glass-intensity" class="block text-sm font-medium mb-2">Intensity</label>
+							<select id="glass-intensity" bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border bg-white">
+								<option value="none">none</option>
+								<option value="light">light</option>
+								<option value="medium">medium</option>
+								<option value="strong">strong</option>
+							</select>
+						</div>
 					</div>
 				</div>
-				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'glass' ? 'rotate-180' : ''}" aria-hidden="true" />
-			</button>
+			</div>
 
-			{#if expandedSection === 'glass'}
-				<div id="glass-section-content" class="space-y-8 animate-in slide-in-from-top-2 duration-300">
-					<!-- Glass Base Component -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;Glass&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Base glass container</span>
-						</h3>
-
-						<div class="grid md:grid-cols-2 gap-6">
-							<!-- Preview -->
-							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
-								<Glass
-									variant={glassVariant}
-									intensity={glassIntensity}
-									gossamer={glassGossamerEnabled ? glassGossamerPreset : false}
-									class="p-6 rounded-xl"
-								>
-									<p class="text-foreground font-medium">Glass content here</p>
-									<p class="text-sm text-foreground-muted mt-1">With {glassVariant} variant</p>
-								</Glass>
-							</div>
-
-							<!-- Controls -->
-							<div class="space-y-4">
-								<div>
-									<label for="glass-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select id="glass-variant" bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="surface">surface</option>
-										<option value="overlay">overlay</option>
-										<option value="card">card</option>
-										<option value="tint">tint</option>
-										<option value="accent">accent</option>
-										<option value="muted">muted</option>
-									</select>
-								</div>
-								<div>
-									<label for="glass-intensity" class="block text-sm font-medium text-foreground mb-2">Intensity</label>
-									<select id="glass-intensity" bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="none">none</option>
-										<option value="light">light</option>
-										<option value="medium">medium</option>
-										<option value="strong">strong</option>
-									</select>
-								</div>
-								<div class="pt-2 border-t border-divider">
-									<label class="flex items-center gap-3 cursor-pointer mb-3">
-										<input type="checkbox" bind:checked={glassGossamerEnabled} class="w-5 h-5 rounded accent-grove-600" />
-										<span class="text-sm font-medium text-foreground">Gossamer Background</span>
-									</label>
-									{#if glassGossamerEnabled}
-										<select bind:value={glassGossamerPreset} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm">
-											{#each gossamerPresets as preset}
-												<option value={preset}>{preset}</option>
-											{/each}
-										</select>
-									{/if}
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- GlassButton -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassButton&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Translucent buttons</span>
-						</h3>
-
-						<div class="grid md:grid-cols-2 gap-6">
-							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[150px]">
-								<GlassButton variant={buttonVariant} size={buttonSize}>
-									<MousePointer class="w-4 h-4" />
-									Click me
-								</GlassButton>
-							</div>
-
-							<div class="space-y-4">
-								<div>
-									<label for="button-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select id="button-variant" bind:value={buttonVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="default">default</option>
-										<option value="accent">accent</option>
-										<option value="dark">dark</option>
-										<option value="ghost">ghost</option>
-										<option value="outline">outline</option>
-									</select>
-								</div>
-								<div>
-									<label for="button-size" class="block text-sm font-medium text-foreground mb-2">Size</label>
-									<select id="button-size" bind:value={buttonSize} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="sm">sm</option>
-										<option value="md">md</option>
-										<option value="lg">lg</option>
-										<option value="icon">icon</option>
-									</select>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- GlassCard -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassCard&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Content cards with glass effect</span>
-						</h3>
-
-						<div class="grid md:grid-cols-2 gap-6">
-							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
-								<GlassCard
-									variant={cardVariant}
-									hoverable={cardHoverable}
-									gossamer={cardGossamerEnabled ? cardGossamerPreset : false}
-									title="Card Title"
-									description="A beautiful glass card"
-									class="w-full max-w-xs"
-								>
-									<p class="text-sm text-foreground-muted">Card content goes here. Try hovering!</p>
-								</GlassCard>
-							</div>
-
-							<div class="space-y-4">
-								<div>
-									<label for="card-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select id="card-variant" bind:value={cardVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="default">default</option>
-										<option value="accent">accent</option>
-										<option value="dark">dark</option>
-										<option value="muted">muted</option>
-										<option value="frosted">frosted</option>
-									</select>
-								</div>
-								<label class="flex items-center gap-3 cursor-pointer">
-									<input type="checkbox" bind:checked={cardHoverable} class="w-5 h-5 rounded" />
-									<span class="text-sm text-foreground">Hoverable</span>
-								</label>
-								<div class="pt-2 border-t border-divider">
-									<label class="flex items-center gap-3 cursor-pointer mb-3">
-										<input type="checkbox" bind:checked={cardGossamerEnabled} class="w-5 h-5 rounded accent-grove-600" />
-										<span class="text-sm font-medium text-foreground">Gossamer Background</span>
-									</label>
-									{#if cardGossamerEnabled}
-										<select bind:value={cardGossamerPreset} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm">
-											{#each gossamerPresets as preset}
-												<option value={preset}>{preset}</option>
-											{/each}
-										</select>
-									{/if}
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- GlassLogo -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassLogo&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Seasonal glassmorphism logo</span>
-						</h3>
-
-						<div class="grid md:grid-cols-2 gap-6">
-							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
-								<GlassLogo
-									variant={logoVariant}
-									season={logoSeason}
-									class="w-24 h-32"
-								/>
-							</div>
-
-							<div class="space-y-4">
-								<div>
-									<label for="logo-variant" class="block text-sm font-medium text-foreground mb-2">Variant</label>
-									<select id="logo-variant" bind:value={logoVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="default">default</option>
-										<option value="accent">accent</option>
-										<option value="frosted">frosted</option>
-										<option value="dark">dark</option>
-										<option value="ethereal">ethereal</option>
-									</select>
-								</div>
-								<div>
-									<label for="logo-season" class="block text-sm font-medium text-foreground mb-2">Season</label>
-									<select id="logo-season" bind:value={logoSeason} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
-										<option value="spring">spring</option>
-										<option value="summer">summer</option>
-										<option value="autumn">autumn</option>
-										<option value="winter">winter</option>
-									</select>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- GlassOverlay -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassOverlay&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Fullscreen backdrop overlay</span>
-						</h3>
-
-						<div class="flex items-center gap-4">
-							<GlassButton variant="accent" onclick={() => showOverlayDemo = true}>
-								<Eye class="w-4 h-4" />
-								Show Overlay Demo
-							</GlassButton>
-							<p class="text-sm text-foreground-muted">Click to see the overlay effect</p>
-						</div>
-					</div>
-
-					<!-- GlassCarousel -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassCarousel&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Stack-style image carousel</span>
-						</h3>
-
-						<div class="max-w-md mx-auto">
-							<GlassCarousel images={carouselImages} variant="frosted" />
-						</div>
-						<p class="text-center text-sm text-foreground-muted mt-4">Swipe, drag, or use arrows to navigate</p>
-					</div>
-
-					<!-- GlassLegend -->
-					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassLegend&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Status indicators and color keys</span>
-						</h3>
-
-						<div class="grid md:grid-cols-2 gap-6">
-							<!-- Examples -->
-							<div class="space-y-4">
-								<GlassLegend
-									title="Status Legend"
-									items={[
-										{ label: 'Active', description: 'In production', color: 'green' },
-										{ label: 'New', description: 'Recently added', color: 'amber' },
-										{ label: 'Planned', description: 'Coming soon', color: 'slate' },
-									]}
-									layout="stacked"
-								/>
-
-								<GlassLegend
-									items={[
-										{ label: 'Success', color: 'green' },
-										{ label: 'Warning', color: 'amber' },
-										{ label: 'Error', color: 'red' },
-									]}
-									layout="inline"
-									compact
-								/>
-							</div>
-
-							<!-- Collapsible example -->
-							<div class="space-y-4">
-								<GlassLegend
-									title="Collapsible Legend"
-									items={[
-										{ label: 'Active', description: 'In production', color: 'green' },
-										{ label: 'New', description: 'Recently added', color: 'amber' },
-										{ label: 'Planned', description: 'Coming soon', color: 'slate' },
-										{ label: 'Reference', description: 'Documentation only', color: 'blue' },
-										{ label: 'Client', description: 'Customer-specific', color: 'purple' },
-									]}
-									collapsible
-									defaultOpen={false}
-								/>
-
-								<p class="text-sm text-foreground-muted">
-									Supports <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">stacked</code>,
-									<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">inline</code>, and
-									<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">grid</code> layouts.
-									Optional <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-xs">collapsible</code> mode.
-								</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- More components note -->
-					<div class="text-center p-6 rounded-xl bg-grove-50/50 dark:bg-grove-950/20 border border-dashed border-grove-300 dark:border-grove-800">
-						<p class="text-foreground-muted">
-							Plus: <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-sm">GlassNavbar</code> and
-							<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-sm">GlassConfirmDialog</code>
-						</p>
-						<p class="text-sm text-foreground-faint mt-1">See them in action throughout Grove</p>
-					</div>
+			<!-- GlassButton -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassButton&gt;</code></h3>
+				<div class="flex flex-wrap gap-4">
+					<GlassButton variant="default">Default</GlassButton>
+					<GlassButton variant="accent">Accent</GlassButton>
+					<GlassButton variant="dark">Dark</GlassButton>
+					<GlassButton variant="ghost">Ghost</GlassButton>
+					<GlassButton variant="outline">Outline</GlassButton>
 				</div>
-			{/if}
+			</div>
+
+			<!-- GlassCard, GlassLogo, GlassOverlay Demo -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassCard&gt;</code>, <code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassLogo&gt;</code>, <code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassOverlay&gt;</code></h3>
+				<div class="grid md:grid-cols-3 gap-4 mb-4">
+					<GlassCard title="Default" hoverable>
+						<p class="text-sm">A warm, inviting card.</p>
+					</GlassCard>
+					<GlassCard title="Accent" variant="accent" hoverable>
+						<p class="text-sm">With grove accent tones.</p>
+					</GlassCard>
+					<GlassCard title="Frosted" variant="frosted" hoverable>
+						<p class="text-sm">Maximum frost effect.</p>
+					</GlassCard>
+				</div>
+				<GlassButton onclick={() => showOverlayDemo = true}>
+					<Eye class="w-4 h-4" />
+					Show Overlay Demo
+				</GlassButton>
+			</div>
+
+			<!-- GlassCarousel -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassCarousel&gt;</code></h3>
+				<div class="max-w-md mx-auto">
+					<GlassCarousel images={carouselImages} variant="frosted" />
+				</div>
+			</div>
 		</div>
 	</section>
 
 	<!-- Nature Assets Section -->
-	<section class="py-8 px-6">
-		<div class="max-w-5xl mx-auto">
-			<!-- Section Header -->
-			<button
-				type="button"
-				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
-				onclick={() => expandedSection = expandedSection === 'nature' ? null : 'nature'}
-				aria-expanded={expandedSection === 'nature'}
-				aria-controls="nature-section-content"
-			>
-				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<TreeIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+	<section class="mb-16">
+		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+			<TreeIcon class="w-6 h-6 text-emerald-600" />
+			Nature Assets ({Object.keys(assets).length} Components)
+		</h2>
+
+		<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+			<div class="grid md:grid-cols-2 gap-8">
+				<!-- Preview Panel -->
+				<div>
+					<div class="bg-gradient-to-b from-sky-100 to-emerald-50 rounded-xl p-8 flex items-center justify-center min-h-[300px] border">
+						{#if CurrentComponent}
+							{#key selectedAsset + JSON.stringify(propValues)}
+								<svelte:boundary onerror={(e) => { componentError = e instanceof Error ? e.message : String(e); }}>
+									<CurrentComponent class="w-32 h-32" {...propValues} />
+									{#snippet failed()}
+										<div class="text-center text-red-500">
+											<p class="text-sm font-medium">Component error</p>
+											<p class="text-xs mt-1 opacity-75">{componentError ?? 'Failed to render'}</p>
+										</div>
+									{/snippet}
+								</svelte:boundary>
+							{/key}
+						{/if}
 					</div>
-					<div class="text-left">
-						<h2 class="text-xl font-serif text-foreground">Nature Assets</h2>
-						<p class="text-sm text-foreground-muted">{Object.keys(assets).length} SVG components across {categories.length} categories</p>
-					</div>
+					<p class="text-center mt-4 text-stone-600 font-mono text-sm">
+						&lt;{selectedAsset} /&gt;
+					</p>
 				</div>
-				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'nature' ? 'rotate-180' : ''}" aria-hidden="true" />
-			</button>
 
-			{#if expandedSection === 'nature'}
-				<div id="nature-section-content" class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40 animate-in slide-in-from-top-2 duration-300">
-					<div class="grid md:grid-cols-2 gap-8">
-						<!-- Preview Panel -->
-						<div>
-							<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-slate-800 dark:to-emerald-950 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-divider">
-								{#if CurrentComponent}
-									{#key selectedAsset + JSON.stringify(propValues)}
-										<svelte:boundary onerror={(e) => { componentError = e instanceof Error ? e.message : String(e); }}>
-											<CurrentComponent class="w-32 h-32" {...propValues} />
-											{#snippet failed()}
-												<div class="text-center text-red-500 dark:text-red-400">
-													<p class="text-sm font-medium">Component error</p>
-													<p class="text-xs mt-1 opacity-75">{componentError ?? 'Failed to render'}</p>
-												</div>
-											{/snippet}
-										</svelte:boundary>
-									{/key}
-								{/if}
-							</div>
-							<p class="text-center mt-4 text-foreground-muted font-mono text-sm">
-								&lt;{selectedAsset} /&gt;
-							</p>
-						</div>
-
-						<!-- Controls Panel -->
-						<div class="space-y-6">
-							<!-- Asset Selector -->
-							<div>
-								<label for="asset-selector" class="block text-sm font-medium text-foreground mb-2">Select Asset</label>
-								<select
-									id="asset-selector"
-									bind:value={selectedAsset}
-									onchange={onAssetChange}
-									class="w-full px-4 py-2 rounded-lg border border-divider bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent-subtle"
-								>
-									{#each categories as category}
-										<optgroup label={category}>
-											{#each getAssetsByCategory(category) as [name, _]}
-												<option value={name}>{name}</option>
-											{/each}
-										</optgroup>
+				<!-- Controls Panel -->
+				<div class="space-y-6">
+					<div>
+						<label for="asset-selector" class="block text-sm font-medium mb-2">Select Asset</label>
+						<select
+							id="asset-selector"
+							bind:value={selectedAsset}
+							onchange={onAssetChange}
+							class="w-full px-4 py-2 rounded-lg border bg-white"
+						>
+							{#each categories as category}
+								<optgroup label={category}>
+									{#each getAssetsByCategory(category) as [name, _]}
+										<option value={name}>{name}</option>
 									{/each}
-								</select>
-							</div>
+								</optgroup>
+							{/each}
+						</select>
+					</div>
 
-							<!-- Props Controls -->
-							{#if getCurrentAsset()}
-								<div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-									<h4 class="text-sm font-medium text-foreground-muted uppercase tracking-wide">Properties</h4>
+					<!-- Props Controls -->
+					{#if getCurrentAsset()}
+						<div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+							<h4 class="text-sm font-medium uppercase tracking-wide">Properties</h4>
 
-									{#each getCurrentAsset().props as prop}
+							{#each getCurrentAsset().props as prop}
+								<div class="space-y-2">
+									<label for="prop-{prop}" class="block text-sm font-medium">{prop}</label>
+
+									{#if isColorProp(prop)}
+										{@const colorError = getColorInputError(prop)}
 										<div class="space-y-2">
-											<label for="prop-{prop}" class="block text-sm font-medium text-foreground">{prop}</label>
-
-											{#if isColorProp(prop)}
-												{@const colorError = getColorInputError(prop)}
-												<div class="space-y-2">
-													<div class="flex gap-2 items-center">
-														<input
-															id="prop-{prop}"
-															type="color"
-															value={propValues[prop] ?? '#16a34a'}
-															oninput={(e) => propValues[prop] = e.currentTarget.value}
-															class="w-10 h-10 rounded cursor-pointer border border-divider"
-														/>
-														<input
-															type="text"
-															value={pendingColorValues[prop] ?? propValues[prop] ?? ''}
-															oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
-															placeholder="#16a34a"
-															class="flex-1 px-3 py-2 rounded-lg border bg-surface text-foreground font-mono text-sm {colorError ? 'border-red-400 dark:border-red-600' : 'border-divider'}"
-															aria-invalid={!!colorError}
-															aria-describedby={colorError ? `${prop}-error` : undefined}
-														/>
-													</div>
-													{#if colorError}
-														<p id="{prop}-error" class="text-xs text-red-500 dark:text-red-400">{colorError}</p>
-													{/if}
-													<div class="flex flex-wrap gap-1">
-														{#each colorPresets as preset}
-															<button
-																type="button"
-																onclick={() => { propValues[prop] = preset.value; pendingColorValues[prop] = preset.value; }}
-																class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
-																style="background-color: {preset.value}"
-																title={preset.name}
-															></button>
-														{/each}
-													</div>
-												</div>
-											{:else if isBooleanProp(prop)}
-												<label class="flex items-center gap-3 cursor-pointer">
-													<input type="checkbox" bind:checked={propValues[prop]} class="w-5 h-5 rounded" />
-													<span class="text-sm text-foreground-muted">{propValues[prop] !== false ? 'Enabled' : 'Disabled'}</span>
-												</label>
-											{:else if hasOptions(prop)}
-												<select
-													id="prop-{prop}"
-													bind:value={propValues[prop]}
-													class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm"
-												>
-													<option value={undefined}>Default</option>
-													{#each getOptions(prop) as option}
-														<option value={option}>{option}</option>
-													{/each}
-												</select>
-											{:else if isNumericProp(prop)}
-												{@const range = getNumericRange(prop)}
-												<div class="space-y-1">
-													<input
-														id="prop-{prop}"
-														type="range"
-														min={range.min}
-														max={range.max}
-														step={range.step}
-														bind:value={propValues[prop]}
-														class="w-full"
-														aria-valuemin={range.min}
-														aria-valuemax={range.max}
-														aria-valuenow={propValues[prop] ?? range.min}
-													/>
-													<div class="flex justify-between text-xs text-foreground-faint">
-														<span>{range.min}</span>
-														<span class="font-medium text-foreground-muted">{propValues[prop]?.toFixed(range.step < 1 ? 1 : 0) ?? 'default'}</span>
-														<span>{range.max}</span>
-													</div>
-												</div>
-											{:else}
+											<div class="flex gap-2 items-center">
 												<input
 													id="prop-{prop}"
-													type="text"
-													bind:value={propValues[prop]}
-													placeholder="Default"
-													class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm"
+													type="color"
+													value={propValues[prop] ?? '#16a34a'}
+													oninput={(e) => propValues[prop] = e.currentTarget.value}
+													class="w-10 h-10 rounded cursor-pointer border"
 												/>
+												<input
+													type="text"
+													value={pendingColorValues[prop] ?? propValues[prop] ?? ''}
+													oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
+													placeholder="#16a34a"
+													class="flex-1 px-3 py-2 rounded-lg border bg-white font-mono text-sm {colorError ? 'border-red-400' : ''}"
+												/>
+											</div>
+											{#if colorError}
+												<p class="text-xs text-red-500">{colorError}</p>
 											{/if}
+											<div class="flex flex-wrap gap-1">
+												{#each colorPresets as preset}
+													<button
+														type="button"
+														onclick={() => { propValues[prop] = preset.value; pendingColorValues[prop] = preset.value; }}
+														class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+														style="background-color: {preset.value}"
+														title={preset.name}
+													></button>
+												{/each}
+											</div>
 										</div>
-									{/each}
+									{:else if isBooleanProp(prop)}
+										<label class="flex items-center gap-3 cursor-pointer">
+											<input type="checkbox" bind:checked={propValues[prop]} class="w-5 h-5 rounded" />
+											<span class="text-sm">{propValues[prop] !== false ? 'Enabled' : 'Disabled'}</span>
+										</label>
+									{:else if hasOptions(prop)}
+										<select
+											id="prop-{prop}"
+											bind:value={propValues[prop]}
+											class="w-full px-3 py-2 rounded-lg border bg-white text-sm"
+										>
+											<option value={undefined}>Default</option>
+											{#each getOptions(prop) as option}
+												<option value={option}>{option}</option>
+											{/each}
+										</select>
+									{:else if isNumericProp(prop)}
+										{@const range = getNumericRange(prop)}
+										<div class="space-y-1">
+											<input
+												id="prop-{prop}"
+												type="range"
+												min={range.min}
+												max={range.max}
+												step={range.step}
+												bind:value={propValues[prop]}
+												class="w-full"
+											/>
+											<div class="flex justify-between text-xs text-stone-500">
+												<span>{range.min}</span>
+												<span class="font-medium">{propValues[prop]?.toFixed(range.step < 1 ? 1 : 0) ?? 'default'}</span>
+												<span>{range.max}</span>
+											</div>
+										</div>
+									{:else}
+										<input
+											id="prop-{prop}"
+											type="text"
+											bind:value={propValues[prop]}
+											placeholder="Default"
+											class="w-full px-3 py-2 rounded-lg border bg-white text-sm"
+										/>
+									{/if}
 								</div>
-							{/if}
-
-							<!-- Reset button -->
-							<button
-								type="button"
-								onclick={() => propValues = {}}
-								class="w-full px-4 py-2 rounded-lg border border-divider text-foreground-muted hover:bg-surface transition-colors text-sm"
-							>
-								Reset to Defaults
-							</button>
+							{/each}
 						</div>
-					</div>
+					{/if}
+
+					<button
+						type="button"
+						onclick={() => propValues = {}}
+						class="w-full px-4 py-2 rounded-lg border text-sm hover:bg-stone-50 transition-colors"
+					>
+						Reset to Defaults
+					</button>
 				</div>
-			{/if}
+			</div>
 		</div>
 	</section>
 
 	<!-- Typography Section -->
-	<section class="py-8 px-6">
-		<div class="max-w-5xl mx-auto">
-			<!-- Section Header -->
-			<button
-				type="button"
-				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
-				onclick={() => expandedSection = expandedSection === 'typography' ? null : 'typography'}
-				aria-expanded={expandedSection === 'typography'}
-				aria-controls="typography-section-content"
-			>
-				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40">
-						<Type class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+	<section class="mb-16">
+		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+			<Type class="w-6 h-6 text-purple-600" />
+			Typography (10 Fonts)
+		</h2>
+
+		<div class="space-y-6">
+			<!-- FontProvider -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;FontProvider&gt;</code></h3>
+				<div class="space-y-4">
+					<div class="flex flex-wrap gap-2">
+						{#each fonts as f}
+							<button
+								class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-purple-600 text-white' : 'bg-stone-100 hover:bg-stone-200'}"
+								onclick={() => selectedFont = f.id as FontId}
+							>{f.name}</button>
+						{/each}
 					</div>
-					<div class="text-left">
-						<h2 class="text-xl font-serif text-foreground">Typography</h2>
-						<p class="text-sm text-foreground-muted">10 curated fonts for every mood - from cozy headers to crisp code</p>
-					</div>
-				</div>
-				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'typography' ? 'rotate-180' : ''}" aria-hidden="true" />
-			</button>
-
-			{#if expandedSection === 'typography'}
-				<div id="typography-section-content" class="space-y-8 animate-in slide-in-from-top-2 duration-300">
-					<!-- FontProvider (Dynamic Selection) -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4 flex flex-wrap items-center gap-2">
-							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;FontProvider&gt;</code>
-							<span class="text-sm font-normal text-foreground-muted">Dynamic font selection</span>
-						</h3>
-
-						<div class="space-y-4">
-							<div class="flex flex-wrap gap-1.5 sm:gap-2">
-								{#each fonts as f}
-									<button
-										class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-foreground hover:bg-slate-200 dark:hover:bg-slate-600'}"
-										onclick={() => selectedFont = f.id as FontId}
-									>{f.name}</button>
-								{/each}
-							</div>
-							<div class="p-4 sm:p-6 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-white/60 dark:border-slate-600/60">
-								<div class="flex items-center justify-between mb-3">
-									<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium">
-										<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-										{fonts.find(f => f.id === selectedFont)?.name}
-									</span>
-									<span class="text-xs text-foreground-faint">{fonts.find(f => f.id === selectedFont)?.category}</span>
-								</div>
-								<FontProvider font={selectedFont} as="p" class="text-xl sm:text-2xl text-foreground">
-									The quick brown fox jumps over the lazy dog.
-								</FontProvider>
-								<p class="text-sm text-foreground-muted mt-2">
-									{fonts.find(f => f.id === selectedFont)?.description}
-								</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- Display Fonts -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Display & Special Fonts</h3>
-						<p class="text-sm text-foreground-muted mb-4">Eye-catching fonts for headers and special moments</p>
-						<div class="space-y-3 sm:space-y-4">
-							<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg">
-								<Alagard as="h2" class="text-2xl text-purple-900 dark:text-purple-100 mb-2">
-									Welcome to the Fantasy Realm
-								</Alagard>
-								<p class="text-sm text-purple-700 dark:text-purple-300">Alagard - pixel art medieval display font</p>
-							</div>
-							<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/40 dark:to-orange-900/40 rounded-lg">
-								<Calistoga as="h2" class="text-2xl text-amber-900 dark:text-amber-100 mb-2">
-									Friendly Headlines Welcome You
-								</Calistoga>
-								<p class="text-sm text-amber-700 dark:text-amber-300">Calistoga - casual brush serif, warm and inviting</p>
-							</div>
-							<div class="p-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/40 dark:to-pink-900/40 rounded-lg">
-								<Caveat as="h2" class="text-2xl text-rose-900 dark:text-rose-100 mb-2">
-									A personal note just for you...
-								</Caveat>
-								<p class="text-sm text-rose-700 dark:text-rose-300">Caveat - handwritten script, personal and informal</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- Sans-Serif Fonts -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Sans-Serif Fonts</h3>
-						<p class="text-sm text-foreground-muted mb-4">Clean, modern fonts for interfaces and body text</p>
-						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Lexend as="h4" class="text-xl text-foreground mb-1">Lexend (Default)</Lexend>
-								<Lexend as="p" class="text-foreground-muted text-sm">Modern, highly readable. Grove's default font.</Lexend>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Quicksand as="h4" class="text-xl text-foreground mb-1">Quicksand</Quicksand>
-								<Quicksand as="p" class="text-foreground-muted text-sm">Geometric sans with rounded terminals. Light and modern.</Quicksand>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<PlusJakartaSans as="h4" class="text-xl text-foreground mb-1">Plus Jakarta Sans</PlusJakartaSans>
-								<PlusJakartaSans as="p" class="text-foreground-muted text-sm">Contemporary geometric sans. Balanced and versatile.</PlusJakartaSans>
-							</div>
-						</div>
-					</div>
-
-					<!-- Monospace Fonts -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Monospace Fonts</h3>
-						<p class="text-sm text-foreground-muted mb-4">For code, terminals, and technical content</p>
-						<div class="space-y-3 sm:space-y-4">
-							<div class="p-4 bg-slate-900 rounded-lg">
-								<IBMPlexMono as="code" class="text-grove-400 block mb-2">
-									// IBM Plex Mono - corporate warmth
-								</IBMPlexMono>
-								<IBMPlexMono as="pre" class="text-slate-100 text-sm">{`function greet(name: string) {
-  console.log(\`Hello, \${name}!\`);
-}
-greet("Grove");`}</IBMPlexMono>
-							</div>
-							<div class="p-4 bg-purple-950 rounded-lg">
-								<Cozette as="code" class="text-purple-400 block mb-2">
-									# Cozette - retro terminal aesthetic
-								</Cozette>
-								<Cozette as="pre" class="text-purple-100 text-sm">{`$ cd ~/grove
-$ npm run dev
-> Server running at localhost:5173`}</Cozette>
-							</div>
-						</div>
-					</div>
-
-					<!-- Accessibility Fonts -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Accessibility Fonts</h3>
-						<p class="text-sm text-foreground-muted mb-4">Designed for maximum readability and inclusion</p>
-						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
-							<div class="p-4 bg-grove-50 dark:bg-grove-900/40 rounded-lg border border-grove-200 dark:border-grove-700">
-								<Atkinson as="h4" class="text-lg text-grove-900 dark:text-grove-100 mb-2">Atkinson Hyperlegible</Atkinson>
-								<Atkinson as="p" class="text-grove-700 dark:text-grove-300 text-sm">
-									Designed for low vision readers. Maximum character distinction.
-								</Atkinson>
-							</div>
-							<div class="p-4 bg-blue-50 dark:bg-blue-900/40 rounded-lg border border-blue-200 dark:border-blue-700">
-								<OpenDyslexic as="h4" class="text-lg text-blue-900 dark:text-blue-100 mb-2">OpenDyslexic</OpenDyslexic>
-								<OpenDyslexic as="p" class="text-blue-700 dark:text-blue-300 text-sm">
-									Weighted bottoms reduce letter confusion for dyslexic readers.
-								</OpenDyslexic>
-							</div>
-						</div>
-					</div>
-
-					<!-- Usage Example -->
-					<div class="p-4 sm:p-6 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-dashed border-purple-300 dark:border-purple-800">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Usage</h3>
-						<IBMPlexMono as="pre" class="p-4 bg-slate-900 rounded-lg text-slate-100 text-sm overflow-x-auto">{`import { Alagard, Caveat, IBMPlexMono } from '@autumnsgrove/groveengine/ui/typography';
-
-// Fantasy game header
-<Alagard as="h1" class="text-4xl">Welcome to the Grove</Alagard>
-
-// Handwritten note feel
-<Caveat as="p" class="text-2xl">A personal touch...</Caveat>
-
-// Code block
-<IBMPlexMono as="code">console.log('hello');</IBMPlexMono>`}</IBMPlexMono>
+					<div class="p-6 bg-white/60 rounded-lg border">
+						<FontProvider font={selectedFont} as="p" class="text-2xl">
+							The quick brown fox jumps over the lazy dog.
+						</FontProvider>
+						<p class="text-sm text-stone-600 mt-2">
+							{fonts.find(f => f.id === selectedFont)?.description}
+						</p>
 					</div>
 				</div>
-			{/if}
-		</div>
-	</section>
-
-	<!-- Color Palette System - Full Grove palette collection -->
-	<section class="py-12 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-divider">
-		<div class="max-w-4xl mx-auto">
-			<div class="text-center mb-8">
-				<Glass variant="tint" intensity="light" class="inline-block px-8 py-3 rounded-xl">
-					<h2 class="text-2xl font-serif text-foreground">Color Palettes</h2>
-					<p class="text-sm text-foreground-muted mt-1">The complete Grove palette system</p>
-				</Glass>
 			</div>
 
-			<div class="grid md:grid-cols-2 gap-6">
-				<!-- Spring Growth -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(spring) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
+			<!-- Display Fonts -->
+			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
+				<h4 class="font-semibold mb-4">Display Fonts</h4>
+				<div class="space-y-4">
+					<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
+						<Alagard as="h3" class="text-2xl text-purple-900 mb-2">
+							Welcome to the Fantasy Realm
+						</Alagard>
+						<p class="text-sm text-purple-700">Alagard - pixel art medieval display font</p>
 					</div>
-				</Glass>
-
-				<!-- Summer Greens -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(greens) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
+					<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
+						<Calistoga as="h3" class="text-2xl text-amber-900 mb-2">
+							Friendly Headlines Welcome You
+						</Calistoga>
+						<p class="text-sm text-amber-700">Calistoga - casual brush serif</p>
 					</div>
-				</Glass>
-
-				<!-- Autumn Colors -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(autumn) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Autumn Reds -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Reds</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(autumnReds) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Winter Frost -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Winter Frost</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(winter) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Cherry Blossoms -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Cherry Blossoms</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(pinks) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Spring Blossoms -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Blossoms</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(springBlossoms) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Bark & Earth -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Bark & Earth</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(bark) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Earth Tones -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Earth Tones</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(earth) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Natural -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Natural</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(natural) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Midnight Bloom -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Midnight Bloom</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(midnightBloom) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
+				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- Bottom spacer -->
-	<div class="flex-1"></div>
+	<!-- Color Palettes Section -->
+	<section class="mb-16">
+		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+			<Palette class="w-6 h-6 text-pink-600" />
+			Color Palettes
+		</h2>
 
-	<Footer />
-</main>
+		<div class="grid gap-6">
+			<!-- Spring Growth -->
+			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
+				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Spring Growth</h3>
+				<div class="flex flex-wrap gap-2">
+					{#each Object.entries(spring) as [name, color]}
+						<div class="flex flex-col items-center gap-1">
+							<div
+								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+								style="background-color: {color};"
+								title={name}
+							></div>
+							<span class="text-xs text-stone-500">{name}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Summer Greens -->
+			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
+				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Summer Greens</h3>
+				<div class="flex flex-wrap gap-2">
+					{#each Object.entries(greens) as [name, color]}
+						<div class="flex flex-col items-center gap-1">
+							<div
+								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+								style="background-color: {color};"
+								title={name}
+							></div>
+							<span class="text-xs text-stone-500">{name}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Autumn Colors -->
+			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
+				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Autumn Colors</h3>
+				<div class="flex flex-wrap gap-2">
+					{#each Object.entries(autumn) as [name, color]}
+						<div class="flex flex-col items-center gap-1">
+							<div
+								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+								style="background-color: {color};"
+								title={name}
+							></div>
+							<span class="text-xs text-stone-500">{name}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- More palettes... showing just a few for brevity -->
+			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
+				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Midnight Bloom</h3>
+				<div class="flex flex-wrap gap-2">
+					{#each Object.entries(midnightBloom) as [name, color]}
+						<div class="flex flex-col items-center gap-1">
+							<div
+								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+								style="background-color: {color};"
+								title={name}
+							></div>
+							<span class="text-xs text-stone-500">{name}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</section>
+</VineyardLayout>
 
 <!-- Overlay Demo -->
 {#if showOverlayDemo}
 	<GlassOverlay onclick={() => showOverlayDemo = false}>
 		<div class="flex items-center justify-center h-full">
 			<GlassCard variant="frosted" class="max-w-sm mx-4" title="Overlay Demo">
-				<p class="text-foreground-muted">Click anywhere on the backdrop to close this overlay.</p>
+				<p>Click anywhere on the backdrop to close this overlay.</p>
 				<div class="mt-4">
 					<GlassButton variant="accent" onclick={() => showOverlayDemo = false}>Close</GlassButton>
 				</div>
