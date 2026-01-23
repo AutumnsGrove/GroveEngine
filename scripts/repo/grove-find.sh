@@ -49,6 +49,13 @@
 #   gfwip                          # Work in progress status
 #   gfstash                        # List stashes with preview
 #   gfreflog                       # Recent reflog entries
+#   gfissue [n]                    # View issue / list open issues
+#   gfissues [filter]              # Filter issues (label/state/@user)
+#   gfissuerefs <n>                # Find references to issue #n
+#   gfissueboard                   # Board view by labels
+#   gfissuemine                    # My assigned issues
+#   gfissuestale [days]            # Stale issues (no activity)
+#   gfissuelink <file>             # Issues related to a file
 #   gftype                         # Find TypeScript types
 #   gfexport                       # Find module exports
 #   gfauth                         # Find authentication code
@@ -1533,6 +1540,455 @@ gfreflog() {
 }
 
 # =============================================================================
+# GitHub Issues (Task Management)
+# =============================================================================
+
+# gfissue - View a specific issue or list recent open issues
+# Usage: gfissue [number]
+# No args: lists recent open issues. With number: shows full issue details.
+gfissue() {
+    local number="$1"
+
+    if ! command -v gh &> /dev/null; then
+        echo -e "${RED}Error: GitHub CLI (gh) required. Install: brew install gh${NC}"
+        return 1
+    fi
+
+    if [ -z "$number" ]; then
+        # List recent open issues
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+            echo -e "${CYAN}║                    📋 Open Issues                              ║${NC}"
+            echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+        else
+            echo "=== Open Issues ==="
+            echo ""
+        fi
+
+        gh issue list --state open --limit 20 2>/dev/null || echo -e "${RED}  (unable to fetch issues)${NC}"
+
+        local open_count
+        open_count=$(gh issue list --state open --json number 2>/dev/null | grep -c '"number"' || echo "0")
+        echo -e "\n${YELLOW}Total open: $open_count${NC}"
+        echo -e "${GREEN}Use 'gfissue <number>' for details, 'gfissues' for filtering${NC}"
+    else
+        # Show specific issue details
+        if [ -z "$GF_AGENT" ]; then
+            echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+            echo -e "${CYAN}║                    🎫 Issue #$number                               ║${NC}"
+            echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+        else
+            echo "=== Issue #$number ==="
+            echo ""
+        fi
+
+        gh issue view "$number" 2>/dev/null || echo -e "${RED}  Issue #$number not found${NC}"
+
+        # Show related PRs
+        echo -e "\n${PURPLE}═══ Related PRs ═══${NC}"
+        local related_prs
+        related_prs=$(gh pr list --state all --search "#$number" --limit 10 2>/dev/null)
+        if [ -n "$related_prs" ]; then
+            echo "$related_prs"
+        else
+            echo -e "  ${YELLOW}No PRs reference this issue${NC}"
+        fi
+
+        # Show branch references
+        echo -e "\n${PURPLE}═══ Related Branches ═══${NC}"
+        local related_branches
+        related_branches=$(git -C "$GROVE_ROOT" branch -a 2>/dev/null | grep -i "$number" || true)
+        if [ -n "$related_branches" ]; then
+            echo "$related_branches"
+        else
+            echo -e "  ${YELLOW}No branches reference #$number in their name${NC}"
+        fi
+
+        # Show recent commits mentioning this issue
+        echo -e "\n${PURPLE}═══ Commits Mentioning #$number ═══${NC}"
+        local related_commits
+        related_commits=$(git -C "$GROVE_ROOT" log --oneline --all --grep="#$number" 2>/dev/null | head -10)
+        if [ -n "$related_commits" ]; then
+            echo "$related_commits"
+        else
+            echo -e "  ${YELLOW}No commits mention #$number${NC}"
+        fi
+    fi
+}
+
+# gfissues - List issues with flexible filtering
+# Usage: gfissues [filter]
+# Filters: label name, "closed", "all", milestone name, or assignee handle
+# Examples:
+#   gfissues             → Open issues (default)
+#   gfissues closed      → Closed issues
+#   gfissues all         → All issues regardless of state
+#   gfissues bug         → Issues with "bug" label
+#   gfissues @username   → Issues assigned to username
+gfissues() {
+    local filter="$1"
+
+    if ! command -v gh &> /dev/null; then
+        echo -e "${RED}Error: GitHub CLI (gh) required. Install: brew install gh${NC}"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                    📋 Issues (filtered)                        ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Issues (filtered) ==="
+        echo ""
+    fi
+
+    if [ -z "$filter" ]; then
+        # Default: open issues
+        echo -e "${GREEN}Filter: open (default)${NC}\n"
+        gh issue list --state open --limit 30 2>/dev/null
+    elif [ "$filter" = "closed" ]; then
+        echo -e "${GREEN}Filter: closed${NC}\n"
+        gh issue list --state closed --limit 30 2>/dev/null
+    elif [ "$filter" = "all" ]; then
+        echo -e "${GREEN}Filter: all states${NC}\n"
+        gh issue list --state all --limit 30 2>/dev/null
+    elif [[ "$filter" == @* ]]; then
+        # Assignee filter (strip the @)
+        local assignee="${filter#@}"
+        echo -e "${GREEN}Filter: assigned to $assignee${NC}\n"
+        gh issue list --state open --assignee "$assignee" --limit 30 2>/dev/null
+    else
+        # Try as label first
+        echo -e "${GREEN}Filter: label \"$filter\"${NC}\n"
+        local result
+        result=$(gh issue list --state open --label "$filter" --limit 30 2>/dev/null)
+        if [ -n "$result" ]; then
+            echo "$result"
+        else
+            # Fall back to search
+            echo -e "${YELLOW}No issues with label \"$filter\". Trying keyword search...${NC}\n"
+            gh issue list --state open --search "$filter" --limit 30 2>/dev/null
+        fi
+    fi
+}
+
+# gfissuerefs - Find where an issue is referenced across the project
+# Usage: gfissuerefs <number>
+# Searches: commits, code comments, PRs, branches, and TODOS.md
+gfissuerefs() {
+    local number="$1"
+
+    if [ -z "$number" ]; then
+        echo -e "${RED}Usage: gfissuerefs <issue-number>${NC}"
+        echo "  Example: gfissuerefs 42"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                 🔗 References to #$number                         ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== References to #$number ==="
+        echo ""
+    fi
+
+    # 1. Code references (comments, strings mentioning the issue)
+    echo -e "${PURPLE}═══ In Code ═══${NC}"
+    local code_refs
+    code_refs=$("$GROVE_RG" "#$number\b" "$GROVE_ROOT" \
+        --glob '!node_modules' --glob '!dist' --glob '!.git' \
+        --glob '!pnpm-lock.yaml' --glob '!*.lock' \
+        -n 2>/dev/null | head -20)
+    if [ -n "$code_refs" ]; then
+        echo "$code_refs"
+    else
+        echo -e "  ${YELLOW}No code references to #$number${NC}"
+    fi
+
+    # 2. Commit messages
+    echo -e "\n${PURPLE}═══ In Commits ═══${NC}"
+    local commit_refs
+    commit_refs=$(git -C "$GROVE_ROOT" log --oneline --all --grep="#$number" 2>/dev/null | head -15)
+    if [ -n "$commit_refs" ]; then
+        echo "$commit_refs"
+    else
+        echo -e "  ${YELLOW}No commits mention #$number${NC}"
+    fi
+
+    # 3. Branch names
+    echo -e "\n${PURPLE}═══ In Branches ═══${NC}"
+    local branch_refs
+    branch_refs=$(git -C "$GROVE_ROOT" branch -a 2>/dev/null | grep -i "\b$number\b\|issue.*$number\|$number-\|/$number[/-]" || true)
+    if [ -n "$branch_refs" ]; then
+        echo "$branch_refs"
+    else
+        echo -e "  ${YELLOW}No branches reference #$number${NC}"
+    fi
+
+    # 4. PRs (via GitHub CLI)
+    if command -v gh &> /dev/null; then
+        echo -e "\n${PURPLE}═══ In Pull Requests ═══${NC}"
+        local pr_refs
+        pr_refs=$(gh pr list --state all --search "#$number" --limit 10 2>/dev/null)
+        if [ -n "$pr_refs" ]; then
+            echo "$pr_refs"
+        else
+            echo -e "  ${YELLOW}No PRs reference #$number${NC}"
+        fi
+    fi
+
+    # 5. TODOS.md references
+    echo -e "\n${PURPLE}═══ In TODOS.md ═══${NC}"
+    local todo_refs
+    todo_refs=$("$GROVE_RG" "#$number\b" "$GROVE_ROOT/TODOS.md" -n 2>/dev/null || true)
+    if [ -n "$todo_refs" ]; then
+        echo "$todo_refs"
+    else
+        echo -e "  ${YELLOW}Not mentioned in TODOS.md${NC}"
+    fi
+
+    # Summary
+    local total=0
+    if [ -n "$code_refs" ]; then
+        total=$((total + $(echo "$code_refs" | wc -l | tr -d '[:space:]')))
+    fi
+    if [ -n "$commit_refs" ]; then
+        total=$((total + $(echo "$commit_refs" | wc -l | tr -d '[:space:]')))
+    fi
+    if [ -n "$branch_refs" ]; then
+        total=$((total + $(echo "$branch_refs" | wc -l | tr -d '[:space:]')))
+    fi
+    echo -e "\n${GREEN}Total references found: $total${NC}"
+}
+
+# gfissueboard - Board-style overview of open issues grouped by label
+# Usage: gfissueboard
+# Shows issues organized by their labels for a kanban-like view
+gfissueboard() {
+    if ! command -v gh &> /dev/null; then
+        echo -e "${RED}Error: GitHub CLI (gh) required. Install: brew install gh${NC}"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                    📊 Issue Board                              ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Issue Board ==="
+        echo ""
+    fi
+
+    # Get all open issues with their labels as JSON
+    local issues_json
+    issues_json=$(gh issue list --state open --limit 100 --json number,title,labels,assignees,updatedAt 2>/dev/null)
+
+    if [ -z "$issues_json" ] || [ "$issues_json" = "[]" ]; then
+        echo -e "${YELLOW}No open issues found${NC}"
+        return 0
+    fi
+
+    # Get unique labels
+    local labels
+    labels=$(echo "$issues_json" | grep -o '"name":"[^"]*"' | sed 's/"name":"//;s/"//' | sort -u)
+
+    if [ -n "$labels" ]; then
+        while IFS= read -r label; do
+            echo -e "${PURPLE}═══ $label ═══${NC}"
+            gh issue list --state open --label "$label" --limit 10 2>/dev/null | while IFS= read -r line; do
+                echo "  $line"
+            done
+            echo ""
+        done <<< "$labels"
+    fi
+
+    # Show unlabeled issues
+    echo -e "${PURPLE}═══ Unlabeled ═══${NC}"
+    local unlabeled
+    unlabeled=$(echo "$issues_json" | python3 -c "
+import json, sys
+issues = json.load(sys.stdin)
+for i in issues:
+    if not i.get('labels'):
+        print(f\"  #{i['number']}  {i['title']}\")
+" 2>/dev/null || echo "")
+    if [ -n "$unlabeled" ]; then
+        echo "$unlabeled"
+    else
+        echo -e "  ${GREEN}(all issues are labeled)${NC}"
+    fi
+
+    # Summary stats
+    echo -e "\n${PURPLE}═══ Summary ═══${NC}"
+    local total_open
+    total_open=$(echo "$issues_json" | grep -c '"number"' || echo "0")
+    echo -e "  Total open: ${YELLOW}$total_open${NC}"
+
+    local label_counts
+    label_counts=$(echo "$issues_json" | grep -o '"name":"[^"]*"' | sed 's/"name":"//;s/"//' | sort | uniq -c | sort -rn)
+    if [ -n "$label_counts" ]; then
+        echo -e "  ${GREEN}By label:${NC}"
+        echo "$label_counts" | while IFS= read -r line; do
+            echo "    $line"
+        done
+    fi
+}
+
+# gfissuemine - Show issues assigned to you
+# Usage: gfissuemine
+gfissuemine() {
+    if ! command -v gh &> /dev/null; then
+        echo -e "${RED}Error: GitHub CLI (gh) required. Install: brew install gh${NC}"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║                    🙋 My Issues                                ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== My Issues ==="
+        echo ""
+    fi
+
+    local username
+    username=$(gh api user --jq '.login' 2>/dev/null)
+
+    if [ -z "$username" ]; then
+        echo -e "${RED}Could not determine your GitHub username. Run 'gh auth login' first.${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Assigned to: @$username${NC}\n"
+
+    # Open issues assigned to me
+    echo -e "${PURPLE}═══ Open (assigned to me) ═══${NC}"
+    local my_issues
+    my_issues=$(gh issue list --state open --assignee "$username" --limit 30 2>/dev/null)
+    if [ -n "$my_issues" ]; then
+        echo "$my_issues"
+    else
+        echo -e "  ${GREEN}No open issues assigned to you${NC}"
+    fi
+
+    # Recently closed by me
+    echo -e "\n${PURPLE}═══ Recently Closed (by me) ═══${NC}"
+    gh issue list --state closed --assignee "$username" --limit 10 2>/dev/null || \
+        echo -e "  ${YELLOW}(unable to fetch)${NC}"
+
+    # Issues I created
+    echo -e "\n${PURPLE}═══ Created by Me (open) ═══${NC}"
+    gh issue list --state open --author "$username" --limit 10 2>/dev/null || \
+        echo -e "  ${YELLOW}(unable to fetch)${NC}"
+}
+
+# gfissuestale - Find issues with no recent activity
+# Usage: gfissuestale [days]
+# Default: 30 days
+gfissuestale() {
+    local days="${1:-30}"
+
+    if ! command -v gh &> /dev/null; then
+        echo -e "${RED}Error: GitHub CLI (gh) required. Install: brew install gh${NC}"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║               🕸️  Stale Issues (${days}+ days)                      ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Stale Issues (${days}+ days) ==="
+        echo ""
+    fi
+
+    # Calculate the cutoff date
+    local cutoff_date
+    if [[ "$(uname)" == "Darwin" ]]; then
+        cutoff_date=$(date -v-${days}d +%Y-%m-%d)
+    else
+        cutoff_date=$(date -d "$days days ago" +%Y-%m-%d)
+    fi
+
+    echo -e "${YELLOW}Issues with no activity since $cutoff_date:${NC}\n"
+
+    # Get open issues and filter by updatedAt
+    local stale_issues
+    stale_issues=$(gh issue list --state open --limit 100 \
+        --json number,title,labels,updatedAt,assignees \
+        --jq ".[] | select(.updatedAt < \"${cutoff_date}T00:00:00Z\") | \"#\(.number)\t\(.updatedAt[:10])\t\(.title)\"" \
+        2>/dev/null)
+
+    if [ -n "$stale_issues" ]; then
+        echo -e "${GREEN}#\tLast Updated\tTitle${NC}"
+        echo "$stale_issues" | sort -t$'\t' -k2 | head -30
+        local stale_count
+        stale_count=$(echo "$stale_issues" | wc -l | tr -d ' ')
+        echo -e "\n${YELLOW}Total stale: $stale_count issues${NC}"
+    else
+        echo -e "${GREEN}No stale issues! All issues have activity within $days days.${NC}"
+    fi
+}
+
+# gfissuelink - Find issues related to a specific file
+# Usage: gfissuelink <file-path>
+# Searches commit history for issue references touching that file
+gfissuelink() {
+    local filepath="$1"
+
+    if [ -z "$filepath" ]; then
+        echo -e "${RED}Usage: gfissuelink <file-path>${NC}"
+        echo "  Example: gfissuelink src/routes/+page.svelte"
+        return 1
+    fi
+
+    if [ -z "$GF_AGENT" ]; then
+        echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║              🔗 Issues Related to File                         ║${NC}"
+        echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}\n"
+    else
+        echo "=== Issues Related to File ==="
+        echo ""
+    fi
+
+    echo -e "${GREEN}File:${NC} $filepath\n"
+
+    # Find commits that touched this file and mentioned issues
+    echo -e "${PURPLE}═══ Commits with Issue Refs ═══${NC}"
+    local issue_commits
+    issue_commits=$(git -C "$GROVE_ROOT" log --oneline --all -- "$filepath" 2>/dev/null | \
+        grep -E '#[0-9]+' | head -20)
+    if [ -n "$issue_commits" ]; then
+        echo "$issue_commits"
+    else
+        echo -e "  ${YELLOW}No commits mentioning issues found for this file${NC}"
+    fi
+
+    # Extract unique issue numbers from those commits
+    echo -e "\n${PURPLE}═══ Referenced Issues ═══${NC}"
+    local issue_numbers
+    issue_numbers=$(git -C "$GROVE_ROOT" log --oneline --all -- "$filepath" 2>/dev/null | \
+        grep -oE '#[0-9]+' | sort -u | sed 's/#//')
+    if [ -n "$issue_numbers" ]; then
+        if command -v gh &> /dev/null; then
+            while IFS= read -r num; do
+                local issue_info
+                issue_info=$(gh issue view "$num" --json number,title,state \
+                    --jq "\"#\(.number) [\(.state)] \(.title)\"" 2>/dev/null)
+                if [ -n "$issue_info" ]; then
+                    echo "  $issue_info"
+                fi
+            done <<< "$issue_numbers"
+        else
+            echo "$issue_numbers" | sed 's/^/  #/'
+        fi
+    else
+        echo -e "  ${YELLOW}No issue references found in this file's history${NC}"
+    fi
+}
+
+# =============================================================================
 # Type System & Exports
 # =============================================================================
 
@@ -1736,6 +2192,15 @@ GIT & HISTORY
   gfstash [n]         List stashes with preview
   gfreflog [n]        Recent reflog entries (recovery helper)
 
+GITHUB ISSUES (TASK MANAGEMENT)
+  gfissue [n]         View issue #n details, or list open issues
+  gfissues [filter]   Filter issues (label, "closed", "all", @user)
+  gfissuerefs <n>     Find all references to issue #n (code, commits, PRs, branches)
+  gfissueboard        Board view grouped by labels
+  gfissuemine         Issues assigned to you + created by you
+  gfissuestale [days] Issues with no activity in N days (default: 30)
+  gfissuelink <file>  Find issues related to a file (via commit history)
+
 PROJECT HEALTH
   gfgitstats          Full project health snapshot (commits, PRs, issues)
   gfbriefing          Daily TODO briefing (oldest items from TODOS.md + code)
@@ -1766,6 +2231,9 @@ PRO TIPS
   • gfchurn → Find bug-prone hotspots
   • gfpr → Generate PR description before submitting
   • gfgitstats → Quick project health check
+  • gfissuerefs 42 → See everywhere issue #42 is mentioned
+  • gfissueboard → Kanban-style view of your issue backlog
+  • gfissuelink src/file.ts → Which issues touch this file?
 AGENT_HELP
 }
 
@@ -2227,6 +2695,15 @@ gfhelp() {
     echo "  gfwip             - Work in progress status"
     echo "  gfstash [n]       - List stashes with preview"
     echo "  gfreflog [n]      - Recent reflog (recovery helper)"
+    echo ""
+    echo -e "${CYAN}GitHub Issues:${NC}"
+    echo "  gfissue [n]       - View issue details / list open issues"
+    echo "  gfissues [filter] - Filter by label, state, @assignee"
+    echo "  gfissuerefs <n>   - Find issue #n references everywhere"
+    echo "  gfissueboard      - Board view grouped by labels"
+    echo "  gfissuemine       - Your assigned & created issues"
+    echo "  gfissuestale [d]  - Issues with no activity in d days"
+    echo "  gfissuelink <f>   - Issues related to a file"
     echo ""
     echo -e "${CYAN}Project Health:${NC}"
     echo "  gfgitstats        - Full project health snapshot"
