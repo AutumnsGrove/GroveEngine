@@ -1006,6 +1006,18 @@ export const helpArticles: Doc[] = [
     readingTime: 4,
   },
   {
+    slug: "what-is-firefly",
+    title: "What is Firefly?",
+    description:
+      "How Grove uses temporary servers that appear when needed and vanish when done",
+    excerpt:
+      "Some things don't need to run all the time. Firefly is Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Like a firefly in a forest: a brief flash of light, purposeful, then gone.",
+    category: "help",
+    section: "philosophy-vision",
+    lastUpdated: "2026-01-23",
+    readingTime: 4,
+  },
+  {
     slug: "wanderers-and-pathfinders",
     title: "Wanderers and Pathfinders",
     description:

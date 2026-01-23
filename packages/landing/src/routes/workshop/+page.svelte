@@ -451,6 +451,7 @@
 					github: 'https://github.com/AutumnsGrove/GroveMC',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Firefly', icon: 'webhook', description: 'Ephemeral server pattern', href: '/knowledge/help/what-is-firefly' },
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
@@ -482,7 +483,8 @@
 					github: 'https://github.com/AutumnsGrove/GroveBloom',
 					spec: '/knowledge/specs/bloom-spec',
 					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Firefly', icon: 'webhook', description: 'Ephemeral server pattern', href: '/knowledge/help/what-is-firefly' }
 					]
 				},
 				{
