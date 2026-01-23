@@ -204,18 +204,18 @@ describe("SSRF Protection (real validator)", () => {
   });
 
   describe("blocks URL bypass attempts", () => {
-    // TODO: SSRF gap — userinfo in URL bypasses regex-based pattern matching.
-    // The regex checks raw string `^https?://169.254.` but userinfo prefix
-    // (evil@) shifts the IP past the regex anchor. Fix: check parsed URL.hostname.
-    it("does NOT currently block URL with userinfo (known SSRF gap)", async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        createOGResponse({ "og:title": "Bypassed" }),
-      );
+    it("blocks URL with userinfo prefix (SSRF bypass vector)", async () => {
       const result = await fetchOGMetadata(
         "http://evil@169.254.169.254/latest/meta-data/",
       );
-      // This SHOULD be blocked but currently isn't — regex checks raw string
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe("BLOCKED");
+    });
+
+    it("blocks URL with username and password", async () => {
+      const result = await fetchOGMetadata("http://user:pass@10.0.0.1/admin");
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe("BLOCKED");
     });
 
     it("rejects invalid URLs", async () => {
