@@ -1,6 +1,42 @@
 /**
  * Mock implementations for Cloudflare services (D1, KV, R2)
- * Used for testing the service abstraction layer
+ * Used for testing the service abstraction layer.
+ *
+ * ## Mock D1 — Supported SQL Operations
+ *
+ * The mock D1 uses a simple in-memory SQL parser. It supports:
+ *
+ * | Operation | Features                                                |
+ * |-----------|---------------------------------------------------------|
+ * | SELECT    | WHERE (= ? / IS NULL / IS NOT NULL / AND), ORDER BY, LIMIT |
+ * | INSERT    | Column list + VALUES with positional params             |
+ * | UPDATE    | SET with positional params, WHERE (same as SELECT)      |
+ * | DELETE    | WHERE (same as SELECT), or full table delete            |
+ * | batch()   | Sequential execution of prepared statements             |
+ *
+ * ### NOT Supported (use Miniflare for these):
+ * - OR conditions, LIKE patterns, IN clauses
+ * - JOINs, subqueries, DISTINCT
+ * - GROUP BY / HAVING / aggregate functions
+ * - INSERT ... ON CONFLICT (upsert)
+ * - ALTER TABLE, CREATE TABLE
+ * - Type coercion (values are stored as-is)
+ *
+ * ## Mock KV — Supported Operations
+ * - get, put (with expirationTtl), delete, list (with prefix/cursor/limit)
+ * - getWithMetadata (metadata stored alongside value)
+ * - TTL-based expiration (checked on read)
+ *
+ * ## Mock R2 — Supported Operations
+ * - get, put, delete, head, list (with prefix/cursor/limit)
+ * - Accepts: ArrayBuffer, string, Blob, ReadableStream
+ * - Stores: httpMetadata (contentType, cacheControl), customMetadata
+ * - Returns: R2Object with body as ReadableStream, arrayBuffer(), text(), json()
+ *
+ * ## Helper Functions
+ * - `seedMockD1(db, tableName, rows)` — Pre-populate table data
+ * - `clearMockD1(db)` — Wipe all tables
+ * - `advanceKVTime(kv, ms)` — Simulate time passage for TTL testing
  */
 
 import { vi } from "vitest";
