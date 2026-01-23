@@ -576,9 +576,11 @@ export function createMockR2(): R2Bucket & { _objects: Map<string, R2Entry> } {
     }),
     bodyUsed: false,
     arrayBuffer: vi.fn(async () => entry.body),
+    bytes: vi.fn(async () => new Uint8Array(entry.body)),
     text: vi.fn(async () => new TextDecoder().decode(entry.body)),
     json: vi.fn(async () => JSON.parse(new TextDecoder().decode(entry.body))),
     blob: vi.fn(async () => new Blob([entry.body])),
+    writeHttpMetadata: vi.fn(),
   });
 
   const bucket = {
