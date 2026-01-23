@@ -701,7 +701,12 @@ export function seedMockD1(
   tableName: string,
   rows: MockRow[],
 ): void {
-  db._tables.set(tableName, [...rows]);
+  // Deep-clone each row to prevent Object.assign mutations in UPDATE
+  // from leaking across test boundaries via shared object references
+  db._tables.set(
+    tableName,
+    rows.map((row) => ({ ...row })),
+  );
 }
 
 /**
