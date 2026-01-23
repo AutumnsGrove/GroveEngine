@@ -291,6 +291,41 @@ describe("Songbird: Kestrel Layer", () => {
     expect(result.failedLayer).toBe("kestrel");
   });
 
+  it("should reject when Kestrel JSON has wrong types (runtime validation)", async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockOpenRouterResponse("SAFE"),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () =>
+          mockOpenRouterResponse(
+            // valid JSON, but wrong types — "yes" is truthy but not boolean
+            JSON.stringify({
+              valid: "yes",
+              confidence: "high",
+              reason: 123,
+            }),
+          ),
+      });
+
+    const providers = {
+      openrouter: (
+        await import("./providers/openrouter.js")
+      ).createOpenRouterProvider("test-key"),
+    };
+
+    const result = await runSongbird(
+      "Legitimate request",
+      "generation",
+      providers,
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.failedLayer).toBe("kestrel");
+  });
+
   it("should reject when Kestrel inference throws (fail-closed)", async () => {
     fetchMock
       .mockResolvedValueOnce({

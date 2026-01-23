@@ -75,7 +75,12 @@ export interface LumenRequestOptions {
   /** Enable streaming response */
   stream?: boolean;
 
-  /** Skip quota check (for internal/system calls or BYOK users) */
+  /**
+   * Skip quota enforcement for this request.
+   * Use for system/admin operations or BYOK users who pay via their own key.
+   * When true, the request still routes through Lumen's pipeline but won't
+   * count toward the tenant's daily limits or reject on quota exhaustion.
+   */
   skipQuota?: boolean;
 
   /** Skip PII scrubbing (for already-sanitized content) */

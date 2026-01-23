@@ -202,17 +202,25 @@ export async function runSongbird(
 
     metrics.kestrelMs = Date.now() - kestrelStart;
 
-    // Parse JSON response — fail-closed on parse error
-    const parsed = JSON.parse(kestrelResponse.content.trim()) as {
-      valid: boolean;
-      confidence: number;
-      reason: string;
-    };
+    // Parse JSON response — fail-closed on parse error or unexpected shape
+    const raw = JSON.parse(kestrelResponse.content.trim());
 
-    const confidence = parsed.confidence ?? 0;
-    const reason = parsed.reason ?? "No reason provided";
+    // Runtime validation: reject if response doesn't match expected shape
+    if (
+      typeof raw !== "object" ||
+      raw === null ||
+      typeof raw.valid !== "boolean" ||
+      typeof raw.confidence !== "number" ||
+      typeof raw.reason !== "string"
+    ) {
+      metrics.kestrelMs = Date.now() - kestrelStart;
+      return { passed: false, failedLayer: "kestrel", metrics };
+    }
 
-    if (!parsed.valid || confidence < threshold) {
+    const confidence: number = raw.confidence;
+    const reason: string = raw.reason;
+
+    if (!raw.valid || confidence < threshold) {
       return {
         passed: false,
         failedLayer: "kestrel",

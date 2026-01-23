@@ -123,6 +123,18 @@ export class LumenClient {
         songbirdOpts,
       );
 
+      // Log metrics for threshold tuning over time
+      if (songbirdResult.metrics.canaryMs || songbirdResult.metrics.kestrelMs) {
+        console.log(
+          `[Lumen/Songbird] task=${request.task} passed=${songbirdResult.passed}` +
+            ` canary=${songbirdResult.metrics.canaryMs ?? "-"}ms` +
+            ` kestrel=${songbirdResult.metrics.kestrelMs ?? "-"}ms` +
+            (songbirdResult.confidence != null
+              ? ` confidence=${songbirdResult.confidence}`
+              : ""),
+        );
+      }
+
       if (!songbirdResult.passed) {
         throw new LumenError(
           "Content failed security validation",

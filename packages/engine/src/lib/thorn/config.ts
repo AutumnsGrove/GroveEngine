@@ -10,6 +10,16 @@
 import type { ThornConfig, ThornContentType, ThornAction } from "./types.js";
 
 // =============================================================================
+// Global Thresholds
+// =============================================================================
+
+/** Below this confidence, always allow (model isn't sure enough to act) */
+const GLOBAL_ALLOW_BELOW = 0.4;
+
+/** Above this confidence, always block (model is very sure of harm) */
+const GLOBAL_BLOCK_ABOVE = 0.95;
+
+// =============================================================================
 // Default Configuration
 // =============================================================================
 
@@ -24,11 +34,8 @@ import type { ThornConfig, ThornContentType, ThornAction } from "./types.js";
  * - Categories map to Lumen's LlamaGuard output (S1-S7 mapped to named categories)
  */
 export const THORN_CONFIG: ThornConfig = {
-  // Below this confidence, always allow (model isn't sure enough)
-  globalAllowBelow: 0.4,
-
-  // Above this confidence, always block (model is very sure)
-  globalBlockAbove: 0.95,
+  globalAllowBelow: GLOBAL_ALLOW_BELOW,
+  globalBlockAbove: GLOBAL_BLOCK_ABOVE,
 
   contentTypes: {
     // ─────────────────────────────────────────────────────────────────────────
