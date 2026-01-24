@@ -628,5 +628,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 21, 2026 — Added Burrow (cross-property access)*
+*Last updated: January 24, 2026 — Added Etch (link saving & highlights)*
 *Status: Placeholder names, pending launch*
