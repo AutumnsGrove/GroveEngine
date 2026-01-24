@@ -490,6 +490,49 @@ The extension is the primary entry point. It should feel instant and invisible:
 
 ---
 
+## Performance Considerations
+
+### Parallelise Independent D1 Queries
+
+Each D1 query carries 100–300 ms of network latency. Etch's primary data-loading
+patterns involve multiple independent reads — these **must** run in parallel via
+`Promise.all()` with individual error handling (per AGENT.md lessons learned).
+
+**Dashboard / Plate view load:**
+
+```typescript
+// ✅ Parallel — plates, grooves, and etchings are independent reads
+const [plates, grooves, etchings] = await Promise.all([
+  db.prepare("SELECT * FROM plates WHERE tenant_id = ?").bind(tenantId).all()
+    .catch(err => { console.warn("Plates failed:", err); return { results: [] }; }),
+  db.prepare("SELECT * FROM grooves WHERE tenant_id = ?").bind(tenantId).all()
+    .catch(err => { console.warn("Grooves failed:", err); return { results: [] }; }),
+  db.prepare("SELECT * FROM etchings WHERE tenant_id = ? AND plate_id = ? ORDER BY created_at DESC LIMIT 50")
+    .bind(tenantId, plateId).all()
+    .catch(err => { console.warn("Etchings failed:", err); return { results: [] }; }),
+]);
+```
+
+**Etching detail view:**
+
+```typescript
+// ✅ Parallel — etching metadata and its scores are independent
+const [etching, scores] = await Promise.all([
+  db.prepare("SELECT * FROM etchings WHERE id = ? AND tenant_id = ?")
+    .bind(etchingId, tenantId).first()
+    .catch(err => { console.warn("Etching fetch failed:", err); return null; }),
+  db.prepare("SELECT * FROM scores WHERE etching_id = ? AND tenant_id = ? ORDER BY position_start")
+    .bind(etchingId, tenantId).all()
+    .catch(err => { console.warn("Scores fetch failed:", err); return { results: [] }; }),
+]);
+```
+
+**When NOT to parallelise:** When Query B depends on Query A's result — e.g.,
+fetching an etching first, then checking if the parent Plate is public before
+returning Proof data.
+
+---
+
 ## Security Considerations
 
 ### XSS via Cached Content
@@ -545,6 +588,15 @@ search results, Proofs, and export. Malicious content could inject HTML/JS.
   within reasonable bounds (max 10,000,000 — no page is longer than this)
 - Sanitize `selector` field: allowlist alphanumeric, `.`, `#`, `>`, ` `, `-`, `_`
   only — reject anything else
+
+### CSRF Protection
+
+Etch operates as a standalone app at `etch.grove.place` — not on per-tenant
+subdomains (e.g., `alice.grove.place`). This means SvelteKit's built-in CSRF
+protection (origin checking) works correctly without the `trustedOrigins`
+workaround required by multi-tenant subdomain routing. The browser extension
+communicates via the authenticated API (`api.etch.grove.place`), which validates
+Bearer tokens rather than relying on cookie-based CSRF.
 
 ---
 
