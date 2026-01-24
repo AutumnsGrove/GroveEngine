@@ -251,4 +251,6 @@ export type FineprintSection =
   | "support"
   | "centennial"
   | "included"
-  | "ownership";
+  | "ownership"
+  | "ai"
+  | "api";

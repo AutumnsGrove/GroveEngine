@@ -80,6 +80,20 @@
 			content:
 				"Grove is designed around portability. Export everything at any time. If we ever register a domain for you, you own it — transfer it whenever you want, no fees, no questions.",
 		},
+		ai: {
+			title: "AI Features",
+			content:
+				"Every Grove blog is protected by Shade — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include Wisp, a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and Fireside mode. Seedling: 100 assists/day. Sapling: 500/day. Oak: 2,000/day. Evergreen: 10,000/day.",
+			detail:
+				"Wisp is a helper, not a writer — it never generates content from scratch. Fireside mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation (Thorn) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.",
+		},
+		api: {
+			title: "API Access",
+			content:
+				"Oak and Evergreen tiers include API access for building custom integrations, automated publishing, and programmatic blog management. Oak: REST API with standard rate limits and webhook support. Evergreen: Priority API access with higher rate limits and dedicated endpoints.",
+			detail:
+				"Seedling and Sapling blogs are accessible via RSS feeds and standard web protocols. Full programmatic API access is reserved for Oak+ to ensure platform stability. API documentation will be available at launch.",
+		},
 	};
 
 	// Which sections to display
