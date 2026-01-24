@@ -194,6 +194,16 @@ when you saved it.
 - Images and assets preserved
 - Your scores persist on the cached copy
 
+**R2 storage strategy:**
+- **Lazy caching** — Content is only fetched and stored when a Wanderer
+  explicitly requests deep etch (not on every save)
+- **Compression** — HTML content is gzip-compressed before R2 storage
+- **Deduplication** — Multiple etchings pointing to the same URL share one
+  R2 object (keyed by content hash). Reference counting tracks when the
+  last etching referencing an impression is deleted
+- **TTL refresh** — Re-fetch on explicit user request ("refresh impression"),
+  not automatically, to respect source servers
+
 *"The blog shut down last year. But my impression still has every word."*
 
 #### AI-Assisted Grooves
@@ -465,6 +475,64 @@ The extension is the primary entry point. It should feel instant and invisible:
 - CSV
 - Obsidian-compatible (highlights as block references)
 - Notion
+
+---
+
+## Security Considerations
+
+### XSS via Cached Content
+
+Deep Etch impressions store full HTML from arbitrary websites. Serving this
+content directly creates XSS vectors.
+
+**Mitigations:**
+- Strip all `<script>` tags and inline event handlers (`onclick`, `onerror`, etc.)
+- Render cached content in a sandboxed iframe: `sandbox="allow-same-origin"`
+- Serve impressions from a separate origin (`impressions.etch.grove.place`)
+  to isolate cookies and storage from the main app
+- Apply strict Content-Security-Policy headers:
+  `default-src 'none'; img-src *; style-src 'unsafe-inline'`
+- Run HTML through a sanitizer (e.g., DOMPurify server-side equivalent)
+  during the Bite process, not at render time
+
+### SSRF via URL Fetching
+
+The Bite process fetches arbitrary URLs provided by the Wanderer. Without
+validation, this could scan internal networks or access localhost services.
+
+**Mitigations:**
+- Block private/reserved IP ranges before fetching:
+  `127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`
+- Block localhost, `0.0.0.0`, and IPv6 loopback (`::1`)
+- Resolve DNS before connecting and validate the resolved IP (prevent DNS rebinding)
+- Enforce HTTPS-only for Deep Etch fetches (no `file://`, `ftp://`, `data:` schemes)
+- Delegate fetching to Shutter (which already handles URL validation)
+- Rate limit: max 10 bites per minute per tenant
+
+### Deep Etch Abuse Prevention
+
+Without limits, a bad actor could use Deep Etch to scrape entire websites
+by etching every page.
+
+**Mitigations:**
+- Rate limit deep etch requests: max 50 per hour, 200 per day per tenant
+- Same-domain throttle: max 10 deep etches from the same domain per hour
+- Total storage cap per tier (integrated with Amber quotas)
+- Flag accounts that repeatedly etch large volumes from the same domain
+
+### Score Text Injection
+
+The `scores.text` field stores user-highlighted text and is displayed in
+search results, Proofs, and export. Malicious content could inject HTML/JS.
+
+**Mitigations:**
+- HTML-escape all Score text at render time (never render raw)
+- Limit `text` field to 5000 characters
+- Limit `note` field to 2000 characters
+- Validate `position_start` and `position_end` as non-negative integers
+  within reasonable bounds (max 10,000,000 — no page is longer than this)
+- Sanitize `selector` field: allowlist alphanumeric, `.`, `#`, `>`, ` `, `-`, `_`
+  only — reject anything else
 
 ---
 
