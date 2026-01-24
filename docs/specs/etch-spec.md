@@ -203,6 +203,14 @@ when you saved it.
   last etching referencing an impression is deleted
 - **TTL refresh** — Re-fetch on explicit user request ("refresh impression"),
   not automatically, to respect source servers
+- **Size limits** — Max 5MB per impression after compression; pages exceeding
+  this are stored as text-only (no images/assets)
+- **Quota enforcement** — Deep etch storage counts toward Amber tier quota.
+  When quota is exceeded: existing impressions remain accessible, new deep
+  etches are blocked until space is freed or tier is upgraded
+- **Cleanup** — When an etching is deleted and its impression's reference
+  count hits zero, the R2 object is scheduled for deletion after a 30-day
+  grace period (allows undo)
 
 *"The blog shut down last year. But my impression still has every word."*
 
@@ -339,6 +347,9 @@ CREATE TABLE grooves (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- NOTE: Application layer MUST validate that etching and groove share the same
+-- tenant_id before inserting. D1 doesn't support compound FKs across tables
+-- with different PK structures, so tenant isolation is enforced in code.
 CREATE TABLE etching_grooves (
   etching_id TEXT NOT NULL REFERENCES etchings(id) ON DELETE CASCADE,
   groove_id TEXT NOT NULL REFERENCES grooves(id) ON DELETE CASCADE,
@@ -356,7 +367,7 @@ CREATE TABLE scores (
   text_after TEXT, -- ~50 chars after highlight for text-anchor matching
   position_start INTEGER, -- character offset (fallback)
   position_end INTEGER,
-  selector TEXT, -- CSS selector (sanitized, never trust raw input)
+  selector TEXT, -- CSS selector (MUST sanitize before storage: allow div/p/span/article/section/h1-h6/li/ul/ol, class, id; reject script/iframe/object/embed)
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -367,6 +378,7 @@ CREATE INDEX idx_etchings_starred ON etchings(tenant_id, starred) WHERE starred 
 CREATE INDEX idx_etchings_reminder ON etchings(reminder_at) WHERE reminder_at IS NOT NULL;
 CREATE UNIQUE INDEX idx_grooves_tenant_name ON grooves(tenant_id, name);
 CREATE INDEX idx_scores_etching ON scores(etching_id);
+CREATE INDEX idx_scores_tenant ON scores(tenant_id);
 CREATE INDEX idx_plates_tenant ON plates(tenant_id);
 ```
 
