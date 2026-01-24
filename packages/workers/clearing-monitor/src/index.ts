@@ -4,7 +4,7 @@
  * Automated health monitoring worker for The Clearing status page.
  *
  * Cron schedules:
- * - Every 2 minutes: Health checks for all components
+ * - Every 5 minutes: Health checks for all components
  * - Daily at midnight UTC: Record daily history for uptime visualization
  *
  * Features:
@@ -37,7 +37,7 @@ export default {
    * Cron trigger handler - called by Cloudflare Cron
    *
    * Schedules:
-   * - Every 2 minutes: Run health checks (cron: star-slash-2)
+   * - Every 5 minutes: Run health checks (cron: star-slash-5)
    * - Daily at midnight UTC: Record daily history (cron: 0 0 star star star)
    */
   async scheduled(
@@ -46,7 +46,7 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     const cronTime = new Date(controller.scheduledTime);
-    const isHealthCheck = controller.cron === "*/2 * * * *";
+    const isHealthCheck = controller.cron === "*/5 * * * *";
     const isDailyAggregation = controller.cron === "0 0 * * *";
 
     if (isHealthCheck) {

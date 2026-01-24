@@ -8,6 +8,7 @@
 import type { HealthCheckResult } from "./health-checks";
 import { INCIDENT_THRESHOLDS, EMAIL_FROM } from "./config";
 import { generateUUID } from "./utils";
+import { updateTodayWorstStatus } from "./daily-history";
 
 /**
  * State tracked in KV for each component
@@ -269,6 +270,7 @@ export async function processHealthCheckResult(
   // Maintenance is intentional — just update status, no incidents
   if (isMaintenance) {
     await updateComponentStatus(env.DB, result.componentId, "maintenance");
+    await updateTodayWorstStatus(env, result.componentId, "maintenance");
     state.lastStatus = result.status;
     state.lastCheckAt = result.timestamp;
     await saveComponentState(env.MONITOR_KV, result.componentId, state);
@@ -322,6 +324,7 @@ export async function processHealthCheckResult(
     // (prevents flapping from a single slow check due to CF-to-CF latency)
     if (state.consecutiveFailures >= INCIDENT_THRESHOLDS.CHECKS_TO_DEGRADE) {
       await updateComponentStatus(env.DB, result.componentId, result.status);
+      await updateTodayWorstStatus(env, result.componentId, result.status);
     }
 
     // Check if we should create a new incident

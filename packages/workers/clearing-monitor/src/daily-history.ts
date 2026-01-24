@@ -98,7 +98,53 @@ async function countIncidentsForDate(
 }
 
 /**
- * Record daily status for a single component
+ * Update today's worst status for a component.
+ * Called after each health check to capture status changes in real-time.
+ * Only updates if the new status is worse than what's already recorded.
+ */
+export async function updateTodayWorstStatus(
+  env: DailyHistoryEnv,
+  componentId: string,
+  currentStatus: string,
+): Promise<void> {
+  const today = new Date().toISOString().split("T")[0];
+  const currentPriority = STATUS_PRIORITY[currentStatus] ?? 0;
+
+  // Skip if operational — no need to write "everything is fine" every 5 min
+  if (currentPriority === 0) return;
+
+  // Check existing record for today
+  const existing = await env.DB
+    .prepare(
+      `SELECT status FROM status_daily_history WHERE component_id = ? AND date = ?`,
+    )
+    .bind(componentId, today)
+    .first<{ status: string }>();
+
+  const existingPriority = STATUS_PRIORITY[existing?.status ?? "operational"] ?? 0;
+
+  // Only write if current status is worse than what we've already recorded
+  if (currentPriority > existingPriority) {
+    const id = generateUUID();
+    const now = new Date().toISOString();
+
+    await env.DB
+      .prepare(
+        `INSERT INTO status_daily_history (id, component_id, date, status, incident_count, created_at)
+         VALUES (?, ?, ?, ?, 0, ?)
+         ON CONFLICT(component_id, date)
+         DO UPDATE SET status = excluded.status`,
+      )
+      .bind(id, componentId, today, currentStatus, now)
+      .run();
+  }
+}
+
+/**
+ * Record daily status for a single component.
+ * Health checks already capture worst status in real-time via updateTodayWorstStatus().
+ * This midnight job enriches the record with incident counts, and provides a
+ * fallback status for days where no health check captured a non-operational state.
  */
 async function recordDailyStatusForComponent(
   db: D1Database,
@@ -114,12 +160,14 @@ async function recordDailyStatusForComponent(
   const id = generateUUID();
   const now = new Date().toISOString();
 
+  // If a record already exists (from real-time health checks), only update incident_count.
+  // If no record exists yet, insert with the incident-derived status as fallback.
   await db
     .prepare(
       `INSERT INTO status_daily_history (id, component_id, date, status, incident_count, created_at)
        VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(component_id, date)
-       DO UPDATE SET status = excluded.status, incident_count = excluded.incident_count`,
+       DO UPDATE SET incident_count = excluded.incident_count`,
     )
     .bind(id, componentId, date, worstStatus, incidentCount, now)
     .run();
