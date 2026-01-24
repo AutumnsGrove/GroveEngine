@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/clearing/**'
+      - 'packages/engine/**'
   workflow_dispatch:
 
 jobs:
