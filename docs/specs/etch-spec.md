@@ -3,7 +3,7 @@ title: Etch — Link Saving & Highlights
 description: Externalized memory for the things that matter. Save links, highlight text, carve out what counts.
 category: specs
 specCategory: standalone-tools
-icon: pen-line
+icon: highlighter
 lastUpdated: '2026-01-24'
 aliases: []
 tags:
@@ -77,7 +77,7 @@ carved into your personal plate—permanent, findable, meaningful.
 | **Plate** | A collection of etchings, grouped by theme or project |
 | **Groove** | A tag — the carved channel that gives an etching meaning |
 | **Proof** | A shared/public view of a Plate (like pulling a print) |
-| **Bite** | When the system processes a saved link (fetches metadata, caches content) |
+| **Bite** | When the system processes a saved link — in printmaking, the acid "bites" the plate to form grooves |
 | **Burnish** | To revisit and refine — editing tags, moving between Plates |
 | **Impression** | The cached copy of a page — what remains when the original erodes |
 | **Score** | To highlight text on a page — pressing the line into the surface |
@@ -289,7 +289,7 @@ Invite others to etch into a shared Plate:
 CREATE TABLE etchings (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  plate_id TEXT,
+  plate_id TEXT REFERENCES plates(id) ON DELETE SET NULL,
   url TEXT,
   title TEXT,
   description TEXT,
@@ -307,7 +307,7 @@ CREATE TABLE etchings (
 CREATE TABLE plates (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  parent_id TEXT, -- for nested plates
+  parent_id TEXT REFERENCES plates(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   icon TEXT,
   is_public INTEGER DEFAULT 0, -- proof mode
@@ -319,19 +319,19 @@ CREATE TABLE plates (
 CREATE TABLE grooves (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  name TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE etching_grooves (
-  etching_id TEXT NOT NULL,
-  groove_id TEXT NOT NULL,
+  etching_id TEXT NOT NULL REFERENCES etchings(id) ON DELETE CASCADE,
+  groove_id TEXT NOT NULL REFERENCES grooves(id) ON DELETE CASCADE,
   PRIMARY KEY (etching_id, groove_id)
 );
 
 CREATE TABLE scores (
   id TEXT PRIMARY KEY,
-  etching_id TEXT NOT NULL,
+  etching_id TEXT NOT NULL REFERENCES etchings(id) ON DELETE CASCADE,
   tenant_id TEXT NOT NULL,
   text TEXT NOT NULL, -- the highlighted text
   note TEXT, -- margin annotation
@@ -341,6 +341,15 @@ CREATE TABLE scores (
   selector TEXT, -- CSS selector for re-anchoring
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Indexes
+CREATE INDEX idx_etchings_tenant_plate ON etchings(tenant_id, plate_id);
+CREATE INDEX idx_etchings_tenant_url ON etchings(tenant_id, url);
+CREATE INDEX idx_etchings_starred ON etchings(tenant_id, starred) WHERE starred = 1;
+CREATE INDEX idx_etchings_reminder ON etchings(reminder_at) WHERE reminder_at IS NOT NULL;
+CREATE UNIQUE INDEX idx_grooves_tenant_name ON grooves(tenant_id, name);
+CREATE INDEX idx_scores_etching ON scores(etching_id);
+CREATE INDEX idx_plates_tenant ON plates(tenant_id);
 ```
 
 ### The Bite Process
