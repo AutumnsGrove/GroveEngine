@@ -73,9 +73,6 @@ jobs:
           CATEGORY_PATHS[design]="docs/design-system"
           CATEGORY_PATHS[exhibit]="docs/museum"
 
-          # Categories that should recurse into subdirectories (must match docs-scanner.ts)
-          RECURSIVE_CATEGORIES="specs"
-
           # Check each category
           for category in specs help legal marketing patterns philosophy design exhibit; do
             DIR_PATH="${CATEGORY_PATHS[$category]}"
@@ -86,15 +83,8 @@ jobs:
               continue
             fi
 
-            # Determine if this category should recurse
-            if echo "$RECURSIVE_CATEGORIES" | grep -qw "$category"; then
-              FIND_DEPTH=""
-            else
-              FIND_DEPTH="-maxdepth 1"
-            fi
-
-            # Count actual files (respecting recursion setting)
-            ACTUAL_CAT=$(find "$DIR_PATH" $FIND_DEPTH -name "*.md" -type f ! -name "index.md" ! -name "README.md" 2>/dev/null | wc -l | tr -d ' ')
+            # Count all markdown files recursively
+            ACTUAL_CAT=$(find "$DIR_PATH" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
             ACTUAL_TOTAL=$((ACTUAL_TOTAL + ACTUAL_CAT))
 
             # Track category breakdown if there's a difference
@@ -143,7 +133,7 @@ jobs:
               elif [ "$DAYS_OLD" -gt "$WARN_DAYS" ]; then
                 echo "  ⏰ Aging (${DAYS_OLD} days): $FILENAME"
               fi
-            done < <(find "$DIR_PATH" $FIND_DEPTH -name "*.md" -type f ! -name "index.md" ! -name "README.md" 2>/dev/null)
+            done < <(find "$DIR_PATH" -name "*.md" -type f 2>/dev/null)
           done
 
           echo ""
