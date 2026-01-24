@@ -236,6 +236,12 @@ with its own URL. Useful for:
 
 `etch.grove.place/@autumn/devtools` — Autumn's DevTools proof
 
+**Copyright boundary:** Proofs display links, metadata, and your Scores
+(highlighted text snippets) only. Deep Etch impressions (full cached pages)
+are never served publicly — they're for personal reference only. If the
+original URL is no longer accessible, the Proof shows the etching metadata
+without the cached content.
+
 #### Shared Plates (Collaborative)
 Invite others to etch into a shared Plate:
 - Permission levels: view / etch / manage
@@ -333,12 +339,14 @@ CREATE TABLE scores (
   id TEXT PRIMARY KEY,
   etching_id TEXT NOT NULL REFERENCES etchings(id) ON DELETE CASCADE,
   tenant_id TEXT NOT NULL,
-  text TEXT NOT NULL, -- the highlighted text
+  text TEXT NOT NULL, -- the highlighted text (canonical source of truth)
   note TEXT, -- margin annotation
   color TEXT DEFAULT 'yellow', -- yellow, blue, green, pink
-  position_start INTEGER, -- character offset
+  text_before TEXT, -- ~50 chars before highlight for text-anchor matching
+  text_after TEXT, -- ~50 chars after highlight for text-anchor matching
+  position_start INTEGER, -- character offset (fallback)
   position_end INTEGER,
-  selector TEXT, -- CSS selector for re-anchoring
+  selector TEXT, -- CSS selector (sanitized, never trust raw input)
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -485,9 +493,13 @@ Things to decide before building:
 2. **Storage limits** — How many deep etch impressions before it counts against
    Amber storage? Or does Etch get its own R2 bucket and quota?
 
-3. **Scoring on external pages** — The browser extension can highlight any page.
-   But how do we persist scores when the page DOM changes? CSS selectors +
-   text anchoring? What's the fallback?
+3. **Scoring re-anchoring strategy** — The schema stores three layers for
+   relocating highlights on changed pages: (1) `text_before` + `text` +
+   `text_after` for fuzzy text-anchor matching, (2) sanitized CSS `selector`
+   for fast DOM lookup, (3) character offsets as last resort. The canonical
+   `text` field is the source of truth — if the page changes beyond recognition,
+   the Score survives as a standalone quote. Implementation must sanitize
+   selectors (allowlist tag names, classes, IDs — never execute raw input).
 
 4. **Mobile scoring** — Highlighting text on mobile is fiddly. Do we support it
    in v1 or focus on desktop for scoring?
