@@ -378,16 +378,16 @@ The bite completes in the background, enriching it over the next few seconds.
 
 ## Integration with Grove Services
 
-| Service | Integration |
-|---------|-------------|
-| **Heartwood** | Authentication — your etchings are tied to your Grove identity |
-| **Shutter** | Content distillation — clean page extraction during the bite |
-| **Lumen** | AI gateway — powers Groove suggestions and semantic search |
-| **Ivy** | Email notifications for reminders |
-| **Amber** | Storage accounting — deep etch cache counts toward storage quota |
-| **Rings** | Private analytics — how your etch habits grow over time |
-| **Meadow** | Share a Proof to your feed |
-| **Mycelium** | MCP integration — AI agents can read/write your etchings |
+| Service | Integration | Spec |
+|---------|-------------|------|
+| **Heartwood** | Authentication — your etchings are tied to your Grove identity | [heartwood-spec](./heartwood-spec.md) |
+| **Shutter** | Content distillation — clean page extraction during the bite | [shutter-spec](./shutter-spec.md) |
+| **Lumen** | AI gateway — powers Groove suggestions and semantic search | [lumen-spec](./lumen-spec.md) |
+| **Ivy** | Email notifications for reminders | [ivy-mail-spec](./ivy-mail-spec.md) |
+| **Amber** | Storage accounting — deep etch cache counts toward storage quota | [amber-spec](./amber-spec.md) |
+| **Rings** | Private analytics — how your etch habits grow over time | [rings-spec](./rings-spec.md) |
+| **Meadow** | Share a Proof to your feed | [meadow-spec](./meadow-spec.md) |
+| **Mycelium** | MCP integration — AI agents can read/write your etchings | [mycelium-spec](./mycelium-spec.md) |
 
 ---
 
