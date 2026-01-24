@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
   "lastUpdated": "2026-01-24",
-  "lastAuditedBy": "claude/greptile-pr-feedback",
+  "lastAuditedBy": "claude/fix-issue-546-7TpRh",
   "components": {
-    "total": 186,
+    "total": 187,
     "breakdown": {
       "primitives": 45,
       "nature": 64,
