@@ -94,6 +94,17 @@
 					]
 				},
 				{
+					name: 'Clearing',
+					tagline: 'Status Page',
+					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
+					status: 'live',
+					icon: 'activity',
+					domain: 'status.grove.place',
+					integration: 'Public platform status for all Wanderers',
+					github: 'https://github.com/AutumnsGrove/Clearing',
+					spec: '/knowledge/specs/clearing-spec'
+				},
+				{
 					name: 'Arbor',
 					tagline: 'Admin Panel',
 					description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
@@ -138,17 +149,6 @@
 						{ name: 'Blight', icon: 'triangle-alert', description: 'Emergency kill switch' },
 						{ name: 'Greenhouse', icon: 'warehouse', description: 'Early access testing' }
 					]
-				},
-				{
-					name: 'Clearing',
-					tagline: 'Status Page',
-					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
-					status: 'live',
-					icon: 'activity',
-					domain: 'status.grove.place',
-					integration: 'Public platform status for all Wanderers',
-					github: 'https://github.com/AutumnsGrove/Clearing',
-					spec: '/knowledge/specs/clearing-spec'
 				},
 				{
 					name: 'Amber',
@@ -313,7 +313,7 @@
 					name: 'Trails',
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
-					status: 'live',
+					status: 'building',
 					icon: 'mapplus',
 					integration: 'Available for all Grove blogs',
 					spec: '/knowledge/specs/trails-spec'
@@ -574,17 +574,6 @@
 					spec: '/knowledge/specs/press-spec'
 				},
 				{
-					name: 'Mycelium',
-					tagline: 'MCP Server',
-					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
-					status: 'building',
-					icon: 'circuitboard',
-					domain: 'mycelium.grove.place',
-					integration: 'MCP server for AI agent integration',
-					github: 'https://github.com/AutumnsGrove/GroveMCP',
-					spec: '/knowledge/specs/mycelium-spec'
-				},
-				{
 					name: 'Lumen',
 					tagline: 'AI Gateway',
 					description: 'In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove\'s unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.',
@@ -596,6 +585,17 @@
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
+				},
+				{
+					name: 'Mycelium',
+					tagline: 'MCP Server',
+					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
+					status: 'building',
+					icon: 'circuitboard',
+					domain: 'mycelium.grove.place',
+					integration: 'MCP server for AI agent integration',
+					github: 'https://github.com/AutumnsGrove/GroveMCP',
+					spec: '/knowledge/specs/mycelium-spec'
 				},
 				{
 					name: 'Vista',
