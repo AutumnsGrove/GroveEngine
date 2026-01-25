@@ -7,7 +7,7 @@
  * The Worker:
  * 1. Catches all *.grove.place requests
  * 2. Excludes subdomains that have their own Pages/Workers
- * 3. Proxies to groveengine.pages.dev with X-Forwarded-Host header
+ * 3. Proxies to grove-lattice.pages.dev with X-Forwarded-Host header
  */
 
 export interface Env {
@@ -17,7 +17,7 @@ export interface Env {
 /**
  * Subdomain routing map.
  * Maps subdomains to their target Pages/Workers hostnames.
- * null = use default groveengine.pages.dev
+ * null = use default grove-lattice.pages.dev
  * string = proxy to that hostname
  */
 const SUBDOMAIN_ROUTES: Record<string, string | null> = {

@@ -2,7 +2,7 @@
 # Proxies wildcard subdomain requests to groveengine Pages
 #
 # This worker catches all *.grove.place requests and forwards them
-# to groveengine.pages.dev with the original host in X-Forwarded-Host.
+# to grove-lattice.pages.dev with the original host in X-Forwarded-Host.
 
 name = "grove-router"
 main = "src/index.ts"

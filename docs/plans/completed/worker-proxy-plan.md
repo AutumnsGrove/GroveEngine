@@ -15,14 +15,14 @@ Cloudflare Pages does not support wildcard custom domains (`*.grove.place`). We 
 - Route groups `(tenant)/` and `(apps)/` created
 - Migration `009_create_tenants_only.sql` applied - tenants table exists
 - Test tenant "Dave" created (`dave.grove.place`)
-- Wildcard DNS record `*` → `groveengine.pages.dev` added
+- Wildcard DNS record `*` → `grove-lattice.pages.dev` added
 
 ### What's Blocking
 - Cloudflare Pages won't accept `*.grove.place` as a custom domain
 - Need a Worker to proxy wildcard requests to Pages
 
 ### Existing Infrastructure
-- **groveengine** Pages project (renamed from grove-example-site)
+- **grove-lattice** Pages project (the main engine)
 - **groveauth** Worker for auth-api.grove.place
 - **grove-domains** Pages for domains.grove.place
 - **grove-landing** Pages for grove.place (root)
@@ -87,7 +87,7 @@ export default {
 
     // Proxy to groveengine Pages
     const targetUrl = new URL(request.url);
-    targetUrl.hostname = 'groveengine.pages.dev';
+    targetUrl.hostname = 'grove-lattice.pages.dev';
 
     // Create new request with modified URL
     const proxyRequest = new Request(targetUrl.toString(), {

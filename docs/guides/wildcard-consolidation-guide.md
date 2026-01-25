@@ -285,13 +285,13 @@ export {};
 # - another.grove.place  CNAME  another-site.pages.dev  ❌ DELETE
 
 # Add wildcard:
-*.grove.place  CNAME  groveengine.pages.dev  ✅ ADD
-grove.place    CNAME  groveengine.pages.dev  ✅ KEEP/ADD
+*.grove.place  CNAME  grove-lattice.pages.dev  ✅ ADD
+grove.place    CNAME  grove-lattice.pages.dev  ✅ KEEP/ADD
 ```
 
 ### Step 2: Add Custom Domain to Pages
 
-1. Go to Cloudflare Dashboard → Pages → groveengine
+1. Go to Cloudflare Dashboard → Pages → grove-lattice
 2. Custom domains → Add custom domain
 3. Add `*.grove.place`
 4. Add `grove.place` (if not already)

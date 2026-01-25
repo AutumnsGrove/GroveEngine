@@ -59,7 +59,7 @@ grove-router/src/index.test.ts
 
 **Subdomain Routing:**
 - Known subdomains (auth, admin, ivy, amber, meadow, music, etc.) route to correct Pages projects
-- Unknown subdomains route to tenant blog lookup (grove-example-site.pages.dev)
+- Unknown subdomains route to tenant blog lookup (grove-lattice.pages.dev)
 - `www.grove.place` redirects to `grove.place` with 301
 
 **X-Forwarded-Host (critical, caused real bugs):**
@@ -430,7 +430,7 @@ const response = await worker.fetch(
 );
 
 expect(fetchSpy).toHaveBeenCalledWith(
-  expect.stringContaining("grove-example-site.pages.dev"),
+  expect.stringContaining("grove-lattice.pages.dev"),
   expect.objectContaining({
     headers: expect.any(Headers)
   })
