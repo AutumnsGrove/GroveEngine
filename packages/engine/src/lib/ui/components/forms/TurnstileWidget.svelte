@@ -8,7 +8,6 @@
 	 * The widget is invisible in "managed" mode - users only see it when suspicious.
 	 */
 
-	import { onMount, onDestroy } from 'svelte';
 
 	interface Props {
 		siteKey: string;
@@ -68,20 +67,31 @@
 		});
 	}
 
-	onMount(async () => {
-		try {
-			await loadScript();
-			renderWidget();
-		} catch (err) {
-			console.error('Turnstile load error:', err);
-			onerror?.(err instanceof Error ? err.message : 'Failed to load Turnstile');
-		}
-	});
+	// Load and render Turnstile widget (runs once on mount)
+	let turnstileInitialized = false;
 
-	onDestroy(() => {
-		if (widgetId && window.turnstile) {
-			window.turnstile.remove(widgetId);
+	$effect(() => {
+		// Only initialize once
+		if (!turnstileInitialized) {
+			turnstileInitialized = true;
+
+			(async () => {
+				try {
+					await loadScript();
+					renderWidget();
+				} catch (err) {
+					console.error('Turnstile load error:', err);
+					onerror?.(err instanceof Error ? err.message : 'Failed to load Turnstile');
+				}
+			})();
 		}
+
+		// Always return cleanup (runs on unmount or if effect re-runs)
+		return () => {
+			if (widgetId && window.turnstile) {
+				window.turnstile.remove(widgetId);
+			}
+		};
 	});
 
 	// Reset the widget (useful after form submission)

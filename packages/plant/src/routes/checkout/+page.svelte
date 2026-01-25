@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
@@ -8,6 +7,7 @@
 
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let checkoutInitialized = false;
 
 	// Plan info derived from unified tier config
 	const planNames: Record<string, string> = Object.fromEntries(
@@ -38,27 +38,32 @@
 			: 0
 	);
 
-	onMount(async () => {
-		// Create checkout session and redirect to Lemon Squeezy
-		try {
-			const res = await fetch('/checkout', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
+	// Create checkout session and redirect (runs once on mount)
+	$effect(() => {
+		if (checkoutInitialized) return;
+		checkoutInitialized = true;
 
-			const result = (await res.json()) as { url?: string; error?: string };
+		(async () => {
+			try {
+				const res = await fetch('/checkout', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
 
-			if (result.url) {
-				// Redirect to Lemon Squeezy Checkout
-				window.location.href = result.url;
-			} else if (result.error) {
-				error = result.error;
+				const result = (await res.json()) as { url?: string; error?: string };
+
+				if (result.url) {
+					// Redirect to Lemon Squeezy Checkout
+					window.location.href = result.url;
+				} else if (result.error) {
+					error = result.error;
+					isLoading = false;
+				}
+			} catch (err) {
+				error = 'Unable to initialize checkout. Please try again.';
 				isLoading = false;
 			}
-		} catch (err) {
-			error = 'Unable to initialize checkout. Please try again.';
-			isLoading = false;
-		}
+		})();
 	});
 </script>
 

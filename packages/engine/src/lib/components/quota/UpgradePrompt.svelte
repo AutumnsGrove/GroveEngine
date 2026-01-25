@@ -12,7 +12,6 @@
    * - ARIA attributes for screen readers
    */
 
-  import { onMount } from 'svelte';
   import type { SubscriptionStatus } from '../../groveauth/index.js';
   import { TIERS, getNextTier, formatLimit, type PaidTierKey } from '../../config/tiers.js';
 
@@ -151,24 +150,19 @@
       // Focus the first element after render
       // Use setTimeout to ensure the DOM is ready
       setTimeout(focusFirstElement, 0);
-    } else {
-      // Remove event listener
-      document.removeEventListener('keydown', handleKeyDown);
+    }
 
+    // Always return cleanup to handle both open→closed transitions and unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
       // Restore focus to the previously focused element
       if (previouslyFocusedElement) {
         previouslyFocusedElement.focus();
         previouslyFocusedElement = null;
       }
-    }
-  });
-
-  // Cleanup on unmount
-  onMount(() => {
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
     };
   });
+
 </script>
 
 {#if open}

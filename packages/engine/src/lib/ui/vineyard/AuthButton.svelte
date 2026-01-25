@@ -10,7 +10,6 @@
   import type { AuthButtonProps } from './types.js';
   import { signIn, signOut, getSession } from './auth.js';
   import { LogIn, LogOut } from 'lucide-svelte';
-  import { onMount } from 'svelte';
 
   interface Props extends AuthButtonProps {}
 
@@ -22,11 +21,18 @@
 
   let isAuthenticated = $state(false);
   let isLoading = $state(true);
+  let sessionFetched = false;
 
-  onMount(async () => {
-    const session = await getSession();
-    isAuthenticated = session.user !== null;
-    isLoading = false;
+  // Fetch session on mount (runs once)
+  $effect(() => {
+    if (sessionFetched) return;
+    sessionFetched = true;
+
+    (async () => {
+      const session = await getSession();
+      isAuthenticated = session.user !== null;
+      isLoading = false;
+    })();
   });
 
   function handleSignIn() {
