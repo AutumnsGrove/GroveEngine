@@ -78,7 +78,8 @@
 					status: 'live',
 					icon: 'kayak',
 					integration: 'Routes all *.grove.place subdomain traffic',
-					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router'
+					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router',
+					spec: '/knowledge/specs/passage-spec'
 				},
 			]
 		},
