@@ -447,9 +447,9 @@
 							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['first-frost'].title}</h2>
-					<p class="text-slate-600 dark:text-slate-300 italic">{phases['first-frost'].subtitle}</p>
-					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['first-frost'].title}</h2>
+					<p class="text-slate-700 dark:text-slate-300 italic">{phases['first-frost'].subtitle}</p>
+					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -458,8 +458,8 @@
 							{feature.major ? 'ring-2 ring-slate-400/50 dark:ring-slate-500/40' : ''}">
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div>
-								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
-								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -519,9 +519,9 @@
 							You are here
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases.thaw.title}</h2>
-					<p class="text-slate-600 dark:text-slate-300 italic">{phases.thaw.subtitle}</p>
-					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases.thaw.description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases.thaw.title}</h2>
+					<p class="text-slate-700 dark:text-slate-300 italic">{phases.thaw.subtitle}</p>
+					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases.thaw.description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -536,12 +536,12 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
 									{#if feature.internal}
-										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">Internal</span>
+										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-400">Internal</span>
 									{/if}
 								</div>
-								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -616,9 +616,9 @@
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['first-buds'].title}</h2>
-					<p class="text-slate-600 dark:text-slate-300 italic">{phases['first-buds'].subtitle}</p>
-					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['first-buds'].title}</h2>
+					<p class="text-slate-700 dark:text-slate-300 italic">{phases['first-buds'].subtitle}</p>
+					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -657,8 +657,8 @@
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
-								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
-								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -734,9 +734,9 @@
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['full-bloom'].title}</h2>
-					<p class="text-slate-600 dark:text-slate-300 italic">{phases['full-bloom'].subtitle}</p>
-					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['full-bloom'].title}</h2>
+					<p class="text-slate-700 dark:text-slate-300 italic">{phases['full-bloom'].subtitle}</p>
+					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -765,8 +765,8 @@
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div>
-								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
-								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
