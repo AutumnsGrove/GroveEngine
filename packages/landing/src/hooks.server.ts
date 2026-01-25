@@ -33,7 +33,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   // Skip DB access for prerendered knowledge base routes
   // (adapter-cloudflare throws when accessing platform.env during prerendering)
-  const isPrerenderedRoute = event.route.id?.startsWith("/knowledge/");
+  const routeId = event.route.id;
+  const isPrerenderedRoute =
+    routeId === "/knowledge" || routeId?.startsWith("/knowledge/");
   if (isPrerenderedRoute) {
     return resolve(event);
   }
