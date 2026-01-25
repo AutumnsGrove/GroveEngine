@@ -1,5 +1,5 @@
 ---
-title: Echo — Voice Transcription
+title: Scribe — Voice Transcription
 description: Voice-to-text transcription via Lumen for Flow mode and beyond
 category: specs
 specCategory: features
@@ -14,33 +14,29 @@ tags:
   - accessibility
 ---
 
-# Echo — Voice Transcription
+# Scribe — Voice Transcription
 
 ```
-                         ·  ·  ·
-                      ·        ·
-                   ·              ·
-                ·                    ·
-             ·  ╭──────────────────╮   ·
-          ·    │                    │    ·
-       ·       │   🎤 → ⟨ echo ⟩ → 📝 │       ·
-          ·    │                    │    ·
-             ·  ╰──────────────────╯   ·
-                ·                    ·
-                   ·              ·
-                      ·        ·
-                         ·  ·  ·
+                    ╭───────────────────╮
+                    │                   │
+                    │    🎤  →  📝      │
+                    │                   │
+                    │   You speak.      │
+                    │   The grove       │
+                    │   scribes.        │
+                    │                   │
+                    ╰───────────────────╯
 
-           Voice ripples outward,
-           returns as text.
+            Before keyboards, there were scribes.
+            You spoke; they wrote.
 ```
 
-> _Speak, and let the grove remember._
+> _Speak. The grove scribes._
 
 Voice transcription for Grove. Wanderers can speak their thoughts and watch them bloom into text. Integrated through Lumen—no local model downloads, no device requirements. Just talk.
 
-**Public Name:** Echo
-**Internal Name:** GroveEcho
+**Public Name:** Scribe
+**Internal Name:** GroveScribe
 **Domain:** _(Lumen task type)_
 **Last Updated:** January 2026
 
@@ -48,7 +44,7 @@ Voice transcription for Grove. Wanderers can speak their thoughts and watch them
 
 ## Overview
 
-Echo adds voice-to-text transcription to Grove through Lumen's AI gateway. The primary use case is **Flow mode** (the markdown editor in Arbor), where Wanderers can press-and-hold a button to dictate their writing instead of typing.
+Scribe adds voice-to-text transcription to Grove through Lumen's AI gateway. The primary use case is **Flow mode** (the markdown editor in Arbor), where Wanderers can press-and-hold a button to dictate their writing instead of typing.
 
 ### The Problem
 
@@ -406,9 +402,9 @@ export class LumenClient {
 ### Browser-Side Recording
 
 ```typescript
-// lib/echo/recorder.ts
+// lib/scribe/recorder.ts
 
-export interface EchoRecorderOptions {
+export interface ScribeRecorderOptions {
   /** Callback when recording starts */
   onStart?: () => void;
 
@@ -428,14 +424,14 @@ export interface EchoRecorderOptions {
   sampleRate?: number;
 }
 
-export class EchoRecorder {
+export class ScribeRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private chunks: Blob[] = [];
   private levelInterval: number | null = null;
 
-  constructor(private options: EchoRecorderOptions = {}) {}
+  constructor(private options: ScribeRecorderOptions = {}) {}
 
   /**
    * Request microphone permission and prepare recorder
@@ -624,19 +620,19 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 ```svelte
 <!-- components/flow/VoiceInput.svelte -->
 <script lang="ts">
-  import { EchoRecorder } from '$lib/echo/recorder';
+  import { ScribeRecorder } from '$lib/scribe/recorder';
   import { onMount, onDestroy } from 'svelte';
 
   export let onTranscription: (text: string) => void;
 
-  let recorder: EchoRecorder;
+  let recorder: ScribeRecorder;
   let isRecording = $state(false);
   let isTranscribing = $state(false);
   let audioLevel = $state(0);
   let error = $state<string | null>(null);
 
   onMount(async () => {
-    recorder = new EchoRecorder({
+    recorder = new ScribeRecorder({
       onStart: () => {
         isRecording = true;
         error = null;
@@ -810,7 +806,7 @@ Assuming average recording length of 30 seconds:
 
 ### Phase 2: Flow Mode Integration
 
-- [ ] Create `EchoRecorder` class for browser recording
+- [ ] Create `ScribeRecorder` class for browser recording
 - [ ] Create `VoiceInput.svelte` component
 - [ ] Integrate into Flow mode editor toolbar
 - [ ] Add keyboard shortcut (Cmd+Shift+V or similar)

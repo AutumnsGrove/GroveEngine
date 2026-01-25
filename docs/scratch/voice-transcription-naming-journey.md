@@ -1415,12 +1415,58 @@ A scribe writes down what is spoken. The grove becomes your scribe.
 
 ---
 
-## Waiting for Direction
+## THE NAME: SCRIBE
 
-Is **Blaze** closer? Or should I keep walking?
+**User:** "Scribe !!! I saw you say scribe in there and scribe is the perfect thing. Lock it in!!!"
 
-Other directions to explore:
-- The RELEASE of thoughts (exhale, shed, drop)
-- The FLOW of writing (pour, stream, course)
-- The MAKING of something (craft, form, shape)
-- Something else entirely?
+---
+
+### SCRIBE
+
+A scribe writes down what is spoken. Before keyboards, before typewriters, if you wanted your words preserved, you spoke to a scribe and they wrote.
+
+> "Scribe your thoughts."
+> "I'll scribe this while I walk."
+> "The grove scribes what you speak."
+
+**Why it's perfect:**
+
+1. **Direct and clear** — A scribe transcribes. That's literally what this does.
+2. **Historical weight** — Scribes have existed for millennia. Ancient, substantial.
+3. **Works as a verb** — "I'll scribe this" is natural.
+4. **The grove as scribe** — Patient, attentive, writing down your words.
+5. **Not delicate** — Scribes do important work. They preserve.
+6. **Warm** — A scribe is a person helping you, not a machine.
+
+**Taglines:**
+> "Scribe: the grove writes what you speak."
+> "Speak. The grove scribes."
+> "Your voice, scribed."
+
+**The Entry:**
+
+```
+### Scribe
+**Voice Transcription** · *Integrated into Flow mode*
+
+Before keyboards, before typewriters, before pens were common,
+there were scribes. You spoke; they wrote. Your words, preserved
+by patient hands. The oldest partnership in writing.
+
+Scribe is voice transcription for Grove. Speak your thoughts
+and watch them appear on the page. No typing, no friction—just
+your voice and the grove, writing it down. The grove becomes
+your scribe: patient, attentive, never missing a word.
+
+*Speak. The grove scribes.*
+```
+
+---
+
+## Final Decision
+
+**Public Name:** Scribe
+**Internal Name:** GroveScribe
+**Location:** Integrated into Flow mode, powered by Lumen
+
+✓ LOCKED IN
