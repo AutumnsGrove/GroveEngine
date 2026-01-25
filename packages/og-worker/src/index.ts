@@ -174,6 +174,64 @@ function getColors(variant: Variant): ColorScheme {
 }
 
 // =============================================================================
+// WORD-AWARE TEXT SPLITTING
+// =============================================================================
+
+interface LineSplit {
+  line1: string;
+  line2: string;
+  line3: string;
+  line4: string;
+}
+
+/**
+ * Splits preview text into lines respecting word boundaries.
+ * Used for the fading glass card effect in OG images.
+ * Lines get progressively shorter to account for the fade effect.
+ */
+function splitPreviewIntoLines(
+  text: string | null | undefined,
+  maxCharsPerLine: number[] = [55, 55, 45, 35],
+): LineSplit {
+  const empty = { line1: "", line2: "", line3: "", line4: "" };
+  if (!text?.trim()) return empty;
+
+  // Normalize whitespace (collapse multiple spaces, trim)
+  const normalized = text.replace(/\s+/g, " ").trim();
+  const words = normalized.split(" ");
+  const lines: string[] = ["", "", "", ""];
+  let currentLine = 0;
+
+  for (const word of words) {
+    if (currentLine >= 4) break;
+
+    const wouldBe = lines[currentLine] ? `${lines[currentLine]} ${word}` : word;
+
+    if (wouldBe.length <= maxCharsPerLine[currentLine]) {
+      lines[currentLine] = wouldBe;
+    } else if (lines[currentLine] === "") {
+      // Word too long for empty line - truncate with ellipsis
+      lines[currentLine] =
+        word.slice(0, maxCharsPerLine[currentLine] - 3) + "...";
+      currentLine++;
+    } else {
+      // Current line is full, move to next line
+      currentLine++;
+      if (currentLine < 4) {
+        lines[currentLine] = word;
+      }
+    }
+  }
+
+  return {
+    line1: lines[0],
+    line2: lines[1],
+    line3: lines[2],
+    line4: lines[3],
+  };
+}
+
+// =============================================================================
 // HTML GENERATION - Simplified for Satori performance
 // =============================================================================
 
@@ -188,17 +246,25 @@ function generateHtml(
   // Glass panel on right side with fading text effect
   let rightPanel: string;
   if (preview) {
-    // Split into ~4 lines with decreasing opacity for fade effect
-    const line1 = preview.slice(0, 60);
-    const line2 = preview.slice(60, 120);
-    const line3 = preview.slice(120, 170);
-    const line4 = preview.slice(170, 210);
+    const { line1, line2, line3, line4 } = splitPreviewIntoLines(preview);
+
+    // Only render lines that have content, with decreasing opacity for fade effect
+    const lineConfigs = [
+      { text: line1, opacity: 1.0 },
+      { text: line2, opacity: 0.75 },
+      { text: line3, opacity: 0.5 },
+      { text: line4, opacity: 0.25 },
+    ].filter((config) => config.text);
+
+    const lineElements = lineConfigs
+      .map(
+        ({ text, opacity }) =>
+          `<div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: ${opacity};">${escapeHtml(text)}</div>`,
+      )
+      .join("");
 
     rightPanel = `<div style="display: flex; flex-direction: column; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; padding: 24px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; overflow: hidden;">
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 1;">${line1}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.75;">${line2}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.5;">${line3}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.25;">${line4}</div>
+      ${lineElements}
     </div>`;
   } else {
     rightPanel = `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
@@ -496,7 +562,10 @@ function extractExternalTitle(html: string): string | undefined {
   return match?.[1] ? decodeHtmlEntities(match[1].trim()) : undefined;
 }
 
-function extractExternalFavicon(html: string, baseUrl: URL): string | undefined {
+function extractExternalFavicon(
+  html: string,
+  baseUrl: URL,
+): string | undefined {
   const patterns = [
     /<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']+)["']/i,
     /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut )?icon["']/i,
@@ -520,11 +589,16 @@ function parseExternalOGMetadata(
   return {
     url: url.href,
     domain: extractDomain(url),
-    title: extractExternalMetaContent(html, "og:title") || extractExternalTitle(html),
+    title:
+      extractExternalMetaContent(html, "og:title") ||
+      extractExternalTitle(html),
     description:
       extractExternalMetaContent(html, "og:description") ||
       extractExternalMetaContent(html, "description"),
-    image: resolveExternalUrl(url, extractExternalMetaContent(html, "og:image")),
+    image: resolveExternalUrl(
+      url,
+      extractExternalMetaContent(html, "og:image"),
+    ),
     imageAlt: extractExternalMetaContent(html, "og:image:alt"),
     siteName: extractExternalMetaContent(html, "og:site_name"),
     type: extractExternalMetaContent(html, "og:type"),
@@ -625,9 +699,9 @@ async function handleOGFetch(
     response = await fetch(targetUrl, {
       method: "GET",
       headers: {
-        "User-Agent":
-          "GroveBot/1.0 (+https://grove.place; Open Graph Fetcher)",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "GroveBot/1.0 (+https://grove.place; Open Graph Fetcher)",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
       },
       signal: controller.signal,
@@ -836,7 +910,7 @@ export default {
 
       const title = escapeHtml(rawTitle.slice(0, 80));
       const subtitle = escapeHtml(rawSubtitle.slice(0, 150));
-      const preview = rawPreview ? escapeHtml(rawPreview.slice(0, 400)) : null;
+      const preview = rawPreview ? rawPreview.slice(0, 400) : null;
       const variant = [
         "default",
         "forest",
