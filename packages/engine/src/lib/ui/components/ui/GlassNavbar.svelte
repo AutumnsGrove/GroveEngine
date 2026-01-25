@@ -22,6 +22,17 @@
 	 *   {/snippet}
 	 * </GlassNavbar>
 	 * ```
+	 *
+	 * @example With custom logo area
+	 * ```svelte
+	 * <GlassNavbar>
+	 *   {#snippet logo()}
+	 *     <a href="/">Home</a>
+	 *     <span>/</span>
+	 *     <span>Section</span>
+	 *   {/snippet}
+	 * </GlassNavbar>
+	 * ```
 	 */
 
 	interface Props {
@@ -35,6 +46,8 @@
 		maxWidth?: 'narrow' | 'default' | 'wide';
 		/** Additional CSS classes */
 		class?: string;
+		/** Custom logo area (replaces default Logo + title) */
+		logo?: Snippet;
 		/** Slot for navigation items */
 		navigation?: Snippet;
 		/** Slot for action items (right side) */
@@ -49,6 +62,7 @@
 		showTitle = true,
 		maxWidth = 'default',
 		class: className,
+		logo,
 		navigation,
 		actions,
 		onLogoClick
@@ -79,7 +93,9 @@
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
-			{#if onLogoClick}
+			{#if logo}
+				{@render logo()}
+			{:else if onLogoClick}
 				<button
 					onclick={handleLogoClick}
 					class="flex-shrink-0 transition-transform hover:scale-110 active:scale-95"
@@ -93,7 +109,7 @@
 				</a>
 			{/if}
 
-			{#if showTitle}
+			{#if !logo && showTitle}
 				<a
 					href={logoHref}
 					class="text-lg font-medium text-foreground hover:text-primary transition-colors"
