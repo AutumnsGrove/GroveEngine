@@ -1,6 +1,7 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { CategoryNav } from '@autumnsgrove/groveengine';
   import { toolIcons, stateIcons, type ToolIconKey } from '$lib/utils/icons';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
   import type { ExhibitWing } from '$lib/types/docs';
@@ -32,8 +33,29 @@
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   }
 
-  // TOC state
-  let isMobileTocOpen = $state(false);
+  // CategoryNav sections
+  const navSections = $derived(
+    wings.map(w => ({
+      id: w.id,
+      name: w.name,
+      icon: getIcon(w.icon)
+    }))
+  );
+
+  // CategoryNav items (exhibits grouped by wing)
+  const navItems = $derived(
+    Object.fromEntries(
+      wings.map(w => [
+        w.id,
+        (exhibitsByWing[w.id] ?? []).map(exhibit => ({
+          id: exhibit.slug,
+          title: exhibit.title.split('—')[0].trim(),
+          icon: getIcon(exhibit.icon),
+          description: exhibit.description
+        }))
+      ])
+    )
+  );
 </script>
 
 <SEO
@@ -66,88 +88,14 @@
     </div>
   </section>
 
-  <!-- Floating TOC Icon Navigation (desktop) -->
-  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-3" aria-label="Wing navigation">
-    {#each wings as wing}
-      {@const WingIcon = getIcon(wing.icon)}
-      {@const wingExhibits = exhibitsByWing[wing.id] ?? []}
-      <div class="relative group">
-        <a
-          href="#{getWingId(wing.name)}"
-          class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-violet-200 dark:border-slate-700 hover:bg-violet-100 dark:hover:bg-violet-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-all duration-200 motion-reduce:transition-none"
-          aria-label="Jump to {wing.name}"
-          title="{wing.name} ({wingExhibits.length})"
-        >
-          <WingIcon class="w-5 h-5 {colors.text} {colors.textDark} group-hover:scale-110 motion-reduce:group-hover:scale-100 transition-transform motion-reduce:transition-none" />
-        </a>
-
-        <!-- Exhibits revealed on hover -->
-        {#if wingExhibits.length > 0}
-          <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 motion-reduce:transition-none flex items-center gap-2 flex-wrap justify-end max-w-xs">
-            {#each wingExhibits.slice(0, 6) as exhibit}
-              {@const ExhibitIcon = getIcon(exhibit.icon)}
-              <a
-                href="/knowledge/exhibit/{exhibit.slug}"
-                class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-violet-200 dark:border-slate-700 {colors.text} {colors.textDark} hover:bg-violet-100 dark:hover:bg-violet-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 transition-colors motion-reduce:transition-none whitespace-nowrap"
-                title={exhibit.description}
-              >
-                <ExhibitIcon class="w-3.5 h-3.5" />
-                <span class="text-xs font-medium">{exhibit.title.split('—')[0].trim()}</span>
-              </a>
-            {/each}
-            {#if wingExhibits.length > 6}
-              <span class="text-xs text-foreground-muted">+{wingExhibits.length - 6} more</span>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    {/each}
-  </nav>
-
-  <!-- Floating TOC Button & Dropdown (mobile) -->
-  <div class="fixed bottom-6 right-6 z-grove-fab lg:hidden">
-    <button
-      type="button"
-      onclick={() => isMobileTocOpen = !isMobileTocOpen}
-      class="w-12 h-12 rounded-full bg-violet-500 text-white shadow-lg flex items-center justify-center hover:bg-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none"
-      aria-expanded={isMobileTocOpen}
-      aria-label="Table of contents"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-      </svg>
-    </button>
-
-    {#if isMobileTocOpen}
-      <div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-violet-200 dark:border-slate-700 overflow-hidden max-h-[70vh] overflow-y-auto">
-        <div class="px-4 py-3 border-b border-violet-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
-          <span class="font-medium text-foreground">Navigate</span>
-          <button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded transition-colors motion-reduce:transition-none" aria-label="Close">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="py-2">
-          {#each wings as wing}
-            {@const WingIcon = getIcon(wing.icon)}
-            {@const wingExhibits = exhibitsByWing[wing.id] ?? []}
-            <div class="mb-2">
-              <a
-                href="#{getWingId(wing.name)}"
-                onclick={() => isMobileTocOpen = false}
-                class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-violet-50 dark:hover:bg-violet-900/20 focus-visible:outline-none focus-visible:bg-violet-50 dark:focus-visible:bg-violet-900/20 focus-visible:text-foreground transition-colors motion-reduce:transition-none"
-              >
-                <WingIcon class="w-5 h-5 text-violet-500" />
-                <span class="font-medium">{wing.name}</span>
-                <span class="ml-auto text-xs text-foreground-faint">{wingExhibits.length}</span>
-              </a>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-  </div>
+  <!-- Floating Category Navigation -->
+  <CategoryNav
+    sections={navSections}
+    items={navItems}
+    getItemHref={(item) => `/knowledge/exhibit/${item.id}`}
+    color="violet"
+    ariaLabel="Wing navigation"
+  />
 
   <!-- Wings -->
   <section class="flex-1 py-12 px-6">
