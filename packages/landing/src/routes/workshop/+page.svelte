@@ -141,7 +141,7 @@
 					spec: '/knowledge/specs/flow-spec',
 					subComponents: [
 						{ name: 'Zen', icon: 'focus', description: 'Distraction-free mode' },
-						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
+						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting', href: '/knowledge/help/what-is-fireside' },
 						{ name: 'Draft', icon: 'save', description: 'Auto-save to localStorage' }
 					]
 				},
