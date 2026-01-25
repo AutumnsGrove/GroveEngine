@@ -72,7 +72,7 @@
 	 */
 
 	import type { Season } from '$lib/ui/types/season';
-	import { themeStore } from '$lib/ui/stores/theme';
+	import { browser } from '$app/environment';
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// TYPES
@@ -301,12 +301,34 @@
 	// THEME-AWARE BACKGROUND
 	// ─────────────────────────────────────────────────────────────────────────────
 
-	const { resolvedTheme } = themeStore;
+	// Track the current theme state by watching the document's .dark class directly.
+	// This is more reliable than going through the store, as it reflects the actual
+	// DOM state regardless of how the theme was set (store, localStorage, system pref).
+	let isDarkMode = $state(browser ? document.documentElement.classList.contains('dark') : false);
 
-	// Auto-detect bgVariant from theme when not explicitly set.
-	// SSR-safe: resolvedTheme defaults to 'light' on the server, then updates
-	// reactively on hydration — no mismatch since SVG attributes are reactive.
-	const effectiveBgVariant = $derived(bgVariant ?? ($resolvedTheme === 'dark' ? 'dark' : 'light'));
+	// Watch for theme changes via MutationObserver on the document element
+	$effect(() => {
+		if (!browser) return;
+
+		// Set initial state
+		isDarkMode = document.documentElement.classList.contains('dark');
+
+		// Watch for class changes on <html> element
+		const observer = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === 'class') {
+					isDarkMode = document.documentElement.classList.contains('dark');
+				}
+			}
+		});
+
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+		return () => observer.disconnect();
+	});
+
+	// Auto-detect bgVariant from theme when not explicitly set
+	const effectiveBgVariant = $derived(bgVariant ?? (isDarkMode ? 'dark' : 'light'));
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// DERIVED VALUES
