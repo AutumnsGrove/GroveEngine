@@ -2,7 +2,7 @@
 lastUpdated: '2026-01-25'
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Monday, January 20th 2026
+date modified: Saturday, January 25th 2026
 tags:
   - specifications
   - architecture
@@ -79,7 +79,8 @@ Grove specifications define the architecture, interfaces, and implementation det
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Amber](amber-spec.md)** | Image processing & optimization | Active | R2, Engine |
-| **[Arbor](arbor-spec.md)** | Theme system & customization | Active | Engine, TenantDO |
+| **[Arbor](arbor-spec.md)** | Admin panel & content management | Active | Engine, TenantDO |
+| **[Flow](flow-spec.md)** | Immersive Markdown editor | **Active** | Arbor, Wisp |
 | **[Bloom](bloom-spec.md)** | Email newsletter system | Planned | Resend, TenantDO |
 | **[Clearing](clearing-spec.md)** | Data export & migration tools | Active | D1, R2 |
 | **[Forage](forage-spec.md)** | AI-powered domain discovery | Active | Python, MCP |
@@ -344,6 +345,7 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-25 | 2.6 | Added Flow spec (Markdown editor documentation); corrected Arbor description |
 | 2026-01-20 | 2.5 | Added Grafts spec (feature customization system) |
 | 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
 | 2026-01-13 | 2.3 | Added Shutter web content distillation spec |

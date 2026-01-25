@@ -132,6 +132,20 @@
 					]
 				},
 				{
+					name: 'Flow',
+					tagline: 'The Writing Sanctuary',
+					description: 'Where the current carries you. Flow is Grove\'s immersive Markdown editor—the space inside Arbor where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.',
+					status: 'live',
+					icon: 'penline',
+					integration: 'Built into Arbor',
+					spec: '/knowledge/specs/flow-spec',
+					subComponents: [
+						{ name: 'Zen', icon: 'focus', description: 'Distraction-free mode' },
+						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
+						{ name: 'Draft', icon: 'save', description: 'Auto-save to localStorage' }
+					]
+				},
+				{
 					name: 'Plant',
 					tagline: 'Tenant Onboarding',
 					description: 'Where new growth begins. Plant is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
