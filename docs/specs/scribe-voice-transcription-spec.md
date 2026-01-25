@@ -1207,17 +1207,18 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 ### Accessibility
 
-1. **Keyboard support** — Hold Space or Enter to record (matches Hex pattern)
-2. **Screen reader** — Announce recording state changes
-3. **Visual feedback** — Audio level meter, recording indicator, transcription spinner
-4. **Reduced motion** — Respect `prefers-reduced-motion`, simplify animations
+1. **Keyboard support** — `Cmd+Shift+R` (or `Ctrl+Shift+R`) to record. Avoids conflict with paste-without-formatting (`Cmd+Shift+V`).
+2. **Toggle mode** — For users who find holding keys/buttons difficult, offer click-to-start/click-to-stop as an alternative to hold-to-record. Essential for motor accessibility.
+3. **Screen reader** — Announce recording state changes ("Recording started", "Recording stopped, transcribing...")
+4. **Visual feedback** — Audio level meter, recording indicator, transcription spinner
+5. **Reduced motion** — Respect `prefers-reduced-motion`, simplify animations
 
 ### Error Handling
 
 | Error | User Message |
 |-------|--------------|
 | Microphone denied | "Microphone access is needed for voice input. Check your browser settings." |
-| Quota exceeded | "You've used your daily voice minutes. Upgrade for more, or try again tomorrow." |
+| Quota exceeded | "You've used your daily transcription requests. Upgrade for more, or try again tomorrow." |
 | Network error | "Couldn't reach the server. Check your connection and try again." |
 | Transcription failed | "Couldn't understand that recording. Try speaking more clearly." |
 
@@ -1272,7 +1273,7 @@ Assuming average recording length of 30 seconds:
 - [ ] Create `ScribeRecorder` class for browser recording
 - [ ] Create `VoiceInput.svelte` component
 - [ ] Integrate into Flow mode editor toolbar
-- [ ] Add keyboard shortcut (Cmd+Shift+V or similar)
+- [ ] Add keyboard shortcut (`Cmd+Shift+R` / `Ctrl+Shift+R`)
 - [ ] Handle cursor position and text insertion
 
 ### Phase 3: Polish
@@ -1285,19 +1286,44 @@ Assuming average recording length of 30 seconds:
 
 ### Phase 4: Advanced Features (Future)
 
-- [ ] Real-time streaming transcription (as user speaks)
+- [ ] Real-time streaming transcription (requires OpenRouter—see constraints below)
 - [ ] Voice commands ("new paragraph", "delete that")
 - [ ] Multi-language auto-detection
 - [ ] Integration with Wisp for voice-powered writing assistance
 
 ---
 
+## Technical Constraints
+
+### Streaming Limitation
+
+**Cloudflare Workers AI Whisper does not support streaming.** Audio must be fully uploaded before transcription begins. This means:
+
+- Users speak → recording completes → upload → transcription → response
+- Typical latency: 1-3 seconds for short recordings (under 30s)
+- For longer recordings, latency scales with audio length
+
+If streaming becomes a requirement (showing words as user speaks), the fallback would be OpenRouter's Whisper endpoint, which supports chunked streaming. This would be a Phase 4 enhancement.
+
+### Mobile UX
+
+**Recommendation: Floating Action Button (FAB)**
+
+On mobile, the microphone should be a floating button above the keyboard, not embedded in the keyboard area. Reasons:
+
+- Easier thumb reach
+- Visible regardless of keyboard state
+- Consistent with mobile voice input patterns (iOS dictation, Gboard)
+- 44×44px minimum touch target per accessibility guidelines
+
+---
+
 ## Open Questions
 
-1. **Streaming vs batch** — Start with batch (simpler), add streaming later if latency is an issue?
+1. ~~**Streaming vs batch**~~ — **Decided:** Start with batch. CF Whisper doesn't support streaming. Add OpenRouter streaming in Phase 4 if needed.
 2. **Voice commands** — Should "delete that" work? Or is that scope creep?
-3. **Mobile UX** — Should the button be in the keyboard area or floating?
-4. **Fallback to OpenAI** — Should we add OpenRouter Whisper as a fallback for redundancy?
+3. ~~**Mobile UX**~~ — **Decided:** Floating action button (FAB) above keyboard.
+4. **Fallback to OpenAI** — Should we add OpenRouter Whisper as a fallback for redundancy? (Also enables future streaming.)
 
 ---
 

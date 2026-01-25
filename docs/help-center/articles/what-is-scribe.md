@@ -79,15 +79,18 @@ Scribe runs through Lumen, Grove's AI gateway. Your voice goes to the edge, gets
 
 ## Where you'll find it
 
-Scribe lives in Flow mode—the markdown editor in Arbor. Look for the microphone icon. Hold to record, release to transcribe. Toggle between Raw and Draft mode depending on what you need.
+Scribe lives in Flow mode—the markdown editor in Arbor. Look for the microphone icon. Two ways to record:
 
-The keyboard shortcut is `Cmd+Shift+V` (or `Ctrl+Shift+V` on Windows/Linux) for quick access.
+- **Hold to record** — Press and hold the button (or shortcut), release to stop
+- **Toggle mode** — Click once to start, click again to stop (better for longer recordings or if holding is difficult)
+
+The keyboard shortcut is `Cmd+Shift+R` (or `Ctrl+Shift+R` on Windows/Linux) for quick access.
 
 ## Usage and quotas
 
 Scribe uses your daily AI quota. Raw mode counts as one transcription request. Draft mode counts as two (transcription + the AI structuring step). Check your usage in the Arbor dashboard under Settings → Usage.
 
-Higher tiers get more voice minutes. If you're doing a lot of voice writing, Sapling or above gives you room to breathe.
+Higher tiers get more transcription requests per day. If you're doing a lot of voice writing, Sapling or above gives you room to breathe.
 
 ---
 
