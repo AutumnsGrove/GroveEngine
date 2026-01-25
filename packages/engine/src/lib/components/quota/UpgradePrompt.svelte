@@ -150,15 +150,16 @@
       // Focus the first element after render
       // Use setTimeout to ensure the DOM is ready
       setTimeout(focusFirstElement, 0);
-    } else {
-      // Remove event listener
-      document.removeEventListener('keydown', handleKeyDown);
 
-      // Restore focus to the previously focused element
-      if (previouslyFocusedElement) {
-        previouslyFocusedElement.focus();
-        previouslyFocusedElement = null;
-      }
+      // Cleanup when effect re-runs or component unmounts
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        // Restore focus to the previously focused element
+        if (previouslyFocusedElement) {
+          previouslyFocusedElement.focus();
+          previouslyFocusedElement = null;
+        }
+      };
     }
   });
 

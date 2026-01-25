@@ -19,9 +19,13 @@
   let user = $state<BetterAuthUser | null>(null);
   let isLoading = $state(true);
   let isMenuOpen = $state(false);
+  let sessionFetched = false;
 
-  // Fetch session on mount
+  // Fetch session on mount (runs once)
   $effect(() => {
+    if (sessionFetched) return;
+    sessionFetched = true;
+
     (async () => {
       const session = await getSession();
       user = session.user;

@@ -21,8 +21,13 @@
 
   let isAuthenticated = $state(false);
   let isLoading = $state(true);
+  let sessionFetched = false;
 
+  // Fetch session on mount (runs once)
   $effect(() => {
+    if (sessionFetched) return;
+    sessionFetched = true;
+
     (async () => {
       const session = await getSession();
       isAuthenticated = session.user !== null;

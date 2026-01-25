@@ -67,15 +67,17 @@
 		});
 	}
 
-	// Load and render Turnstile widget
+	// Load and render Turnstile widget (runs once on mount)
+	let turnstileInitialized = false;
+
 	$effect(() => {
-		let currentWidgetId: string | null = null;
+		if (turnstileInitialized) return;
+		turnstileInitialized = true;
 
 		(async () => {
 			try {
 				await loadScript();
 				renderWidget();
-				currentWidgetId = widgetId;
 			} catch (err) {
 				console.error('Turnstile load error:', err);
 				onerror?.(err instanceof Error ? err.message : 'Failed to load Turnstile');
@@ -83,8 +85,9 @@
 		})();
 
 		return () => {
-			if (currentWidgetId && window.turnstile) {
-				window.turnstile.remove(currentWidgetId);
+			// Use the outer widgetId directly (not a stale closure copy)
+			if (widgetId && window.turnstile) {
+				window.turnstile.remove(widgetId);
 			}
 		};
 	});

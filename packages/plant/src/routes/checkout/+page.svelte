@@ -7,6 +7,7 @@
 
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let checkoutInitialized = false;
 
 	// Plan info derived from unified tier config
 	const planNames: Record<string, string> = Object.fromEntries(
@@ -37,8 +38,11 @@
 			: 0
 	);
 
+	// Create checkout session and redirect (runs once on mount)
 	$effect(() => {
-		// Create checkout session and redirect to Lemon Squeezy
+		if (checkoutInitialized) return;
+		checkoutInitialized = true;
+
 		(async () => {
 			try {
 				const res = await fetch('/checkout', {
