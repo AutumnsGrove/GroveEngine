@@ -1,3 +1,11 @@
+---
+title: "Router Naming Journey"
+description: "Internal naming research documenting the journey to naming the router 'Passage'"
+category: "philosophy"
+lastUpdated: "2026-01-25"
+published: false
+---
+
 # Router Naming Journey
 
 > *Taking the router on a walk through the grove.*
