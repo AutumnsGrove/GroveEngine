@@ -15,7 +15,7 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { Button, Input } from '$lib/ui';
-	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts.js';
+	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();

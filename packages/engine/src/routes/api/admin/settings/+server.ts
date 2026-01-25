@@ -3,7 +3,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import { validFontIds } from "$lib/ui/tokens/fonts.js";
+import { validFontIds } from "$lib/ui/tokens/fonts";
 
 export const prerender = false;
 

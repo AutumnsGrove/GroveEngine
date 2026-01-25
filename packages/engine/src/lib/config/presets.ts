@@ -62,4 +62,4 @@ export {
   validFontIds,
   getFontStack as getFontFamily,
   type FontPreset,
-} from "$lib/ui/tokens/fonts.js";
+} from "$lib/ui/tokens/fonts";

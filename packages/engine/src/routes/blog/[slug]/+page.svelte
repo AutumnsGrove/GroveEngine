@@ -1,7 +1,7 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
 	import { Button, Badge } from '$lib/ui';
-	import { fontMap } from '$lib/ui/tokens/fonts.js';
+	import { fontMap } from '$lib/ui/tokens/fonts';
 
 	let { data } = $props();
 
