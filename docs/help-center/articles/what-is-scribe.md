@@ -84,7 +84,7 @@ Scribe lives in Flow mode—the markdown editor in Arbor. Look for the microphon
 - **Hold to record** — Press and hold the button (or shortcut), release to stop
 - **Toggle mode** — Click once to start, click again to stop (better for longer recordings or if holding is difficult)
 
-The keyboard shortcut is `Cmd+Shift+R` (or `Ctrl+Shift+R` on Windows/Linux) for quick access.
+The keyboard shortcut is `Cmd+Shift+U` (or `Ctrl+Shift+U` on Windows/Linux) for quick access. Think "U" for utterance.
 
 ## Usage and quotas
 

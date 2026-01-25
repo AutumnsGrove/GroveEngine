@@ -1207,7 +1207,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 ### Accessibility
 
-1. **Keyboard support** — `Cmd+Shift+R` (or `Ctrl+Shift+R`) to record. Avoids conflict with paste-without-formatting (`Cmd+Shift+V`).
+1. **Keyboard support** — `Cmd+Shift+U` (Mac) or `Ctrl+Shift+U` (Windows/Linux) to record. "U" for utterance. Avoids conflicts with paste-without-formatting (`Cmd+Shift+V`) and hard reload (`Ctrl+Shift+R`).
 2. **Toggle mode** — For users who find holding keys/buttons difficult, offer click-to-start/click-to-stop as an alternative to hold-to-record. Essential for motor accessibility.
 3. **Screen reader** — Announce recording state changes ("Recording started", "Recording stopped, transcribing...")
 4. **Visual feedback** — Audio level meter, recording indicator, transcription spinner
@@ -1228,6 +1228,118 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 2. **PII scrubbing** — Emails, phone numbers, SSNs are redacted from transcription
 3. **Usage logging** — Only metadata (duration, tenant, tier) logged, never content
 4. **Transparent** — Help article explaining how voice data is handled
+
+### PII Scrubbing Implementation
+
+Scribe uses Lumen's existing `scrubPii()` function to redact sensitive information from transcribed text before returning it to the client.
+
+#### Detected Patterns
+
+| PII Type | Pattern | Replacement |
+|----------|---------|-------------|
+| Email | `\b[\w.-]+@[\w.-]+\.\w{2,}\b` | `[EMAIL]` |
+| Phone (US) | `\b(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b` | `[PHONE]` |
+| SSN | `\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b` | `[SSN]` |
+| Credit Card | `\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b` | `[CARD]` |
+| IP Address | `\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b` | `[IP]` |
+
+#### Scrubbing Strategy
+
+```typescript
+// lib/lumen/pii.ts
+
+export interface PiiScrubResult {
+  /** Text with PII replaced */
+  scrubbed: string;
+  /** Types of PII found */
+  piiFound: PiiType[];
+  /** Count of each type */
+  counts: Record<PiiType, number>;
+}
+
+export type PiiType = "email" | "phone" | "ssn" | "card" | "ip";
+
+const PII_PATTERNS: Record<PiiType, { regex: RegExp; replacement: string }> = {
+  email: {
+    regex: /\b[\w.-]+@[\w.-]+\.\w{2,}\b/gi,
+    replacement: "[EMAIL]",
+  },
+  phone: {
+    regex: /\b(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
+    replacement: "[PHONE]",
+  },
+  ssn: {
+    regex: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
+    replacement: "[SSN]",
+  },
+  card: {
+    regex: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
+    replacement: "[CARD]",
+  },
+  ip: {
+    regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g,
+    replacement: "[IP]",
+  },
+};
+
+export function scrubPii(text: string): PiiScrubResult {
+  let scrubbed = text;
+  const piiFound: PiiType[] = [];
+  const counts: Record<PiiType, number> = {
+    email: 0, phone: 0, ssn: 0, card: 0, ip: 0,
+  };
+
+  for (const [type, { regex, replacement }] of Object.entries(PII_PATTERNS)) {
+    const matches = scrubbed.match(regex);
+    if (matches) {
+      piiFound.push(type as PiiType);
+      counts[type as PiiType] = matches.length;
+      scrubbed = scrubbed.replace(regex, replacement);
+    }
+  }
+
+  return { scrubbed, piiFound, counts };
+}
+```
+
+#### False Positive Handling
+
+Some patterns may match non-PII content:
+- **IP addresses**: Version numbers like `1.2.3.4` may match. Accept this as conservative scrubbing.
+- **Phone numbers**: Some numeric sequences may match. User can re-dictate if needed.
+- **SSN pattern**: Date formats like `123-45-6789` may match. Better to over-scrub.
+
+**Philosophy**: Over-scrubbing is preferred. Users can re-speak the content; leaked PII cannot be unshared.
+
+#### Logging & Alerting
+
+When PII is detected:
+
+```typescript
+// Log PII detection (never log the actual content)
+if (scrubbed.piiFound.length > 0) {
+  console.log(`[Scribe] PII scrubbed from transcription`, {
+    tenant: request.tenant,
+    types: scrubbed.piiFound,
+    counts: scrubbed.counts,
+    // Never log: the actual text, the PII values, or audio data
+  });
+}
+```
+
+No user notification for scrubbing—it happens silently. Users see `[EMAIL]` etc. in their text and can choose to re-type the actual value if intended.
+
+#### Skip Option
+
+For trusted internal tools (e.g., admin transcription of support calls with consent), PII scrubbing can be bypassed:
+
+```typescript
+options: {
+  skipPiiScrub: true, // Requires elevated permissions
+}
+```
+
+This flag is only honored for `oak` tier and above, and is logged for audit purposes.
 
 ---
 
@@ -1273,7 +1385,7 @@ Assuming average recording length of 30 seconds:
 - [ ] Create `ScribeRecorder` class for browser recording
 - [ ] Create `VoiceInput.svelte` component
 - [ ] Integrate into Flow mode editor toolbar
-- [ ] Add keyboard shortcut (`Cmd+Shift+R` / `Ctrl+Shift+R`)
+- [ ] Add keyboard shortcut (`Cmd+Shift+U` / `Ctrl+Shift+U`)
 - [ ] Handle cursor position and text insertion
 
 ### Phase 3: Polish
@@ -1315,6 +1427,161 @@ On mobile, the microphone should be a floating button above the keyboard, not em
 - Visible regardless of keyboard state
 - Consistent with mobile voice input patterns (iOS dictation, Gboard)
 - 44×44px minimum touch target per accessibility guidelines
+
+### Browser Compatibility
+
+MediaRecorder API support varies across browsers. Key considerations:
+
+| Browser | Supported Codecs | Notes |
+|---------|------------------|-------|
+| Chrome 49+ | `audio/webm;codecs=opus`, `audio/webm` | Best support, preferred |
+| Firefox 25+ | `audio/webm;codecs=opus`, `audio/ogg` | Good support |
+| Safari 14.1+ | `audio/mp4`, `audio/webm` | No Opus in older versions |
+| Edge 79+ | Same as Chrome | Chromium-based |
+| iOS Safari 14.5+ | `audio/mp4` | **No WebM support** |
+
+#### Codec Detection Strategy
+
+```typescript
+function getSupportedMimeType(): string {
+  const types = [
+    "audio/webm;codecs=opus", // Best quality/size ratio
+    "audio/webm",             // Fallback WebM
+    "audio/ogg;codecs=opus",  // Firefox fallback
+    "audio/mp4",              // Safari/iOS fallback
+  ];
+  return types.find((t) => MediaRecorder.isTypeSupported(t)) ?? "audio/webm";
+}
+```
+
+#### iOS Safari Considerations
+
+- Uses `audio/mp4` container (larger files than WebM)
+- Requires user gesture to start recording
+- May need explicit `getUserMedia` permission prompt
+- Test thoroughly—iOS audio APIs are notoriously finicky
+
+### Error Recovery Flows
+
+#### Draft Mode Failures
+
+Draft mode has multiple failure points. Each needs graceful degradation:
+
+```typescript
+async function transcribeWithRecovery(
+  request: LumenTranscriptionRequest,
+  tier: TierKey
+): Promise<LumenTranscriptionResponse> {
+  // 1. Pre-flight quota check for draft mode
+  if (request.options?.mode === "draft") {
+    const quotaCheck = await checkDraftModeQuota(request.tenant, tier);
+    if (!quotaCheck.allowed) {
+      // Offer to fall back to raw mode
+      throw new QuotaError(
+        `Draft mode unavailable: ${quotaCheck.reason}. ` +
+        `Switch to Raw mode to continue.`
+      );
+    }
+  }
+
+  // 2. Transcription step
+  let transcription: TranscriptionResult;
+  try {
+    transcription = await this.executeTranscription(config, request.audio, request.options);
+  } catch (err) {
+    // Transcription failed—no recovery possible
+    throw new TranscriptionError("Could not transcribe audio. Try speaking more clearly.");
+  }
+
+  // 3. Draft mode structuring (with fallback)
+  if (request.options?.mode === "draft") {
+    try {
+      return await this.structureDraftTranscript(transcription, request, tier);
+    } catch (err) {
+      // LLM failed—fall back to raw transcript
+      console.error("[Scribe] Draft mode structuring failed, returning raw", err);
+      return {
+        text: transcription.text,
+        wordCount: transcription.wordCount,
+        model: transcription.model,
+        provider: transcription.provider,
+        duration: transcription.duration,
+        latency: Date.now() - startTime,
+        rawTranscript: transcription.text,
+        gutterContent: [],
+        // Signal to UI that draft mode failed
+        _draftFallback: true,
+      };
+    }
+  }
+
+  return rawModeResponse(transcription);
+}
+```
+
+#### Error States & User Messages
+
+| Failure Point | Recovery | User Message |
+|---------------|----------|--------------|
+| Mic permission denied | None | "Microphone access needed. Check browser settings." |
+| Transcription quota exceeded | Suggest upgrade | "Daily limit reached. Upgrade for more, or try tomorrow." |
+| Generation quota exceeded (draft) | Fall back to raw | "Draft mode unavailable. Switching to Raw mode." |
+| Transcription timeout | Retry once | "Taking longer than usual. Trying again..." |
+| LLM structuring failed | Return raw text | "Couldn't structure draft. Here's the raw transcription." |
+| Invalid JSON from LLM | Return raw text | (Same as above, silent fallback) |
+| Network error | Retry with backoff | "Connection lost. Retrying..." |
+| Audio too short (<1s) | Prompt re-record | "Recording too short. Hold longer to capture your thoughts." |
+| Audio too long (>5min) | Truncate warning | "Recording truncated at 5 minutes. Consider shorter segments." |
+
+#### Vine Validation Failures
+
+If LLM returns malformed gutterContent:
+
+```typescript
+private validateGutterContent(items: unknown): GutterItem[] {
+  if (!Array.isArray(items)) {
+    console.warn("[Scribe] gutterContent not an array, ignoring");
+    return [];
+  }
+
+  return items
+    .filter((item): item is GutterItem => {
+      if (typeof item !== "object" || item === null) {
+        console.warn("[Scribe] Invalid gutter item (not object)", item);
+        return false;
+      }
+
+      const { type, content, anchor } = item as Record<string, unknown>;
+
+      // Type must be valid
+      if (!["comment", "photo", "gallery", "emoji"].includes(type as string)) {
+        console.warn("[Scribe] Invalid gutter type", type);
+        return false;
+      }
+
+      // Content required for comments
+      if (type === "comment" && (typeof content !== "string" || !content.trim())) {
+        console.warn("[Scribe] Comment missing content");
+        return false;
+      }
+
+      // Anchor validation (if present)
+      if (anchor !== undefined && typeof anchor !== "string") {
+        console.warn("[Scribe] Invalid anchor type", anchor);
+        return false;
+      }
+
+      return true;
+    })
+    .map((item) => ({
+      type: item.type,
+      anchor: item.anchor,
+      content: item.content,
+    }));
+}
+```
+
+Invalid Vines are silently dropped—better to return clean content than fail entirely.
 
 ---
 
