@@ -1253,13 +1253,174 @@ So yes, naming from grove's perspective is valid!
 
 ---
 
-## Need More Walking?
+## User Feedback (Round 2)
 
-Candidates for user to consider:
-- **Hark** — ancient listener
-- **Sow** — plant your voice
-- **Tuck** — nestle safely
-- **Keep** — hold permanently
-- **Lodge** — stick firmly
+**Sow** — Likes the vibe, but homophone problem is real (even dictation corrects to "so")
+**Keep** — Likes it, but Google Keep exists. Also feels generic.
+**None of these are singing yet.**
 
-Or keep exploring?
+**New direction:** Stop focusing on "talking to the blog." Think about what **writing a blog actually means**.
+
+---
+
+## Reframe: What IS Writing a Blog?
+
+Forget voice-to-text mechanics. What are you DOING when you write?
+
+### The Act of Writing
+
+1. You have something inside (thoughts, ideas, feelings)
+2. You make it external (put it into words)
+3. You put it somewhere others can find it
+4. It persists over time
+5. It becomes part of your story
+
+### The Emotional Core
+
+Writing a blog is:
+- **Leaving a mark** — "I was here. This is what I thought."
+- **Creating a path** — others might follow your thinking
+- **Making permanent** — thoughts that would fade, now persist
+- **Expressing yourself** — your voice (metaphorically), your perspective
+
+### What Nature Metaphors Fit THIS?
+
+Not listening/receiving (that's the grove's side).
+What about the WRITER'S side? The act of MARKING, CREATING, PATH-MAKING?
+
+---
+
+## New Direction: Trail Blazing
+
+In the forest, how do you mark your path?
+
+**Trail Blazing** — You cut marks into tree bark. Each blaze says "I was here. This is the way." Others follow your blazes.
+
+### BLAZE
+
+A blaze is a mark cut into bark. Trail blazers mark trees to create paths through wilderness.
+
+> "Blaze your thoughts."
+> "I'll blaze this while I walk."
+> "Blaze your trail through the grove."
+
+**Testing:**
+
+**As a feature:**
+> "Blaze is voice transcription for Grove."
+> "Enable Blaze to speak your posts."
+> "Use Blaze in Flow mode."
+
+**In sentences:**
+> "I'll blaze this thought while I walk." — Works!
+> "Let me blaze this before I forget." — Natural!
+> "I blazed the whole thing." — Works!
+
+**Taglines:**
+> "Blaze your trail through the grove."
+> "Blaze: mark your path with voice."
+> "Speak. Blaze. The path appears."
+
+**Why it works:**
+- Forest-native (trail blazing is real)
+- Substantial, active (you're MAKING something)
+- About permanence (blazes last)
+- About path-making (writing IS creating a trail of thought)
+- Connects to Trails feature naturally
+- Works great as verb in sentences
+
+**The entry:**
+```
+### Blaze
+**Voice Transcription** · *Integrated into Flow mode*
+
+A blaze is a mark cut into tree bark—the trail marker that
+guides those who follow. Before GPS, before maps, travelers
+blazed trails through wilderness. Each mark said: I was here.
+This is the way.
+
+Blaze is voice transcription for Grove. Speak your thoughts
+and watch them mark the page. No typing, no friction—just
+your voice blazing a trail through the blank page. Every
+word a mark. Every post a path.
+
+*Blaze your trail. Others might follow.*
+```
+
+**Potential concern:** "Blaze" has cannabis culture associations ("420 blaze it"). In Grove's forest context, the trail-blazing meaning should be clear, but worth considering.
+
+---
+
+## Alternative: CATCH
+
+If Blaze feels wrong, what about the moment of CAPTURE?
+
+Your thoughts fly by. You catch them before they're gone.
+
+> "Catch your thoughts."
+> "I'll catch this while I walk."
+> "Catch: grab your voice before it flies."
+
+**Why it works:**
+- Active, quick
+- Like catching fireflies, catching falling leaves
+- "Catch" works naturally in sentences
+- Simple, direct
+
+**Why it might not work:**
+- Not specifically forest-y
+- Generic
+
+---
+
+## Alternative: SCRIBE
+
+A scribe writes down what is spoken. The grove becomes your scribe.
+
+> "Scribe your thoughts."
+> "I'll scribe this out."
+> "Scribe: the grove writes what you speak."
+
+**Why it works:**
+- Direct connection to transcription
+- Historical weight
+
+**Why it might not work:**
+- Medieval/monk vibes
+- Not forest-native
+
+---
+
+## Current Top Candidate: BLAZE
+
+**Blaze** has:
+- Authentic forest roots (trail blazing)
+- Action and substance (not delicate)
+- Path-making meaning (writing = creating a trail)
+- Natural connection to Trails feature
+- Works beautifully in sentences
+- Strong tagline: "Blaze your trail"
+
+---
+
+## Other Quick Candidates
+
+| Name | Meaning | Sentence Test | Vibe |
+|------|---------|---------------|------|
+| **Mark** | Leave your mark | "I'll mark this down" | Generic but solid |
+| **Score** | Cut a mark | "I'll score this thought" | Also music (score) |
+| **Notch** | Cut in wood | "I'll notch this" | A bit awkward |
+| **Trace** | Leave a trace | Taken (part of Weave) | — |
+| **Etch** | Carve in | Taken (link saving) | — |
+
+---
+
+## Waiting for Direction
+
+Is **Blaze** closer? Or should I keep walking?
+
+Other directions to explore:
+- The RELEASE of thoughts (exhale, shed, drop)
+- The FLOW of writing (pour, stream, course)
+- The MAKING of something (craft, form, shape)
+- Something else entirely?
