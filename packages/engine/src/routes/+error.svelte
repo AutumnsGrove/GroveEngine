@@ -1,14 +1,14 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 </script>
 
 <svelte:head>
-	<title>{$page.status} - AutumnsGrove</title>
+	<title>{page.status} - AutumnsGrove</title>
 </svelte:head>
 
 <div class="error-page">
-	<h1>{$page.status}</h1>
-	<p class="message">{$page.error?.message || 'Page not found'}</p>
+	<h1>{page.status}</h1>
+	<p class="message">{page.error?.message || 'Page not found'}</p>
 	<p class="description">The page you're looking for doesn't exist or has been moved.</p>
 	<a href="/" class="home-link">Go back home</a>
 </div>

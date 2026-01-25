@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	/**
 	 * SEO Component - Generates Open Graph and Twitter Card metadata for link previews
@@ -45,8 +45,8 @@
 	// Get base URL from current origin (works in dev/staging/prod)
 	// Falls back to production URL for SSR or if page store unavailable
 	const baseUrl = $derived(
-		typeof window !== 'undefined' && $page?.url?.origin
-			? $page.url.origin
+		typeof window !== 'undefined' && page?.url?.origin
+			? page.url.origin
 			: 'https://grove.place'
 	);
 

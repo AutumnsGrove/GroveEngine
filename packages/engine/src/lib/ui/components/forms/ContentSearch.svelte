@@ -53,7 +53,7 @@
 	```
 -->
 <script lang="ts" generics="T extends Record<string, unknown>">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 
@@ -131,7 +131,7 @@
 	// Initialize from URL if syncing
 	$effect(() => {
 		if (syncWithUrl && typeof window !== 'undefined') {
-			const urlQuery = $page.url.searchParams.get(queryParam);
+			const urlQuery = page.url.searchParams.get(queryParam);
 			if (urlQuery && urlQuery !== searchQuery) {
 				searchQuery = urlQuery;
 				debouncedQuery = urlQuery;
@@ -192,20 +192,20 @@
 	function updateUrl() {
 		if (!syncWithUrl) return;
 
-		const currentQuery = $page.url.searchParams.get(queryParam) || '';
+		const currentQuery = page.url.searchParams.get(queryParam) || '';
 		const newQuery = searchQuery.trim();
 
 		// Skip navigation if query hasn't actually changed
 		if (currentQuery === newQuery) return;
 
-		const params = new URLSearchParams($page.url.searchParams);
+		const params = new URLSearchParams(page.url.searchParams);
 		if (newQuery) {
 			params.set(queryParam, newQuery);
 		} else {
 			params.delete(queryParam);
 		}
 
-		const newUrl = params.toString() ? `?${params.toString()}` : $page.url.pathname;
+		const newUrl = params.toString() ? `?${params.toString()}` : page.url.pathname;
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	}
 

@@ -11,7 +11,7 @@
 	import '../app.css';
 	import '$lib/styles/tokens.css';
 	import '$lib/styles/vine-pattern.css';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
@@ -70,7 +70,7 @@
 	let searchInputRef = $state(null);
 
 	// Check if we're on an admin page
-	let isAdminPage = $derived($page.url.pathname.startsWith('/admin'));
+	let isAdminPage = $derived(page.url.pathname.startsWith('/admin'));
 
 	// Prevent body scroll when mobile menu is open
 	$effect(() => {
@@ -266,12 +266,12 @@
 
 			<!-- Desktop Navigation -->
 			<div class="nav-links desktop-nav">
-				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
-				<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')}>Blog</a>
+				<a href="/" class:active={page.url.pathname === '/'}>Home</a>
+				<a href="/blog" class:active={page.url.pathname.startsWith('/blog')}>Blog</a>
 				{#each data.navPages || [] as navPage (navPage.slug)}
-					<a href="/{navPage.slug}" class:active={$page.url.pathname === `/${navPage.slug}`}>{navPage.title}</a>
+					<a href="/{navPage.slug}" class:active={page.url.pathname === `/${navPage.slug}`}>{navPage.title}</a>
 				{/each}
-				<a href="/about" class:active={$page.url.pathname.startsWith('/about')}>About</a>
+				<a href="/about" class:active={page.url.pathname.startsWith('/about')}>About</a>
 
 				<!-- Search -->
 				<div class="search-wrapper">
@@ -359,17 +359,17 @@
 					</svg>
 				</Button>
 			</form>
-			<a href="/" class:active={$page.url.pathname === '/'} onclick={closeMobileMenu}>Home</a>
-			<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')} onclick={closeMobileMenu}>Blog</a>
+			<a href="/" class:active={page.url.pathname === '/'} onclick={closeMobileMenu}>Home</a>
+			<a href="/blog" class:active={page.url.pathname.startsWith('/blog')} onclick={closeMobileMenu}>Blog</a>
 			{#each data.navPages || [] as navPage (navPage.slug)}
-				<a href="/{navPage.slug}" class:active={$page.url.pathname === `/${navPage.slug}`} onclick={closeMobileMenu}>{navPage.title}</a>
+				<a href="/{navPage.slug}" class:active={page.url.pathname === `/${navPage.slug}`} onclick={closeMobileMenu}>{navPage.title}</a>
 			{/each}
-			<a href="/about" class:active={$page.url.pathname.startsWith('/about')} onclick={closeMobileMenu}>About</a>
+			<a href="/about" class:active={page.url.pathname.startsWith('/about')} onclick={closeMobileMenu}>About</a>
 		</div>
 	</header>
 
 	<main>
-		{#key $page.url.pathname}
+		{#key page.url.pathname}
 			<div in:fade={{ duration: 200 }}>
 				{@render children()}
 			</div>

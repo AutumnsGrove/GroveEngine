@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
 	// Don't show the admin layout on login page
-	const isLoginPage = $derived($page.url.pathname === '/admin/login');
+	const isLoginPage = $derived(page.url.pathname === '/admin/login');
 
 	const tabs = [
 		{ name: 'Dashboard', href: '/admin', icon: 'dashboard' },
@@ -16,9 +16,9 @@
 
 	function isActive(href: string): boolean {
 		if (href === '/admin') {
-			return $page.url.pathname === '/admin';
+			return page.url.pathname === '/admin';
 		}
-		return $page.url.pathname.startsWith(href);
+		return page.url.pathname.startsWith(href);
 	}
 
 	async function logout() {

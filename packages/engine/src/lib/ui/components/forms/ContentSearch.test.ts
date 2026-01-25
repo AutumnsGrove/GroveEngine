@@ -4,12 +4,15 @@ import { tick } from "svelte";
 import ContentSearch from "./ContentSearch.svelte";
 
 // Mock SvelteKit modules
-vi.mock("$app/stores", () => ({
+vi.mock("$app/state", () => ({
   page: {
-    subscribe: (fn: any) => {
-      fn({ url: new URL("http://localhost/test") });
-      return () => {};
-    },
+    url: new URL("http://localhost/test"),
+    params: {},
+    route: { id: "/" },
+    status: 200,
+    error: null,
+    data: {},
+    form: null,
   },
 }));
 

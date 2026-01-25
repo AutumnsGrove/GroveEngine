@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { Card, Badge, Button, ContentSearch } from '$lib/ui';
 
@@ -9,8 +9,8 @@
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
 
 	// Get initial values from URL params
-	const initialQuery = $page.url.searchParams.get('q') || '';
-	const initialTag = $page.url.searchParams.get('tag') || '';
+	const initialQuery = page.url.searchParams.get('q') || '';
+	const initialTag = page.url.searchParams.get('tag') || '';
 
 	let searchQuery = $state(initialQuery);
 	let selectedTag = $state(initialTag);

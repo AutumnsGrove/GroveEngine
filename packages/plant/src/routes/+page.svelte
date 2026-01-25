@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import {
 		GlassCard,
 		Logo,
@@ -53,7 +53,7 @@
 	let authExpanded = $state(false);
 
 	// Check for signup gate redirect notice
-	const showSignupGateNotice = $derived($page.url.searchParams.get('notice') === 'coming_soon');
+	const showSignupGateNotice = $derived(page.url.searchParams.get('notice') === 'coming_soon');
 
 	// Config - could be fetched from API or environment
 	const WAITLIST_COUNT = 67;

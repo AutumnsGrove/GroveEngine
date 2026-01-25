@@ -8,7 +8,7 @@
 
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import {
 		Shield,
 		Plus,
@@ -92,7 +92,7 @@
 
 	// Pagination
 	function goToPage(pageNum: number) {
-		const params = new URLSearchParams($page.url.search);
+		const params = new URLSearchParams(page.url.search);
 		params.set('page', pageNum.toString());
 		goto(`?${params.toString()}`);
 	}

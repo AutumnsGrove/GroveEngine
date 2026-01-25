@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Logo } from '../ui';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
@@ -11,7 +11,7 @@
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 
 	// Determine current page for highlighting
-	let currentPath = $derived($page.url.pathname);
+	let currentPath = $derived(page.url.pathname);
 
 	interface Props {
 		navItems?: NavItem[];

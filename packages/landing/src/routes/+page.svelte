@@ -4,7 +4,7 @@
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
 	import { RoadmapPreview } from '@autumnsgrove/groveengine/ui';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	// Lucide icons
 	import {
@@ -21,7 +21,7 @@
 	} from 'lucide-svelte';
 
 	// Get error from URL if present
-	let error = $derived($page.url.searchParams.get('error'));
+	let error = $derived(page.url.searchParams.get('error'));
 
 	// Toggle season on logo click
 	function handleLogoClick() {

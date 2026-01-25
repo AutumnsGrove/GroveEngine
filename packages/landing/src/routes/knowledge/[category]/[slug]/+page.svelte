@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
@@ -14,8 +14,8 @@
 
   let doc = $derived(data.doc);
   let relatedArticles = $derived(data.relatedArticles || []);
-  let category = $derived($page.params.category as DocCategory);
-  let slug = $derived($page.params.slug);
+  let category = $derived(page.params.category as DocCategory);
+  let slug = $derived(page.params.slug);
   let headers = $derived(doc?.headers || []);
 
   // Get colors for current category (with fallback)

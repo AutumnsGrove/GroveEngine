@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { X, ExternalLink } from 'lucide-svelte';
 	import type { NavItem, FooterLink } from './types';
 	import { isActivePath } from './types';
@@ -27,7 +27,7 @@
 		connectLinks
 	}: Props = $props();
 
-	let currentPath = $derived($page.url.pathname);
+	let currentPath = $derived(page.url.pathname);
 
 	// Use provided links or defaults
 	const resources = resourceLinks ?? DEFAULT_MOBILE_RESOURCE_LINKS;
@@ -100,7 +100,7 @@
 	const items = navItems || DEFAULT_MOBILE_NAV_ITEMS;
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 <!-- Backdrop (mobile only) - uses grove z-index scale -->
 {#if open}

@@ -8,7 +8,7 @@
 
 	import { Check, User, Mail, CreditCard, Sparkles } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	// Define onboarding steps with Grove-friendly language
 	const steps = [
@@ -53,7 +53,7 @@
 		}
 	}
 
-	let currentPath = $derived($page.url.pathname);
+	let currentPath = $derived(page.url.pathname);
 
 	// Count completed steps for progress indicator
 	let completedCount = $derived(
