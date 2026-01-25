@@ -15,6 +15,7 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { Button, Input } from '$lib/ui';
+	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts.js';
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
@@ -29,30 +30,10 @@
 		'The Grove'
 	);
 
-	/** @type {Record<string, string>} */
-	// Font family mapping - maps database values to CSS font stacks
-	const fontMap = {
-		// Default
-		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Accessibility
-		atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Sans-serif
-		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Monospace
-		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-		cozette: "'Cozette', 'Courier New', Consolas, monospace",
-		// Display/Special
-		alagard: "'Alagard', fantasy, cursive",
-		calistoga: "'Calistoga', Georgia, serif",
-		caveat: "'Caveat', cursive, sans-serif"
-	};
-
-	// Apply font from server-loaded settings
+	// Apply font from server-loaded settings (fontMap imported from canonical source)
 	$effect(() => {
 		if (typeof document !== 'undefined' && data?.siteSettings?.font_family) {
-			const fontValue = fontMap[data.siteSettings.font_family] || fontMap.lexend;
+			const fontValue = fontMap[data.siteSettings.font_family] || fontMap[DEFAULT_FONT];
 			document.documentElement.style.setProperty('--font-family-main', fontValue);
 		}
 	});

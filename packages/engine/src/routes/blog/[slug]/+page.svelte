@@ -1,33 +1,15 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
 	import { Button, Badge } from '$lib/ui';
+	import { fontMap } from '$lib/ui/tokens/fonts.js';
 
 	let { data } = $props();
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
 
-	/** @type {Record<string, string>} */
-	// Font family mapping - curated selection of 10 high-quality fonts
-	const fontMap = {
-		// Accessibility
-		lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Modern Sans
-		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Serifs
-		lora: "'Lora', Georgia, 'Times New Roman', serif",
-		merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
-		'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
-		// Monospace
-		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-		// Display/Special
-		calistoga: "'Calistoga', Georgia, serif",
-		caveat: "'Caveat', cursive, sans-serif"
-	};
-
 	// Get the font stack for this post (null if default)
+	// Uses canonical fontMap imported from fonts.ts
 	const postFont = $derived(
 		data.post.font && data.post.font !== 'default'
 			? fontMap[data.post.font]

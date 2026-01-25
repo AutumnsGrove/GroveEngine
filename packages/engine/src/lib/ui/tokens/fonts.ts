@@ -270,3 +270,38 @@ export const fontCategoryLabels: Record<FontCategory, string> = {
   monospace: "Monospace",
   display: "Display & Special",
 };
+
+/**
+ * Array of valid font IDs for API validation
+ * Use this in server-side validation to ensure only valid fonts are accepted
+ */
+export const validFontIds: readonly string[] = fonts.map((f) => f.id);
+
+/**
+ * Font preset format for settings UI
+ * Compatible with the FONT_PRESETS format used in presets.ts
+ */
+export interface FontPreset {
+  /** Internal ID used in database */
+  id: string;
+  /** Display name */
+  name: string;
+  /** CSS font-family stack */
+  family: string;
+  /** Description for settings UI */
+  description: string;
+  /** Category for grouping */
+  category: FontCategory;
+}
+
+/**
+ * Font presets for settings UI
+ * Derived from the canonical fonts array - use this instead of maintaining a separate list
+ */
+export const fontPresets: readonly FontPreset[] = fonts.map((f) => ({
+  id: f.id,
+  name: f.name,
+  family: getFontStack(f.id as FontId),
+  description: f.description,
+  category: f.category,
+}));

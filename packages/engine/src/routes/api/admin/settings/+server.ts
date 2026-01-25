@@ -3,6 +3,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { validFontIds } from "$lib/ui/tokens/fonts.js";
 
 export const prerender = false;
 
@@ -71,26 +72,9 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       }
     }
 
-    // Validate font_family value specifically
+    // Validate font_family value against canonical font list
     if (setting_key === "font_family") {
-      const validFonts = [
-        // Default
-        "lexend",
-        // Accessibility
-        "atkinson",
-        "opendyslexic",
-        // Sans-serif
-        "quicksand",
-        "plus-jakarta-sans",
-        // Monospace
-        "ibm-plex-mono",
-        "cozette",
-        // Display/Special
-        "alagard",
-        "calistoga",
-        "caveat",
-      ];
-      if (!validFonts.includes(setting_value)) {
+      if (!validFontIds.includes(setting_value)) {
         throw error(400, "Invalid font value");
       }
     }
