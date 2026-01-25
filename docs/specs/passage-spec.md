@@ -47,7 +47,7 @@ tags:
 A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.
 
 **Public Name:** Passage
-**Internal Name:** GroveRouter (legacy), GrovePasage (future)
+**Internal Name:** GroveRouter (legacy), GrovePassage (future)
 **Package:** `packages/grove-router` (pending rename to `packages/passage`)
 **Worker:** `grove-router` on Cloudflare Workers
 
