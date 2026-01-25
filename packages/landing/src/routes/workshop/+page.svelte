@@ -8,6 +8,7 @@
 	// Use centralized registry for spec/github link icons
 	const FileText = contentIcons.filetext;
 	const Github = featureIcons.github;
+	const Lightbulb = toolIcons.lightbulb;
 
 	// Type-safe icon getter for tools
 	function getToolIcon(icon: string | undefined) {
@@ -42,6 +43,7 @@
 		integration: string;
 		github?: string;
 		spec?: string;
+		howLink?: string;
 		subComponents?: SubComponent[];
 	}
 
@@ -179,6 +181,7 @@
 					icon: 'squares-exclude',
 					integration: 'Automatic unlock after 12 months of Sapling+ membership',
 					spec: '/knowledge/specs/centennial-spec',
+					howLink: '/knowledge/philosophy/grove-sustainability',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
@@ -962,6 +965,12 @@
 											<a href={tool.spec} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
 												<FileText class="w-4 h-4" />
 												<span>Spec</span>
+											</a>
+										{/if}
+										{#if tool.howLink}
+											<a href={tool.howLink} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
+												<Lightbulb class="w-4 h-4" />
+												<span>How we'll do it</span>
 											</a>
 										{/if}
 										{#if tool.github}
