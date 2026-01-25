@@ -7,9 +7,14 @@ export { default as LeftGutter } from "./components/custom/LeftGutter.svelte";
 export { default as TableOfContents } from "./components/custom/TableOfContents.svelte";
 export { default as MobileTOC } from "./components/custom/MobileTOC.svelte";
 export { default as CollapsibleSection } from "./components/custom/CollapsibleSection.svelte";
+export { default as CategoryNav } from "./components/custom/CategoryNav.svelte";
 
-// TOC types and constants
-export type { TOCHeader } from "./components/custom/types.js";
+// TOC and CategoryNav types and constants
+export type {
+  TOCHeader,
+  CategoryNavSection,
+  CategoryNavItem,
+} from "./components/custom/types.js";
 export {
   DEFAULT_SCROLL_OFFSET,
   isValidIcon,
