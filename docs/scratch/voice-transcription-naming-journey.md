@@ -688,13 +688,578 @@ Hmm. "Rustle" is interesting but might have connotations of:
 
 ---
 
-## Need User Input
+## User Feedback (Round 1)
 
-At this point I have several viable candidates. Let me present them:
+**Liked:** The VIBE of Moss — patient, ancient, receptive, the grove listens
+**Problem:** None of the names work well in a sentence
+**Exception:** Rustle works in a sentence ("rustle up a post") but vibe isn't quite right
 
-**Moss** — Passive, receiving. "The grove listens."
-**Cast** — Active, projecting. "Throw your voice."
-**Rustle** — Responsive, natural. "The forest stirs."
-**Thrum** — Resonant, deep. "Vibration of voice."
+**Direction:** Keep the Moss vibe (patient listener, ancient, substantial) but find something that works as a natural verb/action.
 
-Which direction resonates?
+---
+
+## Walking Deeper: The Patient Listener
+
+So I need something that:
+1. Has the vibe of moss — ancient, patient, absorbent, always there
+2. Works naturally in a sentence — "I'll _____ this post"
+3. Feels substantial, not delicate
+4. Is Grove-native (forest/nature)
+
+What else in the forest LISTENS and RECEIVES like moss does?
+
+### The Forest Floor
+
+The forest floor receives everything:
+- Fallen leaves
+- Seeds
+- Rain
+- Footsteps
+- Sound
+
+What words describe the forest floor's action?
+
+- **Gather** — the floor gathers fallen things
+- **Receive** — too formal
+- **Hold** — the floor holds everything
+- **Keep** — the floor keeps what falls
+- **Catch** — the floor catches rain, leaves
+
+**Gather** is interesting:
+> "Gather your thoughts into a post."
+> "I'll gather this while I walk."
+> "Gather: where the grove collects your voice."
+
+But "gather" might be too generic? Not forest-specific enough?
+
+### Things That Absorb
+
+What absorbs in nature?
+
+- Moss absorbs
+- Soil absorbs
+- Roots absorb
+- Sponges absorb (not forest)
+- Peat absorbs
+
+What's the VERB for what moss does?
+
+Moss doesn't just sit there. It:
+- **Drinks** — moss drinks moisture from the air
+- **Draws** — moss draws in water
+- **Takes** — moss takes what it needs
+- **Soaks** — moss soaks up rain
+
+**Soak** is interesting:
+> "Soak in your thoughts."
+> "Let the grove soak up your voice."
+> "Soak: voice absorbed into text."
+
+But "soak" feels wet, not quite right for voice.
+
+### The Listening Earth
+
+What if the metaphor is the earth itself listening?
+
+- **Ground** — your voice is grounded, becomes real
+- **Root** — your voice takes root (but "Rooted" is subscriber identity)
+- **Earth** — too big, too generic
+- **Soil** — receives seeds, receives everything
+
+**Ground** as a verb:
+> "Ground your thoughts."
+> "I'll ground this idea in a post."
+
+This has nice double meaning:
+- Grounded = made real, substantial
+- Grounded = connected to earth
+- Grounding = calming, centering
+
+But is "ground" too generic? Not Grove-y enough?
+
+### Ancient Things That Listen
+
+What's been listening in the forest for a very long time?
+
+- **Stone** — stones have heard everything
+- **Roots** — roots listen through the soil
+- **Stumps** — old stumps have witnessed centuries
+- **Hollows** — hollow trees hold sound
+
+What about **Stump**?
+
+A stump is what remains. It's been there. It's witnessed everything. You sit on a stump and talk.
+
+> "I'll stump this out." — No, doesn't work.
+
+Stump doesn't verb well.
+
+### What About the Action of Settling?
+
+When you speak, your words settle onto the page. Like sediment. Like leaves settling on the forest floor.
+
+**Settle**:
+> "Let your thoughts settle."
+> "I'll settle this into a post."
+> "Settle: where voice finds its place."
+
+"Settle" has good connotations:
+- Settling down (calming)
+- Settlers (finding home)
+- Sediment settling (becoming permanent)
+- Settling into place (finding where you belong)
+
+But "settle" might be too passive? And "I'll settle this into a post" is awkward.
+
+### What About the Sound of Settling?
+
+When leaves fall and settle, what's the sound?
+
+- A soft **hush**
+- A gentle **sift**
+- A quiet **rest**
+
+**Sift**:
+> "Sift your thoughts into words."
+> "I'll sift this out."
+> "Sift: voice filtered into text."
+
+Sifting is:
+- Separating, clarifying
+- Gentle but purposeful
+- What you do with flour, with soil, with ideas
+
+But sifting implies FILTERING, removing things. That's not quite right for transcription.
+
+### Back to Listening: What Hears in the Forest?
+
+Not just moss. What else?
+
+- **Ferns** — ferns unfurl toward sound? No, that's light.
+- **Lichens** — ancient, symbiotic, but don't listen
+- **Bark** — trees are wrapped in bark, bark is the skin that feels
+
+What about **Bark**?
+
+Bark is:
+- The tree's interface with the world
+- Protective but sensitive
+- Textured, substantial
+- Where you'd carve a message
+
+> "Bark your thoughts." — No, that's dog barking.
+
+Doesn't work.
+
+### The Bed of the Forest
+
+The forest floor is sometimes called:
+- The **duff** — layer of decomposing matter
+- The **litter** — fallen leaves and debris
+- The **bed** — the soft bed of needles
+
+**Bed** doesn't work (too many meanings).
+
+**Duff** is interesting but obscure.
+
+What about **Litter** in the forestry sense? No, too much trash connotation.
+
+### What About Nesting?
+
+Birds nest. Ideas nest. You nest your thoughts.
+
+**Nest**:
+> "Nest your thoughts into a post."
+> "I'll nest this idea."
+> "Nest: where your voice finds home."
+
+Nest is:
+- Cozy, protected
+- Building something
+- Home-making
+- Natural
+
+But "nest" might be too cute? And nesting is about BUILDING, not about being received/heard.
+
+### Burrow?
+
+Burrow is taken (cross-property access).
+
+### What About Lodge?
+
+Animals lodge in the forest. Beavers build lodges. To lodge something is to place it firmly.
+
+**Lodge**:
+> "Lodge your thoughts."
+> "I'll lodge this post."
+> "Lodge: where your voice takes hold."
+
+Lodge means:
+- To place firmly
+- To deposit
+- A beaver's home
+- A cabin in the woods
+
+> "I'll lodge this complaint" — formal usage
+> "The bullet lodged in the tree" — stuck, permanent
+
+"Lodge your thoughts" works! It's:
+- Substantial (things that lodge are stuck, permanent)
+- Natural (lodges in the forest)
+- Active verb that makes sense
+- Not delicate at all
+
+Let me test it:
+
+> "Lodge your voice into the grove."
+> "Lodge: speak and let it stick."
+> "I'll lodge this while I'm walking."
+
+Hmm. "Lodge" might be too formal? "Lodge a complaint" vibes?
+
+### What About the Softer Version: Rest?
+
+When you rest something somewhere, it stays.
+
+**Rest**:
+> "Rest your thoughts on the page."
+> "I'll rest this here."
+> "Rest: where your voice finds peace."
+
+But "rest" implies sleep, ending. Not quite the active creation of a post.
+
+### Let Me Try Animal Actions
+
+What do forest animals do that relates to listening/receiving/keeping?
+
+- Squirrels **stash** — they stash acorns
+- Bears **den** — they den for winter
+- Birds **roost** — they settle in for night
+- Deer **bed** — they bed down in grass
+- Foxes **cache** — they cache food
+
+**Stash**:
+> "Stash your thoughts."
+> "I'll stash this post."
+> "Stash: quick capture for later."
+
+Stash is:
+- Quick, informal
+- Keeping for later
+- Squirrel energy
+- Active, natural
+
+But "stash" might be too casual? And implies hiding, not publishing.
+
+### What About the Way Seeds Work?
+
+Seeds fall, land, and eventually grow. Your voice is like a seed.
+
+- **Sow** — you sow seeds
+- **Scatter** — too chaotic
+- **Plant** — Plant is taken (onboarding)
+- **Seed** — noun, awkward as verb
+
+**Sow**:
+> "Sow your thoughts."
+> "I'll sow this post."
+> "Sow: plant your voice and watch it grow."
+
+Sow is:
+- Agricultural, natural
+- Intentional
+- About future growth
+- Substantial
+
+> "Sow your thoughts into the grove."
+
+This is pretty good! Let me test more:
+
+> "I'll sow this while I walk." — Works!
+> "Use Sow to speak your posts." — Works!
+> "Sow: where voice takes root." — Nice connection to "Rooted"!
+
+**Concern:** "Sow" sounds like "so" when spoken. Could be confusing verbally.
+
+### What About Bury/Plant Adjacent?
+
+- **Tuck** — you tuck something in, safe and snug
+- **Lay** — you lay something down
+- **Set** — too generic
+- **Place** — too generic
+
+**Tuck**:
+> "Tuck your thoughts into a post."
+> "I'll tuck this away."
+> "Tuck: nestle your voice into the grove."
+
+Tuck is:
+- Cozy (tuck in at night)
+- Protective
+- Gentle but not weak
+- Natural action
+
+> "I'll tuck this thought into a post while I walk."
+
+This feels warm! Very Grove-y.
+
+But is "tuck" substantial enough? It's gentle...
+
+### What About the Sound the Forest Makes When It Receives?
+
+When rain falls on the forest canopy, what's the sound?
+
+- A **patter**
+- A **hush**
+- A **sigh**
+
+When wind moves through trees:
+
+- A **sigh**
+- A **hush**
+- A **whoosh**
+
+**Sigh**:
+> "Sigh your thoughts into being."
+
+No, sighing is too melancholy.
+
+### Wait — What About "Hush"?
+
+Hush is interesting because it means BOTH:
+- Silence (hush, be quiet)
+- A soft sound (the hush of wind)
+
+> "Hush your thoughts onto the page."
+
+No, "hush" as a verb means to silence someone. Wrong direction.
+
+### Let Me Try: Words for Natural Deposits
+
+When rivers slow down, sediment **settles**.
+When leaves fall, they **gather**.
+When snow falls, it **blankets** or **covers**.
+When dew forms, it **collects**.
+
+**Collect**:
+> "Collect your thoughts."
+> "I'll collect this into a post."
+
+Too generic, not forest-y.
+
+### What About the Slow Accumulation?
+
+Moss grows slowly. Rings accumulate slowly. What's the word for slow, patient accumulation?
+
+- **Accrue** — too financial
+- **Gather** — still considering
+- **Amass** — too aggressive
+- **Build** — too generic
+- **Grow** — too generic
+- **Accrete** — geological, interesting but obscure
+
+### Forest Time Words
+
+- **Season** — a season of posts? Doesn't verb well.
+- **Ring** — taken (analytics)
+- **Layer** — layers build up...
+
+**Layer**:
+> "Layer your thoughts."
+> "I'll layer this in."
+
+Not quite right either.
+
+### New Angle: What's the Moment of Capture?
+
+The instant your voice becomes text. What is that moment?
+
+- A **catch**
+- A **take**
+- A **hold**
+- A **keep**
+
+**Keep**:
+> "Keep your thoughts."
+> "I'll keep this."
+> "Keep: the grove remembers what you say."
+
+Keep is:
+- Simple
+- Implies permanence
+- "Keep" as in a castle keep (stronghold)
+- "Beekeeping" — tending, caring for
+
+> "I'll keep this thought."
+> "Use Keep to save your voice."
+
+But "keep" might be too close to generic "save" or "store"?
+
+### What About "Hold"?
+
+The grove holds your voice.
+
+**Hold**:
+> "Hold this thought."
+> "I'll hold this in a post."
+> "Hold: the grove holds what you say."
+
+"Hold this thought" is already a phrase! That's good!
+But "hold" might be too temporary? "Hold" implies you'll let go later.
+
+### The Grove as Witness
+
+What if the grove is witnessing, not just receiving?
+
+- **Witness** — too formal/legal
+- **Heed** — the grove heeds your voice
+- **Hear** — too simple
+- **Mark** — the grove marks what you say
+
+**Heed**:
+> "The grove heeds your voice."
+> "Heed: speak and be heard."
+
+"Heed" is old-fashioned, has weight. But as a feature name?
+
+> "I'll heed this post." — Doesn't work as action.
+
+Heed doesn't verb well from the user's perspective.
+
+### Turning Point: User as Speaker vs Grove as Receiver
+
+Maybe the name should be from the GROVE's perspective, not the user's?
+
+The grove:
+- **Hears**
+- **Heeds**
+- **Holds**
+- **Keeps**
+- **Gathers**
+- **Receives**
+
+What if the feature is named after what the GROVE does?
+
+**Hark** — "Hark!" means listen. Old English.
+> "Hark: the grove is listening."
+> "Use Hark to speak your post."
+
+"Hark" is:
+- Ancient, substantial
+- Means "listen!"
+- Forest-y (hark, in the forest)
+- Unusual but recognizable
+
+> "I'll hark this post." — Doesn't quite work.
+
+But as a noun/feature name:
+> "Enable Hark in Flow mode."
+> "Hark: speak and be heard."
+> "Hark is where the grove listens."
+
+**Hark** has the ancient, patient vibe of Moss, but it's about LISTENING, which is exactly what this feature is about from the grove's perspective.
+
+### Testing "Hark"
+
+**As a feature:**
+> "Hark is voice transcription for Grove."
+> "Enable Hark to speak your posts."
+> "With Hark, the grove listens."
+
+**As a command/action:**
+> "I'll use Hark for this post." — Works
+> "Hark this for me." — Awkward but possible
+> "Record with Hark." — Works
+
+**Taglines:**
+> "Hark: the grove is listening."
+> "Speak. The grove harks."
+> "Hark! Your voice, remembered."
+
+**The entry:**
+```
+### Hark
+**Voice Transcription** · *Integrated into Flow mode*
+
+"Hark!" — the old word for "listen." A call to attention.
+Before radio, before recording, if you wanted someone to
+hear you, you called out and hoped they would hark.
+
+Hark is the grove listening. Speak your thoughts and the
+grove hears, transcribes, remembers. No typing, no friction—
+just your voice and a patient listener that never forgets.
+The oldest kind of magic: being heard.
+
+*Hark! The grove is listening.*
+```
+
+---
+
+## Other Candidates in This Direction
+
+If we're going with "the grove listens" vibe:
+
+### Heed
+> "The grove heeds your voice."
+More formal than hark, similar meaning.
+
+### Hearken
+Full form of hark. "Hearken to my words."
+But might be TOO archaic.
+
+### Attend
+"The grove attends to your voice."
+Too formal, too servant-y.
+
+### List (archaic)
+"List!" was another old word for "listen."
+"The grove lists to your voice."
+But "list" has too many modern meanings.
+
+---
+
+## Current Top Candidates (Round 2)
+
+1. **Hark** — "Hark! The grove is listening." Ancient, patient, substantial.
+2. **Sow** — "Sow your thoughts." Agricultural, growth-oriented. (But sounds like "so")
+3. **Tuck** — "Tuck your thoughts in." Cozy, warm, protective.
+4. **Keep** — "Keep your thoughts." Simple, permanent.
+5. **Lodge** — "Lodge your voice." Firm, stuck, substantial.
+
+---
+
+## Gut Check on "Hark"
+
+**Pros:**
+- Ancient word, substantial feel
+- Literally means "listen" — which is what the grove does
+- Works as a feature name
+- Unusual but recognizable
+- Has the Moss vibe (patient listener) but more active
+- "Hark! The grove is listening" is a great tagline
+
+**Cons:**
+- Doesn't work great as a verb from user perspective
+- "Hark this post" is awkward
+- Might feel too Shakespearean/Renaissance Faire?
+
+**The question:** Is it okay that the name is from the GROVE's perspective rather than the user's action?
+
+Wisp = the helper (grove's perspective)
+Thorn = the protector (grove's perspective)
+Rings = the record (grove's perspective)
+
+So yes, naming from grove's perspective is valid!
+
+---
+
+## Need More Walking?
+
+Candidates for user to consider:
+- **Hark** — ancient listener
+- **Sow** — plant your voice
+- **Tuck** — nestle safely
+- **Keep** — hold permanently
+- **Lodge** — stick firmly
+
+Or keep exploring?
