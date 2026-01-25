@@ -52,113 +52,14 @@ export const COLOR_PRESETS: ColorPreset[] = [
 export const DEFAULT_ACCENT_COLOR = "#16a34a";
 
 /**
- * Font presets with display info
+ * Font presets - imported from the canonical source in fonts.ts
+ * This ensures consistency across the entire application
  */
-export interface FontPreset {
-  /** Internal ID used in database */
-  id: string;
-  /** Display name */
-  name: string;
-  /** CSS font-family stack */
-  family: string;
-  /** Description for settings UI */
-  description: string;
-  /** Category for grouping */
-  category: "accessibility" | "sans-serif" | "monospace" | "display";
-}
-
-export const FONT_PRESETS: FontPreset[] = [
-  // Accessibility fonts
-  {
-    id: "lexend",
-    name: "Lexend",
-    family:
-      "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    description: "Modern accessibility font for reading fluency (default)",
-    category: "accessibility",
-  },
-  {
-    id: "atkinson",
-    name: "Atkinson Hyperlegible",
-    family:
-      "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    description: "Accessibility font for low vision readers",
-    category: "accessibility",
-  },
-
-  // Sans-serif
-  {
-    id: "quicksand",
-    name: "Quicksand",
-    family:
-      "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    description: "Rounded, friendly geometric sans-serif",
-    category: "sans-serif",
-  },
-  {
-    id: "plus-jakarta-sans",
-    name: "Plus Jakarta Sans",
-    family:
-      "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    description: "Contemporary geometric sans, balanced and versatile",
-    category: "sans-serif",
-  },
-
-  // Serifs
-  {
-    id: "lora",
-    name: "Lora",
-    family: "'Lora', Georgia, 'Times New Roman', serif",
-    description: "Highly readable serif for body text",
-    category: "sans-serif",
-  },
-  {
-    id: "merriweather",
-    name: "Merriweather",
-    family: "'Merriweather', Georgia, 'Times New Roman', serif",
-    description: "Elegant, professional serif for reading",
-    category: "sans-serif",
-  },
-  {
-    id: "eb-garamond",
-    name: "EB Garamond",
-    family: "'EB Garamond', Georgia, 'Times New Roman', serif",
-    description: "Classic high-elegance serif",
-    category: "sans-serif",
-  },
-
-  // Monospace
-  {
-    id: "ibm-plex-mono",
-    name: "IBM Plex Mono",
-    family: "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-    description: "Clean, highly readable code font",
-    category: "monospace",
-  },
-
-  // Display/Special
-  {
-    id: "calistoga",
-    name: "Calistoga",
-    family: "'Calistoga', Georgia, serif",
-    description: "Casual brush serif, warm and friendly",
-    category: "display",
-  },
-  {
-    id: "caveat",
-    name: "Caveat",
-    family: "'Caveat', cursive, sans-serif",
-    description: "Handwritten script, personal and informal",
-    category: "display",
-  },
-];
-
-export const DEFAULT_FONT = "lexend";
-
-/**
- * Get font family by ID
- */
-export function getFontFamily(id: string): string {
-  const font = FONT_PRESETS.find((f) => f.id === id);
-  return font?.family ?? FONT_PRESETS[0].family;
-}
+export {
+  fontPresets as FONT_PRESETS,
+  DEFAULT_FONT,
+  fontMap,
+  validFontIds,
+  getFontStack as getFontFamily,
+  type FontPreset,
+} from "$lib/ui/tokens/fonts.js";
