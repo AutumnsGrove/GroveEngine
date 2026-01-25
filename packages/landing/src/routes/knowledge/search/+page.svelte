@@ -1,12 +1,14 @@
 <script lang="ts">
-  import { allDocs, type Doc } from '$lib/data/knowledge-base';
+  import type { Doc } from '$lib/data/knowledge-base';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import { ContentSearch } from '@autumnsgrove/groveengine';
 
+  let { data } = $props();
+
   let searchQuery = $state('');
   // Initialize with all docs to prevent empty state flash on page load
-  let filteredResults = $state<Doc[]>(allDocs);
+  let filteredResults = $state<Doc[]>(data.allDocs);
 
   // Filter function for ContentSearch
   function filterDoc(doc: Doc, query: string): boolean {
@@ -54,7 +56,7 @@
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-foreground mb-4">Search Knowledge Base</h1>
       <ContentSearch
-        items={allDocs}
+        items={data.allDocs}
         filterFn={filterDoc}
         bind:searchQuery
         placeholder="Search documentation..."

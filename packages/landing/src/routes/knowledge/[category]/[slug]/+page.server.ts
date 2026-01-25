@@ -1,6 +1,5 @@
 import { loadDocBySlug } from "$lib/utils/docs-loader";
-import { allDocs } from "$lib/data/knowledge-base";
-import { scanDocsCategory } from "$lib/server/docs-scanner";
+import { scanAllDocs } from "$lib/server/docs-scanner";
 import type { Doc, DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
@@ -10,10 +9,12 @@ import type { PageServerLoad, EntryGenerator } from "./$types";
 // The docs-loader uses Node.js fs APIs which only work during the build process
 export const prerender = true;
 
-// Generate entries for all known documents (including dynamically-scanned exhibits)
+// Cache scanned docs at module level for entries + load
+const { allDocs } = scanAllDocs();
+
+// Generate entries for all known documents (scanned from filesystem)
 export const entries: EntryGenerator = () => {
-  const exhibitDocs = scanDocsCategory("exhibit");
-  return [...allDocs, ...exhibitDocs].map((doc) => ({
+  return allDocs.map((doc) => ({
     category: doc.category,
     slug: doc.slug,
   }));

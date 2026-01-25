@@ -1,26 +1,18 @@
+import { scanAllDocs } from "$lib/server/docs-scanner";
 import {
-  specs,
-  helpArticles,
-  legalDocs,
-  marketingDocs,
-  patterns,
-  philosophyDocs,
-  designDocs,
-} from "$lib/data/knowledge-base";
-import { scanDocsCategory } from "$lib/server/docs-scanner";
+  specCategories,
+  helpSections,
+  exhibitWings,
+} from "$lib/data/category-metadata";
+
+export const prerender = true;
 
 export async function load() {
-  // exhibitDocs loaded from filesystem scanner (server-only)
-  const exhibitDocs = scanDocsCategory("exhibit");
-
+  const scanned = scanAllDocs();
   return {
-    specs,
-    helpArticles,
-    legalDocs,
-    marketingDocs,
-    patterns,
-    philosophyDocs,
-    designDocs,
-    exhibitDocs,
+    ...scanned,
+    specCategories,
+    helpSections,
+    exhibitWings,
   };
 }
