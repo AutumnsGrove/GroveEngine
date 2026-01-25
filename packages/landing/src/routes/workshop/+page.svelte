@@ -3,12 +3,12 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
-	import { toolIcons, featureIcons, contentIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
+	import { toolIcons, featureIcons, contentIcons, actionIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
 
 	// Use centralized registry for spec/github link icons
 	const FileText = contentIcons.filetext;
 	const Github = featureIcons.github;
-	const Lightbulb = toolIcons.lightbulb;
+	const Lightbulb = actionIcons.lightbulb;
 
 	// Type-safe icon getter for tools
 	function getToolIcon(icon: string | undefined) {
