@@ -112,25 +112,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           if (galleryResult?.enabled) {
             navPages.push({ slug: "gallery", title: "Gallery" });
           }
-        } else {
-          // Fallback to global settings (for landing page or legacy)
-          try {
-            const result = await db
-              .prepare("SELECT setting_key, setting_value FROM site_settings")
-              .all<{ setting_key: string; setting_value: string }>();
-
-            if (result?.results) {
-              for (const row of result.results) {
-                siteSettings[row.setting_key] = row.setting_value;
-              }
-            }
-          } catch (globalSettingsError) {
-            console.warn(
-              "[Layout] global site_settings query failed:",
-              globalSettingsError,
-            );
-          }
         }
+        // No tenant context = use hardcoded defaults only (line 19)
+        // Don't query DB without tenant filter — would leak other tenants' settings
       }
     } catch (error) {
       // If DB bindings aren't configured, gracefully fall back to defaults
