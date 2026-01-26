@@ -44,7 +44,7 @@ Songbird uses three layers of defense, each named after a bird. Your content pas
 
 **Robin** sings last. Only after Canary and Kestrel verify that your content is safe does the actual AI processing happen. Robin is the production layer where your real request runs.
 
-The tripwire catches obvious attacks. The watchful eye catches subtle ones. Only then do we proceed.
+Canary catches obvious attacks. Kestrel spots subtle ones. Only then do we proceed.
 
 ## Where Grove uses Songbird
 
