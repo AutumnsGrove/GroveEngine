@@ -42,9 +42,9 @@ All AI features in Grove route through **Lumen**, our unified AI gateway. Lumen 
 
 **Wisp** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
 
-**Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears. Only the words you choose to keep remain. Fireside is powered by Wisp but works as its own distinct mode.
+**Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
 
-**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. Flow uses Lumen for AI-powered features like smart suggestions and integrates with Wisp and Fireside for writing assistance.
+**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. When you use AI features within Flow—like Wisp's grammar checks or Fireside conversations—those requests route through Lumen with full ZDR. Your drafts live in your browser until you publish; Flow never sends your writing to AI servers without your explicit action.
 
 **Thorn** (text content moderation) reviews blog posts and written content against community guidelines. The post content is processed, a decision is made, and the content is deleted. We keep the outcome (pass, flag, or escalate) but never the words themselves.
 
