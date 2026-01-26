@@ -111,6 +111,12 @@ export const helpSections: {
     icon: "bird",
   },
   {
+    id: "how-it-works",
+    name: "How It Works",
+    description: "Simple explanations of Grove's technology",
+    icon: "lightbulb",
+  },
+  {
     id: "philosophy-vision",
     name: "Philosophy & Vision",
     description: "What Grove believes in",

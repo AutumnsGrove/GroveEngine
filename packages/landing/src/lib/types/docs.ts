@@ -47,6 +47,7 @@ export type HelpSection =
   | "privacy-security"
   | "ai-features"
   | "philosophy-vision"
+  | "how-it-works"
   | "support-resources"
   | "troubleshooting";
 
