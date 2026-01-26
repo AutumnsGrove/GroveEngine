@@ -97,8 +97,8 @@ export const load: PageServerLoad = async ({
   const isOwner =
     locals.user &&
     locals.context?.type === "tenant" &&
-    locals.context.tenant.ownerId?.toLowerCase() ===
-      locals.user.email.toLowerCase();
+    locals.context.tenant.ownerId?.toLowerCase().trim() ===
+      locals.user.email.toLowerCase().trim();
 
   return {
     posts,
