@@ -140,7 +140,7 @@
 					tagline: 'The Writing Sanctuary',
 					description: 'Where the current carries you. Flow is Grove\'s immersive Markdown editor—the space inside Arbor where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.',
 					status: 'live',
-					icon: 'penline',
+					icon: 'drafting-compass',
 					integration: 'Built into Arbor',
 					spec: '/knowledge/specs/flow-spec',
 					subComponents: [

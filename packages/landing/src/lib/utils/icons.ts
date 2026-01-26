@@ -221,6 +221,10 @@ import {
   Kayak,
   // Scribe - voice transcription
   Mic,
+  // Flow - writing sanctuary icons
+  DraftingCompass,
+  Focus,
+  Save,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -494,6 +498,10 @@ export const toolIcons = {
   kayak: Kayak, // Passage - navigating the river passage
   // Scribe - voice transcription
   mic: Mic, // Scribe - voice-to-text
+  // Flow - writing sanctuary
+  "drafting-compass": DraftingCompass, // Flow - main icon (creative arc)
+  focus: Focus, // Flow/Zen - distraction-free mode
+  save: Save, // Flow/Draft - auto-save to localStorage
 } as const;
 
 // ============================================================================
