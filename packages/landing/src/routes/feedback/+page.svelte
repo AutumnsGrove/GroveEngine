@@ -232,7 +232,7 @@
 				<!-- Turnstile -->
 				<div class="mb-6">
 					<TurnstileWidget
-						siteKey={data.turnsileKey}
+						siteKey={data.turnstileKey}
 						onverify={handleTurnstileVerify}
 					/>
 					<input type="hidden" name="cf-turnstile-response" value={turnstileToken || ''} />

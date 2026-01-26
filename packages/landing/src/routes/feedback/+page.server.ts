@@ -6,9 +6,22 @@ import {
 } from "@autumnsgrove/groveengine/services";
 import { Resend } from "resend";
 
+/**
+ * Escape HTML special characters to prevent XSS in email templates
+ */
+function escapeHtml(unsafe: string | null): string {
+  if (!unsafe) return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export const load: PageServerLoad = async ({ platform }) => {
   return {
-    turnsileKey: platform?.env?.TURNSTILE_SITE_KEY || "",
+    turnstileKey: platform?.env?.TURNSTILE_SITE_KEY || "",
   };
 };
 
@@ -153,13 +166,13 @@ View in Arbor: https://grove.place/admin/feedback
 Feedback ID: ${id}`;
 
         const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
-<p><strong>From:</strong> ${name || "Anonymous Wanderer"}<br>
-<strong>Email:</strong> ${email || "No reply email provided"}<br>
+<p><strong>From:</strong> ${escapeHtml(name) || "Anonymous Wanderer"}<br>
+<strong>Email:</strong> ${escapeHtml(email) || "No reply email provided"}<br>
 <strong>Sentiment:</strong> ${sentimentEmoji} ${sentimentLabel}</p>
 
 <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
 
-<p style="white-space: pre-wrap;">${message}</p>
+<p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
 
 <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
 

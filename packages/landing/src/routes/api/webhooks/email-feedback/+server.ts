@@ -4,6 +4,19 @@ import { generateId } from "@autumnsgrove/groveengine/services";
 import { Resend } from "resend";
 
 /**
+ * Escape HTML special characters to prevent XSS in email templates
+ */
+function escapeHtml(unsafe: string | null): string {
+  if (!unsafe) return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * Email Webhook Handler for feedback@grove.place
  *
  * This endpoint receives emails via Cloudflare Email Routing.
@@ -126,13 +139,13 @@ View in Arbor: https://grove.place/admin/feedback
 Feedback ID: ${id}`;
 
       const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
-<p><strong>From:</strong> ${name || "Unknown"}<br>
-<strong>Email:</strong> ${email}<br>
+<p><strong>From:</strong> ${escapeHtml(name) || "Unknown"}<br>
+<strong>Email:</strong> ${escapeHtml(email)}<br>
 <strong>Source:</strong> Email (feedback@grove.place)</p>
 
 <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
 
-<p style="white-space: pre-wrap;">${truncatedMessage}</p>
+<p style="white-space: pre-wrap;">${escapeHtml(truncatedMessage)}</p>
 
 <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
 
