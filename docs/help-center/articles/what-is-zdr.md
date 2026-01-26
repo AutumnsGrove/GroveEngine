@@ -42,7 +42,9 @@ All AI features in Grove route through **Lumen**, our unified AI gateway. Lumen 
 
 **Wisp** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
 
-**Flow** (writing sanctuary) is Grove's immersive Markdown editor. Within Flow, **Fireside mode** offers conversational drafting—you talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears. Only the words you choose to keep remain.
+**Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears. Only the words you choose to keep remain. Fireside is powered by Wisp but works as its own distinct mode.
+
+**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. Flow uses Lumen for AI-powered features like smart suggestions and integrates with Wisp and Fireside for writing assistance.
 
 **Thorn** (text content moderation) reviews blog posts and written content against community guidelines. The post content is processed, a decision is made, and the content is deleted. We keep the outcome (pass, flag, or escalate) but never the words themselves.
 
@@ -58,7 +60,7 @@ In each case: processing happens, results return, content vanishes.
 
 All AI requests flow through Lumen, Grove's AI gateway. Lumen strips personally identifiable information before content leaves our servers and routes requests only to providers that guarantee zero retention.
 
-**For text processing (Wisp, Flow's Fireside, Thorn, Forage):** Fireworks AI, Cerebras, and Groq. Each has explicit ZDR policies.
+**For text processing (Wisp, Fireside, Flow, Thorn, Forage):** Fireworks AI, Cerebras, and Groq. Each has explicit ZDR policies.
 
 **For image processing (Petal):** Together.ai and FAL.ai. Both support ZDR for vision models.
 
@@ -76,7 +78,8 @@ We exclude providers that can't meet these standards. OpenAI, Anthropic's hosted
 ZDR applies to the AI providers. Grove itself keeps minimal metadata for the features to work:
 
 - Wisp: request timestamp, token usage, cost
-- Flow's Fireside: only whether a post was drafted with Fireside assistance (a simple flag, not the conversation)
+- Fireside: only whether a post was drafted with Fireside assistance (a simple flag, not the conversation)
+- Flow: request metadata only, no content
 - Thorn: moderation decision (pass/flag/escalate), timestamp
 - Petal: moderation decision (pass/block), timestamp
 - Petal CSAM detection: image hash and metadata **only if a match is found** (legal requirement)
@@ -97,8 +100,8 @@ Grove's AI features help you write and keep the community safe. They don't extra
 For technically-minded users: you can verify our ZDR policies in these specs:
 
 - [Lumen spec](/knowledge/specs/lumen-spec) (Section: Security Considerations—the AI gateway all features use)
-- [Wisp spec](/knowledge/specs/wisp-spec) (Section: Privacy First, Model Strategy)
-- [Flow spec](/knowledge/specs/flow-spec) (Section: Fireside Mode—conversational drafting)
+- [Wisp spec](/knowledge/specs/wisp-spec) (Section: Privacy First, Model Strategy, Fireside Data Handling)
+- [Flow spec](/knowledge/specs/flow-spec) (Section: Fireside Mode)
 - [Thorn spec](/knowledge/specs/thorn-spec) (Section: Inference Provider Requirements)
 - [Petal spec](/knowledge/specs/petal-spec) (Section: Data Lifecycle, Inference Provider Requirements)
 - [Shade spec](/knowledge/specs/shade-spec) (broader privacy protections)
