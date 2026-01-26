@@ -22,6 +22,11 @@ declare global {
         AUTH: Fetcher;
         /** Optional KV namespace for caching and rate limiting */
         CACHE_KV?: KVNamespace;
+        /** Alias for CACHE_KV (rate limiting) */
+        CACHE?: KVNamespace;
+        /** Turnstile (Shade) - human verification */
+        TURNSTILE_SITE_KEY: string;
+        TURNSTILE_SECRET_KEY: string;
         GROVEAUTH_URL?: string;
         GROVEAUTH_CLIENT_ID?: string;
         GROVEAUTH_CLIENT_SECRET?: string;
