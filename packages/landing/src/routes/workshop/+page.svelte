@@ -996,7 +996,7 @@
 											</a>
 										{/if}
 										{#if tool.whatIsLink}
-											<a href={tool.whatIsLink} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
+											<a href={tool.whatIsLink} aria-label="Learn more about {tool.name}" class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
 												<BookOpen class="w-4 h-4" />
 												<span>Read more</span>
 											</a>
