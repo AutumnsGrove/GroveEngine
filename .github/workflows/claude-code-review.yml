@@ -74,7 +74,23 @@ jobs:
 
             ### Summary
             One paragraph overall assessment. Is this ready to merge? Any blocking concerns?
+
+            ### Change Flow
+            <details>
+            <summary>View diagram</summary>
+
+            ```mermaid
+            flowchart LR
+              A[Component] --> B[Change] --> C[Effect]
             ```
+            </details>
+            ```
+
+            For the Change Flow diagram:
+            - Use `flowchart LR` (left-to-right) for simple linear flows
+            - Keep it to 3-6 nodes max — just the key components touched
+            - Show the actual data/control flow changed by this PR
+            - Skip the diagram entirely for trivial changes (typos, config tweaks)
 
             If the PR looks good with no significant issues, say so briefly—don't manufacture feedback.
 
