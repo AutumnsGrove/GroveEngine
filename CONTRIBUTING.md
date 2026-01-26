@@ -1,14 +1,76 @@
 # Contributing to Grove
 
-Welcome! We're glad you're here.
+Welcome, Wanderer! We're glad you're here.
 
-Grove is a community-focused project building queer-friendly infrastructure for the web. Whether you're fixing a typo, adding a feature, or just poking around—you're welcome in this space.
+Grove is a community-focused project building queer-friendly infrastructure for the web. Whether you're reporting a bug, suggesting a feature, or writing code—you're welcome in this space.
 
-## Before You Start
+## The Golden Rule: Issues First
 
-- **Read the room.** Grove is about helping people have their own space online, away from big tech algorithms. Keep that spirit in mind.
-- **Check existing issues** before opening a new one. Someone might already be working on it.
-- **Start small.** If you're new, a good first contribution might be documentation, tests, or a small bug fix.
+**Every contribution starts with an issue.**
+
+```
+Issue → Discussion → PR → Review → Merge
+```
+
+We don't accept PRs that appear out of nowhere. Here's why:
+
+1. **Prevents wasted effort.** You might spend hours on something we've already decided against, or that someone else is working on.
+2. **Creates a paper trail.** Issues let us discuss approaches before code is written.
+3. **Keeps everyone aligned.** The community can weigh in on direction before implementation.
+
+### How It Works
+
+1. **Find or create an issue** — Check [existing issues](https://github.com/AutumnsGrove/GroveEngine/issues) first
+2. **Discuss the approach** — Comment on the issue with your plan
+3. **Get the green light** — Wait for a maintainer to approve the approach
+4. **Submit your PR** — Reference the issue number (e.g., "Fixes #123")
+5. **Review and merge** — Address feedback, then celebrate!
+
+**Exception:** Typo fixes and tiny documentation corrections can go straight to PR. Use your judgment—if it takes more than 5 minutes, open an issue first.
+
+## Ways to Contribute
+
+### 🐛 Report Bugs
+
+Found something broken? [Open a bug report](https://github.com/AutumnsGrove/GroveEngine/issues/new?template=bug_report.md) with:
+
+- Clear title describing the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Browser/environment details
+- Screenshots if helpful
+
+### 💡 Suggest Features
+
+Have an idea? [Open a feature request](https://github.com/AutumnsGrove/GroveEngine/issues/new?template=feature_request.md) with:
+
+- What problem does this solve?
+- Who would use this?
+- Any implementation ideas (optional)
+
+Not every suggestion will be accepted—Grove has a focused vision. But we'll always consider thoughtful proposals.
+
+### 🔍 Test and Explore
+
+Sometimes the most valuable contribution is just *using the thing*.
+
+- Explore the site and report what feels off
+- Try edge cases and unusual workflows
+- Check accessibility with screen readers
+- Test on different devices and browsers
+
+### 📝 Improve Documentation
+
+Clear documentation helps everyone. You can:
+
+- Fix typos and clarify confusing sections
+- Add examples where they'd help
+- Translate content (talk to us first)
+- Write tutorials or guides
+
+### 🛠️ Write Code
+
+Ready to dive in? Check out issues labeled [`good first issue`](https://github.com/AutumnsGrove/GroveEngine/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) for beginner-friendly tasks.
 
 ## Development Setup
 
@@ -72,24 +134,19 @@ Keep the subject line under 72 characters. Write in imperative mood ("Add featur
 
 ### Before Opening a PR
 
-1. **Make sure tests pass** – `pnpm test` in the relevant package
-2. **Test your changes locally** – Don't just assume it works
-3. **Keep PRs focused** – One feature or fix per PR. Smaller is better.
-4. **Update docs if needed** – If you change behavior, update the relevant documentation
+1. **Link to the issue** — Your PR must reference an existing issue
+2. **Make sure tests pass** — `pnpm test` in the relevant package
+3. **Test your changes locally** — Don't just assume it works
+4. **Keep PRs focused** — One feature or fix per PR. Smaller is better.
+5. **Update docs if needed** — If you change behavior, update the documentation
 
-### PR Checklist
-
-- [ ] Tests pass locally
-- [ ] Code follows existing patterns in the codebase
-- [ ] Commit messages follow conventional commits
-- [ ] No unrelated changes bundled in
-- [ ] Documentation updated (if applicable)
-
-### Writing a Good PR Description
+### PR Template
 
 ```markdown
 ## Summary
-Brief description of what this PR does and why.
+Brief description of what this PR does.
+
+Fixes #<issue number>
 
 ## Changes
 - Bullet points of specific changes
@@ -114,35 +171,25 @@ Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or other
 
 1. **Read `AGENT.md` first.** It has project-specific instructions, conventions, and context you'll need.
 2. **Check [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues)** for current priorities and in-progress work.
-3. **Follow the commit format** including the co-author line:
+3. **Follow the issue-first workflow.** Don't generate PRs without a corresponding issue.
+4. **Self-identify in commits** — Use the Co-Authored-By line to identify yourself:
    ```
-   🤖 Generated with [Claude Code](https://claude.ai/code)
+   Co-Authored-By: <Agent Name> <Model> <noreply@provider.com>
+   ```
 
-   Co-Authored-By: [Model Name] <noreply@anthropic.com>
+   Examples:
    ```
-4. **Don't over-engineer.** Do what's asked, nothing more. Resist the urge to refactor adjacent code or add "improvements" that weren't requested.
-5. **Ask for clarification** if requirements are ambiguous rather than guessing.
-6. **Respect the project's voice.** Grove has a warm, introspective tone. Match it in documentation and user-facing text.
+   Co-Authored-By: Claude Code (Opus 4.5) <noreply@anthropic.com>
+   Co-Authored-By: Kilo (DeepSeek V3) <noreply@deepseek.com>
+   Co-Authored-By: Kilo (MiniMax M2.1) <noreply@minimax.io>
+   ```
+
+   This helps with auditing—we want to know *which* agent wrote *what*.
+5. **Don't over-engineer.** Do what's asked, nothing more. Resist the urge to refactor adjacent code or add "improvements" that weren't requested.
+6. **Ask for clarification** if requirements are ambiguous rather than guessing.
+7. **Respect the project's voice.** Grove has a warm, introspective tone. Match it in documentation and user-facing text.
 
 You're part of the team. Build things that help people have their own space online.
-
-## Reporting Bugs
-
-Open an issue with:
-- Clear title describing the problem
-- Steps to reproduce
-- Expected vs actual behavior
-- Browser/environment details
-- Screenshots if helpful
-
-## Requesting Features
-
-We're open to ideas! Open an issue with:
-- What problem does this solve?
-- Who would use this?
-- Any implementation ideas (optional)
-
-Not every feature request will be accepted—Grove has a focused vision. But we'll always consider thoughtful suggestions.
 
 ## Code of Conduct
 
@@ -153,11 +200,11 @@ Grove is explicitly a queer-friendly space. Bigotry, harassment, and exclusionar
 ## Questions?
 
 - Check the [docs](docs/) folder
+- Browse [existing issues](https://github.com/AutumnsGrove/GroveEngine/issues)
 - Open a discussion on GitHub
-- Reach out to the maintainers
 
 ---
 
-Thanks for contributing to Grove. Every commit, issue, and review helps build something meaningful.
+Thanks for contributing to Grove. Every issue, commit, and review helps build something meaningful.
 
 *Here's to queer-friendly infrastructure and solarpunk dreams.*
