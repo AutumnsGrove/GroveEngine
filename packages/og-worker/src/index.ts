@@ -1,21 +1,54 @@
 import { ImageResponse } from "workers-og";
 
+// Import pure functions from separate module (enables testing without workers-og WASM)
+import {
+  escapeHtml,
+  decodeHtmlEntities,
+  splitPreviewIntoLines,
+  isAllowedUrl,
+  isBlockedExternalUrl,
+  extractDomain,
+  resolveExternalUrl,
+  getColors,
+  extractExternalMetaContent,
+  extractExternalTitle,
+  extractExternalFavicon,
+  parseExternalOGMetadata,
+} from "./pure-functions";
+
+import type {
+  LineSplit,
+  ColorScheme,
+  Variant,
+  OGMetadata,
+} from "./pure-functions";
+
+// Re-export for consumers who import from index
+export {
+  escapeHtml,
+  decodeHtmlEntities,
+  splitPreviewIntoLines,
+  isAllowedUrl,
+  isBlockedExternalUrl,
+  extractDomain,
+  resolveExternalUrl,
+  getColors,
+  extractExternalMetaContent,
+  extractExternalTitle,
+  extractExternalFavicon,
+  parseExternalOGMetadata,
+};
+
+export type { LineSplit, ColorScheme, Variant, OGMetadata };
+
 export interface Env {
   ENVIRONMENT: string;
   OG_CACHE?: KVNamespace;
 }
 
-function escapeHtml(text: string): string {
-  // Only escape characters that could inject HTML tags
-  // Apostrophes and quotes are safe - Satori renders them as-is
-  // (Satori doesn't interpret HTML entities, so &#039; would show literally)
-  const map: Record<string, string> = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-  };
-  return text.replace(/[&<>]/g, (m) => map[m]);
-}
+// =============================================================================
+// FONT LOADING
+// =============================================================================
 
 let fontCache: ArrayBuffer | null = null;
 
@@ -27,150 +60,6 @@ async function getFont(): Promise<ArrayBuffer> {
   if (!response.ok) throw new Error(`Font fetch failed: ${response.status}`);
   fontCache = await response.arrayBuffer();
   return fontCache;
-}
-
-// =============================================================================
-// PALETTE - Synced from landing/src/lib/components/nature/palette.ts
-// Keep these in sync with the source palette file!
-// =============================================================================
-
-const greens = {
-  darkForest: "#0d4a1c",
-  deepGreen: "#166534",
-  grove: "#16a34a", // Grove brand primary green
-  meadow: "#22c55e",
-  spring: "#4ade80",
-  mint: "#86efac",
-  pale: "#bbf7d0",
-} as const;
-
-const autumn = {
-  rust: "#9a3412",
-  ember: "#c2410c",
-  pumpkin: "#ea580c",
-  amber: "#d97706",
-  gold: "#eab308",
-  honey: "#facc15",
-  straw: "#fde047",
-} as const;
-
-const winter = {
-  snow: "#f8fafc",
-  frost: "#e2e8f0",
-  ice: "#cbd5e1",
-  glacier: "#94a3b8",
-  frostedPine: "#2d4a3e",
-  winterGreen: "#3d5a4a",
-  twilight: "#bfdbfe",
-} as const;
-
-const midnightBloom = {
-  deepPlum: "#581c87",
-  purple: "#7c3aed",
-  violet: "#8b5cf6",
-  amber: "#f59e0b",
-  warmCream: "#fef3c7",
-  softGold: "#fcd34d",
-} as const;
-
-const accents = {
-  sky: {
-    dayLight: "#e0f2fe",
-    dayMid: "#7dd3fc",
-    night: "#1e293b",
-    star: "#fefce8",
-  },
-  water: {
-    surface: "#7dd3fc",
-    deep: "#0284c7",
-    shallow: "#bae6fd",
-  },
-} as const;
-
-// Slate colors for default dark theme (from Tailwind)
-const slate = {
-  900: "#0f172a",
-  800: "#1e293b",
-  700: "#334155",
-  400: "#94a3b8",
-  200: "#e2e8f0",
-  50: "#f8fafc",
-} as const;
-
-// =============================================================================
-// VARIANT COLOR SCHEMES
-// =============================================================================
-
-type Variant = "default" | "forest" | "workshop" | "midnight" | "knowledge";
-
-interface ColorScheme {
-  bgFrom: string;
-  bgTo: string;
-  accent: string;
-  text: string;
-  muted: string;
-  glass: string;
-  glassBorder: string;
-}
-
-function getColors(variant: Variant): ColorScheme {
-  switch (variant) {
-    case "forest":
-      return {
-        bgFrom: greens.darkForest,
-        bgTo: greens.deepGreen,
-        accent: greens.mint,
-        text: greens.pale,
-        muted: greens.spring,
-        glass: "rgba(13, 74, 28, 0.6)", // darkForest with alpha
-        glassBorder: "rgba(134, 239, 172, 0.2)", // mint with alpha
-      };
-
-    case "workshop":
-      // Muted workshop - slate base with warm amber accents
-      return {
-        bgFrom: slate[900],
-        bgTo: slate[800],
-        accent: autumn.gold,
-        text: autumn.straw,
-        muted: autumn.honey,
-        glass: "rgba(15, 23, 42, 0.6)", // slate.900 with alpha
-        glassBorder: "rgba(234, 179, 8, 0.2)", // gold with alpha
-      };
-
-    case "midnight":
-      return {
-        bgFrom: midnightBloom.deepPlum,
-        bgTo: midnightBloom.purple,
-        accent: midnightBloom.amber,
-        text: midnightBloom.warmCream,
-        muted: midnightBloom.softGold,
-        glass: "rgba(88, 28, 135, 0.6)", // deepPlum with alpha
-        glassBorder: "rgba(245, 158, 11, 0.2)", // amber with alpha
-      };
-
-    case "knowledge":
-      return {
-        bgFrom: accents.sky.night,
-        bgTo: accents.water.deep,
-        accent: accents.water.surface,
-        text: accents.sky.dayLight,
-        muted: accents.water.shallow,
-        glass: "rgba(30, 41, 59, 0.6)", // sky.night with alpha
-        glassBorder: "rgba(125, 211, 252, 0.2)", // water.surface with alpha
-      };
-
-    default:
-      return {
-        bgFrom: slate[900],
-        bgTo: slate[800],
-        accent: greens.grove,
-        text: slate[50],
-        muted: slate[400],
-        glass: "rgba(15, 23, 42, 0.6)", // slate.900 with alpha
-        glassBorder: "rgba(22, 163, 74, 0.2)", // grove with alpha
-      };
-  }
 }
 
 // =============================================================================
@@ -188,17 +77,25 @@ function generateHtml(
   // Glass panel on right side with fading text effect
   let rightPanel: string;
   if (preview) {
-    // Split into ~4 lines with decreasing opacity for fade effect
-    const line1 = preview.slice(0, 60);
-    const line2 = preview.slice(60, 120);
-    const line3 = preview.slice(120, 170);
-    const line4 = preview.slice(170, 210);
+    const { line1, line2, line3, line4 } = splitPreviewIntoLines(preview);
+
+    // Only render lines that have content, with decreasing opacity for fade effect
+    const lineConfigs = [
+      { text: line1, opacity: 1.0 },
+      { text: line2, opacity: 0.75 },
+      { text: line3, opacity: 0.5 },
+      { text: line4, opacity: 0.25 },
+    ].filter((config) => config.text);
+
+    const lineElements = lineConfigs
+      .map(
+        ({ text, opacity }) =>
+          `<div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: ${opacity};">${escapeHtml(text)}</div>`,
+      )
+      .join("");
 
     rightPanel = `<div style="display: flex; flex-direction: column; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; padding: 24px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; overflow: hidden;">
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 1;">${line1}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.75;">${line2}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.5;">${line3}</div>
-      <div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: 0.25;">${line4}</div>
+      ${lineElements}
     </div>`;
   } else {
     rightPanel = `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
@@ -218,50 +115,6 @@ function generateHtml(
     <div style="display: flex; font-size: 18px; color: ${c.muted};">grove.place</div>
   </div>
 </div>`;
-}
-
-// =============================================================================
-// SSRF PREVENTION - URL VALIDATION
-// =============================================================================
-
-// Allowed domains for fetching
-const ALLOWED_DOMAINS = new Set([
-  "grove.place",
-  "cdn.grove.place",
-  "imagedelivery.net", // Cloudflare Images
-]);
-
-function isAllowedUrl(urlString: string): boolean {
-  try {
-    const url = new URL(urlString);
-
-    // Block non-HTTPS
-    if (url.protocol !== "https:") {
-      return false;
-    }
-
-    // Block internal/private IPs
-    const hostname = url.hostname;
-    if (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.startsWith("192.168.") ||
-      hostname.startsWith("10.") ||
-      hostname.startsWith("172.") ||
-      hostname.endsWith(".local")
-    ) {
-      return false;
-    }
-
-    // Check against allowlist OR allow subdomains of grove.place
-    if (ALLOWED_DOMAINS.has(hostname) || hostname.endsWith(".grove.place")) {
-      return true;
-    }
-
-    return false;
-  } catch {
-    return false;
-  }
 }
 
 // =============================================================================
@@ -353,183 +206,12 @@ async function fetchPageMeta(pageUrl: string): Promise<PageMeta> {
 // EXTERNAL OG METADATA FETCHER (for LinkPreview component)
 // =============================================================================
 
-interface OGMetadata {
-  url: string;
-  title?: string;
-  description?: string;
-  image?: string;
-  imageAlt?: string;
-  siteName?: string;
-  favicon?: string;
-  domain: string;
-  type?: string;
-  fetchedAt: string;
-}
-
 interface OGFetchResult {
   success: boolean;
   data?: OGMetadata;
   error?: string;
   errorCode?: string;
   cached?: boolean;
-}
-
-// Blocked URL patterns for external fetch (security - SSRF protection)
-const BLOCKED_EXTERNAL_PATTERNS = [
-  // Localhost variations
-  /^https?:\/\/localhost/i,
-  /^https?:\/\/127\./,
-  /^https?:\/\/0\./,
-  // Private IP ranges (RFC 1918)
-  /^https?:\/\/10\./,
-  /^https?:\/\/172\.(1[6-9]|2\d|3[01])\./,
-  /^https?:\/\/192\.168\./,
-  // Link-local addresses (RFC 3927)
-  /^https?:\/\/169\.254\./,
-  // Cloud metadata endpoints (AWS, GCP, Azure, DigitalOcean, etc.)
-  /^https?:\/\/169\.254\.169\.254/,
-  /^https?:\/\/metadata\./i,
-  /^https?:\/\/metadata-/i,
-  // IPv6 localhost
-  /^https?:\/\/\[::1\]/,
-  // IPv6 link-local
-  /^https?:\/\/\[fe80:/i,
-  // IPv6 unique local addresses (fc00::/7)
-  /^https?:\/\/\[fc/i,
-  /^https?:\/\/\[fd/i,
-  // Dangerous protocols
-  /^file:/i,
-  /^data:/i,
-];
-
-function isBlockedExternalUrl(urlString: string): boolean {
-  for (const pattern of BLOCKED_EXTERNAL_PATTERNS) {
-    if (pattern.test(urlString)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function extractDomain(url: URL): string {
-  return url.hostname.replace(/^www\./, "");
-}
-
-function resolveExternalUrl(
-  base: URL,
-  relative: string | undefined,
-): string | undefined {
-  if (!relative) return undefined;
-  if (relative.startsWith("//")) {
-    return `${base.protocol}${relative}`;
-  }
-  try {
-    return new URL(relative, base.href).href;
-  } catch {
-    return undefined;
-  }
-}
-
-function decodeHtmlEntities(text: string): string {
-  const entities: Record<string, string> = {
-    "&amp;": "&",
-    "&lt;": "<",
-    "&gt;": ">",
-    "&quot;": '"',
-    "&#39;": "'",
-    "&apos;": "'",
-    "&nbsp;": " ",
-  };
-  return text.replace(
-    /&(?:amp|lt|gt|quot|#39|apos|nbsp);/g,
-    (match) => entities[match] || match,
-  );
-}
-
-function extractExternalMetaContent(
-  html: string,
-  property: string,
-): string | undefined {
-  // Try og: property first
-  const ogPatterns = [
-    new RegExp(
-      `<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`,
-      "i",
-    ),
-    new RegExp(
-      `<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${property}["']`,
-      "i",
-    ),
-  ];
-
-  for (const pattern of ogPatterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) {
-      return decodeHtmlEntities(match[1].trim());
-    }
-  }
-
-  // Try name attribute for non-OG meta tags
-  const namePatterns = [
-    new RegExp(
-      `<meta[^>]+name=["']${property}["'][^>]+content=["']([^"']+)["']`,
-      "i",
-    ),
-    new RegExp(
-      `<meta[^>]+content=["']([^"']+)["'][^>]+name=["']${property}["']`,
-      "i",
-    ),
-  ];
-
-  for (const pattern of namePatterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) {
-      return decodeHtmlEntities(match[1].trim());
-    }
-  }
-
-  return undefined;
-}
-
-function extractExternalTitle(html: string): string | undefined {
-  const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return match?.[1] ? decodeHtmlEntities(match[1].trim()) : undefined;
-}
-
-function extractExternalFavicon(html: string, baseUrl: URL): string | undefined {
-  const patterns = [
-    /<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']+)["']/i,
-    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut )?icon["']/i,
-    /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) {
-      return resolveExternalUrl(baseUrl, match[1]);
-    }
-  }
-
-  return `${baseUrl.protocol}//${baseUrl.host}/favicon.ico`;
-}
-
-function parseExternalOGMetadata(
-  html: string,
-  url: URL,
-): Omit<OGMetadata, "fetchedAt"> {
-  return {
-    url: url.href,
-    domain: extractDomain(url),
-    title: extractExternalMetaContent(html, "og:title") || extractExternalTitle(html),
-    description:
-      extractExternalMetaContent(html, "og:description") ||
-      extractExternalMetaContent(html, "description"),
-    image: resolveExternalUrl(url, extractExternalMetaContent(html, "og:image")),
-    imageAlt: extractExternalMetaContent(html, "og:image:alt"),
-    siteName: extractExternalMetaContent(html, "og:site_name"),
-    type: extractExternalMetaContent(html, "og:type"),
-    favicon: extractExternalFavicon(html, url),
-  };
 }
 
 async function handleOGFetch(
@@ -625,9 +307,9 @@ async function handleOGFetch(
     response = await fetch(targetUrl, {
       method: "GET",
       headers: {
-        "User-Agent":
-          "GroveBot/1.0 (+https://grove.place; Open Graph Fetcher)",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "GroveBot/1.0 (+https://grove.place; Open Graph Fetcher)",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
       },
       signal: controller.signal,
@@ -720,7 +402,7 @@ async function handleOGFetch(
         }, new Uint8Array(0)),
       ),
     );
-  } catch (err) {
+  } catch {
     return new Response(
       JSON.stringify({
         success: false,
@@ -836,7 +518,7 @@ export default {
 
       const title = escapeHtml(rawTitle.slice(0, 80));
       const subtitle = escapeHtml(rawSubtitle.slice(0, 150));
-      const preview = rawPreview ? escapeHtml(rawPreview.slice(0, 400)) : null;
+      const preview = rawPreview ? rawPreview.slice(0, 400) : null;
       const variant = [
         "default",
         "forest",
