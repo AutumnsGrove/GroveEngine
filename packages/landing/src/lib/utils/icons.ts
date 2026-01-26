@@ -219,6 +219,8 @@ import {
   Highlighter,
   // Passage - subdomain routing
   Kayak,
+  // Scribe - voice transcription
+  Mic,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -490,6 +492,8 @@ export const toolIcons = {
   highlighter: Highlighter, // Etch - scoring/highlighting text
   // Passage - subdomain routing (the hidden way through)
   kayak: Kayak, // Passage - navigating the river passage
+  // Scribe - voice transcription
+  mic: Mic, // Scribe - voice-to-text
 } as const;
 
 // ============================================================================

@@ -409,6 +409,22 @@
 					]
 				},
 				{
+					name: 'Scribe',
+					tagline: 'Voice Transcription',
+					description: 'Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you\'re thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.',
+					status: 'building',
+					icon: 'mic',
+					integration: 'Built into Flow mode in Arbor',
+					spec: '/knowledge/specs/scribe-voice-transcription-spec',
+					whatIsLink: '/knowledge/help/what-is-scribe',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Raw', icon: 'zap', description: '1:1 transcription' },
+						{ name: 'Draft', icon: 'sparkles', description: 'AI-structured output' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+					]
+				},
+				{
 					name: 'Reeds',
 					tagline: 'Comments System',
 					description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
