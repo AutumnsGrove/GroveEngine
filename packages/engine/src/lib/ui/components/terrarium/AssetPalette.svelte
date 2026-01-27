@@ -7,7 +7,17 @@
 	import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
 	import type { AssetCategory } from './types';
 	import PaletteItem from './PaletteItem.svelte';
-	import { Trees, Bug, Leaf, Mountain, Landmark, ChevronDown } from 'lucide-svelte';
+	import {
+		Trees,
+		Bug,
+		Leaf,
+		Mountain,
+		Landmark,
+		Cloud,
+		Droplets,
+		Snowflake,
+		ChevronDown
+	} from 'lucide-svelte';
 	import type { ComponentType } from 'svelte';
 
 	interface Props {
@@ -23,47 +33,94 @@
 		assets: readonly string[];
 	}
 
-	// Map starter assets to their categories
+	// Full asset library - all 62 nature components
 	const categoriesMap: Record<AssetCategory, CategoryMeta> = {
 		trees: {
 			name: 'Trees',
 			icon: Trees,
-			assets: ['TreeAspen', 'TreeBirch']
+			assets: ['TreeAspen', 'TreeBirch', 'TreeCherry', 'TreePine']
 		},
 		creatures: {
 			name: 'Creatures',
 			icon: Bug,
-			assets: ['Butterfly', 'Firefly']
+			assets: [
+				'Bee',
+				'Bird',
+				'BirdFlying',
+				'Bluebird',
+				'Butterfly',
+				'Cardinal',
+				'Chickadee',
+				'Deer',
+				'Firefly',
+				'Owl',
+				'Rabbit',
+				'Robin',
+				'Squirrel'
+			]
 		},
 		botanical: {
 			name: 'Botanical',
 			icon: Leaf,
-			assets: ['Vine']
+			assets: [
+				'Acorn',
+				'Berry',
+				'DandelionPuff',
+				'FallingLeavesLayer',
+				'FallingPetalsLayer',
+				'Leaf',
+				'LeafFalling',
+				'PetalFalling',
+				'PineCone',
+				'Vine'
+			]
 		},
 		ground: {
 			name: 'Ground',
 			icon: Mountain,
-			assets: ['Mushroom', 'Rock']
+			assets: [
+				'Bush',
+				'Crocus',
+				'Daffodil',
+				'Fern',
+				'FlowerWild',
+				'GrassTuft',
+				'Log',
+				'Mushroom',
+				'MushroomCluster',
+				'Rock',
+				'Stump',
+				'Tulip'
+			]
+		},
+		sky: {
+			name: 'Sky',
+			icon: Cloud,
+			assets: ['Cloud', 'CloudWispy', 'Moon', 'Rainbow', 'Star', 'StarCluster', 'StarShooting', 'Sun']
 		},
 		structural: {
 			name: 'Structural',
 			icon: Landmark,
-			assets: ['Lattice', 'LatticeWithVine', 'Lantern']
-		},
-		sky: {
-			name: 'Sky',
-			icon: Landmark,
-			assets: []
+			assets: [
+				'Birdhouse',
+				'Bridge',
+				'FencePost',
+				'GardenGate',
+				'Lantern',
+				'Lattice',
+				'LatticeWithVine',
+				'StonePath'
+			]
 		},
 		water: {
 			name: 'Water',
-			icon: Landmark,
-			assets: []
+			icon: Droplets,
+			assets: ['LilyPad', 'Pond', 'Reeds', 'Stream']
 		},
 		weather: {
 			name: 'Weather',
-			icon: Landmark,
-			assets: []
+			icon: Snowflake,
+			assets: ['SnowfallLayer', 'Snowflake', 'SnowflakeFalling']
 		}
 	};
 
