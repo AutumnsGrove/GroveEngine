@@ -136,6 +136,9 @@
 
       .grove-entrance-logo {
         position: relative;
+        /* z-grove-entrance + 1: Logo must render above vine strips (100000)
+           so it remains visible as vines swing aside. Uses 100001 to stay
+           one layer above the z-grove-entrance semantic token. */
         z-index: 100001;
       }
 
