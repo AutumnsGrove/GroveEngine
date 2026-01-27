@@ -90,24 +90,43 @@
         top: 0;
         height: 100%;
         width: 55vw; /* Overlap in center for seamless coverage */
-        /* Transparent background — just vines, no green space.
-           The site shows through completely as vines part. */
-        background-color: transparent;
-        background-image: var(--vine-pattern);
-        background-size: auto 100%;
-        background-repeat: repeat-y;
+        /* Gradient background: solid at outer edge, fades to transparent at inner edge.
+           This creates a soft dissolve effect so vines don't look "cut off" at center. */
+        background-image:
+          linear-gradient(to right,
+            rgba(18, 42, 26, 0.95) 0%,
+            rgba(18, 42, 26, 0.95) 40%,
+            rgba(18, 42, 26, 0.6) 65%,
+            rgba(18, 42, 26, 0.2) 85%,
+            transparent 100%
+          ),
+          var(--vine-pattern);
+        background-size: 100% 100%, auto 100%;
+        background-repeat: no-repeat, repeat-y;
         will-change: transform;
         pointer-events: auto;
       }
 
+      html:not(.dark) .grove-vine-panel {
+        background-image:
+          linear-gradient(to right,
+            rgba(220, 252, 231, 0.95) 0%,
+            rgba(220, 252, 231, 0.95) 40%,
+            rgba(220, 252, 231, 0.6) 65%,
+            rgba(220, 252, 231, 0.2) 85%,
+            transparent 100%
+          ),
+          var(--vine-pattern);
+      }
+
       .grove-vine-left {
         left: 0;
-        background-position: right center;
+        background-position: 0 0, right center;
       }
 
       .grove-vine-right {
         right: 0;
-        background-position: left center;
+        background-position: 0 0, left center;
         transform: scaleX(-1);
       }
 

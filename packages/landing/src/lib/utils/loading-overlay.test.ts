@@ -108,9 +108,10 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("#122a1a");
     });
 
-    it("should have transparent vine panel backgrounds", () => {
-      // Panels are transparent — just vines, no green space
-      expect(appHtml).toContain("background-color: transparent");
+    it("should have gradient vine panel backgrounds with soft edges", () => {
+      // Panels use gradient: solid at outer edge, fades to transparent at inner edge
+      expect(appHtml).toContain("linear-gradient(to right");
+      expect(appHtml).toContain("transparent 100%");
     });
 
     it("should have light mode styles for logo", () => {
