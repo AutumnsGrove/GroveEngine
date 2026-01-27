@@ -217,10 +217,10 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should have multiple vine strips per side", () => {
-      // Count vine strips - should have 6 per side = 12 total
+      // Count vine strips - should have 8 per side = 16 total
       const stripMatches = appHtml.match(/class="grove-vine-strip"/g);
       expect(stripMatches).not.toBeNull();
-      expect(stripMatches!.length).toBe(12);
+      expect(stripMatches!.length).toBe(16);
     });
 
     it("should have 8 segments per vine", () => {
@@ -229,9 +229,9 @@ describe("Grove Entrance Animation", () => {
       const seg8Matches = appHtml.match(/class="vine-seg vine-seg-8"/g);
       expect(seg1Matches).not.toBeNull();
       expect(seg8Matches).not.toBeNull();
-      // 12 vines × 1 seg-1 each = 12, same for seg-8
-      expect(seg1Matches!.length).toBe(12);
-      expect(seg8Matches!.length).toBe(12);
+      // 16 vines × 1 seg-1 each = 16, same for seg-8
+      expect(seg1Matches!.length).toBe(16);
+      expect(seg8Matches!.length).toBe(16);
     });
   });
 
