@@ -16,6 +16,10 @@
     </script>
     <!-- Loading overlay styles (inline for immediate rendering) -->
     <style id="grove-loading-styles">
+      /* ══════════════════════════════════════════════════════════════
+         GROVE ENTRANCE ANIMATION - "Parting the Vines"
+         ══════════════════════════════════════════════════════════════ */
+
       #grove-loading-overlay {
         position: fixed;
         inset: 0;
@@ -23,23 +27,52 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #122a1a; /* Dark forest green */
-        opacity: 1;
-        transition: opacity 0.3s ease-out;
-      }
-
-      /* Light mode background (theme already detected by blocking script) */
-      html:not(.dark) #grove-loading-overlay {
-        background-color: #f0fdf4;
-      }
-
-      html:not(.dark) .grove-loader-bg {
-        fill: #f0fdf4;
-      }
-
-      #grove-loading-overlay.grove-hidden {
-        opacity: 0;
         pointer-events: none;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Vine Panels (the curtains that part)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-vine-panel {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 55vw; /* Overlap in center for seamless coverage */
+        background-color: #122a1a;
+        will-change: transform;
+        pointer-events: auto;
+      }
+
+      html:not(.dark) .grove-vine-panel {
+        background-color: #dcfce7;
+      }
+
+      /* Dense vine pattern SVG - hand-crafted for dramatic entrance */
+      .grove-vine-left {
+        left: 0;
+        background-image: url("data:image/svg+xml,%3Csvg width='200' height='600' viewBox='0 0 200 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='vineGrad' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%2322c55e' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%2322c55e' stop-opacity='0.15'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23vineGrad)' stroke-linecap='round'%3E%3C!-- Main structural vine 1 - thick dramatic S-curve --%3E%3Cpath d='M-10 0 C40 50 20 120 60 180 S30 280 70 350 S40 450 80 520 S50 580 30 620' stroke-width='3.5' opacity='0.7'/%3E%3C!-- Main structural vine 2 --%3E%3Cpath d='M-15 100 C50 140 35 200 75 260 S45 340 85 400 S55 480 40 560' stroke-width='3' opacity='0.6'/%3E%3C!-- Main structural vine 3 --%3E%3Cpath d='M-5 200 C45 230 25 290 65 350 S35 430 55 500 S30 560 20 620' stroke-width='2.8' opacity='0.55'/%3E%3C!-- Secondary reaching vines --%3E%3Cpath d='M60 180 C100 170 130 200 160 180' stroke-width='2' opacity='0.4'/%3E%3Cpath d='M70 350 C110 340 145 370 180 350' stroke-width='1.8' opacity='0.35'/%3E%3Cpath d='M80 520 C120 510 150 540 190 520' stroke-width='1.8' opacity='0.3'/%3E%3Cpath d='M75 260 C115 280 140 250 175 270' stroke-width='1.6' opacity='0.35'/%3E%3Cpath d='M85 400 C125 420 155 390 185 410' stroke-width='1.5' opacity='0.3'/%3E%3C!-- Curling tendrils --%3E%3Cpath d='M60 180 Q80 165 88 150 Q95 135 85 125 Q75 118 65 128' stroke-width='1.2' opacity='0.45'/%3E%3Cpath d='M70 350 Q90 335 98 318 Q105 300 92 292 Q80 288 72 300' stroke-width='1.1' opacity='0.4'/%3E%3Cpath d='M80 520 Q100 505 108 488 Q115 470 102 462 Q90 458 82 470' stroke-width='1.1' opacity='0.35'/%3E%3Cpath d='M55 500 Q75 510 82 525 Q88 542 75 550' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M65 350 Q55 365 60 382 Q68 398 82 392' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M40 560 Q60 545 75 555 Q90 568 80 582' stroke-width='0.9' opacity='0.3'/%3E%3Cpath d='M75 260 Q95 245 102 228 Q108 212 95 205' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M85 400 Q105 385 112 368 Q118 350 105 345' stroke-width='1' opacity='0.35'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Dense ivy leaves along main vines --%3E%3Cpath d='M50 140 Q68 118 60 98 Q50 118 32 128 Q50 138 50 140Z' opacity='0.5'/%3E%3Cpath d='M65 220 Q83 198 75 178 Q65 198 47 208 Q65 218 65 220Z' opacity='0.45'/%3E%3Cpath d='M55 300 Q73 278 65 258 Q55 278 37 288 Q55 298 55 300Z' opacity='0.4'/%3E%3Cpath d='M75 380 Q93 358 85 338 Q75 358 57 368 Q75 378 75 380Z' opacity='0.4'/%3E%3Cpath d='M60 460 Q78 438 70 418 Q60 438 42 448 Q60 458 60 460Z' opacity='0.35'/%3E%3Cpath d='M70 540 Q88 518 80 498 Q70 518 52 528 Q70 538 70 540Z' opacity='0.35'/%3E%3C!-- Smaller accent leaves --%3E%3Cpath d='M100 195 Q115 180 110 165 Q100 178 88 185 Q100 192 100 195Z' opacity='0.35'/%3E%3Cpath d='M120 365 Q135 350 130 335 Q120 348 108 355 Q120 362 120 365Z' opacity='0.3'/%3E%3Cpath d='M130 535 Q145 520 140 505 Q130 518 118 525 Q130 532 130 535Z' opacity='0.25'/%3E%3Cpath d='M110 280 Q125 265 120 250 Q110 263 98 270 Q110 277 110 280Z' opacity='0.3'/%3E%3Cpath d='M125 420 Q140 405 135 390 Q125 403 113 410 Q125 417 125 420Z' opacity='0.25'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='35' cy='170' rx='10' ry='16' transform='rotate(-25 35 170)' opacity='0.45'/%3E%3Cellipse cx='45' cy='330' rx='9' ry='14' transform='rotate(-30 45 330)' opacity='0.4'/%3E%3Cellipse cx='55' cy='490' rx='9' ry='14' transform='rotate(-20 55 490)' opacity='0.35'/%3E%3Cellipse cx='90' cy='240' rx='7' ry='11' transform='rotate(-35 90 240)' opacity='0.3'/%3E%3Cellipse cx='100' cy='440' rx='7' ry='11' transform='rotate(-28 100 440)' opacity='0.25'/%3E%3C!-- Fern fronds --%3E%3Cg transform='translate(25 80) rotate(-15)' opacity='0.45'%3E%3Cpath d='M0,0 L0,-35' stroke='%2322c55e' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='-5' cy='-8' rx='4' ry='7' transform='rotate(-30 -5 -8)'/%3E%3Cellipse cx='5' cy='-14' rx='4' ry='7' transform='rotate(30 5 -14)'/%3E%3Cellipse cx='-4' cy='-20' rx='3.5' ry='6' transform='rotate(-30 -4 -20)'/%3E%3Cellipse cx='4' cy='-26' rx='3.5' ry='6' transform='rotate(30 4 -26)'/%3E%3Cellipse cx='0' cy='-33' rx='3' ry='5'/%3E%3C/g%3E%3Cg transform='translate(40 250) rotate(-25)' opacity='0.4'%3E%3Cpath d='M0,0 L0,-32' stroke='%2322c55e' stroke-width='0.7' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-28 -5 -7)'/%3E%3Cellipse cx='5' cy='-13' rx='3.5' ry='6' transform='rotate(28 5 -13)'/%3E%3Cellipse cx='-4' cy='-19' rx='3' ry='5' transform='rotate(-28 -4 -19)'/%3E%3Cellipse cx='4' cy='-25' rx='3' ry='5' transform='rotate(28 4 -25)'/%3E%3Cellipse cx='0' cy='-30' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(50 420) rotate(-20)' opacity='0.35'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.7' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-12' rx='3' ry='5' transform='rotate(25 4 -12)'/%3E%3Cellipse cx='-3' cy='-18' rx='2.5' ry='4.5' transform='rotate(-25 -3 -18)'/%3E%3Cellipse cx='3' cy='-24' rx='2.5' ry='4.5' transform='rotate(25 3 -24)'/%3E%3C/g%3E%3Cg transform='translate(30 580) rotate(-10)' opacity='0.3'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-22 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(22 4 -11)'/%3E%3Cellipse cx='-3' cy='-17' rx='2.5' ry='4' transform='rotate(-22 -3 -17)'/%3E%3Cellipse cx='3' cy='-23' rx='2.5' ry='4' transform='rotate(22 3 -23)'/%3E%3C/g%3E%3C!-- Sparse outer leaves (reaching toward center) --%3E%3Cpath d='M150 190 Q165 175 158 160 Q148 173 138 180 Q150 188 150 190Z' opacity='0.2'/%3E%3Cpath d='M165 360 Q180 345 173 330 Q163 343 153 350 Q165 358 165 360Z' opacity='0.18'/%3E%3Cpath d='M175 530 Q190 515 183 500 Q173 513 163 520 Q175 528 175 530Z' opacity='0.15'/%3E%3Cellipse cx='155' cy='270' rx='5' ry='8' transform='rotate(-40 155 270)' opacity='0.18'/%3E%3Cellipse cx='170' cy='440' rx='5' ry='8' transform='rotate(-35 170 440)' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E");
+        background-position: right center;
+        background-size: auto 100%;
+        background-repeat: repeat-y;
+      }
+
+      .grove-vine-right {
+        right: 0;
+        background-image: url("data:image/svg+xml,%3Csvg width='200' height='600' viewBox='0 0 200 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='vineGrad' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%2322c55e' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%2322c55e' stop-opacity='0.15'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23vineGrad)' stroke-linecap='round'%3E%3C!-- Main structural vine 1 - thick dramatic S-curve --%3E%3Cpath d='M-10 0 C40 50 20 120 60 180 S30 280 70 350 S40 450 80 520 S50 580 30 620' stroke-width='3.5' opacity='0.7'/%3E%3C!-- Main structural vine 2 --%3E%3Cpath d='M-15 100 C50 140 35 200 75 260 S45 340 85 400 S55 480 40 560' stroke-width='3' opacity='0.6'/%3E%3C!-- Main structural vine 3 --%3E%3Cpath d='M-5 200 C45 230 25 290 65 350 S35 430 55 500 S30 560 20 620' stroke-width='2.8' opacity='0.55'/%3E%3C!-- Secondary reaching vines --%3E%3Cpath d='M60 180 C100 170 130 200 160 180' stroke-width='2' opacity='0.4'/%3E%3Cpath d='M70 350 C110 340 145 370 180 350' stroke-width='1.8' opacity='0.35'/%3E%3Cpath d='M80 520 C120 510 150 540 190 520' stroke-width='1.8' opacity='0.3'/%3E%3Cpath d='M75 260 C115 280 140 250 175 270' stroke-width='1.6' opacity='0.35'/%3E%3Cpath d='M85 400 C125 420 155 390 185 410' stroke-width='1.5' opacity='0.3'/%3E%3C!-- Curling tendrils --%3E%3Cpath d='M60 180 Q80 165 88 150 Q95 135 85 125 Q75 118 65 128' stroke-width='1.2' opacity='0.45'/%3E%3Cpath d='M70 350 Q90 335 98 318 Q105 300 92 292 Q80 288 72 300' stroke-width='1.1' opacity='0.4'/%3E%3Cpath d='M80 520 Q100 505 108 488 Q115 470 102 462 Q90 458 82 470' stroke-width='1.1' opacity='0.35'/%3E%3Cpath d='M55 500 Q75 510 82 525 Q88 542 75 550' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M65 350 Q55 365 60 382 Q68 398 82 392' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M40 560 Q60 545 75 555 Q90 568 80 582' stroke-width='0.9' opacity='0.3'/%3E%3Cpath d='M75 260 Q95 245 102 228 Q108 212 95 205' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M85 400 Q105 385 112 368 Q118 350 105 345' stroke-width='1' opacity='0.35'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Dense ivy leaves along main vines --%3E%3Cpath d='M50 140 Q68 118 60 98 Q50 118 32 128 Q50 138 50 140Z' opacity='0.5'/%3E%3Cpath d='M65 220 Q83 198 75 178 Q65 198 47 208 Q65 218 65 220Z' opacity='0.45'/%3E%3Cpath d='M55 300 Q73 278 65 258 Q55 278 37 288 Q55 298 55 300Z' opacity='0.4'/%3E%3Cpath d='M75 380 Q93 358 85 338 Q75 358 57 368 Q75 378 75 380Z' opacity='0.4'/%3E%3Cpath d='M60 460 Q78 438 70 418 Q60 438 42 448 Q60 458 60 460Z' opacity='0.35'/%3E%3Cpath d='M70 540 Q88 518 80 498 Q70 518 52 528 Q70 538 70 540Z' opacity='0.35'/%3E%3C!-- Smaller accent leaves --%3E%3Cpath d='M100 195 Q115 180 110 165 Q100 178 88 185 Q100 192 100 195Z' opacity='0.35'/%3E%3Cpath d='M120 365 Q135 350 130 335 Q120 348 108 355 Q120 362 120 365Z' opacity='0.3'/%3E%3Cpath d='M130 535 Q145 520 140 505 Q130 518 118 525 Q130 532 130 535Z' opacity='0.25'/%3E%3Cpath d='M110 280 Q125 265 120 250 Q110 263 98 270 Q110 277 110 280Z' opacity='0.3'/%3E%3Cpath d='M125 420 Q140 405 135 390 Q125 403 113 410 Q125 417 125 420Z' opacity='0.25'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='35' cy='170' rx='10' ry='16' transform='rotate(-25 35 170)' opacity='0.45'/%3E%3Cellipse cx='45' cy='330' rx='9' ry='14' transform='rotate(-30 45 330)' opacity='0.4'/%3E%3Cellipse cx='55' cy='490' rx='9' ry='14' transform='rotate(-20 55 490)' opacity='0.35'/%3E%3Cellipse cx='90' cy='240' rx='7' ry='11' transform='rotate(-35 90 240)' opacity='0.3'/%3E%3Cellipse cx='100' cy='440' rx='7' ry='11' transform='rotate(-28 100 440)' opacity='0.25'/%3E%3C!-- Fern fronds --%3E%3Cg transform='translate(25 80) rotate(-15)' opacity='0.45'%3E%3Cpath d='M0,0 L0,-35' stroke='%2322c55e' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='-5' cy='-8' rx='4' ry='7' transform='rotate(-30 -5 -8)'/%3E%3Cellipse cx='5' cy='-14' rx='4' ry='7' transform='rotate(30 5 -14)'/%3E%3Cellipse cx='-4' cy='-20' rx='3.5' ry='6' transform='rotate(-30 -4 -20)'/%3E%3Cellipse cx='4' cy='-26' rx='3.5' ry='6' transform='rotate(30 4 -26)'/%3E%3Cellipse cx='0' cy='-33' rx='3' ry='5'/%3E%3C/g%3E%3Cg transform='translate(40 250) rotate(-25)' opacity='0.4'%3E%3Cpath d='M0,0 L0,-32' stroke='%2322c55e' stroke-width='0.7' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-28 -5 -7)'/%3E%3Cellipse cx='5' cy='-13' rx='3.5' ry='6' transform='rotate(28 5 -13)'/%3E%3Cellipse cx='-4' cy='-19' rx='3' ry='5' transform='rotate(-28 -4 -19)'/%3E%3Cellipse cx='4' cy='-25' rx='3' ry='5' transform='rotate(28 4 -25)'/%3E%3Cellipse cx='0' cy='-30' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(50 420) rotate(-20)' opacity='0.35'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.7' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-12' rx='3' ry='5' transform='rotate(25 4 -12)'/%3E%3Cellipse cx='-3' cy='-18' rx='2.5' ry='4.5' transform='rotate(-25 -3 -18)'/%3E%3Cellipse cx='3' cy='-24' rx='2.5' ry='4.5' transform='rotate(25 3 -24)'/%3E%3C/g%3E%3Cg transform='translate(30 580) rotate(-10)' opacity='0.3'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-22 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(22 4 -11)'/%3E%3Cellipse cx='-3' cy='-17' rx='2.5' ry='4' transform='rotate(-22 -3 -17)'/%3E%3Cellipse cx='3' cy='-23' rx='2.5' ry='4' transform='rotate(22 3 -23)'/%3E%3C/g%3E%3C!-- Sparse outer leaves (reaching toward center) --%3E%3Cpath d='M150 190 Q165 175 158 160 Q148 173 138 180 Q150 188 150 190Z' opacity='0.2'/%3E%3Cpath d='M165 360 Q180 345 173 330 Q163 343 153 350 Q165 358 165 360Z' opacity='0.18'/%3E%3Cpath d='M175 530 Q190 515 183 500 Q173 513 163 520 Q175 528 175 530Z' opacity='0.15'/%3E%3Cellipse cx='155' cy='270' rx='5' ry='8' transform='rotate(-40 155 270)' opacity='0.18'/%3E%3Cellipse cx='170' cy='440' rx='5' ry='8' transform='rotate(-35 170 440)' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E");
+        background-position: left center;
+        background-size: auto 100%;
+        background-repeat: repeat-y;
+        transform: scaleX(-1);
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Logo (center, breathing)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-entrance-logo {
+        position: relative;
+        z-index: 1;
       }
 
       .grove-loader-logo {
@@ -48,14 +81,69 @@
         animation: grove-breathe 2s ease-in-out infinite;
       }
 
+      html:not(.dark) .grove-loader-bg {
+        fill: #dcfce7;
+      }
+
       @keyframes grove-breathe {
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.7; transform: scale(0.96); }
       }
 
+      /* ─────────────────────────────────────────────────────────────
+         Parting Animation Keyframes
+         ───────────────────────────────────────────────────────────── */
+
+      @keyframes grove-vine-part-left {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+      }
+
+      @keyframes grove-vine-part-right {
+        0% { transform: translateX(0) scaleX(-1); }
+        100% { transform: translateX(100%) scaleX(-1); }
+      }
+
+      @keyframes grove-logo-exit {
+        0% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.85); }
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Parting State (triggered by adding .grove-parting class)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-parting .grove-vine-left {
+        animation: grove-vine-part-left 1000ms cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      }
+
+      .grove-parting .grove-vine-right {
+        animation: grove-vine-part-right 1000ms cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      }
+
+      .grove-parting .grove-entrance-logo {
+        animation: grove-logo-exit 600ms ease-in 300ms forwards;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Reduced Motion: Instant fade (accessibility)
+         ───────────────────────────────────────────────────────────── */
+
       @media (prefers-reduced-motion: reduce) {
         .grove-loader-logo { animation: none; }
-        #grove-loading-overlay { transition: none; }
+
+        .grove-parting .grove-vine-left,
+        .grove-parting .grove-vine-right {
+          animation: none;
+          opacity: 0;
+          transition: opacity 0.15s ease-out;
+        }
+
+        .grove-parting .grove-entrance-logo {
+          animation: none;
+          opacity: 0;
+          transition: opacity 0.15s ease-out;
+        }
       }
     </style>
     <meta charset="utf-8" />
@@ -101,23 +189,32 @@
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
-    <!-- First Paint Loading Overlay -->
+    <!-- First Paint Loading Overlay - "Parting the Vines" -->
     <div id="grove-loading-overlay" aria-hidden="true">
-      <svg class="grove-loader-logo" viewBox="-28 -28 156 156" xmlns="http://www.w3.org/2000/svg">
-        <!-- Background circle -->
-        <circle cx="50" cy="50" r="70" fill="#122a1a" class="grove-loader-bg" />
-        <!-- Tree with -12deg rotation (summer palette) -->
-        <g transform="rotate(-12 50 50)">
-          <path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/>
-          <path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/>
-          <path fill="#166534" d="M50 20 L12 50 L50 35 Z"/>
-          <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/>
-          <path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/>
-          <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/>
-          <path fill="#3d2914" d="M50 54 L42 58 L46 100 L50 100 Z"/>
-          <path fill="#5a3f30" d="M50 54 L58 58 L54 100 L50 100 Z"/>
-        </g>
-      </svg>
+      <!-- Left vine panel -->
+      <div class="grove-vine-panel grove-vine-left"></div>
+
+      <!-- Center: breathing logo -->
+      <div class="grove-entrance-logo">
+        <svg class="grove-loader-logo" viewBox="-28 -28 156 156" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background circle -->
+          <circle cx="50" cy="50" r="70" fill="#122a1a" class="grove-loader-bg" />
+          <!-- Tree with -12deg rotation (summer palette) -->
+          <g transform="rotate(-12 50 50)">
+            <path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#166534" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#3d2914" d="M50 54 L42 58 L46 100 L50 100 Z"/>
+            <path fill="#5a3f30" d="M50 54 L58 58 L54 100 L50 100 Z"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Right vine panel -->
+      <div class="grove-vine-panel grove-vine-right"></div>
     </div>
     <div style="display: contents">%sveltekit.body%</div>
     <!-- Fallback overlay removal (handles edge cases where Svelte doesn't hydrate) -->
@@ -125,9 +222,9 @@
       window.addEventListener('load', function() {
         setTimeout(function() {
           var o = document.getElementById('grove-loading-overlay');
-          if (o && !o.classList.contains('grove-hidden')) {
-            o.classList.add('grove-hidden');
-            setTimeout(function() { o.remove(); }, 350);
+          if (o && !o.classList.contains('grove-parting')) {
+            o.classList.add('grove-parting');
+            setTimeout(function() { o.remove(); }, 2000);
           }
         }, 100);
       });

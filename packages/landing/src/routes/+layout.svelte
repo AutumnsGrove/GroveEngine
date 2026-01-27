@@ -16,8 +16,10 @@
 		if (browser) {
 			const overlay = document.getElementById('grove-loading-overlay');
 			if (overlay) {
-				overlay.classList.add('grove-hidden');
-				setTimeout(() => overlay.remove(), 350);
+				// Trigger the parting animation
+				overlay.classList.add('grove-parting');
+				// Remove after animation completes (~2s)
+				setTimeout(() => overlay.remove(), 2000);
 			}
 		}
 	});
