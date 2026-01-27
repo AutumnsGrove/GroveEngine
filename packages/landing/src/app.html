@@ -46,7 +46,9 @@
         top: 0;
         height: 100%;
         width: 55vw; /* Overlap in center for seamless coverage */
-        background-color: #122a1a;
+        /* Semi-transparent background lets the site peek through the foliage
+           as it parts — creating a sense of discovery, not just reveal */
+        background-color: rgba(18, 42, 26, 0.88);
         background-image: var(--vine-pattern);
         background-size: auto 100%;
         background-repeat: repeat-y;
@@ -55,9 +57,8 @@
       }
 
       html:not(.dark) .grove-vine-panel {
-        /* grove-100 (#dcfce7) chosen over grove-50 for more visual presence
-           in the entrance animation — deeper green = more dramatic reveal */
-        background-color: #dcfce7;
+        /* Semi-transparent grove-100 — lets the site peek through */
+        background-color: rgba(220, 252, 231, 0.88);
       }
 
       .grove-vine-left {
