@@ -90,41 +90,41 @@
         top: 0;
         height: 100%;
         width: 60vw; /* Wider overlap creates solid wall, covers logo fully at start */
-        /* Gradient background: mostly solid with soft fade only at very edge.
-           Stays opaque for 80%, then quick dissolve prevents "cut vine" look. */
+        /* Layered backgrounds: vines ON TOP, gradient underneath.
+           The gradient provides the soft-edge fade; vines render crisp on top. */
         background-image:
+          var(--vine-pattern),
           linear-gradient(to right,
             rgba(18, 42, 26, 0.92) 0%,
             rgba(18, 42, 26, 0.92) 80%,
             rgba(18, 42, 26, 0.5) 92%,
             transparent 100%
-          ),
-          var(--vine-pattern);
-        background-size: 100% 100%, auto 100%;
-        background-repeat: no-repeat, repeat-y;
+          );
+        background-size: auto 100%, 100% 100%;
+        background-repeat: repeat-y, no-repeat;
         will-change: transform;
         pointer-events: auto;
       }
 
       html:not(.dark) .grove-vine-panel {
         background-image:
+          var(--vine-pattern),
           linear-gradient(to right,
             rgba(220, 252, 231, 0.94) 0%,
             rgba(220, 252, 231, 0.94) 80%,
             rgba(220, 252, 231, 0.5) 92%,
             transparent 100%
-          ),
-          var(--vine-pattern);
+          );
       }
 
       .grove-vine-left {
         left: 0;
-        background-position: 0 0, right center;
+        background-position: right center, 0 0;
       }
 
       .grove-vine-right {
         right: 0;
-        background-position: 0 0, left center;
+        background-position: left center, 0 0;
         transform: scaleX(-1);
       }
 
