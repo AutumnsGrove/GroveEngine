@@ -1,0 +1,7 @@
+name = "grove-terrarium"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Terrarium MVP uses localStorage only - no D1 database needed
+# Future: Add D1 binding for cloud sync

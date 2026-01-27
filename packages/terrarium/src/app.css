@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Grove color system */
+:root {
+  --grove-50: #f0fdf4;
+  --grove-100: #dcfce7;
+  --grove-200: #bbf7d0;
+  --grove-300: #86efac;
+  --grove-400: #4ade80;
+  --grove-500: #22c55e;
+  --grove-600: #16a34a;
+  --grove-700: #15803d;
+  --grove-800: #166534;
+  --grove-900: #14532d;
+  --grove-950: #052e16;
+
+  --cream: #fefdfb;
+  --bark: #3d2914;
+
+  /* Semantic colors - light mode */
+  --color-primary: var(--grove-600);
+  --color-foreground: var(--bark);
+  --color-foreground-subtle: #6b7280;
+  --color-surface: rgba(255, 255, 255, 0.7);
+  --color-surface-hover: rgba(255, 255, 255, 0.9);
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-accent: var(--grove-600);
+  --color-accent-muted: var(--grove-500);
+  --color-accent-subtle: var(--grove-300);
+}
+
+.dark {
+  --cream: #171a1e;
+  --bark: #f5f2ea;
+
+  /* Semantic colors - dark mode with warmth */
+  --color-foreground: var(--bark);
+  --color-foreground-subtle: #9ca3af;
+  --color-surface: rgba(15, 23, 42, 0.7);
+  --color-surface-hover: rgba(30, 41, 59, 0.8);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: var(--grove-500);
+  --color-accent-muted: var(--grove-400);
+  --color-accent-subtle: var(--grove-700);
+}
+
+/* Base styles */
+html {
+  font-family: "Lexend", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--color-foreground);
+}
+
+/* Utility classes for Grove semantic colors */
+.bg-page {
+  background-color: var(--cream);
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+.text-foreground {
+  color: var(--color-foreground);
+}
+
+.text-foreground-subtle {
+  color: var(--color-foreground-subtle);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-accent-muted {
+  color: var(--color-accent-muted);
+}
+
+.border-default {
+  border-color: var(--color-border);
+}
+
+/* Terrarium-specific: full viewport canvas */
+.terrarium-viewport {
+  height: calc(100vh - 56px); /* Subtract header height */
+  overflow: hidden;
+}
+
+/* Greenhouse badge styling */
+.greenhouse-badge {
+  @apply inline-flex items-center gap-1.5 px-2 py-1 rounded-full;
+  @apply text-xs font-medium;
+  @apply bg-amber-100/80 text-amber-800 border border-amber-200/50;
+}
+
+.dark .greenhouse-badge {
+  @apply bg-amber-900/30 text-amber-300 border-amber-700/50;
+}
