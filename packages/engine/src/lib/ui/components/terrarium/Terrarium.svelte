@@ -242,6 +242,11 @@
 				onAssetMove={(id, position) => terrarium.updateAsset(id, { position })}
 				onCanvasClick={() => terrarium.selectAsset(null)}
 				onPan={(offset) => terrarium.setPanOffset(offset)}
+				onAssetDrop={(name, category, position) => {
+					if (terrarium.canAddAsset) {
+						terrarium.addAsset(name, category, position);
+					}
+				}}
 			/>
 		</div>
 	</div>

@@ -66,7 +66,6 @@
 				'Acorn',
 				'Berry',
 				'DandelionPuff',
-				'FallingLeavesLayer',
 				'FallingPetalsLayer',
 				'Leaf',
 				'LeafFalling',

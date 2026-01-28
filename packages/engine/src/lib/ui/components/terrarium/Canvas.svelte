@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import type { TerrariumScene, PlacedAsset, Point } from './types';
+	import type { TerrariumScene, PlacedAsset, Point, AssetCategory } from './types';
 	import PlacedAssetComponent from './PlacedAsset.svelte';
 
 	interface Props {
@@ -16,6 +16,7 @@
 		onAssetMove?: (assetId: string, position: Point) => void;
 		onCanvasClick?: () => void;
 		onPan?: (offset: Point) => void;
+		onAssetDrop?: (name: string, category: AssetCategory, position: Point) => void;
 	}
 
 	let {
@@ -26,7 +27,8 @@
 		onAssetSelect,
 		onAssetMove,
 		onCanvasClick,
-		onPan
+		onPan,
+		onAssetDrop
 	}: Props = $props();
 
 	let canvasElement: HTMLDivElement | null = $state(null);
@@ -148,6 +150,34 @@
 		onAssetMove?.(assetId, position);
 	}
 
+	// Drag and drop handlers for adding assets from palette
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'copy';
+		}
+	}
+
+	function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		if (!event.dataTransfer || !canvasElement) return;
+
+		try {
+			const data = JSON.parse(event.dataTransfer.getData('application/json'));
+			if (data.name && data.category) {
+				// Calculate drop position relative to canvas, accounting for pan offset
+				const rect = canvasElement.getBoundingClientRect();
+				const position: Point = {
+					x: event.clientX - rect.left - panOffset.x,
+					y: event.clientY - rect.top - panOffset.y
+				};
+				onAssetDrop?.(data.name, data.category, position);
+			}
+		} catch {
+			// Invalid drop data, ignore
+		}
+	}
+
 	// Set up global event listeners for mouse and keyboard
 	$effect(() => {
 		const handleGlobalMouseMove = (e: MouseEvent) => handleMouseMove(e);
@@ -186,6 +216,8 @@
 	ontouchstart={handleTouchStart}
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
+	ondragover={handleDragOver}
+	ondrop={handleDrop}
 >
 	<!-- Canvas background -->
 	<div
