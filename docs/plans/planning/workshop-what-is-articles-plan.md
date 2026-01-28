@@ -3,7 +3,7 @@
 **Created**: January 28, 2026
 **Status**: Planning
 **Priority**: Medium — completes documentation coverage for workshop tools
-**Estimated Effort**: 15-20 focused writing sessions
+**Estimated Effort**: 8-10 focused writing sessions
 **Prerequisites**: None
 **Related**: `docs/plans/planned/help-center-article-roadmap.md`
 
@@ -11,9 +11,9 @@
 
 ## Overview
 
-The Workshop showcases **47 tools** across 8 categories. Currently, only **8 tools** have dedicated "What Is" articles. This plan outlines the creation of introductory articles for the remaining **39 tools** that lack them.
+The Workshop showcases **47 tools** across 8 categories. Currently, **8 tools** have dedicated "What Is" articles. After reviewing for relevance, **14 tools** are being skipped (internal/developer-focused/too early). This plan covers the remaining **25 articles** to write.
 
-**Goal**: Every tool in the Workshop should have a corresponding "What Is" article that explains what it does, why it exists, and how Wanderers interact with it.
+**Goal**: Every user-facing tool in the Workshop should have a corresponding "What Is" article that explains what it does, why it exists, and how Wanderers interact with it.
 
 ---
 
@@ -32,7 +32,7 @@ The Workshop showcases **47 tools** across 8 categories. Currently, only **8 too
 | Songbird | `what-is-songbird.md` | Patterns |
 | Sentinel | `what-is-sentinel.md` | Patterns |
 
-### Existing Concept Articles (not tools, but relevant)
+### Existing Concept Articles
 
 | Article | Purpose |
 |---------|---------|
@@ -44,74 +44,97 @@ The Workshop showcases **47 tools** across 8 categories. Currently, only **8 too
 
 ---
 
-## Tools WITHOUT "What Is" Articles (39 tools)
+## Intentionally Skipped (14 tools)
 
-### Priority 1: Core Infrastructure & Services (9 articles)
+These tools don't need "What Is" articles — they're internal, developer-focused, too niche, or too early in planning.
 
-These are the foundational tools Wanderers interact with most. Write first.
+| Tool | Reason |
+|------|--------|
+| **Vista** | Operator-only infrastructure monitoring |
+| **Outpost** | Personal Minecraft server, niche |
+| **Bloom** | Personal dev tool, not core to blogging |
+| **Press** | Developer CLI, not user-facing |
+| **Etch** | Planned, tangential to blogging core |
+| **Patina** | Internal backups — covered by "your data is safe" mentions elsewhere |
+| **Lumen** | Internal AI routing — invisible to users |
+| **Mycelium** | MCP server for developers/AI agents |
+| **Gossamer** | npm package for devs, not user-facing |
+| **Nook** | Private video sharing, very niche |
+| **Vineyard** | Meta-pattern about documentation |
+| **Burrow** | Cross-property access — too early, concept may evolve |
+| **Wander** | Immersive 3D discovery — write when closer to reality |
+| **Forests** | Community aggregators — depends on Meadow maturity |
 
-| Tool | Category | Status | Why Priority 1 |
-|------|----------|--------|----------------|
-| **Heartwood** | Core Infrastructure | Live | Central auth — users will ask "how do I sign in?" |
-| **Clearing** | Core Services | Live | Status page — users check during outages |
-| **Arbor** | Core Services | Live | Admin panel — every user interacts with this |
-| **Flow** | Core Services | Live | The editor — users write here daily |
-| **Plant** | Core Services | Live | Onboarding — first impression for new Wanderers |
-| **Grafts** | Core Services | Live | Feature flags — explains why some features appear |
-| **Waystone** | Support & Insights | Live | Help center — meta (help for the help system) |
-| **Foliage** | Creative Studio | Complete | Theming — users want to customize immediately |
-| **Shade** | Operations | Live | AI protection — users care about their content safety |
+---
 
-### Priority 2: Building Features (12 articles)
+## Articles to Write (25 total)
 
-Features actively in development. Articles help build anticipation and explain what's coming.
+### Priority 1: Core Experience (4 articles) — Write First
 
-| Tool | Category | Status | Notes |
-|------|----------|--------|-------|
-| **Amber** | Core Services | Building | Storage dashboard — users will need to understand quotas |
-| **Centennial** | Core Services | Building | 100-year guarantee — unique, needs clear explanation |
-| **Curios** | Creative Studio | Building | Cabinet of wonders — exciting feature, explain early |
-| **Trails** | Content & Community | Building | Public roadmaps — popular concept |
-| **Thorn** | Content & Community | Building | Content moderation — sensitive topic, transparency helps |
-| **Petal** | Content & Community | Building | Image moderation — same as above |
-| **Wisp** | Content & Community | Building | AI writing assistant — users need to know it's opt-in |
-| **Ivy** | Standalone Tools | Building | Email client — explain zero-knowledge approach |
-| **Bloom** | Standalone Tools | Building | Remote AI coding — novel concept needs explanation |
-| **Gossamer** | Standalone Tools | Building | ASCII effects — technical, explain what it enables |
-| **Mycelium** | Operations | Building | MCP server — explain AI integration possibilities |
-| **Rings** | Support & Insights | Planned | Analytics — explain privacy-first approach early |
+The daily touchpoints. Every Wanderer interacts with these.
 
-### Priority 3: Planned Features (11 articles)
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 1 | **Heartwood** | Core Infrastructure | Live | Central auth — "how do I sign in?" |
+| 2 | **Arbor** | Core Services | Live | Admin panel — entry point for everything |
+| 3 | **Flow** | Core Services | Live | The editor — where writing happens |
+| 4 | **Terrarium** | Creative Studio | Building | Actively being built — excitement builder |
 
-Not yet built, but articles establish vision and generate interest.
+### Priority 2: Customization & Safety (5 articles)
 
-| Tool | Category | Status | Notes |
-|------|----------|--------|-------|
-| **Burrow** | Core Services | Planned | Cross-property access — complex concept |
-| **Terrarium** | Creative Studio | Planned | Creative canvas — explain the vision |
-| **Weave** | Creative Studio | Planned | Node-graph editor — explain Breeze/Trace modes |
-| **Porch** | Support & Insights | Planned | Support system — explain conversation approach |
-| **Reeds** | Content & Community | Planned | Comments — explain private vs public replies |
-| **Forests** | Content & Community | Planned | Community groves — explain aggregator concept |
-| **Wander** | Content & Community | Planned | Immersive discovery — ambitious, explain vision |
-| **Nook** | Standalone Tools | Planned | Private video — explain intimate sharing concept |
-| **Etch** | Standalone Tools | Planned | Link saving — explain plates/grooves/scoring |
-| **Vista** | Operations | Planned | Observability — operator-focused, lower priority |
+Making Grove yours, and knowing your content is protected.
 
-### Priority 4: Patterns & Internal Tools (7 articles)
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 5 | **Foliage** | Creative Studio | Complete | Theming — immediate customization want |
+| 6 | **Curios** | Creative Studio | Building | Cabinet of wonders — unique to Grove |
+| 7 | **Shade** | Operations | Live | AI protection — content safety concern |
+| 8 | **Grafts** | Core Services | Live | Why some features appear/disappear |
+| 9 | **Centennial** | Core Services | Building | 100-year promise — philosophy piece (keep `howLink` to sustainability page) |
 
-Technical patterns and internal tools. Useful for curious Wanderers and developers.
+### Priority 3: User Journey (5 articles)
 
-| Tool | Category | Status | Notes |
-|------|----------|--------|-------|
-| **Prism** | Patterns | Live | Design system — explain glassmorphism, seasons |
-| **Threshold** | Patterns | Live | Rate limiting — explain protection approach |
-| **Vineyard** | Patterns | Being implemented | Tool showcase pattern — explain /vineyard URLs |
-| **Patina** | Operations | Live | Backups — explain data safety |
-| **Press** | Operations | Live | Image processing — developer-focused |
-| **Lumen** | Operations | Live | AI gateway — explain unified AI routing |
-| **Forage** | Standalone Tools | Live | Domain discovery — explain AI-powered search |
-| **Outpost** | Standalone Tools | Live | Minecraft server — explain Firefly pattern usage |
+The path from signup through daily use.
+
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 10 | **Plant** | Core Services | Live | Onboarding — new Wanderer reference |
+| 11 | **Clearing** | Core Services | Live | Status page — check during outages |
+| 12 | **Waystone** | Support & Insights | Live | Help system (meta) |
+| 13 | **Amber** | Core Services | Building | Storage dashboard — quota questions |
+| 14 | **Trails** | Content & Community | Building | Build-in-public roadmaps |
+
+### Priority 4: AI & Writing Tools (4 articles)
+
+The AI-powered features — transparency matters here.
+
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 15 | **Wisp** | Content & Community | Building | AI writing assistant — explain opt-in |
+| 16 | **Thorn** | Content & Community | Building | Content moderation — transparency |
+| 17 | **Petal** | Content & Community | Building | Image moderation — transparency |
+| 18 | **Rings** | Support & Insights | Planned | Privacy-first analytics |
+
+### Priority 5: Communication (4 articles)
+
+How Wanderers connect — with readers, with support, with each other.
+
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 19 | **Ivy** | Standalone Tools | Building | Zero-knowledge email |
+| 20 | **Reeds** | Content & Community | Planned | Comments — private vs public replies |
+| 21 | **Porch** | Support & Insights | Planned | Support conversations |
+| 22 | **Weave** | Creative Studio | Planned | Node-graph editor (Breeze/Trace) |
+
+### Priority 6: Patterns (3 articles)
+
+Technical patterns for the curious.
+
+| # | Tool | Category | Status | Notes |
+|---|------|----------|--------|-------|
+| 23 | **Prism** | Patterns | Live | Design system — glassmorphism, seasons |
+| 24 | **Threshold** | Patterns | Live | Rate limiting approach |
+| 25 | **Forage** | Standalone Tools | Live | AI domain discovery |
 
 ---
 
@@ -159,47 +182,6 @@ order: [number]
 
 ---
 
-## Implementation Approach
-
-### Phase 1: Priority 1 Articles (9 articles)
-
-Write the core infrastructure and services articles first. These cover the tools Wanderers use daily.
-
-**Suggested order:**
-1. `what-is-arbor.md` — Admin panel, entry point for all actions
-2. `what-is-flow.md` — Editor, where writing happens
-3. `what-is-heartwood.md` — Auth, explains sign-in
-4. `what-is-foliage.md` — Theming, immediate customization need
-5. `what-is-clearing.md` — Status page, reference during issues
-6. `what-is-plant.md` — Onboarding, new user reference
-7. `what-is-waystone.md` — Help system, meta documentation
-8. `what-is-shade.md` — AI protection, content safety
-9. `what-is-grafts.md` — Feature flags, explains feature availability
-
-### Phase 2: Priority 2 Articles (12 articles)
-
-Write building features to establish expectations and build anticipation.
-
-**Suggested order:**
-1. `what-is-wisp.md` — AI assistant (high interest topic)
-2. `what-is-curios.md` — Cabinet of wonders (unique, exciting)
-3. `what-is-amber.md` — Storage (practical need)
-4. `what-is-ivy.md` — Email (unique privacy approach)
-5. `what-is-centennial.md` — 100-year guarantee (unique to Grove)
-6. `what-is-thorn.md` — Content moderation (transparency)
-7. `what-is-petal.md` — Image moderation (transparency)
-8. `what-is-trails.md` — Roadmaps (build-in-public feature)
-9. `what-is-bloom.md` — Remote coding (novel concept)
-10. `what-is-rings.md` — Analytics (privacy-first)
-11. `what-is-gossamer.md` — ASCII effects (creative tool)
-12. `what-is-mycelium.md` — MCP server (AI integration)
-
-### Phase 3: Priority 3 & 4 Articles (18 articles)
-
-Fill in planned features and technical patterns as bandwidth allows.
-
----
-
 ## File Locations
 
 All articles go in: `docs/help-center/articles/`
@@ -223,22 +205,15 @@ When an article is created, update the corresponding tool in `packages/landing/s
 }
 ```
 
+**Note for Centennial**: Keep the existing `howLink` pointing to `/knowledge/philosophy/grove-sustainability`. The "What Is" article explains the feature; the "How we'll do it" link explains the philosophy and funding model.
+
 ---
 
 ## Success Metrics
 
-- **Phase 1 complete**: 9 core articles written, linked from Workshop
-- **Phase 2 complete**: 21 total articles (all live/building tools covered)
-- **Full coverage**: 47 tools, 47 "What Is" articles
-- **Workshop links**: Every tool card shows "Read more" link
-
----
-
-## Dependencies & Blockers
-
-- **None** — Articles can be written independently
-- **Optional**: Wait for spec completion on planned features for accuracy
-- **Coordination**: Some articles may overlap with `help-center-article-roadmap.md` priorities
+- **Priority 1 complete**: 4 core articles (Heartwood, Arbor, Flow, Terrarium)
+- **Priorities 1-3 complete**: 14 articles (all daily-use tools covered)
+- **Full coverage**: 25 articles total, all linked from Workshop
 
 ---
 
@@ -258,15 +233,21 @@ When writing these articles:
 
 6. **Update Workshop** — After writing each article, add the `whatIsLink` property to the tool in the Workshop page.
 
+7. **Planned features get full articles** — Don't write stubs. Explain the vision clearly, but be honest that it's not built yet.
+
 ---
 
 ## Estimated Completion
 
-- **Phase 1 (9 articles)**: 3-4 writing sessions
-- **Phase 2 (12 articles)**: 4-5 writing sessions
-- **Phase 3 (18 articles)**: 6-8 writing sessions
-
-**Total**: 15-20 focused writing sessions for complete coverage
+| Phase | Articles | Sessions |
+|-------|----------|----------|
+| Priority 1 (Core Experience) | 4 | 1-2 |
+| Priority 2 (Customization & Safety) | 5 | 2 |
+| Priority 3 (User Journey) | 5 | 2 |
+| Priority 4 (AI & Writing) | 4 | 1-2 |
+| Priority 5 (Communication) | 4 | 1-2 |
+| Priority 6 (Patterns) | 3 | 1 |
+| **Total** | **25** | **8-10** |
 
 ---
 
