@@ -13,6 +13,7 @@
     Sparkles,
     CreditCard,
     HelpCircle,
+    MessageCircle,
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -151,6 +152,10 @@
           <HelpCircle class="help-icon" />
           <span>Help Center</span>
         </a>
+        <a href="https://grove.place/porch" target="_blank" rel="noopener" class="help-link">
+          <MessageCircle class="help-icon" />
+          <span>Get Support</span>
+        </a>
         {#if data.user}
           <a href="/auth/logout" class="logout-btn">
             <LogOut class="logout-icon" />
@@ -167,6 +172,9 @@
       <div class="sidebar-footer-collapsed">
         <a href="https://grove.place/knowledge/help" target="_blank" rel="noopener" class="help-link-icon" title="Help Center">
           <HelpCircle class="help-icon" />
+        </a>
+        <a href="https://grove.place/porch" target="_blank" rel="noopener" class="help-link-icon" title="Get Support">
+          <MessageCircle class="help-icon" />
         </a>
         {#if data.user}
           <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
@@ -513,7 +521,9 @@
     padding: 0.75rem;
     border-top: 1px solid var(--grove-border-subtle);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
     flex-shrink: 0;
   }
 
