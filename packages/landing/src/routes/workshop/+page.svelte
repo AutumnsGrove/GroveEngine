@@ -116,7 +116,8 @@
 					domain: 'status.grove.place',
 					integration: 'Public platform status for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Clearing',
-					spec: '/knowledge/specs/clearing-spec'
+					spec: '/knowledge/specs/clearing-spec',
+					whatIsLink: '/knowledge/help/what-is-clearing'
 				},
 				{
 					name: 'Arbor',
@@ -159,6 +160,7 @@
 					domain: 'plant.grove.place',
 					integration: 'Signup and onboarding for new Wanderers',
 					spec: '/knowledge/specs/plant-spec',
+					whatIsLink: '/knowledge/help/what-is-plant',
 					subComponents: [
 						{ name: 'Loam', icon: 'funnel', description: 'Name protection & validation', href: '/knowledge/specs/loam-spec' }
 					]
@@ -191,7 +193,8 @@
 					domain: 'amber.grove.place',
 					integration: 'Storage dashboard for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Amber',
-					spec: '/knowledge/specs/amber-spec'
+					spec: '/knowledge/specs/amber-spec',
+					whatIsLink: '/knowledge/help/what-is-amber'
 				},
 				{
 					name: 'Centennial',
@@ -313,7 +316,8 @@
 					status: 'live',
 					icon: 'signpost',
 					integration: 'Built into all Grove properties',
-					spec: '/knowledge/specs/waystone-spec'
+					spec: '/knowledge/specs/waystone-spec',
+					whatIsLink: '/knowledge/help/what-is-waystone'
 				},
 				{
 					name: 'Porch',
@@ -353,7 +357,8 @@
 					status: 'building',
 					icon: 'mapplus',
 					integration: 'Available for all Grove blogs',
-					spec: '/knowledge/specs/trails-spec'
+					spec: '/knowledge/specs/trails-spec',
+					whatIsLink: '/knowledge/help/what-is-trails'
 				},
 				{
 					name: 'Meadow',
