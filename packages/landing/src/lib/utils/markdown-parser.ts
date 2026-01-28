@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import matter from "gray-matter";
+import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
 
 const md = new MarkdownIt({ html: false, linkify: true });

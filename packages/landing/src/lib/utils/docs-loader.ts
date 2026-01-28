@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
-import matter from "gray-matter";
+import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
 import type {
   Doc,

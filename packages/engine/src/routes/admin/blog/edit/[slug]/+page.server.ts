@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import { getPostBySlug } from "$lib/utils/markdown.js";
-import matter from "gray-matter";
+import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
 
 interface PostRecord {
