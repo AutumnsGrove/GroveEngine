@@ -74,12 +74,9 @@ export const helpSections: {
     description: "Begin your Grove journey",
     icon: "landplot",
   },
-  {
-    id: "how-it-works",
-    name: "How It Works",
-    description: "Simple explanations of Grove's technology",
-    icon: "lightbulb",
-  },
+  // NOTE: "how-it-works" section intentionally excluded from display.
+  // These articles are accessed via Waystones (contextual help links),
+  // not browsed directly. They remain valid in docs-scanner.ts.
   {
     id: "writing-publishing",
     name: "Writing & Publishing",
