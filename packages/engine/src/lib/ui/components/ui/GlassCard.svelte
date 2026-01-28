@@ -41,6 +41,13 @@
 	 *   {#snippet footer()}<Button>Save</Button>{/snippet}
 	 * </GlassCard>
 	 * ```
+	 *
+	 * @example Semantic article for blog posts (improves Safari Reader Mode)
+	 * ```svelte
+	 * <GlassCard as="article" title="My Blog Post">
+	 *   <p>Post content here</p>
+	 * </GlassCard>
+	 * ```
 	 */
 
 	type GlassVariant =
@@ -64,6 +71,9 @@
 		| "ambient-waves"
 		| "ambient-clouds";
 
+	/** Semantic HTML elements for improved accessibility and Reader Mode */
+	type Element = "div" | "section" | "article" | "aside" | "header" | "footer" | "nav" | "main";
+
 	/** Custom Gossamer configuration */
 	interface GossamerConfig {
 		pattern?: "perlin" | "fbm" | "waves" | "static" | "ripple";
@@ -75,13 +85,15 @@
 		animated?: boolean;
 	}
 
-	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, "class"> {
+	interface Props extends Omit<HTMLAttributes<HTMLElement>, "class"> {
 		variant?: GlassVariant;
 		title?: string;
 		description?: string;
 		hoverable?: boolean;
 		border?: boolean;
 		class?: string;
+		/** HTML element to render (defaults to div, use article/section for semantic content) */
+		as?: Element;
 		header?: Snippet;
 		footer?: Snippet;
 		children?: Snippet;
@@ -108,6 +120,7 @@
 		hoverable = false,
 		border = true,
 		class: className,
+		as: element = "div",
 		header,
 		footer,
 		children,
@@ -204,7 +217,7 @@
 	);
 </script>
 
-<div class={computedClass} {...restProps}>
+<svelte:element this={element} class={computedClass} {...restProps}>
 	{#if featured}
 		<!-- Featured star indicator (decorative - context provides meaning) -->
 		<div
@@ -273,4 +286,4 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</svelte:element>
