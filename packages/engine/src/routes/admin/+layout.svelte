@@ -12,6 +12,7 @@
     LogOut,
     Sparkles,
     CreditCard,
+    HelpCircle,
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -146,6 +147,10 @@
         <div class="user-info">
           <span class="email">{data.user?.email ?? 'Guest (Demo Mode)'}</span>
         </div>
+        <a href="https://grove.place/knowledge/help" target="_blank" rel="noopener" class="help-link">
+          <HelpCircle class="help-icon" />
+          <span>Help Center</span>
+        </a>
         {#if data.user}
           <a href="/auth/logout" class="logout-btn">
             <LogOut class="logout-icon" />
@@ -160,6 +165,9 @@
       </div>
     {:else}
       <div class="sidebar-footer-collapsed">
+        <a href="https://grove.place/knowledge/help" target="_blank" rel="noopener" class="help-link-icon" title="Help Center">
+          <HelpCircle class="help-icon" />
+        </a>
         {#if data.user}
           <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
             <LogOut class="logout-icon" />
@@ -582,6 +590,69 @@
   :global(.dark) .logout-btn-icon:hover {
     background: var(--grove-overlay-18);
     color: #86efac;
+  }
+
+  .help-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--grove-overlay-8);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: var(--border-radius-button);
+    font-size: 0.85rem;
+    transition: background 0.2s, color 0.2s;
+    margin-bottom: 0.5rem;
+  }
+
+  :global(.dark) .help-link {
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
+  }
+
+  .help-link:hover {
+    background: var(--grove-overlay-15);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .help-link:hover {
+    background: var(--grove-overlay-18);
+    color: #86efac;
+  }
+
+  .help-link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: var(--grove-overlay-8);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: var(--border-radius-button);
+    transition: background 0.2s, color 0.2s;
+    margin-bottom: 0.5rem;
+  }
+
+  :global(.dark) .help-link-icon {
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
+  }
+
+  .help-link-icon:hover {
+    background: var(--grove-overlay-15);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .help-link-icon:hover {
+    background: var(--grove-overlay-18);
+    color: #86efac;
+  }
+
+  :global(.help-icon) {
+    width: 1rem;
+    height: 1rem;
   }
 
   :global(.logout-icon) {
