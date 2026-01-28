@@ -501,6 +501,7 @@
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
 					github: 'https://github.com/AutumnsGrove/Forage',
 					spec: '/knowledge/specs/forage-spec',
+					whatIsLink: '/knowledge/help/what-is-forage',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
@@ -695,7 +696,8 @@
 					status: 'live',
 					icon: 'triangle',
 					integration: 'Visual foundation for all Grove properties',
-					spec: '/knowledge/patterns/prism-pattern'
+					spec: '/knowledge/patterns/prism-pattern',
+					whatIsLink: '/knowledge/help/what-is-prism'
 				},
 				{
 					name: 'Loom',
@@ -720,6 +722,7 @@
 					icon: 'gauge',
 					integration: 'Protection layer for all Grove endpoints',
 					spec: '/knowledge/patterns/threshold-pattern',
+					whatIsLink: '/knowledge/help/what-is-threshold',
 					subComponents: [
 						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
 						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
