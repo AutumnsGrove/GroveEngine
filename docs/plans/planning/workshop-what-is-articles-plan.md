@@ -3,7 +3,7 @@
 **Created**: January 28, 2026
 **Status**: Planning
 **Priority**: Medium — completes documentation coverage for workshop tools
-**Estimated Effort**: 8-10 focused writing sessions
+**Estimated Effort**: 9-11 focused writing sessions
 **Prerequisites**: None
 **Related**: `docs/plans/planned/help-center-article-roadmap.md`
 
@@ -11,9 +11,9 @@
 
 ## Overview
 
-The Workshop showcases **47 tools** across 8 categories. Currently, **8 tools** have dedicated "What Is" articles. After reviewing for relevance, **14 tools** are being skipped (internal/developer-focused/too early). This plan covers the remaining **25 articles** to write.
+The Workshop showcases **47 tools** across 8 categories. Currently, **8 tools** have dedicated "What Is" articles. After reviewing for relevance, **14 tools** are being skipped (internal/developer-focused/too early). This plan covers **25 tool articles** plus **3 concept articles** (28 total).
 
-**Goal**: Every user-facing tool in the Workshop should have a corresponding "What Is" article that explains what it does, why it exists, and how Wanderers interact with it.
+**Goal**: Every user-facing tool in the Workshop should have a corresponding "What Is" article, plus key concepts that Wanderers need to understand Grove.
 
 ---
 
@@ -41,6 +41,14 @@ The Workshop showcases **47 tools** across 8 categories. Currently, **8 tools** 
 | `what-is-swarm.md` | Agentic swarm concept |
 | `what-is-zdr.md` | Zero Data Retention policy |
 | `what-are-vines.md` | Margin notes system |
+
+### Concept Articles to Write (3 new)
+
+| Article | Purpose | Notes |
+|---------|---------|-------|
+| `what-is-greenhouse.md` | Early access / beta testing mode | Referenced by Grafts, Burrow |
+| `what-is-midnight-mode.md` | The fifth season — night theme | Part of seasonal theming system |
+| `what-are-tiers.md` | Seedling/Sapling/Oak/Evergreen subscription tiers | Link to related: pricing, features per tier, Centennial unlock |
 
 ---
 
@@ -136,6 +144,21 @@ Technical patterns for the curious.
 | 24 | **Threshold** | Patterns | Live | Rate limiting approach |
 | 25 | **Forage** | Standalone Tools | Live | AI domain discovery |
 
+### Priority 7: Concepts (3 articles)
+
+Key Grove concepts that don't map to a single tool.
+
+| # | Article | Purpose | Links to |
+|---|---------|---------|----------|
+| 26 | **what-is-greenhouse.md** | Early access / beta testing mode | Grafts, Burrow workshop entries |
+| 27 | **what-is-midnight-mode.md** | The fifth season — Grove at night | Prism, Foliage, seasonal theming |
+| 28 | **what-are-tiers.md** | Seedling/Sapling/Oak/Evergreen tiers | Pricing page, Centennial, Rings, Ivy, feature availability |
+
+**Note on tiers article**: This should be a quick-reference that explains what each tier includes, with links to:
+- Pricing page
+- `what-is-centennial.md` (unlocks at 12 months Sapling+)
+- Features gated by tier (Rings analytics, Ivy email, etc.)
+
 ---
 
 ## Article Template
@@ -213,7 +236,7 @@ When an article is created, update the corresponding tool in `packages/landing/s
 
 - **Priority 1 complete**: 4 core articles (Heartwood, Arbor, Flow, Terrarium)
 - **Priorities 1-3 complete**: 14 articles (all daily-use tools covered)
-- **Full coverage**: 25 articles total, all linked from Workshop
+- **Full coverage**: 28 articles total (25 tools + 3 concepts), all linked appropriately
 
 ---
 
@@ -247,7 +270,8 @@ When writing these articles:
 | Priority 4 (AI & Writing) | 4 | 1-2 |
 | Priority 5 (Communication) | 4 | 1-2 |
 | Priority 6 (Patterns) | 3 | 1 |
-| **Total** | **25** | **8-10** |
+| Priority 7 (Concepts) | 3 | 1 |
+| **Total** | **28** | **9-11** |
 
 ---
 
