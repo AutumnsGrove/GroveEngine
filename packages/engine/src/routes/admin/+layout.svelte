@@ -147,7 +147,7 @@
         <div class="user-info">
           <span class="email">{data.user?.email ?? 'Guest (Demo Mode)'}</span>
         </div>
-        <a href="https://grove.place/knowledge/help" target="_blank" rel="noopener" class="help-link">
+        <a href="/knowledge/help" target="_blank" rel="noopener" class="help-link">
           <HelpCircle class="help-icon" />
           <span>Help Center</span>
         </a>
@@ -165,7 +165,7 @@
       </div>
     {:else}
       <div class="sidebar-footer-collapsed">
-        <a href="https://grove.place/knowledge/help" target="_blank" rel="noopener" class="help-link-icon" title="Help Center">
+        <a href="/knowledge/help" target="_blank" rel="noopener" class="help-link-icon" title="Help Center">
           <HelpCircle class="help-icon" />
         </a>
         {#if data.user}

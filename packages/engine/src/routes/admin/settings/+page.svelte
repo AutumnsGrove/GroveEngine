@@ -433,7 +433,6 @@
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">
       <h2>Cache Management</h2>
-      <Waystone slug="what-is-foliage" label="Learn about caching" />
     </div>
     <p class="section-description">
       The site uses KV for caching API responses. Clearing resets all cached data.
