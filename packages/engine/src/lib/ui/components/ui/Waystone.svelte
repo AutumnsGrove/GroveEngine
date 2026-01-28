@@ -18,14 +18,14 @@
     class: className
   }: Props = $props();
 
-  // Relative URL - works on tenant domains
-  const helpUrl = $derived(`/knowledge/help/${slug}`);
+  // Absolute URL - KB only exists on grove.place, not tenant subdomains
+  const helpUrl = $derived(`https://grove.place/knowledge/help/${slug}`);
 </script>
 
 <a
   href={helpUrl}
   target="_blank"
-  rel="noopener"
+  rel="noopener noreferrer"
   class={cn('waystone', `waystone--${size}`, inline && 'waystone--inline', className)}
   title={label}
 >
@@ -45,6 +45,15 @@
     text-decoration: none;
     transition: all 0.15s ease;
     flex-shrink: 0;
+    position: relative;
+  }
+
+  /* Extend touch target to meet WCAG 2.5.5 (44×44px minimum) */
+  .waystone::before {
+    content: '';
+    position: absolute;
+    inset: -12px; /* Extends hit area beyond visual element */
+    border-radius: 50%;
   }
 
   .waystone--sm {
