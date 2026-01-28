@@ -454,10 +454,12 @@ All remaining articles from the UI audit table.
 - [ ] Create `/help` route structure in engine
 - [ ] Implement article loading (build-time bundle)
 - [ ] Create `HelpArticle.svelte` renderer
-- [ ] Add category navigation
-- [ ] Add search functionality (basic string match for v1)
+- [ ] Add category navigation (no search for v1)
 - [ ] Style help pages with Grove aesthetic
-- [ ] Add "Was this helpful?" feedback (deferred to later)
+- [ ] Create `ArticleFeedback.svelte` component (ThumbsUp/ThumbsDown)
+- [ ] Add D1 migration for `help_article_feedback` table
+- [ ] Create feedback API endpoint
+- [ ] Add "Edit on GitHub" link to article footer
 
 ### Phase 3: Arbor Integration (Issue #699)
 - [ ] Settings page: Typography section
@@ -533,30 +535,242 @@ Help articles should be cached aggressively:
 
 ---
 
-## Questions for Design Decision
+## Design Decisions (Resolved)
 
-1. **Waystone visibility on mobile**: Should waystones be:
-   - Always visible (current plan)
-   - Hidden on mobile, accessible via overflow menu
-   - Converted to a help button in mobile navigation
+| Question | Decision |
+|----------|----------|
+| **Mobile behavior** | Tappable button, opens article in new tab (same as desktop) |
+| **Interaction model** | Opens new tab + tooltip preview with "Read more" link, aria-labels for accessibility |
+| **Search for v1** | Skip — browse by category only |
+| **"Was this helpful?"** | Include in v1 — simple thumbs up/down using Lucide icons |
+| **Article workflow** | Deploy fresh with builds; keep markdown in repo; add "Edit on GitHub" link for contributors |
 
-2. **Help panel vs new tab**: Should clicking a waystone:
-   - Open article in new tab (current plan)
-   - Open in a slide-out panel (more integrated, more complex)
-   - Show a tooltip preview with "Read more" link
+---
 
-3. **Article update workflow**: When help articles are updated:
-   - Rebuild and redeploy engine (Option A)
-   - Admin UI for editing articles (future, requires D1 storage)
+## Article Feedback Component
 
-4. **Feedback integration**: "Was this helpful?" feature:
-   - Include in v1 (adds D1 table, feedback API)
-   - Defer to post-launch (simpler v1)
+Include feedback on every article page. Simple thumbs up/down with Lucide icons (per grove-ui-design skill: **never emojis, always Lucide**).
 
-5. **Search priority**: For v1, should we:
-   - Skip search entirely (just browse by category)
-   - Basic string matching (client-side)
-   - Full FTS5 implementation (requires D1 articles)
+### Component: `ArticleFeedback.svelte`
+
+**Location:** `packages/engine/src/lib/components/help/ArticleFeedback.svelte`
+
+```svelte
+<script lang="ts">
+  import { ThumbsUp, ThumbsDown } from 'lucide-svelte';
+  import { enhance } from '$app/forms';
+
+  interface Props {
+    articleSlug: string;
+  }
+
+  let { articleSlug }: Props = $props();
+  let submitted = $state(false);
+  let feedback = $state<'helpful' | 'not_helpful' | null>(null);
+</script>
+
+{#if !submitted}
+  <div class="article-feedback" role="group" aria-label="Article feedback">
+    <p class="feedback-prompt">Was this helpful?</p>
+    <div class="feedback-buttons">
+      <form method="POST" action="/help/feedback" use:enhance={() => {
+        return async ({ result }) => {
+          if (result.type === 'success') {
+            submitted = true;
+            feedback = 'helpful';
+          }
+        };
+      }}>
+        <input type="hidden" name="slug" value={articleSlug} />
+        <input type="hidden" name="helpful" value="true" />
+        <button
+          type="submit"
+          class="feedback-btn feedback-btn--up"
+          aria-label="Yes, this was helpful"
+        >
+          <ThumbsUp class="feedback-icon" />
+        </button>
+      </form>
+
+      <form method="POST" action="/help/feedback" use:enhance={() => {
+        return async ({ result }) => {
+          if (result.type === 'success') {
+            submitted = true;
+            feedback = 'not_helpful';
+          }
+        };
+      }}>
+        <input type="hidden" name="slug" value={articleSlug} />
+        <input type="hidden" name="helpful" value="false" />
+        <button
+          type="submit"
+          class="feedback-btn feedback-btn--down"
+          aria-label="No, this wasn't helpful"
+        >
+          <ThumbsDown class="feedback-icon" />
+        </button>
+      </form>
+    </div>
+  </div>
+{:else}
+  <div class="article-feedback article-feedback--submitted">
+    <p class="feedback-thanks">
+      {#if feedback === 'helpful'}
+        Thanks for the feedback!
+      {:else}
+        Thanks — we'll work on improving this.
+      {/if}
+    </p>
+  </div>
+{/if}
+
+<style>
+  .article-feedback {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border);
+    margin-top: 2rem;
+  }
+
+  .feedback-prompt {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .feedback-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .feedback-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;  /* Minimum touch target */
+    height: 44px;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-button);
+    background: var(--glass-bg, var(--color-surface));
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .feedback-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .feedback-btn--up:hover {
+    background: var(--color-success-bg, #dcfce7);
+    border-color: var(--color-success, #16a34a);
+    color: var(--color-success, #16a34a);
+  }
+
+  .feedback-btn--down:hover {
+    background: var(--color-warning-bg, #fef3c7);
+    border-color: var(--color-warning, #d97706);
+    color: var(--color-warning, #d97706);
+  }
+
+  .feedback-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  :global(.feedback-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .feedback-thanks {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin: 0;
+    font-style: italic;
+  }
+</style>
+```
+
+### Feedback API Endpoint
+
+**Location:** `packages/engine/src/routes/help/feedback/+server.ts`
+
+```typescript
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
+  const data = await request.formData();
+  const slug = data.get('slug') as string;
+  const helpful = data.get('helpful') === 'true';
+
+  if (!slug) {
+    return json({ error: 'Missing article slug' }, { status: 400 });
+  }
+
+  // Store feedback in D1
+  const db = platform?.env?.DB;
+  if (db) {
+    await db.prepare(`
+      INSERT INTO help_article_feedback (article_slug, helpful, created_at)
+      VALUES (?, ?, datetime('now'))
+    `).bind(slug, helpful ? 1 : 0).run();
+  }
+
+  return json({ success: true });
+};
+```
+
+### D1 Schema Addition
+
+```sql
+-- Add to migrations
+CREATE TABLE IF NOT EXISTS help_article_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  article_slug TEXT NOT NULL,
+  helpful INTEGER NOT NULL,  -- 1 = helpful, 0 = not helpful
+  created_at TEXT NOT NULL,
+  tenant_id TEXT  -- NULL for global help articles
+);
+
+CREATE INDEX idx_feedback_slug ON help_article_feedback(article_slug);
+```
+
+---
+
+## Edit on GitHub Link
+
+Each article page includes an "Edit on GitHub" link for community contributions:
+
+```svelte
+<!-- In HelpArticle.svelte footer -->
+<footer class="article-footer">
+  <div class="footer-meta">
+    {#if lastUpdated}
+      <p class="last-updated">Last updated: {lastUpdated}</p>
+    {/if}
+
+    <a
+      href="https://github.com/AutumnsGrove/GroveEngine/edit/main/docs/help-center/articles/{slug}.md"
+      target="_blank"
+      rel="noopener"
+      class="edit-link"
+    >
+      <Pencil class="edit-icon" />
+      Edit on GitHub
+    </a>
+  </div>
+
+  <ArticleFeedback articleSlug={slug} />
+</footer>
+```
+
+**Future consideration:** When ready to move beyond deploy-on-build, articles could be stored in a KV or similar system while keeping the canonical source in markdown. The GitHub link would still point to the source file, ensuring the repo remains the single source of truth.
 
 ---
 
@@ -585,9 +799,9 @@ Help articles should be cached aggressively:
 
 ## Next Steps
 
-1. Get design decision answers (see Questions section)
+1. ~~Get design decision answers~~ — **Done** (see Design Decisions section)
 2. Create the Waystone component (Phase 1)
-3. Set up help routes with bundled articles (Phase 2)
+3. Set up help routes with bundled articles + feedback system (Phase 2)
 4. Begin Priority 1 article writing in parallel
 5. Integrate waystones starting with Settings page
 
