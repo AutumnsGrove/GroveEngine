@@ -1,9 +1,11 @@
 # Porch & Feedback Integration Plan
 
 **Created**: January 28, 2026
-**Status**: Planning (awaiting decisions)
+**Status**: ✅ Implemented
 **Priority**: High — core support infrastructure for launch
 **Prerequisites**: Feedback system (completed), Waystone (completed)
+
+> **Implementation Complete**: Porch v1 has been built at `grove.place/porch` with user-facing routes, admin panel, and Arbor integration. See [What Was Built](#what-was-built) section below.
 
 ---
 
@@ -401,6 +403,70 @@ Inbound email replies (Resend webhook) are deferred:
 5. **Add cross-links** between feedback, KB, and porch
 6. **Test end-to-end** flow
 7. **Deploy and run migration**
+
+---
+
+## What Was Built
+
+### Implementation Summary (January 28, 2026)
+
+**Decisions Made:**
+- ✅ Porch lives in landing at `/porch/*` (not separate package)
+- ✅ Feedback remains separate (no merge)
+- ✅ MVP scope: Core conversations, no attachments/inbound email
+
+**Files Created:**
+
+```
+packages/landing/
+├── migrations/
+│   └── 0005_porch.sql                      # D1 schema
+└── src/routes/
+    ├── porch/
+    │   ├── +page.svelte                    # Landing page
+    │   ├── +page.server.ts
+    │   ├── new/
+    │   │   ├── +page.svelte               # Start visit form
+    │   │   └── +page.server.ts            # Form handler + emails
+    │   └── visits/
+    │       ├── +page.svelte               # Visit history
+    │       ├── +page.server.ts
+    │       └── [id]/
+    │           ├── +page.svelte           # Conversation view
+    │           └── +page.server.ts        # Reply handler
+    └── admin/porch/
+        ├── +page.svelte                   # Admin dashboard
+        ├── +page.server.ts
+        └── [id]/
+            ├── +page.svelte               # Admin reply view
+            └── +page.server.ts            # Reply + status + notes
+
+packages/engine/
+└── src/routes/admin/+layout.svelte        # Added Porch link to Arbor
+```
+
+**Features Implemented:**
+- Visit creation with categories (billing, technical, account, hello, other)
+- Visit numbering: PORCH-2026-XXXXX
+- Two-way messaging (visitor ↔ Autumn)
+- Email notifications via Resend (both directions)
+- Visit history for authenticated users
+- Admin dashboard with filters and search
+- Status management (open, pending, resolved)
+- Internal admin notes
+- Arbor panel integration (Get Support link)
+
+**Deferred to v2:**
+- File attachments (R2)
+- Inbound email threading (Resend webhook)
+- Saved responses
+- Metrics dashboard
+- Ivy integration (Phase 2)
+
+**To Deploy:**
+1. Run migration: `wrangler d1 execute grove-engine-db --file=packages/landing/migrations/0005_porch.sql --remote`
+2. Deploy landing: `cd packages/landing && pnpm deploy`
+3. Deploy engine: `cd packages/engine && pnpm deploy`
 
 ---
 
