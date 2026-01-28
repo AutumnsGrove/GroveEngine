@@ -4,17 +4,26 @@
   Licensed under AGPL-3.0
 
   GroveLogo wrapper for Terrarium palette
-  Re-exports LogoArchive with Terrarium-compatible props
+  Re-exports the current Logo component with Terrarium-compatible props
 -->
 <script lang="ts">
-	import LogoArchive from '../LogoArchive.svelte';
+	import Logo from '../../ui/Logo.svelte';
+	import type { Season } from '$lib/ui/types/season';
 
 	interface Props {
 		animate?: boolean;
 		class?: string;
+		season?: Season;
 	}
 
-	let { animate = false, class: className = 'w-16 h-20' }: Props = $props();
+	let { animate = false, class: className, season = 'summer' }: Props = $props();
 </script>
 
-<LogoArchive {animate} class={className} />
+<Logo
+	size={64}
+	class={className}
+	{season}
+	background={false}
+	interactive={animate}
+	rotation={-12}
+/>
