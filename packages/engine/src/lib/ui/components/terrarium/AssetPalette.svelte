@@ -62,15 +62,7 @@
 		botanical: {
 			name: 'Botanical',
 			icon: Leaf,
-			assets: [
-				'Acorn',
-				'Berry',
-				'DandelionPuff',
-				'FallingPetalsLayer',
-				'Leaf',
-				'PineCone',
-				'Vine'
-			]
+			assets: ['Acorn', 'Berry', 'DandelionPuff', 'Leaf', 'PineCone', 'Vine']
 		},
 		ground: {
 			name: 'Ground',
@@ -117,7 +109,7 @@
 		weather: {
 			name: 'Weather',
 			icon: Snowflake,
-			assets: ['SnowfallLayer', 'Snowflake']
+			assets: ['Snowflake']
 		}
 	};
 
