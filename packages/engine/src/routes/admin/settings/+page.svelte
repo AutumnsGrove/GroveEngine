@@ -1,5 +1,5 @@
 <script>
-  import { Button, Spinner, GlassCard, GlassConfirmDialog } from '$lib/ui';
+  import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
@@ -219,7 +219,10 @@
   {/if}
 
   <GlassCard variant="frosted" class="mb-6">
-    <h2>Typography</h2>
+    <div class="section-header">
+      <h2>Typography</h2>
+      <Waystone slug="custom-fonts" label="Learn about fonts" />
+    </div>
     <p class="section-description">
       Choose the font family used across the entire site. Changes take effect immediately.
     </p>
@@ -378,7 +381,10 @@
   </GlassCard>
 
   <GlassCard variant="frosted" class="mb-6">
-    <h2>Accent Color</h2>
+    <div class="section-header">
+      <h2>Accent Color</h2>
+      <Waystone slug="choosing-a-theme" label="Learn about themes" />
+    </div>
     <p class="section-description">
       Customize the accent color used for tags and interactive elements on your blog.
     </p>
@@ -425,7 +431,10 @@
   </GlassCard>
 
   <GlassCard variant="frosted" class="mb-6">
-    <h2>Cache Management</h2>
+    <div class="section-header">
+      <h2>Cache Management</h2>
+      <Waystone slug="what-is-foliage" label="Learn about caching" />
+    </div>
     <p class="section-description">
       The site uses KV for caching API responses. Clearing resets all cached data.
     </p>
@@ -518,6 +527,15 @@
     font-size: 1.25rem;
     color: var(--color-text);
     transition: color 0.3s ease;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .section-header h2 {
+    margin: 0;
   }
   .section-description {
     margin: 0 0 1rem 0;
