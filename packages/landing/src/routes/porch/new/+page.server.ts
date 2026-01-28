@@ -17,7 +17,21 @@ function escapeHtml(unsafe: string | null): string {
 }
 
 /**
- * Generate next visit number: PORCH-2026-00001
+ * Generate next visit number in format: PORCH-2026-00001
+ *
+ * Uses a two-tier strategy for sequence generation:
+ *
+ * 1. **KV (preferred)**: Cloudflare KV provides fast, globally consistent reads.
+ *    We read the current sequence, increment, and write back. While not truly
+ *    atomic, KV's eventual consistency is acceptable for support ticket numbers
+ *    where small gaps or rare duplicates can be handled gracefully.
+ *
+ * 2. **D1 fallback**: If KV is unavailable (local dev, KV errors), we count
+ *    existing visits for the year. This is slower but reliable. The COUNT
+ *    approach means deleted visits could cause gaps, but that's acceptable.
+ *
+ * Why not use D1 auto-increment? We want human-readable, year-prefixed numbers
+ * (PORCH-2026-00001) that reset each year, not raw integer IDs.
  */
 async function generateVisitNumber(db: D1Database, kv?: KVNamespace): Promise<string> {
 	const year = new Date().getFullYear();
@@ -25,14 +39,14 @@ async function generateVisitNumber(db: D1Database, kv?: KVNamespace): Promise<st
 
 	let sequence = 1;
 
-	// Try KV first for atomic increment
 	if (kv) {
 		try {
+			// KV path: read-increment-write (fast, globally distributed)
 			const existing = await kv.get(kvKey);
 			sequence = existing ? parseInt(existing, 10) + 1 : 1;
 			await kv.put(kvKey, sequence.toString());
 		} catch {
-			// Fall back to counting from DB
+			// KV failed - fall back to DB count
 			const result = await db
 				.prepare(`SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`)
 				.bind(`PORCH-${year}-%`)
@@ -40,7 +54,7 @@ async function generateVisitNumber(db: D1Database, kv?: KVNamespace): Promise<st
 			sequence = (result?.count || 0) + 1;
 		}
 	} else {
-		// Count from DB
+		// No KV available (local dev) - count from DB
 		const result = await db
 			.prepare(`SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`)
 			.bind(`PORCH-${year}-%`)

@@ -6,6 +6,9 @@
 -- Porch is Grove's warm, human-centered support system.
 -- "Have a seat on the porch. We'll figure it out together."
 
+-- Enable foreign key constraint enforcement (required for ON DELETE CASCADE)
+PRAGMA foreign_keys = ON;
+
 -- Visit numbering sequence (stored in KV, but we need a fallback)
 -- Format: PORCH-2026-00001
 

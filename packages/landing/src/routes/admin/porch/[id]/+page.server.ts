@@ -44,7 +44,7 @@ function escapeHtml(unsafe: string | null): string {
 
 export const load: PageServerLoad = async ({ params, locals, platform }) => {
 	// Only Autumn can access admin
-	if (!locals.user || locals.user.email !== 'autumn@autumnsgrove.com') {
+	if (!locals.user || locals.user.email !== 'autumn@grove.place') {
 		throw redirect(302, '/admin/login');
 	}
 
@@ -61,39 +61,46 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
 	let userEmail: string | null = null;
 
 	try {
-		visit = await platform.env.DB.prepare(
-			`SELECT id, visit_number, user_id, guest_email, guest_name, category, subject, status, admin_notes, created_at, updated_at
-			 FROM porch_visits
-			 WHERE id = ?`
-		)
-			.bind(params.id)
-			.first<Visit>();
-
-		if (visit) {
-			// Load messages
-			const result = await platform.env.DB.prepare(
+		// Run all queries in parallel to reduce latency (~60% improvement per AGENT.md:316-366)
+		const [visitResult, messagesResult] = await Promise.all([
+			platform.env.DB.prepare(
+				`SELECT id, visit_number, user_id, guest_email, guest_name, category, subject, status, admin_notes, created_at, updated_at
+				 FROM porch_visits
+				 WHERE id = ?`
+			)
+				.bind(params.id)
+				.first<Visit>()
+				.catch((err) => {
+					console.warn('Failed to load visit:', err);
+					return null;
+				}),
+			platform.env.DB.prepare(
 				`SELECT id, visit_id, sender_type, sender_name, content, created_at
 				 FROM porch_messages
 				 WHERE visit_id = ?
 				 ORDER BY created_at ASC`
 			)
-				.bind(visit.id)
-				.all<Message>();
+				.bind(params.id)
+				.all<Message>()
+				.catch((err) => {
+					console.warn('Failed to load messages:', err);
+					return { results: [] };
+				}),
+		]);
 
-			messages = result.results || [];
+		visit = visitResult;
+		messages = messagesResult.results || [];
 
-			// If authenticated user, get their email from users table
-			if (visit.user_id) {
-				const user = await platform.env.DB.prepare(
-					`SELECT email FROM users WHERE id = ?`
-				)
-					.bind(visit.user_id)
-					.first<User>();
-				userEmail = user?.email || null;
-			}
+		// Get user email if this is an authenticated visitor (separate query since it depends on visit.user_id)
+		if (visit?.user_id) {
+			const user = await platform.env.DB.prepare(`SELECT email FROM users WHERE id = ?`)
+				.bind(visit.user_id)
+				.first<User>()
+				.catch(() => null);
+			userEmail = user?.email || null;
 		}
 	} catch (err) {
-		console.error('Failed to load visit:', err);
+		console.error('Failed to load visit data:', err);
 	}
 
 	return {
@@ -105,7 +112,7 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
 
 export const actions: Actions = {
 	reply: async ({ params, request, locals, platform }) => {
-		if (!locals.user || locals.user.email !== 'autumn@autumnsgrove.com') {
+		if (!locals.user || locals.user.email !== 'autumn@grove.place') {
 			throw redirect(302, '/admin/login');
 		}
 
@@ -210,7 +217,7 @@ Grove`;
 	},
 
 	updateStatus: async ({ params, request, locals, platform }) => {
-		if (!locals.user || locals.user.email !== 'autumn@autumnsgrove.com') {
+		if (!locals.user || locals.user.email !== 'autumn@grove.place') {
 			throw redirect(302, '/admin/login');
 		}
 
@@ -250,7 +257,7 @@ Grove`;
 	},
 
 	saveNotes: async ({ params, request, locals, platform }) => {
-		if (!locals.user || locals.user.email !== 'autumn@autumnsgrove.com') {
+		if (!locals.user || locals.user.email !== 'autumn@grove.place') {
 			throw redirect(302, '/admin/login');
 		}
 

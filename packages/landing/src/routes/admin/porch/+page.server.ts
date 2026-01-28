@@ -23,7 +23,7 @@ interface Stats {
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
 	// Only Autumn can access admin
-	if (!locals.user || locals.user.email !== 'autumn@autumnsgrove.com') {
+	if (!locals.user || locals.user.email !== 'autumn@grove.place') {
 		throw redirect(302, '/admin/login');
 	}
 
