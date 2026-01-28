@@ -1024,6 +1024,12 @@
 										{tool.integration}
 									</div>
 									<div class="flex flex-wrap gap-3">
+										{#if tool.whatIsLink}
+											<a href={tool.whatIsLink} aria-label="Learn more about {tool.name}" class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
+												<BookOpen class="w-4 h-4" />
+												<span>Read more</span>
+											</a>
+										{/if}
 										{#if tool.spec}
 											<a href={tool.spec} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
 												<FileText class="w-4 h-4" />
@@ -1034,12 +1040,6 @@
 											<a href={tool.howLink} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
 												<Lightbulb class="w-4 h-4" />
 												<span>How we'll do it</span>
-											</a>
-										{/if}
-										{#if tool.whatIsLink}
-											<a href={tool.whatIsLink} aria-label="Learn more about {tool.name}" class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
-												<BookOpen class="w-4 h-4" />
-												<span>Read more</span>
 											</a>
 										{/if}
 										{#if tool.github}
