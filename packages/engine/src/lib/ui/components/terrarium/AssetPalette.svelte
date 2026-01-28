@@ -68,8 +68,6 @@
 				'DandelionPuff',
 				'FallingPetalsLayer',
 				'Leaf',
-				'LeafFalling',
-				'PetalFalling',
 				'PineCone',
 				'Vine'
 			]
@@ -119,7 +117,7 @@
 		weather: {
 			name: 'Weather',
 			icon: Snowflake,
-			assets: ['SnowfallLayer', 'Snowflake', 'SnowflakeFalling']
+			assets: ['SnowfallLayer', 'Snowflake']
 		}
 	};
 

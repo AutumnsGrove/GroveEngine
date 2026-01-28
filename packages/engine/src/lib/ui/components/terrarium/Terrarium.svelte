@@ -108,6 +108,34 @@
 		}
 	}
 
+	function handleZoomIn() {
+		terrarium.zoomIn();
+	}
+
+	function handleZoomOut() {
+		terrarium.zoomOut();
+	}
+
+	function handleResetZoom() {
+		terrarium.resetZoom();
+	}
+
+	function handleSetBackground(background: string) {
+		terrarium.setBackground(background);
+	}
+
+	function handleFlipX() {
+		if (terrarium.selectedAssetId) {
+			terrarium.flipAssetX(terrarium.selectedAssetId);
+		}
+	}
+
+	function handleFlipY() {
+		if (terrarium.selectedAssetId) {
+			terrarium.flipAssetY(terrarium.selectedAssetId);
+		}
+	}
+
 	async function handleExportPNG(options: { scale: number; includeBackground: boolean }) {
 		if (!canvasElement) {
 			throw new Error('Canvas element not found');
@@ -221,6 +249,8 @@
 			gridEnabled={terrarium.scene.canvas.gridEnabled}
 			gridSize={terrarium.scene.canvas.gridSize}
 			hasSelection={terrarium.selectedAssetId !== null}
+			zoom={terrarium.zoom}
+			background={terrarium.scene.canvas.background}
 			onToggleAnimations={handleToggleAnimations}
 			onToggleGrid={handleToggleGrid}
 			onSetGridSize={handleSetGridSize}
@@ -229,6 +259,12 @@
 			onExport={handleExport}
 			onSave={handleSave}
 			onRename={handleRename}
+			onZoomIn={handleZoomIn}
+			onZoomOut={handleZoomOut}
+			onResetZoom={handleResetZoom}
+			onSetBackground={handleSetBackground}
+			onFlipX={handleFlipX}
+			onFlipY={handleFlipY}
 		/>
 
 		<!-- Canvas Area -->
@@ -238,10 +274,14 @@
 				selectedAssetId={terrarium.selectedAssetId}
 				animationsEnabled={terrarium.animationsEnabled}
 				panOffset={terrarium.panOffset}
+				zoom={terrarium.zoom}
 				onAssetSelect={(id) => terrarium.selectAsset(id)}
 				onAssetMove={(id, position) => terrarium.updateAsset(id, { position })}
+				onAssetScale={(id, scale) => terrarium.updateAsset(id, { scale })}
+				onAssetRotate={(id, rotation) => terrarium.updateAsset(id, { rotation })}
 				onCanvasClick={() => terrarium.selectAsset(null)}
 				onPan={(offset) => terrarium.setPanOffset(offset)}
+				onZoom={(level) => terrarium.setZoom(level)}
 				onAssetDrop={(name, category, position) => {
 					if (terrarium.canAddAsset) {
 						terrarium.addAsset(name, category, position);

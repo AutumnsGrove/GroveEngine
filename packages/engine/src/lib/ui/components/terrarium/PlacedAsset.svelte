@@ -11,23 +11,34 @@
 		asset: PlacedAsset;
 		isSelected?: boolean;
 		animationsEnabled?: boolean;
+		zoom?: number;
 		onSelect?: () => void;
 		onMove?: (position: Point) => void;
+		onScale?: (scale: number) => void;
+		onRotate?: (rotation: number) => void;
 	}
 
 	let {
 		asset,
 		isSelected = false,
 		animationsEnabled = true,
+		zoom = 1,
 		onSelect,
-		onMove
+		onMove,
+		onScale,
+		onRotate
 	}: Props = $props();
 
 	let component: SvelteComponent | null = $state(null);
 	let containerElement: HTMLDivElement | null = $state(null);
 	let isDragging = $state(false);
+	let isResizing = $state(false);
+	let isRotating = $state(false);
 	let dragStart: Point = $state({ x: 0, y: 0 });
 	let positionStart: Point = $state({ x: 0, y: 0 });
+	let scaleStart = $state(1);
+	let rotationStart = $state(0);
+	let assetCenter: Point = $state({ x: 0, y: 0 });
 
 	// Dynamically import the nature component
 	$effect(() => {
@@ -71,9 +82,11 @@
 		loadComponent();
 	});
 
-	// Calculate transform style
+	// Calculate transform style with flip support
+	const scaleX = $derived(asset.flipX ? -asset.scale : asset.scale);
+	const scaleY = $derived(asset.flipY ? -asset.scale : asset.scale);
 	const transformStyle = $derived(
-		`translate(${asset.position.x}px, ${asset.position.y}px) scale(${asset.scale}) rotate(${asset.rotation}deg)`
+		`translate(${asset.position.x}px, ${asset.position.y}px) scale(${scaleX}, ${scaleY}) rotate(${asset.rotation}deg)`
 	);
 
 	// Component props including animation state
@@ -161,12 +174,125 @@
 		}
 	}
 
+	// Get center position of the asset for resize/rotate calculations
+	function getAssetCenter(): Point {
+		if (!containerElement) return { x: 0, y: 0 };
+		const rect = containerElement.getBoundingClientRect();
+		return {
+			x: rect.left + rect.width / 2,
+			y: rect.top + rect.height / 2
+		};
+	}
+
+	// Resize handlers
+	function handleResizeStart(event: MouseEvent) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		isResizing = true;
+		assetCenter = getAssetCenter();
+		scaleStart = asset.scale;
+
+		// Calculate initial distance from center to mouse
+		const dx = event.clientX - assetCenter.x;
+		const dy = event.clientY - assetCenter.y;
+		dragStart = { x: Math.sqrt(dx * dx + dy * dy), y: 0 };
+	}
+
+	function handleResizeMove(event: MouseEvent) {
+		if (!isResizing) return;
+
+		// Calculate new distance from center to mouse
+		const dx = event.clientX - assetCenter.x;
+		const dy = event.clientY - assetCenter.y;
+		const currentDistance = Math.sqrt(dx * dx + dy * dy);
+
+		// Scale proportionally based on distance ratio
+		const ratio = currentDistance / dragStart.x;
+		const newScale = Math.max(0.1, Math.min(5, scaleStart * ratio));
+		onScale?.(newScale);
+	}
+
+	function handleResizeEnd() {
+		isResizing = false;
+	}
+
+	// Rotation handlers
+	function handleRotateStart(event: MouseEvent) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		isRotating = true;
+		assetCenter = getAssetCenter();
+		rotationStart = asset.rotation;
+
+		// Calculate initial angle
+		const dx = event.clientX - assetCenter.x;
+		const dy = event.clientY - assetCenter.y;
+		dragStart = { x: Math.atan2(dy, dx), y: 0 };
+	}
+
+	function handleRotateMove(event: MouseEvent) {
+		if (!isRotating) return;
+
+		// Calculate current angle
+		const dx = event.clientX - assetCenter.x;
+		const dy = event.clientY - assetCenter.y;
+		const currentAngle = Math.atan2(dy, dx);
+
+		// Convert radians to degrees and apply rotation
+		const angleDiff = (currentAngle - dragStart.x) * (180 / Math.PI);
+		let newRotation = rotationStart + angleDiff;
+
+		// Normalize to 0-360
+		while (newRotation < 0) newRotation += 360;
+		while (newRotation >= 360) newRotation -= 360;
+
+		onRotate?.(newRotation);
+	}
+
+	function handleRotateEnd() {
+		isRotating = false;
+	}
+
 	// Set up global event listeners for dragging
 	$effect(() => {
 		const handleGlobalMouseMove = (e: MouseEvent) => handleMouseMove(e);
 		const handleGlobalMouseUp = () => handleMouseUp();
 
 		if (isDragging) {
+			window.addEventListener('mousemove', handleGlobalMouseMove);
+			window.addEventListener('mouseup', handleGlobalMouseUp);
+
+			return () => {
+				window.removeEventListener('mousemove', handleGlobalMouseMove);
+				window.removeEventListener('mouseup', handleGlobalMouseUp);
+			};
+		}
+	});
+
+	// Set up global event listeners for resizing
+	$effect(() => {
+		const handleGlobalMouseMove = (e: MouseEvent) => handleResizeMove(e);
+		const handleGlobalMouseUp = () => handleResizeEnd();
+
+		if (isResizing) {
+			window.addEventListener('mousemove', handleGlobalMouseMove);
+			window.addEventListener('mouseup', handleGlobalMouseUp);
+
+			return () => {
+				window.removeEventListener('mousemove', handleGlobalMouseMove);
+				window.removeEventListener('mouseup', handleGlobalMouseUp);
+			};
+		}
+	});
+
+	// Set up global event listeners for rotating
+	$effect(() => {
+		const handleGlobalMouseMove = (e: MouseEvent) => handleRotateMove(e);
+		const handleGlobalMouseUp = () => handleRotateEnd();
+
+		if (isRotating) {
 			window.addEventListener('mousemove', handleGlobalMouseMove);
 			window.addEventListener('mouseup', handleGlobalMouseUp);
 
@@ -204,6 +330,50 @@
 			class="absolute inset-0 -m-2 pointer-events-none rounded-lg border-2 border-blue-400 bg-blue-50/10 backdrop-blur-sm shadow-lg"
 			style="z-index: -1;"
 		/>
+
+		<!-- Rotation handle (above the asset) -->
+		<div
+			class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto"
+			style="bottom: calc(100% + 8px);"
+		>
+			<!-- Connecting line -->
+			<div class="w-px h-4 bg-blue-400"></div>
+			<!-- Rotation circle -->
+			<button
+				class="w-4 h-4 rounded-full bg-white border-2 border-blue-400 cursor-grab hover:bg-blue-50 hover:border-blue-500 active:cursor-grabbing shadow-sm"
+				onmousedown={handleRotateStart}
+				aria-label="Rotate asset"
+			></button>
+		</div>
+
+		<!-- Resize handles (corners only for proportional scaling) -->
+		<!-- Top-left -->
+		<button
+			class="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			onmousedown={handleResizeStart}
+			aria-label="Resize from top-left corner"
+		></button>
+
+		<!-- Top-right -->
+		<button
+			class="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			onmousedown={handleResizeStart}
+			aria-label="Resize from top-right corner"
+		></button>
+
+		<!-- Bottom-left -->
+		<button
+			class="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			onmousedown={handleResizeStart}
+			aria-label="Resize from bottom-left corner"
+		></button>
+
+		<!-- Bottom-right -->
+		<button
+			class="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			onmousedown={handleResizeStart}
+			aria-label="Resize from bottom-right corner"
+		></button>
 	{/if}
 
 	<!-- Render the nature component -->

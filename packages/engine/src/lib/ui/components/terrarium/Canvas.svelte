@@ -12,10 +12,14 @@
 		selectedAssetId: string | null;
 		animationsEnabled?: boolean;
 		panOffset?: Point;
+		zoom?: number;
 		onAssetSelect?: (assetId: string | null) => void;
 		onAssetMove?: (assetId: string, position: Point) => void;
+		onAssetScale?: (assetId: string, scale: number) => void;
+		onAssetRotate?: (assetId: string, rotation: number) => void;
 		onCanvasClick?: () => void;
 		onPan?: (offset: Point) => void;
+		onZoom?: (level: number) => void;
 		onAssetDrop?: (name: string, category: AssetCategory, position: Point) => void;
 	}
 
@@ -24,10 +28,14 @@
 		selectedAssetId,
 		animationsEnabled = true,
 		panOffset = { x: 0, y: 0 },
+		zoom = 1,
 		onAssetSelect,
 		onAssetMove,
+		onAssetScale,
+		onAssetRotate,
 		onCanvasClick,
 		onPan,
+		onZoom,
 		onAssetDrop
 	}: Props = $props();
 
@@ -42,9 +50,9 @@
 		[...scene.assets].sort((a, b) => a.zIndex - b.zIndex)
 	);
 
-	// Canvas transform style
+	// Canvas transform style with zoom
 	const canvasTransform = $derived(
-		`translate(${panOffset.x}px, ${panOffset.y}px)`
+		`translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`
 	);
 
 	function handleMouseDown(event: MouseEvent) {
@@ -110,6 +118,16 @@
 		}
 	}
 
+	function handleWheel(event: WheelEvent) {
+		// Zoom with Ctrl/Cmd + scroll wheel
+		if (event.ctrlKey || event.metaKey) {
+			event.preventDefault();
+			const delta = event.deltaY > 0 ? 0.9 : 1.1;
+			const newZoom = zoom * delta;
+			onZoom?.(newZoom);
+		}
+	}
+
 	function handleTouchStart(event: TouchEvent) {
 		if (event.touches.length === 2) {
 			// Two-finger touch for panning
@@ -165,11 +183,11 @@
 		try {
 			const data = JSON.parse(event.dataTransfer.getData('application/json'));
 			if (data.name && data.category) {
-				// Calculate drop position relative to canvas, accounting for pan offset
+				// Calculate drop position relative to canvas, accounting for pan offset and zoom
 				const rect = canvasElement.getBoundingClientRect();
 				const position: Point = {
-					x: event.clientX - rect.left - panOffset.x,
-					y: event.clientY - rect.top - panOffset.y
+					x: (event.clientX - rect.left - panOffset.x) / zoom,
+					y: (event.clientY - rect.top - panOffset.y) / zoom
 				};
 				onAssetDrop?.(data.name, data.category, position);
 			}
@@ -211,8 +229,9 @@
 	class="relative w-full h-full overflow-hidden select-none"
 	role="application"
 	tabindex="0"
-	aria-label="Terrarium canvas workspace - Use arrow keys to pan, scroll to zoom"
+	aria-label="Terrarium canvas workspace - Use arrow keys to pan, Ctrl/Cmd+scroll to zoom"
 	onmousedown={handleMouseDown}
+	onwheel={handleWheel}
 	ontouchstart={handleTouchStart}
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
@@ -245,8 +264,11 @@
 					{asset}
 					isSelected={asset.id === selectedAssetId}
 					{animationsEnabled}
+					{zoom}
 					onSelect={() => handleAssetSelect(asset.id)}
 					onMove={(position) => handleAssetMove(asset.id, position)}
+					onScale={(scale) => onAssetScale?.(asset.id, scale)}
+					onRotate={(rotation) => onAssetRotate?.(asset.id, rotation)}
 				/>
 			{/each}
 		</div>

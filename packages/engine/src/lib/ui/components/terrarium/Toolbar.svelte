@@ -17,8 +17,22 @@
 -->
 
 <script lang="ts">
-	import { Play, Pause, Grid3X3, Trash2, Copy, Download, Save } from 'lucide-svelte';
+	import {
+		Play,
+		Pause,
+		Grid3X3,
+		Trash2,
+		Copy,
+		Download,
+		Save,
+		ZoomIn,
+		ZoomOut,
+		FlipHorizontal,
+		FlipVertical,
+		Palette
+	} from 'lucide-svelte';
 	import { cn } from '$lib/ui/utils';
+	import { CANVAS_BACKGROUNDS } from './types';
 
 	/**
 	 * Terrarium Toolbar
@@ -33,6 +47,8 @@
 		gridEnabled: boolean;
 		gridSize: 16 | 32 | 64;
 		hasSelection: boolean;
+		zoom: number;
+		background: string;
 		onToggleAnimations: () => void;
 		onToggleGrid: () => void;
 		onSetGridSize: (size: 16 | 32 | 64) => void;
@@ -41,6 +57,12 @@
 		onExport: () => void;
 		onSave: () => void;
 		onRename: (name: string) => void;
+		onZoomIn: () => void;
+		onZoomOut: () => void;
+		onResetZoom: () => void;
+		onSetBackground: (background: string) => void;
+		onFlipX: () => void;
+		onFlipY: () => void;
 	}
 
 	let {
@@ -49,6 +71,8 @@
 		gridEnabled,
 		gridSize,
 		hasSelection,
+		zoom,
+		background,
 		onToggleAnimations,
 		onToggleGrid,
 		onSetGridSize,
@@ -56,15 +80,41 @@
 		onDuplicate,
 		onExport,
 		onSave,
-		onRename
+		onRename,
+		onZoomIn,
+		onZoomOut,
+		onResetZoom,
+		onSetBackground,
+		onFlipX,
+		onFlipY
 	}: Props = $props();
 
 	let isEditingName = $state(false);
 	let nameInput: HTMLInputElement | null = $state(null);
 	let editedName = $state(sceneName);
+	let showBackgroundPicker = $state(false);
+	let customColor = $state('#87CEEB');
 
 	// Grid size options
 	const gridSizes: Array<16 | 32 | 64> = [16, 32, 64];
+
+	// Format zoom percentage
+	const zoomPercent = $derived(Math.round(zoom * 100));
+
+	// Close background picker when clicking outside
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (showBackgroundPicker && !target.closest('[data-background-picker]')) {
+			showBackgroundPicker = false;
+		}
+	}
+
+	$effect(() => {
+		if (showBackgroundPicker) {
+			document.addEventListener('click', handleClickOutside);
+			return () => document.removeEventListener('click', handleClickOutside);
+		}
+	});
 
 	// Start editing scene name
 	function startEditingName() {
@@ -235,6 +285,156 @@
 				{/each}
 			</select>
 		{/if}
+	</div>
+
+	<!-- Divider -->
+	<div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+
+	<!-- Zoom Controls -->
+	<div class="flex items-center gap-1">
+		<button
+			onclick={onZoomOut}
+			class={iconButtonClass}
+			title="Zoom out"
+			aria-label="Zoom out"
+		>
+			<ZoomOut />
+		</button>
+
+		<button
+			onclick={onResetZoom}
+			class={cn(
+				'h-9 px-2 rounded-lg min-w-[60px]',
+				'bg-white/60 dark:bg-emerald-950/25',
+				'border border-white/40 dark:border-emerald-800/25',
+				'text-foreground text-sm font-medium',
+				'hover:bg-white/75 dark:hover:bg-emerald-950/35',
+				'transition-all duration-200',
+				'backdrop-blur-md shadow-sm',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50'
+			)}
+			title="Reset zoom (click to reset to 100%)"
+			aria-label="Zoom level {zoomPercent}%, click to reset"
+		>
+			{zoomPercent}%
+		</button>
+
+		<button
+			onclick={onZoomIn}
+			class={iconButtonClass}
+			title="Zoom in"
+			aria-label="Zoom in"
+		>
+			<ZoomIn />
+		</button>
+	</div>
+
+	<!-- Divider -->
+	<div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+
+	<!-- Background Picker -->
+	<div class="relative" data-background-picker>
+		<button
+			onclick={() => (showBackgroundPicker = !showBackgroundPicker)}
+			class={cn(iconButtonClass, 'relative overflow-hidden')}
+			title="Canvas background"
+			aria-label="Choose canvas background"
+			aria-expanded={showBackgroundPicker}
+		>
+			<div
+				class="absolute inset-1 rounded"
+				style="background: {background};"
+			></div>
+			<Palette class="relative z-10 drop-shadow-sm" />
+		</button>
+
+		{#if showBackgroundPicker}
+			<!-- Background picker popover -->
+			<div
+				class={cn(
+					'absolute top-full left-0 mt-2 p-3 rounded-lg z-50',
+					'bg-white/90 dark:bg-emerald-950/90',
+					'border border-white/40 dark:border-emerald-800/40',
+					'backdrop-blur-xl shadow-xl',
+					'min-w-[200px]'
+				)}
+			>
+				<div class="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
+					Preset Backgrounds
+				</div>
+				<div class="grid grid-cols-4 gap-2 mb-3">
+					{#each CANVAS_BACKGROUNDS as bg}
+						<button
+							onclick={() => {
+								onSetBackground(bg.value);
+								showBackgroundPicker = false;
+							}}
+							class={cn(
+								'w-10 h-10 rounded-lg border-2 transition-all',
+								background === bg.value
+									? 'border-accent ring-2 ring-accent/30'
+									: 'border-white/40 dark:border-emerald-800/40 hover:border-accent/50'
+							)}
+							style="background: {bg.value};"
+							title={bg.name}
+							aria-label={bg.name}
+						></button>
+					{/each}
+				</div>
+
+				<div class="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
+					Custom Color
+				</div>
+				<div class="flex items-center gap-2">
+					<input
+						type="color"
+						bind:value={customColor}
+						class="w-10 h-10 rounded-lg border border-white/40 dark:border-emerald-800/40 cursor-pointer"
+						title="Pick custom color"
+					/>
+					<button
+						onclick={() => {
+							onSetBackground(customColor);
+							showBackgroundPicker = false;
+						}}
+						class={cn(
+							'flex-1 h-9 px-3 rounded-lg text-sm font-medium',
+							'bg-accent/70 text-white',
+							'hover:bg-accent/85',
+							'transition-all duration-200'
+						)}
+					>
+						Apply
+					</button>
+				</div>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Divider -->
+	<div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+
+	<!-- Flip Buttons -->
+	<div class="flex items-center gap-1">
+		<button
+			onclick={onFlipX}
+			disabled={!hasSelection}
+			class={iconButtonClass}
+			title="Flip horizontal"
+			aria-label="Flip selected asset horizontally"
+		>
+			<FlipHorizontal />
+		</button>
+
+		<button
+			onclick={onFlipY}
+			disabled={!hasSelection}
+			class={iconButtonClass}
+			title="Flip vertical"
+			aria-label="Flip selected asset vertically"
+		>
+			<FlipVertical />
+		</button>
 	</div>
 
 	<!-- Divider -->
