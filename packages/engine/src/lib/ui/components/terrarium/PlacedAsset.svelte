@@ -327,20 +327,20 @@
 	<!-- Selection border with glass effect -->
 	{#if isSelected}
 		<div
-			class="absolute inset-0 -m-2 pointer-events-none rounded-lg border-2 border-blue-400 bg-blue-50/10 backdrop-blur-sm shadow-lg"
+			class="absolute inset-0 -m-1 pointer-events-none rounded border-2 border-blue-400/70"
 			style="z-index: -1;"
 		/>
 
 		<!-- Rotation handle (above the asset) -->
 		<div
 			class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto"
-			style="bottom: calc(100% + 8px);"
+			style="bottom: calc(100% + 4px);"
 		>
 			<!-- Connecting line -->
-			<div class="w-px h-4 bg-blue-400"></div>
+			<div class="w-px h-3 bg-blue-400/70"></div>
 			<!-- Rotation circle -->
 			<button
-				class="w-4 h-4 rounded-full bg-white border-2 border-blue-400 cursor-grab hover:bg-blue-50 hover:border-blue-500 active:cursor-grabbing shadow-sm"
+				class="w-3 h-3 rounded-full bg-white border-2 border-blue-400 cursor-grab hover:bg-blue-50 hover:border-blue-500 active:cursor-grabbing shadow-sm"
 				onmousedown={handleRotateStart}
 				aria-label="Rotate asset"
 			></button>
@@ -349,28 +349,32 @@
 		<!-- Resize handles (corners only for proportional scaling) -->
 		<!-- Top-left -->
 		<button
-			class="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			class="resize-handle absolute w-2 h-2 bg-white border border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500"
+			style="top: -4px; left: -4px;"
 			onmousedown={handleResizeStart}
 			aria-label="Resize from top-left corner"
 		></button>
 
 		<!-- Top-right -->
 		<button
-			class="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			class="resize-handle absolute w-2 h-2 bg-white border border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500"
+			style="top: -4px; right: -4px;"
 			onmousedown={handleResizeStart}
 			aria-label="Resize from top-right corner"
 		></button>
 
 		<!-- Bottom-left -->
 		<button
-			class="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			class="resize-handle absolute w-2 h-2 bg-white border border-blue-400 rounded-sm cursor-nesw-resize hover:bg-blue-50 hover:border-blue-500"
+			style="bottom: -4px; left: -4px;"
 			onmousedown={handleResizeStart}
 			aria-label="Resize from bottom-left corner"
 		></button>
 
 		<!-- Bottom-right -->
 		<button
-			class="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500 shadow-sm"
+			class="resize-handle absolute w-2 h-2 bg-white border border-blue-400 rounded-sm cursor-nwse-resize hover:bg-blue-50 hover:border-blue-500"
+			style="bottom: -4px; right: -4px;"
 			onmousedown={handleResizeStart}
 			aria-label="Resize from bottom-right corner"
 		></button>

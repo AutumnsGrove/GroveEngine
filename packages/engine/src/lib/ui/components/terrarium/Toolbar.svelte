@@ -111,8 +111,15 @@
 
 	$effect(() => {
 		if (showBackgroundPicker) {
-			document.addEventListener('click', handleClickOutside);
-			return () => document.removeEventListener('click', handleClickOutside);
+			// Use setTimeout to add listener after the current click event finishes
+			// Otherwise the same click that opened the picker will immediately close it
+			const timeoutId = setTimeout(() => {
+				document.addEventListener('click', handleClickOutside);
+			}, 0);
+			return () => {
+				clearTimeout(timeoutId);
+				document.removeEventListener('click', handleClickOutside);
+			};
 		}
 	});
 
