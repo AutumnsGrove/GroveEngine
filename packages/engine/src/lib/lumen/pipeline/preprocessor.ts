@@ -172,6 +172,7 @@ const VALID_TASKS: LumenTask[] = [
   "chat",
   "image",
   "code",
+  "transcription",
 ];
 
 const MAX_INPUT_LENGTH = 100000; // 100KB max input

@@ -140,6 +140,26 @@ export interface LumenProvider {
   }>;
 
   // ===========================================================================
+  // TRANSCRIPTION (Optional - only Cloudflare AI supports this)
+  // ===========================================================================
+
+  /**
+   * Transcribe audio to text using Whisper
+   *
+   * @param model - Whisper model identifier (e.g., "@cf/openai/whisper-large-v3-turbo")
+   * @param audio - Audio data as Uint8Array
+   * @returns Transcription result with text, word count, and duration
+   */
+  transcribe?(
+    model: string,
+    audio: Uint8Array,
+  ): Promise<{
+    text: string;
+    wordCount: number;
+    duration: number;
+  }>;
+
+  // ===========================================================================
   // HEALTH CHECK
   // ===========================================================================
 
