@@ -266,7 +266,7 @@
   --color-background: var(--cream);
   --color-foreground: var(--bark);
   --color-muted: var(--cream-300);
-  --color-muted-foreground: var(--bark-300);
+  --color-muted-foreground: var(--bark-700);
   --color-border: var(--cream-300);
   --color-border-strong: var(--cream-400);
   --color-input: var(--cream-300);
