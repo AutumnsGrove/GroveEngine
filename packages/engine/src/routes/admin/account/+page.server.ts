@@ -1,6 +1,7 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
+import type { Passkey } from "$lib/groveauth";
 
 /**
  * Account & Subscription Management Page
@@ -43,7 +44,50 @@ interface TenantRecord {
   created_at: number;
 }
 
-export const load: PageServerLoad = async ({ locals, platform, parent }) => {
+/** Default GroveAuth API URL */
+const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+
+/**
+ * Fetch user passkeys from GroveAuth.
+ * Returns empty array on error to allow graceful degradation.
+ */
+async function fetchUserPasskeys(
+  accessToken: string | undefined,
+  authBaseUrl: string,
+): Promise<{ passkeys: Passkey[]; error: boolean }> {
+  if (!accessToken) {
+    return { passkeys: [], error: false };
+  }
+
+  try {
+    const response = await fetch(
+      `${authBaseUrl}/api/auth/passkey/list-user-passkeys`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.error("[Account] Failed to fetch passkeys:", response.status);
+      return { passkeys: [], error: true };
+    }
+
+    const passkeys = (await response.json()) as Passkey[];
+    return { passkeys, error: false };
+  } catch (e) {
+    console.error("[Account] Passkey fetch error:", e);
+    return { passkeys: [], error: true };
+  }
+}
+
+export const load: PageServerLoad = async ({
+  locals,
+  platform,
+  parent,
+  cookies,
+}) => {
   const parentData = await parent();
 
   if (!locals.tenantId) {
@@ -56,15 +100,21 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
     throw error(500, "Database not configured");
   }
 
-  // PERFORMANCE: Run billing and tenant queries in parallel
+  // Get access token for passkey API calls
+  const accessToken = cookies.get("access_token");
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+
+  // PERFORMANCE: Run billing, tenant, and passkey queries in parallel
   // These are independent queries that were previously sequential (~400ms savings)
   // Each still has individual error handling to prevent cascading failures
   let billing: BillingRecord | null = null;
   let billingError = false;
   let tenant: TenantRecord | null = null;
   let usageError = false;
+  let passkeys: Passkey[] = [];
+  let passkeyError = false;
 
-  const [billingResult, tenantResult] = await Promise.all([
+  const [billingResult, tenantResult, passkeyResult] = await Promise.all([
     // Billing query
     platform.env.DB.prepare(
       `SELECT id, tenant_id, plan, status, provider_customer_id, provider_subscription_id,
@@ -94,10 +144,15 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
         usageError = true;
         return null;
       }),
+
+    // Passkey query (via GroveAuth API)
+    fetchUserPasskeys(accessToken, authBaseUrl),
   ]);
 
   billing = billingResult;
   tenant = tenantResult;
+  passkeys = passkeyResult.passkeys;
+  passkeyError = passkeyResult.error;
 
   // Load export counts for size validation in frontend
   // This prevents users from wasting rate limit quota on oversized exports
@@ -210,5 +265,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
       support: tierConfig.support.displayString,
     },
     availableTiers,
+    passkeys,
+    passkeyError,
   };
 };
