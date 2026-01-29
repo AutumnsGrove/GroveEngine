@@ -58,11 +58,11 @@
     <div class="hero-decoration" aria-hidden="true"></div>
   </header>
 
-  <main class="vineyard-content" id="main-content" role="main" aria-label="Feature showcase">
+  <main class="vineyard-content" id="main-content" aria-label="Feature showcase">
     {@render children()}
   </main>
 
-  <footer class="vineyard-footer" role="contentinfo">
+  <footer class="vineyard-footer">
     <div class="footer-content">
       <p class="footer-label">Works well with</p>
       <nav class="related-tools" aria-label="Related Grove tools">

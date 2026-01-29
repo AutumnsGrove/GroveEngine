@@ -75,7 +75,7 @@
 
 	// Focus management: track the element that had focus before dialog opened
 	let previouslyFocusedElement: HTMLElement | null = null;
-	let dialogRef: HTMLDivElement | null = null;
+	let dialogRef = $state<HTMLDivElement | null>(null);
 
 	// Selector for focusable elements within the dialog (used for focus trap and initial focus)
 	const FOCUSABLE_SELECTOR =

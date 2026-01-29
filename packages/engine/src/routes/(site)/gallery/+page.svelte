@@ -21,7 +21,7 @@
   // For lazy loading
   let visibleImages = $state<typeof data.images>([]);
   let loadedCount = $state(0);
-  const BATCH_SIZE = data.config.itemsPerPage || 30;
+  const BATCH_SIZE = $derived(data.config.itemsPerPage || 30);
   const AUTO_LOAD_LIMIT = 60;
 
   // Derived filtered images
@@ -436,7 +436,7 @@
       </GlassButton>
     {/if}
 
-    <div class="lightbox-content" onclick={(e: MouseEvent) => e.stopPropagation()}>
+    <div class="lightbox-content" role="presentation" onclick={(e: MouseEvent) => e.stopPropagation()}>
       {#key lightboxImage.src}
         <img
           src={lightboxImage.src}

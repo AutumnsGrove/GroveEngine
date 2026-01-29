@@ -44,8 +44,9 @@
 		class: className = "",
 	}: PricingGraftProps = $props();
 
-	// Internal state for billing period
-	let billingPeriod = $state<BillingPeriod>(defaultPeriod);
+	// Internal state for billing period (captures initial prop value intentionally)
+	const initialPeriod = defaultPeriod;
+	let billingPeriod = $state<BillingPeriod>(initialPeriod);
 
 	function handlePeriodChange(period: BillingPeriod) {
 		billingPeriod = period;

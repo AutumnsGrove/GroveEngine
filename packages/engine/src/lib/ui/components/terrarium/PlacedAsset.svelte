@@ -329,7 +329,7 @@
 		<div
 			class="absolute inset-0 -m-1 pointer-events-none rounded border-2 border-blue-400/70"
 			style="z-index: -1;"
-		/>
+		></div>
 
 		<!-- Rotation handle (above the asset) -->
 		<div
@@ -382,7 +382,8 @@
 
 	<!-- Render the nature component -->
 	{#if component}
-		<svelte:component this={component} {...componentProps} />
+		{@const Component = component}
+		<Component {...componentProps} />
 	{:else}
 		<!-- Loading placeholder -->
 		<div class="w-16 h-16 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">

@@ -84,8 +84,9 @@
 		...restProps
 	}: Props = $props();
 
-	// Collapsible state
-	let isOpen = $state(defaultOpen);
+	// Collapsible state (captures initial prop value intentionally)
+	const initialOpen = defaultOpen;
+	let isOpen = $state(initialOpen);
 
 	// Color palette - warm grove tones
 	const colorClasses: Record<ColorKey, string> = {

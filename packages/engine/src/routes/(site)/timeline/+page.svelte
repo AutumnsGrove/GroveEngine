@@ -27,8 +27,11 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let summaries = $state(data.summaries);
-	let pagination = $state(data.pagination);
+	// Local state for incremental loading (intentionally captures initial server data)
+	const initialSummaries = data.summaries;
+	const initialPagination = data.pagination;
+	let summaries = $state(initialSummaries);
+	let pagination = $state(initialPagination);
 
 	// Load more summaries
 	async function loadMore(): Promise<void> {

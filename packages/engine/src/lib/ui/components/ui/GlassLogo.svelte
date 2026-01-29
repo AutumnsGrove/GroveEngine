@@ -329,6 +329,7 @@
 	const trunkLightPath = "M50 54 L58 58 L54 100 L50 100 Z";
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <svg
 	class={finalClass}
 	style={sizeStyles}

@@ -254,7 +254,7 @@
 						linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
 					background-size: {scene.canvas.gridSize}px {scene.canvas.gridSize}px;
 				"
-			/>
+			></div>
 		{/if}
 
 		<!-- Placed assets -->

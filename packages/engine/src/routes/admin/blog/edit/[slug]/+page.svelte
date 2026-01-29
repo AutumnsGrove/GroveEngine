@@ -528,7 +528,7 @@
     margin-bottom: 1.25rem;
     transition: border-color 0.3s ease;
   }
-  .metadata-panel.collapsed .panel-header {
+  :global(.metadata-panel.collapsed .panel-header) {
     flex-direction: column;
     gap: 0.5rem;
     border-bottom: none;
@@ -542,7 +542,7 @@
     color: var(--color-text);
     transition: color 0.3s ease;
   }
-  .metadata-panel.collapsed .panel-title {
+  :global(.metadata-panel.collapsed .panel-title) {
     font-size: 0.7rem;
     writing-mode: vertical-rl;
     text-orientation: mixed;
@@ -741,18 +741,18 @@
     .editor-layout {
       flex-direction: column;
     }
-    .metadata-panel {
+    :global(.metadata-panel) {
       width: 100% !important;
       max-height: none;
     }
-    .metadata-panel.collapsed {
+    :global(.metadata-panel.collapsed) {
       width: 100% !important;
       padding: 1rem;
     }
-    .metadata-panel.collapsed .panel-header {
+    :global(.metadata-panel.collapsed .panel-header) {
       flex-direction: row;
     }
-    .metadata-panel.collapsed .panel-title {
+    :global(.metadata-panel.collapsed .panel-title) {
       writing-mode: horizontal-tb;
       transform: none;
       font-size: 1rem;

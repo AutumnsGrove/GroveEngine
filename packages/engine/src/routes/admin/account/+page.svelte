@@ -385,21 +385,21 @@
     line-height: 1.5;
   }
 
-  /* Danger Zone */
-  .danger-zone {
+  /* Danger Zone - uses :global() because class is passed to child component */
+  :global(.danger-zone) {
     border-color: rgba(239, 68, 68, 0.3) !important;
     background: rgba(239, 68, 68, 0.05) !important;
   }
 
-  :global(.dark) .danger-zone {
+  :global(.dark .danger-zone) {
     background: rgba(239, 68, 68, 0.1) !important;
   }
 
-  .danger-zone h2 {
+  :global(.danger-zone h2) {
     color: #dc2626;
   }
 
-  .danger-zone a {
+  :global(.danger-zone a) {
     color: var(--color-primary);
   }
 

@@ -463,7 +463,9 @@ export class LumenClient {
     const taskConfig = getTaskConfig("transcription");
 
     // Execute transcription with fallback
-    let result: { text: string; wordCount: number; duration: number };
+    let result:
+      | { text: string; wordCount: number; duration: number }
+      | undefined = undefined;
     let usedModel = taskConfig.primaryModel;
 
     try {

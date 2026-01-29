@@ -627,10 +627,6 @@
     margin-bottom: 0.5rem;
   }
 
-  .required {
-    color: #ef4444;
-  }
-
   .field-input,
   .field-select,
   .field-textarea {

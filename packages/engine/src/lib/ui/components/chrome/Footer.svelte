@@ -47,9 +47,9 @@
 		wide: 'max-w-5xl'
 	};
 
-	const resources = resourceLinks || DEFAULT_RESOURCE_LINKS;
-	const connect = connectLinks || DEFAULT_CONNECT_LINKS;
-	const legal = legalLinks || DEFAULT_LEGAL_LINKS;
+	const resources = $derived(resourceLinks || DEFAULT_RESOURCE_LINKS);
+	const connect = $derived(connectLinks || DEFAULT_CONNECT_LINKS);
+	const legal = $derived(legalLinks || DEFAULT_LEGAL_LINKS);
 </script>
 
 <footer class="py-12 border-t border-default">
@@ -92,7 +92,8 @@
 						<li>
 							<a href={link.href} class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
 								{#if link.icon}
-									<svelte:component this={link.icon} class="w-4 h-4" />
+									{@const Icon = link.icon}
+								<Icon class="w-4 h-4" />
 								{/if}
 								{link.label}
 							</a>
@@ -119,7 +120,8 @@
 								class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
 							>
 								{#if link.icon}
-									<svelte:component this={link.icon} class="w-4 h-4" />
+									{@const Icon = link.icon}
+								<Icon class="w-4 h-4" />
 								{/if}
 								{link.label}
 								{#if link.external}

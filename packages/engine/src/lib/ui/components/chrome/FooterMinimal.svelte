@@ -35,7 +35,7 @@
 		{ href: 'mailto:support@grove.place', label: 'Contact Support', icon: Mail }
 	];
 
-	const items = links || DEFAULT_LINKS;
+	const items = $derived(links || DEFAULT_LINKS);
 </script>
 
 <footer
@@ -57,7 +57,8 @@
 					class="inline-flex items-center gap-1.5 text-foreground-muted hover:text-foreground transition-colors"
 				>
 					{#if link.icon}
-						<svelte:component this={link.icon} class="w-4 h-4" />
+						{@const Icon = link.icon}
+						<Icon class="w-4 h-4" />
 					{/if}
 					{link.label}
 					{#if link.external}

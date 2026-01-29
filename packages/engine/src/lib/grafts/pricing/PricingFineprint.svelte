@@ -96,15 +96,17 @@
 		},
 	};
 
-	// Which sections to display
-	let displaySections = $derived(
+	// Which sections to display (reactive to prop changes)
+	const displaySections = $derived(
 		sections ?? (Object.keys(SECTIONS) as FineprintSection[]),
 	);
 
 	// Track expanded state for each section
+	// Initialize once from initial prop values (captured at mount time)
+	const initialSections = sections ?? (Object.keys(SECTIONS) as FineprintSection[]);
 	let expandedSections = $state<Set<FineprintSection>>(
 		defaultExpanded
-			? new Set(displaySections)
+			? new Set(initialSections)
 			: new Set<FineprintSection>(),
 	);
 

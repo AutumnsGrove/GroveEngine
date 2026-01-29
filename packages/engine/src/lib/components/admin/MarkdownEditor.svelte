@@ -1197,48 +1197,6 @@
     display: flex;
     gap: 0.25rem;
   }
-  .toolbar-btn {
-    padding: 0.2rem 0.35rem;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    color: var(--editor-accent-dim, #7a9a7a);
-    font-family: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: color 0.1s ease;
-    white-space: nowrap;
-  }
-  .toolbar-btn:hover:not(:disabled) {
-    color: var(--editor-accent-bright, #a8dca8);
-    background: transparent;
-  }
-  .toolbar-btn:hover:not(:disabled) .key {
-    color: var(--editor-accent-glow, #c8f0c8);
-  }
-  .toolbar-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-  .toolbar-btn.toggle-btn {
-    color: var(--editor-accent, #8bc48b);
-  }
-  .toolbar-btn.toggle-btn:hover {
-    color: var(--editor-accent-glow, #c8f0c8);
-  }
-  .toolbar-btn.toggle-btn.active {
-    color: var(--editor-accent-bright, #a8dca8);
-    text-shadow: 0 0 8px color-mix(in srgb, var(--editor-accent, #8bc48b) 50%, transparent);
-  }
-  .toolbar-btn.full-preview-btn {
-    color: #7ab3ff;
-  }
-  .toolbar-btn.full-preview-btn:hover {
-    color: #9ac5ff;
-  }
-  .toolbar-btn.full-preview-btn .key {
-    color: #9ac5ff;
-  }
   /* Icon-based toolbar buttons */
   .toolbar-icon-btn {
     display: flex;
@@ -1628,10 +1586,6 @@
     }
     .toolbar {
       padding: 0.5rem;
-    }
-    .toolbar-btn {
-      padding: 0.3rem 0.5rem;
-      font-size: 0.75rem;
     }
     .toolbar-hint {
       display: none;

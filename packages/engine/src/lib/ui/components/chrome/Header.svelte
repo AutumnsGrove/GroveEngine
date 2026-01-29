@@ -45,7 +45,7 @@
 		seasonStore.cycle();
 	}
 
-	const items = navItems || DEFAULT_NAV_ITEMS;
+	const items = $derived(navItems || DEFAULT_NAV_ITEMS);
 </script>
 
 <header class="sticky top-0 z-grove-sticky py-6 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">

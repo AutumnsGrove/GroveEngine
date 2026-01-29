@@ -121,8 +121,9 @@
 	);
 
 	// Track which categories are expanded (all start expanded)
+	// Use all category keys directly from categoriesMap since it's static
 	let expandedCategories = $state<Set<AssetCategory>>(
-		new Set(categories.map((c) => c.key))
+		new Set(Object.keys(categoriesMap) as AssetCategory[])
 	);
 
 	function toggleCategory(category: AssetCategory) {

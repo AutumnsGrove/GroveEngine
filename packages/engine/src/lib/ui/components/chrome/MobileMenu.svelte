@@ -29,9 +29,9 @@
 
 	let currentPath = $derived(page.url.pathname);
 
-	// Use provided links or defaults
-	const resources = resourceLinks ?? DEFAULT_MOBILE_RESOURCE_LINKS;
-	const connect = connectLinks ?? DEFAULT_MOBILE_CONNECT_LINKS;
+	// Use provided links or defaults (reactive to prop changes)
+	const resources = $derived(resourceLinks ?? DEFAULT_MOBILE_RESOURCE_LINKS);
+	const connect = $derived(connectLinks ?? DEFAULT_MOBILE_CONNECT_LINKS);
 
 	// References for focus management
 	let closeButtonRef: HTMLButtonElement | undefined = $state();
@@ -97,7 +97,7 @@
 		};
 	});
 
-	const items = navItems || DEFAULT_MOBILE_NAV_ITEMS;
+	const items = $derived(navItems || DEFAULT_MOBILE_NAV_ITEMS);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />

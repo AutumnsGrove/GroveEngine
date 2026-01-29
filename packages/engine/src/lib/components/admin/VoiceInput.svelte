@@ -384,16 +384,16 @@
     }
   }
 
-  .icon {
+  :global(.icon) {
     width: 20px;
     height: 20px;
   }
 
-  .icon.spinning {
+  :global(.icon.spinning) {
     animation: spin 1s linear infinite;
   }
 
-  .icon.pulse {
+  :global(.icon.pulse) {
     animation: icon-pulse 0.8s ease-in-out infinite;
   }
 
@@ -492,8 +492,8 @@
       animation: none;
     }
 
-    .icon.spinning,
-    .icon.pulse {
+    :global(.icon.spinning),
+    :global(.icon.pulse) {
       animation: none;
     }
 

@@ -71,8 +71,8 @@
   let isDrafting = $state(false);
 
   // Refs
-  let messagesContainer: HTMLDivElement;
-  let inputElement: HTMLTextAreaElement;
+  let messagesContainer = $state<HTMLDivElement | undefined>(undefined);
+  let inputElement = $state<HTMLTextAreaElement | undefined>(undefined);
 
   // ============================================================================
   // Constants

@@ -151,7 +151,8 @@
 		{:else if loadError}
 			<span class="text-xs text-red-500">Error</span>
 		{:else if ComponentPreview}
-			<svelte:component this={ComponentPreview} class="w-12 h-12" color="#2D5F3F" />
+			{@const Preview = ComponentPreview}
+			<Preview class="w-12 h-12" color="#2D5F3F" />
 		{/if}
 	</div>
 
