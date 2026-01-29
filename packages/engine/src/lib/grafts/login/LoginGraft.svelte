@@ -41,6 +41,7 @@
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import ProviderButton from "./ProviderButton.svelte";
+	import PasskeyButton from "./PasskeyButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 
@@ -81,15 +82,20 @@
 {#if variant === "compact"}
 	<!-- Compact: Single button only -->
 	{#if primaryProvider}
-		<GlassButton
-			variant="default"
-			size="md"
-			href={getLoginUrl(primaryProvider)}
-			class={className}
-		>
-			<ProviderIcon provider={primaryProvider} size={18} />
-			<span>Sign in with {getProviderName(primaryProvider)}</span>
-		</GlassButton>
+		{#if primaryProvider === "passkey"}
+			<!-- Passkey uses its own button with WebAuthn ceremony -->
+			<PasskeyButton {returnTo} size="md" class={className} />
+		{:else}
+			<GlassButton
+				variant="default"
+				size="md"
+				href={getLoginUrl(primaryProvider)}
+				class={className}
+			>
+				<ProviderIcon provider={primaryProvider} size={18} />
+				<span>Sign in with {getProviderName(primaryProvider)}</span>
+			</GlassButton>
+		{/if}
 	{/if}
 {:else if variant === "fullpage"}
 	<!-- Fullpage: Centered layout with logo and branding -->
@@ -122,10 +128,15 @@
 				{#if availableProviders.length > 0}
 					<div class="space-y-3">
 						{#each availableProviders as provider}
-							<ProviderButton
-								{provider}
-								href={getLoginUrl(provider)}
-							/>
+							{#if provider === "passkey"}
+								<!-- Passkey uses its own button with WebAuthn ceremony -->
+								<PasskeyButton {returnTo} />
+							{:else}
+								<ProviderButton
+									{provider}
+									href={getLoginUrl(provider)}
+								/>
+							{/if}
 						{/each}
 					</div>
 				{:else}
@@ -160,10 +171,15 @@
 			{#if availableProviders.length > 0}
 				<div class="space-y-3">
 					{#each availableProviders as provider}
-						<ProviderButton
-							{provider}
-							href={getLoginUrl(provider)}
-						/>
+						{#if provider === "passkey"}
+							<!-- Passkey uses its own button with WebAuthn ceremony -->
+							<PasskeyButton {returnTo} />
+						{:else}
+							<ProviderButton
+								{provider}
+								href={getLoginUrl(provider)}
+							/>
+						{/if}
 					{/each}
 				</div>
 			{:else}

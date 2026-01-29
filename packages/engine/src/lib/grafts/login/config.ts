@@ -33,6 +33,12 @@ export const PROVIDERS: Record<AuthProvider, ProviderConfig> = {
     available: false, // Not yet implemented
     description: "Sign in with email magic link",
   },
+  passkey: {
+    id: "passkey",
+    name: "Passkey",
+    available: true,
+    description: "Sign in with Face ID, Touch ID, or Windows Hello",
+  },
 };
 
 /**

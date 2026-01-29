@@ -14,9 +14,9 @@ import type { BaseGraftProps } from "../types.js";
 
 /**
  * Supported authentication providers.
- * Currently only Google is fully implemented.
+ * Currently Google and Passkey are fully implemented.
  */
-export type AuthProvider = "google" | "github" | "email";
+export type AuthProvider = "google" | "github" | "email" | "passkey";
 
 /**
  * Configuration for a single auth provider.
@@ -140,6 +140,41 @@ export interface ProviderIconProps {
 
   /** Additional CSS classes */
   class?: string;
+}
+
+// =============================================================================
+// PASSKEY TYPES
+// =============================================================================
+
+/**
+ * Result of a successful passkey authentication.
+ */
+export interface PasskeyAuthResult {
+  /** Whether authentication was successful */
+  success: boolean;
+
+  /** URL to redirect to after successful auth */
+  redirectTo?: string;
+
+  /** Error message if authentication failed */
+  error?: string;
+}
+
+/**
+ * Props for PasskeyButton component.
+ */
+export interface PasskeyButtonProps extends BaseGraftProps {
+  /** URL to redirect after successful authentication */
+  returnTo?: string;
+
+  /** Callback fired on successful authentication */
+  onSuccess?: (result: PasskeyAuthResult) => void;
+
+  /** Callback fired on authentication error */
+  onError?: (error: string) => void;
+
+  /** Button size variant */
+  size?: "sm" | "md" | "lg";
 }
 
 // =============================================================================
