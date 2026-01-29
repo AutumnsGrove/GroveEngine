@@ -221,8 +221,10 @@ describe("Login Graft Configuration", () => {
         expect(AUTH_COOKIE_OPTIONS.temporary.httpOnly).toBe(true);
       });
 
-      it("sets secure to true (HTTPS only)", () => {
-        expect(AUTH_COOKIE_OPTIONS.temporary.secure).toBe(true);
+      it("does not set secure in base options (added dynamically by handlers)", () => {
+        // secure is determined at runtime based on production vs localhost
+        // This allows localhost development while enforcing HTTPS in production
+        expect(AUTH_COOKIE_OPTIONS.temporary).not.toHaveProperty("secure");
       });
 
       it("sets sameSite to lax (allows OAuth redirect)", () => {
