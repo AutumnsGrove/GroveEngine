@@ -1,0 +1,246 @@
+/**
+ * Login Graft Type Definitions
+ *
+ * Types for the LoginGraft component system.
+ * Provides unified login UI across all Grove properties with PKCE OAuth support.
+ */
+
+import type { Snippet } from "svelte";
+import type { BaseGraftProps } from "../types.js";
+
+// =============================================================================
+// AUTH PROVIDER TYPES
+// =============================================================================
+
+/**
+ * Supported authentication providers.
+ * Currently only Google is fully implemented.
+ */
+export type AuthProvider = "google" | "github" | "email";
+
+/**
+ * Configuration for a single auth provider.
+ */
+export interface ProviderConfig {
+  /** Provider identifier */
+  id: AuthProvider;
+
+  /** Human-readable provider name */
+  name: string;
+
+  /** Whether this provider is currently available */
+  available: boolean;
+
+  /** Optional description for the provider */
+  description?: string;
+}
+
+// =============================================================================
+// COMPONENT PROPS
+// =============================================================================
+
+/**
+ * Display variant for LoginGraft.
+ */
+export type LoginVariant = "default" | "compact" | "fullpage";
+
+/**
+ * Props for the main LoginGraft orchestrator component.
+ */
+export interface LoginGraftProps extends BaseGraftProps {
+  /**
+   * Which providers to show (order matters for display).
+   * Defaults to ['google'] since that's the only fully supported provider.
+   */
+  providers?: AuthProvider[];
+
+  /**
+   * URL to redirect after successful authentication.
+   * Defaults to '/admin' or can be configured per-package.
+   */
+  returnTo?: string;
+
+  /**
+   * Client ID for OAuth (for multi-tenant scenarios).
+   * Defaults to env-configured client ID.
+   */
+  clientId?: string;
+
+  /**
+   * Display variant.
+   * - 'default': Card with providers and optional header/footer
+   * - 'compact': Minimal button only
+   * - 'fullpage': Centered card with logo and branding
+   */
+  variant?: LoginVariant;
+
+  /**
+   * Base URL for the login endpoint.
+   * Defaults to '/auth/login'.
+   */
+  loginUrl?: string;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Customization snippets
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /** Custom header content above the provider buttons */
+  header?: Snippet;
+
+  /** Custom footer content below the provider buttons */
+  footer?: Snippet;
+
+  /** Custom content for the logo area (fullpage variant only) */
+  logo?: Snippet;
+}
+
+/**
+ * Props for LoginCard component.
+ */
+export interface LoginCardProps extends BaseGraftProps {
+  /** Which providers to show */
+  providers?: AuthProvider[];
+
+  /** Base URL for login endpoint */
+  loginUrl?: string;
+
+  /** Return URL after auth */
+  returnTo?: string;
+
+  /** Custom header snippet */
+  header?: Snippet;
+
+  /** Custom footer snippet */
+  footer?: Snippet;
+}
+
+/**
+ * Props for ProviderButton component.
+ */
+export interface ProviderButtonProps extends BaseGraftProps {
+  /** Which provider this button is for */
+  provider: AuthProvider;
+
+  /** Full URL to redirect to for OAuth */
+  href: string;
+
+  /** Button size variant */
+  size?: "sm" | "md" | "lg";
+}
+
+/**
+ * Props for ProviderIcon component.
+ */
+export interface ProviderIconProps {
+  /** Which provider icon to show */
+  provider: AuthProvider;
+
+  /** Icon size in pixels */
+  size?: number;
+
+  /** Additional CSS classes */
+  class?: string;
+}
+
+// =============================================================================
+// SERVER HANDLER TYPES
+// =============================================================================
+
+/**
+ * Configuration for createLoginHandler factory.
+ */
+export interface LoginHandlerConfig {
+  /**
+   * OAuth client ID registered with GroveAuth.
+   */
+  clientId: string;
+
+  /**
+   * Base URL for GroveAuth login page.
+   * @example 'https://auth.grove.place'
+   */
+  authUrl: string;
+
+  /**
+   * Default OAuth provider if none specified in request.
+   * @default 'google'
+   */
+  defaultProvider?: AuthProvider;
+
+  /**
+   * Default URL to redirect to after successful auth.
+   * @default '/admin'
+   */
+  defaultReturnTo?: string;
+}
+
+/**
+ * Configuration for createCallbackHandler factory.
+ */
+export interface CallbackHandlerConfig {
+  /**
+   * OAuth client ID registered with GroveAuth.
+   */
+  clientId: string;
+
+  /**
+   * Environment variable name for the client secret.
+   * The handler will read this from platform.env.
+   * @default 'GROVEAUTH_CLIENT_SECRET'
+   */
+  clientSecretEnvVar?: string;
+
+  /**
+   * Base URL for GroveAuth token API.
+   * @example 'https://auth-api.grove.place'
+   */
+  authApiUrl: string;
+
+  /**
+   * Default URL to redirect to after successful auth.
+   * @default '/admin'
+   */
+  defaultReturnTo?: string;
+
+  /**
+   * Cookie domain for cross-subdomain auth.
+   * @example '.grove.place'
+   */
+  cookieDomain?: string;
+
+  /**
+   * KV namespace key for rate limiting.
+   * If not provided, rate limiting is disabled.
+   * @default 'CACHE_KV'
+   */
+  rateLimitKvKey?: string;
+}
+
+// =============================================================================
+// PKCE TYPES
+// =============================================================================
+
+/**
+ * PKCE (Proof Key for Code Exchange) values for OAuth.
+ */
+export interface PKCEValues {
+  /** Random string used to generate the challenge */
+  codeVerifier: string;
+
+  /** SHA-256 hash of the verifier, base64url encoded */
+  codeChallenge: string;
+}
+
+/**
+ * Auth state stored in cookies during OAuth flow.
+ */
+export interface AuthCookieState {
+  /** CSRF protection state value */
+  state: string;
+
+  /** PKCE code verifier */
+  codeVerifier: string;
+
+  /** URL to redirect to after auth */
+  returnTo: string;
+}
