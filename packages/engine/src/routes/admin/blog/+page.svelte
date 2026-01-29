@@ -62,8 +62,8 @@
 
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">Blog Posts</h1>
-      <p class="m-0 text-[#555] dark:text-[#b0b0b0] transition-colors">{data.posts.length} posts</p>
+      <h1 class="m-0 mb-1 text-3xl text-foreground">Blog Posts</h1>
+      <p class="m-0 text-foreground-muted">{data.posts.length} posts</p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/admin/blog/new'}>
       + New Post
@@ -74,10 +74,10 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -88,10 +88,10 @@
                 {post.title}
               </a>
               {#if post.description}
-                <p class="mt-1 mb-0 text-xs text-[#555] dark:text-[#b0b0b0] transition-colors">{post.description}</p>
+                <p class="mt-1 mb-0 text-xs text-foreground-muted">{post.description}</p>
               {/if}
             </td>
-            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-[#555] dark:text-[#b0b0b0] text-sm transition-[border-color,color] max-md:hidden">
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden">
               {#if post.status === 'published' && post.date}
                 {formatDate(post.date)}
               {:else if post.status === 'draft'}
@@ -108,7 +108,7 @@
                   {/each}
                 </div>
               {:else}
-                <span class="text-[#666] dark:text-[#9ca3af] transition-colors">-</span>
+                <span class="text-foreground-muted">-</span>
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
@@ -127,7 +127,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan="4" class="text-center text-[#555] dark:text-[#b0b0b0] py-12 px-4 transition-colors">
+            <td colspan="4" class="text-center text-foreground-muted py-12 px-4">
               No blog posts yet. Create your first post!
             </td>
           </tr>

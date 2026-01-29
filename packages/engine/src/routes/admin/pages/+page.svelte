@@ -69,8 +69,8 @@
 <div class="max-w-screen-xl">
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">Site Pages</h1>
-      <p class="m-0 text-[#555] dark:text-[#b0b0b0] transition-colors">
+      <h1 class="m-0 mb-1 text-3xl text-foreground">Site Pages</h1>
+      <p class="m-0 text-foreground-muted">
         {data.pages.length} pages
         <span class="mx-2">·</span>
         <span class:text-amber-600={atLimit} class:dark:text-amber-400={atLimit}>
@@ -100,11 +100,11 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
-          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
+          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -117,7 +117,7 @@
                 {page.title}
               </a>
               {#if page.description}
-                <p class="mt-1 mb-0 text-xs text-[#555] dark:text-[#b0b0b0] transition-colors">{page.description}</p>
+                <p class="mt-1 mb-0 text-xs text-foreground-muted">{page.description}</p>
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:hidden">
@@ -137,7 +137,7 @@
                 aria-label={`Toggle navigation visibility for ${page.title}`}
               />
             </td>
-            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-[#555] dark:text-[#b0b0b0] text-sm transition-[border-color,color] max-md:hidden">{formatDate(page.updated_at)}</td>
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden">{formatDate(page.updated_at)}</td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/{page.slug === 'home' ? '' : page.slug}" target="_blank" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
               <a href="/admin/pages/edit/{page.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
@@ -145,7 +145,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan="5" class="text-center text-[#555] dark:text-[#b0b0b0] py-12 px-4 transition-colors">
+            <td colspan="5" class="text-center text-foreground-muted py-12 px-4">
               No pages yet. Click "Create Page" to get started.
             </td>
           </tr>
@@ -156,11 +156,11 @@
 
   <GlassCard variant="muted">
     <h3>About Pages</h3>
-    <p class="text-[#555] dark:text-[#b0b0b0]">
+    <p>
       Pages are standalone content like About, Contact, or custom landing pages.
       Unlike blog posts, pages can appear in your site navigation and are designed for timeless content.
     </p>
-    <p class="text-[#555] dark:text-[#b0b0b0] text-sm mt-2">
+    <p class="text-sm mt-2">
       <strong>Navigation limits:</strong> Your plan allows up to {navLimit} custom navigation pages.
       Home, Blog, and About are always included in navigation automatically.
     </p>
