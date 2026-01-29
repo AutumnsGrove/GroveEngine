@@ -208,6 +208,15 @@
       "svelte": "./dist/grafts/pricing/index.js",
       "default": "./dist/grafts/pricing/index.js"
     },
+    "./grafts/login": {
+      "types": "./dist/grafts/login/index.d.ts",
+      "svelte": "./dist/grafts/login/index.js",
+      "default": "./dist/grafts/login/index.js"
+    },
+    "./grafts/login/server": {
+      "types": "./dist/grafts/login/server/index.d.ts",
+      "default": "./dist/grafts/login/server/index.js"
+    },
     "./lumen": {
       "types": "./dist/lumen/index.d.ts",
       "default": "./dist/lumen/index.js"
