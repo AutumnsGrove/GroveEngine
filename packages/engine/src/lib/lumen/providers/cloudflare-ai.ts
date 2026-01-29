@@ -78,6 +78,21 @@ type AiTextEmbeddingsOutput = {
   data: number[][];
 };
 
+type AiTranscriptionInput = {
+  audio: number[];
+};
+
+type AiTranscriptionOutput = {
+  text: string;
+  word_count?: number;
+  words?: Array<{
+    word: string;
+    start: number;
+    end: number;
+  }>;
+  vtt?: string;
+};
+
 // LlamaGuard response categories
 const LLAMAGUARD_CATEGORIES: Record<string, LumenModerationCategory> = {
   S1: "violence",
@@ -272,6 +287,62 @@ export class CloudflareAIProvider implements LumenProvider {
       throw new ProviderError(
         this.name,
         err instanceof Error ? err.message : "Moderation failed",
+        undefined,
+        err,
+      );
+    }
+  }
+
+  // ===========================================================================
+  // TRANSCRIPTION (WHISPER)
+  // ===========================================================================
+
+  /**
+   * Transcribe audio to text using Whisper.
+   *
+   * @param model - The Whisper model to use (e.g., CF_WHISPER_TURBO)
+   * @param audio - Audio data as Uint8Array
+   * @returns Transcription result with text and word count
+   */
+  async transcribe(
+    model: string,
+    audio: Uint8Array,
+  ): Promise<{ text: string; wordCount: number; duration: number }> {
+    const startTime = Date.now();
+
+    try {
+      // Convert Uint8Array to number[] for the CF AI binding
+      const audioArray = [...audio];
+
+      const result = (await this.ai.run(
+        model as Parameters<Ai["run"]>[0],
+        {
+          audio: audioArray,
+        } as AiTranscriptionInput,
+      )) as AiTranscriptionOutput;
+
+      const latency = Date.now() - startTime;
+
+      // Estimate duration from word count (approx 150 words/minute for speech)
+      const wordCount = result.word_count ?? result.text.split(/\s+/).length;
+      const estimatedDuration = (wordCount / 150) * 60;
+
+      // If we have word timestamps, calculate actual duration
+      let duration = estimatedDuration;
+      if (result.words && result.words.length > 0) {
+        const lastWord = result.words[result.words.length - 1];
+        duration = lastWord.end;
+      }
+
+      return {
+        text: result.text,
+        wordCount,
+        duration,
+      };
+    } catch (err) {
+      throw new ProviderError(
+        this.name,
+        err instanceof Error ? err.message : "Transcription failed",
         undefined,
         err,
       );

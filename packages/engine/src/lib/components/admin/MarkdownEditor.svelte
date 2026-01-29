@@ -11,8 +11,9 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import FloatingToolbar from "./FloatingToolbar.svelte";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic } from "lucide-svelte";
   import FiresideChat from "./FiresideChat.svelte";
+  import VoiceInput from "./VoiceInput.svelte";
   import { browser } from "$app/environment";
 
   // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
@@ -95,6 +96,11 @@
 
   // Fireside mode (conversational writing)
   let isFiresideMode = $state(false);
+
+  // Voice mode (Scribe transcription)
+  /** @type {"raw" | "draft"} */
+  let voiceMode = $state(/** @type {"raw" | "draft"} */ ("raw"));
+  let voiceError = $state(/** @type {string | null} */ (null));
 
   // Initialize composables
   const editorTheme = useEditorTheme();
@@ -315,6 +321,66 @@
   // Handle closing Fireside without a draft
   function handleFiresideClose() {
     isFiresideMode = false;
+  }
+
+  /**
+   * Handle transcription result from VoiceInput.
+   * Inserts transcribed text at cursor position.
+   * @param {{ text: string, gutterContent?: Array<{type: string, content: string, anchor?: string}>, rawTranscript?: string }} result
+   */
+  function handleTranscription(result) {
+    voiceError = null;
+
+    if (!textareaRef) return;
+
+    const { text, gutterContent } = result;
+
+    // Get cursor position
+    const start = textareaRef.selectionStart;
+    const end = textareaRef.selectionEnd;
+
+    // Insert text at cursor
+    const before = content.substring(0, start);
+    const after = content.substring(end);
+
+    // Add space before/after if needed
+    const needsSpaceBefore = before.length > 0 && !/\s$/.test(before);
+    const needsSpaceAfter = after.length > 0 && !/^\s/.test(after);
+
+    const insertText =
+      (needsSpaceBefore ? " " : "") +
+      text +
+      (needsSpaceAfter ? " " : "");
+
+    content = before + insertText + after;
+
+    // Move cursor to end of inserted text
+    tick().then(() => {
+      if (textareaRef) {
+        const newPos = start + insertText.length;
+        textareaRef.setSelectionRange(newPos, newPos);
+        textareaRef.focus();
+      }
+    });
+
+    // TODO: Handle gutterContent when Vine integration is ready
+    // For now, gutterContent is available but not yet merged with gutterItems prop
+    if (gutterContent && gutterContent.length > 0) {
+      console.log("[MarkdownEditor] Draft mode produced Vines:", gutterContent);
+    }
+  }
+
+  /**
+   * Handle voice input error.
+   * @param {{ message: string }} error
+   */
+  function handleVoiceError(error) {
+    voiceError = error.message;
+
+    // Clear error after 5 seconds
+    setTimeout(() => {
+      voiceError = null;
+    }, 5000);
   }
 
   // Editor mode switching
@@ -665,6 +731,21 @@
           <Flame class="toolbar-icon fireside-icon" />
           <span>Fireside</span>
         </button>
+        <span class="toolbar-divider">|</span>
+      {/if}
+      <!-- Voice Input (Scribe) -->
+      {#if editorMode !== "preview"}
+        <div class="voice-wrapper" title="Voice Input (⌘⇧U) - Hold to record, release to transcribe">
+          <VoiceInput
+            mode={voiceMode}
+            onTranscription={handleTranscription}
+            onError={handleVoiceError}
+            disabled={readonly}
+          />
+          {#if voiceError}
+            <span class="voice-error">{voiceError}</span>
+          {/if}
+        </div>
         <span class="toolbar-divider">|</span>
       {/if}
       <span class="toolbar-hint">{editorMode === "preview" ? "Preview mode (read-only)" : "Select text to format"}</span>
@@ -1238,6 +1319,16 @@
     color: #4a4a4a;
     margin: 0 0.25rem;
     font-size: 0.8rem;
+  }
+  .voice-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .voice-error {
+    color: var(--grove-error, #ef4444);
+    font-size: 0.75rem;
+    white-space: nowrap;
   }
   .toolbar-spacer {
     flex: 1;

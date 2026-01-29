@@ -4,7 +4,7 @@ description: Unified AI routing layer with task-based provider selection and obs
 category: specs
 specCategory: operations
 icon: lamp-ceiling
-lastUpdated: '2026-01-21'
+lastUpdated: '2026-01-29'
 aliases: []
 tags:
   - ai-integration
@@ -171,7 +171,8 @@ Lumen routes requests based on task type, selecting the optimal model for each j
 | `embedding`  | BGE-M3           | OpenRouter | Qwen3 Embed → BGE Base (CF)          | Vector embeddings     |
 | `chat`       | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Conversational        |
 | `image`      | Gemini 2.5 Flash | OpenRouter | Claude Haiku 4.5                     | Image analysis        |
-| `code`       | DeepSeek v3.2    | OpenRouter | Claude Haiku 4.5 → Kimi K2           | Code generation       |
+| `code`          | DeepSeek v3.2          | OpenRouter    | Claude Haiku 4.5 → Kimi K2           | Code generation       |
+| `transcription` | Whisper Large v3 Turbo | Cloudflare AI | Whisper → Whisper Tiny EN            | Voice-to-text         |
 
 ### Why This Routing?
 
@@ -189,6 +190,9 @@ Gemini 2.5 Flash offers excellent vision capabilities at just $0.15/$0.60 per mi
 
 **Code (DeepSeek v3.2):**
 DeepSeek excels at code generation. Claude Haiku provides a quality fallback for complex cases, with Kimi K2's reasoning capabilities as tertiary.
+
+**Transcription (Whisper Large v3 Turbo):**
+Cloudflare Workers AI provides Whisper models at zero cost. The turbo variant offers fast, accurate transcription for voice input. Fallback to standard Whisper, then Whisper Tiny EN for resilience. All transcription stays on Cloudflare's edge network.
 
 ---
 
@@ -229,7 +233,8 @@ type TaskType =
   | "embedding"
   | "chat"
   | "image"
-  | "code";
+  | "code"
+  | "transcription";
 ```
 
 ### Usage Examples
@@ -274,6 +279,14 @@ const embedding = await Lumen.inference({
   task: "embedding",
   input: "How do I customize my theme?",
 });
+
+// Voice transcription (Scribe)
+const transcript = await Lumen.transcribe({
+  audio: audioData, // Uint8Array
+  tenant: "autumn",
+  options: { mode: "draft" }, // "raw" or "draft"
+});
+// transcript.text, transcript.gutterContent (for draft mode)
 ```
 
 ### Streaming Support
@@ -289,6 +302,100 @@ for await (const chunk of stream) {
   process.stdout.write(chunk.content);
 }
 ```
+
+---
+
+## Scribe: Voice Transcription
+
+Lumen handles voice-to-text transcription via Cloudflare Workers AI's Whisper models. Two modes support different use cases.
+
+### Transcription Modes
+
+**Raw Mode** — Direct 1:1 transcription. What you say is what you get.
+
+```typescript
+const result = await lumen.transcribe({
+  audio: audioData,
+  tenant: "autumn",
+  options: { mode: "raw" },
+});
+// result.text = "Hello world, this is exactly what was said."
+// result.wordCount = 8
+// result.duration = 2.5
+```
+
+**Draft Mode** — AI-structured transcription with auto-generated Vines. The raw transcript passes through an LLM that cleans filler words, structures the content, and extracts tangents as gutter content.
+
+```typescript
+const result = await lumen.transcribe({
+  audio: audioData,
+  tenant: "autumn",
+  options: { mode: "draft" },
+});
+// result.text = "Cleaned, structured transcript."
+// result.rawTranscript = "Original unstructured transcript with um, uh..."
+// result.gutterContent = [{ type: "vine", content: "A tangent", anchor: "word" }]
+```
+
+### Transcription Flow
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                           AUDIO INPUT                                  │
+│                        (Uint8Array, max 25MB)                          │
+└─────────────────────────────────┬──────────────────────────────────────┘
+                                  │
+                                  ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                     CLOUDFLARE WHISPER                                 │
+│                                                                        │
+│   Primary: @cf/openai/whisper-large-v3-turbo                           │
+│   Fallback: @cf/openai/whisper → @cf/openai/whisper-tiny-en            │
+│                                                                        │
+│   Output: { text, word_count, words[]?, duration? }                    │
+└─────────────────────────────────┬──────────────────────────────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+              mode="raw"                  mode="draft"
+                    │                           │
+                    ▼                           ▼
+           ┌───────────────┐         ┌─────────────────────────┐
+           │  PII Scrub    │         │   LLM Structuring       │
+           │  Return text  │         │   (DeepSeek v3.2)       │
+           └───────────────┘         │                         │
+                                     │   - Clean filler words  │
+                                     │   - Structure content   │
+                                     │   - Extract Vines       │
+                                     │                         │
+                                     └────────────┬────────────┘
+                                                  │
+                                                  ▼
+                                     ┌─────────────────────────┐
+                                     │  PII Scrub              │
+                                     │  Return structured text │
+                                     │  + gutterContent[]      │
+                                     └─────────────────────────┘
+```
+
+### Quota Consumption
+
+- **Raw mode:** 1 transcription quota unit
+- **Draft mode:** 1 transcription + 1 generation quota unit (two-step process)
+
+### PII Scrubbing
+
+Transcription output passes through the same PII scrubber as other Lumen tasks. Email addresses, phone numbers, and other sensitive patterns are replaced with tokens before returning to the client.
+
+### Browser Integration (Flow Editor)
+
+The VoiceInput component provides a microphone button for the Flow editor:
+
+- Press-and-hold recording (default)
+- Toggle mode for accessibility
+- Audio level visualization
+- Automatic codec detection (webm/opus preferred, mp4 for Safari)
+- Keyboard shortcut: `Cmd/Ctrl+Shift+U`
 
 ---
 
@@ -331,13 +438,13 @@ await rateLimiter.check(tenant, task);
 
 Integrated with Grove's tier system:
 
-| Tier      | Moderation | Generation | Chat      | Image     |
-| --------- | ---------- | ---------- | --------- | --------- |
-| Free      | 100/day    | 10/day     | 5/day     | 0         |
-| Seedling  | 1,000/day  | 100/day    | 50/day    | 10/day    |
-| Sapling   | 5,000/day  | 500/day    | 200/day   | 50/day    |
-| Oak       | 20,000/day | 2,000/day  | 1,000/day | 200/day   |
-| Evergreen | Unlimited  | 10,000/day | 5,000/day | 1,000/day |
+| Tier      | Moderation | Generation | Chat      | Image     | Transcription |
+| --------- | ---------- | ---------- | --------- | --------- | ------------- |
+| Free      | 100/day    | 10/day     | 5/day     | 0         | 10/day        |
+| Seedling  | 1,000/day  | 100/day    | 50/day    | 10/day    | 100/day       |
+| Sapling   | 5,000/day  | 500/day    | 200/day   | 50/day    | 500/day       |
+| Oak       | 20,000/day | 2,000/day  | 1,000/day | 200/day   | 2,000/day     |
+| Evergreen | Unlimited  | 10,000/day | 5,000/day | 1,000/day | 10,000/day    |
 
 ---
 
@@ -504,6 +611,11 @@ const fallbackChains = {
     { provider: "openrouter", model: "qwen/qwen3-embedding-8b" },
     { provider: "cloudflare-ai", model: "@cf/baai/bge-base-en-v1.5" },
   ],
+  transcription: [
+    { provider: "cloudflare-ai", model: "@cf/openai/whisper-large-v3-turbo" },
+    { provider: "cloudflare-ai", model: "@cf/openai/whisper" },
+    { provider: "cloudflare-ai", model: "@cf/openai/whisper-tiny-en" },
+  ],
 };
 
 // If primary fails, try fallbacks in order
@@ -526,16 +638,18 @@ for (const { provider, model } of fallbackChains[task]) {
 ```
 packages/engine/src/lib/lumen/
 ├── index.ts              # Public exports & factory
-├── types.ts              # Type definitions
-├── client.ts             # LumenClient class
+├── types.ts              # Type definitions (includes ScribeMode, GutterItem)
+├── client.ts             # LumenClient class (includes transcribe())
 ├── router.ts             # Task → model routing
-├── config.ts             # Task registry & model configs
+├── config.ts             # Task registry & model configs (includes Whisper)
 ├── errors.ts             # Custom error types
 ├── providers/
 │   ├── index.ts          # Provider factory & registry
 │   ├── types.ts          # Provider interface
-│   ├── cloudflare-ai.ts  # CF Workers AI (fallback)
+│   ├── cloudflare-ai.ts  # CF Workers AI (moderation, embeddings, transcription)
 │   └── openrouter.ts     # OpenRouter (primary)
+├── prompts/
+│   └── scribe-draft.ts   # Draft mode LLM structuring prompt
 ├── pipeline/
 │   ├── preprocessor.ts   # PII scrubbing, input validation
 │   └── postprocessor.ts  # Response normalization, usage logging

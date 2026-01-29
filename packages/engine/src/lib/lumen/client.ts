@@ -45,6 +45,7 @@ import {
   executeModeration,
 } from "./router.js";
 import type {
+  GutterItem,
   LumenClientConfig,
   LumenEmbeddingRequest,
   LumenEmbeddingResponse,
@@ -54,8 +55,16 @@ import type {
   LumenRequest,
   LumenResponse,
   LumenStreamChunk,
+  LumenTranscriptionRequest,
+  LumenTranscriptionResponse,
   SongbirdOptions,
 } from "./types.js";
+import { scrubPii } from "./pipeline/preprocessor.js";
+import {
+  SCRIBE_DRAFT_SYSTEM_PROMPT,
+  buildScribeDraftPrompt,
+  parseScribeDraftResponse,
+} from "./prompts/scribe-draft.js";
 
 // =============================================================================
 // LUMEN CLIENT
@@ -368,6 +377,231 @@ export class LumenClient {
       model: result.model,
       confidence: result.confidence,
     };
+  }
+
+  // ===========================================================================
+  // TRANSCRIPTION (SCRIBE)
+  // ===========================================================================
+
+  /**
+   * Transcribe audio to text.
+   * Uses Cloudflare AI (Whisper).
+   *
+   * Supports two modes:
+   * - "raw": Direct 1:1 transcription (1 quota unit)
+   * - "draft": AI-structured with auto-generated Vines (2 quota units)
+   *
+   * @param request - Transcription request with audio data
+   * @param tier - Tenant tier for quota enforcement
+   * @returns Transcription response with text and metadata
+   */
+  async transcribe(
+    request: LumenTranscriptionRequest,
+    tier?: TierKey,
+  ): Promise<LumenTranscriptionResponse> {
+    const startTime = Date.now();
+    const mode = request.options?.mode ?? "raw";
+
+    // Check if Lumen is enabled
+    if (!this.enabled) {
+      throw new LumenError("Lumen is disabled", "DISABLED", {
+        task: "transcription",
+      });
+    }
+
+    // Validate audio data
+    if (!request.audio || request.audio.length === 0) {
+      throw new LumenError("Audio data is required", "INVALID_INPUT", {
+        task: "transcription",
+      });
+    }
+
+    // Check audio size (max 25MB as per plan)
+    const MAX_AUDIO_SIZE = 25 * 1024 * 1024; // 25MB
+    if (request.audio.length > MAX_AUDIO_SIZE) {
+      throw new LumenError(
+        `Audio exceeds maximum size of 25MB (got ${(request.audio.length / 1024 / 1024).toFixed(1)}MB)`,
+        "INVALID_INPUT",
+        { task: "transcription" },
+      );
+    }
+
+    // Check quotas (Draft mode needs both transcription + generation)
+    if (
+      request.tenant &&
+      tier &&
+      this.quotaTracker &&
+      !request.options?.skipQuota
+    ) {
+      await this.quotaTracker.enforceQuota(
+        request.tenant,
+        tier,
+        "transcription",
+      );
+
+      // Draft mode also requires generation quota
+      if (mode === "draft") {
+        await this.quotaTracker.enforceQuota(
+          request.tenant,
+          tier,
+          "generation",
+        );
+      }
+    }
+
+    // Get Cloudflare AI provider
+    const provider = this.providers["cloudflare-ai"];
+    if (!provider?.transcribe) {
+      throw new LumenError(
+        "Transcription not available (no Cloudflare AI binding)",
+        "PROVIDER_ERROR",
+        { task: "transcription" },
+      );
+    }
+
+    // Get task config for model selection
+    const taskConfig = getTaskConfig("transcription");
+
+    // Execute transcription with fallback
+    let result: { text: string; wordCount: number; duration: number };
+    let usedModel = taskConfig.primaryModel;
+
+    try {
+      result = await provider.transcribe(
+        taskConfig.primaryModel,
+        request.audio,
+      );
+    } catch (primaryError) {
+      // Try fallback chain
+      let lastError = primaryError;
+
+      for (const fallback of taskConfig.fallbackChain) {
+        try {
+          if (fallback.provider === "cloudflare-ai" && provider.transcribe) {
+            result = await provider.transcribe(fallback.model, request.audio);
+            usedModel = fallback.model;
+            break;
+          }
+        } catch (fallbackError) {
+          lastError = fallbackError;
+          continue;
+        }
+      }
+
+      // If we still don't have a result, throw the last error
+      if (!result!) {
+        throw lastError;
+      }
+    }
+
+    // Scrub PII from transcription output (unless skipped)
+    let rawText = result.text;
+    if (!request.options?.skipPiiScrub) {
+      const scrubbed = scrubPii(result.text);
+      rawText = scrubbed.text;
+
+      if (scrubbed.piiCount > 0) {
+        console.log(
+          `[Lumen/Transcribe] Scrubbed ${scrubbed.piiCount} PII items: ${scrubbed.piiTypes.join(", ")}`,
+        );
+      }
+    }
+
+    // Record transcription usage
+    if (request.tenant && this.quotaTracker) {
+      await this.quotaTracker.recordUsage(
+        request.tenant,
+        "transcription",
+        usedModel,
+        "cloudflare-ai",
+        { input: 0, output: 0, cost: 0 }, // CF AI is included in Workers pricing
+        Date.now() - startTime,
+        false,
+      );
+    }
+
+    // For raw mode, return the transcription directly
+    if (mode === "raw") {
+      return {
+        text: rawText,
+        wordCount: result.wordCount,
+        duration: result.duration,
+        latency: Date.now() - startTime,
+        model: usedModel,
+        provider: "cloudflare-ai",
+      };
+    }
+
+    // Draft mode: structure the transcript with LLM
+    const draftResult = await this.structureDraftTranscript(
+      rawText,
+      request.tenant,
+      tier,
+    );
+
+    return {
+      text: draftResult.text,
+      wordCount: draftResult.text.split(/\s+/).filter(Boolean).length,
+      duration: result.duration,
+      latency: Date.now() - startTime,
+      model: usedModel,
+      provider: "cloudflare-ai",
+      gutterContent: draftResult.gutterContent,
+      rawTranscript: rawText,
+    };
+  }
+
+  /**
+   * Structure a raw transcript using LLM generation.
+   * Cleans up speech patterns and extracts tangents as Vines.
+   *
+   * @param rawTranscript - The raw transcription text
+   * @param tenant - Tenant ID for quota tracking
+   * @param tier - Tenant tier
+   * @returns Structured text with optional gutter content
+   */
+  private async structureDraftTranscript(
+    rawTranscript: string,
+    tenant?: string,
+    tier?: TierKey,
+  ): Promise<{ text: string; gutterContent: GutterItem[] }> {
+    try {
+      // Use the generation task to structure the transcript
+      const response = await this.run(
+        {
+          task: "generation",
+          input: [
+            { role: "system", content: SCRIBE_DRAFT_SYSTEM_PROMPT },
+            { role: "user", content: buildScribeDraftPrompt(rawTranscript) },
+          ],
+          tenant,
+          options: {
+            maxTokens: 2048,
+            temperature: 0.3, // Lower temperature for more consistent structuring
+            skipQuota: true, // Already checked quota above
+            skipPiiScrub: true, // Already scrubbed in transcribe()
+          },
+        },
+        tier,
+      );
+
+      // Parse the LLM response
+      const parsed = parseScribeDraftResponse(response.content);
+
+      if (parsed) {
+        return parsed;
+      }
+
+      // Parsing failed, fallback to raw text
+      console.warn(
+        "[Lumen/Scribe] Failed to parse draft response, using raw text",
+      );
+      return { text: rawTranscript, gutterContent: [] };
+    } catch (err) {
+      // LLM structuring failed, fallback to raw text silently
+      console.error("[Lumen/Scribe] Draft structuring failed:", err);
+      return { text: rawTranscript, gutterContent: [] };
+    }
   }
 
   // ===========================================================================

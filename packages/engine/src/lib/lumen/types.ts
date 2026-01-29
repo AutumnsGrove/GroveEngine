@@ -22,7 +22,8 @@ export type LumenTask =
   | "embedding" // Vector embeddings → bge-base (CF Workers AI)
   | "chat" // Conversational → DeepSeek (OpenRouter)
   | "image" // Image analysis → Claude via OpenRouter
-  | "code"; // Code tasks → Claude via OpenRouter
+  | "code" // Code tasks → Claude via OpenRouter
+  | "transcription"; // Voice-to-text → Whisper (CF Workers AI)
 
 // =============================================================================
 // MESSAGE TYPES
@@ -240,6 +241,93 @@ export type LumenModerationCategory =
   | "sexual"
   | "dangerous"
   | "illegal";
+
+// =============================================================================
+// TRANSCRIPTION (SCRIBE)
+// =============================================================================
+
+/**
+ * Transcription mode determines how voice input is processed.
+ *
+ * - "raw": Direct 1:1 transcription, what you say is what you get
+ * - "draft": AI-structured output with auto-generated Vines for tangents
+ */
+export type ScribeMode = "raw" | "draft";
+
+export interface LumenTranscriptionRequest {
+  /** Audio data as Uint8Array (from MediaRecorder or file upload) */
+  audio: Uint8Array;
+
+  /** Tenant ID for quota tracking */
+  tenant?: string;
+
+  /** Transcription options */
+  options?: LumenTranscriptionOptions;
+}
+
+export interface LumenTranscriptionOptions {
+  /** Transcription mode: "raw" for 1:1, "draft" for AI-structured */
+  mode?: ScribeMode;
+
+  /** Language hint (BCP-47 format, e.g., "en", "en-US") */
+  language?: string;
+
+  /** Include word-level timestamps in response */
+  timestamps?: boolean;
+
+  /** Skip PII scrubbing (for already-sanitized content) */
+  skipPiiScrub?: boolean;
+
+  /** Skip quota enforcement */
+  skipQuota?: boolean;
+}
+
+export interface LumenTranscriptionResponse {
+  /** Transcribed text (cleaned/structured if mode="draft") */
+  text: string;
+
+  /** Word count of the transcription */
+  wordCount: number;
+
+  /** Duration of the audio in seconds */
+  duration: number;
+
+  /** Processing latency in milliseconds */
+  latency: number;
+
+  /** Model that was used */
+  model: string;
+
+  /** Provider that was used */
+  provider: LumenProviderName;
+
+  /**
+   * Gutter content for Vine creation (only present in "draft" mode).
+   * Each item represents a tangent or aside that should become a Vine.
+   */
+  gutterContent?: GutterItem[];
+
+  /**
+   * Raw transcript before structuring (only present in "draft" mode).
+   * Useful for comparison or fallback.
+   */
+  rawTranscript?: string;
+}
+
+/**
+ * A gutter item represents content to be added to the document's margin.
+ * In Scribe's draft mode, these are auto-generated Vines for tangents.
+ */
+export interface GutterItem {
+  /** The type of gutter content */
+  type: "vine";
+
+  /** The text content for the Vine */
+  content: string;
+
+  /** Optional anchor text this Vine relates to */
+  anchor?: string;
+}
 
 // =============================================================================
 // CLIENT CONFIG
