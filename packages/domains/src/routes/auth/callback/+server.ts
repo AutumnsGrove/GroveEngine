@@ -4,6 +4,10 @@
  * Handles the callback from GroveAuth after user authentication.
  * Exchanges the authorization code for tokens and creates a local session.
  *
+ * NOTE: This callback keeps D1 session storage (unlike other apps that use
+ * cross-subdomain cookies) because domains.grove.place needs local user management.
+ * Uses graft utilities for PKCE validation and origin detection.
+ *
  * SECURITY NOTE: This is a +server.ts file which runs server-side only in SvelteKit.
  * Client secrets accessed here are never exposed to the browser.
  * Secrets should be set via: wrangler secret put GROVEAUTH_CLIENT_SECRET
@@ -12,7 +16,8 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createSession, getOrCreateUser } from "$lib/server/db";
-import { getRealOrigin } from "$lib/server/origin";
+import { getRealOrigin } from "@autumnsgrove/groveengine/grafts/login/server";
+import { AUTH_COOKIE_NAMES } from "@autumnsgrove/groveengine/grafts/login";
 
 /**
  * Map GroveAuth error codes to user-friendly messages.
@@ -62,8 +67,8 @@ export const GET: RequestHandler = async ({
     throw redirect(302, `/login?error=${encodeURIComponent(friendlyMessage)}`);
   }
 
-  // Validate state (CSRF protection)
-  const savedState = cookies.get("auth_state");
+  // Validate state (CSRF protection) - using graft's cookie name
+  const savedState = cookies.get(AUTH_COOKIE_NAMES.state);
   if (!state || state !== savedState) {
     console.error("[GroveAuth Callback] State mismatch");
     throw redirect(
@@ -72,8 +77,8 @@ export const GET: RequestHandler = async ({
     );
   }
 
-  // Get code verifier (PKCE)
-  const codeVerifier = cookies.get("auth_code_verifier");
+  // Get code verifier (PKCE) - using graft's cookie name
+  const codeVerifier = cookies.get(AUTH_COOKIE_NAMES.codeVerifier);
   if (!codeVerifier) {
     console.error("[GroveAuth Callback] Missing code verifier");
     throw redirect(
@@ -89,23 +94,17 @@ export const GET: RequestHandler = async ({
     );
   }
 
-  // Clear auth cookies
-  cookies.delete("auth_state", { path: "/" });
-  cookies.delete("auth_code_verifier", { path: "/" });
+  // Clear auth cookies - using graft's cookie names
+  cookies.delete(AUTH_COOKIE_NAMES.state, { path: "/" });
+  cookies.delete(AUTH_COOKIE_NAMES.codeVerifier, { path: "/" });
+  // Also clear returnTo if set by graft's login handler
+  cookies.delete(AUTH_COOKIE_NAMES.returnTo, { path: "/" });
 
   try {
-    const {
-      DB,
-      GROVEAUTH_CLIENT_ID,
-      GROVEAUTH_CLIENT_SECRET,
-      GROVEAUTH_REDIRECT_URI,
-    } = platform.env;
-    const authBaseUrl =
-      platform.env.GROVEAUTH_URL || "https://auth-api.grove.place";
-
-    // Build redirect URI - URLSearchParams handles encoding automatically
-    const redirectUri =
-      GROVEAUTH_REDIRECT_URI || `${getRealOrigin(request, url)}/auth/callback`;
+    const { DB, GROVEAUTH_CLIENT_SECRET } = platform.env;
+    const authBaseUrl = "https://auth-api.grove.place";
+    const clientId = "groveengine"; // Unified client ID across all Grove apps
+    const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
 
     // Exchange code for tokens
     const tokenResponse = await fetch(`${authBaseUrl}/token`, {
@@ -117,7 +116,7 @@ export const GET: RequestHandler = async ({
         grant_type: "authorization_code",
         code,
         redirect_uri: redirectUri,
-        client_id: GROVEAUTH_CLIENT_ID || "domains",
+        client_id: clientId,
         client_secret: GROVEAUTH_CLIENT_SECRET || "",
         code_verifier: codeVerifier,
       }),
