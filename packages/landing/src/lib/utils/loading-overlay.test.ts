@@ -270,17 +270,17 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should have cascading segment delays", () => {
-      // v3: 60ms delay between segments creates wave propagation
-      expect(appHtml).toContain("60ms");
+      // v3 optimized: 40ms delay between segments creates wave propagation
+      expect(appHtml).toContain("40ms");
+      expect(appHtml).toContain("80ms");
       expect(appHtml).toContain("120ms");
-      expect(appHtml).toContain("180ms");
     });
 
     it("should have vine stagger delays", () => {
-      // v3: 80ms delay between adjacent vines for visual separation
-      expect(appHtml).toContain("80ms");
-      expect(appHtml).toContain("160ms");
-      expect(appHtml).toContain("240ms");
+      // v3 optimized: 50ms delay between adjacent vines for visual separation
+      expect(appHtml).toContain("50ms");
+      expect(appHtml).toContain("100ms");
+      expect(appHtml).toContain("150ms");
     });
 
     it("should use dampened amplitude in keyframes", () => {
@@ -306,9 +306,9 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("top: 125px");
     });
 
-    it("should use 2.5s animation duration for appreciable effect", () => {
-      // Original timing (reverted from 1.8s): 2.5s is slower but more elegant
-      expect(appHtml).toContain("2.5s ease-out");
+    it("should use 1.8s animation duration for snappy effect", () => {
+      // Optimized timing: 1.8s is snappier while still appreciable
+      expect(appHtml).toContain("1.8s ease-out");
     });
   });
 });
