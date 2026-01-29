@@ -415,8 +415,8 @@
 <div class="images-page">
   <header class="page-header">
     <div class="header-content">
-      <h1>CDN Uploader</h1>
-      <p class="subtitle">Upload, optimize, and manage images for the Grove</p>
+      <h1>Images</h1>
+      <p class="subtitle">Upload, organize, and manage your image library</p>
     </div>
     <div class="header-stats">
       <div class="stat">
