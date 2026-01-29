@@ -79,8 +79,9 @@ async function isRateLimited(
     });
 
     return false;
-  } catch {
-    // On error, allow the request (fail open for auth)
+  } catch (err) {
+    // Fail open for auth availability, but log for monitoring
+    console.warn("[Auth Callback] Rate limit KV error (failing open):", err);
     return false;
   }
 }
@@ -289,15 +290,19 @@ export function createCallbackHandler(
         const errorData = (await tokenResponse
           .json()
           .catch(() => ({}))) as Record<string, unknown>;
+        // Log full details server-side for debugging
         console.error("[Auth Callback] Token exchange failed:", {
           status: tokenResponse.status,
           error: errorData?.error,
+          // Log description server-side only - don't expose to users
+          description: errorData?.error_description,
         });
-        const debugError =
-          (errorData?.error_description as string) ||
-          (errorData?.error as string) ||
-          "token_exchange_failed";
-        redirect(302, `/?error=${encodeURIComponent(debugError)}`);
+        // Only pass the error code to the user, not the description
+        // This prevents leaking internal implementation details
+        const errorCode =
+          (errorData?.error as string) || "token_exchange_failed";
+        const friendlyMessage = getFriendlyErrorMessage(errorCode);
+        redirect(302, `/?error=${encodeURIComponent(friendlyMessage)}`);
       }
 
       const tokens = (await tokenResponse.json()) as {
