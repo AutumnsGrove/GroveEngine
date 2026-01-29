@@ -107,6 +107,19 @@ export const MODELS = {
 
   /** CF vision - Llama 4 Scout (vision-capable, for image classification) */
   CF_LLAMA4_SCOUT: "@cf/meta/llama-4-scout-17b-16e-instruct",
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Cloudflare Workers AI Models - Transcription (Whisper)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** CF transcription - Whisper Large V3 Turbo (fast, accurate, multilingual) */
+  CF_WHISPER_TURBO: "@cf/openai/whisper-large-v3-turbo",
+
+  /** CF transcription - Whisper Large V3 (slower but most accurate) */
+  CF_WHISPER: "@cf/openai/whisper",
+
+  /** CF transcription - Whisper Tiny EN (English-only, fastest, lower accuracy) */
+  CF_WHISPER_TINY: "@cf/openai/whisper-tiny-en",
 } as const;
 
 // =============================================================================
@@ -140,6 +153,9 @@ export const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   [MODELS.CF_BGE_BASE]: { input: 0, output: 0 },
   [MODELS.CF_LLAMAGUARD_3]: { input: 0, output: 0 },
   [MODELS.CF_LLAMA4_SCOUT]: { input: 0, output: 0 },
+  [MODELS.CF_WHISPER_TURBO]: { input: 0, output: 0 },
+  [MODELS.CF_WHISPER]: { input: 0, output: 0 },
+  [MODELS.CF_WHISPER_TINY]: { input: 0, output: 0 },
 };
 
 // =============================================================================
@@ -286,6 +302,21 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
     defaultMaxTokens: 4096,
     defaultTemperature: 0.1,
     description: "Code generation and analysis",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Transcription (CF Whisper Turbo → Whisper → Whisper Tiny)
+  // ─────────────────────────────────────────────────────────────────────────────
+  transcription: {
+    primaryModel: MODELS.CF_WHISPER_TURBO,
+    primaryProvider: "cloudflare-ai",
+    fallbackChain: [
+      { provider: "cloudflare-ai", model: MODELS.CF_WHISPER },
+      { provider: "cloudflare-ai", model: MODELS.CF_WHISPER_TINY },
+    ],
+    defaultMaxTokens: 0, // Not applicable for transcription
+    defaultTemperature: 0,
+    description: "Voice-to-text transcription",
   },
 };
 

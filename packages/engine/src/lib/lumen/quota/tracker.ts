@@ -181,6 +181,7 @@ export class QuotaTracker {
       chat: 0,
       image: 0,
       code: 0,
+      transcription: 0,
     };
 
     // Fill in actual counts
