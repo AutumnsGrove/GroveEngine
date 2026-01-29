@@ -488,7 +488,7 @@
 
   :global(.dark) .nav-item:hover {
     background: var(--grove-overlay-12);
-    color: #86efac;
+    color: var(--grove-300, #86efac);
   }
 
   :global(.dark) .nav-item {
@@ -572,7 +572,7 @@
 
   :global(.dark) .logout-btn:hover {
     background: var(--grove-overlay-18);
-    color: #86efac;
+    color: var(--grove-300, #86efac);
   }
 
   .logout-btn-icon {
@@ -599,7 +599,7 @@
 
   :global(.dark) .logout-btn-icon:hover {
     background: var(--grove-overlay-18);
-    color: #86efac;
+    color: var(--grove-300, #86efac);
   }
 
   .help-link {
@@ -629,7 +629,7 @@
 
   :global(.dark) .help-link:hover {
     background: var(--grove-overlay-18);
-    color: #86efac;
+    color: var(--grove-300, #86efac);
   }
 
   .help-link-icon {
@@ -657,7 +657,7 @@
 
   :global(.dark) .help-link-icon:hover {
     background: var(--grove-overlay-18);
-    color: #86efac;
+    color: var(--grove-300, #86efac);
   }
 
   :global(.help-icon) {

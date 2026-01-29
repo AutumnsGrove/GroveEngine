@@ -417,7 +417,7 @@
 		margin-bottom: 1rem;
 	}
 	.not-found-content p {
-		color: #666;
+		color: var(--color-text-muted);
 		margin-bottom: 0.5rem;
 	}
 	.not-found-content a {
@@ -504,59 +504,18 @@
 		font-style: normal;
 		font-display: swap;
 	}
-	/* CSS Custom Properties for theming */
+	/* Font family default - dynamically set via JavaScript from database settings */
 	:global(:root) {
-		/* Font family - dynamically set via JavaScript from database settings */
 		--font-family-main: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		/* Primary colors */
-		--color-primary: #2c5f2d;
-		--color-primary-hover: #4a9d4f;
-		--color-primary-light: var(--accent-success);
-		--color-primary-light-hover: var(--accent-success-light);
-		/* Text colors */
-		--color-text: var(--light-border-secondary);
-		--color-text-muted: #666;
-		--color-text-subtle: var(--light-text-light);
-		/* Background colors */
-		--color-bg-secondary: var(--light-bg-tertiary);
-		--color-border: var(--light-border-primary);
-		/* Dark mode color values */
-		--color-text-dark: var(--light-text-primary);
-		--color-text-muted-dark: #d0d0d0;
-		--color-text-subtle-dark: #b8b8b8;
-		--color-bg-secondary-dark: var(--light-bg-primary);
-		--color-bg-tertiary-dark: var(--light-bg-tertiary);
-		--color-border-dark: var(--light-border-secondary);
-		/* Danger/Error colors */
-		--color-danger: var(--accent-danger);
-		--color-danger-hover: #cb2431;
-		/* Component-specific */
-		--mobile-menu-bg: white;
-		--mobile-menu-border: var(--light-border-primary);
-		--tag-bg: #7c4dab;
-		--tag-bg-hover: #6a3d9a;
-		/* Border radius standardization */
-		--border-radius-standard: 8px;
-		--border-radius-small: 4px;
-		--border-radius-button: 6px;
 	}
-	:global(.dark)  {
-		--mobile-menu-bg: #242424;
-		--mobile-menu-border: var(--light-border-secondary);
-		--tag-bg: #6a3d9a;
-		--tag-bg-hover: #7c4dab;
-	}
+	/* Note: All other CSS variables are defined in tokens.css */
 	:global(body) {
 		margin: 0;
 		font-family: var(--font-family-main);
 		line-height: 1.6;
-		color: var(--light-border-secondary);
-		background: #fafafa;
+		color: var(--color-text);
+		background: hsl(var(--background));
 		transition: background-color 0.3s ease, color 0.3s ease;
-	}
-	:global(.dark body) {
-		color: var(--color-text-dark);
-		background: var(--light-bg-primary);
 	}
 	/* Global tag styles - shared across all pages */
 	:global(.tag) {
@@ -619,18 +578,12 @@
 	.logo {
 		font-size: 1.5rem;
 		font-weight: bold;
-		color: #2c5f2d;
+		color: var(--color-primary);
 		text-decoration: none;
 		transition: color 0.2s;
 	}
-	:global(.dark) .logo {
-		color: var(--accent-success);
-	}
 	.logo:hover {
-		color: #4a9d4f;
-	}
-	:global(.dark) .logo:hover {
-		color: var(--accent-success-light);
+		color: var(--color-primary-hover);
 	}
 	.nav-links {
 		display: flex;
@@ -638,7 +591,7 @@
 	}
 	.nav-links a {
 		text-decoration: none;
-		color: #666;
+		color: var(--color-text-muted);
 		font-weight: 500;
 		transition: color 0.2s ease;
 		position: relative;
@@ -650,31 +603,22 @@
 		left: 0;
 		right: 0;
 		height: 2px;
-		background: #2c5f2d;
+		background: var(--color-primary);
 		transform: scaleX(0);
 		transform-origin: left;
 		transition: transform 0.25s ease;
 	}
-	:global(.dark) .nav-links a::after {
-		background: var(--accent-success);
-	}
 	.nav-links a:hover {
-		color: #2c5f2d;
+		color: var(--color-primary);
 	}
 	.nav-links a:hover::after {
 		transform: scaleX(1);
 	}
-	:global(.dark) .nav-links a:hover {
-		color: var(--accent-success);
-	}
 	.nav-links a.active {
-		color: #2c5f2d;
+		color: var(--color-primary);
 	}
 	.nav-links a.active::after {
 		transform: scaleX(1);
-	}
-	:global(.dark) .nav-links a.active {
-		color: var(--accent-success);
 	}
 	/* Search styles */
 	.search-wrapper {
@@ -687,23 +631,18 @@
 		align-items: center;
 	}
 	footer {
-		background: white;
-		border-top: 1px solid var(--light-border-primary);
+		background: hsl(var(--card));
+		border-top: 1px solid var(--color-border);
 		padding: 2rem;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 1rem;
-		color: #666;
+		color: var(--color-text-muted);
 		margin-top: 4rem;
 		position: relative;
 		z-index: 1003;
 		transition: background-color 0.3s ease, border-color 0.3s ease;
-	}
-	:global(.dark) footer {
-		background: #242424;
-		border-top: 1px solid var(--color-border-dark);
-		color: var(--color-text-muted-dark);
 	}
 	/* Footer margin on admin pages to avoid sidebar overlap */
 	footer.admin-page-footer {
@@ -727,17 +666,14 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem;
-		color: #666;
+		color: var(--color-text-muted);
 		text-decoration: none;
 		border-radius: 4px;
 		transition: color 0.2s, transform 0.2s;
 	}
 	.admin-link:hover {
-		color: #2c5f2d;
+		color: var(--color-primary);
 		transform: scale(1.1);
-	}
-	:global(.dark) .admin-link:hover {
-		color: var(--accent-success);
 	}
 	.logged-in-indicator {
 		display: flex;
@@ -827,19 +763,13 @@
 		}
 		.mobile-search-form :global(.mobile-search-input:focus) {
 			outline: none;
-			border-color: #2c5f2d;
-		}
-		:global(.dark) .mobile-search-form :global(.mobile-search-input:focus) {
-			border-color: var(--accent-success);
+			border-color: var(--color-primary);
 		}
 		.mobile-search-form :global(.mobile-search-input::placeholder) {
-			color: var(--light-text-muted);
-		}
-		:global(.dark) .mobile-search-form :global(.mobile-search-input::placeholder) {
-			color: #777;
+			color: var(--color-text-muted);
 		}
 		.mobile-search-form :global(.mobile-search-btn) {
-			background: #2c5f2d;
+			background: var(--color-primary);
 			border: none;
 			cursor: pointer;
 			padding: 0.6rem;
@@ -850,18 +780,12 @@
 			border-radius: 6px;
 			transition: background-color 0.2s;
 		}
-		:global(.dark) .mobile-search-form :global(.mobile-search-btn) {
-			background: var(--accent-success);
-		}
 		.mobile-search-form :global(.mobile-search-btn:hover) {
-			background: #4a9d4f;
-		}
-		:global(.dark) .mobile-search-form :global(.mobile-search-btn:hover) {
-			background: var(--accent-success-light);
+			background: var(--color-primary-hover);
 		}
 		.mobile-menu a {
 			text-decoration: none;
-			color: #666;
+			color: var(--color-text-muted);
 			font-weight: 500;
 			padding: 1rem 1.5rem;
 			transition: background-color 0.2s, color 0.2s;
@@ -869,19 +793,11 @@
 		}
 		.mobile-menu a:hover {
 			background: var(--light-bg-tertiary);
-			color: #2c5f2d;
-		}
-		:global(.dark) .mobile-menu a:hover {
-			background: var(--light-border-secondary);
-			color: var(--accent-success);
+			color: var(--color-primary);
 		}
 		.mobile-menu a.active {
-			color: #2c5f2d;
-			background: #f0f9f0;
-		}
-		:global(.dark) .mobile-menu a.active {
-			color: var(--accent-success);
-			background: #2a3a2a;
+			color: var(--color-primary);
+			background: var(--status-success-bg);
 		}
 		/* Active indicator bar for mobile */
 		.mobile-menu a.active::before {
@@ -891,10 +807,7 @@
 			top: 0;
 			bottom: 0;
 			width: 3px;
-			background: #2c5f2d;
-		}
-		:global(.dark) .mobile-menu a.active::before {
-			background: var(--accent-success);
+			background: var(--color-primary);
 		}
 	}
 </style>
