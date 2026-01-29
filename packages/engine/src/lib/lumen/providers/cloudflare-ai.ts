@@ -324,10 +324,11 @@ export class CloudflareAIProvider implements LumenProvider {
       const latency = Date.now() - startTime;
 
       // Estimate duration from word count (approx 150 words/minute for speech)
+      // Note: This is approximate; recordings with long pauses may differ
       const wordCount = result.word_count ?? result.text.split(/\s+/).length;
-      const estimatedDuration = (wordCount / 150) * 60;
+      const estimatedDuration = Math.min((wordCount / 150) * 60, 600); // Cap at 10 minutes
 
-      // If we have word timestamps, calculate actual duration
+      // If we have word timestamps, use actual duration from last word
       let duration = estimatedDuration;
       if (result.words && result.words.length > 0) {
         const lastWord = result.words[result.words.length - 1];

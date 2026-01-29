@@ -539,6 +539,8 @@ export class LumenClient {
       tier,
     );
 
+    // Note: wordCount reflects cleaned text (filler words removed)
+    // duration reflects original audio length, not cleaned text
     return {
       text: draftResult.text,
       wordCount: draftResult.text.split(/\s+/).filter(Boolean).length,
