@@ -483,6 +483,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";
     // Admin API endpoints use their own auth gate (isAdmin check) — origin validation suffices
     const isAdminApi = event.url.pathname.startsWith("/api/admin/");
+    // Passkey endpoints do their own origin validation and require session auth
+    const isPasskeyApi = event.url.pathname.startsWith("/api/passkey/");
     // SvelteKit form actions have built-in CSRF protection via origin validation
     // Detect via: x-sveltekit-action header OR ?/ URL pattern
     const isSvelteKitAction =
@@ -494,7 +496,13 @@ export const handle: Handle = async ({ event, resolve }) => {
     // (proxy-aware: checks Origin against X-Forwarded-Host, not just Host)
     // SvelteKit's built-in CSRF is disabled because it doesn't understand
     // our grove-router proxy setup (compares Origin against internal Host).
-    if (isFormAction || isAuthEndpoint || isTurnstileEndpoint || isAdminApi) {
+    if (
+      isFormAction ||
+      isAuthEndpoint ||
+      isTurnstileEndpoint ||
+      isAdminApi ||
+      isPasskeyApi
+    ) {
       if (!validateCSRF(event.request)) {
         throw error(403, "Invalid origin");
       }
