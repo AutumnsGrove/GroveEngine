@@ -33,13 +33,13 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 
     if (groveSession && platform?.env?.AUTH) {
       // Use service binding with grove_session (preferred for tenant subdomains)
+      // Note: generate-register-options is a GET endpoint in Better Auth
       response = await platform.env.AUTH.fetch(
         `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             Cookie: `grove_session=${groveSession}`,
-            "Content-Type": "application/json",
           },
         },
       );
@@ -48,10 +48,9 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       response = await fetch(
         `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
           },
         },
       );
