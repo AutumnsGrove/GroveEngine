@@ -105,8 +105,9 @@ function createMockContext(overrides: {
       },
     },
     locals: {
-      user: overrides.user ?? { id: "user_123" },
-      tenantId: overrides.tenantId ?? "tenant_123",
+      // Use 'in' check to allow explicit null values (null ?? default returns default!)
+      user: "user" in overrides ? overrides.user : { id: "user_123" },
+      tenantId: "tenantId" in overrides ? overrides.tenantId : "tenant_123",
     },
   };
 }

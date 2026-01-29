@@ -28,7 +28,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Semgrep
+      - name: Run Semgrep (SARIF output)
         run: |
           semgrep scan \
             --config=p/security-audit \
@@ -44,7 +44,24 @@ jobs:
             --exclude='dist' \
             --exclude='build' \
             --exclude='.svelte-kit' \
-            --sarif --output=semgrep-results.sarif \
+            --sarif --output=semgrep-results.sarif
+
+      - name: Run Semgrep (JSON output)
+        run: |
+          semgrep scan \
+            --config=p/security-audit \
+            --config=p/typescript \
+            --config=p/xss \
+            --config=p/jwt \
+            --config=p/secrets \
+            --config=p/svelte \
+            --include='*.svelte' \
+            --include='*.ts' \
+            --include='*.js' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='build' \
+            --exclude='.svelte-kit' \
             --json --output=semgrep-results.json
 
       - name: Upload SARIF to GitHub Security
