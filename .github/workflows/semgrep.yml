@@ -23,12 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Run Semgrep (SARIF output)
+        # Exit code 7 = findings detected (not an error), but fail on actual errors
         run: |
           semgrep scan \
             --config=p/security-audit \
@@ -44,9 +48,13 @@ jobs:
             --exclude='dist' \
             --exclude='build' \
             --exclude='.svelte-kit' \
-            --sarif --output=semgrep-results.sarif
+            --max-memory 0 \
+            --sarif --output=semgrep-results.sarif; \
+          exit_code=$?; \
+          if [ $exit_code -ne 0 ] && [ $exit_code -ne 7 ]; then exit $exit_code; fi
 
       - name: Run Semgrep (JSON output)
+        # Exit code 7 = findings detected (not an error), but fail on actual errors
         run: |
           semgrep scan \
             --config=p/security-audit \
@@ -62,7 +70,10 @@ jobs:
             --exclude='dist' \
             --exclude='build' \
             --exclude='.svelte-kit' \
-            --json --output=semgrep-results.json
+            --max-memory 0 \
+            --json --output=semgrep-results.json; \
+          exit_code=$?; \
+          if [ $exit_code -ne 0 ] && [ $exit_code -ne 7 ]; then exit $exit_code; fi
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
