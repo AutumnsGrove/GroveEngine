@@ -29,16 +29,27 @@ interface BlogPost {
 export const load: PageServerLoad = async ({ platform, locals }) => {
   const isExampleSite = locals.tenantId === "example-tenant-001";
 
+  // DEBUG: Capture diagnostic info for troubleshooting
+  const debug = {
+    tenantId: locals.tenantId || "NOT_SET",
+    hasDB: !!platform?.env?.DB,
+    contextType: locals.context?.type || "unknown",
+    error: null as string | null,
+    rawPostCount: 0,
+  };
+
   // Require tenant context
   if (!locals.tenantId) {
     console.error("[Admin Blog] No tenant ID found");
-    return { posts: [] as BlogPost[], isExampleSite: false };
+    debug.error = "No tenant ID found";
+    return { posts: [] as BlogPost[], isExampleSite: false, debug };
   }
 
   // Require database
   if (!platform?.env?.DB) {
     console.error("[Admin Blog] D1 database not available");
-    return { posts: [] as BlogPost[], isExampleSite };
+    debug.error = "D1 database not available";
+    return { posts: [] as BlogPost[], isExampleSite, debug };
   }
 
   try {
@@ -54,6 +65,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       [],
       { orderBy: "published_at DESC, created_at DESC" },
     );
+
+    debug.rawPostCount = postsArray.length;
 
     // Transform posts - parse tags from JSON string
     const posts: BlogPost[] = postsArray.map((post) => {
@@ -86,9 +99,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       };
     });
 
-    return { posts, isExampleSite };
+    return { posts, isExampleSite, debug };
   } catch (error) {
     console.error("[Admin Blog] Error fetching posts:", error);
-    return { posts: [] as BlogPost[], isExampleSite };
+    debug.error = error instanceof Error ? error.message : String(error);
+    return { posts: [] as BlogPost[], isExampleSite, debug };
   }
 };

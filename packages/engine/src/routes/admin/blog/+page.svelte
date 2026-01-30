@@ -50,6 +50,22 @@
 </script>
 
 <div class="max-w-screen-xl">
+  <!-- DEBUG BANNER - Remove after fixing issue -->
+  {#if data.debug}
+    <div class="mb-6 p-4 bg-purple-50 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 rounded-lg font-mono text-xs">
+      <p class="m-0 text-purple-800 dark:text-purple-200">
+        <strong>🔍 DEBUG:</strong>
+        tenantId={data.debug.tenantId} |
+        hasDB={data.debug.hasDB} |
+        context={data.debug.contextType} |
+        rawPosts={data.debug.rawPostCount}
+        {#if data.debug.error}
+          | <span class="text-red-500">ERROR: {data.debug.error}</span>
+        {/if}
+      </p>
+    </div>
+  {/if}
+
   <!-- Example Site Notice -->
   {#if data.isExampleSite}
     <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
