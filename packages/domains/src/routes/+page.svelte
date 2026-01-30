@@ -37,7 +37,7 @@
 		<h1 class="text-4xl md:text-5xl font-serif text-bark dark:text-neutral-100 mb-3 text-center">Forage</h1>
 
 		<!-- Tagline -->
-		<p class="text-xl md:text-2xl text-bark/70 dark:text-neutral-400 font-serif italic mb-8 text-center">
+		<p class="text-xl md:text-2xl text-foreground-muted dark:text-neutral-400 font-serif italic mb-8 text-center">
 			before you can plant, you have to search
 		</p>
 
@@ -52,12 +52,12 @@
 
 		<!-- Description -->
 		<GlassCard variant="muted" class="max-w-xl text-center mb-12 p-6">
-			<p class="text-bark/70 dark:text-neutral-300 font-sans leading-relaxed">
+			<p class="text-foreground-muted dark:text-neutral-300 font-sans leading-relaxed">
 				Finding the perfect domain doesn't have to take weeks. Tell Forage about your project, your vibe,
 				your budget—and it returns a curated list of available domains that actually fit. Walk the forest
 				floor, looking for something worth bringing home.
 			</p>
-			<p class="text-bark/60 dark:text-neutral-400 font-sans text-sm mt-4">
+			<p class="text-foreground-muted dark:text-neutral-400 font-sans text-sm mt-4">
 				Powered by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance. Real-time availability checks and smart scoring.
 			</p>
 		</GlassCard>
@@ -71,7 +71,7 @@
 					</svg>
 				</div>
 				<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">AI Generation</h3>
-				<p class="text-bark/60 dark:text-neutral-400 font-sans text-sm">
+				<p class="text-foreground-muted dark:text-neutral-400 font-sans text-sm">
 					Creative domain suggestions powered by DeepSeek v3.2, based on your brand, vibe, and preferences
 				</p>
 			</GlassCard>
@@ -83,7 +83,7 @@
 					</svg>
 				</div>
 				<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">Availability Check</h3>
-				<p class="text-bark/60 dark:text-neutral-400 font-sans text-sm">
+				<p class="text-foreground-muted dark:text-neutral-400 font-sans text-sm">
 					Real-time RDAP verification against global registries
 				</p>
 			</GlassCard>
@@ -95,7 +95,7 @@
 					</svg>
 				</div>
 				<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">Smart Scoring</h3>
-				<p class="text-bark/60 dark:text-neutral-400 font-sans text-sm">
+				<p class="text-foreground-muted dark:text-neutral-400 font-sans text-sm">
 					Each domain rated on pronounceability, memorability, and brand fit
 				</p>
 			</GlassCard>
@@ -115,7 +115,7 @@
 
 	<!-- Footer -->
 	<footer class="py-8 text-center">
-		<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-sans text-bark/50 dark:text-neutral-500 mb-4">
+		<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-sans text-foreground-subtle dark:text-neutral-500 mb-4">
 			<a href="https://grove.place" class="hover:text-domain-600 dark:hover:text-domain-400 transition-colors">
 				Grove
 			</a>
@@ -132,7 +132,7 @@
 				Legal
 			</a>
 		</div>
-		<div class="text-xs text-bark/40 dark:text-neutral-600 font-sans">
+		<div class="text-xs text-foreground-faint dark:text-neutral-600 font-sans">
 			Part of the Grove ecosystem
 		</div>
 	</footer>

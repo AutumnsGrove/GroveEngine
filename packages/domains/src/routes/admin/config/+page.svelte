@@ -67,7 +67,7 @@
 	<!-- Page Header -->
 	<div>
 		<h1 class="text-2xl font-serif text-bark">Configuration</h1>
-		<p class="text-bark/60 font-sans mt-1">Configure the domain search agent settings</p>
+		<p class="text-foreground-muted font-sans mt-1">Configure the domain search agent settings</p>
 	</div>
 
 	<!-- Messages -->
@@ -103,7 +103,7 @@
 						class="input-field"
 						disabled={isSaving}
 					/>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
+					<p class="mt-1 text-xs text-foreground-subtle font-sans">
 						Maximum number of search batches (1-10)
 					</p>
 				</div>
@@ -122,7 +122,7 @@
 						class="input-field"
 						disabled={isSaving}
 					/>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
+					<p class="mt-1 text-xs text-foreground-subtle font-sans">
 						Domains generated per batch (10-100)
 					</p>
 				</div>
@@ -141,7 +141,7 @@
 						class="input-field"
 						disabled={isSaving}
 					/>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
+					<p class="mt-1 text-xs text-foreground-subtle font-sans">
 						Stop when this many good domains are found
 					</p>
 				</div>
@@ -168,11 +168,11 @@
 						class="w-full h-2 bg-grove-200 rounded-lg appearance-none cursor-pointer accent-domain-600"
 						disabled={isSaving}
 					/>
-					<div class="flex justify-between text-xs text-bark/50 font-sans mt-1">
+					<div class="flex justify-between text-xs text-foreground-subtle font-sans mt-1">
 						<span>Conservative</span>
 						<span>Experimental</span>
 					</div>
-					<p class="mt-2 text-xs text-bark/50 font-sans">
+					<p class="mt-2 text-xs text-foreground-subtle font-sans">
 						Higher values = more creative/unusual domain suggestions
 					</p>
 				</div>
@@ -192,7 +192,7 @@
 						class="input-field"
 						disabled={isSaving}
 					/>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
+					<p class="mt-1 text-xs text-foreground-subtle font-sans">
 						Delay between RDAP availability checks (rate limiting)
 					</p>
 					<div class="mt-2 flex gap-2">
@@ -229,7 +229,7 @@
 	<!-- Info Box -->
 	<GlassCard variant="accent" class="p-6">
 		<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">About Configuration</h3>
-		<p class="text-sm text-bark/70 dark:text-neutral-300 font-sans leading-relaxed">
+		<p class="text-sm text-foreground-muted dark:text-neutral-300 font-sans leading-relaxed">
 			These settings control how the domain search agent operates. Changes take effect on the next search.
 			For testing, use the "Fast" RDAP delay. In production, keep it at 10 seconds to avoid rate limiting from registries.
 		</p>

@@ -14,10 +14,22 @@
 	/* Signal supported color schemes to browser and extensions (Dark Reader) */
 	:root {
 		color-scheme: light;
+
+		/* Semantic foreground colors - Light Mode */
+		--color-foreground: #3d2914;
+		--color-foreground-muted: rgba(61, 41, 20, 0.7);
+		--color-foreground-subtle: rgba(61, 41, 20, 0.5);
+		--color-foreground-faint: rgba(61, 41, 20, 0.4);
 	}
 
 	.dark {
 		color-scheme: dark;
+
+		/* Semantic foreground colors - Dark Mode */
+		--color-foreground: #f5f2ea;
+		--color-foreground-muted: rgba(245, 242, 234, 0.7);
+		--color-foreground-subtle: rgba(245, 242, 234, 0.5);
+		--color-foreground-faint: rgba(245, 242, 234, 0.4);
 	}
 
 	html {
@@ -98,8 +110,8 @@
 	}
 
 	.tab-inactive {
-		@apply text-bark/60 dark:text-neutral-400
-			hover:text-bark dark:hover:text-neutral-200
+		@apply text-foreground-muted
+			hover:text-foreground
 			hover:bg-bark/5 dark:hover:bg-white/10;
 	}
 }
@@ -188,4 +200,15 @@
 
 .glass-divide {
 	@apply divide-white/30 dark:divide-neutral-700/40;
+}
+
+/* =============================================================================
+   SEMANTIC TEXT UTILITIES
+   Theme-aware foreground colors that adapt to light/dark mode
+   ============================================================================= */
+@layer utilities {
+	.text-foreground { color: var(--color-foreground); }
+	.text-foreground-muted { color: var(--color-foreground-muted); }
+	.text-foreground-subtle { color: var(--color-foreground-subtle); }
+	.text-foreground-faint { color: var(--color-foreground-faint); }
 }

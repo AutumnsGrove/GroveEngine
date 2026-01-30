@@ -190,7 +190,7 @@
 			case 'needs_followup':
 				return 'badge-warning';
 			default:
-				return 'bg-bark/10 text-bark/60';
+				return 'bg-bark/10 dark:bg-white/10 text-foreground-muted';
 		}
 	}
 
@@ -217,7 +217,7 @@
 	<div class="flex justify-between items-center">
 		<div>
 			<h1 class="text-2xl font-serif text-bark">Search History</h1>
-			<p class="text-bark/60 font-sans mt-1">All previous domain searches ({data.total} total)</p>
+			<p class="text-foreground-muted font-sans mt-1">All previous domain searches ({data.total} total)</p>
 		</div>
 		<div class="flex gap-3">
 			<GlassButton variant="default" onclick={manualSync} disabled={syncing}>
@@ -252,7 +252,7 @@
 			<svg class="w-16 h-16 mx-auto text-bark/20 dark:text-neutral-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
 			</svg>
-			<p class="text-bark/60 dark:text-neutral-400 font-sans mb-4">No search history yet</p>
+			<p class="text-foreground-muted dark:text-neutral-400 font-sans mb-4">No search history yet</p>
 			<GlassButton variant="accent" href="/admin/searcher">
 				Start Your First Search
 			</GlassButton>
@@ -262,12 +262,12 @@
 			<table class="w-full">
 				<thead class="bg-grove-50 border-b border-grove-200">
 					<tr>
-						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-bark/70">Business</th>
-						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden sm:table-cell">Status</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden md:table-cell">Checked</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70">Found</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden lg:table-cell">Tokens</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden md:table-cell">Date</th>
+						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Business</th>
+						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden sm:table-cell">Status</th>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell">Checked</th>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Found</th>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden lg:table-cell">Tokens</th>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell">Date</th>
 						<th class="px-4 py-3"></th>
 					</tr>
 				</thead>
@@ -276,7 +276,7 @@
 						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-domain-50/30' : ''}">
 							<td class="px-4 py-4">
 								<div class="font-sans font-medium text-bark">{job.business_name}</div>
-								<div class="text-sm text-bark/50 font-sans">{job.client_email}</div>
+								<div class="text-sm text-foreground-subtle font-sans">{job.client_email}</div>
 								<div class="sm:hidden mt-1">
 									<span class="badge {getStatusBadge(job.status)} {isRunning(job.status) ? 'animate-pulse' : ''}">{job.status}</span>
 								</div>
@@ -294,24 +294,24 @@
 									</div>
 								{/if}
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-bark/70 hidden md:table-cell">
+							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden md:table-cell">
 								<span class="{isRunning(job.status) ? 'font-medium text-domain-600' : ''}">
 									{job.domains_checked}
 								</span>
 							</td>
 							<td class="px-4 py-4 text-right">
-								<span class="font-sans font-medium {job.good_results > 0 ? 'text-grove-600' : 'text-bark/60'}">
+								<span class="font-sans font-medium {job.good_results > 0 ? 'text-grove-600' : 'text-foreground-muted'}">
 									{job.good_results}
 								</span>
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-bark/70 hidden lg:table-cell">
+							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden lg:table-cell">
 								{#if job.input_tokens || job.output_tokens}
 									{((job.input_tokens ?? 0) + (job.output_tokens ?? 0)).toLocaleString()}
 								{:else}
 									-
 								{/if}
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-bark/50 hidden md:table-cell">
+							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-subtle hidden md:table-cell">
 								{formatDate(job.created_at)}
 							</td>
 							<td class="px-4 py-4 text-right">
@@ -330,7 +330,7 @@
 
 		<!-- Pagination could go here -->
 		{#if data.total > jobs.length}
-			<div class="text-center text-sm text-bark/50 font-sans">
+			<div class="text-center text-sm text-foreground-subtle font-sans">
 				Showing {jobs.length} of {data.total} searches
 			</div>
 		{/if}

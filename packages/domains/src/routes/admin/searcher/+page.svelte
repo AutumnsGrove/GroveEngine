@@ -769,22 +769,22 @@
 
 	function getPriceClass(category: string | null | undefined): string {
 		switch (category) {
-			case 'bundled': return 'text-grove-600';
-			case 'recommended': return 'text-domain-600';
-			case 'premium': return 'text-amber-600';
-			default: return 'text-bark/60';
+			case 'bundled': return 'text-grove-600 dark:text-grove-400';
+			case 'recommended': return 'text-domain-600 dark:text-domain-400';
+			case 'premium': return 'text-amber-600 dark:text-amber-400';
+			default: return 'text-foreground-muted';
 		}
 	}
 
 	function getStatusColor(status: string): string {
 		switch (status) {
-			case 'running': return 'text-domain-600';
-			case 'pending': return 'text-bark/60';
-			case 'complete': return 'text-grove-600';
-			case 'needs_followup': return 'text-amber-600';
-			case 'failed': return 'text-red-600';
-			case 'cancelled': return 'text-red-500';
-			default: return 'text-bark/60';
+			case 'running': return 'text-domain-600 dark:text-domain-400';
+			case 'pending': return 'text-foreground-muted';
+			case 'complete': return 'text-grove-600 dark:text-grove-400';
+			case 'needs_followup': return 'text-amber-600 dark:text-amber-400';
+			case 'failed': return 'text-red-600 dark:text-red-400';
+			case 'cancelled': return 'text-red-500 dark:text-red-400';
+			default: return 'text-foreground-muted';
 		}
 	}
 
@@ -867,7 +867,7 @@
 	<!-- Page Header -->
 	<div>
 		<h1 class="text-2xl font-serif text-bark">Domain Searcher</h1>
-		<p class="text-bark/60 font-sans mt-1">AI-powered domain discovery with live pricing</p>
+		<p class="text-foreground-muted font-sans mt-1">AI-powered domain discovery with live pricing</p>
 	</div>
 
 	<div class="grid lg:grid-cols-2 gap-8">
@@ -891,7 +891,7 @@
 				<button
 					type="button"
 					onclick={() => searchMode = 'vibe'}
-					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'vibe' ? 'bg-white text-bark shadow-sm' : 'text-bark/60 hover:text-bark/80'}"
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'vibe' ? 'bg-white text-bark shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
 					Vibe Mode
@@ -899,7 +899,7 @@
 				<button
 					type="button"
 					onclick={() => searchMode = 'detailed'}
-					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'detailed' ? 'bg-white text-bark shadow-sm' : 'text-bark/60 hover:text-bark/80'}"
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'detailed' ? 'bg-white text-bark shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
 					Detailed
@@ -931,10 +931,10 @@
 
 							<!-- Word count indicator -->
 							<div class="flex items-center justify-between mt-2">
-								<span class="text-xs font-sans {vibeWordCount >= 5 ? 'text-grove-600' : 'text-bark/50'}">
+								<span class="text-xs font-sans {vibeWordCount >= 5 ? 'text-grove-600' : 'text-foreground-subtle'}">
 									{vibeWordCount} word{vibeWordCount === 1 ? '' : 's'}
 									{#if vibeWordCount < 5}
-										<span class="text-bark/40">· need {5 - vibeWordCount} more</span>
+										<span class="text-foreground-faint">· need {5 - vibeWordCount} more</span>
 									{:else}
 										<span class="text-grove-500">· ready!</span>
 									{/if}
@@ -943,7 +943,7 @@
 									<button
 										type="button"
 										onclick={() => { vibeText = ''; vibeError = ''; }}
-										class="text-xs text-bark/40 hover:text-bark/60 font-sans"
+										class="text-xs text-foreground-faint hover:text-foreground-muted font-sans"
 										disabled={isParsingVibe}
 									>
 										Clear
@@ -961,13 +961,13 @@
 
 						<!-- Example prompts -->
 						<div class="pt-2">
-							<p class="text-xs font-sans text-bark/50 mb-2">Try an example:</p>
+							<p class="text-xs font-sans text-foreground-subtle mb-2">Try an example:</p>
 							<div class="flex flex-col gap-2">
 								{#each vibeExamples as example}
 									<button
 										type="button"
 										onclick={() => useExample(example)}
-										class="text-left px-3 py-2 text-sm font-sans text-bark/70 bg-bark/5 hover:bg-bark/10 rounded-lg transition-colors line-clamp-2"
+										class="text-left px-3 py-2 text-sm font-sans text-foreground-muted bg-bark/5 hover:bg-bark/10 dark:hover:bg-white/10 rounded-lg transition-colors line-clamp-2"
 										disabled={isParsingVibe || isFormDisabled}
 									>
 										"{example}"
@@ -1001,7 +1001,7 @@
 								<button
 									type="button"
 									onclick={clearVibeResults}
-									class="text-xs text-bark/50 hover:text-bark/70 font-sans"
+									class="text-xs text-foreground-subtle hover:text-foreground-muted font-sans"
 								>
 									Start over
 								</button>
@@ -1010,7 +1010,7 @@
 							<div class="bg-grove-50 border border-grove-200 rounded-lg p-4 space-y-3">
 								<!-- Business Name -->
 								<div>
-									<label for="business_name_parsed" class="block text-xs font-sans text-bark/60 mb-1">Business Name</label>
+									<label for="business_name_parsed" class="block text-xs font-sans text-foreground-muted mb-1">Business Name</label>
 									<input
 										id="business_name_parsed"
 										type="text"
@@ -1022,7 +1022,7 @@
 
 								<!-- Vibe -->
 								<div>
-									<label for="vibe_parsed" class="block text-xs font-sans text-bark/60 mb-1">Vibe</label>
+									<label for="vibe_parsed" class="block text-xs font-sans text-foreground-muted mb-1">Vibe</label>
 									<select
 										id="vibe_parsed"
 										bind:value={parsedVibe.vibe}
@@ -1037,7 +1037,7 @@
 
 								<!-- Keywords -->
 								<div>
-									<label for="keywords_parsed" class="block text-xs font-sans text-bark/60 mb-1">Keywords</label>
+									<label for="keywords_parsed" class="block text-xs font-sans text-foreground-muted mb-1">Keywords</label>
 									<input
 										id="keywords_parsed"
 										type="text"
@@ -1050,7 +1050,7 @@
 
 								<!-- Domain Idea -->
 								<div>
-									<label for="domain_idea_parsed" class="block text-xs font-sans text-bark/60 mb-1">Domain Idea (optional)</label>
+									<label for="domain_idea_parsed" class="block text-xs font-sans text-foreground-muted mb-1">Domain Idea (optional)</label>
 									<input
 										id="domain_idea_parsed"
 										type="text"
@@ -1064,7 +1064,7 @@
 
 								<!-- TLD Preferences -->
 								<div>
-									<label class="block text-xs font-sans text-bark/60 mb-1">TLD Preferences</label>
+									<label class="block text-xs font-sans text-foreground-muted mb-1">TLD Preferences</label>
 									<div class="flex flex-wrap gap-1.5">
 										{#each ['com', 'co', 'io', 'dev', 'app', 'net', 'org', 'ai', 'studio', 'design', 'place'] as tld}
 											<button
@@ -1077,7 +1077,7 @@
 														parsedVibe.tld_preferences = [...parsedVibe.tld_preferences, tld];
 													}
 												}}
-												class="px-2 py-1 rounded-full text-xs font-sans transition-colors {parsedVibe.tld_preferences.includes(tld) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
+												class="px-2 py-1 rounded-full text-xs font-sans transition-colors {parsedVibe.tld_preferences.includes(tld) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
 												disabled={isSubmitting}
 											>
 												.{tld}
@@ -1089,9 +1089,9 @@
 
 							<!-- AI Provider Info (locked) -->
 							<div class="bg-grove-50 border border-grove-200 rounded-lg p-3">
-								<div class="text-xs font-sans text-bark/60 mb-1">AI Model</div>
+								<div class="text-xs font-sans text-foreground-muted mb-1">AI Model</div>
 								<div class="text-sm font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
-								<div class="text-xs font-sans text-bark/50 mt-1">{aiProviderInfo.description}</div>
+								<div class="text-xs font-sans text-foreground-subtle mt-1">{aiProviderInfo.description}</div>
 							</div>
 
 							<!-- Start Search button -->
@@ -1146,7 +1146,7 @@
 						class="input-field"
 						disabled={isFormDisabled}
 					/>
-					<p class="mt-1 text-xs text-bark/50 font-sans">If you have a specific domain in mind, we'll check it and find similar alternatives</p>
+					<p class="mt-1 text-xs text-foreground-subtle font-sans">If you have a specific domain in mind, we'll check it and find similar alternatives</p>
 				</div>
 
 				<!-- Vibe -->
@@ -1184,14 +1184,14 @@
 								>
 									<div class="flex items-center gap-2">
 										<svg
-											class="w-4 h-4 text-bark/50 transition-transform {isExpanded ? 'rotate-90' : ''}"
+											class="w-4 h-4 text-foreground-subtle transition-transform {isExpanded ? 'rotate-90' : ''}"
 											viewBox="0 0 20 20"
 											fill="currentColor"
 										>
 											<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
 										</svg>
 										<span class="font-sans font-medium text-bark text-sm">{group.label}</span>
-										<span class="text-xs text-bark/50 font-sans">{group.description}</span>
+										<span class="text-xs text-foreground-subtle font-sans">{group.description}</span>
 									</div>
 									{#if selectedCount > 0}
 										<span class="px-2 py-0.5 text-xs font-sans bg-domain-100 text-domain-700 rounded-full">
@@ -1213,12 +1213,12 @@
 												>
 													Select all
 												</button>
-												<span class="text-bark/30">|</span>
+												<span class="text-foreground-faint">|</span>
 												<button
 													type="button"
 													onclick={() => deselectAllInGroup(group.id)}
 													disabled={isFormDisabled}
-													class="text-xs text-bark/50 hover:text-bark/70 font-sans disabled:opacity-50"
+													class="text-xs text-foreground-subtle hover:text-foreground-muted font-sans disabled:opacity-50"
 												>
 													Clear
 												</button>
@@ -1229,7 +1229,7 @@
 												<button
 													type="button"
 													onclick={() => toggleTld(tld.value)}
-													class="px-2.5 py-1 rounded-full text-xs font-sans transition-colors {tldPreferences.includes(tld.value) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
+													class="px-2.5 py-1 rounded-full text-xs font-sans transition-colors {tldPreferences.includes(tld.value) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
 													disabled={isFormDisabled}
 												>
 													{tld.label}
@@ -1246,7 +1246,7 @@
 					<div class="flex items-center justify-between mt-3 pt-3 border-t border-grove-100">
 						<div>
 							<span class="text-sm font-sans font-medium text-bark">Diverse TLDs</span>
-							<p class="text-xs text-bark/50 font-sans">Encourage variety in TLD suggestions</p>
+							<p class="text-xs text-foreground-subtle font-sans">Encourage variety in TLD suggestions</p>
 						</div>
 						<button
 							type="button"
@@ -1284,7 +1284,7 @@
 					</label>
 					<div class="card p-4 bg-grove-50">
 						<div class="text-base font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
-						<p class="mt-1 text-sm text-bark/60 font-sans">
+						<p class="mt-1 text-sm text-foreground-muted font-sans">
 							{aiProviderInfo.description}
 						</p>
 					</div>
@@ -1333,28 +1333,28 @@
 
 					<div class="space-y-3">
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">Business</span>
+							<span class="text-foreground-muted">Business</span>
 							<span class="text-bark font-medium">{currentJob.business_name}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">Batch</span>
+							<span class="text-foreground-muted">Batch</span>
 							<span class="text-bark">{currentJob.batch_num} / 6</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">Domains Checked</span>
+							<span class="text-foreground-muted">Domains Checked</span>
 							<span class="text-bark">{currentJob.domains_checked}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">Available Found</span>
+							<span class="text-foreground-muted">Available Found</span>
 							<span class="text-domain-600 font-medium">{currentJob.domains_available ?? 0}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">Good Results</span>
+							<span class="text-foreground-muted">Good Results</span>
 							<span class="text-grove-600 font-medium">{currentJob.good_results}</span>
 						</div>
 						<!-- Live elapsed time for running jobs, final duration for completed -->
 						<div class="flex justify-between text-sm font-sans">
-							<span class="text-bark/60">
+							<span class="text-foreground-muted">
 								{currentJob.status === 'running' || currentJob.status === 'pending' ? 'Elapsed' : 'Duration'}
 							</span>
 							{#if currentJob.status === 'running' || currentJob.status === 'pending'}
@@ -1364,7 +1364,7 @@
 							{:else if currentJob.duration_seconds}
 								<span class="text-bark font-mono tabular-nums">{formatDuration(currentJob.duration_seconds)}</span>
 							{:else}
-								<span class="text-bark/40">-</span>
+								<span class="text-foreground-faint">-</span>
 							{/if}
 						</div>
 					</div>
@@ -1403,7 +1403,7 @@
 				{#if currentJob.status === 'needs_followup' && followupQuiz}
 					<GlassCard variant="accent" class="p-4 sm:p-6">
 						<h2 class="font-serif text-base sm:text-lg text-bark mb-2">Refine Your Search</h2>
-						<p class="text-sm text-bark/60 font-sans mb-4">
+						<p class="text-sm text-foreground-muted font-sans mb-4">
 							We found {followupQuiz.context.good_found} good domains out of {followupQuiz.context.target} target.
 							Answer these questions to help us find more.
 						</p>
@@ -1449,7 +1449,7 @@
 															followupAnswers[question.id] = [...arr, opt.value];
 														}
 													}}
-													class="px-3 py-1.5 rounded-full text-sm font-sans transition-colors {selected ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
+													class="px-3 py-1.5 rounded-full text-sm font-sans transition-colors {selected ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
 												>
 													{opt.label}
 												</button>
@@ -1486,40 +1486,40 @@
 						<div class="grid grid-cols-2 gap-2 sm:gap-4">
 							<div class="text-center p-2 sm:p-3 bg-grove-50 rounded-lg">
 								<div class="text-xl sm:text-2xl font-mono font-bold text-grove-600">{pricingSummary.bundled}</div>
-								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Bundled (&le;$30/yr)</div>
+								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">Bundled (&le;$30/yr)</div>
 							</div>
 							<div class="text-center p-2 sm:p-3 bg-domain-50 rounded-lg">
 								<div class="text-xl sm:text-2xl font-mono font-bold text-domain-600">{pricingSummary.recommended}</div>
-								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Recommended (&le;$50/yr)</div>
+								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">Recommended (&le;$50/yr)</div>
 							</div>
 							<div class="text-center p-2 sm:p-3 bg-bark/5 rounded-lg">
-								<div class="text-xl sm:text-2xl font-mono font-bold text-bark/70">{pricingSummary.standard}</div>
-								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Standard</div>
+								<div class="text-xl sm:text-2xl font-mono font-bold text-foreground-muted">{pricingSummary.standard}</div>
+								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">Standard</div>
 							</div>
 							<div class="text-center p-2 sm:p-3 bg-amber-50 rounded-lg">
 								<div class="text-xl sm:text-2xl font-mono font-bold text-amber-600">{pricingSummary.premium}</div>
-								<div class="text-[10px] sm:text-xs text-bark/60 font-sans">Premium (&gt;$50/yr)</div>
+								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">Premium (&gt;$50/yr)</div>
 							</div>
 						</div>
 
 						{#if tokenUsage}
 							<div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-grove-200 space-y-1.5 sm:space-y-2">
-								<div class="flex justify-between text-[10px] sm:text-xs font-sans text-bark/50">
+								<div class="flex justify-between text-[10px] sm:text-xs font-sans text-foreground-subtle">
 									<span>API Usage</span>
 									<span class="font-mono">{tokenUsage.total_tokens.toLocaleString()} tokens</span>
 								</div>
 								<div class="grid grid-cols-2 gap-2 text-[10px] sm:text-xs font-sans">
-									<div class="flex justify-between text-bark/40">
+									<div class="flex justify-between text-foreground-faint">
 										<span>Input</span>
 										<span class="font-mono">{tokenUsage.input_tokens.toLocaleString()}</span>
 									</div>
-									<div class="flex justify-between text-bark/40">
+									<div class="flex justify-between text-foreground-faint">
 										<span>Output</span>
 										<span class="font-mono">{tokenUsage.output_tokens.toLocaleString()}</span>
 									</div>
 								</div>
 								<div class="flex justify-between text-[10px] sm:text-xs font-sans pt-1 border-t border-grove-100">
-									<span class="text-bark/50">Est. Cost (DeepSeek v3.2)</span>
+									<span class="text-foreground-subtle">Est. Cost (DeepSeek v3.2)</span>
 									<span class="font-mono text-domain-600 font-medium">{estimateCost(tokenUsage)}</span>
 								</div>
 							</div>
@@ -1532,7 +1532,7 @@
 					<GlassCard>
 						<div class="px-3 py-3 sm:p-4 border-b border-grove-200 flex justify-between items-center">
 							<h2 class="font-serif text-base sm:text-lg text-bark">Available Domains</h2>
-							<span class="text-xs sm:text-sm text-bark/60 font-sans">
+							<span class="text-xs sm:text-sm text-foreground-muted font-sans">
 								{#if isLoadingResults}
 									Loading...
 								{:else}
@@ -1560,13 +1560,13 @@
 														{category === 'bundled' ? 'bg-grove-100 text-grove-700' :
 														 category === 'recommended' ? 'bg-domain-100 text-domain-700' :
 														 category === 'premium' ? 'bg-amber-100 text-amber-700' :
-														 'bg-bark/10 text-bark/60'}">
+														 'bg-bark/10 dark:bg-white/10 text-foreground-muted'}">
 														{category}
 													</span>
 												{/if}
 											</div>
 											<div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5">
-												<span class="text-[11px] sm:text-xs font-sans text-bark/50">Score: {(result.score * 100).toFixed(0)}%</span>
+												<span class="text-[11px] sm:text-xs font-sans text-foreground-subtle">Score: {(result.score * 100).toFixed(0)}%</span>
 												<!-- Evaluation indicators -->
 												{#if evalData}
 													<div class="flex items-center gap-1">
@@ -1598,7 +1598,7 @@
 											<span class="{getPriceClass(result.pricing_category || evalData?.pricing_category)} font-sans font-medium text-sm sm:text-base whitespace-nowrap">
 												{result.price_display || formatPrice(result.price_cents)}/yr
 											</span>
-											<svg class="w-5 h-5 text-bark/40 transition-transform flex-shrink-0 {isExpanded ? 'rotate-180' : ''}" viewBox="0 0 20 20" fill="currentColor">
+											<svg class="w-5 h-5 text-foreground-faint transition-transform flex-shrink-0 {isExpanded ? 'rotate-180' : ''}" viewBox="0 0 20 20" fill="currentColor">
 												<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
 											</svg>
 										</div>
@@ -1610,46 +1610,46 @@
 											<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
 												<!-- Evaluation scores -->
 												<div class="space-y-2">
-													<h4 class="text-xs font-sans font-medium text-bark/70 uppercase tracking-wide">Evaluation</h4>
+													<h4 class="text-xs font-sans font-medium text-foreground-muted uppercase tracking-wide">Evaluation</h4>
 													<div class="space-y-1.5">
 														<div class="flex items-center justify-between text-sm font-sans">
-															<span class="text-bark/60">Pronounceable</span>
-															<span class="{evalData.pronounceable ? 'text-grove-600' : 'text-bark/40'}">{evalData.pronounceable ? 'Yes' : 'No'}</span>
+															<span class="text-foreground-muted">Pronounceable</span>
+															<span class="{evalData.pronounceable ? 'text-grove-600' : 'text-foreground-faint'}">{evalData.pronounceable ? 'Yes' : 'No'}</span>
 														</div>
 														<div class="flex items-center justify-between text-sm font-sans">
-															<span class="text-bark/60">Memorable</span>
-															<span class="{evalData.memorable ? 'text-grove-600' : 'text-bark/40'}">{evalData.memorable ? 'Yes' : 'No'}</span>
+															<span class="text-foreground-muted">Memorable</span>
+															<span class="{evalData.memorable ? 'text-grove-600' : 'text-foreground-faint'}">{evalData.memorable ? 'Yes' : 'No'}</span>
 														</div>
 														<div class="flex items-center justify-between text-sm font-sans">
-															<span class="text-bark/60">Brand Fit</span>
-															<span class="{evalData.brand_fit ? 'text-grove-600' : 'text-bark/40'}">{evalData.brand_fit ? 'Yes' : 'No'}</span>
+															<span class="text-foreground-muted">Brand Fit</span>
+															<span class="{evalData.brand_fit ? 'text-grove-600' : 'text-foreground-faint'}">{evalData.brand_fit ? 'Yes' : 'No'}</span>
 														</div>
 														<div class="flex items-center justify-between text-sm font-sans">
-															<span class="text-bark/60">Email Friendly</span>
-															<span class="{evalData.email_friendly ? 'text-grove-600' : 'text-bark/40'}">{evalData.email_friendly ? 'Yes' : 'No'}</span>
+															<span class="text-foreground-muted">Email Friendly</span>
+															<span class="{evalData.email_friendly ? 'text-grove-600' : 'text-foreground-faint'}">{evalData.email_friendly ? 'Yes' : 'No'}</span>
 														</div>
 													</div>
 												</div>
 
 												<!-- Pricing & RDAP info -->
 												<div class="space-y-2">
-													<h4 class="text-xs font-sans font-medium text-bark/70 uppercase tracking-wide">Details</h4>
+													<h4 class="text-xs font-sans font-medium text-foreground-muted uppercase tracking-wide">Details</h4>
 													<div class="space-y-1.5">
 														{#if evalData.renewal_cents}
 															<div class="flex items-center justify-between text-sm font-sans">
-																<span class="text-bark/60">Renewal</span>
+																<span class="text-foreground-muted">Renewal</span>
 																<span class="text-bark">{formatPrice(evalData.renewal_cents)}/yr</span>
 															</div>
 														{/if}
 														{#if evalData.rdap_registrar}
 															<div class="flex items-center justify-between text-sm font-sans">
-																<span class="text-bark/60">Registrar</span>
+																<span class="text-foreground-muted">Registrar</span>
 																<span class="text-bark truncate max-w-[150px]" title={evalData.rdap_registrar}>{evalData.rdap_registrar}</span>
 															</div>
 														{/if}
 														{#if evalData.rdap_expiration}
 															<div class="flex items-center justify-between text-sm font-sans">
-																<span class="text-bark/60">Expires</span>
+																<span class="text-foreground-muted">Expires</span>
 																<span class="text-bark">{formatExpiration(evalData.rdap_expiration)}</span>
 															</div>
 														{/if}
@@ -1660,7 +1660,7 @@
 											<!-- AI Notes -->
 											{#if evalData.notes}
 												<div class="mt-3 pt-3 border-t border-grove-200">
-													<p class="text-sm text-bark/70 font-sans italic">&ldquo;{evalData.notes}&rdquo;</p>
+													<p class="text-sm text-foreground-muted font-sans italic">&ldquo;{evalData.notes}&rdquo;</p>
 												</div>
 											{/if}
 
@@ -1668,7 +1668,7 @@
 											{#if result.flags && result.flags.length > 0}
 												<div class="mt-3 flex flex-wrap gap-1">
 													{#each result.flags as flag}
-														<span class="px-2 py-0.5 text-xs font-sans bg-bark/10 text-bark/60 rounded">{flag}</span>
+														<span class="px-2 py-0.5 text-xs font-sans bg-bark/10 dark:bg-white/10 text-foreground-muted rounded">{flag}</span>
 													{/each}
 												</div>
 											{/if}
@@ -1680,15 +1680,15 @@
 					</GlassCard>
 				{:else if currentJob.status === 'complete' && !isLoadingResults}
 					<GlassCard variant="muted" class="p-8 text-center">
-						<p class="text-bark/60 font-sans">No available domains found. Try adjusting your search criteria.</p>
+						<p class="text-foreground-muted font-sans">No available domains found. Try adjusting your search criteria.</p>
 					</GlassCard>
 				{/if}
 			{:else}
 				<GlassCard variant="muted" class="p-8 text-center">
-					<svg class="w-16 h-16 mx-auto text-bark/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<svg class="w-16 h-16 mx-auto text-foreground-faint mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
 					</svg>
-					<p class="text-bark/60 font-sans">No active search. Fill out the form to start finding domains.</p>
+					<p class="text-foreground-muted font-sans">No active search. Fill out the form to start finding domains.</p>
 				</GlassCard>
 			{/if}
 		</div>

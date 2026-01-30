@@ -249,16 +249,16 @@
 			case 'complete': return 'badge-success';
 			case 'failed': return 'badge-error';
 			case 'needs_followup': return 'badge-warning';
-			default: return 'bg-bark/10 text-bark/60';
+			default: return 'bg-bark/10 dark:bg-white/10 text-foreground-muted';
 		}
 	}
 
 	function getPriceClass(category: string | null): string {
 		switch (category) {
-			case 'bundled': return 'text-grove-600';
-			case 'recommended': return 'text-domain-600';
-			case 'premium': return 'text-amber-600';
-			default: return 'text-bark/60';
+			case 'bundled': return 'text-grove-600 dark:text-grove-400';
+			case 'recommended': return 'text-domain-600 dark:text-domain-400';
+			case 'premium': return 'text-amber-600 dark:text-amber-400';
+			default: return 'text-foreground-muted';
 		}
 	}
 
@@ -464,7 +464,7 @@
 
 {#if !job}
 	<GlassCard variant="muted" class="p-12 text-center">
-		<p class="text-bark/60 dark:text-neutral-400 font-sans">Job not found</p>
+		<p class="text-foreground-muted dark:text-neutral-400 font-sans">Job not found</p>
 		<GlassButton variant="accent" href="/admin/history" class="mt-4">
 			Back to History
 		</GlassButton>
@@ -475,7 +475,7 @@
 		<div class="flex items-start justify-between">
 			<div>
 				<div class="flex items-center gap-3 mb-2">
-					<a href="/admin/history" class="text-bark/50 hover:text-bark transition-colors" aria-label="Back to history">
+					<a href="/admin/history" class="text-foreground-subtle hover:text-bark transition-colors" aria-label="Back to history">
 						<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
 							<path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
 						</svg>
@@ -488,11 +488,11 @@
 						<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
 					</div>
 				</div>
-				<p class="text-bark/60 font-sans">{job.client_email}</p>
+				<p class="text-foreground-muted font-sans">{job.client_email}</p>
 			</div>
 			{#if isRunning}
 				<div class="text-right">
-					<div class="text-sm text-bark/60 font-sans">Elapsed</div>
+					<div class="text-sm text-foreground-muted font-sans">Elapsed</div>
 					<div class="text-lg font-mono text-domain-600">{formatElapsed(elapsedSeconds)}</div>
 				</div>
 			{/if}
@@ -501,21 +501,21 @@
 		<!-- Job Details -->
 		<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Domains Checked</div>
+				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">Domains Checked</div>
 				<div class="text-2xl font-serif {isRunning ? 'text-domain-600 dark:text-domain-400' : 'text-bark dark:text-neutral-100'}">{job.domains_checked}</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Available Found</div>
+				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">Available Found</div>
 				<div class="text-2xl font-serif text-grove-600 dark:text-grove-400">{job.good_results}</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
+				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
 				<div class="text-2xl font-serif {isRunning ? 'text-domain-600 dark:text-domain-400' : 'text-bark dark:text-neutral-100'}">
 					{isRunning ? formatElapsed(elapsedSeconds) : formatDuration(job.duration_seconds)}
 				</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Batches</div>
+				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">Batches</div>
 				<div class="text-2xl font-serif text-bark dark:text-neutral-100">{job.batch_num} / 6</div>
 				{#if isRunning}
 					<div class="mt-2 h-1.5 bg-grove-100 dark:bg-neutral-700 rounded-full overflow-hidden">
@@ -530,12 +530,12 @@
 			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-4">Search Parameters</h2>
 			<div class="grid sm:grid-cols-2 gap-4 text-sm font-sans">
 				<div>
-					<span class="text-bark/60">Vibe:</span>
+					<span class="text-foreground-muted">Vibe:</span>
 					<span class="text-bark ml-2 capitalize">{job.vibe}</span>
 				</div>
 				{#if job.domain_idea}
 					<div class="flex items-center gap-2 flex-wrap">
-						<span class="text-bark/60">Domain Idea:</span>
+						<span class="text-foreground-muted">Domain Idea:</span>
 						<span class="text-bark font-mono">{job.domain_idea}</span>
 						{#if domainIdeaStatus}
 							{#if domainIdeaStatus.checked}
@@ -555,30 +555,30 @@
 									</span>
 								{/if}
 							{:else if isRunning}
-								<span class="text-bark/40 text-xs">Checking...</span>
+								<span class="text-foreground-faint text-xs">Checking...</span>
 							{/if}
 						{:else if isRunning}
-							<span class="text-bark/40 text-xs">Checking...</span>
+							<span class="text-foreground-faint text-xs">Checking...</span>
 						{/if}
 					</div>
 				{/if}
 				<div>
-					<span class="text-bark/60">TLD Preferences:</span>
+					<span class="text-foreground-muted">TLD Preferences:</span>
 					<span class="text-bark ml-2">{formatTldPreferences(job.tld_preferences)}</span>
 				</div>
 				{#if job.keywords}
 					<div>
-						<span class="text-bark/60">Keywords:</span>
+						<span class="text-foreground-muted">Keywords:</span>
 						<span class="text-bark ml-2">{job.keywords}</span>
 					</div>
 				{/if}
 				<div>
-					<span class="text-bark/60">Created:</span>
+					<span class="text-foreground-muted">Created:</span>
 					<span class="text-bark ml-2">{formatDate(job.created_at)}</span>
 				</div>
 				{#if job.completed_at}
 					<div>
-						<span class="text-bark/60">Completed:</span>
+						<span class="text-foreground-muted">Completed:</span>
 						<span class="text-bark ml-2">{formatDate(job.completed_at)}</span>
 					</div>
 				{/if}
@@ -596,7 +596,7 @@
 					</div>
 					<div class="flex-1">
 						<h2 class="font-serif text-lg text-bark">Refine Your Search</h2>
-						<p class="text-sm text-bark/60 font-sans mt-1">We need a bit more information to find the perfect domains for you.</p>
+						<p class="text-sm text-foreground-muted font-sans mt-1">We need a bit more information to find the perfect domains for you.</p>
 					</div>
 				</div>
 				
@@ -606,7 +606,7 @@
 							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 						</svg>
-						<p class="mt-3 text-bark/60 font-sans">Loading follow-up questions...</p>
+						<p class="mt-3 text-foreground-muted font-sans">Loading follow-up questions...</p>
 					</div>
 				{:else if followupError}
 					<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -628,13 +628,13 @@
 						<div class="bg-gradient-to-r from-grove-50 to-domain-50 p-4 rounded-lg border border-grove-200">
 							<div class="flex items-center justify-between">
 								<div>
-									<p class="text-sm font-sans text-bark/70">
+									<p class="text-sm font-sans text-foreground-muted">
 										We found <span class="font-bold text-grove-700">{followupQuiz.context.good_found}</span> good domains out of <span class="font-bold text-domain-700">{followupQuiz.context.target}</span> target.
 									</p>
-									<p class="text-xs text-bark/50 font-sans mt-1">Answer these questions to help us find more.</p>
+									<p class="text-xs text-foreground-subtle font-sans mt-1">Answer these questions to help us find more.</p>
 								</div>
 								<div class="text-right">
-									<div class="text-xs font-sans text-bark/50">Batches completed</div>
+									<div class="text-xs font-sans text-foreground-subtle">Batches completed</div>
 									<div class="text-lg font-mono font-bold text-domain-600">{followupQuiz.context.batches_completed}/6</div>
 								</div>
 							</div>
@@ -654,7 +654,7 @@
 												{#if question.required}<span class="text-red-500 ml-1">*</span>{/if}
 											</label>
 											{#if question.placeholder}
-												<p class="text-xs text-bark/50 font-sans mb-2">{question.placeholder}</p>
+												<p class="text-xs text-foreground-subtle font-sans mb-2">{question.placeholder}</p>
 											{/if}
 										</div>
 									</div>
@@ -692,7 +692,7 @@
 															followupAnswers[question.id] = [...arr, opt.value];
 														}
 													}}
-													class="px-3 py-2 rounded-lg text-sm font-sans transition-all {selected ? 'bg-domain-100 text-domain-700 border-2 border-domain-300 shadow-sm' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10 hover:border-bark/20'}"
+													class="px-3 py-2 rounded-lg text-sm font-sans transition-all {selected ? 'bg-domain-100 text-domain-700 border-2 border-domain-300 shadow-sm' : 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10 hover:border-bark/20'}"
 												>
 													{opt.label}
 												</button>
@@ -724,7 +724,7 @@
 									Continue Search with Refinements
 								{/if}
 							</button>
-							<p class="text-xs text-center text-bark/50 font-sans mt-3">
+							<p class="text-xs text-center text-foreground-subtle font-sans mt-3">
 								Your search will resume with the additional information you provide.
 							</p>
 						</div>
@@ -753,11 +753,11 @@
 						<table class="w-full">
 							<thead class="bg-grove-50 border-b border-grove-200">
 								<tr>
-									<th class="text-left px-4 py-3 text-sm font-sans font-medium text-bark/70">Domain</th>
-									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-bark/70">Score</th>
-									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-bark/70">Category</th>
-									<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70">Price</th>
-									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden md:table-cell">Batch</th>
+									<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Domain</th>
+									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Score</th>
+									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Category</th>
+									<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Price</th>
+									<th class="text-center px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell">Batch</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-grove-100">
@@ -773,7 +773,7 @@
 													style="width: {result.score * 100}%"
 												></div>
 											</div>
-											<span class="text-xs text-bark/50 font-sans">{(result.score * 100).toFixed(0)}%</span>
+											<span class="text-xs text-foreground-subtle font-sans">{(result.score * 100).toFixed(0)}%</span>
 										</td>
 										<td class="px-4 py-3 text-center">
 											{#if result.price_category}
@@ -781,7 +781,7 @@
 													{result.price_category}
 												</span>
 											{:else}
-												<span class="text-bark/40">-</span>
+												<span class="text-foreground-faint">-</span>
 											{/if}
 										</td>
 										<td class="px-4 py-3 text-right">
@@ -789,7 +789,7 @@
 												{formatPrice(result.price_cents)}
 											</span>
 										</td>
-										<td class="px-4 py-3 text-center text-sm text-bark/50 font-sans hidden md:table-cell">
+										<td class="px-4 py-3 text-center text-sm text-foreground-subtle font-sans hidden md:table-cell">
 											{result.batch_num}
 										</td>
 									</tr>
@@ -798,7 +798,7 @@
 						</table>
 					</div>
 				{:else}
-					<div class="p-8 text-center text-bark/50 font-sans">
+					<div class="p-8 text-center text-foreground-subtle font-sans">
 						{#if isRunning}
 							Waiting for available domains...
 						{:else}
@@ -814,12 +814,12 @@
 			<details class="glass-card overflow-hidden">
 				<summary class="p-4 cursor-pointer hover:bg-grove-50 transition-colors flex justify-between items-center">
 					<h2 class="font-serif text-lg text-bark">Checked Domains (Unavailable)</h2>
-					<span class="text-sm text-bark/50 font-sans">{unavailableResults.length} domains</span>
+					<span class="text-sm text-foreground-subtle font-sans">{unavailableResults.length} domains</span>
 				</summary>
 				<div class="border-t border-grove-200 p-4">
 					<div class="flex flex-wrap gap-2">
 						{#each unavailableResults as result}
-							<span class="px-2 py-1 bg-bark/5 rounded text-sm font-mono text-bark/50">
+							<span class="px-2 py-1 bg-bark/5 rounded text-sm font-mono text-foreground-subtle">
 								{result.domain}
 							</span>
 						{/each}
