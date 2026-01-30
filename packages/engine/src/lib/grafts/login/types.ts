@@ -100,40 +100,6 @@ export interface LoginGraftProps extends BaseGraftProps {
 }
 
 /**
- * Props for LoginCard component.
- */
-export interface LoginCardProps extends BaseGraftProps {
-  /** Which providers to show */
-  providers?: AuthProvider[];
-
-  /** Base URL for login endpoint */
-  loginUrl?: string;
-
-  /** Return URL after auth */
-  returnTo?: string;
-
-  /** Custom header snippet */
-  header?: Snippet;
-
-  /** Custom footer snippet */
-  footer?: Snippet;
-}
-
-/**
- * Props for ProviderButton component.
- */
-export interface ProviderButtonProps extends BaseGraftProps {
-  /** Which provider this button is for */
-  provider: AuthProvider;
-
-  /** Full URL to redirect to for OAuth */
-  href: string;
-
-  /** Button size variant */
-  size?: "sm" | "md" | "lg";
-}
-
-/**
  * Props for ProviderIcon component.
  */
 export interface ProviderIconProps {

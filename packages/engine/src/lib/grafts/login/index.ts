@@ -34,8 +34,6 @@ export type {
   AuthProvider,
   LoginVariant,
   LoginGraftProps,
-  LoginCardProps,
-  ProviderButtonProps,
   ProviderIconProps,
   ProviderConfig,
   PasskeyAuthResult,
@@ -59,8 +57,6 @@ export {
 
 // Components
 export { default as LoginGraft } from "./LoginGraft.svelte";
-export { default as LoginCard } from "./LoginCard.svelte";
-export { default as ProviderButton } from "./ProviderButton.svelte";
 export { default as ProviderIcon } from "./ProviderIcon.svelte";
 export { default as PasskeyButton } from "./PasskeyButton.svelte";
 

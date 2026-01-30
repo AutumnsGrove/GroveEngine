@@ -3,8 +3,11 @@
 	 * LoginGraft - Unified login component for all Grove properties
 	 *
 	 * Main orchestrator component that provides consistent login UI.
-	 * Uses Better Auth for OAuth flows - redirects directly to GroveAuth's
+	 * Uses Better Auth for OAuth flows - POSTs to GroveAuth's
 	 * Better Auth endpoints which handle the full OAuth dance.
+	 *
+	 * IMPORTANT: Better Auth's /api/auth/sign-in/social endpoint requires POST,
+	 * not GET. This component uses form-based submission to ensure proper flow.
 	 *
 	 * Supports three variants:
 	 * - default: Card with providers and optional header/footer
@@ -44,7 +47,6 @@
 		getProviderName,
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import ProviderButton from "./ProviderButton.svelte";
 	import PasskeyButton from "./PasskeyButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
@@ -66,27 +68,12 @@
 	);
 
 	/**
-	 * Build the Better Auth social sign-in URL for a provider.
-	 *
-	 * Better Auth handles the full OAuth flow:
-	 * 1. User clicks → redirects to Better Auth's /api/auth/sign-in/social
-	 * 2. Better Auth redirects to Google/GitHub/etc
-	 * 3. Provider callback → Better Auth /api/auth/callback/:provider
-	 * 4. Better Auth sets session cookie and redirects to callbackURL
-	 *
-	 * The callbackURL points back to our site's /auth/callback which just
-	 * verifies the session cookie exists and redirects to the final destination.
+	 * Get the callback URL for OAuth redirects.
+	 * This URL is where Better Auth will redirect after OAuth completes.
 	 */
-	function getLoginUrl(provider: AuthProvider): string {
-		// Build the callback URL that Better Auth will redirect to after OAuth
+	function getCallbackUrl(): string {
 		const origin = browser ? window.location.origin : "";
-		const callbackUrl = `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
-
-		const params = new URLSearchParams();
-		params.set("provider", provider);
-		params.set("callbackURL", callbackUrl);
-
-		return `${GROVEAUTH_URLS.socialSignIn}?${params.toString()}`;
+		return `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
 	}
 
 	// For compact variant, use first available provider
@@ -100,15 +87,20 @@
 			<!-- Passkey uses its own button with WebAuthn ceremony -->
 			<PasskeyButton {returnTo} size="md" class={className} />
 		{:else}
-			<GlassButton
-				variant="default"
-				size="md"
-				href={getLoginUrl(primaryProvider)}
-				class={className}
-			>
-				<ProviderIcon provider={primaryProvider} size={18} />
-				<span>Sign in with {getProviderName(primaryProvider)}</span>
-			</GlassButton>
+			<!-- POST form for Better Auth social sign-in -->
+			<form method="POST" action={GROVEAUTH_URLS.socialSignIn} class="inline">
+				<input type="hidden" name="provider" value={primaryProvider} />
+				<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
+				<GlassButton
+					variant="default"
+					size="md"
+					type="submit"
+					class={className}
+				>
+					<ProviderIcon provider={primaryProvider} size={18} />
+					<span>Sign in with {getProviderName(primaryProvider)}</span>
+				</GlassButton>
+			</form>
 		{/if}
 	{/if}
 {:else if variant === "fullpage"}
@@ -146,10 +138,20 @@
 								<!-- Passkey uses its own button with WebAuthn ceremony -->
 								<PasskeyButton {returnTo} />
 							{:else}
-								<ProviderButton
-									{provider}
-									href={getLoginUrl(provider)}
-								/>
+								<!-- POST form for Better Auth social sign-in -->
+								<form method="POST" action={GROVEAUTH_URLS.socialSignIn}>
+									<input type="hidden" name="provider" value={provider} />
+									<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
+									<GlassButton
+										variant="default"
+										size="lg"
+										type="submit"
+										class="w-full justify-start gap-3"
+									>
+										<ProviderIcon {provider} size={20} />
+										<span>Continue with {getProviderName(provider)}</span>
+									</GlassButton>
+								</form>
 							{/if}
 						{/each}
 					</div>
@@ -189,10 +191,20 @@
 							<!-- Passkey uses its own button with WebAuthn ceremony -->
 							<PasskeyButton {returnTo} />
 						{:else}
-							<ProviderButton
-								{provider}
-								href={getLoginUrl(provider)}
-							/>
+							<!-- POST form for Better Auth social sign-in -->
+							<form method="POST" action={GROVEAUTH_URLS.socialSignIn}>
+								<input type="hidden" name="provider" value={provider} />
+								<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
+								<GlassButton
+									variant="default"
+									size="lg"
+									type="submit"
+									class="w-full justify-start gap-3"
+								>
+									<ProviderIcon {provider} size={20} />
+									<span>Continue with {getProviderName(provider)}</span>
+								</GlassButton>
+							</form>
 						{/if}
 					{/each}
 				</div>
