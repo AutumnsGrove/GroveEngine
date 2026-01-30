@@ -1,44 +1,47 @@
 import { error } from "@sveltejs/kit";
-import { getPostBySlug } from "$lib/utils/markdown.js";
+import { getTenantDb } from "$lib/server/services/database";
 import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
 
 interface PostRecord {
   slug: string;
   title: string;
-  date?: string;
+  status?: string;
   tags?: string;
   description?: string;
   markdown_content?: string;
   html_content?: string;
   gutter_content?: string;
   last_synced?: string;
-  updated_at?: string;
+  updated_at?: string | number;
+  published_at?: string | number;
+  created_at?: string | number;
 }
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
   // Auth check happens in admin layout
   const { slug } = params;
-  const { tenantId } = locals;
 
   if (!slug) {
     throw error(400, "Slug is required");
   }
 
-  // Admin routes may not have tenantId set - handle gracefully
-  // This allows admin to edit posts across tenants if needed
-  const effectiveTenantId = tenantId || "admin";
+  // Require tenant context for multi-tenant data access
+  if (!locals.tenantId) {
+    console.error("[Edit Post] No tenant ID found");
+    throw error(403, "Tenant context required");
+  }
 
-  // Try D1 first
+  // Try D1 first using TenantDb for proper tenant scoping
   if (platform?.env?.DB) {
     try {
-      const post = (await platform.env.DB.prepare(
-        `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, last_synced, updated_at
-         FROM posts
-         WHERE slug = ? AND tenant_id = ?`,
-      )
-        .bind(slug, effectiveTenantId)
-        .first()) as PostRecord | null;
+      const tenantDb = getTenantDb(platform.env.DB, {
+        tenantId: locals.tenantId,
+      });
+
+      const post = await tenantDb.queryOne<PostRecord>("posts", "slug = ?", [
+        slug,
+      ]);
 
       if (post) {
         return {
@@ -51,7 +54,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
         };
       }
     } catch (err) {
-      console.error("D1 fetch error:", err);
+      console.error("[Edit Post] D1 fetch error:", err);
       // Fall through to filesystem fallback
     }
   }
