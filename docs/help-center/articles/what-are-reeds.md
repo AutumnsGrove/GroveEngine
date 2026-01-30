@@ -57,7 +57,7 @@ Both types support threaded replies, so conversations can develop naturally.
 
 **Less spam, less noise.** Moderation happens before publication, not after.
 
-**Simple for readers.** One form, one choice. No account creation required (though authenticated users get additional features).
+**Simple for readers.** One form, one choice. No account creation required (though authenticated Wanderers get additional features).
 
 ## Related
 

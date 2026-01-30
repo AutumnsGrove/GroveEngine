@@ -49,7 +49,7 @@ Reactions are simple and positive. Think of them as digital nods of acknowledgme
 
 Want to say more? You can reply to posts directly in Meadow. Conversations happen in context, attached to the post that sparked them.
 
-Replies are public to other Meadow users but don't appear on the original blogger's site (unless they choose to display them).
+Replies are public to other Meadow Wanderers but don't appear on the original blogger's site (unless they choose to display them).
 
 ### Vote (privately)
 
@@ -61,9 +61,9 @@ Why? Because visible vote counts create anxiety and gaming behavior. Grove wants
 
 | Content | Visibility |
 |---------|-----------|
-| Your shared post | All Meadow users |
+| Your shared post | All Meadow Wanderers |
 | Your reactions | The post author + public |
-| Your replies | All Meadow users |
+| Your replies | All Meadow Wanderers |
 | Your votes | Only you |
 
 ## Opting out

@@ -26,7 +26,7 @@ Meadow is Grove's community feed—a place where blog posts from across Grove ca
 
 By default, your blog is private. Your posts live at your URL and that's it. People find them through your link, through search engines, or through your RSS feed.
 
-When you enable Meadow sharing, your published posts can appear in the community feed. Other Grove users can discover your writing, vote on it, and react with emojis. It's a way to find readers who might never have stumbled across your blog otherwise.
+When you enable Meadow sharing, your published posts can appear in the community feed. Other Wanderers can discover your writing, vote on it, and react with emojis. It's a way to find readers who might never have stumbled across your blog otherwise.
 
 ## Enabling Meadow sharing
 
@@ -52,7 +52,7 @@ Now only posts with those tags appear in Meadow. Personal updates, drafts-you-pu
 
 When one of your posts appears in Meadow:
 
-- **It shows up in the feed.** Other users browsing Meadow might see it, depending on how they've sorted (newest, popular, etc.)
+- **It shows up in the feed.** Other Wanderers browsing Meadow might see it, depending on how they've sorted (newest, popular, etc.)
 - **People can vote.** Upvotes and downvotes affect where your post appears in rankings, but vote counts aren't displayed publicly.
 - **People can react.** Emoji reactions show community engagement. The top reactions appear on your post in the feed.
 - **People can reply.** Meadow comments are separate from your blog's comment section.

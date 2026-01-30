@@ -37,7 +37,7 @@ Visit [porch.grove.place](https://porch.grove.place) to start a conversation.
 
 **Continue the conversation** — Reply directly to the email. The conversation stays threaded and coherent.
 
-**Check your history** — Logged-in users can see their past visits, check status, and add follow-ups.
+**Check your history** — Logged-in Wanderers can see their past visits, check status, and add follow-ups.
 
 No ticket numbers in the interface. No "your request has been escalated to tier 2." Just two people on a porch, figuring things out.
 

@@ -56,7 +56,7 @@
 				<AlertCircle class="w-12 h-12 mx-auto text-amber-500 mb-4" />
 				<h2 class="text-xl font-serif text-foreground mb-2">Sign in to view your visits</h2>
 				<p class="text-foreground-muted font-sans mb-4">
-					Visit history is available for signed-in users.
+					Visit history is available for signed-in wanderers.
 				</p>
 				<a
 					href="/auth/login?redirect=/porch/visits"

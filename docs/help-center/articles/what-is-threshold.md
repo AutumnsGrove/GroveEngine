@@ -57,7 +57,7 @@ Threshold doesn't just block. It escalates:
 3. **Longer cooldown** — "Take a break for a minute."
 4. **Block** — For persistent abuse only.
 
-Normal users almost never see anything past the first level.
+Normal Wanderers almost never see anything past the first level.
 
 ## What this means for you
 
