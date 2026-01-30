@@ -218,7 +218,9 @@ export const load: PageServerLoad = async ({
       ? {
           plan: billing.plan,
           status: billing.status,
-          hasSubscription: !!billing.provider_subscription_id,
+          hasSubscription:
+            !!billing.provider_subscription_id ||
+            ["oak", "evergreen"].includes(billing.plan),
           currentPeriodStart: billing.current_period_start
             ? new Date(billing.current_period_start * 1000).toISOString()
             : null,

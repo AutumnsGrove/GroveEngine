@@ -1,7 +1,15 @@
 <script>
   import { Button, Badge, GlassCard, toast } from '$lib/ui';
-  import { Plus, AlertCircle } from 'lucide-svelte';
+  import { Plus, AlertCircle, Sparkles, Calendar, Image, Map } from 'lucide-svelte';
   import { api } from '$lib/utils';
+
+  // Map curio slugs to icons
+  /** @type {Record<string, typeof Calendar>} */
+  const curioIcons = {
+    timeline: Calendar,
+    gallery: Image,
+    journey: Map,
+  };
 
   let { data } = $props();
 
@@ -156,6 +164,42 @@
       </tbody>
     </table>
   </GlassCard>
+
+  <!-- Active Curios Section -->
+  {#if data.curios && data.curios.length > 0}
+    <GlassCard variant="default" class="mb-8">
+      <div class="flex items-center gap-2 mb-4">
+        <Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+        <h2 class="m-0 text-lg font-semibold text-foreground">Active Curios</h2>
+      </div>
+      <p class="text-sm text-foreground-muted mb-4">
+        Curios are special page types that add dynamic functionality to your site.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {#each data.curios as curio (curio.slug)}
+          {@const CurioIcon = curioIcons[curio.slug] || Sparkles}
+          <a
+            href={curio.configUrl}
+            class="flex items-center gap-3 p-3 rounded-lg border transition-all {curio.enabled
+              ? 'border-grove-300 bg-grove-50 dark:border-grove-700 dark:bg-grove-900/30 hover:border-grove-400 dark:hover:border-grove-600'
+              : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/30 hover:border-gray-300 dark:hover:border-gray-600'}"
+          >
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center {curio.enabled
+              ? 'bg-grove-100 text-grove-600 dark:bg-grove-800 dark:text-grove-400'
+              : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'}">
+              <CurioIcon class="w-5 h-5" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-foreground">{curio.name}</div>
+              <div class="text-xs {curio.enabled ? 'text-grove-600 dark:text-grove-400' : 'text-foreground-muted'}">
+                {curio.enabled ? 'Enabled' : 'Not configured'}
+              </div>
+            </div>
+          </a>
+        {/each}
+      </div>
+    </GlassCard>
+  {/if}
 
   <GlassCard variant="muted">
     <h3>About Pages</h3>

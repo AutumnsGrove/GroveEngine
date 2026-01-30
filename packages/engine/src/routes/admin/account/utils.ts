@@ -29,14 +29,18 @@ export function formatDate(isoString: string | null | undefined): string {
  * @param endDateIso - ISO 8601 date string for the end date
  * @returns Number of days remaining, or null if invalid
  */
-export function daysRemaining(endDateIso: string | null | undefined): number | null {
+export function daysRemaining(
+  endDateIso: string | null | undefined,
+): number | null {
   if (!endDateIso) return null;
   try {
     const end = new Date(endDateIso);
     // Check for Invalid Date
     if (isNaN(end.getTime())) return null;
     const now = new Date();
-    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const diff = Math.ceil(
+      (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
     return diff > 0 ? diff : 0;
   } catch {
     return null;
@@ -44,8 +48,48 @@ export function daysRemaining(endDateIso: string | null | undefined): number | n
 }
 
 /**
+ * Patterns that indicate sensitive or unhelpful error information.
+ * These should be filtered out and replaced with user-friendly messages.
+ */
+const SENSITIVE_PATTERNS = [
+  // Stripe identifiers
+  "stripe_",
+  "sk_",
+  "pk_",
+  "cus_",
+  "sub_",
+  "pi_",
+  "pm_",
+  "ch_",
+  "in_",
+  // Stripe error types
+  "api_error",
+  "card_error",
+  "invalid_request_error",
+  "authentication_error",
+  "rate_limit_error",
+  "idempotency_error",
+  // LemonSqueezy
+  "lemonsqueezy",
+  "lmsqueezy",
+  "lemon_",
+  // Internal indicators
+  "INTERNAL",
+  "500",
+  "502",
+  "503",
+  "504",
+  // Technical details users shouldn't see
+  "ECONNREFUSED",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "fetch failed",
+  "network error",
+];
+
+/**
  * Sanitize error messages to avoid exposing sensitive provider details.
- * Filters out Stripe-specific error codes and internal error indicators.
+ * Filters out Stripe/LemonSqueezy-specific error codes and internal error indicators.
  *
  * @param error - The error object to sanitize
  * @param fallback - Fallback message to use if error contains sensitive info
@@ -55,15 +99,13 @@ export function sanitizeErrorMessage(error: unknown, fallback: string): string {
   if (!(error instanceof Error)) return fallback;
 
   const msg = error.message;
+  const msgLower = msg.toLowerCase();
 
-  // Filter out messages containing provider-specific details
-  if (msg.includes("stripe_") || msg.includes("sk_") || msg.includes("pk_")) {
-    return fallback;
-  }
-
-  // Filter out internal error codes
-  if (msg.includes("INTERNAL") || msg.includes("500")) {
-    return fallback;
+  // Filter out messages containing sensitive patterns
+  for (const pattern of SENSITIVE_PATTERNS) {
+    if (msgLower.includes(pattern.toLowerCase())) {
+      return fallback;
+    }
   }
 
   return msg || fallback;

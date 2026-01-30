@@ -164,7 +164,7 @@
   {:else if !billingError}
     <div class="no-subscription">
       <p>No active subscription found.</p>
-      <Button variant="primary" href="/plans">
+      <Button variant="primary" href="https://grove.place/plans">
         View Plans
       </Button>
     </div>

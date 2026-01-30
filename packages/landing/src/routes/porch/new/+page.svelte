@@ -171,7 +171,7 @@
 							placeholder="your.email@example.com"
 							required
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
-							disabled={submitting || !!data.user?.email}
+							disabled={submitting}
 						/>
 						<p class="text-xs text-foreground/50 mt-1 font-sans">
 							So I can get back to you
