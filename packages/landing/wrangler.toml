@@ -25,6 +25,11 @@ service = "groveauth"
 binding = "CDN_BUCKET"
 bucket_name = "grove-cdn"
 
+# KV for rate limiting and caching
+[[kv_namespaces]]
+binding = "CACHE"
+id = "3b09be7e03f44bcfbf93a9b9e0d7a9c4"
+
 # Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
 # - RESEND_API_KEY (environment variable, not secret for Pages)
 # - ADMIN_EMAILS (environment variable)

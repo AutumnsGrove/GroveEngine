@@ -217,18 +217,41 @@
 		{#if showComment && vote}
 			<div class="w-full max-w-md animate-in slide-in-from-top-2 duration-200">
 				{#if !showCommentField}
-					<!-- "Want to say more?" button -->
-					<div class="flex justify-center">
+					<!-- Submit now or expand to add comment -->
+					<div class="flex items-center justify-center gap-4">
+						<button
+							type="button"
+							onclick={submitFeedback}
+							disabled={isSubmitting}
+							class={cn(
+								"px-4 py-2 rounded-lg font-medium text-sm",
+								"bg-grove-600 hover:bg-grove-700 text-white",
+								"focus:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2",
+								"disabled:opacity-50 disabled:cursor-not-allowed",
+								"transition-colors duration-200",
+							)}
+						>
+							{#if isSubmitting}
+								<span class="flex items-center gap-2">
+									<Loader2 class="w-4 h-4 animate-spin" aria-hidden="true" />
+									Sending...
+								</span>
+							{:else}
+								Submit
+							{/if}
+						</button>
 						<button
 							type="button"
 							onclick={toggleCommentField}
+							disabled={isSubmitting}
 							class={cn(
 								"text-sm text-muted-foreground hover:text-foreground",
 								"underline underline-offset-2 decoration-dashed",
 								"focus:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 rounded",
+								"disabled:opacity-50",
 							)}
 						>
-							Want to say more?
+							Add a comment
 						</button>
 					</div>
 				{:else}
