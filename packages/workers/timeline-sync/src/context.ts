@@ -55,7 +55,7 @@ const TASK_PATTERNS: TaskPattern[] = [
     pattern: /deploy|ci|cd|pipeline|docker|build/i,
     task: "deployment/CI work",
   },
-  { pattern: /database|schema|sql|d1|migration/i, task: "database work" },
+  { pattern: /database|schema|sql|d1/i, task: "database work" },
   { pattern: /bug|fix|patch|issue|error/i, task: "bug fixes" },
 ];
 

@@ -159,9 +159,8 @@ export default {
  * The sync runs at 1 AM UTC, targeting the previous day's activity.
  */
 function getYesterdayUTC(): string {
-  const now = new Date();
-  now.setUTCDate(now.getUTCDate() - 1);
-  return now.toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000);
+  return yesterday.toISOString().split("T")[0];
 }
 
 /**
