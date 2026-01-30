@@ -31,7 +31,7 @@ const BETTER_AUTH_SESSION_COOKIE = "better-auth.session_token";
  * After this date, legacy cookies will no longer grant access.
  * This prevents old/expired cookies from being used indefinitely.
  */
-const LEGACY_SESSION_DEADLINE = new Date("2025-03-01T00:00:00Z");
+const LEGACY_SESSION_DEADLINE = new Date("2026-03-01T00:00:00Z");
 
 // =============================================================================
 // Error Messages
@@ -42,6 +42,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   auth_failed: "Authentication failed, please try again",
   no_session: "Session was not created, please try again",
   userinfo_failed: "Unable to retrieve your account information",
+  network_error:
+    "Unable to connect to authentication service, please try again",
 };
 
 function getFriendlyErrorMessage(errorCode: string): string {
@@ -178,6 +180,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     ) {
       throw err;
     }
+
+    // Handle network errors specifically (fetch failures, timeouts, etc.)
+    const isNetworkError =
+      err instanceof TypeError ||
+      (err instanceof Error && err.message.includes("fetch"));
+
+    if (isNetworkError) {
+      console.error("[Auth Callback] Network error fetching session:", err);
+      throw redirect(
+        302,
+        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("network_error"))}`,
+      );
+    }
+
     console.error("[Auth Callback] Error:", err);
     throw redirect(
       302,

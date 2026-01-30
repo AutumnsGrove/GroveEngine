@@ -27,7 +27,7 @@ const BETTER_AUTH_SESSION_COOKIE = "better-auth.session_token";
  * After this date, legacy cookies will no longer grant access.
  * This prevents old/expired cookies from being used indefinitely.
  */
-const LEGACY_SESSION_DEADLINE = new Date("2025-03-01T00:00:00Z");
+const LEGACY_SESSION_DEADLINE = new Date("2026-03-01T00:00:00Z");
 
 // =============================================================================
 // Error Messages
