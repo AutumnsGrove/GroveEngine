@@ -158,7 +158,10 @@ export async function safeDecryptToken(
 
 /**
  * Diagnostic version of decryptToken that reports exactly where failures occur.
- * Use this to debug decryption issues, then remove or disable in production.
+ *
+ * ⚠️ SECURITY NOTE: This function reveals detailed failure stages which could
+ * help attackers fingerprint the encryption system. Use ONLY in development
+ * or staging environments. Do not expose in production API responses.
  *
  * Common issues table:
  * | Stage       | Problem                           | Fix                                         |
