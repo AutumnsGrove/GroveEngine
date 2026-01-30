@@ -72,6 +72,10 @@
 
   $effect(() => {
     // Initialize recorder when component mounts
+    // Note: We intentionally do NOT call recorder.warm() here!
+    // Requesting microphone permission should only happen on user interaction,
+    // not on page load. The start() method handles warming on-demand.
+    // This fixes #751 (mic prompt on load), #752 (frozen editor), #757 (disabled state)
     recorder = createScribeRecorder({
       onAudioLevel: (level) => {
         audioLevel = level;
@@ -84,9 +88,6 @@
         onError?.({ message: err.message });
       },
     });
-
-    // Warm up the recorder
-    recorder.warm();
 
     // Cleanup on unmount
     return () => {
