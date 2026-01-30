@@ -3,7 +3,7 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { Input, Button, GlassCard } from '$lib/ui';
+  import { Input, Button, GlassCard } from "$lib/ui";
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
@@ -30,7 +30,9 @@
     tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
     font = /** @type {any} */ (data.post).font || "default";
     content = data.post.markdown_content || "";
-    gutterItems = data.post.gutter_content ? JSON.parse(/** @type {string} */ (data.post.gutter_content)) : [];
+    gutterItems = data.post.gutter_content
+      ? JSON.parse(/** @type {string} */ (data.post.gutter_content))
+      : [];
     status = /** @type {any} */ (data.post).status || "draft";
   });
 
@@ -41,9 +43,9 @@
   // UI state
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
-  let showGutter = $state(false);  // Start hidden for cleaner first-time experience
+  let showGutter = $state(false); // Start hidden for cleaner first-time experience
   let showDeleteDialog = $state(false);
-  let detailsCollapsed = $state(true);  // Start collapsed for focused writing
+  let detailsCollapsed = $state(true); // Start collapsed for focused writing
 
   // Load collapsed state from localStorage
   $effect(() => {
@@ -62,7 +64,10 @@
   function toggleDetailsCollapsed() {
     detailsCollapsed = !detailsCollapsed;
     if (browser) {
-      localStorage.setItem("editor-details-collapsed", String(detailsCollapsed));
+      localStorage.setItem(
+        "editor-details-collapsed",
+        String(detailsCollapsed),
+      );
     }
   }
 
@@ -155,7 +160,8 @@
   function handleBeforeUnload(e) {
     if (hasUnsavedChanges) {
       e.preventDefault();
-      return (e.returnValue = "You have unsaved changes. Are you sure you want to leave?");
+      return (e.returnValue =
+        "You have unsaved changes. Are you sure you want to leave?");
     }
   }
 </script>
@@ -179,6 +185,23 @@
       </div>
     </div>
     <div class="header-actions">
+      <!-- Prominent Publish/Draft Toggle -->
+      <button
+        class="status-toggle {status === 'published' ? 'published' : 'draft'}"
+        onclick={() =>
+          (status = status === "published" ? "draft" : "published")}
+        disabled={saving}
+        title={status === "published"
+          ? "Click to unpublish (make draft)"
+          : "Click to publish"}
+      >
+        {#if status === "published"}
+          <span class="status-icon">✓</span> Published
+        {:else}
+          <span class="status-icon">○</span> Draft — Click to Publish
+        {/if}
+      </button>
+
       <Button
         variant="danger"
         onclick={confirmDelete}
@@ -187,17 +210,10 @@
       >
         Delete
       </Button>
-      <a
-        href="/blog/{slug}"
-        target="_blank"
-        class="view-btn"
-      >
+      <Button variant="outline" href="/blog/{slug}" target="_blank">
         View Live
-      </a>
-      <Button
-        onclick={handleSave}
-        disabled={saving}
-      >
+      </Button>
+      <Button onclick={handleSave} disabled={saving}>
         {saving ? "Saving..." : "Save Changes"}
       </Button>
     </div>
@@ -205,9 +221,14 @@
 
   <div class="editor-layout">
     <!-- Metadata Panel -->
-    <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
+    <GlassCard
+      variant="frosted"
+      class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}"
+    >
       <div class="panel-header">
-        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
+        <h2 class="panel-title">
+          {#if detailsCollapsed}Details{:else}Post Details{/if}
+        </h2>
         <button
           class="collapse-details-btn"
           onclick={toggleDetailsCollapsed}
@@ -242,18 +263,18 @@
 
           <div class="form-group">
             <label for="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              bind:value={date}
-              class="form-input"
-            />
+            <input type="date" id="date" bind:value={date} class="form-input" />
           </div>
 
           <div class="form-group">
             <label for="description">
               Description
-              <span class="char-count" class:warning={description.length > 160} class:good={description.length >= 120 && description.length <= 160}>
+              <span
+                class="char-count"
+                class:warning={description.length > 160}
+                class:good={description.length >= 120 &&
+                  description.length <= 160}
+              >
                 {description.length}/160
               </span>
             </label>
@@ -266,9 +287,13 @@
               class:char-warning={description.length > 160}
             ></textarea>
             {#if description.length > 160}
-              <span class="form-warning">Description exceeds recommended SEO length</span>
+              <span class="form-warning"
+                >Description exceeds recommended SEO length</span
+              >
             {:else if description.length > 0 && description.length < 120}
-              <span class="form-hint">Add {120 - description.length} more chars for optimal SEO</span>
+              <span class="form-hint"
+                >Add {120 - description.length} more chars for optimal SEO</span
+              >
             {/if}
           </div>
 
@@ -337,24 +362,30 @@
               <option value="published">Published</option>
             </select>
             <span class="form-hint">
-              {status === "draft" ? "This post will be hidden from public view" : "This post will be visible to all visitors"}
+              {status === "draft"
+                ? "This post will be hidden from public view"
+                : "This post will be visible to all visitors"}
             </span>
           </div>
 
           <div class="metadata-info">
-            {#if 'last_synced' in data.post && data.post.last_synced}
+            {#if "last_synced" in data.post && data.post.last_synced}
               <p class="info-item">
                 <span class="info-label">Last synced:</span>
                 <span class="info-value">
-                  {new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
+                  {new Date(
+                    /** @type {any} */ (data.post).last_synced,
+                  ).toLocaleString()}
                 </span>
               </p>
             {/if}
-            {#if 'updated_at' in data.post && data.post.updated_at}
+            {#if "updated_at" in data.post && data.post.updated_at}
               <p class="info-item">
                 <span class="info-label">Last updated:</span>
                 <span class="info-value">
-                  {new Date(/** @type {any} */ (data.post).updated_at).toLocaleString()}
+                  {new Date(
+                    /** @type {any} */ (data.post).updated_at,
+                  ).toLocaleString()}
                 </span>
               </p>
             {/if}
@@ -384,7 +415,8 @@
             <GutterManager
               bind:gutterItems
               availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-              onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
+              onInsertAnchor={(/** @type {string} */ name) =>
+                editorRef?.insertAnchor(name)}
             />
           </aside>
         {/if}
@@ -399,6 +431,17 @@
     </main>
   </div>
 </div>
+
+<!-- Delete Confirmation Dialog -->
+<Dialog bind:open={showDeleteDialog} title="Delete Post">
+  <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
+  {#snippet footer()}
+    <Button variant="outline" onclick={() => (showDeleteDialog = false)}
+      >Cancel</Button
+    >
+    <Button variant="danger" onclick={handleDelete}>Delete</Button>
+  {/snippet}
+</Dialog>
 
 <style>
   .edit-post-page {
@@ -487,21 +530,90 @@
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    align-items: center;
   }
-  .view-btn {
-    background: var(--color-bg-secondary);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
+
+  /* Prominent Status Toggle Button */
+  .status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.6rem 1.25rem;
     border-radius: var(--border-radius-button);
     font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background-color 0.2s;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid;
   }
-  .view-btn:hover {
-    background: var(--color-border);
+
+  .status-toggle.draft {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #92400e;
   }
+
+  .status-toggle.draft:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    transform: scale(1.02);
+  }
+
+  .status-toggle.published {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
+  }
+
+  .status-toggle.published:hover {
+    background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  }
+
+  .status-toggle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .status-icon {
+    font-size: 1.1rem;
+  }
+
+  :global(.dark) .status-toggle.draft {
+    background: linear-gradient(
+      135deg,
+      rgba(251, 191, 36, 0.2) 0%,
+      rgba(245, 158, 11, 0.3) 100%
+    );
+    border-color: #f59e0b;
+    color: #fcd34d;
+  }
+
+  :global(.dark) .status-toggle.draft:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(251, 191, 36, 0.3) 0%,
+      rgba(245, 158, 11, 0.4) 100%
+    );
+  }
+
+  :global(.dark) .status-toggle.published {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.2) 0%,
+      rgba(52, 211, 153, 0.3) 100%
+    );
+    border-color: #10b981;
+    color: #6ee7b7;
+  }
+
+  :global(.dark) .status-toggle.published:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.3) 0%,
+      rgba(52, 211, 153, 0.4) 100%
+    );
+  }
+
   /* Editor Layout */
   .editor-layout {
     display: flex;
@@ -594,7 +706,10 @@
     font-size: 0.9rem;
     background: var(--color-bg-secondary);
     color: var(--color-text);
-    transition: border-color 0.2s, background-color 0.3s, color 0.3s;
+    transition:
+      border-color 0.2s,
+      background-color 0.3s,
+      color 0.3s;
   }
   .form-input:focus {
     outline: none;
@@ -612,7 +727,9 @@
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-small);
-    transition: background-color 0.3s, border-color 0.3s;
+    transition:
+      background-color 0.3s,
+      border-color 0.3s;
   }
   .slug-prefix {
     color: var(--color-text-subtle);
@@ -789,12 +906,3 @@
     }
   }
 </style>
-
-<!-- Delete Confirmation Dialog -->
-<Dialog bind:open={showDeleteDialog} title="Delete Post">
-  <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
-  {#snippet footer()}
-    <Button variant="outline" onclick={() => showDeleteDialog = false}>Cancel</Button>
-    <Button variant="danger" onclick={handleDelete}>Delete</Button>
-  {/snippet}
-</Dialog>
