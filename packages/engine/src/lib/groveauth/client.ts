@@ -270,8 +270,11 @@ export class GroveAuthClient {
       }),
     });
 
+    // Parse response body once (streams can only be consumed once)
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = (await response.json()) as AuthError;
+      const error = data as AuthError;
       throw new GroveAuthError(
         error.error || "token_error",
         error.error_description || error.message || "Failed to exchange code",
@@ -279,7 +282,7 @@ export class GroveAuthClient {
       );
     }
 
-    return (await response.json()) as TokenResponse;
+    return data as TokenResponse;
   }
 
   /**
@@ -313,8 +316,11 @@ export class GroveAuthClient {
           },
         );
 
+        // Parse response body once (streams can only be consumed once)
+        const data = await response.json();
+
         if (!response.ok) {
-          const error = (await response.json()) as AuthError;
+          const error = data as AuthError;
           throw new GroveAuthError(
             error.error || "refresh_error",
             error.error_description ||
@@ -324,7 +330,7 @@ export class GroveAuthClient {
           );
         }
 
-        return (await response.json()) as TokenResponse;
+        return data as TokenResponse;
       },
       { maxRetries: options.maxRetries ?? 3 },
     );
