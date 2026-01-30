@@ -3,11 +3,13 @@
 	 * LoginGraft - Unified login component for all Grove properties
 	 *
 	 * Main orchestrator component that provides consistent login UI.
-	 * Uses Better Auth for OAuth flows - POSTs to GroveAuth's
+	 * Uses Better Auth for OAuth flows - POSTs JSON to GroveAuth's
 	 * Better Auth endpoints which handle the full OAuth dance.
 	 *
-	 * IMPORTANT: Better Auth's /api/auth/sign-in/social endpoint requires POST,
-	 * not GET. This component uses form-based submission to ensure proper flow.
+	 * IMPORTANT: Better Auth's /api/auth/sign-in/social endpoint requires:
+	 * - POST method
+	 * - Content-Type: application/json
+	 * - JSON body with { provider, callbackURL }
 	 *
 	 * Supports three variants:
 	 * - default: Card with providers and optional header/footer
@@ -67,6 +69,10 @@
 		providers.filter((p) => isProviderAvailable(p))
 	);
 
+	// Loading state for buttons
+	let loadingProvider = $state<AuthProvider | null>(null);
+	let error = $state<string | null>(null);
+
 	/**
 	 * Get the callback URL for OAuth redirects.
 	 * This URL is where Better Auth will redirect after OAuth completes.
@@ -74,6 +80,47 @@
 	function getCallbackUrl(): string {
 		const origin = browser ? window.location.origin : "";
 		return `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+	}
+
+	/**
+	 * Initiate social sign-in via Better Auth.
+	 * Makes a JSON POST request and redirects to the OAuth provider.
+	 */
+	async function signInWithProvider(provider: AuthProvider) {
+		if (!browser || loadingProvider) return;
+
+		loadingProvider = provider;
+		error = null;
+
+		try {
+			const response = await fetch(GROVEAUTH_URLS.socialSignIn, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					provider,
+					callbackURL: getCallbackUrl(),
+				}),
+			});
+
+			if (!response.ok) {
+				const data = (await response.json().catch(() => ({}))) as { message?: string };
+				throw new Error(data.message || `Sign-in failed (${response.status})`);
+			}
+
+			const data = (await response.json()) as { url?: string };
+
+			// Better Auth returns { url: "https://accounts.google.com/..." }
+			if (data.url) {
+				window.location.href = data.url;
+			} else {
+				throw new Error("No redirect URL returned from auth server");
+			}
+		} catch (err) {
+			error = err instanceof Error ? err.message : "Sign-in failed";
+			loadingProvider = null;
+		}
 	}
 
 	// For compact variant, use first available provider
@@ -87,20 +134,23 @@
 			<!-- Passkey uses its own button with WebAuthn ceremony -->
 			<PasskeyButton {returnTo} size="md" class={className} />
 		{:else}
-			<!-- POST form for Better Auth social sign-in -->
-			<form method="POST" action={GROVEAUTH_URLS.socialSignIn} class="inline">
-				<input type="hidden" name="provider" value={primaryProvider} />
-				<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
-				<GlassButton
-					variant="default"
-					size="md"
-					type="submit"
-					class={className}
-				>
-					<ProviderIcon provider={primaryProvider} size={18} />
-					<span>Sign in with {getProviderName(primaryProvider)}</span>
-				</GlassButton>
-			</form>
+			<GlassButton
+				variant="default"
+				size="md"
+				type="button"
+				class={className}
+				disabled={loadingProvider !== null}
+				onclick={() => signInWithProvider(primaryProvider)}
+			>
+				<ProviderIcon provider={primaryProvider} size={18} />
+				<span>
+					{#if loadingProvider === primaryProvider}
+						Redirecting...
+					{:else}
+						Sign in with {getProviderName(primaryProvider)}
+					{/if}
+				</span>
+			</GlassButton>
 		{/if}
 	{/if}
 {:else if variant === "fullpage"}
@@ -130,6 +180,13 @@
 					{/if}
 				</div>
 
+				<!-- Error message -->
+				{#if error}
+					<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+						{error}
+					</div>
+				{/if}
+
 				<!-- Provider buttons -->
 				{#if availableProviders.length > 0}
 					<div class="space-y-3">
@@ -138,20 +195,23 @@
 								<!-- Passkey uses its own button with WebAuthn ceremony -->
 								<PasskeyButton {returnTo} />
 							{:else}
-								<!-- POST form for Better Auth social sign-in -->
-								<form method="POST" action={GROVEAUTH_URLS.socialSignIn}>
-									<input type="hidden" name="provider" value={provider} />
-									<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
-									<GlassButton
-										variant="default"
-										size="lg"
-										type="submit"
-										class="w-full justify-start gap-3"
-									>
-										<ProviderIcon {provider} size={20} />
-										<span>Continue with {getProviderName(provider)}</span>
-									</GlassButton>
-								</form>
+								<GlassButton
+									variant="default"
+									size="lg"
+									type="button"
+									class="w-full justify-start gap-3"
+									disabled={loadingProvider !== null}
+									onclick={() => signInWithProvider(provider)}
+								>
+									<ProviderIcon {provider} size={20} />
+									<span>
+										{#if loadingProvider === provider}
+											Redirecting...
+										{:else}
+											Continue with {getProviderName(provider)}
+										{/if}
+									</span>
+								</GlassButton>
 							{/if}
 						{/each}
 					</div>
@@ -183,6 +243,13 @@
 				</div>
 			{/if}
 
+			<!-- Error message -->
+			{#if error}
+				<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+					{error}
+				</div>
+			{/if}
+
 			<!-- Provider buttons -->
 			{#if availableProviders.length > 0}
 				<div class="space-y-3">
@@ -191,20 +258,23 @@
 							<!-- Passkey uses its own button with WebAuthn ceremony -->
 							<PasskeyButton {returnTo} />
 						{:else}
-							<!-- POST form for Better Auth social sign-in -->
-							<form method="POST" action={GROVEAUTH_URLS.socialSignIn}>
-								<input type="hidden" name="provider" value={provider} />
-								<input type="hidden" name="callbackURL" value={getCallbackUrl()} />
-								<GlassButton
-									variant="default"
-									size="lg"
-									type="submit"
-									class="w-full justify-start gap-3"
-								>
-									<ProviderIcon {provider} size={20} />
-									<span>Continue with {getProviderName(provider)}</span>
-								</GlassButton>
-							</form>
+							<GlassButton
+								variant="default"
+								size="lg"
+								type="button"
+								class="w-full justify-start gap-3"
+								disabled={loadingProvider !== null}
+								onclick={() => signInWithProvider(provider)}
+							>
+								<ProviderIcon {provider} size={20} />
+								<span>
+									{#if loadingProvider === provider}
+										Redirecting...
+									{:else}
+										Continue with {getProviderName(provider)}
+									{/if}
+								</span>
+							</GlassButton>
 						{/if}
 					{/each}
 				</div>
