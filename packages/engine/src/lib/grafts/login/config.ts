@@ -130,8 +130,10 @@ export const AUTH_COOKIE_NAMES = {
   refreshToken: "refresh_token",
   /** Session ID (legacy) @deprecated */
   session: "session",
-  /** Better Auth session token (the new standard) */
+  /** Better Auth session token (the new standard) - unprefixed for dev */
   betterAuthSession: "better-auth.session_token",
+  /** Better Auth session token with __Secure- prefix (production HTTPS) */
+  betterAuthSessionSecure: "__Secure-better-auth.session_token",
 } as const;
 
 /**

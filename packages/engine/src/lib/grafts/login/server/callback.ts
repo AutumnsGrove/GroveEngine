@@ -170,12 +170,21 @@ export function createCallbackHandler(
     const returnTo = url.searchParams.get("returnTo") || defaultReturnTo;
 
     // Verify Better Auth session cookie was set
-    // Better Auth sets this cookie during the OAuth callback
-    const sessionToken = cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
+    // Better Auth uses __Secure- prefix in production (HTTPS)
+    // Check both prefixed and unprefixed names for compatibility
+    const sessionToken =
+      cookies.get(AUTH_COOKIE_NAMES.betterAuthSessionSecure) ||
+      cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
 
     if (!sessionToken) {
       // No session cookie - auth may have failed silently
+      // Log which cookies ARE present for debugging
       console.warn("[Auth Callback] No Better Auth session cookie found");
+      console.warn(
+        "[Auth Callback] Checked:",
+        AUTH_COOKIE_NAMES.betterAuthSessionSecure,
+        AUTH_COOKIE_NAMES.betterAuthSession,
+      );
       redirect(
         302,
         `/auth/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
