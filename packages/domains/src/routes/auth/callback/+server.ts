@@ -26,6 +26,13 @@ const GROVEAUTH_API_URL = "https://auth-api.grove.place";
 /** Better Auth session cookie name (set by GroveAuth) */
 const BETTER_AUTH_SESSION_COOKIE = "better-auth.session_token";
 
+/**
+ * Migration deadline for legacy session cookies.
+ * After this date, legacy cookies will no longer grant access.
+ * This prevents old/expired cookies from being used indefinitely.
+ */
+const LEGACY_SESSION_DEADLINE = new Date("2025-03-01T00:00:00Z");
+
 // =============================================================================
 // Error Messages
 // =============================================================================
@@ -57,7 +64,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     const friendlyMessage = getFriendlyErrorMessage(
       errorParam === "access_denied" ? "access_denied" : "auth_failed",
     );
-    redirect(302, `/admin/login?error=${encodeURIComponent(friendlyMessage)}`);
+    throw redirect(
+      302,
+      `/admin/login?error=${encodeURIComponent(friendlyMessage)}`,
+    );
   }
 
   // Get return URL from query params (set by LoginGraft) or default to /admin
@@ -69,16 +79,28 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   if (!sessionToken) {
     // No session cookie - check for legacy cookies during migration
     const legacySession = cookies.get("access_token") || cookies.get("session");
-    if (!legacySession) {
-      console.warn("[Auth Callback] No session cookie found");
-      redirect(
+
+    // Check if migration period has expired
+    const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
+
+    if (!legacySession || migrationExpired) {
+      if (migrationExpired && legacySession) {
+        console.warn(
+          "[Auth Callback] Legacy session expired - migration deadline passed",
+        );
+      } else {
+        console.warn("[Auth Callback] No session cookie found");
+      }
+      throw redirect(
         302,
         `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
       );
     }
-    // Legacy session exists - allow through for now but log warning
-    console.warn("[Auth Callback] Using legacy session cookie");
-    redirect(302, returnTo);
+    // Legacy session exists and within migration window - allow through
+    console.warn(
+      "[Auth Callback] Using legacy session cookie (migration period)",
+    );
+    throw redirect(302, returnTo);
   }
 
   // Fetch user info from Better Auth's session endpoint
@@ -98,7 +120,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
         "[Auth Callback] Failed to get session:",
         sessionResponse.status,
       );
-      redirect(
+      throw redirect(
         302,
         `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
       );
@@ -114,7 +136,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     if (!sessionData.user?.email) {
       console.error("[Auth Callback] No user email in session response");
-      redirect(
+      throw redirect(
         302,
         `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
       );
@@ -145,19 +167,19 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       "redirecting to:",
       returnTo,
     );
-    redirect(302, returnTo);
+    throw redirect(302, returnTo);
   } catch (err) {
-    // Re-throw redirects
+    // Re-throw redirects (SvelteKit uses throw for control flow)
     if (
       err &&
       typeof err === "object" &&
       "status" in err &&
-      err.status === 302
+      (err.status === 302 || err.status === 303)
     ) {
       throw err;
     }
     console.error("[Auth Callback] Error:", err);
-    redirect(
+    throw redirect(
       302,
       `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
     );

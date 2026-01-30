@@ -22,6 +22,13 @@ import {
 } from "$lib/server/rate-limits";
 import { AUTH_COOKIE_NAMES } from "$lib/grafts/login";
 
+/**
+ * Migration deadline for legacy session cookies.
+ * After this date, legacy cookies will no longer grant access.
+ * This prevents old/expired cookies from being used indefinitely.
+ */
+const LEGACY_SESSION_DEADLINE = new Date("2025-03-01T00:00:00Z");
+
 // =============================================================================
 // Error Messages
 // =============================================================================
@@ -74,7 +81,10 @@ export const GET: RequestHandler = async ({
     const friendlyMessage = getFriendlyErrorMessage(
       errorParam === "access_denied" ? "access_denied" : "auth_failed",
     );
-    redirect(302, `/auth/login?error=${encodeURIComponent(friendlyMessage)}`);
+    throw redirect(
+      302,
+      `/auth/login?error=${encodeURIComponent(friendlyMessage)}`,
+    );
   }
 
   // Get return URL from query params (set by LoginGraft) or default to /admin
@@ -87,16 +97,26 @@ export const GET: RequestHandler = async ({
   if (!sessionToken) {
     // No session cookie - check for legacy cookies during migration
     const legacySession = cookies.get("access_token") || cookies.get("session");
-    if (!legacySession) {
-      console.warn("[Auth Callback] No session cookie found");
-      redirect(
+
+    // Check if migration period has expired
+    const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
+
+    if (!legacySession || migrationExpired) {
+      if (migrationExpired && legacySession) {
+        console.warn(
+          "[Auth Callback] Legacy session expired - migration deadline passed",
+        );
+      } else {
+        console.warn("[Auth Callback] No session cookie found");
+      }
+      throw redirect(
         302,
         `/auth/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
       );
     }
-    // Legacy session exists - allow through during migration
+    // Legacy session exists and within migration window - allow through
     console.log(
-      "[Auth Callback] Using legacy session, redirecting to:",
+      "[Auth Callback] Using legacy session (migration period), redirecting to:",
       returnTo,
     );
   } else {
@@ -107,5 +127,5 @@ export const GET: RequestHandler = async ({
   }
 
   // Success! Redirect to the requested destination
-  redirect(302, returnTo);
+  throw redirect(302, returnTo);
 };
