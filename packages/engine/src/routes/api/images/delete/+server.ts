@@ -23,8 +23,10 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // CSRF Protection: Validate origin header against host
+  // Check X-Forwarded-Host first (set by grove-router proxy), then fall back to host
   const origin = request.headers.get("origin");
-  const host = request.headers.get("host");
+  const host =
+    request.headers.get("x-forwarded-host") || request.headers.get("host");
 
   if (origin) {
     try {
