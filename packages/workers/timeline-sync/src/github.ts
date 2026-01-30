@@ -45,8 +45,20 @@ export async function fetchGitHubCommits(
 
     if (activity?.repos_active) {
       const repoNames = JSON.parse(activity.repos_active) as string[];
+      // Validate repos belong to this tenant's GitHub username
+      // (prevents cross-tenant data leakage from corrupted backfill data)
+      const validRepoNames = repoNames.filter((name) => {
+        // Short names shouldn't contain slashes (that would indicate wrong format)
+        if (name.includes("/")) {
+          console.warn(
+            `[${config.tenantId}] Invalid repo format in backfill: ${name}`,
+          );
+          return false;
+        }
+        return true;
+      });
       // repos_active stores short names; we need full_name (owner/repo)
-      repoFullNames = repoNames.map(
+      repoFullNames = validRepoNames.map(
         (name) => `${config.githubUsername}/${name}`,
       );
       console.log(
@@ -102,36 +114,50 @@ export async function fetchGitHubCommits(
 /**
  * Enrich commits with real additions/deletions from individual commit details.
  * The Commits list API doesn't include stats — we must fetch each commit individually.
+ *
+ * Uses concurrent fetching with a limit of 5 parallel requests to balance
+ * speed vs rate limiting. Much faster than sequential for many commits.
  */
 export async function fetchCommitStats(
   commits: Commit[],
   username: string,
   token: string,
 ): Promise<void> {
-  for (const commit of commits) {
-    try {
-      const response = await fetch(
-        `https://api.github.com/repos/${username}/${commit.repo}/commits/${commit.sha}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github.v3+json",
-            "User-Agent": USER_AGENT,
-          },
-        },
-      );
+  const CONCURRENCY_LIMIT = 5;
 
-      if (response.ok) {
-        const detail = (await response.json()) as GitHubCommitDetail;
-        commit.additions = detail.stats?.additions ?? 0;
-        commit.deletions = detail.stats?.deletions ?? 0;
-      }
-    } catch {
-      // Non-fatal: keep 0 for this commit
+  // Process commits in batches with concurrency limit
+  for (let i = 0; i < commits.length; i += CONCURRENCY_LIMIT) {
+    const batch = commits.slice(i, i + CONCURRENCY_LIMIT);
+
+    await Promise.all(
+      batch.map(async (commit) => {
+        try {
+          const response = await fetch(
+            `https://api.github.com/repos/${username}/${commit.repo}/commits/${commit.sha}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/vnd.github.v3+json",
+                "User-Agent": USER_AGENT,
+              },
+            },
+          );
+
+          if (response.ok) {
+            const detail = (await response.json()) as GitHubCommitDetail;
+            commit.additions = detail.stats?.additions ?? 0;
+            commit.deletions = detail.stats?.deletions ?? 0;
+          }
+        } catch {
+          // Non-fatal: keep 0 for this commit
+        }
+      }),
+    );
+
+    // Rate limit between batches (100ms)
+    if (i + CONCURRENCY_LIMIT < commits.length) {
+      await sleep(100);
     }
-
-    // Rate limit: 50ms between calls
-    await sleep(50);
   }
 }
 

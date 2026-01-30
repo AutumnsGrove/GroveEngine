@@ -77,6 +77,26 @@ export async function processTenantTimeline(
   const logPrefix = `[${config.tenantId}]`;
 
   try {
+    // 0. Check if summary already exists (skip regeneration)
+    const existing = await env.DB.prepare(
+      `SELECT 1 FROM timeline_summaries
+       WHERE tenant_id = ? AND summary_date = ? AND commit_count > 0`,
+    )
+      .bind(config.tenantId, targetDate)
+      .first();
+
+    if (existing) {
+      console.log(
+        `${logPrefix} Summary already exists for ${targetDate}, skipping`,
+      );
+      return {
+        success: true,
+        tenantId: config.tenantId,
+        date: targetDate,
+        commitCount: 0,
+      };
+    }
+
     // 1. Decrypt tokens
     const encryptionKey = env.TOKEN_ENCRYPTION_KEY;
 
@@ -107,11 +127,17 @@ export async function processTenantTimeline(
     );
 
     if (!githubToken) {
-      throw new Error("Failed to decrypt GitHub token");
+      const reason = githubTokenIsEncrypted
+        ? "decryption failed (wrong key or corrupted data)"
+        : "token is empty or null";
+      throw new Error(`GitHub token invalid: ${reason}`);
     }
 
     if (!openrouterKey) {
-      throw new Error("Failed to decrypt OpenRouter API key");
+      const reason = openrouterKeyIsEncrypted
+        ? "decryption failed (wrong key or corrupted data)"
+        : "key is empty or null";
+      throw new Error(`OpenRouter API key invalid: ${reason}`);
     }
 
     // 2. Fetch GitHub commits
