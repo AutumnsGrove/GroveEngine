@@ -58,7 +58,7 @@
 </script>
 
 <svelte:head>
-	<title>Quick Check | Grove</title>
+	<title>Entering the Grove</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -70,13 +70,13 @@
 			</svg>
 		</div>
 
-		<h1>Just a moment...</h1>
+		<h1>Entering the Grove...</h1>
 
 		{#if status === 'waiting' || status === 'verifying'}
 			<p class="subtitle">
-				We're making sure you're a real person, not a bot.
-				<br />
-				This usually happens automatically.
+				This site uses <strong>Shade</strong> to protect the author's writing from AI scrapers
+				and automated harvesting. We're just making sure you're a real person
+				here to read, not a bot here to collect.
 			</p>
 
 			<div class="widget-container">
@@ -100,8 +100,9 @@
 		{/if}
 
 		<p class="info">
-			This check helps protect our community from automated scraping and spam.
-			<a href="/shade">Learn more about how we protect your content.</a>
+			This usually takes a moment. Once verified, you won't see this again.
+			<br />
+			<a href="https://grove.place/shade">Learn how Grove protects creative work →</a>
 		</p>
 	</div>
 </main>
@@ -113,30 +114,37 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-		background: var(--color-background, #faf9f6);
+		background: var(--color-background);
 	}
 
 	.verify-container {
 		text-align: center;
-		max-width: 400px;
+		max-width: 420px;
 	}
 
 	.grove-logo {
-		color: var(--color-primary, #2d5a27);
+		color: var(--color-primary);
 		margin-bottom: 1.5rem;
 	}
 
 	h1 {
-		font-size: 1.5rem;
+		font-family: var(--font-serif, Georgia, serif);
+		font-size: 1.75rem;
 		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--color-text, #1a1a1a);
+		margin-bottom: 1rem;
+		color: var(--color-foreground);
 	}
 
 	.subtitle {
-		color: var(--color-text-muted, #666);
+		color: var(--color-muted-foreground);
 		margin-bottom: 2rem;
-		line-height: 1.6;
+		line-height: 1.7;
+		font-size: 0.95rem;
+	}
+
+	.subtitle strong {
+		color: var(--color-foreground);
+		font-weight: 600;
 	}
 
 	.widget-container {
@@ -152,44 +160,49 @@
 	}
 
 	.status.verifying {
-		color: var(--color-primary, #2d5a27);
-		background: var(--color-primary-light, #e8f0e7);
+		color: var(--color-primary);
+		background: var(--color-accent);
 	}
 
 	.status.success {
-		color: #166534;
-		background: #dcfce7;
+		color: var(--color-success-foreground);
+		background: var(--color-success-light);
 	}
 
 	.status.error {
-		color: #991b1b;
-		background: #fee2e2;
+		color: var(--color-error-foreground);
+		background: var(--color-error-light);
 	}
 
 	.retry-button {
 		padding: 0.75rem 1.5rem;
-		background: var(--color-primary, #2d5a27);
-		color: white;
+		background: var(--color-primary);
+		color: var(--color-primary-foreground);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius-grove, 6px);
 		font-size: 1rem;
 		cursor: pointer;
 		transition: background 0.2s;
 	}
 
 	.retry-button:hover {
-		background: var(--color-primary-dark, #1f3d1a);
+		background: var(--color-primary-hover);
 	}
 
 	.info {
 		margin-top: 2rem;
 		font-size: 0.8rem;
-		color: var(--color-text-muted, #888);
-		line-height: 1.5;
+		color: var(--color-muted-foreground);
+		line-height: 1.6;
 	}
 
 	.info a {
-		color: var(--color-primary, #2d5a27);
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.info a:hover {
 		text-decoration: underline;
 	}
 </style>
