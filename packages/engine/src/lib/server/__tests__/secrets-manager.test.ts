@@ -219,6 +219,15 @@ function createMockD1() {
     _addTenant: (id: string) => {
       tenants.set(id, { id, encrypted_dek: null });
     },
+
+    // D1 batch() support for rotation operations
+    batch: async (statements: Array<{ run: () => Promise<unknown> }>) => {
+      const results = [];
+      for (const stmt of statements) {
+        results.push(await stmt.run());
+      }
+      return results;
+    },
   } as unknown as D1Database & {
     _reset: () => void;
     _addTenant: (id: string) => void;

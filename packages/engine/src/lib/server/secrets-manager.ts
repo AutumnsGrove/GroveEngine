@@ -234,6 +234,8 @@ export class SecretsManager {
    * Rotate a tenant's DEK.
    * Re-encrypts all their secrets with a new DEK.
    * Use when a tenant's DEK may have been compromised.
+   *
+   * Uses D1 batch operations for better performance with many secrets.
    */
   async rotateTenantDEK(tenantId: string): Promise<{ rotated: number }> {
     // Get current DEK
@@ -250,8 +252,10 @@ export class SecretsManager {
       .bind(tenantId)
       .all<{ key_name: string; encrypted_value: string }>();
 
-    // Re-encrypt each secret
-    let rotated = 0;
+    // Re-encrypt each secret and collect batch statements
+    const batchStatements: D1PreparedStatement[] = [];
+    const failedSecrets: string[] = [];
+
     for (const secret of secrets.results) {
       try {
         // Decrypt with old DEK
@@ -263,33 +267,54 @@ export class SecretsManager {
         // Encrypt with new DEK
         const newEncrypted = await encryptToken(plainValue, newDekHex);
 
-        // Update in DB
-        await this.db
-          .prepare(
-            "UPDATE tenant_secrets SET encrypted_value = ?, updated_at = datetime('now') WHERE tenant_id = ? AND key_name = ?",
-          )
-          .bind(newEncrypted, tenantId, secret.key_name)
-          .run();
-
-        rotated++;
+        // Add to batch
+        batchStatements.push(
+          this.db
+            .prepare(
+              "UPDATE tenant_secrets SET encrypted_value = ?, updated_at = datetime('now') WHERE tenant_id = ? AND key_name = ?",
+            )
+            .bind(newEncrypted, tenantId, secret.key_name),
+        );
       } catch (error) {
         console.error(
-          `Failed to rotate secret ${tenantId}/${secret.key_name}:`,
+          `Failed to re-encrypt secret ${tenantId}/${secret.key_name}:`,
           error,
         );
+        failedSecrets.push(secret.key_name);
         // Continue with other secrets
       }
     }
 
-    // Encrypt and store new DEK
-    const encryptedNewDek = await encryptToken(newDekHex, this.kekHex);
-    await this.db
-      .prepare("UPDATE tenants SET encrypted_dek = ? WHERE id = ?")
-      .bind(encryptedNewDek, tenantId)
-      .run();
+    // Execute all updates in a single batch for better performance
+    // D1 batch() runs statements in a transaction-like manner
+    if (batchStatements.length > 0) {
+      // Encrypt and store new DEK as part of the batch
+      const encryptedNewDek = await encryptToken(newDekHex, this.kekHex);
+      batchStatements.push(
+        this.db
+          .prepare("UPDATE tenants SET encrypted_dek = ? WHERE id = ?")
+          .bind(encryptedNewDek, tenantId),
+      );
+
+      await this.db.batch(batchStatements);
+    } else {
+      // No secrets to rotate, just update the DEK
+      const encryptedNewDek = await encryptToken(newDekHex, this.kekHex);
+      await this.db
+        .prepare("UPDATE tenants SET encrypted_dek = ? WHERE id = ?")
+        .bind(encryptedNewDek, tenantId)
+        .run();
+    }
 
     // Update cache
     this.dekCache.set(tenantId, newDekHex);
+
+    const rotated = batchStatements.length > 0 ? batchStatements.length - 1 : 0; // Subtract 1 for DEK update
+    if (failedSecrets.length > 0) {
+      console.warn(
+        `[SecretsManager] DEK rotation completed with ${failedSecrets.length} failed secrets: ${failedSecrets.join(", ")}`,
+      );
+    }
 
     return { rotated };
   }

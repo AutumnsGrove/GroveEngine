@@ -4,20 +4,31 @@
  * Migrates secrets from old single-key encryption to envelope encryption.
  * This script should be run once to transition existing tenant secrets.
  *
+ * PREREQUISITES:
+ * 1. Apply database migrations FIRST:
+ *    wrangler d1 migrations apply grove-engine-db --local
+ *    wrangler d1 migrations apply grove-engine-db --remote
+ *
+ * 2. Configure GROVE_KEK in Cloudflare Secrets Store:
+ *    wrangler secrets-store store create grove-secrets --remote
+ *    wrangler secrets-store secret put GROVE_KEK --store grove-secrets --remote
+ *
  * Usage:
  *   npx wrangler d1 execute grove-engine-db --command "SELECT * FROM ..." --local
  *   Then run this script with the appropriate environment
  *
  * Strategy:
- * 1. Fetch all existing encrypted secrets (using old TOKEN_ENCRYPTION_KEY)
- * 2. Decrypt each with the old key
- * 3. Re-encrypt using the new envelope encryption system
- * 4. Track success/failure counts
+ * 1. Verify required tables exist (fails fast with helpful message if not)
+ * 2. Fetch all existing encrypted secrets (using old TOKEN_ENCRYPTION_KEY)
+ * 3. Decrypt each with the old key
+ * 4. Re-encrypt using the new envelope encryption system
+ * 5. Track success/failure counts
  *
  * Safety:
  * - Script is idempotent (can be re-run safely)
  * - Errors are logged but don't stop other migrations
  * - Original data is preserved until explicitly removed
+ * - Preflight checks ensure migrations are applied first
  */
 
 import { SecretsManager } from "../src/lib/server/secrets-manager";
@@ -37,7 +48,60 @@ interface MigrationResult {
 }
 
 /**
+ * Verify required tables exist before migration.
+ * Throws with helpful message if migrations haven't been applied.
+ */
+async function verifyTablesExist(db: D1Database): Promise<void> {
+  // Check for tenant_secrets table (migration 039)
+  try {
+    await db
+      .prepare(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='tenant_secrets'",
+      )
+      .first();
+  } catch {
+    throw new Error(
+      "Migration check failed. Ensure D1 is accessible and migrations 038/039 have been applied:\n" +
+        "  wrangler d1 migrations apply grove-engine-db --local\n" +
+        "  wrangler d1 migrations apply grove-engine-db --remote",
+    );
+  }
+
+  const tableExists = await db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='tenant_secrets'",
+    )
+    .first<{ name: string }>();
+
+  if (!tableExists) {
+    throw new Error(
+      "Required table 'tenant_secrets' not found.\n" +
+        "Please run migrations before this script:\n" +
+        "  wrangler d1 migrations apply grove-engine-db --local\n" +
+        "  wrangler d1 migrations apply grove-engine-db --remote",
+    );
+  }
+
+  // Check for encrypted_dek column on tenants (migration 038)
+  const columns = await db
+    .prepare("PRAGMA table_info(tenants)")
+    .all<{ name: string }>();
+
+  const hasEncryptedDek = columns.results.some(
+    (col) => col.name === "encrypted_dek",
+  );
+  if (!hasEncryptedDek) {
+    throw new Error(
+      "Column 'encrypted_dek' not found on tenants table.\n" +
+        "Please run migration 038_add_encrypted_dek.sql first.",
+    );
+  }
+}
+
+/**
  * Migrate all secrets from old single-key encryption to envelope encryption.
+ *
+ * IMPORTANT: Run migrations 038 and 039 BEFORE running this script.
  *
  * @param db - D1 database instance
  * @param kekHex - New KEK from Secrets Store (64 hex chars)
@@ -59,6 +123,11 @@ export async function migrateToEnvelope(
 
   console.log(`[Migration] Starting envelope encryption migration...`);
   console.log(`[Migration] Dry run: ${dryRun}`);
+
+  // Verify tables exist before proceeding
+  console.log(`[Migration] Verifying required tables...`);
+  await verifyTablesExist(db);
+  console.log(`[Migration] Tables verified ✓`);
 
   // Create the new secrets manager
   const manager = new SecretsManager(db, kekHex);
@@ -178,6 +247,8 @@ export async function migrateToEnvelope(
 /**
  * Migrate a specific tenant's GitHub token from the old git_dashboard table.
  * This is a common migration case for Grove.
+ *
+ * IMPORTANT: Run migrations 038 and 039 BEFORE running this function.
  */
 export async function migrateGitDashboardTokens(
   db: D1Database,
@@ -193,6 +264,11 @@ export async function migrateGitDashboardTokens(
   };
 
   console.log(`[Migration] Migrating git_dashboard tokens...`);
+
+  // Verify tables exist before proceeding
+  console.log(`[Migration] Verifying required tables...`);
+  await verifyTablesExist(db);
+  console.log(`[Migration] Tables verified ✓`);
 
   const manager = new SecretsManager(db, kekHex);
 
