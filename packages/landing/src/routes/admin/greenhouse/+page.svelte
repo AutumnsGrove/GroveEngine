@@ -23,92 +23,146 @@
 	// Cultivate mode state
 	let loadingFlagId = $state<string | undefined>(undefined);
 
-	// Handle enrollment through form action
+	// Form references for programmatic submission with enhance
+	let enrollFormRef = $state<HTMLFormElement | null>(null);
+	let toggleFormRef = $state<HTMLFormElement | null>(null);
+	let removeFormRef = $state<HTMLFormElement | null>(null);
+	let cultivateFormRef = $state<HTMLFormElement | null>(null);
+	let pruneFormRef = $state<HTMLFormElement | null>(null);
+
+	// Hidden input values for forms
+	let enrollTenantId = $state("");
+	let enrollNotes = $state("");
+	let toggleTenantId = $state("");
+	let toggleEnabled = $state("");
+	let removeTenantId = $state("");
+	let cultivateFlagId = $state("");
+	let pruneFlagId = $state("");
+
+	// Handle enrollment through enhanced form
 	function handleEnroll(tenantId: string, notes: string) {
-		// We'll submit via form action
 		enrollLoading = true;
-
-		// Create and submit a form programmatically
-		const formEl = document.createElement("form");
-		formEl.method = "POST";
-		formEl.action = "?/enroll";
-
-		const tenantInput = document.createElement("input");
-		tenantInput.type = "hidden";
-		tenantInput.name = "tenantId";
-		tenantInput.value = tenantId;
-		formEl.appendChild(tenantInput);
-
-		const notesInput = document.createElement("input");
-		notesInput.type = "hidden";
-		notesInput.name = "notes";
-		notesInput.value = notes;
-		formEl.appendChild(notesInput);
-
-		document.body.appendChild(formEl);
-		formEl.submit();
+		enrollTenantId = tenantId;
+		enrollNotes = notes;
+		showEnrollDialog = false;
+		requestAnimationFrame(() => {
+			enrollFormRef?.requestSubmit();
+		});
 	}
 
-	// Handle toggle through form action
+	// Handle toggle through enhanced form
 	function handleToggle(tenantId: string, enabled: boolean) {
-		const formEl = document.createElement("form");
-		formEl.method = "POST";
-		formEl.action = "?/toggle";
-
-		const tenantInput = document.createElement("input");
-		tenantInput.type = "hidden";
-		tenantInput.name = "tenantId";
-		tenantInput.value = tenantId;
-		formEl.appendChild(tenantInput);
-
-		const enabledInput = document.createElement("input");
-		enabledInput.type = "hidden";
-		enabledInput.name = "enabled";
-		enabledInput.value = enabled.toString();
-		formEl.appendChild(enabledInput);
-
-		document.body.appendChild(formEl);
-		formEl.submit();
+		toggleTenantId = tenantId;
+		toggleEnabled = enabled.toString();
+		// Use requestAnimationFrame to ensure state is updated before submit
+		requestAnimationFrame(() => {
+			toggleFormRef?.requestSubmit();
+		});
 	}
 
-	// Handle remove through form action
+	// Handle remove through enhanced form
 	function handleRemove(tenantId: string) {
 		if (!confirm("Remove this tenant from the greenhouse program?")) {
 			return;
 		}
-
-		const formEl = document.createElement("form");
-		formEl.method = "POST";
-		formEl.action = "?/remove";
-
-		const tenantInput = document.createElement("input");
-		tenantInput.type = "hidden";
-		tenantInput.name = "tenantId";
-		tenantInput.value = tenantId;
-		formEl.appendChild(tenantInput);
-
-		document.body.appendChild(formEl);
-		formEl.submit();
+		removeTenantId = tenantId;
+		requestAnimationFrame(() => {
+			removeFormRef?.requestSubmit();
+		});
 	}
 
-	// Handle cultivate/prune toggle
+	// Handle cultivate/prune toggle through enhanced forms
 	function handleFlagToggle(flagId: string, enabled: boolean) {
 		loadingFlagId = flagId;
-
-		const formEl = document.createElement("form");
-		formEl.method = "POST";
-		formEl.action = enabled ? "?/cultivate" : "?/prune";
-
-		const flagInput = document.createElement("input");
-		flagInput.type = "hidden";
-		flagInput.name = "flagId";
-		flagInput.value = flagId;
-		formEl.appendChild(flagInput);
-
-		document.body.appendChild(formEl);
-		formEl.submit();
+		if (enabled) {
+			cultivateFlagId = flagId;
+			requestAnimationFrame(() => {
+				cultivateFormRef?.requestSubmit();
+			});
+		} else {
+			pruneFlagId = flagId;
+			requestAnimationFrame(() => {
+				pruneFormRef?.requestSubmit();
+			});
+		}
 	}
 </script>
+
+<!-- Hidden forms with progressive enhancement -->
+<form
+	bind:this={enrollFormRef}
+	method="POST"
+	action="?/enroll"
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+			enrollLoading = false;
+		};
+	}}
+	class="hidden"
+>
+	<input type="hidden" name="tenantId" value={enrollTenantId} />
+	<input type="hidden" name="notes" value={enrollNotes} />
+</form>
+
+<form
+	bind:this={toggleFormRef}
+	method="POST"
+	action="?/toggle"
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+		};
+	}}
+	class="hidden"
+>
+	<input type="hidden" name="tenantId" value={toggleTenantId} />
+	<input type="hidden" name="enabled" value={toggleEnabled} />
+</form>
+
+<form
+	bind:this={removeFormRef}
+	method="POST"
+	action="?/remove"
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+		};
+	}}
+	class="hidden"
+>
+	<input type="hidden" name="tenantId" value={removeTenantId} />
+</form>
+
+<form
+	bind:this={cultivateFormRef}
+	method="POST"
+	action="?/cultivate"
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+			loadingFlagId = undefined;
+		};
+	}}
+	class="hidden"
+>
+	<input type="hidden" name="flagId" value={cultivateFlagId} />
+</form>
+
+<form
+	bind:this={pruneFormRef}
+	method="POST"
+	action="?/prune"
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+			loadingFlagId = undefined;
+		};
+	}}
+	class="hidden"
+>
+	<input type="hidden" name="flagId" value={pruneFlagId} />
+</form>
 
 <svelte:head>
 	<title>Greenhouse - Admin</title>

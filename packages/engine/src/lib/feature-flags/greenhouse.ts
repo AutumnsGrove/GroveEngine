@@ -104,8 +104,13 @@ export async function invalidateGreenhouseCache(
   const cacheKey = `${GREENHOUSE_CACHE_PREFIX}${tenantId}`;
   try {
     await env.FLAGS_KV.delete(cacheKey);
-  } catch {
-    // Ignore delete errors
+  } catch (error) {
+    // Log cache invalidation failures - stale cache could cause confusing behavior
+    // where tenant thinks they're enrolled but cache says otherwise for up to 60s
+    console.warn(
+      `Failed to invalidate greenhouse cache for ${tenantId}:`,
+      error,
+    );
   }
 }
 

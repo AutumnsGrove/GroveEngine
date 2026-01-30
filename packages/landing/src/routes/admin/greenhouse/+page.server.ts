@@ -46,6 +46,9 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
   const enrolledIds = new Set(greenhouseTenants.map((t) => t.tenantId));
 
   // Load all tenants from DB for name lookup
+  // NOTE: This intentionally loads ALL tenants across the Grove instance without
+  // tenant_id scoping. The Wayfinder (platform admin) has global visibility to
+  // enroll any tenant in the greenhouse program.
   let allTenants: Tenant[] = [];
   try {
     const result = await env.DB.prepare(
