@@ -30,6 +30,8 @@
 	let showNewFolder = $state(false);
 	let copiedId = $state<string | null>(null);
 	let deleteConfirmId = $state<string | null>(null);
+	let fileInputRef = $state<HTMLInputElement>();
+	let deleteButtonRef = $state<HTMLButtonElement>();
 
 	function formatBytes(bytes: number): string {
 		if (bytes === 0) return '0 B';
@@ -176,6 +178,22 @@
 			errorMessage = err instanceof Error ? err.message : 'Delete failed';
 		}
 		deleteConfirmId = null;
+		// Restore focus to delete button
+		deleteButtonRef?.focus();
+	}
+
+	function handleDropZoneKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			fileInputRef?.click();
+		}
+	}
+
+	function handleDeleteDialogKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			deleteConfirmId = null;
+			deleteButtonRef?.focus();
+		}
 	}
 </script>
 
@@ -251,8 +269,10 @@
 				ondrop={handleDrop}
 				ondragover={handleDragOver}
 				ondragleave={handleDragLeave}
+				onkeydown={handleDropZoneKeydown}
 				role="button"
 				tabindex="0"
+				aria-label="Upload files. Press Enter or Space to browse, or drag and drop files here."
 			>
 				<div class="w-12 h-12 mx-auto mb-4 text-grove-400">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -268,7 +288,7 @@
 					Drag & drop files here, or
 					<label class="text-grove-600 hover:text-grove-700 cursor-pointer underline">
 						browse
-						<input type="file" multiple class="hidden" onchange={handleFileSelect} />
+						<input bind:this={fileInputRef} type="file" multiple class="hidden" onchange={handleFileSelect} />
 					</label>
 				</p>
 
@@ -335,7 +355,14 @@
 									/>
 								</svg>
 							{:else}
-								<div class="w-24 h-2 bg-grove-100 rounded-full overflow-hidden">
+								<div
+									class="w-24 h-2 bg-grove-100 rounded-full overflow-hidden"
+									role="progressbar"
+									aria-valuenow={item.progress}
+									aria-valuemin={0}
+									aria-valuemax={100}
+									aria-label="Upload progress for {item.name}"
+								>
 									<div
 										class="h-full bg-grove-500 transition-all duration-300"
 										style="width: {item.progress}%"
@@ -434,8 +461,12 @@
 								{#if deleteConfirmId === file.id}
 									<div
 										class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-4"
+										role="dialog"
+										aria-modal="true"
+										aria-labelledby="delete-dialog-{file.id}"
+										onkeydown={handleDeleteDialogKeydown}
 									>
-										<p class="text-white text-sm font-sans mb-3 text-center">Delete this file?</p>
+										<p id="delete-dialog-{file.id}" class="text-white text-sm font-sans mb-3 text-center">Delete this file?</p>
 										<div class="flex gap-2">
 											<button
 												onclick={() => deleteFile(file.id)}
@@ -444,7 +475,10 @@
 												Delete
 											</button>
 											<button
-												onclick={() => (deleteConfirmId = null)}
+												onclick={() => {
+													deleteConfirmId = null;
+													deleteButtonRef?.focus();
+												}}
 												class="px-3 py-1.5 bg-white text-bark text-sm rounded-lg hover:bg-gray-100 transition-colors"
 											>
 												Cancel
@@ -519,9 +553,10 @@
 										</svg>
 									</a>
 									<button
+										bind:this={deleteButtonRef}
 										onclick={() => (deleteConfirmId = file.id)}
 										class="p-1.5 text-bark/40 hover:text-red-500 transition-colors"
-										title="Delete file"
+										aria-label="Delete file {file.original_filename}"
 									>
 										<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
 											<path
