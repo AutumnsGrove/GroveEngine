@@ -65,6 +65,13 @@ export const load: PageServerLoad = async ({
   const authorName =
     context?.type === "tenant" ? context.tenant.name : "Grove Author";
 
+  // Determine if logged-in user is the tenant owner (can edit this post)
+  const isOwner =
+    locals.user &&
+    context?.type === "tenant" &&
+    context.tenant.ownerId?.toLowerCase().trim() ===
+      locals.user.email.toLowerCase().trim();
+
   // Cache key includes tenant for multi-tenant isolation
   const cacheKey = tenantId ? `blog:${tenantId}:${slug}` : `blog:_:${slug}`;
 
@@ -90,13 +97,13 @@ export const load: PageServerLoad = async ({
           Vary: "Cookie",
         });
 
-        return { post: cachedPost };
+        return { post: cachedPost, isOwner: isOwner || false };
       }
     } else if (db && tenantId) {
       // No KV available, fall back to direct D1 (no caching)
       const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
       if (post) {
-        return { post };
+        return { post, isOwner: isOwner || false };
       }
     }
 
@@ -111,6 +118,7 @@ export const load: PageServerLoad = async ({
             font: "default",
             author: authorName,
           },
+          isOwner: isOwner || false,
         };
       }
     }
