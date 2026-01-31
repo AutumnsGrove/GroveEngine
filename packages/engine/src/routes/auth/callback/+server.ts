@@ -101,8 +101,11 @@ export const GET: RequestHandler = async ({
   const returnTo = url.searchParams.get("returnTo") || "/admin";
 
   // Verify Better Auth session cookie was set
-  // Better Auth sets this cookie during the OAuth callback at GroveAuth
-  const sessionToken = cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
+  // Better Auth uses __Secure- prefix in production (HTTPS)
+  // Check both prefixed and unprefixed names for compatibility
+  const sessionToken =
+    cookies.get(AUTH_COOKIE_NAMES.betterAuthSessionSecure) ||
+    cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
 
   if (!sessionToken) {
     // No session cookie - check for legacy cookies during migration
