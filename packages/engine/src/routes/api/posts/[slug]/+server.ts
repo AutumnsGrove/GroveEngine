@@ -258,6 +258,19 @@ export const PUT: RequestHandler = async ({
       }
     }
 
+    // Validate featured_image URL if provided
+    if (data.featured_image && data.featured_image.trim()) {
+      try {
+        const imageUrl = new URL(data.featured_image);
+        if (!["http:", "https:"].includes(imageUrl.protocol)) {
+          throw error(400, "Cover image must be an HTTP or HTTPS URL");
+        }
+      } catch (e) {
+        if ((e as { status?: number }).status === 400) throw e;
+        throw error(400, "Cover image must be a valid URL");
+      }
+    }
+
     // Use TenantDb for automatic tenant isolation
     const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 

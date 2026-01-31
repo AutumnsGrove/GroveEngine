@@ -203,6 +203,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       }
     }
 
+    // Validate featured_image URL if provided
+    if (data.featured_image && data.featured_image.trim()) {
+      try {
+        const imageUrl = new URL(data.featured_image);
+        if (!["http:", "https:"].includes(imageUrl.protocol)) {
+          throw error(400, "Cover image must be an HTTP or HTTPS URL");
+        }
+      } catch (e) {
+        if ((e as { status?: number }).status === 400) throw e;
+        throw error(400, "Cover image must be a valid URL");
+      }
+    }
+
     // Sanitize slug
     const slug = data.slug
       .toLowerCase()
