@@ -13,27 +13,12 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler, RequestEvent } from "@sveltejs/kit";
 import type { CallbackHandlerConfig } from "../types.js";
 import { AUTH_COOKIE_NAMES } from "../config.js";
-
-// =============================================================================
-// ERROR HANDLING
-// =============================================================================
-
-/**
- * User-friendly error messages for common OAuth errors.
- */
-const ERROR_MESSAGES: Record<string, string> = {
-  access_denied: "You cancelled the login process",
-  auth_failed: "Authentication failed, please try again",
-  no_session: "Session was not created, please try again",
-  rate_limited: "Too many login attempts. Please wait before trying again.",
-};
-
-/**
- * Get a user-friendly error message for an error code.
- */
-function getFriendlyErrorMessage(errorCode: string): string {
-  return ERROR_MESSAGES[errorCode] || "An error occurred during login";
-}
+import {
+  AUTH_ERRORS,
+  getAuthError,
+  logAuthError,
+  buildErrorParams,
+} from "../../../groveauth/errors.js";
 
 // =============================================================================
 // RATE LIMITING
@@ -139,11 +124,12 @@ export function createCallbackHandler(
       );
 
       if (rateLimited) {
-        console.warn("[Auth Callback] Rate limited:", { ip: clientIp });
+        const authError = AUTH_ERRORS.RATE_LIMITED;
+        logAuthError(authError, { ip: clientIp });
         return new Response(
           JSON.stringify({
-            error: "rate_limited",
-            message: getFriendlyErrorMessage("rate_limited"),
+            error: authError.code,
+            message: authError.userMessage,
           }),
           {
             status: 429,
@@ -159,11 +145,12 @@ export function createCallbackHandler(
     // Check for error from OAuth provider
     const errorParam = url.searchParams.get("error");
     if (errorParam) {
-      console.error("[Auth Callback] Error from provider:", errorParam);
-      const friendlyMessage = getFriendlyErrorMessage(
-        errorParam === "access_denied" ? "access_denied" : "auth_failed",
-      );
-      redirect(302, `/auth/login?error=${encodeURIComponent(friendlyMessage)}`);
+      const authError = getAuthError(errorParam);
+      logAuthError(authError, {
+        oauthError: errorParam,
+        ip: getClientIP(request),
+      });
+      redirect(302, `/auth/login?${buildErrorParams(authError)}`);
     }
 
     // Get return URL from query params (set by LoginGraft) or use default
@@ -178,17 +165,11 @@ export function createCallbackHandler(
 
     if (!sessionToken) {
       // No session cookie - auth may have failed silently
-      // Log which cookies ARE present for debugging
-      console.warn("[Auth Callback] No Better Auth session cookie found");
-      console.warn(
-        "[Auth Callback] Checked:",
-        AUTH_COOKIE_NAMES.betterAuthSessionSecure,
-        AUTH_COOKIE_NAMES.betterAuthSession,
-      );
-      redirect(
-        302,
-        `/auth/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
-      );
+      const authError = AUTH_ERRORS.NO_SESSION;
+      logAuthError(authError, {
+        ip: getClientIP(request),
+      });
+      redirect(302, `/auth/login?${buildErrorParams(authError)}`);
     }
 
     // Success! Redirect to the requested destination

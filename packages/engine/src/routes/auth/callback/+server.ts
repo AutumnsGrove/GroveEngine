@@ -31,6 +31,12 @@ import {
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits";
 import { AUTH_COOKIE_NAMES } from "$lib/grafts/login";
+import {
+  AUTH_ERRORS,
+  getAuthError,
+  logAuthError,
+  buildErrorParams,
+} from "$lib/groveauth/errors";
 
 /**
  * Migration deadline for legacy session cookies.
@@ -38,20 +44,6 @@ import { AUTH_COOKIE_NAMES } from "$lib/grafts/login";
  * This prevents old/expired cookies from being used indefinitely.
  */
 const LEGACY_SESSION_DEADLINE = new Date("2026-03-01T00:00:00Z");
-
-// =============================================================================
-// Error Messages
-// =============================================================================
-
-const ERROR_MESSAGES: Record<string, string> = {
-  access_denied: "You cancelled the login process",
-  auth_failed: "Authentication failed, please try again",
-  no_session: "Session was not created, please try again",
-};
-
-function getFriendlyErrorMessage(errorCode: string): string {
-  return ERROR_MESSAGES[errorCode] || "An error occurred during login";
-}
 
 // =============================================================================
 // Handler
@@ -87,14 +79,13 @@ export const GET: RequestHandler = async ({
   // Check for error from OAuth provider
   const errorParam = url.searchParams.get("error");
   if (errorParam) {
-    console.error("[Auth Callback] Error from provider:", errorParam);
-    const friendlyMessage = getFriendlyErrorMessage(
-      errorParam === "access_denied" ? "access_denied" : "auth_failed",
-    );
-    throw redirect(
-      302,
-      `/auth/login?error=${encodeURIComponent(friendlyMessage)}`,
-    );
+    const authError = getAuthError(errorParam);
+    logAuthError(authError, {
+      oauthError: errorParam,
+      ip: getClientIP(request),
+      path: url.pathname,
+    });
+    throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
   }
 
   // Get return URL from query params (set by LoginGraft) or default to /admin
@@ -115,17 +106,17 @@ export const GET: RequestHandler = async ({
     const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
 
     if (!legacySession || migrationExpired) {
-      if (migrationExpired && legacySession) {
-        console.warn(
-          "[Auth Callback] Legacy session expired - migration deadline passed",
-        );
-      } else {
-        console.warn("[Auth Callback] No session cookie found");
-      }
-      throw redirect(
-        302,
-        `/auth/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
-      );
+      const authError =
+        migrationExpired && legacySession
+          ? AUTH_ERRORS.LEGACY_SESSION_EXPIRED
+          : AUTH_ERRORS.NO_SESSION;
+
+      logAuthError(authError, {
+        ip: getClientIP(request),
+        path: url.pathname,
+      });
+
+      throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
     }
     // Legacy session exists and within migration window - allow through
     console.log(

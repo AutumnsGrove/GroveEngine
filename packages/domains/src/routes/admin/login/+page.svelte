@@ -9,8 +9,9 @@
 	import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
 	import { page } from '$app/stores';
 
-	// Get error from URL params (set by callback on auth failure)
+	// Get error details from URL params (set by callback on auth failure)
 	const error = $derived($page.url.searchParams.get('error'));
+	const errorCode = $derived($page.url.searchParams.get('error_code'));
 </script>
 
 <svelte:head>
@@ -41,7 +42,12 @@
 		</p>
 		{#if error}
 			<div class="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-				{error}
+				<p>{error}</p>
+				{#if errorCode}
+					<p class="mt-1 text-xs text-red-500 dark:text-red-400 font-mono">
+						Error code: {errorCode}
+					</p>
+				{/if}
 			</div>
 		{/if}
 	{/snippet}

@@ -25,8 +25,12 @@
  */
 
 // Client
-export { GroveAuthClient, createGroveAuthClient } from './client.js';
-export { generateCodeVerifier, generateCodeChallenge, generateState } from './client.js';
+export { GroveAuthClient, createGroveAuthClient } from "./client.js";
+export {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  generateState,
+} from "./client.js";
 
 // Types
 export type {
@@ -53,9 +57,9 @@ export type {
   TwoFactorVerifyResponse,
   // Linked accounts
   LinkedAccount,
-} from './types.js';
+} from "./types.js";
 
-export { GroveAuthError, TIER_POST_LIMITS, TIER_NAMES } from './types.js';
+export { GroveAuthError, TIER_POST_LIMITS, TIER_NAMES } from "./types.js";
 
 // Post limit helpers
 export {
@@ -65,9 +69,9 @@ export {
   getUpgradeRecommendation,
   getQuotaWidgetData,
   getPreSubmitCheck,
-} from './limits.js';
+} from "./limits.js";
 
-export type { QuotaWidgetData, PreSubmitCheckResult } from './limits.js';
+export type { QuotaWidgetData, PreSubmitCheckResult } from "./limits.js";
 
 // Color utilities
 export {
@@ -75,9 +79,9 @@ export {
   ALERT_VARIANTS,
   getStatusColorFromPercentage,
   getAlertVariantFromColor,
-} from './colors.js';
+} from "./colors.js";
 
-export type { StatusColor, AlertVariant } from './colors.js';
+export type { StatusColor, AlertVariant } from "./colors.js";
 
 // Rate limiting
 export {
@@ -85,7 +89,7 @@ export {
   RateLimitError,
   withRateLimit,
   DEFAULT_RATE_LIMITS,
-} from './rate-limit.js';
+} from "./rate-limit.js";
 
 // Validation utilities
 export {
@@ -94,6 +98,17 @@ export {
   getRequiredEnv,
   TOTP_CODE_LENGTH,
   TOTP_CODE_REGEX,
-} from './validation.js';
+} from "./validation.js";
 
-export type { PasskeyCredential } from './validation.js';
+export type { PasskeyCredential } from "./validation.js";
+
+// Auth error system
+export {
+  AUTH_ERRORS,
+  getAuthError,
+  getAuthErrorByCode,
+  logAuthError,
+  buildErrorParams,
+} from "./errors.js";
+
+export type { ErrorCategory, AuthErrorDef, AuthErrorKey } from "./errors.js";
