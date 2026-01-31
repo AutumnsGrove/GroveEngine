@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { greens, wildflowers } from '../palette';
+	import { greens, wildflowers, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -40,6 +40,9 @@
 		variant === 'pink' ? '#f472b6' :
 		variant === 'yellow' ? '#facc15' :
 		'#8b5cf6');
+
+	// Theme-aware petal highlight
+	const petalHighlight = $derived(resolveThemed(themed.petalHighlight));
 </script>
 
 <!-- Classic tulip - spring icon -->
@@ -62,8 +65,8 @@
 	<!-- Front petal -->
 	<path fill={petals} d="M12 38 Q10 30 15 18 Q20 12 25 18 Q30 30 28 38 Q20 42 12 38" />
 
-	<!-- Petal highlights -->
-	<path fill="white" d="M18 20 Q20 15 22 20 Q20 25 18 20" opacity="0.2" />
+	<!-- Petal highlights (theme-aware) -->
+	<path fill={petalHighlight} d="M18 20 Q20 15 22 20 Q20 25 18 20" />
 </svg>
 
 <style>

@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, accents } from '../palette';
+	import { bark, accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -35,6 +35,9 @@
 	const legColor = $derived(bark.darkBark);
 
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Eastern Bluebird - symbol of happiness and spring! -->
@@ -68,8 +71,8 @@
 
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="38" cy="15" r="2" />
-	<!-- Eye highlight -->
-	<circle fill="white" cx="39" cy="14" r="0.6" />
+	<!-- Eye highlight (theme-aware) -->
+	<circle fill={eyeHighlight} cx="39" cy="14" r="0.6" />
 
 	<!-- Beak - small and dark -->
 	<path fill={beak} d="M42 16 L48 17 L42 19 Q41 17.5 42 16" />

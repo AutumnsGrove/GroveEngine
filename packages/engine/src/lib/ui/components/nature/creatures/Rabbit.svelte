@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { earth, natural } from '../palette';
+	import { earth, natural, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -23,6 +23,9 @@
 	const fur = $derived(furColor ?? earth.clay);
 	const innerEar = $derived(natural.cream);
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Sitting rabbit -->
@@ -56,7 +59,7 @@
 
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="40" cy="26" r="2.5" />
-	<circle fill="white" cx="41" cy="25" r="1" />
+	<circle fill={eyeHighlight} cx="41" cy="25" r="1" />
 
 	<!-- Nose -->
 	<ellipse fill={innerEar} cx="46" cy="30" rx="2" ry="1.5" />

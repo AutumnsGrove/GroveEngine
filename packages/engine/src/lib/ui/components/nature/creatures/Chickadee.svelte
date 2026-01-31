@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, accents } from '../palette';
+	import { bark, accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -35,6 +35,10 @@
 	const legColor = $derived(bark.darkBark);
 
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware highlights
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
+	const highlight = $derived(resolveThemed(themed.highlight));
 </script>
 
 <!-- Black-capped Chickadee - small, round, perched -->
@@ -52,8 +56,8 @@
 
 	<!-- Wing detail -->
 	<path fill="#4b5563" d="M10 25 Q7 30 10 35 Q15 33 17 28 Q14 24 10 25" opacity="0.8" />
-	<!-- Wing bars (subtle white edges) -->
-	<path fill="white" d="M9 30 Q12 29 14 30" opacity="0.4" stroke="white" stroke-width="0.5" />
+	<!-- Wing bars (subtle edges, theme-aware) -->
+	<path fill={highlight} d="M9 30 Q12 29 14 30" stroke={highlight} stroke-width="0.5" />
 
 	<!-- Buff belly -->
 	<ellipse fill={belly} cx="26" cy="32" rx="7" ry="8" />
@@ -72,8 +76,8 @@
 
 	<!-- Eye - small and dark -->
 	<circle fill="#1a1a1a" cx="33" cy="16" r="1.5" />
-	<!-- Eye highlight -->
-	<circle fill="white" cx="33.5" cy="15.5" r="0.5" />
+	<!-- Eye highlight (theme-aware) -->
+	<circle fill={eyeHighlight} cx="33.5" cy="15.5" r="0.5" />
 
 	<!-- Beak - tiny and black -->
 	<path fill={beak} d="M38 17 L42 18 L38 19 Z" />

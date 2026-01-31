@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, accents } from '../palette';
+	import { bark, accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -36,6 +36,10 @@
 	const legColor = $derived(bark.darkBark);
 
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware highlights
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
+	const highlight = $derived(resolveThemed(themed.highlight));
 </script>
 
 <!-- American Robin - herald of spring! -->
@@ -64,13 +68,13 @@
 	<!-- Head - dark gray -->
 	<circle fill={body} cx="36" cy="18" r="9" />
 
-	<!-- White eye ring - Robin's distinctive feature -->
-	<circle fill="white" cx="40" cy="17" r="4" opacity="0.3" />
+	<!-- White eye ring - Robin's distinctive feature (theme-aware) -->
+	<circle fill={highlight} cx="40" cy="17" r="4" />
 
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="40" cy="17" r="2.5" />
-	<!-- Eye highlight -->
-	<circle fill="white" cx="41" cy="16" r="0.8" />
+	<!-- Eye highlight (theme-aware) -->
+	<circle fill={eyeHighlight} cx="41" cy="16" r="0.8" />
 
 	<!-- Beak - yellow-orange, pointed -->
 	<path fill={beak} d="M44 18 L52 19 L44 22 Q43 20 44 18" />

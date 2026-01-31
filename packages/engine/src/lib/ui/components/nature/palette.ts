@@ -607,3 +607,92 @@ export const naturePalette = {
 } as const;
 
 export default naturePalette;
+
+// =============================================================================
+// DARK MODE SUPPORT
+// =============================================================================
+
+import { themeStore } from "$lib/ui/stores/theme.svelte";
+
+/**
+ * Themed color pairs for elements that need dark mode adaptation.
+ * Each color has a light and dark variant.
+ *
+ * Design Philosophy:
+ * - Light mode: Dark shadows, bright highlights (natural daylight)
+ * - Dark mode: Subtle light shadows, muted highlights (moonlit night)
+ * - Some colors stay the same (moon glow works in both modes)
+ */
+export const themed = {
+  // Sky elements
+  cloud: { light: "#ffffff", dark: "#d4d4d8" },
+  cloudShadow: { light: "rgba(0,0,0,0.1)", dark: "rgba(255,255,255,0.08)" },
+  moon: { light: "#fef9c3", dark: "#fef9c3" }, // Moon stays warm yellow
+  moonCrater: { light: "#e5e5dc", dark: "#a8a29e" },
+  star: { light: "#fefce8", dark: "#fffbeb" },
+
+  // Water elements
+  ripple: { light: "rgba(255,255,255,0.3)", dark: "rgba(255,255,255,0.15)" },
+  waterHighlight: {
+    light: "rgba(255,255,255,0.4)",
+    dark: "rgba(255,255,255,0.2)",
+  },
+
+  // Universal shadows/highlights
+  shadow: { light: "rgba(0,0,0,0.1)", dark: "rgba(255,255,255,0.05)" },
+  shadowMedium: { light: "rgba(0,0,0,0.15)", dark: "rgba(255,255,255,0.08)" },
+  highlight: { light: "rgba(255,255,255,0.3)", dark: "rgba(255,255,255,0.15)" },
+
+  // Creature details
+  eyeHighlight: { light: "#ffffff", dark: "#e5e5e5" },
+
+  // Botanical details
+  petalHighlight: {
+    light: "rgba(255,255,255,0.2)",
+    dark: "rgba(255,255,255,0.1)",
+  },
+
+  // Tree details
+  barkMark: { light: "#2d2d2d", dark: "#4a4a4a" }, // Birch bark lenticels
+} as const;
+
+export type ThemedColor = (typeof themed)[keyof typeof themed];
+
+/**
+ * Check if dark mode is currently active.
+ * Use in $derived() within components for reactivity.
+ *
+ * @example
+ * const dark = $derived(isDarkMode());
+ * const fillColor = $derived(dark ? '#333' : '#fff');
+ */
+export function isDarkMode(): boolean {
+  return themeStore.resolvedTheme === "dark";
+}
+
+/**
+ * Resolve a themed color to its current value.
+ * Returns the light or dark variant based on current theme.
+ *
+ * @example
+ * // In a Svelte component:
+ * import { themed, resolveThemed } from '../palette';
+ * const cloudFill = $derived(resolveThemed(themed.cloud));
+ */
+export function resolveThemed(color: ThemedColor): string {
+  return themeStore.resolvedTheme === "dark" ? color.dark : color.light;
+}
+
+/**
+ * Get appropriate shadow color for current theme.
+ * Light mode: dark shadows. Dark mode: light shadows (inverted for contrast).
+ *
+ * @param opacity - Shadow opacity (0-1), defaults to 0.1
+ * @example
+ * const shadowColor = $derived(getThemeShadow(0.15));
+ */
+export function getThemeShadow(opacity: number = 0.1): string {
+  return themeStore.resolvedTheme === "dark"
+    ? `rgba(255, 255, 255, ${opacity})`
+    : `rgba(0, 0, 0, ${opacity})`;
+}

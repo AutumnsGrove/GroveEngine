@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, earth } from '../palette';
+	import { bark, earth, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -23,6 +23,9 @@
 	const fur = $derived(furColor ?? bark.warmBark);
 	const lightFur = $derived(earth.sand);
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Sitting squirrel -->
@@ -72,7 +75,7 @@
 
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="52" cy="30" r="3" />
-	<circle fill="white" cx="53" cy="29" r="1" />
+	<circle fill={eyeHighlight} cx="53" cy="29" r="1" />
 
 	<!-- Nose -->
 	<circle fill="#1a1a1a" cx="58" cy="34" r="2" />

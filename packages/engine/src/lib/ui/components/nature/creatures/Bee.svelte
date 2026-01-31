@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { flowers, bark } from '../palette';
+	import { flowers, bark, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -23,6 +23,9 @@
 	const body = $derived(bodyColor ?? flowers.wildflower.buttercup);
 	const stripes = $derived(stripeColor ?? bark.darkBark);
 	const wingColor = $derived('#e0f2fe'); // Light blue-ish transparent
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Bumble bee -->
@@ -43,8 +46,8 @@
 	<!-- Head -->
 	<circle fill={stripes} cx="8" cy="24" r="6" />
 
-	<!-- Eyes -->
-	<circle fill="white" cx="5" cy="22" r="2" />
+	<!-- Eyes (theme-aware) -->
+	<circle fill={eyeHighlight} cx="5" cy="22" r="2" />
 	<circle fill={stripes} cx="5" cy="22" r="1" />
 
 	<!-- Antennae -->

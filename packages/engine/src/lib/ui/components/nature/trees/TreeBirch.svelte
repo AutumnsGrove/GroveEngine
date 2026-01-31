@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { autumn, greens, natural, winter } from '../palette';
+	import { autumn, greens, natural, winter, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -34,7 +34,9 @@
 	// Birch bark is white/cream with dark horizontal marks
 	// In winter, the white bark stands out even more against snow
 	const actualTrunkColor = $derived(trunkColor ?? natural.birchWhite);
-	const barkMarkColor = '#2d2d2d';
+
+	// Theme-aware bark marks (darker in light mode, lighter in dark mode for contrast)
+	const barkMarkColor = $derived(resolveThemed(themed.barkMark));
 </script>
 
 <!-- Birch tree - white bark with horizontal marks, small triangular leaves -->

@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { flowers, greens } from '../palette';
+	import { flowers, greens, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -25,12 +25,15 @@
 	const pad = $derived(padColor ?? greens.grove);
 	const flower = $derived(flowerColor ?? flowers.wildflower.white);
 	const padDark = $derived(greens.deepGreen);
+
+	// Theme-aware shadow
+	const shadowColor = $derived(resolveThemed(themed.shadow));
 </script>
 
 <!-- Lily pad with optional flower -->
 <svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45">
-	<!-- Pad shadow -->
-	<ellipse fill="rgba(0,0,0,0.1)" cx="30" cy="32" rx="25" ry="12" />
+	<!-- Pad shadow (theme-aware) -->
+	<ellipse fill={shadowColor} cx="30" cy="32" rx="25" ry="12" />
 
 	<!-- Lily pad -->
 	<path
