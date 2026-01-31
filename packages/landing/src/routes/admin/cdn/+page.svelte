@@ -31,7 +31,7 @@
 	let copiedId = $state<string | null>(null);
 	let deleteConfirmId = $state<string | null>(null);
 	let fileInputRef = $state<HTMLInputElement>();
-	let deleteButtonRef = $state<HTMLButtonElement>();
+	let deleteButtonRefs = $state<Record<string, HTMLButtonElement>>({});
 
 	function formatBytes(bytes: number): string {
 		if (bytes === 0) return '0 B';
@@ -177,9 +177,10 @@
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : 'Delete failed';
 		}
+		const fileId = deleteConfirmId;
 		deleteConfirmId = null;
 		// Restore focus to delete button
-		deleteButtonRef?.focus();
+		if (fileId) deleteButtonRefs[fileId]?.focus();
 	}
 
 	function handleDropZoneKeydown(e: KeyboardEvent) {
@@ -189,10 +190,10 @@
 		}
 	}
 
-	function handleDeleteDialogKeydown(e: KeyboardEvent) {
+	function handleDeleteDialogKeydown(e: KeyboardEvent, fileId: string) {
 		if (e.key === 'Escape') {
 			deleteConfirmId = null;
-			deleteButtonRef?.focus();
+			deleteButtonRefs[fileId]?.focus();
 		}
 	}
 </script>
@@ -464,7 +465,7 @@
 										role="dialog"
 										aria-modal="true"
 										aria-labelledby="delete-dialog-{file.id}"
-										onkeydown={handleDeleteDialogKeydown}
+										onkeydown={(e) => handleDeleteDialogKeydown(e, file.id)}
 									>
 										<p id="delete-dialog-{file.id}" class="text-white text-sm font-sans mb-3 text-center">Delete this file?</p>
 										<div class="flex gap-2">
@@ -477,7 +478,7 @@
 											<button
 												onclick={() => {
 													deleteConfirmId = null;
-													deleteButtonRef?.focus();
+													deleteButtonRefs[file.id]?.focus();
 												}}
 												class="px-3 py-1.5 bg-white text-bark text-sm rounded-lg hover:bg-gray-100 transition-colors"
 											>
@@ -553,7 +554,7 @@
 										</svg>
 									</a>
 									<button
-										bind:this={deleteButtonRef}
+										bind:this={deleteButtonRefs[file.id]}
 										onclick={() => (deleteConfirmId = file.id)}
 										class="p-1.5 text-bark/40 hover:text-red-500 transition-colors"
 										aria-label="Delete file {file.original_filename}"

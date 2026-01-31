@@ -35,6 +35,8 @@
 			const focusableElements = menuRef.querySelectorAll<HTMLElement>(
 				'button, a, [tabindex]:not([tabindex="-1"])'
 			);
+			if (focusableElements.length === 0) return;
+
 			const firstElement = focusableElements[0];
 			const lastElement = focusableElements[focusableElements.length - 1];
 
@@ -128,8 +130,9 @@
 		} else {
 			if (previouslyFocusedElement && previouslyFocusedElement !== buttonRef) {
 				// Restore focus when menu closes (unless already on button)
-				previouslyFocusedElement = null;
+				previouslyFocusedElement.focus();
 			}
+			previouslyFocusedElement = null;
 		}
 	});
 
