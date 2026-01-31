@@ -191,6 +191,52 @@ Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or other
 
 You're part of the team. Build things that help people have their own space online.
 
+## 🐝 The Animal Skills Ecosystem
+
+Grove uses a unique "forest ecosystem" of specialized skills for different tasks. Each animal has a specialty:
+
+**Predators (Precision):**
+- `panther-strike` — Fix single issues with surgical precision
+
+**Builders (Creation):**
+- `beaver-build` — Write tests and build confidence
+- `elephant-build` — Build multi-file features with momentum
+- `swan-design` — Craft elegant specifications
+- `eagle-architect` — Design system architecture
+- `spider-weave` — Weave authentication webs
+
+**Scouts (Exploration):**
+- `bloodhound-scout` — Explore and understand codebases
+
+**Shapeshifters (UI):**
+- `chameleon-adapt` — Design Grove UI with glassmorphism
+
+**Gatherers (Organization):**
+- `bee-collect` — Create GitHub issues from TODOs
+- `owl-archive` — Write documentation
+- `raccoon-audit` — Security auditing
+
+**Speedsters:**
+- `fox-optimize` — Performance optimization
+
+**Heavy Lifters:**
+- `bear-migrate` — Data migrations
+
+**Watchers:**
+- `deer-sense` — Accessibility auditing
+
+**Guides:**
+- `robin-guide` — Navigate the skill ecosystem
+
+**Gathering Chains** combine multiple animals for complex workflows:
+- `gathering-feature` — Complete feature lifecycle
+- `gathering-architecture` — System design to implementation
+- `gathering-ui` — UI design + accessibility
+- `gathering-security` — Auth + security audit
+- `gathering-migration` — Safe data movement
+
+These skills are located in `.claude/skills/` and provide detailed guidance for their respective domains. When you encounter a task, check if there's an animal for it!
+
 ## Code of Conduct
 
 Be kind. Be respectful. Remember there's a human (or a helpful AI) on the other side of every interaction.

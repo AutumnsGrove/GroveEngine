@@ -227,6 +227,12 @@ Grove is different. It's:
 
 This isn't just a SaaS—it's about helping people have their own space online, away from big tech algorithms.
 
+## 🐝 The Forest Ecosystem
+
+Grove's development workflow is organized as a forest ecosystem—19 specialized "animal skills" that help with different tasks. From the **Panther** that strikes single issues to the **Elephant** that builds multi-file features, each animal has a specialty. When you need to write tests, call the **Beaver**. For UI work, summon the **Chameleon**. Creating issues? The **Bee** collects your TODOs.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full menagerie.
+
 ## 💰 Pricing
 
 | Plan | Price | Key Features |
