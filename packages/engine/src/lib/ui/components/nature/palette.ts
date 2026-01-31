@@ -611,6 +611,22 @@ export default naturePalette;
 // =============================================================================
 // DARK MODE SUPPORT
 // =============================================================================
+//
+// USAGE: These helpers must be called inside $derived() in Svelte components
+// to get reactive theme updates. The theme store is reactive, but the helper
+// functions themselves are not—they read the current theme at call time.
+//
+// Example component pattern:
+//   import { themed, resolveThemed } from '../palette';
+//
+//   // ✓ Correct: wrapped in $derived for reactivity
+//   const cloudColor = $derived(resolveThemed(themed.cloud));
+//   const shadowColor = $derived(getThemeShadow(0.1));
+//
+//   // ✗ Wrong: not reactive, won't update when theme changes
+//   const cloudColor = resolveThemed(themed.cloud);
+//
+// =============================================================================
 
 import { themeStore } from "$lib/ui/stores/theme.svelte";
 
