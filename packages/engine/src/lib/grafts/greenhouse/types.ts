@@ -189,3 +189,72 @@ export interface CultivateFlagTableProps extends BaseGraftProps {
   /** Flag ID currently being toggled (for loading state) */
   loadingFlagId?: string;
 }
+
+// =============================================================================
+// TENANT GRAFT CONTROL TYPES
+// =============================================================================
+
+/**
+ * Information about a graft that a tenant can control.
+ */
+export interface TenantGraftInfo {
+  /** Unique flag identifier */
+  id: string;
+
+  /** Human-readable flag name */
+  name: string;
+
+  /** Optional description explaining what this graft does */
+  description?: string;
+
+  /** Whether the graft is currently enabled for this tenant */
+  enabled: boolean;
+
+  /** Whether the tenant has a custom override (vs. using default) */
+  hasOverride: boolean;
+
+  /** The graft's global default value */
+  globalDefault: boolean;
+
+  /** Category for grouping */
+  category: "experimental" | "stable" | "beta";
+}
+
+/**
+ * Props for GraftControlPanel component.
+ * Self-serve graft controls for greenhouse tenants.
+ */
+export interface GraftControlPanelProps extends BaseGraftProps {
+  /** Array of grafts the tenant can control */
+  grafts: TenantGraftInfo[];
+
+  /** Current evaluated graft values from layout cascade */
+  currentValues?: Record<string, boolean>;
+
+  /** Called when toggling a graft's status */
+  onToggle: (graftId: string, enabled: boolean) => void;
+
+  /** Called when resetting all overrides to defaults */
+  onReset: () => void;
+
+  /** Graft ID currently being toggled (for loading state) */
+  loadingGraftId?: string;
+
+  /** Whether a reset is in progress */
+  resetting?: boolean;
+}
+
+/**
+ * Props for GraftToggleRow component.
+ * Individual graft toggle for tenant self-serve.
+ */
+export interface GraftToggleRowProps extends BaseGraftProps {
+  /** The graft to display */
+  graft: TenantGraftInfo;
+
+  /** Called when toggling the graft */
+  onToggle: (graftId: string, enabled: boolean) => void;
+
+  /** Whether the row is in a loading state */
+  loading?: boolean;
+}

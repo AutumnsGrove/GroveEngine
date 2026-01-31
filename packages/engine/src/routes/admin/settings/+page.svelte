@@ -1,9 +1,11 @@
 <script>
   import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
-  import { GreenhouseStatusCard } from '$lib/grafts/greenhouse';
+  import { GreenhouseStatusCard, GraftControlPanel } from '$lib/grafts/greenhouse';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
+  import { enhance } from '$app/forms';
+  import { invalidateAll } from '$app/navigation';
 
   /**
    * @typedef {Object} HealthStatus
@@ -54,6 +56,11 @@
   let currentAccentColor = $state(DEFAULT_ACCENT_COLOR);
   let savingColor = $state(false);
   let colorMessage = $state('');
+
+  // Graft control state (for greenhouse members)
+  let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
+  let resettingGrafts = $state(false);
+  const tenantGrafts = $derived(data.tenantGrafts ?? []);
 
   async function fetchHealth() {
     loadingHealth = true;
@@ -161,6 +168,63 @@
     fetchCurrentSettings();
     fetchCacheStats();
   });
+
+  /**
+   * Handle graft toggle via form action
+   * @param {string} graftId
+   * @param {boolean} enabled
+   */
+  async function handleGraftToggle(graftId, enabled) {
+    togglingGraftId = graftId;
+    try {
+      const formData = new FormData();
+      formData.append('graftId', graftId);
+      formData.append('enabled', String(enabled));
+
+      const response = await fetch('?/toggleGraft', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success(enabled ? `🌿 ${graftId.replace(/_/g, ' ')} enabled!` : `🌱 ${graftId.replace(/_/g, ' ')} disabled`);
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to update preference');
+      }
+    } catch (error) {
+      toast.error('Failed to update preference');
+      console.error('Graft toggle error:', error);
+    } finally {
+      togglingGraftId = undefined;
+    }
+  }
+
+  /**
+   * Handle reset all grafts to defaults
+   */
+  async function handleResetGrafts() {
+    resettingGrafts = true;
+    try {
+      const response = await fetch('?/resetGrafts', {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success('🌱 Reset to default settings');
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to reset preferences');
+      }
+    } catch (error) {
+      toast.error('Failed to reset preferences');
+      console.error('Reset grafts error:', error);
+    } finally {
+      resettingGrafts = false;
+    }
+  }
 </script>
 
 <div class="settings">
@@ -229,6 +293,18 @@
         inGreenhouse={greenhouseStatus.inGreenhouse}
         enrolledAt={greenhouseStatus.enrolledAt}
         notes={greenhouseStatus.notes}
+      />
+    </div>
+
+    <!-- Graft Control Panel - Self-serve feature toggles -->
+    <div class="mb-6">
+      <GraftControlPanel
+        grafts={tenantGrafts}
+        currentValues={data.grafts}
+        onToggle={handleGraftToggle}
+        onReset={handleResetGrafts}
+        loadingGraftId={togglingGraftId}
+        resetting={resettingGrafts}
       />
     </div>
   {/if}

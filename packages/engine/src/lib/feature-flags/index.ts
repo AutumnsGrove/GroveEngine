@@ -236,3 +236,12 @@ export {
   type GraftsRecord,
   type KnownGraftId,
 } from "./grafts.js";
+
+// Tenant Graft Overrides (Self-serve controls)
+export {
+  getTenantControllableGrafts,
+  setTenantGraftOverride,
+  removeTenantGraftOverride,
+  resetTenantGraftOverrides,
+  type TenantGraftInfo,
+} from "./tenant-grafts.js";

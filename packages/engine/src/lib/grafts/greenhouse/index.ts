@@ -56,6 +56,10 @@ export type {
   FeatureFlagSummary,
   CultivateFlagRowProps,
   CultivateFlagTableProps,
+  // Tenant Graft Control types
+  TenantGraftInfo,
+  GraftControlPanelProps,
+  GraftToggleRowProps,
 } from "./types.js";
 
 // Components
@@ -67,3 +71,7 @@ export { default as GreenhouseToggle } from "./GreenhouseToggle.svelte";
 // Cultivate Mode components
 export { default as CultivateFlagRow } from "./CultivateFlagRow.svelte";
 export { default as CultivateFlagTable } from "./CultivateFlagTable.svelte";
+
+// Tenant Graft Control components (self-serve)
+export { default as GraftControlPanel } from "./GraftControlPanel.svelte";
+export { default as GraftToggleRow } from "./GraftToggleRow.svelte";
