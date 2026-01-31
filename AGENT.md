@@ -518,10 +518,48 @@ validation doesn't use it — you must explicitly whitelist trusted origins.
 - **When naming a new service or feature** → Use skill: `walking-through-the-grove`
 - **When finding a Grove-themed name** → Use skill: `walking-through-the-grove`
 
-### Issue Management
-- **When the user provides a batch of TODOs or tasks** → Use skill: `grove-issues`
-- **When turning a brain dump into GitHub issues** → Use skill: `grove-issues`
-- **When bulk-creating issues with proper labels** → Use skill: `grove-issues`
+### Animal Skills (The Forest Ecosystem)
+Grove's development workflow is organized as a forest ecosystem. Each animal has a specialty:
+
+**Predators (Precision & Focus):**
+- **When fixing a single specific issue** → Use skill: `panther-strike`
+
+**Builders (Creation & Testing):**
+- **When writing tests** → Use skill: `beaver-build`
+- **When building multi-file features** → Use skill: `elephant-build`
+- **When writing technical specifications** → Use skill: `swan-design`
+- **When designing system architecture** → Use skill: `eagle-architect`
+- **When integrating authentication** → Use skill: `spider-weave`
+
+**Shapeshifters (UI & Design):**
+- **When designing Grove UI with glassmorphism** → Use skill: `chameleon-adapt`
+
+**Scouts (Exploration):**
+- **When exploring unfamiliar codebases** → Use skill: `bloodhound-scout`
+
+**Gatherers (Organization & Knowledge):**
+- **When writing documentation** → Use skill: `owl-archive`
+- **When creating GitHub issues from TODOs** → Use skill: `bee-collect`
+- **When security auditing** → Use skill: `raccoon-audit`
+
+**Speedsters (Performance):**
+- **When optimizing performance** → Use skill: `fox-optimize`
+
+**Heavy Lifters (Data):**
+- **When migrating data** → Use skill: `bear-migrate`
+
+**Watchers (Quality):**
+- **When auditing accessibility** → Use skill: `deer-sense`
+
+**Guides (Navigation):**
+- **When unsure which skill to use** → Use skill: `robin-guide`
+
+**Gathering Chains (Multi-Animal Workflows):**
+- **For complete feature lifecycle** → Use skill: `gathering-feature`
+- **For system architecture** → Use skill: `gathering-architecture`
+- **For UI + accessibility** → Use skill: `gathering-ui`
+- **For auth + security** → Use skill: `gathering-security`
+- **For data migration** → Use skill: `gathering-migration`
 
 ### Package Publishing
 - **When publishing to npm** → Use skill: `npm-publish`
