@@ -208,20 +208,30 @@
 					The AI tools that helped write and refine Grove's code.
 				</p>
 
-				<div class="grid gap-4">
+				<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					<div class="card p-5">
 						<div class="flex items-start justify-between gap-4">
 							<div>
 								<h3 class="text-lg font-serif text-foreground mb-1">Claude Code</h3>
 								<p class="text-foreground-subtle font-sans text-sm mb-2">by Anthropic</p>
 								<p class="text-foreground-muted font-sans text-sm">
-									Primary development tool. Used with Claude Haiku, Sonnet, and Opus 4.5 models—primarily Opus for complex architectural decisions and implementation.
+									Primary development tool. Used with frontier open source models all via OpenRouter with ZDR enabled.
 								</p>
 							</div>
 						</div>
-						<a href="https://claude.ai/code" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-3 inline-block">
-							claude.ai/code →
-						</a>
+						<div class="flex items-center gap-3 mt-3">
+							<a href="https://claude.ai/code" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
+								claude.ai/code →
+							</a>
+							<a
+								href="/knowledge/help/what-is-zdr"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								title="Zero Data Retention"
+							>
+								<Shredder class="w-3 h-3" />
+								ZDR
+							</a>
+						</div>
 					</div>
 
 					<div class="card p-5">
@@ -230,13 +240,38 @@
 								<h3 class="text-lg font-serif text-foreground mb-1">Kilo Code</h3>
 								<p class="text-foreground-subtle font-sans text-sm mb-2">VS Code Extension</p>
 								<p class="text-foreground-muted font-sans text-sm">
-									Secondary development tool. Used with DeepSeek V3.2, Kimi K2 (0905 and thinking models), and Minimax M2/M2.1 for additional perspectives and rapid iteration.
+									Secondary development tool. Used with frontier open source models all via OpenRouter with ZDR enabled.
 								</p>
 							</div>
 						</div>
 						<div class="flex items-center gap-3 mt-3">
 							<a href="https://kilocode.ai" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
 								kilocode.ai →
+							</a>
+							<a
+								href="/knowledge/help/what-is-zdr"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								title="Zero Data Retention"
+							>
+								<Shredder class="w-3 h-3" />
+								ZDR
+							</a>
+						</div>
+					</div>
+
+					<div class="card p-5">
+						<div class="flex items-start justify-between gap-4">
+							<div>
+								<h3 class="text-lg font-serif text-foreground mb-1">OpenCode</h3>
+								<p class="text-foreground-subtle font-sans text-sm mb-2">Interactive CLI Tool</p>
+								<p class="text-foreground-muted font-sans text-sm">
+									Development tool. Used with frontier open source models all via OpenRouter with ZDR enabled.
+								</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 mt-3">
+							<a href="https://opencode.ai" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
+								opencode.ai →
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"

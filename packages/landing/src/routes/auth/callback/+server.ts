@@ -14,7 +14,14 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { AUTH_COOKIE_NAMES } from "@autumnsgrove/groveengine/grafts/login";
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+/** Better Auth session cookie names (production uses __Secure- prefix) */
+const BETTER_AUTH_COOKIE = "better-auth.session_token";
+const BETTER_AUTH_COOKIE_SECURE = "__Secure-better-auth.session_token";
 
 /**
  * Migration deadline for legacy session cookies.
@@ -62,8 +69,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
   // Better Auth sets this cookie during the OAuth callback at GroveAuth
   // Check both prefixed (production HTTPS) and unprefixed (development) variants
   const sessionToken =
-    cookies.get(AUTH_COOKIE_NAMES.betterAuthSessionSecure) ||
-    cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
+    cookies.get(BETTER_AUTH_COOKIE_SECURE) || cookies.get(BETTER_AUTH_COOKIE);
 
   if (!sessionToken) {
     // No session cookie - check for legacy cookies during migration
