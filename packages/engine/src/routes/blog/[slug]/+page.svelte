@@ -303,27 +303,16 @@
 		padding: 0.375rem 0.75rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #2c5f2d;
-		background: rgba(44, 95, 45, 0.08);
-		border: 1px solid rgba(44, 95, 45, 0.2);
+		color: var(--accent-success);
+		background: var(--accent-success-faint, rgba(44, 95, 45, 0.08));
+		border: 1px solid var(--accent-success-border, rgba(44, 95, 45, 0.2));
 		border-radius: 6px;
 		text-decoration: none;
 		transition: all 0.15s ease;
 	}
 
 	.edit-link:hover {
-		background: rgba(44, 95, 45, 0.15);
-		border-color: rgba(44, 95, 45, 0.3);
-	}
-
-	:global(.dark) .edit-link {
-		color: var(--accent-success);
-		background: rgba(74, 222, 128, 0.1);
-		border-color: rgba(74, 222, 128, 0.2);
-	}
-
-	:global(.dark) .edit-link:hover {
-		background: rgba(74, 222, 128, 0.18);
-		border-color: rgba(74, 222, 128, 0.3);
+		background: var(--accent-success-faint-hover, rgba(44, 95, 45, 0.15));
+		border-color: var(--accent-success-border-hover, rgba(44, 95, 45, 0.3));
 	}
 </style>
