@@ -12,6 +12,57 @@ import { vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 // ============================================================================
+// Browser API Mocks (localStorage, matchMedia, etc.)
+// ============================================================================
+
+/**
+ * Mock localStorage for test environment
+ * Needed before any modules that depend on localStorage are imported
+ */
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: (index: number) => Object.keys(store)[index] ?? null,
+  };
+})();
+
+/**
+ * Mock matchMedia for system preference detection
+ */
+const createMatchMediaMock = (prefersDark: boolean) => ({
+  matches: prefersDark,
+  media: "(prefers-color-scheme: dark)",
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+});
+
+// Apply mocks to global before any modules import
+Object.defineProperty(globalThis, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
+Object.defineProperty(globalThis, "matchMedia", {
+  value: (query: string) => createMatchMediaMock(false),
+  writable: true,
+  configurable: true,
+});
+
+// ============================================================================
 // Type Definitions for Mock Data
 // ============================================================================
 

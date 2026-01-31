@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { accents } from '../palette';
+	import { accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -20,6 +20,11 @@
 
 	const waterColor = $derived(color ?? accents.water.surface);
 	const deepColor = $derived(accents.water.deep);
+
+	// Theme-aware colors for ripples and shadows
+	const rippleColor = $derived(resolveThemed(themed.ripple));
+	const shadowColor = $derived(resolveThemed(themed.shadow));
+	const highlightColor = $derived(resolveThemed(themed.highlight));
 </script>
 
 <!-- Pond with subtle ripple effect -->
@@ -35,50 +40,49 @@
 	<ellipse fill={deepColor} cx="60" cy="35" rx="55" ry="25" />
 	<ellipse fill={waterColor} cx="60" cy="32" rx="52" ry="22" opacity="0.7" />
 
-	<!-- Ripples -->
+	<!-- Ripples (theme-aware: visible in both light and dark modes) -->
 	<g clip-path="url(#pond-clip)">
 		<ellipse
 			fill="none"
-			stroke="white"
+			stroke={rippleColor}
 			stroke-width="1"
 			cx="40"
 			cy="30"
 			rx="8"
 			ry="4"
-			opacity="0.3"
 			class={animate ? 'ripple ripple-1' : ''}
 		/>
 		<ellipse
 			fill="none"
-			stroke="white"
+			stroke={rippleColor}
 			stroke-width="0.5"
 			cx="40"
 			cy="30"
 			rx="15"
 			ry="7"
-			opacity="0.2"
+			opacity="0.7"
 			class={animate ? 'ripple ripple-2' : ''}
 		/>
 		<ellipse
 			fill="none"
-			stroke="white"
+			stroke={rippleColor}
 			stroke-width="1"
 			cx="75"
 			cy="38"
 			rx="6"
 			ry="3"
-			opacity="0.25"
+			opacity="0.8"
 			class={animate ? 'ripple ripple-3' : ''}
 		/>
 	</g>
 
 	<!-- Reflection highlight -->
-	<ellipse fill="white" cx="45" cy="28" rx="12" ry="5" opacity="0.15" />
+	<ellipse fill={highlightColor} cx="45" cy="28" rx="12" ry="5" opacity="0.5" />
 
-	<!-- Edge shadow -->
+	<!-- Edge shadow (adapts to theme) -->
 	<ellipse
 		fill="none"
-		stroke="rgba(0,0,0,0.1)"
+		stroke={shadowColor}
 		stroke-width="2"
 		cx="60"
 		cy="35"

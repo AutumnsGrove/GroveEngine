@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, earth } from '../palette';
+	import { bark, earth, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -19,12 +19,15 @@
 	const wood = $derived(woodColor ?? bark.warmBark);
 	const railColor = $derived(bark.bark);
 	const shadow = $derived(bark.darkBark);
+
+	// Theme-aware shadow for the bridge
+	const groundShadow = $derived(resolveThemed(themed.shadow));
 </script>
 
 <!-- Small wooden bridge -->
 <svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70">
-	<!-- Shadow under bridge -->
-	<ellipse fill="rgba(0,0,0,0.1)" cx="60" cy="65" rx="55" ry="8" />
+	<!-- Shadow under bridge (theme-aware) -->
+	<ellipse fill={groundShadow} cx="60" cy="65" rx="55" ry="8" />
 
 	<!-- Bridge deck (arched) -->
 	<path

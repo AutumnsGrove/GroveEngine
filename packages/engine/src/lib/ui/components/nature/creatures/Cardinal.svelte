@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, accents } from '../palette';
+	import { bark, accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -31,6 +31,9 @@
 	const mask = $derived(maskColor ?? accents.bird.cardinalMask);
 	const beak = $derived(beakColor ?? accents.bird.cardinalBeak);
 	const legColor = $derived(bark.darkBark);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
@@ -68,8 +71,8 @@
 
 	<!-- Eye - visible within mask -->
 	<circle fill="#1a1a1a" cx="40" cy="19" r="2.5" />
-	<!-- Eye highlight -->
-	<circle fill="white" cx="41" cy="18" r="0.8" />
+	<!-- Eye highlight (theme-aware) -->
+	<circle fill={eyeHighlight} cx="41" cy="18" r="0.8" />
 
 	<!-- Beak - thick orange-red cone shape (cardinal signature) -->
 	<path fill={beak} d="M44 20 L52 21 L44 24 Q43 22 44 20" />

@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, earth, flowers } from '../palette';
+	import { bark, earth, flowers, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -24,6 +24,9 @@
 	const lightFeathers = $derived(earth.clay);
 	const eyeColor = $derived(flowers.wildflower.buttercup);
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Perched owl -->
@@ -58,11 +61,11 @@
 	<g class={animate ? 'blink' : ''}>
 		<circle fill={eyeColor} cx="18" cy="20" r="5" />
 		<circle fill="#1a1a1a" cx="18" cy="20" r="3" />
-		<circle fill="white" cx="19" cy="19" r="1" />
+		<circle fill={eyeHighlight} cx="19" cy="19" r="1" />
 
 		<circle fill={eyeColor} cx="32" cy="20" r="5" />
 		<circle fill="#1a1a1a" cx="32" cy="20" r="3" />
-		<circle fill="white" cx="33" cy="19" r="1" />
+		<circle fill={eyeHighlight} cx="33" cy="19" r="1" />
 	</g>
 
 	<!-- Beak -->

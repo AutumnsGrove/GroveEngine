@@ -4,8 +4,11 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
+	import { themed, resolveThemed } from '../palette';
+
 	interface Props {
 		class?: string;
+		/** Moon color. Defaults to warm pale yellow (works well in both themes). */
 		color?: string;
 		phase?: 'full' | 'waning' | 'crescent' | 'new';
 		animate?: boolean;
@@ -19,6 +22,9 @@
 	}: Props = $props();
 
 	const glowColor = '#fef9c3';
+
+	// Theme-aware crater color: lighter in light mode, darker in dark for contrast
+	const craterColor = $derived(resolveThemed(themed.moonCrater));
 </script>
 
 <!-- Moon with phase options -->
@@ -30,9 +36,9 @@
 		<!-- Full moon -->
 		<circle fill={color} cx="25" cy="25" r="20" />
 		<!-- Craters -->
-		<circle fill="#e5e5dc" cx="18" cy="20" r="4" opacity="0.3" />
-		<circle fill="#e5e5dc" cx="30" cy="28" r="5" opacity="0.25" />
-		<circle fill="#e5e5dc" cx="22" cy="32" r="3" opacity="0.2" />
+		<circle fill={craterColor} cx="18" cy="20" r="4" opacity="0.3" />
+		<circle fill={craterColor} cx="30" cy="28" r="5" opacity="0.25" />
+		<circle fill={craterColor} cx="22" cy="32" r="3" opacity="0.2" />
 	{:else if phase === 'waning'}
 		<!-- Waning gibbous -->
 		<circle fill={color} cx="25" cy="25" r="20" />

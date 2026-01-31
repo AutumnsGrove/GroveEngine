@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, accents } from '../palette';
+	import { bark, accents, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -31,6 +31,10 @@
 	const legColor = $derived(bark.darkBark);
 
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware highlights
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
+	const highlight = $derived(resolveThemed(themed.highlight));
 </script>
 
 <!-- American Robin - perched -->
@@ -60,15 +64,15 @@
 	<!-- Head - dark gray -->
 	<circle fill={body} cx="36" cy="20" r="10" />
 
-	<!-- White eye-ring (robin signature) -->
-	<circle fill="white" cx="40" cy="18" r="3.5" />
+	<!-- White eye-ring (robin signature, theme-aware) -->
+	<circle fill={highlight} cx="40" cy="18" r="3.5" />
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="40" cy="18" r="2" />
-	<!-- Eye highlight -->
-	<circle fill="white" cx="41" cy="17" r="0.7" />
+	<!-- Eye highlight (theme-aware) -->
+	<circle fill={eyeHighlight} cx="41" cy="17" r="0.7" />
 
-	<!-- White crescent below eye -->
-	<path fill="white" d="M38 22 Q40 23 42 22 Q41 24 39 24 Q38 23 38 22" opacity="0.6" />
+	<!-- White crescent below eye (theme-aware) -->
+	<path fill={eyeHighlight} d="M38 22 Q40 23 42 22 Q41 24 39 24 Q38 23 38 22" opacity="0.6" />
 
 	<!-- Beak - yellow-orange -->
 	<path fill={beak} d="M45 20 L52 22 L45 24 Z" />

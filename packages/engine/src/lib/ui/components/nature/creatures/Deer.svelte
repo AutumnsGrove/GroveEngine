@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { earth, bark, natural } from '../palette';
+	import { earth, bark, natural, themed, resolveThemed } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -24,6 +24,9 @@
 	const darkFur = $derived(bark.bark);
 	const lightFur = $derived(natural.cream);
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
+
+	// Theme-aware eye highlight
+	const eyeHighlight = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Standing deer -->
@@ -67,7 +70,7 @@
 
 	<!-- Eye -->
 	<circle fill="#1a1a1a" cx="55" cy="20" r="2" />
-	<circle fill="white" cx="55.5" cy="19.5" r="0.8" />
+	<circle fill={eyeHighlight} cx="55.5" cy="19.5" r="0.8" />
 
 	<!-- Spots (fawn pattern) -->
 	<circle fill={lightFur} cx="25" cy="52" r="2" opacity="0.4" />
