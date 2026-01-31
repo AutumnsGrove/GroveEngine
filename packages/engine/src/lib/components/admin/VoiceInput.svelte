@@ -16,6 +16,7 @@
     type ScribeRecorderState,
   } from "$lib/scribe/recorder.js";
   import type { GutterItem, ScribeMode } from "$lib/lumen/types.js";
+  import { getCSRFToken } from "$lib/utils/api.js";
 
   // ============================================================================
   // Props & Events
@@ -163,10 +164,16 @@
       formData.append("audio", audioBlob);
       formData.append("mode", mode);
 
+      // Get CSRF token for state-changing request
+      const csrfToken = getCSRFToken();
+
       const response = await fetch("/api/lumen/transcribe", {
         method: "POST",
         body: formData,
         credentials: "include",
+        headers: csrfToken
+          ? { "X-CSRF-Token": csrfToken, "csrf-token": csrfToken }
+          : {},
       });
 
       if (!response.ok) {
