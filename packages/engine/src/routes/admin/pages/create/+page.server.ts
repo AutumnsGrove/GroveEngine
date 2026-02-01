@@ -1,12 +1,7 @@
-import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals }) => {
-  // Auth check - ensure user is logged in
-  if (!locals.user) {
-    throw redirect(302, "/auth/login");
-  }
-
+// Auth is handled by the parent /admin layout - no duplicate check needed here
+export const load: PageServerLoad = async () => {
   // Return empty data (no page to load for creation)
   return {};
 };

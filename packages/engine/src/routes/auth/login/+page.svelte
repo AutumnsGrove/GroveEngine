@@ -7,6 +7,7 @@
 	 */
 
 	import { LoginGraft } from '$lib/grafts/login';
+	import { Logo } from '$lib/ui/components/ui';
 	import { page } from '$app/stores';
 
 	// Get error details from URL params (set by callback on auth failure)
@@ -24,11 +25,7 @@
 	returnTo="/admin"
 >
 	{#snippet logo()}
-		<svg class="w-16 h-16 text-grove-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" fill="currentColor" opacity="0.2"/>
-			<path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4zm0 2.18l6 3v5.82c0 4.53-3.13 8.72-6 9.82-2.87-1.1-6-5.29-6-9.82V7.18l6-3z" fill="currentColor"/>
-			<circle cx="12" cy="10" r="3" fill="currentColor"/>
-		</svg>
+		<Logo class="w-16 h-16" />
 	{/snippet}
 
 	{#snippet header()}

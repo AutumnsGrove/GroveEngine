@@ -1,5 +1,5 @@
-import { error, redirect } from "@sveltejs/kit";
-import type { PageServerLoad } from './$types';
+import { error } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
 
 interface PageRecord {
   slug: string;
@@ -20,11 +20,7 @@ interface HeroData {
 }
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
-  // Auth check happens in admin layout
-  if (!locals.user) {
-    throw redirect(302, "/auth/login");
-  }
-
+  // Auth is handled by the parent /admin layout - no duplicate check needed here
   const { slug } = params;
   const tenantId = locals.tenantId;
 
@@ -48,7 +44,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
           source: "d1" as const,
           page: {
             ...page,
-            hero: page.hero ? JSON.parse(page.hero) as HeroData : null,
+            hero: page.hero ? (JSON.parse(page.hero) as HeroData) : null,
             gutter_content: page.gutter_content || "[]",
           },
         };

@@ -1,4 +1,3 @@
-import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {
@@ -23,11 +22,7 @@ interface CurioStatus {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-  // Check if user is authenticated
-  if (!locals.user) {
-    throw redirect(302, "/auth/login");
-  }
-
+  // Auth is handled by the parent /admin layout - no duplicate check needed here
   const tenantId = locals.tenantId;
   let pages: PageRecord[] = [];
   let curios: CurioStatus[] = [];

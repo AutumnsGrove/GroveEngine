@@ -13,9 +13,7 @@ interface CountResult {
 }
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
+  // Auth is handled by the parent /admin layout - no duplicate check needed here
 
   if (!platform?.env?.DB) {
     throw error(500, "Database not available");

@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
-	import { Shredder } from 'lucide-svelte';
+	import { Shredder, Heart, Cpu, Layers, Package, Smile, Type } from 'lucide-svelte';
 
-	const headers = [
-		{ id: 'supporters', text: 'Supporters & Community', level: 2 },
-		{ id: 'queer-quest', text: 'Queer Quest Circle', level: 3 },
-		{ id: 'home-depot-family', text: 'Home Depot Family', level: 3 },
-		{ id: 'kindred-spirits', text: 'Kindred Spirits', level: 3 },
-		{ id: 'ai-tools', text: 'AI Coding Assistants', level: 2 },
-		{ id: 'tech-stack', text: 'Tech Stack', level: 2 },
-		{ id: 'libraries', text: 'Open Source Libraries', level: 2 },
-		{ id: 'icons', text: 'Icons', level: 2 },
-		{ id: 'fonts', text: 'Fonts', level: 2 }
+	// TOC state
+	let isTocOpen = $state(false);
+
+	// TOC items with icons for the floating nav
+	const tocItems = [
+		{ id: 'supporters', text: 'Supporters', icon: Heart },
+		{ id: 'ai-tools', text: 'AI Tools', icon: Cpu },
+		{ id: 'tech-stack', text: 'Tech Stack', icon: Layers },
+		{ id: 'libraries', text: 'Libraries', icon: Package },
+		{ id: 'icons', text: 'Icons', icon: Smile },
+		{ id: 'fonts', text: 'Fonts', icon: Type }
 	];
 </script>
 
@@ -455,6 +455,16 @@
 							<span class="text-foreground-faint text-xs font-sans">MIT</span>
 						</div>
 					</a>
+
+					<a href="https://github.com/huntabyte/shadcn-svelte" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">shadcn-svelte</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— Component primitives powering Grove's glass UI</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">MIT</span>
+						</div>
+					</a>
 				</div>
 			</section>
 
@@ -743,16 +753,64 @@
 				</a>
 			</section>
 			</article>
-
-			<!-- Table of Contents Sidebar -->
-			<aside class="toc-sidebar">
-				<TableOfContents {headers} />
-			</aside>
 		</div>
 	</div>
 
-	<!-- Mobile TOC -->
-	<MobileTOC {headers} />
+	<!-- Floating TOC (Desktop) -->
+	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-3" aria-label="Page navigation">
+		{#each tocItems as item}
+			{@const Icon = item.icon}
+			<a
+				href="#{item.id}"
+				class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200 group"
+				aria-label="Jump to {item.text}"
+				title={item.text}
+			>
+				<Icon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+			</a>
+		{/each}
+	</nav>
+
+	<!-- Floating TOC Button & Dropdown (Mobile + always visible) -->
+	<div class="fixed bottom-6 right-6 z-grove-fab lg:hidden">
+		<button
+			type="button"
+			onclick={() => isTocOpen = !isTocOpen}
+			class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+			aria-expanded={isTocOpen}
+			aria-label="Table of contents"
+		>
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+			</svg>
+		</button>
+
+		{#if isTocOpen}
+			<div class="absolute bottom-16 right-0 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden">
+				<div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between">
+					<span class="font-medium text-foreground">Navigate</span>
+					<button type="button" onclick={() => isTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="py-2">
+					{#each tocItems as item}
+						{@const Icon = item.icon}
+						<a
+							href="#{item.id}"
+							onclick={() => isTocOpen = false}
+							class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+						>
+							<Icon class="w-5 h-5 text-amber-500" />
+							<span>{item.text}</span>
+						</a>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
 
 	<Footer />
 </main>
@@ -760,33 +818,14 @@
 <style>
 	.bg-divider { background-color: var(--color-divider); }
 
-	/* Credits page layout with TOC */
+	/* Credits page layout */
 	.credits-layout {
-		display: grid;
-		grid-template-columns: 1fr;
-		max-width: 1200px;
+		max-width: 800px;
 		margin: 0 auto;
-		gap: 2rem;
-	}
-
-	@media (min-width: 1024px) {
-		.credits-layout {
-			grid-template-columns: 1fr 220px;
-		}
 	}
 
 	.credits-content {
 		max-width: 800px;
-	}
-
-	.toc-sidebar {
-		display: none;
-	}
-
-	@media (min-width: 1024px) {
-		.toc-sidebar {
-			display: block;
-		}
 	}
 
 	/* Supporter styles */
