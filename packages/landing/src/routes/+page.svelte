@@ -17,7 +17,8 @@
 		Users,
 		Download,
 		ArrowRight,
-		Sprout
+		Sprout,
+		ChevronDown
 	} from 'lucide-svelte';
 
 	// Get error from URL if present
@@ -26,6 +27,58 @@
 	// Toggle season on logo click
 	function handleLogoClick() {
 		seasonStore.cycle();
+	}
+
+	// FAQ data
+	const faqItems = [
+		{
+			id: 'what-is-grove',
+			question: 'What is Grove?',
+			answer: 'Grove is a blogging platform where your words stay yours. You get your own subdomain (yourname.grove.place), a clean writing experience, and protection from AI scrapers. No ads, no algorithms, no data harvesting.'
+		},
+		{
+			id: 'how-different',
+			question: 'How is Grove different from other platforms?',
+			answer: "Most platforms make money by showing you ads or selling your data. Grove makes money by charging a fair price for a good service. You're the customer, not the product. We don't track your readers, we don't train AI on your writing, and we don't manipulate what people see."
+		},
+		{
+			id: 'ai-protection',
+			question: 'Is my writing safe from AI training?',
+			answer: "Yes. Every Grove blog is protected by Shade — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human."
+		},
+		{
+			id: 'data-ownership',
+			question: 'What happens to my data?',
+			answer: "Your content belongs to you. Export everything anytime in standard formats (Markdown, JSON). If you leave, your data leaves with you. We don't hold your words hostage."
+		},
+		{
+			id: 'custom-domain',
+			question: 'Can I use my own domain?',
+			answer: "Yes! Oak tier lets you bring a domain you already own. Evergreen tier includes domain registration — we'll find and set up the perfect domain for you."
+		},
+		{
+			id: 'shutdown',
+			question: 'What if Grove shuts down?',
+			answer: "After 12 months on a paid plan, your blog earns Centennial status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform."
+		},
+		{
+			id: 'pricing',
+			question: 'How much does it cost?',
+			answer: "Reading is always free. Writing starts at $8/month (Seedling). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details."
+		}
+	];
+
+	// FAQ expansion state
+	let expandedFaq = $state<Set<string>>(new Set());
+
+	function toggleFaq(id: string) {
+		if (expandedFaq.has(id)) {
+			expandedFaq.delete(id);
+			expandedFaq = new Set(expandedFaq);
+		} else {
+			expandedFaq.add(id);
+			expandedFaq = new Set(expandedFaq);
+		}
 	}
 
 </script>
@@ -252,6 +305,44 @@
 					<span><span class="text-foreground font-medium">Take your stuff and go</span> — export everything anytime, your content lives in standard formats</span>
 				</li>
 			</ul>
+		</div>
+	</section>
+
+	<!-- FAQ Section -->
+	<section id="faq" class="w-full max-w-2xl mb-12 scroll-mt-24">
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Frequently Asked Questions</h2>
+
+		<div class="glass-grove rounded-xl p-6">
+			<div class="space-y-3 text-sm font-sans">
+				{#each faqItems as item (item.id)}
+					{@const isExpanded = expandedFaq.has(item.id)}
+					<div class="border-b border-subtle last:border-0 pb-3 last:pb-0">
+						<button
+							type="button"
+							onclick={() => toggleFaq(item.id)}
+							class="w-full flex items-center justify-between text-left group py-1"
+							aria-expanded={isExpanded}
+							aria-controls="faq-{item.id}"
+						>
+							<span class="font-medium text-foreground group-hover:text-accent-muted transition-colors pr-4">
+								{item.question}
+							</span>
+							<ChevronDown
+								class="w-4 h-4 text-foreground-faint flex-shrink-0 transition-transform duration-200 {isExpanded ? 'rotate-180' : ''}"
+							/>
+						</button>
+
+						{#if isExpanded}
+							<div
+								id="faq-{item.id}"
+								class="mt-2 text-foreground-muted leading-relaxed"
+							>
+								{item.answer}
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
 		</div>
 	</section>
 
