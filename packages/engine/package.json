@@ -262,6 +262,10 @@
     "./email/schedule": {
       "types": "./dist/email/schedule.d.ts",
       "default": "./dist/email/schedule.js"
+    },
+    "./email/urls": {
+      "types": "./dist/email/urls.d.ts",
+      "default": "./dist/email/urls.js"
     }
   },
   "files": [
