@@ -21,6 +21,7 @@ import {
   Blinds,
   Coffee,
   Inbox,
+  Armchair,
 } from "lucide-svelte";
 
 // =============================================================================
@@ -108,6 +109,7 @@ export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/porch", label: "Porch", icon: Armchair },
   { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
@@ -142,6 +144,7 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/porch", label: "Porch", icon: Armchair },
   { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
