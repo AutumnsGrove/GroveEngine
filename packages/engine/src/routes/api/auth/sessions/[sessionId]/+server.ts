@@ -20,6 +20,13 @@ export const DELETE: RequestHandler = async ({ params, cookies, platform }) => {
     return json({ error: "Session ID required" }, { status: 400 });
   }
 
+  // Validate sessionId format (UUID) to prevent path injection
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(sessionId)) {
+    return json({ error: "Invalid session ID format" }, { status: 400 });
+  }
+
   if (!platform?.env?.AUTH) {
     console.error("[Sessions] AUTH service binding not available");
     return json({ error: "Auth service unavailable" }, { status: 503 });
