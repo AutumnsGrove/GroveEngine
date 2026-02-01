@@ -258,6 +258,10 @@
     "./email/updates": {
       "types": "./dist/email/updates/index.d.ts",
       "default": "./dist/email/updates/index.js"
+    },
+    "./email/schedule": {
+      "types": "./dist/email/schedule.d.ts",
+      "default": "./dist/email/schedule.js"
     }
   },
   "files": [
