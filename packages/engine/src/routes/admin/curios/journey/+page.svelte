@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard } from "$lib/ui/components/ui";
+  import { GlassCard, Waystone } from "$lib/ui/components/ui";
   import { ChevronLeft, Sparkles } from "lucide-svelte";
 </script>
 
@@ -18,6 +18,7 @@
       <div class="title-row">
         <Sparkles class="header-icon" />
         <h1>Journey</h1>
+        <Waystone slug="what-is-journey" label="Learn about Journey" />
       </div>
       <p class="subtitle">
         Visualize your creative path and celebrate your blogging milestones

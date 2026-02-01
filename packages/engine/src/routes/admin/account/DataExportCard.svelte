@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Button, Spinner } from "$lib/ui";
+  import { GlassCard, Button, Spinner, Waystone } from "$lib/ui";
   import { Download, AlertTriangle } from "lucide-svelte";
   import type { ExportType } from "./types";
   import { CONTACT } from "$lib/config/contact";
@@ -36,7 +36,7 @@
 </script>
 
 <GlassCard variant="default" class="mb-6">
-  <h2>Your Data</h2>
+  <h2>Your Data <Waystone slug="your-data-and-exports" label="Learn about data portability" inline /></h2>
   <p class="section-description">
     You own your content. Export your blog posts, pages, images, and account
     data at any time. We believe in data portability — you should never feel

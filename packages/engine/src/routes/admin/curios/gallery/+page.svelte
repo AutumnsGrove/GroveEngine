@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData, ActionData } from "./$types";
   import { enhance } from "$app/forms";
-  import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import {
     Image,
     Settings2,
@@ -78,6 +78,7 @@
       <div class="title-row">
         <Image class="header-icon" />
         <h1>Gallery</h1>
+        <Waystone slug="what-is-gallery" label="Learn about Gallery" />
         <Badge variant={enabled ? "default" : "secondary"}>
           {enabled ? "Enabled" : "Disabled"}
         </Badge>

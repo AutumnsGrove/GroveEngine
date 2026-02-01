@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import { Calendar, Sparkles, GitBranch, Construction, Image } from "lucide-svelte";
 
   // Available curios with their status
@@ -59,6 +59,7 @@
       <div class="title-row">
         <Sparkles class="header-icon" />
         <h1>Curios</h1>
+        <Waystone slug="what-are-curios" label="Learn about Curios" />
       </div>
       <p class="subtitle">
         Fun, delightful tools that make your site feel alive.
