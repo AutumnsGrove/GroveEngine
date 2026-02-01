@@ -25,6 +25,10 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
 
+  // Track curio enabled states (hoisted for access in return statement)
+  let timelineEnabled = false;
+  let galleryEnabled = false;
+
   // Only fetch from database at runtime (not during prerendering)
   // The Cloudflare adapter throws when accessing platform.env during prerendering
   // Must check `building` BEFORE accessing platform.env to avoid the getter throwing
@@ -121,12 +125,14 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .map((p) => ({ slug: p.slug, title: p.title }));
           }
 
-          // Add curio pages to nav if enabled
+          // Add curio pages to nav if enabled (and track state for return)
           if (timelineResult?.enabled) {
             navPages.push({ slug: "timeline", title: "Timeline" });
+            timelineEnabled = true;
           }
           if (galleryResult?.enabled) {
             navPages.push({ slug: "gallery", title: "Gallery" });
+            galleryEnabled = true;
           }
 
           // Calculate enabled curios count for the pages admin UI
@@ -160,7 +166,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     enabledCuriosCount,
     csrfToken: locals.csrfToken,
     // Explicit curio enable flags for mobile nav (fixes #848 regression)
-    showTimeline: !!timelineResult?.enabled,
-    showGallery: !!galleryResult?.enabled,
+    // Uses hoisted booleans since Promise.all results are block-scoped
+    showTimeline: timelineEnabled,
+    showGallery: galleryEnabled,
   };
 };

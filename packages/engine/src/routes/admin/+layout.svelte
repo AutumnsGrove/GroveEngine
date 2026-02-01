@@ -5,12 +5,9 @@
     FileText,
     FileStack,
     Image,
-    BarChart3,
-    Calendar,
     Settings,
     ChevronLeft,
     LogOut,
-    Sparkles,
     CreditCard,
     HelpCircle,
     MessageCircle,
@@ -117,21 +114,9 @@
         <FileStack class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Pages</span>
       </a>
-      <a href="/admin/curios" class="nav-item" onclick={closeSidebar} title="Curios">
-        <Sparkles class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Curios</span>
-      </a>
       <a href="/admin/images" class="nav-item" onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
-      </a>
-      <a href="/admin/analytics" class="nav-item" onclick={closeSidebar} title="Rings">
-        <BarChart3 class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Rings</span>
-      </a>
-      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trail">
-        <Calendar class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Trail</span>
       </a>
       <a href="/admin/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
@@ -245,13 +230,14 @@
   .mobile-home-link {
     font-size: 1.25rem;
     font-weight: bold;
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
     text-decoration: none;
     transition: color 0.2s;
   }
 
   .mobile-home-link:hover {
-    color: var(--color-primary-hover);
+    color: var(--user-accent, var(--color-primary-hover));
+    filter: brightness(1.1);
   }
 
   .mobile-header-spacer {
@@ -353,7 +339,8 @@
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
-    color: var(--color-primary);
+    /* Use user's accent color with fallback to Grove Green */
+    color: var(--user-accent, var(--color-primary));
   }
 
   .admin-label {
@@ -483,7 +470,7 @@
 
   .nav-item:hover {
     background: var(--grove-overlay-8);
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
   }
 
   :global(.dark) .nav-item:hover {
@@ -567,7 +554,7 @@
 
   .logout-btn:hover {
     background: var(--grove-overlay-15);
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
   }
 
   :global(.dark) .logout-btn:hover {
@@ -594,7 +581,7 @@
 
   .logout-btn-icon:hover {
     background: var(--grove-overlay-15);
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
   }
 
   :global(.dark) .logout-btn-icon:hover {
@@ -624,7 +611,7 @@
 
   .help-link:hover {
     background: var(--grove-overlay-15);
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
   }
 
   :global(.dark) .help-link:hover {
@@ -652,7 +639,7 @@
 
   .help-link-icon:hover {
     background: var(--grove-overlay-15);
-    color: var(--color-primary);
+    color: var(--user-accent, var(--color-primary));
   }
 
   :global(.dark) .help-link-icon:hover {
