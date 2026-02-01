@@ -18,8 +18,8 @@
 -- Step 1: Add new columns
 -- =============================================================================
 
--- Audience type: waitlist (landing), trial (plant), rooted (subscriber)
-ALTER TABLE email_signups ADD COLUMN audience_type TEXT DEFAULT 'waitlist';
+-- Audience type: wanderer (landing), promo (plant), rooted (subscriber)
+ALTER TABLE email_signups ADD COLUMN audience_type TEXT DEFAULT 'wanderer';
 
 -- Sequence stage: which email in the sequence they're on
 -- Values: 0 (welcome), 1, 7, 14, 30, -1 (complete)

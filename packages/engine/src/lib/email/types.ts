@@ -11,11 +11,11 @@
 /**
  * User audience categories for email segmentation
  *
- * - waitlist: Signed up on landing page, just curious
- * - trial: Signed up via Plant but hasn't subscribed yet
- * - rooted: Active subscriber (any tier)
+ * - wanderer: Signed up on landing page (grove.place), just curious
+ * - promo: Signed up via Plant, showing intent but hasn't purchased
+ * - rooted: Purchased a subscription, active member
  */
-export type AudienceType = "waitlist" | "trial" | "rooted";
+export type AudienceType = "wanderer" | "promo" | "rooted";
 
 /**
  * Sequence stages representing which email in the sequence
@@ -85,39 +85,33 @@ export type SequenceConfig = {
  * Default sequence configurations by audience type
  */
 export const SEQUENCES: SequenceConfig = {
-  waitlist: [
-    { dayOffset: 0, template: "WelcomeEmail", subject: "Welcome to Grove 🌿" },
-    { dayOffset: 7, template: "Day7Email", subject: "What we're building" },
-    { dayOffset: 14, template: "Day14Email", subject: "Why Grove exists" },
-    { dayOffset: 30, template: "Day30Email", subject: "A quick check-in" },
-  ],
-  trial: [
+  wanderer: [
     {
       dayOffset: 0,
       template: "WelcomeEmail",
-      subject: "You planted something 🌱",
+      subject: "Welcome to the Grove 🌿",
     },
     {
-      dayOffset: 1,
-      template: "Day1Email",
-      subject: "Quick tip: your first post",
+      dayOffset: 7,
+      template: "Day7Email",
+      subject: "What makes Grove different",
     },
-    { dayOffset: 7, template: "Day7Email", subject: "Have you tried...?" },
+    { dayOffset: 14, template: "Day14Email", subject: "Why Grove exists" },
+    { dayOffset: 30, template: "Day30Email", subject: "Still there? 👋" },
+  ],
+  promo: [
+    { dayOffset: 0, template: "WelcomeEmail", subject: "You found Grove 🌱" },
     {
-      dayOffset: 14,
-      template: "Day14Email",
-      subject: "Something special for you",
+      dayOffset: 7,
+      template: "Day7Email",
+      subject: "Still thinking about it?",
     },
-    {
-      dayOffset: 30,
-      template: "Day30Email",
-      subject: "Last chance to take root",
-    },
+    // Just 2 emails. Short. Honest. Done.
   ],
   rooted: [
     { dayOffset: 0, template: "WelcomeEmail", subject: "Welcome home 🏡" },
-    { dayOffset: 1, template: "Day1Email", subject: "Getting started guide" },
-    { dayOffset: 7, template: "Day7Email", subject: "Feature spotlight" },
+    { dayOffset: 1, template: "Day1Email", subject: "Making it yours" },
+    { dayOffset: 7, template: "Day7Email", subject: "The blank page" },
     // Rooted users get ongoing patch notes instead of more sequence emails
   ],
 };
