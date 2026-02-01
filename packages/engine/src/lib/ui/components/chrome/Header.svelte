@@ -45,6 +45,8 @@
 		signInHref?: string;
 		/** Label for sign-in link (default: "Sign in") */
 		signInLabel?: string;
+		/** Where logged-in user goes when clicking avatar (default: /admin) */
+		userHref?: string;
 	}
 
 	let {
@@ -65,7 +67,8 @@
 		showSignIn = true,
 		user = null,
 		signInHref = 'https://heartwood.grove.place',
-		signInLabel = 'Sign in'
+		signInLabel = 'Sign in',
+		userHref = '/admin'
 	}: Props = $props();
 
 	const maxWidthClass = {
@@ -204,9 +207,9 @@
 				{#if user}
 					<!-- Logged in: show user info -->
 					<a
-						href="/admin"
+						href={userHref}
 						class="flex items-center gap-2 text-foreground-subtle hover:text-accent-muted transition-colors"
-						title="Go to your admin panel"
+						title="Go to your Grove"
 					>
 						{#if user.avatarUrl}
 							<img
@@ -264,4 +267,5 @@
 	{user}
 	{signInHref}
 	{signInLabel}
+	{userHref}
 />

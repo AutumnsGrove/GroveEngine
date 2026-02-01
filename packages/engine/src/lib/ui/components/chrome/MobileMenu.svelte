@@ -26,6 +26,7 @@
 		user?: HeaderUser | null;
 		signInHref?: string;
 		signInLabel?: string;
+		userHref?: string;
 	}
 
 	let {
@@ -42,7 +43,8 @@
 		showSignIn = true,
 		user = null,
 		signInHref = 'https://heartwood.grove.place',
-		signInLabel = 'Sign in'
+		signInLabel = 'Sign in',
+		userHref = '/admin'
 	}: Props = $props();
 
 	// Search state
@@ -174,9 +176,9 @@
 	{#if showSignIn}
 		<div class="p-3 border-b border-default">
 			{#if user}
-				<!-- Logged in: user info + admin link -->
+				<!-- Logged in: user info + grove link -->
 				<a
-					href="/admin"
+					href={userHref}
 					onclick={handleClose}
 					class="flex items-center gap-3 px-3 py-3 rounded-lg bg-accent/10 text-foreground hover:bg-accent/20 transition-colors"
 				>

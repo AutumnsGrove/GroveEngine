@@ -91,7 +91,7 @@
 	url="/"
 />
 
-<Header user={data.user} />
+<Header user={data.user} userHref={data.groveUrl ?? 'https://heartwood.grove.place'} />
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Error Banner -->
