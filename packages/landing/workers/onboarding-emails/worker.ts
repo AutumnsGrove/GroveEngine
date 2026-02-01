@@ -1,6 +1,18 @@
 /**
  * Grove Onboarding Emails Worker
  *
+ * @deprecated This worker is being replaced by the new email infrastructure v2.
+ * See: docs/plans/planned/email-infrastructure-v2.md
+ * New worker: workers/email-catchup/
+ *
+ * TRANSITION PLAN:
+ * 1. Deploy new email-catchup worker
+ * 2. Update landing signup to use scheduleWelcomeSequence()
+ * 3. Verify v2 is working for 1-2 weeks
+ * 4. Disable this worker's cron trigger
+ * 5. Delete this directory after verification
+ *
+ * OLD BEHAVIOR:
  * Scheduled worker that sends follow-up emails to waitlist signups.
  * Runs daily and checks for users who need Day 3, Day 7, or Day 14 emails.
  *
