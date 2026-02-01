@@ -332,7 +332,25 @@ This makes the intent clearer than passing empty arrays.
 - [ ] Test on multiple screen sizes
 - [ ] Verify Resources/Connect sections are hidden
 
-### Phase 5: Cleanup
+### Phase 5: Write Tests
+
+> **Important:** Before writing tests, invoke skill: `beaver-build` for Grove's testing patterns and conventions.
+
+- [ ] Write unit tests for `buildTenantNavItems()` utility
+  - Default nav items (Home, Blog, About)
+  - Custom nav pages from DB
+  - Optional timeline/gallery flags
+  - Icon mapping
+- [ ] Write component tests for Header search functionality
+  - Search input renders when `searchEnabled={true}`
+  - `onSearch` callback fires on submit
+  - Search hidden when `searchEnabled={false}` (default)
+
+**Test file locations:**
+- `packages/engine/src/lib/ui/components/chrome/tenant-nav.test.ts`
+- `packages/engine/src/lib/ui/components/chrome/Header.test.ts` (extend existing or create)
+
+### Phase 6: Cleanup
 - [ ] Remove any orphaned CSS classes
 - [ ] Verify no console errors
 - [ ] Check accessibility (focus states, ARIA)
