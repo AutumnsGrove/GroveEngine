@@ -10,3 +10,8 @@ export {
   type PatchNotesEmailProps,
   type PatchNote,
 } from "./PatchNotesEmail";
+
+export {
+  AnnouncementEmail,
+  type AnnouncementEmailProps,
+} from "./AnnouncementEmail";

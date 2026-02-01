@@ -17,6 +17,9 @@
  *
  * - `./components` - Grove design system components
  * - `./sequences` - Automated email sequences (Day 0, 1, 7, etc.)
+ * - `./updates` - Patch notes and announcements
+ * - `./lifecycle` - Subscription lifecycle (renewals, nudges)
+ * - `./seasonal` - Seasonal greetings
  * - `./render` - Rendering utilities
  * - `./schedule` - Scheduling with Resend
  *
@@ -28,3 +31,6 @@ export * from "./components";
 
 // Re-export types
 export * from "./types";
+
+// Re-export URL helpers
+export * from "./urls";

@@ -36,7 +36,7 @@ export function PatchNotesEmail({
 }: PatchNotesEmailProps) {
   const heading = version ? `What's new in ${version}` : "What's new in Grove";
 
-  const defaultIntro = `Here's what we've been working on lately. As always, these updates are shaped by your feedback—thank you for being part of the journey.`;
+  const defaultIntro = `Here's what I've been working on. These updates are shaped by your feedback. Thank you for being part of this.`;
 
   const previewText =
     notes.length > 0
