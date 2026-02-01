@@ -36,7 +36,7 @@
 </script>
 
 <GlassCard variant="default" class="mb-6">
-  <h2>Your Data <Waystone slug="your-data-and-exports" label="Learn about data portability" inline /></h2>
+  <h2>Your Data <Waystone slug="exporting-your-content" label="Learn about data portability" inline /></h2>
   <p class="section-description">
     You own your content. Export your blog posts, pages, images, and account
     data at any time. We believe in data portability — you should never feel

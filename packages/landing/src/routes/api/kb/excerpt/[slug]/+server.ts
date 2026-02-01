@@ -89,7 +89,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
   "what-are-curios",
   "how-grove-protects-your-content",
   "how-grove-protects-your-secrets", // Used in Timeline curio
-  "your-data-and-exports",
+  "exporting-your-content",
   "formatting-your-posts",
   "data-portability",
   "understanding-your-privacy",
