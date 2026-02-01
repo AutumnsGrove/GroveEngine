@@ -12,21 +12,19 @@
     HelpCircle,
     MessageCircle,
   } from "lucide-svelte";
+  import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
 
   let { data, children } = $props();
-  let sidebarOpen = $state(false);
+  // Sidebar open state now comes from shared store (controlled by Chrome Header)
+  let sidebarOpen = $derived(sidebarStore.open);
   let sidebarCollapsed = $state(false);
   let sidebarHovered = $state(false);
 
   // Computed: show expanded content when not collapsed OR when hovered
   let showExpanded = $derived(!sidebarCollapsed || sidebarHovered);
 
-  function toggleSidebar() {
-    sidebarOpen = !sidebarOpen;
-  }
-
   function closeSidebar() {
-    sidebarOpen = false;
+    sidebarStore.close();
   }
 
   function toggleCollapse() {
@@ -49,16 +47,7 @@
 </svelte:head>
 
 <div class="admin-layout leaf-pattern">
-  <!-- Mobile header -->
-  <header class="mobile-header glass-surface">
-    <button class="hamburger" onclick={toggleSidebar} aria-label="Toggle menu">
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-    </button>
-    <a href="/" class="mobile-home-link" aria-label="Go to home page">{data.tenant?.displayName || data.tenant?.subdomain || 'The Grove'}</a>
-    <span class="mobile-header-spacer"></span>
-  </header>
+  <!-- Header is now unified Chrome Header from root layout with sidebar toggle -->
 
   <!-- Overlay for mobile -->
   {#if sidebarOpen}
@@ -196,70 +185,6 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--grove-overlay-15);
-  }
-
-  /* Glass surface for mobile header */
-  .glass-surface {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-  }
-
-  :global(.dark) .glass-surface {
-    background: var(--slate-glass-bg);
-    border-color: var(--slate-glass-border);
-  }
-
-  /* Mobile header - hidden on desktop */
-  .mobile-header {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    color: var(--color-text);
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1rem;
-    z-index: 1000;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  }
-
-  .mobile-home-link {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: var(--user-accent, var(--color-primary));
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .mobile-home-link:hover {
-    color: var(--user-accent, var(--color-primary-hover));
-    filter: brightness(1.1);
-  }
-
-  .mobile-header-spacer {
-    width: 36px;
-  }
-
-  .hamburger {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-
-  .hamburger-line {
-    width: 20px;
-    height: 2px;
-    background: var(--color-text);
-    border-radius: 1px;
-    transition: background-color 0.3s ease;
   }
 
   /* Sidebar overlay for mobile */
@@ -671,10 +596,6 @@
 
   /* Mobile styles */
   @media (max-width: 768px) {
-    .mobile-header {
-      display: flex;
-    }
-
     .sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease;
@@ -713,7 +634,8 @@
     .content {
       margin-left: 0;
       padding: 1rem;
-      padding-top: calc(56px + 1rem);
+      /* Chrome Header is ~76px tall (py-6 = 24px*2 + content) */
+      padding-top: calc(76px + 1rem);
     }
 
     .content.expanded {

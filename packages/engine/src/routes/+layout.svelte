@@ -88,21 +88,20 @@
 </div>
 {:else}
 <div class="layout leaf-pattern" style:--user-accent={data.siteSettings?.accent_color || null}>
-	<!-- Unified Header with chrome components (hidden on admin pages - they have Arbor sidebar) -->
-	{#if !isAdminPage}
-		<Header
-			navItems={tenantNavItems}
-			brandTitle={siteName}
-			searchEnabled={true}
-			searchPlaceholder="Search posts..."
-			onSearch={handleSearch}
-			resourceLinks={[]}
-			connectLinks={[]}
-			showLogo={data.siteSettings?.show_grove_logo === true || data.siteSettings?.show_grove_logo === 'true'}
-			logoSize="lg"
-			maxWidth="wide"
-		/>
-	{/if}
+	<!-- Unified Header with chrome components -->
+	<Header
+		navItems={isAdminPage ? [] : tenantNavItems}
+		brandTitle={siteName}
+		searchEnabled={!isAdminPage}
+		searchPlaceholder="Search posts..."
+		onSearch={handleSearch}
+		resourceLinks={[]}
+		connectLinks={[]}
+		showLogo={data.siteSettings?.show_grove_logo === true || data.siteSettings?.show_grove_logo === 'true'}
+		logoSize="lg"
+		maxWidth="wide"
+		showSidebarToggle={isAdminPage}
+	/>
 
 	<main>
 		{#key page.url.pathname}

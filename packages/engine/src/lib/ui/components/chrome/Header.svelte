@@ -4,12 +4,13 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season.svelte';
-	import { Menu, Search, X } from 'lucide-svelte';
+	import { Menu, Search, X, PanelLeftOpen } from 'lucide-svelte';
 	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from './types';
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 	import { LogIn, User } from 'lucide-svelte';
+	import { sidebarStore } from '../../stores/sidebar.svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived(page.url.pathname);
@@ -47,6 +48,10 @@
 		signInLabel?: string;
 		/** Where logged-in user goes when clicking avatar (default: /admin) */
 		userHref?: string;
+
+		// Admin sidebar support
+		/** Show left-side hamburger for sidebar toggle (admin pages) */
+		showSidebarToggle?: boolean;
 	}
 
 	let {
@@ -68,7 +73,9 @@
 		user = null,
 		signInHref = 'https://heartwood.grove.place',
 		signInLabel = 'Sign in',
-		userHref = '/admin'
+		userHref = '/admin',
+		// Admin sidebar props
+		showSidebarToggle = false
 	}: Props = $props();
 
 	const maxWidthClass = {
@@ -123,6 +130,16 @@
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
+			<!-- Sidebar toggle for admin pages (left hamburger) -->
+			{#if showSidebarToggle}
+				<button
+					onclick={() => sidebarStore.toggle()}
+					class="p-2 -ml-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
+					aria-label="Toggle sidebar"
+				>
+					<PanelLeftOpen class="w-5 h-5" />
+				</button>
+			{/if}
 			<!-- Logo icon - clickable to cycle through seasons -->
 			<!-- For landing: always show. For tenants: only if showLogo is true -->
 			{#if !brandTitle || showLogo}
