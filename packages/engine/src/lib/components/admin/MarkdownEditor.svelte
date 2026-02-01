@@ -133,16 +133,21 @@
   // Cache the last rendered HTML to prevent jank during typing
   let debouncedContent = $state(content);
   let debounceTimer = $state(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
+  let isMounted = $state(true);  // Track mount state to prevent race condition
 
   // Update debounced content after 150ms of no typing
   $effect(() => {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      debouncedContent = content;
+      // Only update if component is still mounted (prevents race condition)
+      if (isMounted) {
+        debouncedContent = content;
+      }
     }, 150);
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
+      isMounted = false;  // Mark as unmounted on cleanup
     };
   });
 
