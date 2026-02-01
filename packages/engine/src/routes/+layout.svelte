@@ -97,7 +97,7 @@
 		resourceLinks={[]}
 		connectLinks={[]}
 		showLogo={data.siteSettings?.show_grove_logo === true || data.siteSettings?.show_grove_logo === 'true'}
-		logoSize="md"
+		logoSize="lg"
 		maxWidth="wide"
 	/>
 
