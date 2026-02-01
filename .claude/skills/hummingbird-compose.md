@@ -37,7 +37,7 @@ Understand what kind of email we're creating:
 
 **Ask clarifying questions:**
 - What's the main message?
-- Who's the audience? (waitlist, trial, rooted, all)
+- Who's the audience? (wanderer, promo, rooted, all)
 - Any specific CTAs or links?
 - Tone: excited, informative, casual, urgent?
 

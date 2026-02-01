@@ -7,6 +7,7 @@
 #
 # Deploy: wrangler deploy
 # Logs: wrangler tail
+# Test manually: wrangler dev --test-scheduled
 
 name = "grove-email-catchup"
 main = "worker.ts"
@@ -22,5 +23,9 @@ binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
-# Environment variables (set via wrangler secret)
+# Environment variables
+[vars]
+EMAIL_RENDER_URL = "https://grove-email-render.autumnsgrove.workers.dev"
+
+# Secrets (set via wrangler secret put)
 # - RESEND_API_KEY: Resend API key for sending emails

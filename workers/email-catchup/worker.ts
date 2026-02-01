@@ -7,7 +7,10 @@
  * 3. Mark completed sequences
  *
  * This is a safety net for the primary scheduling system
- * (which schedules all emails at signup time).
+ * (which schedules all emails at signup time via Resend's scheduled_at).
+ *
+ * Deploy: wrangler deploy
+ * Logs: wrangler tail
  */
 
 import { Resend } from "resend";
@@ -19,23 +22,56 @@ import { Resend } from "resend";
 interface Env {
   DB: D1Database;
   RESEND_API_KEY: string;
+  /** URL for the email-render worker */
+  EMAIL_RENDER_URL: string;
 }
+
+type AudienceType = "wanderer" | "promo" | "rooted";
 
 interface EmailSignup {
   id: number;
   email: string;
   name: string | null;
   created_at: string;
-  audience_type: "waitlist" | "trial" | "rooted";
+  audience_type: AudienceType;
   sequence_stage: number;
   last_email_at: string | null;
 }
 
-// Sequence definitions (must match types.ts)
-const SEQUENCES = {
-  waitlist: [0, 7, 14, 30],
-  trial: [0, 1, 7, 14, 30],
-  rooted: [0, 1, 7],
+/**
+ * Sequence definitions by audience type
+ * Must match packages/engine/src/lib/email/types.ts
+ */
+const SEQUENCES: Record<
+  AudienceType,
+  { dayOffset: number; subject: string }[]
+> = {
+  wanderer: [
+    { dayOffset: 0, subject: "Welcome to the Grove 🌿" },
+    { dayOffset: 7, subject: "What makes Grove different" },
+    { dayOffset: 14, subject: "Why Grove exists" },
+    { dayOffset: 30, subject: "Still there? 👋" },
+  ],
+  promo: [
+    { dayOffset: 0, subject: "You found Grove 🌱" },
+    { dayOffset: 7, subject: "Still thinking about it?" },
+  ],
+  rooted: [
+    { dayOffset: 0, subject: "Welcome home 🏡" },
+    { dayOffset: 1, subject: "Making it yours" },
+    { dayOffset: 7, subject: "The blank page" },
+  ],
+};
+
+/**
+ * Template names matching the sequence
+ */
+const TEMPLATE_MAP: Record<number, string> = {
+  0: "WelcomeEmail",
+  1: "Day1Email",
+  7: "Day7Email",
+  14: "Day14Email",
+  30: "Day30Email",
 };
 
 // =============================================================================
@@ -126,6 +162,7 @@ async function processOverdueEmails(env: Env) {
   console.log(`📧 Found ${result.found} overdue users`);
 
   const resend = new Resend(env.RESEND_API_KEY);
+  const renderUrl = env.EMAIL_RENDER_URL;
 
   for (const user of overdueUsers.results || []) {
     try {
@@ -135,22 +172,47 @@ async function processOverdueEmails(env: Env) {
       if (nextStage === -1) {
         // Sequence complete, just update the stage
         await env.DB.prepare(
-          `
-					UPDATE email_signups
-					SET sequence_stage = -1
-					WHERE id = ?
-				`,
+          `UPDATE email_signups SET sequence_stage = -1 WHERE id = ?`,
         )
           .bind(user.id)
           .run();
         continue;
       }
 
-      // Send the catch-up email
-      // Note: In production, you'd render the actual template here
-      // For now, we'll just log and update the database
+      // Get the email content for this stage
+      const emailContent = await renderEmail(renderUrl, {
+        template: TEMPLATE_MAP[nextStage],
+        audienceType: user.audience_type,
+        name: user.name,
+      });
+
+      if (!emailContent) {
+        console.log(
+          `📧 Skipping Day ${nextStage} for ${user.email}: template not available`,
+        );
+        continue;
+      }
+
+      // Get the subject for this audience/stage
+      const sequence = SEQUENCES[user.audience_type];
+      const emailConfig = sequence.find((e) => e.dayOffset === nextStage);
+      const subject = emailConfig?.subject || `Day ${nextStage} from Grove`;
+
+      // Send via Resend
+      const response = await resend.emails.send({
+        from: "Autumn <autumn@grove.place>",
+        to: user.email,
+        subject,
+        html: emailContent.html,
+        text: emailContent.text,
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
       console.log(
-        `📧 Would send Day ${nextStage} email to ${user.email} (${user.audience_type})`,
+        `📧 Sent Day ${nextStage} catch-up to ${user.email} (${user.audience_type})`,
       );
 
       // Update the user's sequence stage and last_email_at
@@ -172,10 +234,45 @@ async function processOverdueEmails(env: Env) {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       result.errors.push(`User ${user.email}: ${message}`);
+      console.error(`📧 Failed to send to ${user.email}:`, message);
     }
   }
 
   return result;
+}
+
+/**
+ * Render an email template via the email-render worker
+ *
+ * Calls the grove-email-render worker to get
+ * the HTML and text versions of an email template.
+ */
+async function renderEmail(
+  renderUrl: string,
+  params: {
+    template: string;
+    audienceType: AudienceType;
+    name: string | null;
+  },
+): Promise<{ html: string; text: string } | null> {
+  try {
+    const response = await fetch(`${renderUrl}/render`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`📧 Render worker returned ${response.status}: ${error}`);
+      return null;
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("📧 Failed to render email:", error);
+    return null;
+  }
 }
 
 // =============================================================================
@@ -215,25 +312,25 @@ async function markCompletedSequences(env: Env) {
   // Find users who have received their last sequence email
   // and mark them as complete (stage = -1)
 
-  // Waitlist: last email is day 30
-  const waitlistResult = await env.DB.prepare(
+  // Wanderer: last email is day 30
+  const wandererResult = await env.DB.prepare(
     `
 		UPDATE email_signups
 		SET sequence_stage = -1
-		WHERE audience_type = 'waitlist'
+		WHERE audience_type = 'wanderer'
 		AND sequence_stage = 30
 		AND last_email_at IS NOT NULL
 		AND datetime(last_email_at, '+1 day') < datetime('now')
 	`,
   ).run();
 
-  // Trial: last email is day 30
-  const trialResult = await env.DB.prepare(
+  // Promo: last email is day 7 (short sequence)
+  const promoResult = await env.DB.prepare(
     `
 		UPDATE email_signups
 		SET sequence_stage = -1
-		WHERE audience_type = 'trial'
-		AND sequence_stage = 30
+		WHERE audience_type = 'promo'
+		AND sequence_stage = 7
 		AND last_email_at IS NOT NULL
 		AND datetime(last_email_at, '+1 day') < datetime('now')
 	`,
@@ -252,8 +349,8 @@ async function markCompletedSequences(env: Env) {
   ).run();
 
   result.completed =
-    (waitlistResult.meta?.changes || 0) +
-    (trialResult.meta?.changes || 0) +
+    (wandererResult.meta?.changes || 0) +
+    (promoResult.meta?.changes || 0) +
     (rootedResult.meta?.changes || 0);
 
   if (result.completed > 0) {
@@ -269,9 +366,10 @@ async function markCompletedSequences(env: Env) {
 
 function getNextStage(
   currentStage: number,
-  audienceType: "waitlist" | "trial" | "rooted",
+  audienceType: AudienceType,
 ): number {
-  const stages = SEQUENCES[audienceType];
+  const sequence = SEQUENCES[audienceType];
+  const stages = sequence.map((s) => s.dayOffset);
   const nextStage = stages.find((s) => s > currentStage);
   return nextStage ?? -1;
 }
