@@ -31,11 +31,13 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Initialize user as null
   event.locals.user = null;
 
-  // Skip DB access for prerendered knowledge base routes
+  // Skip DB access for prerendered routes
   // (adapter-cloudflare throws when accessing platform.env during prerendering)
   const routeId = event.route.id;
   const isPrerenderedRoute =
-    routeId === "/knowledge" || routeId?.startsWith("/knowledge/");
+    routeId === "/knowledge" ||
+    routeId?.startsWith("/knowledge/") ||
+    routeId?.startsWith("/api/kb/"); // Waystone excerpt API
   if (isPrerenderedRoute) {
     return resolve(event);
   }
