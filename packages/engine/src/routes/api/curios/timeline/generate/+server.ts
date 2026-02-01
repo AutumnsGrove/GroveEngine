@@ -23,8 +23,11 @@ import {
   type CustomVoiceConfig,
   type PromptContextInput,
 } from "$lib/curios/timeline";
+import {
+  getTimelineToken,
+  TIMELINE_SECRET_KEYS,
+} from "$lib/curios/timeline/secrets.server";
 import { createLumenClient } from "$lib/lumen/index.js";
-import { safeDecryptToken, isEncryptedToken } from "$lib/server/encryption";
 
 interface GenerateRequest {
   date?: string;
@@ -120,70 +123,62 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  if (!config.github_token_encrypted) {
-    throw error(400, "GitHub token not configured");
-  }
+  // Get tokens using SecretsManager (preferred) with legacy fallback
+  const env = {
+    DB: db,
+    GROVE_KEK: platform?.env?.GROVE_KEK,
+    TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
+  };
 
-  if (!config.openrouter_key_encrypted) {
-    throw error(400, "OpenRouter API key not configured");
-  }
-
-  // Decrypt tokens for API calls (safeDecryptToken handles both encrypted and plaintext)
-  const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
-  const githubTokenIsEncrypted = isEncryptedToken(
+  const githubResult = await getTimelineToken(
+    env,
+    tenantId,
+    TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
     config.github_token_encrypted,
   );
-  const openrouterKeyIsEncrypted = isEncryptedToken(
+
+  const openrouterResult = await getTimelineToken(
+    env,
+    tenantId,
+    TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
     config.openrouter_key_encrypted,
   );
 
-  // Pre-flight check: if tokens are encrypted but no key is available, fail early with clear message
-  if ((githubTokenIsEncrypted || openrouterKeyIsEncrypted) && !encryptionKey) {
+  // Log any auto-migrations
+  if (githubResult.migrated) {
+    console.log(
+      `[Timeline Generate] Auto-migrated GitHub token to SecretsManager`,
+    );
+  }
+  if (openrouterResult.migrated) {
+    console.log(
+      `[Timeline Generate] Auto-migrated OpenRouter key to SecretsManager`,
+    );
+  }
+
+  const githubToken = githubResult.token;
+  const openrouterKey = openrouterResult.token;
+
+  if (!githubToken) {
     console.error(
-      "[Timeline Generate] Token(s) are encrypted but TOKEN_ENCRYPTION_KEY is not configured",
+      `[Timeline Generate] GitHub token retrieval failed - source: ${githubResult.source}`,
     );
     throw error(
       500,
-      "API tokens are encrypted but TOKEN_ENCRYPTION_KEY is not configured. " +
-        "Add TOKEN_ENCRYPTION_KEY to your environment secrets.",
+      "GitHub token is missing or invalid. " +
+        "Try re-saving the token in Admin → Curios → Timeline.",
     );
   }
 
-  const githubToken = await safeDecryptToken(
-    config.github_token_encrypted,
-    encryptionKey,
-  );
-  const openrouterKey = await safeDecryptToken(
-    config.openrouter_key_encrypted,
-    encryptionKey,
-  );
-
-  if (!githubToken) {
-    if (githubTokenIsEncrypted) {
-      console.error(
-        "[Timeline Generate] GitHub token decryption failed - likely key mismatch",
-      );
-      throw error(
-        500,
-        "Failed to decrypt GitHub token. The encryption key may have changed since the token was saved. " +
-          "Try re-saving the token in Admin → Curios → Timeline.",
-      );
-    }
-    throw error(500, "GitHub token is missing or invalid");
-  }
-
   if (!openrouterKey) {
-    if (openrouterKeyIsEncrypted) {
-      console.error(
-        "[Timeline Generate] OpenRouter key decryption failed - likely key mismatch",
-      );
-      throw error(
-        500,
-        "Failed to decrypt OpenRouter API key. The encryption key may have changed since the token was saved. " +
-          "Try re-saving the token in Admin → Curios → Timeline.",
-      );
-    }
-    throw error(500, "OpenRouter API key is missing or invalid");
+    console.error(
+      `[Timeline Generate] OpenRouter key retrieval failed - source: ${openrouterResult.source}`,
+    );
+    throw error(
+      500,
+      "OpenRouter API key is missing or invalid. " +
+        "Try re-saving the token in Admin → Curios → Timeline.",
+    );
   }
 
   try {

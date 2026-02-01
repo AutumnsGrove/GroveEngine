@@ -16,7 +16,10 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Commit } from "$lib/curios/timeline";
-import { safeDecryptToken, isEncryptedToken } from "$lib/server/encryption";
+import {
+  getTimelineToken,
+  TIMELINE_SECRET_KEYS,
+} from "$lib/curios/timeline/secrets.server";
 
 interface ConfigRow {
   github_username: string;
@@ -96,45 +99,44 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     .bind(tenantId)
     .first<ConfigRow>();
 
-  if (!config?.github_token_encrypted) {
-    throw error(400, "GitHub token not configured");
+  if (!config) {
+    throw error(
+      400,
+      "Timeline not configured. Set up in Admin → Curios → Timeline.",
+    );
   }
 
-  // Decrypt token for API calls (safeDecryptToken handles both encrypted and plaintext)
-  const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
-  const tokenIsEncrypted = isEncryptedToken(config.github_token_encrypted);
+  // Get token using SecretsManager (preferred) with legacy fallback
+  const env = {
+    DB: db,
+    GROVE_KEK: platform?.env?.GROVE_KEK,
+    TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
+  };
 
-  // Pre-flight check: if token is encrypted but no key is available, fail early with clear message
-  if (tokenIsEncrypted && !encryptionKey) {
+  const githubResult = await getTimelineToken(
+    env,
+    tenantId,
+    TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
+    config.github_token_encrypted,
+  );
+
+  if (githubResult.migrated) {
+    console.log(
+      `[Timeline Backfill] Auto-migrated GitHub token to SecretsManager`,
+    );
+  }
+
+  const githubToken = githubResult.token;
+
+  if (!githubToken) {
     console.error(
-      "[Timeline Backfill] Token is encrypted but TOKEN_ENCRYPTION_KEY is not configured",
+      `[Timeline Backfill] Token retrieval failed - source: ${githubResult.source}`,
     );
     throw error(
       500,
-      "GitHub token is encrypted but TOKEN_ENCRYPTION_KEY is not configured. " +
-        "Add TOKEN_ENCRYPTION_KEY to your environment secrets.",
+      "GitHub token is missing or invalid. " +
+        "Try re-saving the token in Admin → Curios → Timeline.",
     );
-  }
-
-  const githubToken = await safeDecryptToken(
-    config.github_token_encrypted,
-    encryptionKey,
-  );
-
-  if (!githubToken) {
-    // Provide specific error based on what went wrong
-    if (tokenIsEncrypted) {
-      console.error(
-        "[Timeline Backfill] Token decryption failed - likely key mismatch or corrupted token",
-      );
-      throw error(
-        500,
-        "Failed to decrypt GitHub token. The encryption key may have changed since the token was saved. " +
-          "Try re-saving the token in Admin → Curios → Timeline.",
-      );
-    }
-    // Token wasn't encrypted but still null - shouldn't happen, but handle it
-    throw error(500, "GitHub token is missing or invalid");
   }
 
   const includeRepos = config.repos_include
