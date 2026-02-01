@@ -22,6 +22,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Count of enabled curios (for pages admin UI - curios share the nav page limit)
   let enabledCuriosCount = 0;
   // Curio enable flags (for mobile nav - need to be accessible outside the query block)
+  // These are hoisted here so they're accessible in the return statement after Promise.all
   let timelineEnabled = false;
   let galleryEnabled = false;
 
@@ -124,7 +125,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .map((p) => ({ slug: p.slug, title: p.title }));
           }
 
-          // Add curio pages to nav if enabled
+          // Add curio pages to nav if enabled (and track state for return)
           if (timelineResult?.enabled) {
             navPages.push({ slug: "timeline", title: "Timeline" });
             timelineEnabled = true;
@@ -165,6 +166,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     enabledCuriosCount,
     csrfToken: locals.csrfToken,
     // Explicit curio enable flags for mobile nav (fixes #848 regression)
+    // Uses hoisted booleans since Promise.all results are block-scoped
     showTimeline: timelineEnabled,
     showGallery: galleryEnabled,
   };
