@@ -43,6 +43,8 @@ export { default as GlassCarousel } from "./GlassCarousel.svelte";
 export { default as GlassLegend } from "./GlassLegend.svelte";
 export { default as GlassStatusWidget } from "./GlassStatusWidget.svelte";
 export { default as Waystone } from "./Waystone.svelte";
+export { default as WaystonePopup } from "./waystone/WaystonePopup.svelte";
+export * from "./waystone/types";
 
 // Table sub-components (from primitives)
 export {
