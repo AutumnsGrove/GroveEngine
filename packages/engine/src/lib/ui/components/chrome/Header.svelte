@@ -64,13 +64,13 @@
 
 			<!-- Brand title or "Grove" text - home link, hidden on mobile -->
 			{#if brandTitle}
-				<span class="hidden sm:block text-xl font-serif text-foreground">
+				<span class="text-xl font-serif text-foreground">
 					{brandTitle}
 				</span>
 			{:else}
 				<a
 					href="/"
-					class="hidden sm:block text-xl font-serif text-foreground hover:text-accent-muted transition-colors"
+					class="text-xl font-serif text-foreground hover:text-accent-muted transition-colors"
 				>
 					Grove
 				</a>
