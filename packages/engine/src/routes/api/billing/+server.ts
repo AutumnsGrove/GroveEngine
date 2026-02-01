@@ -3,14 +3,14 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
+import { TIERS, type TierKey } from "$lib/config/tiers";
 import {
   checkRateLimit,
   getEndpointLimitByKey,
   rateLimitHeaders,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
-import { getRealOrigin } from "$lib/server/origin";
+import { Resend } from "resend";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
 const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
@@ -117,6 +117,137 @@ async function logBillingAudit(
  * Plans are derived from $lib/config/tiers.ts (single source of truth).
  * See tiers.ts for current pricing and features.
  */
+
+/**
+ * Send subscription cancellation confirmation email.
+ * Non-blocking - caller should catch errors.
+ */
+interface CancellationEmailParams {
+  to: string;
+  name: string;
+  subdomain: string;
+  periodEndDate: string;
+  planName: string;
+  resendApiKey: string;
+}
+
+async function sendCancellationEmail(
+  params: CancellationEmailParams,
+): Promise<void> {
+  const resend = new Resend(params.resendApiKey);
+
+  const adminUrl = `https://${params.subdomain}.grove.place/admin/account`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Cancelled</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #fefdfb; font-family: 'Lexend', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <tr>
+      <td align="center" style="padding-bottom: 30px;">
+        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
+          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
+        </svg>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
+        <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
+          Hi ${params.name},
+        </h1>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          We've cancelled your subscription as requested.
+        </p>
+        <hr style="border: none; border-top: 1px solid rgba(245, 242, 234, 0.1); margin: 24px 0;" />
+        <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #f5f2ea; font-weight: 500;">
+          Your blog stays live
+        </h2>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          <a href="https://${params.subdomain}.grove.place" style="color: #16a34a; text-decoration: none;">${params.subdomain}.grove.place</a> remains fully accessible until <strong style="color: #f5f2ea;">${params.periodEndDate}</strong>.
+        </p>
+        <hr style="border: none; border-top: 1px solid rgba(245, 242, 234, 0.1); margin: 24px 0;" />
+        <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #f5f2ea; font-weight: 500;">
+          Changed your mind?
+        </h2>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          Resume anytime before ${params.periodEndDate}:
+        </p>
+        <p style="margin: 0 0 24px 0;">
+          <a href="${adminUrl}" style="display: inline-block; padding: 12px 24px; background-color: #16a34a; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 500;">Resume Subscription</a>
+        </p>
+        <hr style="border: none; border-top: 1px solid rgba(245, 242, 234, 0.1); margin: 24px 0;" />
+        <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #f5f2ea; font-weight: 500;">
+          Your content is safe
+        </h2>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          After the period ends, your blog becomes private—but nothing is deleted. You can resubscribe anytime to restore public access.
+        </p>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          Questions? Just reply to this email.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding-top: 30px;">
+        <p style="margin: 0; font-size: 14px; color: rgba(245, 242, 234, 0.5);">
+          —Autumn
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding-top: 40px;">
+        <p style="margin: 0; font-size: 12px; color: rgba(61, 41, 20, 0.4);">
+          grove.place
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+
+  const textContent = `
+Hi ${params.name},
+
+We've cancelled your subscription as requested.
+
+---
+
+Your blog stays live
+
+${params.subdomain}.grove.place remains fully accessible until ${params.periodEndDate}.
+
+---
+
+Changed your mind?
+
+Resume anytime before ${params.periodEndDate}:
+${adminUrl}
+
+---
+
+Your content is safe
+
+After the period ends, your blog becomes private—but nothing is deleted. You can resubscribe anytime to restore public access.
+
+Questions? Just reply to this email.
+
+—Autumn
+`.trim();
+
+  await resend.emails.send({
+    from: "Grove <hello@grove.place>",
+    to: params.to,
+    subject: "Your Grove subscription has been cancelled",
+    html: htmlContent,
+    text: textContent,
+  });
+}
 
 /** Plan configuration */
 interface PlanConfig {
@@ -464,7 +595,7 @@ export const PATCH: RequestHandler = async ({
     throw error(500, "Database not configured");
   }
 
-  if (!platform?.env?.STRIPE_SECRET_KEY) {
+  if (!platform?.env?.LEMON_SQUEEZY_API_KEY) {
     throw error(500, "Payment provider not configured");
   }
 
@@ -487,51 +618,63 @@ export const PATCH: RequestHandler = async ({
 
     const data = (await request.json()) as UpdateRequest;
 
+    // Get billing record with tenant info for email
     const billing = (await platform.env.DB.prepare(
-      `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
-              current_period_start, current_period_end, cancel_at_period_end,
-              trial_end, payment_method_last4, payment_method_brand,
-              created_at, updated_at
-       FROM platform_billing WHERE tenant_id = ?`,
+      `SELECT pb.id, pb.plan, pb.status, pb.provider_customer_id, pb.provider_subscription_id,
+              pb.current_period_start, pb.current_period_end, pb.cancel_at_period_end,
+              pb.trial_end, pb.payment_method_last4, pb.payment_method_brand,
+              pb.created_at, pb.updated_at, t.subdomain
+       FROM platform_billing pb
+       JOIN tenants t ON t.id = pb.tenant_id
+       WHERE pb.tenant_id = ?`,
     )
       .bind(tenantId)
-      .first()) as BillingRecord | null;
+      .first()) as (BillingRecord & { subdomain: string }) | null;
 
     if (!billing || !billing.provider_subscription_id) {
       throw error(404, "No active subscription found");
     }
 
-    const stripe = createPaymentProvider("stripe", {
-      secretKey: platform.env.STRIPE_SECRET_KEY,
+    const payments = createPaymentProvider("lemonsqueezy", {
+      secretKey: platform.env.LEMON_SQUEEZY_API_KEY,
+      storeId: platform.env.LEMON_SQUEEZY_STORE_ID,
     });
 
     switch (data.action) {
       case "cancel":
-        await (
-          stripe as {
-            cancelSubscription: (
-              id: string,
-              immediate: boolean,
-            ) => Promise<void>;
-          }
-        ).cancelSubscription(
+        // LemonSqueezy always cancels at period end (immediate not supported via API)
+        await payments.cancelSubscription(
           billing.provider_subscription_id,
-          data.cancelImmediately === true,
+          false,
         );
 
         await platform.env.DB.prepare(
           `UPDATE platform_billing SET
-            cancel_at_period_end = ?,
+            cancel_at_period_end = 1,
             updated_at = ?
            WHERE id = ? AND tenant_id = ?`,
         )
-          .bind(
-            data.cancelImmediately ? 0 : 1,
-            Math.floor(Date.now() / 1000),
-            billing.id,
-            tenantId,
-          )
+          .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
+
+        // Send cancellation confirmation email (non-blocking)
+        if (platform.env.RESEND_API_KEY && locals.user.email) {
+          sendCancellationEmail({
+            to: locals.user.email,
+            name: locals.user.name || "Wanderer",
+            subdomain: billing.subdomain,
+            periodEndDate: billing.current_period_end
+              ? new Date(billing.current_period_end * 1000).toLocaleDateString(
+                  "en-US",
+                  { month: "long", day: "numeric", year: "numeric" },
+                )
+              : "the end of your billing period",
+            planName: PLANS[billing.plan]?.name || billing.plan,
+            resendApiKey: platform.env.RESEND_API_KEY,
+          }).catch((err) => {
+            console.error("[Billing] Failed to send cancellation email:", err);
+          });
+        }
 
         // Audit log: subscription cancelled
         await logBillingAudit(platform.env.DB, {
@@ -539,7 +682,7 @@ export const PATCH: RequestHandler = async ({
           action: "subscription_cancelled",
           details: {
             plan: billing.plan,
-            immediate: data.cancelImmediately === true,
+            immediate: false, // LemonSqueezy always cancels at period end
             subscriptionId: billing.provider_subscription_id,
           },
           userEmail: locals.user.email,
@@ -548,9 +691,7 @@ export const PATCH: RequestHandler = async ({
         return json(
           {
             success: true,
-            message: data.cancelImmediately
-              ? "Subscription canceled immediately"
-              : "Subscription will cancel at period end",
+            message: "Subscription will cancel at period end",
           },
           {
             headers: rateLimitHeaders(
@@ -561,9 +702,7 @@ export const PATCH: RequestHandler = async ({
         );
 
       case "resume":
-        await (
-          stripe as { resumeSubscription: (id: string) => Promise<void> }
-        ).resumeSubscription(billing.provider_subscription_id);
+        await payments.resumeSubscription(billing.provider_subscription_id);
 
         await platform.env.DB.prepare(
           "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
@@ -596,94 +735,11 @@ export const PATCH: RequestHandler = async ({
         );
 
       case "change_plan":
-        if (!data.plan || !PLANS[data.plan]) {
-          throw error(400, "Invalid plan");
-        }
-
-        // Check if already on the target plan (fail fast)
-        if (billing.plan === data.plan) {
-          throw error(400, "You are already on this plan");
-        }
-
-        // Validate tier is available for purchase
-        const targetTier = TIERS[data.plan as TierKey];
-        if (!targetTier || targetTier.status !== "available") {
-          throw error(
-            400,
-            `The ${targetTier?.display?.name || data.plan} plan is not currently available`,
-          );
-        }
-
-        const newPriceId = (platform.env as unknown as Record<string, string>)[
-          `STRIPE_PRICE_${data.plan.toUpperCase()}`
-        ];
-
-        if (!newPriceId) {
-          throw error(500, "Price ID not configured for plan");
-        }
-
-        const sub = await (
-          stripe as {
-            getSubscription: (
-              id: string,
-            ) => Promise<{ items?: { data?: Array<{ id: string }> } } | null>;
-          }
-        ).getSubscription(billing.provider_subscription_id);
-        if (!sub) {
-          throw error(404, "Subscription not found in Stripe");
-        }
-
-        const stripeClient = (stripe as { client?: unknown }).client || stripe;
-        await (
-          stripeClient as {
-            request: (path: string, opts: object) => Promise<unknown>;
-          }
-        ).request(`subscriptions/${billing.provider_subscription_id}`, {
-          method: "POST",
-          params: {
-            proration_behavior: "create_prorations",
-            items: [
-              {
-                id: sub.items?.data?.[0]?.id,
-                price: newPriceId,
-              },
-            ],
-            metadata: {
-              grove_plan: data.plan,
-            },
-          },
-        });
-
-        // Clear cancel_at_period_end when changing plans - user is committing to a new plan
-        await platform.env.DB.prepare(
-          "UPDATE platform_billing SET plan = ?, cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
-        )
-          .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
-          .run();
-
-        // Audit log: plan changed
-        await logBillingAudit(platform.env.DB, {
-          tenantId,
-          action: "plan_changed",
-          details: {
-            previousPlan: billing.plan,
-            newPlan: data.plan,
-            subscriptionId: billing.provider_subscription_id,
-          },
-          userEmail: locals.user.email,
-        });
-
-        return json(
-          {
-            success: true,
-            message: `Plan changed to ${PLANS[data.plan].name}`,
-          },
-          {
-            headers: rateLimitHeaders(
-              rateLimitResult,
-              BILLING_RATE_LIMIT.limit,
-            ),
-          },
+        // Plan changes are handled through LemonSqueezy's customer portal
+        // Users receive portal links in their LemonSqueezy emails
+        throw error(
+          400,
+          "Plan changes are managed through your billing portal. Check your email for a link, or contact support.",
         );
 
       default:
@@ -700,19 +756,19 @@ export const PATCH: RequestHandler = async ({
       errorMessage = err.message;
       errorDetails.message = err.message;
 
-      // Handle specific Stripe error codes
-      if (err.message.includes("No such subscription")) {
+      // Handle specific LemonSqueezy error codes
+      if (
+        err.message.includes("not found") ||
+        err.message.includes("Not Found")
+      ) {
         errorMessage =
           "Subscription not found. Please try refreshing your billing page.";
-      } else if (err.message.includes("Card declined")) {
-        errorMessage =
-          "Payment method declined. Please update your payment method.";
-      } else if (err.message.includes("Authentication required")) {
-        errorMessage =
-          "Additional authentication required. Please contact support.";
-      } else if (err.message.includes("Invalid API key")) {
+      } else if (err.message.includes("Unauthorized")) {
         errorMessage = "Payment system error. Please try again later.";
         errorDetails.severity = "critical";
+      } else if (err.message.includes("cannot be resumed")) {
+        errorMessage =
+          "This subscription cannot be resumed. Please contact support.";
       }
     } else {
       errorDetails.rawError = String(err);
@@ -728,138 +784,7 @@ export const PATCH: RequestHandler = async ({
   }
 };
 
-/**
- * POST /api/billing/portal - Create billing portal session
- *
- * POST is semantically correct here because we're creating a session
- * on the payment provider's side, not simply retrieving data.
- */
-export const PUT: RequestHandler = async ({
-  url,
-  request,
-  platform,
-  locals,
-}) => {
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
-
-  if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
-  }
-
-  if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
-  }
-
-  // Accept return_url from request body only (standardized approach)
-  let returnUrl: string | null = null;
-  try {
-    const body = (await request.json()) as { returnUrl?: string };
-    returnUrl = body.returnUrl || null;
-  } catch {
-    // Body parsing failed
-  }
-
-  if (!returnUrl) {
-    throw error(400, "Return URL required");
-  }
-
-  // Validate return URL to prevent open redirect attacks
-  try {
-    const parsedReturn = new URL(returnUrl);
-    const isGroveDomain =
-      parsedReturn.hostname === "grove.place" ||
-      parsedReturn.hostname.endsWith(".grove.place");
-    // Use real origin to correctly validate behind proxy
-    const realOrigin = getRealOrigin(request, url);
-    const isSameOrigin = parsedReturn.origin === realOrigin;
-
-    if (!isGroveDomain && !isSameOrigin) {
-      throw error(400, "Invalid return URL: must be a grove.place domain");
-    }
-  } catch (e) {
-    if ((e as { status?: number }).status) throw e;
-    throw error(400, "Invalid return URL format");
-  }
-
-  const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenantId;
-
-  try {
-    const tenantId = await getVerifiedTenantId(
-      platform.env.DB,
-      requestedTenantId,
-      locals.user,
-    );
-
-    // Check rate limit before processing (centralized in $lib/server/rate-limits)
-    const { result: rateLimitResult, response: rateLimitResponse } =
-      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
-
-    const billing = (await platform.env.DB.prepare(
-      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
-    )
-      .bind(tenantId)
-      .first()) as { provider_customer_id: string | null } | null;
-
-    if (!billing?.provider_customer_id) {
-      throw error(404, "No billing customer found");
-    }
-
-    const stripe = createPaymentProvider("stripe", {
-      secretKey: platform.env.STRIPE_SECRET_KEY,
-    });
-
-    const { url: portalUrl } = await (
-      stripe as {
-        createBillingPortalSession: (
-          customerId: string,
-          returnUrl: string,
-        ) => Promise<{ url: string }>;
-      }
-    ).createBillingPortalSession(billing.provider_customer_id, returnUrl);
-
-    return json(
-      {
-        success: true,
-        portalUrl,
-      },
-      {
-        headers: rateLimitHeaders(rateLimitResult, BILLING_RATE_LIMIT.limit),
-      },
-    );
-  } catch (err) {
-    if ((err as { status?: number }).status) throw err;
-
-    // Extract error details for better debugging and user feedback
-    let errorMessage = "Failed to create billing portal session";
-    const errorDetails: Record<string, unknown> = {};
-
-    if (err instanceof Error) {
-      errorMessage = err.message;
-      errorDetails.message = err.message;
-
-      // Handle specific Stripe error codes
-      if (err.message.includes("No such customer")) {
-        errorMessage = "Billing customer not found. Please contact support.";
-      } else if (err.message.includes("Invalid API key")) {
-        errorMessage = "Payment system error. Please try again later.";
-        errorDetails.severity = "critical";
-      }
-    } else {
-      errorDetails.rawError = String(err);
-    }
-
-    console.error(
-      "[Billing] Billing portal creation failed:",
-      errorDetails,
-      err instanceof Error ? err.stack : undefined,
-    );
-
-    throw error(500, errorMessage);
-  }
-};
+// NOTE: PUT /api/billing (billing portal) was removed.
+// LemonSqueezy handles billing portal differently - customers receive portal
+// links in their LemonSqueezy transactional emails. For manual access, direct
+// users to app.lemonsqueezy.com/my-orders or contact support.

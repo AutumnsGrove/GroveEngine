@@ -2,7 +2,7 @@
   import { GlassCard, GlassConfirmDialog } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
-  import { invalidateAll, beforeNavigate } from "$app/navigation";
+  import { invalidateAll } from "$app/navigation";
   import { CONTACT } from "$lib/config/contact";
 
   // Import extracted components
@@ -26,7 +26,6 @@
   let resumingSubscription = $state(false);
   let changingPlan = $state(false);
   let selectedPlan = $state("");
-  let openingPortal = $state(false);
   let exportingData = $state(false);
   let exportType = $state<ExportType>("full");
 
@@ -47,11 +46,7 @@
     });
   });
 
-  // Reset portal state if user navigates back to this page
-  beforeNavigate(() => {
-    openingPortal = false;
-  });
-
+  
   // Cancel subscription - show dialog
   function handleCancelClick(): void {
     showCancelDialog = true;
@@ -133,24 +128,6 @@
     } finally {
       changingPlan = false;
       selectedPlan = "";
-    }
-  }
-
-  // Open billing portal for payment method updates
-  async function handleOpenBillingPortal(): Promise<void> {
-    openingPortal = true;
-    try {
-      const returnUrl = window.location.href;
-      const response = await api.put("/api/billing", { returnUrl });
-      if (response?.portalUrl) {
-        window.location.href = response.portalUrl;
-      } else {
-        toast.error("Could not open billing portal");
-        openingPortal = false;
-      }
-    } catch (error) {
-      toast.error(sanitizeErrorMessage(error, "Failed to open billing portal"));
-      openingPortal = false;
     }
   }
 
@@ -254,11 +231,7 @@
   <FeaturesCard curiosCount={data.curiosCount} />
 
   <!-- Payment Method -->
-  <PaymentMethodCard
-    billing={data.billing}
-    {openingPortal}
-    onOpenPortal={handleOpenBillingPortal}
-  />
+  <PaymentMethodCard billing={data.billing} />
 
   <!-- Passkeys (deferred data - streams in after initial render) -->
   {#await data.passkeyData}

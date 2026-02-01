@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { GlassCard, Button, Spinner } from "$lib/ui";
+  import { GlassCard } from "$lib/ui";
   import { CreditCard, ExternalLink } from "lucide-svelte";
   import type { BillingData } from "./types";
 
   interface Props {
     billing: BillingData | null;
-    openingPortal: boolean;
-    onOpenPortal: () => void;
   }
 
-  let { billing, openingPortal, onOpenPortal }: Props = $props();
+  let { billing }: Props = $props();
+
+  // LemonSqueezy customer portal URL
+  const LEMON_SQUEEZY_PORTAL = "https://app.lemonsqueezy.com/my-orders";
 </script>
 
 <GlassCard variant="default" class="mb-6">
@@ -24,45 +25,25 @@
           <span class="card-number">•••• {billing.paymentMethod.last4}</span>
         </div>
       </div>
-
-      <Button
-        variant="secondary"
-        onclick={onOpenPortal}
-        disabled={openingPortal}
-        aria-busy={openingPortal}
-        aria-label={openingPortal ? "Opening billing portal..." : "Update payment method"}
-      >
-        {#if openingPortal}
-          <span aria-hidden="true"><Spinner size="sm" /></span>
-        {:else}
-          <ExternalLink class="btn-icon" aria-hidden="true" />
-        {/if}
-        Update Payment Method
-      </Button>
     </div>
   {:else}
     <div class="no-payment">
-      <p class="muted">No payment method on file.</p>
-      <Button
-        variant="secondary"
-        onclick={onOpenPortal}
-        disabled={openingPortal}
-        aria-busy={openingPortal}
-        aria-label={openingPortal ? "Opening billing portal..." : "Add payment method"}
-      >
-        {#if openingPortal}
-          <span aria-hidden="true"><Spinner size="sm" /></span>
-        {:else}
-          <CreditCard class="btn-icon" aria-hidden="true" />
-        {/if}
-        Add Payment Method
-      </Button>
+      <p class="muted">Payment method on file with our billing provider.</p>
     </div>
   {/if}
 
   <p class="payment-note">
-    Payment processing is handled securely by our payment provider.
-    We never store your full card details.
+    To update your payment method, visit your
+    <a
+      href={LEMON_SQUEEZY_PORTAL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="portal-link"
+    >
+      billing portal
+      <ExternalLink class="external-icon" aria-hidden="true" />
+    </a>
+    or check your email for a link from LemonSqueezy.
   </p>
 </GlassCard>
 
@@ -105,10 +86,6 @@
   }
 
   .no-payment {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
     margin-bottom: 1rem;
   }
 
@@ -118,18 +95,30 @@
 
   .payment-note {
     margin: 0;
-    font-size: 0.8rem;
-    color: var(--color-text-subtle);
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .portal-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .portal-link:hover {
+    text-decoration: underline;
+  }
+
+  :global(.external-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   .muted {
     color: var(--color-text-muted);
-  }
-
-  :global(.btn-icon) {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 0.375rem;
   }
 
   @media (max-width: 640px) {

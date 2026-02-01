@@ -10,24 +10,24 @@
 // =============================================================================
 
 export interface Money {
-  amount: number;        // Amount in cents (smallest currency unit)
-  currency: string;      // ISO 4217 currency code (e.g., 'usd')
+  amount: number; // Amount in cents (smallest currency unit)
+  currency: string; // ISO 4217 currency code (e.g., 'usd')
 }
 
-export type PricingType = 'one_time' | 'recurring';
-export type BillingInterval = 'day' | 'week' | 'month' | 'year';
+export type PricingType = "one_time" | "recurring";
+export type BillingInterval = "day" | "week" | "month" | "year";
 
 export interface RecurringConfig {
   interval: BillingInterval;
-  intervalCount: number;  // e.g., 2 for "every 2 months"
+  intervalCount: number; // e.g., 2 for "every 2 months"
 }
 
 // =============================================================================
 // PRODUCTS & VARIANTS
 // =============================================================================
 
-export type ProductType = 'physical' | 'digital' | 'subscription' | 'service';
-export type ProductStatus = 'draft' | 'active' | 'archived';
+export type ProductType = "physical" | "digital" | "subscription" | "service";
+export type ProductStatus = "draft" | "active" | "archived";
 
 export interface ProductBase {
   id: string;
@@ -36,7 +36,7 @@ export interface ProductBase {
   description?: string;
   type: ProductType;
   status: ProductStatus;
-  images: string[];          // URLs to product images
+  images: string[]; // URLs to product images
   metadata?: Record<string, string>;
   createdAt: Date;
   updatedAt: Date;
@@ -45,26 +45,26 @@ export interface ProductBase {
 export interface ProductVariant {
   id: string;
   productId: string;
-  name: string;              // e.g., "Small", "Blue", "Monthly"
-  sku?: string;              // Stock keeping unit
+  name: string; // e.g., "Small", "Blue", "Monthly"
+  sku?: string; // Stock keeping unit
   price: Money;
-  compareAtPrice?: Money;    // Original price for sales display
+  compareAtPrice?: Money; // Original price for sales display
   pricingType: PricingType;
   recurring?: RecurringConfig;
 
   // Inventory (physical products)
   inventoryQuantity?: number;
-  inventoryPolicy?: 'deny' | 'continue';  // What to do when out of stock
+  inventoryPolicy?: "deny" | "continue"; // What to do when out of stock
 
   // Digital products
   downloadUrl?: string;
   downloadLimit?: number;
 
   // Provider reference
-  providerPriceId?: string;  // e.g., Stripe price_xxx
+  providerPriceId?: string; // e.g., Stripe price_xxx
 
   isDefault: boolean;
-  position: number;          // Sort order
+  position: number; // Sort order
   createdAt: Date;
   updatedAt: Date;
 }
@@ -101,18 +101,18 @@ export interface LineItem {
 // CHECKOUT
 // =============================================================================
 
-export type CheckoutMode = 'payment' | 'subscription' | 'setup';
+export type CheckoutMode = "payment" | "subscription" | "setup";
 
 export interface CheckoutOptions {
   mode: CheckoutMode;
   successUrl: string;
   cancelUrl: string;
   customerEmail?: string;
-  customerId?: string;           // Provider customer ID
+  customerId?: string; // Provider customer ID
   metadata?: Record<string, string>;
 
   // Stripe Connect specific
-  connectedAccountId?: string;   // For marketplace payments
+  connectedAccountId?: string; // For marketplace payments
   applicationFeeAmount?: number; // Platform fee in cents
 
   // Tax
@@ -125,7 +125,7 @@ export interface CheckoutOptions {
   };
 
   // Billing
-  billingAddressCollection?: 'auto' | 'required';
+  billingAddressCollection?: "auto" | "required";
 
   // Subscription specific
   trialPeriodDays?: number;
@@ -136,13 +136,13 @@ export interface CheckoutOptions {
 
 export interface CheckoutSession {
   id: string;
-  url: string;                   // Redirect URL for hosted checkout
-  status: 'open' | 'complete' | 'expired';
+  url: string; // Redirect URL for hosted checkout
+  status: "open" | "complete" | "expired";
   mode: CheckoutMode;
   customerId?: string;
   customerEmail?: string;
   amountTotal?: Money;
-  paymentStatus: 'unpaid' | 'paid' | 'no_payment_required';
+  paymentStatus: "unpaid" | "paid" | "no_payment_required";
   metadata?: Record<string, string>;
   expiresAt: Date;
 }
@@ -152,22 +152,22 @@ export interface CheckoutSession {
 // =============================================================================
 
 export type PaymentStatus =
-  | 'pending'
-  | 'processing'
-  | 'succeeded'
-  | 'failed'
-  | 'canceled'
-  | 'refunded'
-  | 'partially_refunded';
+  | "pending"
+  | "processing"
+  | "succeeded"
+  | "failed"
+  | "canceled"
+  | "refunded"
+  | "partially_refunded";
 
 export type OrderStatus =
-  | 'pending'          // Order created, awaiting payment
-  | 'paid'             // Payment received
-  | 'processing'       // Being prepared/fulfilled
-  | 'shipped'          // Physical: shipped; Digital: delivered
-  | 'completed'        // Fully delivered
-  | 'canceled'         // Canceled before fulfillment
-  | 'refunded';        // Refunded after payment
+  | "pending" // Order created, awaiting payment
+  | "paid" // Payment received
+  | "processing" // Being prepared/fulfilled
+  | "shipped" // Physical: shipped; Digital: delivered
+  | "completed" // Fully delivered
+  | "canceled" // Canceled before fulfillment
+  | "refunded"; // Refunded after payment
 
 export interface Order {
   id: string;
@@ -190,8 +190,8 @@ export interface Order {
   paymentStatus: PaymentStatus;
 
   // Payment reference
-  providerOrderId?: string;      // e.g., Stripe payment_intent_xxx
-  providerSessionId?: string;    // e.g., Stripe cs_xxx
+  providerOrderId?: string; // e.g., Stripe payment_intent_xxx
+  providerSessionId?: string; // e.g., Stripe cs_xxx
 
   // Shipping (physical products)
   shippingAddress?: Address;
@@ -218,7 +218,7 @@ export interface Address {
   city: string;
   state?: string;
   postalCode: string;
-  country: string;     // ISO 3166-1 alpha-2 country code
+  country: string; // ISO 3166-1 alpha-2 country code
   phone?: string;
 }
 
@@ -227,14 +227,14 @@ export interface Address {
 // =============================================================================
 
 export type RefundReason =
-  | 'duplicate'
-  | 'fraudulent'
-  | 'requested_by_customer'
-  | 'other';
+  | "duplicate"
+  | "fraudulent"
+  | "requested_by_customer"
+  | "other";
 
 export interface RefundRequest {
   orderId: string;
-  amount?: number;       // Partial refund amount in cents (omit for full refund)
+  amount?: number; // Partial refund amount in cents (omit for full refund)
   reason?: RefundReason;
   notes?: string;
 }
@@ -243,7 +243,7 @@ export interface RefundResult {
   id: string;
   orderId: string;
   amount: Money;
-  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  status: "pending" | "succeeded" | "failed" | "canceled";
   reason?: RefundReason;
   providerRefundId?: string;
   createdAt: Date;
@@ -254,12 +254,12 @@ export interface RefundResult {
 // =============================================================================
 
 export type SubscriptionStatus =
-  | 'trialing'
-  | 'active'
-  | 'past_due'
-  | 'paused'
-  | 'canceled'
-  | 'unpaid';
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "paused"
+  | "canceled"
+  | "unpaid";
 
 export interface Subscription {
   id: string;
@@ -309,7 +309,7 @@ export interface Customer {
   defaultBillingAddress?: Address;
 
   // Provider reference
-  providerCustomerId?: string;    // e.g., Stripe cus_xxx
+  providerCustomerId?: string; // e.g., Stripe cus_xxx
 
   // Metadata
   metadata?: Record<string, string>;
@@ -325,25 +325,25 @@ export interface Customer {
 
 export type WebhookEventType =
   // Checkout
-  | 'checkout.session.completed'
-  | 'checkout.session.expired'
+  | "checkout.session.completed"
+  | "checkout.session.expired"
   // Payments
-  | 'payment.succeeded'
-  | 'payment.failed'
+  | "payment.succeeded"
+  | "payment.failed"
   // Subscriptions
-  | 'subscription.created'
-  | 'subscription.updated'
-  | 'subscription.canceled'
-  | 'subscription.trial_will_end'
+  | "subscription.created"
+  | "subscription.updated"
+  | "subscription.canceled"
+  | "subscription.trial_will_end"
   // Invoices
-  | 'invoice.paid'
-  | 'invoice.payment_failed'
+  | "invoice.paid"
+  | "invoice.payment_failed"
   // Refunds
-  | 'refund.created'
-  | 'refund.updated'
+  | "refund.created"
+  | "refund.updated"
   // Connect (marketplace)
-  | 'account.updated'
-  | 'payout.paid';
+  | "account.updated"
+  | "payout.paid";
 
 export interface WebhookEvent {
   id: string;
@@ -364,15 +364,15 @@ export interface WebhookResult {
 // =============================================================================
 
 export type ConnectAccountStatus =
-  | 'pending'          // Account created, onboarding incomplete
-  | 'enabled'          // Can accept payments
-  | 'restricted'       // Limited functionality
-  | 'disabled';        // Cannot process payments
+  | "pending" // Account created, onboarding incomplete
+  | "enabled" // Can accept payments
+  | "restricted" // Limited functionality
+  | "disabled"; // Cannot process payments
 
 export interface ConnectAccount {
   id: string;
   tenantId: string;
-  providerAccountId: string;     // e.g., Stripe acct_xxx
+  providerAccountId: string; // e.g., Stripe acct_xxx
   status: ConnectAccountStatus;
   chargesEnabled: boolean;
   payoutsEnabled: boolean;
@@ -388,10 +388,10 @@ export interface ConnectOnboardingOptions {
   tenantId: string;
   returnUrl: string;
   refreshUrl: string;
-  type?: 'standard' | 'express' | 'custom';
+  type?: "standard" | "express" | "custom";
   country?: string;
   email?: string;
-  businessType?: 'individual' | 'company' | 'non_profit';
+  businessType?: "individual" | "company" | "non_profit";
 }
 
 export interface ConnectOnboardingResult {
@@ -404,23 +404,23 @@ export interface ConnectOnboardingResult {
 // PLATFORM BILLING (TENANT SUBSCRIPTIONS)
 // =============================================================================
 
-export type PlanTier = 'seedling' | 'sapling' | 'oak' | 'evergreen';
+export type PlanTier = "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface PlatformPlan {
   tier: PlanTier;
   name: string;
   price: Money;
-  yearlyPrice?: Money;       // 15% discount for yearly
+  yearlyPrice?: Money; // 15% discount for yearly
   interval: BillingInterval;
   features: string[];
   limits: {
-    posts?: number;          // undefined = unlimited
-    storage?: number;        // MB
+    posts?: number; // undefined = unlimited
+    storage?: number; // MB
     customDomain?: boolean;
-    byod?: boolean;          // Bring Your Own Domain
-    email?: 'none' | 'forward' | 'full';
-    analytics?: 'basic' | 'full';
-    supportHours?: number;   // Included support hours (first month)
+    byod?: boolean; // Bring Your Own Domain
+    email?: "none" | "forward" | "full";
+    analytics?: "basic" | "full";
+    supportHours?: number; // Included support hours (first month)
     shop?: boolean;
   };
   providerPriceId?: string;
@@ -451,6 +451,9 @@ export interface PaymentProviderConfig {
 
   // Platform account (for Connect)
   platformAccountId?: string;
+
+  // LemonSqueezy
+  storeId?: string;
 }
 
 /**
@@ -474,7 +477,10 @@ export interface PaymentProvider {
   /**
    * Sync a price/variant to the payment provider
    */
-  syncPrice(variant: ProductVariant, providerProductId: string): Promise<{ providerPriceId: string }>;
+  syncPrice(
+    variant: ProductVariant,
+    providerProductId: string,
+  ): Promise<{ providerPriceId: string }>;
 
   /**
    * Archive a product in the provider
@@ -491,7 +497,7 @@ export interface PaymentProvider {
   createCheckoutSession(
     items: CartItem[],
     options: CheckoutOptions,
-    resolveVariant: (variantId: string) => Promise<ProductVariant | null>
+    resolveVariant: (variantId: string) => Promise<ProductVariant | null>,
   ): Promise<CheckoutSession>;
 
   /**
@@ -511,7 +517,10 @@ export interface PaymentProvider {
   /**
    * Process a refund
    */
-  refund(request: RefundRequest, providerPaymentId: string): Promise<RefundResult>;
+  refund(
+    request: RefundRequest,
+    providerPaymentId: string,
+  ): Promise<RefundResult>;
 
   // ==========================================================================
   // SUBSCRIPTIONS
@@ -525,7 +534,10 @@ export interface PaymentProvider {
   /**
    * Cancel a subscription
    */
-  cancelSubscription(providerSubscriptionId: string, cancelImmediately?: boolean): Promise<void>;
+  cancelSubscription(
+    providerSubscriptionId: string,
+    cancelImmediately?: boolean,
+  ): Promise<void>;
 
   /**
    * Resume a canceled subscription (if not yet ended)
@@ -539,7 +551,9 @@ export interface PaymentProvider {
   /**
    * Create or update a customer in the provider
    */
-  syncCustomer(customer: Partial<Customer>): Promise<{ providerCustomerId: string }>;
+  syncCustomer(
+    customer: Partial<Customer>,
+  ): Promise<{ providerCustomerId: string }>;
 
   /**
    * Get customer by provider ID
@@ -551,7 +565,7 @@ export interface PaymentProvider {
    */
   createBillingPortalSession(
     providerCustomerId: string,
-    returnUrl: string
+    returnUrl: string,
   ): Promise<{ url: string }>;
 
   // ==========================================================================
@@ -570,7 +584,9 @@ export interface PaymentProvider {
   /**
    * Create a Connect account for a tenant
    */
-  createConnectAccount?(options: ConnectOnboardingOptions): Promise<ConnectOnboardingResult>;
+  createConnectAccount?(
+    options: ConnectOnboardingOptions,
+  ): Promise<ConnectOnboardingResult>;
 
   /**
    * Get Connect account status
@@ -582,7 +598,7 @@ export interface PaymentProvider {
    */
   createConnectAccountLink?(
     providerAccountId: string,
-    options: Pick<ConnectOnboardingOptions, 'returnUrl' | 'refreshUrl'>
+    options: Pick<ConnectOnboardingOptions, "returnUrl" | "refreshUrl">,
   ): Promise<{ url: string; expiresAt?: Date }>;
 
   /**
