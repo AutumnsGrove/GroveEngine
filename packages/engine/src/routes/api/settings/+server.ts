@@ -49,7 +49,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
     return json(settings, {
       headers: {
-        "Cache-Control": "public, max-age=300", // 5 minute cache
+        // Settings can be modified by user - don't let browser cache stale values
+        // This prevents the "color doesn't save" bug where browser serves cached
+        // response after user updates settings (#color-save-bug)
+        "Cache-Control": "private, no-cache",
       },
     });
   } catch (err) {
