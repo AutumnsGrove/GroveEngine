@@ -366,16 +366,6 @@
 						</div>
 					</a>
 
-					<a href="https://github.com/chartjs/Chart.js" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
-						<div class="flex items-center justify-between">
-							<div>
-								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Chart.js</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Data visualization</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">MIT</span>
-						</div>
-					</a>
-
 					<a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
@@ -396,21 +386,31 @@
 						</div>
 					</a>
 
-					<a href="https://github.com/vercel/satori" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+					<a href="https://github.com/kvnang/workers-og" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
-								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Satori</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Dynamic OG image generation</span>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">workers-og</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— OG image generation for Cloudflare Workers</span>
 							</div>
-							<span class="text-foreground-faint text-xs font-sans">MPL-2.0</span>
+							<span class="text-foreground-faint text-xs font-sans">MIT</span>
 						</div>
 					</a>
 
-					<a href="https://github.com/natemoo-re/satori-html" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+					<a href="https://github.com/jamsinclair/jSquash" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
-								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">satori-html</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— HTML to Satori converter</span>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">@jsquash/jxl</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— JPEG XL codec for modern image compression</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">Apache 2.0</span>
+						</div>
+					</a>
+
+					<a href="https://github.com/1904labs/dom-to-image-more" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">dom-to-image-more</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— DOM node to image export</span>
 							</div>
 							<span class="text-foreground-faint text-xs font-sans">MIT</span>
 						</div>
@@ -426,11 +426,31 @@
 						</div>
 					</a>
 
+					<a href="https://github.com/huntabyte/shadcn-svelte" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">shadcn-svelte</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— Component primitives powering Grove's glass UI</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">MIT</span>
+						</div>
+					</a>
+
 					<a href="https://github.com/wobsoriano/svelte-sonner" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
 								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">svelte-sonner</span>
 								<span class="text-foreground-subtle font-sans text-sm ml-2">— Toast notifications</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">MIT</span>
+						</div>
+					</a>
+
+					<a href="https://github.com/nextui-org/tailwind-variants" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">tailwind-variants</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— Variant-based component styling</span>
 							</div>
 							<span class="text-foreground-faint text-xs font-sans">MIT</span>
 						</div>
@@ -451,16 +471,6 @@
 							<div>
 								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">clsx</span>
 								<span class="text-foreground-subtle font-sans text-sm ml-2">— Classname utility</span>
-							</div>
-							<span class="text-foreground-faint text-xs font-sans">MIT</span>
-						</div>
-					</a>
-
-					<a href="https://github.com/huntabyte/shadcn-svelte" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
-						<div class="flex items-center justify-between">
-							<div>
-								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">shadcn-svelte</span>
-								<span class="text-foreground-subtle font-sans text-sm ml-2">— Component primitives powering Grove's glass UI</span>
 							</div>
 							<span class="text-foreground-faint text-xs font-sans">MIT</span>
 						</div>
