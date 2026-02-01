@@ -93,7 +93,7 @@
 
 <Header
 	user={data.user}
-	userHref={data.groveUrl}
+	userHref={data.groveUrl ?? undefined}
 	signInHref="https://plant.grove.place"
 	signInLabel="Sign up"
 />
