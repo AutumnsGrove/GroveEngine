@@ -55,9 +55,10 @@
 </svg>
 
 <style>
+	/* Use opacity instead of filter to avoid expensive layer repaints */
 	@keyframes glow {
-		0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(254, 249, 195, 0.3)); }
-		50% { filter: brightness(1.1) drop-shadow(0 0 10px rgba(254, 249, 195, 0.5)); }
+		0%, 100% { opacity: 0.9; }
+		50% { opacity: 1; }
 	}
 
 	.glow {

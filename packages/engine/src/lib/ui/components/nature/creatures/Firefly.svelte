@@ -87,9 +87,10 @@
 		50% { opacity: 0.9; }
 	}
 
+	/* Use opacity instead of filter: brightness() to avoid layer repaints */
 	@keyframes glow {
-		0%, 100% { filter: brightness(1); }
-		50% { filter: brightness(1.3); }
+		0%, 100% { opacity: 0.8; }
+		50% { opacity: 1; }
 	}
 
 	.float {
