@@ -57,6 +57,11 @@
   let savingColor = $state(false);
   let colorMessage = $state('');
 
+  // Header branding state
+  let showGroveLogo = $state(false);
+  let savingLogo = $state(false);
+  let logoMessage = $state('');
+
   // Graft control state (for greenhouse members)
   let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
   let resettingGrafts = $state(false);
@@ -111,18 +116,20 @@
     clearingCache = false;
   }
 
-  // Fetch current settings (font and accent color)
+  // Fetch current settings (font, accent color, header branding)
   async function fetchCurrentSettings() {
     loadingFont = true;
     try {
       const data = await api.get('/api/settings');
       currentFont = data.font_family || DEFAULT_FONT;
       currentAccentColor = data.accent_color || DEFAULT_ACCENT_COLOR;
+      showGroveLogo = data.show_grove_logo === true || data.show_grove_logo === 'true';
     } catch (error) {
       toast.error('Failed to load settings');
       console.error('Failed to fetch settings:', error);
       currentFont = DEFAULT_FONT;
       currentAccentColor = DEFAULT_ACCENT_COLOR;
+      showGroveLogo = false;
     }
     loadingFont = false;
   }
@@ -165,6 +172,27 @@
     }
 
     savingColor = false;
+  }
+
+  // Save Grove logo setting
+  async function saveGroveLogo() {
+    savingLogo = true;
+    logoMessage = '';
+
+    try {
+      await api.put('/api/admin/settings', {
+        setting_key: 'show_grove_logo',
+        setting_value: showGroveLogo ? 'true' : 'false'
+      });
+
+      logoMessage = showGroveLogo
+        ? 'Grove logo enabled! Tap it to cycle through seasons. 🌲'
+        : 'Grove logo hidden from header.';
+    } catch (error) {
+      logoMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+    }
+
+    savingLogo = false;
   }
 
   $effect(() => {
@@ -712,6 +740,40 @@
 
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">
+      <h2>Header Branding</h2>
+    </div>
+    <p class="section-description">
+      Show the Grove logo next to your site title. Visitors can tap it to cycle through seasonal themes!
+    </p>
+
+    <label class="logo-toggle">
+      <input
+        type="checkbox"
+        bind:checked={showGroveLogo}
+      />
+      <span class="toggle-label">
+        <span class="toggle-title">Show Grove Logo</span>
+        <span class="toggle-description">
+          Displays the seasonal Grove tree icon next to your site title
+        </span>
+      </span>
+    </label>
+
+    {#if logoMessage}
+      <div class="message" class:success={!logoMessage.includes('Error')} class:error={logoMessage.includes('Error')}>
+        {logoMessage}
+      </div>
+    {/if}
+
+    <div class="button-row">
+      <Button onclick={saveGroveLogo} variant="primary" disabled={savingLogo}>
+        {savingLogo ? 'Saving...' : 'Save Header Setting'}
+      </Button>
+    </div>
+  </GlassCard>
+
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
       <h2>Cache Management</h2>
     </div>
     <p class="section-description">
@@ -1044,5 +1106,51 @@
   .cache-actions {
     display: flex;
     gap: 0.75rem;
+  }
+  /* Logo toggle styles */
+  .logo-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    margin-bottom: 1rem;
+  }
+  .logo-toggle:hover {
+    border-color: var(--color-primary);
+  }
+  .logo-toggle:has(input:checked) {
+    border-color: var(--color-primary);
+    background: rgba(44, 95, 45, 0.05);
+  }
+  :global(.dark) .logo-toggle:has(input:checked) {
+    border-color: var(--color-primary-light);
+    background: rgba(92, 184, 95, 0.1);
+  }
+  .logo-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .toggle-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .toggle-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    transition: color 0.3s ease;
+  }
+  .toggle-description {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    transition: color 0.3s ease;
   }
 </style>

@@ -96,7 +96,7 @@
 		onSearch={handleSearch}
 		resourceLinks={[]}
 		connectLinks={[]}
-		showLogo={data.siteSettings?.show_grove_logo ?? false}
+		showLogo={data.siteSettings?.show_grove_logo === true || data.siteSettings?.show_grove_logo === 'true'}
 		logoSize="md"
 		maxWidth="wide"
 	/>
