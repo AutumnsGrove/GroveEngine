@@ -1,5 +1,9 @@
 import type { PageServerLoad } from "./$types";
-import { isFeatureEnabled, getFeatureValue, type FeatureFlagsEnv } from "$lib/feature-flags";
+import {
+  isFeatureEnabled,
+  getFeatureValue,
+  type FeatureFlagsEnv,
+} from "$lib/feature-flags";
 
 /**
  * Server-side data for the admin images page.
@@ -36,7 +40,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     const killSwitchEnabled = await isFeatureEnabled(
       "jxl_kill_switch",
       context,
-      flagsEnv
+      flagsEnv,
     );
 
     // If kill switch is disabled (emergency mode), force WebP
@@ -54,7 +58,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     const jxlEnabled = await isFeatureEnabled(
       "jxl_encoding",
       context,
-      flagsEnv
+      flagsEnv,
     );
 
     // Get rollout percentage (for gradual rollout)
@@ -62,7 +66,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       "jxl_rollout_percentage",
       context,
       flagsEnv,
-      0
+      0,
     );
 
     return {
