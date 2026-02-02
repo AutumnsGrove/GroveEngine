@@ -208,12 +208,19 @@
   <div class="editor-container">
     <!-- Page Details Section -->
     <GlassCard variant="default" class="details-section">
-      <button class="details-header" onclick={toggleDetailsCollapsed}>
+      <div class="details-header">
         <h2 class="m-0 text-xl text-foreground">
           Page Details
         </h2>
-        <span class="collapse-icon">{detailsCollapsed ? '▼' : '▲'}</span>
-      </button>
+        <button
+          class="collapse-toggle"
+          onclick={toggleDetailsCollapsed}
+          title={detailsCollapsed ? "Expand details" : "Collapse details"}
+          aria-expanded={!detailsCollapsed}
+        >
+          {detailsCollapsed ? '▼' : '▲'}
+        </button>
+      </div>
 
       {#if !detailsCollapsed}
         <div class="details-content">
@@ -330,37 +337,41 @@
   }
 
   .details-header {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    background: none;
-    border: none;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1rem;
+  }
+
+  .collapse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .details-header:hover {
+  .collapse-toggle:hover {
     background: var(--color-bg-tertiary);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
-  :global(.dark) .details-header:hover {
+  :global(.dark) .collapse-toggle:hover {
     background: var(--color-bg-primary-dark);
   }
 
-  .collapse-icon {
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
-  }
-
-  :global(.dark) .collapse-icon {
-    color: var(--color-text-subtle-dark);
-  }
-
   .details-content {
-    padding: 0 1.5rem 1.5rem;
+    padding-top: 0.5rem;
   }
 
   .form-group {

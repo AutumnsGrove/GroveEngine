@@ -870,7 +870,7 @@
   }
 
   :global(.drop-zone) {
-    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border: 2px dashed var(--glass-border);
     border-radius: var(--border-radius-standard);
     padding: 3rem 2rem;
     text-align: center;
@@ -879,7 +879,7 @@
   }
 
   :global(.dark .drop-zone) {
-    border-color: rgba(148, 163, 184, 0.3);
+    border-color: var(--slate-glass-border);
   }
 
   :global(.drop-zone:hover) {
@@ -888,7 +888,7 @@
 
   :global(.drop-zone.dragging) {
     border-color: var(--accent-success);
-    background: rgba(40, 167, 69, 0.15);
+    background: var(--status-success-bg);
     backdrop-filter: blur(12px);
     transform: scale(1.01);
   }
@@ -1137,13 +1137,13 @@
   }
 
   .format-badge.supported {
-    background: rgba(40, 167, 69, 0.15);
+    background: var(--status-success-bg);
     color: var(--accent-success);
   }
 
   .format-badge.unsupported {
-    background: rgba(255, 193, 7, 0.15);
-    color: #b8860b;
+    background: var(--status-warning-bg);
+    color: var(--color-text-muted);
   }
 
   .options-info {
@@ -1239,22 +1239,22 @@
   }
 
   .upload-badge.processing {
-    background: rgba(255, 193, 7, 0.15);
-    color: #b8860b;
+    background: var(--status-warning-bg);
+    color: var(--color-text-muted);
   }
 
   .upload-badge.success {
-    background: rgba(40, 167, 69, 0.15);
+    background: var(--status-success-bg);
     color: var(--accent-success);
   }
 
   .upload-badge.duplicate {
-    background: rgba(var(--color-primary-rgb, 99, 102, 241), 0.15);
+    background: var(--grove-overlay-10);
     color: var(--color-primary);
   }
 
   .upload-badge.error {
-    background: rgba(220, 53, 69, 0.15);
+    background: var(--status-danger-bg);
     color: var(--accent-danger);
   }
 
@@ -1321,7 +1321,7 @@
   }
 
   .stat-pill.format {
-    background: rgba(99, 102, 241, 0.15);
+    background: var(--grove-overlay-10);
     color: var(--color-primary);
   }
 
@@ -1387,7 +1387,7 @@
   }
 
   .gallery-error {
-    background: rgba(220, 53, 69, 0.1);
+    background: var(--status-danger-bg);
     color: var(--accent-danger);
     padding: 1rem;
     border-radius: var(--border-radius-small);
@@ -1437,23 +1437,23 @@
 
   .gallery-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--glass-bg-medium);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-standard);
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   }
 
   :global(.dark) .gallery-card {
-    background: rgba(30, 41, 59, 0.5);
-    border-color: rgba(71, 85, 105, 0.3);
+    background: var(--slate-glass-bg);
+    border-color: var(--slate-glass-border);
   }
 
   .gallery-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow-md);
+    background: var(--glass-bg);
   }
 
   :global(.dark) .gallery-card:hover {

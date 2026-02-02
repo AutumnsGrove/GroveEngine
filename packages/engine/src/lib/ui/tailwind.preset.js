@@ -12,76 +12,78 @@ export default {
     extend: {
       // ─────────────────────────────────────────────────────────────
       // COLOR PALETTE
+      // All colors reference CSS custom properties for theme consistency
       // ─────────────────────────────────────────────────────────────
       colors: {
         // Primary: Grove Green
         grove: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a", // PRIMARY
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
-          950: "#052e16",
+          50: "var(--grove-50)",
+          100: "var(--grove-100)",
+          200: "var(--grove-200)",
+          300: "var(--grove-300)",
+          400: "var(--grove-400)",
+          500: "var(--grove-500)",
+          600: "var(--grove-600)",
+          700: "var(--grove-700)",
+          800: "var(--grove-800)",
+          900: "var(--grove-900)",
+          950: "var(--grove-950)",
         },
-        // Neutrals
+        // Neutrals: Cream
         cream: {
-          DEFAULT: "#fefdfb",
-          50: "#fefdfb",
-          100: "#fdfcf8",
-          200: "#faf8f3",
-          300: "#f5f2ea",
-          400: "#ede9de",
-          500: "#e2ddd0",
+          DEFAULT: "var(--cream-50)",
+          50: "var(--cream-50)",
+          100: "var(--cream-100)",
+          200: "var(--cream-200)",
+          300: "var(--cream-300)",
+          400: "var(--cream-400)",
+          500: "var(--cream-500)",
         },
+        // Neutrals: Bark
         bark: {
-          DEFAULT: "#3d2914",
-          50: "#f9f6f3",
-          100: "#f0e9e1",
-          200: "#e0d2c2",
-          300: "#ccb59c",
-          400: "#b69575",
-          500: "#a57c5a",
-          600: "#8a6347",
-          700: "#6f4d39",
-          800: "#5a3f30",
-          900: "#3d2914", // PRIMARY
-          950: "#2a1b0d",
+          DEFAULT: "var(--bark-900)",
+          50: "var(--bark-50)",
+          100: "var(--bark-100)",
+          200: "var(--bark-200)",
+          300: "var(--bark-300)",
+          400: "var(--bark-400)",
+          500: "var(--bark-500)",
+          600: "var(--bark-600)",
+          700: "var(--bark-700)",
+          800: "var(--bark-800)",
+          900: "var(--bark-900)",
+          950: "var(--bark-950)",
         },
         // Semantic aliases
         primary: {
-          DEFAULT: "#16a34a",
+          DEFAULT: "var(--grove-600)",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#e2ddd0",
-          foreground: "#3d2914",
+          DEFAULT: "var(--cream-500)",
+          foreground: "var(--bark-900)",
         },
-        background: "#fefdfb",
+        background: "var(--cream-50)",
         foreground: {
-          DEFAULT: "#3d2914",
-          muted: "#6f4d39",
-          subtle: "#8a6347",
+          DEFAULT: "var(--bark-900)",
+          muted: "var(--bark-700)",
+          subtle: "var(--bark-600)",
         },
         muted: {
-          DEFAULT: "#f5f2ea",
-          foreground: "#6f4d39",
+          DEFAULT: "var(--cream-300)",
+          foreground: "var(--bark-700)",
         },
         accent: {
-          DEFAULT: "#dcfce7",
-          foreground: "#166534",
+          DEFAULT: "var(--grove-100)",
+          foreground: "var(--grove-800)",
         },
         destructive: {
           DEFAULT: "#dc2626",
           foreground: "#ffffff",
         },
-        border: "#e0d2c2",
-        input: "#e0d2c2",
-        ring: "#16a34a",
+        border: "var(--cream-200)",
+        input: "var(--cream-200)",
+        ring: "var(--grove-500)",
       },
 
       // ─────────────────────────────────────────────────────────────
@@ -156,17 +158,13 @@ export default {
         "grove-full": "9999px",
       },
       boxShadow: {
-        "grove-sm": "0 1px 2px 0 rgb(61 41 20 / 0.05)",
-        grove:
-          "0 2px 8px -2px rgb(61 41 20 / 0.08), 0 1px 2px -1px rgb(61 41 20 / 0.04)",
-        "grove-md":
-          "0 4px 12px -4px rgb(61 41 20 / 0.1), 0 2px 4px -2px rgb(61 41 20 / 0.05)",
-        "grove-lg":
-          "0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06)",
-        "grove-xl":
-          "0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08)",
-        "grove-inner": "inset 0 1px 2px 0 rgb(61 41 20 / 0.05)",
-        "grove-glow": "0 0 0 3px rgb(22 163 74 / 0.15)",
+        "grove-sm": "var(--shadow-grove-sm)",
+        grove: "var(--shadow-grove)",
+        "grove-md": "var(--shadow-grove-md)",
+        "grove-lg": "var(--shadow-grove-lg)",
+        "grove-xl": "var(--shadow-grove-xl)",
+        "grove-inner": "var(--shadow-grove-inner)",
+        "grove-glow": "var(--shadow-grove-glow)",
       },
 
       // ─────────────────────────────────────────────────────────────

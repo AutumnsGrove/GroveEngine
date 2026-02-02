@@ -21,6 +21,54 @@
 :root {
 	color-scheme: light;
 
+	/* ==========================================================================
+	   PRIMITIVE COLOR TOKENS
+	   Base palette values - single source of truth
+	   ========================================================================== */
+
+	/* Primary: Grove Green */
+	--grove-50: #f0fdf4;
+	--grove-100: #dcfce7;
+	--grove-200: #bbf7d0;
+	--grove-300: #86efac;
+	--grove-400: #4ade80;
+	--grove-500: #22c55e;
+	--grove-600: #16a34a;
+	--grove-700: #15803d;
+	--grove-800: #166534;
+	--grove-900: #14532d;
+	--grove-950: #052e16;
+
+	/* Neutral: Cream */
+	--cream-50: #fefdfb;
+	--cream-100: #fdfcf8;
+	--cream-200: #faf8f3;
+	--cream-300: #f5f2ea;
+	--cream-400: #ede9de;
+	--cream-500: #e2ddd0;
+
+	/* Neutral: Bark */
+	--bark-50: #f9f6f3;
+	--bark-100: #f0e9e1;
+	--bark-200: #e0d2c2;
+	--bark-300: #ccb59c;
+	--bark-400: #b69575;
+	--bark-500: #a57c5a;
+	--bark-600: #8a6347;
+	--bark-700: #6f4d39;
+	--bark-800: #5a3f30;
+	--bark-900: #3d2914;
+	--bark-950: #2a1b0d;
+
+	/* Semantic color references */
+	--cream: var(--cream-50);
+	--bark: var(--bark-900);
+
+	/* ==========================================================================
+	   SEMANTIC COLOR TOKENS
+	   Contextual colors that reference primitives
+	   ========================================================================== */
+
 	/* Primary colors - flattened HSL values */
 	--color-primary: hsl(121 37% 27%);
 	--color-primary-hover: hsl(121 37% 40%);
@@ -85,6 +133,15 @@
 	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
 	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 	--shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
+
+	/* Grove-specific shadow tokens for Tailwind preset */
+	--shadow-grove-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+	--shadow-grove: 0 2px 8px -2px rgb(61 41 20 / 0.08), 0 1px 2px -1px rgb(61 41 20 / 0.04);
+	--shadow-grove-md: 0 4px 12px -4px rgb(61 41 20 / 0.1), 0 2px 4px -2px rgb(61 41 20 / 0.05);
+	--shadow-grove-lg: 0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06);
+	--shadow-grove-xl: 0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08);
+	--shadow-grove-inner: inset 0 1px 2px 0 rgb(61 41 20 / 0.05);
+	--shadow-grove-glow: 0 0 0 3px rgb(22 163 74 / 0.15);
 
 	/* Dark mode values - flattened HSL values */
 	--color-text-dark: hsl(0 0% 94%);
@@ -178,6 +235,49 @@
 	color-scheme: dark;
 
 	/* ==========================================================================
+	   PRIMITIVE COLOR TOKENS - DARK MODE
+	   Base palette values inverted for dark theme
+	   ========================================================================== */
+
+	/* Primary: Grove Green (same values, used differently) */
+	--grove-50: #052e16;
+	--grove-100: #14532d;
+	--grove-200: #166534;
+	--grove-300: #15803d;
+	--grove-400: #16a34a;
+	--grove-500: #22c55e;
+	--grove-600: #4ade80;
+	--grove-700: #86efac;
+	--grove-800: #bbf7d0;
+	--grove-900: #dcfce7;
+	--grove-950: #f0fdf4;
+
+	/* Neutral: Cream (dark mode - warm grays) */
+	--cream-50: #1a1915;
+	--cream-100: #252320;
+	--cream-200: #32302b;
+	--cream-300: #43403a;
+	--cream-400: #5c584f;
+	--cream-500: #777267;
+
+	/* Neutral: Bark (dark mode - light text) */
+	--bark-50: #2a1b0d;
+	--bark-100: #3d2914;
+	--bark-200: #5a3f30;
+	--bark-300: #6f4d39;
+	--bark-400: #8a6347;
+	--bark-500: #a57c5a;
+	--bark-600: #b69575;
+	--bark-700: #ccb59c;
+	--bark-800: #e0d2c2;
+	--bark-900: #f0e9e1;
+	--bark-950: #f9f6f3;
+
+	/* Semantic color references - dark mode */
+	--cream: var(--cream-50);
+	--bark: var(--bark-900);
+
+	/* ==========================================================================
 	   BASE VARIABLE REDEFINITIONS FOR DARK MODE
 	   These redefine the same variable names used in :root so that components
 	   using var(--color-text-muted) automatically get dark mode values.
@@ -232,6 +332,15 @@
 	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
 	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
 	--shadow-grove: 0 8px 32px rgba(74, 222, 128, 0.15);
+
+	/* Grove-specific shadow tokens - dark mode */
+	--shadow-grove-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+	--shadow-grove: 0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+	--shadow-grove-md: 0 4px 12px -4px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+	--shadow-grove-lg: 0 8px 24px -8px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.3);
+	--shadow-grove-xl: 0 16px 48px -16px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4);
+	--shadow-grove-inner: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
+	--shadow-grove-glow: 0 0 0 3px rgb(74 222 128 / 0.2);
 
 	/* Dark mode component-specific overrides */
 	/* Blog header */
