@@ -1,5 +1,7 @@
 """Rich terminal UI helpers for Grove Wrap."""
 
+import os
+import sys
 from contextlib import contextmanager
 from typing import Generator
 
@@ -10,6 +12,39 @@ from rich.table import Table
 from rich.text import Text
 
 console = Console()
+
+
+def is_interactive() -> bool:
+    """Check if we're running in an interactive terminal.
+
+    Returns False when:
+    - stdin is not a TTY (piped input, CI, agents)
+    - GW_AGENT_MODE is set
+    - Running as MCP server
+    - NO_INTERACTIVE env var is set
+
+    Use this to skip confirmation prompts in non-interactive contexts.
+
+    Returns:
+        True if interactive prompts are safe to use
+    """
+    # Not a TTY = definitely not interactive
+    if not sys.stdin.isatty():
+        return False
+
+    # Agent mode explicitly set
+    if os.environ.get("GW_AGENT_MODE"):
+        return False
+
+    # MCP server mode
+    if os.environ.get("GW_MCP_SERVER"):
+        return False
+
+    # Generic escape hatch
+    if os.environ.get("NO_INTERACTIVE"):
+        return False
+
+    return True
 
 
 def create_table(

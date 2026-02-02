@@ -10,6 +10,7 @@ from rich.prompt import Confirm
 from rich.table import Table
 
 from ...gh_wrapper import GitHub, GitHubError
+from ...ui import is_interactive
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -312,8 +313,8 @@ def run_cancel(
             console.print(f"[dim]{e.suggestion}[/dim]")
         raise SystemExit(1)
 
-    # Confirm if not in JSON mode
-    if not output_json:
+    # Confirm if interactive
+    if not output_json and is_interactive():
         if not Confirm.ask(f"Cancel run {run_id}?", default=True):
             console.print("[dim]Aborted[/dim]")
             raise SystemExit(0)

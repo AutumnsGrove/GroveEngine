@@ -12,6 +12,7 @@ from rich.table import Table
 from rich.markdown import Markdown
 
 from ...gh_wrapper import GitHub, GitHubError, PRComment, PRCheck
+from ...ui import is_interactive
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -458,8 +459,8 @@ def pr_merge(
     else:
         method = "merge"
 
-    # Confirm if not in JSON mode
-    if not output_json and not auto:
+    # Confirm if interactive
+    if not output_json and not auto and is_interactive():
         if not Confirm.ask(f"Merge PR #{number} using {method}?", default=True):
             console.print("[dim]Aborted[/dim]")
             raise SystemExit(0)
@@ -511,8 +512,8 @@ def pr_close(
             console.print(f"[dim]{e.suggestion}[/dim]")
         raise SystemExit(1)
 
-    # Confirm if not in JSON mode
-    if not output_json:
+    # Confirm if interactive
+    if not output_json and is_interactive():
         if not Confirm.ask(f"Close PR #{number} without merging?", default=False):
             console.print("[dim]Aborted[/dim]")
             raise SystemExit(0)
