@@ -219,8 +219,50 @@
     }
   }
 
-  // Set up selection monitoring and keyboard shortcuts
+  // Track if the textarea is focused to avoid global listener interference
+  let isTextareaFocused = $state(false);
+
+  // Handle focus/blur on textarea to manage global listeners lifecycle
+  function handleTextareaFocus() {
+    isTextareaFocused = true;
+  }
+
+  /** @param {FocusEvent} e */
+  function handleTextareaBlur(e) {
+    // If focus moved to toolbar, keep it open
+    if (e.relatedTarget && toolbarRef?.contains(/** @type {Node} */ (e.relatedTarget))) {
+      return;
+    }
+    isTextareaFocused = false;
+    isVisible = false;
+  }
+
+  // Set up focus tracking on the textarea
   $effect(() => {
+    if (!textareaRef) return;
+
+    textareaRef.addEventListener("focus", handleTextareaFocus);
+    textareaRef.addEventListener("blur", handleTextareaBlur);
+
+    // Check if already focused
+    if (document.activeElement === textareaRef) {
+      isTextareaFocused = true;
+    }
+
+    return () => {
+      textareaRef?.removeEventListener("focus", handleTextareaFocus);
+      textareaRef?.removeEventListener("blur", handleTextareaBlur);
+    };
+  });
+
+  // Only add global listeners when textarea is focused
+  // This prevents interference with other form elements in the admin panel
+  $effect(() => {
+    if (!isTextareaFocused) {
+      isVisible = false;
+      return;
+    }
+
     // Use selectionchange for more reliable selection tracking (catches programmatic changes)
     document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("mousedown", handleClickOutside);
