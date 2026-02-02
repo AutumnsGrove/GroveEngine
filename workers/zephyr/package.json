@@ -1,0 +1,25 @@
+{
+  "name": "grove-zephyr",
+  "version": "1.0.0",
+  "description": "Grove's unified email gateway - carrying messages on the wind",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.3.3",
+    "vitest": "^2.1.9",
+    "wrangler": "^3.91.0"
+  }
+}

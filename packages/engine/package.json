@@ -266,6 +266,10 @@
     "./email/urls": {
       "types": "./dist/email/urls.d.ts",
       "default": "./dist/email/urls.js"
+    },
+    "./zephyr": {
+      "types": "./dist/zephyr/index.d.ts",
+      "default": "./dist/zephyr/index.js"
     }
   },
   "files": [

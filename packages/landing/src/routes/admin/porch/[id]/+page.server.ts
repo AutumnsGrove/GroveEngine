@@ -1,7 +1,7 @@
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/groveengine/services";
-import { Resend } from "resend";
+import { sendPorchReply } from "@autumnsgrove/groveengine/zephyr";
 
 interface Visit {
   id: string;
@@ -38,16 +38,6 @@ const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 function isWayfinder(email: string | undefined): boolean {
   if (!email) return false;
   return WAYFINDER_EMAILS.includes(email.toLowerCase());
-}
-
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
 
 export const load: PageServerLoad = async ({ params, parent, platform }) => {
@@ -183,50 +173,41 @@ export const actions: Actions = {
       return fail(500, { error: "Failed to send reply. Please try again." });
     }
 
-    // Email reply to visitor
-    if (platform.env.RESEND_API_KEY && recipientEmail) {
-      try {
-        const resend = new Resend(platform.env.RESEND_API_KEY);
+    // Email reply to visitor via Zephyr
+    // IMPORTANT: Errors are now RETURNED, not swallowed (fixes silent failure bug)
+    let emailFailed = false;
+    let emailError: string | undefined;
 
-        const emailSubject = `Re: ${visit.subject} [${visit.visit_number}]`;
+    if (recipientEmail) {
+      const emailResult = await sendPorchReply(
+        recipientEmail,
+        {
+          content,
+          visitId: visit.id,
+          visitNumber: visit.visit_number,
+          subject: visit.subject,
+          visitorName: visit.guest_name || undefined,
+        },
+        {
+          correlationId: visit.id,
+        },
+      );
 
-        const emailText = `Hi there,
-
-${content}
-
----
-
-View this conversation: https://grove.place/porch/visits/${visit.id}
-
-—Autumn
-Grove`;
-
-        const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6; max-width: 600px;">
-<p style="white-space: pre-wrap;">${escapeHtml(content)}</p>
-
-<hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
-
-<p style="font-size: 14px; color: #666;">
-<a href="https://grove.place/porch/visits/${visit.id}" style="color: #166534;">View this conversation</a>
-</p>
-
-<p style="margin-top: 24px;">—Autumn<br><a href="https://grove.place" style="color: #166534;">Grove</a></p>
-</div>`;
-
-        await resend.emails.send({
-          from: "Autumn at Grove <porch@grove.place>",
-          to: recipientEmail,
-          subject: emailSubject,
-          text: emailText,
-          html: emailHtml,
-        });
-      } catch (err) {
-        console.error("Failed to send reply email:", err);
-        // Don't fail - message is saved
+      if (!emailResult.success) {
+        // Error is RETURNED to caller, not swallowed
+        console.error("Porch reply email failed:", emailResult.error);
+        emailFailed = true;
+        emailError = emailResult.error?.message;
       }
     }
 
-    return { replySuccess: true };
+    // Return success with email status so UI can inform admin
+    return {
+      replySuccess: true,
+      emailFailed,
+      emailError,
+      noRecipient: !recipientEmail,
+    };
   },
 
   updateStatus: async ({ params, request, locals, platform }) => {

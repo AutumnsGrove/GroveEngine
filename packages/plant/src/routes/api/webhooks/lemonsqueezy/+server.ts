@@ -17,11 +17,7 @@ import {
   type LemonSqueezyEventName,
 } from "$lib/server/lemonsqueezy";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
-import { sendEmail } from "$lib/server/send-email";
-import {
-  getPaymentFailedEmail,
-  getPaymentReceivedEmail,
-} from "$lib/server/email-templates";
+import { sendPaymentEmail } from "@autumnsgrove/groveengine/zephyr";
 import {
   sanitizeWebhookPayload,
   calculateWebhookExpiry,
@@ -30,9 +26,8 @@ import {
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
   const webhookSecret = platform?.env?.LEMON_SQUEEZY_WEBHOOK_SECRET;
-  const resendApiKey = platform?.env?.RESEND_API_KEY;
 
-  if (!db || !webhookSecret || !resendApiKey) {
+  if (!db || !webhookSecret) {
     console.error("[Webhook] Missing configuration");
     return json({ error: "Configuration error" }, { status: 500 });
   }
@@ -160,13 +155,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       }
 
       case "subscription_payment_failed": {
-        await handlePaymentFailed(db, event, resendApiKey);
+        await handlePaymentFailed(db, event);
         break;
       }
 
       case "subscription_payment_success":
       case "subscription_payment_recovered": {
-        await handlePaymentSuccess(db, event, resendApiKey);
+        await handlePaymentSuccess(db, event);
         break;
       }
 
@@ -425,7 +420,6 @@ async function handleSubscriptionResumed(
 async function handlePaymentFailed(
   db: D1Database,
   event: LemonSqueezyWebhookPayload,
-  resendApiKey: string,
 ) {
   const subscriptionId = event.data.id;
 
@@ -458,29 +452,22 @@ async function handlePaymentFailed(
     return;
   }
 
-  // Send payment failed email
-  const email = getPaymentFailedEmail({
+  // Send payment failed email via Zephyr
+  const result = await sendPaymentEmail("failed", billing.email as string, {
     name: billing.display_name as string,
-    subdomain: billing.subdomain as string,
-  });
-
-  const result = await sendEmail({
-    to: billing.email as string,
-    subject: email.subject,
-    html: email.html,
-    text: email.text,
-    resendApiKey,
+    planName: "Grove subscription",
   });
 
   if (result.success) {
-    console.log("[Webhook] Payment failed email sent", {
+    console.log("[Webhook] Payment failed email sent via Zephyr", {
       subscriptionId,
       tenantId: billing.id,
     });
   } else {
-    console.error("[Webhook] Failed to send payment failed email", {
+    console.error("[Webhook] Failed to send payment failed email via Zephyr", {
       subscriptionId,
       tenantId: billing.id,
+      error: result.error,
     });
   }
 }
@@ -491,7 +478,6 @@ async function handlePaymentFailed(
 async function handlePaymentSuccess(
   db: D1Database,
   event: LemonSqueezyWebhookPayload,
-  resendApiKey: string,
 ) {
   const attrs = event.data.attributes as {
     status: string;
@@ -536,45 +522,39 @@ async function handlePaymentSuccess(
     return;
   }
 
-  // Send payment received email
-  const email = getPaymentReceivedEmail({
-    name: billing.display_name as string,
-    subdomain: billing.subdomain as string,
-    amount: "subscription", // LS doesn't include amount in webhook
-    paymentDate: new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-    planName: attrs.variant_name || (billing.plan as string),
-    interval: "month",
-    nextPaymentDate: renewsAt
-      ? new Date(renewsAt * 1000).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "Unknown",
-    invoiceId: `ls_${subscriptionId}`,
+  // Format dates for display
+  const paymentDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  const result = await sendEmail({
-    to: billing.email as string,
-    subject: email.subject,
-    html: email.html,
-    text: email.text,
-    resendApiKey,
+  const nextBillingDate = renewsAt
+    ? new Date(renewsAt * 1000).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : undefined;
+
+  // Send payment received email via Zephyr
+  const result = await sendPaymentEmail("received", billing.email as string, {
+    name: billing.display_name as string,
+    planName: attrs.variant_name || (billing.plan as string),
+    date: paymentDate,
+    nextBillingDate,
   });
 
   if (result.success) {
-    console.log("[Webhook] Payment receipt sent", {
+    console.log("[Webhook] Payment receipt sent via Zephyr", {
       subscriptionId,
       tenantId: billing.id,
     });
   } else {
-    console.error("[Webhook] Failed to send payment receipt", {
+    console.error("[Webhook] Failed to send payment receipt via Zephyr", {
       subscriptionId,
       tenantId: billing.id,
+      error: result.error,
     });
   }
 }

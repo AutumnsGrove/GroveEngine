@@ -1,0 +1,44 @@
+# Zephyr — Grove's Email Gateway
+#
+# A unified Cloudflare Worker that handles all email sending
+# for Grove services with retries, fallbacks, and observability.
+#
+# Deploy: wrangler deploy
+# Logs: wrangler tail
+# Local dev: wrangler dev
+
+name = "grove-zephyr"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding for email logging
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Optional: KV namespace for circuit breaker state (multi-isolate resilience)
+# [[kv_namespaces]]
+# binding = "CIRCUIT_STATE"
+# id = "..."
+
+# Environment variables
+[vars]
+BASE_URL = "https://grove.place"
+
+# Secrets (set via wrangler secret put)
+# - RESEND_API_KEY: Resend API key for sending emails
+
+# Production environment
+[env.production]
+name = "grove-zephyr"
+
+[env.production.vars]
+BASE_URL = "https://grove.place"
+
+# Staging environment
+[env.staging]
+name = "grove-zephyr-staging"
+
+[env.staging.vars]
+BASE_URL = "https://staging.grove.place"

@@ -5,8 +5,7 @@
  * Uses D1 for code storage and KV for rate limiting.
  */
 
-import { sendEmail } from "./send-email";
-import { getVerificationEmail } from "./verification-email-template";
+import { sendVerificationCode as sendVerificationCodeEmail } from "@autumnsgrove/groveengine/zephyr";
 
 // Constants
 const CODE_LENGTH = 6;
@@ -135,7 +134,7 @@ export async function createVerificationCode(
   userId: string,
   email: string,
   displayName: string | null,
-  resendApiKey: string,
+  _resendApiKey?: string, // Deprecated: Zephyr handles API key
 ): Promise<CreateCodeResult> {
   const normalizedEmail = normalizeEmail(email);
 
@@ -192,24 +191,15 @@ export async function createVerificationCode(
   // Increment rate limit counter
   await incrementResendCounter(kv, userId);
 
-  // Send email
-  const emailContent = getVerificationEmail({
-    name: displayName || "Wanderer",
-    code,
-    expiryMinutes: CODE_EXPIRY_MINUTES,
-  });
-
-  const emailResult = await sendEmail({
-    to: email,
-    subject: emailContent.subject,
-    html: emailContent.html,
-    text: emailContent.text,
-    resendApiKey,
+  // Send email via Zephyr
+  const emailResult = await sendVerificationCodeEmail(email, code, {
+    name: displayName || undefined,
+    expiresIn: `${CODE_EXPIRY_MINUTES} minutes`,
   });
 
   if (!emailResult.success) {
     console.error(
-      "[Email Verification] Failed to send email:",
+      "[Email Verification] Failed to send email via Zephyr:",
       emailResult.error,
     );
     // Don't fail the whole operation - code is created, user can request resend

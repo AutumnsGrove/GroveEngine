@@ -1,8 +1,8 @@
 /**
- * Email Scheduling with Resend
+ * Email Scheduling via Zephyr
  *
  * Handles scheduling welcome sequences and individual emails
- * using Resend's native `scheduled_at` parameter.
+ * through Grove's unified email gateway.
  *
  * @example
  * ```typescript
@@ -11,42 +11,30 @@
  * await scheduleWelcomeSequence({
  *   email: 'wanderer@example.com',
  *   name: 'Wanderer',
- *   audienceType: 'trial',
- *   resendApiKey: env.RESEND_API_KEY,
+ *   audienceType: 'wanderer',
  * });
  * ```
  */
-import { Resend } from "resend";
-import { render } from "./render";
-import { WelcomeEmail } from "./sequences/WelcomeEmail";
-import { Day1Email } from "./sequences/Day1Email";
-import { Day7Email } from "./sequences/Day7Email";
-import { Day14Email } from "./sequences/Day14Email";
-import { Day30Email } from "./sequences/Day30Email";
+import { sendSequenceEmail, sendRawEmail } from "../zephyr/client";
 import { SEQUENCES, type AudienceType, type SendResult } from "./types";
-import type { ReactElement } from "react";
 
 // =============================================================================
-// Configuration
+// Template to Zephyr mapping
 // =============================================================================
-
-const DEFAULT_FROM = "Autumn <autumn@grove.place>";
 
 /**
- * Template component map for dynamic rendering
+ * Map Engine template names to Zephyr template names.
  */
-const TEMPLATE_MAP: Record<string, (props: TemplateProps) => ReactElement> = {
-  WelcomeEmail: (props) => WelcomeEmail(props as any),
-  Day1Email: (props) => Day1Email(props as any),
-  Day7Email: (props) => Day7Email(props as any),
-  Day14Email: (props) => Day14Email(props as any),
-  Day30Email: (props) => Day30Email(props as any),
+const TEMPLATE_TO_ZEPHYR: Record<
+  string,
+  "welcome" | "day-1" | "day-7" | "day-14" | "day-30"
+> = {
+  WelcomeEmail: "welcome",
+  Day1Email: "day-1",
+  Day7Email: "day-7",
+  Day14Email: "day-14",
+  Day30Email: "day-30",
 };
-
-interface TemplateProps {
-  name?: string;
-  audienceType: AudienceType;
-}
 
 // =============================================================================
 // Schedule Welcome Sequence
@@ -59,9 +47,9 @@ export interface ScheduleSequenceOptions {
   name?: string;
   /** Which audience segment this user belongs to */
   audienceType: AudienceType;
-  /** Resend API key */
-  resendApiKey: string;
-  /** Custom from address (defaults to Autumn) */
+  /** @deprecated Zephyr handles API key internally */
+  resendApiKey?: string;
+  /** @deprecated Zephyr handles from address based on email type */
   from?: string;
   /** Base URL for links (defaults to grove.place) */
   baseUrl?: string;
@@ -77,7 +65,7 @@ export interface ScheduleSequenceResult {
 /**
  * Schedule a complete welcome sequence for a new signup
  *
- * Uses Resend's native `scheduled_at` to queue all emails at once.
+ * Uses Zephyr's scheduling capability to queue all emails at once.
  * Emails are scheduled relative to the current time.
  *
  * @example
@@ -85,8 +73,7 @@ export interface ScheduleSequenceResult {
  * const result = await scheduleWelcomeSequence({
  *   email: 'new-user@example.com',
  *   name: 'Wanderer',
- *   audienceType: 'trial',
- *   resendApiKey: env.RESEND_API_KEY,
+ *   audienceType: 'wanderer',
  * });
  *
  * if (result.success) {
@@ -97,17 +84,11 @@ export interface ScheduleSequenceResult {
 export async function scheduleWelcomeSequence(
   options: ScheduleSequenceOptions,
 ): Promise<ScheduleSequenceResult> {
-  const {
-    email,
-    name,
-    audienceType,
-    resendApiKey,
-    from = DEFAULT_FROM,
-  } = options;
+  const { email, name, audienceType } = options;
 
-  const resend = new Resend(resendApiKey);
   const sequence = SEQUENCES[audienceType];
   const now = new Date();
+  const signupDate = now.toISOString().split("T")[0]; // For idempotency key
 
   const result: ScheduleSequenceResult = {
     success: true,
@@ -116,41 +97,37 @@ export async function scheduleWelcomeSequence(
     messageIds: [],
   };
 
-  for (const { dayOffset, template, subject } of sequence) {
+  for (const { dayOffset, template } of sequence) {
     try {
-      // Get the template component
-      const Template = TEMPLATE_MAP[template];
-      if (!Template) {
+      // Map Engine template to Zephyr template
+      const zephyrTemplate = TEMPLATE_TO_ZEPHYR[template];
+      if (!zephyrTemplate) {
         result.errors.push(`Unknown template: ${template}`);
         continue;
       }
 
-      // Render the email
-      const { html, text } = await render(Template({ name, audienceType }), {
-        plainText: true,
-      });
-
-      // Calculate scheduled time (null for immediate)
+      // Calculate scheduled time (undefined for immediate)
       const scheduledAt =
         dayOffset === 0 ? undefined : addDays(now, dayOffset).toISOString();
 
-      // Send via Resend
-      const response = await resend.emails.send({
-        from,
-        to: email,
-        subject,
-        html,
-        text,
-        scheduledAt,
-      });
+      // Create idempotency key to prevent duplicates
+      const idempotencyKey = `${email}-${zephyrTemplate}-${signupDate}`;
 
-      if (response.error) {
+      // Send via Zephyr
+      const response = await sendSequenceEmail(
+        zephyrTemplate,
+        email,
+        { name, audienceType },
+        { scheduledAt, idempotencyKey },
+      );
+
+      if (!response.success) {
         result.errors.push(
-          `Day ${dayOffset}: ${response.error.message || "Unknown error"}`,
+          `Day ${dayOffset}: ${response.error?.message || "Unknown error"}`,
         );
         result.success = false;
-      } else if (response.data?.id) {
-        result.messageIds.push(response.data.id);
+      } else if (response.messageId) {
+        result.messageIds.push(response.messageId);
         result.scheduled++;
       }
     } catch (error) {
@@ -176,8 +153,8 @@ export interface SendEmailOptions {
   html: string;
   /** Plain text version (optional) */
   text?: string;
-  /** Resend API key */
-  resendApiKey: string;
+  /** @deprecated Zephyr handles API key internally */
+  resendApiKey?: string;
   /** Custom from address */
   from?: string;
   /** Schedule for later (ISO timestamp) */
@@ -185,7 +162,7 @@ export interface SendEmailOptions {
 }
 
 /**
- * Send a single email via Resend
+ * Send a single email via Zephyr
  *
  * Lower-level function for sending individual emails.
  * Use scheduleWelcomeSequence for automated sequences.
@@ -193,38 +170,27 @@ export interface SendEmailOptions {
 export async function sendEmail(
   options: SendEmailOptions,
 ): Promise<SendResult> {
-  const {
-    email,
-    subject,
-    html,
-    text,
-    resendApiKey,
-    from = DEFAULT_FROM,
-    scheduledAt,
-  } = options;
+  const { email, subject, html, text, from, scheduledAt } = options;
 
   try {
-    const resend = new Resend(resendApiKey);
-
-    const response = await resend.emails.send({
-      from,
-      to: email,
+    const response = await sendRawEmail("sequence", email, {
       subject,
       html,
       text,
-      scheduledAt,
+      from,
+      metadata: { source: "engine-schedule" },
     });
 
-    if (response.error) {
+    if (!response.success) {
       return {
         success: false,
-        error: response.error.message || "Failed to send email",
+        error: response.error?.message || "Failed to send email",
       };
     }
 
     return {
       success: true,
-      messageId: response.data?.id,
+      messageId: response.messageId,
     };
   } catch (error) {
     return {
