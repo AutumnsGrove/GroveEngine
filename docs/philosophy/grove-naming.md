@@ -416,17 +416,17 @@ Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first ma
 
 *Connected and concealed.*
 
-### Tendril
-**Remote Coding Infrastructure** · `tendril.grove.place`
-**Repository:** [AutumnsGrove/GroveTendril](https://github.com/AutumnsGrove/GroveTendril)
+### Verge
+**Remote Coding Infrastructure** · `verge.grove.place`
+**Repository:** [AutumnsGrove/GroveVerge](https://github.com/AutumnsGrove/GroveVerge)
 
-A tendril is a slender, reaching thread that vines send out to grab onto something distant. It extends from the plant, finds what it needs, does its work, and either holds fast or lets go. The vine stays rooted. The tendril does the reaching.
+The verge is the edge. The threshold. The liminal space where one state ends and another begins—not quite here, not quite there. In impossible geometries, the verge is where transformation happens. You cross it and emerge changed.
 
-Tendril is Grove's serverless remote coding infrastructure. It sends out ephemeral compute—temporary VPS instances that spin up on-demand, run AI coding agents autonomously to complete development tasks, sync your code to storage, then vanish. Send a task from your phone during lunch. Check back later: the tendril reached out, did its work, and retracted. Infrastructure that extends only when needed, costs almost nothing, and never overstays its welcome.
+Verge is Grove's serverless remote coding infrastructure. Send your code through the Verge—into ephemeral compute that exists in the space between, temporary VPS instances spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes, the compute vanishes, and your code returns more beautiful than you expected.
 
-You stay rooted. The tendril reaches for you.
+You send it through. It comes back transformed.
 
-*Reaching out, doing the work, letting go.*
+*Brief, brilliant, gone.*
 
 ### Forage
 **Domain Discovery** · `forage.grove.place`
@@ -610,7 +610,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Wander** | Content | Immersive discovery | wander.grove.place |
 | **Trails** | Content | Personal roadmaps | username.grove.place/trail |
 | **Ivy** | Tools | Email | ivy.grove.place |
-| **Tendril** | Tools | Remote coding | tendril.grove.place |
+| **Verge** | Tools | Remote coding | verge.grove.place |
 | **Forage** | Tools | Domain discovery | forage.grove.place |
 | **Nook** | Tools | Private video sharing | nook.grove.place |
 | **Shutter** | Tools | Web content distillation | shutter.grove.place |
@@ -669,7 +669,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Wander | GroveWander |
 | Trails | GroveTrails |
 | Ivy | GroveMail |
-| Tendril | GroveTendril |
+| Verge | GroveVerge |
 | Forage | GroveDomainTool |
 | Nook | GroveNook |
 | Shutter | GroveShutter |

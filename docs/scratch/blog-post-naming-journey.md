@@ -419,7 +419,7 @@ After exploring leaves, whispers, hollows, and dens... Autumn felt it:
 
 **Bloom** for your writing. What your grove produces. Moments of expression, color, beauty. "Read my latest bloom."
 
-The old "Bloom" (remote coding infrastructure) becomes **Tendril**—reaching out, doing work, letting go.
+The old "Bloom" (remote coding infrastructure) becomes **Verge**—the threshold, the liminal edge where code goes through and comes back transformed. *Brief, brilliant, gone.*
 
 ### The Final Chain
 
@@ -441,7 +441,7 @@ Like "step away (unsubscribe)" in emails:
 | blog | grove | Your space, your corner of the forest |
 | blog index | garden | The collection, where blooms grow together |
 | post | bloom | What your grove produces |
-| Bloom (remote coding) | Tendril | Reaching out, doing work, letting go |
+| Bloom (remote coding) | Verge | The threshold—brief, brilliant, gone |
 
 ---
 
