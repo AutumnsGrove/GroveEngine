@@ -1,10 +1,10 @@
 ---
-title: Bloom — Remote Coding Infrastructure
+title: Verge — Remote Coding Infrastructure
 description: Serverless autonomous coding agent on transient VPS
 category: specs
 specCategory: standalone-tools
 icon: loader
-lastUpdated: '2025-12-30'
+lastUpdated: '2026-02-02'
 aliases: []
 tags:
   - remote-coding
@@ -13,41 +13,49 @@ tags:
   - hetzner
 ---
 
-# Bloom — Remote Coding Infrastructure
+# Verge — Remote Coding Infrastructure
 
 ```
-                                        🌸
-                              🌸              ·
-                    ·                   🌸
-              🌸         ·                        ·
-                                 🌸
-        ·          🌸                      🌸
-                         ·    🌸     ·
-                                          ·
-    ════════════════════════════════════════════════
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                    ·
+                          ·    ·         ·    ·
+                     ·         ╱ ╲             ·
+                          ·   ╱   ╲   ·
+               ·    ·        ╱     ╲        ·    ·
+                            ╱   ◇   ╲
+                     ·     ╱    │    ╲     ·
+                          ╱     │     ╲
+            ─ ─ ─ ─ ─ ─ ─╱──────│──────╲─ ─ ─ ─ ─ ─ ─
+                  HERE   ╲      │      ╱   THERE
+            ─ ─ ─ ─ ─ ─ ─ ╲─────│─────╱ ─ ─ ─ ─ ─ ─ ─
+                           ╲    │    ╱
+                      ·     ╲   │   ╱     ·
+                             ╲  │  ╱
+                    ·    ·    ╲ │ ╱    ·    ·
+                               ╲│╱
+                          ·     ▼     ·
+                                ·
 
-                 Brief, brilliant, gone.
+                    Brief, brilliant, gone.
 ```
 
 > *Brief, brilliant, gone.*
 
-Grove's serverless remote coding infrastructure that spins up temporary VPS instances on-demand. Runs AI coding agents autonomously to complete development tasks, syncs code to R2 storage, then self-destructs. Text it and forget it.
+Grove's serverless remote coding infrastructure. Send your code through the Verge—into ephemeral compute spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes and your code returns more beautiful than you expected.
 
-**Public Name:** Bloom
-**Internal Name:** GroveBloom
-**Domain:** `bloom.grove.place`
-**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
+**Public Name:** Verge
+**Internal Name:** GroveVerge
+**Domain:** `verge.grove.place`
+**Repository:** [AutumnsGrove/GroveVerge](https://github.com/AutumnsGrove/GroveVerge)
 
-A bloom is the brief, brilliant moment when a flower opens: ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+The verge is the edge. The threshold. The liminal space where one state ends and another begins. Not quite here, not quite there. In impossible geometries, the verge is where transformation happens. You cross it and emerge changed.
 
-Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Text it and forget it. Bloom works through it, saves the results, and cleans up after itself.
+Verge is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Text it and forget it. The Verge works through it, saves the results, and cleans up after itself.
 
 ---
 
 ## Overview
 
-**Philosophy**: "Text it and forget it." Send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs. Work that happens in the quiet hours, blooming into results by morning.
+**Philosophy**: "Text it and forget it." Send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs. Work that happens in the space between, emerging transformed by morning.
 
 **Target**: Personal development work across multiple interconnected Grove ecosystem projects.
 
@@ -61,7 +69,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              CLOUDFLARE                                     │
 │  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐       │
-│  │  R2: bloom-repos │    │ R2: bloom-state  │    │   D1: bloom-db   │       │
+│  │  R2: verge-repos │    │ R2: verge-state  │    │   D1: verge-db   │       │
 │  │  (cloned repos,  │    │   (workspaces,   │    │  (sessions, logs │       │
 │  │   node_modules)  │    │    snapshots)    │    │   config, costs) │       │
 │  └────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘       │
@@ -69,7 +77,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
 │           └───────────────────────┼───────────────────────┘                 │
 │                                   │                                         │
 │                    ┌──────────────▼──────────────┐                          │
-│                    │    Worker: bloom-control    │                          │
+│                    │    Worker: verge-control    │                          │
 │                    │  - Start/stop server        │                          │
 │                    │  - Sync repos to/from R2    │                          │
 │                    │  - Monitor agent state      │                          │
@@ -81,7 +89,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
 │           ┌───────────────────────┼───────────────────────┐                 │
 │           │                       │                       │                 │
 │  ┌────────▼──────────┐   ┌────────▼─────────┐   ┌────────▼─────────┐        │
-│  │ bloom.grove.place │   │  Heartwood Auth  │   │  WebSocket Proxy │        │
+│  │ verge.grove.place │   │  Heartwood Auth  │   │  WebSocket Proxy │        │
 │  │  SvelteKit App    │   │  (login/session) │   │  (terminal stream)│       │
 │  │  - Dashboard      │   │                  │   │                  │        │
 │  │  - Terminal       │   │                  │   │                  │        │
@@ -91,6 +99,10 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
 │                   [DNS: A record updated on boot]                           │
 │                                   │                                         │
 └───────────────────────────────────┼─────────────────────────────────────────┘
+                                    │
+                         ═══════════╪═══════════
+                              THE VERGE
+                         ═══════════╪═══════════
                                     │
                                     ▼
                           ┌─────────────────────────────────────┐
@@ -108,7 +120,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
                           │  │  - Mobile-friendly          │    │
                           │  └─────────────────────────────┘    │
                           │  ┌─────────────────────────────┐    │
-                          │  │     Bloom Daemon            │    │
+                          │  │     Verge Daemon            │    │
                           │  │  - Task completion detect   │    │
                           │  │  - Idle timeout (2hr)       │    │
                           │  │  - R2 sync on shutdown      │    │
@@ -119,7 +131,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
                           │  ├── GroveEngine/                   │
                           │  ├── GroveAuth/                     │
                           │  ├── ... (configured repos)         │
-                          │  └── .bloom/ (agent state)          │
+                          │  └── .verge/ (agent state)          │
                           │                                     │
                           │  Specs: 4 vCPU, 8GB RAM             │
                           └─────────────────────────────────────┘
@@ -145,7 +157,7 @@ Bloom is Grove's serverless remote coding infrastructure. It spins up temporary 
 
 ## The "Two-Model" Brain Configuration
 
-Bloom uses a dual-model approach via OpenRouter for cost-efficiency:
+Verge uses a dual-model approach via OpenRouter for cost-efficiency:
 
 | Mode | Model | Purpose | Pricing (per 1M tokens) |
 |------|-------|---------|-------------------------|
@@ -205,7 +217,7 @@ Injected into `~/.kilocode/config.json` on boot:
 
 Projects to clone and maintain in the workspace. Edit this section to add/remove repos.
 
-&lt;!-- REPO_MANIFEST_START --&gt;
+<!-- REPO_MANIFEST_START -->
 
 | Repository | Branch | Path | Notes |
 |------------|--------|------|-------|
@@ -218,7 +230,7 @@ Projects to clone and maintain in the workspace. Edit this section to add/remove
 | | | | |
 | | | | |
 
-&lt;!-- REPO_MANIFEST_END --&gt;
+<!-- REPO_MANIFEST_END -->
 
 **Note**: All repos are cloned fresh on first boot, then synced to/from R2 on subsequent sessions. Node modules are cached in R2 to speed up boot times.
 
@@ -228,12 +240,12 @@ Projects to clone and maintain in the workspace. Edit this section to add/remove
 
 No Hetzner Volume; all persistence through Cloudflare R2.
 
-### Bucket: `bloom-repos`
+### Bucket: `verge-repos`
 
 Pre-cloned repositories with dependencies installed:
 
 ```
-bloom-repos/
+verge-repos/
 ├── GroveEngine/
 │   ├── .git/
 │   ├── node_modules.tar.gz      # Compressed for faster sync
@@ -246,12 +258,12 @@ bloom-repos/
 └── manifest.json                 # Repo versions, last sync times
 ```
 
-### Bucket: `bloom-state`
+### Bucket: `verge-state`
 
 Agent state and workspace snapshots:
 
 ```
-bloom-state/
+verge-state/
 ├── current/
 │   └── workspace-snapshot.tar.gz  # Latest workspace state
 ├── kilo/
@@ -265,15 +277,15 @@ bloom-state/
 ### Sync Strategy
 
 **On Boot:**
-1. Pull repos from `bloom-repos/`
+1. Pull repos from `verge-repos/`
 2. Extract `node_modules.tar.gz` for each project
 3. `git fetch && git pull` for latest changes
-4. Restore Kilo context from `bloom-state/kilo/`
+4. Restore Kilo context from `verge-state/kilo/`
 
 **On Shutdown:**
 1. Commit and push any uncommitted changes (with user confirmation option)
 2. Compress updated `node_modules` if changed
-3. Snapshot workspace to `bloom-state/`
+3. Snapshot workspace to `verge-state/`
 4. Upload to R2
 5. Delete VPS
 
@@ -290,7 +302,7 @@ bloom-state/
                     │  OFFLINE │ ◄────────────────────────────────────────┐
                     └────┬─────┘                                          │
                          │                                                │
-                    [Start Button]                                        │
+                  [Cross the Verge]                                       │
                          │                                                │
                          ▼                                                │
                   ┌─────────────┐                                         │
@@ -298,7 +310,7 @@ bloom-state/
                   │  (1-3 min)  │                                         │
                   └──────┬──────┘                                         │
                          │                                                │
-                  [Setup Complete]                                        │
+                   [Setup Complete]                                       │
                          │                                                │
                          ▼                                                │
                     ┌─────────┐                                           │
@@ -326,7 +338,7 @@ bloom-state/
          │              ▼                                                 │
          │       ┌─────────────┐                                          │
          └───────┤ TERMINATING ├──────────────────────────────────────────┘
-                 │ (delete VPS)│
+                 │(close Verge)│
                  └─────────────┘
 ```
 
@@ -334,13 +346,13 @@ bloom-state/
 
 | Trigger | Behavior | Default |
 |---------|----------|---------|
-| **Manual Stop** | User clicks "Stop" in dashboard | Always available |
+| **Manual Stop** | User clicks "Close Verge" in dashboard | Always available |
 | **Idle Timeout** | No terminal activity for X minutes | 2 hours (configurable) |
 | **Task Completion** | Kilo signals task done via exit code or webhook | Enabled |
 
 ### Shutdown Flow
 
-1. **Sync Phase**: 
+1. **Sync Phase**:
    - Save all work to R2
    - Optionally commit/push pending changes
    - Preserve Kilo context
@@ -375,24 +387,24 @@ The dashboard includes a **region selector** for cost vs latency tradeoffs:
 
 | Type | Name | Content | Proxy | TTL | Notes |
 |------|------|---------|-------|-----|-------|
-| A | bloom | `&lt;VPS_IP&gt;` | ❌ DNS only | 60s | Updated by worker on boot |
-| CNAME | bloom (offline) | bloom-offline.pages.dev | ✅ Proxied | Auto | When VPS is down |
+| A | verge | `<VPS_IP>` | ❌ DNS only | 60s | Updated by worker on boot |
+| CNAME | verge (offline) | verge-offline.pages.dev | ✅ Proxied | Auto | When VPS is down |
 
-**Connection**: `bloom.grove.place` for both dashboard and terminal.
+**Connection**: `verge.grove.place` for both dashboard and terminal.
 
 ---
 
 ## Worker API Endpoints
 
-Base URL: `https://bloom.grove.place/api`
+Base URL: `https://verge.grove.place/api`
 
 ### `POST /start`
 
-Start a new Bloom session.
+Open the Verge.
 
 ```typescript
 // Request
-{ 
+{
   "region": "eu" | "us",
   "task"?: string,           // Optional: initial task for autonomous mode
   "autoShutdown": boolean    // Default: true
@@ -401,7 +413,7 @@ Start a new Bloom session.
 // Response
 {
   "status": "provisioning",
-  "sessionId": "bloom-20250115-abc123",
+  "sessionId": "verge-20250115-abc123",
   "region": "eu",
   "estimatedReadyTime": "2025-01-15T12:03:00Z",
   "serverId": "12345678"
@@ -410,11 +422,11 @@ Start a new Bloom session.
 
 ### `POST /stop`
 
-Stop the current session.
+Close the Verge.
 
 ```typescript
 // Request
-{ 
+{
   "force": boolean,          // Skip sync if true
   "commitPending": boolean   // Auto-commit uncommitted changes
 }
@@ -434,14 +446,14 @@ Get current session status.
 // Response
 {
   "state": "RUNNING",  // OFFLINE | PROVISIONING | RUNNING | IDLE | SYNCING | TERMINATING
-  "sessionId": "bloom-20250115-abc123",
+  "sessionId": "verge-20250115-abc123",
   "region": "eu",
   "serverId": "12345678",
   "serverIp": "1.2.3.4",
   "uptime": 7200,
   "idleTime": 300,
   "idleTimeout": 7200,
-  "terminalUrl": "wss://bloom.grove.place/terminal",
+  "terminalUrl": "wss://verge.grove.place/terminal",
   "lastActivity": "2025-01-15T13:45:00Z",
   "currentTask": "Implementing feature X",
   "costs": {
@@ -459,7 +471,7 @@ Get current session status.
 
 ### `POST /task`
 
-Send a task to the running agent (autonomous mode).
+Send a task through the Verge (autonomous mode).
 
 ```typescript
 // Request
@@ -473,7 +485,7 @@ Send a task to the running agent (autonomous mode).
 {
   "taskId": "task-xyz789",
   "status": "queued",
-  "message": "Task sent to agent"
+  "message": "Task sent through the Verge"
 }
 ```
 
@@ -521,7 +533,7 @@ Get session history.
 {
   "sessions": [
     {
-      "sessionId": "bloom-20250115-abc123",
+      "sessionId": "verge-20250115-abc123",
       "startedAt": "2025-01-15T10:00:00Z",
       "endedAt": "2025-01-15T12:30:00Z",
       "duration": 9000,
@@ -542,7 +554,7 @@ Get session history.
 
 ### `POST /config`
 
-Update Bloom configuration.
+Update Verge configuration.
 
 ```typescript
 // Request
@@ -573,109 +585,109 @@ Update Bloom configuration.
 ### Main View
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  🌸 Bloom                              [EU ▾] [US]  [☰]     │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │                                                     │    │
-│  │              Server is Offline                      │    │
-│  │                                                     │    │
-│  │         ┌─────────────────────────┐                 │    │
-│  │         │     🌱 Start Bloom      │                 │    │
-│  │         └─────────────────────────┘                 │    │
-│  │                                                     │    │
-│  │              EU · ~$0.0085/hr                       │    │
-│  │                                                     │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ── Quick Task ──────────────────────────────────────────   │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ Describe a task to run autonomously...              │    │
-│  └─────────────────────────────────────────────────────┘    │
-│  [Start with Task]                                          │
-│                                                             │
-│  ── Recent Sessions ─────────────────────────────────────   │
-│                                                             │
-│  Today · 2h 15m · $0.02 · 3 tasks                           │
-│  Yesterday · 45m · $0.01 · 1 task                           │
-│  Dec 13 · 1h 30m · $0.01 · 2 tasks                          │
-│                                                             │
-│  This month: 12.5 hrs · $0.11                               │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  ◇ Verge                              [EU ▾] [US]  [☰]          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                                                         │    │
+│  │              The Verge is Closed                        │    │
+│  │                                                         │    │
+│  │         ┌─────────────────────────┐                     │    │
+│  │         │    ◇ Open the Verge     │                     │    │
+│  │         └─────────────────────────┘                     │    │
+│  │                                                         │    │
+│  │              EU · ~$0.0085/hr                           │    │
+│  │                                                         │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ── Quick Task ──────────────────────────────────────────────   │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ Describe a task to send through the Verge...            │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│  [Send Through]                                                 │
+│                                                                 │
+│  ── Recent Sessions ─────────────────────────────────────────   │
+│                                                                 │
+│  Today · 2h 15m · $0.02 · 3 tasks                               │
+│  Yesterday · 45m · $0.01 · 1 task                               │
+│  Dec 13 · 1h 30m · $0.01 · 2 tasks                              │
+│                                                                 │
+│  This month: 12.5 hrs · $0.11                                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Running View (Terminal)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  🌸 Bloom                    🟢 Running    [Stop ▾]         │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ EU · 45m uptime · $0.006 · Idle: 5m / 2h            │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ Project: GroveEngine ▾                    [Sync]    │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ ┌─────────────────────────────────────────────────┐ │    │
-│  │ │ ~/workspace/GroveEngine $ kilocode              │ │    │
-│  │ │                                                 │ │    │
-│  │ │ 🤖 Kilo Code v2.1.0                             │ │    │
-│  │ │ Model: deepseek/deepseek-chat                   │ │    │
-│  │ │ Mode: code                                      │ │    │
-│  │ │                                                 │ │    │
-│  │ │ > What would you like to work on?               │ │    │
-│  │ │ _                                               │ │    │
-│  │ │                                                 │ │    │
-│  │ │                                                 │ │    │
-│  │ │                                                 │ │    │
-│  │ └─────────────────────────────────────────────────┘ │    │
-│  │              [ ttyd terminal iframe ]               │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ Quick: [Architect] [Code] [Debug] [Git Status]        │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  ◇ Verge                       🟢 Open     [Close ▾]            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ EU · 45m in the Verge · $0.006 · Idle: 5m / 2h          │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ Project: GroveEngine ▾                    [Sync]        │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ ┌─────────────────────────────────────────────────────┐ │    │
+│  │ │ ~/workspace/GroveEngine $ kilocode                  │ │    │
+│  │ │                                                     │ │    │
+│  │ │ 🤖 Kilo Code v2.1.0                                 │ │    │
+│  │ │ Model: deepseek/deepseek-chat                       │ │    │
+│  │ │ Mode: code                                          │ │    │
+│  │ │                                                     │ │    │
+│  │ │ > What would you like to work on?                   │ │    │
+│  │ │ _                                                   │ │    │
+│  │ │                                                     │ │    │
+│  │ │                                                     │ │    │
+│  │ │                                                     │ │    │
+│  │ └─────────────────────────────────────────────────────┘ │    │
+│  │              [ ttyd terminal iframe ]                   │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ Quick: [Architect] [Code] [Debug] [Git Status]            │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Settings View
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ← Settings                                                 │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ── Shutdown Behavior ───────────────────────────────────   │
-│                                                             │
-│  Idle Timeout           [2 hours     ▾]                     │
-│  Auto-shutdown on task complete    [✓]                      │
-│  Auto-commit on shutdown           [ ]                      │
-│                                                             │
-│  ── Default Region ──────────────────────────────────────   │
-│                                                             │
-│  ( ) EU (Falkenstein) · €0.008/hr                           │
-│  (•) US (Ashburn) · €0.021/hr                               │
-│                                                             │
-│  ── Models (OpenRouter) ─────────────────────────────────   │
-│                                                             │
-│  Reasoning     [deepseek/deepseek-chat        ▾]            │
-│  Vision        [z-ai/glm-4.6v                 ▾]            │
-│                                                             │
-│  ── Projects ────────────────────────────────────────────   │
-│                                                             │
-│  GroveEngine        main    [Edit] [Remove]                 │
-│  GroveAuth          main    [Edit] [Remove]                 │
-│  + Add Project                                              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  ← Settings                                                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ── Shutdown Behavior ───────────────────────────────────────   │
+│                                                                 │
+│  Idle Timeout           [2 hours     ▾]                         │
+│  Auto-close on task complete         [✓]                        │
+│  Auto-commit on close                [ ]                        │
+│                                                                 │
+│  ── Default Region ──────────────────────────────────────────   │
+│                                                                 │
+│  ( ) EU (Falkenstein) · €0.008/hr                               │
+│  (•) US (Ashburn) · €0.021/hr                                   │
+│                                                                 │
+│  ── Models (OpenRouter) ─────────────────────────────────────   │
+│                                                                 │
+│  Reasoning     [deepseek/deepseek-chat        ▾]                │
+│  Vision        [z-ai/glm-4.6v                 ▾]                │
+│                                                                 │
+│  ── Projects ────────────────────────────────────────────────   │
+│                                                                 │
+│  GroveEngine        main    [Edit] [Remove]                     │
+│  GroveAuth          main    [Edit] [Remove]                     │
+│  + Add Project                                                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -775,26 +787,26 @@ packages:
   - unzip
 
 write_files:
-  # Bloom daemon script
-  - path: /opt/bloom/daemon.sh
+  # Verge daemon script
+  - path: /opt/verge/daemon.sh
     permissions: '0755'
     content: |
       #!/bin/bash
-      # Bloom Daemon - monitors activity and handles shutdown triggers
-      
+      # Verge Daemon - monitors activity and handles shutdown triggers
+
       IDLE_TIMEOUT=${IDLE_TIMEOUT:-7200}  # 2 hours default
       WEBHOOK_URL="${WEBHOOK_URL}"
       WEBHOOK_SECRET="${WEBHOOK_SECRET}"
-      
+
       last_activity=$(date +%s)
-      
+
       check_terminal_activity() {
         # Check if there's been recent terminal input
-        if [ -f /tmp/bloom-last-activity ]; then
-          last_activity=$(cat /tmp/bloom-last-activity)
+        if [ -f /tmp/verge-last-activity ]; then
+          last_activity=$(cat /tmp/verge-last-activity)
         fi
       }
-      
+
       send_heartbeat() {
         local idle_seconds=$(($(date +%s) - last_activity))
         curl -s -X POST "${WEBHOOK_URL}/webhook/heartbeat" \
@@ -806,68 +818,68 @@ write_files:
             \"timestamp\": \"$(date -Iseconds)\"
           }"
       }
-      
+
       trigger_shutdown() {
         local reason=$1
         echo "$(date): Triggering shutdown - reason: ${reason}"
-        
+
         # Notify worker
         curl -s -X POST "${WEBHOOK_URL}/webhook/${reason}" \
           -H "Authorization: Bearer ${WEBHOOK_SECRET}" \
           -H "Content-Type: application/json" \
           -d "{\"timestamp\": \"$(date -Iseconds)\"}"
       }
-      
+
       # Main loop
       while true; do
         check_terminal_activity
         idle_seconds=$(($(date +%s) - last_activity))
-        
+
         # Send heartbeat every 30 seconds
         send_heartbeat
-        
+
         # Check idle timeout
         if [ "$idle_seconds" -ge "$IDLE_TIMEOUT" ]; then
           trigger_shutdown "idle-timeout"
           exit 0
         fi
-        
+
         sleep 30
       done
 
   # Sync script
-  - path: /opt/bloom/sync-to-r2.sh
+  - path: /opt/verge/sync-to-r2.sh
     permissions: '0755'
     content: |
       #!/bin/bash
       # Sync workspace to R2
-      
+
       echo "$(date): Starting R2 sync..."
-      
+
       cd /workspace
-      
+
       # Compress and upload each project's node_modules
       for dir in */; do
         if [ -d "${dir}node_modules" ]; then
           echo "Compressing ${dir}node_modules..."
           tar -czf "/tmp/${dir%/}-node_modules.tar.gz" -C "$dir" node_modules
-          rclone copy "/tmp/${dir%/}-node_modules.tar.gz" "r2:bloom-repos/${dir}"
+          rclone copy "/tmp/${dir%/}-node_modules.tar.gz" "r2:verge-repos/${dir}"
         fi
       done
-      
+
       # Sync Kilo context
       if [ -d ~/.kilocode ]; then
-        rclone sync ~/.kilocode r2:bloom-state/kilo/
+        rclone sync ~/.kilocode r2:verge-state/kilo/
       fi
-      
+
       # Create workspace snapshot
       tar -czf /tmp/workspace-snapshot.tar.gz \
         --exclude='node_modules' \
         --exclude='.git/objects' \
         -C /workspace .
-      
-      rclone copy /tmp/workspace-snapshot.tar.gz r2:bloom-state/current/
-      
+
+      rclone copy /tmp/workspace-snapshot.tar.gz r2:verge-state/current/
+
       echo "$(date): R2 sync complete"
 
   # Rclone config for R2
@@ -904,12 +916,12 @@ write_files:
       }
 
   # ttyd activity wrapper
-  - path: /opt/bloom/ttyd-wrapper.sh
+  - path: /opt/verge/ttyd-wrapper.sh
     permissions: '0755'
     content: |
       #!/bin/bash
       # Wrapper that updates activity timestamp on input
-      date +%s > /tmp/bloom-last-activity
+      date +%s > /tmp/verge-last-activity
       exec "$@"
 
   # Systemd service for ttyd
@@ -927,17 +939,17 @@ write_files:
       [Install]
       WantedBy=multi-user.target
 
-  # Systemd service for Bloom daemon
-  - path: /etc/systemd/system/bloom-daemon.service
+  # Systemd service for Verge daemon
+  - path: /etc/systemd/system/verge-daemon.service
     content: |
       [Unit]
-      Description=Bloom Daemon
+      Description=Verge Daemon
       After=network.target ttyd.service
 
       [Service]
       Type=simple
-      EnvironmentFile=/etc/bloom/env
-      ExecStart=/opt/bloom/daemon.sh
+      EnvironmentFile=/etc/verge/env
+      ExecStart=/opt/verge/daemon.sh
       Restart=always
 
       [Install]
@@ -965,20 +977,20 @@ runcmd:
 
   # Create workspace directory
   - mkdir -p /workspace
-  - mkdir -p /etc/bloom
-  - mkdir -p /opt/bloom
+  - mkdir -p /etc/verge
+  - mkdir -p /opt/verge
 
   # Write environment file
   - |
-    cat > /etc/bloom/env << 'EOF'
+    cat > /etc/verge/env << 'EOF'
     WEBHOOK_URL=${WEBHOOK_URL}
     WEBHOOK_SECRET=${WEBHOOK_SECRET}
     IDLE_TIMEOUT=${IDLE_TIMEOUT}
     EOF
 
   # Sync repos from R2
-  - rclone sync r2:bloom-repos/ /workspace/
-  
+  - rclone sync r2:verge-repos/ /workspace/
+
   # Extract node_modules for each project
   - |
     cd /workspace
@@ -1003,12 +1015,12 @@ runcmd:
     done
 
   # Restore Kilo context
-  - rclone copy r2:bloom-state/kilo/ /root/.kilocode/
+  - rclone copy r2:verge-state/kilo/ /root/.kilocode/
 
   # Start services
   - systemctl daemon-reload
-  - systemctl enable ttyd bloom-daemon
-  - systemctl start ttyd bloom-daemon
+  - systemctl enable ttyd verge-daemon
+  - systemctl start ttyd verge-daemon
 
   # Notify ready
   - |
@@ -1042,7 +1054,7 @@ kilocode --auto "Implement feature X" --timeout 3600
 
 ```bash
 #!/bin/bash
-# /opt/bloom/run-task.sh
+# /opt/verge/run-task.sh
 
 TASK="$1"
 WEBHOOK_URL="${WEBHOOK_URL}"
@@ -1073,7 +1085,7 @@ curl -X POST "${WEBHOOK_URL}/webhook/task-complete" \
 
 # If auto-shutdown enabled and task complete, trigger shutdown
 if [ "$AUTO_SHUTDOWN" = "true" ] && [ "$STATUS" = "completed" ]; then
-  /opt/bloom/sync-to-r2.sh
+  /opt/verge/sync-to-r2.sh
   curl -X POST "${WEBHOOK_URL}/webhook/task-complete" \
     -H "Authorization: Bearer ${WEBHOOK_SECRET}" \
     -H "Content-Type: application/json" \
@@ -1086,17 +1098,17 @@ fi
 ## Implementation Checklist
 
 ### Phase 1: Cloudflare Setup
-- [ ] Create R2 bucket: `bloom-repos`
-- [ ] Create R2 bucket: `bloom-state`
-- [ ] Create D1 database: `bloom-db`
+- [ ] Create R2 bucket: `verge-repos`
+- [ ] Create R2 bucket: `verge-state`
+- [ ] Create D1 database: `verge-db`
 - [ ] Generate R2 API credentials
-- [ ] Create A record for `bloom.grove.place`
+- [ ] Create A record for `verge.grove.place`
 - [ ] Note Zone ID and create API token for DNS updates
 
 ### Phase 2: Prepare Initial Repos
 - [ ] Clone configured repos locally
 - [ ] Install node_modules for each
-- [ ] Compress and upload to `bloom-repos`
+- [ ] Compress and upload to `verge-repos`
 - [ ] Create `manifest.json` with repo metadata
 - [ ] Upload to R2
 
@@ -1107,7 +1119,7 @@ fi
 - [ ] Test API with both regions
 
 ### Phase 4: Worker Development
-- [ ] Create `bloom-control` worker
+- [ ] Create `verge-control` worker
 - [ ] `POST /start` — provision VPS
 - [ ] `POST /stop` — graceful shutdown
 - [ ] `GET /status` — session status
@@ -1201,8 +1213,8 @@ fi
 
 | Action | Method | Endpoint |
 |--------|--------|----------|
-| Start session | POST | `/api/start` |
-| Stop session | POST | `/api/stop` |
+| Open Verge | POST | `/api/start` |
+| Close Verge | POST | `/api/stop` |
 | Get status | GET | `/api/status` |
 | Send task | POST | `/api/task` |
 | List projects | GET | `/api/projects` |
@@ -1212,7 +1224,7 @@ fi
 
 | Shutdown Trigger | Default | Behavior |
 |------------------|---------|----------|
-| Manual | Always | User clicks Stop |
+| Manual | Always | User clicks Close |
 | Idle Timeout | 2 hours | No terminal activity |
 | Task Complete | Enabled | Kilo exits with code 0 |
 
@@ -1240,5 +1252,7 @@ fi
 
 ---
 
-*Last updated: December 2025*
+*You send it through. It comes back transformed.*
+
+*Last updated: February 2026*
 *Status: Specification complete, ready for implementation*
