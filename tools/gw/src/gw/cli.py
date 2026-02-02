@@ -19,9 +19,10 @@ from .commands.dev.check import check
 from .commands.dev.lint import lint
 from .commands.dev.ci import ci
 from .config import GWConfig
+from .tracking import TrackedGroup
 
 
-@click.group()
+@click.group(cls=TrackedGroup)
 @click.option(
     "--json",
     "output_json",

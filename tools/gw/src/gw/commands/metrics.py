@@ -268,7 +268,12 @@ def metrics_summary(ctx: click.Context, days: int) -> None:
 
     # By command group
     if summary["by_group"]:
-        table = create_table("Usage by Category", ["Category", "Total", "Success", "Failures", "Rate"])
+        table = create_table("Usage by Category")
+        table.add_column("Category")
+        table.add_column("Total")
+        table.add_column("Success")
+        table.add_column("Failures")
+        table.add_column("Rate")
         for row in summary["by_group"]:
             rate = round((row["successes"] / row["count"] * 100) if row["count"] > 0 else 0, 1)
             rate_color = "green" if rate >= 95 else "yellow" if rate >= 80 else "red"
@@ -284,7 +289,9 @@ def metrics_summary(ctx: click.Context, days: int) -> None:
 
     # Average duration
     if summary["avg_duration_by_group"]:
-        table = create_table("Average Duration", ["Category", "Avg Time"])
+        table = create_table("Average Duration")
+        table.add_column("Category")
+        table.add_column("Avg Time")
         for row in summary["avg_duration_by_group"]:
             avg_ms = row["avg_ms"]
             if avg_ms >= 1000:
