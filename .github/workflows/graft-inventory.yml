@@ -1,0 +1,279 @@
+name: Graft Inventory Check
+
+on:
+  # Run on PRs that touch migrations or feature-flags code
+  pull_request:
+    paths:
+      - 'packages/engine/migrations/*.sql'
+      - 'packages/engine/src/lib/feature-flags/**'
+
+  # Run weekly on Wednesday mornings
+  schedule:
+    - cron: '0 9 * * 3'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-graft-inventory:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count grafts and compare to inventory
+        id: count-grafts
+        shell: bash
+        run: |
+          #!/bin/bash
+          set -e
+
+          echo "🌱 Counting feature flags (grafts) in migrations..."
+          echo ""
+
+          # Read expected count from inventory
+          EXPECTED_TOTAL=$(jq -r '.grafts.total' .github/graft-inventory.json)
+          EXPECTED_GREENHOUSE=$(jq -r '.grafts.breakdown.greenhouse' .github/graft-inventory.json)
+          EXPECTED_PLATFORM=$(jq -r '.grafts.breakdown.platform' .github/graft-inventory.json)
+          LAST_UPDATED=$(jq -r '.lastUpdated' .github/graft-inventory.json)
+
+          # Count actual INSERT statements for feature_flags in migrations
+          MIGRATION_DIR="packages/engine/migrations"
+
+          # Extract flag IDs from migrations (look for INSERT OR IGNORE INTO feature_flags)
+          ACTUAL_FLAGS=$(grep -h "INSERT OR IGNORE INTO feature_flags" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
+            grep -oP "'\K[a-z_]+(?=')" | \
+            head -1 | \
+            sort -u || echo "")
+
+          # Alternative: count unique flag IDs by looking at the VALUES clauses
+          ACTUAL_TOTAL=$(grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\(\s*'\K[a-z_]+" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
+            sort -u | wc -l | tr -d ' ')
+
+          # Count greenhouse-only flags (greenhouse_only.*1)
+          ACTUAL_GREENHOUSE=$(grep -l "greenhouse_only" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
+            xargs grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\([^)]*greenhouse_only[^)]*1" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_GREENHOUSE=0
+
+          # Platform flags = total - greenhouse
+          ACTUAL_PLATFORM=$((ACTUAL_TOTAL - ACTUAL_GREENHOUSE))
+
+          echo "📊 Graft Count Results"
+          echo "======================"
+          echo "Expected (from inventory): $EXPECTED_TOTAL total ($EXPECTED_PLATFORM platform, $EXPECTED_GREENHOUSE greenhouse)"
+          echo "Actual (from migrations):  $ACTUAL_TOTAL total ($ACTUAL_PLATFORM platform, $ACTUAL_GREENHOUSE greenhouse)"
+          echo "Inventory last updated:    $LAST_UPDATED"
+          echo ""
+
+          # Calculate difference
+          DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
+
+          # Determine status
+          if [ "$DIFF" -eq 0 ]; then
+            echo "✅ Graft count matches inventory"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "diff=0" >> $GITHUB_OUTPUT
+          elif [ "$DIFF" -gt 0 ]; then
+            echo "🌱 Found $DIFF NEW graft(s) not in inventory"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=added" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Found $((DIFF * -1)) FEWER graft(s) than inventory (possible removal)"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=removed" >> $GITHUB_OUTPUT
+          fi
+
+          # Export values for later steps
+          echo "expected=$EXPECTED_TOTAL" >> $GITHUB_OUTPUT
+          echo "actual=$ACTUAL_TOTAL" >> $GITHUB_OUTPUT
+          echo "expected_greenhouse=$EXPECTED_GREENHOUSE" >> $GITHUB_OUTPUT
+          echo "actual_greenhouse=$ACTUAL_GREENHOUSE" >> $GITHUB_OUTPUT
+          echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+
+      - name: Find new graft definitions in PR
+        if: github.event_name == 'pull_request' && steps.count-grafts.outputs.has_changes == 'true'
+        id: find-new-grafts
+        shell: bash
+        run: |
+          # Get new INSERT INTO feature_flags from changed files
+          NEW_GRAFTS=$(git diff origin/${{ github.base_ref }}...HEAD -- 'packages/engine/migrations/*.sql' | \
+            grep -oP "^\+.*INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\(\s*'\K[a-z_]+" 2>/dev/null || echo "")
+
+          if [ -n "$NEW_GRAFTS" ]; then
+            echo "new_grafts<<EOF" >> $GITHUB_OUTPUT
+            echo "$NEW_GRAFTS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "has_new_grafts=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_new_grafts=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if grafts changed)
+        if: github.event_name == 'pull_request' && steps.count-grafts.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-grafts.outputs.expected }}
+          ACTUAL: ${{ steps.count-grafts.outputs.actual }}
+          DIFF: ${{ steps.count-grafts.outputs.diff }}
+          CHANGE_TYPE: ${{ steps.count-grafts.outputs.change_type }}
+          NEW_GRAFTS: ${{ steps.find-new-grafts.outputs.new_grafts }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const changeType = process.env.CHANGE_TYPE;
+            const newGrafts = process.env.NEW_GRAFTS || '';
+
+            const emoji = changeType === 'added' ? '🌱' : '✂️';
+            const verb = changeType === 'added' ? 'added' : 'removed';
+            const absDiff = Math.abs(diff);
+
+            let newGraftsList = '';
+            if (newGrafts) {
+              const grafts = newGrafts.trim().split('\n').map(g => `- \`${g}\``).join('\n');
+              newGraftsList = `
+
+            ### New Grafts Detected
+            ${grafts}`;
+            }
+
+            const body = `## ${emoji} Graft Inventory Change Detected
+
+            This PR appears to have **${verb} ${absDiff} graft(s)**.
+
+            | Metric | Count |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (migrations) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |
+            ${newGraftsList}
+
+            ### Action Required
+
+            If this PR adds new grafts, please:
+            1. Update \`.github/graft-inventory.json\` with the new flag(s)
+            2. Add the flag ID to \`KnownGraftId\` type in \`grafts.ts\`
+            3. Apply migration to production: \`npx wrangler d1 execute grove-engine-db --remote --file=...\`
+            4. Update the developer guide if the pattern is novel
+
+            See \`docs/guides/adding-grafts-and-flags.md\` for the full process.
+
+            ---
+            *This check helps keep our graft documentation accurate.*`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue for inventory drift (scheduled run only)
+        if: github.event_name == 'schedule' && steps.count-grafts.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-grafts.outputs.expected }}
+          ACTUAL: ${{ steps.count-grafts.outputs.actual }}
+          DIFF: ${{ steps.count-grafts.outputs.diff }}
+          LAST_UPDATED: ${{ steps.count-grafts.outputs.last_updated }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const lastUpdated = process.env.LAST_UPDATED;
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if there's already an open issue for this
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,grafts'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Graft Inventory')
+            );
+
+            if (hasExisting) {
+              console.log('Existing graft inventory issue found, skipping creation');
+              return;
+            }
+
+            const absDiff = Math.abs(diff);
+            const changeType = diff > 0 ? 'added' : 'removed';
+            const emoji = diff > 0 ? '🌱' : '✂️';
+
+            const body = `## ${emoji} Graft Inventory Drift Detected
+
+            The automated graft count found a **${absDiff} graft difference** since the last inventory update.
+
+            | Metric | Value |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (migrations) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |
+            | Inventory Last Updated | ${lastUpdated} |
+
+            ### Action Required
+
+            1. Review which grafts were ${changeType}
+            2. Update \`.github/graft-inventory.json\` with accurate counts
+            3. Ensure \`KnownGraftId\` type matches the inventory
+            4. Verify production D1 has all migrations applied
+
+            ### How to Get Current Graft List
+
+            \`\`\`bash
+            # List all flag IDs from migrations
+            grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\\s*\\(\\s*'\\K[a-z_]+" packages/engine/migrations/*.sql | sort -u
+
+            # Query production D1
+            npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, name, greenhouse_only FROM feature_flags ORDER BY id;"
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the graft-inventory workflow.*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${emoji} Graft Inventory Update Needed - ${today}`,
+              body: body,
+              labels: ['documentation', 'grafts']
+            });
+
+      - name: Summary
+        shell: bash
+        env:
+          HAS_CHANGES: ${{ steps.count-grafts.outputs.has_changes }}
+          EXPECTED: ${{ steps.count-grafts.outputs.expected }}
+          ACTUAL: ${{ steps.count-grafts.outputs.actual }}
+          DIFF: ${{ steps.count-grafts.outputs.diff }}
+        run: |
+          echo "## Graft Inventory Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Expected (inventory) | $EXPECTED |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actual (migrations) | $ACTUAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Difference | $DIFF |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "⚠️ **Graft count has drifted from inventory**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Update \`.github/graft-inventory.json\` to match current state." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Graft count matches inventory" >> $GITHUB_STEP_SUMMARY
+          fi

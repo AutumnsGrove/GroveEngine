@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Tracks feature flag (graft) inventory for documentation and drift detection",
+  "lastUpdated": "2026-02-01",
+  "lastAuditedBy": "claude/admin-auth-design-overhaul",
+  "grafts": {
+    "total": 10,
+    "breakdown": {
+      "platform": 8,
+      "greenhouse": 2
+    },
+    "byType": {
+      "boolean": 9,
+      "number": 1
+    }
+  },
+  "flags": [
+    {
+      "id": "fireside_mode",
+      "name": "Fireside Mode",
+      "type": "boolean",
+      "greenhouseOnly": true,
+      "migration": "040_fireside_scribe_grafts.sql",
+      "description": "AI-assisted writing prompts in the blog editor"
+    },
+    {
+      "id": "image_uploads_enabled",
+      "name": "Image Uploads Enabled",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "031_petal_upload_gate.sql",
+      "description": "Master gate for image uploads (disabled until PhotoDNA integrated)"
+    },
+    {
+      "id": "jxl_encoding",
+      "name": "JPEG XL Encoding",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "020_feature_flags.sql",
+      "description": "Enable JPEG XL image compression for uploads"
+    },
+    {
+      "id": "jxl_kill_switch",
+      "name": "JXL Kill Switch",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "020_feature_flags.sql",
+      "description": "Emergency disable for JPEG XL (no caching, instant effect)"
+    },
+    {
+      "id": "jxl_rollout_percentage",
+      "name": "JPEG XL Rollout Percentage",
+      "type": "number",
+      "greenhouseOnly": false,
+      "migration": "023_jxl_format_tracking.sql",
+      "description": "Percentage of tenants receiving JXL encoding"
+    },
+    {
+      "id": "meadow_access",
+      "name": "Meadow Access",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "020_feature_flags.sql",
+      "description": "Enable Meadow social features (tier-gated)"
+    },
+    {
+      "id": "petal_moderation",
+      "name": "Petal Image Moderation",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "030_petal.sql",
+      "description": "4-layer image moderation system"
+    },
+    {
+      "id": "petal_photodna_enabled",
+      "name": "PhotoDNA Hash Detection",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "031_petal_upload_gate.sql",
+      "description": "PhotoDNA hash-based CSAM detection is integrated"
+    },
+    {
+      "id": "petal_tryon_strict",
+      "name": "Petal Try-On Strict Mode",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "030_petal.sql",
+      "description": "Strict validation for try-on detection"
+    },
+    {
+      "id": "scribe_mode",
+      "name": "Scribe Mode",
+      "type": "boolean",
+      "greenhouseOnly": true,
+      "migration": "040_fireside_scribe_grafts.sql",
+      "description": "Voice-to-text transcription in the blog editor"
+    }
+  ],
+  "migrations": {
+    "path": "packages/engine/migrations",
+    "pattern": "INSERT OR IGNORE INTO feature_flags"
+  },
+  "typeDefinitions": {
+    "knownGraftId": "packages/engine/src/lib/feature-flags/grafts.ts"
+  },
+  "documentation": {
+    "guide": "docs/guides/adding-grafts-and-flags.md",
+    "spec": "docs/specs/grafts-spec.md"
+  }
+}
