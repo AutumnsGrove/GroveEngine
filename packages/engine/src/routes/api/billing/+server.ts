@@ -833,7 +833,12 @@ export const PUT: RequestHandler = async ({
       .first()) as { provider_customer_id: string | null } | null;
 
     if (!billing?.provider_customer_id) {
-      throw error(404, "No billing record found");
+      // This can happen for tenants created before Stripe migration
+      // or for comped accounts without payment records
+      throw error(
+        404,
+        "No payment method on file. If you recently signed up, please contact support.",
+      );
     }
 
     // Get subdomain for return URL
