@@ -1,0 +1,23 @@
+{
+  "name": "grove-email-render",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "bun run sync-templates",
+    "sync-templates": "node scripts/sync-templates.mjs",
+    "dev": "wrangler dev",
+    "build": "bun run prebuild && wrangler deploy --dry-run --outdir=dist",
+    "deploy": "bun run prebuild && wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.0.15",
+    "@react-email/render": "^0.0.12",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240129.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.28.0"
+  }
+}

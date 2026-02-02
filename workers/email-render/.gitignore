@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Synced templates (generated from engine package during build)
+src/templates/
+
+# Wrangler
+.wrangler/
+.dev.vars
