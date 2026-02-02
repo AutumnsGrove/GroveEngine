@@ -65,6 +65,16 @@
 		align-items: center;
 		cursor: pointer;
 		padding: 2px;
+		border-radius: 14px;
+	}
+
+	.greenhouse-toggle:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--color-surface, white), 0 0 0 4px #10b981;
+	}
+
+	:global(.dark) .greenhouse-toggle:focus-visible {
+		box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #10b981;
 	}
 
 	.greenhouse-toggle.disabled {

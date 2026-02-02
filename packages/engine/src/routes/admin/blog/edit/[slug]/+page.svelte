@@ -486,8 +486,7 @@
             previewDate={date}
             previewTags={parseTags(tagsInput)}
             {gutterItems}
-            firesideEnabled={data?.grafts?.fireside_mode ?? false}
-            scribeEnabled={data?.grafts?.scribe_mode ?? false}
+            grafts={data?.grafts ?? {}}
           />
         </div>
         {#if showGutter}

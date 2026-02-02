@@ -16,6 +16,7 @@
 
 	import type { CultivateFlagRowProps } from "./types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
+	import { Sprout, Home } from "lucide-svelte";
 
 	let {
 		flag,
@@ -63,21 +64,20 @@
 	<td class="py-3 px-4">
 		<div class="flex items-center gap-2">
 			{#if flag.greenhouseOnly}
-				<span
-					class="text-emerald-600 dark:text-emerald-400"
-					title="Greenhouse Only"
-				>
-					🌱
-				</span>
+				<Sprout
+					class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+					aria-label="Greenhouse Only"
+				/>
 			{:else}
-				<span class="text-amber-600 dark:text-amber-400" title="Global Flag">
-					🏠
-				</span>
+				<Home
+					class="w-4 h-4 text-amber-600 dark:text-amber-400"
+					aria-label="Global Flag"
+				/>
 			{/if}
-			<span class="font-medium text-foreground">{displayName}</span>
+			<span class="font-medium text-slate-800 dark:text-slate-100">{displayName}</span>
 		</div>
 		{#if flag.description}
-			<p class="text-xs text-foreground-muted mt-0.5 pl-6">
+			<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 pl-6">
 				{flag.description}
 			</p>
 		{/if}
@@ -99,6 +99,7 @@
 				class="w-2 h-2 rounded-full {flag.enabled
 					? 'bg-emerald-500'
 					: 'bg-gray-300 dark:bg-gray-600'}"
+				aria-hidden="true"
 			></span>
 			<span class="text-sm {statusColor}">{statusLabel}</span>
 		</div>

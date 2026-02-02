@@ -82,10 +82,10 @@
 			<div class="icon-wrapper">
 				<Sprout class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
 			</div>
-			<h2 class="text-xl font-serif text-bark dark:text-cream">
+			<h2 class="text-xl font-serif text-slate-800 dark:text-slate-100">
 				Enroll in Greenhouse
 			</h2>
-			<p class="text-sm text-bark/60 dark:text-cream/60 mt-1">
+			<p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
 				Give a tenant early access to experimental features.
 			</p>
 		</div>
@@ -104,6 +104,7 @@
 					bind:value={selectedTenantId}
 					class="form-select"
 					disabled={loading}
+					aria-required="true"
 				>
 					<option value="">Choose a tenant...</option>
 					{#each tenantEntries as [id, name]}
@@ -115,7 +116,7 @@
 			<!-- Notes textarea -->
 			<div class="form-group">
 				<label for="notes-input" class="form-label">
-					Notes <span class="text-bark/40 dark:text-cream/40">(optional)</span>
+					Notes <span class="text-slate-500 dark:text-slate-400">(optional)</span>
 				</label>
 				<textarea
 					id="notes-input"
@@ -147,7 +148,7 @@
 		</form>
 	{:else}
 		<div class="empty-state">
-			<p class="text-bark/60 dark:text-cream/60 text-center">
+			<p class="text-slate-600 dark:text-slate-400 text-center">
 				All tenants are already enrolled in the greenhouse program!
 			</p>
 			<div class="dialog-actions">
@@ -160,12 +161,6 @@
 </Dialog>
 
 <style>
-	.greenhouse-enroll-dialog {
-		padding: 1.5rem;
-		min-width: 400px;
-		max-width: 500px;
-	}
-
 	.dialog-header {
 		text-align: center;
 		margin-bottom: 1.5rem;

@@ -41,6 +41,12 @@
    * @property {Array<{url: string, alt?: string, caption?: string}>} [images]
    */
 
+  /**
+   * @typedef {Object.<string, boolean>} GraftsRecord
+   * Graft flags for this tenant - component reads what it needs.
+   * Known flags: fireside_mode (AI-assisted prompts), scribe_mode (voice-to-text)
+   */
+
   // Props
   let {
     content = $bindable(""),
@@ -54,11 +60,13 @@
     previewTags = /** @type {string[]} */ ([]),
     gutterItems = /** @type {GutterItemProp[]} */ ([]),
     firesideAssisted = $bindable(false),
-    /** Whether Fireside Mode is enabled for this tenant (gated by fireside_mode graft) */
-    firesideEnabled = false,
-    /** Whether Scribe (voice transcription) is enabled for this tenant (gated by scribe_mode graft) */
-    scribeEnabled = false,
+    /** All grafts for this tenant - component reads what it needs */
+    grafts = /** @type {GraftsRecord} */ ({}),
   } = $props();
+
+  // Derived graft flags - add new ones here as they're created
+  const firesideEnabled = $derived(grafts?.fireside_mode ?? false);
+  const scribeEnabled = $derived(grafts?.scribe_mode ?? false);
 
   // Core refs and state
   /** @type {HTMLTextAreaElement | null} */
