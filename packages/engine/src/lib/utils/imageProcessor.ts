@@ -73,12 +73,33 @@ export async function calculateFileHash(file: File | Blob): Promise<string> {
 }
 
 /**
+ * Sanitize filename by replacing problematic Unicode characters
+ * macOS screenshots use narrow no-break space (U+202F) before AM/PM
+ */
+function sanitizeFilename(filename: string): string {
+  // Replace narrow no-break space (U+202F) and other problematic chars with regular space
+  return filename
+    .replace(/\u202F/g, " ") // Narrow no-break space (macOS time format)
+    .replace(/\u00A0/g, " ") // Non-breaking space
+    .replace(/[\u2000-\u200F]/g, " "); // Various Unicode spaces
+}
+
+/**
  * Load an image from a File object
  */
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
+
+    // Sanitize filename to prevent issues with special Unicode characters
+    // (like macOS narrow no-break space in screenshot timestamps)
+    const sanitizedName = sanitizeFilename(file.name);
+    const fileToLoad =
+      sanitizedName !== file.name
+        ? new File([file], sanitizedName, { type: file.type })
+        : file;
+
+    const objectUrl = URL.createObjectURL(fileToLoad);
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
