@@ -101,6 +101,29 @@ gw tenant list                          # List all tenants
 gw tenant list --plan oak               # Filter by plan
 ```
 
+### Secrets Management (Agent-Safe) 🔐
+
+```bash
+gw secret init                       # Create encrypted vault
+gw secret set STRIPE_KEY             # Store a secret (prompts for value)
+gw secret list                       # List secret names (never values)
+gw secret exists STRIPE_KEY          # Check if secret exists
+gw secret apply STRIPE_KEY -w worker # Apply to worker (agent-safe!)
+gw secret sync -w grove-lattice      # Sync all secrets to worker
+gw secret delete OLD_KEY             # Delete a secret
+```
+
+### Cache Management
+
+```bash
+gw cache list autumn                 # List cache keys for tenant
+gw cache list --all                  # List all cache keys
+gw cache purge "cache:autumn:home"   # Purge specific key
+gw cache purge --tenant autumn       # Purge all tenant keys
+gw cache purge --cdn url             # Purge CDN (requires CF_API_TOKEN)
+gw cache stats                       # Show cache statistics
+```
+
 ### Authentication
 
 ```bash
@@ -198,7 +221,10 @@ tools/gw/
 │       ├── auth.py         # gw auth check/login
 │       ├── bindings.py     # gw bindings
 │       ├── db.py           # gw db list/tables/schema/query
-│       └── tenant.py       # gw tenant lookup/stats/list
+│       ├── tenant.py       # gw tenant lookup/stats/list
+│       ├── secret.py       # gw secret set/apply/sync
+│       └── cache.py        # gw cache list/purge/stats
+├── secrets_vault.py        # Encrypted vault implementation
 └── tests/
     └── test_safety.py      # Safety layer tests
 ```
@@ -211,7 +237,7 @@ tools/gw/
 - [x] Safety layer
 - [x] `gw status`, `gw health`, `gw auth`, `gw bindings`
 
-### Phase 2 ✅ (Current)
+### Phase 2 ✅
 - [x] `gw db list` — List databases
 - [x] `gw db tables` — List tables
 - [x] `gw db schema` — Show table schema
@@ -220,11 +246,13 @@ tools/gw/
 - [x] `gw tenant stats` — Tenant statistics
 - [x] `gw tenant list` — List tenants
 
-### Phase 3 (Next)
-- [ ] `gw secret` — Agent-safe secrets management
-- [ ] `gw cache` — Cache operations
+### Phase 3 ✅ (Current)
+- [x] `gw secret init/set/list/delete` — Human-only secrets
+- [x] `gw secret apply/sync/exists` — Agent-safe secrets
+- [x] `gw cache list/purge/stats` — Cache management
+- [x] Encrypted vault at `~/.grove/secrets.enc`
 
-### Phase 4+
+### Phase 4 (Next)
 - [ ] `gw kv`, `gw r2`, `gw do` — Full Cloudflare bindings
 - [ ] `gw mcp serve` — MCP server for Claude Code
 - [ ] Shell completions

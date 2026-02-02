@@ -1,0 +1,355 @@
+"""Secret commands - agent-safe secrets management.
+
+This is the killer feature for agent safety. Secrets are stored in a local
+vault and can be applied to Wrangler without the agent ever seeing the
+actual value.
+
+Security Model:
+- Secrets stored encrypted at ~/.grove/secrets.enc
+- Agent commands (apply, sync, exists) NEVER return secret values
+- Human commands (set, delete) require interactive input
+- Even `gw secret list` only shows names, not values
+"""
+
+import getpass
+import json
+import sys
+
+import click
+
+from ..secrets_vault import SecretsVault, VaultError, get_vault_password
+from ..ui import console, create_table, error, info, success, warning
+from ..wrangler import Wrangler, WranglerError
+
+
+def _get_vault(ctx: click.Context) -> SecretsVault:
+    """Get and unlock the secrets vault."""
+    vault = SecretsVault()
+
+    if not vault.exists:
+        error("Vault does not exist. Run 'gw secret init' first.")
+        ctx.exit(1)
+
+    try:
+        password = get_vault_password()
+        vault.unlock(password)
+    except VaultError as e:
+        error(f"Failed to unlock vault: {e}")
+        ctx.exit(1)
+
+    return vault
+
+
+@click.group()
+@click.pass_context
+def secret(ctx: click.Context) -> None:
+    """Agent-safe secrets management.
+
+    Store secrets locally in an encrypted vault and apply them to
+    Cloudflare Workers without exposing values.
+
+    The vault is stored at ~/.grove/secrets.enc and requires a
+    password to access. Set GW_VAULT_PASSWORD environment variable
+    to avoid prompts.
+    """
+    pass
+
+
+@secret.command("init")
+@click.pass_context
+def secret_init(ctx: click.Context) -> None:
+    """Initialize the secrets vault.
+
+    Creates a new encrypted vault at ~/.grove/secrets.enc.
+    You will be prompted to set a master password.
+
+    Example:
+
+        gw secret init
+    """
+    vault = SecretsVault()
+
+    if vault.exists:
+        warning("Vault already exists at ~/.grove/secrets.enc")
+        info("Use 'gw secret list' to see stored secrets")
+        return
+
+    # Get password (prompt twice for confirmation)
+    password1 = getpass.getpass("Set vault password: ")
+    password2 = getpass.getpass("Confirm password: ")
+
+    if password1 != password2:
+        error("Passwords do not match")
+        ctx.exit(1)
+
+    if len(password1) < 8:
+        error("Password must be at least 8 characters")
+        ctx.exit(1)
+
+    try:
+        vault.create(password1)
+        success("Vault created at ~/.grove/secrets.enc")
+        info("Set GW_VAULT_PASSWORD to avoid password prompts")
+    except VaultError as e:
+        error(f"Failed to create vault: {e}")
+        ctx.exit(1)
+
+
+@secret.command("set")
+@click.argument("name")
+@click.pass_context
+def secret_set(ctx: click.Context, name: str) -> None:
+    """Store a secret in the vault.
+
+    Prompts for the secret value (never echoes). Can also read from
+    stdin for scripting.
+
+    Examples:
+
+        gw secret set STRIPE_SECRET_KEY
+
+        echo "sk_live_xxx" | gw secret set STRIPE_SECRET_KEY
+    """
+    vault = SecretsVault()
+
+    # Create vault if it doesn't exist
+    if not vault.exists:
+        info("Vault does not exist. Creating new vault...")
+        password1 = getpass.getpass("Set vault password: ")
+        password2 = getpass.getpass("Confirm password: ")
+
+        if password1 != password2:
+            error("Passwords do not match")
+            ctx.exit(1)
+
+        try:
+            vault.create(password1)
+        except VaultError as e:
+            error(f"Failed to create vault: {e}")
+            ctx.exit(1)
+    else:
+        try:
+            password = get_vault_password()
+            vault.unlock(password)
+        except VaultError as e:
+            error(f"Failed to unlock vault: {e}")
+            ctx.exit(1)
+
+    # Get secret value
+    if not sys.stdin.isatty():
+        # Reading from pipe
+        value = sys.stdin.read().strip()
+    else:
+        # Interactive prompt (never echoes)
+        value = getpass.getpass(f"Enter value for {name}: ")
+
+    if not value:
+        error("Secret value cannot be empty")
+        ctx.exit(1)
+
+    try:
+        vault.set_secret(name, value)
+        success(f"Secret '{name}' stored in vault")
+    except VaultError as e:
+        error(f"Failed to store secret: {e}")
+        ctx.exit(1)
+
+
+@secret.command("list")
+@click.pass_context
+def secret_list(ctx: click.Context) -> None:
+    """List all secrets in the vault.
+
+    Shows secret names and timestamps. NEVER shows values.
+
+    Example:
+
+        gw secret list
+    """
+    output_json: bool = ctx.obj.get("output_json", False)
+    vault = _get_vault(ctx)
+
+    secrets = vault.list_secrets()
+
+    if output_json:
+        console.print(json.dumps({"secrets": secrets}, indent=2))
+        return
+
+    if not secrets:
+        info("No secrets stored in vault")
+        return
+
+    console.print(
+        f"\n[bold green]Secrets Vault[/bold green] ({len(secrets)} secrets)\n"
+    )
+
+    table = create_table()
+    table.add_column("Name", style="cyan")
+    table.add_column("Created", style="yellow")
+    table.add_column("Updated", style="magenta")
+
+    for s in secrets:
+        # Format timestamps
+        created = s["created_at"][:10] if s["created_at"] else "-"
+        updated = s["updated_at"][:10] if s["updated_at"] else "-"
+        table.add_row(s["name"], created, updated)
+
+    console.print(table)
+    console.print(
+        "\n[dim]Values are never shown. Use 'gw secret apply' to deploy.[/dim]"
+    )
+
+
+@secret.command("delete")
+@click.argument("name")
+@click.pass_context
+def secret_delete(ctx: click.Context, name: str) -> None:
+    """Delete a secret from the vault.
+
+    Example:
+
+        gw secret delete OLD_API_KEY
+    """
+    vault = _get_vault(ctx)
+
+    if not vault.secret_exists(name):
+        warning(f"Secret '{name}' not found in vault")
+        ctx.exit(1)
+
+    if vault.delete_secret(name):
+        success(f"Secret '{name}' deleted from vault")
+    else:
+        error(f"Failed to delete secret '{name}'")
+        ctx.exit(1)
+
+
+@secret.command("exists")
+@click.argument("name")
+@click.pass_context
+def secret_exists(ctx: click.Context, name: str) -> None:
+    """Check if a secret exists in the vault.
+
+    Returns exit code 0 if exists, 1 if not. Agent-safe.
+
+    Example:
+
+        gw secret exists STRIPE_KEY && echo "Secret found"
+    """
+    output_json: bool = ctx.obj.get("output_json", False)
+    vault = _get_vault(ctx)
+
+    exists = vault.secret_exists(name)
+
+    if output_json:
+        console.print(json.dumps({"name": name, "exists": exists}))
+        ctx.exit(0 if exists else 1)
+
+    if exists:
+        success(f"Secret '{name}' exists")
+    else:
+        warning(f"Secret '{name}' not found")
+        ctx.exit(1)
+
+
+@secret.command("apply")
+@click.argument("names", nargs=-1, required=True)
+@click.option("--worker", "-w", required=True, help="Worker name to apply secrets to")
+@click.pass_context
+def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> None:
+    """Apply secrets to a Cloudflare Worker.
+
+    Agent-safe: The secret value is never shown in output.
+    Uses 'wrangler secret put' under the hood.
+
+    Examples:
+
+        gw secret apply STRIPE_KEY --worker grove-lattice
+
+        gw secret apply KEY1 KEY2 KEY3 --worker grove-lattice
+    """
+    from ..config import GWConfig
+
+    output_json: bool = ctx.obj.get("output_json", False)
+    config: GWConfig = ctx.obj["config"]
+    vault = _get_vault(ctx)
+    wrangler = Wrangler(config)
+
+    results = []
+
+    for name in names:
+        if not vault.secret_exists(name):
+            results.append(
+                {"name": name, "success": False, "error": "Not found in vault"}
+            )
+            if not output_json:
+                warning(f"Secret '{name}' not found in vault")
+            continue
+
+        value = vault.get_secret(name)
+        if not value:
+            results.append({"name": name, "success": False, "error": "Empty value"})
+            continue
+
+        # Apply using wrangler secret put (piped via stdin)
+        try:
+            # wrangler secret put reads from stdin when piped
+            import subprocess
+
+            result = subprocess.run(
+                ["wrangler", "secret", "put", name, "--name", worker],
+                input=value,
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                results.append({"name": name, "success": True})
+                if not output_json:
+                    success(f"Applied {name} to {worker}")
+            else:
+                results.append(
+                    {"name": name, "success": False, "error": result.stderr.strip()}
+                )
+                if not output_json:
+                    error(f"Failed to apply {name}: {result.stderr.strip()}")
+
+        except Exception as e:
+            results.append({"name": name, "success": False, "error": str(e)})
+            if not output_json:
+                error(f"Failed to apply {name}: {e}")
+
+    if output_json:
+        console.print(json.dumps({"worker": worker, "results": results}, indent=2))
+
+
+@secret.command("sync")
+@click.option("--worker", "-w", required=True, help="Worker name to sync secrets to")
+@click.pass_context
+def secret_sync(ctx: click.Context, worker: str) -> None:
+    """Sync all secrets to a Cloudflare Worker.
+
+    Applies all secrets from the vault to the specified worker.
+    Agent-safe: Values are never shown.
+
+    Example:
+
+        gw secret sync --worker grove-lattice
+    """
+    output_json: bool = ctx.obj.get("output_json", False)
+    vault = _get_vault(ctx)
+
+    secrets = vault.list_secrets()
+
+    if not secrets:
+        if output_json:
+            console.print(json.dumps({"error": "No secrets in vault"}))
+        else:
+            warning("No secrets in vault to sync")
+        return
+
+    if not output_json:
+        info(f"Syncing {len(secrets)} secrets to {worker}...")
+
+    # Invoke apply for all secrets
+    names = tuple(s["name"] for s in secrets)
+    ctx.invoke(secret_apply, names=names, worker=worker)
