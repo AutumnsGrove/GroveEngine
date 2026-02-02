@@ -480,6 +480,17 @@ The paradox is the point. The hollow that carries light. The void through which 
 
 *Light from the void.*
 
+### Zephyr
+**Email Gateway** · *Internal service*
+
+In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. While other winds howled and destroyed, the zephyr carried seeds to new soil, pollen to waiting flowers, whispers to distant ears. Invisible. Gentle. Reliable.
+
+Zephyr is Grove's unified email gateway. Every email from every service rides the same wind: onboarding sequences to welcome new Wanderers, payment notifications to confirm purchases, support replies from the Porch, verification codes for authentication. Services don't call Resend directly. They release messages to the Zephyr, and the wind carries them through—with retries, fallbacks, templating, and complete observability. One function call. One gentle breeze. One lit inbox.
+
+Like Lumen routes AI through its hollow center, Zephyr carries messages on the wind. The infrastructure you never see. The delivery you never think about. Until the message arrives.
+
+*Carrying messages on the wind.*
+
 ### Shade
 **AI Content Protection** · `grove.place/shade`
 
@@ -537,6 +548,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Patina** | Ops | Backup system | *(internal)* |
 | **Mycelium** | Ops | MCP server | mycelium.grove.place |
 | **Lumen** | Ops | AI gateway | *(internal)* |
+| **Zephyr** | Ops | Email gateway | *(internal)* |
 | **Shade** | Ops | AI content protection | grove.place/shade |
 | **Wanderer** | Identity | Everyone who enters | — |
 | **Rooted** | Identity | Subscribers | — |
@@ -593,6 +605,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Patina | GrovePatina |
 | Mycelium | GroveMCP |
 | Lumen | GroveLumen |
+| Zephyr | GroveZephyr |
 | Shade | GroveShade |
 | Etch | GroveEtch |
 | Vineyard | GroveShowcase |

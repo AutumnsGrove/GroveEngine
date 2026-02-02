@@ -670,6 +670,20 @@
 					]
 				},
 				{
+					name: 'Zephyr',
+					tagline: 'Email Gateway',
+					description: 'In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. Zephyr is Grove\'s unified email gateway. Every email from every service rides the same wind: onboarding sequences, payment notifications, support replies, verification codes. One interface, retries, fallbacks, complete observability.',
+					status: 'planned',
+					icon: 'send',
+					integration: 'Internal email delivery for all Grove services',
+					spec: '/knowledge/specs/zephyr-spec',
+					subComponents: [
+						{ name: 'Retries', icon: 'refresh-cw', description: 'Automatic retry with backoff' },
+						{ name: 'Templates', icon: 'layout', description: 'React Email templates' },
+						{ name: 'Logging', icon: 'database', description: 'Full audit trail' }
+					]
+				},
+				{
 					name: 'Warden',
 					tagline: 'External API Gateway',
 					description: 'A warden guards what matters. Warden is Grove\'s external API gateway for agent operations. When Claude needs to create a GitHub issue or search the web, the request goes through Warden. Agents describe what they need, Warden validates permissions, injects credentials, executes, and returns results. Keys never leave the vault.',

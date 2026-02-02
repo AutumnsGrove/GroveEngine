@@ -231,6 +231,9 @@ import {
   Fingerprint,
   // Warden - external API gateway
   Vault,
+  // Zephyr - email gateway
+  Send,
+  RefreshCw,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -514,6 +517,9 @@ export const toolIcons = {
   fingerprint: Fingerprint, // Heartwood - Passkeys
   // Warden - external API gateway
   vault: Vault, // Warden - credential vault for agents
+  // Zephyr - email gateway
+  send: Send, // Zephyr - email delivery (the gentle wind that carries)
+  "refresh-cw": RefreshCw, // Zephyr - retry with backoff
 } as const;
 
 // ============================================================================
