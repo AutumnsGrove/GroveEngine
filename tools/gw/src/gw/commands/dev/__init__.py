@@ -8,6 +8,7 @@ from .build import build
 from .check import check
 from .lint import lint
 from .ci import ci
+from .reinstall import reinstall
 
 
 @click.group()
@@ -41,3 +42,6 @@ dev.add_command(build)
 dev.add_command(check)
 dev.add_command(lint)
 dev.add_command(ci)
+
+# Tool management
+dev.add_command(reinstall)
