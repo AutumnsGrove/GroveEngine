@@ -56,12 +56,11 @@
 	<title>Porch - Admin</title>
 </svelte:head>
 
-<div class="max-w-5xl mx-auto">
-	<!-- Header -->
-	<div class="mb-8">
-		<h1 class="text-2xl font-serif text-foreground mb-2">The Porch</h1>
-		<p class="text-foreground-muted font-sans">Support conversations with Wanderers</p>
-	</div>
+<!-- Header -->
+<div class="mb-8">
+	<h1 class="text-2xl font-serif text-foreground">The Porch</h1>
+	<p class="text-foreground-muted font-sans mt-1">Support conversations with Wanderers</p>
+</div>
 
 	<!-- Stats -->
 	<div class="grid grid-cols-3 gap-4 mb-6">
@@ -156,4 +155,3 @@
 			{/each}
 		</div>
 	{/if}
-</div>

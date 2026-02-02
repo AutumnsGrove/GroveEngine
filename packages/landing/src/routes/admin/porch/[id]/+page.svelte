@@ -43,8 +43,7 @@
 	<title>{data.visit?.visit_number || 'Visit'} - Admin</title>
 </svelte:head>
 
-<div class="max-w-4xl mx-auto">
-	<!-- Back link -->
+<!-- Back link -->
 	<a
 		href="/admin/porch"
 		class="inline-flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground font-sans mb-6"
@@ -266,4 +265,3 @@
 			</div>
 		</div>
 	{/if}
-</div>

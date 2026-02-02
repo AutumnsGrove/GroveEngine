@@ -143,19 +143,17 @@
 	<title>Greenhouse - Admin</title>
 </svelte:head>
 
-<div class="max-w-5xl mx-auto">
-	<GreenhouseAdminPanel
-		tenants={data.tenants}
-		tenantNames={data.tenantNames}
-		availableTenants={data.availableTenants}
-		featureFlags={data.featureFlags}
-		onEnroll={handleEnroll}
-		onToggle={handleToggle}
-		onRemove={handleRemove}
-		onCultivate={handleCultivate}
-		onPrune={handlePrune}
-		{enrollLoading}
-		{loadingFlagId}
-		formResult={form ?? undefined}
-	/>
-</div>
+<GreenhouseAdminPanel
+	tenants={data.tenants}
+	tenantNames={data.tenantNames}
+	availableTenants={data.availableTenants}
+	featureFlags={data.featureFlags}
+	onEnroll={handleEnroll}
+	onToggle={handleToggle}
+	onRemove={handleRemove}
+	onCultivate={handleCultivate}
+	onPrune={handlePrune}
+	{enrollLoading}
+	{loadingFlagId}
+	formResult={form ?? undefined}
+/>
