@@ -26,12 +26,46 @@ def reinstall(ctx: click.Context, tool: tuple[str, ...]) -> None:
         gw dev reinstall -t gw        # Reinstall just gw
         gw dev reinstall -t gf        # Reinstall just gf
     """
-    # Find the tools directory (relative to this file's location in the repo)
-    # Path: tools/gw/src/gw/commands/dev/reinstall.py
-    # Go up: dev -> commands -> gw -> src -> gw (tools/gw) -> tools
-    this_file = Path(__file__).resolve()
-    gw_root = this_file.parent.parent.parent.parent.parent  # tools/gw
-    tools_root = gw_root.parent  # tools/
+    # Find the tools directory by locating the git repository root
+    # This works both when running from source and from the installed tool
+    tools_root = None
+    found_via_git = False
+    
+    # Method 1: Search upward from current working directory for .git
+    cwd = Path.cwd()
+    current = cwd
+    while current != current.parent:
+        if (current / ".git").exists():
+            tools_root = current / "tools"
+            found_via_git = True
+            break
+        current = current.parent
+    
+    # Method 2: Fallback to relative path from __file__ if running from source
+    if tools_root is None or not tools_root.exists():
+        this_file = Path(__file__).resolve()
+        gw_root = this_file.parent.parent.parent.parent.parent  # tools/gw
+        tools_root = gw_root.parent  # tools/
+
+    if not tools_root.exists():
+        error(f"Could not find tools directory")
+        info("Please run this command from within the GroveEngine repository")
+        ctx.exit(1)
+
+    # If we didn't find via git search, we're likely running from installed location
+    # In that case, verify we have valid source directories (they should have pyproject.toml)
+    if not found_via_git:
+        gw_path = tools_root / "gw"
+        gf_path = tools_root / "grove-find"
+        valid_sources = (
+            (gw_path.exists() and (gw_path / "pyproject.toml").exists()) or
+            (gf_path.exists() and (gf_path / "pyproject.toml").exists())
+        )
+        if not valid_sources:
+            error(f"Not running from a valid source directory")
+            info(f"Current directory: {cwd}")
+            info(f"Please run this command from within the GroveEngine repository")
+            ctx.exit(1)
 
     tools_to_install = {
         "gw": tools_root / "gw",
