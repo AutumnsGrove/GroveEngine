@@ -663,9 +663,27 @@
 					icon: 'lamp-ceiling',
 					integration: 'Internal AI routing for all Grove services',
 					spec: '/knowledge/specs/lumen-spec',
+					whatIsLink: '/knowledge/help/what-is-lumen',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+					]
+				},
+				{
+					name: 'Warden',
+					tagline: 'External API Gateway',
+					description: 'A warden guards what matters. Warden is Grove\'s external API gateway for agent operations. When Claude needs to create a GitHub issue or search the web, the request goes through Warden. Agents describe what they need, Warden validates permissions, injects credentials, executes, and returns results. Keys never leave the vault.',
+					status: 'planned',
+					icon: 'vault',
+					domain: 'warden.grove.place',
+					integration: 'Secure external API access for agents and workflows',
+					spec: '/knowledge/specs/warden-spec',
+					whatIsLink: '/knowledge/help/what-is-warden',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
+						{ name: 'GitHub', icon: 'github', description: 'Repo operations' },
+						{ name: 'Search', icon: 'searchcode', description: 'Web search APIs' }
 					]
 				},
 				{

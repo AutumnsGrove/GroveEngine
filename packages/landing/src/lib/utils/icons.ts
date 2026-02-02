@@ -229,6 +229,8 @@ import {
   Footprints,
   // Passkeys - passwordless authentication
   Fingerprint,
+  // Warden - external API gateway
+  Vault,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -510,6 +512,8 @@ export const toolIcons = {
   footprints: Footprints, // Trace - the mark you leave
   // Passkeys - passwordless authentication
   fingerprint: Fingerprint, // Heartwood - Passkeys
+  // Warden - external API gateway
+  vault: Vault, // Warden - credential vault for agents
 } as const;
 
 // ============================================================================
