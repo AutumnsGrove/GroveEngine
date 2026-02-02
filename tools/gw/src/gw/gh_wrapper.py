@@ -114,6 +114,33 @@ class WorkflowRun:
     url: str
 
 
+@dataclass
+class PRComment:
+    """Parsed PR comment information."""
+
+    id: int
+    author: str
+    body: str
+    created_at: str
+    updated_at: str
+    url: str
+    is_review_comment: bool = False
+    path: Optional[str] = None  # For review comments on specific files
+    line: Optional[int] = None  # For review comments on specific lines
+
+
+@dataclass
+class PRCheck:
+    """Parsed PR check/status information."""
+
+    name: str
+    status: str  # queued, in_progress, completed
+    conclusion: Optional[str]  # success, failure, neutral, cancelled, skipped, timed_out
+    url: Optional[str] = None
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+
+
 class GitHub:
     """Wrapper for GitHub CLI operations."""
 
@@ -481,6 +508,210 @@ class GitHub:
             args.extend(["--body", body])
 
         self.execute(args, use_json=False)
+
+    def pr_comments(self, number: int) -> list[PRComment]:
+        """Get all comments on a pull request (both regular and review comments).
+
+        Args:
+            number: PR number
+
+        Returns:
+            List of PRComment objects, sorted by creation time
+        """
+        comments = []
+
+        # Regular comments via API
+        try:
+            data = self.execute_json([
+                "api", f"repos/{self.repo}/issues/{number}/comments"
+            ])
+            for c in data:
+                comments.append(PRComment(
+                    id=c["id"],
+                    author=c["user"]["login"],
+                    body=c["body"],
+                    created_at=c["created_at"],
+                    updated_at=c["updated_at"],
+                    url=c["html_url"],
+                    is_review_comment=False,
+                ))
+        except GitHubError:
+            pass
+
+        # Review comments via API
+        try:
+            data = self.execute_json([
+                "api", f"repos/{self.repo}/pulls/{number}/comments"
+            ])
+            for c in data:
+                comments.append(PRComment(
+                    id=c["id"],
+                    author=c["user"]["login"],
+                    body=c["body"],
+                    created_at=c["created_at"],
+                    updated_at=c["updated_at"],
+                    url=c["html_url"],
+                    is_review_comment=True,
+                    path=c.get("path"),
+                    line=c.get("line"),
+                ))
+        except GitHubError:
+            pass
+
+        # Sort by creation time
+        comments.sort(key=lambda c: c.created_at)
+        return comments
+
+    def pr_checks(self, number: int) -> list[PRCheck]:
+        """Get CI/CD check status for a pull request.
+
+        Args:
+            number: PR number
+
+        Returns:
+            List of PRCheck objects
+        """
+        args = [
+            "pr", "checks", str(number),
+            "--repo", self.repo,
+            "--json", "name,state,conclusion,detailsUrl,startedAt,completedAt",
+        ]
+
+        try:
+            data = self.execute_json(args)
+            return [
+                PRCheck(
+                    name=c["name"],
+                    status=c.get("state", "unknown"),
+                    conclusion=c.get("conclusion"),
+                    url=c.get("detailsUrl"),
+                    started_at=c.get("startedAt"),
+                    completed_at=c.get("completedAt"),
+                )
+                for c in data
+            ]
+        except GitHubError:
+            return []
+
+    def pr_diff(
+        self,
+        number: int,
+        file_filter: Optional[str] = None,
+    ) -> str:
+        """Get the diff for a pull request.
+
+        Args:
+            number: PR number
+            file_filter: Optional glob pattern to filter files
+
+        Returns:
+            Diff string
+        """
+        args = ["pr", "diff", str(number), "--repo", self.repo]
+
+        output = self.execute(args, use_json=False)
+
+        # Filter by file if requested
+        if file_filter and output:
+            import fnmatch
+            lines = output.split('\n')
+            filtered_lines = []
+            include_file = False
+
+            for line in lines:
+                if line.startswith('diff --git'):
+                    # Extract filename from "diff --git a/path/file b/path/file"
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        filename = parts[2][2:]  # Remove "a/" prefix
+                        include_file = fnmatch.fnmatch(filename, file_filter)
+
+                if include_file:
+                    filtered_lines.append(line)
+
+            return '\n'.join(filtered_lines)
+
+        return output
+
+    def pr_request_review(self, number: int, reviewers: list[str]) -> None:
+        """Request review from users.
+
+        Args:
+            number: PR number
+            reviewers: List of GitHub usernames
+        """
+        args = ["pr", "edit", str(number), "--repo", self.repo]
+        for reviewer in reviewers:
+            args.extend(["--add-reviewer", reviewer])
+
+        self.execute(args, use_json=False)
+
+    def pr_resolve_thread(self, thread_id: str) -> None:
+        """Resolve a review thread using GraphQL.
+
+        Args:
+            thread_id: The node ID of the review thread
+        """
+        query = """
+    mutation ResolveThread($threadId: ID!) {
+      resolveReviewThread(input: {threadId: $threadId}) {
+        thread {
+          isResolved
+        }
+      }
+    }
+    """
+
+        self.execute([
+            "api", "graphql",
+            "-f", f"query={query}",
+            "-f", f"threadId={thread_id}",
+        ], use_json=False)
+
+    def pr_get_review_threads(self, number: int) -> list[dict]:
+        """Get review threads for a PR to find thread IDs.
+
+        Args:
+            number: PR number
+
+        Returns:
+            List of thread info dicts with id, isResolved, path, line, comments
+        """
+        query = """
+    query($owner: String!, $repo: String!, $number: Int!) {
+      repository(owner: $owner, name: $repo) {
+        pullRequest(number: $number) {
+          reviewThreads(first: 100) {
+            nodes {
+              id
+              isResolved
+              path
+              line
+              comments(first: 10) {
+                nodes {
+                  body
+                  author { login }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+
+        owner, repo = self.repo.split("/")
+
+        result = self.execute_json([
+            "api", "graphql",
+            "-f", f"query={query}",
+            "-f", f"owner={owner}",
+            "-f", f"repo={repo}",
+            "-F", f"number={number}",
+        ])
+
+        threads = result.get("data", {}).get("repository", {}).get("pullRequest", {}).get("reviewThreads", {}).get("nodes", [])
+        return threads
 
     def _parse_pr(self, data: dict) -> PullRequest:
         """Parse PR data into PullRequest object."""

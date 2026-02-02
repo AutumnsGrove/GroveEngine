@@ -7,10 +7,11 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
+from rich.syntax import Syntax
 from rich.table import Table
 from rich.markdown import Markdown
 
-from ...gh_wrapper import GitHub, GitHubError
+from ...gh_wrapper import GitHub, GitHubError, PRComment, PRCheck
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -35,7 +36,9 @@ def pr() -> None:
 
 
 @pr.command("list")
-@click.option("--state", default="open", help="Filter by state (open, closed, merged, all)")
+@click.option(
+    "--state", default="open", help="Filter by state (open, closed, merged, all)"
+)
 @click.option("--author", help="Filter by author")
 @click.option("--label", help="Filter by label")
 @click.option("--limit", default=30, help="Maximum number to return")
@@ -163,14 +166,16 @@ def pr_view(
         state_style = "green" if pr.state == "OPEN" else "red"
         draft_badge = " [dim](Draft)[/dim]" if pr.draft else ""
 
-        console.print(Panel(
-            f"[bold]{pr.title}[/bold]{draft_badge}\n\n"
-            f"[{state_style}]{pr.state}[/{state_style}] • "
-            f"[cyan]{pr.head_branch}[/cyan] → [cyan]{pr.base_branch}[/cyan]\n"
-            f"Author: {pr.author} • {pr.url}",
-            title=f"PR #{pr.number}",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                f"[bold]{pr.title}[/bold]{draft_badge}\n\n"
+                f"[{state_style}]{pr.state}[/{state_style}] • "
+                f"[cyan]{pr.head_branch}[/cyan] → [cyan]{pr.base_branch}[/cyan]\n"
+                f"Author: {pr.author} • {pr.url}",
+                title=f"PR #{pr.number}",
+                border_style="green",
+            )
+        )
 
         # Labels
         if pr.labels:
@@ -183,7 +188,11 @@ def pr_view(
 
         # Mergeable status
         if pr.mergeable is not None:
-            status = "[green]Mergeable[/green]" if pr.mergeable else "[red]Not mergeable[/red]"
+            status = (
+                "[green]Mergeable[/green]"
+                if pr.mergeable
+                else "[red]Not mergeable[/red]"
+            )
             console.print(f"\n[bold]Status:[/bold] {status}")
 
     except GitHubError as e:
@@ -238,6 +247,7 @@ def pr_create(
         # Get current branch if head not specified
         if not head:
             from ...git_wrapper import Git
+
             git = Git()
             head = git.current_branch()
 
@@ -247,11 +257,13 @@ def pr_create(
                 console.print("[red]Title required in JSON mode[/red]")
                 raise SystemExit(1)
 
-            console.print(Panel(
-                f"Creating PR for branch [cyan]{head}[/cyan] → [cyan]{base}[/cyan]",
-                title="Create Pull Request",
-                border_style="green",
-            ))
+            console.print(
+                Panel(
+                    f"Creating PR for branch [cyan]{head}[/cyan] → [cyan]{base}[/cyan]",
+                    title="Create Pull Request",
+                    border_style="green",
+                )
+            )
 
             title = Prompt.ask("Title")
             body = Prompt.ask("Body (description)", default="")
@@ -267,11 +279,15 @@ def pr_create(
         )
 
         if output_json:
-            console.print(json.dumps({
-                "number": pr.number,
-                "url": pr.url,
-                "title": pr.title,
-            }))
+            console.print(
+                json.dumps(
+                    {
+                        "number": pr.number,
+                        "url": pr.url,
+                        "title": pr.title,
+                    }
+                )
+            )
         else:
             console.print(f"[green]Created PR #{pr.number}:[/green] {pr.title}")
             console.print(f"[dim]{pr.url}[/dim]")
@@ -335,7 +351,9 @@ def pr_comment(
 @click.argument("number", type=int)
 @click.option("--approve", is_flag=True, help="Approve the PR")
 @click.option("--request-changes", is_flag=True, help="Request changes")
-@click.option("--comment", "comment_only", is_flag=True, help="Comment without approval")
+@click.option(
+    "--comment", "comment_only", is_flag=True, help="Comment without approval"
+)
 @click.option("--body", "-b", help="Review body")
 @click.pass_context
 def pr_review(
@@ -375,7 +393,9 @@ def pr_review(
     elif comment_only:
         action = "comment"
     else:
-        console.print("[yellow]Specify --approve, --request-changes, or --comment[/yellow]")
+        console.print(
+            "[yellow]Specify --approve, --request-changes, or --comment[/yellow]"
+        )
         raise SystemExit(1)
 
     try:
@@ -505,6 +525,362 @@ def pr_close(
             console.print(json.dumps({"closed": number}))
         else:
             console.print(f"[green]Closed PR #{number}[/green]")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@pr.command("comments")
+@click.argument("number", type=int)
+@click.option("--review-only", is_flag=True, help="Show only review comments")
+@click.pass_context
+def pr_comments(
+    ctx: click.Context,
+    number: int,
+    review_only: bool,
+) -> None:
+    """List all comments on a pull request.
+
+    Shows both regular comments and inline review comments.
+    Agent-friendly output without needing jq.
+
+    \b
+    Examples:
+        gw gh pr comments 123
+        gw gh pr comments 123 --review-only
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        gh = GitHub()
+        comments = gh.pr_comments(number)
+
+        if review_only:
+            comments = [c for c in comments if c.is_review_comment]
+
+        if output_json:
+            data = [
+                {
+                    "id": c.id,
+                    "author": c.author,
+                    "body": c.body,
+                    "created_at": c.created_at,
+                    "url": c.url,
+                    "is_review_comment": c.is_review_comment,
+                    "path": c.path,
+                    "line": c.line,
+                }
+                for c in comments
+            ]
+            console.print(json.dumps(data, indent=2))
+            return
+
+        if not comments:
+            console.print("[dim]No comments found[/dim]")
+            return
+
+        console.print(
+            Panel(
+                f"[bold]{len(comments)} comments[/bold] on PR #{number}",
+                title="PR Comments",
+                border_style="green",
+            )
+        )
+
+        for c in comments:
+            # Header with author and time
+            comment_type = "[dim](review)[/dim] " if c.is_review_comment else ""
+            location = ""
+            if c.path:
+                location = f" [cyan]{c.path}[/cyan]"
+                if c.line:
+                    location += f":[cyan]{c.line}[/cyan]"
+
+            console.print(
+                f"\n{comment_type}[bold]{c.author}[/bold]{location} [dim]{c.created_at[:10]}[/dim]"
+            )
+            console.print(Markdown(c.body))
+            console.print("[dim]─" * 40 + "[/dim]")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@pr.command("checks")
+@click.argument("number", type=int)
+@click.option("--watch", is_flag=True, help="Watch until all checks complete")
+@click.pass_context
+def pr_checks(
+    ctx: click.Context,
+    number: int,
+    watch: bool,
+) -> None:
+    """Show CI/CD check status for a pull request.
+
+    Displays pass/fail/pending status without needing to parse with jq.
+
+    \b
+    Examples:
+        gw gh pr checks 123
+        gw gh pr checks 123 --watch
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        gh = GitHub()
+
+        if watch:
+            # Use gh's built-in watch
+            import subprocess
+
+            subprocess.run(
+                ["gh", "pr", "checks", str(number), "--repo", gh.repo, "--watch"]
+            )
+            return
+
+        checks = gh.pr_checks(number)
+
+        if output_json:
+            data = [
+                {
+                    "name": c.name,
+                    "status": c.status,
+                    "conclusion": c.conclusion,
+                    "url": c.url,
+                }
+                for c in checks
+            ]
+            console.print(json.dumps(data, indent=2))
+            return
+
+        if not checks:
+            console.print("[dim]No checks found[/dim]")
+            return
+
+        # Summary counts
+        passed = sum(1 for c in checks if c.conclusion == "success")
+        failed = sum(1 for c in checks if c.conclusion in ("failure", "timed_out"))
+        pending = sum(1 for c in checks if c.status in ("queued", "in_progress"))
+
+        summary = []
+        if passed:
+            summary.append(f"[green]{passed} passed[/green]")
+        if failed:
+            summary.append(f"[red]{failed} failed[/red]")
+        if pending:
+            summary.append(f"[yellow]{pending} pending[/yellow]")
+
+        console.print(
+            Panel(
+                " • ".join(summary) if summary else "[dim]No checks[/dim]",
+                title=f"PR #{number} Checks",
+                border_style=(
+                    "green"
+                    if not failed and not pending
+                    else "yellow" if pending else "red"
+                ),
+            )
+        )
+
+        # Table of checks
+        table = Table(border_style="dim")
+        table.add_column("Status", width=8)
+        table.add_column("Check")
+        table.add_column("Details", style="dim")
+
+        for c in checks:
+            if c.conclusion == "success":
+                status = "[green]✓[/green]"
+            elif c.conclusion in ("failure", "timed_out"):
+                status = "[red]✗[/red]"
+            elif c.status in ("queued", "in_progress"):
+                status = "[yellow]●[/yellow]"
+            elif c.conclusion == "skipped":
+                status = "[dim]○[/dim]"
+            else:
+                status = "[dim]?[/dim]"
+
+            details = c.conclusion or c.status
+            table.add_row(status, c.name, details)
+
+        console.print(table)
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@pr.command("diff")
+@click.argument("number", type=int)
+@click.option("--file", "-f", "file_filter", help="Filter by file pattern (glob)")
+@click.option("--stat", is_flag=True, help="Show diffstat only")
+@click.option("--name-only", is_flag=True, help="Show changed file names only")
+@click.pass_context
+def pr_diff(
+    ctx: click.Context,
+    number: int,
+    file_filter: Optional[str],
+    stat: bool,
+    name_only: bool,
+) -> None:
+    """View code changes in a pull request.
+
+    Supports filtering by file pattern and summary modes.
+
+    \b
+    Examples:
+        gw gh pr diff 123
+        gw gh pr diff 123 --file "*.py"
+        gw gh pr diff 123 --stat
+        gw gh pr diff 123 --name-only
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        gh = GitHub()
+
+        if stat or name_only:
+            # Use gh's built-in options
+            args = ["pr", "diff", str(number), "--repo", gh.repo]
+            if stat:
+                args.append("--stat")
+            if name_only:
+                args.append("--name-only")
+            output = gh.execute(args, use_json=False)
+            console.print(output)
+            return
+
+        diff = gh.pr_diff(number, file_filter=file_filter)
+
+        if output_json:
+            console.print(json.dumps({"diff": diff}))
+            return
+
+        if not diff:
+            console.print("[dim]No changes found[/dim]")
+            return
+
+        # Syntax highlight the diff
+        console.print(Syntax(diff, "diff", theme="monokai", line_numbers=False))
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@pr.command("resolve")
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.argument("number", type=int)
+@click.option(
+    "--thread", "-t", "thread_id", help="Thread ID to resolve (from gw gh pr comments)"
+)
+@click.option("--all", "resolve_all", is_flag=True, help="Resolve all threads")
+@click.pass_context
+def pr_resolve(
+    ctx: click.Context,
+    write: bool,
+    number: int,
+    thread_id: Optional[str],
+    resolve_all: bool,
+) -> None:
+    """Resolve review threads on a pull request.
+
+    Requires --write flag.
+
+    \b
+    Examples:
+        gw gh pr resolve --write 123 --thread PRRT_xxx
+        gw gh pr resolve --write 123 --all
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_github_safety("pr_resolve", write_flag=write)
+    except GitHubSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    if not thread_id and not resolve_all:
+        console.print("[yellow]Specify --thread <id> or --all[/yellow]")
+        raise SystemExit(1)
+
+    try:
+        gh = GitHub()
+
+        if resolve_all:
+            # Get all unresolved threads
+            threads = gh.pr_get_review_threads(number)
+            unresolved = [t for t in threads if not t.get("isResolved")]
+
+            if not unresolved:
+                console.print("[dim]No unresolved threads[/dim]")
+                return
+
+            for thread in unresolved:
+                gh.pr_resolve_thread(thread["id"])
+
+            if output_json:
+                console.print(json.dumps({"resolved": len(unresolved)}))
+            else:
+                console.print(f"[green]Resolved {len(unresolved)} threads[/green]")
+        else:
+            gh.pr_resolve_thread(thread_id)
+
+            if output_json:
+                console.print(json.dumps({"resolved": thread_id}))
+            else:
+                console.print(f"[green]Resolved thread[/green]")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@pr.command("re-review")
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.argument("number", type=int)
+@click.option(
+    "--reviewer", "-r", multiple=True, required=True, help="Reviewer username(s)"
+)
+@click.pass_context
+def pr_re_review(
+    ctx: click.Context,
+    write: bool,
+    number: int,
+    reviewer: tuple[str, ...],
+) -> None:
+    """Request re-review from reviewers.
+
+    Requires --write flag.
+
+    \b
+    Examples:
+        gw gh pr re-review --write 123 -r username
+        gw gh pr re-review --write 123 -r user1 -r user2
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_github_safety("pr_re_review", write_flag=write)
+    except GitHubSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    try:
+        gh = GitHub()
+        gh.pr_request_review(number, list(reviewer))
+
+        if output_json:
+            console.print(json.dumps({"requested": list(reviewer)}))
+        else:
+            reviewers_str = ", ".join(reviewer)
+            console.print(f"[green]Requested review from:[/green] {reviewers_str}")
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")
