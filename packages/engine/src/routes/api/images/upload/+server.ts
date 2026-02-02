@@ -511,8 +511,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
     );
   } catch (err) {
+    // Re-throw SvelteKit HTTP errors (they have status codes)
     if ((err as { status?: number }).status) throw err;
-    console.error("Upload error:", err);
-    throw error(500, "Failed to upload image");
+
+    // Log the full error for server-side debugging
+    console.error("[Image Upload] Unexpected error:", err);
+
+    // Extract a user-friendly error message while preserving debugging info
+    let errorMessage = "Failed to upload image";
+    if (err instanceof Error) {
+      // Include the actual error message to help diagnose issues
+      // but keep it generic enough to not expose sensitive internals
+      errorMessage = `Upload failed: ${err.message}`;
+    }
+
+    throw error(500, errorMessage);
   }
 };

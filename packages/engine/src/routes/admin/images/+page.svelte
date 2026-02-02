@@ -335,10 +335,15 @@
       }
 
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+
+      // Show prominent toast notification for immediate visibility
+      toast.error(`Upload failed: ${errorMessage}`);
+
       updateUpload({
         status: 'error',
         stage: 'Failed',
-        error: err instanceof Error ? err.message : 'Upload failed'
+        error: errorMessage
       });
     }
   }
