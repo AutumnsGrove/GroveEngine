@@ -6,6 +6,7 @@ from .pr import pr
 from .issue import issue
 from .run import run
 from .api import api, rate_limit
+from .project import project
 
 
 @click.group()
@@ -37,3 +38,4 @@ gh.add_command(issue)
 gh.add_command(run)
 gh.add_command(api)
 gh.add_command(rate_limit)
+gh.add_command(project)

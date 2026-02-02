@@ -441,3 +441,284 @@ def _escape_sql(value: str) -> str:
     """Basic SQL escaping to prevent injection in string literals."""
     # Replace single quotes with two single quotes (SQL standard escaping)
     return value.replace("'", "''")
+
+
+@tenant.command("create")
+@click.option("--write", is_flag=True, required=True, help="Confirm write operation")
+@click.option("--subdomain", "-s", help="Subdomain for the tenant")
+@click.option("--name", "-n", help="Display name")
+@click.option("--email", "-e", help="Email address")
+@click.option(
+    "--plan",
+    "-p",
+    type=click.Choice(["seedling", "sapling", "oak", "evergreen"]),
+    default="seedling",
+    help="Subscription plan",
+)
+@click.option(
+    "--db",
+    "-d",
+    "database",
+    default="lattice",
+    help="Database alias (default: lattice)",
+)
+@click.option("--dry-run", is_flag=True, help="Preview without creating")
+@click.pass_context
+def tenant_create(
+    ctx: click.Context,
+    write: bool,
+    subdomain: str | None,
+    name: str | None,
+    email: str | None,
+    plan: str,
+    database: str,
+    dry_run: bool,
+) -> None:
+    """Create a new tenant.
+
+    Interactive wizard if options not provided.
+
+    \b
+    Examples:
+        gw tenant create --write                          # Interactive
+        gw tenant create --write -s myblog -n "My Blog"   # With options
+        gw tenant create --write --dry-run                # Preview
+    """
+    import uuid
+    from datetime import datetime
+
+    config: GWConfig = ctx.obj["config"]
+    output_json: bool = ctx.obj.get("output_json", False)
+    wrangler = Wrangler(config)
+
+    # Resolve database
+    db_name = config.databases.get(database)
+    if db_name:
+        db_name = db_name.name
+    else:
+        db_name = database
+
+    # Interactive prompts if not provided
+    if not subdomain:
+        subdomain = click.prompt("Subdomain", type=str)
+    if not name:
+        name = click.prompt("Display name", type=str, default=subdomain)
+    if not email:
+        email = click.prompt("Email address", type=str)
+
+    # Validate subdomain
+    subdomain = subdomain.lower().strip()
+    if not subdomain.isalnum() and "-" not in subdomain:
+        if output_json:
+            console.print(json.dumps({"error": "Invalid subdomain format"}))
+        else:
+            error("Subdomain must be alphanumeric (hyphens allowed)")
+        ctx.exit(1)
+
+    # Generate ID
+    tenant_id = str(uuid.uuid4())
+    now = int(datetime.now().timestamp())
+
+    tenant_data = {
+        "id": tenant_id,
+        "subdomain": subdomain,
+        "display_name": name,
+        "email": email,
+        "plan": plan,
+        "created_at": now,
+        "updated_at": now,
+        "is_active": True,
+    }
+
+    # Dry run
+    if dry_run:
+        if output_json:
+            console.print(json.dumps({
+                "dry_run": True,
+                "tenant": tenant_data,
+            }, indent=2))
+        else:
+            console.print("[bold yellow]DRY RUN[/bold yellow] - Would create:\n")
+            _display_tenant(tenant_data)
+        return
+
+    # Build INSERT query
+    query = f"""
+        INSERT INTO tenants (id, subdomain, display_name, email, plan, created_at, updated_at, is_active)
+        VALUES (
+            '{_escape_sql(tenant_id)}',
+            '{_escape_sql(subdomain)}',
+            '{_escape_sql(name)}',
+            '{_escape_sql(email)}',
+            '{_escape_sql(plan)}',
+            {now},
+            {now},
+            1
+        )
+    """
+
+    try:
+        wrangler.execute(
+            ["d1", "execute", db_name, "--remote", "--command", query]
+        )
+    except WranglerError as e:
+        if output_json:
+            console.print(json.dumps({"error": str(e)}))
+        else:
+            error(f"Failed to create tenant: {e}")
+        ctx.exit(1)
+
+    if output_json:
+        console.print(json.dumps({"created": tenant_data}, indent=2))
+    else:
+        success(f"Created tenant '{subdomain}' (id: {tenant_id[:8]}...)")
+        info(f"URL: https://{subdomain}.grove.place")
+
+
+@tenant.command("delete")
+@click.argument("subdomain")
+@click.option("--write", is_flag=True, required=True, help="Confirm write operation")
+@click.option("--force", is_flag=True, help="Skip confirmation prompt")
+@click.option(
+    "--db",
+    "-d",
+    "database",
+    default="lattice",
+    help="Database alias (default: lattice)",
+)
+@click.option("--dry-run", is_flag=True, help="Preview what would be deleted")
+@click.pass_context
+def tenant_delete(
+    ctx: click.Context,
+    subdomain: str,
+    write: bool,
+    force: bool,
+    database: str,
+    dry_run: bool,
+) -> None:
+    """Delete a tenant and all their data.
+
+    ⚠️  DANGEROUS: This permanently deletes all tenant data!
+
+    \b
+    Examples:
+        gw tenant delete testuser --write           # With confirmation
+        gw tenant delete testuser --write --force   # Skip confirmation
+        gw tenant delete testuser --write --dry-run # Preview deletion
+    """
+    config: GWConfig = ctx.obj["config"]
+    output_json: bool = ctx.obj.get("output_json", False)
+    wrangler = Wrangler(config)
+
+    # Resolve database
+    db_name = config.databases.get(database)
+    if db_name:
+        db_name = db_name.name
+    else:
+        db_name = database
+
+    # First, look up the tenant to get ID and stats
+    try:
+        result = wrangler.execute(
+            [
+                "d1", "execute", db_name, "--remote", "--json", "--command",
+                f"SELECT * FROM tenants WHERE subdomain = '{_escape_sql(subdomain)}'",
+            ]
+        )
+        tenant_rows = parse_wrangler_json(result)
+    except WranglerError as e:
+        if output_json:
+            console.print(json.dumps({"error": str(e)}))
+        else:
+            error(f"Failed to look up tenant: {e}")
+        ctx.exit(1)
+
+    if not tenant_rows:
+        if output_json:
+            console.print(json.dumps({"error": "Tenant not found"}))
+        else:
+            error(f"Tenant '{subdomain}' not found")
+        ctx.exit(1)
+
+    tenant_data = tenant_rows[0]
+    tenant_id = tenant_data.get("id")
+
+    # Gather deletion stats
+    stats = {}
+    tables_to_delete = ["posts", "pages", "media", "sessions", "products", "orders"]
+
+    for table in tables_to_delete:
+        try:
+            result = wrangler.execute(
+                [
+                    "d1", "execute", db_name, "--remote", "--json", "--command",
+                    f"SELECT COUNT(*) as count FROM {table} WHERE tenant_id = '{tenant_id}'",
+                ]
+            )
+            count_rows = parse_wrangler_json(result)
+            stats[table] = count_rows[0].get("count", 0) if count_rows else 0
+        except WranglerError:
+            stats[table] = "?"
+
+    # Preview / dry run
+    if dry_run or not output_json:
+        total_items = sum(v for v in stats.values() if isinstance(v, int))
+
+        if output_json:
+            console.print(json.dumps({
+                "dry_run": True,
+                "tenant": tenant_data,
+                "would_delete": stats,
+                "total_items": total_items,
+            }, indent=2))
+            return
+
+        console.print(f"\n[bold red]⚠️  DELETE TENANT: {subdomain}[/bold red]\n")
+        console.print(f"Tenant ID: {tenant_id}")
+        console.print(f"Email: {tenant_data.get('email', '-')}")
+        console.print(f"Plan: {tenant_data.get('plan', '-')}")
+        console.print()
+
+        console.print("[bold]Data to be deleted:[/bold]")
+        for table, count in stats.items():
+            console.print(f"  • {table}: {count}")
+        console.print()
+
+        if dry_run:
+            console.print("[yellow]DRY RUN - No changes made[/yellow]")
+            return
+
+    # Confirmation
+    if not force and not output_json:
+        console.print("[bold red]This action CANNOT be undone![/bold red]\n")
+        confirm = click.prompt(
+            f"Type 'DELETE {subdomain}' to confirm",
+            type=str,
+        )
+        if confirm != f"DELETE {subdomain}":
+            info("Cancelled")
+            ctx.exit(0)
+
+    # Perform deletion (CASCADE should handle related tables)
+    try:
+        wrangler.execute(
+            [
+                "d1", "execute", db_name, "--remote", "--command",
+                f"DELETE FROM tenants WHERE id = '{tenant_id}'",
+            ]
+        )
+    except WranglerError as e:
+        if output_json:
+            console.print(json.dumps({"error": str(e)}))
+        else:
+            error(f"Failed to delete tenant: {e}")
+        ctx.exit(1)
+
+    if output_json:
+        console.print(json.dumps({
+            "deleted": subdomain,
+            "tenant_id": tenant_id,
+            "items_deleted": stats,
+        }))
+    else:
+        success(f"Deleted tenant '{subdomain}' and all associated data")

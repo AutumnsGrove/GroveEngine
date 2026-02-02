@@ -4,6 +4,10 @@ import click
 
 from .commands import auth, bindings, cache, db, health, secret, status, tenant
 from .commands import backup, deploy, do, email, flag, kv, logs, r2, packages
+from .commands.doctor import doctor
+from .commands.whoami import whoami
+from .commands.history import history
+from .commands.completion import completion
 from .commands.git import git
 from .commands.gh import gh
 from .commands.dev import dev
@@ -74,6 +78,12 @@ main.add_command(check)
 main.add_command(lint)
 main.add_command(ci)
 main.add_command(packages.packages)
+
+# Phase 7.5 Quality of Life commands
+main.add_command(doctor)
+main.add_command(whoami)
+main.add_command(history)
+main.add_command(completion)
 
 
 if __name__ == "__main__":
