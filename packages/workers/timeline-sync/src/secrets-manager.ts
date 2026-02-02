@@ -30,7 +30,7 @@ function generateDEKHex(): string {
  * ```ts
  * const secrets = new SecretsManager(env.DB, env.GROVE_KEK);
  *
- * const token = await secrets.getSecret('tenant_123', 'github_token');
+ * const token = await secrets.getSecret('tenant_123', 'timeline_github_token');
  * ```
  */
 export class SecretsManager {

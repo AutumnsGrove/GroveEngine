@@ -105,19 +105,19 @@ export async function processTenantTimeline(
 
     // Fetch tokens from tenant_secrets table
     const [githubToken, openrouterKey] = await Promise.all([
-      secrets.safeGetSecret(config.tenantId, "github_token"),
-      secrets.safeGetSecret(config.tenantId, "openrouter_key"),
+      secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
+      secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
     ]);
 
     if (!githubToken) {
       throw new Error(
-        "GitHub token not found in tenant_secrets (key: github_token)",
+        "GitHub token not found in tenant_secrets (key: timeline_github_token)",
       );
     }
 
     if (!openrouterKey) {
       throw new Error(
-        "OpenRouter API key not found in tenant_secrets (key: openrouter_key)",
+        "OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
       );
     }
 
