@@ -18,6 +18,7 @@ from .commands.dev.build import build
 from .commands.dev.check import check
 from .commands.dev.lint import lint
 from .commands.dev.ci import ci
+from .commands.publish import publish
 from .config import GWConfig
 from .tracking import TrackedGroup
 
@@ -81,6 +82,7 @@ main.add_command(check)
 main.add_command(lint)
 main.add_command(ci)
 main.add_command(packages.packages)
+main.add_command(publish)
 
 # Phase 7.5 Quality of Life commands
 main.add_command(doctor)

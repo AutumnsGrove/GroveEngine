@@ -9,6 +9,7 @@ from .check import check
 from .lint import lint
 from .ci import ci
 from .reinstall import reinstall
+from .format import fmt
 
 
 @click.group()
@@ -41,6 +42,7 @@ dev.add_command(test)
 dev.add_command(build)
 dev.add_command(check)
 dev.add_command(lint)
+dev.add_command(fmt)
 dev.add_command(ci)
 
 # Tool management
