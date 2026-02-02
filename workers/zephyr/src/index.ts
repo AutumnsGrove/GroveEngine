@@ -42,12 +42,7 @@ import {
 import { getPrimaryProvider } from "./providers";
 import { logEmailSend, checkIdempotency, getEmailStats } from "./logging/d1";
 import { renderTemplate, getTemplateSubject } from "./templates";
-import {
-  invalidRequest,
-  providerError,
-  idempotencyConflict,
-  templateError,
-} from "./errors";
+import { invalidRequest, providerError } from "./errors";
 import type { ZephyrErrorCode } from "./types";
 
 /**

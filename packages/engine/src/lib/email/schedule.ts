@@ -178,6 +178,7 @@ export async function sendEmail(
       html,
       text,
       from,
+      scheduledAt,
       metadata: { source: "engine-schedule" },
     });
 

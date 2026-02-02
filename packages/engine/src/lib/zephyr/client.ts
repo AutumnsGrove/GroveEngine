@@ -274,6 +274,7 @@ export async function sendRawEmail(
     html: string;
     text?: string;
     from?: string;
+    scheduledAt?: string;
     metadata?: { source?: string; correlationId?: string };
   },
 ): Promise<ZephyrResponse> {
@@ -285,6 +286,7 @@ export async function sendRawEmail(
     html: options.html,
     text: options.text,
     from: options.from,
+    scheduledAt: options.scheduledAt,
     metadata: options.metadata,
   });
 }
