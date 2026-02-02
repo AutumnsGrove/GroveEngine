@@ -220,8 +220,9 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should skip animation when within cooldown period", () => {
-      // When showAnimation is false, overlay is removed immediately
-      expect(appHtml).toContain("!showAnimation");
+      // When withinCooldown is true, overlay is removed immediately
+      expect(appHtml).toContain("withinCooldown");
+      expect(appHtml).toContain("else if (withinCooldown)");
     });
   });
 
