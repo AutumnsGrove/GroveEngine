@@ -2,24 +2,208 @@
 
 **Issue:** #925 - Integrate Grove terminology UI and Waystone Lexicon Elements
 **Generated:** 2026-02-03
-**Purpose:** Complete hit list of all locations using Grove lexicon terms that may need `<GroveTerm>` integration
+**Updated:** 2026-02-03 (added legacy terms, categorization framework)
+**Purpose:** Complete hit list for implementing `<GroveTerm>` components
 
 ---
 
 ## Executive Summary
 
-This audit identified **400+ locations** across the codebase where Grove lexicon terms appear in user-facing code. The most heavily used terms are:
+This audit covers **two distinct tasks:**
 
-| Term | Files | Priority |
-|------|-------|----------|
-| Bloom/Blooms | 40+ | High - emails, roadmap, workshop |
-| Wanderer | 45+ | High - user identity, greetings |
-| Seedling/Sapling/Oak/Evergreen | 100+ | High - pricing, features |
-| Lumen | 66 | Medium - internal service |
-| Grafts | 42 | Medium - feature flags |
-| Rooted | 20+ | High - subscriber identity |
+1. **Grove Terms** - 400+ locations using Grove lexicon that may need `<GroveTerm>` treatment
+2. **Legacy Terms** - 100+ locations using legacy terminology (posts, blog, user) that need replacement
+
+### Term Categories
+
+| Category | Color | Terms |
+|----------|-------|-------|
+| Foundational | Gold | grove, garden, bloom, wanderer, rooted, pathfinder, wayfinder |
+| Platform Services | Green | heartwood, arbor, plant, loam, amber, pantry, foliage, terrarium, curios, grafts, waystone, porch, clearing, passage, burrow |
+| Content & Community | Purple | wisp, fireside, scribe, reeds, thorn, meadow, forests, wander, trails, trace, reverie, weave |
+| Subscription Tiers | Green | seedling, sapling, oak, evergreen |
+| Standalone Tools | Amber | ivy, verge, forage, nook, shutter, outpost, aria, etch, trove, gossamer, lattice |
+| Operations | Blue | lumen, zephyr, vista, patina, mycelium, shade, rings, press |
 
 ---
+
+## PART 1: LEGACY TERMS TO REPLACE
+
+These are standard terms that should be replaced with Grove terminology in user-facing text.
+
+### "posts" → "blooms" (CRITICAL)
+
+#### Tier Display Strings (Visible to all prospective users)
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/durable-objects/src/tiers.ts` | 160 | "React to posts" |
+| `packages/durable-objects/src/tiers.ts` | 213 | "50 posts" |
+| `packages/durable-objects/src/tiers.ts` | 270 | "250 posts" |
+| `packages/durable-objects/src/tiers.ts` | 328 | "Unlimited posts" |
+| `packages/engine/src/lib/config/tiers.ts` | (mirror) | Same as above |
+
+#### Admin Interface Labels
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/engine/src/routes/admin/blog/+page.svelte` | 65 | "Blog Posts" (heading) |
+| `packages/engine/src/routes/admin/blog/+page.svelte` | 66 | "{data.posts.length} posts" |
+| `packages/engine/src/routes/admin/blog/+page.svelte` | 131 | "No blog posts yet" |
+| `packages/engine/src/routes/admin/account/UsageStatsCard.svelte` | 63 | "Posts" (usage label) |
+| `packages/engine/src/routes/admin/account/UsageStatsCard.svelte` | 65 | "{usage.postCount} / {usage.postLimit}" |
+
+#### UI Placeholders & Help Text
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/engine/src/routes/admin/blog/new/+page.svelte` | 51 | "Enter your post title..." |
+| `packages/engine/src/routes/admin/blog/new/+page.svelte` | 207 | "your-post-slug" |
+| `packages/engine/src/routes/admin/blog/new/+page.svelte` | 233 | "A brief summary of your post (120-160 chars for SEO)..." |
+| `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` | 343 | "A brief summary of your post (120-160 chars for SEO)..." |
+| `packages/engine/src/routes/blog/search/+page.svelte` | 104 | "Search posts..." |
+| `packages/engine/src/lib/components/admin/MarkdownEditor.svelte` | 912 | "Start writing your post..." |
+
+#### Error Messages
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/engine/src/routes/admin/blog/new/+page.svelte` | 140 | "Failed to create post" |
+| `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` | 135 | "Failed to update post" |
+| `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` | 210 | "Failed to delete post" |
+| `packages/engine/src/routes/admin/blog/+page.svelte` | 40 | "Failed to delete post" |
+| `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` | 268 | "Delete this post" (dialog) |
+| `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` | 157 | "Delete Post" (heading) |
+
+### "blog" / "blogs" → "garden" (CRITICAL)
+
+#### Workshop Page (40+ instances)
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/landing/src/routes/workshop/+page.svelte` | 145 | "Essential services powering every Grove blog" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 162 | "Arbor is your blog's control center" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 166 | "Built into every Grove blog" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 227 | "from blog images to email attachments" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 286 | "Visual customization for your blog" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 289 | "Theme customization for all Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 305 | "Visitor experience features for all Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 317 | "bring them home to your blog as decorations" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 321 | "Creative tool for building blog decorations" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 327 | "Publish to blog" (button label) |
+| `packages/landing/src/routes/workshop/+page.svelte` | 388 | "Analytics dashboard for Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 410 | "Available for all Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 421 | "Optional social layer for Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 479 | "Comments and replies for Grove blogs" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 577 | "integration with your blog's contact forms" |
+| `packages/landing/src/routes/workshop/+page.svelte` | 665 | "Automatic protection for all Grove blogs" |
+
+#### Vision Page
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/landing/src/routes/vision/+page.svelte` | 107 | "Every Grove blog is publicly accessible" |
+| `packages/landing/src/routes/vision/+page.svelte` | 194 | "Your blog exists independently" |
+| `packages/landing/src/routes/vision/+page.svelte` | 219 | "Your blog isn't locked into Grove" |
+
+#### Other Landing Pages
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/landing/src/routes/contact/+page.svelte` | 82-91 | "Read my blog" |
+| `packages/landing/src/routes/shade/+page.svelte` | 47 | "Your blog posts, your photos, your stories" |
+
+#### Onboarding Emails
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/landing/workers/onboarding-emails/worker.ts` | 152 | "Your own blog at yourname.grove.place" |
+| `packages/landing/src/lib/email/templates.ts` | 195 | "Your own blog at yourname.grove.place" |
+
+#### Meadow
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/meadow/src/routes/+page.svelte` | 23 | "Social feed for Grove blogs" |
+| `packages/meadow/src/routes/+page.svelte` | 52 | "A chronological feed connecting Grove blogs" |
+| `packages/meadow/src/routes/+page.svelte` | 83 | "from under the dense canopy of your own blog" |
+| `packages/meadow/src/routes/+page.svelte` | 107 | "Your blog, your control." |
+
+#### Admin/Navigation
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/engine/src/routes/blog/[slug]/+page.svelte` | 74 | "Back to Blog" button |
+| `packages/engine/src/routes/blog/search/+page.svelte` | 91 | "Search blog posts by keyword" |
+
+### "subscriber" / "subscribers" → "rooted" (HIGH)
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 80 | "Email Subscribers" (heading) |
+| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 99 | "subscriber email{s}" |
+| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 141 | "No subscribers yet" |
+| `packages/engine/src/routes/admin/subscribers/+page.svelte` | 84 | "active subscriber{s}" |
+| `packages/engine/src/routes/admin/subscribers/+page.svelte` | 125 | "No subscribers yet" |
+| `packages/landing/src/routes/admin/+page.svelte` | 60 | "Copy all subscriber emails" |
+| `packages/landing/src/routes/support/+page.svelte` | 112 | "Already a subscriber" |
+| `packages/landing/src/routes/shade/+page.svelte` | 84 | "RSS feeds for your subscribers" |
+
+### "account" (CONTEXT-DEPENDENT)
+
+Some uses are technical, but these are user-facing:
+
+| File | Line | Current Text |
+|------|------|--------------|
+| `packages/plant/src/routes/profile/+page.svelte` | 105 | "Start over with different account" |
+| `packages/engine/src/routes/+page.svelte` | 33 | "sign in with your Grove account" |
+| `packages/plant/src/routes/comped/+page.svelte` | 79 | "a complimentary Grove account" |
+
+---
+
+## PART 2: CATEGORIZATION FRAMEWORK
+
+### When to Apply `<GroveTerm>` Treatment
+
+**YES - Apply treatment when:**
+- The term is a **proper name** for a Grove service/feature/tier
+- The term is an **identity term** used as a capitalized noun (Wanderer, Rooted)
+- The term is a **foundational term** (grove, garden, bloom) referring to the specific Grove concept
+
+**NO - Skip treatment when:**
+- The term appears in **narrative prose, poetry, or marketing flourishes**
+- The term is used as a **verb** ("wandering", "blooming")
+- The term appears in its own **definition** (Waystone popup content)
+- The term is **lowercase general usage** ("a forest of voices")
+
+### Examples
+
+| Text | Treatment | Reason |
+|------|-----------|--------|
+| "Welcome to your **Grove**" | YES | User's personal space |
+| "Browse my **Garden**" | YES | Blog collection |
+| "Read my latest **Bloom**" | YES | A specific post |
+| "watch your words bloom" | NO | Verb, metaphorical |
+| "a forest of voices" | NO | Poetic tagline |
+| "**Forests** are themed communities" | YES | Feature name |
+| "**Seedling** tier" | YES | Product tier |
+| "like a seedling growing" | NO | Metaphor, not tier |
+
+### Poetic/Narrative Uses to EXCLUDE
+
+These should NOT get `<GroveTerm>` treatment:
+
+| File | Context | Reason |
+|------|---------|--------|
+| `packages/landing/src/routes/manifesto/+page.svelte` | "THE GARDEN THAT WAS" | Narrative prose |
+| `packages/landing/src/routes/forest/+page.svelte` | "neighborhoods in a garden city" | Metaphor |
+| `packages/landing/src/lib/email/templates.ts` | "Ready to bloom" | Verb usage |
+| `packages/engine/src/lib/ui/tailwind.preset.js` | "bloom" animation | CSS/technical |
+| `packages/landing/src/routes/roadmap/+page.svelte` | "full-bloom" phase | Phase name (compound) |
+
+---
+
+## PART 3: GROVE TERMS (Need `<GroveTerm>` Treatment)
 
 ## FOUNDATIONAL TERMS
 
