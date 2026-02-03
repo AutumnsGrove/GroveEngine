@@ -136,18 +136,26 @@ These are standard terms that should be replaced with Grove terminology in user-
 | `packages/engine/src/routes/blog/[slug]/+page.svelte` | 74 | "Back to Blog" button |
 | `packages/engine/src/routes/blog/search/+page.svelte` | 91 | "Search blog posts by keyword" |
 
-### "subscriber" / "subscribers" → "rooted" (HIGH)
+### "subscriber" terminology (NUANCED)
 
-| File | Line | Current Text |
-|------|------|--------------|
-| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 80 | "Email Subscribers" (heading) |
-| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 99 | "subscriber email{s}" |
-| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 141 | "No subscribers yet" |
-| `packages/engine/src/routes/admin/subscribers/+page.svelte` | 84 | "active subscriber{s}" |
-| `packages/engine/src/routes/admin/subscribers/+page.svelte` | 125 | "No subscribers yet" |
-| `packages/landing/src/routes/admin/+page.svelte` | 60 | "Copy all subscriber emails" |
-| `packages/landing/src/routes/support/+page.svelte` | 112 | "Already a subscriber" |
-| `packages/landing/src/routes/shade/+page.svelte` | 84 | "RSS feeds for your subscribers" |
+**Important distinction:**
+- **Rooted** = status/position in the grove (they've planted roots, taken root)
+- Users are still **Wanderers** even after subscribing - they become "Rooted Wanderers"
+- "Rooted" is NOT a direct replacement for "subscriber" everywhere
+
+**Context matters:**
+- "Email Subscribers" (newsletter signups) → Keep as-is, these aren't necessarily Rooted
+- "Already a subscriber" (billing context) → Could become "already rooted" or "already taken root"
+- "RSS feeds for your subscribers" → Could become "for your readers" or keep as-is
+
+| File | Line | Current Text | Recommendation |
+|------|------|--------------|----------------|
+| `packages/landing/src/routes/admin/subscribers/+page.svelte` | 80 | "Email Subscribers" | Keep (newsletter context) |
+| `packages/engine/src/routes/admin/subscribers/+page.svelte` | 84 | "active subscriber{s}" | Keep (newsletter context) |
+| `packages/landing/src/routes/support/+page.svelte` | 112 | "Already a subscriber" | Consider "already rooted with us" |
+| `packages/landing/src/routes/shade/+page.svelte` | 84 | "RSS feeds for your subscribers" | Consider "for your readers" |
+
+**The Rooted badge in Arbor** (`packages/engine/src/routes/admin/+page.svelte:86-91`) is correct - it shows the user's rooted status, not replacing "subscriber" text.
 
 ### "account" (CONTEXT-DEPENDENT)
 
