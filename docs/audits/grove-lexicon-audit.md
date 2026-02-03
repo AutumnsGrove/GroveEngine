@@ -876,3 +876,121 @@ When implementing `<GroveTerm>` components:
 4. **Scope:**
    - UI text only - internal code unchanged
    - Marketing, Arbor, onboarding, help docs, error messages
+
+---
+
+## PART 4: CODE/STRUCTURAL CHANGES
+
+This section covers routes, folders, database tables, and other structural elements that need renaming. These are **separate from UI text changes** and require more careful migration planning.
+
+### Route Paths (PUBLIC - Require Redirects)
+
+| Current Path | New Path | Location |
+|--------------|----------|----------|
+| `/blog/` | `/garden/` | `packages/engine/src/routes/blog/+page.svelte` |
+| `/blog/[slug]/` | `/garden/[slug]/` | `packages/engine/src/routes/blog/[slug]/+page.svelte` |
+| `/blog/search/` | `/garden/search/` | `packages/engine/src/routes/blog/search/+page.svelte` |
+| `/admin/blog/` | `/admin/garden/` | `packages/engine/src/routes/admin/blog/+page.svelte` |
+| `/admin/blog/new/` | `/admin/garden/new/` | `packages/engine/src/routes/admin/blog/new/+page.svelte` |
+| `/admin/blog/edit/[slug]/` | `/admin/garden/edit/[slug]/` | `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte` |
+
+### API Endpoints (Require Redirects)
+
+| Current Path | New Path | Location |
+|--------------|----------|----------|
+| `/api/posts/` | `/api/blooms/` | `packages/engine/src/routes/api/posts/+server.ts` |
+| `/api/posts/[slug]/` | `/api/blooms/[slug]/` | `packages/engine/src/routes/api/posts/[slug]/+server.ts` |
+| `/api/posts/[slug]/reactions/` | `/api/blooms/[slug]/reactions/` | `packages/engine/src/routes/api/posts/[slug]/reactions/+server.ts` |
+| `/api/posts/[slug]/view/` | `/api/blooms/[slug]/view/` | `packages/engine/src/routes/api/posts/[slug]/view/+server.ts` |
+
+### Folder Structure
+
+| Current Folder | New Folder | Files |
+|----------------|------------|-------|
+| `packages/engine/src/routes/blog/` | `packages/engine/src/routes/garden/` | 6 files |
+| `packages/engine/src/routes/admin/blog/` | `packages/engine/src/routes/admin/garden/` | 5 files |
+| `packages/engine/src/routes/api/posts/` | `packages/engine/src/routes/api/blooms/` | 4 files |
+
+### Database Schema (CRITICAL - Requires Migration)
+
+| Current Name | New Name | Type |
+|--------------|----------|------|
+| `posts` | `blooms` | Table |
+| `post_views` | `bloom_views` | Table |
+| `idx_posts_tenant` | `idx_blooms_tenant` | Index |
+| `idx_posts_status` | `idx_blooms_status` | Index |
+| `idx_posts_published` | `idx_blooms_published` | Index |
+| `idx_posts_tenant_status` | `idx_blooms_tenant_status` | Index |
+| `idx_posts_tenant_slug` | `idx_blooms_tenant_slug` | Index |
+
+### Internal Code (Safe to Change)
+
+| Current | New | Location |
+|---------|-----|----------|
+| `GROVE_URLS.NEW_POST` | `GROVE_URLS.NEW_BLOOM` | `packages/engine/src/lib/email/urls.ts` |
+| `GROVE_URLS.POSTS` | `GROVE_URLS.BLOOMS` | `packages/engine/src/lib/email/urls.ts` |
+| `buildGoUrl("posts/new")` | `buildGoUrl("blooms/new")` | `packages/engine/src/lib/email/urls.ts` |
+| `PostMetaDO` class | `BloomMetaDO` class | `packages/engine/src/lib/durable-objects/PostMetaDO.ts` |
+| `PostRecord` interface | `BloomRecord` interface | Various server files |
+| `PostInput` interface | `BloomInput` interface | API server files |
+| Cache key `blog:list:` | `garden:list:` | `packages/engine/src/routes/blog/+page.server.ts` |
+
+### Link References in Components
+
+| File | Current | New |
+|------|---------|-----|
+| `packages/engine/src/routes/admin/+page.svelte` | `/admin/blog` | `/admin/garden` |
+| `packages/engine/src/routes/admin/+layout.svelte` | `/admin/blog` | `/admin/garden` |
+| `packages/engine/src/lib/components/quota/UpgradePrompt.svelte` | `/admin/posts` | `/admin/blooms` |
+| `packages/engine/src/lib/components/custom/InternalsPostViewer.svelte` | `/blog/{post.slug}` | `/garden/{bloom.slug}` |
+
+### Email Smart Links (`/go/` system)
+
+| Current | New |
+|---------|-----|
+| `/go/posts/new` | `/go/blooms/new` |
+| `/go/posts` | `/go/blooms` |
+
+---
+
+## Migration Strategy
+
+### Phase 1: Database Migration
+1. Create new `blooms` and `bloom_views` tables with identical schemas
+2. Copy all data from `posts` → `blooms`
+3. Create view `posts` as alias to `blooms` (backwards compatibility)
+4. Update all indices
+
+### Phase 2: Add Redirects First
+1. Add 301 redirects: `/blog/*` → `/garden/*`
+2. Add 301 redirects: `/api/posts/*` → `/api/blooms/*`
+3. Keep old routes working during transition
+
+### Phase 3: Update Routes
+1. Rename route folders
+2. Update all internal links
+3. Update API endpoints
+4. Update email URL builders
+
+### Phase 4: Update Internal Code
+1. Rename interfaces and types
+2. Update Durable Object classes
+3. Update cache keys
+4. Update constants
+
+### Phase 5: Cleanup
+1. Remove legacy redirects (after 6+ months)
+2. Drop `posts` view alias
+3. Remove any backwards compatibility code
+
+---
+
+## Breaking Change Summary
+
+| Category | Count | Risk |
+|----------|-------|------|
+| Public URLs (need redirects) | 10 routes | High - bookmarks, search engines |
+| API endpoints | 4 routes | Medium - external integrations |
+| Database tables | 2 tables + 5 indices | High - requires migration |
+| Internal code | 20+ references | Low - no external impact |
+| Email templates | 2 URL patterns | Medium - active campaigns |
