@@ -133,7 +133,10 @@
 					domain: '{you}.grove.place/garden/{slug}',
 					integration: 'Individual pieces of writing in your garden',
 					spec: '/knowledge/specs/grove-garden-bloom-spec',
-					whatIsLink: '/knowledge/help/what-are-blooms'
+					whatIsLink: '/knowledge/help/what-are-blooms',
+					subComponents: [
+						{ name: 'Vines', icon: 'layoutlist', description: 'Margin notes', href: '/knowledge/help/what-are-vines' }
+					]
 				},
 			]
 		},
@@ -707,7 +710,7 @@
 					name: 'Zephyr',
 					tagline: 'Email Gateway',
 					description: 'In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. Zephyr is Grove\'s unified email gateway. Every email from every service rides the same wind: onboarding sequences, payment notifications, support replies, verification codes. One interface, retries, fallbacks, complete observability.',
-					status: 'planned',
+					status: 'live',
 					icon: 'send',
 					integration: 'Internal email delivery for all Grove services',
 					spec: '/knowledge/specs/zephyr-spec',
@@ -716,6 +719,17 @@
 						{ name: 'Templates', icon: 'layout', description: 'React Email templates' },
 						{ name: 'Logging', icon: 'database', description: 'Full audit trail' }
 					]
+				},
+				{
+					name: 'Mycelium',
+					tagline: 'MCP Server',
+					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, start Verge sessions, manage files in Amber, and tap into every Grove service.',
+					status: 'building',
+					icon: 'circuitboard',
+					domain: 'mycelium.grove.place',
+					integration: 'MCP server for AI agent integration',
+					github: 'https://github.com/AutumnsGrove/GroveMCP',
+					spec: '/knowledge/specs/mycelium-spec'
 				},
 				{
 					name: 'Warden',
@@ -733,17 +747,6 @@
 						{ name: 'GitHub', icon: 'github', description: 'Repo operations' },
 						{ name: 'Search', icon: 'searchcode', description: 'Web search APIs' }
 					]
-				},
-				{
-					name: 'Mycelium',
-					tagline: 'MCP Server',
-					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, start Verge sessions, manage files in Amber, and tap into every Grove service.',
-					status: 'building',
-					icon: 'circuitboard',
-					domain: 'mycelium.grove.place',
-					integration: 'MCP server for AI agent integration',
-					github: 'https://github.com/AutumnsGrove/GroveMCP',
-					spec: '/knowledge/specs/mycelium-spec'
 				},
 				{
 					name: 'Vista',
@@ -827,7 +830,7 @@
 					description: 'A three-layer defense system against prompt injection attacks. Canary detects poison early. Kestrel watches and validates. Robin produces the safe response. Each layer costs fractions of a cent but protects against compromised AI responses.',
 					status: 'applied',
 					icon: 'bird',
-					integration: 'Shared pattern for Wisp, Thorn, and future AI features',
+					integration: 'Integrated with Lumen for all Grove AI features',
 					spec: '/knowledge/patterns/songbird-pattern',
 					subComponents: [
 						{ name: 'Canary', icon: 'origami', description: 'Tripwire detection' },

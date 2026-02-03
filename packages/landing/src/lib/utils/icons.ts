@@ -234,6 +234,9 @@ import {
   // Zephyr - email gateway
   Send,
   RefreshCw,
+  // Garden & Blooms icons
+  Flower,
+  Cherry,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -520,6 +523,10 @@ export const toolIcons = {
   // Zephyr - email gateway
   send: Send, // Zephyr - email delivery (the gentle wind that carries)
   "refresh-cw": RefreshCw, // Zephyr - retry with backoff
+  // Garden & Blooms - core terminology
+  flower: Flower, // Garden - collection of blooms
+  cherry: Cherry, // Blooms - individual pieces of writing
+  zap: Zap, // Verge - remote AI coding
 } as const;
 
 // ============================================================================
