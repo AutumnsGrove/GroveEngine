@@ -60,7 +60,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
-	<Header {navItems} {resourceLinks} {connectLinks} brandTitle="Status" />
+	<Header {navItems} {resourceLinks} {connectLinks} brandTitle="Status" showLogo />
 
 	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">
