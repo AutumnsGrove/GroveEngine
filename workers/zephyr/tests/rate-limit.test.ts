@@ -1,7 +1,7 @@
 /**
  * Rate Limiting Middleware Tests
  *
- * Tests for per-tenant rate limiting by email type.
+ * Tests for per-tenant rate limiting by email type using atomic counters.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -11,48 +11,68 @@ import {
 } from "../src/middleware/rate-limit";
 import type { EmailType } from "../src/types";
 
-// Mock D1 database
-function createMockD1() {
+// Mock D1 database with atomic increment support
+function createMockD1(initialCounts?: { minute?: number; day?: number }) {
   const queries: Array<{ sql: string; params: unknown[] }> = [];
+  let minuteCount = initialCounts?.minute ?? 0;
+  let dayCount = initialCounts?.day ?? 0;
 
   return {
     queries,
-    prepare: vi.fn((sql: string) => ({
-      bind: vi.fn((...params: unknown[]) => ({
-        first: vi.fn(async () => {
-          queries.push({ sql, params });
-          return { count: 0 };
-        }),
-        all: vi.fn(async () => ({
-          results: [],
-        })),
-        run: vi.fn(async () => ({ success: true })),
-      })),
-    })),
-    // Helper to simulate rate limit exceeded
-    simulateCount: (count: number) => {
+    prepare: vi.fn((sql: string) => {
+      queries.push({ sql, params: [] });
       return {
-        prepare: vi.fn((sql: string) => ({
-          bind: vi.fn((...params: unknown[]) => ({
+        bind: vi.fn((...params: unknown[]) => {
+          queries[queries.length - 1].params = params;
+          return {
             first: vi.fn(async () => {
-              queries.push({ sql, params });
-              return { count };
+              // Determine which table is being queried
+              const isMinuteTable = sql.includes("zephyr_rate_limits");
+              const isDayTable = sql.includes("zephyr_rate_limits_daily");
+
+              if (sql.includes("INSERT") && sql.includes("ON CONFLICT")) {
+                // Atomic increment - return incremented count
+                if (isDayTable) {
+                  dayCount++;
+                  return { count: dayCount };
+                } else {
+                  minuteCount++;
+                  return { count: minuteCount };
+                }
+              }
+
+              // SELECT query for getRateLimitStatus
+              if (isDayTable) {
+                return { count: dayCount };
+              }
+              return { count: minuteCount };
             }),
             all: vi.fn(async () => ({
               results: [],
             })),
             run: vi.fn(async () => ({ success: true })),
-          })),
-        })),
-      } as unknown as D1Database;
+          };
+        }),
+      };
+    }),
+    getCounts: () => ({ minute: minuteCount, day: dayCount }),
+    // Helper to simulate specific counts
+    simulateCount: (count: number) => {
+      minuteCount = count;
+      dayCount = count;
+      return mockDb as unknown as D1Database;
     },
   };
 }
 
-describe("checkRateLimit", () => {
-  it("should allow request within limits", async () => {
-    const mockDb = createMockD1();
+let mockDb: ReturnType<typeof createMockD1>;
 
+describe("checkRateLimit", () => {
+  beforeEach(() => {
+    mockDb = createMockD1();
+  });
+
+  it("should allow request within limits", async () => {
     const result = await checkRateLimit(
       mockDb as unknown as D1Database,
       "test-tenant",
@@ -64,12 +84,25 @@ describe("checkRateLimit", () => {
     expect(result.remaining).toBeGreaterThan(0);
   });
 
+  it("should atomically increment counters", async () => {
+    await checkRateLimit(
+      mockDb as unknown as D1Database,
+      "test-tenant",
+      "transactional",
+      "user@example.com",
+    );
+
+    const counts = mockDb.getCounts();
+    expect(counts.minute).toBe(1);
+    expect(counts.day).toBe(1);
+  });
+
   it("should reject when per-minute limit exceeded", async () => {
-    const mockDb = createMockD1();
-    const dbWithHighCount = mockDb.simulateCount(60); // At limit for transactional
+    // Start at 60 (at limit), next increment makes it 61
+    mockDb = createMockD1({ minute: 60, day: 0 });
 
     const result = await checkRateLimit(
-      dbWithHighCount,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
       "user@example.com",
@@ -81,26 +114,11 @@ describe("checkRateLimit", () => {
   });
 
   it("should reject when per-day limit exceeded", async () => {
-    const mockDb = createMockD1();
-    // Simulate 999 emails sent (just under minute limit, at day limit)
-    let callCount = 0;
-    const dbWithDayLimit = {
-      prepare: vi.fn((sql: string) => ({
-        bind: vi.fn((...params: unknown[]) => ({
-          first: vi.fn(async () => {
-            callCount++;
-            // First call is minute check (returns low count)
-            // Second call is day check (returns high count)
-            return { count: callCount === 1 ? 10 : 1000 };
-          }),
-          all: vi.fn(async () => ({ results: [] })),
-          run: vi.fn(async () => ({ success: true })),
-        })),
-      })),
-    } as unknown as D1Database;
+    // Minute count low, day count at limit
+    mockDb = createMockD1({ minute: 10, day: 1000 });
 
     const result = await checkRateLimit(
-      dbWithDayLimit,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
       "user@example.com",
@@ -111,12 +129,10 @@ describe("checkRateLimit", () => {
   });
 
   it("should have different limits for different email types", async () => {
-    const mockDb = createMockD1();
-
     // Test verification type (stricter limits: 10/min, 100/day)
-    const dbAtVerificationLimit = mockDb.simulateCount(10);
+    mockDb = createMockD1({ minute: 10, day: 10 });
     const verificationResult = await checkRateLimit(
-      dbAtVerificationLimit,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "verification",
       "user@example.com",
@@ -125,9 +141,9 @@ describe("checkRateLimit", () => {
     expect(verificationResult.allowed).toBe(false);
 
     // Test broadcast type (higher limits: 1000/min, 10000/day)
-    const dbAtBroadcastLimit = mockDb.simulateCount(1000);
+    mockDb = createMockD1({ minute: 1000, day: 1000 });
     const broadcastResult = await checkRateLimit(
-      dbAtBroadcastLimit,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "broadcast",
       "user@example.com",
@@ -136,13 +152,11 @@ describe("checkRateLimit", () => {
     expect(broadcastResult.allowed).toBe(false);
   });
 
-  it("should allow request after rate limit window resets", async () => {
-    const mockDb = createMockD1();
-
+  it("should allow request in new time bucket after limit", async () => {
     // First request at limit
-    const dbAtLimit = mockDb.simulateCount(60);
+    mockDb = createMockD1({ minute: 60, day: 60 });
     const blockedResult = await checkRateLimit(
-      dbAtLimit,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
       "user@example.com",
@@ -150,10 +164,10 @@ describe("checkRateLimit", () => {
 
     expect(blockedResult.allowed).toBe(false);
 
-    // Simulate time passing (new DB query returns lower count)
-    const dbAfterReset = mockDb.simulateCount(0);
+    // New bucket (simulated by fresh mock with 0 counts)
+    mockDb = createMockD1({ minute: 0, day: 0 });
     const allowedResult = await checkRateLimit(
-      dbAfterReset,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
       "user@example.com",
@@ -180,28 +194,60 @@ describe("checkRateLimit", () => {
   });
 
   it("should track remaining count correctly", async () => {
-    const mockDb = createMockD1();
-    const dbWithPartialUsage = mockDb.simulateCount(30);
+    // At count 30, after increment becomes 31, so remaining = 60 - 31 = 29
+    mockDb = createMockD1({ minute: 30, day: 30 });
 
     const result = await checkRateLimit(
-      dbWithPartialUsage,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
       "user@example.com",
     );
 
     expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(30); // 60 - 30 = 30
+    expect(result.remaining).toBe(29); // 60 - 31 = 29
+  });
+
+  it("should prevent race condition with atomic increments", async () => {
+    // Simulate concurrent requests - each should get accurate count
+    mockDb = createMockD1({ minute: 0, day: 0 });
+
+    const results = await Promise.all([
+      checkRateLimit(
+        mockDb as unknown as D1Database,
+        "test-tenant",
+        "transactional",
+        "user1@example.com",
+      ),
+      checkRateLimit(
+        mockDb as unknown as D1Database,
+        "test-tenant",
+        "transactional",
+        "user2@example.com",
+      ),
+      checkRateLimit(
+        mockDb as unknown as D1Database,
+        "test-tenant",
+        "transactional",
+        "user3@example.com",
+      ),
+    ]);
+
+    // All should be allowed (only 3 requests, limit is 60)
+    expect(results.every((r) => r.allowed)).toBe(true);
+
+    // Counter should show 3
+    const counts = mockDb.getCounts();
+    expect(counts.minute).toBe(3);
   });
 });
 
 describe("getRateLimitStatus", () => {
   it("should return complete rate limit status", async () => {
-    const mockDb = createMockD1();
-    const dbWithUsage = mockDb.simulateCount(25);
+    mockDb = createMockD1({ minute: 25, day: 100 });
 
     const status = await getRateLimitStatus(
-      dbWithUsage,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
     );
@@ -214,13 +260,13 @@ describe("getRateLimitStatus", () => {
 
     expect(status.perDay).toEqual({
       limit: 1000,
-      used: 25,
-      remaining: 975,
+      used: 100,
+      remaining: 900,
     });
   });
 
   it("should handle zero usage", async () => {
-    const mockDb = createMockD1();
+    mockDb = createMockD1({ minute: 0, day: 0 });
 
     const status = await getRateLimitStatus(
       mockDb as unknown as D1Database,
@@ -235,24 +281,10 @@ describe("getRateLimitStatus", () => {
   });
 
   it("should cap remaining at zero when over limit", async () => {
-    // Mock with count over both minute (60) and day (1000) limits
-    let callCount = 0;
-    const dbWithOverage = {
-      prepare: vi.fn((sql: string) => ({
-        bind: vi.fn((...params: unknown[]) => ({
-          first: vi.fn(async () => {
-            callCount++;
-            // Return count over both limits
-            return { count: 1500 };
-          }),
-          all: vi.fn(async () => ({ results: [] })),
-          run: vi.fn(async () => ({ success: true })),
-        })),
-      })),
-    } as unknown as D1Database;
+    mockDb = createMockD1({ minute: 1500, day: 1500 });
 
     const status = await getRateLimitStatus(
-      dbWithOverage,
+      mockDb as unknown as D1Database,
       "test-tenant",
       "transactional",
     );
