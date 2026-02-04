@@ -25,7 +25,7 @@
 				and make this space your own.
 			</p>
 			<div class="setup-actions">
-				<Button href="/admin" variant="default" size="lg">
+				<Button href="/arbor" variant="default" size="lg">
 					Set Up Your Blog
 				</Button>
 			</div>

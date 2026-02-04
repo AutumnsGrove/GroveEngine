@@ -37,7 +37,7 @@ describe("isAllowedUrl (OG image generation allowlist)", () => {
 
   describe("blocked private IPs (RFC 1918)", () => {
     it("should block 127.0.0.1 (localhost)", () => {
-      expect(isAllowedUrl("https://127.0.0.1/admin")).toBe(false);
+      expect(isAllowedUrl("https://127.0.0.1/arbor")).toBe(false);
     });
 
     it("should block 192.168.x.x (private network)", () => {
@@ -65,7 +65,7 @@ describe("isAllowedUrl (OG image generation allowlist)", () => {
     });
 
     it("should block .local domains", () => {
-      expect(isAllowedUrl("https://server.local/admin")).toBe(false);
+      expect(isAllowedUrl("https://server.local/arbor")).toBe(false);
       expect(isAllowedUrl("https://anything.local/")).toBe(false);
     });
   });
@@ -122,7 +122,7 @@ describe("isBlockedExternalUrl (external OG fetch blocklist)", () => {
 
     it("should block 127.x.x.x", () => {
       expect(isBlockedExternalUrl("http://127.0.0.1/")).toBe(true);
-      expect(isBlockedExternalUrl("https://127.0.0.1:8080/admin")).toBe(true);
+      expect(isBlockedExternalUrl("https://127.0.0.1:8080/arbor")).toBe(true);
     });
 
     it("should block 0.x.x.x (any local address)", () => {

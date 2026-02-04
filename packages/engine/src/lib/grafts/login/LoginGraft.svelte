@@ -55,7 +55,7 @@
 
 	let {
 		providers = DEFAULT_PROVIDERS,
-		returnTo = "/admin",
+		returnTo = "/arbor",
 		clientId,
 		variant = "default",
 		header,

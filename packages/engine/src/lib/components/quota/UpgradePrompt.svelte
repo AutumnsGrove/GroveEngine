@@ -261,7 +261,7 @@
 
         <div class="flex gap-3">
           <a
-            href="/admin/posts"
+            href="/arbor/posts"
             class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 text-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
           >
             Manage Posts

@@ -50,7 +50,7 @@ describe("Full-Stack: CSRF Validation", () => {
   describe("Token-based CSRF (validateCSRFToken)", () => {
     it("accepts request with matching x-csrf-token header", () => {
       const token = generateCSRFToken();
-      const request = new Request("https://autumn.grove.place/admin/posts", {
+      const request = new Request("https://autumn.grove.place/arbor/posts", {
         method: "POST",
         headers: { "x-csrf-token": token },
       });
@@ -60,7 +60,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("accepts request with matching csrf-token fallback header", () => {
       const token = generateCSRFToken();
-      const request = new Request("https://autumn.grove.place/admin/posts", {
+      const request = new Request("https://autumn.grove.place/arbor/posts", {
         method: "POST",
         headers: { "csrf-token": token },
       });
@@ -71,7 +71,7 @@ describe("Full-Stack: CSRF Validation", () => {
     it("rejects request with mismatched token", () => {
       const sessionToken = generateCSRFToken();
       const wrongToken = generateCSRFToken();
-      const request = new Request("https://autumn.grove.place/admin/posts", {
+      const request = new Request("https://autumn.grove.place/arbor/posts", {
         method: "POST",
         headers: { "x-csrf-token": wrongToken },
       });
@@ -81,7 +81,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects request with no token header", () => {
       const token = generateCSRFToken();
-      const request = new Request("https://autumn.grove.place/admin/posts", {
+      const request = new Request("https://autumn.grove.place/arbor/posts", {
         method: "POST",
       });
 
@@ -89,7 +89,7 @@ describe("Full-Stack: CSRF Validation", () => {
     });
 
     it("rejects when session token is empty", () => {
-      const request = new Request("https://autumn.grove.place/admin/posts", {
+      const request = new Request("https://autumn.grove.place/arbor/posts", {
         method: "POST",
         headers: { "x-csrf-token": "some-token" },
       });
@@ -119,7 +119,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("accepts same-origin request (host matches origin)", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "https://autumn.grove.place",
@@ -133,7 +133,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("accepts same-origin with x-forwarded-host", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "https://autumn.grove.place",
@@ -147,7 +147,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects cross-origin request (different subdomain)", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "https://evil.grove.place",
@@ -161,7 +161,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects cross-origin request (different domain)", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         { headers: { origin: "https://evil.com", host: "autumn.grove.place" } },
       );
 
@@ -170,7 +170,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects non-HTTPS origin for non-localhost", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "http://autumn.grove.place",
@@ -184,7 +184,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("allows HTTP for localhost", () => {
       const request = createRequestWithHeaders(
-        "http://localhost:5173/admin/posts",
+        "http://localhost:5173/arbor/posts",
         {
           headers: { origin: "http://localhost:5173", host: "localhost:5173" },
         },
@@ -195,7 +195,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects port mismatch", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "https://autumn.grove.place:8443",
@@ -209,7 +209,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("rejects invalid protocol in origin", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         {
           headers: {
             origin: "ftp://autumn.grove.place",
@@ -223,7 +223,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("accepts request with no origin header (non-browser)", () => {
       const request = createRequestWithHeaders(
-        "https://autumn.grove.place/admin/posts",
+        "https://autumn.grove.place/arbor/posts",
         { headers: { host: "autumn.grove.place" } },
       );
 
@@ -234,7 +234,7 @@ describe("Full-Stack: CSRF Validation", () => {
 
     it("prevents cross-tenant CSRF (tenant1 → tenant2)", () => {
       const request = createRequestWithHeaders(
-        "https://victim-tenant.grove.place/admin/settings",
+        "https://victim-tenant.grove.place/arbor/settings",
         {
           headers: {
             origin: "https://attacker-tenant.grove.place",

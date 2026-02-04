@@ -883,11 +883,11 @@ describe("Auth Callback Endpoint", () => {
         },
       });
 
-      const returnTo = event.cookies.get("auth_return_to") || "/admin";
+      const returnTo = event.cookies.get("auth_return_to") || "/arbor";
       expect(returnTo).toBe("/dashboard");
     });
 
-    it("should redirect to /admin if no return_to cookie", async () => {
+    it("should redirect to /arbor if no return_to cookie", async () => {
       const event = createMockRequestEvent({
         url: "https://grove.place/auth/callback?code=auth-code&state=test-state",
         method: "GET",
@@ -904,8 +904,8 @@ describe("Auth Callback Endpoint", () => {
         },
       });
 
-      const returnTo = event.cookies.get("auth_return_to") || "/admin";
-      expect(returnTo).toBe("/admin");
+      const returnTo = event.cookies.get("auth_return_to") || "/arbor";
+      expect(returnTo).toBe("/arbor");
     });
   });
 

@@ -14,12 +14,12 @@ export const GROVE_DOMAIN = "grove.place";
  * Build a full URL to a user's grove
  *
  * @param username - The grove subdomain (e.g., "autumn" for autumn.grove.place)
- * @param path - Optional path within the grove (e.g., "/admin", "/blog/hello")
- * @returns Full URL (e.g., "https://autumn.grove.place/admin")
+ * @param path - Optional path within the grove (e.g., "/arbor", "/blog/hello")
+ * @returns Full URL (e.g., "https://autumn.grove.place/arbor")
  *
  * @example
  * buildGroveUrl("autumn") // "https://autumn.grove.place"
- * buildGroveUrl("autumn", "/admin") // "https://autumn.grove.place/admin"
+ * buildGroveUrl("autumn", "/arbor") // "https://autumn.grove.place/arbor"
  * buildGroveUrl("autumn", "admin") // "https://autumn.grove.place/admin" (auto-adds leading slash)
  */
 export function buildGroveUrl(username: string, path?: string): string {
@@ -38,13 +38,13 @@ export function buildGroveUrl(username: string, path?: string): string {
  * Build the admin URL for a user's grove
  *
  * @param username - The grove subdomain
- * @returns Full admin URL (e.g., "https://autumn.grove.place/admin")
+ * @returns Full admin URL (e.g., "https://autumn.grove.place/arbor")
  *
  * @example
- * buildGroveAdminUrl("autumn") // "https://autumn.grove.place/admin"
+ * buildGroveAdminUrl("autumn") // "https://autumn.grove.place/arbor"
  */
 export function buildGroveAdminUrl(username: string): string {
-  return buildGroveUrl(username, "/admin");
+  return buildGroveUrl(username, "/arbor");
 }
 
 /**

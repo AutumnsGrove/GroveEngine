@@ -7,12 +7,12 @@
 
 	let { children } = $props();
 
-	// Check if we're in admin section (admin has its own chrome)
-	const isAdmin = $derived(page.url.pathname.startsWith('/admin'));
+	// Check if we're in arbor section (arbor has its own chrome)
+	const isAdmin = $derived(page.url.pathname.startsWith('/arbor'));
 
 	// Forage nav items for public pages
 	const navItems = [
-		{ href: '/admin', label: 'Admin', icon: Search }
+		{ href: '/arbor', label: 'Admin', icon: Search }
 	];
 
 	// Enable dark mode by default

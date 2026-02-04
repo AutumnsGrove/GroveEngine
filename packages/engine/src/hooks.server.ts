@@ -28,7 +28,8 @@ function getCookie(cookieHeader: string | null, name: string): string | null {
 const RESERVED_SUBDOMAINS: Record<string, string | null> = {
   www: "/", // Redirect to root
   auth: "/auth", // Auth routes
-  admin: "/admin", // Platform admin
+  admin: "/arbor", // Legacy admin subdomain → new arbor routes
+  arbor: "/arbor", // Platform admin (Grove terminology)
   api: "/api", // API routes
   domains: "/(apps)/domains", // Forage - Domain discovery tool
   monitor: "/(apps)/monitor", // GroveMonitor
@@ -271,7 +272,7 @@ function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
  */
 function needsUnsafeEval(pathname: string): boolean {
   return (
-    pathname.startsWith("/admin/") ||
+    pathname.startsWith("/arbor/") ||
     /^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
     pathname.includes("/preview")
   );
@@ -283,18 +284,26 @@ export const handle: Handle = async ({ event, resolve }) => {
   event.locals.context = { type: "landing" };
 
   // =========================================================================
-  // BLOG → GARDEN REDIRECTS (SEO preservation)
+  // GROVE TERMINOLOGY REDIRECTS (SEO preservation)
   // =========================================================================
-  // Phase 1 of Grove terminology migration: /blog → /garden
-  // These 301 redirects preserve SEO value while transitioning to new routes
+  // 301 redirects preserve SEO value while transitioning to new routes
   const pathname = event.url.pathname;
+
+  // Phase 1: /blog → /garden
   if (pathname === "/blog" || pathname.startsWith("/blog/")) {
     const newPath = pathname.replace(/^\/blog/, "/garden");
     throw redirect(301, `${newPath}${event.url.search}`);
   }
-  // Admin blog routes also redirect
+
+  // Phase 2: /admin → /arbor (check specific routes first)
+  // Legacy /admin/blog → /arbor/garden (combines both migrations)
   if (pathname === "/admin/blog" || pathname.startsWith("/admin/blog/")) {
-    const newPath = pathname.replace(/^\/admin\/blog/, "/admin/garden");
+    const newPath = pathname.replace(/^\/admin\/blog/, "/arbor/garden");
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+  // All other /admin routes → /arbor
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const newPath = pathname.replace(/^\/admin/, "/arbor");
     throw redirect(301, `${newPath}${event.url.search}`);
   }
 

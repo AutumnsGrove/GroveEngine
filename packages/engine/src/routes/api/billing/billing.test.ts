@@ -17,20 +17,22 @@ import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
 describe("Plan Configuration", () => {
   it("should derive PLANS from TIERS config", () => {
     // Verify that all paid tiers are included in PLANS
-    const PLANS: Record<string, { name: string; price: number; interval: string; features: string[] }> =
-      Object.fromEntries(
-        Object.entries(TIERS)
-          .filter(([key]) => key !== "free")
-          .map(([key, tier]) => [
-            key,
-            {
-              name: tier.display.name,
-              price: tier.pricing.monthlyPriceCents,
-              interval: "month",
-              features: tier.display.featureStrings,
-            },
-          ])
-      );
+    const PLANS: Record<
+      string,
+      { name: string; price: number; interval: string; features: string[] }
+    > = Object.fromEntries(
+      Object.entries(TIERS)
+        .filter(([key]) => key !== "free")
+        .map(([key, tier]) => [
+          key,
+          {
+            name: tier.display.name,
+            price: tier.pricing.monthlyPriceCents,
+            interval: "month",
+            features: tier.display.featureStrings,
+          },
+        ]),
+    );
 
     // Should include all paid tiers
     expect(Object.keys(PLANS)).toContain("seedling");
@@ -43,7 +45,7 @@ describe("Plan Configuration", () => {
     const PLANS = Object.fromEntries(
       Object.entries(TIERS)
         .filter(([key]) => key !== "free")
-        .map(([key, tier]) => [key, tier])
+        .map(([key, tier]) => [key, tier]),
     );
 
     expect(Object.keys(PLANS)).not.toContain("free");
@@ -80,7 +82,7 @@ describe("Tier Status Validation", () => {
   it("should reject plan changes to coming_soon tiers", () => {
     // Find any coming_soon tiers
     const comingSoonTiers = Object.entries(TIERS).filter(
-      ([, config]) => config.status === "coming_soon"
+      ([, config]) => config.status === "coming_soon",
     );
 
     for (const [key, config] of comingSoonTiers) {
@@ -93,7 +95,7 @@ describe("Tier Status Validation", () => {
   it("should reject plan changes to future tiers", () => {
     // Find any future tiers
     const futureTiers = Object.entries(TIERS).filter(
-      ([, config]) => config.status === "future"
+      ([, config]) => config.status === "future",
     );
 
     for (const [key, config] of futureTiers) {
@@ -139,7 +141,8 @@ describe("Subscription Actions", () => {
     };
 
     // Plan is required for change_plan
-    const isValid = request.action !== "change_plan" || request.plan !== undefined;
+    const isValid =
+      request.action !== "change_plan" || request.plan !== undefined;
     expect(isValid).toBe(false);
   });
 
@@ -150,7 +153,8 @@ describe("Subscription Actions", () => {
     };
 
     // Plan is not required for cancel
-    const isValid = request.action !== "change_plan" || request.plan !== undefined;
+    const isValid =
+      request.action !== "change_plan" || request.plan !== undefined;
     expect(isValid).toBe(true);
   });
 
@@ -161,7 +165,8 @@ describe("Subscription Actions", () => {
     };
 
     // Plan is not required for resume
-    const isValid = request.action !== "change_plan" || request.plan !== undefined;
+    const isValid =
+      request.action !== "change_plan" || request.plan !== undefined;
     expect(isValid).toBe(true);
   });
 });
@@ -183,7 +188,7 @@ describe("Billing Audit Logging", () => {
     action: string,
     details: Record<string, unknown>,
     tenantId: string = "test-tenant",
-    userEmail: string = "user@example.com"
+    userEmail: string = "user@example.com",
   ): AuditLogEntry => ({
     tenantId,
     action,
@@ -230,7 +235,7 @@ describe("Billing Audit Logging", () => {
       "subscription_cancelled",
       { plan: "oak" },
       "test-tenant",
-      "admin@grove.place"
+      "admin@grove.place",
     );
 
     expect(entry.userEmail).toBe("admin@grove.place");
@@ -241,7 +246,7 @@ describe("Billing Audit Logging", () => {
       "subscription_cancelled",
       { plan: "oak" },
       "tenant-alice",
-      "alice@example.com"
+      "alice@example.com",
     );
 
     expect(entry.tenantId).toBe("tenant-alice");
@@ -296,10 +301,14 @@ describe("Billing Portal Return URL Validation", () => {
    * Validate return URL to prevent open redirect attacks.
    * Must be a grove.place domain or same-origin.
    */
-  const validateReturnUrl = (returnUrl: string, requestOrigin: string): boolean => {
+  const validateReturnUrl = (
+    returnUrl: string,
+    requestOrigin: string,
+  ): boolean => {
     try {
       const parsedReturn = new URL(returnUrl);
-      const isGroveDomain = parsedReturn.hostname === "grove.place" ||
+      const isGroveDomain =
+        parsedReturn.hostname === "grove.place" ||
         parsedReturn.hostname.endsWith(".grove.place");
       const isSameOrigin = parsedReturn.origin === requestOrigin;
       return isGroveDomain || isSameOrigin;
@@ -309,32 +318,81 @@ describe("Billing Portal Return URL Validation", () => {
   };
 
   it("should allow return URLs to grove.place", () => {
-    expect(validateReturnUrl("https://grove.place/admin/account", "https://alice.grove.place")).toBe(true);
-    expect(validateReturnUrl("https://www.grove.place/settings", "https://alice.grove.place")).toBe(true);
+    expect(
+      validateReturnUrl(
+        "https://grove.place/arbor/account",
+        "https://alice.grove.place",
+      ),
+    ).toBe(true);
+    expect(
+      validateReturnUrl(
+        "https://www.grove.place/settings",
+        "https://alice.grove.place",
+      ),
+    ).toBe(true);
   });
 
   it("should allow return URLs to subdomains of grove.place", () => {
-    expect(validateReturnUrl("https://alice.grove.place/admin", "https://alice.grove.place")).toBe(true);
-    expect(validateReturnUrl("https://bob.grove.place/account", "https://alice.grove.place")).toBe(true);
+    expect(
+      validateReturnUrl(
+        "https://alice.grove.place/arbor",
+        "https://alice.grove.place",
+      ),
+    ).toBe(true);
+    expect(
+      validateReturnUrl(
+        "https://bob.grove.place/account",
+        "https://alice.grove.place",
+      ),
+    ).toBe(true);
   });
 
   it("should allow same-origin return URLs", () => {
-    expect(validateReturnUrl("https://alice.grove.place/admin", "https://alice.grove.place")).toBe(true);
+    expect(
+      validateReturnUrl(
+        "https://alice.grove.place/arbor",
+        "https://alice.grove.place",
+      ),
+    ).toBe(true);
   });
 
   it("should reject return URLs to external domains", () => {
-    expect(validateReturnUrl("https://evil.com/steal-token", "https://alice.grove.place")).toBe(false);
-    expect(validateReturnUrl("https://grove.place.evil.com/phish", "https://alice.grove.place")).toBe(false);
-    expect(validateReturnUrl("https://attacker.org/redirect", "https://alice.grove.place")).toBe(false);
+    expect(
+      validateReturnUrl(
+        "https://evil.com/steal-token",
+        "https://alice.grove.place",
+      ),
+    ).toBe(false);
+    expect(
+      validateReturnUrl(
+        "https://grove.place.evil.com/phish",
+        "https://alice.grove.place",
+      ),
+    ).toBe(false);
+    expect(
+      validateReturnUrl(
+        "https://attacker.org/redirect",
+        "https://alice.grove.place",
+      ),
+    ).toBe(false);
   });
 
   it("should reject return URLs with embedded credentials", () => {
-    expect(validateReturnUrl("https://admin:password@evil.com/", "https://alice.grove.place")).toBe(false);
+    expect(
+      validateReturnUrl(
+        "https://admin:password@evil.com/",
+        "https://alice.grove.place",
+      ),
+    ).toBe(false);
   });
 
   it("should reject malformed URLs", () => {
-    expect(validateReturnUrl("not-a-url", "https://alice.grove.place")).toBe(false);
-    expect(validateReturnUrl("javascript:alert(1)", "https://alice.grove.place")).toBe(false);
+    expect(validateReturnUrl("not-a-url", "https://alice.grove.place")).toBe(
+      false,
+    );
+    expect(
+      validateReturnUrl("javascript:alert(1)", "https://alice.grove.place"),
+    ).toBe(false);
   });
 });
 
@@ -356,7 +414,9 @@ describe("Plan Change Proration", () => {
     const daysInMonth = 30;
 
     // Credit for unused Seedling time
-    const seedlingCredit = Math.floor((seedlingPrice * daysRemaining) / daysInMonth);
+    const seedlingCredit = Math.floor(
+      (seedlingPrice * daysRemaining) / daysInMonth,
+    );
     // Charge for Oak time
     const oakCharge = Math.floor((oakPrice * daysRemaining) / daysInMonth);
     // Net charge (Stripe handles this)
@@ -377,7 +437,9 @@ describe("Plan Change Proration", () => {
     // Credit for unused Oak time
     const oakCredit = Math.floor((oakPrice * daysRemaining) / daysInMonth);
     // Charge for Seedling time
-    const seedlingCharge = Math.floor((seedlingPrice * daysRemaining) / daysInMonth);
+    const seedlingCharge = Math.floor(
+      (seedlingPrice * daysRemaining) / daysInMonth,
+    );
     // Net credit (Stripe handles this)
     const netCredit = oakCredit - seedlingCharge;
 

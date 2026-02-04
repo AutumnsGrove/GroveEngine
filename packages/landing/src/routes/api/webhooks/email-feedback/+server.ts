@@ -135,7 +135,7 @@ Source: Email (feedback@grove.place)
 ${truncatedMessage}
 
 ---
-View in Arbor: https://grove.place/admin/feedback
+View in Arbor: https://grove.place/arbor/feedback
 Feedback ID: ${id}`;
 
       const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
@@ -150,7 +150,7 @@ Feedback ID: ${id}`;
 <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
 
 <p style="font-size: 14px; color: #666;">
-<a href="https://grove.place/admin/feedback">View in Arbor</a><br>
+<a href="https://grove.place/arbor/feedback">View in Arbor</a><br>
 Feedback ID: ${id}
 </p>
 </div>`;

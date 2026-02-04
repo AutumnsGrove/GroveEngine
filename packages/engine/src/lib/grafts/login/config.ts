@@ -84,7 +84,7 @@ export const DEFAULT_PROVIDERS: AuthProvider[] = ["google"];
 /**
  * Default return URL after successful auth.
  */
-export const DEFAULT_RETURN_TO = "/admin";
+export const DEFAULT_RETURN_TO = "/arbor";
 
 /**
  * Default GroveAuth URLs.

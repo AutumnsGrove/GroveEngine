@@ -205,7 +205,7 @@ function base64UrlToArrayBuffer(base64url: string): ArrayBuffer {
 export async function authenticateWithPasskey(
   options: AuthenticateOptions = {},
 ): Promise<PasskeyAuthResult> {
-  const { returnTo = "/admin" } = options;
+  const { returnTo = "/arbor" } = options;
 
   // Check WebAuthn support
   if (!isWebAuthnSupported()) {

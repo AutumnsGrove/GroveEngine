@@ -24,7 +24,7 @@ export const load: ServerLoad = async ({ locals, platform }) => {
   }
 
   // Fallback for logged-in users without a grove: link to Plant for signup
-  // This prevents Header from falling back to relative "/admin" (which becomes grove.place/admin)
+  // This prevents Header from falling back to relative "/arbor" (which becomes grove.place/arbor)
   if (locals.user && !groveUrl) {
     groveUrl = "https://plant.grove.place";
   }

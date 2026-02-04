@@ -268,7 +268,7 @@ describe("Auth Login Start Endpoint", () => {
       expect(returnTo).toBe("/dashboard");
     });
 
-    it("should use /admin as default return_to", async () => {
+    it("should use /arbor as default return_to", async () => {
       const event = createMockRequestEvent({
         url: "https://grove.place/auth/login/start",
         method: "GET",
@@ -280,9 +280,9 @@ describe("Auth Login Start Endpoint", () => {
         },
       });
 
-      // No return_to param means it should default to /admin
-      const returnTo = event.url.searchParams.get("return_to") || "/admin";
-      expect(returnTo).toBe("/admin");
+      // No return_to param means it should default to /arbor
+      const returnTo = event.url.searchParams.get("return_to") || "/arbor";
+      expect(returnTo).toBe("/arbor");
     });
 
     it("should preserve custom return_to URL", async () => {

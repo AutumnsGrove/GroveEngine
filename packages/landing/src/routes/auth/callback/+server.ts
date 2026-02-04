@@ -9,7 +9,7 @@
  * 1. User clicks "Sign in with Google" → redirects to Better Auth
  * 2. Better Auth handles OAuth with Google
  * 3. Better Auth sets session cookie and redirects here
- * 4. We verify cookie exists and redirect to /admin (or returnTo)
+ * 4. We verify cookie exists and redirect to /arbor (or returnTo)
  */
 
 import { redirect } from "@sveltejs/kit";
@@ -58,12 +58,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     );
     throw redirect(
       302,
-      `/admin/login?error=${encodeURIComponent(friendlyMessage)}`,
+      `/arbor/login?error=${encodeURIComponent(friendlyMessage)}`,
     );
   }
 
-  // Get return URL from query params (set by LoginGraft) or default to /admin
-  const returnTo = url.searchParams.get("returnTo") || "/admin";
+  // Get return URL from query params (set by LoginGraft) or default to /arbor
+  const returnTo = url.searchParams.get("returnTo") || "/arbor";
 
   // Verify Better Auth session cookie was set
   // Better Auth sets this cookie during the OAuth callback at GroveAuth
@@ -88,7 +88,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
       }
       throw redirect(
         302,
-        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
+        `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
       );
     }
     // Legacy session exists and within migration window - allow through

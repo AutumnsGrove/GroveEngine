@@ -162,7 +162,7 @@
 					description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
 					status: 'live',
 					icon: 'dashboard',
-					domain: '{you}.grove.place/admin',
+					domain: '{you}.grove.place/arbor',
 					integration: 'Built into every Grove blog',
 					spec: '/knowledge/specs/arbor-spec',
 					whatIsLink: '/knowledge/help/what-is-arbor',

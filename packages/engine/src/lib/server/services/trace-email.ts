@@ -102,7 +102,7 @@ function buildHtmlEmail(
 
       <!-- Footer -->
       <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e8e4dc; text-align: center;">
-        <a href="https://grove.place/admin/traces" style="display: inline-block; padding: 12px 24px; background-color: #4a5d23; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 500;">View all traces</a>
+        <a href="https://grove.place/arbor/traces" style="display: inline-block; padding: 12px 24px; background-color: #4a5d23; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 500;">View all traces</a>
       </div>
 
     </div>

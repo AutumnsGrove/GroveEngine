@@ -38,34 +38,36 @@ describe("GROVE_URLS", () => {
   describe("Smart Links (via /go/)", () => {
     it("should route ARBOR_PANEL through /go/", () => {
       expect(GROVE_URLS.ARBOR_PANEL).toContain("/go/");
-      expect(GROVE_URLS.ARBOR_PANEL).toBe("https://grove.place/go/admin");
+      expect(GROVE_URLS.ARBOR_PANEL).toBe("https://grove.place/go/arbor");
     });
 
     it("should route NEW_POST through /go/", () => {
       expect(GROVE_URLS.NEW_POST).toContain("/go/");
-      expect(GROVE_URLS.NEW_POST).toBe("https://grove.place/go/posts/new");
+      expect(GROVE_URLS.NEW_POST).toBe(
+        "https://grove.place/go/arbor/posts/new",
+      );
     });
 
     it("should route SETTINGS through /go/", () => {
       expect(GROVE_URLS.SETTINGS).toContain("/go/");
-      expect(GROVE_URLS.SETTINGS).toBe("https://grove.place/go/settings");
+      expect(GROVE_URLS.SETTINGS).toBe("https://grove.place/go/arbor/settings");
     });
 
     it("should route APPEARANCE through /go/", () => {
       expect(GROVE_URLS.APPEARANCE).toContain("/go/");
       expect(GROVE_URLS.APPEARANCE).toBe(
-        "https://grove.place/go/settings/appearance",
+        "https://grove.place/go/arbor/settings/appearance",
       );
     });
 
     it("should route POSTS through /go/", () => {
       expect(GROVE_URLS.POSTS).toContain("/go/");
-      expect(GROVE_URLS.POSTS).toBe("https://grove.place/go/posts");
+      expect(GROVE_URLS.POSTS).toBe("https://grove.place/go/arbor/posts");
     });
 
     it("should route PAGES through /go/", () => {
       expect(GROVE_URLS.PAGES).toContain("/go/");
-      expect(GROVE_URLS.PAGES).toBe("https://grove.place/go/pages");
+      expect(GROVE_URLS.PAGES).toBe("https://grove.place/go/arbor/pages");
     });
   });
 
@@ -96,8 +98,8 @@ describe("GROVE_URLS", () => {
 
 describe("buildGoUrl", () => {
   it("should build basic URL with path", () => {
-    const url = buildGoUrl("admin");
-    expect(url).toBe("https://grove.place/go/admin");
+    const url = buildGoUrl("arbor");
+    expect(url).toBe("https://grove.place/go/arbor");
   });
 
   it("should handle nested paths", () => {
@@ -111,12 +113,12 @@ describe("buildGoUrl", () => {
   });
 
   it("should add single query parameter", () => {
-    const url = buildGoUrl("admin", { utm_source: "email" });
-    expect(url).toBe("https://grove.place/go/admin?utm_source=email");
+    const url = buildGoUrl("arbor", { utm_source: "email" });
+    expect(url).toBe("https://grove.place/go/arbor?utm_source=email");
   });
 
   it("should add multiple query parameters", () => {
-    const url = buildGoUrl("admin", {
+    const url = buildGoUrl("arbor", {
       utm_source: "email",
       utm_campaign: "welcome",
     });
@@ -126,17 +128,17 @@ describe("buildGoUrl", () => {
   });
 
   it("should handle empty params object", () => {
-    const url = buildGoUrl("admin", {});
-    expect(url).toBe("https://grove.place/go/admin");
+    const url = buildGoUrl("arbor", {});
+    expect(url).toBe("https://grove.place/go/arbor");
   });
 
   it("should handle undefined params", () => {
-    const url = buildGoUrl("admin");
-    expect(url).toBe("https://grove.place/go/admin");
+    const url = buildGoUrl("arbor");
+    expect(url).toBe("https://grove.place/go/arbor");
   });
 
   it("should URL-encode parameter values", () => {
-    const url = buildGoUrl("admin", { ref: "hello world" });
+    const url = buildGoUrl("arbor", { ref: "hello world" });
     // URLSearchParams encodes spaces as + (valid for query strings)
     expect(url).toContain("ref=hello+world");
   });
@@ -148,34 +150,34 @@ describe("buildGoUrl", () => {
 
 describe("buildEmailUrl", () => {
   it("should add utm_source=email", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence");
+    const url = buildEmailUrl("arbor", "welcome-sequence");
     expect(url).toContain("utm_source=email");
   });
 
   it("should add utm_medium=sequence", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence");
+    const url = buildEmailUrl("arbor", "welcome-sequence");
     expect(url).toContain("utm_medium=sequence");
   });
 
   it("should add utm_campaign parameter", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence");
+    const url = buildEmailUrl("arbor", "welcome-sequence");
     expect(url).toContain("utm_campaign=welcome-sequence");
   });
 
   it("should add utm_content when provided", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence", "day-1");
+    const url = buildEmailUrl("arbor", "welcome-sequence", "day-1");
     expect(url).toContain("utm_content=day-1");
   });
 
   it("should not add utm_content when not provided", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence");
+    const url = buildEmailUrl("arbor", "welcome-sequence");
     expect(url).not.toContain("utm_content");
   });
 
   it("should build complete tracking URL for day 1 email", () => {
-    const url = buildEmailUrl("admin", "welcome-sequence", "day-1");
+    const url = buildEmailUrl("arbor", "welcome-sequence", "day-1");
     expect(url).toBe(
-      "https://grove.place/go/admin?utm_source=email&utm_medium=sequence&utm_campaign=welcome-sequence&utm_content=day-1",
+      "https://grove.place/go/arbor?utm_source=email&utm_medium=sequence&utm_campaign=welcome-sequence&utm_content=day-1",
     );
   });
 

@@ -118,7 +118,7 @@ export const POST: RequestHandler = async ({
 
   // Get returnTo from request body or cookie
   const returnTo =
-    body.returnTo || cookies.get("passkey_return_to") || "/admin";
+    body.returnTo || cookies.get("passkey_return_to") || "/arbor";
 
   // Clear the returnTo cookie
   cookies.delete("passkey_return_to", { path: "/" });

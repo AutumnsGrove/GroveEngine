@@ -88,8 +88,8 @@ export const GET: RequestHandler = async ({
     throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
   }
 
-  // Get return URL from query params (set by LoginGraft) or default to /admin
-  const returnTo = url.searchParams.get("returnTo") || "/admin";
+  // Get return URL from query params (set by LoginGraft) or default to /arbor
+  const returnTo = url.searchParams.get("returnTo") || "/arbor";
 
   // Verify Better Auth session cookie was set
   // Better Auth uses __Secure- prefix in production (HTTPS)

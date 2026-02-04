@@ -862,8 +862,8 @@ export const PUT: RequestHandler = async ({
       .first()) as { subdomain: string } | null;
 
     const returnUrl = tenant
-      ? `https://${tenant.subdomain}.grove.place/admin/account`
-      : url.origin + "/admin/account";
+      ? `https://${tenant.subdomain}.grove.place/arbor/account`
+      : url.origin + "/arbor/account";
 
     // Create Stripe Billing Portal session
     const response = await fetch(

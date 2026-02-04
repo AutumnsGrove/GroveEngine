@@ -103,11 +103,11 @@
 
 		<!-- CTA / Login -->
 		{#if data.user}
-			<GlassButton variant="accent" size="lg" href="/admin">
+			<GlassButton variant="accent" size="lg" href="/arbor">
 				Open Dashboard
 			</GlassButton>
 		{:else}
-			<GlassButton variant="accent" size="lg" href="/admin/login">
+			<GlassButton variant="accent" size="lg" href="/arbor/login">
 				Admin Login
 			</GlassButton>
 		{/if}

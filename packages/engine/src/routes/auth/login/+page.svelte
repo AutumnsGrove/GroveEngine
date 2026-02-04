@@ -22,7 +22,7 @@
 <LoginGraft
 	variant="fullpage"
 	providers={['google', 'passkey']}
-	returnTo="/admin"
+	returnTo="/arbor"
 >
 	{#snippet logo()}
 		<Logo class="w-16 h-16" />
