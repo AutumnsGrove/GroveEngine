@@ -3,6 +3,7 @@ title: GroveTerm Full Integration Plan
 description: Complete rollout of interactive Grove terminology across the platform
 status: planning
 created: '2026-02-04'
+updated: '2026-02-04'
 depends_on: ['PR #947 - GroveTerm Simplification']
 ---
 # GroveTerm Full Integration Plan
@@ -17,7 +18,7 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 
 **What GroveTerm Does:**
 - Renders terminology as styled, interactive elements
-- Shows definitions on click via popup
+- Shows definitions on hover (tooltip) with full popup on click (fallback)
 - Color-codes by category (foundational, platform, content, tools, operations)
 - Teaches the Grove lexicon organically as Wanderers explore
 
@@ -25,6 +26,16 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 - Component simplified: `<GroveTerm term="bloom">blooms</GroveTerm>`
 - Initial integration in 3 admin pages (arbor dashboard, garden, account features)
 - 51 terms defined in grove-term-manifest.json
+
+---
+
+## Key Decisions
+
+| Question | Decision | Rationale |
+|----------|----------|-----------|
+| `[[term]]` in user blogs? | **YES** | Wanderers should speak the language too |
+| GroveTerm in emails? | **Skip** | Can't render Svelte; small loss, not worth complexity |
+| Tooltip vs Popup? | **Tooltip primary, popup fallback** | Minimally intrusive; full Waystone behavior on click |
 
 ---
 
@@ -37,28 +48,28 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 │                                                                 │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐        │
 │  │   PHASE 1    │   │   PHASE 2    │   │   PHASE 3    │        │
-│  │   Arbor      │──▶│   Public     │──▶│   Content    │        │
-│  │   (Admin)    │   │   Pages      │   │   System     │        │
+│  │   Arbor      │──▶│   Public     │──▶│   Workshop   │        │
+│  │   (Admin)    │   │   Pages      │   │   & Docs     │        │
 │  └──────────────┘   └──────────────┘   └──────────────┘        │
 │         │                 │                   │                 │
 │         ▼                 ▼                   ▼                 │
-│  • Dashboard        • Landing           • Markdown hook        │
-│  • Garden           • Pricing           • Blog posts           │
-│  • Settings         • Knowledge         • Help articles        │
-│  • Features         • Onboarding        • Email templates      │
+│  • Dashboard        • Landing           • Vineyard             │
+│  • Garden           • Pricing           • TermGallery          │
+│  • Settings         • Knowledge         • KB articles          │
+│  • Features         • Onboarding        • "Using [[term]]"     │
 │                                                                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────┐   ┌──────────────┐                           │
 │  │   PHASE 4    │   │   PHASE 5    │                           │
-│  │   Workshop   │──▶│   Polish     │                           │
-│  │   & Docs     │   │   & Scale    │                           │
+│  │   Content    │──▶│   Polish     │                           │
+│  │   System     │   │   & Scale    │                           │
 │  └──────────────┘   └──────────────┘                           │
 │         │                 │                                     │
 │         ▼                 ▼                                     │
-│  • Vineyard         • Performance                              │
-│  • Component docs   • A11y audit                               │
-│  • API reference    • Mobile UX                                │
+│  • Remark plugin    • Performance                              │
+│  • [[term]] syntax  • A11y audit                               │
+│  • User blogs       • Mobile UX                                │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -144,77 +155,9 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 
 ---
 
-## Phase 3: Content System Integration
+## Phase 3: Workshop & Documentation
 
-**Goal:** Enable GroveTerm in user-generated and markdown content.
-
-This is the most complex phase—requires preprocessing hooks.
-
-### Approach A: Markdown Remark Plugin (Recommended)
-
-Create a remark plugin that transforms `[[term]]` or `::term::` syntax into GroveTerm components.
-
-```markdown
-<!-- Author writes -->
-Welcome to my [[grove]]. Here are my latest [[blooms]].
-
-<!-- Transforms to -->
-Welcome to my <GroveTerm term="grove">grove</GroveTerm>.
-Here are my latest <GroveTerm term="blooms">blooms</GroveTerm>.
-```
-
-**Implementation:**
-
-```typescript
-// packages/engine/src/lib/utils/remark-groveterm.ts
-import { visit } from 'unist-util-visit';
-
-export function remarkGroveTerm() {
-  return (tree) => {
-    visit(tree, 'text', (node, index, parent) => {
-      // Match [[term]] or [[term|display text]]
-      const regex = /\[\[([a-z-]+)(?:\|([^\]]+))?\]\]/g;
-      // Transform matches to GroveTerm nodes
-    });
-  };
-}
-```
-
-**Where to Apply:**
-- Blog post rendering
-- Help article rendering
-- About/bio sections (if markdown)
-
-### Approach B: Runtime Component (Simpler, Less Flexible)
-
-Use a wrapper component that parses content client-side:
-
-```svelte
-<GroveTermContent content={post.body} />
-```
-
-Pros: Simpler to implement
-Cons: Client-side processing, can't use in SSR markdown
-
-### Approach C: Hybrid
-
-- Use remark plugin for known content (help articles, marketing)
-- Use runtime component for user content (blog posts)
-
-### Decision: Start with Approach A
-
-The remark plugin is more powerful and SSR-friendly. Implement for help articles first, then expand.
-
-### Estimated Effort
-- ~6-8 hours for remark plugin
-- ~2-3 hours for integration points
-- Testing across different content types
-
----
-
-## Phase 4: Workshop & Documentation
-
-**Goal:** Use GroveTerm to document itself.
+**Goal:** Use GroveTerm to document itself. Meta and beautiful.
 
 ### Vineyard Component Library
 
@@ -264,23 +207,180 @@ A visual grid showing all terms in a category:
 </div>
 ```
 
-### Knowledge Base Article
+### Knowledge Base Articles
 
-Create a dedicated "Grove Lexicon" article explaining:
+**1. "The Grove Lexicon" (Philosophy)**
 - Why we use custom terminology
-- How to interact with GroveTerm elements
+- The forest metaphor explained
 - Full glossary organized by category
+
+**2. "Speaking Grove: Using [[term]] in Your Blooms" (Help/Tips)**
+A meta article teaching Wanderers how to use GroveTerm syntax in their own writing:
+
+```markdown
+## Speaking Grove
+
+Grove has its own language—terms like [[bloom]], [[wanderer]], and [[garden]]
+that carry meaning beyond their dictionary definitions.
+
+### Using Grove Terms in Your Writing
+
+When you write a bloom, you can make any Grove term interactive by wrapping
+it in double brackets:
+
+    Welcome to my [[grove]]. These are my [[blooms]].
+
+When readers hover over these terms, they'll see the definition. Click for
+the full explanation.
+
+### Custom Display Text
+
+Want to show different text than the term name?
+
+    The [[wanderer|visitors]] who find my garden...
+
+This shows "visitors" but links to the Wanderer definition.
+
+### Available Terms
+
+Browse all 51 Grove terms in the [Lexicon Gallery](/knowledge/philosophy/grove-lexicon).
+```
 
 ### Estimated Effort
 - ~3-4 hours for Vineyard section
 - ~2 hours for TermGallery component
-- ~2 hours for KB article
+- ~3 hours for KB articles (2 articles)
+
+---
+
+## Phase 4: Content System Integration
+
+**Goal:** Enable `[[term]]` syntax in user-generated markdown content.
+
+This is the most complex phase—requires a remark preprocessing plugin.
+
+### What is Remark?
+
+Remark is the markdown processor we use. It parses markdown into an AST (Abstract Syntax Tree), allows plugins to transform that tree, then renders to HTML. A "remark plugin" is a function that walks the tree and modifies nodes.
+
+```
+Markdown Text → [Parse] → AST → [Plugin Transform] → Modified AST → [Render] → HTML
+```
+
+### The Plugin
+
+```typescript
+// packages/engine/src/lib/utils/remark-groveterm.ts
+import { visit } from 'unist-util-visit';
+import type { Root, Text } from 'mdast';
+
+/**
+ * Remark plugin that transforms [[term]] syntax into GroveTerm components.
+ *
+ * Syntax:
+ *   [[bloom]]           → <GroveTerm term="bloom">bloom</GroveTerm>
+ *   [[bloom|my post]]   → <GroveTerm term="bloom">my post</GroveTerm>
+ */
+export function remarkGroveTerm() {
+  return (tree: Root) => {
+    visit(tree, 'text', (node: Text, index, parent) => {
+      if (!parent || index === undefined) return;
+
+      // Match [[term]] or [[term|display text]]
+      const regex = /\[\[([a-z-]+)(?:\|([^\]]+))?\]\]/g;
+      const matches = [...node.value.matchAll(regex)];
+
+      if (matches.length === 0) return;
+
+      // Split text node into multiple nodes (text + groveterm + text + ...)
+      const newNodes = [];
+      let lastIndex = 0;
+
+      for (const match of matches) {
+        const [fullMatch, term, displayText] = match;
+        const matchIndex = match.index!;
+
+        // Text before the match
+        if (matchIndex > lastIndex) {
+          newNodes.push({ type: 'text', value: node.value.slice(lastIndex, matchIndex) });
+        }
+
+        // The GroveTerm element (rendered as custom HTML node for mdsvex)
+        newNodes.push({
+          type: 'html',
+          value: `<GroveTerm term="${term}">${displayText || term}</GroveTerm>`
+        });
+
+        lastIndex = matchIndex + fullMatch.length;
+      }
+
+      // Text after last match
+      if (lastIndex < node.value.length) {
+        newNodes.push({ type: 'text', value: node.value.slice(lastIndex) });
+      }
+
+      // Replace original node with new nodes
+      parent.children.splice(index, 1, ...newNodes);
+    });
+  };
+}
+```
+
+### Integration Points
+
+1. **Blog post rendering** — Add plugin to mdsvex config
+2. **Help article rendering** — Same pipeline
+3. **Bio/about sections** — If rendered as markdown
+
+### Configuration
+
+```javascript
+// svelte.config.js or mdsvex.config.js
+import { remarkGroveTerm } from './src/lib/utils/remark-groveterm.js';
+
+const mdsvexConfig = {
+  remarkPlugins: [
+    remarkGroveTerm,  // Transform [[term]] syntax
+    // ... other plugins
+  ],
+};
+```
+
+### Testing
+
+```markdown
+<!-- Input -->
+Welcome to my [[grove]]. Here you'll find my [[blooms]].
+
+I'm a [[wanderer|traveler]] who finally [[rooted|took root]].
+
+<!-- Output -->
+Welcome to my <GroveTerm term="grove">grove</GroveTerm>.
+Here you'll find my <GroveTerm term="blooms">blooms</GroveTerm>.
+
+I'm a <GroveTerm term="wanderer">traveler</GroveTerm> who finally
+<GroveTerm term="rooted">took root</GroveTerm>.
+```
+
+### Estimated Effort
+- ~6-8 hours for remark plugin + tests
+- ~2-3 hours for integration across render pipelines
+- Testing across different content types
 
 ---
 
 ## Phase 5: Polish & Scale
 
 **Goal:** Ensure GroveTerm works beautifully at scale.
+
+### Interaction Model Update
+
+Implement tooltip-first, popup-fallback:
+
+```
+Hover (150ms delay) → Show tooltip with tagline + short definition
+Click/Tap → Open full Waystone popup with complete definition, examples, related terms
+```
 
 ### Performance Audit
 
@@ -300,8 +400,7 @@ Create a dedicated "Grove Lexicon" article explaining:
 ### Mobile UX
 
 - [ ] Touch targets ≥44×44px
-- [ ] Popup positioning on small screens
-- [ ] Swipe to dismiss?
+- [ ] Tooltip → Popup on mobile (no hover)
 - [ ] Bottom sheet on mobile vs. popup on desktop?
 
 ### Edge Cases
@@ -309,7 +408,8 @@ Create a dedicated "Grove Lexicon" article explaining:
 - [ ] Terms inside links (nested interactive)
 - [ ] Terms in headings (SEO impact?)
 - [ ] Very long definitions (scrollable popup?)
-- [ ] Terms not in manifest (graceful fallback)
+- [ ] Terms not in manifest (graceful fallback—render as plain text)
+- [ ] Invalid `[[syntax]]` (unknown term—render as plain text, don't break)
 
 ### Estimated Effort
 - ~4-6 hours for audits and fixes
@@ -329,21 +429,48 @@ Week 2: Phase 2 (Public Pages)
   └── Knowledge base integration
   └── Onboarding flow integration
 
-Week 3: Phase 3 (Content System)
-  └── Build remark-groveterm plugin
-  └── Integrate with markdown renderer
-  └── Test with existing content
-
-Week 4: Phase 4 (Workshop)
+Week 3: Phase 3 (Workshop & Docs)
   └── Vineyard showcase section
   └── TermGallery component
-  └── KB "Grove Lexicon" article
+  └── KB articles: "Grove Lexicon" + "Using [[term]]"
+
+Week 4: Phase 4 (Content System)
+  └── Build remark-groveterm plugin
+  └── Integrate with mdsvex/markdown renderer
+  └── Test with user content
 
 Week 5: Phase 5 (Polish)
+  └── Tooltip-first interaction model
   └── Performance audit
   └── Accessibility audit
   └── Mobile UX refinement
 ```
+
+---
+
+## Tips for Writers
+
+> **For the KB article "Speaking Grove"**
+
+### Quick Reference
+
+| Syntax | Result |
+|--------|--------|
+| `[[bloom]]` | Shows "bloom" linked to definition |
+| `[[bloom\|my writing]]` | Shows "my writing" linked to bloom definition |
+| `[[wanderer\|visitors]]` | Shows "visitors" linked to wanderer definition |
+
+### Best Practices
+
+1. **Use sparingly** — Not every mention needs to be a GroveTerm. First mention in a section is usually enough.
+
+2. **Match the grammar** — Use display text to match plural/case:
+   - `[[bloom\|Blooms]]` for "Blooms are..."
+   - `[[wanderer\|wanderers]]` for "...the wanderers who..."
+
+3. **Foundational terms are best** — Terms like `[[grove]]`, `[[garden]]`, `[[bloom]]`, `[[wanderer]]`, `[[rooted]]` are the ones readers benefit most from learning.
+
+4. **Don't nest** — Avoid putting GroveTerm inside links or headings.
 
 ---
 
@@ -358,26 +485,7 @@ Week 5: Phase 5 (Polish)
 - [ ] GroveTerm used in 50+ locations across codebase
 - [ ] All 51 terms accessible via interactive elements
 - [ ] Zero accessibility violations (axe-core)
-- [ ] Popup load time <100ms
-
----
-
-## Open Questions
-
-1. **Author opt-in for blog posts?**
-   Should the `[[term]]` syntax be available in user blogs, or just Grove-authored content?
-
-2. **Email rendering?**
-   GroveTerm is a Svelte component—can't render in emails. Options:
-   - Static styling only (no interaction)
-   - Link to KB definition instead
-   - Skip GroveTerm in emails entirely
-
-3. **Popup vs. Tooltip?**
-   Current design uses a popup. Would a simpler tooltip work for short definitions?
-
-4. **Search integration?**
-   Should GroveTerm definitions be searchable in the Knowledge Base?
+- [ ] Tooltip appears in <100ms on hover
 
 ---
 
