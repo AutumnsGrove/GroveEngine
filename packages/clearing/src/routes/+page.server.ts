@@ -161,10 +161,9 @@ function getMockData() {
         id: "comp_payments",
         name: "Payments",
         slug: "payments",
-        description:
-          "LemonSqueezy integration for subscriptions — awaiting verification",
+        description: "Stripe integration for subscriptions",
         display_order: 4,
-        current_status: "maintenance" as const,
+        current_status: "operational" as const,
         created_at: now.toISOString(),
         updated_at: now.toISOString(),
       },
