@@ -4,6 +4,10 @@
 	import type { GroveTermEntry, GroveTermManifest, GroveTermCategory } from './types';
 	import type { Snippet } from 'svelte';
 
+	// Import manifest internally so consumers don't need to
+	import defaultManifestData from '$lib/data/grove-term-manifest.json';
+	const defaultManifest = defaultManifestData as GroveTermManifest;
+
 	// GroveTerm - Interactive Grove terminology with popup definitions
 	//
 	// Renders as an underlined term that opens a popup with the definition.
@@ -14,9 +18,7 @@
 	//   <GroveTerm term="wanderer">wanderers</GroveTerm>
 	//   <p>Welcome to your <GroveTerm term="grove" /> where <GroveTerm term="bloom">blooms</GroveTerm> grow.</p>
 	//
-	// With static manifest:
-	//   import groveTermManifest from '$lib/data/grove-term-manifest.json';
-	//   <GroveTerm term="heartwood" manifest={groveTermManifest} />
+	// The manifest is loaded internally—no additional imports needed!
 
 	interface Props {
 		/** Term slug to look up (e.g., "grove", "heartwood", "wanderer") */
@@ -35,7 +37,7 @@
 		term,
 		inline = true,
 		class: className,
-		manifest,
+		manifest = defaultManifest,
 		children
 	}: Props = $props();
 

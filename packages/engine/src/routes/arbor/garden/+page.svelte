@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassConfirmDialog, GlassCard, toast } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm } from '$lib/ui';
   import { api } from '$lib/utils';
   import { Trash2 } from 'lucide-svelte';
 
@@ -62,8 +62,8 @@
 
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-foreground">Garden</h1>
-      <p class="m-0 text-foreground-muted">{data.posts.length} blooms</p>
+      <h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm term="garden">Garden</GroveTerm></h1>
+      <p class="m-0 text-foreground-muted">{data.posts.length} <GroveTerm term="bloom">blooms</GroveTerm></p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/arbor/garden/new'}>
       + New Bloom
