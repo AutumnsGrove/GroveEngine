@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
@@ -928,7 +929,7 @@
 				The Workshop
 			</h1>
 			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
-				Tools being crafted alongside Grove. Some integrate directly, some stand alone—all built with the same care.
+				Tools being crafted alongside <GroveTerm term="your-grove">Grove</GroveTerm>. Some integrate directly, some stand alone—all built with the same care.
 			</p>
 		</div>
 	</section>

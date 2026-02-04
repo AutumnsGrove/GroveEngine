@@ -3,7 +3,7 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/state';
 
 	let { data } = $props();
@@ -301,7 +301,7 @@
 				</li>
 				<li class="flex items-start gap-3">
 					<Shield class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
-					<span><span class="text-foreground font-medium">Shade protection</span> — AI companies send bots to scrape websites and train their models on your writing. Grove blocks them.</span>
+					<span><span class="text-foreground font-medium"><GroveTerm term="shade">Shade</GroveTerm> protection</span> — AI companies send bots to scrape websites and train their models on your writing. Grove blocks them.</span>
 				</li>
 				<li class="flex items-start gap-3">
 					<Users class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />

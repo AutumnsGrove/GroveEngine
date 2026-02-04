@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { GroveTerm } from '@autumnsgrove/groveengine/ui';
   import { toolIcons, knowledgeCategoryIcons } from '$lib/utils/icons';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 
@@ -56,7 +57,7 @@
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-foreground mb-4">Knowledge Base</h1>
       <p class="text-xl text-foreground-muted max-w-3xl mx-auto">
-        Everything you need to know about Grove - from technical specifications to guides for Wanderers
+        Everything you need to know about Grove - from technical specifications to guides for <GroveTerm term="wanderer">Wanderers</GroveTerm>
       </p>
     </div>
 

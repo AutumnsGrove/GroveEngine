@@ -19,6 +19,7 @@
 		GlassLogo,
 		GlassOverlay,
 		GlassCarousel,
+		GroveTerm,
 	} from '@autumnsgrove/groveengine/ui';
 
 	// Import nature assets
@@ -284,9 +285,9 @@
 <main class="max-w-6xl mx-auto px-6 py-12">
 	<!-- Hero Section -->
 	<section class="text-center mb-12">
-		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3">Lattice Vineyard</h1>
+		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3"><GroveTerm term="lattice">Lattice</GroveTerm> Vineyard</h1>
 		<p class="text-lg text-[var(--color-foreground-muted)] max-w-2xl mx-auto">
-			Every vine starts somewhere. This is where Grove's UI components grow,
+			Every vine starts somewhere. This is where <GroveTerm term="your-grove">Grove's</GroveTerm> UI components grow,
 			ready to be picked and planted throughout the ecosystem.
 		</p>
 	</section>
