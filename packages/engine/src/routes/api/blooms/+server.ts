@@ -2,7 +2,7 @@ import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
-import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import {
   checkRateLimit,
@@ -243,7 +243,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Generate HTML from markdown (renderMarkdown handles sanitization)
     const html_content = renderMarkdown(data.markdown_content);
 
-    const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
 
     // Calculate word count and reading time
