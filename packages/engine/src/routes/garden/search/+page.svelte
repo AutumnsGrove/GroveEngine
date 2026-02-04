@@ -118,6 +118,8 @@
 								variant="tag"
 								class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer select-none"
 								onclick={() => selectTag(tag)}
+								aria-label="{selectedTag === tag ? 'Remove' : 'Filter by'} tag: {tag}"
+								aria-pressed={selectedTag === tag}
 							>
 								{tag}
 							</Badge>
@@ -171,6 +173,8 @@
 										variant="tag"
 										class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer"
 										onclick={(e) => { e.preventDefault(); e.stopPropagation(); selectTag(tag); }}
+										aria-label="{selectedTag === tag ? 'Remove' : 'Filter by'} tag: {tag}"
+										aria-pressed={selectedTag === tag}
 									>
 										{tag}
 									</Badge>
