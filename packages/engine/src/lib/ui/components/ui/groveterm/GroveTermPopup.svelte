@@ -6,6 +6,7 @@
 	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
 	import type { GroveTermEntry, GroveTermManifest, GroveTermCategory } from './types';
 	import { GROVE_TERM_CATEGORY_LABELS, GROVE_TERM_COLORS } from './types';
+	import { themeStore } from '$lib/ui/stores';
 
 	/**
 	 * GroveTermPopup - Definition overlay for Grove terminology
@@ -83,9 +84,10 @@
 		relatedEntry = null;
 	}
 
-	// Get category color for badge
+	// Get category color for badge (reactive to theme changes)
+	const isDark = $derived(themeStore.resolvedTheme === 'dark');
+
 	function getCategoryColor(category: GroveTermCategory): string {
-		const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 		return isDark ? GROVE_TERM_COLORS[category].dark : GROVE_TERM_COLORS[category].light;
 	}
 </script>

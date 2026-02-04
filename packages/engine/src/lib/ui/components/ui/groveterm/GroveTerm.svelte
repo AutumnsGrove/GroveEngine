@@ -46,6 +46,16 @@
 	let error = $state<string | null>(null);
 	let preloadTimer: ReturnType<typeof setTimeout> | null = null;
 
+	// Cleanup preload timer on unmount to prevent memory leaks
+	$effect(() => {
+		return () => {
+			if (preloadTimer) {
+				clearTimeout(preloadTimer);
+				preloadTimer = null;
+			}
+		};
+	});
+
 	// Normalize term to slug format
 	const slug = $derived(term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
 

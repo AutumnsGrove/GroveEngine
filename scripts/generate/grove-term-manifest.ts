@@ -359,7 +359,7 @@ async function main() {
   }
 
   const outputPath = join(outputDir, "grove-term-manifest.json");
-  writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
+  writeFileSync(outputPath, JSON.stringify(manifest, null, 2) + "\n");
 
   // Print summary
   console.log();
