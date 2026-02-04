@@ -271,7 +271,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Invalidate post list cache so the new post appears in listings
     if (kv) {
       try {
-        await cache.del(kv, `blog:list:${tenantId}`);
+        await cache.del(kv, `garden:list:${tenantId}`);
       } catch (err) {
         console.error("[Cache] Failed to invalidate list cache:", err);
       }

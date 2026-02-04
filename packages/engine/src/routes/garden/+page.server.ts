@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({
 
   // Try to get from cache first, or compute from D1
   if (kv && db && tenantId) {
-    const cacheKey = `blog:list:${tenantId}`;
+    const cacheKey = `garden:list:${tenantId}`;
 
     posts = await cache.getOrSet<PostMeta[]>(kv, cacheKey, {
       ttl: CACHE_TTL_SECONDS,

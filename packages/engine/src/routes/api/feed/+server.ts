@@ -57,8 +57,8 @@ export const GET: RequestHandler = (event) => {
       return `
     <item>
       <title><![CDATA[${escapeXml(post.title)}]]></title>
-      <link>${siteUrl}/blog/${normalizedSlug}</link>
-      <guid isPermaLink="true">${siteUrl}/blog/${normalizedSlug}</guid>
+      <link>${siteUrl}/garden/${normalizedSlug}</link>
+      <guid isPermaLink="true">${siteUrl}/garden/${normalizedSlug}</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description><![CDATA[${escapeXml(post.description || "")}]]></description>
       ${post.tags && post.tags.length > 0 ? post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("\n      ") : ""}${enclosure}

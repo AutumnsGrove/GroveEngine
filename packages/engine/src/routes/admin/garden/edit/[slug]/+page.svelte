@@ -3,26 +3,41 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { GlassCard, Glass } from '$lib/ui';
+  import { Input, Button, GlassCard } from "$lib/ui";
+  import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
+  import { ExternalLink } from "lucide-svelte";
 
-  // Page data from admin layout (includes grafts cascade)
   let { data } = $props();
 
-  // Form state
+  // Form state - initialized from loaded data (synced via effect)
   let title = $state("");
   let slug = $state("");
-  let date = $state(new Date().toISOString().split("T")[0]);
+  let date = $state("");
   let description = $state("");
   let tagsInput = $state("");
   let font = $state("default");
   let content = $state("");
-  /** @type {any[]} */
-  let gutterItems = $state([]);
-  let firesideAssisted = $state(false);
+  let gutterItems = $state(/** @type {any[]} */ ([]));
   let status = $state("draft");
   let featuredImage = $state("");
+
+  // Sync form state when data changes (e.g., navigating to different post)
+  $effect(() => {
+    title = data.post.title || "";
+    slug = data.post.slug || "";
+    date = data.post.date || new Date().toISOString().split("T")[0];
+    description = data.post.description || "";
+    tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
+    font = /** @type {any} */ (data.post).font || "default";
+    content = data.post.markdown_content || "";
+    gutterItems = data.post.gutter_content
+      ? JSON.parse(/** @type {string} */ (data.post.gutter_content))
+      : [];
+    status = /** @type {any} */ (data.post).status || "draft";
+    featuredImage = /** @type {any} */ (data.post).featured_image || "";
+  });
 
   // Editor reference for anchor insertion
   /** @type {any} */
@@ -30,11 +45,10 @@
 
   // UI state
   let saving = $state(false);
-  /** @type {string | null} */
-  let error = $state(null);
-  let slugManuallyEdited = $state(false);
-  let showGutter = $state(false);
-  let detailsCollapsed = $state(false);
+  let hasUnsavedChanges = $state(false);
+  let showGutter = $state(false); // Start hidden for cleaner first-time experience
+  let showDeleteDialog = $state(false);
+  let detailsCollapsed = $state(true); // Start collapsed for focused writing
 
   // Load collapsed state from localStorage
   $effect(() => {
@@ -53,7 +67,10 @@
   function toggleDetailsCollapsed() {
     detailsCollapsed = !detailsCollapsed;
     if (browser) {
-      localStorage.setItem("editor-details-collapsed", String(detailsCollapsed));
+      localStorage.setItem(
+        "editor-details-collapsed",
+        String(detailsCollapsed),
+      );
     }
   }
 
@@ -64,26 +81,18 @@
     }
   }
 
-  // Auto-generate slug from title
+  // Track changes
   $effect(() => {
-    if (!slugManuallyEdited && title) {
-      slug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-    }
+    // Simple dirty check - could be more sophisticated
+    const hasChanges =
+      title !== data.post.title ||
+      description !== data.post.description ||
+      content !== data.post.markdown_content;
+    hasUnsavedChanges = hasChanges;
   });
 
-  function handleSlugInput() {
-    slugManuallyEdited = true;
-  }
-
-  /**
-   * Parse tags from comma-separated input
-   * @param {string} input
-   */
+  // Parse tags from comma-separated input
+  /** @param {string} input */
   function parseTags(input) {
     return input
       .split(",")
@@ -94,32 +103,25 @@
   async function handleSave() {
     // Validation
     if (!title.trim()) {
-      error = "Title is required";
-      return;
-    }
-    if (!slug.trim()) {
-      error = "Slug is required";
+      toast.error("Title is required");
       return;
     }
     if (!content.trim()) {
-      error = "Content is required";
+      toast.error("Content is required");
       return;
     }
 
-    error = null;
     saving = true;
 
     try {
-      const result = await api.post("/api/posts", {
+      await api.put(`/api/posts/${slug}`, {
         title: title.trim(),
-        slug: slug.trim(),
         date,
         description: description.trim(),
         tags: parseTags(tagsInput),
         font,
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
-        fireside_assisted: firesideAssisted ? 1 : 0,
         status,
         featured_image: featuredImage.trim() || null,
       });
@@ -127,51 +129,165 @@
       // Clear draft on successful save
       editorRef?.clearDraft();
 
-      // Show success toast
-      toast.success("Post created!", {
-        description: `"${result.title}" has been saved.`,
-      });
-
-      // Redirect to the edit page
-      goto(`/admin/blog/edit/${result.slug}`);
+      toast.success("Post saved successfully!");
+      hasUnsavedChanges = false;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      error = errorMessage;
-      toast.error("Failed to create post", { description: errorMessage });
+      toast.error(err instanceof Error ? err.message : "Failed to update post");
     } finally {
       saving = false;
     }
   }
+
+  /**
+   * Toggle publish status and immediately save
+   * Publishing/unpublishing is a critical action that should persist immediately
+   */
+  async function handleStatusToggle() {
+    const newStatus = status === "published" ? "draft" : "published";
+    const action = newStatus === "published" ? "Publishing" : "Unpublishing";
+
+    // Validation before publish
+    if (newStatus === "published") {
+      if (!title.trim()) {
+        toast.error("Title is required before publishing");
+        return;
+      }
+      if (!content.trim()) {
+        toast.error("Content is required before publishing");
+        return;
+      }
+    }
+
+    saving = true;
+    status = newStatus; // Optimistically update UI
+
+    try {
+      await api.put(`/api/posts/${slug}`, {
+        title: title.trim(),
+        date,
+        description: description.trim(),
+        tags: parseTags(tagsInput),
+        font,
+        markdown_content: content,
+        gutter_content: JSON.stringify(gutterItems),
+        status: newStatus,
+        featured_image: featuredImage.trim() || null,
+      });
+
+      // Clear draft on successful save
+      editorRef?.clearDraft();
+
+      if (newStatus === "published") {
+        toast.success("Post published! 🎉", { description: "Your post is now live." });
+      } else {
+        toast.success("Post unpublished", { description: "Moved back to drafts." });
+      }
+      hasUnsavedChanges = false;
+    } catch (err) {
+      // Revert on failure
+      status = status === "published" ? "draft" : "published";
+      toast.error(err instanceof Error ? err.message : `Failed to ${action.toLowerCase()}`);
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function confirmDelete() {
+    showDeleteDialog = true;
+  }
+
+  async function handleDelete() {
+    showDeleteDialog = false;
+    saving = true;
+
+    try {
+      await api.delete(`/api/posts/${slug}`);
+
+      toast.success("Post deleted successfully");
+      // Redirect to blog admin
+      goto("/admin/garden");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete post");
+    } finally {
+      saving = false;
+    }
+  }
+
+  // Warn about unsaved changes
+  /** @param {BeforeUnloadEvent} e */
+  function handleBeforeUnload(e) {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      return (e.returnValue =
+        "You have unsaved changes. Are you sure you want to leave?");
+    }
+  }
 </script>
 
-<div class="new-post-page">
+<svelte:window onbeforeunload={handleBeforeUnload} />
+
+<div class="edit-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/admin/blog" class="back-link">&larr; Back to Posts</a>
-      <h1>New Post</h1>
+      <a href="/admin/garden" class="back-link">&larr; Back to Garden</a>
+      <div class="title-row">
+        <h1>Edit Post</h1>
+        {#if data.source === "filesystem"}
+          <span class="source-badge filesystem">From UserContent</span>
+        {:else}
+          <span class="source-badge d1">From Database</span>
+        {/if}
+        {#if hasUnsavedChanges}
+          <span class="unsaved-badge">Unsaved changes</span>
+        {/if}
+      </div>
     </div>
-    <button
-      class="save-btn"
-      onclick={handleSave}
-      disabled={saving}
-    >
-      {saving ? "Saving..." : "Save Post"}
-    </button>
-  </header>
+    <div class="header-actions">
+      <!-- Prominent Publish/Draft Toggle - Auto-saves on click -->
+      <button
+        class="status-toggle {status === 'published' ? 'published' : 'draft'}"
+        onclick={handleStatusToggle}
+        disabled={saving}
+        title={status === "published"
+          ? "Click to unpublish (save as draft)"
+          : "Click to publish (goes live immediately)"}
+      >
+        {#if saving}
+          <span class="status-icon">⏳</span> Saving...
+        {:else if status === "published"}
+          <span class="status-icon">✓</span> Published
+        {:else}
+          <span class="status-icon">○</span> Draft — Click to Publish
+        {/if}
+      </button>
 
-  {#if error}
-    <Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg mb-4 flex items-center gap-3">
-      <span class="flex items-center justify-center w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold">!</span>
-      <span class="flex-1 text-red-600 dark:text-red-400">{error}</span>
-      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl leading-none" onclick={() => (error = null)}>&times;</button>
-    </Glass>
-  {/if}
+      <Button
+        variant="danger"
+        onclick={confirmDelete}
+        disabled={saving}
+        title="Delete this post"
+      >
+        Delete
+      </Button>
+      <Button variant="outline" href="/garden/{slug}">
+        View Live <ExternalLink size={16} class="inline-block ml-1" />
+      </Button>
+      <Button onclick={handleSave} disabled={saving}>
+        {saving ? "Saving..." : "Save Changes"}
+      </Button>
+    </div>
+  </header>
 
   <div class="editor-layout">
     <!-- Metadata Panel -->
-    <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
+    <GlassCard
+      variant="frosted"
+      class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}"
+    >
       <div class="panel-header">
-        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
+        <h2 class="panel-title">
+          {#if detailsCollapsed}Details{:else}Post Details{/if}
+        </h2>
         <button
           class="collapse-details-btn"
           onclick={toggleDetailsCollapsed}
@@ -197,33 +313,27 @@
 
           <div class="form-group">
             <label for="slug">Slug</label>
-            <div class="slug-input-wrapper">
-              <span class="slug-prefix">/blog/</span>
-              <input
-                type="text"
-                id="slug"
-                bind:value={slug}
-                oninput={handleSlugInput}
-                placeholder="your-post-slug"
-                class="form-input slug-input"
-              />
+            <div class="slug-display">
+              <span class="slug-prefix">/garden/</span>
+              <span class="slug-value">{slug}</span>
             </div>
+            <span class="form-hint">Slug cannot be changed after creation</span>
           </div>
 
           <div class="form-group">
             <label for="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              bind:value={date}
-              class="form-input"
-            />
+            <input type="date" id="date" bind:value={date} class="form-input" />
           </div>
 
           <div class="form-group">
             <label for="description">
               Description
-              <span class="char-count" class:warning={description.length > 160} class:good={description.length >= 120 && description.length <= 160}>
+              <span
+                class="char-count"
+                class:warning={description.length > 160}
+                class:good={description.length >= 120 &&
+                  description.length <= 160}
+              >
                 {description.length}/160
               </span>
             </label>
@@ -236,9 +346,13 @@
               class:char-warning={description.length > 160}
             ></textarea>
             {#if description.length > 160}
-              <span class="form-warning">Description exceeds recommended SEO length</span>
+              <span class="form-warning"
+                >Description exceeds recommended SEO length</span
+              >
             {:else if description.length > 0 && description.length < 120}
-              <span class="form-hint">Add {120 - description.length} more chars for optimal SEO</span>
+              <span class="form-hint"
+                >Add {120 - description.length} more chars for optimal SEO</span
+              >
             {/if}
           </div>
 
@@ -326,8 +440,33 @@
               <option value="published">Published</option>
             </select>
             <span class="form-hint">
-              {status === "draft" ? "This post will be hidden from public view" : "This post will be visible to all visitors"}
+              {status === "draft"
+                ? "This post will be hidden from public view"
+                : "This post will be visible to all visitors"}
             </span>
+          </div>
+
+          <div class="metadata-info">
+            {#if "last_synced" in data.post && data.post.last_synced}
+              <p class="info-item">
+                <span class="info-label">Last synced:</span>
+                <span class="info-value">
+                  {new Date(
+                    /** @type {any} */ (data.post).last_synced,
+                  ).toLocaleString()}
+                </span>
+              </p>
+            {/if}
+            {#if "updated_at" in data.post && data.post.updated_at}
+              <p class="info-item">
+                <span class="info-label">Last updated:</span>
+                <span class="info-value">
+                  {new Date(
+                    /** @type {any} */ (data.post).updated_at,
+                  ).toLocaleString()}
+                </span>
+              </p>
+            {/if}
           </div>
         </div>
       {/if}
@@ -340,13 +479,13 @@
           <MarkdownEditor
             bind:this={editorRef}
             bind:content
-            bind:firesideAssisted
             {saving}
             onSave={handleSave}
-            draftKey="new-post"
-            bind:previewTitle={title}
+            draftKey={`edit-${slug}`}
+            previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}
+            {gutterItems}
             grafts={data?.grafts ?? {}}
           />
         </div>
@@ -355,7 +494,8 @@
             <GutterManager
               bind:gutterItems
               availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-              onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
+              onInsertAnchor={(/** @type {string} */ name) =>
+                editorRef?.insertAnchor(name)}
             />
           </aside>
         {/if}
@@ -371,8 +511,19 @@
   </div>
 </div>
 
+<!-- Delete Confirmation Dialog -->
+<Dialog bind:open={showDeleteDialog} title="Delete Post">
+  <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
+  {#snippet footer()}
+    <Button variant="outline" onclick={() => (showDeleteDialog = false)}
+      >Cancel</Button
+    >
+    <Button variant="danger" onclick={handleDelete}>Delete</Button>
+  {/snippet}
+</Dialog>
+
 <style>
-  .new-post-page {
+  .edit-post-page {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 8rem);
@@ -384,6 +535,8 @@
     align-items: flex-start;
     margin-bottom: 1.5rem;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   .header-content {
     display: flex;
@@ -404,30 +557,142 @@
   :global(.dark) .back-link {
     color: #86efac;
   }
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
   .page-header h1 {
     margin: 0;
     font-size: 1.75rem;
     color: var(--color-text);
     transition: color 0.3s ease;
   }
-  .save-btn {
+  .source-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .source-badge.filesystem {
+    background: #fff5b1;
+    color: var(--status-warning-bg);
+  }
+  :global(.dark) .source-badge.filesystem {
+    background: rgba(255, 245, 177, 0.2);
+    color: #f0c674;
+  }
+  .source-badge.d1 {
+    background: #dcffe4;
+    color: var(--accent-success-dark);
+  }
+  :global(.dark) .source-badge.d1 {
+    background: rgba(40, 167, 69, 0.2);
+    color: #7ee787;
+  }
+  .unsaved-badge {
+    padding: 0.2rem 0.6rem;
+    background: #ffeef0;
+    color: #cf222e;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+  :global(.dark) .unsaved-badge {
+    background: rgba(248, 81, 73, 0.15);
+    color: #ff7b72;
+  }
+  .header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* Prominent Status Toggle Button */
+  .status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.6rem 1.25rem;
-    background: var(--color-primary);
-    color: white;
-    border: none;
     border-radius: var(--border-radius-button);
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s, opacity 0.2s;
+    transition: all 0.2s ease;
+    border: 2px solid;
   }
-  .save-btn:hover:not(:disabled) {
-    background: var(--color-primary-hover);
+
+  .status-toggle.draft {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #92400e;
   }
-  .save-btn:disabled {
+
+  .status-toggle.draft:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    transform: scale(1.02);
+  }
+
+  .status-toggle.published {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
+  }
+
+  .status-toggle.published:hover {
+    background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  }
+
+  .status-toggle:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
   }
+
+  .status-icon {
+    font-size: 1.1rem;
+  }
+
+  :global(.dark) .status-toggle.draft {
+    background: linear-gradient(
+      135deg,
+      rgba(251, 191, 36, 0.2) 0%,
+      rgba(245, 158, 11, 0.3) 100%
+    );
+    border-color: #f59e0b;
+    color: #fcd34d;
+  }
+
+  :global(.dark) .status-toggle.draft:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(251, 191, 36, 0.3) 0%,
+      rgba(245, 158, 11, 0.4) 100%
+    );
+  }
+
+  :global(.dark) .status-toggle.published {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.2) 0%,
+      rgba(52, 211, 153, 0.3) 100%
+    );
+    border-color: #10b981;
+    color: #6ee7b7;
+  }
+
+  :global(.dark) .status-toggle.published:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.3) 0%,
+      rgba(52, 211, 153, 0.4) 100%
+    );
+  }
+
   /* Editor Layout */
   .editor-layout {
     display: flex;
@@ -484,10 +749,22 @@
     padding: 0.2rem 0.4rem;
     font-family: monospace;
     transition: all 0.15s ease;
+    flex-shrink: 0; /* Prevent button from being squeezed */
   }
   .collapse-details-btn:hover {
     background: var(--color-bg-secondary);
     color: var(--color-primary);
+  }
+  /* Mobile touch target - WCAG 2.5.5 requires 44×44px minimum */
+  @media (max-width: 900px) {
+    .collapse-details-btn {
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
   }
   .form-group {
     margin-bottom: 1.25rem;
@@ -508,7 +785,10 @@
     font-size: 0.9rem;
     background: var(--color-bg-secondary);
     color: var(--color-text);
-    transition: border-color 0.2s, background-color 0.3s, color 0.3s;
+    transition:
+      border-color 0.2s,
+      background-color 0.3s,
+      color 0.3s;
   }
   .form-input:focus {
     outline: none;
@@ -519,32 +799,27 @@
     min-height: 80px;
     font-family: inherit;
   }
-  .slug-input-wrapper {
+  .slug-display {
     display: flex;
     align-items: center;
+    padding: 0.5rem 0.75rem;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-small);
-    overflow: hidden;
-    transition: border-color 0.2s, background-color 0.3s;
-  }
-  .slug-input-wrapper:focus-within {
-    border-color: var(--color-primary);
+    transition:
+      background-color 0.3s,
+      border-color 0.3s;
   }
   .slug-prefix {
-    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
     color: var(--color-text-subtle);
     font-size: 0.85rem;
-    background: var(--color-border);
-    transition: background-color 0.3s, color 0.3s;
+    transition: color 0.3s;
   }
-  .slug-input {
-    border: none;
-    background: transparent;
-    flex: 1;
-  }
-  .slug-input:focus {
-    outline: none;
+  .slug-value {
+    color: var(--color-text);
+    font-family: monospace;
+    font-size: 0.85rem;
+    transition: color 0.3s;
   }
   .form-hint {
     display: block;
@@ -604,6 +879,29 @@
     max-height: 150px;
     object-fit: cover;
     display: block;
+  }
+  .metadata-info {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    transition: border-color 0.3s;
+  }
+  .info-item {
+    margin: 0.5rem 0;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .info-label {
+    color: var(--color-text-subtle);
+    transition: color 0.3s;
+  }
+  .info-value {
+    color: var(--color-text-muted);
+    font-family: monospace;
+    font-size: 0.75rem;
+    transition: color 0.3s;
   }
   /* Editor Main */
   .editor-main {
@@ -681,7 +979,7 @@
       transform: none;
       font-size: 1rem;
     }
-    .new-post-page {
+    .edit-post-page {
       height: auto;
       min-height: auto;
     }
@@ -694,6 +992,10 @@
     .gutter-section {
       width: 100%;
       max-height: 300px;
+    }
+    .header-actions {
+      width: 100%;
+      justify-content: flex-end;
     }
   }
 </style>

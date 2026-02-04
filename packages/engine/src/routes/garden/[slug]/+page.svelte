@@ -71,9 +71,9 @@
 			<!-- Navigation outside of article header for semantic clarity -->
 			<nav class="article-nav" aria-label="Article navigation">
 				<div class="nav-row">
-					<Button variant="link" href="/blog" class="!p-0">&larr; Back to Blog</Button>
+					<Button variant="link" href="/garden" class="!p-0">&larr; Back to Garden</Button>
 					{#if data.isOwner}
-						<a href="/admin/blog/edit/{data.post.slug}" class="edit-link" aria-label="Edit this post in Flow">
+						<a href="/admin/garden/edit/{data.post.slug}" class="edit-link" aria-label="Edit this post in Flow">
 							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
 								<path d="m15 5 4 4"/>
@@ -112,7 +112,7 @@
 							<span class="meta-separator" aria-hidden="true"></span>
 							<div class="tags">
 								{#each data.post.tags as tag (tag)}
-									<a href="/blog/search?tag={encodeURIComponent(tag)}" class="tag-link">
+									<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link">
 										<Badge variant="tag" class="accent-tag">{tag}</Badge>
 									</a>
 								{/each}

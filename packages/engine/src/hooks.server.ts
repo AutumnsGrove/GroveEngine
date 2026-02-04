@@ -283,6 +283,22 @@ export const handle: Handle = async ({ event, resolve }) => {
   event.locals.context = { type: "landing" };
 
   // =========================================================================
+  // BLOG → GARDEN REDIRECTS (SEO preservation)
+  // =========================================================================
+  // Phase 1 of Grove terminology migration: /blog → /garden
+  // These 301 redirects preserve SEO value while transitioning to new routes
+  const pathname = event.url.pathname;
+  if (pathname === "/blog" || pathname.startsWith("/blog/")) {
+    const newPath = pathname.replace(/^\/blog/, "/garden");
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+  // Admin blog routes also redirect
+  if (pathname === "/admin/blog" || pathname.startsWith("/admin/blog/")) {
+    const newPath = pathname.replace(/^\/admin\/blog/, "/admin/garden");
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+
+  // =========================================================================
   // TURNSTILE VERIFICATION (Shade)
   // =========================================================================
   // Skip verification for excluded paths

@@ -105,9 +105,9 @@
         <LayoutDashboard class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Dashboard</span>
       </a>
-      <a href="/admin/blog" class="nav-item" onclick={closeSidebar} title="Blog Posts">
+      <a href="/admin/garden" class="nav-item" onclick={closeSidebar} title="Garden">
         <FileText class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Blog Posts</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Garden</span>
       </a>
       <a href="/admin/pages" class="nav-item" onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />

@@ -59,8 +59,8 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
   {
-    href: "https://autumn.grove.place/blog",
-    label: "Blog",
+    href: "https://autumn.grove.place/garden",
+    label: "Garden",
     icon: PenLine,
     external: true,
   },
@@ -76,8 +76,8 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
   {
-    href: "https://autumn.grove.place/blog",
-    label: "Blog",
+    href: "https://autumn.grove.place/garden",
+    label: "Garden",
     icon: PenLine,
     external: true,
   },
