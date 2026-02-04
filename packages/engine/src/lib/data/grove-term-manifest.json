@@ -28,7 +28,8 @@
     "definition": "A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. It's why visitors come.",
     "usageExample": "\"Read my latest bloom.\"\n\"I wrote a new bloom this morning.\"\n\"Their garden has beautiful blooms.\"",
     "seeAlso": [
-      "press"
+      "your-garden",
+      "plant"
     ]
   },
   "lattice": {
@@ -87,7 +88,8 @@
     "tagline": "Shop & Provisioning",
     "definition": "A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.",
     "seeAlso": [
-      "press"
+      "plant",
+      "rooted"
     ]
   },
   "foliage": {
@@ -199,6 +201,18 @@
     "tagline": "Help Center",
     "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward."
   },
+  "vineyard": {
+    "slug": "vineyard",
+    "term": "Vineyard",
+    "category": "platform",
+    "tagline": "Component Showcase",
+    "definition": "A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire. It's where you see what's growing, what's ready, and what's coming into season.",
+    "seeAlso": [
+      "lattice",
+      "terrarium",
+      "curios"
+    ]
+  },
   "porch": {
     "slug": "porch",
     "term": "Porch",
@@ -214,9 +228,8 @@
     "definition": "A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.",
     "seeAlso": [
       "wander",
-      "press",
       "wanderer",
-      "wayfinder"
+      "reeds"
     ]
   },
   "wisp": {
@@ -236,7 +249,8 @@
     "tagline": "Voice Transcription",
     "definition": "A scribe is a patient listener—someone who sits beside you and transforms your spoken words into written text. Before keyboards, before typewriters, scribes were how thoughts became documents. You spoke; they wrote.",
     "seeAlso": [
-      "press",
+      "blooms",
+      "wisp",
       "lumen"
     ]
   },
@@ -351,10 +365,9 @@
     "tagline": "Link Saving & Highlights",
     "definition": "Water drips on limestone for a thousand years and carves a cave. A glacier scores parallel grooves into bedrock. Frost traces patterns on glass. In printmaking, you score a plate with intention—every mark deliberate, every groove holding ink for the next impression. Etching isn't violent. It's patient. And what it leaves behind is permanent.",
     "seeAlso": [
-      "passage",
       "trace",
-      "wander",
-      "press"
+      "trove",
+      "wander"
     ]
   },
   "trove": {
@@ -393,7 +406,8 @@
     "tagline": "Backup System",
     "definition": "A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.",
     "seeAlso": [
-      "press"
+      "amber",
+      "rings"
     ]
   },
   "mycelium": {
