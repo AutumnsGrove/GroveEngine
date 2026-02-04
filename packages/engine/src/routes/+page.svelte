@@ -26,7 +26,7 @@
 			</p>
 			<div class="setup-actions">
 				<Button href="/arbor" variant="default" size="lg">
-					Set Up Your Blog
+					Set Up Your Grove
 				</Button>
 			</div>
 			<p class="setup-hint">
