@@ -173,7 +173,7 @@
   "gossamer": {
     "slug": "gossamer",
     "term": "Gossamer",
-    "category": "platform",
+    "category": "tools",
     "tagline": "ASCII Visual Effects",
     "definition": "Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.",
     "seeAlso": [
@@ -186,6 +186,18 @@
     "category": "platform",
     "tagline": "Analytics",
     "definition": "Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree."
+  },
+  "centennial": {
+    "slug": "centennial",
+    "term": "Centennial",
+    "category": "platform",
+    "tagline": "100-Year Preservation",
+    "definition": "A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade. When you've been part of Grove long enough, your grove earns Centennial status: 100 years of preservation, even after you're gone.",
+    "seeAlso": [
+      "rings",
+      "rooted",
+      "patina"
+    ]
   },
   "clearing": {
     "slug": "clearing",
@@ -251,7 +263,21 @@
     "seeAlso": [
       "blooms",
       "wisp",
-      "lumen"
+      "lumen",
+      "flow"
+    ]
+  },
+  "flow": {
+    "slug": "flow",
+    "term": "Flow",
+    "category": "content",
+    "tagline": "The Writing Sanctuary",
+    "definition": "Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work. When hours pass like minutes and the cursor moves as fast as thought—that's the state Flow creates.",
+    "seeAlso": [
+      "blooms",
+      "scribe",
+      "wisp",
+      "arbor"
     ]
   },
   "reeds": {
@@ -373,9 +399,14 @@
   "trove": {
     "slug": "trove",
     "term": "Trove",
-    "category": "operations",
+    "category": "tools",
     "tagline": "Library Book Discovery",
-    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered."
+    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered.",
+    "seeAlso": [
+      "etch",
+      "curios",
+      "wander"
+    ]
   },
   "press": {
     "slug": "press",
@@ -428,7 +459,20 @@
     "definition": "In anatomy, a lumen is the hollow center of a tube: the empty space inside blood vessels, intestines, airways. It's not the wall. It's not the tissue. It's the void through which everything flows. But lumen also means light. The same word for darkness and illumination.",
     "seeAlso": [
       "wisp",
-      "thorn"
+      "thorn",
+      "warden"
+    ]
+  },
+  "warden": {
+    "slug": "warden",
+    "term": "Warden",
+    "category": "operations",
+    "tagline": "External API Gateway",
+    "definition": "The one who holds the keys. Every outbound request to third-party services passes through Warden. Agents describe what they need; Warden executes with injected credentials. Keys never leave the vault.",
+    "seeAlso": [
+      "lumen",
+      "mycelium",
+      "heartwood"
     ]
   },
   "zephyr": {
