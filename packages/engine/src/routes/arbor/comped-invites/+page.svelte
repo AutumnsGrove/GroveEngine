@@ -413,7 +413,7 @@
 							{#if newInviteType === 'beta'}
 								Beta testers get free access now, should convert to paid later.
 							{:else}
-								Comped users are free forever (special cases like EU tax issues).
+								Comped wanderers are free forever (special cases like EU tax issues).
 							{/if}
 						</p>
 					</div>

@@ -142,7 +142,7 @@
           {:else}
             <RefreshCw class="btn-icon" aria-hidden="true" />
           {/if}
-          Resume Subscription
+          Resume Membership
         </Button>
       {:else}
         <Button
@@ -157,13 +157,13 @@
           {:else}
             <X class="btn-icon" aria-hidden="true" />
           {/if}
-          Cancel Subscription
+          Cancel Membership
         </Button>
       {/if}
     </div>
   {:else if !billingError}
     <div class="no-subscription">
-      <p>No active subscription found.</p>
+      <p>No active membership found.</p>
       <Button variant="primary" href="https://grove.place/plans">
         View Plans
       </Button>

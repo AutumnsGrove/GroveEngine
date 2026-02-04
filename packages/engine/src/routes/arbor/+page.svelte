@@ -1,5 +1,5 @@
 <script>
-  import { GlassCard, Spinner } from '$lib/ui';
+  import { GlassCard, Spinner, GroveTerm } from '$lib/ui';
   import { api, getUserDisplayName } from "$lib/utils";
   import {
     FileText,
@@ -88,7 +88,7 @@
         aria-label="Learn about being Rooted in Grove"
       >
         <TreeDeciduous class="w-3.5 h-3.5" />
-        <span>Rooted</span>
+        <GroveTerm term="rooted">Rooted</GroveTerm>
       </a>
     </div>
     <p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
@@ -102,7 +102,7 @@
           <FileText class="w-5 h-5" />
         </div>
         <div class="stat-content">
-          <span class="stat-label">Blooms</span>
+          <span class="stat-label"><GroveTerm term="bloom">Blooms</GroveTerm></span>
           {#if loading}
             <Spinner />
           {:else}

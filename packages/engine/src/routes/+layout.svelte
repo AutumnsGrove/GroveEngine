@@ -81,9 +81,9 @@
 {#if context?.type === 'not_found'}
 <div class="not-found-layout">
 	<div class="not-found-content">
-		<h1>Blog Not Found</h1>
-		<p>The blog <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
-		<p>Want to create your own blog? <a href="https://grove.place">Get started at grove.place</a></p>
+		<h1>Garden Not Found</h1>
+		<p>The garden <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
+		<p>Want to start your own garden? <a href="https://grove.place">Get started at grove.place</a></p>
 	</div>
 </div>
 {:else}

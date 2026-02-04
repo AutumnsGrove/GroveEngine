@@ -19,14 +19,14 @@
 				</svg>
 			</div>
 			<h1>Welcome to {data.tenantName}</h1>
-			<p class="setup-subtitle">Your new blog is ready to be set up!</p>
+			<p class="setup-subtitle">Your new grove is ready to be set up!</p>
 			<p class="setup-description">
 				Sign in to the admin panel to create your first post, customize your theme,
 				and make this space your own.
 			</p>
 			<div class="setup-actions">
 				<Button href="/arbor" variant="default" size="lg">
-					Set Up Your Blog
+					Set Up Your Grove
 				</Button>
 			</div>
 			<p class="setup-hint">
@@ -55,7 +55,7 @@
 		<h2 class="section-title">Latest Post</h2>
 		<InternalsPostViewer
 			post={data.latestPost}
-			caption="From the blog"
+			caption="From the garden"
 		/>
 	</section>
 {/if}

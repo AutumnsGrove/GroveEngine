@@ -163,7 +163,7 @@ async function sendCancellationEmail(
           Hi ${params.name},
         </h1>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-          We've cancelled your subscription as requested.
+          We've cancelled your membership as requested.
         </p>
         <hr style="border: none; border-top: 1px solid rgba(245, 242, 234, 0.1); margin: 24px 0;" />
         <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #f5f2ea; font-weight: 500;">
@@ -244,7 +244,7 @@ Questions? Just reply to this email.
   await resend.emails.send({
     from: "Grove <hello@grove.place>",
     to: params.to,
-    subject: "Your Grove subscription has been cancelled",
+    subject: "Your Grove membership has been cancelled",
     html: htmlContent,
     text: textContent,
   });

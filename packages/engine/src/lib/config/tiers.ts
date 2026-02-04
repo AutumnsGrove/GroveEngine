@@ -150,13 +150,13 @@ export const TIERS: Record<TierKey, TierConfig> = {
     display: {
       name: "Free",
       tagline: "Just visiting",
-      description: "Hang out in Meadow, follow blogs, react and comment.",
+      description: "Hang out in Meadow, follow gardens, react and comment.",
       icon: "user",
       bestFor: "Readers",
       featureStrings: [
         "Meadow access",
         "20 comments/week",
-        "Follow blogs",
+        "Follow gardens",
         "React to blooms",
       ],
     },

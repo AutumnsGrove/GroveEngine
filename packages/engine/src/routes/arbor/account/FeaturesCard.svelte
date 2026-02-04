@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Waystone } from "$lib/ui";
+  import { GlassCard, Waystone, GroveTerm } from "$lib/ui";
   import { BarChart3, Calendar, Sparkles } from "lucide-svelte";
 
   interface Props {
@@ -29,7 +29,7 @@
           <Waystone slug="what-is-rings" label="Learn about Rings analytics" />
         </div>
         <p class="feature-description">
-          Privacy-first analytics showing how Wanderers explore your Grove.
+          Privacy-first analytics showing how <GroveTerm term="wanderer">Wanderers</GroveTerm> explore your Grove.
         </p>
       </div>
     </a>
