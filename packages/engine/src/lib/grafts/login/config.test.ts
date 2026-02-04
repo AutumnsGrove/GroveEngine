@@ -34,7 +34,7 @@ describe("Login Graft Configuration", () => {
     });
 
     it("exports default return URL", () => {
-      expect(DEFAULT_RETURN_TO).toBe("/admin");
+      expect(DEFAULT_RETURN_TO).toBe("/arbor");
     });
 
     it("exports GroveAuth URLs", () => {

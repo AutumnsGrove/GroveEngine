@@ -71,7 +71,7 @@ function createOGResponse(
 describe("SSRF Protection (real validator)", () => {
   describe("blocks localhost access", () => {
     it("blocks http://localhost", async () => {
-      const result = await fetchOGMetadata("http://localhost/admin");
+      const result = await fetchOGMetadata("http://localhost/arbor");
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe("BLOCKED");
     });

@@ -101,7 +101,7 @@ async function isRateLimited(
 export function createCallbackHandler(
   config: CallbackHandlerConfig = {},
 ): RequestHandler {
-  const { defaultReturnTo = "/admin", rateLimitKvKey = "CACHE_KV" } = config;
+  const { defaultReturnTo = "/arbor", rateLimitKvKey = "CACHE_KV" } = config;
 
   return async ({
     url,

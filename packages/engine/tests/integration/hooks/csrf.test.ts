@@ -329,13 +329,13 @@ describe("CSRF Hook Orchestration", () => {
     });
   });
 
-  describe("Admin API Endpoints", () => {
-    it("should validate /api/admin/ endpoints with origin", async () => {
+  describe("Arbor API Endpoints", () => {
+    it("should validate /api/arbor/ endpoints with origin", async () => {
       const { validateCSRF } = await import("$lib/utils/csrf.js");
 
       const mockEvent = createMockEvent({
         method: "POST",
-        pathname: "/api/admin/settings",
+        pathname: "/api/arbor/settings",
         headers: {
           origin: "https://autumn.grove.place",
           "x-forwarded-host": "autumn.grove.place",

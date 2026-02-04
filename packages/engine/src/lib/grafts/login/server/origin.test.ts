@@ -332,7 +332,7 @@ describe("Origin Helper", () => {
       expect(adminCookieDomain).toBe(authCookieDomain);
 
       // User accesses their tenant blog
-      const tenantUrl = createUrl("https://autumn.grove.place/admin");
+      const tenantUrl = createUrl("https://autumn.grove.place/arbor");
       const tenantCookieDomain = getCookieDomain(tenantUrl);
 
       // Same domain - cookie will be readable here too

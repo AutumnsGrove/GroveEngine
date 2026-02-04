@@ -418,7 +418,7 @@ describe("Post CRUD Integration", () => {
   describe("Request validation", () => {
     it("requires authentication", () => {
       const event = createMockRequestEvent({
-        url: "https://grove.place/admin/posts?/create",
+        url: "https://grove.place/arbor/posts?/create",
         method: "POST",
         locals: { user: null },
       });
@@ -428,7 +428,7 @@ describe("Post CRUD Integration", () => {
 
     it("requires tenant context", () => {
       const event = createMockRequestEvent({
-        url: "https://grove.place/admin/posts?/create",
+        url: "https://grove.place/arbor/posts?/create",
         method: "POST",
         locals: {
           user: { id: "user-1", email: "test@example.com" },
@@ -442,7 +442,7 @@ describe("Post CRUD Integration", () => {
 
     it("provides authenticated tenant event", () => {
       const event = createMockRequestEvent({
-        url: "https://test-tenant.grove.place/admin/posts?/create",
+        url: "https://test-tenant.grove.place/arbor/posts?/create",
         method: "POST",
         headers: {
           "x-forwarded-host": "test-tenant.grove.place",

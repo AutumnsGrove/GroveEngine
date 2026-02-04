@@ -275,10 +275,10 @@ describe("Security Headers Hook Orchestration", () => {
   });
 
   describe("Content-Security-Policy - unsafe-eval Routes", () => {
-    it("should include 'unsafe-eval' for admin routes", () => {
-      const pathname = "/admin/settings";
+    it("should include 'unsafe-eval' for arbor routes", () => {
+      const pathname = "/arbor/settings";
       const hasUnsafeEval =
-        pathname.startsWith("/admin/") ||
+        pathname.startsWith("/arbor/") ||
         /^\/[^/]+$/.test(pathname) ||
         pathname.includes("/preview");
 
@@ -292,7 +292,7 @@ describe("Security Headers Hook Orchestration", () => {
     it("should include 'unsafe-eval' for root tenant pages", () => {
       const pathname = "/about";
       const hasUnsafeEval =
-        pathname.startsWith("/admin/") ||
+        pathname.startsWith("/arbor/") ||
         /^\/[^/]+$/.test(pathname) ||
         pathname.includes("/preview");
 
@@ -306,7 +306,7 @@ describe("Security Headers Hook Orchestration", () => {
     it("should include 'unsafe-eval' for preview routes", () => {
       const pathname = "/posts/draft-1/preview";
       const hasUnsafeEval =
-        pathname.startsWith("/admin/") ||
+        pathname.startsWith("/arbor/") ||
         /^\/[^/]+$/.test(pathname) ||
         pathname.includes("/preview");
 
@@ -320,7 +320,7 @@ describe("Security Headers Hook Orchestration", () => {
     it("should NOT include 'unsafe-eval' for regular API routes", () => {
       const pathname = "/api/posts";
       const hasUnsafeEval =
-        pathname.startsWith("/admin/") ||
+        pathname.startsWith("/arbor/") ||
         /^\/[^/]+$/.test(pathname) ||
         pathname.includes("/preview");
 
@@ -333,7 +333,7 @@ describe("Security Headers Hook Orchestration", () => {
     it("should NOT include 'unsafe-eval' for auth routes", () => {
       const pathname = "/auth/signin";
       const hasUnsafeEval =
-        pathname.startsWith("/admin/") ||
+        pathname.startsWith("/arbor/") ||
         /^\/[^/]+$/.test(pathname) ||
         pathname.includes("/preview");
 

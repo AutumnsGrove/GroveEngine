@@ -69,12 +69,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     );
     throw redirect(
       302,
-      `/admin/login?error=${encodeURIComponent(friendlyMessage)}`,
+      `/arbor/login?error=${encodeURIComponent(friendlyMessage)}`,
     );
   }
 
-  // Get return URL from query params (set by LoginGraft) or default to /admin
-  const returnTo = url.searchParams.get("returnTo") || "/admin";
+  // Get return URL from query params (set by LoginGraft) or default to /arbor
+  const returnTo = url.searchParams.get("returnTo") || "/arbor";
 
   // Verify Better Auth session cookie was set
   // Check both prefixed (production HTTPS) and unprefixed (development) variants
@@ -98,7 +98,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       }
       throw redirect(
         302,
-        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
+        `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
       );
     }
     // Legacy session exists and within migration window - allow through
@@ -127,7 +127,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       );
       throw redirect(
         302,
-        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
+        `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
       );
     }
 
@@ -143,7 +143,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       console.error("[Auth Callback] No user email in session response");
       throw redirect(
         302,
-        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
+        `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
       );
     }
 
@@ -193,14 +193,14 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       console.error("[Auth Callback] Network error fetching session:", err);
       throw redirect(
         302,
-        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("network_error"))}`,
+        `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("network_error"))}`,
       );
     }
 
     console.error("[Auth Callback] Error:", err);
     throw redirect(
       302,
-      `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
+      `/arbor/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
     );
   }
 };

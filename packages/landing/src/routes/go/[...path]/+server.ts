@@ -5,9 +5,9 @@
  * Used in email templates so links work regardless of tenant subdomain.
  *
  * Examples:
- *   /go/admin         → autumn.grove.place/admin
- *   /go/posts/new     → autumn.grove.place/admin/posts/new
- *   /go/settings      → autumn.grove.place/admin/settings
+ *   /go/arbor         → autumn.grove.place/arbor
+ *   /go/posts/new     → autumn.grove.place/arbor/posts/new
+ *   /go/settings      → autumn.grove.place/arbor/settings
  *
  * If user has no tenant yet, redirects to plant.grove.place (signup flow).
  * If user is not authenticated, redirects to sign-in page.
@@ -51,15 +51,15 @@ export const GET: RequestHandler = async ({
     const subdomain = tenant.subdomain;
     const path = params.path || "";
 
-    // Determine if path should go to /admin or is already a full path
+    // Determine if path should go to /arbor or is already a full path
     let targetPath: string;
-    if (path === "" || path === "admin") {
-      targetPath = "/admin";
-    } else if (path.startsWith("admin/")) {
+    if (path === "" || path === "arbor") {
+      targetPath = "/arbor";
+    } else if (path.startsWith("arbor/")) {
       targetPath = `/${path}`;
     } else {
-      // Assume paths like "posts/new", "settings" should be under /admin
-      targetPath = `/admin/${path}`;
+      // Assume paths like "posts/new", "settings" should be under /arbor
+      targetPath = `/arbor/${path}`;
     }
 
     const targetUrl = `https://${subdomain}.grove.place${targetPath}`;

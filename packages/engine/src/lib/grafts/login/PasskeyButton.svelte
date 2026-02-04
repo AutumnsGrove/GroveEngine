@@ -29,7 +29,7 @@
 	import ProviderIcon from "./ProviderIcon.svelte";
 
 	let {
-		returnTo = "/admin",
+		returnTo = "/arbor",
 		onSuccess,
 		onError,
 		size = "lg",

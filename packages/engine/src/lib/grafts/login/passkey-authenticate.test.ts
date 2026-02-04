@@ -480,7 +480,7 @@ describe("passkey-authenticate", () => {
       const result = await authenticateWithPasskey();
 
       expect(result.success).toBe(true);
-      expect(result.redirectTo).toBe("/admin"); // Default
+      expect(result.redirectTo).toBe("/arbor"); // Default
     });
 
     it("sends credential data to verify endpoint", async () => {

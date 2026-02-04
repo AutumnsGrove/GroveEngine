@@ -32,12 +32,12 @@ export const GROVE_URLS = {
   CHANGELOG: `${BASE_URL}/changelog`,
 
   // Smart links (redirect to user's arbor panel)
-  ARBOR_PANEL: `${GO_PREFIX}/admin`,
-  NEW_POST: `${GO_PREFIX}/posts/new`,
-  SETTINGS: `${GO_PREFIX}/settings`,
-  APPEARANCE: `${GO_PREFIX}/settings/appearance`,
-  POSTS: `${GO_PREFIX}/posts`,
-  PAGES: `${GO_PREFIX}/pages`,
+  ARBOR_PANEL: `${GO_PREFIX}/arbor`,
+  NEW_POST: `${GO_PREFIX}/arbor/posts/new`,
+  SETTINGS: `${GO_PREFIX}/arbor/settings`,
+  APPEARANCE: `${GO_PREFIX}/arbor/settings/appearance`,
+  POSTS: `${GO_PREFIX}/arbor/posts`,
+  PAGES: `${GO_PREFIX}/arbor/pages`,
 
   // External
   PLANT: "https://plant.grove.place",
@@ -49,12 +49,12 @@ export const GROVE_URLS = {
  * @example
  * ```ts
  * // Basic usage
- * buildGoUrl('posts/new')
- * // → "https://grove.place/go/posts/new"
+ * buildGoUrl('arbor/posts/new')
+ * // → "https://grove.place/go/arbor/posts/new"
  *
  * // With UTM tracking
- * buildGoUrl('admin', { utm_source: 'email', utm_campaign: 'welcome' })
- * // → "https://grove.place/go/admin?utm_source=email&utm_campaign=welcome"
+ * buildGoUrl('arbor', { utm_source: 'email', utm_campaign: 'welcome' })
+ * // → "https://grove.place/go/arbor?utm_source=email&utm_campaign=welcome"
  * ```
  */
 export function buildGoUrl(
@@ -77,8 +77,8 @@ export function buildGoUrl(
  *
  * @example
  * ```ts
- * buildEmailUrl('admin', 'welcome-sequence', 'day-1')
- * // → "https://grove.place/go/admin?utm_source=email&utm_medium=sequence&utm_campaign=welcome-sequence&utm_content=day-1"
+ * buildEmailUrl('arbor', 'welcome-sequence', 'day-1')
+ * // → "https://grove.place/go/arbor?utm_source=email&utm_medium=sequence&utm_campaign=welcome-sequence&utm_content=day-1"
  * ```
  */
 export function buildEmailUrl(
