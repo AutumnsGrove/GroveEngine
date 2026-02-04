@@ -101,7 +101,7 @@
 		items={postsWithLowercase}
 		filterFn={filterPost}
 		bind:searchQuery
-		placeholder="Search posts..."
+		placeholder="Search blooms..."
 		syncWithUrl={true}
 		queryParam="q"
 		debounceDelay={250}
@@ -132,7 +132,7 @@
 <div class="results-info">
 	{#if selectedTag || searchQuery}
 		<p>
-			Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
+			Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'bloom' : 'blooms'}
 			{#if selectedTag}
 				tagged with <strong>"{selectedTag}"</strong>
 			{/if}
@@ -141,13 +141,13 @@
 			{/if}
 		</p>
 	{:else}
-		<p>Showing all {data.posts.length} posts</p>
+		<p>Showing all {data.posts.length} blooms</p>
 	{/if}
 </div>
 
 {#if filteredPosts.length === 0}
 	<div class="no-results">
-		<p>No posts found matching your criteria.</p>
+		<p>No blooms found matching your criteria.</p>
 		<Button variant="default" onclick={clearFilters}>Clear filters</Button>
 	</div>
 {:else}
