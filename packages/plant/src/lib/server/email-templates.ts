@@ -365,7 +365,7 @@ export function getPaymentFailedEmail(params: PaymentFailedParams): {
           Hi ${params.name},
         </h1>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-          We tried to charge your card for your Grove subscription, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
+          We tried to charge your card for your Grove membership, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
         </p>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #16a34a; font-weight: 500;">
           Your blog is still live. Nothing's been taken down. You have time to sort this out.
@@ -390,7 +390,7 @@ export function getPaymentFailedEmail(params: PaymentFailedParams): {
           What happens if not fixed
         </h2>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-          If we can't process payment after a few attempts over the next 7 days, your subscription will be paused. Your blog will still exist—your content isn't going anywhere—but it won't be publicly visible until the billing is sorted.
+          If we can't process payment after a few attempts over the next 7 days, your membership will be paused. Your blog will still exist—your content isn't going anywhere—but it won't be publicly visible until the billing is sorted.
         </p>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           You can always reactivate by updating your payment info. No penalty, no "restart fee," no drama.
@@ -419,7 +419,7 @@ export function getPaymentFailedEmail(params: PaymentFailedParams): {
   const text = `
 Hi ${params.name},
 
-We tried to charge your card for your Grove subscription, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
+We tried to charge your card for your Grove membership, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
 
 Your blog is still live. Nothing's been taken down. You have time to sort this out.
 
@@ -436,7 +436,7 @@ Once updated, we'll retry the charge automatically. If you run into any trouble,
 
 What happens if not fixed:
 
-If we can't process payment after a few attempts over the next 7 days, your subscription will be paused. Your blog will still exist—your content isn't going anywhere—but it won't be publicly visible until the billing is sorted.
+If we can't process payment after a few attempts over the next 7 days, your membership will be paused. Your blog will still exist—your content isn't going anywhere—but it won't be publicly visible until the billing is sorted.
 
 You can always reactivate by updating your payment info. No penalty, no "restart fee," no drama.
 
@@ -473,7 +473,7 @@ export function getPaymentReceivedEmail(params: PaymentReceivedParams): {
   html: string;
   text: string;
 } {
-  const subject = `Receipt for your Grove subscription`;
+  const subject = `Receipt for your Grove membership`;
 
   const html = wrapEmail(`
     <tr>

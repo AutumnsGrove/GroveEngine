@@ -73,7 +73,7 @@
       />
       <div class="export-info">
         <span class="export-name">Posts Only</span>
-        <span class="export-desc">All blog posts in Markdown format</span>
+        <span class="export-desc">All blooms in Markdown format</span>
       </div>
     </label>
 

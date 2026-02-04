@@ -27,7 +27,7 @@ export function RenewalThankYou({
       <GroveParagraph>{greeting}</GroveParagraph>
 
       <GroveParagraph>
-        Your subscription just renewed. Thank you for staying rooted.
+        Your membership just renewed. Thank you for staying rooted.
       </GroveParagraph>
 
       <GroveParagraph>

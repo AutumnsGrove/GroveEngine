@@ -29,7 +29,7 @@
 		free: {
 			title: "Free Accounts",
 			content:
-				"Free accounts get full Meadow access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No blog, no storage. When you're ready to write, upgrade to Seedling.",
+				"Free accounts get full Meadow access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No garden, no storage. When you're ready to write, upgrade to Seedling.",
 		},
 		themes: {
 			title: "Themes",
