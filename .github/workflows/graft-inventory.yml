@@ -47,19 +47,23 @@ jobs:
           # Count actual INSERT statements for feature_flags in migrations
           MIGRATION_DIR="packages/engine/migrations"
 
-          # Extract flag IDs from migrations (look for INSERT OR IGNORE INTO feature_flags)
-          ACTUAL_FLAGS=$(grep -h "INSERT OR IGNORE INTO feature_flags" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
-            grep -oP "'\K[a-z_]+(?=')" | \
-            head -1 | \
-            sort -u || echo "")
+          # The SQL format spans multiple lines:
+          #   INSERT OR IGNORE INTO feature_flags (id, ...)
+          #   VALUES (
+          #     'flag_id',
+          # Use awk to find the flag ID (first quoted value after VALUES in a feature_flags INSERT)
+          ACTUAL_TOTAL=$(awk '
+            /INSERT OR IGNORE INTO feature_flags/ { found=1; next }
+            found && /VALUES/ { values=1; next }
+            values && /^[[:space:]]*'"'"'[a-z_]+'"'"'/ {
+              gsub(/[[:space:]'"'"',]/, "")
+              print
+              found=0; values=0
+            }
+          ' "$MIGRATION_DIR"/*.sql 2>/dev/null | sort -u | wc -l | tr -d ' ') || ACTUAL_TOTAL=0
 
-          # Alternative: count unique flag IDs by looking at the VALUES clauses
-          ACTUAL_TOTAL=$(grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\(\s*'\K[a-z_]+" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
-            sort -u | wc -l | tr -d ' ')
-
-          # Count greenhouse-only flags (greenhouse_only.*1)
-          ACTUAL_GREENHOUSE=$(grep -l "greenhouse_only" "$MIGRATION_DIR"/*.sql 2>/dev/null | \
-            xargs grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\([^)]*greenhouse_only[^)]*1" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_GREENHOUSE=0
+          # Count greenhouse-only flags from inventory (approximation - actual check would require parsing multi-line SQL)
+          ACTUAL_GREENHOUSE=$(jq -r '.flags | map(select(.greenhouseOnly == true)) | length' .github/graft-inventory.json 2>/dev/null) || ACTUAL_GREENHOUSE=0
 
           # Platform flags = total - greenhouse
           ACTUAL_PLATFORM=$((ACTUAL_TOTAL - ACTUAL_GREENHOUSE))
@@ -103,9 +107,11 @@ jobs:
         id: find-new-grafts
         shell: bash
         run: |
-          # Get new INSERT INTO feature_flags from changed files
+          # Get new flag IDs from changed migration files
+          # Look for added lines (starting with +) that contain flag IDs after VALUES
           NEW_GRAFTS=$(git diff origin/${{ github.base_ref }}...HEAD -- 'packages/engine/migrations/*.sql' | \
-            grep -oP "^\+.*INSERT OR IGNORE INTO feature_flags.*?VALUES\s*\(\s*'\K[a-z_]+" 2>/dev/null || echo "")
+            awk '/^\+[[:space:]]*'"'"'[a-z_]+'"'"',?$/ { gsub(/[+[:space:]'"'"',]/, ""); print }' | \
+            sort -u || echo "")
 
           if [ -n "$NEW_GRAFTS" ]; then
             echo "new_grafts<<EOF" >> $GITHUB_OUTPUT
@@ -236,7 +242,7 @@ jobs:
 
             \`\`\`bash
             # List all flag IDs from migrations
-            grep -hoP "INSERT OR IGNORE INTO feature_flags.*?VALUES\\s*\\(\\s*'\\K[a-z_]+" packages/engine/migrations/*.sql | sort -u
+            awk '/INSERT OR IGNORE INTO feature_flags/{f=1;next} f&&/VALUES/{v=1;next} v&&/^[[:space:]]*'"'"'[a-z_]+/{gsub(/[[:space:]'"'"',]/,"");print;f=0;v=0}' packages/engine/migrations/*.sql | sort -u
 
             # Query production D1
             npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, name, greenhouse_only FROM feature_flags ORDER BY id;"

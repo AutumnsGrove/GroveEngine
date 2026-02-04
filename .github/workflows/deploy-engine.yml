@@ -32,7 +32,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build engine
+      - name: Build engine package (required for self-referencing imports)
+        working-directory: packages/engine
+        run: pnpm package
+
+      - name: Build engine for deployment
         working-directory: packages/engine
         run: pnpm run build
 
