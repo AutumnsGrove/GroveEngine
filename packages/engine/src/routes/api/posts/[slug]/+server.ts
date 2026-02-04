@@ -20,9 +20,9 @@ async function invalidatePostCaches(
 
   try {
     // Invalidate single post cache
-    await cache.del(kv, `blog:${tenantId}:${slug}`);
+    await cache.del(kv, `garden:${tenantId}:${slug}`);
     // Invalidate post list cache
-    await cache.del(kv, `blog:list:${tenantId}`);
+    await cache.del(kv, `garden:list:${tenantId}`);
   } catch (err) {
     // Log but don't fail the request - cache invalidation is not critical
     console.error("[Cache] Failed to invalidate post caches:", err);

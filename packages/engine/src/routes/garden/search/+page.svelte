@@ -65,7 +65,7 @@
 		if (searchQuery.trim()) params.set('q', searchQuery.trim());
 		if (selectedTag) params.set('tag', selectedTag);
 
-		const newUrl = params.toString() ? `?${params.toString()}` : '/blog/search';
+		const newUrl = params.toString() ? `?${params.toString()}` : '/garden/search';
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	}
 
@@ -82,18 +82,18 @@
 	function clearFilters() {
 		searchQuery = '';
 		selectedTag = '';
-		goto('/blog/search', { replaceState: true });
+		goto('/garden/search', { replaceState: true });
 	}
 </script>
 
 <svelte:head>
-	<title>Search Blog{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
-	<meta name="description" content="Search blog posts by keyword or filter by tags." />
+	<title>Search Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
+	<meta name="description" content="Search the garden by keyword or filter by tags." />
 </svelte:head>
 
 <div class="search-header">
-	<h1>Search Blog</h1>
-	<p>Find posts by keyword or filter by tags.</p>
+	<h1>Search Garden</h1>
+	<p>Find blooms by keyword or filter by tags.</p>
 </div>
 
 <div class="search-container">
@@ -154,7 +154,7 @@
 	<div class="posts-grid">
 		{#each filteredPosts as post (post.slug)}
 			<Card hoverable>
-				<a href="/blog/{post.slug}" class="post-link">
+				<a href="/garden/{post.slug}" class="post-link">
 					<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
 					<div class="post-meta">
 						<time datetime={post.date} class="text-sm text-gray-600 dark:text-gray-400 transition-colors">

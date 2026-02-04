@@ -73,7 +73,7 @@ export const load: PageServerLoad = async ({
     emailsMatch(context.tenant.ownerId, locals.user.email);
 
   // Cache key includes tenant for multi-tenant isolation
-  const cacheKey = tenantId ? `blog:${tenantId}:${slug}` : `blog:_:${slug}`;
+  const cacheKey = tenantId ? `garden:${tenantId}:${slug}` : `garden:_:${slug}`;
 
   try {
     // Try to get from KV cache first, or compute from D1/filesystem

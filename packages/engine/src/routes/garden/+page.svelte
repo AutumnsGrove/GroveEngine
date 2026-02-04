@@ -17,7 +17,7 @@
 		if (target.closest('a')) {
 			return;
 		}
-		goto(`/blog/${slug}`);
+		goto(`/garden/${slug}`);
 	}
 
 	/**
@@ -27,18 +27,18 @@
 	function handleCardKeydown(event, slug) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			goto(`/blog/${slug}`);
+			goto(`/garden/${slug}`);
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Blog{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
-	<meta name="description" content="Read my latest blog posts and articles." />
+	<title>Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
+	<meta name="description" content="Explore my collection of blooms - thoughts, ideas, and explorations." />
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">
-	<h1 class="blog-header-title">Blog</h1>
+	<h1 class="blog-header-title">Garden</h1>
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>
 	{#if data.isOwner}
 		<div class="flex gap-2 items-center mt-4">
@@ -83,7 +83,7 @@
 					{#if post.tags.length > 0}
 						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}
-								<a href="/blog/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
+								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
 									<Badge variant="tag" class="accent-tag">{tag}</Badge>
 								</a>
 							{/each}

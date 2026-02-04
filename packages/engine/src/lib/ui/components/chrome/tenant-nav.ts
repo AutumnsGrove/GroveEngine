@@ -44,6 +44,7 @@ export interface TenantNavOptions {
 const PAGE_ICONS: Record<string, IconComponent> = {
   home: Home,
   blog: BookOpen,
+  garden: BookOpen,
   gallery: Image,
   timeline: Clock,
   trail: Clock,
@@ -68,7 +69,7 @@ const PAGE_ICONS: Record<string, IconComponent> = {
 export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
   const items: NavItem[] = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/blog", label: "Blog", icon: BookOpen },
+    { href: "/garden", label: "Garden", icon: BookOpen },
   ];
 
   // Add optional sections based on tenant config
@@ -82,8 +83,8 @@ export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
   // Add custom nav pages from database
   for (const page of options.navPages ?? []) {
     const slug = page.slug.toLowerCase();
-    // Skip if already added (home, blog, gallery, timeline)
-    if (["home", "blog", "gallery", "timeline"].includes(slug)) {
+    // Skip if already added (home, garden, gallery, timeline)
+    if (["home", "garden", "blog", "gallery", "timeline"].includes(slug)) {
       continue;
     }
 

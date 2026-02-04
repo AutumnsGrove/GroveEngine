@@ -62,10 +62,10 @@
 
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-foreground">Blog Posts</h1>
+      <h1 class="m-0 mb-1 text-3xl text-foreground">Garden</h1>
       <p class="m-0 text-foreground-muted">{data.posts.length} posts</p>
     </div>
-    <Button variant="primary" onclick={() => window.location.href = '/admin/blog/new'}>
+    <Button variant="primary" onclick={() => window.location.href = '/admin/garden/new'}>
       + New Post
     </Button>
   </header>
@@ -84,7 +84,7 @@
         {#each data.posts as post (post.slug)}
           <tr>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors">
+              <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors">
                 {post.title}
               </a>
               {#if post.description}
@@ -112,8 +112,8 @@
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
-              <a href="/admin/blog/edit/{post.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
+              <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              <a href="/admin/garden/edit/{post.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
               <button
                 onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
                 disabled={deleting}
@@ -128,7 +128,7 @@
         {:else}
           <tr>
             <td colspan="4" class="text-center text-foreground-muted py-12 px-4">
-              No blog posts yet. Create your first post!
+              No blooms yet. Create your first one!
             </td>
           </tr>
         {/each}
@@ -137,7 +137,7 @@
   </GlassCard>
 
   <GlassCard variant="muted">
-    <h3>How Blog Posts Work</h3>
+    <h3>How the Garden Works</h3>
     <p>
       Create and edit posts directly in the built-in markdown editor. Posts are saved to the database
       and available immediately.

@@ -167,9 +167,9 @@
   <section class="mb-8">
     <h2 class="m-0 mb-4 text-xl text-foreground">Quick Actions</h2>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
-      <a href="/admin/blog" class="action-card glass-action">
+      <a href="/admin/garden" class="action-card glass-action">
         <FileText class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">Manage Posts</span>
+        <span class="font-medium text-center text-sm">Manage Garden</span>
       </a>
       <a href="/admin/images" class="action-card glass-action">
         <Image class="w-7 h-7 text-accent-muted" />

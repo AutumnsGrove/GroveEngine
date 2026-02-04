@@ -1,6 +1,6 @@
 <script>
 	/**
-	 * Simple component to display a featured blog post
+	 * Simple component to display a featured garden post
 	 * @prop {{ title: string; description?: string; slug: string; date?: string }} post - Post data
 	 * @prop {string} [caption] - Optional caption text
 	 */
@@ -17,7 +17,7 @@
 	{#if caption}
 		<span class="caption">{caption}</span>
 	{/if}
-	<a href="/blog/{post.slug}" class="post-link">
+	<a href="/garden/{post.slug}" class="post-link">
 		<h3 class="title">{post.title}</h3>
 		{#if post.description}
 			<p class="description">{post.description}</p>
