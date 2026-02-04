@@ -1,5 +1,5 @@
 <script>
-	import { GlassCard, Waystone } from '$lib/ui';
+	import { GlassCard, Waystone, GroveTerm } from '$lib/ui';
 	import { BarChart3, TrendingUp, Heart, Eye, Users, Calendar, Sprout, Leaf, TreePine } from 'lucide-svelte';
 </script>
 
@@ -7,7 +7,7 @@
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
 			<BarChart3 class="w-8 h-8 text-accent-muted" />
-			<h1 class="m-0 text-3xl text-foreground">Rings</h1>
+			<h1 class="m-0 text-3xl text-foreground"><GroveTerm term="rings">Rings</GroveTerm></h1>
 			<Waystone slug="what-is-rings" label="Learn about Rings" />
 		</div>
 		<p class="m-0 text-foreground-muted text-lg italic">Count the rings and you learn the story.</p>
@@ -21,7 +21,7 @@
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in Full Bloom (Early Summer)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
-				Rings is Grove's private analytics system designed for writers, not marketers.
+				<GroveTerm term="rings">Rings</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> private analytics system designed for writers, not marketers.
 				Meaningful insights without the anxiety of real-time dashboards.
 			</p>
 		</div>

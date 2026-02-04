@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone, GroveTerm } from "$lib/ui/components/ui";
   import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse } from "lucide-svelte";
 
   // Available curios with their status
@@ -12,7 +12,7 @@
       status: "available",
       href: "/arbor/curios/gallery",
       features: [
-        "Amber-powered storage",
+        "Amber storage",
         "Tags and collections",
         "Lightbox viewer",
         "Masonry layout"

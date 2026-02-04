@@ -5,6 +5,7 @@
     GlassCard,
     GlassConfirmDialog,
     Waystone,
+    GroveTerm,
   } from "$lib/ui";
   import { Smartphone, Laptop, Monitor } from "lucide-svelte";
   import {
@@ -1023,7 +1024,7 @@
       <h2>Header Branding</h2>
     </div>
     <p class="section-description">
-      Show the Grove logo next to your site title. Visitors can tap it to cycle
+      Show the <GroveTerm term="grove">Grove</GroveTerm> logo next to your site title. Visitors can tap it to cycle
       through seasonal themes!
     </p>
 
@@ -1060,7 +1061,7 @@
       <h2>Active Sessions</h2>
     </div>
     <p class="section-description">
-      Devices where you're currently signed in to your Grove.
+      Devices where you're currently signed in to your <GroveTerm term="grove">Grove</GroveTerm>.
     </p>
 
     {#if loadingSessions}

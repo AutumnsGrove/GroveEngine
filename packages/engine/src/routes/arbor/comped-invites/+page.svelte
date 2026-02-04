@@ -27,7 +27,7 @@
 		CheckCircle,
 		Clock
 	} from 'lucide-svelte';
-	import { GlassCard } from '$lib/ui';
+	import { GlassCard, GroveTerm } from '$lib/ui';
 
 	let { data, form } = $props();
 
@@ -413,7 +413,7 @@
 							{#if newInviteType === 'beta'}
 								Beta testers get free access now, should convert to paid later.
 							{:else}
-								Comped wanderers are free forever (special cases like EU tax issues).
+								Comped <GroveTerm term="wanderer">wanderers</GroveTerm> are free forever (special cases like EU tax issues).
 							{/if}
 						</p>
 					</div>

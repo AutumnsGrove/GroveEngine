@@ -1,5 +1,5 @@
 <script>
-	import { GlassCard, Waystone } from '$lib/ui';
+	import { GlassCard, Waystone, GroveTerm } from '$lib/ui';
 	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout } from 'lucide-svelte';
 </script>
 
@@ -7,7 +7,7 @@
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
 			<Calendar class="w-8 h-8 text-accent-muted" />
-			<h1 class="m-0 text-3xl text-foreground">Trail</h1>
+			<h1 class="m-0 text-3xl text-foreground"><GroveTerm term="trails">Trail</GroveTerm></h1>
 			<Waystone slug="what-are-trails" label="Learn about Trails" />
 		</div>
 		<p class="m-0 text-foreground-muted text-lg italic">The path becomes clear by walking it.</p>
@@ -21,7 +21,7 @@
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in First Buds (Early Spring)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
-				Trails is Grove's personal roadmap system for building in public.
+				<GroveTerm term="trails">Trails</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> personal roadmap system for building in public.
 				Create and share project timelines with waypoints, phases, and beautiful nature-themed presentations.
 			</p>
 		</div>

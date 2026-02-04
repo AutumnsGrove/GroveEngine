@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Button, Spinner, Waystone } from "$lib/ui";
+  import { GlassCard, Button, Spinner, Waystone, GroveTerm } from "$lib/ui";
   import { Download, AlertTriangle } from "lucide-svelte";
   import type { ExportType } from "./types";
   import { CONTACT } from "$lib/config/contact";
@@ -73,7 +73,7 @@
       />
       <div class="export-info">
         <span class="export-name">Posts Only</span>
-        <span class="export-desc">All blooms in Markdown format</span>
+        <span class="export-desc">All <GroveTerm term="bloom">blooms</GroveTerm> in Markdown format</span>
       </div>
     </label>
 

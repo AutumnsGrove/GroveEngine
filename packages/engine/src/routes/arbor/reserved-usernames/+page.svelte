@@ -23,7 +23,7 @@
 		X,
 		Loader2
 	} from 'lucide-svelte';
-	import { GlassCard } from '$lib/ui';
+	import { GlassCard, GroveTerm } from '$lib/ui';
 
 	let { data, form } = $props();
 
@@ -107,7 +107,7 @@
 				Reserved Usernames
 			</h1>
 			<p class="text-foreground-muted mt-1">
-				Manage usernames that cannot be claimed by wanderers
+				Manage usernames that cannot be claimed by <GroveTerm term="wanderer">wanderers</GroveTerm>
 			</p>
 		</div>
 
@@ -406,7 +406,7 @@
 				<p class="text-foreground-muted mb-4">
 					Are you sure you want to release <code class="px-1 py-0.5 rounded bg-white/20"
 						>{removeUsername}</code
-					>? This username will become available for wanderers to claim.
+					>? This username will become available for <GroveTerm term="wanderer">wanderers</GroveTerm> to claim.
 				</p>
 
 				<form
