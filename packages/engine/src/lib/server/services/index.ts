@@ -38,6 +38,8 @@ export {
   type UploadOptions,
   type GetFileResult,
   type FileMetadata,
+  type SyncResult,
+  type SyncOptions,
   // Errors
   StorageError,
   type StorageErrorCode,
@@ -55,6 +57,8 @@ export {
   listAllFiles,
   listFolders,
   updateAltText,
+  // R2 → D1 Sync
+  syncFromBucket,
   // Validation
   validateFile,
   isAllowedContentType,

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 	import {
 		Upload,
 		Image,
@@ -15,7 +15,8 @@
 		Trash2,
 		ExternalLink,
 		X,
-		CheckCircle
+		CheckCircle,
+		RefreshCw
 	} from 'lucide-svelte';
 	import type { ComponentType } from 'svelte';
 
@@ -50,6 +51,10 @@
 	let deleteConfirmId = $state<string | null>(null);
 	let fileInputRef = $state<HTMLInputElement>();
 	let deleteButtonRefs = $state<Record<string, HTMLButtonElement>>({});
+
+	// Sync state
+	let isSyncing = $state(false);
+	let syncResult = $state<{ synced: number; skipped: number; total: number; errors: string[] } | null>(null);
 
 	function formatBytes(bytes: number): string {
 		if (bytes === 0) return '0 B';
@@ -225,6 +230,57 @@
 			deleteButtonRefs[fileId]?.focus();
 		}
 	}
+
+	async function syncFromStorage() {
+		if (isSyncing) return;
+
+		isSyncing = true;
+		errorMessage = '';
+		successMessage = '';
+		syncResult = null;
+
+		try {
+			const response = await fetch('/api/admin/cdn/sync', {
+				method: 'POST'
+			});
+
+			const result = (await response.json()) as {
+				success?: boolean;
+				synced: number;
+				skipped: number;
+				total: number;
+				errors: string[];
+				error?: string;
+			};
+
+			if (response.ok && result.success) {
+				syncResult = {
+					synced: result.synced,
+					skipped: result.skipped,
+					total: result.total,
+					errors: result.errors
+				};
+
+				if (result.synced > 0) {
+					successMessage = `Synced ${result.synced} file${result.synced !== 1 ? 's' : ''} from storage`;
+					// Reload the page to show synced files
+					setTimeout(() => {
+						window.location.reload();
+					}, 1500);
+				} else if (result.total === 0) {
+					successMessage = 'No files found in storage bucket';
+				} else {
+					successMessage = `All ${result.total} files already synced`;
+				}
+			} else {
+				throw new Error(result.error || 'Sync failed');
+			}
+		} catch (err) {
+			errorMessage = err instanceof Error ? err.message : 'Failed to sync from storage';
+		} finally {
+			isSyncing = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -248,7 +304,7 @@
 {/if}
 
 {#if successMessage}
-	<div class="mb-6 bg-grove-50 dark:bg-grove-950/30 border border-grove-200 dark:border-grove-800 text-grove-700 dark:text-grove-300 px-4 py-3 rounded-lg">
+	<div class="mb-6 bg-grove-50 dark:bg-grove-950/30 border border-grove-200 dark:border-grove-800 text-grove-700 dark:text-grove-300 px-4 py-3 rounded-lg" role="status" aria-live="polite">
 		<span class="font-sans text-sm">{successMessage}</span>
 	</div>
 {/if}
@@ -268,7 +324,7 @@
 		tabindex="0"
 		aria-label="Upload files. Press Enter or Space to browse, or drag and drop files here."
 	>
-		<Upload class="w-12 h-12 mx-auto mb-4 text-grove-400 dark:text-grove-500" />
+		<Upload class="w-12 h-12 mx-auto mb-4 text-grove-400 dark:text-grove-500" aria-hidden="true" />
 
 		<p class="text-foreground-muted font-sans mb-4">
 			Drag & drop files here, or
@@ -361,9 +417,25 @@
 
 	{#if files.length === 0}
 		<GlassCard class="text-center py-12">
-			<Image class="w-16 h-16 mx-auto mb-4 text-foreground/20" />
-			<p class="text-foreground-muted font-sans">No files uploaded yet</p>
-			<p class="text-sm text-foreground/40 font-sans mt-1">Drop files above to get started</p>
+			<Image class="w-16 h-16 mx-auto mb-4 text-foreground/20" aria-hidden="true" />
+			<p class="text-foreground-muted font-sans">No files found in database</p>
+			<p class="text-sm text-foreground/40 font-sans mt-1 mb-4">
+				Files may exist in storage but be missing from the database.
+			</p>
+			<GlassButton
+				onclick={syncFromStorage}
+				disabled={isSyncing}
+				class="inline-flex items-center gap-2"
+				aria-busy={isSyncing}
+			>
+				<RefreshCw class="w-4 h-4 {isSyncing ? 'animate-spin' : ''}" aria-hidden="true" />
+				{isSyncing ? 'Syncing...' : 'Sync from Storage'}
+			</GlassButton>
+			{#if syncResult && syncResult.synced === 0 && syncResult.total === 0}
+				<p class="text-sm text-foreground/40 font-sans mt-4">
+					Storage bucket is empty. Drop files above to get started.
+				</p>
+			{/if}
 		</GlassCard>
 	{:else}
 		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -380,7 +452,7 @@
 								class="w-full h-full object-cover"
 							/>
 						{:else}
-							<FileTypeIcon class="w-12 h-12 text-grove-400 dark:text-grove-500" />
+							<FileTypeIcon class="w-12 h-12 text-grove-400 dark:text-grove-500" aria-hidden="true" />
 						{/if}
 
 						<!-- Delete Confirmation Overlay -->
@@ -451,9 +523,9 @@
 								target="_blank"
 								rel="noopener noreferrer"
 								class="p-1.5 text-foreground/40 hover:text-grove-600 dark:hover:text-grove-400 transition-colors"
-								title="Open in new tab"
+								aria-label="Open {file.original_filename} in new tab"
 							>
-								<ExternalLink class="w-4 h-4" />
+								<ExternalLink class="w-4 h-4" aria-hidden="true" />
 							</a>
 							<button
 								bind:this={deleteButtonRefs[file.id]}
@@ -461,7 +533,7 @@
 								class="p-1.5 text-foreground/40 hover:text-red-500 dark:hover:text-red-400 transition-colors"
 								aria-label="Delete file {file.original_filename}"
 							>
-								<Trash2 class="w-4 h-4" />
+								<Trash2 class="w-4 h-4" aria-hidden="true" />
 							</button>
 						</div>
 					</div>

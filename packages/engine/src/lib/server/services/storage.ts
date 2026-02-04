@@ -754,6 +754,183 @@ function mapRowToStorageFile(row: CdnFileRow): StorageFile {
 }
 
 // ============================================================================
+// R2 → D1 Sync Operations
+// ============================================================================
+
+export interface SyncResult {
+  /** Number of R2 objects synced to D1 */
+  synced: number;
+  /** Number of R2 objects already in D1 (skipped) */
+  skipped: number;
+  /** Error messages for failed inserts */
+  errors: string[];
+  /** Total R2 objects scanned */
+  total: number;
+}
+
+export interface SyncOptions {
+  /** User ID to assign as uploader for recovered files */
+  uploadedBy: string;
+  /** Folder filter - only sync objects in this folder (optional) */
+  folder?: string;
+}
+
+/**
+ * Guess MIME type from file extension.
+ * Used when R2 httpMetadata is missing.
+ */
+function guessContentType(key: string): string {
+  const ext = key.split(".").pop()?.toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    avif: "image/avif",
+    jxl: "image/jxl",
+    pdf: "application/pdf",
+    mp4: "video/mp4",
+    webm: "video/webm",
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    woff: "font/woff",
+    woff2: "font/woff2",
+    ttf: "font/ttf",
+    otf: "font/otf",
+    json: "application/json",
+    css: "text/css",
+    js: "application/javascript",
+  };
+  return mimeTypes[ext || ""] || "application/octet-stream";
+}
+
+/**
+ * Extract folder path from R2 key.
+ * "images/photo.jpg" → "/images"
+ * "photo.jpg" → "/"
+ */
+function extractFolderFromKey(key: string): string {
+  const lastSlash = key.lastIndexOf("/");
+  if (lastSlash === -1) return "/";
+  return "/" + key.substring(0, lastSlash);
+}
+
+/**
+ * Extract filename from R2 key.
+ * "images/photo.jpg" → "photo.jpg"
+ */
+function extractFilenameFromKey(key: string): string {
+  const lastSlash = key.lastIndexOf("/");
+  return lastSlash === -1 ? key : key.substring(lastSlash + 1);
+}
+
+/**
+ * Sync R2 bucket contents to D1 metadata table.
+ *
+ * Scans all objects in the R2 bucket and inserts missing metadata records
+ * into D1. This is useful for recovering from D1 data loss or migrating
+ * from a bucket without metadata tracking.
+ *
+ * @example
+ * ```ts
+ * const result = await storage.syncFromBucket(bucket, db, {
+ *   uploadedBy: 'admin-user-id'
+ * });
+ * console.log(`Synced ${result.synced} files, skipped ${result.skipped}`);
+ * ```
+ */
+export async function syncFromBucket(
+  bucket: R2Bucket,
+  db: D1DatabaseOrSession,
+  options: SyncOptions,
+): Promise<SyncResult> {
+  const result: SyncResult = {
+    synced: 0,
+    skipped: 0,
+    errors: [],
+    total: 0,
+  };
+
+  // Step 1: List all R2 objects
+  const r2Objects: R2Object[] = [];
+  let cursor: string | undefined;
+  let truncated = true;
+
+  while (truncated) {
+    const listResult: R2Objects = await bucket.list({
+      cursor,
+      limit: 1000, // Max per request
+    });
+    r2Objects.push(...listResult.objects);
+    // R2Objects.cursor may not be in all @cloudflare/workers-types versions
+    cursor = (listResult as R2Objects & { cursor?: string }).cursor;
+    truncated = listResult.truncated;
+  }
+
+  result.total = r2Objects.length;
+
+  if (r2Objects.length === 0) {
+    return result;
+  }
+
+  // Step 2: Get existing keys from D1
+  const existingKeysResult = await db
+    .prepare("SELECT key FROM cdn_files")
+    .all<{ key: string }>();
+  const existingKeys = new Set(
+    (existingKeysResult.results ?? []).map((r) => r.key),
+  );
+
+  // Step 3: Filter to missing objects only
+  const missingObjects = r2Objects.filter((obj) => !existingKeys.has(obj.key));
+  result.skipped = r2Objects.length - missingObjects.length;
+
+  // Step 4: Insert missing records
+  for (const obj of missingObjects) {
+    const id = generateId();
+    const filename = extractFilenameFromKey(obj.key);
+    const folder = extractFolderFromKey(obj.key);
+    const contentType =
+      obj.httpMetadata?.contentType || guessContentType(obj.key);
+    const createdAt = obj.uploaded?.toISOString() || now();
+
+    // Apply folder filter if specified
+    if (options.folder && folder !== normalizeFolder(options.folder)) {
+      result.skipped++;
+      continue;
+    }
+
+    try {
+      await db
+        .prepare(
+          `INSERT OR IGNORE INTO cdn_files
+           (id, filename, original_filename, key, content_type, size_bytes, folder, alt_text, uploaded_by, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
+        )
+        .bind(
+          id,
+          filename,
+          filename, // original_filename same as filename (original is lost)
+          obj.key,
+          contentType,
+          obj.size,
+          folder,
+          options.uploadedBy,
+          createdAt,
+        )
+        .run();
+      result.synced++;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      result.errors.push(`Failed to insert ${obj.key}: ${errorMsg}`);
+    }
+  }
+
+  return result;
+}
+
+// ============================================================================
 // Response Helpers
 // ============================================================================
 
