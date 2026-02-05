@@ -44,33 +44,25 @@ export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
     redirect(302, "/");
   }
 
-  const groveSession = cookies.get("grove_session");
-  if (!groveSession) {
+  const accessToken = cookies.get("access_token");
+  if (!accessToken) {
     redirect(302, "/");
   }
 
   const env = platform?.env as Record<string, string> | undefined;
   const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-  const authService = platform?.env?.AUTH;
 
-  // Use service binding if available, otherwise fall back to fetch
-  const authFetch = authService
-    ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-    : fetch;
-
-  // Fetch account data in parallel using Cookie header
-  const cookieHeader = { Cookie: `grove_session=${groveSession}` };
-
+  // Fetch account data in parallel
   const [passkeysRes, twoFactorRes, linkedAccountsRes] =
     await Promise.allSettled([
-      authFetch(`${authBaseUrl}/api/auth/passkey/list-user-passkeys`, {
-        headers: cookieHeader,
+      fetch(`${authBaseUrl}/api/auth/passkey/list-user-passkeys`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       }),
-      authFetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
-        headers: cookieHeader,
+      fetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       }),
-      authFetch(`${authBaseUrl}/api/auth/linked-accounts`, {
-        headers: cookieHeader,
+      fetch(`${authBaseUrl}/api/auth/linked-accounts`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       }),
     ]);
 
@@ -101,8 +93,8 @@ export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
 export const actions: Actions = {
   // Delete a passkey
   deletePasskey: async ({ request, cookies, platform }) => {
-    const groveSession = cookies.get("grove_session");
-    if (!groveSession) {
+    const accessToken = cookies.get("access_token");
+    if (!accessToken) {
       return fail(401, {
         error: "You'll need to sign in to manage your account settings",
       });
@@ -117,20 +109,14 @@ export const actions: Actions = {
 
     const env = platform?.env as Record<string, string> | undefined;
     const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-    const authService = platform?.env?.AUTH;
-
-    // Use service binding if available, otherwise fall back to fetch
-    const authFetch = authService
-      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-      : fetch;
 
     try {
-      const response = await authFetch(
+      const response = await fetch(
         `${authBaseUrl}/api/auth/passkey/delete-passkey`,
         {
           method: "POST",
           headers: {
-            Cookie: `grove_session=${groveSession}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ passkeyId }),
@@ -154,8 +140,8 @@ export const actions: Actions = {
 
   // Enable 2FA - Step 1: Generate secret and QR code
   enableTwoFactor: async ({ cookies, platform }) => {
-    const groveSession = cookies.get("grove_session");
-    if (!groveSession) {
+    const accessToken = cookies.get("access_token");
+    if (!accessToken) {
       return fail(401, {
         error: "You'll need to sign in to manage your account settings",
       });
@@ -163,19 +149,14 @@ export const actions: Actions = {
 
     const env = platform?.env as Record<string, string> | undefined;
     const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-    const authService = platform?.env?.AUTH;
-
-    const authFetch = authService
-      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-      : fetch;
 
     try {
-      const response = await authFetch(
+      const response = await fetch(
         `${authBaseUrl}/api/auth/two-factor/enable`,
         {
           method: "POST",
           headers: {
-            Cookie: `grove_session=${groveSession}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         },
@@ -202,8 +183,8 @@ export const actions: Actions = {
 
   // Verify 2FA code to complete setup
   verifyTwoFactor: async ({ request, cookies, platform }) => {
-    const groveSession = cookies.get("grove_session");
-    if (!groveSession) {
+    const accessToken = cookies.get("access_token");
+    if (!accessToken) {
       return fail(401, {
         error: "You'll need to sign in to manage your account settings",
       });
@@ -220,19 +201,14 @@ export const actions: Actions = {
 
     const env = platform?.env as Record<string, string> | undefined;
     const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-    const authService = platform?.env?.AUTH;
-
-    const authFetch = authService
-      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-      : fetch;
 
     try {
-      const response = await authFetch(
+      const response = await fetch(
         `${authBaseUrl}/api/auth/two-factor/verify-totp`,
         {
           method: "POST",
           headers: {
-            Cookie: `grove_session=${groveSession}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ code }),
@@ -259,8 +235,8 @@ export const actions: Actions = {
 
   // Disable 2FA
   disableTwoFactor: async ({ request, cookies, platform }) => {
-    const groveSession = cookies.get("grove_session");
-    if (!groveSession) {
+    const accessToken = cookies.get("access_token");
+    if (!accessToken) {
       return fail(401, {
         error: "You'll need to sign in to manage your account settings",
       });
@@ -277,19 +253,14 @@ export const actions: Actions = {
 
     const env = platform?.env as Record<string, string> | undefined;
     const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-    const authService = platform?.env?.AUTH;
-
-    const authFetch = authService
-      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-      : fetch;
 
     try {
-      const response = await authFetch(
+      const response = await fetch(
         `${authBaseUrl}/api/auth/two-factor/disable`,
         {
           method: "POST",
           headers: {
-            Cookie: `grove_session=${groveSession}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ code }),
@@ -311,8 +282,8 @@ export const actions: Actions = {
 
   // Generate new backup codes
   generateBackupCodes: async ({ cookies, platform }) => {
-    const groveSession = cookies.get("grove_session");
-    if (!groveSession) {
+    const accessToken = cookies.get("access_token");
+    if (!accessToken) {
       return fail(401, {
         error: "You'll need to sign in to manage your account settings",
       });
@@ -320,19 +291,14 @@ export const actions: Actions = {
 
     const env = platform?.env as Record<string, string> | undefined;
     const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-    const authService = platform?.env?.AUTH;
-
-    const authFetch = authService
-      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-      : fetch;
 
     try {
-      const response = await authFetch(
+      const response = await fetch(
         `${authBaseUrl}/api/auth/two-factor/generate-backup-codes`,
         {
           method: "POST",
           headers: {
-            Cookie: `grove_session=${groveSession}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         },

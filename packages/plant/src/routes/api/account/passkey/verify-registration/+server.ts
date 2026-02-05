@@ -17,9 +17,9 @@ import {
 const DEFAULT_AUTH_URL = "https://heartwood.grove.place";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
-  const groveSession = cookies.get("grove_session");
+  const accessToken = cookies.get("access_token");
 
-  if (!groveSession) {
+  if (!accessToken) {
     return json(
       { error: "You'll need to sign in to register a passkey" },
       { status: 401 },
@@ -28,12 +28,6 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 
   const env = platform?.env as Record<string, string> | undefined;
   const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-  const authService = platform?.env?.AUTH;
-
-  // Use service binding if available, otherwise fall back to fetch
-  const authFetch = authService
-    ? (url: string, init?: RequestInit) => authService.fetch(url, init)
-    : fetch;
 
   try {
     const body = await request.json();
@@ -46,12 +40,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       );
     }
 
-    const response = await authFetch(
+    const response = await fetch(
       `${authBaseUrl}/api/auth/passkey/verify-registration`,
       {
         method: "POST",
         headers: {
-          Cookie: `grove_session=${groveSession}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
