@@ -121,28 +121,30 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 # =============================================================================
 # Envelope Encryption - Key Encryption Key (KEK)
 # =============================================================================
-# Secrets Store binding for the master encryption key.
 # The KEK encrypts per-tenant DEKs (Data Encryption Keys).
+# Set via wrangler secret put (NOT in this file - it's sensitive!).
 #
-# Setup commands (run manually):
+# Setup commands (run via gw for consistency across services):
+#   # Generate and set KEK:
+#   gw secret generate GROVE_KEK
+#   # OR if you have an existing key:
+#   gw secret set GROVE_KEK
+#   # (paste 64-char hex key when prompted)
+#
+#   # Apply to all services that need it:
+#   gw secret apply GROVE_KEK --worker grove-lattice
+#   gw secret apply GROVE_KEK --worker grove-timeline-sync
+#
+# Manual alternative:
 #   # Generate KEK: openssl rand -hex 32
-#   # Or: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+#   wrangler secret put GROVE_KEK
 #
-#   # Create secrets store (if not exists):
-#   wrangler secrets-store store create grove-secrets --remote
+# IMPORTANT: Both grove-lattice and grove-timeline-sync share the same D1
+# database, so they MUST use the exact same KEK value. Mismatched KEKs
+# means one service can't decrypt secrets encrypted by the other.
 #
-#   # Add KEK to store (paste 64-char hex key when prompted):
-#   wrangler secrets-store secret put GROVE_KEK --store grove-secrets --remote
-#
-#   # Get store ID:
-#   wrangler secrets-store store list
-#
-# NOTE: Each environment (local/staging/production) needs its own
-# secrets store and KEK. Never share KEKs across environments.
-[[secrets_store_secrets]]
-binding = "GROVE_KEK"
-store_id = "a2f25cdc7b4d4db8a4880e9b73630e9a"
-secret_name = "GROVE_KEK"
+# NOTE: GROVE_KEK is set as a regular Cloudflare secret because Pages
+# doesn't support secrets_store_secrets bindings (only Workers do).
 
 # =============================================================================
 # Secrets (set via CLI, not in this file!)

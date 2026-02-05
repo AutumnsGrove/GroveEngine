@@ -17,20 +17,19 @@ import { SecretsManager } from "./secrets-manager";
  * const token = await secrets.getSecret(tenantId, 'github_token');
  * ```
  *
- * @throws If GROVE_KEK binding is not configured
+ * @throws If GROVE_KEK secret is not configured
  */
 export async function createSecretsManager(env: {
   DB: D1Database;
-  GROVE_KEK?: { get(): Promise<string> };
+  GROVE_KEK?: string;
 }): Promise<SecretsManager> {
   if (!env.GROVE_KEK) {
     throw new Error(
-      "GROVE_KEK binding not configured. See wrangler.toml for setup instructions.",
+      "GROVE_KEK secret not configured. Run: wrangler secret put GROVE_KEK",
     );
   }
 
-  const kek = await env.GROVE_KEK.get();
-  return new SecretsManager(env.DB, kek);
+  return new SecretsManager(env.DB, env.GROVE_KEK);
 }
 
 // Re-export for direct usage

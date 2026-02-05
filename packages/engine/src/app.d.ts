@@ -116,10 +116,8 @@ declare global {
         CDN_BASE_URL?: string;
 
         // Envelope Encryption - Key Encryption Key
-        /** Cloudflare Secrets Store binding for KEK (envelope encryption) */
-        GROVE_KEK?: {
-          get(): Promise<string>;
-        };
+        /** KEK for envelope encryption (64 hex chars, set via wrangler secret put) */
+        GROVE_KEK?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

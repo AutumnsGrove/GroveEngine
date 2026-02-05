@@ -39,7 +39,7 @@ export async function GET({
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "Secrets Store not configured");
+    throw error(500, "GROVE_KEK secret not configured");
   }
 
   try {
@@ -93,7 +93,7 @@ export async function PUT({
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "Secrets Store not configured");
+    throw error(500, "GROVE_KEK secret not configured");
   }
 
   try {
@@ -170,7 +170,7 @@ export async function DELETE({
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "Secrets Store not configured");
+    throw error(500, "GROVE_KEK secret not configured");
   }
 
   try {

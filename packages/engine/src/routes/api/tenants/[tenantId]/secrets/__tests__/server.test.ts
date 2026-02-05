@@ -53,7 +53,7 @@ function createMockPlatform() {
   return {
     env: {
       DB: {},
-      GROVE_KEK: { get: () => Promise.resolve("a".repeat(64)) },
+      GROVE_KEK: "a".repeat(64),
     },
   };
 }
@@ -376,20 +376,20 @@ describe("Secrets API Configuration Errors", () => {
       GET({
         params: { tenantId: "test" },
         platform: {
-          env: { GROVE_KEK: { get: () => Promise.resolve("a".repeat(64)) } },
+          env: { GROVE_KEK: "a".repeat(64) },
         },
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof GET>[0]),
     ).rejects.toThrow("Database not configured");
   });
 
-  it("should reject when Secrets Store is not configured", async () => {
+  it("should reject when GROVE_KEK secret is not configured", async () => {
     await expect(
       GET({
         params: { tenantId: "test" },
         platform: { env: { DB: {} } },
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof GET>[0]),
-    ).rejects.toThrow("Secrets Store not configured");
+    ).rejects.toThrow("GROVE_KEK secret not configured");
   });
 });

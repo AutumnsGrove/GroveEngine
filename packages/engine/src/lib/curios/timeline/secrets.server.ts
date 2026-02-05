@@ -27,7 +27,7 @@ export type TimelineSecretKey =
  */
 interface TokenEnv {
   DB: D1Database;
-  GROVE_KEK?: { get(): Promise<string> };
+  GROVE_KEK?: string;
   TOKEN_ENCRYPTION_KEY?: string;
 }
 
