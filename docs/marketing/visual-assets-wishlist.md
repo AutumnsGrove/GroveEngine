@@ -15,16 +15,17 @@ lastUpdated: '2026-02-05'
 
 ## Current Assets
 
-### Hero Carousel (Landing Page) - DONE
-Located: `assets/carousel/hero-slide-*.png`
+### Hero Carousel (Landing Page) - Live Svelte Components
+Located: `packages/landing/src/lib/components/hero/`
+Replaced static PNGs with season-aware live components (#956).
 
-| Slide | Content | Status |
-|-------|---------|--------|
-| 1 | "A grove for people who lost their groves" - 5 seasonal trees | Done |
-| 2 | "Your words. Your space. Forever." - Domain showcase | Done |
-| 3 | "100 year domain guarantee" - Centennial feature | Done |
-| 4 | "No algorithms. No engagement metrics." - 4 trees | Done |
-| 5 | "The internet should belong to everyone." - Autumn tree | Done |
+| Slide | Component | Headline | Visual Scene |
+|-------|-----------|----------|-------------|
+| 1 | HeroRefuge | "A grove for people who lost their groves" | Logo, TreePine, TreeCherry, Fireflies, Mushroom |
+| 2 | HeroOwnership | "Your words. Your space. Forever." | TreeAspen, GardenGate, Butterfly, Fern, Bush |
+| 3 | HeroShade | "Your words are not a dataset" | Dense canopy, Cardinal, falling Leaves, Bushes |
+| 4 | HeroCentennial | "Some trees outlive the people who planted them" | Large TreePine, Lantern, StonePath, Stars |
+| 5 | HeroCommunity | "The internet should feel like home" | Pond, Reeds, LilyPad, TreeBirch, Robin, Rabbit |
 
 ---
 
