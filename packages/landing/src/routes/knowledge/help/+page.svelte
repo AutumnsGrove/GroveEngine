@@ -50,7 +50,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-  <Header />
+  <Header user={data.user} />
 
   <!-- Hero -->
   <section class="relative py-12 px-6 text-center bg-gradient-to-b from-emerald-50/80 via-transparent to-transparent dark:from-emerald-950/20 dark:via-transparent dark:to-transparent">

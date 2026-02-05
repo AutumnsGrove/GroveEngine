@@ -21,7 +21,7 @@
 	url="/unsubscribe"
 />
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen flex flex-col items-center px-6 py-16">
 	<div class="max-w-md w-full">

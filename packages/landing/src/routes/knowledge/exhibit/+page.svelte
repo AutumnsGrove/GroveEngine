@@ -65,7 +65,7 @@
 />
 
 <main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-  <Header />
+  <Header user={data.user} />
 
   <!-- Hero -->
   <section class="relative py-12 px-6 text-center bg-gradient-to-b from-violet-50 via-slate-50 to-white dark:from-violet-950/30 dark:via-slate-900 dark:to-slate-950">

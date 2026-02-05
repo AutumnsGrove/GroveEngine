@@ -5,6 +5,8 @@
 	import { MobileTOC } from '@autumnsgrove/groveengine';
 	import SEO from '$lib/components/SEO.svelte';
 
+	let { data } = $props();
+
 	// Centralized icon registry
 	import { navIcons, contentIcons, actionIcons, toolIcons } from '$lib/utils/icons';
 
@@ -43,7 +45,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<!-- Content -->
 	<article class="flex-1 px-6 py-12">

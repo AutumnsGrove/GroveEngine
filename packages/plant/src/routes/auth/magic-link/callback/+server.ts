@@ -34,13 +34,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const cookieHeader = allCookies.map((c) => `${c.name}=${c.value}`).join("; ");
 
   try {
-    // Get session from Better Auth
-    const sessionResponse = await fetch(`${authBaseUrl}/api/auth/get-session`, {
-      method: "GET",
-      headers: {
-        Cookie: cookieHeader,
+    // Get session from Better Auth via service binding (Worker-to-Worker)
+    if (!platform?.env?.AUTH) {
+      console.error("[Magic Link Callback] AUTH service binding not available");
+      redirect(302, "/?error=Service%20temporarily%20unavailable");
+    }
+    const sessionResponse = await platform.env.AUTH.fetch(
+      `${authBaseUrl}/api/auth/get-session`,
+      {
+        method: "GET",
+        headers: {
+          Cookie: cookieHeader,
+        },
       },
-    });
+    );
 
     if (!sessionResponse.ok) {
       console.error(

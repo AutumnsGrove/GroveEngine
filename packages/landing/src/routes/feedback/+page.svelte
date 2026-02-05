@@ -39,7 +39,7 @@
 	<meta name="description" content="Share your thoughts, ideas, or feedback about Grove. Your voice matters here." />
 </svelte:head>
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen py-12 px-4">
 	<div class="max-w-2xl mx-auto">

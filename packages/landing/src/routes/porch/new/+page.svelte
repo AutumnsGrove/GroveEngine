@@ -40,7 +40,7 @@
 	<meta name="description" content="Start a support conversation with Grove. Tell us what's going on and we'll help you figure it out." />
 </svelte:head>
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen py-12 px-4">
 	<div class="max-w-2xl mx-auto">

@@ -3,6 +3,8 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 
+	let { data } = $props();
+
 	// Nature components for the midnight scene
 	import {
 		Moon,
@@ -26,7 +28,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<!-- The Manifesto -->
 	<article

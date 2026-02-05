@@ -43,7 +43,7 @@
 	<title>{data.visit?.subject || 'Visit'} - The Porch</title>
 </svelte:head>
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen py-12 px-4">
 	<div class="max-w-2xl mx-auto">

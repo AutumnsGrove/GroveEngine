@@ -3,6 +3,8 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Coffee, Heart, TreePine, Sparkles } from 'lucide-svelte';
+
+	let { data } = $props();
 </script>
 
 <SEO
@@ -11,7 +13,7 @@
 	url="/support"
 />
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen flex flex-col items-center px-6 py-16">
 	<div class="max-w-2xl w-full">

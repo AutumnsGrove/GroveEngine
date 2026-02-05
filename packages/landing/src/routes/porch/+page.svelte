@@ -13,7 +13,7 @@
 	<meta name="description" content="Have a seat on the porch. Whether you're stuck, confused, or just want to say hi, we're here to help." />
 </svelte:head>
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen py-12 px-4">
 	<div class="max-w-2xl mx-auto">

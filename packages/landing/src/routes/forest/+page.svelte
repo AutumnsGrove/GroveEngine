@@ -2,6 +2,8 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 
+	let { data } = $props();
+
 	// Import nature assets from engine package
 	import {
 		Logo,
@@ -571,7 +573,7 @@
 />
 
 <main class="min-h-screen flex flex-col transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-indigo-950' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-slate-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
-	<Header />
+	<Header user={data.user} />
 
 	<article class="flex-1 relative overflow-hidden">
 		<!-- Season Toggle - Bottom right corner -->

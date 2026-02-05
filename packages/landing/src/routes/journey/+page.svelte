@@ -127,7 +127,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<article class="flex-1 px-4 md:px-6 py-8 md:py-12">
 		<div class="max-w-4xl mx-auto">

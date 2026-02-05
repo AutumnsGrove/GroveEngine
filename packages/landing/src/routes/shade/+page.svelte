@@ -2,6 +2,8 @@
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import { toolIcons, stateIcons } from '$lib/utils/icons';
 
+	let { data } = $props();
+
 	const ShadeIcon = toolIcons.blinds;
 	const BlockIcon = stateIcons.x;
 	const AllowIcon = stateIcons.check;
@@ -13,7 +15,7 @@
 </svelte:head>
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<article class="flex-1 px-6 py-12">
 		<div class="max-w-3xl mx-auto">

@@ -4,6 +4,8 @@
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
 
+	let { data } = $props();
+
 	// Lucide icons
 	import {
 		Sprout,
@@ -23,7 +25,7 @@
 	url="/hello"
 />
 
-<Header />
+<Header user={data.user} />
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Logo -->

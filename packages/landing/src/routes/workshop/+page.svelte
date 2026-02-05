@@ -3,6 +3,8 @@
 	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
+	let { data } = $props();
+
 	// Centralized icon registry - single source of truth for all icons
 	import { toolIcons, featureIcons, contentIcons, actionIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
 
@@ -909,7 +911,7 @@
 />
 
 <main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-	<Header />
+	<Header user={data.user} />
 
 	<!-- Hero -->
 	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950">

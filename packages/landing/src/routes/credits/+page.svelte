@@ -3,6 +3,8 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { Shredder, Heart, Cpu, Layers, Package, Smile, Type } from 'lucide-svelte';
 
+	let { data } = $props();
+
 	// TOC state
 	let isTocOpen = $state(false);
 
@@ -24,7 +26,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<!-- Content with TOC -->
 	<div class="flex-1 px-6 py-12">

@@ -30,7 +30,6 @@ export const load: ServerLoad = async ({ locals, platform }) => {
   }
 
   return {
-    user: locals.user,
     groveUrl,
   };
 };

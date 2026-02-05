@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+
+	let { data } = $props();
 </script>
 
 <svelte:head>
@@ -8,7 +10,7 @@
 </svelte:head>
 
 <main class="min-h-screen flex flex-col">
-	<Header />
+	<Header user={data.user} />
 
 	<!-- Content -->
 	<article class="flex-1 px-6 py-12">

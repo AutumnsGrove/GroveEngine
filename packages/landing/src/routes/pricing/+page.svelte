@@ -20,7 +20,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-	<Header maxWidth="wide" />
+	<Header maxWidth="wide" user={data.user} />
 
 	<article class="flex-1 px-6 py-12">
 		<div class="max-w-5xl mx-auto">

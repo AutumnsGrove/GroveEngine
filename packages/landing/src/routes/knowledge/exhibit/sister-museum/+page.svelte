@@ -81,7 +81,7 @@
 />
 
 <main class="min-h-screen flex flex-col">
-  <Header />
+  <Header user={data.user} />
 
   <div class="flex-1 px-6 py-12">
     {#if doc}
