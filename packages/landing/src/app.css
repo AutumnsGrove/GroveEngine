@@ -386,6 +386,32 @@
     cursor: not-allowed;
   }
 
+  .btn-secondary {
+    color: var(--color-accent-text-muted);
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-accent-border);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
   .input-field {
     width: 100%;
     padding: 0.75rem 1rem;

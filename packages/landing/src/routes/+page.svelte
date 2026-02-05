@@ -3,7 +3,14 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview, GroveTerm, GlassCarousel, GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm, GlassCarousel, GlassCard, GlassComparisonTable } from '@autumnsgrove/groveengine/ui';
+	import {
+		HeroRefuge,
+		HeroOwnership,
+		HeroShade,
+		HeroCentennial,
+		HeroCommunity
+	} from '$lib/components/hero';
 	import { page } from '$app/state';
 
 	// Lucide icons
@@ -33,30 +40,6 @@
 	function handleLogoClick() {
 		seasonStore.cycle();
 	}
-
-	// Hero carousel slides - using prepared marketing images
-	const heroSlides = [
-		{
-			src: '/assets/carousel/hero-slide-1.png',
-			alt: 'A grove for people who lost their groves. Five seasonal Grove tree logos in pink, green, orange, blue, and purple. Plant your blog for $8/mo. No ads. No algorithms. Just your words.'
-		},
-		{
-			src: '/assets/carousel/hero-slide-2.png',
-			alt: 'Your words. Your space. Forever. A Grove tree logo next to you.grove.place domain showcase. Claim yours button.'
-		},
-		{
-			src: '/assets/carousel/hero-slide-3.png',
-			alt: '100 year domain guarantee. Some trees outlive the people who planted them. Your words remain accessible from 2026 to 2126. Plant your legacy button.'
-		},
-		{
-			src: '/assets/carousel/hero-slide-4.png',
-			alt: 'No algorithms. No engagement metrics. Just you. Four seasonal Grove tree logos. Find your peace button.'
-		},
-		{
-			src: '/assets/carousel/hero-slide-5.png',
-			alt: 'The internet should belong to everyone. Autumn-colored Grove tree logo. Become a Seedling for $8/mo button.'
-		}
-	];
 
 	// Feature showcase items with visual cards
 	const features = [
@@ -125,6 +108,55 @@
 		}
 	];
 
+	// Competitor comparison data — hand-curated for honesty
+	const comparisonColumns = [
+		{ name: 'Grove', highlighted: true },
+		{ name: 'Bear Blog', href: 'https://bearblog.dev' },
+		{ name: 'Substack', href: 'https://substack.com' },
+		{ name: 'WordPress', href: 'https://wordpress.com' },
+		{ name: 'Ghost', href: 'https://ghost.org' },
+		{ name: 'Tumblr', href: 'https://tumblr.com' }
+	];
+
+	const comparisonRows = [
+		{
+			feature: 'Custom subdomain included',
+			description: 'Your own yourname.platform.tld',
+			values: { 'Grove': true, 'Bear Blog': true, 'Substack': true, 'WordPress': true, 'Ghost': false, 'Tumblr': true }
+		},
+		{
+			feature: '100-year domain guarantee',
+			description: 'Content preserved after you stop paying',
+			values: { 'Grove': true, 'Bear Blog': false, 'Substack': false, 'WordPress': false, 'Ghost': false, 'Tumblr': false }
+		},
+		{
+			feature: 'AI crawler protection',
+			description: 'Blocks bots from scraping your writing',
+			values: { 'Grove': true, 'Bear Blog': false, 'Substack': false, 'WordPress': 'Plugin', 'Ghost': false, 'Tumblr': false }
+		},
+		{
+			feature: 'No algorithms or engagement metrics',
+			values: { 'Grove': true, 'Bear Blog': true, 'Substack': false, 'WordPress': true, 'Ghost': 'Partial', 'Tumblr': false }
+		},
+		{
+			feature: 'Full data export',
+			description: 'Download everything in standard formats',
+			values: { 'Grove': true, 'Bear Blog': true, 'Substack': 'Partial', 'WordPress': true, 'Ghost': true, 'Tumblr': 'Partial' }
+		},
+		{
+			feature: 'Community features',
+			values: { 'Grove': 'Meadow', 'Bear Blog': false, 'Substack': 'Notes', 'WordPress': 'Plugin', 'Ghost': 'Members', 'Tumblr': 'Dashboard' }
+		},
+		{
+			feature: 'Open source / indie web aligned',
+			values: { 'Grove': true, 'Bear Blog': 'Partial', 'Substack': false, 'WordPress': true, 'Ghost': true, 'Tumblr': false }
+		},
+		{
+			feature: 'Pricing starts at',
+			values: { 'Grove': '$8/mo', 'Bear Blog': 'Free', 'Substack': 'Free', 'WordPress': 'Free', 'Ghost': '$9/mo', 'Tumblr': 'Free' }
+		}
+	];
+
 	// FAQ expansion state
 	let expandedFaq = $state<Set<string>>(new Set());
 
@@ -169,7 +201,7 @@
 	{/if}
 
 	<!-- Hero Section -->
-	<section class="w-full max-w-4xl text-center mb-12">
+	<section class="w-full max-w-4xl text-center mb-16">
 		<!-- Logo/Brand -->
 		<div class="mb-6">
 			<button
@@ -221,7 +253,7 @@
 	<!-- Hero Carousel Section -->
 	<section class="w-full max-w-4xl mb-16" aria-label="Grove feature highlights">
 		<GlassCarousel
-			itemCount={heroSlides.length}
+			itemCount={5}
 			showDots={true}
 			showArrows={true}
 			autoplay={false}
@@ -230,13 +262,17 @@
 			class="w-full"
 		>
 			{#snippet item(index: number)}
-				{@const slide = heroSlides[index]}
-				<img
-					src={slide.src}
-					alt={slide.alt}
-					class="w-full h-full object-contain"
-					loading={index === 0 ? 'eager' : 'lazy'}
-				/>
+				{#if index === 0}
+					<HeroRefuge season={seasonStore.current} active={true} {index} />
+				{:else if index === 1}
+					<HeroOwnership season={seasonStore.current} active={true} {index} />
+				{:else if index === 2}
+					<HeroShade season={seasonStore.current} active={true} {index} />
+				{:else if index === 3}
+					<HeroCentennial season={seasonStore.current} active={true} {index} />
+				{:else if index === 4}
+					<HeroCommunity season={seasonStore.current} active={true} {index} />
+				{/if}
 			{/snippet}
 		</GlassCarousel>
 	</section>
@@ -256,27 +292,37 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			{#each features as feature}
-				<a
-					href={feature.href}
-					class="group glass-grove rounded-xl p-6 hover:bg-white/60 dark:hover:bg-emerald-950/40 transition-all duration-200 border border-transparent hover:border-accent-muted/30"
-				>
-					<div class="flex items-start gap-4">
-						<div class="w-12 h-12 rounded-lg bg-accent-subtle/30 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-muted/30 transition-colors" aria-hidden="true">
-							<feature.icon class="w-6 h-6 text-accent-muted" />
+				<a href={feature.href} class="group block">
+					<GlassCard hoverable class="h-full">
+						<div class="flex items-start gap-4">
+							<div class="w-12 h-12 rounded-lg bg-accent-subtle/30 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-muted/30 transition-colors" aria-hidden="true">
+								<feature.icon class="w-6 h-6 text-accent-muted" />
+							</div>
+							<div class="flex-1 min-w-0">
+								<h3 class="text-foreground font-sans font-medium mb-1 group-hover:text-accent-muted transition-colors flex items-center gap-2">
+									{feature.title}
+									<ChevronRight class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+								</h3>
+								<p class="text-foreground-subtle text-sm font-sans leading-relaxed">
+									{feature.description}
+								</p>
+							</div>
 						</div>
-						<div class="flex-1 min-w-0">
-							<h3 class="text-foreground font-sans font-medium mb-1 group-hover:text-accent-muted transition-colors flex items-center gap-2">
-								{feature.title}
-								<ChevronRight class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-							</h3>
-							<p class="text-foreground-subtle text-sm font-sans leading-relaxed">
-								{feature.description}
-							</p>
-						</div>
-					</div>
+					</GlassCard>
 				</a>
 			{/each}
 		</div>
+	</section>
+
+	<!-- Competitor Comparison Table -->
+	<section class="w-full max-w-4xl mb-16" aria-labelledby="comparison-heading">
+		<GlassComparisonTable
+			columns={comparisonColumns}
+			rows={comparisonRows}
+			title="How Grove Compares"
+			description="Honest, feature-level comparison with other platforms. Where others do it well, we say so."
+			highlightColumn="Grove"
+		/>
 	</section>
 
 	<!-- Decorative divider -->
@@ -339,46 +385,50 @@
 
 	<!-- Who is Grove for? -->
 	<section class="w-full max-w-2xl mb-12" aria-labelledby="audience-heading">
-		<h2 id="audience-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Who is Grove for?</h2>
+		<h2 id="audience-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">Who is Grove for?</h2>
 
-		<div class="glass-grove rounded-xl p-6 space-y-4">
-			<p class="text-foreground-subtle font-sans leading-relaxed">
-				Writers who want a home on the internet without the surveillance, manipulation, and noise of social media. People who remember when the web felt personal.
-			</p>
-			<p class="text-foreground-subtle font-sans leading-relaxed">
-				<span class="text-foreground font-medium">Neurodivergent folks</span> who hate the endless customization rabbit holes. <span class="text-foreground font-medium">Queer people</span> who want safe digital spaces. Anyone who's tired of being the product.
-			</p>
-			<p class="text-foreground font-sans leading-relaxed font-medium">
-				Your words are yours. Not a dataset. Not a statistic. Yours.
-			</p>
-		</div>
+		<GlassCard as="section">
+			<div class="space-y-4">
+				<p class="text-foreground-subtle font-sans leading-relaxed">
+					Writers who want a home on the internet without the surveillance, manipulation, and noise of social media. People who remember when the web felt personal.
+				</p>
+				<p class="text-foreground-subtle font-sans leading-relaxed">
+					<span class="text-foreground font-medium">Neurodivergent folks</span> who hate the endless customization rabbit holes. <span class="text-foreground font-medium">Queer people</span> who want safe digital spaces. Anyone who's tired of being the product.
+				</p>
+				<p class="text-foreground font-sans leading-relaxed font-medium">
+					Your words are yours. Not a dataset. Not a statistic. Yours.
+				</p>
+			</div>
+		</GlassCard>
 	</section>
 
 	<!-- Why I Built This -->
 	<section class="w-full max-w-2xl mb-12" aria-labelledby="why-heading">
-		<h2 id="why-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Why I built this</h2>
+		<h2 id="why-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">Why I built this</h2>
 
-		<div class="glass-grove rounded-xl p-6 space-y-4">
-			<p class="text-foreground-subtle font-sans leading-relaxed">
-				Remember when the internet felt personal? When you had your little corner of it. When you weren't performing for an algorithm. When your words belonged to you.
-			</p>
-			<p class="text-foreground-subtle font-sans leading-relaxed">
-				I built Grove because I think we can have that again.
-			</p>
-			<p class="text-foreground-subtle font-sans leading-relaxed">
-				I'm tired of my friends being trapped in dopamine slot machines designed to exploit neurodivergent minds. So I built something different — a platform that doesn't spy on you, doesn't train AI on your words, doesn't make you compete for attention. A place where you can just... write.
-			</p>
-			<p class="text-foreground-subtle font-sans leading-relaxed italic">
-				— Autumn, founder
-			</p>
-		</div>
+		<GlassCard as="section">
+			<div class="space-y-4">
+				<p class="text-foreground-subtle font-sans leading-relaxed">
+					Remember when the internet felt personal? When you had your little corner of it. When you weren't performing for an algorithm. When your words belonged to you.
+				</p>
+				<p class="text-foreground-subtle font-sans leading-relaxed">
+					I built Grove because I think we can have that again.
+				</p>
+				<p class="text-foreground-subtle font-sans leading-relaxed">
+					I'm tired of my friends being trapped in dopamine slot machines designed to exploit neurodivergent minds. So I built something different — a platform that doesn't spy on you, doesn't train AI on your words, doesn't make you compete for attention. A place where you can just... write.
+				</p>
+				<p class="text-foreground-subtle font-sans leading-relaxed italic">
+					— Autumn, founder
+				</p>
+			</div>
+		</GlassCard>
 	</section>
 
 	<!-- What You Get -->
-	<section class="w-full max-w-2xl mb-8" aria-labelledby="benefits-heading">
-		<h2 id="benefits-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">What you get</h2>
+	<section class="w-full max-w-2xl mb-12" aria-labelledby="benefits-heading">
+		<h2 id="benefits-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">What you get</h2>
 
-		<div class="glass-grove rounded-xl p-6">
+		<GlassCard as="section">
 			<ul class="space-y-3 text-foreground-subtle font-sans">
 				<li class="flex items-start gap-3">
 					<Leaf class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" aria-hidden="true" />
@@ -397,14 +447,14 @@
 					<span><span class="text-foreground font-medium">Take your stuff and go</span> — export everything anytime, your content lives in standard formats</span>
 				</li>
 			</ul>
-		</div>
+		</GlassCard>
 	</section>
 
 	<!-- FAQ Section -->
 	<section id="faq" class="w-full max-w-2xl mb-12 scroll-mt-24" aria-labelledby="faq-heading">
-		<h2 id="faq-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Frequently Asked Questions</h2>
+		<h2 id="faq-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">Frequently Asked Questions</h2>
 
-		<div class="glass-grove rounded-xl p-6">
+		<GlassCard as="section">
 			<div class="space-y-3 text-sm font-sans">
 				{#each faqItems as item (item.id)}
 					{@const isExpanded = expandedFaq.has(item.id)}
@@ -436,11 +486,11 @@
 					</div>
 				{/each}
 			</div>
-		</div>
+		</GlassCard>
 	</section>
 
 	<!-- Decorative divider -->
-	<div class="flex items-center gap-4 mt-8 mb-12">
+	<div class="flex items-center gap-4 mb-12">
 		<div class="w-12 h-px bg-divider"></div>
 		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 			<path
