@@ -48,3 +48,10 @@ export * from "./validation";
 export * from "./webauthn";
 export * from "./webhook-sanitizer";
 export * from "./grove-url";
+
+// Rehype GroveTerm plugin - explicit exports
+export {
+  rehypeGroveTerm,
+  processGroveTerms,
+  type RehypeGroveTermOptions,
+} from "./rehype-groveterm";
