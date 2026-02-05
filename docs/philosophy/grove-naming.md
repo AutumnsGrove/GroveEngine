@@ -2,7 +2,7 @@
 title: The Grove Naming System
 description: The complete philosophy and naming system for the Grove ecosystem
 category: philosophy
-lastUpdated: '2026-02-02'
+lastUpdated: '2026-02-04'
 ---
 # The Grove Naming System
 
@@ -92,29 +92,11 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 **Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts: related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
 
-### Passage
-**Subdomain Routing** · *Internal infrastructure*
-**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router)
-
-A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.
-
-Passage is how the grove makes the impossible feel inevitable. One domain, infinite destinations. Type `autumn.grove.place` and Passage carries you there—navigating the river of subdomains like a kayak finding its channel. Not by traveling the distance, but by making the distance irrelevant. The architectural barriers that should block you become the corridor that welcomes you home.
-
-*The way through was always there. Passage just reveals it.*
-
 ---
 
 ## Platform Services
 
 *Essential services that power every Grove blog*
-
-### Heartwood
-**Authentication** · `heartwood.grove.place`
-**Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
-
-Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
-
-Heartwood is centralized authentication for the Grove ecosystem. One identity, verified and protected, that works across every Grove property. Your heartwood is yours. It proves you are who you say you are.
 
 ### Arbor
 **Admin Panel** · `{you}.grove.place/admin`
@@ -147,15 +129,6 @@ Amber is fossilized tree resin, preserving moments in time, capturing life in su
 
 Amber is Grove's unified storage management system. Every file you upload (blog images, email attachments, profile pictures) is preserved in Amber, organized and accessible from one place. See what's using your space. Download and export your data. Clean up what you don't need. Buy more when you need it. Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove, made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
 
-### Pantry
-**Shop & Provisioning** · `pantry.grove.place`
-
-A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.
-
-Pantry is Grove's shop. Subscriptions, merchandise, credits, gift cards—the things that keep the grove running and growing. You come when you need something, find what you're looking for, and take it home. Simple, warm, no fuss.
-
-*The cupboard is always stocked.*
-
 ### Foliage
 **Theming System** · `foliage.grove.place`
 **Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
@@ -163,26 +136,6 @@ Pantry is Grove's shop. Subscriptions, merchandise, credits, gift cards—the th
 Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
 
 Foliage is visual customization for your blog, from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it *yours*. Your foliage is how the world sees your corner of the grove.
-
-### Terrarium
-**Creative Canvas** · `grove.place/terrarium`
-
-A terrarium is a sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Moss, stones, tiny plants, all placed with intention.
-
-Terrarium is Grove's creative canvas. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage. Same creative freedom as MySpace, but with Grove's curated aesthetic—guardrails that ensure your space looks beautiful while staying uniquely yours.
-
-Create a scene in Terrarium, export it as a decoration, apply it via Foliage to your blog's header, sidebar, footer, or background. The component library is the guardrail: every tree, firefly, and lattice is curated. Users get creative freedom within Grove's nature palette.
-
-*A little world, all your own.*
-
-### Weave
-**Visual Composition Studio** · *Part of Terrarium*
-
-Weave is what happens when threads come together—a pattern emerging from connection.
-
-Weave is a node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.
-
-*Weave your world together.*
 
 ### Curios
 **Cabinet of Wonders** · `curios.grove.place`
@@ -192,49 +145,6 @@ A curio is something unusual and intriguing—a curiosity that makes you pause a
 Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme (that's Foliage). Not the editor (that's Terrarium). This is the STUFF. The weird, wonderful, old-web-chaos-energy that says "someone lives here."
 
 *What curiosities will they find?*
-
-### Reverie
-**Composition Layer** · `reverie.grove.place`
-
-A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
-
-Reverie is how you compose your grove. You don't design; you *see*. "Fireflies around my guestbook" isn't a specification—it's a reverie. The system takes your half-formed dream and gives it shape. The manifest knows what exists. The DSL knows how things arrange. But you just... drift into what you want.
-
-Behind every "make it cozy" or "add something that glows," there's a translation layer: your intent becomes a query, the query finds components in the manifest, and the components arrange into a composition. You describe the feeling. Reverie finds the pieces. The result appears in Terrarium or Foliage, ready to become part of your space.
-
-You might never interact with Reverie directly. Like the moment between waking and sleeping, it happens in the background—half-conscious, half-automatic. All you see is what emerges: a scene that captures what you meant.
-
-*Half-dream, half-real. Yours.*
-
-### Grafts
-**Feature Customization** · *Operator-configured*
-
-A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
-
-Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
-
-**The Three Layers:**
-- **Feature Grafts** — What capabilities a tenant receives (flags, rollouts, tier-gating)
-- **UI Grafts** — How capabilities render (reusable components like PricingGraft)
-- **Greenhouse mode** — Who gets early access (tenant classification for internal testing)
-
-**The Graft Lexicon:**
-- **Graft** — Enable a feature for a tenant
-- **Prune** — Disable a feature
-- **Propagate** — Roll out to a percentage of the grove
-- **Cultivate** — Roll out to everyone
-- **Cultivars** — A/B test variants
-- **Blight** — Emergency kill switch
-- **Took** — The graft is active and working
-- **Greenhouse** — Tenant enrolled in early access testing
-- **Under glass** — Feature only available in the greenhouse
-- **Transplant** — Promote a feature from greenhouse to general availability
-- **Harden off** — Gradually expose a greenhouse feature to production
-
-*"I'll graft it onto your tree at dusk."*
-*"Dave's tree is in the greenhouse—they'll see the new editor first."*
-
-*A graft makes your tree bear fruit no other can.*
 
 ### Burrow
 **Cross-Property Access** · *Integrated into Arbor*
@@ -257,18 +167,6 @@ Dave wants to help moderate The Prism? Burrow him in. The passage opens. He arri
 
 *A protected way through.*
 
-### Gossamer
-**ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
-**Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
-
-Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.
-
-Gossamer is an open source visual effects library. ASCII patterns that add atmosphere without demanding attention. Floating textures, ambient backgrounds, image transformations. Not the content—the quality of light around it. Barely-there textures woven through your space, character-based patterns that feel handmade.
-
-Framework-agnostic at its core (`gossamer`), with adapters for Svelte (`@gossamer/svelte`), React, and Vue. Born in the Grove, but free to grow anywhere.
-
-*Threads of light.*
-
 ### Rings
 **Analytics** · *Integrated into admin dashboard*
 
@@ -285,15 +183,6 @@ Clearing is Grove's public status page: transparent, real-time communication abo
 
 *Where you go to see what's happening.*
 
-### Waystone
-**Help Center** · *Integrated into platform*
-
-Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.
-
-Waystone is Grove's built-in help center: searchable documentation, contextual help buttons throughout the interface, and a lantern to light your path when you're lost. Not an external docs site, not a separate login. Just help, right where you need it.
-
-*Trail markers for when you're lost.*
-
 ### Porch
 **Front Porch Conversations** · `porch.grove.place`
 
@@ -302,21 +191,6 @@ A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just t
 Porch is Grove's support system—but it's more than that. It's where you reach out when you need help, or when you just want to say hi. Submit a question, start a conversation, or drop by to see what Autumn's up to. Every visit is tracked, but it never feels like a ticket number.
 
 *Have a seat on the porch. We'll figure it out together.*
-
-### Trace
-**Inline Feedback** · *(integrated component)*
-
-A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.
-
-Trace is Grove's inline feedback component. A small, warm invitation that appears wherever you want to hear from Wanderers. Not a survey. Not a metric. Just a soft way to say "this helped" or "this didn't," with room to add a few words if you want. Every trace travels back to the Wayfinder. Every voice matters.
-
-*Leave a trace.*
-
----
-
-## Content & Community
-
-*Writing, moderation, and social features*
 
 ### Wisp
 **Writing Assistant** · *Integrated into editor*
@@ -328,6 +202,94 @@ Wisp is Grove's ethical writing assistant. It helps polish your voice without re
 **Fireside** is a mode of Wisp for writers who freeze at the blank page. Some people can't start writing, but they have no trouble *talking*. Fireside is a conversation that becomes a post. Wisp asks questions, you answer naturally, and your words get organized into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
 
 All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer, and sometimes, a good listener.*
+
+### Trails
+**Personal Roadmaps** · `username.grove.place/trail`
+
+A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
+
+Trails lets Grove users share their own roadmaps with the world. Whether you're building a project, planning a content series, or just charting where your creative work is headed, Trails gives you a place to show the journey. Create waypoints marking milestones, group them into phases with custom names, and let visitors follow along as you make progress.
+
+For those who want to dream bigger: Oak and Evergreen users can bring the full Grove aesthetic to their trails with seasonal themes, nature decorations, custom assets. Or keep it simple with a clean timeline. Your trail, your way.
+
+**Templates available for:** Writers planning content series, developers building in public, musicians tracking album progress, restaurants showing seasonal menus, and more.
+
+*The path becomes clear by walking it.*
+
+### Trace
+**Inline Feedback** · *(integrated component)*
+
+A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.
+
+Trace is Grove's inline feedback component. A small, warm invitation that appears wherever you want to hear from Wanderers. Not a survey. Not a metric. Just a soft way to say "this helped" or "this didn't," with room to add a few words if you want. Every trace travels back to the Wayfinder. Every voice matters.
+
+*Leave a trace.*
+
+### Centennial
+**100-Year Preservation** · Earned status
+
+A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade.
+
+When you've been part of Grove long enough to put down real roots (12 months of paid membership), your grove earns Centennial status. Your `name.grove.place` domain stays online for 100 years from the day you planted it—even if you stop paying, even after you're gone. Some trees outlive the people who planted them.
+
+*A hundred years of home.*
+
+### Vineyard
+**Component Showcase** · `grove.place/vineyard`
+
+A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.
+
+Vineyard is Grove's component showcase—where you see what's growing in the Lattice, what's ready for use, and what's coming into season. Every UI component, every nature asset, documented and demonstrated. It's where developers come to understand what's available.
+
+*See what's ready to harvest.*
+
+---
+
+## Content & Community
+
+*Writing, moderation, and social features*
+
+### Flow
+**The Writing Sanctuary** · Arbor editor
+
+Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work.
+
+Flow is Grove's immersive Markdown editor—the space inside Arbor where you compose your blooms. When hours pass like minutes and the cursor moves as fast as thought—that's the state Flow creates. It's not just a text field with formatting buttons. It's a sanctuary designed around one belief: the best writing happens when the world fades away.
+
+*Where the current carries you.*
+
+### Terrarium
+**Creative Canvas** · `grove.place/terrarium`
+
+A terrarium is a sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Moss, stones, tiny plants, all placed with intention.
+
+Terrarium is Grove's creative canvas. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage. Same creative freedom as MySpace, but with Grove's curated aesthetic—guardrails that ensure your space looks beautiful while staying uniquely yours.
+
+Create a scene in Terrarium, export it as a decoration, apply it via Foliage to your blog's header, sidebar, footer, or background. The component library is the guardrail: every tree, firefly, and lattice is curated. Users get creative freedom within Grove's nature palette.
+
+*A little world, all your own.*
+
+### Weave
+**Visual Composition Studio** · *Part of Terrarium*
+
+Weave is what happens when threads come together—a pattern emerging from connection.
+
+Weave is a node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.
+
+*Weave your world together.*
+
+### Reverie
+**Composition Layer** · `reverie.grove.place`
+
+A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
+
+Reverie is how you compose your grove. You don't design; you *see*. "Fireflies around my guestbook" isn't a specification—it's a reverie. The system takes your half-formed dream and gives it shape. The manifest knows what exists. The DSL knows how things arrange. But you just... drift into what you want.
+
+Behind every "make it cozy" or "add something that glows," there's a translation layer: your intent becomes a query, the query finds components in the manifest, and the components arrange into a composition. You describe the feeling. Reverie finds the pieces. The result appears in Terrarium or Foliage, ready to become part of your space.
+
+You might never interact with Reverie directly. Like the moment between waking and sleeping, it happens in the background—half-conscious, half-automatic. All you see is what emerges: a scene that captures what you meant.
+
+*Half-dream, half-real. Yours.*
 
 ### Scribe
 **Voice Transcription** · *Integrated into editor*
@@ -387,24 +349,62 @@ Complete with time of day, seasons, weather, and an immersive soundscape, Wander
 
 *Step into the forest. See who else calls it home.*
 
-### Trails
-**Personal Roadmaps** · `username.grove.place/trail`
-
-A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
-
-Trails lets Grove users share their own roadmaps with the world. Whether you're building a project, planning a content series, or just charting where your creative work is headed, Trails gives you a place to show the journey. Create waypoints marking milestones, group them into phases with custom names, and let visitors follow along as you make progress.
-
-For those who want to dream bigger: Oak and Evergreen users can bring the full Grove aesthetic to their trails with seasonal themes, nature decorations, custom assets. Or keep it simple with a clean timeline. Your trail, your way.
-
-**Templates available for:** Writers planning content series, developers building in public, musicians tracking album progress, restaurants showing seasonal menus, and more.
-
-*The path becomes clear by walking it.*
-
 ---
 
 ## Standalone Tools
 
 *Independent tools that integrate with Grove*
+
+### Grafts
+**Feature Customization** · *Operator-configured*
+
+A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
+
+Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
+
+**The Three Layers:**
+- **Feature Grafts** — What capabilities a tenant receives (flags, rollouts, tier-gating)
+- **UI Grafts** — How capabilities render (reusable components like PricingGraft)
+- **Greenhouse mode** — Who gets early access (tenant classification for internal testing)
+
+**The Graft Lexicon:**
+- **Graft** — Enable a feature for a tenant
+- **Prune** — Disable a feature
+- **Propagate** — Roll out to a percentage of the grove
+- **Cultivate** — Roll out to everyone
+- **Cultivars** — A/B test variants
+- **Blight** — Emergency kill switch
+- **Took** — The graft is active and working
+- **Greenhouse** — Tenant enrolled in early access testing
+- **Under glass** — Feature only available in the greenhouse
+- **Transplant** — Promote a feature from greenhouse to general availability
+- **Harden off** — Gradually expose a greenhouse feature to production
+
+*"I'll graft it onto your tree at dusk."*
+*"Dave's tree is in the greenhouse—they'll see the new editor first."*
+
+*A graft makes your tree bear fruit no other can.*
+
+### Waystone
+**Help Center** · *Integrated into platform*
+
+Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.
+
+Waystone is Grove's built-in help center: searchable documentation, contextual help buttons throughout the interface, and a lantern to light your path when you're lost. Not an external docs site, not a separate login. Just help, right where you need it.
+
+*Trail markers for when you're lost.*
+
+### Gossamer
+**ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
+**Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
+
+Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.
+
+Gossamer is an open source visual effects library. ASCII patterns that add atmosphere without demanding attention. Floating textures, ambient backgrounds, image transformations. Not the content—the quality of light around it. Barely-there textures woven through your space, character-based patterns that feel handmade.
+
+Framework-agnostic at its core (`gossamer`), with adapters for Svelte (`@gossamer/svelte`), React, and Vue. Born in the Grove, but free to grow anywhere.
+
+*Threads of light.*
 
 ### Ivy
 **Email** · `ivy.grove.place`
@@ -495,6 +495,51 @@ Point your camera at a library shelf. Trove identifies the books, cross-referenc
 
 *Internal infrastructure keeping Grove running*
 
+### Heartwood
+**Authentication** · `heartwood.grove.place`
+**Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
+
+Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
+
+Heartwood is centralized authentication for the Grove ecosystem. One identity, verified and protected, that works across every Grove property. Your heartwood is yours. It proves you are who you say you are.
+
+### Pantry
+**Shop & Provisioning** · `pantry.grove.place`
+
+A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.
+
+Pantry is Grove's shop. Subscriptions, merchandise, credits, gift cards—the things that keep the grove running and growing. You come when you need something, find what you're looking for, and take it home. Simple, warm, no fuss.
+
+*The cupboard is always stocked.*
+
+### Passage
+**Subdomain Routing** · *Internal infrastructure*
+**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router)
+
+A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.
+
+Passage is how the grove makes the impossible feel inevitable. One domain, infinite destinations. Type `autumn.grove.place` and Passage carries you there—navigating the river of subdomains like a kayak finding its channel. Not by traveling the distance, but by making the distance irrelevant. The architectural barriers that should block you become the corridor that welcomes you home.
+
+*The way through was always there. Passage just reveals it.*
+
+### Petal
+**Content Safety** · *Internal service*
+
+Petals fall from blooms, each one examined before it touches the ground. Some carry beauty. Some carry harm. Petal knows the difference.
+
+Petal is Grove's content safety service. Every image uploaded, every piece of media shared, passes through Petal's gentle inspection. Working through Lumen, it detects harmful content before it ever reaches your grove. You won't notice it working. That's the point. Safe petals fall. Harmful ones never do.
+
+*Beauty, filtered.*
+
+### Warden
+**External API Gateway** · `warden.grove.place`
+
+The one who holds the keys. A warden doesn't open doors for just anyone—they verify, they check, they ensure only the right requests pass through.
+
+Warden is Grove's external API gateway. Every outbound request to third-party services passes through Warden: GitHub operations, search queries, Cloudflare management, external integrations. Agents describe what they need. Warden executes with injected credentials. Keys never leave the vault.
+
+*Keys stay home. Requests travel light.*
+
 ### Press
 **Image Processing CLI** · *Developer tool*
 **Repository:** [AutumnsGrove/CDNUploader](https://github.com/AutumnsGrove/CDNUploader)
@@ -580,35 +625,39 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Your Grove** | Foundational | Your personal space | {you}.grove.place |
 | **Garden** | Foundational | Collection of blooms | {you}.grove.place/garden |
 | **Blooms** | Foundational | Your writing | {you}.grove.place/garden/{slug} |
-| **Lattice** | Core | Core platform | npm package |
-| **Passage** | Core | Subdomain routing | *(internal)* |
-| **Heartwood** | Platform | Authentication | heartwood.grove.place |
+| **Lattice** | Foundational | Core platform | npm package |
+| **Wanderer** | Foundational | Everyone who enters | — |
+| **Rooted** | Foundational | Subscribers | — |
+| **Pathfinder** | Foundational | Trusted guides | *(appointed)* |
+| **Wayfinder** | Foundational | Autumn (singular) | — |
 | **Arbor** | Platform | Admin panel | {you}.grove.place/admin |
 | **Plant** | Platform | Onboarding | plant.grove.place |
 | **Loam** | Platform | Name protection | *(internal)* |
 | **Amber** | Platform | Storage management | amber.grove.place |
-| **Pantry** | Platform | Shop & provisioning | pantry.grove.place |
 | **Foliage** | Platform | Theming system | foliage.grove.place |
-| **Terrarium** | Platform | Creative canvas | grove.place/terrarium |
-| **Weave** | Platform | Visual composition | *(part of Terrarium)* |
 | **Curios** | Platform | Cabinet of wonders | curios.grove.place |
-| **Reverie** | Platform | AI composition layer | reverie.grove.place |
-| **Grafts** | Platform | Feature customization | *(operator-configured)* |
 | **Burrow** | Platform | Cross-property access | *(integrated into Arbor)* |
-| **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
 | **Rings** | Platform | Analytics | *(integrated)* |
 | **Clearing** | Platform | Status page | status.grove.place |
-| **Waystone** | Platform | Help center | *(integrated)* |
 | **Porch** | Platform | Support conversations | porch.grove.place |
+| **Wisp** | Platform | Writing assistant (+ Fireside) | *(integrated)* |
+| **Trails** | Platform | Personal roadmaps | username.grove.place/trail |
 | **Trace** | Platform | Inline feedback | *(integrated)* |
-| **Wisp** | Content | Writing assistant (+ Fireside) | *(integrated)* |
+| **Centennial** | Platform | 100-year preservation | *(earned status)* |
+| **Vineyard** | Platform | Component showcase | grove.place/vineyard |
+| **Flow** | Content | Writing sanctuary | *(Arbor editor)* |
+| **Terrarium** | Content | Creative canvas | grove.place/terrarium |
+| **Weave** | Content | Visual composition | *(part of Terrarium)* |
+| **Reverie** | Content | AI composition layer | reverie.grove.place |
 | **Scribe** | Content | Voice transcription | *(integrated)* |
 | **Reeds** | Content | Comments system | *(integrated)* |
 | **Thorn** | Content | Content moderation | *(internal)* |
 | **Meadow** | Content | Social connection | meadow.grove.place |
 | **Forests** | Content | Community aggregation | {forest}.grove.place |
 | **Wander** | Content | Immersive discovery | wander.grove.place |
-| **Trails** | Content | Personal roadmaps | username.grove.place/trail |
+| **Grafts** | Tools | Feature customization | *(operator-configured)* |
+| **Waystone** | Tools | Help center | *(integrated)* |
+| **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
 | **Ivy** | Tools | Email | ivy.grove.place |
 | **Verge** | Tools | Remote coding | verge.grove.place |
 | **Forage** | Tools | Domain discovery | forage.grove.place |
@@ -618,6 +667,11 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Aria** | Tools | Music curation | aria.grove.place |
 | **Etch** | Tools | Link saving & highlights | etch.grove.place |
 | **Trove** | Tools | Library book finder | trove.grove.place |
+| **Heartwood** | Ops | Authentication | heartwood.grove.place |
+| **Pantry** | Ops | Shop & provisioning | pantry.grove.place |
+| **Passage** | Ops | Subdomain routing | *(internal)* |
+| **Petal** | Ops | Content safety | *(internal)* |
+| **Warden** | Ops | External API gateway | warden.grove.place |
 | **Press** | Ops | Image processing CLI | *(developer tool)* |
 | **Vista** | Ops | Infrastructure observability | vista.grove.place |
 | **Patina** | Ops | Backup system | *(internal)* |
@@ -625,10 +679,6 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Lumen** | Ops | AI gateway | *(internal)* |
 | **Zephyr** | Ops | Email gateway | *(internal)* |
 | **Shade** | Ops | AI content protection | grove.place/shade |
-| **Wanderer** | Identity | Everyone who enters | — |
-| **Rooted** | Identity | Subscribers | — |
-| **Pathfinder** | Identity | Trusted guides | *(appointed)* |
-| **Wayfinder** | Identity | Autumn (singular) | — |
 
 ---
 
@@ -685,6 +735,10 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Shade | GroveShade |
 | Etch | GroveEtch |
 | Vineyard | GroveShowcase |
+| Flow | GroveFlow |
+| Centennial | GroveCentennial |
+| Petal | GrovePetal |
+| Warden | GroveWarden |
 
 ---
 
@@ -751,5 +805,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 25, 2026 — Added Scribe (voice transcription)*
+*Last updated: February 4, 2026 — Category restructuring + added Flow, Centennial, Vineyard, Petal, Warden*
 *Status: Placeholder names, pending launch*

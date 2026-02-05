@@ -28,8 +28,8 @@
     "definition": "A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. It's why visitors come.",
     "usageExample": "\"Read my latest bloom.\"\n\"I wrote a new bloom this morning.\"\n\"Their garden has beautiful blooms.\"",
     "seeAlso": [
-      "your-garden",
-      "plant"
+      "flow",
+      "press"
     ]
   },
   "lattice": {
@@ -37,21 +37,10 @@
     "term": "Lattice",
     "category": "foundational",
     "tagline": "Core Platform",
-    "definition": "A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up."
-  },
-  "passage": {
-    "slug": "passage",
-    "term": "Passage",
-    "category": "platform",
-    "tagline": "Subdomain Routing",
-    "definition": "A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care."
-  },
-  "heartwood": {
-    "slug": "heartwood",
-    "term": "Heartwood",
-    "category": "platform",
-    "tagline": "Authentication",
-    "definition": "Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core."
+    "definition": "A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.",
+    "seeAlso": [
+      "flow"
+    ]
   },
   "arbor": {
     "slug": "arbor",
@@ -65,7 +54,10 @@
     "term": "Plant",
     "category": "platform",
     "tagline": "Onboarding",
-    "definition": "A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold."
+    "definition": "A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.",
+    "seeAlso": [
+      "flow"
+    ]
   },
   "loam": {
     "slug": "loam",
@@ -81,46 +73,12 @@
     "tagline": "Storage Management",
     "definition": "Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries."
   },
-  "pantry": {
-    "slug": "pantry",
-    "term": "Pantry",
-    "category": "platform",
-    "tagline": "Shop & Provisioning",
-    "definition": "A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.",
-    "seeAlso": [
-      "plant",
-      "rooted"
-    ]
-  },
   "foliage": {
     "slug": "foliage",
     "term": "Foliage",
     "category": "platform",
     "tagline": "Theming System",
     "definition": "Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same."
-  },
-  "terrarium": {
-    "slug": "terrarium",
-    "term": "Terrarium",
-    "category": "platform",
-    "tagline": "Creative Canvas",
-    "definition": "A terrarium is a sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Moss, stones, tiny plants, all placed with intention.",
-    "seeAlso": [
-      "lattice",
-      "plant",
-      "foliage"
-    ]
-  },
-  "weave": {
-    "slug": "weave",
-    "term": "Weave",
-    "category": "platform",
-    "tagline": "Visual Composition Studio",
-    "definition": "Weave is what happens when threads come together—a pattern emerging from connection.",
-    "seeAlso": [
-      "terrarium",
-      "trace"
-    ]
   },
   "curios": {
     "slug": "curios",
@@ -133,30 +91,6 @@
       "terrarium"
     ]
   },
-  "reverie": {
-    "slug": "reverie",
-    "term": "Reverie",
-    "category": "platform",
-    "tagline": "Composition Layer",
-    "definition": "A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.",
-    "seeAlso": [
-      "foliage",
-      "terrarium",
-      "scribe"
-    ]
-  },
-  "grafts": {
-    "slug": "grafts",
-    "term": "Grafts",
-    "category": "platform",
-    "tagline": "Feature Customization",
-    "definition": "A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.",
-    "seeAlso": [
-      "plant",
-      "aria",
-      "wayfinder"
-    ]
-  },
   "burrow": {
     "slug": "burrow",
     "term": "Burrow",
@@ -164,20 +98,10 @@
     "tagline": "Cross-Property Access",
     "definition": "In the forest, a burrow is a protected passage beneath the earth. Animals create burrows to move safely between dens, sharing them with family and trusted companions. The passage is invisible from above. You have to know it's there.",
     "seeAlso": [
-      "passage",
       "arbor",
       "wander",
+      "passage",
       "wanderer"
-    ]
-  },
-  "gossamer": {
-    "slug": "gossamer",
-    "term": "Gossamer",
-    "category": "tools",
-    "tagline": "ASCII Visual Effects",
-    "definition": "Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.",
-    "seeAlso": [
-      "etch"
     ]
   },
   "rings": {
@@ -187,43 +111,12 @@
     "tagline": "Analytics",
     "definition": "Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree."
   },
-  "centennial": {
-    "slug": "centennial",
-    "term": "Centennial",
-    "category": "platform",
-    "tagline": "100-Year Preservation",
-    "definition": "A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade. When you've been part of Grove long enough, your grove earns Centennial status: 100 years of preservation, even after you're gone.",
-    "seeAlso": [
-      "rings",
-      "rooted",
-      "patina"
-    ]
-  },
   "clearing": {
     "slug": "clearing",
     "term": "Clearing",
     "category": "platform",
     "tagline": "Status Page",
     "definition": "A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening."
-  },
-  "waystone": {
-    "slug": "waystone",
-    "term": "Waystone",
-    "category": "platform",
-    "tagline": "Help Center",
-    "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward."
-  },
-  "vineyard": {
-    "slug": "vineyard",
-    "term": "Vineyard",
-    "category": "platform",
-    "tagline": "Component Showcase",
-    "definition": "A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire. It's where you see what's growing, what's ready, and what's coming into season.",
-    "seeAlso": [
-      "lattice",
-      "terrarium",
-      "curios"
-    ]
   },
   "porch": {
     "slug": "porch",
@@ -232,26 +125,102 @@
     "tagline": "Front Porch Conversations",
     "definition": "A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat."
   },
-  "trace": {
-    "slug": "trace",
-    "term": "Trace",
-    "category": "content",
-    "tagline": "Inline Feedback",
-    "definition": "A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.",
-    "seeAlso": [
-      "wander",
-      "wanderer",
-      "reeds"
-    ]
-  },
   "wisp": {
     "slug": "wisp",
     "term": "Wisp",
-    "category": "content",
+    "category": "platform",
     "tagline": "Writing Assistant",
     "definition": "A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.",
     "seeAlso": [
       "forests"
+    ]
+  },
+  "trails": {
+    "slug": "trails",
+    "term": "Trails",
+    "category": "platform",
+    "tagline": "Personal Roadmaps",
+    "definition": "A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same."
+  },
+  "trace": {
+    "slug": "trace",
+    "term": "Trace",
+    "category": "platform",
+    "tagline": "Inline Feedback",
+    "definition": "A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.",
+    "seeAlso": [
+      "wander",
+      "press",
+      "wanderer",
+      "wayfinder"
+    ]
+  },
+  "centennial": {
+    "slug": "centennial",
+    "term": "Centennial",
+    "category": "platform",
+    "tagline": "100-Year Preservation",
+    "definition": "A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade.",
+    "seeAlso": [
+      "plant",
+      "shade"
+    ]
+  },
+  "vineyard": {
+    "slug": "vineyard",
+    "term": "Vineyard",
+    "category": "platform",
+    "tagline": "Component Showcase",
+    "definition": "A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.",
+    "seeAlso": [
+      "lattice"
+    ]
+  },
+  "flow": {
+    "slug": "flow",
+    "term": "Flow",
+    "category": "content",
+    "tagline": "The Writing Sanctuary",
+    "definition": "Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work.",
+    "seeAlso": [
+      "blooms",
+      "arbor"
+    ]
+  },
+  "terrarium": {
+    "slug": "terrarium",
+    "term": "Terrarium",
+    "category": "content",
+    "tagline": "Creative Canvas",
+    "definition": "A terrarium is a sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Moss, stones, tiny plants, all placed with intention.",
+    "seeAlso": [
+      "lattice",
+      "plant",
+      "foliage",
+      "flow"
+    ]
+  },
+  "weave": {
+    "slug": "weave",
+    "term": "Weave",
+    "category": "content",
+    "tagline": "Visual Composition Studio",
+    "definition": "Weave is what happens when threads come together—a pattern emerging from connection.",
+    "seeAlso": [
+      "trace",
+      "terrarium"
+    ]
+  },
+  "reverie": {
+    "slug": "reverie",
+    "term": "Reverie",
+    "category": "content",
+    "tagline": "Composition Layer",
+    "definition": "A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.",
+    "seeAlso": [
+      "foliage",
+      "terrarium",
+      "scribe"
     ]
   },
   "scribe": {
@@ -261,23 +230,9 @@
     "tagline": "Voice Transcription",
     "definition": "A scribe is a patient listener—someone who sits beside you and transforms your spoken words into written text. Before keyboards, before typewriters, scribes were how thoughts became documents. You spoke; they wrote.",
     "seeAlso": [
-      "blooms",
-      "wisp",
-      "lumen",
-      "flow"
-    ]
-  },
-  "flow": {
-    "slug": "flow",
-    "term": "Flow",
-    "category": "content",
-    "tagline": "The Writing Sanctuary",
-    "definition": "Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work. When hours pass like minutes and the cursor moves as fast as thought—that's the state Flow creates.",
-    "seeAlso": [
-      "blooms",
-      "scribe",
-      "wisp",
-      "arbor"
+      "flow",
+      "press",
+      "lumen"
     ]
   },
   "reeds": {
@@ -322,12 +277,34 @@
       "terrarium"
     ]
   },
-  "trails": {
-    "slug": "trails",
-    "term": "Trails",
+  "grafts": {
+    "slug": "grafts",
+    "term": "Grafts",
     "category": "tools",
-    "tagline": "Personal Roadmaps",
-    "definition": "A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same."
+    "tagline": "Feature Customization",
+    "definition": "A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.",
+    "seeAlso": [
+      "plant",
+      "aria",
+      "wayfinder"
+    ]
+  },
+  "waystone": {
+    "slug": "waystone",
+    "term": "Waystone",
+    "category": "tools",
+    "tagline": "Help Center",
+    "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward."
+  },
+  "gossamer": {
+    "slug": "gossamer",
+    "term": "Gossamer",
+    "category": "tools",
+    "tagline": "ASCII Visual Effects",
+    "definition": "Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.",
+    "seeAlso": [
+      "etch"
+    ]
   },
   "ivy": {
     "slug": "ivy",
@@ -392,8 +369,9 @@
     "definition": "Water drips on limestone for a thousand years and carves a cave. A glacier scores parallel grooves into bedrock. Frost traces patterns on glass. In printmaking, you score a plate with intention—every mark deliberate, every groove holding ink for the next impression. Etching isn't violent. It's patient. And what it leaves behind is permanent.",
     "seeAlso": [
       "trace",
-      "trove",
-      "wander"
+      "wander",
+      "passage",
+      "press"
     ]
   },
   "trove": {
@@ -401,11 +379,51 @@
     "term": "Trove",
     "category": "tools",
     "tagline": "Library Book Discovery",
-    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered.",
+    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered."
+  },
+  "heartwood": {
+    "slug": "heartwood",
+    "term": "Heartwood",
+    "category": "operations",
+    "tagline": "Authentication",
+    "definition": "Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core."
+  },
+  "pantry": {
+    "slug": "pantry",
+    "term": "Pantry",
+    "category": "operations",
+    "tagline": "Shop & Provisioning",
+    "definition": "A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.",
     "seeAlso": [
-      "etch",
-      "curios",
-      "wander"
+      "press"
+    ]
+  },
+  "passage": {
+    "slug": "passage",
+    "term": "Passage",
+    "category": "operations",
+    "tagline": "Subdomain Routing",
+    "definition": "A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care."
+  },
+  "petal": {
+    "slug": "petal",
+    "term": "Petal",
+    "category": "operations",
+    "tagline": "Content Safety",
+    "definition": "Petals fall from blooms, each one examined before it touches the ground. Some carry beauty. Some carry harm. Petal knows the difference.",
+    "seeAlso": [
+      "blooms",
+      "lumen"
+    ]
+  },
+  "warden": {
+    "slug": "warden",
+    "term": "Warden",
+    "category": "operations",
+    "tagline": "External API Gateway",
+    "definition": "The one who holds the keys. A warden doesn't open doors for just anyone—they verify, they check, they ensure only the right requests pass through.",
+    "seeAlso": [
+      "scribe"
     ]
   },
   "press": {
@@ -437,8 +455,7 @@
     "tagline": "Backup System",
     "definition": "A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.",
     "seeAlso": [
-      "amber",
-      "rings"
+      "press"
     ]
   },
   "mycelium": {
@@ -459,20 +476,8 @@
     "definition": "In anatomy, a lumen is the hollow center of a tube: the empty space inside blood vessels, intestines, airways. It's not the wall. It's not the tissue. It's the void through which everything flows. But lumen also means light. The same word for darkness and illumination.",
     "seeAlso": [
       "wisp",
-      "thorn",
-      "warden"
-    ]
-  },
-  "warden": {
-    "slug": "warden",
-    "term": "Warden",
-    "category": "operations",
-    "tagline": "External API Gateway",
-    "definition": "The one who holds the keys. Every outbound request to third-party services passes through Warden. Agents describe what they need; Warden executes with injected credentials. Keys never leave the vault.",
-    "seeAlso": [
-      "lumen",
-      "mycelium",
-      "heartwood"
+      "flow",
+      "thorn"
     ]
   },
   "zephyr": {
@@ -483,23 +488,17 @@
     "definition": "In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. While other winds howled and destroyed, the zephyr carried seeds to new soil, pollen to waiting flowers, whispers to distant ears. Invisible. Gentle. Reliable.",
     "seeAlso": [
       "porch",
+      "flow",
       "wander",
-      "lumen",
-      "wanderer"
+      "lumen"
     ]
   },
   "shade": {
     "slug": "shade",
     "term": "Shade",
-    "category": "foundational",
+    "category": "operations",
     "tagline": "AI Content Protection",
-    "definition": "Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.",
-    "seeAlso": [
-      "blooms",
-      "lattice",
-      "passage",
-      "heartwood"
-    ]
+    "definition": "Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking."
   },
   "wanderer": {
     "slug": "wanderer",

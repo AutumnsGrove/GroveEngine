@@ -235,14 +235,17 @@ function parseGroveNaming(content: string): GroveTermManifest {
 
     // Track H2 sections for category mapping
     if (line.startsWith("## ")) {
-      const sectionName = line.substring(3).trim().toLowerCase();
-      currentSection = sectionName;
-      currentCategory = SECTION_TO_CATEGORY[sectionName] || currentCategory;
-
-      // Commit any pending term
+      // Commit any pending term BEFORE changing category
       if (currentTerm && termLines.length > 0) {
         commitTerm();
       }
+      // Clear term state after section commit to prevent double-commits
+      currentTerm = "";
+      termLines = [];
+
+      const sectionName = line.substring(3).trim().toLowerCase();
+      currentSection = sectionName;
+      currentCategory = SECTION_TO_CATEGORY[sectionName] || currentCategory;
       continue;
     }
 
