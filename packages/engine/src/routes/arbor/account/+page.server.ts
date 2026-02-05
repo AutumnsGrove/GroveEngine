@@ -46,21 +46,44 @@ const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 /**
  * Fetch user passkeys from GroveAuth.
  * Returns empty array on error to allow graceful degradation.
+ *
+ * Session authentication:
+ * - grove_session: SessionDO cookie (preferred, set by session bridge after OAuth)
+ * - better-auth.session_token: Better Auth session (set directly by BA after OAuth)
+ *
+ * Note: access_token (legacy JWT) is no longer used for OAuth accounts.
  */
 async function fetchUserPasskeys(
-  accessToken: string | undefined,
+  sessionCookies: {
+    groveSession?: string;
+    betterAuthSession?: string;
+  },
   authBaseUrl: string,
 ): Promise<{ passkeys: Passkey[]; error: boolean }> {
-  if (!accessToken) {
+  const { groveSession, betterAuthSession } = sessionCookies;
+
+  // Need at least one session cookie
+  if (!groveSession && !betterAuthSession) {
     return { passkeys: [], error: false };
   }
 
   try {
+    // Build Cookie header with available session cookies
+    // GroveAuth validates sessions via Cookie header (not Authorization)
+    const cookieParts: string[] = [];
+    if (groveSession) {
+      cookieParts.push(`grove_session=${groveSession}`);
+    }
+    if (betterAuthSession) {
+      // Better Auth uses this cookie name for session validation
+      cookieParts.push(`better-auth.session_token=${betterAuthSession}`);
+    }
+
     const response = await fetch(
       `${authBaseUrl}/api/auth/passkey/list-user-passkeys`,
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Cookie: cookieParts.join("; "),
         },
       },
     );
@@ -96,8 +119,14 @@ export const load: PageServerLoad = async ({
     throw error(500, "Database not configured");
   }
 
-  // Get access token for passkey API calls
-  const accessToken = cookies.get("access_token");
+  // Get session cookies for passkey API calls
+  // grove_session: SessionDO cookie (set by session bridge after OAuth)
+  // better-auth.session_token: Better Auth session cookie (set directly after OAuth)
+  // Note: access_token (legacy JWT) is no longer used for OAuth accounts
+  const groveSession = cookies.get("grove_session");
+  const betterAuthSession =
+    cookies.get("__Secure-better-auth.session_token") ||
+    cookies.get("better-auth.session_token");
   const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
 
   // ISOLATED QUERIES: D1 queries and external API calls are separated
@@ -111,7 +140,10 @@ export const load: PageServerLoad = async ({
 
   // Start passkey fetch early (runs concurrently with D1 queries)
   // Returned as deferred data - page renders immediately, passkeys stream in
-  const passkeyPromise = fetchUserPasskeys(accessToken, authBaseUrl);
+  const passkeyPromise = fetchUserPasskeys(
+    { groveSession, betterAuthSession },
+    authBaseUrl,
+  );
 
   // Await critical D1 queries
   const [billingResult, tenantResult] = await Promise.all([
