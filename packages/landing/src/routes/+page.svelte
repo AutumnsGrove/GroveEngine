@@ -20,8 +20,6 @@
 		Sprout,
 		ChevronDown,
 		PenLine,
-		Palette,
-		Lock,
 		Image as ImageIcon,
 		ChevronRight
 	} from 'lucide-svelte';
@@ -36,37 +34,27 @@
 		seasonStore.cycle();
 	}
 
-	// Hero carousel slides - showcasing Grove's features visually
+	// Hero carousel slides - using prepared marketing images
 	const heroSlides = [
 		{
-			title: 'Your Corner of the Web',
-			description: 'A beautiful blog that feels like home. No algorithms, no ads, just your words.',
-			icon: PenLine,
-			gradient: 'from-emerald-500/20 to-teal-500/20'
+			src: '/assets/carousel/hero-slide-1.png',
+			alt: 'A grove for people who lost their groves. Five seasonal Grove tree logos in pink, green, orange, blue, and purple. Plant your blog for $8/mo. No ads. No algorithms. Just your words.'
 		},
 		{
-			title: 'Write with Flow',
-			description: 'A distraction-free editor that gets out of your way. Focus on what matters.',
-			icon: Palette,
-			gradient: 'from-amber-500/20 to-orange-500/20'
+			src: '/assets/carousel/hero-slide-2.png',
+			alt: 'Your words. Your space. Forever. A Grove tree logo next to you.grove.place domain showcase. Claim yours button.'
 		},
 		{
-			title: 'Protected by Shade',
-			description: 'AI scrapers blocked. Your words stay yours, never used to train models.',
-			icon: Shield,
-			gradient: 'from-violet-500/20 to-purple-500/20'
+			src: '/assets/carousel/hero-slide-3.png',
+			alt: '100 year domain guarantee. Some trees outlive the people who planted them. Your words remain accessible from 2026 to 2126. Plant your legacy button.'
 		},
 		{
-			title: 'Rich Media Support',
-			description: 'Galleries, embeds, and images that make your stories come alive.',
-			icon: ImageIcon,
-			gradient: 'from-rose-500/20 to-pink-500/20'
+			src: '/assets/carousel/hero-slide-4.png',
+			alt: 'No algorithms. No engagement metrics. Just you. Four seasonal Grove tree logos. Find your peace button.'
 		},
 		{
-			title: 'Your Data, Your Rules',
-			description: 'Export everything anytime. If you leave, your content leaves with you.',
-			icon: Lock,
-			gradient: 'from-sky-500/20 to-blue-500/20'
+			src: '/assets/carousel/hero-slide-5.png',
+			alt: 'The internet should belong to everyone. Autumn-colored Grove tree logo. Become a Seedling for $8/mo button.'
 		}
 	];
 
@@ -230,8 +218,8 @@
 		</p>
 	</section>
 
-	<!-- Feature Carousel Section -->
-	<section class="w-full max-w-3xl mb-16" aria-label="Feature highlights">
+	<!-- Hero Carousel Section -->
+	<section class="w-full max-w-4xl mb-16" aria-label="Grove feature highlights">
 		<GlassCarousel
 			itemCount={heroSlides.length}
 			showDots={true}
@@ -243,13 +231,12 @@
 		>
 			{#snippet item(index: number)}
 				{@const slide = heroSlides[index]}
-				<div class="w-full h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br {slide.gradient}">
-					<div class="w-16 h-16 rounded-full bg-white/30 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4" aria-hidden="true">
-						<slide.icon class="w-8 h-8 text-foreground" />
-					</div>
-					<h3 class="text-xl md:text-2xl font-serif text-foreground mb-2 text-center">{slide.title}</h3>
-					<p class="text-foreground-muted font-sans text-center max-w-md">{slide.description}</p>
-				</div>
+				<img
+					src={slide.src}
+					alt={slide.alt}
+					class="w-full h-full object-contain"
+					loading={index === 0 ? 'eager' : 'lazy'}
+				/>
 			{/snippet}
 		</GlassCarousel>
 	</section>
