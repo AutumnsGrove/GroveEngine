@@ -82,10 +82,11 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   try {
     // Request authentication options from GroveAuth
     // This returns challenge, rpId, timeout - no allowCredentials for discoverable flow
+    // NOTE: Better Auth uses GET for this endpoint, and the name is "authenticate" not "authentication"
     const response = await fetch(
-      `${authBaseUrl}/api/auth/passkey/generate-authentication-options`,
+      `${authBaseUrl}/api/auth/passkey/generate-authenticate-options`,
       {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
