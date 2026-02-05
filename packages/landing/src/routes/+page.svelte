@@ -3,7 +3,7 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview, GroveTerm, GlassCarousel, GlassCard, GlassComparisonTable } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm, GlassCarousel, GlassCard } from '@autumnsgrove/groveengine/ui';
 	import {
 		HeroRefuge,
 		HeroOwnership,
@@ -105,55 +105,6 @@
 			id: 'pricing',
 			question: 'How much does it cost?',
 			answer: "Reading is always free. Writing starts at $8/month (Seedling). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details."
-		}
-	];
-
-	// Competitor comparison data — hand-curated for honesty
-	const comparisonColumns = [
-		{ name: 'Grove', highlighted: true },
-		{ name: 'Bear Blog', href: 'https://bearblog.dev' },
-		{ name: 'Substack', href: 'https://substack.com' },
-		{ name: 'WordPress', href: 'https://wordpress.com' },
-		{ name: 'Ghost', href: 'https://ghost.org' },
-		{ name: 'Tumblr', href: 'https://tumblr.com' }
-	];
-
-	const comparisonRows = [
-		{
-			feature: 'Custom subdomain included',
-			description: 'Your own yourname.platform.tld',
-			values: { 'Grove': true, 'Bear Blog': true, 'Substack': true, 'WordPress': true, 'Ghost': false, 'Tumblr': true }
-		},
-		{
-			feature: '100-year domain guarantee',
-			description: 'Content preserved after you stop paying',
-			values: { 'Grove': true, 'Bear Blog': false, 'Substack': false, 'WordPress': false, 'Ghost': false, 'Tumblr': false }
-		},
-		{
-			feature: 'AI crawler protection',
-			description: 'Blocks bots from scraping your writing',
-			values: { 'Grove': true, 'Bear Blog': false, 'Substack': false, 'WordPress': 'Plugin', 'Ghost': false, 'Tumblr': false }
-		},
-		{
-			feature: 'No algorithms or engagement metrics',
-			values: { 'Grove': true, 'Bear Blog': true, 'Substack': false, 'WordPress': true, 'Ghost': 'Partial', 'Tumblr': false }
-		},
-		{
-			feature: 'Full data export',
-			description: 'Download everything in standard formats',
-			values: { 'Grove': true, 'Bear Blog': true, 'Substack': 'Partial', 'WordPress': true, 'Ghost': true, 'Tumblr': 'Partial' }
-		},
-		{
-			feature: 'Community features',
-			values: { 'Grove': 'Meadow', 'Bear Blog': false, 'Substack': 'Notes', 'WordPress': 'Plugin', 'Ghost': 'Members', 'Tumblr': 'Dashboard' }
-		},
-		{
-			feature: 'Open source / indie web aligned',
-			values: { 'Grove': true, 'Bear Blog': 'Partial', 'Substack': false, 'WordPress': true, 'Ghost': true, 'Tumblr': false }
-		},
-		{
-			feature: 'Pricing starts at',
-			values: { 'Grove': '$8/mo', 'Bear Blog': 'Free', 'Substack': 'Free', 'WordPress': 'Free', 'Ghost': '$9/mo', 'Tumblr': 'Free' }
 		}
 	];
 
@@ -314,15 +265,20 @@
 		</div>
 	</section>
 
-	<!-- Competitor Comparison Table -->
-	<section class="w-full max-w-4xl mb-16" aria-labelledby="comparison-heading">
-		<GlassComparisonTable
-			columns={comparisonColumns}
-			rows={comparisonRows}
-			title="How Grove Compares"
-			description="Honest, feature-level comparison with other platforms. Where others do it well, we say so."
-			highlightColumn="Grove"
-		/>
+	<!-- Comparison CTA -->
+	<section class="w-full max-w-lg mb-16" aria-labelledby="comparison-heading">
+		<h2 id="comparison-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">How Grove Compares</h2>
+		<a href="/compare" class="group block">
+			<GlassCard hoverable>
+				<p class="text-foreground-subtle font-sans text-sm leading-relaxed mb-3">
+					Honest, feature-level comparison with Bear Blog, Substack, WordPress, Ghost, and Tumblr. Where others do it well, we say so.
+				</p>
+				<span class="inline-flex items-center gap-2 text-accent-muted font-sans text-sm font-medium group-hover:gap-3 transition-all">
+					See the full comparison
+					<ArrowRight class="w-4 h-4" aria-hidden="true" />
+				</span>
+			</GlassCard>
+		</a>
 	</section>
 
 	<!-- Decorative divider -->
