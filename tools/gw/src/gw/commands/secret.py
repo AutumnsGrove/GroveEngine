@@ -329,6 +329,57 @@ def secret_exists(ctx: click.Context, name: str) -> None:
         ctx.exit(1)
 
 
+@secret.command("reveal")
+@click.argument("name")
+@click.option("--dangerous", is_flag=True, help="Confirm you want to reveal the secret value")
+@click.pass_context
+def secret_reveal(ctx: click.Context, name: str, dangerous: bool) -> None:
+    """Reveal a secret value from the vault.
+
+    ⚠️  HUMAN-ONLY COMMAND - NOT AGENT-SAFE ⚠️
+
+    This command displays the actual secret value. Use it when you need
+    to manually copy a secret to another system (like the CF dashboard).
+
+    Requires --dangerous flag to confirm intent.
+
+    Examples:
+
+        gw secret reveal GROVE_KEK --dangerous
+
+        gw secret reveal STRIPE_KEY --dangerous | pbcopy
+    """
+    output_json: bool = ctx.obj.get("output_json", False)
+
+    if not dangerous:
+        if output_json:
+            console.print(json.dumps({"error": "Requires --dangerous flag to reveal secret values"}))
+        else:
+            error("This command reveals sensitive secret values")
+            warning("Requires --dangerous flag to confirm")
+            info("Example: gw secret reveal GROVE_KEK --dangerous")
+        ctx.exit(1)
+
+    vault = _get_vault(ctx)
+
+    if not vault.secret_exists(name):
+        if output_json:
+            console.print(json.dumps({"error": f"Secret '{name}' not found"}))
+        else:
+            warning(f"Secret '{name}' not found in vault")
+        ctx.exit(1)
+
+    value = vault.get_secret(name)
+
+    if output_json:
+        console.print(json.dumps({"name": name, "value": value}))
+    else:
+        # Print just the value for easy piping (e.g., | pbcopy)
+        console.print(f"\n[bold red]⚠️  SECRET VALUE - DO NOT SHARE[/bold red]\n")
+        console.print(f"[cyan]{name}[/cyan] = [yellow]{value}[/yellow]")
+        console.print(f"\n[dim]Tip: Use 'gw secret reveal {name} --dangerous | pbcopy' to copy to clipboard[/dim]\n")
+
+
 @secret.command("apply")
 @click.argument("names", nargs=-1, required=True)
 @click.option("--worker", "-w", required=True, help="Worker name to apply secrets to")
