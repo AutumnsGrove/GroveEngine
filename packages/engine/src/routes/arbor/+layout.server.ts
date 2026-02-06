@@ -109,11 +109,30 @@ export const load: LayoutServerLoad = async ({
     }
   }
 
+  // Check if this tenant was created through a beta invite
+  let isBeta = false;
+  if (tenant && platform?.env?.DB) {
+    try {
+      const betaInvite = await platform.env.DB.prepare(
+        `SELECT id FROM comped_invites WHERE used_by_tenant_id = ? AND invite_type = 'beta'`,
+      )
+        .bind(tenant.id)
+        .first();
+      isBeta = !!betaInvite;
+    } catch (error) {
+      // Non-critical — continue without beta status.
+      // Common cause: comped_invites table missing if migration hasn't run yet.
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.warn("[Admin Layout] Failed to check beta status:", errMsg);
+    }
+  }
+
   return {
     ...parentData,
     user: locals.user,
     tenant,
     grafts,
+    isBeta,
     csrfToken: locals.csrfToken,
   };
 };
