@@ -283,6 +283,59 @@ This serves as both a checklist and an audit tool — any term with `hasIntroPag
 
 **Audit step (Phase 3):** Run a check that every manifest entry with `hasIntroPage: true` and a `standardTerm` has a corresponding `<GroveIntro>` component on its page. This can be a simple grep during review or a lint rule later.
 
+### 4. Help Center Articles — "What is X?" Banners
+
+The "What is Porch?" style articles are markdown files rendered by MarkdownIt at build time. We can't inject Svelte components into the markdown body (the `[[term]]` bracket syntax is already flaky enough). But we don't need to — the page wrapper is still a live Svelte component.
+
+**How it works:**
+
+The article page server loader (`/knowledge/[category]/[slug]/+page.server.ts`) already has the slug. Enhancement:
+
+1. Server loader checks the slug against the grove-term manifest
+2. If the article matches a term with a `standardTerm`, pass the term data alongside the doc
+3. The `+page.svelte` wrapper renders a banner *above* the `{@html doc.html}` — not inside the markdown
+4. Banner reads `groveModeStore` for reactivity
+
+**Banner behavior:**
+
+| Grove Mode | Banner |
+|-----------|--------|
+| OFF | Shows: "**Porch** is Grove's name for **Support** — the help and conversation system." |
+| ON | Hidden — you're in the grove, you know the language |
+
+**Matching logic:**
+
+The loader doesn't need per-article configuration. The pattern is predictable:
+- Article slug `what-is-porch` → term slug `porch`
+- Article slug `what-is-arbor` → term slug `arbor`
+- Strip the `what-is-` prefix, look up in manifest
+
+If the manifest entry has a `standardTerm`, the banner renders. If not (e.g., `what-is-flow` where Flow is always-Grove), no banner. The manifest drives everything — no markdown files need editing.
+
+**Why this works:**
+- Zero changes to markdown files
+- Zero changes to the MarkdownIt pipeline
+- Automatic for all 40+ "What is X?" articles — manifest-driven, not per-file
+- Reactive to grove mode at runtime (Svelte component, not prerendered HTML)
+- Degrades gracefully: no manifest match = no banner = current behavior
+
+**Articles that would get banners** (any `what-is-*` article whose term has a `standardTerm`):
+
+| Article | Term | Banner Text |
+|---------|------|-------------|
+| what-is-porch | porch | "Porch is Grove's name for Support" |
+| what-is-arbor | arbor | "Arbor is Grove's name for Dashboard" |
+| what-is-my-garden | your-garden | "Garden is Grove's name for Blog" |
+| what-is-rings | rings | "Rings is Grove's name for Analytics" |
+| what-is-foliage | foliage | "Foliage is Grove's name for Themes" |
+| what-is-clearing | clearing | "Clearing is Grove's name for Status" |
+| what-is-meadow | meadow | "Meadow is Grove's name for Feed" |
+| what-is-terrarium | terrarium | "Terrarium is Grove's name for Component Builder" |
+| what-is-wisp | wisp | "Wisp is Grove's name for Writing Assistant" |
+| ...etc | | |
+
+Articles for always-Grove terms (what-is-flow, what-is-shade, what-is-grove) would have no banner since they have no `standardTerm`.
+
 ---
 
 ## Toggle UI
@@ -341,20 +394,24 @@ For logged-in users, also available in account settings:
 6. Update nav rendering components to use resolved labels
 7. Add Grove Mode toggle to footer
 
-### Phase 3 — Page Introductions
+### Phase 3 — Page Introductions & Help Center Banners
 
 **Files touched:**
 - `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` — new component
 - `packages/engine/src/lib/ui/components/ui/groveterm/index.ts` — export GroveIntro
 - Individual page components for Grove-named features
 - `grove-term-manifest.json` — add `hasIntroPage` flags
+- `packages/landing/src/routes/knowledge/[category]/[slug]/+page.server.ts` — manifest lookup for article terms
+- `packages/landing/src/routes/knowledge/[category]/[slug]/+page.svelte` — render banner above article HTML
 
 **Tasks:**
 1. Create `<GroveIntro>` component (standardized "we call it X" pattern)
 2. Add `hasIntroPage` field to manifest entries that have corresponding pages
 3. Place `<GroveIntro term="...">` on all pages listed in the introduction registry
 4. Audit: verify every `hasIntroPage: true` entry has a `<GroveIntro>` on its page
-5. Review and add standard-term redirects for Grove-named URLs that lack them
+5. Enhance article page server loader to detect `what-is-*` slugs and pass matched term data
+6. Add manifest-driven banner to article page wrapper (Svelte, not markdown — reactive to grove mode)
+7. Review and add standard-term redirects for Grove-named URLs that lack them
 
 ### Phase 4 — Authenticated Persistence
 
@@ -397,3 +454,7 @@ For logged-in users, also available in account settings:
 | `docs/philosophy/grove-naming.md` | Naming philosophy source |
 | `scripts/generate/grove-term-manifest.ts` | Manifest generator |
 | `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` | Standardized page introduction component (new) |
+| `packages/landing/src/routes/knowledge/[category]/[slug]/+page.server.ts` | Article page loader (enhance for term lookup) |
+| `packages/landing/src/routes/knowledge/[category]/[slug]/+page.svelte` | Article page wrapper (add banner rendering) |
+| `packages/landing/src/lib/utils/docs-loader.ts` | Markdown rendering pipeline (no changes needed) |
+| `docs/help-center/articles/what-is-*.md` | 40+ "What is X?" articles (no changes needed — banner is manifest-driven) |
