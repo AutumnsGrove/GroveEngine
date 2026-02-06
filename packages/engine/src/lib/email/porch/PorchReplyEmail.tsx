@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { Text, Heading, Section, Link, Hr } from "@react-email/components";
-import { GroveEmail } from "@autumnsgrove/groveengine/email/components";
+import { GroveEmail } from "../components/GroveEmail";
 
 export interface PorchReplyEmailProps {
   /** Recipient name */
