@@ -31,16 +31,8 @@
 		class: className
 	}: Props = $props();
 
-	// Find the entry from manifest
-	function findEntry(slug: string) {
-		if (slug in manifest) return manifest[slug];
-		if (`your-${slug}` in manifest) return manifest[`your-${slug}`];
-		if (`${slug}s` in manifest) return manifest[`${slug}s`];
-		if (slug.endsWith('s') && slug.slice(0, -1) in manifest) return manifest[slug.slice(0, -1)];
-		return null;
-	}
-
-	const entry = $derived(findEntry(term));
+	// Direct manifest lookup — callers should pass the exact manifest slug
+	const entry = $derived(term in manifest ? manifest[term] : null);
 
 	// Only show when: Grove Mode is OFF, and the term has a standardTerm, and is not alwaysGrove
 	const shouldShow = $derived(

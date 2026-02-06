@@ -4,8 +4,7 @@ import type { Doc, DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 import { readFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { resolve } from "path";
 
 // Prerender all knowledge base articles at build time
 // This is required because Cloudflare Workers don't have filesystem access at runtime
@@ -16,10 +15,9 @@ export const prerender = true;
 const { allDocs } = scanAllDocs();
 
 // Load grove term manifest at build time for "what-is-*" article banners
-const __dirname = dirname(fileURLToPath(import.meta.url));
 let groveTermManifest: Record<string, any> = {};
 try {
-  const manifestPath = resolve(__dirname, "../../../../../../engine/src/lib/data/grove-term-manifest.json");
+  const manifestPath = resolve(process.cwd(), "packages/engine/src/lib/data/grove-term-manifest.json");
   groveTermManifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
 } catch (e) {
   console.warn("[Grove Mode] Could not load grove-term-manifest.json — article banners will be disabled:", (e as Error).message);
