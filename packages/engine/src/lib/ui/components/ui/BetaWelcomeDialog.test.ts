@@ -27,19 +27,58 @@ describe("BetaWelcomeDialog", () => {
   });
 
   // =========================================================================
-  // localStorage persistence logic
+  // autoShow + localStorage persistence logic
   // =========================================================================
 
-  describe("shouldShow logic", () => {
-    it("should show when localStorage key is absent", () => {
-      // No key set — dialog should be shown
-      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  describe("autoShow behavior", () => {
+    it("should auto-open when autoShow is true and localStorage key is absent", async () => {
+      render(BetaWelcomeDialog, {
+        props: {
+          autoShow: true,
+          userName: "Autumn",
+        },
+      });
+
+      // Wait for $effect to run
+      await tick();
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(
+        screen.getByText(/welcome to the beta, autumn/i),
+      ).toBeInTheDocument();
     });
 
-    it("should not show after localStorage key is set", () => {
+    it("should NOT auto-open when localStorage key is already set", async () => {
       localStorage.setItem(STORAGE_KEY, new Date().toISOString());
 
-      expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+      render(BetaWelcomeDialog, {
+        props: {
+          autoShow: true,
+          userName: "Autumn",
+        },
+      });
+
+      await tick();
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(
+        screen.queryByText(/welcome to the beta/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should NOT auto-open when autoShow is false", async () => {
+      render(BetaWelcomeDialog, {
+        props: {
+          autoShow: false,
+          userName: "Autumn",
+        },
+      });
+
+      await tick();
+
+      expect(
+        screen.queryByText(/welcome to the beta/i),
+      ).not.toBeInTheDocument();
     });
 
     it("should store an ISO timestamp when dismissed", async () => {

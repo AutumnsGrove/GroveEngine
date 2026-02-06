@@ -17,18 +17,26 @@
 	 * Uses the same bits-ui Dialog foundation as GlassConfirmDialog for
 	 * accessibility (focus trap, escape-to-close, ARIA).
 	 *
-	 * @example Auto-show for beta users
+	 * @example Auto-show for beta users (recommended)
 	 * ```svelte
 	 * <BetaWelcomeDialog
-	 *   bind:open={showBetaWelcome}
+	 *   autoShow={data.isBeta}
 	 *   userName="Autumn"
 	 *   feedbackUrl="https://grove.place/feedback"
 	 * />
 	 * ```
 	 *
+	 * @example Manual control
+	 * ```svelte
+	 * <BetaWelcomeDialog
+	 *   bind:open={showBetaWelcome}
+	 *   userName="Autumn"
+	 * />
+	 * ```
+	 *
 	 * @example With custom content
 	 * ```svelte
-	 * <BetaWelcomeDialog bind:open={show} userName="Friend">
+	 * <BetaWelcomeDialog autoShow={data.isBeta} userName="Friend">
 	 *   <p>Custom welcome message here.</p>
 	 * </BetaWelcomeDialog>
 	 * ```
@@ -39,6 +47,8 @@
 	interface Props {
 		/** Whether the dialog is open (bindable) */
 		open?: boolean;
+		/** Auto-open on mount if user hasn't seen it yet (manages localStorage internally) */
+		autoShow?: boolean;
 		/** The user's display name for a personal greeting */
 		userName?: string;
 		/** URL for the feedback form */
@@ -51,11 +61,26 @@
 
 	let {
 		open = $bindable(false),
+		autoShow = false,
 		userName = "Wanderer",
 		feedbackUrl = "https://grove.place/feedback",
 		ondismiss,
 		children,
 	}: Props = $props();
+
+	// Auto-show: open dialog on mount if localStorage key is absent
+	$effect(() => {
+		if (autoShow && browser) {
+			try {
+				if (!localStorage.getItem(STORAGE_KEY)) {
+					open = true;
+				}
+			} catch {
+				// Storage unavailable — show anyway to be safe
+				open = true;
+			}
+		}
+	});
 
 	/**
 	 * Check if this dialog has been shown before.
