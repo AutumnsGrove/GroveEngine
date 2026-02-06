@@ -20,7 +20,7 @@
 
 <HeroSlide {season} {active} bgVariant="twilight" ariaLabel="Some trees outlive the people who planted them — 100 year guarantee">
 	{#snippet text()}
-		<h2 class="text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
+		<h2 class="text-2xl sm:text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
 			Some trees outlive the people who planted them.
 		</h2>
 		<p class="text-body-sm md:text-body text-foreground-muted motion-safe:animate-fade-in" style="animation-delay: 150ms;">

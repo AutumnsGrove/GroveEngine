@@ -21,7 +21,7 @@
 
 <HeroSlide {season} {active} bgVariant="forest" ariaLabel="Your words deserve room to bloom">
 	{#snippet text()}
-		<h2 class="text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
+		<h2 class="text-2xl sm:text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
 			Your words deserve room to bloom.
 		</h2>
 		<p class="text-body-sm md:text-body text-foreground-muted motion-safe:animate-fade-in" style="animation-delay: 150ms;">
