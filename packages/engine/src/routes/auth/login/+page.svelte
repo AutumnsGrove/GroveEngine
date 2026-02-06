@@ -40,7 +40,7 @@
 
 	{#snippet header()}
 		<h1 class="text-2xl font-semibold text-foreground">
-			{#if isAdminLogin}<GroveSwap term="arbor" standard="Dashboard">Admin Panel</GroveSwap>{:else}Welcome{#if false}, <GroveSwap term="wanderer">Wanderer</GroveSwap>{/if}{/if}
+			{#if isAdminLogin}<GroveSwap term="arbor" standard="Dashboard">Admin Panel</GroveSwap>{:else}Welcome<GroveSwap term="wanderer" standard="">, Wanderer</GroveSwap>{/if}
 		</h1>
 		<p class="mt-2 text-sm text-muted-foreground">
 			{isAdminLogin ? 'Sign in to access your dashboard' : 'Sign in to continue'}

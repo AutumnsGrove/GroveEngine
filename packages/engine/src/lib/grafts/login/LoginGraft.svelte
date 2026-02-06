@@ -49,6 +49,7 @@
 		getProviderName,
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import PasskeyButton from "./PasskeyButton.svelte";
 	import EmailButton from "./EmailButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";
@@ -177,7 +178,7 @@
 						{@render header()}
 					{:else}
 						<h1 class="text-2xl font-semibold text-foreground">
-							Welcome back
+							Welcome back<GroveSwap term="wanderer" standard="">, Wanderer</GroveSwap>
 						</h1>
 						<p class="mt-2 text-sm text-muted-foreground">
 							Sign in to continue to Grove

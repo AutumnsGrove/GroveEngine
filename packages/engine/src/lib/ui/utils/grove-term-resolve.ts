@@ -46,6 +46,8 @@ export function resolveTerm(slug: string): string {
     .replace(/^-|-$/g, "");
   const entry = findInManifest(normalized);
   if (!entry) return slug;
+  // Brand terms (alwaysGrove) always show the Grove name regardless of mode —
+  // this runs after the null check so unknown slugs fall through safely above.
   if (entry.alwaysGrove) return entry.term;
   return groveModeStore.current
     ? entry.term
