@@ -120,8 +120,10 @@ export const load: LayoutServerLoad = async ({
         .first();
       isBeta = !!betaInvite;
     } catch (error) {
-      // Non-critical — continue without beta status
-      console.warn("[Admin Layout] Failed to check beta status:", error);
+      // Non-critical — continue without beta status.
+      // Common cause: comped_invites table missing if migration hasn't run yet.
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.warn("[Admin Layout] Failed to check beta status:", errMsg);
     }
   }
 
