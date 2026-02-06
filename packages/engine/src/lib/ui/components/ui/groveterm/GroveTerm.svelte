@@ -201,8 +201,8 @@
 	onpointerleave={handlePointerLeave}
 	onfocus={handleFocus}
 >
-	{#if children}
-		{@render children()}
+	{#if showAsGrove}
+		{#if children}{@render children()}{:else}{displayText}{/if}
 	{:else}
 		{displayText}
 	{/if}

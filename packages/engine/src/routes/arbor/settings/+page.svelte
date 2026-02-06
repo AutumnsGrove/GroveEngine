@@ -742,7 +742,7 @@
       <h2>Preferences</h2>
     </div>
     <p class="section-description">
-      Personal display preferences for your <GroveTerm term="arbor">dashboard</GroveTerm>.
+      Personal display preferences for your <GroveTerm term="arbor">Arbor</GroveTerm>.
     </p>
 
     <label class="logo-toggle">
@@ -1086,7 +1086,7 @@
       <h2>Active Sessions</h2>
     </div>
     <p class="section-description">
-      Devices where you're currently signed in to your <GroveTerm term="grove">Grove</GroveTerm>.
+      Devices where you're currently signed in to your <GroveTerm term="grove">grove</GroveTerm>.
     </p>
 
     {#if loadingSessions}

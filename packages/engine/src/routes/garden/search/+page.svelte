@@ -1,7 +1,7 @@
 <script>
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { Card, Badge, Button, ContentSearch } from '$lib/ui';
+	import { Card, Badge, Button, ContentSearch, GroveSwap } from '$lib/ui';
 
 	let { data } = $props();
 
@@ -93,7 +93,7 @@
 
 <div class="search-header">
 	<h1>Search Garden</h1>
-	<p>Find blooms by keyword or filter by tags.</p>
+	<p>Find <GroveSwap term="blooms">blooms</GroveSwap> by keyword or filter by tags.</p>
 </div>
 
 <div class="search-container">
@@ -101,7 +101,7 @@
 		items={postsWithLowercase}
 		filterFn={filterPost}
 		bind:searchQuery
-		placeholder="Search blooms..."
+		placeholder="Search posts..."
 		syncWithUrl={true}
 		queryParam="q"
 		debounceDelay={250}
@@ -134,7 +134,7 @@
 <div class="results-info">
 	{#if selectedTag || searchQuery}
 		<p>
-			Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'bloom' : 'blooms'}
+			Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
 			{#if selectedTag}
 				tagged with <strong>"{selectedTag}"</strong>
 			{/if}
@@ -143,13 +143,13 @@
 			{/if}
 		</p>
 	{:else}
-		<p>Showing all {data.posts.length} blooms</p>
+		<p>Showing all {data.posts.length} <GroveSwap term="blooms">blooms</GroveSwap></p>
 	{/if}
 </div>
 
 {#if filteredPosts.length === 0}
 	<div class="no-results">
-		<p>No blooms found matching your criteria.</p>
+		<p>No <GroveSwap term="blooms">blooms</GroveSwap> found matching your criteria.</p>
 		<Button variant="default" onclick={clearFilters}>Clear filters</Button>
 	</div>
 {:else}

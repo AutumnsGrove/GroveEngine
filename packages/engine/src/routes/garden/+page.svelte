@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { Card, Badge } from '$lib/ui';
+	import { Card, Badge, GroveSwap } from '$lib/ui';
 
 	let { data } = $props();
 
@@ -34,7 +34,7 @@
 
 <svelte:head>
 	<title>Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
-	<meta name="description" content="Explore my collection of blooms - thoughts, ideas, and explorations." />
+	<meta name="description" content="Explore my collection of posts - thoughts, ideas, and explorations." />
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">
@@ -59,7 +59,7 @@
 
 {#if data.posts.length === 0}
 	<div class="text-center py-12 text-gray-500">
-		<p>No blooms yet. Check back soon!</p>
+		<p>No <GroveSwap term="blooms">blooms</GroveSwap> yet. Check back soon!</p>
 	</div>
 {:else}
 	<div class="grid gap-8 max-w-3xl mx-auto">
@@ -83,7 +83,7 @@
 					{#if post.tags.length > 0}
 						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}
-								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter blooms by tag: {tag}">
+								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
 									<Badge variant="tag" class="accent-tag">{tag}</Badge>
 								</a>
 							{/each}

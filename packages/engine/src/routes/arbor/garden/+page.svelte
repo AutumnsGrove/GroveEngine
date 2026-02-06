@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap } from '$lib/ui';
   import { api } from '$lib/utils';
   import { Trash2 } from 'lucide-svelte';
 
@@ -63,10 +63,10 @@
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
       <h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm term="garden">Garden</GroveTerm></h1>
-      <p class="m-0 text-foreground-muted">{data.posts.length} <GroveTerm term="bloom">blooms</GroveTerm></p>
+      <p class="m-0 text-foreground-muted">{data.posts.length} <GroveSwap term="blooms">blooms</GroveSwap></p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/arbor/garden/new'}>
-      + New Bloom
+      + New <GroveSwap term="blooms">Bloom</GroveSwap>
     </Button>
   </header>
 
@@ -128,7 +128,7 @@
         {:else}
           <tr>
             <td colspan="4" class="text-center text-foreground-muted py-12 px-4">
-              No blooms yet. Create your first one!
+              No <GroveSwap term="blooms">blooms</GroveSwap> yet. Create your first one!
             </td>
           </tr>
         {/each}
@@ -139,12 +139,12 @@
   <GlassCard variant="muted">
     <h3>How the Garden Works</h3>
     <p>
-      Create and edit blooms directly in the built-in markdown editor. Blooms are saved to the database
+      Create and edit <GroveSwap term="blooms">blooms</GroveSwap> directly in the built-in markdown editor. <GroveSwap term="blooms">Blooms</GroveSwap> are saved to the database
       and available immediately.
     </p>
     <ul>
-      <li>Use <strong>+ New Bloom</strong> to create a new bloom with the markdown editor</li>
-      <li>Use <strong>Edit</strong> links to modify existing blooms</li>
+      <li>Use <strong>+ New <GroveSwap term="blooms">Bloom</GroveSwap></strong> to create a new <GroveSwap term="blooms">bloom</GroveSwap> with the markdown editor</li>
+      <li>Use <strong>Edit</strong> links to modify existing <GroveSwap term="blooms">blooms</GroveSwap></li>
     </ul>
   </GlassCard>
 </div>

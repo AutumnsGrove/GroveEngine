@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Tag, Sprout, ChevronDown, Sparkles, Wrench, List } from 'lucide-svelte';
 	import { formatNumber, formatBytes, getGrowthIcon } from '$lib/utils/journey';
@@ -499,7 +500,7 @@
 					{#if data.latest.npmUnpackedSize > 0}
 						<div class="text-foreground-muted font-sans">unpacked size</div>
 						<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-							That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with Lattice.
+							That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with <GroveTerm term="lattice">Lattice</GroveTerm>.
 						</p>
 					{:else}
 						<div class="text-foreground-muted font-sans">package data unavailable</div>

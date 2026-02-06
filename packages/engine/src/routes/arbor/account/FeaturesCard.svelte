@@ -25,7 +25,7 @@
       </div>
       <div class="feature-content">
         <div class="feature-title">
-          <span>Rings</span>
+          <span><GroveTerm term="rings">Rings</GroveTerm></span>
           <Waystone slug="what-is-rings" label="Learn about Rings analytics" />
         </div>
         <p class="feature-description">
@@ -57,7 +57,7 @@
       </div>
       <div class="feature-content">
         <div class="feature-title">
-          <span>Curios</span>
+          <span><GroveTerm term="curios">Curios</GroveTerm></span>
           <Waystone slug="what-are-curios" label="Learn about Curios" />
         </div>
         <p class="feature-description">

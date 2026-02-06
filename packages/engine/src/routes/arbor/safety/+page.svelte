@@ -18,7 +18,7 @@
 		Activity,
 		Clock
 	} from 'lucide-svelte';
-	import { GlassCard } from '$lib/ui';
+	import { GlassCard, GroveTerm } from '$lib/ui';
 
 	let { data, form } = $props();
 
@@ -88,7 +88,7 @@
 			<Shield class="header-icon" />
 			<div>
 				<h1>Safety Dashboard</h1>
-				<p class="header-subtitle">Thorn (text) + Petal (image) moderation overview</p>
+				<p class="header-subtitle"><GroveTerm term="thorn">Thorn</GroveTerm> (text) + <GroveTerm term="petal">Petal</GroveTerm> (image) moderation overview</p>
 			</div>
 		</div>
 	</div>
@@ -164,7 +164,7 @@
 		<GlassCard>
 			<div class="section-header">
 				<Shield class="section-icon" />
-				<h2>Thorn &mdash; Text Moderation</h2>
+				<h2><GroveTerm term="thorn">Thorn</GroveTerm> &mdash; Text Moderation</h2>
 			</div>
 
 			{#if thornStats.byCategory.length > 0}
@@ -198,7 +198,7 @@
 		<GlassCard>
 			<div class="section-header">
 				<Eye class="section-icon" />
-				<h2>Petal &mdash; Image Moderation</h2>
+				<h2><GroveTerm term="petal">Petal</GroveTerm> &mdash; Image Moderation</h2>
 			</div>
 
 			{#if petalBlocks.length > 0}

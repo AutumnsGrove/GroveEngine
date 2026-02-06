@@ -7,7 +7,7 @@
 	 */
 
 	import type { PricingFineprintProps, FineprintSection } from "./types.js";
-	import { GroveTerm } from "../../ui/components/ui";
+	import { GroveText } from "../../ui/components/ui";
 
 	let {
 		sections,
@@ -23,36 +23,36 @@
 		reading: {
 			title: "Reading Blogs",
 			content:
-				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. Meadow (the community feed) requires a free account to browse. Only Rooted Evergreens can choose to make their blog require login to view.",
+				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. [[meadow|Meadow]] (the community feed) requires a free account to browse. Only [[rooted|Rooted]] [[evergreen|Evergreens]] can choose to make their blog require login to view.",
 			detail:
 				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
 		},
 		free: {
 			title: "Free Accounts",
 			content:
-				"Free accounts get full Meadow access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No garden, no storage. When you're ready to write, upgrade to Seedling.",
+				"Free accounts get full [[meadow|Meadow]] access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No [[your-garden|garden]], no storage. When you're ready to write, upgrade to [[seedling|Seedling]].",
 		},
 		themes: {
 			title: "Themes",
 			content:
-				"Seedling: Choose from 3 hand-curated themes plus a custom accent color. Sapling: All 10 themes plus accent color. Oak+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. Evergreen: Everything Oak gets, plus upload your own custom fonts.",
+				"[[seedling|Seedling]]: Choose from 3 hand-curated themes plus a custom accent color. [[sapling|Sapling]]: All 10 themes plus accent color. [[oak|Oak]]+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. [[evergreen|Evergreen]]: Everything Oak gets, plus upload your own custom fonts.",
 		},
 		curios: {
 			title: "Curios",
 			content:
-				"Every blog includes Home, Blog, and About in the navigation. Curios let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. Sapling: 3 curios. Oak: 5 curios. Evergreen: 8 curios.",
+				"Every blog includes Home, Blog, and About in the navigation. [[curios|Curios]] let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. [[sapling|Sapling]]: 3 curios. [[oak|Oak]]: 5 curios. [[evergreen|Evergreen]]: 8 curios.",
 			detail:
-				"Those on Seedling can still create unlimited pages—they just won't appear in the navigation bar. Link to them from posts or your About page.",
+				"Those on [[seedling|Seedling]] can still create unlimited pages—they just won't appear in the navigation bar. Link to them from posts or your About page.",
 		},
 		comments: {
 			title: "Comments",
 			content:
-				"Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the Rooted get unlimited. Private replies are rate-limited for free accounts to reduce spam.",
+				"Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the [[rooted|Rooted]] get unlimited. Private replies are rate-limited for free accounts to reduce spam.",
 		},
 		domains: {
 			title: "Custom Domains",
 			content:
-				"Oak (BYOD): Bring a domain you already own at no extra cost. Evergreen: We find and register the perfect domain for you. Registration included for domains up to $100/year.",
+				"[[oak|Oak]] (BYOD): Bring a domain you already own at no extra cost. [[evergreen|Evergreen]]: We find and register the perfect domain for you. Registration included for domains up to $100/year.",
 		},
 		email: {
 			title: "@grove.place Email",
@@ -62,19 +62,19 @@
 		support: {
 			title: "Support Hours (Evergreen)",
 			content:
-				"Evergreen includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
+				"[[evergreen|Evergreen]] includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
 		},
 		centennial: {
 			title: "Centennial (Sapling+)",
 			content:
-				"Your grove can outlive you. After 12 cumulative months on Sapling or above, your site earns Centennial status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
+				"Your grove can outlive you. After 12 cumulative months on [[sapling|Sapling]] or above, your site earns [[centennial|Centennial]] status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
 			detail:
 				"A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.",
 		},
 		included: {
 			title: "What's Included in Every Paid Tier",
 			content:
-				"Markdown blog posts with live preview, image hosting with automatic WebP compression, Vines (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.",
+				"Markdown blog posts with live preview, image hosting with automatic WebP compression, [[vines|Vines]] (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.",
 		},
 		ownership: {
 			title: "Your Data, Your Ownership",
@@ -84,16 +84,16 @@
 		ai: {
 			title: "AI Features",
 			content:
-				"Every Grove blog is protected by Shade — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include Wisp, a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and Fireside mode. Seedling: 100 assists/day. Sapling: 500/day. Oak: 2,000/day. Evergreen: 10,000/day.",
+				"Every Grove blog is protected by [[shade|Shade]] — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include [[wisp|Wisp]], a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and [[fireside|Fireside]] mode. [[seedling|Seedling]]: 100 assists/day. [[sapling|Sapling]]: 500/day. [[oak|Oak]]: 2,000/day. [[evergreen|Evergreen]]: 10,000/day.",
 			detail:
-				"Wisp is a helper, not a writer — it never generates content from scratch. Fireside mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation (Thorn) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.",
+				"[[wisp|Wisp]] is a helper, not a writer — it never generates content from scratch. [[fireside|Fireside]] mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation ([[thorn|Thorn]]) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.",
 		},
 		api: {
 			title: "API Access",
 			content:
-				"Oak and Evergreen tiers include API access for building custom integrations, automated publishing, and programmatic blog management. Oak: REST API with standard rate limits and webhook support. Evergreen: Priority API access with higher rate limits and dedicated endpoints.",
+				"[[oak|Oak]] and [[evergreen|Evergreen]] tiers include API access for building custom integrations, automated publishing, and programmatic blog management. [[oak|Oak]]: REST API with standard rate limits and webhook support. [[evergreen|Evergreen]]: Priority API access with higher rate limits and dedicated endpoints.",
 			detail:
-				"Seedling and Sapling blogs are accessible via RSS feeds and standard web protocols. Full programmatic API access is reserved for Oak+ to ensure platform stability. API documentation will be available at launch.",
+				"[[seedling|Seedling]] and [[sapling|Sapling]] blogs are accessible via RSS feeds and standard web protocols. Full programmatic API access is reserved for [[oak|Oak]]+ to ensure platform stability. API documentation will be available at launch.",
 		},
 	};
 
@@ -121,43 +121,6 @@
 		}
 	}
 </script>
-
-<!-- Snippet overrides for sections with grove terms -->
-{#snippet readingContent()}
-	Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. <GroveTerm term="meadow">Meadow</GroveTerm> (the community feed) requires a free account to browse. Only <GroveTerm term="rooted">Rooted</GroveTerm> <GroveTerm term="evergreen">Evergreens</GroveTerm> can choose to make their blog require login to view.
-{/snippet}
-
-{#snippet freeContent()}
-	Free accounts get full <GroveTerm term="meadow">Meadow</GroveTerm> access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No <GroveTerm term="your-garden">garden</GroveTerm>, no storage. When you're ready to write, upgrade to <GroveTerm term="seedling">Seedling</GroveTerm>.
-{/snippet}
-
-{#snippet themesContent()}
-	<GroveTerm term="seedling">Seedling</GroveTerm>: Choose from 3 hand-curated themes plus a custom accent color. <GroveTerm term="sapling">Sapling</GroveTerm>: All 10 themes plus accent color. <GroveTerm term="oak">Oak</GroveTerm>+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. <GroveTerm term="evergreen">Evergreen</GroveTerm>: Everything Oak gets, plus upload your own custom fonts.
-{/snippet}
-
-{#snippet curiosContent()}
-	Every blog includes Home, Blog, and About in the navigation. <GroveTerm term="curios">Curios</GroveTerm> let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. <GroveTerm term="sapling">Sapling</GroveTerm>: 3 curios. <GroveTerm term="oak">Oak</GroveTerm>: 5 curios. <GroveTerm term="evergreen">Evergreen</GroveTerm>: 8 curios.
-{/snippet}
-
-{#snippet commentsContent()}
-	Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the <GroveTerm term="rooted">Rooted</GroveTerm> get unlimited. Private replies are rate-limited for free accounts to reduce spam.
-{/snippet}
-
-{#snippet centennialContent()}
-	Your grove can outlive you. After 12 cumulative months on <GroveTerm term="sapling">Sapling</GroveTerm> or above, your site earns <GroveTerm term="centennial">Centennial</GroveTerm> status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.
-{/snippet}
-
-{#snippet includedContent()}
-	Markdown blog posts with live preview, image hosting with automatic WebP compression, <GroveTerm term="vines">Vines</GroveTerm> (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.
-{/snippet}
-
-{#snippet aiContent()}
-	Every Grove blog is protected by <GroveTerm term="shade">Shade</GroveTerm> — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include <GroveTerm term="wisp">Wisp</GroveTerm>, a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and <GroveTerm term="fireside">Fireside</GroveTerm> mode. <GroveTerm term="seedling">Seedling</GroveTerm>: 100 assists/day. <GroveTerm term="sapling">Sapling</GroveTerm>: 500/day. <GroveTerm term="oak">Oak</GroveTerm>: 2,000/day. <GroveTerm term="evergreen">Evergreen</GroveTerm>: 10,000/day.
-{/snippet}
-
-{#snippet aiDetail()}
-	<GroveTerm term="wisp">Wisp</GroveTerm> is a helper, not a writer — it never generates content from scratch. <GroveTerm term="fireside">Fireside</GroveTerm> mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation (<GroveTerm term="thorn">Thorn</GroveTerm>) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.
-{/snippet}
 
 <div
 	class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
@@ -199,35 +162,9 @@
 
 				{#if isExpanded}
 					<div class="mt-3 space-y-2">
-						<p>
-							{#if sectionKey === 'reading'}
-								{@render readingContent()}
-							{:else if sectionKey === 'free'}
-								{@render freeContent()}
-							{:else if sectionKey === 'themes'}
-								{@render themesContent()}
-							{:else if sectionKey === 'curios'}
-								{@render curiosContent()}
-							{:else if sectionKey === 'comments'}
-								{@render commentsContent()}
-							{:else if sectionKey === 'centennial'}
-								{@render centennialContent()}
-							{:else if sectionKey === 'included'}
-								{@render includedContent()}
-							{:else if sectionKey === 'ai'}
-								{@render aiContent()}
-							{:else}
-								{section.content}
-							{/if}
-						</p>
+						<p><GroveText content={section.content} /></p>
 						{#if section.detail}
-							<p class="text-xs text-foreground-faint">
-								{#if sectionKey === 'ai'}
-									{@render aiDetail()}
-								{:else}
-									{section.detail}
-								{/if}
-							</p>
+							<p class="text-xs text-foreground-faint"><GroveText content={section.detail} /></p>
 						{/if}
 					</div>
 				{/if}

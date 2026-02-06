@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassCard, toast } from '$lib/ui';
+  import { Button, Badge, GlassCard, toast, GroveTerm } from '$lib/ui';
   import { Plus, AlertCircle, Sparkles, Calendar, Image, Map } from 'lucide-svelte';
   import { api } from '$lib/utils';
 
@@ -98,7 +98,7 @@
   {#if navLimit === 0}
     <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
       <AlertCircle class="w-4 h-4 flex-shrink-0" />
-      <span class="text-sm">Custom navigation pages are available starting with Sapling. <a href="/arbor/billing" class="underline hover:no-underline">Upgrade your plan</a> to add pages to your nav.</span>
+      <span class="text-sm">Custom navigation pages are available starting with <GroveTerm term="sapling">Sapling</GroveTerm>. <a href="/arbor/billing" class="underline hover:no-underline">Upgrade your plan</a> to add pages to your nav.</span>
     </div>
   {:else if atLimit}
     <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
@@ -170,10 +170,10 @@
     <GlassCard variant="default" class="mb-8">
       <div class="flex items-center gap-2 mb-4">
         <Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-        <h2 class="m-0 text-lg font-semibold text-foreground">Active Curios</h2>
+        <h2 class="m-0 text-lg font-semibold text-foreground">Active <GroveTerm term="curios">Curios</GroveTerm></h2>
       </div>
       <p class="text-sm text-foreground-muted mb-4">
-        Curios are special page types that add dynamic functionality to your site.
+        <GroveTerm term="curios">Curios</GroveTerm> are special page types that add dynamic functionality to your site.
       </p>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {#each data.curios as curio (curio.slug)}

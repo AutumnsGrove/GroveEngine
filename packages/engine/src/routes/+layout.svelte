@@ -14,7 +14,7 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/ui';
+	import { Button, GroveTerm } from '$lib/ui';
 	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
 	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
 	import { groveModeStore } from '$lib/ui/stores/grove-mode.svelte';
@@ -123,7 +123,7 @@
 	</main>
 
 	<footer class:admin-page-footer={isAdminPage}>
-		<p>Powered by <a href="https://grove.place/knowledge/help/what-is-lattice" target="_blank" rel="noopener noreferrer">Lattice</a>, from The Grove</p>
+		<p>Powered by <a href="https://grove.place/knowledge/help/what-is-lattice" target="_blank" rel="noopener noreferrer"><GroveTerm term="lattice">Lattice</GroveTerm></a>, from The Grove</p>
 		<div class="footer-actions">
 			{#if data?.user}
 				<span class="logged-in-indicator" title="Logged in">

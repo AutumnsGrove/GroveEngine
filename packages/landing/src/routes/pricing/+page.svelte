@@ -8,6 +8,7 @@
 
 	import { Header, Footer } from "@autumnsgrove/groveengine/ui/chrome";
 	import { PricingGraft } from "@autumnsgrove/groveengine/grafts/pricing";
+	import { GroveTerm } from "@autumnsgrove/groveengine/ui";
 	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();
@@ -54,7 +55,7 @@
 				{#snippet footer()}
 					<div class="text-center space-y-4">
 						<p class="text-foreground-subtle font-sans text-sm">
-							We're launching with Seedling. More plans are on the way.
+							We're launching with <GroveTerm term="seedling">Seedling</GroveTerm>. More plans are on the way.
 						</p>
 						<p class="font-sans text-sm">
 							<a

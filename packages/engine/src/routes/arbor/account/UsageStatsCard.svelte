@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard } from "$lib/ui";
+  import { GlassCard, GroveSwap } from "$lib/ui";
   import { AlertCircle, HardDrive, FileText, Calendar } from "lucide-svelte";
   import { formatStorage, formatLimit } from "$lib/config/tiers";
   import type { UsageData } from "./types";
@@ -60,7 +60,7 @@
       <div class="usage-item">
         <FileText class="usage-icon" aria-hidden="true" />
         <div class="usage-info">
-          <span class="usage-label" id="posts-label">Blooms</span>
+          <span class="usage-label" id="posts-label"><GroveSwap term="blooms">Blooms</GroveSwap></span>
           <span class="usage-value">
             {usage.postCount} / {usage.postLimit ? formatLimit(usage.postLimit) : "Unlimited"}
           </span>

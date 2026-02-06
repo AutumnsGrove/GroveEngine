@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import { MessageCircle, Clock, CheckCircle, Search, Filter, ArrowRight } from 'lucide-svelte';
 	import type { PageData } from './$types';
 
@@ -58,8 +58,8 @@
 
 <!-- Header -->
 <div class="mb-8">
-	<h1 class="text-2xl font-serif text-foreground">The Porch</h1>
-	<p class="text-foreground-muted font-sans mt-1">Support conversations with Wanderers</p>
+	<h1 class="text-2xl font-serif text-foreground">The <GroveTerm term="porch">Porch</GroveTerm></h1>
+	<p class="text-foreground-muted font-sans mt-1">Support conversations with <GroveTerm term="wanderer">Wanderers</GroveTerm></p>
 </div>
 
 	<!-- Stats -->

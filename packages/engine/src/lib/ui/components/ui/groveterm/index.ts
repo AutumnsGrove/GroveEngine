@@ -12,6 +12,9 @@
  */
 
 export { default as GroveTerm } from "./GroveTerm.svelte";
+export { default as GroveSwap } from "./GroveSwap.svelte";
+export { default as GroveText } from "./GroveText.svelte";
+export { default as GroveSwapText } from "./GroveSwapText.svelte";
 export { default as GroveTermPopup } from "./GroveTermPopup.svelte";
 export { default as GroveIntro } from "./GroveIntro.svelte";
 export * from "./types";

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Mail, ExternalLink, Heart, Compass } from 'lucide-svelte';
@@ -33,7 +34,7 @@
 				aria-label="Learn about the Wayfinder role"
 			>
 				<Compass class="w-3.5 h-3.5" />
-				<span>Wayfinder</span>
+				<span><GroveTerm term="wayfinder">Wayfinder</GroveTerm></span>
 			</a>
 		</div>
 

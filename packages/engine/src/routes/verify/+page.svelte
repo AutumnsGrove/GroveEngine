@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	import TurnstileWidget from '$lib/ui/components/forms/TurnstileWidget.svelte';
+	import { GroveTerm } from '$lib/ui';
 
 	interface Props {
 		data: {
@@ -74,7 +75,7 @@
 
 		{#if status === 'waiting' || status === 'verifying'}
 			<p class="subtitle">
-				This site uses <strong>Shade</strong> to protect the author's writing from AI scrapers
+				This site uses <strong><GroveTerm term="shade">Shade</GroveTerm></strong> to protect the author's writing from AI scrapers
 				and automated harvesting. We're just making sure you're a real person
 				here to read, not a bot here to collect.
 			</p>

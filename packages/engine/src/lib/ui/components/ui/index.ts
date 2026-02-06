@@ -49,6 +49,9 @@ export * from "./waystone/types";
 
 // GroveTerm - interactive terminology with popup definitions
 export { default as GroveTerm } from "./groveterm/GroveTerm.svelte";
+export { default as GroveSwap } from "./groveterm/GroveSwap.svelte";
+export { default as GroveText } from "./groveterm/GroveText.svelte";
+export { default as GroveSwapText } from "./groveterm/GroveSwapText.svelte";
 export { default as GroveTermPopup } from "./groveterm/GroveTermPopup.svelte";
 export * from "./groveterm/types";
 

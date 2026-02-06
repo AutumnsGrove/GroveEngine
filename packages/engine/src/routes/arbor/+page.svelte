@@ -177,11 +177,11 @@
       </a>
       <a href="/arbor/analytics" class="action-card glass-action">
         <BarChart3 class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">View Rings</span>
+        <span class="font-medium text-center text-sm">View <GroveTerm term="rings">Rings</GroveTerm></span>
       </a>
       <a href="/arbor/curios" class="action-card glass-action">
         <Calendar class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">Curios</span>
+        <span class="font-medium text-center text-sm"><GroveTerm term="curios">Curios</GroveTerm></span>
       </a>
       <a href="/arbor/settings" class="action-card glass-action">
         <Settings class="w-7 h-7 text-accent-muted" />
