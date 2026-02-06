@@ -55,6 +55,8 @@
 		variant?: "default" | "frosted" | "minimal";
 		/** Aspect ratio for the card container (e.g., "4/3", "16/9"). Use "none" for height-driven layouts. */
 		aspectRatio?: string;
+		/** Overlay navigation on top of slides instead of below */
+		overlayNav?: boolean;
 		/** Custom class name */
 		class?: string;
 		/** Custom content renderer - receives index */
@@ -70,6 +72,7 @@
 		autoplayInterval = 5000,
 		variant = "default",
 		aspectRatio = "4/3",
+		overlayNav = false,
 		class: className,
 		item,
 		...restProps
@@ -376,8 +379,69 @@
 		{/each}
 	</div>
 
-	<!-- Navigation -->
-	{#if totalItems > 1}
+	<!-- Overlay navigation - positioned on top of slides -->
+	{#if overlayNav && totalItems > 1}
+		{#if showArrows}
+			<button
+				type="button"
+				class={cn(
+					"absolute left-3 top-1/2 -translate-y-1/2 z-20",
+					"w-11 h-11 rounded-full flex items-center justify-center",
+					"bg-black/15 hover:bg-black/30 active:bg-black/40",
+					"backdrop-blur-sm text-white/90 hover:text-white",
+					"shadow-sm transition-all duration-200"
+				)}
+				onclick={goPrev}
+				aria-label="Previous slide"
+			>
+				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<polyline points="15 18 9 12 15 6"></polyline>
+				</svg>
+			</button>
+			<button
+				type="button"
+				class={cn(
+					"absolute right-3 top-1/2 -translate-y-1/2 z-20",
+					"w-11 h-11 rounded-full flex items-center justify-center",
+					"bg-black/15 hover:bg-black/30 active:bg-black/40",
+					"backdrop-blur-sm text-white/90 hover:text-white",
+					"shadow-sm transition-all duration-200"
+				)}
+				onclick={goNext}
+				aria-label="Next slide"
+			>
+				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<polyline points="9 18 15 12 9 6"></polyline>
+				</svg>
+			</button>
+		{/if}
+
+		{#if showDots}
+			<div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm">
+				{#each { length: totalItems } as _, index (index)}
+					<button
+						type="button"
+						class={cn(
+							"h-2 rounded-full transition-all duration-300",
+							index === currentIndex
+								? "w-5 bg-white"
+								: "w-2 bg-white/50 hover:bg-white/70"
+						)}
+						onclick={() => goTo(index)}
+						aria-label={`Go to slide ${index + 1}`}
+						aria-current={index === currentIndex ? "true" : undefined}
+					></button>
+				{/each}
+			</div>
+		{/if}
+
+		<div class="sr-only" aria-live="polite" aria-atomic="true">
+			Slide {currentIndex + 1} of {totalItems}
+		</div>
+	{/if}
+
+	<!-- Standard navigation - below slides -->
+	{#if !overlayNav && totalItems > 1}
 		<div class="flex items-center justify-between mt-4 px-2">
 			<!-- Previous arrow -->
 			{#if showArrows}

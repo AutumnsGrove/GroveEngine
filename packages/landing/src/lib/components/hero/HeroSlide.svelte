@@ -52,7 +52,7 @@
 
 	<!-- Layer 3: Text overlay -->
 	<div class="relative z-10 w-full h-full flex flex-col justify-end md:justify-center
-		p-5 pb-6 md:p-8 lg:p-10 md:max-w-[55%]">
+		p-5 pb-14 md:p-8 lg:p-10 md:max-w-[55%]">
 		<Lexend as="div" class="flex flex-col gap-2.5 md:gap-3">
 			{@render text()}
 		</Lexend>

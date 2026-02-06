@@ -210,6 +210,7 @@
 			autoplay={false}
 			variant="minimal"
 			aspectRatio="none"
+			overlayNav={true}
 			class="w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[420px]"
 		>
 			{#snippet item(index: number)}
