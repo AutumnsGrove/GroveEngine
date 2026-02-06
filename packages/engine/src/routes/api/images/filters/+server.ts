@@ -96,12 +96,15 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 
   // Source 2: Fetch tags from D1
+  // SECURITY: Filter by tenant_id to prevent cross-tenant tag leakage (S2-F1)
   let tags: TagRecord[] = [];
   try {
     if (platform?.env?.DB) {
       const tagResults = await platform.env.DB.prepare(
-        "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC",
-      ).all();
+        "SELECT slug, name, color FROM gallery_tags WHERE tenant_id = ? ORDER BY name ASC",
+      )
+        .bind(locals.tenantId)
+        .all();
       tags = (tagResults.results as unknown as TagRecord[]) || [];
     }
   } catch (err) {
@@ -110,12 +113,15 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 
   // Source 3: Fetch collections from D1
+  // SECURITY: Filter by tenant_id to prevent cross-tenant collection leakage (S2-F1)
   let collections: CollectionRecord[] = [];
   try {
     if (platform?.env?.DB) {
       const collectionResults = await platform.env.DB.prepare(
-        "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC",
-      ).all();
+        "SELECT slug, name, description FROM gallery_collections WHERE tenant_id = ? ORDER BY display_order ASC, name ASC",
+      )
+        .bind(locals.tenantId)
+        .all();
       collections =
         (collectionResults.results as unknown as CollectionRecord[]) || [];
     }

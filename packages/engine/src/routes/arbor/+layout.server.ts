@@ -32,8 +32,10 @@ export const load: LayoutServerLoad = async ({
 }) => {
   // Get parent layout data (includes navPages, siteSettings, context)
   const parentData = await parent();
-  // Special case: Example tenant admin is publicly accessible for demos
-  // This allows visitors to explore the admin panel without signing in
+  // SECURITY: Example tenant admin is publicly accessible for demos (S2-F2 documented risk)
+  // This allows visitors to explore the admin panel without signing in.
+  // Risk accepted: demo data only, queries still scoped to example tenant.
+  // TODO: Consider making example tenant read-only or gating behind feature flag
   const isExampleTenant = locals.tenantId === "example-tenant-001";
 
   if (!locals.user && !isExampleTenant) {

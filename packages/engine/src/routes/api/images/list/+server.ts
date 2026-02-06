@@ -130,12 +130,13 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
             FROM gallery_images gi
             LEFT JOIN gallery_image_tags git ON gi.id = git.image_id
             LEFT JOIN gallery_tags gt ON git.tag_id = gt.id
-            WHERE gi.r2_key IN (${placeholders})
+            WHERE gi.r2_key IN (${placeholders}) AND gi.tenant_id = ?
             GROUP BY gi.r2_key
           `;
 
+          // SECURITY: Include tenant_id in bind params for defense-in-depth (S2-F3)
           const metadata = await platform.env.DB.prepare(metadataQuery)
-            .bind(...r2Keys)
+            .bind(...r2Keys, tenantId)
             .all();
 
           // Merge metadata into images

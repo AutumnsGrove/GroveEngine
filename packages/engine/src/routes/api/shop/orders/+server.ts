@@ -176,10 +176,13 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     params.push(Math.floor(Date.now() / 1000));
     params.push(orderId);
 
+    // SECURITY: Include tenant_id in WHERE for defense-in-depth (S2-F4)
+    // Ownership is verified above via getVerifiedTenantId(), but database-level
+    // scoping prevents TOCTOU race conditions
     await platform.env.DB.prepare(
-      `UPDATE orders SET ${updates.join(", ")} WHERE id = ?`,
+      `UPDATE orders SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`,
     )
-      .bind(...params)
+      .bind(...params, orderTenantId)
       .run();
 
     // Fetch updated order
