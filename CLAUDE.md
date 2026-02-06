@@ -42,7 +42,7 @@ Once installed, `gf` and `gw` are available directly — no `uv run` prefix need
 
 Run `gf --help` for full command list.
 
-**Web/remote note:** If `fd` is not installed, file-type searches (`gf svelte`, `gf ts`, etc.) won't work. All other commands work with just `rg` + `git`.
+All `gf` commands work in any environment — when `fd` is not installed, file-type searches automatically fall back to `rg --files`.
 
 ### Infrastructure CLI (gw)
 
