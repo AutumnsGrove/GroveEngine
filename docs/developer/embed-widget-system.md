@@ -21,10 +21,16 @@ The Wanderer just pastes a URL. The system figures out the rest.
 Wanderer pastes URL in GutterManager
          |
          v
-Client: POST /api/oembed?url=...
+Client: GET /api/oembed?url=...
          |
          v
-Server: Match URL against provider allowlist
+Server: Rate limit check (20/60s per IP)
+         |
+         v
+Server: Normalize URL (lowercase, strip tracking params)
+         |
+         v
+Server: Match against provider allowlist
          |
     ┌────┴────┐
     |         |
@@ -33,26 +39,37 @@ Server: Match URL against provider allowlist
     v         v
  Fetch     Fetch OG
  oEmbed    metadata
- from      (og-fetcher.ts)
- provider
+ from      (og-fetcher.ts
+ provider   + SSRF check)
+    |         |
+    v         |
+ Validate    |
+ response    |
+ (type,      |
+  size,      |
+  shape)     |
     |         |
     v         v
  Return    Return
  embed     preview
  data      data
+ + CSP     + CSP
+ headers   headers
          |
          v
 Client: Render in gutter
-  - EmbedWidget (iframe or LinkPreview)
+  - EmbedWidget (sandboxed iframe or LinkPreview)
+  - referrerpolicy="no-referrer"
+  - DOMPurify sanitization for srcdoc
 ```
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/lib/server/services/oembed-providers.ts` | Provider allowlist and URL matching |
-| `src/routes/api/oembed/+server.ts` | API endpoint that resolves URLs |
-| `src/lib/ui/components/content/EmbedWidget.svelte` | Renders embeds or OG previews |
+| `src/lib/server/services/oembed-providers.ts` | Provider allowlist, URL normalization, response validation, CSP generation |
+| `src/routes/api/oembed/+server.ts` | API endpoint with rate limiting, content-type/size checks, CSP headers |
+| `src/lib/ui/components/content/EmbedWidget.svelte` | Renders sandboxed embeds (referrerpolicy, DOMPurify) or OG previews |
 | `src/lib/components/custom/GutterItem.svelte` | Gutter item renderer (includes embed type) |
 | `src/lib/components/admin/GutterManager.svelte` | Admin UI for adding gutter items |
 | `src/lib/utils/markdown.ts` | GutterItem type definitions |
@@ -106,7 +123,9 @@ Add an entry to the `EMBED_PROVIDERS` array in `oembed-providers.ts`:
 }
 ```
 
-Then add tests in `oembed-providers.test.ts` for the new URL patterns and embed URL extraction.
+Then:
+1. Add the provider's embed domain(s) to the `generateFrameSrcCSP()` switch statement in the same file
+2. Add tests in `oembed-providers.test.ts` for the new URL patterns and embed URL extraction
 
 ### Render Strategies
 
@@ -120,7 +139,7 @@ Then add tests in `oembed-providers.test.ts` for the new URL patterns and embed 
 
 ## Security Model
 
-Nine layers, defense in depth:
+Twelve layers, defense in depth:
 
 1. **Allowlist (default-deny)** — Only registered providers get interactive embeds. Everything else becomes a safe OG card.
 2. **URL normalization** — URLs are lowercased, tracking params stripped, and fragments removed before pattern matching. Prevents case-based bypasses (e.g., `YOUTUBE.COM`).
