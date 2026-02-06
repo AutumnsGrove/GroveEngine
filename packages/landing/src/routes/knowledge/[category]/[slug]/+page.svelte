@@ -4,7 +4,6 @@
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import { Trace } from '@autumnsgrove/groveengine/ui/feedback';
   import { GroveTerm } from '@autumnsgrove/groveengine/ui';
-  import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
   import SEO from '$lib/components/SEO.svelte';
   import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
   import RelatedArticles from '$lib/components/RelatedArticles.svelte';
@@ -26,9 +25,9 @@
   // Grove term banner data (passed from server for "what-is-*" articles)
   let groveTermEntry = $derived(data.groveTermEntry);
 
-  // Show banner when: Grove Mode is OFF and a matching term with standardTerm exists
+  // Show banner when a matching term with standardTerm exists (and isn't always-Grove)
   const showGroveBanner = $derived(
-    !groveModeStore.current && groveTermEntry && groveTermEntry.standardTerm && !groveTermEntry.alwaysGrove
+    groveTermEntry && groveTermEntry.standardTerm && !groveTermEntry.alwaysGrove
   );
 
   let categoryTitle = $derived(
