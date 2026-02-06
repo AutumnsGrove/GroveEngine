@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-02-05",
+  "lastUpdated": "2026-02-06",
   "docs": {
-    "total": 303,
+    "total": 304,
     "breakdown": {
       "specs": 63,
       "help": 90,
@@ -10,7 +10,8 @@
       "patterns": 9,
       "philosophy": 69,
       "design": 9,
-      "exhibit": 37
+      "exhibit": 37,
+      "research": 1
     },
     "paths": {
       "specs": "docs/specs",
@@ -20,7 +21,8 @@
       "patterns": "docs/patterns",
       "philosophy": "docs/philosophy",
       "design": "docs/design-system",
-      "exhibit": "docs/museum"
+      "exhibit": "docs/museum",
+      "research": "docs/research"
     }
   },
   "freshnessThreshold": {
