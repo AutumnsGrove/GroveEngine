@@ -11,6 +11,7 @@
 		HeroCentennial,
 		HeroCommunity
 	} from '$lib/components/hero';
+	import { SeasonSwitcher, EditorDemo, BlogCardsDemo } from '$lib/components/demos';
 	import { page } from '$app/state';
 
 	// Lucide icons
@@ -264,6 +265,33 @@
 				</a>
 			{/each}
 		</div>
+	</section>
+
+	<!-- Live Demo: Flow Editor -->
+	<section class="w-full max-w-4xl mb-16" aria-labelledby="editor-demo-heading">
+		<h2 id="editor-demo-heading" class="text-lg font-serif text-foreground-muted text-center mb-3">Try the Editor</h2>
+		<p class="text-sm font-sans text-foreground-subtle text-center max-w-lg mx-auto mb-8">
+			This is Flow — Grove's writing experience. Type on the left, see it rendered on the right. Switch modes to find your rhythm.
+		</p>
+		<EditorDemo />
+	</section>
+
+	<!-- Live Demo: Blog Cards -->
+	<section class="w-full max-w-4xl mb-16" aria-labelledby="blog-demo-heading">
+		<h2 id="blog-demo-heading" class="text-lg font-serif text-foreground-muted text-center mb-3">What Your Readers See</h2>
+		<p class="text-sm font-sans text-foreground-subtle text-center max-w-lg mx-auto mb-8">
+			Clean, focused, distraction-free. Every grove is a quiet place to read.
+		</p>
+		<BlogCardsDemo />
+	</section>
+
+	<!-- Live Demo: Season Switcher -->
+	<section class="w-full max-w-4xl mb-16" aria-labelledby="seasons-demo-heading">
+		<h2 id="seasons-demo-heading" class="text-lg font-serif text-foreground-muted text-center mb-3">Every Season Tells a Story</h2>
+		<p class="text-sm font-sans text-foreground-subtle text-center max-w-lg mx-auto mb-8">
+			Grove changes with the seasons. Your blog stays alive all year.
+		</p>
+		<SeasonSwitcher />
 	</section>
 
 	<!-- Comparison CTA -->
