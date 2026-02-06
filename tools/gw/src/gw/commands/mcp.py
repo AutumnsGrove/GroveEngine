@@ -108,6 +108,11 @@ def mcp_tools(ctx: click.Context) -> None:
         {"name": "grove_test_run", "category": "Dev", "description": "Run package tests", "safety": "WRITE"},
         {"name": "grove_build", "category": "Dev", "description": "Build package", "safety": "WRITE"},
         {"name": "grove_ci", "category": "Dev", "description": "Run CI pipeline", "safety": "WRITE"},
+
+        # Infrastructure Audit
+        {"name": "grove_config_validate", "category": "Audit", "description": "Validate wrangler.toml configs", "safety": "READ"},
+        {"name": "grove_env_audit", "category": "Audit", "description": "Audit env vars across configs", "safety": "READ"},
+        {"name": "grove_monorepo_size", "category": "Audit", "description": "Package size report", "safety": "READ"},
     ]
 
     if output_json:
