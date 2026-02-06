@@ -234,23 +234,54 @@ function resolveNavLabel(item: NavItem, groveMode: boolean, manifest: GroveTermM
 
 This keeps the nav config as a single source of truth — the manifest drives everything.
 
-### 3. Page-Level Introductions
+### 3. Page-Level Introductions — `<GroveIntro>` Component
 
-On pages with Grove-named features, add a contextual introduction when Grove Mode is OFF:
+Rather than implementing introductions ad-hoc per page (which leads to inconsistency and forgotten pages), create a standardized component:
 
+```svelte
+<!-- Usage on any Grove-named page -->
+<GroveIntro term="porch" />
+
+<!-- Renders (when Grove Mode is OFF):
+     Support — we call it the Porch
+     with "Porch" as an interactive GroveTerm -->
+
+<!-- Renders nothing when Grove Mode is ON -->
 ```
-Support — we call it the Porch
-```
 
-Pattern:
-- Shown below the page title or as a subtitle
-- Only visible when Grove Mode is OFF
+**Component behavior:**
+- Reads `groveModeStore` — hidden entirely when Grove Mode is ON
+- Pulls `standardTerm` and `term` from the manifest via the slug
+- Renders: `{standardTerm} — we call it the {GroveTerm}`
 - Uses `<GroveTerm>` inline so users can tap to learn more
+- Shown below the page title or as a subtitle
 - Tasteful, brief — one line, not a paragraph
 
-When Grove Mode is ON, these introductions hide and the page just speaks naturally in Grove terms.
+**Introduction registry in the manifest:**
 
-This is bespoke per page — each page knows its own story. Not automated.
+Add a `hasIntroPage` field to `GroveTermEntry` to track which terms should have page introductions:
+
+```typescript
+/** If true, a page exists for this feature and should show a GroveIntro */
+hasIntroPage?: boolean;
+```
+
+This serves as both a checklist and an audit tool — any term with `hasIntroPage: true` that doesn't have a `<GroveIntro>` on its page is a gap to fill.
+
+**Pages that need `<GroveIntro>`:**
+
+| Route | Term Slug | Introduction |
+|-------|----------|-------------|
+| `/porch` | porch | "Support — we call it the Porch" |
+| `/garden` | your-garden | "Blog — we call it the Garden" |
+| `/arbor` | arbor | "Dashboard — we call it the Arbor" |
+| `/forest` | forests | "Communities — we call it the Forest" |
+| `/vineyard` | vineyard | "Showcase — we call it the Vineyard" |
+| Status page | clearing | "Status — we call it the Clearing" |
+| `/meadow` | meadow | "Feed — we call it the Meadow" |
+| Arbor sub-pages | varies | e.g., "Analytics — we call it Rings" |
+
+**Audit step (Phase 3):** Run a check that every manifest entry with `hasIntroPage: true` and a `standardTerm` has a corresponding `<GroveIntro>` component on its page. This can be a simple grep during review or a lint rule later.
 
 ---
 
@@ -312,20 +343,18 @@ For logged-in users, also available in account settings:
 
 ### Phase 3 — Page Introductions
 
-**Files touched:** Individual page components for Grove-named features
+**Files touched:**
+- `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` — new component
+- `packages/engine/src/lib/ui/components/ui/groveterm/index.ts` — export GroveIntro
+- Individual page components for Grove-named features
+- `grove-term-manifest.json` — add `hasIntroPage` flags
 
 **Tasks:**
-1. Add "we call it X" introductions to key pages:
-   - `/porch` — "Support — we call it the Porch"
-   - `/garden` — "Blog — we call it the Garden"
-   - `/arbor` — "Dashboard — we call it the Arbor"
-   - `/forest` — "Communities — we call it the Forest"
-   - `/vineyard` — "Showcase — we call it the Vineyard"
-   - `/clearing` (status page) — "Status — we call it the Clearing"
-   - And others as appropriate
-2. Each introduction uses `<GroveTerm>` inline for interactivity
-3. Introductions hide when Grove Mode is ON
-4. Review and add standard-term redirects for Grove-named URLs that lack them
+1. Create `<GroveIntro>` component (standardized "we call it X" pattern)
+2. Add `hasIntroPage` field to manifest entries that have corresponding pages
+3. Place `<GroveIntro term="...">` on all pages listed in the introduction registry
+4. Audit: verify every `hasIntroPage: true` entry has a `<GroveIntro>` on its page
+5. Review and add standard-term redirects for Grove-named URLs that lack them
 
 ### Phase 4 — Authenticated Persistence
 
@@ -367,3 +396,4 @@ For logged-in users, also available in account settings:
 | `docs/audits/grove-lexicon-audit.md` | Full term usage audit (400+ locations) |
 | `docs/philosophy/grove-naming.md` | Naming philosophy source |
 | `scripts/generate/grove-term-manifest.ts` | Manifest generator |
+| `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` | Standardized page introduction component (new) |
