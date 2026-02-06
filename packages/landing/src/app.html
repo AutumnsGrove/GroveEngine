@@ -14,10 +14,11 @@
         document.documentElement.classList.add("dark");
       }
     </script>
-    <!-- Inline critical colors to prevent white flash before CSS loads -->
+    <!-- Inline critical colors to prevent white flash before CSS loads.
+         These match the Grove design system values in app.css exactly. -->
     <style>
-      html { background-color: #fefdfb; color: #3d2914; }
-      html.dark { background-color: #171a1e; color: #f5f2ea; }
+      html, body { margin: 0; background-color: #fefdfb; color: #3d2914; }
+      html.dark, html.dark body { background-color: #171a1e; color: #f5f2ea; color-scheme: dark; }
     </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
