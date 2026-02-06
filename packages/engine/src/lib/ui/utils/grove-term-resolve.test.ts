@@ -48,7 +48,7 @@ describe("resolveTermString", () => {
     it("should return grove for various term pairs", () => {
       groveModeStore.enable();
       expect(resolveTermString("Garden", "Blog")).toBe("Garden");
-      expect(resolveTermString("Arbor", "Dashboard")).toBe("Dashboard");
+      expect(resolveTermString("Arbor", "Dashboard")).toBe("Arbor");
       expect(resolveTermString("Wanderer", "Visitor")).toBe("Wanderer");
     });
   });
