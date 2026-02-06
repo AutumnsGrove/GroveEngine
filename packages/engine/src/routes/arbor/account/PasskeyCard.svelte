@@ -11,6 +11,7 @@
     deletingId: string | null;
     onRegister: () => void;
     onDelete: (id: string) => void;
+    loading?: boolean;
   }
 
   let {
@@ -21,6 +22,7 @@
     deletingId,
     onRegister,
     onDelete,
+    loading = false,
   }: Props = $props();
 
   /**
@@ -66,7 +68,13 @@
     </h2>
   </div>
 
-  {#if passkeyError}
+  {#if loading}
+    <!-- Loading State (deferred data streaming in) -->
+    <div class="loading-state">
+      <Spinner size="sm" />
+      <p>Loading passkeys...</p>
+    </div>
+  {:else if passkeyError}
     <!-- Error State -->
     <div class="error-state" role="alert">
       <AlertCircle class="error-icon" aria-hidden="true" />
@@ -193,6 +201,21 @@
     font-size: 0.9rem;
     font-weight: normal;
     color: var(--color-text-muted);
+  }
+
+  /* Loading State */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .loading-state p {
+    margin: 0;
   }
 
   /* Error State */

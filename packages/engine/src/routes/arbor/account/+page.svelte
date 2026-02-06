@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GlassCard, GlassConfirmDialog } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api } from "$lib/utils";
+  import { api, getCSRFToken } from "$lib/utils";
   import { invalidateAll } from "$app/navigation";
   import { CONTACT } from "$lib/config/contact";
 
@@ -135,11 +135,19 @@
   async function handleExportData(): Promise<void> {
     exportingData = true;
     try {
+      const csrfToken = getCSRFToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (csrfToken) {
+        headers["X-CSRF-Token"] = csrfToken;
+        headers["csrf-token"] = csrfToken;
+      }
+
       const response = await fetch("/api/export", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
+        credentials: "include",
         body: JSON.stringify({ type: exportType }),
       });
 
@@ -239,10 +247,11 @@
       passkeys={[]}
       passkeyError={false}
       {supportsPasskeys}
-      registering={true}
+      registering={false}
       deletingId={null}
       onRegister={handleRegisterPasskey}
       onDelete={handleDeletePasskey}
+      loading={true}
     />
   {:then passkeyResult}
     <PasskeyCard

@@ -11,6 +11,7 @@ import {
   isPlatformAuthenticatorAvailable,
   isWebAuthnSupported,
 } from "$lib/utils/webauthn";
+import { getCSRFToken } from "$lib/utils/api";
 
 /**
  * Check if the current device supports passkeys.
@@ -99,9 +100,17 @@ export async function registerPasskey(
 
   try {
     // Step 1: Get registration options from server
+    const csrfToken = getCSRFToken();
+    const csrfHeaders: Record<string, string> = {};
+    if (csrfToken) {
+      csrfHeaders["X-CSRF-Token"] = csrfToken;
+      csrfHeaders["csrf-token"] = csrfToken;
+    }
+
     const optionsResponse = await fetch("/api/passkey/register-options", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...csrfHeaders },
+      credentials: "include",
     });
 
     if (!optionsResponse.ok) {
@@ -180,7 +189,8 @@ export async function registerPasskey(
     // Step 5: Verify credential with server
     const verifyResponse = await fetch("/api/passkey/verify-registration", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...csrfHeaders },
+      credentials: "include",
       body: JSON.stringify({ credential: credentialData, name: passkeyName }),
     });
 

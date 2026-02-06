@@ -1,6 +1,7 @@
 <script lang="ts">
   import { GlassCard } from "$lib/ui";
   import { CreditCard, ExternalLink, Loader2, Gift } from "lucide-svelte";
+  import { api } from "$lib/utils";
   import type { BillingData } from "./types";
 
   interface Props {
@@ -25,32 +26,22 @@
     compedMessage = null;
 
     try {
-      const response = await fetch("/api/billing", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = (await response.json()) as {
+      const data = await api.put<{
         isComped?: boolean;
         message?: string;
         portalUrl?: string;
-      };
+        success?: boolean;
+      }>("/api/billing", {});
 
       // Handle comped accounts gracefully
-      if (data.isComped) {
+      if (data?.isComped) {
         isComped = true;
         compedMessage = data.message || "Your account is complimentary.";
         isLoading = false;
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to open billing portal");
-      }
-
-      if (data.portalUrl) {
+      if (data?.portalUrl) {
         window.location.href = data.portalUrl;
       } else {
         throw new Error("No portal URL returned");
