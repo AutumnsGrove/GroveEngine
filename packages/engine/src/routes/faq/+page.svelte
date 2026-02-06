@@ -67,11 +67,11 @@
 	/>
 </svelte:head>
 
-<div class="faq-page">
+<div class="max-w-3xl mx-auto px-3 py-4 md:px-4 md:py-8">
 	<!-- Hero header -->
 	<Glass variant="tint" as="header" class="rounded-2xl p-8 md:p-12 mb-10 text-center">
 		<div class="flex items-center justify-center gap-3 mb-4">
-			<MessageCircleQuestion class="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+			<MessageCircleQuestion aria-hidden="true" class="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
 			<h1 class="text-3xl md:text-4xl font-bold text-foreground">
 				Frequently Asked Questions
 			</h1>
@@ -88,7 +88,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<Sprout class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<Sprout aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Getting Started</h2>
@@ -119,7 +119,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<PenLine class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<PenLine aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Your <GroveSwap term="your-garden">Blog</GroveSwap></h2>
@@ -150,7 +150,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<Users class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<Users aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Community</h2>
@@ -179,7 +179,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<ShieldCheck class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<ShieldCheck aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Privacy & Security</h2>
@@ -208,7 +208,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<CreditCard class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<CreditCard aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Billing & Plans</h2>
@@ -237,7 +237,7 @@
 			{#snippet header()}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-						<LifeBuoy class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<LifeBuoy aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Troubleshooting</h2>
@@ -278,17 +278,3 @@
 		</div>
 	</Glass>
 </div>
-
-<style>
-	.faq-page {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 2rem 1rem;
-	}
-
-	@media (max-width: 768px) {
-		.faq-page {
-			padding: 1rem 0.75rem;
-		}
-	}
-</style>
