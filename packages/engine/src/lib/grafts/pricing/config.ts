@@ -131,6 +131,8 @@ export function transformTier(
     limits: formatLimits(config),
     features: config.features,
     featureStrings: config.display.featureStrings,
+    standardName: config.display.standardName,
+    standardFeatureStrings: config.display.standardFeatureStrings,
     supportLevel: config.support.displayString,
     highlight: options.highlight,
     badge: options.badge,

@@ -10,6 +10,9 @@
 		DIVIDER_HORIZONTAL
 	} from './defaults';
 	import { GroveDivider } from '../nature';
+	import { groveModeStore } from '../../stores/grove-mode.svelte';
+	import { resolveNavLabel } from './types';
+	import defaultManifestData from '$lib/data/grove-term-manifest.json';
 
 	interface Props {
 		open: boolean;
@@ -136,6 +139,11 @@
 	});
 
 	const items = $derived(navItems || DEFAULT_MOBILE_NAV_ITEMS);
+
+	// Resolve nav labels based on Grove Mode
+	function labelFor(item) {
+		return resolveNavLabel(item, groveModeStore.current, defaultManifestData);
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -269,7 +277,7 @@
 				{#if Icon}
 					<Icon class="w-5 h-5 flex-shrink-0" />
 				{/if}
-				<span class="text-sm font-medium">{item.label}</span>
+				<span class="text-sm font-medium">{labelFor(item)}</span>
 				{#if item.external}
 					<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
 				{/if}
@@ -302,7 +310,7 @@
 						{#if Icon}
 							<Icon class="w-5 h-5 flex-shrink-0" />
 						{/if}
-						<span class="text-sm font-medium">{link.label}</span>
+						<span class="text-sm font-medium">{labelFor(link)}</span>
 						{#if link.external}
 							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
 						{/if}
@@ -337,7 +345,7 @@
 						{#if Icon}
 							<Icon class="w-5 h-5 flex-shrink-0" />
 						{/if}
-						<span class="text-sm font-medium">{link.label}</span>
+						<span class="text-sm font-medium">{labelFor(link)}</span>
 						{#if link.external}
 							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
 						{/if}

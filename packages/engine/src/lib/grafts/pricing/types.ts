@@ -69,6 +69,12 @@ export interface PricingTier {
   /** Feature strings for bullet lists */
   featureStrings: string[];
 
+  /** Standard (non-grove) name shown when Grove Mode is off */
+  standardName?: string;
+
+  /** Standard feature strings shown when Grove Mode is off */
+  standardFeatureStrings?: string[];
+
   /** Support level display string */
   supportLevel: string;
 

@@ -50,6 +50,7 @@
 		howLink?: string;
 		whatIsLink?: string;
 		subComponents?: SubComponent[];
+		termSlug?: string;
 	}
 
 	interface Category {
@@ -66,6 +67,7 @@
 			tools: [
 				{
 					name: 'Lattice',
+					termSlug: 'lattice',
 					tagline: 'Core Framework',
 					description: 'The engine that powers the Grove ecosystem. Multi-tenant architecture, Cloudflare-first infrastructure, and shared components that every Grove property builds on. The lattice that supports all growth.',
 					status: 'live',
@@ -78,6 +80,7 @@
 				},
 				{
 					name: 'Heartwood',
+					termSlug: 'heartwood',
 					tagline: 'Centralized Authentication',
 					description: 'One identity, verified and protected, that works across every Grove property. Passkeys are the primary method—secure, passwordless, and built into your device. Google OAuth available as a fallback when needed. The authentic core of the ecosystem.',
 					status: 'live',
@@ -96,6 +99,7 @@
 				},
 				{
 					name: 'Passage',
+					termSlug: 'passage',
 					tagline: 'The Hidden Way Through',
 					description: 'A passage is a way through—a corridor connecting spaces that seem separate. Passage is the invisible layer that makes the impossible possible: one domain, infinite destinations. Type any *.grove.place address and Passage carries you through—navigating the river of subdomains to your destination like a kayak finding its channel.',
 					status: 'live',
@@ -107,6 +111,7 @@
 				},
 				{
 					name: 'Your Grove',
+					termSlug: 'your-grove',
 					tagline: 'Your Personal Space',
 					description: 'A grove is a small group of trees growing together—intimate, sheltered, yours. The platform is called Grove. Your space within it is your grove. When someone visits autumn.grove.place, they\'re visiting Autumn\'s grove. The possessive makes it personal. The word makes it home.',
 					status: 'live',
@@ -118,6 +123,7 @@
 				},
 				{
 					name: 'Garden',
+					termSlug: 'your-garden',
 					tagline: 'Your Collection of Blooms',
 					description: 'A garden is where you tend what grows. It\'s the cultivated space within your grove where your blooms are planted, arranged, and displayed for visitors to wander through. Not a feed. Not a list. A garden you\'ve tended, ready for someone to stroll through.',
 					status: 'live',
@@ -129,6 +135,7 @@
 				},
 				{
 					name: 'Blooms',
+					termSlug: 'blooms',
 					tagline: 'Your Writing',
 					description: 'A bloom is a flower opening—a moment of expression, color, and beauty. It\'s what your grove produces. Every piece you write is a bloom. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.',
 					status: 'live',
@@ -149,6 +156,7 @@
 			tools: [
 				{
 					name: 'Clearing',
+					termSlug: 'clearing',
 					tagline: 'Status Page',
 					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
 					status: 'live',
@@ -161,6 +169,7 @@
 				},
 				{
 					name: 'Arbor',
+					termSlug: 'arbor',
 					tagline: 'Admin Panel',
 					description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
 					status: 'live',
@@ -177,6 +186,7 @@
 				},
 				{
 					name: 'Flow',
+					termSlug: 'flow',
 					tagline: 'The Writing Sanctuary',
 					description: 'Where the current carries you. Flow is Grove\'s immersive Markdown editor—the space inside Arbor where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.',
 					status: 'live',
@@ -193,6 +203,7 @@
 				},
 				{
 					name: 'Plant',
+					termSlug: 'plant',
 					tagline: 'Tenant Onboarding',
 					description: 'Where new growth begins. Plant is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
 					status: 'live',
@@ -207,6 +218,7 @@
 				},
 				{
 					name: 'Grafts',
+					termSlug: 'grafts',
 					tagline: 'Feature Customization',
 					description: 'A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.',
 					status: 'live',
@@ -226,6 +238,7 @@
 				},
 				{
 					name: 'Amber',
+					termSlug: 'amber',
 					tagline: 'Storage Management',
 					description: 'Your Grove storage, made visible. See what\'s using your space, download and export your data, clean up what you don\'t need, and buy more when you need it. Every file you upload, from blog images to email attachments, organized in one place.',
 					status: 'building',
@@ -238,6 +251,7 @@
 				},
 				{
 					name: 'Centennial',
+					termSlug: 'centennial',
 					tagline: 'Domain Preservation',
 					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
 					status: 'building',
@@ -265,6 +279,7 @@
 				// },
 				{
 					name: 'Burrow',
+					termSlug: 'burrow',
 					tagline: 'Cross-Property Access',
 					description: 'A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role—Pathfinders get admin, Rooted Wanderers can contribute.',
 					status: 'planned',
@@ -285,6 +300,7 @@
 			tools: [
 				{
 					name: 'Foliage',
+					termSlug: 'foliage',
 					tagline: 'Theming Engine',
 					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
 					status: 'complete',
@@ -301,6 +317,7 @@
 				},
 				{
 					name: 'Curios',
+					termSlug: 'curios',
 					tagline: 'Cabinet of Wonders',
 					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
 					status: 'greenhouse',
@@ -316,6 +333,7 @@
 				},
 				{
 					name: 'Terrarium',
+					termSlug: 'terrarium',
 					tagline: 'Creative Canvas',
 					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
 					status: 'greenhouse',
@@ -332,6 +350,7 @@
 				},
 				{
 					name: 'Weave',
+					termSlug: 'weave',
 					tagline: 'Visual Composition Studio',
 					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
 					status: 'planned',
@@ -353,6 +372,7 @@
 			tools: [
 				{
 					name: 'Waystone',
+					termSlug: 'waystone',
 					tagline: 'Help Center',
 					description: 'Integrated help that meets you where you are. Waystone is Grove\'s help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it\'s already there.',
 					status: 'live',
@@ -363,6 +383,7 @@
 				},
 				{
 					name: 'Porch',
+					termSlug: 'porch',
 					tagline: 'Front Porch Conversations',
 					description: 'A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.',
 					status: 'live',
@@ -384,6 +405,7 @@
 				},
 				{
 					name: 'Rings',
+					termSlug: 'rings',
 					tagline: 'Private Analytics',
 					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
 					status: 'planned',
@@ -406,6 +428,7 @@
 			tools: [
 				{
 					name: 'Trails',
+					termSlug: 'trails',
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
 					status: 'greenhouse',
@@ -416,6 +439,7 @@
 				},
 				{
 					name: 'Meadow',
+					termSlug: 'meadow',
 					tagline: 'Social Feed',
 					description: 'Where voices gather. Meadow is Grove\'s opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.',
 					status: 'building',
@@ -432,6 +456,7 @@
 				},
 				{
 					name: 'Thorn',
+					termSlug: 'thorn',
 					tagline: 'Content Moderation',
 					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
 					status: 'greenhouse',
@@ -447,6 +472,7 @@
 				},
 				{
 					name: 'Petal',
+					termSlug: 'petal',
 					tagline: 'Image Content Moderation',
 					description: 'Petals close to protect what\'s precious. Petal is Grove\'s image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.',
 					status: 'greenhouse',
@@ -462,6 +488,7 @@
 				},
 				{
 					name: 'Wisp',
+					termSlug: 'wisp',
 					tagline: 'Writing Assistant',
 					description: 'A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.',
 					status: 'greenhouse',
@@ -478,6 +505,7 @@
 				},
 				{
 					name: 'Scribe',
+					termSlug: 'scribe',
 					tagline: 'Voice Transcription',
 					description: 'Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you\'re thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.',
 					status: 'greenhouse',
@@ -495,6 +523,7 @@
 				},
 				{
 					name: 'Reeds',
+					termSlug: 'reeds',
 					tagline: 'Comments System',
 					description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
 					status: 'planned',
@@ -509,6 +538,7 @@
 				},
 				{
 					name: 'Forests',
+					termSlug: 'forests',
 					tagline: 'Community Groves',
 					description: 'Many trees, one grove. Forests are themed community aggregators—places where like-minded folks gather. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Take a stroll and discover kindred spirits among the trees.',
 					status: 'planned',
@@ -524,6 +554,7 @@
 				},
 				{
 					name: 'Wander',
+					termSlug: 'wander',
 					tagline: 'Immersive Discovery',
 					description: 'Step into the forest. A first-person walking experience through the Grove where other people\'s groves float among the trees as living terrariums. Complete with time of day, seasons, weather, and an immersive soundscape. Discovery through presence, not browsing.',
 					status: 'planned',
@@ -544,6 +575,7 @@
 			tools: [
 				{
 					name: 'Forage',
+					termSlug: 'forage',
 					tagline: 'Domain Discovery',
 					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.',
 					status: 'live',
@@ -561,6 +593,7 @@
 				},
 				{
 					name: 'Outpost',
+					termSlug: 'outpost',
 					tagline: 'On-Demand Minecraft',
 					description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
 					status: 'live',
@@ -576,6 +609,7 @@
 				},
 				{
 					name: 'Ivy',
+					termSlug: 'ivy',
 					tagline: 'Privacy-First Email',
 					description: 'A zero-knowledge email client for your @grove.place address. Client-side encryption means we can\'t read your mail. It\'s yours alone. Threaded conversations, rich text, attachments, and integration with your blog\'s contact forms.',
 					status: 'building',
@@ -594,6 +628,7 @@
 				},
 				{
 					name: 'Verge',
+					termSlug: 'verge',
 					tagline: 'Remote AI Coding',
 					description: 'Send code through the Verge—into ephemeral compute spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes and your code returns more beautiful than you expected. Brief, brilliant, gone.',
 					status: 'building',
@@ -610,6 +645,7 @@
 				},
 				{
 					name: 'Gossamer',
+					termSlug: 'gossamer',
 					tagline: 'ASCII Visual Effects',
 					description: 'Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.',
 					status: 'building',
@@ -638,6 +674,7 @@
 				},
 				{
 					name: 'Etch',
+					termSlug: 'etch',
 					tagline: 'Link Saving & Highlights',
 					description: 'Your externalized memory. Save any link, highlight any text, carve out what counts. Anything can go in, but you decide what it means. Tag it, plate it, score the passages that matter. Patient, permanent, yours.',
 					status: 'planned',
@@ -660,6 +697,7 @@
 			tools: [
 				{
 					name: 'Shade',
+					termSlug: 'shade',
 					tagline: 'AI Content Protection',
 					description: 'Writers own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
@@ -677,6 +715,7 @@
 				},
 				{
 					name: 'Patina',
+					termSlug: 'patina',
 					tagline: 'Automated Backups',
 					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor. Recent backup activity is visible at status.grove.place.',
 					status: 'live',
@@ -687,6 +726,7 @@
 				},
 				{
 					name: 'Press',
+					termSlug: 'press',
 					tagline: 'Image Processing CLI',
 					description: 'A press takes something raw and makes it ready. Press converts images to WebP, generates AI descriptions for accessibility, deduplicates by content hash, and uploads to R2. One command, and your images are ready to publish.',
 					status: 'live',
@@ -697,6 +737,7 @@
 				},
 				{
 					name: 'Lumen',
+					termSlug: 'lumen',
 					tagline: 'AI Gateway',
 					description: 'In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove\'s unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.',
 					status: 'live',
@@ -711,6 +752,7 @@
 				},
 				{
 					name: 'Zephyr',
+					termSlug: 'zephyr',
 					tagline: 'Email Gateway',
 					description: 'In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. Zephyr is Grove\'s unified email gateway. Every email from every service rides the same wind: onboarding sequences, payment notifications, support replies, verification codes. One interface, retries, fallbacks, complete observability.',
 					status: 'live',
@@ -725,6 +767,7 @@
 				},
 				{
 					name: 'Mycelium',
+					termSlug: 'mycelium',
 					tagline: 'MCP Server',
 					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, start Verge sessions, manage files in Amber, and tap into every Grove service.',
 					status: 'building',
@@ -736,6 +779,7 @@
 				},
 				{
 					name: 'Warden',
+					termSlug: 'warden',
 					tagline: 'External API Gateway',
 					description: 'A warden guards what matters. Warden is Grove\'s external API gateway for agent operations. When Claude needs to create a GitHub issue or search the web, the request goes through Warden. Agents describe what they need, Warden validates permissions, injects credentials, executes, and returns results. Keys never leave the vault.',
 					status: 'planned',
@@ -753,6 +797,7 @@
 				},
 				{
 					name: 'Vista',
+					termSlug: 'vista',
 					tagline: 'Infrastructure Observability',
 					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',
 					status: 'planned',
@@ -1056,7 +1101,7 @@
 											<ToolIcon class="w-5 h-5" />
 										</div>
 										<div>
-											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>
+											<h3 class="text-xl font-serif text-foreground">{#if tool.termSlug}<GroveTerm term={tool.termSlug}>{tool.name}</GroveTerm>{:else}{tool.name}{/if}</h3>
 											<p class="text-sm text-foreground-muted">{tool.tagline}</p>
 										</div>
 									</div>

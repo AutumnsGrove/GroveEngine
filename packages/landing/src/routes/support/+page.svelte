@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
+	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Coffee, Heart, TreePine, Sparkles } from 'lucide-svelte';
 
@@ -114,7 +115,7 @@
 		<!-- Already a subscriber note -->
 		<div class="text-center mb-10 p-6 rounded-xl bg-surface-subtle border border-default">
 			<p class="text-foreground-muted font-sans text-sm leading-relaxed">
-				Already have a Grove subscription? <span class="text-foreground">You're already supporting the dream.</span> Thank you for being rooted with us.
+				Already have a Grove subscription? <span class="text-foreground">You're already supporting the dream.</span> Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
 			</p>
 		</div>
 

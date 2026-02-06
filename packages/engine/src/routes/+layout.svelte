@@ -17,6 +17,7 @@
 	import { Button } from '$lib/ui';
 	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
 	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
+	import { groveModeStore } from '$lib/ui/stores/grove-mode.svelte';
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
@@ -68,6 +69,14 @@
 		goto(`/blog/search?q=${encodeURIComponent(query)}`);
 	}
 
+	// Map server user data to HeaderUser shape (picture → avatarUrl)
+	const headerUser = $derived(data.user ? {
+		id: data.user.id,
+		name: data.user.name,
+		email: data.user.email,
+		avatarUrl: data.user.picture
+	} : null);
+
 	// Theme is handled by themeStore in chrome components
 	// Just need to sync with the layout's needs for the footer toggle
 	let darkMode = $derived(themeStore.resolvedTheme === 'dark');
@@ -101,6 +110,8 @@
 		logoSize="lg"
 		maxWidth="wide"
 		showSidebarToggle={isAdminPage}
+		user={headerUser}
+		signInHref="/auth/login"
 	/>
 
 	<main>
@@ -127,6 +138,17 @@
 					</svg>
 				</a>
 			{/if}
+			<button
+				type="button"
+				class="grove-mode-btn"
+				class:active={groveModeStore.current}
+				onclick={() => groveModeStore.toggle()}
+				aria-label={groveModeStore.current ? 'Disable Grove Mode' : 'Enable Grove Mode'}
+				aria-pressed={groveModeStore.current}
+				title={groveModeStore.current ? 'Grove Mode is on' : 'Grove Mode is off'}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 1.5 17 1.5s4.78 8.1 0 13.5c-2.5 2.5-6.2 5-6.2 5Z"/><path d="M11 20a7 7 0 0 0 1.2-13.1C6.5 4.9 5 1.5 5 1.5S.22 9.6 5 15c2.5 2.5 6 5 6 5Z"/></svg>
+			</button>
 			<Button variant="ghost" size="icon" class="theme-toggle" onclick={toggleTheme} aria-label="Toggle dark mode">
 				{#if darkMode}
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -302,6 +324,25 @@
 	}
 	:global(.dark) .logged-in-indicator {
 		color: var(--accent-success);
+	}
+	.grove-mode-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		color: var(--color-text-muted);
+		background: none;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: color 0.2s, transform 0.2s;
+	}
+	.grove-mode-btn:hover {
+		color: var(--color-primary);
+		transform: scale(1.1);
+	}
+	.grove-mode-btn.active {
+		color: var(--color-primary);
 	}
 	/* Mobile-specific layout adjustments */
 	@media (max-width: 768px) {

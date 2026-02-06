@@ -44,6 +44,7 @@
 	 */
 
 	import type { PricingTableProps, PricingTier } from "./types.js";
+	import { groveModeStore } from "../../stores/grove-mode.svelte";
 
 	let {
 		tiers,
@@ -64,6 +65,7 @@
 	interface TableRow {
 		type: RowType;
 		label: string;
+		standardLabel?: string;
 		icon: typeof PenLine;
 		getValue: (tier: PricingTier) => string | boolean;
 	}
@@ -96,12 +98,14 @@
 		{
 			type: "limit",
 			label: "Curios",
+			standardLabel: "Custom Pages",
 			icon: Amphora,
 			getValue: (tier) => tier.limits.navPages,
 		},
 		{
 			type: "feature",
 			label: "Meadow",
+			standardLabel: "Community Feed",
 			icon: Flower2,
 			getValue: (tier) => tier.features.meadow,
 		},
@@ -134,6 +138,7 @@
 		{
 			type: "feature",
 			label: "Centennial",
+			standardLabel: "100-Year Preservation",
 			icon: Clock,
 			getValue: (tier) => tier.features.centennial,
 		},
@@ -150,6 +155,12 @@
 			getValue: (tier) => tier.bestFor,
 		},
 	];
+
+	// Resolve row label based on Grove Mode
+	function rowLabel(row: TableRow): string {
+		if (groveModeStore.current) return row.label;
+		return row.standardLabel || row.label;
+	}
 
 	// Helper to render cell value
 	function renderValue(
@@ -190,7 +201,7 @@
 								/>
 							</div>
 						{/if}
-						<div class="font-serif text-foreground">{tier.name}</div>
+						<div class="font-serif text-foreground">{groveModeStore.current ? tier.name : (tier.standardName || tier.name)}</div>
 						<div class="text-2xl font-sans font-bold text-accent-muted">
 							{tier.monthlyPrice === 0 ? "$0" : `$${tier.monthlyPrice}`}
 							{#if tier.monthlyPrice > 0}
@@ -220,7 +231,7 @@
 					<th scope="row" class="py-3 px-3 text-foreground-muted font-normal text-left">
 						<span class="inline-flex items-center gap-2">
 							<Icon class="w-4 h-4 text-accent-subtle flex-shrink-0" aria-hidden="true" />
-							{row.label}
+							{rowLabel(row)}
 						</span>
 					</th>
 

@@ -33,6 +33,8 @@ interface GroveTermEntry {
   definition: string;
   usageExample?: string;
   seeAlso?: string[];
+  standardTerm?: string;
+  alwaysGrove?: boolean;
 }
 
 type GroveTermManifest = Record<string, GroveTermEntry>;
@@ -49,6 +51,7 @@ const SECTION_TO_CATEGORY: Record<string, GroveTermCategory> = {
   "standalone tools": "tools",
   operations: "operations",
   "user identity": "foundational",
+  "additional terms": "platform",
 };
 
 // ============================================================================
@@ -155,6 +158,11 @@ function extractDefinition(lines: string[]): string {
       continue;
     }
 
+    // Skip Standard and AlwaysGrove annotation lines
+    if (trimmed === "**AlwaysGrove**" || trimmed.startsWith("**Standard:**")) {
+      continue;
+    }
+
     // Skip bullet points (often feature lists)
     if (trimmed.startsWith("-") || trimmed.startsWith("*")) continue;
 
@@ -222,7 +230,8 @@ function parseGroveNaming(content: string): GroveTermManifest {
         !termName.includes("Symmetry") &&
         !termName.includes("Layers") &&
         !termName.includes("Lexicon") &&
-        !termName.includes("Identity vs")
+        !termName.includes("Identity vs") &&
+        !termName.includes("Subscription Tiers")
       ) {
         allTermSlugs.add(toSlug(termName));
       }
@@ -265,7 +274,8 @@ function parseGroveNaming(content: string): GroveTermManifest {
         termName.includes("Symmetry") ||
         termName.includes("Layers") ||
         termName.includes("Lexicon") ||
-        termName.includes("Identity vs")
+        termName.includes("Identity vs") ||
+        termName.includes("Subscription Tiers")
       ) {
         currentTerm = "";
         termLines = [];
@@ -306,6 +316,20 @@ function parseGroveNaming(content: string): GroveTermManifest {
       }
     }
 
+    // Parse Standard and AlwaysGrove annotations
+    let standardTerm: string | undefined;
+    let alwaysGrove: boolean | undefined;
+    for (const line of termLines) {
+      const trimmedLine = line.trim();
+      const standardMatch = trimmedLine.match(/^\*\*Standard:\*\*\s+(.+)$/);
+      if (standardMatch) {
+        standardTerm = standardMatch[1].trim();
+      }
+      if (trimmedLine === "**AlwaysGrove**") {
+        alwaysGrove = true;
+      }
+    }
+
     const definition = extractDefinition(termLines);
     const usageExample = extractUsageExample(termLines);
     const seeAlso = findRelatedTerms(
@@ -323,6 +347,8 @@ function parseGroveNaming(content: string): GroveTermManifest {
         definition,
         ...(usageExample && { usageExample }),
         ...(seeAlso.length > 0 && { seeAlso }),
+        ...(standardTerm && { standardTerm }),
+        ...(alwaysGrove && { alwaysGrove }),
       };
     }
   }

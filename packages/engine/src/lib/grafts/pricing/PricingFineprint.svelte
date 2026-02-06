@@ -7,6 +7,7 @@
 	 */
 
 	import type { PricingFineprintProps, FineprintSection } from "./types.js";
+	import { GroveTerm } from "../../ui/components/ui";
 
 	let {
 		sections,
@@ -121,6 +122,43 @@
 	}
 </script>
 
+<!-- Snippet overrides for sections with grove terms -->
+{#snippet readingContent()}
+	Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. <GroveTerm term="meadow">Meadow</GroveTerm> (the community feed) requires a free account to browse. Only <GroveTerm term="rooted">Rooted</GroveTerm> <GroveTerm term="evergreen">Evergreens</GroveTerm> can choose to make their blog require login to view.
+{/snippet}
+
+{#snippet freeContent()}
+	Free accounts get full <GroveTerm term="meadow">Meadow</GroveTerm> access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No <GroveTerm term="your-garden">garden</GroveTerm>, no storage. When you're ready to write, upgrade to <GroveTerm term="seedling">Seedling</GroveTerm>.
+{/snippet}
+
+{#snippet themesContent()}
+	<GroveTerm term="seedling">Seedling</GroveTerm>: Choose from 3 hand-curated themes plus a custom accent color. <GroveTerm term="sapling">Sapling</GroveTerm>: All 10 themes plus accent color. <GroveTerm term="oak">Oak</GroveTerm>+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. <GroveTerm term="evergreen">Evergreen</GroveTerm>: Everything Oak gets, plus upload your own custom fonts.
+{/snippet}
+
+{#snippet curiosContent()}
+	Every blog includes Home, Blog, and About in the navigation. <GroveTerm term="curios">Curios</GroveTerm> let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. <GroveTerm term="sapling">Sapling</GroveTerm>: 3 curios. <GroveTerm term="oak">Oak</GroveTerm>: 5 curios. <GroveTerm term="evergreen">Evergreen</GroveTerm>: 8 curios.
+{/snippet}
+
+{#snippet commentsContent()}
+	Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the <GroveTerm term="rooted">Rooted</GroveTerm> get unlimited. Private replies are rate-limited for free accounts to reduce spam.
+{/snippet}
+
+{#snippet centennialContent()}
+	Your grove can outlive you. After 12 cumulative months on <GroveTerm term="sapling">Sapling</GroveTerm> or above, your site earns <GroveTerm term="centennial">Centennial</GroveTerm> status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.
+{/snippet}
+
+{#snippet includedContent()}
+	Markdown blog posts with live preview, image hosting with automatic WebP compression, <GroveTerm term="vines">Vines</GroveTerm> (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.
+{/snippet}
+
+{#snippet aiContent()}
+	Every Grove blog is protected by <GroveTerm term="shade">Shade</GroveTerm> — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include <GroveTerm term="wisp">Wisp</GroveTerm>, a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and <GroveTerm term="fireside">Fireside</GroveTerm> mode. <GroveTerm term="seedling">Seedling</GroveTerm>: 100 assists/day. <GroveTerm term="sapling">Sapling</GroveTerm>: 500/day. <GroveTerm term="oak">Oak</GroveTerm>: 2,000/day. <GroveTerm term="evergreen">Evergreen</GroveTerm>: 10,000/day.
+{/snippet}
+
+{#snippet aiDetail()}
+	<GroveTerm term="wisp">Wisp</GroveTerm> is a helper, not a writer — it never generates content from scratch. <GroveTerm term="fireside">Fireside</GroveTerm> mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation (<GroveTerm term="thorn">Thorn</GroveTerm>) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.
+{/snippet}
+
 <div
 	class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
 >
@@ -161,9 +199,35 @@
 
 				{#if isExpanded}
 					<div class="mt-3 space-y-2">
-						<p>{section.content}</p>
+						<p>
+							{#if sectionKey === 'reading'}
+								{@render readingContent()}
+							{:else if sectionKey === 'free'}
+								{@render freeContent()}
+							{:else if sectionKey === 'themes'}
+								{@render themesContent()}
+							{:else if sectionKey === 'curios'}
+								{@render curiosContent()}
+							{:else if sectionKey === 'comments'}
+								{@render commentsContent()}
+							{:else if sectionKey === 'centennial'}
+								{@render centennialContent()}
+							{:else if sectionKey === 'included'}
+								{@render includedContent()}
+							{:else if sectionKey === 'ai'}
+								{@render aiContent()}
+							{:else}
+								{section.content}
+							{/if}
+						</p>
 						{#if section.detail}
-							<p class="text-xs text-foreground-faint">{section.detail}</p>
+							<p class="text-xs text-foreground-faint">
+								{#if sectionKey === 'ai'}
+									{@render aiDetail()}
+								{:else}
+									{section.detail}
+								{/if}
+							</p>
 						{/if}
 					</div>
 				{/if}

@@ -76,6 +76,10 @@ export interface TierDisplay {
   icon: TierIcon;
   bestFor: string;
   featureStrings: string[];
+  /** Standard (non-grove) name for this tier, shown when Grove Mode is off */
+  standardName?: string;
+  /** Standard feature strings shown when Grove Mode is off */
+  standardFeatureStrings?: string[];
 }
 
 export type SupportLevel =
@@ -159,6 +163,13 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "Follow gardens",
         "React to blooms",
       ],
+      standardName: "Free",
+      standardFeatureStrings: [
+        "Community feed access",
+        "20 comments/week",
+        "Follow blogs",
+        "React to posts",
+      ],
     },
     support: { level: "help_center", displayString: "Help Center" },
   },
@@ -214,6 +225,15 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "1 GB storage",
         "3 curated themes",
         "Meadow access",
+        "RSS feed",
+        "No ads ever",
+      ],
+      standardName: "Starter",
+      standardFeatureStrings: [
+        "50 posts",
+        "1 GB storage",
+        "3 curated themes",
+        "Community feed access",
         "RSS feed",
         "No ads ever",
       ],
@@ -275,6 +295,16 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "Centennial eligible",
         "Everything in Seedling",
       ],
+      standardName: "Growth",
+      standardFeatureStrings: [
+        "250 posts",
+        "5 GB storage",
+        "10 themes",
+        "3 nav pages",
+        "Email forwarding",
+        "100-year preservation eligible",
+        "Everything in Starter",
+      ],
     },
     support: { level: "email", displayString: "Email" },
   },
@@ -333,6 +363,16 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "Centennial eligible",
         "Priority support",
       ],
+      standardName: "Pro",
+      standardFeatureStrings: [
+        "Unlimited posts",
+        "20 GB storage",
+        "Theme customizer",
+        "5 nav pages",
+        "Bring your own domain",
+        "100-year preservation eligible",
+        "Priority support",
+      ],
     },
     support: { level: "priority", displayString: "Priority" },
   },
@@ -389,6 +429,16 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "8 nav pages",
         "Domain included",
         "Centennial eligible",
+        "8 hrs/mo dedicated support",
+      ],
+      standardName: "Ultra",
+      standardFeatureStrings: [
+        "Unlimited everything",
+        "100 GB storage",
+        "Custom fonts",
+        "8 nav pages",
+        "Domain included",
+        "100-year preservation eligible",
         "8 hrs/mo dedicated support",
       ],
     },

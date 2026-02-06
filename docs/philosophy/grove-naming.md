@@ -26,6 +26,7 @@ This is how we build.
 
 ### Your Grove
 **Your Space** · `{you}.grove.place`
+**AlwaysGrove**
 
 A grove is a small group of trees growing together—intimate, sheltered, yours. The platform is called Grove. Your space within it is *your* grove. Not a blog. Not a site. A grove.
 
@@ -38,6 +39,7 @@ When someone visits `autumn.grove.place`, they're visiting Autumn's grove. A cor
 
 ### Your Garden
 **The Collection** · `{you}.grove.place/garden`
+**Standard:** Blog
 
 A garden is where you tend what grows. It's the cultivated space within your grove where your blooms are planted, arranged, and displayed for visitors to wander through.
 
@@ -50,6 +52,7 @@ The garden is your blog index—the page where all your blooms live together. No
 
 ### Blooms
 **Your Writing** · `{you}.grove.place/garden/{slug}`
+**Standard:** Posts
 
 A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. It's why visitors come.
 
@@ -85,6 +88,7 @@ The Grove language is what users see and feel. The standard terms remain for scr
 ### Lattice
 **Core Platform** · `npm: @autumnsgrove/lattice`
 **Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+**AlwaysGrove**
 
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
 
@@ -100,6 +104,7 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 ### Arbor
 **Admin Panel** · `{you}.grove.place/admin`
+**Standard:** Dashboard
 
 An arbor is the structured framework where growth is tended—a garden structure that shapes and supports what grows within it.
 
@@ -107,6 +112,7 @@ Arbor is your blog's control center—write posts, manage pages, upload images, 
 
 ### Plant
 **Onboarding** · `plant.grove.place`
+**Standard:** Onboarding
 
 A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.
 
@@ -114,6 +120,7 @@ Plant is Grove's onboarding system: the complete flow for new users from initial
 
 ### Loam
 **Name Protection** · *Internal service*
+**Standard:** Name Protection
 
 Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow.
 
@@ -124,6 +131,7 @@ Loam is Grove's username and domain validation system. Every name passes through
 ### Amber
 **Storage Management** · `amber.grove.place`
 **Repository:** [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)
+**Standard:** Storage
 
 Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.
 
@@ -132,6 +140,7 @@ Amber is Grove's unified storage management system. Every file you upload (blog 
 ### Foliage
 **Theming System** · `foliage.grove.place`
 **Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
+**Standard:** Themes
 
 Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
 
@@ -139,6 +148,7 @@ Foliage is visual customization for your blog, from accent colors to full theme 
 
 ### Curios
 **Cabinet of Wonders** · `curios.grove.place`
+**Standard:** Custom Pages
 
 A curio is something unusual and intriguing—a curiosity that makes you pause and look closer. Historically, cabinets of curiosities held natural wonders alongside strange artifacts: shells, fossils, oddities, treasures.
 
@@ -148,6 +158,7 @@ Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, c
 
 ### Burrow
 **Cross-Property Access** · *Integrated into Arbor*
+**Standard:** Cross-Site Access
 
 In the forest, a burrow is a protected passage beneath the earth. Animals create burrows to move safely between dens, sharing them with family and trusted companions. The passage is invisible from above. You have to know it's there.
 
@@ -169,6 +180,7 @@ Dave wants to help moderate The Prism? Burrow him in. The passage opens. He arri
 
 ### Rings
 **Analytics** · *Integrated into admin dashboard*
+**Standard:** Analytics
 
 Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
 
@@ -176,6 +188,7 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 
 ### Clearing
 **Status Page** · `status.grove.place`
+**Standard:** Status Page
 
 A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.
 
@@ -185,6 +198,7 @@ Clearing is Grove's public status page: transparent, real-time communication abo
 
 ### Porch
 **Front Porch Conversations** · `porch.grove.place`
+**Standard:** Support
 
 A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat.
 
@@ -194,6 +208,7 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 
 ### Wisp
 **Writing Assistant** · *Integrated into editor*
+**Standard:** Writing Assistant
 
 A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.
 
@@ -205,6 +220,7 @@ All features off by default. Zero data retention. Your words analyzed, never sto
 
 ### Trails
 **Personal Roadmaps** · `username.grove.place/trail`
+**Standard:** Project Roadmaps
 
 A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
 
@@ -227,6 +243,7 @@ Trace is Grove's inline feedback component. A small, warm invitation that appear
 
 ### Centennial
 **100-Year Preservation** · Earned status
+**Standard:** 100-Year Preservation
 
 A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade.
 
@@ -236,6 +253,7 @@ When you've been part of Grove long enough to put down real roots (12 months of 
 
 ### Vineyard
 **Component Showcase** · `grove.place/vineyard`
+**Standard:** Showcase
 
 A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.
 
@@ -251,6 +269,7 @@ Vineyard is Grove's component showcase—where you see what's growing in the Lat
 
 ### Flow
 **The Writing Sanctuary** · Arbor editor
+**AlwaysGrove**
 
 Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work.
 
@@ -260,6 +279,7 @@ Flow is Grove's immersive Markdown editor—the space inside Arbor where you com
 
 ### Terrarium
 **Creative Canvas** · `grove.place/terrarium`
+**Standard:** Creative Canvas
 
 A terrarium is a sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Moss, stones, tiny plants, all placed with intention.
 
@@ -271,6 +291,7 @@ Create a scene in Terrarium, export it as a decoration, apply it via Foliage to 
 
 ### Weave
 **Visual Composition Studio** · *Part of Terrarium*
+**Standard:** Visual Composer
 
 Weave is what happens when threads come together—a pattern emerging from connection.
 
@@ -293,6 +314,7 @@ You might never interact with Reverie directly. Like the moment between waking a
 
 ### Scribe
 **Voice Transcription** · *Integrated into editor*
+**AlwaysGrove**
 
 A scribe is a patient listener—someone who sits beside you and transforms your spoken words into written text. Before keyboards, before typewriters, scribes were how thoughts became documents. You spoke; they wrote.
 
@@ -302,6 +324,7 @@ Scribe is voice-to-text for Grove. Press and hold, speak your thoughts, and watc
 
 ### Reeds
 **Comments System** · *Integrated into blogs*
+**Standard:** Comments
 
 Reeds sway together at the water's edge, whispering in the breeze: a gentle murmur of community.
 
@@ -311,6 +334,7 @@ Reeds is Grove's comment system, supporting both private replies (author-only) a
 
 ### Thorn
 **Content Moderation** · *Internal service*
+**Standard:** Content Moderation
 
 Every rose has thorns for protection. Not aggression, but defense—the boundary that keeps harm at bay.
 
@@ -320,6 +344,7 @@ Thorn is Grove's automated content moderation—privacy-first, context-aware, de
 
 ### Meadow
 **The Social Layer** · `meadow.grove.place`
+**Standard:** Community Feed
 
 A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view.
 
@@ -329,6 +354,7 @@ Meadow is social media that remembers what "social" means. No public metrics bre
 
 ### Forests
 **Community Groves** · `{forest}.grove.place`
+**Standard:** Communities
 
 A forest is many trees growing together. Roots intertwined. Shelter shared. No tree grows alone.
 
@@ -340,6 +366,7 @@ Discovery happens through *strolling*—take a random walk through a forest and 
 
 ### Wander
 **Immersive Discovery** · `wander.grove.place`
+**Standard:** Discovery
 
 Wander is a verb and a place. To wander is to move without a fixed destination, discovering by being present.
 
@@ -357,6 +384,7 @@ Complete with time of day, seasons, weather, and an immersive soundscape, Wander
 
 ### Grafts
 **Feature Customization** · *Operator-configured*
+**Standard:** Feature Flags
 
 A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
 
@@ -387,6 +415,7 @@ Grafts are per-tenant features that operators enable for specific trees. Not plu
 
 ### Waystone
 **Help Center** · *Integrated into platform*
+**Standard:** Help Center
 
 Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.
 
@@ -397,6 +426,7 @@ Waystone is Grove's built-in help center: searchable documentation, contextual h
 ### Gossamer
 **ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
 **Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
+**AlwaysGrove**
 
 Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.
 
@@ -409,6 +439,7 @@ Framework-agnostic at its core (`gossamer`), with adapters for Svelte (`@gossame
 ### Ivy
 **Email** · `ivy.grove.place`
 **Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
+**Standard:** Email
 
 Ivy climbs the lattice, reaching out, intertwining, linking one point to another. But ivy does something else too: what it covers, it conceals. An ivy-covered wall disappears into green. The structure beneath becomes invisible to anyone outside.
 
@@ -419,6 +450,7 @@ Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first ma
 ### Verge
 **Remote Coding Infrastructure** · `verge.grove.place`
 **Repository:** [AutumnsGrove/GroveVerge](https://github.com/AutumnsGrove/GroveVerge)
+**Standard:** Domain Manager
 
 The verge is the edge. The threshold. The liminal space where one state ends and another begins—not quite here, not quite there. In impossible geometries, the verge is where transformation happens. You cross it and emerge changed.
 
@@ -431,6 +463,7 @@ You send it through. It comes back transformed.
 ### Forage
 **Domain Discovery** · `forage.grove.place`
 **Repository:** [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)
+**Standard:** Domain Search
 
 Before you can plant, you have to search. You walk the forest floor, looking for what you need: something that fits, something that's *available*, something worth bringing home.
 
@@ -439,6 +472,7 @@ Forage is an AI-powered domain hunting tool that turns weeks of frustrating sear
 ### Nook
 **Private Video Sharing** · `nook.grove.place`
 **Repository:** [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook)
+**Standard:** Link in Bio
 
 A nook is a tucked-away corner, a quiet space set apart from the main room. Somewhere intimate and private.
 
@@ -459,6 +493,7 @@ Shutter is Grove's web content distillation service. Hand it a URL and a questio
 ### Outpost
 **Minecraft Server** · `mc.grove.place`
 **Repository:** [AutumnsGrove/GroveMC](https://github.com/AutumnsGrove/GroveMC)
+**Standard:** Game Server
 
 An outpost is where you gather at the edge of the wilderness. A place to rest, regroup, and adventure together.
 
@@ -474,6 +509,7 @@ Give Aria a song you love, and it builds a playlist of tracks that share the sam
 
 ### Etch
 **Link Saving & Highlights** · `etch.grove.place`
+**Standard:** Blog Importer
 
 Water drips on limestone for a thousand years and carves a cave. A glacier scores parallel grooves into bedrock. Frost traces patterns on glass. In printmaking, you score a plate with intention—every mark deliberate, every groove holding ink for the next impression. Etching isn't violent. It's patient. And what it leaves behind is permanent.
 
@@ -484,6 +520,7 @@ Etch is your externalized memory. Save any link, highlight any text, carve out w
 ### Trove
 **Library Book Discovery** · `trove.grove.place`
 **Repository:** [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove)
+**Standard:** Collections
 
 A trove is a collection of precious things, gathered and waiting to be discovered.
 
@@ -498,6 +535,7 @@ Point your camera at a library shelf. Trove identifies the books, cross-referenc
 ### Heartwood
 **Authentication** · `heartwood.grove.place`
 **Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
+**Standard:** Authentication
 
 Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
 
@@ -505,6 +543,7 @@ Heartwood is centralized authentication for the Grove ecosystem. One identity, v
 
 ### Pantry
 **Shop & Provisioning** · `pantry.grove.place`
+**Standard:** Data Store
 
 A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.
 
@@ -515,6 +554,7 @@ Pantry is Grove's shop. Subscriptions, merchandise, credits, gift cards—the th
 ### Passage
 **Subdomain Routing** · *Internal infrastructure*
 **Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router)
+**Standard:** Router
 
 A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.
 
@@ -524,6 +564,7 @@ Passage is how the grove makes the impossible feel inevitable. One domain, infin
 
 ### Petal
 **Content Safety** · *Internal service*
+**Standard:** Image Moderation
 
 Petals fall from blooms, each one examined before it touches the ground. Some carry beauty. Some carry harm. Petal knows the difference.
 
@@ -533,6 +574,7 @@ Petal is Grove's content safety service. Every image uploaded, every piece of me
 
 ### Warden
 **External API Gateway** · `warden.grove.place`
+**Standard:** API Gateway
 
 The one who holds the keys. A warden doesn't open doors for just anyone—they verify, they check, they ensure only the right requests pass through.
 
@@ -543,6 +585,7 @@ Warden is Grove's external API gateway. Every outbound request to third-party se
 ### Press
 **Image Processing CLI** · *Developer tool*
 **Repository:** [AutumnsGrove/CDNUploader](https://github.com/AutumnsGrove/CDNUploader)
+**Standard:** Build System
 
 A press is a tool of transformation. The olive press extracts oil from fruit. The wine press releases juice from grapes. The printing press prepares words for the world. Every press takes something raw and makes it ready.
 
@@ -553,6 +596,7 @@ Press is Grove's image processing CLI. It takes your raw photos and presses them
 ### Vista
 **Infrastructure Observability** · `vista.grove.place`
 **Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
+**Standard:** Monitoring
 
 A vista is a clearing in the forest where the canopy opens up, a place where you can finally see. The whole grove stretches out before you: what's thriving, what's struggling, what needs attention.
 
@@ -565,6 +609,7 @@ Rings tells writers about their readers. Vista tells the grove keeper about the 
 ### Patina
 **Backup System** · *Internal service*
 **Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
+**Standard:** Backups
 
 A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.
 
@@ -574,6 +619,7 @@ Patina runs nightly automated backups of every Grove database to cold storage. W
 
 ### Mycelium
 **MCP Server** · `mycelium.grove.place`
+**Standard:** MCP Server
 
 In the forest, mycelium is the wood wide web: invisible fungal threads connecting every tree, sharing nutrients and signals across the entire ecosystem. It's how the forest communicates with itself.
 
@@ -587,6 +633,7 @@ It's the invisible network beneath everything. You don't see it. You don't think
 
 ### Lumen
 **AI Gateway** · *Internal service*
+**Standard:** AI Gateway
 
 In anatomy, a lumen is the hollow center of a tube: the empty space inside blood vessels, intestines, airways. It's not the wall. It's not the tissue. It's the void through which everything flows. But lumen also means light. The same word for darkness and illumination.
 
@@ -598,6 +645,7 @@ The paradox is the point. The hollow that carries light. The void through which 
 
 ### Zephyr
 **Email Gateway** · *Internal service*
+**Standard:** Email Gateway
 
 In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. While other winds howled and destroyed, the zephyr carried seeds to new soil, pollen to waiting flowers, whispers to distant ears. Invisible. Gentle. Reliable.
 
@@ -609,6 +657,7 @@ Like Lumen routes AI through its hollow center, Zephyr carries messages on the w
 
 ### Shade
 **AI Content Protection** · `grove.place/shade`
+**AlwaysGrove**
 
 Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.
 
@@ -758,6 +807,7 @@ Grove doesn't use words like "user" or "member." Those feel transactional. Inste
 
 ### Wanderer
 **Everyone who enters the grove.**
+**Standard:** Visitor
 
 A wanderer is anyone who shows up. No account needed. No commitment required. You're exploring, reading, finding your way. Even after taking root, you never stop being a wanderer. The paths wind on.
 
@@ -765,6 +815,7 @@ A wanderer is anyone who shows up. No account needed. No commitment required. Yo
 
 ### Rooted
 **Those who've planted their tree.**
+**Standard:** Subscriber
 
 When you subscribe and create your blog, you take root. You've chosen this place. Your tree grows here now. Being rooted doesn't mean you stop wandering. You've just found a home to return to.
 
@@ -772,6 +823,7 @@ When you subscribe and create your blog, you take root. You've chosen this place
 
 ### Pathfinder
 **Trusted guides appointed by the Wayfinder.**
+**Standard:** Trusted Guide
 
 Pathfinders know the grove's paths by heart. They help wanderers find their way, answer questions, and light the path forward. The Wayfinder appoints Pathfinders based on trust and contribution.
 
@@ -779,6 +831,7 @@ Pathfinders know the grove's paths by heart. They help wanderers find their way,
 
 ### Wayfinder
 **Autumn. Singular.**
+**Standard:** Grove Keeper
 
 The Wayfinder tends the grove itself. Where wanderers seek paths, the Wayfinder creates them. There is one Wayfinder.
 
@@ -799,11 +852,75 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 *For full documentation, see [Grove User Identity](/knowledge/philosophy/grove-user-identity).*
 
+### Subscription Tiers
+
+*Tiers describe what you pay. Identity describes who you are.*
+
+### Seedling
+**Starter Tier** · Entry-level plan
+**Standard:** Starter
+
+A seedling is the first green shoot breaking through soil. Everything ahead of it. Just planted, full of potential.
+
+Seedling is Grove's entry tier ($8/mo). A quiet corner to call your own: 50 blooms, 1 GB storage, curated themes. Perfect for getting started.
+
+### Sapling
+**Growth Tier** · Mid-level plan
+**Standard:** Growth
+
+A sapling has survived its first seasons. Still young, but growing strong. The trunk thickens. The roots spread.
+
+Sapling is for blogs finding their voice ($12/mo). More storage, more themes, email forwarding, and Centennial eligibility. Room to stretch.
+
+### Oak
+**Pro Tier** · Advanced plan
+**Standard:** Pro
+
+An oak takes decades to mature, but once it does, nothing uproots it. Deep roots, broad canopy, shelter for everything beneath.
+
+Oak is for serious bloggers ($25/mo). Unlimited blooms, theme customizer, bring your own domain, analytics. Full creative control.
+
+### Evergreen
+**Ultra Tier** · Top-level plan
+**Standard:** Ultra
+
+An evergreen never loses its leaves. Through every season, it remains. Constant, dependable, always flourishing.
+
+Evergreen is the complete package ($35/mo). Everything Grove has to offer: custom fonts, dedicated support, domain included. Always flourishing.
+
+---
+
+## Additional Terms
+
+### Workshop
+**Internal Services** · `grove.place/workshop`
+**Standard:** Internal Services
+
+A workshop is where tools are made and maintained. Sawdust on the floor, projects in various stages, everything within reach.
+
+Workshop is Grove's internal services directory—a behind-the-scenes look at every tool powering the ecosystem. Authentication, moderation, storage, routing: all the infrastructure laid out for curious Wanderers to explore.
+
+### Fireside
+**Focus Mode** · *Part of Wisp*
+**Standard:** Focus Mode
+
+A fireside is where stories begin. The crackling warmth, the gentle light, the safety of the circle.
+
+Fireside is a mode of Wisp for writers who freeze at the blank page. A conversation that becomes a post. Wisp asks questions, you answer naturally, and your words get organized into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+
+### Vines
+**Sidebar Links** · *Part of Lattice*
+**Standard:** Sidebar Links
+
+Vines climb the lattice, filling the spaces between the main structure. They add color and life to the margins.
+
+Vines are sidebar widgets in your blog's gutters—the content that grows alongside your posts. Related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
+
 ---
 
 [^1]: Named after the first test tenant in Grove. "Dave" was chosen as the most wonderfully mundane, generic example name imaginable during early development. The internal codename "Dave mode" honors this humble beginning. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode.
 
 ---
 
-*Last updated: February 4, 2026 — Category restructuring + added Flow, Centennial, Vineyard, Petal, Warden*
+*Last updated: February 6, 2026 — Added Standard/AlwaysGrove annotations + tier entries, Workshop, Fireside, Vines*
 *Status: Placeholder names, pending launch*

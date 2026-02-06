@@ -94,7 +94,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 // Resources section (desktop footer)
 // Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (already in nav)
 export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
-  { href: "/workshop", label: "Workshop", icon: Hammer },
+  { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {
@@ -130,7 +130,7 @@ export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
 // Resources section (mobile menu)
 // Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (in mobile nav)
 export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
-  { href: "/workshop", label: "Workshop", icon: Hammer },
+  { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {

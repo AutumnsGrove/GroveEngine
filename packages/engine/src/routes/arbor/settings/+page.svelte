@@ -7,7 +7,8 @@
     Waystone,
     GroveTerm,
   } from "$lib/ui";
-  import { Smartphone, Laptop, Monitor } from "lucide-svelte";
+  import { Smartphone, Laptop, Monitor, Leaf } from "lucide-svelte";
+  import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
   import {
     GreenhouseStatusCard,
     GraftControlPanel,
@@ -735,6 +736,30 @@
       />
     </GlassCard>
   {/if}
+
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
+      <h2>Preferences</h2>
+    </div>
+    <p class="section-description">
+      Personal display preferences for your <GroveTerm term="arbor">dashboard</GroveTerm>.
+    </p>
+
+    <label class="logo-toggle">
+      <input type="checkbox" checked={groveModeStore.current} onchange={() => groveModeStore.toggle()} />
+      <span class="toggle-label">
+        <span class="toggle-title">
+          <Leaf class="inline-icon" size={16} />
+          Grove Mode
+        </span>
+        <span class="toggle-description">
+          {groveModeStore.current
+            ? 'Nature-themed terminology is active. Navigation and features use Grove names.'
+            : 'Standard terminology is active. Navigation and features use familiar web terms.'}
+        </span>
+      </span>
+    </label>
+  </GlassCard>
 
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">
@@ -1530,6 +1555,9 @@
     gap: 0.25rem;
   }
   .toggle-title {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-text);

@@ -85,7 +85,8 @@
 		{
 			id: 'ai-protection',
 			question: 'Is my writing safe from AI training?',
-			answer: "Yes. Every Grove blog is protected by Shade — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human."
+			answer: "Yes. Every Grove blog is protected by Shade — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human.",
+			richAnswer: true
 		},
 		{
 			id: 'data-ownership',
@@ -95,17 +96,20 @@
 		{
 			id: 'custom-domain',
 			question: 'Can I use my own domain?',
-			answer: "Yes! Oak tier lets you bring a domain you already own. Evergreen tier includes domain registration — we'll find and set up the perfect domain for you."
+			answer: "Yes! Oak tier lets you bring a domain you already own. Evergreen tier includes domain registration — we'll find and set up the perfect domain for you.",
+			richAnswer: true
 		},
 		{
 			id: 'shutdown',
 			question: 'What if Grove shuts down?',
-			answer: "After 12 months on a paid plan, your blog earns Centennial status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform."
+			answer: "After 12 months on a paid plan, your blog earns Centennial status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform.",
+			richAnswer: true
 		},
 		{
 			id: 'pricing',
 			question: 'How much does it cost?',
-			answer: "Reading is always free. Writing starts at $8/month (Seedling). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details."
+			answer: "Reading is always free. Writing starts at $8/month (Seedling). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details.",
+			richAnswer: true
 		}
 	];
 
@@ -122,6 +126,23 @@
 		}
 	}
 </script>
+
+<!-- FAQ answer overrides with GroveTerm wrapping -->
+{#snippet faqAiProtection()}
+	Yes. Every Grove blog is protected by <GroveTerm term="shade">Shade</GroveTerm> — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human.
+{/snippet}
+
+{#snippet faqCustomDomain()}
+	Yes! <GroveTerm term="oak">Oak</GroveTerm> tier lets you bring a domain you already own. <GroveTerm term="evergreen">Evergreen</GroveTerm> tier includes domain registration — we'll find and set up the perfect domain for you.
+{/snippet}
+
+{#snippet faqShutdown()}
+	After 12 months on a paid plan, your blog earns <GroveTerm term="centennial">Centennial</GroveTerm> status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform.
+{/snippet}
+
+{#snippet faqPricing()}
+	Reading is always free. Writing starts at $8/month (<GroveTerm term="seedling">Seedling</GroveTerm>). We're launching with one simple plan and adding more tiers as we grow. See the <a href="/pricing" class="text-accent-muted hover:text-accent underline">pricing page</a> for details.
+{/snippet}
 
 <SEO
 	title="Grove — A place to Be"
@@ -465,7 +486,17 @@
 								id="faq-{item.id}"
 								class="mt-2 text-foreground-muted leading-relaxed"
 							>
-								{item.answer}
+								{#if item.id === 'ai-protection'}
+									{@render faqAiProtection()}
+								{:else if item.id === 'custom-domain'}
+									{@render faqCustomDomain()}
+								{:else if item.id === 'shutdown'}
+									{@render faqShutdown()}
+								{:else if item.id === 'pricing'}
+									{@render faqPricing()}
+								{:else}
+									{item.answer}
+								{/if}
 							</div>
 						{/if}
 					</div>

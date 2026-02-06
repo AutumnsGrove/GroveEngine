@@ -10,6 +10,7 @@
 	import type { PricingCardProps } from "./types.js";
 	import type { TierIcon } from "../../config/tiers.js";
 	import PricingCTA from "./PricingCTA.svelte";
+	import { groveModeStore } from "../../stores/grove-mode.svelte";
 
 	let {
 		tier,
@@ -57,6 +58,14 @@
 				? "Future"
 				: null,
 	);
+
+	// Mode-aware display values
+	let displayName = $derived(
+		groveModeStore.current ? tier.name : (tier.standardName || tier.name)
+	);
+	let displayFeatures = $derived(
+		groveModeStore.current ? tier.featureStrings : (tier.standardFeatureStrings || tier.featureStrings)
+	);
 </script>
 
 <div
@@ -94,7 +103,10 @@
 		</div>
 
 		<!-- Name & tagline -->
-		<h3 class="text-xl font-serif text-foreground">{tier.name}</h3>
+		<h3 class="text-xl font-serif text-foreground">{displayName}</h3>
+		{#if !groveModeStore.current && tier.standardName && tier.standardName !== tier.name}
+			<p class="text-xs text-foreground-faint italic">({tier.name} Plan)</p>
+		{/if}
 		<p class="text-sm text-foreground-muted">{tier.tagline}</p>
 
 		<!-- Price -->
@@ -112,7 +124,7 @@
 
 	<!-- Features list -->
 	<ul class="flex-1 space-y-3 mb-6">
-		{#each tier.featureStrings as feature}
+		{#each displayFeatures as feature}
 			<li class="flex items-start gap-2 text-sm text-foreground-muted">
 				<Check class="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
 				<span>{feature}</span>

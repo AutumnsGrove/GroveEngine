@@ -11,6 +11,9 @@
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 	import { LogIn, LogOut, User } from 'lucide-svelte';
 	import { sidebarStore } from '../../stores/sidebar.svelte';
+	import { groveModeStore } from '../../stores/grove-mode.svelte';
+	import { resolveNavLabel } from './types';
+	import defaultManifestData from '$lib/data/grove-term-manifest.json';
 
 	// Determine current page for highlighting
 	let currentPath = $derived(page.url.pathname);
@@ -130,6 +133,11 @@
 	}
 
 	const items = $derived(navItems || DEFAULT_NAV_ITEMS);
+
+	// Resolve nav labels based on Grove Mode
+	function labelFor(item) {
+		return resolveNavLabel(item, groveModeStore.current, defaultManifestData);
+	}
 </script>
 
 <header class="sticky top-0 z-grove-sticky py-6 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
@@ -196,7 +204,7 @@
 						? 'text-accent-muted'
 						: 'text-foreground-subtle hover:text-accent-muted'}"
 				>
-					<span>{item.label}</span>
+					<span>{labelFor(item)}</span>
 				</a>
 			{/each}
 

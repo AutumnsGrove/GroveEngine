@@ -42,8 +42,10 @@
     "tagline": "Core Platform",
     "definition": "A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.",
     "seeAlso": [
-      "flow"
-    ]
+      "flow",
+      "vines"
+    ],
+    "alwaysGrove": true
   },
   "arbor": {
     "slug": "arbor",
@@ -61,21 +63,24 @@
     "definition": "A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.",
     "seeAlso": [
       "flow"
-    ]
+    ],
+    "standardTerm": "Onboarding"
   },
   "loam": {
     "slug": "loam",
     "term": "Loam",
     "category": "platform",
     "tagline": "Name Protection",
-    "definition": "Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow."
+    "definition": "Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow.",
+    "standardTerm": "Name Protection"
   },
   "amber": {
     "slug": "amber",
     "term": "Amber",
     "category": "platform",
     "tagline": "Storage Management",
-    "definition": "Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries."
+    "definition": "Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.",
+    "standardTerm": "Storage"
   },
   "foliage": {
     "slug": "foliage",
@@ -95,7 +100,7 @@
       "foliage",
       "terrarium"
     ],
-    "standardTerm": "Decorations"
+    "standardTerm": "Custom Pages"
   },
   "burrow": {
     "slug": "burrow",
@@ -108,7 +113,8 @@
       "wander",
       "passage",
       "wanderer"
-    ]
+    ],
+    "standardTerm": "Cross-Site Access"
   },
   "rings": {
     "slug": "rings",
@@ -124,7 +130,7 @@
     "category": "platform",
     "tagline": "Status Page",
     "definition": "A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.",
-    "standardTerm": "Status"
+    "standardTerm": "Status Page"
   },
   "porch": {
     "slug": "porch",
@@ -141,7 +147,8 @@
     "tagline": "Writing Assistant",
     "definition": "A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.",
     "seeAlso": [
-      "forests"
+      "forests",
+      "fireside"
     ],
     "standardTerm": "Writing Assistant"
   },
@@ -151,7 +158,11 @@
     "category": "platform",
     "tagline": "Personal Roadmaps",
     "definition": "A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.",
-    "standardTerm": "Roadmap"
+    "seeAlso": [
+      "oak",
+      "evergreen"
+    ],
+    "standardTerm": "Project Roadmaps"
   },
   "trace": {
     "slug": "trace",
@@ -174,8 +185,11 @@
     "definition": "A century is the lifetime of an oak—the span between a sapling taking root and becoming something people gather beneath for shade.",
     "seeAlso": [
       "plant",
-      "shade"
-    ]
+      "shade",
+      "sapling",
+      "oak"
+    ],
+    "standardTerm": "100-Year Preservation"
   },
   "vineyard": {
     "slug": "vineyard",
@@ -184,7 +198,8 @@
     "tagline": "Component Showcase",
     "definition": "A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.",
     "seeAlso": [
-      "lattice"
+      "lattice",
+      "vines"
     ],
     "standardTerm": "Showcase"
   },
@@ -212,7 +227,7 @@
       "foliage",
       "flow"
     ],
-    "standardTerm": "Component Builder"
+    "standardTerm": "Creative Canvas"
   },
   "weave": {
     "slug": "weave",
@@ -223,7 +238,8 @@
     "seeAlso": [
       "trace",
       "terrarium"
-    ]
+    ],
+    "standardTerm": "Visual Composer"
   },
   "reverie": {
     "slug": "reverie",
@@ -246,7 +262,8 @@
     "seeAlso": [
       "flow",
       "press",
-      "lumen"
+      "lumen",
+      "vines"
     ],
     "alwaysGrove": true
   },
@@ -263,7 +280,8 @@
     "term": "Thorn",
     "category": "content",
     "tagline": "Content Moderation",
-    "definition": "Every rose has thorns for protection. Not aggression, but defense—the boundary that keeps harm at bay."
+    "definition": "Every rose has thorns for protection. Not aggression, but defense—the boundary that keeps harm at bay.",
+    "standardTerm": "Content Moderation"
   },
   "meadow": {
     "slug": "meadow",
@@ -271,7 +289,7 @@
     "category": "content",
     "tagline": "The Social Layer",
     "definition": "A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view.",
-    "standardTerm": "Feed"
+    "standardTerm": "Community Feed"
   },
   "forests": {
     "slug": "forests",
@@ -292,8 +310,10 @@
     "tagline": "Immersive Discovery",
     "definition": "Wander is a verb and a place. To wander is to move without a fixed destination, discovering by being present.",
     "seeAlso": [
-      "terrarium"
-    ]
+      "terrarium",
+      "oak"
+    ],
+    "standardTerm": "Discovery"
   },
   "grafts": {
     "slug": "grafts",
@@ -305,7 +325,8 @@
       "plant",
       "aria",
       "wayfinder"
-    ]
+    ],
+    "standardTerm": "Feature Flags"
   },
   "waystone": {
     "slug": "waystone",
@@ -313,7 +334,7 @@
     "category": "tools",
     "tagline": "Help Center",
     "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.",
-    "standardTerm": "Help"
+    "standardTerm": "Help Center"
   },
   "gossamer": {
     "slug": "gossamer",
@@ -323,7 +344,8 @@
     "definition": "Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.",
     "seeAlso": [
       "etch"
-    ]
+    ],
+    "alwaysGrove": true
   },
   "ivy": {
     "slug": "ivy",
@@ -333,14 +355,16 @@
     "definition": "Ivy climbs the lattice, reaching out, intertwining, linking one point to another. But ivy does something else too: what it covers, it conceals. An ivy-covered wall disappears into green. The structure beneath becomes invisible to anyone outside.",
     "seeAlso": [
       "lattice"
-    ]
+    ],
+    "standardTerm": "Email"
   },
   "verge": {
     "slug": "verge",
     "term": "Verge",
     "category": "tools",
     "tagline": "Remote Coding Infrastructure",
-    "definition": "The verge is the edge. The threshold. The liminal space where one state ends and another begins—not quite here, not quite there. In impossible geometries, the verge is where transformation happens. You cross it and emerge changed."
+    "definition": "The verge is the edge. The threshold. The liminal space where one state ends and another begins—not quite here, not quite there. In impossible geometries, the verge is where transformation happens. You cross it and emerge changed.",
+    "standardTerm": "Domain Manager"
   },
   "forage": {
     "slug": "forage",
@@ -350,14 +374,16 @@
     "definition": "Before you can plant, you have to search. You walk the forest floor, looking for what you need: something that fits, something that's available, something worth bringing home.",
     "seeAlso": [
       "plant"
-    ]
+    ],
+    "standardTerm": "Domain Search"
   },
   "nook": {
     "slug": "nook",
     "term": "Nook",
     "category": "tools",
     "tagline": "Private Video Sharing",
-    "definition": "A nook is a tucked-away corner, a quiet space set apart from the main room. Somewhere intimate and private."
+    "definition": "A nook is a tucked-away corner, a quiet space set apart from the main room. Somewhere intimate and private.",
+    "standardTerm": "Link in Bio"
   },
   "shutter": {
     "slug": "shutter",
@@ -371,7 +397,8 @@
     "term": "Outpost",
     "category": "tools",
     "tagline": "Minecraft Server",
-    "definition": "An outpost is where you gather at the edge of the wilderness. A place to rest, regroup, and adventure together."
+    "definition": "An outpost is where you gather at the edge of the wilderness. A place to rest, regroup, and adventure together.",
+    "standardTerm": "Game Server"
   },
   "aria": {
     "slug": "aria",
@@ -391,21 +418,24 @@
       "wander",
       "passage",
       "press"
-    ]
+    ],
+    "standardTerm": "Blog Importer"
   },
   "trove": {
     "slug": "trove",
     "term": "Trove",
     "category": "tools",
     "tagline": "Library Book Discovery",
-    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered."
+    "definition": "A trove is a collection of precious things, gathered and waiting to be discovered.",
+    "standardTerm": "Collections"
   },
   "heartwood": {
     "slug": "heartwood",
     "term": "Heartwood",
     "category": "operations",
     "tagline": "Authentication",
-    "definition": "Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core."
+    "definition": "Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.",
+    "standardTerm": "Authentication"
   },
   "pantry": {
     "slug": "pantry",
@@ -415,14 +445,16 @@
     "definition": "A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.",
     "seeAlso": [
       "press"
-    ]
+    ],
+    "standardTerm": "Data Store"
   },
   "passage": {
     "slug": "passage",
     "term": "Passage",
     "category": "operations",
     "tagline": "Subdomain Routing",
-    "definition": "A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care."
+    "definition": "A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.",
+    "standardTerm": "Router"
   },
   "petal": {
     "slug": "petal",
@@ -433,7 +465,8 @@
     "seeAlso": [
       "blooms",
       "lumen"
-    ]
+    ],
+    "standardTerm": "Image Moderation"
   },
   "warden": {
     "slug": "warden",
@@ -443,7 +476,8 @@
     "definition": "The one who holds the keys. A warden doesn't open doors for just anyone—they verify, they check, they ensure only the right requests pass through.",
     "seeAlso": [
       "scribe"
-    ]
+    ],
+    "standardTerm": "API Gateway"
   },
   "press": {
     "slug": "press",
@@ -453,7 +487,8 @@
     "definition": "A press is a tool of transformation. The olive press extracts oil from fruit. The wine press releases juice from grapes. The printing press prepares words for the world. Every press takes something raw and makes it ready.",
     "seeAlso": [
       "scribe"
-    ]
+    ],
+    "standardTerm": "Build System"
   },
   "vista": {
     "slug": "vista",
@@ -465,7 +500,8 @@
       "rings",
       "clearing",
       "etch"
-    ]
+    ],
+    "standardTerm": "Monitoring"
   },
   "patina": {
     "slug": "patina",
@@ -475,7 +511,8 @@
     "definition": "A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.",
     "seeAlso": [
       "press"
-    ]
+    ],
+    "standardTerm": "Backups"
   },
   "mycelium": {
     "slug": "mycelium",
@@ -484,8 +521,10 @@
     "tagline": "MCP Server",
     "definition": "In the forest, mycelium is the wood wide web: invisible fungal threads connecting every tree, sharing nutrients and signals across the entire ecosystem. It's how the forest communicates with itself.",
     "seeAlso": [
-      "amber"
-    ]
+      "amber",
+      "seedling"
+    ],
+    "standardTerm": "MCP Server"
   },
   "lumen": {
     "slug": "lumen",
@@ -496,8 +535,10 @@
     "seeAlso": [
       "wisp",
       "flow",
-      "thorn"
-    ]
+      "thorn",
+      "fireside"
+    ],
+    "standardTerm": "AI Gateway"
   },
   "zephyr": {
     "slug": "zephyr",
@@ -510,7 +551,8 @@
       "flow",
       "wander",
       "lumen"
-    ]
+    ],
+    "standardTerm": "Email Gateway"
   },
   "shade": {
     "slug": "shade",
@@ -557,7 +599,8 @@
       "wander",
       "wanderer",
       "wayfinder"
-    ]
+    ],
+    "standardTerm": "Trusted Guide"
   },
   "wayfinder": {
     "slug": "wayfinder",
@@ -569,6 +612,87 @@
     "seeAlso": [
       "wander",
       "wanderer"
-    ]
+    ],
+    "standardTerm": "Grove Keeper"
+  },
+  "seedling": {
+    "slug": "seedling",
+    "term": "Seedling",
+    "category": "foundational",
+    "tagline": "Starter Tier",
+    "definition": "A seedling is the first green shoot breaking through soil. Everything ahead of it. Just planted, full of potential.",
+    "seeAlso": [
+      "blooms",
+      "plant"
+    ],
+    "standardTerm": "Starter"
+  },
+  "sapling": {
+    "slug": "sapling",
+    "term": "Sapling",
+    "category": "foundational",
+    "tagline": "Growth Tier",
+    "definition": "A sapling has survived its first seasons. Still young, but growing strong. The trunk thickens. The roots spread.",
+    "seeAlso": [
+      "centennial",
+      "etch"
+    ],
+    "standardTerm": "Growth"
+  },
+  "oak": {
+    "slug": "oak",
+    "term": "Oak",
+    "category": "foundational",
+    "tagline": "Pro Tier",
+    "definition": "An oak takes decades to mature, but once it does, nothing uproots it. Deep roots, broad canopy, shelter for everything beneath.",
+    "seeAlso": [
+      "blooms"
+    ],
+    "standardTerm": "Pro"
+  },
+  "evergreen": {
+    "slug": "evergreen",
+    "term": "Evergreen",
+    "category": "foundational",
+    "tagline": "Ultra Tier",
+    "definition": "An evergreen never loses its leaves. Through every season, it remains. Constant, dependable, always flourishing.",
+    "standardTerm": "Ultra"
+  },
+  "workshop": {
+    "slug": "workshop",
+    "term": "Workshop",
+    "category": "platform",
+    "tagline": "Internal Services",
+    "definition": "A workshop is where tools are made and maintained. Sawdust on the floor, projects in various stages, everything within reach.",
+    "seeAlso": [
+      "wander",
+      "wanderer"
+    ],
+    "standardTerm": "Internal Services"
+  },
+  "fireside": {
+    "slug": "fireside",
+    "term": "Fireside",
+    "category": "platform",
+    "tagline": "Focus Mode",
+    "definition": "A fireside is where stories begin. The crackling warmth, the gentle light, the safety of the circle.",
+    "seeAlso": [
+      "wisp"
+    ],
+    "standardTerm": "Focus Mode"
+  },
+  "vines": {
+    "slug": "vines",
+    "term": "Vines",
+    "category": "platform",
+    "tagline": "Sidebar Links",
+    "definition": "Vines climb the lattice, filling the spaces between the main structure. They add color and life to the margins.",
+    "seeAlso": [
+      "lattice",
+      "flow",
+      "workshop",
+      "fireside"
+    ],
+    "standardTerm": "Sidebar Links"
   }
 }
