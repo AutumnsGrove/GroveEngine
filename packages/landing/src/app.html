@@ -1,25 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
-    <!-- Blocking script to prevent FOUC (flash of unstyled content) -->
-    <script>
-      try {
-        const stored = localStorage.getItem("grove-theme");
-        // Default to dark if no stored preference (matches theme store default)
-        if (stored === "dark" || !stored) {
-          document.documentElement.classList.add("dark");
-        }
-      } catch (e) {
-        // localStorage unavailable, default to dark
-        document.documentElement.classList.add("dark");
-      }
-    </script>
-    <!-- Inline critical colors to prevent white flash before CSS loads.
+    <!-- Inline critical colors — dark by default to prevent any flash.
          These match the Grove design system values in app.css exactly. -->
     <style>
-      html, body { margin: 0; background-color: #fefdfb; color: #3d2914; }
-      html.dark, html.dark body { background-color: #171a1e; color: #f5f2ea; color-scheme: dark; }
+      html, body { margin: 0; background-color: #171a1e; color: #f5f2ea; color-scheme: dark; }
+      html:not(.dark), html:not(.dark) body { background-color: #fefdfb; color: #3d2914; color-scheme: light; }
     </style>
+    <!-- Blocking script: only acts if user has explicitly chosen light mode -->
+    <script>
+      try {
+        var stored = localStorage.getItem("grove-theme");
+        if (stored === "light") {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Grove: a place to Be. Coming soon." />
