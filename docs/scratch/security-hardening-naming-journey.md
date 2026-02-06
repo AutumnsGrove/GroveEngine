@@ -87,3 +87,9 @@ In the grove, the tortoise moves slowly through the underbrush, checking each tr
 **Category:** Watcher (like the Deer who watches for accessibility, the Tortoise watches for security)
 
 *The shell grows from within. Defense is not what you add — it's what you are.* 🐢
+
+---
+
+## Postscript: Tortoise → Turtle (2026-02-06)
+
+We renamed the skill from `tortoise-harden` to `turtle-harden` for easier typing. Six fewer characters in a command you reach for often — that adds up. The spirit is the same: patient, layered, bone-deep defense. We just gave it a shorter name to call by.

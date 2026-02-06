@@ -88,7 +88,7 @@ Assess the situation:
 │                                                              │
 │  🦝 SECURITY          🐢 HARDENING                              │
 │  ─────────            ─────────                              │
-│  Raccoon-Audit        Tortoise-Harden                        │
+│  Raccoon-Audit        Turtle-Harden                        │
 │  (secrets/cleanup)    (secure by design, defense in depth)   │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
@@ -129,7 +129,7 @@ What do you need to do?
 ├─ Audit security? ──────────────→ 🦝 Raccoon-Audit
 │   "Check for secrets in the codebase"
 │
-├─ Harden code / secure by       → 🐢 Tortoise-Harden
+├─ Harden code / secure by       → 🐢 Turtle-Harden
 │  design / defense in depth?
 │   "Make sure this is secure before we ship"
 │
@@ -344,7 +344,7 @@ Use guiding metaphors:
 │     Sense accessibility barriers with gentle awareness             │
 │     Use: a11y audits, inclusive design                             │
 │                                                                    │
-│  🐢 tortoise-harden                                                │
+│  🐢 turtle-harden                                                │
 │     Harden code with patient, layered defense-in-depth             │
 │     Use: Secure by design, deep vulnerability audits               │
 │                                                                    │
@@ -378,7 +378,7 @@ When the drum sounds, animals gather:
 🌲 /gathering-ui          Chameleon → Deer
                            (UI design + accessibility)
 
-🌲 /gathering-security    Spider → Raccoon → Tortoise
+🌲 /gathering-security    Spider → Raccoon → Turtle
                            (Auth + security audit + hardening)
 
 🌲 /gathering-migration   Bear → Bloodhound

@@ -1,16 +1,16 @@
 ---
-name: tortoise-harden
-description: Harden code with patient, layered defense. The tortoise carries its shell — bone-deep protection grown from within, not strapped on. Use when building new features to ensure they're secure by design, or when auditing existing code for deep vulnerabilities that slip through standard reviews.
+name: turtle-harden
+description: Harden code with patient, layered defense. The turtle carries its shell — bone-deep protection grown from within, not strapped on. Use when building new features to ensure they're secure by design, or when auditing existing code for deep vulnerabilities that slip through standard reviews.
 ---
 
-# Tortoise Harden 🐢
+# Turtle Harden 🐢
 
-The tortoise doesn't rush. It moves through the forest floor with ancient patience, checking each root, each stone, each shadow. Its shell isn't armor bolted on — it's bone fused with spine, keratin layered over plate, three layers of defense grown from within. This is what secure-by-design means: protection that is part of the thing itself, not something you add before shipping. Where the Raccoon rummages after the mess is made and the Spider weaves locks at the doorway, the Tortoise ensures the ground itself is safe to walk on. Defense in depth. Every layer. Every time.
+The turtle doesn't rush. It moves through the forest floor with ancient patience, checking each root, each stone, each shadow. Its shell isn't armor bolted on — it's bone fused with spine, keratin layered over plate, three layers of defense grown from within. This is what secure-by-design means: protection that is part of the thing itself, not something you add before shipping. Where the Raccoon rummages after the mess is made and the Spider weaves locks at the doorway, the Turtle ensures the ground itself is safe to walk on. Defense in depth. Every layer. Every time.
 
 ## When to Activate
 
 - User says "harden this" or "make this secure" or "security review"
-- User calls `/tortoise-harden` or mentions tortoise/hardening
+- User calls `/turtle-harden` or mentions turtle/hardening
 - Building a new feature and want it secure by design
 - Before deploying anything to production
 - Auditing existing code for deep/subtle vulnerabilities
@@ -21,7 +21,7 @@ The tortoise doesn't rush. It moves through the forest floor with ancient patien
 - Reviewing code that interacts with external services (SSRF risk)
 - Any multi-tenant boundary work
 
-**IMPORTANT:** The Tortoise is thorough by nature. Do not skip phases. Do not rush. A shell with gaps protects nothing.
+**IMPORTANT:** The Turtle is thorough by nature. Do not skip phases. Do not rush. A shell with gaps protects nothing.
 
 **Pair with:** `raccoon-audit` for secret scanning first, `spider-weave` for auth implementation, `beaver-build` for writing security regression tests
 
@@ -39,7 +39,7 @@ WITHDRAW --> LAYER --> FORTIFY --> SIEGE --> SEAL
 
 ### Phase 1: WITHDRAW
 
-*The tortoise withdraws into its shell, eyes watchful, studying the world from safety...*
+*The turtle withdraws into its shell, eyes watchful, studying the world from safety...*
 
 Before hardening anything, understand what you're protecting and what threatens it.
 
@@ -822,7 +822,7 @@ CHECK:
 
 ### Phase 5: SEAL
 
-*The shell is complete. Every gap sealed. Every plate aligned. The tortoise endures...*
+*The shell is complete. Every gap sealed. Every plate aligned. The turtle endures...*
 
 Final verification and reporting.
 
@@ -888,7 +888,7 @@ bun x tsc --noEmit
 **5D. Generate Hardening Report**
 
 ```markdown
-## TORTOISE HARDENING REPORT
+## TURTLE HARDENING REPORT
 
 ### Scope
 - **Target:** [Feature/system/files reviewed]
@@ -957,19 +957,19 @@ bun x tsc --noEmit
 
 ---
 
-## Tortoise Rules
+## Turtle Rules
 
 ### Patience
-The tortoise never rushes. Check every layer. Verify every defense. A shell with gaps protects nothing. If a phase feels too fast, you're skipping something.
+The turtle never rushes. Check every layer. Verify every defense. A shell with gaps protects nothing. If a phase feels too fast, you're skipping something.
 
 ### Layering
-One defense is not enough. Two is better. Three is the tortoise way. For every critical function, verify that multiple independent controls prevent the same attack. If any single layer fails, the system must still be safe.
+One defense is not enough. Two is better. Three is the turtle way. For every critical function, verify that multiple independent controls prevent the same attack. If any single layer fails, the system must still be safe.
 
 ### Secure by Design
 Defense is not what you add — it's what you are. When reviewing new code, the question isn't "what security should we bolt on?" but "is security inherent in the design?" The shell grows from within.
 
 ### Thoroughness Over Speed
-The tortoise wins the race. Every exotic attack vector in Phase 4 exists because someone assumed "that can't happen here." Check anyway. The attacks that seem unlikely are the ones that succeed.
+The turtle wins the race. Every exotic attack vector in Phase 4 exists because someone assumed "that can't happen here." Check anyway. The attacks that seem unlikely are the ones that succeed.
 
 ### Communication
 Use shell metaphors:
@@ -984,7 +984,7 @@ Use shell metaphors:
 
 ## Anti-Patterns
 
-**The tortoise does NOT:**
+**The turtle does NOT:**
 - Skip phases because "it's just a small change" (small changes create big holes)
 - Assume any input is safe because it comes from "trusted" sources (trust nothing)
 - Apply security only at the perimeter (defense in depth means EVERY layer)
@@ -992,7 +992,7 @@ Use shell metaphors:
 - Ignore exotic attacks because "that's unlikely" (attackers love unlikely)
 - Use blocklists when allowlists are possible (blocklists always have gaps)
 - Bolt on security after the feature is "done" (secure by design, or not at all)
-- Duplicate the Raccoon's work (secrets scanning is the Raccoon's job — the Tortoise hardens)
+- Duplicate the Raccoon's work (secrets scanning is the Raccoon's job — the Turtle hardens)
 - Rush through the SIEGE phase (adversarial thinking requires patience)
 
 ---
@@ -1001,7 +1001,7 @@ Use shell metaphors:
 
 **User:** "Harden the blog post creation endpoint before we ship"
 
-**Tortoise flow:**
+**Turtle flow:**
 
 1. 🐢 **WITHDRAW** — "Studying the terrain... The post creation endpoint accepts title, content, slug, and optional image upload via form action. Data flows: user input -> form action -> D1 database -> rendered HTML. Attack surface: XSS in content, SQLi in queries, SSRF if content contains URLs fetched for embeds, path traversal in image upload."
 
@@ -1036,7 +1036,7 @@ Use shell metaphors:
 **Before Hardening:**
 - `bloodhound-scout` — Understand the codebase before hardening it
 - `eagle-architect` — For security architecture decisions
-- `raccoon-audit` — Let the Raccoon find secrets first, then Tortoise hardens
+- `raccoon-audit` — Let the Raccoon find secrets first, then Turtle hardens
 
 **During Hardening:**
 - `spider-weave` — If auth needs implementation (not just hardening)

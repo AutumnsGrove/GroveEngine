@@ -1,11 +1,11 @@
 ---
 name: gathering-security
-description: The drum sounds. Spider, Raccoon, and Tortoise gather for complete security work. Use when implementing auth, auditing security, or hardening code end-to-end.
+description: The drum sounds. Spider, Raccoon, and Turtle gather for complete security work. Use when implementing auth, auditing security, or hardening code end-to-end.
 ---
 
 # Gathering Security 🌲🕷️🦝🐢
 
-The drum echoes in the shadows. The Spider weaves intricate webs of authentication, each strand placed with precision. The Raccoon rummages through every corner, finding what doesn't belong, cleaning what could harm. The Tortoise moves with ancient patience, layering defense upon defense, testing every plate of the shell. Together they secure the forest — doors locked tight, secrets safe, paths protected, and the ground itself hardened against anything that comes.
+The drum echoes in the shadows. The Spider weaves intricate webs of authentication, each strand placed with precision. The Raccoon rummages through every corner, finding what doesn't belong, cleaning what could harm. The Turtle moves with ancient patience, layering defense upon defense, testing every plate of the shell. Together they secure the forest — doors locked tight, secrets safe, paths protected, and the ground itself hardened against anything that comes.
 
 ## When to Summon
 
@@ -33,7 +33,7 @@ Request   Animals      Work        Check       Hardened
 
 1. **🕷️ Spider** — Weave authentication webs with patient precision
 2. **🦝 Raccoon** — Rummage for security risks and cleanup
-3. **🐢 Tortoise** — Harden with layered, defense-in-depth protection
+3. **🐢 Turtle** — Harden with layered, defense-in-depth protection
 
 ---
 
@@ -65,7 +65,7 @@ Receive and parse the request:
 >   - Vulnerability check
 >   - Dependency audit
 >   - Dead code removal
-> - 🐢 Tortoise hardening defenses
+> - 🐢 Turtle hardening defenses
 >   - Input/output validation
 >   - Security headers & CSP
 >   - Defense-in-depth enforcement
@@ -79,11 +79,11 @@ Not every gathering needs all three animals:
 
 | Situation | Animals Needed |
 |-----------|---------------|
-| New auth system + full security | All three: Spider → Raccoon → Tortoise |
-| Auth already exists, need hardening | Raccoon → Tortoise |
-| New feature, ensure secure by design | Tortoise only (or Tortoise → Raccoon) |
-| Secrets leak / incident response | Raccoon → Spider (rotate creds) → Tortoise (verify) |
-| Pre-production deploy | Raccoon → Tortoise |
+| New auth system + full security | All three: Spider → Raccoon → Turtle |
+| Auth already exists, need hardening | Raccoon → Turtle |
+| New feature, ensure secure by design | Turtle only (or Turtle → Raccoon) |
+| Secrets leak / incident response | Raccoon → Spider (rotate creds) → Turtle (verify) |
+| Pre-production deploy | Raccoon → Turtle |
 
 ---
 
@@ -96,7 +96,7 @@ Dispatch in sequence:
 **Full Dispatch Order:**
 
 ```
-Spider ──→ Raccoon ──→ Tortoise
+Spider ──→ Raccoon ──→ Turtle
    │          │            │
    │          │            │
 Weave      Audit       Harden
@@ -105,8 +105,8 @@ Auth       Secrets     Defenses
 
 **Dependencies:**
 - Spider must complete before Raccoon (needs auth to audit)
-- Raccoon should complete before Tortoise (clean first, then harden)
-- May iterate: Tortoise findings → Spider/Raccoon fixes → Tortoise re-verify
+- Raccoon should complete before Turtle (clean first, then harden)
+- May iterate: Turtle findings → Spider/Raccoon fixes → Turtle re-verify
 
 **Iteration Cycle (When Vulnerabilities Found):**
 
@@ -115,7 +115,7 @@ Auth       Secrets     Defenses
 │                   SECURITY ITERATION                              │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                   │
-│  🕷️ Spider ──► 🦝 Raccoon ──► 🐢 Tortoise                       │
+│  🕷️ Spider ──► 🦝 Raccoon ──► 🐢 Turtle                       │
 │  weaves auth    audits          hardens & tests                   │
 │       ▲                              │                            │
 │       │                              ▼                            │
@@ -129,15 +129,15 @@ Auth       Secrets     Defenses
 │       │    /         \                                            │
 │       │  Yes          No                                          │
 │       │   │           │                                           │
-│       └───┘    Raccoon/Tortoise                                   │
+│       └───┘    Raccoon/Turtle                                   │
 │                fixes directly                                     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 **Iteration Rules:**
-- Tortoise finds auth vulnerability → Spider patches → Tortoise re-verifies
-- Tortoise finds non-auth vulnerability → Fix directly → Tortoise re-verifies
-- Raccoon finds secrets → Raccoon cleans → Tortoise verifies no residual exposure
+- Turtle finds auth vulnerability → Spider patches → Turtle re-verifies
+- Turtle finds non-auth vulnerability → Fix directly → Turtle re-verifies
+- Raccoon finds secrets → Raccoon cleans → Turtle verifies no residual exposure
 - Maximum 3 iterations per issue (if more needed, architectural review required)
 - Each iteration focuses only on newly found/fixed items
 - Document all iterations in final report
@@ -223,7 +223,7 @@ Output:
 - Preventive measures in place
 ```
 
-**🐢 TORTOISE — HARDEN**
+**🐢 TURTLE — HARDEN**
 
 ```
 "Withdrawing to study the terrain..."
@@ -287,14 +287,14 @@ Output:
 - [ ] Raccoon: Dependencies up to date
 - [ ] Raccoon: No sensitive data in logs
 - [ ] Raccoon: Pre-commit hooks installed
-- [ ] Tortoise: Input validation on all entry points
-- [ ] Tortoise: Output encoding on all exit points
-- [ ] Tortoise: Security headers complete
-- [ ] Tortoise: CSP enforced (nonce-based)
-- [ ] Tortoise: CORS restricted to exact origins
-- [ ] Tortoise: Defense-in-depth verified (2+ layers per critical function)
-- [ ] Tortoise: Exotic attack vectors tested and clear
-- [ ] Tortoise: Multi-tenant isolation verified (if applicable)
+- [ ] Turtle: Input validation on all entry points
+- [ ] Turtle: Output encoding on all exit points
+- [ ] Turtle: Security headers complete
+- [ ] Turtle: CSP enforced (nonce-based)
+- [ ] Turtle: CORS restricted to exact origins
+- [ ] Turtle: Defense-in-depth verified (2+ layers per critical function)
+- [ ] Turtle: Exotic attack vectors tested and clear
+- [ ] Turtle: Multi-tenant isolation verified (if applicable)
 
 **Security Test Cases:**
 
@@ -341,7 +341,7 @@ Hardening:
 ### Security Work: [Description]
 
 ### Animals Mobilized
-🕷️ Spider → 🦝 Raccoon → 🐢 Tortoise
+🕷️ Spider → 🦝 Raccoon → 🐢 Turtle
 
 ### Authentication Implemented
 - **Provider:** [OAuth 2.0 / GitHub / Google / etc.]
@@ -414,12 +414,12 @@ Hardening:
 
 1. 🌲 **SUMMON** — "Mobilizing full security gathering: GitHub OAuth + audit + hardening. All three animals needed."
 
-2. 🌲 **ORGANIZE** — "Spider implements auth → Raccoon audits for secrets/vulns → Tortoise hardens everything"
+2. 🌲 **ORGANIZE** — "Spider implements auth → Raccoon audits for secrets/vulns → Turtle hardens everything"
 
 3. 🌲 **EXECUTE** —
    - 🕷️ Spider: "OAuth client registered, PKCE flow implemented, sessions working, routes protected"
    - 🦝 Raccoon: "No secrets found, 2 dependency vulns patched, dead debug endpoint removed"
-   - 🐢 Tortoise: "CSP configured with nonces, CORS locked to exact origins, all inputs validated with Zod, constant-time token comparison added, prototype pollution vector in config merge fixed, defense-in-depth verified at 3 layers per critical function"
+   - 🐢 Turtle: "CSP configured with nonces, CORS locked to exact origins, all inputs validated with Zod, constant-time token comparison added, prototype pollution vector in config merge fixed, defense-in-depth verified at 3 layers per critical function"
 
 4. 🌲 **VALIDATE** — "Auth works, audit clean, hardening verified, all exotic vectors tested clear"
 
@@ -431,12 +431,12 @@ Hardening:
 
 | Situation | Animals to Mobilize |
 |-----------|-------------------|
-| New auth + full security | Spider → Raccoon → Tortoise |
-| Auth exists, need deep hardening | Raccoon → Tortoise |
-| New feature, secure by design | Tortoise (optionally + Raccoon) |
-| Incident response | Raccoon → Spider → Tortoise |
-| Pre-production deploy | Raccoon → Tortoise |
-| Auth-only work | Spider → Raccoon (no Tortoise needed) |
+| New auth + full security | Spider → Raccoon → Turtle |
+| Auth exists, need deep hardening | Raccoon → Turtle |
+| New feature, secure by design | Turtle (optionally + Raccoon) |
+| Incident response | Raccoon → Spider → Turtle |
+| Pre-production deploy | Raccoon → Turtle |
+| Auth-only work | Spider → Raccoon (no Turtle needed) |
 
 ---
 
