@@ -40,12 +40,8 @@ import { AnnouncementEmail } from "../../packages/engine/src/lib/email/updates/A
 // Seasonal
 import { SeasonalGreeting } from "../../packages/engine/src/lib/email/seasonal/SeasonalGreeting";
 
-// Porch (uses GroveEmail directly — component imports resolve via workspace)
-import { GroveEmail } from "../../packages/engine/src/lib/email/components/GroveEmail";
-import {
-  GroveParagraph,
-  GroveHeading,
-} from "../../packages/engine/src/lib/email/components/GroveText";
+// Porch
+import { PorchReplyEmail } from "../../packages/engine/src/lib/email/porch/PorchReplyEmail";
 
 // ---------------------------------------------------------------------------
 // Template registry — each entry becomes a previewable HTML file
@@ -259,93 +255,18 @@ const TEMPLATES: TemplateEntry[] = [
   },
 
   // ── Porch ───────────────────────────────────────────────────────────
-  // PorchReplyEmail constructed inline (it uses package imports internally)
   {
     name: "PorchReplyEmail",
     category: "porch",
     description: "Porch conversation reply notification",
-    element: React.createElement(
-      GroveEmail,
-      { previewText: "Autumn replied to your Porch visit" },
-      React.createElement(GroveParagraph, null, "Hello River,"),
-      React.createElement(
-        GroveParagraph,
-        null,
-        React.createElement("strong", null, "Autumn"),
-        " replied to your Porch visit from ",
-        React.createElement("em", null, "January 15, 2026"),
-        ".",
-      ),
-      React.createElement("hr", {
-        style: {
-          border: "none",
-          borderTop: "1px solid #e8e4dc",
-          margin: "24px 0",
-        },
-      }),
-      React.createElement(
-        GroveHeading,
-        { as: "h2" },
-        "Their reply",
-      ),
-      React.createElement(
-        "div",
-        {
-          style: {
-            fontSize: "15px",
-            lineHeight: "1.7",
-            color: "#4a4a4a",
-            padding: "16px",
-            backgroundColor: "#f8f6f1",
-            borderRadius: "8px",
-            whiteSpace: "pre-wrap" as const,
-            marginBottom: "24px",
-          },
-        },
-        "Thank you for stopping by! I loved reading your thoughts on the latest post. The forest metaphor really resonated with me too — there's something about building in public that feels like tending a garden.\n\nLet me know if you'd like to collaborate on something. Always happy to chat.",
-      ),
-      React.createElement("hr", {
-        style: {
-          border: "none",
-          borderTop: "1px solid #e8e4dc",
-          margin: "24px 0",
-        },
-      }),
-      React.createElement(
-        "div",
-        { style: { textAlign: "center" as const, margin: "32px 0" } },
-        React.createElement(
-          "a",
-          {
-            href: "https://autumn.grove.place/porch/visit/abc123",
-            style: {
-              display: "inline-block",
-              padding: "12px 24px",
-              backgroundColor: "#5c6b5c",
-              color: "#ffffff",
-              textDecoration: "none",
-              borderRadius: "6px",
-              fontSize: "14px",
-              fontWeight: "500",
-            },
-          },
-          "View full conversation",
-        ),
-      ),
-      React.createElement(
-        "p",
-        {
-          style: {
-            fontSize: "13px",
-            lineHeight: "1.5",
-            color: "#6b6b6b",
-            margin: "24px 0 0 0",
-            fontStyle: "italic",
-          },
-        },
-        "Porch is a quiet space for meaningful conversation. Take your time responding\u2014there\u2019s no rush here.",
-      ),
-    ),
+    element: React.createElement(PorchReplyEmail, {
+      recipientName: "River",
+      replierName: "Autumn",
+      replyContent:
+        "Thank you for stopping by! I loved reading your thoughts on the latest post. The forest metaphor really resonated with me too \u2014 there\u2019s something about building in public that feels like tending a garden.\n\nLet me know if you\u2019d like to collaborate on something. Always happy to chat.",
+      visitDate: "January 15, 2026",
+      conversationUrl: "https://autumn.grove.place/porch/visit/abc123",
+    }),
   },
 ];
 
