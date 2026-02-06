@@ -10,7 +10,7 @@ import typer
 
 from grove_find.core.config import get_config
 from grove_find.core.tools import discover_tools, run_tool
-from grove_find.output import console, print_section, print_warning
+from grove_find.output import console, print_section, print_warning, print_error
 
 app = typer.Typer(help="File type searches")
 
@@ -19,6 +19,11 @@ def _run_fd(args: list[str], cwd: Path, limit: int = 50) -> str:
     """Run fd with standard options."""
     tools = discover_tools()
     if not tools.fd:
+        print_error(
+            "fd is not installed. File-type searches require fd.\n"
+            "  Install: apt install fd-find (Ubuntu) or brew install fd (macOS)\n"
+            "  Tip: Use 'gf search', 'gf func', 'gf class', 'gf usage' instead — they only need ripgrep."
+        )
         raise typer.Exit(1)
 
     config = get_config()
@@ -175,6 +180,11 @@ def yaml_command(pattern: Optional[str] = None) -> None:
 
     tools = discover_tools()
     if not tools.fd:
+        print_error(
+            "fd is not installed. File-type searches require fd.\n"
+            "  Install: apt install fd-find (Ubuntu) or brew install fd (macOS)\n"
+            "  Tip: Use 'gf search', 'gf func', 'gf class', 'gf usage' instead — they only need ripgrep."
+        )
         raise typer.Exit(1)
 
     base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
@@ -232,6 +242,11 @@ def shell_command(pattern: Optional[str] = None) -> None:
 
     tools = discover_tools()
     if not tools.fd:
+        print_error(
+            "fd is not installed. File-type searches require fd.\n"
+            "  Install: apt install fd-find (Ubuntu) or brew install fd (macOS)\n"
+            "  Tip: Use 'gf search', 'gf func', 'gf class', 'gf usage' instead — they only need ripgrep."
+        )
         raise typer.Exit(1)
 
     base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
@@ -275,6 +290,11 @@ def test_command(name: Optional[str] = None) -> None:
 
     tools = discover_tools()
     if not tools.fd:
+        print_error(
+            "fd is not installed. File-type searches require fd.\n"
+            "  Install: apt install fd-find (Ubuntu) or brew install fd (macOS)\n"
+            "  Tip: Use 'gf search', 'gf func', 'gf class', 'gf usage' instead — they only need ripgrep."
+        )
         raise typer.Exit(1)
 
     base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
@@ -336,6 +356,11 @@ def config_command(name: Optional[str] = None) -> None:
 
     tools = discover_tools()
     if not tools.fd:
+        print_error(
+            "fd is not installed. File-type searches require fd.\n"
+            "  Install: apt install fd-find (Ubuntu) or brew install fd (macOS)\n"
+            "  Tip: Use 'gf search', 'gf func', 'gf class', 'gf usage' instead — they only need ripgrep."
+        )
         raise typer.Exit(1)
 
     base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]

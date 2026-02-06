@@ -10,22 +10,28 @@ The `AGENT.md` file contains all project-specific instructions, workflows, and g
 
 ## Codebase Navigation (grove-find)
 
-**After reading AGENT.md**, run this command to load the codebase search toolkit:
+**After reading AGENT.md**, use the Python-based `gf` tool for codebase search:
 
 ```bash
-GF_AGENT=1 source scripts/repo/grove-find.sh && gfagent
+uv run --project tools/grove-find gf --agent <command>
 ```
 
-The `GF_AGENT=1` flag enables agent mode: no colors, no emoji, no box-drawing characters—just clean output.
+The `--agent` flag enables agent mode: no colors, no emoji, no box-drawing characters—just clean output.
 
-This gives you 45+ blazing-fast search commands for navigating the codebase. Key commands:
-- `gf "pattern"` — Search entire codebase
-- `gfused "Name"` — Find where a component is used
-- `gfrecent 1` — Files changed today
-- `gfchanged` — Files changed on current branch
-- `gfengine` — Verify engine-first pattern compliance
+**Key commands:**
+- `gf --agent search "pattern"` — Search entire codebase
+- `gf --agent usage "Name"` — Find where a component is used
+- `gf --agent func "name"` — Find function definitions
+- `gf --agent class "Name"` — Find class/component definitions
+- `gf --agent recent 1` — Files changed today
+- `gf --agent changed` — Files changed on current branch
+- `gf --agent engine` — Find engine imports
+- `gf --agent todo` — Find TODO/FIXME/HACK comments
+- `gf --agent git churn` — Most frequently changed files
 
-Run `gfhelp` for full documentation or `gfagent` for a compact reference.
+Run `gf --help` for full command list.
+
+**Web/remote sessions:** If `fd` is not installed, file-type searches (`gf svelte`, `gf ts`, etc.) won't work. All other commands (search, func, class, usage, recent, changed, todo, git, engine, etc.) work with just `rg` + `git`.
 
 ---
 
