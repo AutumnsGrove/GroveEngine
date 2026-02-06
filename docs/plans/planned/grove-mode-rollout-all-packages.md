@@ -13,6 +13,13 @@ Grove Mode is the accessibility toggle that swaps Grove's nature-themed vocabula
 
 **The foundation is shipped:** `groveModeStore`, `GroveTerm`, `GroveSwap`, `GroveText`, `GroveSwapText`, `GroveIntro`, and the manifest with `standardTerm`/`alwaysGrove` fields all exist in the engine.
 
+**Verified component locations:**
+- `GroveIntro` → `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` (exported from `groveterm/index.ts`)
+- `GroveTerm` / `GroveSwap` / `GroveText` / `GroveSwapText` → same directory
+- `groveModeStore` → `packages/engine/src/lib/ui/stores/grove-mode.svelte.ts`
+- `grove-term-manifest.json` → `packages/engine/src/lib/data/grove-term-manifest.json`
+- Engine Footer (with Grove Mode toggle) → `packages/engine/src/lib/ui/components/chrome/Footer.svelte`
+
 **What this plan covers:** Closing every remaining gap across all monorepo packages so Grove Mode is complete end-to-end — every user-facing Grove term wrapped, every package site using the shared chrome Footer (with the toggle), and every Grove-named page showing a `GroveIntro` banner.
 
 ---
@@ -149,7 +156,18 @@ Consider creating this as a shared utility in the engine: `resolveTermString(gro
 
 The Workshop page (`packages/landing/src/routes/workshop/+page.svelte`) is the single densest page needing attention. Tool names already use `termSlug` for resolution, but the **description text** within each tool card contains hardcoded Grove terms.
 
-**Strategy:** Workshop tool definitions are data objects with string descriptions. Use `[[term]]` bracket syntax in description strings, then render with `<GroveText>` instead of raw text.
+**Strategy:** Workshop tool definitions are data objects with string `description` fields. These strings are rendered at line ~1133 in the workshop page as:
+
+```svelte
+<p class="text-foreground-muted mb-4 leading-relaxed">
+    {tool.description}
+</p>
+```
+
+The fix has two parts:
+
+1. **Data strings:** Add `[[term]]` bracket syntax to the description strings in the tool data objects (e.g., `"for all [[wanderer|Wanderers]]"`)
+2. **Rendering:** Replace `{tool.description}` with `<GroveSwapText content={tool.description} manifest={groveTermManifest} />` — this parses `[[term]]` syntax and silently swaps terms
 
 | Location | Term | Count | Fix |
 |----------|------|-------|-----|
@@ -161,8 +179,9 @@ The Workshop page (`packages/landing/src/routes/workshop/+page.svelte`) is the s
 | Tool descriptions | `Meadow` (in context) | 1 instance | Replace with `[[meadow\|Meadow]]` |
 | Tool descriptions | `Reeds` (in context) | 1 instance | Replace with `[[reeds\|Reeds]]` |
 | Tool descriptions | `Foliage` (in context) | 2 instances | Replace with `[[foliage\|Foliage]]` |
+| Rendering (line ~1133) | — | 1 change | Replace `{tool.description}` with `<GroveSwapText content={tool.description} manifest={groveTermManifest} />` |
 
-Then update the rendering component to pass descriptions through `<GroveSwapText>` (silent swap, no popups in dense card layouts) or `<GroveText>` (with popups for discoverability).
+Similarly, the `integration` field strings (e.g., `"for all Wanderers"`) are rendered elsewhere in the card — apply the same `[[term]]` + `<GroveSwapText>` pattern there.
 
 **Decision:** Use `<GroveSwapText>` for tool card descriptions — popups in a dense grid would be noisy. Reserve `<GroveTerm>` for dedicated feature pages where users are focused.
 
@@ -223,7 +242,7 @@ Meadow **uses the engine's Header** but has a **custom Footer** at `packages/mea
 - `packages/meadow/src/routes/+page.svelte` — Replace local Footer import with engine Footer
 - `packages/meadow/src/lib/components/Footer.svelte` — Can be deleted after migration (or kept as reference temporarily)
 
-**Note:** The custom footer has a tagline "Where the forest opens up." — this may need to be passed to the engine Footer as a slot or preserved via a different mechanism. Evaluate how the engine Footer handles per-site customization.
+**Note:** The custom footer has a tagline "Where the forest opens up." — this drops in favor of the standard Grove tagline ("A place to Be"). See Cross-Cutting Concerns > Chrome Footer Unification for rationale.
 
 ### 4B: Term Wrapping
 
@@ -253,7 +272,7 @@ Clearing **uses the engine's Header** but has a **custom Footer** at `packages/c
 - `packages/clearing/src/routes/incidents/[slug]/+page.svelte` — Same
 - `packages/clearing/src/lib/components/Footer.svelte` — Can be deleted after migration
 
-**Note:** Clearing's custom footer has a description "A clearing in the forest where you can see what's happening." — evaluate how to preserve this in the engine Footer.
+**Note:** Clearing's custom footer has a description "A clearing in the forest where you can see what's happening." — this drops in favor of the standard Grove tagline. See Cross-Cutting Concerns > Chrome Footer Unification for rationale.
 
 ### 5B: Term Wrapping
 
@@ -409,10 +428,29 @@ Three packages need their custom footers replaced with the engine's shared `Foot
 | Package | Current Footer | Engine Header? | Action |
 |---------|---------------|----------------|--------|
 | **Plant** | Custom inline in +layout.svelte | Custom (onboarding steps) | Replace footer only |
-| **Meadow** | Custom component `$lib/components/Footer.svelte` | Engine Header | Replace footer, preserve tagline |
+| **Meadow** | Custom component `$lib/components/Footer.svelte` | Engine Header | Replace footer |
 | **Clearing** | Custom component `$lib/components/Footer.svelte` | Engine Header | Replace footer in 2 page files |
 
 **Important:** The engine Footer has the Grove Mode toggle built in. Once these packages use the shared Footer, users can toggle Grove Mode on every site.
+
+**Engine Footer props (verified):**
+
+```typescript
+interface Props {
+    resourceLinks?: FooterLink[];  // Override default resource links
+    connectLinks?: FooterLink[];   // Override default connect links
+    legalLinks?: FooterLink[];     // Override default legal links
+    season?: Season;               // Override season (defaults to seasonStore)
+    maxWidth?: MaxWidth;           // 'narrow' | 'default' | 'wide'
+}
+```
+
+The engine Footer has a **hardcoded brand section**: Grove logo, "A place to Be" tagline, and "A quiet corner of the internet..." description. There are **no slots or props** for per-site taglines.
+
+**Impact on custom footer taglines:**
+- Meadow's "Where the forest opens up." → **Drops.** The unified footer uses the standard Grove tagline. This is acceptable — the Grove brand identity should be consistent across properties.
+- Clearing's "A clearing in the forest..." → **Drops.** Same rationale.
+- If per-site taglines are needed later, the engine Footer can be extended with a `tagline` prop — but that's out of scope for this rollout.
 
 ### Cross-Site localStorage
 
