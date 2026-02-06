@@ -99,6 +99,9 @@ def mcp_tools(ctx: click.Context) -> None:
         # GitHub WRITE
         {"name": "grove_gh_pr_create", "category": "GitHub", "description": "Create pull request", "safety": "WRITE"},
 
+        # Bindings
+        {"name": "grove_bindings", "category": "Bindings", "description": "List Cloudflare bindings", "safety": "READ"},
+
         # Dev Tools
         {"name": "grove_packages_list", "category": "Dev", "description": "List monorepo packages", "safety": "READ"},
         {"name": "grove_dev_status", "category": "Dev", "description": "Dev server status", "safety": "READ"},

@@ -9,7 +9,7 @@ from datetime import datetime
 import typer
 
 from grove_find.core.config import get_config
-from grove_find.core.tools import discover_tools, run_tool
+from grove_find.core.tools import discover_tools, find_files, find_files_by_glob, run_tool
 from grove_find.output import console, print_header, print_section, print_warning
 
 app = typer.Typer(help="Project health commands")
@@ -555,6 +555,20 @@ def briefing_command() -> None:
         console.print_raw("\n".join(lines))
     else:
         console.print("  No commits yesterday")
+
+    # Project structure counts
+    print_section("Project Structure", "")
+    page_routes = find_files_by_glob("**/+page.svelte", cwd=config.grove_root)
+    page_count = len(page_routes.strip().split("\n")) if page_routes.strip() else 0
+    console.print(f"  Page routes: {page_count}")
+
+    api_routes = find_files_by_glob("**/+server.ts", cwd=config.grove_root)
+    api_count = len(api_routes.strip().split("\n")) if api_routes.strip() else 0
+    console.print(f"  API routes: {api_count}")
+
+    components = find_files("", extensions=["svelte"], cwd=config.grove_root)
+    comp_count = len(components.strip().split("\n")) if components.strip() else 0
+    console.print(f"  Svelte components: {comp_count}")
 
     # Hot files
     print_section("Hot Files (Changed This Week)", "")
