@@ -197,7 +197,7 @@
 		</div>
 
 		<p class="text-foreground-subtle text-sm font-sans">
-			Signups open end of February. Feel free to look around.
+			Signups open February 14th. Feel free to look around.
 		</p>
 	</section>
 
@@ -215,13 +215,13 @@
 		>
 			{#snippet item(index: number)}
 				{#if index === 0}
-					<HeroRefuge season={seasonStore.current} active={true} {index} />
-				{:else if index === 1}
 					<HeroOwnership season={seasonStore.current} active={true} {index} />
-				{:else if index === 2}
+				{:else if index === 1}
 					<HeroShade season={seasonStore.current} active={true} {index} />
-				{:else if index === 3}
+				{:else if index === 2}
 					<HeroCentennial season={seasonStore.current} active={true} {index} />
+				{:else if index === 3}
+					<HeroRefuge season={seasonStore.current} active={true} {index} />
 				{:else if index === 4}
 					<HeroCommunity season={seasonStore.current} active={true} {index} />
 				{/if}

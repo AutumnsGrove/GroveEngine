@@ -1,6 +1,6 @@
 <!--
-  HeroRefuge — Slide 1: "A grove for people who lost their groves"
-  The emotional hook. Grove Logo center, TreePine + TreeCherry flanking,
+  HeroRefuge — "Your words deserve room to bloom"
+  The growth catalyst. Grove Logo center, TreePine + TreeCherry flanking,
   Fireflies ambient, GrassTuft + Mushroom on the ground.
 -->
 <script lang="ts">
@@ -19,13 +19,13 @@
 	let { season, active, index }: HeroSlideContentProps = $props();
 </script>
 
-<HeroSlide {season} {active} bgVariant="forest" ariaLabel="A grove for people who lost their groves">
+<HeroSlide {season} {active} bgVariant="forest" ariaLabel="Your words deserve room to bloom">
 	{#snippet text()}
 		<h2 class="text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
-			A grove for people who lost their groves.
+			Your words deserve room to bloom.
 		</h2>
 		<p class="text-body-sm md:text-body text-foreground-muted motion-safe:animate-fade-in" style="animation-delay: 150ms;">
-			No ads. No algorithms. Just your words, growing in soil you own.
+			No ads. No algorithms. Just your voice, growing in soil you own.
 		</p>
 		<a
 			href="https://plant.grove.place"
