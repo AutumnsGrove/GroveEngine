@@ -21,8 +21,8 @@ let groveTermManifest: Record<string, any> = {};
 try {
   const manifestPath = resolve(__dirname, "../../../../../../engine/src/lib/data/grove-term-manifest.json");
   groveTermManifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
-} catch {
-  // Manifest not found — banner feature will silently degrade
+} catch (e) {
+  console.warn("[Grove Mode] Could not load grove-term-manifest.json — article banners will be disabled:", (e as Error).message);
 }
 
 // Generate entries for all known documents (scanned from filesystem)
