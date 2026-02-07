@@ -53,23 +53,30 @@ export const load: PageServerLoad = async ({ parent, platform, params }) => {
   }
 
   // Load content stats in parallel
-  const [postResult, pageResult, mediaResult] = await Promise.all([
-    DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
-      .bind(id)
-      .first<{ count: number }>()
-      .catch(() => ({ count: 0 })),
-    DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
-      .bind(id)
-      .first<{ count: number }>()
-      .catch(() => ({ count: 0 })),
-    DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
-      .bind(id)
-      .first<{ count: number }>()
-      .catch(() => ({ count: 0 })),
-  ]);
+  const [postResult, pageResult, mediaResult, storageResult] =
+    await Promise.all([
+      DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
+        .bind(id)
+        .first<{ count: number }>()
+        .catch(() => ({ count: 0 })),
+      DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
+        .bind(id)
+        .first<{ count: number }>()
+        .catch(() => ({ count: 0 })),
+      DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
+        .bind(id)
+        .first<{ count: number }>()
+        .catch(() => ({ count: 0 })),
+      DB.prepare(
+        "SELECT COALESCE(SUM(size), 0) as total FROM media WHERE tenant_id = ?",
+      )
+        .bind(id)
+        .first<{ total: number }>()
+        .catch(() => ({ total: 0 })),
+    ]);
 
   return {
-    tenant,
+    tenant: { ...tenant, storage_used: storageResult?.total || 0 },
     postCount: postResult?.count || 0,
     pageCount: pageResult?.count || 0,
     mediaCount: mediaResult?.count || 0,
