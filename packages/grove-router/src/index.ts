@@ -12,15 +12,31 @@
 
 export interface Env {
   CDN: R2Bucket;
+  // Service Bindings for direct Worker-to-Worker communication
+  SCOUT?: Fetcher;
+  AUTH_API?: Fetcher;
+  MC_CONTROL?: Fetcher;
+  MYCELIUM?: Fetcher;
+  OG?: Fetcher;
+}
+
+/**
+ * Route target configuration.
+ * - `origin`: Public hostname (used as fallback for local dev where bindings aren't available)
+ * - `binding`: Optional key into Env for a Service Binding Fetcher
+ */
+interface RouteTarget {
+  origin: string;
+  binding?: keyof Env;
 }
 
 /**
  * Subdomain routing map.
- * Maps subdomains to their target Pages/Workers hostnames.
- * null = use default grove-lattice.pages.dev
- * string = proxy to that hostname
+ * Maps subdomains to their target Pages/Workers.
+ * string = simple proxy to that hostname (Pages projects, special handlers)
+ * RouteTarget = proxy with optional Service Binding (Workers)
  */
-const SUBDOMAIN_ROUTES: Record<string, string | null> = {
+const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
   // Auth subdomains → groveauth-frontend Pages
   auth: "groveauth-frontend.pages.dev",
   admin: "groveauth-frontend.pages.dev",
@@ -47,12 +63,18 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   music: "grovemusic.pages.dev",
   aria: "grovemusic.pages.dev",
 
-  // Workers - proxy to their workers.dev URLs
-  scout: "scout.m7jv4v7npb.workers.dev",
-  "auth-api": "groveauth.m7jv4v7npb.workers.dev",
-  "mc-control": "mc-control.m7jv4v7npb.workers.dev",
-  mycelium: "mycelium.m7jv4v7npb.workers.dev",
-  og: "grove-og.m7jv4v7npb.workers.dev", // OG image generation
+  // Workers - use Service Bindings when available, fall back to public URLs
+  scout: { origin: "scout.m7jv4v7npb.workers.dev", binding: "SCOUT" },
+  "auth-api": {
+    origin: "groveauth.m7jv4v7npb.workers.dev",
+    binding: "AUTH_API",
+  },
+  "mc-control": {
+    origin: "mc-control.m7jv4v7npb.workers.dev",
+    binding: "MC_CONTROL",
+  },
+  mycelium: { origin: "mycelium.m7jv4v7npb.workers.dev", binding: "MYCELIUM" },
+  og: { origin: "grove-og.m7jv4v7npb.workers.dev", binding: "OG" },
 
   // Reserved subdomains - route to landing until services are built
   // These are claimed to prevent user registration conflicts
@@ -200,16 +222,16 @@ export default {
       return new Response(object.body, { headers });
     }
 
-    // Handle unknown subdomains - proxy to groveengine for tenant lookup
-    // (null routes were removed - all special subdomains now have explicit targets)
+    // Resolve route target to hostname and optional Service Binding
+    const target = typeof routeTarget === "object" ? routeTarget : null;
+    const targetHostname =
+      (typeof routeTarget === "string" ? routeTarget : target?.origin) ||
+      "grove-lattice.pages.dev";
 
-    // Determine target hostname - default to main engine for tenant blogs
-    // Note: Project is "grove-lattice"
-    const targetHostname = routeTarget || "grove-lattice.pages.dev";
-
-    // Proxy to target
-    const targetUrl = new URL(request.url);
-    targetUrl.hostname = targetHostname;
+    // Check if a Service Binding is available for this target
+    const fetcher = target?.binding
+      ? (env[target.binding] as Fetcher | undefined)
+      : undefined;
 
     // Create new headers, preserving original headers
     const headers = new Headers(request.headers);
@@ -217,7 +239,10 @@ export default {
     // Add X-Forwarded-Host so the Pages app knows the original hostname
     headers.set("X-Forwarded-Host", host);
 
-    // Create the proxy request
+    // Build the proxy request
+    const targetUrl = new URL(request.url);
+    targetUrl.hostname = targetHostname;
+
     const proxyRequest = new Request(targetUrl.toString(), {
       method: request.method,
       headers: headers,
@@ -226,7 +251,11 @@ export default {
     });
 
     try {
-      const response = await fetch(proxyRequest);
+      // Use Service Binding when available (direct internal routing),
+      // fall back to public fetch (for local dev or Pages targets)
+      const response = fetcher
+        ? await fetcher.fetch(proxyRequest)
+        : await fetch(proxyRequest);
 
       // Return response as-is (preserving headers, status, etc.)
       return new Response(response.body, {

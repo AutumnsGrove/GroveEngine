@@ -57,4 +57,8 @@ export interface ZephyrResponse {
 export interface ZephyrConfig {
   baseUrl: string;
   apiKey: string;
+  /** Service Binding Fetcher for direct Worker-to-Worker communication. */
+  fetcher?: {
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+  };
 }

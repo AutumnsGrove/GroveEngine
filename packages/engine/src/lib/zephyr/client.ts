@@ -22,10 +22,12 @@ import type { ZephyrRequest, ZephyrResponse, ZephyrConfig } from "./types";
 export class ZephyrClient {
   private baseUrl: string;
   private apiKey: string;
+  private fetcher?: ZephyrConfig["fetcher"];
 
   constructor(config: ZephyrConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
     this.apiKey = config.apiKey;
+    this.fetcher = config.fetcher;
   }
 
   /**
@@ -46,7 +48,8 @@ export class ZephyrClient {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/send`, {
+      const doFetch = this.fetcher?.fetch ?? fetch;
+      const response = await doFetch(`${this.baseUrl}/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +124,8 @@ export class ZephyrClient {
     version: string;
   } | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/health`);
+      const doFetch = this.fetcher?.fetch ?? fetch;
+      const response = await doFetch(`${this.baseUrl}/health`);
       if (!response.ok) return null;
       return (await response.json()) as {
         status: string;

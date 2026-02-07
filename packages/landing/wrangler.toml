@@ -21,6 +21,11 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 binding = "AUTH"
 service = "groveauth"
 
+# Zephyr Service Binding (email gateway - direct internal routing)
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
 # R2 Storage binding
 [[r2_buckets]]
 binding = "CDN_BUCKET"
@@ -38,6 +43,7 @@ binding = "CACHE_KV"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
 # Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# - ZEPHYR_API_KEY - Shared secret for authenticating with Zephyr email worker
 # - RESEND_API_KEY (environment variable, not secret for Pages)
 # - ADMIN_EMAILS (environment variable)
 # - CDN_URL = https://cdn.grove.place (production only)

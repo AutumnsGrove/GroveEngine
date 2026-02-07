@@ -73,6 +73,13 @@ binding = "AUTH"
 service = "groveauth"
 
 # =============================================================================
+# Zephyr Service Binding (email gateway - direct internal routing)
+# =============================================================================
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# =============================================================================
 # Durable Objects - Loom Pattern (Grove's coordination layer)
 # =============================================================================
 # DOs are hosted in the grove-durable-objects worker and referenced here.

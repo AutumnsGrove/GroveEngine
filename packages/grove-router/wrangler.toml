@@ -19,3 +19,29 @@ routes = [
 [[r2_buckets]]
 binding = "CDN"
 bucket_name = "grove-cdn"
+
+# =============================================================================
+# Service Bindings - Direct Worker-to-Worker communication
+# =============================================================================
+# These replace public URL fetches with internal Cloudflare networking,
+# eliminating DNS resolution, TLS overhead, and Error 1042 failures.
+
+[[services]]
+binding = "SCOUT"
+service = "scout"
+
+[[services]]
+binding = "AUTH_API"
+service = "groveauth"
+
+[[services]]
+binding = "MC_CONTROL"
+service = "mc-control"
+
+[[services]]
+binding = "MYCELIUM"
+service = "mycelium"
+
+[[services]]
+binding = "OG"
+service = "grove-og"
