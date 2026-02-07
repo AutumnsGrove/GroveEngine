@@ -153,6 +153,10 @@
 
   // Update debounced content after 150ms of no typing
   $effect(() => {
+    // Reset mounted flag — cleanup sets it to false before each re-run,
+    // so we must restore it here. It only stays false after final unmount.
+    isMounted = true;
+
     // Clear any existing timer
     if (debounceTimer) clearTimeout(debounceTimer);
 
