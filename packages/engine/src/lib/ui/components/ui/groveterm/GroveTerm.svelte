@@ -33,6 +33,8 @@
 		class?: string;
 		/** Override display text */
 		children?: Snippet;
+		/** Force display of grove or standard term regardless of mode (used by GroveIntro) */
+		displayOverride?: 'grove' | 'standard';
 	}
 
 	let {
@@ -41,7 +43,8 @@
 		href,
 		class: className,
 		manifest = defaultManifest,
-		children
+		children,
+		displayOverride
 	}: Props = $props();
 
 	// State
@@ -74,6 +77,8 @@
 
 	// Whether this term should show as Grove (interactive underline) or standard (plain)
 	const showAsGrove = $derived(
+		displayOverride === 'grove' ? true :
+		displayOverride === 'standard' ? false :
 		groveModeStore.current || !entry?.standardTerm || entry?.alwaysGrove
 	);
 
