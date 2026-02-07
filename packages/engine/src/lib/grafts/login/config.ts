@@ -77,9 +77,9 @@ export function getAvailableProviders(): AuthProvider[] {
 
 /**
  * Default providers to show if none specified.
- * Only includes providers that are fully implemented.
+ * Includes all fully implemented providers: Google OAuth, Passkeys, and Email magic links.
  */
-export const DEFAULT_PROVIDERS: AuthProvider[] = ["google"];
+export const DEFAULT_PROVIDERS: AuthProvider[] = ["google", "passkey", "email"];
 
 /**
  * Default return URL after successful auth.

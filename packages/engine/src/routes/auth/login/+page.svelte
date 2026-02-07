@@ -31,7 +31,7 @@
 
 <LoginGraft
 	variant="fullpage"
-	providers={['google', 'passkey']}
+	providers={['google', 'passkey', 'email']}
 	returnTo={returnTo}
 >
 	{#snippet logo()}

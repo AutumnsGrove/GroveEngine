@@ -25,8 +25,8 @@ describe("Login Graft Configuration", () => {
   // ==========================================================================
 
   describe("Constants", () => {
-    it("exports default providers with only Google (the only working provider)", () => {
-      expect(DEFAULT_PROVIDERS).toEqual(["google"]);
+    it("exports default providers with all implemented providers", () => {
+      expect(DEFAULT_PROVIDERS).toEqual(["google", "passkey", "email"]);
     });
 
     it("exports default login URL", () => {
