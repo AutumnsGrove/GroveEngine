@@ -441,11 +441,13 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str | None,
 
         # Apply using wrangler secret put (piped via stdin)
         try:
-            # wrangler secret put reads from stdin when piped
-            # When --force is set, prepend "y\n" to auto-confirm overwrite prompts
+            # wrangler secret put reads ALL of stdin as the secret value when piped.
+            # It does NOT prompt for confirmation in non-interactive mode, so we
+            # always pass the raw value. The --force flag is kept for CLI compat
+            # but doesn't change behavior (wrangler overwrites silently when piped).
             import subprocess
 
-            stdin_value = f"y\n{value}" if force else value
+            stdin_value = value
 
             # Build command based on target type
             if is_pages:

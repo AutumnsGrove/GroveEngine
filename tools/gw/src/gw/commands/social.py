@@ -62,6 +62,7 @@ def _zephyr_request(
     headers = {
         "X-API-Key": api_key,
         "Content-Type": "application/json",
+        "User-Agent": "grove-wrap/1.0",
     }
 
     body = json.dumps(data).encode("utf-8") if data else None
