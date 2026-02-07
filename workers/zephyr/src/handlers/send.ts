@@ -19,6 +19,7 @@ import { checkUnsubscribed } from "../middleware/unsubscribe";
 import { renderTemplate } from "../templates";
 import { sendWithRetry } from "../providers/resend";
 import { logToD1 } from "../logging/d1";
+import { ZEPHYR_ERRORS, logZephyrError } from "../errors";
 
 export async function sendHandler(c: Context<{ Bindings: Env }>) {
   const startTime = Date.now();
@@ -78,7 +79,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
     if (!rateLimitResult.allowed) {
       const response: ZephyrResponse = {
         success: false,
-        errorCode: "RATE_LIMITED",
+        errorCode: ZEPHYR_ERRORS.RATE_LIMITED.code,
         errorMessage: rateLimitResult.message,
         latencyMs: Date.now() - startTime,
       };
@@ -91,7 +92,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
           template: request.template,
           recipient: request.to,
           success: false,
-          error_code: "RATE_LIMITED",
+          error_code: ZEPHYR_ERRORS.RATE_LIMITED.code,
           error_message: rateLimitResult.message,
           attempts: 0,
           latency_ms: response.latencyMs,
@@ -110,7 +111,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
     if (unsubscribeResult.unsubscribed) {
       const response: ZephyrResponse = {
         success: false,
-        errorCode: "UNSUBSCRIBED",
+        errorCode: ZEPHYR_ERRORS.UNSUBSCRIBED.code,
         errorMessage: "Recipient has unsubscribed from emails",
         unsubscribed: true,
         latencyMs: Date.now() - startTime,
@@ -124,7 +125,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
           template: request.template,
           recipient: request.to,
           success: false,
-          error_code: "UNSUBSCRIBED",
+          error_code: ZEPHYR_ERRORS.UNSUBSCRIBED.code,
           error_message: response.errorMessage,
           attempts: 0,
           latency_ms: response.latencyMs,
@@ -161,7 +162,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
       const message = error instanceof Error ? error.message : String(error);
       const response: ZephyrResponse = {
         success: false,
-        errorCode: "TEMPLATE_ERROR",
+        errorCode: ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.code,
         errorMessage: message,
         latencyMs: Date.now() - startTime,
       };
@@ -175,7 +176,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
           recipient: request.to,
           subject: request.subject,
           success: false,
-          error_code: "TEMPLATE_ERROR",
+          error_code: ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.code,
           error_message: message,
           attempts: 0,
           latency_ms: response.latencyMs,
@@ -220,7 +221,9 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
         recipient: request.to,
         subject,
         success: providerResult.success,
-        error_code: providerResult.error ? "PROVIDER_ERROR" : undefined,
+        error_code: providerResult.error
+          ? ZEPHYR_ERRORS.PROVIDER_ERROR.code
+          : undefined,
         error_message: providerResult.error,
         provider: "resend",
         attempts: providerResult.attempts || 1,
@@ -238,7 +241,9 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
     const response: ZephyrResponse = {
       success: providerResult.success,
       messageId: providerResult.messageId,
-      errorCode: providerResult.error ? "PROVIDER_ERROR" : undefined,
+      errorCode: providerResult.error
+        ? ZEPHYR_ERRORS.PROVIDER_ERROR.code
+        : undefined,
       errorMessage: providerResult.error,
       attempts: providerResult.attempts,
       latencyMs,
@@ -250,7 +255,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
     const message = error instanceof Error ? error.message : String(error);
     const latencyMs = Date.now() - startTime;
 
-    console.error("[Zephyr] Unexpected error:", message);
+    logZephyrError(ZEPHYR_ERRORS.INTERNAL_ERROR, { cause: error });
 
     // Fire-and-forget logging - don't block response
     c.executionCtx.waitUntil(
@@ -260,7 +265,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
         template: "unknown",
         recipient: "unknown",
         success: false,
-        error_code: "INTERNAL_ERROR",
+        error_code: ZEPHYR_ERRORS.INTERNAL_ERROR.code,
         error_message: message,
         attempts: 0,
         latency_ms: latencyMs,
@@ -270,7 +275,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
 
     const response: ZephyrResponse = {
       success: false,
-      errorCode: "INTERNAL_ERROR",
+      errorCode: ZEPHYR_ERRORS.INTERNAL_ERROR.code,
       errorMessage: message,
       latencyMs,
     };

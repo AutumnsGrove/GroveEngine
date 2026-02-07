@@ -23,6 +23,7 @@ import type {
 } from "../types";
 import { BlueskyProvider, getBlueskyCircuitStatus } from "../providers/bluesky";
 import { prepareBlueskyContent } from "../adapters/content";
+import { ZEPHYR_ERRORS, logZephyrError } from "../errors";
 
 /** All platforms we know about (expand as we add Mastodon, DEV.to, etc.) */
 const KNOWN_PLATFORMS: SocialPlatform[] = ["bluesky"];
@@ -116,6 +117,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
             broadcastId: "",
             latencyMs: Date.now() - startTime,
           },
+          errorCode: ZEPHYR_ERRORS.BROADCAST_CONTENT_REQUIRED.code,
           errorMessage: "content is required and must be a string",
         },
         400,
@@ -133,6 +135,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
             broadcastId: "",
             latencyMs: Date.now() - startTime,
           },
+          errorCode: ZEPHYR_ERRORS.BROADCAST_CONTENT_REQUIRED.code,
           errorMessage: "content cannot be empty",
         },
         400,
@@ -151,6 +154,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
             broadcastId: "",
             latencyMs: Date.now() - startTime,
           },
+          errorCode: ZEPHYR_ERRORS.BROADCAST_CONTENT_TOO_LONG.code,
           errorMessage: `content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`,
         },
         400,
@@ -203,6 +207,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
             broadcastId: "",
             latencyMs: Date.now() - startTime,
           },
+          errorCode: ZEPHYR_ERRORS.BROADCAST_INVALID_PLATFORM.code,
           errorMessage: platformError,
         },
         400,
@@ -279,7 +284,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
       }
     } catch (err) {
       // Idempotency check failed — proceed anyway (fail-open)
-      console.error("[Zephyr] Idempotency check failed:", err);
+      logZephyrError(ZEPHYR_ERRORS.IDEMPOTENCY_CHECK_FAILED, { cause: err });
     }
 
     // Step 4: Fan out to platform providers
@@ -344,7 +349,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     // Log the full error server-side, but return a generic message to the caller
-    console.error("[Zephyr] Broadcast error:", message);
+    logZephyrError(ZEPHYR_ERRORS.INTERNAL_ERROR, { cause: error });
 
     return c.json(
       {
@@ -356,6 +361,7 @@ export async function broadcastHandler(c: Context<{ Bindings: Env }>) {
           broadcastId: "",
           latencyMs: Date.now() - startTime,
         },
+        errorCode: ZEPHYR_ERRORS.INTERNAL_ERROR.code,
         errorMessage:
           "An internal error occurred while processing the broadcast",
       },
@@ -473,6 +479,6 @@ async function logBroadcast(
     }
   } catch (error) {
     // Log but don't fail — same pattern as email logging
-    console.error("[Zephyr] Failed to log broadcast:", error);
+    logZephyrError(ZEPHYR_ERRORS.LOG_WRITE_FAILED, { cause: error });
   }
 }

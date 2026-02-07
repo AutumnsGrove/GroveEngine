@@ -8,6 +8,7 @@
 
 import { BskyAgent, RichText } from "@atproto/api";
 import type { SocialProvider, SocialContent, SocialDelivery } from "../types";
+import { ZEPHYR_ERRORS, logZephyrError } from "../errors";
 
 // =============================================================================
 // Circuit Breaker (same pattern as resend.ts)
@@ -45,7 +46,9 @@ function recordFailure(): void {
   circuitState.lastFailure = Date.now();
   if (circuitState.failures >= CIRCUIT_THRESHOLD) {
     circuitState.open = true;
-    console.error("[Zephyr] Bluesky circuit breaker opened");
+    logZephyrError(ZEPHYR_ERRORS.CIRCUIT_OPEN, {
+      detail: "Circuit breaker threshold reached",
+    });
   }
 }
 
@@ -154,8 +157,8 @@ export class BlueskyProvider implements SocialProvider {
         success: false,
         platform: "bluesky",
         error: {
-          code: "CIRCUIT_OPEN",
-          message: "Too many recent failures — circuit breaker active",
+          code: ZEPHYR_ERRORS.CIRCUIT_OPEN.code,
+          message: ZEPHYR_ERRORS.CIRCUIT_OPEN.userMessage,
           retryable: true,
         },
       };
@@ -206,7 +209,7 @@ export class BlueskyProvider implements SocialProvider {
             success: false,
             platform: "bluesky",
             error: {
-              code: "PROVIDER_ERROR",
+              code: ZEPHYR_ERRORS.PROVIDER_ERROR.code,
               message: sanitizeError(message),
               retryable: isRetryableError(message),
             },
@@ -223,8 +226,8 @@ export class BlueskyProvider implements SocialProvider {
       success: false,
       platform: "bluesky",
       error: {
-        code: "INTERNAL_ERROR",
-        message: "Max retry attempts exceeded",
+        code: ZEPHYR_ERRORS.INTERNAL_ERROR.code,
+        message: ZEPHYR_ERRORS.INTERNAL_ERROR.userMessage,
         retryable: false,
       },
     };

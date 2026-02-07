@@ -7,6 +7,7 @@
 
 import type { Context, Next } from "hono";
 import type { Env } from "../types";
+import { ZEPHYR_ERRORS, logZephyrError } from "../errors";
 
 /**
  * API key validation result
@@ -50,24 +51,24 @@ export async function validateApiKey(
   apiKey: string | undefined,
 ): Promise<AuthResult> {
   if (!apiKey) {
-    return { valid: false, error: "Missing API key" };
+    return { valid: false, error: ZEPHYR_ERRORS.MISSING_API_KEY.code };
   }
 
   // Basic format validation
   if (apiKey.length < 16) {
-    return { valid: false, error: "Invalid API key format" };
+    return { valid: false, error: ZEPHYR_ERRORS.INVALID_API_KEY_FORMAT.code };
   }
 
   // Validate against configured API key
   const validKey = env.ZEPHYR_API_KEY;
   if (!validKey) {
-    console.error("[Zephyr] ZEPHYR_API_KEY environment variable not set");
-    return { valid: false, error: "Service configuration error" };
+    logZephyrError(ZEPHYR_ERRORS.API_KEY_NOT_CONFIGURED);
+    return { valid: false, error: ZEPHYR_ERRORS.API_KEY_NOT_CONFIGURED.code };
   }
 
   // Use timing-safe comparison to prevent timing attacks
   if (!(await timingSafeEqual(apiKey, validKey))) {
-    return { valid: false, error: "Invalid API key" };
+    return { valid: false, error: ZEPHYR_ERRORS.INVALID_API_KEY.code };
   }
 
   return { valid: true, tenant: "default" };
@@ -95,8 +96,8 @@ export async function authMiddleware(
     return c.json(
       {
         success: false,
-        errorCode: "INVALID_REQUEST",
-        errorMessage: "Missing X-API-Key header",
+        errorCode: ZEPHYR_ERRORS.MISSING_API_KEY.code,
+        errorMessage: ZEPHYR_ERRORS.MISSING_API_KEY.userMessage,
       },
       401,
     );
@@ -105,11 +106,16 @@ export async function authMiddleware(
   const result = await validateApiKey(c.env, apiKey);
 
   if (!result.valid) {
+    // Map the error code back to the catalog for the user message
+    const errorDef = Object.values(ZEPHYR_ERRORS).find(
+      (e) => e.code === result.error,
+    );
     return c.json(
       {
         success: false,
-        errorCode: "INVALID_REQUEST",
-        errorMessage: result.error || "Invalid API key",
+        errorCode: result.error || ZEPHYR_ERRORS.INVALID_API_KEY.code,
+        errorMessage:
+          errorDef?.userMessage || ZEPHYR_ERRORS.INVALID_API_KEY.userMessage,
       },
       401,
     );

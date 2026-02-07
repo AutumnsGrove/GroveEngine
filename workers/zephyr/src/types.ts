@@ -20,18 +20,12 @@ export type EmailType =
   | "broadcast";
 
 /**
- * Error codes returned by Zephyr
+ * Error codes returned by Zephyr.
+ *
+ * Structured codes follow ZEPHYR-NNN format (see errors.ts for the full catalog).
+ * The string type allows the catalog to be the source of truth.
  */
-export type ZephyrErrorCode =
-  | "INVALID_REQUEST"
-  | "INVALID_TEMPLATE"
-  | "INVALID_RECIPIENT"
-  | "RATE_LIMITED"
-  | "UNSUBSCRIBED"
-  | "PROVIDER_ERROR"
-  | "TEMPLATE_ERROR"
-  | "CIRCUIT_OPEN"
-  | "INTERNAL_ERROR";
+export type ZephyrErrorCode = string;
 
 // =============================================================================
 // Request/Response Types

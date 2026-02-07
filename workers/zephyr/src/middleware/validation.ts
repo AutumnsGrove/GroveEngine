@@ -5,6 +5,7 @@
  */
 
 import type { ZephyrRequest, ZephyrErrorCode } from "../types";
+import { ZEPHYR_ERRORS } from "../errors";
 
 export interface ValidationResult {
   valid: boolean;
@@ -20,7 +21,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!body || typeof body !== "object") {
     return {
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: ZEPHYR_ERRORS.INVALID_REQUEST_BODY.code,
       errorMessage: "Request body must be an object",
     };
   }
@@ -31,7 +32,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!req.type) {
     return {
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: ZEPHYR_ERRORS.MISSING_REQUIRED_FIELD.code,
       errorMessage: "Missing required field: type",
     };
   }
@@ -39,7 +40,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!req.template) {
     return {
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: ZEPHYR_ERRORS.MISSING_REQUIRED_FIELD.code,
       errorMessage: "Missing required field: template",
     };
   }
@@ -47,7 +48,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!req.to) {
     return {
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: ZEPHYR_ERRORS.MISSING_REQUIRED_FIELD.code,
       errorMessage: "Missing required field: to",
     };
   }
@@ -64,7 +65,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!validTypes.includes(req.type)) {
     return {
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: ZEPHYR_ERRORS.INVALID_EMAIL_TYPE.code,
       errorMessage: `Invalid email type: ${req.type}. Must be one of: ${validTypes.join(", ")}`,
     };
   }
@@ -73,7 +74,7 @@ export function validateRequest(body: unknown): ValidationResult {
   if (!isValidEmail(req.to)) {
     return {
       valid: false,
-      errorCode: "INVALID_RECIPIENT",
+      errorCode: ZEPHYR_ERRORS.INVALID_RECIPIENT.code,
       errorMessage: `Invalid email address: ${req.to}`,
     };
   }
@@ -83,14 +84,14 @@ export function validateRequest(body: unknown): ValidationResult {
     if (!req.html && !req.text) {
       return {
         valid: false,
-        errorCode: "INVALID_TEMPLATE",
+        errorCode: ZEPHYR_ERRORS.INVALID_TEMPLATE.code,
         errorMessage: "Raw template requires html or text content",
       };
     }
     if (!req.subject) {
       return {
         valid: false,
-        errorCode: "INVALID_TEMPLATE",
+        errorCode: ZEPHYR_ERRORS.INVALID_TEMPLATE.code,
         errorMessage: "Raw template requires subject",
       };
     }
@@ -102,7 +103,7 @@ export function validateRequest(body: unknown): ValidationResult {
     if (isNaN(scheduledDate.getTime())) {
       return {
         valid: false,
-        errorCode: "INVALID_REQUEST",
+        errorCode: ZEPHYR_ERRORS.INVALID_SCHEDULE.code,
         errorMessage: "Invalid scheduledAt format. Must be ISO 8601 timestamp.",
       };
     }
