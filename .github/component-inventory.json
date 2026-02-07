@@ -5,7 +5,7 @@
   "lastUpdated": "2026-02-07",
   "lastAuditedBy": "claude/grove-messages-beta-comm",
   "components": {
-    "total": 206,
+    "total": 207,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
@@ -20,7 +20,7 @@
       "forms": 3,
       "feedback": 1,
       "indicators": 3,
-      "icons": 2
+      "icons": 3
     },
     "paths": {
       "primitives": "packages/engine/src/lib/ui/components/primitives",
