@@ -1,6 +1,7 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
-  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+  import Footer from '$lib/components/Footer.svelte';
   import { GlassLegend } from '@autumnsgrove/groveengine/ui';
   import { CategoryNav } from '@autumnsgrove/groveengine';
   import { toolIcons, stateIcons, type ToolIconKey } from '$lib/utils/icons';

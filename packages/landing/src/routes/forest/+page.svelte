@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();

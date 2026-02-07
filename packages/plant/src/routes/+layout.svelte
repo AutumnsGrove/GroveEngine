@@ -60,7 +60,8 @@
 		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: FileText, external: true }
 	];
 
-	// Plant onboarding doesn't need additional menu sections
+	// Plant onboarding doesn't need additional menu sections — empty arrays
+	// override MobileMenu defaults (which are also empty for non-landing properties)
 	const noResourceLinks: FooterLink[] = [];
 	const noConnectLinks: FooterLink[] = [];
 </script>

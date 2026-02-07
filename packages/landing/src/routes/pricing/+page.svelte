@@ -6,7 +6,8 @@
 	 * reusable pricing experience across Grove properties.
 	 */
 
-	import { Header, Footer } from "@autumnsgrove/groveengine/ui/chrome";
+	import { Header } from "@autumnsgrove/groveengine/ui/chrome";
+	import Footer from "$lib/components/Footer.svelte";
 	import { PricingGraft } from "@autumnsgrove/groveengine/grafts/pricing";
 	import { GroveTerm } from "@autumnsgrove/groveengine/ui";
 	import SEO from "$lib/components/SEO.svelte";

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { enhance } from '$app/forms';

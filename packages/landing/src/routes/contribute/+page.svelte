@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+	import Footer from '$lib/components/Footer.svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { MobileTOC } from '@autumnsgrove/groveengine';
 	import SEO from '$lib/components/SEO.svelte';

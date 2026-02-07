@@ -1,6 +1,7 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
-  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+  import Footer from '$lib/components/Footer.svelte';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();

@@ -89,6 +89,7 @@
 				</p>
 			</div>
 
+			{#if resources.length > 0}
 			<!-- Vertical Divider (hidden on mobile/tablet) -->
 			<div class="hidden lg:flex items-center px-2">
 				<GroveDivider {...DIVIDER_VERTICAL} />
@@ -111,7 +112,9 @@
 					{/each}
 				</ul>
 			</div>
+			{/if}
 
+			{#if connect.length > 0}
 			<!-- Vertical Divider (hidden on mobile/tablet) -->
 			<div class="hidden lg:flex items-center px-2">
 				<GroveDivider {...DIVIDER_VERTICAL} />
@@ -142,6 +145,7 @@
 					{/each}
 				</ul>
 			</div>
+			{/if}
 		</div>
 
 		<!-- Bottom Bar -->
@@ -153,7 +157,7 @@
 					<span class="text-divider">·</span>
 					<span>Made with care</span>
 					<span class="text-divider hidden sm:inline">·</span>
-					<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
+					<a href="https://grove.place/credits" class="hover:text-accent-muted transition-colors">Credits</a>
 					<span class="text-divider">·</span>
 					{#each legal as link, index}
 						<a href={link.href} class="hover:text-accent-muted transition-colors">{labelFor(link)}</a>

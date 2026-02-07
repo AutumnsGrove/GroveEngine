@@ -86,14 +86,13 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 ];
 
 // =============================================================================
-// FOOTER LINKS (Desktop)
+// LANDING-SPECIFIC FOOTER LINKS (Desktop)
 // =============================================================================
-// These appear in the desktop footer. Deduplicated from nav to avoid redundancy.
-// On mobile, footer hides these sections - they appear in the mobile overflow menu instead.
+// These are grove.place-specific links that use relative URLs.
+// Only used by the landing site's Footer wrapper — NOT safe for other properties.
 
-// Resources section (desktop footer)
-// Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (already in nav)
-export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
+// Resources section (desktop footer, landing only)
+export const LANDING_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
@@ -105,9 +104,8 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
   },
 ];
 
-// Connect section (desktop footer)
-// Excludes: Blog (already in nav)
-export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
+// Connect section (desktop footer, landing only)
+export const LANDING_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
@@ -122,14 +120,11 @@ export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
 ];
 
 // =============================================================================
-// MOBILE MENU FOOTER SECTIONS
+// LANDING-SPECIFIC MOBILE MENU FOOTER SECTIONS
 // =============================================================================
-// These appear in the mobile overflow menu below the main nav items.
-// Deduplicated from mobile nav to show only unique items.
 
-// Resources section (mobile menu)
-// Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (in mobile nav)
-export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
+// Resources section (mobile menu, landing only)
+export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
@@ -141,8 +136,8 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   },
 ];
 
-// Connect section (mobile menu)
-export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
+// Connect section (mobile menu, landing only)
+export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
@@ -157,12 +152,33 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
 ];
 
 // =============================================================================
-// LEGAL LINKS
+// LANDING-SPECIFIC LEGAL LINKS
 // =============================================================================
 
-// Default legal links (footer bottom bar)
-export const DEFAULT_LEGAL_LINKS: FooterLink[] = [
+// Legal links with relative URLs (landing only)
+export const LANDING_LEGAL_LINKS: FooterLink[] = [
   { href: "/knowledge/legal/privacy-policy", label: "Privacy" },
   { href: "/knowledge/legal/terms-of-service", label: "Terms" },
   { href: "/shade", label: "Shade", icon: Blinds, termSlug: "shade" },
+];
+
+// =============================================================================
+// SHARED DEFAULTS (safe for all properties)
+// =============================================================================
+// Non-landing properties get empty resource/connect columns and absolute legal URLs.
+// This prevents broken relative links on subdomains like plant.grove.place.
+
+export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [];
+export const DEFAULT_CONNECT_LINKS: FooterLink[] = [];
+export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [];
+export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [];
+export const DEFAULT_LEGAL_LINKS: FooterLink[] = [
+  {
+    href: "https://grove.place/knowledge/legal/privacy-policy",
+    label: "Privacy",
+  },
+  {
+    href: "https://grove.place/knowledge/legal/terms-of-service",
+    label: "Terms",
+  },
 ];

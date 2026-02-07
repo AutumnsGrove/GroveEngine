@@ -1,7 +1,8 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { browser } from '$app/environment';
-  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+  import Footer from '$lib/components/Footer.svelte';
   import { Trace } from '@autumnsgrove/groveengine/ui/feedback';
   import { GroveTerm } from '@autumnsgrove/groveengine/ui';
   import SEO from '$lib/components/SEO.svelte';
