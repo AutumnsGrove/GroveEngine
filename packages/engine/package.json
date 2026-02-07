@@ -179,9 +179,13 @@
       "types": "./dist/config/terrarium.d.ts",
       "default": "./dist/config/terrarium.js"
     },
+    "./heartwood": {
+      "types": "./dist/heartwood/index.d.ts",
+      "default": "./dist/heartwood/index.js"
+    },
     "./groveauth": {
-      "types": "./dist/groveauth/index.d.ts",
-      "default": "./dist/groveauth/index.js"
+      "types": "./dist/heartwood/index.d.ts",
+      "default": "./dist/heartwood/index.js"
     },
     "./feature-flags": {
       "types": "./dist/feature-flags/index.d.ts",
