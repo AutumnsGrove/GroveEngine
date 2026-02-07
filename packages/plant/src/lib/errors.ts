@@ -60,7 +60,7 @@ export const PLANT_ERRORS = {
     code: "PLANT-020",
     category: "user" as const,
     userMessage:
-      "We couldn't verify your sign-in. Please try the magic link again.",
+      "We couldn't verify your sign-in. Please try again.",
     adminMessage: "GET /api/auth/get-session returned non-200 status.",
   },
 
@@ -68,7 +68,7 @@ export const PLANT_ERRORS = {
     code: "PLANT-021",
     category: "user" as const,
     userMessage:
-      "Your sign-in session wasn't found. Please request a new magic link.",
+      "Your sign-in session wasn't found. Please try again.",
     adminMessage:
       "get-session returned 200 but response has no session or user data.",
   },
@@ -79,6 +79,32 @@ export const PLANT_ERRORS = {
     userMessage: "Your magic link didn't work. Please request a new one.",
     adminMessage:
       "Magic link callback received an error parameter from Heartwood.",
+  },
+
+  OAUTH_ACCESS_DENIED: {
+    code: "PLANT-023",
+    category: "user" as const,
+    userMessage: "You cancelled the sign-in. Try again when you're ready.",
+    adminMessage:
+      "User denied OAuth consent or cancelled the sign-in flow.",
+  },
+
+  OAUTH_PROVIDER_ERROR: {
+    code: "PLANT-024",
+    category: "bug" as const,
+    userMessage:
+      "The sign-in provider ran into trouble. Please try again.",
+    adminMessage:
+      "OAuth provider returned an error during authentication.",
+  },
+
+  NO_SESSION_COOKIE: {
+    code: "PLANT-025",
+    category: "user" as const,
+    userMessage:
+      "Your session wasn't created. Please try signing in again.",
+    adminMessage:
+      "No Better Auth session cookie found after OAuth callback. May indicate cookie blocking or cross-site restrictions.",
   },
 
   // ─────────────────────────────────────────────────────────────────────────
