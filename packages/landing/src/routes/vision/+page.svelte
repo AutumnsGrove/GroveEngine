@@ -1,6 +1,6 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { MobileTOC } from '@autumnsgrove/groveengine';

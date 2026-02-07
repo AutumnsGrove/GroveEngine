@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GlassCard, GlassButton, GroveTerm, GroveIntro } from '@autumnsgrove/groveengine/ui';
-	import { Header, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import Header from '$lib/components/Header.svelte';
+	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { MessageCircle, Clock, ArrowRight } from 'lucide-svelte';

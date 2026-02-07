@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import SEO from '$lib/components/SEO.svelte';
-  import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+  import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import { GroveTerm } from '@autumnsgrove/groveengine/ui';
   import { toolIcons, knowledgeCategoryIcons } from '$lib/utils/icons';

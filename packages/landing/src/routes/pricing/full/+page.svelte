@@ -6,7 +6,7 @@
 	 * Linked from /pricing for those who want to see the roadmap.
 	 */
 
-	import { Header } from "@autumnsgrove/groveengine/ui/chrome";
+	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { PricingGraft } from "@autumnsgrove/groveengine/grafts/pricing";
 	import SEO from "$lib/components/SEO.svelte";

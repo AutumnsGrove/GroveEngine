@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Header } from '@autumnsgrove/groveengine/ui/chrome';
+	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import { toolIcons, stateIcons } from '$lib/utils/icons';
