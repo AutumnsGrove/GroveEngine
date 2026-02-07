@@ -382,20 +382,23 @@ def secret_reveal(ctx: click.Context, name: str, dangerous: bool) -> None:
 
 @secret.command("apply")
 @click.argument("names", nargs=-1, required=True)
-@click.option("--worker", "-w", required=True, help="Worker name to apply secrets to")
+@click.option("--worker", "-w", default=None, help="Worker name to apply secrets to")
+@click.option("--pages", "-p", default=None, help="Pages project name to apply secrets to")
 @click.option("--force", "-f", is_flag=True, help="Overwrite existing secrets without prompting")
 @click.pass_context
-def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force: bool) -> None:
-    """Apply secrets to a Cloudflare Worker.
+def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str | None, pages: str | None, force: bool) -> None:
+    """Apply secrets to a Cloudflare Worker or Pages project.
 
     Agent-safe: The secret value is never shown in output.
-    Uses 'wrangler secret put' under the hood.
+    Uses 'wrangler secret put' or 'wrangler pages secret put' under the hood.
 
     Examples:
 
         gw secret apply STRIPE_KEY --worker grove-lattice
 
         gw secret apply KEY1 KEY2 KEY3 --worker grove-lattice
+
+        gw secret apply ZEPHYR_API_KEY --pages grove-landing
 
         gw secret apply GROVE_KEK --worker grove-lattice --force
     """
@@ -405,6 +408,18 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force:
     config: GWConfig = ctx.obj["config"]
     vault = _get_vault(ctx)
     wrangler = Wrangler(config)
+
+    # Validate: must specify exactly one of --worker or --pages
+    if not worker and not pages:
+        error("Must specify --worker (-w) or --pages (-p)")
+        ctx.exit(1)
+    if worker and pages:
+        error("Cannot specify both --worker and --pages")
+        ctx.exit(1)
+
+    target = worker or pages
+    is_pages = pages is not None
+    target_label = f"Pages:{target}" if is_pages else target
 
     results = []
 
@@ -430,8 +445,14 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force:
 
             stdin_value = f"y\n{value}" if force else value
 
+            # Build command based on target type
+            if is_pages:
+                cmd = ["wrangler", "pages", "secret", "put", name, "--project-name", target]
+            else:
+                cmd = ["wrangler", "secret", "put", name, "--name", target]
+
             result = subprocess.run(
-                ["wrangler", "secret", "put", name, "--name", worker],
+                cmd,
                 input=stdin_value,
                 capture_output=True,
                 text=True,
@@ -440,7 +461,7 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force:
             if result.returncode == 0:
                 results.append({"name": name, "success": True})
                 if not output_json:
-                    success(f"Applied {name} to {worker}")
+                    success(f"Applied {name} to {target_label}")
             else:
                 err_msg = result.stderr.strip()
                 # Check if this is an "already exists" prompt that needs --force
@@ -449,7 +470,7 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force:
                         {"name": name, "success": False, "error": "Secret already exists. Use --force to overwrite."}
                     )
                     if not output_json:
-                        warning(f"Secret '{name}' already exists on {worker}")
+                        warning(f"Secret '{name}' already exists on {target_label}")
                         info("Use --force to overwrite")
                 else:
                     results.append(
@@ -464,29 +485,40 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force:
                 error(f"Failed to apply {name}: {e}")
 
     if output_json:
-        console.print(json.dumps({"worker": worker, "results": results}, indent=2))
+        console.print(json.dumps({"target": target_label, "results": results}, indent=2))
 
 
 @secret.command("sync")
-@click.option("--worker", "-w", required=True, help="Worker name to sync secrets to")
+@click.option("--worker", "-w", default=None, help="Worker name to sync secrets to")
+@click.option("--pages", "-p", default=None, help="Pages project name to sync secrets to")
 @click.option("--force", "-f", is_flag=True, help="Overwrite existing secrets without prompting")
 @click.pass_context
-def secret_sync(ctx: click.Context, worker: str, force: bool) -> None:
-    """Sync all secrets to a Cloudflare Worker.
+def secret_sync(ctx: click.Context, worker: str | None, pages: str | None, force: bool) -> None:
+    """Sync all secrets to a Cloudflare Worker or Pages project.
 
-    Applies all secrets from the vault to the specified worker.
+    Applies all secrets from the vault to the specified target.
     Agent-safe: Values are never shown.
 
     Examples:
 
         gw secret sync --worker grove-lattice
 
+        gw secret sync --pages grove-landing
+
         gw secret sync --worker grove-lattice --force
     """
     output_json: bool = ctx.obj.get("output_json", False)
-    vault = _get_vault(ctx)
 
+    if not worker and not pages:
+        error("Must specify --worker (-w) or --pages (-p)")
+        ctx.exit(1)
+    if worker and pages:
+        error("Cannot specify both --worker and --pages")
+        ctx.exit(1)
+
+    vault = _get_vault(ctx)
     secrets = vault.list_secrets()
+    target_label = f"Pages:{pages}" if pages else worker
 
     if not secrets:
         if output_json:
@@ -496,8 +528,8 @@ def secret_sync(ctx: click.Context, worker: str, force: bool) -> None:
         return
 
     if not output_json:
-        info(f"Syncing {len(secrets)} secrets to {worker}...")
+        info(f"Syncing {len(secrets)} secrets to {target_label}...")
 
     # Invoke apply for all secrets
     names = tuple(s["name"] for s in secrets)
-    ctx.invoke(secret_apply, names=names, worker=worker, force=force)
+    ctx.invoke(secret_apply, names=names, worker=worker, pages=pages, force=force)
