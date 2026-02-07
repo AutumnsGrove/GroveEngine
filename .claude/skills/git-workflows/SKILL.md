@@ -61,7 +61,7 @@ gw validates commit messages against Conventional Commits automatically. Format:
 | `perf` | Performance | `perf: optimize query speed` |
 | `ci` | CI/CD changes | `ci: fix deploy workflow` |
 
-**Breaking changes**: Use `!` suffix — `feat!: replace XML config with YAML`
+**Breaking changes**: Add an exclamation mark after the type, e.g. `feat!: replace XML config with YAML`
 
 ## Git Commands — Reading (Always Safe)
 
