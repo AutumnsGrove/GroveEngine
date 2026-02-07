@@ -183,6 +183,10 @@
       "types": "./dist/heartwood/index.d.ts",
       "default": "./dist/heartwood/index.js"
     },
+    "./groveauth": {
+      "types": "./dist/heartwood/index.d.ts",
+      "default": "./dist/heartwood/index.js"
+    },
     "./feature-flags": {
       "types": "./dist/feature-flags/index.d.ts",
       "default": "./dist/feature-flags/index.js"
