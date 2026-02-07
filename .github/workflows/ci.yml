@@ -84,3 +84,7 @@ jobs:
       - name: Type check landing
         run: pnpm check
         working-directory: packages/landing
+
+      - name: Type check heartwood
+        run: pnpm exec tsc --noEmit
+        working-directory: packages/heartwood

@@ -11,6 +11,7 @@ on:
       - 'packages/grove-router/**'
       - 'packages/durable-objects/**'
       - 'packages/post-migrator/**'
+      - 'packages/heartwood/**'
       - 'packages/workers/**'
       # Pages
       - 'packages/engine/**'
@@ -44,6 +45,8 @@ jobs:
             path: packages/durable-objects
           - name: post-migrator
             path: packages/post-migrator
+          - name: heartwood
+            path: packages/heartwood
           - name: clearing-monitor
             path: packages/workers/clearing-monitor
           - name: webhook-cleanup
