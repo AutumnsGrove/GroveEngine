@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
 
 	// Use graft config for tier data and toggle component
 	import {
@@ -169,6 +170,8 @@
 			{@const isComingSoon = tier.status === 'coming_soon'}
 			{@const isFuture = tier.status === 'future'}
 			{@const isSelected = selectedPlan === tier.key}
+			{@const displayName = groveModeStore.current ? tier.name : (tier.standardName || tier.name)}
+			{@const displayFeatures = groveModeStore.current ? tier.featureStrings : (tier.standardFeatureStrings || tier.featureStrings)}
 
 			<div class="relative">
 				<!-- Status badge positioned above card -->
@@ -203,7 +206,7 @@
 					role="radio"
 					aria-checked={isSelected}
 					aria-disabled={!isAvailable}
-					aria-label="{tier.name} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
+					aria-label="{displayName} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
 				>
 					<GlassCard
 						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
@@ -227,7 +230,7 @@
 
 									<!-- Name and tagline -->
 									<div>
-										<h3 class="text-lg font-medium text-foreground">{tier.name}</h3>
+										<h3 class="text-lg font-medium text-foreground">{displayName}</h3>
 										<p class="text-sm {getStatusColor(tier.status, 'text')}">
 											{tier.tagline}
 										</p>
@@ -253,7 +256,7 @@
 
 							<!-- Features grid - responsive: single column on mobile, two on tablet+ -->
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-								{#each tier.featureStrings as feature}
+								{#each displayFeatures as feature}
 									<div class="flex items-center gap-2">
 										<Check class="w-4 h-4 flex-shrink-0 {getStatusColor(tier.status, 'check')}" />
 										<span class="text-sm text-foreground-muted">{feature}</span>
@@ -320,7 +323,9 @@
 				<Loader2 class="w-5 h-5 animate-spin" />
 				Processing...
 			{:else if selectedPlan}
-				Continue with {plans.find((p) => p.key === selectedPlan)?.name}
+				{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
+				Continue with {groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}
+
 			{:else}
 				Select a plan to continue
 			{/if}
