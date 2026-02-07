@@ -46,6 +46,14 @@ type InviteType = (typeof VALID_INVITE_TYPES)[number];
 // Must match +layout.server.ts - duplicated here for action access
 const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
+interface EligibleSubscriber {
+  id: number;
+  email: string;
+  name: string | null;
+  created_at: string;
+  source: string;
+}
+
 export const load: PageServerLoad = async ({ parent, platform, url }) => {
   const { isWayfinder, user } = await parent();
 
@@ -110,7 +118,7 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
     }
 
     // Run all queries in parallel
-    const [invitesResult, countResult, auditResult, statsResult] =
+    const [invitesResult, countResult, auditResult, statsResult, eligibleResult] =
       await Promise.all([
         DB.prepare(query)
           .bind(...params)
@@ -136,11 +144,26 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
           beta: number;
           comped: number;
         }>(),
+        // Find email subscribers who are eligible for beta promotion:
+        // - Active (not unsubscribed)
+        // - Don't already have a comped_invites entry
+        // - Don't already have a tenants entry (not already a Grove user)
+        DB.prepare(
+          `SELECT es.id, es.email, es.name, es.created_at, es.source
+           FROM email_signups es
+           LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
+           LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
+           WHERE es.unsubscribed_at IS NULL
+             AND ci.id IS NULL
+             AND t.id IS NULL
+           ORDER BY es.created_at DESC`,
+        ).all<EligibleSubscriber>(),
       ]);
 
     return {
       invites: invitesResult.results || [],
       auditLog: auditResult.results || [],
+      eligibleSubscribers: eligibleResult.results || [],
       stats: {
         total: statsResult?.total || 0,
         used: statsResult?.used || 0,
@@ -395,6 +418,297 @@ export const actions: Actions = {
       console.error("[Comped Invites] Error revoking invite:", message, err);
       return fail(500, {
         error: `Failed to revoke comped invite: ${message}`,
+      });
+    }
+  },
+
+  promote: async ({ request, locals, platform }) => {
+    const user = locals.user;
+    if (!user) {
+      return fail(403, { error: "Not authenticated" });
+    }
+    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
+    if (!isWayfinder) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+    const formData = await request.formData();
+    const email = formData.get("email")?.toString().toLowerCase().trim();
+    const tier = (formData.get("tier")?.toString() as CompedTier) || "seedling";
+    const customMessage =
+      formData.get("custom_message")?.toString().trim() || null;
+
+    if (!email || !email.includes("@")) {
+      return fail(400, { error: "Invalid email address" });
+    }
+
+    let step = "init";
+    try {
+      // Verify subscriber exists in email list
+      step = "check-subscriber";
+      const subscriber = await DB.prepare(
+        "SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
+      )
+        .bind(email)
+        .first<{ id: number; email: string }>();
+
+      if (!subscriber) {
+        return fail(400, {
+          error: `${email} is not an active email subscriber`,
+        });
+      }
+
+      // Check they don't already have an invite
+      step = "check-existing";
+      const existing = await DB.prepare(
+        "SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
+      )
+        .bind(email)
+        .first<{ id: string; used_at: number | null }>();
+
+      if (existing) {
+        if (existing.used_at) {
+          return fail(400, {
+            error: `${email} has already used their invite`,
+          });
+        }
+        return fail(400, {
+          error: `${email} already has a pending invite`,
+        });
+      }
+
+      // Check they're not already a Grove user
+      step = "check-tenant";
+      const existingTenant = await DB.prepare(
+        "SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
+      )
+        .bind(email)
+        .first<{ subdomain: string }>();
+
+      if (existingTenant) {
+        return fail(400, {
+          error: `${email} is already a Grove user (${existingTenant.subdomain}.grove.place)`,
+        });
+      }
+
+      // Create the beta invite
+      step = "insert-invite";
+      const inviteId = crypto.randomUUID();
+      const inviteToken = crypto.randomUUID();
+      await DB.prepare(
+        `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
+         VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
+      )
+        .bind(inviteId, email, tier, customMessage, user.email, inviteToken)
+        .run();
+
+      // Audit log
+      step = "insert-audit";
+      await DB.prepare(
+        `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+         VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Promoted from email list', unixepoch())`,
+      )
+        .bind(crypto.randomUUID(), inviteId, email, tier, user.email)
+        .run();
+
+      // Send the invite email
+      step = "send-email";
+      const zephyrApiKey =
+        platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
+      let emailStatus: "sent" | "failed" | "not-configured" = "not-configured";
+      let emailError: string | undefined;
+
+      if (zephyrApiKey) {
+        const emailResult = await sendInviteEmail({
+          email,
+          tier,
+          inviteType: "beta",
+          customMessage,
+          inviteToken,
+          invitedBy: user.email,
+          zephyrApiKey,
+          zephyrUrl: platform?.env?.ZEPHYR_URL,
+        });
+
+        if (emailResult.success) {
+          emailStatus = "sent";
+          await DB.prepare(
+            `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
+          )
+            .bind(inviteId)
+            .run();
+        } else {
+          emailStatus = "failed";
+          emailError = emailResult.error;
+          console.error(
+            `[Comped Invites] Promote email failed for ${email}:`,
+            emailResult.error,
+          );
+        }
+      }
+
+      return {
+        success: true,
+        emailStatus,
+        emailError,
+        message: `Promoted ${email} to beta (${tier} tier)`,
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unknown database error";
+      console.error(
+        `[Comped Invites] Error promoting subscriber at step "${step}":`,
+        message,
+        err,
+      );
+      return fail(500, {
+        error: `Failed to promote subscriber (${step}): ${message}`,
+      });
+    }
+  },
+
+  promote_all: async ({ request, locals, platform }) => {
+    const user = locals.user;
+    if (!user) {
+      return fail(403, { error: "Not authenticated" });
+    }
+    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
+    if (!isWayfinder) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+    const formData = await request.formData();
+    const tier = (formData.get("tier")?.toString() as CompedTier) || "seedling";
+    const customMessage =
+      formData.get("custom_message")?.toString().trim() || null;
+
+    try {
+      // Find all eligible subscribers
+      const eligible = await DB.prepare(
+        `SELECT es.id, es.email
+         FROM email_signups es
+         LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
+         LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
+         WHERE es.unsubscribed_at IS NULL
+           AND ci.id IS NULL
+           AND t.id IS NULL
+         ORDER BY es.created_at ASC`,
+      ).all<{ id: number; email: string }>();
+
+      const subscribers = eligible.results || [];
+      if (subscribers.length === 0) {
+        return fail(400, {
+          error: "No eligible subscribers to promote",
+        });
+      }
+
+      const zephyrApiKey =
+        platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
+
+      let promoted = 0;
+      let emailsSent = 0;
+      let emailsFailed = 0;
+      const errors: string[] = [];
+
+      for (const sub of subscribers) {
+        const inviteId = crypto.randomUUID();
+        const inviteToken = crypto.randomUUID();
+
+        try {
+          // Create the invite
+          await DB.prepare(
+            `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
+             VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
+          )
+            .bind(
+              inviteId,
+              sub.email,
+              tier,
+              customMessage,
+              user.email,
+              inviteToken,
+            )
+            .run();
+
+          // Audit log
+          await DB.prepare(
+            `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+             VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Bulk promoted from email list', unixepoch())`,
+          )
+            .bind(crypto.randomUUID(), inviteId, sub.email, tier, user.email)
+            .run();
+
+          promoted++;
+
+          // Send the invite email
+          if (zephyrApiKey) {
+            const emailResult = await sendInviteEmail({
+              email: sub.email,
+              tier,
+              inviteType: "beta",
+              customMessage,
+              inviteToken,
+              invitedBy: user.email,
+              zephyrApiKey,
+              zephyrUrl: platform?.env?.ZEPHYR_URL,
+            });
+
+            if (emailResult.success) {
+              emailsSent++;
+              await DB.prepare(
+                `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
+              )
+                .bind(inviteId)
+                .run();
+            } else {
+              emailsFailed++;
+              console.error(
+                `[Comped Invites] Bulk email failed for ${sub.email}:`,
+                emailResult.error,
+              );
+            }
+          }
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Unknown error";
+          errors.push(`${sub.email}: ${message}`);
+          console.error(
+            `[Comped Invites] Bulk promote error for ${sub.email}:`,
+            message,
+          );
+        }
+      }
+
+      const emailNote = zephyrApiKey
+        ? ` (${emailsSent} emails sent${emailsFailed > 0 ? `, ${emailsFailed} failed` : ""})`
+        : " (no email API key configured — emails not sent)";
+
+      return {
+        success: true,
+        emailStatus: emailsFailed > 0 ? ("partial" as const) : emailsSent > 0 ? ("sent" as const) : ("not-configured" as const),
+        message: `Promoted ${promoted} of ${subscribers.length} subscribers to beta (${tier} tier)${emailNote}`,
+        promoteErrors: errors.length > 0 ? errors : undefined,
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unknown database error";
+      console.error(
+        "[Comped Invites] Error in bulk promote:",
+        message,
+        err,
+      );
+      return fail(500, {
+        error: `Failed to bulk promote subscribers: ${message}`,
       });
     }
   },
