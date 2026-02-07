@@ -15,7 +15,7 @@ const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 
 interface MagicLinkRequest {
   email: string;
-  /** Invite token to thread through the callback for expired-link recovery */
+  /** Invite token to thread through the magic link callback for error recovery */
   inviteToken?: string;
 }
 
@@ -56,8 +56,7 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
   if (body.inviteToken) {
     callbackParams.set("inviteToken", body.inviteToken);
   }
-  const qs = callbackParams.toString();
-  const callbackURL = `${appBaseUrl}/auth/magic-link/callback${qs ? `?${qs}` : ""}`;
+  const callbackURL = `${appBaseUrl}/auth/magic-link/callback${callbackParams.toString() ? `?${callbackParams}` : ""}`;
 
   try {
     const response = await fetch(`${authBaseUrl}/api/auth/sign-in/magic-link`, {
