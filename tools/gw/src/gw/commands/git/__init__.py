@@ -3,7 +3,7 @@
 import click
 
 from .read import diff, log, show, status, blame
-from .write import add, branch, commit, push, stash, switch, unstage
+from .write import add, branch, commit, pull, push, stash, switch, unstage
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
 from .worktree import worktree
@@ -19,7 +19,7 @@ def git() -> None:
     \b
     Safety Tiers:
     - READ:      status, log, diff, blame, show (always safe)
-    - WRITE:     commit, push, add, branch (require --write)
+    - WRITE:     commit, push, pull, add, branch (require --write)
     - DANGEROUS: force-push, reset, rebase (require --write --force)
     - PROTECTED: Force-push to main/production (always blocked)
 
@@ -43,6 +43,7 @@ git.add_command(show)
 # Register write commands
 git.add_command(add)
 git.add_command(commit)
+git.add_command(pull)
 git.add_command(push)
 git.add_command(branch)
 git.add_command(stash)

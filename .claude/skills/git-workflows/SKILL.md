@@ -11,7 +11,7 @@ Grove Wrap adds safety tiers, Conventional Commits enforcement, protected branch
 ## When to Activate
 
 Activate this skill when:
-- Making git commits, pushing, branching, or stashing
+- Making git commits, pushing, pulling, branching, or stashing
 - Creating, reviewing, or merging pull requests
 - Creating, viewing, or closing GitHub issues
 - Checking CI/workflow run status
@@ -26,7 +26,7 @@ gw enforces a three-tier safety model:
 | Tier | Flag Required | Examples |
 |------|---------------|---------|
 | **READ** | None | `gw git status`, `gw git log`, `gw gh pr list` |
-| **WRITE** | `--write` | `gw git commit`, `gw git push`, `gw gh pr create` |
+| **WRITE** | `--write` | `gw git commit`, `gw git push`, `gw git pull`, `gw gh pr create` |
 | **DANGEROUS** | `--write --force` | `gw git reset`, `gw git force-push`, `gw git rebase` |
 
 **Protected branches** (`main`, `master`, `production`, `staging`) can NEVER be force-pushed, even with `--force`.
@@ -82,6 +82,8 @@ gw git add --write .                              # Stage files
 gw git add --write src/lib/thing.ts               # Stage specific file
 gw git commit --write -m "feat: add new feature"  # Commit (validates conventional commits!)
 gw git push --write                               # Push to remote
+gw git pull --write                               # Pull from remote
+gw git pull --write --rebase                      # Pull with rebase strategy
 gw git branch --write feature/new-thing           # Create branch
 gw git switch --write feature/new-thing           # Switch branches
 gw git stash --write                              # Stash changes
@@ -260,6 +262,13 @@ gw git fast --write -m "fix: correct typo in header"
 gw gh pr status                 # See CI status on current PR
 gw gh run list                  # See recent workflow runs
 gw gh run watch 12345678        # Watch the current run
+```
+
+### Pull latest changes
+```bash
+gw git pull --write             # Pull from remote (merge strategy)
+gw git pull --write --rebase    # Pull with rebase (cleaner history)
+gw git pull --write origin main # Pull specific remote/branch
 ```
 
 ### Sync branch with main

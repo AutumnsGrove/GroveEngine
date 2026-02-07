@@ -377,6 +377,79 @@ def push(
 
 @click.command()
 @click.option("--write", is_flag=True, help="Confirm write operation")
+@click.option("--rebase", is_flag=True, help="Use rebase instead of merge")
+@click.argument("remote", default="origin")
+@click.argument("branch", required=False)
+@click.pass_context
+def pull(
+    ctx: click.Context,
+    write: bool,
+    rebase: bool,
+    remote: str,
+    branch: Optional[str],
+) -> None:
+    """Pull changes from remote.
+
+    Requires --write flag.
+
+    \b
+    Examples:
+        gw git pull --write
+        gw git pull --write --rebase
+        gw git pull --write origin main
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_git_safety("pull", write_flag=write)
+    except GitSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        current_branch = branch or git.current_branch()
+
+        git.pull(remote=remote, branch=current_branch, rebase=rebase)
+
+        if output_json:
+            console.print(json.dumps({
+                "remote": remote,
+                "branch": current_branch,
+                "rebase": rebase,
+            }))
+        else:
+            console.print(f"[green]Pulled from {remote}/{current_branch}[/green]")
+            if rebase:
+                console.print("[dim]Used rebase strategy[/dim]")
+
+    except GitError as e:
+        stderr = e.stderr.lower()
+        if "conflict" in stderr:
+            console.print("[red]Pull failed: merge conflicts[/red]")
+            console.print(
+                "[dim]Resolve conflicts, then 'gw git add --write' "
+                "and 'gw git commit --write'[/dim]"
+            )
+        elif "not possible" in stderr and "unstaged" in stderr:
+            console.print("[red]Pull failed: uncommitted changes would be overwritten[/red]")
+            console.print(
+                "[dim]Commit or stash your changes first, then try again.[/dim]"
+            )
+        else:
+            console.print(f"[red]Pull failed:[/red] {e.stderr.strip() or e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--write", is_flag=True, help="Confirm write operation")
 @click.option("--delete", "-d", is_flag=True, help="Delete branch")
 @click.option("--from", "start_point", help="Create branch from this ref")
 @click.option("--list", "-l", "list_branches", is_flag=True, help="List branches")
