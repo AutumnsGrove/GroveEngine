@@ -6,15 +6,16 @@
 	import defaultManifestData from '$lib/data/grove-term-manifest.json';
 	const defaultManifest = defaultManifestData as GroveTermManifest;
 
-	// GroveIntro - Standardized "we call it X" page introduction
+	// GroveIntro - Standardized inverse-term page introduction
 	//
-	// Renders below a page title when Grove Mode is OFF, introducing the
-	// Grove term for the feature. Hidden entirely when Grove Mode is ON.
+	// Always shows the OPPOSITE term from what the heading displays,
+	// so users naturally learn both names:
+	//   - Grove Mode OFF: heading shows "Support", subtitle shows "we call it the Porch"
+	//   - Grove Mode ON: heading shows "Porch", subtitle shows "also known as Support"
 	//
 	// Usage:
-	//   <h1>Support</h1>
+	//   <h1><GroveSwap term="porch">Porch</GroveSwap></h1>
 	//   <GroveIntro term="porch" />
-	//   <!-- Renders: "we call it the Porch" with Porch as interactive GroveTerm -->
 
 	interface Props {
 		/** Term slug to look up (e.g., "porch", "arbor") */
@@ -34,15 +35,21 @@
 	// Direct manifest lookup — callers should pass the exact manifest slug
 	const entry = $derived(term in manifest ? manifest[term] : null);
 
-	// Only show when: Grove Mode is OFF, and the term has a standardTerm, and is not alwaysGrove
+	// Show when: term has both a grove term and a standard term, and is not alwaysGrove
 	const shouldShow = $derived(
-		!groveModeStore.current && entry && entry.standardTerm && !entry.alwaysGrove
+		entry && entry.standardTerm && !entry.alwaysGrove
 	);
+
+	const isGroveMode = $derived(groveModeStore.current);
 </script>
 
 {#if shouldShow && entry}
 	<p class="grove-intro text-sm text-foreground-subtle italic {className || ''}">
-		we call it the <GroveTerm term={term} {manifest} />
+		{#if isGroveMode}
+			also known as <GroveTerm term={term} displayOverride="standard" {manifest} />
+		{:else}
+			we call it the <GroveTerm term={term} displayOverride="grove" {manifest} />
+		{/if}
 	</p>
 {/if}
 
