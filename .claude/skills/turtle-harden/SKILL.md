@@ -215,19 +215,29 @@ TYPE SAFETY CHECKLIST:
 [ ] Explicit return types on security-critical functions
 ```
 
-**2E. Error Handling**
+**2E. Error Handling (Signpost Standard)**
+
+Every error MUST use a Signpost error code. No bare `throw new Error()` or `throw error(500, ...)`.
 
 ```
-ERROR HANDLING CHECKLIST:
-[ ] Production error pages show GENERIC messages only (no stack traces)
-[ ] Error responses don't reveal: file paths, database schema, framework versions,
-    internal IPs, query details, or configuration values
+ERROR HANDLING CHECKLIST (SIGNPOST):
+[ ] All errors use a Signpost code from the appropriate catalog
+    (API_ERRORS, ARBOR_ERRORS, SITE_ERRORS, AUTH_ERRORS, PLANT_ERRORS)
+[ ] logGroveError() called for all server-side errors (never console.error alone)
+[ ] API routes return buildErrorJson() — never ad-hoc JSON error shapes
+[ ] Page loads use throwGroveError() for expected errors (renders in +error.svelte)
+[ ] userMessage is warm, clear, and contains NO technical details
+[ ] adminMessage is detailed and actionable (for logs/dashboards only)
+[ ] Error category is correct: "user" (they can fix), "admin" (config), "bug" (investigate)
+[ ] Client-side actions show toast.success() or toast.error() feedback
+[ ] Production error pages show GENERIC userMessage only (no stack traces)
 [ ] Different errors produce the SAME response for auth (no user enumeration)
     "Invalid credentials" — never "user not found" vs "wrong password"
-[ ] Errors are logged server-side with full detail for debugging
-[ ] Client-facing errors include a correlation ID (not the error detail)
-[ ] try/catch blocks don't silently swallow errors
+[ ] adminMessage never reaches the client (information disclosure prevention)
+[ ] try/catch blocks don't silently swallow errors — at minimum logGroveError()
 ```
+
+See `AgentUsage/error_handling.md` for the complete Signpost reference.
 
 **Output:** Foundational defenses applied to all entry and exit points
 

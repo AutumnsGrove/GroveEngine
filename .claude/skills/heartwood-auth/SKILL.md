@@ -300,6 +300,40 @@ Once a user signs in on any Grove property, they're signed in everywhere.
 - Ensure KV caching is enabled (SESSION_KV binding)
 - Check for cold start issues (Workers may sleep)
 
+## Error Codes (HW-AUTH Catalog)
+
+Heartwood has its own Signpost error catalog with 16 codes:
+
+```typescript
+import {
+  AUTH_ERRORS, getAuthError, logAuthError, buildErrorParams,
+} from '@autumnsgrove/groveengine/heartwood';
+```
+
+**Key error codes:**
+
+| Code | Key | When |
+|------|-----|------|
+| `HW-AUTH-001` | `ACCESS_DENIED` | User lacks permission |
+| `HW-AUTH-002` | `PROVIDER_ERROR` | OAuth provider failed |
+| `HW-AUTH-004` | `REDIRECT_URI_MISMATCH` | Callback URL doesn't match registered client |
+| `HW-AUTH-020` | `NO_SESSION` | No session cookie found |
+| `HW-AUTH-021` | `SESSION_EXPIRED` | Session timed out |
+| `HW-AUTH-022` | `INVALID_TOKEN` | Token verification failed |
+| `HW-AUTH-023` | `TOKEN_EXCHANGE_FAILED` | Code-for-token exchange failed |
+
+**Mapping OAuth errors to Signpost codes:**
+```typescript
+// In callback handler — map OAuth error param to structured error
+const authError = getAuthError(errorParam); // e.g. "access_denied" → AUTH_ERRORS.ACCESS_DENIED
+logAuthError(authError, { path: '/auth/callback', ip });
+redirect(302, `/login?${buildErrorParams(authError)}`);
+```
+
+**Number ranges:** 001-019 infrastructure, 020-039 session/token, 040+ reserved.
+
+See `AgentUsage/error_handling.md` for the full Signpost reference.
+
 ## Related Resources
 
 - **Heartwood Spec**: `/Users/autumn/Documents/Projects/GroveAuth/GROVEAUTH_SPEC.md`

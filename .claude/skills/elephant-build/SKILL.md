@@ -243,9 +243,36 @@ export const POST: RequestHandler = async ({ request }) => {
 **Construction Principles:**
 - **One file at a time** — Finish it before moving on
 - **Follow existing patterns** — Match the codebase style
-- **Handle errors** — Every async call needs error handling
+- **Use Signpost error codes** — Every error uses a code from the appropriate catalog
 - **Validate inputs** — Never trust user data
 - **Add types** — TypeScript is your friend
+
+**Error Handling (Signpost Standard):**
+
+API routes return structured errors:
+```typescript
+import { API_ERRORS, buildErrorJson, logGroveError } from '@autumnsgrove/groveengine/errors';
+
+// In +server.ts
+if (!locals.user) {
+  logGroveError('Engine', API_ERRORS.UNAUTHORIZED, { path: '/api/resource' });
+  return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
+}
+```
+
+Client actions show toast feedback:
+```typescript
+import { toast } from '@autumnsgrove/groveengine/ui';
+
+try {
+  await apiRequest('/api/resource', { method: 'POST', body });
+  toast.success('Created successfully!');
+} catch (err) {
+  toast.error(err instanceof Error ? err.message : 'Something went wrong');
+}
+```
+
+See `AgentUsage/error_handling.md` for the full Signpost reference.
 
 **Output:** Complete implementation across all required files
 

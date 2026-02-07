@@ -810,10 +810,75 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 - Keep functions small and focused on single responsibilities
 - Add docstrings to functions and classes
 
-### Error Handling
-- Use try/except blocks gracefully
-- Provide helpful error messages
-- Never let errors fail silently
+### Error Handling (Signpost Standard)
+
+**MANDATORY: Every error MUST use a Signpost error code.** Bare `throw new Error()` or `throw error(500, 'message')` is not acceptable in Grove code.
+
+**Import:**
+```typescript
+import {
+  API_ERRORS, ARBOR_ERRORS, SITE_ERRORS,
+  throwGroveError, logGroveError, buildErrorJson, buildErrorUrl,
+} from '@autumnsgrove/groveengine/errors';
+```
+
+**Quick Reference — Which Helper Where:**
+
+| Context | Helper | Example |
+|---------|--------|---------|
+| API routes (`+server.ts`) | `buildErrorJson()` | `return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 })` |
+| Page loads (`+page.server.ts`) | `throwGroveError()` | `throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, 'Engine')` |
+| Auth redirects | `buildErrorUrl()` | `redirect(302, buildErrorUrl(AUTH_ERRORS.SESSION_EXPIRED, '/login'))` |
+| Any server context | `logGroveError()` | `logGroveError('Engine', API_ERRORS.INTERNAL_ERROR, { path, cause: err })` |
+
+**Error Catalogs:**
+
+| Catalog | Prefix | Import |
+|---------|--------|--------|
+| `API_ERRORS` | `GROVE-API-XXX` | `@autumnsgrove/groveengine/errors` |
+| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/groveengine/errors` |
+| `SITE_ERRORS` | `GROVE-SITE-XXX` | `@autumnsgrove/groveengine/errors` |
+| `AUTH_ERRORS` | `HW-AUTH-XXX` | `@autumnsgrove/groveengine/heartwood` |
+| `PLANT_ERRORS` | `PLANT-XXX` | `packages/plant/src/lib/errors.ts` |
+
+**Number ranges:** 001-019 infrastructure, 020-039 auth, 040-059 business logic, 060-079 rate limiting, 080-099 internal
+
+**Client-Side Feedback (Toast):**
+```typescript
+import { toast } from '@autumnsgrove/groveengine/ui';
+
+// After successful action
+toast.success('Post published!');
+
+// After failed action
+toast.error(err instanceof Error ? err.message : 'Something went wrong');
+
+// Async operations
+toast.promise(apiRequest('/api/export', { method: 'POST' }), {
+  loading: 'Exporting...', success: 'Export complete!', error: 'Export failed.',
+});
+
+// Multi-step flows
+const id = toast.loading('Saving...');
+// ... later
+toast.dismiss(id);
+toast.success('Saved!');
+```
+
+**When NOT to use toast:** form validation errors (use `fail()` + inline display), page load failures (`+error.svelte` handles these), persistent admin notices (use GroveMessages)
+
+**Error Handling Checklist:**
+```
+[ ] Server errors use a Signpost code from the appropriate catalog
+[ ] API routes return buildErrorJson() — never ad-hoc JSON
+[ ] Page loads use throwGroveError() for expected errors
+[ ] logGroveError() called for all server-side errors
+[ ] Client actions show toast.success() or toast.error()
+[ ] New error codes follow number ranges and have warm userMessage
+[ ] adminMessage never reaches the client
+```
+
+See `AgentUsage/error_handling.md` for the full reference.
 
 ### File Organization
 - Group related functionality into modules

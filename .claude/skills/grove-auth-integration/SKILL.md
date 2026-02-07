@@ -34,6 +34,22 @@ Add Heartwood authentication to a Grove property — from client registration th
 Identify → Register Client → Configure Secrets → Write Code → Wire Wrangler → Test
 ```
 
+**Error Handling in Auth Flows:**
+Auth errors MUST use the `AUTH_ERRORS` Signpost catalog — never bare redirect with ad-hoc error strings.
+
+```typescript
+import { AUTH_ERRORS, getAuthError, logAuthError, buildErrorParams } from '@autumnsgrove/groveengine/heartwood';
+
+// In callback — map OAuth error to structured code
+if (errorParam) {
+  const authError = getAuthError(errorParam);
+  logAuthError(authError, { path: '/auth/callback' });
+  redirect(302, `/login?${buildErrorParams(authError)}`);
+}
+```
+
+See `AgentUsage/error_handling.md` for the full Signpost reference.
+
 ---
 
 ### Step 1: Identify the Integration

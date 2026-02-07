@@ -51,6 +51,14 @@ Receive and parse the request:
 - Post-incident cleanup?
 - Pre-production hardening?
 
+**Error Codes as Security Posture:**
+All errors MUST use Signpost codes — this is a security requirement, not just a convention:
+- All server errors use codes from the appropriate catalog (`API_ERRORS`, `AUTH_ERRORS`, etc.)
+- `userMessage` is always generic and warm — no technical details leak to clients
+- `adminMessage` is detailed — stays in server logs only
+- Auth errors NEVER reveal user existence ("Invalid credentials" — not "user not found")
+- `logGroveError()` for all server errors — never `console.error` alone
+
 **Scope Check:**
 > "I'll mobilize a security gathering for: **[security work]**
 >

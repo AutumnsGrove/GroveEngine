@@ -84,6 +84,24 @@ Before gathering materials, understand what you're building for:
 - Expensive to write and maintain
 - Reserve for flows where failure = business impact
 
+**Error Code Coverage:**
+When testing API routes and server actions, verify Signpost error compliance:
+
+```typescript
+// Verify API returns structured Signpost error
+const response = await fetch('/api/resource', { method: 'POST', body: '{}' });
+const data = await response.json();
+expect(data.error_code).toMatch(/^GROVE-(API|SITE|ARBOR)-\d{3}$/);
+expect(data.error).toBeDefined();
+expect(data.error_description).toBeDefined();
+```
+
+Test checklist for error handling:
+- [ ] API routes return `buildErrorJson()` format (has `error_code`, `error`, `error_description`)
+- [ ] Error messages match catalog `userMessage` (no ad-hoc strings)
+- [ ] Client shows `toast.success()` / `toast.error()` for user actions
+- [ ] Auth errors don't reveal user existence (same response for valid/invalid)
+
 **Output:** Brief summary of what needs testing and at what layer
 
 ---

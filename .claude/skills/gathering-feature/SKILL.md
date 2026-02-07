@@ -83,6 +83,16 @@ Scout          Build       Harden      Test       Secrets    a11y    Speed   Doc
 Patterns      Feature     Security    Coverage    Cleanup    Check   Opt     Write
 ```
 
+**Cross-Cutting Standard — Signpost Error Codes:**
+All animals MUST use Signpost error codes (from `@autumnsgrove/groveengine/errors`). This is not optional:
+- **Elephant** uses them when building (buildErrorJson in API routes, throwGroveError in page loads)
+- **Turtle** verifies all errors use Signpost codes during hardening (Phase 2E checklist)
+- **Beaver** tests that API routes return proper `error_code` fields
+- **Raccoon** audits for bare `throw error()` and `console.error` without `logGroveError()`
+- Client-side feedback uses `toast` from `@autumnsgrove/groveengine/ui`
+
+See `AgentUsage/error_handling.md` for the full reference.
+
 **Dependencies:**
 - Bloodhound must complete before Elephant (needs context)
 - Elephant must complete before Turtle (hardens what was built)

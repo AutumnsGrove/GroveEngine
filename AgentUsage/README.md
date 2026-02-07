@@ -38,6 +38,7 @@ skill: "git-workflows"
 | [secrets_management.md](secrets_management.md) | API key handling, security patterns | Setting up projects with external APIs |
 | [secrets_advanced.md](secrets_advanced.md) | Advanced secrets patterns, rotation, auditing | Enterprise-grade security implementations |
 | [api_usage.md](api_usage.md) | Respectful public API usage, rate limiting, auth | Integrating external APIs |
+| [error_handling.md](error_handling.md) | Signpost error codes, Toast notifications | Building any feature with error handling |
 | [house_agents.md](house_agents.md) | Specialized agent usage (research, coding) | Complex searches or multi-file refactoring |
 | [subagent_usage.md](subagent_usage.md) | Creating focused task agents | Breaking down large tasks into subtasks |
 | [research_workflow.md](research_workflow.md) | Codebase analysis patterns | Understanding unfamiliar codebases |
@@ -157,8 +158,9 @@ For new projects, use these skills in order:
 | `svelte5-development` | svelte5_guide.md |
 | `rich-terminal-output` | rich_formatting.md |
 | `research-strategy` | research_workflow.md |
+| *(cross-cutting)* | error_handling.md |
 
 ---
 
 *Last updated: 2025-12-22*
-*Total guides: 25*
+*Total guides: 26*

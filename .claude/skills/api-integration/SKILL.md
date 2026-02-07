@@ -242,6 +242,43 @@ def fetch_all_pages(base_url: str, api_key: str) -> list:
 - [ ] Cache appropriately
 - [ ] Monitor usage
 
+## Grove API Error Responses (MANDATORY)
+
+When building API routes in Grove applications, **all error responses MUST use Signpost error codes**. Never return ad-hoc JSON error shapes.
+
+```typescript
+import { API_ERRORS, buildErrorJson, logGroveError } from '@autumnsgrove/groveengine/errors';
+import { json } from '@sveltejs/kit';
+
+export const POST: RequestHandler = async ({ request, locals }) => {
+  if (!locals.user) {
+    logGroveError('Engine', API_ERRORS.UNAUTHORIZED, { path: '/api/resource' });
+    return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
+  }
+
+  const body = schema.safeParse(await request.json());
+  if (!body.success) {
+    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), { status: 400 });
+  }
+
+  // ... business logic
+};
+```
+
+Client-side, use `apiRequest()` (handles CSRF + credentials) and show toast feedback:
+```typescript
+import { toast } from '@autumnsgrove/groveengine/ui';
+
+try {
+  await apiRequest('/api/resource', { method: 'POST', body });
+  toast.success('Created!');
+} catch (err) {
+  toast.error(err instanceof Error ? err.message : 'Something went wrong');
+}
+```
+
+See `AgentUsage/error_handling.md` for the complete Signpost error code reference.
+
 ## Related Resources
 
 See `AgentUsage/api_usage.md` for complete documentation including:

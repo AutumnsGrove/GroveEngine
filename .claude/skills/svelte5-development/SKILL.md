@@ -230,6 +230,46 @@ state.count++;
 <form method="POST" use:enhance>
 ```
 
+### Error Feedback (Signpost + Toast)
+
+**Toast** is the primary client-side feedback for user actions:
+
+```typescript
+import { toast } from '@autumnsgrove/groveengine/ui';
+
+// After successful action
+toast.success('Post published!');
+
+// After failed action
+toast.error(err instanceof Error ? err.message : 'Something went wrong');
+
+// Async operations
+toast.promise(apiRequest('/api/export', { method: 'POST' }), {
+  loading: 'Exporting...', success: 'Done!', error: 'Export failed.',
+});
+
+// Multi-step flows
+const id = toast.loading('Saving...');
+// ... later
+toast.dismiss(id);
+toast.success('Saved!');
+```
+
+**When NOT to use toast:** form validation (use `fail()` + inline errors), page load failures (`+error.svelte`), persistent notices (use GroveMessages).
+
+**Server-side errors** use Signpost codes:
+```typescript
+import { API_ERRORS, buildErrorJson, throwGroveError, logGroveError } from '@autumnsgrove/groveengine/errors';
+
+// API route: return structured error
+return json(buildErrorJson(API_ERRORS.RESOURCE_NOT_FOUND), { status: 404 });
+
+// Page load: throw to +error.svelte
+throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, 'Engine');
+```
+
+See `AgentUsage/error_handling.md` for the full reference.
+
 ## Project Structure
 
 ```
