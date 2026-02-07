@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { COLOR_PRESETS } from '@autumnsgrove/groveengine';
+	import { submitFormAndGo } from '$lib/submit-form';
 
-	let { data, form } = $props();
+	let { data } = $props();
 
 	// Extract initial values (captured once, not reactive - intentional for form fields)
 	const initialDisplayName = data.user?.displayName || '';
@@ -17,6 +17,7 @@
 
 	// Submission state
 	let isSubmitting = $state(false);
+	let submitError = $state<string | null>(null);
 
 	// Username validation state
 	let usernameStatus = $state<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
@@ -92,6 +93,24 @@
 			selectedInterests = [...selectedInterests, id];
 		}
 	}
+
+	// Submit profile via JSON API (grove-router POST proxy fix)
+	async function saveProfile() {
+		if (!displayName || usernameStatus !== 'available' || isSubmitting) return;
+
+		isSubmitting = true;
+		submitError = null;
+
+		const error = await submitFormAndGo('/api/save-profile', {
+			displayName,
+			username,
+			favoriteColor,
+			interests: selectedInterests,
+		});
+
+		if (error) submitError = error;
+		isSubmitting = false;
+	}
 </script>
 
 <div class="animate-fade-in">
@@ -114,15 +133,7 @@
 
 	<!-- Form -->
 	<GlassCard variant="frosted" class="max-w-md mx-auto">
-		<form
-			method="POST"
-			use:enhance={() => {
-				isSubmitting = true;
-				return async ({ update }) => {
-					await update();
-					isSubmitting = false;
-				};
-			}}
+		<div
 			class="space-y-6"
 		>
 			<!-- Display Name -->
@@ -254,16 +265,17 @@
 				<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
 			</fieldset>
 
-			<!-- Form error -->
-			{#if form?.error}
-				<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm">
-					{form.error}
+			<!-- Error -->
+			{#if submitError}
+				<div class="p-3 rounded-lg bg-red-50/80 dark:bg-red-950/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-sm">
+					{submitError}
 				</div>
 			{/if}
 
 			<!-- Submit -->
 			<button
-				type="submit"
+				type="button"
+				onclick={saveProfile}
 				disabled={!displayName || usernameStatus !== 'available' || isSubmitting}
 				class="btn-primary w-full"
 			>
@@ -274,6 +286,6 @@
 					Continue to Plans
 				{/if}
 			</button>
-		</form>
+		</div>
 	</GlassCard>
 </div>

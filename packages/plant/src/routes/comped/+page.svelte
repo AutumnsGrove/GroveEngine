@@ -6,34 +6,47 @@
 	 * Shows them their special status and creates their tenant directly.
 	 */
 
-	import { enhance } from '$app/forms';
 	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { TIERS } from '@autumnsgrove/groveengine/config';
+	import { submitForm } from '$lib/submit-form';
 
-	let { data, form } = $props();
+	let { data } = $props();
 
 	let isClaiming = $state(false);
 	let claimError = $state<string | null>(null);
+	let claimSuccess = $state(false);
+	let claimedSubdomain = $state<string | null>(null);
 
 	// Get tier display info
 	const tierInfo = $derived(
 		data.compedInvite?.tier ? TIERS[data.compedInvite.tier] : null
 	);
 
-	// After successful claim, redirect to the new blog
-	$effect(() => {
-		if (form?.success && form?.subdomain) {
+	// Claim the comped invite via JSON API
+	async function claimBlog() {
+		if (isClaiming) return;
+		isClaiming = true;
+		claimError = null;
+
+		const result = await submitForm('/api/claim-comped', {});
+
+		if (result.success && result.subdomain) {
+			claimSuccess = true;
+			claimedSubdomain = result.subdomain as string;
 			// Small delay for celebration, then redirect
 			setTimeout(() => {
-				window.location.href = `https://${form.subdomain}.grove.place/admin?welcome=true`;
+				window.location.href = `https://${claimedSubdomain}.grove.place/admin?welcome=true`;
 			}, 2000);
+		} else {
+			claimError = (result.error as string) || 'Something went wrong. Please try again.';
+			isClaiming = false;
 		}
-	});
+	}
 </script>
 
 <div class="animate-fade-in">
-	{#if form?.success && form?.subdomain}
+	{#if claimSuccess && claimedSubdomain}
 		<!-- Success state -->
 		<div class="text-center">
 			<GlassCard variant="accent" class="max-w-md mx-auto mb-8">
@@ -50,7 +63,7 @@
 						Welcome to Grove, {data.user?.displayName || 'Wanderer'}!
 					</p>
 					<p class="text-lg text-primary font-medium">
-						{form.subdomain}.grove.place
+						{claimedSubdomain}.grove.place
 					</p>
 				</div>
 			</GlassCard>
@@ -151,35 +164,21 @@
 				</div>
 			{/if}
 
-			<form
-				method="POST"
-				action="?/claim"
-				use:enhance={() => {
-					isClaiming = true;
-					claimError = null;
-					return async ({ result }) => {
-						isClaiming = false;
-						if (result.type === 'failure' || result.type === 'error') {
-							claimError = 'Something went wrong. Please try again.';
-						}
-					};
-				}}
+			<button
+				type="button"
+				onclick={claimBlog}
+				disabled={isClaiming}
+				class="btn-primary w-full justify-center text-lg py-3"
 			>
-				<button
-					type="submit"
-					disabled={isClaiming}
-					class="btn-primary w-full justify-center text-lg py-3"
-				>
-					{#if isClaiming}
-						<Loader2 size={20} class="animate-spin" />
-						Creating your blog...
-					{:else}
-						<Gift size={20} />
-						Claim Your Blog
-						<ArrowRight size={20} />
-					{/if}
-				</button>
-			</form>
+				{#if isClaiming}
+					<Loader2 size={20} class="animate-spin" />
+					Creating your blog...
+				{:else}
+					<Gift size={20} />
+					Claim Your Blog
+					<ArrowRight size={20} />
+				{/if}
+			</button>
 		</GlassCard>
 
 		<!-- Thank you note -->

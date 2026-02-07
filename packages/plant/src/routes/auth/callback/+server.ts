@@ -7,6 +7,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
 
 /**
  * Map error codes to user-friendly messages
@@ -33,7 +34,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
   // Check for error from GroveAuth
   if (errorParam) {
-    console.error("[Auth Callback] Error from GroveAuth:", errorParam);
+    logPlantError(PLANT_ERRORS.MAGIC_LINK_ERROR, {
+      path: url.pathname,
+      detail: `OAuth error: ${errorParam}`,
+    });
     const friendlyMessage = getFriendlyErrorMessage(errorParam);
     redirect(302, `/?error=${encodeURIComponent(friendlyMessage)}`);
   }
@@ -80,11 +84,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const db = platform?.env?.DB;
 
   if (!db) {
-    console.error("[Auth Callback] Database not available");
-    redirect(
-      302,
-      `/?error=${encodeURIComponent("Service temporarily unavailable")}`,
-    );
+    logPlantError(PLANT_ERRORS.DB_UNAVAILABLE, { path: url.pathname });
+    redirect(302, buildPlantErrorUrl(PLANT_ERRORS.DB_UNAVAILABLE));
   }
 
   try {
@@ -106,9 +107,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.json().catch(() => ({}));
-      console.error("[Auth Callback] Token exchange failed:", {
-        status: tokenResponse.status,
-        error: errorData,
+      logPlantError(PLANT_ERRORS.SESSION_FETCH_FAILED, {
+        path: url.pathname,
+        detail: `Token exchange returned ${tokenResponse.status}`,
+        cause: errorData,
       });
       redirect(
         302,
@@ -130,10 +132,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     });
 
     if (!userinfoResponse.ok) {
-      console.error(
-        "[Auth Callback] Userinfo fetch failed:",
-        userinfoResponse.status,
-      );
+      logPlantError(PLANT_ERRORS.SESSION_FETCH_FAILED, {
+        path: url.pathname,
+        detail: `Userinfo fetch returned ${userinfoResponse.status}`,
+      });
       redirect(
         302,
         `/?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
@@ -165,12 +167,33 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     }
 
     // Check if user already has an onboarding record
-    const existingOnboarding = await db
-      .prepare(
-        "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
-      )
-      .bind(groveauthId)
-      .first();
+    let existingOnboarding:
+      | {
+          id: string;
+          tenant_id?: string;
+          profile_completed_at?: number;
+        }
+      | undefined;
+    try {
+      existingOnboarding = (await db
+        .prepare(
+          "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
+        )
+        .bind(groveauthId)
+        .first()) as
+        | {
+            id: string;
+            tenant_id?: string;
+            profile_completed_at?: number;
+          }
+        | undefined;
+    } catch (err) {
+      logPlantError(PLANT_ERRORS.ONBOARDING_QUERY_FAILED, {
+        path: url.pathname,
+        cause: err,
+      });
+      redirect(302, buildPlantErrorUrl(PLANT_ERRORS.ONBOARDING_QUERY_FAILED));
+    }
 
     let onboardingId: string;
 
@@ -179,35 +202,55 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       onboardingId = existingOnboarding.id as string;
 
       // Update auth timestamp and auto-verify if OAuth provider confirms email
-      if (emailVerified) {
-        await db
-          .prepare(
-            `UPDATE user_onboarding
-             SET auth_completed_at = unixepoch(),
-                 email_verified = CASE WHEN email_verified = 0 THEN 1 ELSE email_verified END,
-                 email_verified_at = CASE WHEN email_verified = 0 THEN unixepoch() ELSE email_verified_at END,
-                 email_verified_via = CASE WHEN email_verified = 0 THEN 'oauth' ELSE email_verified_via END,
-                 updated_at = unixepoch()
-             WHERE id = ?`,
-          )
-          .bind(onboardingId)
-          .run();
-      } else {
-        await db
-          .prepare(
-            "UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
-          )
-          .bind(onboardingId)
-          .run();
+      try {
+        if (emailVerified) {
+          await db
+            .prepare(
+              `UPDATE user_onboarding
+               SET auth_completed_at = unixepoch(),
+                   email_verified = CASE WHEN email_verified = 0 THEN 1 ELSE email_verified END,
+                   email_verified_at = CASE WHEN email_verified = 0 THEN unixepoch() ELSE email_verified_at END,
+                   email_verified_via = CASE WHEN email_verified = 0 THEN 'oauth' ELSE email_verified_via END,
+                   updated_at = unixepoch()
+               WHERE id = ?`,
+            )
+            .bind(onboardingId)
+            .run();
+        } else {
+          await db
+            .prepare(
+              "UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
+            )
+            .bind(onboardingId)
+            .run();
+        }
+      } catch (err) {
+        logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
+          path: url.pathname,
+          cause: err,
+        });
+        redirect(
+          302,
+          buildPlantErrorUrl(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED),
+        );
       }
 
       // If they already have a tenant, redirect to their blog
       if (existingOnboarding.tenant_id) {
         // Get their subdomain
-        const tenant = await db
-          .prepare("SELECT subdomain FROM tenants WHERE id = ?")
-          .bind(existingOnboarding.tenant_id)
-          .first();
+        let tenant: { subdomain: string } | undefined;
+        try {
+          tenant = (await db
+            .prepare("SELECT subdomain FROM tenants WHERE id = ?")
+            .bind(existingOnboarding.tenant_id)
+            .first()) as { subdomain: string } | undefined;
+        } catch (err) {
+          logPlantError(PLANT_ERRORS.TENANT_QUERY_FAILED, {
+            path: url.pathname,
+            cause: err,
+          });
+          redirect(302, buildPlantErrorUrl(PLANT_ERRORS.TENANT_QUERY_FAILED));
+        }
 
         if (tenant) {
           redirect(302, `https://${tenant.subdomain}.grove.place/admin`);
@@ -218,22 +261,33 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       onboardingId = crypto.randomUUID();
 
       // Include email_verified fields if OAuth provider confirms email
-      if (emailVerified) {
-        await db
-          .prepare(
-            `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
-             VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
-          )
-          .bind(onboardingId, groveauthId, email, name || null)
-          .run();
-      } else {
-        await db
-          .prepare(
-            `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
-             VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
-          )
-          .bind(onboardingId, groveauthId, email, name || null)
-          .run();
+      try {
+        if (emailVerified) {
+          await db
+            .prepare(
+              `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
+               VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
+            )
+            .bind(onboardingId, groveauthId, email, name || null)
+            .run();
+        } else {
+          await db
+            .prepare(
+              `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
+               VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
+            )
+            .bind(onboardingId, groveauthId, email, name || null)
+            .run();
+        }
+      } catch (err) {
+        logPlantError(PLANT_ERRORS.ONBOARDING_INSERT_FAILED, {
+          path: url.pathname,
+          cause: err,
+        });
+        redirect(
+          302,
+          buildPlantErrorUrl(PLANT_ERRORS.ONBOARDING_INSERT_FAILED),
+        );
       }
     }
 
@@ -273,19 +327,22 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       redirect(302, "/profile");
     }
   } catch (err) {
-    // Re-throw redirects
+    // Re-throw SvelteKit redirects (300-399 status)
     if (
-      err &&
+      err != null &&
       typeof err === "object" &&
       "status" in err &&
-      err.status === 302
+      typeof (err as any).status === "number" &&
+      (err as any).status >= 300 &&
+      (err as any).status < 400
     ) {
       throw err;
     }
-    console.error("[Auth Callback] Error:", err);
-    redirect(
-      302,
-      `/?error=${encodeURIComponent(getFriendlyErrorMessage("token_exchange_failed"))}`,
-    );
+    logPlantError(PLANT_ERRORS.INTERNAL_ERROR, {
+      path: url.pathname,
+      detail: "Unhandled error in OAuth callback",
+      cause: err,
+    });
+    redirect(302, buildPlantErrorUrl(PLANT_ERRORS.INTERNAL_ERROR));
   }
 };

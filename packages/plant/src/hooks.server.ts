@@ -12,9 +12,14 @@ import { validateCSRF } from "@autumnsgrove/groveengine/utils";
 export const handle: Handle = async ({ event, resolve }) => {
   // CSRF validation for all state-changing methods (not just POST)
   if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
-    if (!validateCSRF(event.request)) {
+    if (!validateCSRF(event.request, true)) {
       console.error(
-        `[CSRF] Blocked ${event.request.method} from disallowed origin: ${event.request.headers.get("origin")}`,
+        `[CSRF] Blocked ${event.request.method} ${event.url.pathname}`,
+        JSON.stringify({
+          origin: event.request.headers.get("origin"),
+          host: event.request.headers.get("host"),
+          xForwardedHost: event.request.headers.get("x-forwarded-host"),
+        }),
       );
       throw error(403, "Cross-site request blocked");
     }

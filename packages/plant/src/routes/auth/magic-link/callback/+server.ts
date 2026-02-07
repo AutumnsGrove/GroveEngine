@@ -9,27 +9,46 @@
  * 1. Get the session/user info from Better Auth
  * 2. Create or update the onboarding record
  * 3. Redirect to passkey setup (for new users) or profile (for existing)
+ *
+ * Error handling uses structured PLANT-XXX codes so failures are diagnosable.
  */
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
 
 /** Default GroveAuth API URL */
 const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+
+/**
+ * Helper: redirect with a structured error.
+ * Logs the error, then throws a SvelteKit redirect.
+ */
+function errorRedirect(
+  error: (typeof PLANT_ERRORS)[keyof typeof PLANT_ERRORS],
+  context: { path?: string; userId?: string; detail?: string; cause?: unknown },
+  extra?: Record<string, string>,
+): never {
+  logPlantError(error, context);
+  redirect(302, buildPlantErrorUrl(error, "/", extra));
+}
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const env = platform?.env as Record<string, string> | undefined;
   const authBaseUrl = env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
   const db = platform?.env?.DB;
+  const path = url.pathname;
 
-  // Invite token threaded through for expired-link recovery
+  // ─── Invite token threaded through for expired-link recovery ───────────
   const inviteToken = url.searchParams.get("inviteToken");
   const errorParam = url.searchParams.get("error");
 
-  // If redirected here with an error (e.g., expired magic link), redirect to invite page
-  // Thread the actual error code so the UI can show what went wrong
   if (errorParam && inviteToken) {
-    console.log("[Magic Link Callback] Error with invite token:", errorParam);
+    logPlantError(PLANT_ERRORS.MAGIC_LINK_ERROR, {
+      path,
+      detail: `Error from Heartwood: ${errorParam}`,
+    });
+
     const errorParams = new URLSearchParams({
       token: inviteToken,
       expired: "true",
@@ -38,65 +57,85 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     redirect(302, `/invited?${errorParams.toString()}`);
   }
 
+  // ─── Pre-flight checks ────────────────────────────────────────────────
   if (!db) {
-    console.error("[Magic Link Callback] Database not available");
-    redirect(302, "/?error=Service%20temporarily%20unavailable");
+    errorRedirect(PLANT_ERRORS.DB_UNAVAILABLE, { path });
   }
 
-  // Better Auth should have set session cookies when the magic link was clicked
-  // We need to get the session info to know who the user is
-  // Try to get session from Better Auth using any cookies that were set
+  if (!platform?.env?.AUTH) {
+    errorRedirect(PLANT_ERRORS.AUTH_BINDING_MISSING, { path });
+  }
+
+  // ─── Step 1: Get session from Better Auth ─────────────────────────────
   const allCookies = cookies.getAll();
   const cookieHeader = allCookies.map((c) => `${c.name}=${c.value}`).join("; ");
 
+  let sessionData: {
+    session?: {
+      id: string;
+      userId: string;
+      token: string;
+      expiresAt: string;
+    };
+    user?: {
+      id: string;
+      email: string;
+      name?: string;
+      emailVerified?: boolean;
+    };
+  };
+
   try {
-    // Get session from Better Auth via service binding (Worker-to-Worker)
-    if (!platform?.env?.AUTH) {
-      console.error("[Magic Link Callback] AUTH service binding not available");
-      redirect(302, "/?error=Service%20temporarily%20unavailable");
-    }
     const sessionResponse = await platform.env.AUTH.fetch(
       `${authBaseUrl}/api/auth/get-session`,
       {
         method: "GET",
-        headers: {
-          Cookie: cookieHeader,
-        },
+        headers: { Cookie: cookieHeader },
       },
     );
 
     if (!sessionResponse.ok) {
-      console.error(
-        "[Magic Link Callback] Failed to get session:",
-        sessionResponse.status,
-      );
-      redirect(302, "/?error=Magic%20link%20expired%20or%20invalid");
+      errorRedirect(PLANT_ERRORS.SESSION_FETCH_FAILED, {
+        path,
+        detail: `Status ${sessionResponse.status}`,
+      });
     }
 
-    const sessionData = (await sessionResponse.json()) as {
-      session?: {
-        id: string;
-        userId: string;
-        token: string;
-        expiresAt: string;
-      };
-      user?: {
-        id: string;
-        email: string;
-        name?: string;
-        emailVerified?: boolean;
-      };
-    };
+    sessionData = (await sessionResponse.json()) as typeof sessionData;
+  } catch (err) {
+    // Re-throw SvelteKit redirects (errorRedirect uses them)
+    if (isRedirect(err)) throw err;
 
-    if (!sessionData.session || !sessionData.user) {
-      console.error("[Magic Link Callback] No session in response");
-      redirect(302, "/?error=Magic%20link%20expired%20or%20invalid");
-    }
+    errorRedirect(PLANT_ERRORS.SESSION_FETCH_FAILED, {
+      path,
+      detail: "Network or parse error fetching session",
+      cause: err,
+    });
+  }
 
-    const { user } = sessionData;
+  if (!sessionData!.session || !sessionData!.user) {
+    errorRedirect(PLANT_ERRORS.NO_SESSION_DATA, {
+      path,
+      detail: "Session response was 200 but missing session/user fields",
+    });
+  }
 
-    // Check if user already has an onboarding record
-    const existingOnboarding = (await db
+  // Non-null assert: the guard above calls errorRedirect (never) if missing
+  const user = sessionData!.user!;
+  const session = sessionData!.session!;
+  console.log(
+    `[Magic Link Callback] Session verified for user ${user.id.slice(0, 8)}...`,
+  );
+
+  // ─── Step 2: Check existing onboarding record ────────────────────────
+  let existingOnboarding: {
+    id: string;
+    tenant_id: string | null;
+    profile_completed_at: number | null;
+  } | null = null;
+
+  try {
+    existingOnboarding = (await db
       .prepare(
         "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
       )
@@ -106,15 +145,23 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       tenant_id: string | null;
       profile_completed_at: number | null;
     } | null;
+  } catch (err) {
+    errorRedirect(PLANT_ERRORS.ONBOARDING_QUERY_FAILED, {
+      path,
+      userId: user.id,
+      detail: "SELECT user_onboarding failed",
+      cause: err,
+    });
+  }
 
-    let onboardingId: string;
-    let isNewUser = false;
+  // ─── Step 3: Create or update onboarding record ──────────────────────
+  let onboardingId: string;
+  let isNewUser = false;
 
-    if (existingOnboarding) {
-      // Existing user
-      onboardingId = existingOnboarding.id;
+  if (existingOnboarding) {
+    onboardingId = existingOnboarding.id;
 
-      // Update auth timestamp and mark email as verified
+    try {
       await db
         .prepare(
           `UPDATE user_onboarding
@@ -127,9 +174,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
         )
         .bind(onboardingId)
         .run();
+    } catch (err) {
+      errorRedirect(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
+        path,
+        userId: user.id,
+        detail: `UPDATE user_onboarding id=${onboardingId}`,
+        cause: err,
+      });
+    }
 
-      // If they have a tenant, redirect to their blog admin
-      if (existingOnboarding.tenant_id) {
+    // If they have a tenant, redirect to their blog admin
+    if (existingOnboarding.tenant_id) {
+      try {
         const tenant = (await db
           .prepare("SELECT subdomain FROM tenants WHERE id = ?")
           .bind(existingOnboarding.tenant_id)
@@ -138,13 +194,24 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
         if (tenant) {
           redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
         }
-      }
-    } else {
-      // New user - create onboarding record
-      onboardingId = crypto.randomUUID();
-      isNewUser = true;
-      const displayName = user.name || user.email.split("@")[0];
+      } catch (err) {
+        if (isRedirect(err)) throw err;
 
+        errorRedirect(PLANT_ERRORS.TENANT_QUERY_FAILED, {
+          path,
+          userId: user.id,
+          detail: `SELECT tenants for id=${existingOnboarding.tenant_id}`,
+          cause: err,
+        });
+      }
+    }
+  } else {
+    // New user - create onboarding record
+    onboardingId = crypto.randomUUID();
+    isNewUser = true;
+    const displayName = user.name || user.email.split("@")[0];
+
+    try {
       await db
         .prepare(
           `INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
@@ -157,9 +224,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
         "[Magic Link Callback] Created onboarding record:",
         onboardingId,
       );
+    } catch (err) {
+      errorRedirect(PLANT_ERRORS.ONBOARDING_INSERT_FAILED, {
+        path,
+        userId: user.id,
+        detail: `INSERT user_onboarding for ${user.email}`,
+        cause: err,
+      });
     }
+  }
 
-    // Set cookies
+  // ─── Step 4: Set cookies ──────────────────────────────────────────────
+  try {
     const isProduction =
       url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
 
@@ -171,40 +247,48 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     };
 
-    // Store onboarding ID
     cookies.set("onboarding_id", onboardingId, cookieOptions);
 
-    // Store the Better Auth session token as access_token for our API calls
-    if (sessionData.session.token) {
-      cookies.set("access_token", sessionData.session.token, {
+    if (session.token) {
+      cookies.set("access_token", session.token, {
         ...cookieOptions,
         maxAge: 60 * 60, // 1 hour
       });
     }
-
-    // For new users, redirect to passkey setup
-    // For existing users without profile, redirect to profile
-    // For existing users with profile, redirect to plans
-    if (isNewUser) {
-      redirect(302, "/auth/setup-passkey");
-    } else if (!existingOnboarding?.profile_completed_at) {
-      redirect(302, "/profile");
-    } else {
-      redirect(302, "/plans");
-    }
   } catch (err) {
-    // Re-throw redirects
-    if (
-      err &&
-      typeof err === "object" &&
-      "status" in err &&
-      (err as { status: number }).status >= 300 &&
-      (err as { status: number }).status < 400
-    ) {
-      throw err;
-    }
+    errorRedirect(PLANT_ERRORS.COOKIE_ERROR, {
+      path,
+      userId: user.id,
+      cause: err,
+    });
+  }
 
-    console.error("[Magic Link Callback] Error:", err);
-    redirect(302, "/?error=Something%20went%20wrong");
+  // ─── Step 5: Redirect to next step ───────────────────────────────────
+  // Cache this before the conditional to avoid TS control-flow narrowing issues
+  // (the per-operation try/catch blocks above confuse TypeScript's narrowing)
+  const hasCompletedProfile = existingOnboarding?.profile_completed_at != null;
+
+  if (isNewUser) {
+    redirect(302, "/auth/setup-passkey");
+  } else if (!hasCompletedProfile) {
+    redirect(302, "/profile");
+  } else {
+    redirect(302, "/plans");
   }
 };
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+/** Check if a thrown value is a SvelteKit redirect (must be re-thrown). */
+function isRedirect(err: unknown): boolean {
+  return (
+    err != null &&
+    typeof err === "object" &&
+    "status" in err &&
+    typeof (err as { status: unknown }).status === "number" &&
+    (err as { status: number }).status >= 300 &&
+    (err as { status: number }).status < 400
+  );
+}

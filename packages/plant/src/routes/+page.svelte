@@ -59,6 +59,11 @@
 	// Check for expired/invalid invite link notice
 	const showInviteExpiredNotice = $derived(page.url.searchParams.get('notice') === 'invite_expired');
 
+	// Auth error display (redirected here with ?error= and ?error_code= from callbacks)
+	const authError = $derived(page.url.searchParams.get('error'));
+	const authErrorCode = $derived(page.url.searchParams.get('error_code'));
+	const showAuthError = $derived(!!authError);
+
 	// Config - could be fetched from API or environment
 	const WAITLIST_COUNT = 67;
 
@@ -116,6 +121,33 @@
 			<span>Already have a blog? <span class="text-primary font-medium">Sign in</span></span>
 		</button>
 	</div>
+
+	<!-- Auth Error Notice (shown when auth callback redirects with ?error=) -->
+	{#if showAuthError}
+		<GlassCard variant="frosted" class="text-center border-red-300/50 dark:border-red-500/30 bg-red-50/60 dark:bg-red-950/20">
+			<div class="flex items-center justify-center gap-2 mb-2">
+				<AlertTriangle class="w-5 h-5 text-red-600 dark:text-red-400" />
+				<span class="font-medium text-foreground">Sign-in trouble</span>
+			</div>
+			<p class="text-foreground-muted text-sm">
+				{authError}
+			</p>
+			{#if authErrorCode}
+				<p class="text-xs text-red-700/50 dark:text-red-300/40 text-center mt-2 font-mono">
+					{authErrorCode}
+				</p>
+			{/if}
+			<button
+				onclick={() => {
+					authExpanded = true;
+					document.querySelector('#auth-section')?.scrollIntoView({ behavior: 'smooth' });
+				}}
+				class="mt-3 text-sm text-primary hover:underline"
+			>
+				Try again
+			</button>
+		</GlassCard>
+	{/if}
 
 	<!-- Invite Expired Notice (shown when invite link is invalid or already used) -->
 	{#if showInviteExpiredNotice}

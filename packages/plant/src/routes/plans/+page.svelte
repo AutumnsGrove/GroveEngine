@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/groveengine/ui';
 
@@ -18,9 +17,12 @@
 	// Shared icon mapping
 	import { tierIcons } from '$lib/ui/tier-icons';
 
+	// JSON form submission (grove-router POST proxy fix)
+	import { submitFormAndGo } from '$lib/submit-form';
+
 	// Type-safe props
-	import type { PageData, ActionData } from './$types';
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	import type { PageData } from './$types';
+	let { data }: { data: PageData } = $props();
 
 	// Plans from server (transformed via graft config)
 	const plans: PricingTier[] = data.tiers;
@@ -37,9 +39,25 @@
 
 	// Submission state
 	let isSubmitting = $state(false);
+	let submitError = $state<string | null>(null);
 
 	// Map billing period to database format (annual → yearly)
 	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
+
+	// Submit plan selection via JSON API
+	async function savePlan() {
+		if (!selectedPlan || isSubmitting) return;
+		isSubmitting = true;
+		submitError = null;
+
+		const error = await submitFormAndGo('/api/select-plan', {
+			plan: selectedPlan,
+			billingCycle: billingCycleForDb,
+		});
+
+		if (error) submitError = error;
+		isSubmitting = false;
+	}
 
 	// ============================================================================
 	// STATUS COLOR HELPERS
@@ -285,28 +303,16 @@
 	</div>
 
 	<!-- Continue button -->
-	<form
-		method="POST"
-		use:enhance={() => {
-			isSubmitting = true;
-			return async ({ update }) => {
-				await update();
-				isSubmitting = false;
-			};
-		}}
-		class="space-y-4"
-	>
-		<!-- Form error -->
-		{#if form?.error}
-			<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm">
-				{form.error}
+	<div class="space-y-4">
+		{#if submitError}
+			<div class="p-3 rounded-lg bg-red-50/80 dark:bg-red-950/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-sm">
+				{submitError}
 			</div>
 		{/if}
 
-		<input type="hidden" name="plan" value={selectedPlan || ''} />
-		<input type="hidden" name="billingCycle" value={billingCycleForDb} />
 		<button
-			type="submit"
+			type="button"
+			onclick={savePlan}
 			disabled={!selectedPlan || isSubmitting}
 			class="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
 		>
@@ -322,7 +328,7 @@
 		<p class="text-xs text-foreground-subtle text-center">
 			You won't be charged until after your 14-day trial. Cancel anytime.
 		</p>
-	</form>
+	</div>
 
 	<!-- Full comparison link -->
 	<div class="text-center pb-4">
