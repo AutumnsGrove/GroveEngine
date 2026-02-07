@@ -25,6 +25,8 @@
 		term: string;
 		/** Display inline with text (default: true) */
 		inline?: boolean;
+		/** Optional link to the actual service/page this term represents */
+		href?: string;
 		/** Static manifest for build-time lookup (optional) */
 		manifest?: GroveTermManifest;
 		/** Additional CSS classes */
@@ -36,6 +38,7 @@
 	let {
 		term,
 		inline = true,
+		href,
 		class: className,
 		manifest = defaultManifest,
 		children
@@ -215,6 +218,7 @@
 	{manifest}
 	{loading}
 	{error}
+	{href}
 	onclose={handlePopupClose}
 />
 

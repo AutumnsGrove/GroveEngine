@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from 'bits-ui';
-	import { X, Leaf } from 'lucide-svelte';
+	import { X, Leaf, ExternalLink } from 'lucide-svelte';
 	import { cn } from '$lib/ui/utils';
 	import GlassCard from '../GlassCard.svelte';
 	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
@@ -34,6 +34,8 @@
 		loading?: boolean;
 		/** Error message */
 		error?: string | null;
+		/** Optional link to the actual service/page this term represents */
+		href?: string;
 		/** Called when the popup closes */
 		onclose?: () => void;
 	}
@@ -44,6 +46,7 @@
 		manifest,
 		loading = false,
 		error = null,
+		href,
 		onclose
 	}: Props = $props();
 
@@ -235,16 +238,31 @@
 					{/if}
 				</div>
 
-				<!-- Footer - only show back button when viewing related term -->
-				{#if relatedEntry}
-					<div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30">
-						<button
-							type="button"
-							class="text-sm text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded"
-							onclick={handleBackClick}
-						>
-							← Back to {entry?.term}
-						</button>
+				<!-- Footer - back button for related terms, visit link for href -->
+				{#if relatedEntry || href}
+					<div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex items-center justify-between gap-3">
+						{#if relatedEntry}
+							<button
+								type="button"
+								class="text-sm text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded"
+								onclick={handleBackClick}
+							>
+								← Back to {entry?.term}
+							</button>
+						{:else}
+							<span></span>
+						{/if}
+						{#if href}
+							<a
+								{href}
+								class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline underline-offset-2 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Visit {displayEntry?.term || 'page'}
+								<ExternalLink class="w-3.5 h-3.5" aria-hidden="true" />
+							</a>
+						{/if}
 					</div>
 				{/if}
 			</GlassCard>

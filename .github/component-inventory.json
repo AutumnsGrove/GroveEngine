@@ -5,7 +5,7 @@
   "lastUpdated": "2026-02-07",
   "lastAuditedBy": "claude/grove-messages-beta-comm",
   "components": {
-    "total": 205,
+    "total": 206,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
@@ -15,7 +15,7 @@
       "terrarium": 7,
       "gallery": 4,
       "charts": 4,
-      "content": 6,
+      "content": 7,
       "states": 4,
       "forms": 3,
       "feedback": 1,

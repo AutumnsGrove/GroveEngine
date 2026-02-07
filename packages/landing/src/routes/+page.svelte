@@ -481,6 +481,12 @@
 				{/each}
 			</div>
 		</GlassCard>
+
+		<p class="text-center mt-6">
+			<a href="/faq" class="text-sm font-sans text-foreground-muted hover:text-accent-muted transition-colors underline underline-offset-4 decoration-accent-subtle/40">
+				See all frequently asked questions
+			</a>
+		</p>
 	</section>
 
 	<!-- Decorative divider -->
