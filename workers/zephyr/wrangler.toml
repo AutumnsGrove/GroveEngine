@@ -10,7 +10,7 @@ database_id = "a7038f4d-4850-428c-b816-f2636668852d"
 
 # Environment variables
 [vars]
-EMAIL_RENDER_URL = "https://grove-email-render.pages.dev"
+EMAIL_RENDER_URL = "https://grove-email-render.m7jv4v7npb.workers.dev"
 DEFAULT_FROM_EMAIL = "autumn@grove.place"
 DEFAULT_FROM_NAME = "Autumn"
 
