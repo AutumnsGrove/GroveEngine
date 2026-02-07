@@ -20,6 +20,10 @@ import {
   getTimelineToken,
   TIMELINE_SECRET_KEYS,
 } from "$lib/curios/timeline/secrets.server";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 
 interface ConfigRow {
   github_username: string;
@@ -72,6 +76,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!user) {
     throw error(401, "Authentication required");
+  }
+
+  // Rate limit backfill (bulk GitHub API operation)
+  if (platform?.env?.CACHE_KV) {
+    const { response } = await checkRateLimit({
+      kv: platform.env.CACHE_KV,
+      key: buildRateLimitKey("ai/timeline-backfill", user.id),
+      limit: 5,
+      windowSeconds: 86400, // 24 hours
+      namespace: "ai-ratelimit",
+      failClosed: true,
+    });
+    if (response) return response;
   }
 
   const body = (await request.json()) as BackfillRequest;

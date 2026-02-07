@@ -28,6 +28,10 @@ import {
   TIMELINE_SECRET_KEYS,
 } from "$lib/curios/timeline/secrets.server";
 import { createLumenClient } from "$lib/lumen/index.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */
 const CONCURRENCY_LIMIT = 5;
@@ -111,6 +115,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!user) {
     throw error(401, "Authentication required");
+  }
+
+  // Rate limit generation (expensive AI + GitHub API operation)
+  if (platform?.env?.CACHE_KV) {
+    const { response } = await checkRateLimit({
+      kv: platform.env.CACHE_KV,
+      key: buildRateLimitKey("ai/timeline-generate", user.id),
+      limit: 20,
+      windowSeconds: 86400, // 24 hours
+      namespace: "ai-ratelimit",
+      failClosed: true,
+    });
+    if (response) return response;
   }
 
   // Parse request body
