@@ -169,6 +169,21 @@ betterAuthRoutes.all("/*", async (c) => {
       c.req.path.includes("magiclink/verify");
     const isRedirectResponse = response.status >= 300 && response.status < 400;
 
+    // Diagnostic logging for magic link verify
+    if (isBrowserNavigation && isMagicVerify) {
+      console.log("[MagicLink-Diag] Verify response:", {
+        status: response.status,
+        isRedirect: isRedirectResponse,
+        location: response.headers.get("Location"),
+      });
+      if (isRedirectResponse) {
+        console.log(
+          "[MagicLink-Diag] BA redirect →",
+          (response.headers.get("Location") || "").slice(0, 200),
+        );
+      }
+    }
+
     if (isBrowserNavigation && isMagicVerify && !isRedirectResponse) {
       const reqUrl = new URL(c.req.url);
       const callbackURL = reqUrl.searchParams.get("callbackURL") || "/";
@@ -176,6 +191,16 @@ betterAuthRoutes.all("/*", async (c) => {
       try {
         const cloned = response.clone();
         const body = (await cloned.json()) as Record<string, unknown>;
+
+        // Diagnostic: log full BA response body
+        console.log("[MagicLink-Diag] BA JSON body:", {
+          status: response.status,
+          error: body.error,
+          code: body.code,
+          message: body.message,
+          hasSession: !!body.session,
+          hasUser: !!body.user,
+        });
 
         // Preserve Set-Cookie headers from Better Auth (session cookies)
         const setCookies: string[] = [];

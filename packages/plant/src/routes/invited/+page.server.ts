@@ -66,5 +66,6 @@ export const load: PageServerLoad = async ({ url, platform, parent }) => {
     customMessage: invite.custom_message,
     token,
     expired: url.searchParams.get("expired") === "true",
+    errorCode: url.searchParams.get("errorCode") || null,
   };
 };

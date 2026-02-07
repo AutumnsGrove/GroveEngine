@@ -27,11 +27,15 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const errorParam = url.searchParams.get("error");
 
   // If redirected here with an error (e.g., expired magic link), redirect to invite page
+  // Thread the actual error code so the UI can show what went wrong
   if (errorParam && inviteToken) {
-    redirect(
-      302,
-      `/invited?token=${encodeURIComponent(inviteToken)}&expired=true`,
-    );
+    console.log("[Magic Link Callback] Error with invite token:", errorParam);
+    const errorParams = new URLSearchParams({
+      token: inviteToken,
+      expired: "true",
+      errorCode: errorParam,
+    });
+    redirect(302, `/invited?${errorParams.toString()}`);
   }
 
   if (!db) {

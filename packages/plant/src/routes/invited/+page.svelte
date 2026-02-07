@@ -87,12 +87,17 @@
 		{/if}
 	</section>
 
-	<!-- Expired magic link notice -->
+	<!-- Expired/error magic link notice -->
 	{#if showExpiredNotice}
 		<div class="max-w-md mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm" role="alert">
 			<p class="text-sm text-amber-800 dark:text-amber-200 text-center">
-				Your sign-in link expired — no worries! Click below to get a fresh one.
+				Your sign-in link didn't work — no worries! Click below to get a fresh one.
 			</p>
+			{#if data.errorCode}
+				<p class="text-xs text-amber-700/70 dark:text-amber-300/50 text-center mt-2 font-mono">
+					Error: {data.errorCode}
+				</p>
+			{/if}
 		</div>
 	{/if}
 
