@@ -145,8 +145,12 @@ class Git:
             )
             return result.stdout if capture_output else ""
         except subprocess.CalledProcessError as e:
+            stderr_text = (e.stderr or "").strip()
+            msg = f"Git command failed: {' '.join(cmd)}"
+            if stderr_text:
+                msg += f"\n{stderr_text}"
             raise GitError(
-                f"Git command failed: {' '.join(cmd)}",
+                msg,
                 returncode=e.returncode,
                 stderr=e.stderr or "",
             ) from e
