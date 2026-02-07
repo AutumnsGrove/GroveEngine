@@ -666,7 +666,7 @@ export const PATCH: RequestHandler = async ({
           }).catch((err) => {
             console.error("[Billing] Failed to send cancellation email:", err, {
               tenant: tenantId,
-              email: locals.user.email,
+              email: locals.user?.email,
             });
           });
         }
