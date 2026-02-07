@@ -45,7 +45,7 @@ The client automatically reads from environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_ZEPHYR_URL` | Zephyr worker URL | `https://grove-zephyr.pages.dev` |
+| `VITE_ZEPHYR_URL` | Zephyr worker URL | `https://grove-zephyr.m7jv4v7npb.workers.dev` |
 | `VITE_ZEPHYR_API_KEY` | Your API key | — |
 | `PUBLIC_ZEPHYR_URL` | Alternative URL var | — |
 | `ZEPHYR_API_KEY` | Alternative key var | — |
@@ -56,7 +56,7 @@ The client automatically reads from environment variables:
 import { ZephyrClient } from '@autumnsgrove/groveengine/zephyr';
 
 const client = new ZephyrClient({
-  baseUrl: 'https://grove-zephyr.pages.dev',
+  baseUrl: 'https://grove-zephyr.m7jv4v7npb.workers.dev',
   apiKey: 'your-api-key-here'
 });
 

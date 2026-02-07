@@ -228,7 +228,7 @@ X-API-Key: your-api-key-here
 
 **Example Request:**
 ```bash
-curl -X POST https://grove-zephyr.pages.dev/send \
+curl -X POST https://grove-zephyr.m7jv4v7npb.workers.dev/send \
   -H "Content-Type: application/json" \
   -H "X-API-Key: $ZEPHYR_API_KEY" \
   -d '{
@@ -454,7 +454,7 @@ GROUP BY tenant, type;
 Monitor the service health:
 
 ```bash
-curl https://grove-zephyr.pages.dev/health
+curl https://grove-zephyr.m7jv4v7npb.workers.dev/health
 ```
 
 ### Circuit Breaker Status
