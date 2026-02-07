@@ -113,7 +113,6 @@ packages/engine/src/routes/admin/
 ```
 packages/engine/src/lib/components/admin/
 ├── MarkdownEditor.svelte   # WYSIWYG-ish markdown editor
-├── FloatingToolbar.svelte  # Formatting toolbar
 ├── GutterManager.svelte    # Line gutters for editor
 └── ImageUploader.svelte    # Drag-drop image upload
 ```

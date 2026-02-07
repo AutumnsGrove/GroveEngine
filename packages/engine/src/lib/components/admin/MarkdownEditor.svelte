@@ -12,9 +12,8 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { apiRequest } from "$lib/utils/api";
   import { getActionableUploadError } from "$lib/utils/upload-validation";
-  import FloatingToolbar from "./FloatingToolbar.svelte";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "lucide-svelte";
   import FiresideChat from "./FiresideChat.svelte";
   import VoiceInput from "./VoiceInput.svelte";
   import { browser } from "$app/environment";
@@ -818,6 +817,94 @@
   {#if !isFiresideMode}
   <div class="toolbar">
     <div class="toolbar-left">
+      {#if editorMode !== "preview"}
+        <!-- Formatting buttons -->
+        <div class="toolbar-group formatting-group">
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => wrapSelection("**", "**")}
+            disabled={readonly}
+            title="Bold (⌘B)"
+            aria-label="Bold"
+          >
+            <Bold class="toolbar-icon" />
+          </button>
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => wrapSelection("_", "_")}
+            disabled={readonly}
+            title="Italic (⌘I)"
+            aria-label="Italic"
+          >
+            <Italic class="toolbar-icon" />
+          </button>
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => wrapSelection("`", "`")}
+            disabled={readonly}
+            title="Inline code"
+            aria-label="Code"
+          >
+            <Code class="toolbar-icon" />
+          </button>
+        </div>
+
+        <div class="toolbar-divider-line"></div>
+
+        <div class="toolbar-group formatting-group">
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => insertLink()}
+            disabled={readonly}
+            title="Insert link"
+            aria-label="Link"
+          >
+            <Link class="toolbar-icon" />
+          </button>
+        </div>
+
+        <div class="toolbar-divider-line"></div>
+
+        <div class="toolbar-group formatting-group">
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => insertHeading(1)}
+            disabled={readonly}
+            title="Heading 1"
+            aria-label="Heading 1"
+          >
+            <Heading1 class="toolbar-icon" />
+          </button>
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => insertHeading(2)}
+            disabled={readonly}
+            title="Heading 2"
+            aria-label="Heading 2"
+          >
+            <Heading2 class="toolbar-icon" />
+          </button>
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => insertHeading(3)}
+            disabled={readonly}
+            title="Heading 3"
+            aria-label="Heading 3"
+          >
+            <Heading3 class="toolbar-icon" />
+          </button>
+        </div>
+
+        <div class="toolbar-divider-line"></div>
+      {/if}
+
       {#if firesideEnabled && !content.trim()}
         <button
           type="button"
@@ -844,9 +931,10 @@
             <span class="voice-error">{voiceError}</span>
           {/if}
         </div>
-        <span class="toolbar-divider">|</span>
       {/if}
-      <span class="toolbar-hint">{editorMode === "preview" ? "Preview mode (read-only)" : "Select text to format"}</span>
+      {#if editorMode === "preview"}
+        <span class="toolbar-hint">Preview mode (read-only)</span>
+      {/if}
     </div>
 
     <div class="toolbar-spacer"></div>
@@ -1013,13 +1101,6 @@
   {/if}
 </div>
 
-<!-- Floating Toolbar for text formatting (Medium-style) -->
-<FloatingToolbar
-  {textareaRef}
-  bind:content={content}
-  {readonly}
-  onContentChange={(c) => content = c}
-/>
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
@@ -1410,6 +1491,17 @@
     color: var(--editor-text-dim, #5a5a5a);
     font-size: 0.75rem;
     font-style: italic;
+  }
+  /* Formatting button group */
+  .formatting-group {
+    background: var(--editor-bg-secondary, #252526);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 0.15rem;
+  }
+  .toolbar-icon-btn.fmt-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
   /* Mode toggle group */
   .mode-group {

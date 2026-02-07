@@ -575,7 +575,7 @@ Respects `prefers-reduced-motion`:
 | File | Purpose |
 |------|---------|
 | `packages/engine/src/lib/components/admin/MarkdownEditor.svelte` | Main editor component (~1700 lines) |
-| `packages/engine/src/lib/components/admin/FloatingToolbar.svelte` | Medium-style formatting toolbar |
+| ~~`FloatingToolbar.svelte`~~ | Removed — formatting buttons moved to MarkdownEditor's persistent toolbar |
 | `packages/engine/src/lib/components/admin/FiresideChat.svelte` | Fireside conversation UI |
 | `packages/engine/src/lib/components/admin/composables/` | Editor composables (draft manager, themes) |
 
@@ -583,11 +583,10 @@ Respects `prefers-reduced-motion`:
 
 ```
 MarkdownEditor.svelte
-├── FloatingToolbar.svelte (conditional, on text selection)
 ├── FiresideChat.svelte (conditional, replaces editor area)
 ├── ContentWithGutter.svelte (in full preview modal)
 └── Internal:
-    ├── Toolbar (mode switching, zen toggle)
+    ├── Toolbar (formatting buttons, mode switching, zen toggle)
     ├── Editor panel (textarea + line numbers)
     ├── Preview panel (rendered markdown)
     └── Status bar (statistics + state)
