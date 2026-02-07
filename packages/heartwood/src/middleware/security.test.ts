@@ -29,7 +29,7 @@ describe("securityHeaders middleware", () => {
     const res = await app.request("/test", {}, mockEnv);
 
     expect(res.headers.get("Strict-Transport-Security")).toBe(
-      "max-age=31536000; includeSubDomains",
+      "max-age=31536000; includeSubDomains; preload",
     );
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("X-Frame-Options")).toBe("DENY");
