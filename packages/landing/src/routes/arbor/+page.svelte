@@ -20,7 +20,8 @@
 		CreditCard,
 		CircleDot,
 		ExternalLink,
-		Trees
+		Trees,
+		Kanban
 	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -299,6 +300,21 @@
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Issues</p>
 							<p class="text-xs text-foreground-muted font-sans">GitHub Issue Tracker</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://github.com/users/AutumnsGrove/projects/1" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Kanban class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Lattice Board</p>
+							<p class="text-xs text-foreground-muted font-sans">GitHub Project Kanban</p>
 						</div>
 						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
 					</div>
