@@ -6,7 +6,7 @@
 	 * Public-facing status page showing platform health, incidents, and uptime.
 	 */
 	import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GroveIntro } from '@autumnsgrove/groveengine/ui';
+	import { GroveIntro, GroveMessages } from '@autumnsgrove/groveengine/ui';
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';
@@ -64,6 +64,10 @@
 
 	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">
+			{#if data.messages?.length}
+				<GroveMessages messages={data.messages} centered={true} />
+			{/if}
+
 			<GroveIntro term="clearing" />
 
 			<!-- Mock data indicator for development -->

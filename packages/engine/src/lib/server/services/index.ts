@@ -250,6 +250,20 @@ export {
 } from "./oembed-providers.js";
 
 // ============================================================================
+// Messages Service (Grove Messages)
+// ============================================================================
+
+export * as messages from "./messages.js";
+export {
+  // Constants
+  GROVE_MESSAGE_CHANNELS,
+  // Types
+  type GroveMessageChannel,
+  // Operations
+  loadChannelMessages,
+} from "./messages.js";
+
+// ============================================================================
 // Trace Email Service
 // ============================================================================
 

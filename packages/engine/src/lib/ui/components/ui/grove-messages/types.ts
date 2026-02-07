@@ -8,3 +8,10 @@ export interface GroveMessage {
 }
 
 export type GroveMessageType = GroveMessage["message_type"];
+
+export type GroveMessageChannel =
+  | "landing"
+  | "arbor"
+  | "plant"
+  | "meadow"
+  | "clearing";

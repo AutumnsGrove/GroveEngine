@@ -1,5 +1,6 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
+import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
 
 /**
  * Admin Layout Server
@@ -32,45 +33,12 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   );
 
   // Fetch arbor-channel messages for admin panel banner
-  type MessageType = "info" | "warning" | "celebration" | "update";
-  let messages: Array<{
-    id: string;
-    title: string;
-    body: string;
-    message_type: MessageType;
-    pinned: boolean;
-    created_at: string;
-  }> = [];
-
-  if (platform?.env?.DB) {
-    try {
-      const result = await platform.env.DB.prepare(
-        `SELECT id, title, body, message_type, pinned, created_at
-         FROM grove_messages
-         WHERE channel = 'arbor' AND published = 1
-           AND (expires_at IS NULL OR expires_at > datetime('now'))
-         ORDER BY pinned DESC, created_at DESC
-         LIMIT 5`,
-      ).all<{
-        id: string;
-        title: string;
-        body: string;
-        message_type: string;
-        pinned: number;
-        created_at: string;
-      }>();
-      messages = (result.results || []).map((m) => ({
-        id: m.id,
-        title: m.title,
-        body: m.body,
-        message_type: m.message_type as MessageType,
-        pinned: !!m.pinned,
-        created_at: m.created_at,
-      }));
-    } catch (err) {
-      console.error("[Arbor] Failed to load messages:", err);
-    }
-  }
+  const messages = platform?.env?.DB
+    ? await loadChannelMessages(platform.env.DB, "arbor").catch((err) => {
+        console.error("[Arbor] Failed to load messages:", err);
+        return [];
+      })
+    : [];
 
   return {
     user: locals.user,

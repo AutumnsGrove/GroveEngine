@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GroveMessages } from '@autumnsgrove/groveengine/ui';
 	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from '@autumnsgrove/groveengine/ui/icons';
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
 
@@ -174,6 +175,9 @@
 
 	<!-- Main content -->
 	<main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8 md:py-12">
+		{#if data?.messages?.length}
+			<GroveMessages messages={data.messages} centered={true} />
+		{/if}
 		{#if data?.loadError}
 			<div class="p-4 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm text-center">
 				Something went wrong loading your session. Please refresh the page.

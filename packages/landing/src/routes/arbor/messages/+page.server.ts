@@ -7,6 +7,7 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { GROVE_MESSAGE_CHANNELS } from "@autumnsgrove/groveengine/services";
 
 interface DbMessage {
   id: string;
@@ -55,6 +56,9 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
   const byChannel = {
     landing: messages.filter((m) => m.channel === "landing").length,
     arbor: messages.filter((m) => m.channel === "arbor").length,
+    plant: messages.filter((m) => m.channel === "plant").length,
+    meadow: messages.filter((m) => m.channel === "meadow").length,
+    clearing: messages.filter((m) => m.channel === "clearing").length,
   };
 
   return { messages, stats: { total, published, byChannel } };
@@ -83,7 +87,10 @@ export const actions: Actions = {
     if (!title || !body) {
       return fail(400, { error: "Title and body are required" });
     }
-    if (!channel || !["landing", "arbor"].includes(channel)) {
+    if (
+      !channel ||
+      !(GROVE_MESSAGE_CHANNELS as readonly string[]).includes(channel)
+    ) {
       return fail(400, { error: "Invalid channel" });
     }
     if (!["info", "warning", "celebration", "update"].includes(message_type)) {

@@ -1,4 +1,5 @@
 import type { LayoutServerLoad } from "./$types";
+import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
 
 export const load: LayoutServerLoad = async ({ cookies, platform }) => {
   // Check if user has an active onboarding session
@@ -6,9 +7,14 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
   const accessToken = cookies.get("access_token");
 
   if (!onboardingId || !accessToken) {
+    // Still load messages even for unauthenticated visitors
+    const messages = platform?.env?.DB
+      ? await loadChannelMessages(platform.env.DB, "plant").catch(() => [])
+      : [];
     return {
       user: null,
       onboarding: null,
+      messages,
     };
   }
 
@@ -18,6 +24,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
     return {
       user: null,
       onboarding: null,
+      messages: [],
     };
   }
 
@@ -48,12 +55,16 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
       .bind(onboardingId)
       .first();
 
+    // Load plant-channel messages (available for all authenticated users)
+    const messages = await loadChannelMessages(db, "plant").catch(() => []);
+
     if (!result) {
       // Invalid onboarding session, clear cookies
       cookies.delete("onboarding_id", { path: "/" });
       return {
         user: null,
         onboarding: null,
+        messages,
       };
     }
 
@@ -109,12 +120,14 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
           ? JSON.parse(result.interests as string)
           : [],
       },
+      messages,
     };
   } catch (error) {
     console.error("[Layout] Error loading onboarding state:", error);
     return {
       user: null,
       onboarding: null,
+      messages: [],
       loadError: true,
     };
   }

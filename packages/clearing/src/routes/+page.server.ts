@@ -10,6 +10,7 @@ import {
   getMockBackupStatus,
   type BackupStatus,
 } from "$lib/server/backups";
+import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
 
 export const load: PageServerLoad = async ({ platform }) => {
   // In development without D1, return mock data
@@ -18,12 +19,17 @@ export const load: PageServerLoad = async ({ platform }) => {
     return {
       ...getMockData(),
       backupStatus: getMockBackupStatus(),
+      messages: [],
       isMockData: true,
     };
   }
 
   try {
-    const data = await getStatusPageData(platform.env.DB);
+    // Load status data and messages in parallel
+    const [data, messages] = await Promise.all([
+      getStatusPageData(platform.env.DB),
+      loadChannelMessages(platform.env.DB, "clearing").catch(() => []),
+    ]);
 
     // Fetch backup status (separate try/catch so status page still works if backups fail)
     // Uses 6-hour cache to avoid D1 reads on every page load
@@ -42,7 +48,7 @@ export const load: PageServerLoad = async ({ platform }) => {
       backupStatus = getMockBackupStatus();
     }
 
-    return { ...data, backupStatus, isMockData: false };
+    return { ...data, backupStatus, messages, isMockData: false };
   } catch (error) {
     console.error(
       "[status] Failed to load status data, falling back to mock:",
@@ -52,6 +58,7 @@ export const load: PageServerLoad = async ({ platform }) => {
     return {
       ...getMockData(),
       backupStatus: getMockBackupStatus(),
+      messages: [],
       isMockData: true,
     };
   }
