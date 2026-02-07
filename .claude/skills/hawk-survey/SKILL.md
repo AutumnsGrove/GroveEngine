@@ -112,7 +112,7 @@ For each major component or data flow, evaluate against STRIDE:
 | Payment flow      | ! | ! | ! | ! | . | ! | CRITICAL |
 ```
 
-Legend: `!` = likely threat, `?` = needs investigation, `.` = low risk
+Legend: **!** = likely threat, **?** = needs investigation, **.** = low risk
 
 **1C. Trust Boundaries**
 
