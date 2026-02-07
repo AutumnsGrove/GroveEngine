@@ -29,10 +29,7 @@ function wrapEmail(content: string, unsubscribeUrl: string): string {
     <tr>
       <td align="center" style="padding-bottom: 30px;">
         <!-- Grove Logo -->
-        <svg width="48" height="59" viewBox="0 0 417 512" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
+        <img src="https://grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     ${content}
@@ -70,10 +67,7 @@ export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
     <tr>
       <td align="center" style="padding-bottom: 30px;">
         <!-- Grove Logo -->
-        <svg width="60" height="73" viewBox="0 0 417 512" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
+        <img src="https://grove.place/email/logo.png" width="56" height="56" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     <tr>
@@ -93,30 +87,24 @@ export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
     <tr>
       <td style="padding: 30px; background-color: #f0fdf4; border-radius: 12px;">
         <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          Thank you for joining us early.
+          Hey there,
         </p>
         <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          We're building something special — a quiet corner of the internet where your words can grow and flourish.
+          Thank you for planting yourself here. It means a lot.
+        </p>
+        <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
+          Grove is a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no data harvesting — just your space, growing at your pace.
         </p>
         <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          We'll reach out when Grove is ready to bloom. Until then, thank you for believing in what we're growing.
+          I'll be in touch soon with more. In the meantime, you can reply directly to this email — it comes straight to me.
         </p>
       </td>
     </tr>
     <tr>
       <td align="center" style="padding-top: 40px;">
         <p style="margin: 0; font-size: 14px; color: #3d2914; opacity: 0.5;">
-          — The Grove Team
+          — Autumn
         </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 30px;">
-        <div style="display: inline-block;">
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #bbf7d0; border-radius: 50%; margin: 0 4px;"></span>
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #86efac; border-radius: 50%; margin: 0 4px;"></span>
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #4ade80; border-radius: 50%; margin: 0 4px;"></span>
-        </div>
       </td>
     </tr>
     <tr>
@@ -146,13 +134,15 @@ Welcome to Grove
 
 a place to Be
 
-Thank you for joining us early.
+Hey there,
 
-We're building something special — a quiet corner of the internet where your words can grow and flourish.
+Thank you for planting yourself here. It means a lot.
 
-We'll reach out when Grove is ready to bloom. Until then, thank you for believing in what we're growing.
+Grove is a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no data harvesting — just your space, growing at your pace.
 
-— The Grove Team
+I'll be in touch soon with more. In the meantime, you can reply directly to this email — it comes straight to me.
+
+— Autumn
 
 grove.place
 

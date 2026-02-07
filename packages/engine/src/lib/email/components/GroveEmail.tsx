@@ -55,9 +55,9 @@ export function GroveEmail({
             <Section style={styles.header}>
               <Link href="https://grove.place" style={styles.logoLink}>
                 <Img
-                  src="https://grove.place/logo.svg"
-                  width={48}
-                  height={48}
+                  src="https://grove.place/email/logo.png"
+                  width={56}
+                  height={56}
                   alt="Grove"
                   style={styles.logo}
                 />
@@ -113,6 +113,7 @@ const styles = {
   },
   logo: {
     display: "inline-block",
+    borderRadius: "50%",
   },
   content: {
     padding: "30px",
