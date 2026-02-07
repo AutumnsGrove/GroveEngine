@@ -214,11 +214,11 @@
 					<p class="text-sm font-sans text-foreground-muted">No backups available</p>
 				</GlassCard>
 			{:else}
-				<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
-					<div class="divide-y divide-grove-100 dark:divide-bark-700/50">
+				<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+					<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
 						{#each backups as backup}
 							<div
-								class="flex items-center justify-between px-4 py-3 bg-white dark:bg-bark-800/30"
+								class="flex items-center justify-between px-4 py-3 bg-white dark:bg-cream-100/30"
 							>
 								<div>
 									<div class="text-sm font-sans text-foreground">
@@ -296,7 +296,7 @@
 					<button
 						type="button"
 						onclick={() => (showResetConfirm = false)}
-						class="px-3 py-1.5 bg-white dark:bg-bark-700 border border-grove-200 dark:border-bark-600 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-bark-600 transition-colors"
+						class="px-3 py-1.5 bg-white dark:bg-cream-200 border border-grove-200 dark:border-cream-300 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-cream-300 transition-colors"
 					>
 						Cancel
 					</button>

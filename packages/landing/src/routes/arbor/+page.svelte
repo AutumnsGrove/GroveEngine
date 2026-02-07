@@ -219,7 +219,7 @@
 			<a href="https://github.com/AutumnsGrove/GroveEngine" target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-cream-100 dark:bg-bark-800/50 rounded-lg flex items-center justify-center flex-shrink-0">
+						<div class="w-9 h-9 bg-cream-100 dark:bg-cream-100/50 rounded-lg flex items-center justify-center flex-shrink-0">
 							<Github class="w-5 h-5 text-foreground" />
 						</div>
 						<div class="flex-1 min-w-0">

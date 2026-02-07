@@ -74,7 +74,7 @@
 	{@render children()}
 {:else}
 	<!-- Full admin layout with header and navigation -->
-	<div class="min-h-screen bg-cream dark:bg-bark-900 transition-colors">
+	<div class="min-h-screen bg-cream transition-colors">
 		<AdminHeader
 			{tabs}
 			brandTitle="Admin"
