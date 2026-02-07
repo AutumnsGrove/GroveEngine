@@ -113,13 +113,11 @@ I'm just getting started here. Check back soon for new posts!
   await db
     .prepare(
       `INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
-       VALUES (?, ?, 'home', ?, ?, 'home', ?, ?, ?, '[]', 'default', unixepoch(), unixepoch())`,
+       VALUES (?, ?, 'home', 'Home', 'Your home page', 'home', ?, ?, ?, '[]', 'default', unixepoch(), unixepoch())`,
     )
     .bind(
       homePageId,
       tenantId,
-      input.displayName,
-      `Welcome to ${input.displayName}`,
       homeContent,
       `<h1>Welcome to ${input.displayName}</h1><p>Thanks for visiting! This is my blog on Grove.</p><h2>About This Site</h2><p>I'm just getting started here. Check back soon for new posts!</p><p><em>Powered by <a href="https://grove.place">Grove</a> — the cozy blogging platform.</em></p>`,
       JSON.stringify({
@@ -131,6 +129,29 @@ I'm just getting started here. Check back soon for new posts!
     .run();
 
   console.log("[Tenant] Default home page created");
+
+  // 6. Create default about page
+  const aboutPageId = crypto.randomUUID();
+  const aboutMarkdown = `# About
+
+Welcome! This page is waiting for your story.
+
+*Edit this page from your [admin panel](/arbor/pages/edit/about).*`;
+
+  await db
+    .prepare(
+      `INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, gutter_content, font, show_in_nav, nav_order, created_at, updated_at)
+       VALUES (?, ?, 'about', 'About', 'A little about this site', 'about', ?, ?, '[]', 'default', 0, 0, unixepoch(), unixepoch())`,
+    )
+    .bind(
+      aboutPageId,
+      tenantId,
+      aboutMarkdown,
+      '<h1>About</h1><p>Welcome! This page is waiting for your story.</p><p><em>Edit this page from your <a href="/arbor/pages/edit/about">admin panel</a>.</em></p>',
+    )
+    .run();
+
+  console.log("[Tenant] Default about page created");
 
   return {
     tenantId,

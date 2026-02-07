@@ -41,61 +41,76 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         .bind(tenantId)
         .first()) as PageData | null;
 
-      if (pageData) {
-        // Generate HTML from markdown if not stored
-        let htmlContent = pageData.html_content;
-        if (
-          !htmlContent &&
-          pageData.markdown_content &&
-          typeof pageData.markdown_content === "string"
-        ) {
-          htmlContent = renderMarkdown(pageData.markdown_content);
-        }
-
-        // Extract headers from HTML for table of contents
-        const headers = extractHeadersFromHtml(String(htmlContent || ""));
-
-        // Safe JSON parsing for gutter content
-        let gutterContent: GutterItem[] = [];
-        if (
-          pageData.gutter_content &&
-          typeof pageData.gutter_content === "string"
-        ) {
-          try {
-            const parsedGutter = JSON.parse(
-              pageData.gutter_content,
-            ) as GutterItem[];
-            // Process gutter items: convert markdown to HTML
-            gutterContent = parsedGutter.map((item) => {
-              if (
-                (item.type === "comment" || item.type === "markdown") &&
-                item.content
-              ) {
-                return {
-                  ...item,
-                  content: renderMarkdown(item.content),
-                };
-              }
-              return item;
-            });
-          } catch (e) {
-            console.warn("Failed to parse gutter_content for about page:", e);
-            gutterContent = [];
-          }
-        }
-
+      if (!pageData) {
+        // No about page in D1 for this tenant — return a warm default
+        // rather than 404-ing (handles deleted pages or missed migrations)
         return {
           page: {
-            slug: pageData.slug,
-            title: pageData.title,
-            description: pageData.description || "",
-            content: htmlContent || "",
-            headers,
-            gutterContent,
-            font: pageData.font || "default",
+            slug: "about",
+            title: "About",
+            description: "A little about this site",
+            content:
+              '<h1>About</h1><p>Welcome! This page is waiting for your story.</p><p><em>Edit this page from your <a href="/arbor/pages/edit/about">admin panel</a>.</em></p>',
+            headers: [],
+            gutterContent: [],
+            font: "default",
           },
         };
       }
+
+      // Generate HTML from markdown if not stored
+      let htmlContent = pageData.html_content;
+      if (
+        !htmlContent &&
+        pageData.markdown_content &&
+        typeof pageData.markdown_content === "string"
+      ) {
+        htmlContent = renderMarkdown(pageData.markdown_content);
+      }
+
+      // Extract headers from HTML for table of contents
+      const headers = extractHeadersFromHtml(String(htmlContent || ""));
+
+      // Safe JSON parsing for gutter content
+      let gutterContent: GutterItem[] = [];
+      if (
+        pageData.gutter_content &&
+        typeof pageData.gutter_content === "string"
+      ) {
+        try {
+          const parsedGutter = JSON.parse(
+            pageData.gutter_content,
+          ) as GutterItem[];
+          // Process gutter items: convert markdown to HTML
+          gutterContent = parsedGutter.map((item) => {
+            if (
+              (item.type === "comment" || item.type === "markdown") &&
+              item.content
+            ) {
+              return {
+                ...item,
+                content: renderMarkdown(item.content),
+              };
+            }
+            return item;
+          });
+        } catch (e) {
+          console.warn("Failed to parse gutter_content for about page:", e);
+          gutterContent = [];
+        }
+      }
+
+      return {
+        page: {
+          slug: pageData.slug,
+          title: pageData.title,
+          description: pageData.description || "",
+          content: htmlContent || "",
+          headers,
+          gutterContent,
+          font: pageData.font || "default",
+        },
+      };
     } catch (err) {
       console.error("D1 fetch error for about page:", err);
       // Fall through to filesystem fallback
