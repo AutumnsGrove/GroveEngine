@@ -93,16 +93,23 @@ export const DEFAULT_RETURN_TO = "/arbor";
  * - OAuth flows redirect directly to Better Auth's /api/auth/sign-in/social
  * - No more intermediate PKCE dance - Better Auth handles everything
  * - Session cookie (better-auth.session_token) is set by Better Auth
+ *
+ * For local development with Cloudflare Tunnel, set VITE_AUTH_API_URL
+ * in .env.local to override the production auth API base URL.
+ * @example VITE_AUTH_API_URL=https://dev.grove.place
  */
+const AUTH_API_BASE =
+  import.meta.env.VITE_AUTH_API_URL ?? "https://auth-api.grove.place";
+
 export const GROVEAUTH_URLS = {
   /** Frontend login page (legacy - kept for reference) */
   auth: "https://auth.grove.place",
   /** Better Auth API endpoint for social sign-in */
-  api: "https://auth-api.grove.place",
+  api: AUTH_API_BASE,
   /** Better Auth social sign-in endpoint (direct redirect) */
-  socialSignIn: "https://auth-api.grove.place/api/auth/sign-in/social",
+  socialSignIn: `${AUTH_API_BASE}/api/auth/sign-in/social`,
   /** Better Auth magic link sign-in endpoint */
-  magicLink: "https://auth-api.grove.place/api/auth/sign-in/magic-link",
+  magicLink: `${AUTH_API_BASE}/api/auth/sign-in/magic-link`,
 } as const;
 
 /**

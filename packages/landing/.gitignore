@@ -7,3 +7,4 @@ build
 !.env.example
 .DS_Store
 *.local
+!.env.local.example
