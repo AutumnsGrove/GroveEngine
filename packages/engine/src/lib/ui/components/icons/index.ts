@@ -59,6 +59,8 @@ export {
   Palette,
   Shield,
   ShieldCheck,
+  ShieldAlert,
+  UserX,
   Download,
   Rss,
   Eye,

@@ -1,16 +1,20 @@
 /**
- * Arbor Reeds — Comment Moderation Queue
+ * Arbor Reeds — Comment Moderation & Management
  *
- * Loads pending public comments and private replies for the blog author.
+ * Loads pending comments, private replies, moderated comments,
+ * blocked users, and comment settings for the blog author.
  */
 
 import { getTenantDb } from "$lib/server/services/database.js";
 import {
   getPendingComments,
   getAllPrivateReplies,
+  getModeratedComments,
   getCommentSettings,
+  getBlockedCommenters,
   type CommentRecord,
   type CommentSettingsRecord,
+  type BlockedCommenterRecord,
 } from "$lib/server/services/reeds.js";
 import type { PageServerLoad } from "./$types.js";
 
@@ -25,6 +29,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     return {
       pending: [],
       replies: [],
+      moderated: [],
+      blocked: [],
       settings: null,
       postMap: {},
     };
@@ -34,29 +40,38 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     tenantId: locals.tenantId,
   });
 
-  const [pending, replies, settings, posts] = await Promise.all([
-    getPendingComments(tenantDb).catch((err) => {
-      console.error("[Reeds] Failed to load pending comments:", err);
-      return [] as CommentRecord[];
-    }),
-    getAllPrivateReplies(tenantDb).catch((err) => {
-      console.error("[Reeds] Failed to load private replies:", err);
-      return [] as CommentRecord[];
-    }),
-    getCommentSettings(tenantDb).catch((err) => {
-      console.error("[Reeds] Failed to load settings:", err);
-      return null;
-    }),
-    tenantDb
-      .queryMany<PostLookup>("posts", undefined, [], {
-        orderBy: "created_at DESC",
-        limit: 500,
-      })
-      .catch((err) => {
-        console.error("[Reeds] Failed to load posts:", err);
-        return [] as PostLookup[];
+  const [pending, replies, moderated, blocked, settings, posts] =
+    await Promise.all([
+      getPendingComments(tenantDb).catch((err) => {
+        console.error("[Reeds] Failed to load pending comments:", err);
+        return [] as CommentRecord[];
       }),
-  ]);
+      getAllPrivateReplies(tenantDb).catch((err) => {
+        console.error("[Reeds] Failed to load private replies:", err);
+        return [] as CommentRecord[];
+      }),
+      getModeratedComments(tenantDb).catch((err) => {
+        console.error("[Reeds] Failed to load moderated comments:", err);
+        return [] as CommentRecord[];
+      }),
+      getBlockedCommenters(platform.env.DB, locals.tenantId).catch((err) => {
+        console.error("[Reeds] Failed to load blocked users:", err);
+        return [] as BlockedCommenterRecord[];
+      }),
+      getCommentSettings(tenantDb).catch((err) => {
+        console.error("[Reeds] Failed to load settings:", err);
+        return null;
+      }),
+      tenantDb
+        .queryMany<PostLookup>("posts", undefined, [], {
+          orderBy: "created_at DESC",
+          limit: 500,
+        })
+        .catch((err) => {
+          console.error("[Reeds] Failed to load posts:", err);
+          return [] as PostLookup[];
+        }),
+    ]);
 
   // Build a post lookup map for display
   const postMap: Record<string, { slug: string; title: string }> = {};
@@ -67,6 +82,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   return {
     pending,
     replies,
+    moderated,
+    blocked,
     settings,
     postMap,
   };

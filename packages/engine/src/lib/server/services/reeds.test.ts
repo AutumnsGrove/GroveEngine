@@ -17,6 +17,10 @@ import {
   getApprovedComments,
   getCommentCount,
   getPendingComments,
+  getPendingCount,
+  getModeratedComments,
+  getBlockedCommenters,
+  upsertCommentSettings,
   getCommentById,
   isUserBlocked,
   blockCommenter,
@@ -739,5 +743,191 @@ describe("checkCommentRateLimit", () => {
     const calls = (db.prepare as ReturnType<typeof vi.fn>).mock.calls;
     expect(calls[0][0]).toContain("INSERT INTO comment_rate_limits");
     expect(calls[1][0]).toContain("SELECT count FROM comment_rate_limits");
+  });
+});
+
+// ============================================================================
+// Pending Count
+// ============================================================================
+
+describe("getPendingCount", () => {
+  it("counts pending public comments", async () => {
+    const db = createMockTenantDb({
+      count: vi.fn().mockResolvedValue(3),
+    });
+
+    const count = await getPendingCount(db);
+    expect(count).toBe(3);
+    expect(db.count).toHaveBeenCalledWith(
+      "comments",
+      "is_public = 1 AND status = ?",
+      ["pending"],
+    );
+  });
+
+  it("returns 0 when no pending comments", async () => {
+    const db = createMockTenantDb({
+      count: vi.fn().mockResolvedValue(0),
+    });
+
+    const count = await getPendingCount(db);
+    expect(count).toBe(0);
+  });
+});
+
+// ============================================================================
+// Moderated Comments
+// ============================================================================
+
+describe("getModeratedComments", () => {
+  it("queries rejected and spam comments", async () => {
+    const db = createMockTenantDb();
+    await getModeratedComments(db);
+
+    expect(db.queryMany).toHaveBeenCalledWith(
+      "comments",
+      "is_public = 1 AND status IN (?, ?)",
+      ["rejected", "spam"],
+      { orderBy: "moderated_at DESC", limit: 100 },
+    );
+  });
+
+  it("returns moderated comments", async () => {
+    const comments = [
+      makeComment({ id: "c1", status: "rejected" }),
+      makeComment({ id: "c2", status: "spam" }),
+    ];
+    const db = createMockTenantDb({
+      queryMany: vi.fn().mockResolvedValue(comments),
+    });
+
+    const result = await getModeratedComments(db);
+    expect(result).toHaveLength(2);
+    expect(result[0].status).toBe("rejected");
+    expect(result[1].status).toBe("spam");
+  });
+});
+
+// ============================================================================
+// Blocked Commenters
+// ============================================================================
+
+describe("getBlockedCommenters", () => {
+  it("returns blocked users for a tenant", async () => {
+    const blocked = [
+      { blocked_user_id: "user-1", reason: "Spam", created_at: "2025-01-01" },
+      { blocked_user_id: "user-2", reason: null, created_at: "2025-01-02" },
+    ];
+    const db = createMockD1();
+    const stmt = (db as unknown as { _mockStatement: { all: ReturnType<typeof vi.fn> } })._mockStatement;
+    stmt.all.mockResolvedValue({ results: blocked });
+
+    const result = await getBlockedCommenters(db, "tenant-1");
+    expect(result).toHaveLength(2);
+    expect(result[0].blocked_user_id).toBe("user-1");
+    expect(result[0].reason).toBe("Spam");
+    expect(result[1].reason).toBeNull();
+  });
+
+  it("returns empty array when no blocked users", async () => {
+    const db = createMockD1();
+    const result = await getBlockedCommenters(db, "tenant-1");
+    expect(result).toEqual([]);
+  });
+
+  it("uses parameterized query with tenant_id", async () => {
+    const db = createMockD1();
+    await getBlockedCommenters(db, "tenant-1");
+
+    expect(db.prepare).toHaveBeenCalledWith(
+      expect.stringContaining("blocked_commenters WHERE tenant_id = ?"),
+    );
+    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    expect(stmt.bind).toHaveBeenCalledWith("tenant-1");
+  });
+});
+
+// ============================================================================
+// Upsert Comment Settings
+// ============================================================================
+
+describe("upsertCommentSettings", () => {
+  it("updates existing settings", async () => {
+    const existing: CommentSettingsRecord = {
+      tenant_id: "tenant-1",
+      comments_enabled: 1,
+      public_comments_enabled: 1,
+      who_can_comment: "anyone",
+      show_comment_count: 1,
+      notify_on_reply: 1,
+      notify_on_pending: 1,
+      notify_on_thread_reply: 0,
+      updated_at: "2025-01-01T00:00:00.000Z",
+    };
+    const db = createMockTenantDb({
+      queryOne: vi.fn().mockResolvedValue(existing),
+    });
+
+    await upsertCommentSettings(db, { comments_enabled: 0 });
+
+    expect(db.update).toHaveBeenCalledWith(
+      "comment_settings",
+      expect.objectContaining({
+        comments_enabled: 0,
+        updated_at: expect.any(String),
+      }),
+      "tenant_id = ?",
+      ["tenant-1"],
+    );
+  });
+
+  it("inserts when no settings exist", async () => {
+    const db = createMockTenantDb({
+      queryOne: vi.fn().mockResolvedValue(null),
+    });
+
+    await upsertCommentSettings(db, {
+      comments_enabled: 1,
+      who_can_comment: "grove_members",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith(
+      "comment_settings",
+      expect.objectContaining({
+        comments_enabled: 1,
+        who_can_comment: "grove_members",
+        updated_at: expect.any(String),
+      }),
+    );
+  });
+
+  it("preserves other fields when updating partial settings", async () => {
+    const existing: CommentSettingsRecord = {
+      tenant_id: "tenant-1",
+      comments_enabled: 1,
+      public_comments_enabled: 1,
+      who_can_comment: "anyone",
+      show_comment_count: 1,
+      notify_on_reply: 1,
+      notify_on_pending: 1,
+      notify_on_thread_reply: 0,
+      updated_at: "2025-01-01T00:00:00.000Z",
+    };
+    const db = createMockTenantDb({
+      queryOne: vi.fn().mockResolvedValue(existing),
+    });
+
+    await upsertCommentSettings(db, { show_comment_count: 0 });
+
+    // Should only send the changed field + updated_at
+    expect(db.update).toHaveBeenCalledWith(
+      "comment_settings",
+      {
+        show_comment_count: 0,
+        updated_at: expect.any(String),
+      },
+      "tenant_id = ?",
+      ["tenant-1"],
+    );
   });
 });

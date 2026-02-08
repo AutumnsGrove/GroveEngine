@@ -146,6 +146,33 @@ export async function getPendingComments(
 }
 
 /**
+ * Get count of pending public comments (for nav badge).
+ */
+export async function getPendingCount(
+  tenantDb: TenantDb,
+): Promise<number> {
+  return tenantDb.count(
+    "comments",
+    "is_public = 1 AND status = ?",
+    ["pending"],
+  );
+}
+
+/**
+ * Get moderated comments (rejected/spam) for review.
+ */
+export async function getModeratedComments(
+  tenantDb: TenantDb,
+): Promise<CommentRecord[]> {
+  return tenantDb.queryMany<CommentRecord>(
+    "comments",
+    "is_public = 1 AND status IN (?, ?)",
+    ["rejected", "spam"],
+    { orderBy: "moderated_at DESC", limit: 100 },
+  );
+}
+
+/**
  * Get all private replies across all posts for the author inbox.
  */
 export async function getAllPrivateReplies(
@@ -434,6 +461,61 @@ export async function unblockCommenter(
     )
     .bind(tenantId, userId)
     .run();
+}
+
+export interface BlockedCommenterRecord {
+  blocked_user_id: string;
+  reason: string | null;
+  created_at: string;
+}
+
+/**
+ * Get all blocked commenters for a tenant.
+ */
+export async function getBlockedCommenters(
+  db: D1Database,
+  tenantId: string,
+): Promise<BlockedCommenterRecord[]> {
+  const result = await db
+    .prepare(
+      "SELECT blocked_user_id, reason, created_at FROM blocked_commenters WHERE tenant_id = ? ORDER BY created_at DESC",
+    )
+    .bind(tenantId)
+    .all<BlockedCommenterRecord>();
+  return result.results ?? [];
+}
+
+// ============================================================================
+// Settings Management
+// ============================================================================
+
+/**
+ * Upsert comment settings for a tenant.
+ */
+export async function upsertCommentSettings(
+  tenantDb: TenantDb,
+  settings: Partial<Omit<CommentSettingsRecord, "tenant_id" | "updated_at">>,
+): Promise<void> {
+  const existing = await tenantDb.queryOne<CommentSettingsRecord>(
+    "comment_settings",
+  );
+
+  if (existing) {
+    await tenantDb.update(
+      "comment_settings",
+      {
+        ...settings,
+        updated_at: new Date().toISOString(),
+      },
+      "tenant_id = ?",
+      [tenantDb.tenantId],
+    );
+  } else {
+    await tenantDb.insert("comment_settings", {
+      ...settings,
+      updated_at: new Date().toISOString(),
+    });
+  }
 }
 
 // ============================================================================
