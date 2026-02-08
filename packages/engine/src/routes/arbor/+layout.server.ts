@@ -1,4 +1,4 @@
-import { redirect } from "@sveltejs/kit";
+import { redirect, isRedirect } from "@sveltejs/kit";
 import {
   getEnabledGrafts,
   isInGreenhouse,
@@ -9,8 +9,8 @@ import { loadChannelMessages } from "$lib/server/services/messages.js";
 import type { LayoutServerLoad } from "./$types";
 
 // Demo mode secret key for local development and screenshots
-// In production, this should come from environment variables
-const DEMO_MODE_SECRET = "glimpse-demo-2026";
+// Falls back to a dev-only default; production MUST set DEMO_MODE_SECRET env var
+const DEMO_MODE_SECRET_FALLBACK = "glimpse-demo-2026-dev";
 
 interface DemoUser {
   id: string;
@@ -27,9 +27,10 @@ interface DemoTenant {
 }
 
 // Check if request is in demo mode
-function isDemoRequest(url: URL): boolean {
+function isDemoRequest(url: URL, envSecret?: string): boolean {
   const demoKey = url.searchParams.get("demo");
-  return demoKey === DEMO_MODE_SECRET;
+  const secret = envSecret || DEMO_MODE_SECRET_FALLBACK;
+  return demoKey === secret;
 }
 
 // Get demo user for screenshots and exploration
@@ -79,7 +80,7 @@ export const load: LayoutServerLoad = async ({
   const parentData = await parent();
 
   // Check for demo mode (for screenshots and development)
-  const isDemoMode = isDemoRequest(url);
+  const isDemoMode = isDemoRequest(url, platform?.env?.DEMO_MODE_SECRET);
 
   // SECURITY: Example tenant admin is publicly accessible for demos (S2-F2 documented risk)
   // This allows visitors to explore the admin panel without signing in.
@@ -144,7 +145,11 @@ export const load: LayoutServerLoad = async ({
         };
       }
     } catch (error) {
-      if (error instanceof Response) {
+      // CRITICAL: Re-throw SvelteKit redirects (e.g. ownership mismatch at line 136).
+      // In SvelteKit 2.x, redirect() throws a Redirect object, NOT a Response.
+      // Using `instanceof Response` silently swallowed the redirect, allowing
+      // any logged-in user to access any tenant's arbor panel.
+      if (isRedirect(error)) {
         throw error;
       }
       console.error("[Admin Layout] Failed to load tenant:", error);
