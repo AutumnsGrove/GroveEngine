@@ -42,6 +42,27 @@ vi.mock("$lib/server/secrets", () => ({
   createSecretsManager: () => mockSecretsManager,
 }));
 
+vi.mock("$lib/errors", async () => {
+  const actual =
+    await vi.importActual<typeof import("$lib/errors")>("$lib/errors");
+  return {
+    ...actual,
+    throwGroveError: (
+      status: number,
+      groveError: { userMessage: string; code: string },
+      _prefix: string,
+      _context?: unknown,
+    ) => {
+      const err = new Error(groveError.userMessage) as Error & {
+        status: number;
+      };
+      err.status = status;
+      throw err;
+    },
+    logGroveError: vi.fn(),
+  };
+});
+
 // Import after mocks
 import { GET, PUT, DELETE } from "../+server.js";
 
@@ -86,7 +107,7 @@ describe("Secrets API Authentication", () => {
         platform: createMockPlatform(),
         locals: { user: null },
       } as Parameters<typeof GET>[0]),
-    ).rejects.toThrow("Unauthorized");
+    ).rejects.toThrow("sign in");
   });
 
   it("should reject unauthenticated PUT requests", async () => {
@@ -97,7 +118,7 @@ describe("Secrets API Authentication", () => {
         platform: createMockPlatform(),
         locals: { user: null },
       } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("Unauthorized");
+    ).rejects.toThrow("sign in");
   });
 
   it("should reject unauthenticated DELETE requests", async () => {
@@ -108,7 +129,7 @@ describe("Secrets API Authentication", () => {
         platform: createMockPlatform(),
         locals: { user: null },
       } as Parameters<typeof DELETE>[0]),
-    ).rejects.toThrow("Unauthorized");
+    ).rejects.toThrow("sign in");
   });
 });
 
@@ -188,7 +209,7 @@ describe("Secrets API CSRF Protection", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("Invalid origin");
+    ).rejects.toThrow("security reasons");
   });
 
   it("should reject DELETE with invalid CSRF", async () => {
@@ -201,7 +222,7 @@ describe("Secrets API CSRF Protection", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof DELETE>[0]),
-    ).rejects.toThrow("Invalid origin");
+    ).rejects.toThrow("security reasons");
   });
 
   it("should allow GET without CSRF (read-only)", async () => {
@@ -238,7 +259,7 @@ describe("Secrets API Input Validation", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("keyName is required");
+    ).rejects.toThrow("required fields");
   });
 
   it("should reject PUT with invalid keyName format", async () => {
@@ -249,7 +270,7 @@ describe("Secrets API Input Validation", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("keyName must start with a letter");
+    ).rejects.toThrow("isn't quite right");
   });
 
   it("should reject PUT with keyName too long", async () => {
@@ -263,7 +284,7 @@ describe("Secrets API Input Validation", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("64 characters or less");
+    ).rejects.toThrow("isn't quite right");
   });
 
   it("should reject DELETE without keyName", async () => {
@@ -274,7 +295,7 @@ describe("Secrets API Input Validation", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof DELETE>[0]),
-    ).rejects.toThrow("keyName is required");
+    ).rejects.toThrow("required fields");
   });
 });
 
@@ -362,7 +383,7 @@ describe("Secrets API Success Paths", () => {
         platform: createMockPlatform(),
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof DELETE>[0]),
-    ).rejects.toThrow("not found");
+    ).rejects.toThrow("doesn't exist");
   });
 });
 
@@ -380,7 +401,7 @@ describe("Secrets API Configuration Errors", () => {
         },
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof GET>[0]),
-    ).rejects.toThrow("Database not configured");
+    ).rejects.toThrow("temporarily unavailable");
   });
 
   it("should reject when GROVE_KEK secret is not configured", async () => {
@@ -390,6 +411,6 @@ describe("Secrets API Configuration Errors", () => {
         platform: { env: { DB: {} } },
         locals: { user: { id: "user-1" } },
       } as Parameters<typeof GET>[0]),
-    ).rejects.toThrow("GROVE_KEK secret not configured");
+    ).rejects.toThrow("temporarily unavailable");
   });
 });

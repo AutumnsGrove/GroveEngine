@@ -28,9 +28,13 @@ const errorResponses: Map<
 
 vi.mock("@sveltejs/kit", () => ({
   json: (data: unknown) => ({ status: 200, body: data }),
-  error: (status: number, message: string) => {
-    const err = new Error(message) as Error & { status: number };
+  error: (
+    status: number,
+    body: { message: string; code: string; category: string },
+  ) => {
+    const err = new Error() as Error & { status: number; body: typeof body };
     err.status = status;
+    err.body = body;
     throw err;
   },
 }));
@@ -57,6 +61,27 @@ vi.mock("$lib/lumen/client.js", () => ({
     transcribe: mockTranscribe,
   }),
 }));
+
+vi.mock("$lib/errors", async () => {
+  const actual =
+    await vi.importActual<typeof import("$lib/errors")>("$lib/errors");
+  return {
+    ...actual,
+    throwGroveError: (
+      status: number,
+      groveError: { userMessage: string; code: string },
+      _prefix: string,
+      _context?: unknown,
+    ) => {
+      const err = new Error(groveError.userMessage) as Error & {
+        status: number;
+      };
+      err.status = status;
+      throw err;
+    },
+    logGroveError: vi.fn(),
+  };
+});
 
 // Import after mocks are set up
 import { POST } from "../+server.js";
@@ -137,20 +162,20 @@ describe("POST /api/lumen/transcribe - Authentication", () => {
   it("should reject unauthenticated requests", async () => {
     const ctx = createMockContext({ user: null });
 
-    await expect(POST(ctx as any)).rejects.toThrow("Unauthorized");
+    await expect(POST(ctx as any)).rejects.toThrow("sign in");
   });
 
   it("should reject requests without tenant context", async () => {
     const ctx = createMockContext({ tenantId: null });
 
-    await expect(POST(ctx as any)).rejects.toThrow("Tenant context required");
+    await expect(POST(ctx as any)).rejects.toThrow("Something went wrong");
   });
 
   it("should reject invalid CSRF", async () => {
     mockValidateCSRF.mockReturnValueOnce(false);
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow("Invalid origin");
+    await expect(POST(ctx as any)).rejects.toThrow("security reasons");
   });
 });
 
@@ -184,7 +209,7 @@ describe("POST /api/lumen/transcribe - Validation", () => {
       body: new FormData(),
     });
 
-    await expect(POST(ctx as any)).rejects.toThrow("Audio file required");
+    await expect(POST(ctx as any)).rejects.toThrow("required fields");
   });
 
   it("should reject invalid audio MIME type", async () => {
@@ -200,7 +225,7 @@ describe("POST /api/lumen/transcribe - Validation", () => {
       body: formData,
     });
 
-    await expect(POST(ctx as any)).rejects.toThrow(/Invalid audio type/);
+    await expect(POST(ctx as any)).rejects.toThrow("file type");
   });
 
   it("should reject oversized audio files", { timeout: 15000 }, async () => {
@@ -219,7 +244,7 @@ describe("POST /api/lumen/transcribe - Validation", () => {
       body: formData,
     });
 
-    await expect(POST(ctx as any)).rejects.toThrow(/Audio file too large/);
+    await expect(POST(ctx as any)).rejects.toThrow("too large");
   });
 
   it("should accept valid audio types", async () => {
@@ -280,7 +305,7 @@ describe("POST /api/lumen/transcribe - Subscription", () => {
     mockGetTenantSubscription.mockResolvedValue(null);
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow("Tenant not found");
+    await expect(POST(ctx as any)).rejects.toThrow("doesn't exist");
   });
 
   it("should reject inactive subscriptions", async () => {
@@ -290,7 +315,7 @@ describe("POST /api/lumen/transcribe - Subscription", () => {
     });
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow("Subscription inactive");
+    await expect(POST(ctx as any)).rejects.toThrow("active subscription");
   });
 });
 
@@ -450,9 +475,7 @@ describe("POST /api/lumen/transcribe - Error Handling", () => {
 
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow(
-      "Daily transcription limit reached",
-    );
+    await expect(POST(ctx as any)).rejects.toThrow("usage limit");
   });
 
   it("should return 422 when transcription fails to parse", async () => {
@@ -462,9 +485,7 @@ describe("POST /api/lumen/transcribe - Error Handling", () => {
 
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow(
-      "Couldn't understand the recording",
-    );
+    await expect(POST(ctx as any)).rejects.toThrow("file type");
   });
 
   it("should return 503 when environment is misconfigured", async () => {
@@ -475,9 +496,7 @@ describe("POST /api/lumen/transcribe - Error Handling", () => {
 
     const ctx = createMockContext({});
 
-    await expect(POST(ctx as any)).rejects.toThrow(
-      "Transcription service temporarily unavailable",
-    );
+    await expect(POST(ctx as any)).rejects.toThrow("isn't available");
   });
 });
 
