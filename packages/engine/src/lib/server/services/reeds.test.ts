@@ -122,6 +122,16 @@ describe("stripControlChars", () => {
     expect(stripControlChars("hello\x7Fworld")).toBe("helloworld");
   });
 
+  it("removes C1 control characters (\\x80-\\x9F)", () => {
+    expect(stripControlChars("hello\x80world")).toBe("helloworld");
+    expect(stripControlChars("a\x85b\x8Dc\x9Fd")).toBe("abcd");
+  });
+
+  it("removes Unicode line/paragraph separators", () => {
+    expect(stripControlChars("hello\u2028world")).toBe("helloworld");
+    expect(stripControlChars("hello\u2029world")).toBe("helloworld");
+  });
+
   it("preserves normal text and unicode", () => {
     const text = "Hello, world! This is a test. 🌲🍂";
     expect(stripControlChars(text)).toBe(text);
@@ -449,7 +459,9 @@ describe("createComment", () => {
 
 describe("editComment", () => {
   it("updates content and content_html", async () => {
-    const db = createMockTenantDb();
+    const db = createMockTenantDb({
+      findById: vi.fn().mockResolvedValue(makeComment()),
+    });
     const result = await editComment(db, "comment-1", "Updated content");
 
     expect(result).toBe(true);
@@ -466,7 +478,9 @@ describe("editComment", () => {
   });
 
   it("strips control characters from new content", async () => {
-    const db = createMockTenantDb();
+    const db = createMockTenantDb({
+      findById: vi.fn().mockResolvedValue(makeComment()),
+    });
     await editComment(db, "comment-1", "Updated\x00content");
 
     expect(db.update).toHaveBeenCalledWith(
@@ -479,13 +493,26 @@ describe("editComment", () => {
     );
   });
 
-  it("returns false when no rows updated", async () => {
+  it("returns false when comment not found", async () => {
     const db = createMockTenantDb({
-      update: vi.fn().mockResolvedValue(0),
+      findById: vi.fn().mockResolvedValue(null),
     });
 
     const result = await editComment(db, "nonexistent", "New content");
     expect(result).toBe(false);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("returns false for soft-deleted comments", async () => {
+    const db = createMockTenantDb({
+      findById: vi.fn().mockResolvedValue(
+        makeComment({ content: "[deleted]", author_name: "[deleted]" }),
+      ),
+    });
+
+    const result = await editComment(db, "comment-1", "Trying to resurrect");
+    expect(result).toBe(false);
+    expect(db.update).not.toHaveBeenCalled();
   });
 });
 

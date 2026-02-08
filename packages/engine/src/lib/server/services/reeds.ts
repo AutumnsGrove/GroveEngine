@@ -24,6 +24,7 @@ export interface CommentRecord {
   parent_id: string | null;
   content: string;
   content_html: string | null;
+  /** SQLite INTEGER (0/1) — use `is_public ? 1 : 0` when writing, truthy check when reading */
   is_public: number;
   status: string;
   moderation_note: string | null;
@@ -56,12 +57,16 @@ export interface ThreadedComment extends CommentRecord {
 // ============================================================================
 
 /**
- * Strip null bytes and C0 control characters from user input.
- * Preserves \n (\x0A), \r (\x0D), \t (\x09) for markdown formatting.
+ * Strip control characters from user input.
+ * Covers C0 (\x00-\x1F), DEL (\x7F), C1 (\x80-\x9F), and Unicode
+ * line/paragraph separators (U+2028, U+2029) that could cause rendering
+ * exploits or obfuscation. Preserves \n, \r, \t for markdown formatting.
  */
 export function stripControlChars(input: string): string {
-  // eslint-disable-next-line no-control-regex
-  return input.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+  return input.replace(
+    /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x80-\x9F\u2028\u2029]/g,
+    "",
+  );
 }
 
 // ============================================================================
@@ -315,12 +320,23 @@ export function isWithinEditWindow(createdAt: string): boolean {
 
 /**
  * Edit a comment's content. Only allowed within the edit window.
+ * Returns false for soft-deleted comments (content = '[deleted]') to
+ * prevent resurrection of removed comments within the edit window.
  */
 export async function editComment(
   tenantDb: TenantDb,
   commentId: string,
   newContent: string,
 ): Promise<boolean> {
+  // Prevent editing soft-deleted comments
+  const existing = await tenantDb.findById<CommentRecord>(
+    "comments",
+    commentId,
+  );
+  if (!existing || existing.content === "[deleted]") {
+    return false;
+  }
+
   const cleanContent = stripControlChars(newContent);
   const contentHtml = renderMarkdown(cleanContent);
   const changes = await tenantDb.update(
@@ -532,7 +548,10 @@ export async function upsertCommentSettings(
  * SQLite, so batched writes are serialized.
  *
  * This is the secondary (durable, per-tier) limit. The primary
- * burst defense is the KV rate limiter in the API route handler.
+ * burst defense is the KV rate limiter in the API route handler
+ * (60/hour global, regardless of tenant). Rate limits are keyed
+ * by user_id only (not tenant-scoped) so they apply across all
+ * tenants — a user's weekly cap is global, not per-blog.
  */
 export async function checkCommentRateLimit(
   db: D1Database,
