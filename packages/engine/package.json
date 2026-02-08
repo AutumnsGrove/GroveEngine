@@ -370,6 +370,7 @@
     "@react-email/render": "^2.0.4",
     "clsx": "^2.1.1",
     "dom-to-image-more": "^3.5.0",
+    "heic2any": "^0.0.4",
     "dompurify": "^3.3.0",
     "esm-env": "^1.2.2",
     "lucide-svelte": "^0.554.0",

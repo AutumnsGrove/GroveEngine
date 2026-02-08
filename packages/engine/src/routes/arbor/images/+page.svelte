@@ -19,6 +19,7 @@
     ALLOWED_EXTENSIONS,
     ALLOWED_TYPES_DISPLAY,
     validateImageFile,
+    isConvertibleFormat,
     getUploadStrategy,
     getActionableUploadError,
   } from "$lib/utils/upload-validation";
@@ -193,6 +194,11 @@
     const rejectedFiles = [];
 
     for (const file of files) {
+      // HEIC/HEIF files bypass standard validation — they'll be converted to JPEG
+      if (isConvertibleFormat(file)) {
+        validFiles.push(file);
+        continue;
+      }
       const error = validateImageFile(file);
       if (error) {
         rejectedFiles.push({ name: file.name, error });
@@ -267,7 +273,7 @@
 
       // Step 2: Calculate hash for duplicate detection
       const hash = await calculateFileHash(file);
-      updateUpload({ progress: 10, stage: strategy.skipProcessing ? 'Preparing upload...' : 'Processing image...' });
+      updateUpload({ progress: 10, stage: strategy.needsConversion ? 'Converting iPhone photo...' : strategy.skipProcessing ? 'Preparing upload...' : 'Processing image...' });
 
       // Step 3: Process image (JXL/WebP conversion, quality, EXIF strip)
       // Skip processing for non-renderable formats (TIFF, HEIC, RAW) and GIFs

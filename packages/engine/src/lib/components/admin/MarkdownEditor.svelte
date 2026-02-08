@@ -10,7 +10,8 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { apiRequest } from "$lib/utils/api";
-  import { getActionableUploadError } from "$lib/utils/upload-validation";
+  import { getActionableUploadError, isConvertibleFormat } from "$lib/utils/upload-validation";
+  import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "lucide-svelte";
   import FiresideChat from "./FiresideChat.svelte";
@@ -680,6 +681,12 @@
     lastFailedFile = null;
 
     try {
+      // Convert HEIC/HEIF to JPEG before uploading
+      if (isConvertibleFormat(file)) {
+        uploadProgress = `Converting ${file.name}...`;
+        file = await convertHeicToJpeg(file);
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("folder", "blog");

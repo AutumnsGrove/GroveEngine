@@ -59,6 +59,61 @@ export async function supportsJxlEncoding(): Promise<boolean> {
 }
 
 // =============================================================================
+// HEIC DECODER (LAZY LOADED)
+// =============================================================================
+
+/**
+ * Lazily loaded HEIC decoder module (heic2any)
+ * Uses libheif WASM (~1.3MB), only loaded when someone uploads a HEIC file
+ */
+let heicModule: typeof import("heic2any") | null = null;
+
+/**
+ * Get the HEIC decoder, loading it on first use
+ */
+async function getHeicDecoder(): Promise<typeof import("heic2any")> {
+  if (!heicModule) {
+    heicModule = await import("heic2any");
+  }
+  return heicModule;
+}
+
+/**
+ * Check if a file is a HEIC/HEIF image by extension or MIME type.
+ * Browsers often don't set the MIME type correctly for HEIC files,
+ * so we check the extension as a fallback.
+ */
+export function isHeicFile(file: File): boolean {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  return (
+    ["heic", "heif"].includes(ext) ||
+    file.type === "image/heic" ||
+    file.type === "image/heif"
+  );
+}
+
+/**
+ * Convert a HEIC/HEIF file to JPEG using the heic2any WASM decoder.
+ * Quality is intentionally high (0.92) since this is an intermediate step —
+ * the result will be re-encoded to JXL/WebP by the normal processing pipeline.
+ */
+export async function convertHeicToJpeg(file: File): Promise<File> {
+  const heic2any = await getHeicDecoder();
+  const result = await heic2any.default({
+    blob: file,
+    toType: "image/jpeg",
+    quality: 0.92,
+  });
+
+  // heic2any may return a single Blob or an array (for multi-image HEIC)
+  const jpegBlob = Array.isArray(result) ? result[0] : result;
+
+  // Create a new File with .jpg extension
+  const baseName = file.name.replace(/\.(heic|heif)$/i, "");
+  return new File([jpegBlob], `${baseName}.jpg`, { type: "image/jpeg" });
+}
+
+// =============================================================================
 // CORE UTILITIES
 // =============================================================================
 
@@ -125,7 +180,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
       if (["heic", "heif"].includes(ext)) {
         reject(
           new Error(
-            `HEIC/HEIF files (iPhone photos) have limited browser support. Please upload as original format or convert to JPG first.`,
+            `HEIC/HEIF conversion may have failed. Please try uploading again.`,
           ),
         );
         return;
@@ -317,6 +372,11 @@ export async function processImage(
   if (!formatPreference) {
     // Backward compatibility: if convertToWebP is explicitly false, keep original
     formatPreference = convertToWebP ? "auto" : "original";
+  }
+
+  // Convert HEIC/HEIF to JPEG before processing
+  if (isHeicFile(file)) {
+    file = await convertHeicToJpeg(file);
   }
 
   // For GIFs, return original to preserve animation

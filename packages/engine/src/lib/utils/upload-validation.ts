@@ -34,10 +34,10 @@ export type AllowedExtension = (typeof ALLOWED_EXTENSIONS)[number];
 
 /** HTML accept attribute value for file inputs */
 export const UPLOAD_ACCEPT_ATTR =
-  ".jpg,.jpeg,.png,.gif,.webp,.jxl,image/jpeg,image/png,image/gif,image/webp,image/jxl";
+  ".jpg,.jpeg,.png,.gif,.webp,.jxl,.heic,.heif,image/jpeg,image/png,image/gif,image/webp,image/jxl,image/heic,image/heif";
 
 /** Human-readable list for error messages */
-export const ALLOWED_TYPES_DISPLAY = "JPG, PNG, GIF, WebP, or JPEG XL";
+export const ALLOWED_TYPES_DISPLAY = "JPG, PNG, GIF, WebP, JPEG XL, or HEIC";
 
 // ============================================================================
 // MIME to Extension Mapping
@@ -277,17 +277,6 @@ export const NON_RENDERABLE_FORMATS = [
     reason: "TIFF files cannot be processed in-browser. Uploading original.",
   },
   {
-    ext: "heic",
-    mime: "image/heic",
-    reason:
-      "HEIC (iPhone) files have limited browser support. Uploading original.",
-  },
-  {
-    ext: "heif",
-    mime: "image/heif",
-    reason: "HEIF files have limited browser support. Uploading original.",
-  },
-  {
     ext: "raw",
     mime: "image/x-raw",
     reason: "RAW files cannot be processed in-browser. Uploading original.",
@@ -329,9 +318,34 @@ export const NON_RENDERABLE_FORMATS = [
   },
 ] as const;
 
+// ============================================================================
+// Convertible Formats (HEIC/HEIF → JPEG via WASM)
+// ============================================================================
+
+/**
+ * Formats that can be converted client-side via WASM before processing.
+ * These are NOT natively renderable by browsers, but we can decode them
+ * to JPEG using heic2any, then feed them through the normal pipeline.
+ */
+export const CONVERTIBLE_FORMATS = [
+  { ext: "heic", mime: "image/heic" },
+  { ext: "heif", mime: "image/heif" },
+] as const;
+
+/**
+ * Check if a file is a convertible format (HEIC/HEIF).
+ * These files need WASM decoding before the normal processing pipeline.
+ */
+export function isConvertibleFormat(file: File): boolean {
+  const ext = getFileExtension(file.name);
+  return CONVERTIBLE_FORMATS.some(
+    (format) => format.ext === ext || format.mime === file.type,
+  );
+}
+
 /**
  * Check if a file type is renderable by the browser's Image API.
- * Non-renderable files (TIFF, HEIC, RAW, etc.) should skip client-side processing.
+ * Non-renderable files (TIFF, RAW, etc.) should skip client-side processing.
  */
 export function isBrowserRenderable(file: File): boolean {
   // Check MIME type first
@@ -485,9 +499,19 @@ export function getActionableUploadError(serverMessage: string): string {
 export function getUploadStrategy(file: File): {
   canProcess: boolean;
   skipProcessing: boolean;
+  needsConversion?: boolean;
   reason?: string;
   warning?: string;
 } {
+  // Check for convertible formats (HEIC/HEIF → JPEG via WASM)
+  if (isConvertibleFormat(file)) {
+    return {
+      canProcess: true,
+      skipProcessing: false,
+      needsConversion: true,
+    };
+  }
+
   // Check for known non-renderable formats
   const nonRenderable = getNonRenderableInfo(file);
   if (nonRenderable) {
