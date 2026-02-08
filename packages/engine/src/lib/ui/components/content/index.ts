@@ -13,4 +13,7 @@ export { default as LinkPreview } from "./LinkPreview.svelte";
 export { default as EmbedWidget } from "./EmbedWidget.svelte";
 export { default as FaqPage } from "./FaqPage.svelte";
 
-export const CONTENT_VERSION = "0.4.0";
+// Hum — Music link previews
+export { HumCard, HumCardFallback, HumCardSkeleton, HumProviderBadge, HumPlatformTray } from "./hum/index.js";
+
+export const CONTENT_VERSION = "0.5.0";

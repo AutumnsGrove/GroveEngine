@@ -227,6 +227,50 @@
 		};
 	});
 
+	// Hum: Hydrate music link preview placeholders
+	$effect(() => {
+		if (!browser) return;
+
+		// Wait for content to render
+		const contentEl = contentBodyElement;
+		if (!contentEl) return;
+
+		const humCards = contentEl.querySelectorAll('.hum-card[data-hum-url]');
+		if (humCards.length === 0) return;
+
+		const cleanups: Array<() => void> = [];
+
+		humCards.forEach((card) => {
+			const url = card.getAttribute('data-hum-url');
+			const provider = card.getAttribute('data-hum-provider') || 'unknown';
+			if (!url || card.hasAttribute('data-hum-mounted')) return;
+
+			// Mark as mounted to avoid double-hydration
+			card.setAttribute('data-hum-mounted', 'true');
+
+			// Dynamically import and mount the HumCard component
+			import('$lib/ui/components/content/hum/HumCard.svelte').then((module) => {
+				// Clear the fallback link
+				card.innerHTML = '';
+
+				const component = new module.default({
+					target: card as HTMLElement,
+					props: { url, provider },
+				});
+
+				cleanups.push(() => {
+					component.$destroy?.();
+				});
+			}).catch((err) => {
+				console.warn('[Hum] Failed to mount card:', err);
+			});
+		});
+
+		return () => {
+			cleanups.forEach((fn) => fn());
+		};
+	});
+
 	// Handle initial positioning and re-calculate when dependencies change
 	$effect(() => {
 		// Explicitly reference dependencies to track changes
@@ -492,6 +536,8 @@
 						'class', 'id', 'style',
 						// ONLY allow specific safe data attributes
 						'data-anchor', 'data-language', 'data-line-numbers', 'data-code',
+						// Hum: music link preview placeholders
+						'data-hum-url', 'data-hum-provider',
 						// Accessibility
 						'aria-label', 'aria-hidden', 'role',
 						// Form elements (for task lists)

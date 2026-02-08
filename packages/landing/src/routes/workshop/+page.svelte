@@ -146,7 +146,8 @@
 					spec: '/knowledge/specs/grove-garden-bloom-spec',
 					whatIsLink: '/knowledge/help/what-are-blooms',
 					subComponents: [
-						{ name: 'Vines', icon: 'layoutlist', description: 'Margin notes', href: '/knowledge/help/what-are-vines' }
+						{ name: 'Vines', icon: 'layoutlist', description: 'Margin notes', href: '/knowledge/help/what-are-vines' },
+						{ name: 'Hum', icon: 'music', description: 'Music link previews', href: '/knowledge/help/what-is-hum' }
 					]
 				},
 			]

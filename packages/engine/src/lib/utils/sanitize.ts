@@ -137,6 +137,7 @@ function sanitizeServerSafe(html: string): string {
       img: ["src", "alt", "title", "width", "height", "class"],
       "*": ["class", "id"],
       span: ["class", "id", "data-anchor"],
+      div: ["class", "id", "data-hum-url", "data-hum-provider"],
       td: ["align"],
       th: ["align"],
       input: ["type", "checked", "disabled"],
@@ -456,6 +457,9 @@ export function sanitizeMarkdown(markdownHTML: string): string {
       "type",
       "checked",
       "disabled",
+      // Hum: music link preview placeholders
+      "data-hum-url",
+      "data-hum-provider",
     ],
     FORBID_TAGS: [
       "script",

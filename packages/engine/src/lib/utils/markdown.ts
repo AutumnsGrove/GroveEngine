@@ -1,6 +1,7 @@
 import MarkdownIt from "markdown-it";
 import matter from "@11ty/gray-matter";
 import { sanitizeMarkdown } from "./sanitize.js";
+import { humPlugin } from "./markdown-hum.js";
 
 // ============================================================================
 // Type Definitions
@@ -221,6 +222,9 @@ function escapeHtmlForAttr(str: string): string {
 // must pass through rendering for processAnchorTags() to work.
 // Security is handled by sanitizeMarkdown() which strips dangerous elements.
 const md = new MarkdownIt({ html: true, linkify: true, breaks: false });
+
+// Hum: Transform music URLs into preview card placeholders
+md.use(humPlugin);
 
 // Add IDs to headings for table of contents linking
 // In markdown-it, heading_open/heading_close are separate tokens.
