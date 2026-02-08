@@ -46,6 +46,7 @@ export * from "./ui/index";
 
 // Utilities
 export { cn } from "./utils/cn";
+export { seededShuffle } from "./utils/shuffle.js";
 
 // Config presets (colors, fonts)
 export {
@@ -56,6 +57,17 @@ export {
   getFontFamily,
 } from "./config/presets.js";
 export type { ColorPreset, FontPreset } from "./config/presets.js";
+
+// Canopy categories
+export {
+  CANOPY_CATEGORIES,
+  CANOPY_CATEGORY_LABELS,
+  CANOPY_SETTING_KEYS,
+  CANOPY_SETTINGS_SCHEMA,
+  isValidCanopyCategory,
+  parseCanopyCategories,
+} from "./config/canopy-categories.js";
+export type { CanopyCategory } from "./config/canopy-categories.js";
 
 // Heartwood client (re-export explicitly to avoid StatusColor conflict with UI)
 export {
