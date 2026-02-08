@@ -75,8 +75,12 @@ describe("upload-validation constants", () => {
       expect(ALLOWED_IMAGE_TYPES).toContain("image/jxl");
     });
 
-    it("has 5 types total", () => {
-      expect(ALLOWED_IMAGE_TYPES).toHaveLength(5);
+    it("includes avif", () => {
+      expect(ALLOWED_IMAGE_TYPES).toContain("image/avif");
+    });
+
+    it("has 6 types total", () => {
+      expect(ALLOWED_IMAGE_TYPES).toHaveLength(6);
     });
   });
 
@@ -105,8 +109,12 @@ describe("upload-validation constants", () => {
       expect(ALLOWED_EXTENSIONS).toContain("jxl");
     });
 
-    it("has 6 extensions total", () => {
-      expect(ALLOWED_EXTENSIONS).toHaveLength(6);
+    it("includes avif", () => {
+      expect(ALLOWED_EXTENSIONS).toContain("avif");
+    });
+
+    it("has 7 extensions total", () => {
+      expect(ALLOWED_EXTENSIONS).toHaveLength(7);
     });
   });
 
@@ -220,8 +228,12 @@ describe("upload-validation constants", () => {
       expect(MIME_TO_EXTENSIONS["image/jxl"]).toEqual(["jxl"]);
     });
 
-    it("has 5 mappings total", () => {
-      expect(Object.keys(MIME_TO_EXTENSIONS)).toHaveLength(5);
+    it("maps image/avif to avif", () => {
+      expect(MIME_TO_EXTENSIONS["image/avif"]).toEqual(["avif"]);
+    });
+
+    it("has 6 mappings total", () => {
+      expect(Object.keys(MIME_TO_EXTENSIONS)).toHaveLength(6);
     });
   });
 

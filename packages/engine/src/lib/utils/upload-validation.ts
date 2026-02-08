@@ -16,6 +16,7 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/gif",
   "image/webp",
   "image/jxl",
+  "image/avif",
 ] as const;
 
 export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
@@ -28,16 +29,18 @@ export const ALLOWED_EXTENSIONS = [
   "gif",
   "webp",
   "jxl",
+  "avif",
 ] as const;
 
 export type AllowedExtension = (typeof ALLOWED_EXTENSIONS)[number];
 
 /** HTML accept attribute value for file inputs */
 export const UPLOAD_ACCEPT_ATTR =
-  ".jpg,.jpeg,.png,.gif,.webp,.jxl,.heic,.heif,image/jpeg,image/png,image/gif,image/webp,image/jxl,image/heic,image/heif";
+  ".jpg,.jpeg,.png,.gif,.webp,.jxl,.avif,.heic,.heif,image/jpeg,image/png,image/gif,image/webp,image/jxl,image/avif,image/heic,image/heif";
 
 /** Human-readable list for error messages */
-export const ALLOWED_TYPES_DISPLAY = "JPG, PNG, GIF, WebP, JPEG XL, or HEIC";
+export const ALLOWED_TYPES_DISPLAY =
+  "JPG, PNG, GIF, WebP, JPEG XL, AVIF, or HEIC";
 
 // ============================================================================
 // MIME to Extension Mapping
@@ -50,6 +53,7 @@ export const MIME_TO_EXTENSIONS: Record<AllowedImageType, string[]> = {
   "image/gif": ["gif"],
   "image/webp": ["webp"],
   "image/jxl": ["jxl"],
+  "image/avif": ["avif"],
 };
 
 // ============================================================================
@@ -80,6 +84,9 @@ export const FILE_SIGNATURES: Record<AllowedImageType, number[][]> = {
     [0xff, 0x0a], // JPEG XL naked codestream
     [0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20], // JPEG XL container (ISOBMFF box)
   ],
+  // AVIF: ISOBMFF container — validated via ftyp box check in validateFileSignature()
+  // Placeholder entry required by Record<AllowedImageType, ...> type constraint
+  "image/avif": [],
 };
 
 /** WebP marker bytes at offset 8 */
@@ -119,11 +126,33 @@ export function extensionMatchesMimeType(
 /**
  * Validate file signature (magic bytes) matches claimed MIME type.
  * For WebP, also validates the WEBP marker at offset 8.
+ * For AVIF, validates the ISOBMFF ftyp box and avif/avis brand.
  */
 export function validateFileSignature(
   buffer: Uint8Array,
   mimeType: AllowedImageType,
 ): boolean {
+  // AVIF uses ISOBMFF container — magic bytes at offset 4 (ftyp) and 8 (brand),
+  // not offset 0, so it needs its own validation path
+  if (mimeType === "image/avif") {
+    if (buffer.length < 12) return false;
+    // Bytes 4-7 must be "ftyp" (0x66 0x74 0x79 0x70)
+    const hasFtyp =
+      buffer[4] === 0x66 &&
+      buffer[5] === 0x74 &&
+      buffer[6] === 0x79 &&
+      buffer[7] === 0x70;
+    if (!hasFtyp) return false;
+    // Bytes 8-11 must be "avif" or "avis" (sequence) brand
+    const brand = String.fromCharCode(
+      buffer[8],
+      buffer[9],
+      buffer[10],
+      buffer[11],
+    );
+    return brand === "avif" || brand === "avis";
+  }
+
   const signatures = FILE_SIGNATURES[mimeType];
   if (!signatures) return false;
 
@@ -246,6 +275,7 @@ export const BROWSER_RENDERABLE_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
+  "image/avif",
   "image/bmp", // BMP is renderable but not processable well
   "image/svg+xml", // SVG is renderable but handled differently
 ] as const;
@@ -257,6 +287,7 @@ export const BROWSER_RENDERABLE_EXTENSIONS = [
   "png",
   "gif",
   "webp",
+  "avif",
   "bmp",
   "svg",
 ] as const;
