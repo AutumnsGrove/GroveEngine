@@ -11,6 +11,7 @@
     CreditCard,
     HelpCircle,
     MessageCircle,
+    MessageSquare,
     Shield,
     ShieldAlert,
     Gift,
@@ -125,6 +126,10 @@
       <a href="/arbor/images" class="nav-item" onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
+      </a>
+      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title="Comments">
+        <MessageSquare class="nav-icon" />
+        <span class="nav-label" class:hidden={!showExpanded}>Reeds</span>
       </a>
       <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />

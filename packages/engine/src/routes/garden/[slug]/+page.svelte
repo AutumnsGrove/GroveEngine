@@ -1,5 +1,6 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
+	import ReedsThread from '$lib/components/reeds/ReedsThread.svelte';
 	import { Button, Badge, GroveSwap } from '$lib/ui';
 	import { fontMap } from '$lib/ui/tokens/fonts';
 
@@ -123,6 +124,19 @@
 			</header>
 		{/snippet}
 	</ContentWithGutter>
+
+	<!-- Reeds: Comments section -->
+	<div class="reeds-container">
+		<ReedsThread
+			slug={data.post.slug}
+			initialComments={data.comments || []}
+			initialTotal={data.commentTotal || 0}
+			settings={data.commentSettings}
+			currentUserId={data.user?.id}
+			isOwner={data.isOwner || false}
+			isLoggedIn={!!data.user}
+		/>
+	</div>
 </div>
 
 <style>
@@ -314,5 +328,12 @@
 	.edit-link:hover {
 		background: var(--accent-success-faint-hover, rgba(44, 95, 45, 0.15));
 		border-color: var(--accent-success-border-hover, rgba(44, 95, 45, 0.3));
+	}
+
+	/* Reeds comment section container */
+	.reeds-container {
+		max-width: 768px;
+		margin: 0 auto;
+		padding: 0 1rem;
 	}
 </style>
