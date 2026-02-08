@@ -58,7 +58,15 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Whitelist allowed settings to prevent arbitrary data injection
-    const allowedSettings = ["font_family", "accent_color", "show_grove_logo"];
+    const allowedSettings = [
+      "font_family",
+      "accent_color",
+      "show_grove_logo",
+      "canopy_visible",
+      "canopy_banner",
+      "canopy_categories",
+      "canopy_show_forests",
+    ];
     if (!allowedSettings.includes(setting_key)) {
       throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
@@ -83,6 +91,60 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     // Validate font_family value against canonical font list
     if (setting_key === "font_family") {
       if (!validFontIds.includes(setting_value)) {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate canopy_visible (boolean string)
+    if (setting_key === "canopy_visible") {
+      if (setting_value !== "true" && setting_value !== "false") {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate canopy_banner (max 160 chars)
+    if (setting_key === "canopy_banner") {
+      if (setting_value.length > 160) {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate canopy_categories (valid JSON array of valid categories)
+    if (setting_key === "canopy_categories") {
+      try {
+        const parsed = JSON.parse(setting_value);
+        if (!Array.isArray(parsed)) {
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+        }
+        const validCategories = [
+          "writing",
+          "photography",
+          "art",
+          "code",
+          "music",
+          "poetry",
+          "gaming",
+          "food",
+          "travel",
+          "science",
+          "queer",
+          "journal",
+          "other",
+        ];
+        const allValid = parsed.every(
+          (cat) => typeof cat === "string" && validCategories.includes(cat),
+        );
+        if (!allValid) {
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+        }
+      } catch {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate canopy_show_forests (boolean string)
+    if (setting_key === "canopy_show_forests") {
+      if (setting_value !== "true" && setting_value !== "false") {
         throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }

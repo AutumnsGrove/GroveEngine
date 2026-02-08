@@ -588,6 +588,120 @@
       loadingFlagId = undefined;
     }
   }
+
+  // =========================================================================
+  // CANOPY SETTINGS
+  // =========================================================================
+
+  // Canopy categories
+  const CANOPY_CATEGORIES = [
+    { id: 'writing', label: 'Writing' },
+    { id: 'photography', label: 'Photography' },
+    { id: 'art', label: 'Art' },
+    { id: 'code', label: 'Code' },
+    { id: 'music', label: 'Music' },
+    { id: 'poetry', label: 'Poetry' },
+    { id: 'gaming', label: 'Gaming' },
+    { id: 'food', label: 'Food' },
+    { id: 'travel', label: 'Travel' },
+    { id: 'science', label: 'Science' },
+    { id: 'queer', label: 'Queer' },
+    { id: 'journal', label: 'Journal' },
+    { id: 'other', label: 'Other' }
+  ];
+
+  // Canopy settings state
+  let canopyVisible = $state(false);
+  let canopyBanner = $state("");
+  /** @type {string[]} */
+  let canopyCategories = $state([]);
+  let canopyShowForests = $state(true);
+  let loadingCanopy = $state(true);
+  let savingCanopy = $state(false);
+  let canopyMessage = $state("");
+
+  /**
+   * Fetch Canopy settings
+   */
+  async function fetchCanopySettings() {
+    loadingCanopy = true;
+    try {
+      const settings = await api.get("/api/settings");
+      canopyVisible = settings.canopy_visible === "true" || settings.canopy_visible === true;
+      canopyBanner = settings.canopy_banner || "";
+      canopyShowForests = settings.canopy_show_forests !== "false" && settings.canopy_show_forests !== false;
+      
+      // Parse categories
+      try {
+        const cats = settings.canopy_categories ? JSON.parse(settings.canopy_categories) : [];
+        canopyCategories = Array.isArray(cats) ? cats : [];
+      } catch {
+        canopyCategories = [];
+      }
+    } catch (error) {
+      console.error("Failed to fetch Canopy settings:", error);
+    }
+    loadingCanopy = false;
+  }
+
+  /**
+   * Toggle category selection
+   * @param {string} categoryId
+   */
+  function toggleCategory(categoryId) {
+    if (canopyCategories.includes(categoryId)) {
+      canopyCategories = canopyCategories.filter(c => c !== categoryId);
+    } else {
+      canopyCategories = [...canopyCategories, categoryId];
+    }
+  }
+
+  /**
+   * Save all Canopy settings
+   */
+  async function saveCanopySettings() {
+    savingCanopy = true;
+    canopyMessage = "";
+
+    try {
+      // Save visibility
+      await api.put("/api/admin/settings", {
+        setting_key: "canopy_visible",
+        setting_value: canopyVisible ? "true" : "false"
+      });
+
+      // Save banner
+      await api.put("/api/admin/settings", {
+        setting_key: "canopy_banner",
+        setting_value: canopyBanner.trim()
+      });
+
+      // Save categories
+      await api.put("/api/admin/settings", {
+        setting_key: "canopy_categories",
+        setting_value: JSON.stringify(canopyCategories)
+      });
+
+      // Save show forests
+      await api.put("/api/admin/settings", {
+        setting_key: "canopy_show_forests",
+        setting_value: canopyShowForests ? "true" : "false"
+      });
+
+      canopyMessage = "Canopy settings saved! You'll appear in the directory.";
+      toast.success("Canopy settings saved");
+    } catch (error) {
+      canopyMessage = "Error: " + (error instanceof Error ? error.message : String(error));
+      toast.error("Failed to save Canopy settings");
+    }
+
+    savingCanopy = false;
+  }
+
+  // Load Canopy settings on mount
+  $effect(() => {
+    fetchCanopySettings();
+  });
 </script>
 
 <div class="settings">
@@ -1057,6 +1171,97 @@
         {savingLogo ? "Saving..." : "Save Header Setting"}
       </Button>
     </div>
+  </GlassCard>
+
+  <!-- Canopy Settings -->
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
+      <h2>Canopy</h2>
+    </div>
+    <p class="section-description">
+      Let other wanderers discover your <GroveTerm term="grove">grove</GroveTerm> in the public directory.
+    </p>
+
+    {#if loadingCanopy}
+      <div class="sessions-loading">
+        <Spinner />
+      </div>
+    {:else}
+      <!-- Visibility Toggle -->
+      <label class="logo-toggle canopy-toggle">
+        <input type="checkbox" bind:checked={canopyVisible} />
+        <span class="toggle-label">
+          <span class="toggle-title">Rise into the Canopy</span>
+          <span class="toggle-description">
+            When enabled, your grove appears in the Canopy — Grove's public directory where wanderers discover each other.
+          </span>
+        </span>
+      </label>
+
+      {#if canopyVisible}
+        <!-- Banner Input -->
+        <div class="canopy-field">
+          <label for="canopy-banner" class="field-label">Your Banner</label>
+          <input
+            type="text"
+            id="canopy-banner"
+            bind:value={canopyBanner}
+            placeholder="What brings you to the grove?"
+            maxlength="160"
+            class="canopy-input"
+          />
+          <p class="field-help">
+            The flag you fly from the canopy — a short line about you or your grove. 
+            <span class="char-count">{canopyBanner.length}/160</span>
+          </p>
+        </div>
+
+        <!-- Categories -->
+        <div class="canopy-field">
+          <label class="field-label">Categories</label>
+          <div class="category-grid">
+            {#each CANOPY_CATEGORIES as category}
+              <label class="category-checkbox">
+                <input
+                  type="checkbox"
+                  checked={canopyCategories.includes(category.id)}
+                  onchange={() => toggleCategory(category.id)}
+                />
+                <span class="checkbox-label">{category.label}</span>
+              </label>
+            {/each}
+          </div>
+          <p class="field-help">Select categories that describe your grove. This helps others find you.</p>
+        </div>
+
+        <!-- Show Forests Toggle -->
+        <label class="logo-toggle">
+          <input type="checkbox" bind:checked={canopyShowForests} />
+          <span class="toggle-label">
+            <span class="toggle-title">Show my Forests</span>
+            <span class="toggle-description">
+              Display which Forest communities you're part of (when Forests become available)
+            </span>
+          </span>
+        </label>
+      {/if}
+
+      {#if canopyMessage}
+        <div
+          class="message"
+          class:success={canopyMessage.includes("saved")}
+          class:error={canopyMessage.includes("Error")}
+        >
+          {canopyMessage}
+        </div>
+      {/if}
+
+      <div class="button-row">
+        <Button onclick={saveCanopySettings} variant="primary" disabled={savingCanopy}>
+          {savingCanopy ? "Saving..." : "Save Canopy Settings"}
+        </Button>
+      </div>
+    {/if}
   </GlassCard>
 
   <!-- Active Sessions / Security -->
@@ -1752,5 +1957,71 @@
     .session-card:hover .session-icon {
       transform: none;
     }
+  }
+  /* Canopy styles */
+  .canopy-field {
+    margin-bottom: 1.5rem;
+  }
+  .field-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+  }
+  .canopy-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+  .canopy-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+  .field-help {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin: 0.5rem 0 0 0;
+  }
+  .char-count {
+    float: right;
+    opacity: 0.7;
+  }
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+  .category-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-button);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .category-checkbox:hover {
+    border-color: var(--color-primary);
+    background: rgba(44, 95, 45, 0.05);
+  }
+  .category-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+    flex-shrink: 0;
+  }
+  .checkbox-label {
+    font-size: 0.875rem;
+    color: var(--color-text);
+  }
+  .canopy-toggle {
+    margin-bottom: 1.5rem;
   }
 </style>
