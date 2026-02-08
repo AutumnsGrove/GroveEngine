@@ -379,6 +379,8 @@ Canopy is Grove's opt-in directory. When you're ready to be found, you rise into
 
 No algorithms. No ranking. Just trees, reaching up, visible to anyone who looks.
 
+**Banner** is a feature of Canopy: the short text you write about yourself or your grove—the flag you fly from your highest branch so others know what they'll find when they visit. In standard mode, it's your bio. In Grove mode, it's your Banner.
+
 *See who's growing here.*
 
 ### Meadow

@@ -116,7 +116,7 @@ All Canopy data lives in the existing `tenant_settings` key-value table. No new 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `canopy_visible` | `"true"` / `"false"` | `"false"` | Opt-in: show this grove in the Canopy |
-| `canopy_tagline` | string (max 160 chars) | `""` | Custom text: why should someone visit your grove? |
+| `canopy_banner` | string (max 160 chars) | `""` | Your Banner: why should someone visit your grove? (Standard: Bio) |
 | `canopy_categories` | JSON string array | `"[]"` | Selected categories (from predefined list + custom) |
 | `canopy_show_forests` | `"true"` / `"false"` | `"true"` | Show which Forests this wanderer is active in |
 
@@ -168,7 +168,7 @@ SELECT
   ts_categories.setting_value AS categories
 FROM tenants t
 LEFT JOIN tenant_settings ts_tagline
-  ON t.id = ts_tagline.tenant_id AND ts_tagline.setting_key = 'canopy_tagline'
+  ON t.id = ts_tagline.tenant_id AND ts_tagline.setting_key = 'canopy_banner'
 LEFT JOIN tenant_settings ts_categories
   ON t.id = ts_categories.tenant_id AND ts_categories.setting_key = 'canopy_categories'
 INNER JOIN tenant_settings ts_visible
@@ -204,7 +204,7 @@ Each directory listing shows:
 │  [avatar]  Display Name          │
 │            @subdomain.grove.place│
 │                                  │
-│  "Their tagline text here"       │
+│  "Their banner text here"        │
 │                                  │
 │  [photography] [queer] [journal] │
 │                                  │
@@ -216,14 +216,14 @@ Each directory listing shows:
 - **Avatar:** From Heartwood (user table `avatar_url`)
 - **Display name:** From `tenants.display_name`
 - **Subdomain link:** Links to `{subdomain}.grove.place`
-- **Tagline:** The custom text from `canopy_tagline`
+- **Banner:** The custom text from `canopy_banner` (Grove: "Banner", Standard: "Bio")
 - **Category badges:** From `canopy_categories`
 - **Bloom count:** From `tenants.post_count`
 - **Forests:** Optional, from `canopy_show_forests` (when Forests ship)
 
 ### Search & Filter
 
-- **Search bar:** Filters by display name and tagline text (client-side for V1)
+- **Search bar:** Filters by display name and banner text (client-side for V1)
 - **Category tabs/pills:** Click a category to filter the grid
 - **Combined:** Search within a category
 
@@ -241,11 +241,11 @@ A new "Canopy" section in the blog settings page:
 │    Canopy — Grove's public directory where     │
 │    wanderers discover each other.             │
 │                                               │
-│  Your [tagline term] ─────────────────────    │
+│  Your Banner ─────────────────────────────     │
 │  │ What brings you to the grove?          │    │
 │  └────────────────────────────────────────┘    │
-│  A short line about you or your writing.       │
-│  This is what others see in the directory.     │
+│  The flag you fly from the canopy — a short    │
+│  line about you or your grove.                 │
 │                                               │
 │  Categories ──────────────────────────         │
 │  [x] photography  [x] queer  [ ] code         │
@@ -269,7 +269,7 @@ Returns the directory listing for the Canopy page.
 
 **Query params:**
 - `category` (optional): Filter by category
-- `q` (optional): Search query (matches display_name and tagline)
+- `q` (optional): Search query (matches display_name and banner)
 
 **Response:**
 ```json
@@ -279,7 +279,7 @@ Returns the directory listing for the Canopy page.
       "subdomain": "autumn",
       "display_name": "Autumn",
       "avatar_url": "https://cdn.grove.place/avatars/...",
-      "tagline": "Building a forest, one tree at a time.",
+      "banner": "Building a forest, one tree at a time.",
       "categories": ["code", "queer"],
       "bloom_count": 47,
       "forests": ["The Prism", "The Terminal"]
@@ -322,7 +322,7 @@ No email addresses. No real names unless the wanderer chooses to use one as thei
 
 ### Moderation
 
-- Taglines pass through Thorn (content moderation) before appearing
+- Banners pass through Thorn (content moderation) before appearing
 - Custom category tags pass through Loam for offensive content
 - The Wayfinder can remove a listing from the Canopy without disabling the grove itself
 
@@ -379,7 +379,7 @@ The existing settings API already handles arbitrary key-value pairs. The only ch
 ```typescript
 const CANOPY_SETTINGS = {
   canopy_visible: { type: 'boolean', default: 'false' },
-  canopy_tagline: { type: 'string', maxLength: 160, default: '' },
+  canopy_banner: { type: 'string', maxLength: 160, default: '' }, // Grove: "Banner", Standard: "Bio"
   canopy_categories: { type: 'json', default: '[]' },
   canopy_show_forests: { type: 'boolean', default: 'true' },
 } as const;
