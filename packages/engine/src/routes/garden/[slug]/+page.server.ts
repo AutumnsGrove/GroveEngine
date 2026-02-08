@@ -107,15 +107,36 @@ export const load: PageServerLoad = async ({
         });
 
         // Load comments (not cached — always fresh from D1)
-        const reeds = await loadComments(db, tenantId, slug, kv);
-        return { post: cachedPost, isOwner: isOwner || false, ...reeds };
+        const { comments, commentTotal, commentSettings } = await loadComments(
+          db,
+          tenantId,
+          slug,
+          kv,
+        );
+        return {
+          post: cachedPost,
+          isOwner: isOwner || false,
+          comments,
+          commentTotal,
+          commentSettings,
+        };
       }
     } else if (db && tenantId) {
       // No KV available, fall back to direct D1 (no caching)
       const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
       if (post) {
-        const reeds = await loadComments(db, tenantId, slug);
-        return { post, isOwner: isOwner || false, ...reeds };
+        const { comments, commentTotal, commentSettings } = await loadComments(
+          db,
+          tenantId,
+          slug,
+        );
+        return {
+          post,
+          isOwner: isOwner || false,
+          comments,
+          commentTotal,
+          commentSettings,
+        };
       }
     }
 
@@ -171,7 +192,9 @@ async function loadComments(
     // Gate: reeds_comments graft — skip loading if feature is off
     if (kv) {
       const flagsEnv = { DB: db, FLAGS_KV: kv };
-      const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+      const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
+        () => false,
+      );
       if (!inGreenhouse) {
         return { comments: [], commentTotal: 0, commentSettings: null };
       }
@@ -188,11 +211,9 @@ async function loadComments(
     const tenantDb = getTenantDb(db, { tenantId });
 
     // Get the post ID from slug
-    const post = await tenantDb.queryOne<{ id: string }>(
-      "posts",
-      "slug = ?",
-      [slug],
-    );
+    const post = await tenantDb.queryOne<{ id: string }>("posts", "slug = ?", [
+      slug,
+    ]);
 
     if (!post) {
       return { comments: [], commentTotal: 0, commentSettings: null };

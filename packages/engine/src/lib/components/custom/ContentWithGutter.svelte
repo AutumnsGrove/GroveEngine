@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { tick, untrack, mount, unmount } from 'svelte';
 	import { browser } from '$app/environment';
 	import TableOfContents from './TableOfContents.svelte';
 	import MobileTOC from './MobileTOC.svelte';
@@ -15,6 +15,7 @@
 		type GutterItem as GutterItemType,
 		type Header
 	} from '$lib/utils/gutter';
+	import type { HumProvider } from '$lib/ui/components/content/hum/types';
 	import '$lib/styles/content.css';
 
 	// Constants for positioning calculations
@@ -242,7 +243,7 @@
 
 		humCards.forEach((card) => {
 			const url = card.getAttribute('data-hum-url');
-			const provider = card.getAttribute('data-hum-provider') || 'unknown';
+			const provider = (card.getAttribute('data-hum-provider') || 'unknown') as HumProvider;
 			if (!url || card.hasAttribute('data-hum-mounted')) return;
 
 			// Mark as mounted to avoid double-hydration
@@ -253,13 +254,13 @@
 				// Clear the fallback link
 				card.innerHTML = '';
 
-				const component = new module.default({
+				const component = mount(module.default, {
 					target: card as HTMLElement,
 					props: { url, provider },
 				});
 
 				cleanups.push(() => {
-					component.$destroy?.();
+					unmount(component);
 				});
 			}).catch((err) => {
 				console.warn('[Hum] Failed to mount card:', err);
