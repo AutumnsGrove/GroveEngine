@@ -85,7 +85,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
   // Debug logging
   console.log(
     `[Greenhouse] Loaded ${allTenants.length} total tenants, ${greenhouseTenants.length} enrolled, ` +
-    `${Object.keys(availableTenants).length} available for enrollment`
+      `${Object.keys(availableTenants).length} available for enrollment`,
   );
 
   return {
