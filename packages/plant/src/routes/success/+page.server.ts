@@ -1,4 +1,4 @@
-import { redirect } from "@sveltejs/kit";
+import { redirect, isRedirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { getTenantForOnboarding } from "$lib/server/tenant";
 
@@ -52,6 +52,7 @@ export const load: PageServerLoad = async ({
         }
       }
     } catch (error) {
+      if (isRedirect(error)) throw error;
       console.error(
         "[Success] Error handling unauthenticated checkout redirect:",
         error,

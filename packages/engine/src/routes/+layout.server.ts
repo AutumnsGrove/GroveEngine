@@ -3,6 +3,7 @@ import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
 import { getNavPageLimit } from "$lib/server/tier-features.js";
 import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags";
+import { emailsMatch } from "$lib/utils/user.js";
 
 interface SiteSettings {
   font_family: string;
@@ -171,9 +172,19 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   const plan = context.type === "tenant" ? context.tenant.plan : "seedling";
   const navPageLimit = getNavPageLimit(plan);
 
+  // SECURITY: Determine if the logged-in user owns this tenant.
+  // The admin gear icon in the footer must ONLY show for the tenant owner,
+  // not for any logged-in user. This prevents leaking the /arbor link
+  // to visitors who happen to be signed in on another Grove site.
+  const isOwner =
+    !!locals.user &&
+    context.type === "tenant" &&
+    emailsMatch(context.tenant.ownerId, locals.user.email);
+
   return {
     user: locals.user || null,
     context: locals.context as AppContext,
+    isOwner,
     siteSettings,
     navPages,
     navPageLimit,
