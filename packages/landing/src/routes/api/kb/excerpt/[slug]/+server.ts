@@ -109,6 +109,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
   "account-deletion",
   "sessions-and-cookies",
   "image-upload-failures", // Used in Arbor image upload error state
+  "what-is-hum", // Hum music link previews
 ];
 
 // Generate entries for all waystone-linked articles

@@ -561,6 +561,22 @@ An aria is a self-contained melody, a single voice carrying emotion through song
 
 Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs. Your aria becomes a chorus. One voice finds its kindred.
 
+### Hum
+**Music Link Previews** · *Integrated into blogs*
+**Standard:** Music Widget
+**Waystone:** Music link previews in your posts — paste a Spotify or Apple Music URL and it becomes a beautiful card with album art, track info, and cross-platform links.
+
+A hum is the ambient sound of a living forest—bees in the undergrowth, wind through the canopy, the low vibration of everything being alive. It's also what people do without thinking: hear a song, and hours later you're humming it in the kitchen.
+
+Hum is the music layer in your blooms. Paste a music link on its own line, and it transforms into a warm glass card showing album artwork, track name, and artist. No embed, no iframe, no autoplay—just a beautiful preview that says *here's what I was listening to*. Click the provider badge to find the same song on other streaming services.
+
+Where Aria discovers, Hum remembers. One finds new music. The other shares what you already love.
+
+> "I added a hum to my latest bloom."
+> "That hum card for the new album looks gorgeous."
+
+*The forest hums along.*
+
 ### Etch
 **Link Saving & Highlights** · `etch.grove.place`
 **Standard:** Blog Importer
@@ -1003,5 +1019,5 @@ Vines are sidebar widgets in your blog's gutters—the content that grows alongs
 
 ---
 
-*Last updated: February 8, 2026 — Added Canopy (opt-in wanderer directory)*
+*Last updated: February 8, 2026 — Added Canopy (opt-in wanderer directory) and Hum (music link previews)*
 *Status: Placeholder names, pending launch*
