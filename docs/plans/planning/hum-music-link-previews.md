@@ -1,6 +1,6 @@
-# Songbird: Universal Music Link Previews
+# Hum: Universal Music Link Previews
 
-> *Someone shares a song. The grove hums along.*
+> *Share a song. The grove hums along.*
 
 **Priority:** Tier 2 — Build Next
 **Complexity:** Medium
@@ -17,9 +17,9 @@ When someone pastes a music link into a post — Apple Music, Spotify, YouTube M
 
 Sharing music is one of the most intimate, human things we do online. "Listen to this" is a love language. But right now, a music link in a post is just... a URL. Cold, uninviting, easy to scroll past. And provider embeds (Spotify's iframe, Apple Music's widget) each look different, clash with the site's aesthetic, and load heavy third-party scripts.
 
-Songbird solves this by creating a **unified music card** — same beautiful design regardless of where the link came from. An Apple Music link and a Spotify link for the same song should feel equally at home in the grove. The source matters (we show it), but it doesn't dictate the design.
+Hum solves this by creating a **unified music card** — same beautiful design regardless of where the link came from. An Apple Music link and a Spotify link for the same song should feel equally at home in the grove. The source matters (we show it), but it doesn't dictate the design.
 
-This is also the kind of feature that makes Grove feel *alive* and *opinionated*. Most platforms just linkify URLs. We make them sing.
+This is also the kind of feature that makes Grove feel *alive* and *opinionated*. Most platforms just linkify URLs. We make them hum.
 
 ---
 
@@ -27,11 +27,11 @@ This is also the kind of feature that makes Grove feel *alive* and *opinionated*
 
 ### One card to rule them all
 
-Every music link renders through the same `SongbirdCard` component. The card is ours — Grove-designed, Grove-styled, seasonal-aware. Provider logos appear as a subtle badge (top-right corner), but the card itself never looks like "a Spotify embed" or "an Apple Music widget."
+Every music link renders through the same `HumCard` component. The card is ours — Grove-designed, Grove-styled, seasonal-aware. Provider logos appear as a subtle badge (top-right corner), but the card itself never looks like "a Spotify embed" or "an Apple Music widget."
 
 ### Content pipeline integration
 
-Songbird lives in the **markdown processing pipeline**, not in a separate embed system. When `renderMarkdown()` encounters a music URL, it outputs a semantic placeholder. The client hydrates it into the card component. Same pattern as GroveTerm — server marks it up, client makes it interactive.
+Hum lives in the **markdown processing pipeline**, not in a separate embed system. When `renderMarkdown()` encounters a music URL, it outputs a semantic placeholder. The client hydrates it into the card component. Same pattern as GroveTerm — server marks it up, client makes it interactive.
 
 ### Click-through, not playback
 
@@ -73,16 +73,16 @@ renderMarkdown() — markdown-it processes content
   ├── linkify detects bare URLs (existing behavior)
   │
   ▼
-songbird markdown-it plugin (NEW)
+hum markdown-it plugin (NEW)
   │
   ├── Matches URL against music provider patterns
-  ├── Outputs: <div class="songbird-card" data-url="..." data-provider="spotify">
+  ├── Outputs: <div class="hum-card" data-url="..." data-provider="spotify">
   │            <a href="...">Loading music preview...</a>
   │            </div>
   │   (The <a> fallback is the progressive enhancement — works without JS)
   │
   ▼
-sanitizeMarkdown() — allows songbird divs + data attributes
+sanitizeMarkdown() — allows hum divs + data attributes
   │
   ▼
 html_content stored in D1 (alongside markdown_content)
@@ -93,12 +93,12 @@ Page load: +page.svelte renders {@html content}
   ▼
 Client-side $effect in ContentWithGutter.svelte (NEW)
   │
-  ├── Finds .songbird-card elements in rendered HTML
-  ├── Fetches metadata from /api/songbird/resolve?url={encoded}
-  ├── Mounts SongbirdCard component into each placeholder
+  ├── Finds .hum-card elements in rendered HTML
+  ├── Fetches metadata from /api/hum/resolve?url={encoded}
+  ├── Mounts HumCard component into each placeholder
   │
   ▼
-SongbirdCard.svelte renders: artwork, title, artist, provider badge
+HumCard.svelte renders: artwork, title, artist, provider badge
   │
   ▼
 Click → opens original URL in new tab
@@ -106,13 +106,13 @@ Click → opens original URL in new tab
 
 ### Metadata Resolution (Server-side API)
 
-The `/api/songbird/resolve` endpoint handles metadata fetching with a cascading fallback strategy:
+The `/api/hum/resolve` endpoint handles metadata fetching with a cascading fallback strategy:
 
 ```
 Incoming URL
   │
   ▼
-1. Check KV cache (key: songbird:{url_hash})
+1. Check KV cache (key: hum:{url_hash})
   │
   ├── HIT → return cached metadata (TTL: 7 days)
   │
@@ -162,11 +162,11 @@ Incoming URL
 ### Normalized Metadata
 
 ```typescript
-interface SongbirdMetadata {
+interface HumMetadata {
   /** The original URL that was shared */
   sourceUrl: string;
   /** Which provider the link came from */
-  provider: SongbirdProvider;
+  provider: HumProvider;
   /** Content type */
   type: "track" | "album" | "playlist" | "artist" | "unknown";
   /** Track or album title */
@@ -180,14 +180,14 @@ interface SongbirdMetadata {
   /** High-res artwork URL for OG images */
   artworkUrlLarge: string | null;
   /** Cross-platform links (from Odesli) */
-  platformLinks: Partial<Record<SongbirdProvider, string>>;
+  platformLinks: Partial<Record<HumProvider, string>>;
   /** When this metadata was resolved */
   resolvedAt: string;
   /** Resolution quality */
   status: "resolved" | "partial" | "unresolved";
 }
 
-type SongbirdProvider =
+type HumProvider =
   | "apple-music"
   | "spotify"
   | "youtube-music"
@@ -201,9 +201,9 @@ type SongbirdProvider =
 
 ### KV Cache
 
-- **Namespace:** `SONGBIRD_CACHE` (or reuse existing KV with prefix)
-- **Key:** `songbird:{sha256(normalized_url)}`
-- **Value:** JSON-serialized `SongbirdMetadata`
+- **Namespace:** `HUM_CACHE` (or reuse existing KV with prefix)
+- **Key:** `hum:{sha256(normalized_url)}`
+- **Value:** JSON-serialized `HumMetadata`
 - **TTL:** 7 days (music metadata rarely changes; album art URLs are stable)
 - **Miss behavior:** Fetch from API cascade, cache result, return
 
@@ -216,7 +216,7 @@ No D1 table needed. This is pure cache — if KV expires, we re-fetch. Music met
 ### Regex Patterns
 
 ```typescript
-const SONGBIRD_PATTERNS: Record<SongbirdProvider, RegExp[]> = {
+const HUM_PATTERNS: Record<HumProvider, RegExp[]> = {
   "apple-music": [
     /^https?:\/\/music\.apple\.com\/[a-z]{2}\/(album|playlist|music-video)\/[^/]+\/[a-zA-Z0-9.]+/,
     /^https?:\/\/music\.apple\.com\/[a-z]{2}\/artist\/[^/]+\/\d+/,
@@ -248,9 +248,9 @@ const SONGBIRD_PATTERNS: Record<SongbirdProvider, RegExp[]> = {
 
 ### Where detection happens
 
-The **markdown-it plugin** intercepts link tokens during rendering. When `linkify: true` converts a bare URL into a link token, or when a user writes `[text](url)`, the plugin checks the href against `SONGBIRD_PATTERNS`. On match, it replaces the default `<a>` output with the songbird placeholder div.
+The **markdown-it plugin** intercepts link tokens during rendering. When `linkify: true` converts a bare URL into a link token, or when a user writes `[text](url)`, the plugin checks the href against `HUM_PATTERNS`. On match, it replaces the default `<a>` output with the hum placeholder div.
 
-This means detection happens at **write time** (when the post is saved), not at read time. The `html_content` column already contains the songbird placeholders. The client just hydrates them.
+This means detection happens at **write time** (when the post is saved), not at read time. The `html_content` column already contains the hum placeholders. The client just hydrates them.
 
 ---
 
@@ -258,25 +258,25 @@ This means detection happens at **write time** (when the post is saved), not at 
 
 | Component | Purpose |
 |-----------|---------|
-| `SongbirdCard.svelte` | Main display — artwork, title, artist, provider badge |
-| `SongbirdCardSkeleton.svelte` | Loading state (shimmer animation matching card layout) |
-| `SongbirdCardFallback.svelte` | Unresolved state — provider logo + styled link |
-| `SongbirdProviderBadge.svelte` | Small provider logo (Apple, Spotify, etc.) |
+| `HumCard.svelte` | Main display — artwork, title, artist, provider badge |
+| `HumCardSkeleton.svelte` | Loading state (shimmer animation matching card layout) |
+| `HumCardFallback.svelte` | Unresolved state — provider logo + styled link |
+| `HumProviderBadge.svelte` | Small provider logo (Apple, Spotify, etc.) |
 
 ### Component location
 
 ```
-packages/engine/src/lib/ui/components/content/songbird/
+packages/engine/src/lib/ui/components/content/hum/
 ├── index.ts
 ├── types.ts
-├── SongbirdCard.svelte
-├── SongbirdCardSkeleton.svelte
-├── SongbirdCardFallback.svelte
-├── SongbirdProviderBadge.svelte
+├── HumCard.svelte
+├── HumCardSkeleton.svelte
+├── HumCardFallback.svelte
+├── HumProviderBadge.svelte
 └── providers.ts                  # URL patterns + provider metadata
 ```
 
-### SongbirdCard visual design
+### HumCard visual design
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -314,7 +314,7 @@ packages/engine/src/lib/ui/components/content/songbird/
 
 | Method | Route | Purpose | Auth |
 |--------|-------|---------|------|
-| `GET` | `/api/songbird/resolve?url={encoded}` | Resolve metadata for a music URL | Public (rate-limited) |
+| `GET` | `/api/hum/resolve?url={encoded}` | Resolve metadata for a music URL | Public (rate-limited) |
 
 ### Rate limiting
 
@@ -332,7 +332,7 @@ packages/engine/src/lib/ui/components/content/songbird/
   "title": "Running Up That Hill",
   "artist": "Kate Bush",
   "album": "Hounds of Love",
-  "artworkUrl": "https://cdn.grove.place/songbird/abc123.jpg",
+  "artworkUrl": "https://cdn.grove.place/hum/abc123.jpg",
   "sourceUrl": "https://music.apple.com/us/album/running-up-that-hill/1558627166?i=1558627175",
   "platformLinks": {
     "spotify": "https://open.spotify.com/track/75FEaRjZTKLhTrFGsfMUXR",
@@ -350,7 +350,7 @@ We should **not** hotlink provider CDNs directly. Album art URLs from Apple/Spot
 
 **Strategy:** On first resolve, fetch the artwork and store it in **R2** (or cache in KV as a base64 blob for smaller images). Serve through the existing CDN domain (`cdn.grove.place`).
 
-- **R2 key:** `songbird/{sha256(artworkSourceUrl)}.jpg`
+- **R2 key:** `hum/{sha256(artworkSourceUrl)}.jpg`
 - **Dimensions:** Store at 300×300 (card display) and 600×600 (OG image generation)
 - **Fallback:** If R2 storage fails, fall back to direct URL with a `referrerpolicy="no-referrer"` attribute
 
@@ -362,18 +362,18 @@ This also means artwork survives even if the provider takes the album down — a
 
 ### 1. Markdown-it Plugin
 
-**File:** `packages/engine/src/lib/utils/markdown-songbird.ts` (new)
+**File:** `packages/engine/src/lib/utils/markdown-hum.ts` (new)
 
 Register on the `md` instance in `markdown.ts`:
 
 ```typescript
-import { songbirdPlugin } from './markdown-songbird';
+import { humPlugin } from './markdown-hum';
 
 const md = new MarkdownIt({ html: true, linkify: true, breaks: false });
-md.use(songbirdPlugin);
+md.use(humPlugin);
 ```
 
-The plugin hooks into `core` rules (after linkify runs) and walks the token stream. When it finds a link token whose `href` matches a songbird pattern, it replaces the link's open/content/close tokens with an `html_block` token containing the placeholder div.
+The plugin hooks into `core` rules (after linkify runs) and walks the token stream. When it finds a link token whose `href` matches a hum pattern, it replaces the link's open/content/close tokens with an `html_block` token containing the placeholder div.
 
 ### 2. Sanitizer allowlist
 
@@ -384,8 +384,8 @@ Add `div` to `ALLOWED_TAGS` (already present) and ensure these data attributes p
 ```typescript
 ALLOWED_ATTR: [
   // ... existing ...
-  "data-songbird-url",
-  "data-songbird-provider",
+  "data-hum-url",
+  "data-hum-provider",
 ]
 ```
 
@@ -393,14 +393,14 @@ ALLOWED_ATTR: [
 
 **File:** `packages/engine/src/lib/components/custom/ContentWithGutter.svelte`
 
-Add a `$effect` that finds `.songbird-card` elements in the rendered content and mounts `SongbirdCard` into each one:
+Add a `$effect` that finds `.hum-card` elements in the rendered content and mounts `HumCard` into each one:
 
 ```typescript
 $effect(() => {
-  const cards = contentEl?.querySelectorAll('.songbird-card[data-songbird-url]');
+  const cards = contentEl?.querySelectorAll('.hum-card[data-hum-url]');
   cards?.forEach(card => {
-    const url = card.getAttribute('data-songbird-url');
-    if (url) mountSongbirdCard(card, url);
+    const url = card.getAttribute('data-hum-url');
+    if (url) mountHumCard(card, url);
   });
 });
 ```
@@ -409,7 +409,7 @@ $effect(() => {
 
 **File:** `packages/engine/src/lib/server/services/oembed-providers.ts`
 
-Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry. This isn't strictly needed for Songbird (we use our own card, not iframes), but keeps the registry complete for any future gutter embed use.
+Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry. This isn't strictly needed for Hum (we use our own card, not iframes), but keeps the registry complete for any future gutter embed use.
 
 ---
 
@@ -418,12 +418,12 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 ### Phase 1: Foundation (1-2 days)
 
 1. Create `providers.ts` — URL patterns + provider metadata
-2. Create `markdown-songbird.ts` — markdown-it plugin
+2. Create `markdown-hum.ts` — markdown-it plugin
 3. Wire plugin into `markdown.ts`
 4. Update sanitizer allowlist
-5. Create `/api/songbird/resolve` endpoint with Odesli integration
+5. Create `/api/hum/resolve` endpoint with Odesli integration
 6. Add KV caching layer
-7. Create `SongbirdCard.svelte` + skeleton + fallback components
+7. Create `HumCard.svelte` + skeleton + fallback components
 8. Wire client-side hydration in `ContentWithGutter.svelte`
 9. Test with Apple Music + Spotify URLs
 
@@ -442,7 +442,7 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 2. OG image generation for social sharing
 3. Seasonal card variations
 4. Add Tidal, Deezer, Amazon Music providers
-5. Integration with Now Playing curio (share what you're listening to → auto-creates a songbird card in your feed)
+5. Integration with Now Playing curio (share what you're listening to → auto-creates a hum card in your feed)
 
 ---
 
@@ -451,12 +451,12 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 | Scenario | Handling |
 |----------|----------|
 | Odesli API is down | Fall back to provider-specific API |
-| All APIs fail | Render `SongbirdCardFallback` — styled link with provider logo |
+| All APIs fail | Render `HumCardFallback` — styled link with provider logo |
 | URL is valid music link but for a removed track | Show card with "Track unavailable" + provider logo |
 | Same song shared from different providers | Each renders its own card (cross-platform links shown if available) |
 | User shares a playlist with 200 tracks | Card shows playlist artwork + title + track count, not individual tracks |
 | Non-music YouTube link matched by YouTube Music regex | YouTube Music URLs use `music.youtube.com`, regular YouTube uses `youtube.com` — different domains, no collision |
-| Link is in a markdown `[text](url)` with custom text | Plugin detects the href, replaces the full link with a songbird card (the custom text becomes the fallback) |
+| Link is in a markdown `[text](url)` with custom text | Plugin detects the href, replaces the full link with a hum card (the custom text becomes the fallback) |
 | Multiple music links in one post | Each gets its own card, fetched in parallel |
 | Image-heavy post with many cards | Cards lazy-load artwork (IntersectionObserver) |
 | KV cache miss + API rate limit hit | Queue and retry with backoff; serve fallback card immediately |
@@ -465,12 +465,12 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 
 ## Relationship to Now Playing Curio
 
-**Songbird** and **Now Playing** are complementary, not competing:
+**Hum** and **Now Playing** are complementary, not competing:
 
 - **Now Playing** = live status widget ("I'm listening to this *right now*"), lives in vine slots, updates via polling
-- **Songbird** = content enhancement ("I want to share this song *in this post*"), lives inline in post content, static after render
+- **Hum** = content enhancement ("I want to share this song *in this post*"), lives inline in post content, static after render
 
-They share some infrastructure (provider logos, artwork proxying, possibly the artwork cache), but serve different purposes. A future integration could let the Now Playing curio automatically create a "recently listened" feed that uses Songbird cards — but that's Phase 3 territory.
+They share some infrastructure (provider logos, artwork proxying, possibly the artwork cache), but serve different purposes. A future integration could let the Now Playing curio automatically create a "recently listened" feed that uses Hum cards — but that's Phase 3 territory.
 
 ---
 
@@ -479,7 +479,7 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 - **Audio playback** — No 30-second previews, no play buttons. Click → opens in the provider app. This keeps us lean and avoids streaming license complexity.
 - **Provider iframes** — No Spotify embeds, no Apple Music widgets. Our card, our design, our rules.
 - **MusicKit / Apple Developer account** — Not needed. The iTunes Lookup API is free and gives us everything we need for metadata.
-- **User authentication with providers** — No OAuth, no "connect your Spotify." That's the Now Playing curio's job. Songbird works purely from public URLs and public APIs.
+- **User authentication with providers** — No OAuth, no "connect your Spotify." That's the Now Playing curio's job. Hum works purely from public URLs and public APIs.
 - **Music search** — We don't search for songs. Someone pastes a link, we make it pretty. That's it.
 
 ---
@@ -490,9 +490,9 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 
 2. **Cross-platform links UX** — If Odesli gives us the same song on 5 platforms, do we show all 5 as tiny icons below the card? Or is that too busy? Maybe just the source provider + "also available on..." hover/expand?
 
-3. **Write-time vs. read-time resolution** — Current plan resolves metadata at read-time (client calls `/api/songbird/resolve`). Alternative: resolve at write-time (when post is saved) and store metadata in D1 alongside the post. Write-time is faster for readers but means metadata could go stale. Read-time with KV caching is probably the sweet spot.
+3. **Write-time vs. read-time resolution** — Current plan resolves metadata at read-time (client calls `/api/hum/resolve`). Alternative: resolve at write-time (when post is saved) and store metadata in D1 alongside the post. Write-time is faster for readers but means metadata could go stale. Read-time with KV caching is probably the sweet spot.
 
-4. **Existing Spotify/SoundCloud embeds in oEmbed registry** — The current `oembed-providers.ts` already handles Spotify and SoundCloud for gutter embeds. Should Songbird cards *replace* those in the main content body, or coexist? Recommendation: Songbird handles music links in post content; the oEmbed system continues to handle gutter embeds. Different contexts, different presentations.
+4. **Existing Spotify/SoundCloud embeds in oEmbed registry** — The current `oembed-providers.ts` already handles Spotify and SoundCloud for gutter embeds. Should Hum cards *replace* those in the main content body, or coexist? Recommendation: Hum handles music links in post content; the oEmbed system continues to handle gutter embeds. Different contexts, different presentations.
 
 5. **Bandcamp edge case** — Bandcamp has no free metadata API and their oEmbed is limited. Might need to fall back to OG tag scraping for Bandcamp. This is fine — we just need title + artist + artwork.
 
@@ -502,7 +502,9 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 
 Don't overthink Phase 1. The magic is in the *detection + beautiful card*, not in supporting every edge case from day one. Get Apple Music + Spotify working with Odesli, make the card look gorgeous, ship it. Everything else is iteration.
 
-The name "Songbird" fits the Grove ecosystem — a small, beautiful creature that fills the forest with music. It doesn't need to be loud or complex. It just sings.
+A hum is the ambient music of a living forest — bees in the undergrowth, wind through the canopy, the vibration of everything being alive. It's also what you do when a song won't leave your head. Not a performance. Not something you rehearse. Just music, living in you, leaking out. That's what this feature is. You paste a link, and the grove hums along.
+
+*The forest was always humming. We just made it visible.*
 
 ---
 
