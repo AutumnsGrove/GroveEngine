@@ -12,10 +12,21 @@
 // ============================================================================
 
 // Re-export all rate limiting utilities from the rate-limits module
-export * from './rate-limits/index.js';
+export * from "./rate-limits/index.js";
 
 // ============================================================================
 // Logger
 // ============================================================================
 
-export * from './logger.js';
+export * from "./logger.js";
+
+// ============================================================================
+// Canopy Directory
+// ============================================================================
+
+export {
+  fetchCanopyDirectory,
+  type CanopyWanderer,
+  type CategoryCount,
+  type CanopyDirectoryResult,
+} from "./canopy-directory.js";
