@@ -2,6 +2,7 @@
 
 import json
 import re
+from pathlib import Path
 from typing import Any
 
 import click
@@ -376,6 +377,122 @@ def d1_query(
         result_table.add_row(*[_format_value(row.get(col)) for col in columns])
 
     console.print(result_table)
+
+
+@d1.command("migrate")
+@click.argument("file_path", type=click.Path(exists=True))
+@click.option(
+    "--db",
+    "-d",
+    "database",
+    default="lattice",
+    help="Database alias or name (default: lattice)",
+)
+@click.option(
+    "--write",
+    is_flag=True,
+    help="Required to execute the migration",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show SQL without executing",
+)
+@click.pass_context
+def d1_migrate(
+    ctx: click.Context, file_path: str, database: str, write: bool, dry_run: bool
+) -> None:
+    """Execute a SQL migration file against D1.
+
+    Reads a .sql file and runs it against the specified database.
+    Multi-statement files and DDL (CREATE, ALTER, DROP) are allowed.
+    Comments are preserved and passed to wrangler.
+
+    Examples:
+
+        gw d1 migrate --write packages/engine/migrations/049_photo_gallery_graft.sql
+
+        gw d1 migrate --dry-run packages/engine/migrations/049_photo_gallery_graft.sql
+
+        gw d1 migrate --write --db groveauth migrations/001_init.sql
+    """
+    config: GWConfig = ctx.obj["config"]
+    output_json: bool = ctx.obj.get("output_json", False)
+    wrangler = Wrangler(config)
+
+    path = Path(file_path)
+
+    if not path.suffix == ".sql":
+        error(f"Expected a .sql file, got: {path.name}")
+        ctx.exit(1)
+
+    sql_content = path.read_text()
+    if not sql_content.strip():
+        error(f"Migration file is empty: {path.name}")
+        ctx.exit(1)
+
+    # Resolve database name
+    db_name = _resolve_database(config, database)
+
+    # Show preview
+    if not output_json:
+        console.print(f"\n[bold]Migration:[/bold] {path.name}")
+        console.print(f"[bold]Database:[/bold] {db_name}")
+        console.print(f"[bold]File:[/bold] {path}\n")
+
+        # Show the SQL content (truncated for large files)
+        lines = sql_content.strip().split("\n")
+        preview = "\n".join(lines[:40])
+        if len(lines) > 40:
+            preview += f"\n\n... ({len(lines) - 40} more lines)"
+        console.print(f"[dim]{preview}[/dim]\n")
+
+    if dry_run:
+        if output_json:
+            console.print(
+                json.dumps(
+                    {"dry_run": True, "database": db_name, "file": str(path), "sql": sql_content},
+                    indent=2,
+                )
+            )
+        else:
+            info("Dry run — no changes made")
+        return
+
+    if not write:
+        error("Migrations require --write flag")
+        info("Preview with: gw d1 migrate --dry-run <file>")
+        ctx.exit(1)
+
+    # Execute via wrangler --file (supports multi-statement SQL, comments, DDL)
+    try:
+        result = wrangler.execute(
+            [
+                "d1",
+                "execute",
+                db_name,
+                "--remote",
+                "--file",
+                str(path),
+            ]
+        )
+
+        if output_json:
+            console.print(json.dumps({"success": True, "database": db_name, "file": str(path)}))
+        else:
+            success(f"Migration applied: {path.name}")
+            if result.strip():
+                # Show wrangler output (row counts, etc.)
+                for line in result.strip().split("\n"):
+                    if line.strip():
+                        console.print(f"  [dim]{line.strip()}[/dim]")
+
+    except WranglerError as e:
+        if output_json:
+            console.print(json.dumps({"error": str(e)}))
+        else:
+            error(f"Migration failed: {e}")
+        ctx.exit(1)
 
 
 def _resolve_database(config: GWConfig, database: str) -> str:
