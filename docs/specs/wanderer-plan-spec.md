@@ -132,7 +132,7 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
   │    ┌──────────────────────────────────────────────┐      │
   │    │  🌱 Ready to grow?                           │      │
   │    │                                              │      │
-  │    │  You've filled your clearing. Take root      │      │
+  │    │  You've filled your garden. Take root      │      │
   │    │  and get room to keep writing.               │      │
   │    │                                              │      │
   │    │  Seedling: $8/mo · 50 posts · 1 GB · AI     │      │
@@ -144,7 +144,7 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
 
 ### Upgrade Triggers (Gentle, Never Pushy)
 
-1. **Post limit reached (5/5):** Soft banner in the editor. "You've filled your clearing. Take root and get room to keep writing." They can still edit existing posts. They just can't create new ones.
+1. **Post limit reached (5/5):** Soft banner in the editor. "You've filled your garden. Take root and get room to keep writing." They can still edit existing posts. They just can't create new ones.
 
 2. **Storage limit approaching (40/50 MB):** Subtle notice. "Your storage is getting cozy. Seedling gives you 1 GB to spread out."
 
