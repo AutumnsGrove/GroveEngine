@@ -37,7 +37,7 @@
 						Pricing
 					</h1>
 					<p class="text-lg text-foreground-subtle font-sans">
-						Simple and honest. One plan to get started.
+						Simple and honest. Free to start, with paid options as you grow.
 					</p>
 					<div class="flex items-center justify-center gap-4 mt-6">
 						<div class="w-12 h-px bg-divider"></div>

@@ -434,7 +434,7 @@
 			Reading is free. Always.
 		</p>
 		<p class="text-foreground-muted font-sans mb-4">
-			Every Grove blog is publicly accessible — just visit and read, no account needed. When you're ready to write your own, plans start at <span class="text-foreground font-medium">$8/month</span>.
+			Every Grove blog is publicly accessible — just visit and read, no account needed. When you're ready to write your own, start for free or upgrade to paid plans.
 		</p>
 		<a
 			href="/pricing"
