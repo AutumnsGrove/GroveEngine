@@ -10,7 +10,6 @@
  * Events that count as activity:
  * - Post create/update
  * - Media upload
- * - Settings change
  * - Login success (handled separately by auth hooks)
  */
 

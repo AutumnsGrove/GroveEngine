@@ -195,6 +195,18 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
           );
         }
 
+        // Log IP before tenant creation so the limit is always tracked.
+        // Over-counting (if createTenant then fails) is preferable to
+        // under-counting (which would allow bypassing the 3-account limit).
+        if (clientIP) {
+          try {
+            await logFreeAccountCreation(db, clientIP);
+          } catch (err) {
+            // Non-critical — don't block signup over a logging failure
+            console.error("[Select Plan API] IP log error:", err);
+          }
+        }
+
         // Create the tenant immediately (no webhook needed)
         await createTenant(db, {
           onboardingId,
@@ -204,13 +216,6 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
           plan: "free",
           favoriteColor: onboarding.favorite_color,
         });
-
-        // Log IP only after successful tenant creation
-        if (clientIP) {
-          logFreeAccountCreation(db, clientIP).catch((err) => {
-            console.error("[Select Plan API] IP log error:", err);
-          });
-        }
 
         console.log(
           `[Select Plan API] Created free tier tenant for ${onboarding.username}`,

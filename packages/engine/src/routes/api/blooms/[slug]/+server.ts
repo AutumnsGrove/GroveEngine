@@ -222,43 +222,50 @@ export const PUT: RequestHandler = async ({
 
     const data = sanitizeObject(await request.json()) as PostInput;
 
-    // If publishing a draft, enforce published post limit
+    // If publishing a draft, enforce published post limit (isolated — DB failures fail open)
     if (data.status === "published") {
-      // Fetch tenant plan and current post status in parallel
-      const [tenant, currentPost] = await Promise.all([
-        platform.env.DB
-          .prepare("SELECT plan FROM tenants WHERE id = ?")
-          .bind(tenantId)
-          .first<{ plan: string }>(),
-        platform.env.DB
-          .prepare(
-            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
-          )
-          .bind(tenantId, slug)
-          .first<{ status: string }>(),
-      ]);
+      try {
+        // Fetch tenant plan and current post status in parallel
+        const [tenant, currentPost] = await Promise.all([
+          platform.env.DB
+            .prepare("SELECT plan FROM tenants WHERE id = ?")
+            .bind(tenantId)
+            .first<{ plan: string }>(),
+          platform.env.DB
+            .prepare(
+              "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
+            )
+            .bind(tenantId, slug)
+            .first<{ status: string }>(),
+        ]);
 
-      const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
-        ? tenant.plan
-        : "seedling";
-      const tierConfig = TIERS[tierKey];
+        const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
+          ? tenant.plan
+          : "seedling";
+        const tierConfig = TIERS[tierKey];
 
-      // Only enforce limit on draft→published transitions
-      if (
-        tierConfig.limits.posts !== Infinity &&
-        currentPost &&
-        currentPost.status !== "published"
-      ) {
-        const publishedCount = await platform.env.DB
-          .prepare(
-            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-          )
-          .bind(tenantId)
-          .first<{ count: number }>();
+        // Only enforce limit on draft→published transitions
+        if (
+          tierConfig.limits.posts !== Infinity &&
+          currentPost &&
+          currentPost.status !== "published"
+        ) {
+          const publishedCount = await platform.env.DB
+            .prepare(
+              "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+            )
+            .bind(tenantId)
+            .first<{ count: number }>();
 
-        if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
-          throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+          if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+            throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+          }
         }
+      } catch (err) {
+        // Re-throw intentional Grove errors (limit violations)
+        if ((err as { status?: number }).status) throw err;
+        // DB failure on tier lookup — fail open, log, and allow the write
+        console.error("[Blooms] Publish limit check failed, allowing write:", err);
       }
     }
 

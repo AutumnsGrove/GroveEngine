@@ -164,54 +164,58 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       locals.user,
     );
 
-    // Look up tenant plan and parse request body in parallel
-    const [tenant, data] = await Promise.all([
-      platform.env.DB
+    const data = sanitizeObject(await request.json()) as PostInput;
+
+    // Tier-based limit enforcement (isolated — DB failures fail open)
+    try {
+      const tenant = await platform.env.DB
         .prepare("SELECT plan FROM tenants WHERE id = ?")
         .bind(tenantId)
-        .first<{ plan: string }>(),
-      request.json().then((body) => sanitizeObject(body) as PostInput),
-    ]);
+        .first<{ plan: string }>();
 
-    const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
-      ? tenant.plan
-      : "seedling";
-    const tierConfig = TIERS[tierKey];
+      const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
+        ? tenant.plan
+        : "seedling";
+      const tierConfig = TIERS[tierKey];
 
-    // Check blog access
-    if (!tierConfig.features.blog) {
-      throwGroveError(403, API_ERRORS.BLOG_NOT_AVAILABLE, "API");
-    }
-
-    // Enforce post limit (published posts only) and draft limit
-    const isDraft = !data.status || data.status === "draft";
-
-    if (isDraft && tierConfig.limits.drafts !== Infinity) {
-      // Count existing drafts
-      const draftCount = await platform.env.DB
-        .prepare(
-          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
-        )
-        .bind(tenantId)
-        .first<{ count: number }>();
-
-      if (draftCount && draftCount.count >= tierConfig.limits.drafts) {
-        throwGroveError(403, API_ERRORS.DRAFT_LIMIT_REACHED, "API");
+      // Check blog access
+      if (!tierConfig.features.blog) {
+        throwGroveError(403, API_ERRORS.BLOG_NOT_AVAILABLE, "API");
       }
-    }
 
-    if (!isDraft && tierConfig.limits.posts !== Infinity) {
-      // Count published posts only (drafts don't count toward the limit)
-      const publishedCount = await platform.env.DB
-        .prepare(
-          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-        )
-        .bind(tenantId)
-        .first<{ count: number }>();
+      // Enforce draft or published post limit (mutually exclusive branches)
+      const isDraft = !data.status || data.status === "draft";
 
-      if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
-        throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+      if (isDraft && tierConfig.limits.drafts !== Infinity) {
+        const draftCount = await platform.env.DB
+          .prepare(
+            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
+          )
+          .bind(tenantId)
+          .first<{ count: number }>();
+
+        if (draftCount && draftCount.count >= tierConfig.limits.drafts) {
+          throwGroveError(403, API_ERRORS.DRAFT_LIMIT_REACHED, "API");
+        }
       }
+
+      if (!isDraft && tierConfig.limits.posts !== Infinity) {
+        const publishedCount = await platform.env.DB
+          .prepare(
+            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+          )
+          .bind(tenantId)
+          .first<{ count: number }>();
+
+        if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+          throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+        }
+      }
+    } catch (err) {
+      // Re-throw intentional Grove errors (limit violations, blog gating)
+      if ((err as { status?: number }).status) throw err;
+      // DB failure on tier lookup — fail open, log, and allow the write
+      console.error("[Blooms] Tier limit check failed, allowing write:", err);
     }
 
     // Validate required fields
