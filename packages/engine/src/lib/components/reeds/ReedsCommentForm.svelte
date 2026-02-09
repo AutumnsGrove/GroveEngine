@@ -7,6 +7,7 @@
    */
 
   import { toast } from "$lib/ui";
+  import { getCSRFToken } from "$lib/utils/api.js";
 
   interface Props {
     slug: string;
@@ -50,9 +51,19 @@
     submitting = true;
 
     try {
+      const csrfToken = getCSRFToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (csrfToken) {
+        headers["X-CSRF-Token"] = csrfToken;
+        headers["csrf-token"] = csrfToken;
+      }
+
       const response = await fetch(`/api/reeds/${slug}`, {
+        // csrf-ok - CSRF token manually injected above
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           content: content.trim(),
           is_public: isPublic,

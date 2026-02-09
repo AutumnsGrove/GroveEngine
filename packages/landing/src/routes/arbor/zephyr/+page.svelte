@@ -2,7 +2,8 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { Wind, Send, Check, AlertTriangle, ExternalLink, Clock } from 'lucide-svelte';
+	import { Wind, Send, Check, AlertTriangle, ExternalLink, RefreshCw } from 'lucide-svelte';
+	import { ZephyrAnalytics } from '@autumnsgrove/groveengine';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -40,44 +41,19 @@
 	let blueskyPlatform = $derived(
 		data.platforms?.find((p) => p.id === 'bluesky')
 	);
-
-	// Format relative time
-	function timeAgo(timestamp: number): string {
-		const seconds = Math.floor((Date.now() - timestamp) / 1000);
-		if (seconds < 60) return 'just now';
-		if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-		if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-		return `${Math.floor(seconds / 86400)}d ago`;
-	}
-
-	function statusBadge(status: string): { text: string; class: string } {
-		switch (status) {
-			case 'delivered':
-				return { text: 'Delivered', class: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' };
-			case 'partial':
-				return { text: 'Partial', class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' };
-			case 'failed':
-				return { text: 'Failed', class: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' };
-			default:
-				return { text: status, class: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300' };
-		}
-	}
 </script>
 
 <div class="space-y-8">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-2xl font-serif text-foreground">Zephyr Social</h1>
+			<h1 class="text-2xl font-serif text-foreground flex items-center gap-2">
+				<Wind class="w-6 h-6 text-blue-500" />
+				Zephyr Social
+			</h1>
 			<p class="text-foreground-muted font-sans mt-1">
-				Scatter content on the wind
+				Scatter content on the wind — with full observability
 			</p>
-		</div>
-		<div class="flex items-center gap-2 text-foreground-subtle text-sm">
-			<Wind class="w-4 h-4" />
-			<span>
-				{data.broadcasts?.length || 0} recent post{data.broadcasts?.length !== 1 ? 's' : ''}
-			</span>
 		</div>
 	</div>
 
@@ -112,8 +88,12 @@
 		</GlassCard>
 	{/if}
 
+	<!-- Analytics Section -->
+	<ZephyrAnalytics broadcasts={data.broadcasts || []} stats={data.stats} />
+
 	<!-- Compose Card -->
-	<GlassCard variant="frosted">
+	<GlassCard variant="frosted" class="mt-8">
+		<h2 class="text-lg font-semibold text-foreground mb-4">Compose Post</h2>
 		<form
 			method="POST"
 			action="?/post"
@@ -212,36 +192,4 @@
 			</div>
 		</form>
 	</GlassCard>
-
-	<!-- Recent Broadcasts -->
-	{#if data.broadcasts && data.broadcasts.length > 0}
-		<div>
-			<h2 class="text-lg font-serif text-foreground mb-4">Recent Posts</h2>
-			<div class="space-y-3">
-				{#each data.broadcasts as broadcast}
-					{@const badge = statusBadge(broadcast.status)}
-					{@const platforms = JSON.parse(broadcast.platforms) as string[]}
-					<GlassCard variant="default">
-						<div class="flex items-start justify-between gap-4">
-							<div class="flex-1 min-w-0">
-								<p class="text-foreground font-sans text-sm whitespace-pre-wrap break-words">
-									{broadcast.content}
-								</p>
-								<div class="flex items-center gap-3 mt-2 text-xs text-foreground-subtle">
-									<span class="inline-flex items-center gap-1">
-										<Clock class="w-3 h-3" />
-										{timeAgo(broadcast.created_at)}
-									</span>
-									<span>{platforms.join(', ')}</span>
-								</div>
-							</div>
-							<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {badge.class} shrink-0">
-								{badge.text}
-							</span>
-						</div>
-					</GlassCard>
-				{/each}
-			</div>
-		</div>
-	{/if}
 </div>

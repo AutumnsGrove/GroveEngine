@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
     content: string;
     platforms: string;
     status: string;
+    tenant: string;
     created_at: number;
   }> = [];
 
@@ -29,21 +30,71 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
     comingSoon?: boolean;
   }> = [];
 
+  // Fetch stats for the last 7 days
+  let stats: {
+    byStatus: Array<{ status: string; count: number }>;
+    byPlatform: Record<string, number>;
+    total: number;
+  } | null = null;
+
   if (platform?.env?.DB) {
     try {
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+      // Get broadcasts
       const result = await platform.env.DB.prepare(
-        `SELECT id, content, platforms, status, created_at
+        `SELECT id, content, platforms, status, created_at, tenant
          FROM zephyr_broadcasts
          ORDER BY created_at DESC
-         LIMIT 20`,
+         LIMIT 50`,
       ).all<{
         id: string;
         content: string;
         platforms: string;
         status: string;
         created_at: number;
+        tenant: string;
       }>();
       broadcasts = result.results || [];
+
+      // Get stats by status (last 7 days)
+      const statsResult = await platform.env.DB.prepare(
+        `SELECT status, COUNT(*) as count
+         FROM zephyr_broadcasts
+         WHERE created_at >= ?
+         GROUP BY status`,
+      )
+        .bind(oneWeekAgo)
+        .all<{ status: string; count: number }>();
+
+      // Get recent broadcasts for platform breakdown
+      const recentResult = await platform.env.DB.prepare(
+        `SELECT platforms
+         FROM zephyr_broadcasts
+         WHERE created_at >= ?`,
+      )
+        .bind(oneWeekAgo)
+        .all<{ platforms: string }>();
+
+      // Calculate platform breakdown
+      const platformCounts: Record<string, number> = {};
+      for (const row of recentResult.results || []) {
+        try {
+          const platforms = JSON.parse(row.platforms) as string[];
+          for (const p of platforms) {
+            platformCounts[p] = (platformCounts[p] || 0) + 1;
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+
+      const byStatus = statsResult.results || [];
+      stats = {
+        byStatus,
+        byPlatform: platformCounts,
+        total: byStatus.reduce((sum, s) => sum + s.count, 0),
+      };
     } catch (err) {
       console.error("[Zephyr] Failed to load broadcasts:", err);
     }
@@ -69,6 +120,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
   return {
     broadcasts,
     platforms,
+    stats,
   };
 };
 

@@ -24,7 +24,8 @@
 		Users,
 		Gamepad2,
 		Megaphone,
-		Wind
+		Wind,
+		Sparkles
 	} from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -63,7 +64,8 @@
 		{ href: '/arbor/status', label: 'Status', icon: Activity },
 		{ href: '/arbor/tenants', label: 'Tenants', icon: Users },
 		{ href: '/arbor/minecraft', label: 'Minecraft', icon: Gamepad2 },
-		{ href: '/arbor/zephyr', label: 'Zephyr', icon: Wind }
+		{ href: '/arbor/zephyr', label: 'Zephyr', icon: Wind },
+		{ href: '/arbor/lumen', label: 'Lumen', icon: Sparkles }
 	];
 
 	let tabs = $derived(data.isWayfinder ? [...baseTabs, ...wayfinderTabs] : baseTabs);

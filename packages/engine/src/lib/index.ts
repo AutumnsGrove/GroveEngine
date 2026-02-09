@@ -23,6 +23,8 @@ export {
 // Admin components
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
 export { default as GutterManager } from "./components/admin/GutterManager.svelte";
+export { default as LumenAnalytics } from "./components/admin/LumenAnalytics.svelte";
+export { default as ZephyrAnalytics } from "./components/admin/ZephyrAnalytics.svelte";
 
 // Wisp - Writing Assistant
 export { default as WispPanel } from "./components/WispPanel.svelte";
