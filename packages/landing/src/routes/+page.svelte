@@ -105,7 +105,7 @@
 		{
 			id: 'pricing',
 			question: 'How much does it cost?',
-			answer: "Reading is always free. Writing starts at $8/month ([[seedling|Seedling]]). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details."
+			answer: "Writing is free with [[wanderer|Wanderer]] tier. Paid plans start at $8/month ([[seedling|Seedling]]) for more storage, custom domains, and archival protection. See the pricing page for details."
 		}
 	];
 
