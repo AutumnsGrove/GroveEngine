@@ -15,14 +15,12 @@ import {
 } from "@autumnsgrove/groveengine/grafts/pricing";
 import { type TierKey, isValidTier } from "@autumnsgrove/groveengine/config";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
-import {
-  createTenant,
-  getTenantForOnboarding,
-} from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import {
   checkFreeAccountIPLimit,
   logFreeAccountCreation,
 } from "$lib/server/free-account-limits";
+import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
 
 // Valid billing cycles for database storage
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
@@ -44,7 +42,12 @@ function getTierByKey(id: string): PricingTier | undefined {
   return tiers.find((t: PricingTier) => t.key === id);
 }
 
-export const POST: RequestHandler = async ({ request, cookies, platform, getClientAddress }) => {
+export const POST: RequestHandler = async ({
+  request,
+  cookies,
+  platform,
+  getClientAddress,
+}) => {
   let body: {
     plan?: string;
     billingCycle?: string;
@@ -127,7 +130,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
   );
 
   // Free plan (Wanderer) skips checkout — create tenant directly
-  if (plan === "free") {
+  if (shouldSkipCheckout(plan)) {
     // Resolve client IP once for both rate-check and logging
     let clientIP: string | undefined;
     try {
@@ -139,28 +142,15 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
       // Best-effort — IP resolution is non-critical
     }
 
-    // IP-based abuse prevention: max 3 free accounts per IP per 30 days
-    if (clientIP) {
-      try {
-        const allowed = await checkFreeAccountIPLimit(db, clientIP);
-        if (!allowed) {
-          return json(
-            {
-              error:
-                "Too many free accounts have been created from this location recently. Please try again later.",
-            },
-            { status: 429 },
-          );
-        }
-      } catch (err) {
-        // Don't block signup if the IP check fails — log and continue
-        console.error("[Select Plan API] IP limit check error:", err);
-      }
-    }
+    // Run IP limit check and payment completed update in parallel
+    // (IP check is independent of DB updates)
+    const ipCheckPromise = clientIP
+      ? checkFreeAccountIPLimit(db, clientIP).catch(() => true)
+      : Promise.resolve(true);
 
-    try {
-      // Mark payment as complete (no payment needed)
-      await db
+    const [ipAllowed] = await Promise.all([
+      ipCheckPromise,
+      db
         .prepare(
           `UPDATE user_onboarding
            SET payment_completed = 1,
@@ -169,42 +159,48 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
            WHERE id = ?`,
         )
         .bind(onboardingId)
-        .run();
+        .run(),
+    ]);
 
+    // IP-based abuse prevention: max 3 free accounts per IP per 30 days
+    if (clientIP && !ipAllowed) {
+      return json(
+        {
+          error:
+            "Too many free accounts have been created from this location recently. Please try again later.",
+        },
+        { status: 429 },
+      );
+    }
+
+    try {
       // Check for existing tenant (idempotency)
       const existing = await getTenantForOnboarding(db, onboardingId);
       if (!existing) {
-        // Get onboarding data for tenant creation
-        const onboarding = await db
-          .prepare(
-            `SELECT username, display_name, email, favorite_color
-             FROM user_onboarding WHERE id = ?`,
-          )
-          .bind(onboardingId)
-          .first<{
-            username: string;
-            display_name: string;
-            email: string;
-            favorite_color: string | null;
-          }>();
+        // Fetch onboarding data and log IP in parallel
+        const [onboarding] = await Promise.all([
+          db
+            .prepare(
+              `SELECT username, display_name, email, favorite_color
+               FROM user_onboarding WHERE id = ?`,
+            )
+            .bind(onboardingId)
+            .first<{
+              username: string;
+              display_name: string;
+              email: string;
+              favorite_color: string | null;
+            }>(),
+          clientIP
+            ? logFreeAccountCreation(db, clientIP).catch(() => {})
+            : Promise.resolve(),
+        ]);
 
         if (!onboarding) {
           return json(
             { error: "Onboarding session not found." },
             { status: 404 },
           );
-        }
-
-        // Log IP before tenant creation so the limit is always tracked.
-        // Over-counting (if createTenant then fails) is preferable to
-        // under-counting (which would allow bypassing the 3-account limit).
-        if (clientIP) {
-          try {
-            await logFreeAccountCreation(db, clientIP);
-          } catch (err) {
-            // Non-critical — don't block signup over a logging failure
-            console.error("[Select Plan API] IP log error:", err);
-          }
         }
 
         // Create the tenant immediately (no webhook needed)
