@@ -6,7 +6,7 @@
 --   npx wrangler d1 execute grove-engine-db --file=packages/engine/migrations/053_wanderer_tier.sql --remote
 
 -- Track last meaningful activity for inactivity reclamation (free tier only).
--- Updated on: login, post create/update, media upload, settings change.
+-- Updated on: login, post create/update, media upload.
 ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT (unixepoch());
 
 -- Track reclamation warning state for free tier accounts.
@@ -28,6 +28,10 @@ CREATE TABLE IF NOT EXISTS reclaimed_accounts (
   archive_expires_at INTEGER NOT NULL,
   created_at INTEGER DEFAULT (unixepoch())
 );
+
+-- Index for looking up archives by original tenant.
+CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_tenant
+  ON reclaimed_accounts(original_tenant_id);
 
 -- Index for the daily reclamation cron to find expired archives efficiently.
 CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_archive_expires
