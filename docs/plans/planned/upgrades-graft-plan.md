@@ -3,18 +3,40 @@
 > **Date:** February 9, 2026
 > **Priority:** Medium — Future architecture improvement
 > **Related:** LoginGraft pattern, `/api/billing` in engine, Plant checkout flow
+>
+> *"Every grove begins as a single seed in the wind."*
 
 ## Overview
 
-Create a centralized `UpgradesGraft` module for consistent upgrade/billing management across all Grove properties. Currently, billing logic is duplicated across:
-- `packages/plant/src/routes/api/select-plan/+server.ts` (onboarding signup)
-- `packages/plant/src/lib/server/stripe.ts` (Stripe integration)
-- `packages/engine/src/routes/api/billing/+server.ts` (tenant billing management)
+Create a centralized `UpgradesGraft` module for consistent upgrade and cultivation management across all Grove properties. Currently, the growth logic is scattered across the orchard:
+
+- `packages/plant/src/routes/api/select-plan/+server.ts` — First planting (onboarding)
+- `packages/plant/src/lib/server/stripe.ts` — Payment tending
+- `packages/engine/src/routes/api/billing/+server.ts` — Garden management
 
 Following the successful `LoginGraft` pattern, UpgradesGraft will provide:
-- Server-side API handlers for plan changes, billing portal, upgrades
-- Client-side UI components for upgrade flows
-- Unified configuration for checkout URLs and billing providers
+- Server-side API handlers for cultivation (upgrades), garden management (billing portal), and growth tracking
+- Client-side UI components for the nurturing journey
+- Unified configuration for checkout and tending
+
+## The Grove Perspective
+
+In Grove, upgrades aren't transactions — they're **growth**.
+
+|| Technical | Grove Perspective |
+|----------|-----------|-------------------|
+| Upgrade | Change plan tier | Your grove flourishes |
+| Billing | Payment management | Tend your garden |
+| Tier | Subscription level | Stage of growth |
+| Checkout | Purchase flow | Planting ceremony |
+| Portal | Account management | Garden tools |
+
+**The journey:**
+```
+Wanderer → Seedling → Sapling → Oak → Evergreen
+   🌱          🌿         🌳        🌲        🌲
+  (free)      (paid)    (growth)  (shade)  (legacy)
+```
 
 ## Why a Graft?
 
@@ -22,122 +44,130 @@ Following the successful `LoginGraft` pattern, UpgradesGraft will provide:
 
 ```
 plant/                    landing/arbor/
-  ├─ checkout/              ├─ billing UI (missing)
-  ├─ plans/                 └─ upgrade links → ???
+  ├─ checkout/              ├─ garden tools (missing)
+  ├─ plans/                 └─ growth path → ???
   ├─ api/select-plan/
   └─ lib/server/stripe.ts
 ```
 
 **Problems:**
-- Plant package contains onboarding-specific upgrade logic
-- No clear path for existing users (arbor) to upgrade
-- Billing logic split between plant and engine
-- Duplicated Stripe configuration
+- Plant package contains planting-specific logic, but growing happens elsewhere
+- Existing groves (Arbor) have no clear path to flourish
+- Garden tending logic split between packages
+- Duplicated payment configuration
 
 ### After UpgradesGraft
 
 ```
 engine/src/lib/grafts/upgrades/
-  ├─ index.ts              # Main export
+  ├─ index.ts              # Main export (the seed catalog)
   ├─ server/
   │   ├─ api/
-  │   │   ├─ upgrade.ts    # POST /api/grafts/upgrades/upgrade
-  │   │   ├─ portal.ts     # POST /api/grafts/upgrades/portal
-  │   │   └─ status.ts     # GET /api/grafts/upgrades/status
-  │   └─ checkout.ts       # Checkout session creation
+  │   │   ├─ cultivate.ts  # POST /api/grafts/upgrades/cultivate (upgrade)
+  │   │   ├─ tend.ts       # POST /api/grafts/upgrades/tend (billing portal)
+  │   │   └─ growth.ts     # GET /api/grafts/upgrades/growth (status)
+  │   ├─ planting.ts       # Checkout session creation
+  │   └─ garden.ts         # Garden utilities
   ├─ config.ts             # Checkout URLs, tier mapping
   ├─ types.ts              # TypeScript interfaces
   └─ components/
-      ├─ UpgradeCard.svelte
-      ├─ UpgradeModal.svelte
-      └─ CurrentPlanBadge.svelte
+      ├─ GrowthCard.svelte      # Tier display with nurturing button
+      ├─ GardenModal.svelte     # Modal for comparing growth stages
+      ├─ CurrentStageBadge.svelte # Show where you are in the journey
+      └─ GardenStatus.svelte    # Nurturing overview for dashboard
 
 plant/                    landing/arbor/
   └─ uses UpgradesGraft    └─ uses UpgradesGraft
 ```
 
-## Architecture
+**Grove Language:** Use `cultivate` instead of `upgrade`, `tend` instead of `portal`, `growth` instead of `status`.
 
-### Server-Side API
+## Server-Side API: The Garden Tools
 
-#### `POST /api/grafts/upgrades/upgrade`
+### `POST /api/grafts/upgrades/cultivate`
 
-Upgrade from current plan to a higher tier.
-
-```typescript
-// Request body
-interface UpgradeRequest {
-  targetTier: TierKey;        // 'seedling', 'sapling', 'oak', 'evergreen'
-  billingPeriod: 'monthly' | 'yearly';
-  returnTo?: string;          // URL to redirect after checkout
-}
-
-// Response
-interface UpgradeResponse {
-  checkoutUrl: string;        // Redirect user here
-  sessionId?: string;         // Optional session tracking
-}
-```
-
-**Flow:**
-1. Verify authenticated tenant
-2. Check current tier (cannot downgrade via this endpoint)
-3. Create Stripe checkout session for proration
-4. Return checkout URL
-
-#### `POST /api/grafts/upgrades/portal`
-
-Open Stripe Billing Portal for self-service management.
+Help your grove grow to the next stage.
 
 ```typescript
 // Request body
-interface PortalRequest {
-  returnTo: string;           // Where to return after portal
+interface CultivateRequest {
+  targetStage: TierKey;      // 'seedling', 'sapling', 'oak', 'evergreen'
+  billingCycle: 'monthly' | 'annual';
+  returnTo?: string;         // Where to return after planting
 }
 
 // Response
-interface PortalResponse {
-  portalUrl: string;          // Redirect user to Stripe portal
+interface CultivateResponse {
+  plantingUrl: string;       // Redirect here to begin
+  sessionId?: string;        // Track the growth
 }
 ```
 
-**Flow:**
-1. Verify authenticated tenant
-2. Get Stripe customer ID from platform_billing
-3. Create billing portal session
-4. Return portal URL
+**The Flow:**
+1. Verify the grove owner is authenticated
+2. Check current growth stage (cannot prune down via this endpoint)
+3. Create a Stripe planting session with proration for immediate growth
+4. Redirect to the planting ceremony
 
-**Capabilities:**
-- View invoices
-- Update payment method
-- Cancel subscription
-- Resume canceled subscription
+---
 
-#### `GET /api/grafts/upgrades/status`
+### `POST /api/grafts/upgrades/tend`
 
-Get current billing status for UI.
+Open the garden shed for self-service management.
+
+```typescript
+// Request body
+interface TendRequest {
+  returnTo: string;          // Return to your grove after tending
+}
+
+// Response
+interface TendResponse {
+  shedUrl: string;           // Redirect to the garden shed
+}
+```
+
+**The Flow:**
+1. Verify the grove owner is authenticated
+2. Retrieve the grove's customer ID from platform_billing
+3. Open the garden shed (Stripe Billing Portal)
+4. Redirect to tend your garden
+
+**What you can tend:**
+- View harvest records (invoices)
+- Update your watering method (payment method)
+- Prune your grove (cancel subscription)
+- Regrow a pruned grove (resume subscription)
+
+---
+
+### `GET /api/grafts/upgrades/growth`
+
+Check how your grove is flourishing.
 
 ```typescript
 // Response
-interface BillingStatus {
-  currentTier: TierKey;
-  status: 'active' | 'trialing' | 'past_due' | 'paused' | 'cancelled';
+interface GrowthStatus {
+  currentStage: TierKey;
+  flourishState: 'active' | 'trialing' | 'past_due' | 'resting' | 'pruned';
   currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
+  pruningScheduled: boolean;       // Cancel at period end
   trialEnd: string | null;
-  isComped: boolean;
-  paymentMethod?: {
-    brand: string;
-    last4: string;
+  isComped: boolean;               // Gifted grove
+  wateringMethod?: {               // Payment method
+    source: string;                // Card brand
+    lastDigits: string;            // Last 4 digits
   };
 }
 ```
 
 ### Client-Side Components
 
-#### `UpgradeCard.svelte`
+### Client-Side Components
 
-Display a tier for upgrade with action button.
+#### `GrowthCard.svelte`
+
+Display a growth stage for nurturing with action button.
 
 ```svelte
 <script>
@@ -148,27 +178,27 @@ Display a tier for upgrade with action button.
   tier={tier}
   billingPeriod={billingPeriod}
   variant="primary"
-  onCheckout={handleCheckout}
+  onPlant={handlePlanting}
 />
 ```
 
-**Props:**
+|**Props:**
 ```typescript
-interface UpgradeCardProps {
+interface GrowthCardProps {
   tier: PricingTier;
-  currentTier?: TierKey;      // Show "Current Plan" if matches
+  currentTier?: TierKey;      // Show "Current Stage" if matches
   billingPeriod: BillingPeriod;
-  onCheckout?: (tier: TierKey, period: BillingPeriod) => void;
+  onPlant?: (tier: TierKey, period: BillingPeriod) => void;
 }
 ```
 
-#### `UpgradeModal.svelte`
+#### `GardenModal.svelte`
 
-Modal with tier comparison for upgrades.
+Modal with stage comparison for nurturing your grove.
 
 ```svelte
 <script>
-  import { UpgradeCard, PricingToggle } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import { GrowthCard, PricingToggle } from '@autumnsgrove/groveengine/grafts/upgrades';
 </script>
 
 <PricingToggle
@@ -177,7 +207,7 @@ Modal with tier comparison for upgrades.
 />
 
 {#each availableTiers as tier}
-  <UpgradeCard
+  <GrowthCard
     {tier}
     {billingPeriod}
     currentTier={userTier}
@@ -185,86 +215,87 @@ Modal with tier comparison for upgrades.
 {/each}
 ```
 
-#### `CurrentPlanBadge.svelte`
+#### `CurrentStageBadge.svelte`
 
-Show user's current plan with upgrade CTAs.
+Show user's current growth stage with nurture CTAs.
 
 ```svelte
 <script>
-  import { UpgradeCTA } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import { NurtureCTA } from '@autumnsgrove/groveengine/grafts/upgrades';
 </script>
 
-<div class="current-plan">
-  <span class="tier-name">{TIERS[currentTier].display.name}</span>
-  {#if canUpgrade}
-    <UpgradeCTA tier={nextTier} />
+<div class="current-stage">
+  <span class="stage-name">{TIERS[currentTier].display.name}</span>
+  {#if canNurture}
+    <NurtureCTA tier={nextTier} />
   {/if}
 </div>
 ```
 
-### Configuration
+## Configuration: The Seed Catalog
 
-Following the `LoginGraft` pattern, configuration is environment-driven:
+Following the `LoginGraft` pattern, configuration is environment-driven — like preparing your seed catalog for the season:
 
 ```typescript
 // packages/engine/src/lib/grafts/upgrades/config.ts
 
 export interface UpgradesConfig {
-  /** Checkout URLs by tier and billing period */
-  checkoutUrls: Record<TierKey, { monthly?: string; annual?: string }>;
+  /** Planting URLs by stage and billing cycle */
+  plantingUrls: Record<TierKey, { monthly?: string; annual?: string }>;
   /** Stripe secret key (from environment) */
   stripeSecretKey: string;
-  /** Stripe billing portal URL */
-  billingPortalUrl: string;
+  /** Garden shed URL */
+  gardenShedUrl: string;
 }
 
 /**
- * Create upgrade config from environment variables
+ * Create the seed catalog from environment variables
  */
 export function createUpgradeConfig(env: Record<string, string | undefined>): UpgradesConfig {
   return {
-    checkoutUrls: {
+    plantingUrls: {
       seedling: {
-        monthly: env.STRIPE_CHECKOUT_SEEDLING_MONTHLY,
-        annual: env.STRIPE_CHECKOUT_SEEDLING_YEARLY,
+        monthly: env.STRIPE_PLANT_SEEDLING_MONTHLY,
+        annual: env.STRIPE_PLANT_SEEDLING_YEARLY,
       },
       sapling: { /* ... */ },
       oak: { /* ... */ },
       evergreen: { /* ... */ },
     },
     stripeSecretKey: env.STRIPE_SECRET_KEY ?? '',
-    billingPortalUrl: `${env.APP_URL ?? 'https://grove.place'}/api/grafts/upgrades/portal`,
+    gardenShedUrl: `${env.APP_URL ?? 'https://grove.place'}/api/grafts/upgrades/tend`,
   };
 }
 ```
 
-## Migration Plan
+## Migration Plan: The Growing Season
 
-### Phase 1: Extract Server-Side API
+### Phase 1: Prepare the Soil (Extract Server-Side API)
 
 1. **Create graft skeleton** (`packages/engine/src/lib/grafts/upgrades/`)
-2. **Migrate onboarding checkout logic** from `plant/src/routes/api/select-plan/+server.ts`
-3. **Migrate billing operations** from `engine/src/routes/api/billing/+server.ts`
-4. **Create unified checkout handler** supporting both new signups and upgrades
+2. **Migrate first planting logic** from `plant/src/routes/api/select-plan/+server.ts`
+3. **Migrate garden management** from `engine/src/routes/api/billing/+server.ts`
+4. **Create unified planting handler** supporting both new groves and growth
 
-### Phase 2: Create Client Components
+### Phase 2: Plant the Seeds (Create Client Components)
 
-1. **UpgradeCard.svelte** — Reusable tier display with CTA
-2. **UpgradeModal.svelte** — Modal with tier comparison
-3. **CurrentPlanBadge.svelte** — User's current tier display
-4. **Export from graft index** alongside pricing components
+1. **GrowthCard.svelte** — Reusable stage display with nurture button
+2. **GardenModal.svelte** — Modal for comparing growth stages
+3. **CurrentStageBadge.svelte** — Your current place on the journey
+4. **GardenStatus.svelte** — Dashboard nurturing overview
+5. **Export from graft index** alongside pricing components
 
-### Phase 3: Update Plant Package
+### Phase 3: First Planting (Update Plant Package)
 
 1. **Replace `/api/select-plan/+server.ts`** with graft API call
-2. **Update checkout flow** to use graft components
-3. **Remove duplicated Stripe logic** from `plant/lib/server/stripe.ts`
+2. **Update planting flow** to use graft components
+3. **Remove duplicated payment logic** from `plant/lib/server/stripe.ts`
 
-### Phase 4: Integrate with Arbor (Future)
+### Phase 4: Growth for Existing Groves (Integrate with Arbor)
 
-1. **Add upgrade section** to Arbor dashboard
-2. **Link from settings** → billing management
-3. **Show upgrade CTAs** when on free/wanderer tier
+1. **Add garden section** to the Arbor dashboard
+2. **Link from settings** → garden shed
+3. **Show growth options** when on Wanderer or Seedling stage
 
 ## API Compatibility
 
@@ -278,104 +309,107 @@ export function createUpgradeConfig(env: Record<string, string | undefined>): Up
 | `PUT /api/billing` (portal) | Migrate | `POST /api/grafts/upgrades/portal` |
 | `PATCH /api/billing` (cancel) | Migrate | Portal self-service |
 
-## Example Usage
+## Example Usage: Growing Your Grove
 
-### Onboarding (Plant)
+### First Planting (Plant package)
 
 ```svelte
 <script>
-  import { UpgradeCard } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import { GrowthCard } from '@autumnsgrove/groveengine/grafts/upgrades';
 </script>
 
-{#each availableTiers as tier}
-  <UpgradeCard
-    {tier}
-    billingPeriod={billingPeriod}
-    currentTier={userTier}
-    onCheckout={async (tier, period) => {
-      const res = await fetch('/api/grafts/upgrades/upgrade', {
+{#each availableStages as stage}
+  <GrowthCard
+    {stage}
+    billingCycle={billingCycle}
+    currentStage={yourStage}
+    onPlant={async (stage, cycle) => {
+      const res = await fetch('/api/grafts/upgrades/cultivate', {
         method: 'POST',
-        body: JSON.stringify({ targetTier: tier, billingPeriod: period }),
+        body: JSON.stringify({ targetStage: stage, billingCycle: cycle }),
       });
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      const { plantingUrl } = await res.json();
+      window.location.href = plantingUrl;
     }}
   />
 {/each}
 ```
 
-### User Dashboard (Arbor)
+### Your Growing Grove (Arbor dashboard)
 
 ```svelte
 <script>
-  import { CurrentPlanBadge, UpgradeModal } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import { CurrentStageBadge, GardenModal } from '@autumnsgrove/groveengine/grafts/upgrades';
 </script>
 
-<CurrentPlanBadge currentTier={userTier} />
+<CurrentStageBadge currentStage={yourStage} />
 
-{#if showUpgradeModal}
-  <UpgradeModal
-    currentTier={userTier}
-    onUpgrade={(tier) => { /* redirect to checkout */ }}
-    onManageBilling={() => { /* open portal */ }}
+{#if showGardenModal}
+  <GardenModal
+    currentStage={yourStage}
+    onCultivate={(stage) => { /* redirect to planting */ }}
+    onTend={() => { /* open garden shed */ }}
   />
 {/if}
 ```
 
-## Environment Variables
+## Environment Variables: The Seed Catalog
 
 ```bash
 # Stripe (existing, reuse)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Checkout URLs (per-tier, per-period)
+# Planting URLs (per-stage, per-cycle)
 # These replace the hardcoded URLs in plant/lib/server/stripe.ts
-STRIPE_CHECKOUT_SEEDLING_MONTHLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_SEEDLING_YEARLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_SAPLING_MONTHLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_SAPLING_YEARLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_OAK_MONTHLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_OAK_YEARLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_EVERGREEN_MONTHLY=https://checkout.stripe.com/...
-STRIPE_CHECKOUT_EVERGREEN_YEARLY=https://checkout.stripe.com/...
+STRIPE_PLANT_SEEDLING_MONTHLY=https://checkout.stripe.com/...
+STRIPE_PLANT_SEEDLING_YEARLY=https://checkout.stripe.com/...
+STRIPE_PLANT_SAPLING_MONTHLY=https://checkout.stripe.com/...
+STRIPE_PLANT_SAPLING_YEARLY=https://checkout.stripe.com/...
+STRIPE_PLANT_OAK_MONTHLY=https://checkout.stripe.com/...
+STRIPE_PLANT_OAK_YEARLY=https://checkout.stripe.com/...
+STRIPE_PLANT_EVERGREEN_MONTHLY=https://checkout.stripe.com/...
+STRIPE_PLANT_EVERGREEN_YEARLY=https://checkout.stripe.com/...
 ```
 
-## Open Questions
+## Open Questions: Planning the Harvest
 
-1. **Proration handling:** Should upgrade immediately activate with prorated billing, or wait until next cycle?
-2. **Downgrades:** Support via portal only, or also via API?
-3. **Free tier upgrades:** Is the flow different for Wanderer → Seedling vs Seedling → Sapling?
-4. **Comped accounts:** How do upgrades interact with comped tiers?
+1. **Immediate growth:** Should cultivation activate immediately with prorated care, or wait for the next season?
+2. **Pruning:** Support through garden shed only, or also via API?
+3. **First planting:** Is the flow different for Wanderer → Seedling vs Seedling → Sapling?
+4. **Gifted groves:** How does cultivation work with comped stages?
+
+These are decisions the Wayfinder will make when implementation begins.
 
 ## Dependencies
 
-- `@autumnsgrove/groveengine/config` — Tier definitions
-- `@autumnsgrove/groveengine/grafts/pricing` — Tier display components
+- `@autumnsgrove/groveengine/config` — Growth stage definitions
+- `@autumnsgrove/groveengine/grafts/pricing` — Stage display components
 - `stripe` — Payment provider SDK
 
-## Files to Create/Modify
+## Files to Create/Modify: Building the Graft
 
 ### New Files
 
 ```
 packages/engine/src/lib/grafts/upgrades/
-├── index.ts                    # Main export
-├── types.ts                    # TypeScript interfaces
+├── index.ts                    # Main export (seed catalog)
+├── types.ts                    # TypeScript interfaces (growth stages)
 ├── config.ts                   # Configuration & environment handling
 └── server/
     ├── api/
-    │   ├── upgrade.ts          # POST /api/grafts/upgrades/upgrade
-    │   ├── portal.ts           # POST /api/grafts/upgrades/portal
-    │   └── status.ts           # GET /api/grafts/upgrades/status
-    ├── checkout.ts             # Checkout session creation
-    └── billing.ts              # Billing portal & helpers
+    │   ├── cultivate.ts        # POST /api/grafts/upgrades/cultivate
+    │   ├── tend.ts             # POST /api/grafts/upgrades/tend
+    │   └── growth.ts           # GET /api/grafts/upgrades/growth
+    ├── planting.ts             # Planting session creation
+    └── garden.ts               # Garden utilities
 
 packages/engine/src/lib/grafts/pricing/
 └── components/
-    ├── UpgradeCard.svelte
-    ├── UpgradeModal.svelte
-    └── CurrentPlanBadge.svelte
+    ├── GrowthCard.svelte
+    ├── GardenModal.svelte
+    ├── CurrentStageBadge.svelte
+    └── GardenStatus.svelte
 ```
 
 ### Modified Files
@@ -389,12 +423,16 @@ packages/plant/src/lib/server/stripe.ts           # Remove duplicated code
 packages/plant/src/routes/checkout/+page.server.ts # Use graft
 ```
 
-## Acceptance Criteria
+## Acceptance Criteria: Ready for the Grove
 
-- [ ] Server-side API handles plan upgrades and billing portal
-- [ ] Client components work for both onboarding and existing users
-- [ ] Plant package uses graft instead of duplicated Stripe logic
-- [ ] All existing billing operations continue to work
+- [ ] Server-side API handles cultivation, garden shed, and growth tracking
+- [ ] Client components work for both first planting and existing groves
+- [ ] Plant package uses graft instead of duplicated payment logic
+- [ ] All existing billing operations continue to work seamlessly
 - [ ] Environment-driven configuration (no hardcoded Stripe URLs)
-- [ ] Audit logging for all billing operations
-- [ ] Rate limiting on all upgrade endpoints
+- [ ] Audit logging for all growth operations
+- [ ] Rate limiting on all cultivation endpoints
+
+---
+
+*The graft is ready. The grove awaits its growth.* 🌳
