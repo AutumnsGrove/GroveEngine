@@ -52,7 +52,7 @@
   });
 
   // Derive flourish state from billing status
-  let flourishState = $derived<FlourishState>((): FlourishState => {
+  function getFlourishState(): FlourishState {
     if (!data.billing) return 'active';
     const status = data.billing.status;
 
@@ -61,13 +61,17 @@
     if (data.billing.cancelAtPeriodEnd) return 'resting';
     if (status === 'canceled' || status === 'unpaid') return 'pruned';
     return 'active';
-  })();
+  }
+
+  let flourishState = $derived<FlourishState>(getFlourishState());
 
   // Get current period end as timestamp for GardenStatus
-  let currentPeriodEnd = $derived((): number | null => {
+  function getPeriodEnd(): number | null {
     if (!data.billing?.currentPeriodEnd) return null;
     return new Date(data.billing.currentPeriodEnd).getTime() / 1000;
-  })();
+  }
+
+  let currentPeriodEnd = $derived(getPeriodEnd());
 
   // Handle nurture - open plan selection for upgrades
   function handleNurture(): void {

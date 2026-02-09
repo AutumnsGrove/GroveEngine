@@ -11,10 +11,8 @@ import { createUpgradeConfig, getPlantingUrl } from "../../config";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
 import { checkRateLimit } from "$lib/server/rate-limits";
-import { PLANS } from "$lib/config/tiers";
 import { createPaymentProvider } from "$lib/payments";
-import { logBillingAudit } from "$lib/server/billing";
-import { isCompedAccount } from "$lib/server/billing";
+import { logBillingAudit, isCompedAccount } from "$lib/server/billing";
 
 const CULTIVATE_RATE_LIMIT = { limit: 20, windowSeconds: 3600 }; // 20 per hour
 
@@ -48,7 +46,7 @@ export const POST: RequestHandler = async ({
   // Get and verify tenant
   const tenantId = locals.tenantId;
   if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_REQUIRED, "API");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const verifiedTenantId = await getVerifiedTenantId(
@@ -75,7 +73,7 @@ export const POST: RequestHandler = async ({
   try {
     body = await request.json();
   } catch {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST, "API");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   const { targetStage, billingCycle = "monthly", returnTo } = body;
@@ -83,12 +81,12 @@ export const POST: RequestHandler = async ({
   // Validate target stage
   const validStages = ["seedling", "sapling", "oak", "evergreen"];
   if (!targetStage || !validStages.includes(targetStage)) {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST, "API");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   // Validate billing cycle
   if (billingCycle !== "monthly" && billingCycle !== "yearly") {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST, "API");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   // Get configuration
@@ -99,7 +97,7 @@ export const POST: RequestHandler = async ({
   // Check if cultivation is allowed to this stage
   const plantingUrl = getPlantingUrl(config, targetStage, billingCycle);
   if (!plantingUrl) {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST, "API");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   // Check if already at or above target stage
@@ -213,7 +211,7 @@ export const POST: RequestHandler = async ({
       userEmail: locals.user.email,
     });
 
-    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_ERROR, "API");
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };
 

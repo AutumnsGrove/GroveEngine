@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({
   // Get and verify tenant
   const tenantId = locals.tenantId;
   if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_REQUIRED, "API");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const verifiedTenantId = await getVerifiedTenantId(
@@ -72,7 +72,7 @@ export const POST: RequestHandler = async ({
   try {
     body = await request.json();
   } catch {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST, "API");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   const { returnTo } = body;
@@ -133,7 +133,7 @@ export const POST: RequestHandler = async ({
       userEmail: locals.user.email,
     });
 
-    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_ERROR, "API");
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };
 

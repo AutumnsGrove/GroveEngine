@@ -245,6 +245,7 @@
 
 		{#if selectedPlan}
 			{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
+			{@const selectedSavings = billingPeriod === 'annual' && selectedTier?.key !== 'free' ? getYearlySavingsAmount(selectedTier) : 0}
 			<div class="p-4 rounded-lg bg-grove-100/50 dark:bg-grove-900/30 border border-grove-200 dark:border-grove-800">
 				<div class="flex items-center justify-between">
 					<div>
@@ -253,7 +254,7 @@
 						</p>
 						{#if billingPeriod === 'annual' && selectedTier?.key !== 'free'}
 							<p class="text-xs text-accent mt-0.5">
-								Save ${savings}/year with annual billing
+								Save ${selectedSavings}/year with annual billing
 							</p>
 						{/if}
 					</div>

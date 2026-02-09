@@ -31,7 +31,7 @@ export const GET: RequestHandler = async ({
   // Get and verify tenant
   const tenantId = locals.tenantId;
   if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_REQUIRED, "API");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const verifiedTenantId = await getVerifiedTenantId(

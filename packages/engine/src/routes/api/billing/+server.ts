@@ -10,7 +10,11 @@ import {
   rateLimitHeaders,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
-import { isCompedAccount } from "$lib/server/billing.js";
+import {
+  isCompedAccount,
+  logBillingAudit,
+  type AuditLogEntry,
+} from "$lib/server/billing.js";
 import { Resend } from "resend";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { GROVE_EMAILS } from "$lib/config/emails.js";
@@ -55,63 +59,6 @@ async function checkBillingRateLimit(
   });
 
   return { result, response };
-}
-
-/**
- * Audit log entry for billing operations.
- * Logs are stored in the audit_log table for compliance and debugging.
- */
-interface AuditLogEntry {
-  tenantId: string;
-  action: string;
-  details: Record<string, unknown>;
-  userEmail: string;
-  ipAddress?: string;
-}
-
-/**
- * Log billing operations for audit trail.
- * This helps with compliance, debugging, and dispute resolution.
- *
- * IMPORTANT: Audit log failures are non-blocking to prevent billing operations
- * from failing due to logging issues. However, persistent failures should trigger
- * alerts in the monitoring system. Look for "[Billing Audit] CRITICAL" in logs.
- *
- * Trade-off: We prioritize completing the user's billing action over guaranteed
- * audit logging. For true compliance-critical operations, consider a separate
- * job queue that retries failed audit entries.
- */
-async function logBillingAudit(
-  db: D1Database,
-  entry: AuditLogEntry,
-): Promise<void> {
-  try {
-    await db
-      .prepare(
-        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .bind(
-        crypto.randomUUID(),
-        entry.tenantId,
-        "billing",
-        entry.action,
-        JSON.stringify(entry.details),
-        entry.userEmail,
-        Math.floor(Date.now() / 1000),
-      )
-      .run();
-  } catch (e) {
-    // CRITICAL: Audit log failures need monitoring alerts
-    // This log line should trigger alerts in production monitoring
-    console.error("[Billing Audit] CRITICAL - Failed to log billing action:", {
-      error: e instanceof Error ? e.message : String(e),
-      action: entry.action,
-      tenantId: entry.tenantId,
-      userEmail: entry.userEmail,
-      timestamp: new Date().toISOString(),
-    });
-  }
 }
 
 /**
