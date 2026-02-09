@@ -4,7 +4,4 @@
  * Check how your grove is flourishing.
  */
 
-import { GET } from "../../../server/api/growth";
-import type { RequestHandler } from "./$types";
-
-export const GET: RequestHandler = GET;
+export { GET } from "$lib/grafts/upgrades/server/api/growth";

@@ -8,7 +8,7 @@
 
 	import { Sprout, TreeDeciduous, Trees, Crown, User, Footprints, Settings, ArrowRight } from 'lucide-svelte';
 	import type { CurrentStageBadgeProps } from './types.js';
-	import type { TierKey } from '@autumnsgrove/groveengine/config';
+	import type { TierKey } from '$lib/config/tiers';
 
 	let {
 		currentStage = 'wanderer',

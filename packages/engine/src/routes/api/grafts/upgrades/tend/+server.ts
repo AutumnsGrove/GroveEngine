@@ -4,7 +4,4 @@
  * Open the garden shed for self-service billing management.
  */
 
-import { POST } from "../../../server/api/tend";
-import type { RequestHandler } from "./$types";
-
-export const POST: RequestHandler = POST;
+export { POST } from "$lib/grafts/upgrades/server/api/tend";

@@ -15,14 +15,14 @@
   import FeaturesCard from "./FeaturesCard.svelte";
 
   // Import UpgradesGraft components for garden status
-  import { CurrentStageBadge, GardenStatus } from '@autumnsgrove/groveengine/grafts/upgrades';
-  import type { FlourishState } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import { CurrentStageBadge, GardenStatus } from '$lib/grafts/upgrades';
+  import type { FlourishState } from '$lib/grafts/upgrades';
 
   // Import types and utils
   import type { ExportType } from "./types";
   import { sanitizeErrorMessage } from "./utils";
   import { checkPasskeySupport, registerPasskey } from "./passkey-utils";
-  import type { TierKey } from '@autumnsgrove/groveengine/config';
+  import type { TierKey } from '$lib/config/tiers';
 
   let { data } = $props();
 

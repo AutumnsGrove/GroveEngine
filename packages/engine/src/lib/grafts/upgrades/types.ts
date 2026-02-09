@@ -4,7 +4,7 @@
  * Growth stages, cultivation requests, and garden status.
  */
 
-import type { TierKey } from "@autumnsgrove/groveengine/config";
+import type { TierKey } from "$lib/config/tiers";
 
 // ============================================================================
 // Growth Stages

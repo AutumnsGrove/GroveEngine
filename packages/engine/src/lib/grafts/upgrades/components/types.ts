@@ -5,7 +5,7 @@
  */
 
 import type { Snippet } from "svelte";
-import type { TierKey } from "@autumnsgrove/groveengine/config";
+import type { TierKey } from "$lib/config/tiers";
 import type { BaseGraftProps } from "../types.js";
 import type { FlourishState } from "./types.js";
 

@@ -211,7 +211,7 @@ describe("UpgradesGraft API", () => {
 
       expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(
         400,
-        API_ERRORS.INVALID_REQUEST,
+        API_ERRORS.INVALID_REQUEST_BODY,
         "API",
       );
     });

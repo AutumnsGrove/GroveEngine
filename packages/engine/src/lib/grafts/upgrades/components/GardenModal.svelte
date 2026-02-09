@@ -7,8 +7,8 @@
 
 	import { X, Sprout, RefreshCw, Settings } from 'lucide-svelte';
 	import type { GardenModalProps } from './types.js';
-	import type { TierKey } from '@autumnsgrove/groveengine/config';
-	import { transformAllTiers, type PricingTier } from '@autumnsgrove/groveengine/grafts/pricing';
+	import type { TierKey } from '$lib/config/tiers';
+	import { transformAllTiers, type PricingTier } from '$lib/grafts/pricing';
 	import GrowthCard from './GrowthCard.svelte';
 	import PricingToggle from '../../pricing/PricingToggle.svelte';
 
