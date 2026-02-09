@@ -24,8 +24,8 @@
 	import type { TierKey, FlourishState } from './types.js';
 
 	let {
-		currentStage = 'wanderer',
-		flourishState = 'active',
+		currentStage = 'wanderer' as TierKey,
+		flourishState = 'active' as FlourishState,
 		currentPeriodEnd = null,
 		pruningScheduled = false,
 		paymentBrand = '',

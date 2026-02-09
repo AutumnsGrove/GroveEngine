@@ -5,7 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import type { RequestHandler } from "@sveltejs/kit";
 import type { GrowthStatus, FlourishState } from "../../types";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
@@ -91,7 +91,10 @@ export const GET: RequestHandler = async ({
     );
 
     // Check comped status
-    const isComped = await isCompedAccount(platform.env.DB, verifiedTenantId);
+    const { isComped: isCompedBool } = await isCompedAccount(
+      platform.env.DB,
+      verifiedTenantId,
+    );
 
     const response: GrowthStatus = {
       currentStage: billing.plan as GrowthStatus["currentStage"],
@@ -99,7 +102,7 @@ export const GET: RequestHandler = async ({
       currentPeriodEnd: billing.current_period_end,
       pruningScheduled: billing.cancel_at_period_end === 1,
       trialEnd: billing.trial_end,
-      isComped,
+      isComped: isCompedBool,
       wateringMethod: billing.payment_method_last4
         ? {
             source: billing.payment_method_brand ?? "unknown",

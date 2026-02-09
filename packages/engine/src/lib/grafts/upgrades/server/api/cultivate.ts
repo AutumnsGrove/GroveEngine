@@ -5,7 +5,7 @@
  */
 
 import { json, redirect } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import type { RequestHandler } from "@sveltejs/kit";
 import type { CultivateRequest, CultivateResponse } from "../../types";
 import { createUpgradeConfig, getPlantingUrl } from "../../config";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
@@ -91,7 +91,7 @@ export const POST: RequestHandler = async ({
 
   // Get configuration
   const config = createUpgradeConfig(
-    platform.env as Record<string, string | undefined>,
+    platform.env as unknown as Record<string, string | undefined>,
   );
 
   // Check if cultivation is allowed to this stage
@@ -127,8 +127,11 @@ export const POST: RequestHandler = async ({
   }
 
   // Check for comped status
-  const isComped = await isCompedAccount(platform.env.DB, verifiedTenantId);
-  if (isComped) {
+  const { isComped: isCompedBool } = await isCompedAccount(
+    platform.env.DB,
+    verifiedTenantId,
+  );
+  if (isCompedBool) {
     // Comped accounts cannot upgrade through cultivation
     const params = new URLSearchParams();
     params.set("error", "comped");
@@ -153,29 +156,33 @@ export const POST: RequestHandler = async ({
     }
 
     // Create checkout session with proration
-    const session = await payments.createCheckoutSession({
-      customerId: providerCustomerId.provider_customer_id,
-      successUrl: constructSuccessUrl(config.appUrl, returnTo),
-      cancelUrl: constructCancelUrl(config.appUrl, returnTo),
-      lineItems: [
-        {
-          price: getStagePriceId(targetStage, billingCycle),
-          quantity: 1,
+    const items = [
+      {
+        variantId: targetStage,
+        quantity: 1,
+      },
+    ];
+    const resolveVariant = async (): Promise<null> => null;
+    const session = await payments.createCheckoutSession(
+      items,
+      {
+        mode: "subscription",
+        successUrl: constructSuccessUrl(config.appUrl, returnTo),
+        cancelUrl: constructCancelUrl(config.appUrl, returnTo),
+        customerId: providerCustomerId.provider_customer_id,
+        metadata: {
+          tenantId: verifiedTenantId,
+          targetStage,
+          billingCycle,
+          type: "cultivation",
         },
-      ],
-      mode: "subscription",
-      metadata: {
-        tenantId: verifiedTenantId,
-        targetStage,
-        billingCycle,
-        type: "cultivation",
+        allowPromotionCodes: true,
+        subscriptionData: {
+          prorationBehavior: "create_prorations",
+        },
       },
-      allowPromotionCodes: true,
-      // Enable proration for immediate effect
-      subscriptionData: {
-        prorationBehavior: "create_prorations",
-      },
-    });
+      resolveVariant,
+    );
 
     // Audit log the cultivation attempt
     await logBillingAudit(platform.env.DB, {

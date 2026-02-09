@@ -378,7 +378,7 @@ describe("UpgradesGraft API", () => {
 
       vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
       vi.mocked(createPaymentProvider).mockReturnValue({
-        createPortalSession: vi.fn().mockResolvedValue({
+        createBillingPortalSession: vi.fn().mockResolvedValue({
           id: "bps_123",
           url: "https://billing.stripe.com/...",
         }),

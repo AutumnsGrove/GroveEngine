@@ -129,6 +129,10 @@ export interface CheckoutOptions {
 
   // Subscription specific
   trialPeriodDays?: number;
+  subscriptionData?: {
+    prorationBehavior?: "create_prorations" | "always_invoice" | "none";
+    trialPeriodDays?: number;
+  };
 
   // Discounts
   allowPromotionCodes?: boolean;
@@ -566,7 +570,7 @@ export interface PaymentProvider {
   createBillingPortalSession(
     providerCustomerId: string,
     returnUrl: string,
-  ): Promise<{ url: string }>;
+  ): Promise<{ id: string; url: string }>;
 
   // ==========================================================================
   // WEBHOOKS

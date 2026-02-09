@@ -6,12 +6,19 @@
 
 import type { Snippet } from "svelte";
 import type { TierKey } from "$lib/config/tiers";
-import type { BaseGraftProps } from "../types.js";
-import type { FlourishState } from "./types.js";
+import type { FlourishState } from "../types.js";
 
 // =============================================================================
 // COMPONENT PROPS
 // =============================================================================
+
+/**
+ * Base props interface for all UpgradesGraft components.
+ */
+export interface BaseGraftProps {
+  /** Additional CSS classes */
+  class?: string;
+}
 
 /**
  * Props for the main UpgradesGraft orchestrator component.

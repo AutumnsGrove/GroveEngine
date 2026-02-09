@@ -5,7 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import type { RequestHandler } from "@sveltejs/kit";
 import type { TendRequest, TendResponse } from "../../types";
 import { createUpgradeConfig } from "../../config";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
@@ -95,13 +95,13 @@ export const POST: RequestHandler = async ({
     });
 
     const config = createUpgradeConfig(
-      platform.env as Record<string, string | undefined>,
+      platform.env as unknown as Record<string, string | undefined>,
     );
 
-    const portalSession = await payments.createPortalSession({
-      customerId: billing.provider_customer_id,
-      returnUrl: constructReturnUrl(config.appUrl, returnTo),
-    });
+    const portalSession = await payments.createBillingPortalSession(
+      billing.provider_customer_id,
+      constructReturnUrl(config.appUrl, returnTo),
+    );
 
     // Audit log the portal access
     await logBillingAudit(platform.env.DB, {
