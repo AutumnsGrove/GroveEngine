@@ -89,7 +89,7 @@ This isn't just a SaaS — it's about helping people have their own space online
 
 | Plan | Price | Posts | Storage |
 |------|-------|-------|---------|
-| Free | $0/mo | — | — |
+| Free | $0/mo | 5 | 50 MB |
 | Seedling | $8/mo | 50 | 1 GB |
 | Sapling | $12/mo | 250 | 5 GB |
 | Oak | $25/mo | Unlimited | 20 GB |
