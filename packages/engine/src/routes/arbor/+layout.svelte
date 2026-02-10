@@ -12,15 +12,10 @@
     HelpCircle,
     MessageCircle,
     MessageSquare,
-    Shield,
-    ShieldAlert,
-    Gift,
-    Eye,
     X,
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
-  import { isWayfinder } from "$lib/config/wayfinder";
 
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
@@ -31,9 +26,6 @@
 
   // Computed: show expanded content when not collapsed OR when hovered
   let showExpanded = $derived(!sidebarCollapsed || sidebarHovered);
-
-  // Wayfinder can see Vista section
-  let isGroveAdmin = $derived(isWayfinder(data.user?.email));
 
   function closeSidebar() {
     sidebarStore.close();
@@ -147,26 +139,6 @@
         <span class="nav-label" class:hidden={!showExpanded}>Settings</span>
       </a>
 
-      {#if isGroveAdmin}
-        <!-- Vista: Grove Admin Section -->
-        <div class="nav-divider" class:hidden={!showExpanded}></div>
-        <div class="nav-section-label" class:hidden={!showExpanded}>
-          <Eye class="section-icon" />
-          <span>Vista</span>
-        </div>
-        <a href="/arbor/safety" class="nav-item" onclick={closeSidebar} title="Safety">
-          <ShieldAlert class="nav-icon" />
-          <span class="nav-label" class:hidden={!showExpanded}>Safety</span>
-        </a>
-        <a href="/arbor/comped-invites" class="nav-item" onclick={closeSidebar} title="Comped Invites">
-          <Gift class="nav-icon" />
-          <span class="nav-label" class:hidden={!showExpanded}>Comped Invites</span>
-        </a>
-        <a href="/arbor/reserved-usernames" class="nav-item" onclick={closeSidebar} title="Reserved Usernames">
-          <Shield class="nav-icon" />
-          <span class="nav-label" class:hidden={!showExpanded}>Reserved Names</span>
-        </a>
-      {/if}
     </nav>
 
     {#if showExpanded}
@@ -562,30 +534,6 @@
 
   .hidden {
     display: none;
-  }
-
-  .nav-divider {
-    height: 1px;
-    background: var(--grove-border-subtle);
-    margin: 0.75rem 1rem;
-  }
-
-  .nav-section-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 1.25rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-muted);
-    opacity: 0.7;
-  }
-
-  :global(.section-icon) {
-    width: 0.75rem;
-    height: 0.75rem;
   }
 
   .sidebar-footer {

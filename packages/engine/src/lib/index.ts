@@ -24,6 +24,7 @@ export {
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
 export { default as GutterManager } from "./components/admin/GutterManager.svelte";
 export { default as LumenAnalytics } from "./components/admin/LumenAnalytics.svelte";
+export { default as SafetyMonitoring } from "./components/admin/SafetyMonitoring.svelte";
 export { default as ZephyrAnalytics } from "./components/admin/ZephyrAnalytics.svelte";
 
 // Wisp - Writing Assistant

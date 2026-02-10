@@ -12,7 +12,7 @@
  * - [x] Hook into post publish flow (on_publish) — via waitUntil
  * - [x] Hook into post edit flow (on_edit) — via waitUntil
  * - [x] D1 tables for moderation events (audit trail)
- * - [x] Admin review UI for flagged content (/arbor/safety)
+ * - [x] Admin review UI for flagged content (moved to landing Lumen panel)
  * - [ ] Hook into comment submission (on_comment)
  * - [ ] Hook into profile bio updates (on_profile_update)
  *

@@ -1,12 +1,12 @@
 <script lang="ts">
 	/**
-	 * Safety Dashboard
+	 * SafetyMonitoring — Thorn + Petal Safety Dashboard
 	 *
-	 * Wayfinder-only page showing combined Petal (image) and Thorn (text)
-	 * moderation metrics with a flagged content review queue.
+	 * Reusable component for displaying moderation metrics.
+	 * Props-based widget for embedding in admin panels (e.g., landing Lumen).
 	 */
 
-	import { enhance } from '$app/forms';
+	import { GlassCard } from '$lib/ui';
 	import {
 		Shield,
 		ShieldAlert,
@@ -18,17 +18,49 @@
 		Activity,
 		Clock
 	} from 'lucide-svelte';
-	import { GlassCard, GroveTerm } from '$lib/ui';
 
-	let { data, form } = $props();
+	interface Props {
+		thornStats: {
+			total: number;
+			allowed: number;
+			warned: number;
+			flagged: number;
+			blocked: number;
+			passRate: number;
+			byCategory: Array<{ category: string; count: number }>;
+			byContentType: Array<{ content_type: string; count: number }>;
+		};
+		petalBlocks: Array<{ category: string; count: number }>;
+		thornFlagged: Array<{
+			id: string;
+			content_type: string;
+			content_ref: string | null;
+			action: string;
+			categories: string | null;
+			confidence: number | null;
+			created_at: string;
+		}>;
+		thornRecent: Array<{
+			content_type: string;
+			content_ref: string | null;
+			action: string;
+			categories: string | null;
+			timestamp: string;
+		}>;
+		petalFlags: Array<{
+			id: string;
+			user_id: string;
+			flag_type: string;
+			created_at: string;
+		}>;
+		onReview?: (flagId: string, action: 'cleared' | 'removed', notes?: string) => Promise<void>;
+	}
 
-	let thornStats = $derived(data.thornStats);
-	let petalBlocks = $derived(data.petalBlocks);
-	let thornFlagged = $derived(data.thornFlagged);
-	let thornRecent = $derived(data.thornRecent);
-	let petalFlags = $derived(data.petalFlags);
+	let { thornStats, petalBlocks, thornFlagged, thornRecent, petalFlags, onReview }: Props = $props();
 
-	// Format timestamp for display
+	let reviewMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+	let reviewingId = $state<string | null>(null);
+
 	function formatTime(ts: string): string {
 		try {
 			const d = new Date(ts);
@@ -43,19 +75,13 @@
 		}
 	}
 
-	// Action badge styling
 	function actionClass(action: string): string {
 		switch (action) {
-			case 'allow':
-				return 'bg-green-500/20 text-green-300 border-green-500/30';
-			case 'warn':
-				return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-			case 'flag_review':
-				return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
-			case 'block':
-				return 'bg-red-500/20 text-red-300 border-red-500/30';
-			default:
-				return 'bg-slate-500/20 text-foreground-faint border-slate-500/30';
+			case 'allow': return 'action-allow';
+			case 'warn': return 'action-warn';
+			case 'flag_review': return 'action-flag';
+			case 'block': return 'action-block';
+			default: return 'action-default';
 		}
 	}
 
@@ -69,7 +95,6 @@
 		}
 	}
 
-	// Parse categories from JSON string (validated as string array, bounded)
 	function parseCategories(cats: string | null): string[] {
 		if (!cats) return [];
 		try {
@@ -80,30 +105,37 @@
 			return [];
 		}
 	}
+
+	async function handleReview(flagId: string, action: 'cleared' | 'removed') {
+		if (!onReview) return;
+		reviewingId = flagId;
+		reviewMessage = null;
+		try {
+			await onReview(flagId, action);
+			reviewMessage = {
+				type: 'success',
+				text: `Content ${action === 'cleared' ? 'cleared' : 'removed'} successfully`
+			};
+		} catch (err) {
+			reviewMessage = {
+				type: 'error',
+				text: err instanceof Error ? err.message : 'Review action failed'
+			};
+		} finally {
+			reviewingId = null;
+		}
+	}
 </script>
 
 <div class="safety-dashboard">
-	<div class="dashboard-header">
-		<div class="header-title">
-			<Shield class="header-icon" />
-			<div>
-				<h1>Safety Dashboard</h1>
-				<p class="header-subtitle"><GroveTerm term="thorn">Thorn</GroveTerm> (text) + <GroveTerm term="petal">Petal</GroveTerm> (image) moderation overview</p>
-			</div>
-		</div>
-	</div>
-
-	{#if form?.success}
-		<div class="success-banner">
-			<CheckCircle class="banner-icon" />
-			<span>{form.message}</span>
-		</div>
-	{/if}
-
-	{#if form?.error}
-		<div class="error-banner">
-			<AlertTriangle class="banner-icon" />
-			<span>{form.error}</span>
+	{#if reviewMessage}
+		<div class={reviewMessage.type === 'success' ? 'success-banner' : 'error-banner'}>
+			{#if reviewMessage.type === 'success'}
+				<CheckCircle class="banner-icon" />
+			{:else}
+				<AlertTriangle class="banner-icon" />
+			{/if}
+			<span>{reviewMessage.text}</span>
 		</div>
 	{/if}
 
@@ -164,7 +196,7 @@
 		<GlassCard>
 			<div class="section-header">
 				<Shield class="section-icon" />
-				<h2><GroveTerm term="thorn">Thorn</GroveTerm> &mdash; Text Moderation</h2>
+				<h2>Thorn &mdash; Text Moderation</h2>
 			</div>
 
 			{#if thornStats.byCategory.length > 0}
@@ -198,7 +230,7 @@
 		<GlassCard>
 			<div class="section-header">
 				<Eye class="section-icon" />
-				<h2><GroveTerm term="petal">Petal</GroveTerm> &mdash; Image Moderation</h2>
+				<h2>Petal &mdash; Image Moderation</h2>
 			</div>
 
 			{#if petalBlocks.length > 0}
@@ -270,15 +302,24 @@
 						<span class="queue-col-confidence">{flag.confidence ? `${Math.round(flag.confidence * 100)}%` : '—'}</span>
 						<span class="queue-col-time">{formatTime(flag.created_at)}</span>
 						<span class="queue-col-actions">
-							<form method="POST" action="?/reviewFlag" use:enhance class="review-form">
-								<input type="hidden" name="flag_id" value={flag.id} />
-								<button type="submit" name="action" value="cleared" class="btn-clear" title="Clear - content is safe">
+							<div class="review-buttons">
+								<button
+									class="btn-clear"
+									title="Clear - content is safe"
+									disabled={reviewingId === flag.id}
+									onclick={() => handleReview(flag.id, 'cleared')}
+								>
 									<CheckCircle class="btn-icon" />
 								</button>
-								<button type="submit" name="action" value="removed" class="btn-remove" title="Remove - content violates policy">
+								<button
+									class="btn-remove"
+									title="Remove - content violates policy"
+									disabled={reviewingId === flag.id}
+									onclick={() => handleReview(flag.id, 'removed')}
+								>
 									<XCircle class="btn-icon" />
 								</button>
-							</form>
+							</div>
 						</span>
 					</div>
 				{/each}
@@ -322,35 +363,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
-	}
-
-	.dashboard-header {
-		margin-bottom: 0.5rem;
-	}
-
-	.header-title {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	:global(.header-icon) {
-		width: 2rem;
-		height: 2rem;
-		color: var(--user-accent, var(--color-primary));
-	}
-
-	.header-title h1 {
-		font-size: 1.75rem;
-		font-weight: 700;
-		margin: 0;
-		color: var(--color-text);
-	}
-
-	.header-subtitle {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		margin: 0.125rem 0 0;
 	}
 
 	/* Stats Grid */
@@ -595,6 +607,36 @@
 		font-weight: 500;
 	}
 
+	.action-allow {
+		background: rgba(34, 197, 94, 0.2);
+		color: rgb(34, 197, 94);
+		border-color: rgba(34, 197, 94, 0.3);
+	}
+
+	.action-warn {
+		background: rgba(234, 179, 8, 0.2);
+		color: rgb(234, 179, 8);
+		border-color: rgba(234, 179, 8, 0.3);
+	}
+
+	.action-flag {
+		background: rgba(249, 115, 22, 0.2);
+		color: rgb(249, 115, 22);
+		border-color: rgba(249, 115, 22, 0.3);
+	}
+
+	.action-block {
+		background: rgba(239, 68, 68, 0.2);
+		color: rgb(239, 68, 68);
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+
+	.action-default {
+		background: rgba(100, 116, 139, 0.2);
+		color: var(--color-text-muted);
+		border-color: rgba(100, 116, 139, 0.3);
+	}
+
 	/* Category tags */
 	.cat-tag {
 		display: inline-block;
@@ -607,7 +649,7 @@
 	}
 
 	/* Review buttons */
-	.review-form {
+	.review-buttons {
 		display: flex;
 		gap: 0.25rem;
 	}
@@ -624,12 +666,18 @@
 		transition: background 0.15s, color 0.15s;
 	}
 
+	.btn-clear:disabled,
+	.btn-remove:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
 	.btn-clear {
 		background: rgba(34, 197, 94, 0.15);
 		color: rgb(34, 197, 94);
 	}
 
-	.btn-clear:hover {
+	.btn-clear:hover:not(:disabled) {
 		background: rgba(34, 197, 94, 0.3);
 	}
 
@@ -638,7 +686,7 @@
 		color: rgb(239, 68, 68);
 	}
 
-	.btn-remove:hover {
+	.btn-remove:hover:not(:disabled) {
 		background: rgba(239, 68, 68, 0.3);
 	}
 
