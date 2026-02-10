@@ -11,6 +11,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Cloudflare Workers
+    permissions:
+      contents: read
+      deployments: write
 
     steps:
       - name: Checkout
@@ -28,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: workers/zephyr
+        working-directory: .
 
       - name: Type check
         run: pnpm run typecheck
