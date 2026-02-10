@@ -516,9 +516,9 @@
                 {#if anchor.isHeading}
                   <span class="anchor-badge heading-badge" aria-hidden="true">H{anchor.headingLevel}</span>
                 {:else if anchor.isAnchorTag}
-                  <span class="anchor-badge tag-badge" aria-hidden="true"><Anchor size={10} /></span>
+                  <span class="anchor-badge tag-badge" aria-hidden="true"><Anchor size={12} /></span>
                 {:else}
-                  <span class="anchor-badge para-badge" aria-hidden="true"><Pilcrow size={10} /></span>
+                  <span class="anchor-badge para-badge" aria-hidden="true"><Pilcrow size={12} /></span>
                 {/if}
                 <span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
                 <span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>

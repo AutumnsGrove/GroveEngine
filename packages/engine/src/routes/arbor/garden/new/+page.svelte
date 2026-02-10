@@ -166,7 +166,7 @@
     <Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg mb-4 flex items-center gap-3">
       <AlertCircle class="w-5 h-5 text-red-500 shrink-0" />
       <span class="flex-1 text-red-600 dark:text-red-400">{error}</span>
-      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 leading-none" onclick={() => (error = null)} aria-label="Dismiss error"><X size={18} /></button>
+      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 leading-none" onclick={() => (error = null)} aria-label="Dismiss error"><X size={16} /></button>
     </Glass>
   {/if}
 

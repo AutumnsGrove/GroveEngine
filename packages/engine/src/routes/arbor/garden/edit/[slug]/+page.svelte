@@ -8,6 +8,7 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
+  import { clickOutside } from "$lib/actions/clickOutside";
   import { ExternalLink, Ellipsis, Trash2, ChevronRight, ChevronLeft, ArrowLeft, ArrowRight } from "lucide-svelte";
 
   let { data } = $props();
@@ -225,18 +226,9 @@
     }
   }
 
-  /** @param {MouseEvent} e */
-  function handleClickOutsideMenu(e) {
-    if (showMoreMenu) {
-      const target = /** @type {HTMLElement} */ (e.target);
-      if (!target.closest('.more-menu')) {
-        showMoreMenu = false;
-      }
-    }
-  }
 </script>
 
-<svelte:window onbeforeunload={handleBeforeUnload} onclick={handleClickOutsideMenu} />
+<svelte:window onbeforeunload={handleBeforeUnload} />
 
 <div class="edit-post-page">
   <header class="page-header">
@@ -279,7 +271,7 @@
           <Ellipsis size={16} />
         </Button>
         {#if showMoreMenu}
-          <div class="more-menu-dropdown" role="menu">
+          <div class="more-menu-dropdown" role="menu" use:clickOutside={() => showMoreMenu = false}>
             <button
               class="menu-item danger"
               role="menuitem"

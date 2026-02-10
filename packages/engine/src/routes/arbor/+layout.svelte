@@ -106,7 +106,7 @@
         <ChevronLeft class="collapse-icon{sidebarCollapsed ? ' rotated' : ''}" />
       </button>
       <button class="close-sidebar" onclick={closeSidebar} aria-label="Close menu">
-        <X size={18} />
+        <X size={16} />
       </button>
     </div>
 
