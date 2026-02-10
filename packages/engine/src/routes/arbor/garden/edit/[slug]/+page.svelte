@@ -233,11 +233,6 @@
       <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <div class="title-row">
         <h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
-        {#if data.source === "filesystem"}
-          <span class="source-badge filesystem">From UserContent</span>
-        {:else}
-          <span class="source-badge d1">From Database</span>
-        {/if}
         {#if hasUnsavedChanges}
           <span class="unsaved-badge">Unsaved changes</span>
         {/if}
@@ -569,30 +564,6 @@
     font-size: 1.75rem;
     color: var(--color-text);
     transition: color 0.3s ease;
-  }
-  .source-badge {
-    padding: 0.2rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  .source-badge.filesystem {
-    background: #fff5b1;
-    color: var(--status-warning-bg);
-  }
-  :global(.dark) .source-badge.filesystem {
-    background: rgba(255, 245, 177, 0.2);
-    color: #f0c674;
-  }
-  .source-badge.d1 {
-    background: #dcffe4;
-    color: var(--accent-success-dark);
-  }
-  :global(.dark) .source-badge.d1 {
-    background: rgba(40, 167, 69, 0.2);
-    color: #7ee787;
   }
   .unsaved-badge {
     padding: 0.2rem 0.6rem;

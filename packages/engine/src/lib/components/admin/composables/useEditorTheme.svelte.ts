@@ -1,10 +1,9 @@
 /**
  * Editor Theme Composable
- * Applies the Grove theme CSS variables to the editor
- *
- * Note: Multiple themes were removed for simplicity. The editor uses
- * a single "Grove" theme that matches the overall Grove aesthetic.
+ * Applies the Grove theme CSS variables to the editor, reactive to light/dark mode
  */
+
+import { themeStore } from "$lib/ui/stores/theme.svelte";
 
 export interface Theme {
   name: string;
@@ -25,9 +24,8 @@ export interface Theme {
   statusBorder: string;
 }
 
-// Single Grove theme (other themes removed for simplicity)
-export const themes: Record<string, Theme> = {
-  grove: {
+const groveThemes = {
+  dark: {
     name: "grove",
     label: "Grove",
     desc: "forest green",
@@ -45,25 +43,37 @@ export const themes: Record<string, Theme> = {
     statusBg: "#2d4a2d",
     statusBorder: "#3d5a3d",
   },
-};
+  light: {
+    name: "grove",
+    label: "Grove",
+    desc: "forest green",
+    accent: "#4a8c4a",
+    accentDim: "#6a9a6a",
+    accentBright: "#3a7c3a",
+    accentGlow: "#2d6a2d",
+    bg: "#ffffff",
+    bgSecondary: "#f9f9f9",
+    bgTertiary: "#f5f5f5",
+    border: "#e0e0e0",
+    borderAccent: "#4a8c4a",
+    text: "#333333",
+    textDim: "#777777",
+    statusBg: "#e8f5e9",
+    statusBorder: "#c8e6c9",
+  },
+} satisfies Record<string, Theme>;
 
 export interface EditorThemeManager {
   currentTheme: string;
-  themes: Record<string, Theme>;
   loadTheme: () => void;
 }
 
 /**
  * Creates an editor theme manager
- * Simplified to always use the Grove theme
+ * Reactively applies light/dark theme based on the site's theme setting
  */
 export function useEditorTheme(): EditorThemeManager {
-  const theme = themes.grove;
-
-  /**
-   * Apply the Grove theme CSS variables to the document
-   */
-  function applyTheme(): void {
+  function applyTheme(theme: Theme): void {
     const root = document.documentElement;
     root.style.setProperty("--editor-accent", theme.accent);
     root.style.setProperty("--editor-accent-dim", theme.accentDim);
@@ -80,16 +90,18 @@ export function useEditorTheme(): EditorThemeManager {
     root.style.setProperty("--editor-status-border", theme.statusBorder);
   }
 
-  /**
-   * Load theme (always applies Grove theme)
-   */
   function loadTheme(): void {
-    applyTheme();
+    const isDark = themeStore.resolvedTheme === "dark";
+    applyTheme(isDark ? groveThemes.dark : groveThemes.light);
   }
+
+  $effect(() => {
+    const isDark = themeStore.resolvedTheme === "dark";
+    applyTheme(isDark ? groveThemes.dark : groveThemes.light);
+  });
 
   return {
     currentTheme: "grove",
-    themes,
     loadTheme,
   };
 }

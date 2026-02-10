@@ -21,7 +21,6 @@
   // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
   import {
     useEditorTheme,
-    themes,
     useDraftManager,
   } from "./composables";
 
@@ -1091,21 +1090,18 @@
       <span class="status-mode-indicator" title="Editor mode (⌘1/2/3)">
         {editorMode === "write" ? "Source" : editorMode === "split" ? "Split" : "Preview"}
       </span>
-      <span class="status-divider">|</span>
-      {#if editorSettings.typewriterMode}
-        <span class="status-mode">Typewriter</span>
-        <span class="status-divider">|</span>
-      {/if}
       {#if saving}
+        <span class="status-divider">|</span>
         <span class="status-saving">Saving...</span>
       {:else if draftKey && draftManager.saveStatus === "saving"}
+        <span class="status-divider">|</span>
         <span class="status-draft-saving">Saving draft...</span>
       {:else if draftKey && draftManager.saveStatus === "saved"}
+        <span class="status-divider">|</span>
         <span class="status-draft-saved">Draft saved ✓</span>
       {:else if draftKey && draftManager.hasUnsavedChanges(content)}
+        <span class="status-divider">|</span>
         <span class="status-draft-unsaved">Unsaved</span>
-      {:else}
-        <span class="status-item">Markdown</span>
       {/if}
     </div>
   </div>
@@ -1599,6 +1595,9 @@
     resize: none;
     outline: none;
     overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   .editor-textarea::placeholder {
     color: var(--editor-text-dim, #5a5a5a);
@@ -1770,10 +1769,6 @@
   .status-draft-unsaved {
     color: #e0a050;
     font-style: italic;
-  }
-  .status-mode {
-    color: #7ab3ff;
-    font-size: 0.75rem;
   }
   .status-mode-indicator {
     color: var(--editor-accent, #8bc48b);
