@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Zip Data Export**: Self-service ZIP export at `/arbor/export` with markdown files (YAML frontmatter), actual R2 images, and README. Background processing via Durable Object with progress tracking, email delivery via Zephyr, and in-browser download. Exports expire after 7 days with automatic R2 cleanup.
+
 ## [0.8.5] - 2026-01-04
 
 ### Added
+
 - **Glass Design System**: Complete implementation of glassmorphism UI across Forest, Plant, Admin, and Domains pages with browser fallbacks
 - **Typography Components**: New `@autumnsgrove/groveengine/ui/typography` package with scoped font application and showcase
 - **Vineyard Showcase**: New `vineyard.grove.place` site displaying component library and asset gallery
@@ -27,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pricing Page Redesign**: Glass aesthetic with tier comparison and accessibility improvements
 
 ### Changed
+
 - **Navigation**: Standardized Lucide icons across all components with consistent naming
 - **Logo System**: Enhanced breathing animation with seasonal variants (summer as default)
 - **Domain Pages**: Unified glass design system with consistent borders and dark mode visibility
@@ -35,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build System**: Improved Svelte 5 reactive patterns and defensive coding practices
 
 ### Fixed
+
 - **Deployment Issues**: Resolved GitHub Actions failures and critical build errors
 - **Accessibility**: Improved keyboard navigation, screen reader support, and mobile responsiveness
 - **Browser Compatibility**: Enhanced glass system fallbacks for older browsers
@@ -42,12 +49,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation Links**: Resolved broken internal links causing prerendering failures
 
 ### Breaking Changes
+
 - **Import Paths**: Nature components now require `@autumnsgrove/groveengine/ui/nature` import instead of local paths
 - **Spec Naming**: All specification files renamed with Grove ecosystem names (affects cross-references)
 
 ## [0.8.0] - 2025-12-29
 
 ### Added
+
 - **Nature Components Library**: Complete collection of SVG nature components for atmospheric forest scenes
   - **Trees**: `Logo`, `TreePine`, `TreeCherry`, `TreeAspen`, `TreeBirch`
   - **Botanical**: `Leaf`, `LeafFalling`, `PetalFalling`, `FallingLeavesLayer`, `FallingPetalsLayer`, `Vine`, `Acorn`, `PineCone`, `Berry`, `DandelionPuff`
@@ -62,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Package export**: `@autumnsgrove/groveengine/ui/nature` for importing all nature components
 
 ### Changed
+
 - Add season prop to Logo component with summer as default
 - Fix variant and season props in GlassLogo so accentColor no longer overrides them
 - Default both Logo and GlassLogo components to summer colors (emerald green)
@@ -70,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expand viewBox to provide room for top bar animation upward
 
 ### Breaking Changes
+
 - **Import path change**: Nature components now imported from `@autumnsgrove/groveengine/ui/nature` instead of local paths
 - Components previously at `$lib/components/nature/*` should now use `import { ... } from '@autumnsgrove/groveengine/ui/nature'`
 

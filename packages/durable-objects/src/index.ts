@@ -13,6 +13,7 @@ export { TenantDO } from "./TenantDO.js";
 export { PostMetaDO } from "./PostMetaDO.js";
 export { PostContentDO } from "./PostContentDO.js";
 export { SentinelDO } from "./sentinel/SentinelDO.js";
+export { ExportDO } from "./ExportDO.js";
 
 // Minimal fetch handler for health checks
 export default {
@@ -23,7 +24,13 @@ export default {
       return Response.json({
         status: "ok",
         service: "grove-durable-objects",
-        classes: ["TenantDO", "PostMetaDO", "PostContentDO", "SentinelDO"],
+        classes: [
+          "TenantDO",
+          "PostMetaDO",
+          "PostContentDO",
+          "SentinelDO",
+          "ExportDO",
+        ],
       });
     }
 

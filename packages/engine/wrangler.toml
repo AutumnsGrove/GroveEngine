@@ -109,6 +109,12 @@ name = "SENTINEL"
 class_name = "SentinelDO"
 script_name = "grove-durable-objects"
 
+# ExportDO: Per-export zip assembly job (alarm-based, long-running)
+[[durable_objects.bindings]]
+name = "EXPORTS"
+class_name = "ExportDO"
+script_name = "grove-durable-objects"
+
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.
 # Pages projects reference external DOs via script_name.
 

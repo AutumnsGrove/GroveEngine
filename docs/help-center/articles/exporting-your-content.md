@@ -3,7 +3,7 @@ title: Exporting Your Content
 description: How to export your blog content from Grove
 category: help
 section: writing-publishing
-lastUpdated: '2025-12-01'
+lastUpdated: "2026-02-10"
 keywords:
   - export
   - download
@@ -23,6 +23,12 @@ Everything you write on Grove belongs to you. Here's how to get a complete copy 
 
 ## How to export
 
+Grove offers two ways to get your content, depending on what you need.
+
+### Quick Export (JSON)
+
+For a quick backup or if you're comfortable with JSON:
+
 1. Go to **Account & Subscription** in your admin panel
 2. Scroll to the **Your Data** section
 3. Choose what to export:
@@ -34,9 +40,51 @@ Everything you write on Grove belongs to you. Here's how to get a complete copy 
 
 The page shows an estimate before you export: how many posts, pages, and media files will be included.
 
-## What's in the export
+### Full Export (ZIP)
 
-Your download is a JSON file. We know JSON isn't the friendliest format for non-developers, and we're working on a better solution (see "What's coming" below). For now, here's what you get and how to use it.
+For everything organized and ready to use:
+
+1. Go to **Settings → Export** in your admin panel
+2. Choose your options:
+   - **Include images**: Toggle to download actual image files from your blog
+   - **Delivery method**: Get the ZIP as an in-browser download or sent to your email
+3. Click **Start Export**
+4. We process your content in the background and notify you when it's ready
+
+That's it. Your words, your images, organized exactly how you'd want them.
+
+## What's in a ZIP export
+
+Your ZIP file contains everything organized into folders:
+
+```
+grove-export-yourusername-2026-02-10/
+├── blooms/
+│   ├── my-first-post.md
+│   ├── reflections-on-spring.md
+│   └── ...
+├── pages/
+│   ├── about.md
+│   ├── contact.md
+│   └── ...
+├── images/
+│   ├── sunset.jpg
+│   ├── header.png
+│   └── ...
+└── README.md
+```
+
+**Blooms** are your posts, each as a Markdown file with YAML frontmatter (title, date, tags, etc. at the top). The content is ready to paste into any other platform.
+
+**Pages** are your custom pages, also as Markdown.
+
+**Images** are the actual files from your blog—not URLs, but real image files you can use immediately.
+
+**README** explains everything inside so you're never confused about what you're looking at.
+
+## What's in the JSON export
+
+If you use the Quick Export, you get a JSON file with all the same data. Here's what you get:
 
 **Posts** include the title, content (in Markdown), tags, status, and publication date.
 
@@ -45,6 +93,7 @@ Your download is a JSON file. We know JSON isn't the friendliest format for non-
 **Media** is a list of your uploaded files with filenames, URLs, and sizes. You can visit each URL to download the actual file.
 
 Example structure:
+
 ```json
 {
   "exportedAt": "2026-01-15T12:00:00.000Z",
@@ -71,15 +120,11 @@ Example structure:
 }
 ```
 
-## Working with your export
+## Working with your exports
 
-**If you're comfortable with code:** The JSON structure is straightforward. Parse it with any programming language, extract the `content` field from each post (it's already Markdown), and you have portable files.
+**For ZIP exports:** Download, unzip, and you're ready to go. Paste the Markdown files anywhere. Upload images where you need them. No conversion needed.
 
-**If you're not a developer:** Open the JSON file in any text editor. Your post content is in the `"content"` fields, already in Markdown format. You can copy-paste this text into any other blogging platform or text editor. For images, copy each URL from the `"media"` section and paste it into your browser to download the file.
-
-**Quick tip:** Search for `"content":` in the file to jump between your posts. Everything between the quotes after `"content":` is your actual writing.
-
-We apologize for the extra steps. A proper export with organized folders and actual files is coming soon.
+**For JSON exports:** If you're comfortable with code, the structure is straightforward—parse it with any programming language, extract the `content` field from each post, and you have portable Markdown. If you're not a developer, open the JSON file in any text editor, search for `"content":` to jump between posts, and copy-paste into any other platform.
 
 ## Limits
 
@@ -87,32 +132,23 @@ We apologize for the extra steps. A proper export with organized folders and act
 
 **Size limit**: 5,000 items per category (posts, pages, or media). If you have more than that, contact support for a bulk export.
 
-## What's coming
+## Full ZIP Export (Now Available)
 
-We're building a better export system that will give you a proper ZIP file with:
+The ZIP export is live and ready to use. Here's what happens when you create one:
 
-- **Markdown files** for each post and page (not wrapped in JSON)
-- **Actual image files** organized in folders (not just URLs)
-- **A README** explaining the folder structure
-- **Everything ready to use** without any technical knowledge
+**Background processing:** We handle everything for you. Just start the export and go—we'll process your content in the background, even if you close the window.
 
-This will arrive with our [[amber|Amber]] update in the next feature season. Your exports will look like this:
+**Progress tracking:** Watch real-time progress in the admin panel. See exactly what's being packaged.
 
-```
-grove-export-yourusername-2026-03-15.zip
-├── posts/
-│   ├── 2026-01-15-my-first-post.md
-│   ├── 2026-02-20-another-post.md
-│   └── ...
-├── pages/
-│   └── about.md
-├── media/
-│   ├── sunset.jpg
-│   └── ...
-└── README.txt
-```
+**Email delivery:** Choose to have the download link sent to your email. Perfect for large exports.
 
-Until then, the JSON export has all your data. It's just not as friendly as we'd like.
+**In-browser download:** Or grab it immediately as soon as it's ready.
+
+**Automatic cleanup:** Exports expire after 7 days and are automatically removed from our servers. You don't have to worry about us keeping copies of your content around.
+
+**Rate limits:** You can create 3 exports per day and run 1 at a time. This prevents abuse and keeps our infrastructure happy.
+
+The ZIP is the easiest way to take your content anywhere. Everything is organized, ready to use, and you don't need to understand any technical formats to use it.
 
 ## When you might want to export
 
@@ -145,4 +181,4 @@ Your domain goes where you go.
 
 ---
 
-*Your content is yours. We mean that literally. Take it whenever you want.*
+_Your content is yours. We mean that literally. Take it whenever you want._

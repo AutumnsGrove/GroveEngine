@@ -250,6 +250,28 @@ export const API_ERRORS = {
       "Export exceeds maximum size limits (posts, media, or pages count).",
   },
 
+  EXPORT_IN_PROGRESS: {
+    code: "GROVE-API-058",
+    category: "user" as const,
+    userMessage: "An export is already being prepared. Check back soon!",
+    adminMessage:
+      "Concurrent export rejected — an export is already in-progress for this tenant.",
+  },
+
+  EXPORT_NOT_FOUND: {
+    code: "GROVE-API-059",
+    category: "user" as const,
+    userMessage: "Export not found.",
+    adminMessage: "Export record not found in storage_exports table.",
+  },
+
+  EXPORT_EXPIRED: {
+    code: "GROVE-API-063",
+    category: "user" as const,
+    userMessage: "This export has expired. You can create a new one anytime.",
+    adminMessage: "Export download attempted after 7-day expiry window.",
+  },
+
   INVALID_STATE_TRANSITION: {
     code: "GROVE-API-049",
     category: "user" as const,
@@ -268,8 +290,7 @@ export const API_ERRORS = {
   COMMENT_NOT_FOUND: {
     code: "GROVE-API-051",
     category: "user" as const,
-    userMessage:
-      "That comment doesn't exist or has already been removed.",
+    userMessage: "That comment doesn't exist or has already been removed.",
     adminMessage: "Comment ID not found in database.",
   },
 
@@ -278,17 +299,14 @@ export const API_ERRORS = {
     category: "user" as const,
     userMessage:
       "The edit window has closed. Comments can only be edited within 15 minutes.",
-    adminMessage:
-      "Comment edit attempted after 15-minute edit window expired.",
+    adminMessage: "Comment edit attempted after 15-minute edit window expired.",
   },
 
   COMMENT_BLOCKED: {
     code: "GROVE-API-053",
     category: "user" as const,
-    userMessage:
-      "You're unable to comment on this blog.",
-    adminMessage:
-      "Blocked user attempted to submit comment on tenant.",
+    userMessage: "You're unable to comment on this blog.",
+    adminMessage: "Blocked user attempted to submit comment on tenant.",
   },
 
   POST_LIMIT_REACHED: {
@@ -305,15 +323,13 @@ export const API_ERRORS = {
     category: "user" as const,
     userMessage:
       "You've reached your draft limit. Publish or delete some drafts to make room.",
-    adminMessage:
-      "Draft count has reached tier limit (100 for free tier).",
+    adminMessage: "Draft count has reached tier limit (100 for free tier).",
   },
 
   BLOG_NOT_AVAILABLE: {
     code: "GROVE-API-056",
     category: "user" as const,
-    userMessage:
-      "Blog features aren't available on your current plan.",
+    userMessage: "Blog features aren't available on your current plan.",
     adminMessage:
       "User attempted blog operation but tier does not include blog access.",
   },

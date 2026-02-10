@@ -75,6 +75,9 @@ declare global {
         /** SentinelDO - Stress test coordination (long-running tests, WebSocket updates) */
         SENTINEL: DurableObjectNamespace;
 
+        /** ExportDO - Per-export zip assembly job (alarm-based, long-running) */
+        EXPORTS: DurableObjectNamespace;
+
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
