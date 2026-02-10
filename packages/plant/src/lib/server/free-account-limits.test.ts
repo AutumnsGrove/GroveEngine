@@ -86,11 +86,10 @@ describe("Free Account IP Limits", () => {
       expect(sql).toContain("created_at");
 
       // Verify bind was called with the IP and a cutoff timestamp
-      const bind = prepare.mock.results[0].value.bind as ReturnType<typeof vi.fn>;
-      expect(bind).toHaveBeenCalledWith(
-        "203.0.113.42",
-        expect.any(Number),
-      );
+      const bind = prepare.mock.results[0].value.bind as ReturnType<
+        typeof vi.fn
+      >;
+      expect(bind).toHaveBeenCalledWith("203.0.113.42", expect.any(Number));
 
       // The cutoff should be ~30 days ago in unix seconds
       const cutoff = bind.mock.calls[0][1] as number;
@@ -131,7 +130,9 @@ describe("Free Account IP Limits", () => {
       expect(sql).toContain("INSERT INTO free_account_creation_log");
       expect(sql).toContain("ip_address");
 
-      const bind = prepare.mock.results[0].value.bind as ReturnType<typeof vi.fn>;
+      const bind = prepare.mock.results[0].value.bind as ReturnType<
+        typeof vi.fn
+      >;
       // First arg is a UUID, second is the IP
       expect(bind).toHaveBeenCalledWith(expect.any(String), "192.168.1.1");
     });
@@ -166,6 +167,46 @@ describe("Free Account IP Limits", () => {
       await expect(logFreeAccountCreation(db, "10.0.0.1")).rejects.toThrow(
         "D1 write failed",
       );
+    });
+  });
+
+  // ==========================================================================
+  // IP validation
+  // ==========================================================================
+
+  describe("IP address validation", () => {
+    it("allows valid IPv4 addresses", async () => {
+      const db = createMockDb({ count: 0 });
+      const allowed = await checkFreeAccountIPLimit(db, "192.168.1.1");
+      expect(allowed).toBe(true);
+      expect(db.prepare).toHaveBeenCalled();
+    });
+
+    it("allows valid IPv6 addresses", async () => {
+      const db = createMockDb({ count: 0 });
+      const allowed = await checkFreeAccountIPLimit(db, "2001:db8::1");
+      expect(allowed).toBe(true);
+      expect(db.prepare).toHaveBeenCalled();
+    });
+
+    it("skips check for empty string IP", async () => {
+      const db = createMockDb({ count: 0 });
+      const allowed = await checkFreeAccountIPLimit(db, "");
+      expect(allowed).toBe(true);
+      expect(db.prepare).not.toHaveBeenCalled();
+    });
+
+    it("skips check for garbage IP values", async () => {
+      const db = createMockDb({ count: 0 });
+      const allowed = await checkFreeAccountIPLimit(db, "not-an-ip-address!");
+      expect(allowed).toBe(true);
+      expect(db.prepare).not.toHaveBeenCalled();
+    });
+
+    it("skips logging for invalid IP", async () => {
+      const db = createMockDb();
+      await logFreeAccountCreation(db, "garbage-value");
+      expect(db.prepare).not.toHaveBeenCalled();
     });
   });
 });

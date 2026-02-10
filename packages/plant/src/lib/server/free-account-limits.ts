@@ -14,6 +14,19 @@ const MAX_FREE_ACCOUNTS_PER_IP = 3;
 const WINDOW_SECONDS = 30 * 24 * 60 * 60;
 
 /**
+ * Basic IP address format validation.
+ * Accepts IPv4 (1.2.3.4) and IPv6 (including :: shorthand).
+ * Rejects empty strings, whitespace, and obviously invalid values.
+ */
+const IPV4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
+const IPV6_RE = /^[0-9a-fA-F:]+$/;
+
+function isValidIPAddress(ip: string): boolean {
+  if (!ip || ip.length > 45) return false;
+  return IPV4_RE.test(ip) || IPV6_RE.test(ip);
+}
+
+/**
  * Check if an IP address is allowed to create another free account.
  *
  * @param db - D1 database binding
@@ -24,6 +37,9 @@ export async function checkFreeAccountIPLimit(
   db: D1Database,
   ipAddress: string,
 ): Promise<boolean> {
+  if (!isValidIPAddress(ipAddress)) {
+    return true; // Allow — don't block on invalid IP, just skip the check
+  }
   const cutoff = Math.floor(Date.now() / 1000) - WINDOW_SECONDS;
 
   const result = await db
@@ -48,6 +64,9 @@ export async function logFreeAccountCreation(
   db: D1Database,
   ipAddress: string,
 ): Promise<void> {
+  if (!isValidIPAddress(ipAddress)) {
+    return; // Skip logging invalid IPs
+  }
   await db
     .prepare(
       `INSERT INTO free_account_creation_log (id, ip_address, created_at)

@@ -202,6 +202,11 @@ export const POST: RequestHandler = async ({
           { status: 429 },
         );
       }
+
+      // Log IP immediately after check passes to close the TOCTOU window.
+      // Must happen before any other async work so concurrent requests
+      // see the updated count.
+      await logFreeAccountCreation(db, clientIP).catch(() => {});
     }
 
     await db
@@ -219,24 +224,18 @@ export const POST: RequestHandler = async ({
       // Check for existing tenant (idempotency)
       const existing = await getTenantForOnboarding(db, onboardingId);
       if (!existing) {
-        // Fetch onboarding data and log IP in parallel
-        const [onboarding] = await Promise.all([
-          db
-            .prepare(
-              `SELECT username, display_name, email, favorite_color
-               FROM user_onboarding WHERE id = ?`,
-            )
-            .bind(onboardingId)
-            .first<{
-              username: string;
-              display_name: string;
-              email: string;
-              favorite_color: string | null;
-            }>(),
-          clientIP
-            ? logFreeAccountCreation(db, clientIP).catch(() => {})
-            : Promise.resolve(),
-        ]);
+        const onboarding = await db
+          .prepare(
+            `SELECT username, display_name, email, favorite_color
+             FROM user_onboarding WHERE id = ?`,
+          )
+          .bind(onboardingId)
+          .first<{
+            username: string;
+            display_name: string;
+            email: string;
+            favorite_color: string | null;
+          }>();
 
         if (!onboarding) {
           return json(
