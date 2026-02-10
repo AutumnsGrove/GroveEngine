@@ -54,7 +54,7 @@ export async function logBillingAudit(
       )
       .run();
   } catch (e) {
-    console.error("[Billing Audit] Failed to log billing action:", {
+    console.error("[Billing Audit] CRITICAL - Failed to log billing action:", {
       error: e instanceof Error ? e.message : String(e),
       action: entry.action,
       tenantId: entry.tenantId,

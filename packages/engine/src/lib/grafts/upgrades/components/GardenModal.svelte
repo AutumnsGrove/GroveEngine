@@ -14,7 +14,7 @@
 
 	let {
 		open = false,
-		currentStage = 'wanderer',
+		currentStage = 'free',
 		flourishState = 'active',
 		billingPeriod = 'monthly',
 		availableStages = ['seedling', 'sapling', 'oak', 'evergreen'],
@@ -36,7 +36,7 @@
 	);
 
 	// Get current stage index
-	const stageOrder: TierKey[] = ['wanderer', 'seedling', 'sapling', 'oak', 'evergreen'];
+	const stageOrder: TierKey[] = ['free', 'seedling', 'sapling', 'oak', 'evergreen'];
 	let currentIndex = $derived(stageOrder.indexOf(currentStage));
 
 	// Handle backdrop click

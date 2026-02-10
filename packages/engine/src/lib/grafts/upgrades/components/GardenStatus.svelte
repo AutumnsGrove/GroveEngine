@@ -24,7 +24,7 @@
 	import type { TierKey, FlourishState } from './types.js';
 
 	let {
-		currentStage = 'wanderer' as TierKey,
+		currentStage = 'free',
 		flourishState = 'active' as FlourishState,
 		currentPeriodEnd = null,
 		pruningScheduled = false,
@@ -47,7 +47,7 @@
 
 	// Stage display names
 	const stageNames: Record<TierKey, string> = {
-		wanderer: 'Wanderer',
+		free: 'Wanderer',
 		seedling: 'Seedling',
 		sapling: 'Sapling',
 		oak: 'Oak',
@@ -154,7 +154,7 @@
 			{/if}
 
 			<!-- Wanderer special case -->
-			{#if currentStage === 'wanderer' && flourishState === 'active'}
+			{#if currentStage === 'free' && flourishState === 'active'}
 				<div class="mt-2 p-3 rounded-lg bg-grove-50 dark:bg-grove-900/30 text-sm">
 					<p class="text-foreground-muted">
 						Free tier. <button

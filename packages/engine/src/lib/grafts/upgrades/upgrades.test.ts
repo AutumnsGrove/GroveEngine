@@ -253,7 +253,7 @@ describe("UpgradesGraft API", () => {
       };
 
       vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
-      vi.mocked(isCompedAccount).mockResolvedValue(false);
+      vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
       vi.mocked(createPaymentProvider).mockReturnValue({
         createCheckoutSession: vi.fn().mockResolvedValue({
           id: "cs_test_123",
@@ -434,7 +434,7 @@ describe("UpgradesGraft API", () => {
       };
 
       vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
-      vi.mocked(isCompedAccount).mockResolvedValue(false);
+      vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
 
       const response = await growthGET({
         locals: mockLocals,
@@ -470,7 +470,7 @@ describe("UpgradesGraft API", () => {
       };
 
       vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
-      vi.mocked(isCompedAccount).mockResolvedValue(false);
+      vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
 
       const response = await growthGET({
         locals: mockLocals,

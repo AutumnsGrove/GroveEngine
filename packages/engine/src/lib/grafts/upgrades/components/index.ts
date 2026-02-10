@@ -9,4 +9,10 @@ export { default as GardenModal } from "./GardenModal.svelte";
 export { default as CurrentStageBadge } from "./CurrentStageBadge.svelte";
 export { default as GardenStatus } from "./GardenStatus.svelte";
 
-export * from "./types";
+export type {
+  UpgradesGraftProps,
+  GrowthCardProps,
+  GardenModalProps,
+  CurrentStageBadgeProps,
+  GardenStatusProps,
+} from "./types";

@@ -11,7 +11,7 @@
 	import type { TierKey } from '$lib/config/tiers';
 
 	let {
-		currentStage = 'wanderer',
+		currentStage = 'free',
 		flourishState = 'active',
 		showNurture = true,
 		showTend = true,
@@ -32,7 +32,7 @@
 
 	// Stage display names
 	const stageNames: Record<TierKey, string> = {
-		wanderer: 'Wanderer',
+		free: 'Wanderer',
 		seedling: 'Seedling',
 		sapling: 'Sapling',
 		oak: 'Oak',
@@ -61,7 +61,7 @@
 
 	// Next stage for nurture
 	const nextStage: Record<TierKey, TierKey | null> = {
-		wanderer: 'seedling',
+		free: 'seedling',
 		seedling: 'sapling',
 		sapling: 'oak',
 		oak: 'evergreen',

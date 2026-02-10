@@ -548,7 +548,11 @@ export const PATCH: RequestHandler = async ({
   }
 
   try {
-    await getVerifiedTenantId(platform.env.DB, tenantId, locals.user);
+    const verifiedTenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      tenantId,
+      locals.user,
+    );
 
     // Check rate limit before processing (centralized in $lib/server/rate-limits)
     const { result: rateLimitResult, response: rateLimitResponse } =

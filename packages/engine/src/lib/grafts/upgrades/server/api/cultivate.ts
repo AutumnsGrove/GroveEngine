@@ -223,39 +223,13 @@ export const POST: RequestHandler = async ({
 };
 
 /**
- * Get the Stripe price ID for a stage and billing cycle.
- */
-function getStagePriceId(stage: string, billingCycle: string): string {
-  const prices: Record<string, Record<string, string>> = {
-    seedling: {
-      monthly: process.env.STRIPE_PRICE_SEEDLING_MONTHLY ?? "",
-      yearly: process.env.STRIPE_PRICE_SEEDLING_YEARLY ?? "",
-    },
-    sapling: {
-      monthly: process.env.STRIPE_PRICE_SAPLING_MONTHLY ?? "",
-      yearly: process.env.STRIPE_PRICE_SAPLING_YEARLY ?? "",
-    },
-    oak: {
-      monthly: process.env.STRIPE_PRICE_OAK_MONTHLY ?? "",
-      yearly: process.env.STRIPE_PRICE_OAK_YEARLY ?? "",
-    },
-    evergreen: {
-      monthly: process.env.STRIPE_PRICE_EVERGREEN_MONTHLY ?? "",
-      yearly: process.env.STRIPE_PRICE_EVERGREEN_YEARLY ?? "",
-    },
-  };
-
-  return prices[stage]?.[billingCycle] ?? "";
-}
-
-/**
  * Construct the success URL for after cultivation.
  */
 function constructSuccessUrl(appUrl: string, returnTo?: string): string {
   const baseUrl = `${appUrl}/api/grafts/upgrades/cultivate/complete`;
   const params = new URLSearchParams();
 
-  if (returnTo) {
+  if (returnTo && returnTo.startsWith("/")) {
     params.set("returnTo", returnTo);
   }
 
@@ -269,7 +243,7 @@ function constructCancelUrl(appUrl: string, returnTo?: string): string {
   const baseUrl = `${appUrl}/garden`;
   const params = new URLSearchParams();
 
-  if (returnTo) {
+  if (returnTo && returnTo.startsWith("/")) {
     params.set("returnTo", returnTo);
   }
 

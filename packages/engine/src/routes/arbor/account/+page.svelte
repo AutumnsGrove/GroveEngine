@@ -84,8 +84,8 @@
   async function handleTend(): Promise<void> {
     try {
       const response = await api.post('/api/grafts/upgrades/tend', {});
-      if (response.url) {
-        window.location.href = response.url;
+      if (response.shedUrl) {
+        window.location.href = response.shedUrl;
       } else {
         toast.error('Unable to open billing portal');
       }

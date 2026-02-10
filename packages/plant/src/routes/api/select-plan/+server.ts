@@ -187,36 +187,33 @@ export const POST: RequestHandler = async ({
       // Best-effort — IP resolution is non-critical
     }
 
-    // Run IP limit check and payment completed update in parallel
-    // (IP check is independent of DB updates)
-    const ipCheckPromise = clientIP
-      ? checkFreeAccountIPLimit(db, clientIP).catch(() => true)
-      : Promise.resolve(true);
-
-    const [ipAllowed] = await Promise.all([
-      ipCheckPromise,
-      db
-        .prepare(
-          `UPDATE user_onboarding
-           SET payment_completed = 1,
-               payment_completed_at = unixepoch(),
-               updated_at = unixepoch()
-           WHERE id = ?`,
-        )
-        .bind(onboardingId)
-        .run(),
-    ]);
-
     // IP-based abuse prevention: max 3 free accounts per IP per 30 days
-    if (clientIP && !ipAllowed) {
-      return json(
-        {
-          error:
-            "Too many free accounts have been created from this location recently. Please try again later.",
-        },
-        { status: 429 },
+    // Check BEFORE updating payment status to prevent write-then-reject
+    if (clientIP) {
+      const ipAllowed = await checkFreeAccountIPLimit(db, clientIP).catch(
+        () => true,
       );
+      if (!ipAllowed) {
+        return json(
+          {
+            error:
+              "Too many free accounts have been created from this location recently. Please try again later.",
+          },
+          { status: 429 },
+        );
+      }
     }
+
+    await db
+      .prepare(
+        `UPDATE user_onboarding
+         SET payment_completed = 1,
+             payment_completed_at = unixepoch(),
+             updated_at = unixepoch()
+         WHERE id = ?`,
+      )
+      .bind(onboardingId)
+      .run();
 
     try {
       // Check for existing tenant (idempotency)

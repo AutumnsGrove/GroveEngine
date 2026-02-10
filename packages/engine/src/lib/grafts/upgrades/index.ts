@@ -10,8 +10,27 @@
  * ```
  */
 
-export * from "./types";
+// Types
+export type {
+  GrowthStage,
+  GrowthStageKey,
+  CultivateRequest,
+  CultivateResponse,
+  TendRequest,
+  TendResponse,
+  FlourishState,
+  GrowthStatus,
+  PlantingSession,
+  GardenStats,
+  UpgradesConfig,
+} from "./types";
+export { GROWTH_STAGES } from "./types";
+
+// Config
 export { createUpgradeConfig, getPlantingUrl, canCultivateTo } from "./config";
 
 // Client Components
-export * from "./components/index.js";
+export { default as GrowthCard } from "./components/GrowthCard.svelte";
+export { default as GardenModal } from "./components/GardenModal.svelte";
+export { default as CurrentStageBadge } from "./components/CurrentStageBadge.svelte";
+export { default as GardenStatus } from "./components/GardenStatus.svelte";

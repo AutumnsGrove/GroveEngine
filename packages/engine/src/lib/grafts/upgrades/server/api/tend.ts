@@ -141,8 +141,8 @@ export const POST: RequestHandler = async ({
  * Construct the return URL after tending the garden.
  */
 function constructReturnUrl(appUrl: string, returnTo?: string): string {
-  if (returnTo) {
-    return returnTo;
+  if (returnTo && returnTo.startsWith("/")) {
+    return `${appUrl}${returnTo}`;
   }
   return `${appUrl}/garden`;
 }
