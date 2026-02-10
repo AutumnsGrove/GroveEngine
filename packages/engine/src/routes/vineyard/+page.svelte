@@ -103,8 +103,8 @@
 			<span>Lattice UI</span>
 			<Badge variant="secondary">v0.2.0</Badge>
 		</div>
-		<h1 class="text-4xl font-bold text-bark-900 mb-4">Grove Component Vineyard</h1>
-		<p class="text-lg text-bark-600 max-w-2xl mx-auto">
+		<h1 class="text-4xl font-bold text-bark-900 dark:text-cream-50 mb-4">Grove Component Vineyard</h1>
+		<p class="text-lg text-bark-600 dark:text-cream-300 max-w-2xl mx-auto">
 			Every vine starts somewhere. This is where Grove's UI components grow,
 			ready to be picked and planted throughout the ecosystem.
 		</p>
@@ -112,19 +112,19 @@
 
 	<!-- Quick Nav -->
 	<nav class="flex flex-wrap justify-center gap-4 mb-16">
-		<a href="#glass" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
+		<a href="#glass" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors">
 			<Sparkles class="w-4 h-4 text-grove-600" />
 			Glass Suite
 		</a>
-		<a href="#components" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
+		<a href="#components" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors">
 			<Box class="w-4 h-4 text-grove-600" />
 			UI Components
 		</a>
-		<a href="#typography" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
+		<a href="#typography" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors">
 			<Type class="w-4 h-4 text-grove-600" />
 			Typography
 		</a>
-		<a href="#palettes" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
+		<a href="#palettes" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors">
 			<Palette class="w-4 h-4 text-grove-600" />
 			Color Palettes
 		</a>
@@ -135,11 +135,11 @@
 	<!-- ========================================== -->
 	<section id="glass" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
 				<Sparkles class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-bark-900">Glass Suite</h2>
+				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Glass Suite</h2>
 				<p class="text-bark-600">Frosted glassmorphism components with that cozy Grove warmth</p>
 			</div>
 		</div>
@@ -504,11 +504,11 @@
 	<!-- ========================================== -->
 	<section id="components" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
 				<Box class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-bark-900">UI Components</h2>
+				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">UI Components</h2>
 				<p class="text-bark-600">The building blocks of every Grove interface</p>
 			</div>
 		</div>
@@ -716,11 +716,11 @@
 	<!-- ========================================== -->
 	<section id="typography" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
 				<Type class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-bark-900">Typography</h2>
+				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Typography</h2>
 				<p class="text-bark-600">11 fonts for every mood - from cozy headers to crisp code</p>
 			</div>
 		</div>
@@ -738,7 +738,7 @@
 							>{f.name}</button>
 						{/each}
 					</div>
-					<div class="p-6 bg-white/80 rounded-lg border border-white/60">
+					<div class="p-6 bg-white/80 dark:bg-bark-800/80 rounded-lg border border-white/60 dark:border-bark-700/60">
 						<FontProvider font={selectedFont} as="p" class="text-2xl text-bark-800">
 							The quick brown fox jumps over the lazy dog.
 						</FontProvider>
@@ -778,15 +778,15 @@
 			<GlassCard title="Sans-Serif Fonts" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Clean, modern fonts for interfaces and body text</p>
 				<div class="grid md:grid-cols-2 gap-4">
-					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 dark:bg-bark-800/80 rounded-lg border border-bark-200 dark:border-bark-700">
 						<Lexend as="h3" class="text-xl text-bark-800 mb-2">Lexend (Default)</Lexend>
 						<Lexend as="p" class="text-bark-600">Modern, highly readable sans-serif. Grove's default font.</Lexend>
 					</div>
-					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 dark:bg-bark-800/80 rounded-lg border border-bark-200 dark:border-bark-700">
 						<Quicksand as="h3" class="text-xl text-bark-800 mb-2">Quicksand</Quicksand>
 						<Quicksand as="p" class="text-bark-600">Geometric sans with rounded terminals. Light and modern.</Quicksand>
 					</div>
-					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 dark:bg-bark-800/80 rounded-lg border border-bark-200 dark:border-bark-700">
 						<PlusJakartaSans as="h3" class="text-xl text-bark-800 mb-2">Plus Jakarta Sans</PlusJakartaSans>
 						<PlusJakartaSans as="p" class="text-bark-600">Contemporary geometric sans. Balanced and versatile.</PlusJakartaSans>
 					</div>
@@ -865,18 +865,18 @@ $ npm run dev
 	<!-- ========================================== -->
 	<section id="palettes" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
 				<Palette class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-bark-900">Color Palettes</h2>
+				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Color Palettes</h2>
 				<p class="text-bark-600">The rich, natural hues that bring Grove to life</p>
 			</div>
 		</div>
 
 		<!-- Design Tokens -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Design Tokens</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Design Tokens</h3>
 			<div class="grid gap-6">
 				{@render PaletteRow({ name: "Grove", colors: grove, description: "Our signature green - growth, life, community" })}
 				{@render PaletteRow({ name: "Cream", colors: cream, description: "Warm backgrounds that feel like home" })}
@@ -886,7 +886,7 @@ $ npm run dev
 
 		<!-- Status Colors -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Status Colors</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Status Colors</h3>
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 				{@render StatusSwatch({ name: "Success", color: status.success.DEFAULT, light: status.success.light })}
 				{@render StatusSwatch({ name: "Warning", color: status.warning.DEFAULT, light: status.warning.light })}
@@ -897,7 +897,7 @@ $ npm run dev
 
 		<!-- Nature Palettes -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Nature Palettes</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Nature Palettes</h3>
 			<p class="text-bark-600 mb-6">Colors drawn from Pacific Northwest forests - atmospheric depth and natural beauty.</p>
 			<div class="grid gap-6">
 				{@render PaletteRow({ name: "Greens", colors: greens, description: "From dark forest depths to pale spring leaves" })}
@@ -909,7 +909,7 @@ $ npm run dev
 
 		<!-- Flowers Palette -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Flowers</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Flowers</h3>
 			<p class="text-bark-600 mb-6">All flower colors unified in one palette — separated from foliage for clarity.</p>
 			<div class="grid gap-6">
 				{@render PaletteRow({ name: "Wildflowers", colors: flowers.wildflower, description: "Meadow flowers - yellows, purples, pinks, whites" })}
@@ -920,7 +920,7 @@ $ npm run dev
 
 		<!-- Seasonal Palettes -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Seasonal Palettes</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Seasonal Palettes</h3>
 			<p class="text-bark-600 mb-6">Each season brings its own color story to the grove.</p>
 			<div class="grid gap-6">
 				<!-- Spring -->
@@ -936,7 +936,7 @@ $ npm run dev
 
 		<!-- Midnight Bloom -->
 		<div class="mb-12">
-			<h3 class="text-lg font-semibold text-bark-800 mb-4">Midnight Bloom</h3>
+			<h3 class="text-lg font-semibold text-bark-800 dark:text-cream-100 mb-4">Midnight Bloom</h3>
 			<p class="text-bark-600 mb-6">A late-night tea cafe palette - deep plums, warm amber, and soft golds.</p>
 			{@render PaletteRow({ name: "Midnight Bloom", colors: midnightBloom, description: "The far vision - cozy evening vibes" })}
 		</div>
@@ -987,7 +987,7 @@ $ npm run dev
 
 <!-- Helper Components -->
 {#snippet PaletteRow({ name, colors, description }: { name: string; colors: Record<string, string>; description: string })}
-	<div class="p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-white/60">
+	<div class="p-4 bg-white/60 dark:bg-bark-800/60 backdrop-blur-sm rounded-lg border border-white/60 dark:border-bark-700/60">
 		<div class="flex items-center justify-between mb-3">
 			<div>
 				<h4 class="font-medium text-bark-800">{name}</h4>
