@@ -3,7 +3,7 @@ import type { RequestHandler } from "./$types.js";
 
 export const prerender = false;
 
-export const GET: RequestHandler = (event) => {
+export const GET: RequestHandler = async (event) => {
   const posts = getAllPosts();
   const siteConfig = getSiteConfig();
 
@@ -20,7 +20,31 @@ export const GET: RequestHandler = (event) => {
       : context?.type === "app"
         ? `https://${context.app}.grove.place`
         : "https://grove.place";
-  const feedTitle = `${context?.type === "tenant" ? context.tenant.name : siteConfig.site?.title || "The Grove"} Blog`;
+
+  // Prefer grove_title from site_settings over tenant display_name
+  let tenantName =
+    context?.type === "tenant"
+      ? context.tenant.name
+      : siteConfig.site?.title || "The Grove";
+  if (context?.type === "tenant") {
+    try {
+      const db = event.platform?.env?.DB;
+      if (db) {
+        const row = await db
+          .prepare(
+            "SELECT setting_value FROM site_settings WHERE tenant_id = ? AND setting_key = 'grove_title'",
+          )
+          .bind(context.tenant.id)
+          .first<{ setting_value: string }>();
+        if (row?.setting_value) {
+          tenantName = row.setting_value;
+        }
+      }
+    } catch {
+      // Fall back to tenant name if D1 unavailable
+    }
+  }
+  const feedTitle = `${tenantName} Blog`;
   const feedDescription =
     siteConfig.site?.description ||
     "A personal website for blogging, demonstrating projects, and sharing articles";
