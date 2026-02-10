@@ -46,7 +46,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       locals.user,
     );
     const body = sanitizeObject(await request.json()) as SettingsBody;
-    const { setting_key, setting_value } = body;
+    const { setting_key } = body;
+    let { setting_value } = body;
 
     // Validate required fields
     if (!setting_key || typeof setting_key !== "string") {
@@ -62,6 +63,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       "font_family",
       "accent_color",
       "show_grove_logo",
+      "grove_title",
       "canopy_visible",
       "canopy_banner",
       "canopy_categories",
@@ -74,6 +76,17 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     // Validate show_grove_logo (boolean string)
     if (setting_key === "show_grove_logo") {
       if (setting_value !== "true" && setting_value !== "false") {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate grove_title (max 50 chars, store trimmed)
+    if (setting_key === "grove_title") {
+      if (typeof setting_value !== "string") {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+      setting_value = setting_value.trim();
+      if (setting_value.length > 50) {
         throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }

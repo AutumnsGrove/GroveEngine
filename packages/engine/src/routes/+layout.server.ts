@@ -8,6 +8,7 @@ import { emailsMatch } from "$lib/utils/user.js";
 interface SiteSettings {
   font_family: string;
   accent_color?: string;
+  grove_title?: string;
   [key: string]: string | undefined;
 }
 
