@@ -293,7 +293,7 @@
 			</p>
 		{:else}
 			<p class="text-xs text-foreground-subtle text-center">
-				You won't be charged until after your 14-day trial. Cancel anytime.
+				Full refund within 14 days. Cancel anytime.
 			</p>
 		{/if}
 	</div>

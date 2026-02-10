@@ -220,13 +220,6 @@ export class StripeProvider implements PaymentProvider {
       };
     }
 
-    // Subscription trial
-    if (options.mode === "subscription" && options.trialPeriodDays) {
-      params.subscription_data = {
-        trial_period_days: options.trialPeriodDays,
-      };
-    }
-
     // Promo codes
     if (options.allowPromotionCodes) {
       params.allow_promotion_codes = true;
@@ -402,7 +395,7 @@ export class StripeProvider implements PaymentProvider {
 
   private mapSubscription(sub: StripeSubscription): Subscription {
     const statusMap: Record<string, SubscriptionStatus> = {
-      trialing: "trialing",
+      trialing: "active",
       active: "active",
       past_due: "past_due",
       paused: "paused",
@@ -429,10 +422,6 @@ export class StripeProvider implements PaymentProvider {
       canceledAt: sub.canceled_at
         ? new Date(sub.canceled_at * 1000)
         : undefined,
-      trialStart: sub.trial_start
-        ? new Date(sub.trial_start * 1000)
-        : undefined,
-      trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : undefined,
       providerSubscriptionId: sub.id,
       createdAt: new Date(sub.created * 1000),
       updatedAt: new Date(sub.created * 1000), // Stripe doesn't have updated_at
@@ -565,7 +554,6 @@ export class StripeProvider implements PaymentProvider {
       "customer.subscription.created": "subscription.created",
       "customer.subscription.updated": "subscription.updated",
       "customer.subscription.deleted": "subscription.canceled",
-      "customer.subscription.trial_will_end": "subscription.trial_will_end",
       "invoice.paid": "invoice.paid",
       "invoice.payment_failed": "invoice.payment_failed",
       "charge.refunded": "refund.created",

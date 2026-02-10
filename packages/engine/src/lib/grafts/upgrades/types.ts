@@ -62,7 +62,6 @@ export interface TendResponse {
 
 export type FlourishState =
   | "active" // Normal subscription
-  | "trialing" // In trial period
   | "past_due" // Payment failed
   | "resting" // Canceled at period end
   | "pruned"; // Fully canceled
@@ -76,8 +75,6 @@ export interface GrowthStatus {
   currentPeriodEnd: number | null;
   /** Whether pruning is scheduled */
   pruningScheduled: boolean;
-  /** Trial end timestamp (if in trial) */
-  trialEnd: number | null;
   /** Whether this is a gifted grove */
   isComped: boolean;
   /** Watering method (payment method) */
@@ -115,7 +112,6 @@ export interface PlantingSession {
 export interface GardenStats {
   totalGroves: number;
   activeGroves: number;
-  trialingGroves: number;
   pastDueGroves: number;
   prunedGroves: number;
   revenue: {

@@ -217,7 +217,6 @@ interface BillingRecord {
   current_period_start: number | null;
   current_period_end: number | null;
   cancel_at_period_end: number;
-  trial_end: number | null;
   payment_method_last4: string | null;
   payment_method_brand: string | null;
   created_at: number;
@@ -279,7 +278,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     const billing = (await platform.env.DB.prepare(
       `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
               current_period_start, current_period_end, cancel_at_period_end,
-              trial_end, payment_method_last4, payment_method_brand,
+              payment_method_last4, payment_method_brand,
               created_at, updated_at
        FROM platform_billing WHERE tenant_id = ?`,
     )
@@ -306,9 +305,6 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
           ? new Date(billing.current_period_end * 1000).toISOString()
           : null,
         cancelAtPeriodEnd: billing.cancel_at_period_end === 1,
-        trialEnd: billing.trial_end
-          ? new Date(billing.trial_end * 1000).toISOString()
-          : null,
         paymentMethod: billing.payment_method_last4
           ? {
               last4: billing.payment_method_last4,
@@ -401,7 +397,6 @@ export const POST: RequestHandler = async ({
       billing_address_collection: "required",
       allow_promotion_codes: true,
       subscription_data: {
-        trial_period_days: data.trialDays || (existingBilling ? 0 : 7),
         metadata: {
           grove_tenant_id: tenantId,
           grove_plan: data.plan,
@@ -567,7 +562,7 @@ export const PATCH: RequestHandler = async ({
     const billing = (await platform.env.DB.prepare(
       `SELECT pb.id, pb.plan, pb.status, pb.provider_customer_id, pb.provider_subscription_id,
               pb.current_period_start, pb.current_period_end, pb.cancel_at_period_end,
-              pb.trial_end, pb.payment_method_last4, pb.payment_method_brand,
+              pb.payment_method_last4, pb.payment_method_brand,
               pb.created_at, pb.updated_at, t.subdomain
        FROM platform_billing pb
        JOIN tenants t ON t.id = pb.tenant_id

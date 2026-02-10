@@ -282,7 +282,7 @@ export class LemonSqueezyProvider implements PaymentProvider {
     attrs: LemonSqueezySubscriptionAttributes,
   ): Subscription {
     const statusMap: Record<string, SubscriptionStatus> = {
-      on_trial: "trialing",
+      on_trial: "active",
       active: "active",
       past_due: "past_due",
       paused: "paused",
@@ -304,8 +304,6 @@ export class LemonSqueezyProvider implements PaymentProvider {
       currentPeriodEnd: new Date(attrs.renews_at),
       cancelAtPeriodEnd: attrs.cancelled,
       canceledAt: attrs.ends_at ? new Date(attrs.ends_at) : undefined,
-      trialStart: undefined, // LS doesn't expose trial start
-      trialEnd: attrs.trial_ends_at ? new Date(attrs.trial_ends_at) : undefined,
       providerSubscriptionId: id,
       createdAt: new Date(attrs.created_at),
       updatedAt: new Date(attrs.updated_at),

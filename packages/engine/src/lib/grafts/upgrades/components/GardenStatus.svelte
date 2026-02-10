@@ -11,7 +11,6 @@
 		TreeDeciduous,
 		Trees,
 		Crown,
-		User,
 		Footprints,
 		Calendar,
 		CreditCard,
@@ -36,14 +35,13 @@
 		class: className = '',
 	}: GardenStatusProps = $props();
 
-	// Icon mapping
-	const iconComponents: Record<string, typeof Sprout> = {
-		user: User,
-		footprints: Footprints,
-		sprout: Sprout,
-		'tree-deciduous': TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
+	// Icon mapping — keyed by TierKey
+	const iconComponents: Record<TierKey, typeof Sprout> = {
+		free: Footprints,
+		seedling: Sprout,
+		sapling: TreeDeciduous,
+		oak: Trees,
+		evergreen: Crown,
 	};
 
 	// Stage display names
@@ -58,7 +56,6 @@
 	// State icons
 	const stateIcons: Record<FlourishState, typeof CheckCircle2> = {
 		active: CheckCircle2,
-		trialing: Clock,
 		past_due: AlertCircle,
 		resting: Clock,
 		pruned: AlertCircle,
@@ -67,7 +64,6 @@
 	// State labels and colors
 	const stateConfig: Record<FlourishState, { label: string; color: string; bg: string }> = {
 		active: { label: 'Flourishing', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30' },
-		trialing: { label: 'In Trial', color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
 		past_due: { label: 'Past Due', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30' },
 		resting: { label: 'Scheduled End', color: 'text-yellow-600', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
 		pruned: { label: 'Ended', color: 'text-gray-600', bg: 'bg-gray-100 dark:bg-gray-900/30' },

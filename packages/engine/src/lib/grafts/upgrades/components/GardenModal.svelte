@@ -112,11 +112,9 @@
 					</span>
 					{#if flourishState !== 'active'}
 						<span
-							class="px-3 py-1 rounded-full text-sm font-medium {flourishState === 'trialing'
-								? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-								: flourishState === 'past_due'
-									? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-									: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
+							class="px-3 py-1 rounded-full text-sm font-medium {flourishState === 'past_due'
+								? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+								: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
 						>
 							{flourishState.charAt(0).toUpperCase() + flourishState.slice(1).replace('_', ' ')}
 						</span>

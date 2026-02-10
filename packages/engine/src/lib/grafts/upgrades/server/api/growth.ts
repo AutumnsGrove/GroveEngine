@@ -62,7 +62,6 @@ export const GET: RequestHandler = async ({
 				current_period_start,
 				current_period_end,
 				cancel_at_period_end,
-				trial_end,
 				payment_method_last4,
 				payment_method_brand
 			FROM platform_billing
@@ -75,7 +74,6 @@ export const GET: RequestHandler = async ({
       current_period_start: number | null;
       current_period_end: number | null;
       cancel_at_period_end: number;
-      trial_end: number | null;
       payment_method_last4: string | null;
       payment_method_brand: string | null;
     } | null;
@@ -85,10 +83,7 @@ export const GET: RequestHandler = async ({
     }
 
     // Determine flourish state
-    const flourishState = determineFlourishState(
-      billing.status,
-      billing.trial_end,
-    );
+    const flourishState = determineFlourishState(billing.status);
 
     // Check comped status
     const { isComped: isCompedBool } = await isCompedAccount(
@@ -101,7 +96,6 @@ export const GET: RequestHandler = async ({
       flourishState,
       currentPeriodEnd: billing.current_period_end,
       pruningScheduled: billing.cancel_at_period_end === 1,
-      trialEnd: billing.trial_end,
       isComped: isCompedBool,
       wateringMethod: billing.payment_method_last4
         ? {
@@ -125,15 +119,7 @@ export const GET: RequestHandler = async ({
 /**
  * Determine the flourish state from billing status.
  */
-function determineFlourishState(
-  status: string,
-  trialEnd: number | null,
-): FlourishState {
-  // Check if in trial
-  if (trialEnd && Date.now() < trialEnd * 1000) {
-    return "trialing";
-  }
-
+function determineFlourishState(status: string): FlourishState {
   // Map billing status to flourish state
   const statusMap: Record<string, FlourishState> = {
     active: "active",
@@ -143,7 +129,7 @@ function determineFlourishState(
     incomplete: "active",
     incomplete_expired: "pruned",
     paused: "resting",
-    trialing: "trialing",
+    trialing: "active",
   };
 
   return statusMap[status] ?? "active";

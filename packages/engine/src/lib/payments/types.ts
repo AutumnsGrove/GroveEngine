@@ -128,10 +128,8 @@ export interface CheckoutOptions {
   billingAddressCollection?: "auto" | "required";
 
   // Subscription specific
-  trialPeriodDays?: number;
   subscriptionData?: {
     prorationBehavior?: "create_prorations" | "always_invoice" | "none";
-    trialPeriodDays?: number;
   };
 
   // Discounts
@@ -258,7 +256,6 @@ export interface RefundResult {
 // =============================================================================
 
 export type SubscriptionStatus =
-  | "trialing"
   | "active"
   | "past_due"
   | "paused"
@@ -284,10 +281,6 @@ export interface Subscription {
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
   canceledAt?: Date;
-
-  // Trial
-  trialStart?: Date;
-  trialEnd?: Date;
 
   // Provider reference
   providerSubscriptionId?: string;
@@ -338,7 +331,6 @@ export type WebhookEventType =
   | "subscription.created"
   | "subscription.updated"
   | "subscription.canceled"
-  | "subscription.trial_will_end"
   // Invoices
   | "invoice.paid"
   | "invoice.payment_failed"

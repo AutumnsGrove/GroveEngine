@@ -8,7 +8,6 @@ import { getTiersWithFeature, type TierKey } from "../config/tiers.js";
 
 export type PlanTier = TierKey;
 export type SubscriptionStatus =
-  | "trialing"
   | "active"
   | "past_due"
   | "paused"
@@ -102,10 +101,8 @@ export async function getTenantSubscription(
 
   // Subscription is active if:
   // 1. Tenant is active (not suspended)
-  // 2. AND either no billing record (free tier) OR billing status is active/trialing
-  const isActive =
-    tenant.active === 1 &&
-    (!billing || status === "active" || status === "trialing");
+  // 2. AND either no billing record (free tier) OR billing status is active
+  const isActive = tenant.active === 1 && (!billing || status === "active");
 
   return {
     tier,

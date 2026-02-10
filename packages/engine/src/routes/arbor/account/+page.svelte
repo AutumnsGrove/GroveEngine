@@ -56,7 +56,6 @@
     if (!data.billing) return 'active';
     const status = data.billing.status;
 
-    if (status === 'trialing') return 'trialing';
     if (status === 'past_due') return 'past_due';
     if (data.billing.cancelAtPeriodEnd) return 'resting';
     if (status === 'canceled' || status === 'unpaid') return 'pruned';

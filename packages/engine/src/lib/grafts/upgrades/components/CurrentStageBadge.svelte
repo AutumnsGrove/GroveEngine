@@ -6,7 +6,7 @@
 	 * Used in dashboard headers and account settings.
 	 */
 
-	import { Sprout, TreeDeciduous, Trees, Crown, User, Footprints, Settings, ArrowRight } from 'lucide-svelte';
+	import { Sprout, TreeDeciduous, Trees, Crown, Footprints, Settings, ArrowRight } from 'lucide-svelte';
 	import type { CurrentStageBadgeProps } from './types.js';
 	import type { TierKey } from '$lib/config/tiers';
 
@@ -20,14 +20,13 @@
 		class: className = '',
 	}: CurrentStageBadgeProps = $props();
 
-	// Icon mapping
-	const iconComponents: Record<string, typeof Sprout> = {
-		user: User,
-		footprints: Footprints,
-		sprout: Sprout,
-		'tree-deciduous': TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
+	// Icon mapping — keyed by TierKey
+	const iconComponents: Record<TierKey, typeof Sprout> = {
+		free: Footprints,
+		seedling: Sprout,
+		sapling: TreeDeciduous,
+		oak: Trees,
+		evergreen: Crown,
 	};
 
 	// Stage display names
@@ -44,7 +43,6 @@
 	// Flourish state colors
 	const stateColors = {
 		active: 'bg-green-500',
-		trialing: 'bg-purple-500',
 		past_due: 'bg-red-500',
 		resting: 'bg-yellow-500',
 		pruned: 'bg-gray-500',
@@ -53,7 +51,6 @@
 	// Flourish state labels
 	const stateLabels = {
 		active: 'Flourishing',
-		trialing: 'In Trial',
 		past_due: 'Past Due',
 		resting: 'Scheduled End',
 		pruned: 'Ended',

@@ -426,7 +426,6 @@ describe("UpgradesGraft API", () => {
             current_period_start: 1700000000,
             current_period_end: 1702592000,
             cancel_at_period_end: 0,
-            trial_end: null,
             payment_method_last4: "4242",
             payment_method_brand: "visa",
           }),
@@ -447,39 +446,6 @@ describe("UpgradesGraft API", () => {
       expect(responseData).toHaveProperty("flourishState", "active");
       expect(responseData).toHaveProperty("wateringMethod");
       expect(responseData.wateringMethod).toHaveProperty("lastDigits", "4242");
-    });
-
-    it("should handle trialing state correctly", async () => {
-      const mockLocals = {
-        user: { email: "test@example.com" },
-        tenantId: "tenant-123",
-      };
-      const mockPlatform = {
-        env: {
-          DB: createMockDB({
-            plan: "seedling",
-            status: "trialing",
-            current_period_start: 1700000000,
-            current_period_end: 1702592000,
-            cancel_at_period_end: 0,
-            trial_end: 1705000000, // Future trial end
-            payment_method_last4: null,
-            payment_method_brand: null,
-          }),
-        },
-      };
-
-      vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
-      vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
-
-      const response = await growthGET({
-        locals: mockLocals,
-        platform: mockPlatform,
-      } as any);
-      const responseData = await response.json();
-
-      expect(responseData).toHaveProperty("flourishState", "trialing");
-      expect(responseData).toHaveProperty("trialEnd");
     });
   });
 });
