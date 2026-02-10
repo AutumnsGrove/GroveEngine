@@ -13,6 +13,7 @@ import {
 import { isCompedAccount } from "$lib/server/billing.js";
 import { Resend } from "resend";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+import { GROVE_EMAILS } from "$lib/config/emails.js";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
 const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
@@ -243,7 +244,7 @@ Questions? Just reply to this email.
 `.trim();
 
   await resend.emails.send({
-    from: "Grove <hello@grove.place>",
+    from: GROVE_EMAILS.support.from,
     to: params.to,
     subject: "Your Grove membership has been cancelled",
     html: htmlContent,

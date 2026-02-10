@@ -4,6 +4,7 @@ import {
   verifyTurnstileToken,
   generateId,
 } from "@autumnsgrove/groveengine/services";
+import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
 import { Resend } from "resend";
 
 /**
@@ -273,8 +274,8 @@ ${locals.user ? `<strong>User:</strong> ${escapeHtml(locals.user.id)}<br>` : "<e
 </div>`;
 
         await resend.emails.send({
-          from: "Grove Porch <porch@grove.place>",
-          to: "autumn@grove.place",
+          from: GROVE_EMAILS.porch.fromSystem,
+          to: GROVE_EMAILS.autumn.address,
           replyTo: email,
           subject: emailSubject,
           text: emailText,
@@ -330,7 +331,7 @@ Grove`;
 </div>`;
 
         await resend.emails.send({
-          from: "Autumn at Grove <porch@grove.place>",
+          from: GROVE_EMAILS.porch.fromAutumn,
           to: email,
           subject: confirmSubject,
           text: confirmText,

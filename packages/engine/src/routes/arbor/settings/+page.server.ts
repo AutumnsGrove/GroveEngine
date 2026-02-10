@@ -17,15 +17,7 @@ import {
 import type { TenantGraftInfo } from "$lib/feature-flags/tenant-grafts";
 import type { GreenhouseTenant } from "$lib/feature-flags/types";
 import type { FeatureFlagSummary } from "$lib/feature-flags/admin";
-
-// List of Wayfinder (platform owner) emails
-// The Wayfinder has access to system health and other platform-wide features
-const WAYFINDER_EMAILS = ["autumn@grove.place"];
-
-function isWayfinder(email: string | undefined): boolean {
-  if (!email) return false;
-  return WAYFINDER_EMAILS.includes(email.toLowerCase());
-}
+import { isWayfinder } from "$lib/config/wayfinder.js";
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
   const env = platform?.env;

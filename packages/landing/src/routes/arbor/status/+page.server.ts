@@ -7,6 +7,7 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 interface Incident {
   id: string;
@@ -36,8 +37,6 @@ interface ScheduledMaintenance {
   scheduled_end: string;
   status: string;
 }
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
   const parentData = await parent();
@@ -105,8 +104,7 @@ export const actions: Actions = {
   updateComponentStatus: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });

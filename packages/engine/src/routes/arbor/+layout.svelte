@@ -19,6 +19,7 @@
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
+  import { isWayfinder } from "$lib/config/wayfinder.js";
 
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
@@ -30,11 +31,8 @@
   // Computed: show expanded content when not collapsed OR when hovered
   let showExpanded = $derived(!sidebarCollapsed || sidebarHovered);
 
-  // Grove admin emails who can see Vista section
-  const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
-  let isGroveAdmin = $derived(
-    data.user?.email ? ADMIN_EMAILS.includes(data.user.email.toLowerCase()) : false
-  );
+  // Wayfinder can see Vista section
+  let isGroveAdmin = $derived(isWayfinder(data.user?.email));
 
   function closeSidebar() {
     sidebarStore.close();

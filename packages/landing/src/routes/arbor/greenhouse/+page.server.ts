@@ -12,19 +12,12 @@ import type {
   GreenhouseTenant,
   FeatureFlagSummary,
 } from "@autumnsgrove/groveengine/feature-flags";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 interface Tenant {
   id: string;
   username: string;
   display_name: string | null;
-}
-
-// Wayfinder emails (platform owner - same person, multiple accounts)
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
-
-function isWayfinder(email: string | undefined): boolean {
-  if (!email) return false;
-  return WAYFINDER_EMAILS.includes(email.toLowerCase());
 }
 
 export const load: PageServerLoad = async ({ parent, platform }) => {

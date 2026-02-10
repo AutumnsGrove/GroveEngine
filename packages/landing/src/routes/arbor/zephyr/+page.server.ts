@@ -1,7 +1,6 @@
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 const ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
@@ -128,7 +127,7 @@ export const actions: Actions = {
   post: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase())) {
+    if (!isWayfinder(user.email)) {
       return fail(403, { error: "Access denied" });
     }
 

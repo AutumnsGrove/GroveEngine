@@ -408,4 +408,10 @@ export interface CdnFileRow {
   updated_at: string;
 }
 
-export const ADMIN_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+// Wayfinder identity - re-exported from config mirror
+export { WAYFINDER_EMAILS, isWayfinder } from "./config/wayfinder.js";
+/** @deprecated Use WAYFINDER_EMAILS instead */
+export const ADMIN_EMAILS = [
+  "autumn@grove.place",
+  "autumnbrown23@pm.me",
+] as const;

@@ -1,6 +1,7 @@
 import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/groveengine/services";
+import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
 import { Resend } from "resend";
 
 interface Visit {
@@ -179,8 +180,8 @@ Reply in Arbor: https://grove.place/arbor/porch/${visit.id}`;
 </div>`;
 
         await resend.emails.send({
-          from: "Grove Porch <porch@grove.place>",
-          to: "autumn@grove.place",
+          from: GROVE_EMAILS.porch.fromSystem,
+          to: GROVE_EMAILS.autumn.address,
           replyTo: locals.user.email,
           subject: emailSubject,
           text: emailText,

@@ -9,6 +9,7 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { sendInviteEmail } from "$lib/server/invite-email";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 interface CompedInvite {
   id: string;
@@ -41,10 +42,6 @@ type CompedTier = (typeof VALID_TIERS)[number];
 // Valid invite types
 const VALID_INVITE_TYPES = ["comped", "beta"] as const;
 type InviteType = (typeof VALID_INVITE_TYPES)[number];
-
-// The Wayfinder (platform owner) has access to all admin features
-// Must match +layout.server.ts - duplicated here for action access
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 // Basic email format check — real validation happens at send time via Zephyr
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -206,8 +203,8 @@ export const actions: Actions = {
     if (!user) {
       return fail(403, { error: "Not authenticated" });
     }
-    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
-    if (!isWayfinder) {
+    const isWayfinderCheck = isWayfinder(user.email);
+    if (!isWayfinderCheck) {
       return fail(403, { error: "Access denied" });
     }
 
@@ -360,8 +357,8 @@ export const actions: Actions = {
     if (!user) {
       return fail(403, { error: "Not authenticated" });
     }
-    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
-    if (!isWayfinder) {
+    const isWayfinderCheck = isWayfinder(user.email);
+    if (!isWayfinderCheck) {
       return fail(403, { error: "Access denied" });
     }
 
@@ -434,8 +431,8 @@ export const actions: Actions = {
     if (!user) {
       return fail(403, { error: "Not authenticated" });
     }
-    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
-    if (!isWayfinder) {
+    const isWayfinderCheck = isWayfinder(user.email);
+    if (!isWayfinderCheck) {
       return fail(403, { error: "Access denied" });
     }
 
@@ -587,8 +584,8 @@ export const actions: Actions = {
     if (!user) {
       return fail(403, { error: "Not authenticated" });
     }
-    const isWayfinder = WAYFINDER_EMAILS.includes(user.email.toLowerCase());
-    if (!isWayfinder) {
+    const isWayfinderCheck = isWayfinder(user.email);
+    if (!isWayfinderCheck) {
       return fail(403, { error: "Access denied" });
     }
 

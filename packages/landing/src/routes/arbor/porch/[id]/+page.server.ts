@@ -1,6 +1,7 @@
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/groveengine/services";
+import { isWayfinder, GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
 import { Resend } from "resend";
 
 interface Visit {
@@ -30,14 +31,6 @@ interface User {
   id: string;
   email: string;
   name: string | null;
-}
-
-// Wayfinder emails (platform owner - same person, multiple accounts)
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
-
-function isWayfinder(email: string | undefined): boolean {
-  if (!email) return false;
-  return WAYFINDER_EMAILS.includes(email.toLowerCase());
 }
 
 function escapeHtml(unsafe: string | null): string {
@@ -214,7 +207,7 @@ Grove`;
 </div>`;
 
         await resend.emails.send({
-          from: "Autumn at Grove <porch@grove.place>",
+          from: GROVE_EMAILS.porch.fromAutumn,
           to: recipientEmail,
           subject: emailSubject,
           text: emailText,

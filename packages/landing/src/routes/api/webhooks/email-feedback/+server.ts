@@ -1,6 +1,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { generateId } from "@autumnsgrove/groveengine/services";
+import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
 import { Resend } from "resend";
 
 /**
@@ -156,8 +157,8 @@ Feedback ID: ${id}
 </div>`;
 
       await resend.emails.send({
-        from: "Grove <hello@grove.place>",
-        to: "autumn@grove.place",
+        from: GROVE_EMAILS.support.from,
+        to: GROVE_EMAILS.autumn.address,
         subject: emailSubject,
         text: emailText,
         html: emailHtml,

@@ -1,6 +1,7 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 /**
  * Admin Layout Server
@@ -11,10 +12,6 @@ import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
  * Wayfinder-only pages (greenhouse, porch) should check
  * `parentData.isWayfinder` before allowing access.
  */
-
-// The Wayfinder (platform owner) has access to all admin features
-// Multiple emails for the same person (work + personal)
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Auth check - redirect to login if not authenticated
@@ -28,9 +25,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   }
 
   // Determine if user is the Wayfinder (has access to greenhouse, porch, etc.)
-  const isWayfinder = WAYFINDER_EMAILS.includes(
-    locals.user.email.toLowerCase(),
-  );
+  const wayfinderCheck = isWayfinder(locals.user.email);
 
   // Fetch arbor-channel messages for admin panel banner
   const messages = platform?.env?.DB
@@ -42,7 +37,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
   return {
     user: locals.user,
-    isWayfinder,
+    isWayfinder: wayfinderCheck,
     messages,
   };
 };

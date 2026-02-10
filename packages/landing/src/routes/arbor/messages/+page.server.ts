@@ -8,6 +8,7 @@
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { GROVE_MESSAGE_CHANNELS } from "@autumnsgrove/groveengine/services";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 interface DbMessage {
   id: string;
@@ -22,8 +23,6 @@ interface DbMessage {
   created_at: string;
   updated_at: string;
 }
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -68,8 +67,7 @@ export const actions: Actions = {
   create: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });
@@ -129,8 +127,7 @@ export const actions: Actions = {
   update: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });
@@ -178,8 +175,7 @@ export const actions: Actions = {
   publish: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });
@@ -209,8 +205,7 @@ export const actions: Actions = {
   archive: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });

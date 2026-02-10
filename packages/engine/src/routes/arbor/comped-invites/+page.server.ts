@@ -10,6 +10,7 @@ import { error, fail } from "@sveltejs/kit";
 import { validateEmail } from "$lib/utils/validation.js";
 import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
+import { isWayfinder } from "$lib/config/wayfinder.js";
 
 interface CompedInvite {
   id: string;
@@ -43,22 +44,13 @@ type CompedTier = (typeof VALID_TIERS)[number];
 const VALID_INVITE_TYPES = ["comped", "beta"] as const;
 type InviteType = (typeof VALID_INVITE_TYPES)[number];
 
-// List of admin emails who can manage comped invites
-// In production, this would come from a config or database
-const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
-
-function isAdmin(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
-
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
   if (!locals.user) {
     throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
   // Check if user is a Grove admin
-  if (!isAdmin(locals.user.email)) {
+  if (!isWayfinder(locals.user.email)) {
     throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
@@ -189,7 +181,7 @@ export const actions: Actions = {
    * Create a new comped invite
    */
   create: async ({ request, locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, {
         error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
         error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
@@ -328,7 +320,7 @@ export const actions: Actions = {
    * Revoke a comped invite (only if not yet used)
    */
   revoke: async ({ request, locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, {
         error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
         error_code: ARBOR_ERRORS.ACCESS_DENIED.code,

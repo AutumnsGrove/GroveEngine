@@ -19,8 +19,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 /** Headers to forward from client request to Heartwood */
 const FORWARD_HEADERS = [
@@ -34,8 +33,7 @@ async function proxy(event: Parameters<RequestHandler>[0]): Promise<Response> {
   const { request, locals, platform, url } = event;
 
   if (!locals.user) throw error(401, "Unauthorized");
-  if (!WAYFINDER_EMAILS.includes(locals.user.email.toLowerCase()))
-    throw error(403, "Access denied");
+  if (!isWayfinder(locals.user.email)) throw error(403, "Access denied");
   if (!platform?.env?.AUTH) throw error(500, "Service not available");
 
   // Map /api/minecraft/* → /minecraft/*

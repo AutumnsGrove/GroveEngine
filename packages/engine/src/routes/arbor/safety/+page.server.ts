@@ -14,15 +14,8 @@ import {
 } from "$lib/thorn/logging.js";
 import { getRecentBlocksByCategory } from "$lib/server/petal/logging.js";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
+import { isWayfinder } from "$lib/config/wayfinder.js";
 import type { PageServerLoad, Actions } from "./$types";
-
-// Wayfinder-only access
-const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
-
-function isAdmin(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
 
 interface PetalFlag {
   id: string;
@@ -40,7 +33,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
-  if (!isAdmin(locals.user.email)) {
+  if (!isWayfinder(locals.user.email)) {
     throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
@@ -106,7 +99,7 @@ export const actions: Actions = {
    * Review a flagged content item (clear or remove)
    */
   reviewFlag: async ({ request, locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, {
         error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
         error_code: ARBOR_ERRORS.ACCESS_DENIED.code,

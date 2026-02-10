@@ -5,6 +5,7 @@ import {
   generateId,
 } from "@autumnsgrove/groveengine/services";
 import { createZephyrClient } from "@autumnsgrove/groveengine/zephyr";
+import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
 
 /**
  * Escape HTML special characters to prevent XSS in email templates
@@ -183,7 +184,7 @@ Feedback ID: ${id}
 </div>`;
 
         await zephyr.sendRaw({
-          to: "autumn@grove.place",
+          to: GROVE_EMAILS.autumn.address,
           subject: emailSubject,
           text: emailText,
           html: emailHtml,

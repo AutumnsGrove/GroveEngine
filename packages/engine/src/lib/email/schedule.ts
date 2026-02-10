@@ -18,6 +18,7 @@
  * ```
  */
 import { ZephyrClient } from "$lib/zephyr/client.js";
+import { GROVE_EMAILS } from "$lib/config/emails.js";
 import { render } from "./render";
 import { WelcomeEmail } from "./sequences/WelcomeEmail";
 import { Day1Email } from "./sequences/Day1Email";
@@ -31,7 +32,7 @@ import type { ReactElement } from "react";
 // Configuration
 // =============================================================================
 
-const DEFAULT_FROM = "Autumn <autumn@grove.place>";
+const DEFAULT_FROM = GROVE_EMAILS.autumn.from;
 const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
 /**

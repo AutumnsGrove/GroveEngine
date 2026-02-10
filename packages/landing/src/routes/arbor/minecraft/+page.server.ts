@@ -8,8 +8,7 @@
 
 import { redirect, fail, error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 /**
  * Helper to call Heartwood via service binding with cookie forwarding.
@@ -119,8 +118,7 @@ export const actions: Actions = {
   start: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 
@@ -146,8 +144,7 @@ export const actions: Actions = {
   stop: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 
@@ -170,8 +167,7 @@ export const actions: Actions = {
   sync: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 
@@ -192,8 +188,7 @@ export const actions: Actions = {
   command: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 
@@ -243,8 +238,7 @@ export const actions: Actions = {
   whitelistAdd: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 
@@ -277,8 +271,7 @@ export const actions: Actions = {
   whitelistRemove: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
     if (!platform?.env?.AUTH)
       return fail(500, { error: "Service not available" });
 

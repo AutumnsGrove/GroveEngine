@@ -7,6 +7,7 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 interface Component {
   id: string;
@@ -14,8 +15,6 @@ interface Component {
   slug: string;
   current_status: string;
 }
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 function slugify(title: string): string {
   return (
@@ -54,8 +53,7 @@ export const actions: Actions = {
   default: async ({ request, locals, platform }) => {
     const user = locals.user;
     if (!user) return fail(403, { error: "Not authenticated" });
-    if (!WAYFINDER_EMAILS.includes(user.email.toLowerCase()))
-      return fail(403, { error: "Access denied" });
+    if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 
     if (!platform?.env?.DB)
       return fail(500, { error: "Database not available" });

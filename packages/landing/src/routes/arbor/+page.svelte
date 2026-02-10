@@ -24,6 +24,7 @@
 		Kanban,
 		Eye
 	} from 'lucide-svelte';
+	import { WAYFINDER_LINKS } from '@autumnsgrove/groveengine/config';
 
 	let { data }: { data: PageData } = $props();
 
@@ -217,7 +218,7 @@
 	<section class="mt-8">
 		<h2 class="text-lg font-serif text-foreground mb-4">My Links</h2>
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-			<a href="https://github.com/AutumnsGrove/GroveEngine" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.github.repo} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-cream-100 dark:bg-cream-100/50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -232,7 +233,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://dash.cloudflare.com/04e847fa7655624e84414a8280b3a4d0/home/domains" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.cloudflare.domains} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -247,7 +248,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://knownagents.com/projects/378d0348-a640-4be0-9a60-fbd306d6bf4e/crawlers-and-scrapers" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.knownAgents} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -262,7 +263,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://dash.cloudflare.com/04e847fa7655624e84414a8280b3a4d0/grove.place" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.cloudflare.analytics} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -277,7 +278,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.stripe} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -292,7 +293,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://github.com/AutumnsGrove/GroveEngine/issues" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.github.issues} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -307,7 +308,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://github.com/users/AutumnsGrove/projects/1" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.github.project} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -322,7 +323,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://autumn.grove.place/arbor" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.myArbor} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -337,7 +338,7 @@
 				</GlassCard>
 			</a>
 
-			<a href="https://us.cloud.langfuse.com/project/cmlf7boc10248ad070td8wrpu" target="_blank" rel="noopener noreferrer" class="block">
+			<a href={WAYFINDER_LINKS.langfuse} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
 						<div class="w-9 h-9 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">

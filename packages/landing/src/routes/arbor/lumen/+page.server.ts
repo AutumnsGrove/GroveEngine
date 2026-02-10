@@ -1,7 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-
-const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+import { isWayfinder } from "@autumnsgrove/groveengine/config";
 
 export const load: PageServerLoad = async ({ parent }) => {
   const parentData = await parent();
