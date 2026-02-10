@@ -10,7 +10,7 @@
    */
 
   import { tick } from "svelte";
-  import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame } from "lucide-svelte";
+  import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame, X } from "lucide-svelte";
 
   // ============================================================================
   // Props & Events
@@ -337,7 +337,7 @@
       <h2>Fireside with Wisp</h2>
       <p class="fireside-subtitle">sit by the fire and tell me what's on your mind</p>
       <button class="close-button" onclick={handleClose} type="button" aria-label="Exit Fireside">
-        &times;
+        <X size={20} />
       </button>
     </header>
 

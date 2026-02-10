@@ -8,7 +8,7 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
-  import { ExternalLink, Ellipsis, Trash2 } from "lucide-svelte";
+  import { ExternalLink, Ellipsis, Trash2, ChevronRight, ChevronLeft, ArrowLeft, ArrowRight } from "lucide-svelte";
 
   let { data } = $props();
 
@@ -241,7 +241,7 @@
 <div class="edit-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
+      <a href="/arbor/garden" class="back-link"><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <div class="title-row">
         <h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
         {#if hasUnsavedChanges}
@@ -326,7 +326,7 @@
           title={detailsCollapsed ? "Expand details" : "Collapse details"}
           aria-expanded={!detailsCollapsed}
         >
-          {#if detailsCollapsed}»{:else}«{/if}
+          {#if detailsCollapsed}<ChevronRight size={14} />{:else}<ChevronLeft size={14} />{/if}
         </button>
       </div>
 
@@ -398,7 +398,7 @@
               class="form-input"
             />
             <span class="form-hint">
-              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first →</a>
+              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first <ArrowRight size={12} class="inline-block" /></a>
             </span>
             {#if featuredImage}
               <div class="cover-preview">
@@ -753,12 +753,13 @@
     border: 1px solid var(--color-border);
     border-radius: 4px;
     color: var(--color-text-muted);
-    font-size: 0.9rem;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    font-family: monospace;
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.15s ease;
-    flex-shrink: 0; /* Prevent button from being squeezed */
+    flex-shrink: 0;
   }
   .collapse-details-btn:hover {
     background: var(--color-bg-secondary);
