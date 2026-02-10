@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({
   );
 
   // Rate limiting
-  const { result, response } = await checkRateLimit({
+  const { response } = await checkRateLimit({
     kv: platform.env.CACHE_KV,
     key: `growth:${verifiedTenantId}`,
     limit: GROWTH_RATE_LIMIT.limit,

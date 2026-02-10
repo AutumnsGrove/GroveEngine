@@ -26,10 +26,18 @@ export const POST: RequestHandler = async ({
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  // CSRF validation
-  const origin =
+  // CSRF validation — use URL.origin for exact domain match (prevents grove.place.evil.com bypass)
+  const requestOrigin =
     request.headers.get("origin") || request.headers.get("referer");
-  if (!origin || !origin.startsWith(locals.origin ?? "https://grove.place")) {
+  try {
+    if (!requestOrigin) throw new Error("Missing origin");
+    const originUrl = new URL(requestOrigin);
+    const expectedUrl = new URL(locals.origin ?? "https://grove.place");
+    if (originUrl.origin !== expectedUrl.origin) {
+      throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
+    }
+  } catch (e) {
+    if ((e as { status?: number }).status === 403) throw e;
     throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
@@ -55,7 +63,7 @@ export const POST: RequestHandler = async ({
   );
 
   // Rate limiting
-  const { result, response } = await checkRateLimit({
+  const { response } = await checkRateLimit({
     kv: platform.env.CACHE_KV,
     key: `tend:${verifiedTenantId}`,
     limit: TEND_RATE_LIMIT.limit,

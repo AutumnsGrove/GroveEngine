@@ -1,4 +1,4 @@
-import { json, error, isHttpError } from "@sveltejs/kit";
+import { json, isHttpError } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
