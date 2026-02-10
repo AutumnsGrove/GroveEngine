@@ -421,6 +421,20 @@
     "tagline": "Music Curation",
     "definition": "A music discovery tool — give it a song you love, and it builds a playlist of tracks with similar sonic DNA, with explanations for each pick."
   },
+  "hum": {
+    "slug": "hum",
+    "term": "Hum",
+    "category": "tools",
+    "tagline": "Music Link Previews",
+    "definition": "Music link previews in your posts — paste a Spotify or Apple Music URL and it becomes a beautiful card with album art, track info, and cross-platform links.",
+    "usageExample": "\"I added a hum to my latest bloom.\"\n\"That hum card for the new album looks gorgeous.\"",
+    "seeAlso": [
+      "blooms",
+      "canopy",
+      "aria"
+    ],
+    "standardTerm": "Music Widget"
+  },
   "etch": {
     "slug": "etch",
     "term": "Etch",
