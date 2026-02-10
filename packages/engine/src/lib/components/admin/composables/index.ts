@@ -5,7 +5,7 @@
  * Note: useAmbientSounds, useSnippets, and useWritingSession were removed (features deprecated)
  */
 
-export { useEditorTheme, themes } from "./useEditorTheme.svelte";
+export { useEditorTheme } from "./useEditorTheme.svelte";
 export type { Theme, EditorThemeManager } from "./useEditorTheme.svelte";
 
 export { useDraftManager } from "./useDraftManager.svelte";

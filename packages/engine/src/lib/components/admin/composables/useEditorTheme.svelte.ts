@@ -63,11 +63,8 @@ const groveThemes = {
   },
 } satisfies Record<string, Theme>;
 
-export const themes: Record<string, Theme> = { grove: groveThemes.dark };
-
 export interface EditorThemeManager {
   currentTheme: string;
-  themes: Record<string, Theme>;
   loadTheme: () => void;
 }
 
@@ -99,12 +96,12 @@ export function useEditorTheme(): EditorThemeManager {
   }
 
   $effect(() => {
-    loadTheme();
+    const isDark = themeStore.resolvedTheme === "dark";
+    applyTheme(isDark ? groveThemes.dark : groveThemes.light);
   });
 
   return {
     currentTheme: "grove",
-    themes,
     loadTheme,
   };
 }

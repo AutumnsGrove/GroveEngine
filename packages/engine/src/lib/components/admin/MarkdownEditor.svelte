@@ -21,7 +21,6 @@
   // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
   import {
     useEditorTheme,
-    themes,
     useDraftManager,
   } from "./composables";
 
