@@ -46,7 +46,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       locals.user,
     );
     const body = sanitizeObject(await request.json()) as SettingsBody;
-    const { setting_key, setting_value } = body;
+    const { setting_key } = body;
+    let { setting_value } = body;
 
     // Validate required fields
     if (!setting_key || typeof setting_key !== "string") {
@@ -79,10 +80,10 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       }
     }
 
-    // Validate grove_title (max 50 chars, trimmed)
+    // Validate grove_title (max 50 chars, store trimmed)
     if (setting_key === "grove_title") {
-      const trimmed = setting_value.trim();
-      if (trimmed.length > 50) {
+      setting_value = setting_value.trim();
+      if (setting_value.length > 50) {
         throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }
