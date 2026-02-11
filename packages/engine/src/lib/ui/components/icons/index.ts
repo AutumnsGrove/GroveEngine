@@ -10,6 +10,7 @@
 // Custom SVG components
 export { default as Icons } from "./Icons.svelte";
 export { default as IconLegend } from "./IconLegend.svelte";
+export { default as BlueSky } from "./BlueSky.svelte";
 
 // Lucide icon registries and utilities
 export {
