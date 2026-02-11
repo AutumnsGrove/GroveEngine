@@ -989,6 +989,11 @@
     border-radius: var(--border-radius-small);
   }
 
+  :global(.dark) .toggle-option.primary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .toggle-option input {
     display: none;
   }
@@ -1057,6 +1062,11 @@
     background: var(--mobile-menu-bg);
     color: var(--color-text);
     font-size: 0.85rem;
+  }
+
+  :global(.dark) .format-selector select {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .advanced-toggle {
@@ -1159,6 +1169,11 @@
     font-size: 0.85rem;
   }
 
+  :global(.dark) .format-control select {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   .format-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.5rem;
@@ -1182,6 +1197,11 @@
     border-radius: var(--border-radius-small);
     font-size: 0.8rem;
     color: var(--color-text-muted);
+  }
+
+  :global(.dark) .options-info {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .options-info p {
@@ -1314,6 +1334,11 @@
     font-size: 0.85rem;
   }
 
+  :global(.dark) .ai-metadata {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .ai-description {
     margin: 0 0 0.25rem 0;
     color: var(--color-text);
@@ -1340,6 +1365,11 @@
     color: var(--color-text-muted);
   }
 
+  :global(.dark) .stat-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .stat-pill .compression {
     color: var(--accent-success);
     font-weight: 500;
@@ -1361,6 +1391,11 @@
     border-radius: var(--border-radius-small);
     margin-bottom: 0.75rem;
     overflow-x: auto;
+  }
+
+  :global(.dark) .upload-url {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .upload-url code {
@@ -1435,6 +1470,11 @@
     font-size: 0.85rem;
   }
 
+  :global(.dark) .gallery-controls select {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   .filter-group {
     display: flex;
     gap: 0.5rem;
@@ -1448,6 +1488,11 @@
     color: var(--color-text);
     font-size: 0.85rem;
     min-width: 150px;
+  }
+
+  :global(.dark) .filter-group input {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .gallery-error {
@@ -1591,6 +1636,11 @@
     color: var(--color-text-muted);
   }
 
+  :global(.dark) .action-btn.copy {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .action-btn.copy:hover {
     background: var(--color-primary);
     color: white;
@@ -1599,6 +1649,11 @@
   .action-btn.delete {
     background: var(--color-bg-secondary);
     color: var(--color-text-muted);
+  }
+
+  :global(.dark) .action-btn.delete {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .action-btn.delete:hover {
