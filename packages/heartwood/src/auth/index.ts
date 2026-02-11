@@ -275,10 +275,13 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
       }),
 
       // Passkey (WebAuthn) authentication
+      // origin supports comma-separated values for multi-origin (e.g. "https://login.grove.place,http://localhost:5173")
       passkey({
         rpID: env.PASSKEY_RP_ID || "grove.place",
         rpName: "Heartwood",
-        origin: env.AUTH_BASE_URL,
+        origin: (env.PASSKEY_ORIGIN || "https://login.grove.place")
+          .split(",")
+          .map((o: string) => o.trim()),
       }),
 
       // Two-factor authentication (TOTP)
