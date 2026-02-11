@@ -3,13 +3,8 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
-# D1 Database binding (shared GroveEngine database)
-[[d1_databases]]
-binding = "DB"
-database_name = "grove-engine-db"
-database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
-
 # GroveAuth Service Binding (Heartwood - auth API)
+# No D1 binding — login is a UI + proxy layer only (least privilege)
 [[services]]
 binding = "AUTH"
 service = "groveauth"
