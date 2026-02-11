@@ -10,7 +10,7 @@
 
 export interface Env {
   DB: D1Database;
-  IMAGES: R2Bucket;
+  EXPORTS_BUCKET: R2Bucket;
 }
 
 /**
@@ -52,7 +52,7 @@ async function cleanupExpiredExports(env: Env): Promise<number> {
       try {
         // Delete R2 object if it exists
         if (exp.r2_key) {
-          await env.IMAGES.delete(exp.r2_key);
+          await env.EXPORTS_BUCKET.delete(exp.r2_key);
         }
 
         // Mark as expired in D1

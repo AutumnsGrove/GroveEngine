@@ -57,6 +57,9 @@ declare global {
         /** R2 Bucket for images and media */
         IMAGES: R2Bucket;
 
+        /** R2 Bucket for temporary export zip files (grove-exports, 7-day TTL) */
+        EXPORTS_BUCKET?: R2Bucket;
+
         /** R2 Bucket - source for image migration (e.g., autumnsgrove-images) */
         IMAGES_SOURCE?: R2Bucket;
 

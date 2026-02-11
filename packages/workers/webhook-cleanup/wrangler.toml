@@ -23,5 +23,5 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # R2 Bucket - For cleaning up expired export zip files
 # =============================================================================
 [[r2_buckets]]
-binding = "IMAGES"
-bucket_name = "grove-media"
+binding = "EXPORTS_BUCKET"
+bucket_name = "grove-exports"

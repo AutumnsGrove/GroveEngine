@@ -110,7 +110,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     }
 
     // Get file from R2
-    const object = await platform.env.IMAGES?.get(record.r2_key);
+    const object = await platform.env.EXPORTS_BUCKET?.get(record.r2_key);
     if (!object) {
       throwGroveError(404, API_ERRORS.EXPORT_NOT_FOUND, "API", {
         detail: "Export file not found in storage",

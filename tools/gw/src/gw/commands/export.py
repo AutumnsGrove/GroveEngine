@@ -610,7 +610,7 @@ def export_download(
 
     # Download from R2
     try:
-        wrangler.execute(["r2", "object", "get", "grove-media", r2_key, "--file", output])
+        wrangler.execute(["r2", "object", "get", "grove-exports", r2_key, "--file", output])
     except WranglerError as e:
         if output_json:
             console.print(json.dumps({"error": str(e)}))
@@ -713,7 +713,7 @@ def export_cleanup(
         # Delete R2 object if it exists
         if r2_key:
             try:
-                wrangler.execute(["r2", "object", "delete", "grove-media", r2_key])
+                wrangler.execute(["r2", "object", "delete", "grove-exports", r2_key])
             except WranglerError:
                 r2_errors += 1
 

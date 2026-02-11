@@ -82,8 +82,15 @@ database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 # =============================================================================
-# R2 Bucket - For cold storage migration
+# R2 Bucket - For reading user-uploaded images (included in export zips)
 # =============================================================================
 [[r2_buckets]]
 binding = "IMAGES"
 bucket_name = "grove-media"
+
+# =============================================================================
+# R2 Bucket - Dedicated bucket for temporary export zip files
+# =============================================================================
+[[r2_buckets]]
+binding = "EXPORTS_BUCKET"
+bucket_name = "grove-exports"

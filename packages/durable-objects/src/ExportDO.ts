@@ -20,6 +20,7 @@ interface ExportDOEnv {
   DB: D1Database;
   KV: KVNamespace;
   IMAGES: R2Bucket;
+  EXPORTS_BUCKET: R2Bucket;
   ZEPHYR: {
     fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
   };
@@ -483,7 +484,7 @@ export class ExportDO implements DurableObject {
     const r2Key = `exports/${this.jobState.tenantId}/${this.jobState.exportId}/grove-export-${safeUsername}-${dateStr}.zip`;
 
     // Upload to R2
-    await this.env.IMAGES.put(r2Key, zipData);
+    await this.env.EXPORTS_BUCKET.put(r2Key, zipData);
 
     // Get media for cleanup
     const media = await this.state.storage.get<MediaRecord[]>("media");
