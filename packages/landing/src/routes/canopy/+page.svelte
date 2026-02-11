@@ -2,7 +2,7 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
-  import { Glass, GlassCard, Button, Input, GroveTerm } from '@autumnsgrove/groveengine/ui';
+  import { Glass, GlassCard, Button, Input, GroveTerm, PassageTransition } from '@autumnsgrove/groveengine/ui';
   import { Search, Users, Leaf } from '@autumnsgrove/groveengine/ui/icons';
   import {
     CANOPY_CATEGORY_LABELS,
@@ -51,6 +51,24 @@
   // Reactive state
   let searchQuery = $state('');
   let selectedCategory = $state<CanopyCategory | null>(null);
+
+  // Passage transition state — shows overlay during cross-origin navigation
+  let navigatingTo = $state<CanopyWanderer | null>(null);
+
+  function handleWandererClick(e: MouseEvent, wanderer: CanopyWanderer) {
+    // Don't intercept modified clicks (new tab, middle-click, etc.)
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    e.preventDefault();
+    navigatingTo = wanderer;
+
+    // Double rAF ensures the overlay paints before navigation begins
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.location.href = getGroveUrl(wanderer.subdomain);
+      });
+    });
+  }
 
   // --- Season state ---
   const isSpring = $derived(seasonStore.current === 'spring');
@@ -510,6 +528,7 @@
           <a
             href={getGroveUrl(wanderer.subdomain)}
             class="wanderer-card block no-underline text-inherit"
+            onclick={(e) => handleWandererClick(e, wanderer)}
           >
             <GlassCard variant="frosted" class="wanderer-inner h-full !flex !flex-col">
               <div class="flex items-center gap-3 mb-3">
@@ -572,6 +591,10 @@
     {/if}
   </div>
 </main>
+
+{#if navigatingTo}
+  <PassageTransition name={navigatingTo.display_name} />
+{/if}
 
 <Footer />
 
