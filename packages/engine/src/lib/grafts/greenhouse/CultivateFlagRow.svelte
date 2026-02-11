@@ -74,10 +74,10 @@
 					aria-label="Global Flag"
 				/>
 			{/if}
-			<span class="font-medium text-bark-800 dark:text-cream-100">{displayName}</span>
+			<span class="font-medium text-foreground">{displayName}</span>
 		</div>
 		{#if flag.description}
-			<p class="text-xs text-bark-500 dark:text-cream-400 mt-0.5 pl-6">
+			<p class="text-xs text-foreground-muted mt-0.5 pl-6">
 				{flag.description}
 			</p>
 		{/if}
