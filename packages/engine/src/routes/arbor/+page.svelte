@@ -15,7 +15,8 @@
     MapPin,
     ArrowRight,
     Megaphone,
-    TreeDeciduous
+    TreeDeciduous,
+    Users
   } from 'lucide-svelte';
 
   /**
@@ -188,6 +189,10 @@
       <a href="/arbor/curios" class="action-card glass-action">
         <Calendar class="w-7 h-7 text-accent-muted" />
         <span class="font-medium text-center text-sm"><GroveTerm term="curios">Curios</GroveTerm></span>
+      </a>
+      <a href="https://grove.place/canopy" class="action-card glass-action" target="_blank" rel="noopener noreferrer" aria-label="Browse the Canopy directory (opens in new tab)">
+        <Users class="w-7 h-7 text-accent-muted" />
+        <span class="font-medium text-center text-sm"><GroveTerm term="canopy">Canopy</GroveTerm></span>
       </a>
       <a href="/arbor/settings" class="action-card glass-action">
         <Settings class="w-7 h-7 text-accent-muted" />

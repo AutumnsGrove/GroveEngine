@@ -6,6 +6,7 @@ import {
   Tag,
   BookOpen,
   Trees,
+  Users,
   PenLine,
   Home,
   HandCoins,
@@ -58,7 +59,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   { href: "/roadmap", label: "Roadmap", icon: MapPin },
   { href: "/pricing", label: "Pricing", icon: Tag },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
+  { href: "/canopy", label: "Canopy", icon: Users, termSlug: "canopy" },
   {
     href: "https://autumn.grove.place/garden",
     label: "Garden",
@@ -76,7 +77,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/roadmap", label: "Roadmap", icon: MapPin },
   { href: "/pricing", label: "Pricing", icon: HandCoins },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
+  { href: "/canopy", label: "Canopy", icon: Users, termSlug: "canopy" },
   {
     href: "https://autumn.grove.place/garden",
     label: "Garden",
@@ -96,6 +97,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 export const LANDING_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
+  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {
     href: "https://status.grove.place",
@@ -134,6 +136,7 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
 export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
   { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
+  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {
     href: "https://status.grove.place",

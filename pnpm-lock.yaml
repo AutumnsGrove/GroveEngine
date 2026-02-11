@@ -62,7 +62,7 @@ importers:
         version: 5.4.21(@types/node@24.10.11)
       vitest:
         specifier: ^4.0.14
-        version: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@2.4.2)(jsdom@27.4.0)
+        version: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@1.21.7)(jsdom@27.4.0)
       wrangler:
         specifier: ^4.63.0
         version: 4.63.0(@cloudflare/workers-types@4.20260116.0)
@@ -305,7 +305,7 @@ importers:
         version: 5.4.21(@types/node@24.10.11)
       vitest:
         specifier: ^4.0.14
-        version: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@1.21.7)(jsdom@27.4.0)
+        version: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@2.4.2)(jsdom@27.4.0)
 
   packages/grove-router:
     devDependencies:
@@ -7548,7 +7548,7 @@ snapshots:
       svelte: 5.50.0
     optionalDependencies:
       vite: 5.4.21(@types/node@24.10.11)
-      vitest: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@1.21.7)(jsdom@27.4.0)
+      vitest: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@2.4.2)(jsdom@27.4.0)
 
   '@types/aria-query@5.0.4': {}
 
@@ -7652,7 +7652,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@1.21.7)(jsdom@27.4.0)
+      vitest: 4.0.16(@types/node@24.10.11)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@2.4.2)(jsdom@27.4.0)
     transitivePeerDependencies:
       - supports-color
 

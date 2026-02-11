@@ -1233,6 +1233,7 @@
     </div>
     <p class="section-description">
       Let other wanderers discover your <GroveTerm term="grove">grove</GroveTerm> in the public directory.
+      <a href="https://grove.place/canopy" target="_blank" rel="noopener noreferrer" class="canopy-link">View the Canopy &rarr;</a>
     </p>
 
     {#if loadingCanopy}
@@ -1524,6 +1525,16 @@
     color: var(--color-text-muted);
     font-size: 0.9rem;
     transition: color 0.3s ease;
+  }
+  .canopy-link {
+    display: inline-block;
+    margin-left: 0.25rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .canopy-link:hover {
+    text-decoration: underline;
   }
   .health-grid {
     display: grid;

@@ -8,7 +8,7 @@ interface TenantRow {
   id: string;
   subdomain: string;
   display_name: string | null;
-  post_count: number;
+  published_count: number;
 }
 
 interface SettingsRow {
@@ -51,22 +51,28 @@ export interface CanopyDirectoryResult {
 export async function fetchCanopyDirectory(
   db: D1Database,
 ): Promise<CanopyDirectoryResult> {
-  // Query all visible tenants
+  // Query all visible tenants with real published post count
+  // Note: tenants.post_count is a stale denormalized column that's never updated,
+  // so we use EXISTS + a correlated subquery on the posts table instead.
   const tenantResult = await db
     .prepare(
       `
-      SELECT 
+      SELECT
         t.id,
         t.subdomain,
         t.display_name,
-        t.post_count
+        (SELECT COUNT(*) FROM posts p WHERE p.tenant_id = t.id AND p.status = 'published') as published_count
       FROM tenants t
       INNER JOIN site_settings ts_visible
         ON t.id = ts_visible.tenant_id
         AND ts_visible.setting_key = ?
         AND ts_visible.setting_value = 'true'
       WHERE t.active = 1
-        AND t.post_count >= 1
+        AND EXISTS (
+          SELECT 1 FROM posts p
+          WHERE p.tenant_id = t.id
+          AND p.status = 'published'
+        )
     `,
     )
     .bind(CANOPY_SETTING_KEYS.VISIBLE)
@@ -130,7 +136,7 @@ export async function fetchCanopyDirectory(
       avatar_url: null, // Placeholder for future avatar implementation
       banner: tenantSettings.banner || "",
       categories: parseCanopyCategories(tenantSettings.categories),
-      bloom_count: tenant.post_count,
+      bloom_count: tenant.published_count,
       forests: [], // Placeholder for future Forests integration
     };
   });

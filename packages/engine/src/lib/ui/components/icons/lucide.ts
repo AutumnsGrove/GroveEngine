@@ -17,11 +17,13 @@ import {
   // Navigation
   Home,
   Info,
+  Search,
   Telescope,
   MapPin,
   HandCoins,
   BookOpen,
   Trees,
+  TreePine,
   PenLine,
   ArrowRight,
   ArrowLeft,
@@ -125,11 +127,13 @@ import {
 export const navIcons = {
   home: Home,
   about: Info,
+  search: Search,
   vision: Telescope,
   roadmap: MapPin,
   pricing: HandCoins,
   knowledge: BookOpen,
   forest: Trees,
+  treepine: TreePine,
   blog: PenLine,
   arrow: ArrowRight,
   arrowLeft: ArrowLeft,
@@ -373,6 +377,7 @@ export {
   // Navigation
   Home,
   Menu,
+  Search,
   Settings,
   ExternalLink,
   ChevronDown,
@@ -382,6 +387,7 @@ export {
   Github,
   HandCoins,
   FileText,
+  TreePine,
   // Features
   Mail,
   HardDrive,
