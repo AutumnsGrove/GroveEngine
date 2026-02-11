@@ -104,6 +104,26 @@ class Issue:
 
 
 @dataclass
+class JobStep:
+    """Parsed job step information."""
+
+    name: str
+    status: str
+    conclusion: Optional[str]
+    number: int
+
+
+@dataclass
+class JobInfo:
+    """Parsed workflow job information."""
+
+    name: str
+    status: str
+    conclusion: Optional[str]
+    steps: list[JobStep]
+
+
+@dataclass
 class WorkflowRun:
     """Parsed workflow run information."""
 
@@ -116,6 +136,7 @@ class WorkflowRun:
     event: str
     created_at: str
     url: str
+    jobs: list[JobInfo] | None = None
 
 
 @dataclass
@@ -969,6 +990,58 @@ class GitHub:
 
         data = self.execute_json(args)
         return self._parse_run(data)
+
+    def run_view_with_jobs(self, run_id: int) -> WorkflowRun:
+        """Get workflow run details including job breakdown.
+
+        Args:
+            run_id: Run ID
+
+        Returns:
+            WorkflowRun object with jobs populated
+        """
+        args = [
+            "run", "view", str(run_id),
+            "--repo", self.repo,
+            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,jobs",
+        ]
+
+        data = self.execute_json(args)
+        run = self._parse_run(data)
+
+        # Parse jobs
+        jobs_data = data.get("jobs", [])
+        run.jobs = [
+            JobInfo(
+                name=j.get("name", "unknown"),
+                status=j.get("status", "unknown"),
+                conclusion=j.get("conclusion"),
+                steps=[
+                    JobStep(
+                        name=s.get("name", "unknown"),
+                        status=s.get("status", "unknown"),
+                        conclusion=s.get("conclusion"),
+                        number=s.get("number", 0),
+                    )
+                    for s in j.get("steps", [])
+                ],
+            )
+            for j in jobs_data
+        ]
+
+        return run
+
+    def run_failed_logs(self, run_id: int) -> str:
+        """Get logs for failed jobs only.
+
+        Args:
+            run_id: Run ID
+
+        Returns:
+            Log output as string
+        """
+        args = ["run", "view", str(run_id), "--repo", self.repo, "--log-failed"]
+        return self.execute(args, use_json=False)
 
     def run_rerun(self, run_id: int, failed_only: bool = False) -> None:
         """Rerun a workflow.

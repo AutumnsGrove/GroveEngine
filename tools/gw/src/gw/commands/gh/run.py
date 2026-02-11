@@ -140,28 +140,32 @@ def run_list(
 @click.argument("run_id", type=int)
 @click.option("--log", is_flag=True, help="Show full logs")
 @click.option("--log-failed", is_flag=True, help="Show only failed job logs")
+@click.option("--no-logs", is_flag=True, help="Skip auto-fetching failure logs")
 @click.pass_context
 def run_view(
     ctx: click.Context,
     run_id: int,
     log: bool,
     log_failed: bool,
+    no_logs: bool,
 ) -> None:
-    """View workflow run details.
+    """View workflow run details with job breakdown.
 
-    Always safe - no --write flag required.
+    Shows all jobs and their status. When a run has failures,
+    automatically fetches and displays failed job logs unless
+    --no-logs is passed.
 
     \b
     Examples:
         gw gh run view 12345678
         gw gh run view 12345678 --log
-        gw gh run view 12345678 --log-failed
+        gw gh run view 12345678 --no-logs
     """
     output_json = ctx.obj.get("output_json", False)
 
     try:
         gh = GitHub()
-        run = gh.run_view(run_id)
+        run = gh.run_view_with_jobs(run_id)
 
         if output_json:
             data = {
@@ -174,6 +178,18 @@ def run_view(
                 "event": run.event,
                 "created_at": run.created_at,
                 "url": run.url,
+                "jobs": [
+                    {
+                        "name": j.name,
+                        "status": j.status,
+                        "conclusion": j.conclusion,
+                        "failed_steps": [
+                            s.name for s in j.steps
+                            if s.conclusion == "failure"
+                        ],
+                    }
+                    for j in (run.jobs or [])
+                ],
             }
             console.print(json.dumps(data, indent=2))
             return
@@ -198,16 +214,68 @@ def run_view(
             border_style="green",
         ))
 
-        # Show logs if requested (would need gh run view --log)
-        if log or log_failed:
-            console.print("\n[dim]Fetching logs...[/dim]")
-            args = ["run", "view", str(run_id), "--repo", gh.repo]
-            if log_failed:
-                args.append("--log-failed")
-            else:
-                args.append("--log")
-            log_output = gh.execute(args, use_json=False)
-            console.print(log_output)
+        # Show job breakdown
+        has_failures = False
+        if run.jobs:
+            job_table = Table(border_style="dim")
+            job_table.add_column("Job", style="white")
+            job_table.add_column("Status")
+            job_table.add_column("Failed Step", style="dim")
+
+            for job in run.jobs:
+                job_conclusion = job.conclusion or job.status
+                job_style = {
+                    "success": "green",
+                    "failure": "red",
+                    "cancelled": "yellow",
+                    "skipped": "dim",
+                }.get(job_conclusion.lower(), "white")
+
+                # Find failed steps
+                failed_steps = [
+                    s.name for s in job.steps
+                    if s.conclusion == "failure"
+                ]
+
+                if job_conclusion.lower() == "failure":
+                    has_failures = True
+
+                job_table.add_row(
+                    job.name,
+                    f"[{job_style}]{job_conclusion}[/{job_style}]",
+                    ", ".join(failed_steps) if failed_steps else "",
+                )
+
+            console.print()
+            console.print(job_table)
+
+        # Auto-fetch failure logs when run failed (unless --no-logs)
+        show_failed_logs = (
+            log_failed
+            or (has_failures and not no_logs and not log)
+        )
+
+        if log or show_failed_logs:
+            log_type = "failed" if show_failed_logs else "full"
+            console.print(f"\n[dim]Fetching {log_type} logs...[/dim]\n")
+            try:
+                if show_failed_logs:
+                    log_output = gh.run_failed_logs(run_id)
+                else:
+                    args = ["run", "view", str(run_id), "--repo", gh.repo, "--log"]
+                    log_output = gh.execute(args, use_json=False)
+
+                if log_output.strip():
+                    # Truncate very long logs to last 60 lines
+                    lines = log_output.strip().splitlines()
+                    if len(lines) > 60 and not log:
+                        console.print(f"[dim]... ({len(lines) - 60} lines truncated, use --log for full output)[/dim]\n")
+                        log_output = "\n".join(lines[-60:])
+                    console.print(log_output)
+                else:
+                    console.print("[dim]No failure logs available[/dim]")
+            except GitHubError:
+                console.print("[dim]Could not fetch logs[/dim]")
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")
