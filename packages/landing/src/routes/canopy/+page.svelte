@@ -52,24 +52,6 @@
   let searchQuery = $state('');
   let selectedCategory = $state<CanopyCategory | null>(null);
 
-  // Passage transition state — shows overlay during cross-origin navigation
-  let navigatingTo = $state<CanopyWanderer | null>(null);
-
-  function handleWandererClick(e: MouseEvent, wanderer: CanopyWanderer) {
-    // Don't intercept modified clicks (new tab, middle-click, etc.)
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-
-    e.preventDefault();
-    navigatingTo = wanderer;
-
-    // Double rAF ensures the overlay paints before navigation begins
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.location.href = getGroveUrl(wanderer.subdomain);
-      });
-    });
-  }
-
   // --- Season state ---
   const isSpring = $derived(seasonStore.current === 'spring');
   const isAutumn = $derived(seasonStore.current === 'autumn');
@@ -528,7 +510,7 @@
           <a
             href={getGroveUrl(wanderer.subdomain)}
             class="wanderer-card block no-underline text-inherit"
-            onclick={(e) => handleWandererClick(e, wanderer)}
+            data-passage-name={wanderer.display_name}
           >
             <GlassCard variant="frosted" class="wanderer-inner h-full !flex !flex-col">
               <div class="flex items-center gap-3 mb-3">
@@ -592,9 +574,7 @@
   </div>
 </main>
 
-{#if navigatingTo}
-  <PassageTransition name={navigatingTo.display_name} />
-{/if}
+<PassageTransition />
 
 <Footer />
 

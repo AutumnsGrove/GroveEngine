@@ -1,33 +1,43 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { cn } from "$lib/ui/utils";
 	import Logo from "./Logo.svelte";
 
 	/**
-	 * PassageTransition - A warm navigation overlay for cross-origin Grove transitions
+	 * PassageTransition - Self-contained navigation overlay for cross-origin Grove links
 	 *
-	 * Shows a glassmorphism overlay with the Grove logo breathing animation and
-	 * floating light motes while the browser navigates between Grove properties
-	 * (e.g., from Canopy to a wanderer's garden).
+	 * Drop this component on any page or layout and it automatically intercepts
+	 * clicks on links to other *.grove.place subdomains, showing a warm glassmorphism
+	 * overlay with a breathing Grove logo and floating light motes while the browser
+	 * navigates through the Passage (Grove's subdomain router).
 	 *
-	 * Named after the Passage — Grove's subdomain router that guides wanderers
-	 * between gardens.
+	 * Named after the Passage — the Cloudflare Worker that routes wanderers between gardens.
 	 *
-	 * @example
+	 * @example Basic — just drop it in a layout and forget about it
 	 * ```svelte
-	 * {#if navigating}
-	 *   <PassageTransition name={wandererName} />
-	 * {/if}
+	 * <PassageTransition />
 	 * ```
+	 *
+	 * @example With destination names — add data-passage-name to links for personalized text
+	 * ```svelte
+	 * <a href="https://autumn.grove.place" data-passage-name="Autumn">Visit Autumn</a>
+	 * <PassageTransition />
+	 * ```
+	 *
+	 * Without data-passage-name, the overlay shows "Following the path..."
+	 * With it, it shows "Wandering to {name}'s garden..."
 	 */
 
 	interface Props {
-		/** Display name of the destination (e.g., the wanderer's name) */
-		name?: string;
-		/** Additional CSS classes */
+		/** Additional CSS classes for the overlay container */
 		class?: string;
 	}
 
-	let { name, class: className }: Props = $props();
+	let { class: className }: Props = $props();
+
+	// Internal state
+	let active = $state(false);
+	let name = $state<string | undefined>(undefined);
 
 	// Mote configuration — staggered floating particles for ambient life
 	const motes = Array.from({ length: 8 }, (_, i) => ({
@@ -37,50 +47,102 @@
 		size: `${2 + (i % 3)}px`,
 		duration: `${2.5 + (i % 3) * 0.5}s`,
 	}));
+
+	/**
+	 * Check if a URL points to a different Grove subdomain than the current page.
+	 * Matches any *.grove.place link that isn't the current hostname.
+	 */
+	function isPassageLink(href: string): boolean {
+		try {
+			const url = new URL(href, window.location.origin);
+			return (
+				url.hostname.endsWith(".grove.place") &&
+				url.hostname !== window.location.hostname &&
+				url.hostname !== "grove.place"
+			);
+		} catch {
+			return false;
+		}
+	}
+
+	onMount(() => {
+		function handleClick(e: MouseEvent) {
+			// Don't intercept modified clicks (new tab, middle-click, etc.)
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+			// Walk up from click target to find the nearest <a> with an href
+			const link = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
+			if (!link) return;
+
+			const href = link.getAttribute("href");
+			if (!href || !isPassageLink(href)) return;
+
+			e.preventDefault();
+
+			// Look for a friendly name on the link or its ancestors
+			name =
+				link.getAttribute("data-passage-name") ??
+				link.closest("[data-passage-name]")?.getAttribute("data-passage-name") ??
+				undefined;
+			active = true;
+
+			// Double rAF ensures the overlay paints before navigation begins
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					window.location.href = href;
+				});
+			});
+		}
+
+		document.addEventListener("click", handleClick);
+		return () => document.removeEventListener("click", handleClick);
+	});
 </script>
 
-<div
-	class={cn(
-		"fixed inset-0 z-grove-overlay flex flex-col items-center justify-center",
-		"passage-overlay",
-		className,
-	)}
-	role="alert"
-	aria-live="polite"
->
-	<!-- Warm glassmorphism backdrop -->
-	<div class="absolute inset-0 passage-backdrop" />
+{#if active}
+	<div
+		class={cn(
+			"fixed inset-0 z-grove-overlay flex flex-col items-center justify-center",
+			"passage-overlay",
+			className,
+		)}
+		role="alert"
+		aria-live="polite"
+	>
+		<!-- Warm glassmorphism backdrop -->
+		<div class="absolute inset-0 passage-backdrop" />
 
-	<!-- Centered content -->
-	<div class="relative z-10 flex flex-col items-center gap-5">
-		<div class="passage-breathe">
-			<Logo class="w-16 h-16 drop-shadow-lg" />
+		<!-- Centered content -->
+		<div class="relative z-10 flex flex-col items-center gap-5">
+			<div class="passage-breathe">
+				<Logo class="w-16 h-16 drop-shadow-lg" />
+			</div>
+			<p class="passage-label text-white/90 text-base font-sans font-medium tracking-wide">
+				{#if name}
+					Wandering to {name}&rsquo;s garden&hellip;
+				{:else}
+					Following the path&hellip;
+				{/if}
+			</p>
 		</div>
-		<p class="passage-label text-white/90 text-base font-sans font-medium tracking-wide">
-			{#if name}
-				Wandering to {name}&rsquo;s garden&hellip;
-			{:else}
-				Following the path&hellip;
-			{/if}
-		</p>
-	</div>
 
-	<!-- Floating light motes — like fireflies guiding through the forest -->
-	<div class="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-		{#each motes as mote, i (i)}
-			<div
-				class="passage-mote"
-				style="
-					--mote-delay: {mote.delay};
-					--mote-x: {mote.x};
-					--mote-drift: {mote.drift};
-					--mote-size: {mote.size};
-					--mote-duration: {mote.duration};
-				"
-			/>
-		{/each}
+		<!-- Floating light motes — like fireflies guiding through the forest -->
+		<div class="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+			{#each motes as mote, i (i)}
+				<div
+					class="passage-mote"
+					style="
+						--mote-delay: {mote.delay};
+						--mote-x: {mote.x};
+						--mote-drift: {mote.drift};
+						--mote-size: {mote.size};
+						--mote-duration: {mote.duration};
+					"
+				/>
+			{/each}
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	/* Backdrop — warm bark tones with blur */
