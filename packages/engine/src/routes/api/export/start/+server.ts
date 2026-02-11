@@ -1,0 +1,206 @@
+/**
+ * Start Zip Export Job
+ *
+ * POST /api/export/start
+ *
+ * Initiates a background zip export job for the authenticated user.
+ * Returns a jobId and initial status. The Durable Object handles
+ * the actual work of querying, assembling, and uploading the zip.
+ *
+ * Requests payload:
+ * - includeImages?: boolean (default: true)
+ * - deliveryMethod?: 'email' | 'download' (default: 'email')
+ *
+ * Response:
+ * - exportId: string
+ * - status: 'pending'
+ */
+
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  checkRateLimit,
+  getEndpointLimitByKey,
+  rateLimitHeaders,
+} from "$lib/server/rate-limits/index.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  buildErrorJson,
+  logGroveError,
+} from "$lib/errors";
+
+interface StartExportRequest {
+  includeImages?: boolean;
+  deliveryMethod?: "email" | "download";
+}
+
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
+  if (!locals.user) {
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+  }
+
+  if (!validateCSRF(request)) {
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
+  }
+
+  if (!platform?.env?.DB) {
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+  }
+
+  try {
+    // Parse request body
+    let body: StartExportRequest = {};
+    try {
+      body = (await request.json()) as StartExportRequest;
+    } catch {
+      throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
+    }
+
+    const includeImages = body.includeImages !== false; // default true
+    let deliveryMethod = body.deliveryMethod || "email";
+
+    // Validate deliveryMethod
+    if (!["email", "download"].includes(deliveryMethod)) {
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+        detail: "deliveryMethod must be 'email' or 'download'",
+      });
+    }
+
+    // Get verified tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
+    // Check rate limit BEFORE checking for in-progress exports
+    // This prevents spamming the check itself
+    const RATE_LIMIT = getEndpointLimitByKey("export/zip-start");
+    let rateLimitResult = {
+      allowed: true,
+      remaining: RATE_LIMIT.limit,
+      resetAt: 0,
+    };
+
+    if (platform.env.CACHE_KV) {
+      const { result, response } = await checkRateLimit({
+        kv: platform.env.CACHE_KV,
+        key: `export-zip:${tenantId}`,
+        limit: RATE_LIMIT.limit,
+        windowSeconds: RATE_LIMIT.windowSeconds,
+        namespace: "export-zip",
+      });
+      rateLimitResult = result;
+      if (response) return response;
+    }
+
+    // Check for in-progress export
+    const existing = await platform.env.DB.prepare(
+      `SELECT id FROM storage_exports
+       WHERE tenant_id = ? AND status IN ('pending', 'querying', 'assembling', 'uploading', 'notifying')`,
+    )
+      .bind(tenantId)
+      .first<{ id: string }>();
+
+    if (existing) {
+      return json(
+        {
+          ...buildErrorJson(API_ERRORS.EXPORT_IN_PROGRESS),
+          exportId: existing.id,
+        },
+        {
+          status: 409,
+          headers: rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit),
+        },
+      );
+    }
+
+    // Get tenant info for Durable Object
+    const tenant = await platform.env.DB.prepare(
+      "SELECT subdomain FROM tenants WHERE id = ?",
+    )
+      .bind(tenantId)
+      .first<{ subdomain: string }>();
+
+    if (!tenant) {
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+    }
+
+    // Create export record
+    const exportId = crypto.randomUUID();
+    const now = Math.floor(Date.now() / 1000);
+    const expiresAt = now + 7 * 24 * 60 * 60; // 7 days
+
+    await platform.env.DB.prepare(
+      `INSERT INTO storage_exports (id, tenant_id, user_email, include_images, delivery_method, status, progress, created_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, 'pending', 0, ?, ?)`,
+    )
+      .bind(
+        exportId,
+        tenantId,
+        locals.user.email,
+        includeImages ? 1 : 0,
+        deliveryMethod,
+        now,
+        expiresAt,
+      )
+      .run();
+
+    // Get Durable Object and start job
+    if (platform.env.EXPORTS) {
+      const doId = platform.env.EXPORTS.idFromName(
+        `export:${tenantId}:${exportId}`,
+      );
+      const stub = platform.env.EXPORTS.get(doId);
+      await stub.fetch("https://export/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          exportId,
+          tenantId,
+          userEmail: locals.user.email,
+          username: tenant.subdomain,
+          includeImages,
+          deliveryMethod,
+        }),
+      });
+    }
+
+    // Audit log
+    try {
+      await platform.env.DB.prepare(
+        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+        .bind(
+          crypto.randomUUID(),
+          tenantId,
+          "data_export",
+          "zip_export_started",
+          JSON.stringify({ exportId, includeImages, deliveryMethod }),
+          locals.user.email,
+          now,
+        )
+        .run();
+    } catch (e) {
+      // Don't fail export if audit logging fails
+      logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+        detail: "Audit log write failed",
+        cause: e,
+      });
+    }
+
+    return json(
+      { exportId, status: "pending" },
+      {
+        headers: rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit),
+      },
+    );
+  } catch (err) {
+    if ((err as { status?: number }).status) throw err;
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+  }
+};

@@ -47,6 +47,13 @@ binding = "IMAGES_SOURCE"
 bucket_name = "autumnsgrove-images"
 
 # =============================================================================
+# R2 Bucket - Dedicated bucket for temporary export zip files
+# =============================================================================
+[[r2_buckets]]
+binding = "EXPORTS_BUCKET"
+bucket_name = "grove-exports"
+
+# =============================================================================
 # D1 Database - Main shared database for multi-tenant platform
 # =============================================================================
 # Uses the shared grove-engine-db for tenants, users, content, and auth
@@ -107,6 +114,12 @@ script_name = "grove-durable-objects"
 [[durable_objects.bindings]]
 name = "SENTINEL"
 class_name = "SentinelDO"
+script_name = "grove-durable-objects"
+
+# ExportDO: Per-export zip assembly job (alarm-based, long-running)
+[[durable_objects.bindings]]
+name = "EXPORTS"
+class_name = "ExportDO"
 script_name = "grove-durable-objects"
 
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.

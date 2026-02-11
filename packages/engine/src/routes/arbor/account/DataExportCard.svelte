@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard, Button, Spinner, Waystone, GroveTerm } from "$lib/ui";
-  import { Download, AlertTriangle } from "lucide-svelte";
+  import { Download, AlertTriangle, Archive } from "lucide-svelte";
   import type { ExportType } from "./types";
   import { CONTACT } from "$lib/config/contact";
 
@@ -42,9 +42,18 @@
     data at any time. We believe in data portability — you should never feel
     locked in.
   </p>
+  <div class="zip-export-callout">
+    <Archive class="callout-icon" aria-hidden="true" />
+    <div class="callout-content">
+      <strong>Full Zip Export</strong>
+      <p>Download all your content as Markdown files with images — ready for any platform.</p>
+      <a href="/arbor/export" class="callout-link">Go to Full Export →</a>
+    </div>
+  </div>
+
   <p class="export-format-note">
-    Exports are in JSON format. Media files are listed with download URLs
-    (not bundled in the export).
+    The quick export below produces JSON format. For a complete zip with Markdown
+    files and images, use the <a href="/arbor/export">Full Export</a> page.
   </p>
 
   <fieldset class="export-options">
@@ -136,12 +145,69 @@
     line-height: 1.5;
   }
 
+  .zip-export-callout {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(44, 95, 45, 0.08);
+    border: 1px solid rgba(44, 95, 45, 0.2);
+    border-radius: var(--border-radius-standard);
+  }
+
+  :global(.dark) .zip-export-callout {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.2);
+  }
+
+  :global(.callout-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .callout-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+
+  .callout-content p {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+
+  .callout-link {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .callout-link:hover {
+    text-decoration: underline;
+  }
+
   .export-format-note {
     margin: 0 0 1rem 0;
     color: var(--color-text-muted);
     font-size: 0.8rem;
     font-style: italic;
     opacity: 0.8;
+  }
+
+  .export-format-note a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .export-format-note a:hover {
+    text-decoration: underline;
   }
 
   /* Screen reader only */

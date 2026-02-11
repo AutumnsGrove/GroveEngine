@@ -8,6 +8,9 @@
     "deploy": "wrangler deploy",
     "check": "tsc --noEmit"
   },
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260116.0",
     "typescript": "^5.7.2",

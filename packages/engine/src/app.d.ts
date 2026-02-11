@@ -57,6 +57,9 @@ declare global {
         /** R2 Bucket for images and media */
         IMAGES: R2Bucket;
 
+        /** R2 Bucket for temporary export zip files (grove-exports, 7-day TTL) */
+        EXPORTS_BUCKET?: R2Bucket;
+
         /** R2 Bucket - source for image migration (e.g., autumnsgrove-images) */
         IMAGES_SOURCE?: R2Bucket;
 
@@ -74,6 +77,9 @@ declare global {
 
         /** SentinelDO - Stress test coordination (long-running tests, WebSocket updates) */
         SENTINEL: DurableObjectNamespace;
+
+        /** ExportDO - Per-export zip assembly job (alarm-based, long-running) */
+        EXPORTS: DurableObjectNamespace;
 
         // Secrets
         GITHUB_TOKEN?: string;

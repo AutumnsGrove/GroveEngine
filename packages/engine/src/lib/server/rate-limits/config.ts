@@ -71,6 +71,7 @@ export const ENDPOINT_RATE_LIMITS = {
 
   // Data operations (prevents abuse of expensive operations)
   "export/data": { limit: 10, windowSeconds: 3600 }, // 10 exports per hour
+  "export/zip-start": { limit: 3, windowSeconds: 86400 }, // 3 zip exports per day
   "billing/operations": { limit: 20, windowSeconds: 3600 }, // 20 billing actions per hour
 
   // Feedback endpoints
@@ -107,6 +108,7 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
   "POST:/api/ai/fireside": "ai/fireside",
   "POST:/api/ai/draft": "ai/draft",
   "POST:/api/export": "export/data",
+  "POST:/api/export/start": "export/zip-start",
   "POST:/api/billing": "billing/operations",
   "PATCH:/api/billing": "billing/operations",
   "PUT:/api/billing": "billing/operations",
