@@ -951,7 +951,7 @@ describe("GET /api/export/[id]/download - Success", () => {
       platform: {
         env: {
           DB: mockDB,
-          IMAGES: mockR2,
+          EXPORTS_BUCKET: mockR2,
         },
       },
     });
@@ -995,7 +995,7 @@ describe("GET /api/export/[id]/download - Success", () => {
       platform: {
         env: {
           DB: mockDB,
-          IMAGES: createMockR2(),
+          EXPORTS_BUCKET: createMockR2(),
         },
       },
     });
