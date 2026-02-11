@@ -59,9 +59,9 @@
 		<!-- Success Message -->
 		{#if form?.success}
 			<div role="status" aria-live="polite">
-				<GlassCard class="mb-6 bg-green-50/80 border-green-200">
+				<GlassCard class="mb-6 bg-green-50/80 dark:bg-green-950/40 border-green-200 dark:border-green-800/40">
 					<div class="flex items-start gap-4">
-						<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
+						<div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
 									fill-rule="evenodd"
@@ -71,8 +71,8 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-green-900 mb-1">Thank you for sharing!</h2>
-							<p class="text-sm text-green-800 font-sans">
+							<h2 class="text-lg font-serif text-green-900 dark:text-green-100 mb-1">Thank you for sharing!</h2>
+							<p class="text-sm text-green-800 dark:text-green-200 font-sans">
 								Your feedback means a lot. I read everything personally. —Autumn
 							</p>
 						</div>
@@ -84,9 +84,9 @@
 		<!-- Error Message -->
 		{#if form?.error}
 			<div role="alert" aria-live="assertive">
-				<GlassCard class="mb-6 bg-red-50/80 border-red-200">
+				<GlassCard class="mb-6 bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-800/40">
 					<div class="flex items-start gap-4">
-						<div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+						<div class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0">
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
 									fill-rule="evenodd"
@@ -96,7 +96,7 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<p class="text-sm text-red-800 font-sans">{form.error}</p>
+							<p class="text-sm text-red-800 dark:text-red-200 font-sans">{form.error}</p>
 						</div>
 					</div>
 				</GlassCard>
@@ -122,7 +122,7 @@
 				<!-- Name (Optional) -->
 				<div class="mb-5">
 					<label for="name" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Name <span class="text-foreground/40 font-normal">(optional)</span>
+						Name <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
 					</label>
 					<input
 						type="text"
@@ -130,7 +130,7 @@
 						name="name"
 						bind:value={name}
 						placeholder="How should I address you?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -138,7 +138,7 @@
 				<!-- Email (Optional) -->
 				<div class="mb-5">
 					<label for="email" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Email <span class="text-foreground/40 font-normal">(optional - if you'd like a reply)</span>
+						Email <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional - if you'd like a reply)</span>
 					</label>
 					<input
 						type="email"
@@ -146,7 +146,7 @@
 						name="email"
 						bind:value={email}
 						placeholder="your.email@example.com"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -154,7 +154,7 @@
 				<!-- Subject (Optional) -->
 				<div class="mb-5">
 					<label for="subject" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Subject <span class="text-foreground/40 font-normal">(optional)</span>
+						Subject <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
 					</label>
 					<input
 						type="text"
@@ -162,7 +162,7 @@
 						name="subject"
 						bind:value={subject}
 						placeholder="What's this about?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -170,13 +170,13 @@
 				<!-- Sentiment (Optional) -->
 				<div class="mb-5">
 					<label class="block text-sm font-sans font-medium text-foreground mb-3">
-						How are you feeling? <span class="text-foreground/40 font-normal">(optional)</span>
+						How are you feeling? <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
 					</label>
 					<div class="flex gap-3">
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'positive' ? null : 'positive'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 text-green-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === 'positive' ? 'Positive feedback (selected)' : 'Positive feedback'}
 							aria-pressed={sentiment === 'positive'}
@@ -187,7 +187,7 @@
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'neutral' ? null : 'neutral'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === 'neutral' ? 'Neutral feedback (selected)' : 'Neutral feedback'}
 							aria-pressed={sentiment === 'neutral'}
@@ -198,7 +198,7 @@
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'negative' ? null : 'negative'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === 'negative' ? 'Concern feedback (selected)' : 'Concern feedback'}
 							aria-pressed={sentiment === 'negative'}
@@ -225,12 +225,12 @@
 						aria-required="true"
 						minlength="10"
 						maxlength="2000"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
 						disabled={submitting}
 					></textarea>
 					<div class="flex justify-between items-center mt-2 text-xs font-sans">
-						<span class="text-foreground/50">At least 10 characters</span>
-						<span class="{isValidLength ? 'text-grove-600' : charCount > 2000 ? 'text-red-600' : 'text-foreground/50'}">
+						<span class="text-foreground/50 dark:text-foreground/60">At least 10 characters</span>
+						<span class="{isValidLength ? 'text-grove-600 dark:text-grove-400' : charCount > 2000 ? 'text-red-600 dark:text-red-400' : 'text-foreground/50 dark:text-foreground/60'}">
 							{charCount}/2000
 						</span>
 					</div>
