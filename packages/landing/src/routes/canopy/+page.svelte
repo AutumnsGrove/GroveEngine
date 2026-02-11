@@ -510,6 +510,7 @@
           <a
             href={getGroveUrl(wanderer.subdomain)}
             class="wanderer-card block no-underline text-inherit"
+            data-passage-name={wanderer.display_name}
           >
             <GlassCard variant="frosted" class="wanderer-inner h-full !flex !flex-col">
               <div class="flex items-center gap-3 mb-3">

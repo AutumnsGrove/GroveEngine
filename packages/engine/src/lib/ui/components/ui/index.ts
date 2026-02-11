@@ -41,6 +41,7 @@ export { default as GlassCard } from "./GlassCard.svelte";
 export { default as GlassConfirmDialog } from "./GlassConfirmDialog.svelte";
 export { default as GlassNavbar } from "./GlassNavbar.svelte";
 export { default as GlassOverlay } from "./GlassOverlay.svelte";
+export { default as PassageTransition } from "./PassageTransition.svelte";
 export { default as GlassLogo } from "./GlassLogo.svelte";
 export { default as GlassLogoArchive } from "./GlassLogoArchive.svelte";
 export { default as GlassCarousel } from "./GlassCarousel.svelte";

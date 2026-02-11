@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-02-08",
-  "lastAuditedBy": "PR #1011 - Hum music link previews",
+  "lastUpdated": "2026-02-11",
+  "lastAuditedBy": "PassageTransition navigation overlay",
   "components": {
-    "total": 212,
+    "total": 213,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
-      "ui": 43,
+      "ui": 44,
       "typography": 11,
       "chrome": 7,
       "terrarium": 7,
