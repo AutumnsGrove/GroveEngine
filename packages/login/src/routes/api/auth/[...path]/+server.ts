@@ -31,6 +31,10 @@ const SKIP_RESPONSE_HEADERS = new Set(["transfer-encoding", "connection"]);
 /**
  * Proxy a request to Heartwood and return the full response,
  * including all headers (especially Set-Cookie).
+ *
+ * CSRF note: State-changing methods (POST, PUT, DELETE, PATCH) are protected
+ * by origin validation in hooks.server.ts, which runs for every request before
+ * this handler. SvelteKit hooks cannot be bypassed — they are the entry point.
  */
 async function proxyToHeartwood({
   request,
@@ -45,9 +49,13 @@ async function proxyToHeartwood({
     });
   }
 
-  // Sanitize path: prevent path traversal and ensure it stays within /api/auth/
-  const path = (params.path || "").replace(/\.\./g, "");
-  if (!path || path.includes("\0")) {
+  // Validate path: strict allowlist of characters permitted in better-auth routes.
+  // Only letters, digits, hyphens, and slashes — rejects encoded traversals (%2e),
+  // null bytes, dots, and anything else that could escape /api/auth/ boundaries.
+  // Defense-in-depth: SvelteKit normalizes URL encoding and the service binding
+  // is internal (Worker-to-Worker), but we don't rely on either assumption.
+  const path = params.path || "";
+  if (!path || !/^[a-zA-Z0-9\-/]+$/.test(path)) {
     return new Response(JSON.stringify({ error: "Invalid path" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
@@ -57,7 +65,11 @@ async function proxyToHeartwood({
   const authBaseUrl = platform.env.GROVEAUTH_URL || DEFAULT_AUTH_URL;
   const targetUrl = `${authBaseUrl}/api/auth/${path}`;
 
-  // Forward cookies for session identification
+  // Forward cookies for session identification.
+  // Reconstructed as simple name=value pairs — security attributes (HttpOnly,
+  // Secure, SameSite) are intentionally omitted because this is a server-to-server
+  // request via Cloudflare service binding (Worker-to-Worker, never public internet).
+  // Heartwood only needs the cookie values for session lookup.
   const cookieHeader = cookies
     .getAll()
     .map((c) => `${c.name}=${c.value}`)

@@ -64,7 +64,7 @@ export function validateRedirectUrl(
       }
     }
 
-    console.warn(`[Redirect] Blocked unsafe redirect URL: ${parsed.origin}`);
+    console.warn("[Redirect] Blocked unsafe redirect URL");
     return DEFAULT_REDIRECT;
   } catch {
     return DEFAULT_REDIRECT;
