@@ -5,6 +5,8 @@
   // Local instance for admin editor preview
   const editorMd = new MarkdownIt({ html: false, linkify: true });
   import { extractHeaders } from "$lib/utils/markdown";
+  import { groveDirectivePlugin } from "$lib/utils/markdown-directives";
+  editorMd.use(groveDirectivePlugin);
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
@@ -13,8 +15,9 @@
   import { getActionableUploadError, isConvertibleFormat } from "$lib/utils/upload-validation";
   import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check, Images } from "lucide-svelte";
   import FiresideChat from "./FiresideChat.svelte";
+  import PhotoPicker from "./PhotoPicker.svelte";
   import VoiceInput from "./VoiceInput.svelte";
   import { browser } from "$app/environment";
 
@@ -107,6 +110,9 @@
 
   // Full preview mode
   let showFullPreview = $state(false);
+
+  // Photo picker
+  let showPhotoPicker = $state(false);
 
   // Editor settings
   let editorSettings = $state({
@@ -316,6 +322,12 @@
   /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
+      // Close photo picker first (highest priority - it has its own handler too)
+      if (showPhotoPicker) {
+        showPhotoPicker = false;
+        e.preventDefault();
+        return;
+      }
       // Exit Fireside mode first (highest priority)
       if (isFiresideMode) {
         isFiresideMode = false;
@@ -539,6 +551,17 @@
 
   function insertImage() {
     insertAtCursor("![alt text](image-url)");
+  }
+
+  /** @param {string[]} urls */
+  function handlePhotoInsert(urls) {
+    showPhotoPicker = false;
+    if (urls.length === 0) return;
+    if (urls.length === 1) {
+      insertAtCursor(`![Photo](${urls[0]})\n`);
+    } else {
+      insertAtCursor(`::gallery[${urls.join(", ")}]::\n`);
+    }
   }
 
   async function insertCodeBlock() {
@@ -877,6 +900,22 @@
           </button>
         </div>
 
+        {#if uploadsEnabled}
+          <div class="toolbar-divider-line"></div>
+          <div class="toolbar-group formatting-group">
+            <button
+              type="button"
+              class="toolbar-icon-btn fmt-btn"
+              onclick={() => showPhotoPicker = true}
+              disabled={readonly}
+              title="Insert photo from gallery"
+              aria-label="Insert photo from gallery"
+            >
+              <Images class="toolbar-icon" />
+            </button>
+          </div>
+        {/if}
+
         <div class="toolbar-divider-line"></div>
 
         <div class="toolbar-group formatting-group">
@@ -1108,6 +1147,11 @@
   {/if}
 </div>
 
+
+<!-- Photo Picker -->
+{#if showPhotoPicker}
+  <PhotoPicker onInsert={handlePhotoInsert} onClose={() => showPhotoPicker = false} />
+{/if}
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}

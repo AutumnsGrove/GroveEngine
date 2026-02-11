@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
   "lastUpdated": "2026-02-11",
-  "lastAuditedBy": "PassageTransition navigation overlay",
+  "lastAuditedBy": "PhotoPicker gallery insertion for Flow editor (#1031)",
   "components": {
     "total": 213,
     "breakdown": {
@@ -38,6 +38,23 @@
       "indicators": "packages/engine/src/lib/ui/components/indicators",
       "icons": "packages/engine/src/lib/ui/components/icons"
     }
+  },
+  "adminComponents": {
+    "total": 8,
+    "path": "packages/engine/src/lib/components/admin",
+    "items": [
+      "MarkdownEditor.svelte",
+      "PhotoPicker.svelte",
+      "FiresideChat.svelte",
+      "VoiceInput.svelte",
+      "GutterManager.svelte",
+      "LumenAnalytics.svelte",
+      "ZephyrAnalytics.svelte",
+      "SafetyMonitoring.svelte"
+    ]
+  },
+  "utilities": {
+    "markdownPlugins": ["markdown-hum.ts", "markdown-directives.ts"]
   },
   "documentation": {
     "componentReference": "docs/design-system/COMPONENT-REFERENCE.md",
