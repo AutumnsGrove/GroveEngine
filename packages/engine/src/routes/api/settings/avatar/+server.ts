@@ -137,7 +137,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     if (hasLumenProvider) {
       const lumen = createLumenClient({
-        openrouterApiKey,
+        openrouterApiKey: openrouterApiKey ?? "",
         ai: platform!.env!.AI,
         db,
       });
