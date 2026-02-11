@@ -22,6 +22,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
   // sign-in with a helpful error rather than silently sending the user
   // to a destination where they'd be unauthenticated.
   // Heartwood sets cookies with domain=.grove.place, so they're visible here.
+  // Domain spoofing is not a concern: SvelteKit's cookies.get() only returns
+  // cookies that the browser sent for the current origin — browsers enforce
+  // cookie domain scoping before the request even reaches the server.
   const hasSession =
     cookies.get("better-auth.session_token") ||
     cookies.get("__Secure-better-auth.session_token");

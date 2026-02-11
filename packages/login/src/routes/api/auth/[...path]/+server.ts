@@ -32,9 +32,12 @@ const SKIP_RESPONSE_HEADERS = new Set(["transfer-encoding", "connection"]);
  * Proxy a request to Heartwood and return the full response,
  * including all headers (especially Set-Cookie).
  *
- * CSRF note: State-changing methods (POST, PUT, DELETE, PATCH) are protected
- * by origin validation in hooks.server.ts, which runs for every request before
- * this handler. SvelteKit hooks cannot be bypassed — they are the entry point.
+ * CSRF note: This handler does NOT perform its own CSRF validation.
+ * CSRF protection happens upstream in hooks.server.ts, which runs for every
+ * request before any route handler executes. By the time this function is
+ * called, state-changing methods (POST, PUT, DELETE, PATCH) have already
+ * passed origin validation. SvelteKit hooks cannot be bypassed — they are
+ * the mandatory entry point for all requests.
  */
 async function proxyToHeartwood({
   request,
@@ -50,10 +53,11 @@ async function proxyToHeartwood({
   }
 
   // Validate path: strict allowlist of characters permitted in better-auth routes.
-  // Only letters, digits, hyphens, and slashes — rejects encoded traversals (%2e),
-  // null bytes, dots, and anything else that could escape /api/auth/ boundaries.
-  // Defense-in-depth: SvelteKit normalizes URL encoding and the service binding
-  // is internal (Worker-to-Worker), but we don't rely on either assumption.
+  // Only letters, digits, hyphens, and slashes — dots are blocked because they
+  // enable path traversal (../) and are not used in any better-auth endpoint.
+  // SvelteKit decodes percent-encoded characters (e.g., %2e → .) BEFORE routing,
+  // so this regex catches both literal and encoded variants. The service binding
+  // is also internal (Worker-to-Worker), but we don't rely on either layer alone.
   const path = params.path || "";
   if (!path || !/^[a-zA-Z0-9\-/]+$/.test(path)) {
     return new Response(JSON.stringify({ error: "Invalid path" }), {
