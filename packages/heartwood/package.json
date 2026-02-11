@@ -12,20 +12,20 @@
     "test:e2e": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {
-    "@better-auth/passkey": "^1.4.10",
-    "better-auth": "^1.4.10",
+    "@better-auth/passkey": "^1.4.18",
+    "better-auth": "^1.4.18",
     "better-auth-cloudflare": "^0.2.9",
     "drizzle-orm": "0.44.5",
-    "hono": "^4.10.7",
+    "hono": "^4.11.9",
     "jose": "^6.1.3",
-    "zod": "^4.1.13"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251205.0",
-    "@playwright/test": "^1.52.0",
-    "@types/node": "^24.10.1",
+    "@cloudflare/workers-types": "^4.20260210.0",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^24.10.13",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.15",
-    "wrangler": "^4.63.0"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.64.0"
   }
 }
