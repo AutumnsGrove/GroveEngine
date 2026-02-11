@@ -173,6 +173,7 @@ def _print_rich_status(status) -> None:
 @click.option("--author", help="Filter by author")
 @click.option("--since", help="Show commits since date (e.g., '3 days ago')")
 @click.option("--file", "file_path", help="Show commits for specific file")
+@click.option("--graph", is_flag=True, help="Show branch graph (incompatible with --json)")
 @click.pass_context
 def log(
     ctx: click.Context,
@@ -181,6 +182,7 @@ def log(
     author: Optional[str],
     since: Optional[str],
     file_path: Optional[str],
+    graph: bool,
 ) -> None:
     """Show commit log.
 
@@ -202,6 +204,22 @@ def log(
         if not git.is_repo():
             console.print("[red]Not a git repository[/red]")
             raise SystemExit(1)
+
+        if graph:
+            args = ["log", f"-{limit}", "--graph", "--oneline", "--decorate", "--color=never"]
+            if author:
+                args.append(f"--author={author}")
+            if since:
+                args.append(f"--since={since}")
+            if file_path:
+                args.extend(["--", file_path])
+            output = git.execute(args)
+            if output.strip():
+                syntax = Syntax(output, "text", theme="monokai", line_numbers=False)
+                console.print(syntax)
+            else:
+                console.print("[dim]No commits[/dim]")
+            return
 
         commits = git.log(
             limit=limit,
@@ -451,6 +469,236 @@ def show(ctx: click.Context, ref: str, stat_only: bool) -> None:
         # Show with syntax highlighting
         syntax = Syntax(output, "diff", theme="monokai", line_numbers=False)
         console.print(syntax)
+
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--prune", "-p", is_flag=True, help="Remove deleted remote branches")
+@click.option("--all", "all_remotes", is_flag=True, help="Fetch from all remotes")
+@click.option("--tags", is_flag=True, help="Fetch all tags")
+@click.argument("remote", default="origin")
+@click.argument("branch", required=False)
+@click.pass_context
+def fetch(
+    ctx: click.Context,
+    prune: bool,
+    all_remotes: bool,
+    tags: bool,
+    remote: str,
+    branch: Optional[str],
+) -> None:
+    """Fetch refs from remote without merging.
+
+    Always safe - no --write flag required. Downloads new commits,
+    branches, and tags from the remote without modifying your working tree.
+
+    \b
+    Examples:
+        gw git fetch                    # Fetch from origin
+        gw git fetch --prune            # Fetch and prune deleted branches
+        gw git fetch --all              # Fetch from all remotes
+        gw git fetch upstream main      # Fetch specific remote/branch
+        gw git fetch --tags             # Fetch all tags
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        args = ["fetch"]
+
+        if all_remotes:
+            args.append("--all")
+        else:
+            args.append(remote)
+            if branch:
+                args.append(branch)
+
+        if prune:
+            args.append("--prune")
+        if tags:
+            args.append("--tags")
+
+        # Fetch outputs to stderr, capture it
+        output = git.execute(args)
+
+        if output_json:
+            data = {
+                "remote": "all" if all_remotes else remote,
+                "pruned": prune,
+            }
+            console.print(json.dumps(data))
+        else:
+            target = "all remotes" if all_remotes else remote
+            if branch:
+                target = f"{remote}/{branch}"
+            console.print(f"[green]Fetched from {target}[/green]")
+            if prune:
+                console.print("[dim]Pruned stale remote-tracking branches[/dim]")
+
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--limit", "-n", default=20, help="Number of entries to show")
+@click.pass_context
+def reflog(ctx: click.Context, limit: int) -> None:
+    """Show reference log - history of HEAD changes.
+
+    Always safe - no --write flag required. The reflog records when
+    branch tips and HEAD were updated. Invaluable for recovering
+    commits after reset or rebase.
+
+    \b
+    Examples:
+        gw git reflog                  # Last 20 entries
+        gw git reflog --limit 50       # More entries
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        output = git.execute([
+            "reflog", "show",
+            f"-{limit}",
+            "--format=%h %gd %gs (%cr)",
+        ])
+
+        if not output.strip():
+            console.print("[dim]No reflog entries[/dim]")
+            return
+
+        if output_json:
+            entries = []
+            for line in output.strip().split("\n"):
+                if line.strip():
+                    entries.append({"raw": line.strip()})
+            console.print(json.dumps({"entries": entries}, indent=2))
+            return
+
+        table = Table(title="Reflog", border_style="green")
+        table.add_column("Hash", style="yellow", width=8)
+        table.add_column("Ref", style="cyan", width=16)
+        table.add_column("Action", style="white")
+        table.add_column("When", style="dim")
+
+        for line in output.strip().split("\n"):
+            if not line.strip():
+                continue
+            # Parse: hash ref action (time)
+            parts = line.strip().split(" ", 2)
+            if len(parts) >= 3:
+                hash_short = parts[0]
+                ref = parts[1]
+                # Split action from time
+                rest = parts[2]
+                if rest.endswith(")"):
+                    paren_idx = rest.rfind("(")
+                    if paren_idx > 0:
+                        action = rest[:paren_idx].strip()
+                        when = rest[paren_idx + 1:-1]
+                    else:
+                        action = rest
+                        when = ""
+                else:
+                    action = rest
+                    when = ""
+                table.add_row(hash_short, ref, action, when)
+
+        console.print(table)
+        console.print(f"\n[dim]Showing {limit} most recent entries[/dim]")
+
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--limit", "-n", default=None, type=int, help="Limit number of authors shown")
+@click.option("--since", help="Show commits since date (e.g., 'v1.0.0', '3 months ago')")
+@click.option("--summary", "-s", is_flag=True, help="Show only commit counts")
+@click.pass_context
+def shortlog(
+    ctx: click.Context,
+    limit: Optional[int],
+    since: Optional[str],
+    summary: bool,
+) -> None:
+    """Summarize commit log by author.
+
+    Always safe - no --write flag required. Shows commit counts
+    per author, useful for changelogs and contribution summaries.
+
+    \b
+    Examples:
+        gw git shortlog                        # All authors
+        gw git shortlog --summary              # Just counts
+        gw git shortlog --since "v1.0.0"       # Since a tag
+        gw git shortlog --since "3 months ago" # Recent activity
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        args = ["shortlog", "-sne", "HEAD"]
+        if since:
+            args.insert(1, f"--since={since}")
+
+        output = git.execute(args)
+
+        if not output.strip():
+            console.print("[dim]No commits found[/dim]")
+            return
+
+        # Parse shortlog output: "  count\tAuthor Name <email>"
+        authors = []
+        for line in output.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split("\t", 1)
+            if len(parts) == 2:
+                count = int(parts[0].strip())
+                author_info = parts[1].strip()
+                authors.append({"count": count, "author": author_info})
+
+        if limit:
+            authors = authors[:limit]
+
+        if output_json:
+            console.print(json.dumps({"authors": authors}, indent=2))
+            return
+
+        table = Table(title="Contributors", border_style="green")
+        table.add_column("Commits", style="cyan", justify="right", width=8)
+        table.add_column("Author")
+
+        for entry in authors:
+            table.add_row(str(entry["count"]), entry["author"])
+
+        console.print(table)
+
+        total = sum(a["count"] for a in authors)
+        console.print(f"\n[dim]{total} commits from {len(authors)} contributor(s)[/dim]")
 
     except GitError as e:
         console.print(f"[red]Git error:[/red] {e.message}")

@@ -17,6 +17,7 @@ from ...safety.git import (
     check_git_safety,
     extract_issue_number,
     format_conventional_commit,
+    is_agent_mode,
     validate_conventional_commit,
 )
 
@@ -817,4 +818,192 @@ def cherry_pick(ctx: click.Context, write: bool, commits: tuple[str, ...]) -> No
             )
         else:
             console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.option("--staged", "-S", is_flag=True, help="Unstage files (restore from index)")
+@click.option("--source", help="Restore from a specific commit (e.g., HEAD~1)")
+@click.argument("paths", nargs=-1, required=True)
+@click.pass_context
+def restore(
+    ctx: click.Context,
+    write: bool,
+    staged: bool,
+    source: Optional[str],
+    paths: tuple[str, ...],
+) -> None:
+    """Restore working tree files or unstage changes.
+
+    Requires --write flag. Discards changes to specific files, or
+    unstages them with --staged. More targeted than reset.
+
+    \b
+    Examples:
+        gw git restore --write src/file.ts              # Discard unstaged changes
+        gw git restore --write --staged src/file.ts     # Unstage a file
+        gw git restore --write --source HEAD~1 src/     # Restore from previous commit
+        gw git restore --write .                        # Discard all unstaged changes
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_git_safety("restore", write_flag=write)
+    except GitSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        # Warn when restoring everything
+        if "." in paths and not staged and not output_json:
+            status = git.status()
+            change_count = len(status.unstaged)
+            if change_count > 0:
+                console.print(
+                    f"[yellow]About to discard unstaged changes in {change_count} file(s)[/yellow]"
+                )
+
+        args = ["restore"]
+        if staged:
+            args.append("--staged")
+        if source:
+            args.extend(["--source", source])
+        args.extend(list(paths))
+
+        git.execute(args)
+
+        if output_json:
+            console.print(json.dumps({
+                "restored": list(paths),
+                "staged": staged,
+                "source": source,
+            }))
+        else:
+            action = "Unstaged" if staged else "Restored"
+            console.print(f"[green]{action} {len(paths)} path(s)[/green]")
+            if source:
+                console.print(f"[dim]From: {source}[/dim]")
+
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.option("--force", is_flag=True, help="Confirm dangerous operation")
+@click.option("--dry-run", "-n", is_flag=True, help="Show what would be removed without removing")
+@click.option("--ignored", "-x", is_flag=True, help="Also remove ignored files (build artifacts, etc.)")
+@click.option("--directories", "-d", is_flag=True, help="Also remove untracked directories")
+@click.pass_context
+def clean(
+    ctx: click.Context,
+    write: bool,
+    force: bool,
+    dry_run: bool,
+    ignored: bool,
+    directories: bool,
+) -> None:
+    """Remove untracked files from the working tree (DANGEROUS).
+
+    Requires --write --force flags (or just --write for --dry-run).
+    BLOCKED in agent mode. Permanently deletes files not tracked by git.
+
+    \b
+    Examples:
+        gw git clean --write --dry-run              # Preview what would be removed
+        gw git clean --write --force                # Remove untracked files
+        gw git clean --write --force --directories  # Also remove untracked dirs
+        gw git clean --write --force --ignored      # Also remove ignored files
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    # Dry-run is safe, only actual clean is dangerous
+    if dry_run:
+        try:
+            check_git_safety("status", write_flag=True)  # READ tier
+        except GitSafetyError:
+            pass  # Always allow dry-run
+    else:
+        try:
+            check_git_safety("clean", write_flag=write, force_flag=force)
+        except GitSafetyError as e:
+            console.print(f"[red]Safety check failed:[/red] {e.message}")
+            if e.suggestion:
+                console.print(f"[dim]{e.suggestion}[/dim]")
+            raise SystemExit(1)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        args = ["clean"]
+
+        if dry_run:
+            args.append("-n")  # dry-run
+        else:
+            args.append("-f")  # force (git requires this)
+
+        if ignored:
+            args.append("-x")
+        if directories:
+            args.append("-d")
+
+        output = git.execute(args)
+
+        if output_json:
+            files = [
+                line.replace("Would remove ", "").replace("Removing ", "").strip()
+                for line in output.strip().split("\n")
+                if line.strip()
+            ]
+            console.print(json.dumps({
+                "dry_run": dry_run,
+                "files": files,
+                "count": len(files),
+            }))
+        else:
+            if dry_run:
+                lines = [l for l in output.strip().split("\n") if l.strip()]
+                if lines:
+                    console.print(Panel(
+                        f"[bold yellow]Dry Run[/bold yellow] — nothing will be deleted",
+                        border_style="yellow",
+                    ))
+                    table = Table(border_style="yellow")
+                    table.add_column("Would Remove", style="yellow")
+                    for line in lines:
+                        cleaned = line.replace("Would remove ", "").strip()
+                        table.add_row(cleaned)
+                    console.print(table)
+                    console.print(
+                        f"\n[dim]{len(lines)} file(s) would be removed. "
+                        f"Run with --force to actually remove.[/dim]"
+                    )
+                else:
+                    console.print("[dim]Nothing to clean — working tree is tidy[/dim]")
+            else:
+                lines = [l for l in output.strip().split("\n") if l.strip()]
+                if lines:
+                    for line in lines:
+                        cleaned = line.replace("Removing ", "").strip()
+                        console.print(f"[red]Removed:[/red] {cleaned}")
+                    console.print(f"\n[green]Cleaned {len(lines)} file(s)[/green]")
+                else:
+                    console.print("[dim]Nothing to clean — working tree is tidy[/dim]")
+
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
         raise SystemExit(1)

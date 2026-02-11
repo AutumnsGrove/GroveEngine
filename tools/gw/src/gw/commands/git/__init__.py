@@ -2,12 +2,15 @@
 
 import click
 
-from .read import diff, log, show, status, blame
-from .write import add, branch, cherry_pick, commit, pull, push, stash, switch, unstage
+from .read import diff, log, show, status, blame, fetch, reflog, shortlog
+from .write import add, branch, cherry_pick, commit, pull, push, stash, switch, unstage, restore, clean
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
 from .workflows import prep, ship
 from .worktree import worktree
+from .remote import remote
+from .tag import tag
+from .config_cmd import git_config
 
 
 @click.group()
@@ -19,15 +22,16 @@ def git() -> None:
 
     \b
     Safety Tiers:
-    - READ:      status, log, diff, blame, show (always safe)
-    - WRITE:     commit, push, pull, add, branch (require --write)
-    - DANGEROUS: force-push, reset, rebase (require --write --force)
+    - READ:      status, log, diff, blame, show, fetch, reflog, shortlog (always safe)
+    - WRITE:     commit, push, pull, add, branch, restore, tag, config (require --write)
+    - DANGEROUS: force-push, reset, rebase, clean (require --write --force)
     - PROTECTED: Force-push to main/production (always blocked)
 
     \b
     Examples:
         gw git status              # Always safe
         gw git log --limit 5       # Always safe
+        gw git fetch --prune       # Always safe
         gw git commit --write -m "feat: add feature"
         gw git push --write
     """
@@ -40,6 +44,9 @@ git.add_command(log)
 git.add_command(diff)
 git.add_command(blame)
 git.add_command(show)
+git.add_command(fetch)
+git.add_command(reflog)
+git.add_command(shortlog)
 
 # Register write commands
 git.add_command(add)
@@ -51,6 +58,8 @@ git.add_command(stash)
 git.add_command(switch)
 git.add_command(unstage)
 git.add_command(cherry_pick, name="cherry-pick")
+git.add_command(restore)
+git.add_command(clean)
 
 # Register dangerous commands
 git.add_command(reset)
@@ -72,3 +81,8 @@ git.add_command(prep)
 
 # Register worktree commands
 git.add_command(worktree)
+
+# Register group commands
+git.add_command(remote)
+git.add_command(tag)
+git.add_command(git_config)
