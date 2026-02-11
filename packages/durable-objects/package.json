@@ -9,6 +9,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@autumnsgrove/groveengine": "^0.9.99",
     "fflate": "^0.8.2"
   },
   "devDependencies": {

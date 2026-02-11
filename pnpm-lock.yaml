@@ -118,6 +118,9 @@ importers:
 
   packages/durable-objects:
     dependencies:
+      '@autumnsgrove/groveengine':
+        specifier: ^0.9.99
+        version: 0.9.99(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.0)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)))(svelte@5.50.0)(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(svelte@5.50.0)(tailwindcss@4.1.18)
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -912,6 +915,13 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
+
+  '@autumnsgrove/groveengine@0.9.99':
+    resolution: {integrity: sha512-hiRbh94ovS9RmRW57+0ygzB2+GBSTXq/dRkEMsdVUxoGinrQiBgi+cfOg/gWtKH/nIbQMWCFWENg+p/jIJp7UA==}
+    peerDependencies:
+      '@sveltejs/kit': ^2.0.0
+      svelte: ^5.0.0
+      tailwindcss: ^3.4.0
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -6025,6 +6035,31 @@ snapshots:
     optionalDependencies:
       svelte: 5.50.0
 
+  '@autumnsgrove/groveengine@0.9.99(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.0)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)))(svelte@5.50.0)(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(svelte@5.50.0)(tailwindcss@4.1.18)':
+    dependencies:
+      '@11ty/gray-matter': 2.0.1
+      '@autumnsgrove/gossamer': 0.1.1(svelte@5.50.0)
+      '@jsquash/jxl': 1.3.0
+      '@lemonsqueezy/lemonsqueezy.js': 4.0.0
+      '@react-email/components': 1.0.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@react-email/render': 2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@sveltejs/kit': 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.0)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)))(svelte@5.50.0)(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2))
+      clsx: 2.1.1
+      dom-to-image-more: 3.7.2
+      dompurify: 3.3.1
+      esm-env: 1.2.2
+      lucide-svelte: 0.554.0(svelte@5.50.0)
+      markdown-it: 14.1.0
+      resend: 4.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      sanitize-html: 2.17.0
+      svelte: 5.50.0
+      svelte-sonner: 1.0.7(svelte@5.50.0)
+      tailwind-merge: 3.4.0
+      tailwindcss: 4.1.18
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   '@babel/code-frame@7.27.1':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -7497,7 +7532,6 @@ snapshots:
       vite: 7.3.0(@types/node@24.10.11)(jiti@2.4.2)
     optionalDependencies:
       typescript: 5.9.3
-    optional: true
 
   '@sveltejs/package@2.5.7(svelte@5.50.0)(typescript@5.9.3)':
     dependencies:
@@ -7527,7 +7561,6 @@ snapshots:
       vite: 7.3.0(@types/node@24.10.11)(jiti@2.4.2)
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.0)(vite@5.4.21(@types/node@24.10.11))':
     dependencies:
@@ -7554,7 +7587,6 @@ snapshots:
       vitefu: 1.1.1(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@swc/helpers@0.5.18':
     dependencies:
@@ -10718,7 +10750,6 @@ snapshots:
   vitefu@1.1.1(vite@7.3.0(@types/node@24.10.11)(jiti@2.4.2)):
     optionalDependencies:
       vite: 7.3.0(@types/node@24.10.11)(jiti@2.4.2)
-    optional: true
 
   vitest@2.1.9(@types/node@24.10.11)(@vitest/ui@2.1.9)(happy-dom@20.0.11)(jsdom@25.0.1):
     dependencies:

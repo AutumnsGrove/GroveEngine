@@ -40,6 +40,11 @@ class_name = "SentinelDO"
 name = "EXPORTS"
 class_name = "ExportDO"
 
+# TriageDO: Email triage processing + digest scheduling (alarm-based)
+[[durable_objects.bindings]]
+name = "TRIAGE"
+class_name = "TriageDO"
+
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
 # =============================================================================
@@ -59,12 +64,37 @@ new_sqlite_classes = ["SentinelDO"]
 tag = "v4"
 new_sqlite_classes = ["ExportDO"]
 
+[[migrations]]
+tag = "v5"
+new_sqlite_classes = ["TriageDO"]
+
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
 # =============================================================================
 [[services]]
 binding = "ZEPHYR"
 service = "grove-zephyr"
+
+# =============================================================================
+# Ivy D1 Database - For TriageDO email queries
+# =============================================================================
+[[d1_databases]]
+binding = "IVY_DB"
+database_name = "ivy-db"
+database_id = "57738720-bc43-4a7f-ad5b-ceb86b3c0542"
+
+# =============================================================================
+# Ivy R2 Bucket - For TriageDO email body storage
+# =============================================================================
+[[r2_buckets]]
+binding = "IVY_R2"
+bucket_name = "ivy-storage"
+
+# =============================================================================
+# Workers AI - For Lumen classification in TriageDO
+# =============================================================================
+[ai]
+binding = "AI"
 
 # =============================================================================
 # KV Namespace - For caching and rate limiting (used by SentinelDO)
