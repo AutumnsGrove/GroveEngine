@@ -1,5 +1,5 @@
 <script>
-  import { GlassCard, Spinner, GroveTerm, GroveSwap, BetaBadge, BetaWelcomeDialog, GroveIntro } from '$lib/ui';
+  import { GlassCard, Spinner, GroveTerm, GroveSwap, BetaBadge, BetaWelcomeDialog, GroveIntro, Badge } from '$lib/ui';
   import { toast } from '$lib/ui/components/ui/toast';
   import { api, getUserDisplayName } from "$lib/utils";
   import {
@@ -145,7 +145,13 @@
           {#if loading}
             <Spinner />
           {:else if stats?.topTags?.length}
-            <span class="stat-value text-sm">{stats.topTags.slice(0, 3).join(', ')}</span>
+            <div class="tag-list">
+              {#each stats.topTags as tag (tag)}
+                <a href="/garden/search?tag={encodeURIComponent(tag)}" class="dashboard-tag-link" aria-label="Filter posts by tag: {tag}">
+                  <Badge variant="tag">{tag}</Badge>
+                </a>
+              {/each}
+            </div>
           {:else}
             <span class="stat-value text-muted">No tags yet</span>
           {/if}
@@ -290,13 +296,24 @@
     color: var(--color-text);
   }
 
-  .stat-value.text-sm {
-    font-size: 0.875rem;
-  }
-
   .stat-value.text-muted {
     color: var(--color-text-muted);
     font-size: 0.875rem;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .dashboard-tag-link {
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .dashboard-tag-link:hover {
+    opacity: 0.8;
   }
 
   /* Glass action cards */
