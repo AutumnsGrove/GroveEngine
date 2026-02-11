@@ -19,6 +19,18 @@ const config = {
         "http://127.0.0.1:*",
       ],
     },
+    csp: {
+      mode: "nonce",
+      directives: {
+        "default-src": ["self"],
+        "script-src": ["self"],
+        "style-src": ["self", "unsafe-inline"],
+        "img-src": ["self", "data:"],
+        "connect-src": ["self", "https://*.grove.place"],
+        "frame-ancestors": ["none"],
+        "upgrade-insecure-requests": true,
+      },
+    },
   },
 };
 

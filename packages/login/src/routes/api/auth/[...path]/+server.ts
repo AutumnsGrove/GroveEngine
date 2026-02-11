@@ -4,9 +4,10 @@
  * Catch-all route that proxies all /api/auth/* requests to Heartwood
  * via Cloudflare service binding (Worker-to-Worker, no public internet).
  *
- * CRITICAL: This proxy forwards ALL response headers from Heartwood,
- * including Set-Cookie. This is what makes passkey registration work —
- * the challenge cookie (better-auth-passkey) must reach the browser.
+ * Security hardening per docs/security/hawk-report-2026-02-10-login-auth-hub.md:
+ * - Response header allowlist limits blast radius from Heartwood (HAWK-005)
+ * - Request body size limit prevents resource abuse (HAWK-006)
+ * - Cookie filtering sends only auth-related cookies (HAWK-007)
  *
  * By running on login.grove.place (same origin as the auth UI pages),
  * all cookies are first-party and WebAuthn origin matches automatically.
@@ -15,6 +16,9 @@
 import type { RequestHandler } from "./$types";
 
 const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+
+/** Max request body size for auth endpoints (1MB — generous for JSON payloads) */
+const MAX_BODY_SIZE = 1_048_576;
 
 /** Headers to skip when proxying (hop-by-hop or set by the platform) */
 const SKIP_REQUEST_HEADERS = new Set([
@@ -25,19 +29,55 @@ const SKIP_REQUEST_HEADERS = new Set([
   "upgrade",
 ]);
 
-/** Response headers that should NOT be forwarded to the client */
-const SKIP_RESPONSE_HEADERS = new Set(["transfer-encoding", "connection"]);
+/**
+ * Response headers allowed to pass through from Heartwood. (HAWK-005)
+ * Allowlist approach limits blast radius if Heartwood ever returns unexpected headers.
+ */
+const ALLOWED_RESPONSE_HEADERS = new Set([
+  "content-type",
+  "content-length",
+  "set-cookie",
+  "cache-control",
+  "location",
+  "vary",
+  "etag",
+  "last-modified",
+  "x-request-id",
+]);
+
+/**
+ * Auth-related cookie names to forward to Heartwood. (HAWK-007)
+ * Only these cookies are sent — analytics, preferences, etc. are filtered out.
+ */
+const AUTH_COOKIE_NAMES = new Set([
+  "grove_session",
+  "session_token",
+  "session",
+  "access_token",
+  "refresh_token",
+  "better-auth.session_token",
+  "__Secure-better-auth.session_token",
+  "better-auth-passkey",
+  "better-auth.oauth_state",
+]);
+
+/** Check if a cookie name matches an auth cookie (exact or prefix match) */
+function isAuthCookie(name: string): boolean {
+  if (AUTH_COOKIE_NAMES.has(name)) return true;
+  // Catch any future better-auth cookies by prefix
+  if (name.startsWith("better-auth")) return true;
+  if (name.startsWith("__Secure-better-auth")) return true;
+  return false;
+}
 
 /**
  * Proxy a request to Heartwood and return the full response,
- * including all headers (especially Set-Cookie).
+ * including allowed headers (especially Set-Cookie for passkey challenges).
  *
  * CSRF note: This handler does NOT perform its own CSRF validation.
- * CSRF protection happens upstream in hooks.server.ts, which runs for every
- * request before any route handler executes. By the time this function is
- * called, state-changing methods (POST, PUT, DELETE, PATCH) have already
- * passed origin validation. SvelteKit hooks cannot be bypassed — they are
- * the mandatory entry point for all requests.
+ * CSRF protection is handled by SvelteKit's built-in csrf.checkOrigin
+ * (configured in svelte.config.js trustedOrigins), which runs for every
+ * state-changing request before any route handler executes.
  */
 async function proxyToHeartwood({
   request,
@@ -66,22 +106,36 @@ async function proxyToHeartwood({
     });
   }
 
+  // Body size check for state-changing requests (HAWK-006)
+  // Auth endpoints handle small JSON payloads; reject anything unreasonably large.
+  if (!["GET", "HEAD"].includes(request.method)) {
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+      return new Response(JSON.stringify({ error: "Request body too large" }), {
+        status: 413,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }
+
   const authBaseUrl = platform.env.GROVEAUTH_URL || DEFAULT_AUTH_URL;
   const targetUrl = `${authBaseUrl}/api/auth/${path}`;
 
-  // Forward cookies for session identification.
+  // Forward only auth-related cookies for session identification. (HAWK-007)
   // Reconstructed as simple name=value pairs — security attributes (HttpOnly,
   // Secure, SameSite) are intentionally omitted because this is a server-to-server
   // request via Cloudflare service binding (Worker-to-Worker, never public internet).
   // Heartwood only needs the cookie values for session lookup.
-  const cookieHeader = cookies
-    .getAll()
+  const authCookies = cookies.getAll().filter((c) => isAuthCookie(c.name));
+  const cookieHeader = authCookies
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
   // Build proxied request headers
   const proxyHeaders = new Headers();
-  proxyHeaders.set("Cookie", cookieHeader);
+  if (cookieHeader) {
+    proxyHeaders.set("Cookie", cookieHeader);
+  }
 
   // Forward relevant request headers
   for (const [key, value] of request.headers.entries()) {
@@ -99,11 +153,12 @@ async function proxyToHeartwood({
       : await request.arrayBuffer(),
   });
 
-  // Forward ALL response headers, including Set-Cookie (critical for passkey challenge)
-  // Skip hop-by-hop headers that shouldn't be forwarded
+  // Forward only allowed response headers (HAWK-005)
+  // Allowlist limits blast radius if Heartwood returns unexpected headers.
+  // Set-Cookie is critical for passkey challenge cookies.
   const responseHeaders = new Headers();
   response.headers.forEach((value, key) => {
-    if (!SKIP_RESPONSE_HEADERS.has(key.toLowerCase())) {
+    if (ALLOWED_RESPONSE_HEADERS.has(key.toLowerCase())) {
       responseHeaders.append(key, value);
     }
   });

@@ -128,10 +128,59 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
         // kv: env.SESSION_KV,  // Disabled: KV session bug (PR #7583) - sessions lack ID field
       },
       {
-        // Disable Better Auth's built-in rate limiting
-        // Grove uses its own Threshold pattern for rate limiting
+        // Better Auth's built-in rate limiting — catch-all safety net.
+        // Grove's Hono middleware rate limiters (rateLimit.ts) provide tight
+        // per-endpoint controls on sensitive routes (magic link, passkey, admin).
+        // This layer catches everything else (OAuth, sign-up, etc.).
+        // See HAWK-001 in docs/security/hawk-report-2026-02-10-login-auth-hub.md
+        // Uses customStorage to reuse the existing rate_limits D1 table.
         rateLimit: {
-          enabled: false,
+          enabled: true,
+          window: 60,
+          max: 100,
+          customRules: {
+            "/sign-in/*": { window: 60, max: 20 },
+            "/sign-up/*": { window: 60, max: 10 },
+            "/callback/*": { window: 60, max: 30 },
+          },
+          customStorage: {
+            get: async (key) => {
+              try {
+                const row = await env.DB.prepare(
+                  "SELECT count, window_start FROM rate_limits WHERE key = ?",
+                )
+                  .bind(`ba:${key}`)
+                  .first<{ count: number; window_start: string }>();
+                if (!row) return null;
+                return {
+                  key: `ba:${key}`,
+                  count: row.count,
+                  lastRequest: new Date(row.window_start).getTime(),
+                };
+              } catch {
+                return null;
+              }
+            },
+            set: async (key, value) => {
+              try {
+                await env.DB.prepare(
+                  `INSERT INTO rate_limits (key, count, window_start)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(key) DO UPDATE SET count = ?, window_start = ?`,
+                )
+                  .bind(
+                    `ba:${key}`,
+                    value.count,
+                    new Date(value.lastRequest).toISOString(),
+                    value.count,
+                    new Date(value.lastRequest).toISOString(),
+                  )
+                  .run();
+              } catch {
+                // Rate limit storage failure shouldn't block auth requests
+              }
+            },
+          },
         },
       },
     ),
