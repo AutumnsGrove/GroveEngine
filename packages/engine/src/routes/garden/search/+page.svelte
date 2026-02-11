@@ -40,8 +40,10 @@
 	}
 
 	// Track search results from ContentSearch
+	// FIX: Initialize with all posts to prevent empty results when landing with ?tag= parameter
+	// ContentSearch will update this via handleSearchChange callback
 	/** @type {any[]} */
-	let searchResults = $state([]);
+	let searchResults = $state(postsWithLowercase);
 	/**
 	 * @param {string} _query
 	 * @param {any[]} results
@@ -54,7 +56,11 @@
 	// This ensures filteredPosts updates whenever searchResults OR selectedTag changes
 	let filteredPosts = $derived.by(() => {
 		if (selectedTag) {
-			return searchResults.filter(post => post.tags.includes(selectedTag));
+			// FIX: Case-insensitive tag comparison to handle mixed case tags
+			const tagLower = selectedTag.toLowerCase();
+			return searchResults.filter(post =>
+				post.tags.some(tag => tag.toLowerCase() === tagLower)
+			);
 		}
 		return searchResults;
 	});
