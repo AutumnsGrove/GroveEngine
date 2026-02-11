@@ -190,15 +190,14 @@
 	}
 	.gutter-photo img {
 		width: 100%;
-		max-width: 160px;
 		height: auto;
 		border-radius: 8px;
 		display: block;
 		transition: opacity 0.2s, transform 0.2s;
 	}
-	/* Also constrain images in markdown comments */
+	/* Images in markdown comments fill their container */
 	.gutter-comment :global(img) {
-		max-width: 160px;
+		max-width: 100%;
 		height: auto;
 		border-radius: 6px;
 		display: block;
@@ -220,7 +219,7 @@
 	/* Gallery styles for gutter - using GlassCarousel */
 	.gutter-gallery {
 		width: 100%;
-		max-width: 180px;
+		max-width: 100%;
 	}
 	/* Compact carousel for gutter */
 	.gutter-gallery :global(.gutter-carousel) {
@@ -255,7 +254,7 @@
 		border: 1px dashed rgba(0, 0, 0, 0.15);
 		border-radius: 10px;
 		text-align: center;
-		max-width: 180px;
+		max-width: 100%;
 	}
 	.gutter-gallery-empty span {
 		font-size: 0.75rem;
@@ -303,6 +302,6 @@
 	/* Embed styles */
 	.gutter-embed {
 		width: 100%;
-		max-width: 220px;
+		max-width: 100%;
 	}
 </style>

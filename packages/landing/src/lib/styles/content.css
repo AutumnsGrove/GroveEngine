@@ -25,45 +25,11 @@
   gap: 2rem;
 }
 
-/* Desktop: Both gutters */
-@media (min-width: 1200px) {
-  .content-layout.has-both-gutters {
-    grid-template-columns: 240px 1fr 200px;
-  }
-
-  .content-layout.has-left-gutter:not(.has-both-gutters) {
-    grid-template-columns: 240px 1fr;
-    max-width: 1100px;
-  }
-
-  .content-layout.has-right-gutter:not(.has-both-gutters) {
+/* Desktop + Tablet: Right gutter (TOC) only needs grid */
+@media (min-width: 769px) {
+  .content-layout.has-right-gutter {
     grid-template-columns: 1fr 200px;
     max-width: 1000px;
-  }
-}
-
-/* Tablet: Both gutters */
-@media (min-width: 769px) and (max-width: 1199px) {
-  .content-layout.has-both-gutters {
-    grid-template-columns: 200px 1fr 200px;
-    max-width: 1200px;
-  }
-
-  .content-layout.has-left-gutter:not(.has-both-gutters) {
-    grid-template-columns: 200px 1fr;
-    max-width: 900px;
-  }
-
-  .content-layout.has-right-gutter:not(.has-both-gutters) {
-    grid-template-columns: 1fr 200px;
-    max-width: 900px;
-  }
-
-  /* Hide mobile gutter content since left gutter container is visible */
-  .mobile-gutter-content,
-  .mobile-gutter-inline {
-    display: none !important;
-    float: none;
   }
 }
 
@@ -95,16 +61,29 @@
   text-align: center;
 }
 
+/* Desktop (>=769px): float LEFT, punch into left margin */
 .mobile-gutter-inline {
-  float: right;
-  clear: right;
-  width: 35%;
-  max-width: 250px;
-  min-width: 120px;
-  margin: 0.25rem 0 1rem 1.5rem;
+  float: left;
+  clear: left;
+  width: 38%;
+  max-width: 300px;
+  min-width: 160px;
+  margin: 0.5rem 1.5rem 1rem -2rem;
   padding: 0;
   background: none;
   border-radius: 0;
+}
+
+/* Mobile (<769px): float RIGHT */
+@media (max-width: 768px) {
+  .mobile-gutter-inline {
+    float: right;
+    clear: right;
+    width: 35%;
+    max-width: 250px;
+    min-width: 120px;
+    margin: 0.25rem 0 1rem 1.5rem;
+  }
 }
 
 /* On very small mobile, don't float - just display inline and centered */
@@ -112,6 +91,7 @@
   .mobile-gutter-inline {
     float: none;
     clear: none;
+    width: auto;
     max-width: none;
     margin: 1rem auto 1.5rem auto;
     padding: 0.75rem;
@@ -129,89 +109,21 @@
   background: #1a1a1a;
 }
 
-@media (min-width: 1200px) {
-  .mobile-gutter-content {
-    display: none;
-  }
-}
-
 /* ==========================================================================
    Gutter Containers
    ========================================================================== */
 
-.left-gutter-container,
 .right-gutter-container {
   min-width: 0;
 }
 
-/* Explicit grid positioning to handle missing gutters */
-@media (min-width: 1200px) {
-  /* Both gutters - 3 column layout */
-  .content-layout.has-both-gutters .left-gutter-container {
+/* Grid positioning: content + right TOC */
+@media (min-width: 769px) {
+  .content-layout.has-right-gutter .content-article {
     grid-column: 1;
   }
 
-  .content-layout.has-both-gutters .content-article {
-    grid-column: 2;
-  }
-
-  .content-layout.has-both-gutters .right-gutter-container {
-    grid-column: 3;
-  }
-
-  /* Left gutter only - 2 column layout */
-  .content-layout.has-left-gutter:not(.has-right-gutter)
-    .left-gutter-container {
-    grid-column: 1;
-  }
-
-  .content-layout.has-left-gutter:not(.has-right-gutter) .content-article {
-    grid-column: 2;
-  }
-
-  /* Right gutter only - 2 column layout */
-  .content-layout.has-right-gutter:not(.has-left-gutter) .content-article {
-    grid-column: 1;
-  }
-
-  .content-layout.has-right-gutter:not(.has-left-gutter)
-    .right-gutter-container {
-    grid-column: 2;
-  }
-}
-
-/* Tablet grid positioning */
-@media (min-width: 769px) and (max-width: 1199px) {
-  /* Both gutters - 3 column layout */
-  .content-layout.has-both-gutters .left-gutter-container {
-    grid-column: 1;
-  }
-
-  .content-layout.has-both-gutters .content-article {
-    grid-column: 2;
-  }
-
-  .content-layout.has-both-gutters .right-gutter-container {
-    grid-column: 3;
-  }
-
-  /* Left gutter only - 2 column layout */
-  .content-layout.has-left-gutter:not(.has-right-gutter)
-    .left-gutter-container {
-    grid-column: 1;
-  }
-
-  .content-layout.has-left-gutter:not(.has-right-gutter) .content-article {
-    grid-column: 2;
-  }
-
-  /* Right gutter only - 2 column layout */
-  .content-layout.has-right-gutter:not(.has-left-gutter) .content-article {
-    grid-column: 1;
-  }
-
-  .content-layout.has-right-gutter:not(.has-left-gutter)
-    .right-gutter-container {
+  .content-layout.has-right-gutter .right-gutter-container {
     grid-column: 2;
   }
 }
@@ -223,6 +135,23 @@
 .content-article {
   max-width: 800px;
   min-width: 0;
+  padding-left: 2rem;
+}
+
+@media (max-width: 768px) {
+  .content-article {
+    padding-left: 0;
+  }
+}
+
+/* Headings clear floated vines so they always start on a fresh line */
+.content-body h1,
+.content-body h2,
+.content-body h3,
+.content-body h4,
+.content-body h5,
+.content-body h6 {
+  clear: both;
 }
 
 /* ==========================================================================
