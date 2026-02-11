@@ -28,7 +28,7 @@ import {
   getClientIP,
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits/index.js";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /** Session cookie duration: 30 days */
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 30;

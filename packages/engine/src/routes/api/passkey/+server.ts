@@ -14,7 +14,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const GET: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate origin - this endpoint returns sensitive security data

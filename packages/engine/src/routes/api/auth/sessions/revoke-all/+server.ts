@@ -8,7 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError } from "$lib/errors";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   const groveSession = cookies.get("grove_session");

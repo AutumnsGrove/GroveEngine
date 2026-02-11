@@ -14,7 +14,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * DELETE /api/passkey/[id] - Delete a passkey

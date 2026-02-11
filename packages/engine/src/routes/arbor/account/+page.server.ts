@@ -3,7 +3,7 @@ import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
 import type { Passkey } from "$lib/heartwood";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * Account & Subscription Management Page

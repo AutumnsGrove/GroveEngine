@@ -8,7 +8,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * POST is the primary logout handler (CSRF-safe).

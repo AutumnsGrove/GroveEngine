@@ -15,7 +15,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate CSRF (origin-based for API endpoints)
