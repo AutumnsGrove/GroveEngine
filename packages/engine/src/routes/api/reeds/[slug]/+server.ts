@@ -69,8 +69,14 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   // Gate: reeds_comments graft
-  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
-    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+  if (
+    !(await isReedsEnabled(
+      platform.env.DB,
+      platform?.env?.CACHE_KV,
+      locals.tenantId,
+    ))
+  ) {
+    throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   const { slug } = params;
@@ -81,11 +87,9 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     });
 
     // Get the post ID from slug (must resolve before comment queries that need post.id)
-    const post = await tenantDb.queryOne<{ id: string }>(
-      "posts",
-      "slug = ?",
-      [slug],
-    );
+    const post = await tenantDb.queryOne<{ id: string }>("posts", "slug = ?", [
+      slug,
+    ]);
 
     if (!post) {
       throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
@@ -159,8 +163,14 @@ export const POST: RequestHandler = async ({
   }
 
   // Gate: reeds_comments graft
-  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
-    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+  if (
+    !(await isReedsEnabled(
+      platform.env.DB,
+      platform?.env?.CACHE_KV,
+      locals.tenantId,
+    ))
+  ) {
+    throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   const { slug } = params;
@@ -294,11 +304,7 @@ export const POST: RequestHandler = async ({
     });
 
     // Thorn: async content moderation for public comments (non-blocking)
-    if (
-      isPublic &&
-      platform?.env?.AI &&
-      platform.context
-    ) {
+    if (isPublic && platform?.env?.AI && platform.context) {
       platform.context.waitUntil(
         moderatePublishedContent({
           content: data.content,

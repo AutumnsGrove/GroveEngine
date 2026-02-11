@@ -62,8 +62,8 @@
   let deletingId = $state<string | null>(null);
   let deleting = $state(false);
 
-  let commentsEnabled = $derived(settings?.comments_enabled !== 0);
-  let publicEnabled = $derived(settings?.public_comments_enabled !== 0);
+  let commentsEnabled = $derived(settings?.comments_enabled === 1);
+  let publicEnabled = $derived(settings?.public_comments_enabled === 1);
 
   async function refreshComments() {
     loading = true;
