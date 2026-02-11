@@ -41,7 +41,8 @@ export const PLANT_ERRORS = {
     category: "bug" as const,
     userMessage:
       "Service temporarily unavailable. Please try again in a moment.",
-    adminMessage: "D1 database binding (platform.env.DB) is not available.",
+    adminMessage:
+      "D1 database binding (platform.env.DB) is not available. Configure in Cloudflare Dashboard > Pages > grove-plant > Settings > Database bindings. See https://developers.cloudflare.com/pages/platform/functions/#databases",
   },
 
   AUTH_BINDING_MISSING: {
@@ -52,6 +53,24 @@ export const PLANT_ERRORS = {
     adminMessage: "AUTH service binding (platform.env.AUTH) is not available.",
   },
 
+  STRIPE_NOT_CONFIGURED: {
+    code: "PLANT-003",
+    category: "bug" as const,
+    userMessage:
+      "Payment system is being set up. Please try again in a moment.",
+    adminMessage:
+      "Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Cloudflare Dashboard > Pages > grove-plant > Settings > Environment variables. See https://docs.stripe.com/keys#api-keys",
+  },
+
+  KV_BINDING_MISSING: {
+    code: "PLANT-004",
+    category: "bug" as const,
+    userMessage:
+      "Service temporarily unavailable. Please try again in a moment.",
+    adminMessage:
+      "KV binding (platform.env.KV) is not available. Configure in Cloudflare Dashboard > Pages > grove-plant > Settings > KV namespace bindings.",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // Session & Auth Errors (020-039)
   // ─────────────────────────────────────────────────────────────────────────
@@ -59,16 +78,14 @@ export const PLANT_ERRORS = {
   SESSION_FETCH_FAILED: {
     code: "PLANT-020",
     category: "user" as const,
-    userMessage:
-      "We couldn't verify your sign-in. Please try again.",
+    userMessage: "We couldn't verify your sign-in. Please try again.",
     adminMessage: "GET /api/auth/get-session returned non-200 status.",
   },
 
   NO_SESSION_DATA: {
     code: "PLANT-021",
     category: "user" as const,
-    userMessage:
-      "Your sign-in session wasn't found. Please try again.",
+    userMessage: "Your sign-in session wasn't found. Please try again.",
     adminMessage:
       "get-session returned 200 but response has no session or user data.",
   },
@@ -85,24 +102,20 @@ export const PLANT_ERRORS = {
     code: "PLANT-023",
     category: "user" as const,
     userMessage: "You cancelled the sign-in. Try again when you're ready.",
-    adminMessage:
-      "User denied OAuth consent or cancelled the sign-in flow.",
+    adminMessage: "User denied OAuth consent or cancelled the sign-in flow.",
   },
 
   OAUTH_PROVIDER_ERROR: {
     code: "PLANT-024",
     category: "bug" as const,
-    userMessage:
-      "The sign-in provider ran into trouble. Please try again.",
-    adminMessage:
-      "OAuth provider returned an error during authentication.",
+    userMessage: "The sign-in provider ran into trouble. Please try again.",
+    adminMessage: "OAuth provider returned an error during authentication.",
   },
 
   NO_SESSION_COOKIE: {
     code: "PLANT-025",
     category: "user" as const,
-    userMessage:
-      "Your session wasn't created. Please try signing in again.",
+    userMessage: "Your session wasn't created. Please try signing in again.",
     adminMessage:
       "No Better Auth session cookie found after OAuth callback. May indicate cookie blocking or cross-site restrictions.",
   },

@@ -1,16 +1,31 @@
 import type { LayoutServerLoad } from "./$types";
 import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
+import { PLANT_ERRORS } from "$lib/errors";
 
 export const load: LayoutServerLoad = async ({ cookies, platform }) => {
+  // Fail-fast: Check if database binding is configured
+  if (!platform?.env?.DB) {
+    console.error(
+      "[Layout] Database binding missing. Configure in Cloudflare Dashboard > Pages > grove-plant > Settings > Database bindings",
+    );
+    return {
+      user: null,
+      onboarding: null,
+      messages: [],
+      bindingError: "database",
+      errorDetails: PLANT_ERRORS.DB_UNAVAILABLE,
+    };
+  }
+
   // Check if user has an active onboarding session
   const onboardingId = cookies.get("onboarding_id");
   const accessToken = cookies.get("access_token");
 
   if (!onboardingId || !accessToken) {
     // Still load messages even for unauthenticated visitors
-    const messages = platform?.env?.DB
-      ? await loadChannelMessages(platform.env.DB, "plant").catch(() => [])
-      : [];
+    const messages = await loadChannelMessages(platform.env.DB, "plant").catch(
+      () => [],
+    );
     return {
       user: null,
       onboarding: null,
@@ -19,14 +34,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
   }
 
   // Fetch onboarding state from database
-  const db = platform?.env?.DB;
-  if (!db) {
-    return {
-      user: null,
-      onboarding: null,
-      messages: [],
-    };
-  }
+  const db = platform.env.DB;
 
   try {
     const result = await db
