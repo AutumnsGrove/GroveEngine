@@ -2,17 +2,19 @@
 
 ## Overview
 
-This plan explores how Grove can enable natural language search across all blogs in the network — not just "find posts with the word 'grove'" but "find posts about loss and grief" or "show me writing about starting over."
+Grove will enable natural language search across all blogs in the network — not just "find posts with the word 'grove'" but "find posts about loss and grief" or "show me writing about starting over."
 
 **The Vision:**
 Right now, each blog has its own search. But Grove isn't just isolated sites — it's a community. Wanderers should be able to discover stories, ideas, and voices across the entire network. Natural language search makes that discovery feel _human_ rather than mechanical.
 
-**Key Questions to Explore:**
+**Key Decisions Made:**
 
-- How do we index content across multiple blogs while respecting privacy?
-- What's the right balance between search quality and infrastructure cost?
-- Can we make semantic search feel like discovering a friend's writing, not querying a database?
-- How do we handle tenant opt-in/opt-out for cross-site discovery?
+- ✅ **Architecture:** Orama hybrid search (Option C) from the start
+- ✅ **Privacy Model:** Opt-OUT by default (discoverable unless you opt out)
+- ✅ **Gating:** Two levels - account opt-out + per-post frontmatter
+- ✅ **Naming:** `discover.grove.place`
+- ✅ **Design:** Glassmorphism for search results
+- ✅ **Infrastructure:** Route through Lumen (AI gateway) for automatic tracking
 
 **Related Goals:**
 
@@ -46,9 +48,11 @@ Each blog has local search:
 
 ---
 
-## Architecture Options
+## Architecture: Orama Hybrid Search (Option C)
 
-### Option A: Client-Side Aggregated Index
+**Decision:** Build with Orama from day one. No migration needed.
+
+### ~~Option A: Client-Side Aggregated Index~~ (Not chosen)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -86,7 +90,7 @@ Each blog has local search:
 
 ---
 
-### Option B: Cloudflare AI Search (Managed)
+### ~~Option B: Cloudflare AI Search (Managed)~~ (Not chosen)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -127,7 +131,7 @@ Each blog has local search:
 
 ---
 
-### Option C: Orama Hybrid Search (Client + Server)
+### ✅ Chosen Architecture: Orama Hybrid Search (Client + Server)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -165,7 +169,16 @@ Each blog has local search:
 - Workers AI usage costs (embedding generation)
 - Need to build and maintain indexing pipeline
 
-**Estimated Cost:** $10-30/month (Workers AI embeddings + KV/Vectorize storage)
+**Estimated Cost:** $0-5/month initially (very few posts), scaling to $10-30/month at 500+ posts
+
+**Why This Choice:**
+
+- No need to migrate later from keyword-only to semantic
+- CF embedding pricing is incredibly cheap
+- Fallback: Can run embeddings on own hardware if costs grow
+- With Lumen (AI gateway already built), all usage is automatically tracked via LangFuse
+- OpenRouter already configured as fallback
+- Small initial dataset = near-zero cost to start
 
 ---
 
@@ -245,148 +258,267 @@ Each blog has local search:
 
 ---
 
+## Infrastructure: Lumen Integration
+
+**Decision:** Route ALL embeddings through Lumen (Grove's AI gateway).
+
+**Why:**
+
+- Already built and deployed
+- Already supports embeddings
+- Automatic usage tracking via LangFuse
+- OpenRouter already configured as fallback
+- Zero additional monitoring work needed
+
+**Lumen Endpoint:**
+
+```typescript
+POST https://lumen.grove.place/api/embed
+{
+  "model": "text-embedding-3-small",
+  "input": "Find posts about grief and healing"
+}
+
+Response:
+{
+  "embedding": [0.123, -0.456, ...],  // 1536 dimensions
+  "model": "text-embedding-3-small",
+  "usage": { "tokens": 8 }
+}
+```
+
+**Tracking:**
+
+- All embedding calls logged in LangFuse
+- Cost tracking per operation
+- Usage alerts if costs spike
+- Automatic fallback to OpenRouter if primary fails
+
+---
+
 ## Implementation Phases
 
 ### Phase 0: Planning & Research (Current - Q1 2026)
 
 **Deliverables:**
 
-- ✅ This document
-- Research Cloudflare AI Search pricing (when available)
+- ✅ This document (decisions made!)
+- ✅ Architecture chosen (Orama + Workers AI via Lumen)
+- ✅ Privacy model defined (opt-out by default)
+- ✅ Design system chosen (glassmorphism)
+- ✅ Infrastructure chosen (route through Lumen)
 - Prototype Orama with small dataset
-- Test embedding quality with Workers AI
-- Design search UI mockups (Chameleon gathering)
+- Test embedding quality via Lumen
+- Design search UI mockups
 
-**Decision Gates:**
-
-- Is Cloudflare AI Search affordable? → Option B
-- Do we need semantic search now? → Option C
-- Should we start simple? → Option A
+**Status:** ✅ Complete — Ready to build!
 
 ---
 
-### Phase 1: Cross-Site Keyword Search (MVP - Q2 2026)
+### Phase 1: Hybrid Search Foundation (Q2 2026)
 
-**Goal:** Enable basic "find posts with keyword X" across all opted-in blogs.
+**Goal:** Build discover.grove.place with full keyword + semantic search from day one.
 
-**Implementation: Option A (Client-Side)**
+**Implementation: Orama Hybrid Search (No migration needed!)**
 
-#### 1.1 Opt-In System
+#### 1.1 Discovery Opt-Out System
 
-**Database Schema** (`packages/engine/migrations/XXX_search_opt_in.sql`):
+**Database Schema** (`packages/engine/migrations/XXX_discovery_settings.sql`):
 
 ```sql
-CREATE TABLE IF NOT EXISTS search_opt_in (
+CREATE TABLE IF NOT EXISTS discovery_settings (
   tenant_id TEXT PRIMARY KEY,
-  opted_in INTEGER DEFAULT 0,
+  discoverable INTEGER DEFAULT 1,  -- 1 = discoverable by default (opt-out model)
   indexed_at TEXT,
-  index_url TEXT
+  last_sync TEXT,
+  post_count INTEGER DEFAULT 0
 );
 ```
 
-**Admin UI** (`packages/engine/src/routes/arbor/settings/discovery`):
+**Admin UI** (`packages/engine/src/routes/arbor/settings/discovery/+page.svelte`):
 
-- Toggle: "Make my blog discoverable in Grove search"
-- Explanation: "Your public posts will appear in cross-site search"
-- Preview: "Your blog will appear as: [Name] ([subdomain].grove.place)"
+```svelte
+<Glass variant="card" class="p-6">
+  <h2 class="text-xl font-semibold mb-4">Grove Discovery</h2>
 
-#### 1.2 RSS Polling & Indexing
+  <p class="text-foreground-secondary mb-6">
+    Your blog is currently <strong>{discoverable ? 'discoverable' : 'private'}</strong>.
+    {#if discoverable}
+      Wanderers can find your posts on <a href="https://discover.grove.place">discover.grove.place</a>.
+    {:else}
+      Your posts won't appear in cross-site search.
+    {/if}
+  </p>
+
+  <!-- Toggle -->
+  <label class="flex items-center gap-3 cursor-pointer">
+    <input
+      type="checkbox"
+      bind:checked={discoverable}
+      onchange={handleToggle}
+      class="w-5 h-5"
+    />
+    <span>Make my blog discoverable in Grove search</span>
+  </label>
+
+  {#if discoverable}
+    <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+      <p class="text-sm">
+        ✓ Your public posts will appear in search results
+      </p>
+      <p class="text-sm text-foreground-muted mt-2">
+        To exclude specific posts, add <code>discoverable: false</code> to frontmatter.
+      </p>
+    </div>
+  {/if}
+</Glass>
+```
+
+#### 1.2 RSS Polling & Orama Indexing
 
 **Background Worker** (`packages/discovery/src/workers/indexer.ts`):
 
-- Cron schedule: Every 15 minutes
-- Fetch opted-in blogs from D1
-- Poll RSS feeds (`/feed.xml`)
-- Build FlexSearch index
-- Store index in R2 (`grove-search-index/index.json`)
-- Update `indexed_at` timestamp
+```typescript
+// Cron: Every 15 minutes
+export default {
+  async scheduled(event: ScheduledEvent, env: Env) {
+    // 1. Get all discoverable tenants
+    const tenants = await env.DB.prepare(
+      "SELECT tenant_id, subdomain FROM discovery_settings WHERE discoverable = 1",
+    ).all();
 
-**Index Structure:**
+    // 2. Poll RSS feeds
+    for (const tenant of tenants.results) {
+      const rssUrl = `https://${tenant.subdomain}.grove.place/feed.xml`;
+      const posts = await fetchAndParseRSS(rssUrl);
 
-```json
-{
-  "version": "1.0",
-  "updated_at": "2026-03-15T10:30:00Z",
-  "posts": [
-    {
-      "id": "tenant_slug:post_slug",
-      "title": "Starting Over",
-      "description": "...",
-      "content_preview": "First 500 chars...",
-      "author": "Blog Name",
-      "blog_url": "https://example.grove.place",
-      "post_url": "https://example.grove.place/garden/starting-over",
-      "date": "2026-03-10",
-      "tags": ["personal", "reflection"]
+      // 3. For each post: generate embedding via Lumen
+      for (const post of posts) {
+        const embedding = await generateEmbedding(post.content, env);
+
+        // 4. Store in index
+        await env.DB.prepare(
+          `
+          INSERT OR REPLACE INTO discovery_index (
+            post_id, tenant_id, title, description, content_preview,
+            embedding, tags, date, url
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        )
+          .bind(
+            post.id,
+            tenant.tenant_id,
+            post.title,
+            post.description,
+            post.content.slice(0, 500),
+            JSON.stringify(embedding),
+            JSON.stringify(post.tags),
+            post.date,
+            post.url,
+          )
+          .run();
+      }
     }
-  ]
+  },
+};
+
+async function generateEmbedding(text: string, env: Env): Promise<number[]> {
+  const response = await fetch("https://lumen.grove.place/api/embed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "text-embedding-3-small",
+      input: text.slice(0, 8000), // Limit to ~8k chars
+    }),
+  });
+
+  const data = await response.json();
+  return data.embedding;
 }
 ```
 
-#### 1.3 Discovery Frontend
+**Index Schema** (`packages/discovery/migrations/001_search_index.sql`):
+
+```sql
+CREATE TABLE IF NOT EXISTS discovery_index (
+  post_id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  content_preview TEXT,
+  embedding TEXT,  -- JSON array of floats
+  tags TEXT,  -- JSON array of strings
+  date TEXT NOT NULL,
+  url TEXT NOT NULL,
+  indexed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (tenant_id) REFERENCES discovery_settings(tenant_id)
+);
+
+CREATE INDEX idx_discovery_tenant ON discovery_index(tenant_id);
+CREATE INDEX idx_discovery_date ON discovery_index(date DESC);
+```
+
+#### 1.3 Discovery Frontend with Orama
 
 **New Property:** `packages/discovery/` (SvelteKit)
 
-- Route: `discover.grove.place/search`
-- On mount: Fetch index from R2
-- Initialize FlexSearch client-side
-- Search as user types (debounced)
-- Display results with blog context
+**Route:** `discover.grove.place/`
 
-**Timeline:** 3-4 weeks
+**Search Handler** (`packages/discovery/src/routes/api/search/+server.ts`):
 
-**Success Metrics:**
+```typescript
+import { create, insert, search } from "@orama/orama";
 
-- Can search across all opted-in blogs
-- Results appear in <500ms
-- Index size stays under 2MB
-- Zero per-search cost
+export async function POST({ request, locals }) {
+  const { query, mode } = await request.json(); // mode: 'keyword' | 'semantic'
 
----
+  if (mode === "semantic") {
+    // Generate query embedding via Lumen
+    const embedding = await generateEmbedding(query);
 
-### Phase 2: Semantic Search (Q3 2026)
+    // Vector search in D1
+    const results = await locals.db
+      .prepare(
+        `
+      SELECT post_id, title, description, content_preview, url, date, tags,
+        -- Cosine similarity
+        (1 - (embedding_distance(embedding, ?) / 2)) AS similarity
+      FROM discovery_index
+      WHERE similarity > 0.7
+      ORDER BY similarity DESC
+      LIMIT 20
+    `,
+      )
+      .bind(JSON.stringify(embedding))
+      .all();
 
-**Goal:** Enable "find posts about X" where X is a concept/theme, not just keywords.
+    return json({ results: results.results });
+  } else {
+    // Keyword search with Orama client-side (fetch index)
+    const allPosts = await locals.db
+      .prepare("SELECT * FROM discovery_index ORDER BY date DESC")
+      .all();
 
-**Implementation: Option C (Orama + Workers AI)**
+    // Return for client-side Orama
+    return json({ posts: allPosts.results });
+  }
+}
+```
 
-#### 2.1 Upgrade to Orama
-
-- Replace FlexSearch with Orama client
-- Add vector search capability
-- Hybrid mode: keywords (fast) + semantic (smart)
-
-#### 2.2 Embedding Generation
-
-**Worker:** `packages/discovery/src/workers/embedder.ts`
-
-- For each new post: generate embedding (Workers AI)
-- Model: `@cf/baai/bge-base-en-v1.5` (multilingual)
-- Store in Cloudflare Vectorize or KV
-- Associate with post ID
-
-#### 2.3 Query Understanding
-
-**Server Handler:** `packages/discovery/src/routes/api/search/+server.ts`
-
-- Detect semantic queries ("about X", "related to Y")
-- Generate query embedding
-- Search vector store for similar posts
-- Merge with keyword results
-- Rank by relevance score
-
-**Timeline:** 4-6 weeks
+**Timeline:** 6-8 weeks
 
 **Success Metrics:**
 
+- Keyword search: <500ms response
+- Semantic search: <1s response (including embedding)
 - "Posts about grief" returns thematically related content
-- "Queer joy" finds celebratory LGBTQ+ writing
-- "Building in public" discovers maker stories
-- Query latency <1s (including embedding generation)
+- Index size manageable (<5MB with 1000 posts)
+- Embedding cost: <$5/month initially
 
 ---
 
-### Phase 3: Discovery Features (Q4 2026)
+### Phase 2: Discovery Features (Q3-Q4 2026)
 
 **Goal:** Make search feel like _exploration_, not just retrieval.
 
@@ -421,14 +553,30 @@ CREATE TABLE IF NOT EXISTS search_opt_in (
 
 ### Tenant Controls
 
-**Default: Opt-Out**
+**Default: Opt-OUT (Discoverable by Default)**
 
-- New tenants NOT discoverable by default
-- Must explicitly opt in via settings
-- Clear explanation of what gets indexed
+**Why opt-out is privacy-first:**
 
-**Per-Post Control:**
-Frontmatter flag:
+- Wanderers WANT to be discovered — that's why they're on Grove
+- Clearly show this during signup: "Your blog is discoverable. You can change this in settings."
+- One-click opt-out available in Arbor settings
+- No hidden indexing — transparent about what's searchable
+
+**Important:** This isn't extractive. We show wanderers exactly what's happening and give them control.
+
+**Two-Level Gating System:**
+
+**Level 1: Account-Level Opt-Out**
+
+- Tenant can disable discovery entirely in settings
+- When opted out: ALL posts excluded from index, immediately purged
+- Clear toggle in Arbor settings
+
+**Level 2: Per-Post Opt-Out**
+
+- Frontmatter flag: `discoverable: false`
+- Even if account opted in, this post won't be searchable
+- Useful for personal/private posts you don't want surfaced
 
 ```yaml
 ---
@@ -436,6 +584,12 @@ title: Private Thoughts
 discoverable: false
 ---
 ```
+
+**How the gates work together:**
+
+- Account opted OUT → No posts indexed, frontmatter ignored
+- Account opted IN + post `discoverable: false` → This post excluded
+- Account opted IN + no frontmatter → Post is searchable
 
 **Respect Robots.txt:**
 
