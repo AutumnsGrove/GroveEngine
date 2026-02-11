@@ -113,6 +113,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     isWayfinder: userIsWayfinder,
     greenhouseStatus,
     tenantGrafts,
+    oauthAvatarUrl: locals.user?.picture ?? null,
     // Wayfinder-only data
     greenhouseTenants,
     tenantNames,

@@ -15,7 +15,7 @@
     GreenhouseAdminPanel,
   } from "$lib/grafts/greenhouse";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api } from "$lib/utils";
+  import { api, apiRequest } from "$lib/utils";
   import {
     COLOR_PRESETS,
     FONT_PRESETS,
@@ -106,6 +106,14 @@
   let savingLogo = $state(false);
   let logoMessage = $state("");
 
+  // Profile photo state
+  /** @type {string | null} */
+  let avatarUrl = $state(null);
+  let uploadingAvatar = $state(false);
+  let clearingAvatar = $state(false);
+  const oauthAvatarUrl = $derived(data.oauthAvatarUrl ?? null);
+  const displayAvatar = $derived(avatarUrl || oauthAvatarUrl);
+
   // Graft control state (for greenhouse members)
   let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
   let resettingGrafts = $state(false);
@@ -183,6 +191,7 @@
       groveTitle = data.grove_title || "";
       showGroveLogo =
         data.show_grove_logo === true || data.show_grove_logo === "true";
+      avatarUrl = data.avatar_url || null;
     } catch (error) {
       toast.error("Failed to load settings");
       console.error("Failed to fetch settings:", error);
@@ -282,6 +291,64 @@
     }
 
     savingLogo = false;
+  }
+
+  // =========================================================================
+  // PROFILE PHOTO
+  // =========================================================================
+
+  /** Opens native file picker and uploads to the avatar endpoint */
+  function handleAvatarUpload() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      // Client-side size check (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Photo must be under 5 MB");
+        return;
+      }
+
+      uploadingAvatar = true;
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const result = await apiRequest("/api/settings/avatar", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (result?.url) {
+          avatarUrl = result.url;
+          toast.success("Profile photo updated!");
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to upload photo",
+        );
+      }
+      uploadingAvatar = false;
+    };
+    input.click();
+  }
+
+  /** Remove the custom avatar and fall back to OAuth photo or placeholder */
+  async function handleAvatarClear() {
+    clearingAvatar = true;
+    try {
+      await apiRequest("/api/settings/avatar", { method: "DELETE" });
+      avatarUrl = null;
+      toast.success("Profile photo removed");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to remove photo",
+      );
+    }
+    clearingAvatar = false;
   }
 
   // =========================================================================
@@ -730,6 +797,60 @@
     <h1>Settings</h1>
     <p class="subtitle">Manage site configuration and maintenance</p>
   </header>
+
+  <!-- Profile Photo -->
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
+      <h2>Profile Photo</h2>
+    </div>
+    <p class="section-description">
+      Your photo appears in the <GroveTerm term="canopy">Canopy</GroveTerm> directory and across your <GroveTerm term="grove">grove</GroveTerm>.
+    </p>
+
+    <div class="avatar-section">
+      <div class="avatar-preview">
+        {#if displayAvatar}
+          <img
+            src={displayAvatar}
+            alt="Profile photo"
+            class="avatar-image"
+          />
+        {:else}
+          <span class="avatar-placeholder">
+            {data.user?.name?.[0] || data.user?.email?.[0] || "?"}
+          </span>
+        {/if}
+      </div>
+
+      <div class="avatar-actions">
+        <Button
+          onclick={handleAvatarUpload}
+          variant="primary"
+          disabled={uploadingAvatar}
+        >
+          {#if uploadingAvatar}
+            <Spinner size="sm" /> Uploading...
+          {:else}
+            {avatarUrl ? "Change Photo" : "Upload Photo"}
+          {/if}
+        </Button>
+
+        {#if avatarUrl}
+          <Button
+            onclick={handleAvatarClear}
+            variant="danger"
+            disabled={clearingAvatar}
+          >
+            {clearingAvatar ? "Removing..." : "Remove"}
+          </Button>
+        {/if}
+
+        {#if !avatarUrl && oauthAvatarUrl}
+          <p class="avatar-hint">Currently using your sign-in photo</p>
+        {/if}
+      </div>
+    </div>
+  </GlassCard>
 
   <!-- System Health - Only visible to platform admins -->
   {#if isPlatformAdmin}
@@ -2021,6 +2142,53 @@
     .session-card:hover .session-icon {
       transform: none;
     }
+  }
+  /* Profile photo styles */
+  .avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .avatar-preview {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 3px solid var(--color-border);
+    background: var(--color-surface-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease;
+  }
+  .avatar-preview:hover {
+    border-color: var(--color-primary);
+  }
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .avatar-placeholder {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    user-select: none;
+  }
+  .avatar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .avatar-hint {
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+    margin: 0;
+    font-style: italic;
   }
   /* Canopy styles */
   .canopy-field {
