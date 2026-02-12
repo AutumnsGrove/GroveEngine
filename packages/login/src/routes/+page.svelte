@@ -27,6 +27,23 @@
 	let email = $state('');
 
 	/**
+	 * Store redirect URL in a cookie before starting OAuth.
+	 * This is a fallback for when Better Auth doesn't preserve query
+	 * parameters in the callbackURL during the OAuth redirect chain.
+	 *
+	 * NOTE: HttpOnly is intentionally omitted — this cookie is set via
+	 * document.cookie (client-side) because the server-side +page.svelte
+	 * load function doesn't run for client-initiated OAuth navigations.
+	 * The value is always a validated grove.place URL (via validateRedirectUrl),
+	 * so XSS exfiltration risk is limited to leaking the redirect target,
+	 * not session tokens.
+	 */
+	function storeRedirectCookie() {
+		if (!browser) return;
+		document.cookie = `grove_auth_redirect=${encodeURIComponent(redirectTo)};path=/;max-age=600;samesite=lax;secure`;
+	}
+
+	/**
 	 * Sign in with Google OAuth.
 	 * better-auth handles the full OAuth dance — we just redirect.
 	 */
@@ -36,6 +53,7 @@
 		error = null;
 
 		try {
+			storeRedirectCookie();
 			await authClient.signIn.social({
 				provider: 'google',
 				callbackURL: `/callback?redirect=${encodeURIComponent(redirectTo)}`,
@@ -81,6 +99,7 @@
 		error = null;
 
 		try {
+			storeRedirectCookie();
 			const result = await authClient.signIn.magicLink({
 				email: email.trim(),
 				callbackURL: `/callback?redirect=${encodeURIComponent(redirectTo)}`,
