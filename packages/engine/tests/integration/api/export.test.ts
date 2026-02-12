@@ -118,23 +118,8 @@ describe("POST /api/export/start - Authentication", () => {
     }
   });
 
-  it("should return 403 when CSRF validation fails", async () => {
-    mockValidateCSRF.mockReturnValue(false);
-
-    const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
-      url: "https://test-tenant.grove.place/api/export/start",
-      method: "POST",
-      body: { includeImages: true, deliveryMethod: "email" },
-    });
-
-    try {
-      await StartExport(event as any);
-      expect.fail("Should have thrown an error");
-    } catch (err) {
-      const error = err as { status: number; body: { message: string } };
-      expect(error.status).toBe(403);
-    }
-  });
+  // NOTE: CSRF validation is now handled globally in hooks.server.ts
+  // Individual endpoints no longer need per-route CSRF checks
 });
 
 // ============================================================================

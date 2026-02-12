@@ -7,6 +7,7 @@
  * Digest times default to 8am / 1pm / 6pm, configurable per-user.
  */
 
+import type { LumenClient } from "@autumnsgrove/groveengine/lumen";
 import type { EmailCategory } from "./types.js";
 
 // =============================================================================
@@ -33,19 +34,6 @@ export interface DigestSettings {
 
 interface ZephyrBinding {
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-}
-
-interface LumenClient {
-  run(request: {
-    task: string;
-    input: Array<{ role: string; content: string }>;
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      skipQuota?: boolean;
-      skipPiiScrub?: boolean;
-    };
-  }): Promise<{ content: string }>;
 }
 
 // =============================================================================
@@ -194,7 +182,7 @@ export async function generateDigest(
   if (lumen) {
     try {
       const response = await lumen.run({
-        task: "summary",
+        task: "summary" as const,
         input: [
           { role: "system", content: DIGEST_SYSTEM_PROMPT },
           { role: "user", content: buildDigestPrompt(emails) },

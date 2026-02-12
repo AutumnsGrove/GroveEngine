@@ -13,11 +13,11 @@
   "dependencies": {
     "@react-email/components": "^0.0.15",
     "@react-email/render": "^0.0.12",
-    "react": "^18.2.0"
+    "react": "^18.3.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240129.0",
-    "typescript": "^5.3.3",
+    "@cloudflare/workers-types": "^4.20260210.0",
+    "typescript": "^5.9.3",
     "wrangler": "^3.114.17"
   }
 }

@@ -6,6 +6,7 @@
  * Falls back to "uncategorized" on any parse failure.
  */
 
+import type { LumenClient } from "@autumnsgrove/groveengine/lumen";
 import type {
   EmailCategory,
   SuggestedAction,
@@ -22,19 +23,6 @@ export interface EmailEnvelope {
   snippet: string; // First ~300 chars of body text
   date?: string;
   to?: string;
-}
-
-interface LumenClient {
-  run(request: {
-    task: string;
-    input: Array<{ role: string; content: string }>;
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      skipQuota?: boolean;
-      skipPiiScrub?: boolean;
-    };
-  }): Promise<{ content: string }>;
 }
 
 // =============================================================================
@@ -116,7 +104,7 @@ export async function classifyEmail(
 ): Promise<ClassificationResult> {
   try {
     const response = await lumen.run({
-      task: "summary",
+      task: "summary" as const,
       input: [
         { role: "system", content: CLASSIFICATION_SYSTEM_PROMPT },
         { role: "user", content: buildClassificationPrompt(envelope) },
