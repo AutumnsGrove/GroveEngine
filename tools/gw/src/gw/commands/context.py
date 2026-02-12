@@ -51,11 +51,17 @@ def _get_affected_packages(file_paths: list[str]) -> list[str]:
 
 
 def _count_todos_in_files(file_paths: list[str], root: Path) -> int:
-    """Count TODO/FIXME/HACK comments in the given files."""
+    """Count TODO/FIXME/HACK comments in the given files.
+
+    Uses errors="replace" to handle binary content that slips past the
+    extension filter (e.g., .js files that are actually sourcemaps).
+    Only catches specific filesystem errors to avoid masking bugs.
+    """
     if not file_paths:
         return 0
 
     count = 0
+    skipped: list[str] = []
     for filepath in file_paths:
         full_path = root / filepath
         if not full_path.exists() or full_path.is_dir():
@@ -68,9 +74,12 @@ def _count_todos_in_files(file_paths: list[str], root: Path) -> int:
         }:
             continue
         try:
-            text = full_path.read_text(errors="ignore")
+            text = full_path.read_text(errors="replace")
             count += len(re.findall(r'\b(TODO|FIXME|HACK)\b', text))
-        except OSError:
+        except PermissionError:
+            skipped.append(filepath)
+        except FileNotFoundError:
+            # File listed in git status but deleted before we read it
             continue
     return count
 

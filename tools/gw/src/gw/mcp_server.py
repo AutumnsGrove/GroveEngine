@@ -25,6 +25,7 @@ Claude Code settings.json:
 import json
 import os
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
@@ -33,7 +34,8 @@ from .config import GWConfig
 from .wrangler import Wrangler, WranglerError
 from .git_wrapper import Git, GitError
 from .gh_wrapper import GitHub, GitHubError
-from .packages import load_monorepo, detect_current_package
+from .packages import load_monorepo, detect_current_package, find_monorepo_root
+from .commands.context import _get_affected_packages, _count_todos_in_files
 
 # Enable agent mode for all MCP operations
 os.environ["GW_AGENT_MODE"] = "1"
@@ -1135,10 +1137,6 @@ def grove_context() -> str:
         git = Git()
         if not git.is_repo():
             return json.dumps({"error": "Not a git repository"})
-
-        from .commands.context import _get_affected_packages, _count_todos_in_files
-        from .packages import find_monorepo_root
-        from pathlib import Path
 
         status = git.status()
         commits = git.log(limit=5)
