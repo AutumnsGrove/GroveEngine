@@ -373,7 +373,7 @@ export class TriageDO implements DurableObject {
       try {
         const lumen = this.getLumen();
         const result = await classifyEmail(
-          { from, subject, snippet, to },
+          { from, subject, snippet, to: to.join(", ") },
           lumen,
         );
         category = result.category;

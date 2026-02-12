@@ -171,12 +171,8 @@ describe("POST /api/lumen/transcribe - Authentication", () => {
     await expect(POST(ctx as any)).rejects.toThrow("Something went wrong");
   });
 
-  it("should reject invalid CSRF", async () => {
-    mockValidateCSRF.mockReturnValueOnce(false);
-    const ctx = createMockContext({});
-
-    await expect(POST(ctx as any)).rejects.toThrow("security reasons");
-  });
+  // NOTE: CSRF validation is now handled globally in hooks.server.ts
+  // Individual endpoints no longer need per-route CSRF checks
 });
 
 // =============================================================================

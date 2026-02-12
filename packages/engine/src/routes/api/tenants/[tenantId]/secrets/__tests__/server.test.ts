@@ -193,36 +193,13 @@ describe("Secrets API Tenant Isolation", () => {
 // CSRF VALIDATION TESTS
 // =============================================================================
 
-describe("Secrets API CSRF Protection", () => {
+// NOTE: CSRF validation is now handled globally in hooks.server.ts
+// Individual endpoints no longer need per-route CSRF checks
+
+describe("Secrets API Read Operations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetVerifiedTenantId.mockResolvedValue("tenant-123");
-  });
-
-  it("should reject PUT with invalid CSRF", async () => {
-    mockValidateCSRF.mockReturnValueOnce(false);
-
-    await expect(
-      PUT({
-        params: { tenantId: "test" },
-        request: createMockRequest({ keyName: "test", value: "secret" }),
-        platform: createMockPlatform(),
-        locals: { user: { id: "user-1" } },
-      } as Parameters<typeof PUT>[0]),
-    ).rejects.toThrow("security reasons");
-  });
-
-  it("should reject DELETE with invalid CSRF", async () => {
-    mockValidateCSRF.mockReturnValueOnce(false);
-
-    await expect(
-      DELETE({
-        params: { tenantId: "test" },
-        request: createMockRequest({ keyName: "test" }),
-        platform: createMockPlatform(),
-        locals: { user: { id: "user-1" } },
-      } as Parameters<typeof DELETE>[0]),
-    ).rejects.toThrow("security reasons");
   });
 
   it("should allow GET without CSRF (read-only)", async () => {

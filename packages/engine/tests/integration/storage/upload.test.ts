@@ -289,24 +289,8 @@ describe("Image Upload Endpoint - Authentication", () => {
     }
   });
 
-  it("should return 403 when CSRF validation fails", async () => {
-    mockValidateCSRF.mockReturnValue(false);
-
-    const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
-      url: "https://test-tenant.grove.place/api/images/upload",
-      method: "POST",
-      body: createImageFormData(),
-    });
-
-    try {
-      await POST(event as any);
-      expect.fail("Should have thrown an error");
-    } catch (err) {
-      const error = err as { status: number; body: { message: string } };
-      expect(error.status).toBe(403);
-      expect(error.body.message).toContain("security reasons");
-    }
-  });
+  // NOTE: CSRF validation is now handled globally in hooks.server.ts
+  // Individual endpoints no longer need per-route CSRF checks
 });
 
 // ============================================================================
