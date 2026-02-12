@@ -30,6 +30,13 @@
 	 * Store redirect URL in a cookie before starting OAuth.
 	 * This is a fallback for when Better Auth doesn't preserve query
 	 * parameters in the callbackURL during the OAuth redirect chain.
+	 *
+	 * NOTE: HttpOnly is intentionally omitted — this cookie is set via
+	 * document.cookie (client-side) because the server-side +page.svelte
+	 * load function doesn't run for client-initiated OAuth navigations.
+	 * The value is always a validated grove.place URL (via validateRedirectUrl),
+	 * so XSS exfiltration risk is limited to leaking the redirect target,
+	 * not session tokens.
 	 */
 	function storeRedirectCookie() {
 		if (!browser) return;
