@@ -14,10 +14,14 @@
     MessageSquare,
     X,
   } from "lucide-svelte";
+  import { page } from "$app/state";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
 
   let { data, children } = $props();
+
+  // Current path for active nav item highlighting
+  let currentPath = $derived(page.url.pathname);
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
   let sidebarOpen = $derived(sidebarStore.open);
   // Desktop collapse state also from shared store so Header toggle can control it
@@ -103,24 +107,24 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="/arbor" class="nav-item" onclick={closeSidebar} title="Dashboard">
+      <a href="/arbor" class="nav-item" class:active={currentPath === '/arbor'} onclick={closeSidebar} title="Dashboard">
         <LayoutDashboard class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="arbor">Dashboard</GroveSwap></span>
       </a>
-      <a href="/arbor/garden" class="nav-item" onclick={closeSidebar} title="Garden">
+      <a href="/arbor/garden" class="nav-item" class:active={currentPath.startsWith('/arbor/garden')} onclick={closeSidebar} title="Garden">
         <FileText class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="your-garden">Garden</GroveSwap></span>
       </a>
-      <a href="/arbor/pages" class="nav-item" onclick={closeSidebar} title="Pages">
+      <a href="/arbor/pages" class="nav-item" class:active={currentPath.startsWith('/arbor/pages')} onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Pages</span>
       </a>
-      <a href="/arbor/images" class="nav-item" onclick={closeSidebar} title="Images">
+      <a href="/arbor/images" class="nav-item" class:active={currentPath.startsWith('/arbor/images')} onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
       {#if data.grafts?.reeds_comments}
-      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title={resolveTerm("reeds")}>
+      <a href="/arbor/reeds" class="nav-item" class:active={currentPath.startsWith('/arbor/reeds')} onclick={closeSidebar} title={resolveTerm("reeds")}>
         <span class="nav-icon-wrap">
           <MessageSquare class="nav-icon" />
           {#if data.pendingCommentCount > 0}
@@ -130,11 +134,11 @@
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
       </a>
       {/if}
-      <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
+      <a href="/arbor/account" class="nav-item" class:active={currentPath.startsWith('/arbor/account')} onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Account</span>
       </a>
-      <a href="/arbor/settings" class="nav-item" onclick={closeSidebar} title="Settings">
+      <a href="/arbor/settings" class="nav-item" class:active={currentPath.startsWith('/arbor/settings')} onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Settings</span>
       </a>
@@ -473,8 +477,19 @@
     color: var(--user-accent, var(--color-primary));
   }
 
+  .nav-item.active {
+    background: var(--grove-overlay-15);
+    color: var(--user-accent, var(--color-primary));
+    font-weight: 500;
+  }
+
   :global(.dark) .nav-item:hover {
     background: var(--grove-overlay-12);
+    color: var(--grove-300, #86efac);
+  }
+
+  :global(.dark) .nav-item.active {
+    background: var(--grove-overlay-15);
     color: var(--grove-300, #86efac);
   }
 
