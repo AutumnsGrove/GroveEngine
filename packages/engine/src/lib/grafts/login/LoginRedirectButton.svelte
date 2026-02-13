@@ -27,12 +27,12 @@
 	 */
 
 	import { browser } from "$app/environment";
+	import type { ComponentProps } from "svelte";
 	import { buildLoginUrl } from "./config.js";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Logo from "$lib/ui/components/ui/Logo.svelte";
 
-	type GlassVariant = "default" | "accent" | "dark" | "ghost" | "outline";
-	type ButtonSize = "sm" | "md" | "lg";
+	type GlassButtonProps = ComponentProps<typeof GlassButton>;
 
 	interface Props {
 		/** Where to send the user after authentication (default: "/arbor") */
@@ -41,10 +41,10 @@
 		callbackPath?: string;
 		/** Button label (default: "Sign in with Grove") */
 		label?: string;
-		/** GlassButton variant */
-		variant?: GlassVariant;
-		/** Button size */
-		size?: ButtonSize;
+		/** GlassButton variant (synced with GlassButton's type) */
+		variant?: GlassButtonProps["variant"];
+		/** Button size (synced with GlassButton's type) */
+		size?: GlassButtonProps["size"];
 		/** Show the Grove logo icon */
 		showLogo?: boolean;
 		/** Additional CSS classes */
