@@ -7,7 +7,7 @@ build:
 	go build -o $(BINARY) .
 
 install:
-	go install .
+	go build -o ~/.local/bin/$(BINARY) .
 
 clean:
 	rm -f $(BINARY)
