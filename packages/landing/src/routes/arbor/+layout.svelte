@@ -3,7 +3,8 @@
 	 * Admin Layout
 	 *
 	 * Provides consistent sidebar navigation and theming for all admin pages.
-	 * Uses the engine's ArborPanel component for the full sidebar experience.
+	 * Uses the engine's ArborPanel component for the full sidebar experience,
+	 * wrapped with Chrome Header (for mobile sidebar toggle) and Footer.
 	 *
 	 * Note: Login page (/arbor/login) redirects to login.grove.place via
 	 * +page.server.ts, so it bypasses ArborPanel chrome.
@@ -11,7 +12,10 @@
 
 	import { page } from '$app/state';
 	import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
+	import { sidebarStore } from '@autumnsgrove/groveengine/ui/arbor';
 	import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
+	import Header from '$lib/components/Header.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 	import {
 		Home,
 		MessageCircle,
@@ -40,6 +44,9 @@
 	// Dialog state for logout confirmation
 	let showSignOutDialog = $state(false);
 
+	// Track sidebar collapsed state for footer margin
+	let sidebarCollapsed = $derived(sidebarStore.collapsed);
+
 	function handleLogoutClick() {
 		showSignOutDialog = true;
 	}
@@ -48,6 +55,17 @@
 		await fetch('/api/auth/signout', { method: 'POST' }); // csrf-ok
 		window.location.href = '/';
 	}
+
+	// Map user to HeaderUser shape (landing user has no avatarUrl)
+	const headerUser = $derived(
+		data.user
+			? {
+					id: data.user.id,
+					name: data.user.name,
+					email: data.user.email
+				}
+			: null
+	);
 
 	// Admin navigation items
 	const baseItems: ArborNavEntry[] = [
@@ -84,6 +102,9 @@
 	<!-- Login page redirects to login.grove.place (fallback renders without ArborPanel) -->
 	{@render children()}
 {:else}
+	<!-- Chrome Header with sidebar toggle (matches engine's arbor pattern) -->
+	<Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+
 	<ArborPanel
 		{navItems}
 		{footerLinks}
@@ -95,6 +116,11 @@
 		{@render children()}
 	</ArborPanel>
 
+	<!-- Footer with sidebar margin offset -->
+	<div class="arbor-footer-wrapper" class:collapsed={sidebarCollapsed}>
+		<Footer />
+	</div>
+
 	<GlassConfirmDialog
 		bind:open={showSignOutDialog}
 		title="Sign Out"
@@ -104,3 +130,28 @@
 		onconfirm={handleSignOutConfirm}
 	/>
 {/if}
+
+<style>
+	/* Footer offset to account for sidebar width, matching engine pattern */
+	.arbor-footer-wrapper {
+		margin-left: calc(250px + 0.75rem);
+		transition: margin-left 0.3s ease;
+	}
+
+	.arbor-footer-wrapper.collapsed {
+		margin-left: calc(72px + 0.75rem);
+	}
+
+	@media (max-width: 768px) {
+		.arbor-footer-wrapper,
+		.arbor-footer-wrapper.collapsed {
+			margin-left: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.arbor-footer-wrapper {
+			transition: none;
+		}
+	}
+</style>
