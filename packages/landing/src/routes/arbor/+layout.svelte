@@ -2,16 +2,16 @@
 	/**
 	 * Admin Layout
 	 *
-	 * Provides consistent header, navigation, and theming for all admin pages.
-	 * Uses the engine's AdminHeader component for proper glassmorphism and dark mode.
+	 * Provides consistent sidebar navigation and theming for all admin pages.
+	 * Uses the engine's ArborPanel component for the full sidebar experience.
 	 *
 	 * Note: Login page (/arbor/login) uses LoginGraft with its own layout,
 	 * so we conditionally render based on route.
 	 */
 
 	import { page } from '$app/state';
-	import { AdminHeader } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GlassConfirmDialog, GroveMessages } from '@autumnsgrove/groveengine/ui';
+	import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
+	import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
 	import {
 		Home,
 		MessageCircle,
@@ -28,6 +28,7 @@
 		Sparkles,
 		ImagePlus
 	} from 'lucide-svelte';
+	import type { ArborNavEntry } from '@autumnsgrove/groveengine/ui/arbor';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -48,16 +49,17 @@
 		window.location.href = '/';
 	}
 
-	// Admin navigation tabs (Wayfinder-only tabs are conditionally included)
-	const baseTabs = [
+	// Admin navigation items
+	const baseItems: ArborNavEntry[] = [
 		{ href: '/arbor', label: 'Dashboard', icon: Home },
 		{ href: '/arbor/feedback', label: 'Feedback', icon: MessageCircle },
 		{ href: '/arbor/subscribers', label: 'Subscribers', icon: AtSign },
 		{ href: '/arbor/cdn', label: 'CDN', icon: Upload }
 	];
 
-	// Wayfinder-only tabs
-	const wayfinderTabs = [
+	// Wayfinder-only items with section divider
+	const wayfinderItems: ArborNavEntry[] = [
+		{ kind: 'divider', label: 'Wayfinder Tools', style: 'grove' },
 		{ href: '/arbor/messages', label: 'Messages', icon: Megaphone },
 		{ href: '/arbor/porch', label: 'Porch', icon: MessageSquare },
 		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout },
@@ -70,32 +72,28 @@
 		{ href: '/arbor/lumen', label: 'Lumen', icon: Sparkles }
 	];
 
-	let tabs = $derived(data.isWayfinder ? [...baseTabs, ...wayfinderTabs] : baseTabs);
+	let navItems = $derived(data.isWayfinder ? [...baseItems, ...wayfinderItems] : baseItems);
+
+	const footerLinks = [
+		{ href: 'https://grove.place/knowledge/help', label: 'Help Center', external: true },
+		{ href: 'https://grove.place/porch', label: 'Get Support', external: true }
+	];
 </script>
 
 {#if isLoginPage}
 	<!-- Login page manages its own layout via LoginGraft -->
 	{@render children()}
 {:else}
-	<!-- Full admin layout with header and navigation -->
-	<div class="min-h-screen bg-cream transition-colors">
-		<AdminHeader
-			{tabs}
-			brandTitle="Admin"
-			user={data.user}
-			onLogout={handleLogoutClick}
-			maxWidth="wide"
-		/>
-
-		<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-			{#if data.messages?.length && !isLoginPage}
-				<div class="mb-6">
-					<GroveMessages messages={data.messages} dismissible={true} />
-				</div>
-			{/if}
-			{@render children()}
-		</main>
-	</div>
+	<ArborPanel
+		{navItems}
+		{footerLinks}
+		user={data.user}
+		brandTitle="Admin"
+		onLogout={handleLogoutClick}
+		messages={data.messages}
+	>
+		{@render children()}
+	</ArborPanel>
 
 	<GlassConfirmDialog
 		bind:open={showSignOutDialog}

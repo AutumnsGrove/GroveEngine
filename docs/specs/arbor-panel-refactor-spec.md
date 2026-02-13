@@ -1,7 +1,8 @@
 # Arbor Panel Refactor — Architecture & Planning Spec
 
-> **Status:** Planning / Exploration
-> **Branch:** `claude/arbor-panel-refactor-fCa2i`
+> **Status:** Implemented (Phases 1-3)
+> **Implementation Branch:** `claude/arbor-gathering-feature-cnInA`
+> **Original Planning Branch:** `claude/arbor-panel-refactor-fCa2i`
 > **Goal:** Elevate the Arbor panel from a route-level layout into a first-class engine component that any consumer can call as `<ArborPanel>`, with composable sections, a configurable utility bar, and consistent navigation — so building an admin experience feels like snapping Legos together instead of rebuilding from primitives every time.
 
 ---
