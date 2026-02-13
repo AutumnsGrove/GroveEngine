@@ -42,6 +42,11 @@ interface PostInput {
 /**
  * Generate the next sequential "Untitled" title for a tenant.
  * Returns "Untitled", "Untitled 2", "Untitled 3", etc.
+ *
+ * Note: Concurrent saves could produce duplicate titles since there's no
+ * transaction isolation on title uniqueness. This is acceptable because
+ * titles aren't unique keys (slug is), and slug conflicts are already
+ * handled via 409 responses. Worst case: two posts share a title.
  */
 async function getNextUntitledTitle(
   db: D1Database,
@@ -243,10 +248,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       console.error("[Blooms] [FAIL_OPEN] Tier limit check failed:", err);
     }
 
-    const isDraft = !data.status || data.status === "draft";
-
-    // Published posts require title + content; drafts generate defaults
-    if (!isDraft) {
+    // Published posts require title + content; drafts generate defaults.
+    // Explicit check — anything that isn't "published" is treated as a draft.
+    const isPublishing = data.status === "published";
+    if (isPublishing) {
       if (!data.title?.trim()) {
         throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
       }
