@@ -62,6 +62,9 @@
         </a>
       {/each}
     {/if}
+    <!-- Logout precedence: logoutHref (link) wins over onLogout (callback).
+         When both are provided, we render a navigating <a>. The callback-only
+         path uses a proper <button> for correct semantics. -->
     {#if logoutHref || onLogout}
       {#if user}
         {#if onLogout && !logoutHref}
