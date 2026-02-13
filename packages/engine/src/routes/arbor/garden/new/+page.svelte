@@ -36,16 +36,16 @@
   let error = $state(null);
   let slugManuallyEdited = $state(false);
   let showGutter = $state(false);
-  let detailsCollapsed = $state(false);
+  let detailsCollapsed = $state(true);
 
-  // Load collapsed state from localStorage
+  // Load collapsed state from localStorage (using separate keys for new post page)
   $effect(() => {
     if (browser) {
-      const savedDetails = localStorage.getItem("editor-details-collapsed");
+      const savedDetails = localStorage.getItem("new-post-details-collapsed");
       if (savedDetails !== null) {
         detailsCollapsed = savedDetails === "true";
       }
-      const savedGutter = localStorage.getItem("editor-gutter-visible");
+      const savedGutter = localStorage.getItem("new-post-gutter-visible");
       if (savedGutter !== null) {
         showGutter = savedGutter === "true";
       }
@@ -55,14 +55,14 @@
   function toggleDetailsCollapsed() {
     detailsCollapsed = !detailsCollapsed;
     if (browser) {
-      localStorage.setItem("editor-details-collapsed", String(detailsCollapsed));
+      localStorage.setItem("new-post-details-collapsed", String(detailsCollapsed));
     }
   }
 
   function toggleGutter() {
     showGutter = !showGutter;
     if (browser) {
-      localStorage.setItem("editor-gutter-visible", String(showGutter));
+      localStorage.setItem("new-post-gutter-visible", String(showGutter));
     }
   }
 
@@ -171,6 +171,18 @@
   {/if}
 
   <div class="editor-layout">
+    <!-- External toggle for metadata panel (visible when panel is hidden) -->
+    {#if detailsCollapsed}
+      <button
+        class="show-details-btn"
+        onclick={toggleDetailsCollapsed}
+        title="Show details panel"
+        aria-label="Show details panel"
+      >
+        <ChevronRight size={16} />
+      </button>
+    {/if}
+
     <!-- Metadata Panel -->
     <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
       <div class="panel-header">
@@ -437,16 +449,17 @@
     gap: 1.5rem;
     flex: 1;
     min-height: 0;
+    position: relative;
   }
   /* Metadata Panel - Now using GlassCard */
   :global(.metadata-panel) {
     width: 280px;
     flex-shrink: 0;
     overflow-y: auto;
-    transition: width 0.2s ease;
+    transition: all 0.2s ease;
   }
   :global(.metadata-panel.collapsed) {
-    width: 50px;
+    display: none;
   }
   .panel-header {
     display: flex;
@@ -659,6 +672,35 @@
     background: rgba(74, 222, 128, 0.2);
     border-color: rgba(74, 222, 128, 0.35);
   }
+  /* Show details button (external toggle, visible when panel hidden) */
+  .show-details-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.5rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-left: none;
+    border-radius: 0 var(--border-radius-button) var(--border-radius-button) 0;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    z-index: 10;
+  }
+  .show-details-btn:hover {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+  :global(.dark) .show-details-btn {
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.2);
+    color: #86efac;
+  }
+  :global(.dark) .show-details-btn:hover {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.35);
+  }
   /* Responsive */
   @media (max-width: 1200px) {
     .gutter-section {
@@ -674,8 +716,7 @@
       max-height: none;
     }
     :global(.metadata-panel.collapsed) {
-      width: 100% !important;
-      padding: 1rem;
+      display: none !important;
     }
     :global(.metadata-panel.collapsed .panel-header) {
       flex-direction: row;
