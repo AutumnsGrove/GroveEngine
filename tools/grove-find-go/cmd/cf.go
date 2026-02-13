@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
@@ -41,52 +42,57 @@ func cfOverview() error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 4)
-	var wg sync.WaitGroup
-	wg.Add(4)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// D1 bindings.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\bD1Database\b|d1_databases|binding\s*=.*D1`,
-			search.WithGlob("*.{toml,ts,js,svelte}"))
-		results[0] = sectionResult{title: "D1 Databases", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("D1 Databases: %w", err)
+		}
+		results[0] = sectionResult{title: "D1 Databases", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// KV bindings.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\bKVNamespace\b|kv_namespaces|binding\s*=.*KV`,
-			search.WithGlob("*.{toml,ts,js,svelte}"))
-		results[1] = sectionResult{title: "KV Namespaces", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("KV Namespaces: %w", err)
+		}
+		results[1] = sectionResult{title: "KV Namespaces", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// R2 bindings.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\bR2Bucket\b|r2_buckets|binding\s*=.*R2`,
-			search.WithGlob("*.{toml,ts,js,svelte}"))
-		results[2] = sectionResult{title: "R2 Buckets", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("R2 Buckets: %w", err)
+		}
+		results[2] = sectionResult{title: "R2 Buckets", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// Durable Objects.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\bDurableObject\b|durable_objects|DurableObjectNamespace`,
-			search.WithGlob("*.{toml,ts,js,svelte}"))
-		results[3] = sectionResult{title: "Durable Objects", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	// Check for errors.
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("Durable Objects: %w", err)
 		}
+		results[3] = sectionResult{title: "Durable Objects", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -201,50 +207,56 @@ func cfD1Full(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 4)
-	var wg sync.WaitGroup
-	wg.Add(4)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// D1 bindings in wrangler config.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`d1_databases|D1Database|\[\[d1`,
-			search.WithGlob("*.{toml,ts}"))
-		results[0] = sectionResult{title: "D1 Bindings", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts}"))
+		if err != nil {
+			return fmt.Errorf("D1 Bindings: %w", err)
+		}
+		results[0] = sectionResult{title: "D1 Bindings", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// Query operations (.prepare, .exec, .all, .first, .run, .batch).
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\.prepare\s*\(|\.exec\s*\(|\.all\s*\(|\.first\s*\(|\.run\s*\(|\.batch\s*\(`,
-			search.WithGlob("*.{ts,js,svelte}"))
-		results[1] = sectionResult{title: "Query Operations", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("Query Operations: %w", err)
+		}
+		results[1] = sectionResult{title: "Query Operations", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// SQL files.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		files, err := search.FindFilesByGlob([]string{"*.sql"})
-		results[2] = sectionResult{title: "SQL Files", lines: files, err: err}
-	}()
+		if err != nil {
+			return fmt.Errorf("SQL Files: %w", err)
+		}
+		results[2] = sectionResult{title: "SQL Files", lines: files}
+		return nil
+	})
 
 	// Wrangler D1 config sections.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`database_name|database_id`,
-			search.WithGlob("wrangler*.toml"))
-		results[3] = sectionResult{title: "Wrangler D1 Config", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			search.WithContext(ctx), search.WithGlob("wrangler*.toml"))
+		if err != nil {
+			return fmt.Errorf("Wrangler D1 Config: %w", err)
 		}
+		results[3] = sectionResult{title: "Wrangler D1 Config", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -341,43 +353,46 @@ func cfKVFull(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 3)
-	var wg sync.WaitGroup
-	wg.Add(3)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// KV bindings.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`kv_namespaces|KVNamespace|\[\[kv`,
-			search.WithGlob("*.{toml,ts}"))
-		results[0] = sectionResult{title: "KV Bindings", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts}"))
+		if err != nil {
+			return fmt.Errorf("KV Bindings: %w", err)
+		}
+		results[0] = sectionResult{title: "KV Bindings", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// KV operations.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\.get\s*\(|\.put\s*\(|\.delete\s*\(|\.list\s*\(|\.getWithMetadata\s*\(`,
-			search.WithGlob("*.{ts,js,svelte}"))
-		results[1] = sectionResult{title: "KV Operations", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("KV Operations: %w", err)
+		}
+		results[1] = sectionResult{title: "KV Operations", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// Wrangler KV config.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`kv_namespaces|preview_id|namespace_id`,
-			search.WithGlob("wrangler*.toml"))
-		results[2] = sectionResult{title: "Wrangler KV Config", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			search.WithContext(ctx), search.WithGlob("wrangler*.toml"))
+		if err != nil {
+			return fmt.Errorf("Wrangler KV Config: %w", err)
 		}
+		results[2] = sectionResult{title: "Wrangler KV Config", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -474,43 +489,46 @@ func cfR2Full(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 3)
-	var wg sync.WaitGroup
-	wg.Add(3)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// R2 bindings.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`r2_buckets|R2Bucket|\[\[r2`,
-			search.WithGlob("*.{toml,ts}"))
-		results[0] = sectionResult{title: "R2 Bindings", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{toml,ts}"))
+		if err != nil {
+			return fmt.Errorf("R2 Bindings: %w", err)
+		}
+		results[0] = sectionResult{title: "R2 Bindings", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// R2 operations.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\.put\s*\(|\.get\s*\(|\.delete\s*\(|\.list\s*\(|\.head\s*\(|\.createMultipartUpload\s*\(`,
-			search.WithGlob("*.{ts,js,svelte}"))
-		results[1] = sectionResult{title: "R2 Operations", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("R2 Operations: %w", err)
+		}
+		results[1] = sectionResult{title: "R2 Operations", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// Wrangler R2 config.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`r2_buckets|bucket_name`,
-			search.WithGlob("wrangler*.toml"))
-		results[2] = sectionResult{title: "Wrangler R2 Config", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			search.WithContext(ctx), search.WithGlob("wrangler*.toml"))
+		if err != nil {
+			return fmt.Errorf("Wrangler R2 Config: %w", err)
 		}
+		results[2] = sectionResult{title: "Wrangler R2 Config", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -622,50 +640,56 @@ func cfDOFull(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 4)
-	var wg sync.WaitGroup
-	wg.Add(4)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// DO class definitions.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`class\s+\w+.*(?:extends\s+DurableObject|implements\s+DurableObject)`,
-			search.WithGlob("*.{ts,js}"))
-		results[0] = sectionResult{title: "DO Class Definitions", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{ts,js}"))
+		if err != nil {
+			return fmt.Errorf("DO Class Definitions: %w", err)
+		}
+		results[0] = sectionResult{title: "DO Class Definitions", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// DO-related files.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		files, err := search.FindFiles("durable", search.WithGlob("*.{ts,js}"))
-		results[1] = sectionResult{title: "DO Files", lines: files, err: err}
-	}()
+		if err != nil {
+			return fmt.Errorf("DO Files: %w", err)
+		}
+		results[1] = sectionResult{title: "DO Files", lines: files}
+		return nil
+	})
 
 	// Stub usage (idFromName, idFromString, get).
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`\.idFromName\s*\(|\.idFromString\s*\(|DurableObjectNamespace|\.get\s*\(\s*id\b`,
-			search.WithGlob("*.{ts,js,svelte}"))
-		results[2] = sectionResult{title: "Stub Usage", lines: search.SplitLines(out), err: err}
-	}()
+			search.WithContext(ctx), search.WithGlob("*.{ts,js,svelte}"))
+		if err != nil {
+			return fmt.Errorf("Stub Usage: %w", err)
+		}
+		results[2] = sectionResult{title: "Stub Usage", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// Wrangler DO config.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(`durable_objects|class_name|script_name`,
-			search.WithGlob("wrangler*.toml"))
-		results[3] = sectionResult{title: "Wrangler DO Config", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			search.WithContext(ctx), search.WithGlob("wrangler*.toml"))
+		if err != nil {
+			return fmt.Errorf("Wrangler DO Config: %w", err)
 		}
+		results[3] = sectionResult{title: "Wrangler DO Config", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {

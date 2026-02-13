@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,9 +10,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
@@ -73,24 +74,16 @@ func runImpact(filePath string) error {
 	importPatterns = append(importPatterns, stem)
 	importPatterns = append(importPatterns, targetRel)
 
-	// Run all four searches in parallel.
+	// Run all three searches in parallel.
 	type sectionResult struct {
 		items []string
-		err   error
 	}
 
-	var (
-		importersResult sectionResult
-		testsResult     sectionResult
-		routesResult    sectionResult
-		mu              sync.Mutex
-		wg              sync.WaitGroup
-	)
+	results := make([]sectionResult, 3)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// 1. Find direct importers (parallel over patterns, then dedupe).
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		seen := make(map[string]bool)
 		var allImporters []string
 
@@ -98,15 +91,13 @@ func runImpact(filePath string) error {
 			escaped := regexp.QuoteMeta(pattern)
 			rgPattern := fmt.Sprintf(`(from|import).*%s`, escaped)
 			out, err := search.RunRg(rgPattern,
+				search.WithContext(ctx),
 				search.WithType("ts"),
 				search.WithGlob("*.svelte"),
 				search.WithExtraArgs("-l"),
 			)
 			if err != nil {
-				mu.Lock()
-				importersResult.err = err
-				mu.Unlock()
-				return
+				return fmt.Errorf("importer search failed: %w", err)
 			}
 			for _, line := range search.SplitLines(out) {
 				if line != targetRel && !seen[line] {
@@ -116,29 +107,24 @@ func runImpact(filePath string) error {
 			}
 		}
 
-		mu.Lock()
-		importersResult.items = allImporters
-		mu.Unlock()
-	}()
+		results[0] = sectionResult{items: allImporters}
+		return nil
+	})
 
 	// 2. Find test files referencing the module.
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		seen := make(map[string]bool)
 		var tests []string
 
 		// Search test/spec files for references to the stem.
 		out, err := search.RunRg(stem,
+			search.WithContext(ctx),
 			search.WithGlob("*.test.*"),
 			search.WithGlob("*.spec.*"),
 			search.WithExtraArgs("-l"),
 		)
 		if err != nil {
-			mu.Lock()
-			testsResult.err = err
-			mu.Unlock()
-			return
+			return fmt.Errorf("test search failed: %w", err)
 		}
 		for _, line := range search.SplitLines(out) {
 			if !seen[line] {
@@ -161,24 +147,19 @@ func runImpact(filePath string) error {
 			}
 		}
 
-		mu.Lock()
-		testsResult.items = tests
-		mu.Unlock()
-	}()
+		results[1] = sectionResult{items: tests}
+		return nil
+	})
 
 	// 3. Find route exposure.
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(stem,
+			search.WithContext(ctx),
 			search.WithGlob("**/routes/**"),
 			search.WithExtraArgs("-l"),
 		)
 		if err != nil {
-			mu.Lock()
-			routesResult.err = err
-			mu.Unlock()
-			return
+			return fmt.Errorf("route search failed: %w", err)
 		}
 		var routes []string
 		for _, line := range search.SplitLines(out) {
@@ -186,27 +167,17 @@ func runImpact(filePath string) error {
 				routes = append(routes, line)
 			}
 		}
-		mu.Lock()
-		routesResult.items = routes
-		mu.Unlock()
-	}()
+		results[2] = sectionResult{items: routes}
+		return nil
+	})
 
-	wg.Wait()
-
-	// Check for errors.
-	if importersResult.err != nil {
-		return fmt.Errorf("importer search failed: %w", importersResult.err)
-	}
-	if testsResult.err != nil {
-		return fmt.Errorf("test search failed: %w", testsResult.err)
-	}
-	if routesResult.err != nil {
-		return fmt.Errorf("route search failed: %w", routesResult.err)
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
-	importers := importersResult.items
-	tests := testsResult.items
-	routes := routesResult.items
+	importers := results[0].items
+	tests := results[1].items
+	routes := results[2].items
 
 	if importers == nil {
 		importers = []string{}
@@ -359,50 +330,50 @@ func runTestFor(filePath string) error {
 	// 2. Test files that reference this module (parallel with integration search).
 	type rgResult struct {
 		lines []string
-		err   error
 	}
 
-	var refsResult, intResult rgResult
-	var wg sync.WaitGroup
+	rgResults := make([]rgResult, 2)
+	g, ctx := errgroup.WithContext(context.Background())
 
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(stem,
+			search.WithContext(ctx),
 			search.WithGlob("*.test.*"),
 			search.WithGlob("*.spec.*"),
 			search.WithExtraArgs("-l"),
 		)
-		refsResult = rgResult{lines: search.SplitLines(out), err: err}
-	}()
+		if err != nil {
+			return fmt.Errorf("test reference search failed: %w", err)
+		}
+		rgResults[0] = rgResult{lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// 3. Integration tests.
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(stem,
+			search.WithContext(ctx),
 			search.WithGlob("**/tests/integration/**"),
 			search.WithExtraArgs("-l"),
 		)
-		intResult = rgResult{lines: search.SplitLines(out), err: err}
-	}()
+		if err != nil {
+			return fmt.Errorf("integration test search failed: %w", err)
+		}
+		rgResults[1] = rgResult{lines: search.SplitLines(out)}
+		return nil
+	})
 
-	wg.Wait()
-
-	if refsResult.err != nil {
-		return fmt.Errorf("test reference search failed: %w", refsResult.err)
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
-	if intResult.err != nil {
-		return fmt.Errorf("integration test search failed: %w", intResult.err)
-	}
 
-	for _, line := range refsResult.lines {
+	for _, line := range rgResults[0].lines {
 		if !seen[line] {
 			seen[line] = true
 			tests = append(tests, testEntry{File: line, Type: "references"})
 		}
 	}
-	for _, line := range intResult.lines {
+	for _, line := range rgResults[1].lines {
 		if !seen[line] {
 			seen[line] = true
 			tests = append(tests, testEntry{File: line, Type: "integration"})

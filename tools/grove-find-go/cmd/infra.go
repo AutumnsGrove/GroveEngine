@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
@@ -233,30 +235,27 @@ func runOrphanedCommand() error {
 		componentFiles = append(componentFiles, fp)
 	}
 
-	// Check each component for imports using goroutines with a semaphore.
-	sem := make(chan struct{}, 10)
+	// Check each component for imports using errgroup with concurrency limit.
+	g, ctx := errgroup.WithContext(context.Background())
+	g.SetLimit(10)
 	var mu sync.Mutex
-	var wg sync.WaitGroup
 
 	var orphaned []string
 
 	for _, fp := range componentFiles {
-		wg.Add(1)
-		go func(filePath string) {
-			defer wg.Done()
-			sem <- struct{}{}        // Acquire semaphore.
-			defer func() { <-sem }() // Release semaphore.
-
+		filePath := fp
+		g.Go(func() error {
 			componentName := strings.TrimSuffix(filepath.Base(filePath), ".svelte")
 
 			// Check if this component is imported anywhere.
 			pattern := fmt.Sprintf(`(import.*%s|<%s[\s/>])`, componentName, componentName)
 			rgOutput, rgErr := search.RunRg(pattern,
+				search.WithContext(ctx),
 				search.WithGlob("*.{ts,js,svelte}"),
 				search.WithExtraArgs("-l"),
 			)
 			if rgErr != nil {
-				return
+				return nil
 			}
 
 			importFiles := search.SplitLines(rgOutput)
@@ -274,10 +273,13 @@ func runOrphanedCommand() error {
 				orphaned = append(orphaned, filePath)
 				mu.Unlock()
 			}
-		}(fp)
+			return nil
+		})
 	}
 
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
+	}
 
 	// Sort orphaned list for stable output.
 	sort.Strings(orphaned)

@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
@@ -51,40 +52,42 @@ func routesGuards(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 2)
-	var wg sync.WaitGroup
-	wg.Add(2)
+	g, ctx := errgroup.WithContext(context.Background())
 
 	// 1. Server load functions with auth
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(
 			`(redirect|session|auth|locals\.user|locals\.session)`,
+			search.WithContext(ctx),
 			search.WithGlob("**/+page.server.ts"),
 			search.WithGlob("**/+layout.server.ts"),
 		)
-		results[0] = sectionResult{title: "Server Load Functions with Auth", lines: search.SplitLines(out), err: err}
-	}()
+		if err != nil {
+			return fmt.Errorf("Server Load Functions with Auth: %w", err)
+		}
+		results[0] = sectionResult{title: "Server Load Functions with Auth", lines: search.SplitLines(out)}
+		return nil
+	})
 
 	// 2. Auth hooks
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		out, err := search.RunRg(
 			`(handle|auth|session|redirect)`,
+			search.WithContext(ctx),
 			search.WithGlob("**/hooks.server.ts"),
 		)
-		results[1] = sectionResult{title: "Auth Hooks (hooks.server.ts)", lines: search.SplitLines(out), err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+		if err != nil {
+			return fmt.Errorf("Auth Hooks (hooks.server.ts): %w", err)
 		}
+		results[1] = sectionResult{title: "Auth Hooks (hooks.server.ts)", lines: search.SplitLines(out)}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	// Protected routes summary via file reading
@@ -166,20 +169,16 @@ func routesFiltered(cfg *config.Config, pattern string) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 2)
-	var wg sync.WaitGroup
-	wg.Add(2)
+	g, _ := errgroup.WithContext(context.Background())
 
 	// Page routes matching pattern
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		files, err := search.FindFilesByGlob([]string{"**/+page.svelte"})
 		if err != nil {
-			results[0] = sectionResult{title: "Page Routes", err: err}
-			return
+			return fmt.Errorf("Page Routes: %w", err)
 		}
 		lowerPattern := strings.ToLower(pattern)
 		var filtered []string
@@ -189,15 +188,14 @@ func routesFiltered(cfg *config.Config, pattern string) error {
 			}
 		}
 		results[0] = sectionResult{title: "Page Routes", lines: filtered}
-	}()
+		return nil
+	})
 
 	// API routes matching pattern
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		files, err := search.FindFilesByGlob([]string{"**/+server.ts"})
 		if err != nil {
-			results[1] = sectionResult{title: "API Routes", err: err}
-			return
+			return fmt.Errorf("API Routes: %w", err)
 		}
 		lowerPattern := strings.ToLower(pattern)
 		var filtered []string
@@ -207,14 +205,11 @@ func routesFiltered(cfg *config.Config, pattern string) error {
 			}
 		}
 		results[1] = sectionResult{title: "API Routes", lines: filtered}
-	}()
+		return nil
+	})
 
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
-		}
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -246,43 +241,49 @@ func routesOverview(cfg *config.Config) error {
 	type sectionResult struct {
 		title string
 		lines []string
-		err   error
 	}
 
 	results := make([]sectionResult, 4)
-	var wg sync.WaitGroup
-	wg.Add(4)
+	g, _ := errgroup.WithContext(context.Background())
 
-	go func() {
-		defer wg.Done()
+	g.Go(func() error {
 		files, err := search.FindFilesByGlob([]string{"**/+page.svelte"})
-		results[0] = sectionResult{title: "Page Routes", lines: files, err: err}
-	}()
-
-	go func() {
-		defer wg.Done()
-		files, err := search.FindFilesByGlob([]string{"**/+server.ts"})
-		results[1] = sectionResult{title: "API Routes", lines: files, err: err}
-	}()
-
-	go func() {
-		defer wg.Done()
-		files, err := search.FindFilesByGlob([]string{"**/+layout.svelte"})
-		results[2] = sectionResult{title: "Layouts", lines: files, err: err}
-	}()
-
-	go func() {
-		defer wg.Done()
-		files, err := search.FindFilesByGlob([]string{"**/+error.svelte"})
-		results[3] = sectionResult{title: "Error Pages", lines: files, err: err}
-	}()
-
-	wg.Wait()
-
-	for _, r := range results {
-		if r.err != nil {
-			return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+		if err != nil {
+			return fmt.Errorf("Page Routes: %w", err)
 		}
+		results[0] = sectionResult{title: "Page Routes", lines: files}
+		return nil
+	})
+
+	g.Go(func() error {
+		files, err := search.FindFilesByGlob([]string{"**/+server.ts"})
+		if err != nil {
+			return fmt.Errorf("API Routes: %w", err)
+		}
+		results[1] = sectionResult{title: "API Routes", lines: files}
+		return nil
+	})
+
+	g.Go(func() error {
+		files, err := search.FindFilesByGlob([]string{"**/+layout.svelte"})
+		if err != nil {
+			return fmt.Errorf("Layouts: %w", err)
+		}
+		results[2] = sectionResult{title: "Layouts", lines: files}
+		return nil
+	})
+
+	g.Go(func() error {
+		files, err := search.FindFilesByGlob([]string{"**/+error.svelte"})
+		if err != nil {
+			return fmt.Errorf("Error Pages: %w", err)
+		}
+		results[3] = sectionResult{title: "Error Pages", lines: files}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("search failed in %s", err)
 	}
 
 	if cfg.JSONMode {
@@ -480,39 +481,41 @@ var storeCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 2)
-			var wg sync.WaitGroup
-			wg.Add(2)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Svelte 4 stores
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				pattern := fmt.Sprintf(`(writable|readable|derived).*%s|%s.*(writable|readable|derived)`, name, name)
 				out, err := search.RunRg(pattern,
+					search.WithContext(ctx),
 					search.WithGlob("*.{ts,js,svelte}"),
 				)
-				results[0] = sectionResult{title: "Svelte 4 Stores", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Svelte 4 Stores: %w", err)
+				}
+				results[0] = sectionResult{title: "Svelte 4 Stores", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Svelte 5 runes
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				pattern := fmt.Sprintf(`(\$state|\$derived|\$effect|\$bindable).*%s|%s.*(\$state|\$derived|\$effect|\$bindable)`, name, name)
 				out, err := search.RunRg(pattern,
+					search.WithContext(ctx),
 					search.WithGlob("*.{ts,js,svelte}"),
 				)
-				results[1] = sectionResult{title: "Svelte 5 Runes", lines: search.SplitLines(out), err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				if err != nil {
+					return fmt.Errorf("Svelte 5 Runes: %w", err)
 				}
+				results[1] = sectionResult{title: "Svelte 5 Runes", lines: search.SplitLines(out)}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -541,18 +544,18 @@ var storeCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 3)
-			var wg sync.WaitGroup
-			wg.Add(3)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Store files
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				files, err := search.FindFiles("store", search.WithGlob("*.{ts,js}"))
-				if err == nil && files != nil {
+				if err != nil {
+					return fmt.Errorf("Store Files: %w", err)
+				}
+				if files != nil {
 					var filtered []string
 					for _, f := range files {
 						if !strings.Contains(f, "_deprecated") {
@@ -561,38 +564,43 @@ var storeCmd = &cobra.Command{
 					}
 					files = filtered
 				}
-				results[0] = sectionResult{title: "Store Files", lines: files, err: err}
-			}()
+				results[0] = sectionResult{title: "Store Files", lines: files}
+				return nil
+			})
 
 			// Svelte 4 store definitions
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`export\s+(const|let).*=\s*(writable|readable|derived)`,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 					search.WithType("js"),
 					search.WithGlob("!_deprecated"),
 				)
-				results[1] = sectionResult{title: "Svelte 4 Stores (writable/readable/derived)", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Svelte 4 Stores (writable/readable/derived): %w", err)
+				}
+				results[1] = sectionResult{title: "Svelte 4 Stores (writable/readable/derived)", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Svelte 5 runes
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`\$state\(|\$state\.snapshot|\$derived\(|\$derived\.by|\$effect\(|\$bindable\(`,
+					search.WithContext(ctx),
 					search.WithGlob("*.{ts,js,svelte}"),
 					search.WithGlob("!_deprecated"),
 				)
-				results[2] = sectionResult{title: "Svelte 5 Runes ($state/$derived/$effect)", lines: search.SplitLines(out), err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				if err != nil {
+					return fmt.Errorf("Svelte 5 Runes ($state/$derived/$effect): %w", err)
 				}
+				results[2] = sectionResult{title: "Svelte 5 Runes ($state/$derived/$effect)", lines: search.SplitLines(out)}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -640,35 +648,35 @@ var typeCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 2)
-			var wg sync.WaitGroup
-			wg.Add(2)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Definition
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				pattern := fmt.Sprintf(`(type|interface|enum)\s+%s`, name)
-				out, err := search.RunRg(pattern, search.WithType("ts"))
-				results[0] = sectionResult{title: "Definition", lines: search.SplitLines(out), err: err}
-			}()
+				out, err := search.RunRg(pattern, search.WithContext(ctx), search.WithType("ts"))
+				if err != nil {
+					return fmt.Errorf("Definition: %w", err)
+				}
+				results[0] = sectionResult{title: "Definition", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Usage
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				pattern := fmt.Sprintf(`:\s*%s\b|<%s>|as\s+%s`, name, name, name)
-				out, err := search.RunRg(pattern, search.WithType("ts"))
-				results[1] = sectionResult{title: fmt.Sprintf("Usage of %s", name), lines: search.SplitLines(out), err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				out, err := search.RunRg(pattern, search.WithContext(ctx), search.WithType("ts"))
+				if err != nil {
+					return fmt.Errorf("Usage of %s: %w", name, err)
 				}
+				results[1] = sectionResult{title: fmt.Sprintf("Usage of %s", name), lines: search.SplitLines(out)}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -703,39 +711,47 @@ var typeCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 3)
-			var wg sync.WaitGroup
-			wg.Add(3)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Exported types
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`^export\s+(type|interface)\s+\w+`,
+					search.WithContext(ctx),
 					search.WithGlob("!*.d.ts"),
 					search.WithType("ts"),
 				)
-				results[0] = sectionResult{title: "Type Definitions", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Type Definitions: %w", err)
+				}
+				results[0] = sectionResult{title: "Type Definitions", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Enums
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`^export\s+enum\s+\w+`,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 				)
-				results[1] = sectionResult{title: "Enums", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Enums: %w", err)
+				}
+				results[1] = sectionResult{title: "Enums", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Type files
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				files, err := search.FindFiles("types?", search.WithGlob("*.ts"))
-				if err == nil && files != nil {
+				if err != nil {
+					return fmt.Errorf("Type Files: %w", err)
+				}
+				if files != nil {
 					var filtered []string
 					for _, f := range files {
 						if !strings.HasSuffix(f, ".d.ts") {
@@ -744,15 +760,12 @@ var typeCmd = &cobra.Command{
 					}
 					files = filtered
 				}
-				results[2] = sectionResult{title: "Type Files", lines: files, err: err}
-			}()
+				results[2] = sectionResult{title: "Type Files", lines: files}
+				return nil
+			})
 
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
-				}
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -797,44 +810,46 @@ var exportCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 2)
-			var wg sync.WaitGroup
-			wg.Add(2)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Named exports
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				rgPattern := fmt.Sprintf(
 					`export\s+(default\s+)?(const|let|function|class|type|interface|enum)\s+.*%s`,
 					pattern,
 				)
 				out, err := search.RunRg(rgPattern,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[0] = sectionResult{title: "Exports", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Exports: %w", err)
+				}
+				results[0] = sectionResult{title: "Exports", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Re-exports
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				rgPattern := fmt.Sprintf(`export\s+\{[^}]*%s`, pattern)
 				out, err := search.RunRg(rgPattern,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[1] = sectionResult{title: "Re-exports", lines: search.SplitLines(out), err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				if err != nil {
+					return fmt.Errorf("Re-exports: %w", err)
 				}
+				results[1] = sectionResult{title: "Re-exports", lines: search.SplitLines(out)}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -867,46 +882,51 @@ var exportCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 3)
-			var wg sync.WaitGroup
-			wg.Add(3)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Default exports
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(`export\s+default`,
+					search.WithContext(ctx),
 					search.WithGlob("*.{ts,js,svelte}"),
 				)
-				results[0] = sectionResult{title: "Default Exports", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Default Exports: %w", err)
+				}
+				results[0] = sectionResult{title: "Default Exports", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Named exports
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`^export\s+(const|let|function|class|async function)`,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[1] = sectionResult{title: "Named Exports", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Named Exports: %w", err)
+				}
+				results[1] = sectionResult{title: "Named Exports", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Barrel exports (index.ts files)
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				files, err := search.FindFiles("index.ts")
-				results[2] = sectionResult{title: "Barrel Exports (index.ts)", lines: files, err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				if err != nil {
+					return fmt.Errorf("Barrel Exports (index.ts): %w", err)
 				}
+				results[2] = sectionResult{title: "Barrel Exports (index.ts)", lines: files}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {
@@ -994,61 +1014,70 @@ var authCmd = &cobra.Command{
 			type sectionResult struct {
 				title string
 				lines []string
-				err   error
 			}
 
 			results := make([]sectionResult, 4)
-			var wg sync.WaitGroup
-			wg.Add(4)
+			g, ctx := errgroup.WithContext(context.Background())
 
 			// Auth files
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				files, err := search.FindFiles("auth|login|session", search.WithGlob("*.{ts,js,svelte}"))
-				results[0] = sectionResult{title: "Auth Files", lines: files, err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Auth Files: %w", err)
+				}
+				results[0] = sectionResult{title: "Auth Files", lines: files}
+				return nil
+			})
 
 			// Session handling
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`(session|getSession|createSession|destroySession)`,
+					search.WithContext(ctx),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[1] = sectionResult{title: "Session Handling", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Session Handling: %w", err)
+				}
+				results[1] = sectionResult{title: "Session Handling", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Token operations
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`(token|jwt|accessToken|refreshToken|bearer)`,
+					search.WithContext(ctx),
 					search.WithExtraArgs("-i"),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[2] = sectionResult{title: "Token Operations", lines: search.SplitLines(out), err: err}
-			}()
+				if err != nil {
+					return fmt.Errorf("Token Operations: %w", err)
+				}
+				results[2] = sectionResult{title: "Token Operations", lines: search.SplitLines(out)}
+				return nil
+			})
 
 			// Heartwood/GroveAuth
-			go func() {
-				defer wg.Done()
+			g.Go(func() error {
 				out, err := search.RunRg(
 					`(heartwood|groveauth|GroveAuth)`,
+					search.WithContext(ctx),
 					search.WithExtraArgs("-i"),
 					search.WithType("ts"),
 					search.WithType("js"),
 				)
-				results[3] = sectionResult{title: "Heartwood/GroveAuth", lines: search.SplitLines(out), err: err}
-			}()
-
-			wg.Wait()
-
-			for _, r := range results {
-				if r.err != nil {
-					return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+				if err != nil {
+					return fmt.Errorf("Heartwood/GroveAuth: %w", err)
 				}
+				results[3] = sectionResult{title: "Heartwood/GroveAuth", lines: search.SplitLines(out)}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return fmt.Errorf("search failed in %s", err)
 			}
 
 			if cfg.JSONMode {

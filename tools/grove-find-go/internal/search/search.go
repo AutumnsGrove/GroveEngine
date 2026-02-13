@@ -2,12 +2,17 @@ package search
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/tools"
 )
+
+// MaxPatternLength is the maximum allowed regex pattern length to prevent resource exhaustion.
+const MaxPatternLength = 4096
 
 // Standard glob exclusions applied to all ripgrep calls.
 var DefaultExcludes = []string{
@@ -23,6 +28,7 @@ var DefaultExcludes = []string{
 type Option func(*rgOpts)
 
 type rgOpts struct {
+	ctx       context.Context
 	cwd       string
 	color     bool
 	excludes  []string
@@ -32,19 +38,24 @@ type rgOpts struct {
 	extraArgs []string
 }
 
-func WithCwd(cwd string) Option         { return func(o *rgOpts) { o.cwd = cwd } }
-func WithColor(enabled bool) Option      { return func(o *rgOpts) { o.color = enabled } }
-func WithExcludes(ex []string) Option    { return func(o *rgOpts) { o.excludes = ex } }
-func WithType(t string) Option           { return func(o *rgOpts) { o.fileTypes = append(o.fileTypes, t) } }
-func WithTypes(ts ...string) Option      { return func(o *rgOpts) { o.fileTypes = append(o.fileTypes, ts...) } }
-func WithGlob(g string) Option           { return func(o *rgOpts) { o.globs = append(o.globs, g) } }
-func WithGlobs(gs ...string) Option      { return func(o *rgOpts) { o.globs = append(o.globs, gs...) } }
-func WithFilesOnly() Option              { return func(o *rgOpts) { o.filesOnly = true } }
-func WithExtraArgs(args ...string) Option { return func(o *rgOpts) { o.extraArgs = append(o.extraArgs, args...) } }
+func WithContext(ctx context.Context) Option { return func(o *rgOpts) { o.ctx = ctx } }
+func WithCwd(cwd string) Option              { return func(o *rgOpts) { o.cwd = cwd } }
+func WithColor(enabled bool) Option          { return func(o *rgOpts) { o.color = enabled } }
+func WithExcludes(ex []string) Option        { return func(o *rgOpts) { o.excludes = ex } }
+func WithType(t string) Option               { return func(o *rgOpts) { o.fileTypes = append(o.fileTypes, t) } }
+func WithTypes(ts ...string) Option          { return func(o *rgOpts) { o.fileTypes = append(o.fileTypes, ts...) } }
+func WithGlob(g string) Option               { return func(o *rgOpts) { o.globs = append(o.globs, g) } }
+func WithGlobs(gs ...string) Option          { return func(o *rgOpts) { o.globs = append(o.globs, gs...) } }
+func WithFilesOnly() Option                  { return func(o *rgOpts) { o.filesOnly = true } }
+func WithExtraArgs(args ...string) Option    { return func(o *rgOpts) { o.extraArgs = append(o.extraArgs, args...) } }
 
 // RunRg executes ripgrep with the given pattern and options.
 // Returns stdout as a string. Non-zero exit with no output is not an error (just no matches).
 func RunRg(pattern string, opts ...Option) (string, error) {
+	if len(pattern) > MaxPatternLength {
+		return "", fmt.Errorf("pattern too long (%d bytes, max %d)", len(pattern), MaxPatternLength)
+	}
+
 	t := tools.Discover()
 	if !t.HasRg() {
 		return "", nil
@@ -87,7 +98,7 @@ func RunRg(pattern string, opts ...Option) (string, error) {
 	args = append(args, o.extraArgs...)
 	args = append(args, pattern)
 
-	cmd := exec.Command(t.Rg, args...)
+	cmd := makeCommand(o.ctx, t.Rg, args...)
 	cmd.Dir = o.cwd
 
 	var stdout, stderr bytes.Buffer
@@ -365,4 +376,12 @@ func splitLines(text string) []string {
 // SplitLines is the exported version of splitLines.
 func SplitLines(text string) []string {
 	return splitLines(text)
+}
+
+// makeCommand creates an exec.Cmd, using CommandContext if a context is provided.
+func makeCommand(ctx context.Context, name string, args ...string) *exec.Cmd {
+	if ctx != nil {
+		return exec.CommandContext(ctx, name, args...)
+	}
+	return exec.Command(name, args...)
 }

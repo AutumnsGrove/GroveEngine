@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
@@ -111,51 +112,56 @@ var classCmd = &cobra.Command{
 		type sectionResult struct {
 			title string
 			lines []string
-			err   error
 		}
 
 		results := make([]sectionResult, 4)
-		var wg sync.WaitGroup
-		wg.Add(4)
+		g, ctx := errgroup.WithContext(context.Background())
 
 		// 1. Svelte component files
-		go func() {
-			defer wg.Done()
+		g.Go(func() error {
 			files, err := search.FindFiles(name, search.WithGlob("*.svelte"))
-			results[0] = sectionResult{title: "Svelte Components", lines: files, err: err}
-		}()
+			if err != nil {
+				return fmt.Errorf("Svelte Components: %w", err)
+			}
+			results[0] = sectionResult{title: "Svelte Components", lines: files}
+			return nil
+		})
 
 		// 2. Component exports in .svelte files
-		go func() {
-			defer wg.Done()
+		g.Go(func() error {
 			pattern := fmt.Sprintf(`(export\s+(let|const|interface)\s+.*%s|<script.*>.*%s)`, name, name)
-			out, err := search.RunRg(pattern, search.WithGlob("*.svelte"))
-			results[1] = sectionResult{title: "Component Exports", lines: search.SplitLines(out), err: err}
-		}()
+			out, err := search.RunRg(pattern, search.WithContext(ctx), search.WithGlob("*.svelte"))
+			if err != nil {
+				return fmt.Errorf("Component Exports: %w", err)
+			}
+			results[1] = sectionResult{title: "Component Exports", lines: search.SplitLines(out)}
+			return nil
+		})
 
 		// 3. Class definitions
-		go func() {
-			defer wg.Done()
+		g.Go(func() error {
 			pattern := fmt.Sprintf(`class\s+%s`, name)
-			out, err := search.RunRg(pattern, search.WithType("ts"), search.WithType("js"))
-			results[2] = sectionResult{title: "Class Definitions", lines: search.SplitLines(out), err: err}
-		}()
+			out, err := search.RunRg(pattern, search.WithContext(ctx), search.WithType("ts"), search.WithType("js"))
+			if err != nil {
+				return fmt.Errorf("Class Definitions: %w", err)
+			}
+			results[2] = sectionResult{title: "Class Definitions", lines: search.SplitLines(out)}
+			return nil
+		})
 
 		// 4. Type/interface definitions
-		go func() {
-			defer wg.Done()
+		g.Go(func() error {
 			pattern := fmt.Sprintf(`(interface|type)\s+%s`, name)
-			out, err := search.RunRg(pattern, search.WithType("ts"))
-			results[3] = sectionResult{title: "Type/Interface Definitions", lines: search.SplitLines(out), err: err}
-		}()
-
-		wg.Wait()
-
-		// Check for errors.
-		for _, r := range results {
-			if r.err != nil {
-				return fmt.Errorf("search failed in %s: %w", r.title, r.err)
+			out, err := search.RunRg(pattern, search.WithContext(ctx), search.WithType("ts"))
+			if err != nil {
+				return fmt.Errorf("Type/Interface Definitions: %w", err)
 			}
+			results[3] = sectionResult{title: "Type/Interface Definitions", lines: search.SplitLines(out)}
+			return nil
+		})
+
+		if err := g.Wait(); err != nil {
+			return fmt.Errorf("search failed in %s", err)
 		}
 
 		if cfg.JSONMode {
