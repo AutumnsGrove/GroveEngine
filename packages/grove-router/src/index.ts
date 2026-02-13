@@ -287,4 +287,19 @@ export default {
       return new Response("Proxy error", { status: 502 });
     }
   },
+
+  /**
+   * Cron keepalive — prevents cold starts on the router.
+   *
+   * The grove-router is the entry point for ALL *.grove.place traffic.
+   * Without this, the first request after idle can take ~10 seconds
+   * while the worker cold-starts and establishes service binding connections.
+   */
+  async scheduled(
+    _controller: ScheduledController,
+    _env: Env,
+    _ctx: ExecutionContext,
+  ): Promise<void> {
+    console.log("[Keepalive] grove-router warm");
+  },
 };
