@@ -118,11 +118,16 @@
 	/>
 
 	<main>
-		{#key page.url.pathname}
-			<div in:fade={{ duration: 200 }}>
-				{@render children()}
-			</div>
-		{/key}
+		{#if isAdminPage}
+			<!-- Admin pages: no {#key} wrapper — preserves sidebar layout across navigations -->
+			{@render children()}
+		{:else}
+			{#key page.url.pathname}
+				<div in:fade={{ duration: 200 }}>
+					{@render children()}
+				</div>
+			{/key}
+		{/if}
 	</main>
 
 	<footer class:admin-page-footer={isAdminPage}>

@@ -109,53 +109,96 @@ export const load: LayoutServerLoad = async ({
     locals.user = demoUser;
   }
 
-  // Load tenant data for the admin panel
-  // PERFORMANCE: Combined ownership verification and tenant data into single query
-  // Previously: two separate queries to `tenants` table (one for email, one for data)
-  // Now: single query fetches all fields, ownership verified in-memory
+  // PERFORMANCE: Run independent queries in parallel to reduce navigation latency.
+  // Previously sequential awaits stacked D1 latency (100-300ms each = 1-3s total).
+  // Now: tenant, greenhouse+grafts, beta, and messages all run concurrently.
+  // Only getPendingCount depends on grafts result, so it runs after.
+
+  const db = platform?.env?.DB;
+  const kv = platform?.env?.CACHE_KV;
+  const tenantId = locals.tenantId;
+
+  // Phase 1: Run all independent queries in parallel
+  const [tenantResult, graftsResult, betaResult, messagesResult] =
+    await Promise.all([
+      // Tenant data + ownership verification
+      tenantId && db
+        ? db
+            .prepare(
+              `SELECT id, subdomain, display_name, email FROM tenants WHERE id = ?`,
+            )
+            .bind(tenantId)
+            .first<TenantRow>()
+            .catch((err) => {
+              console.error("[Admin Layout] Failed to load tenant:", err);
+              return null;
+            })
+        : Promise.resolve(null),
+
+      // Grafts: greenhouse check + flag evaluation (has internal dependency)
+      tenantId && db && kv
+        ? (async () => {
+            try {
+              const flagsEnv = { DB: db, FLAGS_KV: kv };
+              const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv);
+              return await getEnabledGrafts(
+                { tenantId, inGreenhouse },
+                flagsEnv,
+              );
+            } catch (error) {
+              console.error("[Admin Layout] Failed to load grafts:", error);
+              return {} as GraftsRecord;
+            }
+          })()
+        : Promise.resolve({} as GraftsRecord),
+
+      // Beta invite check
+      tenantId && db
+        ? db
+            .prepare(
+              `SELECT id FROM comped_invites WHERE used_by_tenant_id = ? AND invite_type = 'beta'`,
+            )
+            .bind(tenantId)
+            .first()
+            .catch((err) => {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              console.warn(
+                "[Admin Layout] Failed to check beta status:",
+                errMsg,
+              );
+              return null;
+            })
+        : Promise.resolve(null),
+
+      // Channel messages
+      db
+        ? loadChannelMessages(db, "arbor").catch(() => [])
+        : Promise.resolve([]),
+    ]);
+
+  // Process tenant result with ownership verification
   let tenant: TenantInfo | null = null;
-  if (locals.tenantId && platform?.env?.DB) {
-    try {
-      const result = await platform.env.DB.prepare(
-        `SELECT id, subdomain, display_name, email FROM tenants WHERE id = ?`,
-      )
-        .bind(locals.tenantId)
-        .first<TenantRow>();
+  if (tenantResult) {
+    if (!isExampleTenant) {
+      const tenantEmail = tenantResult.email;
+      const userEmail = locals.user?.email;
+      const match = emailsMatch(tenantEmail, userEmail);
 
-      if (result) {
-        // Skip ownership verification for example tenant (public demo)
-        if (!isExampleTenant) {
-          // Verify ownership in-memory instead of separate query
-          const tenantEmail = result.email;
-          const userEmail = locals.user?.email;
-          const match = emailsMatch(tenantEmail, userEmail);
-
-          if (!match) {
-            console.warn("[Admin Auth] Ownership mismatch", {
-              tenantId: locals.tenantId,
-              tenantEmail: normalizeEmail(tenantEmail),
-              userEmail: normalizeEmail(userEmail),
-            });
-            throw redirect(302, "/");
-          }
-        }
-
-        tenant = {
-          id: result.id,
-          subdomain: result.subdomain,
-          displayName: result.display_name,
-        };
+      if (!match) {
+        console.warn("[Admin Auth] Ownership mismatch", {
+          tenantId,
+          tenantEmail: normalizeEmail(tenantEmail),
+          userEmail: normalizeEmail(userEmail),
+        });
+        throw redirect(302, "/");
       }
-    } catch (error) {
-      // CRITICAL: Re-throw SvelteKit redirects (e.g. ownership mismatch at line 136).
-      // In SvelteKit 2.x, redirect() throws a Redirect object, NOT a Response.
-      // Using `instanceof Response` silently swallowed the redirect, allowing
-      // any logged-in user to access any tenant's arbor panel.
-      if (isRedirect(error)) {
-        throw error;
-      }
-      console.error("[Admin Layout] Failed to load tenant:", error);
     }
+
+    tenant = {
+      id: tenantResult.id,
+      subdomain: tenantResult.subdomain,
+      displayName: tenantResult.display_name,
+    };
   }
 
   // Use demo tenant if in demo mode (no database required)
@@ -163,57 +206,15 @@ export const load: LayoutServerLoad = async ({
     tenant = demoTenant;
   }
 
-  // Load ALL grafts for this tenant (engine-first approach)
-  // Grafts cascade to all child pages — no per-page flag checking needed
-  let grafts: GraftsRecord = {};
-  if (platform?.env?.DB && platform?.env?.CACHE_KV && locals.tenantId) {
-    try {
-      // Check if tenant is in greenhouse (for greenhouse-only flags)
-      const inGreenhouse = await isInGreenhouse(locals.tenantId, {
-        DB: platform.env.DB,
-        FLAGS_KV: platform.env.CACHE_KV,
-      });
+  const grafts = graftsResult;
+  const isBeta = !!betaResult;
+  const messages = messagesResult;
 
-      grafts = await getEnabledGrafts(
-        { tenantId: locals.tenantId, inGreenhouse },
-        { DB: platform.env.DB, FLAGS_KV: platform.env.CACHE_KV },
-      );
-    } catch (error) {
-      console.error("[Admin Layout] Failed to load grafts:", error);
-      // Continue with empty grafts - features will be disabled
-    }
-  }
-
-  // Check if this tenant was created through a beta invite
-  let isBeta = false;
-  if (tenant && platform?.env?.DB) {
-    try {
-      const betaInvite = await platform.env.DB.prepare(
-        `SELECT id FROM comped_invites WHERE used_by_tenant_id = ? AND invite_type = 'beta'`,
-      )
-        .bind(tenant.id)
-        .first();
-      isBeta = !!betaInvite;
-    } catch (error) {
-      // Non-critical — continue without beta status.
-      // Common cause: comped_invites table missing if migration hasn't run yet.
-      const errMsg = error instanceof Error ? error.message : String(error);
-      console.warn("[Admin Layout] Failed to check beta status:", errMsg);
-    }
-  }
-
-  // Fetch arbor-channel messages for wanderer notifications
-  const messages = platform?.env?.DB
-    ? await loadChannelMessages(platform.env.DB, "arbor").catch(() => [])
-    : [];
-
-  // Pending comment count for nav activity indicator (only when reeds graft is on)
+  // Phase 2: Pending comment count depends on grafts result
   let pendingCommentCount = 0;
-  if (grafts.reeds_comments && platform?.env?.DB && locals.tenantId) {
+  if (grafts.reeds_comments && db && tenantId) {
     try {
-      const tenantDb = getTenantDb(platform.env.DB, {
-        tenantId: locals.tenantId,
-      });
+      const tenantDb = getTenantDb(db, { tenantId });
       pendingCommentCount = await getPendingCount(tenantDb);
     } catch {
       // Non-critical — continue without count

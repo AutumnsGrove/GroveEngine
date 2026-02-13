@@ -14,10 +14,18 @@
     MessageSquare,
     X,
   } from "lucide-svelte";
+  import { page } from "$app/state";
+  import { navigating } from "$app/stores";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
 
   let { data, children } = $props();
+
+  // Navigation loading state — shows a progress bar during page transitions
+  let isNavigating = $derived(!!$navigating);
+
+  // Current path for active nav item highlighting
+  let currentPath = $derived(page.url.pathname);
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
   let sidebarOpen = $derived(sidebarStore.open);
   // Desktop collapse state also from shared store so Header toggle can control it
@@ -103,24 +111,24 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="/arbor" class="nav-item" onclick={closeSidebar} title="Dashboard">
+      <a href="/arbor" class="nav-item" class:active={currentPath === '/arbor'} onclick={closeSidebar} title="Dashboard">
         <LayoutDashboard class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="arbor">Dashboard</GroveSwap></span>
       </a>
-      <a href="/arbor/garden" class="nav-item" onclick={closeSidebar} title="Garden">
+      <a href="/arbor/garden" class="nav-item" class:active={currentPath.startsWith('/arbor/garden')} onclick={closeSidebar} title="Garden">
         <FileText class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="your-garden">Garden</GroveSwap></span>
       </a>
-      <a href="/arbor/pages" class="nav-item" onclick={closeSidebar} title="Pages">
+      <a href="/arbor/pages" class="nav-item" class:active={currentPath.startsWith('/arbor/pages')} onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Pages</span>
       </a>
-      <a href="/arbor/images" class="nav-item" onclick={closeSidebar} title="Images">
+      <a href="/arbor/images" class="nav-item" class:active={currentPath.startsWith('/arbor/images')} onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
       {#if data.grafts?.reeds_comments}
-      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title={resolveTerm("reeds")}>
+      <a href="/arbor/reeds" class="nav-item" class:active={currentPath.startsWith('/arbor/reeds')} onclick={closeSidebar} title={resolveTerm("reeds")}>
         <span class="nav-icon-wrap">
           <MessageSquare class="nav-icon" />
           {#if data.pendingCommentCount > 0}
@@ -130,11 +138,11 @@
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
       </a>
       {/if}
-      <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
+      <a href="/arbor/account" class="nav-item" class:active={currentPath.startsWith('/arbor/account')} onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Account</span>
       </a>
-      <a href="/arbor/settings" class="nav-item" onclick={closeSidebar} title="Settings">
+      <a href="/arbor/settings" class="nav-item" class:active={currentPath.startsWith('/arbor/settings')} onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Settings</span>
       </a>
@@ -188,6 +196,11 @@
   </aside>
 
   <main class="content" class:expanded={sidebarCollapsed}>
+    {#if isNavigating}
+      <div class="nav-loading-bar" role="progressbar" aria-label="Loading page">
+        <div class="nav-loading-bar-fill"></div>
+      </div>
+    {/if}
     {#if data.messages?.length}
       <div class="mb-6">
         <GroveMessages messages={data.messages} dismissible={true} />
@@ -473,8 +486,19 @@
     color: var(--user-accent, var(--color-primary));
   }
 
+  .nav-item.active {
+    background: var(--grove-overlay-15);
+    color: var(--user-accent, var(--color-primary));
+    font-weight: 500;
+  }
+
   :global(.dark) .nav-item:hover {
     background: var(--grove-overlay-12);
+    color: var(--grove-300, #86efac);
+  }
+
+  :global(.dark) .nav-item.active {
+    background: var(--grove-overlay-15);
     color: var(--grove-300, #86efac);
   }
 
@@ -697,6 +721,55 @@
   :global(.logout-icon) {
     width: 1rem;
     height: 1rem;
+  }
+
+  /* Navigation loading bar — visible during page transitions */
+  .nav-loading-bar {
+    position: fixed;
+    top: 76px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 1100;
+    background: var(--grove-overlay-8);
+    overflow: hidden;
+  }
+
+  .nav-loading-bar-fill {
+    height: 100%;
+    background: var(--user-accent, var(--color-primary, #2c5f2d));
+    animation: nav-loading 1.5s ease-in-out infinite;
+    transform-origin: left;
+  }
+
+  :global(.dark) .nav-loading-bar-fill {
+    background: var(--grove-300, #86efac);
+  }
+
+  @keyframes nav-loading {
+    0% {
+      transform: translateX(-100%) scaleX(0.3);
+    }
+    50% {
+      transform: translateX(0%) scaleX(0.6);
+    }
+    100% {
+      transform: translateX(100%) scaleX(0.3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-loading-bar-fill {
+      animation: none;
+      width: 100%;
+      opacity: 0.5;
+      animation: nav-loading-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes nav-loading-pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
   }
 
   .content {
