@@ -323,11 +323,13 @@ export function formatHistoricalContextForPrompt(
     const focus = brief?.mainFocus || ctx.briefSummary || "Various work";
     const repos = brief?.repos?.join(", ") || "multiple repos";
     const task = ctx.focus?.task || brief?.detectedTask;
+    const loc = brief?.linesChanged || 0;
     // Truncate focus to ~80 chars to keep context lean
     const shortFocus =
       focus.length > 80 ? focus.substring(0, 77) + "..." : focus;
+    const locStr = loc > 0 ? `, ~${loc} lines` : "";
 
-    return `- ${ctx.date}: ${shortFocus} (${repos}${task ? `, ${task}` : ""})`;
+    return `- ${ctx.date}: ${shortFocus} (${repos}${locStr}${task ? `, ${task}` : ""})`;
   });
 
   return lines.join("\n");
