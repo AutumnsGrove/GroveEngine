@@ -16,13 +16,18 @@ import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 import { buildLoginUrl } from "$lib/grafts/login/config.js";
+import { getRealOrigin } from "$lib/server/origin.js";
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, request }) => {
   // Where the user wants to go after auth (e.g., /arbor)
   const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/");
 
-  // Build the engine's callback URL that login.grove.place will redirect back to
-  const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+  // Build the engine's callback URL that login.grove.place will redirect back to.
+  // Must use getRealOrigin() to get the tenant's public hostname (e.g., autumn.grove.place)
+  // instead of url.origin which resolves to the internal Pages hostname (grove-lattice.pages.dev)
+  // when behind the grove-router proxy.
+  const origin = getRealOrigin(request, url);
+  const callbackUrl = `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
 
   // Redirect to the login hub with the callback URL
   throw redirect(302, buildLoginUrl(callbackUrl));

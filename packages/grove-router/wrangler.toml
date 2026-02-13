@@ -45,3 +45,8 @@ service = "mycelium"
 [[services]]
 binding = "OG"
 service = "grove-og"
+
+# Cron triggers
+# - Every minute: keepalive to prevent cold starts (~10s delay on first request)
+[triggers]
+crons = ["* * * * *"]
