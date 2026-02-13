@@ -12,9 +12,11 @@
 		signInHref?: string;
 		signInLabel?: string;
 		userHref?: string;
+		showSidebarToggle?: boolean;
 	}
 
-	let { maxWidth, user, signInHref, signInLabel, userHref }: Props = $props();
+	let { maxWidth, user, signInHref, signInLabel, userHref, showSidebarToggle = false }: Props =
+		$props();
 </script>
 
 <EngineHeader
@@ -25,4 +27,5 @@
 	{signInHref}
 	{signInLabel}
 	{userHref}
+	{showSidebarToggle}
 />
