@@ -97,7 +97,11 @@ function splitMentions(
  */
 function processInlineChildren(
   children: Token[],
-  TokenConstructor: new (type: string, tag: string, nesting: number) => Token,
+  TokenConstructor: new (
+    type: string,
+    tag: string,
+    nesting: -1 | 0 | 1,
+  ) => Token,
 ): Token[] {
   const newChildren: Token[] = [];
   let insideLink = false;
