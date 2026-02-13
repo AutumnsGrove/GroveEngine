@@ -235,7 +235,17 @@ interface ArborNavDivider {
   kind: "divider";
   /** Optional group label (e.g., "Wayfinder Tools") */
   label?: string;
+  /** Divider style: 'line' (default), 'grove' (GroveDivider logos), or any unicode char */
+  style?: ArborDividerStyle;
 }
+
+/**
+ * Divider rendering style:
+ * - 'line'    — Simple horizontal rule (default)
+ * - 'grove'   — GroveDivider component (alternating Grove logos, xs size)
+ * - string    — Any unicode character repeated as the separator (e.g., '·', '✦', '🌿')
+ */
+type ArborDividerStyle = "line" | "grove" | string;
 
 interface ArborNavItem {
   kind?: "item"; // Default, can be omitted
@@ -694,8 +704,19 @@ type ArborNavEntry = ArborNavItem | ArborNavDivider;
 
 interface ArborNavDivider {
   kind: "divider";
-  label?: string; // Optional group label (e.g., "Wayfinder Tools")
+  /** Optional group label (e.g., "Wayfinder Tools") */
+  label?: string;
+  /** Divider style — controls what renders between sections */
+  style?: ArborDividerStyle;
 }
+
+/**
+ * Divider rendering style:
+ * - 'line'         — Simple horizontal rule (default)
+ * - 'grove'        — GroveDivider component (alternating Grove logos)
+ * - string         — Any unicode character repeated as the divider (e.g., '·', '✦', '🌿', '─')
+ */
+type ArborDividerStyle = "line" | "grove" | string;
 
 interface ArborNavItem {
   kind?: "item"; // Default, can be omitted
@@ -708,6 +729,18 @@ interface ArborNavItem {
   visible?: boolean;
 }
 ```
+
+The divider `style` prop lets consumers choose how sections are visually separated:
+
+```typescript
+// Examples:
+{ kind: 'divider', label: 'Wayfinder Tools', style: 'grove' }     // GroveDivider logos
+{ kind: 'divider', label: 'Settings', style: '✦' }                // Repeated unicode
+{ kind: 'divider', style: '·' }                                   // Dots, no label
+{ kind: 'divider', label: 'Admin' }                               // Default: plain line
+```
+
+When `style` is `'grove'`, the component renders `<GroveDivider>` (already exported from `@autumnsgrove/groveengine/ui/nature`) with sidebar-appropriate sizing (`size="xs"`, `count={3}`). When `style` is any other string, it repeats that character 3-5 times as a decorative separator. When `style` is `'line'` or omitted, it renders a simple `<hr>`.
 
 **Impact on props:** `navItems` becomes `navItems: ArborNavEntry[]`.
 
