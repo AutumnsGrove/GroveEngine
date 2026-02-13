@@ -9,18 +9,21 @@ on:
     branches: [main]
     paths:
       # Go source code
-      - 'tools/grove-find-go/**/*.go'
+      - "tools/grove-find-go/**/*.go"
       # Go module files
-      - 'tools/grove-find-go/go.mod'
-      - 'tools/grove-find-go/go.sum'
+      - "tools/grove-find-go/go.mod"
+      - "tools/grove-find-go/go.sum"
   push:
     branches: [main]
     paths:
       # Go source code
-      - 'tools/grove-find-go/**/*.go'
+      - "tools/grove-find-go/**/*.go"
       # Go module files
-      - 'tools/grove-find-go/go.mod'
-      - 'tools/grove-find-go/go.sum'
+      - "tools/grove-find-go/go.mod"
+      - "tools/grove-find-go/go.sum"
+
+permissions:
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,7 +63,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: "1.23"
 
       - name: Build ${{ matrix.binary }}
         env:
@@ -128,11 +131,7 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           git add tools/grove-find-go/dist/
-          git commit -m "chore: rebuild gf binaries for latest Go changes
-
-- Rebuilt cross-platform binaries (linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64)
-- Triggered by Go source or dependency changes
-- Binary size: ~3.5MB each, ~14MB total"
+          git commit -m "chore: rebuild gf binaries for latest Go changes"
 
       - name: Push
         if: steps.changes.outputs.has_changes == 'true'
@@ -144,12 +143,14 @@ jobs:
         run: |
           echo "## GF Binary Build Summary"
           echo ""
-          echo "Status: $([ steps.changes.outputs.has_changes == 'true' ] && echo '✅ Updated' || echo '✓ No changes')"
+          if [ "${{ steps.changes.outputs.has_changes }}" = "true" ]; then
+            echo "Status: Updated"
+          else
+            echo "Status: No changes"
+          fi
           echo ""
           echo "### Binaries"
-          echo "\`\`\`"
           ls -lh tools/grove-find-go/dist/ | tail -n +2
-          echo "\`\`\`"
           echo ""
           echo "### Total Size"
           du -sh tools/grove-find-go/dist/
