@@ -123,6 +123,13 @@ export async function getTimelineToken(
       );
       return { token: legacyColumnValue, source: "legacy", migrated: false };
     }
+
+    // v1: encrypted token but no decryption key — permanently unreadable
+    console.error(
+      `[Timeline Secrets] Found v1: encrypted ${keyName} but TOKEN_ENCRYPTION_KEY is not configured. ` +
+        `This token was encrypted with a key that is no longer available. ` +
+        `The user must re-save a new token value to overwrite it.`,
+    );
   }
 
   return { token: null, source: "none", migrated: false };
@@ -229,8 +236,13 @@ export async function hasTimelineToken(
     }
   }
 
-  // Check legacy column
-  return Boolean(legacyColumnValue);
+  // Check legacy column — but v1: encrypted tokens without TOKEN_ENCRYPTION_KEY
+  // are permanently unreadable, so don't report them as "present"
+  if (!legacyColumnValue) return false;
+  if (legacyColumnValue.startsWith("v1:") && !env.TOKEN_ENCRYPTION_KEY) {
+    return false;
+  }
+  return true;
 }
 
 /**

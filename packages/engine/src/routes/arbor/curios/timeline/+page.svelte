@@ -69,6 +69,12 @@
   let errorMessage = $state("");
   let saveConfirmed = $state(false);
 
+  // Per-token save state
+  let githubTokenSaving = $state(false);
+  let githubTokenResult = $state<{ ok: boolean; message: string } | null>(null);
+  let openrouterKeySaving = $state(false);
+  let openrouterKeyResult = $state<{ ok: boolean; message: string } | null>(null);
+
   // Common timezones
   const timezones = [
     { value: "America/New_York", label: "Eastern Time (US)" },
@@ -278,6 +284,77 @@
   function cancelGeneration() {
     generateCancelled = true;
   }
+
+  async function saveTokenIndividually(type: "github" | "openrouter") {
+    const value = type === "github" ? githubToken : openrouterKey;
+    if (!value?.trim()) {
+      toast.error("Enter a token value first");
+      return;
+    }
+
+    if (type === "github") {
+      githubTokenSaving = true;
+      githubTokenResult = null;
+    } else {
+      openrouterKeySaving = true;
+      openrouterKeyResult = null;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("tokenType", type);
+      formData.append("tokenValue", value.trim());
+
+      const response = await fetch("?/saveToken", { // csrf-ok
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: {
+          "x-sveltekit-action": "true",
+        },
+      });
+
+      const result = await response.json() as {
+        type?: string;
+        data?: Record<string, unknown>;
+      };
+      // SvelteKit action responses are wrapped: { type: "success"|"failure", data: {...} }
+      const actionData = result?.data;
+
+      if (result?.type === "success" && actionData?.tokenSaved) {
+        const msg = `Saved and verified (${actionData.tokenSource as string})`;
+        if (type === "github") {
+          githubTokenResult = { ok: true, message: msg };
+          githubToken = "";
+        } else {
+          openrouterKeyResult = { ok: true, message: msg };
+          openrouterKey = "";
+        }
+        toast.success(`${type === "github" ? "GitHub" : "OpenRouter"} token saved!`, {
+          description: msg,
+        });
+      } else {
+        const errorMsg = (actionData?.tokenError as string) || "Save failed";
+        if (type === "github") {
+          githubTokenResult = { ok: false, message: errorMsg };
+        } else {
+          openrouterKeyResult = { ok: false, message: errorMsg };
+        }
+        toast.error("Token save failed", { description: errorMsg });
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Network error";
+      if (type === "github") {
+        githubTokenResult = { ok: false, message: errorMsg };
+      } else {
+        openrouterKeyResult = { ok: false, message: errorMsg };
+      }
+      toast.error("Token save failed", { description: errorMsg });
+    } finally {
+      if (type === "github") githubTokenSaving = false;
+      else openrouterKeySaving = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -459,6 +536,32 @@
             {/if}
           </button>
         </div>
+        <div class="token-actions">
+          <button
+            type="button"
+            class="token-save-btn"
+            disabled={githubTokenSaving || !githubToken?.trim()}
+            onclick={() => saveTokenIndividually("github")}
+          >
+            {#if githubTokenSaving}
+              <Loader2 size={14} class="spinning" />
+              Verifying...
+            {:else}
+              <Key size={14} />
+              Save Key
+            {/if}
+          </button>
+          {#if githubTokenResult}
+            <span class="token-result {githubTokenResult.ok ? 'token-ok' : 'token-fail'}">
+              {#if githubTokenResult.ok}
+                <CheckCircle2 size={14} />
+              {:else}
+                <AlertCircle size={14} />
+              {/if}
+              {githubTokenResult.message}
+            </span>
+          {/if}
+        </div>
         <p class="field-help">
           Needs <code>repo</code> scope to read your commit history.
           <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">
@@ -533,6 +636,32 @@
               <Eye class="visibility-icon" />
             {/if}
           </button>
+        </div>
+        <div class="token-actions">
+          <button
+            type="button"
+            class="token-save-btn"
+            disabled={openrouterKeySaving || !openrouterKey?.trim()}
+            onclick={() => saveTokenIndividually("openrouter")}
+          >
+            {#if openrouterKeySaving}
+              <Loader2 size={14} class="spinning" />
+              Verifying...
+            {:else}
+              <Key size={14} />
+              Save Key
+            {/if}
+          </button>
+          {#if openrouterKeyResult}
+            <span class="token-result {openrouterKeyResult.ok ? 'token-ok' : 'token-fail'}">
+              {#if openrouterKeyResult.ok}
+                <CheckCircle2 size={14} />
+              {:else}
+                <AlertCircle size={14} />
+              {/if}
+              {openrouterKeyResult.message}
+            </span>
+          {/if}
         </div>
         <p class="field-help">
           Your own OpenRouter key (BYOK).
@@ -1083,6 +1212,55 @@
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.75rem;
+  }
+
+  /* Token Actions */
+  .token-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .token-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.08);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: var(--border-radius-standard);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .token-save-btn:hover:not(:disabled) {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
+  }
+
+  .token-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .token-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .token-ok {
+    color: var(--color-success, #22c55e);
+  }
+
+  .token-fail {
+    color: var(--color-error, #ef4444);
   }
 
   /* Password Field */
