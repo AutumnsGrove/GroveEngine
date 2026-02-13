@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import { toast } from "$lib/ui/components/ui/toast";
+  import { api } from "$lib/utils/api";
   import {
     Calendar,
     Github,
@@ -66,6 +67,7 @@
   // Explicit feedback state (more reliable than relying on form prop in Svelte 5)
   let successMessage = $state("");
   let errorMessage = $state("");
+  let saveConfirmed = $state(false);
 
   // Common timezones
   const timezones = [
@@ -119,39 +121,24 @@
     backfillResult = null;
 
     try {
-      const response = await fetch("/api/curios/timeline/backfill", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-csrf-token": data.csrfToken ?? "",
-        },
-        body: JSON.stringify({
-          startDate: backfillStartDate,
-          endDate: backfillEndDate || undefined,
-          repoLimit: backfillRepoLimit,
-        }),
+      const result = await api.post<Record<string, unknown>>("/api/curios/timeline/backfill", {
+        startDate: backfillStartDate,
+        endDate: backfillEndDate || undefined,
+        repoLimit: backfillRepoLimit,
       });
 
-      const result = await response.json() as Record<string, unknown>;
-
-      if (response.ok) {
-        backfillResult = {
-          success: true,
-          message: (result.message as string) || "Backfill complete",
-          stats: result.stats,
-        };
-        toast.success("Backfill complete!", {
-          description: backfillResult.message,
-        });
-      } else {
-        const errorMsg = (result.message as string) || `Backfill failed (${response.status})`;
-        backfillResult = { success: false, message: errorMsg };
-        toast.error("Backfill failed", { description: errorMsg });
-      }
+      backfillResult = {
+        success: true,
+        message: (result?.message as string) || "Backfill complete",
+        stats: result?.stats,
+      };
+      toast.success("Backfill complete!", {
+        description: backfillResult.message,
+      });
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Network error";
+      const errorMsg = err instanceof Error ? err.message : "Backfill failed";
       backfillResult = { success: false, message: errorMsg };
-      toast.error("Backfill error", { description: errorMsg });
+      toast.error("Backfill failed", { description: errorMsg });
     } finally {
       isBackfilling = false;
     }
@@ -208,12 +195,13 @@
       };
 
       try {
-        const response = await fetch("/api/curios/timeline/generate", {
+        const response = await fetch("/api/curios/timeline/generate", { // csrf-ok
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-csrf-token": data.csrfToken ?? "",
           },
+          credentials: "include",
           body: JSON.stringify({ date }),
         });
 
@@ -346,6 +334,8 @@
         if (result.type === "success") {
           toast.success("Configuration saved!", { description: "Your Timeline settings have been updated." });
           successMessage = "Configuration saved successfully!";
+          saveConfirmed = true;
+          setTimeout(() => { saveConfirmed = false; }, 4000);
           // Clear token fields after successful save (they're now stored encrypted)
           githubToken = "";
           openrouterKey = "";
@@ -655,9 +645,23 @@
     <!-- Actions -->
     <div class="form-actions">
       <GlassButton type="submit" variant="accent" disabled={isSubmitting}>
-        <Save class="button-icon" />
-        {isSubmitting ? "Saving..." : "Save Configuration"}
+        {#if saveConfirmed}
+          <CheckCircle2 class="button-icon" />
+          Saved!
+        {:else if isSubmitting}
+          <Loader2 class="button-icon spinning" />
+          Saving...
+        {:else}
+          <Save class="button-icon" />
+          Save Configuration
+        {/if}
       </GlassButton>
+      {#if errorMessage}
+        <p class="save-error-inline">
+          <AlertCircle size={14} />
+          {errorMessage}
+        </p>
+      {/if}
     </div>
   </form>
 
@@ -1232,9 +1236,19 @@
   /* Form Actions */
   .form-actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 2rem;
+  }
+
+  .save-error-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: hsl(var(--destructive, 0 84% 60%));
+    font-size: 0.875rem;
+    margin: 0;
   }
 
   :global(.button-icon) {
