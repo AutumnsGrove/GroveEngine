@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData, ActionData } from "./$types";
-  import { enhance } from "$app/forms";
+  import { enhance, deserialize } from "$app/forms";
   import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api";
@@ -314,11 +314,11 @@
         },
       });
 
-      const result = await response.json() as {
-        type?: string;
+      // SvelteKit actions use devalue serialization, not plain JSON
+      const result = deserialize(await response.text()) as {
+        type: string;
         data?: Record<string, unknown>;
       };
-      // SvelteKit action responses are wrapped: { type: "success"|"failure", data: {...} }
       const actionData = result?.data;
 
       if (result?.type === "success" && actionData?.tokenSaved) {
