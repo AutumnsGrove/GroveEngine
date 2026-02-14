@@ -137,6 +137,9 @@ CLEARING_API_URL = "https://status.grove.place"
 # Turnstile (Shade) - human verification
 # Get from: Cloudflare Dashboard → Turnstile → Your Widget
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
+# Pulse landing page — tenant ID for the engine's own heartbeat
+# Set to your primary tenant's UUID so grove.place/pulse shows engine activity
+# PULSE_LANDING_TENANT_ID = "your-tenant-uuid-here"
 
 # =============================================================================
 # Envelope Encryption - Key Encryption Key (KEK)

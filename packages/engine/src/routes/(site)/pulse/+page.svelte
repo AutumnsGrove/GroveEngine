@@ -24,6 +24,7 @@
   } from "$lib/curios/pulse";
 
   interface PageData {
+    isLanding: boolean;
     config: PulseCurioConfig;
     active: PulseActiveStatus;
     today: PulseTodayStats;
@@ -77,10 +78,12 @@
 </script>
 
 <svelte:head>
-  <title>Development Pulse</title>
+  <title>{data.isLanding ? "Lattice Pulse" : "Development Pulse"}</title>
   <meta
     name="description"
-    content="Live development heartbeat — real-time activity from GitHub"
+    content={data.isLanding
+      ? "The heartbeat of Lattice — live development activity from the engine that powers Grove"
+      : "Live development heartbeat — real-time activity from GitHub"}
   />
 </svelte:head>
 
@@ -92,9 +95,13 @@
         <HeartPulse size={32} strokeWidth={1.5} />
       </div>
       <div class="hero-text">
-        <h1>Development Pulse</h1>
+        <h1>{data.isLanding ? "Lattice Pulse" : "Development Pulse"}</h1>
         <p class="hero-subtitle">
-          Live heartbeat of what's being built, right now
+          {#if data.isLanding}
+            The heartbeat of the engine that powers Grove
+          {:else}
+            Live heartbeat of what's being built, right now
+          {/if}
         </p>
         {#if todaySummary}
           <p class="hero-today">

@@ -2,7 +2,10 @@
  * Pulse Public Route — Server
  *
  * Loads pulse data for the public /pulse page.
- * Requires Pulse Curio to be enabled for the current tenant.
+ *
+ * Two modes:
+ * - Tenant context: shows that tenant's pulse (requires curio enabled)
+ * - Landing context: shows the engine's own pulse via PULSE_LANDING_TENANT_ID
  */
 
 import type { PageServerLoad } from "./$types";
@@ -62,7 +65,12 @@ interface HourlyRow {
 export const load: PageServerLoad = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
-  const tenantId = locals.tenantId;
+
+  // Landing mode: use the engine's own tenant ID for dogfooding
+  const isLanding = locals.context.type === "landing";
+  const tenantId =
+    locals.tenantId ??
+    (isLanding ? platform?.env?.PULSE_LANDING_TENANT_ID : undefined);
 
   if (!db) throwGroveError(503, SITE_ERRORS.DB_NOT_CONFIGURED, "Site");
   if (!tenantId)
@@ -193,6 +201,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   }));
 
   return {
+    isLanding,
     config: {
       enabled: true,
       showHeatmap: Boolean(config.show_heatmap),
