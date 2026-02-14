@@ -14,12 +14,20 @@ const config = {
   kit: {
     adapter: adapter(),
 
-    // Disable SvelteKit's built-in CSRF origin check. It uses exact string matching
-    // for trustedOrigins (no wildcard support), so "https://*.grove.place" is treated
-    // literally and never matches "https://autumn.grove.place". This causes 403 errors
-    // on multipart/form-data uploads (images) behind the grove-router proxy.
+    // Disable SvelteKit's built-in CSRF origin check for two reasons:
     //
-    // Our hooks.server.ts provides comprehensive proxy-aware CSRF validation:
+    // 1. No wildcard support in SvelteKit 2.50.2 — respond.js line 93 uses
+    //    Array.includes() for trustedOrigins matching. "https://*.grove.place"
+    //    is compared literally and never matches "https://autumn.grove.place".
+    //    This blocks multipart/form-data uploads (images) with a 403.
+    //
+    // 2. Proxy-incompatible — SvelteKit compares Origin against url.origin,
+    //    which behind grove-router is the internal worker URL (pages.dev),
+    //    not the user-facing subdomain. Multi-tenant subdomains can't be
+    //    enumerated in a static array.
+    //
+    // Defense in depth: hooks.server.ts provides comprehensive CSRF validation
+    // (tested in tests/integration/hooks/csrf.test.ts):
     // - Origin vs X-Forwarded-Host matching (proxy-safe)
     // - Session-bound HMAC tokens (timing-safe comparison)
     // - Token fallback when Origin is absent (fail-closed)
