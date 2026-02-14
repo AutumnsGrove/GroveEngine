@@ -549,6 +549,10 @@
     scrollbar-width: none;
   }
 
+  :global(.dark) .tab-bar {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
   .tab-bar::-webkit-scrollbar {
     display: none;
   }
@@ -604,6 +608,10 @@
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--grove-border-subtle, rgba(0, 0, 0, 0.06));
     transition: opacity 0.2s;
+  }
+
+  :global(.dark) .comment-card {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .comment-card:last-child {
@@ -825,6 +833,14 @@
     border-bottom: none;
   }
 
+  :global(.dark) .setting-group {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  :global(.dark) .setting-group:last-of-type {
+    border-bottom: none;
+  }
+
   .setting-label {
     display: flex;
     flex-direction: column;
@@ -878,12 +894,16 @@
     transition: background 0.2s;
   }
 
+  :global(.dark) .toggle-track {
+    background: #4b5563; /* gray-600 — visible off-state on dark backgrounds */
+  }
+
   .toggle-btn.on .toggle-track {
     background: var(--user-accent, var(--color-primary, #2c5f2d));
   }
 
   :global(.dark) .toggle-btn.on .toggle-track {
-    background: var(--grove-400, #4ade80);
+    background: #10b981; /* emerald-500 — bright, clearly distinguishable from off */
   }
 
   .toggle-thumb {
