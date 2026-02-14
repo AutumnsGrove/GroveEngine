@@ -10,6 +10,7 @@
   let includeImages = $state(true);
   let deliveryMethod = $state<'email' | 'download'>('email');
   let starting = $state(false);
+  let cancelling = $state(false);
 
   // Active export tracking
   let activeExportId = $state<string | null>(data.activeExport?.id ?? null);
@@ -92,6 +93,23 @@
       toast.error(message);
     } finally {
       starting = false;
+    }
+  }
+
+  async function cancelExport() {
+    if (!activeExportId) return;
+    cancelling = true;
+    try {
+      await api.post(`/api/export/${activeExportId}/cancel`, {});
+      stopPolling();
+      activeStatus = 'failed';
+      activeProgress = 0;
+      toast.success('Export cancelled.');
+    } catch (err: any) {
+      const message = err?.userMessage || err?.message || 'Failed to cancel export';
+      toast.error(message);
+    } finally {
+      cancelling = false;
     }
   }
 
@@ -296,6 +314,21 @@
           Hang tight! Your download will be ready in a moment.
         </p>
       {/if}
+
+      <Button
+        variant="secondary"
+        onclick={cancelExport}
+        disabled={cancelling}
+        class="cancel-btn"
+      >
+        {#if cancelling}
+          <Spinner size="sm" />
+          Cancelling...
+        {:else}
+          <XCircle class="btn-icon" aria-hidden="true" />
+          Cancel Export
+        {/if}
+      </Button>
     </GlassCard>
   {/if}
 
@@ -564,7 +597,7 @@
   }
 
   .progress-note {
-    margin: 0;
+    margin: 0 0 1rem 0;
     font-size: 0.85rem;
     color: var(--color-text-muted);
     font-style: italic;
