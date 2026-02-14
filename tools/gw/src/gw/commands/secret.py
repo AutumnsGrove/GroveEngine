@@ -98,13 +98,26 @@ def secret_init(ctx: click.Context) -> None:
 @secret.command("generate")
 @click.argument("name")
 @click.option("--length", "-l", default=32, help="Key length in bytes (default: 32)")
+@click.option(
+    "--format", "-f", "fmt",
+    type=click.Choice(["urlsafe", "hex"], case_sensitive=False),
+    default="urlsafe",
+    help="Output format: urlsafe (base64url, default) or hex (for encryption keys like GROVE_KEK)",
+)
 @click.option("--force", is_flag=True, help="Overwrite existing secret")
 @click.pass_context
-def secret_generate(ctx: click.Context, name: str, length: int, force: bool) -> None:
+def secret_generate(ctx: click.Context, name: str, length: int, fmt: str, force: bool) -> None:
     """Generate and store a secure API key.
 
-    Creates a cryptographically secure random key using secrets.token_urlsafe()
-    and stores it in the vault. The value is NEVER shown - only confirmed.
+    Creates a cryptographically secure random key and stores it in the vault.
+    The value is NEVER shown - only confirmed.
+
+    Formats:
+
+        urlsafe  Base64url encoding (default). Compact, safe for URLs/headers.
+
+        hex      Hexadecimal encoding. Required for encryption keys (e.g. GROVE_KEK)
+                 that expect exact hex character counts (32 bytes = 64 hex chars).
 
     This is agent-safe: the secret value is generated and stored without
     ever being displayed or returned.
@@ -112,6 +125,8 @@ def secret_generate(ctx: click.Context, name: str, length: int, force: bool) -> 
     Examples:
 
         gw secret generate ZEPHYR_API_KEY
+
+        gw secret generate GROVE_KEK --format hex
 
         gw secret generate MY_KEY --length 48
 
@@ -149,8 +164,13 @@ def secret_generate(ctx: click.Context, name: str, length: int, force: bool) -> 
             info("Use --force to overwrite")
         ctx.exit(1)
 
-    # Generate secure key
-    key = secrets_module.token_urlsafe(length)
+    # Generate secure key in requested format
+    if fmt == "hex":
+        key = secrets_module.token_hex(length)
+    else:
+        key = secrets_module.token_urlsafe(length)
+
+    fmt_label = "hex" if fmt == "hex" else "base64url"
 
     try:
         vault.set_secret(name, key)
@@ -159,10 +179,11 @@ def secret_generate(ctx: click.Context, name: str, length: int, force: bool) -> 
                 "name": name,
                 "generated": True,
                 "length": length,
+                "format": fmt_label,
                 "note": "Value stored in vault (never shown)"
             }))
         else:
-            success(f"Generated and stored '{name}' ({length} bytes)")
+            success(f"Generated and stored '{name}' ({length} bytes, {fmt_label})")
             console.print("[dim]🔒 Value stored in vault - never shown for security[/dim]")
             console.print(f"[dim]Apply with: gw secret apply {name} --worker WORKER_NAME[/dim]")
     except VaultError as e:
