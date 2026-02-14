@@ -27,6 +27,7 @@
 	let loading = $state(!initialMetadata);
 	let error = $state(false);
 	let trayOpen = $state(false);
+	let artworkError = $state(false);
 
 	const info = $derived(getProviderInfo(meta?.provider ?? provider));
 	const hasPlatformLinks = $derived(
@@ -57,6 +58,7 @@
 				if (cancelled) return;
 
 				meta = data;
+				artworkError = false;
 				loading = false;
 			} catch {
 				if (cancelled) return;
@@ -128,7 +130,7 @@
 		onkeydown={handleCardKeydown}
 	>
 		<!-- Album artwork -->
-		{#if meta.artworkUrl}
+		{#if meta.artworkUrl && !artworkError}
 			<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
 				<img
 					src={meta.artworkUrl}
@@ -136,6 +138,7 @@
 					class="w-full h-full object-cover"
 					loading="lazy"
 					referrerpolicy="no-referrer"
+					onerror={() => { artworkError = true; }}
 				/>
 			</div>
 		{:else}
