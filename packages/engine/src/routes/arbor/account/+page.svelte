@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GlassCard, GlassConfirmDialog } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { api, getCSRFToken } from "$lib/utils";
+  import { api } from "$lib/utils";
   import { invalidateAll } from "$app/navigation";
   import { CONTACT } from "$lib/config/contact";
 
@@ -19,7 +19,6 @@
   import type { FlourishState } from '$lib/grafts/upgrades';
 
   // Import types and utils
-  import type { ExportType } from "./types";
   import { sanitizeErrorMessage } from "./utils";
   import { checkPasskeySupport, registerPasskey } from "./passkey-utils";
   import type { TierKey } from '$lib/config/tiers';
@@ -31,8 +30,6 @@
   let resumingSubscription = $state(false);
   let changingPlan = $state(false);
   let selectedPlan = $state("");
-  let exportingData = $state(false);
-  let exportType = $state<ExportType>("full");
 
   // Dialog states
   let showCancelDialog = $state(false);
@@ -178,57 +175,6 @@
     }
   }
 
-  // Export data
-  async function handleExportData(): Promise<void> {
-    exportingData = true;
-    try {
-      const csrfToken = getCSRFToken();
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (csrfToken) {
-        headers["X-CSRF-Token"] = csrfToken;
-        headers["csrf-token"] = csrfToken;
-      }
-
-      const response = await fetch("/api/export", { // csrf-ok: manual CSRF headers for blob download
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({ type: exportType }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null) as { message?: string } | null;
-        throw new Error(errorData?.message || `Export failed (${response.status})`);
-      }
-
-      const blob = await response.blob();
-      const filename =
-        response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ||
-        `grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json`;
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast.success("Data export downloaded successfully.");
-    } catch (error) {
-      toast.error(sanitizeErrorMessage(error, "Failed to export data"));
-    } finally {
-      exportingData = false;
-    }
-  }
-
-  function handleExportTypeChange(type: ExportType): void {
-    exportType = type;
-  }
-
   // Register a new passkey
   async function handleRegisterPasskey(): Promise<void> {
     registeringPasskey = true;
@@ -349,12 +295,7 @@
 
   <!-- Data Export -->
   <DataExportCard
-    {exportType}
-    {exportingData}
     exportCounts={data.exportCounts}
-    exportTooLarge={data.exportTooLarge}
-    onExport={handleExportData}
-    onExportTypeChange={handleExportTypeChange}
   />
 
   <!-- Danger Zone -->

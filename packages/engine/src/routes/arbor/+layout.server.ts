@@ -11,8 +11,7 @@ import { getPendingCount } from "$lib/server/services/reeds.js";
 import type { LayoutServerLoad } from "./$types";
 
 // Demo mode secret key for local development and screenshots
-// Falls back to a dev-only default; production MUST set DEMO_MODE_SECRET env var
-const DEMO_MODE_SECRET_FALLBACK = "glimpse-demo-2026-dev";
+// Production MUST set DEMO_MODE_SECRET env var; demo mode is off without it
 
 interface DemoUser {
   id: string;
@@ -28,11 +27,11 @@ interface DemoTenant {
   displayName: string;
 }
 
-// Check if request is in demo mode
+// Check if request is in demo mode (off by default unless DEMO_MODE_SECRET is set)
 function isDemoRequest(url: URL, envSecret?: string): boolean {
+  if (!envSecret) return false;
   const demoKey = url.searchParams.get("demo");
-  const secret = envSecret || DEMO_MODE_SECRET_FALLBACK;
-  return demoKey === secret;
+  return demoKey === envSecret;
 }
 
 // Get demo user for screenshots and exploration
@@ -84,14 +83,11 @@ export const load: LayoutServerLoad = async ({
   // Check for demo mode (for screenshots and development)
   const isDemoMode = isDemoRequest(url, platform?.env?.DEMO_MODE_SECRET);
 
-  // SECURITY: Example tenant admin is publicly accessible for demos (S2-F2 documented risk)
-  // This allows visitors to explore the admin panel without signing in.
-  // Risk accepted: demo data only, queries still scoped to example tenant.
-  // TODO: Consider making example tenant read-only or gating behind feature flag
-  const isExampleTenant = locals.tenantId === "example-tenant-001";
+  // SECURITY: Example tenant bypass removed for launch (tracked in #1120)
+  // const isExampleTenant = locals.tenantId === "example-tenant-001";
 
-  // Demo mode or example tenant bypasses authentication
-  if (!locals.user && !isExampleTenant && !isDemoMode) {
+  // Demo mode bypasses authentication (requires DEMO_MODE_SECRET env var)
+  if (!locals.user && !isDemoMode) {
     throw redirect(
       302,
       `/auth/login?redirect=${encodeURIComponent(url.pathname)}`,
@@ -180,19 +176,17 @@ export const load: LayoutServerLoad = async ({
   // Process tenant result with ownership verification
   let tenant: TenantInfo | null = null;
   if (tenantResult) {
-    if (!isExampleTenant) {
-      const tenantEmail = tenantResult.email;
-      const userEmail = locals.user?.email;
-      const match = emailsMatch(tenantEmail, userEmail);
+    const tenantEmail = tenantResult.email;
+    const userEmail = locals.user?.email;
+    const match = emailsMatch(tenantEmail, userEmail);
 
-      if (!match) {
-        console.warn("[Admin Auth] Ownership mismatch", {
-          tenantId,
-          tenantEmail: normalizeEmail(tenantEmail),
-          userEmail: normalizeEmail(userEmail),
-        });
-        throw redirect(302, "/");
-      }
+    if (!match && !isDemoMode) {
+      console.warn("[Admin Auth] Ownership mismatch", {
+        tenantId,
+        tenantEmail: normalizeEmail(tenantEmail),
+        userEmail: normalizeEmail(userEmail),
+      });
+      throw redirect(302, "/");
     }
 
     tenant = {

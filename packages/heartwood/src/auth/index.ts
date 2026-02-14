@@ -389,7 +389,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
               "[Auth] Signup blocked - email not in allowlist or comped invites",
             );
             throw new Error(
-              "Email not authorized. Contact an administrator for access.",
+              "We couldn't create your account right now. If you think this is a mistake, visit grove.place/support for help.",
             );
           },
         },

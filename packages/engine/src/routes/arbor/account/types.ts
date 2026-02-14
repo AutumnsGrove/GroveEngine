@@ -56,8 +56,5 @@ export interface AccountPageData {
   availableTiers: AvailableTier[];
 }
 
-// Re-export from canonical source to avoid duplication
-export type { ExportType } from "../../api/export/+server";
-
 // Re-export Passkey type for use in Account page components
 export type { Passkey } from "$lib/heartwood";

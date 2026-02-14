@@ -19,7 +19,7 @@ CDN_URL = "https://cdn.grove.place"
 PASSKEY_ORIGIN = "https://login.grove.place"
 
 # Feature flags
-PUBLIC_SIGNUP_ENABLED = "false"  # Set to "true" to allow public signup (bypass email allowlist)
+PUBLIC_SIGNUP_ENABLED = "true"  # Public signup enabled — launch day 2026-02-14
 
 # D1 Database binding (Heartwood auth data)
 [[d1_databases]]

@@ -45,9 +45,6 @@
 		icon: tier.icon,
 	}));
 
-	// Check for signup gate redirect notice
-	const showSignupGateNotice = $derived(page.url.searchParams.get('notice') === 'coming_soon');
-
 	// Check for expired/invalid invite link notice
 	const showInviteExpiredNotice = $derived(page.url.searchParams.get('notice') === 'invite_expired');
 
@@ -55,9 +52,6 @@
 	const authError = $derived(page.url.searchParams.get('error'));
 	const authErrorCode = $derived(page.url.searchParams.get('error_code'));
 	const showAuthError = $derived(!!authError);
-
-	// Config - could be fetched from API or environment
-	const WAITLIST_COUNT = 67;
 
 	// Feature list for "What you'll get" section
 	const features = [
@@ -149,30 +143,6 @@
 		</GlassCard>
 	{/if}
 
-	<!-- Signup Gate Notice (shown when user tries to sign up but payments aren't ready) -->
-	{#if showSignupGateNotice}
-		<GlassCard variant="frosted" class="text-center border-amber-300/50 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20">
-			<div class="flex items-center justify-center gap-2 mb-2">
-				<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400" />
-				<span class="font-medium text-foreground">Almost there!</span>
-			</div>
-			<p class="text-foreground-muted text-sm">
-				We're just finishing setting up payments. Join the waitlist at <a href="https://grove.place" class="text-primary hover:underline">grove.place</a> and we'll let you know the moment signups open!
-			</p>
-		</GlassCard>
-	{/if}
-
-	<!-- Coming Soon Notice -->
-	<GlassCard variant="accent" class="text-center">
-		<div class="flex items-center justify-center gap-2 mb-2">
-			<Clock class="w-5 h-5 text-primary" />
-			<span class="font-medium text-foreground">We're growing carefully</span>
-		</div>
-		<p class="text-foreground-muted text-sm">
-			Signups aren't open quite yet, but we're almost ready. Take a look around and see what's coming.
-		</p>
-	</GlassCard>
-
 	<!-- Section 1: Welcome -->
 	<section class="text-center space-y-6">
 		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100/40 dark:bg-emerald-900/30 backdrop-blur-md border border-emerald-200/40 dark:border-emerald-700/30 mb-2">
@@ -203,7 +173,7 @@
 
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5 flex-wrap">
 			<Users class="w-4 h-4 flex-shrink-0" />
-			<span>Join {WAITLIST_COUNT} writers already on the waitlist</span>
+			<span>Join writers building their corner of the web</span>
 		</p>
 	</section>
 
@@ -412,22 +382,4 @@
 		/>
 	</section>
 
-	<!-- Opening Soon Message -->
-	<section class="text-center space-y-4 pb-4">
-		<div class="flex items-center justify-center gap-2 animate-pulse-subtle">
-			<Leaf class="w-5 h-5 text-primary" />
-			<span class="text-foreground-muted">Opening soon</span>
-			<Leaf class="w-5 h-5 text-primary" />
-		</div>
-		<p class="text-sm text-foreground-subtle max-w-sm mx-auto">
-			We're putting the finishing touches on a few things. When we're ready, you'll be the first to know.
-		</p>
-		<a
-			href="https://grove.place"
-			class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-		>
-			Join the waitlist
-			<ArrowRight class="w-4 h-4" />
-		</a>
-	</section>
 </div>
