@@ -32,6 +32,7 @@ import {
   ChevronDown,
   ExternalLink,
   LogIn,
+  LogOut,
   // Features & Content
   Mail,
   HardDrive,
@@ -289,6 +290,7 @@ export const authIcons = {
   lock: Lock,
   mail: Mail,
   login: LogIn,
+  logout: LogOut,
 } as const;
 
 // ============================================================================
@@ -384,6 +386,7 @@ export {
   ChevronLeft,
   ChevronRight,
   LogIn,
+  LogOut,
   Github,
   HandCoins,
   FileText,

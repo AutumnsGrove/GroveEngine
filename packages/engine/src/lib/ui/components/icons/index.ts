@@ -54,6 +54,7 @@ export {
   ChevronLeft,
   ChevronRight,
   LogIn,
+  LogOut,
   Github,
   HandCoins,
   FileText,

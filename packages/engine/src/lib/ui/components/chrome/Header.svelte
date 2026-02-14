@@ -9,7 +9,7 @@
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
-	import { LogIn, LogOut, User } from 'lucide-svelte';
+	import AccountStatus from './AccountStatus.svelte';
 	import { sidebarStore } from '../../stores/sidebar.svelte';
 	import { groveModeStore } from '../../stores/grove-mode.svelte';
 	import { resolveNavLabel } from './types';
@@ -240,49 +240,9 @@
 				</div>
 			{/if}
 
-			<!-- Auth: Sign in or user info -->
+			<!-- Auth: AccountStatus component -->
 			{#if showSignIn}
-				{#if user}
-					<!-- Logged in: show user info -->
-					<a
-						href={userHref}
-						class="flex items-center gap-2 text-foreground-subtle hover:text-accent-muted transition-colors"
-						title="Go to your Grove"
-					>
-						{#if user.avatarUrl}
-							<img
-								src={user.avatarUrl}
-								alt=""
-								class="w-6 h-6 rounded-full object-cover"
-								loading="lazy"
-								decoding="async"
-							/>
-						{:else}
-							<div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
-								<User class="w-3.5 h-3.5 text-accent-muted" />
-							</div>
-						{/if}
-						<span class="text-sm hidden lg:inline">{user.name || 'Your Grove'}</span>
-					</a>
-					<!-- Sign out button -->
-					<a
-						href={signOutHref}
-						class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-accent-muted transition-colors"
-						title={signOutLabel}
-					>
-						<LogOut class="w-4 h-4" />
-						<span class="hidden lg:inline">{signOutLabel}</span>
-					</a>
-				{:else}
-					<!-- Not logged in: show sign-in link -->
-					<a
-						href={signInHref}
-						class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-accent-muted transition-colors"
-					>
-						<LogIn class="w-4 h-4" />
-						<span>{signInLabel}</span>
-					</a>
-				{/if}
+				<AccountStatus {user} {signInHref} {signInLabel} {userHref} {signOutHref} {signOutLabel} />
 			{/if}
 
 			<ThemeToggle />

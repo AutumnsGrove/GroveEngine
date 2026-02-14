@@ -57,6 +57,37 @@ export interface HeaderUser {
 export type MaxWidth = "narrow" | "default" | "wide";
 
 /**
+ * Props for the AccountStatus component — unified auth display for chrome headers.
+ *
+ * Three visual states:
+ * - Loading: skeleton pulse circle
+ * - Unauthenticated: sign-in link with LogIn icon
+ * - Authenticated: avatar + name, optional dropdown with sign-out
+ */
+export interface AccountStatusProps {
+  /** Server-driven user object. null = not logged in, undefined = unknown/loading */
+  user?: HeaderUser | null;
+  /** Explicit loading state (shows skeleton). Defaults to false. */
+  loading?: boolean;
+  /** Sign-in URL (default: "https://heartwood.grove.place") */
+  signInHref?: string;
+  /** Label for sign-in link (default: "Sign in") */
+  signInLabel?: string;
+  /** Where clicking the avatar navigates (default: "/arbor") */
+  userHref?: string;
+  /** Sign-out URL (default: "/logout") */
+  signOutHref?: string;
+  /** Label for sign-out action (default: "Sign out") */
+  signOutLabel?: string;
+  /** Avatar-only mode — hides name text (default: false) */
+  compact?: boolean;
+  /** When false, avatar links directly to userHref with no dropdown (default: true) */
+  dropdown?: boolean;
+  /** Injectable custom dropdown items rendered between user info and sign-out */
+  menuItems?: import("svelte").Snippet;
+}
+
+/**
  * Check if a navigation item is active based on the current path
  */
 export function isActivePath(href: string, currentPath: string): boolean {
@@ -74,11 +105,14 @@ export function isActivePath(href: string, currentPath: string): boolean {
 export function resolveNavLabel(
   item: NavItem | FooterLink,
   groveMode: boolean,
-  manifest?: Record<string, { term: string; standardTerm?: string; alwaysGrove?: boolean }>
+  manifest?: Record<
+    string,
+    { term: string; standardTerm?: string; alwaysGrove?: boolean }
+  >,
 ): string {
   if (!item.termSlug || !manifest) return item.label;
   const entry = manifest[item.termSlug];
   if (!entry) return item.label;
   if (entry.alwaysGrove) return entry.term;
-  return groveMode ? entry.term : (entry.standardTerm || entry.term);
+  return groveMode ? entry.term : entry.standardTerm || entry.term;
 }

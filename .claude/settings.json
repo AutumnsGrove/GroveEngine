@@ -20,11 +20,10 @@
     ]
   },
   "companyAnnouncements": [
-    "Welcome, Wanderer. Start with gw context to find your bearings.",
-    "The grove remembers. Read AGENT.md before you begin.",
-    "Use gw for all infrastructure. It keeps the paths safe.",
-    "Breathe. The forest is patient. Use gf to search, gw to act.",
-    "You're safe here. Build something meaningful."
+    "Welcome, Wanderer.",
+    "Breathe. The forest is patient.",
+    "You're safe here. Build something meaningful.",
+    "Grow at your own pace. The light finds everyone."
   ],
   "attribution": {
     "commit": "Co-Authored-By: Claude (Grove Agent)"
