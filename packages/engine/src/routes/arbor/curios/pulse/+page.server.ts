@@ -28,7 +28,12 @@ interface ConfigRow {
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
-  const tenantId = locals.tenantId;
+
+  // Landing mode: use the engine's own tenant ID for dogfooding
+  const isLanding = locals.context.type === "landing";
+  const tenantId =
+    locals.tenantId ??
+    (isLanding ? platform?.env?.PULSE_LANDING_TENANT_ID : undefined);
 
   if (!db || !tenantId) {
     return {
@@ -115,7 +120,12 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 export const actions: Actions = {
   save: async ({ request, platform, locals }) => {
     const db = platform?.env?.DB;
-    const tenantId = locals.tenantId;
+
+    // Landing mode: use the engine's own tenant ID
+    const isLanding = locals.context.type === "landing";
+    const tenantId =
+      locals.tenantId ??
+      (isLanding ? platform?.env?.PULSE_LANDING_TENANT_ID : undefined);
 
     if (!db || !tenantId) {
       return fail(500, {
