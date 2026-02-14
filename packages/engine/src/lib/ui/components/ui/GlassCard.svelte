@@ -163,54 +163,54 @@
 	// See grove-ui-design skill for opacity guidelines:
 	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
 	//
-	// Dark mode uses grove-50 (deep forest green in dark mode) for glass tinting.
-	// NOTE: The grove scale is INVERTED in dark mode (grove-50 = darkest, grove-950 = lightest).
-	// The /XX alpha modifier works because CSS vars store RGB channels.
+	// Dark mode uses cream tokens for neutral warm grays (cream-100 dark = 37 35 32).
+	// WARNING: The grove scale is INVERTED in dark mode — grove-50 = deep green, grove-950 = near-white.
+	// Never use grove-* for dark mode glass backgrounds; use cream-* for neutral surfaces.
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/80 dark:bg-grove-50/65
+			bg-white/80 dark:bg-cream-100/65
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		accent: `
-			bg-accent/20 dark:bg-grove-50/25
+			bg-accent/20 dark:bg-cream-100/25
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-bark-900/40 dark:bg-grove-50/50
+			bg-bark-900/40 dark:bg-cream-50/50
 			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/60 dark:bg-grove-50/40
+			bg-white/60 dark:bg-cream-100/40
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/90 dark:bg-grove-50/75
+			bg-white/90 dark:bg-cream-100/80
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
 	// Border colors per variant - subtle, warm borders
-	// Dark mode: grove-200 = 22 101 52 (dark green), grove-100 = 20 83 45
+	// Dark mode: cream-300 = 67 64 58 (medium warm gray), cream-400 = 87 83 76
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-grove-200/30",
-		accent: "border-accent/30 dark:border-grove-100/30",
+		default: "border-white/40 dark:border-cream-300/40",
+		accent: "border-accent/30 dark:border-cream-300/30",
 		dark: "border-bark-700/30 dark:border-cream-400/30",
-		muted: "border-white/20 dark:border-grove-200/25",
-		frosted: "border-white/50 dark:border-grove-200/30"
+		muted: "border-white/20 dark:border-cream-300/30",
+		frosted: "border-white/50 dark:border-cream-300/40"
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/90 dark:hover:bg-grove-50/75 hover:shadow-lg hover:border-white/50 dark:hover:border-grove-300/40",
-		accent: "hover:bg-accent/30 dark:hover:bg-grove-100/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-bark-900/50 dark:hover:bg-grove-50/60 hover:shadow-xl hover:border-bark-600/40",
-		muted: "hover:bg-white/70 dark:hover:bg-grove-50/50 hover:shadow-md hover:border-white/30 dark:hover:border-grove-300/35",
-		frosted: "hover:bg-white/95 dark:hover:bg-grove-50/80 hover:shadow-lg hover:border-white/60 dark:hover:border-grove-300/40"
+		default: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-cream-400/50",
+		accent: "hover:bg-accent/30 dark:hover:bg-cream-200/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
+		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
+		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-cream-400/40",
+		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-cream-400/50"
 	};
 
 	const computedClass = $derived(

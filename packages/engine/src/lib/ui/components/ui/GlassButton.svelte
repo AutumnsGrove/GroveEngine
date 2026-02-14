@@ -72,14 +72,14 @@
 	const glassBase = "backdrop-blur-md";
 
 	// Glass variant-specific overlays - these ADD to Button's styling
-	// NOTE: Grove scale is INVERTED in dark mode (grove-50 = darkest, grove-950 = lightest)
+	// Dark mode: cream tokens for neutral warm grays (NOT grove-* which is inverted green)
 	const glassOverlays: Record<GlassVariant, string> = {
 		default: `
-			bg-white/80 dark:bg-grove-50/25
-			border border-white/40 dark:border-grove-200/30
+			bg-white/80 dark:bg-cream-100/25
+			border border-white/40 dark:border-cream-300/30
 			text-foreground
-			hover:bg-white/90 dark:hover:bg-grove-50/35
-			hover:border-white/50 dark:hover:border-grove-300/30
+			hover:bg-white/90 dark:hover:bg-cream-200/35
+			hover:border-white/50 dark:hover:border-cream-400/30
 			shadow-sm hover:shadow-md
 		`
 			.trim()
@@ -111,18 +111,18 @@
 			bg-transparent
 			border border-transparent
 			text-foreground
-			hover:bg-white/60 dark:hover:bg-grove-50/25
-			hover:border-white/25 dark:hover:border-grove-200/20
+			hover:bg-white/60 dark:hover:bg-cream-100/25
+			hover:border-white/25 dark:hover:border-cream-300/20
 		`
 			.trim()
 			.replace(/\s+/g, " "),
 
 		outline: `
 			bg-transparent
-			border border-white/40 dark:border-grove-200/30
+			border border-white/40 dark:border-cream-300/30
 			text-foreground
-			hover:bg-white/50 dark:hover:bg-grove-50/20
-			hover:border-white/55 dark:hover:border-grove-300/40
+			hover:bg-white/50 dark:hover:bg-cream-100/20
+			hover:border-white/55 dark:hover:border-cream-400/40
 		`
 			.trim()
 			.replace(/\s+/g, " ")
