@@ -160,17 +160,12 @@ export const PATCH: RequestHandler = async ({
   }
 
   try {
-    // For example tenant, use tenant ID directly; otherwise verify ownership
-    let tenantId: string;
-    if (isExampleTenant) {
-      tenantId = locals.tenantId;
-    } else {
-      tenantId = await getVerifiedTenantId(
-        platform.env.DB,
-        locals.tenantId,
-        locals.user,
-      );
-    }
+    // Verify tenant ownership (all tenants require auth now)
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
 
     const data = sanitizeObject(await request.json()) as PagePatchInput;
 
