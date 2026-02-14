@@ -95,10 +95,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       showTrends: Boolean(config.show_trends),
       showCi: Boolean(config.show_ci),
       reposInclude: config.repos_include
-        ? safeParseJson(config.repos_include)
+        ? (safeParseJson(config.repos_include) as string[] | null)
         : null,
       reposExclude: config.repos_exclude
-        ? safeParseJson(config.repos_exclude)
+        ? (safeParseJson(config.repos_exclude) as string[] | null)
         : null,
       timezone: config.timezone,
       feedMaxItems: config.feed_max_items,
