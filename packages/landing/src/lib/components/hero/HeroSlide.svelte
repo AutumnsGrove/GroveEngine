@@ -45,7 +45,7 @@
 	<!-- Layer 2: Gradient veil for text readability -->
 	<div class="absolute inset-0 pointer-events-none
 		bg-gradient-to-t from-white/80 via-white/40 to-transparent
-		dark:from-emerald-950/85 dark:via-emerald-950/40 dark:to-transparent
+		dark:from-emerald-950/85 dark:via-emerald-950/50 dark:to-transparent
 		md:bg-gradient-to-r md:from-white/75 md:via-white/30 md:to-transparent
 		md:dark:from-emerald-950/80 md:dark:via-emerald-950/30 md:dark:to-transparent">
 	</div>

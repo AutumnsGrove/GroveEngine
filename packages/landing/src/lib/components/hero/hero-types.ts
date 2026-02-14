@@ -19,11 +19,10 @@ export interface HeroSlideContentProps {
 export function getGradientClasses(variant: BgVariant): string {
   const variants: Record<BgVariant, string> = {
     forest:
-      "from-emerald-50/90 via-green-100/70 to-emerald-50/50 dark:from-emerald-950/70 dark:via-green-950/50 dark:to-emerald-900/40",
+      "from-emerald-50/90 via-green-100/70 to-emerald-50/50 dark:from-emerald-950/90 dark:via-green-950/70 dark:to-emerald-950/60",
     twilight:
-      "from-indigo-50/80 via-emerald-50/50 to-slate-100/60 dark:from-indigo-950/60 dark:via-emerald-950/30 dark:to-slate-900/40",
-    dawn:
-      "from-amber-50/85 via-orange-50/60 to-emerald-50/40 dark:from-amber-950/60 dark:via-orange-950/35 dark:to-emerald-950/30",
+      "from-indigo-50/80 via-emerald-50/50 to-slate-100/60 dark:from-indigo-950/80 dark:via-emerald-950/50 dark:to-slate-950/50",
+    dawn: "from-amber-50/85 via-orange-50/60 to-emerald-50/40 dark:from-amber-950/80 dark:via-orange-950/50 dark:to-emerald-950/40",
   };
   return variants[variant];
 }

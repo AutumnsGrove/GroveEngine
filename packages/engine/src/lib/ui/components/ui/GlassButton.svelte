@@ -75,7 +75,7 @@
 	const glassOverlays: Record<GlassVariant, string> = {
 		default: `
 			bg-white/80 dark:bg-grove-950/25
-			border border-white/40 dark:border-grove-800/25
+			border border-white/40 dark:border-grove-800/30
 			text-foreground
 			hover:bg-white/90 dark:hover:bg-grove-950/35
 			hover:border-white/50 dark:hover:border-grove-700/30
@@ -85,10 +85,10 @@
 			.replace(/\s+/g, " "),
 
 		accent: `
-			bg-accent/70 dark:bg-accent/60
+			bg-accent/70 dark:bg-accent/75
 			border border-accent/40 dark:border-accent/30
 			text-accent-foreground dark:text-white
-			hover:bg-accent/85 dark:hover:bg-accent/75
+			hover:bg-accent/85 dark:hover:bg-accent/90
 			hover:border-accent/60 dark:hover:border-accent/50
 			shadow-sm hover:shadow-md shadow-accent/20
 		`
