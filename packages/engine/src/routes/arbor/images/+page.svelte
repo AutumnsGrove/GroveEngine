@@ -336,6 +336,8 @@
           const lastDot = uploadName.lastIndexOf('.');
           if (lastDot > 0) {
             uploadName = uploadName.substring(0, lastDot) + newExt;
+          } else {
+            uploadName = uploadName + newExt;
           }
         }
       }
