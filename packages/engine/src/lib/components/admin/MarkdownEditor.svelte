@@ -241,6 +241,10 @@
     draftManager.clearDraft();
   }
 
+  export function flushDraft() {
+    draftManager.flushSave();
+  }
+
   export function getDraftStatus() {
     return draftManager.getStatus();
   }
@@ -911,6 +915,18 @@
     }
   }
 
+  // Flush draft to localStorage on page unload (session expiry, tab close, navigation)
+  function handleBeforeUnload() {
+    draftManager.flushSave();
+  }
+
+  // Flush draft when page becomes hidden (tab switch, app switch, screen lock)
+  function handleVisibilityChange() {
+    if (document.visibilityState === "hidden") {
+      draftManager.flushSave();
+    }
+  }
+
   // Initialize editor on mount
   $effect(() => {
     updateCursorPosition();
@@ -919,7 +935,13 @@
     // Note: editorMode is now initialized synchronously at declaration time
     // to avoid flash of wrong mode on initial render
 
+    // Register page lifecycle handlers to prevent draft loss
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       draftManager.cleanup();
     };
   });
