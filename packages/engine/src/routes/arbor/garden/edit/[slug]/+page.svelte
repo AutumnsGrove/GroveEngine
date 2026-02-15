@@ -221,9 +221,12 @@
     }
   }
 
-  // Warn about unsaved changes
+  // Flush draft and warn about unsaved changes on page unload
   /** @param {BeforeUnloadEvent} e */
   function handleBeforeUnload(e) {
+    // Always flush the draft to localStorage so content survives session expiry
+    editorRef?.flushDraft();
+
     if (hasUnsavedChanges) {
       e.preventDefault();
       return (e.returnValue =

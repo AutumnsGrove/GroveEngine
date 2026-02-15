@@ -142,6 +142,19 @@
     }
   }
 
+  // Flush draft and warn about unsaved changes on page unload
+  /** @param {BeforeUnloadEvent} e */
+  function handleBeforeUnload(e) {
+    // Always flush the draft to localStorage so content survives session expiry
+    editorRef?.flushDraft();
+
+    if (content.trim() || title.trim()) {
+      e.preventDefault();
+      return (e.returnValue =
+        "You have unsaved changes. Are you sure you want to leave?");
+    }
+  }
+
   /** Publish — validates title + content before sending */
   async function handlePublish() {
     if (!title.trim()) {
@@ -190,6 +203,8 @@
     }
   }
 </script>
+
+<svelte:window onbeforeunload={handleBeforeUnload} />
 
 <div class="new-post-page">
   <header class="page-header">

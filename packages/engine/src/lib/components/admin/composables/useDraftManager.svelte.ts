@@ -39,14 +39,18 @@ export interface DraftManager {
   discardDraft: () => void;
   getStatus: () => { hasDraft: boolean; storedDraft: StoredDraft | null };
   hasUnsavedChanges: (content: string) => boolean;
+  flushSave: () => void;
   cleanup: () => void;
 }
 
 /**
  * Creates a draft manager with Svelte 5 runes
  */
-export function useDraftManager(options: DraftManagerOptions = {}): DraftManager {
-  const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;
+export function useDraftManager(
+  options: DraftManagerOptions = {},
+): DraftManager {
+  const { draftKey, getContent, setContent, onDraftRestored, readonly } =
+    options;
 
   let lastSavedContent = $state("");
   let draftSaveTimer = $state<ReturnType<typeof setTimeout> | null>(null);
@@ -157,10 +161,31 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
     }
   }
 
-  function cleanup(): void {
+  /**
+   * Immediately persist any pending draft save.
+   * Called on component unmount, beforeunload, and visibilitychange
+   * to prevent data loss during session expiry or navigation.
+   */
+  function flushSave(): void {
+    if (!draftKey || readonly || !getContent) return;
+
+    // If there's a pending debounce timer, cancel it and save now
     if (draftSaveTimer) {
       clearTimeout(draftSaveTimer);
+      draftSaveTimer = null;
     }
+
+    // Save if content has changed since last save
+    const current = getContent();
+    if (current !== lastSavedContent) {
+      saveDraft();
+    }
+  }
+
+  function cleanup(): void {
+    // Flush any pending draft save before clearing timers
+    flushSave();
+
     if (savedConfirmTimer) {
       clearTimeout(savedConfirmTimer);
     }
@@ -198,6 +223,7 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
     discardDraft,
     getStatus,
     hasUnsavedChanges,
+    flushSave,
     cleanup,
   };
 }
