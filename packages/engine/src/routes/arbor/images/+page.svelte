@@ -337,6 +337,7 @@
       // Without this, the server rejects the upload because the extension doesn't match the MIME type
       let uploadName = file.name;
       if (processedBlob.type && processedBlob.type !== file.type) {
+        /** @type {Record<string, string>} */
         const extForMime = { 'image/webp': '.webp', 'image/jxl': '.jxl', 'image/gif': '.gif', 'image/jpeg': '.jpg', 'image/png': '.png', 'image/avif': '.avif' };
         const newExt = extForMime[processedBlob.type];
         if (newExt) {
