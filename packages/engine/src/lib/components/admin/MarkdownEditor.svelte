@@ -16,6 +16,7 @@
   import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check, Images } from "lucide-svelte";
+  import Waystone from "$lib/ui/components/ui/Waystone.svelte";
   import FiresideChat from "./FiresideChat.svelte";
   import PhotoPicker from "./PhotoPicker.svelte";
   import VoiceInput from "./VoiceInput.svelte";
@@ -985,6 +986,8 @@
     </div>
 
     <div class="toolbar-spacer"></div>
+
+    <Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
 
     <div class="toolbar-group mode-group">
       <button

@@ -586,8 +586,20 @@
   }
 
   @media (max-width: 640px) {
+    .title-row {
+      flex-wrap: wrap;
+    }
+
     .style-grid {
       grid-template-columns: 1fr;
+    }
+
+    .toggle-row {
+      flex-wrap: wrap;
+    }
+
+    .count-display {
+      flex-wrap: wrap;
     }
   }
 </style>

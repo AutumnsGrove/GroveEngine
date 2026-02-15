@@ -176,4 +176,9 @@
   .artifact-info h3 { font-size: 1rem; font-weight: 600; margin: 0; color: var(--color-text); }
   .meta-tag { font-size: 0.75rem; padding: 0.125rem 0.5rem; background: var(--grove-overlay-8); border-radius: 999px; color: var(--color-text-muted); }
   :global(.remove-btn) { min-width: 2.75rem; min-height: 2.75rem; }
+  @media (max-width: 640px) {
+    .title-row { flex-wrap: wrap; }
+    .form-actions { flex-wrap: wrap; }
+    .artifact-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  }
 </style>

@@ -7,6 +7,20 @@
 
   let selectedMode = $state(data.config?.mode || "time");
   let manualColor = $state(data.config?.manualColor || "#7cb85c");
+  let displayStyle = $state(data.config?.displayStyle || "ring");
+  let colorScheme = $state(data.config?.colorScheme || "default");
+
+  const schemeColors: Record<string, string> = {
+    default: "#7cb85c",
+    warm: "#d4853b",
+    cool: "#7ba3c9",
+    forest: "#3d7a4a",
+    sunset: "#e8705a",
+  };
+
+  const previewColor = $derived(
+    selectedMode === "manual" ? manualColor : (schemeColors[colorScheme] || "#7cb85c")
+  );
 
   $effect(() => {
     if (form?.configSaved) {
@@ -37,8 +51,14 @@
   <!-- Preview -->
   <GlassCard class="preview-card">
     <div class="ring-preview">
-      <div class="mood-ring" style="--ring-color: {manualColor}"></div>
-      <span class="preview-label">Preview</span>
+      {#if displayStyle === "gem"}
+        <div class="mood-gem" style="--ring-color: {previewColor}"></div>
+      {:else if displayStyle === "orb"}
+        <div class="mood-orb" style="--ring-color: {previewColor}"></div>
+      {:else}
+        <div class="mood-ring" style="--ring-color: {previewColor}"></div>
+      {/if}
+      <span class="preview-label">Preview — {displayStyle}</span>
     </div>
   </GlassCard>
 
@@ -58,7 +78,7 @@
 
         <div class="form-field">
           <label for="displayStyle">Display Style</label>
-          <select id="displayStyle" name="displayStyle" class="glass-input" value={data.config?.displayStyle || "ring"}>
+          <select id="displayStyle" name="displayStyle" class="glass-input" bind:value={displayStyle}>
             {#each data.displayStyleOptions as opt}
               <option value={opt.value}>{opt.label}</option>
             {/each}
@@ -67,7 +87,7 @@
 
         <div class="form-field">
           <label for="colorScheme">Color Scheme</label>
-          <select id="colorScheme" name="colorScheme" class="glass-input" value={data.config?.colorScheme || "default"}>
+          <select id="colorScheme" name="colorScheme" class="glass-input" bind:value={colorScheme}>
             {#each data.colorSchemeOptions as opt}
               <option value={opt.value}>{opt.label}</option>
             {/each}
@@ -160,6 +180,8 @@
   :global(.preview-card) { padding: 2rem; margin-bottom: 1.5rem; text-align: center; }
   .ring-preview { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
   .mood-ring { width: 80px; height: 80px; border-radius: 50%; background: var(--ring-color, #7cb85c); box-shadow: 0 0 20px var(--ring-color, #7cb85c); transition: background 0.6s, box-shadow 0.6s; }
+  .mood-gem { width: 60px; height: 60px; background: var(--ring-color, #7cb85c); transform: rotate(45deg); border-radius: 4px; box-shadow: 0 0 16px var(--ring-color, #7cb85c); transition: background 0.6s, box-shadow 0.6s; }
+  .mood-orb { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4), var(--ring-color, #7cb85c) 60%); box-shadow: 0 0 30px var(--ring-color, #7cb85c), 0 0 60px color-mix(in srgb, var(--ring-color, #7cb85c) 40%, transparent); transition: background 0.6s, box-shadow 0.6s; }
   .preview-label { font-size: 0.8rem; color: var(--color-text-muted); }
   :global(.config-card) { padding: 1.5rem; margin-bottom: 1.5rem; }
   :global(.log-card) { padding: 1.5rem; }
@@ -179,5 +201,12 @@
   .timeline-dot { width: 24px; height: 24px; border-radius: 50%; cursor: help; transition: transform 0.2s; }
   .timeline-dot:hover { transform: scale(1.3); }
   .empty-log { font-size: 0.85rem; color: var(--color-text-muted); }
-  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .title-row { flex-wrap: wrap; }
+    .form-grid { grid-template-columns: 1fr; }
+    .log-inputs { flex-direction: column; }
+    .log-inputs input { width: 100%; }
+    .log-inputs .color-input { width: auto; }
+    .note-input { min-width: auto; }
+  }
 </style>

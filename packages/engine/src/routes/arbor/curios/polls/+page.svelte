@@ -288,5 +288,12 @@
   .option-chip { font-size: 0.8rem; padding: 0.25rem 0.625rem; border-radius: 999px; background: var(--grove-overlay-8, rgba(0, 0, 0, 0.06)); color: var(--color-text-muted); }
   .empty-state { text-align: center; padding: 1.5rem; color: var(--color-text-muted); font-size: 0.95rem; }
 
-  @media (max-width: 640px) { .settings-row { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .title-row { flex-wrap: wrap; }
+    .section-header { flex-wrap: wrap; align-items: stretch; }
+    .settings-row { grid-template-columns: 1fr; }
+    .poll-header { flex-wrap: wrap; }
+    .option-row { flex-wrap: wrap; }
+    .form-actions { flex-wrap: wrap; }
+  }
 </style>

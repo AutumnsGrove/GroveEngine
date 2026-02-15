@@ -191,10 +191,10 @@ export const actions: Actions = {
       });
     }
 
-    const url = (formData.get("url") as string)?.trim();
-    if (!url || !isValidUrl(url) || url.length > MAX_URL_LENGTH) {
+    const url = (formData.get("url") as string)?.trim() || "";
+    if (url && (!isValidUrl(url) || url.length > MAX_URL_LENGTH)) {
       return fail(400, {
-        error: "A valid URL is required",
+        error: "Please enter a valid URL",
         error_code: "INVALID_URL",
       });
     }

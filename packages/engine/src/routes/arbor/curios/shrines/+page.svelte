@@ -187,5 +187,10 @@
   .shrine-actions { display: flex; gap: 0.25rem; }
   .shrine-contents-info { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--grove-overlay-8); }
   :global(.remove-btn) { min-width: 2.75rem; min-height: 2.75rem; }
-  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .title-row { flex-wrap: wrap; }
+    .shrine-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .shrine-actions { flex-wrap: wrap; }
+  }
 </style>

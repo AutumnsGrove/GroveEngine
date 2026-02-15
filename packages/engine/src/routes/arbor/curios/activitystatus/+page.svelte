@@ -563,5 +563,20 @@
     .emoji-input-group {
       flex: none;
     }
+
+    .tab-row {
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .tab-btn {
+      padding: 0.625rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .status-meta {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
   }
 </style>

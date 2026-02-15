@@ -682,9 +682,30 @@
   }
 
   @media (max-width: 640px) {
+    .title-row {
+      flex-wrap: wrap;
+    }
+
     .form-grid,
     .style-grid {
       grid-template-columns: 1fr;
+    }
+
+    .section-header {
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+
+    .current-track {
+      flex-wrap: wrap;
+    }
+
+    .toggle-row {
+      flex-wrap: wrap;
+    }
+
+    .history-item {
+      flex-wrap: wrap;
     }
   }
 </style>

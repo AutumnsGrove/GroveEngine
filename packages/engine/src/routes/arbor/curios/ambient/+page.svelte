@@ -110,5 +110,8 @@
   .volume-slider { width: 100%; cursor: pointer; accent-color: var(--color-primary); }
   .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: var(--color-text); }
   .form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
-  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .title-row { flex-wrap: wrap; }
+  }
 </style>

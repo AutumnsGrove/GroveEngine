@@ -111,12 +111,16 @@
                     <input type="text" id="bmTitle" name="title" required maxlength="200" class="glass-input" />
                   </div>
                   <div class="form-field">
-                    <label for="bmUrl">URL</label>
-                    <input type="url" id="bmUrl" name="url" required class="glass-input" />
+                    <label for="bmUrl">URL <span class="optional">(optional)</span></label>
+                    <input type="url" id="bmUrl" name="url" class="glass-input" />
                   </div>
                   <div class="form-field">
                     <label for="bmAuthor">Author <span class="optional">(optional)</span></label>
                     <input type="text" id="bmAuthor" name="author" maxlength="100" class="glass-input" />
+                  </div>
+                  <div class="form-field full-width">
+                    <label for="bmDescription">Description <span class="optional">(optional)</span></label>
+                    <textarea id="bmDescription" name="description" maxlength="500" rows="2" placeholder="A short note about this bookmark" class="glass-input"></textarea>
                   </div>
                   <div class="form-field">
                     <label for="bmCategory">Category <span class="optional">(optional)</span></label>
@@ -153,9 +157,13 @@
               {#each shelf.bookmarks as bookmark}
                 <div class="bookmark-item">
                   <div class="bookmark-info">
-                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" class="bookmark-title">
-                      {bookmark.title}
-                    </a>
+                    {#if bookmark.url}
+                      <a href={bookmark.url} target="_blank" rel="noopener noreferrer" class="bookmark-title">
+                        {bookmark.title}
+                      </a>
+                    {:else}
+                      <span class="bookmark-title">{bookmark.title}</span>
+                    {/if}
                     <div class="bookmark-meta">
                       {#if bookmark.author}<span class="meta-author">{bookmark.author}</span>{/if}
                       {#if bookmark.category}<span class="meta-category">{bookmark.category}</span>{/if}
@@ -221,6 +229,14 @@
   :global(.meta-icon.favorite) { color: #fbbf24; }
   :global(.remove-btn) { min-width: 2.75rem; min-height: 2.75rem; }
   .empty-shelf { font-size: 0.85rem; color: var(--color-text-muted); opacity: 0.7; padding: 0.5rem 0; }
+  .full-width { grid-column: 1 / -1; }
+  .full-width textarea { resize: vertical; min-height: 2.5rem; }
   .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: var(--color-text); }
-  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .title-row { flex-wrap: wrap; }
+    .shelf-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .shelf-actions { flex-wrap: wrap; }
+    .bookmark-item { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  }
 </style>

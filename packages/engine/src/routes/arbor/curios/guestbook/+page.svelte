@@ -768,7 +768,7 @@
 
   @media (max-width: 640px) {
     .stats-row {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr;
       gap: 0.5rem;
     }
 
@@ -776,9 +776,25 @@
       grid-template-columns: 1fr;
     }
 
+    .title-row {
+      flex-wrap: wrap;
+    }
+
+    .toggle-row {
+      flex-wrap: wrap;
+    }
+
     .tab {
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
+    }
+
+    .entry-header {
+      flex-wrap: wrap;
+    }
+
+    .entry-actions {
+      flex-wrap: wrap;
     }
   }
 </style>

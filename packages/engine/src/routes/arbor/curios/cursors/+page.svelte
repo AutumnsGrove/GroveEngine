@@ -147,4 +147,7 @@
   .range-input { width: 100%; accent-color: var(--color-primary); }
   .form-actions { margin-top: 1.5rem; }
   :global(.btn-icon) { width: 1rem; height: 1rem; margin-right: 0.375rem; }
+  @media (max-width: 640px) {
+    .title-row { flex-wrap: wrap; }
+  }
 </style>

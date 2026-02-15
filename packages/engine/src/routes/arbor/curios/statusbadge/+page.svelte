@@ -709,12 +709,41 @@
   }
 
   @media (max-width: 640px) {
+    .section-header {
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .badge-item {
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .badge-info {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .remove-btn {
+      align-self: flex-end;
+    }
+
     .badge-type-grid {
       grid-template-columns: repeat(2, 1fr);
     }
 
     .position-grid {
       grid-template-columns: 1fr;
+    }
+
+    .toggle-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .toggle-input {
+      width: 2rem;
+      height: 1rem;
     }
   }
 

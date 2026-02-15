@@ -66,23 +66,23 @@ export interface StatusPreset {
  */
 export const STATUS_PRESETS: StatusPreset[] = [
   // Activity
-  { id: "writing", emoji: "✍️", text: "Writing", category: "activity" },
-  { id: "coding", emoji: "💻", text: "Coding", category: "activity" },
-  { id: "reading", emoji: "📖", text: "Reading", category: "activity" },
-  { id: "gaming", emoji: "🎮", text: "Gaming", category: "activity" },
-  { id: "cooking", emoji: "🍳", text: "Cooking", category: "activity" },
-  { id: "creating", emoji: "🎨", text: "Creating", category: "activity" },
+  { id: "writing", emoji: "✎", text: "Writing", category: "activity" },
+  { id: "coding", emoji: "⌨", text: "Coding", category: "activity" },
+  { id: "reading", emoji: "☰", text: "Reading", category: "activity" },
+  { id: "gaming", emoji: "▣", text: "Gaming", category: "activity" },
+  { id: "cooking", emoji: "♨", text: "Cooking", category: "activity" },
+  { id: "creating", emoji: "✦", text: "Creating", category: "activity" },
   // Away
-  { id: "away", emoji: "🚶", text: "Away", category: "away" },
-  { id: "sleeping", emoji: "😴", text: "Sleeping", category: "away" },
-  { id: "vacation", emoji: "🏖️", text: "On Vacation", category: "away" },
-  { id: "grass", emoji: "🌿", text: "Touching grass", category: "away" },
-  { id: "walk", emoji: "🚶", text: "Out for a walk", category: "away" },
+  { id: "away", emoji: "→", text: "Away", category: "away" },
+  { id: "sleeping", emoji: "ᓚᘏᗢ", text: "Sleeping", category: "away" },
+  { id: "vacation", emoji: "☀", text: "On Vacation", category: "away" },
+  { id: "grass", emoji: "⌇", text: "Touching grass", category: "away" },
+  { id: "walk", emoji: "⇝", text: "Out for a walk", category: "away" },
   // Mood
-  { id: "music", emoji: "🎵", text: "Listening to music", category: "mood" },
-  { id: "watching", emoji: "📺", text: "Watching something", category: "mood" },
-  { id: "tea", emoji: "🍵", text: "Having tea", category: "mood" },
-  { id: "nightowl", emoji: "🦉", text: "Night owl mode", category: "mood" },
+  { id: "music", emoji: "♪", text: "Listening to music", category: "mood" },
+  { id: "watching", emoji: "◉", text: "Watching something", category: "mood" },
+  { id: "tea", emoji: "⌇", text: "Having tea", category: "mood" },
+  { id: "nightowl", emoji: "☽", text: "Night owl mode", category: "mood" },
 ];
 
 /**

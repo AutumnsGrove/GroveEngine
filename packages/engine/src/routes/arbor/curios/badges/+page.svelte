@@ -200,5 +200,12 @@
   :global(.custom-badge-card) { padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; }
   .custom-badge-info { display: flex; flex-direction: column; }
   :global(.remove-btn) { min-width: 2.75rem; min-height: 2.75rem; }
-  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .badge-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .title-row { flex-wrap: wrap; }
+    .form-grid { grid-template-columns: 1fr; }
+    .badge-grid { grid-template-columns: 1fr; }
+    .badge-card { flex-wrap: wrap; }
+    .custom-badge-card { flex-wrap: wrap; gap: 0.75rem; }
+    .badge-icon-wrap { flex-shrink: 1; }
+  }
 </style>
