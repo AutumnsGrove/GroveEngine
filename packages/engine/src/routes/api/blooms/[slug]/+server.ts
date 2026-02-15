@@ -48,6 +48,7 @@ interface PostRecord {
 
 interface PostInput {
   title?: string;
+  slug?: string;
   markdown_content?: string;
   date?: string;
   tags?: string[];
@@ -321,6 +322,30 @@ export const PUT: RequestHandler = async ({
     // Use TenantDb for automatic tenant isolation
     const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 
+    // Validate and sanitize new slug if provided
+    let newSlug: string | undefined;
+    if (data.slug && data.slug !== slug) {
+      newSlug = data.slug
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      if (!newSlug || newSlug.length < 1) {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+
+      if (newSlug.length > 200) {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+
+      // Check the new slug doesn't conflict with an existing post
+      const conflict = await tenantDb.exists("posts", "slug = ?", [newSlug]);
+      if (conflict) {
+        throwGroveError(409, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
     // Check if post exists for this tenant
     const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
@@ -355,6 +380,11 @@ export const PUT: RequestHandler = async ({
       featured_image: data.featured_image || null,
     };
 
+    // Update slug if renamed
+    if (newSlug) {
+      updateData.slug = newSlug;
+    }
+
     // Set published_at when publishing
     if (published_at !== undefined) {
       updateData.published_at = published_at;
@@ -368,6 +398,10 @@ export const PUT: RequestHandler = async ({
 
     // Invalidate caches so readers see the updated content
     await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);
+    // If slug changed, also invalidate the new slug's cache entry
+    if (newSlug) {
+      await invalidatePostCaches(platform.env.CACHE_KV, tenantId, newSlug);
+    }
 
     // Thorn: async post-edit moderation (non-blocking)
     if (platform?.env?.AI && data.status === "published" && platform.context) {
@@ -381,14 +415,14 @@ export const PUT: RequestHandler = async ({
           userId: locals.user.id,
           contentType: "blog_post",
           hookPoint: "on_edit",
-          contentRef: slug,
+          contentRef: newSlug || slug,
         }),
       );
     }
 
     return json({
       success: true,
-      slug,
+      slug: newSlug || slug,
       message: "Post updated successfully",
     });
   } catch (err) {
