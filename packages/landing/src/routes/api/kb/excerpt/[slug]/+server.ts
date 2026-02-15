@@ -111,6 +111,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
   "image-upload-failures", // Used in Arbor image upload error state
   "what-is-hum", // Hum music link previews
   "what-is-pulse", // Pulse GitHub activity curio
+  "using-curios-in-content", // Curio directives cheatsheet for editors
 ];
 
 // Generate entries for all waystone-linked articles
