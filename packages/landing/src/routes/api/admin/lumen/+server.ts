@@ -52,13 +52,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   const userIsWayfinder = locals.user ? isWayfinder(locals.user.email) : false;
 
   try {
-    // Get today's stats
-    const todayStart = new Date();
-    todayStart.setUTCHours(0, 0, 0, 0);
-
     // AI analytics queries (available to all admins)
     const aiQueries = Promise.all([
       // Today's usage by task
+      // Uses SQLite's datetime() for consistent format with CURRENT_TIMESTAMP
+      // (JS toISOString() uses 'T' separator which breaks lexicographic comparison)
       db
         .prepare(
           `SELECT
@@ -69,10 +67,9 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
             SUM(cost) as total_cost,
             AVG(latency_ms) as avg_latency
           FROM lumen_usage
-          WHERE created_at >= ?
+          WHERE created_at >= datetime('now', 'start of day')
           GROUP BY task`,
         )
-        .bind(todayStart.toISOString())
         .all<LumenUsageRow>(),
 
       // Last 7 days usage

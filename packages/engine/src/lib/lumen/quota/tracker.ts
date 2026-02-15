@@ -219,12 +219,12 @@ export class QuotaTracker {
 
     if (options?.startDate) {
       query += ` AND created_at >= ?`;
-      params.push(options.startDate.toISOString());
+      params.push(this.toSQLiteTimestamp(options.startDate));
     }
 
     if (options?.endDate) {
       query += ` AND created_at <= ?`;
-      params.push(options.endDate.toISOString());
+      params.push(this.toSQLiteTimestamp(options.endDate));
     }
 
     query += ` ORDER BY created_at DESC`;
@@ -275,7 +275,11 @@ export class QuotaTracker {
          WHERE tenant_id = ? AND created_at >= ? AND created_at <= ?
          GROUP BY task`,
       )
-      .bind(tenantId, startDate.toISOString(), endDate.toISOString())
+      .bind(
+        tenantId,
+        this.toSQLiteTimestamp(startDate),
+        this.toSQLiteTimestamp(endDate),
+      )
       .all<{
         task: LumenTask;
         requests: number;
@@ -330,7 +334,7 @@ export class QuotaTracker {
 
     const result = await this.db
       .prepare(`DELETE FROM lumen_usage WHERE created_at < ?`)
-      .bind(cutoffDate.toISOString())
+      .bind(this.toSQLiteTimestamp(cutoffDate))
       .run();
 
     return result.meta.changes ?? 0;
@@ -342,13 +346,32 @@ export class QuotaTracker {
 
   /**
    * Get today's start timestamp in UTC (midnight)
+   *
+   * Returns SQLite-compatible format "YYYY-MM-DD HH:MM:SS" to match
+   * CURRENT_TIMESTAMP. Using toISOString() ("...T00:00:00.000Z") breaks
+   * lexicographic comparison because space < 'T' in ASCII.
    */
   private getTodayStartUTC(): string {
     const now = new Date();
-    const todayStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-    );
-    return todayStart.toISOString();
+    const y = now.getUTCFullYear();
+    const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(now.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d} 00:00:00`;
+  }
+
+  /**
+   * Convert a JS Date to SQLite-compatible timestamp string.
+   * SQLite CURRENT_TIMESTAMP uses "YYYY-MM-DD HH:MM:SS" format,
+   * so bound parameters must match for lexicographic comparison.
+   */
+  private toSQLiteTimestamp(date: Date): string {
+    const y = date.getUTCFullYear();
+    const mo = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+    const h = String(date.getUTCHours()).padStart(2, "0");
+    const mi = String(date.getUTCMinutes()).padStart(2, "0");
+    const s = String(date.getUTCSeconds()).padStart(2, "0");
+    return `${y}-${mo}-${d} ${h}:${mi}:${s}`;
   }
 }
 
