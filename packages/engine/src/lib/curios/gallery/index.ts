@@ -268,6 +268,11 @@ export const DEFAULT_TAG_COLOR = "#5cb85f";
 export const MAX_ITEMS_PER_PAGE = 100;
 
 /**
+ * Max gallery tags per tenant
+ */
+export const MAX_GALLERY_TAGS_PER_TENANT = 200;
+
+/**
  * Default configuration for new Gallery Curio setups
  */
 export const DEFAULT_GALLERY_CONFIG: Omit<
@@ -335,6 +340,52 @@ export function toDisplayImage(
  */
 export function generateGalleryId(): string {
   return `gal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Maximum length for custom CSS (prevents excessive storage/processing)
+ */
+export const MAX_CUSTOM_CSS_LENGTH = 10_000;
+
+/**
+ * Dangerous CSS patterns that could enable data exfiltration or injection.
+ * Strips url(), @import, expression(), -moz-binding, and behavior().
+ */
+const DANGEROUS_CSS_PATTERNS = [
+  /url\s*\(/gi,
+  /@import\b/gi,
+  /expression\s*\(/gi,
+  /-moz-binding\s*:/gi,
+  /behavior\s*:/gi,
+  /javascript\s*:/gi,
+  /<\/?script/gi,
+  /<\/?style/gi,
+];
+
+/**
+ * Sanitize custom CSS to prevent data exfiltration and injection.
+ * Removes url(), @import, expression(), and other dangerous patterns.
+ * Returns null if input is empty after sanitization.
+ */
+export function sanitizeCustomCss(
+  css: string | null | undefined,
+): string | null {
+  if (!css) return null;
+
+  let sanitized = css.trim();
+  if (!sanitized) return null;
+
+  // Strip dangerous patterns
+  for (const pattern of DANGEROUS_CSS_PATTERNS) {
+    sanitized = sanitized.replace(pattern, "/* removed */");
+  }
+
+  // Enforce length limit
+  if (sanitized.length > MAX_CUSTOM_CSS_LENGTH) {
+    sanitized = sanitized.slice(0, MAX_CUSTOM_CSS_LENGTH);
+  }
+
+  return sanitized || null;
 }
 
 /**

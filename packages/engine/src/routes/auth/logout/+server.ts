@@ -11,9 +11,8 @@ import type { RequestHandler } from "./$types";
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
- * POST is the primary logout handler (CSRF-safe).
- * GET is kept as a fallback for existing links during migration,
- * but new code should always use POST.
+ * POST logout handler (CSRF-safe).
+ * All logout forms must use POST — GET logout was removed to prevent CSRF logout attacks.
  */
 export const POST: RequestHandler = async ({
   url,
@@ -61,15 +60,3 @@ export const POST: RequestHandler = async ({
 
   redirect(302, "/");
 };
-
-/**
- * GET fallback — kept for backwards compatibility with existing <a> links.
- * Delegates to the same logic as POST. Safe because:
- * - Session revocation is idempotent (revoking a revoked session is a no-op)
- * - SvelteKit's built-in CSRF protection (checkOrigin) only applies to
- *   POST/PUT/DELETE/PATCH, so GET logout doesn't trigger CSRF rejection
- * - SameSite=Lax cookies prevent cross-origin GET-with-cookies in most contexts
- *
- * TODO: Remove once all logout links are migrated to POST forms
- */
-export const GET: RequestHandler = POST;

@@ -565,6 +565,65 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // =========================================================================
+  // REQUEST BODY SIZE VALIDATION (HAWK-008)
+  // =========================================================================
+  // Reject oversized request bodies before processing.
+  // Cloudflare Workers have a 100MB limit, but we enforce a tighter 1MB limit
+  // for JSON API endpoints to prevent abuse. File uploads are excluded.
+  if (["POST", "PUT", "PATCH"].includes(event.request.method)) {
+    const contentLength = event.request.headers.get("content-length");
+    const contentType = event.request.headers.get("content-type") || "";
+    const isJsonOrForm =
+      contentType.includes("application/json") ||
+      contentType.includes("application/x-www-form-urlencoded") ||
+      contentType.includes("multipart/form-data");
+
+    // 1MB limit for JSON/form requests, skip for binary uploads
+    const MAX_BODY_SIZE = 1024 * 1024;
+    if (
+      contentLength &&
+      isJsonOrForm &&
+      parseInt(contentLength) > MAX_BODY_SIZE
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: "payload_too_large",
+          message: "Request body exceeds maximum allowed size.",
+        }),
+        {
+          status: 413,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+  }
+
+  // =========================================================================
+  // API RATE LIMITING (HAWK-002)
+  // =========================================================================
+  // Global rate limit for API routes. Fails open if KV is unavailable.
+  if (event.url.pathname.startsWith("/api/")) {
+    const kv = event.platform?.env?.CACHE_KV;
+    if (kv) {
+      const { checkRateLimit, getClientIP, buildRateLimitKey } =
+        await import("$lib/server/rate-limits/middleware.js");
+      const clientIp = getClientIP(event.request);
+      const isWrite = ["POST", "PUT", "PATCH", "DELETE"].includes(
+        event.request.method,
+      );
+
+      const { response: rateLimitResponse } = await checkRateLimit({
+        kv,
+        key: buildRateLimitKey(isWrite ? "api:write" : "api:read", clientIp),
+        limit: isWrite ? 30 : 120,
+        windowSeconds: 60,
+      });
+
+      if (rateLimitResponse) return rateLimitResponse;
+    }
+  }
+
+  // =========================================================================
   // CSRF PROTECTION
   // =========================================================================
   // Use the shared getCookie helper for consistent cookie parsing

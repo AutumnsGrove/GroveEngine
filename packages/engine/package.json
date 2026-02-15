@@ -76,6 +76,11 @@
       "svelte": "./dist/ui/components/content/hum/index.js",
       "default": "./dist/ui/components/content/hum/index.js"
     },
+    "./ui/content/curios": {
+      "types": "./dist/ui/components/content/curios/index.d.ts",
+      "svelte": "./dist/ui/components/content/curios/index.js",
+      "default": "./dist/ui/components/content/curios/index.js"
+    },
     "./ui/feedback": {
       "types": "./dist/ui/components/feedback/index.d.ts",
       "svelte": "./dist/ui/components/feedback/index.js",

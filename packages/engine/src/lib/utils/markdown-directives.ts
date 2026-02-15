@@ -57,10 +57,60 @@ function handleGallery(content: string): string | null {
   return `<div class="grove-gallery" data-images="${urls.length}">\n  ${items}\n</div>\n`;
 }
 
+// ============================================================================
+// Curio Directive Handlers
+// ============================================================================
+
+/**
+ * All embeddable curio types that can be used via ::name[content]:: syntax.
+ * Each produces a placeholder <div> that the CurioHydrator mounts at runtime.
+ */
+const CURIO_DIRECTIVES = [
+  "guestbook",
+  "hitcounter",
+  "poll",
+  "nowplaying",
+  "moodring",
+  "badges",
+  "blogroll",
+  "webring",
+  "linkgarden",
+  "activitystatus",
+  "statusbadges",
+  "artifacts",
+  "bookmarkshelf",
+] as const;
+
+/**
+ * Curio directive handler: emits a placeholder div for client-side hydration.
+ *
+ * The CurioHydrator $effect in ContentWithGutter.svelte scans for
+ * `.grove-curio[data-grove-curio]` elements and dynamically imports
+ * the corresponding Svelte component.
+ *
+ * Content (the text between [ ]) becomes the data-curio-arg attribute,
+ * used for curios that need an ID (e.g., ::poll[my-poll-id]::).
+ */
+function handleCurio(curioName: string, content: string): string {
+  const safeName = escapeHtml(curioName);
+  // Truncate arg to 200 chars to prevent resource exhaustion via huge attributes
+  const safeContent = escapeHtml(content.trim().slice(0, 200));
+  const argAttr = safeContent ? ` data-curio-arg="${safeContent}"` : "";
+  return `<div class="grove-curio" data-grove-curio="${safeName}"${argAttr}>\n  <span class="grove-curio-loading">Loading ${safeName}\u2026</span>\n</div>\n`;
+}
+
 /** Map of directive names to their handlers */
 const directiveHandlers: Record<string, DirectiveHandler> = {
   gallery: handleGallery,
 };
+
+// Register all curio directives
+for (const name of CURIO_DIRECTIVES) {
+  directiveHandlers[name] = (content) => handleCurio(name, content);
+}
+
+/** Exported for testing — the list of recognized curio directive names */
+export { CURIO_DIRECTIVES };
 
 // ============================================================================
 // Block Rule

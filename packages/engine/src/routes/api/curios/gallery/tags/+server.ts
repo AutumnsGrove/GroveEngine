@@ -10,6 +10,7 @@ import {
   generateGalleryId,
   generateSlug,
   DEFAULT_TAG_COLOR,
+  MAX_GALLERY_TAGS_PER_TENANT,
 } from "$lib/curios/gallery";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
@@ -40,15 +41,22 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       `SELECT id, name, slug, color, description, sort_order
        FROM gallery_tags
        WHERE tenant_id = ?
-       ORDER BY sort_order, name`,
+       ORDER BY sort_order, name LIMIT 500`,
     )
     .bind(tenantId)
     .all<TagRow>();
 
-  return json({
-    success: true,
-    tags: result.results,
-  });
+  return json(
+    {
+      success: true,
+      tags: result.results,
+    },
+    {
+      headers: {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+      },
+    },
+  );
 };
 
 // POST - Create a new tag
@@ -78,6 +86,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!name || typeof name !== "string") {
     throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+  }
+
+  // Enforce per-tenant tag limit
+  const countResult = await db
+    .prepare(`SELECT COUNT(*) as count FROM gallery_tags WHERE tenant_id = ?`)
+    .bind(tenantId)
+    .first<{ count: number }>();
+  if ((countResult?.count ?? 0) >= MAX_GALLERY_TAGS_PER_TENANT) {
+    throwGroveError(400, API_ERRORS.RATE_LIMITED, "API");
   }
 
   const slug = generateSlug(name);
@@ -154,7 +171,10 @@ export const DELETE: RequestHandler = async ({ url, platform, locals }) => {
     }
 
     // Delete the tag (cascades to gallery_image_tags)
-    await db.prepare(`DELETE FROM gallery_tags WHERE id = ?`).bind(tagId).run();
+    await db
+      .prepare(`DELETE FROM gallery_tags WHERE id = ? AND tenant_id = ?`)
+      .bind(tagId, tenantId)
+      .run();
 
     return json({ success: true });
   } catch (err) {
@@ -235,11 +255,13 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
-  params.push(id);
+  params.push(id, tenantId);
 
   try {
     await db
-      .prepare(`UPDATE gallery_tags SET ${updates.join(", ")} WHERE id = ?`)
+      .prepare(
+        `UPDATE gallery_tags SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`,
+      )
       .bind(...params)
       .run();
 

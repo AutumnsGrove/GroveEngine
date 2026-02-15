@@ -6,23 +6,28 @@
  * then reads it back to verify it's retrievable. Returns inline success/failure.
  */
 
-import { json, error, type RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import {
   setTimelineToken,
   getTimelineToken,
   TIMELINE_SECRET_KEYS,
 } from "$lib/curios/timeline/secrets.server";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const db = platform?.env?.DB;
   const tenantId = locals.tenantId;
 
-  if (!locals.user) {
-    throw error(401, "Authentication required");
+  if (!db) {
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
-  if (!db || !tenantId) {
-    throw error(500, "Database not available");
+  if (!tenantId) {
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+  }
+
+  if (!locals.user) {
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   const body = (await request.json()) as {
@@ -33,11 +38,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const tokenValue = body.tokenValue?.trim();
 
   if (!tokenType || !["github", "openrouter"].includes(tokenType as string)) {
-    throw error(400, "Invalid token type");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   if (!tokenValue) {
-    throw error(400, "Token value is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   const env = {
@@ -124,13 +129,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       );
     }
   } catch (err) {
-    const errMsg = err instanceof Error ? err.message : "Unknown error";
-    console.error(`[Timeline Config] save-token failed:`, err);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Timeline save-token failed",
+      cause: err,
+    });
     return json(
       {
         success: false,
-        error: `Failed to save ${tokenType} token: ${errMsg}`,
-        tokenType,
+        error: "Failed to save token. Please try again.",
       },
       { status: 500 },
     );

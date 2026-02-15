@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
 	import { GroveMessages } from '@autumnsgrove/groveengine/ui';
+	import { CurioCursorsLayer, CurioAmbientLayer } from '@autumnsgrove/groveengine/ui/content/curios';
 
 	let { children, data } = $props();
 
@@ -15,3 +16,7 @@
 	{/if}
 	{@render children()}
 </div>
+
+<!-- Global curio layers — site-wide cosmetic effects -->
+<CurioCursorsLayer />
+<CurioAmbientLayer />
