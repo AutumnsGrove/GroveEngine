@@ -25,11 +25,14 @@
   let gutterItems = $state(/** @type {any[]} */ ([]));
   let status = $state("draft");
   let featuredImage = $state("");
+  let originalSlug = $state("");
+  let slugError = $state("");
 
   // Sync form state when data changes (e.g., navigating to different post)
   $effect(() => {
     title = data.post.title || "";
     slug = data.post.slug || "";
+    originalSlug = data.post.slug || "";
     date = data.post.date || new Date().toISOString().split("T")[0];
     description = data.post.description || "";
     tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
@@ -111,6 +114,20 @@
       .filter((/** @type {string} */ tag) => tag.length > 0);
   }
 
+  /** @param {string} value */
+  function validateSlug(value) {
+    if (!value) {
+      slugError = "Slug is required";
+      return;
+    }
+    const slugPattern = /^[a-z0-9-]+$/;
+    if (!slugPattern.test(value)) {
+      slugError = "Only lowercase letters, numbers, and hyphens";
+      return;
+    }
+    slugError = "";
+  }
+
   /** Save — for drafts, zero validation; for published, title + content required */
   async function handleSave() {
     if (status === "published") {
@@ -124,10 +141,16 @@
       }
     }
 
+    if (slugError) {
+      toast.error("Please fix the slug error");
+      return;
+    }
+
     saving = true;
 
     try {
-      await api.put(`/api/blooms/${slug}`, {
+      const saveSlug = originalSlug; // Use original slug for the URL
+      await api.put(`/api/blooms/${saveSlug}`, {
         title: title.trim() || "",
         date,
         description: description.trim(),
@@ -137,11 +160,18 @@
         gutter_content: JSON.stringify(gutterItems),
         status,
         featured_image: featuredImage.trim() || null,
+        slug: slug !== originalSlug ? slug : undefined,
       });
 
       editorRef?.clearDraft();
       toast.success(`${resolveTermString('Bloom', 'Post')} saved successfully!`);
       hasUnsavedChanges = false;
+
+      // If slug changed, navigate to the new URL
+      if (slug !== originalSlug) {
+        originalSlug = slug;
+        await goto(`/arbor/garden/edit/${slug}`, { replaceState: true });
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : `Failed to update ${resolveTermString('bloom', 'post')}`);
     } finally {
@@ -173,7 +203,8 @@
     status = newStatus; // Optimistically update UI
 
     try {
-      await api.put(`/api/blooms/${slug}`, {
+      const saveSlug = originalSlug;
+      await api.put(`/api/blooms/${saveSlug}`, {
         title: title.trim() || "",
         date,
         description: description.trim(),
@@ -183,6 +214,7 @@
         gutter_content: JSON.stringify(gutterItems),
         status: newStatus,
         featured_image: featuredImage.trim() || null,
+        slug: slug !== originalSlug ? slug : undefined,
       });
 
       editorRef?.clearDraft();
@@ -193,6 +225,12 @@
         toast.success(`${resolveTermString('Bloom', 'Post')} unpublished`, { description: "Moved back to drafts." });
       }
       hasUnsavedChanges = false;
+
+      // If slug changed, navigate to the new URL
+      if (slug !== originalSlug) {
+        originalSlug = slug;
+        await goto(`/arbor/garden/edit/${slug}`, { replaceState: true });
+      }
     } catch (err) {
       // Revert on failure
       status = status === "published" ? "draft" : "published";
@@ -394,11 +432,24 @@
 
           <div class="form-group">
             <label for="slug">Slug</label>
-            <div class="slug-display">
+            <div class="slug-input-wrapper">
               <span class="slug-prefix">/garden/</span>
-              <span class="slug-value">{slug}</span>
+              <input
+                id="slug"
+                type="text"
+                bind:value={slug}
+                oninput={() => validateSlug(slug)}
+                class="slug-input"
+                placeholder="my-post-slug"
+              />
             </div>
-            <span class="form-hint">Slug cannot be changed after creation</span>
+            {#if slugError}
+              <span class="form-hint form-error">{slugError}</span>
+            {:else if slug !== originalSlug}
+              <span class="form-hint slug-changed">URL will change from <code>/{originalSlug}</code> to <code>/{slug}</code></span>
+            {:else}
+              <span class="form-hint">Lowercase letters, numbers, and hyphens only</span>
+            {/if}
           </div>
 
           <div class="form-group">
@@ -797,25 +848,47 @@
     min-height: 80px;
     font-family: inherit;
   }
-  .slug-display {
+  .slug-input-wrapper {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.75rem;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-small);
     transition: background-color 0.3s, border-color 0.3s;
+    overflow: hidden;
+  }
+  .slug-input-wrapper:focus-within {
+    border-color: var(--user-accent, var(--color-primary));
   }
   .slug-prefix {
     color: var(--color-text-subtle);
     font-size: 0.85rem;
+    padding-left: 0.75rem;
+    flex-shrink: 0;
     transition: color 0.3s;
   }
-  .slug-value {
+  .slug-input {
+    flex: 1;
+    border: none;
+    background: transparent;
     color: var(--color-text);
     font-family: monospace;
     font-size: 0.85rem;
-    transition: color 0.3s;
+    padding: 0.5rem 0.75rem 0.5rem 0.25rem;
+    outline: none;
+    min-width: 0;
+  }
+  .form-error {
+    color: var(--color-danger, #ef4444) !important;
+  }
+  .slug-changed {
+    color: var(--color-info, #3b82f6) !important;
+  }
+  .slug-changed code {
+    font-size: 0.7rem;
+    background: var(--color-bg-secondary);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
   }
   .form-hint {
     display: block;
