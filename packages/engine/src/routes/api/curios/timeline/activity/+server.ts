@@ -88,22 +88,29 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   const longestStreak = calculateLongestStreak(activity);
   const currentStreak = calculateCurrentStreak(activity, endDate);
 
-  return json({
-    activity,
-    stats: {
-      totalCommits,
-      totalAdditions,
-      totalDeletions,
-      activeDays,
-      totalDays: days,
-      longestStreak,
-      currentStreak,
+  return json(
+    {
+      activity,
+      stats: {
+        totalCommits,
+        totalAdditions,
+        totalDeletions,
+        activeDays,
+        totalDays: days,
+        longestStreak,
+        currentStreak,
+      },
+      range: {
+        start: startDate,
+        end: endDate,
+      },
     },
-    range: {
-      start: startDate,
-      end: endDate,
+    {
+      headers: {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+      },
     },
-  });
+  );
 };
 
 /**

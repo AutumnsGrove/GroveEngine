@@ -6,6 +6,7 @@ import {
   GRID_STYLE_OPTIONS,
   SORT_ORDER_OPTIONS,
   THUMBNAIL_SIZE_OPTIONS,
+  sanitizeCustomCss,
 } from "$lib/curios/gallery";
 
 interface ConfigRow {
@@ -260,7 +261,7 @@ export const actions: Actions = {
           enableFilters ? 1 : 0,
           gridStyle || DEFAULT_GALLERY_CONFIG.gridStyle,
           thumbnailSize || DEFAULT_GALLERY_CONFIG.thumbnailSize,
-          customCss?.trim() || null,
+          sanitizeCustomCss(customCss),
         )
         .run();
 

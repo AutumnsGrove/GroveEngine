@@ -160,6 +160,62 @@
 		};
 	});
 
+	// Curios: Hydrate ::curio:: directive placeholders into Svelte components
+	$effect(() => {
+		if (!browser) return;
+
+		const contentEl = contentBodyElement;
+		if (!contentEl) return;
+
+		const curioEls = contentEl.querySelectorAll('.grove-curio[data-grove-curio]');
+		if (curioEls.length === 0) return;
+
+		const cleanups: Array<() => void> = [];
+
+		// Allowlist of valid curio names — prevents arbitrary component loading
+		const VALID_CURIOS = new Set([
+			'guestbook', 'hitcounter', 'poll', 'nowplaying', 'moodring',
+			'badges', 'blogroll', 'webring', 'linkgarden', 'activitystatus',
+			'statusbadges', 'artifacts', 'bookmarkshelf'
+		]);
+
+		curioEls.forEach((el) => {
+			const curioName = el.getAttribute('data-grove-curio');
+			const curioArg = el.getAttribute('data-curio-arg') || '';
+			if (!curioName || el.hasAttribute('data-curio-mounted')) return;
+
+			// Validate curio name against allowlist (security: prevents path traversal)
+			if (!VALID_CURIOS.has(curioName)) {
+				console.warn(`[Curio] Unknown curio: ${curioName}`);
+				return;
+			}
+
+			el.setAttribute('data-curio-mounted', 'true');
+
+			// Capitalize for component filename: hitcounter → Hitcounter
+			const componentName = curioName.charAt(0).toUpperCase() + curioName.slice(1);
+
+			// Dynamic import of the curio component
+			import(`$lib/ui/components/content/curios/Curio${componentName}.svelte`)
+				.then((module) => {
+					el.innerHTML = '';
+					const component = mount(module.default, {
+						target: el as HTMLElement,
+						props: { arg: curioArg },
+					});
+					cleanups.push(() => unmount(component));
+				})
+				.catch((err) => {
+					console.warn(`[Curio] Failed to mount ${curioName}:`, err);
+					el.innerHTML = '<span class="grove-curio-error">Curio unavailable</span>';
+				});
+		});
+
+		return () => {
+			cleanups.forEach((fn) => fn());
+		};
+	});
+
 	// Add IDs to headers and position inline gutter items via DOM insertion
 	$effect(() => {
 		// Track contentBodyElement outside untrack() so effect re-runs when element becomes available
@@ -299,6 +355,8 @@
 						'data-anchor', 'data-language', 'data-line-numbers', 'data-code',
 						// Hum: music link preview placeholders
 						'data-hum-url', 'data-hum-provider',
+						// Curios: ::curio-name[]:: directive placeholders
+						'data-grove-curio', 'data-curio-arg',
 						// Accessibility
 						'aria-label', 'aria-hidden', 'role',
 						// Form elements (for task lists)

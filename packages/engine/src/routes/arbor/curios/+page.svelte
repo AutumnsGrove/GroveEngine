@@ -1,9 +1,261 @@
 <script lang="ts">
   import { GlassCard, GlassButton, Badge, Waystone, GroveTerm, GroveSwap, GroveIntro } from "$lib/ui/components/ui";
-  import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse, Activity } from "lucide-svelte";
+  import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse, BookOpen, Hash, Shield, Activity, Link, Music, BarChart3, Globe, Wand2, MousePointer, Circle, Rss, Award, Volume2, BookMarked, Heart, Sticker, Upload } from "lucide-svelte";
 
   // Available curios with their status
   const curios = [
+    {
+      id: "guestbook",
+      name: "Guestbook",
+      description: "Let visitors sign your guestbook — the classic personal web element",
+      icon: BookOpen,
+      status: "available",
+      href: "/arbor/curios/guestbook",
+      features: [
+        "Visitor signatures",
+        "4 display styles",
+        "Moderation queue",
+        "Emoji support"
+      ]
+    },
+    {
+      id: "hitcounter",
+      name: "Hit Counter",
+      description: "Nostalgic page view counter — zero tracking, just a number going up",
+      icon: Hash,
+      status: "available",
+      href: "/arbor/curios/hitcounter",
+      features: [
+        "4 display styles",
+        "No visitor tracking",
+        "Animated digits",
+        "Custom labels"
+      ]
+    },
+    {
+      id: "statusbadge",
+      name: "Status Badges",
+      description: "Small, expressive badges that signal the state of your site",
+      icon: Shield,
+      status: "available",
+      href: "/arbor/curios/statusbadge",
+      features: [
+        "9 badge types",
+        "Auto-detected badges",
+        "CSS animations",
+        "Configurable position"
+      ]
+    },
+    {
+      id: "activitystatus",
+      name: "Activity Status",
+      description: "A customizable status indicator — let visitors know you're here",
+      icon: Activity,
+      status: "available",
+      href: "/arbor/curios/activitystatus",
+      features: [
+        "15 quick presets",
+        "Custom text + emoji",
+        "Auto-expiration",
+        "One-line display"
+      ]
+    },
+    {
+      id: "linkgarden",
+      name: "Link Gardens",
+      description: "Curated link collections — blogroll, friends list, cool sites",
+      icon: Link,
+      status: "available",
+      href: "/arbor/curios/linkgarden",
+      features: [
+        "4 display styles",
+        "Auto-favicons",
+        "Category grouping",
+        "88x31 button wall"
+      ]
+    },
+    {
+      id: "nowplaying",
+      name: "Now Playing",
+      description: "Share what you're listening to — music fills the grove",
+      icon: Music,
+      status: "available",
+      href: "/arbor/curios/nowplaying",
+      features: [
+        "Manual + Spotify + Last.fm",
+        "4 display styles",
+        "Album art display",
+        "Listening history"
+      ]
+    },
+    {
+      id: "polls",
+      name: "Polls",
+      description: "Run interactive polls on your site — quick votes, live results",
+      icon: BarChart3,
+      status: "available",
+      href: "/arbor/curios/polls",
+      features: [
+        "Single & multiple choice",
+        "Results visibility control",
+        "Pin to homepage",
+        "Auto-close dates"
+      ]
+    },
+    {
+      id: "webring",
+      name: "Webring Hub",
+      description: "Join webrings and connect your site to the wider indie web",
+      icon: Globe,
+      status: "available",
+      href: "/arbor/curios/webring",
+      features: [
+        "Multiple ring memberships",
+        "4 display styles",
+        "Classic navigation bar",
+        "Configurable position"
+      ]
+    },
+    {
+      id: "artifacts",
+      name: "Weird Artifacts",
+      description: "Interactive chaos objects — Magic 8-Ball, fortune cookies, dice rollers",
+      icon: Wand2,
+      status: "available",
+      href: "/arbor/curios/artifacts",
+      features: [
+        "8 artifact types",
+        "Daily fortunes & draws",
+        "Marquee text",
+        "Configurable placement"
+      ]
+    },
+    {
+      id: "cursors",
+      name: "Custom Cursors",
+      description: "Replace the default pointer with something that matches your vibe",
+      icon: MousePointer,
+      status: "available",
+      href: "/arbor/curios/cursors",
+      features: [
+        "13 cursor presets",
+        "Trail effects",
+        "Nature & seasonal themes",
+        "Reduced motion aware"
+      ]
+    },
+    {
+      id: "moodring",
+      name: "Mood Ring",
+      description: "A visual mood indicator that changes color throughout the day",
+      icon: Circle,
+      status: "available",
+      href: "/arbor/curios/moodring",
+      features: [
+        "4 color modes",
+        "Ring, Gem, Orb styles",
+        "Mood logging timeline",
+        "Seasonal integration"
+      ]
+    },
+    {
+      id: "blogroll",
+      name: "Blogroll",
+      description: "The blogs you love, the voices you return to — curated recommendations",
+      icon: Rss,
+      status: "available",
+      href: "/arbor/curios/blogroll",
+      features: [
+        "Auto-favicons",
+        "RSS feed tracking",
+        "Latest post display",
+        "Blog descriptions"
+      ]
+    },
+    {
+      id: "badges",
+      name: "Badges",
+      description: "Collectible achievements celebrating your milestones and journey",
+      icon: Award,
+      status: "available",
+      href: "/arbor/curios/badges",
+      features: [
+        "12 system badges",
+        "Auto-award detection",
+        "Showcase display",
+        "Custom badges (Oak+)"
+      ]
+    },
+    {
+      id: "ambient",
+      name: "Ambient Sounds",
+      description: "Optional background audio — forest rain, morning birds, or lo-fi vibes",
+      icon: Volume2,
+      status: "available",
+      href: "/arbor/curios/ambient",
+      features: [
+        "7 curated sound sets",
+        "Volume persistence",
+        "Seamless looping",
+        "Custom uploads (Oak+)"
+      ]
+    },
+    {
+      id: "bookmarkshelf",
+      name: "Bookmark Shelf",
+      description: "A visual bookshelf for your reading list — organized by shelf and category",
+      icon: BookMarked,
+      status: "available",
+      href: "/arbor/curios/bookmarkshelf",
+      features: [
+        "Multiple shelves",
+        "Currently Reading section",
+        "Favorites highlighting",
+        "Category color-coding"
+      ]
+    },
+    {
+      id: "shrines",
+      name: "Personal Shrines",
+      description: "Sacred spaces for things you love — memories, fandoms, gratitude",
+      icon: Heart,
+      status: "available",
+      href: "/arbor/curios/shrines",
+      features: [
+        "6 shrine types",
+        "6 frame styles",
+        "Published/draft states",
+        "Positioned content items"
+      ]
+    },
+    {
+      id: "clipart",
+      name: "Clip Art Library",
+      description: "Decorative overlays — borders, critters, sparkles dropped onto any page",
+      icon: Sticker,
+      status: "available",
+      href: "/arbor/curios/clipart",
+      features: [
+        "5 asset categories",
+        "Per-page placements",
+        "Scale, rotation, z-index",
+        "Reduced motion aware"
+      ]
+    },
+    {
+      id: "customuploads",
+      name: "Custom Uploads",
+      description: "Upload and manage images used across all your curios",
+      icon: Upload,
+      status: "available",
+      href: "/arbor/curios/customuploads",
+      features: [
+        "Auto-resize & thumbnails",
+        "WebP conversion",
+        "Quota management",
+        "Usage tracking"
+      ]
+    },
     {
       id: "gallery",
       name: "Gallery",

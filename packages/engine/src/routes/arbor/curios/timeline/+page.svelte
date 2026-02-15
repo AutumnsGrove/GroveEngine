@@ -1107,15 +1107,15 @@
   }
 
   .alert-error {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: var(--color-error, #ef4444);
+    background: hsl(var(--destructive) / 0.1);
+    border: 1px solid hsl(var(--destructive) / 0.2);
+    color: hsl(var(--destructive));
   }
 
   .alert-success {
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: var(--color-success, #22c55e);
+    background: hsl(var(--grove-600, 142 76% 36%) / 0.1);
+    border: 1px solid hsl(var(--grove-600, 142 76% 36%) / 0.3);
+    color: hsl(var(--grove-600, 142 76% 36%));
   }
 
   :global(.alert-icon) {
@@ -1172,7 +1172,7 @@
   }
 
   .required {
-    color: var(--color-error, #ef4444);
+    color: hsl(var(--destructive));
   }
 
   :global(.token-badge) {
@@ -1276,11 +1276,11 @@
   }
 
   .token-ok {
-    color: var(--color-success, #22c55e);
+    color: hsl(var(--grove-600, 142 76% 36%));
   }
 
   .token-fail {
-    color: var(--color-error, #ef4444);
+    color: hsl(var(--destructive));
   }
 
   /* Password Field */
@@ -1556,7 +1556,7 @@
   }
 
   .stat-generated {
-    color: var(--color-success, #22c55e);
+    color: hsl(var(--grove-600, 142 76% 36%));
   }
 
   .stat-skipped {
@@ -1564,7 +1564,7 @@
   }
 
   .stat-failed {
-    color: var(--color-error, #ef4444);
+    color: hsl(var(--destructive));
   }
 
   .stat-cost {

@@ -506,6 +506,68 @@
 }
 
 /* ==========================================================================
+   Grove Curios (::curio-name[]:: directive placeholders)
+   ========================================================================== */
+
+.grove-curio {
+  margin: 1.5rem 0;
+  min-height: 3rem;
+}
+
+.grove-curio-loading {
+  display: block;
+  text-align: center;
+  padding: 1rem;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.dark .grove-curio-loading {
+  color: #9ca3af;
+}
+
+.grove-curio-skeleton {
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.04);
+  animation: grove-curio-pulse 1.5s ease-in-out infinite;
+}
+
+.dark .grove-curio-skeleton {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@keyframes grove-curio-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grove-curio-skeleton {
+    animation: none;
+  }
+}
+
+.grove-curio-error {
+  display: block;
+  text-align: center;
+  padding: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+
+.dark .grove-curio-error {
+  color: #9ca3af;
+}
+
+/* ==========================================================================
    Responsive Typography Adjustments
    ========================================================================== */
 

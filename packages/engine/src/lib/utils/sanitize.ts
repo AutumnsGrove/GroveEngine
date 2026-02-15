@@ -146,7 +146,15 @@ function sanitizeServerSafe(html: string): string {
       img: ["src", "alt", "title", "width", "height", "class"],
       "*": ["class", "id"],
       span: ["class", "id", "data-anchor"],
-      div: ["class", "id", "data-hum-url", "data-hum-provider"],
+      div: [
+        "class",
+        "id",
+        "data-hum-url",
+        "data-hum-provider",
+        // Curios: ::curio-name[]:: directive placeholders
+        "data-grove-curio",
+        "data-curio-arg",
+      ],
       td: ["align"],
       th: ["align"],
       input: ["type", "checked", "disabled"],
@@ -469,6 +477,9 @@ export function sanitizeMarkdown(markdownHTML: string): string {
       // Hum: music link preview placeholders
       "data-hum-url",
       "data-hum-provider",
+      // Curios: ::curio-name[]:: directive placeholders
+      "data-grove-curio",
+      "data-curio-arg",
       // Mentions: @username grove links with passage animation
       "data-passage-name",
       "data-mention",
