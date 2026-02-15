@@ -109,6 +109,33 @@ for (const name of CURIO_DIRECTIVES) {
   directiveHandlers[name] = (content) => handleCurio(name, content);
 }
 
+/**
+ * Metadata for all embeddable curios — used by the editor autocomplete.
+ * Single source of truth for directive names, display names, and argument requirements.
+ *
+ * - `requiresArg: true` → inserts `::name[]::` with cursor between brackets
+ * - `requiresArg: false` → inserts `::name::` with cursor after
+ * - `system: true` → not a curio, but uses the same directive syntax (e.g., gallery)
+ */
+export const CURIO_METADATA = [
+  { id: "guestbook", name: "Guestbook", requiresArg: false },
+  { id: "hitcounter", name: "Hit Counter", requiresArg: false },
+  { id: "poll", name: "Poll", requiresArg: true },
+  { id: "nowplaying", name: "Now Playing", requiresArg: false },
+  { id: "moodring", name: "Mood Ring", requiresArg: false },
+  { id: "badges", name: "Badges", requiresArg: false },
+  { id: "blogroll", name: "Blogroll", requiresArg: false },
+  { id: "webring", name: "Web Ring", requiresArg: false },
+  { id: "linkgarden", name: "Link Garden", requiresArg: false },
+  { id: "activitystatus", name: "Activity Status", requiresArg: false },
+  { id: "statusbadges", name: "Status Badge", requiresArg: false },
+  { id: "artifacts", name: "Artifacts", requiresArg: false },
+  { id: "bookmarkshelf", name: "Bookmark Shelf", requiresArg: false },
+  { id: "shrines", name: "Shrines", requiresArg: false },
+  // System directive (not a curio, but uses same syntax)
+  { id: "gallery", name: "Gallery", requiresArg: true, system: true },
+] as const;
+
 /** Exported for testing — the list of recognized curio directive names */
 export { CURIO_DIRECTIVES };
 

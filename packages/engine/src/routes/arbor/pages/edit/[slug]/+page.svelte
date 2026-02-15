@@ -18,7 +18,7 @@
    */
 
   /**
-   * @type {{ data: { page: PageData } }}
+   * @type {{ data: { page: PageData, curios?: { slug: string, name: string, enabled: boolean }[] } }}
    */
   let { data } = $props();
 
@@ -313,6 +313,7 @@
         bind:this={editorRef}
         bind:content
         draftKey="page-{slug}"
+        configuredCurios={data?.curios ?? []}
       />
     </GlassCard>
   </div>

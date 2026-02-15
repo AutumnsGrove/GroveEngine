@@ -16,6 +16,7 @@
   import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check, Images } from "lucide-svelte";
+  import CurioAutocomplete from "./CurioAutocomplete.svelte";
   import FiresideChat from "./FiresideChat.svelte";
   import PhotoPicker from "./PhotoPicker.svelte";
   import VoiceInput from "./VoiceInput.svelte";
@@ -66,6 +67,8 @@
     firesideAssisted = $bindable(false),
     /** All grafts for this tenant - component reads what it needs */
     grafts = /** @type {GraftsRecord} */ ({}),
+    /** Curio configuration status for autocomplete — loaded server-side */
+    configuredCurios = /** @type {{ slug: string, name: string, enabled: boolean }[]} */ ([]),
   } = $props();
 
   // Derived graft flags - add new ones here as they're created
@@ -113,6 +116,14 @@
 
   // Photo picker
   let showPhotoPicker = $state(false);
+
+  // Curio autocomplete state
+  let showCurioAutocomplete = $state(false);
+  let curioQuery = $state("");
+  let curioAutocompletePos = $state({ top: 0, left: 0 });
+  let curioTriggerStart = $state(0); // character index where :: begins
+  /** @type {CurioAutocomplete | null} */
+  let curioAutocompleteRef = $state(null);
 
   // Editor settings
   let editorSettings = $state({
@@ -244,11 +255,126 @@
     cursorCol = lines[lines.length - 1].length + 1;
   }
 
+  // Curio autocomplete: detect :: trigger and track query
+  function checkCurioTrigger() {
+    if (!textareaRef || isProgrammaticUpdate) return;
+    const pos = textareaRef.selectionStart;
+    const textBefore = content.substring(0, pos);
+
+    // Find the last :: in the text before cursor
+    const lastTrigger = textBefore.lastIndexOf("::");
+    if (lastTrigger === -1) {
+      if (showCurioAutocomplete) showCurioAutocomplete = false;
+      return;
+    }
+
+    // Extract text between :: and cursor
+    const afterTrigger = textBefore.substring(lastTrigger + 2);
+
+    // If there's another :: in the text after trigger, it's a complete directive — close
+    if (afterTrigger.includes("::")) {
+      if (showCurioAutocomplete) showCurioAutocomplete = false;
+      return;
+    }
+
+    // Query should only contain word characters (alphanumeric). Space or special chars = close.
+    if (afterTrigger && !/^\w*$/.test(afterTrigger)) {
+      if (showCurioAutocomplete) showCurioAutocomplete = false;
+      return;
+    }
+
+    // Check that :: is at start of line or preceded by whitespace/newline
+    if (lastTrigger > 0) {
+      const charBefore = textBefore[lastTrigger - 1];
+      if (charBefore !== "\n" && charBefore !== " " && charBefore !== "\t") {
+        if (showCurioAutocomplete) showCurioAutocomplete = false;
+        return;
+      }
+    }
+
+    // We have a valid trigger — calculate position and show autocomplete
+    curioTriggerStart = lastTrigger;
+    curioQuery = afterTrigger;
+
+    // Calculate dropdown position from cursor
+    if (textareaRef) {
+      const textareaRect = textareaRef.getBoundingClientRect();
+      const editorContainer = textareaRef.closest(".editor-container");
+      const containerRect = editorContainer?.getBoundingClientRect() || textareaRect;
+
+      // Approximate position: line height × line number, adjusted for scroll
+      const lineHeight = parseFloat(getComputedStyle(textareaRef).lineHeight) || 24;
+      const lineNumberGutterWidth = textareaRef.offsetLeft - (containerRect?.left || 0);
+
+      // Current line of the cursor
+      const linesBeforeCursor = textBefore.split("\n");
+      const currentLine = linesBeforeCursor.length;
+      const currentCol = linesBeforeCursor[linesBeforeCursor.length - 1].length;
+
+      // Position relative to editor container
+      const top = textareaRect.top - containerRect.top + (currentLine * lineHeight) - textareaRef.scrollTop + 4;
+      const charWidth = 8; // approximate monospace char width at 0.9rem
+      const left = lineNumberGutterWidth + 16 + Math.min(currentCol * charWidth, textareaRect.width - 260);
+
+      curioAutocompletePos = { top, left };
+    }
+
+    showCurioAutocomplete = true;
+  }
+
+  /**
+   * Handle curio selection from autocomplete.
+   * Replaces the :: trigger + query with the full directive.
+   * @param {string} directiveText - e.g. "::guestbook::" or "::poll[]::"
+   * @param {number} cursorOffset - where to place cursor within the directive text
+   */
+  async function handleCurioSelect(directiveText, cursorOffset) {
+    if (!textareaRef) return;
+    isUpdating = true;
+    isProgrammaticUpdate = true;
+
+    const pos = textareaRef.selectionStart;
+    // Delete from trigger start (the ::) to current cursor position
+    const before = content.substring(0, curioTriggerStart);
+    const after = content.substring(pos);
+    content = before + directiveText + after;
+
+    showCurioAutocomplete = false;
+
+    await tick();
+
+    // Place cursor at the specified offset within the inserted directive
+    const newCursorPos = curioTriggerStart + cursorOffset;
+    textareaRef.selectionStart = textareaRef.selectionEnd = newCursorPos;
+    textareaRef.focus();
+
+    isProgrammaticUpdate = false;
+    isUpdating = false;
+  }
+
+  function closeCurioAutocomplete() {
+    showCurioAutocomplete = false;
+  }
+
   // Keyboard handlers (simplified - removed slash commands and command palette)
   /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
-    // Escape key handling - exit zen mode
+    // Curio autocomplete intercepts keys first when open
+    if (showCurioAutocomplete && curioAutocompleteRef) {
+      const handled = curioAutocompleteRef.handleKey(e);
+      if (handled) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Escape key handling - close autocomplete first, then zen mode
     if (e.key === "Escape") {
+      if (showCurioAutocomplete) {
+        showCurioAutocomplete = false;
+        e.preventDefault();
+        return;
+      }
       if (isZenMode) {
         isZenMode = false;
         return;
@@ -322,6 +448,13 @@
   /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
+      // Close curio autocomplete first (handled inline by textarea keydown too,
+      // but this catches Escape when textarea isn't focused)
+      if (showCurioAutocomplete) {
+        showCurioAutocomplete = false;
+        e.preventDefault();
+        return;
+      }
       // Close photo picker first (highest priority - it has its own handler too)
       if (showPhotoPicker) {
         showPhotoPicker = false;
@@ -595,6 +728,8 @@
   // Scroll sync
   function handleScroll() {
     syncLineNumbersScroll();
+    // Close autocomplete on scroll to prevent visual drift
+    if (showCurioAutocomplete) showCurioAutocomplete = false;
     // Sync scroll with preview when in split or preview mode
     if (textareaRef && previewRef && editorMode !== "write") {
       const scrollRatio = textareaRef.scrollTop / (textareaRef.scrollHeight - textareaRef.clientHeight);
@@ -1073,8 +1208,8 @@
               aria-label="Markdown editor content"
               bind:this={textareaRef}
               bind:value={content}
-              oninput={updateCursorPosition}
-              onclick={updateCursorPosition}
+              oninput={() => { updateCursorPosition(); checkCurioTrigger(); }}
+              onclick={() => { updateCursorPosition(); if (showCurioAutocomplete) checkCurioTrigger(); }}
               onkeyup={updateCursorPosition}
               onkeydown={handleKeydown}
               onscroll={handleScroll}
@@ -1084,6 +1219,16 @@
               disabled={readonly}
               class="editor-textarea"
             ></textarea>
+            {#if showCurioAutocomplete}
+              <CurioAutocomplete
+                bind:this={curioAutocompleteRef}
+                query={curioQuery}
+                {configuredCurios}
+                position={curioAutocompletePos}
+                onselect={handleCurioSelect}
+                onclose={closeCurioAutocomplete}
+              />
+            {/if}
           </div>
         </div>
       {/if}

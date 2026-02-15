@@ -1,6 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import { getTenantDb } from "$lib/server/services/database";
+import { loadCurioStatus } from "$lib/server/curio-status";
 import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
 
@@ -46,6 +47,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
       ]);
 
       if (post) {
+        const curios = await loadCurioStatus(platform.env.DB, locals.tenantId);
         return {
           source: "d1",
           post: {
@@ -53,6 +55,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
             tags: post.tags ? JSON.parse(post.tags as string) : [],
             gutter_content: post.gutter_content || "[]",
           },
+          curios,
         };
       }
     } catch (err) {
@@ -98,6 +101,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
         markdown_content: markdownContent,
         gutter_content: "[]",
       },
+      curios: [],
     };
   } catch (err) {
     if (err && typeof err === "object" && "status" in err && err.status === 404)

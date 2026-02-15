@@ -1,5 +1,6 @@
 import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
+import { loadCurioStatus, type CurioStatus } from "$lib/server/curio-status";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {
@@ -31,14 +32,22 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 
   // Try D1 first
   if (platform?.env?.DB) {
+    const db = platform.env.DB;
+
     try {
-      const page = await platform.env.DB.prepare(
-        `SELECT slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, updated_at, created_at
-         FROM pages
-         WHERE slug = ? AND tenant_id = ?`,
-      )
-        .bind(slug, tenantId)
-        .first<PageRecord>();
+      // Run page query and curio status in parallel
+      const [page, curios] = await Promise.all([
+        db
+          .prepare(
+            `SELECT slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, updated_at, created_at
+             FROM pages
+             WHERE slug = ? AND tenant_id = ?`,
+          )
+          .bind(slug, tenantId)
+          .first<PageRecord>(),
+
+        loadCurioStatus(db, tenantId),
+      ]);
 
       if (page) {
         return {
@@ -48,6 +57,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
             hero: page.hero ? (JSON.parse(page.hero) as HeroData) : null,
             gutter_content: page.gutter_content || "[]",
           },
+          curios,
         };
       }
     } catch (err) {

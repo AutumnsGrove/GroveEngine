@@ -479,6 +479,7 @@
             previewTags={parseTags(tagsInput)}
             {gutterItems}
             grafts={data?.grafts ?? {}}
+            configuredCurios={data?.curios ?? []}
           />
         </div>
         {#if showGutter}

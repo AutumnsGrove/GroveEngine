@@ -388,6 +388,7 @@
             previewDate={date}
             previewTags={parseTags(tagsInput)}
             grafts={data?.grafts ?? {}}
+            configuredCurios={data?.curios ?? []}
           />
         </div>
         {#if showGutter}
