@@ -1,3 +1,5 @@
+> **Note**: Individual agent-handoff files have been extracted to [`planned/curios/`](curios/). This file remains as the full source reference.
+
 # Curio Safari — Polish Plan
 
 > Comprehensive review of all 22 curios. Each curio gets its own character.
