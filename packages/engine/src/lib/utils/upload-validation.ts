@@ -463,6 +463,7 @@ export function getActionableUploadError(serverMessage: string): string {
   // File too large
   if (
     msg.includes("too large") ||
+    msg.includes("exceeds maximum") ||
     msg.includes("file size") ||
     msg.includes("payload too large") ||
     msg.includes("413")

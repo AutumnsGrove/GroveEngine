@@ -573,16 +573,17 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (["POST", "PUT", "PATCH"].includes(event.request.method)) {
     const contentLength = event.request.headers.get("content-length");
     const contentType = event.request.headers.get("content-type") || "";
-    const isJsonOrForm =
+    const isJsonOrUrlEncoded =
       contentType.includes("application/json") ||
-      contentType.includes("application/x-www-form-urlencoded") ||
-      contentType.includes("multipart/form-data");
+      contentType.includes("application/x-www-form-urlencoded");
+    // multipart/form-data is excluded — it's used for file uploads which
+    // have their own size limits in each upload endpoint (e.g. 10MB for images)
 
-    // 1MB limit for JSON/form requests, skip for binary uploads
+    // 1MB limit for JSON/URL-encoded requests, skip for file uploads
     const MAX_BODY_SIZE = 1024 * 1024;
     if (
       contentLength &&
-      isJsonOrForm &&
+      isJsonOrUrlEncoded &&
       parseInt(contentLength) > MAX_BODY_SIZE
     ) {
       return new Response(
