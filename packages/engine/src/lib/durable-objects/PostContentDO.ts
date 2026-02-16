@@ -3,33 +3,19 @@
 /**
  * PostContentDO - Per-Post Durable Object for Content Caching
  *
- * Handles static content that rarely changes:
- * - Cached rendered HTML
- * - Markdown source
- * - Post metadata (title, description, tags)
+ * Engine-bundled copy. The canonical implementation lives in
+ * packages/durable-objects/src/PostContentDO.ts (deployed worker).
+ * This copy is bundled into the engine worker via script_name binding.
  *
- * This DO hibernates quickly since content doesn't change often.
- * Separated from PostMetaDO for cost efficiency.
- *
- * ID Pattern: content:{tenantId}:{slug}
- *
- * Part of the Loom pattern - Grove's coordination layer.
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
-/**
- * Local JSON parsing helper to avoid bundling conflicts.
- * When DOs are bundled and concatenated into _worker.js, importing from
- * utils/json causes duplicate function declarations. This inline version
- * uses a unique name scoped to this DO.
- */
-function parseJsonForPostContent<T>(str: string | null | undefined, fallback: T): T {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return fallback;
-  }
-}
+import { LoomDO, safeJsonParse } from "../loom/index.js";
+import type {
+  LoomRoute,
+  LoomConfig,
+  LoomRequestContext,
+} from "../loom/types.js";
 
 // ============================================================================
 // Types
@@ -61,119 +47,96 @@ export interface ContentUpdate {
   font?: string;
 }
 
+interface ContentEnv extends Record<string, unknown> {
+  DB: D1Database;
+  CACHE_KV: KVNamespace;
+  IMAGES: R2Bucket;
+}
+
 // ============================================================================
 // PostContentDO Class
 // ============================================================================
 
-export class PostContentDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: Env;
+const STORE_KEY = "post_content";
 
-  private content: PostContent | null = null;
-  private initialized: boolean = false;
-
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-
-    this.state.blockConcurrencyWhile(async () => {
-      await this.initializeStorage();
-    });
+export class PostContentDO extends LoomDO<PostContent, ContentEnv> {
+  config(): LoomConfig {
+    return { name: "PostContentDO" };
   }
 
-  private async initializeStorage(): Promise<void> {
-    if (this.initialized) return;
-
-    await this.state.storage.sql.exec(`
+  protected schema(): string {
+    return `
       CREATE TABLE IF NOT EXISTS content (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
         updated_at INTEGER NOT NULL
-      );
-    `);
-
-    const stored = this.state.storage.sql
-      .exec("SELECT value FROM content WHERE key = 'post_content'")
-      .one();
-
-    if (stored?.value) {
-      const parsed = parseJsonForPostContent<PostContent | null>(
-        stored.value as string,
-        null,
-      );
-      // Only assign if parsing succeeded
-      if (parsed) {
-        this.content = parsed;
-      }
-    }
-
-    this.initialized = true;
+      )
+    `;
   }
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    try {
-      if (path === "/content" && request.method === "GET") {
-        return this.handleGetContent();
-      }
-
-      if (path === "/content" && request.method === "PUT") {
-        return this.handleSetContent(request);
-      }
-
-      if (path === "/content" && request.method === "PATCH") {
-        return this.handleUpdateContent(request);
-      }
-
-      if (path === "/content/html" && request.method === "GET") {
-        return this.handleGetHtml();
-      }
-
-      if (path === "/content/invalidate" && request.method === "POST") {
-        return this.handleInvalidate();
-      }
-
-      if (path === "/content/migrate" && request.method === "POST") {
-        return this.handleMigrateToCold(request);
-      }
-
-      return new Response("Not found", { status: 404 });
-    } catch (err) {
-      console.error("[PostContentDO] Error:", err);
-      return new Response(
-        JSON.stringify({
-          error: err instanceof Error ? err.message : "Internal error",
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
+  protected async loadState(): Promise<PostContent | null> {
+    const row = this.sql.queryOne<{ value: string }>(
+      "SELECT value FROM content WHERE key = ?",
+      STORE_KEY,
+    );
+    if (!row?.value) return null;
+    return safeJsonParse<PostContent | null>(row.value, null);
   }
 
-  private async handleGetContent(): Promise<Response> {
-    if (!this.content) {
+  routes(): LoomRoute[] {
+    return [
+      { method: "GET", path: "/content", handler: () => this.getContent() },
+      {
+        method: "PUT",
+        path: "/content",
+        handler: (ctx) => this.setContent(ctx),
+      },
+      {
+        method: "PATCH",
+        path: "/content",
+        handler: (ctx) => this.updateContent(ctx),
+      },
+      { method: "GET", path: "/content/html", handler: () => this.getHtml() },
+      {
+        method: "POST",
+        path: "/content/invalidate",
+        handler: () => this.invalidate(),
+      },
+      {
+        method: "POST",
+        path: "/content/migrate",
+        handler: (ctx) => this.migrateToCold(ctx),
+      },
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Route Handlers
+  // ════════════════════════════════════════════════════════════════════
+
+  private async getContent(): Promise<Response> {
+    if (!this.state_data) {
       return new Response("Content not found", { status: 404 });
     }
 
-    if (this.content.storageLocation === "cold" && this.content.r2Key) {
-      const r2Content = await this.fetchFromR2(this.content.r2Key);
+    if (this.state_data.storageLocation === "cold" && this.state_data.r2Key) {
+      const r2Content = await this.fetchFromR2(this.state_data.r2Key);
       if (r2Content) {
-        return Response.json({ ...this.content, ...r2Content });
+        return Response.json({ ...this.state_data, ...r2Content });
       }
     }
 
-    return Response.json(this.content);
+    return Response.json(this.state_data);
   }
 
-  private async handleSetContent(request: Request): Promise<Response> {
-    const data = (await request.json()) as PostContent;
+  private async setContent(ctx: LoomRequestContext): Promise<Response> {
+    const data = (await ctx.request.json()) as PostContent;
 
     if (!data.tenantId || !data.slug || !data.title) {
       return new Response("Missing required fields", { status: 400 });
     }
 
-    this.content = {
+    this.state_data = {
       tenantId: data.tenantId,
       slug: data.slug,
       title: data.title,
@@ -189,42 +152,40 @@ export class PostContentDO implements DurableObject {
     };
 
     await this.persistContent();
-
-    return Response.json({ success: true, content: this.content });
+    return Response.json({ success: true, content: this.state_data });
   }
 
-  private async handleUpdateContent(request: Request): Promise<Response> {
-    if (!this.content) {
+  private async updateContent(ctx: LoomRequestContext): Promise<Response> {
+    if (!this.state_data) {
       return new Response("Content not found", { status: 404 });
     }
 
-    const updates = (await request.json()) as ContentUpdate;
+    const updates = (await ctx.request.json()) as ContentUpdate;
 
-    if (updates.title !== undefined) this.content.title = updates.title;
+    if (updates.title !== undefined) this.state_data.title = updates.title;
     if (updates.description !== undefined)
-      this.content.description = updates.description;
-    if (updates.tags !== undefined) this.content.tags = updates.tags;
+      this.state_data.description = updates.description;
+    if (updates.tags !== undefined) this.state_data.tags = updates.tags;
     if (updates.markdownContent !== undefined)
-      this.content.markdownContent = updates.markdownContent;
+      this.state_data.markdownContent = updates.markdownContent;
     if (updates.htmlContent !== undefined)
-      this.content.htmlContent = updates.htmlContent;
+      this.state_data.htmlContent = updates.htmlContent;
     if (updates.gutterContent !== undefined)
-      this.content.gutterContent = updates.gutterContent;
-    if (updates.font !== undefined) this.content.font = updates.font;
+      this.state_data.gutterContent = updates.gutterContent;
+    if (updates.font !== undefined) this.state_data.font = updates.font;
 
-    this.content.updatedAt = Date.now();
+    this.state_data.updatedAt = Date.now();
     await this.persistContent();
-
-    return Response.json({ success: true, content: this.content });
+    return Response.json({ success: true, content: this.state_data });
   }
 
-  private async handleGetHtml(): Promise<Response> {
-    if (!this.content) {
+  private async getHtml(): Promise<Response> {
+    if (!this.state_data) {
       return new Response("Content not found", { status: 404 });
     }
 
-    if (this.content.storageLocation === "cold" && this.content.r2Key) {
-      const r2Content = await this.fetchFromR2(this.content.r2Key);
+    if (this.state_data.storageLocation === "cold" && this.state_data.r2Key) {
+      const r2Content = await this.fetchFromR2(this.state_data.r2Key);
       if (r2Content?.htmlContent) {
         return new Response(r2Content.htmlContent, {
           headers: { "Content-Type": "text/html" },
@@ -232,25 +193,23 @@ export class PostContentDO implements DurableObject {
       }
     }
 
-    return new Response(this.content.htmlContent, {
+    return new Response(this.state_data.htmlContent, {
       headers: { "Content-Type": "text/html" },
     });
   }
 
-  private async handleInvalidate(): Promise<Response> {
-    this.content = null;
-    await this.state.storage.sql.exec(
-      "DELETE FROM content WHERE key = 'post_content'",
-    );
+  private async invalidate(): Promise<Response> {
+    this.state_data = null;
+    this.sql.exec("DELETE FROM content WHERE key = ?", STORE_KEY);
     return Response.json({ success: true, message: "Content invalidated" });
   }
 
-  private async handleMigrateToCold(request: Request): Promise<Response> {
-    if (!this.content) {
+  private async migrateToCold(ctx: LoomRequestContext): Promise<Response> {
+    if (!this.state_data) {
       return new Response("Content not found", { status: 404 });
     }
 
-    const data = (await request.json()) as { r2Key: string };
+    const data = (await ctx.request.json()) as { r2Key: string };
 
     if (!data.r2Key) {
       return new Response("R2 key required", { status: 400 });
@@ -261,14 +220,12 @@ export class PostContentDO implements DurableObject {
       return new Response("R2 not configured", { status: 500 });
     }
 
-    // Prepare content payload before modifying state
     const contentPayload = JSON.stringify({
-      markdownContent: this.content.markdownContent,
-      htmlContent: this.content.htmlContent,
-      gutterContent: this.content.gutterContent,
+      markdownContent: this.state_data.markdownContent,
+      htmlContent: this.state_data.htmlContent,
+      gutterContent: this.state_data.gutterContent,
     });
 
-    // Upload to R2 with retry logic
     const maxRetries = 3;
     let lastError: Error | null = null;
 
@@ -278,33 +235,28 @@ export class PostContentDO implements DurableObject {
           httpMetadata: { contentType: "application/json" },
         });
 
-        // Verify upload succeeded by checking object exists
         const verification = await r2.head(data.r2Key);
         if (!verification) {
           throw new Error("R2 upload verification failed - object not found");
         }
 
-        // Atomic state update: prepare new state, persist, then update memory
-        // This prevents partial state if persistContent() fails
         const updatedContent: PostContent = {
-          ...this.content,
-          markdownContent: "", // Clear after moving to R2
+          ...this.state_data,
+          markdownContent: "",
           htmlContent: "",
           gutterContent: "[]",
           storageLocation: "cold",
           r2Key: data.r2Key,
         };
 
-        // Persist BEFORE modifying in-memory state (atomic operation)
-        await this.state.storage.sql.exec(
+        this.sql.exec(
           "INSERT OR REPLACE INTO content (key, value, updated_at) VALUES (?, ?, ?)",
-          "post_content",
+          STORE_KEY,
           JSON.stringify(updatedContent),
           Date.now(),
         );
 
-        // Only after successful persistence, update in-memory state
-        this.content = updatedContent;
+        this.state_data = updatedContent;
 
         return Response.json({
           success: true,
@@ -313,13 +265,11 @@ export class PostContentDO implements DurableObject {
         });
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        console.error(
-          `[PostContentDO] R2 upload attempt ${attempt}/${maxRetries} failed:`,
-          lastError.message,
-        );
+        this.log.error(`R2 upload attempt ${attempt}/${maxRetries} failed`, {
+          error: lastError.message,
+        });
 
         if (attempt < maxRetries) {
-          // Exponential backoff: 100ms, 200ms, 400ms
           await new Promise((resolve) =>
             setTimeout(resolve, 100 * Math.pow(2, attempt - 1)),
           );
@@ -327,7 +277,6 @@ export class PostContentDO implements DurableObject {
       }
     }
 
-    // All retries failed - return error without modifying local state
     return new Response(
       JSON.stringify({
         error: "R2 migration failed after retries",
@@ -336,6 +285,10 @@ export class PostContentDO implements DurableObject {
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Private Helpers
+  // ════════════════════════════════════════════════════════════════════
 
   private async fetchFromR2(key: string): Promise<{
     markdownContent: string;
@@ -350,31 +303,25 @@ export class PostContentDO implements DurableObject {
       if (!object) return null;
 
       const text = await object.text();
-      return parseJsonForPostContent<{
+      return safeJsonParse<{
         markdownContent: string;
         htmlContent: string;
         gutterContent: string;
       } | null>(text, null);
     } catch (err) {
-      console.error("[PostContentDO] R2 fetch error:", err);
+      this.log.errorWithCause("R2 fetch error", err);
       return null;
     }
   }
 
   private async persistContent(): Promise<void> {
-    if (!this.content) return;
+    if (!this.state_data) return;
 
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       "INSERT OR REPLACE INTO content (key, value, updated_at) VALUES (?, ?, ?)",
-      "post_content",
-      JSON.stringify(this.content),
+      STORE_KEY,
+      JSON.stringify(this.state_data),
       Date.now(),
     );
   }
-}
-
-interface Env {
-  DB: D1Database;
-  CACHE_KV: KVNamespace;
-  IMAGES: R2Bucket;
 }

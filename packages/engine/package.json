@@ -324,6 +324,22 @@
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "default": "./dist/errors/index.js"
+    },
+    "./loom": {
+      "types": "./dist/loom/index.d.ts",
+      "default": "./dist/loom/index.js"
+    },
+    "./loom/sveltekit": {
+      "types": "./dist/loom/adapters/sveltekit.d.ts",
+      "default": "./dist/loom/adapters/sveltekit.js"
+    },
+    "./loom/worker": {
+      "types": "./dist/loom/adapters/worker.d.ts",
+      "default": "./dist/loom/adapters/worker.js"
+    },
+    "./loom/testing": {
+      "types": "./dist/loom/test-utils.d.ts",
+      "default": "./dist/loom/test-utils.js"
     }
   },
   "files": [
