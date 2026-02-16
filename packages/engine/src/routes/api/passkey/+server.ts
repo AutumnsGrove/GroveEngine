@@ -4,6 +4,7 @@
  * GET /api/passkey
  *
  * Returns all passkeys for the authenticated user.
+ * Uses service binding to reach Heartwood (Worker-to-Worker).
  */
 
 import { json } from "@sveltejs/kit";
@@ -15,22 +16,40 @@ import {
 } from "$lib/errors/index.js";
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
-export const GET: RequestHandler = async ({ request, cookies, platform }) => {
-  // Get access token from cookie
-  const accessToken = cookies.get("access_token");
-  if (!accessToken) {
+export const GET: RequestHandler = async ({ cookies, platform }) => {
+  // Collect session cookies (modern auth — no legacy access_token)
+  const groveSession = cookies.get("grove_session");
+  const betterAuthSession =
+    cookies.get("__Secure-better-auth.session_token") ||
+    cookies.get("better-auth.session_token");
+
+  if (!groveSession && !betterAuthSession) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
+  if (!platform?.env?.AUTH) {
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, {
+      detail: "AUTH service binding not available",
+    });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
+  }
 
   try {
-    // Fetch passkeys from GroveAuth
-    const response = await fetch(
-      `${authBaseUrl}/api/auth/passkey/list-user-passkeys`,
+    // Build Cookie header with available session cookies
+    const cookieParts: string[] = [];
+    if (groveSession) {
+      cookieParts.push(`grove_session=${groveSession}`);
+    }
+    if (betterAuthSession) {
+      cookieParts.push(`better-auth.session_token=${betterAuthSession}`);
+    }
+
+    // Use service binding — Worker-to-Worker, never public internet
+    const response = await platform.env.AUTH.fetch(
+      `${AUTH_HUB_URL}/api/auth/passkey/list-user-passkeys`,
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Cookie: cookieParts.join("; "),
         },
       },
     );

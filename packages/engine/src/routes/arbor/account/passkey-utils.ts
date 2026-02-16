@@ -1,17 +1,14 @@
 /**
  * Passkey Utilities
  *
- * Client-side helpers for WebAuthn passkey registration ceremony.
- * These functions handle the browser-side WebAuthn API interactions.
+ * Client-side helpers for passkey feature detection.
+ * Registration is handled by login.grove.place (single WebAuthn origin).
  */
 
 import {
-  base64urlToBuffer,
-  bufferToBase64url,
   isPlatformAuthenticatorAvailable,
   isWebAuthnSupported,
 } from "$lib/utils/webauthn";
-import { getCSRFToken } from "$lib/utils/api";
 
 /**
  * Check if the current device supports passkeys.
@@ -72,177 +69,4 @@ export function getDeviceName(): string {
   }
 
   return "My Passkey";
-}
-
-/**
- * Result from a passkey registration attempt
- */
-export interface PasskeyRegistrationResult {
-  success: boolean;
-  error?: string;
-}
-
-/**
- * Register a new passkey via WebAuthn ceremony.
- *
- * This function:
- * 1. Fetches registration options from the server
- * 2. Triggers the WebAuthn ceremony in the browser
- * 3. Sends the credential back to the server for verification
- *
- * @param name - Optional custom name for the passkey (defaults to device name)
- * @returns Result indicating success or failure with error message
- */
-export async function registerPasskey(
-  name?: string,
-): Promise<PasskeyRegistrationResult> {
-  const passkeyName = name || getDeviceName();
-
-  try {
-    // Step 1: Get registration options from server
-    const csrfToken = getCSRFToken();
-    const csrfHeaders: Record<string, string> = {};
-    if (csrfToken) {
-      csrfHeaders["X-CSRF-Token"] = csrfToken;
-      csrfHeaders["csrf-token"] = csrfToken;
-    }
-
-    const optionsResponse = await fetch("/api/passkey/register-options", {
-      // csrf-ok: manual CSRF headers for WebAuthn
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...csrfHeaders },
-      credentials: "include",
-    });
-
-    if (!optionsResponse.ok) {
-      const errorData = (await optionsResponse.json().catch(() => ({}))) as {
-        message?: string;
-      };
-      return {
-        success: false,
-        error: errorData.message || "Failed to start passkey registration",
-      };
-    }
-
-    const options = (await optionsResponse.json()) as {
-      challenge: string;
-      rp: { name: string; id: string };
-      user: { id: string; name: string; displayName: string };
-      pubKeyCredParams: Array<{ type: "public-key"; alg: number }>;
-      authenticatorSelection?: {
-        authenticatorAttachment?: AuthenticatorAttachment;
-        requireResidentKey?: boolean;
-        residentKey?: ResidentKeyRequirement;
-        userVerification?: UserVerificationRequirement;
-      };
-      timeout?: number;
-      attestation?: AttestationConveyancePreference;
-    };
-
-    // Step 2: Convert base64url values to ArrayBuffer for WebAuthn API
-    const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions =
-      {
-        challenge: base64urlToBuffer(options.challenge),
-        rp: options.rp,
-        user: {
-          id: base64urlToBuffer(options.user.id),
-          name: options.user.name,
-          displayName: options.user.displayName,
-        },
-        pubKeyCredParams: options.pubKeyCredParams,
-        authenticatorSelection: options.authenticatorSelection || {
-          authenticatorAttachment: "platform",
-          residentKey: "preferred",
-          userVerification: "required",
-        },
-        timeout: options.timeout || 60000,
-        attestation: options.attestation || "none",
-      };
-
-    // Step 3: Trigger WebAuthn ceremony
-    const credential = (await navigator.credentials.create({
-      publicKey: publicKeyCredentialCreationOptions,
-    })) as PublicKeyCredential | null;
-
-    if (!credential) {
-      return {
-        success: false,
-        error: "Passkey registration was cancelled",
-      };
-    }
-
-    // Step 4: Prepare credential response for server
-    const attestationResponse =
-      credential.response as AuthenticatorAttestationResponse;
-
-    const credentialData = {
-      id: credential.id,
-      rawId: bufferToBase64url(credential.rawId),
-      response: {
-        attestationObject: bufferToBase64url(
-          attestationResponse.attestationObject,
-        ),
-        clientDataJSON: bufferToBase64url(attestationResponse.clientDataJSON),
-      },
-      type: credential.type,
-    };
-
-    // Step 5: Verify credential with server
-    const verifyResponse = await fetch("/api/passkey/verify-registration", {
-      // csrf-ok: manual CSRF headers for WebAuthn
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...csrfHeaders },
-      credentials: "include",
-      body: JSON.stringify({ credential: credentialData, name: passkeyName }),
-    });
-
-    if (!verifyResponse.ok) {
-      const errorData = (await verifyResponse.json().catch(() => ({}))) as {
-        message?: string;
-      };
-      return {
-        success: false,
-        error: errorData.message || "Failed to verify passkey registration",
-      };
-    }
-
-    return { success: true };
-  } catch (err) {
-    // Handle specific WebAuthn errors
-    if (err instanceof DOMException) {
-      switch (err.name) {
-        case "NotAllowedError":
-          return {
-            success: false,
-            error: "Passkey registration was cancelled or timed out",
-          };
-        case "InvalidStateError":
-          return {
-            success: false,
-            error: "A passkey for this device already exists",
-          };
-        case "SecurityError":
-          return {
-            success: false,
-            error: "Passkey registration is not allowed on this page",
-          };
-        case "NotSupportedError":
-          return {
-            success: false,
-            error: "Your device does not support passkeys",
-          };
-        default:
-          return {
-            success: false,
-            error: `Passkey error: ${err.message}`,
-          };
-      }
-    }
-
-    console.error("[Passkey] Registration error:", err);
-    return {
-      success: false,
-      error: "An unexpected error occurred during passkey registration",
-    };
-  }
 }

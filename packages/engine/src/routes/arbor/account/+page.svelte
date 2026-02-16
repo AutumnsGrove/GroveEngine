@@ -20,7 +20,7 @@
 
   // Import types and utils
   import { sanitizeErrorMessage } from "./utils";
-  import { checkPasskeySupport, registerPasskey } from "./passkey-utils";
+  import { checkPasskeySupport } from "./passkey-utils";
   import type { TierKey } from '$lib/config/tiers';
 
   let { data } = $props();
@@ -38,7 +38,6 @@
 
   // Passkey states
   let supportsPasskeys = $state(false);
-  let registeringPasskey = $state(false);
   let deletingPasskeyId = $state<string | null>(null);
 
   // Check passkey support on mount
@@ -175,22 +174,10 @@
     }
   }
 
-  // Register a new passkey
-  async function handleRegisterPasskey(): Promise<void> {
-    registeringPasskey = true;
-    try {
-      const result = await registerPasskey();
-      if (result.success) {
-        toast.success("Passkey registered successfully!");
-        await invalidateAll();
-      } else {
-        toast.error(result.error || "Failed to register passkey");
-      }
-    } catch (error) {
-      toast.error(sanitizeErrorMessage(error, "Failed to register passkey"));
-    } finally {
-      registeringPasskey = false;
-    }
+  // Register a new passkey — redirects to login hub (single WebAuthn origin)
+  function handleRegisterPasskey(): void {
+    const returnUrl = encodeURIComponent(window.location.href);
+    window.location.href = `https://login.grove.place/passkey?redirect=${returnUrl}`;
   }
 
   // Delete a passkey
@@ -254,7 +241,6 @@
       passkeys={[]}
       passkeyError={false}
       {supportsPasskeys}
-      registering={false}
       deletingId={null}
       onRegister={handleRegisterPasskey}
       onDelete={handleDeletePasskey}
@@ -265,7 +251,6 @@
       passkeys={passkeyResult.passkeys}
       passkeyError={passkeyResult.error}
       {supportsPasskeys}
-      registering={registeringPasskey}
       deletingId={deletingPasskeyId}
       onRegister={handleRegisterPasskey}
       onDelete={handleDeletePasskey}
@@ -275,7 +260,6 @@
       passkeys={[]}
       passkeyError={true}
       {supportsPasskeys}
-      registering={false}
       deletingId={null}
       onRegister={handleRegisterPasskey}
       onDelete={handleDeletePasskey}

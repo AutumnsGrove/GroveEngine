@@ -3,7 +3,8 @@
  *
  * DELETE /api/passkey/[id] - Delete a specific passkey
  *
- * This endpoint proxies to GroveAuth's passkey delete endpoint.
+ * This endpoint proxies to GroveAuth's passkey delete endpoint
+ * via service binding (Worker-to-Worker, never public internet).
  */
 
 import { json } from "@sveltejs/kit";
@@ -29,46 +30,45 @@ export const DELETE: RequestHandler = async ({
     throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
+  // Collect all session cookies
   const groveSession = cookies.get("grove_session");
-  const accessToken = cookies.get("access_token");
+  const betterAuthSession =
+    cookies.get("__Secure-better-auth.session_token") ||
+    cookies.get("better-auth.session_token");
 
-  if (!groveSession && !accessToken) {
+  if (!groveSession && !betterAuthSession) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  try {
-    let response: Response;
-    const requestBody = JSON.stringify({ passkeyId });
+  if (!platform?.env?.AUTH) {
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, {
+      detail: "AUTH service binding not available",
+    });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
+  }
 
-    if (groveSession && platform?.env?.AUTH) {
-      // Use service binding with grove_session
-      response = await platform.env.AUTH.fetch(
-        `${AUTH_HUB_URL}/api/auth/passkey/delete-passkey`,
-        {
-          method: "POST",
-          headers: {
-            Cookie: `grove_session=${groveSession}`,
-            "Content-Type": "application/json",
-          },
-          body: requestBody,
-        },
-      );
-    } else if (accessToken) {
-      // Fallback to direct fetch with access_token
-      response = await fetch(
-        `${AUTH_HUB_URL}/api/auth/passkey/delete-passkey`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: requestBody,
-        },
-      );
-    } else {
-      throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+  try {
+    // Build Cookie header with all available session cookies
+    const cookieParts: string[] = [];
+    if (groveSession) {
+      cookieParts.push(`grove_session=${groveSession}`);
     }
+    if (betterAuthSession) {
+      cookieParts.push(`better-auth.session_token=${betterAuthSession}`);
+    }
+
+    // Use service binding — Worker-to-Worker, never public internet
+    const response = await platform.env.AUTH.fetch(
+      `${AUTH_HUB_URL}/api/auth/passkey/delete-passkey`,
+      {
+        method: "POST",
+        headers: {
+          Cookie: cookieParts.join("; "),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ passkeyId }),
+      },
+    );
 
     if (!response.ok) {
       const errorData = (await response.json().catch(() => ({}))) as {

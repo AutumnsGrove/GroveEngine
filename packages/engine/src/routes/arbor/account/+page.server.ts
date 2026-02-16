@@ -56,13 +56,19 @@ async function fetchUserPasskeys(
     groveSession?: string;
     betterAuthSession?: string;
   },
-  authBaseUrl: string,
+  platform: App.Platform | undefined,
 ): Promise<{ passkeys: Passkey[]; error: boolean }> {
   const { groveSession, betterAuthSession } = sessionCookies;
 
   // Need at least one session cookie
   if (!groveSession && !betterAuthSession) {
     return { passkeys: [], error: false };
+  }
+
+  // Need service binding to reach Heartwood
+  if (!platform?.env?.AUTH) {
+    console.error("[Account] AUTH service binding not available");
+    return { passkeys: [], error: true };
   }
 
   try {
@@ -77,8 +83,9 @@ async function fetchUserPasskeys(
       cookieParts.push(`better-auth.session_token=${betterAuthSession}`);
     }
 
-    const response = await fetch(
-      `${authBaseUrl}/api/auth/passkey/list-user-passkeys`,
+    // Use service binding — Worker-to-Worker, never public internet
+    const response = await platform.env.AUTH.fetch(
+      `${AUTH_HUB_URL}/api/auth/passkey/list-user-passkeys`,
       {
         headers: {
           Cookie: cookieParts.join("; "),
@@ -125,8 +132,6 @@ export const load: PageServerLoad = async ({
   const betterAuthSession =
     cookies.get("__Secure-better-auth.session_token") ||
     cookies.get("better-auth.session_token");
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
-
   // ISOLATED QUERIES: D1 queries and external API calls are separated
   // D1 queries (billing, tenant) are fast (~50ms) and critical for page render
   // Passkey fetch is an external API call that can be slower and is non-critical
@@ -140,7 +145,7 @@ export const load: PageServerLoad = async ({
   // Returned as deferred data - page renders immediately, passkeys stream in
   const passkeyPromise = fetchUserPasskeys(
     { groveSession, betterAuthSession },
-    authBaseUrl,
+    platform,
   );
 
   // Await critical D1 queries

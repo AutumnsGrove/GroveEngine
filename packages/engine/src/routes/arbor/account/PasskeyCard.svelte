@@ -7,7 +7,6 @@
     passkeys: Passkey[];
     passkeyError: boolean;
     supportsPasskeys: boolean;
-    registering: boolean;
     deletingId: string | null;
     onRegister: () => void;
     onDelete: (id: string) => void;
@@ -18,7 +17,6 @@
     passkeys,
     passkeyError,
     supportsPasskeys,
-    registering,
     deletingId,
     onRegister,
     onDelete,
@@ -96,17 +94,10 @@
         <Button
           variant="primary"
           onclick={onRegister}
-          disabled={registering}
-          aria-busy={registering}
-          aria-label={registering ? "Registering passkey..." : "Add your first passkey"}
+          aria-label="Add your first passkey"
         >
-          {#if registering}
-            <span aria-hidden="true"><Spinner size="sm" /></span>
-            Registering...
-          {:else}
-            <Plus class="btn-icon" aria-hidden="true" />
-            Add Your First Passkey
-          {/if}
+          <Plus class="btn-icon" aria-hidden="true" />
+          Add Your First Passkey
         </Button>
       {:else}
         <p class="not-supported">
@@ -154,17 +145,10 @@
         <Button
           variant="secondary"
           onclick={onRegister}
-          disabled={registering}
-          aria-busy={registering}
-          aria-label={registering ? "Registering passkey..." : "Add another passkey"}
+          aria-label="Add another passkey"
         >
-          {#if registering}
-            <span aria-hidden="true"><Spinner size="sm" /></span>
-            Registering...
-          {:else}
-            <Plus class="btn-icon" aria-hidden="true" />
-            Add Passkey
-          {/if}
+          <Plus class="btn-icon" aria-hidden="true" />
+          Add Passkey
         </Button>
       </div>
     {/if}
