@@ -43,7 +43,7 @@ function tabnabbingTransform(
  */
 function normalizeTagWhitespace(html: string): string {
   return html.replace(/<([^>]*)>/g, (_match, inner) => {
-    return "<" + inner.replace(/[\n\r\t]+/g, "") + ">";
+    return "<" + inner.replace(/[\n\r\t\x00\x0B\x0C]+/g, "") + ">";
   });
 }
 

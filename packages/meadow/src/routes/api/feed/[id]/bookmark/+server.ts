@@ -7,6 +7,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { toggleBookmark } from "$lib/server/bookmarks";
+import { validateUUID } from "@autumnsgrove/groveengine/utils/validation";
 import { createThreshold } from "@autumnsgrove/groveengine/threshold";
 import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
@@ -19,6 +20,17 @@ export const POST: RequestHandler = async ({ params, platform, locals }) => {
         error_description: "Please sign in to continue.",
       },
       { status: 401 },
+    );
+  }
+
+  if (!validateUUID(params.id)) {
+    return json(
+      {
+        error: "GROVE-API-040",
+        error_code: "INVALID_REQUEST_BODY",
+        error_description: "Invalid post ID format.",
+      },
+      { status: 400 },
     );
   }
 

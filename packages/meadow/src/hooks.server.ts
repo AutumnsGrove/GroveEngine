@@ -6,7 +6,6 @@
  */
 
 import type { Handle } from "@sveltejs/kit";
-import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/groveengine/utils";
 
 /**
@@ -25,7 +24,14 @@ export const handle: Handle = async ({ event, resolve }) => {
   // CSRF validation for state-changing requests
   if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
     if (!validateCSRF(event.request)) {
-      throw error(403, "Cross-site request blocked");
+      return new Response(
+        JSON.stringify({
+          error: "GROVE-API-030",
+          error_code: "CSRF_BLOCKED",
+          error_description: "Cross-site request blocked.",
+        }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      );
     }
   }
 
@@ -42,6 +48,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (sessionCookie && event.platform?.env?.AUTH) {
     try {
+      // URL is a routing identifier for the AUTH service binding (Worker-to-Worker).
+      // Traffic goes through the binding, not the public internet.
       const response = await event.platform.env.AUTH.fetch(
         "https://login.grove.place/session/validate",
         {

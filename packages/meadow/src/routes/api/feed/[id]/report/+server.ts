@@ -3,12 +3,13 @@
  *
  * POST /api/feed/[id]/report — Submit report { reason, details? }
  *
- * Auto-hide: if a post accumulates 3+ reports, set visible = 0.
+ * Auto-hide: if a post accumulates 5+ reports, set visible = 0.
  */
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { VALID_REPORT_REASONS } from "$lib/server/types";
+import { validateUUID } from "@autumnsgrove/groveengine/utils/validation";
 import { createThreshold } from "@autumnsgrove/groveengine/threshold";
 import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
@@ -32,6 +33,17 @@ export const POST: RequestHandler = async ({
   const db = platform?.env?.DB;
   if (!db) {
     return json({ error: "Service unavailable" }, { status: 503 });
+  }
+
+  if (!validateUUID(params.id)) {
+    return json(
+      {
+        error: "GROVE-API-040",
+        error_code: "INVALID_REQUEST_BODY",
+        error_description: "Invalid post ID format.",
+      },
+      { status: 400 },
+    );
   }
 
   // Rate limit — check early before parsing body or hitting DB
@@ -79,6 +91,23 @@ export const POST: RequestHandler = async ({
   const id = crypto.randomUUID();
 
   try {
+    // Verify the post exists before accepting a report
+    const post = await db
+      .prepare("SELECT id FROM meadow_posts WHERE id = ?")
+      .bind(params.id)
+      .first();
+
+    if (!post) {
+      return json(
+        {
+          error: "GROVE-API-044",
+          error_code: "NOT_FOUND",
+          error_description: "Post not found.",
+        },
+        { status: 404 },
+      );
+    }
+
     // Check for duplicate report from same user
     const existing = await db
       .prepare(
@@ -99,8 +128,9 @@ export const POST: RequestHandler = async ({
     }
 
     // Batch the INSERT + conditional auto-hide atomically.
-    // The UPDATE uses a subquery so the count reflects the newly inserted
-    // report — no race window between checking and acting.
+    // D1 batch() runs statements sequentially in a single transaction.
+    // The COUNT(*) subquery sees the row from the preceding INSERT,
+    // so there's no race window between checking and acting.
     await db.batch([
       db
         .prepare(
@@ -111,7 +141,7 @@ export const POST: RequestHandler = async ({
       db
         .prepare(
           `UPDATE meadow_posts SET visible = 0
-           WHERE id = ? AND (SELECT COUNT(*) FROM meadow_reports WHERE post_id = ?) >= 3`,
+           WHERE id = ? AND (SELECT COUNT(*) FROM meadow_reports WHERE post_id = ?) >= 5`,
         )
         .bind(params.id, params.id),
     ]);

@@ -2,18 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
-  "lastUpdated": "2026-02-12",
+  "lastUpdated": "2026-02-16",
   "lastAuditedBy": "claude/fix-waystone-inventory-CS8hN",
   "waystones": {
-    "total": 17,
+    "total": 20,
     "breakdown": {
-      "engine": 15,
+      "engine": 18,
       "login": 2,
       "landing": 0,
       "plant": 0,
       "meadow": 0
     },
-    "bySlugs": 13
+    "bySlugs": 14
   },
   "slugs": [
     {
@@ -181,6 +181,34 @@
           "label": "What's a passkey?",
           "placement": "auth-context",
           "size": "sm"
+        }
+      ]
+    },
+    {
+      "slug": "using-curios-in-content",
+      "usageCount": 3,
+      "instances": [
+        {
+          "file": "packages/engine/src/routes/arbor/garden/new/+page.svelte",
+          "line": 225,
+          "label": "Curio directives",
+          "placement": "inline-help",
+          "size": "sm"
+        },
+        {
+          "file": "packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte",
+          "line": 295,
+          "label": "Curio directives",
+          "placement": "inline-help",
+          "size": "sm"
+        },
+        {
+          "file": "packages/engine/src/routes/arbor/pages/edit/[slug]/+page.svelte",
+          "line": 191,
+          "label": "Curio directives",
+          "placement": "inline-help",
+          "size": "sm",
+          "inline": true
         }
       ]
     },

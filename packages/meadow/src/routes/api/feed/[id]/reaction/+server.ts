@@ -9,6 +9,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { addReaction, removeReaction } from "$lib/server/reactions";
 import { isValidReaction } from "$lib/constants/reactions";
+import { validateUUID } from "@autumnsgrove/groveengine/utils/validation";
 import { createThreshold } from "@autumnsgrove/groveengine/threshold";
 import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
@@ -26,6 +27,17 @@ export const POST: RequestHandler = async ({
         error_description: "Please sign in to continue.",
       },
       { status: 401 },
+    );
+  }
+
+  if (!validateUUID(params.id)) {
+    return json(
+      {
+        error: "GROVE-API-040",
+        error_code: "INVALID_REQUEST_BODY",
+        error_description: "Invalid post ID format.",
+      },
+      { status: 400 },
     );
   }
 
@@ -92,6 +104,17 @@ export const DELETE: RequestHandler = async ({
     );
   }
 
+  if (!validateUUID(params.id)) {
+    return json(
+      {
+        error: "GROVE-API-040",
+        error_code: "INVALID_REQUEST_BODY",
+        error_description: "Invalid post ID format.",
+      },
+      { status: 400 },
+    );
+  }
+
   const db = platform?.env?.DB;
   if (!db) {
     return json({ error: "Service unavailable" }, { status: 503 });
@@ -111,12 +134,12 @@ export const DELETE: RequestHandler = async ({
     );
   }
 
-  if (!body.emoji) {
+  if (!body.emoji || !isValidReaction(body.emoji)) {
     return json(
       {
-        error: "GROVE-API-041",
-        error_code: "MISSING_REQUIRED_FIELDS",
-        error_description: "Emoji is required.",
+        error: "GROVE-API-042",
+        error_code: "VALIDATION_FAILED",
+        error_description: "Invalid reaction emoji.",
       },
       { status: 400 },
     );
