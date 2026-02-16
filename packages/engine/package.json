@@ -41,6 +41,11 @@
       "svelte": "./dist/ui/index.js",
       "default": "./dist/ui/index.js"
     },
+    "./ui/editor": {
+      "types": "./dist/components/editor/index.d.ts",
+      "svelte": "./dist/components/editor/index.js",
+      "default": "./dist/components/editor/index.js"
+    },
     "./ui/arbor": {
       "types": "./dist/ui/components/arbor/index.d.ts",
       "svelte": "./dist/ui/components/arbor/index.js",
@@ -425,6 +430,14 @@
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@react-email/components": "^1.0.7",
     "@react-email/render": "^2.0.4",
+    "@tiptap/core": "^3.19.0",
+    "@tiptap/extension-bubble-menu": "^3.19.0",
+    "@tiptap/extension-character-count": "^3.19.0",
+    "@tiptap/extension-image": "^3.19.0",
+    "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/extension-underline": "^3.19.0",
+    "@tiptap/pm": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
     "clsx": "^2.1.1",
     "dom-to-image-more": "^3.7.2",
     "dompurify": "^3.3.1",
@@ -435,6 +448,7 @@
     "resend": "^4.8.0",
     "sanitize-html": "^2.17.0",
     "svelte-sonner": "^1.0.7",
+    "svelte-tiptap": "^3.0.1",
     "tailwind-merge": "^3.4.0"
   }
 }

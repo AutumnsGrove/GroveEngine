@@ -452,6 +452,8 @@
 					spec: '/knowledge/specs/meadow-spec',
 					whatIsLink: '/knowledge/help/what-is-meadow',
 					subComponents: [
+						{ name: 'Notes', icon: 'penline', description: 'Short-form posts', href: '/knowledge/help/what-are-notes' },
+						{ name: 'Blooms', icon: 'cherry', description: 'RSS syndicated posts', href: '/knowledge/help/what-are-blooms' },
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
 						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first sharing' }

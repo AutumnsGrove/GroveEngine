@@ -22,10 +22,15 @@
 
   const { post, onvote, onbookmark, onreact }: Props = $props();
 
+  const isNote = $derived(post.postType === "note");
   const relativeTime = $derived(formatRelativeTime(post.publishedAt));
-  const authorUrl = $derived(`https://${post.authorSubdomain}.grove.place`);
+  const authorUrl = $derived(
+    post.authorSubdomain
+      ? `https://${post.authorSubdomain}.grove.place`
+      : null,
+  );
   const displayTags = $derived(post.tags.slice(0, 4));
-  const hasImage = $derived(!!post.featuredImage);
+  const hasImage = $derived(!isNote && !!post.featuredImage);
 </script>
 
 <article
@@ -33,23 +38,39 @@
 >
   <!-- Author header -->
   <div class="flex items-center gap-3 px-5 pt-4 pb-2">
-    <a
-      href={authorUrl}
-      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
-      aria-label="Visit {post.authorName || post.authorSubdomain}'s site"
-    >
-      {(post.authorName || post.authorSubdomain).charAt(0).toUpperCase()}
-    </a>
-    <div class="min-w-0 flex-1">
+    {#if authorUrl}
       <a
         href={authorUrl}
-        class="block truncate text-sm font-medium text-foreground hover:underline"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+        aria-label="Visit {post.authorName || post.authorSubdomain}'s site"
       >
-        {post.authorName || post.authorSubdomain}
+        {(post.authorName || post.authorSubdomain || "?").charAt(0).toUpperCase()}
       </a>
+    {:else}
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+      >
+        {(post.authorName || "?").charAt(0).toUpperCase()}
+      </div>
+    {/if}
+    <div class="min-w-0 flex-1">
+      {#if authorUrl}
+        <a
+          href={authorUrl}
+          class="block truncate text-sm font-medium text-foreground hover:underline"
+        >
+          {post.authorName || post.authorSubdomain}
+        </a>
+      {:else}
+        <span class="block truncate text-sm font-medium text-foreground">
+          {post.authorName || "A wanderer"}
+        </span>
+      {/if}
       <div class="flex items-center gap-1.5 text-xs text-foreground-muted">
-        <span>{post.authorSubdomain}.grove.place</span>
-        <span aria-hidden="true">&middot;</span>
+        {#if post.authorSubdomain}
+          <span>{post.authorSubdomain}.grove.place</span>
+          <span aria-hidden="true">&middot;</span>
+        {/if}
         <time datetime={new Date(post.publishedAt * 1000).toISOString()}>
           {relativeTime}
         </time>
@@ -58,37 +79,53 @@
   </div>
 
   <!-- Content area -->
-  <div class="px-5 py-3">
-    <h3 class="mb-1.5 text-lg font-semibold leading-snug">
-      <a
-        href={post.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-foreground hover:text-grove-600 hover:underline dark:hover:text-grove-400"
-        aria-label="{post.title} (opens in new tab)"
-      >
-        {post.title}
+  {#if isNote}
+    <!-- Note: rich HTML or plain text body -->
+    <div class="px-5 py-3">
+      <a href="/feed/{post.id}" class="block hover:text-foreground/80">
+        {#if post.contentHtml}
+          <div class="prose prose-sm prose-grove max-w-none dark:prose-invert">
+            {@html post.contentHtml}
+          </div>
+        {:else}
+          <p class="text-base leading-relaxed text-foreground">{post.body}</p>
+        {/if}
       </a>
-    </h3>
-
-    {#if post.description}
-      <p class="line-clamp-3 text-sm leading-relaxed text-foreground-muted">
-        {post.description}
-      </p>
-    {/if}
-  </div>
-
-  <!-- Featured image -->
-  {#if hasImage}
-    <div class="px-5 pb-3">
-      <img
-        src={post.featuredImage}
-        alt=""
-        class="w-full rounded-lg object-cover"
-        style="max-height: 280px;"
-        loading="lazy"
-      />
     </div>
+  {:else}
+    <!-- Bloom: title + description + optional image -->
+    <div class="px-5 py-3">
+      <h3 class="mb-1.5 text-lg font-semibold leading-snug">
+        <a
+          href={post.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-foreground hover:text-grove-600 hover:underline dark:hover:text-grove-400"
+          aria-label="{post.title} (opens in new tab)"
+        >
+          {post.title}
+        </a>
+      </h3>
+
+      {#if post.description}
+        <p class="line-clamp-3 text-sm leading-relaxed text-foreground-muted">
+          {post.description}
+        </p>
+      {/if}
+    </div>
+
+    <!-- Featured image -->
+    {#if hasImage}
+      <div class="px-5 pb-3">
+        <img
+          src={post.featuredImage}
+          alt=""
+          class="w-full rounded-lg object-cover"
+          style="max-height: 280px;"
+          loading="lazy"
+        />
+      </div>
+    {/if}
   {/if}
 
   <!-- Tags -->

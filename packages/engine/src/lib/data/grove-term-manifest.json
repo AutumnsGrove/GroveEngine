@@ -305,6 +305,21 @@
     ],
     "standardTerm": "Community Feed"
   },
+  "notes": {
+    "slug": "notes",
+    "term": "Notes",
+    "category": "content",
+    "tagline": "Short-Form Posts",
+    "definition": "Quick thoughts you leave in the Meadow. Short-form posts, up to 500 characters, written directly on the community feed.",
+    "usageExample": "\"I left a note in the meadow.\"\n\"Her notes are always worth reading.\"",
+    "seeAlso": [
+      "blooms",
+      "flow",
+      "canopy",
+      "meadow"
+    ],
+    "standardTerm": "Posts / Status Updates"
+  },
   "forests": {
     "slug": "forests",
     "term": "Forests",
@@ -723,8 +738,8 @@
     "seeAlso": [
       "lattice",
       "flow",
-      "canopy",
-      "wander"
+      "meadow",
+      "notes"
     ],
     "standardTerm": "Sidebar Links"
   }

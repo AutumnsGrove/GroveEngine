@@ -476,6 +476,8 @@ const GROVE_CONCEPTS: string[] = [
   "leaves",
   "grove-keeper",
   "grovekeeper",
+  "note",
+  "notes",
 ];
 
 // =============================================================================

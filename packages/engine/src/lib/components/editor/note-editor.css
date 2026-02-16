@@ -1,0 +1,107 @@
+/**
+ * NoteEditor — ProseMirror styles for the meadow note editor.
+ *
+ * Targets the .note-editor container with styles that match
+ * the existing textarea aesthetic: transparent bg, no outline,
+ * typography consistent with Grove's text-base leading-relaxed.
+ */
+
+.note-editor .tiptap {
+  outline: none;
+  min-height: 4.5rem; /* ~3 lines */
+  max-height: 20rem;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.625;
+}
+
+.note-editor .tiptap p {
+  margin: 0;
+}
+
+.note-editor .tiptap p + p {
+  margin-top: 0.5rem;
+}
+
+/* Headings */
+.note-editor .tiptap h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.note-editor .tiptap h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.note-editor .tiptap h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Lists */
+.note-editor .tiptap ul,
+.note-editor .tiptap ol {
+  padding-left: 1.5rem;
+  margin: 0.25rem 0;
+}
+
+.note-editor .tiptap li {
+  margin: 0.125rem 0;
+}
+
+/* Blockquote */
+.note-editor .tiptap blockquote {
+  border-left: 3px solid rgb(var(--grove-300, 134 239 172));
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  opacity: 0.85;
+}
+
+/* Horizontal rule */
+.note-editor .tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 0.75rem 0;
+}
+
+:global(.dark) .note-editor .tiptap hr {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Images */
+.note-editor .tiptap img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Placeholder */
+.note-editor .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Strong/em in note context */
+.note-editor .tiptap strong {
+  font-weight: 600;
+}
+
+/* Links */
+.note-editor .tiptap a {
+  color: rgb(var(--grove-600, 22 163 74));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
