@@ -19,12 +19,12 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import {
-  getEndpointLimitByKey,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/index.js";
 import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import {
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
+import { getEndpointLimitByKey } from "$lib/threshold/config.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -83,12 +83,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     const threshold = createThreshold(platform?.env);
     if (threshold) {
-      const denied = await thresholdCheck(threshold, {
+      const { result, response } = await thresholdCheckWithResult(threshold, {
         key: `export-zip:${tenantId}`,
         limit: RATE_LIMIT.limit,
         windowSeconds: RATE_LIMIT.windowSeconds,
       });
-      if (denied) return denied;
+      if (response) return response;
+      rateLimitResult = result;
     }
 
     // Check for in-progress export
@@ -107,7 +108,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         },
         {
           status: 409,
-          headers: rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit),
+          headers: thresholdHeaders(rateLimitResult, RATE_LIMIT.limit),
         },
       );
     }
@@ -201,7 +202,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     return json(
       { exportId, status: "pending" },
       {
-        headers: rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit),
+        headers: thresholdHeaders(rateLimitResult, RATE_LIMIT.limit),
       },
     );
   } catch (err) {
