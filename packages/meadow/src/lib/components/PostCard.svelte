@@ -80,10 +80,16 @@
 
   <!-- Content area -->
   {#if isNote}
-    <!-- Note: body is the content -->
+    <!-- Note: rich HTML or plain text body -->
     <div class="px-5 py-3">
-      <a href="/feed/{post.id}" class="block text-base leading-relaxed text-foreground hover:text-foreground/80">
-        {post.body}
+      <a href="/feed/{post.id}" class="block hover:text-foreground/80">
+        {#if post.contentHtml}
+          <div class="prose prose-sm prose-grove max-w-none dark:prose-invert">
+            {@html post.contentHtml}
+          </div>
+        {:else}
+          <p class="text-base leading-relaxed text-foreground">{post.body}</p>
+        {/if}
       </a>
     </div>
   {:else}

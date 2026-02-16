@@ -165,9 +165,15 @@
     </div>
 
     {#if isNote}
-      <!-- Note content -->
+      <!-- Note content: rich HTML or plain text -->
       <div class="px-6 pb-6">
-        <p class="text-lg leading-relaxed text-foreground whitespace-pre-wrap">{post.body}</p>
+        {#if post.contentHtml}
+          <div class="prose prose-grove dark:prose-invert max-w-none">
+            {@html post.contentHtml}
+          </div>
+        {:else}
+          <p class="text-lg leading-relaxed text-foreground whitespace-pre-wrap">{post.body}</p>
+        {/if}
       </div>
     {:else}
       <!-- Bloom: Title + Content HTML -->

@@ -7,10 +7,11 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createNote } from "$lib/server/notes";
+import { sanitizeNoteHtml } from "$lib/server/sanitize";
 import { createThreshold } from "@autumnsgrove/groveengine/threshold";
 import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
-const MAX_BODY_LENGTH = 500;
+const MAX_BODY_LENGTH = 1000;
 const MAX_TAGS = 5;
 const MAX_TAG_LENGTH = 30;
 
@@ -44,7 +45,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Parse and validate body
-  let payload: { body?: string; tags?: string[] };
+  let payload: { body?: string; content_html?: string; tags?: string[] };
   try {
     payload = await request.json();
   } catch {
@@ -75,12 +76,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .slice(0, MAX_TAGS);
   }
 
+  // Sanitize content_html if provided
+  const contentHtml =
+    typeof payload.content_html === "string"
+      ? sanitizeNoteHtml(payload.content_html)
+      : null;
+
   const post = await createNote(
     db,
     locals.user.id,
     locals.user.name ?? null,
     body,
     tags,
+    contentHtml,
   );
 
   return json({ success: true, post }, { status: 201 });

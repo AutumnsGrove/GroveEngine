@@ -2,15 +2,15 @@
  * Notes Service — Create and delete native short-form posts.
  *
  * Notes are words left in the meadow for others to find.
- * Up to 500 characters, no title, no external link.
+ * Up to 1000 characters, optional rich text (content_html), no title, no external link.
  */
 
 import type { MeadowPost } from "$lib/types/post";
-import type { PostRow } from "./types";
-import { rowToPost } from "./types";
 
 /**
  * Create a new Note in the meadow.
+ *
+ * @param contentHtml - Sanitized HTML from the NoteEditor (null for plain-text notes)
  */
 export async function createNote(
   db: D1Database,
@@ -18,6 +18,7 @@ export async function createNote(
   authorName: string | null,
   body: string,
   tags?: string[],
+  contentHtml?: string | null,
 ): Promise<MeadowPost> {
   const id = crypto.randomUUID();
   const guid = `note:${id}`;
@@ -31,7 +32,7 @@ export async function createNote(
          author_name, author_subdomain, tags, featured_image,
          published_at, score, reaction_counts, visible,
          post_type, user_id, body)
-      VALUES (?, NULL, ?, '', '', NULL, '',
+      VALUES (?, NULL, ?, '', '', ?, '',
               ?, '', ?, NULL,
               ?, 0, '{}', 1,
               'note', ?, ?)`,
@@ -39,6 +40,7 @@ export async function createNote(
     .bind(
       id,
       guid,
+      contentHtml ?? null,
       authorName,
       JSON.stringify(tags || []),
       now,
@@ -59,7 +61,7 @@ export async function createNote(
     tags: tags || [],
     featuredImage: null,
     publishedAt: now,
-    contentHtml: null,
+    contentHtml: contentHtml ?? null,
     body: trimmedBody,
     userId,
     userVoted: false,

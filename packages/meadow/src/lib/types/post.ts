@@ -16,7 +16,7 @@ export interface MeadowPost {
   featuredImage: string | null;
   publishedAt: number; // Unix seconds
   contentHtml: string | null;
-  /** Plain-text body for Notes (up to 500 chars) */
+  /** Plain-text body for Notes (up to 1000 chars) */
   body: string | null;
   /** Heartwood user ID for Notes authors */
   userId: string | null;

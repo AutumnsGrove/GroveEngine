@@ -2,47 +2,68 @@
   ComposeBox — Leave a note in the meadow.
 
   Collapsed: a single-line glass prompt.
-  Expanded: textarea with character counter, optional tags, submit button.
+  Expanded: NoteEditor with character counter, optional tags, submit button.
   Wires to POST /api/notes, emits oncreated with the new post.
 -->
 <script lang="ts">
   import type { MeadowPost } from "$lib/types/post";
+  import { NoteEditor } from "@autumnsgrove/groveengine/ui/editor";
+  import { uploadNoteImage } from "$lib/utils/note-upload";
 
   interface Props {
     userName: string | null;
+    /** Whether user has a grove (tenant) — enables image uploads */
+    hasGrove?: boolean;
     oncreated: (post: MeadowPost) => void;
   }
 
-  const { userName, oncreated }: Props = $props();
+  const { userName, hasGrove = false, oncreated }: Props = $props();
 
-  const MAX_BODY = 500;
-  const WARN_AT = 450;
+  const MAX_BODY = 1000;
+  const WARN_AT = 900;
   const MAX_TAGS = 5;
 
   let expanded = $state(false);
-  let body = $state("");
+  let html = $state("");
+  let text = $state("");
+  let charCount = $state(0);
   let tagInput = $state("");
   let tags = $state<string[]>([]);
   let submitting = $state(false);
   let errorMsg = $state<string | null>(null);
+  let noteEditor: ReturnType<typeof NoteEditor> | undefined = $state();
 
-  const charCount = $derived(body.length);
   const isOverLimit = $derived(charCount > MAX_BODY);
   const isNearLimit = $derived(charCount >= WARN_AT && !isOverLimit);
   const canSubmit = $derived(
-    body.trim().length > 0 && !isOverLimit && !submitting,
+    text.trim().length > 0 && !isOverLimit && !submitting,
   );
 
   function expand() {
     expanded = true;
+    // Focus the editor after DOM updates
+    requestAnimationFrame(() => noteEditor?.focus());
   }
 
   function collapse() {
     expanded = false;
-    body = "";
+    html = "";
+    text = "";
+    charCount = 0;
     tags = [];
     tagInput = "";
     errorMsg = null;
+    noteEditor?.clearContent();
+  }
+
+  function handleEditorUpdate(
+    newHtml: string,
+    newText: string,
+    newCharCount: number,
+  ) {
+    html = newHtml;
+    text = newText;
+    charCount = newCharCount;
   }
 
   function addTag() {
@@ -69,6 +90,10 @@
     submitting = true;
     errorMsg = null;
 
+    // Determine if note has any rich content beyond plain text
+    const hasRichContent =
+      html !== `<p>${text}</p>` && html !== "<p></p>" && html.trim() !== "";
+
     try {
       const res = await fetch("/api/notes", {
         // csrf-ok
@@ -76,15 +101,21 @@
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          body: body.trim(),
+          body: text.trim(),
+          content_html: hasRichContent ? html : undefined,
           tags: tags.length > 0 ? tags : undefined,
         }),
       });
 
       if (!res.ok) {
-        const errData = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        const errData = (await res.json().catch(() => ({}))) as Record<
+          string,
+          unknown
+        >;
         errorMsg =
-          (typeof errData.error_description === 'string' ? errData.error_description : null) || "Something went wrong. Try again?";
+          (typeof errData.error_description === "string"
+            ? errData.error_description
+            : null) || "Something went wrong. Try again?";
         return;
       }
 
@@ -128,19 +159,15 @@
           {(userName || "?").charAt(0).toUpperCase()}
         </div>
         <div class="min-w-0 flex-1">
-          <textarea
-            class="w-full resize-none rounded-lg border-0 bg-transparent p-0 text-base leading-relaxed text-foreground placeholder:text-foreground-muted/60 focus:ring-0 focus:outline-none"
+          <NoteEditor
+            bind:this={noteEditor}
+            onupdate={handleEditorUpdate}
+            onsubmit={submit}
             placeholder="What's on your mind?"
-            rows="3"
-            maxlength={MAX_BODY + 50}
-            bind:value={body}
-            onkeydown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                submit();
-              }
-            }}
-          ></textarea>
+            maxChars={MAX_BODY}
+            uploadsEnabled={hasGrove}
+            uploadImage={hasGrove ? uploadNoteImage : undefined}
+          />
 
           <!-- Character counter -->
           <div class="mt-1 flex items-center justify-between">
@@ -202,7 +229,7 @@
             </button>
             <button
               type="button"
-              class="rounded-lg bg-grove-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-grove-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-grove-500 dark:hover:bg-grove-600"
+              class="rounded-lg bg-grove-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-grove-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-grove-500 dark:hover:bg-grove-600"
               disabled={!canSubmit}
               onclick={submit}
             >
