@@ -142,7 +142,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const db = platform!.env!.DB;
   const images = platform!.env!.IMAGES;
   const kv = platform!.env!.CACHE_KV;
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
 
   // Rate limit uploads (fail-closed to prevent storage abuse)
   if (threshold) {

@@ -118,7 +118,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   // Rate limit generation (admin-only, tenant pays via BYOK)
   // Limit is generous since this is an admin endpoint and costs are borne by the tenant
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
       key: `ai/timeline-generate:${user.id}`,

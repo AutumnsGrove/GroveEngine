@@ -36,7 +36,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit content creation to prevent spam
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
       key: `pages/create:${locals.user.id}`,

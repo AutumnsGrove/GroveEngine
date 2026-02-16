@@ -179,7 +179,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limiting using Threshold (fail-closed to prevent cost overruns)
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (!threshold) {
     // Fail closed: AI operations are expensive, so we reject if we can't enforce limits
     logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);

@@ -149,7 +149,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Check rate limit after size validation (so oversized exports don't consume quota)
     // Uses Threshold SDK from $lib/threshold
-    const threshold = createThreshold(platform?.env);
+    const threshold = createThreshold(platform?.env, {
+      identifier: locals.user?.id,
+    });
     let rateLimitResult = {
       allowed: true,
       remaining: EXPORT_RATE_LIMIT.limit,

@@ -195,7 +195,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limiting (fail-closed for AI operations)
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (!threshold) {
     logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
     return json(

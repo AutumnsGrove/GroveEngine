@@ -68,7 +68,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const images = platform!.env!.IMAGES;
 
   // Rate limit: 5 uploads per hour per user
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (threshold) {
     const { result, response } = await thresholdCheckWithResult(threshold, {
       key: `avatar/upload:${locals.user.id}`,

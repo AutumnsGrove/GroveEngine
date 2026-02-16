@@ -68,7 +68,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit expensive AI operations (fail-closed - already validated above)
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user?.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
       key: `ai/analyze:${locals.user.id}`,

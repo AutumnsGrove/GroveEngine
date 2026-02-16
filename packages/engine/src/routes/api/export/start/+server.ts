@@ -81,7 +81,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       resetAt: 0,
     };
 
-    const threshold = createThreshold(platform?.env);
+    const threshold = createThreshold(platform?.env, {
+      identifier: locals.user?.id,
+    });
     if (threshold) {
       const { result, response } = await thresholdCheckWithResult(threshold, {
         key: `export-zip:${tenantId}`,
