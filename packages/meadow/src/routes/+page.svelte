@@ -19,7 +19,7 @@
 
 <SEO
 	title="Meadow — Social feed for Grove blogs"
-	description="A chronological feed connecting Grove blogs. No algorithms, no public metrics, no viral mechanics. Just authentic connection."
+	description="A chronological feed connecting Grove blogs. No algorithms, no public metrics, no viral mechanics. Now in early beta."
 	url="/"
 />
 
@@ -52,11 +52,11 @@
 		A chronological feed connecting Grove blogs. No algorithms deciding what you see. No public metrics breeding anxiety. Just people, sharing, in the order they posted.
 	</p>
 
-	<!-- Coming Soon Notice -->
+	<!-- Beta Notice -->
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">Meadow launches in Phase 3 —</span> After the blog engine is live and people are writing. For now, this is a glimpse of what's coming.
+				<span class="font-medium">Meadow is in early beta.</span> You can browse the feed, leave notes, react, and bookmark. Things may shift as we grow. Come say hi.
 			</p>
 		</div>
 	</div>
@@ -173,39 +173,42 @@
 		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
-	<!-- Early Access Signup -->
+	<!-- Jump In -->
 	<section class="w-full max-w-md mb-12">
 		<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-4 text-center">
-			Join the waitlist
+			Come on in
 		</h2>
 		<p class="text-base text-foreground-muted font-sans text-center mb-6 leading-relaxed">
-			Be notified when Meadow launches. No spam, just a heads up when it's ready.
-		</p>
-		<EmailSignup />
-	</section>
-
-	<!-- Link to Grove -->
-	<div class="text-center mb-12">
-		<p class="text-foreground-muted text-base font-sans leading-relaxed mb-4">
-			While you're waiting, explore Grove
+			Meadow is open. Browse the feed, leave a note, react to something that resonates.
 		</p>
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
 			<a
-				href="https://grove.place"
+				href="/feed"
 				class="btn-primary inline-flex items-center gap-2 text-base"
 			>
-				Visit Grove
-				<Sprout class="w-4 h-4" />
+				Open the Feed
+				<ArrowRight class="w-4 h-4" />
 			</a>
 			<a
 				href="https://plant.grove.place"
 				class="btn-secondary inline-flex items-center gap-2 text-base"
 			>
 				Plant Your Blog
-				<ArrowRight class="w-4 h-4" />
+				<Sprout class="w-4 h-4" />
 			</a>
 		</div>
-	</div>
+	</section>
+
+	<!-- Stay Updated -->
+	<section class="w-full max-w-md mb-12">
+		<h2 class="text-xl font-serif text-foreground mb-4 text-center">
+			Stay in the loop
+		</h2>
+		<p class="text-sm text-foreground-muted font-sans text-center mb-4 leading-relaxed">
+			Get notified about new features as Meadow grows.
+		</p>
+		<EmailSignup />
+	</section>
 </main>
 
 <Footer />
