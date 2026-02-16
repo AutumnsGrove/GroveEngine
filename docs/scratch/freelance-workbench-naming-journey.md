@@ -646,3 +646,284 @@ My pick: **"A book of beasts."**
 - No tech company has claimed this word
 - Immediately evocative — everyone knows what a bestiary is
 - The "best" in "bestiary" is a nice accident
+
+---
+
+## Correction: Bestiary Is a Book, Not a Room
+
+Autumn's feedback: "I don't think it's a PLACE though.
+We are describing my workshop. Not the contents. Yes, we
+will have a bestiary within the workshop. But that's not
+what it's called."
+
+She's right. The Bestiary is a book on the shelf. Not the
+shelf. Not the room. Not the workshop. The Raven lives in
+the Bestiary as an entry. But the Bestiary itself lives
+INSIDE the workshop. We need the ROOM.
+
+So Bestiary becomes the name for the internal catalog of
+animal skills — a perfect sub-concept. But the repo name
+is the SPACE that contains it.
+
+Back to the spaces. What is this room?
+
+---
+
+## Back to the Room
+
+What we know about this room:
+
+1. It's at the EDGE of the grove, facing outward
+2. The Wayfinder goes OUT from here to client codebases
+3. She comes BACK here with findings
+4. It contains:
+   - The Bestiary (animal skill catalog)
+   - Documents (agreement, proposal, cheat sheet, runbook)
+   - Archives (client records, quote history)
+   - Tools (calipers, instruments, precision equipment)
+5. It's where preparation happens BEFORE an engagement
+6. It's where processing happens AFTER an engagement
+7. It's HER space. Private. Personal. Professional.
+
+The feeling: You open the door. The room smells like
+old paper and linseed oil. Light comes through one tall
+window. A heavy wooden table dominates the center —
+scarred with use, stained with ink. On the table: an
+open book (the Bestiary), a brass compass, a half-drafted
+proposal. Shelves line the walls — scrolls, ledgers,
+specimen jars, labeled drawers. A cloak hangs by the
+door. Boots underneath. This is where you gear up before
+going into the forest. This is where you debrief when
+you come back.
+
+Now. What do you CALL that room?
+
+---
+
+## Renaissance Spaces (Serious Pass)
+
+**Bottega** — The master craftsperson's workshop. Where
+apprentices learn, where commissions are fulfilled, where
+the work happens. Da Vinci's bottega was legendary. The
+word is warm, Italian, three syllables (bot-TAY-ga).
+
+But: a bottega implies multiple people. A master and
+apprentices. Autumn works alone. Also, a bottega is where
+you BUILD things for clients who come to you. Autumn goes
+TO clients. The direction is reversed.
+
+**Studiolo** — A small private study room in an Italian
+Renaissance palace. The studiolo was personal, intimate,
+intellectual. Often decorated with trompe l'oeil paintings
+of books and instruments. It was where the duke or scholar
+retreated to THINK. To study. To prepare.
+
+Federico da Montefeltro's studiolo in Urbino is the most
+famous: walls covered in intricate wood inlay (intarsia)
+depicting books, musical instruments, armor, scientific
+tools — all rendered in perspective so they look real.
+A room designed to look like it's full of the tools of
+knowledge, even when they're illusions. The real tools
+were there too. But the room ITSELF was the statement:
+"This is who I am. These are my instruments."
+
+Studiolo. Four syllables (STOO-dee-OH-lo). Italian.
+Renaissance. Private. Intellectual. A room of one's own.
+
+Testing:
+
+- "Check the Studiolo." — Formal.
+- "I'm in the Studiolo preparing for the engagement." ✓
+  This one SINGS. Because that's what a studiolo IS.
+
+But: four syllables, Italian, might feel pretentious.
+And "studiolo" is uncommon enough that most people would
+need it explained. Not immediately evocative.
+
+**Scriptorium** — Where manuscripts were written and
+copied in medieval monasteries. Five syllables. And it
+implies copying, not original work. No.
+
+**Sanctum** — Sacred, private place. But comic book
+associations (Doctor Strange). And religious overtones.
+
+---
+
+## What About Nature-Workshop Hybrids?
+
+The Grove names things with nature words. Heartwood,
+Canopy, Meadow, Foliage. What if the workshop has a
+nature name? What natural structure serves as a private
+workspace at the edge of a forest?
+
+**Hollow** — A natural cavity in a tree or hillside.
+Animals shelter in hollows. Warm, protected, hidden.
+But: the word itself means "empty." And "Sleepy Hollow"
+dominates the association.
+
+**Den** — An animal's lair. Warm, cozy. But too generic.
+Used everywhere. `AutumnsGrove/Den` feels too small.
+
+**Lodge** — A shelter in the wilderness. Where a ranger
+stays. Strong, but implies communal space.
+
+**Holt** — An otter's den. Also Old English for "small
+wood." Beautiful but too obscure.
+
+**Hearth** — The fireplace at the center of a home.
+Medieval. Universally warm. But too close to "Heartwood"
+phonetically. And it's a part of a room, not the room.
+
+---
+
+## The Keep vs The Bottega
+
+Two finalists for "the room":
+
+**Keep** — The strongest tower in a castle. Where you
+KEEP things. The verb IS the noun. Clean. One syllable.
+But: too military. Too stone-and-iron. Not warm enough.
+
+**Bottega** — The master's workshop. Literally "workshop"
+in Italian. Three syllables. Da Vinci's actual workspace
+was called his bottega. THE word for a Renaissance
+craftsperson's professional home base.
+
+The apprentice concern is overblown — bottega just means
+workshop. The direction concern was wrong: Leonardo
+PREPARED in the bottega, then went TO patrons' courts.
+Exactly what Autumn does.
+
+The Bottega Veneta fashion brand association is weaker
+than the Codex/OpenAI overlap. Fashion and tech don't
+mix. Context disambiguates.
+
+---
+
+## The Room Is the Bottega
+
+Testing with intent:
+
+- "I'm in the Bottega preparing for the engagement." ✓
+- "The Bestiary is in the Bottega." ✓ ← Key sentence.
+  The book of beasts lives inside the workshop.
+- "Check the Bottega for the engagement runbook." ✓
+- "I updated the Bottega with new templates." ✓
+- "Open the Bottega and run the Raven." ✓
+
+`AutumnsGrove/Bottega` — three syllables (bot-TAY-ga).
+
+The Bottega contains:
+
+- The Bestiary (the catalog of animal skills)
+- The instruments (Osprey's estimation calipers)
+- The documents (agreement, proposal, cheat sheet)
+- The runbook (the engagement playbook)
+- The archives (client records, quotes)
+
+It IS the workshop. Not a metaphor. Not an analogy.
+The specific Renaissance Italian word for the kind of
+workshop where Da Vinci prepared his masterworks.
+
+The Bestiary lives in the Bottega.
+The instruments live in the Bottega.
+The documents live in the Bottega.
+The Wayfinder prepares in the Bottega.
+She ventures out. She returns. She annotates.
+The Bottega grows.
+
+```
+         At the edge of the grove,
+         facing outward...
+
+                🌲    🌲    🌲
+             🌲              🌲
+
+          ┌──────────────────────┐
+          │                      │
+    🕯️    │   B O T T E G A    │    🕯️
+          │                      │
+          │  📖 The Bestiary     │
+          │     (beasts within)  │
+          │                      │
+          │  📐 The Instruments  │
+          │     (Osprey's tools) │
+          │                      │
+          │  📜 The Documents    │
+          │     (agreement,      │
+          │      proposal,       │
+          │      runbook)        │
+          │                      │
+          │  📁 The Archives     │
+          │     (client records) │
+          │                      │
+          └───────┬──────────────┘
+                  │
+                  │  The Wayfinder
+                  │  ventures out
+                  ↓
+           client codebases
+```
+
+---
+
+## Why Bottega (Revisited)
+
+| Quality                     | Bottega   |
+| --------------------------- | --------- |
+| Means "workshop"            | literally |
+| Medieval/Renaissance        | YES       |
+| Da Vinci's actual workspace | YES       |
+| A PLACE (not a book/object) | YES       |
+| Can contain the Bestiary    | YES       |
+| Warm and inviting           | YES       |
+| Clean in tech namespace     | YES       |
+| Three syllables, musical    | YES       |
+| Private/personal            | YES       |
+| Facing outward              | YES       |
+
+Bottega Veneta concern: weaker than Codex/OpenAI.
+Different industries. Context makes it Grove's word.
+
+Naming pattern concern (Italian vs English): Lattice
+isn't a nature word either. And "Bottega" earns its
+place — it's THE word for this concept.
+
+---
+
+## The Full Picture
+
+```
+THE GROVE ECOSYSTEM
+
+  Heartwood ── Canopy ── Meadow ── Foliage
+  (identity)   (dir)     (social)   (themes)
+
+  Arbor ── Plant ── Pantry ── Terrarium
+  (admin)  (onboard) (shop)    (local dev)
+
+  ═══════════ LATTICE (framework) ═══════════
+
+       And at the edge, facing outward:
+
+       ┌─────────────────────────┐
+       │      BOTTEGA            │
+       │   The Wayfinder's       │
+       │   freelance workshop    │
+       │                         │
+       │   Contains:             │
+       │   · The Bestiary        │
+       │   · The Instruments     │
+       │   · The Documents       │
+       │   · The Archives        │
+       │                         │
+       └─────────────────────────┘
+              ↕
+        Client Codebases
+```
+
+**The Name:** Bottega
+**The Tagline:** "The master's workshop."
+**The Repo:** `AutumnsGrove/Bottega`
+**The Sub-concept:** The Bestiary (the catalog of beasts
+within the Bottega)
