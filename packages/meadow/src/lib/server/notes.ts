@@ -30,11 +30,11 @@ export async function createNote(
       `INSERT INTO meadow_posts
         (id, tenant_id, guid, title, description, content_html, link,
          author_name, author_subdomain, tags, featured_image,
-         published_at, score, reaction_counts, visible,
+         published_at, fetched_at, score, reaction_counts, visible,
          post_type, user_id, body)
-      VALUES (?, NULL, ?, '', '', ?, '',
+      VALUES (?, '', ?, '', '', ?, '',
               ?, '', ?, NULL,
-              ?, 0, '{}', 1,
+              ?, ?, 0, '{}', 1,
               'note', ?, ?)`,
     )
     .bind(
@@ -43,6 +43,7 @@ export async function createNote(
       contentHtml ?? null,
       authorName,
       JSON.stringify(tags || []),
+      now,
       now,
       userId,
       trimmedBody,
