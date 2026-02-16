@@ -319,7 +319,7 @@ describe("Image Upload Endpoint - Feature Flag", () => {
 
     expect(response.status).toBe(403);
     expect(data.error_code).toBe("GROVE-API-047");
-    expect(data.message).toContain("isn't enabled");
+    expect(data.error_description).toContain("isn't enabled");
   });
 });
 
