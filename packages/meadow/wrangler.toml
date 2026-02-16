@@ -23,4 +23,4 @@ preview_id = "fbf702e54358468d8ec767ca0bfc8c56"
 # Service binding to Heartwood auth service
 [[services]]
 binding = "AUTH"
-service = "grove-heartwood"
+service = "groveauth"
