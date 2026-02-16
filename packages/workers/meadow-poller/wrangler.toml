@@ -28,5 +28,5 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # =============================================================================
 [[kv_namespaces]]
 binding = "POLL_STATE"
-id = "meadow-poll-state-id"
-preview_id = "meadow-poll-state-preview-id"
+id = "8ff178985bab4cae85aaa31b85f2d479"
+preview_id = "ea29311b6e3c4fb88a605274469f35cd"
