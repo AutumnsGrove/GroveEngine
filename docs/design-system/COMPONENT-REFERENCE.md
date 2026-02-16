@@ -1,12 +1,13 @@
 ---
 title: Component Reference
-description: Complete catalog of Grove's 204 UI components
+description: Complete catalog of Grove's 236 UI components
 category: design
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-02-16"
 ---
+
 # Component Reference
 
-> 204 components organized by category, ready to help you build something beautiful.
+> 236 components organized by category, ready to help you build something beautiful.
 > Import from `@autumnsgrove/groveengine/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
@@ -16,19 +17,19 @@ This is your field guide to Grove's component library. Each component is designe
 ## Quick Links
 
 - [Import Patterns](#import-patterns)
-- [ui/ - Core UI Components](#ui---core-ui-components-42)
+- [ui/ - Core UI Components](#ui---core-ui-components-44)
 - [primitives/ - Headless Primitives](#primitives---headless-primitives-45)
 - [nature/ - Decorative Nature](#nature---decorative-nature-65)
 - [typography/ - Font Providers](#typography---font-providers-11)
-- [chrome/ - Layout Shell](#chrome---layout-shell-7)
+- [chrome/ - Layout Shell](#chrome---layout-shell-8)
 - [terrarium/ - Canvas Editor](#terrarium---canvas-editor-7)
 - [charts/ - Data Visualization](#charts---data-visualization-4)
-- [content/ - Content Display](#content---content-display-6)
+- [content/ - Content Display](#content---content-display-27)
 - [gallery/ - Image Galleries](#gallery---image-galleries-4)
 - [states/ - Loading & Empty States](#states---loading--empty-states-4)
 - [forms/ - Search & Input](#forms---search--input-3)
 - [indicators/ - Status & Progress](#indicators---status--progress-3)
-- [icons/ - Icon Components](#icons---icon-components-2)
+- [icons/ - Icon Components](#icons---icon-components-3)
 
 ---
 
@@ -58,26 +59,26 @@ Import from specific subpaths when you need several components from the same fam
 
 ### Available Import Paths
 
-| Path | What's Inside |
-|------|---------------|
-| `@autumnsgrove/groveengine/ui` | Core UI: Glass components, Button, Card, Dialog, etc. |
-| `@autumnsgrove/groveengine/ui/nature` | Trees, creatures, sky, weather, botanical elements |
-| `@autumnsgrove/groveengine/ui/chrome` | Header, Footer, MobileMenu, ThemeToggle |
-| `@autumnsgrove/groveengine/ui/typography` | Font provider components |
-| `@autumnsgrove/groveengine/ui/states` | Loading, EmptyState, skeletons |
-| `@autumnsgrove/groveengine/ui/forms` | SearchInput, ContentSearch, filter utilities |
-| `@autumnsgrove/groveengine/ui/charts` | Data visualization components |
-| `@autumnsgrove/groveengine/ui/content` | ProductCard, SearchCard, PlanCard |
-| `@autumnsgrove/groveengine/ui/gallery` | ImageGallery, Lightbox, ZoomableImage |
-| `@autumnsgrove/groveengine/ui/indicators` | StatusBadge, ScoreBar, CreditBalance |
-| `@autumnsgrove/groveengine/ui/icons` | Icon components and Lucide icon registries |
-| `@autumnsgrove/groveengine/ui/terrarium` | Canvas editor for nature scene composition |
-| `@autumnsgrove/groveengine/ui/utils` | Utilities like `cn()` for class merging |
-| `@autumnsgrove/groveengine/ui/stores` | `seasonStore`, `themeStore` for reactive state |
+| Path                                      | What's Inside                                         |
+| ----------------------------------------- | ----------------------------------------------------- |
+| `@autumnsgrove/groveengine/ui`            | Core UI: Glass components, Button, Card, Dialog, etc. |
+| `@autumnsgrove/groveengine/ui/nature`     | Trees, creatures, sky, weather, botanical elements    |
+| `@autumnsgrove/groveengine/ui/chrome`     | Header, Footer, MobileMenu, ThemeToggle               |
+| `@autumnsgrove/groveengine/ui/typography` | Font provider components                              |
+| `@autumnsgrove/groveengine/ui/states`     | Loading, EmptyState, skeletons                        |
+| `@autumnsgrove/groveengine/ui/forms`      | SearchInput, ContentSearch, filter utilities          |
+| `@autumnsgrove/groveengine/ui/charts`     | Data visualization components                         |
+| `@autumnsgrove/groveengine/ui/content`    | ProductCard, SearchCard, PlanCard, Curios, Hum cards  |
+| `@autumnsgrove/groveengine/ui/gallery`    | ImageGallery, Lightbox, ZoomableImage                 |
+| `@autumnsgrove/groveengine/ui/indicators` | StatusBadge, ScoreBar, CreditBalance                  |
+| `@autumnsgrove/groveengine/ui/icons`      | Icon components and Lucide icon registries            |
+| `@autumnsgrove/groveengine/ui/terrarium`  | Canvas editor for nature scene composition            |
+| `@autumnsgrove/groveengine/ui/utils`      | Utilities like `cn()` for class merging               |
+| `@autumnsgrove/groveengine/ui/stores`     | `seasonStore`, `themeStore` for reactive state        |
 
 ---
 
-## ui/ - Core UI Components (42)
+## ui/ - Core UI Components (44)
 
 The heart of Grove's visual language. These components implement our glassmorphism design system—translucent surfaces with gentle blur that let the forest peek through.
 
@@ -204,51 +205,51 @@ For moments that need a pause—destructive actions, important decisions.
 
 ### Other Glass Components
 
-| Component | Description |
-|-----------|-------------|
-| `Glass` | Base glassmorphism container—use for custom glass effects |
-| `GlassNavbar` | Navigation bar with glass styling |
-| `GlassOverlay` | Full-screen glass overlay for modals |
-| `GlassCarousel` | Image carousel with glass controls |
-| `GlassLegend` | Legend/key component with glass background |
-| `GlassLogo` | Logo with glass container |
-| `GlassLogoArchive` | Archived logo variant |
+| Component           | Description                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `Glass`             | Base glassmorphism container—use for custom glass effects                          |
+| `GlassNavbar`       | Navigation bar with glass styling                                                  |
+| `GlassOverlay`      | Full-screen glass overlay for modals                                               |
+| `GlassCarousel`     | Image carousel with glass controls                                                 |
+| `GlassLegend`       | Legend/key component with glass background                                         |
+| `GlassLogo`         | Logo with glass container                                                          |
+| `GlassLogoArchive`  | Archived logo variant                                                              |
 | `GlassStatusWidget` | Real-time status widget with auto-refresh—displays system health from The Clearing |
 
 ### Beta Program Components
 
 Components for beta tester onboarding, status display, and program enrollment. Reusable for any future beta programs.
 
-| Component | Description |
-|-----------|-------------|
-| `BetaBadge` | Inline pill badge with flask icon indicating beta program membership |
+| Component           | Description                                                                  |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `BetaBadge`         | Inline pill badge with flask icon indicating beta program membership         |
 | `BetaWelcomeDialog` | One-time welcome dialog for beta users with feedback link and warm messaging |
 
 ### Standard Components
 
 These wrap the primitives with Grove styling, ready to use out of the box.
 
-| Component | Description |
-|-----------|-------------|
-| `Button` | Standard button with variants |
-| `Card` | Content card container |
-| `Badge` | Small status indicators |
-| `FeatureStar` | Inline star indicator for key/featured items |
-| `Dialog` | Modal dialog wrapper |
-| `Input` | Text input field |
-| `Textarea` | Multi-line text input |
-| `Select` | Dropdown select |
-| `Tabs` | Tabbed interface |
-| `Accordion` | Collapsible content sections |
-| `Sheet` | Slide-out panel |
-| `Toast` | Notification toasts |
-| `Table` | Data tables (with sub-components) |
-| `Skeleton` | Loading placeholder |
-| `Spinner` | Loading spinner |
-| `CollapsibleSection` | Expandable section |
-| `Logo` | Grove tree logo (new design) |
-| `LogoLoader` | Logo with loading animation |
-| `LogoArchive` | Original asterisk logo |
+| Component            | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `Button`             | Standard button with variants                |
+| `Card`               | Content card container                       |
+| `Badge`              | Small status indicators                      |
+| `FeatureStar`        | Inline star indicator for key/featured items |
+| `Dialog`             | Modal dialog wrapper                         |
+| `Input`              | Text input field                             |
+| `Textarea`           | Multi-line text input                        |
+| `Select`             | Dropdown select                              |
+| `Tabs`               | Tabbed interface                             |
+| `Accordion`          | Collapsible content sections                 |
+| `Sheet`              | Slide-out panel                              |
+| `Toast`              | Notification toasts                          |
+| `Table`              | Data tables (with sub-components)            |
+| `Skeleton`           | Loading placeholder                          |
+| `Spinner`            | Loading spinner                              |
+| `CollapsibleSection` | Expandable section                           |
+| `Logo`               | Grove tree logo (new design)                 |
+| `LogoLoader`         | Logo with loading animation                  |
+| `LogoArchive`        | Original asterisk logo                       |
 
 ---
 
@@ -381,18 +382,18 @@ Table subcomponents are exported for flexible table composition:
 
 ### Available Wrapper Components
 
-| Component | What It Wraps | Exported From |
-|-----------|---------------|---------------|
-| `Accordion` | Collapsible content panels | `@autumnsgrove/groveengine/ui` |
-| `Dialog` | Modal dialogs | `@autumnsgrove/groveengine/ui` |
-| `Select` | Dropdown selection | `@autumnsgrove/groveengine/ui` |
-| `Sheet` | Slide-out panels | `@autumnsgrove/groveengine/ui` |
-| `Tabs` | Tabbed content | `@autumnsgrove/groveengine/ui` |
-| `Table` + subcomponents | Data tables | `@autumnsgrove/groveengine/ui` |
-| `Input` | Text input | `@autumnsgrove/groveengine/ui` |
-| `Textarea` | Multi-line input | `@autumnsgrove/groveengine/ui` |
-| `Badge` | Labels and tags | `@autumnsgrove/groveengine/ui` |
-| `Skeleton` | Loading placeholders | `@autumnsgrove/groveengine/ui` |
+| Component               | What It Wraps              | Exported From                  |
+| ----------------------- | -------------------------- | ------------------------------ |
+| `Accordion`             | Collapsible content panels | `@autumnsgrove/groveengine/ui` |
+| `Dialog`                | Modal dialogs              | `@autumnsgrove/groveengine/ui` |
+| `Select`                | Dropdown selection         | `@autumnsgrove/groveengine/ui` |
+| `Sheet`                 | Slide-out panels           | `@autumnsgrove/groveengine/ui` |
+| `Tabs`                  | Tabbed content             | `@autumnsgrove/groveengine/ui` |
+| `Table` + subcomponents | Data tables                | `@autumnsgrove/groveengine/ui` |
+| `Input`                 | Text input                 | `@autumnsgrove/groveengine/ui` |
+| `Textarea`              | Multi-line input           | `@autumnsgrove/groveengine/ui` |
+| `Badge`                 | Labels and tags            | `@autumnsgrove/groveengine/ui` |
+| `Skeleton`              | Loading placeholders       | `@autumnsgrove/groveengine/ui` |
 
 ---
 
@@ -403,13 +404,14 @@ This is where Grove comes alive. These SVG components create atmospheric forest 
 ### Season Support
 
 Most nature components accept a `season` prop that adapts their appearance:
+
 - **spring** - Fresh yellow-greens, cherry blossoms at peak bloom
 - **summer** - Lush greens, full foliage
 - **autumn** - Warm oranges, golds, and russet tones (default)
 - **winter** - Frosted evergreens, snow accents, bare deciduous trees
 - **midnight** - Special deep plum and amber palette
 
-**Season prop vs seasonStore:** Components automatically subscribe to `seasonStore` for their default season. The `season` prop is an *override*—use it when you want a component to stay fixed regardless of the global season. Internally, components use: `const activeSeason = $derived(season ?? $seasonStore)`.
+**Season prop vs seasonStore:** Components automatically subscribe to `seasonStore` for their default season. The `season` prop is an _override_—use it when you want a component to stay fixed regardless of the global season. Internally, components use: `const activeSeason = $derived(season ?? $seasonStore)`.
 
 ```svelte
 <script>
@@ -604,26 +606,26 @@ The nature module exports a comprehensive seasonal color system:
 
 ```typescript
 import {
-  greens,        // Forest greens from dark to pale
-  bark,          // Tree trunk browns
-  earth,         // Soil and stone tones
-  autumn,        // Fall foliage colors
-  winter,        // Snow, frost, and frosted greens
-  flowers,       // Wildflower and cherry blossom colors
-  accents,       // Creature colors, mushrooms, berries
-  getSeasonalGreens,  // Helper for seasonal foliage
-  getCherryColors,    // Helper for cherry tree colors
-  type Season
-} from '@autumnsgrove/groveengine/ui/nature';
+  greens, // Forest greens from dark to pale
+  bark, // Tree trunk browns
+  earth, // Soil and stone tones
+  autumn, // Fall foliage colors
+  winter, // Snow, frost, and frosted greens
+  flowers, // Wildflower and cherry blossom colors
+  accents, // Creature colors, mushrooms, berries
+  getSeasonalGreens, // Helper for seasonal foliage
+  getCherryColors, // Helper for cherry tree colors
+  type Season,
+} from "@autumnsgrove/groveengine/ui/nature";
 ```
 
 ### Other Nature Components
 
-| Component | Description |
-|-----------|-------------|
-| `Logo` | The Grove tree logo (re-exported from ui/) |
-| `LogoArchive` | Original asterisk logo with nature animations |
-| `GroveDivider` | Decorative divider with alternating logos |
+| Component      | Description                                   |
+| -------------- | --------------------------------------------- |
+| `Logo`         | The Grove tree logo (re-exported from ui/)    |
+| `LogoArchive`  | Original asterisk logo with nature animations |
+| `GroveDivider` | Decorative divider with alternating logos     |
 
 ---
 
@@ -665,18 +667,19 @@ Scoped font components that automatically load fonts and apply them to their chi
 | `FontProvider` | Dynamic | Programmatic font selection |
 
 **Font Utilities:**
+
 ```typescript
 import {
-  fonts,           // Array of all font definitions
-  fontById,        // Get font by ID
-  getFontUrl,      // Get CDN URL for a font
-  getFontsByCategory  // Filter fonts by category
-} from '@autumnsgrove/groveengine/ui/typography';
+  fonts, // Array of all font definitions
+  fontById, // Get font by ID
+  getFontUrl, // Get CDN URL for a font
+  getFontsByCategory, // Filter fonts by category
+} from "@autumnsgrove/groveengine/ui/typography";
 ```
 
 ---
 
-## chrome/ - Layout Shell (7)
+## chrome/ - Layout Shell (8)
 
 The scaffolding that holds every Grove page together.
 
@@ -704,27 +707,29 @@ The scaffolding that holds every Grove page together.
 
 ### Components
 
-| Component | Description |
-|-----------|-------------|
-| `Header` | Sticky navigation with logo, nav links, theme toggle, mobile menu |
-| `HeaderMinimal` | Simplified header for focused pages |
-| `Footer` | Site footer with links |
-| `FooterMinimal` | Compact footer |
-| `MobileMenu` | Slide-out menu for mobile navigation |
-| `ThemeToggle` | Light/dark mode toggle button |
+| Component       | Description                                                       |
+| --------------- | ----------------------------------------------------------------- |
+| `Header`        | Sticky navigation with logo, nav links, theme toggle, mobile menu |
+| `HeaderMinimal` | Simplified header for focused pages                               |
+| `Footer`        | Site footer with links                                            |
+| `FooterMinimal` | Compact footer                                                    |
+| `MobileMenu`    | Slide-out menu for mobile navigation                              |
+| `ThemeToggle`   | Light/dark mode toggle button                                     |
+| `AccountStatus` | Displays user login status and account actions                    |
+| `AdminHeader`   | Header variant for Arbor admin pages                              |
 
 ### Stores
 
 ```typescript
-import { seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/stores';
+import { seasonStore, themeStore } from "@autumnsgrove/groveengine/ui/stores";
 
 // Season store
-$seasonStore // Current season: 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight'
-seasonStore.cycle() // Advance to next season
-seasonStore.set('autumn') // Set specific season
+$seasonStore; // Current season: 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight'
+seasonStore.cycle(); // Advance to next season
+seasonStore.set("autumn"); // Set specific season
 
 // Theme store
-$themeStore // Current theme: 'light' | 'dark'
+$themeStore; // Current theme: 'light' | 'dark'
 ```
 
 ---
@@ -743,15 +748,15 @@ A creative playground where users compose nature scenes by dragging and dropping
 
 ### Components
 
-| Component | Description |
-|-----------|-------------|
-| `Terrarium` | Main canvas editor (all-in-one) |
-| `Canvas` | The drawing surface |
-| `AssetPalette` | Draggable asset picker |
-| `PaletteItem` | Individual asset in palette |
-| `PlacedAssetComponent` | Rendered asset on canvas |
-| `Toolbar` | Canvas tools (select, pan, delete) |
-| `ExportDialog` | Export scene as PNG |
+| Component              | Description                        |
+| ---------------------- | ---------------------------------- |
+| `Terrarium`            | Main canvas editor (all-in-one)    |
+| `Canvas`               | The drawing surface                |
+| `AssetPalette`         | Draggable asset picker             |
+| `PaletteItem`          | Individual asset in palette        |
+| `PlacedAssetComponent` | Rendered asset on canvas           |
+| `Toolbar`              | Canvas tools (select, pan, delete) |
+| `ExportDialog`         | Export scene as PNG                |
 
 ### State & Utilities
 
@@ -763,8 +768,8 @@ import {
   type PlacedAsset,
   CANVAS_BACKGROUNDS,
   DEFAULT_SCENE,
-  exportSceneAsPNG
-} from '@autumnsgrove/groveengine/ui/terrarium';
+  exportSceneAsPNG,
+} from "@autumnsgrove/groveengine/ui/terrarium";
 ```
 
 ---
@@ -796,9 +801,9 @@ Simple, warm charts for displaying data without overwhelming.
 
 ---
 
-## content/ - Content Display (6)
+## content/ - Content Display (27)
 
-Cards for displaying structured content like products, plans, and search results.
+Cards, embeds, and interactive widgets for displaying structured content. Includes the Curio system (15 self-fetching embeddable widgets) and Hum system (5 rich link preview components).
 
 ```svelte
 <script>
@@ -828,6 +833,52 @@ Cards for displaying structured content like products, plans, and search results
 <RoadmapPreview items={roadmapItems} />
 ```
 
+### Base Content Components (7)
+
+| Component        | Description                               |
+| ---------------- | ----------------------------------------- |
+| `ProductCard`    | Product display card with features list   |
+| `PlanCard`       | Pricing plan card with feature comparison |
+| `SearchCard`     | Search result card with excerpt           |
+| `RoadmapPreview` | Roadmap display with status indicators    |
+| `FaqPage`        | FAQ page layout with accordion sections   |
+| `LinkPreview`    | Rich link preview with metadata           |
+| `EmbedWidget`    | Generic embed container                   |
+
+### Curio Components (15)
+
+Self-fetching embeddable widgets that bring indie web charm to any Grove page. Each curio fetches its own data from `/api/curios/*` and handles loading, error, and display states autonomously.
+
+| Component             | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| `CurioActivitystatus` | Inline emoji + text status indicator             |
+| `CurioAmbientLayer`   | Global ambient sounds player (site-wide, opt-in) |
+| `CurioArtifacts`      | Display collection of digital artifacts          |
+| `CurioBadges`         | Earned badge showcase grid                       |
+| `CurioBlogroll`       | Blog recommendations with favicons               |
+| `CurioBookmarkshelf`  | Organized bookmark shelves with covers           |
+| `CurioCursorsLayer`   | Global custom cursor overlay (site-wide)         |
+| `CurioGuestbook`      | Recent guestbook entries display                 |
+| `CurioHitcounter`     | Retro page visit counter (4 styles)              |
+| `CurioLinkgarden`     | Curated link collections by garden               |
+| `CurioMoodring`       | Current mood color ring display                  |
+| `CurioNowplaying`     | Currently playing track card                     |
+| `CurioPoll`           | Interactive poll with bar chart results          |
+| `CurioStatusbadges`   | Animated status badge row                        |
+| `CurioWebring`        | Classic webring navigation bar                   |
+
+### Hum Components (5)
+
+Rich link preview cards rendered by the markdown-hum plugin. Display metadata, platform icons, and fallback states for embedded URLs.
+
+| Component          | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| `HumCard`          | Rich link preview with title, description, and image |
+| `HumCardFallback`  | Graceful fallback when metadata unavailable          |
+| `HumCardSkeleton`  | Loading skeleton for async metadata fetch            |
+| `HumPlatformTray`  | Platform icon strip (GitHub, YouTube, etc.)          |
+| `HumProviderBadge` | Provider attribution badge                           |
+
 ---
 
 ## gallery/ - Image Galleries (4)
@@ -854,12 +905,12 @@ Beautiful ways to display images.
 <ZoomableImage src="/detailed-map.png" alt="Detailed trail map" />
 ```
 
-| Component | Description |
-|-----------|-------------|
-| `ImageGallery` | Grid layout with optional lightbox |
-| `Lightbox` | Full-screen image viewer with navigation |
-| `LightboxCaption` | Caption component for lightbox |
-| `ZoomableImage` | Single image with zoom capability |
+| Component         | Description                              |
+| ----------------- | ---------------------------------------- |
+| `ImageGallery`    | Grid layout with optional lightbox       |
+| `Lightbox`        | Full-screen image viewer with navigation |
+| `LightboxCaption` | Caption component for lightbox           |
+| `ZoomableImage`   | Single image with zoom capability        |
 
 ---
 
@@ -890,12 +941,12 @@ For those in-between moments.
 </EmptyState>
 ```
 
-| Component | Description |
-|-----------|-------------|
-| `Loading` | Full loading indicator with message |
-| `LoadingSkeleton` | Animated placeholder lines |
-| `EmptyState` | Friendly empty state with icon, title, description, action |
-| `ThemeToggle` | (Also exported here for convenience) |
+| Component         | Description                                                |
+| ----------------- | ---------------------------------------------------------- |
+| `Loading`         | Full loading indicator with message                        |
+| `LoadingSkeleton` | Animated placeholder lines                                 |
+| `EmptyState`      | Friendly empty state with icon, title, description, action |
+| `ThemeToggle`     | (Also exported here for convenience)                       |
 
 ---
 
@@ -927,15 +978,15 @@ Specialized form components.
 
 ```typescript
 import {
-  createTextFilter,       // Simple text match on one field
+  createTextFilter, // Simple text match on one field
   createMultiFieldFilter, // Match across multiple fields
-  createFuzzyFilter,      // Fuzzy/approximate matching
-  createDateFilter,       // Filter by date range
-  combineFilters          // Combine multiple filters
-} from '@autumnsgrove/groveengine/ui/forms';
+  createFuzzyFilter, // Fuzzy/approximate matching
+  createDateFilter, // Filter by date range
+  combineFilters, // Combine multiple filters
+} from "@autumnsgrove/groveengine/ui/forms";
 
 // Example: Search title and content
-const filter = createMultiFieldFilter(['title', 'content', 'tags']);
+const filter = createMultiFieldFilter(["title", "content", "tags"]);
 ```
 
 ---
@@ -962,7 +1013,7 @@ Visual indicators for status and progress.
 
 ---
 
-## icons/ - Icon Components (2)
+## icons/ - Icon Components (3)
 
 Grove uses [Lucide icons](https://lucide.dev) with semantic groupings and custom SVG components.
 
@@ -989,16 +1040,16 @@ Semantic groupings for consistent icon usage:
 
 ```typescript
 import {
-  navIcons,      // Navigation: home, menu, settings
-  stateIcons,    // States: loading, success, error
-  pricingIcons,  // Pricing: check, crown, sprout
-  featureIcons,  // Features: shield, download, rss
-  seasonIcons,   // Seasons: sun, leaf, snowflake, flower
-  actionIcons,   // Actions: plus, copy, trash, refresh
-  authIcons,     // Auth: fingerprint, key, link
-  getIcon,       // Get icon by semantic key
-  allIcons       // All icons in one map
-} from '@autumnsgrove/groveengine/ui/icons';
+  navIcons, // Navigation: home, menu, settings
+  stateIcons, // States: loading, success, error
+  pricingIcons, // Pricing: check, crown, sprout
+  featureIcons, // Features: shield, download, rss
+  seasonIcons, // Seasons: sun, leaf, snowflake, flower
+  actionIcons, // Actions: plus, copy, trash, refresh
+  authIcons, // Auth: fingerprint, key, link
+  getIcon, // Get icon by semantic key
+  allIcons, // All icons in one map
+} from "@autumnsgrove/groveengine/ui/icons";
 ```
 
 ---
@@ -1008,13 +1059,13 @@ import {
 ### Class Merging
 
 ```typescript
-import { cn } from '@autumnsgrove/groveengine/ui/utils';
+import { cn } from "@autumnsgrove/groveengine/ui/utils";
 
 // Merge classes with Tailwind conflict resolution
 const className = cn(
-  'base-styles px-4 py-2',
-  isActive && 'bg-accent',
-  className // User-provided classes win
+  "base-styles px-4 py-2",
+  isActive && "bg-accent",
+  className, // User-provided classes win
 );
 ```
 
@@ -1034,4 +1085,4 @@ When you're building with Grove components, you're creating spaces where people 
 
 ---
 
-*Last updated: 2026-02-06*
+_Last updated: 2026-02-16_
