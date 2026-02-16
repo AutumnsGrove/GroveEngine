@@ -72,7 +72,7 @@ export const GET: RequestHandler = async (event) => {
         .prepare(
           `SELECT slug, title, description, html_content, tags, published_at, featured_image
            FROM posts
-           WHERE tenant_id = ? AND status = 'published'
+           WHERE tenant_id = ? AND status = 'published' AND (meadow_exclude IS NULL OR meadow_exclude != 1)
            ORDER BY published_at DESC
            LIMIT 50`,
         )

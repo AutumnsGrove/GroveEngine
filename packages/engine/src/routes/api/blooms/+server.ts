@@ -35,6 +35,7 @@ interface PostInput {
   fireside_assisted?: number;
   status?: "draft" | "published";
   featured_image?: string;
+  meadow_exclude?: number;
 }
 
 /**
@@ -362,6 +363,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       reading_time: readingTime,
       fireside_assisted: data.fireside_assisted || 0,
       featured_image: data.featured_image || null,
+      meadow_exclude: data.meadow_exclude ?? 0,
     });
 
     // Track activity for inactivity reclamation

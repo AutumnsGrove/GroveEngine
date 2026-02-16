@@ -25,6 +25,7 @@
   let gutterItems = $state(/** @type {any[]} */ ([]));
   let status = $state("draft");
   let featuredImage = $state("");
+  let shareToMeadow = $state(true);
   let originalSlug = $state("");
   let slugError = $state("");
 
@@ -43,6 +44,7 @@
       : [];
     status = /** @type {any} */ (data.post).status || "draft";
     featuredImage = /** @type {any} */ (data.post).featured_image || "";
+    shareToMeadow = /** @type {any} */ (data.post).meadow_exclude !== 1;
   });
 
   // Editor reference for anchor insertion
@@ -160,6 +162,7 @@
         gutter_content: JSON.stringify(gutterItems),
         status,
         featured_image: featuredImage.trim() || null,
+        meadow_exclude: shareToMeadow ? 0 : 1,
         slug: slug !== originalSlug ? slug : undefined,
       });
 
@@ -214,6 +217,7 @@
         gutter_content: JSON.stringify(gutterItems),
         status: newStatus,
         featured_image: featuredImage.trim() || null,
+        meadow_exclude: shareToMeadow ? 0 : 1,
         slug: slug !== originalSlug ? slug : undefined,
       });
 
@@ -504,6 +508,16 @@
           <div class="form-group">
             <label for="date">Date</label>
             <input type="date" id="date" bind:value={date} class="form-input" />
+          </div>
+
+          <div class="form-group field-full">
+            <label class="meadow-toggle">
+              <input type="checkbox" bind:checked={shareToMeadow} />
+              <span class="meadow-toggle-text">
+                <span class="meadow-toggle-title">Share to Meadow</span>
+                <span class="meadow-toggle-hint">This post will appear in the community feed when published.</span>
+              </span>
+            </label>
           </div>
 
           <!-- Metadata info -->
@@ -981,6 +995,35 @@
     font-family: monospace;
     font-size: 0.75rem;
     transition: color 0.3s;
+  }
+
+  /* Meadow toggle */
+  .meadow-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  .meadow-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .meadow-toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .meadow-toggle-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+  .meadow-toggle-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
   }
 
   /* Editor Main */

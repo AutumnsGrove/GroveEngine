@@ -471,6 +471,36 @@
   $effect(() => {
     fetchCanopySettings();
   });
+
+  // =========================================================================
+  // MEADOW SETTINGS
+  // =========================================================================
+
+  let meadowOptIn = $state(data.meadowOptIn ?? false);
+  let savingMeadow = $state(false);
+  let meadowMessage = $state("");
+
+  async function saveMeadowSettings() {
+    savingMeadow = true;
+    meadowMessage = "";
+
+    try {
+      await api.put("/api/admin/meadow", {
+        meadow_opt_in: meadowOptIn,
+      });
+
+      meadowMessage = meadowOptIn
+        ? "Meadow enabled! Your published posts will appear in the community feed."
+        : "Meadow disabled. Your posts will no longer appear in the community feed.";
+      toast.success(meadowOptIn ? "Sharing to Meadow" : "Meadow sharing disabled");
+    } catch (error) {
+      meadowMessage = "Error: " + (error instanceof Error ? error.message : String(error));
+      toast.error("Failed to save Meadow settings");
+    }
+
+    savingMeadow = false;
+  }
+
 </script>
 
 <div class="settings">
@@ -1072,6 +1102,42 @@
         </Button>
       </div>
     {/if}
+  </GlassCard>
+
+  <!-- Meadow Settings -->
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
+      <h2>Meadow</h2>
+    </div>
+    <p class="section-description">
+      Share your published <GroveTerm term="blooms">posts</GroveTerm> to the community feed at <a href="https://meadow.grove.place" target="_blank" rel="noopener noreferrer" class="canopy-link">meadow.grove.place</a>.
+    </p>
+
+    <label class="logo-toggle">
+      <input type="checkbox" bind:checked={meadowOptIn} />
+      <span class="toggle-label">
+        <span class="toggle-title">Share to Meadow</span>
+        <span class="toggle-description">
+          When enabled, your published posts appear in Meadow — Grove's community feed where wanderers discover each other's writing. You can exclude individual posts from the bloom editor.
+        </span>
+      </span>
+    </label>
+
+    {#if meadowMessage}
+      <div
+        class="message"
+        class:success={!meadowMessage.includes("Error")}
+        class:error={meadowMessage.includes("Error")}
+      >
+        {meadowMessage}
+      </div>
+    {/if}
+
+    <div class="button-row">
+      <Button onclick={saveMeadowSettings} variant="primary" disabled={savingMeadow}>
+        {savingMeadow ? "Saving..." : "Save Meadow Settings"}
+      </Button>
+    </div>
   </GlassCard>
 
   <!-- Active Sessions / Security -->

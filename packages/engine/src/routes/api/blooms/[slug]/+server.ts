@@ -57,6 +57,7 @@ interface PostInput {
   font?: string;
   status?: "draft" | "published";
   featured_image?: string;
+  meadow_exclude?: number;
 }
 
 /**
@@ -379,6 +380,11 @@ export const PUT: RequestHandler = async ({
       updated_at: unixNow,
       featured_image: data.featured_image || null,
     };
+
+    // Include meadow_exclude if provided
+    if (data.meadow_exclude !== undefined) {
+      updateData.meadow_exclude = data.meadow_exclude;
+    }
 
     // Update slug if renamed
     if (newSlug) {

@@ -109,11 +109,27 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     }
   }
 
+  // Fetch meadow opt-in status from tenants table
+  let meadowOptIn = false;
+  if (env?.DB && locals.tenantId) {
+    try {
+      const row = await env.DB.prepare(
+        "SELECT meadow_opt_in FROM tenants WHERE id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ meadow_opt_in: number | null }>();
+      meadowOptIn = row?.meadow_opt_in === 1;
+    } catch {
+      // Default to false if query fails
+    }
+  }
+
   return {
     isWayfinder: userIsWayfinder,
     greenhouseStatus,
     tenantGrafts,
     oauthAvatarUrl: locals.user?.picture ?? null,
+    meadowOptIn,
     // Wayfinder-only data
     greenhouseTenants,
     tenantNames,
