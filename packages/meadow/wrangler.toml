@@ -17,8 +17,8 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # KV namespace for feed page caching (2-min TTL)
 [[kv_namespaces]]
 binding = "CACHE_KV"
-id = "meadow-cache-kv-id"
-preview_id = "meadow-cache-kv-preview-id"
+id = "fbf702e54358468d8ec767ca0bfc8c56"
+preview_id = "fbf702e54358468d8ec767ca0bfc8c56"
 
 # Service binding to Heartwood auth service
 [[services]]
