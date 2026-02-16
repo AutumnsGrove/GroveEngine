@@ -8,21 +8,22 @@ on:
     branches: [main]
     paths:
       # Workers
-      - 'packages/grove-router/**'
-      - 'packages/durable-objects/**'
-      - 'packages/post-migrator/**'
-      - 'packages/heartwood/**'
-      - 'packages/workers/**'
+      - "packages/grove-router/**"
+      - "packages/durable-objects/**"
+      - "packages/post-migrator/**"
+      - "packages/heartwood/**"
+      - "packages/workers/**"
       # Pages
-      - 'packages/engine/**'
-      - 'packages/landing/**'
-      - 'packages/clearing/**'
-      - 'packages/domains/**'
-      - 'packages/plant/**'
-      - 'packages/terrarium/**'
+      - "packages/engine/**"
+      - "packages/landing/**"
+      - "packages/clearing/**"
+      - "packages/domains/**"
+      - "packages/plant/**"
+      - "packages/terrarium/**"
+      - "packages/meadow/**"
       # Root config changes affect all
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -62,9 +63,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -119,6 +120,10 @@ jobs:
             path: packages/terrarium
             project: grove-terrarium
             needs-engine: true
+          - name: meadow
+            path: packages/meadow
+            project: grove-meadow
+            needs-engine: true
 
     steps:
       - name: Checkout
@@ -130,9 +135,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
