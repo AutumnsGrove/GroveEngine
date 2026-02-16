@@ -16,7 +16,9 @@ export type FeedFilter =
   | "hot"
   | "top"
   | "following"
-  | "bookmarks";
+  | "bookmarks"
+  | "notes"
+  | "blooms";
 
 export type TopPeriod = "day" | "week" | "month";
 
@@ -76,6 +78,9 @@ export interface PostRow {
   published_at: number;
   score: number;
   reaction_counts: string | null;
+  post_type: string;
+  user_id: string | null;
+  body: string | null;
   // Joined from user context
   user_voted?: number | null;
   user_bookmarked?: number | null;
@@ -109,6 +114,7 @@ export function rowToPost(row: PostRow): MeadowPost {
 
   return {
     id: row.id,
+    postType: (row.post_type as "bloom" | "note") || "bloom",
     title: row.title,
     description: row.description,
     link: row.link,
@@ -118,6 +124,8 @@ export function rowToPost(row: PostRow): MeadowPost {
     featuredImage: row.featured_image,
     publishedAt: row.published_at,
     contentHtml: row.content_html,
+    body: row.body ?? null,
+    userId: row.user_id ?? null,
     userVoted: Boolean(row.user_voted),
     userBookmarked: Boolean(row.user_bookmarked),
     userReactions,

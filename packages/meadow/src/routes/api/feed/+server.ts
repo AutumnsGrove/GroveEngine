@@ -9,7 +9,15 @@ import type { RequestHandler } from "./$types";
 import { getFeed } from "$lib/server/feed";
 import type { FeedFilter, TopPeriod } from "$lib/server/types";
 
-const VALID_FILTERS = new Set(["all", "popular", "hot", "top", "following"]);
+const VALID_FILTERS = new Set([
+  "all",
+  "popular",
+  "hot",
+  "top",
+  "following",
+  "notes",
+  "blooms",
+]);
 const VALID_TOP_PERIODS = new Set(["day", "week", "month"]);
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {

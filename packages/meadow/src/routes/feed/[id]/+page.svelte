@@ -17,9 +17,28 @@
   const user = $derived(data.user);
   const loggedIn = $derived(!!user);
   const relativeTime = $derived(formatRelativeTime(post.publishedAt));
-  const authorUrl = $derived(`https://${post.authorSubdomain}.grove.place`);
+  const authorUrl = $derived(post.authorSubdomain ? `https://${post.authorSubdomain}.grove.place` : null);
+
+  const isNote = $derived(post.postType === 'note');
+  const isOwnNote = $derived(isNote && !!user && post.userId === user.id);
 
   let showReactionPicker = $state(false);
+  let deleting = $state(false);
+
+  async function handleDelete() {
+    if (!isOwnNote || deleting) return;
+    deleting = true;
+    try {
+      const res = await fetch(`/api/notes/${post.id}`, { method: 'DELETE', credentials: 'include' }); // csrf-ok
+      if (res.ok) {
+        goto('/feed');
+        return;
+      }
+    } catch {
+      // silently fail
+    }
+    deleting = false;
+  }
 
   function requireAuth(): boolean {
     if (loggedIn) return true;
@@ -88,8 +107,8 @@
 </script>
 
 <SEO
-  title="{post.title} — Meadow"
-  description={post.description}
+  title="{isNote ? 'Note' : post.title} — Meadow"
+  description={isNote ? (post.body?.slice(0, 160) ?? '') : post.description}
   url="/feed/{post.id}"
 />
 
@@ -108,20 +127,36 @@
   <article class="glass-grove rounded-xl border border-divider overflow-hidden">
     <!-- Author header -->
     <div class="flex items-center gap-3 px-6 pt-5 pb-3">
-      <a
-        href={authorUrl}
-        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
-        aria-label="Visit {post.authorName || post.authorSubdomain}'s site"
-      >
-        {(post.authorName || post.authorSubdomain).charAt(0).toUpperCase()}
-      </a>
-      <div>
-        <a href={authorUrl} class="text-sm font-medium text-foreground hover:underline">
-          {post.authorName || post.authorSubdomain}
+      {#if authorUrl}
+        <a
+          href={authorUrl}
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+          aria-label="Visit {post.authorName || post.authorSubdomain}'s site"
+        >
+          {(post.authorName || post.authorSubdomain || '?').charAt(0).toUpperCase()}
         </a>
+      {:else}
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+        >
+          {(post.authorName || '?').charAt(0).toUpperCase()}
+        </div>
+      {/if}
+      <div>
+        {#if authorUrl}
+          <a href={authorUrl} class="text-sm font-medium text-foreground hover:underline">
+            {post.authorName || post.authorSubdomain}
+          </a>
+        {:else}
+          <span class="text-sm font-medium text-foreground">
+            {post.authorName || 'A wanderer'}
+          </span>
+        {/if}
         <div class="flex items-center gap-1.5 text-xs text-foreground-muted">
-          <span>{post.authorSubdomain}.grove.place</span>
-          <span aria-hidden="true">&middot;</span>
+          {#if post.authorSubdomain}
+            <span>{post.authorSubdomain}.grove.place</span>
+            <span aria-hidden="true">&middot;</span>
+          {/if}
           <time datetime={new Date(post.publishedAt * 1000).toISOString()}>
             {relativeTime}
           </time>
@@ -129,22 +164,28 @@
       </div>
     </div>
 
-    <!-- Title -->
-    <div class="px-6 pb-3">
-      <h1 class="text-2xl font-serif font-semibold text-foreground leading-snug">
-        {post.title}
-      </h1>
-    </div>
-
-    <!-- Content HTML -->
-    {#if post.contentHtml}
-      <div class="px-6 pb-6 prose prose-grove dark:prose-invert max-w-none">
-        {@html post.contentHtml}
-      </div>
-    {:else if post.description}
+    {#if isNote}
+      <!-- Note content -->
       <div class="px-6 pb-6">
-        <p class="text-foreground-muted leading-relaxed">{post.description}</p>
+        <p class="text-lg leading-relaxed text-foreground whitespace-pre-wrap">{post.body}</p>
       </div>
+    {:else}
+      <!-- Bloom: Title + Content HTML -->
+      <div class="px-6 pb-3">
+        <h1 class="text-2xl font-serif font-semibold text-foreground leading-snug">
+          {post.title}
+        </h1>
+      </div>
+
+      {#if post.contentHtml}
+        <div class="px-6 pb-6 prose prose-grove dark:prose-invert max-w-none">
+          {@html post.contentHtml}
+        </div>
+      {:else if post.description}
+        <div class="px-6 pb-6">
+          <p class="text-foreground-muted leading-relaxed">{post.description}</p>
+        </div>
+      {/if}
     {/if}
 
     <!-- Tags -->
@@ -232,15 +273,31 @@
     </div>
   </article>
 
-  <!-- Original post link -->
-  <div class="mt-6 text-center">
-    <a
-      href={post.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-sm text-grove-600 hover:underline dark:text-grove-400"
-    >
-      Read on {post.authorSubdomain}.grove.place &rarr;
-    </a>
-  </div>
+  {#if isNote}
+    <!-- Delete own note -->
+    {#if isOwnNote}
+      <div class="mt-6 text-center">
+        <button
+          type="button"
+          class="text-sm text-red-500/70 transition-colors hover:text-red-600 disabled:opacity-50"
+          disabled={deleting}
+          onclick={handleDelete}
+        >
+          {deleting ? 'Deleting...' : 'Delete this note'}
+        </button>
+      </div>
+    {/if}
+  {:else}
+    <!-- Original post link -->
+    <div class="mt-6 text-center">
+      <a
+        href={post.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-grove-600 hover:underline dark:text-grove-400"
+      >
+        Read on {post.authorSubdomain}.grove.place &rarr;
+      </a>
+    </div>
+  {/if}
 </main>

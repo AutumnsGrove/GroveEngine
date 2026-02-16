@@ -30,6 +30,7 @@ function buildBaseSelect(userId: string | null): string {
       p.id, p.tenant_id, p.guid, p.title, p.description, p.content_html,
       p.link, p.author_name, p.author_subdomain, p.tags, p.featured_image,
       p.published_at, p.score, p.reaction_counts,
+      p.post_type, p.user_id, p.body,
       ${userId ? "CASE WHEN mv.id IS NOT NULL THEN 1 ELSE 0 END" : "0"} AS user_voted,
       ${userId ? "CASE WHEN mb.id IS NOT NULL THEN 1 ELSE 0 END" : "0"} AS user_bookmarked,
       ${userId ? "mr.emojis" : "NULL"} AS user_reactions
@@ -75,7 +76,19 @@ export async function getFeed(
   let orderClause = "";
   const whereBinds: (string | number)[] = [];
 
-  switch (filter) {
+  // Content type filters
+  if (filter === "notes") {
+    whereClause += " AND p.post_type = ?";
+    whereBinds.push("note");
+  } else if (filter === "blooms") {
+    whereClause += " AND p.post_type = ?";
+    whereBinds.push("bloom");
+  }
+
+  // Algorithm selection (notes/blooms use "all" ordering)
+  const algo = filter === "notes" || filter === "blooms" ? "all" : filter;
+
+  switch (algo) {
     case "all":
       orderClause = "ORDER BY p.published_at DESC";
       break;

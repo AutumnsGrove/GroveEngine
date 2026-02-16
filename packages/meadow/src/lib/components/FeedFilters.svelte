@@ -18,6 +18,8 @@
 
   const tabs: { id: FeedFilter; label: string; authRequired?: boolean }[] = [
     { id: "all", label: "All" },
+    { id: "notes", label: "Notes" },
+    { id: "blooms", label: "Blooms" },
     { id: "popular", label: "Popular" },
     { id: "hot", label: "Hot" },
     { id: "top", label: "Top" },

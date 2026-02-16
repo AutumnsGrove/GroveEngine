@@ -9,6 +9,7 @@
   import { page } from '$app/state';
   import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
   import PostCard from '$lib/components/PostCard.svelte';
+  import ComposeBox from '$lib/components/ComposeBox.svelte';
   import FeedFilters from '$lib/components/FeedFilters.svelte';
   import ReactionPicker from '$lib/components/ReactionPicker.svelte';
   import SEO from '$lib/components/SEO.svelte';
@@ -125,6 +126,11 @@
     }
   }
 
+  function handleNoteCreated(newPost: MeadowPost) {
+    posts = [newPost, ...posts];
+    pagination = { ...pagination, total: pagination.total + 1 };
+  }
+
   async function handleReact(postId: string, emoji: string) {
     if (!requireAuth()) return;
     const post = posts.find((p) => p.id === postId);
@@ -176,6 +182,16 @@
 />
 
 <main class="mx-auto max-w-2xl px-4 py-8">
+  <!-- Compose box (authenticated users only) -->
+  {#if loggedIn}
+    <div class="mb-6">
+      <ComposeBox
+        userName={user?.name ?? null}
+        oncreated={handleNoteCreated}
+      />
+    </div>
+  {/if}
+
   <!-- Filter tabs -->
   <div class="mb-6">
     <FeedFilters
@@ -193,6 +209,10 @@
           You're not following any blogs yet.
         {:else if currentFilter === 'bookmarks'}
           No saved posts yet.
+        {:else if currentFilter === 'notes'}
+          No notes yet.
+        {:else if currentFilter === 'blooms'}
+          No blog posts yet.
         {:else}
           The meadow is quiet for now.
         {/if}
@@ -200,6 +220,8 @@
       <p class="mt-2 text-sm text-foreground-subtle">
         {#if currentFilter === 'following'}
           Follow some blogs from their pages to see their posts here.
+        {:else if currentFilter === 'notes'}
+          Leave a note above to be the first.
         {:else}
           Posts from Grove blogs will appear here once they opt in.
         {/if}

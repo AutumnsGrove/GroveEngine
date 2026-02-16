@@ -8,7 +8,15 @@ import type { PageServerLoad } from "./$types";
 import { getFeed } from "$lib/server/feed";
 import type { FeedFilter, TopPeriod } from "$lib/server/types";
 
-const VALID_FILTERS = new Set(["all", "popular", "hot", "top", "following"]);
+const VALID_FILTERS = new Set([
+  "all",
+  "popular",
+  "hot",
+  "top",
+  "following",
+  "notes",
+  "blooms",
+]);
 
 export const load: PageServerLoad = async ({ url, platform, locals }) => {
   const db = platform?.env?.DB;

@@ -1,0 +1,87 @@
+/**
+ * Notes API — Create a Note
+ *
+ * POST /api/notes — Leave a note in the meadow
+ */
+
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { createNote } from "$lib/server/notes";
+import { createThreshold } from "@autumnsgrove/groveengine/threshold";
+import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
+
+const MAX_BODY_LENGTH = 500;
+const MAX_TAGS = 5;
+const MAX_TAG_LENGTH = 30;
+
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
+  if (!locals.user) {
+    return json(
+      {
+        error: "GROVE-API-020",
+        error_code: "UNAUTHORIZED",
+        error_description: "Please sign in to continue.",
+      },
+      { status: 401 },
+    );
+  }
+
+  const db = platform?.env?.DB;
+  if (!db) {
+    return json({ error: "Service unavailable" }, { status: 503 });
+  }
+
+  // Rate limit: 30 notes per hour
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `meadow/notes:${locals.user.id}`,
+      limit: 30,
+      windowSeconds: 3600,
+      failMode: "open",
+    });
+    if (denied) return denied;
+  }
+
+  // Parse and validate body
+  let payload: { body?: string; tags?: string[] };
+  try {
+    payload = await request.json();
+  } catch {
+    return json(
+      { error: "GROVE-API-001", error_description: "Invalid JSON body." },
+      { status: 400 },
+    );
+  }
+
+  const body = typeof payload.body === "string" ? payload.body.trim() : "";
+  if (body.length === 0 || body.length > MAX_BODY_LENGTH) {
+    return json(
+      {
+        error: "GROVE-API-040",
+        error_description: `Note body must be 1-${MAX_BODY_LENGTH} characters.`,
+      },
+      { status: 400 },
+    );
+  }
+
+  // Validate tags
+  let tags: string[] = [];
+  if (Array.isArray(payload.tags)) {
+    tags = payload.tags
+      .filter((t): t is string => typeof t === "string")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0 && t.length <= MAX_TAG_LENGTH)
+      .slice(0, MAX_TAGS);
+  }
+
+  const post = await createNote(
+    db,
+    locals.user.id,
+    locals.user.name ?? null,
+    body,
+    tags,
+  );
+
+  return json({ success: true, post }, { status: 201 });
+};
