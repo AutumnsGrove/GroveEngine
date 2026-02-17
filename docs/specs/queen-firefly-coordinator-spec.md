@@ -718,14 +718,14 @@ steps:
 These remain from the original planning. Each needs its own investigation before Phase 2.
 
 1. **Artifacts:** Where do build artifacts live? R2 bucket with per-job prefixes? Ephemeral runner disk with upload step?
-  R2 bucket.
+   R2 bucket.
 2. **Caching:** How to cache `node_modules` and build outputs between jobs? Shared R2 bucket with content-addressed keys?
-  YES. shared R2 bucket.
+   YES. shared R2 bucket.
 3. **Secrets:** Woodpecker secrets vs. Worker env bindings vs. dedicated secrets store? How do secrets reach the runner securely?
-  Accessed via the upcoming Warden SDK.
+   Accessed via the upcoming Warden SDK.
 4. **Networking:** Private registry access for Docker images? Docker Hub rate limit mitigation?
 5. **Debugging:** SSH access to a failed ephemeral runner before it fades? Configurable grace period on failure?
-  Yes, we need a way in, to check status of things or execute commands. Access for 5 mins is available.
+   Yes, we need a way in, to check status of things or execute commands. Access for 5 mins is available.
 
 ---
 
