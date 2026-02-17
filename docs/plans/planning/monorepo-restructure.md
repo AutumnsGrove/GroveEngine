@@ -446,7 +446,34 @@ The root `package.json` has test scripts with `--filter` flags. These use packag
 - `CLAUDE.md` — Tailwind preset path example
 - Any other docs referencing `packages/`
 
-**Step 1.13 — Verify:**
+**Step 1.13 — Update `gw` tool (REQUIRED — breaks immediately after moves):**
+
+> gw's `discover_packages()` hardcodes `root / "packages"` for detection. After Step 1.2–1.5, `gw context` and `gw packages list` return zero packages.
+
+- `tools/gw/src/gw/packages.py` → Update `discover_packages()` (lines 260-273) to scan `apps/`, `services/`, `workers/`, `libs/` instead of `packages/`
+- `tools/gw/src/gw/commands/db.py` — Update `packages/` references in D1 migration paths
+- `tools/gw/src/gw/commands/dev/format.py` — Update `packages/` references
+- Update tests: `tools/gw/tests/test_packages.py`
+
+**Step 1.14 — Update `gf` tool (REQUIRED — breaks immediately after moves):**
+
+> gf hardcodes `packages/` in 20+ locations across Go and Python. After Step 1.2–1.5, `gf impact`, `gf migrations`, and quality commands return wrong results silently.
+
+- **Go version (`tools/grove-find-go/cmd/`):**
+  - `impact.go` — hardcodes `packages/` for import path conversion and package detection (lines 66, 201, 481)
+  - `infra.go` — hardcodes `packages/` for migration discovery and package paths (lines 381, 929, 1035, 1135)
+  - `quality.go` — hardcodes `!packages/engine` exclusion pattern (line 435)
+- **Python version (`tools/grove-find/src/grove_find/commands/`):**
+  - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
+  - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
+  - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
+- **Rebuild gf Go binaries** for all 4 platforms:
+  - Run `tools/grove-find-go/build-all.sh` (or equivalent cross-compile script)
+  - Verify new binaries in `tools/grove-find-go/dist/` for linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64
+  - **This blocks the Phase 1 commit.** Stale binaries mean `gf impact` and `gf migrations` silently return wrong results.
+  - Commit the rebuilt binaries as part of the Phase 1 atomic commit.
+
+**Step 1.15 — Verify:**
 
 ```bash
 pnpm install
@@ -500,21 +527,27 @@ pnpm -r run check
 2. Copy the Worker source into `services/forage/`
 3. Set up `package.json` with name `grove-forage`
 4. Set up `wrangler.toml` for the worker
-5. **Migrate secrets/env vars:** Forage requires several API keys that need wiring into the monorepo's Cloudflare config:
-   - `OPENROUTER_API_KEY` (DeepSeek v3.2 via OpenRouter)
-   - `RESEND_API_KEY` (result emails)
-   - Any other service-specific secrets from the external repo's wrangler.toml or `.dev.vars`
-   - Document these in `services/forage/.dev.vars.example`
-   - Ensure `wrangler secret put` commands are run for production
+5. **Migrate secrets/env vars:** Forage requires API keys to function. Without them it deploys but silently fails every request.
+   - **Source of truth:** The external repo's `wrangler.toml` (for bindings/vars) and `.dev.vars` (for local secrets). Audit both before importing.
+   - Known required secrets:
+     - `OPENROUTER_API_KEY` (DeepSeek v3.2 via OpenRouter)
+     - `RESEND_API_KEY` (result emails)
+     - Any other service-specific secrets discovered during audit
+   - **In the new `services/forage/wrangler.toml`:** Document all required secrets as comments at the top, e.g. `# Required secrets: OPENROUTER_API_KEY, RESEND_API_KEY — set via wrangler secret put`
+   - Create `services/forage/.dev.vars.example` with placeholder values for local development
+   - **Before first production deploy:** Run `wrangler secret put <KEY>` for each secret. The deploy workflow should be tested with a dry-run first.
+   - **Owner:** Whoever runs the Forage deploy workflow is responsible for confirming secrets are set. Consider adding a pre-deploy check in the workflow that fails fast if required vars are unset.
 6. Update `apps/domains/wrangler.toml` service binding to use the local worker
 7. Add deploy workflow: `.github/workflows/deploy-forage.yml`
 8. Verify: build, type-check
 
 ---
 
-### Phase 3: Documentation & Tooling Sync
+### Phase 3: Documentation Sync
 
-> **Goal:** Everything reflects the new structure.
+> **Goal:** All documentation reflects the new structure.
+>
+> **Note:** gw and gf tooling updates are in Phase 1 (Steps 1.13–1.14), not here. Those are structural breakages, not documentation sync.
 
 1. **Update `AGENT.md`:**
    - Directory structure references
@@ -530,30 +563,8 @@ pnpm -r run check
 3. **Update `CLAUDE.md`:**
    - Tailwind preset import path example
 
-4. **Update `gw` tool (REQUIRED — will break without this):**
-   - `tools/gw/src/gw/packages.py` → `discover_packages()` hardcodes `root / "packages"` for package detection. Must be updated to scan `apps/`, `services/`, `workers/`, `libs/` instead.
-   - Specifically: lines 260-273 iterate `packages_dir = root / "packages"` and its children. Replace with iteration over all four workspace directories.
-   - `tools/gw/src/gw/commands/db.py` — references `packages/` in D1 migration paths
-   - `tools/gw/src/gw/commands/dev/format.py` — references `packages/`
-   - Update tests: `tools/gw/tests/test_packages.py`
-
-5. **Update `gf` tool (REQUIRED — will break without this):**
-   - **Go version (`tools/grove-find-go/cmd/`):**
-     - `impact.go` — hardcodes `packages/` for import path conversion and package detection (lines 66, 201, 481)
-     - `infra.go` — hardcodes `packages/` for migration discovery and package paths (lines 381, 929, 1035, 1135)
-     - `quality.go` — hardcodes `!packages/engine` exclusion pattern (line 435)
-   - **Python version (`tools/grove-find/src/grove_find/commands/`):**
-     - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
-     - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
-     - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
-   - After updating source, **rebuild gf Go binaries** for all 4 platforms:
-     - Run `tools/grove-find-go/build-all.sh` (or equivalent cross-compile script)
-     - Verify new binaries in `tools/grove-find-go/dist/` for linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64
-     - **This blocks merge.** If binaries aren't rebuilt, `gf impact` and `gf migrations` will silently return wrong results on any machine using the pre-compiled binary.
-     - Commit the rebuilt binaries as part of the Phase 3 tooling PR.
-
-6. **Clean up stale references:**
-   - Search entire codebase for `packages/` path references
+4. **Clean up stale references:**
+   - Search entire codebase for remaining `packages/` path references
    - Move root `landing/` directory safely if stale (git mv to `_deprecated/`, never rm -rf)
 
 ---
@@ -642,14 +653,18 @@ Rewrite CI to detect packages by workspace membership rather than hardcoded path
 
 ## Verification Checklist
 
-After Phase 1 (restructure):
+After Phase 1 (restructure + tooling):
 
 - [ ] `pnpm install` succeeds
 - [ ] `pnpm -r run build` succeeds for all packages
 - [ ] `pnpm -r run check` succeeds (TypeScript)
 - [ ] `pnpm -r run test:run` passes
-- [ ] `gw context` reports correct packages
+- [ ] `gw context` reports correct packages (not zero)
+- [ ] `gw packages list` shows correct paths under new directories
 - [ ] `gf --agent search "test"` still finds files correctly
+- [ ] `gf --agent impact libs/engine/src/lib/ui/GlassCard.svelte` resolves correctly (not empty)
+- [ ] `gf --agent migrations` finds D1 migrations in new paths
+- [ ] gf Go binaries rebuilt for all 4 platforms and committed
 - [ ] No remaining references to `packages/` in workspace config
 - [ ] All deploy workflows point to new paths
 
@@ -661,26 +676,22 @@ After Phase 2 (imports):
 - [ ] Shutter library type-checks and exports work
 - [ ] No circular dependencies
 
-After Phase 3 (docs + tooling):
+After Phase 3 (docs):
 
 - [ ] `AGENT.md` reflects new structure
 - [ ] `project-organization.md` updated
 - [ ] No stale `packages/` references in docs
 - [ ] `CLAUDE.md` examples use correct paths
-- [ ] `gw context` reports all packages correctly
-- [ ] `gw packages list` shows correct paths
-- [ ] `gf --agent impact <file>` resolves packages correctly
-- [ ] `gf --agent migrations` finds D1 migrations in new paths
-- [ ] gf Go binaries rebuilt for all 4 platforms
+- [ ] `CONTRIBUTING.md` dev setup paths updated
 
 ---
 
 ## Execution Notes
 
-- **Do Phase 1 as a single atomic commit.** Moving 22 packages across directories in multiple commits creates an unrecoverable mess if something goes wrong mid-way.
+- **Do Phase 1 as a single atomic commit.** This includes the directory moves (1.1–1.6), config updates (1.7–1.12), **and** the gw/gf tooling fixes + binary rebuild (1.13–1.14). Moving packages without updating the tools that scan them creates a broken-but-silent state.
 - **Phase 2 can be one commit per import** (Foliage, Gossamer, Shutter, Forage separately). This keeps the blame history clean and makes rollback granular.
-- **Phase 3 is safe to do incrementally.** Docs updates can land as follow-ups.
-- **Test locally before pushing.** The full `pnpm install && pnpm -r run build && pnpm -r run check` cycle is non-negotiable.
+- **Phase 3 is safe to do incrementally.** Docs updates can land as follow-ups without breaking anything.
+- **Test locally before pushing.** The full `pnpm install && pnpm -r run build && pnpm -r run check` cycle is non-negotiable. Also verify `gw context` and `gf --agent impact` return non-empty results.
 
 ---
 
