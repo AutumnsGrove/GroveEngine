@@ -1333,3 +1333,210 @@ The word we need lives at the intersection of:
 **Still standing:** Bottega (the master's workshop)
 
 The walk continues.
+
+---
+
+## The Observatory
+
+Leave the rice fields. The mist is still rising from
+the paddies as we turn uphill. There's a path through
+the forest — steep, switchbacking up through old growth.
+The canopy thins as we climb. The air gets colder. The
+trees give way to scrub, then rock.
+
+At the top: a building. Stone walls, copper dome, green
+with verdigris. The observatory. It's been here longer
+than anyone remembers. The dome is closed now — daytime.
+Inside, the telescope is covered. The real work happens
+at night.
+
+But the building is alive during the day too. Behind
+the dome, through a low door, there's a warm room.
+A study. This is where the astronomers actually LIVE
+their work.
+
+Charts cover every wall — star maps, orbital plots,
+tables of ephemerides (the predicted positions of
+celestial bodies). On the desk: a brass orrery —
+delicate wire arms holding tiny spheres that orbit
+a central sun when you turn the crank. Saturn has
+rings made of hammered copper. Jupiter is a glass
+marble with swirls inside.
+
+A logbook lies open. Tonight's plan: observe the
+transit of Venus. The coordinates are pre-calculated.
+The instruments are calibrated. Everything is ready.
+The astronomer has been preparing for this moment for
+months. But she's calm. She's done this before. The
+stars come around again.
+
+---
+
+## Speaking with the Stargazers
+
+Three astronomers at the observatory. Different ages,
+different temperaments. The same sky.
+
+**The Elder** has been here forty years. Silver hair.
+Steady hands. She says:
+
+"We don't name our observatories after what's inside
+them. We name them after WHERE they are. Palomar.
+Mauna Kea. Cerro Tololo. The location defines the
+work. What mountain are you on?"
+
+_The edge of the grove. Where the trees face outward._
+
+She nods. "Then name it for the edge."
+
+**The Young One** is enthusiastic, restless, always
+looking up even during the day. She says:
+
+"The best instruments are named for what they let you
+SEE. Hubble sees deep space. Webb sees infrared. Kepler
+sees exoplanets. What does your workshop let you see?"
+
+_Vulnerabilities. The cracks in other people's walls.
+The places where the water gets in._
+
+She tilts her head. "Then name it for the sight."
+
+**The Philosopher** has a cup of tea. Always has a cup
+of tea. She says:
+
+"Every name is wrong until it's right. You'll know it
+when you hear it. It will sound like the thing itself.
+Like it was always the name and you just hadn't heard
+it yet. Stop hunting. Let it find you."
+
+She sips her tea.
+
+"Tell me — what does the room FEEL like when you're
+in it? Not what it contains. Not what it does. What
+does it FEEL like?"
+
+_Safe. Ready. Mine. Like everything I need is within
+arm's reach. Like I've done this a hundred times and
+I'll do it a hundred more. Like the tools know my
+hands and the logbook knows my voice._
+
+"And when you leave the room? To go to a client?"
+
+_Like stepping out of warmth into cold air. The door
+closes behind me. I know the room is there. I know
+I'll come back. The knowing is what makes me brave._
+
+"And when you come back?"
+
+_I hang up the cloak. Sit down. Write what I found.
+The room absorbs it. Grows a little. The shelves
+are slightly fuller. The logbook has a new entry.
+Then I make tea and start preparing for the next one._
+
+The Philosopher smiles. "You're not describing a
+workshop. You're describing a home. Not your HOUSE —
+your home. The place inside the place. The room that
+is most yours."
+
+---
+
+## What the Stars Teach
+
+The observatory adds the final element.
+
+Da Vinci's workshop: **fire** (candles, forge, heat)
+Alexandria: **earth** (stone, shelves, foundation)
+Rice fields: **water** (patience, flow, reflection)
+Observatory: **air** (height, perspective, breath)
+
+And the stargazers taught us three things:
+
+**1. Name it for the edge.**
+The Elder says: the location defines the work. This
+room is at the edge of the grove. It faces outward.
+It's the boundary between home and the wild.
+
+**2. Name it for the sight.**
+The Young One says: the best things are named for
+what they reveal. This room reveals vulnerabilities.
+It sees what others miss.
+
+**3. Let it find you.**
+The Philosopher says: stop hunting. Listen. The room
+itself is trying to tell you its name. What does it
+FEEL like?
+
+And the Philosopher's reframe cuts deepest: "You're
+not describing a workshop. You're describing a home."
+
+Not a house. Not a residence. A HOME. The place
+inside the place. The room that is most yours. Where
+the tools know your hands and the logbook knows your
+voice.
+
+---
+
+## Sitting with the Philosopher's Words
+
+"The room that is most yours."
+
+In a medieval castle, this room had a name. The
+lord's private chamber, usually on an upper floor,
+with the best windows. Above the great hall, away
+from the noise and the crowds. Where the lord
+retreated to read, write, think, and work.
+
+It was called the **solar**.
+
+From Latin _solarium_ — "sunny room." A room full
+of light. The most private room. The most personal.
+
+A solar is:
+
+- A PRIVATE room (the most private) ✓
+- On an upper floor (elevated) ✓
+- Where the lord/lady WORKS ✓
+- Away from the communal spaces ✓
+- Named for LIGHT ✓
+- Medieval ✓
+- Two syllables (SOH-lar) ✓
+
+Testing:
+
+- "Check the Solar." — Clean. Warm. Light.
+- "The Solar has the engagement runbook." ✓
+- "I'm in the Solar." — Private. Elevated.
+- "The Bestiary is in the Solar." ✓
+
+`AutumnsGrove/Solar` — five letters. Two syllables.
+
+But: "solar" in 2026 means solar panels, solar energy,
+solar system. The modern meaning overshadows the
+medieval one. People would think "renewable energy"
+before "medieval private chamber."
+
+Back pocket. Not dead, but shadowed.
+
+---
+
+## Four Walks Complete
+
+| Walk                | Element | Teaching          | Candidate           |
+| ------------------- | ------- | ----------------- | ------------------- |
+| Da Vinci's workshop | Fire    | Craft, precision  | Bottega             |
+| Alexandria          | Earth   | Knowledge, remedy | (Apothecary vibe)   |
+| Rice fields         | Water   | Patience, cycles  | (cultivation feel)  |
+| Observatory         | Air     | Perspective, home | Solar (back pocket) |
+
+**Still standing:** Bottega
+**Back pocket:** Codex, Solar
+**Sub-concept:** Bestiary (the catalog within the room)
+
+The room is fully described now. Four elements. Four
+teachings. We know exactly what it feels like. We know
+exactly what's in it. We know exactly where it sits.
+
+The Philosopher is still sipping her tea. She says
+the name will come when we're ready to hear it.
+
+The walk continues.
