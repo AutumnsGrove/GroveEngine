@@ -1916,3 +1916,479 @@ a home. The room that is most yours."
 — The Potter (Santiago)
 
 The word is close now.
+
+---
+
+## The Safari
+
+_The sun is low and golden. You throw your bag in the
+back of the jeep, unfold the map across the hood, and
+trace the route with your finger. Santiago to Maputo:
+across the Atlantic, across the equator, into the
+Southern Hemisphere's eastern coast. The canvas roof
+is rolled back. Binoculars around your neck. Leather
+journal on the passenger seat. The engine turns over._
+
+_This isn't a workshop visit. This isn't a library.
+This is a safari — a journey to observe things in
+their natural habitat. The word "safari" itself is
+Swahili, from Arabic safar: "a journey." That's what
+the Wayfinder does. She goes on safaris into client
+codebases. And the room we're naming is where she
+returns from them._
+
+_The savanna waits._
+
+---
+
+## Stop 1: The Coast
+
+_The jeep rolls down the red laterite road toward the
+coast. Cashew trees line both sides. Then the Indian
+Ocean appears — impossibly blue, stretching east toward
+India, Arabia, Indonesia. Trade routes older than
+memory. Every dhow that sailed this coast carried
+something: gold, ivory, spices, cloth. And knowledge.
+Always knowledge._
+
+Ilha de Moçambique lies four kilometers offshore — a
+coral crescent barely three kilometers long. It gave
+the entire country its name. UNESCO World Heritage.
+A melting pot layered over centuries: Bantu, Swahili,
+Arab, Persian, Indian, Portuguese.
+
+Binoculars up.
+
+The buildings are coral limestone — quarried from the
+reef, bound with lime mortar made from burnt coral.
+Warm, reddish tone. Thick walls for the tropical heat.
+Whitewashed. Breathing. The same materials, the same
+techniques, for five hundred years.
+
+_Through the dust haze, the first observation:_
+Everything here is built from what's HERE. Coral from
+the reef. Lime from the coral. The island builds
+itself from itself. The Grove builds from the grove.
+
+Sketching in the journal: the workshop should feel
+like it's MADE from the grove. Not imported. Not
+foreign. Grown from the same material as everything
+else.
+
+_Back in the jeep. Deeper into the island._
+
+---
+
+## Stop 2: The Swahili House
+
+_The jeep can't fit through the narrow streets of Stone
+Town. On foot now. The streets are barely two meters
+wide — coral walls rising on both sides, cool shadows,
+the sound of a radio through a window. Then: a carved
+wooden door. Massive. Ornate. The only decoration on
+an otherwise austere facade._
+
+The Swahili house is not a floor plan. It's a spatial
+grammar. A journey from public to private, calibrated
+over seven hundred years.
+
+Binoculars up. Looking THROUGH the house:
+
+**The Baraza** — Outside. A stone bench built into the
+wall. Fully public. Where the homeowner sits to receive
+visitors, conduct business, drink coffee. The threshold
+between street and home. You can sit on the baraza
+without being invited inside. It is both furniture and
+architecture. Both object and institution.
+
+**The Daka** — The entrance porch. Three meters wide.
+Raised steps. The magnificent carved door. Casual
+visitors are received here. Only the closest friends
+go further.
+
+**The Tekani** — Step through the door and you face...
+a BLANK WALL. Deliberately placed. No sightline
+penetrates to the interior. Privacy through geometry,
+not locks. The exterior reveals NOTHING. This is the
+facade as mask.
+
+**The Kiwanda** — The central courtyard. Open to the
+sky. Children play. Laundry hangs. The spatial nucleus
+of the house. Neither fully inside nor fully outside.
+The working heart.
+
+**The Sabule** — Reception room. Controlled access.
+
+**The Misana** — Parallel galleries, running from
+courtyard to the back of the house. Bed spaces at the
+ends, curtained by lacquered rails called _miwandi_.
+Intimate. Private.
+
+**The Ndani** — The innermost room. The most private
+space. Sacred. Where births happen. Where weddings
+are consummated. Where the dead are prepared. The
+walls are lined with _vidaka_ — ornamental niches,
+floor to ceiling, holding precious objects. The ndani
+is the room that is most yours.
+
+**The Poro** — Storage room. Attached to the ndani.
+Where the irreplaceable things are kept.
+
+_The journal falls open. Pencil moves fast._
+
+The intimacy gradient:
+
+```
+STREET → BARAZA → DAKA → TEKANI → KIWANDA
+  ↓                                   ↓
+fully                              courtyard
+public                              (nucleus)
+                                      ↓
+              SABULE → MISANA → NDANI → PORO
+                                  ↓       ↓
+                               sacred  storage
+                              (innermost)
+```
+
+And look — the freelance workshop has the SAME
+gradient:
+
+```
+PUBLIC GITHUB → README → SKILL DEFS → DOCUMENTS
+  ↓                                       ↓
+the world                             (proposals,
+sees this                              agreement)
+                                          ↓
+             RUNBOOK → ARCHIVES → CLIENT RECORDS
+                                    ↓
+                                (innermost —
+                                 the irreplaceable)
+```
+
+The README is the carved door — the only hint of
+what's inside. The skill definitions are the daka.
+The documents are the sabule. The runbook is the
+misana. The client archives are the ndani. The
+pricing formulas are the poro.
+
+The exterior reveals nothing. The interior contains
+everything.
+
+_Back in the jeep. Heading north._
+
+---
+
+## Stop 3: The Makonde Carver
+
+_Red road through cashew and coconut. The Mueda
+Plateau rises ahead — remote, defensible high ground
+where the Makonde people settled centuries ago to
+escape the slave trade. The jeep climbs._
+
+_Under a spreading tree, a group of men sit on the
+ground. Wood shavings everywhere. The sound of chisel
+on wood. The smell of mpingo — African Blackwood,
+so dense it sinks in water, so fine-grained it
+shines when polished._
+
+Binoculars up. Closer now — on foot.
+
+The master carver — a _fundi_ — works with the wood
+braced against his thigh. No sketches. No models.
+No blueprint. The sculpture emerges freehand, guided
+by imagination and the grain of the material. The
+tools are deliberately few: hammer, chisels, adze,
+rasp, knife. Nothing more.
+
+He's carving an **Ujamaa** — a Tree of Life.
+
+The Ujamaa is carved from a SINGLE TRUNK of mpingo.
+Two meters tall. Dozens of human figures — men,
+women, children — intertwined, climbing on each
+other, supporting each other across generations.
+At the top: a woman's face. The Makonde are
+matrilineal. The mother presides.
+
+Every figure is carved from the SAME PIECE OF WOOD.
+Not assembled. Not glued. Not joined. One trunk
+becomes many figures. The tree becomes a community.
+
+_The fundi pauses. Looks at me._
+
+"You are looking for something."
+
+_A name. For a workspace._
+
+"A workspace." He turns the trunk slowly, studying
+the grain. "This tree was alive for eighty years
+before I cut it. The heartwood is dark — see?
+Almost black. The sapwood is pale. The bark is grey.
+Three layers. One tree."
+
+_Three layers. Like the intimacy gradient._
+
+"When I carve the Ujamaa, I don't ADD the figures.
+They are already IN the wood. I remove what is not
+them. The tree already knows what it wants to be.
+I help it get there."
+
+He taps the trunk with his chisel handle.
+
+"What is your workspace made from?"
+
+_From the grove. From the same material as everything
+else._
+
+"Then the name is already IN the grove. You don't
+add it. You remove what is not it."
+
+_Sketching in the journal:_ The name is already in
+the grove. Like the figures in the mpingo trunk. We
+don't invent it. We uncover it. We remove what is
+not it.
+
+But what IS it? What's the shape hiding in the wood?
+
+_Back in the jeep. The road curves west._
+
+---
+
+## Stop 4: The Baobab
+
+_The jeep crests a low ridge and there it is._
+
+_A baobab. Alone in the grassland. Massive beyond
+reason. The trunk is fifteen meters around — wider
+than a room. The branches reach up like roots, bare
+against the sky. The tree looks upside-down. A myth
+says God plucked it from his garden and threw it
+over the wall of Paradise. It landed inverted and
+kept growing._
+
+_The engine cuts. Silence. Then: birds. Insects. The
+creak of enormous branches in wind._
+
+Walk up to the trunk. It's hollow. The opening is
+large enough to step through. Inside: a cathedral.
+The interior walls are smooth, pale wood. Light
+comes through cracks and the opening. Cool air.
+The smell of ancient wood.
+
+This tree has been alive for a thousand years. Maybe
+two thousand. David Livingstone recorded hollow
+baobabs in Mozambique being used as dwellings. Across
+Africa, hollow baobabs have been: workshops, stores,
+classrooms, chapels, post offices, bars, grain
+stores, meeting halls. A tree that IS a room. A
+living building that grows.
+
+_Binoculars down. Don't need them. I'm standing
+inside the observation._
+
+An African proverb: "Wisdom is like a baobab tree;
+no one individual can embrace it."
+
+The baobab stores water in its trunk — up to 10,000
+liters. It provides for the dry season. It HOLDS
+what's needed for the time when nothing grows.
+
+_Sketching in the journal, sitting inside the trunk:_
+
+In the Grove, everything is trees. Heartwood.
+Canopy. Roots. Rings. What if the freelance
+workshop is the HOLLOW TREE? The oldest tree
+at the edge of the grove. The one with the
+massive trunk. Hollow inside — not because it's
+dying, but because its vascular tissue is in the
+outer layers. The hollow is healthy. The hollow
+is the ROOM.
+
+You step inside. The walls are alive. The ceiling
+is branches. Light filters through. Your tools
+hang from the inner walls. Your Bestiary sits on
+a shelf carved from the living wood. The logbook
+on a desk made from a fallen branch. The Raven
+and Osprey perch on high notches in the trunk.
+
+The tree grows. The room grows with it.
+
+But "Baobab" doesn't work as a name — it's a species,
+not a space. And baobabs don't grow in temperate
+forests. The Grove's biome is wrong for it.
+
+What the baobab TEACHES: the workshop is a living
+structure. It grows. It stores what's needed.
+It's been here longer than you. You work INSIDE
+something alive.
+
+_Back in the jeep. Last stop._
+
+---
+
+## Stop 5: The Baraza
+
+_Evening. The jeep rolls back to the coast. The sun
+is low, turning the coral walls amber. On a narrow
+street in Stone Town, a man sits on the baraza
+outside his house. Coffee on a small tray. Playing
+bao — the ancient strategy game — with a neighbor.
+The carved wooden door behind him is open. Through
+it: the blank wall. No glimpse of the life inside._
+
+The baraza is not just a bench. It's five things
+at once:
+
+1. A **physical object** (stone, built into the wall)
+2. An **architectural element** (part of the facade)
+3. A **social institution** (the public gathering)
+4. A **liminal zone** (neither street nor home)
+5. A **threshold** (the exact point between worlds)
+
+The baraza is WHERE the homeowner meets the world.
+Facing outward. Conducting business. Receiving news.
+Drinking coffee. Then, when the business is done, he
+stands, steps through the carved door, and disappears
+into the private interior.
+
+_Binoculars down. Journal open._
+
+The freelance workshop IS a baraza. It faces outward.
+It's where the Wayfinder meets clients. Where
+business is conducted. Where proposals are written
+and agreements signed. But it's also part of the
+home — attached to the grove, built from the same
+coral stone, inseparable from the larger structure.
+
+The baraza is the threshold between the grove and
+the world. The Wayfinder sits on it, facing out.
+When the engagement begins, she steps through the
+carved door into the client's codebase. When it
+ends, she returns to the baraza, sits down, updates
+the journal.
+
+But "baraza" is a Swahili word rooted in specific
+East African culture. We sit on it, learn from it,
+and respect it. We don't take the word.
+
+What we take: the CONCEPT. The workshop is a
+threshold. Part of the home, facing the world.
+Neither fully inside nor fully outside. Where
+business happens at the boundary.
+
+---
+
+## Making Camp
+
+_The sun touches the Indian Ocean. Orange light
+floods the coral walls. Pull the jeep under an
+acacia tree at the edge of town. Set up camp.
+Light a fire. The journal comes out one last time._
+
+_Flip through every page. Every stop._
+
+**What Mozambique taught us:**
+
+**Stop 1 (The Coast):** Build from what's here.
+The workshop should feel like it's made from the
+grove — not imported, not foreign.
+
+**Stop 2 (The Swahili House):** The intimacy gradient.
+The exterior reveals nothing; the interior contains
+everything. The carved door is the only hint. The
+ndani is the innermost room — sacred, precious,
+irreplaceable. The poro is the storage room attached
+to it. THIS IS THE WORKSHOP'S ARCHITECTURE.
+
+**Stop 3 (The Makonde Carver):** "The name is already
+in the grove. You don't add it. You remove what is
+not it." The Ujamaa is carved from a single trunk.
+Every figure was always inside the wood.
+
+**Stop 4 (The Baobab):** The workshop is a living
+structure. It grows. It stores what's needed. The
+tree IS the room. In the Grove, the workshop is a
+hollow tree.
+
+**Stop 5 (The Baraza):** The workshop is a threshold.
+Part of the home, facing the world. Where business
+happens at the boundary. Neither fully inside nor
+fully outside.
+
+---
+
+## Six Walks Complete
+
+_The fire crackles. Stars emerge — different
+constellations here, southern sky. The journal
+is full._
+
+| Walk                | Element  | Teaching                      |
+| ------------------- | -------- | ----------------------------- |
+| Da Vinci's workshop | Fire     | Craft, precision, tools       |
+| Alexandria          | Earth    | Knowledge, cataloging, remedy |
+| Rice fields         | Water    | Patience, cycles, cultivation |
+| Observatory         | Air      | Perspective, navigation, home |
+| Santiago            | Soul     | Home IS workshop. One room.   |
+| **Mozambique**      | **Wild** | **The name is in the grove.** |
+
+Six walks. Six elements. Six teachings. Every walk
+added a layer. The room is fully described. The
+feeling is complete.
+
+Fire + Earth + Water + Air + Soul + Wild = the room.
+
+And the Makonde carver's voice echoes:
+
+_"The name is already in the grove. You don't add it.
+You remove what is not it."_
+
+---
+
+## The Candidates, Refined
+
+After six walks across the world, what's standing?
+
+**Bookmarked by Autumn:**
+
+- **Solarium** — room of light, medieval solar, the
+  -arium suffix matches Terrarium. Autumn liked it.
+- **Apotheca** — the Latin root that followed us
+  across three continents. "A place to put things
+  away."
+
+**Still standing:**
+
+- **Bottega** — the master's workshop. Confirmed by
+  bodega convergence. Literally "workshop" in Italian.
+
+**Back pocket:**
+
+- Codex — beautiful but OpenAI-shadowed
+- Solar — two-syllable version, modern associations
+
+**Sub-concepts (naming the parts within the room):**
+
+- **Bestiary** — the catalog of animal skills
+- **Bodega** — the storage room for the irreplaceable
+- **Baraza** — the threshold/interface with clients
+
+**Three teachings confirmed everywhere:**
+
+1. "The room that is most yours."
+   — The Philosopher (observatory)
+   — The Potter (Santiago)
+   — The Ndani (Mozambique)
+
+2. "The exterior reveals nothing; the interior
+   contains everything."
+   — The Swahili house facade
+   — The carved door
+
+3. "The name is already in the grove."
+   — The Makonde carver
+
+_The fire dies to embers. The journal is full. Six
+walks. Four continents. The whole landscape mapped.
+The name is in the grove. It was always in the grove._
+
+_Tomorrow, we go home and look._
