@@ -1539,4 +1539,380 @@ exactly what's in it. We know exactly where it sits.
 The Philosopher is still sipping her tea. She says
 the name will come when we're ready to hear it.
 
+Autumn bookmarks Solarium. She likes it. The light
+in it. The warmth.
+
 The walk continues.
+
+---
+
+## Santiago
+
+Descend the mountain. Leave the observatory behind.
+The Philosopher waves from the doorway, cup of tea
+in hand. She doesn't say goodbye. She says: "You'll
+be back."
+
+Cross the Pacific. South and west and south again.
+Past the equator. Past the tropics. Into the Southern
+Hemisphere where the seasons are reversed — Autumn's
+domain, inverted.
+
+Santiago de Chile. The Andes rise to the east like
+a wall — filmmaker Patricio Guzmán calls them "a
+natural border that surrounds Chile entirely. Beyond
+it is the world." The cordillera delivers the city's
+first rays of sunlight each morning. From nearly every
+street corner, you can see the mountains. Snow-capped.
+Immovable. A geological reminder of what has always
+been.
+
+The city sits in a basin between two mountain ranges.
+Everything is built for earthquakes. Thick adobe walls.
+Low buildings. An architecture of survival and warmth
+— quincha (wattle and daub, 8,000 years old), tapial
+(rammed earth), tile roofs and deep eaves. Nothing is
+tall because the ground will shake. Nothing is fragile
+because the ground will shake.
+
+Walk into Barrio Italia. Nineteenth-century Italian
+immigrants settled here. The neighborhood is organized
+around _cités_ — row houses with long central hallways,
+originally both homes and workshops. You step through
+an unassuming door on Avenida Italia and find yourself
+in a covered passage lined with workshops: a ceramicist,
+a bookbinder, a leather worker, a furniture restorer.
+Each stall a world. The passage smells of sawdust and
+glaze and coffee.
+
+---
+
+## The Potter
+
+At the end of the passage, a potter. Her name doesn't
+matter. What matters: she's been working in greda —
+the local red terracotta — for thirty years. Her hands
+are the color of the clay. The workshop is one room:
+wheel, shelves, a scarred wooden table, a window
+facing the passage. Through the back door: a courtyard
+with a kiln. Pomaire clay in bags along the wall.
+
+She's throwing a bowl. The wheel hums. She doesn't
+look up.
+
+"What are you looking for?"
+
+_A name. For my workshop._
+
+"Your taller." She nods. "What kind of work?"
+
+_Security consulting. I investigate codebases — other
+people's software — find what's broken, estimate the
+repair, write the proposal, do the remediation._
+
+"So you're a doctor." Not a question. "People bring
+you their sick children. You examine them. You tell
+the parents what's wrong and what it will cost to fix.
+Then you fix them."
+
+_More like... I go to their house. The children don't
+come to me. I go to them._
+
+She considers this. The bowl rises between her hands.
+
+"In Chile, your taller is not separate from your
+home. My grandmother made pots in the same room where
+she raised her children. The clay was under the bed.
+The kiln was outside the kitchen door. You don't LEAVE
+home to work. You work WITHIN your home. The work IS
+the home."
+
+She lifts the bowl off the wheel. Sets it on the shelf
+to dry. Starts another.
+
+"My grandmother didn't have a separate word for her
+workshop. She called it _la casa_. The house. Because
+that's what it was. Everything in one room — the wheel,
+the children, the cooking fire, the drying shelves.
+The pots were everywhere. You couldn't tell where the
+work ended and the life began."
+
+_But I need a word for just the workshop part._
+
+She looks up for the first time. Studies me.
+
+"Why?"
+
+_Because it lives in a different place. Separate from
+my other work. It faces outward — toward clients,
+toward the world outside my... grove._
+
+"Ah." She goes back to the wheel. "So you DO have a
+home. And this workshop is a room WITHIN the home.
+Not the whole house. Just one room."
+
+_Yes. The most personal room. Where my tools are.
+Where my reference books are. Where I prepare before
+going out and debrief when I come back._
+
+"The room that is most yours." She says it exactly
+the way the Philosopher said it, on the other side of
+the world, at the top of a mountain.
+
+---
+
+## The Bodega
+
+She stands. Wipes her hands on her apron. Walks to the
+back of the workshop. Opens a heavy wooden door I
+hadn't noticed.
+
+Behind it: a small room. Cool. Dim. Shelves floor to
+ceiling. Bags of clay — different colors, different
+textures, each labeled with the source and the year.
+Glazes in glass jars, labeled by recipe. A notebook
+on a hook by the door — her formula book. Firing
+schedules. Glaze experiments. Notes going back decades,
+in different handwriting (her grandmother's, her
+mother's, hers).
+
+"This is my _bodega_," she says. "Where I keep
+everything."
+
+Bodega. The word hits differently here, standing in
+one. Not a New York corner store. Not a wine cellar.
+A BODEGA — the room behind the workshop where the
+valuable things are kept. The materials. The formulas.
+The records.
+
+_What does that word mean to you?_
+
+"It means... the place that holds what I can't afford
+to lose. My clay. My recipes. My grandmother's notes.
+If the kiln breaks, I build another kiln. If the wheel
+breaks, I buy another wheel. But if the bodega burns?"
+She shakes her head. "The bodega is irreplaceable."
+
+---
+
+## The Etymology That Won't Let Go
+
+Later, walking back through the passage, the word
+echoes.
+
+Bodega.
+
+And then — a recognition. A convergence. The word
+has been following us across the entire journey,
+wearing different masks:
+
+**Greek:** ἀποθήκη (apothḗkē) — "a place to put
+things away." A repository. A storehouse.
+
+This single Greek word spawned:
+
+→ **Latin:** apotheca — storehouse
+→ **Italian:** bottega — workshop, shop
+→ **Spanish:** bodega — cellar, warehouse, shop
+→ **English:** apothecary — pharmacy
+
+BOTTEGA AND BODEGA ARE THE SAME WORD.
+
+The same root. The same meaning. Separated by a
+thousand years and two languages but born from the
+same impulse: "the place where valued things are
+kept."
+
+We discovered Bottega in Florence.
+We discovered Apothecary in Alexandria.
+We discovered Bodega in Santiago.
+They're the same word.
+
+The word has been trying to find us since Walk One.
+It keeps appearing in different languages, in different
+rooms, on different continents. The Greek root apothḗkē
+won't let go.
+
+"A place to put things away." A place where valued
+things are kept. Where tools are stored. Where
+knowledge accumulates. Where the irreplaceable lives.
+
+---
+
+## The Ruka
+
+Before leaving Santiago, one more stop. Not in the
+city. In the museo, where Mapuche traditions are
+preserved and taught.
+
+The ruka is the traditional Mapuche house. "Ruka"
+means "house" in Mapudungun. Round or oval. Built
+from roble hardwood and totora reeds. No windows.
+One entrance, facing east — toward Puel Mapu, the
+Land of the East, homeland of the gods.
+
+In Mapudungun, the word for "door" simultaneously
+means "where the person enters and exits" AND
+"where the sun enters."
+
+At the center of the ruka: the _kutralwe_. The
+hearth. Home of Ngen-kutral, the fire spirit.
+The fire burns constantly. It's the main hub and
+energy center — where families gather to cook, eat,
+share stories, and transmit wisdom to younger
+generations.
+
+There are no internal walls. Everything is one room.
+The loom stands against the wall (_witral_ — "to be
+vertical"). The wooden plates (_rali_). The stools
+carved from a single block of wood (_wanku_). The
+fire. The roof — round, high — reproduces Wenu Mapu,
+the sacred sky where ancestors live.
+
+Before building a ruka, the future owner requests
+permission from Ngen-mapu, the earth spirit. The
+entire community helps build it in a collective
+labor called _rukatun_. The diagonal beam both
+strengthens the structure and symbolizes the link
+between the universe and the Mapuche world.
+
+The ruka is not just shelter. It is a living
+representation of the relationship between the
+human, the natural, and the spiritual. The
+structure embodies cosmology.
+
+And something else. In Mapuche weaving tradition,
+there is a figure: **Llallinkushe** — "Old-primal
+spider." The great ancient original weaver. In
+Mapuche cosmogony, the spider inhabits domestic
+space, sharing knowledge. A girl learning to weave
+is called _llallin_ — "little spider."
+
+The Spider lives in the house. The Spider teaches
+from within the home. The Spider skill is already
+in the Bestiary.
+
+(We don't take the word "ruka." It belongs to the
+Mapuche people, living and struggling and weaving
+and singing. We take only the lesson: your workshop
+is not separate from your cosmology. The room you
+build reflects the world you believe in.)
+
+---
+
+## What Santiago Teaches
+
+Five walks now. Each one has given us a layer:
+
+| Walk                | Element  | Teaching                        |
+| ------------------- | -------- | ------------------------------- |
+| Da Vinci's workshop | Fire     | Craft, precision, tools         |
+| Alexandria          | Earth    | Knowledge, cataloging, remedy   |
+| Rice fields         | Water    | Patience, cycles, cultivation   |
+| Observatory         | Air      | Perspective, navigation, home   |
+| **Santiago**        | **Soul** | **Home IS workshop. One room.** |
+
+Santiago adds the fifth element: **soul**. The insight
+that the workshop isn't just a functional space — it's
+an expression of who you are. The ruka embodies
+cosmology. The potter's bodega holds what's irreplaceable.
+The cité house doesn't separate living from working.
+
+And the etymological convergence won't let go:
+
+```
+       ἀποθήκη (apothḗkē)
+       "a place to put things away"
+              │
+         apotheca (Latin)
+              │
+     ┌────────┼────────┐
+     │        │        │
+  bottega  bodega  apothecary
+  (Italian) (Spanish) (English)
+  Walk 1    Walk 5    Walk 2
+```
+
+The same word. Three continents. Five walks. It
+keeps finding us.
+
+---
+
+## Solarium, Revisited
+
+Autumn bookmarked Solarium after the observatory walk.
+Let me look at it fresh, with Santiago's lessons:
+
+The potter said: "The room that is most yours."
+The Philosopher said: "The room that is most yours."
+The ruka said: the room IS the cosmology.
+
+**Solarium** — from Latin _solarium_, "a place exposed
+to the sun." A room designed for light.
+
+In medieval castles: the solar, the lord's private
+upper chamber with the best windows.
+
+In botany: a glass room for growing things. A
+greenhouse. A place of cultivation.
+
+In astronomy: a sundial structure. A device for
+tracking the sun's position.
+
+In the Grove: a room full of light. Where the
+Wayfinder sees clearly. Where the tools are kept
+in warmth. Where the Bestiary is open on the desk
+in a shaft of afternoon sun.
+
+Four syllables (soh-LAIR-ee-um). The _-arium_ suffix
+matches Terrarium. Latin. Warm. Luminous.
+
+Testing with Santiago energy:
+
+- "I'm in the Solarium." — The room of light. ✓
+- "The Bestiary is in the Solarium." ✓
+- "Check the Solarium for the Raven protocols." ✓
+- "I updated the Solarium with new templates." ✓
+- "The bodega in the Solarium holds the client
+  records." — Layers within layers. ✓
+
+The modern "solar panel" association:
+Autumn said she liked it. In the Grove context,
+surrounded by Heartwood, Canopy, Foliage, Terrarium,
+"Solarium" reads as a specific room — not as energy
+technology. Context shapes meaning.
+
+`AutumnsGrove/Solarium`
+
+---
+
+## Where We Stand After Five Walks
+
+**Bookmarked by Autumn:**
+Solarium — the room of light
+
+**Still standing:**
+Bottega — the master's workshop (confirmed by bodega
+convergence: same Greek root, same fundamental concept)
+
+**Back pocket:**
+Codex, Solar
+
+**Sub-concepts within the room:**
+
+- Bestiary (the catalog of beasts)
+- Bodega (the storage room for the irreplaceable)
+
+**The convergence:**
+Bottega and Bodega are the same word. Both from Greek
+apothḗkē — "a place to put things away." The same
+root that gave us Apothecary. The word has been
+following us for five walks.
+
+**The reframe (twice confirmed):**
+"You're not describing a workshop. You're describing
+a home. The room that is most yours."
+— The Philosopher (observatory)
+— The Potter (Santiago)
+
+The word is close now.
