@@ -2392,3 +2392,245 @@ walks. Four continents. The whole landscape mapped.
 The name is in the grove. It was always in the grove._
 
 _Tomorrow, we go home and look._
+
+---
+
+## Coming Home
+
+_The jeep engine cuts. The safari is over. The
+journal is full — six walks, four continents, every
+page marked with a different dust. Red laterite from
+Mozambique. White lime from Alexandria. Rice-paddy
+clay from Yunnan. Charcoal smudges from the
+observatory fire. Pomaire greda from Santiago.
+Linseed oil from Florence._
+
+_Walk back into the grove. The trees close around
+you. Familiar. Cool. Home._
+
+_Climb the hill. Past the Heartwood. Past the
+Canopy. Past the Meadow where friends gather. Up
+through the old growth, where the trunks are wide
+and the light filters green and gold._
+
+_At the top of the hill, at the edge of the grove,
+facing outward: a building. Stone walls. A copper
+dome, green with verdigris. One tall window. A door
+that faces east — where the sun enters._
+
+_Step inside._
+
+_The room smells like old paper and linseed oil.
+Light comes through the window — warm, steady,
+afternoon light. A heavy wooden table, scarred
+with use, stained with ink. On the table: the
+Bestiary, open to the Raven's page. A brass orrery.
+A half-drafted proposal. Shelves line the walls —
+the Bodega of client records behind a heavy door,
+the engagement runbook dog-eared and annotated.
+A cloak hangs by the door. Boots underneath._
+
+_Through the dome: the sky. Stars by night. Sun
+by day. The room was designed for light._
+
+_Sit down. Open the journal to a blank page.
+Write:_
+
+---
+
+# The Name: Solarium
+
+**`AutumnsGrove/Solarium`**
+
+_The celestial workshop._
+
+---
+
+From Latin _solarium_ — "a place exposed to the
+sun." A room designed for light.
+
+In medieval castles, the **solar** was the lord's
+private upper chamber — the most personal room,
+away from the noise of the great hall, with the
+best windows. Where you retreated to read, write,
+think, and work. The room that was most yours.
+
+In botany, a **solarium** is a glass-enclosed room
+for cultivating plants. A place of growth. Patient,
+seasonal, cyclical — the rice fields in miniature.
+
+In astronomy, a **solarium** is a structure for
+tracking the sun's movement. Built high, with
+clear views. The observatory's domain.
+
+In the Grove, the **Solarium** is all three:
+
+The private chamber where the Wayfinder works.
+The glass room where her practice is cultivated.
+The observatory on the hill where she reads the
+patterns in client codebases — the cracks, the
+vulnerabilities, the places where the water gets in.
+
+A beacon of hope. A glance toward the sky.
+
+```
+                    ☀️
+            🌲    🌲    🌲
+         🌲    🌳      🌲
+
+      The Grove
+      ═══════════════════
+
+   Heartwood ── Canopy ── Meadow
+   Arbor ── Plant ── Pantry
+   ═══════ LATTICE ═══════
+
+        And on the hill,
+        facing the sky...
+
+           ┌─────────┐
+          ╱    ╲╱    ╲
+         │ ☀ SOLARIUM │
+          ╲          ╱
+           └────┬────┘
+                │
+      ┌─────────┴──────────┐
+      │                     │
+      │  📖 The Bestiary    │
+      │     (the beasts)    │
+      │                     │
+      │  📐 The Instruments │
+      │     (Raven, Osprey) │
+      │                     │
+      │  📜 The Documents   │
+      │     (agreement,     │
+      │      proposal,      │
+      │      runbook)       │
+      │                     │
+      │  📁 The Bodega      │
+      │     (the records    │
+      │      you can't      │
+      │      afford to      │
+      │      lose)          │
+      │                     │
+      └─────────────────────┘
+              ↕
+       client codebases
+```
+
+---
+
+## Why Solarium
+
+The word carries everything the six walks taught us:
+
+**Fire (Da Vinci):** A room with instruments and
+precision tools. The orrery on the desk. The
+Bestiary open to the Raven's page.
+
+**Earth (Alexandria):** Knowledge organized and
+cataloged. The apothecary's labeled drawers — now
+the Bodega's shelves of client records.
+
+**Water (Rice fields):** Patient cultivation over
+seasons. The botanical solarium where practice
+grows year after year.
+
+**Air (Observatory):** The dome. The sky. The high
+vantage point. The Philosopher's cup of tea.
+
+**Soul (Santiago):** Home IS workshop. The room that
+is most yours. The potter's irreplaceable bodega.
+
+**Wild (Mozambique):** The name was already in the
+grove. The exterior reveals nothing; the interior
+contains everything.
+
+---
+
+## The Word Itself
+
+**Solarium** (soh-LAIR-ee-um)
+
+- Four syllables — matches Terrarium
+- Latin — the _-arium_ suffix means "a place for"
+  (solarium = a place for the sun)
+- Immediately warm — it literally means "sunny room"
+- Clean in tech — no company has claimed it
+- Nature-adjacent — light, growth, sky
+- Medieval roots — the solar of the castle
+- Astronomical roots — the sun-tracking structure
+- Botanical roots — the glass room for cultivation
+- The _sol-_ prefix echoes through the Grove:
+  solace, solitary, solid, soul
+
+---
+
+## The Full Ecosystem
+
+```
+THE GROVE
+
+  Heartwood ── Canopy ── Meadow ── Foliage
+  (identity)   (dir)     (social)   (themes)
+
+  Arbor ── Plant ── Pantry ── Terrarium
+  (admin)  (onboard) (shop)    (local dev)
+
+  ═══════════ LATTICE (framework) ═══════════
+
+       On the hill, facing the sky:
+
+       ╔═══════════════════════╗
+       ║     SOLARIUM          ║
+       ║  The celestial        ║
+       ║  workshop             ║
+       ║                       ║
+       ║  📖 Bestiary          ║
+       ║  📜 Documents         ║
+       ║  📁 Bodega            ║
+       ║  🐦‍⬛ Raven             ║
+       ║  🦅 Osprey            ║
+       ╚═══════════════════════╝
+              ↕
+        Client Codebases
+```
+
+---
+
+## Tagline
+
+**"The celestial workshop."**
+
+Or, quieter:
+
+_"A room designed for light."_
+
+---
+
+## The Journey
+
+Six walks to find one word.
+
+| Walk                | Where           | Teaching                      |
+| ------------------- | --------------- | ----------------------------- |
+| Da Vinci's workshop | Florence        | Craft, precision, tools       |
+| Library of          | Alexandria      | Knowledge, cataloging, remedy |
+| Alexandria          |                 |                               |
+| The rice fields     | Yunnan, China   | Patience, cycles, cultivation |
+| The observatory     | The mountain    | Perspective, navigation, home |
+| The potter's taller | Santiago, Chile | Home IS workshop. One room.   |
+| The safari          | Mozambique      | The name is in the grove.     |
+
+And the name was waiting on the mountain the whole
+time. In the room behind the dome. Where the
+Philosopher sipped her tea and said: "You're not
+describing a workshop. You're describing a home.
+The room that is most yours."
+
+The Solarium. A room designed for light.
+
+`AutumnsGrove/Solarium`
+
+_The fire dies to embers. The stars wheel overhead.
+The journal closes. The name is found._
