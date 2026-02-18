@@ -17,6 +17,8 @@ declare global {
         DB: D1Database;
         CACHE_KV: KVNamespace;
         AUTH: Fetcher;
+        /** ThresholdDO - Per-identifier rate limiting (Loom pattern) */
+        THRESHOLD?: DurableObjectNamespace;
       };
     }
   }

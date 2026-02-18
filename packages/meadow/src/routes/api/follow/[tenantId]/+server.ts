@@ -41,10 +41,12 @@ export const POST: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   // Rate limit
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/follow:${locals.user.id}`,
+      key: "meadow/follow",
       limit: 30,
       windowSeconds: 3600,
       failMode: "open",
@@ -85,10 +87,12 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   // Rate limit
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/follow:${locals.user.id}`,
+      key: "meadow/follow",
       limit: 30,
       windowSeconds: 3600,
       failMode: "open",

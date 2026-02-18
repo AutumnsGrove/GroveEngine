@@ -47,10 +47,12 @@ export const POST: RequestHandler = async ({
   }
 
   // Rate limit — check early before parsing body or hitting DB
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/report:${locals.user.id}`,
+      key: "meadow/report",
       limit: 10,
       windowSeconds: 3600,
       failMode: "open",

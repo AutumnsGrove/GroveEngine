@@ -28,10 +28,12 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   // Rate limit: 60 deletes per hour
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/notes/delete:${locals.user.id}`,
+      key: "meadow/notes/delete",
       limit: 60,
       windowSeconds: 3600,
       failMode: "open",

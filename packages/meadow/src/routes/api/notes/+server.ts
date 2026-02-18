@@ -33,10 +33,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit: 30 notes per hour
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/notes:${locals.user.id}`,
+      key: "meadow/notes",
       limit: 30,
       windowSeconds: 3600,
       failMode: "open",

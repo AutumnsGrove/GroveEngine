@@ -24,3 +24,9 @@ preview_id = "fbf702e54358468d8ec767ca0bfc8c56"
 [[services]]
 binding = "AUTH"
 service = "groveauth"
+
+# ThresholdDO: Per-identifier rate limiting (Loom pattern)
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"

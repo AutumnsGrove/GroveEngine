@@ -602,29 +602,29 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // API RATE LIMITING (HAWK-002)
   // =========================================================================
-  // Global rate limit for API routes. Fails open if KV is unavailable.
+  // Global rate limit for API routes. DO-first (per-user/IP isolation),
+  // falls back to KV when THRESHOLD binding is absent (local dev, etc.).
+  // Fails open if neither backend is available.
   if (event.url.pathname.startsWith("/api/")) {
-    const kv = event.platform?.env?.CACHE_KV;
-    if (kv) {
-      const { createThreshold } = await import("$lib/threshold/factory.js");
-      const { thresholdCheck } =
-        await import("$lib/threshold/adapters/sveltekit.js");
-      const { getClientIP } = await import("$lib/threshold/adapters/worker.js");
-      const threshold = createThreshold(event.platform?.env);
-      if (threshold) {
-        const clientIp = getClientIP(event.request);
-        const isWrite = ["POST", "PUT", "PATCH", "DELETE"].includes(
-          event.request.method,
-        );
-
-        const denied = await thresholdCheck(threshold, {
-          key: `${isWrite ? "api:write" : "api:read"}:${clientIp}`,
-          limit: isWrite ? 30 : 120,
-          windowSeconds: 60,
-        });
-
-        if (denied) return denied;
-      }
+    const { createThreshold } = await import("$lib/threshold/factory.js");
+    const { thresholdCheck } =
+      await import("$lib/threshold/adapters/sveltekit.js");
+    const { getClientIP } = await import("$lib/threshold/adapters/worker.js");
+    const clientIp = getClientIP(event.request);
+    // Authenticated users: rate limit per user ID so limits follow sessions, not IPs.
+    // Anonymous: rate limit per IP.
+    const identifier = event.locals.user?.id ?? clientIp;
+    const threshold = createThreshold(event.platform?.env, { identifier });
+    if (threshold) {
+      const isWrite = ["POST", "PUT", "PATCH", "DELETE"].includes(
+        event.request.method,
+      );
+      const denied = await thresholdCheck(threshold, {
+        key: isWrite ? "api:write" : "api:read",
+        limit: isWrite ? 30 : 120,
+        windowSeconds: 60,
+      });
+      if (denied) return denied;
     }
   }
 

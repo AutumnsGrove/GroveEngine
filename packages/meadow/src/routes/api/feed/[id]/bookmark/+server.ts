@@ -40,10 +40,12 @@ export const POST: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   // Rate limit
-  const threshold = createThreshold(platform?.env);
+  const threshold = createThreshold(platform?.env, {
+    identifier: locals.user.id,
+  });
   if (threshold) {
     const denied = await thresholdCheck(threshold, {
-      key: `meadow/bookmark:${locals.user.id}`,
+      key: "meadow/bookmark",
       limit: 120,
       windowSeconds: 3600,
       failMode: "open",

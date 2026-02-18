@@ -81,6 +81,9 @@ declare global {
         /** ExportDO - Per-export zip assembly job (alarm-based, long-running) */
         EXPORTS: DurableObjectNamespace;
 
+        /** ThresholdDO - Per-identifier rate limiting (Loom pattern) */
+        THRESHOLD?: DurableObjectNamespace;
+
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
