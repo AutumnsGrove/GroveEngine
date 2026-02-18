@@ -12,7 +12,7 @@ from rich.table import Table
 from rich.markdown import Markdown
 
 from ...gh_wrapper import GitHub, GitHubError
-from ...ui import is_interactive
+from ...ui import is_interactive, render_comments
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -178,6 +178,18 @@ def issue_view(
                 "assignees": issue.assignees,
                 "milestone": issue.milestone,
             }
+            if comments:
+                fetched = gh.issue_comments(number)
+                data["comments"] = [
+                    {
+                        "id": c.id,
+                        "author": c.author,
+                        "body": c.body,
+                        "created_at": c.created_at,
+                        "url": c.url,
+                    }
+                    for c in fetched
+                ]
             console.print(json.dumps(data, indent=2))
             return
 
@@ -208,6 +220,53 @@ def issue_view(
         if issue.body:
             console.print("\n[bold]Description:[/bold]")
             console.print(Markdown(issue.body))
+
+        # Comments (when --comments flag is passed)
+        if comments:
+            fetched = gh.issue_comments(number)
+            render_comments(fetched, title="Comments")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@issue.command("comments")
+@click.argument("number", type=int)
+@click.pass_context
+def issue_comments_cmd(
+    ctx: click.Context,
+    number: int,
+) -> None:
+    """List all comments on an issue.
+
+    Always safe - no --write flag required.
+
+    \b
+    Examples:
+        gw gh issue comments 348
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        gh = GitHub()
+        comments = gh.issue_comments(number)
+
+        if output_json:
+            data = [
+                {
+                    "id": c.id,
+                    "author": c.author,
+                    "body": c.body,
+                    "created_at": c.created_at,
+                    "url": c.url,
+                }
+                for c in comments
+            ]
+            console.print(json.dumps(data, indent=2))
+            return
+
+        render_comments(comments, title="Issue Comments")
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")

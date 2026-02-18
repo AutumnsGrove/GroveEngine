@@ -12,7 +12,7 @@ from rich.table import Table
 from rich.markdown import Markdown
 
 from ...gh_wrapper import GitHub, GitHubError, PRComment, PRCheck
-from ...ui import is_interactive
+from ...ui import is_interactive, render_comments
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -160,6 +160,19 @@ def pr_view(
                 "draft": pr.draft,
                 "mergeable": pr.mergeable,
             }
+            if comments:
+                fetched = gh.pr_comments(number)
+                data["comments"] = [
+                    {
+                        "author": c.author,
+                        "body": c.body,
+                        "created_at": c.created_at,
+                        "is_review": c.is_review_comment,
+                        "path": c.path,
+                        "line": c.line,
+                    }
+                    for c in fetched
+                ]
             console.print(json.dumps(data, indent=2))
             return
 
@@ -195,6 +208,11 @@ def pr_view(
                 else "[red]Not mergeable[/red]"
             )
             console.print(f"\n[bold]Status:[/bold] {status}")
+
+        # Comments (when --comments flag is passed)
+        if comments:
+            fetched = gh.pr_comments(number)
+            render_comments(fetched, title="Comments")
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")
@@ -577,32 +595,7 @@ def pr_comments(
             console.print(json.dumps(data, indent=2))
             return
 
-        if not comments:
-            console.print("[dim]No comments found[/dim]")
-            return
-
-        console.print(
-            Panel(
-                f"[bold]{len(comments)} comments[/bold] on PR #{number}",
-                title="PR Comments",
-                border_style="green",
-            )
-        )
-
-        for c in comments:
-            # Header with author and time
-            comment_type = "[dim](review)[/dim] " if c.is_review_comment else ""
-            location = ""
-            if c.path:
-                location = f" [cyan]{c.path}[/cyan]"
-                if c.line:
-                    location += f":[cyan]{c.line}[/cyan]"
-
-            console.print(
-                f"\n{comment_type}[bold]{c.author}[/bold]{location} [dim]{c.created_at[:10]}[/dim]"
-            )
-            console.print(Markdown(c.body))
-            console.print("[dim]─" * 40 + "[/dim]")
+        render_comments(comments, title="PR Comments")
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")

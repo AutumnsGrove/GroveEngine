@@ -588,6 +588,35 @@ class GitHub:
         comments.sort(key=lambda c: c.created_at)
         return comments
 
+    def issue_comments(self, number: int) -> list[PRComment]:
+        """Get all comments on an issue.
+
+        Args:
+            number: Issue number
+
+        Returns:
+            List of PRComment objects sorted by creation time
+        """
+        comments = []
+        try:
+            data = self.execute_json([
+                "api", f"repos/{self.repo}/issues/{number}/comments"
+            ])
+            for c in data:
+                comments.append(PRComment(
+                    id=c["id"],
+                    author=c["user"]["login"],
+                    body=c["body"],
+                    created_at=c["created_at"],
+                    updated_at=c["updated_at"],
+                    url=c["html_url"],
+                    is_review_comment=False,
+                ))
+        except GitHubError:
+            pass
+        comments.sort(key=lambda c: c.created_at)
+        return comments
+
     def pr_checks(self, number: int) -> list[PRCheck]:
         """Get CI/CD check status for a pull request.
 

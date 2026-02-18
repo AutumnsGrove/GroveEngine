@@ -54,6 +54,35 @@ def relative_time(iso_str: str) -> str:
         return iso_str
 
 
+def render_comments(comments: list, title: str = "Comments") -> None:
+    """Render a list of comment objects with Rich formatting.
+
+    Works with any object that has: .author, .body, .created_at,
+    .is_review_comment, .path, .line attributes.
+    """
+    from rich.markdown import Markdown  # local import to keep ui.py lean
+
+    if not comments:
+        console.print("\n[dim]No comments.[/dim]")
+        return
+
+    console.print(f"\n[bold]{title}[/bold] [dim]({len(comments)})[/dim]")
+    for c in comments:
+        comment_type = "[dim](review)[/dim] " if c.is_review_comment else ""
+        location = ""
+        if c.path:
+            location = f" [cyan]{c.path}[/cyan]"
+            if c.line:
+                location += f":[cyan]{c.line}[/cyan]"
+
+        console.print(
+            f"\n{comment_type}[bold]{c.author}[/bold]{location} "
+            f"[dim]{relative_time(c.created_at)}[/dim]"
+        )
+        console.print(Markdown(c.body))
+        console.print("[dim]" + "─" * 40 + "[/dim]")
+
+
 def is_interactive() -> bool:
     """Check if we're running in an interactive terminal.
 
