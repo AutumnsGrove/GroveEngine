@@ -18,6 +18,9 @@ CDN_URL = "https://cdn.grove.place"
 # Passkey (WebAuthn) allowed origins — comma-separated for multi-origin support
 PASSKEY_ORIGIN = "https://login.grove.place"
 
+# Zephyr email gateway
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+
 # Feature flags
 PUBLIC_SIGNUP_ENABLED = "true"  # Public signup enabled — launch day 2026-02-14
 
@@ -58,6 +61,11 @@ new_sqlite_classes = ["SessionDO"]
 binding = "SESSION_KV"
 id = "7cfbd9e67125405994b49ecf80a372a4"
 
+# Zephyr Service Binding (email gateway - direct internal routing)
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
 # Smart Placement - run worker closer to D1 database location
 # Reduces latency for database-heavy auth operations
 [placement]
@@ -74,6 +82,7 @@ crons = ["* * * * *", "0 0 * * *"]
 # - JWT_PUBLIC_KEY: RSA public key for verifying JWTs (PEM format)
 # - GOOGLE_CLIENT_ID: Google OAuth client ID
 # - GOOGLE_CLIENT_SECRET: Google OAuth client secret
-# - RESEND_API_KEY: Resend API key for sending emails
+# - ZEPHYR_API_KEY: Shared secret for authenticating with Zephyr email worker
+# - RESEND_API_KEY: (deprecated — magic links now route through Zephyr)
 # - SESSION_SECRET: Secret for signing session cookies (32+ bytes)
 # - BETTER_AUTH_SECRET: Secret for Better Auth (can reuse SESSION_SECRET)

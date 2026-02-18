@@ -17,6 +17,7 @@ import type { CloudflareGeolocation } from "better-auth-cloudflare";
 import { magicLink, twoFactor } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey";
 import { drizzle } from "drizzle-orm/d1";
+import { ZephyrClient } from "@autumnsgrove/groveengine/zephyr";
 import type { Env } from "../types.js";
 import { isEmailAllowed } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
@@ -26,46 +27,52 @@ import {
   bridgeSessionToSessionDO,
 } from "../lib/sessionBridge.js";
 
-// Email template for magic link
+// Magic link email template — Grove-branded, warm style
+// Matches the shared Grove email design (see Plant verification template)
 const MAGIC_LINK_EMAIL_HTML = (url: string) =>
   `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heartwood Login</title>
+  <title>Grove</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
+<body style="margin: 0; padding: 0; background-color: #fefdfb; font-family: 'Lexend', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
-      <td>
-        <div style="background-color: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <h1 style="margin: 0 0 24px; font-size: 24px; font-weight: 600; color: #18181b; text-align: center;">
-            Heartwood
-          </h1>
-
-          <p style="margin: 0 0 24px; font-size: 16px; color: #3f3f46; line-height: 1.5;">
-            Click the button below to sign in. This link will expire in 10 minutes.
-          </p>
-
-          <div style="text-align: center; margin: 0 0 24px;">
-            <a href="${url}" style="display: inline-block; background-color: #18181b; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
-              Sign In to Heartwood
-            </a>
-          </div>
-
-          <p style="margin: 0 0 8px; font-size: 14px; color: #71717a; line-height: 1.5;">
-            If you didn't request this link, you can safely ignore this email.
-          </p>
-
-          <p style="margin: 0; font-size: 12px; color: #a1a1aa; line-height: 1.5; word-break: break-all;">
-            Or copy this link: ${url}
-          </p>
+      <td align="center" style="padding-bottom: 30px;">
+        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
+          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
+        </svg>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
+        <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
+          Sign in to Grove
+        </h1>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+          Click the button below to sign in. This link expires in 10 minutes.
+        </p>
+        <div style="text-align: center; margin: 0 0 24px;">
+          <a href="${url}" style="display: inline-block; background-color: #22c55e; color: #1e2227; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+            Sign In
+          </a>
         </div>
-
-        <p style="margin: 24px 0 0; font-size: 12px; color: #a1a1aa; text-align: center;">
-          Heartwood - Authentication for AutumnsGrove
+        <p style="margin: 0 0 8px 0; font-size: 14px; color: rgba(245, 242, 234, 0.5);">
+          If you didn't request this, you can safely ignore this email.
+        </p>
+        <p style="margin: 0; font-size: 12px; color: rgba(245, 242, 234, 0.35); line-height: 1.5; word-break: break-all;">
+          Or copy this link: ${url}
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding-top: 30px;">
+        <p style="margin: 0; font-size: 12px; color: rgba(61, 41, 20, 0.4);">
+          grove.place
         </p>
       </td>
     </tr>
@@ -76,17 +83,16 @@ const MAGIC_LINK_EMAIL_HTML = (url: string) =>
 
 const MAGIC_LINK_EMAIL_TEXT = (url: string) =>
   `
-Heartwood Login
+Sign in to Grove
 
 Click the link below to sign in:
 ${url}
 
-This link will expire in 10 minutes.
+This link expires in 10 minutes.
 
-If you didn't request this link, you can safely ignore this email.
+If you didn't request this, you can safely ignore this email.
 
----
-Heartwood - Authentication for AutumnsGrove
+— Grove
 `.trim();
 
 /**
@@ -100,6 +106,11 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
   // Create Drizzle instance for D1 with schema
   const db = drizzle(env.DB, { schema });
   const groveDb = createDbSession(env);
+  const zephyr = new ZephyrClient({
+    baseUrl: env.ZEPHYR_URL,
+    apiKey: env.ZEPHYR_API_KEY,
+    fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
+  });
 
   return betterAuth({
     // Base URL for auth endpoints
@@ -291,35 +302,32 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
         // Disable signup via magic link (allowlist only)
         disableSignUp: false,
 
-        // Send magic link email via Resend
+        // Send magic link email via Zephyr (unified email gateway)
         sendMagicLink: async ({ email, url }) => {
-          try {
-            const response = await fetch("https://api.resend.com/emails", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${env.RESEND_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                from: "Heartwood <auth@grove.place>",
-                to: email,
-                subject: "Sign in to Heartwood",
-                html: MAGIC_LINK_EMAIL_HTML(url),
-                text: MAGIC_LINK_EMAIL_TEXT(url),
-              }),
-            });
+          const result = await zephyr.sendRaw({
+            to: email,
+            subject: "Sign in to Grove",
+            html: MAGIC_LINK_EMAIL_HTML(url),
+            text: MAGIC_LINK_EMAIL_TEXT(url),
+            from: "auth@grove.place",
+            fromName: "Grove",
+            type: "verification",
+            tenant: "heartwood",
+            // Use the magic link token as idempotency key — stable per request,
+            // so retries deduplicate correctly rather than sending duplicate emails.
+            idempotencyKey: `magic-link-${new URL(url).searchParams.get("token") ?? email}`,
+          });
 
-            if (!response.ok) {
-              const error = await response.text();
-              console.error("[MagicLink] Failed to send email:", error);
-              throw new Error("Failed to send magic link email");
-            }
-
-            console.log("[MagicLink] Sent magic link");
-          } catch (error) {
-            console.error("[MagicLink] Error sending email:", error);
-            throw error;
+          if (!result.success) {
+            console.error(
+              "[MagicLink] Zephyr send failed:",
+              result.errorCode,
+              result.errorMessage,
+            );
+            throw new Error("Failed to send magic link email");
           }
+
+          console.log("[MagicLink] Sent magic link via Zephyr");
         },
       }),
 
