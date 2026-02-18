@@ -6,10 +6,11 @@
 	"license": "AGPL-3.0-only",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/AutumnsGrove/Lattice.git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
 		"directory": "packages/engine"
 	},
 	"publishConfig": {
+		"access": "public",
 		"registry": "https://npm.pkg.github.com"
 	},
 	"keywords": [
