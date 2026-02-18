@@ -181,6 +181,8 @@ Also define the full service registry (updated to include Warden, Meadow, and Qu
 
 Add tables to grove-engine-db for storing collected metrics:
 
+**Timestamp convention:** All timestamps use INTEGER (Unix epoch seconds), consistent with the rest of the engine schema. No `datetime('now')` TEXT fields — keeps cross-table queries and sorting straightforward.
+
 ```sql
 -- Observability metrics (time-series)
 CREATE TABLE IF NOT EXISTS observability_metrics (
@@ -193,6 +195,9 @@ CREATE TABLE IF NOT EXISTS observability_metrics (
   metadata TEXT
 );
 
+-- Primary query pattern: WHERE service_name = ? AND recorded_at > ? ORDER BY recorded_at
+CREATE INDEX idx_obs_metrics_service_time ON observability_metrics(service_name, recorded_at);
+
 -- Health check results
 CREATE TABLE IF NOT EXISTS observability_health_checks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -203,6 +208,8 @@ CREATE TABLE IF NOT EXISTS observability_health_checks (
   error_message TEXT,
   checked_at INTEGER NOT NULL
 );
+
+CREATE INDEX idx_obs_health_endpoint_time ON observability_health_checks(endpoint, checked_at);
 
 -- D1 database stats
 CREATE TABLE IF NOT EXISTS observability_d1_stats (
@@ -215,6 +222,8 @@ CREATE TABLE IF NOT EXISTS observability_d1_stats (
   recorded_at INTEGER NOT NULL
 );
 
+CREATE INDEX idx_obs_d1_name_time ON observability_d1_stats(database_name, recorded_at);
+
 -- R2 bucket stats
 CREATE TABLE IF NOT EXISTS observability_r2_stats (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -223,6 +232,8 @@ CREATE TABLE IF NOT EXISTS observability_r2_stats (
   total_size_bytes INTEGER,
   recorded_at INTEGER NOT NULL
 );
+
+CREATE INDEX idx_obs_r2_bucket_time ON observability_r2_stats(bucket_name, recorded_at);
 
 -- KV namespace stats
 CREATE TABLE IF NOT EXISTS observability_kv_stats (
@@ -235,6 +246,8 @@ CREATE TABLE IF NOT EXISTS observability_kv_stats (
   recorded_at INTEGER NOT NULL
 );
 
+CREATE INDEX idx_obs_kv_ns_time ON observability_kv_stats(namespace_name, recorded_at);
+
 -- Durable Object stats (self-reported)
 CREATE TABLE IF NOT EXISTS observability_do_stats (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -246,7 +259,14 @@ CREATE TABLE IF NOT EXISTS observability_do_stats (
   recorded_at INTEGER NOT NULL
 );
 
+CREATE INDEX idx_obs_do_class_time ON observability_do_stats(class_name, recorded_at);
+
 -- Daily cost aggregates
+-- NOTE: estimated_cost_usd is calculated at collection time using the CLOUDFLARE_PRICING
+-- constants active at that moment. If pricing changes, historical rows are NOT retroactively
+-- recalculated — they reflect what the cost *was* under the pricing in effect when collected.
+-- The raw usage columns (d1_reads, r2_class_a, etc.) are always accurate, so a retroactive
+-- recalculation can be done via a one-off script if needed.
 CREATE TABLE IF NOT EXISTS observability_daily_costs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   date TEXT NOT NULL,
@@ -261,6 +281,7 @@ CREATE TABLE IF NOT EXISTS observability_daily_costs (
   worker_requests INTEGER DEFAULT 0,
   do_requests INTEGER DEFAULT 0,
   estimated_cost_usd REAL DEFAULT 0,
+  pricing_version TEXT DEFAULT '2026-02-17',
   UNIQUE(date, service_name)
 );
 
@@ -273,8 +294,8 @@ CREATE TABLE IF NOT EXISTS observability_alert_thresholds (
   threshold_value REAL NOT NULL,
   severity TEXT NOT NULL,
   enabled INTEGER DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
 );
 
 -- Alert history
@@ -287,10 +308,13 @@ CREATE TABLE IF NOT EXISTS observability_alerts (
   metric_type TEXT,
   metric_value REAL,
   threshold_value REAL,
-  triggered_at TEXT NOT NULL DEFAULT (datetime('now')),
-  resolved_at TEXT,
+  triggered_at INTEGER NOT NULL,
+  resolved_at INTEGER,
   acknowledged INTEGER DEFAULT 0
 );
+
+CREATE INDEX idx_obs_alerts_service_time ON observability_alerts(service_name, triggered_at);
+CREATE INDEX idx_obs_alerts_unresolved ON observability_alerts(resolved_at) WHERE resolved_at IS NULL;
 ```
 
 ### Step 3: Cloudflare API Collector Service
@@ -308,7 +332,7 @@ Build collector modules that query Cloudflare APIs:
 
 The Cloudflare Analytics GraphQL API endpoint is `https://api.cloudflare.com/client/v4/graphql` and requires:
 
-- `CF_API_TOKEN` (with Analytics:Read, D1:Read, R2:Read, KV:Read permissions)
+- `CF_OBSERVABILITY_TOKEN` (with Analytics:Read, D1:Read, R2:Read, KV:Read permissions — see Operational Prerequisites for full scope list)
 - `CF_ACCOUNT_ID`
 
 ### Step 4: Cost Calculator
@@ -543,12 +567,86 @@ Also add a `/do-metrics` endpoint on the durable-objects worker that aggregates 
 
 ### Step 9: Cron Collection Job
 
-**Add to engine wrangler.toml:** A cron trigger that runs every 5 minutes to collect metrics.
+**Files:**
 
-Alternatively, since we're building inside the engine for now, add a self-triggered collection that runs via:
+- `packages/engine/src/lib/server/observability/scheduler.ts` — Collection orchestrator
+- `packages/engine/src/routes/api/admin/observability/collect/+server.ts` — Manual trigger endpoint (already in Step 6)
+- `packages/engine/wrangler.toml` — Cron trigger registration
 
-- A scheduled endpoint called by an external cron (Cloudflare cron trigger)
-- Or manual collection from the admin dashboard
+**Trigger mechanism:** Cloudflare cron trigger on the landing worker, running every 5 minutes.
+
+```toml
+# In packages/landing/wrangler.toml
+[triggers]
+crons = ["*/5 * * * *"]
+```
+
+The `scheduled` event handler calls the collection orchestrator:
+
+```typescript
+// In packages/landing/src/worker.ts (or equivalent entry point)
+export default {
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const collector = createObservabilityCollector(env);
+    ctx.waitUntil(collector.runFullCollection());
+  },
+};
+```
+
+**Collection orchestrator** (`scheduler.ts`) coordinates all collectors in sequence:
+
+```typescript
+async runFullCollection(): Promise<CollectionResult> {
+  const results = {
+    startedAt: Date.now(),
+    collectors: {} as Record<string, CollectorResult>,
+  };
+
+  // 1. Cloudflare API collectors (Workers, D1, R2, KV stats)
+  //    These hit external APIs — run in parallel with Promise.allSettled
+  const [workers, d1, r2, kv] = await Promise.allSettled([
+    this.collectWorkerMetrics(),
+    this.collectD1Metrics(),
+    this.collectR2Metrics(),
+    this.collectKVMetrics(),
+  ]);
+
+  // 2. Health checks — ping all worker /health endpoints in parallel
+  const healthResults = await this.runHealthChecks();
+
+  // 3. DO metrics — query the durable-objects worker's /do-metrics endpoint
+  const doResults = await this.collectDOMetrics();
+
+  // 4. Internal aggregators — query D1 tables for Lumen, Petal, Thorn, etc.
+  //    These are cheap local queries, run in parallel
+  const aggregated = await Promise.allSettled([
+    this.aggregateLumen(),
+    this.aggregatePetal(),
+    this.aggregateThorn(),
+    this.aggregateSentinel(),
+    this.aggregateClearing(),
+    this.aggregateWarden(),
+    this.aggregateMeadow(),
+    this.aggregateFirefly(),
+  ]);
+
+  // 5. Calculate and store daily costs
+  await this.calculateDailyCosts();
+
+  // 6. Evaluate alert thresholds against fresh data
+  await this.evaluateAlerts();
+
+  // 7. Write collection metadata (duration, errors, next run)
+  results.completedAt = Date.now();
+  return results;
+}
+```
+
+**Data freshness:** At 5-minute intervals, the `observability_metrics` table grows by ~200 rows/day per service (12 collections/hour x ~1-2 rows per collector). With 11 services, that's ~2,200 rows/day or ~66,000 rows/month. The indexes from Step 2 keep queries fast. A retention job (delete rows older than 90 days) should run daily as a separate cron or as part of the collection cycle.
+
+**Manual collection** is also available via `POST /api/admin/observability/collect` (Step 6) for on-demand refresh from the Vista dashboard. This calls the same `runFullCollection()` method.
+
+**Failure handling:** Each collector runs independently via `Promise.allSettled` — if one Cloudflare API times out, the others still complete. Failed collectors log the error and the dashboard shows stale data with a "last collected at" timestamp rather than no data.
 
 ### Step 10: Security-Adjacent Monitoring (v1.0 Audit Findings)
 
