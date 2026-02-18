@@ -70,7 +70,7 @@ This means no separate deployment, no separate D1/KV provisioning, no cross-serv
 
 The collectors need a Cloudflare API token to query the Analytics GraphQL API, D1 HTTP API, R2 API, and KV Analytics API. This is the single biggest setup dependency.
 
-**Required token scopes:**
+**Required token scopes** (create at dash.cloudflare.com → My Profile → API Tokens → Create Token):
 
 - `Account Analytics:Read` — Worker request/error/latency metrics via GraphQL
 - `Account D1:Read` — Database size, row counts, query stats
@@ -78,9 +78,22 @@ The collectors need a Cloudflare API token to query the Analytics GraphQL API, D
 - `Account Workers KV Storage:Read` — Namespace operation counts
 - `Account Workers Scripts:Read` — Worker list and deployment status
 
-**Storage:** The token goes in the engine's `wrangler.toml` as a secret (`CF_OBSERVABILITY_TOKEN`), deployed via `gw secret apply --write` or `wrangler secret put`. It lives alongside `CF_ACCOUNT_ID` which is already in environment config.
+**What you need to provision — exactly two things:**
 
-**Rotation:** Cloudflare API tokens don't expire by default, but the plan should support rotation. The token is read from the Worker environment on each collection cycle — rotating means deploying a new secret value. No code change needed, just `wrangler secret put CF_OBSERVABILITY_TOKEN`. A future improvement could add token expiry monitoring as an alert threshold itself.
+1. `CF_OBSERVABILITY_TOKEN` — the new read-only API token (sensitive, goes in vault)
+2. `CF_ACCOUNT_ID` — `04e847fa7655624e84414a8280b3a4d0` — already hardcoded in `packages/engine/src/lib/config/links.ts`; not sensitive, goes in `[vars]` in the collector's `wrangler.toml`, no vault needed
+
+**How to store and deploy the token (using gw secrets vault):**
+
+```bash
+# 1. Store in vault (prompts for value, never echoes)
+gw secret set CF_OBSERVABILITY_TOKEN
+
+# 2. Push to the collector worker after it's deployed
+gw secret apply CF_OBSERVABILITY_TOKEN --worker grove-vista-collector
+```
+
+**Rotation:** Cloudflare API tokens don't expire by default. To rotate: run `gw secret set CF_OBSERVABILITY_TOKEN` with the new value, then `gw secret apply CF_OBSERVABILITY_TOKEN --worker grove-vista-collector`. No code change needed.
 
 **Separation of concerns:** This token is read-only and scoped to analytics. It cannot modify workers, databases, or storage. It's a separate token from any deployment credentials.
 
@@ -567,24 +580,48 @@ Also add a `/do-metrics` endpoint on the durable-objects worker that aggregates 
 
 ### Step 9: Cron Collection Job
 
+**The collector is a dedicated standalone worker** — `packages/workers/vista-collector/` — not bolted onto the landing or engine deployment. This follows the same pattern as `grove-clearing-monitor` and `grove-meadow-poller`: isolated lifecycle, isolated bindings, no coupling to the landing deploy.
+
 **Files:**
 
-- `packages/engine/src/lib/server/observability/scheduler.ts` — Collection orchestrator
+- `packages/workers/vista-collector/src/index.ts` — Worker entry point + scheduled handler
+- `packages/workers/vista-collector/wrangler.toml` — Bindings, cron triggers, vars
+- `packages/engine/src/lib/server/observability/scheduler.ts` — Collection orchestrator (imported by the worker)
 - `packages/engine/src/routes/api/admin/observability/collect/+server.ts` — Manual trigger endpoint (already in Step 6)
-- `packages/engine/wrangler.toml` — Cron trigger registration
 
-**Trigger mechanism:** Cloudflare cron trigger on the landing worker, running every 5 minutes.
+**`packages/workers/vista-collector/wrangler.toml`:**
 
 ```toml
-# In packages/landing/wrangler.toml
+# Grove Vista Collector
+# Observability metrics collection for the Vista dashboard
+
+name = "grove-vista-collector"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
 [triggers]
-crons = ["*/5 * * * *"]
+crons = [
+  "*/5 * * * *",  # Metric collection: Workers, D1, R2, KV, health checks
+  "0 0 * * *"     # Daily: cost aggregation + 90-day retention cleanup
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+[vars]
+CF_ACCOUNT_ID = "04e847fa7655624e84414a8280b3a4d0"
+
+# Secrets (via gw secret apply CF_OBSERVABILITY_TOKEN --worker grove-vista-collector)
+# CF_OBSERVABILITY_TOKEN
 ```
 
-The `scheduled` event handler calls the collection orchestrator:
+**`packages/workers/vista-collector/src/index.ts`:**
 
 ```typescript
-// In packages/landing/src/worker.ts (or equivalent entry point)
+import { createObservabilityCollector } from "@autumnsgrove/groveengine/server/observability";
+
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     const collector = createObservabilityCollector(env);
