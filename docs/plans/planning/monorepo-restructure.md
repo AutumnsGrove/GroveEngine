@@ -8,7 +8,7 @@
 
 ## The Problem
 
-The monorepo has outgrown its flat `packages/` structure. Fourteen packages — SvelteKit apps, core service workers, utility cron workers, and shared libraries — sit side-by-side in one directory with no visual hierarchy. Two critical theming projects (Foliage and Gossamer) have stalled because coordinating work across separate repos is too painful. Meanwhile, Forage's business logic belongs here (the UI already is), and Shutter is becoming integral to multiple Grove services.
+The monorepo has outgrown its flat `packages/` structure. Fourteen active packages — SvelteKit apps, core service workers, utility cron workers, and shared libraries — sit side-by-side in one directory with no visual hierarchy, alongside three abandoned artifact packages (`example-site`, `ui`, `zig-core`) that have never been cleaned up. Two critical theming projects (Foliage and Gossamer) have stalled because coordinating work across separate repos is too painful. Meanwhile, Forage's business logic belongs here (the UI already is), and Shutter is becoming integral to multiple Grove services.
 
 ## The Solution
 
@@ -20,16 +20,19 @@ The monorepo has outgrown its flat `packages/` structure. Fourteen packages — 
 
 ## Decisions (Confirmed)
 
-| Decision                                               | Answer                                                                   |
-| ------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Forage                                                 | Bring business logic in. Front-end already in `domains` app.             |
-| Shutter                                                | Bring in. TS worker version becoming integral. Stays publishable as npm. |
-| Foliage                                                | Bring back in. Themes stalled from cross-repo complexity.                |
-| Gossamer                                               | Bring inside. Core part of theming engine, same stall issue.             |
-| Press, Verge, Aria, Trove, Clearing (newspaper), Scout | Stay external. Truly independent projects.                               |
-| Nook, Outpost, Bloom                                   | Stay external. Will import Lattice SDKs but don't belong here.           |
-| Directory structure                                    | `apps/`, `services/`, `workers/`, `libs/`, `tools/`                      |
-| npm rename to `@groveplace/lattice`                    | Separate follow-up effort, not part of this migration.                   |
+| Decision                                               | Answer                                                                                                                                        |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Forage                                                 | Bring TS worker in as `services/forage/`. Python predecessor → `archives/` (preserve history, not active code).                               |
+| Shutter                                                | Bring in **both** Python and TypeScript versions together as `libs/shutter/`. Python preserves dev history; TS worker is the live version.    |
+| Foliage                                                | `libs/foliage/` as `@autumnsgrove/foliage` — separate lib, not merged into engine. Migrations fold into main D1 pipeline.                     |
+| Gossamer                                               | `libs/gossamer/` — flatten `packages/core/` from its nested monorepo. Name already `@autumnsgrove/gossamer`, no rename needed.                |
+| `example-site`, `ui`, `zig-core`                       | Artifact packages with no source. Archive to `archives/` first, then `git rm`. Must be done in Phase 1 before `packages/` is removed.         |
+| Press, Verge, Aria, Trove, Clearing (newspaper), Scout | Stay external. Truly independent projects.                                                                                                    |
+| Nook, Outpost, Bloom                                   | Stay external. Will import Lattice SDKs but don't belong here.                                                                                |
+| Directory structure                                    | `apps/`, `services/`, `workers/`, `libs/`, `tools/`                                                                                           |
+| Foliage package name                                   | Rename from `@groveengine/foliage` → `@autumnsgrove/foliage` during import. Consistent with org namespace.                                    |
+| Foliage merged into engine?                            | No. Lives in `libs/foliage/` as its own package. Engine adds `workspace:*` dep + new `./foliage` export paths. Engine has zero foliage today. |
+| npm rename to `@groveplace/lattice`                    | Separate follow-up effort, not part of this migration.                                                                                        |
 
 ---
 
@@ -37,7 +40,7 @@ The monorepo has outgrown its flat `packages/` structure. Fourteen packages — 
 
 ```
 GroveEngine/
-├── packages/                    # FLAT — 14 packages (mixed types)
+├── packages/                    # FLAT — 14 active + 3 artifact packages
 │   ├── engine/                  #   Library + SvelteKit app
 │   ├── landing/                 #   SvelteKit app
 │   ├── plant/                   #   SvelteKit app
@@ -52,6 +55,9 @@ GroveEngine/
 │   ├── og-worker/               #   OG image worker
 │   ├── post-migrator/           #   Cron worker
 │   ├── durable-objects/         #   DO worker
+│   ├── example-site/            #   ⚠️ ARTIFACT — only node_modules, no source → archives/
+│   ├── ui/                      #   ⚠️ ARTIFACT — only node_modules, no source → archives/
+│   ├── zig-core/                #   ⚠️ ARTIFACT — only node_modules, no source → archives/
 │   └── workers/                 #   Nested cron workers
 │       ├── clearing-monitor/
 │       ├── meadow-poller/
@@ -208,26 +214,32 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 
 ### Foliage (libs/foliage/)
 
-**Source:** `AutumnsGrove/Foliage`
-**What it is:** Full theme customization system — 10 curated themes, accent colors, custom fonts, live preview customizer, community theme sharing.
+**Source:** `AutumnsGrove/Foliage` (available locally at `~/Documents/Projects/Foliage/` — no clone needed)
+**What it is:** Full theme customization system — 10 curated themes (zine, minimal, ocean, night-garden, wildflower, cozy-cabin, typewriter, solarpunk, moodboard, grove default), accent colors, custom fonts, live preview customizer, community theme sharing.
 **Why it stalled:** Cross-repo coordination with Lattice was too complex. Theme changes require touching both Foliage and the engine simultaneously.
-**What changes:** Gets its own workspace package in `libs/foliage/` with a proper `package.json`. The engine imports from it via `workspace:*`.
+**What changes:** Gets its own workspace package in `libs/foliage/` as `@autumnsgrove/foliage` (renamed from `@groveengine/foliage`). The engine adds a `workspace:*` dependency and new `./foliage` export paths.
 
-**Reconciliation decision (pinned):** The engine's existing `src/lib/foliage/` becomes a **thin re-export layer** — it imports from `@autumnsgrove/foliage` and re-exports through the existing `./foliage` export path. This preserves the engine's public API (`@autumnsgrove/groveengine/foliage`) without breaking any consumers, while the real implementation lives in `libs/foliage/`. The re-export layer can be removed later as a separate cleanup if/when consumers migrate to importing `@autumnsgrove/foliage` directly.
+**Important — no existing foliage code in engine:** The engine has zero foliage code today. There is no `src/lib/foliage/` and no `./foliage` export path to reconcile. Phase 2A adds these from scratch, pointing directly at `libs/foliage/`. No re-export shim is needed — just new export entries.
+
+**Migrations — fold into main D1 pipeline:** Foliage has 3 SQL migration files that reference `tenants(id) ON DELETE CASCADE`, meaning they belong in the same D1 database as Heartwood — not a separate database. During Phase 2A, these 3 files are numbered sequentially after the current last migration and added to the main migration directory:
+
+- `001_theme_settings.sql` → `theme_settings` table (tenant theme preferences)
+- `002_custom_fonts.sql` → `custom_fonts` table (Evergreen tier font uploads)
+- `003_community_themes.sql` → `community_themes` table (Oak+ tier theme sharing)
 
 **Integration points:**
 
-- Engine's `foliage/` export path
+- Engine gains new `./foliage`, `./foliage/themes`, `./foliage/components`, `./foliage/server` export paths
 - Tier-gated features (Seedling/Sapling/Oak/Evergreen)
-- D1 tables: `theme_settings`, `custom_fonts`, `community_themes`
+- D1 tables: `theme_settings`, `custom_fonts`, `community_themes` (folded into main pipeline)
 - TenantDO for live preview
 
 ### Gossamer (libs/gossamer/)
 
-**Source:** `AutumnsGrove/Gossamer`
+**Source:** `AutumnsGrove/Gossamer` (available locally at `~/Documents/Projects/Gossamer/` — no clone needed)
 **What it is:** 2D ASCII visual effects — floating clouds, gentle patterns, image-to-ASCII transforms, decorative borders. The whimsy layer.
 **Why it stalled:** Same cross-repo coordination pain. Effects need to integrate with Glass UI and seasonal themes (Foliage).
-**What changes:** Source moves into `libs/gossamer/`. Already listed as npm dependency (`@autumnsgrove/gossamer: ^0.1.1` in engine's `package.json`), so the switch is from npm registry to `workspace:*`.
+**What changes:** Gossamer is itself a nested monorepo (`packages/core/` is its only package). We flatten it — copy `packages/core/` contents directly into `libs/gossamer/`. The package name is already `@autumnsgrove/gossamer` (no rename needed). Already listed as npm dependency (`@autumnsgrove/gossamer: ^0.1.1` in engine's `package.json`), so the switch is simply from npm registry pin to `workspace:*`.
 
 **Integration points:**
 
@@ -238,10 +250,12 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 
 ### Forage (services/forage/)
 
-**Source:** `AutumnsGrove/Forage` (also referenced as `AutumnsGrove/GroveDomainTool`)
+**Source:** `AutumnsGrove/GroveDomainTool` (available locally at `~/Documents/Projects/GroveDomainTool/` — no clone needed)
 **What it is:** AI-powered domain discovery tool. 5-question quiz → AI generates candidates → Haiku swarm evaluates → RDAP checks availability → email with curated list.
 **Front-end:** Already in `packages/domains` (→ `apps/domains`)
-**What comes in:** The Cloudflare Worker backend — DO-based orchestration, AI pipeline.
+**What comes in:** The TypeScript Cloudflare Worker in `worker/` → `services/forage/`.
+
+**Python predecessor — preserve in archives:** GroveDomainTool began as a Python script that ran on Claude.ai web, iterated into a proper backend over time. This Python source (`src/`, `tests/`, `pyproject.toml`) is _not_ active code — the TS worker is — but it represents meaningful development history. It is archived to `archives/GroveDomainTool-python/` during Phase 2D, not deleted.
 
 **Key simplification:** As an external repo, Forage needed its own OpenRouter key and Resend integration. Inside the monorepo, it can use **Lumen** for AI and **Zephyr** for email via service bindings — eliminating standalone API keys entirely. See [Integration Upgrades](#integration-upgrades) below.
 
@@ -255,16 +269,31 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 
 ### Shutter (libs/shutter/)
 
-**Source:** `AutumnsGrove/Shutter`
+**Source:** `AutumnsGrove/Shutter` (available locally at `~/Documents/Projects/Shutter/` — no clone needed)
 **What it is:** Content distillation with prompt injection defense. Sits between LLM agents and untrusted web content. Reduces 20k tokens to 200 with injection detection.
-**What comes in:** The TypeScript implementation (exists but not live). Python version stays external.
+**What comes in:** **Both versions together.** Shutter is the one import that maintains both a Python implementation and a TypeScript/Cloudflare Worker implementation side by side. The local Shutter repo already carries this structure naturally:
+
+```
+Shutter/
+├── src/            # Python implementation (pyproject.toml at root)
+├── tests/          # Python tests
+├── pyproject.toml  # Python project config
+├── cloudflare/     # TypeScript Cloudflare Worker (package.json inside)
+│   ├── src/
+│   ├── migrations/
+│   ├── wrangler.toml
+│   └── package.json  (name: "shutter-worker")
+└── docs/
+```
+
+The entire Shutter repo becomes `libs/shutter/` — no restructuring, just a copy. The Python version preserves the development lineage (similar to how gf went bash → Python → Go). The TS worker in `cloudflare/` is the active implementation.
 
 **Integration points:**
 
 - Mycelium MCP server (all external web access)
 - Meadow (link previews)
 - Forage (domain research)
-- Publishable as `@autumnsgrove/shutter` or `@groveengine/shutter`
+- Publishable as `@autumnsgrove/shutter` (the TS worker package name needs updating from `shutter-worker`)
 
 ---
 
@@ -425,11 +454,27 @@ git mv packages/engine    libs/engine
 git mv packages/vineyard  libs/vineyard
 ```
 
-**Step 1.6 — Clean up empty directories and reconcile root `landing/`:**
+**Step 1.6 — Archive artifact packages and clean up empty directories:**
+
+Three packages in `packages/` contain only `node_modules/` and no source files. They are artifacts of past experiments. Before removing `packages/`, archive them so history is preserved:
 
 ```bash
-# packages/ directory should now be empty (or contain only stale files)
-# Verify first, then remove empty dirs
+# Confirm they're truly empty (only node_modules)
+ls packages/example-site  # should only show: node_modules
+ls packages/ui            # should only show: node_modules
+ls packages/zig-core      # should only show: node_modules
+
+# Archive them (git mv preserves history)
+mkdir -p archives
+git mv packages/example-site  archives/example-site
+git mv packages/ui            archives/ui
+git mv packages/zig-core      archives/zig-core
+```
+
+Then remove the now-empty `packages/` directory:
+
+```bash
+# packages/ directory should now be empty
 ls packages/workers  # confirm empty
 rmdir packages/workers
 ls packages          # confirm empty
@@ -572,41 +617,70 @@ pnpm -r run check
 
 **Priority: Highest** — Themes have been stalled the longest.
 
-1. Clone `AutumnsGrove/Foliage` into a temp directory
-2. Copy source into `libs/foliage/`
-3. Set up `package.json` with name `@autumnsgrove/foliage`
-4. Add `workspace:*` dependency in engine's `package.json`
-5. Reconcile with existing `libs/engine/src/lib/foliage/`:
-   - Determine what's already in the engine vs what's in the external repo
-   - Engine's foliage becomes a re-export layer, or gets replaced entirely
-   - Keep the engine's `./foliage` export path working
-6. Update imports in any consuming packages
+**Pre-check:** Confirm the current last migration number in the main D1 migration directory so Foliage's 3 files are numbered correctly:
+
+```bash
+ls services/heartwood/migrations/  # or wherever the main migrations live — note highest number N
+```
+
+**Steps:**
+
+1. Copy `~/Documents/Projects/Foliage/` source into `libs/foliage/` (no clone needed — available locally)
+2. Update `package.json` name from `@groveengine/foliage` → `@autumnsgrove/foliage`
+3. Add `"@autumnsgrove/foliage": "workspace:*"` to engine's `package.json` dependencies
+4. **Add new export paths to engine's `package.json`** — the engine has zero foliage today, these are entirely new entries:
+   ```json
+   "./foliage": { "types": "./dist/foliage/index.d.ts", "svelte": "./dist/foliage/index.js", "default": "./dist/foliage/index.js" },
+   "./foliage/themes": { "types": "./dist/foliage/themes/index.d.ts", "default": "./dist/foliage/themes/index.js" },
+   "./foliage/components": { "types": "./dist/foliage/components/index.d.ts", "svelte": "./dist/foliage/components/index.js", "default": "./dist/foliage/components/index.js" },
+   "./foliage/server": { "types": "./dist/foliage/server/index.d.ts", "default": "./dist/foliage/server/index.js" }
+   ```
+5. Create `libs/engine/src/lib/foliage/` re-export shims pointing to `@autumnsgrove/foliage` so consumers can import from either package
+6. **Fold Foliage's 3 migrations into the main D1 pipeline:** Renumber the files sequentially after `N` and copy them into the main migrations directory:
+   - `libs/foliage/migrations/001_theme_settings.sql` → main migrations as `(N+1)_theme_settings.sql`
+   - `libs/foliage/migrations/002_custom_fonts.sql` → `(N+2)_custom_fonts.sql`
+   - `libs/foliage/migrations/003_community_themes.sql` → `(N+3)_community_themes.sql`
+   - Remove the original `libs/foliage/migrations/` directory (now canonical location is main pipeline)
 7. Verify: build, test, type-check
+8. Verify migrations: confirm `theme_settings`, `custom_fonts`, `community_themes` tables are present in D1
 
 #### 2B: Import Gossamer → libs/gossamer/
 
-1. Clone `AutumnsGrove/Gossamer` into a temp directory
-2. Copy source into `libs/gossamer/`
-3. Set up `package.json` with name `@autumnsgrove/gossamer`
-4. In engine's `package.json`, change `@autumnsgrove/gossamer: ^0.1.1` to `workspace:*`
+Gossamer is a nested monorepo with a single package (`packages/core/`). Flatten it — only `packages/core/` comes in.
+
+1. Copy `~/Documents/Projects/Gossamer/packages/core/` into `libs/gossamer/` (no clone needed — available locally)
+2. Package name is **already** `@autumnsgrove/gossamer` — no rename needed
+3. In engine's `package.json`, change `"@autumnsgrove/gossamer": "^0.1.1"` → `"@autumnsgrove/gossamer": "workspace:*"`
+4. Do NOT copy Gossamer's root `pnpm-workspace.yaml` or its examples — only the `core/` package contents
 5. Verify all existing Gossamer imports still resolve
 6. Verify: build, test
 
 #### 2C: Import Shutter → libs/shutter/
 
-1. Clone `AutumnsGrove/Shutter` into a temp directory
-2. Copy the TypeScript/Worker source into `libs/shutter/`
-3. Set up `package.json` with name `@autumnsgrove/shutter` (or `@groveengine/shutter`)
-4. Configure as publishable (for external consumption)
-5. Wire up any internal consumers (Mycelium integration can come later)
-6. Verify: build, test
+Shutter maintains both a Python and TypeScript implementation. Both come in together — the repo structure is preserved as-is.
+
+1. Copy `~/Documents/Projects/Shutter/` into `libs/shutter/` (no clone needed — available locally)
+   - Python root (`src/`, `tests/`, `pyproject.toml`, `uv.lock`) stays at `libs/shutter/` root
+   - TypeScript Worker stays at `libs/shutter/cloudflare/` (no restructuring)
+2. Update `libs/shutter/cloudflare/package.json` name from `"shutter-worker"` → `"@autumnsgrove/shutter"` (or keep `shutter-worker` for the worker and add a root `package.json` for the lib — decide at implementation time based on how consumers will import it)
+3. Wire up any internal consumers that can use direct import instead of API call (Mycelium integration can come later)
+4. Verify: TypeScript worker builds (`cd libs/shutter/cloudflare && pnpm build`), Python tests pass (`uv run pytest libs/shutter/tests`)
 
 #### 2D: Import Forage → services/forage/
 
 > Forage gets the most dramatic simplification of any import. It was the first Loom-style service, built before the SDK existed. Bringing it in means it can shed its bespoke infrastructure and become a thin orchestrator.
 
-1. Clone `AutumnsGrove/Forage` (or `AutumnsGrove/GroveDomainTool`) into a temp directory
-2. Copy the Worker source into `services/forage/`
+1. **Archive the Python predecessor first:**
+   ```bash
+   mkdir -p archives/GroveDomainTool-python
+   cp -r ~/Documents/Projects/GroveDomainTool/src        archives/GroveDomainTool-python/
+   cp -r ~/Documents/Projects/GroveDomainTool/tests      archives/GroveDomainTool-python/
+   cp    ~/Documents/Projects/GroveDomainTool/pyproject.toml archives/GroveDomainTool-python/
+   cp    ~/Documents/Projects/GroveDomainTool/README.md  archives/GroveDomainTool-python/
+   # Add a README note explaining this is the predecessor to the TS worker
+   git add archives/GroveDomainTool-python/
+   ```
+2. Copy the TS Worker source from `~/Documents/Projects/GroveDomainTool/worker/` into `services/forage/` (no clone needed — available locally)
 3. Set up `package.json` with name `grove-forage`
 4. Set up `wrangler.toml` with service bindings (no secrets needed):
    - Bind to Zephyr (email), Lumen (AI), Loom/durable-objects (session orchestration)
@@ -808,18 +882,21 @@ Same pattern for `ci.yml`. Create a reusable `_ci.yml` with the test/check/lint 
 
 ## Risk Assessment
 
-| Risk                                  | Impact                                   | Mitigation                                                         |
-| ------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------ |
-| **Broken relative paths**             | High — builds fail                       | Comprehensive search-and-replace; verify with full build           |
-| **CI deploy paths wrong**             | High — deploys stop working              | Update all workflow files; test with dry-run before merge          |
-| **gw package detection breaks**       | High — `gw context`, `gw packages` fail  | Update `packages.py` discover logic to scan new dirs (confirmed)   |
-| **gf impact/infra commands break**    | High — `gf impact`, `gf migrations` fail | Update hardcoded `packages/` in Go + Python (confirmed, 20+ refs)  |
-| **wrangler.toml cross-references**    | Medium — workers can't build             | Explicit audit step; grep for `../` and `packages/` in all configs |
-| **Forage service binding wiring**     | Medium — Forage deploys but calls fail   | Test Zephyr + Lumen service bindings end-to-end before going live  |
-| **Git history fragmentation**         | Medium — blame/log harder to trace       | `git log --follow` still works; accept trade-off                   |
-| **Foliage/Gossamer import conflicts** | Medium — existing code vs imported code  | Reconcile carefully in Phase 2; engine foliage re-exports          |
-| **npm publish pipeline break**        | Medium — can't release engine            | Verify publish workflow uses correct new path                      |
-| **Stale path references in docs**     | Low — confusion but no breakage          | Global search for `packages/` after migration                      |
+| Risk                                  | Impact                                                   | Mitigation                                                                                 |
+| ------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Broken relative paths**             | High — builds fail                                       | Comprehensive search-and-replace; verify with full build                                   |
+| **CI deploy paths wrong**             | High — deploys stop working                              | Update all workflow files; test with dry-run before merge                                  |
+| **gw package detection breaks**       | High — `gw context`, `gw packages` fail                  | Update `packages.py` discover logic to scan new dirs (confirmed)                           |
+| **gf impact/infra commands break**    | High — `gf impact`, `gf migrations` fail                 | Update hardcoded `packages/` in Go + Python (confirmed, 20+ refs)                          |
+| **wrangler.toml cross-references**    | Medium — workers can't build                             | Explicit audit step; grep for `../` and `packages/` in all configs                         |
+| **Forage service binding wiring**     | Medium — Forage deploys but calls fail                   | Test Zephyr + Lumen service bindings end-to-end before going live                          |
+| **Git history fragmentation**         | Medium — blame/log harder to trace                       | `git log --follow` still works; accept trade-off                                           |
+| **Foliage migration numbering clash** | Medium — migrations out of order                         | Check current last migration number before running Phase 2A; slot as N+1, N+2, N+3         |
+| **Foliage missing export paths**      | Medium — `@autumnsgrove/groveengine/foliage` returns 404 | Engine has no foliage today — add export paths in Phase 2A step 4; verify build            |
+| **Shutter package naming ambiguity**  | Low — unclear import path for consumers                  | Decide on root-level `package.json` vs worker-only at implementation time; document choice |
+| **Gossamer examples lost**            | Low — useful demo code disappears                        | Gossamer's `examples/` stay in the external repo; only `core/` is imported. Acceptable.    |
+| **npm publish pipeline break**        | Medium — can't release engine                            | Verify publish workflow uses correct new path                                              |
+| **Stale path references in docs**     | Low — confusion but no breakage                          | Global search for `packages/` after migration                                              |
 
 ---
 
@@ -827,9 +904,11 @@ Same pattern for `ci.yml`. Create a reusable `_ci.yml` with the test/check/lint 
 
 1. **Do NOT rename the npm package** (`@autumnsgrove/groveengine` → `@groveplace/lattice`). That's a separate effort with its own blast radius.
 2. **Do NOT restructure the engine's internal `src/lib/` layout.** Only its location in the monorepo changes.
-3. **Do NOT change package names** in `package.json` files. Only locations change.
+3. **Do NOT change package names** in `package.json` files. Only locations change. (Exception: Foliage is intentionally renamed from `@groveengine/foliage` → `@autumnsgrove/foliage` — this is a one-time correction to align with the org namespace.)
 4. **Do NOT refactor imports** from `@autumnsgrove/groveengine` to anything else.
 5. **Do NOT update Cloudflare project names** or resource IDs. Those are infrastructure, not code organization.
+6. **Do NOT merge Foliage into the engine.** It lives in `libs/foliage/` as its own package. The engine gains export paths that point at it, but the source stays separate.
+7. **Do NOT `rm -rf` the artifact packages** (`example-site`, `ui`, `zig-core`) — archive them with `git mv` first so history is preserved.
 
 ---
 
@@ -863,9 +942,16 @@ After Phase 1 (restructure):
 After Phase 2 (imports):
 
 - [ ] Each imported package builds independently
-- [ ] Engine can import from Foliage and Gossamer
+- [ ] Engine can import from Foliage (`@autumnsgrove/foliage`) via `workspace:*`
+- [ ] Engine's new `./foliage`, `./foliage/themes`, `./foliage/components`, `./foliage/server` export paths resolve
+- [ ] Gossamer imports in engine still resolve (now via `workspace:*` instead of npm registry)
 - [ ] Forage worker type-checks
-- [ ] Shutter library type-checks and exports work
+- [ ] Forage service bindings to Zephyr and Lumen connect (verify locally)
+- [ ] Shutter TypeScript worker builds (`libs/shutter/cloudflare`)
+- [ ] Shutter Python tests pass (`uv run pytest libs/shutter/tests`)
+- [ ] Foliage migrations applied: `theme_settings`, `custom_fonts`, `community_themes` tables exist in D1
+- [ ] Python predecessor archived at `archives/GroveDomainTool-python/`
+- [ ] Artifact packages archived at `archives/example-site/`, `archives/ui/`, `archives/zig-core/`
 - [ ] No circular dependencies
 
 After Phase 3 (docs):
