@@ -12,7 +12,7 @@ from ..wrangler import Wrangler, WranglerError
 
 
 @click.command()
-@click.option("--worker", "-w", default="grove-engine", help="Worker name (default: grove-engine)")
+@click.option("--worker", "-w", default="grove-lattice", help="Worker name (default: grove-lattice)")
 @click.option("--format", "-f", "log_format", type=click.Choice(["json", "pretty"]), default="pretty", help="Output format")
 @click.option("--status", "-s", type=click.Choice(["ok", "error", "canceled"]), help="Filter by status")
 @click.option("--method", "-m", help="Filter by HTTP method (GET, POST, etc.)")
@@ -39,7 +39,7 @@ def logs(
     \b
     Examples:
         gw logs                          # Stream all logs
-        gw logs --worker grove-engine    # Specific worker
+        gw logs --worker grove-lattice   # Specific worker
         gw logs --status error           # Only errors
         gw logs --method POST            # Only POST requests
         gw logs --search "tenant"        # Search in log content

@@ -27,7 +27,7 @@ def do(ctx: click.Context) -> None:
 
 
 @do.command("list")
-@click.option("--worker", "-w", default="grove-engine", help="Worker name (default: grove-engine)")
+@click.option("--worker", "-w", default="grove-durable-objects", help="Worker name (default: grove-durable-objects)")
 @click.pass_context
 def do_list(ctx: click.Context, worker: str) -> None:
     """List Durable Object namespaces.
@@ -37,7 +37,7 @@ def do_list(ctx: click.Context, worker: str) -> None:
     \b
     Examples:
         gw do list
-        gw do list --worker grove-auth
+        gw do list --worker grove-durable-objects
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)
@@ -85,7 +85,7 @@ def do_list(ctx: click.Context, worker: str) -> None:
 
 @do.command("info")
 @click.argument("namespace")
-@click.option("--worker", "-w", default="grove-engine", help="Worker name")
+@click.option("--worker", "-w", default="grove-durable-objects", help="Worker name")
 @click.pass_context
 def do_info(ctx: click.Context, namespace: str, worker: str) -> None:
     """Show Durable Object namespace info.
@@ -95,7 +95,7 @@ def do_info(ctx: click.Context, namespace: str, worker: str) -> None:
     \b
     Examples:
         gw do info TENANT_SESSIONS
-        gw do info RATE_LIMITER --worker grove-engine
+        gw do info RATE_LIMITER --worker grove-durable-objects
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)

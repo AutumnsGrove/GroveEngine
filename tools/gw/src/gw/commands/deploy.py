@@ -18,7 +18,7 @@ from ..wrangler import Wrangler, WranglerError
 @click.option("--dry-run", is_flag=True, help="Show what would be deployed without deploying")
 @click.option("--minify/--no-minify", default=True, help="Minify output (default: yes)")
 @click.option("--keep-vars", is_flag=True, help="Keep existing environment variables")
-@click.argument("worker", default="grove-engine")
+@click.argument("worker", default="grove-lattice")
 @click.pass_context
 def deploy(
     ctx: click.Context,
