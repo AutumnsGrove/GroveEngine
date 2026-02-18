@@ -1,3 +1,10 @@
+---
+title: Vista — Observability Dashboard
+description: Grove's internal observability platform — Wayfinder-only dashboard with Cloudflare metrics, health checks, alert thresholds, and cost projections
+category: specs
+lastUpdated: "2026-02-18"
+---
+
 # Vista — Observability Dashboard
 
 > Grove's single pane of glass for infrastructure health: metrics from every Cloudflare service, health checks on every worker, configurable alert thresholds, and cost projections — all behind a Wayfinder-only admin dashboard.

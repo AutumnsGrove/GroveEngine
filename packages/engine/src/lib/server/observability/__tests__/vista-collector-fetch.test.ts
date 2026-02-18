@@ -17,7 +17,7 @@
  * See: packages/workers/vista-collector/src/index.ts
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // =============================================================================
 // Extracted fetch handler logic (mirrors the worker exactly)

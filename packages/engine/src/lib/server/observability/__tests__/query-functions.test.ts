@@ -13,7 +13,7 @@
  * graceful degradation when DB is unavailable.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { D1Database } from "@cloudflare/workers-types";
 import {
 	getObservabilityOverview,
@@ -54,19 +54,6 @@ function createMockDb(
 		dump: vi.fn(),
 		exec: vi.fn(),
 	} as unknown as D1Database;
-}
-
-/**
- * Create a mock that returns different values on consecutive calls to first().
- */
-function createSequentialMockDb(firstValues: unknown[]): D1Database {
-	let callIndex = 0;
-	const firstFn = vi.fn().mockImplementation(() => {
-		const val = firstValues[callIndex] ?? null;
-		callIndex++;
-		return Promise.resolve(val);
-	});
-	return createMockDb({ first: firstFn });
 }
 
 // =============================================================================

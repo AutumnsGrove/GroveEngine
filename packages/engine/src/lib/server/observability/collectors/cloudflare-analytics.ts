@@ -152,9 +152,6 @@ export async function collectWorkerMetrics(
 
 		const rows = json.data?.viewer?.accounts?.[0]?.workersAnalyticsEngineAdaptiveGroups ?? [];
 
-		// Build a set of known worker script names for cross-referencing
-		const knownWorkers = new Set(SERVICE_REGISTRY.workers.map((w) => w.scriptName));
-
 		const metrics: WorkerMetrics[] = [];
 
 		for (const row of rows) {
