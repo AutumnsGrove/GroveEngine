@@ -129,13 +129,13 @@ The engine provides a shared Tailwind preset (`packages/engine/src/lib/ui/tailwi
 import grovePreset from "../engine/src/lib/ui/tailwind.preset.js";
 
 export default {
-  presets: [grovePreset],
-  content: [
-    "./src/**/*.{html,js,svelte,ts}",
-    // REQUIRED: Scan engine components for Tailwind classes
-    "../engine/src/lib/**/*.{html,js,svelte,ts}",
-  ],
-  // ... rest of config
+	presets: [grovePreset],
+	content: [
+		"./src/**/*.{html,js,svelte,ts}",
+		// REQUIRED: Scan engine components for Tailwind classes
+		"../engine/src/lib/**/*.{html,js,svelte,ts}",
+	],
+	// ... rest of config
 };
 ```
 
@@ -274,12 +274,12 @@ gw runs as an MCP server for Claude Code, exposing 34+ tools including git opera
 
 ```json
 {
-  "mcpServers": {
-    "grove-wrap": {
-      "command": "gw",
-      "args": ["mcp", "serve"]
-    }
-  }
+	"mcpServers": {
+		"grove-wrap": {
+			"command": "gw",
+			"args": ["mcp", "serve"]
+		}
+	}
 }
 ```
 
@@ -563,7 +563,7 @@ We just deleted **11,925 lines** of duplicate code that accumulated because apps
 // ❌ BAD - Creating local utilities
 // landing/src/lib/utils/cn.ts
 export function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
+	return classes.filter(Boolean).join(" ");
 }
 
 // ✅ GOOD - Import from engine
@@ -657,21 +657,21 @@ One failing query will block all subsequent queries, causing cascading failures.
 ```typescript
 // ❌ BAD - cascading failure pattern
 try {
-  const settings = await db.prepare("SELECT * FROM settings").all(); // If table missing, this fails...
-  const pages = await db.prepare("SELECT * FROM pages").all(); // ...and this NEVER runs!
+	const settings = await db.prepare("SELECT * FROM settings").all(); // If table missing, this fails...
+	const pages = await db.prepare("SELECT * FROM pages").all(); // ...and this NEVER runs!
 } catch (error) {}
 
 // ✅ GOOD - isolated query pattern
 try {
-  const settings = await db.prepare("SELECT * FROM settings").all();
+	const settings = await db.prepare("SELECT * FROM settings").all();
 } catch (error) {
-  /* graceful fallback */
+	/* graceful fallback */
 }
 
 try {
-  const pages = await db.prepare("SELECT * FROM pages").all();
+	const pages = await db.prepare("SELECT * FROM pages").all();
 } catch (error) {
-  /* graceful fallback */
+	/* graceful fallback */
 }
 ```
 
@@ -685,36 +685,33 @@ Each D1 query has 100-300ms network latency. Sequential queries stack this laten
 
 ```typescript
 // ❌ BAD - sequential queries (900ms+ for 3 queries)
-const settings = await db
-  .prepare("SELECT * FROM settings")
-  .bind(tenantId)
-  .all();
+const settings = await db.prepare("SELECT * FROM settings").bind(tenantId).all();
 const pages = await db.prepare("SELECT * FROM pages").bind(tenantId).all();
 const config = await db.prepare("SELECT * FROM config").bind(tenantId).first();
 
 // ✅ GOOD - parallel queries with individual error handling (~300ms total)
 const [settings, pages, config] = await Promise.all([
-  db
-    .prepare("SELECT * FROM settings")
-    .bind(tenantId)
-    .all()
-    .catch((err) => {
-      console.warn("Settings failed:", err);
-      return null;
-    }),
-  db
-    .prepare("SELECT * FROM pages")
-    .bind(tenantId)
-    .all()
-    .catch((err) => {
-      console.warn("Pages failed:", err);
-      return null;
-    }),
-  db
-    .prepare("SELECT * FROM config")
-    .bind(tenantId)
-    .first()
-    .catch((err) => null),
+	db
+		.prepare("SELECT * FROM settings")
+		.bind(tenantId)
+		.all()
+		.catch((err) => {
+			console.warn("Settings failed:", err);
+			return null;
+		}),
+	db
+		.prepare("SELECT * FROM pages")
+		.bind(tenantId)
+		.all()
+		.catch((err) => {
+			console.warn("Pages failed:", err);
+			return null;
+		}),
+	db
+		.prepare("SELECT * FROM config")
+		.bind(tenantId)
+		.first()
+		.catch((err) => null),
 ]);
 ```
 
@@ -730,33 +727,29 @@ page loads. Parallelizing reduced this to 1.5-2.5 seconds (~60% improvement).
 
 ```typescript
 import {
-  queryOne,
-  queryMany,
-  execute,
-  findById,
-  findByIdOrThrow,
-  insert,
-  upsert,
-  update,
-  deleteWhere,
-  deleteById,
-  exists,
-  count,
-  getTenantDb,
+	queryOne,
+	queryMany,
+	execute,
+	findById,
+	findByIdOrThrow,
+	insert,
+	upsert,
+	update,
+	deleteWhere,
+	deleteById,
+	exists,
+	count,
+	getTenantDb,
 } from "$lib/server/services/database";
 
 // ✅ GOOD - typed query helpers with validation
 const user = await findById<User>(db, "users", userId);
-const posts = await queryMany<Post>(
-  db,
-  "SELECT * FROM posts WHERE status = ?",
-  ["published"],
-);
+const posts = await queryMany<Post>(db, "SELECT * FROM posts WHERE status = ?", ["published"]);
 
 // ✅ GOOD - insert with auto-generated ID and timestamps
 const newId = await insert(db, "posts", {
-  title: "Hello World",
-  content: "My first post",
+	title: "Hello World",
+	content: "My first post",
 });
 
 // ✅ GOOD - upsert (insert or replace)
@@ -764,9 +757,7 @@ await upsert(db, "settings", { id: "theme", value: "dark" });
 
 // ✅ GOOD - multi-tenant operations (automatic tenant scoping)
 const tenantDb = getTenantDb(db, { tenantId: locals.tenant.id });
-const posts = await tenantDb.queryMany<Post>("posts", "status = ?", [
-  "published",
-]);
+const posts = await tenantDb.queryMany<Post>("posts", "status = ?", ["published"]);
 // Automatically adds: WHERE tenant_id = ? AND status = ?
 ```
 
@@ -1040,13 +1031,13 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 
 ```typescript
 import {
-  API_ERRORS,
-  ARBOR_ERRORS,
-  SITE_ERRORS,
-  throwGroveError,
-  logGroveError,
-  buildErrorJson,
-  buildErrorUrl,
+	API_ERRORS,
+	ARBOR_ERRORS,
+	SITE_ERRORS,
+	throwGroveError,
+	logGroveError,
+	buildErrorJson,
+	buildErrorUrl,
 } from "@autumnsgrove/lattice/errors";
 ```
 
@@ -1084,9 +1075,9 @@ toast.error(err instanceof Error ? err.message : "Something went wrong");
 
 // Async operations
 toast.promise(apiRequest("/api/export", { method: "POST" }), {
-  loading: "Exporting...",
-  success: "Export complete!",
-  error: "Export failed.",
+	loading: "Exporting...",
+	success: "Export complete!",
+	error: "Export failed.",
 });
 
 // Multi-step flows
@@ -1132,6 +1123,50 @@ See `AgentUsage/error_handling.md` for the full reference.
 
 ---
 
+## Agent Ecosystem
+
+Grove uses a **two-layer agent architecture** for specialized task delegation. Agents handle focused responsibilities so the main conversation stays clean and context-efficient.
+
+### Layer 1: User-Level Agents (`~/.claude/agents/`)
+
+Generic agents portable across all projects:
+
+| Agent                       | Role     | Purpose                                                               |
+| --------------------------- | -------- | --------------------------------------------------------------------- |
+| **house-bash**              | Executor | Runs commands, reports output. Never edits files or fixes failures.   |
+| **house-git**               | Observer | Analyzes diffs, commits, branches. READ-ONLY — never runs git writes. |
+| **house-research**          | Observer | Searches 20+ files, returns condensed findings.                       |
+| **haiku-coder**             | Actor    | Small code patches (0-250 lines). No Bash access — cannot run tests.  |
+| **web-research-specialist** | Observer | Web search and URL content extraction.                                |
+
+### Layer 2: Grove-Specific Agents (`.claude/agents/`)
+
+Project agents that know gw/gf, Lattice conventions, Signpost errors, and the monorepo:
+
+| Agent              | Role     | Purpose                                                                            |
+| ------------------ | -------- | ---------------------------------------------------------------------------------- |
+| **grove-runner**   | Executor | CI/build/test via `gw ci`. Never edits files or fixes failures.                    |
+| **grove-git**      | Observer | Git analysis via `gw git`/`gf`. Knows conventional commits and package boundaries. |
+| **grove-coder**    | Actor    | Code patches with engine-first imports, Signpost errors, cn(), Svelte 5 runes.     |
+| **grove-scout**    | Observer | Codebase exploration via `gf`. Impact analysis, usage tracing, TODO discovery.     |
+| **grove-verifier** | Executor | Pre-commit gate. Runs CI and delivers PASS/FAIL verdict. Never fixes.              |
+
+### Agent Selection
+
+**Prefer Grove agents** when working in this monorepo — they know the conventions:
+
+| Task                 | Generic        | Grove (Preferred)  |
+| -------------------- | -------------- | ------------------ |
+| Run CI               | house-bash     | **grove-runner**   |
+| Analyze git          | house-git      | **grove-git**      |
+| Code changes         | haiku-coder    | **grove-coder**    |
+| Search code          | house-research | **grove-scout**    |
+| Verify before commit | house-bash     | **grove-verifier** |
+
+**Full reference:** `AgentUsage/house_agents.md`
+
+---
+
 ## Additional Resources
 
 ### Skills Documentation
@@ -1146,5 +1181,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-_Last updated: 2026-02-12_
+_Last updated: 2026-02-18_
 _Model: Claude Opus 4.6_
