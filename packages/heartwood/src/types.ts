@@ -40,11 +40,19 @@ export interface Env {
   // Service-to-service authentication (optional — defense-in-depth for validate-service)
   SERVICE_SECRET?: string;
 
+  // Zephyr email gateway
+  ZEPHYR_URL: string;
+  ZEPHYR_API_KEY: string;
+  ZEPHYR: {
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+  };
+
   // Secrets (set via wrangler secret put)
   JWT_PRIVATE_KEY: string;
   JWT_PUBLIC_KEY: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  /** @deprecated Magic links now route through Zephyr — remove after confirming migration */
   RESEND_API_KEY: string;
   SESSION_SECRET: string;
 }
