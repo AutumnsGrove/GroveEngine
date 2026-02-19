@@ -30,29 +30,29 @@ import { invalidateFlag } from "./cache.js";
  * Summary of a feature flag for admin display.
  */
 export interface FeatureFlagSummary {
-  /** Unique flag identifier */
-  id: string;
+	/** Unique flag identifier */
+	id: string;
 
-  /** Human-readable flag name */
-  name: string;
+	/** Human-readable flag name */
+	name: string;
 
-  /** Optional description */
-  description?: string;
+	/** Optional description */
+	description?: string;
 
-  /** Whether the flag is globally enabled (cultivated) */
-  enabled: boolean;
+	/** Whether the flag is globally enabled (cultivated) */
+	enabled: boolean;
 
-  /** Whether the flag is only available to greenhouse tenants */
-  greenhouseOnly: boolean;
+	/** Whether the flag is only available to greenhouse tenants */
+	greenhouseOnly: boolean;
 
-  /** The type of flag value */
-  flagType: FlagType;
+	/** The type of flag value */
+	flagType: FlagType;
 
-  /** Default value when no rules match */
-  defaultValue: unknown;
+	/** Default value when no rules match */
+	defaultValue: unknown;
 
-  /** Cache TTL in seconds (0 = no cache) */
-  cacheTtl: number;
+	/** Cache TTL in seconds (0 = no cache) */
+	cacheTtl: number;
 }
 
 // =============================================================================
@@ -65,21 +65,19 @@ export interface FeatureFlagSummary {
  * @param env - Cloudflare environment bindings
  * @returns Array of flag summaries sorted by name
  */
-export async function getFeatureFlags(
-  env: FeatureFlagsEnv,
-): Promise<FeatureFlagSummary[]> {
-  try {
-    const result = await env.DB.prepare(
-      `SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
+export async function getFeatureFlags(env: FeatureFlagsEnv): Promise<FeatureFlagSummary[]> {
+	try {
+		const result = await env.DB.prepare(
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
        FROM feature_flags
        ORDER BY name ASC`,
-    ).all<FeatureFlagRow>();
+		).all<FeatureFlagRow>();
 
-    return (result.results ?? []).map(rowToFlagSummary);
-  } catch (error) {
-    console.error("Failed to load feature flags:", error);
-    return [];
-  }
+		return (result.results ?? []).map(rowToFlagSummary);
+	} catch (error) {
+		console.error("Failed to load feature flags:", error);
+		return [];
+	}
 }
 
 /**
@@ -94,32 +92,32 @@ export async function getFeatureFlags(
  * @returns True if the update succeeded
  */
 export async function setFlagEnabled(
-  flagId: string,
-  enabled: boolean,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	enabled: boolean,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    const result = await env.DB.prepare(
-      `UPDATE feature_flags
+	try {
+		const result = await env.DB.prepare(
+			`UPDATE feature_flags
        SET enabled = ?, updated_at = datetime('now')
        WHERE id = ?`,
-    )
-      .bind(enabled ? 1 : 0, flagId)
-      .run();
+		)
+			.bind(enabled ? 1 : 0, flagId)
+			.run();
 
-    if (result.meta.changes === 0) {
-      // Flag not found
-      return false;
-    }
+		if ((result.meta as D1Meta).changes === 0) {
+			// Flag not found
+			return false;
+		}
 
-    // Invalidate the cache so the change takes effect immediately
-    await invalidateFlag(flagId, env);
+		// Invalidate the cache so the change takes effect immediately
+		await invalidateFlag(flagId, env);
 
-    return true;
-  } catch (error) {
-    console.error(`Failed to update flag ${flagId}:`, error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Failed to update flag ${flagId}:`, error);
+		return false;
+	}
 }
 
 /**
@@ -130,23 +128,23 @@ export async function setFlagEnabled(
  * @returns The flag summary or null if not found
  */
 export async function getFeatureFlag(
-  flagId: string,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	env: FeatureFlagsEnv,
 ): Promise<FeatureFlagSummary | null> {
-  try {
-    const result = await env.DB.prepare(
-      `SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
+	try {
+		const result = await env.DB.prepare(
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
        FROM feature_flags
        WHERE id = ?`,
-    )
-      .bind(flagId)
-      .first<FeatureFlagRow>();
+		)
+			.bind(flagId)
+			.first<FeatureFlagRow>();
 
-    return result ? rowToFlagSummary(result) : null;
-  } catch (error) {
-    console.error(`Failed to load flag ${flagId}:`, error);
-    return null;
-  }
+		return result ? rowToFlagSummary(result) : null;
+	} catch (error) {
+		console.error(`Failed to load flag ${flagId}:`, error);
+		return null;
+	}
 }
 
 // =============================================================================
@@ -157,21 +155,21 @@ export async function getFeatureFlag(
  * Convert a database row to a FeatureFlagSummary.
  */
 function rowToFlagSummary(row: FeatureFlagRow): FeatureFlagSummary {
-  let defaultValue: unknown;
-  try {
-    defaultValue = JSON.parse(row.default_value);
-  } catch {
-    defaultValue = row.default_value;
-  }
+	let defaultValue: unknown;
+	try {
+		defaultValue = JSON.parse(row.default_value);
+	} catch {
+		defaultValue = row.default_value;
+	}
 
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description ?? undefined,
-    enabled: row.enabled === 1,
-    greenhouseOnly: row.greenhouse_only === 1,
-    flagType: row.flag_type as FlagType,
-    defaultValue,
-    cacheTtl: row.cache_ttl ?? 300,
-  };
+	return {
+		id: row.id,
+		name: row.name,
+		description: row.description ?? undefined,
+		enabled: row.enabled === 1,
+		greenhouseOnly: row.greenhouse_only === 1,
+		flagType: row.flag_type as FlagType,
+		defaultValue,
+		cacheTtl: row.cache_ttl ?? 300,
+	};
 }

@@ -73,7 +73,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 			.all<ExistingImage>();
 
 		const existingByKey = new Map<string, string>();
-		for (const row of existingResult.results) {
+		for (const row of existingResult.results ?? []) {
 			existingByKey.set(row.r2_key, row.id);
 		}
 

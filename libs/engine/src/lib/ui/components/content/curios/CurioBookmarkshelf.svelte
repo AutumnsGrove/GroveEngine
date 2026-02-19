@@ -7,7 +7,7 @@
 	 * (if available), title, author, and reading status badges.
 	 */
 
-	let { arg = '' }: { arg?: string } = $props();
+	let { arg = "" }: { arg?: string } = $props();
 
 	let data = $state<{
 		shelves: Array<{
@@ -30,7 +30,7 @@
 	let error = $state(false);
 
 	$effect(() => {
-		fetch('/api/curios/bookmarkshelf') // csrf-ok
+		fetch("/api/curios/bookmarkshelf") // csrf-ok
 			.then((r) => {
 				if (!r.ok) throw new Error(`HTTP ${r.status}`);
 				return r.json() as Promise<typeof data>;
@@ -40,7 +40,7 @@
 				loading = false;
 			})
 			.catch((err) => {
-				console.warn('[CurioBookmarkshelf] Failed to load:', err);
+				console.warn("[CurioBookmarkshelf] Failed to load:", err);
 				error = true;
 				loading = false;
 			});
@@ -103,14 +103,10 @@
 									{/if}
 									<div class="bookmark-badges">
 										{#if bookmark.isCurrentlyReading}
-											<span class="badge badge-reading" title="Currently reading">
-												Reading
-											</span>
+											<span class="badge badge-reading" title="Currently reading"> Reading </span>
 										{/if}
 										{#if bookmark.isFavorite}
-											<span class="badge badge-favorite" title="Favorite">
-												Favorite
-											</span>
+											<span class="badge badge-favorite" title="Favorite"> Favorite </span>
 										{/if}
 									</div>
 								</div>
@@ -209,6 +205,7 @@
 		line-height: 1.3;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
@@ -282,7 +279,7 @@
 	}
 
 	.bookmark-placeholder::before {
-		content: '';
+		content: "";
 		display: block;
 		width: 100%;
 		height: 6rem;
@@ -291,7 +288,7 @@
 	}
 
 	.bookmark-placeholder::after {
-		content: '';
+		content: "";
 		display: block;
 		height: 0.875rem;
 		background: rgba(0, 0, 0, 0.06);

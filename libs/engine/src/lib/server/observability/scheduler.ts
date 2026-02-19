@@ -59,7 +59,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 				.run()
 				.catch(() => null);
 
-			const logId = logResult?.meta?.last_row_id ?? null;
+			const logId = (logResult?.meta as D1Meta | undefined)?.last_row_id ?? null;
 
 			console.log(`[Vista Collector] Starting full collection (trigger=${trigger})`);
 
@@ -372,7 +372,7 @@ async function evaluateAlerts(
 							.run()
 							.catch(() => null);
 
-						if (resolveResult?.meta?.changes && resolveResult.meta.changes > 0) {
+						if (((resolveResult?.meta as D1Meta | undefined)?.changes ?? 0) > 0) {
 							resolved++;
 							activeAlertKeys.delete(key); // keep local state consistent
 						}
@@ -443,8 +443,9 @@ async function runRetentionCleanup(db: D1Database): Promise<void> {
 					return null;
 				});
 
-			if (result?.meta?.changes && result.meta.changes > 0) {
-				console.log(`[Vista Collector] Cleaned ${result.meta.changes} old rows from ${table}`);
+			const cleanedChanges = (result?.meta as D1Meta | undefined)?.changes ?? 0;
+			if (cleanedChanges > 0) {
+				console.log(`[Vista Collector] Cleaned ${cleanedChanges} old rows from ${table}`);
 			}
 		}),
 	);

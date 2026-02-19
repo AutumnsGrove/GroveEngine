@@ -31,26 +31,26 @@ import { invalidateFlag } from "./cache.js";
  * Information about a graft that a tenant can control.
  */
 export interface TenantGraftInfo {
-  /** Unique flag identifier */
-  id: string;
+	/** Unique flag identifier */
+	id: string;
 
-  /** Human-readable flag name */
-  name: string;
+	/** Human-readable flag name */
+	name: string;
 
-  /** Optional description explaining what this graft does */
-  description?: string;
+	/** Optional description explaining what this graft does */
+	description?: string;
 
-  /** Whether the graft is currently enabled for this tenant */
-  enabled: boolean;
+	/** Whether the graft is currently enabled for this tenant */
+	enabled: boolean;
 
-  /** Whether the tenant has a custom override (vs. using default) */
-  hasOverride: boolean;
+	/** Whether the tenant has a custom override (vs. using default) */
+	hasOverride: boolean;
 
-  /** The graft's global default value */
-  globalDefault: boolean;
+	/** The graft's global default value */
+	globalDefault: boolean;
 
-  /** Category for grouping (derived from flag ID prefix) */
-  category: "experimental" | "stable" | "beta";
+	/** Category for grouping (derived from flag ID prefix) */
+	category: "experimental" | "stable" | "beta";
 }
 
 // =============================================================================
@@ -68,67 +68,67 @@ export interface TenantGraftInfo {
  * @returns Array of controllable grafts with current status
  */
 export async function getTenantControllableGrafts(
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<TenantGraftInfo[]> {
-  try {
-    // Get all greenhouse-only flags that are enabled
-    const flagsResult = await env.DB.prepare(
-      `SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only
+	try {
+		// Get all greenhouse-only flags that are enabled
+		const flagsResult = await env.DB.prepare(
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only
        FROM feature_flags
        WHERE greenhouse_only = 1 AND enabled = 1 AND flag_type = 'boolean'
        ORDER BY name ASC`,
-    ).all<FeatureFlagRow>();
+		).all<FeatureFlagRow>();
 
-    const flags = flagsResult.results ?? [];
-    if (flags.length === 0) return [];
+		const flags = flagsResult.results ?? [];
+		if (flags.length === 0) return [];
 
-    // Get any tenant-specific overrides
-    const flagIds = flags.map((f) => f.id);
-    const placeholders = flagIds.map(() => "?").join(",");
+		// Get any tenant-specific overrides
+		const flagIds = flags.map((f) => f.id);
+		const placeholders = flagIds.map(() => "?").join(",");
 
-    const rulesResult = await env.DB.prepare(
-      `SELECT flag_id, result_value, enabled
+		const rulesResult = await env.DB.prepare(
+			`SELECT flag_id, result_value, enabled
        FROM flag_rules
        WHERE rule_type = 'tenant_override'
          AND flag_id IN (${placeholders})
          AND rule_value LIKE ?
          AND enabled = 1`,
-    )
-      .bind(...flagIds, `%"${tenantId}"%`)
-      .all<{ flag_id: string; result_value: string; enabled: number }>();
+		)
+			.bind(...flagIds, `%"${tenantId}"%`)
+			.all<{ flag_id: string; result_value: string; enabled: number }>();
 
-    // Build a map of tenant overrides
-    const overrides = new Map<string, boolean>();
-    for (const rule of rulesResult.results ?? []) {
-      try {
-        const value = JSON.parse(rule.result_value);
-        overrides.set(rule.flag_id, value === true);
-      } catch {
-        // Skip malformed rules
-      }
-    }
+		// Build a map of tenant overrides
+		const overrides = new Map<string, boolean>();
+		for (const rule of rulesResult.results ?? []) {
+			try {
+				const value = JSON.parse(rule.result_value);
+				overrides.set(rule.flag_id, value === true);
+			} catch {
+				// Skip malformed rules
+			}
+		}
 
-    // Build the response
-    return flags.map((flag) => {
-      const globalDefault = flag.default_value === "true";
-      const hasOverride = overrides.has(flag.id);
-      const enabled = hasOverride ? overrides.get(flag.id)! : globalDefault;
+		// Build the response
+		return flags.map((flag) => {
+			const globalDefault = flag.default_value === "true";
+			const hasOverride = overrides.has(flag.id);
+			const enabled = hasOverride ? overrides.get(flag.id)! : globalDefault;
 
-      return {
-        id: flag.id,
-        name: flag.name,
-        description: flag.description ?? undefined,
-        enabled,
-        hasOverride,
-        globalDefault,
-        category: getCategoryFromId(flag.id),
-      };
-    });
-  } catch (error) {
-    console.error("[TenantGrafts] Failed to load controllable grafts:", error);
-    return [];
-  }
+			return {
+				id: flag.id,
+				name: flag.name,
+				description: flag.description ?? undefined,
+				enabled,
+				hasOverride,
+				globalDefault,
+				category: getCategoryFromId(flag.id),
+			};
+		});
+	} catch (error) {
+		console.error("[TenantGrafts] Failed to load controllable grafts:", error);
+		return [];
+	}
 }
 
 /**
@@ -144,69 +144,66 @@ export async function getTenantControllableGrafts(
  * @returns True if the override was set successfully
  */
 export async function setTenantGraftOverride(
-  flagId: string,
-  tenantId: string,
-  enabled: boolean,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	tenantId: string,
+	enabled: boolean,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    // First verify this is a valid greenhouse-only flag
-    const flag = await env.DB.prepare(
-      `SELECT id, greenhouse_only, enabled FROM feature_flags WHERE id = ?`,
-    )
-      .bind(flagId)
-      .first<{ id: string; greenhouse_only: number; enabled: number }>();
+	try {
+		// First verify this is a valid greenhouse-only flag
+		const flag = await env.DB.prepare(
+			`SELECT id, greenhouse_only, enabled FROM feature_flags WHERE id = ?`,
+		)
+			.bind(flagId)
+			.first<{ id: string; greenhouse_only: number; enabled: number }>();
 
-    if (!flag) {
-      console.error(`[TenantGrafts] Flag not found: ${flagId}`);
-      return false;
-    }
+		if (!flag) {
+			console.error(`[TenantGrafts] Flag not found: ${flagId}`);
+			return false;
+		}
 
-    if (flag.greenhouse_only !== 1) {
-      console.error(`[TenantGrafts] Flag is not greenhouse-only: ${flagId}`);
-      return false;
-    }
+		if (flag.greenhouse_only !== 1) {
+			console.error(`[TenantGrafts] Flag is not greenhouse-only: ${flagId}`);
+			return false;
+		}
 
-    if (flag.enabled !== 1) {
-      console.error(`[TenantGrafts] Flag is not globally enabled: ${flagId}`);
-      return false;
-    }
+		if (flag.enabled !== 1) {
+			console.error(`[TenantGrafts] Flag is not globally enabled: ${flagId}`);
+			return false;
+		}
 
-    // Build the rule_value JSON for this tenant
-    const ruleValue = JSON.stringify({ tenantId });
-    const resultValue = JSON.stringify(enabled);
+		// Build the rule_value JSON for this tenant
+		const ruleValue = JSON.stringify({ tenantId });
+		const resultValue = JSON.stringify(enabled);
 
-    // Try to update existing override first
-    const updateResult = await env.DB.prepare(
-      `UPDATE flag_rules
+		// Try to update existing override first
+		const updateResult = await env.DB.prepare(
+			`UPDATE flag_rules
        SET result_value = ?, enabled = 1, created_at = datetime('now')
        WHERE flag_id = ? AND rule_type = 'tenant_override' AND rule_value = ?`,
-    )
-      .bind(resultValue, flagId, ruleValue)
-      .run();
+		)
+			.bind(resultValue, flagId, ruleValue)
+			.run();
 
-    if (updateResult.meta.changes === 0) {
-      // No existing rule, insert a new one
-      // Auto-assign unique priority in 40-59 range (below explicit tenant rules at 100)
-      await env.DB.prepare(
-        `INSERT INTO flag_rules (flag_id, priority, rule_type, rule_value, result_value, enabled, created_at)
+		if ((updateResult.meta as D1Meta).changes === 0) {
+			// No existing rule, insert a new one
+			// Auto-assign unique priority in 40-59 range (below explicit tenant rules at 100)
+			await env.DB.prepare(
+				`INSERT INTO flag_rules (flag_id, priority, rule_type, rule_value, result_value, enabled, created_at)
          VALUES (?, (SELECT COALESCE(MAX(priority), 39) + 1 FROM flag_rules WHERE flag_id = ? AND priority BETWEEN 40 AND 59), 'tenant_override', ?, ?, 1, datetime('now'))`,
-      )
-        .bind(flagId, flagId, ruleValue, resultValue)
-        .run();
-    }
+			)
+				.bind(flagId, flagId, ruleValue, resultValue)
+				.run();
+		}
 
-    // Invalidate cache so the change takes effect immediately
-    await invalidateFlag(flagId, env);
+		// Invalidate cache so the change takes effect immediately
+		await invalidateFlag(flagId, env);
 
-    return true;
-  } catch (error) {
-    console.error(
-      `[TenantGrafts] Failed to set override for ${flagId}:`,
-      error,
-    );
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`[TenantGrafts] Failed to set override for ${flagId}:`, error);
+		return false;
+	}
 }
 
 /**
@@ -218,31 +215,28 @@ export async function setTenantGraftOverride(
  * @returns True if the override was removed successfully
  */
 export async function removeTenantGraftOverride(
-  flagId: string,
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    const ruleValue = JSON.stringify({ tenantId });
+	try {
+		const ruleValue = JSON.stringify({ tenantId });
 
-    await env.DB.prepare(
-      `DELETE FROM flag_rules
+		await env.DB.prepare(
+			`DELETE FROM flag_rules
        WHERE flag_id = ? AND rule_type = 'tenant_override' AND rule_value = ?`,
-    )
-      .bind(flagId, ruleValue)
-      .run();
+		)
+			.bind(flagId, ruleValue)
+			.run();
 
-    // Invalidate cache
-    await invalidateFlag(flagId, env);
+		// Invalidate cache
+		await invalidateFlag(flagId, env);
 
-    return true;
-  } catch (error) {
-    console.error(
-      `[TenantGrafts] Failed to remove override for ${flagId}:`,
-      error,
-    );
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`[TenantGrafts] Failed to remove override for ${flagId}:`, error);
+		return false;
+	}
 }
 
 /**
@@ -253,29 +247,29 @@ export async function removeTenantGraftOverride(
  * @returns Number of overrides removed
  */
 export async function resetTenantGraftOverrides(
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<number> {
-  try {
-    // Find all overrides for this tenant
-    const ruleValue = JSON.stringify({ tenantId });
+	try {
+		// Find all overrides for this tenant
+		const ruleValue = JSON.stringify({ tenantId });
 
-    const result = await env.DB.prepare(
-      `DELETE FROM flag_rules
+		const result = await env.DB.prepare(
+			`DELETE FROM flag_rules
        WHERE rule_type = 'tenant_override' AND rule_value = ?`,
-    )
-      .bind(ruleValue)
-      .run();
+		)
+			.bind(ruleValue)
+			.run();
 
-    // Invalidate all greenhouse flags to be safe
-    // (We could be smarter and only invalidate affected flags)
-    await env.FLAGS_KV.delete(`greenhouse:${tenantId}`);
+		// Invalidate all greenhouse flags to be safe
+		// (We could be smarter and only invalidate affected flags)
+		await env.FLAGS_KV.delete(`greenhouse:${tenantId}`);
 
-    return result.meta.changes ?? 0;
-  } catch (error) {
-    console.error("[TenantGrafts] Failed to reset overrides:", error);
-    return 0;
-  }
+		return (result.meta as D1Meta).changes ?? 0;
+	} catch (error) {
+		console.error("[TenantGrafts] Failed to reset overrides:", error);
+		return 0;
+	}
 }
 
 // =============================================================================
@@ -287,7 +281,7 @@ export async function resetTenantGraftOverrides(
  * Convention: IDs starting with "beta_" are beta, others are experimental.
  */
 function getCategoryFromId(id: string): "experimental" | "stable" | "beta" {
-  if (id.startsWith("beta_")) return "beta";
-  if (id.startsWith("stable_")) return "stable";
-  return "experimental";
+	if (id.startsWith("beta_")) return "beta";
+	if (id.startsWith("stable_")) return "stable";
+	return "experimental";
 }

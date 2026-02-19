@@ -73,24 +73,39 @@
 			<table class="w-full" aria-label="Greenhouse enrolled tenants">
 				<thead>
 					<tr class="border-b border-grove-200 dark:border-grove-700/50">
-						<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+						<th
+							scope="col"
+							class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+						>
 							Tenant
 						</th>
-						<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+						<th
+							scope="col"
+							class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+						>
 							Enrolled
 						</th>
 						{#if showToggle}
-							<th scope="col" class="text-center py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+							<th
+								scope="col"
+								class="text-center py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+							>
 								Status
 							</th>
 						{/if}
 						{#if showNotes}
-							<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+							<th
+								scope="col"
+								class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+							>
 								Notes
 							</th>
 						{/if}
 						{#if showRemove}
-							<th scope="col" class="text-right py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+							<th
+								scope="col"
+								class="text-right py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+							>
 								Actions
 							</th>
 						{/if}
@@ -98,7 +113,9 @@
 				</thead>
 				<tbody>
 					{#each tenants as tenant (tenant.tenantId)}
-						<tr class="border-b border-grove-100 dark:border-grove-800/30 hover:bg-grove-50 dark:hover:bg-grove-900/20 transition-colors">
+						<tr
+							class="border-b border-grove-100 dark:border-grove-800/30 hover:bg-grove-50 dark:hover:bg-grove-900/20 transition-colors"
+						>
 							<th scope="row" class="py-3 px-4 font-normal text-left">
 								<span class="font-medium text-slate-800 dark:text-slate-100">
 									{getDisplayName(tenant.tenantId)}
@@ -177,13 +194,17 @@
 		border-radius: var(--border-radius-standard, 12px);
 		border: 1px solid rgba(22, 101, 52, 0.1);
 		overflow: hidden;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.05),
+			0 2px 4px -2px rgba(0, 0, 0, 0.05);
 	}
 
 	:global(.dark) .greenhouse-enroll-table {
 		background: rgba(30, 41, 59, 0.7);
 		border-color: rgba(255, 255, 255, 0.1);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.2),
+			0 2px 4px -2px rgba(0, 0, 0, 0.15);
 	}
 
 	.empty-state {
@@ -197,6 +218,7 @@
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}

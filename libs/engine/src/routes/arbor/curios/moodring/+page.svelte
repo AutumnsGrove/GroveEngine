@@ -167,7 +167,7 @@
 			</div>
 		</form>
 
-		{#if data.logEntries.length > 0}
+		{#if (data.logEntries?.length ?? 0) > 0}
 			<div class="mood-timeline">
 				{#each data.logEntries as entry}
 					<div

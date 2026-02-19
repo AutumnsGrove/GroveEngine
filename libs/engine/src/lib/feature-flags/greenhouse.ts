@@ -11,11 +11,7 @@
  * @see docs/plans/feature-flags-spec.md
  */
 
-import type {
-  FeatureFlagsEnv,
-  GreenhouseTenant,
-  GreenhouseTenantRow,
-} from "./types.js";
+import type { FeatureFlagsEnv, GreenhouseTenant, GreenhouseTenantRow } from "./types.js";
 
 // =============================================================================
 // CONSTANTS
@@ -47,47 +43,44 @@ const GREENHOUSE_CACHE_PREFIX = "greenhouse:";
  * }
  * ```
  */
-export async function isInGreenhouse(
-  tenantId: string,
-  env: FeatureFlagsEnv,
-): Promise<boolean> {
-  if (!tenantId) return false;
+export async function isInGreenhouse(tenantId: string, env: FeatureFlagsEnv): Promise<boolean> {
+	if (!tenantId) return false;
 
-  // Check cache first
-  const cacheKey = `${GREENHOUSE_CACHE_PREFIX}${tenantId}`;
-  try {
-    const cached = await env.FLAGS_KV.get(cacheKey);
-    if (cached !== null) {
-      return cached === "true";
-    }
-  } catch {
-    // Cache read failed - continue to DB query
-  }
+	// Check cache first
+	const cacheKey = `${GREENHOUSE_CACHE_PREFIX}${tenantId}`;
+	try {
+		const cached = await env.FLAGS_KV.get(cacheKey);
+		if (cached !== null) {
+			return cached === "true";
+		}
+	} catch {
+		// Cache read failed - continue to DB query
+	}
 
-  // Query database
-  try {
-    const result = await env.DB.prepare(
-      "SELECT enabled FROM greenhouse_tenants WHERE tenant_id = ? AND enabled = 1",
-    )
-      .bind(tenantId)
-      .first<{ enabled: number }>();
+	// Query database
+	try {
+		const result = await env.DB.prepare(
+			"SELECT enabled FROM greenhouse_tenants WHERE tenant_id = ? AND enabled = 1",
+		)
+			.bind(tenantId)
+			.first<{ enabled: number }>();
 
-    const inGreenhouse = result !== null;
+		const inGreenhouse = result !== null;
 
-    // Cache the result
-    try {
-      await env.FLAGS_KV.put(cacheKey, inGreenhouse ? "true" : "false", {
-        expirationTtl: GREENHOUSE_CACHE_TTL,
-      });
-    } catch {
-      // Cache write failed - not critical
-    }
+		// Cache the result
+		try {
+			await env.FLAGS_KV.put(cacheKey, inGreenhouse ? "true" : "false", {
+				expirationTtl: GREENHOUSE_CACHE_TTL,
+			});
+		} catch {
+			// Cache write failed - not critical
+		}
 
-    return inGreenhouse;
-  } catch (error) {
-    console.error(`Failed to check greenhouse status for ${tenantId}:`, error);
-    return false; // Fail safe - don't grant greenhouse access on error
-  }
+		return inGreenhouse;
+	} catch (error) {
+		console.error(`Failed to check greenhouse status for ${tenantId}:`, error);
+		return false; // Fail safe - don't grant greenhouse access on error
+	}
 }
 
 /**
@@ -98,20 +91,17 @@ export async function isInGreenhouse(
  * @param env - Cloudflare environment bindings
  */
 export async function invalidateGreenhouseCache(
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<void> {
-  const cacheKey = `${GREENHOUSE_CACHE_PREFIX}${tenantId}`;
-  try {
-    await env.FLAGS_KV.delete(cacheKey);
-  } catch (error) {
-    // Log cache invalidation failures - stale cache could cause confusing behavior
-    // where tenant thinks they're enrolled but cache says otherwise for up to 60s
-    console.warn(
-      `Failed to invalidate greenhouse cache for ${tenantId}:`,
-      error,
-    );
-  }
+	const cacheKey = `${GREENHOUSE_CACHE_PREFIX}${tenantId}`;
+	try {
+		await env.FLAGS_KV.delete(cacheKey);
+	} catch (error) {
+		// Log cache invalidation failures - stale cache could cause confusing behavior
+		// where tenant thinks they're enrolled but cache says otherwise for up to 60s
+		console.warn(`Failed to invalidate greenhouse cache for ${tenantId}:`, error);
+	}
 }
 
 // =============================================================================
@@ -125,21 +115,19 @@ export async function invalidateGreenhouseCache(
  * @param env - Cloudflare environment bindings
  * @returns Array of greenhouse tenant records
  */
-export async function getGreenhouseTenants(
-  env: FeatureFlagsEnv,
-): Promise<GreenhouseTenant[]> {
-  try {
-    const result = await env.DB.prepare(
-      `SELECT tenant_id, enabled, enrolled_at, enrolled_by, notes
+export async function getGreenhouseTenants(env: FeatureFlagsEnv): Promise<GreenhouseTenant[]> {
+	try {
+		const result = await env.DB.prepare(
+			`SELECT tenant_id, enabled, enrolled_at, enrolled_by, notes
        FROM greenhouse_tenants
        ORDER BY enrolled_at DESC`,
-    ).all<GreenhouseTenantRow>();
+		).all<GreenhouseTenantRow>();
 
-    return (result.results ?? []).map(rowToGreenhouseTenant);
-  } catch (error) {
-    console.error("Failed to load greenhouse tenants:", error);
-    return [];
-  }
+		return (result.results ?? []).map(rowToGreenhouseTenant);
+	} catch (error) {
+		console.error("Failed to load greenhouse tenants:", error);
+		return [];
+	}
 }
 
 /**
@@ -150,23 +138,23 @@ export async function getGreenhouseTenants(
  * @returns The greenhouse tenant or null if not enrolled
  */
 export async function getGreenhouseTenant(
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<GreenhouseTenant | null> {
-  try {
-    const result = await env.DB.prepare(
-      `SELECT tenant_id, enabled, enrolled_at, enrolled_by, notes
+	try {
+		const result = await env.DB.prepare(
+			`SELECT tenant_id, enabled, enrolled_at, enrolled_by, notes
        FROM greenhouse_tenants
        WHERE tenant_id = ?`,
-    )
-      .bind(tenantId)
-      .first<GreenhouseTenantRow>();
+		)
+			.bind(tenantId)
+			.first<GreenhouseTenantRow>();
 
-    return result ? rowToGreenhouseTenant(result) : null;
-  } catch (error) {
-    console.error(`Failed to load greenhouse tenant ${tenantId}:`, error);
-    return null;
-  }
+		return result ? rowToGreenhouseTenant(result) : null;
+	} catch (error) {
+		console.error(`Failed to load greenhouse tenant ${tenantId}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -179,27 +167,27 @@ export async function getGreenhouseTenant(
  * @returns True if enrollment succeeded
  */
 export async function enrollInGreenhouse(
-  tenantId: string,
-  enrolledBy: string | undefined,
-  notes: string | undefined,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	enrolledBy: string | undefined,
+	notes: string | undefined,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    await env.DB.prepare(
-      `INSERT OR REPLACE INTO greenhouse_tenants (tenant_id, enabled, enrolled_at, enrolled_by, notes)
+	try {
+		await env.DB.prepare(
+			`INSERT OR REPLACE INTO greenhouse_tenants (tenant_id, enabled, enrolled_at, enrolled_by, notes)
        VALUES (?, 1, datetime('now'), ?, ?)`,
-    )
-      .bind(tenantId, enrolledBy ?? null, notes ?? null)
-      .run();
+		)
+			.bind(tenantId, enrolledBy ?? null, notes ?? null)
+			.run();
 
-    // Invalidate cache
-    await invalidateGreenhouseCache(tenantId, env);
+		// Invalidate cache
+		await invalidateGreenhouseCache(tenantId, env);
 
-    return true;
-  } catch (error) {
-    console.error(`Failed to enroll tenant ${tenantId} in greenhouse:`, error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Failed to enroll tenant ${tenantId} in greenhouse:`, error);
+		return false;
+	}
 }
 
 /**
@@ -210,25 +198,20 @@ export async function enrollInGreenhouse(
  * @returns True if removal succeeded
  */
 export async function removeFromGreenhouse(
-  tenantId: string,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    await env.DB.prepare("DELETE FROM greenhouse_tenants WHERE tenant_id = ?")
-      .bind(tenantId)
-      .run();
+	try {
+		await env.DB.prepare("DELETE FROM greenhouse_tenants WHERE tenant_id = ?").bind(tenantId).run();
 
-    // Invalidate cache
-    await invalidateGreenhouseCache(tenantId, env);
+		// Invalidate cache
+		await invalidateGreenhouseCache(tenantId, env);
 
-    return true;
-  } catch (error) {
-    console.error(
-      `Failed to remove tenant ${tenantId} from greenhouse:`,
-      error,
-    );
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Failed to remove tenant ${tenantId} from greenhouse:`, error);
+		return false;
+	}
 }
 
 /**
@@ -241,30 +224,30 @@ export async function removeFromGreenhouse(
  * @returns True if toggle succeeded
  */
 export async function toggleGreenhouseStatus(
-  tenantId: string,
-  enabled: boolean,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	enabled: boolean,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    const result = await env.DB.prepare(
-      "UPDATE greenhouse_tenants SET enabled = ? WHERE tenant_id = ?",
-    )
-      .bind(enabled ? 1 : 0, tenantId)
-      .run();
+	try {
+		const result = await env.DB.prepare(
+			"UPDATE greenhouse_tenants SET enabled = ? WHERE tenant_id = ?",
+		)
+			.bind(enabled ? 1 : 0, tenantId)
+			.run();
 
-    if (result.meta.changes === 0) {
-      // Tenant not in greenhouse
-      return false;
-    }
+		if ((result.meta as D1Meta).changes === 0) {
+			// Tenant not in greenhouse
+			return false;
+		}
 
-    // Invalidate cache
-    await invalidateGreenhouseCache(tenantId, env);
+		// Invalidate cache
+		await invalidateGreenhouseCache(tenantId, env);
 
-    return true;
-  } catch (error) {
-    console.error(`Failed to toggle greenhouse status for ${tenantId}:`, error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Failed to toggle greenhouse status for ${tenantId}:`, error);
+		return false;
+	}
 }
 
 /**
@@ -276,22 +259,22 @@ export async function toggleGreenhouseStatus(
  * @returns True if update succeeded
  */
 export async function updateGreenhouseNotes(
-  tenantId: string,
-  notes: string | null,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	notes: string | null,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  try {
-    const result = await env.DB.prepare(
-      "UPDATE greenhouse_tenants SET notes = ? WHERE tenant_id = ?",
-    )
-      .bind(notes, tenantId)
-      .run();
+	try {
+		const result = await env.DB.prepare(
+			"UPDATE greenhouse_tenants SET notes = ? WHERE tenant_id = ?",
+		)
+			.bind(notes, tenantId)
+			.run();
 
-    return result.meta.changes > 0;
-  } catch (error) {
-    console.error(`Failed to update greenhouse notes for ${tenantId}:`, error);
-    return false;
-  }
+		return (result.meta as D1Meta).changes > 0;
+	} catch (error) {
+		console.error(`Failed to update greenhouse notes for ${tenantId}:`, error);
+		return false;
+	}
 }
 
 // =============================================================================
@@ -302,11 +285,11 @@ export async function updateGreenhouseNotes(
  * Convert a database row to a GreenhouseTenant object.
  */
 function rowToGreenhouseTenant(row: GreenhouseTenantRow): GreenhouseTenant {
-  return {
-    tenantId: row.tenant_id,
-    enabled: row.enabled === 1,
-    enrolledAt: new Date(row.enrolled_at),
-    enrolledBy: row.enrolled_by ?? undefined,
-    notes: row.notes ?? undefined,
-  };
+	return {
+		tenantId: row.tenant_id,
+		enabled: row.enabled === 1,
+		enrolledAt: new Date(row.enrolled_at),
+		enrolledBy: row.enrolled_by ?? undefined,
+		notes: row.notes ?? undefined,
+	};
 }

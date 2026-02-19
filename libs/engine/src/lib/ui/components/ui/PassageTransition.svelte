@@ -135,7 +135,7 @@
 		aria-live="assertive"
 	>
 		<!-- Warm glassmorphism backdrop -->
-		<div class="absolute inset-0 passage-backdrop" />
+		<div class="absolute inset-0 passage-backdrop"></div>
 
 		<!-- Centered content -->
 		<div class="relative z-10 flex flex-col items-center gap-5">
@@ -145,7 +145,22 @@
 					{#snippet failed()}
 						<!-- Fallback: simple leaf circle if Logo fails to render -->
 						<div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 1.5 17 1.5s4.78 8.1 0 13.5c-2.5 2.5-6.2 5-6.2 5Z"/><path d="M11 20a7 7 0 0 0 1.2-13.1C6.5 4.9 5 1.5 5 1.5S.22 9.6 5 15c2.5 2.5 6 5 6 5Z"/></svg>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="32"
+								height="32"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="rgba(255,255,255,0.7)"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								><path
+									d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 1.5 17 1.5s4.78 8.1 0 13.5c-2.5 2.5-6.2 5-6.2 5Z"
+								/><path
+									d="M11 20a7 7 0 0 0 1.2-13.1C6.5 4.9 5 1.5 5 1.5S.22 9.6 5 15c2.5 2.5 6 5 6 5Z"
+								/></svg
+							>
 						</div>
 					{/snippet}
 				</svelte:boundary>
@@ -171,7 +186,7 @@
 						--mote-size: {mote.size};
 						--mote-duration: {mote.duration};
 					"
-				/>
+				></div>
 			{/each}
 		</div>
 	</div>
