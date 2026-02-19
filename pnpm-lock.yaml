@@ -59,16 +59,10 @@ importers:
       bits-ui:
         specifier: ^2.14.4
         version: 2.15.8(@internationalized/date@3.11.0)(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)
-      tailwind-variants:
-        specifier: ^3.2.2
-        version: 3.2.2(tailwind-merge@3.4.0)(tailwindcss@3.4.19(tsx@4.21.0))
-      tailwindcss:
-        specifier: ^3.4.19
-        version: 3.4.19(tsx@4.21.0)
     devDependencies:
       '@sveltejs/adapter-cloudflare':
-        specifier: ^4.0.0
-        version: 4.9.0(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33)))(wrangler@3.114.17(@cloudflare/workers-types@4.20260210.0))
+        specifier: ^7.2.6
+        version: 7.2.6(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33)))(wrangler@3.114.17(@cloudflare/workers-types@4.20260210.0))
       '@sveltejs/kit':
         specifier: ^2.0.0
         version: 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33))
@@ -108,6 +102,9 @@ importers:
       svelte-check:
         specifier: ^4.0.0
         version: 4.3.6(picomatch@4.0.3)(svelte@5.50.1)(typescript@5.9.3)
+      tailwindcss:
+        specifier: ^3.4.19
+        version: 3.4.19(tsx@4.21.0)
       tslib:
         specifier: ^2.6.0
         version: 2.8.1
@@ -6730,16 +6727,6 @@ packages:
     peerDependencies:
       tailwindcss: '*'
 
-  tailwind-variants@3.2.2:
-    resolution: {integrity: sha512-Mi4kHeMTLvKlM98XPnK+7HoBPmf4gygdFmqQPaDivc3DpYS6aIY6KiG/PgThrGvii5YZJqRsPz0aPyhoFzmZgg==}
-    engines: {node: '>=16.x', pnpm: '>=7.x'}
-    peerDependencies:
-      tailwind-merge: '>=3.0.0'
-      tailwindcss: '*'
-    peerDependenciesMeta:
-      tailwind-merge:
-        optional: true
-
   tailwindcss@3.4.19:
     resolution: {integrity: sha512-3ofp+LL8E+pK/JuPLPggVAIaEuhvIz4qNcf3nA1Xn2o/7fb7s/TYpHhwGDv1ZU3PkBluUVaF8PyCHcm48cKLWQ==}
     engines: {node: '>=14.0.0'}
@@ -9157,19 +9144,18 @@ snapshots:
     dependencies:
       '@sveltejs/kit': 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@6.4.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@6.4.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0))
 
-  '@sveltejs/adapter-cloudflare@4.9.0(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33)))(wrangler@3.114.17(@cloudflare/workers-types@4.20260210.0))':
-    dependencies:
-      '@cloudflare/workers-types': 4.20260210.0
-      '@sveltejs/kit': 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33))
-      esbuild: 0.24.2
-      worktop: 0.8.0-next.18
-      wrangler: 3.114.17(@cloudflare/workers-types@4.20260210.0)
-
   '@sveltejs/adapter-cloudflare@4.9.0(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@6.4.1(@types/node@22.19.11)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.11)(jiti@2.4.2)(tsx@4.21.0)))(wrangler@3.114.17(@cloudflare/workers-types@4.20260210.0))':
     dependencies:
       '@cloudflare/workers-types': 4.20260210.0
       '@sveltejs/kit': 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@6.4.1(@types/node@22.19.11)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.11)(jiti@2.4.2)(tsx@4.21.0))
       esbuild: 0.24.2
+      worktop: 0.8.0-next.18
+      wrangler: 3.114.17(@cloudflare/workers-types@4.20260210.0)
+
+  '@sveltejs/adapter-cloudflare@7.2.6(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33)))(wrangler@3.114.17(@cloudflare/workers-types@4.20260210.0))':
+    dependencies:
+      '@cloudflare/workers-types': 4.20260210.0
+      '@sveltejs/kit': 2.50.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@20.19.33)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@20.19.33))
       worktop: 0.8.0-next.18
       wrangler: 3.114.17(@cloudflare/workers-types@4.20260210.0)
 
@@ -13250,12 +13236,6 @@ snapshots:
     dependencies:
       tailwind-merge: 2.5.4
       tailwindcss: 3.4.19(tsx@4.21.0)
-
-  tailwind-variants@3.2.2(tailwind-merge@3.4.0)(tailwindcss@3.4.19(tsx@4.21.0)):
-    dependencies:
-      tailwindcss: 3.4.19(tsx@4.21.0)
-    optionalDependencies:
-      tailwind-merge: 3.4.0
 
   tailwindcss@3.4.19(tsx@4.21.0):
     dependencies:

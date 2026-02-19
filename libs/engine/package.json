@@ -48,6 +48,11 @@
 			"svelte": "./dist/ui/index.js",
 			"default": "./dist/ui/index.js"
 		},
+		"./ui/components": {
+			"types": "./dist/ui/components/ui/index.d.ts",
+			"svelte": "./dist/ui/components/ui/index.js",
+			"default": "./dist/ui/components/ui/index.js"
+		},
 		"./ui/editor": {
 			"types": "./dist/components/editor/index.d.ts",
 			"svelte": "./dist/components/editor/index.js",

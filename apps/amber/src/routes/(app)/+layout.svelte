@@ -2,7 +2,7 @@
 	import type { Snippet } from "svelte";
 	import { page } from "$app/stores";
 	import Icon from "$lib/components/Icons.svelte";
-	import { Logo } from "@autumnsgrove/lattice/ui";
+	import { Logo } from "@autumnsgrove/lattice/ui/components";
 	import { theme, currentUser, searchQuery, sidebarOpen } from "$lib/stores";
 
 	let { children }: { children: Snippet } = $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Logo } from "@autumnsgrove/lattice/ui";
+	import { Logo } from "@autumnsgrove/lattice/ui/components";
 	import { signIn } from "$lib/auth";
 	import Icon from "$lib/components/Icons.svelte";
 
