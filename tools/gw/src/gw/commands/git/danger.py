@@ -272,9 +272,9 @@ def rebase(
         )
 
         if output_json:
-            action = "continued" if continue_rebase else "aborted" if abort_rebase else "rebased"
+            action_name = "continued" if continue_rebase else "aborted" if abort_rebase else "rebased"
             console.print(json.dumps({
-                "action": action,
+                "action": action_name,
                 "onto": onto,
             }))
         else:
