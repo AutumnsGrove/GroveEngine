@@ -310,17 +310,41 @@ advanced: {
 
 ### Background Tasks (Timing Attack Prevention)
 
-Sensitive operations should complete in constant time:
+Sensitive operations should complete in constant time. The `handler` callback receives a promise that must outlive the response — on serverless platforms, you need the platform's `waitUntil` to keep it alive.
+
+**Cloudflare Workers:** Capture `ExecutionContext` from the fetch handler and close over it:
 
 ```typescript
+// In your Worker fetch handler:
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    // Create auth with ctx in scope
+    const auth = createAuth(env, ctx);
+    return auth.handler(request);
+  },
+};
+
+// In your auth config factory:
+function createAuth(env: Env, ctx: ExecutionContext) {
+  return betterAuth({
+    // ...
+    advanced: {
+      backgroundTasks: {
+        handler: (promise) => ctx.waitUntil(promise),
+      },
+    },
+  });
+}
+```
+
+**Vercel/Next.js:** Use the `waitUntil` export from `@vercel/functions`:
+
+```typescript
+import { waitUntil } from "@vercel/functions";
+
 advanced: {
   backgroundTasks: {
-    handler: (promise) => {
-      // Cloudflare Workers:
-      ctx.waitUntil(promise);
-      // Vercel:
-      // waitUntil(promise);
-    },
+    handler: (promise) => waitUntil(promise),
   },
 }
 ```
@@ -511,11 +535,8 @@ plugins: [
 
 ## Plugins Reference
 
-**Import from dedicated paths for tree-shaking:**
-
 ```typescript
-import { twoFactor } from "better-auth/plugins/two-factor"
-// NOT: from "better-auth/plugins"
+import { twoFactor, organization } from "better-auth/plugins";
 ```
 
 | Plugin | Purpose | Scoped Package? |
@@ -648,7 +669,7 @@ databaseHooks: {
 - [ ] CSRF protection enabled (`disableCSRFCheck: false`)
 - [ ] Secure cookies enabled (automatic with HTTPS)
 - [ ] `account.encryptOAuthTokens: true` if storing tokens
-- [ ] Background tasks configured for serverless (`ctx.waitUntil`)
+- [ ] Background tasks configured for serverless (capture `ExecutionContext` from fetch handler)
 - [ ] Audit logging via `databaseHooks` or `hooks`
 - [ ] IP tracking headers configured if behind proxy
 - [ ] Email verification enabled
@@ -666,83 +687,86 @@ databaseHooks: {
 import { betterAuth } from "better-auth";
 import { twoFactor, organization } from "better-auth/plugins";
 
-export const auth = betterAuth({
-  appName: "Grove",
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: "https://auth-api.grove.place",
-  trustedOrigins: [
-    "https://heartwood.grove.place",
-    "https://*.grove.place",
-  ],
+// Factory pattern — ctx comes from the Worker fetch handler
+export function createAuth(env: Env, ctx: ExecutionContext) {
+  return betterAuth({
+    appName: "Grove",
+    secret: env.BETTER_AUTH_SECRET,
+    baseURL: "https://auth-api.grove.place",
+    trustedOrigins: [
+      "https://heartwood.grove.place",
+      "https://*.grove.place",
+    ],
 
-  database: d1Adapter,
-  secondaryStorage: kvAdapter,
+    database: d1Adapter(env),
+    secondaryStorage: kvAdapter(env),
 
-  // Rate limiting (replaces custom threshold SDK for auth)
-  rateLimit: {
-    enabled: true,
-    storage: "secondary-storage",
-    customRules: {
-      "/api/auth/sign-in/email": { window: 60, max: 5 },
-      "/api/auth/sign-up/email": { window: 60, max: 3 },
-      "/api/auth/change-password": { window: 60, max: 3 },
-    },
-  },
-
-  // Sessions
-  session: {
-    expiresIn: 60 * 60 * 24 * 7,    // 7 days
-    updateAge: 60 * 60 * 24,         // 24 hours
-    freshAge: 60 * 60,               // 1 hour for sensitive actions
-    cookieCache: {
+    // Rate limiting (replaces custom threshold SDK for auth)
+    rateLimit: {
       enabled: true,
-      maxAge: 300,
-      strategy: "jwe",
+      storage: "secondary-storage",
+      customRules: {
+        "/api/auth/sign-in/email": { window: 60, max: 5 },
+        "/api/auth/sign-up/email": { window: 60, max: 3 },
+        "/api/auth/change-password": { window: 60, max: 3 },
+      },
     },
-  },
 
-  // OAuth
-  account: {
-    encryptOAuthTokens: true,
-    storeStateStrategy: "cookie",
-  },
-
-  // Security
-  advanced: {
-    useSecureCookies: true,
-    crossSubDomainCookies: {
-      enabled: true,
-      domain: ".grove.place",
-    },
-    ipAddress: {
-      ipAddressHeaders: ["x-forwarded-for"],
-      ipv6Subnet: 64,
-    },
-    backgroundTasks: {
-      handler: (promise) => ctx.waitUntil(promise),
-    },
-  },
-
-  // Plugins
-  plugins: [
-    twoFactor({
-      issuer: "Grove",
-      backupCodeOptions: { storeBackupCodes: "encrypted" },
-    }),
-    organization(),
-  ],
-
-  // Audit hooks
-  databaseHooks: {
+    // Sessions
     session: {
-      create: {
-        after: async ({ data, ctx }) => {
-          console.log(`[audit] session created: user=${data.userId}`);
+      expiresIn: 60 * 60 * 24 * 7,    // 7 days
+      updateAge: 60 * 60 * 24,         // 24 hours
+      freshAge: 60 * 60,               // 1 hour for sensitive actions
+      cookieCache: {
+        enabled: true,
+        maxAge: 300,
+        strategy: "jwe",
+      },
+    },
+
+    // OAuth
+    account: {
+      encryptOAuthTokens: true,
+      storeStateStrategy: "cookie",
+    },
+
+    // Security
+    advanced: {
+      useSecureCookies: true,
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: ".grove.place",
+      },
+      ipAddress: {
+        ipAddressHeaders: ["x-forwarded-for"],
+        ipv6Subnet: 64,
+      },
+      backgroundTasks: {
+        handler: (promise) => ctx.waitUntil(promise),  // ctx captured from fetch handler
+      },
+    },
+
+    // Plugins
+    plugins: [
+      twoFactor({
+        issuer: "Grove",
+        backupCodeOptions: { storeBackupCodes: "encrypted" },
+      }),
+      organization(),
+    ],
+
+    // Audit hooks
+    databaseHooks: {
+      session: {
+        create: {
+          after: async ({ data, ctx: hookCtx }) => {
+            console.log(`[audit] session created: user=${data.userId}`);
+          },
         },
       },
     },
-  },
-});
+  });
+}
 ```
 
 ---
