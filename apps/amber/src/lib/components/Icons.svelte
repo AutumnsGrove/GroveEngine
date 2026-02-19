@@ -30,6 +30,9 @@
 		Plus,
 		HardDrive,
 		Menu,
+		LogOut,
+		Github,
+		Globe,
 	} from "@lucide/svelte";
 
 	interface Props {
@@ -63,7 +66,10 @@
 			| "export"
 			| "plus"
 			| "storage"
-			| "menu";
+			| "menu"
+			| "logout"
+			| "github"
+			| "google";
 		size?: number;
 		class?: string;
 	}
@@ -101,6 +107,9 @@
 		plus: Plus,
 		storage: HardDrive,
 		menu: Menu,
+		logout: LogOut,
+		github: Github,
+		google: Globe,
 	};
 
 	const IconComponent = $derived(iconMap[name]);

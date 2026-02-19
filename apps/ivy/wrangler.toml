@@ -6,6 +6,10 @@ main = "src/index.ts"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Static assets for SvelteKit adapter-cloudflare
+[assets]
+directory = ".svelte-kit/cloudflare"
+
 # Build settings for SvelteKit
 [build]
 command = "pnpm build"

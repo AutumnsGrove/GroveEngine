@@ -15,7 +15,7 @@
 <div class="login-page">
 	<div class="login-card">
 		<div class="logo-section">
-			<Logo class="logo-icon" color="var(--color-primary)" />
+			<Logo class="logo-icon" monochromeColor="var(--color-primary)" />
 			<h1 class="app-name">Amber</h1>
 			<p class="tagline">Unified Storage Management for Grove</p>
 		</div>
@@ -26,12 +26,12 @@
 
 			<div class="sign-in-buttons">
 				<button class="sign-in-btn google" onclick={handleGoogleSignIn}>
-					<Icon name="logo-google" size={20} />
+					<Icon name="google" size={20} />
 					<span>Continue with Google</span>
 				</button>
 
 				<button class="sign-in-btn github" onclick={handleGithubSignIn}>
-					<Icon name="logo-github" size={20} />
+					<Icon name="github" size={20} />
 					<span>Continue with GitHub</span>
 				</button>
 			</div>

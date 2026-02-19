@@ -60,7 +60,7 @@
 	<aside class="sidebar" class:open={$sidebarOpen}>
 		<div class="sidebar-header">
 			<a href="/" class="logo">
-				<Logo class="w-6 h-6" color="var(--color-primary)" />
+				<Logo class="w-6 h-6" monochromeColor="var(--color-primary)" />
 				<span class="logo-text">Amber</span>
 			</a>
 			<button class="sidebar-close-btn" onclick={closeSidebar} title="Close menu">

@@ -49,7 +49,7 @@
 		<div class="settings-card">
 			<div class="setting-row">
 				<div class="setting-info">
-					<Icon name="log-out" size={20} />
+					<Icon name="logout" size={20} />
 					<div>
 						<span class="setting-label">Sign Out</span>
 						<span class="setting-description">Sign out of your account</span>
