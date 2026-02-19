@@ -37,6 +37,11 @@ name = "TRIAGE"
 class_name = "TriageDO"
 script_name = "grove-durable-objects"
 
+# Heartwood auth service binding (Worker-to-Worker)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
 # Zephyr service binding (email delivery)
 [[services]]
 binding = "ZEPHYR"
