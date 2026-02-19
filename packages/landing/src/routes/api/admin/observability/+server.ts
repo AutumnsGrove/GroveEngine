@@ -2,7 +2,7 @@
  * GET /api/admin/observability — Overview summary for Vista dashboard
  *
  * Returns last collection timestamp, active alert count, health summary
- * per endpoint, and whether the CF observability token is configured.
+ * per endpoint, and whether the collector has run (data-driven check).
  * Wayfinder access required.
  */
 
@@ -26,10 +26,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 	try {
 		const overview = await getObservabilityOverview(db);
-		return json({
-			...overview,
-			collectionTokenConfigured: !!platform?.env?.CF_OBSERVABILITY_TOKEN,
-		});
+		return json(overview);
 	} catch (err) {
 		console.error("[Vista/Overview] Error:", err);
 		return json(

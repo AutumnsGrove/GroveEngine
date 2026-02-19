@@ -36,12 +36,12 @@
 	</p>
 </div>
 
-{#if !data.collectionTokenConfigured}
+{#if !data.collectorConnected}
 	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
 		<div class="flex items-start gap-3">
 			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
 			<p class="text-sm font-sans text-amber-700 dark:text-amber-400">
-				Vista is ready — connect your Cloudflare API token to start seeing live metrics.
+				Awaiting first collection run — ensure the grove-vista-collector worker is deployed.
 			</p>
 		</div>
 	</GlassCard>
@@ -51,9 +51,7 @@
 	<GlassCard class="p-8 text-center">
 		<Server class="w-12 h-12 mx-auto mb-3 text-foreground/20" />
 		<p class="text-foreground-muted font-sans">
-			{data.collectionTokenConfigured
-				? "No worker metrics collected yet — check back after the next collection run."
-				: "Worker metrics will appear here once the CF observability token is connected."}
+			No worker metrics collected yet — check back after the next collection run.
 		</p>
 	</GlassCard>
 {:else}

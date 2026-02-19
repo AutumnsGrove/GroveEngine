@@ -1,8 +1,9 @@
 /**
  * Vista Overview — server load
  *
- * Loads overview data (health summary, active alerts, last collection time)
- * and checks whether the CF observability token is configured.
+ * Loads overview data (health summary, active alerts, last collection time).
+ * Collector "connected" status is derived from whether collection data exists
+ * in the observability_collection_log table (no env var check needed).
  */
 
 import type { PageServerLoad } from "./$types";
@@ -12,13 +13,12 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent(); // ensures Wayfinder gate has run
 
 	const db = platform?.env?.DB;
-	const collectionTokenConfigured = !!platform?.env?.CF_OBSERVABILITY_TOKEN;
 
 	if (!db) {
 		return {
 			overview: null,
 			activeAlerts: [],
-			collectionTokenConfigured,
+			collectorConnected: false,
 			dbAvailable: false,
 		};
 	}
@@ -28,17 +28,13 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 		getAlerts(db, 5),
 	]);
 
-	const overview =
-		overviewResult.status === "fulfilled"
-			? { ...overviewResult.value, collectionTokenConfigured }
-			: null;
-
+	const overview = overviewResult.status === "fulfilled" ? overviewResult.value : null;
 	const activeAlerts = alertsResult.status === "fulfilled" ? alertsResult.value.active : [];
 
 	return {
 		overview,
 		activeAlerts,
-		collectionTokenConfigured,
+		collectorConnected: overview?.collectorConnected ?? false,
 		dbAvailable: true,
 	};
 };

@@ -5,19 +5,21 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getWorkerMetrics } from "@autumnsgrove/lattice/server/observability";
+import { getWorkerMetrics, hasCollectionData } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
 
 	const db = platform?.env?.DB;
-	const collectionTokenConfigured = !!platform?.env?.CF_OBSERVABILITY_TOKEN;
 
 	if (!db) {
-		return { metrics: [], collectionTokenConfigured, dbAvailable: false };
+		return { metrics: [], collectorConnected: false, dbAvailable: false };
 	}
 
-	const result = await getWorkerMetrics(db, 24).catch(() => []);
+	const [result, collectorConnected] = await Promise.all([
+		getWorkerMetrics(db, 24).catch(() => []),
+		hasCollectionData(db),
+	]);
 
 	// Group metrics by service name — each service will have multiple metric types
 	const byService = new Map<
@@ -56,5 +58,5 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 		a.serviceName.localeCompare(b.serviceName),
 	);
 
-	return { workers, collectionTokenConfigured, dbAvailable: true };
+	return { workers, collectorConnected, dbAvailable: true };
 };

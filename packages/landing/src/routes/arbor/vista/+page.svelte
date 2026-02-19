@@ -42,19 +42,20 @@
 	<p class="text-foreground-muted font-sans mt-1">Observability overview for all Grove services</p>
 </div>
 
-<!-- Token not configured notice -->
-{#if !data.collectionTokenConfigured}
+<!-- Collector not connected notice -->
+{#if !data.collectorConnected}
 	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
 		<div class="flex items-start gap-3">
 			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
 			<div>
 				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
-					Vista is ready — connect your Cloudflare API token to start seeing live metrics.
+					Vista is ready — awaiting the first collection run.
 				</p>
 				<p class="text-xs font-sans text-foreground-muted mt-1">
-					Apply <code class="font-mono text-xs bg-cream-100 dark:bg-cream-200 px-1 py-0.5 rounded"
-						>CF_OBSERVABILITY_TOKEN</code
-					> to the grove-vista-collector worker to begin collection.
+					Ensure the <code
+						class="font-mono text-xs bg-cream-100 dark:bg-cream-200 px-1 py-0.5 rounded"
+						>grove-vista-collector</code
+					> worker is deployed with its cron trigger and API token configured.
 				</p>
 			</div>
 		</div>
@@ -143,18 +144,10 @@
 
 	{#if !data.overview || data.overview.healthSummary.length === 0}
 		<GlassCard class="p-6 text-center">
-			{#if !data.collectionTokenConfigured}
-				<WifiOff class="w-10 h-10 mx-auto mb-3 text-foreground/20" />
-				<p class="text-foreground-muted font-sans text-sm">
-					Health checks will appear here once the CF observability token is connected and the first
-					collection has run.
-				</p>
-			{:else}
-				<Clock class="w-10 h-10 mx-auto mb-3 text-foreground/20" />
-				<p class="text-foreground-muted font-sans text-sm">
-					Awaiting first collection run — check back in a few minutes.
-				</p>
-			{/if}
+			<WifiOff class="w-10 h-10 mx-auto mb-3 text-foreground/20" />
+			<p class="text-foreground-muted font-sans text-sm">
+				No health check data yet — the collector hasn't completed a run.
+			</p>
 		</GlassCard>
 	{:else}
 		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">

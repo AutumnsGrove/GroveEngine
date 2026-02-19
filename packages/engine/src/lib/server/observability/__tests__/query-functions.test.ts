@@ -21,6 +21,7 @@ import {
 	getAlerts,
 	getAlertThresholds,
 	upsertAlertThreshold,
+	hasCollectionData,
 } from "../index.js";
 
 // =============================================================================
@@ -74,7 +75,7 @@ describe("getObservabilityOverview", () => {
 		expect(result.lastCollectionAt).toBeNull();
 		expect(result.activeAlerts).toBe(0);
 		expect(result.healthSummary).toEqual([]);
-		expect(result.collectionTokenConfigured).toBe(false);
+		expect(result.collectorConnected).toBe(false);
 	});
 
 	it("returns lastCollectionAt from DB", async () => {
@@ -153,10 +154,62 @@ describe("getObservabilityOverview", () => {
 		expect(result.healthSummary[0].isHealthy).toBe(false);
 	});
 
-	it("collectionTokenConfigured is always false (set by API endpoint)", async () => {
+	it("collectorConnected is true when lastCollectionAt is present", async () => {
+		const db = {
+			prepare: vi.fn().mockReturnValue({
+				bind: vi.fn().mockReturnThis(),
+				first: vi
+					.fn()
+					.mockResolvedValueOnce({ completed_at: 1700000000 }) // lastCollection
+					.mockResolvedValueOnce({ count: 0 }), // activeAlerts
+				all: vi.fn().mockResolvedValue({ results: [] }), // healthChecks
+			}),
+		} as unknown as D1Database;
+
+		const result = await getObservabilityOverview(db);
+		expect(result.collectorConnected).toBe(true);
+	});
+
+	it("collectorConnected is false when no collection data exists", async () => {
 		const db = createMockDb();
 		const result = await getObservabilityOverview(db);
-		expect(result.collectionTokenConfigured).toBe(false);
+		expect(result.collectorConnected).toBe(false);
+	});
+});
+
+// =============================================================================
+// hasCollectionData
+// =============================================================================
+
+describe("hasCollectionData", () => {
+	it("returns true when a completed collection exists", async () => {
+		const db = {
+			prepare: vi.fn().mockReturnValue({
+				first: vi.fn().mockResolvedValue({ ok: 1 }),
+			}),
+		} as unknown as D1Database;
+
+		expect(await hasCollectionData(db)).toBe(true);
+	});
+
+	it("returns false when no completed collection exists", async () => {
+		const db = {
+			prepare: vi.fn().mockReturnValue({
+				first: vi.fn().mockResolvedValue(null),
+			}),
+		} as unknown as D1Database;
+
+		expect(await hasCollectionData(db)).toBe(false);
+	});
+
+	it("returns false when DB query fails", async () => {
+		const db = {
+			prepare: vi.fn().mockReturnValue({
+				first: vi.fn().mockRejectedValue(new Error("offline")),
+			}),
+		} as unknown as D1Database;
+
+		expect(await hasCollectionData(db)).toBe(false);
 	});
 });
 

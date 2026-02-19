@@ -78,13 +78,29 @@ export { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
 // =============================================================================
 
 /**
+ * Check whether the vista-collector has ever completed a collection run.
+ * Used by dashboard pages to show "connected" vs "awaiting first collection" state.
+ * This is a lightweight indexed query (LIMIT 1 on the completed_at DESC index).
+ */
+export async function hasCollectionData(db: D1Database): Promise<boolean> {
+	const row = await db
+		.prepare(
+			`SELECT 1 AS ok FROM observability_collection_log
+       WHERE completed_at IS NOT NULL LIMIT 1`,
+		)
+		.first<{ ok: number }>()
+		.catch(() => null);
+	return row !== null;
+}
+
+/**
  * Get a full overview summary: health statuses, active alerts, last collection time.
  */
 export async function getObservabilityOverview(db: D1Database): Promise<{
 	lastCollectionAt: number | null;
 	activeAlerts: number;
 	healthSummary: Array<{ endpoint: string; isHealthy: boolean; checkedAt: number }>;
-	collectionTokenConfigured: boolean;
+	collectorConnected: boolean;
 }> {
 	const [lastCollection, activeAlerts, healthChecks] = await Promise.allSettled([
 		db
@@ -127,8 +143,7 @@ export async function getObservabilityOverview(db: D1Database): Promise<{
 			isHealthy: h.is_healthy === 1,
 			checkedAt: h.checked_at,
 		})),
-		// Token configured is determined by checking if we have any non-unavailable CF collector runs
-		collectionTokenConfigured: false, // Set by the API endpoint based on env
+		collectorConnected: lastAt !== null,
 	};
 }
 
