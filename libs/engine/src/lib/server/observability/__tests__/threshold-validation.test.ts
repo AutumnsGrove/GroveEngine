@@ -7,7 +7,7 @@
  * as a pure function. This documents the contract and guards against regressions
  * if the validation logic is ever moved or refactored.
  *
- * See: packages/landing/src/routes/api/admin/observability/thresholds/+server.ts
+ * See: libs/engine/src/routes/api/admin/observability/thresholds/+server.ts
  */
 
 import { describe, it, expect } from "vitest";

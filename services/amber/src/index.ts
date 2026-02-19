@@ -27,6 +27,7 @@ interface HeartwoodSession {
 		id: string;
 		email: string;
 		name?: string;
+		tier?: string;
 	};
 }
 
@@ -246,9 +247,7 @@ async function getAuthUser(
 			return null;
 		}
 
-		// TODO: Extract tier from subscription service or Heartwood user metadata
-		// For now, default to seedling until the subscription system is designed
-		const tier: SubscriptionTier = "seedling";
+		const tier = (session.user.tier as SubscriptionTier) || "seedling";
 
 		return {
 			id: session.user.id,
@@ -266,7 +265,9 @@ const TIER_STORAGE: Record<string, number> = {
 	seedling: 1,
 	sapling: 5,
 	oak: 20,
+	canopy: 20,
 	evergreen: 100,
+	platform: 100,
 };
 
 const GB_IN_BYTES = 1024 * 1024 * 1024;

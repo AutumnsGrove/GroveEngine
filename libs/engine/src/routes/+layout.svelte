@@ -1,24 +1,15 @@
-<svelte:head>
-	{#if context?.type === 'tenant'}
-		<title>{siteName}</title>
-		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
-	{:else}
-		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
-	{/if}
-</svelte:head>
-
 <script>
-	import '../app.css';
-	import '$lib/styles/tokens.css';
-	import '$lib/styles/vine-pattern.css';
-	import { page } from '$app/state';
-	import { navigating } from '$app/stores';
-	import { fade } from 'svelte/transition';
-	import { goto } from '$app/navigation';
-	import { Button, GroveSwap, PassageTransition } from '$lib/ui';
-	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
-	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
-	import { groveModeStore } from '$lib/ui/stores/grove-mode.svelte';
+	import "../app.css";
+	import "$lib/styles/tokens.css";
+	import "$lib/styles/vine-pattern.css";
+	import { page } from "$app/state";
+	import { navigating } from "$app/stores";
+	import { fade } from "svelte/transition";
+	import { goto } from "$app/navigation";
+	import { Button, GroveSwap, PassageTransition } from "$lib/ui";
+	import { fontMap, DEFAULT_FONT } from "$lib/ui/tokens/fonts";
+	import { Header, buildTenantNavItems, themeStore } from "$lib/ui/components/chrome";
+	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
@@ -32,11 +23,11 @@
 	// Derive site name based on context
 	// grove_title from site_settings takes priority over the tenant display_name
 	const siteName = $derived(
-		context?.type === 'tenant'
-			? (data.siteSettings?.grove_title || context.tenant.name)
-			: context?.type === 'app'
+		context?.type === "tenant"
+			? data.siteSettings?.grove_title || context.tenant.name
+			: context?.type === "app"
 				? `Grove ${context.app.charAt(0).toUpperCase() + context.app.slice(1)}`
-				: 'The Grove'
+				: "The Grove",
 	);
 
 	// Track if optional fonts CSS has been loaded
@@ -45,30 +36,32 @@
 	// Apply font from server-loaded settings (fontMap imported from canonical source)
 	// PERFORMANCE: Only load optional fonts CSS if tenant uses a non-default font
 	$effect(() => {
-		if (typeof document !== 'undefined' && data?.siteSettings?.font_family) {
+		if (typeof document !== "undefined" && data?.siteSettings?.font_family) {
 			const selectedFont = data.siteSettings.font_family;
 			const fontValue = fontMap[selectedFont] || fontMap[DEFAULT_FONT];
-			document.documentElement.style.setProperty('--font-family-main', fontValue);
+			document.documentElement.style.setProperty("--font-family-main", fontValue);
 
 			// Lazy-load optional fonts CSS only when needed (not Lexend)
-			if (selectedFont !== 'lexend' && selectedFont !== DEFAULT_FONT && !optionalFontsLoaded) {
-				import('$lib/styles/fonts-optional.css');
+			if (selectedFont !== "lexend" && selectedFont !== DEFAULT_FONT && !optionalFontsLoaded) {
+				import("$lib/styles/fonts-optional.css");
 				optionalFontsLoaded = true;
 			}
 		}
 	});
 
 	// Check if we're on an admin page
-	let isAdminPage = $derived(page.url.pathname.startsWith('/arbor'));
+	let isAdminPage = $derived(page.url.pathname.startsWith("/arbor"));
 
 	// Build tenant navigation items from context
 	// showTimeline/showGallery flags come from +layout.server.ts (curio config queries)
-	const tenantNavItems = $derived(buildTenantNavItems({
-		siteName: siteName,
-		navPages: data.navPages,
-		showTimeline: data.showTimeline,
-		showGallery: data.showGallery,
-	}));
+	const tenantNavItems = $derived(
+		buildTenantNavItems({
+			siteName: siteName,
+			navPages: data.navPages,
+			showTimeline: data.showTimeline,
+			showGallery: data.showGallery,
+		}),
+	);
 
 	// Handle search - navigate to blog search
 	/** @param {string} query */
@@ -78,122 +71,216 @@
 
 	// Map server user data to HeaderUser shape (picture → avatarUrl)
 	// Prefer custom avatar from site_settings over OAuth provider picture
-	const headerUser = $derived(data.user ? {
-		id: data.user.id,
-		name: data.user.name,
-		email: data.user.email,
-		avatarUrl: data.siteSettings?.avatar_url || data.user.picture
-	} : null);
+	const headerUser = $derived(
+		data.user
+			? {
+					id: data.user.id,
+					name: data.user.name,
+					email: data.user.email,
+					avatarUrl: data.siteSettings?.avatar_url || data.user.picture,
+				}
+			: null,
+	);
 
 	// Theme is handled by themeStore in chrome components
 	// Just need to sync with the layout's needs for the footer toggle
-	let darkMode = $derived(themeStore.resolvedTheme === 'dark');
+	let darkMode = $derived(themeStore.resolvedTheme === "dark");
 
 	function toggleTheme() {
 		themeStore.toggle();
 	}
 </script>
 
+<svelte:head>
+	{#if context?.type === "tenant"}
+		<title>{siteName}</title>
+		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
+	{:else}
+		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
+	{/if}
+</svelte:head>
+
 <!-- Handle not_found context (invalid subdomain) -->
-{#if context?.type === 'not_found'}
-<div class="not-found-layout">
-	<div class="not-found-content">
-		<h1><GroveSwap term="your-garden">Garden</GroveSwap> Not Found</h1>
-		<p>The <GroveSwap term="your-garden" standard="blog">garden</GroveSwap> <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
-		<p>Want to start your own <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>? <a href="https://grove.place">Get started at grove.place</a></p>
+{#if context?.type === "not_found"}
+	<div class="not-found-layout">
+		<div class="not-found-content">
+			<h1><GroveSwap term="your-garden">Garden</GroveSwap> Not Found</h1>
+			<p>
+				The <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>
+				<strong>{context.subdomain}.grove.place</strong> doesn't exist yet.
+			</p>
+			<p>
+				Want to start your own <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>?
+				<a href="https://grove.place">Get started at grove.place</a>
+			</p>
+		</div>
 	</div>
-</div>
 {:else}
-<div class="layout leaf-pattern" style:--user-accent={data.siteSettings?.accent_color || null} style:--color-primary={data.siteSettings?.accent_color || null}>
-	<!-- Unified Header with chrome components -->
-	<Header
-		navItems={tenantNavItems}
-		brandTitle={siteName}
-		searchEnabled={!isAdminPage}
-		searchPlaceholder="Search posts..."
-		onSearch={handleSearch}
-		resourceLinks={[]}
-		connectLinks={[]}
-		showLogo={data.siteSettings?.show_grove_logo === true || data.siteSettings?.show_grove_logo === 'true'}
-		logoSize="lg"
-		maxWidth="wide"
-		showSidebarToggle={isAdminPage}
-		user={headerUser}
-		signInHref="/auth/login"
-	/>
+	<div
+		class="layout leaf-pattern"
+		style:--user-accent={data.siteSettings?.accent_color || null}
+		style:--color-primary={data.siteSettings?.accent_color || null}
+	>
+		<!-- Unified Header with chrome components -->
+		<Header
+			navItems={tenantNavItems}
+			brandTitle={siteName}
+			searchEnabled={!isAdminPage}
+			searchPlaceholder="Search posts..."
+			onSearch={handleSearch}
+			resourceLinks={[]}
+			connectLinks={[]}
+			showLogo={data.siteSettings?.show_grove_logo === true ||
+				data.siteSettings?.show_grove_logo === "true"}
+			logoSize="lg"
+			maxWidth="wide"
+			showSidebarToggle={isAdminPage}
+			user={headerUser}
+			signInHref="/auth/login"
+		/>
 
-	{#if isNavigating}
-		<div class="nav-loading-bar" role="progressbar" aria-label="Loading page">
-			<div class="nav-loading-bar-fill"></div>
-		</div>
-	{/if}
-
-	<main>
-		{#if isAdminPage}
-			<!-- Admin pages: no {#key} wrapper — preserves sidebar layout across navigations -->
-			{@render children()}
-		{:else}
-			{#key page.url.pathname}
-				<div in:fade={{ duration: 200 }}>
-					{@render children()}
-				</div>
-			{/key}
+		{#if isNavigating}
+			<div class="nav-loading-bar" role="progressbar" aria-label="Loading page">
+				<div class="nav-loading-bar-fill"></div>
+			</div>
 		{/if}
-	</main>
 
-	{#if !isAdminPage}
-	<footer>
-		<p>Powered by <a href="https://grove.place/knowledge/help/what-is-lattice" target="_blank" rel="noopener noreferrer">Lattice</a>, from <a href="https://grove.place" target="_blank" rel="noopener noreferrer">The Grove</a></p>
-		<div class="footer-actions">
-			{#if data?.user}
-				<span class="logged-in-indicator" title="Logged in">
-					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="20 6 9 17 4 12"></polyline>
-					</svg>
-				</span>
+		<main>
+			{#if isAdminPage}
+				<!-- Admin pages: no {#key} wrapper — preserves sidebar layout across navigations -->
+				{@render children()}
+			{:else}
+				{#key page.url.pathname}
+					<div in:fade={{ duration: 200 }}>
+						{@render children()}
+					</div>
+				{/key}
 			{/if}
-			{#if data?.isOwner}
-				<a href="/arbor" class="admin-link" aria-label="Admin Panel">
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-						<circle cx="12" cy="12" r="3"></circle>
-					</svg>
-				</a>
-			{/if}
-			<button
-				type="button"
-				class="grove-mode-btn"
-				class:active={groveModeStore.current}
-				onclick={() => groveModeStore.toggle()}
-				aria-label={groveModeStore.current ? 'Disable Grove Mode' : 'Enable Grove Mode'}
-				aria-pressed={groveModeStore.current}
-				title={groveModeStore.current ? 'Grove Mode is on' : 'Grove Mode is off'}
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 1.5 17 1.5s4.78 8.1 0 13.5c-2.5 2.5-6.2 5-6.2 5Z"/><path d="M11 20a7 7 0 0 0 1.2-13.1C6.5 4.9 5 1.5 5 1.5S.22 9.6 5 15c2.5 2.5 6 5 6 5Z"/></svg>
-			</button>
-			<Button variant="ghost" size="icon" class="theme-toggle" onclick={toggleTheme} aria-label="Toggle dark mode">
-				{#if darkMode}
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<circle cx="12" cy="12" r="5"></circle>
-						<line x1="12" y1="1" x2="12" y2="3"></line>
-						<line x1="12" y1="21" x2="12" y2="23"></line>
-						<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-						<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-						<line x1="1" y1="12" x2="3" y2="12"></line>
-						<line x1="21" y1="12" x2="23" y2="12"></line>
-						<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-						<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-					</svg>
-				{:else}
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-					</svg>
-				{/if}
-			</Button>
-		</div>
-	</footer>
-	{/if}
-</div>
+		</main>
+
+		{#if !isAdminPage}
+			<footer>
+				<p>
+					Powered by <a
+						href="https://grove.place/knowledge/help/what-is-lattice"
+						target="_blank"
+						rel="noopener noreferrer">Lattice</a
+					>, from
+					<a href="https://grove.place" target="_blank" rel="noopener noreferrer">The Grove</a>
+				</p>
+				<div class="footer-actions">
+					{#if data?.user}
+						<span class="logged-in-indicator" title="Logged in">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="3"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<polyline points="20 6 9 17 4 12"></polyline>
+							</svg>
+						</span>
+					{/if}
+					{#if data?.isOwner}
+						<a href="/arbor" class="admin-link" aria-label="Admin Panel">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path
+									d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+								></path>
+								<circle cx="12" cy="12" r="3"></circle>
+							</svg>
+						</a>
+					{/if}
+					<button
+						type="button"
+						class="grove-mode-btn"
+						class:active={groveModeStore.current}
+						onclick={() => groveModeStore.toggle()}
+						aria-label={groveModeStore.current ? "Disable Grove Mode" : "Enable Grove Mode"}
+						aria-pressed={groveModeStore.current}
+						title={groveModeStore.current ? "Grove Mode is on" : "Grove Mode is off"}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 1.5 17 1.5s4.78 8.1 0 13.5c-2.5 2.5-6.2 5-6.2 5Z"
+							/><path
+								d="M11 20a7 7 0 0 0 1.2-13.1C6.5 4.9 5 1.5 5 1.5S.22 9.6 5 15c2.5 2.5 6 5 6 5Z"
+							/></svg
+						>
+					</button>
+					<Button
+						variant="ghost"
+						size="icon"
+						class="theme-toggle"
+						onclick={toggleTheme}
+						aria-label="Toggle dark mode"
+					>
+						{#if darkMode}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<circle cx="12" cy="12" r="5"></circle>
+								<line x1="12" y1="1" x2="12" y2="3"></line>
+								<line x1="12" y1="21" x2="12" y2="23"></line>
+								<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+								<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+								<line x1="1" y1="12" x2="3" y2="12"></line>
+								<line x1="21" y1="12" x2="23" y2="12"></line>
+								<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+								<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+							</svg>
+						{:else}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+						{/if}
+					</Button>
+				</div>
+			</footer>
+		{/if}
+	</div>
 {/if}
 
 <PassageTransition />
@@ -239,17 +326,17 @@
 	/* Critical font: Lexend (default across all Grove sites)
 	   Other fonts are lazy-loaded via fonts-optional.css when tenant selects them.
 	   This reduces initial CSS size and network requests for first paint.
-	   See: packages/engine/src/lib/styles/fonts-optional.css */
+	   See: libs/engine/src/lib/styles/fonts-optional.css */
 	@font-face {
-		font-family: 'Lexend';
-		src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
+		font-family: "Lexend";
+		src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf") format("truetype");
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	/* Font family default - dynamically set via JavaScript from database settings */
 	:global(:root) {
-		--font-family-main: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		--font-family-main: "Lexend", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	}
 	/* Note: All other CSS variables are defined in tokens.css */
 	:global(body) {
@@ -258,7 +345,9 @@
 		line-height: 1.6;
 		color: var(--color-text);
 		background: hsl(var(--background));
-		transition: background-color 0.3s ease, color 0.3s ease;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
 	}
 	/* Global tag styles - shared across all pages */
 	:global(.tag) {
@@ -272,7 +361,10 @@
 		text-decoration: none;
 		cursor: pointer;
 		display: inline-block;
-		transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease,
+			transform 0.2s ease;
 	}
 	:global(.tag:hover) {
 		background: var(--tag-bg-hover);
@@ -307,7 +399,9 @@
 		margin-top: 4rem;
 		position: relative;
 		z-index: 1003;
-		transition: background-color 0.3s ease, border-color 0.3s ease;
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
 	}
 	footer p {
 		margin: 0;
@@ -325,7 +419,9 @@
 		color: var(--color-text-muted);
 		text-decoration: none;
 		border-radius: 4px;
-		transition: color 0.2s, transform 0.2s;
+		transition:
+			color 0.2s,
+			transform 0.2s;
 	}
 	.admin-link:hover {
 		color: var(--color-primary);
@@ -351,7 +447,9 @@
 		border: none;
 		border-radius: 4px;
 		cursor: pointer;
-		transition: color 0.2s, transform 0.2s;
+		transition:
+			color 0.2s,
+			transform 0.2s;
 	}
 	.grove-mode-btn:hover {
 		color: var(--color-primary);
@@ -390,9 +488,15 @@
 		background: var(--grove-300, #86efac);
 	}
 	@keyframes nav-loading {
-		0% { transform: translateX(-100%) scaleX(0.3); }
-		50% { transform: translateX(0%) scaleX(0.6); }
-		100% { transform: translateX(100%) scaleX(0.3); }
+		0% {
+			transform: translateX(-100%) scaleX(0.3);
+		}
+		50% {
+			transform: translateX(0%) scaleX(0.6);
+		}
+		100% {
+			transform: translateX(100%) scaleX(0.3);
+		}
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.nav-loading-bar-fill {
@@ -401,7 +505,12 @@
 		}
 	}
 	@keyframes nav-loading-pulse {
-		0%, 100% { opacity: 0.3; }
-		50% { opacity: 0.7; }
+		0%,
+		100% {
+			opacity: 0.3;
+		}
+		50% {
+			opacity: 0.7;
+		}
 	}
 </style>

@@ -16,14 +16,14 @@
  * The DO always returns honest data — fail-mode handling (open/closed)
  * stays in the ThresholdDOStore layer, not here.
  *
- * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
+ * Migrated to LoomDO base class — see libs/engine/src/lib/loom/
  */
 
 import {
-  LoomDO,
-  type LoomRoute,
-  type LoomConfig,
-  type LoomRequestContext,
+	LoomDO,
+	type LoomRoute,
+	type LoomConfig,
+	type LoomRequestContext,
 } from "@autumnsgrove/lattice/loom";
 
 // =============================================================================
@@ -31,16 +31,16 @@ import {
 // =============================================================================
 
 interface ThresholdCheckRequest {
-  key: string;
-  limit: number;
-  windowSeconds: number;
+	key: string;
+	limit: number;
+	windowSeconds: number;
 }
 
 interface ThresholdResult {
-  allowed: boolean;
-  remaining: number;
-  resetAt: number;
-  retryAfter?: number;
+	allowed: boolean;
+	remaining: number;
+	resetAt: number;
+	retryAfter?: number;
 }
 
 // =============================================================================
@@ -51,14 +51,14 @@ interface ThresholdResult {
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 export class ThresholdDO extends LoomDO<null, Record<string, unknown>> {
-  private createdAt: number = Date.now();
+	private createdAt: number = Date.now();
 
-  config(): LoomConfig {
-    return { name: "ThresholdDO", blockOnInit: false };
-  }
+	config(): LoomConfig {
+		return { name: "ThresholdDO", blockOnInit: false };
+	}
 
-  protected schema(): string {
-    return `
+	protected schema(): string {
+		return `
       CREATE TABLE IF NOT EXISTS rate_limits (
         key TEXT PRIMARY KEY,
         count INTEGER NOT NULL DEFAULT 0,
@@ -66,43 +66,43 @@ export class ThresholdDO extends LoomDO<null, Record<string, unknown>> {
         window_seconds INTEGER NOT NULL
       )
     `;
-  }
+	}
 
-  routes(): LoomRoute[] {
-    return [
-      {
-        method: "POST",
-        path: "/check",
-        handler: (ctx) => this.handleCheck(ctx),
-      },
-      { method: "GET", path: "/health", handler: () => this.handleHealth() },
-    ];
-  }
+	routes(): LoomRoute[] {
+		return [
+			{
+				method: "POST",
+				path: "/check",
+				handler: (ctx) => this.handleCheck(ctx),
+			},
+			{ method: "GET", path: "/health", handler: () => this.handleHealth() },
+		];
+	}
 
-  // =========================================================================
-  // POST /check — Atomic Rate Limit Check
-  // =========================================================================
+	// =========================================================================
+	// POST /check — Atomic Rate Limit Check
+	// =========================================================================
 
-  private async handleCheck(ctx: LoomRequestContext): Promise<Response> {
-    const body = (await ctx.request.json()) as ThresholdCheckRequest;
+	private async handleCheck(ctx: LoomRequestContext): Promise<Response> {
+		const body = (await ctx.request.json()) as ThresholdCheckRequest;
 
-    if (!body.key || !body.limit || !body.windowSeconds) {
-      return Response.json(
-        {
-          error: "bad_request",
-          message: "Missing key, limit, or windowSeconds",
-        },
-        { status: 400 },
-      );
-    }
+		if (!body.key || !body.limit || !body.windowSeconds) {
+			return Response.json(
+				{
+					error: "bad_request",
+					message: "Missing key, limit, or windowSeconds",
+				},
+				{ status: 400 },
+			);
+		}
 
-    const nowSeconds = Math.floor(Date.now() / 1000);
+		const nowSeconds = Math.floor(Date.now() / 1000);
 
-    // Single atomic INSERT ON CONFLICT RETURNING — same pattern as ThresholdD1Store
-    // but running on local SQLite (zero network latency, single-writer guarantee).
-    const row = this.sql
-      .exec(
-        `INSERT INTO rate_limits (key, count, window_start, window_seconds)
+		// Single atomic INSERT ON CONFLICT RETURNING — same pattern as ThresholdD1Store
+		// but running on local SQLite (zero network latency, single-writer guarantee).
+		const row = this.sql
+			.exec(
+				`INSERT INTO rate_limits (key, count, window_start, window_seconds)
 				 VALUES (?, 1, ?, ?)
 				 ON CONFLICT(key) DO UPDATE SET
 				   count = CASE
@@ -115,75 +115,68 @@ export class ThresholdDO extends LoomDO<null, Record<string, unknown>> {
 				   END,
 				   window_seconds = excluded.window_seconds
 				 RETURNING count, window_start, window_seconds`,
-        body.key,
-        nowSeconds,
-        body.windowSeconds,
-        nowSeconds,
-        nowSeconds,
-      )
-      .one();
+				body.key,
+				nowSeconds,
+				body.windowSeconds,
+				nowSeconds,
+				nowSeconds,
+			)
+			.one();
 
-    const count = row.count as number;
-    const windowStart = row.window_start as number;
-    const windowSeconds = row.window_seconds as number;
-    const resetAt = windowStart + windowSeconds;
+		const count = row.count as number;
+		const windowStart = row.window_start as number;
+		const windowSeconds = row.window_seconds as number;
+		const resetAt = windowStart + windowSeconds;
 
-    // Schedule cleanup alarm if not already set
-    await this.alarms.ensureScheduled(CLEANUP_INTERVAL_MS);
+		// Schedule cleanup alarm if not already set
+		await this.alarms.ensureScheduled(CLEANUP_INTERVAL_MS);
 
-    const result: ThresholdResult =
-      count > body.limit
-        ? {
-            allowed: false,
-            remaining: 0,
-            resetAt,
-            retryAfter: Math.max(0, resetAt - nowSeconds),
-          }
-        : {
-            allowed: true,
-            remaining: body.limit - count,
-            resetAt,
-          };
+		const result: ThresholdResult =
+			count > body.limit
+				? {
+						allowed: false,
+						remaining: 0,
+						resetAt,
+						retryAfter: Math.max(0, resetAt - nowSeconds),
+					}
+				: {
+						allowed: true,
+						remaining: body.limit - count,
+						resetAt,
+					};
 
-    return Response.json(result);
-  }
+		return Response.json(result);
+	}
 
-  // =========================================================================
-  // GET /health — Diagnostics
-  // =========================================================================
+	// =========================================================================
+	// GET /health — Diagnostics
+	// =========================================================================
 
-  private handleHealth(): Response {
-    const row = this.sql
-      .exec(`SELECT COUNT(*) as total FROM rate_limits`)
-      .one();
+	private handleHealth(): Response {
+		const row = this.sql.exec(`SELECT COUNT(*) as total FROM rate_limits`).one();
 
-    return Response.json({
-      status: "ok",
-      counters: row.total as number,
-      uptimeMs: Date.now() - this.createdAt,
-    });
-  }
+		return Response.json({
+			status: "ok",
+			counters: row.total as number,
+			uptimeMs: Date.now() - this.createdAt,
+		});
+	}
 
-  // =========================================================================
-  // Alarm — Cleanup Expired Windows
-  // =========================================================================
+	// =========================================================================
+	// Alarm — Cleanup Expired Windows
+	// =========================================================================
 
-  protected async onAlarm(): Promise<void> {
-    const nowSeconds = Math.floor(Date.now() / 1000);
+	protected async onAlarm(): Promise<void> {
+		const nowSeconds = Math.floor(Date.now() / 1000);
 
-    // Delete rows where the window has fully expired
-    this.sql.exec(
-      `DELETE FROM rate_limits WHERE window_start + window_seconds < ?`,
-      nowSeconds,
-    );
+		// Delete rows where the window has fully expired
+		this.sql.exec(`DELETE FROM rate_limits WHERE window_start + window_seconds < ?`, nowSeconds);
 
-    // Check if any rows remain — only reschedule if there's data to clean
-    const remaining = this.sql
-      .exec(`SELECT COUNT(*) as total FROM rate_limits`)
-      .one();
+		// Check if any rows remain — only reschedule if there's data to clean
+		const remaining = this.sql.exec(`SELECT COUNT(*) as total FROM rate_limits`).one();
 
-    if ((remaining.total as number) > 0) {
-      await this.alarms.schedule(CLEANUP_INTERVAL_MS);
-    }
-  }
+		if ((remaining.total as number) > 0) {
+			await this.alarms.schedule(CLEANUP_INTERVAL_MS);
+		}
+	}
 }

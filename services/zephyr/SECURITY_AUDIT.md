@@ -2,7 +2,7 @@
 
 **Audit Date:** 2026-02-02
 **Auditor:** Raccoon Security Audit
-**Scope:** workers/zephyr/src/ and packages/engine/src/lib/zephyr/
+**Scope:** workers/zephyr/src/ and libs/engine/src/lib/zephyr/
 
 ---
 
@@ -22,13 +22,14 @@ The Zephyr email gateway had one **critical security vulnerability**: the `/send
 
 - **Location:** `workers/zephyr/src/index.ts:33`
 - **Risk:** CRITICAL - Anyone could send emails through the gateway without authentication, leading to spam/abuse, email reputation damage, and potential financial costs (Resend charges per email)
-- **Fix:** 
+- **Fix:**
   - Created new `workers/zephyr/src/middleware/auth.ts` with timing-safe API key validation
   - Added `authMiddleware` to protect the `/send` endpoint
   - Added `ZEPHYR_API_KEY` environment variable requirement
   - Updated `wrangler.toml` with documentation
 
 **Code Changes:**
+
 ```typescript
 // BEFORE: No authentication
 app.post("/send", sendHandler);
@@ -44,6 +45,7 @@ app.post("/send", authMiddleware, sendHandler);
 - **Fix:** Removed partial key logging, now logs generic message
 
 **Code Changes:**
+
 ```typescript
 // BEFORE: Leaked partial key
 console.error(`[Zephyr] Circuit breaker opened for ${apiKey.slice(0, 8)}...`);
@@ -78,16 +80,16 @@ console.error(`[Zephyr] Circuit breaker opened for provider`);
 
 ### Security Verification
 
-| Category | Status | Notes |
-|----------|--------|-------|
-| Secrets scan | PASS | No hardcoded secrets found; all keys in env vars |
-| Input validation | PASS | All user inputs validated; parameterized D1 queries |
-| Authentication | PASS | API key auth now implemented on /send endpoint |
-| Authorization | PASS | Rate limiting per tenant enforced |
-| Privacy | PASS | Email body/content never logged; only metadata |
-| Rate limiting | PASS | D1-backed rate limiting per tenant and email type |
-| Error handling | PASS | Generic error messages; stack traces not exposed |
-| Dependencies | PASS | Standard packages (hono, resend) from trusted sources |
+| Category         | Status | Notes                                                 |
+| ---------------- | ------ | ----------------------------------------------------- |
+| Secrets scan     | PASS   | No hardcoded secrets found; all keys in env vars      |
+| Input validation | PASS   | All user inputs validated; parameterized D1 queries   |
+| Authentication   | PASS   | API key auth now implemented on /send endpoint        |
+| Authorization    | PASS   | Rate limiting per tenant enforced                     |
+| Privacy          | PASS   | Email body/content never logged; only metadata        |
+| Rate limiting    | PASS   | D1-backed rate limiting per tenant and email type     |
+| Error handling   | PASS   | Generic error messages; stack traces not exposed      |
+| Dependencies     | PASS   | Standard packages (hono, resend) from trusted sources |
 
 ---
 
@@ -96,6 +98,7 @@ console.error(`[Zephyr] Circuit breaker opened for provider`);
 #### Immediate Actions
 
 1. **Deploy ZEPHYR_API_KEY secret**
+
    ```bash
    cd workers/zephyr
    wrangler secret put ZEPHYR_API_KEY
@@ -103,7 +106,7 @@ console.error(`[Zephyr] Circuit breaker opened for provider`);
    ```
 
 2. **Update all clients with the new API key**
-   - Update `packages/engine/src/lib/zephyr/client.ts` default config
+   - Update `libs/engine/src/lib/zephyr/client.ts` default config
    - Update any services using Zephyr with the new key
 
 3. **Enable Cloudflare Access** (optional but recommended)
@@ -118,11 +121,12 @@ console.error(`[Zephyr] Circuit breaker opened for provider`);
    - Test timing attack resistance
 
 2. **Add request size limits**
+
    ```typescript
    // In send handler
-   const contentLength = c.req.header('Content-Length');
+   const contentLength = c.req.header("Content-Length");
    if (contentLength && parseInt(contentLength) > 1024 * 1024) {
-     return c.json({ error: "Request too large" }, 413);
+   	return c.json({ error: "Request too large" }, 413);
    }
    ```
 
@@ -179,16 +183,18 @@ console.error(`[Zephyr] Circuit breaker opened for provider`);
 ### Post-Deployment Monitoring
 
 Monitor for:
+
 - Authentication failures (potential attacks)
 - Unusual email volume patterns
 - Circuit breaker triggers
 - Rate limit hits
 
 Set up alerts for:
-- >10 auth failures per minute
-- >1000 emails per hour
+
+- > 10 auth failures per minute
+- > 1000 emails per hour
 - Circuit breaker opened
 
 ---
 
-*Audit completed by Raccoon. The rocks have been lifted, the stream has been inspected, and the code is now clean.* 🦝
+_Audit completed by Raccoon. The rocks have been lifted, the stream has been inspected, and the code is now clean._ 🦝

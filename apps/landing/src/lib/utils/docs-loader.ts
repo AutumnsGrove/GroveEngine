@@ -2,12 +2,7 @@ import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
-import type {
-  Doc,
-  DocCategory,
-  DocWithContent,
-  DocHeader,
-} from "$lib/types/docs";
+import type { Doc, DocCategory, DocWithContent, DocHeader } from "$lib/types/docs";
 import { groveTermPlugin } from "./markdown-groveterm";
 
 /**
@@ -15,24 +10,24 @@ import { groveTermPlugin } from "./markdown-groveterm";
  * Used by both extractHeaders and the heading renderer to ensure consistency.
  */
 function generateHeadingId(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim();
+	return text
+		.toLowerCase()
+		.replace(/[^\w\s-]/g, "")
+		.replace(/\s+/g, "-")
+		.replace(/-+/g, "-")
+		.trim();
 }
 
 /**
  * Escape HTML special characters for safe embedding in HTML attributes.
  */
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
 }
 
 // Create markdown-it instance with custom renderers and GroveTerm plugin
@@ -41,12 +36,12 @@ md.use(groveTermPlugin);
 
 // Heading renderer - adds IDs for TOC navigation
 md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
-  const token = tokens[idx];
-  const inlineToken = tokens[idx + 1];
-  const headingText = inlineToken?.content || "";
-  const id = generateHeadingId(headingText);
-  token.attrSet("id", id);
-  return self.renderToken(tokens, idx, options);
+	const token = tokens[idx];
+	const inlineToken = tokens[idx + 1];
+	const headingText = inlineToken?.content || "";
+	const id = generateHeadingId(headingText);
+	token.attrSet("id", id);
+	return self.renderToken(tokens, idx, options);
 };
 
 // Code block renderer - wraps code blocks with GitHub-style header and copy button
@@ -54,12 +49,12 @@ md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
 // avoiding the need to duplicate content in a data-code attribute (which inflated
 // page size significantly for code-heavy specs like lattice-spec).
 md.renderer.rules.fence = function (tokens, idx) {
-  const token = tokens[idx];
-  const code = token.content;
-  const lang = token.info || "text";
-  const escapedCode = escapeHtml(code);
+	const token = tokens[idx];
+	const code = token.content;
+	const lang = token.info || "text";
+	const escapedCode = escapeHtml(code);
 
-  return `<div class="code-block-wrapper">
+	return `<div class="code-block-wrapper">
   <div class="code-block-header">
     <span class="code-block-language">${lang}</span>
     <button class="code-block-copy" aria-label="Copy code to clipboard">
@@ -77,86 +72,86 @@ md.renderer.rules.fence = function (tokens, idx) {
 // Re-export types for convenience
 export type { Doc, DocWithContent } from "$lib/types/docs";
 
-// Docs are at project root - landing is now at packages/landing/
+// Docs are at project root - landing is now at apps/landing/
 // so we need to go up two levels to reach the repo root
 const DOCS_ROOT = resolve(process.cwd(), "..", "..", "docs");
 
 /** Internal type with file path for content loading */
 interface DocInternal extends Doc {
-  _filePath: string;
+	_filePath: string;
 }
 
 function calculateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
+	const wordsPerMinute = 200;
+	const wordCount = content.split(/\s+/).length;
+	return Math.ceil(wordCount / wordsPerMinute);
 }
 
 function generateExcerpt(content: string): string {
-  // Remove markdown headers and take first paragraph
-  const cleanContent = content
-    .replace(/^#+\s+.*$/gm, "") // Remove headers
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove links but keep text
-    .trim();
+	// Remove markdown headers and take first paragraph
+	const cleanContent = content
+		.replace(/^#+\s+.*$/gm, "") // Remove headers
+		.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove links but keep text
+		.trim();
 
-  const firstParagraph = cleanContent.split("\n\n")[0];
-  const excerpt = firstParagraph.substring(0, 200).trim();
+	const firstParagraph = cleanContent.split("\n\n")[0];
+	const excerpt = firstParagraph.substring(0, 200).trim();
 
-  return excerpt + (firstParagraph.length > 200 ? "..." : "");
+	return excerpt + (firstParagraph.length > 200 ? "..." : "");
 }
 
 /**
  * Extract headers from markdown content for table of contents
  */
 function extractHeaders(markdown: string): DocHeader[] {
-  const headers: DocHeader[] = [];
+	const headers: DocHeader[] = [];
 
-  // Remove fenced code blocks before extracting headers
-  // This prevents # comments inside code blocks from being treated as headers
-  const markdownWithoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, "");
+	// Remove fenced code blocks before extracting headers
+	// This prevents # comments inside code blocks from being treated as headers
+	const markdownWithoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, "");
 
-  const headerRegex = /^(#{1,6})\s+(.+)$/gm;
+	const headerRegex = /^(#{1,6})\s+(.+)$/gm;
 
-  let match;
-  while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
-    const level = match[1].length;
-    const text = match[2].trim();
-    // Use shared helper to generate ID - ensures consistency with heading renderer
-    const id = generateHeadingId(text);
+	let match;
+	while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
+		const level = match[1].length;
+		const text = match[2].trim();
+		// Use shared helper to generate ID - ensures consistency with heading renderer
+		const id = generateHeadingId(text);
 
-    headers.push({
-      level,
-      text,
-      id,
-    });
-  }
+		headers.push({
+			level,
+			text,
+			id,
+		});
+	}
 
-  return headers;
+	return headers;
 }
 
 function parseDoc(filePath: string, category: DocCategory): DocInternal {
-  const content = readFileSync(filePath, "utf-8");
-  const { data, content: markdownContent } = matter(content);
+	const content = readFileSync(filePath, "utf-8");
+	const { data, content: markdownContent } = matter(content);
 
-  const slug = filePath.split("/").pop()?.replace(".md", "") || "";
-  const title =
-    data.title ||
-    slug
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase())
-      .replace("And", "and");
+	const slug = filePath.split("/").pop()?.replace(".md", "") || "";
+	const title =
+		data.title ||
+		slug
+			.replace(/-/g, " ")
+			.replace(/\b\w/g, (l) => l.toUpperCase())
+			.replace("And", "and");
 
-  return {
-    slug,
-    title,
-    description: data.description,
-    excerpt: data.description || generateExcerpt(markdownContent),
-    category,
-    lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
-    readingTime: calculateReadingTime(markdownContent),
-    related: Array.isArray(data.related) ? data.related : undefined,
-    _filePath: filePath,
-  };
+	return {
+		slug,
+		title,
+		description: data.description,
+		excerpt: data.description || generateExcerpt(markdownContent),
+		category,
+		lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
+		readingTime: calculateReadingTime(markdownContent),
+		related: Array.isArray(data.related) ? data.related : undefined,
+		_filePath: filePath,
+	};
 }
 
 // Categories that should recursively include subdirectories.
@@ -166,147 +161,128 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
 //   scratch/draft folders that shouldn't be exposed publicly.
 const RECURSIVE_CATEGORIES: DocCategory[] = ["specs", "exhibit"];
 
-function loadDocsFromDir(
-  dirPath: string,
-  category: DocCategory,
-): DocInternal[] {
-  const docs: DocInternal[] = [];
-  const seenSlugs = new Set<string>();
-  const shouldRecurse = RECURSIVE_CATEGORIES.includes(category);
+function loadDocsFromDir(dirPath: string, category: DocCategory): DocInternal[] {
+	const docs: DocInternal[] = [];
+	const seenSlugs = new Set<string>();
+	const shouldRecurse = RECURSIVE_CATEGORIES.includes(category);
 
-  function readDirRecursive(currentPath: string) {
-    const items = readdirSync(currentPath);
+	function readDirRecursive(currentPath: string) {
+		const items = readdirSync(currentPath);
 
-    for (const item of items) {
-      const fullPath = join(currentPath, item);
+		for (const item of items) {
+			const fullPath = join(currentPath, item);
 
-      // Gracefully handle broken symlinks or inaccessible files
-      let stat;
-      try {
-        stat = statSync(fullPath);
-      } catch {
-        console.warn(`Skipping inaccessible file: ${fullPath}`);
-        continue;
-      }
+			// Gracefully handle broken symlinks or inaccessible files
+			let stat;
+			try {
+				stat = statSync(fullPath);
+			} catch {
+				console.warn(`Skipping inaccessible file: ${fullPath}`);
+				continue;
+			}
 
-      // Only recurse into subdirectories for certain categories (e.g., specs/completed)
-      // Other categories like philosophy have internal scratch folders that shouldn't be public
-      if (stat.isDirectory() && shouldRecurse) {
-        readDirRecursive(fullPath);
-      } else if (stat.isFile() && item.endsWith(".md")) {
-        try {
-          const doc = parseDoc(fullPath, category);
+			// Only recurse into subdirectories for certain categories (e.g., specs/completed)
+			// Other categories like philosophy have internal scratch folders that shouldn't be public
+			if (stat.isDirectory() && shouldRecurse) {
+				readDirRecursive(fullPath);
+			} else if (stat.isFile() && item.endsWith(".md")) {
+				try {
+					const doc = parseDoc(fullPath, category);
 
-          // Detect duplicate slugs (e.g., same file in both specs/ and specs/completed/)
-          if (seenSlugs.has(doc.slug)) {
-            console.warn(
-              `Duplicate slug "${doc.slug}" found at ${fullPath}, skipping`,
-            );
-            continue;
-          }
+					// Detect duplicate slugs (e.g., same file in both specs/ and specs/completed/)
+					if (seenSlugs.has(doc.slug)) {
+						console.warn(`Duplicate slug "${doc.slug}" found at ${fullPath}, skipping`);
+						continue;
+					}
 
-          seenSlugs.add(doc.slug);
-          docs.push(doc);
-        } catch (error) {
-          console.error(`Error parsing ${fullPath}:`, error);
-        }
-      }
-    }
-  }
+					seenSlugs.add(doc.slug);
+					docs.push(doc);
+				} catch (error) {
+					console.error(`Error parsing ${fullPath}:`, error);
+				}
+			}
+		}
+	}
 
-  try {
-    readDirRecursive(dirPath);
-  } catch (error) {
-    console.error(`Error reading directory ${dirPath}:`, error);
-  }
+	try {
+		readDirRecursive(dirPath);
+	} catch (error) {
+		console.error(`Error reading directory ${dirPath}:`, error);
+	}
 
-  return docs.sort((a, b) => a.title.localeCompare(b.title));
+	return docs.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export function loadAllDocs(): {
-  specs: Doc[];
-  helpArticles: Doc[];
-  legalDocs: Doc[];
-  marketingDocs: Doc[];
-  patterns: Doc[];
-  exhibitDocs: Doc[];
+	specs: Doc[];
+	helpArticles: Doc[];
+	legalDocs: Doc[];
+	marketingDocs: Doc[];
+	patterns: Doc[];
+	exhibitDocs: Doc[];
 } {
-  const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
-  const helpArticles = loadDocsFromDir(
-    join(DOCS_ROOT, "help-center/articles"),
-    "help",
-  );
-  const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
-  const marketingDocs = loadDocsFromDir(
-    join(DOCS_ROOT, "marketing"),
-    "marketing",
-  );
-  const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
-  const exhibitDocs = loadDocsFromDir(join(DOCS_ROOT, "museum"), "exhibit");
+	const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
+	const helpArticles = loadDocsFromDir(join(DOCS_ROOT, "help-center/articles"), "help");
+	const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
+	const marketingDocs = loadDocsFromDir(join(DOCS_ROOT, "marketing"), "marketing");
+	const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
+	const exhibitDocs = loadDocsFromDir(join(DOCS_ROOT, "museum"), "exhibit");
 
-  return {
-    specs,
-    helpArticles,
-    legalDocs,
-    marketingDocs,
-    patterns,
-    exhibitDocs,
-  };
+	return {
+		specs,
+		helpArticles,
+		legalDocs,
+		marketingDocs,
+		patterns,
+		exhibitDocs,
+	};
 }
 
-export function loadDocBySlug(
-  slug: string,
-  category: DocCategory,
-): DocWithContent | null {
-  // Sanitize slug to prevent path traversal attacks
-  if (
-    !slug ||
-    slug.includes("..") ||
-    slug.includes("/") ||
-    slug.includes("\\")
-  ) {
-    return null;
-  }
+export function loadDocBySlug(slug: string, category: DocCategory): DocWithContent | null {
+	// Sanitize slug to prevent path traversal attacks
+	if (!slug || slug.includes("..") || slug.includes("/") || slug.includes("\\")) {
+		return null;
+	}
 
-  const categoryPaths: Record<DocCategory, string> = {
-    specs: join(DOCS_ROOT, "specs"),
-    help: join(DOCS_ROOT, "help-center/articles"),
-    marketing: join(DOCS_ROOT, "marketing"),
-    patterns: join(DOCS_ROOT, "patterns"),
-    legal: join(DOCS_ROOT, "legal"),
-    philosophy: join(DOCS_ROOT, "philosophy"),
-    design: join(DOCS_ROOT, "design-system"),
-    exhibit: join(DOCS_ROOT, "museum"),
-  };
-  const docsPath = categoryPaths[category];
+	const categoryPaths: Record<DocCategory, string> = {
+		specs: join(DOCS_ROOT, "specs"),
+		help: join(DOCS_ROOT, "help-center/articles"),
+		marketing: join(DOCS_ROOT, "marketing"),
+		patterns: join(DOCS_ROOT, "patterns"),
+		legal: join(DOCS_ROOT, "legal"),
+		philosophy: join(DOCS_ROOT, "philosophy"),
+		design: join(DOCS_ROOT, "design-system"),
+		exhibit: join(DOCS_ROOT, "museum"),
+	};
+	const docsPath = categoryPaths[category];
 
-  const docs = loadDocsFromDir(docsPath, category);
+	const docs = loadDocsFromDir(docsPath, category);
 
-  const doc = docs.find((d) => d.slug === slug);
-  if (!doc) return null;
+	const doc = docs.find((d) => d.slug === slug);
+	if (!doc) return null;
 
-  // Use stored file path to support nested directories
-  const filePath = doc._filePath || join(docsPath, `${slug}.md`);
+	// Use stored file path to support nested directories
+	const filePath = doc._filePath || join(docsPath, `${slug}.md`);
 
-  try {
-    const content = readFileSync(filePath, "utf-8");
-    const { content: markdownContent } = matter(content);
+	try {
+		const content = readFileSync(filePath, "utf-8");
+		const { content: markdownContent } = matter(content);
 
-    // Extract headers for table of contents
-    const headers = extractHeaders(markdownContent);
+		// Extract headers for table of contents
+		const headers = extractHeaders(markdownContent);
 
-    // Remove internal _filePath from returned doc
-    const { _filePath, ...docWithoutPath } = doc;
+		// Remove internal _filePath from returned doc
+		const { _filePath, ...docWithoutPath } = doc;
 
-    return {
-      ...docWithoutPath,
-      content: markdownContent,
-      html: md.render(markdownContent),
-      headers,
-    };
-  } catch (error) {
-    // Return null on failure - don't serve incomplete content
-    console.error(`Error loading full content for ${slug}:`, error);
-    return null;
-  }
+		return {
+			...docWithoutPath,
+			content: markdownContent,
+			html: md.render(markdownContent),
+			headers,
+		};
+	} catch (error) {
+		// Return null on failure - don't serve incomplete content
+		console.error(`Error loading full content for ${slug}:`, error);
+		return null;
+	}
 }

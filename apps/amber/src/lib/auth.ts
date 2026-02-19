@@ -3,7 +3,7 @@
  * Handles authentication with Better Auth session-based auth
  */
 
-const AUTH_BASE_URL = "https://auth-api.grove.place";
+const AUTH_BASE_URL = "https://login.grove.place";
 
 export interface User {
 	id: string;
