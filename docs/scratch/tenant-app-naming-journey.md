@@ -33,9 +33,9 @@ This is the critical insight:
 ```
   Lattice          ???
   ┌──────┐    ┌─────────────┐
-  │trellis│───→│living shelter│
-  │frame  │    │that grows   │
-  │work   │    │on the frame │
+  │trellis│───→│living thing │
+  │frame  │    │that grew on │
+  │work   │    │the frame    │
   └──────┘    └─────────────┘
   (library)    (deployment)
 ```
@@ -67,142 +67,147 @@ Not the framework — that's invisible, like a trellis behind a wall of green.
 I see the LIVING thing. The rendered page. The garden. The curios.
 The admin panel behind the door. The safety systems watching from the shadows.
 
-I see a SHELTER. A space that someone has MADE into their own.
-Branches woven overhead, light filtering through, flowers climbing
-the structure. Not wild forest — something tended, intentional,
-alive. A place built from living things.
+I see something DENSE. Something that grew thick and tangled and alive.
+Branches woven into branches. Paths that fork and reconnect.
+127 API handlers. 80+ curio endpoints. Admin panels and auth flows
+and blog routes and RSS feeds — all growing into each other,
+all part of one living whole.
 
-I see... a bower.
+Not manicured. Not sterile. Beautifully complex. Intentionally dense.
 
----
-
-## Candidates
-
-### 1. Bower
-
-**A natural shelter formed by trees, vines, or flowering plants arching overhead.**
-
-In gardens, a bower is a shaded retreat — a seat surrounded by climbing
-plants, supported by a lattice or trellis. In literature, a bower is an
-idyllic retreat. A bowerbird creates elaborate, decorated structures —
-the ultimate expression of "someone lives here."
-
-**The relationship is perfect:** A bower grows on a lattice. The framework
-supports the shelter. The trellis holds up the living thing.
-
-- `packages/bower` → clean
-- `grove-bower` → clean script name
-- "Lattice provides the components. Bower renders them." → clear distinction
-- "Deploy Bower" / "Bower routes" / "Bower API" → makes sense
-
-> "Bower is the living shelter that Lattice holds up."
-
-Completing the sentence: "Bower is where your grove comes alive."
-
-Vibe: Warm, sheltered, intentional, intimate. Like walking into a
-garden alcove and finding a seat beneath climbing roses.
-
-Potential issue: There was a defunct JS package manager called "bower"
-(deprecated 2017). Probably irrelevant in 2026, but worth noting.
-
-
-### 2. Glade
-
-**An open space in a forest where sunlight reaches the ground.**
-
-A glade is often the most beautiful, alive part of a forest — where
-wildflowers bloom, butterflies gather, deer graze. It's a place of
-ARRIVAL: you walk through dense trees and suddenly you're there.
-
-- `packages/glade` → clean
-- `grove-glade` → clean script name
-- "Lattice builds the forest. Glade is the clearing where life happens."
-- "Deploy Glade" / "Glade routes" → makes sense
-
-> "Glade is the open heart of the grove."
-
-Completing the sentence: "Glade is where the grove opens up."
-
-Vibe: Open, sunlit, alive, a place of discovery and arrival.
-
-Potential issue: A glade is an ABSENCE (clearing = removed trees),
-not a structure. The app IS a structure. Also, no direct relationship
-to "lattice" as a metaphor — glades don't grow on lattices.
-
-
-### 3. Stand
-
-**A contiguous community of trees, uniform enough to be a forestry unit.**
-
-In forestry, "this stand of oaks" = "this group of trees functioning
-as one." The deployment IS the stand — all tenants growing together,
-served by the same runtime.
-
-- `packages/stand` → clean but could be confused
-- `grove-stand` → ok script name
-
-> "Stand is where every tree in the grove takes root."
-
-Completing the sentence: "Stand is the living community of trees."
-
-Vibe: Solid, communal, grounded.
-
-Potential issue: "Stand" has many non-forest meanings (take a stand,
-a market stand, etc.). Less poetic than Bower or Glade.
+I see... a thicket.
 
 ---
 
-## The Verdict
+## The Walk: Bower → Rejection → Thicket
 
-**Bower** wins.
+### Round 1: Bower (Rejected)
 
-The lattice-bower relationship is too perfect:
-- Lattice = the framework, the trellis, the invisible support
-- Bower = the living shelter that grows on the lattice
+Bower had a perfect metaphorical relationship to Lattice — a bower grows on
+a trellis. But the word doesn't *roll* in the grove. Too archaic. Catches in
+the throat. Doesn't have the simple warmth of Meadow, Clearing, Vista.
 
-Every other candidate has a weaker connection to "Lattice" as a
-concept. Bower is SPECIFICALLY the thing that grows on a lattice.
-That's not a coincidence — it's the name that was always there.
+The Wayfinder's verdict: "Bower is explicitly not allowed. I dislike the name
+greatly and it doesn't roll well for the grove."
+
+Lesson: the metaphor must serve the feeling, not the other way around.
+
+### Round 2: Three Candidates
+
+**Glade** — Open, sunlit, alive. Where light reaches the forest floor.
+Beautiful word. But a glade is an *absence* — an opening, a clearing.
+The app isn't an opening. It's dense. It's full. It's bursting with routes.
+
+**Hollow** — Sheltered, storied, fairy-tale energy.
+But "hollow" means empty. The opposite of what this app is.
+
+**Thicket** — Dense, living, beautifully tangled.
+"Step into the thicket." Has energy. Has texture.
+Implies richness, complexity, the vibrant tangle of a real blog
+with curios and routes and admin panels all woven together.
+
+**The Wayfinder chose Thicket.**
+
+---
+
+## Why Thicket Fits
+
+A thicket is a dense group of bushes, small trees, and undergrowth growing
+closely together. In nature:
+
+- Thickets are full of LIFE — birds nest in them, animals shelter in them
+- They have texture, depth, complexity
+- They're not manicured — they're beautifully wild, but not random
+- You push through the branches and discover things inside
+- A thicket provides SHELTER through density — not a single wall, but
+  a thousand interwoven branches
+
+The tenant app IS a thicket:
+- 262 route files woven together
+- 127 API handlers branching in every direction
+- 80+ curio endpoints — guestbooks, galleries, badges, timelines
+- Arbor (admin) growing alongside public pages
+- Sentinel (safety) watching from the shadows
+- Auth flows, billing routes, RSS feeds, blog posts — all dense, all alive
+
+The relationship to Lattice:
+- A lattice provides structure. A thicket is what grows when that
+  structure disappears beneath abundant, intertwined life.
+- You can't see the lattice anymore — the thicket has covered it entirely.
+  But it's still there, holding everything up.
 
 ```
-                    🌸 🌿 🌸
-                 🌿    BOWER   🌿
-              🌸   (the living    🌸
-           🌿    shelter where     🌿
-        🌸    Wanderers create,     🌸
-     🌿    read, visit, and live     🌿
-  ═══╪════╪════╪════╪════╪════╪════╪═══
-     │    │    │    │    │    │    │
-     │    │  LATTICE (the trellis) │
-     │    │    │    │    │    │    │
-  ───┴────┴────┴────┴────┴────┴────┴───
-              infrastructure
+     🌿🌸🍃🌿🌸🍃🌿🌸🍃🌿
+    🍃  T H I C K E T  🍃
+   🌿  routes, APIs, curios  🌿
+  🌸   admin, safety, blogs   🌸
+ 🍃    all dense and alive     🍃
+  🌿     woven together      🌿
+   🌸      262 routes       🌸
+    🍃     127 handlers    🍃
+     🌿🌸🍃🌿🌸🍃🌿🌸🍃🌿
+  ════╪════╪════╪════╪════╪════
+      │    │    │    │    │
+      │  L A T T I C E   │
+      │  (still there,   │
+      │   beneath it all) │
+  ────┴────┴────┴────┴────┴────
 ```
+
+### The Sound Test
+
+"Heartwood, Passage, Meadow, Clearing, Vista, **Thicket**."
+
+It fits. Two syllables. The "th" is soft (like the forest), the "ick" has
+energy (like the life inside), the "et" is crisp (like a twig snapping
+underfoot). It rolls.
+
+"Deploy Thicket." — clean
+"Thicket routes." — clean
+"Thicket API." — clean
+"Lattice provides components. Thicket renders them." — clear distinction
+
+### The Tagline Test
+
+> "Thicket is where the grove grows dense and alive."
+> "Thicket is the living tangle of every grove."
+> "Step into the thicket."
+
+All work. "Step into the thicket" is the best — an invitation, not a description.
 
 ---
 
-## The Entry (Draft)
+## The Entry
 
-### Bower
+### Thicket
 
 **The Living Grove** · `*.grove.place`
-**Internal Name:** GroveBower
+**Internal Name:** GroveThicket
 **Standard:** Application Server
-**Waystone:** The deployment that serves every Grove blog — the routes,
-pages, APIs, admin panel, and safety systems that bring your grove to life.
+**Waystone:** The deployment that serves every Grove blog — routes, pages, APIs,
+the admin panel, and safety systems, all woven dense and alive.
 
-A bower is a shelter woven from living things — branches arching overhead,
-vines climbing a trellis, flowers tumbling through the frame. In gardens,
-a bower is where you sit and the world is beautiful around you. Where a
-lattice is the structure you build on, a bower is what grows on it: the
-shade, the color, the life.
+A thicket is where the forest grows most dense — branches into branches,
+leaves overlapping, paths that fork and reconnect. Birds nest in it.
+Animals shelter in it. Push through the outer edge and you find a world
+inside: more life per square foot than anywhere else in the forest.
 
-Bower is the SvelteKit deployment that renders every `*.grove.place` site.
-When someone visits your grove, Bower serves the page. When you open Arbor,
-Bower runs the admin panel. When a curio sparkles in the sidebar, Bower
-handles the API call. Lattice provides the components. Bower weaves them
-into the living, breathing space that Wanderers experience.
+Thicket is the SvelteKit deployment that renders every `*.grove.place` site.
+262 routes, 127 API handlers, 80+ curio endpoints — guestbooks, galleries,
+timelines, badges — all growing into each other, all part of one living whole.
+When someone visits your grove, Thicket serves the page. When you open Arbor,
+Thicket runs the admin panel. When Sentinel watches for harm, it watches from
+inside the thicket. Lattice provides the components. Thicket weaves them dense.
 
-The framework is invisible. The bower is what you see.
+The framework is invisible. The thicket is what grew.
 
-*A shelter woven from the lattice.*
+*Step into the thicket.*
+
+### Conflict Check
+
+- `thicket` — not used anywhere in the codebase as a service/feature name
+- No tech products called "Thicket" in our space
+- Not in the domain blocklist yet (will need to add `thicket` to reserve it)
+- `packages/thicket` — clean, available
+- `grove-thicket` — clean script name
+- `thicket.grove.place` — available (could host Vineyard page)
