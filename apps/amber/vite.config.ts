@@ -11,6 +11,14 @@ export default defineConfig({
 	resolve: {
 		conditions: ["browser"],
 	},
+	optimizeDeps: {
+		exclude: ["@jsquash/jxl"],
+	},
+	build: {
+		rollupOptions: {
+			external: ["@jsquash/jxl"],
+		},
+	},
 	test: {
 		include: ["src/**/*.{test,spec}.{js,ts}"],
 		globals: true,

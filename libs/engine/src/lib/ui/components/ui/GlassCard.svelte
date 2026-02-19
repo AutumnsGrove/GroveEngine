@@ -2,9 +2,10 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
-	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
-	import "@autumnsgrove/gossamer/svelte/style.css";
-	import { Star } from "lucide-svelte";
+	// TODO: Re-enable when gossamer package exports are wired up
+	// import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
+	// import "@autumnsgrove/gossamer/svelte/style.css";
+	import { Star } from "@lucide/svelte";
 
 	/**
 	 * GlassCard - A glassmorphism card component with seasonal theming
@@ -266,30 +267,8 @@
 		</div>
 	{/if}
 
-	{#if gossamer}
-		<!-- Gossamer ASCII background layer -->
-		{#if gossamerPreset}
-			<GossamerClouds
-				preset={gossamerPreset}
-				color={gossamerColor}
-				opacity={gossamerOpacity}
-				speed={gossamerSpeed}
-				animated={!gossamerStatic}
-			/>
-		{:else if gossamerConfig}
-			<GossamerClouds
-				pattern={gossamerConfig.pattern}
-				characters={gossamerConfig.characters}
-				frequency={gossamerConfig.frequency}
-				amplitude={gossamerConfig.amplitude}
-				speed={gossamerSpeed ?? gossamerConfig.speed}
-				cellSize={gossamerConfig.cellSize}
-				color={gossamerColor}
-				opacity={gossamerOpacity}
-				animated={!gossamerStatic && gossamerConfig.animated !== false}
-			/>
-		{/if}
-	{/if}
+	<!-- TODO: Re-enable GossamerClouds when gossamer package exports are wired up -->
+	<!-- {#if gossamer} ... {/if} -->
 
 	<!-- Content layer (above Gossamer) -->
 	<div class={cn(gossamer && "relative z-10", flush && "flex-1 flex flex-col min-h-0")}>
