@@ -215,29 +215,177 @@ The managed service option (MobiLoud, Median.co) handles wrapper building, nativ
 
 ---
 
-## What This Means for Our Architecture
+## What Actually Needs to Change in the Codebase
 
-The good news: **we don't need to rewrite anything.** SvelteKit was the right choice. The path forward is:
+The good news: **we don't need to rewrite anything.** SvelteKit was the right choice. The web app stays exactly as-is on Cloudflare. We're adding a distribution layer alongside it — same codebase, second build target.
 
-1. Our existing web app stays exactly as-is on Cloudflare
-2. We add a static build target alongside the existing adapter-cloudflare build
-3. Capacitor wraps that static build with native chrome
-4. The mobile app calls our existing Cloudflare API for all data
-5. Bubblewrap packages our existing PWA for Android
+That said, there's real work to do. Here's what "API decoupling" means concretely and why it matters.
 
-The core architecture doesn't change. We're adding a distribution layer, not rebuilding.
+### The Core Problem: Server vs. Static
 
----
+Right now, every Grove app runs as a **Cloudflare Worker** (via `adapter-cloudflare`). Pages fetch data in two ways:
 
-## Next Steps (When Ready to Implement)
+1. **SSR load functions** (`+page.server.ts`) — these run on the server and access D1 databases, service bindings, and auth state directly via `platform.env`
+2. **Client-side fetch** to `+server.ts` API routes — these also run on the server
 
-1. Implement service workers for offline support (benefits both web and mobile)
-2. Create `adapter-static` build configuration for mobile builds
-3. Set up Bubblewrap TWA for Android (quickest win)
-4. Initialize Capacitor project for iOS
-5. Add native plugins (biometrics, share, status bar, offline fallback)
-6. Register for Apple Developer Program ($99)
-7. Build and submit to both stores
+A Capacitor app is a **static bundle** (HTML/CSS/JS in a WebView). There's no server. So:
+
+- `+page.server.ts` files don't execute — there's no Cloudflare Worker runtime
+- `+server.ts` API routes don't exist — there's no server to handle them
+- `platform.env.AUTH`, `platform.env.DB`, `platform.env.THRESHOLD` — none of this exists outside Workers
+
+**The mobile app needs to get all its data by calling the live Cloudflare deployment over HTTPS.** The website keeps working exactly as it does today. The mobile app just talks to it as an API.
+
+### What Changes, Concretely
+
+#### 1. Add a Service Worker (benefits web + mobile)
+
+We have PWA manifests and icons but **no service workers** anywhere. We need one for:
+
+- Offline fallback screen (required for Apple review)
+- Caching recently viewed content
+- Better perceived performance on mobile
+
+SvelteKit has built-in service worker support via `src/service-worker.ts`. This is maybe 60-80 lines of code.
+
+**Files to create:**
+- `apps/meadow/src/service-worker.ts` (start with Meadow since it's the social hub)
+- Eventually one per app that goes into the mobile build
+
+#### 2. Create a Mobile API Client
+
+The good news: **most of the API routes already exist.** Meadow has `/api/feed`, `/api/feed/[id]/vote`, `/api/bookmarks`, `/api/following`, etc. These are already REST endpoints that return JSON. The mobile app just needs to call them at their public URLs instead of relative paths.
+
+What we need is a shared API client that:
+
+- Calls `https://meadow.grove.place/api/feed` instead of `/api/feed`
+- Passes auth tokens in `Authorization` headers instead of relying on cookies
+- Handles token refresh when sessions expire
+- Works from both the web (as a progressive enhancement) and Capacitor
+
+**Where it lives:** Something like `packages/engine/src/lib/api-client/` or a new `packages/grove-api/` package.
+
+**The pattern change:**
+
+```typescript
+// Current (web, relative URL, cookies automatic):
+const res = await fetch('/api/feed?filter=latest', {
+  credentials: 'include'
+});
+
+// Mobile (absolute URL, explicit auth token):
+const res = await fetch('https://meadow.grove.place/api/feed?filter=latest', {
+  headers: { Authorization: `Bearer ${token}` }
+});
+```
+
+A thin wrapper abstracts this so components don't care which environment they're in.
+
+#### 3. Add Token-Based Auth to Heartwood
+
+This is the biggest actual change. Right now auth works like this:
+
+1. User logs in via Google OAuth → Heartwood sets a `grove_session` cookie
+2. Every request: `hooks.server.ts` validates the cookie via `platform.env.AUTH.fetch()` (service binding)
+3. API routes check `locals.user` (populated by hooks)
+
+Capacitor can't use this flow because:
+
+- **Service bindings** (`platform.env.AUTH`) only work inside Cloudflare's internal mesh
+- **Cookies** don't transfer cleanly between a WebView and a different domain
+
+We need Heartwood to also support **bearer tokens**:
+
+1. After OAuth callback, Heartwood returns a JWT or opaque token (in addition to the cookie)
+2. Mobile app stores the token in secure storage (`@capacitor-community/secure-storage`)
+3. Mobile app sends `Authorization: Bearer <token>` with every request
+4. API routes accept either cookies (web) OR bearer tokens (mobile)
+
+**Files to modify:**
+- `services/groveauth/` — add token issuance endpoint, add bearer token validation
+- `apps/meadow/src/hooks.server.ts` — accept `Authorization` header as alternative to cookie
+- Same pattern for every app's `hooks.server.ts`
+
+This is the most significant piece of work, but it also makes the API more versatile for future integrations (third-party clients, CLI tools, etc.).
+
+#### 4. Dual Build Configuration
+
+We need a way to build any Grove app in two modes:
+
+- **Web mode** (existing): `adapter-cloudflare`, SSR, server routes, service bindings
+- **Mobile mode** (new): `adapter-static`, SPA, no server routes, API client
+
+This could be a build-time environment variable:
+
+```javascript
+// svelte.config.js
+import adapterCloudflare from '@sveltejs/adapter-cloudflare';
+import adapterStatic from '@sveltejs/adapter-static';
+
+const isMobile = process.env.BUILD_TARGET === 'mobile';
+
+const config = {
+  kit: {
+    adapter: isMobile ? adapterStatic({ fallback: 'index.html' }) : adapterCloudflare({...}),
+    // In mobile mode, disable SSR so everything runs client-side
+    ...(isMobile && { ssr: false })
+  }
+};
+```
+
+**Files to modify:**
+- `apps/meadow/svelte.config.js` (and whichever apps go into the mobile build)
+- Add `adapter-static` as a dev dependency
+
+#### 5. Capacitor Project Shell
+
+Once the above is in place, the Capacitor setup is straightforward:
+
+```
+apps/grove-mobile/           # New Capacitor project
+├── capacitor.config.ts      # Points to Meadow's static build output
+├── ios/                     # Generated by `cap init`, opened in Xcode
+├── android/                 # Generated by `cap init`, opened in Android Studio
+├── package.json
+└── src/
+    └── native/              # Native plugin integrations
+        ├── biometrics.ts    # @capacitor-community/biometric-auth
+        ├── share.ts         # @capacitor/share
+        ├── status-bar.ts    # @capacitor/status-bar
+        └── haptics.ts       # @capacitor/haptics
+```
+
+The native features (biometrics, share sheet, status bar, haptics) are mostly plugin configuration — each one is maybe 20-50 lines of integration code.
+
+### What Stays Exactly the Same
+
+- **The web deployment** — nothing changes for grove.place
+- **The Cloudflare Workers** — all services keep running as-is
+- **The database layer** — D1, KV, R2 are untouched
+- **The component library** — Svelte components work identically in static builds
+- **The design system** — glassmorphism, seasons, forests — all CSS/Svelte, all portable
+
+### Implementation Order (Phased)
+
+**Phase 1: Foundation** (web-only, benefits everyone)
+1. Add service workers for offline support
+2. Add bearer token auth to Heartwood (alongside existing cookie auth)
+3. Create shared API client in engine
+
+**Phase 2: Android** (quickest store win)
+4. Ensure PWA manifest + service worker score 80+ on Lighthouse
+5. Package as TWA via Bubblewrap
+6. Submit to Google Play ($25)
+
+**Phase 3: iOS** (the real goal)
+7. Add `adapter-static` dual build config
+8. Initialize Capacitor project
+9. Integrate native plugins (biometrics, share, status bar, haptics)
+10. Add selective notifications (replies, mentions — not engagement bait)
+11. Register for Apple Developer Program ($99)
+12. Build in Xcode, submit to App Store
+
+Phase 1 improves the web experience too. Phase 2 is a quick win. Phase 3 is where the real effort lives but is entirely achievable.
 
 ---
 
