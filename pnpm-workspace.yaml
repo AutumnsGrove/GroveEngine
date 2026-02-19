@@ -3,3 +3,4 @@ packages:
   - "services/*"
   - "workers/*"
   - "libs/*"
+  - "libs/shutter/cloudflare"
