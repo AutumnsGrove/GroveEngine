@@ -44,12 +44,12 @@ jobs:
         run: pnpm run package
         working-directory: libs/engine
 
-      - name: Build
-        run: pnpm run build
-
       - name: Type check
         run: pnpm check
         working-directory: apps/login
+
+      - name: Build
+        run: pnpm run build
 
       - name: Run tests
         run: pnpm test:run

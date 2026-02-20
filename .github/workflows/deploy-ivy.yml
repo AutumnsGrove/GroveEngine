@@ -48,12 +48,12 @@ jobs:
         run: pnpm run package
         working-directory: libs/engine
 
-      - name: Build
-        run: pnpm run build
-
       - name: Type check
         run: pnpm check
         working-directory: apps/ivy
+
+      - name: Build
+        run: pnpm run build
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
