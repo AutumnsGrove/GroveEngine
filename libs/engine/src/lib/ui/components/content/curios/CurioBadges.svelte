@@ -43,7 +43,7 @@
 
 	const rarityColors: Record<string, string> = {
 		common: '#9ca3af',
-		uncommon: '#4ade80',
+		uncommon: 'rgb(var(--grove-400, 74 222 128))',
 		rare: '#60a5fa',
 		epic: '#a78bfa',
 		legendary: '#fbbf24',
@@ -185,16 +185,5 @@
 		height: 32px;
 		border-radius: 9999px;
 		background: rgba(0, 0, 0, 0.08);
-	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		border: 0;
 	}
 </style>

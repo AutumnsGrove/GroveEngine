@@ -145,3 +145,25 @@
     color: hsl(var(--foreground-subtle));
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   CURIO SKELETON UTILITIES
+   Shared loading state styles for all curio components.
+   Individual curios define their own layout but inherit the
+   shimmer animation from these shared classes.
+   ───────────────────────────────────────────────────────────────── */
+
+@keyframes grove-skeleton-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+.grove-curio-placeholder {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 0.375rem;
+  animation: grove-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .grove-curio-placeholder {
+  background: rgba(255, 255, 255, 0.1);
+}

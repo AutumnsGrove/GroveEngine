@@ -477,9 +477,9 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 
 | Phase | Item | Status |
 |-------|------|--------|
-| 0A | Shared `.sr-only` | Not started |
-| 0B | Hardcoded `#4ade80` | Not started |
-| 0C | Skeleton shimmer | Not started |
+| 0A | Shared `.sr-only` | Shipped |
+| 0B | Hardcoded `#4ade80` | Shipped |
+| 0C | Skeleton shimmer | Shipped |
 | 1 | Webring | Not started |
 | 2 | Status Badge | Not started |
 | 3 | Activity Status | Not started |

@@ -94,25 +94,25 @@
 	.webring-nav {
 		padding: 0.25rem 0.5rem;
 		text-decoration: none;
-		color: #4ade80;
+		color: rgb(var(--grove-400, 74 222 128));
 		font-weight: 500;
-		border: 1px solid rgba(74, 222, 128, 0.3);
+		border: 1px solid rgb(var(--grove-400, 74 222 128) / 0.3);
 		border-radius: 0.25rem;
 		transition: all 0.2s ease;
 	}
 
 	:global(.dark) .webring-nav {
-		color: #86efac;
+		color: rgb(var(--grove-300, 134 239 172));
 	}
 
 	.webring-nav:hover {
-		background: rgba(74, 222, 128, 0.1);
-		border-color: rgba(74, 222, 128, 0.6);
+		background: rgb(var(--grove-400, 74 222 128) / 0.1);
+		border-color: rgb(var(--grove-400, 74 222 128) / 0.6);
 	}
 
 	:global(.dark) .webring-nav:hover {
-		background: rgba(134, 239, 172, 0.15);
-		border-color: rgba(134, 239, 172, 0.6);
+		background: rgb(var(--grove-300, 134 239 172) / 0.15);
+		border-color: rgb(var(--grove-300, 134 239 172) / 0.6);
 	}
 
 	.webring-name {
@@ -138,16 +138,5 @@
 		height: 2.5rem;
 		background: rgba(0, 0, 0, 0.1);
 		border-radius: 0.375rem;
-	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		border: 0;
 	}
 </style>

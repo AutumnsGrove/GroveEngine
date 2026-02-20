@@ -179,7 +179,7 @@
 
 	.bar {
 		width: 3px;
-		background: #4ade80;
+		background: rgb(var(--grove-400, 74 222 128));
 		border-radius: 1px;
 		animation: nowplaying-bounce 1s ease-in-out infinite;
 	}
@@ -232,15 +232,4 @@
 
 	.nowplaying-skeleton-line.wide { width: 70%; }
 	.nowplaying-skeleton-line.narrow { width: 45%; }
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		border: 0;
-	}
 </style>
