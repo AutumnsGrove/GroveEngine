@@ -31,7 +31,7 @@
 	<p class="text-foreground-muted font-sans mt-1">D1 database sizes and operation counts</p>
 </div>
 
-{#if !data.collectorConnected}
+{#if !data.collectionStatus?.hasCompleted}
 	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
 		<div class="flex items-start gap-3">
 			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />

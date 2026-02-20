@@ -26,6 +26,11 @@ service = "groveauth"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# Vista Collector Service Binding (manual collection trigger)
+[[services]]
+binding = "VISTA_COLLECTOR"
+service = "grove-vista-collector"
+
 # R2 Storage binding
 [[r2_buckets]]
 binding = "CDN_BUCKET"

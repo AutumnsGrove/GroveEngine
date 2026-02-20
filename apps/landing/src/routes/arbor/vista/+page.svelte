@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
-	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
+	import { api } from "@autumnsgrove/lattice/utils";
+	import { invalidateAll } from "$app/navigation";
 	import {
 		CheckCircle2,
 		AlertTriangle,
@@ -9,9 +11,14 @@
 		Wifi,
 		WifiOff,
 		Info,
+		RefreshCw,
+		Loader2,
 	} from "lucide-svelte";
 
 	let { data }: { data: PageData } = $props();
+
+	let collecting = $state(false);
+	let collectMessage = $state("");
 
 	function formatRelativeTime(epochSeconds: number | null): string {
 		if (!epochSeconds) return "Never";
@@ -24,6 +31,28 @@
 		if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
 		if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
 		return `${days} day${days !== 1 ? "s" : ""} ago`;
+	}
+
+	async function triggerCollection() {
+		collecting = true;
+		collectMessage = "";
+		try {
+			const result = await api.post<{ success: boolean; message?: string }>(
+				"/api/admin/observability/collect",
+				{},
+			);
+			if (result?.success !== false) {
+				collectMessage = "Collection complete — refreshing data...";
+				await invalidateAll();
+				collectMessage = "";
+			} else {
+				collectMessage = result?.message || "Collection failed.";
+			}
+		} catch (err) {
+			collectMessage = err instanceof Error ? err.message : "Could not reach the collector.";
+		} finally {
+			collecting = false;
+		}
 	}
 
 	const severityColors: Record<string, string> = {
@@ -42,8 +71,28 @@
 	<p class="text-foreground-muted font-sans mt-1">Observability overview for all Grove services</p>
 </div>
 
-<!-- Collector not connected notice -->
-{#if !data.collectorConnected}
+<!-- Collection status banners — priority: token missing → never attempted → attempted but failed -->
+{#if data.collectionStatus?.tokenMissing}
+	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+		<div class="flex items-start gap-3">
+			<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+			<div>
+				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
+					The observability API token isn't configured yet.
+				</p>
+				<p class="text-xs font-sans text-foreground-muted mt-1">
+					Set <code class="font-mono text-xs bg-cream-100 dark:bg-cream-200 px-1 py-0.5 rounded"
+						>CF_OBSERVABILITY_TOKEN</code
+					>
+					in the
+					<code class="font-mono text-xs bg-cream-100 dark:bg-cream-200 px-1 py-0.5 rounded"
+						>grove-vista-collector</code
+					> worker's environment to enable metrics collection.
+				</p>
+			</div>
+		</div>
+	</GlassCard>
+{:else if !data.collectionStatus?.hasAttempted}
 	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
 		<div class="flex items-start gap-3">
 			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
@@ -55,15 +104,35 @@
 					Ensure the <code
 						class="font-mono text-xs bg-cream-100 dark:bg-cream-200 px-1 py-0.5 rounded"
 						>grove-vista-collector</code
-					> worker is deployed with its cron trigger and API token configured.
+					> worker is deployed with its cron trigger, or trigger a run manually below.
+				</p>
+			</div>
+		</div>
+	</GlassCard>
+{:else if data.collectionStatus?.hasAttempted && !data.collectionStatus?.hasCompleted}
+	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+		<div class="flex items-start gap-3">
+			<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+			<div>
+				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
+					Collection runs have started but haven't completed successfully.
+				</p>
+				<p class="text-xs font-sans text-foreground-muted mt-1">
+					Last attempted {formatRelativeTime(data.collectionStatus.lastAttemptedAt)}.
+					{#if data.collectionStatus.lastCollectorsFailed}
+						{data.collectionStatus.lastCollectorsFailed} collector{data.collectionStatus
+							.lastCollectorsFailed !== 1
+							? "s"
+							: ""} failed.
+					{/if}
 				</p>
 			</div>
 		</div>
 	</GlassCard>
 {/if}
 
-<!-- Last Collection + Alert Summary -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+<!-- Last Collection + Alert Summary + Manual Trigger -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
 	<GlassCard class="p-5">
 		<div class="flex items-center gap-3">
 			<Clock class="w-5 h-5 text-foreground-muted shrink-0" />
@@ -72,8 +141,13 @@
 					Last Collection
 				</p>
 				<p class="text-sm font-sans font-medium text-foreground mt-0.5">
-					{formatRelativeTime(data.overview?.lastCollectionAt ?? null)}
+					{formatRelativeTime(data.collectionStatus?.lastCompletedAt ?? null)}
 				</p>
+				{#if data.collectionStatus?.lastAttemptedAt && data.collectionStatus.lastAttemptedAt !== data.collectionStatus.lastCompletedAt}
+					<p class="text-xs font-sans text-foreground-muted mt-0.5">
+						Last attempted {formatRelativeTime(data.collectionStatus.lastAttemptedAt)}
+					</p>
+				{/if}
 			</div>
 		</div>
 	</GlassCard>
@@ -96,6 +170,36 @@
 						? "None"
 						: `${data.activeAlerts.length} alert${data.activeAlerts.length !== 1 ? "s" : ""}`}
 				</p>
+			</div>
+		</div>
+	</GlassCard>
+
+	<GlassCard class="p-5">
+		<div class="flex items-center gap-3">
+			<RefreshCw class="w-5 h-5 text-foreground-muted shrink-0" />
+			<div class="flex-1">
+				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">
+					Manual Trigger
+				</p>
+				<div class="mt-1.5">
+					<GlassButton
+						variant="outline"
+						size="sm"
+						onclick={triggerCollection}
+						disabled={collecting}
+					>
+						{#if collecting}
+							<Loader2 class="w-3.5 h-3.5 mr-1.5 animate-spin" />
+							Collecting...
+						{:else}
+							<RefreshCw class="w-3.5 h-3.5 mr-1.5" />
+							Run Collection Now
+						{/if}
+					</GlassButton>
+				</div>
+				{#if collectMessage}
+					<p class="text-xs font-sans text-foreground-muted mt-1.5">{collectMessage}</p>
+				{/if}
 			</div>
 		</div>
 	</GlassCard>

@@ -5,7 +5,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getWorkerMetrics, hasCollectionData } from "@autumnsgrove/lattice/server/observability";
+import { getWorkerMetrics, getCollectionStatus } from "@autumnsgrove/lattice/server/observability";
+import type { CollectionStatus } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
@@ -13,12 +14,12 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 	const db = platform?.env?.DB;
 
 	if (!db) {
-		return { metrics: [], collectorConnected: false, dbAvailable: false };
+		return { metrics: [], collectionStatus: null as CollectionStatus | null, dbAvailable: false };
 	}
 
-	const [result, collectorConnected] = await Promise.all([
+	const [result, collectionStatus] = await Promise.all([
 		getWorkerMetrics(db, 24).catch(() => []),
-		hasCollectionData(db),
+		getCollectionStatus(db),
 	]);
 
 	// Group metrics by service name — each service will have multiple metric types
@@ -58,5 +59,5 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 		a.serviceName.localeCompare(b.serviceName),
 	);
 
-	return { workers, collectorConnected, dbAvailable: true };
+	return { workers, collectionStatus, dbAvailable: true };
 };

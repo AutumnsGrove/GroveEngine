@@ -81,6 +81,8 @@ export { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
  * Check whether the vista-collector has ever completed a collection run.
  * Used by dashboard pages to show "connected" vs "awaiting first collection" state.
  * This is a lightweight indexed query (LIMIT 1 on the completed_at DESC index).
+ *
+ * @deprecated Use `getCollectionStatus()` instead — it provides richer diagnostics.
  */
 export async function hasCollectionData(db: D1Database): Promise<boolean> {
 	const row = await db
@@ -91,6 +93,98 @@ export async function hasCollectionData(db: D1Database): Promise<boolean> {
 		.first<{ ok: number }>()
 		.catch(() => null);
 	return row !== null;
+}
+
+// =============================================================================
+// Collection Status — richer diagnostics for the Vista dashboard
+// =============================================================================
+
+/** Detailed collection status for multi-state dashboard banners. */
+export interface CollectionStatus {
+	/** Whether any collection run has ever been attempted (row exists in log). */
+	hasAttempted: boolean;
+	/** Whether at least one collection run completed successfully. */
+	hasCompleted: boolean;
+	/** Epoch seconds of the last successful completion, or null. */
+	lastCompletedAt: number | null;
+	/** Epoch seconds of the most recent attempt (any state), or null. */
+	lastAttemptedAt: number | null;
+	/** True if the most recent error_summary mentions a missing token. */
+	tokenMissing: boolean;
+	/** How the last run was triggered ('cron' | 'manual'). */
+	lastTrigger: string | null;
+	/** Duration of the last completed run in ms. */
+	lastDurationMs: number | null;
+	/** Number of collectors run in the last attempt. */
+	lastCollectorsRun: number | null;
+	/** Number of collectors that failed in the last attempt. */
+	lastCollectorsFailed: number | null;
+	/** Raw error_summary JSON from the last attempt, or null. */
+	lastErrorSummary: string | null;
+}
+
+/**
+ * Get rich collection status by running two parallel D1 queries:
+ * - Query A: Latest row with completed_at IS NOT NULL (last successful run)
+ * - Query B: Latest row overall (any state — started, completed, or failed)
+ *
+ * This lets the dashboard distinguish: token missing, never attempted,
+ * attempted but never completed, and healthy states.
+ */
+export async function getCollectionStatus(db: D1Database): Promise<CollectionStatus> {
+	type LogRow = {
+		started_at: number;
+		completed_at: number | null;
+		duration_ms: number | null;
+		collectors_run: number | null;
+		collectors_failed: number | null;
+		trigger: string | null;
+		error_summary: string | null;
+	};
+
+	const [completedResult, latestResult] = await Promise.allSettled([
+		db
+			.prepare(
+				`SELECT started_at, completed_at, duration_ms, collectors_run,
+				        collectors_failed, trigger, error_summary
+				 FROM observability_collection_log
+				 WHERE completed_at IS NOT NULL
+				 ORDER BY completed_at DESC LIMIT 1`,
+			)
+			.first<LogRow>(),
+		db
+			.prepare(
+				`SELECT started_at, completed_at, duration_ms, collectors_run,
+				        collectors_failed, trigger, error_summary
+				 FROM observability_collection_log
+				 ORDER BY started_at DESC LIMIT 1`,
+			)
+			.first<LogRow>(),
+	]);
+
+	const completed = completedResult.status === "fulfilled" ? completedResult.value : null;
+	const latest = latestResult.status === "fulfilled" ? latestResult.value : null;
+
+	// Check if the most recent error_summary mentions a missing token
+	let tokenMissing = false;
+	if (latest?.error_summary) {
+		tokenMissing = latest.error_summary
+			.toLowerCase()
+			.includes("cf_observability_token not configured");
+	}
+
+	return {
+		hasAttempted: latest !== null,
+		hasCompleted: completed !== null,
+		lastCompletedAt: completed?.completed_at ?? null,
+		lastAttemptedAt: latest?.started_at ?? null,
+		tokenMissing,
+		lastTrigger: latest?.trigger ?? null,
+		lastDurationMs: completed?.duration_ms ?? null,
+		lastCollectorsRun: latest?.collectors_run ?? null,
+		lastCollectorsFailed: latest?.collectors_failed ?? null,
+		lastErrorSummary: latest?.error_summary ?? null,
+	};
 }
 
 /**

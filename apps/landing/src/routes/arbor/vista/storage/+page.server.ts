@@ -3,7 +3,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getStorageMetrics, hasCollectionData } from "@autumnsgrove/lattice/server/observability";
+import { getStorageMetrics, getCollectionStatus } from "@autumnsgrove/lattice/server/observability";
+import type { CollectionStatus } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
@@ -11,12 +12,17 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 	const db = platform?.env?.DB;
 
 	if (!db) {
-		return { r2: [], kv: [], collectorConnected: false, dbAvailable: false };
+		return {
+			r2: [],
+			kv: [],
+			collectionStatus: null as CollectionStatus | null,
+			dbAvailable: false,
+		};
 	}
 
-	const [storage, collectorConnected] = await Promise.all([
+	const [storage, collectionStatus] = await Promise.all([
 		getStorageMetrics(db).catch(() => ({ r2: [], kv: [] })),
-		hasCollectionData(db),
+		getCollectionStatus(db),
 	]);
-	return { ...storage, collectorConnected, dbAvailable: true };
+	return { ...storage, collectionStatus, dbAvailable: true };
 };

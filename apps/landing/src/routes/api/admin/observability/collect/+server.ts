@@ -1,10 +1,8 @@
 /**
  * POST /api/admin/observability/collect — Manual collection trigger
  *
- * Returns instructions for triggering a manual collection run.
- * The collector runs as a separate worker (grove-vista-collector) — a service
- * binding is needed to trigger it from here, which is not yet wired.
- * Wayfinder access required.
+ * Calls the grove-vista-collector worker via service binding to trigger
+ * a manual collection run. Wayfinder access required.
  */
 
 import { json } from "@sveltejs/kit";
@@ -24,12 +22,54 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 			{ status: 403 },
 		);
 
-	return json(
-		{
-			success: false,
-			message:
-				"Manual collection is not yet available from this endpoint. The collector worker service binding is not configured.",
-		},
-		{ status: 501 },
-	);
+	const vistaCollector = platform?.env?.VISTA_COLLECTOR;
+	if (!vistaCollector) {
+		return json(
+			{
+				success: false,
+				message:
+					"Manual collection is not yet available — the VISTA_COLLECTOR service binding is not configured.",
+			},
+			{ status: 501 },
+		);
+	}
+
+	const token = platform?.env?.CF_OBSERVABILITY_TOKEN;
+	if (!token) {
+		return json(
+			{
+				success: false,
+				message:
+					"CF_OBSERVABILITY_TOKEN is not configured. Set it in the landing app's environment.",
+			},
+			{ status: 503 },
+		);
+	}
+
+	try {
+		const response = await vistaCollector.fetch("https://vista-collector.internal/", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			return json(
+				{ success: false, message: "Collector returned an error.", detail: result },
+				{ status: response.status },
+			);
+		}
+
+		return json({ success: true, result });
+	} catch (err) {
+		console.error("[Vista Collect API] Service binding call failed:", err);
+		return json(
+			{ success: false, message: "Failed to reach the collector worker." },
+			{ status: 502 },
+		);
+	}
 };

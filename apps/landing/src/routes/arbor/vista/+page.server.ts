@@ -7,7 +7,12 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getObservabilityOverview, getAlerts } from "@autumnsgrove/lattice/server/observability";
+import {
+	getObservabilityOverview,
+	getAlerts,
+	getCollectionStatus,
+} from "@autumnsgrove/lattice/server/observability";
+import type { CollectionStatus } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent(); // ensures Wayfinder gate has run
@@ -18,23 +23,25 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 		return {
 			overview: null,
 			activeAlerts: [],
-			collectorConnected: false,
+			collectionStatus: null as CollectionStatus | null,
 			dbAvailable: false,
 		};
 	}
 
-	const [overviewResult, alertsResult] = await Promise.allSettled([
+	const [overviewResult, alertsResult, statusResult] = await Promise.allSettled([
 		getObservabilityOverview(db),
 		getAlerts(db, 5),
+		getCollectionStatus(db),
 	]);
 
 	const overview = overviewResult.status === "fulfilled" ? overviewResult.value : null;
 	const activeAlerts = alertsResult.status === "fulfilled" ? alertsResult.value.active : [];
+	const collectionStatus = statusResult.status === "fulfilled" ? statusResult.value : null;
 
 	return {
 		overview,
 		activeAlerts,
-		collectorConnected: overview?.collectorConnected ?? false,
+		collectionStatus,
 		dbAvailable: true,
 	};
 };

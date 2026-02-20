@@ -43,6 +43,8 @@ declare global {
 				GROVEAUTH_CLIENT_SECRET?: string;
 				/** CF Analytics API token for Vista observability collector */
 				CF_OBSERVABILITY_TOKEN?: string;
+				/** Vista collector service binding (manual collection trigger) */
+				VISTA_COLLECTOR?: Fetcher;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

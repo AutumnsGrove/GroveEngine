@@ -32,14 +32,21 @@ export default {
 			});
 		}
 
-		// Manual trigger requires Bearer token auth to prevent unauthorized collection runs
-		const authHeader = request.headers.get("Authorization");
-		const expectedToken = env.CF_OBSERVABILITY_TOKEN;
-		if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-			return new Response(JSON.stringify({ error: "Unauthorized" }), {
-				status: 401,
-				headers: { "Content-Type": "application/json" },
-			});
+		// Service binding calls from other Cloudflare Workers include the CF-Worker header
+		// automatically — it cannot be spoofed by external callers. Trust these without
+		// requiring Bearer token auth.
+		const isServiceBinding = request.headers.has("CF-Worker");
+
+		if (!isServiceBinding) {
+			// External HTTP POSTs still require Bearer token auth
+			const authHeader = request.headers.get("Authorization");
+			const expectedToken = env.CF_OBSERVABILITY_TOKEN;
+			if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
+				return new Response(JSON.stringify({ error: "Unauthorized" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 		}
 
 		console.log("[Vista Collector] Manual collection triggered via HTTP");
