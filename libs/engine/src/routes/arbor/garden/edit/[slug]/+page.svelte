@@ -16,6 +16,7 @@
 		ChevronRight,
 		ArrowLeft,
 		ArrowRight,
+		RefreshCw,
 	} from "lucide-svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
@@ -24,7 +25,6 @@
 	// Form state - initialized from loaded data (synced via effect)
 	let title = $state("");
 	let slug = $state("");
-	let date = $state("");
 	let description = $state("");
 	let tagsInput = $state("");
 	let font = $state("default");
@@ -41,7 +41,6 @@
 		title = data.post.title || "";
 		slug = data.post.slug || "";
 		originalSlug = data.post.slug || "";
-		date = data.post.date || new Date().toISOString().split("T")[0];
 		description = data.post.description || "";
 		tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
 		font = /** @type {any} */ (data.post).font || "default";
@@ -65,6 +64,7 @@
 		browser ? localStorage.getItem("editor-gutter-visible") === "true" : false,
 	);
 	let showDeleteDialog = $state(false);
+	let showRepublishDialog = $state(false);
 	let showMoreMenu = $state(false);
 	let detailsExpanded = $state(
 		browser ? localStorage.getItem("editor-details-collapsed") === "false" : false,
@@ -151,7 +151,6 @@
 			const saveSlug = originalSlug; // Use original slug for the URL
 			await api.put(`/api/blooms/${saveSlug}`, {
 				title: title.trim() || "",
-				date,
 				description: description.trim(),
 				tags: parseTags(tagsInput),
 				font,
@@ -210,7 +209,6 @@
 			const saveSlug = originalSlug;
 			await api.put(`/api/blooms/${saveSlug}`, {
 				title: title.trim() || "",
-				date,
 				description: description.trim(),
 				tags: parseTags(tagsInput),
 				font,
@@ -270,6 +268,50 @@
 				err instanceof Error
 					? err.message
 					: `Failed to delete ${resolveTermString("bloom", "post")}`,
+			);
+		} finally {
+			saving = false;
+		}
+	}
+
+	/** Format a Unix timestamp (seconds or ms) to a human-readable locale string */
+	/** @param {number | string | null | undefined} val */
+	function formatTimestamp(val) {
+		if (!val) return "";
+		const ms = typeof val === "number" && val < 1e12 ? val * 1000 : Number(val);
+		return new Date(ms).toLocaleString();
+	}
+
+	async function handleRepublish() {
+		showRepublishDialog = false;
+		saving = true;
+
+		try {
+			const saveSlug = originalSlug;
+			await api.put(`/api/blooms/${saveSlug}`, {
+				title: title.trim() || "",
+				description: description.trim(),
+				tags: parseTags(tagsInput),
+				font,
+				markdown_content: content,
+				gutter_content: JSON.stringify(gutterItems),
+				status,
+				featured_image: featuredImage.trim() || null,
+				meadow_exclude: shareToMeadow ? 0 : 1,
+				slug: slug !== originalSlug ? slug : undefined,
+				republish: true,
+			});
+
+			editorRef?.clearDraft();
+			toast.success(`${resolveTermString("Bloom", "Post")} re-published!`, {
+				description: "Timestamp bumped — it will appear fresh in feeds.",
+			});
+			hasUnsavedChanges = false;
+		} catch (err) {
+			toast.error(
+				err instanceof Error
+					? err.message
+					: `Failed to re-publish ${resolveTermString("bloom", "post")}`,
 			);
 		} finally {
 			saving = false;
@@ -353,6 +395,19 @@
 						role="menu"
 						use:clickOutside={() => (showMoreMenu = false)}
 					>
+						{#if status === "published"}
+							<button
+								class="menu-item"
+								role="menuitem"
+								onclick={() => {
+									showMoreMenu = false;
+									showRepublishDialog = true;
+								}}
+							>
+								<RefreshCw size={14} />
+								Re-publish (bump in feeds)
+							</button>
+						{/if}
 						<button
 							class="menu-item danger"
 							role="menuitem"
@@ -538,11 +593,6 @@
 						<span class="form-hint">Choose a font for this bloom's content</span>
 					</div>
 
-					<div class="form-group">
-						<label for="date">Date</label>
-						<input type="date" id="date" bind:value={date} class="form-input" />
-					</div>
-
 					<div class="form-group field-full">
 						<label class="meadow-toggle">
 							<input type="checkbox" bind:checked={shareToMeadow} />
@@ -555,13 +605,21 @@
 						</label>
 					</div>
 
-					<!-- Metadata info -->
+					<!-- Lifecycle metadata -->
 					<div class="metadata-info field-full">
-						{#if "last_synced" in data.post && data.post.last_synced}
+						{#if "created_at" in data.post && data.post.created_at}
 							<p class="info-item">
-								<span class="info-label">Last synced:</span>
+								<span class="info-label">Created:</span>
 								<span class="info-value">
-									{new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
+									{formatTimestamp(/** @type {any} */ (data.post).created_at)}
+								</span>
+							</p>
+						{/if}
+						{#if "published_at" in data.post && data.post.published_at}
+							<p class="info-item">
+								<span class="info-label">Published:</span>
+								<span class="info-value">
+									{formatTimestamp(/** @type {any} */ (data.post).published_at)}
 								</span>
 							</p>
 						{/if}
@@ -569,7 +627,15 @@
 							<p class="info-item">
 								<span class="info-label">Last updated:</span>
 								<span class="info-value">
-									{new Date(/** @type {any} */ (data.post).updated_at).toLocaleString()}
+									{formatTimestamp(/** @type {any} */ (data.post).updated_at)}
+								</span>
+							</p>
+						{/if}
+						{#if "last_synced" in data.post && data.post.last_synced}
+							<p class="info-item">
+								<span class="info-label">Last synced:</span>
+								<span class="info-value">
+									{new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
 								</span>
 							</p>
 						{/if}
@@ -590,7 +656,6 @@
 						draftKey={`edit-${slug}`}
 						serverDraftSlug={`edit-${slug}`}
 						previewTitle={title}
-						previewDate={date}
 						previewTags={parseTags(tagsInput)}
 						{gutterItems}
 						grafts={data?.grafts ?? {}}
@@ -624,6 +689,18 @@
 	{#snippet footer()}
 		<Button variant="outline" onclick={() => (showDeleteDialog = false)}>Cancel</Button>
 		<Button variant="danger" onclick={handleDelete}>Delete</Button>
+	{/snippet}
+</Dialog>
+
+<!-- Re-publish Confirmation Dialog -->
+<Dialog bind:open={showRepublishDialog} title={`Re-publish ${resolveTermString("Bloom", "Post")}`}>
+	<p>
+		This will update the publish date to right now, bumping "{title}" to the top of RSS feeds and
+		the Meadow.
+	</p>
+	{#snippet footer()}
+		<Button variant="outline" onclick={() => (showRepublishDialog = false)}>Cancel</Button>
+		<Button onclick={handleRepublish}>Re-publish</Button>
 	{/snippet}
 </Dialog>
 

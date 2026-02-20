@@ -348,6 +348,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			fireside_assisted: data.fireside_assisted || 0,
 			featured_image: data.featured_image || null,
 			meadow_exclude: data.meadow_exclude ?? 0,
+			// Set published_at on direct publish (skipping draft stage) so RSS and
+			// meadow poller see the correct timestamp instead of NULL.
+			...(data.status === "published" ? { published_at: Math.floor(Date.now() / 1000) } : {}),
 		});
 
 		// Track activity for inactivity reclamation

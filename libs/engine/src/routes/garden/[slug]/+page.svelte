@@ -59,7 +59,7 @@
 			name: data.post.author,
 		},
 		datePublished: data.post.date,
-		dateModified: data.post.date,
+		dateModified: data.post.updated_at || data.post.date,
 		keywords: data.post.tags.join(", "),
 		...(data.post.featured_image ? { image: data.post.featured_image } : {}),
 	})}<\/script>`}
@@ -129,6 +129,20 @@
 								day: "numeric",
 							})}
 						</time>
+						{#if data.post.created_at}
+							{@const created = new Date(data.post.created_at)}
+							{@const published = new Date(data.post.date)}
+							{#if Math.abs(published.getTime() - created.getTime()) > 86400000}
+								<span class="meta-separator" aria-hidden="true"></span>
+								<span class="started-date">
+									Started {created.toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
+								</span>
+							{/if}
+						{/if}
 						{#if data.post.tags.length > 0}
 							<span class="meta-separator" aria-hidden="true"></span>
 							<div class="tags">
@@ -311,6 +325,17 @@
 
 	:global(.dark) .post-meta .entry-date {
 		color: var(--color-text-muted-dark);
+	}
+
+	/* "Started writing" secondary date — muted to stay subordinate to publish date */
+	.post-meta .started-date {
+		color: #999;
+		font-size: 0.9em;
+		font-style: italic;
+	}
+
+	:global(.dark) .post-meta .started-date {
+		color: #777;
 	}
 
 	/* Tags with accent color support */
