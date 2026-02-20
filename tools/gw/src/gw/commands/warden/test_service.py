@@ -55,6 +55,8 @@ def test_service(ctx: click.Context, service: str, url: str, api_key: str) -> No
     try:
         import urllib.request
 
+        from . import GW_USER_AGENT
+
         data = json.dumps(payload).encode()
         req = urllib.request.Request(
             f"{url}/request",
@@ -62,6 +64,7 @@ def test_service(ctx: click.Context, service: str, url: str, api_key: str) -> No
             headers={
                 "Content-Type": "application/json",
                 "X-API-Key": api_key,
+                "User-Agent": GW_USER_AGENT,
             },
             method="POST",
         )

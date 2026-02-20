@@ -32,9 +32,11 @@ def status(ctx: click.Context, url: str) -> None:
     try:
         import urllib.request
 
+        from . import GW_USER_AGENT
+
         req = urllib.request.Request(
             f"{url}/health",
-            headers={"Accept": "application/json"},
+            headers={"Accept": "application/json", "User-Agent": GW_USER_AGENT},
         )
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())

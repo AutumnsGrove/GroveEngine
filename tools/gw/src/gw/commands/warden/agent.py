@@ -73,6 +73,8 @@ def register(
     try:
         import urllib.request
 
+        from . import GW_USER_AGENT
+
         data = json.dumps(payload).encode()
         req = urllib.request.Request(
             f"{url}/admin/agents",
@@ -80,6 +82,7 @@ def register(
             headers={
                 "Content-Type": "application/json",
                 "X-API-Key": admin_key,
+                "User-Agent": GW_USER_AGENT,
             },
             method="POST",
         )
@@ -133,11 +136,14 @@ def list_agents(ctx: click.Context, url: str, admin_key: str) -> None:
     try:
         import urllib.request
 
+        from . import GW_USER_AGENT
+
         req = urllib.request.Request(
             f"{url}/admin/agents",
             headers={
                 "Accept": "application/json",
                 "X-API-Key": admin_key,
+                "User-Agent": GW_USER_AGENT,
             },
         )
         with urllib.request.urlopen(req, timeout=15) as resp:
@@ -222,9 +228,11 @@ def revoke(
     try:
         import urllib.request
 
+        from . import GW_USER_AGENT
+
         req = urllib.request.Request(
             f"{url}/admin/agents/{agent_id}",
-            headers={"X-API-Key": admin_key},
+            headers={"X-API-Key": admin_key, "User-Agent": GW_USER_AGENT},
             method="DELETE",
         )
         with urllib.request.urlopen(req, timeout=15) as resp:

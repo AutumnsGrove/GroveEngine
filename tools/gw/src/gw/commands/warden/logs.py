@@ -54,12 +54,15 @@ def logs(
         if service:
             params["service"] = service
 
+        from . import GW_USER_AGENT
+
         query_string = urllib.parse.urlencode(params)
         req = urllib.request.Request(
             f"{url}/admin/logs?{query_string}",
             headers={
                 "Accept": "application/json",
                 "X-API-Key": admin_key,
+                "User-Agent": GW_USER_AGENT,
             },
         )
         with urllib.request.urlopen(req, timeout=15) as resp:

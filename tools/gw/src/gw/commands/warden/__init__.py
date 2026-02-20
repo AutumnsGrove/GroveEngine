@@ -8,6 +8,10 @@ from .test_service import test_service
 from .agent import agent
 from .logs import logs
 
+# User-Agent for Warden HTTP requests.
+# Cloudflare Bot Fight Mode blocks Python-urllib's default UA.
+GW_USER_AGENT = "gw-cli/1.0 (Grove Wrap)"
+
 WARDEN_CATEGORIES = {
     "monitoring": (
         "\U0001f4ca Monitoring",
