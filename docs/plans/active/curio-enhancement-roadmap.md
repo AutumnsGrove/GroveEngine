@@ -16,6 +16,7 @@
 Extract the duplicated `.sr-only` CSS class from 11 curio components into a shared utility. Every public curio component defines the identical 9-line class.
 
 **Files to touch:**
+
 - CurioNowplaying.svelte (line ~236)
 - CurioStatusbadges.svelte (line ~144)
 - CurioBlogroll.svelte (line ~168)
@@ -34,11 +35,11 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 
 ### 0B. Hardcoded `#4ade80` → grove CSS vars (3 components)
 
-| File | Line | Context |
-|------|------|---------|
-| CurioNowplaying.svelte | ~182 | `.bar { background: #4ade80 }` |
-| CurioWebring.svelte | ~97 | Link `color: #4ade80` |
-| CurioBadges.svelte | ~46 | Rarity color map `uncommon: '#4ade80'` |
+| File                   | Line | Context                                |
+| ---------------------- | ---- | -------------------------------------- |
+| CurioNowplaying.svelte | ~182 | `.bar { background: #4ade80 }`         |
+| CurioWebring.svelte    | ~97  | Link `color: #4ade80`                  |
+| CurioBadges.svelte     | ~46  | Rarity color map `uncommon: '#4ade80'` |
 
 **Replace with**: `rgb(var(--grove-500))` or the appropriate Tailwind grove color token.
 
@@ -58,12 +59,14 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Retro web solidarity — circular navigation between chosen sites.
 
 **What's broken**:
+
 - Only renders "classic" style — 3 other styles in data model ignored
 - Hardcoded `#4ade80` everywhere (fixed in Phase 0)
 - No ring identity (icon, member count, position)
 - Position field ignored
 
 **Full treatment**:
+
 - [ ] Render all 4 styles: classic bar, 88x31 badge, compact, floating
 - [ ] Ring identity: icon, member count ("1 of 42"), description on hover
 - [ ] Ring accent color per membership (owner-configurable)
@@ -81,6 +84,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Garden signs — wooden/slate signs planted in the soil of your grove.
 
 **What's broken**:
+
 - Gray pills with no character or color system
 - Only one visual style — no garden signs, no enamel pins
 - Position field ignored (4 positions in model)
@@ -88,6 +92,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - No edit form (PATCH endpoint exists)
 
 **Full treatment**:
+
 - [ ] 3 badge styles: garden sign (wooden plank), enamel pin (glossy), clean pill (current, improved)
 - [ ] Color per badge type — warm defaults, owner-override
 - [ ] Position rendering (floating, header, right-vine, footer-vine)
@@ -106,12 +111,14 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: A living indicator — a tiny candle in the window.
 
 **What's broken**:
+
 - No pulse/shimmer animation
 - No freshness system (status glow fading over time)
 - Flat fallback text
 - Unicode symbols render inconsistently
 
 **Full treatment**:
+
 - [ ] Living indicator: shimmer for "doing", muted for "away", warm for "vibes"
 - [ ] Freshness system: glow fades over 24h, hover reveals "set 5m ago"
 - [ ] Lucide icons replace Unicode symbols
@@ -130,6 +137,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Your music, your way, your story.
 
 **Quick fixes only** (full treatment in Phase 3):
+
 - [ ] Replace hardcoded `#4ade80` equalizer bars with grove CSS var (done in Phase 0)
 - [ ] Warm up fallback music note SVG (grove-green instead of plain gray)
 - [ ] Warm up fallback text styling
@@ -146,11 +154,13 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Grove-ified retro. Retro shapes, nature palette.
 
 **What's broken**:
+
 - Only classic style renders — 3 other styles ignored
 - No label system (presets + custom text)
 - No dedup strategy
 
 **Full treatment**:
+
 - [ ] Render all 4 styles: Classic (frosted glass), Odometer (brass flip), LCD (seven-segment), Minimal
 - [ ] Label system: presets ("You are visitor", "Wanderer #", etc.) + custom text
 - [ ] Since-date display (footnote vs. integrated styles)
@@ -170,12 +180,14 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Mountain lodge book meets coffee shop sticky wall. Two layers: the Room (owner's surface) and the Pen (visitor's expression).
 
 **What's broken**:
+
 - All entries look identical — gray boxes, no individual voice
 - No signing styles for visitors
 - No color expression
 - No wall backing texture
 
 **Full treatment**:
+
 - [ ] 4 wall styles (room): Corkboard, Notebook, Garden wall, Clean glass
 - [ ] 5 signing styles (pen): Sticky note, Letter, Postcard, Typewriter card, Leaf
 - [ ] Color palette per entry (visitor picks from 8 nature colors)
@@ -194,6 +206,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: A declaration of taste — your neighborhood, the corners of the internet you vouch for.
 
 **What's broken**:
+
 - Only one display style (flat list)
 - Ignores `lastPostTitle`, `lastPostUrl`, `lastPostDate` from API
 - Favicon fallback is empty gray square
@@ -201,6 +214,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - No edit form (PATCH exists but no UI)
 
 **Full treatment**:
+
 - [ ] 4 display modes: Warm list (default), Card grid, Compact tiles, 88x31 button wall
 - [ ] Show latest post per blog (title, date, link)
 - [ ] Personal notes per blog ("Why I read this")
@@ -220,6 +234,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Mystical artifact — liquid aurora trapped in crystal.
 
 **What's broken**:
+
 - Public component ignores `displayStyle` — always renders plain 2rem circle
 - Crude `{color}22` fill instead of glow/translucency
 - Time mode snaps between 7 colors (no interpolation)
@@ -227,6 +242,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - Uses own season logic instead of Grove's
 
 **Full treatment**:
+
 - [ ] 7 display shapes: Ring, Gem, Orb, Crystal, Flame, Leaf, Moon
 - [ ] Aurora animated gradient effect per shape
 - [ ] Smooth color interpolation for time-based mode
@@ -248,12 +264,14 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Community voice — the town square question box.
 
 **What's broken**:
+
 - **No voting UI at all** — component is read-only
 - Type mismatch on `resultsVisibility`
 - No description rendered
 - `rgba(0,0,0,0.02)` backgrounds
 
 **Full treatment**:
+
 - [ ] Voting UI: clickable glass chip options, "Cast vote" confirm
 - [ ] Vote-then-reveal animation (bars grow from 0, numbers tick up)
 - [ ] Pre-vote ghost bars (~5% opacity hint)
@@ -275,12 +293,14 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Glass ornaments — translucent, precious, catches the light.
 
 **What's broken**:
+
 - 24px pills with no collectible feel
 - No showcase vs. collection distinction
 - Rarity colors are generic (gray/green/blue)
 - No hover detail, no empty state personality
 
 **Full treatment**:
+
 - [ ] Glass ornament badges: frosted glass panes with icon + label
 - [ ] Category shapes: rectangle (retro), shield/heart (pride), leaf/circle (nature), star/medal (achievement)
 - [ ] 3 size options: small (48-64px), medium (80-96px), large (120-140px)
@@ -302,6 +322,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: The atmosphere engine — turns a page into a room.
 
 **What's broken**:
+
 - Sound set mismatch (type system ≠ component)
 - No actual audio files
 - Characterless button
@@ -309,6 +330,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - No visualization, no crossfade, no seasonal logic, no localStorage persistence
 
 **Full treatment**:
+
 - [ ] Fix sound set mapping (align type system with component)
 - [ ] Audio files: source/create ambient loops for all 7 sets
 - [ ] Warm button with sound wave animation when playing
@@ -330,6 +352,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Beautiful furniture for your favorite things.
 
 **What's broken**:
+
 - Book-only field assumptions ("Reading" badge)
 - No physical shelf visual
 - No spine view for missing covers
@@ -337,6 +360,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - Link Garden exists separately but should merge in
 
 **Full treatment**:
+
 - [ ] Universal preset system: Books, Music, Movies, Games, Recipes, Tools, Links
 - [ ] Each preset: custom field labels, status labels, category defaults
 - [ ] Physical shelf visual: wood grain line, shadow, sense of furniture
@@ -359,6 +383,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Every style is a different room — record shop, late-night radio booth, living room stereo, boombox on a stoop.
 
 **What's needed**:
+
 - [ ] 8 display styles: Compact, Card, Vinyl (spinning record), Minimal, Cassette, Radio, Boombox, Hum Card
 - [ ] Each style is a fully realized component with unique animation
 - [ ] Hum Card integration: render actual HumCard component from engine
@@ -376,6 +401,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Enchanted forest meets cozy companion — a leaf drifting after your mouse.
 
 **What's needed**:
+
 - [ ] Build SVGs for all 13+ presets (only 3 exist: leaf, paw, star)
 - [ ] Cursor categories: Nature, Whimsical, Classic, Seasonal, Cozy
 - [ ] Subtle animation: butterfly wings, candle flicker, leaf sway
@@ -396,6 +422,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: The invisible backbone powering all curio images.
 
 **What's needed**:
+
 - [ ] Upload dropzone UI (drag-and-drop + file picker)
 - [ ] Wire `imageProcessor.ts` (exists but unused): auto-resize, EXIF strip, thumbnail gen
 - [ ] Wire `upload-validation.ts` (exists but unused): magic byte checking, strategy detection
@@ -416,6 +443,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Decorative flair — critters, borders, sparkles on your pages.
 
 **What's needed**:
+
 - [ ] Build `CurioClipArt.svelte` from scratch
 - [ ] Positioned overlay rendering system (absolute/relative to page content)
 - [ ] Asset library: create/curate clip art assets that ship with Grove
@@ -433,6 +461,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: Sacred spaces for things you love — the most emotionally powerful curio.
 
 **What's needed**:
+
 - [ ] Build `CurioShrines.svelte` from scratch (no public component exists)
 - [ ] Spatial canvas renderer: position items at x/y coordinates within a frame
 - [ ] Content editor: simple mode (templates) + advanced mode (drag-and-drop)
@@ -452,6 +481,7 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 **Character**: A personal cabinet of curiosities — silly toys, personal talismans, chaos objects.
 
 **What's needed**:
+
 - [ ] Replace "Coming soon" placeholder with actual artifact components
 - [ ] 21 artifact types, each a self-contained component:
   - Oracular: Magic 8-Ball, Fortune Cookie, Tarot Card, Crystal Ball
@@ -475,26 +505,26 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 - **PR open**: Code written, review needed
 - **Shipped**: Merged to main
 
-| Phase | Item | Status |
-|-------|------|--------|
-| 0A | Shared `.sr-only` | Shipped |
-| 0B | Hardcoded `#4ade80` | Shipped |
-| 0C | Skeleton shimmer | Shipped |
-| 1 | Webring | Not started |
-| 2 | Status Badge | Not started |
-| 3 | Activity Status | Not started |
-| 4 | Now Playing (quick) | Not started |
-| 5 | Hit Counter | Not started |
-| 6 | Guestbook | Not started |
-| 7 | Blogroll | Not started |
-| 8 | Mood Ring | Not started |
-| 9 | Polls | Not started |
-| 10 | Badges | Not started |
-| 11 | Ambient | Not started |
-| 12 | Shelves | Not started |
-| 13 | Now Playing (full) | Not started |
-| 14 | Cursors | Not started |
-| 15 | Custom Uploads | Not started |
-| 16 | Clip Art | Not started |
-| 17 | Shrines | Not started |
-| 18 | Artifacts | Not started |
+| Phase | Item                | Status                                                            |
+| ----- | ------------------- | ----------------------------------------------------------------- |
+| 0A    | Shared `.sr-only`   | Shipped                                                           |
+| 0B    | Hardcoded `#4ade80` | Shipped                                                           |
+| 0C    | Skeleton shimmer    | In progress — utility defined, components adopt during their wave |
+| 1     | Webring             | Not started                                                       |
+| 2     | Status Badge        | Not started                                                       |
+| 3     | Activity Status     | Not started                                                       |
+| 4     | Now Playing (quick) | Not started                                                       |
+| 5     | Hit Counter         | Not started                                                       |
+| 6     | Guestbook           | Not started                                                       |
+| 7     | Blogroll            | Not started                                                       |
+| 8     | Mood Ring           | Not started                                                       |
+| 9     | Polls               | Not started                                                       |
+| 10    | Badges              | Not started                                                       |
+| 11    | Ambient             | Not started                                                       |
+| 12    | Shelves             | Not started                                                       |
+| 13    | Now Playing (full)  | Not started                                                       |
+| 14    | Cursors             | Not started                                                       |
+| 15    | Custom Uploads      | Not started                                                       |
+| 16    | Clip Art            | Not started                                                       |
+| 17    | Shrines             | Not started                                                       |
+| 18    | Artifacts           | Not started                                                       |
