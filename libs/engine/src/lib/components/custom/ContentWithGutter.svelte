@@ -127,6 +127,10 @@
 	/**
 	 * Mount a single Hum card embed.
 	 * Returns a cleanup function to unmount the component.
+	 *
+	 * Uses a cancellation flag so that if the effect tears down while
+	 * the dynamic import is still in-flight, the resolved module won't
+	 * mount against a potentially detached DOM node.
 	 */
 	function mountHumCard(card: Element): (() => void) | null {
 		const url = card.getAttribute("data-hum-url");
@@ -134,10 +138,12 @@
 		if (!url || card.hasAttribute("data-hum-mounted")) return null;
 
 		card.setAttribute("data-hum-mounted", "true");
+		let cancelled = false;
 		let cleanup: (() => void) | null = null;
 
 		import("$lib/ui/components/content/hum/HumCard.svelte")
 			.then((module) => {
+				if (cancelled) return;
 				card.innerHTML = "";
 				const component = mount(module.default, {
 					target: card as HTMLElement,
@@ -149,12 +155,19 @@
 				console.warn("[Hum] Failed to mount card:", err);
 			});
 
-		return () => cleanup?.();
+		return () => {
+			cancelled = true;
+			cleanup?.();
+		};
 	}
 
 	/**
 	 * Mount a single Curio embed.
 	 * Returns a cleanup function to unmount the component.
+	 *
+	 * Uses a cancellation flag so that if the effect tears down while
+	 * the dynamic import is still in-flight, the resolved module won't
+	 * mount against a potentially detached DOM node.
 	 */
 	function mountCurio(el: Element): (() => void) | null {
 		const curioName = el.getAttribute("data-grove-curio");
@@ -168,10 +181,12 @@
 
 		el.setAttribute("data-curio-mounted", "true");
 		const componentName = curioName.charAt(0).toUpperCase() + curioName.slice(1);
+		let cancelled = false;
 		let cleanup: (() => void) | null = null;
 
 		import(`$lib/ui/components/content/curios/Curio${componentName}.svelte`)
 			.then((module) => {
+				if (cancelled) return;
 				el.innerHTML = "";
 				const component = mount(module.default, {
 					target: el as HTMLElement,
@@ -180,11 +195,15 @@
 				cleanup = () => unmount(component);
 			})
 			.catch((err) => {
+				if (cancelled) return;
 				console.warn(`[Curio] Failed to mount ${curioName}:`, err);
 				el.innerHTML = '<span class="grove-curio-error">Curio unavailable</span>';
 			});
 
-		return () => cleanup?.();
+		return () => {
+			cancelled = true;
+			cleanup?.();
+		};
 	}
 
 	/**
