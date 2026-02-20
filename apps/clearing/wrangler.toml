@@ -9,7 +9,7 @@
 name = "grove-clearing"
 main = ".svelte-kit/cloudflare/_entry.js"
 compatibility_date = "2025-04-08"
-compatibility_flags = ["nodejs_als"]
+compatibility_flags = ["nodejs_compat"]
 
 # Smart Placement — run closer to D1 database for lower latency
 [placement]

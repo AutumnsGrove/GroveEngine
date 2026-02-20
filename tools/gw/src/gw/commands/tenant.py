@@ -260,7 +260,8 @@ def tenant_stats(ctx: click.Context, subdomain: str, database: str) -> None:
     except WranglerError:
         stats["counts"]["pages"] = "?"
 
-    # Count media
+    # Count images and calculate actual storage from image_hashes
+    # (matches Arbor account page — NOT the stale tenants.storage_used_bytes)
     try:
         result = wrangler.execute(
             [
@@ -270,13 +271,19 @@ def tenant_stats(ctx: click.Context, subdomain: str, database: str) -> None:
                 "--remote",
                 "--json",
                 "--command",
-                f"SELECT COUNT(*) as count FROM media WHERE tenant_id = '{tenant_id}'",
+                f"SELECT COUNT(*) as count, COALESCE(SUM(COALESCE(stored_size_bytes, 0)), 0) as total_bytes FROM image_hashes WHERE tenant_id = '{tenant_id}'",
             ]
         )
         count_rows = parse_wrangler_json(result)
-        stats["counts"]["media"] = count_rows[0].get("count", 0) if count_rows else 0
+        if count_rows:
+            stats["counts"]["images"] = count_rows[0].get("count", 0)
+            stats["storage_used_bytes"] = count_rows[0].get("total_bytes", 0)
+        else:
+            stats["counts"]["images"] = 0
+            stats["storage_used_bytes"] = 0
     except WranglerError:
-        stats["counts"]["media"] = "?"
+        stats["counts"]["images"] = "?"
+        stats["storage_used_bytes"] = 0
 
     # Count sessions
     try:
@@ -304,9 +311,6 @@ def tenant_stats(ctx: click.Context, subdomain: str, database: str) -> None:
     console.print(f"\n[bold green]Tenant Statistics: {subdomain}[/bold green]\n")
 
     # Tenant info panel
-    storage_used = tenant_data.get("storage_used_bytes", 0) or 0
-    storage_limit = tenant_data.get("storage_limit_bytes", 0) or 0
-
     info_text = f"""[bold]{tenant_data.get('display_name', subdomain)}[/bold]
 Subdomain: {subdomain}.grove.place
 Email: {tenant_data.get('email', '-')}
@@ -323,19 +327,22 @@ Created: {format_timestamp(tenant_data.get('created_at'))}"""
 
     stats_table.add_row("Posts", str(stats["counts"]["posts"]))
     stats_table.add_row("Pages", str(stats["counts"]["pages"]))
-    stats_table.add_row("Media Files", str(stats["counts"]["media"]))
+    stats_table.add_row("Images", str(stats["counts"]["images"]))
     stats_table.add_row("Active Sessions", str(stats["counts"]["sessions"]))
 
     console.print(stats_table)
     console.print()
 
-    # Storage panel
+    # Storage panel — use actual storage from image_hashes, not stale tenants.storage_used_bytes
+    actual_storage = stats.get("storage_used_bytes", 0) or 0
+    storage_limit = tenant_data.get("storage_limit_bytes", 0) or 0
+
     if storage_limit > 0:
-        usage_pct = (storage_used / storage_limit) * 100
-        storage_text = f"""Used: {format_bytes(storage_used)} of {format_bytes(storage_limit)}
+        usage_pct = (actual_storage / storage_limit) * 100
+        storage_text = f"""Used: {format_bytes(actual_storage)} of {format_bytes(storage_limit)}
 Usage: {usage_pct:.1f}%"""
     else:
-        storage_text = f"Used: {format_bytes(storage_used)}"
+        storage_text = f"Used: {format_bytes(actual_storage)}"
 
     console.print(create_panel(storage_text, title="Storage", style="magenta"))
 
