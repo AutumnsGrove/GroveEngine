@@ -1,0 +1,41 @@
+# Grove Warden — External API Gateway
+# Secure credential injection for agents and third-party API proxying
+#
+# Secrets (via: gw secret apply <name> --worker grove-warden):
+# WARDEN_SIGNING_KEY — HMAC key for challenge-response auth
+# GROVE_KEK — Key encryption key for SecretsManager envelope decryption
+# GITHUB_TOKEN — GitHub API token (global fallback)
+# TAVILY_API_KEY — Tavily search API key (global fallback)
+
+name = "grove-warden"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[routes]
+pattern = "warden.grove.place/*"
+zone_name = "grove.place"
+
+# Warden's own database — agent registry + audit log
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-warden"
+database_id = "85b07f03-f0c2-4b2a-bfb3-b607940e2317"
+
+# Engine DB — for SecretsManager per-tenant credential resolution
+[[d1_databases]]
+binding = "TENANT_DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Nonce storage — challenge-response auth nonces with 30s TTL
+[[kv_namespaces]]
+binding = "NONCES"
+title = "grove-warden-nonces"
+id = "8967d0c659924c9f870d83012bee3ee6"
+
+# Rate limit counters — per-agent, per-service sliding windows
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+title = "grove-warden-ratelimits"
+id = "b780371b9539489dac4c71d965c9f381"

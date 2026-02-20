@@ -341,6 +341,10 @@
 			"types": "./dist/zephyr/index.d.ts",
 			"default": "./dist/zephyr/index.js"
 		},
+		"./warden": {
+			"types": "./dist/warden/index.d.ts",
+			"default": "./dist/warden/index.js"
+		},
 		"./errors": {
 			"types": "./dist/errors/index.d.ts",
 			"default": "./dist/errors/index.js"

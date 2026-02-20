@@ -1,0 +1,71 @@
+/**
+ * Scope Validation
+ *
+ * Agents are granted scopes like ["github:read", "tavily:*"] that control
+ * which services and actions they can access through Warden.
+ *
+ * Scope format: "service:permission" or "service:*" for wildcard
+ */
+
+import type { WardenService } from "../types";
+
+/** Action-to-scope mapping for each service */
+const SERVICE_SCOPES: Record<string, Record<string, string>> = {
+	github: {
+		list_repos: "read",
+		get_repo: "read",
+		get_issue: "read",
+		list_issues: "read",
+		create_issue: "write",
+		create_comment: "write",
+		list_workflow_runs: "read",
+		trigger_workflow: "write",
+	},
+	tavily: {
+		search: "read",
+		crawl: "read",
+		extract: "read",
+	},
+};
+
+/** Check if an agent's scopes permit a given service + action */
+export function validateScope(
+	agentScopes: string[],
+	service: WardenService,
+	action: string,
+): boolean {
+	const requiredPermission = SERVICE_SCOPES[service]?.[action];
+	if (!requiredPermission) return false;
+
+	for (const scope of agentScopes) {
+		const [scopeService, scopePermission] = scope.split(":");
+
+		// Exact match
+		if (scopeService === service && scopePermission === requiredPermission) {
+			return true;
+		}
+
+		// Wildcard match (service:*)
+		if (scopeService === service && scopePermission === "*") {
+			return true;
+		}
+
+		// Global wildcard (*:*)
+		if (scopeService === "*" && scopePermission === "*") {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/** Get the required scope for a service+action (for error messages) */
+export function getRequiredScope(service: WardenService, action: string): string | null {
+	const permission = SERVICE_SCOPES[service]?.[action];
+	return permission ? `${service}:${permission}` : null;
+}
+
+/** Check if a service+action combination is valid */
+export function isValidAction(service: string, action: string): boolean {
+	return !!SERVICE_SCOPES[service]?.[action];
+}

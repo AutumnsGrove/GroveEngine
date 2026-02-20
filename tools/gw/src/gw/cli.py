@@ -16,6 +16,7 @@ from .commands.monorepo_size import monorepo_size
 from .commands.context import context
 from .commands.git import git
 from .commands.gh import gh
+from .commands.warden import warden
 from .commands.dev import dev
 from .commands.dev.test import test
 from .commands.dev.build import build
@@ -139,6 +140,7 @@ main.add_command(backup.backup)
 main.add_command(export.export)
 main.add_command(email.email)
 main.add_command(social.social)
+main.add_command(warden)
 
 # Dev Tools Phase 15-18 commands
 main.add_command(dev)
