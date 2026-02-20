@@ -18,13 +18,39 @@ const SERVICE_SCOPES: Record<string, Record<string, string>> = {
 		list_issues: "read",
 		create_issue: "write",
 		create_comment: "write",
-		list_workflow_runs: "read",
-		trigger_workflow: "write",
+		list_workflow_runs: "actions",
+		trigger_workflow: "actions",
+		// Admin scopes (expanded)
+		admin: "admin",
 	},
 	tavily: {
 		search: "read",
 		crawl: "read",
 		extract: "read",
+	},
+	cloudflare: {
+		list_workers: "read",
+		get_worker: "read",
+		list_kv_namespaces: "read",
+		list_d1_databases: "read",
+		list_dns_records: "dns",
+		create_dns_record: "dns",
+		purge_cache: "write",
+	},
+	exa: {
+		search: "search",
+		find_similar: "similar",
+		get_contents: "contents",
+	},
+	resend: {
+		send_email: "send",
+	},
+	stripe: {
+		list_customers: "read",
+		get_customer: "read",
+		list_subscriptions: "read",
+		list_invoices: "read",
+		get_invoice: "read",
 	},
 };
 

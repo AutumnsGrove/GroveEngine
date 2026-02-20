@@ -23,6 +23,7 @@ import { adminRoutes } from "./routes/admin";
 
 // Register services with the registry (side-effect imports)
 import "./services";
+import { listServices } from "./services";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -40,8 +41,8 @@ app.use(
 app.get("/health", (c) => {
 	return c.json({
 		status: "healthy",
-		services: ["github", "tavily"],
-		version: "0.1.0",
+		services: listServices(),
+		version: "0.2.0",
 	});
 });
 

@@ -8,7 +8,7 @@
 // Service Types
 // =============================================================================
 
-export type WardenService = "github" | "tavily";
+export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe";
 
 export type WardenErrorCode =
 	| "INVALID_REQUEST"
@@ -154,6 +154,163 @@ export interface TavilyCrawlResponse {
 export interface TavilyExtractResponse {
 	results: Array<{ url: string; raw_content: string }>;
 	failed_results: Array<{ url: string; error: string }>;
+}
+
+// =============================================================================
+// Cloudflare Types
+// =============================================================================
+
+export interface CloudflareWorkerScript {
+	id: string;
+	tag: string;
+	etag: string;
+	handlers: string[];
+	named_handlers: Array<{ name: string; entrypoint: string }>;
+	modified_on: string;
+	created_on: string;
+	usage_model: string;
+	compatibility_date: string;
+	compatibility_flags: string[];
+	last_deployed_from?: string;
+}
+
+export interface CloudflareKvNamespace {
+	id: string;
+	title: string;
+	supports_url_encoding?: boolean;
+}
+
+export interface CloudflareD1Database {
+	uuid: string;
+	name: string;
+	version: string;
+	num_tables: number;
+	file_size: number;
+	created_at: string;
+}
+
+export interface CloudflareDnsRecord {
+	id: string;
+	zone_id: string;
+	zone_name: string;
+	name: string;
+	type: string;
+	content: string;
+	proxiable: boolean;
+	proxied: boolean;
+	ttl: number;
+	locked: boolean;
+	created_on: string;
+	modified_on: string;
+}
+
+export interface CloudflareListResponse<T> {
+	result: T[];
+	success: boolean;
+	errors: Array<{ code: number; message: string }>;
+	messages: Array<{ code: number; message: string }>;
+	result_info?: { page: number; per_page: number; count: number; total_count: number };
+}
+
+export interface CloudflareSingleResponse<T> {
+	result: T;
+	success: boolean;
+	errors: Array<{ code: number; message: string }>;
+	messages: Array<{ code: number; message: string }>;
+}
+
+// =============================================================================
+// Exa Types
+// =============================================================================
+
+export interface ExaSearchResult {
+	title: string;
+	url: string;
+	id: string;
+	score: number;
+	publishedDate?: string;
+	author?: string;
+	text?: string;
+	highlights?: string[];
+	highlightScores?: number[];
+}
+
+export interface ExaSearchResponse {
+	results: ExaSearchResult[];
+	autopromptString?: string;
+	requestId: string;
+}
+
+export interface ExaContentsResponse {
+	results: Array<{
+		url: string;
+		title: string;
+		id: string;
+		text?: string;
+		highlights?: string[];
+		highlightScores?: number[];
+	}>;
+	requestId: string;
+}
+
+// =============================================================================
+// Resend Types
+// =============================================================================
+
+export interface ResendEmailResponse {
+	id: string;
+}
+
+// =============================================================================
+// Stripe Types
+// =============================================================================
+
+export interface StripeCustomer {
+	id: string;
+	object: "customer";
+	email: string | null;
+	name: string | null;
+	description: string | null;
+	created: number;
+	currency: string | null;
+	default_source: string | null;
+	metadata: Record<string, string>;
+}
+
+export interface StripeSubscription {
+	id: string;
+	object: "subscription";
+	customer: string;
+	status: string;
+	current_period_start: number;
+	current_period_end: number;
+	plan: { id: string; amount: number; currency: string; interval: string };
+	metadata: Record<string, string>;
+	cancel_at_period_end: boolean;
+	created: number;
+}
+
+export interface StripeInvoice {
+	id: string;
+	object: "invoice";
+	customer: string;
+	status: string;
+	amount_due: number;
+	amount_paid: number;
+	currency: string;
+	created: number;
+	period_start: number;
+	period_end: number;
+	hosted_invoice_url: string | null;
+	invoice_pdf: string | null;
+	subscription: string | null;
+}
+
+export interface StripeListResponse<T> {
+	object: "list";
+	data: T[];
+	has_more: boolean;
+	url: string;
 }
 
 // =============================================================================

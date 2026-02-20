@@ -26,6 +26,12 @@ import type {
 	WardenService,
 } from "./types";
 import { signNonce } from "./crypto";
+import { WardenGitHub } from "./services/github";
+import { WardenTavily } from "./services/tavily";
+import { WardenCloudflare } from "./services/cloudflare";
+import { WardenExa } from "./services/exa";
+import { WardenResend } from "./services/resend";
+import { WardenStripe } from "./services/stripe";
 
 export class WardenClient {
 	private baseUrl: string;
@@ -33,11 +39,25 @@ export class WardenClient {
 	private agent?: { id: string; secret: string };
 	private fetcher?: WardenConfig["fetcher"];
 
+	readonly github: WardenGitHub;
+	readonly tavily: WardenTavily;
+	readonly cloudflare: WardenCloudflare;
+	readonly exa: WardenExa;
+	readonly resend: WardenResend;
+	readonly stripe: WardenStripe;
+
 	constructor(config: WardenConfig) {
 		this.baseUrl = config.baseUrl.replace(/\/$/, "");
 		this.apiKey = config.apiKey;
 		this.agent = config.agent;
 		this.fetcher = config.fetcher;
+
+		this.github = new WardenGitHub(this);
+		this.tavily = new WardenTavily(this);
+		this.cloudflare = new WardenCloudflare(this);
+		this.exa = new WardenExa(this);
+		this.resend = new WardenResend(this);
+		this.stripe = new WardenStripe(this);
 	}
 
 	/**

@@ -26,12 +26,20 @@ export interface Env {
 	GITHUB_TOKEN: string;
 	/** Tavily search API key (global fallback) */
 	TAVILY_API_KEY: string;
+	/** Cloudflare API token (global fallback) */
+	CLOUDFLARE_API_TOKEN: string;
+	/** Exa search API key (global fallback) */
+	EXA_API_KEY: string;
+	/** Resend email API key (global fallback) */
+	RESEND_API_KEY: string;
+	/** Stripe secret key — read-only billing (global fallback) */
+	STRIPE_SECRET_KEY: string;
 	/** Admin API key for agent management endpoints */
 	WARDEN_ADMIN_KEY?: string;
 }
 
 /** Warden service identifiers */
-export type WardenService = "github" | "tavily";
+export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe";
 
 /** Authentication method used for a request */
 export type AuthMethod = "service_binding" | "challenge_response";

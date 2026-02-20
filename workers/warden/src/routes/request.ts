@@ -10,7 +10,7 @@ import { Hono } from "hono";
 import type { Env, WardenRequestBody, WardenService } from "../types";
 import { dualAuth, type AuthVariables } from "../auth/dual-auth";
 import { validateScope, getRequiredScope, isValidAction } from "../auth/scopes";
-import { checkRateLimit } from "../middleware/rate-limit";
+import { checkRateLimit, checkServiceRateLimit } from "../middleware/rate-limit";
 import { scrubResponse } from "../middleware/scrub";
 import { resolveCredential } from "../lib/credentials";
 import { executeUpstream } from "../lib/execute";
@@ -97,7 +97,7 @@ requestRoute.post("/", async (c) => {
 		);
 	}
 
-	// Check rate limits
+	// Check per-agent rate limits
 	const rateResult = await checkRateLimit(c.env.RATE_LIMITS, agent, service as WardenService);
 	if (!rateResult.allowed) {
 		await logAuditEvent(c.env.DB, {
@@ -118,6 +118,36 @@ requestRoute.post("/", async (c) => {
 				error: {
 					code: "RATE_LIMITED",
 					message: `Rate limit exceeded. Remaining: ${rateResult.remaining}, resets at: ${rateResult.resetAt}`,
+				},
+			},
+			429,
+		);
+	}
+
+	// Check global per-service rate limits (prevents upstream API throttling)
+	const serviceRateResult = await checkServiceRateLimit(
+		c.env.RATE_LIMITS,
+		service as WardenService,
+	);
+	if (!serviceRateResult.allowed) {
+		await logAuditEvent(c.env.DB, {
+			agent_id: agent.id,
+			agent_name: agent.name,
+			target_service: service,
+			action,
+			auth_method: authMethod,
+			auth_result: "failed",
+			event_type: "rate_limit_hit",
+			tenant_id: tenant_id || null,
+			latency_ms: Date.now() - startTime,
+			error_code: "RATE_LIMITED",
+		});
+		return c.json(
+			{
+				success: false,
+				error: {
+					code: "RATE_LIMITED",
+					message: `Service rate limit exceeded for ${service}. Resets at: ${serviceRateResult.resetAt}`,
 				},
 			},
 			429,

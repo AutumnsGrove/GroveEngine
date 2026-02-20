@@ -14,12 +14,20 @@ import type { Env, WardenService } from "../types";
 const GLOBAL_CREDENTIAL_MAP: Record<WardenService, keyof Env> = {
 	github: "GITHUB_TOKEN",
 	tavily: "TAVILY_API_KEY",
+	cloudflare: "CLOUDFLARE_API_TOKEN",
+	exa: "EXA_API_KEY",
+	resend: "RESEND_API_KEY",
+	stripe: "STRIPE_SECRET_KEY",
 };
 
 /** Mapping of services to their SecretsManager key names */
 const TENANT_CREDENTIAL_MAP: Record<WardenService, string> = {
 	github: "github_token",
 	tavily: "tavily_api_key",
+	cloudflare: "cloudflare_api_token",
+	exa: "exa_api_key",
+	resend: "resend_api_key",
+	stripe: "stripe_secret_key",
 };
 
 export interface ResolvedCredential {

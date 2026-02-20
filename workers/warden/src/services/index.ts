@@ -7,5 +7,9 @@
 
 import "./github";
 import "./tavily";
+import "./cloudflare";
+import "./exa";
+import "./resend";
+import "./stripe";
 
 export { getService, listServices } from "./registry";

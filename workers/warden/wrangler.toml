@@ -4,8 +4,13 @@
 # Secrets (via: gw secret apply <name> --worker grove-warden):
 # WARDEN_SIGNING_KEY — HMAC key for challenge-response auth
 # GROVE_KEK — Key encryption key for SecretsManager envelope decryption
+# WARDEN_ADMIN_KEY — Admin API key for agent management endpoints
 # GITHUB_TOKEN — GitHub API token (global fallback)
 # TAVILY_API_KEY — Tavily search API key (global fallback)
+# CLOUDFLARE_API_TOKEN — Cloudflare API token (global fallback)
+# EXA_API_KEY — Exa search API key (global fallback)
+# RESEND_API_KEY — Resend email API key (global fallback)
+# STRIPE_SECRET_KEY — Stripe secret key, read-only billing (global fallback)
 
 name = "grove-warden"
 main = "src/index.ts"
