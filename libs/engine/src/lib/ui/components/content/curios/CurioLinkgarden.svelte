@@ -278,15 +278,4 @@
 		background: rgba(0, 0, 0, 0.1);
 		border-radius: 0.375rem;
 	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		border: 0;
-	}
 </style>
