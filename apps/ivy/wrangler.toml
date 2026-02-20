@@ -9,6 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 # Static assets for SvelteKit adapter-cloudflare
 [assets]
 directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
 
 # Build settings for SvelteKit
 [build]

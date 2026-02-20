@@ -34,6 +34,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build foliage package (required for engine imports)
+        working-directory: libs/foliage
+        run: pnpm build
+
       - name: Build engine package (required for self-referencing imports)
         working-directory: libs/engine
         run: pnpm package

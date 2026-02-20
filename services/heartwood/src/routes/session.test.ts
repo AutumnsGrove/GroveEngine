@@ -63,7 +63,7 @@ vi.mock("../utils/crypto.js", () => ({
 }));
 
 import sessionRoutes from "./session.js";
-import { getUserById, getUserSubscription } from "../db/queries.js";
+import { getUserById } from "../db/queries.js";
 import { verifyAccessToken } from "../services/jwt.js";
 import { getSessionFromRequest, parseSessionCookie } from "../lib/session.js";
 import {

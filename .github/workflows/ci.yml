@@ -84,6 +84,10 @@ jobs:
             (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
           done
 
+      - name: Build foliage package (required for engine imports)
+        run: pnpm build
+        working-directory: libs/foliage
+
       - name: Build engine package (required for self-referencing imports)
         run: pnpm package
         working-directory: libs/engine

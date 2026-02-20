@@ -46,10 +46,9 @@ describe("FileGrid", () => {
 	it("should display file dates", () => {
 		render(FileGrid, { props: { files: mockFiles } });
 
-		// Dates are formatted with toLocaleDateString, verify both files have date elements
-		// Use flexible matching since timezone differences may affect display
-		expect(screen.getByText(/2025/)).toBeInTheDocument();
-		const dateElements = screen.getAllByText(/\d{4}/);
+		// Dates are formatted with toLocaleDateString — match any year to avoid
+		// timezone issues (2025-01-01T00:00:00Z renders as Dec 31 2024 in US timezones)
+		const dateElements = screen.getAllByText(/20\d{2}/);
 		expect(dateElements.length).toBeGreaterThanOrEqual(2);
 	});
 

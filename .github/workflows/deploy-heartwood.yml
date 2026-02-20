@@ -30,6 +30,10 @@ jobs:
         run: pnpm install
         working-directory: .
 
+      - name: Build engine package (required for @autumnsgrove/lattice/zephyr)
+        run: pnpm package
+        working-directory: libs/engine
+
       - name: Type check
         run: pnpm exec tsc --noEmit
         working-directory: services/heartwood
