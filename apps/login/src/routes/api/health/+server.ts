@@ -62,10 +62,11 @@ export const GET: RequestHandler = async ({ platform }) => {
 		if (response.ok) {
 			try {
 				const body = (await response.json()) as Record<string, unknown>;
-				(result.heartwood as Record<string, unknown>) = {
-					...(result.heartwood as Record<string, unknown>),
-					...body,
-				};
+				// Allowlist fields — avoid leaking internal details if Heartwood's payload grows
+				const hw = result.heartwood as Record<string, unknown>;
+				hw.status = body.status;
+				if (body.version != null) hw.version = body.version;
+				if (body.uptime != null) hw.uptime = body.uptime;
 			} catch {
 				// JSON parse failed but endpoint was reachable
 			}

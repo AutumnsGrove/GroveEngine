@@ -115,6 +115,9 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	// Create Drizzle instance for D1 with schema
 	const db = drizzle(env.DB, { schema });
 	const groveDb = createDbSession(env);
+	if (!env.ZEPHYR_API_KEY) {
+		console.warn("[createAuth] Missing ZEPHYR_API_KEY — magic link emails will fail");
+	}
 	const zephyr = new ZephyrClient({
 		baseUrl: env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev",
 		apiKey: env.ZEPHYR_API_KEY || "",

@@ -121,8 +121,8 @@ export const actions: Actions = {
 		}
 
 		// Better Auth responds with a redirect → Google OAuth authorization URL.
-		// Accept any redirect status (301, 302, 303, 307, 308).
-		const isRedirect = response.status >= 301 && response.status <= 308;
+		// Accept standard redirect statuses (not 304/305/306 which aren't redirects).
+		const isRedirect = [301, 302, 303, 307, 308].includes(response.status);
 		if (isRedirect) {
 			const location = response.headers.get("location");
 			if (location) {
