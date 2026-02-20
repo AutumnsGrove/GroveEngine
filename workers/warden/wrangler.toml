@@ -12,9 +12,8 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-[routes]
-pattern = "warden.grove.place/*"
-zone_name = "grove.place"
+# Routing: warden.grove.place traffic is handled by grove-router via service binding.
+# No [routes] block here — the router proxies to this worker directly.
 
 # Warden's own database — agent registry + audit log
 [[d1_databases]]
