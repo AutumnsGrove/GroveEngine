@@ -54,9 +54,6 @@ jobs:
           - name: heartwood
             path: services/heartwood
             needs-engine: false
-          - name: clearing-monitor
-            path: workers/clearing-monitor
-            needs-engine: false
           - name: webhook-cleanup
             path: workers/webhook-cleanup
             needs-engine: false

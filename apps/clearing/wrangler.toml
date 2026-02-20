@@ -1,16 +1,39 @@
-# Grove Clearing - Status Page
+# Grove Clearing - Status Page + Health Monitor
 # Deployed to: status.grove.place
+#
+# This is a Workers deployment (not Pages) that serves the SvelteKit status page
+# via fetch() and runs health monitoring via scheduled() cron triggers.
+# Previously these were two separate deployments (grove-clearing Pages +
+# grove-clearing-monitor Worker) — now unified into one.
 
 name = "grove-clearing"
-compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".svelte-kit/cloudflare"
+main = ".svelte-kit/cloudflare/_entry.js"
+compatibility_date = "2025-04-08"
+compatibility_flags = ["nodejs_als"]
 
-# Environment variables for local development
+# Smart Placement — run closer to D1 database for lower latency
+[placement]
+mode = "smart"
+
+# Cron triggers for health monitoring (absorbed from grove-clearing-monitor)
+[triggers]
+crons = [
+  "*/5 * * * *",   # Every 5 minutes: Health checks for all components
+  "0 0 * * *"      # Daily at midnight UTC: Daily history aggregation
+]
+
+# Workers Static Assets — serves SvelteKit's generated static files
+[assets]
+binding = "ASSETS"
+directory = ".svelte-kit/cloudflare"
+
+# Environment variables
 [vars]
 CDN_URL = "http://localhost:5173/cdn"
+ALERT_EMAIL = "alerts@grove.place"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 
-# D1 Database binding (shared with Grove)
+# D1 Database binding (shared with Grove Engine)
 [[d1_databases]]
 binding = "DB"
 database_name = "grove-engine-db"
@@ -22,6 +45,11 @@ binding = "BACKUPS_DB"
 database_name = "grove-backups-db"
 database_id = "4ad25abc-f972-4159-ac81-578806709275"
 
-# NOTE: For production deployment, configure:
-# - Custom domain: status.grove.place
-# - See DEPLOY.md for deployment instructions
+# KV Namespace — consecutive failure tracking for monitor
+[[kv_namespaces]]
+binding = "MONITOR_KV"
+id = "82d6537525d345f1981924bfd082248f"
+
+# Secrets (configured via wrangler secret put):
+# - SENTINEL_API_KEY: API key for Sentinel status updates
+# - RESEND_API_KEY: Email notifications for incidents (optional)

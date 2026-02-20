@@ -456,14 +456,8 @@ export const SERVICE_REGISTRY = {
 			hasHttp: true,
 			description: "Queen Firefly — ephemeral server management (provider-agnostic SDK)",
 		},
-		{
-			name: "grove-clearing-monitor",
-			scriptName: "grove-clearing-monitor",
-			healthCheckUrl: null,
-			healthPath: null,
-			hasHttp: false,
-			description: "Clearing status page health monitor (cron only)",
-		},
+		// grove-clearing-monitor was absorbed into grove-clearing (Pages → Workers conversion)
+		// Health monitoring now runs via cron triggers on the grove-clearing Worker
 		{
 			name: "grove-vista-collector",
 			scriptName: "grove-vista-collector",
