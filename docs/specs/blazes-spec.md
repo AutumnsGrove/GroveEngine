@@ -19,14 +19,16 @@ type: tech-spec
 # Blazes — Content Type Indicators
 
 ```
-         🌲          🌲          🌲          🌲
+        .↑.         .↑.         .↑.         .↑.
+       /|||\\       /|||\\       /|||\\       /|||\\
+      //|||\\\\    //|||\\\\    //|||\\\\    //|||\\\\
          │           │           │           │
-         │           │           │           │
-        [🌸]        [🎵]        [🌸]        [🎵]
-         │           │           │           │
+        (*)         (~)         (*)         (~)
          │           │           │           │
     ═════╧═══════════╧═══════════╧═══════════╧═════
                      the trail ahead
+             * = cherry (bloom)
+             ~ = feather (note)
 
     A painted mark on a tree.
     You glance. You know the path. You keep walking.
@@ -72,7 +74,7 @@ Meadow's feed displays blooms and notes side by side. The only way to tell them 
 
 A blaze is a small badge in the post card header, next to the author info and timestamp. It contains:
 
-1. **An icon** that represents the content type (flower for bloom, music note for note)
+1. **An icon** that represents the content type (cherry for bloom, feather for note)
 2. **A label** that names it ("Bloom" or "Note")
 3. **A color** that distinguishes it at a glance
 
@@ -95,22 +97,25 @@ Two content types exist today. The blaze system is designed to extend when more 
 
 ### Current types
 
-| Type | Icon | Label | Color | Description |
-|------|------|-------|-------|-------------|
-| Bloom | `🌸` | Bloom | grove (green) | A full blog post syndicated from a Grove garden via RSS. Has title, description, external link, optional featured image. |
-| Note | `♪` | Note | amber (warm) | A short-form native post written directly in Meadow. Up to 1000 characters. No title. |
+| Type | Lucide Icon | Label | Color | Description |
+|------|-------------|-------|-------|-------------|
+| Bloom | `Cherry` | Bloom | grove (green) | A full blog post syndicated from a Grove garden via RSS. Has title, description, external link, optional featured image. |
+| Note | `Feather` | Note | amber (warm) | A short-form native post written directly in Meadow. Up to 1000 characters. No title. |
 
 ### Type definitions
 
 ```typescript
+import type { Component } from "svelte";
+import { Cherry, Feather } from "lucide-svelte";
+
 /** Blaze configuration for a content type */
 interface BlazeConfig {
   /** Machine identifier — matches MeadowPost.postType */
   type: "bloom" | "note";
   /** Display label shown next to the icon */
   label: string;
-  /** Icon character or SVG reference */
-  icon: string;
+  /** Lucide icon component */
+  icon: Component;
   /** Tailwind color classes for the badge */
   colors: {
     bg: string;
@@ -124,7 +129,7 @@ const BLAZE_CONFIG: Record<string, BlazeConfig> = {
   bloom: {
     type: "bloom",
     label: "Bloom",
-    icon: "🌸",
+    icon: Cherry,
     colors: {
       bg: "bg-grove-50",
       text: "text-grove-700",
@@ -135,7 +140,7 @@ const BLAZE_CONFIG: Record<string, BlazeConfig> = {
   note: {
     type: "note",
     label: "Note",
-    icon: "♪",
+    icon: Feather,
     colors: {
       bg: "bg-amber-50",
       text: "text-amber-700",
@@ -146,6 +151,11 @@ const BLAZE_CONFIG: Record<string, BlazeConfig> = {
 };
 ```
 
+**Why these icons:**
+
+- **Cherry** (`Cherry` from lucide-svelte) — Already mapped in the Grove icon registry as "Blooms: individual pieces of writing." A cherry is a fruit of the tree, just as a bloom is a fruit of the garden.
+- **Feather** (`Feather` from lucide-svelte) — Already in the registry for songbird features. Notes are described as "the smallest complete sound a bird can make." A feather is the lightest natural mark. Quick, effortless, organic.
+
 ---
 
 ## Visual Design
@@ -155,56 +165,56 @@ const BLAZE_CONFIG: Record<string, BlazeConfig> = {
 The blaze sits in the post card header, inline with the author metadata row. It appears after the timestamp, separated by a middot.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│   ┌───┐  autumn · autumn.grove.place · 3h · 🌸 Bloom        │
-│   │ A │                                                      │
-│   └───┘  ──────────────────────────────────────────────      │
-│                                                              │
-│   On the Quiet Architecture of Personal Websites             │
-│                                                              │
-│   There's something about building your own corner           │
-│   of the internet that feels like planting a garden...       │
-│                                                              │
-│   ┌──────────────────────────────────────────┐               │
-│   │                                          │               │
-│   │            [ featured image ]             │               │
-│   │                                          │               │
-│   └──────────────────────────────────────────┘               │
-│                                                              │
-│   ──────────────────────────────────────────────────         │
-│   △ 12                                          🔖           │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│   ┌───┐  autumn · autumn.grove.place · 3h · [*] Bloom        │
+│   │ A │                                      Cherry icon      │
+│   └───┘  ───────────────────────────────────────────────      │
+│                                                               │
+│   On the Quiet Architecture of Personal Websites              │
+│                                                               │
+│   There's something about building your own corner            │
+│   of the internet that feels like planting a garden...        │
+│                                                               │
+│   ┌───────────────────────────────────────────┐               │
+│   │                                           │               │
+│   │            [ featured image ]              │               │
+│   │                                           │               │
+│   └───────────────────────────────────────────┘               │
+│                                                               │
+│   ───────────────────────────────────────────────────         │
+│   △ 12                                           [=]          │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
 
 
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│   ┌───┐  river · river.grove.place · 20m · ♪ Note           │
-│   │ R │                                                      │
-│   └───┘  ──────────────────────────────────────────────      │
-│                                                              │
-│   just found the most beautiful moth on my windowsill.       │
-│   she's been sitting there for twenty minutes. i think       │
-│   she likes the lamp.                                        │
-│                                                              │
-│   ──────────────────────────────────────────────────         │
-│   △ 4                                           🔖           │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│   ┌───┐  river · river.grove.place · 20m · [~] Note          │
+│   │ R │                                     Feather icon      │
+│   └───┘  ───────────────────────────────────────────────      │
+│                                                               │
+│   just found the most beautiful moth on my windowsill.        │
+│   she's been sitting there for twenty minutes. i think        │
+│   she likes the lamp.                                         │
+│                                                               │
+│   ───────────────────────────────────────────────────         │
+│   △ 4                                            [=]          │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ### Badge anatomy
 
 ```
         ╭──────────────╮
-        │  🌸  Bloom   │     ← icon + label
+        │  [*] Bloom   │     ← Lucide icon + label
         ╰──────────────╯
             ↑
        rounded-full pill
+       Lucide Cherry (w-3.5 h-3.5)
        subtle bg color
        small text (text-xs)
-       44px min touch target (via padding)
 ```
 
 The badge is a small pill. Rounded corners (full radius), subtle background tint matching the content type color, icon on the left, label on the right. At small viewport widths, the label collapses and only the icon remains.
@@ -212,9 +222,9 @@ The badge is a small pill. Rounded corners (full radius), subtle background tint
 ### Responsive behavior
 
 ```
-  Desktop (≥640px):          Mobile (<640px):
+  Desktop (>=640px):          Mobile (<640px):
 
-  autumn · 3h · 🌸 Bloom    autumn · 3h · 🌸
+  autumn · 3h · [*] Bloom    autumn · 3h · [*]
 ```
 
 On mobile, the label hides. The icon alone carries the meaning. This keeps the header from overflowing while preserving the visual signal.
@@ -230,15 +240,17 @@ Blazes use the lightest tint of their color family. They should feel like a gent
   │ bg-grove-50      │         │ bg-grove-900/30  │
   │ text-grove-700   │         │ text-grove-300   │
   │                  │         │                  │
-  │  🌸 Bloom        │         │  🌸 Bloom        │
+  │  [*] Bloom       │         │  [*] Bloom       │
   └─────────────────┘         └─────────────────┘
 
   ┌─────────────────┐         ┌─────────────────┐
   │ bg-amber-50      │         │ bg-amber-900/30  │
   │ text-amber-700   │         │ text-amber-300   │
   │                  │         │                  │
-  │  ♪ Note          │         │  ♪ Note          │
+  │  [~] Note        │         │  [~] Note        │
   └─────────────────┘         └─────────────────┘
+
+  [*] = Cherry icon    [~] = Feather icon
 ```
 
 ---
@@ -255,11 +267,12 @@ A single new component in the Meadow app. Intentionally simple. No engine depend
 <!--
   PostBlaze — Content type indicator for Meadow posts.
 
-  Displays a small icon + label badge identifying the post type
+  Displays a small Lucide icon + label badge identifying the post type
   (Bloom, Note, etc). Label collapses on mobile viewports.
 -->
 <script lang="ts">
   import type { MeadowPost } from "$lib/types/post.js";
+  import { BLAZE_CONFIG } from "$lib/types/blaze.js";
 
   interface Props {
     postType: MeadowPost["postType"];
@@ -268,6 +281,7 @@ A single new component in the Meadow app. Intentionally simple. No engine depend
   const { postType }: Props = $props();
 
   const config = $derived(BLAZE_CONFIG[postType] ?? BLAZE_CONFIG.bloom);
+  const Icon = $derived(config.icon);
 </script>
 
 <span
@@ -276,7 +290,7 @@ A single new component in the Meadow app. Intentionally simple. No engine depend
          {config.colors.darkBg} {config.colors.darkText}"
   aria-label="{config.label} post"
 >
-  <span aria-hidden="true">{config.icon}</span>
+  <Icon class="w-3.5 h-3.5" aria-hidden="true" />
   <span class="hidden sm:inline">{config.label}</span>
 </span>
 ```
@@ -314,7 +328,7 @@ The blaze slots into the existing author metadata row in `PostCard.svelte`. One 
   After:
   ┌─────────────────────────────────────────────────────────┐
   │  [avatar]  author name                                  │
-  │            subdomain.grove.place · 3h ago · 🌸 Bloom    │
+  │            subdomain.grove.place · 3h ago · [*] Bloom   │
   └─────────────────────────────────────────────────────────┘
 ```
 
@@ -355,9 +369,9 @@ PostBlaze is intentionally not built on the engine's `Badge` component. The shar
 
 ### Screen readers
 
-The blaze badge includes an `aria-label` that reads naturally: "Bloom post" or "Note post." The icon is marked `aria-hidden="true"` since the label carries the semantic meaning.
+The blaze badge includes an `aria-label` that reads naturally: "Bloom post" or "Note post." The Lucide icon SVG is marked `aria-hidden="true"` since the label carries the semantic meaning.
 
-On mobile, where the label is visually hidden (`hidden sm:inline`), the `aria-label` on the parent span still announces the full type name. Screen readers always hear "Bloom post" regardless of viewport.
+On mobile, where the text label is visually hidden (`hidden sm:inline`), the `aria-label` on the parent span still announces the full type name. Screen readers always hear "Bloom post" regardless of viewport. Lucide icons render as inline SVGs, so there's no emoji character for screen readers to misinterpret.
 
 ### Reduced motion
 
@@ -388,26 +402,28 @@ The blaze system is designed for extension. When new content types arrive, you a
 
 These are speculative. They illustrate how the system extends, not a commitment to build them.
 
-| Type | Icon | Label | Color | What it might be |
-|------|------|-------|-------|------------------|
-| Share | `🔗` | Share | sky (blue) | A repost or link share from another grove |
-| Thread | `🧵` | Thread | violet (purple) | A connected sequence of notes |
-| Event | `📅` | Event | rose (pink) | A calendar happening |
+| Type | Lucide Icon | Label | Color | What it might be |
+|------|-------------|-------|-------|------------------|
+| Share | `Link` | Share | sky (blue) | A repost or link share from another grove |
+| Thread | `MessageSquare` | Thread | violet (purple) | A connected sequence of notes |
+| Event | `Calendar` | Event | rose (pink) | A calendar happening |
 
 Adding a new type:
 
 ```typescript
+import { Link } from "lucide-svelte";
+
 // 1. Add database value
 //    ALTER TABLE meadow_posts ... (or new migration)
 
 // 2. Update TypeScript union
 //    postType: "bloom" | "note" | "share"
 
-// 3. Add blaze config
+// 3. Add blaze config entry
 BLAZE_CONFIG.share = {
   type: "share",
   label: "Share",
-  icon: "🔗",
+  icon: Link,
   colors: {
     bg: "bg-sky-50",
     text: "text-sky-700",
