@@ -740,7 +740,9 @@
     "definition": "Sidebar widgets alongside your blog posts — related links, callouts, annotations, and other contextual content in the margins.",
     "seeAlso": [
       "lattice",
-      "flow"
+      "flow",
+      "meadow",
+      "notes"
     ],
     "standardTerm": "Sidebar Links"
   },

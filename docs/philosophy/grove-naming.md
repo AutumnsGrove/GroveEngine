@@ -1103,7 +1103,7 @@ Fireside is a mode of Wisp for writers who freeze at the blank page. A conversat
 
 Vines climb the lattice, filling the spaces between the main structure. They add color and life to the margins.
 
-Vines are sidebar widgets in your blog's gutters—the content that grows alongside your posts. Related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
+Vines are sidebar widgets in your blog's gutters—the content that grows alongside your posts. Related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow. In Meadow, Notes can include vine-style annotations too.
 
 ### Blazes
 

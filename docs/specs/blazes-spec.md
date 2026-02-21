@@ -107,46 +107,44 @@ Two content types exist today. The blaze system is designed to extend when more 
 ```typescript
 import type { Component } from "svelte";
 import { Cherry, Feather } from "lucide-svelte";
+import type { MeadowPost } from "$lib/types/post.js";
+
+/** Post types that have blazes. Exhaustive — adding a type here forces you to add its config. */
+type BlazeType = MeadowPost["postType"];
 
 /** Blaze configuration for a content type */
 interface BlazeConfig {
-  /** Machine identifier — matches MeadowPost.postType */
-  type: "bloom" | "note";
   /** Display label shown next to the icon */
   label: string;
   /** Lucide icon component */
   icon: Component;
-  /** Tailwind color classes for the badge */
-  colors: {
-    bg: string;
-    text: string;
-    darkBg: string;
-    darkText: string;
-  };
+  /**
+   * Full class string for the badge.
+   *
+   * Written as a static literal so Tailwind's content scanner sees every
+   * class name at build time. Dynamic interpolation (e.g. {config.bg})
+   * would be invisible to the scanner and purged in production.
+   */
+  classes: string;
 }
 
-const BLAZE_CONFIG: Record<string, BlazeConfig> = {
+/**
+ * Keyed by BlazeType so TypeScript flags missing entries at compile time.
+ * If you add a new post type to MeadowPost["postType"], the compiler
+ * will error here until you add a matching blaze config.
+ */
+const BLAZE_CONFIG: Record<BlazeType, BlazeConfig> = {
   bloom: {
-    type: "bloom",
     label: "Bloom",
     icon: Cherry,
-    colors: {
-      bg: "bg-grove-50",
-      text: "text-grove-700",
-      darkBg: "dark:bg-grove-900/30",
-      darkText: "dark:text-grove-300",
-    },
+    classes:
+      "bg-grove-50 text-grove-700 dark:bg-grove-900/30 dark:text-grove-300",
   },
   note: {
-    type: "note",
     label: "Note",
     icon: Feather,
-    colors: {
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      darkBg: "dark:bg-amber-900/30",
-      darkText: "dark:text-amber-300",
-    },
+    classes:
+      "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
   },
 };
 ```
@@ -280,14 +278,13 @@ A single new component in the Meadow app. Intentionally simple. No engine depend
 
   const { postType }: Props = $props();
 
-  const config = $derived(BLAZE_CONFIG[postType] ?? BLAZE_CONFIG.bloom);
+  const config = $derived(BLAZE_CONFIG[postType]);
   const Icon = $derived(config.icon);
 </script>
 
 <span
   class="inline-flex items-center gap-1 rounded-full px-2 py-0.5
-         text-xs font-medium {config.colors.bg} {config.colors.text}
-         {config.colors.darkBg} {config.colors.darkText}"
+         text-xs font-medium {config.classes}"
   aria-label="{config.label} post"
 >
   <Icon class="w-3.5 h-3.5" aria-hidden="true" />
@@ -416,21 +413,18 @@ import { Link } from "lucide-svelte";
 // 1. Add database value
 //    ALTER TABLE meadow_posts ... (or new migration)
 
-// 2. Update TypeScript union
+// 2. Update TypeScript union in post.ts
 //    postType: "bloom" | "note" | "share"
+//
+//    The compiler now errors in blaze.ts because BLAZE_CONFIG
+//    is Record<BlazeType, BlazeConfig> and "share" is missing.
 
-// 3. Add blaze config entry
-BLAZE_CONFIG.share = {
-  type: "share",
-  label: "Share",
-  icon: Link,
-  colors: {
-    bg: "bg-sky-50",
-    text: "text-sky-700",
-    darkBg: "dark:bg-sky-900/30",
-    darkText: "dark:text-sky-300",
-  },
-};
+// 3. Add the missing entry (compiler-guided)
+//    share: {
+//      label: "Share",
+//      icon: Link,
+//      classes: "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+//    },
 
 // 4. Done. PostBlaze renders it automatically.
 ```
