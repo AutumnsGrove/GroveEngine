@@ -163,5 +163,5 @@ For new projects, use these skills in order:
 
 ---
 
-*Last updated: 2025-12-22*
-*Total guides: 26*
+*Last updated: 2026-02-21*
+*Total guides: 27*

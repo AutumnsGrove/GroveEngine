@@ -290,7 +290,7 @@ When a task spans multiple specialties, gatherings orchestrate the right animals
 | Gathering                | Animals                                           | Use When                         |
 | ------------------------ | ------------------------------------------------- | -------------------------------- |
 | `gathering-feature`      | Bloodhound → Elephant → Turtle → Beaver → Owl    | Full feature lifecycle           |
-| `gathering-architecture` | Eagle → Swan → Elephant                           | System design → spec → build     |
+| `gathering-architecture` | Eagle → Crow → Swan → Elephant                    | System design → challenge → spec → build |
 | `gathering-ui`           | Chameleon → Deer                                  | UI design + accessibility        |
 | `gathering-security`     | Spider → Raccoon → Turtle                         | Auth + audit + hardening         |
 | `gathering-migration`    | Bear → Bloodhound                                 | Data migration + codebase nav    |
