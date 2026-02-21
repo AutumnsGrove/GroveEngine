@@ -382,5 +382,218 @@ Three visual weights:
 
 ---
 
-_Journey taken: February 21, 2026_
-_The name was always there. We just had to listen._
+## Course Correction
+
+**Rustle was the wrong trail.**
+
+Not because the vibe was wrong — but because the QUESTION was wrong.
+We were looking for a third content type. That's not what we need.
+
+We need the **small indicator markers** on posts that tell you what
+kind of thing you're looking at. The visual badge. The icon. The
+system that differentiates a bloom from a note at a glance.
+
+Simon's beats have category badges: "Release", "TIL", "Museum."
+We need the same thing — but in Grove language. A name for this
+system of small identifying marks.
+
+---
+
+## The Real Walk
+
+### What IS This Thing? (Take Two)
+
+It's not a content type. It's a **marking system.** The little
+label or icon that appears on or near a post to identify it.
+
+In nature, what are small identifying marks?
+
+**On trails:**
+- **Blazes** — colored marks painted on trees. A rectangle of paint
+  that tells hikers: you're on the right trail. Blue blaze, white
+  blaze, yellow blaze. Small, visible, purposeful.
+- Cairns — stacked stones marking the path
+- Waymarks — signs at trail junctions (but Waystone is taken)
+
+**On creatures:**
+- Plumage — a bird's distinctive coloring that says what it is
+- Markings — the stripes on a bee, the spots on a fawn
+- Crests — the raised feathers on a bird's head
+
+**On trees/plants:**
+- Bark patterns — how you identify a birch vs an oak
+- Leaf shapes — maple, oak, elm, each distinct
+- **Rings** — already taken (analytics)
+- Burls — distinctive growths
+- Thorns — already taken (moderation)
+
+**On the forest floor:**
+- Tracks — animal prints that tell you who passed by
+- Scat — no
+- Spoor — the trail left behind
+
+**In a garden:**
+- Stakes — labels stuck in the ground by each plant
+- **Tags** — the little labels tied to branches in a nursery
+- Markers — identifying labels on seedlings
+- **Tabs** — the plastic labels in seed trays
+
+### What does it DO?
+
+- **Identifies** — tells you WHAT something is
+- **Differentiates** — makes a bloom look different from a note
+- **Signals** — quick visual read of content type
+- **Orients** — you know what you're looking at without reading
+
+### What emotion should it evoke?
+
+- **Clarity** — instant recognition
+- **Belonging** — each type has its own identity
+- **Craft** — the care of someone who labeled their garden
+
+---
+
+## Walking Through... (Take Two)
+
+I enter the meadow. I see posts in the timeline.
+
+But now each one has a small mark on it. A tiny identifier.
+Like the blazes on a trail — except instead of telling you
+which TRAIL you're on, they tell you which KIND OF THING
+you're looking at.
+
+A bloom has a 🌸 and the word "Bloom" — or maybe just the icon.
+A note has a 🎵 — one clear tone.
+A shared link has... something else. A different mark.
+
+These marks are the visual rhythm of the feed. Without them,
+everything blurs together. With them, your eye can skim and
+sort: *bloom, note, note, link, bloom, update, note...*
+
+In a real forest, what does this?
+
+A naturalist walking through a meadow identifies what they see
+by small distinguishing features. The shape of a petal. The
+color of a stem. The pattern on a wing. These aren't labels
+someone stuck on — they're PART of the thing. Inherent
+identifying marks.
+
+But in a GARDEN — a tended, cultivated space — the gardener
+puts small labels in the soil next to each plant. A stake,
+a tag, a marker. So visitors know what they're looking at.
+
+The meadow IS a garden. We're the gardeners. The marks are ours.
+
+---
+
+## Candidates (Round Two)
+
+### 1. **Blaze**
+
+- *What it means:* A trail blaze — a painted mark on a tree
+  trunk that identifies which trail you're on. Hikers follow
+  blazes through dense forest. Each trail has its own color.
+- *Why it fits:* Blazes are EXACTLY this — small identifying
+  marks in a forest that tell you what you're looking at.
+  "Bloom blaze." "Note blaze." Each content type gets its
+  own blaze (icon + label).
+- *The vibe:* Outdoorsy. Purposeful. Clear.
+- *Usage:* "Each post has a blaze showing its type."
+  "The bloom blaze is a flower icon."
+- *Issues:* "Blaze" carries fire connotations. Also cannabis
+  slang. The trail marking meaning might not land for everyone.
+
+### 2. **Sprig**
+
+- *What it means:* A small shoot or twig. A tiny piece of a
+  plant — often used decoratively. A sprig of rosemary. A
+  sprig of holly. Small, identifying, distinctive.
+- *Why it fits:* Sprigs are small, visual, and identifying.
+  A sprig of lavender tells you it's lavender. A sprig of
+  rosemary tells you it's rosemary. Each content type gets
+  a sprig — a small visual identifier.
+- *The vibe:* Delicate. Decorative. Botanical. Warm.
+- *Usage:* "The bloom sprig is a flower." "Note sprig."
+  "Each post wears its sprig."
+- *Issues:* Slightly precious? But Grove IS precious in the
+  best way. "Sprig" is warm and crafty.
+
+### 3. **Mark**
+
+- *What it means:* The simplest word. A mark on a tree. A
+  mark on a trail. A distinguishing mark.
+- *Why it fits:* Direct, clear, functional. "Content marks."
+  "Post marks." "Each type has its mark."
+- *The vibe:* Clean. Honest. Unpretentious.
+- *Issues:* Very generic. Doesn't feel Grove-y. "Mark" is
+  what you'd call it if you weren't trying to call it anything.
+
+### 4. **Crest**
+
+- *What it means:* The distinctive plumage on a bird's head.
+  A cardinal's red crest. A jay's blue crest. The thing that
+  identifies a bird at a distance.
+- *Why it fits:* Crests are nature's content type indicators.
+  They say "I'm a cardinal" before you even see the rest of
+  the bird. Quick identification at a glance.
+- *The vibe:* Noble. Distinctive. Visible.
+- *Usage:* "The bloom crest is a flower." "Each post shows
+  its crest." "Crested with a note icon."
+- *Issues:* "Crest" also means peak/summit and has heraldic
+  associations. Could feel too formal.
+
+### 5. **Tag**
+
+- *What it means:* In a nursery or garden center, each plant
+  has a small tag tied to it — species, care instructions,
+  a tiny identifier.
+- *Why it fits:* Tags are the garden equivalent of content
+  type indicators. Simple, small, informative.
+- *The vibe:* Practical. Familiar. Gardener-y.
+- *Issues:* "Tag" is extremely overloaded in tech (HTML tags,
+  hashtags, tagging users). Might not feel distinctive enough.
+
+### 6. **Pip**
+
+- *What it means:* A small seed inside a fruit. Also: a small
+  spot on a playing card or die. Also: the short high-pitched
+  tone of a time signal.
+- *Why it fits:* Pips are TINY. The smallest meaningful mark.
+  In a fruit, the pip is what identifies it — an apple pip, an
+  orange pip. Small, identifying, essential.
+- *The vibe:* Tiny. Bright. Quick.
+- *Usage:* "The bloom pip shows a flower." "Note pip."
+  "Each post has its pip."
+- *Issues:* Might feel too small/trivial? But that might be
+  exactly right for a tiny indicator.
+
+---
+
+## Sensing the Trail
+
+I'm drawn to two different vibes here:
+
+**Sprig** is the warm, crafty, botanical option. It feels like
+something a gardener would do — pin a little sprig to each post
+so you know what kind of plant it is. "A sprig of bloom." "A
+sprig of note." It's decorative AND functional.
+
+**Blaze** is the trail-marker option. More rugged, more functional.
+"Follow the bloom blazes." "Note blaze." It's about wayfinding
+in the forest — which connects to Wayfinder, Waystone, the whole
+trail-marking infrastructure.
+
+---
+
+## Testing the Tagline (Round Two)
+
+> "Every post wears its **sprig** — a small mark that says what it is."
+> "A **sprig** is the tiny identifier pinned to each post in the meadow."
+
+> "Every post carries its **blaze** — the mark that says what trail it belongs to."
+> "A **blaze** is the trail marker painted on each post."
+
+---
+
+_Journey continues: February 21, 2026_
+_The walk changed direction. Good. That's what walks do._
