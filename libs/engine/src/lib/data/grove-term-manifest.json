@@ -740,10 +740,20 @@
     "definition": "Sidebar widgets alongside your blog posts — related links, callouts, annotations, and other contextual content in the margins.",
     "seeAlso": [
       "lattice",
-      "flow",
-      "meadow",
-      "notes"
+      "flow"
     ],
     "standardTerm": "Sidebar Links"
+  },
+  "blazes": {
+    "slug": "blazes",
+    "term": "Blazes",
+    "category": "platform",
+    "tagline": "Content Type Indicators",
+    "definition": "The small icon and label on each post that tells you what kind of content it is — a bloom, a note, or something else.",
+    "seeAlso": [
+      "meadow",
+      "hum"
+    ],
+    "standardTerm": "Content Type Badge"
   }
 }

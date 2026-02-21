@@ -595,5 +595,79 @@ trail-marking infrastructure.
 
 ---
 
-_Journey continues: February 21, 2026_
-_The walk changed direction. Good. That's what walks do._
+## The Moment (Take Two)
+
+**Blaze.**
+
+A trail blaze — the small painted mark on a tree trunk that tells
+hikers which trail they're on. Blue blaze, white blaze, yellow blaze.
+You don't stop to read a blaze. You glance at it and keep walking.
+It orients you instantly.
+
+In the Meadow, every post carries its blaze: a small icon + label
+that identifies the content type at a glance. The bloom blaze says
+"this is a full post." The note blaze says "this is a quick thought."
+Future content types get their own blazes too.
+
+The word connects to the wayfinding language already in Grove:
+Wayfinder, Waystone, Wanderer, Trails. Blazes are how you navigate
+the forest. Of course they are.
+
+Previous naming journeys considered "blaze" for voice transcription
+(chose Scribe) and for roadmaps (chose Trails). It was always waiting
+for the right thing. Small identifying marks on trees in the forest.
+That's what it always was.
+
+---
+
+## Step 8: The Entry
+
+### Blaze
+
+**The mark that says what it is** · _Part of Meadow_
+**Standard:** Content Type Badge
+**Waystone:** The small icon and label on each post that tells you
+what kind of content it is — a bloom, a note, or something else.
+
+A trail blaze is a painted mark on a tree — a small rectangle of
+color that tells hikers which path they're on. You don't read it.
+You glance. Blue blaze, white blaze, yellow blaze. Keep walking.
+The blaze isn't the destination. It's the mark that keeps you
+oriented in the forest.
+
+Blazes in Meadow are the small content type indicators on each post.
+An icon and a word — or sometimes just the icon — that tells you
+at a glance: this is a Bloom (a full post from someone's garden),
+this is a Note (a quick thought), this is something else entirely.
+Without blazes, the feed is a wall of identical cards. With them,
+your eye finds rhythm. You can skim, sort, and navigate.
+
+The Wayfinder marks the trails. The blazes show you what you're
+looking at.
+
+> "Every post wears its blaze."
+> "The bloom blaze is a flower."
+
+_A small mark that tells you everything._
+
+---
+
+## Step 9: Conflict Check
+
+- **Blaze** — explored in previous naming journeys (Scribe, Trails)
+  but never claimed. Available.
+- Not in the ecosystem table. No subdomain needed (part of Meadow).
+- Previous journeys noted cannabis slang concern; in the context of
+  a visual indicator system within a forest-themed platform, the
+  trail-blazing meaning is clear and dominant.
+- Connects naturally to existing wayfinding language: Wayfinder,
+  Waystone, Wanderer, Trails.
+- Spoken aloud: "blaze" — short, clear, memorable.
+- Plural works: "blazes" — "the blazes on each post."
+- As adjective: "blazed" — "each post is blazed with its type."
+
+---
+
+_Journey completed: February 21, 2026_
+_We walked the wrong way, turned around, and found it waiting._
+_A small mark on a tree. Of course._

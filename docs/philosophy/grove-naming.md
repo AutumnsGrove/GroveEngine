@@ -439,6 +439,10 @@ Notes live alongside Blooms in the Meadow timeline. Where a Bloom is a full gard
 
 _One clear tone in the canopy._
 
+**Blazes** are a feature of Meadow: the small content type indicators on each post. A trail blaze is a painted mark on a tree — a rectangle of color that tells hikers which path they're on. You don't read it. You glance. Blue blaze, white blaze, yellow blaze. Keep walking. In Meadow, every post wears its blaze: a small icon and label that says *this is a Bloom*, *this is a Note*, *this is something else*. Without blazes, the feed is a wall of identical cards. With them, your eye finds rhythm. In standard mode, it's a content type badge. In Grove mode, it's a Blaze.
+
+_A small mark that tells you everything._
+
 ### Forests
 
 **Community Groves** · `{forest}.grove.place`
@@ -862,6 +866,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Canopy**     | Content      | Wanderer directory             | grove.place/canopy              |
 | **Meadow**     | Content      | Social connection              | meadow.grove.place              |
 | **Notes**      | Content      | Short-form posts               | meadow.grove.place              |
+| **Blazes**     | Content      | Content type indicators        | _(part of Meadow)_              |
 | **Forests**    | Content      | Community aggregation          | {forest}.grove.place            |
 | **Wander**     | Content      | Immersive discovery            | wander.grove.place              |
 | **Grafts**     | Tools        | Feature customization          | _(operator-configured)_         |
@@ -1100,11 +1105,23 @@ Vines climb the lattice, filling the spaces between the main structure. They add
 
 Vines are sidebar widgets in your blog's gutters—the content that grows alongside your posts. Related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
 
+### Blazes
+
+**Content Type Indicators** · _Part of Meadow_
+**Standard:** Content Type Badge
+**Waystone:** The small icon and label on each post that tells you what kind of content it is — a bloom, a note, or something else.
+
+A trail blaze is a painted mark on a tree — a small rectangle of color that tells hikers which path they're on. You don't read it. You glance. Blue blaze, white blaze, yellow blaze. Keep walking. The blaze isn't the destination. It's the mark that keeps you oriented in the forest.
+
+Blazes in Meadow are the small content type indicators on each post. An icon and a word — or sometimes just the icon — that tells you at a glance: this is a Bloom, this is a Note, this is something else entirely. Without blazes, the feed is a wall of identical cards. With them, your eye finds rhythm.
+
+_A small mark that tells you everything._
+
 ---
 
 [^1]: Named after the first test tenant in Grove. "Dave" was chosen as the most wonderfully mundane, generic example name imaginable during early development. The internal codename "Dave mode" honors this humble beginning. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode.
 
 ---
 
-_Last updated: February 15, 2026 — Added Notes (short-form Meadow posts)_
+_Last updated: February 21, 2026 — Added Blazes (content type indicators for Meadow)_
 _Status: Placeholder names, pending launch_
