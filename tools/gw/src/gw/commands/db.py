@@ -293,9 +293,14 @@ def d1_schema(ctx: click.Context, table_name: str, database: str) -> None:
     default=100,
     help="Maximum rows to return (default: 100)",
 )
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Bypass row-limit safety checks (still enforces WHERE and protected tables)",
+)
 @click.pass_context
 def d1_query(
-    ctx: click.Context, sql: str, database: str, write: bool, limit: int
+    ctx: click.Context, sql: str, database: str, write: bool, limit: int, force: bool
 ) -> None:
     """Execute a SQL query.
 
@@ -308,6 +313,8 @@ def d1_query(
         gw d1 query "SELECT subdomain, plan FROM tenants WHERE plan = 'oak'"
 
         gw d1 query --db groveauth "SELECT * FROM clients"
+
+        gw d1 query --write --force "UPDATE posts SET status = 'draft' WHERE tenant_id = 'x'"
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)
@@ -320,7 +327,7 @@ def d1_query(
     safety_config = SafetyConfig() if write else AGENT_SAFE_CONFIG
 
     try:
-        validate_sql(sql, safety_config)
+        validate_sql(sql, safety_config, skip_row_limits=force)
     except SafetyViolationError as e:
         if output_json:
             console.print(json.dumps({"error": str(e), "code": e.code.value}, indent=2))

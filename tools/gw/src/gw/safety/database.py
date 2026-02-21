@@ -102,12 +102,14 @@ def get_operation_type(sql: str) -> str:
         return "UNKNOWN"
 
 
-def validate_sql(sql: str, config: SafetyConfig) -> None:
+def validate_sql(sql: str, config: SafetyConfig, *, skip_row_limits: bool = False) -> None:
     """Validate SQL query against safety rules.
 
     Args:
         sql: SQL query to validate
         config: Safety configuration
+        skip_row_limits: Skip row-count estimation checks (--force).
+            Still enforces WHERE clause, protected table, and DDL checks.
 
     Raises:
         SafetyViolationError: If query violates safety rules
@@ -174,22 +176,24 @@ def validate_sql(sql: str, config: SafetyConfig) -> None:
             )
 
     # Check row limits for DELETE operations
-    if operation == "DELETE":
+    if operation == "DELETE" and not skip_row_limits:
         estimated_rows = _estimate_rows(sql)
         if estimated_rows > config.max_delete_rows:
             raise SafetyViolationError(
                 ErrorCode.UNSAFE_DELETE,
-                f"Estimated {estimated_rows} rows to delete exceeds limit of {config.max_delete_rows}",
+                f"Estimated {estimated_rows} rows to delete exceeds limit of {config.max_delete_rows}. "
+                f"Use --force to bypass row-limit checks.",
                 sql,
             )
 
     # For UPDATE on unprotected tables, check row limits before WHERE
-    if operation == "UPDATE":
+    if operation == "UPDATE" and not skip_row_limits:
         estimated_rows = _estimate_rows(sql)
         if estimated_rows > config.max_update_rows:
             raise SafetyViolationError(
                 ErrorCode.UNSAFE_UPDATE,
-                f"Estimated {estimated_rows} rows to update exceeds limit of {config.max_update_rows}",
+                f"Estimated {estimated_rows} rows to update exceeds limit of {config.max_update_rows}. "
+                f"Use --force to bypass row-limit checks.",
                 sql,
             )
 
@@ -226,9 +230,13 @@ def _has_where_clause(sql: str) -> bool:
 def _estimate_rows(sql: str) -> int:
     """Estimate number of rows affected by query.
 
-    For queries with LIMIT, returns the limit.
-    For queries with WHERE and a specific ID condition, returns 1.
-    For all other queries without LIMIT, returns 10000 (conservative).
+    Recognition order:
+      1. LIMIT clause → return that number
+      2. WHERE id = X → 1 row
+      3. WHERE id IN (X, Y, ...) → count of items
+      4. WHERE with equality conditions → estimate from condition count
+         (each equality condition narrows significantly)
+      5. No recognizable pattern → 10000 (conservative fallback)
     """
     sql_upper = sql.upper()
 
@@ -238,16 +246,45 @@ def _estimate_rows(sql: str) -> int:
         if match:
             return int(match.group(1))
 
-    # Check for ID-based WHERE clause (WHERE id = X, WHERE id IN (X), etc.)
-    if "WHERE" in sql_upper:
-        # If it's a specific ID lookup, assume 1 row
-        if re.search(r"WHERE\s+\w*\.?\bID\b\s*=\s*", sql_upper):
-            return 1
-        # For IN clauses, count the items
-        match = re.search(r"WHERE\s+\w*\.?\bID\b\s+IN\s*\(([^)]+)\)", sql_upper)
-        if match:
-            items = match.group(1).split(",")
-            return len(items)
+    if "WHERE" not in sql_upper:
+        return 10000
 
-    # Conservative estimate: assume large number if no LIMIT or safe pattern
+    # Extract the WHERE clause (everything after WHERE, before ORDER BY/LIMIT/GROUP BY)
+    where_match = re.search(
+        r"WHERE\s+(.*?)(?:\s+ORDER\s+BY|\s+GROUP\s+BY|\s+LIMIT|\s*$)",
+        sql_upper,
+        re.DOTALL,
+    )
+    if not where_match:
+        return 10000
+
+    where_clause = where_match.group(1)
+
+    # Check for ID-based WHERE clause (WHERE id = X)
+    if re.search(r"\bID\b\s*=\s*", where_clause):
+        return 1
+
+    # For IN clauses on id, count the items
+    in_match = re.search(r"\bID\b\s+IN\s*\(([^)]+)\)", where_clause)
+    if in_match:
+        items = in_match.group(1).split(",")
+        return len(items)
+
+    # Count equality conditions (column = value patterns)
+    # Each AND-ed equality condition narrows the result set significantly
+    # Require the LHS to start with a letter (column name, not a numeric literal like 1=1)
+    equality_conditions = re.findall(r"\b[A-Z_][A-Z0-9_]*\b\s*=\s*", where_clause)
+    if equality_conditions:
+        count = len(equality_conditions)
+        # 1 equality → ~100 rows (e.g. tenant_id = X)
+        # 2 equalities → ~10 rows (e.g. tenant_id = X AND slug = Y)
+        # 3+ equalities → ~1 row (very specific)
+        if count >= 3:
+            return 1
+        elif count == 2:
+            return 10
+        else:
+            return 100
+
+    # Conservative estimate: assume large number if no recognizable pattern
     return 10000
