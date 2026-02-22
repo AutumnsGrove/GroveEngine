@@ -3,7 +3,7 @@ title: Choosing Your Plan
 description: Understanding Grove's pricing tiers and features
 category: help
 section: getting-started
-lastUpdated: "2025-12-01"
+lastUpdated: "2026-02-22"
 keywords:
   - plan
   - pricing
@@ -48,7 +48,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 
 - Up to 100 posts
 - 1 GB storage for images and media
-- All 10 fonts + accent color customization
+- All 10 fonts + accent color customization (coming soon)
 - 3 curated themes (coming soon)
 - Unlimited comments on your blog
 - RSS feed

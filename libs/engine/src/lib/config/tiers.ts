@@ -50,7 +50,7 @@ export interface TierFeatures {
   customDomain: boolean;
   byod: boolean; // Bring Your Own Domain
   themeCustomizer: boolean;
-  customFonts: boolean;
+  customFonts: boolean; // Upload custom font files (WOFF2). All tiers get the 10 built-in fonts.
   centennial: boolean;
   shop: boolean;
   ai: boolean;

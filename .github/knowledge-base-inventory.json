@@ -1,7 +1,7 @@
 {
 	"lastUpdated": "2026-02-22",
 	"docs": {
-		"total": 330,
+		"total": 332,
 		"breakdown": {
 			"specs": 81,
 			"help": 98,
@@ -12,7 +12,8 @@
 			"design": 9,
 			"exhibit": 37,
 			"research": 1,
-			"playbooks": 1
+			"playbooks": 1,
+			"audits": 2
 		},
 		"paths": {
 			"specs": "docs/specs",
@@ -24,7 +25,8 @@
 			"design": "docs/design-system",
 			"exhibit": "docs/museum",
 			"research": "docs/research",
-			"playbooks": "docs/playbooks"
+			"playbooks": "docs/playbooks",
+			"audits": "docs/audits"
 		}
 	},
 	"freshnessThreshold": {

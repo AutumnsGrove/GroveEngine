@@ -1,13 +1,13 @@
 # Foliage
 
-[![npm version](https://img.shields.io/npm/v/@groveengine/foliage.svg)](https://www.npmjs.com/package/@groveengine/foliage)
-[![npm downloads](https://img.shields.io/npm/dm/@groveengine/foliage.svg)](https://www.npmjs.com/package/@groveengine/foliage)
-[![license](https://img.shields.io/npm/l/@groveengine/foliage.svg)](https://github.com/AutumnsGrove/Foliage/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@autumnsgrove/foliage.svg)](https://www.npmjs.com/package/@autumnsgrove/foliage)
+[![npm downloads](https://img.shields.io/npm/dm/@autumnsgrove/foliage.svg)](https://www.npmjs.com/package/@autumnsgrove/foliage)
+[![license](https://img.shields.io/npm/l/@autumnsgrove/foliage.svg)](https://github.com/AutumnsGrove/Foliage/blob/main/LICENSE)
 [![Svelte 5](https://img.shields.io/badge/Svelte-5-ff3e00.svg)](https://svelte.dev)
 
 Grove's theme system — personal expression with modern guardrails.
 
-**Package:** `@groveengine/foliage`
+**Package:** `@autumnsgrove/foliage`
 
 ---
 
@@ -72,7 +72,7 @@ pnpm lint         # Run ESLint
 ## Installation
 
 ```bash
-pnpm add @groveengine/foliage
+pnpm add @autumnsgrove/foliage
 ```
 
 ### Usage
@@ -84,13 +84,13 @@ import {
 	ThemePreview,
 	ThemeCustomizer,
 	AccentColorPicker,
-} from "@groveengine/foliage";
+} from "@autumnsgrove/foliage";
 
 // Import server functions (for SvelteKit)
-import { loadThemeSettings, saveThemeSettings } from "@groveengine/foliage/server";
+import { loadThemeSettings, saveThemeSettings } from "@autumnsgrove/foliage/server";
 
 // Import utilities
-import { generateThemeVariables, validateThemeContrast } from "@groveengine/foliage/utils";
+import { generateThemeVariables, validateThemeContrast } from "@autumnsgrove/foliage/utils";
 ```
 
 ---
@@ -143,13 +143,13 @@ import {
 	saveThemeSettings,
 	updateAccentColor,
 	updateThemeId,
-} from "@groveengine/foliage/server/theme-loader";
+} from "@autumnsgrove/foliage/server/theme-loader";
 ```
 
 ### Font Management
 
 ```typescript
-import { uploadFont, deleteFont, listFonts } from "@groveengine/foliage/server/font-uploader";
+import { uploadFont, deleteFont, listFonts } from "@autumnsgrove/foliage/server/font-uploader";
 ```
 
 ### Community Themes
@@ -159,7 +159,7 @@ import {
 	createCommunityTheme,
 	listCommunityThemes,
 	addRating,
-} from "@groveengine/foliage/server/community-themes";
+} from "@autumnsgrove/foliage/server/community-themes";
 ```
 
 ---
@@ -229,8 +229,8 @@ Foliage integrates through package exports:
 ```svelte
 <!-- +layout.svelte -->
 <script>
-	import { loadThemeSettings } from "@groveengine/foliage/server";
-	import { generateThemeVariables } from "@groveengine/foliage/utils";
+	import { loadThemeSettings } from "@autumnsgrove/foliage/server";
+	import { generateThemeVariables } from "@autumnsgrove/foliage/utils";
 
 	const settings = await loadThemeSettings(db, tenantId);
 	const cssVars = generateThemeVariables(theme, settings);
