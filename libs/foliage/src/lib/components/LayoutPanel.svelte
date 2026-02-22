@@ -76,10 +76,16 @@
 	// Max width presets
 	const maxWidthPresets = ["1000px", "1200px", "1400px", "1600px"];
 
-	// Local state
-	let localLayout = $state({ ...layout });
-	let maxWidthInput = $state(layout.maxWidth);
+	// Local state (synced from layout prop via $effect)
+	let localLayout = $state<ThemeLayout>(undefined!);
+	let maxWidthInput = $state("");
 	let isValidMaxWidth = $state(true);
+
+	// Initialize and sync local state from the layout prop
+	$effect(() => {
+		localLayout = { ...layout };
+		maxWidthInput = layout.maxWidth;
+	});
 
 	// Derived: check if max width is relevant for current layout
 	let isMaxWidthRelevant = $derived(

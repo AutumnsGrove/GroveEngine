@@ -12,9 +12,10 @@
 		baseTheme: Theme;
 		settings: ThemeSettings;
 		onSave?: (settings: ThemeSettings) => void;
+		effectiveTheme?: Theme;
 	}
 
-	let { baseTheme, settings, onSave }: Props = $props();
+	let { baseTheme, settings, onSave, effectiveTheme = $bindable() }: Props = $props();
 
 	// Tab state
 	type TabId = "colors" | "typography" | "layout" | "css";
@@ -50,13 +51,15 @@
 			localCustomCSS !== (settings.customCSS || baseTheme.customCSS || ""),
 	);
 
-	// Effective theme for preview (exported for parent components)
-	export let effectiveTheme = $derived<Theme>({
-		...baseTheme,
-		colors: localColors,
-		fonts: localFonts,
-		layout: localLayout,
-		customCSS: localCustomCSS,
+	// Keep effectiveTheme prop in sync with local state
+	$effect(() => {
+		effectiveTheme = {
+			...baseTheme,
+			colors: localColors,
+			fonts: localFonts,
+			layout: localLayout,
+			customCSS: localCustomCSS,
+		};
 	});
 
 	// Tab definitions with icons and labels

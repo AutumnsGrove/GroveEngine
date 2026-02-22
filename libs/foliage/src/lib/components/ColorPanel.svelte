@@ -13,15 +13,28 @@
 
 	let { colors, onChange }: Props = $props();
 
-	// Local state for each color with hex validation
-	let localColors = $state({ ...colors });
+	// Local state for each color with hex validation (synced from colors prop via $effect)
+	let localColors = $state<ThemeColors>(undefined!);
 	let hexInputs = $state({
-		background: colors.background,
-		surface: colors.surface,
-		foreground: colors.foreground,
-		foregroundMuted: colors.foregroundMuted,
-		accent: colors.accent,
-		border: colors.border,
+		background: "",
+		surface: "",
+		foreground: "",
+		foregroundMuted: "",
+		accent: "",
+		border: "",
+	});
+
+	// Initialize and sync from props
+	$effect(() => {
+		localColors = { ...colors };
+		hexInputs = {
+			background: colors.background,
+			surface: colors.surface,
+			foreground: colors.foreground,
+			foregroundMuted: colors.foregroundMuted,
+			accent: colors.accent,
+			border: colors.border,
+		};
 	});
 
 	let validationState = $state({
@@ -212,10 +225,10 @@
 		<h4>Background</h4>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Background</span>
 				<span class="label-hint">Main page background</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -253,10 +266,10 @@
 		</div>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Surface</span>
 				<span class="label-hint">Cards and panels</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -299,10 +312,10 @@
 		<h4>Text</h4>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Foreground</span>
 				<span class="label-hint">Primary text color</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -351,10 +364,10 @@
 		</div>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Foreground Muted</span>
 				<span class="label-hint">Secondary text color</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -409,10 +422,10 @@
 		<h4>Accent & Border</h4>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Accent</span>
 				<span class="label-hint">Links and highlights</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -450,10 +463,10 @@
 		</div>
 
 		<div class="color-input-group">
-			<label class="color-label">
+			<div class="color-label">
 				<span class="label-text">Border</span>
 				<span class="label-hint">Dividers and outlines</span>
-			</label>
+			</div>
 			<div class="picker-row">
 				<div class="color-input-wrapper">
 					<input
@@ -495,14 +508,13 @@
 	<section class="presets-section">
 		<h4>Color Presets</h4>
 		<p class="presets-hint">Quick access to popular color schemes</p>
-		<div class="presets-grid" role="list">
+		<div class="presets-grid">
 			{#each presets as preset}
 				<button
 					type="button"
 					class="preset-card"
 					onclick={() => applyPreset(preset)}
 					aria-label="Apply {preset.name} color preset"
-					role="listitem"
 				>
 					<div class="preset-name">{preset.name}</div>
 					<div class="preset-preview">

@@ -52,12 +52,12 @@
 	}: GossamerTextProps = $props();
 
 	// State
-	let canvas: HTMLCanvasElement;
-	let container: HTMLDivElement;
-	let isVisible = true;
-	let reducedMotion = false;
-	let animationId: number | null = null;
-	let textMetrics: { width: number; height: number } = { width: 0, height: 0 };
+	let canvas: HTMLCanvasElement = $state(undefined!);
+	let container: HTMLDivElement = $state(undefined!);
+	let isVisible = $state(true);
+	let reducedMotion = $state(false);
+	let animationId: number | null = $state(null);
+	let textMetrics: { width: number; height: number } = $state({ width: 0, height: 0 });
 
 	const shouldAnimate = $derived(animated && isVisible && !reducedMotion);
 

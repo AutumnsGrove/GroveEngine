@@ -33,7 +33,7 @@
 	let selectedFile = $state<File | null>(null);
 	let validationResult = $state<ValidationResult | null>(null);
 	let previewFontFamily = $state<string | null>(null);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement>(undefined!);
 
 	// Derived state
 	let fontCount = $derived(existingFonts.length);

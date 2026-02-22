@@ -17,8 +17,11 @@
 		warnings: string[];
 	}
 
-	// Local state for CSS input
-	let localValue = $state(value);
+	// Local state for CSS input (initialized from prop, then managed independently)
+	let localValue = $state(value ?? "");
+	$effect(() => {
+		localValue = value;
+	});
 
 	// Validate CSS for security and size
 	function validateCSS(css: string, maxSize: number): ValidationResult {

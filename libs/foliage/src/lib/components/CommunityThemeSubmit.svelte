@@ -233,12 +233,7 @@
 	</div>
 {:else}
 	<div class="theme-submit-container">
-		<form
-			class="theme-submit-form"
-			onsubmit={handleSubmit}
-			role="form"
-			aria-label="Submit community theme"
-		>
+		<form class="theme-submit-form" onsubmit={handleSubmit} aria-label="Submit community theme">
 			<div class="form-content">
 				<!-- Header -->
 				<header class="form-header">
@@ -742,8 +737,7 @@
 	}
 
 	.text-input.invalid,
-	.textarea-input.invalid,
-	.select-input.invalid {
+	.textarea-input.invalid {
 		border-color: #dc2626;
 	}
 

@@ -32,10 +32,17 @@
 		{ name: "Consolas", stack: "Consolas, monospace" },
 	];
 
-	// Local state for current selections
-	let selectedHeading = $state(fonts.heading);
-	let selectedBody = $state(fonts.body);
-	let selectedMono = $state(fonts.mono);
+	// Local state for current selections (synced from fonts prop via $effect)
+	let selectedHeading = $state("");
+	let selectedBody = $state("");
+	let selectedMono = $state("");
+
+	// Initialize and sync from props
+	$effect(() => {
+		selectedHeading = fonts.heading;
+		selectedBody = fonts.body;
+		selectedMono = fonts.mono;
+	});
 
 	// Preview text samples
 	const headingSample = "The Quick Brown Fox Jumps Over";

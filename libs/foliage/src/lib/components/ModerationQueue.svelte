@@ -965,6 +965,32 @@
 
 <!-- Preview Modal -->
 {#if showPreviewModal && previewTheme}
+	<!-- Build a Theme object for preview -->
+	{@const previewThemeObj = {
+		id: previewTheme.id,
+		name: previewTheme.name,
+		description: previewTheme.description || "",
+		thumbnail: "",
+		tier: "oak",
+		colors: {
+			background: previewTheme.customColors?.background || "#ffffff",
+			surface: previewTheme.customColors?.surface || "#f5f5f5",
+			foreground: previewTheme.customColors?.foreground || "#111111",
+			foregroundMuted: previewTheme.customColors?.foregroundMuted || "#666666",
+			accent: previewTheme.customColors?.accent || "#16a34a",
+			border: previewTheme.customColors?.border || "#e5e5e5",
+		},
+		fonts: {
+			heading: previewTheme.customTypography?.heading || "system-ui",
+			body: previewTheme.customTypography?.body || "system-ui",
+			mono: previewTheme.customTypography?.mono || "monospace",
+		},
+		layout: {
+			type: previewTheme.customLayout?.type || "sidebar",
+			maxWidth: previewTheme.customLayout?.maxWidth || "1200px",
+			spacing: previewTheme.customLayout?.spacing || "comfortable",
+		},
+	}}
 	<div
 		class="modal-overlay"
 		onclick={closePreviewModal}
@@ -999,33 +1025,6 @@
 			</div>
 
 			<div class="modal-body">
-				<!-- Create a Theme object for preview -->
-				{@const previewThemeObj = {
-					id: previewTheme.id,
-					name: previewTheme.name,
-					description: previewTheme.description || "",
-					thumbnail: "",
-					tier: "oak",
-					colors: {
-						background: previewTheme.customColors?.background || "#ffffff",
-						surface: previewTheme.customColors?.surface || "#f5f5f5",
-						foreground: previewTheme.customColors?.foreground || "#111111",
-						foregroundMuted: previewTheme.customColors?.foregroundMuted || "#666666",
-						accent: previewTheme.customColors?.accent || "#16a34a",
-						border: previewTheme.customColors?.border || "#e5e5e5",
-					},
-					fonts: {
-						heading: previewTheme.customTypography?.heading || "system-ui",
-						body: previewTheme.customTypography?.body || "system-ui",
-						mono: previewTheme.customTypography?.mono || "monospace",
-					},
-					layout: {
-						type: previewTheme.customLayout?.type || "sidebar",
-						maxWidth: previewTheme.customLayout?.maxWidth || "1200px",
-						spacing: previewTheme.customLayout?.spacing || "comfortable",
-					},
-				}}
-
 				<ThemePreview theme={previewThemeObj} />
 
 				<div class="preview-meta">

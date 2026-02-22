@@ -52,14 +52,14 @@
 	}: GossamerImageProps = $props();
 
 	// State
-	let canvas: HTMLCanvasElement;
-	let container: HTMLDivElement;
-	let isLoading = true;
-	let hasError = false;
-	let isHovered = false;
-	let loadedImage: HTMLImageElement | null = null;
-	let imageWidth = 0;
-	let imageHeight = 0;
+	let canvas: HTMLCanvasElement = $state(undefined!);
+	let container: HTMLDivElement = $state(undefined!);
+	let isLoading = $state(true);
+	let hasError = $state(false);
+	let isHovered = $state(false);
+	let loadedImage: HTMLImageElement | null = $state(null);
+	let imageWidth = $state(0);
+	let imageHeight = $state(0);
 
 	// Effective characters (possibly inverted)
 	const effectiveCharacters = $derived(invert ? invertCharacters(characters) : characters);
