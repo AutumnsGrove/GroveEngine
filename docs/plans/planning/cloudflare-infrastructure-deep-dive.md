@@ -328,9 +328,17 @@ return Response.json({ status: "processing", key: uploadKey });
 
 *Content moderation — Thorn for text, Petal for images.*
 
-**Current state:** Worker sequence — Workers calling Workers, hoping they scale and complete. No guaranteed retry, no durable state between steps, no reliable failure handling.
+**Current state:** Both are **library implementations** inside the engine, not standalone Workers or Worker chains.
 
-**This is exactly what Queues + Workflows were built for.**
+**Thorn** (`libs/engine/src/lib/thorn/`) — Text moderation, called via `waitUntil()` hooks after post publish/edit. Uses Lumen AI client with a 3-model cascade (GPT-oss Safeguard 20B → LlamaGuard 4 12B → DeepSeek V3.2). Has D1 tables for audit trail (`thorn_moderation_log`) and review queue (`thorn_flagged_content`). Graduated enforcement: allow → warn → flag_review → block, with content-type sensitivity (blog posts most permissive, comments stricter). 22 test cases. Privacy-first: logs decisions with content reference, never stores content. 90-day retention with automatic cleanup.
+
+**Petal** (`libs/engine/src/lib/server/petal/`) — 4-layer image moderation pipeline. Layer 1: CSAM detection via PhotoDNA (awaiting Microsoft approval, falls back to vision model). Layer 2: content classification via Workers AI (Llama 4 Scout primary, Llama 3.2 Vision fallback, Together.ai tertiary). Layer 3: context-aware sanity checks (face detection, screenshot detection, quality scoring). Layer 4: AI-generated output verification. Full config with rate limits, confidence thresholds, circuit breaker for provider failover, and per-context requirements (tryon/profile/blog/general). Has D1 migrations and security logging.
+
+**What works well:** Both libraries are functional, tested, and integrated into the publishing pipeline. Thorn fires on `on_publish` and `on_edit`; Petal scans on image upload. They never block the user-facing response — moderation runs asynchronously.
+
+**What's missing:** No guaranteed retry if an AI provider call fails mid-scan. No durable state between moderation and human review. No queue-based decoupling. If `waitUntil()` fails silently, moderation is skipped entirely with no record. No standalone Workers — everything runs inside the main app Worker's lifecycle.
+
+**This is where Queues + Workflows fill the gap — not replacing a broken system, but adding reliability and durability to a working one.**
 
 **With Queues:**
 
@@ -340,21 +348,22 @@ Post submitted
   → push to petal-scan-queue (images, if any)
 
 thorn-scan-queue consumer:
-  → run text through Workers AI / external moderation API
-  → ack if clean, push to thorn-review-queue if flagged
-  → automatic retry if API call fails
+  → run text through Lumen (existing Thorn library)
+  → ack if clean, push to moderation-review-queue if flagged
+  → automatic retry if AI provider call fails
 
 petal-scan-queue consumer:
-  → run images through moderation model (via Amber's R2 keys)
-  → ack if clean, push to petal-review-queue if flagged
+  → run images through Petal's 4-layer pipeline (existing library)
+  → ack if clean, push to moderation-review-queue if flagged
 ```
 
-Benefits over current Worker chain:
+Benefits over current `waitUntil()` pattern:
 
-- **Retries** — if the moderation API times out, the message retries automatically. Currently you'd just silently miss it.
-- **Decoupled** — Thorn and Petal run independently, in parallel, at their own pace
-- **Backpressure** — if you get a spike of flagged content, the review queue absorbs it without overwhelming anything downstream
-- **Dead letter queues** — content that fails moderation after max retries goes somewhere you can inspect, not into a void
+- **Retries** — if a Lumen or Workers AI call times out, the message retries automatically. Currently a `waitUntil()` failure is silent — no retry, no record.
+- **Decoupled** — Thorn and Petal already run independently; queues formalize this and add backpressure.
+- **Observable** — queue depth, processing time, and dead letter counts give visibility into moderation health.
+- **Dead letter queues** — content that fails moderation after max retries goes somewhere inspectable, not into a void.
+- **Scales independently** — the moderation consumer can scale separately from the main app Worker.
 
 **With Workflows:**
 
@@ -387,7 +396,7 @@ export class ModerationWorkflow extends WorkflowEntrypoint {
 }
 ```
 
-This replaces the entire hopeful Worker chain with a durable, auditable, human-in-the-loop moderation pipeline.
+This wraps the existing Thorn and Petal libraries in a durable, auditable, human-in-the-loop moderation pipeline — with retry guarantees and state persistence that `waitUntil()` cannot provide.
 
 -----
 
@@ -550,8 +559,8 @@ Instead of template emails, Workflow triggers → agent reads user's post analyt
 ## Key Takeaways
 
 1. **Durable Objects are genuinely unique.** No 1:1 alternative exists. The combination of actor model + edge + hibernation + co-located SQLite + zero infra is a category of one. You're building on this in its relative infancy (GA 2022, SQLite 2024).
-1. **Queues fix the "hoping Workers scale" problem.** Thorn, Petal, Amber processing, Ivy sending, Meadow fan-out — all of these become reliable, retried, decoupled, and observable.
-1. **Workflows fix the "multi-step Worker chain" problem.** Firefly provisioning, Ivy drip sequences, Thorn+Petal moderation with human review, tenant provisioning — all become durable, resumable, auditable.
+1. **Queues add reliability to `waitUntil()` patterns.** Thorn and Petal already work as libraries — queues add guaranteed retry, backpressure, and dead letter handling. Amber processing, Ivy sending, and Meadow fan-out all benefit from the same decoupling.
+1. **Workflows fix multi-step processes that need durability.** Firefly provisioning, Ivy drip sequences, Thorn+Petal moderation with human review, tenant provisioning — all become durable, resumable, auditable.
 1. **The stack compounds.** DO (state) + Queue (async side effects) + Workflow (durable multi-step) + Worker (stateless compute) + Loom SDK (orchestration) = a full agentic application runtime. Grove already has most of this built. Queues and Workflows are the missing layer.
 1. **The Forage pattern generalizes.** LLM-generated task list → queue fan-out → parallel Workers → aggregate is the pattern for any agentic Grove feature: Wander discovery, Ivy personalization, content analysis, CI orchestration via Firefly.
 

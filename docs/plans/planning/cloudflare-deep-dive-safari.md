@@ -197,32 +197,53 @@ Forage at `services/forage/` is **fully built and on Loom SDK**:
 
 ## 6. Thorn & Petal — Content Moderation 🟠
 
-**Character**: Protective brambles. Extensive specs and config. No production pipeline.
+**Character**: Protective brambles. Functional libraries integrated via `waitUntil()` hooks. No standalone Workers or queue-based pipeline.
 
 ### Research claim
 > "Current state: Worker sequence — Workers calling Workers, hoping they scale."
 
 ### Codebase reality
 
-- [x] **Petal config** (`libs/engine/src/lib/config/petal.ts`, 375 lines) — provider cascade, categories, thresholds, rate limits, circuit breaker, PhotoDNA config, classification prompts
-- [x] **Petal spec** (`docs/specs/petal-spec.md`) — full specification
-- [x] **Thorn → Resin** — renamed in naming journey
-- [ ] **No production moderation Worker** — no `services/thorn/`, `services/petal/`, or `services/resin/`
-- [ ] **No Worker chain** — the "Worker sequence" described doesn't exist
-- [ ] **No human review UI**
+**Thorn** (`libs/engine/src/lib/thorn/`) — LIBRARY, LIVE:
+- [x] `moderate.ts` — Core moderation via Lumen AI client (3-model cascade: GPT-oss Safeguard → LlamaGuard 4 → DeepSeek V3.2)
+- [x] `config.ts` — Graduated enforcement: allow/warn/flag_review/block with per-content-type sensitivity (blog_post permissive, comment strict, profile_bio moderate). Global thresholds: 0.4 (allow below), 0.95 (block above).
+- [x] `hooks.ts` — `moderatePublishedContent()` called via `waitUntil()` on post publish/edit. Fire-and-forget, never throws.
+- [x] `logging.ts` — D1 tables: `thorn_moderation_log` (audit trail, 90-day retention), `thorn_flagged_content` (review queue with pending/cleared/removed status)
+- [x] `thorn.test.ts` — 22 test cases covering decision logic and integration
+- [x] **Name is Thorn** — naming journey explored "Resin" as an alternative but the rename was never applied; all code remains `thorn/`
 
-**Accuracy verdict**: Significantly off. There IS no current moderation pipeline. No Workers calling Workers. No "hoping they scale." The config and specs exist — the infrastructure does not.
+**Petal** (`libs/engine/src/lib/server/petal/`) — LIBRARY, LIVE:
+- [x] `layer1-csam.ts` — CSAM detection (PhotoDNA primary, awaiting Microsoft approval; falls back to vision model)
+- [x] `layer2-classify.ts` — Content classification via Workers AI (Llama 4 Scout primary → Llama 3.2 Vision fallback → Together.ai tertiary)
+- [x] `layer3-sanity.ts` — Context-aware sanity checks (face detection, screenshot detection, quality scoring, per-context requirements for tryon/profile/blog/general)
+- [x] `layer4-output.ts` — AI-generated output verification
+- [x] `vision-client.ts` — Provider cascade with circuit breaker (3 failures → 60s cooldown)
+- [x] `photodna-client.ts` — PhotoDNA Cloud Service integration
+- [x] Full config (`libs/engine/src/lib/config/petal.ts`, 375 lines) — provider cascade, 12 content categories, confidence thresholds, rate limits, sanity requirements, classification prompts
+- [x] D1 migrations: `030_petal.sql`, `031_petal_upload_gate.sql`
+- [x] Tests: `petal.test.ts`, `petal-integration.test.ts`, `lumen-classify.test.ts`
+
+**What's missing (not library code — infrastructure):**
+- [ ] **No standalone moderation Workers** — no `services/thorn/`, `services/petal/`
+- [ ] **No queue-based processing** — moderation runs inside main app Worker via `waitUntil()`
+- [ ] **No guaranteed retry** — if `waitUntil()` fails silently, moderation is skipped with no record
+- [ ] **No human review UI** — `thorn_flagged_content` table exists but no admin interface
+- [ ] **No durable moderation pipeline** — no state persistence between scan and review
+
+**Accuracy verdict**: Research was wrong about the *current state* — there's no "Worker chain hoping they scale." The reality is better: functional, tested libraries with `waitUntil()` integration. But the research was right about the *gap*: no retry guarantees, no durability, no queue-based decoupling.
 
 ### Design spec (safari-approved)
 
-**Better situation than the research assumes — build queue-first from day one:**
+**Libraries are ready — wrap them in queues for reliability:**
 
-- [ ] Petal config is ready: providers, categories, thresholds all defined
-- [ ] Build moderation service with CF Queues from the start (no migration needed):
-  - `petal-scan-queue` (images) → consumer runs Workers AI classification
-  - `resin-scan-queue` (text) → consumer runs text moderation
+- [x] Thorn library is ready: moderation logic, thresholds, logging, all tested
+- [x] Petal config is ready: providers, categories, thresholds all defined
+- [ ] Build moderation service with CF Queues (wrapping existing libraries):
+  - `petal-scan-queue` (images) → consumer calls existing `scanImage()` from Petal library
+  - `thorn-scan-queue` (text) → consumer calls existing `moderateContent()` from Thorn library
   - `moderation-review-queue` (flagged content) → human review via Workflow
-- [ ] `ModerationWorkflow` from research doc is solid — should be the INITIAL architecture, not a migration target
+- [ ] `ModerationWorkflow` from research doc is solid — wraps existing library calls with durable state
+- [ ] Build admin review UI for `thorn_flagged_content` and Petal security logs
 
 -----
 
@@ -319,7 +340,7 @@ Forage at `services/forage/` is **fully built and on Loom SDK**:
 - [ ] Any DO state change can trigger background work without direct service calls
 
 **Phase 5: Future greenfield services**
-- [ ] Petal/Resin moderation — build queue-first
+- [ ] Petal/Thorn moderation — wrap libraries in queues
 - [ ] Firefly provisioning — build Workflow-first
 - [ ] Wander discovery — build with full stack (DO + Queue + Workflow)
 
@@ -348,7 +369,7 @@ Forage at `services/forage/` is **fully built and on Loom SDK**:
 | Amber | ⚠️ No processing pipeline exists to fix | ✅ Queue-first when building |
 | Ivy | ⚠️ Architecture mischaracterized (Zephyr exists) | ✅ Best queue candidate |
 | Meadow | ❌ Assumes push model; reality is RSS pull | ⚠️ Different problems than proposed |
-| Thorn/Petal | ❌ "Worker chain" doesn't exist | ✅ Build queue-first from scratch |
+| Thorn/Petal | ❌ "Worker chain" doesn't exist — they're libraries via `waitUntil()` | ✅ Wrap existing libraries in queues for reliability |
 | Wander | ❌ Service doesn't exist at all | ✅ Solid greenfield design |
 | Firefly | ⚠️ Nothing to "migrate from" | ✅ Workflow-first makes sense |
 | Queues/Workflows | ✅ Accurately identifies the gap | ✅ Adoption roadmap is sound |
@@ -359,7 +380,7 @@ Forage at `services/forage/` is **fully built and on Loom SDK**:
 2. **Loom SDK + emit()** — small surface area, high leverage. Every DO becomes a queue producer.
 3. **Meadow + Queues** — decouple poller from D1 writes. Immediate throughput improvement.
 4. **Ivy + Workflow** — onboarding drip sequence. First Workflow in production.
-5. **Petal/Resin** — when moderation is built, build queue-first using the extensive config that already exists.
+5. **Petal/Thorn** — wrap existing libraries in CF Queues for reliability and add admin review UI.
 6. **Firefly** — when server provisioning is built, build Workflow-first using the comprehensive specs.
 7. **Forage** — migrate from alarm-based to queue-based parallel fan-out.
 8. **Wander** — greenfield, full stack, Phase 6+.
@@ -374,7 +395,7 @@ Forage at `services/forage/` is **fully built and on Loom SDK**:
 
 4. **Alarm chaining → Workflows is the other migration.** Forage, ExportDO, and TriageDO all use alarm-based multi-step execution. For truly complex multi-step processes (Firefly, onboarding), CF Workflows would be more appropriate.
 
-5. **Build new services on the full stack from day one.** Petal/Resin, Firefly, and Wander should all be built with DOs + Queues + Workflows from the start. No legacy to migrate. The research's designs for these services are solid starting architectures.
+5. **Build new services on the full stack from day one.** Petal/Thorn queue wrappers, Firefly, and Wander should all be built with DOs + Queues + Workflows from the start. The Thorn and Petal libraries provide the moderation logic — queues and workflows provide the reliability layer.
 
 -----
 
