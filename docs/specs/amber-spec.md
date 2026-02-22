@@ -1,63 +1,168 @@
 ---
-title: Amber — Storage Management
-description: Unified storage management system for Grove
+title: Amber — Storage Management & Data Sovereignty
+description: Unified storage visibility, automated backups, and external storage sync for Grove
 category: specs
 specCategory: platform-services
 icon: harddrive
-lastUpdated: '2025-12-01'
+date created: Saturday, February 22nd 2026
+date modified: Saturday, February 22nd 2026
 aliases: []
 tags:
   - storage
   - cloudflare-r2
-  - file-management
+  - data-sovereignty
+  - backups
+  - engine
+type: tech-spec
 ---
 
-# Amber: Grove Storage Management Specification
+# Amber: Grove Storage & Data Sovereignty Specification
 
 ```
                               ·
                              ╱ ╲
                             ╱   ╲
                            ╱  ✨ ╲
-                          ╱   🦟  ╲
-                         ╱    ··   ╲
-                        ╱           ╲
-                       ╱      ◇      ╲
-                      ╱_______________╲
-                          ╲      ╱
-                           ╲    ╱
-                            ╲  ╱
-                             ··
+                          ╱       ╲
+                         ╱   ···   ╲
+                        ╱   ·   ·   ╲
+                       ╱    · ◇ ·    ╲
+                      ╱      ···      ╲
+                     ╱_________________╲
+                         ╲      ╱
+                      ════╲════╱════
+                           ╲  ╱
+                            ··
 
-            Moments preserved. Time suspended.
+         Moments preserved. Sovereignty granted.
 ```
 
-Grove's unified storage management system for all uploaded files across the ecosystem. Every image, attachment, and asset is preserved in Amber: organized, accessible, and manageable from one place.
+> _Your data doesn't belong to Grove. It belongs to you. Amber is how we prove it._
+
+Amber is Grove's unified storage management layer and data sovereignty system. Every file a Wanderer uploads, every image, every attachment, is preserved in Amber: visible, downloadable, and eventually, already sitting in their own Google Drive before they ever think to ask.
+
+|                       |                                                      |
+| --------------------- | ---------------------------------------------------- |
+| **Public name**       | Amber                                                |
+| **Internal codename** | GroveStorage                                         |
+| **Domain**            | `amber.grove.place` (frontend), Engine API (backend) |
+| **Last Updated**      | February 2026                                        |
+
+### Why "Amber"
+
+Amber is fossilized tree resin. It preserves moments in time, capturing life in suspended animation. Your digital Amber holds your files, keeps them safe, and lets you manage your space as it grows. The metaphor extends further than storage: amber is warm, translucent, honest. You can see what's inside. Nothing hidden.
+
+### What Changed (February 2026 Rewrite)
+
+This spec replaces the December 2025 version. The original treated Amber as a standalone service with its own Worker and D1 database. That architecture was never realized. Instead, Engine evolved to handle file tracking, uploads, exports, and tier management. This rewrite reflects architectural truth:
+
+- **Amber is a view into Engine's data.** Engine owns the backend.
+- **The export system was already ported to Engine.** That proved the pattern.
+- **Data sovereignty is Amber's philosophical core.** Automated backups and external storage sync are first-class features, not footnotes.
 
 ---
 
 ## Overview
 
-**Amber** is Grove's unified storage management system. Every file you upload (blog images, email attachments, profile pictures) is preserved in Amber, organized and accessible from one place.
+### What This Is
 
-### Why "Amber"?
+Amber gives Wanderers visibility and control over the storage that already exists inside Grove. Every paid Wanderer already has storage. Amber makes it visible: what's using space, how much is left, how to clean up, how to export. Beyond visibility, Amber is the foundation for data sovereignty, the promise that your data is already in your hands.
 
-Amber is fossilized tree resin: preserving moments in time, capturing life in suspended animation. Your digital Amber holds your files, keeps them safe, and lets you manage your space as it grows.
+### Goals
 
-| | |
-|---|---|
-| **Public name** | Amber |
-| **Internal codename** | GroveStorage |
-| **Domain** | amber.grove.place (or integrated into dashboard) |
+- **Visibility**: See what's using storage, broken down by product
+- **Management**: Delete, restore, search, and organize files
+- **Export**: Download everything as a structured ZIP archive
+- **Sovereignty**: Automated backups pushed to the Wanderer's own external storage
+- **Trust**: "Your data is already in your Google Drive. You don't need to ask us for it."
 
-### Philosophy
+### Non-Goals
 
-Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove, made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
+- **File sync**: Two-way cross-device sync (Obsidian-style) is a separate product. See `amber-sync-spec.md`.
+- **Becoming Dropbox**: Amber is the storage layer inside Grove, made visible. Not a general-purpose file manager.
+- **Direct file uploads to Amber**: Files are uploaded through their respective products (Blog, Ivy, Profile). Amber surfaces them.
 
-- See what's using your space
-- Download and export your data
-- Clean up what you don't need
-- Buy more when you need it
+---
+
+## Architecture
+
+Amber is a **frontend application** that consumes **Engine's APIs**. It has no backend logic of its own.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Wanderer's Browser                           │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │                 Amber Frontend (SvelteKit)                  │   │
+│   │   Dashboard │ Files │ Trash │ Settings │ Backups            │   │
+│   └──────────────────────────┬──────────────────────────────────┘   │
+└──────────────────────────────┼──────────────────────────────────────┘
+                               │ HTTPS
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Engine Worker (grove-lattice)                    │
+│                                                                     │
+│   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│   │ Storage  │  │ Export   │  │ Quota    │  │ Backup   │            │
+│   │ API      │  │ API      │  │ Enforce  │  │ API      │            │
+│   └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘            │
+│        │             │             │             │                  │
+│   ┌────┴─────────────┴─────────────┴─────────────┴──────────┐       │
+│   │                  Engine D1 (SQLite)                     │       │
+│   │   cdn_files │ storage_exports │ image_hashes │ tiers    │       │
+│   └─────────────────────────────────────────────────────────┘       │
+│        │                                                            │
+│   ┌────┴──────────────────────────────────────────────────┐         │
+│   │                    R2 (grove-storage)                 │         │
+│   │   images/ │ exports/ │ backups/ │ fonts/ │ avatars/   │         │
+│   └───────────────────────────────────────────────────────┘         │
+└─────────────────────────────────────────────────────────────────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │  Durable Objects    │
+                    │  (grove-durable-    │
+                    │   objects worker)   │
+                    │                     │
+                    │  ExportDO           │
+                    │  BackupDO (planned) │
+                    └─────────────────────┘
+                               │
+                    ┌──────────┴──────────┐   (Phase C)
+                    │  External Storage   │
+                    │  ┌────────────────┐ │
+                    │  │ Google Drive   │ │
+                    │  │ Dropbox        │ │
+                    │  │ (OAuth2 push)  │ │
+                    │  └────────────────┘ │
+                    └─────────────────────┘
+```
+
+### Tech Stack
+
+| Component            | Technology                    | Notes                                 |
+| -------------------- | ----------------------------- | ------------------------------------- |
+| Frontend             | SvelteKit on Cloudflare Pages | `apps/amber/`                         |
+| Backend API          | Engine Worker                 | `libs/engine/` routes                 |
+| File Storage         | Cloudflare R2                 | `grove-storage` bucket                |
+| Metadata DB          | Engine's D1 (SQLite)          | `cdn_files` table (evolved)           |
+| Export Processing    | Durable Objects               | `ExportDO` in `grove-durable-objects` |
+| Backup Orchestration | CF Queues + Workflows         | Planned (Phase B)                     |
+| Auth                 | Heartwood                     | SSO via session cookies               |
+| Billing              | Stripe (via Plant)            | Add-on subscriptions                  |
+
+### What Engine Already Provides
+
+These systems exist today and Amber builds on them:
+
+| System           | Location                                         | What It Does                                   |
+| ---------------- | ------------------------------------------------ | ---------------------------------------------- |
+| Storage Service  | `libs/engine/src/lib/server/services/storage.ts` | R2 upload, get, delete, list, sync (911 lines) |
+| Tier Config      | `libs/engine/src/lib/config/tiers.ts`            | Storage limits per tier with rate limits       |
+| Upload Gate      | `libs/engine/src/lib/server/upload-gate.ts`      | Feature-flagged per-tenant upload control      |
+| Export System    | `libs/engine/src/routes/api/export/`             | Start, poll, download, cancel ZIP exports      |
+| Image Dedup      | Engine D1 `image_hashes` table                   | Hash-based duplicate detection                 |
+| Bucket Sync      | `storage.ts` `syncFromBucket()`                  | R2 to D1 metadata recovery                     |
+| Upload Endpoints | `/api/images/upload`, `/api/settings/avatar`     | Image and avatar uploads with validation       |
 
 ---
 
@@ -65,147 +170,112 @@ Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that al
 
 Storage is shared across all Grove products. Amber provides visibility into this unified pool.
 
-| Tier | Base Storage | Email Access | Storage Add-ons |
-|------|:------------:|:------------:|:---------------:|
-| Free | — | — | — |
-| Seedling ($8) | 1 GB | — | ✓ |
-| Sapling ($12) | 5 GB | Read-only | ✓ |
-| Oak ($25) | 20 GB | Full | ✓ |
-| Evergreen ($35) | 100 GB | Full | ✓ |
+| Tier            | Price  | Storage | Upload Rate | Add-ons |
+| --------------- | ------ | ------- | ----------- | ------- |
+| Wanderer (Free) | $0     | 100 MB  | 5/day       | —       |
+| Seedling        | $8/mo  | 1 GB    | 10/day      | ✓       |
+| Sapling         | $12/mo | 5 GB    | 50/day      | ✓       |
+| Oak             | $25/mo | 20 GB   | 200/day     | ✓       |
+| Evergreen       | $35/mo | 100 GB  | 1000/day    | ✓       |
+
+Source of truth: `libs/engine/src/lib/config/tiers.ts`
 
 ### Storage Breakdown by Product
 
-The same storage pool is used by:
+| Product     | What Uses Storage                                  |
+| ----------- | -------------------------------------------------- |
+| **Blog**    | Images, markdown content, custom fonts             |
+| **Ivy**     | Email bodies, attachments                          |
+| **Profile** | Avatar, banner images                              |
+| **Themes**  | Custom CSS, uploaded assets                        |
+| **Exports** | Generated ZIP archives (temporary, 7-day TTL)      |
+| **Backups** | Automated backup archives (configurable retention) |
 
-| Product | What Uses Storage |
-|---------|-------------------|
-| **Blog** | Images, markdown content, custom fonts |
-| **Ivy** | Email bodies, attachments |
-| **Profile** | Avatar, banner images |
-| **Themes** | Custom CSS, uploaded assets |
-| **Exports** | Generated zip files (temporary) |
+### Storage Add-ons
 
----
+Wanderers who need more space can purchase additional storage:
 
-## Features
+| Add-on  | Price | Storage |
+| ------- | ----- | ------- |
+| +10 GB  | $1/mo | 10 GB   |
+| +50 GB  | $4/mo | 50 GB   |
+| +100 GB | $7/mo | 100 GB  |
 
-### Day One (MVP)
-
-#### Storage Dashboard
-- **Visual breakdown:** Pie/bar chart showing usage by category
-- **Storage meter:** Current usage vs. quota with percentage
-- **Quota warnings:** Clear indicators at 80%, 95%, 100%
-- **Usage trends:** Simple graph showing storage over time
-
-#### File Browser
-- **Category views:** Browse by type (images, attachments, documents)
-- **Source views:** Browse by product (Blog files, Ivy attachments)
-- **Search:** Find files by name
-- **Preview:** View images and documents inline
-- **Metadata:** Size, upload date, dimensions (for images)
-
-#### Export & Download
-- **Single file download:** Download any file directly
-- **Bulk download:** Select multiple files, download as zip
-- **Full export:** Download everything (GDPR compliance)
-- **Export by category:** Download all blog images, all email attachments, etc.
-
-#### Storage Management
-- **Delete files:** Remove individual files
-- **Bulk delete:** Select and delete multiple files
-- **Trash:** 30-day retention before permanent deletion
-- **Empty trash:** Immediately reclaim space
-
-### Later Features
-
-#### Organization (Phase 2)
-- **Folders:** User-created organization (especially for blog assets)
-- **Tags:** Label files for easier finding
-- **Favorites:** Quick access to frequently used files
-- **Sort options:** By date, size, name, type
-
-#### Optimization (Phase 2)
-- **Image compression:** Automatically optimize uploaded images
-  - See `docs/plans/jxl-migration-spec.md` for JPEG XL migration plan
-  - Target: 20-60% smaller files with JXL vs current WebP
-- **Attachment compression:** Compress large email attachments
-- **Duplicate detection:** Identify and merge duplicate files
-- **Cleanup suggestions:** "These files are large and unused"
-
-#### Advanced (Phase 3)
-- **Version history:** For blog content (track changes)
-- **Sharing:** Generate temporary download links
-- **API access:** Programmatic file management
+**Cost basis:** R2 costs ~$0.015/GB/month. These prices provide healthy margin while remaining affordable. Add-ons are managed through Plant's Stripe integration and stack with the base tier.
 
 ---
 
-## Storage Add-ons
+## Schema: Unified File Tracking
 
-Users who need more space can purchase additional storage:
+### The Convergence
 
-| Add-on | Price | Storage |
-|--------|-------|---------|
-| +10 GB | $1/mo | 10 GB |
-| +50 GB | $4/mo | 50 GB |
-| +100 GB | $7/mo | 100 GB |
+Engine currently tracks files in `cdn_files`. Amber needs additional fields for product categorization, trash, and storage management. The solution: evolve `cdn_files` with three new columns.
 
-**Cost basis:** R2 costs ~$0.015/GB/month. These prices provide healthy margin while remaining affordable.
+### Current Schema (Engine D1)
 
-### Implementation (Stripe)
+```sql
+-- Exists today in libs/engine/migrations/
+CREATE TABLE cdn_files (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  original_filename TEXT NOT NULL,
+  key TEXT NOT NULL UNIQUE,           -- R2 object key
+  content_type TEXT NOT NULL,
+  size_bytes INTEGER NOT NULL,
+  folder TEXT DEFAULT '/',
+  alt_text TEXT,
+  uploaded_by TEXT NOT NULL,          -- tenant_id in multi-tenant context
+  created_at TEXT NOT NULL
+);
 
-```typescript
-// Storage add-on products
-const STORAGE_PRODUCTS = {
-  'storage_10gb': {
-    id: 'prod_storage_10gb',
-    name: '+10 GB Storage',
-    gb: 10,
-    price_cents: 100,
-  },
-  'storage_50gb': {
-    id: 'prod_storage_50gb',
-    name: '+50 GB Storage',
-    gb: 50,
-    price_cents: 400,
-  },
-  'storage_100gb': {
-    id: 'prod_storage_100gb',
-    name: '+100 GB Storage',
-    gb: 100,
-    price_cents: 700,
-  },
-};
-
-// Add to subscription
-async function addStorageAddon(userId: string, addon: keyof typeof STORAGE_PRODUCTS) {
-  const subscription = await getUserSubscription(userId);
-  const product = STORAGE_PRODUCTS[addon];
-
-  await stripe.subscriptions.update(subscription.stripe_id, {
-    items: [
-      { id: subscription.item_id },
-      { price: product.price_id },
-    ],
-  });
-
-  // Update user's quota in D1
-  await db.run(`
-    UPDATE user_storage
-    SET additional_gb = additional_gb + ?
-    WHERE user_id = ?
-  `, [product.gb, userId]);
-}
+CREATE INDEX idx_cdn_files_folder ON cdn_files(folder);
+CREATE INDEX idx_cdn_files_key ON cdn_files(key);
 ```
 
-### Multiple Add-ons
+### Migration: Add Amber Columns
 
-Users can stack multiple add-ons:
-- Oak (20 GB) + 50 GB add-on + 50 GB add-on = 120 GB total
-- Shown as line items on invoice:
-  - Oak Plan: $25/mo
-  - +50 GB Storage: $4/mo
-  - +50 GB Storage: $4/mo
-  - Total: $33/mo
+```sql
+-- New migration: add Amber storage management columns to cdn_files
+ALTER TABLE cdn_files ADD COLUMN product TEXT DEFAULT 'blog'
+  CHECK (product IN ('blog', 'ivy', 'profile', 'themes', 'exports', 'backups'));
+
+ALTER TABLE cdn_files ADD COLUMN category TEXT DEFAULT 'images';
+
+ALTER TABLE cdn_files ADD COLUMN deleted_at TEXT;  -- soft delete for trash
+
+-- Performance indexes for Amber queries
+CREATE INDEX idx_cdn_files_product ON cdn_files(uploaded_by, product, category);
+CREATE INDEX idx_cdn_files_deleted ON cdn_files(uploaded_by, deleted_at);
+CREATE INDEX idx_cdn_files_size ON cdn_files(uploaded_by, size_bytes DESC);
+CREATE INDEX idx_cdn_files_created_desc ON cdn_files(uploaded_by, created_at DESC);
+```
+
+### Why Evolve, Not Replace
+
+The `cdn_files` table already has real data. Blog uploads, avatar uploads, CDN files all write to it through Engine's `storage.ts` service. Creating a separate `storage_files` table would mean two sources of truth. Instead, we add the columns Amber needs to the table Engine already uses.
+
+**What changes in existing upload code:** Each upload endpoint sets `product` and `category` when calling `uploadFile()`. The storage service accepts these as optional parameters and defaults to `'blog'` / `'images'` for backward compatibility.
+
+### Export Tracking (Already Exists)
+
+```sql
+-- Already in Engine: libs/engine/migrations/054_storage_exports.sql
+CREATE TABLE storage_exports (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  export_type TEXT NOT NULL,
+  progress INTEGER DEFAULT 0,
+  r2_key TEXT,
+  size_bytes INTEGER,
+  file_count INTEGER,
+  error_message TEXT,
+  created_at TEXT NOT NULL,
+  completed_at TEXT,
+  expires_at TEXT,
+  updated_at TEXT
+);
+```
 
 ---
 
@@ -213,297 +283,402 @@ Users can stack multiple add-ons:
 
 ### Warning Thresholds
 
-| Usage | Action |
-|-------|--------|
-| 80% | Email notification, dashboard warning |
-| 95% | Prominent warning, upload limits for large files |
-| 100% | Block new uploads, prompt for cleanup or upgrade |
+| Usage | Action                                           |
+| ----- | ------------------------------------------------ |
+| < 80% | Normal operation                                 |
+| 80%   | Dashboard warning banner, yellow storage meter   |
+| 95%   | Prominent warning, large file uploads restricted |
+| 100%  | Block new uploads, prompt for cleanup or upgrade |
 
 ### What Gets Blocked at 100%
 
 **Blocked:**
+
 - New blog image uploads
 - New email attachments (outgoing)
 - Profile image changes
 - Theme asset uploads
 
 **Never Blocked:**
+
 - Incoming email (Ivy receives, even if over quota)
 - Reading existing content
-- Downloading/exporting
+- Downloading and exporting
 - Deleting files
+- Automated backups (these are essential, even at quota)
+
+### Implementation
+
+Quota enforcement happens at the Engine level. Each upload endpoint checks before accepting:
+
+```typescript
+// In Engine upload endpoints
+import { TIERS } from "$lib/config/tiers.js";
+
+async function enforceQuota(db: D1Database, tenantId: string, tier: TierKey, newFileSize: number) {
+	const tierConfig = TIERS[tier];
+	const storageLimit = tierConfig.limits.storage; // bytes
+
+	// Calculate current usage from cdn_files
+	const usage = await db
+		.prepare(
+			`
+    SELECT COALESCE(SUM(size_bytes), 0) as total
+    FROM cdn_files
+    WHERE uploaded_by = ? AND deleted_at IS NULL
+  `,
+		)
+		.bind(tenantId)
+		.first<{ total: number }>();
+
+	const currentUsage = usage?.total ?? 0;
+
+	if (currentUsage + newFileSize > storageLimit) {
+		return { allowed: false, used: currentUsage, limit: storageLimit };
+	}
+
+	return { allowed: true, used: currentUsage, limit: storageLimit };
+}
+```
 
 ### User Experience at Quota
 
-When a user hits 100%:
-
 ```
-┌─────────────────────────────────────────────────────────┐
-│  ⚠️  Storage Full                                       │
-│                                                         │
-│  You've used all 20 GB of your storage.                 │
-│                                                         │
-│  To continue uploading, you can:                        │
-│                                                         │
-│  [Download & Clean Up]  - Export files, then delete     │
-│  [Add Storage]          - Starting at $1/mo for 10 GB   │
-│  [Upgrade Plan]         - Get more storage + features   │
-│                                                         │
-│  Your existing content is safe. You can still           │
-│  receive emails and access everything.                  │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Storage Full                                            │
+│                                                          │
+│  You've used all 20 GB of your storage.                  │
+│                                                          │
+│  To continue uploading, you can:                         │
+│                                                          │
+│  [ Clean Up ]       - Move unused files to trash         │
+│  [ Add Storage ]    - Starting at $1/mo for 10 GB        │
+│  [ Upgrade Plan ]   - Get more storage + features        │
+│                                                          │
+│  Your existing content is safe. You can still            │
+│  receive emails and access everything.                   │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Technical Architecture
+## Features
 
-### Stack
+### Phase A: Visibility (Foundation)
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Frontend | SvelteKit | UI, matches Grove stack |
-| Backend | Cloudflare Workers | API endpoints |
-| Storage | Cloudflare R2 | File storage |
-| Metadata DB | Cloudflare D1 | File records, quotas |
-| Auth | Heartwood | SSO with Grove account |
+Make Amber real. Connect the frontend to Engine's actual data.
 
-### R2 Storage Structure
+#### Storage Dashboard
+
+- Visual breakdown: usage by product (blog, ivy, profile, themes)
+- Storage meter: current usage vs quota with percentage
+- Quota warnings: clear indicators at 80%, 95%, 100%
+- Quick stats: total files, trash size, recent activity
+
+#### File Browser
+
+- Browse by product (Blog files, Ivy attachments, Profile images)
+- Grid and list view modes
+- Search files by name
+- Sort by date, size, name
+- Preview images inline
+- Metadata: size, upload date, dimensions, product source
+
+#### Trash Management
+
+- Soft delete moves files to trash (sets `deleted_at`)
+- 30-day retention before permanent deletion
+- Restore from trash
+- Empty trash to reclaim space immediately
+- Cron job: daily at 3 AM UTC, deletes files where `deleted_at` > 30 days
+
+#### Export
+
+Already implemented in Engine. Amber surfaces it in the UI:
+
+- Full data export as ZIP (posts as Markdown, media files, manifest)
+- Export by type (posts only, media only)
+- Async processing via ExportDO with progress polling
+- Download links valid for 7 days
+- Rate-limited per tenant via Threshold
+
+### Phase B: Automated Backups (The Pipeline)
+
+The foundation for data sovereignty. Grove automatically packages Wanderer data on a schedule.
+
+#### Backup Architecture
 
 ```
-grove-storage/
-├── {user_id}/
-│   ├── blog/
-│   │   ├── images/
-│   │   │   └── {image_id}.webp
-│   │   ├── content/
-│   │   │   └── {post_id}.md
-│   │   └── fonts/
-│   │       └── {font_id}.woff2
-│   ├── ivy/
-│   │   ├── emails/
-│   │   │   └── {email_id}.enc
-│   │   └── attachments/
-│   │       └── {attachment_id}/
-│   │           └── {filename}
-│   ├── profile/
-│   │   ├── avatar.webp
-│   │   └── banner.webp
-│   ├── themes/
-│   │   └── {theme_id}/
-│   │       └── {asset}
-│   └── exports/
-│       └── {export_id}.zip    # Temporary, auto-deleted after 7 days
+┌────────────────────────────────────────────────────────────────┐
+│                     Backup Pipeline                            │
+│                                                                │
+│  Trigger              Orchestrate          Package     Store   │
+│  ┌─────────┐         ┌──────────┐        ┌────────┐  ┌─────┐   │
+│  │ CF Cron │───────→ │ CF Queue │──────→ │BackupDO│─→│ R2  │   │
+│  │ (daily) │         │ (buffer) │        │(stream)│  │     │   │
+│  └─────────┘         └──────────┘        └────────┘  └──┬──┘   │
+│                                                         │      │
+│                                                         ▼      │
+│                                                  Amber View    │
+│                                               (Wanderer sees   │
+│                                                backup files)   │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-### File References
+#### How It Works
 
-Files are referenced by their R2 key. The key structure encodes:
-- Owner (user_id)
-- Product (blog, ivy, profile, themes)
-- Type (images, attachments, etc.)
-- Unique ID
+1. **Cron trigger**: Daily (configurable). CF Cron enqueues a backup job per tenant.
+2. **Queue processing**: CF Queue ensures reliable delivery. Jobs don't get lost.
+3. **BackupDO**: A Durable Object (similar to ExportDO) packages the tenant's data.
+   - Posts as Markdown with YAML frontmatter
+   - Media files from R2
+   - Settings and configuration as JSON
+   - Manifest with checksums
+4. **R2 storage**: Backup archive lands in the Wanderer's Amber storage under `backups/`.
+5. **Retention**: Keep last N backups (configurable, default: 7 daily + 4 weekly).
+6. **Visible in Amber**: The dashboard shows backup history, last backup time, and download links.
 
-This structure enables:
-- Efficient listing by category
-- Easy calculation of per-product storage usage
-- Simple access control (user can only access their prefix)
+#### Backup Format
+
+```
+grove-backup-{username}-{date}/
+├── manifest.json          # Checksums, file list, backup metadata
+├── README.txt             # How to use this backup
+├── posts/
+│   ├── 2026-01-15-my-first-post.md
+│   └── 2026-02-01-another-post.md
+├── pages/
+│   └── about.md
+├── media/
+│   ├── images/
+│   │   └── sunset-1738000000-abc123.webp
+│   └── avatars/
+│       └── avatar.webp
+└── settings/
+    ├── site-settings.json
+    └── theme-config.json
+```
+
+#### Backup Scheduling
+
+| Tier      | Auto-Backup | Retention                       |
+| --------- | ----------- | ------------------------------- |
+| Wanderer  | —           | —                               |
+| Seedling  | Weekly      | 4 backups                       |
+| Sapling   | Daily       | 7 daily + 4 weekly              |
+| Oak       | Daily       | 7 daily + 4 weekly + 2 monthly  |
+| Evergreen | Daily       | 7 daily + 4 weekly + 12 monthly |
+
+### Phase C: External Storage Sync (Data Sovereignty)
+
+This is the feature that changes everything. Most platforms say "you can export your data." Grove says "your data is already in your Google Drive. You don't need to ask us for it."
+
+#### How It Works
+
+```
+Amber R2 (backup archive)
+    │
+    │  one-way push
+    ▼
+┌─────────────────────────────────────────────────────┐
+│              External Sync Worker                   │
+│                                                     │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐        │
+│  │  Google   │  │  Dropbox  │  │  WebDAV   │        │
+│  │  Drive    │  │  API v2   │  │  (future) │        │
+│  │  (OAuth2) │  │  (OAuth2) │  │           │        │
+│  └───────────┘  └───────────┘  └───────────┘        │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Provider Priority
+
+1. **Google Drive** (first). Best API, most users, OAuth2 well-understood.
+2. **Dropbox** (second). Good API, straightforward OAuth2.
+3. **WebDAV / generic** (future). Covers Nextcloud, Synology, self-hosted.
+4. **iCloud** (unlikely). Apple provides no public API for iCloud Drive. May become possible through CloudKit web services, but don't design for it.
+
+#### OAuth2 Flow
+
+1. Wanderer clicks "Connect Google Drive" in Amber Settings
+2. Redirect to Google OAuth2 consent screen (scope: `drive.file`)
+3. Authorization code returned to Engine callback
+4. Engine stores encrypted refresh token in D1
+5. After each backup, sync worker uses refresh token to push to Drive
+
+#### What Gets Pushed
+
+Only backup archives. Not individual files in real-time. The external provider receives the same ZIP that appears in the Wanderer's Amber storage. Simple, predictable, auditable.
+
+#### Why This Matters
+
+This is a philosophical differentiator:
+
+- If Grove goes down, Wanderers already have their data
+- If Wanderers leave, they don't need to wait for an export
+- Trust is built through continuous proof, not promises
+- The data is warm and present, not locked behind a "Request Export" button
 
 ---
 
-## Database Schema (D1)
+## API Routes
 
-### Core Tables
-
-```sql
--- User storage quotas and usage
-CREATE TABLE user_storage (
-  user_id TEXT PRIMARY KEY,
-  tier_gb INTEGER NOT NULL,              -- Storage from subscription tier
-  additional_gb INTEGER DEFAULT 0,       -- Purchased add-ons
-  used_bytes INTEGER DEFAULT 0,          -- Current usage in bytes
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- File metadata
-CREATE TABLE storage_files (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  r2_key TEXT NOT NULL UNIQUE,           -- Full R2 object key
-  filename TEXT NOT NULL,                -- Original filename
-  mime_type TEXT NOT NULL,
-  size_bytes INTEGER NOT NULL,
-  product TEXT NOT NULL,                 -- blog, ivy, profile, themes
-  category TEXT NOT NULL,                -- images, attachments, content, etc.
-  parent_id TEXT,                        -- Optional: linked blog post, email, etc.
-  metadata TEXT,                         -- JSON: dimensions, duration, etc.
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,                  -- Soft delete (trash)
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Storage add-on purchases
-CREATE TABLE storage_addons (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  addon_type TEXT NOT NULL,              -- storage_10gb, storage_50gb, storage_100gb
-  gb_amount INTEGER NOT NULL,
-  stripe_subscription_item_id TEXT,
-  active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  cancelled_at TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Export jobs
-CREATE TABLE storage_exports (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  status TEXT DEFAULT 'pending',         -- pending, processing, completed, failed
-  export_type TEXT NOT NULL,             -- full, blog, ivy, category
-  filter_params TEXT,                    -- JSON: category filters, date range, etc.
-  r2_key TEXT,                           -- Location of generated zip
-  size_bytes INTEGER,
-  file_count INTEGER,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  completed_at TIMESTAMP,
-  expires_at TIMESTAMP,                  -- Auto-delete after 7 days
-  error_message TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-```
-
-### Indexes
-
-```sql
-CREATE INDEX idx_files_user ON storage_files(user_id, deleted_at);
-CREATE INDEX idx_files_product ON storage_files(user_id, product, category);
-CREATE INDEX idx_files_created ON storage_files(user_id, created_at DESC);
-CREATE INDEX idx_files_size ON storage_files(user_id, size_bytes DESC);
-CREATE INDEX idx_addons_user ON storage_addons(user_id, active);
-CREATE INDEX idx_exports_user ON storage_exports(user_id, status);
-CREATE INDEX idx_exports_expiry ON storage_exports(status, expires_at);
-```
-
-### Usage Tracking
-
-Storage usage is updated in real-time:
-
-```typescript
-// On file upload
-async function trackUpload(userId: string, sizeBytes: number) {
-  await db.run(`
-    UPDATE user_storage
-    SET used_bytes = used_bytes + ?,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE user_id = ?
-  `, [sizeBytes, userId]);
-}
-
-// On file delete (from trash)
-async function trackDelete(userId: string, sizeBytes: number) {
-  await db.run(`
-    UPDATE user_storage
-    SET used_bytes = used_bytes - ?,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE user_id = ?
-  `, [sizeBytes, userId]);
-}
-
-// Calculate per-product usage
-async function getUsageBreakdown(userId: string) {
-  return await db.all(`
-    SELECT product, category,
-           SUM(size_bytes) as bytes,
-           COUNT(*) as file_count
-    FROM storage_files
-    WHERE user_id = ? AND deleted_at IS NULL
-    GROUP BY product, category
-  `, [userId]);
-}
-```
-
----
-
-## API Endpoints
+All routes live in Engine (`libs/engine/src/routes/api/`). Amber's frontend calls these. No separate Amber API.
 
 ### Storage Info
 
 ```
 GET /api/storage
-→ Returns: quota, used, available, breakdown by product
+  → Returns: quota (tier + addons), used bytes, available, breakdown by product
+  → Source: SUM(size_bytes) from cdn_files WHERE deleted_at IS NULL
 
 GET /api/storage/files
-→ Query params: product, category, sort, limit, offset
-→ Returns: paginated file list with metadata
+  → Query: ?product=blog&category=images&sort=created_at&order=desc&limit=50&offset=0&search=sunset
+  → Returns: paginated file list with metadata
 
 GET /api/storage/files/:id
-→ Returns: single file metadata
+  → Returns: single file metadata
 
 GET /api/storage/usage
-→ Returns: usage over time (for charts)
+  → Returns: usage breakdown by product and category
+  → Source: GROUP BY product, category on cdn_files
 ```
 
 ### File Operations
 
 ```
 DELETE /api/storage/files/:id
-→ Moves file to trash
+  → Sets deleted_at (soft delete, moves to trash)
 
 POST /api/storage/files/:id/restore
-→ Restores from trash
+  → Clears deleted_at (restores from trash)
+
+GET /api/storage/trash
+  → Returns: files where deleted_at IS NOT NULL, with days remaining
 
 DELETE /api/storage/trash
-→ Empties trash (permanent delete)
+  → Permanently deletes all trash (R2 + D1)
 
 DELETE /api/storage/trash/:id
-→ Permanently deletes single file from trash
+  → Permanently deletes single file from trash
 ```
 
-### Export
+### Export (Already Implemented)
 
 ```
-POST /api/storage/export
-→ Body: { type: 'full' | 'blog' | 'ivy' | 'category', filters?: {...} }
-→ Returns: { export_id, status: 'pending' }
+POST /api/export
+  → Starts async ZIP export job (ExportDO)
 
-GET /api/storage/export/:id
-→ Returns: export status, download URL when ready
+GET /api/export/:id/status
+  → Returns: progress, status, file count
 
-GET /api/storage/export/:id/download
-→ Returns: redirect to signed R2 URL
+GET /api/export/:id/download
+  → Streams completed ZIP from R2
+
+POST /api/export/:id/cancel
+  → Cancels in-progress export
 ```
 
-### Add-ons
+### Add-ons (Future, via Plant)
 
 ```
 GET /api/storage/addons
-→ Returns: available add-ons and current purchases
+  → Returns: available tiers and current purchases
 
 POST /api/storage/addons
-→ Body: { addon_type: 'storage_10gb' | 'storage_50gb' | 'storage_100gb' }
-→ Returns: Stripe checkout session URL
+  → Body: { addon_type: 'storage_10gb' | 'storage_50gb' | 'storage_100gb' }
+  → Returns: Stripe checkout session URL (via Plant)
 
 DELETE /api/storage/addons/:id
-→ Cancels add-on at end of billing period
+  → Cancels at end of billing period
+```
+
+### Backups (Phase B)
+
+```
+GET /api/storage/backups
+  → Returns: backup history with dates, sizes, download URLs
+
+POST /api/storage/backups/trigger
+  → Manually triggers a backup (rate-limited: 1/day)
+
+GET /api/storage/backups/:id/download
+  → Streams backup archive from R2
+```
+
+### External Sync (Phase C)
+
+```
+GET /api/storage/providers
+  → Returns: connected providers with last sync time
+
+POST /api/storage/providers/connect
+  → Body: { provider: 'google_drive' | 'dropbox' }
+  → Returns: OAuth2 authorization URL
+
+GET /api/storage/providers/callback
+  → Handles OAuth2 callback, stores refresh token
+
+DELETE /api/storage/providers/:id
+  → Disconnects provider, revokes token
 ```
 
 ---
 
-## UI/UX Considerations
+## Frontend
 
-### Storage Dashboard
+### Current State
+
+The Amber frontend (`apps/amber/`) is 6,281 lines of polished SvelteKit. The components are well-built. The design system is thorough. The problem is connectivity: it talks to a standalone worker that has no data.
+
+### What Exists (Preserve)
+
+| Component       | Lines | Quality                             |
+| --------------- | ----- | ----------------------------------- |
+| Dashboard page  | 467   | Good structure, needs data wiring   |
+| Files page      | 369   | Grid/list toggle, filter, sort      |
+| Trash page      | 264   | Restore/delete, empty with confirm  |
+| Settings page   | 324   | Account, theme, export, danger zone |
+| App layout      | 482   | Sidebar, header, responsive         |
+| StorageMeter    | 152   | Progress bar with warning levels    |
+| UsageBreakdown  | 233   | Per-product bars with file counts   |
+| FileGrid        | 265   | Card view with selection            |
+| FileList        | 291   | Table view with sortable columns    |
+| AddStorageModal | 242   | Tier cards for purchase             |
+| TrashBin        | 148   | Trash container with confirm flow   |
+
+### What Needs Rewiring
+
+| Current                                | Target                                                     |
+| -------------------------------------- | ---------------------------------------------------------- |
+| `api.ts` calls `amber-api.grove.place` | Call Engine API routes via proxy or direct                 |
+| Better Auth client (`auth.ts`)         | Heartwood session validation server-side                   |
+| Custom `theme.css` (255 lines)         | Lattice Tailwind preset (`@autumnsgrove/lattice/tailwind`) |
+| SSR disabled (`ssr = false`)           | Enable SSR with `+page.server.ts` files                    |
+| Mock data fallback                     | Real data or real error states                             |
+| No Lattice UI components               | Use GlassCard, GlassButton where they exist                |
+
+### What to Add
+
+- **Upload dropzone**: Drag-and-drop file upload (calls Engine's upload endpoints)
+- **File preview modal**: Images inline, PDFs in iframe, others show metadata
+- **Bulk selection toolbar**: Delete, download, move to trash
+- **Backup dashboard**: Last backup time, backup history, manual trigger button
+- **External provider settings**: Connect/disconnect Google Drive, sync status
+
+### UI Wireframes
+
+#### Storage Dashboard
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Storage                                           ⚙️ Settings  │
+│  Amber                                               Settings   │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ████████████████████████░░░░░░░░░░░░  15.2 GB / 20 GB (76%)    │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐    │
-│  │  📊 Usage by Category                                   │    │
+│  │  Usage by Product                                       │    │
 │  │                                                         │    │
 │  │  Blog Images     ████████████████  10.1 GB   [Browse]   │    │
 │  │  Email Attach.   ██████            3.8 GB    [Browse]   │    │
@@ -511,653 +686,239 @@ DELETE /api/storage/addons/:id
 │  │  Profile         ░                 0.2 GB    [Browse]   │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                 │
-│  [Download All]    [Empty Trash (342 MB)]    [+ Add Storage]    │
+│  ┌──────────────────────┐  ┌──────────────────────────────┐     │
+│  │  Last Backup         │  │  External Sync               │     │
+│  │  Today, 3:00 AM      │  │  Google Drive: synced 3h ago │     │
+│  │  [View Backups]      │  │  [Manage Providers]          │     │
+│  └──────────────────────┘  └──────────────────────────────┘     │
+│                                                                 │
+│  [Export All]    [Empty Trash (342 MB)]    [+ Add Storage]      │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### File Browser
+#### File Browser
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Blog Images                                    🔍 Search...    │
+│  Blog Images                                    Search...       │
 ├─────────────────────────────────────────────────────────────────┤
-│  Sort by: [Date ▼]    View: [Grid] [List]     [Select All]      │
+│  Sort: [Date]    View: [Grid] [List]     [Select All]           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐     │
-│  │  🖼️    │  │   🖼️   │  │  🖼️    │  │  🖼️    │  │   🖼️   │     │
+│  │        │  │        │  │        │  │        │  │        │     │
+│  │  img   │  │  img   │  │  img   │  │  img   │  │  img   │     │
 │  │        │  │        │  │        │  │        │  │        │     │
 │  └────────┘  └────────┘  └────────┘  └────────┘  └────────┘     │
-│  sunset.jpg  header.png  author.jpg  post-1.webp graph.svg      │
-│  2.4 MB      1.1 MB      340 KB      890 KB      12 KB          │
-│                                                                 │
-│  ┌────────┐  ┌────────┐  ┌────────┐                             │
-│  │  🖼️    │  │   🖼️   │  │  🖼️    │                             │
-│  │        │  │        │  │        │                             │
-│  └────────┘  └────────┘  └────────┘                             │
-│  banner.jpg  code.png    diagram.svg                            │
-│  3.2 MB      456 KB      28 KB                                  │
+│  sunset.jpg  header.png  author.jpg  post-1.webp  graph.svg     │
+│  2.4 MB      1.1 MB      340 KB      890 KB       12 KB         │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Mobile
+---
 
-- Responsive grid layout
-- Bottom sheet for file actions
-- Swipe to delete/select
-- Pull to refresh
+## Security
+
+### Authentication
+
+All Amber API routes require a valid Heartwood session. Session validation happens server-side (not client-side Better Auth). The frontend uses `+page.server.ts` to verify the session before rendering.
+
+### Authorization
+
+Multi-tenant isolation: every query includes `WHERE uploaded_by = ?` with the tenant ID. Wanderers can only see their own files. This is inherited from Engine's existing pattern.
+
+### CSRF Protection
+
+All mutating endpoints (POST, DELETE) must validate the request origin. Engine's existing CSRF configuration covers this via `svelte.config.js` trusted origins.
+
+### Rate Limiting
+
+| Operation        | Limit  | Window     |
+| ---------------- | ------ | ---------- |
+| File listing     | 60/min | Per tenant |
+| File delete      | 20/min | Per tenant |
+| Export start     | 3/day  | Per tenant |
+| Backup trigger   | 1/day  | Per tenant |
+| Provider connect | 5/day  | Per tenant |
+
+Rate limits enforced via Engine's Threshold system.
+
+### External Provider Tokens
+
+OAuth2 refresh tokens for connected providers (Google Drive, Dropbox) are stored encrypted in D1. Encryption key stored in Workers secret. Tokens are revoked when a provider is disconnected. Tokens are scoped to minimum permissions (`drive.file` for Google, not full Drive access).
 
 ---
 
-## Integrations
-
-### 1. Blog (Existing)
-
-Blog already uploads images to R2. Amber provides:
-- Visibility into blog storage usage
-- Ability to delete unused images
-- Bulk download of blog assets
-
-**Migration:** Existing blog files need metadata entries in `storage_files` table.
-
-### 2. Ivy (Email)
-
-Ivy attachments are stored in R2. Amber provides:
-- View email attachments separately from emails
-- Download attachments without opening email
-- See which attachments use the most space
-
-### 3. Profile
-
-Profile images (avatar, banner) are visible in Amber.
-
-### 4. Themes
-
-Custom theme assets appear in Amber for Oak+ users with custom themes.
-
----
-
-## Data Portability
-
-Amber is central to Grove's GDPR compliance. Following the **Google Takeout model**.
-
-### Full Export
-
-Users can request a complete export of all their data:
-
-1. Click "Download All" in Amber
-2. **Choose format:**
-   - Zip (default, 1GB chunks)
-   - Zip (5GB chunks)
-   - 7z (better compression, 1GB or 5GB chunks)
-3. System generates archives in background (streamed, not buffered)
-4. **Download links emailed** to user's external email address
-5. Download links valid for 7 days
-6. Archives auto-deleted from R2 after expiry
-
-### Export Delivery
-
-**Why email instead of browser download?**
-- Large exports (10GB+) can timeout in browser
-- User doesn't have to wait—they get notified
-- Works even if they close the tab
-- Provides audit trail for GDPR requests
-
-```
-Export Flow:
-1. User clicks "Download All"
-2. Selects format (zip/7z) and chunk size (1GB/5GB)
-3. Job queued → status shows "Preparing..."
-4. Worker streams files into chunks (never loads all in memory)
-5. When complete: email sent with signed download URLs
-6. User downloads from email links at their convenience
-```
-
-### Export File Structure
-
-```
-grove-export-{username}-{date}/
-├── part-1.zip (or .7z)        # Up to 1GB or 5GB
-│   ├── blog/
-│   │   ├── images/
-│   │   ├── content/
-│   │   └── metadata.json
-│   └── profile/
-│       ├── avatar.webp
-│       └── banner.webp
-├── part-2.zip                 # If needed
-│   └── email/
-│       ├── inbox/
-│       ├── sent/
-│       └── attachments/
-├── manifest.json              # Export metadata (always separate)
-└── README.md                  # Explanation of contents
-```
-
-### Export Rate Limits
-
-- **1 concurrent export** per user
-- **3 exports per day** maximum
-- Large exports (>10GB) may take hours—user notified of estimated time
-
-### Export Streaming Implementation
-
-Workers have 128MB memory limit. Large exports (50GB+) must stream directly to R2:
-
-```typescript
-// Stream zip directly to R2 without buffering entire export
-import { ZipWriter } from '@aspect-build/rules_js'; // or similar streaming zip library
-
-// Configuration constants
-const EXPORT_CONFIG = {
-  batchSize: 10,                  // Fetch 10 files concurrently
-  chunkSizes: {
-    small: 1 * 1024 * 1024 * 1024,   // 1 GB
-    large: 5 * 1024 * 1024 * 1024,   // 5 GB
-  },
-  maxConcurrentExports: 1,        // Per user
-  expiryDays: 7,
-};
-
-// Batch R2 reads to avoid N+1 queries
-async function batchGetFiles(
-  bucket: R2Bucket,
-  keys: string[]
-): Promise<Map<string, R2ObjectBody | null>> {
-  const results = new Map<string, R2ObjectBody | null>();
-
-  // R2 doesn't have native batch get, but we can parallelize
-  const batches: string[][] = [];
-  for (let i = 0; i < keys.length; i += EXPORT_CONFIG.batchSize) {
-    batches.push(keys.slice(i, i + EXPORT_CONFIG.batchSize));
-  }
-
-  for (const batch of batches) {
-    const promises = batch.map(async (key) => {
-      const obj = await bucket.get(key);
-      results.set(key, obj);
-    });
-    await Promise.all(promises);
-  }
-
-  return results;
-}
-
-async function generateExportChunk(
-  env: Env,
-  userId: string,
-  files: StorageFile[],
-  chunkNumber: number,
-  chunkSizeBytes: number
-): Promise<string> {
-  const r2Key = `exports/${userId}/${Date.now()}/part-${chunkNumber}.zip`;
-
-  // Create a TransformStream for streaming to R2
-  const { readable, writable } = new TransformStream();
-
-  // Start R2 upload with streaming body
-  const uploadPromise = env.R2_BUCKET.put(r2Key, readable, {
-    httpMetadata: { contentType: 'application/zip' },
-  });
-
-  // Create zip writer that streams to the writable side
-  const zipWriter = new ZipWriter(writable);
-
-  // Pre-filter files for this chunk
-  let currentSize = 0;
-  const chunkFiles: StorageFile[] = [];
-  for (const file of files) {
-    if (currentSize >= chunkSizeBytes) break;
-    chunkFiles.push(file);
-    currentSize += file.size_bytes;
-  }
-
-  // Batch fetch file data (avoids N+1 queries)
-  const fileKeys = chunkFiles.map(f => f.r2_key);
-  const fileDataMap = await batchGetFiles(env.R2_BUCKET, fileKeys);
-
-  // Stream each file into the zip
-  for (const file of chunkFiles) {
-    const fileData = fileDataMap.get(file.r2_key);
-    if (fileData) {
-      await zipWriter.add(file.filename, fileData.body);
-    }
-  }
-
-  await zipWriter.close();
-  await uploadPromise;
-
-  return r2Key;
-}
-
-// Durable Object for long-running exports (survives Worker timeout)
-export class ExportJob {
-  state: DurableObjectState;
-
-  async processExport(userId: string, format: 'zip' | '7z', chunkSize: number) {
-    // Durable Objects can run for up to 30 seconds per alarm
-    // Schedule sequential alarms to process large exports
-    const files = await this.getFilesForUser(userId);
-    const chunks = this.chunkFiles(files, chunkSize);
-
-    for (let i = 0; i < chunks.length; i++) {
-      await this.state.storage.put('currentChunk', i);
-      await generateExportChunk(this.env, userId, chunks[i], i + 1, chunkSize);
-      // Update progress
-      await this.updateExportProgress(userId, (i + 1) / chunks.length);
-    }
-
-    // Send email with download links
-    await this.sendExportReadyEmail(userId);
-  }
-}
-```
-
-**Key points:**
-- TransformStream pipes data directly from source R2 → zip → destination R2
-- Durable Objects handle exports >30 seconds via alarm chaining
-- Progress tracked in D1 for UI updates
-- Memory usage stays constant regardless of export size
-
-### Migration Script (Existing Files)
-
-Existing blog files need `storage_files` entries:
-
-```typescript
-// Migration: populate storage_files from existing R2 objects
-async function migrateExistingFiles() {
-  const bucket = env.R2_BUCKET;
-  let cursor: string | undefined;
-
-  do {
-    const listed = await bucket.list({ cursor, limit: 1000 });
-
-    for (const object of listed.objects) {
-      // Parse R2 key: {user_id}/blog/images/{filename}
-      const [userId, product, category, ...rest] = object.key.split('/');
-      const filename = rest.join('/');
-
-      await db.run(`
-        INSERT OR IGNORE INTO storage_files
-        (id, user_id, r2_key, filename, mime_type, size_bytes, product, category, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        crypto.randomUUID(),
-        userId,
-        object.key,
-        filename,
-        object.httpMetadata?.contentType || 'application/octet-stream',
-        object.size,
-        product,
-        category,
-        object.uploaded.toISOString()
-      ]);
-    }
-
-    cursor = listed.truncated ? listed.cursor : undefined;
-  } while (cursor);
-
-  // Update user_storage totals
-  await db.run(`
-    INSERT INTO user_storage (user_id, tier_gb, used_bytes)
-    SELECT user_id, 0, SUM(size_bytes)
-    FROM storage_files
-    GROUP BY user_id
-    ON CONFLICT (user_id) DO UPDATE SET used_bytes = excluded.used_bytes
-  `);
-}
-```
-
----
-
-## Testing Strategy
-
-### Unit Tests
-
-**Quota Calculation:**
-- Tier + add-ons computed correctly
-- Used bytes tracked accurately
-- Threshold warnings triggered at 80%, 95%, 100%
-
-**File Operations:**
-- Upload creates storage_files entry
-- Delete moves to trash (soft delete)
-- Permanent delete removes from R2 and D1
-
-**Export Generation:**
-- Files chunked at correct boundaries
-- 7z compression works
-- Manifest generated correctly
-
-### Integration Tests
-
-**Upload → Storage → Download Flow:**
-- File uploaded → R2 + D1 entry
-- Quota updated atomically
-- Download returns correct file
-
-**Export Flow:**
-- Job queued → processed → email sent
-- Chunked correctly for large exports
-- Signed URLs work and expire
-
-**Add-on Purchase:**
-- Stripe checkout flow
-- Quota increased after payment
-- Cancellation at period end
-
-### End-to-End Tests
-
-- Full export of 10GB+ mailbox
-- Quota enforcement blocks upload
-- Migration script populates existing files
-
-### Load Tests
-
-- 100 concurrent uploads
-- 100GB export streaming
-- File browser with 10k files
-
----
-
-## Open Questions
-
-### Technical
-
-1. **Deduplication:** Should we detect and dedupe identical uploads? (Same hash = same R2 object, shared reference)
-2. **Image variants:** Do we store original + resized, or generate on demand?
-3. **Encryption:** Blog files are unencrypted. Should Amber offer encrypted storage option?
-4. **Trash retention:** 30 days standard. Make configurable?
-
-### Product
-
-1. **Folder support:** Users will ask for folders. Worth the complexity?
-2. **Sharing:** Temporary public links for files?
-3. **Collaboration:** Future multi-user Grove accounts?
-4. **Versioning:** Keep old versions of blog content?
-
-### Business
-
-1. **Free tier storage:** Should Free users get any storage for profile images?
-2. **Storage limits:** Are the add-on prices right?
-3. **Enterprise:** Custom storage tiers for business customers?
-
----
-
-## Implementation Phases
-
-### Phase 1: Foundation (MVP)
-
-- [ ] D1 schema and migrations
-- [ ] Storage usage tracking
-- [ ] Basic dashboard view
-- [ ] Usage breakdown by product
-- [ ] Quota warnings
-- [ ] Trash auto-deletion cron (see Scheduled Tasks)
-
-### Phase 2: File Management
-
-- [ ] File browser (list view)
-- [ ] Single file download
-- [ ] Delete to trash
-- [ ] Empty trash
-- [ ] Search
-
-### Phase 3: Export & Add-ons
-
-- [ ] Full export generation
-- [ ] Export by category
-- [ ] Storage add-on purchase flow
-- [ ] Stripe integration for add-ons
-- [ ] Export cleanup cron (see Scheduled Tasks)
-
-### Phase 4: Polish
-
-- [ ] Grid view with thumbnails
-- [ ] Bulk operations
-- [ ] Usage charts over time
-- [ ] Mobile optimization
-- [ ] Cleanup suggestions
-
----
-
-## Scheduled Tasks (Worker Cron)
-
-Amber requires scheduled tasks for automated cleanup:
+## Scheduled Tasks
 
 ### Cron Configuration
 
-```typescript
-// Cron job configuration constants
-const CRON_CONFIG = {
-  trashRetentionDays: 30,
-  exportRetentionDays: 7,
-  batchSize: {
-    trash: 100,
-    exports: 50,
-  },
-};
-```
+| Task              | Schedule       | Purpose                                           |
+| ----------------- | -------------- | ------------------------------------------------- |
+| Trash cleanup     | Daily 3 AM UTC | Delete files where `deleted_at` > 30 days         |
+| Export cleanup    | Daily 3 AM UTC | Delete completed exports where `expires_at` < now |
+| Backup processing | Daily 3 AM UTC | Enqueue backup jobs for eligible tenants          |
+| External sync     | Hourly         | Push new backups to connected providers           |
 
-### Structured Logging
-
-All cron jobs use structured JSON logging for monitoring and alerting:
+All cron jobs run in Engine's worker and emit structured JSON logs for monitoring:
 
 ```typescript
-// Structured log entry for cron operations
 interface CronLogEntry {
-  job: string;
-  status: 'started' | 'completed' | 'failed';
-  timestamp: string;
-  duration_ms?: number;
-  items_processed?: number;
-  bytes_freed?: number;
-  errors?: string[];
-  metadata?: Record<string, unknown>;
-}
-
-function logCronEvent(entry: CronLogEntry): void {
-  // Structured JSON for log aggregation (Cloudflare Logpush, Datadog, etc.)
-  console.log(JSON.stringify({
-    ...entry,
-    service: 'amber',
-    environment: process.env.ENVIRONMENT || 'production',
-  }));
+	job: string;
+	status: "started" | "completed" | "failed";
+	timestamp: string;
+	duration_ms?: number;
+	items_processed?: number;
+	bytes_freed?: number;
+	errors?: string[];
 }
 ```
 
-### Trash Auto-Deletion
+---
 
-**Schedule:** Daily at 3:00 AM UTC
+## Implementation Checklist
 
-```typescript
-// wrangler.toml
-[triggers]
-crons = ["0 3 * * *"]  # Daily at 3 AM UTC
+### Phase A: Make Amber Real (Foundation)
 
-// Worker cron handler
-export default {
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    if (event.cron === "0 3 * * *") {
-      await deleteExpiredTrash(env);
-      await deleteExpiredExports(env);
-    }
-  }
-};
+Engine backend work:
 
-async function deleteExpiredTrash(env: Env) {
-  const startTime = Date.now();
-  const errors: string[] = [];
-  let itemsDeleted = 0;
-  let bytesFreed = 0;
+- [ ] Migration: add `product`, `category`, `deleted_at` columns to `cdn_files`
+- [ ] Update `storage.ts` `uploadFile()` to accept `product` and `category` parameters
+- [ ] Tag existing upload endpoints: `/api/images/upload` → `product='blog'`, `/api/settings/avatar` → `product='profile'`
+- [ ] Add quota enforcement to upload endpoints (check `TIERS[tier].limits.storage`)
+- [ ] Add `GET /api/storage` route (quota info + usage breakdown)
+- [ ] Add `GET /api/storage/files` route (paginated file list with product filter)
+- [ ] Add soft delete: `DELETE /api/storage/files/:id` sets `deleted_at`
+- [ ] Add restore: `POST /api/storage/files/:id/restore` clears `deleted_at`
+- [ ] Add trash listing: `GET /api/storage/trash`
+- [ ] Add trash cleanup: `DELETE /api/storage/trash`
+- [ ] Add cron job: delete expired trash (30 days)
+- [ ] Backfill: run `syncFromBucket()` to populate `cdn_files` for existing R2 objects
+- [ ] Add usage aggregation: `GET /api/storage/usage` (GROUP BY product, category)
 
-  logCronEvent({
-    job: 'trash_cleanup',
-    status: 'started',
-    timestamp: new Date().toISOString(),
-  });
+Frontend rewiring:
 
-  try {
-    const cutoffDate = new Date(Date.now() - CRON_CONFIG.trashRetentionDays * 24 * 60 * 60 * 1000).toISOString();
+- [ ] Replace `api.ts` to call Engine routes
+- [ ] Add `+page.server.ts` for each route (SSR data loading)
+- [ ] Enable SSR (remove `ssr = false`)
+- [ ] Replace `theme.css` with Lattice Tailwind preset (keep amber accent color)
+- [ ] Replace Better Auth with Heartwood session validation
+- [ ] Remove mock data fallback
+- [ ] Wire StorageMeter to real quota data
+- [ ] Wire UsageBreakdown to real product aggregation
+- [ ] Wire FileGrid/FileList to real file listing
+- [ ] Wire TrashBin to real trash operations
+- [ ] Add upload dropzone component
+- [ ] Add file preview modal
 
-    // Get expired trash items (batch of 100 at a time)
-    const expired = await env.DB.prepare(`
-      SELECT id, user_id, r2_key, size_bytes
-      FROM storage_files
-      WHERE deleted_at IS NOT NULL AND deleted_at < ?
-      LIMIT ?
-    `).bind(cutoffDate, CRON_CONFIG.batchSize.trash).all();
+### Phase B: Automated Backups
 
-    for (const file of expired.results) {
-      try {
-        // Delete from R2
-        await env.R2_BUCKET.delete(file.r2_key);
+- [ ] Research CF Queues + Workflows for reliable async processing
+- [ ] Implement BackupDO (similar pattern to ExportDO)
+- [ ] Backup format: Markdown posts + media + settings + manifest
+- [ ] Cron trigger: enqueue backup jobs for eligible tenants
+- [ ] Backup retention policy (per-tier, as defined above)
+- [ ] `GET /api/storage/backups` route
+- [ ] `POST /api/storage/backups/trigger` route (manual trigger)
+- [ ] Backup history visible in Amber dashboard
+- [ ] Backup download from Amber
 
-        // Delete from D1
-        await env.DB.prepare('DELETE FROM storage_files WHERE id = ?').bind(file.id).run();
+### Phase C: External Storage Sync
 
-        // Update user's used_bytes
-        await env.DB.prepare(`
-          UPDATE user_storage
-          SET used_bytes = used_bytes - ?
-          WHERE user_id = ?
-        `).bind(file.size_bytes, file.user_id).run();
+- [ ] OAuth2 flow for Google Drive (`drive.file` scope)
+- [ ] Encrypted token storage in D1
+- [ ] Sync worker: after backup completes, push to connected providers
+- [ ] Provider settings UI in Amber (connect, disconnect, last sync time)
+- [ ] Dropbox integration (second provider)
+- [ ] Sync status and error reporting in dashboard
+- [ ] Token refresh and revocation handling
 
-        itemsDeleted++;
-        bytesFreed += file.size_bytes;
-      } catch (err) {
-        errors.push(`Failed to delete file ${file.id}: ${err.message}`);
-      }
-    }
+### Phase D: Polish
 
-    logCronEvent({
-      job: 'trash_cleanup',
-      status: errors.length > 0 ? 'completed' : 'completed',
-      timestamp: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
-      items_processed: itemsDeleted,
-      bytes_freed: bytesFreed,
-      errors: errors.length > 0 ? errors : undefined,
-      metadata: { batch_size: expired.results.length },
-    });
-  } catch (err) {
-    logCronEvent({
-      job: 'trash_cleanup',
-      status: 'failed',
-      timestamp: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
-      errors: [err.message],
-    });
-    throw err;
-  }
-}
+- [ ] Bulk file selection and actions (delete, download)
+- [ ] Sort dropdown with multiple options
+- [ ] Filter by product and category in file browser
+- [ ] Mobile optimization (responsive file grid)
+- [ ] Storage usage over time chart
+- [ ] Cleanup suggestions ("These files are large and unused")
+- [ ] Notification when backup completes
 
-async function deleteExpiredExports(env: Env) {
-  const startTime = Date.now();
-  const errors: string[] = [];
-  let itemsDeleted = 0;
+---
 
-  logCronEvent({
-    job: 'export_cleanup',
-    status: 'started',
-    timestamp: new Date().toISOString(),
-  });
+## Decisions
 
-  try {
-    const cutoffDate = new Date(Date.now() - CRON_CONFIG.exportRetentionDays * 24 * 60 * 60 * 1000).toISOString();
+### Resolved
 
-    const expired = await env.DB.prepare(`
-      SELECT id, r2_key
-      FROM storage_exports
-      WHERE status = 'completed' AND expires_at < ?
-      LIMIT ?
-    `).bind(cutoffDate, CRON_CONFIG.batchSize.exports).all();
+| Question                                         | Decision                      | Rationale                                                                 |
+| ------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------- |
+| Standalone worker vs Engine?                     | **Engine**                    | Export system already proved this pattern. One source of truth.           |
+| New `storage_files` table vs evolve `cdn_files`? | **Evolve `cdn_files`**        | Already has real data. Adding 3 columns is simpler than dual tracking.    |
+| Deduplication?                                   | **Already solved**            | Engine's `image_hashes` table handles hash-based dedup for images.        |
+| Image variants?                                  | **Not now**                   | Generate on demand via CF Image Resizing if needed. Don't store variants. |
+| Trash retention?                                 | **30 days, not configurable** | Simple, predictable. Same for all tiers.                                  |
+| Backup format?                                   | **Same as export**            | Markdown + media + manifest ZIP. Consistent, already proven.              |
+| External sync model?                             | **One-way push after backup** | Simple, auditable. Not real-time sync.                                    |
 
-    for (const exp of expired.results) {
-      try {
-        if (exp.r2_key) {
-          // Delete all export files (could be multiple chunks)
-          const prefix = exp.r2_key.replace(/\/[^/]+$/, '/'); // Get directory
-          const list = await env.R2_BUCKET.list({ prefix });
-          for (const obj of list.objects) {
-            await env.R2_BUCKET.delete(obj.key);
-          }
-        }
+### Open
 
-        await env.DB.prepare('DELETE FROM storage_exports WHERE id = ?').bind(exp.id).run();
-        itemsDeleted++;
-      } catch (err) {
-        errors.push(`Failed to delete export ${exp.id}: ${err.message}`);
-      }
-    }
-
-    logCronEvent({
-      job: 'export_cleanup',
-      status: 'completed',
-      timestamp: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
-      items_processed: itemsDeleted,
-      errors: errors.length > 0 ? errors : undefined,
-      metadata: { batch_size: expired.results.length },
-    });
-  } catch (err) {
-    logCronEvent({
-      job: 'export_cleanup',
-      status: 'failed',
-      timestamp: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
-      errors: [err.message],
-    });
-    throw err;
-  }
-}
-```
-
-### Cron Schedule Summary
-
-| Task | Schedule | Purpose |
-|------|----------|---------|
-| Trash cleanup | Daily 3 AM UTC | Delete files in trash >30 days |
-| Export cleanup | Daily 3 AM UTC | Delete completed exports >7 days |
+| Question            | Options                              | Notes                                                                    |
+| ------------------- | ------------------------------------ | ------------------------------------------------------------------------ |
+| Folder support?     | Flat (product-based) vs user-created | `cdn_files` already has `folder`. Could expose it.                       |
+| Encryption at rest? | R2 default vs per-file encryption    | R2 provides server-side encryption by default. Per-file adds complexity. |
+| Sharing?            | Temporary signed URLs                | Useful but adds security surface. Defer to Phase D.                      |
+| iCloud integration? | Probably never                       | No public API. Monitor CloudKit web services.                            |
 
 ---
 
 ## Success Metrics
 
-1. **Adoption** — % of users who visit Amber
-2. **Exports** — How many users export their data (healthy if occasional)
-3. **Add-on revenue** — Storage add-on purchases
-4. **Support reduction** — Fewer "where is my file" tickets
-5. **Quota management** — Users staying under quota via self-service
+1. **Adoption**: % of paid Wanderers who visit Amber within first month
+2. **Backup coverage**: % of tenants with successful backup in last 7 days
+3. **External sync**: % of tenants with connected external provider
+4. **Export usage**: Healthy if occasional (means Wanderers trust the system)
+5. **Quota management**: Wanderers staying under quota via self-service
+6. **Add-on revenue**: Storage add-on purchases
+7. **Support reduction**: Fewer "where is my file" tickets
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| R2 outage | Files temporarily unavailable | Clear status page, graceful degradation |
-| Quota confusion | Users surprised by limits | Clear UI, proactive warnings |
-| Export abuse | Large exports strain system | Rate limit exports, queue processing |
-| Feature creep | Becomes full file manager | Strict scope, defer non-essential |
-| Migration complexity | Existing files lack metadata | Careful migration script, gradual rollout |
+| Risk                                       | Impact                        | Mitigation                                               |
+| ------------------------------------------ | ----------------------------- | -------------------------------------------------------- |
+| R2 outage                                  | Files temporarily unavailable | Status page, graceful degradation in UI                  |
+| Schema migration breaks existing uploads   | Data loss                     | Test migration on staging D1 first                       |
+| OAuth2 token expiry for external providers | Sync silently fails           | Token refresh on every sync, alert on failure            |
+| Backup storage costs for large tenants     | Margin erosion                | Retention limits, backup archives count toward quota     |
+| Feature creep toward file manager          | Scope bloat                   | Amber surfaces files. Products manage them.              |
+| Google Drive API changes                   | Sync breaks                   | Abstract provider interface, monitor deprecation notices |
 
 ---
 
 ## References
 
-### Cloudflare
-- [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/pricing/)
-- [Cloudflare R2 API](https://developers.cloudflare.com/r2/api/)
-- [Cloudflare D1 Limits](https://developers.cloudflare.com/d1/platform/limits/)
+### Internal
 
-### Grove Internal
-- Grove Pricing: `/docs/grove-pricing.md`
-- Grove Naming: `/docs/grove-naming.md`
-- Ivy Spec: `/docs/specs/ivy-mail-spec.md`
+| Document                                               | Purpose                                      |
+| ------------------------------------------------------ | -------------------------------------------- |
+| `docs/specs/amber-sync-spec.md`                        | Future cross-device sync (separate product)  |
+| `docs/plans/active/amber-storage-safari.md`            | Comprehensive codebase audit (February 2026) |
+| `docs/plans/completed/amber-zip-export-integration.md` | How the export system was ported to Engine   |
+| `libs/engine/src/lib/config/tiers.ts`                  | Source of truth for storage limits           |
+| `libs/engine/src/lib/server/services/storage.ts`       | Engine's R2 storage abstraction              |
+
+### Cloudflare
+
+| Resource   | URL                                                   |
+| ---------- | ----------------------------------------------------- |
+| R2 Pricing | https://developers.cloudflare.com/r2/pricing/         |
+| R2 API     | https://developers.cloudflare.com/r2/api/             |
+| D1 Limits  | https://developers.cloudflare.com/d1/platform/limits/ |
+| Queues     | https://developers.cloudflare.com/queues/             |
+| Workflows  | https://developers.cloudflare.com/workflows/          |
 
 ---
 
-*This is a living document. Update as decisions are made and implementation progresses.*
+_Amber is warm. Translucent. Honest. You can see what's inside. Nothing hidden, nothing held hostage. Your files, your backups, your sovereignty. Preserved in time, yours to carry forward._
