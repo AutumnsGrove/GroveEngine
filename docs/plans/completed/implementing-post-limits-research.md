@@ -4,6 +4,8 @@ date created: Friday, November 21st 2025, 3:01:12 pm
 date modified: Friday, November 21st 2025, 3:02:38 pm
 tags:
 type: research
+status: completed
+conclusion: D1 + Durable Objects + soft limits recommended. Implementation reflected in tiers.ts.
 ---
 
 # Implementing Post Limits in Svelte on Cloudflare Pages
