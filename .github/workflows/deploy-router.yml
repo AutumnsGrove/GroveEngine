@@ -1,55 +1,16 @@
-name: Deploy Grove Router to Cloudflare Workers
+name: Deploy Router
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "services/grove-router/**"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: services/grove-router
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: .
-
-      - name: Type check
-        run: pnpm exec tsc --noEmit
-        working-directory: services/grove-router
-
-      - name: Run tests
-        run: pnpm test:run
-        working-directory: services/grove-router
-
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
-          workingDirectory: services/grove-router
-          packageManager: pnpm
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: services/grove-router
+      run-tests: true
+    secrets: inherit

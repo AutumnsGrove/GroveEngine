@@ -1,4 +1,4 @@
-name: Deploy Lattice to Cloudflare Pages
+name: Deploy Engine
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - "libs/vineyard/**"
       - "package.json"
       - "pnpm-lock.yaml"
-      - "docs/philosophy/grove-naming.md" # Regenerates grove-term-manifest.json
+      - "docs/philosophy/grove-naming.md"
       - "scripts/generate/grove-term-manifest.ts"
   workflow_dispatch:
 
@@ -16,37 +16,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Cloudflare Pages
+    permissions:
+      contents: read
+      deployments: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Engine has unique build order: foliage → engine package → tests →
+      # vineyard → type check → full build → deploy. Too custom for reusable
+      # workflow, but still uses the shared composite setup action.
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
         with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build foliage package (required for engine imports)
-        working-directory: libs/foliage
-        run: pnpm build
-
-      - name: Build engine package (required for self-referencing imports)
-        working-directory: libs/engine
-        run: pnpm package
+          build-engine: true
+          build-foliage: true
 
       - name: Run tests
         run: pnpm test:run
         working-directory: libs/engine
 
-      - name: Build vineyard (workspace dependency)
+      - name: Build vineyard
         run: pnpm package
         working-directory: libs/vineyard
 
@@ -55,8 +43,8 @@ jobs:
         working-directory: libs/engine
 
       - name: Build engine for deployment
-        working-directory: libs/engine
         run: pnpm run build
+        working-directory: libs/engine
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

@@ -1,9 +1,8 @@
-name: Deploy to Cloudflare Pages
+name: Deploy Landing
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "apps/landing/**"
       - "libs/engine/**"
@@ -12,73 +11,20 @@ on:
       - "docs/specs/**"
   workflow_run:
     workflows: ["Auto-tag on Version Bump"]
-    types:
-      - completed
+    types: [completed]
   workflow_dispatch:
-
-defaults:
-  run:
-    working-directory: apps/landing
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    # Only run if: push/dispatch triggered, OR workflow_run succeeded
+    # Skip if triggered by failed workflow_run
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    permissions:
-      contents: read
-      deployments: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # Always get latest main to include snapshot commits
-          ref: main
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: .
-
-      - name: Build engine package
-        run: pnpm run package
-        working-directory: libs/engine
-
-      - name: Type check
-        run: pnpm check
-        working-directory: apps/landing
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Run tests
-        run: pnpm test:run
-        working-directory: apps/landing
-
-      - name: Run Database Migrations
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: d1 migrations apply grove-engine-db --remote
-          workingDirectory: apps/landing
-          packageManager: pnpm
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing
-          workingDirectory: apps/landing
-          packageManager: pnpm
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      app-dir: apps/landing
+      project-name: grove-landing
+      needs-engine: true
+      run-tests: true
+      run-migrations: true
+      migration-db: grove-engine-db
+      checkout-ref: main
+    secrets: inherit
