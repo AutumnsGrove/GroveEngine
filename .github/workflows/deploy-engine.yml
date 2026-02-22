@@ -24,6 +24,9 @@ jobs:
       # Engine has unique build order: foliage → engine package → tests →
       # vineyard → type check → full build → deploy. Too custom for reusable
       # workflow, but still uses the shared composite setup action.
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup workspace
         uses: ./.github/actions/grove-setup
         with:

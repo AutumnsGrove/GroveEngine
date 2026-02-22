@@ -80,6 +80,9 @@ jobs:
         include: ${{ fromJson(needs.detect.outputs.test-matrix) }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup workspace
         uses: ./.github/actions/grove-setup
         with:
@@ -101,6 +104,9 @@ jobs:
         include: ${{ fromJson(needs.detect.outputs.typecheck-matrix) }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup workspace
         uses: ./.github/actions/grove-setup
         with:
@@ -132,6 +138,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup workspace
         uses: ./.github/actions/grove-setup
 
