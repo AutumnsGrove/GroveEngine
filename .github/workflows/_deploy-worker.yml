@@ -1,0 +1,90 @@
+# Reusable workflow for deploying Cloudflare Workers.
+#
+# Each worker/service calls this with its own parameters.
+# The calling workflow still appears as its own entry in the
+# Actions tab with full step-level logs.
+#
+# Usage (thin shim):
+#   jobs:
+#     deploy:
+#       uses: ./.github/workflows/_deploy-worker.yml
+#       with:
+#         worker-dir: services/heartwood
+#       secrets: inherit
+
+name: _Deploy Worker
+
+on:
+  workflow_call:
+    inputs:
+      worker-dir:
+        description: "Worker directory relative to repo root (e.g. services/heartwood)"
+        required: true
+        type: string
+      needs-engine:
+        description: "Build libs/engine before deploying"
+        required: false
+        type: boolean
+        default: false
+      run-typecheck:
+        description: "Run type checking"
+        required: false
+        type: boolean
+        default: true
+      typecheck-command:
+        description: "Type check command (default: pnpm exec tsc --noEmit)"
+        required: false
+        type: string
+        default: "pnpm exec tsc --noEmit"
+      run-tests:
+        description: "Run tests before deploying"
+        required: false
+        type: boolean
+        default: false
+      test-command:
+        description: "Test command to run"
+        required: false
+        type: string
+        default: "pnpm test:run"
+      run-build:
+        description: "Run pnpm run build before deploying (for SvelteKit workers like Clearing)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: ${{ inputs.needs-engine && 'true' || 'false' }}
+
+      - name: Type check
+        if: inputs.run-typecheck
+        run: ${{ inputs.typecheck-command }}
+        working-directory: ${{ inputs.worker-dir }}
+
+      - name: Run tests
+        if: inputs.run-tests
+        run: ${{ inputs.test-command }}
+        working-directory: ${{ inputs.worker-dir }}
+
+      - name: Build
+        if: inputs.run-build
+        run: pnpm run build
+        working-directory: ${{ inputs.worker-dir }}
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: ${{ inputs.worker-dir }}
+          packageManager: pnpm

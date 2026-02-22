@@ -1,59 +1,18 @@
-name: Deploy Domains to Cloudflare Pages
+name: Deploy Domains
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "apps/domains/**"
       - "libs/engine/**"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: apps/domains
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: .
-
-      - name: Build engine package
-        run: pnpm run package
-        working-directory: libs/engine
-
-      - name: Type check
-        run: pnpm check
-        working-directory: apps/domains
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=forage
-          workingDirectory: apps/domains
-          packageManager: pnpm
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      app-dir: apps/domains
+      project-name: forage
+      needs-engine: true
+    secrets: inherit

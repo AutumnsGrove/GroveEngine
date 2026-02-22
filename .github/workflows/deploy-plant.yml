@@ -1,103 +1,45 @@
-name: Deploy Plant to Cloudflare Pages
+name: Deploy Plant
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "apps/plant/**"
       - "libs/engine/**"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: apps/plant
-
 jobs:
   deploy:
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      app-dir: apps/plant
+      project-name: grove-plant
+      needs-engine: true
+      run-tests: true
+      checkout-ref: main
+    secrets: inherit
+
+  health-check:
+    name: Stripe Health Check
+    needs: deploy
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: .
-
-      - name: Build engine package
-        run: pnpm run package
-        working-directory: libs/engine
-
-      - name: Type check
-        run: pnpm check
-        working-directory: apps/plant
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Run tests
-        run: pnpm test:run
-        working-directory: apps/plant
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=grove-plant
-          workingDirectory: apps/plant
-          packageManager: pnpm
-
-      - name: Health Check - Stripe Payments
+      - name: Check Stripe payments endpoint
         run: |
-          # Wait for deployment to be live (max 30 seconds)
           for i in {1..6}; do
             STATUS=$(curl -s https://grove-plant.pages.dev/api/health/payments | jq -r '.status // "error"')
-            if [ "$STATUS" != "error" ]; then
-              break
-            fi
+            if [ "$STATUS" != "error" ]; then break; fi
             echo "Waiting for deployment ($i/6)..."
             sleep 5
           done
 
-          # Fetch the full health response
           RESPONSE=$(curl -s https://grove-plant.pages.dev/api/health/payments)
           STATUS=$(echo "$RESPONSE" | jq -r '.status')
-          CHECKS=$(echo "$RESPONSE" | jq '.checks')
+          echo "Health Check: $STATUS"
+          echo "$RESPONSE" | jq '.checks'
 
-          echo "Health Check Result: $STATUS"
-          echo "Checks:"
-          echo "$CHECKS" | jq .
-
-          # Fail if status is not healthy or degraded
           if [[ "$STATUS" != "healthy" && "$STATUS" != "degraded" ]]; then
-            echo "❌ Deployment health check failed!"
-            echo ""
-            echo "Status: $STATUS"
-            echo "Reason: $(echo "$RESPONSE" | jq -r '.reason // "Unknown"')"
-            echo ""
-            echo "Likely causes:"
-            echo "  - STRIPE_SECRET_KEY not configured in Cloudflare Dashboard"
-            echo "  - STRIPE_WEBHOOK_SECRET not configured in Cloudflare Dashboard"
-            echo ""
-            echo "Fix: https://dashboard.cloudflare.com/apps/grove-plant (Pages > Settings > Environment variables)"
+            echo "::error::Deployment health check failed — Status: $STATUS"
             exit 1
           fi
-
-          echo "✓ Health check passed"
+          echo "Health check passed"

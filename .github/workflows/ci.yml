@@ -6,50 +6,120 @@ on:
   pull_request:
     branches: [main]
 
-# Cancel in-progress runs for the same branch
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test Suite
+  # ── Detect which packages are affected by the changes ────────────
+  detect:
+    name: Detect Affected
     runs-on: ubuntu-latest
+    outputs:
+      affected: ${{ steps.affected.outputs.packages }}
+      test-matrix: ${{ steps.affected.outputs.test_matrix }}
+      typecheck-matrix: ${{ steps.affected.outputs.typecheck_matrix }}
+      needs-engine: ${{ steps.affected.outputs.needs_engine }}
+      has-tests: ${{ steps.affected.outputs.has_tests }}
+      has-typechecks: ${{ steps.affected.outputs.has_typechecks }}
+      run-all: ${{ steps.affected.outputs.run_all }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Sync SvelteKit (generate tsconfig)
+      - name: Detect affected packages
+        id: affected
         run: |
-          for config in apps/*/svelte.config.* services/*/svelte.config.* workers/*/svelte.config.* libs/*/svelte.config.*; do
-            (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="HEAD~1"
+          fi
+
+          RESULT=$(node .github/scripts/affected-packages.mjs "$BASE")
+          echo "Full result: $RESULT"
+
+          PACKAGES=$(echo "$RESULT" | jq -r '.affectedPackages')
+          TEST_MATRIX=$(echo "$RESULT" | jq -c '.testMatrix')
+          TC_MATRIX=$(echo "$RESULT" | jq -c '.typecheckMatrix')
+          NEEDS_ENGINE=$(echo "$RESULT" | jq -r '.needsEngine')
+          RUN_ALL=$(echo "$RESULT" | jq -r '.runAll')
+          HAS_TESTS=$(echo "$RESULT" | jq -r '.testMatrix | length > 0')
+          HAS_TC=$(echo "$RESULT" | jq -r '.typecheckMatrix | length > 0')
+
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "test_matrix=$TEST_MATRIX" >> $GITHUB_OUTPUT
+          echo "typecheck_matrix=$TC_MATRIX" >> $GITHUB_OUTPUT
+          echo "needs_engine=$NEEDS_ENGINE" >> $GITHUB_OUTPUT
+          echo "has_tests=$HAS_TESTS" >> $GITHUB_OUTPUT
+          echo "has_typechecks=$HAS_TC" >> $GITHUB_OUTPUT
+          echo "run_all=$RUN_ALL" >> $GITHUB_OUTPUT
+
+          # Summary for the Actions UI
+          echo "### Affected Packages" >> $GITHUB_STEP_SUMMARY
+          echo "$RESULT" | jq -r '.affectedPackages[]' | while read pkg; do
+            echo "- \`$pkg\`" >> $GITHUB_STEP_SUMMARY
           done
+          CHANGED=$(echo "$RESULT" | jq -r '.changedFiles')
+          AFFECTED=$(echo "$RESULT" | jq -r '.affectedPackages | length')
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**$CHANGED files changed → $AFFECTED packages affected**" >> $GITHUB_STEP_SUMMARY
 
-      - name: Build engine package (for workspace imports)
-        run: pnpm package
-        working-directory: libs/engine
+  # ── Run tests only for affected packages ─────────────────────────
+  test:
+    name: "Test: ${{ matrix.name }}"
+    needs: detect
+    if: needs.detect.outputs.has-tests == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.detect.outputs.test-matrix) }}
 
-      - name: Run all tests
-        run: pnpm test
+    steps:
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: ${{ needs.detect.outputs.needs-engine }}
 
+      - name: Run tests
+        run: pnpm test:run
+        working-directory: ${{ matrix.package }}
+
+  # ── Type check only affected packages ────────────────────────────
+  typecheck:
+    name: "Check: ${{ matrix.name }}"
+    needs: detect
+    if: needs.detect.outputs.has-typechecks == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.detect.outputs.typecheck-matrix) }}
+
+    steps:
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: ${{ needs.detect.outputs.needs-engine }}
+          build-foliage: ${{ needs.detect.outputs.needs-engine }}
+
+      - name: Sync SvelteKit
+        if: matrix.isSvelteKit
+        run: pnpm exec svelte-kit sync
+        working-directory: ${{ matrix.package }}
+
+      - name: Type check
+        run: ${{ matrix.command }}
+        working-directory: ${{ matrix.package }}
+
+  # ── Barrel export verification (fast, always runs) ───────────────
   barrel-exports:
     name: Engine Barrel Exports
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,57 +127,43 @@ jobs:
       - name: Verify engine barrel exports
         run: ./tools/verify-engine-exports.sh
 
-  typecheck:
-    name: Type Check
+  # ── Lint (always runs, fast) ─────────────────────────────────────
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Run linters
+        run: pnpm lint
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
+      - name: Check formatting
+        run: pnpm format:check
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Sync SvelteKit (generate tsconfig)
+  # ── Summary gate — blocks merge if any job fails ─────────────────
+  ci-pass:
+    name: CI Pass
+    if: always()
+    needs: [detect, test, typecheck, barrel-exports, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all jobs
         run: |
-          for config in apps/*/svelte.config.* services/*/svelte.config.* workers/*/svelte.config.* libs/*/svelte.config.*; do
-            (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
-          done
+          echo "detect: ${{ needs.detect.result }}"
+          echo "test: ${{ needs.test.result }}"
+          echo "typecheck: ${{ needs.typecheck.result }}"
+          echo "barrel-exports: ${{ needs.barrel-exports.result }}"
+          echo "lint: ${{ needs.lint.result }}"
 
-      - name: Build foliage package (required for engine imports)
-        run: pnpm build
-        working-directory: libs/foliage
+          # Fail if any required job failed
+          if [[ "${{ needs.detect.result }}" == "failure" ]] || \
+             [[ "${{ needs.test.result }}" == "failure" ]] || \
+             [[ "${{ needs.typecheck.result }}" == "failure" ]] || \
+             [[ "${{ needs.barrel-exports.result }}" == "failure" ]] || \
+             [[ "${{ needs.lint.result }}" == "failure" ]]; then
+            echo "::error::One or more CI jobs failed"
+            exit 1
+          fi
 
-      - name: Build engine package (required for self-referencing imports)
-        run: pnpm package
-        working-directory: libs/engine
-
-      - name: Type check engine
-        run: pnpm check
-        working-directory: libs/engine
-
-      - name: Type check landing
-        run: pnpm check
-        working-directory: apps/landing
-
-      - name: Type check ivy
-        run: pnpm check
-        working-directory: apps/ivy
-
-      - name: Type check heartwood
-        run: pnpm exec tsc --noEmit
-        working-directory: services/heartwood
-
-      - name: Type check durable-objects
-        run: pnpm exec tsc --noEmit
-        working-directory: services/durable-objects
+          echo "All CI checks passed"
