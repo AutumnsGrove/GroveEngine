@@ -52,6 +52,7 @@ Core  Tools  Docs
 | **[Burrow](burrow-spec.md)** | Cross-property access for greenhouse-mode | Active |
 | **[Grove Garden Bloom](grove-garden-bloom-spec.md)** | Foundational terminology for spaces, collections, content | Active |
 | **[File Formats](file-formats-spec.md)** | Custom .grove and .foliage ZIP-based file formats | Active |
+| **[Grove Types](grove-types-spec.md)** | Type safety at boundaries, cast elimination, type unification | Active |
 
 ### Monitoring & Analytics
 
