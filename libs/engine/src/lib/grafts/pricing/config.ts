@@ -5,12 +5,12 @@
  */
 
 import {
-  TIERS,
-  TIER_ORDER,
-  formatStorage,
-  formatLimit,
-  type TierKey,
-  type TierConfig,
+	TIERS,
+	TIER_ORDER,
+	formatStorage,
+	formatLimit,
+	type TierKey,
+	type TierConfig,
 } from "../../config/tiers.js";
 import type { PricingTier, PricingTierLimits } from "./types.js";
 
@@ -39,15 +39,15 @@ export const DEFAULT_ANNUAL_SAVINGS = 15;
  * @returns Formatted theme string
  */
 function formatThemes(config: TierConfig): string {
-  const themes = config.limits.themes;
-  const hasCustomizer = config.features.themeCustomizer;
-  const hasCustomFonts = config.features.customFonts;
+	const themes = config.limits.themes;
+	const hasCustomizer = config.features.themeCustomizer;
+	const hasCustomFonts = config.features.customFonts;
 
-  if (themes === 0) return "—";
-  if (themes === Infinity && hasCustomFonts) return "All + Customizer + Fonts";
-  if (themes === Infinity && hasCustomizer) return "All + Customizer";
-  if (themes === Infinity) return "All themes";
-  return `${themes} themes`;
+	if (themes === 0) return "—";
+	if (themes === Infinity && hasCustomFonts) return "All + Customizer + Fonts";
+	if (themes === Infinity && hasCustomizer) return "All + Customizer";
+	if (themes === Infinity) return "All themes";
+	return `${themes} themes`;
 }
 
 /**
@@ -57,18 +57,18 @@ function formatThemes(config: TierConfig): string {
  * @returns Formatted limits object
  */
 function formatLimits(config: TierConfig): PricingTierLimits {
-  return {
-    posts: formatLimit(config.limits.posts),
-    storage: formatStorage(config.limits.storage),
-    themes: formatThemes(config),
-    navPages: formatLimit(config.limits.navPages),
-    commentsPerWeek:
-      config.limits.commentsPerWeek === Infinity
-        ? "Unlimited"
-        : config.limits.commentsPerWeek === 0
-          ? "—"
-          : `${config.limits.commentsPerWeek}/week`,
-  };
+	return {
+		posts: formatLimit(config.limits.posts),
+		storage: formatStorage(config.limits.storage),
+		themes: formatThemes(config),
+		navPages: formatLimit(config.limits.navPages),
+		commentsPerWeek:
+			config.limits.commentsPerWeek === Infinity
+				? "Unlimited"
+				: config.limits.commentsPerWeek === 0
+					? "—"
+					: `${config.limits.commentsPerWeek}/week`,
+	};
 }
 
 /**
@@ -78,13 +78,10 @@ function formatLimits(config: TierConfig): PricingTierLimits {
  * @param annualPrice - Annual price
  * @returns Savings percentage (0-100)
  */
-export function calculateAnnualSavings(
-  monthlyPrice: number,
-  annualPrice: number,
-): number {
-  if (monthlyPrice <= 0) return 0;
-  const monthlyEquivalent = annualPrice / 12;
-  return Math.round((1 - monthlyEquivalent / monthlyPrice) * 100);
+export function calculateAnnualSavings(monthlyPrice: number, annualPrice: number): number {
+	if (monthlyPrice <= 0) return 0;
+	const monthlyEquivalent = annualPrice / 12;
+	return Math.round((1 - monthlyEquivalent / monthlyPrice) * 100);
 }
 
 // =============================================================================
@@ -103,41 +100,41 @@ export function calculateAnnualSavings(
  * @example
  * ```typescript
  * const seedlingTier = transformTier('seedling', TIERS.seedling, {
- *   monthly: 'https://checkout.lemonsqueezy.com/...',
- *   annual: 'https://checkout.lemonsqueezy.com/...'
+ *   monthly: 'https://checkout.stripe.com/...',
+ *   annual: 'https://checkout.stripe.com/...'
  * }, { highlight: true, badge: 'Most Popular' });
  * ```
  */
 export function transformTier(
-  key: TierKey,
-  config: TierConfig,
-  checkoutUrls: { monthly?: string; annual?: string } = {},
-  options: { highlight?: boolean; badge?: string } = {},
+	key: TierKey,
+	config: TierConfig,
+	checkoutUrls: { monthly?: string; annual?: string } = {},
+	options: { highlight?: boolean; badge?: string } = {},
 ): PricingTier {
-  const monthlyPrice = config.pricing.monthlyPrice;
-  const annualPrice = config.pricing.yearlyPrice;
-  const annualSavings = calculateAnnualSavings(monthlyPrice, annualPrice);
+	const monthlyPrice = config.pricing.monthlyPrice;
+	const annualPrice = config.pricing.yearlyPrice;
+	const annualSavings = calculateAnnualSavings(monthlyPrice, annualPrice);
 
-  return {
-    key,
-    name: config.display.name,
-    tagline: config.display.tagline,
-    icon: config.display.icon,
-    status: config.status,
-    bestFor: config.display.bestFor,
-    monthlyPrice,
-    annualPrice,
-    annualSavings,
-    limits: formatLimits(config),
-    features: config.features,
-    featureStrings: config.display.featureStrings,
-    standardName: config.display.standardName,
-    standardFeatureStrings: config.display.standardFeatureStrings,
-    supportLevel: config.support.displayString,
-    highlight: options.highlight,
-    badge: options.badge,
-    checkoutUrls,
-  };
+	return {
+		key,
+		name: config.display.name,
+		tagline: config.display.tagline,
+		icon: config.display.icon,
+		status: config.status,
+		bestFor: config.display.bestFor,
+		monthlyPrice,
+		annualPrice,
+		annualSavings,
+		limits: formatLimits(config),
+		features: config.features,
+		featureStrings: config.display.featureStrings,
+		standardName: config.display.standardName,
+		standardFeatureStrings: config.display.standardFeatureStrings,
+		supportLevel: config.support.displayString,
+		highlight: options.highlight,
+		badge: options.badge,
+		checkoutUrls,
+	};
 }
 
 /**
@@ -163,46 +160,46 @@ export function transformTier(
  * ```
  */
 export function transformAllTiers(
-  options: {
-    /** Checkout URLs by tier key */
-    checkoutUrls?: Record<TierKey, { monthly?: string; annual?: string }>;
-    /** Which tier to highlight */
-    highlightTier?: TierKey;
-    /** Badges by tier key */
-    badges?: Partial<Record<TierKey, string>>;
-    /** Custom tier order */
-    tierOrder?: TierKey[];
-    /** Filter to only include specific tiers */
-    includeTiers?: TierKey[];
-    /** Exclude specific tiers */
-    excludeTiers?: TierKey[];
-  } = {},
+	options: {
+		/** Checkout URLs by tier key */
+		checkoutUrls?: Record<TierKey, { monthly?: string; annual?: string }>;
+		/** Which tier to highlight */
+		highlightTier?: TierKey;
+		/** Badges by tier key */
+		badges?: Partial<Record<TierKey, string>>;
+		/** Custom tier order */
+		tierOrder?: TierKey[];
+		/** Filter to only include specific tiers */
+		includeTiers?: TierKey[];
+		/** Exclude specific tiers */
+		excludeTiers?: TierKey[];
+	} = {},
 ): PricingTier[] {
-  const {
-    checkoutUrls = {} as Record<TierKey, { monthly?: string; annual?: string }>,
-    highlightTier,
-    badges = {},
-    tierOrder = DEFAULT_TIER_ORDER,
-    includeTiers,
-    excludeTiers = [],
-  } = options;
+	const {
+		checkoutUrls = {} as Record<TierKey, { monthly?: string; annual?: string }>,
+		highlightTier,
+		badges = {},
+		tierOrder = DEFAULT_TIER_ORDER,
+		includeTiers,
+		excludeTiers = [],
+	} = options;
 
-  let tiers = tierOrder;
+	let tiers = tierOrder;
 
-  // Apply include filter
-  if (includeTiers) {
-    tiers = tiers.filter((key) => includeTiers.includes(key));
-  }
+	// Apply include filter
+	if (includeTiers) {
+		tiers = tiers.filter((key) => includeTiers.includes(key));
+	}
 
-  // Apply exclude filter
-  tiers = tiers.filter((key) => !excludeTiers.includes(key));
+	// Apply exclude filter
+	tiers = tiers.filter((key) => !excludeTiers.includes(key));
 
-  return tiers.map((key) =>
-    transformTier(key, TIERS[key], checkoutUrls[key] ?? {}, {
-      highlight: key === highlightTier,
-      badge: badges[key],
-    }),
-  );
+	return tiers.map((key) =>
+		transformTier(key, TIERS[key], checkoutUrls[key] ?? {}, {
+			highlight: key === highlightTier,
+			badge: badges[key],
+		}),
+	);
 }
 
 // =============================================================================
@@ -216,16 +213,12 @@ export function transformAllTiers(
  * @param period - Billing period
  * @returns Price string
  */
-export function getDisplayPrice(
-  tier: PricingTier,
-  period: "monthly" | "annual",
-): string {
-  if (tier.monthlyPrice === 0) return "Free";
+export function getDisplayPrice(tier: PricingTier, period: "monthly" | "annual"): string {
+	if (tier.monthlyPrice === 0) return "Free";
 
-  const price =
-    period === "monthly" ? tier.monthlyPrice : Math.round(tier.annualPrice);
+	const price = period === "monthly" ? tier.monthlyPrice : Math.round(tier.annualPrice);
 
-  return `$${price}`;
+	return `$${price}`;
 }
 
 /**
@@ -235,7 +228,7 @@ export function getDisplayPrice(
  * @returns Price suffix
  */
 export function getPriceSuffix(period: "monthly" | "annual"): string {
-  return period === "monthly" ? "/mo" : "/yr";
+	return period === "monthly" ? "/mo" : "/yr";
 }
 
 /**
@@ -245,8 +238,8 @@ export function getPriceSuffix(period: "monthly" | "annual"): string {
  * @returns Monthly equivalent string
  */
 export function formatAnnualAsMonthly(annualPrice: number): string {
-  const monthly = annualPrice / 12;
-  return `$${monthly.toFixed(2)}/mo`;
+	const monthly = annualPrice / 12;
+	return `$${monthly.toFixed(2)}/mo`;
 }
 
 /**
@@ -270,18 +263,15 @@ export function formatAnnualAsMonthly(annualPrice: number): string {
  * <span>/mo</span>
  * ```
  */
-export function getMonthlyEquivalentPrice(
-  tier: PricingTier,
-  period: "monthly" | "annual",
-): string {
-  if (period === "annual") {
-    const monthlyEquivalent = tier.annualPrice / 12;
-    // Show clean integers when possible, otherwise 2 decimal places
-    return monthlyEquivalent % 1 === 0
-      ? monthlyEquivalent.toFixed(0)
-      : monthlyEquivalent.toFixed(2);
-  }
-  return tier.monthlyPrice.toString();
+export function getMonthlyEquivalentPrice(tier: PricingTier, period: "monthly" | "annual"): string {
+	if (period === "annual") {
+		const monthlyEquivalent = tier.annualPrice / 12;
+		// Show clean integers when possible, otherwise 2 decimal places
+		return monthlyEquivalent % 1 === 0
+			? monthlyEquivalent.toFixed(0)
+			: monthlyEquivalent.toFixed(2);
+	}
+	return tier.monthlyPrice.toString();
 }
 
 /**
@@ -299,9 +289,9 @@ export function getMonthlyEquivalentPrice(
  * ```
  */
 export function getYearlySavingsAmount(tier: PricingTier): string {
-  const fullYearAtMonthly = tier.monthlyPrice * 12;
-  const savings = fullYearAtMonthly - tier.annualPrice;
-  return savings.toFixed(0);
+	const fullYearAtMonthly = tier.monthlyPrice * 12;
+	const savings = fullYearAtMonthly - tier.annualPrice;
+	return savings.toFixed(0);
 }
 
 // =============================================================================
@@ -310,7 +300,7 @@ export function getYearlySavingsAmount(tier: PricingTier): string {
 
 /**
  * Database billing cycle format.
- * Some systems (like LemonSqueezy webhooks) use "yearly" instead of "annual".
+ * Some systems use "yearly" instead of "annual".
  */
 export type DbBillingCycle = "monthly" | "yearly";
 
@@ -328,10 +318,8 @@ export type DbBillingCycle = "monthly" | "yearly";
  * const dbCycle = billingPeriodToDbFormat('annual'); // 'yearly'
  * ```
  */
-export function billingPeriodToDbFormat(
-  period: "monthly" | "annual",
-): DbBillingCycle {
-  return period === "annual" ? "yearly" : "monthly";
+export function billingPeriodToDbFormat(period: "monthly" | "annual"): DbBillingCycle {
+	return period === "annual" ? "yearly" : "monthly";
 }
 
 /**
@@ -345,8 +333,6 @@ export function billingPeriodToDbFormat(
  * const period = dbFormatToBillingPeriod('yearly'); // 'annual'
  * ```
  */
-export function dbFormatToBillingPeriod(
-  dbFormat: DbBillingCycle,
-): "monthly" | "annual" {
-  return dbFormat === "yearly" ? "annual" : "monthly";
+export function dbFormatToBillingPeriod(dbFormat: DbBillingCycle): "monthly" | "annual" {
+	return dbFormat === "yearly" ? "annual" : "monthly";
 }

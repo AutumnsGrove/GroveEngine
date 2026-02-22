@@ -19,9 +19,7 @@
 
 	// Get the checkout URL for current period
 	let checkoutUrl = $derived(
-		billingPeriod === "monthly"
-			? tier.checkoutUrls.monthly
-			: tier.checkoutUrls.annual,
+		billingPeriod === "monthly" ? tier.checkoutUrls.monthly : tier.checkoutUrls.annual,
 	);
 
 	// Determine if this is a free tier
@@ -56,8 +54,7 @@
 
 	// Variant classes
 	const variantClasses = {
-		primary:
-			"bg-accent hover:bg-accent-hover text-white shadow-sm hover:shadow",
+		primary: "bg-accent hover:bg-accent-hover text-white shadow-sm hover:shadow",
 		secondary:
 			"bg-white/80 dark:bg-grove-800/40 hover:bg-white/90 dark:hover:bg-grove-800/60 text-foreground border border-white/40 dark:border-grove-700/40",
 		outline:
@@ -77,7 +74,7 @@
 			// Warn developers about missing checkout URL for available paid tiers
 			console.warn(
 				`[PricingCTA] No checkout URL configured for tier "${tier.key}" (${billingPeriod}). ` +
-					`Configure checkout URLs via checkoutUrls prop or LemonSqueezy environment variables.`,
+					`Configure checkout URLs via checkoutUrls prop or Stripe environment variables.`,
 			);
 		}
 	}

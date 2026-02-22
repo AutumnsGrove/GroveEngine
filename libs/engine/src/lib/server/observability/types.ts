@@ -438,7 +438,7 @@ export const SERVICE_REGISTRY = {
 			healthCheckUrl: "https://payments.grove.place/health",
 			healthPath: "/health",
 			hasHttp: true,
-			description: "Payment webhooks and subscription management (LemonSqueezy)",
+			description: "Payment webhooks and subscription management (Stripe)",
 		},
 		{
 			name: "grove-durable-objects",

@@ -328,9 +328,8 @@
 						},
 					],
 				},
-				// TEMPORARILY HIDDEN: Pantry removed from public Workshop during LemonSqueezy verification
-				// LS was curious about "domain selling" — Pantry's shop concept might complicate verification
-				// Re-enable after LS verification complete (see TODOS.md for context)
+				// TEMPORARILY HIDDEN: Pantry removed from public Workshop
+				// Shop concept deferred indefinitely (see TODOS.md for context)
 				// {
 				// 	name: 'Pantry',
 				// 	tagline: 'Shop & Provisioning',

@@ -503,7 +503,7 @@ describe("Webhook Endpoint - Data Persistence", () => {
 		expect(webhookEvents.length).toBe(1);
 		expect(webhookEvents[0].payload).toBeDefined();
 
-		// Stripe payloads don't match the LemonSqueezy format the sanitizer expects,
+		// Stripe payloads don't match the structured format the sanitizer expects,
 		// so the endpoint stores a safe fallback structure with the event metadata
 		const payload = JSON.parse(webhookEvents[0].payload as string);
 		expect(payload).toEqual({
