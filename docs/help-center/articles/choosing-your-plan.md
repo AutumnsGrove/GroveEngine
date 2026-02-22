@@ -35,7 +35,6 @@ A quiet clearing to try your hand at writing — no credit card, no commitment. 
 
 - Up to 25 blog posts
 - 100 MB storage for images
-- All 10 fonts
 - Your own grove.place address
 - RSS feed
 - [[meadow]] access for browsing and reacting
@@ -49,7 +48,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 
 - Up to 100 posts
 - 1 GB storage for images and media
-- All 10 fonts + accent color customization
+- All 10 fonts + accent color customization (coming soon)
 - 3 curated themes (coming soon)
 - Unlimited comments on your blog
 - RSS feed

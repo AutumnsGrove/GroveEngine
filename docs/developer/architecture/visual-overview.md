@@ -72,7 +72,6 @@ This document contains visual diagrams and charts to help understand the Grove p
 
 ### Wanderer (Free) - $0/month
 - 25 blog posts, 100 MB storage
-- All 10 fonts
 - Your blog at `username.grove.place`
 - RSS feed, Meadow access
 - No credit card needed
