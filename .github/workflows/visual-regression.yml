@@ -91,7 +91,8 @@ jobs:
         run: npx playwright test --config=.github/visual-regression/playwright.config.ts --update-snapshots
 
       - name: Commit updated snapshots
-        uses: stefanzweifel/git-auto-commit-action@v5
+        # Pinned to v5 commit SHA — this job has contents: write permission
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: "test: update visual regression baselines [bot]"
           file_pattern: ".github/visual-regression/snapshots/**"

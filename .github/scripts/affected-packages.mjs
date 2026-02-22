@@ -289,14 +289,13 @@ const affected = runAll
 	? new Set(Object.keys(PACKAGES))
 	: resolveAffected(directlyChanged);
 
-// Check if engine build is needed
+// Check if engine build is needed — only if engine itself or an actual
+// engine dependent is affected (not every arbitrary package)
+const engineDependents = new Set(DEPENDENTS["libs/engine"] || []);
 const needsEngine =
 	runAll ||
 	affected.has("libs/engine") ||
-	[...affected].some((pkg) => {
-		const meta = PACKAGES[pkg];
-		return meta && pkg !== "libs/engine";
-	});
+	[...affected].some((pkg) => engineDependents.has(pkg));
 
 // Build matrices for GitHub Actions
 const testMatrix = [];
