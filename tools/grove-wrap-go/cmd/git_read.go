@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -11,6 +12,12 @@ import (
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
+
+// maxLimit is the upper bound for any --limit/-n flag to prevent excessive output.
+const maxLimit = 10000
+
+// blameLineRe validates the -L flag format for git blame (e.g. "10,20" or "10-20" or "/regex/").
+var blameLineRe = regexp.MustCompile(`^(\d+[,-]\d+|\d+|/[^/]+/)$`)
 
 // ── git status ──────────────────────────────────────────────────────
 
@@ -90,7 +97,8 @@ var gitLogCmd = &cobra.Command{
 			gitArgs = append(gitArgs, "--format=%H|%h|%an|%ae|%ai|%s")
 		}
 
-		gitArgs = append(gitArgs, fmt.Sprintf("-n%d", gitLogLimit))
+		limit := clampLimit(gitLogLimit, 1, maxLimit)
+		gitArgs = append(gitArgs, fmt.Sprintf("-n%d", limit))
 
 		if gitLogAuthor != "" {
 			gitArgs = append(gitArgs, "--author="+gitLogAuthor)
@@ -100,6 +108,9 @@ var gitLogCmd = &cobra.Command{
 		}
 
 		if len(args) > 0 {
+			if err := sanitizeRef(args[0]); err != nil {
+				return err
+			}
 			gitArgs = append(gitArgs, args[0])
 		}
 
@@ -178,6 +189,12 @@ var gitDiffCmd = &cobra.Command{
 				gitArgs = append(gitArgs, a)
 				continue
 			}
+			// Before --, validate refs don't look like flags
+			if !dashDash {
+				if err := sanitizeRef(a); err != nil {
+					return err
+				}
+			}
 			gitArgs = append(gitArgs, a)
 		}
 
@@ -219,6 +236,9 @@ var gitShowCmd = &cobra.Command{
 			gitArgs = append(gitArgs, "--stat")
 		}
 		if len(args) > 0 {
+			if err := sanitizeRef(args[0]); err != nil {
+				return err
+			}
 			gitArgs = append(gitArgs, args[0])
 		}
 
@@ -251,9 +271,15 @@ var gitBlameCmd = &cobra.Command{
 
 		gitArgs := []string{"blame"}
 		if gitBlameLines != "" {
+			if !blameLineRe.MatchString(gitBlameLines) {
+				return fmt.Errorf("invalid line range %q: expected format like 10,20 or 10-20", gitBlameLines)
+			}
 			gitArgs = append(gitArgs, "-L", gitBlameLines)
 		}
 		if gitBlameRef != "" {
+			if err := sanitizeRef(gitBlameRef); err != nil {
+				return err
+			}
 			gitArgs = append(gitArgs, gitBlameRef)
 		}
 		gitArgs = append(gitArgs, "--", args[0])
@@ -300,10 +326,16 @@ var gitFetchCmd = &cobra.Command{
 			// Default: fetch from origin (or specified remote)
 			remote := "origin"
 			if len(args) > 0 {
+				if err := sanitizeRef(args[0]); err != nil {
+					return err
+				}
 				remote = args[0]
 			}
 			gitArgs = append(gitArgs, remote)
 			if len(args) > 1 {
+				if err := sanitizeRef(args[1]); err != nil {
+					return err
+				}
 				gitArgs = append(gitArgs, args[1])
 			}
 		}
@@ -355,8 +387,9 @@ var gitReflogCmd = &cobra.Command{
 		}
 		cfg := config.Get()
 
+		limit := clampLimit(gitReflogLimit, 1, maxLimit)
 		gitArgs := []string{"reflog", "show",
-			fmt.Sprintf("-n%d", gitReflogLimit),
+			fmt.Sprintf("-n%d", limit),
 			"--format=%h|%gd|%gs|%ci",
 		}
 
@@ -416,6 +449,9 @@ var gitShortlogCmd = &cobra.Command{
 			gitArgs = append(gitArgs, "--since="+gitShortlogSince)
 		}
 		if len(args) > 0 {
+			if err := sanitizeRef(args[0]); err != nil {
+				return err
+			}
 			gitArgs = append(gitArgs, args[0])
 		} else {
 			gitArgs = append(gitArgs, "HEAD")
@@ -608,4 +644,24 @@ func formatDateShort(date string) string {
 		return date[:10]
 	}
 	return date
+}
+
+// sanitizeRef validates that a git ref argument doesn't start with a dash,
+// which would be interpreted as a flag by git.
+func sanitizeRef(ref string) error {
+	if strings.HasPrefix(ref, "-") {
+		return fmt.Errorf("invalid ref %q: must not start with '-'", ref)
+	}
+	return nil
+}
+
+// clampLimit ensures a limit value is within reasonable bounds.
+func clampLimit(n, min, max int) int {
+	if n < min {
+		return min
+	}
+	if n > max {
+		return max
+	}
+	return n
 }
