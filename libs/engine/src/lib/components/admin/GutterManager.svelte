@@ -497,7 +497,8 @@
 										>H{anchor.headingLevel}</span
 									>
 								{:else if anchor.isAnchorTag}
-									<span class="anchor-badge tag-badge" aria-hidden="true"><actionIcons.anchor size={12} /></span
+									<span class="anchor-badge tag-badge" aria-hidden="true"
+										><actionIcons.anchor size={12} /></span
 									>
 								{:else}
 									<span class="anchor-badge para-badge" aria-hidden="true"
@@ -611,13 +612,19 @@
 									>H{anchor.headingLevel}</span
 								>
 							{:else if anchor.isAnchorTag}
-								<span class="anchor-icon tag-icon" aria-hidden="true"><actionIcons.anchor size={12} /></span>
+								<span class="anchor-icon tag-icon" aria-hidden="true"
+									><actionIcons.anchor size={12} /></span
+								>
 							{:else}
-								<span class="anchor-icon para-icon" aria-hidden="true"><actionIcons.pilcrow size={12} /></span>
+								<span class="anchor-icon para-icon" aria-hidden="true"
+									><actionIcons.pilcrow size={12} /></span
+								>
 							{/if}
 							<span class="anchor-text">{anchor.displayText}</span>
 							{#if itemAnchor === anchor.raw}
-								<span class="selected-check" aria-hidden="true"><stateIcons.check class="w-3 h-3" /></span>
+								<span class="selected-check" aria-hidden="true"
+									><stateIcons.check class="w-3 h-3" /></span
+								>
 							{/if}
 						</button>
 					{/each}
@@ -693,11 +700,7 @@
 									type="text"
 									value={image.caption}
 									oninput={(e) =>
-										updateGalleryImage(
-											i,
-											"caption",
-											(e.currentTarget as HTMLInputElement).value,
-										)}
+										updateGalleryImage(i, "caption", (e.currentTarget as HTMLInputElement).value)}
 									placeholder="Caption"
 									class="small"
 								/>
@@ -988,7 +991,7 @@
 
 	.para-badge {
 		background: rgba(107, 114, 128, 0.15);
-		color: #6b7280;
+		color: var(--color-foreground-muted);
 		font-size: 0.65rem;
 	}
 
@@ -1007,12 +1010,12 @@
 
 	.no-anchor-warning {
 		font-size: 0.7rem;
-		color: #e07030;
+		color: hsl(var(--warning));
 		font-style: italic;
 	}
 
 	:global(.dark) .no-anchor-warning {
-		color: #f0c674;
+		color: hsl(var(--warning-muted));
 	}
 
 	.item-actions {
@@ -1058,13 +1061,13 @@
 	}
 
 	.action-btn.delete:hover {
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+		background: var(--color-error-bg);
+		color: var(--color-error);
 	}
 
 	:global(.dark) .action-btn.delete:hover {
-		background: rgba(239, 68, 68, 0.15);
-		color: #f87171;
+		background: var(--color-error-bg);
+		color: var(--color-error);
 	}
 
 	.item-preview {
@@ -1245,7 +1248,7 @@
 
 	.para-icon {
 		background: rgba(107, 114, 128, 0.15);
-		color: #6b7280;
+		color: var(--color-foreground-muted);
 		font-size: 0.75rem;
 	}
 
@@ -1331,14 +1334,14 @@
 		padding: 0.25rem 0.5rem;
 		background: transparent;
 		border: none;
-		color: #ef4444;
+		color: var(--color-error);
 		font-size: 1.2rem;
 		cursor: pointer;
 		transition: color 0.15s ease;
 	}
 
 	.remove-btn:hover {
-		color: #f87171;
+		color: var(--color-error);
 	}
 
 	.add-image-btn {
@@ -1445,18 +1448,18 @@
 
 	.embed-error {
 		padding: 0.5rem 0.75rem;
-		background: rgba(239, 68, 68, 0.08);
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		background: var(--color-error-bg);
+		border: 1px solid var(--color-error-border);
 		border-radius: 8px;
 		margin-bottom: 1rem;
 		font-size: 0.8rem;
-		color: #ef4444;
+		color: var(--color-error);
 	}
 
 	:global(.dark) .embed-error {
-		background: rgba(239, 68, 68, 0.1);
-		border-color: rgba(239, 68, 68, 0.25);
-		color: #f87171;
+		background: var(--color-error-bg);
+		border-color: var(--color-error-border);
+		color: var(--color-error);
 	}
 
 	.embed-resolved {
@@ -1501,13 +1504,13 @@
 	}
 
 	.preview-badge .embed-resolved-label {
-		color: #3b82f6;
-		background: rgba(59, 130, 246, 0.1);
+		color: hsl(var(--info));
+		background: hsl(var(--info-bg));
 	}
 
 	:global(.dark) .preview-badge .embed-resolved-label {
-		color: #60a5fa;
-		background: rgba(96, 165, 250, 0.1);
+		color: hsl(var(--info));
+		background: hsl(var(--info-bg));
 	}
 
 	.embed-resolved-title {
@@ -1545,13 +1548,13 @@
 	/* Dark mode for form elements inside Dialog */
 	:global(.dark) .form-group label,
 	:global(.dark) .gallery-label {
-		color: #d1d5db;
+		color: var(--color-foreground);
 	}
 
 	:global(.dark) .form-input {
 		background: rgba(15, 23, 42, 0.6);
 		border-color: var(--grove-accent-15);
-		color: #e5e7eb;
+		color: var(--color-foreground);
 	}
 
 	:global(.dark) .form-input:focus {
@@ -1559,7 +1562,7 @@
 	}
 
 	:global(.dark) .form-hint {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 	}
 
 	:global(.dark) .form-hint code {
@@ -1568,7 +1571,7 @@
 	}
 
 	:global(.dark) .anchors-label {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 	}
 
 	:global(.dark) .no-anchors-hint {
@@ -1577,7 +1580,7 @@
 	}
 
 	:global(.dark) .no-anchors-hint p {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 	}
 
 	:global(.dark) .image-preview {
@@ -1597,7 +1600,7 @@
 
 	:global(.dark) .loading,
 	:global(.dark) .no-images {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 	}
 
 	:global(.dark) .image-option {
@@ -1605,16 +1608,16 @@
 	}
 
 	:global(.dark) .image-name {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 	}
 
 	:global(.dark) .embed-resolving {
 		background: rgba(15, 23, 42, 0.4);
-		color: #d1d5db;
+		color: var(--color-foreground);
 	}
 
 	:global(.dark) .embed-resolved-title {
-		color: #d1d5db;
+		color: var(--color-foreground);
 	}
 
 	:global(.dark) .embed-thumbnail-preview {
@@ -1622,7 +1625,7 @@
 	}
 
 	:global(.dark) .add-image-btn {
-		color: #9ca3af;
+		color: var(--color-foreground-muted);
 		border-color: var(--grove-accent-15);
 	}
 

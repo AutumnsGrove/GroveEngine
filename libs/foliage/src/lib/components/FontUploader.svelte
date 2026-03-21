@@ -563,7 +563,7 @@
 	}
 
 	.count-value.at-limit {
-		color: #dc2626;
+		color: var(--color-error);
 	}
 
 	.count-separator {
@@ -663,11 +663,11 @@
 	}
 
 	.upload-icon.success {
-		color: #16a34a;
+		color: hsl(var(--success));
 	}
 
 	.upload-icon.error {
-		color: #dc2626;
+		color: var(--color-error);
 	}
 
 	.upload-icon.disabled {
@@ -710,18 +710,18 @@
 	}
 
 	.validation-section.error {
-		background: #fee2e2;
-		border-color: #dc2626;
+		background: var(--color-error-bg);
+		border-color: var(--color-error);
 	}
 
 	.validation-section.warning {
-		background: #ffedd5;
-		border-color: #ea580c;
+		background: hsl(var(--warning-bg));
+		border-color: hsl(var(--warning));
 	}
 
 	.validation-section.success {
-		background: #dcfce7;
-		border-color: #16a34a;
+		background: hsl(var(--success-bg));
+		border-color: hsl(var(--success));
 	}
 
 	.validation-title {
@@ -731,15 +731,15 @@
 	}
 
 	.validation-section.error .validation-title {
-		color: #991b1b;
+		color: var(--color-error-text);
 	}
 
 	.validation-section.warning .validation-title {
-		color: #9a3412;
+		color: hsl(var(--warning-foreground));
 	}
 
 	.validation-section.success .validation-title {
-		color: #166534;
+		color: hsl(var(--success-foreground));
 	}
 
 	.validation-message {
@@ -749,7 +749,7 @@
 	}
 
 	.validation-section.error .validation-message {
-		color: #991b1b;
+		color: var(--color-error-text);
 	}
 
 	.validation-list {
@@ -761,7 +761,7 @@
 	.validation-list li {
 		font-size: 0.875rem;
 		line-height: 1.5;
-		color: #9a3412;
+		color: hsl(var(--warning-foreground));
 		margin-bottom: 0.25rem;
 	}
 

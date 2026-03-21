@@ -480,8 +480,8 @@
 	.draft-warning {
 		margin-top: 1rem;
 		padding: 0.75rem 1rem;
-		background: rgba(255, 193, 7, 0.1);
-		border: 1px solid rgba(255, 193, 7, 0.25);
+		background: hsl(var(--warning-bg));
+		border: 1px solid hsl(var(--warning) / 0.25);
 		border-radius: var(--grove-radius-md, 8px);
 		color: var(--grove-text-secondary, #a0a0a0);
 		font-size: 0.875rem;

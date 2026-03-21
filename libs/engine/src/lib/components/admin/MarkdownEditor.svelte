@@ -21,7 +21,13 @@
 	} from "$lib/utils/upload-validation";
 	import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
 	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-	import { stateIcons, actionIcons, featureIcons, natureIcons, chromeIcons } from "@autumnsgrove/prism/icons";
+	import {
+		stateIcons,
+		actionIcons,
+		featureIcons,
+		natureIcons,
+		chromeIcons,
+	} from "@autumnsgrove/prism/icons";
 	import CurioAutocomplete from "./CurioAutocomplete.svelte";
 	import FiresideChat from "./FiresideChat.svelte";
 	import PhotoPicker from "./PhotoPicker.svelte";
@@ -1535,24 +1541,24 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem 1.25rem;
-		background: rgba(45, 74, 45, 0.95);
-		border: 1px solid #4a7c4a;
+		background: var(--grove-accent-80);
+		border: 1px solid var(--grove-accent-dark);
 		border-radius: 6px;
-		color: #a8dca8;
+		color: var(--grove-accent-light);
 		font-size: 0.9rem;
 		z-index: 99;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+		box-shadow: var(--shadow-md);
 	}
 	.upload-status.error {
-		background: rgba(80, 40, 40, 0.95);
-		border-color: #a85050;
-		color: #ffb0b0;
+		background: var(--color-error-bg);
+		border-color: var(--color-error-border);
+		color: var(--color-error-text);
 	}
 	.upload-spinner {
 		width: 18px;
 		height: 18px;
-		border: 2px solid #4a7c4a;
-		border-top-color: #a8dca8;
+		border: 2px solid var(--grove-accent-dark);
+		border-top-color: var(--grove-accent-light);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -1562,7 +1568,7 @@
 		justify-content: center;
 		width: 20px;
 		height: 20px;
-		background: #a85050;
+		background: var(--color-error);
 		color: white;
 		border-radius: 50%;
 		font-size: 0.75rem;
@@ -1571,7 +1577,7 @@
 	.retry-btn {
 		background: transparent;
 		border: none;
-		color: #ffb0b0;
+		color: var(--color-error-text);
 		font-family: "JetBrains Mono", "Fira Code", monospace;
 		font-size: 0.85rem;
 		cursor: pointer;
@@ -1579,7 +1585,7 @@
 		transition: color 0.15s ease;
 	}
 	.retry-btn:hover {
-		color: #ffd0d0;
+		color: var(--color-error-text);
 	}
 	@keyframes spin {
 		to {
@@ -1587,8 +1593,8 @@
 		}
 	}
 	.draft-prompt {
-		background: rgba(45, 60, 45, 0.98);
-		border-bottom: 1px solid #4a7c4a;
+		background: var(--grove-accent-80);
+		border-bottom: 1px solid var(--grove-accent-dark);
 		padding: 0.5rem 0.75rem;
 		flex-shrink: 0;
 	}
@@ -1600,22 +1606,22 @@
 	}
 	.draft-icon {
 		font-size: 1.25rem;
-		color: #8bc48b;
+		color: var(--grove-accent);
 		font-weight: bold;
 	}
 	.draft-message {
 		display: flex;
 		flex-direction: column;
 		gap: 0.15rem;
-		color: #d4d4d4;
+		color: var(--color-foreground);
 		flex: 1;
 	}
 	.draft-message strong {
-		color: #a8dca8;
+		color: var(--grove-accent-light);
 	}
 	.draft-time {
 		font-size: 0.75rem;
-		color: #7a9a7a;
+		color: var(--color-foreground-subtle);
 	}
 	.draft-actions {
 		display: flex;
@@ -1636,16 +1642,16 @@
 		touch-action: manipulation;
 	}
 	.draft-btn.restore {
-		color: #8bc48b;
+		color: var(--grove-accent);
 	}
 	.draft-btn.restore:hover {
-		color: #c8f0c8;
+		color: var(--grove-accent-light);
 	}
 	.draft-btn.discard {
-		color: #9d9d9d;
+		color: var(--color-foreground-muted);
 	}
 	.draft-btn.discard:hover {
-		color: #d4d4d4;
+		color: var(--color-foreground);
 	}
 	.key {
 		color: var(--editor-accent, #8bc48b);
@@ -1691,11 +1697,11 @@
 		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 15%, transparent);
 	}
 	.toolbar-icon-btn.full-btn {
-		color: #7ab3ff;
+		color: hsl(var(--info));
 	}
 	.toolbar-icon-btn.full-btn:hover {
-		color: #9ac5ff;
-		background: color-mix(in srgb, #7ab3ff 10%, transparent);
+		color: hsl(var(--info-muted));
+		background: color-mix(in srgb, hsl(var(--info)) 10%, transparent);
 	}
 	.toolbar-icon-btn.zen-btn {
 		color: #d4a5ff;
@@ -1746,7 +1752,7 @@
 	}
 	/* svelte-ignore css-unused-selector */
 	.toolbar-divider {
-		color: #4a4a4a;
+		color: var(--color-border);
 		margin: 0 0.25rem;
 		font-size: 0.8rem;
 	}
@@ -1887,7 +1893,7 @@
 		width: 50%;
 		display: flex;
 		flex-direction: column;
-		background: #252526;
+		background: var(--color-surface);
 		min-height: 0;
 	}
 	.preview-header {
@@ -1895,11 +1901,11 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.5rem 1rem;
-		background: #2d2d2d;
+		background: var(--color-surface-elevated);
 		border-bottom: 1px solid var(--light-border-primary);
 	}
 	.preview-label {
-		color: #8bc48b;
+		color: var(--grove-accent);
 		font-size: 0.85rem;
 		font-family: "JetBrains Mono", "Fira Code", monospace;
 	}
@@ -1917,13 +1923,13 @@
 		flex: 1;
 		padding: 1rem;
 		overflow-y: auto;
-		color: #d4d4d4;
+		color: var(--color-foreground);
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 		font-size: 0.95rem;
 		line-height: 1.7;
 	}
 	.preview-placeholder {
-		color: #5a5a5a;
+		color: var(--color-foreground-faint);
 		font-style: italic;
 	}
 	.preview-content :global(h1),
@@ -1932,7 +1938,7 @@
 	.preview-content :global(h4),
 	.preview-content :global(h5),
 	.preview-content :global(h6) {
-		color: #8bc48b;
+		color: var(--grove-accent);
 		margin-top: 1.5rem;
 		margin-bottom: 0.75rem;
 		font-weight: 600;
@@ -1952,7 +1958,7 @@
 		margin: 0.75rem 0;
 	}
 	.preview-content :global(a) {
-		color: #6cb36c;
+		color: var(--grove-accent-dark);
 		text-decoration: underline;
 	}
 	.preview-content :global(code) {
@@ -1961,7 +1967,7 @@
 		border-radius: 3px;
 		font-family: inherit;
 		font-size: 0.9em;
-		color: #ce9178;
+		color: var(--color-accent-text);
 	}
 	.preview-content :global(pre) {
 		background: var(--light-bg-primary);
@@ -1973,13 +1979,13 @@
 	.preview-content :global(pre code) {
 		background: none;
 		padding: 0;
-		color: #d4d4d4;
+		color: var(--color-foreground);
 	}
 	.preview-content :global(blockquote) {
-		border-left: 3px solid #4a7c4a;
+		border-left: 3px solid var(--grove-accent-dark);
 		margin: 1rem 0;
 		padding-left: 1rem;
-		color: #9d9d9d;
+		color: var(--color-foreground-muted);
 		font-style: italic;
 	}
 	.preview-content :global(ul),
@@ -2031,11 +2037,11 @@
 		opacity: 0.4;
 	}
 	.status-saving {
-		color: #f0c674;
+		color: hsl(var(--warning));
 		animation: pulse 1s ease-in-out infinite;
 	}
 	.status-draft-saving {
-		color: #7a9a7a;
+		color: var(--color-foreground-subtle);
 		font-style: italic;
 	}
 	.status-draft-saved {
@@ -2043,18 +2049,18 @@
 		font-weight: 500;
 	}
 	.status-draft-unsaved {
-		color: #e0a050;
+		color: hsl(var(--warning-muted));
 		font-style: italic;
 	}
 	.status-server-syncing {
-		color: #8bafc4;
+		color: hsl(var(--info-muted));
 		font-style: italic;
 	}
 	.status-server-synced {
 		color: var(--editor-accent, #8bc48b);
 	}
 	.status-server-error {
-		color: #e07050;
+		color: var(--color-error);
 		font-style: italic;
 	}
 	.status-mode-indicator {
@@ -2194,7 +2200,7 @@
 	}
 	.vine-count {
 		font-weight: 400;
-		color: #7a9a7a;
+		color: var(--color-foreground-subtle);
 		font-size: 0.75rem;
 		margin-left: 0.5rem;
 	}
@@ -2219,12 +2225,12 @@
 		font-size: 0.9rem;
 		font-weight: 500;
 		font-family: "JetBrains Mono", "Fira Code", monospace;
-		color: #8bc48b;
+		color: var(--grove-accent);
 	}
 	.full-preview-close {
 		padding: 0.3rem 0.5rem;
 		background: transparent;
-		color: #7a9a7a;
+		color: var(--color-foreground-subtle);
 		border: none;
 		font-size: 0.85rem;
 		font-family: "JetBrains Mono", "Fira Code", monospace;
@@ -2232,7 +2238,7 @@
 		transition: color 0.1s ease;
 	}
 	.full-preview-close:hover {
-		color: #a8dca8;
+		color: var(--grove-accent-light);
 	}
 	.full-preview-scroll {
 		flex: 1;

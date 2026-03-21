@@ -37,9 +37,7 @@
 	let debounceTimer: ReturnType<typeof setTimeout>;
 
 	// Tier checks
-	const hasCustomDomain = $derived(
-		TIERS[userTier as TierKey]?.features?.customDomain ?? false,
-	);
+	const hasCustomDomain = $derived(TIERS[userTier as TierKey]?.features?.customDomain ?? false);
 	const oakTier = TIERS.oak;
 
 	async function checkDomain(value: string) {
@@ -63,7 +61,12 @@
 
 		try {
 			const res = await fetch(`/api/check-domain?domain=${encodeURIComponent(query)}`); // csrf-ok: GET-only read
-			const result = (await res.json()) as { domain: string; status: string; registrar?: string; error?: string };
+			const result = (await res.json()) as {
+				domain: string;
+				status: string;
+				registrar?: string;
+				error?: string;
+			};
 
 			// Only update if this is still the current check
 			if (checkedDomain !== query) return;
@@ -160,8 +163,7 @@
 			<div class="domain-checker__upsell">
 				<p>
 					Custom domains are available starting with the
-					<strong>{oakTier.display.name}</strong> plan
-					(${oakTier.pricing.monthlyPrice}/mo).
+					<strong>{oakTier.display.name}</strong> plan (${oakTier.pricing.monthlyPrice}/mo).
 				</p>
 				<a href="/arbor/account" class="domain-checker__upsell-link">
 					See plans <navIcons.external class="w-[14px] h-[14px]" />
@@ -172,7 +174,9 @@
 		<div class="domain-checker__result domain-checker__result--taken">
 			<stateIcons.x class="w-4 h-4" />
 			<span>
-				<strong>{checkedDomain}</strong> is already registered{registrar ? ` (via ${registrar})` : ""}
+				<strong>{checkedDomain}</strong> is already registered{registrar
+					? ` (via ${registrar})`
+					: ""}
 			</span>
 		</div>
 	{:else if domainError}
@@ -312,8 +316,8 @@
 		color: var(--accent-danger, #dc2626);
 	}
 	:global(.dark) .domain-checker__result--taken {
-		background: rgba(220, 38, 38, 0.15);
-		color: #f87171;
+		background: var(--color-error-bg);
+		color: var(--color-error);
 	}
 	.domain-checker__action {
 		margin: 0;
