@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
+	import { slide } from "svelte/transition";
 
-	let { title = '', expanded = $bindable(false), children } = $props();
+	let { title = "", expanded = $bindable(false), children } = $props();
 
 	function toggle() {
 		expanded = !expanded;
@@ -9,13 +9,9 @@
 </script>
 
 <div class="collapsible-section">
-	<button
-		class="collapsible-toggle"
-		onclick={toggle}
-		aria-expanded={expanded}
-	>
+	<button class="collapsible-toggle" onclick={toggle} aria-expanded={expanded}>
 		<span class="collapsible-title">{title}</span>
-		<span class="toggle-icon">{expanded ? '▼' : '▶'}</span>
+		<span class="toggle-icon">{expanded ? "▼" : "▶"}</span>
 	</button>
 
 	{#if expanded}
@@ -66,9 +62,6 @@
 	}
 	.collapsible-content {
 		padding: 1rem;
-		background: #fafafa;
-	}
-	:global(.dark) .collapsible-content {
-		background: #1f1f1f;
+		background: var(--color-surface);
 	}
 </style>

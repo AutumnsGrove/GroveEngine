@@ -284,16 +284,23 @@ Drove `apps/aspen` svelte-check from **415 errors → 0 errors**:
 - Typed root layout data prop, vineyard showcase, community settings
 - Fixed component prop mismatches in vineyard showcase (Season, StatusBadge, Tabs, Select, Accordion)
 
-### Remaining (Phase 2+)
+### Phase 2 — Complete (2026-03-21)
+
+| Item | Before | After | Status |
+|------|--------|-------|--------|
+| Event handler migration (`on:` → `onclick`) | Audit said ~2,980 | **1 remaining** (was only 83 total; 82 were already migrated) | **Done** — last `on:keydown` in amber layout converted |
+| Hardcoded colors → design tokens | Audit said 166 files | ~37 real violations across 11 files | **Done** — 88 hardcoded values replaced with tokens |
+
+**Audit number corrections:** The original count of ~2,980 `on:` directives was from a grep that matched CSS pseudo-selectors (`:hover`, `:focus`). Actual Svelte 4 event directives were 83, and 82 of those were already converted. The 166-file color count included ~498 CSS fallback patterns (`var(--token, #fallback)`) which are the correct defensive pattern.
+
+### Remaining (Phase 3+)
 
 | Item | Scope | Priority |
 |------|-------|----------|
-| Event handler migration (`on:` → `onclick`) | ~2,980 occurrences | Phase 2 |
-| Hardcoded colors → design tokens | 166 files | Phase 3 |
-| Oversized components (>500 lines) | 74 files | Phase 4 |
-| Missing `alt` attributes | 28 instances, 15 files | Phase 4 |
-| Style block convention decision | 3 competing patterns | Phase 4 |
-| Documentation approach standardization | ~300 undocumented files | Phase 4 |
+| Oversized components (>500 lines) | 74 files | Phase 3 |
+| Missing `alt` attributes | ~28 instances, 15 files | Phase 3 |
+| Style block convention decision | 3 competing patterns | Low |
+| Documentation approach standardization | ~300 undocumented files | Low |
 
 ---
 

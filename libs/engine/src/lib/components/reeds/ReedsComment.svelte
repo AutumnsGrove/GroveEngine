@@ -248,7 +248,7 @@
 	}
 
 	:global(.dark) .action-btn-danger:hover {
-		color: #f87171;
+		color: var(--color-error);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

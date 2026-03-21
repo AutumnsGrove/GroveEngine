@@ -355,7 +355,7 @@
 	}
 
 	.editor-container:has(.has-errors) {
-		border-color: #dc2626;
+		border-color: var(--color-error);
 	}
 
 	.css-textarea {
@@ -410,11 +410,11 @@
 	}
 
 	.size-value.warning {
-		color: #ea580c;
+		color: hsl(var(--warning));
 	}
 
 	.size-value.error {
-		color: #dc2626;
+		color: var(--color-error);
 	}
 
 	.char-count {
@@ -432,7 +432,7 @@
 
 	.size-fill {
 		height: 100%;
-		background: #16a34a;
+		background: hsl(var(--success));
 		transition:
 			width 0.2s ease,
 			background-color 0.15s ease;
@@ -440,11 +440,11 @@
 	}
 
 	.size-fill.warning {
-		background: #ea580c;
+		background: hsl(var(--warning));
 	}
 
 	.size-fill.error {
-		background: #dc2626;
+		background: var(--color-error);
 	}
 
 	/* Validation sections */
@@ -455,18 +455,18 @@
 	}
 
 	.validation-section.errors {
-		background: #fee2e2;
-		border-color: #dc2626;
+		background: var(--color-error-bg);
+		border-color: var(--color-error);
 	}
 
 	.validation-section.warnings {
-		background: #ffedd5;
-		border-color: #ea580c;
+		background: hsl(var(--warning-bg));
+		border-color: hsl(var(--warning));
 	}
 
 	.validation-section.success {
-		background: #dcfce7;
-		border-color: #16a34a;
+		background: hsl(var(--success-bg));
+		border-color: hsl(var(--success));
 	}
 
 	.validation-title {
@@ -476,15 +476,15 @@
 	}
 
 	.validation-section.errors .validation-title {
-		color: #991b1b;
+		color: var(--color-error-text);
 	}
 
 	.validation-section.warnings .validation-title {
-		color: #9a3412;
+		color: hsl(var(--warning-foreground));
 	}
 
 	.validation-section.success .validation-title {
-		color: #166534;
+		color: hsl(var(--success-foreground));
 	}
 
 	.validation-list {
@@ -504,11 +504,11 @@
 	}
 
 	.validation-item.error {
-		color: #991b1b;
+		color: var(--color-error-text);
 	}
 
 	.validation-item.warning {
-		color: #9a3412;
+		color: hsl(var(--warning-foreground));
 	}
 
 	/* Responsive adjustments */
