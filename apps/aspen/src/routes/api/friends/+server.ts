@@ -3,6 +3,8 @@
  *
  * GET  — List the current user's friends
  * POST — Add a friend by subdomain
+ *
+ * User-scoped: uses locals.user.id directly. No grove required.
  */
 
 import { json } from "@sveltejs/kit";
@@ -24,16 +26,8 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
-	// Resolve the user's own grove — friends are always scoped to your home tenant,
-	// not whichever grove you happen to be visiting
-	const homeGrove = await getUserHomeGrove(db, locals.user.email);
-	if (!homeGrove) {
-		// User hasn't created a grove yet — no friends to show
-		return json({ friends: [] });
-	}
-
 	try {
-		const friends = await listFriends(db, homeGrove.tenantId);
+		const friends = await listFriends(db, locals.user.id);
 		return json({ friends });
 	} catch (error) {
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
@@ -53,13 +47,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-	}
-
-	// Resolve the user's home grove — friends are always added to your own tenant,
-	// even when the request comes from a different grove's subdomain
-	const homeGrove = await getUserHomeGrove(db, locals.user.email);
-	if (!homeGrove) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
 	}
 
 	// Rate limit: 30 friend additions per hour
@@ -92,7 +79,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	try {
-		const result = await addFriend(db, homeGrove.tenantId, friendSubdomain);
+		// Resolve user's home grove for self-add check and tenant_id storage.
+		// This is optional — grove-less users can still follow.
+		const homeGrove = await getUserHomeGrove(db, locals.user.email);
+
+		const result = await addFriend(db, locals.user.id, friendSubdomain, homeGrove?.tenantId);
 
 		if ("error" in result) {
 			if (result.error === "not_found") {

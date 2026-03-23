@@ -4,6 +4,8 @@
  * Tests the service layer that owns all friends SQL queries.
  * Mocks D1 at the prepare() boundary since the queries use INSERT OR IGNORE
  * and LIKE with ESCAPE which the in-memory mock D1 doesn't support.
+ *
+ * User-scoped: all functions use user_id as the primary scope.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -51,7 +53,7 @@ describe("listFriends", () => {
 			],
 		});
 
-		const result = await listFriends(db, "tenant-1");
+		const result = await listFriends(db, "user-1");
 
 		expect(result).toHaveLength(2);
 		expect(result[0]).toEqual({
@@ -71,21 +73,21 @@ describe("listFriends", () => {
 	it("should return empty array when no friends exist", async () => {
 		const db = createMockDB({ allResults: [] });
 
-		const result = await listFriends(db, "tenant-1");
+		const result = await listFriends(db, "user-1");
 
 		expect(result).toEqual([]);
 	});
 
-	it("should query the friends table scoped to tenant", async () => {
+	it("should query the friends table scoped to user_id", async () => {
 		const db = createMockDB();
-		await listFriends(db, "my-tenant");
+		await listFriends(db, "user-1");
 
 		const prepareCall = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
 		expect(prepareCall).toContain("FROM friends");
-		expect(prepareCall).toContain("WHERE tenant_id = ?");
+		expect(prepareCall).toContain("WHERE user_id = ?");
 
 		const bindCall = (db.prepare as ReturnType<typeof vi.fn>).mock.results[0].value.bind;
-		expect(bindCall).toHaveBeenCalledWith("my-tenant");
+		expect(bindCall).toHaveBeenCalledWith("user-1");
 	});
 });
 
@@ -97,7 +99,7 @@ describe("addFriend", () => {
 			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art's Grove" },
 		});
 
-		const result = await addFriend(db, "home-tenant", "a2a0");
+		const result = await addFriend(db, "user-1", "a2a0");
 
 		expect("friend" in result).toBe(true);
 		if ("friend" in result) {
@@ -113,7 +115,7 @@ describe("addFriend", () => {
 	it("should return not_found error when subdomain doesn't exist", async () => {
 		const db = createMockDB({ firstResult: null });
 
-		const result = await addFriend(db, "home-tenant", "nonexistent");
+		const result = await addFriend(db, "user-1", "nonexistent");
 
 		expect(result).toEqual({ error: "not_found" });
 	});
@@ -123,9 +125,19 @@ describe("addFriend", () => {
 			firstResult: { id: "home-tenant", subdomain: "autumn", display_name: "My Grove" },
 		});
 
-		const result = await addFriend(db, "home-tenant", "autumn");
+		const result = await addFriend(db, "user-1", "autumn", "home-tenant");
 
 		expect(result).toEqual({ error: "self_add" });
+	});
+
+	it("should allow grove-less users to follow (no self_add check without tenantId)", async () => {
+		const db = createMockDB({
+			firstResult: { id: "any-tenant", subdomain: "a2a0", display_name: "Art" },
+		});
+
+		const result = await addFriend(db, "user-1", "a2a0");
+
+		expect("friend" in result).toBe(true);
 	});
 
 	it("should use INSERT OR IGNORE for duplicate handling", async () => {
@@ -133,11 +145,33 @@ describe("addFriend", () => {
 			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art" },
 		});
 
-		await addFriend(db, "home-tenant", "a2a0");
+		await addFriend(db, "user-1", "a2a0");
 
 		// Second prepare call is the INSERT
 		const insertCall = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[1][0] as string;
 		expect(insertCall).toContain("INSERT OR IGNORE INTO friends");
+	});
+
+	it("should store tenant_id when user has a grove", async () => {
+		const db = createMockDB({
+			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art" },
+		});
+
+		await addFriend(db, "user-1", "a2a0", "home-tenant");
+
+		const bindCall = (db.prepare as ReturnType<typeof vi.fn>).mock.results[1].value.bind;
+		expect(bindCall).toHaveBeenCalledWith("user-1", "home-tenant", "friend-tenant", "Art", "a2a0");
+	});
+
+	it("should store null tenant_id when user has no grove", async () => {
+		const db = createMockDB({
+			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art" },
+		});
+
+		await addFriend(db, "user-1", "a2a0");
+
+		const bindCall = (db.prepare as ReturnType<typeof vi.fn>).mock.results[1].value.bind;
+		expect(bindCall).toHaveBeenCalledWith("user-1", null, "friend-tenant", "Art", "a2a0");
 	});
 });
 
@@ -147,7 +181,7 @@ describe("removeFriend", () => {
 	it("should return true when connection existed (changes > 0)", async () => {
 		const db = createMockDB({ changes: 1 });
 
-		const result = await removeFriend(db, "home-tenant", "friend-tenant");
+		const result = await removeFriend(db, "user-1", "friend-tenant");
 
 		expect(result).toBe(true);
 	});
@@ -155,7 +189,7 @@ describe("removeFriend", () => {
 	it("should return false when connection didn't exist (changes = 0)", async () => {
 		const db = createMockDB({ changes: 0 });
 
-		const result = await removeFriend(db, "home-tenant", "nonexistent");
+		const result = await removeFriend(db, "user-1", "nonexistent");
 
 		expect(result).toBe(false);
 	});
@@ -163,7 +197,7 @@ describe("removeFriend", () => {
 	it("should use a single DELETE query (no SELECT round-trip)", async () => {
 		const db = createMockDB({ changes: 1 });
 
-		await removeFriend(db, "home-tenant", "friend-tenant");
+		await removeFriend(db, "user-1", "friend-tenant");
 
 		// Only one prepare call — the DELETE
 		expect(db.prepare).toHaveBeenCalledTimes(1);
@@ -171,13 +205,15 @@ describe("removeFriend", () => {
 		expect(sql).toContain("DELETE FROM friends");
 	});
 
-	it("should scope deletion to the tenant pair", async () => {
+	it("should scope deletion to the user and friend pair", async () => {
 		const db = createMockDB({ changes: 1 });
 
-		await removeFriend(db, "home-tenant", "friend-tenant");
+		await removeFriend(db, "user-1", "friend-tenant");
 
+		const sql = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+		expect(sql).toContain("user_id = ?");
 		const bindCall = (db.prepare as ReturnType<typeof vi.fn>).mock.results[0].value.bind;
-		expect(bindCall).toHaveBeenCalledWith("home-tenant", "friend-tenant");
+		expect(bindCall).toHaveBeenCalledWith("user-1", "friend-tenant");
 	});
 });
 
@@ -187,7 +223,7 @@ describe("isFriend", () => {
 	it("should return true when connection exists", async () => {
 		const db = createMockDB({ firstResult: { "1": 1 } });
 
-		const result = await isFriend(db, "home", "friend");
+		const result = await isFriend(db, "user-1", "friend");
 
 		expect(result).toBe(true);
 	});
@@ -195,9 +231,17 @@ describe("isFriend", () => {
 	it("should return false when connection doesn't exist", async () => {
 		const db = createMockDB({ firstResult: null });
 
-		const result = await isFriend(db, "home", "nobody");
+		const result = await isFriend(db, "user-1", "nobody");
 
 		expect(result).toBe(false);
+	});
+
+	it("should query by user_id", async () => {
+		const db = createMockDB({ firstResult: null });
+		await isFriend(db, "user-1", "friend");
+
+		const sql = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+		expect(sql).toContain("user_id = ?");
 	});
 });
 

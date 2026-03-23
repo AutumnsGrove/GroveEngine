@@ -2,6 +2,9 @@
  * Friends Search API — Find Groves
  *
  * GET — Search for groves by subdomain or display name
+ *
+ * Uses getUserHomeGrove only to exclude the user's own grove from results.
+ * Grove-less users can still search — they just don't need self-exclusion.
  */
 
 import { json } from "@sveltejs/kit";

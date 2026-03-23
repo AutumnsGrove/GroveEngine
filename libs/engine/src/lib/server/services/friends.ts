@@ -1,7 +1,11 @@
 /**
- * Friends Service — tenant-to-tenant follow relationships.
+ * Friends Service — user-scoped follow relationships.
  *
- * Friends are a first-class tenant concept, independent of any UI surface.
+ * Friends are scoped by user_id so that any logged-in user can follow groves,
+ * even if they haven't created their own grove yet. When a user does have a
+ * grove, their tenant_id is stored alongside for features like Chirp mutual
+ * friends, but it's not required.
+ *
  * Lantern, FollowButton, and future social features all consume this service.
  *
  * Types defined here are the source of truth — validated at the API boundary.
@@ -17,17 +21,17 @@ export interface FriendSearchResult {
 }
 
 /**
- * List all friends for a tenant, ordered by most recently added.
+ * List all friends for a user, ordered by most recently added.
  */
-export async function listFriends(db: D1Database, tenantId: string): Promise<Friend[]> {
+export async function listFriends(db: D1Database, userId: string): Promise<Friend[]> {
 	const result = await db
 		.prepare(
 			`SELECT friend_tenant_id, friend_name, friend_subdomain, source
 			 FROM friends
-			 WHERE tenant_id = ?
+			 WHERE user_id = ?
 			 ORDER BY added_at DESC`,
 		)
-		.bind(tenantId)
+		.bind(userId)
 		.all<{
 			friend_tenant_id: string;
 			friend_name: string;
@@ -48,12 +52,17 @@ export async function listFriends(db: D1Database, tenantId: string): Promise<Fri
  * validates it's not the caller's own grove, and inserts with
  * INSERT OR IGNORE for graceful duplicate handling.
  *
- * Returns the new Friend on success, or null if the subdomain doesn't exist.
+ * @param userId - The authenticated user's ID
+ * @param tenantId - The user's own tenant ID (null if they don't have a grove)
+ *
+ * Returns the new Friend on success, or an error if the subdomain doesn't exist
+ * or the user is trying to follow their own grove.
  */
 export async function addFriend(
 	db: D1Database,
-	tenantId: string,
+	userId: string,
 	friendSubdomain: string,
+	tenantId?: string | null,
 ): Promise<{ friend: Friend } | { error: "not_found" | "self_add" }> {
 	const friendTenant = await db
 		.prepare(`SELECT id, subdomain, display_name FROM tenants WHERE subdomain = ?`)
@@ -64,16 +73,23 @@ export async function addFriend(
 		return { error: "not_found" };
 	}
 
-	if (friendTenant.id === tenantId) {
+	// Prevent following your own grove — check if the user owns this tenant
+	if (tenantId && friendTenant.id === tenantId) {
 		return { error: "self_add" };
 	}
 
 	await db
 		.prepare(
-			`INSERT OR IGNORE INTO friends (tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
-			 VALUES (?, ?, ?, ?, 'manual')`,
+			`INSERT OR IGNORE INTO friends (user_id, tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
+			 VALUES (?, ?, ?, ?, ?, 'manual')`,
 		)
-		.bind(tenantId, friendTenant.id, friendTenant.display_name, friendTenant.subdomain)
+		.bind(
+			userId,
+			tenantId ?? null,
+			friendTenant.id,
+			friendTenant.display_name,
+			friendTenant.subdomain,
+		)
 		.run();
 
 	return {
@@ -92,28 +108,28 @@ export async function addFriend(
  */
 export async function removeFriend(
 	db: D1Database,
-	tenantId: string,
+	userId: string,
 	friendTenantId: string,
 ): Promise<boolean> {
 	const result = await db
-		.prepare(`DELETE FROM friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-		.bind(tenantId, friendTenantId)
+		.prepare(`DELETE FROM friends WHERE user_id = ? AND friend_tenant_id = ?`)
+		.bind(userId, friendTenantId)
 		.run();
 
 	return ((result.meta as Record<string, number>)?.changes ?? 0) > 0;
 }
 
 /**
- * Check if a tenant-to-tenant friend connection exists.
+ * Check if a user-to-tenant friend connection exists.
  */
 export async function isFriend(
 	db: D1Database,
-	tenantId: string,
+	userId: string,
 	friendTenantId: string,
 ): Promise<boolean> {
 	const existing = await db
-		.prepare(`SELECT 1 FROM friends WHERE tenant_id = ? AND friend_tenant_id = ? LIMIT 1`)
-		.bind(tenantId, friendTenantId)
+		.prepare(`SELECT 1 FROM friends WHERE user_id = ? AND friend_tenant_id = ? LIMIT 1`)
+		.bind(userId, friendTenantId)
 		.first();
 
 	return !!existing;
@@ -122,6 +138,10 @@ export async function isFriend(
 /**
  * Check if two tenants are mutual friends (both follow each other).
  * Required for Chirp DM access — both parties must opt in.
+ *
+ * Uses tenant_id (not user_id) because mutual friendship inherently
+ * requires both parties to have groves. Grove-less users can follow
+ * but can't be mutual friends.
  */
 export async function areMutualFriends(
 	db: D1Database,

@@ -2,8 +2,10 @@
  * Friends API Tests
  *
  * Tests the friends list (GET), add (POST), and delete (DELETE) endpoints.
- * Mocks D1 at the prepare() boundary since the queries use INSERT OR IGNORE
- * and other features the in-memory mock D1 doesn't support.
+ * Mocks the friends service at the boundary.
+ *
+ * User-scoped: endpoints use locals.user.id directly, not getUserHomeGrove().
+ * getUserHomeGrove is only used in POST for optional self-add check / tenant_id storage.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -97,7 +99,6 @@ function createDELETEEvent(
 describe("GET /api/friends", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 	});
 
 	it("should return the user's friends list", async () => {
@@ -130,14 +131,16 @@ describe("GET /api/friends", () => {
 		});
 	});
 
-	it("should return empty array when user has no grove", async () => {
-		vi.mocked(getUserHomeGrove).mockResolvedValue(null);
+	it("should work for users without a grove", async () => {
+		vi.mocked(listFriends).mockResolvedValue([]);
 		const db = createMockDB();
 
 		const response = await GET(createGETEvent(db));
 		const data = (await response.json()) as any;
 
 		expect(data.friends).toEqual([]);
+		// Should call listFriends with user ID, not require a grove
+		expect(listFriends).toHaveBeenCalledWith(db, "user-1");
 	});
 
 	it("should reject unauthenticated requests", async () => {
@@ -147,12 +150,12 @@ describe("GET /api/friends", () => {
 		await expect(GET(event)).rejects.toThrow();
 	});
 
-	it("should call listFriends with home tenant ID", async () => {
+	it("should call listFriends with user ID", async () => {
 		vi.mocked(listFriends).mockResolvedValue([]);
 		const db = createMockDB();
 		await GET(createGETEvent(db));
 
-		expect(listFriends).toHaveBeenCalledWith(db, "home-tenant");
+		expect(listFriends).toHaveBeenCalledWith(db, "user-1");
 	});
 });
 
@@ -187,6 +190,28 @@ describe("POST /api/friends", () => {
 			subdomain: "a2a0",
 			source: "manual",
 		});
+	});
+
+	it("should work for users without a grove", async () => {
+		vi.mocked(getUserHomeGrove).mockResolvedValue(null);
+		vi.mocked(addFriend).mockResolvedValue({
+			friend: {
+				tenantId: "friend-tenant",
+				name: "Art's Grove",
+				subdomain: "a2a0",
+				source: "manual",
+			},
+		});
+
+		const db = createMockDB();
+		const event = createPOSTEvent({ friendSubdomain: "a2a0" }, db);
+		const response = await POST(event);
+		const data = (await response.json()) as any;
+
+		expect(response.status).toBe(201);
+		expect(data.success).toBe(true);
+		// Should pass null tenantId for grove-less users
+		expect(addFriend).toHaveBeenCalledWith(db, "user-1", "a2a0", undefined);
 	});
 
 	it("should reject invalid subdomain format", async () => {
@@ -240,8 +265,8 @@ describe("POST /api/friends", () => {
 		const event = createPOSTEvent({ friendSubdomain: "A2A0" }, db);
 		await POST(event);
 
-		// The service should be called with the lowercased subdomain
-		expect(addFriend).toHaveBeenCalledWith(db, "home-tenant", "a2a0");
+		// The service should be called with the lowercased subdomain and user ID
+		expect(addFriend).toHaveBeenCalledWith(db, "user-1", "a2a0", "home-tenant");
 	});
 
 	it("should reject unauthenticated requests", async () => {
@@ -291,7 +316,6 @@ describe("POST /api/friends", () => {
 describe("DELETE /api/friends/:tenantId", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 	});
 
 	it("should delete an existing friend connection", async () => {
@@ -321,20 +345,23 @@ describe("DELETE /api/friends/:tenantId", () => {
 		await expect(DELETE(event)).rejects.toThrow();
 	});
 
-	it("should require the user to have a grove", async () => {
-		vi.mocked(getUserHomeGrove).mockResolvedValue(null);
-		const db = createMockDB();
+	it("should work for users without a grove", async () => {
+		vi.mocked(removeFriend).mockResolvedValue(true);
 
-		const event = createDELETEEvent("friend-tenant", db);
-		await expect(DELETE(event)).rejects.toThrow();
+		const db = createMockDB();
+		const response = await DELETE(createDELETEEvent("friend-tenant", db));
+
+		expect(response.status).toBe(200);
+		// Should use user ID, not require a grove
+		expect(removeFriend).toHaveBeenCalledWith(db, "user-1", "friend-tenant");
 	});
 
-	it("should call removeFriend with home tenant and friend tenant", async () => {
+	it("should call removeFriend with user ID and friend tenant", async () => {
 		vi.mocked(removeFriend).mockResolvedValue(true);
 
 		const db = createMockDB();
 		await DELETE(createDELETEEvent("friend-tenant", db));
 
-		expect(removeFriend).toHaveBeenCalledWith(db, "home-tenant", "friend-tenant");
+		expect(removeFriend).toHaveBeenCalledWith(db, "user-1", "friend-tenant");
 	});
 });
