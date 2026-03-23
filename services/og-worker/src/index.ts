@@ -65,16 +65,14 @@ function log(level: "info" | "warn" | "error", cat: string, msg: string, meta?: 
 // FONT LOADING
 // =============================================================================
 
-/** Primary CDN and Google Fonts fallback */
+/** Google Fonts TTF URLs (primary source for both weights) */
 const FONT_URLS = [
+	"https://fonts.gstatic.com/s/lexend/v26/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsW_LA.ttf",
 	"https://cdn.grove.place/fonts/Lexend-Regular.ttf",
-	"https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCwkWtLBfog.ttf",
 ];
 
-/** Bold variant CDN and Google Fonts fallback */
 const BOLD_FONT_URLS = [
-	"https://cdn.grove.place/fonts/Lexend-Bold.ttf",
-	"https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC2sStbBfog.ttf",
+	"https://fonts.gstatic.com/s/lexend/v26/wlptgwvFAVdoq2_F94zlCfv0bz1WC9wR_LA.ttf",
 ];
 
 /** Retry delays in milliseconds */
