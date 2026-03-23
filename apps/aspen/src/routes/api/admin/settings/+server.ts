@@ -55,6 +55,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		const allowedSettings = [
 			"font_family",
 			"accent_color",
+			"vine_color",
 			"show_grove_logo",
 			"grove_title",
 			"preferred_season",
@@ -85,12 +86,16 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			}
 		}
 
-		// Validate accent_color (hex format)
-		if (setting_key === "accent_color") {
-			// Allow 3, 4, 6, or 8 digit hex colors with # prefix
-			const hexColorRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
-			if (!hexColorRegex.test(setting_value)) {
-				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		// Validate color settings (hex format)
+		if (setting_key === "accent_color" || setting_key === "vine_color") {
+			// vine_color allows empty string to clear (falls back to accent)
+			if (setting_key === "vine_color" && setting_value === "") {
+				// Will be handled as a delete below
+			} else {
+				const hexColorRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+				if (!hexColorRegex.test(setting_value)) {
+					throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+				}
 			}
 		}
 
@@ -154,19 +159,27 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
 		const now = Math.floor(Date.now() / 1000);
 
-		// Upsert the setting (scoped to tenant)
-		await db
-			.prepare(
-				`
+		// Empty value = delete the setting (used by vine_color "match accent" mode)
+		if (setting_value === "") {
+			await db
+				.prepare(`DELETE FROM site_settings WHERE tenant_id = ? AND setting_key = ?`)
+				.bind(tenantId, setting_key)
+				.run();
+		} else {
+			// Upsert the setting (scoped to tenant)
+			await db
+				.prepare(
+					`
       INSERT INTO site_settings (tenant_id, setting_key, setting_value, updated_at)
       VALUES (?, ?, ?, ?)
       ON CONFLICT(tenant_id, setting_key) DO UPDATE SET
         setting_value = excluded.setting_value,
         updated_at = excluded.updated_at
     `,
-			)
-			.bind(tenantId, setting_key, setting_value, now)
-			.run();
+				)
+				.bind(tenantId, setting_key, setting_value, now)
+				.run();
+		}
 
 		return json({
 			success: true,

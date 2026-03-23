@@ -11,6 +11,7 @@
 	import { api } from "@autumnsgrove/lattice/utils";
 	import {
 		COLOR_PRESETS,
+		VINE_COLOR_PRESETS,
 		FONT_PRESETS,
 		getFontFamily,
 		DEFAULT_ACCENT_COLOR,
@@ -29,6 +30,11 @@
 	let currentAccentColor = $state(DEFAULT_ACCENT_COLOR);
 	let savingColor = $state(false);
 
+	// ── Vine color state ────────────────────────────────────────────────────────
+	let vineColorMode = $state<"accent" | "custom">("accent");
+	let currentVineColor = $state("#22c55e"); // accent-ok — vine default, not accent usage
+	let savingVineColor = $state(false);
+
 	// ── Preferred season state ──────────────────────────────────────────────────
 	let preferredSeason = $state("");
 	let savingSeason = $state(false);
@@ -39,6 +45,10 @@
 			const result = await api.get("/api/settings");
 			if (result.font_family) currentFont = result.font_family;
 			if (result.accent_color) currentAccentColor = result.accent_color;
+			if (result.vine_color) {
+				vineColorMode = "custom";
+				currentVineColor = result.vine_color;
+			}
 			if (result.preferred_season) preferredSeason = result.preferred_season;
 		} catch (error) {
 			console.error("Failed to fetch settings:", error);
@@ -80,6 +90,23 @@
 			toast.error("Couldn't save accent color. Please try again.");
 		}
 		savingColor = false;
+	}
+
+	async function saveVineColor() {
+		savingVineColor = true;
+		try {
+			await api.put("/api/admin/settings", {
+				setting_key: "vine_color",
+				setting_value: vineColorMode === "accent" ? "" : currentVineColor,
+			});
+			toast.success(
+				vineColorMode === "accent" ? "Vine color set to match accent." : "Vine color saved.",
+			);
+		} catch (error) {
+			console.error("Failed to save vine color:", error);
+			toast.error("Couldn't save vine color. Please try again.");
+		}
+		savingVineColor = false;
 	}
 
 	async function saveSeason() {
@@ -205,6 +232,89 @@
 					Saving...
 				{:else}
 					Save Color
+				{/if}
+			</Button>
+		</div>
+	</GlassCard>
+
+	<!-- ── Vine Color ────────────────────────────────────────────────────────── -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Vine Color</h2>
+		</div>
+		<p class="section-description">
+			The leaves and vines in your background. Match your accent or pick something different.
+		</p>
+
+		<div class="vine-mode-toggle" role="radiogroup" aria-label="Vine color mode">
+			<button
+				type="button"
+				class="vine-mode-btn"
+				class:active={vineColorMode === "accent"}
+				role="radio"
+				aria-checked={vineColorMode === "accent"}
+				onclick={() => (vineColorMode = "accent")}
+			>
+				Match Accent
+			</button>
+			<button
+				type="button"
+				class="vine-mode-btn"
+				class:active={vineColorMode === "custom"}
+				role="radio"
+				aria-checked={vineColorMode === "custom"}
+				onclick={() => (vineColorMode = "custom")}
+			>
+				Custom
+			</button>
+		</div>
+
+		{#if vineColorMode === "accent"}
+			<p class="vine-match-hint">
+				Vines will follow your accent color — currently {currentAccentColor}.
+			</p>
+		{:else}
+			<div class="color-picker-section">
+				<div class="color-preview-wrapper">
+					<input
+						type="color"
+						class="color-input"
+						bind:value={currentVineColor}
+						aria-label="Choose vine color"
+					/>
+					<div class="color-preview" style="background: {currentVineColor};">
+						<span class="color-hex">{currentVineColor}</span>
+					</div>
+				</div>
+
+				<div class="color-presets" role="radiogroup" aria-label="Vine color presets">
+					<span class="presets-label">Presets</span>
+					<div class="preset-swatches">
+						{#each VINE_COLOR_PRESETS as color (color.hex)}
+							<button
+								type="button"
+								class="preset-btn"
+								class:active={currentVineColor === color.hex}
+								style="background: {color.hex};"
+								title={color.name}
+								aria-label={color.name}
+								role="radio"
+								aria-checked={currentVineColor === color.hex}
+								onclick={() => (currentVineColor = color.hex)}
+							></button>
+						{/each}
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<div class="button-row">
+			<Button onclick={saveVineColor} variant="primary" disabled={savingVineColor}>
+				{#if savingVineColor}
+					<Spinner size="sm" />
+					Saving...
+				{:else}
+					Save Vine Color
 				{/if}
 			</Button>
 		</div>
@@ -426,6 +536,42 @@
 		transform: scale(1.1);
 	}
 
+	/* ── Vine mode toggle ─────────────────────────────────────────────────────── */
+	.vine-mode-toggle {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+	.vine-mode-btn {
+		padding: 0.5rem 1.25rem;
+		border: 2px solid var(--color-border);
+		border-radius: var(--border-radius-button, 0.375rem);
+		background: transparent;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease,
+			color 0.15s ease;
+	}
+	.vine-mode-btn:hover {
+		border-color: var(--color-primary);
+		color: var(--color-text);
+	}
+	.vine-mode-btn.active {
+		border-color: var(--color-primary);
+		background: hsl(var(--primary-color) / 0.1);
+		color: var(--color-text);
+	}
+	.vine-match-hint {
+		font-size: 0.85rem;
+		color: var(--color-text-subtle);
+		font-style: italic;
+		margin: 0;
+	}
+
 	/* ── Season picker ────────────────────────────────────────────────────────── */
 	.season-picker {
 		display: flex;
@@ -476,6 +622,7 @@
 	@media (prefers-reduced-motion: reduce) {
 		.font-option,
 		.preset-btn,
+		.vine-mode-btn,
 		.season-option {
 			transition: none;
 		}
