@@ -281,6 +281,8 @@ function generateHtml(
 
 	const brandName = brand || "Grove";
 	const domainFooter = brand ? `${brand.toLowerCase()}.grove.place` : "grove.place";
+	const titleMaxWidth = preview ? "660px" : "1080px";
+	const subtitleMaxWidth = preview ? "620px" : "1000px";
 
 	// Glass panel on right side with fading text effect
 	let rightPanel: string;
@@ -306,7 +308,8 @@ function generateHtml(
       ${lineElements}
     </div>`;
 	} else {
-		rightPanel = `<div style="display: flex; position: absolute; right: 60px; top: 120px; bottom: 100px; width: 380px; background: ${c.glass}; border-radius: 16px; border: 1px solid ${c.glassBorder}; opacity: 0.5;"></div>`;
+		// No preview text — skip the glass panel entirely, let the title breathe
+		rightPanel = "";
 	}
 
 	// Ultra-simplified layout - minimal elements, no gradients, solid bg
@@ -316,8 +319,8 @@ function generateHtml(
     <img src="https://grove.place/icon-192.png" width="48" height="48" style="border-radius: 8px;" />
     <div style="display: flex; font-size: 24px; font-weight: 700; color: ${c.accent}; margin-left: 14px;">${brandName}</div>
   </div>
-  <div style="display: flex; font-size: 52px; font-weight: 700; letter-spacing: -0.02em; color: ${c.text}; line-height: 1.15; max-width: 660px;">${title}</div>
-  <div style="display: flex; font-size: 22px; font-weight: 400; color: ${c.muted}; margin-top: 12px; line-height: 1.4; max-width: 620px;">${subtitle}</div>
+  <div style="display: flex; font-size: 52px; font-weight: 700; letter-spacing: -0.02em; color: ${c.text}; line-height: 1.15; max-width: ${titleMaxWidth};">${title}</div>
+  <div style="display: flex; font-size: 22px; font-weight: 400; color: ${c.muted}; margin-top: 12px; line-height: 1.4; max-width: ${subtitleMaxWidth};">${subtitle}</div>
   ${rightPanel}
   <div style="display: flex; position: absolute; bottom: 50px; left: 60px;">
     <div style="display: flex; font-size: 16px; letter-spacing: 0.02em; color: ${c.muted};">${domainFooter}</div>
