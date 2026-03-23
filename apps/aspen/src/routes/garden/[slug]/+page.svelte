@@ -22,6 +22,19 @@
 	const postFont = $derived(
 		data.post.font && data.post.font !== "default" ? fontMap[data.post.font] : null,
 	);
+
+	// Build dynamic OG image URL for posts without a featured image.
+	// og.grove.place generates a branded preview card with the post title,
+	// description, grove name, and accent color.
+	const ogImageUrl = $derived.by(() => {
+		if (data.post.featured_image) return data.post.featured_image;
+		const params = new URLSearchParams();
+		params.set("title", data.post.title.slice(0, 80));
+		if (data.post.description) params.set("subtitle", data.post.description.slice(0, 150));
+		if (data.context?.type === "tenant") params.set("brand", data.context.tenant.name);
+		if (accentColor) params.set("accent", accentColor.replace("#", ""));
+		return `https://og.grove.place/?${params.toString()}`;
+	});
 </script>
 
 <svelte:head>
@@ -42,18 +55,16 @@
 		<meta property="article:tag" content={tag} />
 	{/each}
 
-	<!-- Cover image for social media -->
-	{#if data.post.featured_image}
-		<meta property="og:image" content={data.post.featured_image} />
-	{/if}
+	<!-- Cover image for social media (featured image or dynamic OG generation) -->
+	<meta property="og:image" content={ogImageUrl} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
 
 	<!-- Twitter Card metadata -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={data.post.title} />
 	<meta name="twitter:description" content={data.post.description || data.post.title} />
-	{#if data.post.featured_image}
-		<meta name="twitter:image" content={data.post.featured_image} />
-	{/if}
+	<meta name="twitter:image" content={ogImageUrl} />
 
 	<!-- Schema.org JSON-LD structured data for articles -->
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted JSON-LD script -->
@@ -69,7 +80,7 @@
 		datePublished: data.post.date,
 		dateModified: data.post.updated_at || data.post.date,
 		keywords: data.post.tags.join(", "),
-		...(data.post.featured_image ? { image: data.post.featured_image } : {}),
+		image: ogImageUrl,
 	})}<\/script>`}
 </svelte:head>
 

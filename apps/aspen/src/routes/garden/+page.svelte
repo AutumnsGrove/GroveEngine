@@ -13,6 +13,16 @@
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
 
+	// Dynamic OG image for the garden index page
+	const gardenOgUrl = $derived.by(() => {
+		const params = new URLSearchParams();
+		params.set("title", data.context?.type === "tenant" ? data.context.tenant.name : "Garden");
+		params.set("subtitle", "Explore my collection of posts — thoughts, ideas, and explorations.");
+		if (data.context?.type === "tenant") params.set("brand", data.context.tenant.name);
+		if (accentColor) params.set("accent", accentColor.replace("#", ""));
+		return `https://og.grove.place/?${params.toString()}`;
+	});
+
 	function handleCardClick(event: MouseEvent, slug: string) {
 		// Don't navigate if clicking on a tag link or badge
 		const target = event.target as HTMLElement;
@@ -36,6 +46,19 @@
 		name="description"
 		content="Explore my collection of posts - thoughts, ideas, and explorations."
 	/>
+	<meta
+		property="og:title"
+		content="Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}"
+	/>
+	<meta
+		property="og:description"
+		content="Explore my collection of posts — thoughts, ideas, and explorations."
+	/>
+	<meta property="og:image" content={gardenOgUrl} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content={gardenOgUrl} />
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">

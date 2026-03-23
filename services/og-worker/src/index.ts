@@ -71,10 +71,17 @@ const FONT_URLS = [
 	"https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCwkWtLBfog.ttf",
 ];
 
+/** Bold variant CDN and Google Fonts fallback */
+const BOLD_FONT_URLS = [
+	"https://cdn.grove.place/fonts/Lexend-Bold.ttf",
+	"https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC2sStbBfog.ttf",
+];
+
 /** Retry delays in milliseconds */
 const RETRY_DELAYS = [100, 500, 2000];
 
 let fontCache: ArrayBuffer | null = null;
+let boldFontCache: ArrayBuffer | null = null;
 
 /**
  * Get font with multi-layer caching and resilient fetching:
@@ -160,6 +167,94 @@ async function getFont(env: Env): Promise<ArrayBuffer> {
 	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
 }
 
+/**
+ * Get bold font with multi-layer caching and resilient fetching:
+ * 1. Memory cache (fastest, per-isolate)
+ * 2. KV cache (cross-worker persistence)
+ * 3. Fetch from CDN with retry and backoff
+ * 4. Fallback to Google Fonts if primary fails
+ */
+async function getBoldFont(env: Env): Promise<ArrayBuffer> {
+	// 1. Check memory cache (fastest)
+	if (boldFontCache) {
+		log("info", "font", "Bold loaded from memory cache");
+		return boldFontCache;
+	}
+
+	// 2. Check KV cache (cross-worker persistence)
+	if (env.OG_CACHE) {
+		try {
+			const kvFont = await env.OG_CACHE.get("font:lexend-bold", "arrayBuffer");
+			if (kvFont) {
+				boldFontCache = kvFont;
+				log("info", "font", "Bold loaded from KV cache");
+				return boldFontCache;
+			}
+		} catch (err) {
+			log("warn", "font", "Bold KV cache read failed", {
+				error: err instanceof Error ? err.message : "Unknown",
+			});
+			// KV miss or error, continue to fetch
+		}
+	}
+
+	// 3. Fetch from CDN with retry and fallback
+	for (const url of BOLD_FONT_URLS) {
+		const host = new URL(url).host;
+
+		for (let attempt = 1; attempt <= 3; attempt++) {
+			try {
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+				const response = await fetch(url, { signal: controller.signal });
+				clearTimeout(timeoutId);
+
+				if (response.ok) {
+					boldFontCache = await response.arrayBuffer();
+					log("info", "font", `Bold loaded from ${host}`, { attempt });
+
+					// Cache in KV for other workers (24h TTL)
+					if (env.OG_CACHE) {
+						env.OG_CACHE.put("font:lexend-bold", boldFontCache, {
+							expirationTtl: 86400,
+						}).catch((err) => {
+							log("warn", "font", "Bold KV cache write failed", {
+								error: err instanceof Error ? err.message : "Unknown",
+							});
+						});
+					}
+					return boldFontCache;
+				}
+
+				log("warn", "font", `Bold HTTP ${response.status} from ${host}`, {
+					attempt,
+				});
+			} catch (err) {
+				const isTimeout = err instanceof Error && err.name === "AbortError";
+				log(
+					"warn",
+					"font",
+					isTimeout ? `Bold timeout from ${host}` : `Bold fetch error from ${host}`,
+					{
+						attempt,
+						error: err instanceof Error ? err.message : "Unknown",
+					},
+				);
+			}
+
+			// Backoff before next attempt (skip delay on last attempt)
+			if (attempt < 3) {
+				await sleep(RETRY_DELAYS[attempt - 1]);
+			}
+		}
+		log("warn", "font", `All bold attempts failed for ${host}`);
+	}
+
+	log("error", "font", OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
+	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
+}
+
 // =============================================================================
 // HTML GENERATION - Simplified for Satori performance
 // =============================================================================
@@ -169,8 +264,23 @@ function generateHtml(
 	subtitle: string,
 	preview: string | null,
 	variant: Variant,
+	brand?: string | null,
+	accentHex?: string | null,
 ): string {
 	const c = getColors(variant);
+
+	// Override accent color for default variant if accentHex is provided
+	if (accentHex && variant === "default") {
+		c.accent = accentHex;
+		// Convert hex to RGB for glassBorder at 25% opacity
+		const r = parseInt(accentHex.slice(1, 3), 16);
+		const g = parseInt(accentHex.slice(3, 5), 16);
+		const b = parseInt(accentHex.slice(5, 7), 16);
+		c.glassBorder = `rgba(${r}, ${g}, ${b}, 0.2)`;
+	}
+
+	const brandName = brand || "Grove";
+	const domainFooter = brand ? `${brand.toLowerCase()}.grove.place` : "grove.place";
 
 	// Glass panel on right side with fading text effect
 	let rightPanel: string;
@@ -188,7 +298,7 @@ function generateHtml(
 		const lineElements = lineConfigs
 			.map(
 				({ text, opacity }) =>
-					`<div style="display: flex; font-size: 17px; color: ${c.muted}; line-height: 1.7; opacity: ${opacity};">${escapeHtml(text)}</div>`,
+					`<div style="display: flex; font-size: 16px; color: ${c.muted}; line-height: 1.6; opacity: ${opacity};">${escapeHtml(text)}</div>`,
 			)
 			.join("");
 
@@ -201,16 +311,16 @@ function generateHtml(
 
 	// Ultra-simplified layout - minimal elements, no gradients, solid bg
 	return `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; background: ${c.bgFrom}; padding: 60px; font-family: Lexend; position: relative;">
-  <div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 6px; background: ${c.accent};"></div>
+  <div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 4px; background: ${c.accent};"></div>
   <div style="display: flex; align-items: center; margin-bottom: 32px;">
     <img src="https://grove.place/icon-192.png" width="48" height="48" style="border-radius: 8px;" />
-    <div style="display: flex; font-size: 24px; font-weight: 600; color: ${c.accent}; margin-left: 14px;">Grove</div>
+    <div style="display: flex; font-size: 24px; font-weight: 700; color: ${c.accent}; margin-left: 14px;">${brandName}</div>
   </div>
-  <div style="display: flex; font-size: 56px; font-weight: 700; color: ${c.text}; line-height: 1.15; max-width: 660px;">${title}</div>
-  <div style="display: flex; font-size: 26px; color: ${c.muted}; margin-top: 16px; line-height: 1.4; max-width: 620px;">${subtitle}</div>
+  <div style="display: flex; font-size: 52px; font-weight: 700; letter-spacing: -0.02em; color: ${c.text}; line-height: 1.15; max-width: 660px;">${title}</div>
+  <div style="display: flex; font-size: 22px; font-weight: 400; color: ${c.muted}; margin-top: 12px; line-height: 1.4; max-width: 620px;">${subtitle}</div>
   ${rightPanel}
   <div style="display: flex; position: absolute; bottom: 50px; left: 60px;">
-    <div style="display: flex; font-size: 18px; color: ${c.muted};">grove.place</div>
+    <div style="display: flex; font-size: 16px; letter-spacing: 0.02em; color: ${c.muted};">${domainFooter}</div>
   </div>
 </div>`;
 }
@@ -708,6 +818,8 @@ export default {
 				url.searchParams.get("subtitle") || pageMeta?.description || "A place to Be.";
 			const rawVariant = url.searchParams.get("variant") || "default";
 			const rawPreview = url.searchParams.get("preview") || pageMeta?.preview;
+			const rawBrand = url.searchParams.get("brand");
+			const rawAccent = url.searchParams.get("accent");
 
 			const title = escapeHtml(rawTitle.slice(0, 80));
 			const subtitle = escapeHtml(rawSubtitle.slice(0, 150));
@@ -717,14 +829,19 @@ export default {
 			)
 				? (rawVariant as Variant)
 				: "default";
+			const brand = rawBrand ? escapeHtml(rawBrand.slice(0, 50)) : null;
+			const accentHex = rawAccent && /^[0-9A-Fa-f]{6}$/.test(rawAccent) ? `#${rawAccent}` : null;
 
-			const fontData = await getFont(env);
-			const html = generateHtml(title, subtitle, preview, variant);
+			const [fontData, boldFontData] = await Promise.all([getFont(env), getBoldFont(env)]);
+			const html = generateHtml(title, subtitle, preview, variant, brand, accentHex);
 
 			const response = new ImageResponse(html, {
 				width: 1200,
 				height: 630,
-				fonts: [{ name: "Lexend", data: fontData, weight: 400, style: "normal" }],
+				fonts: [
+					{ name: "Lexend", data: fontData, weight: 400, style: "normal" },
+					{ name: "Lexend", data: boldFontData, weight: 700, style: "normal" },
+				],
 			});
 
 			const headers = new Headers(response.headers);
