@@ -2,22 +2,64 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { featureIcons, stateIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
+	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
+	import { featureIcons, stateIcons, authIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils/api";
 
 	let { data } = $props();
 
-	type TabId = "pending" | "replies" | "moderated" | "blocked" | "settings";
-	let activeTab = $state<TabId>("pending");
+	type TabId = "inbox" | "moderated" | "blocked" | "settings";
+	let activeTab = $state<TabId>("inbox");
 	let moderating = $state<string | null>(null);
 	let unblocking = $state<string | null>(null);
 	let savingSettings = $state(false);
 
 	let pendingCount = $derived(data.pending?.length ?? 0);
-	let replyCount = $derived(data.replies?.length ?? 0);
 	let moderatedCount = $derived(data.moderated?.length ?? 0);
 	let blockedCount = $derived(data.blocked?.length ?? 0);
+
+	// Unified inbox: pending + replies sorted newest-first
+	type InboxItem = {
+		kind: "pending" | "reply";
+		id: string;
+		post_id: string;
+		author_name: string;
+		content: string;
+		content_html?: string | null;
+		created_at: string;
+	};
+
+	let inboxItems = $derived.by(() => {
+		const pending: InboxItem[] = (data.pending ?? []).map(
+			(c: {
+				id: string;
+				post_id: string;
+				author_name: string;
+				content: string;
+				content_html?: string | null;
+				created_at: string;
+			}) => ({
+				...c,
+				kind: "pending" as const,
+			}),
+		);
+		const replies: InboxItem[] = (data.replies ?? []).map(
+			(r: {
+				id: string;
+				post_id: string;
+				author_name: string;
+				content: string;
+				content_html?: string | null;
+				created_at: string;
+			}) => ({
+				...r,
+				kind: "reply" as const,
+			}),
+		);
+		return [...pending, ...replies].sort(
+			(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+		);
+	});
 
 	// Local settings state (editable copy)
 	// svelte-ignore state_referenced_locally
@@ -114,421 +156,345 @@
 	}
 </script>
 
-<div class="reeds-admin">
-	<header class="page-header">
-		<h1 class="page-title">
-			<featureIcons.messageSquare class="title-icon" />
-			<GroveTerm term="reeds">Comments</GroveTerm>
-		</h1>
-		<p class="page-subtitle">
-			<GroveTerm term="reeds" standard="Comments and replies on your posts"
-				>Reeds and replies on your blooms</GroveTerm
+<ArborSection
+	title="Reeds"
+	icon={featureIcons.messageSquare}
+	description="Comments and replies on your posts."
+	backHref="/arbor"
+	backLabel="Dashboard"
+>
+	<div class="reeds-admin">
+		<!-- Tab navigation -->
+		<div class="tab-bar" role="tablist">
+			<button
+				role="tab"
+				id="tab-inbox"
+				aria-selected={activeTab === "inbox"}
+				aria-controls="panel-inbox"
+				class="tab"
+				class:active={activeTab === "inbox"}
+				onclick={() => (activeTab = "inbox")}
 			>
-		</p>
-	</header>
-
-	<!-- Tab navigation -->
-	<div class="tab-bar" role="tablist">
-		<button
-			role="tab"
-			id="tab-pending"
-			aria-selected={activeTab === "pending"}
-			aria-controls="panel-pending"
-			class="tab"
-			class:active={activeTab === "pending"}
-			onclick={() => (activeTab = "pending")}
-		>
-			Pending
-			{#if pendingCount > 0}
-				<Badge variant="destructive">{pendingCount}</Badge>
-			{/if}
-		</button>
-		<button
-			role="tab"
-			id="tab-replies"
-			aria-selected={activeTab === "replies"}
-			aria-controls="panel-replies"
-			class="tab"
-			class:active={activeTab === "replies"}
-			onclick={() => (activeTab = "replies")}
-		>
-			Replies
-			{#if replyCount > 0}
-				<Badge variant="secondary">{replyCount}</Badge>
-			{/if}
-		</button>
-		<button
-			role="tab"
-			id="tab-moderated"
-			aria-selected={activeTab === "moderated"}
-			aria-controls="panel-moderated"
-			class="tab"
-			class:active={activeTab === "moderated"}
-			onclick={() => (activeTab = "moderated")}
-		>
-			Moderated
-			{#if moderatedCount > 0}
-				<Badge variant="secondary">{moderatedCount}</Badge>
-			{/if}
-		</button>
-		<button
-			role="tab"
-			id="tab-blocked"
-			aria-selected={activeTab === "blocked"}
-			aria-controls="panel-blocked"
-			class="tab"
-			class:active={activeTab === "blocked"}
-			onclick={() => (activeTab = "blocked")}
-		>
-			Blocked
-			{#if blockedCount > 0}
-				<Badge variant="secondary">{blockedCount}</Badge>
-			{/if}
-		</button>
-		<button
-			role="tab"
-			id="tab-settings"
-			aria-selected={activeTab === "settings"}
-			aria-controls="panel-settings"
-			class="tab"
-			class:active={activeTab === "settings"}
-			onclick={() => (activeTab = "settings")}
-		>
-			Settings
-		</button>
-	</div>
-
-	<!-- Pending comments -->
-	{#if activeTab === "pending"}
-		<div id="panel-pending" role="tabpanel" aria-labelledby="tab-pending">
-			<GlassCard variant="default" class="overflow-hidden">
-				{#if data.pending && data.pending.length > 0}
-					<div class="comment-list">
-						{#each data.pending as comment (comment.id)}
-							{@const post = getPostInfo(comment.post_id)}
-							<div class="comment-card" class:moderating={moderating === comment.id}>
-								<div class="comment-meta">
-									<span class="comment-author">{comment.author_name}</span>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<time class="comment-time">{formatTimeAgo(comment.created_at)}</time>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<a href="/garden/{post.slug}" class="comment-post" target="_blank">
-										{post.title}
-									</a>
-								</div>
-
-								<div class="comment-content">
-									{#if comment.content_html}
-										<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
-										{@html comment.content_html}
-									{:else}
-										<p>{comment.content}</p>
-									{/if}
-								</div>
-
-								<div class="comment-actions">
-									<button
-										class="mod-btn mod-approve"
-										onclick={() => moderate(comment.id, post.slug, "approve")}
-										disabled={moderating === comment.id}
-										title="Approve"
-									>
-										<stateIcons.check class="mod-icon" />
-										Approve
-									</button>
-									<button
-										class="mod-btn mod-reject"
-										onclick={() => moderate(comment.id, post.slug, "reject")}
-										disabled={moderating === comment.id}
-										title="Reject"
-									>
-										<stateIcons.x class="mod-icon" />
-										Reject
-									</button>
-									<button
-										class="mod-btn mod-block"
-										onclick={() => moderate(comment.id, post.slug, "block_user")}
-										disabled={moderating === comment.id}
-										title="Block this user"
-									>
-										<stateIcons.ban class="mod-icon" />
-										Block
-									</button>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="empty-state">
-						<featureIcons.messageSquare class="empty-icon" />
-						<p>No comments waiting for review.</p>
-					</div>
+				Inbox
+				{#if pendingCount > 0}
+					<Badge variant="destructive">{pendingCount}</Badge>
 				{/if}
-			</GlassCard>
-		</div>
-	{/if}
-
-	<!-- Private replies -->
-	{#if activeTab === "replies"}
-		<div id="panel-replies" role="tabpanel" aria-labelledby="tab-replies">
-			<GlassCard variant="default" class="overflow-hidden">
-				{#if data.replies && data.replies.length > 0}
-					<div class="comment-list">
-						{#each data.replies as reply (reply.id)}
-							{@const post = getPostInfo(reply.post_id)}
-							<div class="comment-card">
-								<div class="comment-meta">
-									<featureIcons.mail class="reply-icon" />
-									<span class="comment-author">{reply.author_name}</span>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<time class="comment-time">{formatTimeAgo(reply.created_at)}</time>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<a href="/garden/{post.slug}" class="comment-post" target="_blank">
-										{post.title}
-									</a>
-								</div>
-
-								<div class="comment-content">
-									{#if reply.content_html}
-										<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
-										{@html reply.content_html}
-									{:else}
-										<p>{reply.content}</p>
-									{/if}
-								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="empty-state">
-						<featureIcons.mail class="empty-icon" />
-						<p>No private replies yet.</p>
-					</div>
+			</button>
+			<button
+				role="tab"
+				id="tab-moderated"
+				aria-selected={activeTab === "moderated"}
+				aria-controls="panel-moderated"
+				class="tab"
+				class:active={activeTab === "moderated"}
+				onclick={() => (activeTab = "moderated")}
+			>
+				Moderated
+				{#if moderatedCount > 0}
+					<Badge variant="secondary">{moderatedCount}</Badge>
 				{/if}
-			</GlassCard>
-		</div>
-	{/if}
-
-	<!-- Moderated (rejected/spam) -->
-	{#if activeTab === "moderated"}
-		<div id="panel-moderated" role="tabpanel" aria-labelledby="tab-moderated">
-			<GlassCard variant="default" class="overflow-hidden">
-				{#if data.moderated && data.moderated.length > 0}
-					<div class="comment-list">
-						{#each data.moderated as comment (comment.id)}
-							{@const post = getPostInfo(comment.post_id)}
-							<div class="comment-card" class:moderating={moderating === comment.id}>
-								<div class="comment-meta">
-									<span class="status-label status-{comment.status}">{comment.status}</span>
-									<span class="comment-author">{comment.author_name}</span>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<time class="comment-time"
-										>{formatTimeAgo(comment.moderated_at || comment.created_at)}</time
-									>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<a href="/garden/{post.slug}" class="comment-post" target="_blank">
-										{post.title}
-									</a>
-								</div>
-
-								<div class="comment-content">
-									{#if comment.content_html}
-										<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
-										{@html comment.content_html}
-									{:else}
-										<p>{comment.content}</p>
-									{/if}
-								</div>
-
-								<div class="comment-actions">
-									<button
-										class="mod-btn mod-approve"
-										onclick={() => moderate(comment.id, post.slug, "approve")}
-										disabled={moderating === comment.id}
-										title="Re-approve this comment"
-									>
-										<stateIcons.check class="mod-icon" />
-										Approve
-									</button>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="empty-state">
-						<authIcons.shieldAlert class="empty-icon" />
-						<p>No rejected or spam-flagged comments.</p>
-					</div>
+			</button>
+			<button
+				role="tab"
+				id="tab-blocked"
+				aria-selected={activeTab === "blocked"}
+				aria-controls="panel-blocked"
+				class="tab"
+				class:active={activeTab === "blocked"}
+				onclick={() => (activeTab = "blocked")}
+			>
+				Blocked
+				{#if blockedCount > 0}
+					<Badge variant="secondary">{blockedCount}</Badge>
 				{/if}
-			</GlassCard>
+			</button>
+			<button
+				role="tab"
+				id="tab-settings"
+				aria-selected={activeTab === "settings"}
+				aria-controls="panel-settings"
+				class="tab"
+				class:active={activeTab === "settings"}
+				onclick={() => (activeTab = "settings")}
+			>
+				Settings
+			</button>
 		</div>
-	{/if}
 
-	<!-- Blocked users -->
-	{#if activeTab === "blocked"}
-		<div id="panel-blocked" role="tabpanel" aria-labelledby="tab-blocked">
-			<GlassCard variant="default" class="overflow-hidden">
-				{#if data.blocked && data.blocked.length > 0}
-					<div class="comment-list">
-						{#each data.blocked as blocked (blocked.blocked_user_id)}
-							<div class="comment-card" class:moderating={unblocking === blocked.blocked_user_id}>
-								<div class="comment-meta">
-									<authIcons.userX class="reply-icon" />
-									<span class="comment-author">{blocked.blocked_user_id}</span>
-									<span class="meta-sep" aria-hidden="true"></span>
-									<time class="comment-time">{formatTimeAgo(blocked.created_at)}</time>
-									{#if blocked.reason}
+		<!-- Inbox (pending + private replies) -->
+		{#if activeTab === "inbox"}
+			<div id="panel-inbox" role="tabpanel" aria-labelledby="tab-inbox">
+				<GlassCard variant="default" class="overflow-hidden">
+					{#if inboxItems.length > 0}
+						<div class="comment-list">
+							{#each inboxItems as item (item.id)}
+								{@const post = getPostInfo(item.post_id)}
+								<div class="comment-card" class:moderating={moderating === item.id}>
+									<div class="comment-meta">
+										{#if item.kind === "pending"}
+											<span class="inbox-badge inbox-pending">Pending</span>
+										{:else}
+											<featureIcons.mail class="reply-icon" />
+											<span class="inbox-badge inbox-private">Private</span>
+										{/if}
+										<span class="comment-author">{item.author_name}</span>
 										<span class="meta-sep" aria-hidden="true"></span>
-										<span class="block-reason">{blocked.reason}</span>
+										<time class="comment-time">{formatTimeAgo(item.created_at)}</time>
+										<span class="meta-sep" aria-hidden="true"></span>
+										<a href="/garden/{post.slug}" class="comment-post" target="_blank">
+											{post.title}
+										</a>
+									</div>
+
+									<div class="comment-content">
+										{#if item.content_html}
+											<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
+											{@html item.content_html}
+										{:else}
+											<p>{item.content}</p>
+										{/if}
+									</div>
+
+									{#if item.kind === "pending"}
+										<div class="comment-actions">
+											<button
+												class="mod-btn mod-approve"
+												onclick={() => moderate(item.id, post.slug, "approve")}
+												disabled={moderating === item.id}
+												title="Approve"
+											>
+												<stateIcons.check class="mod-icon" />
+												Approve
+											</button>
+											<button
+												class="mod-btn mod-reject"
+												onclick={() => moderate(item.id, post.slug, "reject")}
+												disabled={moderating === item.id}
+												title="Reject"
+											>
+												<stateIcons.x class="mod-icon" />
+												Reject
+											</button>
+											<button
+												class="mod-btn mod-block"
+												onclick={() => moderate(item.id, post.slug, "block_user")}
+												disabled={moderating === item.id}
+												title="Block this user"
+											>
+												<stateIcons.ban class="mod-icon" />
+												Block
+											</button>
+										</div>
 									{/if}
 								</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="empty-state">
+							<featureIcons.messageSquare class="empty-icon" />
+							<p>All quiet in the reeds. When someone leaves a thought, it'll appear here.</p>
+						</div>
+					{/if}
+				</GlassCard>
+			</div>
+		{/if}
 
-								<div class="comment-actions">
-									<button
-										class="mod-btn mod-approve"
-										onclick={() => unblock(blocked.blocked_user_id)}
-										disabled={unblocking === blocked.blocked_user_id}
-										title="Unblock this user"
-									>
-										<stateIcons.check class="mod-icon" />
-										Unblock
-									</button>
+		<!-- Moderated (rejected/spam) -->
+		{#if activeTab === "moderated"}
+			<div id="panel-moderated" role="tabpanel" aria-labelledby="tab-moderated">
+				<GlassCard variant="default" class="overflow-hidden">
+					{#if data.moderated && data.moderated.length > 0}
+						<div class="comment-list">
+							{#each data.moderated as comment (comment.id)}
+								{@const post = getPostInfo(comment.post_id)}
+								<div class="comment-card" class:moderating={moderating === comment.id}>
+									<div class="comment-meta">
+										<span class="status-label status-{comment.status}">{comment.status}</span>
+										<span class="comment-author">{comment.author_name}</span>
+										<span class="meta-sep" aria-hidden="true"></span>
+										<time class="comment-time"
+											>{formatTimeAgo(comment.moderated_at || comment.created_at)}</time
+										>
+										<span class="meta-sep" aria-hidden="true"></span>
+										<a href="/garden/{post.slug}" class="comment-post" target="_blank">
+											{post.title}
+										</a>
+									</div>
+
+									<div class="comment-content">
+										{#if comment.content_html}
+											<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
+											{@html comment.content_html}
+										{:else}
+											<p>{comment.content}</p>
+										{/if}
+									</div>
+
+									<div class="comment-actions">
+										<button
+											class="mod-btn mod-approve"
+											onclick={() => moderate(comment.id, post.slug, "approve")}
+											disabled={moderating === comment.id}
+											title="Re-approve this comment"
+										>
+											<stateIcons.check class="mod-icon" />
+											Approve
+										</button>
+									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="empty-state">
-						<stateIcons.ban class="empty-icon" />
-						<p>No blocked users.</p>
-					</div>
-				{/if}
-			</GlassCard>
-		</div>
-	{/if}
+							{/each}
+						</div>
+					{:else}
+						<div class="empty-state">
+							<authIcons.shieldAlert class="empty-icon" />
+							<p>No moderated comments — your garden's been peaceful.</p>
+						</div>
+					{/if}
+				</GlassCard>
+			</div>
+		{/if}
 
-	<!-- Settings -->
-	{#if activeTab === "settings"}
-		<div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings">
-			<GlassCard variant="default">
-				<div class="settings-form">
-					<div class="setting-group">
-						<span class="setting-label" id="label-comments-enabled">
-							<span class="setting-name">Comments enabled</span>
-							<span class="setting-desc">Allow visitors to leave comments on your posts</span>
-						</span>
-						<button
-							class="toggle-btn"
-							class:on={commentsEnabled}
-							onclick={() => (commentsEnabled = commentsEnabled ? 0 : 1)}
-							role="switch"
-							aria-checked={!!commentsEnabled}
-							aria-labelledby="label-comments-enabled"
-						>
-							<span class="toggle-track">
-								<span class="toggle-thumb"></span>
+		<!-- Blocked users -->
+		{#if activeTab === "blocked"}
+			<div id="panel-blocked" role="tabpanel" aria-labelledby="tab-blocked">
+				<GlassCard variant="default" class="overflow-hidden">
+					{#if data.blocked && data.blocked.length > 0}
+						<div class="comment-list">
+							{#each data.blocked as blocked (blocked.blocked_user_id)}
+								<div class="comment-card" class:moderating={unblocking === blocked.blocked_user_id}>
+									<div class="comment-meta">
+										<authIcons.userX class="reply-icon" />
+										<span class="comment-author">
+											Blocked user
+											<span class="blocked-id"
+												>&middot; {blocked.blocked_user_id.slice(0, 8)}&hellip;</span
+											>
+										</span>
+										<span class="meta-sep" aria-hidden="true"></span>
+										<time class="comment-time">{formatTimeAgo(blocked.created_at)}</time>
+										{#if blocked.reason}
+											<span class="meta-sep" aria-hidden="true"></span>
+											<span class="block-reason">{blocked.reason}</span>
+										{/if}
+									</div>
+
+									<div class="comment-actions">
+										<button
+											class="mod-btn mod-approve"
+											onclick={() => unblock(blocked.blocked_user_id)}
+											disabled={unblocking === blocked.blocked_user_id}
+											title="Unblock this user"
+										>
+											<stateIcons.check class="mod-icon" />
+											Unblock
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="empty-state">
+							<stateIcons.ban class="empty-icon" />
+							<p>Nobody blocked. That's the dream.</p>
+						</div>
+					{/if}
+				</GlassCard>
+			</div>
+		{/if}
+
+		<!-- Settings -->
+		{#if activeTab === "settings"}
+			<div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings">
+				<GlassCard variant="default">
+					<div class="settings-form">
+						<div class="setting-group">
+							<span class="setting-label" id="label-comments-enabled">
+								<span class="setting-name">Comments enabled</span>
+								<span class="setting-desc">Allow visitors to leave comments on your posts</span>
 							</span>
-						</button>
-					</div>
-
-					<div class="setting-group">
-						<span class="setting-label" id="label-public-comments">
-							<span class="setting-name">Public comments</span>
-							<span class="setting-desc"
-								>Allow public comments visible to all readers (otherwise, only private replies to
-								you)</span
+							<button
+								class="toggle-btn"
+								class:on={commentsEnabled}
+								onclick={() => (commentsEnabled = commentsEnabled ? 0 : 1)}
+								role="switch"
+								aria-checked={!!commentsEnabled}
+								aria-labelledby="label-comments-enabled"
 							>
-						</span>
-						<button
-							class="toggle-btn"
-							class:on={publicEnabled}
-							onclick={() => (publicEnabled = publicEnabled ? 0 : 1)}
-							role="switch"
-							aria-checked={!!publicEnabled}
-							aria-labelledby="label-public-comments"
-						>
-							<span class="toggle-track">
-								<span class="toggle-thumb"></span>
+								<span class="toggle-track">
+									<span class="toggle-thumb"></span>
+								</span>
+							</button>
+						</div>
+
+						<div class="setting-group">
+							<span class="setting-label" id="label-public-comments">
+								<span class="setting-name">Public comments</span>
+								<span class="setting-desc"
+									>Allow public comments visible to all readers (otherwise, only private replies to
+									you)</span
+								>
 							</span>
-						</button>
-					</div>
+							<button
+								class="toggle-btn"
+								class:on={publicEnabled}
+								onclick={() => (publicEnabled = publicEnabled ? 0 : 1)}
+								role="switch"
+								aria-checked={!!publicEnabled}
+								aria-labelledby="label-public-comments"
+							>
+								<span class="toggle-track">
+									<span class="toggle-thumb"></span>
+								</span>
+							</button>
+						</div>
 
-					<div class="setting-group">
-						<label class="setting-label" for="who-can-comment">
-							<span class="setting-name">Who can comment</span>
-							<span class="setting-desc">Restrict who is allowed to leave comments</span>
-						</label>
-						<select id="who-can-comment" class="setting-select" bind:value={whoCanComment}>
-							<option value="anyone">Anyone (signed in)</option>
-							<option value="grove_members">Grove members only</option>
-							<option value="paid_only">Paid subscribers only</option>
-							<option value="nobody">Nobody (disabled)</option>
-						</select>
-					</div>
+						<div class="setting-group">
+							<label class="setting-label" for="who-can-comment">
+								<span class="setting-name">Who can comment</span>
+								<span class="setting-desc">Restrict who is allowed to leave comments</span>
+							</label>
+							<select id="who-can-comment" class="setting-select" bind:value={whoCanComment}>
+								<option value="anyone">Anyone (signed in)</option>
+								<option value="grove_members">Grove members only</option>
+								<option value="paid_only">Paid subscribers only</option>
+								<option value="nobody">Nobody (disabled)</option>
+							</select>
+						</div>
 
-					<div class="setting-group">
-						<span class="setting-label" id="label-show-count">
-							<span class="setting-name">Show comment count</span>
-							<span class="setting-desc">Display comment count badge on blog posts</span>
-						</span>
-						<button
-							class="toggle-btn"
-							class:on={showCount}
-							onclick={() => (showCount = showCount ? 0 : 1)}
-							role="switch"
-							aria-checked={!!showCount}
-							aria-labelledby="label-show-count"
-						>
-							<span class="toggle-track">
-								<span class="toggle-thumb"></span>
+						<div class="setting-group">
+							<span class="setting-label" id="label-show-count">
+								<span class="setting-name">Show comment count</span>
+								<span class="setting-desc">Display comment count badge on blog posts</span>
 							</span>
-						</button>
-					</div>
+							<button
+								class="toggle-btn"
+								class:on={showCount}
+								onclick={() => (showCount = showCount ? 0 : 1)}
+								role="switch"
+								aria-checked={!!showCount}
+								aria-labelledby="label-show-count"
+							>
+								<span class="toggle-track">
+									<span class="toggle-thumb"></span>
+								</span>
+							</button>
+						</div>
 
-					<div class="setting-actions">
-						<button class="save-btn" onclick={saveSettings} disabled={savingSettings}>
-							{savingSettings ? "Saving..." : "Save Settings"}
-						</button>
+						<div class="setting-actions">
+							<button class="save-btn" onclick={saveSettings} disabled={savingSettings}>
+								{savingSettings ? "Saving..." : "Save Settings"}
+							</button>
+						</div>
 					</div>
-				</div>
-			</GlassCard>
-		</div>
-	{/if}
-</div>
+				</GlassCard>
+			</div>
+		{/if}
+	</div>
+</ArborSection>
 
 <style>
 	.reeds-admin {
 		max-width: 800px;
-	}
-
-	.page-header {
-		margin-bottom: 1.5rem;
-	}
-
-	.page-title {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 1.5rem;
-		font-weight: 700;
-		margin: 0 0 0.25rem 0;
-		color: var(--color-text, #1a1a1a);
-	}
-
-	:global(.dark) .page-title {
-		color: var(--grove-text-strong, #e5e5e5);
-	}
-
-	:global(.title-icon) {
-		width: 1.5rem;
-		height: 1.5rem;
-		color: var(--grove-accent);
-	}
-
-	.page-subtitle {
-		margin: 0;
-		color: var(--color-text-muted, #666);
-		font-size: 0.9375rem;
 	}
 
 	/* Tab bar */
@@ -685,6 +651,40 @@
 
 	.comment-content :global(p:last-child) {
 		margin-bottom: 0;
+	}
+
+	/* Inbox badges */
+	.inbox-badge {
+		display: inline-block;
+		padding: 0.125rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+
+	.inbox-pending {
+		background: rgba(234, 179, 8, 0.12);
+		color: #b45309;
+	}
+
+	:global(.dark) .inbox-pending {
+		background: rgba(234, 179, 8, 0.15);
+		color: #fbbf24;
+	}
+
+	.inbox-private {
+		background: var(--grove-accent-8);
+		color: var(--grove-accent-dark);
+	}
+
+	/* Blocked user display */
+	.blocked-id {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.75rem;
+		font-weight: 400;
+		color: var(--color-text-muted, #888);
 	}
 
 	/* Status labels for moderated tab */
