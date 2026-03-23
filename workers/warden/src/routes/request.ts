@@ -188,7 +188,10 @@ requestRoute.post("/", async (c) => {
 	}
 
 	// Build and execute upstream request
-	const httpRequest = actionDef.buildRequest(parseResult.data, credential.value);
+	const httpRequest = actionDef.buildRequest(
+		parseResult.data as Record<string, unknown>,
+		credential.value,
+	);
 	const result = await executeUpstream(httpRequest);
 
 	// Scrub response

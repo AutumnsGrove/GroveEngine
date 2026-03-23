@@ -56,10 +56,11 @@ vi.mock("../middleware/rate-limit", () => ({
 		.mockResolvedValue({ allowed: true, remaining: 4999, limit: 5000, resetAt: 0 }),
 }));
 
+// Hoist zod import for use inside vi.mock factory
+const { z } = await vi.hoisted(() => import("zod"));
+
 // Register test services so getService() returns something
 vi.mock("../services", () => {
-	const { z } = require("zod");
-
 	const mockActions: Record<string, any> = {
 		list_repos: {
 			schema: z.object({ owner: z.string().optional() }),

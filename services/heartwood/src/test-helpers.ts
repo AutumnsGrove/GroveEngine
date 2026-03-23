@@ -176,6 +176,9 @@ export const TEST_USER = {
 	is_admin: 0,
 	created_at: "2025-01-01T00:00:00.000Z",
 	last_login: "2025-01-15T00:00:00.000Z",
+	theme: null,
+	grove_mode: null,
+	season: null,
 };
 
 export const TEST_CLIENT = {
