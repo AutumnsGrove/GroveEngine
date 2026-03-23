@@ -42,13 +42,9 @@
 	<h1 class="blog-header-title"><GroveTerm term="your-garden">Garden</GroveTerm></h1>
 	<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
 		{#if groveModeStore.current}
-			<GroveTerm term="your-garden" displayOverride="grove" icon />
+			<GroveTerm term="your-garden" displayOverride="standard" />
 		{:else}
-			<GroveTerm term="your-garden" displayOverride="standard" /> · <GroveTerm
-				term="your-garden"
-				displayOverride="grove"
-				icon
-			/>
+			<GroveTerm term="your-garden" displayOverride="grove" icon />
 		{/if}
 	</p>
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>
@@ -171,14 +167,10 @@
 <style>
 	.blog-header-title {
 		font-size: 2.5rem;
-		color: var(--grove-accent-dark);
+		color: var(--blog-header-title);
 		margin-bottom: 0.75rem;
 		letter-spacing: -0.02em;
 		transition: color 0.3s ease;
-	}
-
-	:global(.dark) .blog-header-title {
-		color: var(--grove-accent);
 	}
 
 	@media (max-width: 768px) {

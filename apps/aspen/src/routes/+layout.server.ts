@@ -12,6 +12,7 @@ import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
 interface SiteSettings {
 	font_family: string;
 	accent_color?: string;
+	vine_color?: string;
 	grove_title?: string;
 	[key: string]: string | undefined;
 }

@@ -42,6 +42,7 @@
 		siteSettings: {
 			font_family: string;
 			accent_color?: string;
+			vine_color?: string;
 			grove_title?: string;
 			avatar_url?: string;
 			show_grove_logo?: string;
@@ -86,8 +87,7 @@
 		}
 	});
 
-	let { children, data }: { children: import("svelte").Snippet; data: LayoutData } =
-		$props();
+	let { children, data }: { children: import("svelte").Snippet; data: LayoutData } = $props();
 
 	// Navigation loading state — shows a progress bar during all page transitions
 	let isNavigating = $derived(!!$navigating);
@@ -173,11 +173,15 @@
 </script>
 
 <svelte:head>
-	<!-- Inject user accent on :root so the Prism accent scale resolves correctly.
-	     The scale tokens (--grove-accent-10, etc.) are defined on :root — if --user-accent
-	     is only set on a child div, they evaluate before it cascades and fall back to green. -->
+	<!-- Inject user accent + vine color on :root so the Prism accent scale and
+	     VineBackground resolve correctly. The scale tokens (--grove-accent-10, etc.)
+	     are defined on :root — if --user-accent is only set on a child div, they
+	     evaluate before it cascades and fall back to green. -->
 	{#if data.siteSettings?.accent_color}
 		{@html `<style>:root{--user-accent:${data.siteSettings.accent_color};}</style>`}
+	{/if}
+	{#if data.siteSettings?.vine_color}
+		{@html `<style>:root{--grove-vine-color:${data.siteSettings.vine_color};}</style>`}
 	{/if}
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>
