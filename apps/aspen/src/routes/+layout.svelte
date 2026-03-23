@@ -173,13 +173,11 @@
 </script>
 
 <svelte:head>
-	<!-- Inject user accent + vine color on :root so the Prism accent scale and
-	     VineBackground resolve correctly. The scale tokens (--grove-accent-10, etc.)
-	     are defined on :root — if --user-accent is only set on a child div, they
-	     evaluate before it cascades and fall back to green. -->
-	{#if data.siteSettings?.accent_color}
-		{@html `<style>:root{--user-accent:${data.siteSettings.accent_color};}</style>`}
-	{/if}
+	<!-- Inject site owner's accent + vine color on :root so the Prism accent scale
+	     resolves correctly. The scale tokens (--grove-accent-10, etc.) are defined
+	     on :root — --user-accent MUST be set at :root scope, not on a child element,
+	     because color-mix() evaluates where the property is defined. (#1512) -->
+	{@html `<style>:root{--user-accent:${data.siteSettings?.accent_color || '#16a34a'};--color-primary:${data.siteSettings?.accent_color || '#16a34a'};}</style>`}<!-- accent-ok — definition point for accent tokens -->
 	{#if data.siteSettings?.vine_color}
 		{@html `<style>:root{--grove-vine-color:${data.siteSettings.vine_color};}</style>`}
 	{/if}
@@ -215,11 +213,7 @@
 		</div>
 	</div>
 {:else}
-	<div
-		class="layout relative"
-		style:--user-accent={data.siteSettings?.accent_color || null}
-		style:--color-primary={data.siteSettings?.accent_color || null}
-	>
+	<div class="layout relative">
 		<VineBackground />
 		<!-- Unified Header with chrome components -->
 		<Header

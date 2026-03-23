@@ -9,6 +9,9 @@ import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
 
+/** Default accent color — grove green 600. Matches @autumnsgrove/lattice/config/presets */
+const DEFAULT_ACCENT_COLOR = "#16a34a";
+
 interface SiteSettings {
 	font_family: string;
 	accent_color?: string;
@@ -144,6 +147,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						preferredSeason = resolveSeasonPreference(siteSettings.preferred_season);
 					}
 
+					// Ensure accent_color always has a value so the :root CSS injection
+					// fires reliably — prevents visitors from seeing stale/default colors
+					// instead of the site owner's configured accent (#1512)
+					if (!siteSettings.accent_color) {
+						siteSettings.accent_color = DEFAULT_ACCENT_COLOR;
+					}
+
 					// Process navigation results
 					if (navResult?.results) {
 						// Get tier-based nav page limit
@@ -235,7 +245,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 					displayName: siteSettings.grove_title || homeGrove?.name || "",
 					enabled: lanternEnabled,
 					visitingGrove:
-						context.type === "tenant" && context.tenant.id !== homeGrove?.tenantId
+						context.type === "tenant" && context.tenant.id !== homeGrove?.tenantId && !isOwner
 							? {
 									tenantId: context.tenant.id,
 									subdomain: context.tenant.subdomain,
