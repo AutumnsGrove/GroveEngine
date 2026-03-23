@@ -1,0 +1,20 @@
+name: Deploy OG Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/og-worker/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: services/og-worker
+      needs-engine: true
+    secrets: inherit
