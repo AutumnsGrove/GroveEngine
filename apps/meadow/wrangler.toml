@@ -3,10 +3,14 @@ compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
+# Local development — port assignment to avoid collisions with other apps
+[dev]
+port = 5176
+
 # Environment variables for local development
 [vars]
 SITE_NAME = "Meadow"
-SITE_URL = "http://localhost:5175"
+SITE_URL = "http://localhost:5176"
 
 # D1 database (shared grove-engine-db for cross-app messages)
 [[d1_databases]]

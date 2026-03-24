@@ -14,6 +14,10 @@ main = ".svelte-kit/cloudflare/_worker.js"
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
+# Local development — port assignment to avoid collisions with other apps
+[dev]
+port = 5173
+
 # Smart Placement — run closer to back-end services (D1, KV, R2, DOs)
 [placement]
 mode = "smart"

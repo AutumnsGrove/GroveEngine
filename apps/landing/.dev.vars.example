@@ -1,0 +1,17 @@
+# Local development environment variables for Landing (grove.place)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# GroveAuth (Heartwood) OAuth client secret
+GROVEAUTH_CLIENT_SECRET=your_groveauth_client_secret_here
+
+# Turnstile (Shade) human verification — use Cloudflare test keys for local dev
+# Test secret key (always passes): 1x0000000000000000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Zephyr email gateway API key (for contact forms, newsletters)
+# ZEPHYR_API_KEY=your_zephyr_api_key_here
+
+# Unsubscribe link signing secret
+# Generate with: openssl rand -hex 32
+# UNSUBSCRIBE_SECRET=your_unsubscribe_secret_here

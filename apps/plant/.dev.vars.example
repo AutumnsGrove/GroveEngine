@@ -1,0 +1,14 @@
+# Local development environment variables for Plant (onboarding/signup)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# GroveAuth (Heartwood) OAuth client secret
+# Must match what Heartwood expects for the "grove-plant" client
+GROVEAUTH_CLIENT_SECRET=your_groveauth_client_secret_here
+
+# Turnstile (Shade) human verification — use Cloudflare test keys for local dev
+# Test secret key (always passes): 1x0000000000000000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Zephyr email gateway API key (for verification emails — optional for most local dev)
+# ZEPHYR_API_KEY=your_zephyr_api_key_here

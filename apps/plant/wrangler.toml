@@ -21,6 +21,10 @@ binding = "ASSETS"
 pattern = "plant.grove.place/*"
 zone_name = "grove.place"
 
+# Local development — port assignment to avoid collisions with other apps
+[dev]
+port = 5175
+
 # Smart Placement — run closer to back-end services (D1) for lower latency
 [placement]
 mode = "smart"

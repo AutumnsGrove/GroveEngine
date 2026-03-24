@@ -1,0 +1,10 @@
+# Local development environment variables for Meadow (community feed)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# No secrets required for basic local dev.
+# Meadow uses service bindings (AUTH) which resolve via
+# platformProxy in dev mode or wrangler dev multi-config.
+#
+# If running standalone without service bindings:
+# GROVEAUTH_URL=http://localhost:5177

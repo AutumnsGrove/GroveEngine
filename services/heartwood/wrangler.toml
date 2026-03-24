@@ -9,6 +9,10 @@ compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
+# Local development — port assignment to avoid collisions with other apps
+[dev]
+port = 8787
+
 # Production environment variables
 [vars]
 AUTH_BASE_URL = "https://login.grove.place"

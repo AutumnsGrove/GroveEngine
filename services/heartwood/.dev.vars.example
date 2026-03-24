@@ -1,0 +1,27 @@
+# Local development environment variables for Heartwood (auth hub)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# Better Auth secret (session encryption)
+# Generate with: openssl rand -hex 32
+BETTER_AUTH_SECRET=your_better_auth_secret_here
+
+# Session secret (cookie signing)
+# Generate with: openssl rand -hex 32
+SESSION_SECRET=your_session_secret_here
+
+# Google OAuth credentials (get from Google Cloud Console)
+# Required for "Sign in with Google" flow
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# JWT key pair for session tokens
+# Generate with: openssl ecparam -genkey -name prime256v1 -noout | openssl pkcs8 -topk8 -nocrypt
+JWT_PRIVATE_KEY=your_jwt_private_key_here
+JWT_PUBLIC_KEY=your_jwt_public_key_here
+
+# Zephyr email gateway API key (for magic link emails)
+ZEPHYR_API_KEY=your_zephyr_api_key_here
+
+# Resend API key (deprecated — Zephyr handles email now, but still referenced)
+# RESEND_API_KEY=re_your_resend_key_here

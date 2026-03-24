@@ -15,9 +15,9 @@ binding = "ASSETS"
 [build]
 command = "pnpm build"
 
-# Development settings
+# Local development — port assignment to avoid collisions with other apps
 [dev]
-port = 5173
+port = 5178
 
 # D1 Database
 [[d1_databases]]

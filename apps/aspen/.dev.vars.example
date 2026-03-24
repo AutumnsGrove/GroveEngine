@@ -1,0 +1,27 @@
+# Local development environment variables for Aspen (main tenant site)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# Session signing secret (any random string for local dev)
+# Generate with: openssl rand -hex 32
+SESSION_SECRET=your_session_secret_here
+
+# Admin email addresses (comma-separated) for arbor access
+ALLOWED_ADMIN_EMAILS=you@example.com
+
+# GroveAuth (Heartwood) OAuth client credentials
+# Get from Heartwood config or use dev values
+GROVEAUTH_CLIENT_ID=grove-aspen
+GROVEAUTH_CLIENT_SECRET=your_groveauth_client_secret_here
+
+# Turnstile (Shade) human verification — use Cloudflare test keys for local dev
+# Test site key is already in wrangler.toml [vars]
+# Test secret key (always passes): 1x0000000000000000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Key Encryption Key for envelope encryption (timeline curio tokens, etc.)
+# Generate with: openssl rand -hex 32
+GROVE_KEK=your_64_character_hex_key_here
+
+# Resend API key (for email features — optional for most local dev)
+# RESEND_API_KEY=re_your_resend_key_here

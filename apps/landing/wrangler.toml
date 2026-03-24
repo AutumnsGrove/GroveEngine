@@ -15,6 +15,10 @@ routes = [
   { pattern = "grove.place/*", zone_name = "grove.place" }
 ]
 
+# Local development — port assignment to avoid collisions with other apps
+[dev]
+port = 5174
+
 # Smart Placement — run closer to back-end services (D1, KV, R2, Zephyr)
 [placement]
 mode = "smart"
