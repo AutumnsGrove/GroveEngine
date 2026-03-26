@@ -5,6 +5,7 @@
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
 	import { featureIcons, stateIcons, authIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils/api";
+	import { invalidateAll } from "$app/navigation";
 
 	let { data } = $props();
 
@@ -14,9 +15,29 @@
 	let unblocking = $state<string | null>(null);
 	let savingSettings = $state(false);
 
-	let pendingCount = $derived(data.pending?.length ?? 0);
-	let moderatedCount = $derived(data.moderated?.length ?? 0);
-	let blockedCount = $derived(data.blocked?.length ?? 0);
+	// Local mutable copies of server data — $state ensures derived values
+	// (inboxItems, badge counts) reliably react to optimistic removals.
+	// svelte-ignore state_referenced_locally
+	let localPending = $state(data.pending ?? []);
+	// svelte-ignore state_referenced_locally
+	let localModerated = $state(data.moderated ?? []);
+	// svelte-ignore state_referenced_locally
+	let localBlocked = $state(data.blocked ?? []);
+
+	// Sync when SvelteKit provides fresh page data (e.g. navigation)
+	$effect(() => {
+		localPending = data.pending ?? [];
+	});
+	$effect(() => {
+		localModerated = data.moderated ?? [];
+	});
+	$effect(() => {
+		localBlocked = data.blocked ?? [];
+	});
+
+	let pendingCount = $derived(localPending.length);
+	let moderatedCount = $derived(localModerated.length);
+	let blockedCount = $derived(localBlocked.length);
 
 	// Unified inbox: pending + replies sorted newest-first
 	type InboxItem = {
@@ -30,7 +51,7 @@
 	};
 
 	let inboxItems = $derived.by(() => {
-		const pending: InboxItem[] = (data.pending ?? []).map(
+		const pending: InboxItem[] = localPending.map(
 			(c: {
 				id: string;
 				post_id: string;
@@ -104,13 +125,12 @@
 			);
 			toast.success(result?.message || "Done!");
 
-			// Remove from the appropriate list
-			if (data.pending) {
-				data.pending = data.pending.filter((c: { id: string }) => c.id !== commentId);
-			}
-			if (data.moderated) {
-				data.moderated = data.moderated.filter((c: { id: string }) => c.id !== commentId);
-			}
+			// Optimistic removal from local state
+			localPending = localPending.filter((c: { id: string }) => c.id !== commentId);
+			localModerated = localModerated.filter((c: { id: string }) => c.id !== commentId);
+
+			// Sync with server to ensure consistency
+			invalidateAll();
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Something went wrong");
 		} finally {
@@ -125,11 +145,13 @@
 			await api.delete(`/api/reeds/blocked/${userId}`);
 			toast.success("User unblocked.");
 
-			if (data.blocked) {
-				data.blocked = data.blocked.filter(
-					(b: { blocked_user_id: string }) => b.blocked_user_id !== userId,
-				);
-			}
+			// Optimistic removal from local state
+			localBlocked = localBlocked.filter(
+				(b: { blocked_user_id: string }) => b.blocked_user_id !== userId,
+			);
+
+			// Sync with server to ensure consistency
+			invalidateAll();
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Something went wrong");
 		} finally {
@@ -303,9 +325,9 @@
 		{#if activeTab === "moderated"}
 			<div id="panel-moderated" role="tabpanel" aria-labelledby="tab-moderated">
 				<GlassCard variant="default" class="overflow-hidden">
-					{#if data.moderated && data.moderated.length > 0}
+					{#if localModerated.length > 0}
 						<div class="comment-list">
-							{#each data.moderated as comment (comment.id)}
+							{#each localModerated as comment (comment.id)}
 								{@const post = getPostInfo(comment.post_id)}
 								<div class="comment-card" class:moderating={moderating === comment.id}>
 									<div class="comment-meta">
@@ -358,9 +380,9 @@
 		{#if activeTab === "blocked"}
 			<div id="panel-blocked" role="tabpanel" aria-labelledby="tab-blocked">
 				<GlassCard variant="default" class="overflow-hidden">
-					{#if data.blocked && data.blocked.length > 0}
+					{#if localBlocked.length > 0}
 						<div class="comment-list">
-							{#each data.blocked as blocked (blocked.blocked_user_id)}
+							{#each localBlocked as blocked (blocked.blocked_user_id)}
 								<div class="comment-card" class:moderating={unblocking === blocked.blocked_user_id}>
 									<div class="comment-meta">
 										<authIcons.userX class="reply-icon" />
