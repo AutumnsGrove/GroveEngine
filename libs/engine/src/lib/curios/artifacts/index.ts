@@ -6,6 +6,10 @@
  * Each artifact is a self-contained object with its own visual
  * style, interaction pattern, and optional glass card container.
  *
+ * Artifact type data and default content externalized to:
+ * - libs/engine/src/lib/data/artifacts.json
+ * - libs/engine/src/lib/data/artifact-defaults.json
+ *
  * Features:
  * - Self-contained interactive artifacts with unique visuals
  * - Daily draws seeded by date (consistent per day per tenant)
@@ -16,6 +20,8 @@
  */
 
 import type { Component } from "svelte";
+import artifactTypeData from "../../data/artifacts.json";
+import artifactDefaults from "../../data/artifact-defaults.json";
 
 // =============================================================================
 // Types
@@ -249,7 +255,7 @@ export interface TerrariumGlobeConfig {
 }
 
 // =============================================================================
-// Constants
+// Constants — Artifact Types (from JSON)
 // =============================================================================
 
 /**
@@ -265,133 +271,18 @@ export interface ArtifactTypeDefinition {
 /**
  * All artifact type definitions — 20 types across 5 categories
  */
-export const ARTIFACT_TYPES: ArtifactTypeDefinition[] = [
-	// --- Mystical ---
-	{
-		value: "magic8ball",
-		label: "Magic 8-Ball",
-		description: "Shake for an answer to your question",
-		category: "mystical",
-	},
-	{
-		value: "fortunecookie",
-		label: "Fortune Cookie",
-		description: "Crack open for a daily fortune",
-		category: "mystical",
-	},
-	{
-		value: "tarotcard",
-		label: "Tarot Card",
-		description: "Daily card draw from the Major Arcana",
-		category: "mystical",
-	},
-	{
-		value: "crystalball",
-		label: "Crystal Ball",
-		description: "Swirling mist in a glass sphere",
-		category: "mystical",
-	},
-	{
-		value: "glasscathedral",
-		label: "Glass Cathedral",
-		description: "A prismatic doorway to an immersive experience",
-		category: "mystical",
-	},
-	// --- Interactive ---
-	{
-		value: "diceroller",
-		label: "Dice Roller",
-		description: "Roll any die from d4 to d20",
-		category: "interactive",
-	},
-	{
-		value: "coinflip",
-		label: "Coin Flip",
-		description: "Heads or tails with a spinning animation",
-		category: "interactive",
-	},
-	{
-		value: "wishingwell",
-		label: "Wishing Well",
-		description: "Toss a coin and make a wish",
-		category: "interactive",
-	},
-	{
-		value: "snowglobe",
-		label: "Snow Globe",
-		description: "Shake to send particles swirling",
-		category: "interactive",
-	},
-	// --- Classic Web ---
-	{
-		value: "marqueetext",
-		label: "Marquee Text",
-		description: "Scrolling message across the page",
-		category: "classic",
-	},
-	{
-		value: "blinkingnew",
-		label: 'Blinking "NEW!"',
-		description: "The classic blinking new indicator",
-		category: "classic",
-	},
-	{
-		value: "rainbowdivider",
-		label: "Rainbow Divider",
-		description: "Colorful animated separator line",
-		category: "classic",
-	},
-	{
-		value: "emailbutton",
-		label: "Email Button",
-		description: "Retro contact button with mailbox icon",
-		category: "classic",
-	},
-	// --- Nature ---
-	{
-		value: "moodcandle",
-		label: "Mood Candle",
-		description: "Flickering flame, brighter in dark mode",
-		category: "nature",
-	},
-	{
-		value: "windchime",
-		label: "Wind Chime",
-		description: "Gently swaying chimes",
-		category: "nature",
-	},
-	{
-		value: "hourglass",
-		label: "Hourglass",
-		description: "Countdown timer to your next event",
-		category: "nature",
-	},
-	// --- Whimsical ---
-	{
-		value: "potionbottle",
-		label: "Potion Bottle",
-		description: "Bubbling liquid in a glass bottle",
-		category: "whimsical",
-	},
-	{
-		value: "musicbox",
-		label: "Music Box",
-		description: "Click to play a short melody",
-		category: "whimsical",
-	},
-	{
-		value: "compassrose",
-		label: "Compass Rose",
-		description: "A needle that always points somewhere",
-		category: "whimsical",
-	},
-	{
-		value: "terrariumglobe",
-		label: "Terrarium Globe",
-		description: "A tiny sealed ecosystem in glass",
-		category: "whimsical",
-	},
-];
+export const ARTIFACT_TYPES: ArtifactTypeDefinition[] = (
+	artifactTypeData as { type: string; label: string; description: string; category: string }[]
+).map((d) => ({
+	value: d.type as ArtifactType,
+	label: d.label,
+	description: d.description,
+	category: d.category as ArtifactCategory,
+}));
+
+// =============================================================================
+// Constants — Display Options
+// =============================================================================
 
 /**
  * Placement zone options
@@ -479,52 +370,19 @@ export const CONTAINER_OPTIONS: {
 	{ value: "glass-card", label: "Glass card (display case)" },
 ];
 
+// =============================================================================
+// Default Data (from JSON)
+// =============================================================================
+
 /**
  * Default Magic 8-Ball answers (20)
  */
-export const DEFAULT_8BALL_ANSWERS: string[] = [
-	"It is certain",
-	"Without a doubt",
-	"Yes definitely",
-	"You may rely on it",
-	"As I see it, yes",
-	"Most likely",
-	"Outlook good",
-	"Yes",
-	"Signs point to yes",
-	"Reply hazy, try again",
-	"Ask again later",
-	"Better not tell you now",
-	"Cannot predict now",
-	"Concentrate and ask again",
-	"Don't count on it",
-	"My reply is no",
-	"My sources say no",
-	"Outlook not so good",
-	"Very doubtful",
-	"The forest whispers no",
-];
+export const DEFAULT_8BALL_ANSWERS: string[] = artifactDefaults.magic8ball_answers;
 
 /**
  * Daily fortunes (15)
  */
-export const DEFAULT_FORTUNES: string[] = [
-	"A pleasant surprise is waiting for you",
-	"The path ahead is clear — walk boldly",
-	"Something you lost will soon be found",
-	"A creative endeavor will bear fruit",
-	"Trust the process; the grove grows slowly",
-	"An old friend will reach out soon",
-	"Your patience will be rewarded today",
-	"The answer you seek is closer than you think",
-	"A small kindness will ripple outward",
-	"Today is a good day for new beginnings",
-	"The stars are aligned in your favor",
-	"Rest is productive too — the forest rests",
-	"Something wonderful is on its way",
-	"Your instincts are right — trust them",
-	"A gentle wind carries good news",
-];
+export const DEFAULT_FORTUNES: string[] = artifactDefaults.fortunes;
 
 /**
  * Tarot Major Arcana — 22 cards
@@ -533,46 +391,11 @@ export const TAROT_MAJOR_ARCANA: {
 	number: number;
 	name: string;
 	meaning: string;
-}[] = [
-	{ number: 0, name: "The Fool", meaning: "New beginnings, spontaneity" },
-	{ number: 1, name: "The Magician", meaning: "Willpower, creation" },
-	{
-		number: 2,
-		name: "The High Priestess",
-		meaning: "Intuition, inner voice",
-	},
-	{ number: 3, name: "The Empress", meaning: "Abundance, nurturing" },
-	{ number: 4, name: "The Emperor", meaning: "Structure, authority" },
-	{
-		number: 5,
-		name: "The Hierophant",
-		meaning: "Tradition, spiritual guidance",
-	},
-	{ number: 6, name: "The Lovers", meaning: "Connection, harmony" },
-	{ number: 7, name: "The Chariot", meaning: "Determination, momentum" },
-	{ number: 8, name: "Strength", meaning: "Courage, inner strength" },
-	{ number: 9, name: "The Hermit", meaning: "Reflection, solitude" },
-	{
-		number: 10,
-		name: "Wheel of Fortune",
-		meaning: "Cycles, turning points",
-	},
-	{ number: 11, name: "Justice", meaning: "Truth, fairness" },
-	{
-		number: 12,
-		name: "The Hanged Man",
-		meaning: "Surrender, new perspective",
-	},
-	{ number: 13, name: "Death", meaning: "Transformation, endings" },
-	{ number: 14, name: "Temperance", meaning: "Balance, patience" },
-	{ number: 15, name: "The Devil", meaning: "Shadow, attachment" },
-	{ number: 16, name: "The Tower", meaning: "Upheaval, revelation" },
-	{ number: 17, name: "The Star", meaning: "Hope, inspiration" },
-	{ number: 18, name: "The Moon", meaning: "Illusion, the unconscious" },
-	{ number: 19, name: "The Sun", meaning: "Joy, vitality" },
-	{ number: 20, name: "Judgement", meaning: "Rebirth, reckoning" },
-	{ number: 21, name: "The World", meaning: "Completion, wholeness" },
-];
+}[] = artifactDefaults.tarot_major_arcana;
+
+// =============================================================================
+// Enum-like Constants
+// =============================================================================
 
 /**
  * Music box melody presets
@@ -627,6 +450,10 @@ export const DICE_FACES: Record<DiceType, number> = {
 	d20: 20,
 };
 
+// =============================================================================
+// Valid Sets
+// =============================================================================
+
 /**
  * Valid artifact types set
  */
@@ -654,6 +481,10 @@ export const VALID_REVEAL_ANIMATIONS = new Set<string>(
  */
 export const VALID_CONTAINERS = new Set<string>(CONTAINER_OPTIONS.map((c) => c.value));
 
+// =============================================================================
+// Limits
+// =============================================================================
+
 /**
  * Max artifact name length
  */
@@ -674,87 +505,8 @@ export const MAX_MARQUEE_TEXT_LENGTH = 200;
  */
 export const MAX_ARTIFACTS_PER_TENANT = 100;
 
-/**
- * Look up the human-readable label for an artifact type.
- * Returns the raw type string if no match is found.
- */
-export function getTypeLabel(type: string): string {
-	return ARTIFACT_TYPES.find((t) => t.value === type)?.label ?? type;
-}
-
-/**
- * Summarize non-empty config values as human-readable display tags.
- * Used in showcase admin mode and artifact card meta tags.
- */
-export function summarizeConfig(config: Record<string, unknown>): string[] {
-	return Object.entries(config)
-		.filter(([, v]) => v !== undefined && v !== "" && v !== null)
-		.map(([k, v]) => {
-			if (Array.isArray(v)) return `${k}: ${v.length} items`;
-			if (typeof v === "boolean") return v ? k : "";
-			return `${k}: ${v}`;
-		})
-		.filter(Boolean);
-}
-
 // =============================================================================
-// Utility Functions
-// =============================================================================
-
-import { stripHtml } from "../sanitize";
-
-/**
- * Generate a unique artifact ID
- */
-export function generateArtifactId(): string {
-	return `art_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/**
- * Validate artifact type
- */
-export function isValidArtifactType(type: string): type is ArtifactType {
-	return VALID_ARTIFACT_TYPES.has(type);
-}
-
-/**
- * Validate placement
- */
-export function isValidPlacement(placement: string): placement is ArtifactPlacement {
-	return VALID_PLACEMENTS.has(placement);
-}
-
-/**
- * Validate visibility mode
- */
-export function isValidVisibility(visibility: string): visibility is ArtifactVisibility {
-	return VALID_VISIBILITIES.has(visibility);
-}
-
-/**
- * Validate reveal animation
- */
-export function isValidRevealAnimation(animation: string): animation is RevealAnimation {
-	return VALID_REVEAL_ANIMATIONS.has(animation);
-}
-
-/**
- * Validate container style
- */
-export function isValidContainer(container: string): container is ArtifactContainer {
-	return VALID_CONTAINERS.has(container);
-}
-
-/**
- * Validate artifact name (1-80 chars, trimmed, non-empty)
- */
-export function isValidArtifactName(name: string): boolean {
-	const trimmed = name.trim();
-	return trimmed.length >= 1 && trimmed.length <= MAX_ARTIFACT_NAME_LENGTH;
-}
-
-// =============================================================================
-// Config Field Registry
+// Config Field Registry (kept in TS — product configuration, not data)
 // =============================================================================
 
 /**
@@ -1036,6 +788,89 @@ export const ARTIFACT_CONFIG_FIELDS: Record<ArtifactType, ArtifactConfigFieldDef
 	],
 	terrariumglobe: [],
 };
+
+// =============================================================================
+// Lookup Functions
+// =============================================================================
+
+/**
+ * Look up the human-readable label for an artifact type.
+ * Returns the raw type string if no match is found.
+ */
+export function getTypeLabel(type: string): string {
+	return ARTIFACT_TYPES.find((t) => t.value === type)?.label ?? type;
+}
+
+/**
+ * Summarize non-empty config values as human-readable display tags.
+ * Used in showcase admin mode and artifact card meta tags.
+ */
+export function summarizeConfig(config: Record<string, unknown>): string[] {
+	return Object.entries(config)
+		.filter(([, v]) => v !== undefined && v !== "" && v !== null)
+		.map(([k, v]) => {
+			if (Array.isArray(v)) return `${k}: ${v.length} items`;
+			if (typeof v === "boolean") return v ? k : "";
+			return `${k}: ${v}`;
+		})
+		.filter(Boolean);
+}
+
+// =============================================================================
+// Utility Functions
+// =============================================================================
+
+import { stripHtml } from "../sanitize";
+
+/**
+ * Generate a unique artifact ID
+ */
+export function generateArtifactId(): string {
+	return `art_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Validate artifact type
+ */
+export function isValidArtifactType(type: string): type is ArtifactType {
+	return VALID_ARTIFACT_TYPES.has(type);
+}
+
+/**
+ * Validate placement
+ */
+export function isValidPlacement(placement: string): placement is ArtifactPlacement {
+	return VALID_PLACEMENTS.has(placement);
+}
+
+/**
+ * Validate visibility mode
+ */
+export function isValidVisibility(visibility: string): visibility is ArtifactVisibility {
+	return VALID_VISIBILITIES.has(visibility);
+}
+
+/**
+ * Validate reveal animation
+ */
+export function isValidRevealAnimation(animation: string): animation is RevealAnimation {
+	return VALID_REVEAL_ANIMATIONS.has(animation);
+}
+
+/**
+ * Validate container style
+ */
+export function isValidContainer(container: string): container is ArtifactContainer {
+	return VALID_CONTAINERS.has(container);
+}
+
+/**
+ * Validate artifact name (1-80 chars, trimmed, non-empty)
+ */
+export function isValidArtifactName(name: string): boolean {
+	const trimmed = name.trim();
+	return trimmed.length >= 1 && trimmed.length <= MAX_ARTIFACT_NAME_LENGTH;
+}
 
 /**
  * Sanitize artifact config JSON
