@@ -4,6 +4,7 @@
 	import Icon from "$lib/components/Icons.svelte";
 	import * as api from "$lib/api";
 	import type { StorageFile } from "$types";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 	// State
 	let loading = $state(true);
@@ -64,13 +65,7 @@
 		loadData();
 	});
 
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-	}
+
 </script>
 
 <svelte:head>

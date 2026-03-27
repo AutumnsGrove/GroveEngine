@@ -21,7 +21,6 @@ import {
 	getAlerts,
 	getAlertThresholds,
 	upsertAlertThreshold,
-	hasCollectionData,
 } from "../index.js";
 
 // =============================================================================
@@ -174,42 +173,6 @@ describe("getObservabilityOverview", () => {
 		const db = createMockDb();
 		const result = await getObservabilityOverview(db);
 		expect(result.collectorConnected).toBe(false);
-	});
-});
-
-// =============================================================================
-// hasCollectionData
-// =============================================================================
-
-describe("hasCollectionData", () => {
-	it("returns true when a completed collection exists", async () => {
-		const db = {
-			prepare: vi.fn().mockReturnValue({
-				first: vi.fn().mockResolvedValue({ ok: 1 }),
-			}),
-		} as unknown as D1Database;
-
-		expect(await hasCollectionData(db)).toBe(true);
-	});
-
-	it("returns false when no completed collection exists", async () => {
-		const db = {
-			prepare: vi.fn().mockReturnValue({
-				first: vi.fn().mockResolvedValue(null),
-			}),
-		} as unknown as D1Database;
-
-		expect(await hasCollectionData(db)).toBe(false);
-	});
-
-	it("returns false when DB query fails", async () => {
-		const db = {
-			prepare: vi.fn().mockReturnValue({
-				first: vi.fn().mockRejectedValue(new Error("offline")),
-			}),
-		} as unknown as D1Database;
-
-		expect(await hasCollectionData(db)).toBe(false);
 	});
 });
 

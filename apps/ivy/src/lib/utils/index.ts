@@ -14,31 +14,3 @@ export async function hashIp(ip: string, salt: string): Promise<string> {
 		.map((b) => b.toString(16).padStart(2, "0"))
 		.join("");
 }
-
-/**
- * Generate a unique ID
- */
-export function generateId(): string {
-	return crypto.randomUUID();
-}
-
-/**
- * Format date for display
- */
-export function formatDate(date: Date): string {
-	const now = new Date();
-	const diff = now.getTime() - date.getTime();
-
-	// Today: show time
-	if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
-		return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-	}
-
-	// This year: show month and day
-	if (date.getFullYear() === now.getFullYear()) {
-		return date.toLocaleDateString([], { month: "short", day: "numeric" });
-	}
-
-	// Older: show full date
-	return date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
-}

@@ -4,6 +4,7 @@
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 	import { actionIcons, featureIcons, metricIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
@@ -29,14 +30,6 @@
 		const imageSize = includeImages ? data.estimatedImageSize : 0;
 		return textSize + imageSize;
 	});
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-	}
 
 	function formatDate(dateValue: string | number): string {
 		const date = typeof dateValue === "string" ? new Date(dateValue) : new Date(dateValue * 1000);

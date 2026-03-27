@@ -12,6 +12,7 @@ import type {
 	QuotaStatus,
 } from "$types";
 import { TIER_STORAGE_GB } from "@autumnsgrove/lattice/config";
+import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 // Re-export for backwards compatibility
 export const TIER_STORAGE = TIER_STORAGE_GB;
@@ -71,16 +72,8 @@ export function canUpload(storage: UserStorage, fileSizeBytes: number): boolean 
 	return quota.available_bytes >= fileSizeBytes;
 }
 
-/**
- * Format bytes to human-readable string
- */
-export function formatBytes(bytes: number): string {
-	if (bytes === 0) return "0 B";
-	const k = 1024;
-	const sizes = ["B", "KB", "MB", "GB", "TB"];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
+// formatBytes re-exported from engine SSOT for backwards compatibility
+export { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 /**
  * Generate R2 key for a file

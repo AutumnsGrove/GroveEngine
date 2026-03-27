@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { formatBytes } from '@autumnsgrove/lattice/utils/format';
 	import { actionIcons, featureIcons, authIcons, metricIcons, navIcons, stateIcons } from '@autumnsgrove/prism/icons';
 	const Play = actionIcons.play;
 	const Square = featureIcons.square;
@@ -89,13 +90,6 @@
 		const minutes = Math.floor((seconds % 3600) / 60);
 		if (hours > 0) return `${hours}h ${minutes}m`;
 		return `${minutes}m`;
-	}
-
-	function formatBytes(bytes: number): string {
-		if (!bytes) return '0 B';
-		const units = ['B', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(1024));
-		return `${(bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0)} ${units[i]}`;
 	}
 
 	function formatCost(cents: number): string {

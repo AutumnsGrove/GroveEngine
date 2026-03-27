@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
-import { getNavPageLimit } from "@autumnsgrove/lattice/server/tier-features";
+import { TIERS, isValidTier } from "@autumnsgrove/lattice/config/tiers";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
 import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
@@ -159,7 +159,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						// Get tier-based nav page limit
 						const context = locals.context;
 						const plan = context.type === "tenant" ? context.tenant.plan : "seedling";
-						const navLimit = getNavPageLimit(plan);
+						const navLimit = isValidTier(plan) ? TIERS[plan].limits.navPages : 0;
 
 						navPages = navResult.results
 							.filter((p) => p.show_in_nav && p.slug !== "home" && p.slug !== "about")
@@ -212,7 +212,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	// Get nav page limit for the current tier (for UI display)
 	const context = locals.context;
 	const plan = context.type === "tenant" ? context.tenant.plan : "seedling";
-	const navPageLimit = getNavPageLimit(plan);
+	const navPageLimit = isValidTier(plan) ? TIERS[plan].limits.navPages : 0;
 
 	// SECURITY: Determine if the logged-in user owns this tenant.
 	// The admin gear icon in the footer must ONLY show for the tenant owner,

@@ -77,24 +77,6 @@ export { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
 // Query Functions — read from observability tables for API endpoints
 // =============================================================================
 
-/**
- * Check whether the vista-collector has ever completed a collection run.
- * Used by dashboard pages to show "connected" vs "awaiting first collection" state.
- * This is a lightweight indexed query (LIMIT 1 on the completed_at DESC index).
- *
- * @deprecated Use `getCollectionStatus()` instead — it provides richer diagnostics.
- */
-export async function hasCollectionData(db: D1Database): Promise<boolean> {
-	const row = await db
-		.prepare(
-			`SELECT 1 AS ok FROM observability_collection_log
-       WHERE completed_at IS NOT NULL LIMIT 1`,
-		)
-		.first<{ ok: number }>()
-		.catch(() => null);
-	return row !== null;
-}
-
 // =============================================================================
 // Collection Status — richer diagnostics for the Vista dashboard
 // =============================================================================

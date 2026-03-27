@@ -122,8 +122,8 @@ export function getMimeType(filename: string): string {
 
 // ─── Formatting ───────────────────────────────────────────────────
 
-// Re-export from utils for backwards compatibility
-export { formatBytes } from "../utils/imageProcessor.js";
+// Re-export from SSOT for backwards compatibility
+export { formatBytes } from "../utils/format.js";
 
 // ─── ID Generation ────────────────────────────────────────────────
 
