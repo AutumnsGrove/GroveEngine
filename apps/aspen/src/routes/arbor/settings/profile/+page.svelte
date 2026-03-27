@@ -575,7 +575,7 @@
 		<div class="mb-6">
 			<GraftControlPanel
 				grafts={data.tenantGrafts}
-				currentValues={data.grafts}
+				currentValues={data.flags}
 				onToggle={(graftId, enabled) => {
 					loadingGraftId = graftId;
 					toggleGraftId = graftId;

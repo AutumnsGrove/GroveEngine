@@ -26,9 +26,9 @@ interface PostLookup {
 }
 
 export const load: PageServerLoad = async ({ platform, locals, parent }) => {
-	// Gate: reeds_comments graft (cascaded from arbor layout)
+	// Gate: reeds_comments flag (cascaded from arbor layout)
 	const parentData = await parent();
-	if (!parentData.grafts?.reeds_comments) {
+	if (!parentData.flags?.reeds_comments) {
 		throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
 	}
 

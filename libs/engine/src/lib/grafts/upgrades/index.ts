@@ -1,36 +1,8 @@
 /**
- * UpgradesGraft: Cultivation & Garden Management
+ * Upgrades Graft — DEPRECATED re-export shim
  *
- * Unified module for growth stages, plan upgrades, and billing portal.
- *
- * @example
- * ```typescript
- * import { CurrentStageBadge, GardenStatus } from '@autumnsgrove/lattice/grafts/upgrades';
- * import type { FlourishState, GrowthStatus } from '@autumnsgrove/lattice/grafts/upgrades';
- * ```
+ * This module has moved to platform/upgrades/.
+ * This shim exists for backward compatibility and will be removed in a future release.
  */
 
-// Types
-export type {
-	GrowthStage,
-	GrowthStageKey,
-	CultivateRequest,
-	CultivateResponse,
-	TendRequest,
-	TendResponse,
-	FlourishState,
-	GrowthStatus,
-	PlantingSession,
-	GardenStats,
-	UpgradesConfig,
-} from "./types";
-export { GROWTH_STAGES } from "./types";
-
-// Config
-export { createUpgradeConfig } from "./config";
-
-// Client Components
-export { default as GrowthCard } from "./components/GrowthCard.svelte";
-export { default as GardenModal } from "./components/GardenModal.svelte";
-export { default as CurrentStageBadge } from "./components/CurrentStageBadge.svelte";
-export { default as GardenStatus } from "./components/GardenStatus.svelte";
+export * from "../../platform/upgrades/index.js";

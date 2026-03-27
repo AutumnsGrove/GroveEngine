@@ -490,7 +490,7 @@
 						bind:previewTitle={title}
 						previewDate={date}
 						previewTags={parseTags(tagsInput)}
-						grafts={data?.grafts ?? {}}
+						flags={data?.flags ?? {}}
 						configuredCurios={data?.curios ?? []}
 					/>
 				</div>

@@ -8,9 +8,9 @@ export const load: PageServerLoad = async ({ locals, url, fetch, parent }) => {
 		redirect(302, `/auth/login?redirect=${encodeURIComponent(url.pathname)}`);
 	}
 
-	// Gate: chirp_enabled graft (cascaded from arbor layout)
+	// Gate: chirp_enabled flag (cascaded from arbor layout)
 	const parentData = await parent();
-	if (!parentData.grafts?.chirp_enabled) {
+	if (!parentData.flags?.chirp_enabled) {
 		throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
 	}
 

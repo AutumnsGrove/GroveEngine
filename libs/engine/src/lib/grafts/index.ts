@@ -1,45 +1,31 @@
 /**
- * UI Grafts System
+ * UI Grafts System — DEPRECATED re-export shim
  *
- * Reusable, configurable components that can be "grafted" onto any Grove property.
- * UI Grafts are components; Feature Grafts (flags) control their availability.
- *
- * @example
- * ```typescript
- * import { isGraftEnabled, setGraftContext } from '@autumnsgrove/lattice/grafts';
- * import { PricingGraft } from '@autumnsgrove/lattice/grafts/pricing';
- *
- * // Check if graft is enabled
- * const enabled = await isGraftEnabled('pricing', { productId: 'grove' });
- *
- * // Set context for child grafts
- * setGraftContext({ productId: 'grove', tier: 'seedling' });
- * ```
- *
- * @see docs/specs/grafts-spec.md
+ * This module has moved to platform/.
+ * This shim exists for backward compatibility and will be removed in a future release.
  */
 
 // Types
 export type {
-  GraftId,
-  ProductId,
-  GraftRegistryEntry,
-  GraftContext,
-  BaseGraftProps,
-} from "./types.js";
+	GraftId,
+	ProductId,
+	GraftRegistryEntry,
+	GraftContext,
+	BaseGraftProps,
+} from "../platform/types.js";
 
 // Registry & helpers
 export {
-  GRAFT_REGISTRY,
-  getGraftEntry,
-  isGraftEnabled,
-  getAllGrafts,
-  getGraftsByStatus,
-} from "./registry.js";
+	GRAFT_REGISTRY,
+	getGraftEntry,
+	isGraftEnabled,
+	getAllGrafts,
+	getGraftsByStatus,
+} from "../platform/registry.js";
 
 // Svelte context
 export {
-  setGraftContext,
-  getGraftContext,
-  requireGraftContext,
-} from "./context.svelte.js";
+	setGraftContext,
+	getGraftContext,
+	requireGraftContext,
+} from "../platform/context.svelte.js";

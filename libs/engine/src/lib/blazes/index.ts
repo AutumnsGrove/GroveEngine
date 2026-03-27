@@ -1,29 +1,6 @@
 /**
- * Blazes — Content Markers for Grove
- *
- * A two-slot marking system for posts. Auto-blazes (Slot 1) identify content
- * type (Bloom, Note). Custom blazes (Slot 2) let wanderers express what their
- * post is really about.
- *
- * @module @autumnsgrove/lattice/blazes
+ * Re-export shim — Blazes has moved to social/blazes/
+ * This file preserves backward compatibility for internal imports.
+ * @see ../social/blazes/index.ts
  */
-
-// Types
-export type { AutoBlazeConfig, BlazeColorClasses, BlazeDefinition, BlazeResponse, PostType } from "./types.js";
-
-// Config and palette
-export {
-	BLAZE_CONFIG,
-	BLAZE_COLORS,
-	BLAZE_COLOR_HEX,
-	GLOBAL_BLAZE_DEFAULTS,
-	VALID_BLAZE_COLORS,
-	VALID_BLAZE_ICONS,
-	resolveLucideIcon,
-	isValidBlazeHexColor,
-	isValidBlazeColor,
-} from "./palette.js";
-
-// Resolution utility
-export { resolveBlaze } from "./resolve.js";
-export type { BlazeDisplayDef } from "./resolve.js";
+export * from "../social/blazes/index.js";

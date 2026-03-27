@@ -1,0 +1,201 @@
+/**
+ * Upload Admin — Management Functions for Upload Suspension
+ *
+ * Provides admin functions to view and toggle per-tenant upload suspension.
+ * Used by the /arbor/uploads admin page.
+ *
+ * @see migrations/055_upload_gate_redesign.sql
+ */
+
+import { invalidateFlag } from "./cache.js";
+import type { FeatureFlagsEnv } from "./types.js";
+
+const UPLOADS_SUSPENDED_FLAG = "uploads_suspended";
+
+/**
+ * Derive a unique priority from a tenant ID.
+ *
+ * The flag_rules table has UNIQUE(flag_id, priority), so each per-tenant
+ * rule needs a distinct priority. We hash the tenant ID to a number in
+ * the 1000–65535 range (well above any manually-set priorities).
+ */
+function tenantIdToPriority(tenantId: string): number {
+	let hash = 0;
+	for (let i = 0; i < tenantId.length; i++) {
+		hash = (hash * 31 + tenantId.charCodeAt(i)) | 0;
+	}
+	// Map to 1000–65535 range to avoid collisions with manual priorities
+	return 1000 + (Math.abs(hash) % 64536);
+}
+
+export interface TenantUploadStatus {
+	tenantId: string;
+	/** True if uploads are suspended (default state) */
+	suspended: boolean;
+	/** The flag_rules row ID if an unsuspend rule exists */
+	ruleId: number | null;
+}
+
+/**
+ * Get upload suspension status for all tenants.
+ *
+ * Joins the tenants table with flag_rules for uploads_suspended to determine
+ * which tenants have been individually unsuspended.
+ *
+ * @param env - Cloudflare environment bindings
+ * @returns Array of tenant upload statuses
+ */
+export async function getUploadSuspensionStatus(
+	env: FeatureFlagsEnv,
+): Promise<TenantUploadStatus[]> {
+	try {
+		const result = await env.DB.prepare(
+			`SELECT
+        t.id as tenant_id,
+        fr.id as rule_id,
+        fr.result_value
+      FROM tenants t
+      LEFT JOIN flag_rules fr ON (
+        fr.flag_id = ?
+        AND fr.rule_type = 'tenant'
+        AND fr.enabled = 1
+        AND json_extract(fr.rule_value, '$.tenantIds') LIKE '%' || t.id || '%'
+      )
+      ORDER BY t.username`,
+		)
+			.bind(UPLOADS_SUSPENDED_FLAG)
+			.all<{
+				tenant_id: string;
+				rule_id: number | null;
+				result_value: string | null;
+			}>();
+
+		return (result.results ?? []).map((row) => {
+			// A tenant is unsuspended if they have a rule that evaluates to false
+			const hasUnsuspendRule = row.rule_id !== null && row.result_value === "false";
+
+			return {
+				tenantId: row.tenant_id,
+				suspended: !hasUnsuspendRule,
+				ruleId: row.rule_id,
+			};
+		});
+	} catch (error) {
+		console.error("[UploadAdmin] Failed to load suspension status:", error);
+		return [];
+	}
+}
+
+/**
+ * Get upload suspension status for a single tenant.
+ *
+ * Checks if the tenant has an active unsuspend rule. Fails closed —
+ * returns suspended: true if anything goes wrong.
+ *
+ * @param tenantId - The tenant to check
+ * @param env - Cloudflare environment bindings
+ * @returns Upload suspension status for this tenant
+ */
+export async function getTenantUploadSuspension(
+	tenantId: string,
+	env: FeatureFlagsEnv,
+): Promise<TenantUploadStatus> {
+	try {
+		const row = await env.DB.prepare(
+			`SELECT fr.id as rule_id, fr.result_value
+       FROM flag_rules fr
+       WHERE fr.flag_id = ?
+         AND fr.rule_type = 'tenant'
+         AND fr.enabled = 1
+         AND json_extract(fr.rule_value, '$.tenantIds') LIKE '%' || ? || '%'
+       LIMIT 1`,
+		)
+			.bind(UPLOADS_SUSPENDED_FLAG, tenantId)
+			.first<{ rule_id: number; result_value: string }>();
+
+		if (row && row.result_value === "false") {
+			return { tenantId, suspended: false, ruleId: row.rule_id };
+		}
+
+		return { tenantId, suspended: true, ruleId: row?.rule_id ?? null };
+	} catch (error) {
+		console.error(`[UploadAdmin] Failed to check suspension for ${tenantId}:`, error);
+		// Fail closed — assume suspended
+		return { tenantId, suspended: true, ruleId: null };
+	}
+}
+
+/**
+ * Set upload suspension for a specific tenant.
+ *
+ * - Unsuspend: INSERT a flag_rules row with result_value='false'
+ * - Re-suspend: DELETE that rule (falls back to default 'true')
+ *
+ * @param tenantId - The tenant to modify
+ * @param suspended - True to suspend, false to unsuspend
+ * @param env - Cloudflare environment bindings
+ * @returns True if the operation succeeded
+ */
+export async function setUploadSuspension(
+	tenantId: string,
+	suspended: boolean,
+	env: FeatureFlagsEnv,
+): Promise<boolean> {
+	try {
+		if (suspended) {
+			// Re-suspend: delete the unsuspend rule (tenant falls back to default=true)
+			await env.DB.prepare(
+				`DELETE FROM flag_rules
+         WHERE flag_id = ?
+           AND rule_type = 'tenant'
+           AND enabled = 1
+           AND json_extract(rule_value, '$.tenantIds') LIKE '%' || ? || '%'`,
+			)
+				.bind(UPLOADS_SUSPENDED_FLAG, tenantId)
+				.run();
+		} else {
+			// Unsuspend: create a tenant rule that overrides to false
+			// First check if one already exists
+			const existing = await env.DB.prepare(
+				`SELECT id FROM flag_rules
+         WHERE flag_id = ?
+           AND rule_type = 'tenant'
+           AND json_extract(rule_value, '$.tenantIds') LIKE '%' || ? || '%'`,
+			)
+				.bind(UPLOADS_SUSPENDED_FLAG, tenantId)
+				.first<{ id: number }>();
+
+			if (existing) {
+				// Update existing rule to ensure it's enabled and result is false
+				await env.DB.prepare(
+					`UPDATE flag_rules SET enabled = 1, result_value = 'false'
+           WHERE id = ?`,
+				)
+					.bind(existing.id)
+					.run();
+			} else {
+				// Insert new unsuspend rule with a unique priority derived from
+				// a hash of the tenant ID. The UNIQUE(flag_id, priority) constraint
+				// requires each tenant's rule to have a distinct priority value.
+				const priority = tenantIdToPriority(tenantId);
+				await env.DB.prepare(
+					`INSERT INTO flag_rules (
+            flag_id, rule_type, rule_value, result_value, priority, enabled, created_at
+          ) VALUES (?, 'tenant', ?, 'false', ?, 1, datetime('now'))`,
+				)
+					.bind(UPLOADS_SUSPENDED_FLAG, JSON.stringify({ tenantIds: [tenantId] }), priority)
+					.run();
+			}
+		}
+
+		// Invalidate cache so the change takes effect immediately
+		await invalidateFlag(UPLOADS_SUSPENDED_FLAG, env).catch((err) => {
+			console.warn("[UploadAdmin] Cache invalidation failed:", err);
+		});
+
+		return true;
+	} catch (error) {
+		console.error(`[UploadAdmin] Failed to set suspension for ${tenantId}:`, error);
+		return false;
+	}
+}

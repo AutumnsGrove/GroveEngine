@@ -17,8 +17,8 @@
  * @module @autumnsgrove/lattice/firefly
  */
 
-import type { WardenClient } from "../../warden/client.js";
-import type { WardenService } from "../../warden/types.js";
+import type { WardenClient } from "../../auth/warden/client.js";
+import type { WardenService } from "../../auth/warden/types.js";
 import type {
 	FireflyProviderName,
 	TokenResolver,

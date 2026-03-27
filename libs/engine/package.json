@@ -87,6 +87,48 @@
 			"types": "./dist/amber/index.d.ts",
 			"default": "./dist/amber/index.js"
 		},
+		"./media/amber": {
+			"types": "./dist/media/amber/index.d.ts",
+			"default": "./dist/media/amber/index.js"
+		},
+		"./media/processing": {
+			"types": "./dist/media/processing/imageProcessor.d.ts",
+			"default": "./dist/media/processing/imageProcessor.js"
+		},
+		"./media/processing/*": {
+			"types": "./dist/media/processing/*.d.ts",
+			"default": "./dist/media/processing/*.js"
+		},
+		"./media/validation": {
+			"types": "./dist/media/validation/upload-validation.d.ts",
+			"default": "./dist/media/validation/upload-validation.js"
+		},
+		"./media/validation/*": {
+			"types": "./dist/media/validation/*.d.ts",
+			"default": "./dist/media/validation/*.js"
+		},
+		"./content/markdown": {
+			"types": "./dist/content/markdown/index.d.ts",
+			"default": "./dist/content/markdown/index.js"
+		},
+		"./content/markdown/*": {
+			"types": "./dist/content/markdown/*.d.ts",
+			"default": "./dist/content/markdown/*.js"
+		},
+		"./content/editor": {
+			"types": "./dist/content/editor/index.d.ts",
+			"svelte": "./dist/content/editor/index.js",
+			"default": "./dist/content/editor/index.js"
+		},
+		"./content/editor/*": {
+			"types": "./dist/content/editor/*.d.ts",
+			"default": "./dist/content/editor/*.js"
+		},
+		"./content/editor/*.svelte": {
+			"types": "./dist/content/editor/*.svelte.d.ts",
+			"svelte": "./dist/content/editor/*.svelte",
+			"default": "./dist/content/editor/*.svelte"
+		},
 		"./auth": {
 			"types": "./dist/auth/index.d.ts",
 			"default": "./dist/auth/index.js"
@@ -94,6 +136,33 @@
 		"./auth/*": {
 			"types": "./dist/auth/*.d.ts",
 			"default": "./dist/auth/*.js"
+		},
+		"./auth/warden": {
+			"types": "./dist/auth/warden/index.d.ts",
+			"default": "./dist/auth/warden/index.js"
+		},
+		"./auth/login": {
+			"types": "./dist/auth/login/index.d.ts",
+			"svelte": "./dist/auth/login/index.js",
+			"default": "./dist/auth/login/index.js"
+		},
+		"./auth/login/*": {
+			"types": "./dist/auth/login/*.d.ts",
+			"default": "./dist/auth/login/*.js"
+		},
+		"./auth/login/server": {
+			"types": "./dist/auth/login/server/index.d.ts",
+			"default": "./dist/auth/login/server/index.js"
+		},
+		"./social/blazes": {
+			"types": "./dist/social/blazes/index.d.ts",
+			"svelte": "./dist/social/blazes/index.js",
+			"default": "./dist/social/blazes/index.js"
+		},
+		"./social/blazes/components": {
+			"types": "./dist/social/blazes/components/index.d.ts",
+			"svelte": "./dist/social/blazes/components/index.js",
+			"default": "./dist/social/blazes/components/index.js"
 		},
 		"./blazes": {
 			"types": "./dist/blazes/index.d.ts",
@@ -130,17 +199,25 @@
 			"svelte": "./dist/components/terminology/*.svelte",
 			"default": "./dist/components/terminology/*.svelte"
 		},
+		"./platform/config": {
+			"types": "./dist/platform/config/index.d.ts",
+			"default": "./dist/platform/config/index.js"
+		},
+		"./platform/config/*": {
+			"types": "./dist/platform/config/*.d.ts",
+			"default": "./dist/platform/config/*.js"
+		},
 		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"default": "./dist/config/index.js"
+			"types": "./dist/platform/config/index.d.ts",
+			"default": "./dist/platform/config/index.js"
 		},
 		"./config/*": {
-			"types": "./dist/config/*.d.ts",
-			"default": "./dist/config/*.js"
+			"types": "./dist/platform/config/*.d.ts",
+			"default": "./dist/platform/config/*.js"
 		},
 		"./config/terrarium": {
-			"types": "./dist/config/terrarium.d.ts",
-			"default": "./dist/config/terrarium.js"
+			"types": "./dist/platform/config/terrarium.d.ts",
+			"default": "./dist/platform/config/terrarium.js"
 		},
 		"./curios": {
 			"types": "./dist/curios/index.d.ts",
@@ -262,13 +339,21 @@
 			"types": "./dist/errors/*.d.ts",
 			"default": "./dist/errors/*.js"
 		},
+		"./platform/feature-flags": {
+			"types": "./dist/platform/feature-flags/index.d.ts",
+			"default": "./dist/platform/feature-flags/index.js"
+		},
+		"./platform/feature-flags/*": {
+			"types": "./dist/platform/feature-flags/*.d.ts",
+			"default": "./dist/platform/feature-flags/*.js"
+		},
 		"./feature-flags": {
-			"types": "./dist/feature-flags/index.d.ts",
-			"default": "./dist/feature-flags/index.js"
+			"types": "./dist/platform/feature-flags/index.d.ts",
+			"default": "./dist/platform/feature-flags/index.js"
 		},
 		"./feature-flags/*": {
-			"types": "./dist/feature-flags/*.d.ts",
-			"default": "./dist/feature-flags/*.js"
+			"types": "./dist/platform/feature-flags/*.d.ts",
+			"default": "./dist/platform/feature-flags/*.js"
 		},
 		"./firefly": {
 			"types": "./dist/firefly/index.d.ts",
@@ -278,15 +363,39 @@
 			"types": "./dist/git/index.d.ts",
 			"default": "./dist/git/index.js"
 		},
+		"./platform/greenhouse": {
+			"types": "./dist/platform/greenhouse/index.d.ts",
+			"svelte": "./dist/platform/greenhouse/index.js",
+			"default": "./dist/platform/greenhouse/index.js"
+		},
+		"./platform/pricing": {
+			"types": "./dist/platform/pricing/index.d.ts",
+			"svelte": "./dist/platform/pricing/index.js",
+			"default": "./dist/platform/pricing/index.js"
+		},
+		"./platform/upgrades": {
+			"types": "./dist/platform/upgrades/index.d.ts",
+			"svelte": "./dist/platform/upgrades/index.js",
+			"default": "./dist/platform/upgrades/index.js"
+		},
+		"./platform/upgrades/server/api/*": {
+			"types": "./dist/platform/upgrades/server/api/*.d.ts",
+			"default": "./dist/platform/upgrades/server/api/*.js"
+		},
+		"./platform/uploads": {
+			"types": "./dist/platform/uploads/index.d.ts",
+			"svelte": "./dist/platform/uploads/index.js",
+			"default": "./dist/platform/uploads/index.js"
+		},
 		"./grafts": {
 			"types": "./dist/grafts/index.d.ts",
 			"svelte": "./dist/grafts/index.js",
 			"default": "./dist/grafts/index.js"
 		},
 		"./grafts/greenhouse": {
-			"types": "./dist/grafts/greenhouse/index.d.ts",
-			"svelte": "./dist/grafts/greenhouse/index.js",
-			"default": "./dist/grafts/greenhouse/index.js"
+			"types": "./dist/platform/greenhouse/index.d.ts",
+			"svelte": "./dist/platform/greenhouse/index.js",
+			"default": "./dist/platform/greenhouse/index.js"
 		},
 		"./grafts/login": {
 			"types": "./dist/grafts/login/index.d.ts",
@@ -302,23 +411,23 @@
 			"default": "./dist/grafts/login/server/index.js"
 		},
 		"./grafts/pricing": {
-			"types": "./dist/grafts/pricing/index.d.ts",
-			"svelte": "./dist/grafts/pricing/index.js",
-			"default": "./dist/grafts/pricing/index.js"
+			"types": "./dist/platform/pricing/index.d.ts",
+			"svelte": "./dist/platform/pricing/index.js",
+			"default": "./dist/platform/pricing/index.js"
 		},
 		"./grafts/upgrades": {
-			"types": "./dist/grafts/upgrades/index.d.ts",
-			"svelte": "./dist/grafts/upgrades/index.js",
-			"default": "./dist/grafts/upgrades/index.js"
+			"types": "./dist/platform/upgrades/index.d.ts",
+			"svelte": "./dist/platform/upgrades/index.js",
+			"default": "./dist/platform/upgrades/index.js"
 		},
 		"./grafts/upgrades/server/api/*": {
-			"types": "./dist/grafts/upgrades/server/api/*.d.ts",
-			"default": "./dist/grafts/upgrades/server/api/*.js"
+			"types": "./dist/platform/upgrades/server/api/*.d.ts",
+			"default": "./dist/platform/upgrades/server/api/*.js"
 		},
 		"./grafts/uploads": {
-			"types": "./dist/grafts/uploads/index.d.ts",
-			"svelte": "./dist/grafts/uploads/index.js",
-			"default": "./dist/grafts/uploads/index.js"
+			"types": "./dist/platform/uploads/index.d.ts",
+			"svelte": "./dist/platform/uploads/index.js",
+			"default": "./dist/platform/uploads/index.js"
 		},
 		"./groveauth": {
 			"types": "./dist/heartwood/index.d.ts",
@@ -348,6 +457,14 @@
 			"types": "./dist/loom/adapters/worker.d.ts",
 			"default": "./dist/loom/adapters/worker.js"
 		},
+		"./ai/lumen": {
+			"types": "./dist/ai/lumen/index.d.ts",
+			"default": "./dist/ai/lumen/index.js"
+		},
+		"./ai/lumen/*": {
+			"types": "./dist/ai/lumen/*.d.ts",
+			"default": "./dist/ai/lumen/*.js"
+		},
 		"./lumen": {
 			"types": "./dist/lumen/index.d.ts",
 			"default": "./dist/lumen/index.js"
@@ -364,9 +481,21 @@
 			"types": "./dist/payments/*.d.ts",
 			"default": "./dist/payments/*.js"
 		},
+		"./ai/reverie": {
+			"types": "./dist/ai/reverie/index.d.ts",
+			"default": "./dist/ai/reverie/index.js"
+		},
 		"./reverie": {
 			"types": "./dist/reverie/index.d.ts",
 			"default": "./dist/reverie/index.js"
+		},
+		"./monitoring/sentinel": {
+			"types": "./dist/monitoring/sentinel/index.d.ts",
+			"default": "./dist/monitoring/sentinel/index.js"
+		},
+		"./monitoring/sentinel/*": {
+			"types": "./dist/monitoring/sentinel/*.d.ts",
+			"default": "./dist/monitoring/sentinel/*.js"
 		},
 		"./sentinel": {
 			"types": "./dist/sentinel/index.d.ts",
@@ -383,6 +512,10 @@
 		"./server/*": {
 			"types": "./dist/server/*.d.ts",
 			"default": "./dist/server/*.js"
+		},
+		"./monitoring/observability": {
+			"types": "./dist/monitoring/observability/index.d.ts",
+			"default": "./dist/monitoring/observability/index.js"
 		},
 		"./server/observability": {
 			"types": "./dist/server/observability/index.d.ts",
@@ -432,29 +565,49 @@
 			"types": "./dist/thorn/*.d.ts",
 			"default": "./dist/thorn/*.js"
 		},
+		"./platform/threshold": {
+			"types": "./dist/platform/threshold/index.d.ts",
+			"default": "./dist/platform/threshold/index.js"
+		},
+		"./platform/threshold/*": {
+			"types": "./dist/platform/threshold/*.d.ts",
+			"default": "./dist/platform/threshold/*.js"
+		},
+		"./platform/threshold/hono": {
+			"types": "./dist/platform/threshold/adapters/hono.d.ts",
+			"default": "./dist/platform/threshold/adapters/hono.js"
+		},
+		"./platform/threshold/sveltekit": {
+			"types": "./dist/platform/threshold/adapters/sveltekit.d.ts",
+			"default": "./dist/platform/threshold/adapters/sveltekit.js"
+		},
+		"./platform/threshold/worker": {
+			"types": "./dist/platform/threshold/adapters/worker.d.ts",
+			"default": "./dist/platform/threshold/adapters/worker.js"
+		},
 		"./threshold": {
-			"types": "./dist/threshold/index.d.ts",
-			"default": "./dist/threshold/index.js"
+			"types": "./dist/platform/threshold/index.d.ts",
+			"default": "./dist/platform/threshold/index.js"
 		},
 		"./threshold/*": {
-			"types": "./dist/threshold/*.d.ts",
-			"default": "./dist/threshold/*.js"
+			"types": "./dist/platform/threshold/*.d.ts",
+			"default": "./dist/platform/threshold/*.js"
 		},
 		"./threshold/adapters/*": {
-			"types": "./dist/threshold/adapters/*.d.ts",
-			"default": "./dist/threshold/adapters/*.js"
+			"types": "./dist/platform/threshold/adapters/*.d.ts",
+			"default": "./dist/platform/threshold/adapters/*.js"
 		},
 		"./threshold/hono": {
-			"types": "./dist/threshold/adapters/hono.d.ts",
-			"default": "./dist/threshold/adapters/hono.js"
+			"types": "./dist/platform/threshold/adapters/hono.d.ts",
+			"default": "./dist/platform/threshold/adapters/hono.js"
 		},
 		"./threshold/sveltekit": {
-			"types": "./dist/threshold/adapters/sveltekit.d.ts",
-			"default": "./dist/threshold/adapters/sveltekit.js"
+			"types": "./dist/platform/threshold/adapters/sveltekit.d.ts",
+			"default": "./dist/platform/threshold/adapters/sveltekit.js"
 		},
 		"./threshold/worker": {
-			"types": "./dist/threshold/adapters/worker.d.ts",
-			"default": "./dist/threshold/adapters/worker.js"
+			"types": "./dist/platform/threshold/adapters/worker.d.ts",
+			"default": "./dist/platform/threshold/adapters/worker.js"
 		},
 		"./ui": {
 			"types": "./dist/ui/index.d.ts",
@@ -516,6 +669,16 @@
 			"types": "./dist/ui/components/chrome/lantern/*.svelte.d.ts",
 			"svelte": "./dist/ui/components/chrome/lantern/*.svelte",
 			"default": "./dist/ui/components/chrome/lantern/*.svelte"
+		},
+		"./ui/components/custom": {
+			"types": "./dist/ui/components/custom/index.d.ts",
+			"svelte": "./dist/ui/components/custom/index.js",
+			"default": "./dist/ui/components/custom/index.js"
+		},
+		"./ui/components/custom/*.svelte": {
+			"types": "./dist/ui/components/custom/*.svelte.d.ts",
+			"svelte": "./dist/ui/components/custom/*.svelte",
+			"default": "./dist/ui/components/custom/*.svelte"
 		},
 		"./ui/components/content": {
 			"types": "./dist/ui/components/content/index.d.ts",

@@ -714,7 +714,7 @@
 						previewTitle={title}
 						previewTags={parseTags(tagsInput)}
 						{gutterItems}
-						grafts={data?.grafts ?? {}}
+						flags={data?.flags ?? {}}
 						configuredCurios={data?.curios ?? []}
 					/>
 				</div>

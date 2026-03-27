@@ -1,8 +1,8 @@
 import { redirect, isRedirect } from "@sveltejs/kit";
 import {
-	getEnabledGrafts,
+	getEnabledFlags,
 	isInGreenhouse,
-	type GraftsRecord,
+	type FlagsRecord,
 } from "@autumnsgrove/lattice/feature-flags";
 import { emailsMatch, normalizeEmail } from "@autumnsgrove/lattice/utils/user";
 import { loadChannelMessages } from "@autumnsgrove/lattice/server/services/messages";
@@ -99,15 +99,15 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) 
 
 	// PERFORMANCE: Run independent queries in parallel to reduce navigation latency.
 	// Previously sequential awaits stacked D1 latency (100-300ms each = 1-3s total).
-	// Now: tenant, greenhouse+grafts, beta, and messages all run concurrently.
-	// Only getPendingCount depends on grafts result, so it runs after.
+	// Now: tenant, greenhouse+flags, beta, and messages all run concurrently.
+	// Only getPendingCount depends on flags result, so it runs after.
 
 	const db = platform?.env?.DB;
 	const kv = platform?.env?.CACHE_KV;
 	const tenantId = locals.tenantId;
 
 	// Phase 1: Run all independent queries in parallel
-	const [tenantResult, graftsResult, betaResult, messagesResult] = await Promise.all([
+	const [tenantResult, flagsResult, betaResult, messagesResult] = await Promise.all([
 		// Tenant data + ownership verification
 		tenantId && db
 			? db
@@ -120,20 +120,20 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) 
 					})
 			: Promise.resolve(null),
 
-		// Grafts: greenhouse check + flag evaluation (has internal dependency)
+		// Flags: greenhouse check + flag evaluation (has internal dependency)
 		tenantId && db && kv
 			? (async () => {
 					try {
 						const flagsEnv = { DB: db, FLAGS_KV: kv };
 						const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv);
-						const grafts = await getEnabledGrafts({ tenantId, inGreenhouse }, flagsEnv);
-						return { grafts, inGreenhouse };
+						const flags = await getEnabledFlags({ tenantId, inGreenhouse }, flagsEnv);
+						return { flags, inGreenhouse };
 					} catch (error) {
-						console.error("[Admin Layout] Failed to load grafts:", error);
-						return { grafts: {} as GraftsRecord, inGreenhouse: false };
+						console.error("[Admin Layout] Failed to load flags:", error);
+						return { flags: {} as FlagsRecord, inGreenhouse: false };
 					}
 				})()
-			: Promise.resolve({ grafts: {} as GraftsRecord, inGreenhouse: false }),
+			: Promise.resolve({ flags: {} as FlagsRecord, inGreenhouse: false }),
 
 		// Beta invite check
 		tenantId && db
@@ -182,13 +182,13 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) 
 		tenant = demoTenant;
 	}
 
-	const { grafts, inGreenhouse } = graftsResult;
+	const { flags, inGreenhouse } = flagsResult;
 	const isBeta = !!betaResult;
 	const messages = messagesResult;
 
-	// Phase 2: Pending comment count depends on grafts result
+	// Phase 2: Pending comment count depends on flags result
 	let pendingCommentCount = 0;
-	if (grafts.reeds_comments && db && tenantId) {
+	if (flags.reeds_comments && db && tenantId) {
 		try {
 			const tenantDb = getTenantDb(db, { tenantId });
 			pendingCommentCount = await getPendingCount(tenantDb);
@@ -201,7 +201,7 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) 
 		...parentData,
 		user: locals.user,
 		tenant,
-		grafts,
+		flags,
 		inGreenhouse,
 		isBeta,
 		isDemoMode,

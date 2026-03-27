@@ -1,26 +1,8 @@
 /**
- * Upload Management Graft
+ * Uploads Graft — DEPRECATED re-export shim
  *
- * Wayfinder-only admin panel for managing per-tenant upload suspension.
- *
- * @example
- * ```svelte
- * <script>
- *   import { UploadManagementPanel } from '@autumnsgrove/lattice/grafts/uploads';
- * </script>
- *
- * <UploadManagementPanel
- *   tenants={data.tenants}
- *   tenantNames={data.tenantNames}
- *   onSuspend={handleSuspend}
- *   onUnsuspend={handleUnsuspend}
- *   formResult={form}
- * />
- * ```
+ * This module has moved to platform/uploads/.
+ * This shim exists for backward compatibility and will be removed in a future release.
  */
 
-// Types
-export type { UploadManagementPanelProps, TenantUploadRow } from "./types.js";
-
-// Components
-export { default as UploadManagementPanel } from "./UploadManagementPanel.svelte";
+export * from "../../platform/uploads/index.js";

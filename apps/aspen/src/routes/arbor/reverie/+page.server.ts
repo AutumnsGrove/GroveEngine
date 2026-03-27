@@ -2,9 +2,9 @@ import type { PageServerLoad } from "./$types";
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const load: PageServerLoad = async ({ locals, parent }) => {
-	// Gate: reverie_enabled graft (cascaded from arbor layout)
+	// Gate: reverie_enabled flag (cascaded from arbor layout)
 	const parentData = await parent();
-	if (!parentData.grafts?.reverie_enabled) {
+	if (!parentData.flags?.reverie_enabled) {
 		throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
 	}
 
