@@ -125,6 +125,31 @@
 			"svelte": "./dist/content/editor/*.svelte",
 			"default": "./dist/content/editor/*.svelte"
 		},
+		"./components/admin/*.svelte": {
+			"types": "./dist/components/admin/*.svelte.d.ts",
+			"svelte": "./dist/components/admin/*.svelte",
+			"default": "./dist/components/admin/*.svelte"
+		},
+		"./components/chrome/*.svelte": {
+			"types": "./dist/components/chrome/*.svelte.d.ts",
+			"svelte": "./dist/components/chrome/*.svelte",
+			"default": "./dist/components/chrome/*.svelte"
+		},
+		"./components/custom/*.svelte": {
+			"types": "./dist/components/custom/*.svelte.d.ts",
+			"svelte": "./dist/components/custom/*.svelte",
+			"default": "./dist/components/custom/*.svelte"
+		},
+		"./components/reeds/*.svelte": {
+			"types": "./dist/components/reeds/*.svelte.d.ts",
+			"svelte": "./dist/components/reeds/*.svelte",
+			"default": "./dist/components/reeds/*.svelte"
+		},
+		"./components/terminology/*.svelte": {
+			"types": "./dist/components/terminology/*.svelte.d.ts",
+			"svelte": "./dist/components/terminology/*.svelte",
+			"default": "./dist/components/terminology/*.svelte"
+		},
 		"./auth": {
 			"types": "./dist/auth/index.d.ts",
 			"default": "./dist/auth/index.js"
