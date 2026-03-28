@@ -5,7 +5,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { SERVICE_REGISTRY } from "@autumnsgrove/lattice/server/observability";
+import { SERVICE_REGISTRY } from "@autumnsgrove/lattice/monitoring/observability";
 
 interface DOStatsRow {
 	class_name: string;

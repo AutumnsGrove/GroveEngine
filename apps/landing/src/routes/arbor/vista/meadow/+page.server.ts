@@ -3,8 +3,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { aggregateMeadow } from "@autumnsgrove/lattice/server/observability";
-import type { MeadowAggregateResult } from "@autumnsgrove/lattice/server/observability";
+import { aggregateMeadow } from "@autumnsgrove/lattice/monitoring/observability";
+import type { MeadowAggregateResult } from "@autumnsgrove/lattice/monitoring/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

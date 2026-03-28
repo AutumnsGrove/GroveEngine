@@ -13,7 +13,7 @@ import type { RequestHandler } from "./$types.js";
 import { fetchOGMetadata } from "@autumnsgrove/lattice/server/services/og-fetcher";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import { API_ERRORS, buildErrorJson } from "@autumnsgrove/lattice/errors";
 import { isValidUrl } from "@autumnsgrove/lattice/curios/shelves";
 

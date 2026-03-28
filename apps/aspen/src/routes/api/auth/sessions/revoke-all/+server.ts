@@ -8,7 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
-import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config/auth";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/platform/config/auth";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 	const groveSession = cookies.get("grove_session");

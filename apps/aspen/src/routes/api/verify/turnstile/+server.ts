@@ -17,7 +17,7 @@ import {
 } from "@autumnsgrove/lattice/server/services/turnstile";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {

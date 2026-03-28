@@ -136,7 +136,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 				}
 				// Import from centralized config to ensure consistency
 				const { CANOPY_CATEGORIES } =
-					await import("@autumnsgrove/lattice/config/canopy-categories");
+					await import("@autumnsgrove/lattice/platform/config/canopy-categories");
 				const allValid = parsed.every(
 					(cat) =>
 						typeof cat === "string" &&

@@ -16,7 +16,7 @@ import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { generateId } from "@autumnsgrove/lattice/server/services/database";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import { sendTraceNotification } from "@autumnsgrove/lattice/server/services/trace-email";
 import { API_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
 import type { RequestHandler } from "./$types.js";

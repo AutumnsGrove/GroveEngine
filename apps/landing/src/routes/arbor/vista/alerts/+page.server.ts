@@ -3,7 +3,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getAlerts, getAlertThresholds } from "@autumnsgrove/lattice/server/observability";
+import { getAlerts, getAlertThresholds } from "@autumnsgrove/lattice/monitoring/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

@@ -16,8 +16,8 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
-import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
+import { getEndpointLimitByKey } from "@autumnsgrove/lattice/platform/threshold/config";
 import { AUTH_COOKIE_NAMES } from "@autumnsgrove/lattice/auth/login";
 import {
 	AUTH_ERRORS,

@@ -10,7 +10,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config/auth";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/platform/config/auth";
 
 export const GET: RequestHandler = async ({ cookies, platform }) => {
 	// Collect session cookies (modern auth — no legacy access_token)

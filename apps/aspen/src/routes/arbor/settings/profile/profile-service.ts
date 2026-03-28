@@ -15,7 +15,7 @@ import { queryMany, queryOne } from "@autumnsgrove/lattice/server/services/datab
 import type { TenantGraftInfo } from "@autumnsgrove/lattice/platform/feature-flags/tenant-grafts";
 import type { GreenhouseTenant } from "@autumnsgrove/lattice/platform/feature-flags/types";
 import type { FeatureFlagSummary } from "@autumnsgrove/lattice/platform/feature-flags/admin";
-import { isWayfinder } from "@autumnsgrove/lattice/config/wayfinder";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config/wayfinder";
 import { isValidTier, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	canChangeUsername,

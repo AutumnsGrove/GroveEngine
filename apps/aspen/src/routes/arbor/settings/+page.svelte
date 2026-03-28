@@ -4,7 +4,7 @@
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
 	import GroveIcon from "@autumnsgrove/lattice/ui/components/ui/groveicon/GroveIcon.svelte";
 	import { authIcons, chromeIcons, featureIcons, natureIcons } from "@autumnsgrove/prism/icons";
-	import { FONT_PRESETS } from "@autumnsgrove/lattice/config/presets";
+	import { FONT_PRESETS } from "@autumnsgrove/lattice/platform/config/presets";
 	import { SEASON_LABELS, type Season } from "@autumnsgrove/lattice/ui/types/season";
 	import { getSeasonFavicons, SEASON_THEME_COLORS } from "@autumnsgrove/lattice/ui/season-meta";
 	import { api } from "@autumnsgrove/lattice/utils";

@@ -9,7 +9,7 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
 	import { authIcons, chromeIcons, blazeIcons } from "@autumnsgrove/prism/icons";
-	import { authPath } from "@autumnsgrove/lattice/config/auth";
+	import { authPath } from "@autumnsgrove/lattice/platform/config/auth";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
 

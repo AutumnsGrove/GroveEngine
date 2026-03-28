@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
-	import { CONTACT } from "@autumnsgrove/lattice/config/contact";
+	import { CONTACT } from "@autumnsgrove/lattice/platform/config/contact";
 	import {
 		buildPortalUrl,
 		buildCancelUrl,

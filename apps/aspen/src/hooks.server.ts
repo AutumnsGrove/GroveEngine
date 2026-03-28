@@ -716,8 +716,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith("/api/")) {
 		const [{ createThreshold }, { thresholdCheck }, { getClientIP }] = await Promise.all([
 			import("@autumnsgrove/lattice/threshold/factory"),
-			import("@autumnsgrove/lattice/threshold/adapters/sveltekit"),
-			import("@autumnsgrove/lattice/threshold/adapters/worker"),
+			import("@autumnsgrove/lattice/platform/threshold/sveltekit"),
+			import("@autumnsgrove/lattice/platform/threshold/worker"),
 		]);
 		const clientIp = getClientIP(event.request);
 		// Authenticated users: rate limit per user ID so limits follow sessions, not IPs.

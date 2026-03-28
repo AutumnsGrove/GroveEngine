@@ -3,8 +3,11 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getStorageMetrics, getCollectionStatus } from "@autumnsgrove/lattice/server/observability";
-import type { CollectionStatus } from "@autumnsgrove/lattice/server/observability";
+import {
+	getStorageMetrics,
+	getCollectionStatus,
+} from "@autumnsgrove/lattice/monitoring/observability";
+import type { CollectionStatus } from "@autumnsgrove/lattice/monitoring/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

@@ -3,7 +3,10 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getCostMetrics, PRICING_LAST_VERIFIED } from "@autumnsgrove/lattice/server/observability";
+import {
+	getCostMetrics,
+	PRICING_LAST_VERIFIED,
+} from "@autumnsgrove/lattice/monitoring/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

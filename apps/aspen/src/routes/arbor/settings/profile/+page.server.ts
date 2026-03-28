@@ -17,7 +17,7 @@ import {
 	toggleGreenhouseStatus,
 	setFlagEnabled,
 } from "@autumnsgrove/lattice/platform/feature-flags";
-import { isWayfinder } from "@autumnsgrove/lattice/config/wayfinder";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config/wayfinder";
 import { isValidTier, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	validateUsernameAvailability,
