@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
-	import MarkdownEditor from "@autumnsgrove/lattice/components/admin/MarkdownEditor.svelte";
+	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Dialog from "@autumnsgrove/lattice/ui/components/ui/Dialog.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";

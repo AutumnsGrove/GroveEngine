@@ -82,7 +82,7 @@
 							class="time-input"
 							value={time}
 							oninput={(e) => onUpdateDigestTime(i, (e.target as HTMLInputElement).value)}
-						aria-label={`Digest time ${i + 1}`}
+							aria-label={`Digest time ${i + 1}`}
 						/>
 						{#if digestTimes.length > 1}
 							<button
@@ -115,7 +115,7 @@
 				class="select-input"
 				value={digestTimezone}
 				onchange={(e) => onDigestTimezoneChange(e.currentTarget.value)}
-			aria-label="Digest timezone"
+				aria-label="Digest timezone"
 			>
 				<option value="America/New_York">Eastern (ET)</option>
 				<option value="America/Chicago">Central (CT)</option>
@@ -144,7 +144,7 @@
 				placeholder="you@example.com"
 				value={digestRecipient}
 				oninput={(e) => onDigestRecipientChange(e.currentTarget.value)}
-			aria-label="Digest recipient email"
+				aria-label="Digest recipient email"
 			/>
 		</div>
 

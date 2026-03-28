@@ -2,7 +2,7 @@
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
-	import MarkdownEditor from "@autumnsgrove/lattice/components/admin/MarkdownEditor.svelte";
+	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import GutterManager from "@autumnsgrove/lattice/components/admin/GutterManager.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";

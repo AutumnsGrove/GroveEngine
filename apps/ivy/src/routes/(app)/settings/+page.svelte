@@ -790,5 +790,4 @@
 	.text-input::placeholder {
 		color: var(--color-text-tertiary);
 	}
-
 </style>

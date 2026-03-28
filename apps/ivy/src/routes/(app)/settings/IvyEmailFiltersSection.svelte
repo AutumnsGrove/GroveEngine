@@ -56,7 +56,8 @@
 				<select
 					class="select-input"
 					value={newFilterType}
-					onchange={(e) => onNewFilterTypeChange(e.currentTarget.value as "blocklist" | "allowlist")}
+					onchange={(e) =>
+						onNewFilterTypeChange(e.currentTarget.value as "blocklist" | "allowlist")}
 					aria-label="Filter type"
 				>
 					<option value="blocklist">Block</option>
@@ -120,7 +121,7 @@
 								class="filter-remove"
 								onclick={() => onRemoveFilter(filter.id)}
 								title="Remove filter"
-							aria-label={`Remove filter for ${filter.pattern}`}
+								aria-label={`Remove filter for ${filter.pattern}`}
 							>
 								<Icon name="x" size={14} />
 							</button>

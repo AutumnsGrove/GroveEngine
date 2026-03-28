@@ -4,8 +4,7 @@
 -->
 <script lang="ts">
 	import MarkdownEditor from "../../content/editor/MarkdownEditor.svelte";
-	// Forward all props using Svelte 5 rest props
-	let { ...props }: Record<string, any> = $props();
+	let { content = $bindable(""), previewTitle = $bindable(""), firesideAssisted = $bindable(false), ...rest } = $props<any>();
 </script>
 
-<MarkdownEditor {...props} />
+<MarkdownEditor bind:content bind:previewTitle bind:firesideAssisted {...rest} />

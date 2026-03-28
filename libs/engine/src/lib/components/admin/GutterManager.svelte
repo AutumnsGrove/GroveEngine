@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import GutterManager from "../../content/editor/GutterManager.svelte";
-	let { ...props }: Record<string, any> = $props();
+	let { gutterItems = $bindable([]), ...rest } = $props<any>();
 </script>
 
-<GutterManager {...props} />
+<GutterManager bind:gutterItems {...rest} />

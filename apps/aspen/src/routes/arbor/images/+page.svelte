@@ -14,7 +14,7 @@
 	} = $props();
 
 	// Feature flag for image uploads (cascaded from Arbor layout flags)
-	const uploadsEnabled = $derived(data.flags?.image_uploads ?? true);
+	const uploadsEnabled = $derived(data.grafts?.image_uploads ?? true);
 
 	// Feature flags from server (reactive to data changes)
 	const jxlFeatureEnabled = $derived(data.jxl?.jxlEnabled ?? false);
