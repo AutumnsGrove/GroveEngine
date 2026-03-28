@@ -5,8 +5,9 @@
  * and pre-Plant user detection.
  */
 
-import { redirect } from "@sveltejs/kit";
+import { redirect, isRedirect } from "@sveltejs/kit";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
+import { queryOne, execute } from "@autumnsgrove/lattice/server/services/database";
 
 /** Better Auth session cookie names */
 const BETTER_AUTH_COOKIE = "better-auth.session_token";
@@ -22,18 +23,6 @@ function errorRedirect(
 ): never {
 	logPlantError(error, context);
 	redirect(302, buildPlantErrorUrl(error, "/", extra));
-}
-
-/** Check if a thrown value is a SvelteKit redirect */
-function isRedirect(err: unknown): boolean {
-	return (
-		err != null &&
-		typeof err === "object" &&
-		"status" in err &&
-		typeof (err as { status: unknown }).status === "number" &&
-		(err as { status: number }).status >= 300 &&
-		(err as { status: number }).status < 400
-	);
 }
 
 // ============================================================================
@@ -143,12 +132,11 @@ export async function resolveOnboarding(
 	let existing: OnboardingRecord | null = null;
 
 	try {
-		existing = (await db
-			.prepare(
-				"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
-			)
-			.bind(userId)
-			.first()) as OnboardingRecord | null;
+		existing = await queryOne<OnboardingRecord>(
+			db,
+			"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
+			[userId],
+		);
 	} catch (err) {
 		errorRedirect(PLANT_ERRORS.ONBOARDING_QUERY_FAILED, {
 			path,
@@ -161,23 +149,21 @@ export async function resolveOnboarding(
 	// Fallback: look up by email
 	if (!existing) {
 		try {
-			existing = (await db
-				.prepare(
-					"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
-				)
-				.bind(userEmail.toLowerCase())
-				.first()) as OnboardingRecord | null;
+			existing = await queryOne<OnboardingRecord>(
+				db,
+				"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
+				[userEmail.toLowerCase()],
+			);
 
 			if (existing) {
 				console.log(
 					`[Auth Callback] Found onboarding by email, updating groveauth_id for ${userId.slice(0, 8)}...`,
 				);
-				await db
-					.prepare(
-						"UPDATE user_onboarding SET groveauth_id = ?, updated_at = unixepoch() WHERE id = ?",
-					)
-					.bind(userId, existing.id)
-					.run();
+				await execute(
+					db,
+					"UPDATE user_onboarding SET groveauth_id = ?, updated_at = unixepoch() WHERE id = ?",
+					[userId, existing.id],
+				);
 			}
 		} catch (err) {
 			console.warn("[Auth Callback] Email fallback query failed:", err);
@@ -193,16 +179,18 @@ export async function resolveOnboarding(
 
 export async function checkPrePlantUser(db: D1Database, userEmail: string): Promise<void> {
 	try {
-		const existingUser = (await db
-			.prepare("SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL")
-			.bind(userEmail.toLowerCase())
-			.first()) as { tenant_id: string } | null;
+		const existingUser = await queryOne<{ tenant_id: string }>(
+			db,
+			"SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL",
+			[userEmail.toLowerCase()],
+		);
 
 		if (existingUser) {
-			const tenant = (await db
-				.prepare("SELECT subdomain FROM tenants WHERE id = ? AND active = 1")
-				.bind(existingUser.tenant_id)
-				.first()) as { subdomain: string } | null;
+			const tenant = await queryOne<{ subdomain: string }>(
+				db,
+				"SELECT subdomain FROM tenants WHERE id = ? AND active = 1",
+				[existingUser.tenant_id],
+			);
 
 			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
 				console.log(
@@ -213,10 +201,11 @@ export async function checkPrePlantUser(db: D1Database, userEmail: string): Prom
 		}
 
 		if (!existingUser) {
-			const tenant = (await db
-				.prepare("SELECT subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1")
-				.bind(userEmail.toLowerCase())
-				.first()) as { subdomain: string } | null;
+			const tenant = await queryOne<{ subdomain: string }>(
+				db,
+				"SELECT subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1",
+				[userEmail.toLowerCase()],
+			);
 
 			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
 				console.log(
@@ -247,25 +236,23 @@ export async function upsertOnboarding(
 
 		try {
 			if (emailVerified) {
-				await db
-					.prepare(
-						`UPDATE user_onboarding
+				await execute(
+					db,
+					`UPDATE user_onboarding
              SET auth_completed_at = unixepoch(),
                  email_verified = CASE WHEN email_verified = 0 THEN 1 ELSE email_verified END,
                  email_verified_at = CASE WHEN email_verified = 0 THEN unixepoch() ELSE email_verified_at END,
                  email_verified_via = CASE WHEN email_verified = 0 THEN 'oauth' ELSE email_verified_via END,
                  updated_at = unixepoch()
              WHERE id = ?`,
-					)
-					.bind(onboardingId)
-					.run();
+					[onboardingId],
+				);
 			} else {
-				await db
-					.prepare(
-						"UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
-					)
-					.bind(onboardingId)
-					.run();
+				await execute(
+					db,
+					"UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
+					[onboardingId],
+				);
 			}
 		} catch (err) {
 			errorRedirect(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
@@ -294,21 +281,19 @@ export async function upsertOnboarding(
 
 		try {
 			if (emailVerified) {
-				await db
-					.prepare(
-						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
+				await execute(
+					db,
+					`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
-					)
-					.bind(onboardingId, user.id, user.email, displayName)
-					.run();
+					[onboardingId, user.id, user.email, displayName],
+				);
 			} else {
-				await db
-					.prepare(
-						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
+				await execute(
+					db,
+					`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
-					)
-					.bind(onboardingId, user.id, user.email, displayName)
-					.run();
+					[onboardingId, user.id, user.email, displayName],
+				);
 			}
 
 			console.log("[Auth Callback] Created onboarding record:", onboardingId);
@@ -340,10 +325,11 @@ async function resolveTenantSubdomain(
 
 	if (existingOnboarding.tenant_id) {
 		try {
-			const tenant = (await db
-				.prepare("SELECT subdomain FROM tenants WHERE id = ?")
-				.bind(existingOnboarding.tenant_id)
-				.first()) as { subdomain: string } | null;
+			const tenant = await queryOne<{ subdomain: string }>(
+				db,
+				"SELECT subdomain FROM tenants WHERE id = ?",
+				[existingOnboarding.tenant_id],
+			);
 
 			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
 				tenantSubdomain = tenant.subdomain;
@@ -360,41 +346,42 @@ async function resolveTenantSubdomain(
 	} else {
 		// Cross-reference users/tenants tables
 		try {
-			const existingUser = (await db
-				.prepare("SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL")
-				.bind(user.email.toLowerCase())
-				.first()) as { tenant_id: string } | null;
+			const existingUser = await queryOne<{ tenant_id: string }>(
+				db,
+				"SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL",
+				[user.email.toLowerCase()],
+			);
 
 			if (existingUser) {
-				const tenant = (await db
-					.prepare("SELECT id, subdomain FROM tenants WHERE id = ? AND active = 1")
-					.bind(existingUser.tenant_id)
-					.first()) as { id: string; subdomain: string } | null;
+				const tenant = await queryOne<{ id: string; subdomain: string }>(
+					db,
+					"SELECT id, subdomain FROM tenants WHERE id = ? AND active = 1",
+					[existingUser.tenant_id],
+				);
 
 				if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-					await db
-						.prepare(
-							"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
-						)
-						.bind(tenant.id, onboardingId)
-						.run();
+					await execute(
+						db,
+						"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
+						[tenant.id, onboardingId],
+					);
 					tenantSubdomain = tenant.subdomain;
 				}
 			}
 
 			if (!tenantSubdomain) {
-				const tenant = (await db
-					.prepare("SELECT id, subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1")
-					.bind(user.email.toLowerCase())
-					.first()) as { id: string; subdomain: string } | null;
+				const tenant = await queryOne<{ id: string; subdomain: string }>(
+					db,
+					"SELECT id, subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1",
+					[user.email.toLowerCase()],
+				);
 
 				if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-					await db
-						.prepare(
-							"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
-						)
-						.bind(tenant.id, onboardingId)
-						.run();
+					await execute(
+						db,
+						"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
+						[tenant.id, onboardingId],
+					);
 					tenantSubdomain = tenant.subdomain;
 				}
 			}

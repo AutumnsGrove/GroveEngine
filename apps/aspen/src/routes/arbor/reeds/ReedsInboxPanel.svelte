@@ -203,13 +203,13 @@
 	}
 
 	.inbox-pending {
-		background: rgba(234, 179, 8, 0.12);
-		color: #b45309;
+		background: rgb(var(--warning-bg) / 0.5);
+		color: rgb(var(--warning-foreground));
 	}
 
 	:global(.dark) .inbox-pending {
-		background: rgba(234, 179, 8, 0.15);
-		color: #fbbf24;
+		background: rgb(var(--warning-bg) / 0.7);
+		color: rgb(var(--warning-muted));
 	}
 
 	.inbox-private {
@@ -265,23 +265,23 @@
 	}
 
 	.mod-reject {
-		color: #b91c1c;
-		background: rgba(185, 28, 28, 0.08);
-		border-color: rgba(185, 28, 28, 0.2);
+		color: var(--color-error-text);
+		background: var(--color-error-bg);
+		border-color: var(--color-error-border);
 	}
 
 	.mod-reject:hover:not(:disabled) {
-		background: rgba(185, 28, 28, 0.15);
+		background: color-mix(in srgb, var(--color-error-bg) 85%, var(--color-error) 15%);
 	}
 
 	.mod-block {
-		color: #92400e;
-		background: rgba(146, 64, 14, 0.08);
-		border-color: rgba(146, 64, 14, 0.2);
+		color: rgb(var(--warning-foreground));
+		background: rgb(var(--warning-bg) / 0.4);
+		border-color: rgb(var(--warning) / 0.3);
 	}
 
 	.mod-block:hover:not(:disabled) {
-		background: rgba(146, 64, 14, 0.15);
+		background: rgb(var(--warning-bg) / 0.7);
 	}
 
 	.empty-state {

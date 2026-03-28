@@ -7,6 +7,7 @@
 import { PROMPT_MODES, getMaxTokens } from "@autumnsgrove/lattice/config/wisp";
 import { secureUserContent } from "@autumnsgrove/lattice/server/inference-client";
 import type { LumenClient } from "@autumnsgrove/lattice/lumen";
+import { execute, queryOne } from "@autumnsgrove/lattice/server/services/database";
 
 // ============================================================================
 // Grammar Analysis
@@ -185,12 +186,11 @@ export async function logWispUsage(
 	postSlug: string | null,
 ): Promise<void> {
 	try {
-		await db
-			.prepare(
-				`INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost, post_slug)
+		await execute(
+			db,
+			`INSERT INTO wisp_requests (user_id, action, mode, model, provider, input_tokens, output_tokens, cost, post_slug)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			)
-			.bind(
+			[
 				userId,
 				action,
 				mode,
@@ -200,8 +200,8 @@ export async function logWispUsage(
 				totalTokens.output,
 				cost,
 				postSlug,
-			)
-			.run();
+			],
+		);
 	} catch (err) {
 		console.warn(
 			"[Wisp] Could not log usage:",
@@ -221,17 +221,16 @@ export async function getWispUsageStats(
 	try {
 		const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-		const stats = await db
-			.prepare(
-				`SELECT
+		const stats = await queryOne<{ requests: number; tokens: number; cost: number }>(
+			db,
+			`SELECT
 					COUNT(*) as requests,
 					COALESCE(SUM(input_tokens + output_tokens), 0) as tokens,
 					COALESCE(SUM(cost), 0) as cost
 				FROM wisp_requests
 				WHERE user_id = ? AND created_at > ?`,
-			)
-			.bind(userId, thirtyDaysAgo)
-			.first<{ requests: number; tokens: number; cost: number }>();
+			[userId, thirtyDaysAgo],
+		);
 
 		return {
 			requests: stats?.requests || 0,

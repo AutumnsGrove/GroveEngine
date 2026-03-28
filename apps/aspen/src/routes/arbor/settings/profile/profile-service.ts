@@ -11,6 +11,7 @@ import {
 	getGreenhouseTenants,
 	getFeatureFlags,
 } from "@autumnsgrove/lattice/feature-flags";
+import { queryMany, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import type { TenantGraftInfo } from "@autumnsgrove/lattice/feature-flags/tenant-grafts";
 import type { GreenhouseTenant } from "@autumnsgrove/lattice/feature-flags/types";
 import type { FeatureFlagSummary } from "@autumnsgrove/lattice/feature-flags/admin";
@@ -113,11 +114,12 @@ export async function loadProfileData(
 				const enrolledIds = new Set(ghTenants.map((t) => t.tenantId));
 
 				try {
-					const result = await env.DB.prepare(
+					const tenantRows = await queryMany<TenantRow>(
+						env.DB,
 						"SELECT id, username, display_name FROM tenants ORDER BY username",
-					).all<TenantRow>();
+					);
 
-					for (const t of result.results ?? []) {
+					for (const t of tenantRows) {
 						const displayName = t.display_name || t.username || t.id;
 						tenantNames[t.id] = displayName;
 
@@ -136,9 +138,11 @@ export async function loadProfileData(
 
 	const loadUsername = async () => {
 		try {
-			const tenantRow = await env.DB.prepare("SELECT subdomain, plan FROM tenants WHERE id = ?")
-				.bind(tenantId)
-				.first<{ subdomain: string; plan: string | null }>();
+			const tenantRow = await queryOne<{ subdomain: string; plan: string | null }>(
+				env.DB,
+				"SELECT subdomain, plan FROM tenants WHERE id = ?",
+				[tenantId],
+			);
 
 			if (tenantRow) {
 				currentSubdomain = tenantRow.subdomain;

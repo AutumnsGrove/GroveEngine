@@ -277,6 +277,7 @@ export async function uploadAndStore(opts: {
 	if (opts.description) metadata.description = opts.description.substring(0, 1000);
 	if (opts.hash) metadata.hash = opts.hash;
 
+	// sdk-ok: direct R2 for image CDN storage — Amber FileManager uses Drizzle/EngineDb for user files, not tenant image CDN
 	await images.put(key, arrayBuffer, {
 		httpMetadata: {
 			contentType: file.type,
@@ -291,6 +292,7 @@ export async function uploadAndStore(opts: {
 		thumbnailR2Key = `${tenantId}/thumbs/${datePath}/${filename.replace(/\.[^.]+$/, "")}-thumb.webp`;
 		try {
 			const thumbBuffer = await opts.thumbnail.arrayBuffer();
+			// sdk-ok: direct R2 for image CDN storage
 			await images.put(thumbnailR2Key, thumbBuffer, {
 				httpMetadata: {
 					contentType: "image/webp",
@@ -311,6 +313,7 @@ export async function uploadAndStore(opts: {
 	// Store hash for duplicate detection
 	if (opts.hash) {
 		try {
+			// sdk-ok: ON CONFLICT upsert not supported by TenantDb helpers — explicit tenant_id in SQL
 			await db
 				.prepare(
 					`INSERT INTO image_hashes (
@@ -348,6 +351,7 @@ export async function uploadAndStore(opts: {
 		const keyWithoutPrefix = key.startsWith(`${tenantId}/`) ? key.slice(tenantId.length + 1) : key;
 		const parsed = parseImageFilename(keyWithoutPrefix);
 
+		// sdk-ok: INSERT OR IGNORE not supported by TenantDb helpers — explicit tenant_id in SQL
 		await db
 			.prepare(
 				`INSERT OR IGNORE INTO gallery_images (

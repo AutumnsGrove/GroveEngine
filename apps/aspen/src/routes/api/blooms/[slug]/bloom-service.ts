@@ -7,7 +7,7 @@
 
 import { getPostBySlug, renderMarkdown } from "@autumnsgrove/lattice/utils/markdown";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
-import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
+import { getTenantDb, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
@@ -152,11 +152,14 @@ export async function updatePost(
 ): Promise<{ slug: string }> {
 	const data = sanitizeObject(requestData) as PostInput;
 
+	const tenantDbEarly = getTenantDb(db, { tenantId });
+
 	// Fetch current post state
-	const currentPost = await db
-		.prepare("SELECT status, published_at FROM posts WHERE tenant_id = ? AND slug = ?")
-		.bind(tenantId, slug)
-		.first<{ status: string; published_at: number | null }>();
+	const currentPost = await tenantDbEarly.queryOne<{ status: string; published_at: number | null }>(
+		"posts",
+		"slug = ?",
+		[slug],
+	);
 
 	if (!currentPost) {
 		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
@@ -166,26 +169,14 @@ export async function updatePost(
 	if (data.status === "published" && currentPost.status !== "published") {
 		try {
 			const [tenant, publishedCount] = await Promise.all([
-				db
-					.prepare("SELECT plan FROM tenants WHERE id = ?")
-					.bind(tenantId)
-					.first<{ plan: string }>(),
-				db
-					.prepare(
-						"SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-					)
-					.bind(tenantId)
-					.first<{ count: number }>(),
+				queryOne<{ plan: string }>(db, "SELECT plan FROM tenants WHERE id = ?", [tenantId]),
+				tenantDbEarly.count("posts", "status = ?", ["published"]),
 			]);
 
 			const tierKey: TierKey = tenant?.plan && isValidTier(tenant.plan) ? tenant.plan : "seedling";
 			const tierConfig = TIERS[tierKey];
 
-			if (
-				tierConfig.limits.posts !== Infinity &&
-				publishedCount &&
-				publishedCount.count >= tierConfig.limits.posts
-			) {
+			if (tierConfig.limits.posts !== Infinity && publishedCount >= tierConfig.limits.posts) {
 				throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
 			}
 		} catch (err) {
@@ -239,7 +230,7 @@ export async function updatePost(
 		}
 	}
 
-	const tenantDb = getTenantDb(db, { tenantId });
+	const tenantDb = tenantDbEarly;
 
 	// Validate and sanitize new slug
 	let newSlug: string | undefined;

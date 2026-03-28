@@ -139,7 +139,7 @@
 		width: 100%;
 	}
 	.editor-area.preview-only {
-		background: var(--editor-bg, #1e1e1e);
+		background: var(--editor-bg, #1e1e1e); /* accent-ok — editor theme token fallback */
 	}
 	.editor-area.preview-only .preview-panel {
 		width: 100%;
@@ -182,8 +182,8 @@
 		height: 1.6em;
 	}
 	.line-numbers span.current {
-		color: var(--editor-accent, #8bc48b);
-		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent);
+		color: var(--editor-accent, #8bc48b); /* accent-ok — editor theme token fallback */
+		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent); /* accent-ok — editor theme token fallback */
 	}
 	.editor-textarea {
 		flex: 1;
@@ -232,7 +232,7 @@
 	:global(.preview-logo) {
 		width: 18px;
 		height: 18px;
-		color: var(--editor-accent, #8bc48b);
+		color: var(--editor-accent, #8bc48b); /* accent-ok — editor theme token fallback */
 		opacity: 0.6;
 		transition: opacity 0.2s ease;
 	}

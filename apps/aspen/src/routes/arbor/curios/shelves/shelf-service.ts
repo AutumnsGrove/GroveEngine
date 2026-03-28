@@ -6,6 +6,7 @@
  */
 
 import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
+import { queryOne, queryMany, execute } from "@autumnsgrove/lattice/server/services/database";
 import {
 	generateShelfId,
 	generateItemId,
@@ -76,35 +77,31 @@ type ServiceResult<T = Record<string, unknown>> =
 // ============================================================================
 
 export async function loadShelves(db: D1Database, tenantId: string) {
-	const [shelvesResult, itemsResult] = await Promise.all([
-		db
-			.prepare(
-				`SELECT id, name, description, preset, display_mode, material,
-				        creator_label, status1_label, status2_label,
-				        is_featured, group_by_category, auto_favicon, sort_order
-				 FROM bookmark_shelves WHERE tenant_id = ?
-				 ORDER BY sort_order ASC, created_at ASC`,
-			)
-			.bind(tenantId)
-			.all<ShelfRow>()
-			.catch(() => ({ results: [] as ShelfRow[] })),
-		db
-			.prepare(
-				`SELECT b.id, b.shelf_id, b.url, b.title, b.author, b.description,
-				        b.cover_url, b.thumbnail_url, b.category,
-				        b.is_currently_reading, b.is_favorite, b.rating, b.note
-				 FROM bookmarks b
-				 JOIN bookmark_shelves s ON b.shelf_id = s.id
-				 WHERE s.tenant_id = ?
-				 ORDER BY b.sort_order ASC, b.added_at ASC`,
-			)
-			.bind(tenantId)
-			.all<ItemRow>()
-			.catch(() => ({ results: [] as ItemRow[] })),
+	const [shelvesList, itemsList] = await Promise.all([
+		queryMany<ShelfRow>(
+			db,
+			`SELECT id, name, description, preset, display_mode, material,
+			        creator_label, status1_label, status2_label,
+			        is_featured, group_by_category, auto_favicon, sort_order
+			 FROM bookmark_shelves WHERE tenant_id = ?
+			 ORDER BY sort_order ASC, created_at ASC`,
+			[tenantId],
+		).catch(() => [] as ShelfRow[]),
+		queryMany<ItemRow>(
+			db,
+			`SELECT b.id, b.shelf_id, b.url, b.title, b.author, b.description,
+			        b.cover_url, b.thumbnail_url, b.category,
+			        b.is_currently_reading, b.is_favorite, b.rating, b.note
+			 FROM bookmarks b
+			 JOIN bookmark_shelves s ON b.shelf_id = s.id
+			 WHERE s.tenant_id = ?
+			 ORDER BY b.sort_order ASC, b.added_at ASC`,
+			[tenantId],
+		).catch(() => [] as ItemRow[]),
 	]);
 
 	const itemsByShelf = new Map<string, typeof formattedItems>();
-	const formattedItems = (itemsResult.results ?? []).map((row) => ({
+	const formattedItems = itemsList.map((row) => ({
 		id: row.id,
 		shelfId: row.shelf_id,
 		url: row.url,
@@ -126,7 +123,7 @@ export async function loadShelves(db: D1Database, tenantId: string) {
 		itemsByShelf.set(item.shelfId, list);
 	}
 
-	const shelves = (shelvesResult.results ?? []).map((row) => ({
+	const shelves = shelvesList.map((row) => ({
 		id: row.id,
 		name: row.name,
 		description: row.description,
@@ -185,23 +182,21 @@ export async function addShelf(
 	const id = generateShelfId();
 
 	try {
-		const maxSort = await db
-			.prepare(
-				`SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM bookmark_shelves WHERE tenant_id = ?`,
-			)
-			.bind(tenantId)
-			.first<{ max_sort: number }>();
+		const maxSortRow = await queryOne<{ max_sort: number }>(
+			db,
+			`SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM bookmark_shelves WHERE tenant_id = ?`,
+			[tenantId],
+		);
 
-		const sortOrder = (maxSort?.max_sort ?? -1) + 1;
+		const sortOrder = (maxSortRow?.max_sort ?? -1) + 1;
 
-		await db
-			.prepare(
-				`INSERT INTO bookmark_shelves
-				 (id, tenant_id, name, description, preset, display_mode, material,
-				  creator_label, status1_label, status2_label, auto_favicon, sort_order)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			)
-			.bind(
+		await execute(
+			db,
+			`INSERT INTO bookmark_shelves
+			 (id, tenant_id, name, description, preset, display_mode, material,
+			  creator_label, status1_label, status2_label, auto_favicon, sort_order)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
 				id,
 				tenantId,
 				name,
@@ -214,8 +209,8 @@ export async function addShelf(
 				defaults.status2Label,
 				defaults.autoFavicon ? 1 : 0,
 				sortOrder,
-			)
-			.run();
+			],
+		);
 
 		return { success: true, shelfAdded: true };
 	} catch (error) {
@@ -253,10 +248,11 @@ export async function addItem(
 ): Promise<ServiceResult<{ itemAdded: true }>> {
 	const { shelfId } = data;
 
-	const shelf = await db
-		.prepare(`SELECT id, auto_favicon FROM bookmark_shelves WHERE id = ? AND tenant_id = ?`)
-		.bind(shelfId, tenantId)
-		.first<{ id: string; auto_favicon: number }>();
+	const shelf = await queryOne<{ id: string; auto_favicon: number }>(
+		db,
+		`SELECT id, auto_favicon FROM bookmark_shelves WHERE id = ? AND tenant_id = ?`,
+		[shelfId, tenantId],
+	);
 
 	if (!shelf) {
 		return { success: false, error: "Shelf not found", error_code: "INVALID_SHELF" };
@@ -287,22 +283,22 @@ export async function addItem(
 	const id = generateItemId();
 
 	try {
-		const maxSort = await db
-			.prepare(`SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM bookmarks WHERE shelf_id = ?`)
-			.bind(shelfId)
-			.first<{ max_sort: number }>();
+		const maxSortRow = await queryOne<{ max_sort: number }>(
+			db,
+			`SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM bookmarks WHERE shelf_id = ?`,
+			[shelfId],
+		);
 
-		const sortOrder = (maxSort?.max_sort ?? -1) + 1;
+		const sortOrder = (maxSortRow?.max_sort ?? -1) + 1;
 
-		await db
-			.prepare(
-				`INSERT INTO bookmarks
-				 (id, tenant_id, shelf_id, url, title, author, description,
-				  cover_url, thumbnail_url, category,
-				  is_currently_reading, is_favorite, rating, note, sort_order)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			)
-			.bind(
+		await execute(
+			db,
+			`INSERT INTO bookmarks
+			 (id, tenant_id, shelf_id, url, title, author, description,
+			  cover_url, thumbnail_url, category,
+			  is_currently_reading, is_favorite, rating, note, sort_order)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
 				id,
 				tenantId,
 				shelfId,
@@ -318,8 +314,8 @@ export async function addItem(
 				rating,
 				note,
 				sortOrder,
-			)
-			.run();
+			],
+		);
 
 		return { success: true, itemAdded: true };
 	} catch (error) {
@@ -399,10 +395,11 @@ export async function updateShelf(
 	values.push(shelfId, tenantId);
 
 	try {
-		await db
-			.prepare(`UPDATE bookmark_shelves SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`)
-			.bind(...values)
-			.run();
+		await execute(
+			db,
+			`UPDATE bookmark_shelves SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`,
+			values,
+		);
 
 		return { success: true, shelfUpdated: true };
 	} catch (error) {
@@ -486,13 +483,12 @@ export async function updateItem(
 	values.push(itemId, tenantId);
 
 	try {
-		await db
-			.prepare(
-				`UPDATE bookmarks SET ${updates.join(", ")}
-				 WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
-			)
-			.bind(...values)
-			.run();
+		await execute(
+			db,
+			`UPDATE bookmarks SET ${updates.join(", ")}
+			 WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
+			values,
+		);
 
 		return { success: true, itemUpdated: true };
 	} catch (error) {
@@ -516,10 +512,10 @@ export async function removeShelf(
 	shelfId: string,
 ): Promise<ServiceResult<{ shelfRemoved: true }>> {
 	try {
-		await db
-			.prepare(`DELETE FROM bookmark_shelves WHERE id = ? AND tenant_id = ?`)
-			.bind(shelfId, tenantId)
-			.run();
+		await execute(db, `DELETE FROM bookmark_shelves WHERE id = ? AND tenant_id = ?`, [
+			shelfId,
+			tenantId,
+		]);
 
 		return { success: true, shelfRemoved: true };
 	} catch (error) {
@@ -539,12 +535,11 @@ export async function removeItem(
 	itemId: string,
 ): Promise<ServiceResult<{ itemRemoved: true }>> {
 	try {
-		await db
-			.prepare(
-				`DELETE FROM bookmarks WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
-			)
-			.bind(itemId, tenantId)
-			.run();
+		await execute(
+			db,
+			`DELETE FROM bookmarks WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
+			[itemId, tenantId],
+		);
 
 		return { success: true, itemRemoved: true };
 	} catch (error) {

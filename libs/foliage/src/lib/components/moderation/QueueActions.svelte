@@ -11,6 +11,7 @@
 		statusChangeTheme: CommunityTheme | null;
 		statusChangeAction: CommunityThemeStatus | null;
 		statusChangeReason: string;
+		statusChangeError?: string;
 		onClosePreview: () => void;
 		onCloseStatusChange: () => void;
 		onConfirmStatusChange: () => void;
@@ -23,6 +24,7 @@
 		statusChangeTheme,
 		statusChangeAction,
 		statusChangeReason,
+		statusChangeError = "",
 		onClosePreview,
 		onCloseStatusChange,
 		onConfirmStatusChange,
@@ -186,6 +188,10 @@
 					</div>
 				{/if}
 
+				{#if statusChangeError}
+					<p class="status-change-error" role="alert">{statusChangeError}</p>
+				{/if}
+
 				<div class="modal-actions">
 					<button type="button" class="modal-btn cancel" onclick={onCloseStatusChange}>
 						Cancel
@@ -292,6 +298,17 @@
 	.reason-field textarea:focus {
 		outline: none;
 		border-color: var(--color-accent, #16a34a); /* accent-ok */
+	}
+
+	.status-change-error {
+		margin: 1rem 0 0 0;
+		padding: 0.75rem 1rem;
+		background: color-mix(in srgb, #dc2626 10%, transparent);
+		color: #b91c1c;
+		border: 1px solid color-mix(in srgb, #dc2626 25%, transparent);
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
 	}
 
 	.modal-actions {

@@ -30,9 +30,14 @@
 	let statusChangeTheme = $state<CommunityTheme | null>(null);
 	let statusChangeAction = $state<CommunityThemeStatus | null>(null);
 	let statusChangeReason = $state("");
+	let statusChangeError = $state("");
+
+	// Bulk action confirmation state
+	let bulkConfirmAction = $state<"approve" | "reject" | null>(null);
+	let bulkRejectReason = $state("");
 
 	// Filter and sort themes
-	const filteredThemes = $derived(() => {
+	const filteredThemes = $derived.by(() => {
 		let result = [...themes];
 
 		if (statusFilter !== "all") {
@@ -77,10 +82,10 @@
 	}
 
 	function toggleSelectAll() {
-		if (selectedThemes.size === filteredThemes().length) {
+		if (selectedThemes.size === filteredThemes.length) {
 			selectedThemes = new Set();
 		} else {
-			selectedThemes = new Set(filteredThemes().map((t) => t.id));
+			selectedThemes = new Set(filteredThemes.map((t) => t.id));
 		}
 	}
 
@@ -157,6 +162,7 @@
 		statusChangeTheme = null;
 		statusChangeAction = null;
 		statusChangeReason = "";
+		statusChangeError = "";
 	}
 
 	function confirmStatusChange() {
@@ -166,10 +172,11 @@
 			statusChangeAction === "changes_requested" || statusChangeAction === "rejected";
 
 		if (needsReason && !statusChangeReason.trim()) {
-			alert("Please provide a reason for this action");
+			statusChangeError = "Please provide a reason for this action";
 			return;
 		}
 
+		statusChangeError = "";
 		onStatusChange?.(
 			statusChangeTheme.id,
 			statusChangeAction,
@@ -182,23 +189,34 @@
 	// Bulk actions
 	function bulkApprove() {
 		if (selectedThemes.size === 0) return;
-		if (!confirm(`Approve ${selectedThemes.size} themes?`)) return;
-
-		for (const themeId of selectedThemes) {
-			onStatusChange?.(themeId, "approved");
-		}
-		selectedThemes = new Set();
+		bulkConfirmAction = "approve";
 	}
 
 	function bulkReject() {
 		if (selectedThemes.size === 0) return;
-		const reason = prompt(`Reject ${selectedThemes.size} themes? Enter reason:`);
-		if (!reason) return;
+		bulkRejectReason = "";
+		bulkConfirmAction = "reject";
+	}
 
-		for (const themeId of selectedThemes) {
-			onStatusChange?.(themeId, "rejected", reason);
+	function confirmBulkAction() {
+		if (bulkConfirmAction === "approve") {
+			for (const themeId of selectedThemes) {
+				onStatusChange?.(themeId, "approved");
+			}
+			selectedThemes = new Set();
+		} else if (bulkConfirmAction === "reject") {
+			if (!bulkRejectReason.trim()) return;
+			for (const themeId of selectedThemes) {
+				onStatusChange?.(themeId, "rejected", bulkRejectReason);
+			}
+			selectedThemes = new Set();
 		}
-		selectedThemes = new Set();
+		closeBulkConfirm();
+	}
+
+	function closeBulkConfirm() {
+		bulkConfirmAction = null;
+		bulkRejectReason = "";
 	}
 
 	// Keyboard navigation
@@ -206,6 +224,7 @@
 		if (
 			showPreviewModal ||
 			statusChangeTheme ||
+			bulkConfirmAction ||
 			event.target instanceof HTMLInputElement ||
 			event.target instanceof HTMLTextAreaElement ||
 			event.target instanceof HTMLSelectElement
@@ -213,7 +232,7 @@
 			return;
 		}
 
-		const themes = filteredThemes();
+		const themes = filteredThemes;
 		if (themes.length === 0) return;
 
 		switch (event.key.toLowerCase()) {
@@ -254,7 +273,7 @@
 		{searchQuery}
 		{statusFilter}
 		{sortBy}
-		filteredCount={filteredThemes().length}
+		filteredCount={filteredThemes.length}
 		selectedCount={selectedThemes.size}
 		onSearchChange={(v) => (searchQuery = v)}
 		onStatusFilterChange={(v) => (statusFilter = v)}
@@ -265,7 +284,7 @@
 	/>
 
 	<QueueList
-		themes={filteredThemes()}
+		themes={filteredThemes}
 		{currentThemeIndex}
 		{selectedThemes}
 		{showCustomizations}
@@ -285,11 +304,89 @@
 		{statusChangeTheme}
 		{statusChangeAction}
 		{statusChangeReason}
+		{statusChangeError}
 		onClosePreview={closePreviewModal}
 		onCloseStatusChange={closeStatusChangeDialog}
 		onConfirmStatusChange={confirmStatusChange}
-		onReasonChange={(v) => (statusChangeReason = v)}
+		onReasonChange={(v) => {
+			statusChangeReason = v;
+			statusChangeError = "";
+		}}
 	/>
+
+	<!-- Bulk Action Confirmation Dialog -->
+	{#if bulkConfirmAction}
+		<div
+			class="modal-overlay"
+			onclick={closeBulkConfirm}
+			onkeydown={(e) => e.key === "Escape" && closeBulkConfirm()}
+			role="presentation"
+		>
+			<div
+				class="modal-content"
+				onclick={(e) => e.stopPropagation()}
+				role="dialog"
+				tabindex="-1"
+				aria-modal="true"
+				aria-labelledby="bulk-confirm-title"
+				onkeydown={(e) => e.stopPropagation()}
+			>
+				<div class="modal-header">
+					<h2 id="bulk-confirm-title">
+						{bulkConfirmAction === "approve" ? "Bulk Approve" : "Bulk Reject"}
+					</h2>
+					<button
+						type="button"
+						class="modal-close"
+						onclick={closeBulkConfirm}
+						aria-label="Close dialog"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							aria-hidden="true"
+						>
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					</button>
+				</div>
+
+				<div class="modal-body">
+					{#if bulkConfirmAction === "approve"}
+						<p>Approve <strong>{selectedThemes.size}</strong> selected themes?</p>
+					{:else}
+						<p>Reject <strong>{selectedThemes.size}</strong> selected themes?</p>
+						<div class="reason-field">
+							<label for="bulk-reject-reason">Reason (required):</label>
+							<textarea
+								id="bulk-reject-reason"
+								bind:value={bulkRejectReason}
+								placeholder="Explain why these themes are being rejected..."
+								rows="4"
+							></textarea>
+						</div>
+					{/if}
+
+					<div class="modal-actions">
+						<button type="button" class="modal-btn cancel" onclick={closeBulkConfirm}>
+							Cancel
+						</button>
+						<button
+							type="button"
+							class="modal-btn confirm"
+							disabled={bulkConfirmAction === "reject" && !bulkRejectReason.trim()}
+							onclick={confirmBulkAction}
+						>
+							{bulkConfirmAction === "approve" ? "Approve All" : "Reject All"}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -315,5 +412,137 @@
 		font-size: 1rem;
 		color: var(--color-foreground-muted, #666);
 		margin: 0;
+	}
+
+	/* Bulk confirmation dialog */
+	.modal-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		padding: 1rem;
+	}
+
+	.modal-content {
+		background: var(--color-surface, #fff);
+		border-radius: 0.75rem;
+		max-width: 600px;
+		width: 100%;
+		max-height: 90vh;
+		overflow-y: auto;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	}
+
+	.modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1.5rem;
+		border-bottom: 2px solid var(--color-border, #e5e5e5);
+	}
+
+	.modal-header h2 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin: 0;
+	}
+
+	.modal-close {
+		padding: 0.5rem;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-radius: 0.25rem;
+	}
+
+	.modal-close:hover {
+		background: var(--color-surface, #f5f5f5);
+	}
+
+	.modal-close svg {
+		width: 1.25rem;
+		height: 1.25rem;
+		color: var(--color-foreground, #111);
+	}
+
+	.modal-body {
+		padding: 1.5rem;
+	}
+
+	.reason-field {
+		margin: 1.5rem 0;
+	}
+
+	.reason-field label {
+		display: block;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+
+	.reason-field textarea {
+		width: 100%;
+		padding: 0.75rem;
+		border: 2px solid var(--color-border, #e5e5e5);
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		resize: vertical;
+	}
+
+	.reason-field textarea:focus {
+		outline: none;
+		border-color: var(--color-accent, #16a34a); /* accent-ok */
+	}
+
+	.modal-actions {
+		display: flex;
+		gap: 0.75rem;
+		justify-content: flex-end;
+		margin-top: 1.5rem;
+	}
+
+	.modal-btn {
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.modal-btn.cancel {
+		background: transparent;
+		color: var(--color-foreground, #111);
+		border: 2px solid var(--color-border, #e5e5e5);
+	}
+
+	.modal-btn.cancel:hover {
+		background: var(--color-surface, #f5f5f5);
+	}
+
+	.modal-btn.confirm {
+		background: var(--color-accent, #16a34a); /* accent-ok */
+		color: #fff;
+	}
+
+	.modal-btn.confirm:hover {
+		background: color-mix(in srgb, var(--color-accent, #16a34a) 85%, black); /* accent-ok */
+	}
+
+	.modal-btn.confirm:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.modal-close,
+		.modal-btn {
+			transition: none;
+		}
 	}
 </style>

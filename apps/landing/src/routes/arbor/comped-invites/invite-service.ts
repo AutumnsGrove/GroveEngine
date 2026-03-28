@@ -7,6 +7,7 @@
 
 import { sendInviteEmail } from "$lib/server/invite-email";
 import { EMAIL_RE } from "./schemas";
+import { queryOne, queryMany, execute } from "@autumnsgrove/lattice/server/services/database";
 
 // ============================================================================
 // Types
@@ -107,17 +108,15 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
 	}
 
 	// Run all queries in parallel
-	const [invitesResult, countResult, auditResult, statsResult, eligibleResult] = await Promise.all([
-		DB.prepare(query)
-			.bind(...params)
-			.all<CompedInvite>(),
-		DB.prepare(countQuery)
-			.bind(...countParams)
-			.first<{ count: number }>(),
-		DB.prepare(
+	const [invitesList, countResult, auditList, statsResult, eligibleList] = await Promise.all([
+		queryMany<CompedInvite>(DB, query, params),
+		queryOne<{ count: number }>(DB, countQuery, countParams),
+		queryMany<AuditLogEntry>(
+			DB,
 			`SELECT * FROM comped_invites_audit ORDER BY created_at DESC LIMIT 20`,
-		).all<AuditLogEntry>(),
-		DB.prepare(
+		),
+		queryOne<{ total: number; used: number; pending: number; beta: number; comped: number }>(
+			DB,
 			`SELECT
              COUNT(*) as total,
              COUNT(CASE WHEN used_at IS NOT NULL THEN 1 END) as used,
@@ -125,15 +124,10 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
              COUNT(CASE WHEN invite_type = 'beta' THEN 1 END) as beta,
              COUNT(CASE WHEN invite_type = 'comped' THEN 1 END) as comped
            FROM comped_invites`,
-		).first<{
-			total: number;
-			used: number;
-			pending: number;
-			beta: number;
-			comped: number;
-		}>(),
+		),
 		// Find email subscribers who are eligible for beta promotion
-		DB.prepare(
+		queryMany<EligibleSubscriber>(
+			DB,
 			`SELECT es.id, es.email, es.name, es.created_at, es.source
            FROM email_signups es
            LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
@@ -142,13 +136,13 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
              AND ci.id IS NULL
              AND t.id IS NULL
            ORDER BY es.created_at DESC`,
-		).all<EligibleSubscriber>(),
+		),
 	]);
 
 	return {
-		invites: invitesResult.results || [],
-		auditLog: auditResult.results || [],
-		eligibleSubscribers: eligibleResult.results || [],
+		invites: invitesList,
+		auditLog: auditList,
+		eligibleSubscribers: eligibleList,
 		stats: {
 			total: statsResult?.total || 0,
 			used: statsResult?.used || 0,
@@ -187,9 +181,11 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 
 	let step = "check-existing";
 	try {
-		const existing = await DB.prepare("SELECT id, used_at FROM comped_invites WHERE email = ?")
-			.bind(email)
-			.first<{ id: string; used_at: number | null }>();
+		const existing = await queryOne<{ id: string; used_at: number | null }>(
+			DB,
+			"SELECT id, used_at FROM comped_invites WHERE email = ?",
+			[email],
+		);
 
 		if (existing) {
 			if (existing.used_at) {
@@ -199,9 +195,11 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 		}
 
 		step = "check-tenant";
-		const existingTenant = await DB.prepare(`SELECT subdomain FROM tenants WHERE email = ?`)
-			.bind(email)
-			.first<{ subdomain: string }>();
+		const existingTenant = await queryOne<{ subdomain: string }>(
+			DB,
+			`SELECT subdomain FROM tenants WHERE email = ?`,
+			[email],
+		);
 
 		if (existingTenant) {
 			return {
@@ -213,21 +211,21 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 		step = "insert-invite";
 		const inviteId = crypto.randomUUID();
 		const inviteToken = crypto.randomUUID();
-		await DB.prepare(
+		await execute(
+			DB,
 			`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())`,
-		)
-			.bind(inviteId, email, tier, inviteType, customMessage, actorEmail, inviteToken)
-			.run();
+			[inviteId, email, tier, inviteType, customMessage, actorEmail, inviteToken],
+		);
 
 		step = "insert-audit";
 		const auditId = crypto.randomUUID();
-		await DB.prepare(
+		await execute(
+			DB,
 			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
          VALUES (?, 'create', ?, ?, ?, ?, ?, ?, unixepoch())`,
-		)
-			.bind(auditId, inviteId, email, tier, inviteType, actorEmail, notes)
-			.run();
+			[auditId, inviteId, email, tier, inviteType, actorEmail, notes],
+		);
 
 		// Send the invite email via Zephyr
 		step = "send-email";
@@ -272,11 +270,11 @@ export async function resendInvite(
 	emailEnv: EmailEnv,
 ) {
 	try {
-		const invite = await DB.prepare(
+		const invite = await queryOne<CompedInvite>(
+			DB,
 			"SELECT id, email, tier, invite_type, custom_message, invited_by, invite_token, used_at FROM comped_invites WHERE id = ?",
-		)
-			.bind(inviteId)
-			.first<CompedInvite>();
+			[inviteId],
+		);
 
 		if (!invite) {
 			return { success: false as const, error: "Invite not found", status: 404 };
@@ -321,24 +319,17 @@ export async function resendInvite(
 		});
 
 		if (emailResult.success) {
-			await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-				.bind(inviteId)
-				.run();
+			await execute(DB, `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`, [
+				inviteId,
+			]);
 
 			// Audit the resend
-			await DB.prepare(
+			await execute(
+				DB,
 				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
            VALUES (?, 'resend', ?, ?, ?, ?, ?, 'Email resent', unixepoch())`,
-			)
-				.bind(
-					crypto.randomUUID(),
-					inviteId,
-					invite.email,
-					invite.tier,
-					invite.invite_type,
-					actorEmail,
-				)
-				.run();
+				[crypto.randomUUID(), inviteId, invite.email, invite.tier, invite.invite_type, actorEmail],
+			);
 
 			return {
 				success: true as const,
@@ -376,11 +367,11 @@ export async function revokeInvite(
 	actorEmail: string,
 ) {
 	try {
-		const invite = await DB.prepare(
+		const invite = await queryOne<CompedInvite>(
+			DB,
 			"SELECT id, email, tier, invite_type, used_at FROM comped_invites WHERE id = ?",
-		)
-			.bind(inviteId)
-			.first<CompedInvite>();
+			[inviteId],
+		);
 
 		if (!invite) {
 			return { success: false as const, error: "Invite not found", status: 404 };
@@ -394,15 +385,15 @@ export async function revokeInvite(
 			};
 		}
 
-		await DB.prepare("DELETE FROM comped_invites WHERE id = ?").bind(inviteId).run();
+		await execute(DB, "DELETE FROM comped_invites WHERE id = ?", [inviteId]);
 
 		const auditId = crypto.randomUUID();
-		await DB.prepare(
+		await execute(
+			DB,
 			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
          VALUES (?, 'revoke', ?, ?, ?, ?, ?, ?, unixepoch())`,
-		)
-			.bind(auditId, inviteId, invite.email, invite.tier, invite.invite_type, actorEmail, notes)
-			.run();
+			[auditId, inviteId, invite.email, invite.tier, invite.invite_type, actorEmail, notes],
+		);
 
 		return {
 			success: true as const,
@@ -440,11 +431,11 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 	let step = "check-subscriber";
 	try {
 		// Verify subscriber exists in email list
-		const subscriber = await DB.prepare(
+		const subscriber = await queryOne<{ id: number; email: string }>(
+			DB,
 			"SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
-		)
-			.bind(email)
-			.first<{ id: number; email: string }>();
+			[email],
+		);
 
 		if (!subscriber) {
 			return { success: false as const, error: `${email} is not an active email subscriber` };
@@ -452,11 +443,11 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 
 		// Check they don't already have an invite
 		step = "check-existing";
-		const existing = await DB.prepare(
+		const existing = await queryOne<{ id: string; used_at: number | null }>(
+			DB,
 			"SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
-		)
-			.bind(email)
-			.first<{ id: string; used_at: number | null }>();
+			[email],
+		);
 
 		if (existing) {
 			if (existing.used_at) {
@@ -467,11 +458,11 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 
 		// Check they're not already a Grove user
 		step = "check-tenant";
-		const existingTenant = await DB.prepare(
+		const existingTenant = await queryOne<{ subdomain: string }>(
+			DB,
 			"SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
-		)
-			.bind(email)
-			.first<{ subdomain: string }>();
+			[email],
+		);
 
 		if (existingTenant) {
 			return {
@@ -484,21 +475,21 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 		step = "insert-invite";
 		const inviteId = crypto.randomUUID();
 		const inviteToken = crypto.randomUUID();
-		await DB.prepare(
+		await execute(
+			DB,
 			`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
          VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-		)
-			.bind(inviteId, email, tier, customMessage, actorEmail, inviteToken)
-			.run();
+			[inviteId, email, tier, customMessage, actorEmail, inviteToken],
+		);
 
 		// Audit log
 		step = "insert-audit";
-		await DB.prepare(
+		await execute(
+			DB,
 			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
          VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Promoted from email list', unixepoch())`,
-		)
-			.bind(crypto.randomUUID(), inviteId, email, tier, actorEmail)
-			.run();
+			[crypto.randomUUID(), inviteId, email, tier, actorEmail],
+		);
 
 		// Send the invite email
 		step = "send-email";
@@ -553,7 +544,8 @@ export async function bulkPromoteSubscribers(
 
 	try {
 		// Find eligible subscribers (capped to avoid worker timeout)
-		const eligible = await DB.prepare(
+		const subscribers = await queryMany<{ id: number; email: string }>(
+			DB,
 			`SELECT es.id, es.email
          FROM email_signups es
          LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
@@ -563,11 +555,8 @@ export async function bulkPromoteSubscribers(
            AND t.id IS NULL
          ORDER BY es.created_at ASC
          LIMIT ?`,
-		)
-			.bind(BATCH_LIMIT)
-			.all<{ id: number; email: string }>();
-
-		const subscribers = eligible.results || [];
+			[BATCH_LIMIT],
+		);
 		if (subscribers.length === 0) {
 			return { success: false as const, error: "No eligible subscribers to promote", status: 400 };
 		}
@@ -585,12 +574,12 @@ export async function bulkPromoteSubscribers(
 
 			try {
 				// Create the invite (OR IGNORE handles race if already promoted)
-				const insertResult = await DB.prepare(
+				const insertResult = await execute(
+					DB,
 					`INSERT OR IGNORE INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
              VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-				)
-					.bind(inviteId, sub.email, tier, customMessage, actorEmail, inviteToken)
-					.run();
+					[inviteId, sub.email, tier, customMessage, actorEmail, inviteToken],
+				);
 
 				// Skip if already promoted by a concurrent request
 				if (insertResult.meta.changes === 0) {
@@ -598,12 +587,12 @@ export async function bulkPromoteSubscribers(
 				}
 
 				// Audit log
-				await DB.prepare(
+				await execute(
+					DB,
 					`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
              VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Bulk promoted from email list', unixepoch())`,
-				)
-					.bind(crypto.randomUUID(), inviteId, sub.email, tier, actorEmail)
-					.run();
+					[crypto.randomUUID(), inviteId, sub.email, tier, actorEmail],
+				);
 
 				promoted++;
 
@@ -623,9 +612,11 @@ export async function bulkPromoteSubscribers(
 
 					if (emailResult.success) {
 						emailsSent++;
-						await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-							.bind(inviteId)
-							.run();
+						await execute(
+							DB,
+							`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
+							[inviteId],
+						);
 					} else {
 						emailsFailed++;
 						console.error(
@@ -706,9 +697,9 @@ async function sendInviteEmailWrapped(opts: {
 	});
 
 	if (emailResult.success) {
-		await opts.DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-			.bind(opts.inviteId)
-			.run();
+		await execute(opts.DB, `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`, [
+			opts.inviteId,
+		]);
 		return { status: "sent" };
 	} else {
 		console.error(`[Comped Invites] Email send failed for ${opts.email}:`, emailResult.error);

@@ -35,7 +35,7 @@ const PROJECT_ROOT = resolve(__dirname, "..");
 const DATA_DIR = resolve(PROJECT_ROOT, "libs/engine/src/lib/data");
 
 // Database ID: grove-engine-db
-const D1_DATABASE_ID = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68";
+const D1_DATABASE_ID = process.env.D1_DATABASE_ID ?? "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68";
 
 type DatasetName = "badges" | "artifacts" | "blocklist";
 
