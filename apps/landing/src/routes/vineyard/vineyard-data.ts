@@ -16,7 +16,7 @@ export type AssetInfo = {
 
 // Color presets for the nature asset viewer
 // Color presets
-const colorPresets = [
+export const colorPresets = [
 	{ name: "Grove Green", value: greens.grove },
 	{ name: "Deep Green", value: greens.deepGreen },
 	{ name: "Meadow", value: greens.meadow },
@@ -30,7 +30,7 @@ const colorPresets = [
 ];
 
 // Prop options
-const propOptions: Record<string, string[]> = {
+export const propOptions: Record<string, string[]> = {
 	season: ["spring", "summer", "autumn", "winter"],
 	variant: ["default"],
 	facing: ["left", "right"],
@@ -42,7 +42,7 @@ const propOptions: Record<string, string[]> = {
 	direction: ["left", "right"],
 };
 
-const assetVariants: Record<string, string[]> = {
+export const assetVariants: Record<string, string[]> = {
 	GlassLogo: ["default", "accent", "frosted", "dark", "ethereal"],
 	Rock: ["round", "flat", "jagged"],
 	Leaf: ["oak", "maple", "simple", "aspen"],

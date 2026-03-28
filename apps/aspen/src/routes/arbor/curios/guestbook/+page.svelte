@@ -245,9 +245,9 @@
 			{allowedStyles}
 			{colorPalette}
 			{isSubmitting}
-			styleOptions={data.styleOptions}
-			wallBackingOptions={data.wallBackingOptions}
-			signingStyleOptions={data.signingStyleOptions}
+			styleOptions={data.styleOptions ?? []}
+			wallBackingOptions={data.wallBackingOptions ?? []}
+			signingStyleOptions={data.signingStyleOptions ?? []}
 			onEnabledChange={(v) => (enabled = v)}
 			onStyleChange={(v) => (style = v)}
 			onWallBackingChange={(v) => (wallBacking = v)}

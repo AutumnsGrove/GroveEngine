@@ -125,29 +125,8 @@ describe("GET /auth/callback", () => {
 		}
 	});
 
-	it("redirects to returnTo with legacy session within migration window", async () => {
-		// Set the time BEFORE the deadline (2026-03-01)
-		vi.useFakeTimers();
-		vi.setSystemTime(new Date("2026-02-28T00:00:00Z"));
-
-		const event = makeEvent({
-			searchParams: { returnTo: "/arbor/my-sites" },
-			cookies: { access_token: "legacy-token" },
-		});
-
-		try {
-			await GET(event);
-			expect.fail("Should have thrown");
-		} catch (err: any) {
-			expect(err.status).toBe(302);
-			expect(err.location).toBe("/arbor/my-sites");
-		}
-
-		vi.useRealTimers();
-	});
-
-	it("redirects with no_session when legacy session expired (after deadline)", async () => {
-		// Deadline is 2026-03-01, today is 2026-03-12 (past deadline)
+	it("redirects with no_session when only legacy access_token cookie is present", async () => {
+		// Legacy access_token is no longer recognized - only Better Auth session cookies work
 		const event = makeEvent({
 			searchParams: {},
 			cookies: { access_token: "legacy-token" },

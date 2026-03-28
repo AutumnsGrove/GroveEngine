@@ -146,7 +146,7 @@ export async function updatePost(
 	tenantId: string,
 	userId: string,
 	platformEnv: {
-		AI?: unknown;
+		AI?: Ai;
 		OPENROUTER_API_KEY?: string;
 		CACHE_KV?: KVNamespace;
 	},

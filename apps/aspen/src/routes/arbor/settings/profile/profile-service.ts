@@ -12,7 +12,7 @@ import {
 	getFeatureFlags,
 } from "@autumnsgrove/lattice/platform/feature-flags";
 import { queryMany, queryOne } from "@autumnsgrove/lattice/server/services/database";
-import type { TenantGraftInfo } from "@autumnsgrove/lattice/platform/feature-flags/tenant-grafts";
+import type { TenantGraftInfo } from "@autumnsgrove/lattice/platform/feature-flags";
 import type { GreenhouseTenant } from "@autumnsgrove/lattice/platform/feature-flags/types";
 import type { FeatureFlagSummary } from "@autumnsgrove/lattice/platform/feature-flags/admin";
 import { isWayfinder } from "@autumnsgrove/lattice/platform/config/wayfinder";
