@@ -282,7 +282,7 @@ Engine components **SHOULD**:
 ```typescript
 // Lattice component (e.g., src/lib/components/admin/*)
 import { Card, Button } from "$lib/ui";
-import { parseMarkdown } from "$lib/utils/markdown";
+import { parseMarkdown } from "$lib/content/markdown/";
 
 // Uses UI components + adds domain logic
 ```
@@ -319,7 +319,7 @@ import { Button } from "@autumnsgrove/lattice/ui";
 
 **Utilities**:
 
-- `/libs/engine/src/lib/utils/markdown.js`
+- `/libs/engine/src/lib/content/markdown/`
 - `/libs/engine/src/lib/utils/gutter.js`
 - `/libs/engine/src/lib/utils/imageProcessor.js`
 - `/libs/engine/src/lib/utils/validation.js`

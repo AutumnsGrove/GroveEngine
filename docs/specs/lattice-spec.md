@@ -158,30 +158,29 @@ Lattice uses ~47 named export paths for tree-shaking. Each subsystem has its own
 	"./auth/*": "Individual auth modules",
 	"./server": "Server-side utilities (rate limits, logger, canopy dir)",
 	"./server/*": "Individual server modules",
-	"./config": "Platform configuration constants",
-	"./config/*": "Individual config modules",
-	"./config/terrarium": "Terrarium-specific config",
+	"./platform/config": "Platform configuration constants",
+	"./platform/config/*": "Individual config modules",
+	"./platform/config/terrarium": "Terrarium-specific config",
 	"./payments": "Abstract payment provider types",
 	"./services": "Server services",
-	"./heartwood": "GroveAuth OAuth client",
-	"./groveauth": "Alias for ./heartwood",
-	"./feature-flags": "Feature flag evaluation engine",
+	"./auth": "GroveAuth OAuth client",
+	"./groveauth": "Alias for ./auth",
+	"./platform/feature-flags": "Feature flag evaluation engine",
 	"./curios": "Curio types, logic, developer curio components",
 	"./curios/timeline": "Timeline curio (AI daily summaries)",
 	"./curios/timeline/voices": "Timeline voice presets",
 	"./curios/gallery": "Gallery curio",
-	"./grafts": "UI Graft registry and context",
-	"./grafts/pricing": "Pricing page graft",
-	"./grafts/login": "Login UI graft",
-	"./grafts/login/server": "Login server utilities",
-	"./grafts/greenhouse": "Greenhouse beta access graft",
-	"./grafts/uploads": "Upload management graft",
-	"./grafts/upgrades": "Upgrade flow graft",
-	"./lumen": "AI inference gateway",
-	"./threshold": "Rate limiting SDK",
-	"./threshold/sveltekit": "Threshold SvelteKit adapter",
-	"./threshold/hono": "Threshold Hono adapter",
-	"./threshold/worker": "Threshold raw Worker adapter",
+	"./platform/pricing": "Pricing page component",
+	"./platform/greenhouse": "Greenhouse beta access component",
+	"./platform/uploads": "Upload management component",
+	"./platform/upgrades": "Upgrade flow component",
+	"./auth/login": "Login UI component",
+	"./auth/login/server": "Login server utilities",
+	"./ai/lumen": "AI inference gateway",
+	"./platform/threshold": "Rate limiting SDK",
+	"./platform/threshold/sveltekit": "Threshold SvelteKit adapter",
+	"./platform/threshold/hono": "Threshold Hono adapter",
+	"./platform/threshold/worker": "Threshold raw Worker adapter",
 	"./thorn": "Content moderation",
 	"./email": "Email infrastructure (components, types, templates)",
 	"./email/components": "Grove-branded React Email components",
@@ -209,7 +208,7 @@ Lattice uses ~47 named export paths for tree-shaking. Each subsystem has its own
 
 ### Heartwood — Authentication
 
-**Import:** `@autumnsgrove/lattice/heartwood` (also aliased as `./groveauth`)
+**Import:** `@autumnsgrove/lattice/auth` (also aliased as `./groveauth`)
 
 Heartwood is Grove's authentication service — a separate Hono worker that handles OAuth, sessions, passkeys, and 2FA. Lattice ships the client library for interacting with it.
 
@@ -218,7 +217,7 @@ Auth uses PKCE-based OAuth. There are no magic codes, no Resend-based email auth
 #### Client Setup
 
 ```typescript
-import { createGroveAuthClient } from "@autumnsgrove/lattice/heartwood";
+import { createGroveAuthClient } from "@autumnsgrove/lattice/auth";
 
 const auth = createGroveAuthClient({
 	clientId: "your-client-id",
@@ -243,7 +242,7 @@ import {
 	generateCodeVerifier,
 	generateCodeChallenge,
 	generateState,
-} from "@autumnsgrove/lattice/heartwood";
+} from "@autumnsgrove/lattice/auth";
 ```
 
 #### Quota Utilities
@@ -256,7 +255,7 @@ import {
 	getQuotaUrgency,
 	getSuggestedActions,
 	getUpgradeRecommendation,
-} from "@autumnsgrove/lattice/heartwood";
+} from "@autumnsgrove/lattice/auth";
 
 // Powers the QuotaWidget component
 const widgetData = getQuotaWidgetData(subscription);
@@ -271,7 +270,7 @@ if (!check.canPost) {
 #### Rate Limiting (Client-Side)
 
 ```typescript
-import { RateLimiter, withRateLimit } from "@autumnsgrove/lattice/heartwood";
+import { RateLimiter, withRateLimit } from "@autumnsgrove/lattice/auth";
 
 await withRateLimit(limiter, "operation-key", async () => {
 	await doExpensiveThing();
@@ -303,7 +302,7 @@ interface CanPostResponse {
 #### Auth Error System
 
 ```typescript
-import { AUTH_ERRORS, getAuthError, buildErrorParams } from "@autumnsgrove/lattice/heartwood";
+import { AUTH_ERRORS, getAuthError, buildErrorParams } from "@autumnsgrove/lattice/auth";
 
 const error = getAuthError("INVALID_SESSION");
 const params = buildErrorParams(error, context);
@@ -315,7 +314,7 @@ const params = buildErrorParams(error, context);
 import {
 	getStatusColorFromPercentage,
 	getAlertVariantFromColor,
-} from "@autumnsgrove/lattice/heartwood";
+} from "@autumnsgrove/lattice/auth";
 
 const color = getStatusColorFromPercentage((postsUsed / postsLimit) * 100); // 'green' | 'yellow' | 'orange' | 'red'
 const variant = getAlertVariantFromColor(color); // 'success' | 'warning' | 'destructive'
@@ -325,14 +324,14 @@ const variant = getAlertVariantFromColor(color); // 'success' | 'warning' | 'des
 
 ### Threshold — Rate Limiting
 
-**Import:** `@autumnsgrove/lattice/threshold`
+**Import:** `@autumnsgrove/lattice/platform/threshold`
 
 Threshold is the unified rate limiting SDK used across all Grove workers. Three storage backends. Three framework adapters. Endpoint-aware configuration with abuse tracking.
 
 #### Quick Start
 
 ```typescript
-import { createThreshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
+import { createThreshold, ThresholdKVStore } from "@autumnsgrove/lattice/platform/threshold";
 
 const threshold = createThreshold({
 	store: new ThresholdKVStore(env.KV),
@@ -357,27 +356,27 @@ import {
 	ThresholdKVStore, // Cloudflare KV — fastest, approximate
 	ThresholdD1Store, // D1 — exact counts, audit trail
 	ThresholdDOStore, // Durable Object — exact, consistent, for hot paths
-} from "@autumnsgrove/lattice/threshold";
+} from "@autumnsgrove/lattice/platform/threshold";
 ```
 
 #### Framework Adapters
 
 ```typescript
 // SvelteKit hooks.server.ts
-import { thresholdHandle } from "@autumnsgrove/lattice/threshold/sveltekit";
+import { thresholdHandle } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 export const handle = thresholdHandle({ store, limits: ENDPOINT_RATE_LIMITS });
 
 // Hono middleware
-import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
+import { thresholdMiddleware } from "@autumnsgrove/lattice/platform/threshold/hono";
 
 // Raw Worker
-import { applyThreshold } from "@autumnsgrove/lattice/threshold/worker";
+import { applyThreshold } from "@autumnsgrove/lattice/platform/threshold/worker";
 ```
 
 #### Endpoint Configuration
 
 ```typescript
-import { ENDPOINT_RATE_LIMITS, getEndpointLimit } from "@autumnsgrove/lattice/threshold";
+import { ENDPOINT_RATE_LIMITS, getEndpointLimit } from "@autumnsgrove/lattice/platform/threshold";
 
 // Pre-configured limits for all Grove API endpoints
 const limit = getEndpointLimit("/api/posts");
@@ -391,7 +390,7 @@ import {
 	isBanned,
 	getBanRemaining,
 	clearAbuseState,
-} from "@autumnsgrove/lattice/threshold";
+} from "@autumnsgrove/lattice/platform/threshold";
 
 await recordViolation(store, ip, "rate_limit_exceeded");
 const banned = await isBanned(store, ip);
@@ -489,7 +488,7 @@ import { createMockLoomDO } from "@autumnsgrove/lattice/loom/testing";
 
 ### Lumen — AI Gateway
 
-**Import:** `@autumnsgrove/lattice/lumen`
+**Import:** `@autumnsgrove/lattice/ai/lumen`
 
 Lumen is Grove's unified AI inference layer. All AI features — Wisp (writing assistant), Thorn (content moderation), the Timeline curio, and anything else that touches a model — run through Lumen. It handles provider routing, fallback, tier-based quotas, PII scrubbing, usage tracking, and streaming.
 
@@ -503,7 +502,7 @@ Lumen automatically falls back to Cloudflare AI when OpenRouter fails.
 #### Quick Start
 
 ```typescript
-import { createLumenClient } from "@autumnsgrove/lattice/lumen";
+import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen";
 
 const lumen = createLumenClient({
 	openrouterApiKey: env.OPENROUTER_API_KEY,
@@ -559,7 +558,7 @@ type LumenTask =
 #### Quota Management
 
 ```typescript
-import { getTierQuota, wouldExceedQuota, LUMEN_QUOTAS } from "@autumnsgrove/lattice/lumen";
+import { getTierQuota, wouldExceedQuota, LUMEN_QUOTAS } from "@autumnsgrove/lattice/ai/lumen";
 
 const quota = getTierQuota("seedling", "generation");
 const wouldExceed = wouldExceedQuota(currentUsage, estimatedTokens, quota);
@@ -568,7 +567,7 @@ const wouldExceed = wouldExceedQuota(currentUsage, estimatedTokens, quota);
 #### Songbird (Streaming Chat)
 
 ```typescript
-import { runSongbird } from "@autumnsgrove/lattice/lumen";
+import { runSongbird } from "@autumnsgrove/lattice/ai/lumen";
 
 // Specialized streaming for Wisp writing assistant
 const result = await runSongbird(lumen, options, context);
@@ -577,7 +576,7 @@ const result = await runSongbird(lumen, options, context);
 #### Shutter (Image Analysis)
 
 ```typescript
-import { runShutter, injectShutterContext } from "@autumnsgrove/lattice/lumen";
+import { runShutter, injectShutterContext } from "@autumnsgrove/lattice/ai/lumen";
 
 // Image description and analysis
 const description = await runShutter(lumen, { imageUrl, task: "describe" });
@@ -586,7 +585,7 @@ const description = await runShutter(lumen, { imageUrl, task: "describe" });
 #### MCP Tool Support
 
 ```typescript
-import { McpServerRegistry, runMcpTools } from "@autumnsgrove/lattice/lumen";
+import { McpServerRegistry, runMcpTools } from "@autumnsgrove/lattice/ai/lumen";
 
 // Model Context Protocol integration
 const registry = new McpServerRegistry();
@@ -676,7 +675,7 @@ const stats = await getStats(db, tenantId);
 
 ### Feature Flags
 
-**Import:** `@autumnsgrove/lattice/feature-flags`
+**Import:** `@autumnsgrove/lattice/platform/feature-flags`
 
 A Cloudflare-native feature flag engine. Flags are stored in D1 and cached in KV. They support boolean on/off, percentage rollouts, tier-gating, user-specific rules, time-based windows, and A/B variants.
 
@@ -688,7 +687,7 @@ import {
 	getFeatureValue,
 	getVariant,
 	getFlags,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Boolean check
 const enabled = await isFeatureEnabled("jxl_encoding", { tenantId }, env);
@@ -735,7 +734,7 @@ import {
 	enrollInGreenhouse,
 	getGreenhouseTenants,
 	toggleGreenhouseStatus,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Enroll a tenant in beta testing
 await enrollInGreenhouse(db, tenantId, kv, { notes: "Early access partner" });
@@ -744,23 +743,23 @@ const inBeta = await isInGreenhouse(db, tenantId, kv);
 
 #### Grafts API
 
-Grafts are named feature flags with known IDs. They're loaded once per request and cascaded down.
+Grafts are Grove's name for named feature flags — the horticulture metaphor for capabilities grafted onto a tenant's tree. In code, these are "flags" (`KnownFlagId`). They're loaded once per request and cascaded down.
 
 ```typescript
 import {
-	getEnabledGrafts,
-	isGraftEnabled,
-	type KnownGraftId,
-} from "@autumnsgrove/lattice/feature-flags";
+	getEnabledFlags,
+	isFlagEnabled,
+	type KnownFlagId,
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
-// Load all grafts for a request (in +layout.server.ts)
-const grafts = await getEnabledGrafts(env, context);
+// Load all flags for a request (in +layout.server.ts)
+const flags = await getEnabledFlags(env, context);
 
-// Check a specific graft
-const canAccessMeadow = isGraftEnabled(grafts, "meadow_access");
+// Check a specific flag
+const canAccessMeadow = isFlagEnabled(flags, "meadow_access");
 ```
 
-In Svelte: `const flag = $derived(grafts?.flag_id ?? false)`
+In Svelte: `const flag = $derived(flags?.flag_id ?? false)`
 
 #### Upload Suspension
 
@@ -768,7 +767,7 @@ In Svelte: `const flag = $derived(grafts?.flag_id ?? false)`
 import {
 	getUploadSuspensionStatus,
 	setUploadSuspension,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Suspend uploads for a tenant (admin action)
 await setUploadSuspension(db, tenantId, { suspended: true, reason: "abuse" });
@@ -778,19 +777,19 @@ await setUploadSuspension(db, tenantId, { suspended: true, reason: "abuse" });
 
 ```typescript
 import {
-	getTenantControllableGrafts,
-	setTenantGraftOverride,
-} from "@autumnsgrove/lattice/feature-flags";
+	getTenantControllableFlags,
+	setTenantFlagOverride,
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Let tenants toggle their own optional features
-const controllable = await getTenantControllableGrafts(db, tenantId, env);
-await setTenantGraftOverride(db, tenantId, "dark_mode_default", true);
+const controllable = await getTenantControllableFlags(db, tenantId, env);
+await setTenantFlagOverride(db, tenantId, "dark_mode_default", true);
 ```
 
 #### Admin (Cultivate Mode)
 
 ```typescript
-import { getFeatureFlags, setFlagEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { getFeatureFlags, setFlagEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 const flags = await getFeatureFlags(db);
 await setFlagEnabled(db, kv, "jxl_encoding", true);
@@ -798,43 +797,20 @@ await setFlagEnabled(db, kv, "jxl_encoding", true);
 
 ---
 
-### Grafts — UI Extension System
+### Platform UI Components
 
-**Import:** `@autumnsgrove/lattice/grafts`
+Feature flags control availability; these platform UI components handle rendering. They live under domain-specific paths reflecting The Big Refactor's reorganization.
 
-"Graft" means two things in Grove. A Feature Graft (from `./feature-flags`) is a named boolean flag. A UI Graft (from `./grafts`) is a reusable Svelte component module that can be mounted onto any Grove property. The two work together: feature flags control availability, UI grafts handle rendering.
+#### Named Platform Modules
 
-#### Registry
-
-```typescript
-import { GRAFT_REGISTRY, getGraftEntry, getAllGrafts } from "@autumnsgrove/lattice/grafts";
-
-const entry = getGraftEntry("pricing");
-// { id, productId, status: 'enabled' | 'disabled' | 'beta', ... }
-```
-
-#### Svelte Context
-
-```typescript
-import { setGraftContext, getGraftContext } from "@autumnsgrove/lattice/grafts";
-
-// In a layout — set context for all child grafts
-setGraftContext({ productId: "grove", tier: "seedling" });
-
-// In a graft component — read it
-const ctx = getGraftContext();
-```
-
-#### Named Graft Modules
-
-| Path                    | What It Is                                       |
-| ----------------------- | ------------------------------------------------ |
-| `./grafts/pricing`      | Pricing page component                           |
-| `./grafts/login`        | Login UI (sign-in form, OAuth buttons)           |
-| `./grafts/login/server` | Server-side login utilities (session, redirect)  |
-| `./grafts/greenhouse`   | Greenhouse beta signup/status UI                 |
-| `./grafts/uploads`      | Upload gate and suspension messaging             |
-| `./grafts/upgrades`     | Upgrade flow (tier selection, checkout redirect) |
+| Path                       | What It Is                                       |
+| -------------------------- | ------------------------------------------------ |
+| `./platform/pricing`       | Pricing page component                           |
+| `./auth/login`             | Login UI (sign-in form, OAuth buttons)           |
+| `./auth/login/server`      | Server-side login utilities (session, redirect)  |
+| `./platform/greenhouse`    | Greenhouse beta signup/status UI                 |
+| `./platform/uploads`       | Upload gate and suspension messaging             |
+| `./platform/upgrades`      | Upgrade flow (tier selection, checkout redirect) |
 
 ---
 
@@ -1212,7 +1188,7 @@ Wisp uses:
 
 ## Platform Configuration
 
-**Import:** `@autumnsgrove/lattice/config`
+**Import:** `@autumnsgrove/lattice/platform/config`
 
 Grove's subscription model lives in a single source of truth: `config/tiers.ts`. Pricing pages, rate limiters, upload gates, and feature checks all read from the same `TIERS` object. If the limits change, they change everywhere at once.
 
@@ -1243,7 +1219,7 @@ Grove's subscription model lives in a single source of truth: `config/tiers.ts`.
 ### Config API
 
 ```typescript
-import { TIERS, tierHasFeature } from "@autumnsgrove/lattice/config";
+import { TIERS, tierHasFeature } from "@autumnsgrove/lattice/platform/config";
 
 // Check if a feature is available for a tenant's tier
 const hasAI = tierHasFeature("seedling", "ai"); // true
@@ -1328,7 +1304,7 @@ A snapshot of where each subsystem stands.
 | **Lumen**            | Live          | OpenRouter primary, Workers AI fallback           |
 | **Thorn**            | Live          | Wired into publish and edit hooks via waitUntil   |
 | **Feature Flags**    | Live          | 6 rule types, Greenhouse management               |
-| **Grafts**           | Live          | Named flags, `KnownGraftId` union                 |
+| **Grafts (Platform UI)** | Live      | Named grafts (feature flags), `KnownFlagId` union |
 | **Zephyr**           | In progress   | Email sending live; social broadcast building     |
 | **Curios (dev)**     | Live          | Timeline, Pulse, Journey, Gallery                 |
 | **Curios (visitor)** | In progress   | Types/logic ready; UI components in progress      |

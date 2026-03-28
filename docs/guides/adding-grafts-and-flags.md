@@ -1,9 +1,9 @@
 ---
 title: "Adding Grafts and Feature Flags"
-description: "Developer guide for adding new feature flags and grafts to Grove."
+description: "Developer guide for adding new grafts (feature flags) to Grove."
 category: guides
 guideCategory: infrastructure
-lastUpdated: "2026-03-12"
+lastUpdated: "2026-03-28"
 aliases: []
 tags:
   - grafts
@@ -14,15 +14,21 @@ tags:
 
 # Adding Grafts and Feature Flags
 
-> A developer guide for adding new feature flags and grafts to Grove.
+> A developer guide for adding new grafts (feature flags) to Grove.
+
+## Terminology
+
+Grove calls these capabilities **grafts** — from the horticulture practice of joining a cutting onto rootstock so one tree can bear many varieties. It's the user-facing term you'll see in the UI, in tenant-facing docs, and in Grove vocabulary throughout the codebase.
+
+In code, the system is implemented as **feature flags**: `KnownFlagId`, `getEnabledFlags()`, `data.flags`. When reading code, think "flag." When talking to tenants or writing docs, think "graft."
 
 ## Quick Reference
 
-| Term             | Meaning                                                                |
-| ---------------- | ---------------------------------------------------------------------- |
-| **Feature Flag** | A database toggle that controls whether a capability is enabled        |
-| **Graft**        | Grove's term for a feature flag (from horticulture: grafting branches) |
-| **UI Graft**     | A reusable component that can be "spliced" onto pages                  |
+| Term             | Meaning                                                                          |
+| ---------------- | -------------------------------------------------------------------------------- |
+| **Graft**        | Grove's user-facing name for a feature flag — "graft a capability onto your tree" |
+| **Feature Flag** | The code-level term — database toggle controlling what a tenant can access       |
+| **UI Graft**     | A reusable component that can be "spliced" onto pages                            |
 | **Greenhouse**   | Early access program for trusted tenants to test experimental features |
 | **Cultivate**    | Enable a flag globally                                                 |
 | **Prune**        | Disable a flag globally                                                |
@@ -38,7 +44,7 @@ tags:
 │  "Who gets early access?"                                   │
 │  └─ Tenant enrollment in greenhouse_tenants table           │
 ├─────────────────────────────────────────────────────────────┤
-│  LAYER 2: FEATURE GRAFTS (Feature Flags)                    │
+│  LAYER 2: FEATURE FLAGS                                     │
 │  "What capabilities are enabled?"                           │
 │  └─ Boolean flags, percentage rollouts, tier-gating         │
 ├─────────────────────────────────────────────────────────────┤
@@ -95,12 +101,12 @@ npx wrangler d1 execute grove-engine-db --remote --file=libs/engine/migrations/X
 npx wrangler d1 execute grove-engine-db --remote --command="SELECT * FROM feature_flags WHERE id = 'my_feature';"
 ```
 
-### Step 3: Add to Known Grafts (Type Safety)
+### Step 3: Add to Known Flags (Type Safety)
 
-Update `libs/engine/src/lib/feature-flags/grafts.ts`:
+Update `libs/engine/src/lib/platform/feature-flags/flags.ts`:
 
 ```typescript
-export type KnownGraftId =
+export type KnownFlagId =
 	| "fireside_mode"
 	| "scribe_mode"
 	| "meadow_access"
@@ -112,17 +118,17 @@ export type KnownGraftId =
 ### Step 4: Use in Code
 
 ```typescript
-import { isGraftEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isFlagEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // In a +page.server.ts or +layout.server.ts
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	const parentData = await parent();
 
-	// Option A: Check from cascaded grafts (preferred - no extra DB call)
-	const myFeatureEnabled = parentData.grafts?.my_feature ?? false;
+	// Option A: Check from cascaded flags (preferred - no extra DB call)
+	const myFeatureEnabled = parentData.flags?.my_feature ?? false;
 
 	// Option B: Direct check (use sparingly - adds DB/KV call)
-	const myFeatureEnabled = await isGraftEnabled(
+	const myFeatureEnabled = await isFlagEnabled(
 		"my_feature",
 		{ tenantId: locals.tenantId, inGreenhouse: parentData.inGreenhouse },
 		{ DB: platform.env.DB, FLAGS_KV: platform.env.FLAGS_KV },
@@ -240,28 +246,28 @@ INSERT OR IGNORE INTO feature_flags (
 
 ## The Admin Layout Cascade Pattern
 
-Grafts are loaded ONCE at the admin layout level and cascaded to all child pages:
+Feature flags are loaded ONCE at the admin layout level and cascaded to all child pages:
 
 ```
 /admin/+layout.server.ts
-├── Loads all enabled grafts for tenant
-├── Returns { grafts: Record<string, boolean> }
+├── Loads all enabled flags for tenant
+├── Returns { flags: Record<string, boolean> }
 │
 ├── /admin/blog/+page.server.ts
-│   └── Uses parentData.grafts.fireside_mode
+│   └── Uses parentData.flags.fireside_mode
 │
 ├── /admin/settings/+page.server.ts
-│   └── Uses parentData.grafts (shows toggle UI)
+│   └── Uses parentData.flags (shows toggle UI)
 │
 └── /admin/posts/edit/[slug]/+page.server.ts
-    └── Uses parentData.grafts.scribe_mode
+    └── Uses parentData.flags.scribe_mode
 ```
 
 **Why this pattern?**
 
 - Single DB/KV call per request (not per page)
-- Consistent graft state across all admin pages
-- Easy to access: `const { grafts } = await parent()`
+- Consistent flag state across all admin pages
+- Easy to access: `const { flags } = await parent()`
 
 ---
 
@@ -321,24 +327,24 @@ if (killSwitch) {
 - [ ] Set `greenhouse_only` if it's an experimental feature
 - [ ] Add rules if needed (tenant, percentage, tier)
 - [ ] Apply migration to production: `npx wrangler d1 execute grove-engine-db --remote --file=...`
-- [ ] Add to `KnownGraftId` type for type safety
-- [ ] Use via cascaded `parentData.grafts` or direct `isGraftEnabled()` call
+- [ ] Add to `KnownFlagId` type for type safety
+- [ ] Use via cascaded `parentData.flags` or direct `isFlagEnabled()` call
 - [ ] Test in greenhouse before cultivating globally
 
 ---
 
 ## File Reference
 
-| File                                                 | Purpose                                  |
-| ---------------------------------------------------- | ---------------------------------------- |
-| `libs/engine/migrations/`                            | SQL migrations that create flags         |
-| `libs/engine/src/lib/feature-flags/types.ts`         | Type definitions                         |
-| `libs/engine/src/lib/feature-flags/grafts.ts`        | `getEnabledGrafts()`, `isGraftEnabled()` |
-| `libs/engine/src/lib/feature-flags/evaluate.ts`      | Core evaluation logic                    |
-| `libs/engine/src/lib/feature-flags/greenhouse.ts`    | Greenhouse enrollment                    |
-| `libs/engine/src/lib/feature-flags/tenant-grafts.ts` | Self-serve controls                      |
-| `libs/engine/src/lib/feature-flags/admin.ts`         | Admin UI functions                       |
-| `docs/specs/grafts-spec.md`                          | Full specification                       |
+| File                                                          | Purpose                                  |
+| ------------------------------------------------------------- | ---------------------------------------- |
+| `libs/engine/migrations/`                                     | SQL migrations that create flags         |
+| `libs/engine/src/lib/platform/feature-flags/types.ts`         | Type definitions                         |
+| `libs/engine/src/lib/platform/feature-flags/flags.ts`         | `getEnabledFlags()`, `isFlagEnabled()`   |
+| `libs/engine/src/lib/platform/feature-flags/evaluate.ts`      | Core evaluation logic                    |
+| `libs/engine/src/lib/platform/feature-flags/greenhouse.ts`    | Greenhouse enrollment                    |
+| `libs/engine/src/lib/platform/feature-flags/tenant-flags.ts`  | Self-serve controls                      |
+| `libs/engine/src/lib/platform/feature-flags/admin.ts`         | Admin UI functions                       |
+| `docs/specs/grafts-spec.md`                                   | Full specification (updated)             |
 
 ---
 
@@ -347,7 +353,7 @@ if (killSwitch) {
 ### Pattern: Feature Gate in UI
 
 ```svelte
-{#if data.grafts.my_feature}
+{#if data.flags.my_feature}
 	<MyFeatureComponent />
 {/if}
 ```
@@ -356,7 +362,7 @@ if (killSwitch) {
 
 ```typescript
 // In +server.ts
-if (grafts.enhanced_uploads) {
+if (flags.enhanced_uploads) {
 	return handleEnhancedUpload(request);
 }
 return handleBasicUpload(request);
@@ -404,4 +410,4 @@ VALUES ('premium_feature', 80, 'tier', '{"tiers": ["oak", "evergreen"]}', 'true'
 
 ---
 
-_For the complete specification, see `docs/specs/grafts-spec.md`._
+_For the complete specification, see `docs/specs/grafts-spec.md` (updated)._

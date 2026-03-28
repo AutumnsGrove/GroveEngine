@@ -39,7 +39,7 @@ These layers are independent. A request can pass tenant limits and still be bloc
 The `Threshold` class is the central API. It wraps a storage backend and provides four levels of rate limit checks.
 
 ```typescript
-import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
+import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/platform/threshold";
 
 const threshold = new Threshold({
   store: new ThresholdKVStore(platform.env.CACHE_KV),
@@ -78,16 +78,16 @@ Threshold has three framework adapters. Pick the one that matches your service.
 
 | Adapter | Import path | Use for |
 |---------|------------|---------|
-| SvelteKit | `@autumnsgrove/lattice/threshold/sveltekit` | Engine routes (`+server.ts` files) |
-| Hono | `@autumnsgrove/lattice/threshold/hono` | Hono-based workers (Heartwood, Reverie) |
-| Worker | `@autumnsgrove/lattice/threshold/worker` | Bare Cloudflare Workers (OG Worker) |
+| SvelteKit | `@autumnsgrove/lattice/platform/threshold/sveltekit` | Engine routes (`+server.ts` files) |
+| Hono | `@autumnsgrove/lattice/platform/threshold/hono` | Hono-based workers (Heartwood, Reverie) |
+| Worker | `@autumnsgrove/lattice/platform/threshold/worker` | Bare Cloudflare Workers (OG Worker) |
 
 ### Step 2: Create a Threshold instance
 
 Use the factory helper. It picks the best available storage backend automatically (DO if available with an identifier, KV as fallback).
 
 ```typescript
-import { createThreshold } from "$lib/threshold/factory.js";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
 
 const threshold = createThreshold(platform?.env, {
   identifier: locals.user?.id,
@@ -101,8 +101,8 @@ If neither `THRESHOLD` (DO binding) nor `CACHE_KV` is available, `createThreshol
 **SvelteKit pattern** (most common in the engine):
 
 ```typescript
-import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
 
 export const POST: RequestHandler = async ({ platform, locals }) => {
   const threshold = createThreshold(platform?.env, {
@@ -128,7 +128,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 **Hono middleware pattern** (for workers using Hono):
 
 ```typescript
-import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
+import { thresholdMiddleware } from "@autumnsgrove/lattice/platform/threshold/hono";
 
 app.use("/api/auth/*", thresholdMiddleware({
   threshold,
@@ -145,7 +145,7 @@ The middleware automatically skips rate limiting when `ENVIRONMENT === "test"`. 
 **Bare Worker pattern** (no framework):
 
 ```typescript
-import { thresholdCheck, getClientIP } from "@autumnsgrove/lattice/threshold/worker";
+import { thresholdCheck, getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 
 export default {
   async fetch(request, env) {
@@ -166,7 +166,7 @@ export default {
 
 ### Step 4: Register the endpoint (if applicable)
 
-If you want your endpoint to work with `checkEndpoint()` auto-detection, add it to two places in `libs/engine/src/lib/threshold/config.ts`:
+If you want your endpoint to work with `checkEndpoint()` auto-detection, add it to two places in `libs/engine/src/lib/platform/threshold/config.ts`:
 
 1. Add an entry to `ENDPOINT_RATE_LIMITS` with the limit and window.
 2. Add a mapping in `ENDPOINT_MAP` from `"METHOD:/path"` to the endpoint key.
@@ -187,7 +187,7 @@ Two helpers are available:
 - `thresholdCheckWithResult(threshold, options)` returns `{ result, response? }`. Use this when you need the `ThresholdResult` to attach rate limit headers to success responses too.
 
 ```typescript
-import { thresholdCheckWithResult, thresholdHeaders } from "$lib/threshold/adapters/sveltekit.js";
+import { thresholdCheckWithResult, thresholdHeaders } from "$lib/platform/threshold/adapters/sveltekit.js";
 
 const { result, response } = await thresholdCheckWithResult(threshold, {
   key: `upload/image:${locals.user.id}`,
@@ -223,7 +223,7 @@ Threshold has three storage backends. All implement the same `ThresholdStore` in
 ### KV store (default)
 
 ```typescript
-import { ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
+import { ThresholdKVStore } from "@autumnsgrove/lattice/platform/threshold";
 
 const store = new ThresholdKVStore(env.CACHE_KV);
 ```
@@ -239,7 +239,7 @@ KV is the default storage backend. Fast, globally distributed, eventually consis
 ### D1 store
 
 ```typescript
-import { ThresholdD1Store } from "@autumnsgrove/lattice/threshold";
+import { ThresholdD1Store } from "@autumnsgrove/lattice/platform/threshold";
 
 const store = new ThresholdD1Store(env.DB);
 ```
@@ -259,7 +259,7 @@ Use D1 for auth endpoints and billing-sensitive operations where precision matte
 ### DO store (preferred when available)
 
 ```typescript
-import { ThresholdDOStore } from "@autumnsgrove/lattice/threshold";
+import { ThresholdDOStore } from "@autumnsgrove/lattice/platform/threshold";
 
 const store = new ThresholdDOStore(env.THRESHOLD, userId);
 ```
@@ -280,7 +280,7 @@ The factory helper (`createThreshold`) makes the choice for you: DO if available
 
 ## Tier-based limits
 
-Rate limits scale with subscription tiers. Tier config lives in `libs/engine/src/lib/config/tiers.ts`, and Threshold reads from it directly. Four categories of rate limits are defined per tier:
+Rate limits scale with subscription tiers. Tier config lives in `libs/engine/src/lib/platform/config/tiers.ts`, and Threshold reads from it directly. Four categories of rate limits are defined per tier:
 
 | Tier | Requests/min | Writes/hour | Uploads/day | AI calls/day |
 |------|-------------|-------------|-------------|-------------|
@@ -490,7 +490,7 @@ Threshold errors use the `GROVE-THRESHOLD-XXX` prefix.
 Use `logThresholdError` for structured error logging:
 
 ```typescript
-import { THRESHOLD_ERRORS, logThresholdError } from "@autumnsgrove/lattice/threshold";
+import { THRESHOLD_ERRORS, logThresholdError } from "@autumnsgrove/lattice/platform/threshold";
 
 logThresholdError(THRESHOLD_ERRORS.KV_UNAVAILABLE, {
   key: "wisp:abc123",
@@ -506,7 +506,7 @@ logThresholdError(THRESHOLD_ERRORS.KV_UNAVAILABLE, {
 Threshold provides test utilities in `test-utils.ts`:
 
 ```typescript
-import { createMockKV, createMockD1, createMockStore } from "@autumnsgrove/lattice/threshold";
+import { createMockKV, createMockD1, createMockStore } from "@autumnsgrove/lattice/platform/threshold";
 ```
 
 - `createMockKV()` returns an in-memory KV backed by a Map. Supports `get`, `put`, `delete`.
@@ -514,8 +514,8 @@ import { createMockKV, createMockD1, createMockStore } from "@autumnsgrove/latti
 - `createMockStore()` returns a minimal `ThresholdStore` backed by a Map. Use this when testing the Threshold class or adapters without caring about storage internals.
 
 ```typescript
-import { Threshold } from "@autumnsgrove/lattice/threshold";
-import { createMockStore } from "@autumnsgrove/lattice/threshold";
+import { Threshold } from "@autumnsgrove/lattice/platform/threshold";
+import { createMockStore } from "@autumnsgrove/lattice/platform/threshold";
 
 const store = createMockStore();
 const threshold = new Threshold({ store });
@@ -535,22 +535,22 @@ expect(result.remaining).toBe(4);
 
 | File | Purpose |
 |------|---------|
-| `libs/engine/src/lib/threshold/types.ts` | Core types: `ThresholdResult`, `ThresholdCheckOptions`, `ThresholdStore` |
-| `libs/engine/src/lib/threshold/threshold.ts` | `Threshold` class with `check`, `checkTier`, `checkEndpoint`, `checkTenant`, `checkWithAbuse` |
-| `libs/engine/src/lib/threshold/config.ts` | `ENDPOINT_RATE_LIMITS` and `ENDPOINT_MAP` (single source of truth for endpoint limits) |
-| `libs/engine/src/lib/threshold/factory.ts` | `createThreshold` factory (DO-first, KV-fallback) |
-| `libs/engine/src/lib/threshold/abuse.ts` | Graduated response: `getAbuseState`, `recordViolation`, `isBanned`, `clearAbuseState` |
-| `libs/engine/src/lib/threshold/errors.ts` | `THRESHOLD_ERRORS` catalog and `logThresholdError` helper |
-| `libs/engine/src/lib/threshold/rss.ts` | RSS feed client classification and rate limiting |
-| `libs/engine/src/lib/threshold/stores/kv.ts` | `ThresholdKVStore` (default, eventually consistent) |
-| `libs/engine/src/lib/threshold/stores/d1.ts` | `ThresholdD1Store` (strongly consistent, atomic) |
-| `libs/engine/src/lib/threshold/stores/do.ts` | `ThresholdDOStore` (per-identifier Durable Object isolation) |
-| `libs/engine/src/lib/threshold/adapters/sveltekit.ts` | SvelteKit helpers: `thresholdCheck`, `thresholdCheckWithResult`, `thresholdHeaders` |
-| `libs/engine/src/lib/threshold/adapters/hono.ts` | Hono middleware factory and inline check |
-| `libs/engine/src/lib/threshold/adapters/worker.ts` | Bare Worker helpers: `thresholdCheck`, `getClientIP` |
-| `libs/engine/src/lib/threshold/test-utils.ts` | Mock KV, D1, and ThresholdStore for tests |
-| `libs/engine/src/lib/threshold/index.ts` | Barrel export |
-| `libs/engine/src/lib/config/tiers.ts` | Tier-based rate limits (single source of truth for `checkTier`) |
+| `libs/engine/src/lib/platform/threshold/types.ts` | Core types: `ThresholdResult`, `ThresholdCheckOptions`, `ThresholdStore` |
+| `libs/engine/src/lib/platform/threshold/threshold.ts` | `Threshold` class with `check`, `checkTier`, `checkEndpoint`, `checkTenant`, `checkWithAbuse` |
+| `libs/engine/src/lib/platform/threshold/config.ts` | `ENDPOINT_RATE_LIMITS` and `ENDPOINT_MAP` (single source of truth for endpoint limits) |
+| `libs/engine/src/lib/platform/threshold/factory.ts` | `createThreshold` factory (DO-first, KV-fallback) |
+| `libs/engine/src/lib/platform/threshold/abuse.ts` | Graduated response: `getAbuseState`, `recordViolation`, `isBanned`, `clearAbuseState` |
+| `libs/engine/src/lib/platform/threshold/errors.ts` | `THRESHOLD_ERRORS` catalog and `logThresholdError` helper |
+| `libs/engine/src/lib/platform/threshold/rss.ts` | RSS feed client classification and rate limiting |
+| `libs/engine/src/lib/platform/threshold/stores/kv.ts` | `ThresholdKVStore` (default, eventually consistent) |
+| `libs/engine/src/lib/platform/threshold/stores/d1.ts` | `ThresholdD1Store` (strongly consistent, atomic) |
+| `libs/engine/src/lib/platform/threshold/stores/do.ts` | `ThresholdDOStore` (per-identifier Durable Object isolation) |
+| `libs/engine/src/lib/platform/threshold/adapters/sveltekit.ts` | SvelteKit helpers: `thresholdCheck`, `thresholdCheckWithResult`, `thresholdHeaders` |
+| `libs/engine/src/lib/platform/threshold/adapters/hono.ts` | Hono middleware factory and inline check |
+| `libs/engine/src/lib/platform/threshold/adapters/worker.ts` | Bare Worker helpers: `thresholdCheck`, `getClientIP` |
+| `libs/engine/src/lib/platform/threshold/test-utils.ts` | Mock KV, D1, and ThresholdStore for tests |
+| `libs/engine/src/lib/platform/threshold/index.ts` | Barrel export |
+| `libs/engine/src/lib/platform/config/tiers.ts` | Tier-based rate limits (single source of truth for `checkTier`) |
 
 ---
 

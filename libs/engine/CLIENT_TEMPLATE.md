@@ -151,7 +151,7 @@ import {
 
 ```javascript
 // AI model configuration
-import { AI_MODELS, getModelConfig } from "@autumnsgrove/lattice/config";
+import { AI_MODELS, getModelConfig } from "@autumnsgrove/lattice/platform/config";
 ```
 
 ### Payments (Stripe)

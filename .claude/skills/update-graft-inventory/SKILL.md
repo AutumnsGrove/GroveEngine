@@ -21,8 +21,8 @@ Activate this skill when:
 | --------------------------------------------- | --------------------------------------------- |
 | `.github/graft-inventory.json`                | Source of truth for graft counts and metadata |
 | `libs/engine/migrations/*.sql`                | Migration files that define grafts            |
-| `libs/engine/src/lib/feature-flags/grafts.ts` | Type definitions (`KnownGraftId`)             |
-| `docs/guides/adding-grafts-and-flags.md`      | Developer guide                               |
+| `libs/engine/src/lib/platform/feature-flags/flags.ts` | Type definitions (`KnownFlagId`)        |
+| `docs/guides/adding-grafts-and-flags.md`      | Developer guide (grafts = Grove term for feature flags) |
 
 ## Inventory Structure
 
@@ -122,12 +122,12 @@ Edit `.github/graft-inventory.json`:
    "lastAuditedBy": "claude/<context>"
    ```
 
-### 6. Update KnownGraftId Type
+### 6. Update KnownFlagId Type
 
-Edit `libs/engine/src/lib/feature-flags/grafts.ts`:
+Edit `libs/engine/src/lib/platform/feature-flags/flags.ts`:
 
 ```typescript
-export type KnownGraftId =
+export type KnownFlagId =
 	| "fireside_mode"
 	| "scribe_mode"
 	| "meadow_access"
@@ -139,12 +139,12 @@ export type KnownGraftId =
 ### 7. Commit Changes
 
 ```bash
-git add .github/graft-inventory.json libs/engine/src/lib/feature-flags/grafts.ts
+git add .github/graft-inventory.json libs/engine/src/lib/platform/feature-flags/flags.ts
 git commit -m "docs: update graft inventory
 
 - Add <flag_id> to inventory
 - Update total: X -> Y
-- Update KnownGraftId type"
+- Update KnownFlagId type"
 ```
 
 ## Quick Reference Commands
@@ -172,7 +172,7 @@ When adding a new graft:
 
 - [ ] Create migration file: `libs/engine/migrations/XXX_name.sql`
 - [ ] Apply migration: `npx wrangler d1 execute grove-engine-db --remote --file=...`
-- [ ] Add to `KnownGraftId` type in `grafts.ts`
+- [ ] Add to `KnownFlagId` type in `flags.ts`
 - [ ] Add entry to `.github/graft-inventory.json` flags array
 - [ ] Update inventory counts (total, breakdown.platform/greenhouse, byType)
 - [ ] Update `lastUpdated` and `lastAuditedBy`
@@ -216,7 +216,7 @@ Before finishing:
 
 - [ ] Production D1 graft count matches inventory `total`
 - [ ] All flags in D1 have entries in inventory `flags` array
-- [ ] `KnownGraftId` type includes all flag IDs
+- [ ] `KnownFlagId` type includes all flag IDs
 - [ ] `lastUpdated` date is today
 - [ ] Counts add up: `total = platform + greenhouse`
 - [ ] Type breakdown is accurate

@@ -210,9 +210,9 @@ Spec describes a non-existent "magic code" auth system with Resend. Heartwood is
 - [x] **Batch evaluation**: `getFlags` evaluates multiple flags in one call
 - [x] **Caching**: KV-backed with `invalidateFlag`, `invalidateAllFlags`
 - [x] **Greenhouse**: Beta tenant enrollment — `isInGreenhouse`, `enrollInGreenhouse`, `toggleGreenhouseStatus`
-- [x] **Grafts API**: `getEnabledGrafts`, `isGraftEnabled`, `KnownGraftId` union type
+- [x] **Feature Flags API**: `getEnabledFlags`, `isFlagEnabled`, `KnownFlagId` union type
 - [x] **Upload suspension**: admin control over upload access per tenant
-- [x] **Tenant overrides**: Self-serve flag overrides — `setTenantGraftOverride`, `resetTenantGraftOverrides`
+- [x] **Tenant overrides**: Self-serve flag overrides — `setTenantFlagOverride`, `resetTenantFlagOverrides`
 - [x] **Admin (Cultivate Mode)**: `getFeatureFlags`, `getFeatureFlag`, `setFlagEnabled`
 - [x] **Percentage**: `getUserBucket` (deterministic hashing by session/user)
 

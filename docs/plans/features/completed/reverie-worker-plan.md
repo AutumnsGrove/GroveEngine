@@ -18,6 +18,8 @@ tags:
 type: implementation-plan
 ---
 
+> **Note (2026-03-28):** This document was written before The Big Refactor (PR #1535). Import paths and terminology have changed: "grafts" → "feature flags", `$lib/grafts/` → domain-specific paths (`$lib/platform/`, `$lib/auth/`, etc.), `$lib/feature-flags/` → `$lib/platform/feature-flags/`, `$lib/config/` → `$lib/platform/config/`, `$lib/lumen/` → `$lib/ai/lumen/`, `$lib/threshold/` → `$lib/platform/threshold/`. See `docs/plans/infra/planning/big-refactor-cleanup.md` for the full migration map.
+
 # Reverie Worker — Implementation Plan
 
 ```
