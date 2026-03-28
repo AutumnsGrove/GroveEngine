@@ -12,10 +12,12 @@ import type { Env } from "../types";
 const mockCheck = vi.fn();
 
 vi.mock("@autumnsgrove/lattice/platform/threshold", () => ({
-	Threshold: vi.fn().mockImplementation(() => ({
-		check: mockCheck,
-	})),
-	ThresholdKVStore: vi.fn(),
+	Threshold: vi.fn().mockImplementation(function () {
+		return { check: mockCheck };
+	}),
+	ThresholdKVStore: vi.fn().mockImplementation(function () {
+		return {};
+	}),
 	ENDPOINT_RATE_LIMITS: {
 		"lumen/inference": { limit: 60, windowSeconds: 60 },
 		"lumen/embed": { limit: 120, windowSeconds: 60 },
