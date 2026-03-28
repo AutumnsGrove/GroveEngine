@@ -62,8 +62,10 @@ export async function invalidatePostCaches(
 	if (!kv) return;
 
 	try {
-		await cache.del(kv, `garden:${tenantId}:${slug}`);
-		await cache.del(kv, `garden:list:${tenantId}`);
+		await Promise.all([
+			cache.del(kv, `garden:${tenantId}:${slug}`),
+			cache.del(kv, `garden:list:${tenantId}`),
+		]);
 	} catch (err) {
 		console.error("[Cache] Failed to invalidate post caches:", err);
 	}

@@ -86,6 +86,22 @@ async function d1Query(
 }
 
 // ---------------------------------------------------------------------------
+// Concurrency helper — run async tasks in batches
+// ---------------------------------------------------------------------------
+
+const CONCURRENCY = 10;
+
+async function runConcurrent<T>(tasks: (() => Promise<T>)[]): Promise<PromiseSettledResult<T>[]> {
+	const results: PromiseSettledResult<T>[] = [];
+	for (let i = 0; i < tasks.length; i += CONCURRENCY) {
+		const batch = tasks.slice(i, i + CONCURRENCY);
+		const batchResults = await Promise.allSettled(batch.map((fn) => fn()));
+		results.push(...batchResults);
+	}
+	return results;
+}
+
+// ---------------------------------------------------------------------------
 // Hashing
 // ---------------------------------------------------------------------------
 
@@ -141,44 +157,58 @@ async function syncBadges(
 	const existingHashes = await getExistingHashes("data_badges", "id");
 	console.log(`    ${existingHashes.size} existing in D1`);
 
-	let synced = 0;
+	// Filter to only changed badges
+	const changedBadges: { badge: BadgeJson; hash: string }[] = [];
 	let skipped = 0;
-	let errors = 0;
 
 	for (const badge of badges) {
 		const hash = contentHash(badge);
-
 		if (existingHashes.get(badge.id) === hash) {
 			skipped++;
-			continue;
+		} else {
+			changedBadges.push({ badge, hash });
 		}
+	}
 
-		const isSystem = badge.group === "system" ? 1 : 0;
-		const autoCriteria = badge.criteria || null;
+	if (changedBadges.length === 0) {
+		return { synced: 0, skipped, errors: 0 };
+	}
 
-		try {
-			await d1Query(
-				`INSERT OR REPLACE INTO data_badges
-					(id, name, description, icon, category, rarity, badge_group,
-					 auto_criteria, is_system, content_hash, updated_at)
-				VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, datetime('now'))`,
-				[
-					badge.id,
-					badge.name,
-					badge.description,
-					badge.icon,
-					badge.category,
-					badge.rarity,
-					badge.group,
-					autoCriteria,
-					isSystem,
-					hash,
-				],
-			);
-			console.log(`    + ${badge.id}`);
+	// Upsert changed badges concurrently (batches of CONCURRENCY)
+	const tasks = changedBadges.map(
+		({ badge, hash }) =>
+			() =>
+				d1Query(
+					`INSERT OR REPLACE INTO data_badges
+				(id, name, description, icon, category, rarity, badge_group,
+				 auto_criteria, is_system, content_hash, updated_at)
+			VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, datetime('now'))`,
+					[
+						badge.id,
+						badge.name,
+						badge.description,
+						badge.icon,
+						badge.category,
+						badge.rarity,
+						badge.group,
+						badge.criteria || null,
+						badge.group === "system" ? 1 : 0,
+						hash,
+					],
+				),
+	);
+
+	const results = await runConcurrent(tasks);
+
+	let synced = 0;
+	let errors = 0;
+	for (let i = 0; i < results.length; i++) {
+		if (results[i].status === "fulfilled") {
+			console.log(`    + ${changedBadges[i].badge.id}`);
 			synced++;
-		} catch (err) {
-			console.error(`    x ${badge.id}: ${(err as Error).message}`);
+		} else {
+			const reason = (results[i] as PromiseRejectedResult).reason;
+			console.error(`    x ${changedBadges[i].badge.id}: ${reason?.message || reason}`);
 			errors++;
 		}
 	}
@@ -241,43 +271,58 @@ async function syncArtifacts(
 	const existingHashes = await getExistingHashes("data_artifacts", "id");
 	console.log(`    ${existingHashes.size} existing in D1`);
 
-	let synced = 0;
+	// Filter to only changed artifacts
+	const changedArtifacts: { id: string; artifact: ArtifactJson; hash: string }[] = [];
 	let skipped = 0;
-	let errors = 0;
 
 	for (const artifact of artifacts) {
 		const id = `artifact_${artifact.type}`;
 		const hash = contentHash(artifact);
-
 		if (existingHashes.get(id) === hash) {
 			skipped++;
-			continue;
+		} else {
+			changedArtifacts.push({ id, artifact, hash });
 		}
+	}
 
-		const icon = ARTIFACT_ICONS[artifact.type] || "box";
+	if (changedArtifacts.length === 0) {
+		return { synced: 0, skipped, errors: 0 };
+	}
 
-		try {
-			await d1Query(
-				`INSERT OR REPLACE INTO data_artifacts
-					(id, name, label, description, artifact_type, category,
-					 icon, default_config, content_hash, updated_at)
-				VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'))`,
-				[
-					id,
-					artifact.label,
-					artifact.label,
-					artifact.description,
-					artifact.type,
-					artifact.category,
-					icon,
-					null,
-					hash,
-				],
-			);
-			console.log(`    + ${id}`);
+	// Upsert changed artifacts concurrently
+	const tasks = changedArtifacts.map(
+		({ id, artifact, hash }) =>
+			() =>
+				d1Query(
+					`INSERT OR REPLACE INTO data_artifacts
+				(id, name, label, description, artifact_type, category,
+				 icon, default_config, content_hash, updated_at)
+			VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'))`,
+					[
+						id,
+						artifact.label,
+						artifact.label,
+						artifact.description,
+						artifact.type,
+						artifact.category,
+						ARTIFACT_ICONS[artifact.type] || "box",
+						null,
+						hash,
+					],
+				),
+	);
+
+	const results = await runConcurrent(tasks);
+
+	let synced = 0;
+	let errors = 0;
+	for (let i = 0; i < results.length; i++) {
+		if (results[i].status === "fulfilled") {
+			console.log(`    + ${changedArtifacts[i].id}`);
 			synced++;
-		} catch (err) {
-			console.error(`    x ${id}: ${(err as Error).message}`);
+		} else {
+			const reason = (results[i] as PromiseRejectedResult).reason;
+			console.error(`    x ${changedArtifacts[i].id}: ${reason?.message || reason}`);
 			errors++;
 		}
 	}
@@ -319,33 +364,49 @@ async function syncDomainBlocklist(
 	const existingHashes = await getExistingHashes("data_domain_blocklist", "username");
 	console.log(`    ${existingHashes.size} existing in D1`);
 
-	let synced = 0;
+	// Filter to only changed entries
+	const changedEntries: { entry: BlocklistJson; hash: string }[] = [];
 	let skipped = 0;
-	let errors = 0;
 
 	for (const entry of entries) {
 		const hash = contentHash(entry);
-
 		if (existingHashes.get(entry.username) === hash) {
 			skipped++;
-			continue;
+		} else {
+			changedEntries.push({ entry, hash });
 		}
+	}
 
-		try {
-			await d1Query(
-				`INSERT OR REPLACE INTO data_domain_blocklist
-					(username, reason, category, content_hash, updated_at)
-				VALUES (?1, ?2, ?3, ?4, datetime('now'))`,
-				[entry.username, entry.reason, entry.category || null, hash],
-			);
+	if (changedEntries.length === 0) {
+		return { synced: 0, skipped, errors: 0 };
+	}
+
+	// Upsert changed entries concurrently
+	const tasks = changedEntries.map(
+		({ entry, hash }) =>
+			() =>
+				d1Query(
+					`INSERT OR REPLACE INTO data_domain_blocklist
+				(username, reason, category, content_hash, updated_at)
+			VALUES (?1, ?2, ?3, ?4, datetime('now'))`,
+					[entry.username, entry.reason, entry.category || null, hash],
+				),
+	);
+
+	const results = await runConcurrent(tasks);
+
+	let synced = 0;
+	let errors = 0;
+	for (let i = 0; i < results.length; i++) {
+		if (results[i].status === "fulfilled") {
 			synced++;
-		} catch (err) {
-			console.error(`    x ${entry.username}: ${(err as Error).message}`);
+		} else {
+			const reason = (results[i] as PromiseRejectedResult).reason;
+			console.error(`    x ${changedEntries[i].entry.username}: ${reason?.message || reason}`);
 			errors++;
 		}
 	}
 
-	// Log synced count without individual lines (too many entries)
 	if (synced > 0) {
 		console.log(`    + ${synced} entries upserted`);
 	}

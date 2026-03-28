@@ -181,11 +181,14 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 
 	let step = "check-existing";
 	try {
-		const existing = await queryOne<{ id: string; used_at: number | null }>(
-			DB,
-			"SELECT id, used_at FROM comped_invites WHERE email = ?",
-			[email],
-		);
+		const [existing, existingTenant] = await Promise.all([
+			queryOne<{ id: string; used_at: number | null }>(
+				DB,
+				"SELECT id, used_at FROM comped_invites WHERE email = ?",
+				[email],
+			),
+			queryOne<{ subdomain: string }>(DB, `SELECT subdomain FROM tenants WHERE email = ?`, [email]),
+		]);
 
 		if (existing) {
 			if (existing.used_at) {
@@ -193,13 +196,6 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 			}
 			return { success: false as const, error: `${email} already has a pending comped invite` };
 		}
-
-		step = "check-tenant";
-		const existingTenant = await queryOne<{ subdomain: string }>(
-			DB,
-			`SELECT subdomain FROM tenants WHERE email = ?`,
-			[email],
-		);
 
 		if (existingTenant) {
 			return {
@@ -319,17 +315,24 @@ export async function resendInvite(
 		});
 
 		if (emailResult.success) {
-			await execute(DB, `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`, [
-				inviteId,
-			]);
-
-			// Audit the resend
-			await execute(
-				DB,
-				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+			await Promise.all([
+				execute(DB, `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`, [
+					inviteId,
+				]),
+				execute(
+					DB,
+					`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
            VALUES (?, 'resend', ?, ?, ?, ?, ?, 'Email resent', unixepoch())`,
-				[crypto.randomUUID(), inviteId, invite.email, invite.tier, invite.invite_type, actorEmail],
-			);
+					[
+						crypto.randomUUID(),
+						inviteId,
+						invite.email,
+						invite.tier,
+						invite.invite_type,
+						actorEmail,
+					],
+				),
+			]);
 
 			return {
 				success: true as const,
@@ -385,15 +388,16 @@ export async function revokeInvite(
 			};
 		}
 
-		await execute(DB, "DELETE FROM comped_invites WHERE id = ?", [inviteId]);
-
 		const auditId = crypto.randomUUID();
-		await execute(
-			DB,
-			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+		await Promise.all([
+			execute(DB, "DELETE FROM comped_invites WHERE id = ?", [inviteId]),
+			execute(
+				DB,
+				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
          VALUES (?, 'revoke', ?, ?, ?, ?, ?, ?, unixepoch())`,
-			[auditId, inviteId, invite.email, invite.tier, invite.invite_type, actorEmail, notes],
-		);
+				[auditId, inviteId, invite.email, invite.tier, invite.invite_type, actorEmail, notes],
+			),
+		]);
 
 		return {
 			success: true as const,
@@ -430,24 +434,28 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 
 	let step = "check-subscriber";
 	try {
-		// Verify subscriber exists in email list
-		const subscriber = await queryOne<{ id: number; email: string }>(
-			DB,
-			"SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
-			[email],
-		);
+		// Run all three eligibility checks in parallel
+		const [subscriber, existing, existingTenant] = await Promise.all([
+			queryOne<{ id: number; email: string }>(
+				DB,
+				"SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
+				[email],
+			),
+			queryOne<{ id: string; used_at: number | null }>(
+				DB,
+				"SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
+				[email],
+			),
+			queryOne<{ subdomain: string }>(
+				DB,
+				"SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
+				[email],
+			),
+		]);
 
 		if (!subscriber) {
 			return { success: false as const, error: `${email} is not an active email subscriber` };
 		}
-
-		// Check they don't already have an invite
-		step = "check-existing";
-		const existing = await queryOne<{ id: string; used_at: number | null }>(
-			DB,
-			"SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
-			[email],
-		);
 
 		if (existing) {
 			if (existing.used_at) {
@@ -455,14 +463,6 @@ export async function promoteSubscriber(DB: D1Database, params: PromoteParams, e
 			}
 			return { success: false as const, error: `${email} already has a pending invite` };
 		}
-
-		// Check they're not already a Grove user
-		step = "check-tenant";
-		const existingTenant = await queryOne<{ subdomain: string }>(
-			DB,
-			"SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
-			[email],
-		);
 
 		if (existingTenant) {
 			return {
