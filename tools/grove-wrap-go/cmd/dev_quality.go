@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -354,18 +357,30 @@ var ciCmd = &cobra.Command{
 	Short: "Run full CI pipeline",
 	Long: `Run full CI pipeline: lint → check → test → build.
 
-Supports --affected to only run CI for packages with uncommitted changes.
-Supports --skip-* flags to skip individual steps.
-Supports --diagnose for structured error output.`,
+Matches the GitHub Actions CI pipeline as closely as possible:
+- Runs lint, check, and test in PARALLEL by default (build runs after)
+- Detects affected packages from both committed and uncommitted changes
+- Resolves transitive dependencies (engine change → all consumer apps)
+- Rebuilds library dist/ when needed (foliage, gossamer, engine)
+
+Flags:
+  --affected     Only run CI for packages affected by changes since origin/main
+  --full         Run CI for ALL packages regardless of changes
+  --sequential   Run steps one at a time instead of in parallel
+  --skip-*       Skip individual steps (lint, check, test, build)
+  --fail-fast    Stop on first failure (cancels parallel steps)
+  --diagnose     Show structured error diagnostics`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		pkg, _ := cmd.Flags().GetString("package")
 		affected, _ := cmd.Flags().GetBool("affected")
+		full, _ := cmd.Flags().GetBool("full")
 		skipLint, _ := cmd.Flags().GetBool("skip-lint")
 		skipCheck, _ := cmd.Flags().GetBool("skip-check")
 		skipTest, _ := cmd.Flags().GetBool("skip-test")
 		skipBuild, _ := cmd.Flags().GetBool("skip-build")
 		failFast, _ := cmd.Flags().GetBool("fail-fast")
+		sequential, _ := cmd.Flags().GetBool("sequential")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 		root := cfg.GroveRoot
@@ -373,37 +388,63 @@ Supports --diagnose for structured error output.`,
 		// Determine scope
 		var scope string
 		var filterArgs []string
+		runAll := full // --full forces all packages
+		var affectedFullPaths []string // track "libs/engine" etc. for rebuild logic
+
 		if pkg != "" {
 			scope = pkg
 			filterArgs = []string{"--filter", pkg}
-		} else if affected {
-			affectedPkgs := detectAffectedCIPackages(root)
-			if len(affectedPkgs) == 0 {
-				if cfg.JSONMode {
-					data, _ := json.Marshal(map[string]interface{}{
-						"passed": true, "steps": []ciStep{}, "affected_packages": []string{},
-					})
-					fmt.Println(string(data))
-				} else {
-					ui.Success("No affected packages — nothing to check")
-				}
-				return nil
+		} else if affected || full {
+			if full {
+				runAll = true
 			}
-			scope = strings.Join(affectedPkgs, ", ")
-			for _, p := range affectedPkgs {
-				filterArgs = append(filterArgs, "--filter", p)
+			if !runAll {
+				result := detectAffectedCIPackages()
+				if result.runAll {
+					runAll = true
+				}
+				if len(result.shortNames) == 0 && !runAll {
+					if cfg.JSONMode {
+						data, _ := json.Marshal(map[string]interface{}{
+							"passed": true, "steps": []ciStep{}, "affected_packages": []string{},
+						})
+						fmt.Println(string(data))
+					} else {
+						ui.Success("No affected packages — nothing to check")
+					}
+					return nil
+				}
+				if !runAll {
+					scope = strings.Join(result.shortNames, ", ")
+					for _, p := range result.shortNames {
+						filterArgs = append(filterArgs, "--filter", p)
+					}
+					affectedFullPaths = result.fullPaths
+				}
+			}
+			if runAll {
+				scope = "all"
 			}
 		} else {
 			scope = "all"
 		}
 
-		// Define pipeline steps
-		type stepDef struct {
-			name string
-			skip bool
-			args []string
+		// --- Library rebuild step (matches grove-setup action) ---
+		// If affected libs need their dist/ rebuilt before consumers can type-check
+		needsRebuild := runAll || containsAny(affectedFullPaths,
+			"libs/foliage", "libs/gossamer", "libs/engine",
+			"libs/prism", "libs/infra")
+
+		if needsRebuild {
+			if err := rebuildLibraries(cfg, root, affectedFullPaths, runAll, dryRun); err != nil {
+				if !cfg.JSONMode {
+					ui.Error("Library rebuild failed — downstream checks would be unreliable")
+				}
+				return err
+			}
 		}
 
+		// Define pipeline steps
 		steps := []stepDef{
 			{"lint", skipLint, append([]string{"pnpm"}, append(filterArgs, "run", "lint")...)},
 			{"check", skipCheck, append([]string{"pnpm"}, append(filterArgs, "run", "check")...)},
@@ -433,49 +474,30 @@ Supports --diagnose for structured error output.`,
 				})
 			}
 			data, _ := json.MarshalIndent(map[string]interface{}{
-				"dry_run": true, "scope": scope, "steps": drySteps,
+				"dry_run": true, "scope": scope, "parallel": !sequential, "steps": drySteps,
 			}, "", "  ")
 			fmt.Println(string(data))
 			return nil
 		}
 
 		if !cfg.JSONMode {
-			ui.PrintHeader(fmt.Sprintf("Grove CI Pipeline (%s)", scope))
+			mode := "parallel"
+			if sequential {
+				mode = "sequential"
+			}
+			ui.PrintHeader(fmt.Sprintf("Grove CI Pipeline (%s, %s)", scope, mode))
 		}
 
 		var results []ciStep
 		allPassed := true
 		totalStart := time.Now()
 
-		for _, s := range steps {
-			if s.skip {
-				results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
-				continue
-			}
-
-			if !cfg.JSONMode {
-				fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
-			}
-
-			start := time.Now()
-			result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
-			duration := time.Since(start).Seconds()
-
-			passed := err == nil && result != nil && result.OK()
-			results = append(results, ciStep{
-				Name: s.name, Passed: passed, Duration: duration,
-			})
-
-			if !cfg.JSONMode {
-				ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
-			}
-
-			if !passed {
-				allPassed = false
-				if failFast {
-					break
-				}
-			}
+		if sequential {
+			// Original sequential execution
+			results, allPassed = runStepsSequential(cfg, steps, failFast)
+		} else {
+			// Parallel: lint+check+test concurrently, then build
+			results, allPassed = runStepsParallel(cfg, steps, failFast)
 		}
 
 		totalDuration := time.Since(totalStart).Seconds()
@@ -510,35 +532,159 @@ Supports --diagnose for structured error output.`,
 	},
 }
 
-// detectAffectedCIPackages returns package names affected by uncommitted changes.
-func detectAffectedCIPackages(root string) []string {
-	result, err := exec.Git("status", "--porcelain")
-	if err != nil || !result.OK() {
-		return nil
-	}
+// dependents maps a library to the packages that depend on it.
+// Extends .github/scripts/affected-packages.mjs DEPENDENTS with prism/infra
+// chains. Keep in sync — if you add a package here, add it to the JS too.
+var dependents = map[string][]string{
+	"libs/foliage":  {"libs/engine"},
+	"libs/gossamer": {"libs/engine"},
+	"libs/prism":    {"libs/foliage", "libs/engine"},
+	"libs/infra":    {"libs/engine"},
+	"libs/engine": {
+		"apps/amber",
+		"apps/clearing",
+		"apps/domains",
+		"apps/ivy",
+		"apps/landing",
+		"apps/login",
+		"apps/meadow",
+		"apps/plant",
+		"apps/terrarium",
+		"services/amber",
+		"services/durable-objects",
+		"services/forage",
+		"services/heartwood",
+		"workers/vista-collector",
+		"workers/warden",
+	},
+	"libs/vineyard": {},
+	"libs/shutter":  {},
+}
 
-	affected := map[string]bool{}
-	for _, line := range result.Lines() {
-		if len(line) < 4 {
-			continue
+// rootLevelFiles trigger a full CI run when changed.
+var rootLevelFiles = []string{
+	"package.json",
+	"pnpm-lock.yaml",
+	"tsconfig.json",
+}
+
+// fileToPackagePath maps a file path to its monorepo package path (e.g. "libs/engine").
+// Returns empty string if the file is not inside a known package directory.
+func fileToPackagePath(file string) string {
+	for _, prefix := range []string{"apps/", "services/", "workers/", "libs/", "packages/"} {
+		if strings.HasPrefix(file, prefix) {
+			rest := strings.TrimPrefix(file, prefix)
+			parts := strings.SplitN(rest, "/", 2)
+			if len(parts) > 0 && parts[0] != "" {
+				return strings.TrimSuffix(prefix, "/") + "/" + parts[0]
+			}
 		}
-		file := strings.TrimSpace(line[3:])
-		// Map file path to package
-		for _, prefix := range []string{"packages/", "apps/", "services/", "workers/", "libs/"} {
-			if strings.HasPrefix(file, prefix) {
-				parts := strings.SplitN(strings.TrimPrefix(file, prefix), "/", 2)
-				if len(parts) > 0 {
-					affected[parts[0]] = true
+	}
+	return ""
+}
+
+// resolveTransitiveDependents expands a set of directly-changed packages to
+// include all transitive dependents via the dependents graph.
+func resolveTransitiveDependents(direct map[string]bool) map[string]bool {
+	affected := make(map[string]bool)
+	for k := range direct {
+		affected[k] = true
+	}
+	changed := true
+	for changed {
+		changed = false
+		for pkg := range affected {
+			for _, dep := range dependents[pkg] {
+				if !affected[dep] {
+					affected[dep] = true
+					changed = true
 				}
 			}
 		}
 	}
+	return affected
+}
 
-	var pkgs []string
-	for pkg := range affected {
-		pkgs = append(pkgs, pkg)
+// ciAffectedResult holds both representations of affected packages.
+type ciAffectedResult struct {
+	// shortNames are for pnpm --filter (e.g. "engine", "plant")
+	shortNames []string
+	// fullPaths are for rebuild detection (e.g. "libs/engine", "apps/plant")
+	fullPaths []string
+	// runAll is true when root-level files changed, meaning all packages are affected
+	runAll bool
+}
+
+// detectAffectedCIPackages returns packages affected by changes since main.
+// Uses git diff origin/main...HEAD for committed changes AND git status for
+// uncommitted changes — matching the detection strategy of GitHub Actions CI.
+func detectAffectedCIPackages() ciAffectedResult {
+	directlyChanged := map[string]bool{}
+	runAll := false
+
+	// 1. Committed-but-not-pushed changes: git diff origin/main...HEAD
+	diffResult, err := exec.Git("diff", "--name-only", "origin/main...HEAD")
+	if err == nil && diffResult.OK() {
+		for _, file := range diffResult.Lines() {
+			file = strings.TrimSpace(file)
+			if file == "" {
+				continue
+			}
+			if isRootLevelChange(file) {
+				runAll = true
+			}
+			if pkg := fileToPackagePath(file); pkg != "" {
+				directlyChanged[pkg] = true
+			}
+		}
 	}
-	return pkgs
+
+	// 2. Uncommitted changes: git status --porcelain
+	statusResult, err := exec.Git("status", "--porcelain")
+	if err == nil && statusResult.OK() {
+		for _, line := range statusResult.Lines() {
+			if len(line) < 4 {
+				continue
+			}
+			file := strings.TrimSpace(line[3:])
+			if isRootLevelChange(file) {
+				runAll = true
+			}
+			if pkg := fileToPackagePath(file); pkg != "" {
+				directlyChanged[pkg] = true
+			}
+		}
+	}
+
+	if len(directlyChanged) == 0 && !runAll {
+		return ciAffectedResult{}
+	}
+
+	// Resolve transitive dependents
+	affected := resolveTransitiveDependents(directlyChanged)
+
+	var shortNames []string
+	var fullPaths []string
+	for pkg := range affected {
+		fullPaths = append(fullPaths, pkg)
+		// Convert "libs/engine" → "engine" for pnpm --filter
+		parts := strings.SplitN(pkg, "/", 2)
+		if len(parts) == 2 {
+			shortNames = append(shortNames, parts[1])
+		}
+	}
+	return ciAffectedResult{shortNames: shortNames, fullPaths: fullPaths, runAll: runAll}
+}
+
+// isRootLevelChange returns true if a file path represents a root-level
+// change that should trigger a full CI run.
+func isRootLevelChange(file string) bool {
+	for _, rf := range rootLevelFiles {
+		if file == rf {
+			return true
+		}
+	}
+	return strings.HasPrefix(file, "scripts/")
 }
 
 // runInPackage runs a command in a specific package directory.
@@ -629,6 +775,307 @@ func printDryRun(cfg *config.Config, pkg string, cmdArgs []string) error {
 	return nil
 }
 
+// stepDef represents a single CI pipeline step.
+type stepDef struct {
+	name string
+	skip bool
+	args []string
+}
+
+// runStepsSequential runs CI steps one at a time (original behavior).
+func runStepsSequential(cfg *config.Config, steps []stepDef, failFast bool) ([]ciStep, bool) {
+	var results []ciStep
+	allPassed := true
+
+	for _, s := range steps {
+		if s.skip {
+			results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
+		}
+
+		start := time.Now()
+		result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
+		duration := time.Since(start).Seconds()
+
+		passed := err == nil && result != nil && result.OK()
+		results = append(results, ciStep{
+			Name: s.name, Passed: passed, Duration: duration,
+		})
+
+		if !cfg.JSONMode {
+			ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
+		}
+
+		if !passed {
+			allPassed = false
+			if failFast {
+				break
+			}
+		}
+	}
+	return results, allPassed
+}
+
+// runStepsParallel runs lint+check+test concurrently, then build sequentially.
+// This mirrors GitHub Actions CI where test/typecheck/lint are parallel matrix jobs.
+// Build runs last because it writes to dist/ and could interfere with type checking.
+func runStepsParallel(cfg *config.Config, steps []stepDef, failFast bool) ([]ciStep, bool) {
+	// Split steps into parallel group (lint, check, test) and sequential group (build)
+	var parallelSteps []stepDef
+	var sequentialSteps []stepDef
+	for _, s := range steps {
+		if s.name == "build" {
+			sequentialSteps = append(sequentialSteps, s)
+		} else {
+			parallelSteps = append(parallelSteps, s)
+		}
+	}
+
+	// Create a cancellable context for fail-fast
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Run parallel group
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	parallelResults := make([]ciStep, len(parallelSteps))
+	allPassed := true
+
+	if !cfg.JSONMode {
+		var names []string
+		for _, s := range parallelSteps {
+			if !s.skip {
+				names = append(names, s.name)
+			}
+		}
+		if len(names) > 0 {
+			fmt.Printf("  > Running in parallel: %s\n", strings.Join(names, ", "))
+		}
+	}
+
+	for i, s := range parallelSteps {
+		if s.skip {
+			parallelResults[i] = ciStep{Name: s.name, Passed: true, Skipped: true}
+			continue
+		}
+
+		wg.Add(1)
+		go func(idx int, step stepDef) {
+			defer wg.Done()
+
+			// Check if already cancelled (fail-fast from another goroutine)
+			select {
+			case <-ctx.Done():
+				mu.Lock()
+				parallelResults[idx] = ciStep{
+					Name: step.name, Passed: false, Skipped: true,
+				}
+				mu.Unlock()
+				return
+			default:
+			}
+
+			start := time.Now()
+			timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 5*time.Minute)
+			defer timeoutCancel()
+
+			result, err := exec.RunContext(timeoutCtx, step.args[0], step.args[1:]...)
+			duration := time.Since(start).Seconds()
+
+			passed := err == nil && result != nil && result.OK()
+
+			mu.Lock()
+			parallelResults[idx] = ciStep{
+				Name: step.name, Passed: passed, Duration: duration,
+			}
+			if !cfg.JSONMode {
+				ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(step.name), duration))
+			}
+			if !passed {
+				allPassed = false
+				if failFast {
+					cancel() // Cancel remaining parallel steps
+				}
+			}
+			mu.Unlock()
+		}(i, s)
+	}
+
+	wg.Wait()
+
+	// Collect parallel results
+	var results []ciStep
+	results = append(results, parallelResults...)
+
+	// Run sequential group (build) only if parallel passed or not fail-fast
+	for _, s := range sequentialSteps {
+		if s.skip {
+			results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
+			continue
+		}
+
+		if failFast && !allPassed {
+			results = append(results, ciStep{Name: s.name, Passed: false, Skipped: true})
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
+		}
+
+		start := time.Now()
+		result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
+		duration := time.Since(start).Seconds()
+
+		passed := err == nil && result != nil && result.OK()
+		results = append(results, ciStep{
+			Name: s.name, Passed: passed, Duration: duration,
+		})
+
+		if !cfg.JSONMode {
+			ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
+		}
+
+		if !passed {
+			allPassed = false
+		}
+	}
+
+	// Sort results back into canonical order for consistent output
+	order := map[string]int{"lint": 0, "check": 1, "test": 2, "build": 3}
+	sort.SliceStable(results, func(i, j int) bool {
+		return order[results[i].Name] < order[results[j].Name]
+	})
+
+	return results, allPassed
+}
+
+// containsAny returns true if the slice contains any of the given values.
+func containsAny(slice []string, values ...string) bool {
+	set := make(map[string]bool, len(slice))
+	for _, s := range slice {
+		set[s] = true
+	}
+	for _, v := range values {
+		if set[v] {
+			return true
+		}
+	}
+	return false
+}
+
+// rebuildLibraries runs build/package commands for affected libraries,
+// matching the grove-setup GitHub Action's build steps.
+// Order matters: prism → foliage → gossamer → engine (dependency chain).
+func rebuildLibraries(cfg *config.Config, root string, affectedPaths []string, runAll, dryRun bool) error {
+	type libBuild struct {
+		path    string // e.g. "libs/foliage"
+		command []string
+		label   string
+	}
+
+	// Ordered by dependency chain (upstream first)
+	libs := []libBuild{
+		{"libs/foliage", []string{"pnpm", "run", "build"}, "Building foliage"},
+		{"libs/gossamer", []string{"pnpm", "run", "build"}, "Building gossamer"},
+		{"libs/engine", []string{"pnpm", "run", "package"}, "Packaging engine"},
+	}
+
+	affected := make(map[string]bool, len(affectedPaths))
+	for _, p := range affectedPaths {
+		affected[p] = true
+	}
+
+	// Determine which libs need rebuilding: the lib itself changed,
+	// OR one of its upstream deps changed (prism/infra → engine chain)
+	needsBuild := make(map[string]bool)
+	if runAll {
+		for _, lib := range libs {
+			needsBuild[lib.path] = true
+		}
+	} else {
+		// If prism or infra changed, foliage and engine need rebuild
+		if affected["libs/prism"] {
+			needsBuild["libs/foliage"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/infra"] {
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/foliage"] {
+			needsBuild["libs/foliage"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/gossamer"] {
+			needsBuild["libs/gossamer"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/engine"] {
+			needsBuild["libs/engine"] = true
+		}
+		// Also rebuild if any engine dependent is affected (they need fresh dist/)
+		engineDeps := dependents["libs/engine"]
+		for _, dep := range engineDeps {
+			if affected[dep] {
+				needsBuild["libs/engine"] = true
+				break
+			}
+		}
+	}
+
+	if len(needsBuild) == 0 {
+		return nil
+	}
+
+	if !cfg.JSONMode && !dryRun {
+		fmt.Println("  > Rebuilding libraries...")
+	}
+
+	for _, lib := range libs {
+		if !needsBuild[lib.path] {
+			continue
+		}
+		dir := filepath.Join(root, lib.path)
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			continue
+		}
+
+		if dryRun {
+			if !cfg.JSONMode {
+				ui.Step(true, fmt.Sprintf("[dry-run] %s", lib.label))
+			}
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("    %s...\n", lib.label)
+		}
+
+		result, err := exec.RunInDirWithTimeout(5*time.Minute, dir, lib.command[0], lib.command[1:]...)
+		if err != nil {
+			return fmt.Errorf("%s failed: %w", lib.label, err)
+		}
+		if !result.OK() {
+			if !cfg.JSONMode {
+				ui.Step(false, lib.label)
+				if result.Stderr != "" {
+					fmt.Println(result.Stderr)
+				}
+			}
+			return fmt.Errorf("%s failed with exit code %d", lib.label, result.ExitCode)
+		}
+		if !cfg.JSONMode {
+			ui.Step(true, lib.label)
+		}
+	}
+
+	return nil
+}
+
 // capitalizeFirst capitalizes the first letter of a string.
 func capitalizeFirst(s string) string {
 	if s == "" {
@@ -689,11 +1136,13 @@ func init() {
 	// ci flags
 	ciCmd.Flags().StringP("package", "p", "", "Run CI for specific package")
 	ciCmd.Flags().Bool("affected", false, "Only run CI for affected packages")
+	ciCmd.Flags().Bool("full", false, "Run CI for ALL packages regardless of changes")
 	ciCmd.Flags().Bool("skip-lint", false, "Skip linting step")
 	ciCmd.Flags().Bool("skip-check", false, "Skip type checking step")
 	ciCmd.Flags().Bool("skip-test", false, "Skip testing step")
 	ciCmd.Flags().Bool("skip-build", false, "Skip build step")
 	ciCmd.Flags().Bool("fail-fast", false, "Stop on first failure")
+	ciCmd.Flags().Bool("sequential", false, "Run steps sequentially (default: parallel)")
 	ciCmd.Flags().Bool("diagnose", false, "Show structured error diagnostics")
 	ciCmd.Flags().Bool("dry-run", false, "Preview all steps without execution")
 

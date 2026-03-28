@@ -214,11 +214,95 @@ func TestCapitalizeFirst(t *testing.T) {
 
 // --- CI affected packages tests ---
 
-func TestDetectAffectedCIPackagesEmpty(t *testing.T) {
-	// When called with a nonexistent root, should return nil
-	pkgs := detectAffectedCIPackages("/nonexistent/path")
-	// May or may not be empty depending on git status, but should not panic
-	_ = pkgs
+func TestDetectAffectedCIPackagesNoOp(t *testing.T) {
+	// On a clean branch at main, should return empty or non-empty
+	// depending on git state, but should never panic
+	result := detectAffectedCIPackages()
+	_ = result.shortNames
+	_ = result.fullPaths
+	_ = result.runAll
+}
+
+func TestIsRootLevelChange(t *testing.T) {
+	tests := []struct {
+		file string
+		want bool
+	}{
+		{"package.json", true},
+		{"pnpm-lock.yaml", true},
+		{"tsconfig.json", true},
+		{"scripts/foo.sh", true},
+		{"libs/engine/src/index.ts", false},
+		{"apps/plant/package.json", false},
+		{"", false},
+	}
+	for _, tt := range tests {
+		got := isRootLevelChange(tt.file)
+		if got != tt.want {
+			t.Errorf("isRootLevelChange(%q) = %v, want %v", tt.file, got, tt.want)
+		}
+	}
+}
+
+func TestFileToPackagePath(t *testing.T) {
+	tests := []struct {
+		file string
+		want string
+	}{
+		{"libs/engine/src/lib/foo.ts", "libs/engine"},
+		{"apps/plant/src/routes/+page.svelte", "apps/plant"},
+		{"services/heartwood/src/index.ts", "services/heartwood"},
+		{"workers/warden/src/index.ts", "workers/warden"},
+		{"package.json", ""},
+		{"scripts/foo.sh", ""},
+		{"", ""},
+	}
+	for _, tt := range tests {
+		got := fileToPackagePath(tt.file)
+		if got != tt.want {
+			t.Errorf("fileToPackagePath(%q) = %q, want %q", tt.file, got, tt.want)
+		}
+	}
+}
+
+func TestResolveTransitiveDependents(t *testing.T) {
+	// Changing libs/prism should cascade: prism → foliage → engine → all apps
+	direct := map[string]bool{"libs/prism": true}
+	affected := resolveTransitiveDependents(direct)
+
+	// Must include the full chain
+	for _, pkg := range []string{"libs/prism", "libs/foliage", "libs/engine", "apps/plant", "apps/landing"} {
+		if !affected[pkg] {
+			t.Errorf("expected %q in affected set, but it was missing", pkg)
+		}
+	}
+}
+
+func TestResolveTransitiveDependentsEngineOnly(t *testing.T) {
+	direct := map[string]bool{"libs/engine": true}
+	affected := resolveTransitiveDependents(direct)
+
+	// Engine change should include all consumer apps
+	if !affected["apps/plant"] {
+		t.Error("expected apps/plant in affected set")
+	}
+	if !affected["services/heartwood"] {
+		t.Error("expected services/heartwood in affected set")
+	}
+	// But NOT foliage (foliage is upstream of engine, not downstream)
+	if affected["libs/foliage"] {
+		t.Error("libs/foliage should NOT be in affected set when only engine changed")
+	}
+}
+
+func TestContainsAny(t *testing.T) {
+	slice := []string{"libs/engine", "apps/plant", "libs/foliage"}
+	if !containsAny(slice, "libs/engine", "libs/prism") {
+		t.Error("expected containsAny to find libs/engine")
+	}
+	if containsAny(slice, "libs/prism", "libs/infra") {
+		t.Error("expected containsAny to return false for missing values")
+	}
 }
 
 // --- API endpoint validation ---
