@@ -4,7 +4,7 @@ import {
 	extractHeaders,
 	renderMarkdown,
 	type GutterItem,
-} from "@autumnsgrove/lattice/utils/markdown";
+} from "@autumnsgrove/lattice/content/markdown/markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
@@ -15,7 +15,7 @@ import {
 	getCommentSettings,
 	buildCommentTree,
 } from "@autumnsgrove/lattice/server/services/reeds";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime

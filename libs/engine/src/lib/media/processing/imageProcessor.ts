@@ -1,0 +1,725 @@
+/**
+ * Client-side image processing utility
+ * Handles JXL/WebP conversion, quality adjustment, EXIF stripping, and hash generation
+ *
+ * JPEG XL (JXL) is preferred when supported, with WebP as fallback.
+ * Drawing to canvas automatically strips EXIF data including GPS for privacy.
+ */
+
+// =============================================================================
+// JXL ENCODER (LAZY LOADED)
+// =============================================================================
+
+/**
+ * Lazily loaded JXL encoder module
+ * The @jsquash/jxl WASM module is ~800KB, so we only load it when needed
+ */
+let jxlModule: typeof import("@jsquash/jxl") | null = null;
+
+/**
+ * Get the JXL encoder, loading it on first use
+ */
+async function getJxlEncoder(): Promise<typeof import("@jsquash/jxl")> {
+	if (!jxlModule) {
+		// Dynamic import with .catch() so bundlers (esbuild/Rollup) don't fail
+		// when @jsquash/jxl isn't installed. JXL is disabled in production
+		// until Firefox adds support.
+		jxlModule = await import("@jsquash/jxl").catch(() => null);
+		if (!jxlModule) throw new Error("JXL encoder not available");
+	}
+	return jxlModule;
+}
+
+/**
+ * Check if the browser supports JXL encoding via WASM
+ * Caches result after first check
+ */
+let jxlSupportChecked = false;
+let jxlSupported = false;
+
+export async function supportsJxlEncoding(): Promise<boolean> {
+	if (jxlSupportChecked) {
+		return jxlSupported;
+	}
+
+	try {
+		// Check for WebAssembly support
+		if (typeof WebAssembly !== "object") {
+			jxlSupportChecked = true;
+			jxlSupported = false;
+			return false;
+		}
+
+		// Try to load the JXL encoder
+		await getJxlEncoder();
+		jxlSupportChecked = true;
+		jxlSupported = true;
+		return true;
+	} catch {
+		jxlSupportChecked = true;
+		jxlSupported = false;
+		return false;
+	}
+}
+
+// =============================================================================
+// HEIC DECODER (LAZY LOADED)
+// =============================================================================
+
+/**
+ * Lazily loaded HEIC decoder module (heic2any)
+ * Uses libheif WASM (~1.3MB), only loaded when someone uploads a HEIC file
+ */
+let heicModule: typeof import("heic2any") | null = null;
+
+/**
+ * Get the HEIC decoder, loading it on first use
+ */
+async function getHeicDecoder(): Promise<typeof import("heic2any")> {
+	if (!heicModule) {
+		heicModule = await import("heic2any");
+	}
+	return heicModule;
+}
+
+/**
+ * Check if a file is a HEIC/HEIF image by extension or MIME type.
+ * Browsers often don't set the MIME type correctly for HEIC files,
+ * so we check the extension as a fallback.
+ */
+export function isHeicFile(file: File): boolean {
+	const ext = file.name.split(".").pop()?.toLowerCase() || "";
+	return ["heic", "heif"].includes(ext) || file.type === "image/heic" || file.type === "image/heif";
+}
+
+/**
+ * HEIF/HEIC brand identifiers in ISOBMFF ftyp box.
+ * iPad camera apps (especially third-party ones like Dazz Cam) sometimes
+ * save HEIF data with a .jpeg extension, so we can't rely on extension alone.
+ */
+const HEIF_BRANDS = ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1"];
+
+/**
+ * Detect HEIF/HEIC format by reading the file's magic bytes (ISOBMFF ftyp box).
+ * This catches files that have wrong extensions (e.g., HEIF data saved as .jpeg).
+ *
+ * ISOBMFF layout: [4 bytes size][4 bytes "ftyp"][4 bytes brand]
+ */
+export async function isHeifByMagicBytes(file: File): Promise<boolean> {
+	if (file.size < 12) return false;
+
+	try {
+		const slice = file.slice(0, 12);
+		const buffer = new Uint8Array(await slice.arrayBuffer());
+
+		// Check for ftyp box at offset 4-7
+		const hasFtyp =
+			buffer[4] === 0x66 && // f
+			buffer[5] === 0x74 && // t
+			buffer[6] === 0x79 && // y
+			buffer[7] === 0x70; // p
+
+		if (!hasFtyp) return false;
+
+		// Check brand at offset 8-11
+		const brand = String.fromCharCode(buffer[8], buffer[9], buffer[10], buffer[11]);
+		return HEIF_BRANDS.includes(brand);
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Convert a HEIC/HEIF file to JPEG using the heic2any WASM decoder.
+ * Quality is intentionally high (0.92) since this is an intermediate step —
+ * the result will be re-encoded to JXL/WebP by the normal processing pipeline.
+ */
+export async function convertHeicToJpeg(file: File): Promise<File> {
+	const heic2any = await getHeicDecoder();
+	const result = await heic2any.default({
+		blob: file,
+		toType: "image/jpeg",
+		quality: 0.92,
+	});
+
+	// heic2any may return a single Blob or an array (for multi-image HEIC)
+	const jpegBlob = Array.isArray(result) ? result[0] : result;
+
+	// Create a new File with .jpg extension, stripping any existing extension
+	const lastDot = file.name.lastIndexOf(".");
+	const baseName = lastDot > 0 ? file.name.substring(0, lastDot) : file.name;
+	return new File([jpegBlob], `${baseName}.jpg`, { type: "image/jpeg" });
+}
+
+// =============================================================================
+// CORE UTILITIES
+// =============================================================================
+
+/**
+ * Calculate SHA-256 hash of file for duplicate detection
+ */
+export async function calculateFileHash(file: File | Blob): Promise<string> {
+	const buffer = await file.arrayBuffer();
+	const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Sanitize filename by replacing problematic Unicode characters
+ * macOS screenshots use narrow no-break space (U+202F) before AM/PM
+ */
+function sanitizeFilename(filename: string): string {
+	// Replace narrow no-break space (U+202F) and other problematic chars with regular space
+	return filename
+		.replace(/\u202F/g, " ") // Narrow no-break space (macOS time format)
+		.replace(/\u00A0/g, " ") // Non-breaking space
+		.replace(/[\u2000-\u200F]/g, " "); // Various Unicode spaces
+}
+
+/**
+ * Load an image from a File object
+ */
+function loadImage(file: File): Promise<HTMLImageElement> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+
+		// Sanitize filename to prevent issues with special Unicode characters
+		// (like macOS narrow no-break space in screenshot timestamps)
+		const sanitizedName = sanitizeFilename(file.name);
+		const fileToLoad =
+			sanitizedName !== file.name ? new File([file], sanitizedName, { type: file.type }) : file;
+
+		const objectUrl = URL.createObjectURL(fileToLoad);
+
+		img.onload = () => {
+			URL.revokeObjectURL(objectUrl);
+			resolve(img);
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(objectUrl);
+
+			// Provide specific error messages based on file type
+			const ext = file.name.split(".").pop()?.toLowerCase() || "";
+			const fileType = file.type || "unknown";
+
+			// Known problematic formats
+			if (["tiff", "tif"].includes(ext)) {
+				reject(
+					new Error(
+						`TIFF files cannot be processed in-browser. Please upload as original format or convert to JPG/PNG first.`,
+					),
+				);
+				return;
+			}
+			if (["heic", "heif"].includes(ext)) {
+				reject(new Error(`HEIC/HEIF conversion may have failed. Please try uploading again.`));
+				return;
+			}
+			if (["raw", "cr2", "nef", "arw", "dng"].includes(ext)) {
+				reject(
+					new Error(
+						`RAW camera files cannot be processed in-browser. Please upload as original format or convert to JPG first.`,
+					),
+				);
+				return;
+			}
+			if (["psd", "ai", "eps"].includes(ext)) {
+				reject(
+					new Error(
+						`${ext.toUpperCase()} files cannot be processed in-browser. Please convert to JPG/PNG/WebP first.`,
+					),
+				);
+				return;
+			}
+
+			// BMP is renderable but often problematic
+			if (ext === "bmp" || fileType === "image/bmp") {
+				reject(
+					new Error(`BMP files may fail to load in browsers. Try converting to PNG or JPG first.`),
+				);
+				return;
+			}
+
+			// Very large files
+			if (file.size > 50 * 1024 * 1024) {
+				reject(
+					new Error(
+						`File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum for processing is 50MB. Try uploading as original format or resize first.`,
+					),
+				);
+				return;
+			}
+
+			// Generic error with helpful context
+			// Avoid the word "unsupported" here — getActionableUploadError() maps
+			// it to "Unsupported file type" which is misleading when the type IS
+			// valid but the browser can't decode the image data
+			reject(
+				new Error(
+					`Failed to load image "${file.name}" (${fileType}). The file may be corrupted or in a format your browser can't decode.`,
+				),
+			);
+		};
+
+		img.src = objectUrl;
+	});
+}
+
+/**
+ * Calculate dimensions maintaining aspect ratio
+ */
+function calculateDimensions(
+	width: number,
+	height: number,
+	maxDimension: number,
+): { width: number; height: number } {
+	if (width <= maxDimension && height <= maxDimension) {
+		return { width, height };
+	}
+
+	const ratio = Math.min(maxDimension / width, maxDimension / height);
+	return {
+		width: Math.round(width * ratio),
+		height: Math.round(height * ratio),
+	};
+}
+
+/**
+ * Get max dimension based on quality setting
+ * Higher quality = larger max dimension
+ */
+function getMaxDimensionForQuality(quality: number): number {
+	if (quality >= 90) return 4096;
+	if (quality >= 70) return 2560;
+	if (quality >= 50) return 1920;
+	if (quality >= 30) return 1280;
+	return 960;
+}
+
+/**
+ * Get adaptive effort level based on device capabilities
+ * Higher effort = better compression but slower encoding
+ *
+ * Mobile devices: effort 5 (faster, preserves battery)
+ * Desktop: effort 7 (balanced, stays under 3s target)
+ */
+function getAdaptiveEffort(): number {
+	// Detect mobile via user agent or screen size
+	const isMobile =
+		typeof navigator !== "undefined" &&
+		(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+			(typeof window !== "undefined" && window.innerWidth < 768));
+
+	// Mobile gets lower effort for battery/performance
+	if (isMobile) return 5;
+
+	// Cap at 7 to stay under 3s encoding target
+	return 7;
+}
+
+/**
+ * Convert canvas to WebP blob
+ */
+function canvasToWebP(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+	return new Promise((resolve, reject) => {
+		canvas.toBlob(
+			(blob) => {
+				if (blob) resolve(blob);
+				else reject(new Error("Failed to create WebP blob"));
+			},
+			"image/webp",
+			quality / 100,
+		);
+	});
+}
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+/** Output format for processed images */
+export type ImageFormat = "jxl" | "webp" | "gif" | "original";
+
+export interface ProcessedImageResult {
+	blob: Blob;
+	width: number;
+	height: number;
+	originalSize: number;
+	processedSize: number;
+	/** The format the image was encoded to */
+	format: ImageFormat;
+	/** True if processing was skipped (e.g., for GIFs) */
+	skipped?: boolean;
+	/** Reason for skipping or fallback */
+	reason?: string;
+}
+
+export interface ProcessImageOptions {
+	/** Quality 0-100 (default 80) */
+	quality?: number;
+	/**
+	 * Output format preference
+	 * - 'auto': Use JXL if supported, fall back to WebP
+	 * - 'jxl': Force JXL (falls back to WebP if not supported)
+	 * - 'webp': Force WebP
+	 * - 'original': Keep original format (only resizes, strips EXIF)
+	 */
+	format?: "auto" | "jxl" | "webp" | "original";
+	/** Skip resizing (default false) */
+	fullResolution?: boolean;
+	/**
+	 * @deprecated Use `format` instead. Kept for backward compatibility.
+	 * If true and format is not set, uses WebP. If false and format not set, keeps original.
+	 */
+	convertToWebP?: boolean;
+}
+
+// =============================================================================
+// MAIN PROCESSING FUNCTION
+// =============================================================================
+
+/**
+ * Process an image: convert to JXL/WebP, adjust quality, strip EXIF
+ *
+ * Privacy: Drawing to canvas automatically strips all EXIF data including GPS.
+ * The @jsquash/jxl encode() receives ImageData (pixel array), NOT the original
+ * file buffer, so EXIF metadata is NOT passed to the encoder.
+ */
+export async function processImage(
+	file: File,
+	options: ProcessImageOptions = {},
+): Promise<ProcessedImageResult> {
+	const {
+		quality = 80,
+		fullResolution = false,
+		convertToWebP = true, // Backward compat
+	} = options;
+
+	// Handle format option with backward compatibility
+	let formatPreference = options.format;
+	if (!formatPreference) {
+		// Backward compatibility: if convertToWebP is explicitly false, keep original
+		formatPreference = convertToWebP ? "auto" : "original";
+	}
+
+	// Convert HEIC/HEIF to JPEG before processing.
+	// Check both extension/MIME and magic bytes — iPad camera apps (e.g., Dazz Cam)
+	// sometimes save HEIF data with a .jpeg extension, so extension alone isn't reliable.
+	let alreadyConvertedFromHeic = false;
+	if (isHeicFile(file) || (await isHeifByMagicBytes(file))) {
+		file = await convertHeicToJpeg(file);
+		alreadyConvertedFromHeic = true;
+	}
+
+	// For GIFs, return original to preserve animation
+	if (file.type === "image/gif") {
+		return {
+			blob: file,
+			width: 0,
+			height: 0,
+			originalSize: file.size,
+			processedSize: file.size,
+			format: "gif",
+			skipped: true,
+			reason: "GIF preserved for animation",
+		};
+	}
+
+	// Try loading the image. If it fails and we haven't already tried HEIC
+	// conversion, attempt it as a last resort — catches rare HEIF variants
+	// whose brand isn't in our magic bytes list.
+	let img: HTMLImageElement;
+	try {
+		img = await loadImage(file);
+	} catch (loadError) {
+		if (!alreadyConvertedFromHeic) {
+			try {
+				file = await convertHeicToJpeg(file);
+				img = await loadImage(file);
+			} catch {
+				// HEIC conversion also failed — throw the original error
+				throw loadError;
+			}
+		} else {
+			throw loadError;
+		}
+	}
+	const originalSize = file.size;
+
+	// Calculate target dimensions
+	let targetWidth = img.naturalWidth;
+	let targetHeight = img.naturalHeight;
+
+	if (!fullResolution) {
+		const maxDim = getMaxDimensionForQuality(quality);
+		const dims = calculateDimensions(img.naturalWidth, img.naturalHeight, maxDim);
+		targetWidth = dims.width;
+		targetHeight = dims.height;
+	}
+
+	// Create canvas and draw image (this strips EXIF data)
+	const canvas = document.createElement("canvas");
+	canvas.width = targetWidth;
+	canvas.height = targetHeight;
+
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		throw new Error("Failed to get canvas 2d context");
+	}
+	ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+	// Handle original format (just resize/strip EXIF)
+	if (formatPreference === "original") {
+		const mimeType = file.type || "image/png";
+		const blob = await new Promise<Blob>((resolve, reject) => {
+			canvas.toBlob(
+				(b) => {
+					if (b) resolve(b);
+					else reject(new Error("Failed to create blob"));
+				},
+				mimeType,
+				quality / 100,
+			);
+		});
+
+		return {
+			blob,
+			width: targetWidth,
+			height: targetHeight,
+			originalSize,
+			processedSize: blob.size,
+			format: "original",
+		};
+	}
+
+	// Determine target format
+	let targetFormat: "jxl" | "webp" = "webp";
+
+	if (formatPreference === "jxl" || formatPreference === "auto") {
+		const canUseJxl = await supportsJxlEncoding();
+		if (canUseJxl) {
+			targetFormat = "jxl";
+		}
+	}
+
+	// Encode to target format
+	let blob: Blob;
+	let actualFormat: ImageFormat = targetFormat;
+
+	if (targetFormat === "jxl") {
+		try {
+			const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+			const effort = getAdaptiveEffort();
+
+			const { encode } = await getJxlEncoder();
+			const encoded = await encode(imageData, {
+				quality,
+				effort,
+				lossless: false,
+				progressive: true, // Better loading UX
+			});
+
+			blob = new Blob([encoded], { type: "image/jxl" });
+			actualFormat = "jxl";
+		} catch (error) {
+			// Fall back to WebP on JXL encoding failure
+			console.warn("JXL encoding failed, falling back to WebP:", error);
+			blob = await canvasToWebP(canvas, quality);
+			actualFormat = "webp";
+		}
+	} else {
+		// WebP via Canvas API
+		blob = await canvasToWebP(canvas, quality);
+		actualFormat = "webp";
+	}
+
+	return {
+		blob,
+		width: targetWidth,
+		height: targetHeight,
+		originalSize,
+		processedSize: blob.size,
+		format: actualFormat,
+		reason:
+			actualFormat !== targetFormat
+				? `Fallback from ${targetFormat} to ${actualFormat}`
+				: undefined,
+	};
+}
+
+// =============================================================================
+// THUMBNAIL + COLOR EXTRACTION
+// =============================================================================
+
+export interface ThumbnailOptions {
+	/** Maximum width in pixels (default 400) */
+	maxWidth?: number;
+	/** WebP quality 0-100 (default 60) */
+	quality?: number;
+}
+
+export interface ThumbnailResult {
+	blob: Blob;
+	width: number;
+	height: number;
+}
+
+/**
+ * Generate a small WebP thumbnail for grid display.
+ * Handles HEIC conversion and GIF first-frame extraction via canvas.
+ * Typical output: 15-40KB (vs 200-500KB+ for full image)
+ */
+export async function generateThumbnail(
+	file: File,
+	options: ThumbnailOptions = {},
+): Promise<ThumbnailResult> {
+	const { maxWidth = 400, quality = 60 } = options;
+
+	// Convert HEIC/HEIF before processing
+	if (isHeicFile(file) || (await isHeifByMagicBytes(file))) {
+		file = await convertHeicToJpeg(file);
+	}
+
+	const img = await loadImage(file);
+	const dims = calculateDimensions(img.naturalWidth, img.naturalHeight, maxWidth);
+
+	const canvas = document.createElement("canvas");
+	canvas.width = dims.width;
+	canvas.height = dims.height;
+
+	const ctx = canvas.getContext("2d");
+	if (!ctx) throw new Error("Failed to get canvas 2d context");
+	ctx.drawImage(img, 0, 0, dims.width, dims.height);
+
+	const blob = await canvasToWebP(canvas, quality);
+	return { blob, width: dims.width, height: dims.height };
+}
+
+/**
+ * Extract the dominant color from an image by averaging a 10×10 downscale.
+ * Returns a hex string like "#3a5c2f". Zero dependencies — just canvas math.
+ */
+export async function extractDominantColor(file: File): Promise<string> {
+	// Convert HEIC/HEIF before processing
+	if (isHeicFile(file) || (await isHeifByMagicBytes(file))) {
+		file = await convertHeicToJpeg(file);
+	}
+
+	const img = await loadImage(file);
+
+	const canvas = document.createElement("canvas");
+	const size = 10;
+	canvas.width = size;
+	canvas.height = size;
+
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return "#888888";
+	ctx.drawImage(img, 0, 0, size, size);
+
+	const imageData = ctx.getImageData(0, 0, size, size);
+	const data = imageData.data;
+	let r = 0,
+		g = 0,
+		b = 0;
+	const pixelCount = size * size;
+
+	for (let i = 0; i < data.length; i += 4) {
+		r += data[i];
+		g += data[i + 1];
+		b += data[i + 2];
+	}
+
+	r = Math.round(r / pixelCount);
+	g = Math.round(g / pixelCount);
+	b = Math.round(b / pixelCount);
+
+	return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+// =============================================================================
+// FILENAME UTILITIES
+// =============================================================================
+
+/**
+ * Generate a date-based path for organizing uploads
+ * Format: photos/YYYY/MM/DD/
+ */
+export function generateDatePath(): string {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `photos/${year}/${month}/${day}`;
+}
+
+/**
+ * Generate a clean filename from original name for image files
+ *
+ * @param originalName - Original filename
+ * @param format - Target format ('jxl', 'webp', or undefined to keep original extension)
+ */
+export function sanitizeImageFilename(originalName: string, format?: "jxl" | "webp"): string {
+	// Get base name without extension
+	const lastDot = originalName.lastIndexOf(".");
+	const baseName = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;
+	const originalExt = lastDot > 0 ? originalName.substring(lastDot + 1).toLowerCase() : "";
+
+	// Sanitize the base name
+	const sanitized = baseName
+		.toLowerCase()
+		.replace(/[^a-z0-9]/g, "-")
+		.replace(/-+/g, "-")
+		.replace(/^-|-$/g, "")
+		.substring(0, 100); // Limit length
+
+	// Add timestamp for uniqueness
+	const timestamp = Date.now().toString(36);
+
+	// Determine extension
+	let ext: string;
+	if (format) {
+		ext = format;
+	} else if (originalExt === "gif") {
+		ext = "gif"; // Preserve GIF extension
+	} else {
+		ext = "webp"; // Default fallback for legacy calls
+	}
+
+	return `${sanitized}-${timestamp}.${ext}`;
+}
+
+// =============================================================================
+// DISPLAY UTILITIES
+// =============================================================================
+
+// Re-export from SSOT for backwards compatibility
+export { formatBytes } from "../../utils/format.js";
+
+/**
+ * Calculate compression ratio
+ */
+export function compressionRatio(original: number, processed: number): string {
+	if (original <= 0) return "0%";
+	const saved = ((original - processed) / original) * 100;
+	return saved > 0 ? `-${saved.toFixed(0)}%` : `+${Math.abs(saved).toFixed(0)}%`;
+}
+
+/**
+ * Get human-readable format name
+ */
+export function formatName(format: ImageFormat): string {
+	switch (format) {
+		case "jxl":
+			return "JPEG XL";
+		case "webp":
+			return "WebP";
+		case "gif":
+			return "GIF";
+		case "original":
+			return "Original";
+		default:
+			return format;
+	}
+}

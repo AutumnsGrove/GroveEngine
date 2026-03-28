@@ -1,93 +1,35 @@
 /**
  * Comped Invites Admin Page Server (Landing)
  *
+ * Thin routing layer — delegates business logic to invite-service.ts.
  * Allows the Wayfinder to manage comped invites - pre-approving
  * users by email to skip payment and receive a free premium tier.
- * All changes are logged to the audit table for compliance.
  */
 
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { sendInviteEmail } from "$lib/server/invite-email";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { isWayfinder } from "@autumnsgrove/lattice/config";
-import { z } from "zod";
-
-interface CompedInvite {
-	id: string;
-	email: string;
-	tier: string;
-	invite_type: "comped" | "beta";
-	custom_message: string | null;
-	invited_by: string;
-	invite_token: string;
-	created_at: number;
-	used_at: number | null;
-	used_by_tenant_id: string | null;
-	email_sent_at: number | null;
-}
-
-interface AuditLogEntry {
-	id: string;
-	action: string;
-	invite_id: string;
-	email: string;
-	tier: string;
-	invite_type: "comped" | "beta";
-	actor_email: string;
-	notes: string | null;
-	created_at: number;
-}
-
-// Valid tiers for comped accounts
-const VALID_TIERS = ["seedling", "sapling", "oak", "evergreen"] as const;
-type CompedTier = (typeof VALID_TIERS)[number];
-
-// Valid invite types
-const VALID_INVITE_TYPES = ["comped", "beta"] as const;
-type InviteType = (typeof VALID_INVITE_TYPES)[number];
-
-// Basic email format check — real validation happens at send time via Zephyr
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const CreateInviteSchema = z.object({
-	email: z.string().toLowerCase().trim().min(1, "Please enter a valid email address"),
-	tier: z.enum(["seedling", "sapling", "oak", "evergreen"], {
-		error: "Please select a valid tier",
-	}),
-	invite_type: z.enum(["comped", "beta"]).optional().default("beta"),
-	custom_message: z.string().trim().optional().default(""),
-	notes: z.string().trim().optional().default(""),
-});
-
-const InviteIdSchema = z.object({
-	invite_id: z.string().min(1, "Invite ID is required"),
-	notes: z.string().trim().optional().default(""),
-});
-
-const PromoteSchema = z.object({
-	email: z.string().toLowerCase().trim().min(1, "Invalid email address"),
-	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
-	custom_message: z.string().trim().optional().default(""),
-});
-
-const PromoteAllSchema = z.object({
-	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
-	custom_message: z.string().trim().optional().default(""),
-});
-
-interface EligibleSubscriber {
-	id: number;
-	email: string;
-	name: string | null;
-	created_at: string;
-	source: string;
-}
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
+import {
+	VALID_TIERS,
+	VALID_INVITE_TYPES,
+	CreateInviteSchema,
+	InviteIdSchema,
+	PromoteSchema,
+	PromoteAllSchema,
+} from "./schemas";
+import {
+	loadInviteData,
+	createInvite,
+	resendInvite,
+	revokeInvite,
+	promoteSubscriber,
+	bulkPromoteSubscribers,
+} from "./invite-service";
 
 export const load: PageServerLoad = async ({ parent, platform, url }) => {
 	const { isWayfinder, user } = await parent();
 
-	// Only Wayfinder can access this page
 	if (!isWayfinder) {
 		throw error(403, "Access denied. This page is for the Wayfinder only.");
 	}
@@ -96,121 +38,24 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
 		throw error(500, "Database not available");
 	}
 
-	const { DB } = platform.env;
-
-	// Pagination
 	const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
 	const pageSize = 50;
-	const offset = (page - 1) * pageSize;
-
-	// Filter
+	const search = url.searchParams.get("search") || "";
 	const statusFilter = url.searchParams.get("status") || "";
 	const typeFilter = url.searchParams.get("type") || "";
-	const search = url.searchParams.get("search") || "";
 
 	try {
-		// Build query with optional filters
-		let query = "SELECT * FROM comped_invites";
-		const params: (string | number)[] = [];
-		const conditions: string[] = [];
-
-		if (search) {
-			conditions.push("email LIKE ?");
-			params.push(`%${search}%`);
-		}
-
-		if (statusFilter === "used") {
-			conditions.push("used_at IS NOT NULL");
-		} else if (statusFilter === "pending") {
-			conditions.push("used_at IS NULL");
-		}
-
-		if (typeFilter === "comped" || typeFilter === "beta") {
-			conditions.push("invite_type = ?");
-			params.push(typeFilter);
-		}
-
-		if (conditions.length > 0) {
-			query += " WHERE " + conditions.join(" AND ");
-		}
-
-		query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-		params.push(pageSize, offset);
-
-		// Build count query
-		let countQuery = "SELECT COUNT(*) as count FROM comped_invites";
-		const countParams: string[] = [];
-		if (conditions.length > 0) {
-			countQuery += " WHERE " + conditions.join(" AND ");
-			if (search) countParams.push(`%${search}%`);
-			if (typeFilter === "comped" || typeFilter === "beta") countParams.push(typeFilter);
-		}
-
-		// Run all queries in parallel
-		const [invitesResult, countResult, auditResult, statsResult, eligibleResult] =
-			await Promise.all([
-				DB.prepare(query)
-					.bind(...params)
-					.all<CompedInvite>(),
-				DB.prepare(countQuery)
-					.bind(...countParams)
-					.first<{ count: number }>(),
-				DB.prepare(
-					`SELECT * FROM comped_invites_audit ORDER BY created_at DESC LIMIT 20`,
-				).all<AuditLogEntry>(),
-				DB.prepare(
-					`SELECT
-             COUNT(*) as total,
-             COUNT(CASE WHEN used_at IS NOT NULL THEN 1 END) as used,
-             COUNT(CASE WHEN used_at IS NULL THEN 1 END) as pending,
-             COUNT(CASE WHEN invite_type = 'beta' THEN 1 END) as beta,
-             COUNT(CASE WHEN invite_type = 'comped' THEN 1 END) as comped
-           FROM comped_invites`,
-				).first<{
-					total: number;
-					used: number;
-					pending: number;
-					beta: number;
-					comped: number;
-				}>(),
-				// Find email subscribers who are eligible for beta promotion:
-				// - Active (not unsubscribed)
-				// - Don't already have a comped_invites entry
-				// - Don't already have a tenants entry (not already a Grove user)
-				DB.prepare(
-					`SELECT es.id, es.email, es.name, es.created_at, es.source
-           FROM email_signups es
-           LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
-           LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
-           WHERE es.unsubscribed_at IS NULL
-             AND ci.id IS NULL
-             AND t.id IS NULL
-           ORDER BY es.created_at DESC`,
-				).all<EligibleSubscriber>(),
-			]);
+		const data = await loadInviteData(platform.env.DB, {
+			page,
+			pageSize,
+			search,
+			statusFilter,
+			typeFilter,
+		});
 
 		return {
-			invites: invitesResult.results || [],
-			auditLog: auditResult.results || [],
-			eligibleSubscribers: eligibleResult.results || [],
-			stats: {
-				total: statsResult?.total || 0,
-				used: statsResult?.used || 0,
-				pending: statsResult?.pending || 0,
-				beta: statsResult?.beta || 0,
-				comped: statsResult?.comped || 0,
-			},
-			pagination: {
-				page,
-				pageSize,
-				total: countResult?.count || 0,
-				totalPages: Math.ceil((countResult?.count || 0) / pageSize),
-			},
-			filters: {
-				search,
-				status: statusFilter,
-				type: typeFilter,
-			},
+			...data,
+			filters: { search, status: statusFilter, type: typeFilter },
 			validTiers: VALID_TIERS,
 			validInviteTypes: VALID_INVITE_TYPES,
 		};
@@ -222,589 +67,176 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
 
 export const actions: Actions = {
 	create: async ({ request, locals, platform }) => {
-		// Actions can't use parent() - must check locals directly
 		const user = locals.user;
-		if (!user) {
-			return fail(403, { error: "Not authenticated" });
-		}
-		const isWayfinderCheck = isWayfinder(user.email);
-		if (!isWayfinderCheck) {
-			return fail(403, { error: "Access denied" });
-		}
+		if (!user) return fail(403, { error: "Not authenticated" });
+		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
+		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
 
-		if (!platform?.env?.DB) {
-			return fail(500, { error: "Database not available" });
-		}
-
-		const { DB } = platform.env;
 		const formData = await request.formData();
 		const result = parseFormData(formData, CreateInviteSchema);
 		if (!result.success) {
 			const firstError = Object.values(result.errors).flat()[0];
 			return fail(400, { error: firstError || "Invalid form data" });
 		}
-		const { email, tier } = result.data;
-		const inviteType = result.data.invite_type;
-		const customMessage = result.data.custom_message || null;
-		const notes = result.data.notes || null;
 
-		if (!EMAIL_RE.test(email)) {
-			return fail(400, { error: "Please enter a valid email address" });
+		const serviceResult = await createInvite(
+			platform.env.DB,
+			{
+				email: result.data.email,
+				tier: result.data.tier,
+				inviteType: result.data.invite_type,
+				customMessage: result.data.custom_message || null,
+				notes: result.data.notes || null,
+				actorEmail: user.email,
+			},
+			{
+				ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
+				RESEND_API_KEY: platform.env.RESEND_API_KEY,
+				ZEPHYR_URL: platform.env.ZEPHYR_URL,
+				ZEPHYR: platform.env.ZEPHYR,
+			},
+		);
+
+		if (!serviceResult.success) {
+			return fail(serviceResult.status || 400, { error: serviceResult.error });
 		}
 
-		let step = "check-existing";
-		try {
-			const existing = await DB.prepare("SELECT id, used_at FROM comped_invites WHERE email = ?")
-				.bind(email)
-				.first<{ id: string; used_at: number | null }>();
-
-			if (existing) {
-				if (existing.used_at) {
-					return fail(400, {
-						error: `${email} has already used their comped invite`,
-					});
-				}
-				return fail(400, {
-					error: `${email} already has a pending comped invite`,
-				});
-			}
-
-			step = "check-tenant";
-			const existingTenant = await DB.prepare(`SELECT subdomain FROM tenants WHERE email = ?`)
-				.bind(email)
-				.first<{ subdomain: string }>();
-
-			if (existingTenant) {
-				return fail(400, {
-					error: `${email} is already a Grove user (${existingTenant.subdomain}.grove.place)`,
-				});
-			}
-
-			step = "insert-invite";
-			const inviteId = crypto.randomUUID();
-			const inviteToken = crypto.randomUUID();
-			await DB.prepare(
-				`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())`,
-			)
-				.bind(inviteId, email, tier, inviteType, customMessage, user.email, inviteToken)
-				.run();
-
-			step = "insert-audit";
-			const auditId = crypto.randomUUID();
-			await DB.prepare(
-				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-         VALUES (?, 'create', ?, ?, ?, ?, ?, ?, unixepoch())`,
-			)
-				.bind(auditId, inviteId, email, tier, inviteType, user.email, notes)
-				.run();
-
-			// Send the invite email via Zephyr
-			step = "send-email";
-			const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
-			let emailStatus: "sent" | "failed" | "not-configured" = "not-configured";
-			let emailError: string | undefined;
-
-			if (zephyrApiKey) {
-				const emailResult = await sendInviteEmail({
-					email,
-					tier,
-					inviteType,
-					customMessage,
-					inviteToken,
-					invitedBy: user.email,
-					zephyrApiKey,
-					zephyrUrl: platform?.env?.ZEPHYR_URL,
-					zephyrBinding: platform?.env?.ZEPHYR,
-				});
-
-				if (emailResult.success) {
-					emailStatus = "sent";
-					await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-						.bind(inviteId)
-						.run();
-				} else {
-					emailStatus = "failed";
-					emailError = emailResult.error;
-					console.error(`[Comped Invites] Email send failed for ${email}:`, emailResult.error);
-				}
-			} else {
-				console.warn(
-					"[Comped Invites] No ZEPHYR_API_KEY configured — invite created but email not sent",
-				);
-			}
-
-			const typeLabel = inviteType === "beta" ? "beta" : "comped";
-			return {
-				success: true,
-				emailStatus,
-				emailError,
-				message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
-			};
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unknown database error";
-			console.error(`[Comped Invites] Error at step "${step}":`, message, err);
-			// Surface D1 error details to admin for debugging
-			return fail(500, {
-				error: `Failed to create comped invite (${step}): ${message}`,
-			});
-		}
+		return {
+			success: true,
+			emailStatus: serviceResult.emailStatus,
+			emailError: serviceResult.emailError,
+			message: serviceResult.message,
+		};
 	},
 
 	resend: async ({ request, locals, platform }) => {
 		const user = locals.user;
-		if (!user) {
-			return fail(403, { error: "Not authenticated" });
-		}
-		if (!isWayfinder(user.email)) {
-			return fail(403, { error: "Access denied" });
-		}
+		if (!user) return fail(403, { error: "Not authenticated" });
+		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
+		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
 
-		if (!platform?.env?.DB) {
-			return fail(500, { error: "Database not available" });
-		}
-
-		const { DB } = platform.env;
 		const formData = await request.formData();
 		const result = parseFormData(formData, InviteIdSchema);
-		if (!result.success) {
-			return fail(400, { error: "Invite ID is required" });
+		if (!result.success) return fail(400, { error: "Invite ID is required" });
+
+		const serviceResult = await resendInvite(platform.env.DB, result.data.invite_id, user.email, {
+			ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
+			RESEND_API_KEY: platform.env.RESEND_API_KEY,
+			ZEPHYR_URL: platform.env.ZEPHYR_URL,
+			ZEPHYR: platform.env.ZEPHYR,
+		});
+
+		if (!serviceResult.success) {
+			return fail(serviceResult.status || 500, { error: serviceResult.error });
 		}
-		const inviteId = result.data.invite_id;
 
-		try {
-			const invite = await DB.prepare(
-				"SELECT id, email, tier, invite_type, custom_message, invited_by, invite_token, used_at FROM comped_invites WHERE id = ?",
-			)
-				.bind(inviteId)
-				.first<CompedInvite>();
-
-			if (!invite) {
-				return fail(404, { error: "Invite not found" });
-			}
-
-			if (invite.used_at) {
-				return fail(400, {
-					error: "Cannot resend — this invite has already been used",
-				});
-			}
-
-			if (!invite.invite_token) {
-				return fail(400, {
-					error: "Invite has no token — it may need to be recreated",
-				});
-			}
-
-			const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
-
-			if (!zephyrApiKey) {
-				return fail(500, {
-					error: "No email API key configured — cannot send email",
-				});
-			}
-
-			const emailResult = await sendInviteEmail({
-				email: invite.email,
-				tier: invite.tier,
-				inviteType: invite.invite_type,
-				customMessage: invite.custom_message,
-				inviteToken: invite.invite_token,
-				invitedBy: invite.invited_by,
-				zephyrApiKey,
-				zephyrUrl: platform?.env?.ZEPHYR_URL,
-				zephyrBinding: platform?.env?.ZEPHYR,
-			});
-
-			if (emailResult.success) {
-				await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-					.bind(inviteId)
-					.run();
-
-				// Audit the resend
-				await DB.prepare(
-					`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-           VALUES (?, 'resend', ?, ?, ?, ?, ?, 'Email resent', unixepoch())`,
-				)
-					.bind(
-						crypto.randomUUID(),
-						inviteId,
-						invite.email,
-						invite.tier,
-						invite.invite_type,
-						user.email,
-					)
-					.run();
-
-				return {
-					success: true,
-					emailStatus: "sent" as const,
-					message: `Resent invite email to ${invite.email}`,
-				};
-			} else {
-				console.error(`[Comped Invites] Resend failed for ${invite.email}:`, emailResult.error);
-				return {
-					success: true,
-					emailStatus: "failed" as const,
-					emailError: emailResult.error,
-					message: `Resend attempted for ${invite.email}, but email delivery failed`,
-				};
-			}
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unknown error";
-			console.error("[Comped Invites] Error resending invite:", message, err);
-			return fail(500, {
-				error: `Failed to resend invite email: ${message}`,
-			});
-		}
+		return {
+			success: true,
+			emailStatus: serviceResult.emailStatus,
+			emailError: serviceResult.emailError,
+			message: serviceResult.message,
+		};
 	},
 
 	revoke: async ({ request, locals, platform }) => {
-		// Actions can't use parent() - must check locals directly
 		const user = locals.user;
-		if (!user) {
-			return fail(403, { error: "Not authenticated" });
-		}
-		const isWayfinderCheck = isWayfinder(user.email);
-		if (!isWayfinderCheck) {
-			return fail(403, { error: "Access denied" });
-		}
+		if (!user) return fail(403, { error: "Not authenticated" });
+		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
+		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
 
-		if (!platform?.env?.DB) {
-			return fail(500, { error: "Database not available" });
-		}
-
-		const { DB } = platform.env;
 		const formData = await request.formData();
 		const result = parseFormData(formData, InviteIdSchema);
-		if (!result.success) {
-			return fail(400, { error: "Invite ID is required" });
+		if (!result.success) return fail(400, { error: "Invite ID is required" });
+
+		const serviceResult = await revokeInvite(
+			platform.env.DB,
+			result.data.invite_id,
+			result.data.notes || null,
+			user.email,
+		);
+
+		if (!serviceResult.success) {
+			return fail(serviceResult.status || 500, { error: serviceResult.error });
 		}
-		const inviteId = result.data.invite_id;
-		const notes = result.data.notes || null;
 
-		try {
-			const invite = await DB.prepare(
-				"SELECT id, email, tier, invite_type, used_at FROM comped_invites WHERE id = ?",
-			)
-				.bind(inviteId)
-				.first<CompedInvite>();
-
-			if (!invite) {
-				return fail(404, { error: "Invite not found" });
-			}
-
-			if (invite.used_at) {
-				return fail(400, {
-					error: "Cannot revoke an invite that has already been used",
-				});
-			}
-
-			await DB.prepare("DELETE FROM comped_invites WHERE id = ?").bind(inviteId).run();
-
-			const auditId = crypto.randomUUID();
-			await DB.prepare(
-				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-         VALUES (?, 'revoke', ?, ?, ?, ?, ?, ?, unixepoch())`,
-			)
-				.bind(auditId, inviteId, invite.email, invite.tier, invite.invite_type, user.email, notes)
-				.run();
-
-			return {
-				success: true,
-				message: `Revoked comped invite for ${invite.email}`,
-			};
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unknown database error";
-			console.error("[Comped Invites] Error revoking invite:", message, err);
-			return fail(500, {
-				error: `Failed to revoke comped invite: ${message}`,
-			});
-		}
+		return { success: true, message: serviceResult.message };
 	},
 
 	promote: async ({ request, locals, platform }) => {
 		const user = locals.user;
-		if (!user) {
-			return fail(403, { error: "Not authenticated" });
-		}
-		const isWayfinderCheck = isWayfinder(user.email);
-		if (!isWayfinderCheck) {
-			return fail(403, { error: "Access denied" });
-		}
+		if (!user) return fail(403, { error: "Not authenticated" });
+		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
+		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
 
-		if (!platform?.env?.DB) {
-			return fail(500, { error: "Database not available" });
-		}
-
-		const { DB } = platform.env;
 		const formData = await request.formData();
 		const result = parseFormData(formData, PromoteSchema);
 		if (!result.success) {
 			const firstError = Object.values(result.errors).flat()[0];
 			return fail(400, { error: firstError || "Invalid form data" });
 		}
-		const { email, tier } = result.data;
-		const customMessage = result.data.custom_message || null;
 
-		if (!EMAIL_RE.test(email)) {
-			return fail(400, { error: "Invalid email address" });
+		const serviceResult = await promoteSubscriber(
+			platform.env.DB,
+			{
+				email: result.data.email,
+				tier: result.data.tier,
+				customMessage: result.data.custom_message || null,
+				actorEmail: user.email,
+			},
+			{
+				ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
+				RESEND_API_KEY: platform.env.RESEND_API_KEY,
+				ZEPHYR_URL: platform.env.ZEPHYR_URL,
+				ZEPHYR: platform.env.ZEPHYR,
+			},
+		);
+
+		if (!serviceResult.success) {
+			return fail(serviceResult.status || 400, { error: serviceResult.error });
 		}
 
-		let step = "check-subscriber";
-		try {
-			// Verify subscriber exists in email list
-			const subscriber = await DB.prepare(
-				"SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
-			)
-				.bind(email)
-				.first<{ id: number; email: string }>();
-
-			if (!subscriber) {
-				return fail(400, {
-					error: `${email} is not an active email subscriber`,
-				});
-			}
-
-			// Check they don't already have an invite
-			step = "check-existing";
-			const existing = await DB.prepare(
-				"SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
-			)
-				.bind(email)
-				.first<{ id: string; used_at: number | null }>();
-
-			if (existing) {
-				if (existing.used_at) {
-					return fail(400, {
-						error: `${email} has already used their invite`,
-					});
-				}
-				return fail(400, {
-					error: `${email} already has a pending invite`,
-				});
-			}
-
-			// Check they're not already a Grove user
-			step = "check-tenant";
-			const existingTenant = await DB.prepare(
-				"SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
-			)
-				.bind(email)
-				.first<{ subdomain: string }>();
-
-			if (existingTenant) {
-				return fail(400, {
-					error: `${email} is already a Grove user (${existingTenant.subdomain}.grove.place)`,
-				});
-			}
-
-			// Create the beta invite
-			step = "insert-invite";
-			const inviteId = crypto.randomUUID();
-			const inviteToken = crypto.randomUUID();
-			await DB.prepare(
-				`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
-         VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-			)
-				.bind(inviteId, email, tier, customMessage, user.email, inviteToken)
-				.run();
-
-			// Audit log
-			step = "insert-audit";
-			await DB.prepare(
-				`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-         VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Promoted from email list', unixepoch())`,
-			)
-				.bind(crypto.randomUUID(), inviteId, email, tier, user.email)
-				.run();
-
-			// Send the invite email
-			step = "send-email";
-			const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
-			let emailStatus: "sent" | "failed" | "not-configured" = "not-configured";
-			let emailError: string | undefined;
-
-			if (zephyrApiKey) {
-				const emailResult = await sendInviteEmail({
-					email,
-					tier,
-					inviteType: "beta",
-					customMessage,
-					inviteToken,
-					invitedBy: user.email,
-					zephyrApiKey,
-					zephyrUrl: platform?.env?.ZEPHYR_URL,
-					zephyrBinding: platform?.env?.ZEPHYR,
-				});
-
-				if (emailResult.success) {
-					emailStatus = "sent";
-					await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-						.bind(inviteId)
-						.run();
-				} else {
-					emailStatus = "failed";
-					emailError = emailResult.error;
-					console.error(`[Comped Invites] Promote email failed for ${email}:`, emailResult.error);
-				}
-			}
-
-			return {
-				success: true,
-				emailStatus,
-				emailError,
-				message: `Promoted ${email} to beta (${tier} tier)`,
-			};
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unknown database error";
-			console.error(`[Comped Invites] Error promoting subscriber at step "${step}":`, message, err);
-			return fail(500, {
-				error: `Failed to promote subscriber (${step}): ${message}`,
-			});
-		}
+		return {
+			success: true,
+			emailStatus: serviceResult.emailStatus,
+			emailError: serviceResult.emailError,
+			message: serviceResult.message,
+		};
 	},
 
 	promote_all: async ({ request, locals, platform }) => {
 		const user = locals.user;
-		if (!user) {
-			return fail(403, { error: "Not authenticated" });
-		}
-		const isWayfinderCheck = isWayfinder(user.email);
-		if (!isWayfinderCheck) {
-			return fail(403, { error: "Access denied" });
-		}
+		if (!user) return fail(403, { error: "Not authenticated" });
+		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
+		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
 
-		if (!platform?.env?.DB) {
-			return fail(500, { error: "Database not available" });
-		}
-
-		const { DB } = platform.env;
 		const formData = await request.formData();
 		const result = parseFormData(formData, PromoteAllSchema);
-		if (!result.success) {
-			return fail(400, { error: "Please select a valid tier" });
+		if (!result.success) return fail(400, { error: "Please select a valid tier" });
+
+		const serviceResult = await bulkPromoteSubscribers(
+			platform.env.DB,
+			{
+				tier: result.data.tier,
+				customMessage: result.data.custom_message || null,
+				actorEmail: user.email,
+			},
+			{
+				ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
+				RESEND_API_KEY: platform.env.RESEND_API_KEY,
+				ZEPHYR_URL: platform.env.ZEPHYR_URL,
+				ZEPHYR: platform.env.ZEPHYR,
+			},
+		);
+
+		if (!serviceResult.success) {
+			return fail(serviceResult.status || 500, { error: serviceResult.error });
 		}
-		const { tier } = result.data;
-		const customMessage = result.data.custom_message || null;
 
-		// Cap batch size to avoid worker timeout (4 async ops per subscriber)
-		const BATCH_LIMIT = 50;
-
-		try {
-			// Find eligible subscribers (capped to avoid worker timeout)
-			const eligible = await DB.prepare(
-				`SELECT es.id, es.email
-         FROM email_signups es
-         LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
-         LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
-         WHERE es.unsubscribed_at IS NULL
-           AND ci.id IS NULL
-           AND t.id IS NULL
-         ORDER BY es.created_at ASC
-         LIMIT ?`,
-			)
-				.bind(BATCH_LIMIT)
-				.all<{ id: number; email: string }>();
-
-			const subscribers = eligible.results || [];
-			if (subscribers.length === 0) {
-				return fail(400, {
-					error: "No eligible subscribers to promote",
-				});
-			}
-
-			const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
-
-			let promoted = 0;
-			let emailsSent = 0;
-			let emailsFailed = 0;
-			const errors: string[] = [];
-
-			for (const sub of subscribers) {
-				const inviteId = crypto.randomUUID();
-				const inviteToken = crypto.randomUUID();
-
-				try {
-					// Create the invite (OR IGNORE handles race if already promoted)
-					const insertResult = await DB.prepare(
-						`INSERT OR IGNORE INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
-             VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-					)
-						.bind(inviteId, sub.email, tier, customMessage, user.email, inviteToken)
-						.run();
-
-					// Skip if already promoted by a concurrent request
-					if (insertResult.meta.changes === 0) {
-						continue;
-					}
-
-					// Audit log
-					await DB.prepare(
-						`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-             VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Bulk promoted from email list', unixepoch())`,
-					)
-						.bind(crypto.randomUUID(), inviteId, sub.email, tier, user.email)
-						.run();
-
-					promoted++;
-
-					// Send the invite email
-					if (zephyrApiKey) {
-						const emailResult = await sendInviteEmail({
-							email: sub.email,
-							tier,
-							inviteType: "beta",
-							customMessage,
-							inviteToken,
-							invitedBy: user.email,
-							zephyrApiKey,
-							zephyrUrl: platform?.env?.ZEPHYR_URL,
-							zephyrBinding: platform?.env?.ZEPHYR,
-						});
-
-						if (emailResult.success) {
-							emailsSent++;
-							await DB.prepare(`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`)
-								.bind(inviteId)
-								.run();
-						} else {
-							emailsFailed++;
-							console.error(
-								`[Comped Invites] Bulk email failed for ${sub.email}:`,
-								emailResult.error,
-							);
-						}
-					}
-				} catch (err) {
-					const message = err instanceof Error ? err.message : "Unknown error";
-					errors.push(`${sub.email}: ${message}`);
-					console.error(`[Comped Invites] Bulk promote error for ${sub.email}:`, message);
-				}
-			}
-
-			const emailNote = zephyrApiKey
-				? ` (${emailsSent} emails sent${emailsFailed > 0 ? `, ${emailsFailed} failed` : ""})`
-				: " (no email API key configured — emails not sent)";
-
-			const errorNote = errors.length > 0 ? ` (${errors.length} failed)` : "";
-
-			return {
-				success: true,
-				emailStatus:
-					emailsFailed > 0
-						? ("partial" as const)
-						: emailsSent > 0
-							? ("sent" as const)
-							: ("not-configured" as const),
-				message: `Promoted ${promoted} of ${subscribers.length} subscribers to beta (${tier} tier)${errorNote}${emailNote}`,
-				promoteErrors: errors.length > 0 ? errors : undefined,
-			};
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unknown database error";
-			console.error("[Comped Invites] Error in bulk promote:", message, err);
-			return fail(500, {
-				error: `Failed to bulk promote subscribers: ${message}`,
-			});
-		}
+		return {
+			success: true,
+			emailStatus: serviceResult.emailStatus,
+			message: serviceResult.message,
+			promoteErrors: serviceResult.promoteErrors,
+		};
 	},
 };

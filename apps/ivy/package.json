@@ -19,6 +19,7 @@
 		"db:migrate:local": "wrangler d1 migrations apply ivy-db --local"
 	},
 	"devDependencies": {
+		"@autumnsgrove/infra": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",

@@ -33,7 +33,7 @@ vi.mock("@autumnsgrove/lattice/firefly", () => ({
 	createWardenProvider: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/warden", () => ({
+vi.mock("@autumnsgrove/lattice/auth/warden", () => ({
 	createWardenClient: vi.fn(),
 }));
 

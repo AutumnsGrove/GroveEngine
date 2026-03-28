@@ -3,8 +3,10 @@
  * Re-exports all shared chrome/navigation components from the engine package
  */
 
-// Classic chrome (full-size header/footer from components/chrome)
-export { Header, Footer, MobileMenu } from "../../../components/chrome/index.js";
+// Classic chrome (full-size header/footer — now local)
+export { default as Header } from "./Header.svelte";
+export { default as Footer } from "./Footer.svelte";
+export { default as MobileMenu } from "./MobileMenu.svelte";
 
 export { default as ThemeToggle } from "./ThemeToggle.svelte";
 export { default as HeaderMinimal } from "./HeaderMinimal.svelte";

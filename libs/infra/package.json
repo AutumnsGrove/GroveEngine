@@ -24,6 +24,18 @@
 		"./testing": {
 			"types": "./src/testing/index.ts",
 			"default": "./src/testing/index.ts"
+		},
+		"./response": {
+			"types": "./src/response.ts",
+			"default": "./src/response.ts"
+		},
+		"./middleware": {
+			"types": "./src/middleware/auth.ts",
+			"default": "./src/middleware/auth.ts"
+		},
+		"./vite": {
+			"types": "./src/vite/grove-vite-config.ts",
+			"default": "./src/vite/grove-vite-config.ts"
 		}
 	},
 	"files": [
@@ -35,11 +47,14 @@
 		"test:run": "vitest run"
 	},
 	"dependencies": {
-		"@autumnsgrove/lattice": "workspace:*"
+		"@autumnsgrove/lattice": "workspace:*",
+		"hono": "^4.11.9"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",
+		"@sveltejs/kit": "^2.50.2",
 		"typescript": "^5.9.3",
+		"vite": "^7.3.1",
 		"vitest": "^4.1.0"
 	},
 	"keywords": [

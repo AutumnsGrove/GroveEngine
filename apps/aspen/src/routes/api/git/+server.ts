@@ -8,12 +8,12 @@ import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { DEFAULT_GIT_CONFIG, isValidUsername, CLEAR_TOKEN_VALUE } from "@autumnsgrove/lattice/git";
 import { queryOne, execute } from "@autumnsgrove/lattice/server/services/database";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import {
 	thresholdCheckWithResult,
 	thresholdCheck,
 	thresholdHeaders,
-} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+} from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { encryptToken } from "@autumnsgrove/lattice/server/encryption";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

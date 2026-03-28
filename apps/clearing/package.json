@@ -16,6 +16,7 @@
 		"test:run": "vitest run"
 	},
 	"devDependencies": {
+		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"esbuild": "^0.25.0",

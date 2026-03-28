@@ -6,7 +6,7 @@
  */
 
 import { Hono } from "hono";
-import { ATMOSPHERE_MANIFOLD } from "@autumnsgrove/lattice/reverie";
+import { ATMOSPHERE_MANIFOLD } from "@autumnsgrove/lattice/ai/reverie";
 import type { Env, ReverieVariables, ReverieResponse } from "../types";
 
 const atmospheres = new Hono<{ Bindings: Env; Variables: ReverieVariables }>();

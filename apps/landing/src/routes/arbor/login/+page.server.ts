@@ -15,15 +15,15 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
-import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
+import { buildLoginUrl } from "@autumnsgrove/lattice/auth/login";
 
 export const load: PageServerLoad = async ({ url }) => {
-  // Where the user wants to go after auth (e.g., /arbor)
-  const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/arbor");
+	// Where the user wants to go after auth (e.g., /arbor)
+	const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/arbor");
 
-  // Build the callback URL that login.grove.place will redirect back to
-  const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+	// Build the callback URL that login.grove.place will redirect back to
+	const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
 
-  // Redirect to the login hub with the callback URL
-  throw redirect(302, buildLoginUrl(callbackUrl));
+	// Redirect to the login hub with the callback URL
+	throw redirect(302, buildLoginUrl(callbackUrl));
 };

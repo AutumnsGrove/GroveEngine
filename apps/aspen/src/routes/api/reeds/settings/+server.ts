@@ -10,7 +10,7 @@ import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import {
 	getCommentSettings,
 	upsertCommentSettings,

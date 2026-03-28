@@ -6,12 +6,12 @@
 import { json } from "@sveltejs/kit";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isPaidTier } from "@autumnsgrove/lattice/config/tiers";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isPaidTier } from "@autumnsgrove/lattice/platform/config/tiers";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import {
 	getApprovedComments,
 	getCommentSettings,

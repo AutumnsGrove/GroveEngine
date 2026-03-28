@@ -2,6 +2,7 @@
 	import type { StorageFile } from "$types";
 	import FileList from "./FileList.svelte";
 	import Icon from "./Icons.svelte";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 	interface Props {
 		files: StorageFile[];
@@ -13,14 +14,6 @@
 	}
 
 	let { files, totalSize, onRestore, onDelete, onEmptyTrash, loading = false }: Props = $props();
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-	}
 
 	let confirmEmpty = $state(false);
 </script>

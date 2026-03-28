@@ -6,7 +6,6 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { api } from "@autumnsgrove/lattice/utils/api";
 	import {
 		metricIcons,
 		chromeIcons,
@@ -29,11 +28,12 @@
 	const CheckCircle2 = stateIcons.checkCircle2;
 	const Eye = stateIcons.eye;
 	const EyeOff = stateIcons.eyeOff;
-	const History = metricIcons.history;
 	const Loader2 = stateIcons.loader;
-	const Sparkles = phaseIcons.sparkles;
-	const XCircle = stateIcons.xCircle;
 	const ArrowRight = navIcons.arrowRight;
+
+	import { saveTokenIndividually as saveTokenApi } from "./timeline-api";
+	import TimelineBackfillSection from "./TimelineBackfillSection.svelte";
+	import TimelineGenerateSection from "./TimelineGenerateSection.svelte";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -104,224 +104,10 @@
 	// Check if using custom voice
 	const isCustomVoice = $derived(voicePreset === "custom");
 
-	// Backfill state
-	let backfillStartDate = $state("");
-	let backfillEndDate = $state("");
-	let backfillRepoLimit = $state(10);
-	let isBackfilling = $state(false);
-	let backfillResult = $state<{ success: boolean; message: string; stats?: any } | null>(null);
 
-	// Generate summaries state
-	let generateStartDate = $state("");
-	let generateEndDate = $state("");
-	let isGenerating = $state(false);
-	let generateCancelled = $state(false);
-	let generateProgress = $state<{
-		current: number;
-		total: number;
-		currentDate: string;
-		completed: string[];
-		skipped: string[];
-		failed: Array<{ date: string; error: string }>;
-		totalCost: number;
-	} | null>(null);
-	let generateResult = $state<{ success: boolean; message: string } | null>(null);
-
-	async function startBackfill() {
-		if (!backfillStartDate) {
-			toast.error("Start date required", { description: "Pick how far back to go." });
-			return;
-		}
-
-		isBackfilling = true;
-		backfillResult = null;
-
-		try {
-			const result = await api.post<Record<string, unknown>>("/api/curios/timeline/backfill", {
-				startDate: backfillStartDate,
-				endDate: backfillEndDate || undefined,
-				repoLimit: backfillRepoLimit,
-			});
-
-			backfillResult = {
-				success: true,
-				message: (result?.message as string) || "Backfill complete",
-				stats: result?.stats,
-			};
-			toast.success("Backfill complete!", {
-				description: backfillResult.message,
-			});
-		} catch (err) {
-			const errorMsg = err instanceof Error ? err.message : "Backfill failed";
-			backfillResult = { success: false, message: errorMsg };
-			toast.error("Backfill failed", { description: errorMsg });
-		} finally {
-			isBackfilling = false;
-		}
-	}
-
-	/**
-	 * Generate AI summaries for a date range.
-	 * Calls the generate endpoint for each day sequentially so that
-	 * long-horizon context can build up across consecutive days.
-	 */
-	async function generateSummaries() {
-		if (!generateStartDate) {
-			toast.error("Start date required", { description: "Pick the first date to generate." });
-			return;
-		}
-
-		isGenerating = true;
-		generateCancelled = false;
-		generateResult = null;
-
-		const start = new Date(generateStartDate + "T00:00:00");
-		const end = generateEndDate
-			? new Date(generateEndDate + "T00:00:00")
-			: new Date(new Date().toISOString().split("T")[0] + "T00:00:00");
-
-		// Build array of dates
-		const dates: string[] = [];
-		const current = new Date(start);
-		while (current <= end) {
-			dates.push(current.toISOString().split("T")[0]);
-			current.setDate(current.getDate() + 1);
-		}
-
-		generateProgress = {
-			current: 0,
-			total: dates.length,
-			currentDate: "",
-			completed: [],
-			skipped: [],
-			failed: [],
-			totalCost: 0,
-		};
-
-		// Track the first error to show a clear message if all dates fail for the same reason
-		let firstError: string | null = null;
-
-		for (const date of dates) {
-			if (generateCancelled) break;
-
-			generateProgress = {
-				...generateProgress!,
-				current: generateProgress!.current + 1,
-				currentDate: date,
-			};
-
-			try {
-				const response = await fetch("/api/curios/timeline/generate", {
-					// csrf-ok
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"x-csrf-token": data.csrfToken ?? "",
-					},
-					credentials: "include",
-					body: JSON.stringify({ date }),
-				});
-
-				const result = (await response.json()) as Record<string, unknown>;
-
-				if (response.ok && result.success !== false) {
-					if (result.summary) {
-						generateProgress = {
-							...generateProgress!,
-							completed: [...generateProgress!.completed, date],
-							totalCost:
-								generateProgress!.totalCost +
-								(((result.usage as Record<string, unknown>)?.cost as number) ?? 0),
-						};
-					} else {
-						// No commits for this day
-						generateProgress = {
-							...generateProgress!,
-							skipped: [...generateProgress!.skipped, date],
-						};
-					}
-				} else {
-					// Extract the actual error message from the API response
-					const errorMsg = (result.message as string) || `HTTP ${response.status}`;
-					if (!firstError) firstError = errorMsg;
-					generateProgress = {
-						...generateProgress!,
-						failed: [...generateProgress!.failed, { date, error: errorMsg }],
-					};
-
-					// Stop early on errors where every subsequent date will fail the same way
-					const errorType = result.error as string | undefined;
-					if (errorType === "github_token_missing" || errorType === "openrouter_key_missing") {
-						toast.error("Configuration issue", { description: errorMsg });
-						break;
-					}
-					if (errorType === "rate_limited") {
-						const retryAfter = result.retryAfter as number | undefined;
-						const waitMsg = retryAfter
-							? `Rate limit reached. Try again in ${Math.ceil(retryAfter / 60)} minutes.`
-							: "Rate limit reached. Try again later.";
-						toast.error(waitMsg);
-						// Mark remaining dates as failed with the same reason
-						const remaining = dates.slice(dates.indexOf(date) + 1);
-						for (const d of remaining) {
-							generateProgress = {
-								...generateProgress!,
-								current: generateProgress!.current + 1,
-								failed: [...generateProgress!.failed, { date: d, error: "Skipped (rate limited)" }],
-							};
-						}
-						break;
-					}
-				}
-			} catch (err) {
-				const errorMsg = err instanceof Error ? err.message : "Network error";
-				if (!firstError) firstError = errorMsg;
-				generateProgress = {
-					...generateProgress!,
-					failed: [...generateProgress!.failed, { date, error: errorMsg }],
-				};
-			}
-		}
-
-		const completedCount = generateProgress!.completed.length;
-		const skippedCount = generateProgress!.skipped.length;
-		const failedCount = generateProgress!.failed.length;
-
-		let resultMessage: string;
-		if (generateCancelled) {
-			resultMessage = `Cancelled. Generated ${completedCount} summaries before stopping.`;
-		} else if (failedCount > 0 && completedCount === 0 && firstError) {
-			// All failed — show the underlying error
-			resultMessage = `All ${failedCount} dates failed: ${firstError}`;
-		} else {
-			resultMessage = `Done! ${completedCount} generated, ${skippedCount} skipped (no commits), ${failedCount} failed.`;
-		}
-
-		generateResult = {
-			success: failedCount === 0,
-			message: resultMessage,
-		};
-
-		if (completedCount > 0) {
-			toast.success("Summaries generated!", {
-				description: `${completedCount} day${completedCount === 1 ? "" : "s"} of timeline entries created. Cost: $${generateProgress!.totalCost.toFixed(4)}`,
-			});
-		}
-
-		isGenerating = false;
-	}
-
-	function cancelGeneration() {
-		generateCancelled = true;
-	}
 
 	async function saveTokenIndividually(type: "github" | "openrouter") {
 		const value = type === "github" ? githubToken : openrouterKey;
-		if (!value?.trim()) {
-			toast.error("Enter a token value first");
-			return;
-		}
-
 		if (type === "github") {
 			githubTokenSaving = true;
 			githubTokenResult = null;
@@ -330,62 +116,16 @@
 			openrouterKeyResult = null;
 		}
 
-		try {
-			const result = await api.post<{
-				success: boolean;
-				tokenSource?: string;
-				verified?: boolean;
-				warning?: string;
-				error?: string;
-			}>("/api/curios/timeline/save-token", {
-				tokenType: type,
-				tokenValue: value.trim(),
-			});
+		const result = await saveTokenApi(type, value);
 
-			if (!result) {
-				throw new Error("No response from server");
-			}
-
-			if (result.success) {
-				const msg = result.warning
-					? `Saved (${result.tokenSource}) — ${result.warning}`
-					: `Saved and verified (${result.tokenSource})`;
-				if (type === "github") {
-					githubTokenResult = { ok: !result.warning, message: msg };
-					githubToken = "";
-				} else {
-					openrouterKeyResult = { ok: !result.warning, message: msg };
-					openrouterKey = "";
-				}
-				if (result.warning) {
-					toast.warning(`${type === "github" ? "GitHub" : "OpenRouter"} token saved with warning`, {
-						description: result.warning,
-					});
-				} else {
-					toast.success(`${type === "github" ? "GitHub" : "OpenRouter"} token saved!`, {
-						description: msg,
-					});
-				}
-			} else {
-				const errorMsg = result.error || "Save failed";
-				if (type === "github") {
-					githubTokenResult = { ok: false, message: errorMsg };
-				} else {
-					openrouterKeyResult = { ok: false, message: errorMsg };
-				}
-				toast.error("Token save failed", { description: errorMsg });
-			}
-		} catch (err) {
-			const errorMsg = err instanceof Error ? err.message : "Network error";
-			if (type === "github") {
-				githubTokenResult = { ok: false, message: errorMsg };
-			} else {
-				openrouterKeyResult = { ok: false, message: errorMsg };
-			}
-			toast.error("Token save failed", { description: errorMsg });
-		} finally {
-			if (type === "github") githubTokenSaving = false;
-			else openrouterKeySaving = false;
+		if (type === "github") {
+			githubTokenResult = result;
+			if (result.ok) githubToken = "";
+			githubTokenSaving = false;
+		} else {
+			openrouterKeyResult = result;
+			if (result.ok) openrouterKey = "";
+			openrouterKeySaving = false;
 		}
 	}
 </script>
@@ -819,228 +559,8 @@
 		</div>
 	</form>
 
-	<!-- Historical Backfill -->
-	<GlassCard class="config-section backfill-section">
-		<div class="section-header">
-			<History class="section-icon" />
-			<h2>Historical Backfill</h2>
-		</div>
-
-		<p class="backfill-description">
-			Pull historical commit data from GitHub to populate your Timeline. This uses the Commits API
-			(no 90-day limit) to fetch your full history.
-		</p>
-
-		<div class="backfill-fields">
-			<div class="field-group">
-				<label for="backfillStart" class="field-label">
-					Start Date
-					<span class="required">*</span>
-				</label>
-				<input
-					type="date"
-					id="backfillStart"
-					bind:value={backfillStartDate}
-					class="field-input"
-					max={new Date().toISOString().split("T")[0]}
-				/>
-				<p class="field-help">How far back to fetch commits (e.g., your project start date).</p>
-			</div>
-
-			<div class="field-group">
-				<label for="backfillEnd" class="field-label">End Date</label>
-				<input
-					type="date"
-					id="backfillEnd"
-					bind:value={backfillEndDate}
-					class="field-input"
-					max={new Date().toISOString().split("T")[0]}
-				/>
-				<p class="field-help">Defaults to today if left empty.</p>
-			</div>
-
-			<div class="field-group">
-				<label for="backfillRepoLimit" class="field-label">Repo Limit</label>
-				<input
-					type="number"
-					id="backfillRepoLimit"
-					bind:value={backfillRepoLimit}
-					class="field-input"
-					min="1"
-					max="50"
-				/>
-				<p class="field-help">
-					Max repos to process (rate-limited to 1/second). Higher = more data but slower.
-				</p>
-			</div>
-		</div>
-
-		{#if backfillResult}
-			<div class="alert {backfillResult.success ? 'alert-success' : 'alert-error'}">
-				{#if backfillResult.success}
-					<CheckCircle2 class="alert-icon" />
-				{:else}
-					<AlertCircle class="alert-icon" />
-				{/if}
-				<div class="backfill-result-content">
-					<span>{backfillResult.message}</span>
-					{#if backfillResult.stats}
-						<div class="backfill-stats">
-							<span>{backfillResult.stats.totalCommits} commits</span>
-							<span>·</span>
-							<span>{backfillResult.stats.processedRepos} repos</span>
-							<span>·</span>
-							<span>{backfillResult.stats.datesWithActivity} days with activity</span>
-						</div>
-					{/if}
-				</div>
-			</div>
-		{/if}
-
-		<div class="form-actions">
-			<GlassButton
-				type="button"
-				variant="accent"
-				disabled={isBackfilling || !backfillStartDate}
-				onclick={startBackfill}
-			>
-				{#if isBackfilling}
-					<Loader2 class="button-icon spinning" />
-					Backfilling...
-				{:else}
-					<History class="button-icon" />
-					Start Backfill
-				{/if}
-			</GlassButton>
-		</div>
-	</GlassCard>
-
-	<!-- Generate Summaries -->
-	<GlassCard class="config-section generate-section">
-		<div class="section-header">
-			<Sparkles class="section-icon" />
-			<h2>Generate Summaries</h2>
-		</div>
-
-		<p class="generate-description">
-			Generate AI-powered timeline entries for dates with commit activity. Each day uses your
-			OpenRouter key to create a brief summary, detailed timeline, and gutter comments. Days are
-			processed sequentially so context builds across consecutive entries.
-		</p>
-
-		<div class="generate-fields">
-			<div class="field-group">
-				<label for="generateStart" class="field-label">
-					Start Date
-					<span class="required">*</span>
-				</label>
-				<input
-					type="date"
-					id="generateStart"
-					bind:value={generateStartDate}
-					class="field-input"
-					max={new Date().toISOString().split("T")[0]}
-					disabled={isGenerating}
-				/>
-				<p class="field-help">First date to generate a summary for.</p>
-			</div>
-
-			<div class="field-group">
-				<label for="generateEnd" class="field-label">End Date</label>
-				<input
-					type="date"
-					id="generateEnd"
-					bind:value={generateEndDate}
-					class="field-input"
-					max={new Date().toISOString().split("T")[0]}
-					disabled={isGenerating}
-				/>
-				<p class="field-help">Defaults to today if left empty.</p>
-			</div>
-		</div>
-
-		{#if generateProgress}
-			<div class="generate-progress">
-				<div class="progress-bar-container">
-					<div
-						class="progress-bar-fill"
-						style="width: {(generateProgress.current / generateProgress.total) * 100}%"
-					></div>
-				</div>
-				<div class="progress-details">
-					{#if isGenerating}
-						<span class="progress-current">
-							Generating {generateProgress.currentDate}... ({generateProgress.current}/{generateProgress.total})
-						</span>
-					{:else}
-						<span class="progress-current">
-							Complete ({generateProgress.current}/{generateProgress.total})
-						</span>
-					{/if}
-					<div class="progress-stats">
-						{#if generateProgress.completed.length > 0}
-							<span class="stat-generated">{generateProgress.completed.length} generated</span>
-						{/if}
-						{#if generateProgress.skipped.length > 0}
-							<span class="stat-skipped">{generateProgress.skipped.length} skipped</span>
-						{/if}
-						{#if generateProgress.failed.length > 0}
-							<span
-								class="stat-failed"
-								title={generateProgress.failed.map((f) => `${f.date}: ${f.error}`).join("\n")}
-								>{generateProgress.failed.length} failed</span
-							>
-						{/if}
-						{#if generateProgress.totalCost > 0}
-							<span class="stat-cost">${generateProgress.totalCost.toFixed(4)}</span>
-						{/if}
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		{#if generateResult && !isGenerating}
-			<div class="alert {generateResult.success ? 'alert-success' : 'alert-error'}">
-				{#if generateResult.success}
-					<CheckCircle2 class="alert-icon" />
-				{:else}
-					<AlertCircle class="alert-icon" />
-				{/if}
-				<div class="generate-result-content">
-					<span>{generateResult.message}</span>
-					{#if generateProgress && generateProgress.failed.length > 0 && generateProgress.failed.length <= 5}
-						<details class="failed-details">
-							<summary>Show failed dates</summary>
-							<ul class="failed-list">
-								{#each generateProgress.failed as failure}
-									<li><strong>{failure.date}</strong>: {failure.error}</li>
-								{/each}
-							</ul>
-						</details>
-					{/if}
-				</div>
-			</div>
-		{/if}
-
-		<div class="form-actions">
-			{#if isGenerating}
-				<GlassButton type="button" variant="ghost" onclick={cancelGeneration}>
-					<XCircle class="button-icon" />
-					Cancel
-				</GlassButton>
-			{:else}
-				<GlassButton
-					type="button"
-					variant="accent"
-					disabled={!generateStartDate}
-					onclick={generateSummaries}
-				>
-					<Sparkles class="button-icon" />
-					Generate Summaries
-				</GlassButton>
-			{/if}
-		</div>
-	</GlassCard>
+	<TimelineBackfillSection />
+	<TimelineGenerateSection csrfToken={data.csrfToken ?? ""} />
 </div>
 
 <style>
@@ -1508,6 +1028,12 @@
 		}
 		to {
 			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.spinning) {
+			animation: none;
 		}
 	}
 

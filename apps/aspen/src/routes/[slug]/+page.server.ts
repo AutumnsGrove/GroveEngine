@@ -4,7 +4,7 @@ import {
 	type GutterItem,
 	type Header,
 	renderMarkdown,
-} from "@autumnsgrove/lattice/utils/markdown";
+} from "@autumnsgrove/lattice/content/markdown/markdown";
 import type { PageServerLoad } from "./$types.js";
 
 interface HeroData {

@@ -85,6 +85,9 @@ importers:
         specifier: ^2.14.4
         version: 2.15.8(@internationalized/date@3.11.0)(@sveltejs/kit@2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.50.1)(vite@7.3.1(@types/node@20.19.33)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@7.3.1(@types/node@20.19.33)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
         version: 7.2.6(@sveltejs/kit@2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.50.1)(vite@7.3.1(@types/node@20.19.33)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@7.3.1(@types/node@20.19.33)(jiti@1.21.7)(tsx@4.21.0)))(wrangler@4.76.0(@cloudflare/workers-types@4.20260317.1))
@@ -225,6 +228,9 @@ importers:
         specifier: workspace:*
         version: link:../../libs/engine
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -277,6 +283,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -338,6 +347,9 @@ importers:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -396,6 +408,9 @@ importers:
         specifier: ^2.4.1
         version: 2.7.3
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
         version: 4.20260317.1
@@ -481,6 +496,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
         version: 4.20260317.1
@@ -548,6 +566,9 @@ importers:
         specifier: ^1.4.18
         version: 1.4.18(@sveltejs/kit@2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.50.1)(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0)))(drizzle-kit@0.31.9)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20260317.1)(@opentelemetry/api@1.9.0)(kysely@0.28.11))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(svelte@5.50.1)(vitest@4.1.0)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -600,6 +621,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -655,6 +679,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -707,6 +734,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -1085,13 +1115,22 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../engine
+      hono:
+        specifier: ^4.11.9
+        version: 4.11.9
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
         version: 4.20260317.1
+      '@sveltejs/kit':
+        specifier: ^2.50.2
+        version: 2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.50.1)(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.50.1)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0)
       vitest:
         specifier: ^4.1.0
         version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.2.3)(@vitest/ui@4.1.0)(happy-dom@20.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1)(canvas@3.2.1))(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0))
@@ -1437,6 +1476,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
@@ -1675,6 +1717,9 @@ importers:
 
   workers/reverie-exec:
     dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine

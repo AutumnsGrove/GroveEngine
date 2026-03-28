@@ -49,7 +49,7 @@ vi.mock("@autumnsgrove/lattice/server/env-validation", () => ({
 	validateEnv: () => mockValidateEnv(),
 }));
 
-vi.mock("@autumnsgrove/lattice/lumen/client", () => ({
+vi.mock("@autumnsgrove/lattice/ai/lumen/client", () => ({
 	createLumenClient: () => ({
 		transcribe: mockTranscribe,
 	}),

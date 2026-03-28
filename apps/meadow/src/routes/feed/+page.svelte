@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
+	import { buildLoginUrl } from "@autumnsgrove/lattice/auth/login";
 	import PostCard from "$lib/components/PostCard.svelte";
 	import ComposeBox from "$lib/components/ComposeBox.svelte";
 	import FeedFilters from "$lib/components/FeedFilters.svelte";
@@ -118,7 +118,7 @@
 		posts = posts;
 
 		try {
-			const res = await fetch(`/api/feed/${postId}/bookmark`, {
+			const res = await fetch(`/api/feed/${postId}/bookmark`, { // csrf-ok
 				method: "POST",
 				credentials: "include",
 			}); // csrf-ok

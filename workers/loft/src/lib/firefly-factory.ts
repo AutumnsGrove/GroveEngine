@@ -11,7 +11,7 @@ import {
 	LOFT_DEFAULTS,
 	createWardenProvider,
 } from "@autumnsgrove/lattice/firefly";
-import { createWardenClient } from "@autumnsgrove/lattice/warden";
+import { createWardenClient } from "@autumnsgrove/lattice/auth/warden";
 import type { Env } from "../types";
 
 export function createLoftFirefly(env: Env): Firefly {

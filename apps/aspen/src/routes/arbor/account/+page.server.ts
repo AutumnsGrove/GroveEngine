@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad, Actions } from "./$types";
-import { TIERS, type TierKey, getTier } from "@autumnsgrove/lattice/config/tiers";
+import { TIERS, type TierKey, getTier } from "@autumnsgrove/lattice/platform/config/tiers";
 
 /**
  * Account & Subscription Management Page

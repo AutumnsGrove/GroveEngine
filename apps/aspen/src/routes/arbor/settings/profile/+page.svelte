@@ -5,7 +5,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassConfirmDialog from "@autumnsgrove/lattice/ui/components/ui/GlassConfirmDialog.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { GreenhouseStatusCard, GraftControlPanel } from "@autumnsgrove/lattice/grafts/greenhouse";
+	import { GreenhouseStatusCard, GraftControlPanel } from "@autumnsgrove/lattice/platform/greenhouse";
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
 	import {
 		chromeIcons,
@@ -575,7 +575,7 @@
 		<div class="mb-6">
 			<GraftControlPanel
 				grafts={data.tenantGrafts}
-				currentValues={data.grafts}
+				currentValues={data.flags}
 				onToggle={(graftId, enabled) => {
 					loadingGraftId = graftId;
 					toggleGraftId = graftId;

@@ -12,11 +12,11 @@
 		billingPeriodToDbFormat,
 		getMonthlyEquivalentPrice,
 		getYearlySavingsAmount,
-	} from "@autumnsgrove/lattice/grafts/pricing";
-	import type { TierStatus, TierKey } from "@autumnsgrove/lattice/config";
+	} from "@autumnsgrove/lattice/platform/pricing";
+	import type { TierStatus, TierKey } from "@autumnsgrove/lattice/platform/config";
 
 	// UpgradesGraft components for plan selection
-	import { GrowthCard } from "@autumnsgrove/lattice/grafts/upgrades";
+	import { GrowthCard } from "@autumnsgrove/lattice/platform/upgrades";
 
 	// Shared icon mapping
 	import { tierIcons } from "$lib/ui/tier-icons";

@@ -1,0 +1,408 @@
+/**
+ * UpgradesGraft API Tests
+ *
+ * Tests for cultivation, garden tending, and growth status APIs.
+ */
+
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
+
+// Mock dependencies before imports
+vi.mock("$lib/errors", () => ({
+	throwGroveError: vi.fn().mockImplementation((status, error, prefix, context) => {
+		throw Object.assign(new Error(error.userMessage), {
+			status,
+			code: error.code,
+			category: error.category,
+		});
+	}),
+	API_ERRORS: {
+		UNAUTHORIZED: {
+			code: "UNAUTHORIZED",
+			message: "Unauthorized",
+			category: "auth",
+		},
+		INVALID_ORIGIN: {
+			code: "INVALID_ORIGIN",
+			message: "Invalid origin",
+			category: "security",
+		},
+		DB_NOT_CONFIGURED: {
+			code: "DB_NOT_CONFIGURED",
+			message: "DB not configured",
+			category: "config",
+		},
+		PAYMENT_PROVIDER_NOT_CONFIGURED: {
+			code: "PAYMENT_PROVIDER_NOT_CONFIGURED",
+			message: "Payment provider not configured",
+			category: "config",
+		},
+		TENANT_REQUIRED: {
+			code: "TENANT_REQUIRED",
+			message: "Tenant required",
+			category: "validation",
+		},
+		INVALID_REQUEST: {
+			code: "INVALID_REQUEST",
+			message: "Invalid request",
+			category: "validation",
+		},
+		RESOURCE_NOT_FOUND: {
+			code: "RESOURCE_NOT_FOUND",
+			message: "Resource not found",
+			category: "not_found",
+		},
+		PAYMENT_PROVIDER_ERROR: {
+			code: "PAYMENT_PROVIDER_ERROR",
+			message: "Payment provider error",
+			category: "external",
+		},
+		INTERNAL_ERROR: {
+			code: "INTERNAL_ERROR",
+			message: "Internal error",
+			category: "server",
+		},
+	},
+	throwError: vi.fn(),
+	logGroveError: vi.fn(),
+}));
+
+vi.mock("$lib/auth/session", () => ({
+	getVerifiedTenantId: vi.fn(),
+}));
+
+vi.mock("$lib/platform/threshold/factory.js", () => ({
+	createThreshold: vi.fn(),
+}));
+
+vi.mock("$lib/platform/threshold/adapters/sveltekit.js", () => ({
+	thresholdCheck: vi.fn(),
+}));
+
+vi.mock("$lib/platform/config/billing", () => ({
+	buildCheckoutUrl: vi
+		.fn()
+		.mockReturnValue("https://billing.grove.place?action=checkout&tier=seedling"),
+	buildPortalUrl: vi
+		.fn()
+		.mockReturnValue(
+			"https://billing.grove.place/portal?redirect=https%3A%2F%2Fgrove.place%2Fgarden",
+		),
+}));
+
+vi.mock("$lib/server/billing", () => ({
+	logBillingAudit: vi.fn(),
+	isCompedAccount: vi.fn(),
+}));
+
+// Import mocked modules
+import { throwGroveError, API_ERRORS } from "$lib/errors";
+import { getVerifiedTenantId } from "$lib/auth/session";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
+import { buildCheckoutUrl, buildPortalUrl } from "$lib/platform/config/billing";
+import { logBillingAudit, isCompedAccount } from "$lib/server/billing";
+
+// Import after mocking
+const { POST: cultivatePOST } = await import("./server/api/cultivate");
+const { POST: tendPOST } = await import("./server/api/tend");
+const { GET: growthGET } = await import("./server/api/growth");
+
+// Helper to create mock DB
+function createMockDB(mockData: Record<string, unknown> = {}) {
+	return {
+		prepare: vi.fn().mockReturnValue({
+			bind: vi.fn().mockReturnValue({
+				first: vi.fn().mockResolvedValue(mockData),
+			}),
+		}),
+		...mockData,
+	};
+}
+
+describe("UpgradesGraft API", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		// Default: rate limit passes (threshold returns a mock, check returns null = allowed)
+		vi.mocked(createThreshold).mockReturnValue({} as ReturnType<typeof createThreshold>);
+		vi.mocked(thresholdCheck).mockResolvedValue(null);
+	});
+
+	afterAll(() => {
+		vi.restoreAllMocks();
+	});
+
+	describe("Cultivate API", () => {
+		it("should return 401 when user is not authenticated", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({ targetStage: "seedling" }),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: null,
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: { DB: {} },
+			};
+
+			await expect(
+				cultivatePOST({
+					request: mockRequest,
+					locals: mockLocals,
+					platform: mockPlatform,
+				} as any),
+			).rejects.toThrow();
+
+			expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(401, API_ERRORS.UNAUTHORIZED, "API");
+		});
+
+		it("should return 403 for invalid origin", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({ targetStage: "seedling" }),
+				headers: new Headers({ origin: "https://evil.com" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: { DB: {} },
+			};
+
+			await expect(
+				cultivatePOST({
+					request: mockRequest,
+					locals: mockLocals,
+					platform: mockPlatform,
+				} as any),
+			).rejects.toThrow();
+
+			expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(
+				403,
+				API_ERRORS.INVALID_ORIGIN,
+				"API",
+			);
+		});
+
+		it("should return 400 for invalid target stage", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({ targetStage: "invalid_stage" }),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: { DB: {} },
+			};
+
+			vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
+
+			await expect(
+				cultivatePOST({
+					request: mockRequest,
+					locals: mockLocals,
+					platform: mockPlatform,
+				} as any),
+			).rejects.toThrow();
+
+			expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(
+				400,
+				API_ERRORS.INVALID_REQUEST_BODY,
+				"API",
+			);
+		});
+
+		it("should return BillingHub checkout URL for valid request", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({
+					targetStage: "seedling",
+					billingCycle: "monthly",
+				}),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: {
+					DB: createMockDB({}),
+					APP_URL: "https://grove.place",
+				},
+			};
+
+			vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
+			vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
+			vi.mocked(logBillingAudit).mockResolvedValue(undefined);
+
+			const response = await cultivatePOST({
+				request: mockRequest,
+				locals: mockLocals,
+				platform: mockPlatform,
+			} as any);
+			const responseData = (await response.json()) as any;
+
+			expect(response.status).toBe(200);
+			expect(responseData).toHaveProperty("plantingUrl");
+			expect(vi.mocked(buildCheckoutUrl)).toHaveBeenCalledWith({
+				tenantId: "tenant-123",
+				tier: "seedling",
+				billingCycle: "monthly",
+				redirect: expect.stringContaining("grove.place"),
+			});
+		});
+
+		it("should redirect when already at or above target stage", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({ targetStage: "oak", billingCycle: "monthly" }),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: {
+					// Mock DB returns plan=oak (same as target), so should redirect
+					DB: createMockDB({ plan: "oak" }),
+					APP_URL: "https://grove.place",
+				},
+			};
+
+			vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
+
+			// SvelteKit redirect() throws a Redirect object
+			await expect(
+				cultivatePOST({
+					request: mockRequest,
+					locals: mockLocals,
+					platform: mockPlatform,
+				} as any),
+			).rejects.toMatchObject({
+				status: 302,
+				location: "/garden?returnTo=%2Fgarden",
+			});
+		});
+	});
+
+	describe("Tend API", () => {
+		it("should return 401 when user is not authenticated", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({}),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: null,
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: { DB: {} },
+			};
+
+			await expect(
+				tendPOST({
+					request: mockRequest,
+					locals: mockLocals,
+					platform: mockPlatform,
+				} as any),
+			).rejects.toThrow();
+
+			expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(401, API_ERRORS.UNAUTHORIZED, "API");
+		});
+
+		it("should return BillingHub portal URL for valid request", async () => {
+			const mockRequest = {
+				json: vi.fn().mockResolvedValue({ returnTo: "/garden" }),
+				headers: new Headers({ origin: "https://grove.place" }),
+			} as unknown as Request;
+
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+				origin: "https://grove.place",
+			};
+			const mockPlatform = {
+				env: {
+					DB: createMockDB({}),
+					APP_URL: "https://grove.place",
+				},
+			};
+
+			vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
+			vi.mocked(logBillingAudit).mockResolvedValue(undefined);
+
+			const response = await tendPOST({
+				request: mockRequest,
+				locals: mockLocals,
+				platform: mockPlatform,
+			} as any);
+			const responseData = (await response.json()) as any;
+
+			expect(response.status).toBe(200);
+			expect(responseData).toHaveProperty("shedUrl");
+			expect(vi.mocked(buildPortalUrl)).toHaveBeenCalledWith("https://grove.place/garden");
+		});
+	});
+
+	describe("Growth API", () => {
+		it("should return 401 when user is not authenticated", async () => {
+			const mockLocals = { user: null, tenantId: "tenant-123" };
+			const mockPlatform = { env: { DB: {} } };
+
+			await expect(
+				growthGET({ locals: mockLocals, platform: mockPlatform } as any),
+			).rejects.toThrow();
+
+			expect(vi.mocked(throwGroveError)).toHaveBeenCalledWith(401, API_ERRORS.UNAUTHORIZED, "API");
+		});
+
+		it("should return growth status for valid request", async () => {
+			const mockLocals = {
+				user: { email: "test@example.com" },
+				tenantId: "tenant-123",
+			};
+			const mockPlatform = {
+				env: {
+					DB: createMockDB({
+						plan: "seedling",
+						status: "active",
+						current_period_start: 1700000000,
+						current_period_end: 1702592000,
+						cancel_at_period_end: 0,
+						payment_method_last4: "4242",
+						payment_method_brand: "visa",
+					}),
+				},
+			};
+
+			vi.mocked(getVerifiedTenantId).mockResolvedValue("tenant-123");
+			vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
+
+			const response = await growthGET({
+				locals: mockLocals,
+				platform: mockPlatform,
+			} as any);
+			const responseData = (await response.json()) as any;
+
+			expect(response.status).toBe(200);
+			expect(responseData).toHaveProperty("currentStage", "seedling");
+			expect(responseData).toHaveProperty("flourishState", "active");
+			expect(responseData).toHaveProperty("wateringMethod");
+			expect(responseData.wateringMethod).toHaveProperty("lastDigits", "4242");
+		});
+	});
+});

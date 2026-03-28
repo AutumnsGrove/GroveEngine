@@ -5,10 +5,10 @@ import {
 	getFeatureFlags,
 	setFlagEnabled,
 	setFlagMaturity,
-} from "@autumnsgrove/lattice/feature-flags";
-import type { FeatureFlagSummary } from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
+import type { FeatureFlagSummary } from "@autumnsgrove/lattice/platform/feature-flags";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { isWayfinder } from "@autumnsgrove/lattice/config";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 import { z } from "zod";
 
 // ── Schemas ──────────────────────────────────────────────────────────

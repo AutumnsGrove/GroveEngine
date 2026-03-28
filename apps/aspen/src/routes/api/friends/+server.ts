@@ -12,8 +12,8 @@ import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { listFriends, addFriend } from "@autumnsgrove/lattice/server/services/friends";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;

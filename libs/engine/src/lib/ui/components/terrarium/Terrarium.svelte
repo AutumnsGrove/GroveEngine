@@ -23,7 +23,7 @@
 	import Toolbar from './Toolbar.svelte';
 	import ExportDialog from './ExportDialog.svelte';
 	import { exportSceneAsPNG } from './utils/export';
-	import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+	import { TERRARIUM_CONFIG } from '$lib/platform/config/terrarium';
 	import type { AssetCategory, TerrariumScene } from './types';
 
 	/**

@@ -7,7 +7,7 @@
 import { json } from "@sveltejs/kit";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import { unblockCommenter } from "@autumnsgrove/lattice/server/services/reeds";
 import type { RequestHandler } from "./$types.js";
 

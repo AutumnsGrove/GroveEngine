@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from "$app/state";
 	import { GlassCard, Glass, Logo, GroveTerm, RoadmapPreview } from "@autumnsgrove/lattice/ui";
-	import { LoginRedirectButton } from "@autumnsgrove/lattice/grafts/login";
+	import { LoginRedirectButton } from "@autumnsgrove/lattice/auth/login";
 	import {
 		TreePine,
 		TreeCherry,
@@ -21,7 +21,7 @@
 	} from "@autumnsgrove/prism/icons";
 
 	// Use graft config for tier data
-	import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/grafts/pricing";
+	import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/platform/pricing";
 
 	// Shared icon mapping
 	import { tierIcons } from "$lib/ui/tier-icons";

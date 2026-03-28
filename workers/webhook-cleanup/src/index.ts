@@ -12,6 +12,7 @@
 
 import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 import type { GroveContext } from "@autumnsgrove/infra";
+import { jsonResponse, errorResponse } from "@autumnsgrove/infra/response";
 
 export interface Env {
 	DB: D1Database;
@@ -180,7 +181,7 @@ export default {
 	 */
 	async fetch(request: Request, env: Env): Promise<Response> {
 		if (request.method !== "GET") {
-			return new Response("Method not allowed", { status: 405 });
+			return errorResponse("Method not allowed", 405, "METHOD_NOT_ALLOWED");
 		}
 
 		const ctx = createContext(env);
@@ -189,8 +190,7 @@ export default {
 			const { totalDeleted, batchCount } = await cleanupExpiredWebhooks(ctx);
 			const exportsCleaned = await cleanupExpiredExports(ctx);
 
-			return Response.json({
-				success: true,
+			return jsonResponse({
 				webhooks: { deleted: totalDeleted, batches: batchCount },
 				exports: { cleaned: exportsCleaned },
 				message:
@@ -199,13 +199,8 @@ export default {
 						: "Nothing to clean up",
 			});
 		} catch (err) {
-			return Response.json(
-				{
-					success: false,
-					error: err instanceof Error ? err.message : "Unknown error",
-				},
-				{ status: 500 },
-			);
+			const message = err instanceof Error ? err.message : "Unknown error";
+			return errorResponse(message, 500, "INTERNAL_ERROR");
 		}
 	},
 };

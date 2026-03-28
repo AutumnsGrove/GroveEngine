@@ -505,6 +505,9 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            # Also check the line above for accent-ok
+            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
+            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -in '#\(22c55e\|4ade80\|16a34a\|86efac\|15803d\|10b981\|059669\|166534\|14532d\|dcfce7\|bbf7d0\|f0fdf4\)' 2>/dev/null || true)
@@ -513,6 +516,8 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
+            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -n 'rgba\s*(\s*\(34,\s*197,\s*94\|74,\s*222,\s*128\|22,\s*163,\s*74\|74,\s*124,\s*89\)' 2>/dev/null || true)
@@ -521,6 +526,8 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
+            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -n 'var(--grove-[3-7]00' 2>/dev/null || true)

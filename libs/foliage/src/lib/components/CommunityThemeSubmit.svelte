@@ -1,17 +1,18 @@
 <script lang="ts">
-	// CommunityThemeSubmit.svelte
+	// CommunityThemeSubmit.svelte — orchestrator
 	// Form component for submitting custom themes to the community
 
 	import type { CommunityTheme, UserTier, ThemeColors, ThemeFonts, ThemeLayout } from "../types.js";
 	import type { Theme } from "../types.js";
 	import { themes } from "../themes/registry.js";
 	import { validateThemeContrast } from "../utils/contrast.js";
-	import { validateCustomCSS, MAX_CSS_SIZE } from "../server/css-validator.js";
+	import { MAX_CSS_SIZE } from "../server/css-validator.js";
 	import ColorPanel from "./ColorPanel.svelte";
 	import TypographyPanel from "./TypographyPanel.svelte";
 	import LayoutPanel from "./LayoutPanel.svelte";
 	import CustomCSSEditor from "./CustomCSSEditor.svelte";
-	import ThemePreview from "./ThemePreview.svelte";
+	import ThemeBasicsPanel from "./ThemeBasicsPanel.svelte";
+	import ThemePreviewSidebar from "./ThemePreviewSidebar.svelte";
 
 	interface Props {
 		userTier: UserTier;
@@ -30,7 +31,6 @@
 		evergreen: 4,
 	};
 
-	// Check if user can access community theme submission (Oak+ tier)
 	const canSubmitThemes = $derived(tierLevels[userTier] >= 3);
 
 	// Form state
@@ -84,7 +84,7 @@
 			.split(",")
 			.map((tag) => tag.trim())
 			.filter((tag) => tag.length > 0)
-			.slice(0, 5); // Max 5 tags
+			.slice(0, 5);
 	});
 
 	// Validation states
@@ -109,13 +109,11 @@
 		cssError = error;
 	}
 
-	// Additional CSS size validation
 	const cssSizeValid = $derived.by(() => {
 		if (!customCSSEnabled || !customCSS) return true;
 		return new Blob([customCSS]).size <= MAX_CSS_SIZE;
 	});
 
-	// Overall form validation
 	const isFormValid = $derived(
 		nameValid &&
 			descriptionValid &&
@@ -142,7 +140,6 @@
 		customCSS = css;
 	}
 
-	// Handle form submission
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 
@@ -172,7 +169,6 @@
 			await onSubmit?.(themeData);
 			submitSuccess = true;
 
-			// Reset form after short delay
 			setTimeout(() => {
 				handleReset();
 			}, 2000);
@@ -183,7 +179,6 @@
 		}
 	}
 
-	// Reset form
 	function handleReset() {
 		name = "";
 		description = "";
@@ -201,7 +196,6 @@
 		submitError = null;
 	}
 
-	// Handle cancel
 	function handleCancelClick() {
 		onCancel?.();
 	}
@@ -242,114 +236,21 @@
 				</header>
 
 				<!-- Basic Information -->
-				<section class="form-section">
-					<h3 class="section-title">Basic Information</h3>
-
-					<!-- Name field -->
-					<div class="form-field">
-						<label for="theme-name" class="field-label">
-							Theme Name <span class="required">*</span>
-						</label>
-						<input
-							id="theme-name"
-							type="text"
-							class="text-input"
-							class:invalid={name.length > 0 && !nameValid}
-							bind:value={name}
-							maxlength="60"
-							placeholder="My Awesome Theme"
-							required
-							aria-required="true"
-							aria-invalid={!nameValid}
-							aria-describedby="name-hint name-error"
-						/>
-						<div id="name-hint" class="field-hint">
-							{name.length} / 60 characters
-						</div>
-						{#if name.length > 0 && !nameValid}
-							<div id="name-error" class="field-error" role="alert">
-								Name must be between 1 and 60 characters
-							</div>
-						{/if}
-					</div>
-
-					<!-- Description field -->
-					<div class="form-field">
-						<label for="theme-description" class="field-label">
-							Description <span class="optional">(optional)</span>
-						</label>
-						<textarea
-							id="theme-description"
-							class="textarea-input"
-							class:invalid={!descriptionValid}
-							bind:value={description}
-							maxlength="300"
-							rows="3"
-							placeholder="Describe your theme's style and inspiration..."
-							aria-invalid={!descriptionValid}
-							aria-describedby="description-hint description-error"
-						></textarea>
-						<div id="description-hint" class="field-hint">
-							{description.length} / 300 characters
-						</div>
-						{#if !descriptionValid}
-							<div id="description-error" class="field-error" role="alert">
-								Description must be 300 characters or less
-							</div>
-						{/if}
-					</div>
-
-					<!-- Tags field -->
-					<div class="form-field">
-						<label for="theme-tags" class="field-label">
-							Tags <span class="optional">(optional, max 5)</span>
-						</label>
-						<input
-							id="theme-tags"
-							type="text"
-							class="text-input"
-							class:invalid={!tagsValid}
-							bind:value={tagsInput}
-							placeholder="minimal, dark, professional"
-							aria-invalid={!tagsValid}
-							aria-describedby="tags-hint tags-error"
-						/>
-						<div id="tags-hint" class="field-hint">
-							Separate tags with commas. Current: {tags.length} / 5
-						</div>
-						{#if !tagsValid}
-							<div id="tags-error" class="field-error" role="alert">Maximum 5 tags allowed</div>
-						{/if}
-						{#if tags.length > 0}
-							<div class="tags-preview">
-								{#each tags as tag}
-									<span class="tag-chip">{tag}</span>
-								{/each}
-							</div>
-						{/if}
-					</div>
-
-					<!-- Base Theme selection -->
-					<div class="form-field">
-						<label for="base-theme" class="field-label">
-							Base Theme <span class="required">*</span>
-						</label>
-						<select
-							id="base-theme"
-							class="select-input"
-							bind:value={selectedBaseTheme}
-							required
-							aria-required="true"
-							aria-describedby="base-theme-hint"
-						>
-							<option value="">Select a base theme...</option>
-							{#each baseThemesList as theme}
-								<option value={theme.id}>{theme.name}</option>
-							{/each}
-						</select>
-						<div id="base-theme-hint" class="field-hint">Choose a theme to customize</div>
-					</div>
-				</section>
+				<ThemeBasicsPanel
+					{name}
+					{description}
+					{tagsInput}
+					{selectedBaseTheme}
+					{nameValid}
+					{descriptionValid}
+					{tagsValid}
+					{tags}
+					{baseThemesList}
+					onNameChange={(v) => (name = v)}
+					onDescriptionChange={(v) => (description = v)}
+					onTagsInputChange={(v) => (tagsInput = v)}
+					onBaseThemeChange={(v) => (selectedBaseTheme = v)}
+				/>
 
 				<!-- Customization Sections -->
 				{#if baseTheme}
@@ -454,7 +355,6 @@
 					<section class="form-section validation-status">
 						<h3 class="section-title">Validation Status</h3>
 
-						<!-- Contrast validation -->
 						{#if customColorsEnabled}
 							<div class="status-item" class:success={contrastValid} class:error={!contrastValid}>
 								<span class="status-icon" aria-hidden="true">
@@ -468,7 +368,6 @@
 							</div>
 						{/if}
 
-						<!-- CSS validation -->
 						{#if customCSSEnabled}
 							<div
 								class="status-item"
@@ -562,14 +461,7 @@
 
 			<!-- Preview Panel -->
 			{#if effectiveTheme}
-				<aside class="preview-panel" aria-label="Theme preview">
-					<div class="preview-header">
-						<h3 class="preview-title">Live Preview</h3>
-					</div>
-					<div class="preview-content">
-						<ThemePreview theme={effectiveTheme!} />
-					</div>
-				</aside>
+				<ThemePreviewSidebar {effectiveTheme} />
 			{/if}
 		</form>
 	</div>
@@ -641,7 +533,6 @@
 		max-width: 100%;
 	}
 
-	/* Two-column layout on desktop */
 	@media (min-width: 1024px) {
 		.theme-submit-form {
 			grid-template-columns: 1fr 400px;
@@ -654,7 +545,6 @@
 		gap: 2rem;
 	}
 
-	/* Form header */
 	.form-header {
 		padding-bottom: 1.5rem;
 		border-bottom: 2px solid var(--color-border, #e5e5e5);
@@ -673,7 +563,6 @@
 		color: var(--color-foreground-muted, #666);
 	}
 
-	/* Form sections */
 	.form-section {
 		display: flex;
 		flex-direction: column;
@@ -691,87 +580,6 @@
 		margin: -0.75rem 0 0 0;
 		font-size: 0.875rem;
 		color: var(--color-foreground-muted, #666);
-	}
-
-	/* Form fields */
-	.form-field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.field-label {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-foreground, #111);
-	}
-
-	.required {
-		color: #dc2626;
-	}
-
-	.optional {
-		font-weight: 400;
-		color: var(--color-foreground-muted, #666);
-	}
-
-	.text-input,
-	.textarea-input,
-	.select-input {
-		padding: 0.75rem;
-		border: 2px solid var(--color-border, #e5e5e5);
-		border-radius: 0.5rem;
-		font-size: 1rem;
-		font-family: inherit;
-		background: var(--color-surface, #fff);
-		color: var(--color-foreground, #111);
-		transition: border-color 0.2s ease;
-	}
-
-	.text-input:focus,
-	.textarea-input:focus,
-	.select-input:focus {
-		outline: none;
-		border-color: var(--color-accent, #16a34a);
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #16a34a) 20%, transparent);
-	}
-
-	.text-input.invalid,
-	.textarea-input.invalid {
-		border-color: #dc2626;
-	}
-
-	.textarea-input {
-		resize: vertical;
-		min-height: 5rem;
-	}
-
-	.field-hint {
-		font-size: 0.75rem;
-		color: var(--color-foreground-muted, #666);
-	}
-
-	.field-error {
-		font-size: 0.75rem;
-		color: #dc2626;
-		font-weight: 500;
-	}
-
-	/* Tags preview */
-	.tags-preview {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-top: 0.25rem;
-	}
-
-	.tag-chip {
-		padding: 0.25rem 0.75rem;
-		background: var(--color-accent, #16a34a);
-		color: #fff;
-		border-radius: 1rem;
-		font-size: 0.75rem;
-		font-weight: 500;
 	}
 
 	/* Customization sections */
@@ -807,7 +615,7 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		cursor: pointer;
-		accent-color: var(--color-accent, #16a34a);
+		accent-color: var(--color-accent, #16a34a); /* accent-ok */
 	}
 
 	.summary-text {
@@ -848,8 +656,8 @@
 	}
 
 	.status-item.success {
-		background: #dcfce7;
-		border-left: 3px solid #16a34a;
+		background: #dcfce7; /* accent-ok */
+		border-left: 3px solid #16a34a; /* accent-ok */
 	}
 
 	.status-item.error {
@@ -863,7 +671,7 @@
 	}
 
 	.status-item.success .status-icon {
-		color: #16a34a;
+		color: var(--grove-accent);
 	}
 
 	.status-item.error .status-icon {
@@ -876,7 +684,7 @@
 	}
 
 	.status-item.success .status-text {
-		color: #166534;
+		color: var(--grove-accent-dark);
 	}
 
 	.status-item.error .status-text {
@@ -895,9 +703,9 @@
 	}
 
 	.submit-message.success {
-		background: #dcfce7;
-		border-color: #16a34a;
-		color: #166534;
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent);
+		color: var(--grove-accent-dark);
 	}
 
 	.submit-message.error {
@@ -935,7 +743,7 @@
 
 	.button:focus {
 		outline: none;
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #16a34a) 30%, transparent);
+		box-shadow: 0 0 0 3px var(--grove-accent-30);
 	}
 
 	.button:disabled {
@@ -944,12 +752,12 @@
 	}
 
 	.button-primary {
-		background: var(--color-accent, #16a34a);
+		background: var(--grove-accent);
 		color: #fff;
 	}
 
 	.button-primary:hover:not(:disabled) {
-		background: color-mix(in srgb, var(--color-accent, #16a34a) 90%, #000);
+		background: var(--grove-accent-dark);
 	}
 
 	.button-secondary {
@@ -961,43 +769,6 @@
 	.button-secondary:hover:not(:disabled) {
 		background: var(--color-surface, #fff);
 		border-color: var(--color-foreground-muted, #666);
-	}
-
-	/* Preview panel */
-	.preview-panel {
-		position: sticky;
-		top: 1rem;
-		height: fit-content;
-		background: var(--color-surface, #fff);
-		border: 2px solid var(--color-border, #e5e5e5);
-		border-radius: 0.75rem;
-		padding: 1.5rem;
-	}
-
-	.preview-header {
-		margin-bottom: 1rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--color-border, #e5e5e5);
-	}
-
-	.preview-title {
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: var(--color-foreground, #111);
-	}
-
-	.preview-content {
-		display: flex;
-		justify-content: center;
-	}
-
-	/* Mobile responsive */
-	@media (max-width: 1023px) {
-		.preview-panel {
-			position: static;
-			margin-top: 2rem;
-		}
 	}
 
 	@media (max-width: 640px) {
@@ -1012,17 +783,9 @@
 		.button {
 			width: 100%;
 		}
-
-		.preview-panel {
-			padding: 1rem;
-		}
 	}
 
-	/* Accessibility: Reduced motion */
 	@media (prefers-reduced-motion: reduce) {
-		.text-input,
-		.textarea-input,
-		.select-input,
 		.button,
 		.customization-summary {
 			transition: none;

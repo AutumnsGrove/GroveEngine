@@ -8,8 +8,8 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createNote } from "$lib/server/notes";
 import { sanitizeNoteHtml } from "$lib/server/sanitize";
-import { createThreshold } from "@autumnsgrove/lattice/threshold";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 
 const MAX_BODY_LENGTH = 1000;
 const MAX_TAGS = 5;

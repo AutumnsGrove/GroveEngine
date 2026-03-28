@@ -7,7 +7,7 @@
  *
  * This endpoint:
  * 1. Calls GroveAuth /session/revoke to invalidate the SessionDO session
- * 2. Clears all auth-related cookies (grove_session, access_token, etc.)
+ * 2. Clears all auth-related cookies (grove_session, better-auth session)
  */
 
 import { redirect } from "@sveltejs/kit";
@@ -47,17 +47,11 @@ export const POST: RequestHandler = async ({ url, cookies, platform }) => {
 
 	// Clear all auth cookies
 	cookies.delete("grove_session", cookieOptions); // SessionDO session
-	cookies.delete("access_token", cookieOptions); // Legacy JWT
-	cookies.delete("refresh_token", cookieOptions); // Legacy refresh
-	cookies.delete("session", cookieOptions); // Legacy session ID
 
 	// Clear Better Auth session cookies (both prefixed and unprefixed variants)
 	// Production uses __Secure- prefix, development uses unprefixed
 	cookies.delete("__Secure-better-auth.session_token", cookieOptions);
 	cookies.delete("better-auth.session_token", cookieOptions);
-
-	// Also clear the old session cookie if it exists (from magic code auth)
-	cookies.delete("session_token", { path: "/" });
 
 	redirect(302, "/");
 };

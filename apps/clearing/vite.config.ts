@@ -1,14 +1,3 @@
-import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vite";
+import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 
-export default defineConfig({
-  plugins: [sveltekit()],
-  optimizeDeps: {
-    exclude: ["@jsquash/jxl"],
-  },
-  build: {
-    rollupOptions: {
-      external: ["@jsquash/jxl"],
-    },
-  },
-});
+export default createGroveViteConfig();

@@ -7,7 +7,7 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { isWayfinder } from "@autumnsgrove/lattice/config";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 import { slugify } from "@autumnsgrove/lattice/utils";
 
 interface Component {

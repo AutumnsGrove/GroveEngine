@@ -1,0 +1,122 @@
+[
+  {
+    "type": "magic8ball",
+    "label": "Magic 8-Ball",
+    "description": "Shake for an answer to your question",
+    "category": "mystical"
+  },
+  {
+    "type": "fortunecookie",
+    "label": "Fortune Cookie",
+    "description": "Crack open for a daily fortune",
+    "category": "mystical"
+  },
+  {
+    "type": "tarotcard",
+    "label": "Tarot Card",
+    "description": "Daily card draw from the Major Arcana",
+    "category": "mystical"
+  },
+  {
+    "type": "crystalball",
+    "label": "Crystal Ball",
+    "description": "Swirling mist in a glass sphere",
+    "category": "mystical"
+  },
+  {
+    "type": "glasscathedral",
+    "label": "Glass Cathedral",
+    "description": "A prismatic doorway to an immersive experience",
+    "category": "mystical"
+  },
+  {
+    "type": "diceroller",
+    "label": "Dice Roller",
+    "description": "Roll any die from d4 to d20",
+    "category": "interactive"
+  },
+  {
+    "type": "coinflip",
+    "label": "Coin Flip",
+    "description": "Heads or tails with a spinning animation",
+    "category": "interactive"
+  },
+  {
+    "type": "wishingwell",
+    "label": "Wishing Well",
+    "description": "Toss a coin and make a wish",
+    "category": "interactive"
+  },
+  {
+    "type": "snowglobe",
+    "label": "Snow Globe",
+    "description": "Shake to send particles swirling",
+    "category": "interactive"
+  },
+  {
+    "type": "marqueetext",
+    "label": "Marquee Text",
+    "description": "Scrolling message across the page",
+    "category": "classic"
+  },
+  {
+    "type": "blinkingnew",
+    "label": "Blinking \"NEW!\"",
+    "description": "The classic blinking new indicator",
+    "category": "classic"
+  },
+  {
+    "type": "rainbowdivider",
+    "label": "Rainbow Divider",
+    "description": "Colorful animated separator line",
+    "category": "classic"
+  },
+  {
+    "type": "emailbutton",
+    "label": "Email Button",
+    "description": "Retro contact button with mailbox icon",
+    "category": "classic"
+  },
+  {
+    "type": "moodcandle",
+    "label": "Mood Candle",
+    "description": "Flickering flame, brighter in dark mode",
+    "category": "nature"
+  },
+  {
+    "type": "windchime",
+    "label": "Wind Chime",
+    "description": "Gently swaying chimes",
+    "category": "nature"
+  },
+  {
+    "type": "hourglass",
+    "label": "Hourglass",
+    "description": "Countdown timer to your next event",
+    "category": "nature"
+  },
+  {
+    "type": "potionbottle",
+    "label": "Potion Bottle",
+    "description": "Bubbling liquid in a glass bottle",
+    "category": "whimsical"
+  },
+  {
+    "type": "musicbox",
+    "label": "Music Box",
+    "description": "Click to play a short melody",
+    "category": "whimsical"
+  },
+  {
+    "type": "compassrose",
+    "label": "Compass Rose",
+    "description": "A needle that always points somewhere",
+    "category": "whimsical"
+  },
+  {
+    "type": "terrariumglobe",
+    "label": "Terrarium Globe",
+    "description": "A tiny sealed ecosystem in glass",
+    "category": "whimsical"
+  }
+]

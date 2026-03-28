@@ -1,12 +1,12 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import {
 	thresholdCheckWithResult,
 	thresholdHeaders,
-} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config";
+} from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { getEndpointLimitByKey } from "@autumnsgrove/lattice/platform/threshold/config";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 /**

@@ -1,0 +1,581 @@
+[
+  {
+    "id": "badge_early_adopter",
+    "name": "Early Adopter",
+    "description": "Joined during the beta period",
+    "icon": "sprout",
+    "category": "achievement",
+    "rarity": "rare",
+    "group": "system",
+    "criteria": "signup_during_beta"
+  },
+  {
+    "id": "badge_first_post",
+    "name": "First Post",
+    "description": "Published your first blog post",
+    "icon": "pen-line",
+    "category": "achievement",
+    "rarity": "common",
+    "group": "system",
+    "criteria": "posts_count_gte_1"
+  },
+  {
+    "id": "badge_prolific_writer",
+    "name": "Prolific Writer",
+    "description": "Published 50 or more posts",
+    "icon": "book-open",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "posts_count_gte_50"
+  },
+  {
+    "id": "badge_centurion",
+    "name": "Centurion",
+    "description": "Published 100 or more posts",
+    "icon": "crown",
+    "category": "achievement",
+    "rarity": "rare",
+    "group": "system",
+    "criteria": "posts_count_gte_100"
+  },
+  {
+    "id": "badge_night_owl",
+    "name": "Night Owl",
+    "description": "Over half your posts published between 10pm and 4am",
+    "icon": "moon",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "night_posts_majority"
+  },
+  {
+    "id": "badge_early_bird",
+    "name": "Early Bird",
+    "description": "Over half your posts published between 5am and 9am",
+    "icon": "sun",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "morning_posts_majority"
+  },
+  {
+    "id": "badge_consistent",
+    "name": "Consistent",
+    "description": "Posted every week for 4 or more weeks",
+    "icon": "calendar",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "weekly_streak_gte_4"
+  },
+  {
+    "id": "badge_gallery_keeper",
+    "name": "Gallery Keeper",
+    "description": "Uploaded 50 or more gallery images",
+    "icon": "camera",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "gallery_count_gte_50"
+  },
+  {
+    "id": "badge_guestbook_star",
+    "name": "Guestbook Star",
+    "description": "Received 100 or more guestbook signatures",
+    "icon": "message-circle",
+    "category": "achievement",
+    "rarity": "rare",
+    "group": "system",
+    "criteria": "guestbook_count_gte_100"
+  },
+  {
+    "id": "badge_webring_walker",
+    "name": "Webring Walker",
+    "description": "Member of 3 or more webrings",
+    "icon": "link-2",
+    "category": "achievement",
+    "rarity": "uncommon",
+    "group": "system",
+    "criteria": "webring_count_gte_3"
+  },
+  {
+    "id": "badge_curator",
+    "name": "Curator",
+    "description": "Added 25 or more links to Link Gardens",
+    "icon": "bookmark",
+    "category": "achievement",
+    "rarity": "common",
+    "group": "system",
+    "criteria": "links_count_gte_25"
+  },
+  {
+    "id": "badge_seasonal",
+    "name": "Seasonal",
+    "description": "Active during all four seasons",
+    "icon": "leaf",
+    "category": "achievement",
+    "rarity": "rare",
+    "group": "system",
+    "criteria": "active_all_seasons"
+  },
+  {
+    "id": "badge_beta_tester",
+    "name": "Beta Tester",
+    "description": "Participated in beta testing",
+    "icon": "flask-conical",
+    "category": "community",
+    "rarity": "uncommon",
+    "group": "community"
+  },
+  {
+    "id": "badge_bug_hunter",
+    "name": "Bug Hunter",
+    "description": "Found and reported a bug",
+    "icon": "search-code",
+    "category": "community",
+    "rarity": "uncommon",
+    "group": "community"
+  },
+  {
+    "id": "badge_pathfinder",
+    "name": "Pathfinder",
+    "description": "Appointed community guide",
+    "icon": "compass",
+    "category": "community",
+    "rarity": "rare",
+    "group": "community"
+  },
+  {
+    "id": "badge_seedling_nurturer",
+    "name": "Seedling Nurturer",
+    "description": "Helped new members get started",
+    "icon": "heart",
+    "category": "community",
+    "rarity": "uncommon",
+    "group": "community"
+  },
+  {
+    "id": "badge_made_with_grove",
+    "name": "Made with Grove",
+    "description": "Built on the Grove platform",
+    "icon": "trees",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_powered_by_svelte",
+    "name": "Powered by Svelte",
+    "description": "Built with SvelteKit under the hood",
+    "icon": "zap",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_best_viewed_firefox",
+    "name": "Best Viewed in Firefox",
+    "description": "A nod to the browsers we love",
+    "icon": "globe",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_handmade",
+    "name": "This Site is Handmade",
+    "description": "Crafted with care, not generated",
+    "icon": "hammer",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_no_algorithms",
+    "name": "No Algorithms Here",
+    "description": "Just content, no manipulation",
+    "icon": "shield-off",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_indie_web_citizen",
+    "name": "Indie Web Citizen",
+    "description": "Part of the independent web",
+    "icon": "flag",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_webgardener",
+    "name": "Webgardener",
+    "description": "Tending the digital garden",
+    "icon": "flower-2",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_html_first_language",
+    "name": "HTML Was My First Language",
+    "description": "Started from the source",
+    "icon": "code",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_rss_not_dead",
+    "name": "RSS is Not Dead",
+    "description": "Long live syndication",
+    "icon": "rss",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_no_cookies",
+    "name": "No Cookies (Just Vibes)",
+    "description": "Privacy-first, tracking-free",
+    "icon": "cookie",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_under_construction_retro",
+    "name": "Under Construction",
+    "description": "Forever building, never done",
+    "icon": "hard-hat",
+    "category": "retro-web",
+    "rarity": "common",
+    "group": "retro_web"
+  },
+  {
+    "id": "badge_pride_rainbow",
+    "name": "Rainbow Pride",
+    "description": "LGBTQ+ pride",
+    "icon": "rainbow",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_trans",
+    "name": "Trans Pride",
+    "description": "Transgender pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_bi",
+    "name": "Bi Pride",
+    "description": "Bisexual pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_pan",
+    "name": "Pan Pride",
+    "description": "Pansexual pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_ace",
+    "name": "Ace Pride",
+    "description": "Asexual pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_aro",
+    "name": "Aro Pride",
+    "description": "Aromantic pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_nonbinary",
+    "name": "Nonbinary Pride",
+    "description": "Nonbinary pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_lesbian",
+    "name": "Lesbian Pride",
+    "description": "Lesbian pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_gay",
+    "name": "Gay Pride",
+    "description": "Gay pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_genderqueer",
+    "name": "Genderqueer Pride",
+    "description": "Genderqueer pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_genderfluid",
+    "name": "Genderfluid Pride",
+    "description": "Genderfluid pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_intersex",
+    "name": "Intersex Pride",
+    "description": "Intersex pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_polyamorous",
+    "name": "Polyamorous Pride",
+    "description": "Polyamorous pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_agender",
+    "name": "Agender Pride",
+    "description": "Agender pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_demisexual",
+    "name": "Demisexual Pride",
+    "description": "Demisexual pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pride_progress",
+    "name": "Progress Pride",
+    "description": "Inclusive progress pride",
+    "icon": "heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_he",
+    "name": "He/Him",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_she",
+    "name": "She/Her",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_they",
+    "name": "They/Them",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_hethey",
+    "name": "He/They",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_shethey",
+    "name": "She/They",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_any",
+    "name": "Any Pronouns",
+    "description": "Pronoun badge",
+    "icon": "user",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_pronouns_ask",
+    "name": "Ask Me",
+    "description": "Ask me my pronouns",
+    "icon": "help-circle",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_queer_site",
+    "name": "This Site is Queer",
+    "description": "Proudly queer space",
+    "icon": "sparkles",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_safe_space",
+    "name": "Safe Space",
+    "description": "A welcoming, safe environment",
+    "icon": "shield-check",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_allies_welcome",
+    "name": "Allies Welcome",
+    "description": "Open arms for supporters",
+    "icon": "hand-heart",
+    "category": "pride",
+    "rarity": "common",
+    "group": "pride"
+  },
+  {
+    "id": "badge_spring_blossom",
+    "name": "Spring Blossom",
+    "description": "The grove awakens",
+    "icon": "flower-2",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_summer_sun",
+    "name": "Summer Sun",
+    "description": "Warm days, long light",
+    "icon": "sun",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_autumn_leaf",
+    "name": "Autumn Leaf",
+    "description": "Golden change",
+    "icon": "leaf",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_winter_frost",
+    "name": "Winter Frost",
+    "description": "Quiet, crystalline rest",
+    "icon": "snowflake",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_mushroom_collector",
+    "name": "Mushroom Collector",
+    "description": "Finding treasures in the undergrowth",
+    "icon": "tree-pine",
+    "category": "seasonal",
+    "rarity": "uncommon",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_stargazer",
+    "name": "Stargazer",
+    "description": "Eyes on the night sky",
+    "icon": "star",
+    "category": "seasonal",
+    "rarity": "uncommon",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_rain_lover",
+    "name": "Rain Lover",
+    "description": "Finding peace in the downpour",
+    "icon": "cloud-rain",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_firefly_catcher",
+    "name": "Firefly Catcher",
+    "description": "Collecting tiny lights",
+    "icon": "sparkles",
+    "category": "seasonal",
+    "rarity": "uncommon",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_forest_dweller",
+    "name": "Forest Dweller",
+    "description": "At home among the trees",
+    "icon": "trees",
+    "category": "seasonal",
+    "rarity": "common",
+    "group": "seasonal"
+  },
+  {
+    "id": "badge_moonchild",
+    "name": "Moonchild",
+    "description": "Drawn to the silver light",
+    "icon": "moon",
+    "category": "seasonal",
+    "rarity": "uncommon",
+    "group": "seasonal"
+  }
+]

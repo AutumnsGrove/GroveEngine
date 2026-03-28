@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from "vitest";
 import { validateToolCalls } from "./validator";
-import type { LumenToolCall } from "@autumnsgrove/lattice/lumen";
+import type { LumenToolCall } from "@autumnsgrove/lattice/ai/lumen";
 
 /** Helper to build a tool call fixture */
 function toolCall(name: string, args: Record<string, unknown>): LumenToolCall {

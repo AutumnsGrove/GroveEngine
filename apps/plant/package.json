@@ -15,6 +15,7 @@
 		"deploy": "pnpm run build && wrangler deploy"
 	},
 	"devDependencies": {
+		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",

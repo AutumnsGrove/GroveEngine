@@ -7,12 +7,12 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
+	import { buildLoginUrl } from "@autumnsgrove/lattice/auth/login";
 	import { formatRelativeTime } from "$lib/utils/time";
 	import ReactionPicker from "$lib/components/ReactionPicker.svelte";
 	import SEO from "$lib/components/SEO.svelte";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { resolveBlaze } from "@autumnsgrove/lattice/social/blazes";
 
 	let { data } = $props();
 

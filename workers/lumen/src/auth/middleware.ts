@@ -9,8 +9,7 @@
  * later following Warden's challenge-response pattern.
  */
 
-import { createMiddleware } from "hono/factory";
-import { timingSafeEqual } from "@autumnsgrove/lattice/utils";
+import { createAuthMiddleware } from "@autumnsgrove/infra/middleware";
 import type { Env, LumenWorkerResponse, AppVariables } from "../types";
 
 export type AuthVariables = AppVariables & {
@@ -23,47 +22,32 @@ export type AuthVariables = AppVariables & {
  * Compares X-API-Key header against env.LUMEN_API_KEY using
  * constant-time comparison to prevent timing attacks.
  */
-export const apiKeyAuth = createMiddleware<{
+export const apiKeyAuth = createAuthMiddleware<{
 	Bindings: Env;
 	Variables: AuthVariables;
-}>(async (c, next) => {
-	const apiKey = c.req.header("X-API-Key");
-
-	if (!apiKey) {
-		const response: LumenWorkerResponse = {
-			success: false,
-			error: {
-				code: "AUTH_REQUIRED",
-				message: "Missing X-API-Key header",
-			},
-		};
-		return c.json(response, 401);
-	}
-
-	// Constant-time comparison to prevent timing attacks
-	const expected = c.env.LUMEN_API_KEY;
-	if (!expected) {
-		const response: LumenWorkerResponse = {
-			success: false,
-			error: {
-				code: "INTERNAL_ERROR",
-				message: "LUMEN_API_KEY not configured",
-			},
-		};
-		return c.json(response, 500);
-	}
-
-	if (!timingSafeEqual(apiKey, expected)) {
-		const response: LumenWorkerResponse = {
-			success: false,
-			error: {
-				code: "AUTH_REQUIRED",
-				message: "Invalid API key",
-			},
-		};
-		return c.json(response, 401);
-	}
-
-	c.set("authenticated", true);
-	await next();
+}>({
+	getSecret: (env) => env.LUMEN_API_KEY,
+	errors: {
+		missingToken: (c) => {
+			const response: LumenWorkerResponse = {
+				success: false,
+				error: { code: "AUTH_REQUIRED", message: "Missing X-API-Key header" },
+			};
+			return c.json(response, 401);
+		},
+		secretNotConfigured: (c) => {
+			const response: LumenWorkerResponse = {
+				success: false,
+				error: { code: "INTERNAL_ERROR", message: "LUMEN_API_KEY not configured" },
+			};
+			return c.json(response, 500);
+		},
+		invalidToken: (c) => {
+			const response: LumenWorkerResponse = {
+				success: false,
+				error: { code: "AUTH_REQUIRED", message: "Invalid API key" },
+			};
+			return c.json(response, 401);
+		},
+	},
 });

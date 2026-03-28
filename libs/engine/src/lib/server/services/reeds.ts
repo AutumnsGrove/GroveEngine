@@ -8,7 +8,7 @@
  */
 
 import { getTenantDb, type TenantDb } from "./database.js";
-import { renderMarkdown } from "$lib/utils/markdown.js";
+import { renderMarkdown } from "$lib/content/markdown/markdown.js";
 
 // ============================================================================
 // Types

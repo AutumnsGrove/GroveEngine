@@ -6,8 +6,8 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { featureIcons } from "@autumnsgrove/prism/icons";
 	import { fontMap } from "@autumnsgrove/lattice/ui/tokens/fonts";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { resolveBlaze } from "@autumnsgrove/lattice/social/blazes";
 
 	let { data } = $props();
 

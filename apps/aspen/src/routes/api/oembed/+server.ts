@@ -10,9 +10,9 @@ import {
 	type OEmbedResponse,
 } from "@autumnsgrove/lattice/server/services/oembed-providers";
 import { fetchOGMetadata } from "@autumnsgrove/lattice/server/services/og-fetcher";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 /**

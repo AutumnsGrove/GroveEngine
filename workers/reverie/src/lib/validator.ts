@@ -5,9 +5,9 @@
  * rejects writes to read-only domains, and builds preview entries.
  */
 
-import type { LumenToolCall } from "@autumnsgrove/lattice/lumen";
-import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/reverie";
-import type { DomainId, DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/reverie";
+import type { LumenToolCall } from "@autumnsgrove/lattice/ai/lumen";
+import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId, DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/ai/reverie";
 import type { ChangePreview } from "../types";
 import { safeParseJson } from "@autumnsgrove/lattice/utils/json";
 

@@ -16,8 +16,8 @@ import {
 	ALL_ATMOSPHERE_KEYWORDS,
 	SCHEMA_REGISTRY,
 	getImplementedDomains,
-} from "@autumnsgrove/lattice/reverie";
-import type { DomainId, AtmosphereEntry } from "@autumnsgrove/lattice/reverie";
+} from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId, AtmosphereEntry } from "@autumnsgrove/lattice/ai/reverie";
 
 // =============================================================================
 // Types

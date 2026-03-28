@@ -4,6 +4,8 @@
  * Common constants and helpers used across the Clearing Monitor.
  */
 
+import { generateId } from "@autumnsgrove/lattice/utils/id";
+
 /** Component status levels (eliminates magic strings) */
 export const ComponentStatus = {
 	OPERATIONAL: "operational",
@@ -14,7 +16,7 @@ export const ComponentStatus = {
 } as const;
 export type ComponentStatus = (typeof ComponentStatus)[keyof typeof ComponentStatus];
 
-/** Generate a UUID v4 using the Web Crypto API */
+/** Generate a UUID v4 using the engine SSOT */
 export function generateUUID(): string {
-	return crypto.randomUUID();
+	return generateId();
 }

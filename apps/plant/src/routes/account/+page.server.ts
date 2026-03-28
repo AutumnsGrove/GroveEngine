@@ -9,7 +9,7 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { isValidTotpCode, getRequiredEnv, TOTP_CODE_LENGTH } from "@autumnsgrove/lattice/heartwood";
+import { isValidTotpCode, getRequiredEnv, TOTP_CODE_LENGTH } from "@autumnsgrove/lattice/auth";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
 const DEFAULT_AUTH_URL = "https://heartwood.grove.place";

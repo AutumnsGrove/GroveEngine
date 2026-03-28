@@ -15,8 +15,8 @@
 	 */
 
 	import { stateIcons, navIcons } from "@autumnsgrove/prism/icons";
-	import { TIERS } from "$lib/config/tiers";
-	import type { TierKey } from "$lib/config/tiers";
+	import { TIERS } from "$lib/platform/config/tiers";
+	import type { TierKey } from "$lib/platform/config/tiers";
 
 	interface Props {
 		username: string;

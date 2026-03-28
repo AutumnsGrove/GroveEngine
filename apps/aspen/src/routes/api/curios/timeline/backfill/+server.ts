@@ -20,8 +20,8 @@ import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
 } from "@autumnsgrove/lattice/curios/timeline/secrets.server";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface ConfigRow {

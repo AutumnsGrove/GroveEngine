@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 	import { featureIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	const HardDrive = featureIcons.hardDrive;
 	const Info = stateIcons.info;
@@ -8,14 +9,6 @@
 	const AlertTriangle = stateIcons.warning;
 
 	let { data }: { data: PageData } = $props();
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		if (bytes < 1024) return bytes + " B";
-		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-		if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + " MB";
-		return (bytes / 1024 / 1024 / 1024).toFixed(2) + " GB";
-	}
 </script>
 
 <svelte:head>

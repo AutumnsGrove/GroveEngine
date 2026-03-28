@@ -73,12 +73,8 @@ export type DatabaseErrorCode =
 // Utility Functions
 // ============================================================================
 
-/**
- * Generate a UUID v4 identifier
- */
-export function generateId(): string {
-	return crypto.randomUUID();
-}
+// Re-export from SSOT for backwards compatibility
+export { generateId } from "../../utils/id.js";
 
 /**
  * Get current timestamp in ISO format (for session expiry, tokens, etc.)

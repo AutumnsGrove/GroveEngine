@@ -1,22 +1,18 @@
-import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
+import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 import { showroomPlugin } from "./src/lib/vite-plugin-showroom";
 
+const base = createGroveViteConfig();
+
 export default defineConfig({
-	plugins: [showroomPlugin(), sveltekit()],
+	...base,
+	// showroomPlugin must run before sveltekit
+	plugins: [showroomPlugin(), ...base.plugins!],
 	server: {
 		port: 5188,
 		fs: {
 			// Allow serving files from the entire monorepo (components live in libs/)
 			allow: ["../.."],
-		},
-	},
-	optimizeDeps: {
-		exclude: ["@jsquash/jxl"],
-	},
-	build: {
-		rollupOptions: {
-			external: ["@jsquash/jxl"],
 		},
 	},
 });

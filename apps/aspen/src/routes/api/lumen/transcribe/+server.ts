@@ -14,10 +14,10 @@ import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { getTenantSubscription } from "@autumnsgrove/lattice/server/billing";
 import { validateEnv } from "@autumnsgrove/lattice/server/env-validation";
-import { createLumenClient } from "@autumnsgrove/lattice/lumen/client";
-import type { ScribeMode } from "@autumnsgrove/lattice/lumen/types";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen/client";
+import type { ScribeMode } from "@autumnsgrove/lattice/ai/lumen/types";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 // Maximum audio file size (25MB as per plan)

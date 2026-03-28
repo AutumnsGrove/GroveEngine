@@ -16,6 +16,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@autumnsgrove/infra": "workspace:*",
     "@autumnsgrove/prism": "workspace:*",
     "vitest": "^4.1.0",
     "@cloudflare/workers-types": "^4.20260317.1",

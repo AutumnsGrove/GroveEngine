@@ -8,7 +8,7 @@
 
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import { stateIcons, navIcons, phaseIcons, natureIcons } from '@autumnsgrove/prism/icons';
-	import { TIERS } from '@autumnsgrove/lattice/config';
+	import { TIERS } from '@autumnsgrove/lattice/platform/config';
 	import { submitForm } from '$lib/submit-form';
 
 	let { data } = $props();

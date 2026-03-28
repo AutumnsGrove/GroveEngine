@@ -15,8 +15,8 @@ import {
 	createMessage,
 	isParticipant,
 } from "@autumnsgrove/lattice/server/services/chat";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { getLoomDO } from "@autumnsgrove/lattice/loom/sveltekit";
 
 export const GET: RequestHandler = async ({ platform, locals, params, url }) => {

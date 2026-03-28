@@ -24,25 +24,18 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
-import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config";
-import { AUTH_COOKIE_NAMES } from "@autumnsgrove/lattice/grafts/login";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
+import { getEndpointLimitByKey } from "@autumnsgrove/lattice/platform/threshold/config";
+import { AUTH_COOKIE_NAMES } from "@autumnsgrove/lattice/auth/login";
 import {
 	AUTH_ERRORS,
 	getAuthError,
 	logAuthError,
 	buildErrorParams,
-} from "@autumnsgrove/lattice/heartwood/errors";
+} from "@autumnsgrove/lattice/auth/errors";
 import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
-
-/**
- * Migration deadline for legacy session cookies.
- * After this date, legacy cookies will no longer grant access.
- * This prevents old/expired cookies from being used indefinitely.
- */
-const LEGACY_SESSION_DEADLINE = new Date("2026-03-01T00:00:00Z");
 
 // =============================================================================
 // Handler
@@ -88,32 +81,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
 		cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
 
 	if (!sessionToken) {
-		// No session cookie - check for legacy cookies during migration
-		const legacySession = cookies.get("access_token") || cookies.get("session");
-
-		// Check if migration period has expired
-		const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
-
-		if (!legacySession || migrationExpired) {
-			const authError =
-				migrationExpired && legacySession
-					? AUTH_ERRORS.LEGACY_SESSION_EXPIRED
-					: AUTH_ERRORS.NO_SESSION;
-
-			logAuthError(authError, {
-				ip: getClientIP(request),
-				path: url.pathname,
-			});
-
-			throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
-		}
-		// Legacy session exists and within migration window - allow through
-		console.warn(
-			"[Auth Callback] Using legacy session (migration period), redirecting to:",
-			returnTo,
-		);
-	} else {
-		console.warn("[Auth Callback] Better Auth session found, redirecting to:", returnTo);
+		const authError = AUTH_ERRORS.NO_SESSION;
+		logAuthError(authError, {
+			ip: getClientIP(request),
+			path: url.pathname,
+		});
+		throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
 	}
 
 	// Success! Redirect to the requested destination

@@ -2,6 +2,7 @@
 	import type { StorageFile } from "$types";
 	import Icon from "./Icons.svelte";
 	import { formatDateTime } from "@autumnsgrove/lattice/utils";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 	interface Props {
 		files: StorageFile[];
@@ -24,14 +25,6 @@
 		onRestore,
 		showRestore = false,
 	}: Props = $props();
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-	}
 
 	function getFileIcon(
 		mimeType: string,

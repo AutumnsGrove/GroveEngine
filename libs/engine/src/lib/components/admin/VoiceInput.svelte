@@ -15,7 +15,7 @@
 		type ScribeRecorder,
 		type ScribeRecorderState,
 	} from "$lib/scribe/recorder.js";
-	import type { GutterItem, ScribeMode } from "$lib/lumen/types.js";
+	import type { GutterItem, ScribeMode } from "$lib/ai/lumen/types.js";
 	import { getCSRFToken } from "$lib/utils/api.js";
 
 	// ============================================================================

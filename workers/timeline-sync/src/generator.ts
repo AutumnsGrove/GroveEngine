@@ -27,7 +27,7 @@ import {
 	formatContinuationForPrompt,
 	buildSummaryContextData,
 } from "./context";
-import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen";
+import { RemoteLumenClient } from "@autumnsgrove/lattice/ai/lumen";
 
 // =============================================================================
 // Public API

@@ -3,8 +3,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { aggregateWarden } from "@autumnsgrove/lattice/server/observability";
-import type { WardenAggregateResult } from "@autumnsgrove/lattice/server/observability";
+import { aggregateWarden } from "@autumnsgrove/lattice/monitoring/observability";
+import type { WardenAggregateResult } from "@autumnsgrove/lattice/monitoring/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

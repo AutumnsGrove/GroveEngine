@@ -1,4 +1,5 @@
 import grovePreset from "@autumnsgrove/prism/tailwind";
+import { groveProseConfig } from "@autumnsgrove/prism/tailwind/prose";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -33,22 +34,7 @@ export default {
 					"sans-serif",
 				],
 			},
-			typography: ({ theme }) => ({
-				DEFAULT: {
-					css: {
-						"--tw-prose-body": "var(--color-foreground-muted)",
-						"--tw-prose-headings": "var(--color-foreground)",
-						"--tw-prose-links": "var(--color-accent-text-muted)",
-						a: {
-							color: "var(--color-accent-text-muted)",
-							textDecoration: "underline",
-							"&:hover": {
-								color: "var(--color-primary)",
-							},
-						},
-					},
-				},
-			}),
+			...groveProseConfig,
 		},
 	},
 	plugins: [require("@tailwindcss/typography")],

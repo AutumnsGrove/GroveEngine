@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
+	import { formatBytes } from '@autumnsgrove/lattice/utils/format';
 	import { actionIcons, featureIcons, stateIcons, navIcons, blazeIcons } from '@autumnsgrove/prism/icons';
 	const Upload = actionIcons.upload;
 	const Image = featureIcons.image;
@@ -54,14 +55,6 @@
 	// Sync state
 	let isSyncing = $state(false);
 	let syncResult = $state<{ synced: number; skipped: number; total: number; errors: string[] } | null>(null);
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 B';
-		const k = 1024;
-		const sizes = ['B', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-	}
 
 	function formatDate(dateStr: string): string {
 		return new Date(dateStr).toLocaleDateString('en-US', {

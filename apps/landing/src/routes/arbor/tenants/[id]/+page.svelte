@@ -5,7 +5,7 @@
 		TenantGreenhouseSection,
 		TenantUploadSection,
 		TenantGraftSection
-	} from '@autumnsgrove/lattice/grafts/greenhouse';
+	} from '@autumnsgrove/lattice/platform/greenhouse';
 	import { navIcons, featureIcons, actionIcons, stateIcons } from '@autumnsgrove/prism/icons';
 	const ArrowLeft = navIcons.arrowLeft;
 	const Globe = navIcons.globe;

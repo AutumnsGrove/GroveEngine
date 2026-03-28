@@ -2,6 +2,8 @@
 	import Icon from "$lib/components/Icons.svelte";
 	import { theme, currentUser } from "$lib/stores";
 	import { onMount } from "svelte";
+	import IvyTriageDigestSection from "./IvyTriageDigestSection.svelte";
+	import IvyEmailFiltersSection from "./IvyEmailFiltersSection.svelte";
 
 	let unsendDelay = $state("10");
 	let signature = $state("");
@@ -403,197 +405,39 @@
 		</section>
 
 		<!-- Triage & Digest Section -->
-		<section class="settings-section">
-			<h2 class="section-title">Triage & Digest</h2>
-
-			<div class="setting-card">
-				<!-- Digest toggle -->
-				<label class="setting-item">
-					<div class="setting-info">
-						<Icon name="inbox" size={20} />
-						<div class="setting-details">
-							<span class="setting-label">Email digest</span>
-							<span class="setting-description"
-								>Receive AI-summarized email briefings at scheduled times</span
-							>
-						</div>
-					</div>
-					<input type="checkbox" class="toggle-checkbox" bind:checked={digestEnabled} />
-				</label>
-
-				<div class="setting-divider"></div>
-
-				<!-- Digest times -->
-				<div class="setting-item column">
-					<div class="setting-info full">
-						<Icon name="settings" size={20} />
-						<div class="setting-details">
-							<span class="setting-label">Digest schedule</span>
-							<span class="setting-description">When to receive digest emails</span>
-						</div>
-					</div>
-					<div class="digest-times">
-						{#each digestTimes as time, i}
-							<div class="digest-time-row">
-								<input
-									type="time"
-									class="time-input"
-									value={time}
-									oninput={(e) => updateDigestTime(i, (e.target as HTMLInputElement).value)}
-								/>
-								{#if digestTimes.length > 1}
-									<button
-										class="remove-time-btn"
-										onclick={() => removeDigestTime(i)}
-										title="Remove time"
-									>
-										<Icon name="x" size={14} />
-									</button>
-								{/if}
-							</div>
-						{/each}
-						{#if digestTimes.length < 6}
-							<button class="add-time-btn" onclick={addDigestTime}>+ Add time</button>
-						{/if}
-					</div>
-				</div>
-
-				<div class="setting-divider"></div>
-
-				<!-- Timezone -->
-				<div class="setting-item">
-					<div class="setting-info">
-						<Icon name="settings" size={20} />
-						<div class="setting-details">
-							<span class="setting-label">Timezone</span>
-						</div>
-					</div>
-					<select class="select-input" bind:value={digestTimezone}>
-						<option value="America/New_York">Eastern (ET)</option>
-						<option value="America/Chicago">Central (CT)</option>
-						<option value="America/Denver">Mountain (MT)</option>
-						<option value="America/Los_Angeles">Pacific (PT)</option>
-						<option value="Europe/London">London (GMT)</option>
-						<option value="Europe/Berlin">Berlin (CET)</option>
-						<option value="Asia/Tokyo">Tokyo (JST)</option>
-					</select>
-				</div>
-
-				<div class="setting-divider"></div>
-
-				<!-- Recipient -->
-				<div class="setting-item">
-					<div class="setting-info">
-						<Icon name="send" size={20} />
-						<div class="setting-details">
-							<span class="setting-label">Send digest to</span>
-							<span class="setting-description">Email address for digest delivery</span>
-						</div>
-					</div>
-					<input
-						type="email"
-						class="text-input"
-						placeholder="you@example.com"
-						bind:value={digestRecipient}
-					/>
-				</div>
-
-				<div class="setting-divider"></div>
-
-				<!-- Save + Send Now buttons -->
-				<div class="setting-item">
-					<button class="btn-outline" onclick={saveDigestSettings} disabled={savingDigest}>
-						{#if savingDigest}Saving...{:else if digestSaved}Saved!{:else}Save Settings{/if}
-					</button>
-					<button class="btn-outline" onclick={triggerDigest} disabled={sendingDigest}>
-						{#if sendingDigest}Sending...{:else}Send Digest Now{/if}
-					</button>
-				</div>
-				{#if digestMessage}
-					<div class="digest-message">{digestMessage}</div>
-				{/if}
-			</div>
-		</section>
+		<IvyTriageDigestSection
+			{digestEnabled}
+			{digestTimes}
+			{digestTimezone}
+			{digestRecipient}
+			{savingDigest}
+			{digestSaved}
+			{sendingDigest}
+			{digestMessage}
+			onDigestEnabledChange={(v) => (digestEnabled = v)}
+			onDigestTimezoneChange={(v) => (digestTimezone = v)}
+			onDigestRecipientChange={(v) => (digestRecipient = v)}
+			onUpdateDigestTime={updateDigestTime}
+			onAddDigestTime={addDigestTime}
+			onRemoveDigestTime={removeDigestTime}
+			onSaveDigestSettings={saveDigestSettings}
+			onTriggerDigest={triggerDigest}
+		/>
 
 		<!-- Filter Management Section -->
-		<section class="settings-section">
-			<h2 class="section-title">Email Filters</h2>
-
-			<div class="setting-card">
-				<!-- Add filter -->
-				<div class="setting-item column">
-					<div class="setting-info full">
-						<Icon name="settings" size={20} />
-						<div class="setting-details">
-							<span class="setting-label">Add filter rule</span>
-							<span class="setting-description">Block or allow specific senders and domains</span>
-						</div>
-					</div>
-					<div class="filter-form">
-						<select class="select-input" bind:value={newFilterType}>
-							<option value="blocklist">Block</option>
-							<option value="allowlist">Allow</option>
-						</select>
-						<select class="select-input" bind:value={newFilterMatchType}>
-							<option value="domain">Domain</option>
-							<option value="exact">Exact</option>
-							<option value="contains">Contains</option>
-						</select>
-						<input
-							type="text"
-							class="text-input filter-pattern"
-							placeholder="e.g. instagram.com"
-							bind:value={newFilterPattern}
-							onkeydown={(e) => e.key === "Enter" && addFilter()}
-						/>
-						<button
-							class="btn-outline"
-							onclick={addFilter}
-							disabled={addingFilter || !newFilterPattern.trim()}
-						>
-							{addingFilter ? "Adding..." : "Add"}
-						</button>
-					</div>
-				</div>
-
-				<div class="setting-divider"></div>
-
-				<!-- Filter list -->
-				<div class="setting-item column">
-					{#if loadingFilters}
-						<p class="filter-loading">Loading filters...</p>
-					{:else if filters.length === 0}
-						<p class="filter-empty">
-							No custom filters yet. Default junk domains (Instagram, Facebook, LinkedIn, etc.) are
-							blocked automatically.
-						</p>
-					{:else}
-						<div class="filter-list">
-							{#each filters as filter (filter.id)}
-								<div class="filter-row">
-									<span
-										class="filter-type"
-										class:blocklist={filter.type === "blocklist"}
-										class:allowlist={filter.type === "allowlist"}
-									>
-										{filter.type === "blocklist" ? "Block" : "Allow"}
-									</span>
-									<span class="filter-match">{filter.match_type}</span>
-									<span class="filter-pattern-text">{filter.pattern}</span>
-									<button
-										class="filter-remove"
-										onclick={() => removeFilter(filter.id)}
-										title="Remove filter"
-									>
-										<Icon name="x" size={14} />
-									</button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
-		</section>
+		<IvyEmailFiltersSection
+			{filters}
+			{loadingFilters}
+			{newFilterPattern}
+			{newFilterType}
+			{newFilterMatchType}
+			{addingFilter}
+			onNewFilterPatternChange={(v) => (newFilterPattern = v)}
+			onNewFilterTypeChange={(v) => (newFilterType = v)}
+			onNewFilterMatchTypeChange={(v) => (newFilterMatchType = v)}
+			onAddFilter={addFilter}
+			onRemoveFilter={removeFilter}
+		/>
 
 		<!-- Danger Zone -->
 		<section class="settings-section danger-zone">
@@ -947,142 +791,4 @@
 		color: var(--color-text-tertiary);
 	}
 
-	/* Digest Times */
-	.digest-times {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-		margin-top: var(--space-3);
-	}
-
-	.digest-time-row {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-	}
-
-	.time-input {
-		padding: var(--space-2) var(--space-3);
-		background: var(--color-bg-tertiary);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		color: var(--color-text-primary);
-		font-size: var(--text-sm);
-	}
-
-	.time-input:focus {
-		outline: none;
-		border-color: var(--color-primary);
-	}
-
-	.remove-time-btn {
-		padding: var(--space-1);
-		border-radius: var(--radius-sm);
-		color: var(--color-text-muted);
-		transition: all var(--transition-fast);
-	}
-
-	.remove-time-btn:hover {
-		color: var(--color-error);
-		background: var(--color-surface-hover);
-	}
-
-	.add-time-btn {
-		padding: var(--space-1) var(--space-2);
-		color: var(--color-primary);
-		font-size: var(--text-sm);
-		font-weight: var(--font-medium);
-		background: transparent;
-		transition: color var(--transition-fast);
-	}
-
-	.add-time-btn:hover {
-		color: var(--color-primary-hover);
-	}
-
-	/* Digest message */
-	.digest-message {
-		padding: var(--space-2) var(--space-4);
-		font-size: var(--text-sm);
-		color: var(--color-primary);
-		text-align: center;
-	}
-
-	/* Filter Form */
-	.filter-form {
-		display: flex;
-		gap: var(--space-2);
-		margin-top: var(--space-3);
-		flex-wrap: wrap;
-	}
-
-	.filter-pattern {
-		flex: 1;
-		min-width: 150px;
-	}
-
-	.filter-loading,
-	.filter-empty {
-		font-size: var(--text-sm);
-		color: var(--color-text-tertiary);
-		padding: var(--space-2) 0;
-	}
-
-	.filter-list {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-		width: 100%;
-	}
-
-	.filter-row {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		padding: var(--space-2);
-		background: var(--color-bg-tertiary);
-		border-radius: var(--radius-md);
-	}
-
-	.filter-type {
-		font-size: var(--text-xs);
-		font-weight: var(--font-semibold);
-		padding: 1px 6px;
-		border-radius: var(--radius-sm);
-		text-transform: uppercase;
-	}
-
-	.filter-type.blocklist {
-		background: var(--color-error);
-		color: white;
-	}
-
-	.filter-type.allowlist {
-		background: var(--color-primary);
-		color: white;
-	}
-
-	.filter-match {
-		font-size: var(--text-xs);
-		color: var(--color-text-tertiary);
-	}
-
-	.filter-pattern-text {
-		flex: 1;
-		font-size: var(--text-sm);
-		color: var(--color-text-primary);
-		font-family: monospace;
-	}
-
-	.filter-remove {
-		padding: var(--space-1);
-		border-radius: var(--radius-sm);
-		color: var(--color-text-muted);
-		transition: all var(--transition-fast);
-	}
-
-	.filter-remove:hover {
-		color: var(--color-error);
-		background: var(--color-surface-hover);
-	}
 </style>

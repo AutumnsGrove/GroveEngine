@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { StorageFile } from "$types";
 	import Icon from "./Icons.svelte";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
+	import { formatDateShort } from "@autumnsgrove/lattice/utils/date";
 
 	interface Props {
 		files: StorageFile[];
@@ -19,23 +21,6 @@
 		onDownload,
 		onPreview,
 	}: Props = $props();
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return "0 B";
-		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-	}
-
-	function formatDate(dateStr: string): string {
-		const date = new Date(dateStr);
-		return date.toLocaleDateString("en-US", {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		});
-	}
 
 	function getFileIcon(
 		mimeType: string,
@@ -96,7 +81,7 @@
 						<p class="file-meta">
 							<span>{formatBytes(file.size_bytes)}</span>
 							<span>•</span>
-							<span>{formatDate(file.created_at)}</span>
+							<span>{formatDateShort(file.created_at)}</span>
 						</p>
 					</div>
 

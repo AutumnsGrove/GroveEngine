@@ -19,6 +19,7 @@
 		},
 		"./css": "./src/lib/css/grove-tokens.css",
 		"./tailwind": "./src/lib/tailwind/preset.js",
+		"./tailwind/prose": "./src/lib/tailwind/prose.js",
 		"./icons": {
 			"types": "./src/lib/icons/index.ts",
 			"default": "./src/lib/icons/index.ts"

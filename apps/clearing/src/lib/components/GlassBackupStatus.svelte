@@ -12,6 +12,7 @@
 	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import type { BackupStatus } from "$lib/server/backups";
 	import { authIcons, stateIcons, metricIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 	interface Props {
 		backupStatus: BackupStatus;
@@ -19,13 +20,6 @@
 	}
 
 	let { backupStatus, class: className }: Props = $props();
-
-	// Format bytes to human-readable
-	function formatBytes(bytes: number): string {
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / 1048576).toFixed(1)} MB`;
-	}
 
 	// Format date with friendly labels
 	function formatDate(dateStr: string): string {
