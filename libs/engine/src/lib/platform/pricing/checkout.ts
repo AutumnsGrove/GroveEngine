@@ -5,7 +5,7 @@
  * Each Grove product can configure their own LemonSqueezy store/products.
  */
 
-import type { TierKey } from "../../config/tiers.js";
+import type { TierKey } from "../config/tiers.js";
 import type { BillingPeriod } from "./types.js";
 
 /**

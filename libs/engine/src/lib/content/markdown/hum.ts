@@ -12,7 +12,7 @@
 
 import type MarkdownIt from "markdown-it";
 import type Token from "markdown-it/lib/token.mjs";
-import { detectProvider, isMusicUrl } from "../ui/components/content/hum/providers.js";
+import { detectProvider, isMusicUrl } from "../../ui/components/content/hum/providers.js";
 
 /**
  * Escape HTML special characters for safe embedding in attributes.

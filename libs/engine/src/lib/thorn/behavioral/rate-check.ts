@@ -12,10 +12,10 @@
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
-import type { Threshold } from "../../threshold/threshold.js";
+import type { Threshold } from "../../platform/threshold/threshold.js";
 import type { ThornAction } from "../types.js";
-import { getEndpointLimitByKey, type EndpointKey } from "../../threshold/config.js";
-import { recordViolation } from "../../threshold/abuse.js";
+import { getEndpointLimitByKey, type EndpointKey } from "../../platform/threshold/config.js";
+import { recordViolation } from "../../platform/threshold/abuse.js";
 import { addLabel } from "./labels.js";
 
 // =============================================================================

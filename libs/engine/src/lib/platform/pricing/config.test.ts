@@ -19,7 +19,7 @@ import {
 	DEFAULT_ANNUAL_SAVINGS,
 	DEFAULT_TIER_ORDER,
 } from "./config";
-import { TIERS } from "../../config/tiers";
+import { TIERS } from "../config/tiers";
 import type { PricingTier } from "./types";
 
 // ===

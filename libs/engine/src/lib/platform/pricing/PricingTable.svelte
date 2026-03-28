@@ -14,7 +14,7 @@
 		toolIcons,
 	} from "@autumnsgrove/prism/icons";
 	import type { Component } from "svelte";
-	import type { TierIcon } from "../../config/tiers.js";
+	import type { TierIcon } from "../config/tiers.js";
 
 	// Icon components for tier headers - defined at module level for performance
 	const TIER_ICON_MAP: Record<TierIcon, Component> = {

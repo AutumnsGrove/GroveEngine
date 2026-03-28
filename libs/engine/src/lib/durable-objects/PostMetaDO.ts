@@ -15,7 +15,7 @@
  * Split from PostContentDO for optimal hibernation behavior.
  */
 
-import { DEFAULT_TIER, type TierKey } from "../config/tiers.js";
+import { DEFAULT_TIER, type TierKey } from "../platform/config/tiers.js";
 
 /**
  * Local JSON parsing helper to avoid bundling conflicts.

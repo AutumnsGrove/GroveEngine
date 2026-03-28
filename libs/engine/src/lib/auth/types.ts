@@ -4,7 +4,7 @@
  * Type definitions for integrating with GroveAuth service.
  */
 
-import { TIERS, PAID_TIERS, type PaidTierKey } from "../config/tiers.js";
+import { TIERS, PAID_TIERS, type PaidTierKey } from "../platform/config/tiers.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -241,7 +241,7 @@ export const TIER_NAMES: Record<SubscriptionTier, string> = Object.fromEntries(
  *
  * @example
  * ```typescript
- * const response = await fetch('/token');
+ * const response = await fetch('/token'); // csrf-ok
  * if (!response.ok) {
  *   const error: AuthError = await response.json();
  *   console.error(error.error, error.error_description);

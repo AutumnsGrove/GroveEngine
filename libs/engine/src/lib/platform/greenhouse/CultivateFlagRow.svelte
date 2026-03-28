@@ -7,7 +7,7 @@
 	 */
 
 	import type { CultivateFlagRowProps } from "./types.js";
-	import type { FlagMaturity } from "../../feature-flags/types.js";
+	import type { FlagMaturity } from "../feature-flags/types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
 	import { navIcons, natureIcons } from "@autumnsgrove/prism/icons";
 

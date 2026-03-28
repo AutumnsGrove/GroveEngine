@@ -6,7 +6,7 @@
  */
 
 import type { AuthProvider, ProviderConfig } from "./types.js";
-import { AUTH_HUB_URL } from "../../config/auth.js";
+import { AUTH_HUB_URL } from "../../platform/config/auth.js";
 
 // =============================================================================
 // PROVIDER REGISTRY

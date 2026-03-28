@@ -19,11 +19,11 @@
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
-import { createLumenClient } from "../lumen/client.js";
+import { createLumenClient } from "../ai/lumen/client.js";
 import { moderateContent } from "./moderate.js";
 import { logModerationEvent, flagContent } from "./logging.js";
 import type { ThornContentType, ThornHookPoint } from "./types.js";
-import type { Threshold } from "../threshold/threshold.js";
+import type { Threshold } from "../platform/threshold/threshold.js";
 import { evaluateBehavioralRules, countLinks } from "./behavioral/evaluate.js";
 import {
 	checkBehavioralRateLimit,

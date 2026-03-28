@@ -14,12 +14,12 @@
  * @see migrations/055_upload_gate_redesign.sql
  */
 
-import { isFeatureEnabled } from "../feature-flags/index.js";
-import type { FeatureFlagsEnv } from "../feature-flags/types.js";
+import { isFeatureEnabled } from "../platform/feature-flags/index.js";
+import type { FeatureFlagsEnv } from "../platform/feature-flags/types.js";
 
 export interface UploadGateResult {
-  allowed: boolean;
-  reason?: string;
+	allowed: boolean;
+	reason?: string;
 }
 
 /**
@@ -39,37 +39,29 @@ export interface UploadGateResult {
  * ```
  */
 export async function canUploadImages(
-  tenantId: string,
-  userId: string | undefined,
-  env: FeatureFlagsEnv,
+	tenantId: string,
+	userId: string | undefined,
+	env: FeatureFlagsEnv,
 ): Promise<UploadGateResult> {
-  const context = { tenantId, userId };
+	const context = { tenantId, userId };
 
-  // Check 1: Is the image upload feature globally enabled?
-  const featureEnabled = await isFeatureEnabled(
-    "image_uploads",
-    context,
-    env,
-  ).catch(() => false);
+	// Check 1: Is the image upload feature globally enabled?
+	const featureEnabled = await isFeatureEnabled("image_uploads", context, env).catch(() => false);
 
-  if (!featureEnabled) {
-    return { allowed: false, reason: "Image uploads are disabled" };
-  }
+	if (!featureEnabled) {
+		return { allowed: false, reason: "Image uploads are disabled" };
+	}
 
-  // Check 2: Is this tenant suspended from uploads?
-  // Default is true (suspended), tenant rules can override to false (unsuspended)
-  const isSuspended = await isFeatureEnabled(
-    "uploads_suspended",
-    context,
-    env,
-  ).catch(() => true); // Fail-closed: assume suspended on error
+	// Check 2: Is this tenant suspended from uploads?
+	// Default is true (suspended), tenant rules can override to false (unsuspended)
+	const isSuspended = await isFeatureEnabled("uploads_suspended", context, env).catch(() => true); // Fail-closed: assume suspended on error
 
-  if (isSuspended) {
-    return {
-      allowed: false,
-      reason: "Image uploads are suspended for this account",
-    };
-  }
+	if (isSuspended) {
+		return {
+			allowed: false,
+			reason: "Image uploads are suspended for this account",
+		};
+	}
 
-  return { allowed: true };
+	return { allowed: true };
 }

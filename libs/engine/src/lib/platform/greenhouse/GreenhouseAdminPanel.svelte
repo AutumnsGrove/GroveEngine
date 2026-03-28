@@ -35,8 +35,8 @@
 	import CultivateFlagTable from "./CultivateFlagTable.svelte";
 	import { stateIcons, natureIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 
-	import type { GreenhouseTenant } from "../../feature-flags/types.js";
-	import type { FeatureFlagSummary } from "../../feature-flags/admin.js";
+	import type { GreenhouseTenant } from "../feature-flags/types.js";
+	import type { FeatureFlagSummary } from "../feature-flags/admin.js";
 
 	interface Props {
 		tenants?: GreenhouseTenant[];

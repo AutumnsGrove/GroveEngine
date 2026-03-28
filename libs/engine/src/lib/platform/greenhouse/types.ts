@@ -7,7 +7,7 @@
 
 import type { Snippet } from "svelte";
 import type { BaseGraftProps } from "../types.js";
-import type { GreenhouseTenant, FlagType, FlagMaturity } from "../../feature-flags/types.js";
+import type { GreenhouseTenant, FlagType, FlagMaturity } from "../feature-flags/types.js";
 
 // Re-export for convenience
 export type { GreenhouseTenant };

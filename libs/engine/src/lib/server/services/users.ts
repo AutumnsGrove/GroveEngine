@@ -17,7 +17,7 @@
  */
 
 import { queryOne, update } from "./database.js";
-import { AUTH_HUB_URL } from "../../config/auth.js";
+import { AUTH_HUB_URL } from "../../platform/config/auth.js";
 
 // ============================================================================
 // Types

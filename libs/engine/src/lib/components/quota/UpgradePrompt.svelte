@@ -12,8 +12,8 @@
 	 * - ARIA attributes for screen readers
 	 */
 
-	import type { SubscriptionStatus } from "../../heartwood/index.js";
-	import { TIERS, getNextTier, formatLimit, type PaidTierKey } from "../../config/tiers.js";
+	import type { SubscriptionStatus } from "../../auth/index.js";
+	import { TIERS, getNextTier, formatLimit, type PaidTierKey } from "../../platform/config/tiers.js";
 
 	interface Props {
 		open: boolean;

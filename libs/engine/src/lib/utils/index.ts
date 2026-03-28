@@ -45,9 +45,9 @@ export {
 	type GutterItem,
 } from "./gutter";
 
-export * from "./imageProcessor";
+export * from "../media/processing/imageProcessor";
 export * from "./json";
-export * from "./markdown";
+export * from "../content/markdown/markdown";
 export * from "./readability";
 export * from "./sanitize";
 export * from "./user";
@@ -58,7 +58,7 @@ export * from "./webhook-sanitizer";
 export * from "./grove-url";
 
 // Mentions - @username grove links
-export { mentionsPlugin, processMentions } from "./markdown-mentions";
+export { mentionsPlugin, processMentions } from "../content/markdown/mentions";
 
 // Rehype GroveTerm plugin - explicit exports
 export {

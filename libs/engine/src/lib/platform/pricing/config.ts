@@ -11,7 +11,7 @@ import {
 	formatLimit,
 	type TierKey,
 	type TierConfig,
-} from "../../config/tiers.js";
+} from "../config/tiers.js";
 import type { PricingTier, PricingTierLimits } from "./types.js";
 
 // =============================================================================

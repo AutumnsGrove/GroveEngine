@@ -10,7 +10,7 @@
 	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 	import type { IconComponent } from "$lib/ui/components/ui/groveicon";
 	import type { PricingCardProps } from "./types.js";
-	import type { TierIcon } from "../../config/tiers.js";
+	import type { TierIcon } from "../config/tiers.js";
 	import PricingCTA from "./PricingCTA.svelte";
 	import { groveModeStore } from "../../ui/stores/grove-mode.svelte";
 

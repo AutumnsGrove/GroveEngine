@@ -17,7 +17,7 @@
 	 */
 
 	import type { GreenhouseEnrollTableProps } from "./types.js";
-	import type { GreenhouseTenant } from "../../feature-flags/types.js";
+	import type { GreenhouseTenant } from "../feature-flags/types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
 	import { natureIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 

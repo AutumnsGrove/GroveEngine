@@ -11,44 +11,44 @@
  * Part of the Loom pattern - Grove's coordination layer.
  */
 
-import type { PaidTierKey } from "../config/tiers.js";
+import type { PaidTierKey } from "../platform/config/tiers.js";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface TenantConfig {
-  id: string; // Tenant UUID from D1 - cached to avoid repeated lookups
-  subdomain: string;
-  displayName: string;
-  theme: Record<string, unknown> | null;
-  tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'wanderer' since tenants are paying)
-  limits: TierLimits;
-  ownerId: string;
+	id: string; // Tenant UUID from D1 - cached to avoid repeated lookups
+	subdomain: string;
+	displayName: string;
+	theme: Record<string, unknown> | null;
+	tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'wanderer' since tenants are paying)
+	limits: TierLimits;
+	ownerId: string;
 }
 
 export interface TierLimits {
-  postsPerMonth: number;
-  storageBytes: number;
-  customDomains: number;
+	postsPerMonth: number;
+	storageBytes: number;
+	customDomains: number;
 }
 
 export interface Draft {
-  slug: string;
-  content: string;
-  metadata: DraftMetadata;
-  lastSaved: number;
-  deviceId: string;
+	slug: string;
+	content: string;
+	metadata: DraftMetadata;
+	lastSaved: number;
+	deviceId: string;
 }
 
 export interface DraftMetadata {
-  title: string;
-  description?: string;
-  tags?: string[];
+	title: string;
+	description?: string;
+	tags?: string[];
 }
 
 export interface AnalyticsEvent {
-  type: string;
-  data?: Record<string, unknown>;
-  timestamp: number;
+	type: string;
+	data?: Record<string, unknown>;
+	timestamp: number;
 }

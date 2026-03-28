@@ -6,13 +6,7 @@
  */
 
 import type { Snippet } from "svelte";
-import type {
-	TierKey,
-	TierLimits,
-	TierFeatures,
-	TierStatus,
-	TierIcon,
-} from "../../config/tiers.js";
+import type { TierKey, TierLimits, TierFeatures, TierStatus, TierIcon } from "../config/tiers.js";
 import type { ProductId, BaseGraftProps } from "../types.js";
 
 // =============================================================================

@@ -11,52 +11,43 @@
 
 // Configuration (re-exported from threshold)
 export {
-  ENDPOINT_RATE_LIMITS,
-  ENDPOINT_MAP,
-  getEndpointLimit,
-  getEndpointLimitByKey,
-} from "../../threshold/config.js";
+	ENDPOINT_RATE_LIMITS,
+	ENDPOINT_MAP,
+	getEndpointLimit,
+	getEndpointLimitByKey,
+} from "../../platform/threshold/config.js";
 
-export type { EndpointKey } from "../../threshold/config.js";
+export type { EndpointKey } from "../../platform/threshold/config.js";
 
 // Legacy config exports still from local files
 export { TIER_RATE_LIMITS, getTierLimit, isValidTier } from "./config.js";
 
-export type {
-  SubscriptionTier,
-  RateLimitCategory,
-  RateLimitConfig,
-} from "./config.js";
+export type { SubscriptionTier, RateLimitCategory, RateLimitConfig } from "./config.js";
 
 // Core rate limiting (shim re-exports)
-export type { ThresholdResult as RateLimitResult } from "../../threshold/types.js";
+export type { ThresholdResult as RateLimitResult } from "../../platform/threshold/types.js";
 
 // Middleware helpers (shim)
-export {
-  checkRateLimit,
-  rateLimitHeaders,
-  buildRateLimitKey,
-  getClientIP,
-} from "./middleware.js";
+export { checkRateLimit, rateLimitHeaders, buildRateLimitKey, getClientIP } from "./middleware.js";
 
 // RateLimitMiddlewareOptions and RateLimitCheckResult removed —
 // use ThresholdResult (re-exported as RateLimitResult above)
 
 // Tenant rate limiting (still local — not yet in threshold)
 export {
-  checkTenantRateLimit,
-  categorizeRequest,
-  getTenantLimitInfo,
-  formatLimit,
+	checkTenantRateLimit,
+	categorizeRequest,
+	getTenantLimitInfo,
+	formatLimit,
 } from "./tenant.js";
 
 // Abuse tracking (re-exported from threshold)
 export {
-  getAbuseState,
-  recordViolation,
-  isBanned,
-  getBanRemaining,
-  clearAbuseState,
-} from "../../threshold/abuse.js";
+	getAbuseState,
+	recordViolation,
+	isBanned,
+	getBanRemaining,
+	clearAbuseState,
+} from "../../platform/threshold/abuse.js";
 
-export type { AbuseState, ViolationResult } from "../../threshold/abuse.js";
+export type { AbuseState, ViolationResult } from "../../platform/threshold/abuse.js";

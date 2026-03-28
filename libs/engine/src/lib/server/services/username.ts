@@ -16,9 +16,9 @@ import {
 	VALIDATION_CONFIG,
 	type BlocklistReason,
 	VALID_BLOCKLIST_REASONS,
-} from "../../config/domain-blocklist.js";
-import { containsOffensiveContent } from "../../config/offensive-blocklist.js";
-import type { TierKey } from "../../config/tiers.js";
+} from "../../platform/config/domain-blocklist.js";
+import { containsOffensiveContent } from "../../platform/config/offensive-blocklist.js";
+import type { TierKey } from "../../platform/config/tiers.js";
 
 // ============================================================================
 // Constants

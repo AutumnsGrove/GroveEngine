@@ -7,7 +7,7 @@
  * @see docs/specs/thorn-spec.md
  */
 
-import type { LumenClient } from "../lumen/index.js";
+import type { LumenClient } from "../ai/lumen/index.js";
 import { determineAction } from "./config.js";
 import type { ThornResult, ThornOptions } from "./types.js";
 
@@ -44,25 +44,25 @@ import type { ThornResult, ThornOptions } from "./types.js";
  * ```
  */
 export async function moderateContent(
-  content: string,
-  options: ThornOptions,
+	content: string,
+	options: ThornOptions,
 ): Promise<ThornResult> {
-  const { lumen, tenant, contentType } = options;
+	const { lumen, tenant, contentType } = options;
 
-  // Call Lumen's moderation task
-  const result = await lumen.moderate({
-    content,
-    tenant,
-  });
+	// Call Lumen's moderation task
+	const result = await lumen.moderate({
+		content,
+		tenant,
+	});
 
-  // Map Lumen moderation result to Thorn action via config thresholds
-  const action = determineAction(result, contentType);
+	// Map Lumen moderation result to Thorn action via config thresholds
+	const action = determineAction(result, contentType);
 
-  return {
-    allowed: action === "allow" || action === "warn",
-    action,
-    categories: result.categories,
-    confidence: result.confidence,
-    model: result.model,
-  };
+	return {
+		allowed: action === "allow" || action === "warn",
+		action,
+		categories: result.categories,
+		confidence: result.confidence,
+		model: result.model,
+	};
 }

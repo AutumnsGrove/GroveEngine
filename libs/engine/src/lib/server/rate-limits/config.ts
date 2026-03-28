@@ -13,7 +13,7 @@ import {
 	type TierKey,
 	type TierRateLimits,
 	isValidTier as configIsValidTier,
-} from "../../config/tiers.js";
+} from "../../platform/config/tiers.js";
 
 // ============================================================================
 // Types
