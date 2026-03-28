@@ -91,13 +91,7 @@
 	let carouselAutoplay = $state(false);
 	let selectedFont = $state<FontId>("alagard");
 
-	// Demo slides for the carousel
-	const carouselSlides = [
-		{ title: "Spring", color: "from-emerald-400 to-lime-300", icon: "🌸" },
-		{ title: "Summer", color: "from-amber-400 to-orange-300", icon: "☀️" },
-		{ title: "Autumn", color: "from-orange-500 to-red-400", icon: "🍂" },
-		{ title: "Winter", color: "from-slate-400 to-blue-300", icon: "❄️" },
-	];
+	import { carouselSlides } from "./vineyard-data";
 
 	function handleConfirm() {
 		confirmResult = "Confirmed! Yippee!";

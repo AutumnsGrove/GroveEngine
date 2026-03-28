@@ -3,6 +3,9 @@
 	import { Button } from "$lib/ui/components/primitives/button";
 	import { MAX_CONTENT_LENGTH } from "$lib/config/wisp.js";
 	import { api } from "$lib/utils/api";
+	import WispGrammarTab from "./WispGrammarTab.svelte";
+	import WispToneTab from "./WispToneTab.svelte";
+	import WispReadabilityTab from "./WispReadabilityTab.svelte";
 
 	interface GrammarSuggestion {
 		original: string;
@@ -11,36 +14,18 @@
 		severity?: string;
 	}
 
-	interface ToneTrait {
-		trait: string;
-		score: number;
-	}
-
-	interface WispTone {
-		analysis?: string;
-		traits?: ToneTrait[];
-		suggestions?: string[];
-	}
-
-	interface WispReadability {
-		fleschKincaid?: number;
-		readingTime?: string;
-		wordCount?: number;
-		sentenceCount?: number;
-		sentenceStats?: { average: number; longest: number };
-		suggestions?: string[];
-	}
-
-	interface WispMeta {
-		tokensUsed?: number;
-		cost?: number;
-	}
-
 	interface WispResults {
 		grammar?: { overallScore?: number; suggestions?: GrammarSuggestion[] };
-		tone?: WispTone;
-		readability?: WispReadability;
-		meta?: WispMeta;
+		tone?: { analysis?: string; traits?: { trait: string; score: number }[]; suggestions?: string[] };
+		readability?: {
+			fleschKincaid?: number;
+			readingTime?: string;
+			wordCount?: number;
+			sentenceCount?: number;
+			sentenceStats?: { average: number; longest: number };
+			suggestions?: string[];
+		};
+		meta?: { tokensUsed?: number; cost?: number };
 	}
 
 	interface Props {
@@ -68,9 +53,9 @@
 	let analysisError = $state<string | null>(null);
 	let results = $state<WispResults | null>(null);
 	let activeTab = $state("grammar");
-	let selectedMode = $state("quick"); // quick or thorough
+	let selectedMode = $state("quick");
 
-	// ASCII art vibes - text landscapes that create atmosphere
+	// ASCII art vibes
 	const vibes = {
 		idle: `
       .  *  .    .  *
@@ -79,7 +64,6 @@
      / ~ ~ \\  .    .
     /       \\______
    ~~~~~~~~~~~~~~~~~~~`,
-
 		analyzing: `
     . * . analyzing . *
       \\  |  /
@@ -87,7 +71,6 @@
       /  |  \\
    ~~~~~~~~~~~~~~~~~
      words flowing...`,
-
 		success: `
               *
     .    *  /|\\   .
@@ -95,7 +78,6 @@
          /__|__\\
     ~~~~~/      \\~~~~
       all clear  `,
-
 		grammarGood: `
         .-~~~-.
       .'       '.
@@ -103,7 +85,6 @@
     |  (o) (o)  |  nice!
      \\   <=>   /
       '-.___.-'`,
-
 		toneWarm: `
        __/\\__
       \\      /
@@ -111,7 +92,6 @@
       /      \\
      /   ^^   \\
     warm & cozy`,
-
 		error: `
       .  x  .
         /|\\
@@ -121,7 +101,6 @@
     try again?`,
 	};
 
-	// Get current vibe based on state
 	let currentVibe = $derived.by(() => {
 		if (isAnalyzing) return vibes.analyzing;
 		if (analysisError) return vibes.error;
@@ -131,9 +110,7 @@
 		return vibes.idle;
 	});
 
-	// Seasonal vibe rotation for idle state
 	const seasonalVibes = [
-		// Forest morning
 		`
     .  *  .    .  *
   .    _    .      .
@@ -141,7 +118,6 @@
     / ~ ~ \\  .    .
    /       \\______
   ~~~~~~~~~~~~~~~~~~~`,
-		// Starry grove
 		`
   *  .  * .  *  .  *
     .  *    *  .
@@ -149,7 +125,6 @@
    .   /    \\  .
    ___/      \\___
   ~~~~~~  ~~~~~~~~~`,
-		// Mountain vista
 		`
         /\\
     .  /  \\  .  *
@@ -157,7 +132,6 @@
    * /  /\\  \\  .
   __/  /  \\  \\__
   ~~~~~~~~~~~~~~~~`,
-		// Meadow
 		`
    . * . * . * . * .
      ~  ~  ~  ~  ~
@@ -165,7 +139,6 @@
    v v v v v v v v v
    | | | | | | | | |
   ==================`,
-		// Night grove
 		`
   * . . * . . * . *
      .    *    .
@@ -178,7 +151,6 @@
 	let vibeIndex = $state(0);
 	let panelRef = $state<HTMLElement | null>(null);
 
-	// Content length status
 	let contentLengthStatus = $derived.by(() => {
 		const len = content.length;
 		const pct = Math.round((len / MAX_CONTENT_LENGTH) * 100);
@@ -187,7 +159,6 @@
 		return { status: "ok", pct, len };
 	});
 
-	// Rotate through vibes when idle
 	$effect(() => {
 		if (!isOpen || isAnalyzing || results) return;
 
@@ -198,7 +169,6 @@
 		return () => clearInterval(interval);
 	});
 
-	// Handle keyboard navigation
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape" && isOpen) {
 			e.preventDefault();
@@ -206,7 +176,6 @@
 		}
 	}
 
-	// Get the display vibe
 	let displayVibe = $derived.by(() => {
 		if (isAnalyzing) return vibes.analyzing;
 		if (analysisError) return vibes.error;
@@ -214,7 +183,6 @@
 		return seasonalVibes[vibeIndex];
 	});
 
-	// Run analysis
 	async function runAnalysis(action = "all") {
 		if (!content.trim()) {
 			analysisError = "Write something first!";
@@ -252,10 +220,8 @@
 		}
 	}
 
-	// Apply a grammar fix
 	function applyFix(suggestion: GrammarSuggestion) {
 		onApplyFix(suggestion.original, suggestion.suggestion);
-		// Remove from list
 		if (results?.grammar?.suggestions) {
 			results.grammar.suggestions = results.grammar.suggestions.filter(
 				(s) => s.original !== suggestion.original,
@@ -263,13 +229,11 @@
 		}
 	}
 
-	// Clear results
 	function clearResults() {
 		results = null;
 		analysisError = null;
 	}
 
-	// Toggle panel
 	function togglePanel() {
 		if (isMinimized) {
 			isMinimized = false;
@@ -279,25 +243,11 @@
 		}
 	}
 
-	// Minimize to tab
 	function minimize() {
 		isMinimized = true;
 		isOpen = false;
 	}
 
-	// Severity colors
-	function getSeverityClass(severity: string | undefined) {
-		switch (severity) {
-			case "error":
-				return "severity-error";
-			case "warning":
-				return "severity-warning";
-			default:
-				return "severity-style";
-		}
-	}
-
-	// Format score as visual bar
 	function formatScore(score: number | null | undefined) {
 		if (score === null || score === undefined) return "░░░░░░░░░░";
 		const filled = Math.round(score / 10);
@@ -309,7 +259,6 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if enabled}
-	<!-- Minimized tab on the side -->
 	{#if isMinimized}
 		<button
 			class="wisp-tab"
@@ -323,7 +272,6 @@
 		</button>
 	{/if}
 
-	<!-- Main panel -->
 	{#if isOpen && !isMinimized}
 		<aside
 			class="wisp-panel"
@@ -331,7 +279,6 @@
 			bind:this={panelRef}
 			transition:slide={{ axis: "x", duration: 200 }}
 		>
-			<!-- Header -->
 			<header class="panel-header">
 				<h3>wisp</h3>
 				<div class="header-actions">
@@ -349,7 +296,6 @@
 				</div>
 			</header>
 
-			<!-- Content length indicator -->
 			<div
 				class="content-length"
 				class:warn={contentLengthStatus.status === "warn"}
@@ -364,12 +310,10 @@
 				</div>
 			</div>
 
-			<!-- Vibes section - the ASCII art atmosphere -->
 			<div class="vibes-section">
 				<pre class="ascii-vibe" aria-hidden="true">{displayVibe}</pre>
 			</div>
 
-			<!-- Mode selector -->
 			<div class="mode-selector">
 				<label>
 					<input type="radio" bind:group={selectedMode} value="quick" />
@@ -381,7 +325,6 @@
 				</label>
 			</div>
 
-			<!-- Action buttons -->
 			<div class="actions" role="group" aria-label="Analysis actions">
 				<button
 					class="action-btn"
@@ -417,7 +360,6 @@
 				</button>
 			</div>
 
-			<!-- Error message -->
 			{#if analysisError}
 				<div class="error-message" transition:slide>
 					<p>{analysisError}</p>
@@ -425,10 +367,8 @@
 				</div>
 			{/if}
 
-			<!-- Results -->
 			{#if results}
 				<div class="results" transition:slide>
-					<!-- Tabs -->
 					<div class="tabs">
 						{#if results.grammar}
 							<button
@@ -459,113 +399,34 @@
 						{/if}
 					</div>
 
-					<!-- Grammar Results -->
 					{#if activeTab === "grammar" && results.grammar}
-						<div class="tab-content">
-							<div class="score-display">
-								<span class="score-label">clarity</span>
-								<span class="score-bar">{formatScore(results.grammar.overallScore)}</span>
-								<span class="score-num">{results.grammar.overallScore ?? "—"}</span>
-							</div>
-
-							{#if (results.grammar.suggestions?.length ?? 0) > 0}
-								<div class="suggestions">
-									{#each results.grammar.suggestions as suggestion}
-										<div class="suggestion {getSeverityClass(suggestion.severity)}">
-											<div class="suggestion-original">
-												<span class="strike">{suggestion.original}</span>
-											</div>
-											<div class="suggestion-fix">
-												<span class="arrow">→</span>
-												<span class="fix-text">{suggestion.suggestion}</span>
-											</div>
-											<div class="suggestion-reason">{suggestion.reason}</div>
-											<button class="apply-btn" onclick={() => applyFix(suggestion)}>
-												apply
-											</button>
-										</div>
-									{/each}
-								</div>
-							{:else}
-								<p class="no-issues">looking good!</p>
-							{/if}
-						</div>
+						<WispGrammarTab
+							overallScore={results.grammar.overallScore}
+							suggestions={results.grammar.suggestions}
+							onApplyFix={applyFix}
+							{formatScore}
+						/>
 					{/if}
 
-					<!-- Tone Results -->
 					{#if activeTab === "tone" && results.tone}
-						<div class="tab-content">
-							<p class="tone-analysis">{results.tone.analysis}</p>
-
-							{#if (results.tone.traits?.length ?? 0) > 0}
-								<div class="traits">
-									{#each results.tone.traits as trait}
-										<div class="trait">
-											<span class="trait-name">{trait.trait}</span>
-											<div class="trait-bar-container">
-												<div class="trait-bar" style="width: {trait.score}%"></div>
-											</div>
-											<span class="trait-score">{trait.score}</span>
-										</div>
-									{/each}
-								</div>
-							{/if}
-
-							{#if (results.tone.suggestions?.length ?? 0) > 0}
-								<div class="tone-suggestions">
-									{#each results.tone.suggestions as sug}
-										<p class="tone-sug">• {sug}</p>
-									{/each}
-								</div>
-							{/if}
-						</div>
+						<WispToneTab
+							analysis={results.tone.analysis}
+							traits={results.tone.traits}
+							suggestions={results.tone.suggestions}
+						/>
 					{/if}
 
-					<!-- Readability Results -->
 					{#if activeTab === "readability" && results.readability}
-						<div class="tab-content">
-							<div class="readability-stats">
-								<div class="stat">
-									<span class="stat-label">grade level</span>
-									<span class="stat-value">{results.readability.fleschKincaid}</span>
-								</div>
-								<div class="stat">
-									<span class="stat-label">reading time</span>
-									<span class="stat-value">{results.readability.readingTime}</span>
-								</div>
-								<div class="stat">
-									<span class="stat-label">words</span>
-									<span class="stat-value">{results.readability.wordCount}</span>
-								</div>
-								<div class="stat">
-									<span class="stat-label">sentences</span>
-									<span class="stat-value">{results.readability.sentenceCount}</span>
-								</div>
-								{#if results.readability.sentenceStats}
-									<div class="stat">
-										<span class="stat-label">avg sentence</span>
-										<span class="stat-value">{results.readability.sentenceStats.average} words</span
-										>
-									</div>
-									<div class="stat">
-										<span class="stat-label">longest</span>
-										<span class="stat-value">{results.readability.sentenceStats.longest} words</span
-										>
-									</div>
-								{/if}
-							</div>
-
-							{#if (results.readability.suggestions?.length ?? 0) > 0}
-								<div class="readability-suggestions">
-									{#each results.readability.suggestions as sug}
-										<p class="read-sug">• {sug}</p>
-									{/each}
-								</div>
-							{/if}
-						</div>
+						<WispReadabilityTab
+							fleschKincaid={results.readability.fleschKincaid}
+							readingTime={results.readability.readingTime}
+							wordCount={results.readability.wordCount}
+							sentenceCount={results.readability.sentenceCount}
+							sentenceStats={results.readability.sentenceStats}
+							suggestions={results.readability.suggestions}
+						/>
 					{/if}
 
-					<!-- Usage info -->
 					<div class="usage-info">
 						{#if results.meta?.tokensUsed}
 							<span>tokens: {results.meta.tokensUsed}</span>
@@ -576,7 +437,6 @@
 				</div>
 			{/if}
 
-			<!-- Footer note -->
 			<footer
 				class="panel-footer"
 				aria-label="Wisp philosophy: analyzes your writing but never generates content"
@@ -588,7 +448,6 @@
 {/if}
 
 <style>
-	/* Minimized tab */
 	.wisp-tab {
 		position: fixed;
 		right: 0;
@@ -630,7 +489,6 @@
 		text-orientation: mixed;
 	}
 
-	/* Main panel */
 	.wisp-panel {
 		position: fixed;
 		right: 0;
@@ -646,7 +504,6 @@
 		overflow: hidden;
 	}
 
-	/* Header */
 	.panel-header {
 		display: flex;
 		justify-content: space-between;
@@ -687,7 +544,6 @@
 		color: var(--color-foreground, #d4d4d4);
 	}
 
-	/* Content length indicator */
 	.content-length {
 		padding: 0.25rem 0.75rem;
 		border-bottom: 1px solid var(--color-border, #3a3a3a);
@@ -737,7 +593,6 @@
 		background: var(--color-error);
 	}
 
-	/* Vibes section */
 	.vibes-section {
 		padding: 0.5rem;
 		text-align: center;
@@ -756,7 +611,6 @@
 		user-select: none;
 	}
 
-	/* Mode selector */
 	.mode-selector {
 		display: flex;
 		gap: 1rem;
@@ -777,7 +631,6 @@
 		accent-color: var(--grove-accent);
 	}
 
-	/* Actions */
 	.actions {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -814,7 +667,6 @@
 		border-color: var(--color-accent, #8bc48b);
 	}
 
-	/* Error message */
 	.error-message {
 		margin: 0.5rem;
 		padding: 0.5rem;
@@ -835,7 +687,6 @@
 		margin-top: 0.25rem;
 	}
 
-	/* Results */
 	.results {
 		flex: 1;
 		overflow-y: auto;
@@ -843,7 +694,6 @@
 		flex-direction: column;
 	}
 
-	/* Tabs */
 	.tabs {
 		display: flex;
 		border-bottom: 1px solid var(--color-border, #3a3a3a);
@@ -873,213 +723,6 @@
 		border-bottom-color: var(--color-accent, #8bc48b);
 	}
 
-	/* Tab content */
-	.tab-content {
-		flex: 1;
-		overflow-y: auto;
-		padding: 0.75rem;
-	}
-
-	/* Score display */
-	.score-display {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-		font-size: 0.75rem;
-	}
-
-	.score-label {
-		color: var(--color-muted-foreground, #888);
-	}
-
-	.score-bar {
-		font-family: monospace;
-		color: var(--color-accent, #8bc48b);
-		letter-spacing: -0.05em;
-	}
-
-	.score-num {
-		color: var(--color-foreground, #d4d4d4);
-		font-weight: 600;
-	}
-
-	/* Suggestions */
-	.suggestions {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.suggestion {
-		background: var(--color-surface, #2a2a2a);
-		border-radius: 4px;
-		padding: 0.5rem;
-		border-left: 3px solid var(--color-border, #3a3a3a);
-	}
-
-	.suggestion.severity-error {
-		border-left-color: var(--color-error);
-	}
-
-	.suggestion.severity-warning {
-		border-left-color: hsl(var(--warning));
-	}
-
-	.suggestion.severity-style {
-		border-left-color: var(--color-accent, #8bc48b);
-	}
-
-	.suggestion-original {
-		margin-bottom: 0.25rem;
-	}
-
-	.strike {
-		text-decoration: line-through;
-		color: var(--color-muted-foreground, #888);
-		font-style: italic;
-	}
-
-	.suggestion-fix {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.arrow {
-		color: var(--color-accent, #8bc48b);
-	}
-
-	.fix-text {
-		color: var(--color-accent, #8bc48b);
-	}
-
-	.suggestion-reason {
-		font-size: 0.7rem;
-		color: var(--color-muted-foreground, #888);
-		margin-bottom: 0.5rem;
-	}
-
-	.apply-btn {
-		background: var(--color-primary, #2d5a2d);
-		border: none;
-		border-radius: 3px;
-		padding: 0.25rem 0.5rem;
-		color: white;
-		cursor: pointer;
-		font-size: 0.65rem;
-		transition: background-color 0.15s;
-	}
-
-	.apply-btn:hover {
-		background: var(--color-accent, #8bc48b);
-	}
-
-	.no-issues {
-		color: var(--color-accent, #8bc48b);
-		font-style: italic;
-		text-align: center;
-		padding: 1rem;
-	}
-
-	/* Tone results */
-	.tone-analysis {
-		color: var(--color-foreground, #d4d4d4);
-		margin-bottom: 0.75rem;
-		line-height: 1.4;
-	}
-
-	.traits {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.trait {
-		display: grid;
-		grid-template-columns: 80px 1fr 30px;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.7rem;
-	}
-
-	.trait-name {
-		color: var(--color-muted-foreground, #888);
-		text-transform: lowercase;
-	}
-
-	.trait-bar-container {
-		background: var(--color-surface, #2a2a2a);
-		height: 6px;
-		border-radius: 3px;
-		overflow: hidden;
-	}
-
-	.trait-bar {
-		height: 100%;
-		background: var(--color-accent, #8bc48b);
-		border-radius: 3px;
-		transition: width 0.3s ease;
-	}
-
-	.trait-score {
-		text-align: right;
-		color: var(--color-muted-foreground, #888);
-	}
-
-	.tone-suggestions {
-		border-top: 1px solid var(--color-border, #3a3a3a);
-		padding-top: 0.5rem;
-	}
-
-	.tone-sug {
-		color: var(--color-muted-foreground, #888);
-		font-size: 0.7rem;
-		margin: 0.25rem 0;
-	}
-
-	/* Readability results */
-	.readability-stats {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.stat {
-		background: var(--color-surface, #2a2a2a);
-		padding: 0.5rem;
-		border-radius: 4px;
-	}
-
-	.stat-label {
-		display: block;
-		font-size: 0.65rem;
-		color: var(--color-muted-foreground, #888);
-		text-transform: lowercase;
-		margin-bottom: 0.25rem;
-	}
-
-	.stat-value {
-		font-size: 0.9rem;
-		color: var(--color-foreground, #d4d4d4);
-		font-weight: 500;
-	}
-
-	.readability-suggestions {
-		border-top: 1px solid var(--color-border, #3a3a3a);
-		padding-top: 0.5rem;
-	}
-
-	.read-sug {
-		color: var(--color-muted-foreground, #888);
-		font-size: 0.7rem;
-		margin: 0.25rem 0;
-	}
-
-	/* Usage info */
 	.usage-info {
 		display: flex;
 		justify-content: space-between;
@@ -1103,7 +746,6 @@
 		color: var(--color-foreground, #d4d4d4);
 	}
 
-	/* Footer */
 	.panel-footer {
 		padding: 0.5rem;
 		text-align: center;
@@ -1119,24 +761,19 @@
 		letter-spacing: 0.05em;
 	}
 
-	/* Scrollbar styling */
-	.results::-webkit-scrollbar,
-	.tab-content::-webkit-scrollbar {
+	.results::-webkit-scrollbar {
 		width: 4px;
 	}
 
-	.results::-webkit-scrollbar-track,
-	.tab-content::-webkit-scrollbar-track {
+	.results::-webkit-scrollbar-track {
 		background: transparent;
 	}
 
-	.results::-webkit-scrollbar-thumb,
-	.tab-content::-webkit-scrollbar-thumb {
+	.results::-webkit-scrollbar-thumb {
 		background: var(--color-border, #3a3a3a);
 		border-radius: 2px;
 	}
 
-	/* Responsive */
 	@media (max-width: 768px) {
 		.wisp-panel {
 			width: 100%;
