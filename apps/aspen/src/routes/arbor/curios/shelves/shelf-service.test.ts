@@ -186,7 +186,9 @@ describe("loadShelves", () => {
 	});
 
 	it("swallows database errors and returns empty results", async () => {
-		vi.mocked(queryMany).mockRejectedValueOnce(new Error("D1 connection error"));
+		vi.mocked(queryMany)
+			.mockRejectedValueOnce(new Error("D1 connection error"))
+			.mockRejectedValueOnce(new Error("D1 connection error"));
 
 		const result = await loadShelves(mockDb, TENANT);
 
