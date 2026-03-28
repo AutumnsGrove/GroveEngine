@@ -220,6 +220,7 @@ describe("getPost", () => {
 			tags: ["meta"],
 			description: "From disk",
 			content: "<p>Hello</p>",
+			headers: [],
 		} as ReturnType<typeof getPostBySlug>);
 
 		const result = await getPost(SLUG, TENANT, true, mockDb);
@@ -230,7 +231,7 @@ describe("getPost", () => {
 
 	it("throws 404 when post is missing from both D1 and filesystem", async () => {
 		mockTenantDb.queryOne.mockResolvedValueOnce(null);
-		vi.mocked(getPostBySlug).mockReturnValueOnce(undefined);
+		vi.mocked(getPostBySlug).mockReturnValueOnce(null);
 
 		await expect(getPost(SLUG, TENANT, true, mockDb)).rejects.toMatchObject({ status: 404 });
 	});
@@ -243,6 +244,7 @@ describe("getPost", () => {
 			tags: [],
 			description: "",
 			content: "<p>Content</p>",
+			headers: [],
 		} as ReturnType<typeof getPostBySlug>);
 
 		const result = await getPost(SLUG, TENANT, true /* no db arg */);
