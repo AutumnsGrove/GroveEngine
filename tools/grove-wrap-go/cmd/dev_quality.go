@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -355,16 +358,18 @@ var ciCmd = &cobra.Command{
 	Long: `Run full CI pipeline: lint → check → test → build.
 
 Matches the GitHub Actions CI pipeline as closely as possible:
+- Runs lint, check, and test in PARALLEL by default (build runs after)
 - Detects affected packages from both committed and uncommitted changes
 - Resolves transitive dependencies (engine change → all consumer apps)
 - Rebuilds library dist/ when needed (foliage, gossamer, engine)
 
 Flags:
-  --affected   Only run CI for packages affected by changes since origin/main
-  --full       Run CI for ALL packages regardless of changes
-  --skip-*     Skip individual steps (lint, check, test, build)
-  --fail-fast  Stop on first failure
-  --diagnose   Show structured error diagnostics`,
+  --affected     Only run CI for packages affected by changes since origin/main
+  --full         Run CI for ALL packages regardless of changes
+  --sequential   Run steps one at a time instead of in parallel
+  --skip-*       Skip individual steps (lint, check, test, build)
+  --fail-fast    Stop on first failure (cancels parallel steps)
+  --diagnose     Show structured error diagnostics`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		pkg, _ := cmd.Flags().GetString("package")
@@ -375,6 +380,7 @@ Flags:
 		skipTest, _ := cmd.Flags().GetBool("skip-test")
 		skipBuild, _ := cmd.Flags().GetBool("skip-build")
 		failFast, _ := cmd.Flags().GetBool("fail-fast")
+		sequential, _ := cmd.Flags().GetBool("sequential")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 		root := cfg.GroveRoot
@@ -439,12 +445,6 @@ Flags:
 		}
 
 		// Define pipeline steps
-		type stepDef struct {
-			name string
-			skip bool
-			args []string
-		}
-
 		steps := []stepDef{
 			{"lint", skipLint, append([]string{"pnpm"}, append(filterArgs, "run", "lint")...)},
 			{"check", skipCheck, append([]string{"pnpm"}, append(filterArgs, "run", "check")...)},
@@ -474,49 +474,30 @@ Flags:
 				})
 			}
 			data, _ := json.MarshalIndent(map[string]interface{}{
-				"dry_run": true, "scope": scope, "steps": drySteps,
+				"dry_run": true, "scope": scope, "parallel": !sequential, "steps": drySteps,
 			}, "", "  ")
 			fmt.Println(string(data))
 			return nil
 		}
 
 		if !cfg.JSONMode {
-			ui.PrintHeader(fmt.Sprintf("Grove CI Pipeline (%s)", scope))
+			mode := "parallel"
+			if sequential {
+				mode = "sequential"
+			}
+			ui.PrintHeader(fmt.Sprintf("Grove CI Pipeline (%s, %s)", scope, mode))
 		}
 
 		var results []ciStep
 		allPassed := true
 		totalStart := time.Now()
 
-		for _, s := range steps {
-			if s.skip {
-				results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
-				continue
-			}
-
-			if !cfg.JSONMode {
-				fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
-			}
-
-			start := time.Now()
-			result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
-			duration := time.Since(start).Seconds()
-
-			passed := err == nil && result != nil && result.OK()
-			results = append(results, ciStep{
-				Name: s.name, Passed: passed, Duration: duration,
-			})
-
-			if !cfg.JSONMode {
-				ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
-			}
-
-			if !passed {
-				allPassed = false
-				if failFast {
-					break
-				}
-			}
+		if sequential {
+			// Original sequential execution
+			results, allPassed = runStepsSequential(cfg, steps, failFast)
+		} else {
+			// Parallel: lint+check+test concurrently, then build
+			results, allPassed = runStepsParallel(cfg, steps, failFast)
 		}
 
 		totalDuration := time.Since(totalStart).Seconds()
@@ -794,6 +775,185 @@ func printDryRun(cfg *config.Config, pkg string, cmdArgs []string) error {
 	return nil
 }
 
+// stepDef represents a single CI pipeline step.
+type stepDef struct {
+	name string
+	skip bool
+	args []string
+}
+
+// runStepsSequential runs CI steps one at a time (original behavior).
+func runStepsSequential(cfg *config.Config, steps []stepDef, failFast bool) ([]ciStep, bool) {
+	var results []ciStep
+	allPassed := true
+
+	for _, s := range steps {
+		if s.skip {
+			results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
+		}
+
+		start := time.Now()
+		result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
+		duration := time.Since(start).Seconds()
+
+		passed := err == nil && result != nil && result.OK()
+		results = append(results, ciStep{
+			Name: s.name, Passed: passed, Duration: duration,
+		})
+
+		if !cfg.JSONMode {
+			ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
+		}
+
+		if !passed {
+			allPassed = false
+			if failFast {
+				break
+			}
+		}
+	}
+	return results, allPassed
+}
+
+// runStepsParallel runs lint+check+test concurrently, then build sequentially.
+// This mirrors GitHub Actions CI where test/typecheck/lint are parallel matrix jobs.
+// Build runs last because it writes to dist/ and could interfere with type checking.
+func runStepsParallel(cfg *config.Config, steps []stepDef, failFast bool) ([]ciStep, bool) {
+	// Split steps into parallel group (lint, check, test) and sequential group (build)
+	var parallelSteps []stepDef
+	var sequentialSteps []stepDef
+	for _, s := range steps {
+		if s.name == "build" {
+			sequentialSteps = append(sequentialSteps, s)
+		} else {
+			parallelSteps = append(parallelSteps, s)
+		}
+	}
+
+	// Create a cancellable context for fail-fast
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Run parallel group
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	parallelResults := make([]ciStep, len(parallelSteps))
+	allPassed := true
+
+	if !cfg.JSONMode {
+		var names []string
+		for _, s := range parallelSteps {
+			if !s.skip {
+				names = append(names, s.name)
+			}
+		}
+		if len(names) > 0 {
+			fmt.Printf("  > Running in parallel: %s\n", strings.Join(names, ", "))
+		}
+	}
+
+	for i, s := range parallelSteps {
+		if s.skip {
+			parallelResults[i] = ciStep{Name: s.name, Passed: true, Skipped: true}
+			continue
+		}
+
+		wg.Add(1)
+		go func(idx int, step stepDef) {
+			defer wg.Done()
+
+			// Check if already cancelled (fail-fast from another goroutine)
+			select {
+			case <-ctx.Done():
+				mu.Lock()
+				parallelResults[idx] = ciStep{
+					Name: step.name, Passed: false, Skipped: true,
+				}
+				mu.Unlock()
+				return
+			default:
+			}
+
+			start := time.Now()
+			timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 5*time.Minute)
+			defer timeoutCancel()
+
+			result, err := exec.RunContext(timeoutCtx, step.args[0], step.args[1:]...)
+			duration := time.Since(start).Seconds()
+
+			passed := err == nil && result != nil && result.OK()
+
+			mu.Lock()
+			parallelResults[idx] = ciStep{
+				Name: step.name, Passed: passed, Duration: duration,
+			}
+			if !cfg.JSONMode {
+				ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(step.name), duration))
+			}
+			if !passed {
+				allPassed = false
+				if failFast {
+					cancel() // Cancel remaining parallel steps
+				}
+			}
+			mu.Unlock()
+		}(i, s)
+	}
+
+	wg.Wait()
+
+	// Collect parallel results
+	var results []ciStep
+	results = append(results, parallelResults...)
+
+	// Run sequential group (build) only if parallel passed or not fail-fast
+	for _, s := range sequentialSteps {
+		if s.skip {
+			results = append(results, ciStep{Name: s.name, Passed: true, Skipped: true})
+			continue
+		}
+
+		if failFast && !allPassed {
+			results = append(results, ciStep{Name: s.name, Passed: false, Skipped: true})
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("  > %s...\n", capitalizeFirst(s.name))
+		}
+
+		start := time.Now()
+		result, err := exec.RunWithTimeout(5*time.Minute, s.args[0], s.args[1:]...)
+		duration := time.Since(start).Seconds()
+
+		passed := err == nil && result != nil && result.OK()
+		results = append(results, ciStep{
+			Name: s.name, Passed: passed, Duration: duration,
+		})
+
+		if !cfg.JSONMode {
+			ui.Step(passed, fmt.Sprintf("%s (%.1fs)", capitalizeFirst(s.name), duration))
+		}
+
+		if !passed {
+			allPassed = false
+		}
+	}
+
+	// Sort results back into canonical order for consistent output
+	order := map[string]int{"lint": 0, "check": 1, "test": 2, "build": 3}
+	sort.SliceStable(results, func(i, j int) bool {
+		return order[results[i].Name] < order[results[j].Name]
+	})
+
+	return results, allPassed
+}
+
 // containsAny returns true if the slice contains any of the given values.
 func containsAny(slice []string, values ...string) bool {
 	set := make(map[string]bool, len(slice))
@@ -982,6 +1142,7 @@ func init() {
 	ciCmd.Flags().Bool("skip-test", false, "Skip testing step")
 	ciCmd.Flags().Bool("skip-build", false, "Skip build step")
 	ciCmd.Flags().Bool("fail-fast", false, "Stop on first failure")
+	ciCmd.Flags().Bool("sequential", false, "Run steps sequentially (default: parallel)")
 	ciCmd.Flags().Bool("diagnose", false, "Show structured error diagnostics")
 	ciCmd.Flags().Bool("dry-run", false, "Preview all steps without execution")
 
