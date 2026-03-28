@@ -393,11 +393,11 @@ Flags:
 				runAll = true
 			}
 			if !runAll {
-				affectedPkgs, allChanged := detectAffectedCIPackages(root)
-				if allChanged {
+				result := detectAffectedCIPackages()
+				if result.runAll {
 					runAll = true
 				}
-				if len(affectedPkgs) == 0 && !runAll {
+				if len(result.shortNames) == 0 && !runAll {
 					if cfg.JSONMode {
 						data, _ := json.Marshal(map[string]interface{}{
 							"passed": true, "steps": []ciStep{}, "affected_packages": []string{},
@@ -409,12 +409,11 @@ Flags:
 					return nil
 				}
 				if !runAll {
-					scope = strings.Join(affectedPkgs, ", ")
-					for _, p := range affectedPkgs {
+					scope = strings.Join(result.shortNames, ", ")
+					for _, p := range result.shortNames {
 						filterArgs = append(filterArgs, "--filter", p)
 					}
-					// Reconstruct full paths for rebuild detection
-					affectedFullPaths = reconstructFullPaths(root, affectedPkgs)
+					affectedFullPaths = result.fullPaths
 				}
 			}
 			if runAll {
@@ -553,7 +552,8 @@ Flags:
 }
 
 // dependents maps a library to the packages that depend on it.
-// Mirrors .github/scripts/affected-packages.mjs DEPENDENTS.
+// Extends .github/scripts/affected-packages.mjs DEPENDENTS with prism/infra
+// chains. Keep in sync — if you add a package here, add it to the JS too.
 var dependents = map[string][]string{
 	"libs/foliage":  {"libs/engine"},
 	"libs/gossamer": {"libs/engine"},
@@ -576,6 +576,8 @@ var dependents = map[string][]string{
 		"workers/vista-collector",
 		"workers/warden",
 	},
+	"libs/vineyard": {},
+	"libs/shutter":  {},
 }
 
 // rootLevelFiles trigger a full CI run when changed.
@@ -622,10 +624,20 @@ func resolveTransitiveDependents(direct map[string]bool) map[string]bool {
 	return affected
 }
 
-// detectAffectedCIPackages returns package paths affected by changes since main.
+// ciAffectedResult holds both representations of affected packages.
+type ciAffectedResult struct {
+	// shortNames are for pnpm --filter (e.g. "engine", "plant")
+	shortNames []string
+	// fullPaths are for rebuild detection (e.g. "libs/engine", "apps/plant")
+	fullPaths []string
+	// runAll is true when root-level files changed, meaning all packages are affected
+	runAll bool
+}
+
+// detectAffectedCIPackages returns packages affected by changes since main.
 // Uses git diff origin/main...HEAD for committed changes AND git status for
 // uncommitted changes — matching the detection strategy of GitHub Actions CI.
-func detectAffectedCIPackages(root string) ([]string, bool) {
+func detectAffectedCIPackages() ciAffectedResult {
 	directlyChanged := map[string]bool{}
 	runAll := false
 
@@ -637,11 +649,8 @@ func detectAffectedCIPackages(root string) ([]string, bool) {
 			if file == "" {
 				continue
 			}
-			// Check for root-level changes
-			for _, root := range rootLevelFiles {
-				if file == root || strings.HasPrefix(file, "scripts/") {
-					runAll = true
-				}
+			if isRootLevelChange(file) {
+				runAll = true
 			}
 			if pkg := fileToPackagePath(file); pkg != "" {
 				directlyChanged[pkg] = true
@@ -657,10 +666,8 @@ func detectAffectedCIPackages(root string) ([]string, bool) {
 				continue
 			}
 			file := strings.TrimSpace(line[3:])
-			for _, rf := range rootLevelFiles {
-				if file == rf || strings.HasPrefix(file, "scripts/") {
-					runAll = true
-				}
+			if isRootLevelChange(file) {
+				runAll = true
 			}
 			if pkg := fileToPackagePath(file); pkg != "" {
 				directlyChanged[pkg] = true
@@ -669,21 +676,34 @@ func detectAffectedCIPackages(root string) ([]string, bool) {
 	}
 
 	if len(directlyChanged) == 0 && !runAll {
-		return nil, false
+		return ciAffectedResult{}
 	}
 
 	// Resolve transitive dependents
 	affected := resolveTransitiveDependents(directlyChanged)
 
-	var pkgs []string
+	var shortNames []string
+	var fullPaths []string
 	for pkg := range affected {
+		fullPaths = append(fullPaths, pkg)
 		// Convert "libs/engine" → "engine" for pnpm --filter
 		parts := strings.SplitN(pkg, "/", 2)
 		if len(parts) == 2 {
-			pkgs = append(pkgs, parts[1])
+			shortNames = append(shortNames, parts[1])
 		}
 	}
-	return pkgs, runAll
+	return ciAffectedResult{shortNames: shortNames, fullPaths: fullPaths, runAll: runAll}
+}
+
+// isRootLevelChange returns true if a file path represents a root-level
+// change that should trigger a full CI run.
+func isRootLevelChange(file string) bool {
+	for _, rf := range rootLevelFiles {
+		if file == rf {
+			return true
+		}
+	}
+	return strings.HasPrefix(file, "scripts/")
 }
 
 // runInPackage runs a command in a specific package directory.
@@ -786,22 +806,6 @@ func containsAny(slice []string, values ...string) bool {
 		}
 	}
 	return false
-}
-
-// reconstructFullPaths converts short package names (e.g. "engine") back to
-// full monorepo paths (e.g. "libs/engine") by checking which directory exists.
-func reconstructFullPaths(root string, shortNames []string) []string {
-	var paths []string
-	for _, name := range shortNames {
-		for _, prefix := range []string{"libs", "apps", "services", "workers", "packages"} {
-			dir := filepath.Join(root, prefix, name)
-			if info, err := os.Stat(dir); err == nil && info.IsDir() {
-				paths = append(paths, prefix+"/"+name)
-				break
-			}
-		}
-	}
-	return paths
 }
 
 // rebuildLibraries runs build/package commands for affected libraries,

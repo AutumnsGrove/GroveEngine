@@ -214,11 +214,34 @@ func TestCapitalizeFirst(t *testing.T) {
 
 // --- CI affected packages tests ---
 
-func TestDetectAffectedCIPackagesEmpty(t *testing.T) {
-	// When called with a nonexistent root, should return nil/empty
-	pkgs, _ := detectAffectedCIPackages("/nonexistent/path")
-	// May or may not be empty depending on git status, but should not panic
-	_ = pkgs
+func TestDetectAffectedCIPackagesNoOp(t *testing.T) {
+	// On a clean branch at main, should return empty or non-empty
+	// depending on git state, but should never panic
+	result := detectAffectedCIPackages()
+	_ = result.shortNames
+	_ = result.fullPaths
+	_ = result.runAll
+}
+
+func TestIsRootLevelChange(t *testing.T) {
+	tests := []struct {
+		file string
+		want bool
+	}{
+		{"package.json", true},
+		{"pnpm-lock.yaml", true},
+		{"tsconfig.json", true},
+		{"scripts/foo.sh", true},
+		{"libs/engine/src/index.ts", false},
+		{"apps/plant/package.json", false},
+		{"", false},
+	}
+	for _, tt := range tests {
+		got := isRootLevelChange(tt.file)
+		if got != tt.want {
+			t.Errorf("isRootLevelChange(%q) = %v, want %v", tt.file, got, tt.want)
+		}
+	}
 }
 
 func TestFileToPackagePath(t *testing.T) {
