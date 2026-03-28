@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import InternalsPostViewer from "../../ui/components/custom/InternalsPostViewer.svelte";
-	let { ...props }: Record<string, any> = $props();
+	let { ...props } = $props<any>();
 </script>
 
 <InternalsPostViewer {...props} />

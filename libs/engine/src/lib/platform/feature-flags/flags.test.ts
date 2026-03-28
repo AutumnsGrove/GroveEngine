@@ -186,7 +186,7 @@ describe("Grafts API", () => {
 			// Assert: Should return empty record, not throw
 			expect(grafts).toEqual({});
 			expect(consoleSpy).toHaveBeenCalledWith(
-				expect.stringContaining("[Grafts]"),
+				expect.stringContaining("[Flags]"),
 				expect.any(Error),
 			);
 

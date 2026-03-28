@@ -17,7 +17,7 @@
 	 */
 
 	import { browser } from "$app/environment";
-	import type { BaseGraftProps } from "../../grafts/types.js";
+	import type { BaseGraftProps } from "../../platform/types.js";
 	import { GROVEAUTH_URLS } from "./config.js";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";

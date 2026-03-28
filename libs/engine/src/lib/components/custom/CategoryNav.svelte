@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import CategoryNav from "../../ui/components/custom/CategoryNav.svelte";
-	let { ...props }: Record<string, any> = $props();
+	let { ...props } = $props<any>();
 </script>
 
 <CategoryNav {...props} />

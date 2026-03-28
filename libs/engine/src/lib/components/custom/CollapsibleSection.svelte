@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import CollapsibleSection from "../../ui/components/custom/CollapsibleSection.svelte";
-	let { ...props }: Record<string, any> = $props();
+	let { ...props } = $props<any>();
 </script>
 
 <CollapsibleSection {...props} />

@@ -6,7 +6,7 @@
  */
 
 import type { Snippet } from "svelte";
-import type { BaseGraftProps } from "../../grafts/types.js";
+import type { BaseGraftProps } from "../../platform/types.js";
 
 // =============================================================================
 // AUTH PROVIDER TYPES

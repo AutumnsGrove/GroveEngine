@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import ContentWithGutter from "../../ui/components/custom/ContentWithGutter.svelte";
-	let { ...props }: Record<string, any> = $props();
+	let { ...props } = $props<any>();
 </script>
 
 <ContentWithGutter {...props} />

@@ -594,8 +594,8 @@ describe("Rate Check Bridge", () => {
 			const { db, prepare } = createMockDB();
 
 			// Mock recordViolation to simulate ban
-			vi.mock("../../threshold/abuse.js", async (importOriginal) => {
-				const actual = await importOriginal<typeof import("../../threshold/abuse.js")>();
+			vi.mock("../../platform/threshold/abuse.js", async (importOriginal) => {
+				const actual = await importOriginal<typeof import("../../platform/threshold/abuse.js")>();
 				return {
 					...actual,
 					recordViolation: vi.fn().mockResolvedValue({

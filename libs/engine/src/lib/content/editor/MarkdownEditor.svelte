@@ -14,8 +14,8 @@
 		getActionableUploadError,
 		isConvertibleFormat,
 		normalizeFileForUpload,
-	} from "$lib/media/upload-validation";
-	import { convertHeicToJpeg } from "$lib/media/imageProcessor";
+	} from "$lib/media/validation/upload-validation";
+	import { convertHeicToJpeg } from "$lib/media/processing/imageProcessor";
 	import FiresideChat from "../../components/admin/FiresideChat.svelte";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
 	import { browser } from "$app/environment";

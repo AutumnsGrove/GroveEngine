@@ -41,7 +41,7 @@ export { canUploadImages, type UploadGateResult } from "./upload-gate.js";
 // Vista Observability
 // ============================================================================
 
-export * from "./observability/index.js";
+export * from "../monitoring/observability/index.js";
 
 // ============================================================================
 // Type Safety Utilities (Rootwork)

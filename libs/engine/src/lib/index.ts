@@ -10,8 +10,12 @@ export { default as CollapsibleSection } from "./components/custom/CollapsibleSe
 export { default as CategoryNav } from "./components/custom/CategoryNav.svelte";
 
 // TOC and CategoryNav types and constants
-export type { TOCHeader, CategoryNavSection, CategoryNavItem } from "./components/custom/types.js";
-export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./components/custom/types.js";
+export type {
+	TOCHeader,
+	CategoryNavSection,
+	CategoryNavItem,
+} from "./ui/components/custom/types.js";
+export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./ui/components/custom/types.js";
 
 // Admin components
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
@@ -47,8 +51,8 @@ export {
 	FONT_PRESETS,
 	DEFAULT_FONT,
 	getFontFamily,
-} from "./config/presets.js";
-export type { ColorPreset, FontPreset } from "./config/presets.js";
+} from "./platform/config/presets.js";
+export type { ColorPreset, FontPreset } from "./platform/config/presets.js";
 
 // Canopy categories
 export {
@@ -58,8 +62,8 @@ export {
 	CANOPY_SETTINGS_SCHEMA,
 	isValidCanopyCategory,
 	parseCanopyCategories,
-} from "./config/canopy-categories.js";
-export type { CanopyCategory } from "./config/canopy-categories.js";
+} from "./platform/config/canopy-categories.js";
+export type { CanopyCategory } from "./platform/config/canopy-categories.js";
 
 // =============================================================================
 // Curios - Developer Tools & Fun Website Features

@@ -146,9 +146,9 @@ export interface AuthMiddlewareOptions<
  * ```
  */
 export function createAuthMiddleware<
-	THono extends { Bindings: Record<string, unknown>; Variables: Record<string, unknown> } = {
-		Bindings: Record<string, unknown>;
-		Variables: Record<string, unknown>;
+	THono extends { Bindings: Record<string, any>; Variables: Record<string, any> } = {
+		Bindings: Record<string, any>;
+		Variables: Record<string, any>;
 	},
 >(options: AuthMiddlewareOptions<THono["Bindings"]>): MiddlewareHandler<THono> {
 	const {
