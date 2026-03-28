@@ -8,10 +8,6 @@
 	import { groveDirectivePlugin } from "$lib/utils/markdown-directives";
 	editorMd.use(groveDirectivePlugin);
 	import "$lib/styles/content.css";
-	import Button from "$lib/ui/components/ui/Button.svelte";
-	import Input from "$lib/ui/components/ui/Input.svelte";
-	import Logo from "$lib/ui/components/ui/Logo.svelte";
-	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { apiRequest } from "$lib/utils/api";
 	import {
@@ -20,22 +16,17 @@
 		normalizeFileForUpload,
 	} from "$lib/utils/upload-validation";
 	import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
-	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-	import {
-		stateIcons,
-		actionIcons,
-		featureIcons,
-		natureIcons,
-		chromeIcons,
-	} from "@autumnsgrove/prism/icons";
-	import CurioAutocomplete from "../../components/admin/CurioAutocomplete.svelte";
 	import FiresideChat from "../../components/admin/FiresideChat.svelte";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
-	import VoiceInput from "../../components/admin/VoiceInput.svelte";
 	import { browser } from "$app/environment";
 
-	// Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
+	// Import composables
 	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
+
+	// Import sub-components
+	import FormattingToolbar from "./FormattingToolbar.svelte";
+	import EditorCore from "./EditorCore.svelte";
+	import FullPreviewModal from "./FullPreviewModal.svelte";
 
 	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
 
@@ -82,7 +73,7 @@
 		serverDraftSlug = null,
 	}: Props = $props();
 
-	// Derived flags - add new ones here as they're created
+	// Derived flags
 	const wispEnabled = $derived(flags?.wisp_enabled ?? false);
 	const firesideEnabled = $derived(flags?.fireside_mode ?? false);
 	const scribeEnabled = $derived(flags?.scribe_mode ?? false);
@@ -93,8 +84,7 @@
 	let previewRef: HTMLElement | null = $state(null);
 	let lineNumbersRef: HTMLElement | null = $state(null);
 
-	// Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
-	// Initialize from localStorage synchronously to avoid flash of wrong mode
+	// Editor mode
 	let editorMode: "write" | "split" | "preview" = $state(
 		(() => {
 			if (browser) {
@@ -103,14 +93,14 @@
 					return saved;
 				}
 			}
-			return "write"; // Default to source/raw mode for focused writing
+			return "write";
 		})(),
 	);
 
 	let cursorLine = $state(1);
 	let cursorCol = $state(1);
 	let isUpdating = $state(false);
-	let isProgrammaticUpdate = $state(false); // Flag to skip oninput during toolbar operations
+	let isProgrammaticUpdate = $state(false);
 
 	// Image upload state
 	let isDragging = $state(false);
@@ -129,7 +119,7 @@
 	let showCurioAutocomplete = $state(false);
 	let curioQuery = $state("");
 	let curioAutocompletePos = $state({ top: 0, left: 0 });
-	let curioTriggerStart = $state(0); // character index where :: begins
+	let curioTriggerStart = $state(0);
 	let curioAutocompleteRef: { handleKey: (e: KeyboardEvent) => boolean } | null = $state(null);
 
 	// Editor settings
@@ -143,10 +133,10 @@
 	// Zen mode
 	let isZenMode = $state(false);
 
-	// Fireside mode (conversational writing)
+	// Fireside mode
 	let isFiresideMode = $state(false);
 
-	// Voice mode (Scribe transcription)
+	// Voice mode
 	let voiceMode: "raw" | "draft" = $state("raw");
 	let voiceError: string | null = $state(null);
 
@@ -164,38 +154,23 @@
 		serverSlug: serverDraftSlug,
 	});
 
-	// Note: Slash commands and command palette removed for simplified Medium-style UX
-
-	// Debounced preview HTML - avoid expensive markdown rendering on every keystroke
-	// Cache the last rendered HTML to prevent jank during typing
+	// Debounced preview HTML
 	let debouncedContent = $state(content);
-	// NOT $state - these are cleanup handles, not reactive state
-	// Using $state here causes infinite loops (effect writes to state it reads)
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let isMounted: boolean = true;
 
-	// Update debounced content after 150ms of no typing
 	$effect(() => {
-		// Reset mounted flag — cleanup sets it to false before each re-run,
-		// so we must restore it here. It only stays false after final unmount.
 		isMounted = true;
-
-		// Clear any existing timer
 		if (debounceTimer) clearTimeout(debounceTimer);
-
-		// Capture current content for the closure
 		const currentContent = content;
-
 		debounceTimer = setTimeout(() => {
-			// Only update if component is still mounted (prevents race condition)
 			if (isMounted) {
 				debouncedContent = currentContent;
 			}
 		}, 150);
-
 		return () => {
 			if (debounceTimer) clearTimeout(debounceTimer);
-			isMounted = false; // Mark as unmounted on cleanup
+			isMounted = false;
 		};
 	});
 
@@ -203,8 +178,6 @@
 	let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
 	let charCount = $derived(content.length);
 	let lineCount = $derived(content.split("\n").length);
-	// Use debounced content for expensive operations (markdown rendering)
-	// Note: editorMd has html:false so output is already safe — no sanitization needed for admin preview
 	let previewHtml = $derived(debouncedContent ? editorMd.render(debouncedContent) : "");
 	let previewHeaders = $derived(debouncedContent ? extractHeaders(debouncedContent) : []);
 
@@ -233,7 +206,7 @@
 		return anchors;
 	});
 
-	// Public exports
+	// Public exports (API must not change)
 	export function getAvailableAnchors() {
 		return availableAnchors;
 	}
@@ -256,7 +229,7 @@
 
 	// Cursor position tracking
 	function updateCursorPosition() {
-		if (!textareaRef || isProgrammaticUpdate) return; // Skip during programmatic updates
+		if (!textareaRef || isProgrammaticUpdate) return;
 		const pos = textareaRef.selectionStart;
 		const textBefore = content.substring(0, pos);
 		const lines = textBefore.split("\n");
@@ -264,35 +237,30 @@
 		cursorCol = lines[lines.length - 1].length + 1;
 	}
 
-	// Curio autocomplete: detect :: trigger and track query
+	// Curio autocomplete
 	function checkCurioTrigger() {
 		if (!textareaRef || isProgrammaticUpdate) return;
 		const pos = textareaRef.selectionStart;
 		const textBefore = content.substring(0, pos);
 
-		// Find the last :: in the text before cursor
 		const lastTrigger = textBefore.lastIndexOf("::");
 		if (lastTrigger === -1) {
 			if (showCurioAutocomplete) showCurioAutocomplete = false;
 			return;
 		}
 
-		// Extract text between :: and cursor
 		const afterTrigger = textBefore.substring(lastTrigger + 2);
 
-		// If there's another :: in the text after trigger, it's a complete directive — close
 		if (afterTrigger.includes("::")) {
 			if (showCurioAutocomplete) showCurioAutocomplete = false;
 			return;
 		}
 
-		// Query should only contain word characters (alphanumeric). Space or special chars = close.
 		if (afterTrigger && !/^\w*$/.test(afterTrigger)) {
 			if (showCurioAutocomplete) showCurioAutocomplete = false;
 			return;
 		}
 
-		// Check that :: is at start of line or preceded by whitespace/newline
 		if (lastTrigger > 0) {
 			const charBefore = textBefore[lastTrigger - 1];
 			if (charBefore !== "\n" && charBefore !== " " && charBefore !== "\t") {
@@ -301,34 +269,27 @@
 			}
 		}
 
-		// We have a valid trigger — calculate position and show autocomplete
 		curioTriggerStart = lastTrigger;
 		curioQuery = afterTrigger;
 
-		// Calculate dropdown position from cursor
 		if (textareaRef) {
 			const textareaRect = textareaRef.getBoundingClientRect();
 			const editorContainer = textareaRef.closest(".editor-container");
 			const containerRect = editorContainer?.getBoundingClientRect() || textareaRect;
 
-			// Approximate position: line height × line number, adjusted for scroll
 			const lineHeight = parseFloat(getComputedStyle(textareaRef).lineHeight) || 24;
-			const textareaPadding = 16; // 1rem padding inside textarea
+			const textareaPadding = 16;
 
-			// Current line of the cursor
 			const linesBeforeCursor = textBefore.split("\n");
 			const currentLine = linesBeforeCursor.length;
 			const currentCol = linesBeforeCursor[linesBeforeCursor.length - 1].length;
 
-			// Position relative to editor container
 			const top =
 				textareaRect.top - containerRect.top + currentLine * lineHeight - textareaRef.scrollTop + 4;
 
-			// Left: start from textarea's left edge (after line numbers), add cursor column offset
 			const textareaLeftInContainer = textareaRect.left - containerRect.left;
-			const charWidth = 8; // approximate monospace char width at 0.9rem
+			const charWidth = 8;
 			const cursorLeft = textareaLeftInContainer + textareaPadding + currentCol * charWidth;
-			// Clamp so the dropdown (240-320px wide) doesn't overflow the right edge
 			const maxLeft = containerRect.width - 260;
 			const left = Math.max(
 				textareaLeftInContainer + textareaPadding,
@@ -341,17 +302,12 @@
 		showCurioAutocomplete = true;
 	}
 
-	/**
-	 * Handle curio selection from autocomplete.
-	 * Replaces the :: trigger + query with the full directive.
-	 */
 	async function handleCurioSelect(directiveText: string, cursorOffset: number) {
 		if (!textareaRef) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
 
 		const pos = textareaRef.selectionStart;
-		// Delete from trigger start (the ::) to current cursor position
 		const before = content.substring(0, curioTriggerStart);
 		const after = content.substring(pos);
 		content = before + directiveText + after;
@@ -360,7 +316,6 @@
 
 		await tick();
 
-		// Place cursor at the specified offset within the inserted directive
 		const newCursorPos = curioTriggerStart + cursorOffset;
 		textareaRef.selectionStart = textareaRef.selectionEnd = newCursorPos;
 		textareaRef.focus();
@@ -373,9 +328,8 @@
 		showCurioAutocomplete = false;
 	}
 
-	// Keyboard handlers (simplified - removed slash commands and command palette)
+	// Keyboard handlers
 	function handleKeydown(e: KeyboardEvent) {
-		// Curio autocomplete intercepts keys first when open
 		if (showCurioAutocomplete && curioAutocompleteRef) {
 			const handled = curioAutocompleteRef.handleKey(e);
 			if (handled) {
@@ -384,7 +338,6 @@
 			}
 		}
 
-		// Escape key handling - close autocomplete first, then zen mode
 		if (e.key === "Escape") {
 			if (showCurioAutocomplete) {
 				showCurioAutocomplete = false;
@@ -397,13 +350,11 @@
 			}
 		}
 
-		// Zen mode: Cmd+Shift+Enter
 		if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
 			e.preventDefault();
 			toggleZenMode();
 		}
 
-		// Tab for indentation
 		if (e.key === "Tab" && textareaRef) {
 			e.preventDefault();
 			const start = textareaRef.selectionStart;
@@ -416,25 +367,21 @@
 			}, 0);
 		}
 
-		// Cmd/Ctrl + S to save
 		if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			onSave();
 		}
 
-		// Cmd/Ctrl + B for bold
 		if (e.key === "b" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			wrapSelection("**", "**");
 		}
 
-		// Cmd/Ctrl + I for italic
 		if (e.key === "i" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			wrapSelection("_", "_");
 		}
 
-		// Mode switching: Cmd/Ctrl + 1/2/3
 		if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
 			if (e.key === "1") {
 				e.preventDefault();
@@ -448,13 +395,11 @@
 			}
 		}
 
-		// Cmd/Ctrl + P to cycle modes (when not in preview-only)
 		if (e.key === "p" && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
 			e.preventDefault();
 			cycleEditorMode();
 		}
 
-		// Cmd/Ctrl + Shift + F for Fireside mode (only if graft enabled)
 		if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey && wispEnabled && firesideEnabled) {
 			e.preventDefault();
 			toggleFiresideMode();
@@ -463,32 +408,26 @@
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape") {
-			// Close curio autocomplete first (handled inline by textarea keydown too,
-			// but this catches Escape when textarea isn't focused)
 			if (showCurioAutocomplete) {
 				showCurioAutocomplete = false;
 				e.preventDefault();
 				return;
 			}
-			// Close photo picker first (highest priority - it has its own handler too)
 			if (showPhotoPicker) {
 				showPhotoPicker = false;
 				e.preventDefault();
 				return;
 			}
-			// Exit Fireside mode first (highest priority)
 			if (isFiresideMode) {
 				isFiresideMode = false;
 				e.preventDefault();
 				return;
 			}
-			// Exit zen mode second
 			if (isZenMode) {
 				isZenMode = false;
 				e.preventDefault();
 				return;
 			}
-			// Then check for full preview
 			if (showFullPreview) {
 				showFullPreview = false;
 				e.preventDefault();
@@ -506,75 +445,48 @@
 
 	// Fireside mode toggle
 	function toggleFiresideMode() {
-		// Can't use Fireside if there's already content (it's for starting fresh)
 		if (!isFiresideMode && content.trim()) {
-			// Could show a warning here, but for now just don't toggle
 			return;
 		}
 		isFiresideMode = !isFiresideMode;
 	}
 
-	/**
-	 * Handle accepting a draft from Fireside mode
-	 */
 	function handleFiresideDraft(draft: { title: string; content: string; marker: string }) {
-		// Set the content (with the marker appended)
 		content = draft.content + "\n\n" + draft.marker;
-
-		// Set the title if the prop is bindable
 		if (draft.title) {
 			previewTitle = draft.title;
 		}
-
-		// Mark as fireside-assisted
 		firesideAssisted = true;
-
-		// Exit Fireside mode
 		isFiresideMode = false;
-
-		// Focus the textarea after a tick
 		tick().then(() => {
 			textareaRef?.focus();
 		});
 	}
 
-	// Handle closing Fireside without a draft
 	function handleFiresideClose() {
 		isFiresideMode = false;
 	}
 
-	/**
-	 * Handle transcription result from VoiceInput.
-	 * Inserts transcribed text at cursor position.
-	 */
 	function handleTranscription(result: {
 		text: string;
 		gutterContent?: Array<{ type: string; content: string; anchor?: string }>;
 		rawTranscript?: string;
 	}) {
 		voiceError = null;
-
 		if (!textareaRef) return;
 
-		const { text, gutterContent } = result;
-
-		// Get cursor position
+		const { text } = result;
 		const start = textareaRef.selectionStart;
 		const end = textareaRef.selectionEnd;
-
-		// Insert text at cursor
 		const before = content.substring(0, start);
 		const after = content.substring(end);
 
-		// Add space before/after if needed
 		const needsSpaceBefore = before.length > 0 && !/\s$/.test(before);
 		const needsSpaceAfter = after.length > 0 && !/^\s/.test(after);
-
 		const insertText = (needsSpaceBefore ? " " : "") + text + (needsSpaceAfter ? " " : "");
 
 		content = before + insertText + after;
 
-		// Move cursor to end of inserted text
 		tick().then(() => {
 			if (textareaRef) {
 				const newPos = start + insertText.length;
@@ -582,18 +494,10 @@
 				textareaRef.focus();
 			}
 		});
-
-		// TODO: Handle gutterContent when Vine integration is ready
-		// gutterContent is available but not yet merged with gutterItems prop
 	}
 
-	/**
-	 * Handle voice input error.
-	 */
 	function handleVoiceError(error: { message: string }) {
 		voiceError = error.message;
-
-		// Clear error after 5 seconds
 		setTimeout(() => {
 			voiceError = null;
 		}, 5000);
@@ -605,8 +509,6 @@
 		if (browser) {
 			localStorage.setItem("editor-mode", mode);
 		}
-		// Focus textarea when switching to write or split mode.
-		// Use preventScroll to avoid resetting the viewport position.
 		if (mode !== "preview" && textareaRef) {
 			setTimeout(() => textareaRef?.focus({ preventScroll: true }), 50);
 		}
@@ -618,10 +520,6 @@
 		const nextIndex = (currentIndex + 1) % modes.length;
 		setEditorMode(modes[nextIndex]);
 	}
-
-	// Note: Editor mode is now initialized synchronously at declaration time
-	// using an IIFE that reads from localStorage. This prevents the flash of
-	// wrong mode that occurred when loadEditorMode() was called in $effect.
 
 	// Typewriter scrolling
 	function applyTypewriterScroll() {
@@ -650,7 +548,7 @@
 		const selectedText = content.substring(start, end);
 		content = content.substring(0, start) + before + selectedText + after + content.substring(end);
 
-		await tick(); // Wait for Svelte to update DOM
+		await tick();
 
 		textareaRef.selectionStart = start + before.length;
 		textareaRef.selectionEnd = end + before.length;
@@ -668,7 +566,7 @@
 		const start = textareaRef.selectionStart;
 		content = content.substring(0, start) + text + content.substring(start);
 
-		await tick(); // Wait for Svelte to update DOM
+		await tick();
 
 		textareaRef.selectionStart = textareaRef.selectionEnd = start + text.length;
 		textareaRef.focus();
@@ -686,10 +584,6 @@
 		wrapSelection("[", "](url)");
 	}
 
-	function insertImage() {
-		insertAtCursor("![alt text](image-url)");
-	}
-
 	function handlePhotoInsert(urls: string[]) {
 		showPhotoPicker = false;
 		if (urls.length === 0) return;
@@ -700,40 +594,10 @@
 		}
 	}
 
-	async function insertCodeBlock() {
-		if (!textareaRef || isUpdating) return;
-		isUpdating = true;
-		isProgrammaticUpdate = true;
-
-		const start = textareaRef.selectionStart;
-		const end = textareaRef.selectionEnd;
-		const selectedText = content.substring(start, end);
-		const codeBlock = "```\n" + (selectedText || "code here") + "\n```";
-		content = content.substring(0, start) + codeBlock + content.substring(end);
-
-		await tick(); // Wait for Svelte to update DOM
-
-		textareaRef.selectionStart = textareaRef.selectionEnd = start + codeBlock.length;
-		textareaRef.focus();
-
-		isProgrammaticUpdate = false;
-		isUpdating = false;
-	}
-
-	function insertList() {
-		insertAtCursor("- ");
-	}
-
-	function insertQuote() {
-		insertAtCursor("> ");
-	}
-
 	// Scroll sync
 	function handleScroll() {
 		syncLineNumbersScroll();
-		// Close autocomplete on scroll to prevent visual drift
 		if (showCurioAutocomplete) showCurioAutocomplete = false;
-		// Sync scroll with preview when in split or preview mode
 		if (textareaRef && previewRef && editorMode !== "write") {
 			const scrollRatio =
 				textareaRef.scrollTop / (textareaRef.scrollHeight - textareaRef.clientHeight);
@@ -752,28 +616,6 @@
 	$effect(() => {
 		if (draftKey && !readonly) {
 			draftManager.scheduleSave(content);
-		}
-	});
-
-	// Full preview modal focus management
-	let previouslyFocusedBeforePreview: HTMLElement | null = null;
-	let fullPreviewModalRef: HTMLDivElement | null = $state(null);
-
-	$effect(() => {
-		if (showFullPreview) {
-			// Store the currently focused element to restore on close
-			const activeEl = document.activeElement;
-			if (activeEl instanceof HTMLElement) {
-				previouslyFocusedBeforePreview = activeEl;
-			}
-			// Focus the modal for keyboard accessibility
-			setTimeout(() => {
-				fullPreviewModalRef?.focus();
-			}, 50);
-		} else if (previouslyFocusedBeforePreview) {
-			// Restore focus when modal closes
-			previouslyFocusedBeforePreview.focus();
-			previouslyFocusedBeforePreview = null;
 		}
 	});
 
@@ -823,7 +665,6 @@
 	}
 
 	async function uploadImage(file: File) {
-		// Pre-check: is the feature enabled via flags?
 		if (!uploadsEnabled) {
 			toast.warning(
 				"Your grove needs a little time to sprout before photo uploads are available. You can paste external image URLs using the link button instead!",
@@ -837,12 +678,9 @@
 		lastFailedFile = null;
 
 		try {
-			// Normalize file: detect actual format from magic bytes, fix MIME/extension
-			// mismatches, and flag HEIF files disguised as JPEG (common on iPads)
 			const normalized = await normalizeFileForUpload(file);
 			file = normalized.file;
 
-			// Convert HEIC/HEIF to JPEG before uploading
 			if (normalized.needsHeicConversion || isConvertibleFormat(file)) {
 				uploadProgress = `Converting ${file.name}...`;
 				file = await convertHeicToJpeg(file);
@@ -911,27 +749,22 @@
 		}
 	}
 
-	// Flush draft to localStorage on page unload (session expiry, tab close, navigation)
+	// Draft lifecycle
 	function handleBeforeUnload() {
 		draftManager.flushSave();
 	}
 
-	// Flush draft when page becomes hidden (tab switch, app switch, screen lock)
 	function handleVisibilityChange() {
 		if (document.visibilityState === "hidden") {
 			draftManager.flushSave();
 		}
 	}
 
-	// Initialize editor on mount — untrack prevents re-running on content/ref changes.
-	// IMPORTANT: Do NOT call functions that read reactive state (like updateCursorPosition)
-	// inside this effect — it would cause init() to re-run on every keystroke, re-showing
-	// the draft banner after dismiss and breaking restore/discard on touch devices.
+	// Initialize editor on mount
 	$effect(() => {
 		editorTheme.loadTheme();
 		draftManager.init(untrack(() => content));
 
-		// Register page lifecycle handlers to prevent draft loss
 		window.addEventListener("beforeunload", handleBeforeUnload);
 		document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -1013,211 +846,40 @@
 		</div>
 	{/if}
 
-	<!-- Mode-based Toolbar (hidden in Fireside mode) -->
-	{#if !isFiresideMode}
-		<div class="toolbar">
-			<div class="toolbar-left">
-				{#if editorMode !== "preview"}
-					<!-- Formatting buttons -->
-					<div class="toolbar-group formatting-group">
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => wrapSelection("**", "**")}
-							disabled={readonly}
-							title="Bold (⌘B)"
-							aria-label="Bold"
-						>
-							<actionIcons.bold class="toolbar-icon" />
-						</button>
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => wrapSelection("_", "_")}
-							disabled={readonly}
-							title="Italic (⌘I)"
-							aria-label="Italic"
-						>
-							<actionIcons.italic class="toolbar-icon" />
-						</button>
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => wrapSelection("`", "`")}
-							disabled={readonly}
-							title="Inline code"
-							aria-label="Code"
-						>
-							<featureIcons.code class="toolbar-icon" />
-						</button>
-					</div>
-
-					<div class="toolbar-divider-line"></div>
-
-					<div class="toolbar-group formatting-group">
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => insertLink()}
-							disabled={readonly}
-							title="Insert link"
-							aria-label="Link"
-						>
-							<actionIcons.link class="toolbar-icon" />
-						</button>
-					</div>
-
-					<div class="toolbar-divider-line"></div>
-					<div class="toolbar-group formatting-group">
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => (showPhotoPicker = true)}
-							disabled={readonly}
-							title="Insert photo from gallery"
-							aria-label="Insert photo from gallery"
-						>
-							<featureIcons.images class="toolbar-icon" />
-						</button>
-					</div>
-
-					<div class="toolbar-divider-line"></div>
-
-					<div class="toolbar-group formatting-group">
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => insertHeading(1)}
-							disabled={readonly}
-							title="Heading 1"
-							aria-label="Heading 1"
-						>
-							<actionIcons.heading1 class="toolbar-icon" />
-						</button>
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => insertHeading(2)}
-							disabled={readonly}
-							title="Heading 2"
-							aria-label="Heading 2"
-						>
-							<actionIcons.heading2 class="toolbar-icon" />
-						</button>
-						<button
-							type="button"
-							class="toolbar-icon-btn fmt-btn"
-							onclick={() => insertHeading(3)}
-							disabled={readonly}
-							title="Heading 3"
-							aria-label="Heading 3"
-						>
-							<actionIcons.heading3 class="toolbar-icon" />
-						</button>
-					</div>
-
-					<div class="toolbar-divider-line"></div>
-				{/if}
-
-				{#if wispEnabled && firesideEnabled && !content.trim()}
-					<button
-						type="button"
-						class="fireside-btn"
-						onclick={toggleFiresideMode}
-						title="Fireside Mode (⌘⇧F) - Start with a conversation"
-						aria-label="Enter Fireside mode for conversational writing"
-					>
-						<natureIcons.flame class="toolbar-icon fireside-icon" />
-						<span>Fireside</span>
-					</button>
-					<span class="toolbar-divider">|</span>
-				{/if}
-				<!-- Voice Input (Scribe) - gated by scribe_mode graft -->
-				{#if wispEnabled && scribeEnabled && editorMode !== "preview"}
-					<div
-						class="voice-wrapper"
-						title="Voice Input (⌘⇧U) - Hold to record, release to transcribe"
-					>
-						<VoiceInput
-							mode={voiceMode}
-							onTranscription={handleTranscription}
-							onError={handleVoiceError}
-							disabled={readonly}
-						/>
-						{#if voiceError}
-							<span class="voice-error">{voiceError}</span>
-						{/if}
-					</div>
-				{/if}
-				{#if editorMode === "preview"}
-					<span class="toolbar-hint">Preview mode (read-only)</span>
-				{/if}
-			</div>
-
-			<div class="toolbar-spacer"></div>
-
-			<div class="toolbar-group mode-group">
-				<button
-					type="button"
-					class="toolbar-icon-btn mode-btn"
-					class:active={editorMode === "write"}
-					onclick={() => setEditorMode("write")}
-					title="Source Mode (⌘1)"
-					aria-label="Source mode - editor only"
-				>
-					<actionIcons.penLine class="toolbar-icon" />
-				</button>
-				<button
-					type="button"
-					class="toolbar-icon-btn mode-btn"
-					class:active={editorMode === "split"}
-					onclick={() => setEditorMode("split")}
-					title="Split Mode (⌘2)"
-					aria-label="Split mode - editor and preview"
-				>
-					<actionIcons.columns class="toolbar-icon" />
-				</button>
-				<button
-					type="button"
-					class="toolbar-icon-btn mode-btn"
-					class:active={editorMode === "preview"}
-					onclick={() => setEditorMode("preview")}
-					title="Preview Mode (⌘3)"
-					aria-label="Preview mode - preview only"
-				>
-					<featureIcons.bookOpen class="toolbar-icon" />
-				</button>
-			</div>
-
-			<div class="toolbar-divider-line"></div>
-
-			<div class="toolbar-group">
-				<button
-					type="button"
-					class="toolbar-icon-btn full-btn"
-					onclick={() => (showFullPreview = true)}
-					title="Full Preview with Styling"
-					aria-label="Open full preview with blog styling"
-				>
-					<actionIcons.maximize class="toolbar-icon" />
-				</button>
-				<button
-					type="button"
-					class="toolbar-icon-btn zen-btn"
-					class:active={isZenMode}
-					onclick={toggleZenMode}
-					title={isZenMode ? "Exit Zen Mode (Esc)" : "Zen Mode (⌘⇧↵)"}
-					aria-label={isZenMode ? "Exit zen mode" : "Enter zen mode for focused writing"}
-				>
-					{#if isZenMode}
-						<actionIcons.minimize class="toolbar-icon" />
-					{:else}
-						<actionIcons.focus class="toolbar-icon" />
-					{/if}
-				</button>
-			</div>
-		</div>
-	{/if}
+	<!-- Formatting Toolbar + Status Bar -->
+	<FormattingToolbar
+		{editorMode}
+		{readonly}
+		{isZenMode}
+		{isFiresideMode}
+		{wispEnabled}
+		{firesideEnabled}
+		{scribeEnabled}
+		hasContent={!!content.trim()}
+		{saving}
+		{draftKey}
+		draftSaveStatus={draftManager.saveStatus}
+		draftHasUnsavedChanges={draftManager.hasUnsavedChanges(content)}
+		{serverDraftSlug}
+		serverSyncStatus={draftManager.serverSyncStatus}
+		{cursorLine}
+		{cursorCol}
+		{lineCount}
+		{wordCount}
+		{readingTime}
+		{voiceMode}
+		{voiceError}
+		onWrapSelection={wrapSelection}
+		onInsertLink={insertLink}
+		onInsertHeading={insertHeading}
+		onShowPhotoPicker={() => (showPhotoPicker = true)}
+		onSetEditorMode={setEditorMode}
+		onShowFullPreview={() => (showFullPreview = true)}
+		onToggleZenMode={toggleZenMode}
+		onToggleFiresideMode={toggleFiresideMode}
+		onTranscription={handleTranscription}
+		onVoiceError={handleVoiceError}
+	/>
 
 	<!-- Fireside Mode (replaces editor) -->
 	{#if isFiresideMode}
@@ -1225,129 +887,37 @@
 			<FiresideChat onDraft={handleFiresideDraft} onClose={handleFiresideClose} />
 		</div>
 	{:else}
-		<!-- Editor Area -->
-		<div
-			class="editor-area"
-			class:split={editorMode === "split"}
-			class:preview-only={editorMode === "preview"}
-		>
-			<!-- Editor Panel (hidden via CSS in preview mode to preserve scroll position & cursor) -->
-			<div class="editor-panel" class:editor-panel-hidden={editorMode === "preview"}>
-				<div class="editor-wrapper">
-					<div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
-						{#each lineNumbers as num}
-							<span class:current={num === cursorLine}>{num}</span>
-						{/each}
-					</div>
-					<textarea
-						aria-label="Markdown editor content"
-						bind:this={textareaRef}
-						bind:value={content}
-						oninput={() => {
-							updateCursorPosition();
-							checkCurioTrigger();
-						}}
-						onclick={() => {
-							updateCursorPosition();
-							if (showCurioAutocomplete) checkCurioTrigger();
-						}}
-						onkeyup={updateCursorPosition}
-						onkeydown={handleKeydown}
-						onscroll={handleScroll}
-						onpaste={handlePaste}
-						placeholder="Start writing your bloom... (Drag & drop or paste images)"
-						spellcheck="true"
-						disabled={readonly}
-						class="editor-textarea"
-					></textarea>
-				</div>
-			</div>
-
-			<!-- Preview Panel (shown in split and preview modes) -->
-			{#if editorMode === "split" || editorMode === "preview"}
-				<div class="preview-panel" class:full-width={editorMode === "preview"}>
-					<div class="preview-header">
-						<span class="preview-label"
-							>:: {editorMode === "preview" ? "preview (read-only)" : "live preview"}</span
-						>
-						<Logo class="preview-logo" />
-					</div>
-					<div class="preview-content" bind:this={previewRef}>
-						{#if previewHtml}
-							{#key previewHtml}
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized highlighted code -->
-								<div class="rendered-content">{@html previewHtml}</div>
-							{/key}
-						{:else}
-							<p class="preview-placeholder">
-								{editorMode === "preview"
-									? "No content to preview..."
-									: "Start typing to see your rendered markdown..."}
-							</p>
-						{/if}
-					</div>
-				</div>
-			{/if}
-		</div>
-	{/if}
-
-	<!-- Curio Autocomplete (rendered at editor-container level to avoid overflow:hidden clipping) -->
-	{#if showCurioAutocomplete}
-		<CurioAutocomplete
-			bind:this={curioAutocompleteRef}
-			query={curioQuery}
+		<!-- Editor Core (textarea, line numbers, preview panels, curio autocomplete) -->
+		<EditorCore
+			bind:content
+			{editorMode}
+			{readonly}
+			{previewHtml}
+			{lineNumbers}
+			{cursorLine}
 			{configuredCurios}
-			position={curioAutocompletePos}
-			onselect={handleCurioSelect}
-			onclose={closeCurioAutocomplete}
+			bind:textareaRef
+			bind:previewRef
+			bind:lineNumbersRef
+			bind:curioAutocompleteRef
+			onInput={() => {
+				updateCursorPosition();
+				checkCurioTrigger();
+			}}
+			onClick={() => {
+				updateCursorPosition();
+				if (showCurioAutocomplete) checkCurioTrigger();
+			}}
+			onKeyup={updateCursorPosition}
+			onKeydown={handleKeydown}
+			onScroll={handleScroll}
+			onPaste={handlePaste}
+			{showCurioAutocomplete}
+			{curioQuery}
+			{curioAutocompletePos}
+			onCurioSelect={handleCurioSelect}
+			onCurioClose={closeCurioAutocomplete}
 		/>
-	{/if}
-
-	<!-- Status Bar (hidden in Fireside mode) -->
-	{#if !isFiresideMode}
-		<div class="status-bar">
-			<div class="status-left">
-				<span class="status-item">Ln {cursorLine}, Col {cursorCol}</span>
-				<span class="status-divider">|</span>
-				<span class="status-item">{lineCount} lines</span>
-				<span class="status-divider">|</span>
-				<span class="status-item">{wordCount} words</span>
-				<span class="status-divider">|</span>
-				<span class="status-item">{readingTime}</span>
-			</div>
-			<div class="status-right">
-				<span class="status-mode-indicator" title="Editor mode (⌘1/2/3)">
-					{editorMode === "write" ? "Source" : editorMode === "split" ? "Split" : "Preview"}
-				</span>
-				{#if saving}
-					<span class="status-divider">|</span>
-					<span class="status-saving">Saving...</span>
-				{:else if draftKey && draftManager.saveStatus === "saving"}
-					<span class="status-divider">|</span>
-					<span class="status-draft-saving">Saving draft...</span>
-				{:else if draftKey && draftManager.saveStatus === "saved"}
-					<span class="status-divider">|</span>
-					<span class="status-draft-saved"
-						>Draft saved <stateIcons.check class="inline-block w-3 h-3" /></span
-					>
-				{:else if draftKey && draftManager.hasUnsavedChanges(content)}
-					<span class="status-divider">|</span>
-					<span class="status-draft-unsaved">Unsaved</span>
-				{/if}
-				{#if serverDraftSlug && draftManager.serverSyncStatus === "syncing"}
-					<span class="status-divider">|</span>
-					<span class="status-server-syncing" title="Syncing to server">Syncing...</span>
-				{:else if serverDraftSlug && draftManager.serverSyncStatus === "synced"}
-					<span class="status-divider">|</span>
-					<span class="status-server-synced" title="Synced to server">Synced</span>
-				{:else if serverDraftSlug && draftManager.serverSyncStatus === "error"}
-					<span class="status-divider">|</span>
-					<span class="status-server-error" title="Server sync failed (local draft is safe)"
-						>Sync error</span
-					>
-				{/if}
-			</div>
-		</div>
 	{/if}
 </div>
 
@@ -1361,123 +931,16 @@
 {/if}
 
 <!-- Full Preview Modal -->
-{#if showFullPreview}
-	<div
-		bind:this={fullPreviewModalRef}
-		class="full-preview-modal"
-		role="dialog"
-		aria-modal="true"
-		aria-label="Full article preview"
-		tabindex="-1"
-		onkeydown={(e) => e.key === "Escape" && (showFullPreview = false)}
-	>
-		<button
-			type="button"
-			class="full-preview-backdrop"
-			onclick={() => (showFullPreview = false)}
-			aria-label="Close preview"
-		></button>
-		<div class="full-preview-container" class:has-vines={gutterItems.length > 0}>
-			<header class="full-preview-header">
-				<h2>
-					:: full preview {#if gutterItems.length > 0}<span class="vine-count"
-							>({gutterItems.length} vine{gutterItems.length !== 1 ? "s" : ""})</span
-						>{/if}
-				</h2>
-				<div class="full-preview-actions">
-					<button
-						type="button"
-						class="full-preview-close"
-						onclick={() => (showFullPreview = false)}
-					>
-						[<span class="key">c</span>lose]
-					</button>
-				</div>
-			</header>
-			<div class="full-preview-scroll">
-				{#if gutterItems.length > 0}
-					<!-- Use ContentWithGutter when we have vines -->
-					<ContentWithGutter
-						content={previewHtml}
-						gutterContent={gutterItems}
-						headers={previewHeaders}
-						showTableOfContents={previewHeaders.length > 0}
-					>
-						{#if previewTitle || previewDate || previewTags.length > 0}
-							<header class="content-header">
-								{#if previewTitle}
-									<h1 class="full-preview-title">{previewTitle}</h1>
-								{/if}
-								{#if previewDate || previewTags.length > 0}
-									<div class="post-meta">
-										{#if previewDate}
-											<time datetime={previewDate}>
-												{new Date(previewDate).toLocaleDateString("en-US", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-												})}
-											</time>
-										{/if}
-										{#if previewTags.length > 0}
-											<div class="tags">
-												{#each previewTags as tag}
-													<span class="tag">{tag}</span>
-												{/each}
-											</div>
-										{/if}
-									</div>
-								{/if}
-							</header>
-						{/if}
-					</ContentWithGutter>
-				{:else}
-					<!-- Simple preview without vines -->
-					<article class="full-preview-article">
-						{#if previewTitle || previewDate || previewTags.length > 0}
-							<header class="content-header">
-								{#if previewTitle}
-									<h1>{previewTitle}</h1>
-								{/if}
-								{#if previewDate || previewTags.length > 0}
-									<div class="post-meta">
-										{#if previewDate}
-											<time datetime={previewDate}>
-												{new Date(previewDate).toLocaleDateString("en-US", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-												})}
-											</time>
-										{/if}
-										{#if previewTags.length > 0}
-											<div class="tags">
-												{#each previewTags as tag}
-													<span class="tag">{tag}</span>
-												{/each}
-											</div>
-										{/if}
-									</div>
-								{/if}
-							</header>
-						{/if}
-
-						<div class="content-body">
-							{#if previewHtml}
-								{#key previewHtml}
-									<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized highlighted code -->
-									<div>{@html previewHtml}</div>
-								{/key}
-							{:else}
-								<p class="preview-placeholder">Start writing to see your content here...</p>
-							{/if}
-						</div>
-					</article>
-				{/if}
-			</div>
-		</div>
-	</div>
-{/if}
+<FullPreviewModal
+	show={showFullPreview}
+	{previewHtml}
+	{previewTitle}
+	{previewDate}
+	{previewTags}
+	{previewHeaders}
+	{gutterItems}
+	onClose={() => (showFullPreview = false)}
+/>
 
 <style>
 	.editor-container {
@@ -1658,490 +1121,11 @@
 		font-weight: bold;
 		text-decoration: underline;
 	}
-	.toolbar {
-		display: flex;
-		align-items: center;
-		gap: 0.15rem;
-		padding: 0.4rem 0.75rem;
-		background: var(--editor-bg-tertiary, var(--light-bg-primary));
-		border-bottom: 1px solid var(--editor-border, var(--light-border-primary));
-		flex-wrap: wrap;
-		font-family: "JetBrains Mono", "Fira Code", monospace;
-		transition: opacity 0.3s ease;
-	}
-	.toolbar-group {
-		display: flex;
-		gap: 0.25rem;
-	}
-	/* Icon-based toolbar buttons */
-	.toolbar-icon-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.4rem;
-		background: transparent;
-		border: none;
-		border-radius: 4px;
-		color: var(--editor-accent-dim, #7a9a7a);
-		cursor: pointer;
-		transition:
-			color 0.15s ease,
-			background 0.15s ease;
-	}
-	.toolbar-icon-btn:hover {
-		color: var(--editor-accent-bright, #a8dca8);
-		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent);
-	}
-	.toolbar-icon-btn.active {
-		color: var(--editor-accent, #8bc48b);
-		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 15%, transparent);
-	}
-	.toolbar-icon-btn.full-btn {
-		color: hsl(var(--info));
-	}
-	.toolbar-icon-btn.full-btn:hover {
-		color: hsl(var(--info-muted));
-		background: color-mix(in srgb, hsl(var(--info)) 10%, transparent);
-	}
-	.toolbar-icon-btn.zen-btn {
-		color: #d4a5ff;
-	}
-	.toolbar-icon-btn.zen-btn:hover {
-		color: #e4c5ff;
-		background: color-mix(in srgb, #d4a5ff 10%, transparent);
-	}
-	.toolbar-icon-btn.zen-btn.active {
-		color: #e4c5ff;
-		background: color-mix(in srgb, #d4a5ff 20%, transparent);
-		box-shadow: 0 0 8px color-mix(in srgb, #d4a5ff 30%, transparent);
-	}
-	:global(.toolbar-icon) {
-		width: 1rem;
-		height: 1rem;
-	}
-	/* Fireside button - warm orange/amber styling */
-	.fireside-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.3rem 0.6rem;
-		background: linear-gradient(135deg, rgba(255, 140, 50, 0.15) 0%, rgba(255, 100, 30, 0.1) 100%);
-		border: 1px solid rgba(255, 140, 50, 0.3);
-		border-radius: 6px;
-		color: #ff9d5c;
-		font-family: inherit;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.15s ease;
-	}
-	.fireside-btn:hover {
-		background: linear-gradient(135deg, rgba(255, 140, 50, 0.25) 0%, rgba(255, 100, 30, 0.2) 100%);
-		border-color: rgba(255, 140, 50, 0.5);
-		color: #ffb88c;
-	}
-	:global(.fireside-icon) {
-		width: 0.875rem;
-		height: 0.875rem;
-		color: #ff8c32;
-	}
 	.fireside-area {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
-	}
-	/* svelte-ignore css-unused-selector */
-	.toolbar-divider {
-		color: var(--color-border);
-		margin: 0 0.25rem;
-		font-size: 0.8rem;
-	}
-	.voice-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-	.voice-error {
-		color: hsl(var(--destructive));
-		font-size: 0.75rem;
-		white-space: nowrap;
-	}
-	.toolbar-spacer {
-		flex: 1;
-	}
-	.toolbar-left {
-		display: flex;
-		align-items: center;
-	}
-	.toolbar-hint {
-		color: var(--editor-text-dim, #5a5a5a);
-		font-size: 0.75rem;
-		font-style: italic;
-	}
-	/* Formatting button group */
-	.formatting-group {
-		background: var(--editor-bg-secondary, #252526);
-		border-radius: 6px;
-		padding: 2px;
-		gap: 0.15rem;
-	}
-	.toolbar-icon-btn.fmt-btn:disabled {
-		opacity: 0.35;
-		cursor: not-allowed;
-	}
-	/* Mode toggle group */
-	.mode-group {
-		background: var(--editor-bg-secondary, #252526);
-		border-radius: 6px;
-		padding: 2px;
-	}
-	.mode-btn.active {
-		background: var(--editor-accent, #8bc48b) !important;
-		color: var(--editor-bg, #1e1e1e) !important;
-	}
-	.toolbar-divider-line {
-		width: 1px;
-		height: 1.25rem;
-		background: var(--editor-border, #3a3a3a);
-		margin: 0 0.5rem;
-	}
-	.editor-area {
-		display: flex;
-		flex: 1;
-		min-height: 0;
-	}
-	.editor-area.split .editor-panel {
-		width: 50%;
-		border-right: 1px solid var(--light-border-primary);
-	}
-	.editor-area:not(.split) .editor-panel {
-		width: 100%;
-	}
-	/* Preview-only mode */
-	.editor-area.preview-only {
-		background: var(--editor-bg, #1e1e1e);
-	}
-	.editor-area.preview-only .preview-panel {
-		width: 100%;
-		max-width: 800px;
-		margin: 0 auto;
-	}
-	.preview-panel.full-width {
-		border-left: none;
-	}
-	.editor-panel {
-		display: flex;
-		flex-direction: column;
-		min-height: 0;
-	}
-	.editor-panel-hidden {
-		display: none;
-	}
-	.editor-wrapper {
-		display: flex;
-		flex: 1;
-		min-height: 0;
-		overflow: hidden;
-	}
-	.line-numbers {
-		display: flex;
-		flex-direction: column;
-		padding: 1rem 0;
-		background: var(--editor-bg-tertiary, var(--light-bg-primary));
-		border-right: 1px solid var(--editor-border, var(--light-bg-tertiary));
-		min-width: 3rem;
-		text-align: right;
-		user-select: none;
-		overflow: hidden;
-	}
-	.line-numbers span {
-		padding: 0 0.75rem;
-		color: var(--editor-text-dim, #5a5a5a);
-		font-size: 0.85rem;
-		line-height: 1.6;
-		height: 1.6em;
-	}
-	.line-numbers span.current {
-		color: var(--editor-accent, #8bc48b);
-		background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent);
-	}
-	.editor-textarea {
-		flex: 1;
-		padding: 1rem;
-		background: var(--editor-bg, var(--light-bg-primary));
-		border: none;
-		color: var(--editor-text, #d4d4d4);
-		font-family: inherit;
-		font-size: 0.9rem;
-		line-height: 1.6;
-		resize: none;
-		outline: none;
-		overflow-y: auto;
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		overflow-wrap: break-word;
-	}
-	.editor-textarea::placeholder {
-		color: var(--editor-text-dim, #5a5a5a);
-		font-style: italic;
-	}
-	.editor-textarea:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
-	}
-	.preview-panel {
-		width: 50%;
-		display: flex;
-		flex-direction: column;
-		background: var(--color-surface);
-		min-height: 0;
-	}
-	.preview-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.5rem 1rem;
-		background: var(--color-surface-elevated);
-		border-bottom: 1px solid var(--light-border-primary);
-	}
-	.preview-label {
-		color: var(--grove-accent);
-		font-size: 0.85rem;
-		font-family: "JetBrains Mono", "Fira Code", monospace;
-	}
-	:global(.preview-logo) {
-		width: 18px;
-		height: 18px;
-		color: var(--editor-accent, #8bc48b);
-		opacity: 0.6;
-		transition: opacity 0.2s ease;
-	}
-	:global(.preview-logo:hover) {
-		opacity: 1;
-	}
-	.preview-content {
-		flex: 1;
-		padding: 1rem;
-		overflow-y: auto;
-		color: var(--color-foreground);
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.7;
-	}
-	.preview-placeholder {
-		color: var(--color-foreground-faint);
-		font-style: italic;
-	}
-	.preview-content :global(h1),
-	.preview-content :global(h2),
-	.preview-content :global(h3),
-	.preview-content :global(h4),
-	.preview-content :global(h5),
-	.preview-content :global(h6) {
-		color: var(--grove-accent);
-		margin-top: 1.5rem;
-		margin-bottom: 0.75rem;
-		font-weight: 600;
-	}
-	.preview-content :global(h1) {
-		font-size: 1.75rem;
-		border-bottom: 1px solid var(--light-border-primary);
-		padding-bottom: 0.5rem;
-	}
-	.preview-content :global(h2) {
-		font-size: 1.5rem;
-	}
-	.preview-content :global(h3) {
-		font-size: 1.25rem;
-	}
-	.preview-content :global(p) {
-		margin: 0.75rem 0;
-	}
-	.preview-content :global(a) {
-		color: var(--grove-accent-dark);
-		text-decoration: underline;
-	}
-	.preview-content :global(code) {
-		background: var(--light-bg-primary);
-		padding: 0.15rem 0.4rem;
-		border-radius: 3px;
-		font-family: inherit;
-		font-size: 0.9em;
-		color: var(--color-accent-text);
-	}
-	.preview-content :global(pre) {
-		background: var(--light-bg-primary);
-		padding: 1rem;
-		border-radius: 4px;
-		overflow-x: auto;
-		border: 1px solid var(--light-bg-tertiary);
-	}
-	.preview-content :global(pre code) {
-		background: none;
-		padding: 0;
-		color: var(--color-foreground);
-	}
-	.preview-content :global(blockquote) {
-		border-left: 3px solid var(--grove-accent-dark);
-		margin: 1rem 0;
-		padding-left: 1rem;
-		color: var(--color-foreground-muted);
-		font-style: italic;
-	}
-	.preview-content :global(ul),
-	.preview-content :global(ol) {
-		margin: 0.75rem 0;
-		padding-left: 1.5rem;
-	}
-	.preview-content :global(li) {
-		margin: 0.25rem 0;
-	}
-	.preview-content :global(hr) {
-		border: none;
-		border-top: 1px solid var(--light-border-primary);
-		margin: 1.5rem 0;
-	}
-	.preview-content :global(img) {
-		max-width: 100%;
-		border-radius: 4px;
-	}
-	.status-bar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.35rem 0.75rem;
-		background: var(--editor-status-bg, var(--light-border-secondary));
-		border-top: 1px solid var(--editor-status-border, var(--light-border-secondary));
-		font-size: 0.75rem;
-		color: var(--editor-accent-bright, #a8dca8);
-		transition: opacity 0.3s ease;
-	}
-	.status-left,
-	.status-right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		overflow: hidden;
-	}
-	.status-left {
-		flex: 1;
-		min-width: 0;
-	}
-	.status-right {
-		flex-shrink: 0;
-	}
-	.status-item {
-		opacity: 0.9;
-	}
-	.status-divider {
-		opacity: 0.4;
-	}
-	.status-saving {
-		color: hsl(var(--warning));
-		animation: pulse 1s ease-in-out infinite;
-	}
-	.status-draft-saving {
-		color: var(--color-foreground-subtle);
-		font-style: italic;
-	}
-	.status-draft-saved {
-		color: var(--editor-accent, #8bc48b);
-		font-weight: 500;
-	}
-	.status-draft-unsaved {
-		color: hsl(var(--warning-muted));
-		font-style: italic;
-	}
-	.status-server-syncing {
-		color: hsl(var(--info-muted));
-		font-style: italic;
-	}
-	.status-server-synced {
-		color: var(--editor-accent, #8bc48b);
-	}
-	.status-server-error {
-		color: var(--color-error);
-		font-style: italic;
-	}
-	.status-mode-indicator {
-		color: var(--editor-accent, #8bc48b);
-		font-weight: 500;
-		cursor: default;
-	}
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.5;
-		}
-	}
-	@media (max-width: 768px) {
-		.editor-area.split {
-			flex-direction: column;
-		}
-		.editor-area.split .editor-panel {
-			width: 100%;
-			border-right: none;
-			border-bottom: 1px solid var(--light-border-primary);
-			height: 50%;
-		}
-		.editor-area.split .preview-panel {
-			width: 100%;
-			height: 50%;
-		}
-		.toolbar {
-			padding: 0.5rem;
-		}
-		.toolbar-hint {
-			display: none;
-		}
-		.status-bar {
-			font-size: 0.7rem;
-			gap: 0.25rem;
-		}
-		.status-left,
-		.status-right {
-			gap: 0.25rem;
-		}
-		/* Hide less important status items on mobile */
-		.status-left .status-item:nth-child(n + 4) {
-			display: none;
-		}
-	}
-	@media (max-width: 600px) {
-		.toolbar {
-			padding: 0.35rem 0.5rem;
-			gap: 0.1rem;
-		}
-		.toolbar-divider-line {
-			margin: 0 0.25rem;
-		}
-		.toolbar-icon-btn {
-			padding: 0.35rem;
-		}
-		.formatting-group {
-			padding: 1px;
-			gap: 0.1rem;
-		}
-		.line-numbers {
-			min-width: 2.25rem;
-		}
-		.line-numbers span {
-			padding: 0 0.4rem;
-			font-size: 0.75rem;
-		}
-		.editor-textarea {
-			padding: 0.75rem;
-			font-size: 0.85rem;
-		}
-	}
-	@media (max-width: 480px) {
-		.status-left .status-item:nth-child(n + 3),
-		.status-left .status-divider:nth-child(n + 3) {
-			display: none;
-		}
 	}
 	.editor-container.zen-mode {
 		position: fixed;
@@ -2150,131 +1134,20 @@
 		border-radius: 0;
 		border: none;
 	}
-	.editor-container.zen-mode .toolbar {
+	/* Zen mode toolbar/status bar fade — these target child components' root elements */
+	.editor-container.zen-mode :global(.toolbar) {
 		opacity: 0.3;
 	}
-	.editor-container.zen-mode .toolbar:hover {
+	.editor-container.zen-mode :global(.toolbar:hover) {
 		opacity: 1;
 	}
-	.editor-container.zen-mode .status-bar {
+	.editor-container.zen-mode :global(.status-bar) {
 		opacity: 0.5;
 	}
-	.editor-container.zen-mode .status-bar:hover {
+	.editor-container.zen-mode :global(.status-bar:hover) {
 		opacity: 1;
 	}
-	.editor-container.zen-mode .editor-area {
+	.editor-container.zen-mode :global(.editor-area) {
 		height: calc(100vh - 80px);
-	}
-	.full-preview-modal {
-		position: fixed;
-		inset: 0;
-		z-index: 1000;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.full-preview-backdrop {
-		position: absolute;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.7);
-		border: none;
-		padding: 0;
-		cursor: pointer;
-	}
-	.full-preview-container {
-		position: relative;
-		width: 90%;
-		max-width: 900px;
-		height: 90vh;
-		background: var(--color-bg, var(--light-bg-primary));
-		border-radius: 12px;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-		transition: max-width 0.3s ease;
-	}
-	/* Wider container when vines are present */
-	.full-preview-container.has-vines {
-		max-width: 1400px;
-	}
-	.vine-count {
-		font-weight: 400;
-		color: var(--color-foreground-subtle);
-		font-size: 0.75rem;
-		margin-left: 0.5rem;
-	}
-	:global(.dark) .full-preview-container {
-		background: var(--color-bg-dark, #0d1117);
-	}
-	.full-preview-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem 1.5rem;
-		background: var(--color-bg-secondary, var(--light-bg-tertiary));
-		border-bottom: 1px solid var(--color-border, var(--light-border-primary));
-		flex-shrink: 0;
-	}
-	:global(.dark) .full-preview-header {
-		background: var(--color-bg-secondary-dark, var(--light-bg-primary));
-		border-color: var(--color-border-dark, var(--light-border-secondary));
-	}
-	.full-preview-header h2 {
-		margin: 0;
-		font-size: 0.9rem;
-		font-weight: 500;
-		font-family: "JetBrains Mono", "Fira Code", monospace;
-		color: var(--grove-accent);
-	}
-	.full-preview-close {
-		padding: 0.3rem 0.5rem;
-		background: transparent;
-		color: var(--color-foreground-subtle);
-		border: none;
-		font-size: 0.85rem;
-		font-family: "JetBrains Mono", "Fira Code", monospace;
-		cursor: pointer;
-		transition: color 0.1s ease;
-	}
-	.full-preview-close:hover {
-		color: var(--grove-accent-light);
-	}
-	.full-preview-scroll {
-		flex: 1;
-		overflow-y: auto;
-		padding: 2rem;
-	}
-	.full-preview-article {
-		max-width: 800px;
-		margin: 0 auto;
-	}
-	.full-preview-article .post-meta {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		flex-wrap: wrap;
-		margin-top: 1rem;
-	}
-	.full-preview-article time {
-		color: var(--light-text-light);
-		font-size: 1rem;
-		transition: color 0.3s ease;
-	}
-	:global(.dark) .full-preview-article time {
-		color: var(--color-text-subtle-dark, #666);
-	}
-	.full-preview-article .tags {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-	.full-preview-article .tag {
-		padding: 0.25rem 0.75rem;
-		background: var(--tag-bg, var(--grove-accent-dark));
-		color: white;
-		border-radius: 12px;
-		font-size: 0.8rem;
-		font-weight: 500;
 	}
 </style>
