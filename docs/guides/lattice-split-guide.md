@@ -162,11 +162,11 @@ gw ci
 | `src/lib/server/` | Database services, auth helpers | `@autumnsgrove/lattice/server/*` |
 | `src/lib/curios/` | Curio widget logic + components | `@autumnsgrove/lattice/curios/*` |
 | `src/lib/heartwood/` | Auth client | `@autumnsgrove/lattice/heartwood` |
-| `src/lib/threshold/` | Rate limiting | `@autumnsgrove/lattice/threshold/*` |
+| `src/lib/platform/threshold/` | Rate limiting | `@autumnsgrove/lattice/platform/threshold/*` |
 | `src/lib/blazes/` | Content markers | `@autumnsgrove/lattice/blazes/*` |
 | `src/lib/types/` | Shared types (Friend, Petal, Chat) | `@autumnsgrove/lattice/types/*` |
 | `src/lib/components/` | Domain components (terminology, chrome) | `@autumnsgrove/lattice/components/*` |
-| `src/lib/config/` | Tiers, petal config | `@autumnsgrove/lattice/config/*` |
+| `src/lib/platform/config/` | Tiers, petal config | `@autumnsgrove/lattice/platform/config/*` |
 | `src/lib/utils/` | Markdown, CSRF, sanitization | `@autumnsgrove/lattice/utils/*` |
 
 ### What the Engine Doesn't Have

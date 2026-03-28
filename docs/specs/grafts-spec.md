@@ -1,13 +1,14 @@
 ---
-title: Grafts — Feature Customization
+title: Feature Flags — Feature Customization (Grafts)
 description: >-
   Per-tenant feature customization with boolean flags, percentage rollouts, and
-  A/B variants
+  A/B variants. Historically called "Grafts"; code now uses "feature flags" terminology.
 category: specs
 specCategory: core-infrastructure
 icon: flag
-lastUpdated: "2026-01-20"
-aliases: []
+lastUpdated: "2026-03-28"
+aliases:
+  - grafts-spec
 tags:
   - feature-flags
   - ui-components
@@ -15,7 +16,7 @@ tags:
   - cloudflare-workers
 ---
 
-# Grafts — Feature Customization
+# Feature Flags — Feature Customization (Grafts)
 
 ```
                               🌳
@@ -38,38 +39,41 @@ tags:
 
 > _A graft makes your tree bear fruit no other can._
 
-Grove's per-tenant customization system. Grafts are the deliberate act of joining new capabilities onto existing trees. Not plugins users upload, but trusted configurations the Wayfinder enables for specific groves.
+Grove's per-tenant customization system. In code, this is the **feature flags** system. The term "graft" is user-facing language — the horticulture metaphor that Grove uses when talking to tenants about enabling capabilities for their tree. Code uses `flag`, `isFlagEnabled`, `FlagId`, etc.
 
-There are three types of Grafts:
+There are three layers:
 
-- **Feature Grafts** control _what_ capabilities a tenant receives (flags, rollouts, tier-gating)
-- **UI Grafts** provide _how_ those capabilities render (reusable components)
+- **Feature flags** control _what_ capabilities a tenant receives (flags, rollouts, tier-gating) — _user-facing language: "Feature Grafts"_
+- **Domain components** provide _how_ those capabilities render (reusable components at domain paths) — _user-facing language: "UI Grafts"_
 - **Greenhouse mode** determines _who_ gets early access (tenant classification for internal testing)
 
-Want JXL encoding? Feature Graft it on. Need a pricing page? Splice in the PricingGraft. Testing a feature before rollout? Put the tenant in the greenhouse.
+Want JXL encoding? Enable the flag. Need a pricing page? Use the pricing domain components. Testing a feature before rollout? Put the tenant in the greenhouse.
 
-**Public Name:** Grafts
+**Public Name:** Grafts _(user-facing horticulture metaphor)_
+**Code Term:** Feature Flags
 **Internal Name:** GroveGrafts
 **Domain:** _Operator-configured_
 **Repository:** Part of [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)
-**Last Updated:** January 2026
+**Last Updated:** March 2026 (The Big Refactor)
 
 In orcharding, a graft joins a cutting from one tree onto the rootstock of another. The cutting grows, becomes one with the tree, yet retains what makes it special. One apple tree can bear four different varieties. One grove can serve tenants with entirely different capabilities.
 
-Feature Grafts decide which branches grow. UI Grafts are the branches themselves. Together, they let any Grove property customize its features and appearance while sharing a common rootstock.
+_Feature Grafts_ decide which branches grow. _UI Grafts_ are the branches themselves. Together, they let any Grove property customize its features and appearance while sharing a common rootstock. _(This is user-facing language. In code: feature flags decide what's enabled; domain components render the UI.)_
 
 ## Terminology
 
-- **Feature Graft (flag):** A feature flag controlling what capabilities are enabled for a tenant. Lives in the `feature_flags` table with rules in `flag_rules`.
-- **UI Graft (component):** A reusable Svelte component (e.g., `PricingGraft`, `GraftControlPanel`) that renders feature UI. Found under `libs/engine/src/lib/grafts/`.
+- **Feature flag** _(user-facing: "Feature Graft")_: A flag controlling what capabilities are enabled for a tenant. Lives in the `feature_flags` table with rules in `flag_rules`. Code uses `FlagId`, `isFlagEnabled()`, `getEnabledFlags()`.
+- **Domain component** _(user-facing: "UI Graft")_: A reusable Svelte component (e.g., `PricingGraft`) that renders feature UI. After The Big Refactor, these live at domain-specific paths (e.g., `$lib/platform/pricing/`, `$lib/auth/login/`) rather than a shared `grafts/` directory.
 - **Greenhouse:** The early access program — membership determines who gets experimental features. Tenants are enrolled via the `greenhouse_tenants` table.
-- **Maturity:** The lifecycle stage of a feature graft: `experimental → beta → stable → graduated`. Stored as a column on `feature_flags` (migration 100). Replaces the previous convention of deriving category from flag ID prefixes.
+- **Maturity:** The lifecycle stage of a feature flag: `experimental → beta → stable → graduated`. Stored as a column on `feature_flags` (migration 100). Replaces the previous convention of deriving category from flag ID prefixes.
 
 ---
 
 ## The Graft Lexicon
 
-Grove doesn't call them "feature flags" or "shared components." We call them grafts, and the vocabulary follows:
+> **Note:** The following vocabulary is user-facing language — what Grove presents to tenants and in public documentation. In code, the system uses standard feature flag terminology (`FlagId`, `isFlagEnabled()`, etc.). The horticulture metaphor is a design choice, not a code convention.
+
+Grove presents this system to tenants using horticultural metaphors:
 
 | Term          | Action             | Description                                  |
 | ------------- | ------------------ | -------------------------------------------- |
@@ -100,15 +104,15 @@ _"Splice the PricingGraft into the landing page."_
 
 ---
 
-# Part I: Feature Grafts
+# Part I: Feature Flags
 
-Feature Grafts are Grove's Cloudflare-native feature flag system. They support boolean flags, percentage rollouts, tier-gated features, and A/B variants. Simple infrastructure that lets operators control exactly which features each tenant receives.
+The feature flags system is Grove's Cloudflare-native per-tenant customization infrastructure. It supports boolean flags, percentage rollouts, tier-gated features, and A/B variants. _(User-facing name: "Feature Grafts.")_ Simple infrastructure that lets operators control exactly which features each tenant receives.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         Graft Evaluation                            │
+│                      Feature Flag Evaluation                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │   Request arrives with context                                      │
@@ -124,7 +128,7 @@ Feature Grafts are Grove's Cloudflare-native feature flag system. They support b
 │         └── MISS ────┐                                              │
 │                      ↓                                              │
 │              ┌─────────────┐                                        │
-│              │     D1      │ ← Load graft config                    │
+│              │     D1      │ ← Load flag config                     │
 │              │  (SQLite)   │                                        │
 │              └─────────────┘                                        │
 │                      ↓                                              │
@@ -137,10 +141,10 @@ Feature Grafts are Grove's Cloudflare-native feature flag system. They support b
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        Graft Management                             │
+│                      Feature Flag Management                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   Admin updates graft                                               │
+│   Admin updates flag                                                │
 │              ↓                                                      │
 │   Update D1 → Invalidate KV keys → Effect within 60s                │
 │                                                                     │
@@ -168,7 +172,7 @@ Feature Grafts are Grove's Cloudflare-native feature flag system. They support b
 ├───────────────────────────────────────────────────────────────┤
 │                                                               │
 │   Rules evaluated by priority (highest first)                 │
-│   First matching rule determines the graft value              │
+│   First matching rule determines the flag value               │
 │                                                               │
 │   ┌─────────────┐    Priority 100                             │
 │   │   tenant    │ ── "Enable for tenant_abc only"             │
@@ -233,7 +237,7 @@ Gradual propagation across the grove:
 }
 ```
 
-The percentage is deterministic. Same tenant always gets the same result for the same graft. This uses SHA-256 hashing with a salt to bucket identifiers.
+The percentage is deterministic. Same tenant always gets the same result for the same flag. This uses SHA-256 hashing with a salt to bucket identifiers.
 
 ### Time Rules
 
@@ -255,11 +259,11 @@ Seasonal or scheduled features:
 ## Database Schema
 
 ```sql
--- Core grafts table
+-- Core feature flags table
 CREATE TABLE feature_flags (
   id TEXT PRIMARY KEY,               -- e.g., 'jxl_encoding', 'meadow_access'
   name TEXT NOT NULL,                -- Human-readable name
-  description TEXT,                  -- What this graft controls
+  description TEXT,                  -- What this flag controls
   flag_type TEXT NOT NULL,           -- 'boolean', 'percentage', 'variant', 'tier', 'json'
   default_value TEXT NOT NULL,       -- Default when no rules match (JSON)
   enabled INTEGER NOT NULL DEFAULT 1, -- Master blight switch
@@ -270,7 +274,7 @@ CREATE TABLE feature_flags (
   updated_by TEXT
 );
 
--- Rules determine graft values based on context
+-- Rules determine flag values based on context
 CREATE TABLE flag_rules (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   flag_id TEXT NOT NULL REFERENCES feature_flags(id) ON DELETE CASCADE,
@@ -303,14 +307,17 @@ CREATE INDEX idx_audit_flag ON flag_audit_log(flag_id, changed_at DESC);
 
 ---
 
-## Feature Graft API
+## Feature Flag API
 
-### Check if a Graft Took
+### Check if a Flag Is Enabled
+
+_(User-facing: "Check if a Graft Took")_
 
 ```typescript
-import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
-// Did the JXL graft take?
+// Is the JXL flag enabled? (user-facing: "did the graft take?")
+
 const useJxl = await isFeatureEnabled(
 	"jxl_encoding",
 	{
@@ -325,10 +332,10 @@ if (useJxl) {
 }
 ```
 
-### Get Graft Value with Default
+### Get Flag Value with Default
 
 ```typescript
-import { getFeatureValue } from "@autumnsgrove/lattice/feature-flags";
+import { getFeatureValue } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Get post limit, defaulting to 50
 const maxPosts = await getFeatureValue(
@@ -344,7 +351,7 @@ const maxPosts = await getFeatureValue(
 ### Check Cultivar (A/B Variant)
 
 ```typescript
-import { getVariant } from "@autumnsgrove/lattice/feature-flags";
+import { getVariant } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Which pricing cultivar?
 const variant = await getVariant(
@@ -361,9 +368,9 @@ const variant = await getVariant(
 ### Batch Evaluation
 
 ```typescript
-import { getFlags } from "@autumnsgrove/lattice/feature-flags";
+import { getFlags } from "@autumnsgrove/lattice/platform/feature-flags";
 
-// Evaluate multiple grafts at once
+// Evaluate multiple flags at once
 const flags = await getFlags(
 	["meadow_access", "dark_mode_default", "new_nav"],
 	{ tenantId, tier, userId },
@@ -437,80 +444,93 @@ flag:{flag_id}:user:{user_id}            → User-specific
 ### Cache Invalidation
 
 ```typescript
-import { invalidateFlag } from "@autumnsgrove/lattice/feature-flags";
+import { invalidateFlag } from "@autumnsgrove/lattice/platform/feature-flags";
 
-// When admin updates a graft
+// When admin updates a flag
 await invalidateFlag("jxl_encoding", env);
 // Clears all KV keys with prefix flag:jxl_encoding:
 ```
 
 ---
 
-# Part II: UI Grafts
+# Part II: Domain Components (UI Grafts)
 
-UI Grafts are reusable, configurable components that can be "spliced" onto any Grove property. They live in `@autumnsgrove/lattice` and provide consistent UI for common features like pricing, navigation, and footers.
+> **The Big Refactor:** What were previously called "UI Grafts" (living in `libs/engine/src/lib/grafts/`) are now regular Svelte components organized at domain-specific paths. They are no longer in a shared `grafts/` directory or exported under `@autumnsgrove/lattice/grafts/`. _(User-facing name: "UI Grafts" — the horticulture metaphor is preserved in public language.)_
+
+Domain components are reusable, configurable components that can be used in any Grove property. They live in `@autumnsgrove/lattice` under domain-specific subpaths and provide consistent UI for features like pricing, navigation, and footers.
+
+**Domain paths (after The Big Refactor):**
+- Pricing: `$lib/platform/pricing/` → `@autumnsgrove/lattice/platform/pricing`
+- Login: `$lib/auth/login/` → `@autumnsgrove/lattice/auth/login`
+- Greenhouse: `$lib/platform/greenhouse/` → `@autumnsgrove/lattice/platform/greenhouse`
+- Upgrades: `$lib/platform/upgrades/` → `@autumnsgrove/lattice/platform/upgrades`
+- Uploads: `$lib/platform/uploads/` → `@autumnsgrove/lattice/platform/uploads`
+- Feature flags: `$lib/platform/feature-flags/` → `@autumnsgrove/lattice/platform/feature-flags`
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     Feature Grafts vs UI Grafts                     │
+│              Feature Flags vs Domain Components (UI Grafts)         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   Feature Grafts (flags)              UI Grafts (components)        │
+│   Feature flags                       Domain components             │
 │   ├── isFeatureEnabled()      ───►    ├── PricingGraft              │
 │   ├── getFeatureValue()               ├── (future: NavGraft)        │
 │   └── rules/tier/percentage           └── (future: FooterGraft)     │
 │                                                                     │
-│   "Is pricing_graft enabled?"         "Render the pricing UI"       │
+│   "Is pricing_flag enabled?"          "Render the pricing UI"       │
 │                                                                     │
 │                        ┌───────────┐                                │
-│   Feature Graft ──────►│  checks   │──────► UI Graft renders        │
+│   Feature flag ───────►│  checks   │──────► Component renders       │
 │   (optional)           │ isEnabled │        (or not)                │
 │                        └───────────┘                                │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key distinction:** Feature Grafts ask "is X enabled?" UI Grafts answer "render X." A UI Graft can optionally check a Feature Graft before rendering, enabling gradual rollouts of new UI.
+**Key distinction:** Feature flags ask "is X enabled?" Domain components answer "render X." A domain component can optionally check a feature flag before rendering, enabling gradual rollouts of new UI.
 
 ---
 
-## UI Graft Architecture
+## Domain Component Architecture
+
+After The Big Refactor, components live at domain-specific paths rather than in a shared `grafts/` directory.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         UI Graft System                             │
+│                    Domain Component System                          │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   libs/engine/src/lib/grafts/                                       │
-│   ├── index.ts              # Public exports                        │
-│   ├── types.ts              # Core types (GraftId, GraftContext)    │
-│   ├── registry.ts           # Graft registry & isGraftEnabled()     │
-│   ├── context.svelte.ts     # Svelte context helpers                │
-│   └── pricing/              # PricingGraft (first UI Graft)         │
-│       ├── index.ts          # Pricing exports                       │
-│       ├── types.ts          # Pricing-specific types                │
-│       ├── config.ts         # Tier transformation utilities         │
-│       ├── checkout.ts       # LemonSqueezy URL generation           │
-│       ├── PricingGraft.svelte        # Main orchestrator            │
-│       ├── PricingTable.svelte        # Comparison table             │
-│       ├── PricingCard.svelte         # Individual tier card         │
-│       ├── PricingToggle.svelte       # Monthly/Annual toggle        │
-│       ├── PricingCTA.svelte          # Checkout button              │
-│       └── PricingFineprint.svelte    # Expandable fine print        │
+│   libs/engine/src/lib/platform/feature-flags/                       │
+│   ├── index.ts              # Public API exports                    │
+│   ├── types.ts              # TypeScript interfaces (FlagId, etc.)  │
+│   ├── flags.ts              # isFlagEnabled(), getEnabledFlags()    │
+│   └── registry.ts           # Flag registry & isFlagEnabled()       │
+│                                                                     │
+│   libs/engine/src/lib/platform/pricing/                             │
+│   ├── index.ts              # Pricing exports                       │
+│   ├── types.ts              # Pricing-specific types                │
+│   ├── config.ts             # Tier transformation utilities         │
+│   ├── checkout.ts           # LemonSqueezy URL generation           │
+│   ├── PricingGraft.svelte        # Main orchestrator                │
+│   ├── PricingTable.svelte        # Comparison table                 │
+│   ├── PricingCard.svelte         # Individual tier card             │
+│   ├── PricingToggle.svelte       # Monthly/Annual toggle            │
+│   ├── PricingCTA.svelte          # Checkout button                  │
+│   └── PricingFineprint.svelte    # Expandable fine print            │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│                       Graft Registry Flow                           │
+│                      Flag Registry Flow                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   1. Register graft in GRAFT_REGISTRY                               │
+│   1. Register flag in FLAG_REGISTRY                                 │
 │              ↓                                                      │
-│   2. (Optional) Link to Feature Graft via featureFlagId             │
+│   2. (Optional) Link to feature flag via featureFlagId              │
 │              ↓                                                      │
-│   3. Consumer calls isGraftEnabled() with context                   │
+│   3. Consumer calls isFlagEnabled() with context                    │
 │              ↓                                                      │
-│   4. If linked, checks Feature Graft system                         │
+│   4. If linked, checks feature flags system                         │
 │              ↓                                                      │
 │   5. Returns boolean: should this UI render?                        │
 │                                                                     │
@@ -519,41 +539,41 @@ UI Grafts are reusable, configurable components that can be "spliced" onto any G
 
 ---
 
-## The Graft Registry
+## The Flag Registry
 
-Every UI Graft registers its metadata in a central registry. This enables discovery, versioning, and optional Feature Graft integration.
+Every domain component that supports optional feature-flag gating registers its metadata in a central registry. This enables discovery, versioning, and optional feature flag integration.
 
 ```typescript
-// libs/engine/src/lib/grafts/registry.ts
+// libs/engine/src/lib/platform/feature-flags/registry.ts
 
-import { isFeatureEnabled } from "../feature-flags/index.js";
-import type { GraftId, GraftContext, GraftRegistryEntry } from "./types.js";
+import { isFeatureEnabled } from "../feature-flags/flags.js";
+import type { FlagId, FlagContext, FlagRegistryEntry } from "./types.js";
 
 /**
- * Registry of all available UI grafts.
+ * Registry of all available domain components with optional flag gating.
  */
-export const GRAFT_REGISTRY = new Map<GraftId, GraftRegistryEntry>([
+export const FLAG_REGISTRY = new Map<FlagId, FlagRegistryEntry>([
 	[
 		"pricing",
 		{
 			id: "pricing",
-			name: "Pricing Graft",
+			name: "Pricing Graft", // user-facing name preserves "Graft" metaphor
 			description: "Reusable pricing table, cards, and checkout components",
-			featureFlagId: "pricing_graft", // Optional: link to Feature Graft
+			featureFlagId: "pricing_flag", // Optional: link to feature flag
 			version: "1.0.0",
 			status: "stable",
 		},
 	],
-	// Future grafts register here
+	// Future components register here
 ]);
 
 /**
- * Check if a UI graft should render based on its linked Feature Graft.
+ * Check if a domain component should render based on its linked feature flag.
  */
-export async function isGraftEnabled(graftId: GraftId, context: GraftContext): Promise<boolean> {
-	const entry = GRAFT_REGISTRY.get(graftId);
+export async function isFlagEnabled(flagId: FlagId, context: FlagContext): Promise<boolean> {
+	const entry = FLAG_REGISTRY.get(flagId);
 
-	// Unknown graft - don't render
+	// Unknown flag - don't render
 	if (!entry) return false;
 
 	// No feature flag linked - always enabled
@@ -562,7 +582,7 @@ export async function isGraftEnabled(graftId: GraftId, context: GraftContext): P
 	// No env provided - can't check flags, default to enabled
 	if (!context.env) return true;
 
-	// Check the linked Feature Graft
+	// Check the linked feature flag
 	return isFeatureEnabled(
 		entry.featureFlagId,
 		{ tenantId: context.tenantId, tier: context.tier },
@@ -574,25 +594,25 @@ export async function isGraftEnabled(graftId: GraftId, context: GraftContext): P
 ### Registry Entry Type
 
 ```typescript
-// libs/engine/src/lib/grafts/types.ts
+// libs/engine/src/lib/platform/feature-flags/types.ts
 
-export type GraftId = "pricing" | "nav" | "footer" | "hero" | (string & {});
+export type FlagId = "pricing" | "nav" | "footer" | "hero" | (string & {});
 
 export type ProductId = "grove" | "scout" | "daily-clearing" | "meadow" | (string & {});
 
-export interface GraftRegistryEntry {
-	/** Unique graft identifier */
-	id: GraftId;
+export interface FlagRegistryEntry {
+	/** Unique flag identifier */
+	id: FlagId;
 
-	/** Human-readable name */
+	/** Human-readable name (may use user-facing "Graft" terminology) */
 	name: string;
 
-	/** Description of what this graft does */
+	/** Description of what this component does */
 	description: string;
 
 	/**
-	 * Optional feature flag ID that controls this graft's availability.
-	 * If specified, isGraftEnabled() checks this flag before allowing render.
+	 * Optional feature flag ID that controls this component's availability.
+	 * If specified, isFlagEnabled() checks this flag before allowing render.
 	 */
 	featureFlagId?: string;
 
@@ -603,8 +623,8 @@ export interface GraftRegistryEntry {
 	status: "stable" | "beta" | "experimental" | "deprecated";
 }
 
-export interface GraftContext {
-	/** Which product this graft is rendering for */
+export interface FlagContext {
+	/** Which product this component is rendering for */
 	productId: ProductId;
 
 	/** Optional tenant ID for multi-tenant scenarios */
@@ -620,9 +640,11 @@ export interface GraftContext {
 
 ---
 
-## PricingGraft: The First UI Graft
+## PricingGraft: The First Domain Component
 
-PricingGraft provides a complete pricing page solution: tier cards, comparison tables, billing toggles, and checkout buttons. Any Grove property can splice it in with a single import.
+_(User-facing name: "Pricing Graft" — the "UI Graft" metaphor is preserved in public language.)_
+
+PricingGraft provides a complete pricing page solution: tier cards, comparison tables, billing toggles, and checkout buttons. Any Grove property can use it with a single import.
 
 ### The Problem It Solves
 
@@ -642,12 +664,14 @@ apps/landing/src/routes/pricing/+page.svelte    → 82 lines
 
 An 85% reduction. Same UI, single source of truth.
 
-### Splicing PricingGraft
+### Using PricingGraft
+
+_(User-facing: "Splicing PricingGraft")_
 
 ```svelte
 <!-- apps/landing/src/routes/pricing/+page.svelte -->
 <script lang="ts">
-	import { PricingGraft } from "@autumnsgrove/lattice/grafts/pricing";
+	import { PricingGraft } from "@autumnsgrove/lattice/platform/pricing";
 
 	let { data } = $props();
 </script>
@@ -670,7 +694,7 @@ An 85% reduction. Same UI, single source of truth.
 
 ```typescript
 // apps/landing/src/routes/pricing/+page.server.ts
-import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
+import { transformAllTiers } from "@autumnsgrove/lattice/platform/pricing";
 
 export function load() {
 	const tiers = transformAllTiers({
@@ -824,7 +848,7 @@ interface PricingTier {
 PricingGraft integrates with LemonSqueezy for payment processing. The `checkout.ts` module generates secure checkout URLs.
 
 ```typescript
-// libs/engine/src/lib/grafts/pricing/checkout.ts
+// libs/engine/src/lib/platform/pricing/checkout.ts
 
 export interface CheckoutConfig {
 	storeId: string;
@@ -905,32 +929,34 @@ export function createCheckoutConfigFromEnv(env: {
 
 ---
 
-## Creating a New UI Graft
+## Creating a New Domain Component
 
-To add a new UI Graft (e.g., NavGraft):
+_(User-facing: "Creating a New UI Graft")_
 
-### 1. Create the folder structure
+To add a new domain component (e.g., NavGraft), place it in its domain directory rather than a shared `grafts/` folder:
+
+### 1. Create the domain folder structure
 
 ```
-libs/engine/src/lib/grafts/nav/
+libs/engine/src/lib/platform/nav/
 ├── index.ts              # Public exports
 ├── types.ts              # Nav-specific types
 ├── config.ts             # Configuration helpers
-├── NavGraft.svelte       # Main component
+├── NavGraft.svelte       # Main component (name preserves user-facing "Graft" metaphor)
 ├── NavItem.svelte        # Child component
 └── NavGraft.test.ts      # Tests
 ```
 
-### 2. Register in the graft registry
+### 2. Register in the flag registry (if feature-flag gating is needed)
 
 ```typescript
-// libs/engine/src/lib/grafts/registry.ts
+// libs/engine/src/lib/platform/feature-flags/registry.ts
 
-GRAFT_REGISTRY.set("nav", {
+FLAG_REGISTRY.set("nav", {
 	id: "nav",
-	name: "Navigation Graft",
+	name: "Navigation Graft", // user-facing name
 	description: "Reusable navigation bar with product-specific links",
-	featureFlagId: "nav_graft", // Optional
+	featureFlagId: "nav_flag", // Optional
 	version: "1.0.0",
 	status: "beta",
 });
@@ -942,40 +968,40 @@ GRAFT_REGISTRY.set("nav", {
 // libs/engine/package.json
 {
 	"exports": {
-		"./grafts/nav": {
-			"types": "./dist/grafts/nav/index.d.ts",
-			"svelte": "./dist/grafts/nav/index.js",
-			"default": "./dist/grafts/nav/index.js"
+		"./platform/nav": {
+			"types": "./dist/platform/nav/index.d.ts",
+			"svelte": "./dist/platform/nav/index.js",
+			"default": "./dist/platform/nav/index.js"
 		}
 	}
 }
 ```
 
-### 4. Export from the main grafts index
+### 4. Export from the domain index
 
 ```typescript
-// libs/engine/src/lib/grafts/index.ts
-export * from "./nav/index.js";
+// libs/engine/src/lib/platform/nav/index.ts
+export * from "./NavGraft.svelte";
+export * from "./types.js";
 ```
 
 ---
 
 ## Package Exports
 
-UI Grafts are exported from `@autumnsgrove/lattice`:
+Domain components are exported from `@autumnsgrove/lattice` under domain-specific subpaths:
 
 ```json
 {
 	"exports": {
-		"./grafts": {
-			"types": "./dist/grafts/index.d.ts",
-			"svelte": "./dist/grafts/index.js",
-			"default": "./dist/grafts/index.js"
+		"./platform/feature-flags": {
+			"types": "./dist/platform/feature-flags/index.d.ts",
+			"default": "./dist/platform/feature-flags/index.js"
 		},
-		"./grafts/pricing": {
-			"types": "./dist/grafts/pricing/index.d.ts",
-			"svelte": "./dist/grafts/pricing/index.js",
-			"default": "./dist/grafts/pricing/index.js"
+		"./platform/pricing": {
+			"types": "./dist/platform/pricing/index.d.ts",
+			"svelte": "./dist/platform/pricing/index.js",
+			"default": "./dist/platform/pricing/index.js"
 		}
 	}
 }
@@ -984,8 +1010,8 @@ UI Grafts are exported from `@autumnsgrove/lattice`:
 ### Import Patterns
 
 ```typescript
-// Core graft utilities
-import { isGraftEnabled, getGraftEntry, GRAFT_REGISTRY } from "@autumnsgrove/lattice/grafts";
+// Feature flag registry utilities
+import { isFlagEnabled, getFlagEntry, FLAG_REGISTRY } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // PricingGraft and utilities
 import {
@@ -996,14 +1022,14 @@ import {
 	transformTier,
 	transformAllTiers,
 	getCheckoutUrl,
-} from "@autumnsgrove/lattice/grafts/pricing";
+} from "@autumnsgrove/lattice/platform/pricing";
 ```
 
 ---
 
 # Part III: Greenhouse Mode
 
-Greenhouse mode is Grove's approach to internal testing and early access—an entire abstraction layer above Feature Grafts and UI Grafts. Where Feature Grafts ask "is X enabled?" and UI Grafts answer "render X," Greenhouse mode asks a more fundamental question: "is this tenant in the greenhouse?"
+Greenhouse mode is Grove's approach to internal testing and early access — an entire abstraction layer above the feature flags system and domain components. Where feature flags ask "is X enabled?" and domain components answer "render X," Greenhouse mode asks a more fundamental question: "is this tenant in the greenhouse?"
 
 ```
                               🌱
@@ -1046,7 +1072,7 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     The Three Layers of Grafts                       │
+│               The Three Layers of Feature Flags (Grafts)            │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │   Layer 3: GREENHOUSE MODE                                          │
@@ -1058,7 +1084,7 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 │   └─────────────────────────────────────────────────────────────┘   │
 │              ↓ Greenhouse tenants automatically receive...          │
 │                                                                     │
-│   Layer 2: FEATURE GRAFTS                                           │
+│   Layer 2: FEATURE FLAGS (user-facing: "Feature Grafts")            │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │  "What capabilities are enabled?"                           │   │
 │   │  ├── Boolean flags                                          │   │
@@ -1068,12 +1094,12 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 │   └─────────────────────────────────────────────────────────────┘   │
 │              ↓ Enabled features can use...                          │
 │                                                                     │
-│   Layer 1: UI GRAFTS                                                │
+│   Layer 1: DOMAIN COMPONENTS (user-facing: "UI Grafts")             │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │  "How do features render?"                                  │   │
-│   │  ├── PricingGraft                                           │   │
-│   │  ├── NavGraft (planned)                                     │   │
-│   │  └── FooterGraft (planned)                                  │   │
+│   │  ├── PricingGraft ($lib/platform/pricing/)                  │   │
+│   │  ├── NavGraft ($lib/platform/nav/, planned)                 │   │
+│   │  └── FooterGraft ($lib/platform/footer/, planned)           │   │
 │   └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -1081,19 +1107,19 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 
 **Why three layers?**
 
-- **UI Grafts** are granular: individual components spliced onto pages
-- **Feature Grafts** are specific: individual feature flags for individual tenants
+- **Domain components** (UI Grafts) are granular: individual components used on pages
+- **Feature flags** (Feature Grafts) are specific: individual flags for individual tenants
 - **Greenhouse mode** is holistic: tenant-wide classification that unlocks self-serve control
 
-A tenant in greenhouse mode doesn't need individual Feature Grafts for each experimental feature—they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on _tenant classification_, not feature configuration.
+A tenant in greenhouse mode doesn't need individual feature flags for each experimental feature — they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on _tenant classification_, not feature configuration.
 
 ---
 
 ## The Dev Mode Revelation
 
-Greenhouse mode solves a fundamental architectural question: **where do graft controls live?**
+Greenhouse mode solves a fundamental architectural question: **where do feature flag controls live?**
 
-The original plan was to abstract graft controls into a separate admin panel (Arbor). But this creates friction—tenants who want to experiment with their own trees would need operator intervention for every toggle. That's not how a grove should work.
+The original plan was to abstract flag controls into a separate admin panel (Arbor). But this creates friction — tenants who want to experiment with their own trees would need operator intervention for every toggle. That's not how a grove should work.
 
 **The insight:** Greenhouse mode _is_ dev mode.
 
@@ -1104,7 +1130,7 @@ The original plan was to abstract graft controls into a separate admin panel (Ar
 │                                                                     │
 │   PRODUCTION MODE (Default)                                         │
 │   ┌─────────────────────────────────────────────────────────────┐   │
-│   │  Grafts are operator-configured                             │   │
+│   │  Feature flags are operator-configured                      │   │
 │   │  ├── Wayfinder decides what's enabled                       │   │
 │   │  ├── Tenant sees the result, not the controls               │   │
 │   │  └── Safe, stable, curated experience                       │   │
@@ -1112,8 +1138,8 @@ The original plan was to abstract graft controls into a separate admin panel (Ar
 │                                                                     │
 │   GREENHOUSE MODE (Dev Mode)                                        │
 │   ┌─────────────────────────────────────────────────────────────┐   │
-│   │  Grafts are self-serve                                      │   │
-│   │  ├── Tenant sees AND controls the graft toggles             │   │
+│   │  Feature flags are self-serve                               │   │
+│   │  ├── Tenant sees AND controls the flag toggles              │   │
 │   │  ├── Can freely graft/prune features on their own tree      │   │
 │   │  ├── Access to experimental features before general release │   │
 │   │  └── More tweakability, tuning, and control                 │   │
@@ -1127,18 +1153,18 @@ The original plan was to abstract graft controls into a separate admin panel (Ar
 
 **What greenhouse mode enables:**
 
-| Capability                   | Production | Greenhouse |
-| ---------------------------- | ---------- | ---------- |
-| View active grafts           | ✗          | ✓          |
-| Toggle feature grafts        | ✗          | ✓          |
-| Access experimental features | ✗          | ✓          |
-| Adjust graft parameters      | ✗          | ✓          |
-| See graft admin UI           | ✗          | ✓          |
-| Reset to defaults            | ✗          | ✓          |
+| Capability                        | Production | Greenhouse |
+| --------------------------------- | ---------- | ---------- |
+| View active flags (grafts)        | ✗          | ✓          |
+| Toggle feature flags              | ✗          | ✓          |
+| Access experimental features      | ✗          | ✓          |
+| Adjust flag parameters            | ✗          | ✓          |
+| See flag admin UI                 | ✗          | ✓          |
+| Reset to defaults                 | ✗          | ✓          |
 
 **Why this matters architecturally:**
 
-1. **No separate admin panel needed** — Graft controls live in the tenant's own dashboard, visible only in greenhouse mode
+1. **No separate admin panel needed** — Feature flag controls live in the tenant's own dashboard, visible only in greenhouse mode
 2. **Progressive disclosure** — Most tenants never see the complexity; power users opt into it
 3. **Self-serve experimentation** — Tenants can try features without waiting for operator approval
 4. **Clean separation** — Production tenants get a curated experience; greenhouse tenants get full control
@@ -1163,13 +1189,13 @@ _The greenhouse isn't a testing environment. It's a tinkerer's workshop._
 │         │                                                           │
 │         ├── YES → All greenhouse_only features enabled              │
 │         │         ┌─────────────────────────────────────────────┐   │
-│         │         │  Feature Graft evaluation includes:         │   │
+│         │         │  Feature flag evaluation includes:          │   │
 │         │         │  • Standard rules (tier, percentage, etc.)  │   │
 │         │         │  • PLUS greenhouse_only features            │   │
 │         │         │  • PLUS experimental UI components          │   │
 │         │         └─────────────────────────────────────────────┘   │
 │         │                                                           │
-│         └── NO → Standard Feature Graft evaluation                  │
+│         └── NO → Standard feature flag evaluation                   │
 │                  (greenhouse_only features excluded)                │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -1206,7 +1232,7 @@ CREATE INDEX idx_flags_greenhouse ON feature_flags(greenhouse_only) WHERE greenh
 ### Check if Tenant is in Greenhouse
 
 ```typescript
-import { isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
+import { isInGreenhouse } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Is this tenant part of the greenhouse?
 const inGreenhouse = await isInGreenhouse(locals.tenantId, platform.env);
@@ -1220,7 +1246,7 @@ if (inGreenhouse) {
 ### Evaluate with Greenhouse Context
 
 ```typescript
-import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Greenhouse context is automatically included
 const useExperimentalEditor = await isFeatureEnabled(
@@ -1369,12 +1395,12 @@ interface FeatureFlagsEnv {
 
 ### Invoking Blight (Kill Switch)
 
-When a graft causes problems:
+When a flag causes problems:
 
-1. **Via Admin UI**: Navigate to graft → Toggle master switch OFF
+1. **Via Admin UI**: Navigate to flag → Toggle master switch OFF
 2. **Direct D1 update**:
    ```sql
-   UPDATE feature_flags SET enabled = 0 WHERE id = 'problem_graft';
+   UPDATE feature_flags SET enabled = 0 WHERE id = 'problem_flag';
    ```
 3. **Clear cache** (if invalidation fails):
    ```bash
@@ -1393,67 +1419,77 @@ When a graft causes problems:
 
 ---
 
-## Example Grafts
+## Example Flags (Grafts)
 
-### Feature Grafts
+### Feature Flags
 
-| Graft ID          | Type       | Purpose                     | Example Use                 |
+_(User-facing: "Feature Grafts")_
+
+| Flag ID           | Type       | Purpose                     | Example Use                 |
 | ----------------- | ---------- | --------------------------- | --------------------------- |
 | `jxl_encoding`    | percentage | JPEG XL image encoding      | Propagate to 25% of grove   |
 | `jxl_kill_switch` | boolean    | Emergency disable for JXL   | Blight switch (instant off) |
 | `meadow_access`   | tier       | Gate Meadow social features | Oak and Evergreen only      |
-| `pricing_graft`   | boolean    | Gate PricingGraft rollout   | Gradual UI rollout          |
+| `pricing_flag`    | boolean    | Gate PricingGraft rollout   | Gradual UI rollout          |
 
-### UI Grafts
+### Domain Components
 
-| Graft ID  | Status  | Purpose                              | Components                                    |
-| --------- | ------- | ------------------------------------ | --------------------------------------------- |
-| `pricing` | stable  | Pricing pages for any Grove property | PricingGraft, PricingTable, PricingCard, etc. |
-| `nav`     | planned | Consistent navigation                | NavGraft, NavItem                             |
-| `footer`  | planned | Consistent footer                    | FooterGraft, FooterLinks                      |
-| `hero`    | planned | Customizable hero sections           | HeroGraft, HeroContent                        |
+_(User-facing: "UI Grafts")_
+
+| Component ID | Status  | Path                           | Components                                    |
+| ------------ | ------- | ------------------------------ | --------------------------------------------- |
+| `pricing`    | stable  | `$lib/platform/pricing/`       | PricingGraft, PricingTable, PricingCard, etc. |
+| `nav`        | planned | `$lib/platform/nav/`           | NavGraft, NavItem                             |
+| `footer`     | planned | `$lib/platform/footer/`        | FooterGraft, FooterLinks                      |
+| `hero`       | planned | `$lib/platform/hero/`          | HeroGraft, HeroContent                        |
 
 ---
 
 ## Project Structure
 
+After The Big Refactor, the structure is domain-organized rather than grouped under `grafts/`:
+
 ```
 libs/engine/src/lib/
-├── feature-flags/            # Feature Grafts
-│   ├── index.ts              # Public API exports
-│   ├── types.ts              # TypeScript interfaces
-│   ├── evaluate.ts           # Core evaluation logic
-│   ├── percentage.ts         # Deterministic bucketing
-│   ├── rules.ts              # Rule evaluation
-│   ├── cache.ts              # KV caching utilities
-│   └── *.test.ts             # Unit tests
+├── platform/
+│   ├── feature-flags/        # Feature flag system (user-facing: "Feature Grafts")
+│   │   ├── index.ts          # Public API exports
+│   │   ├── types.ts          # TypeScript interfaces (FlagId, FlagContext, etc.)
+│   │   ├── flags.ts          # isFlagEnabled(), getEnabledFlags()
+│   │   ├── evaluate.ts       # Core evaluation logic
+│   │   ├── percentage.ts     # Deterministic bucketing
+│   │   ├── rules.ts          # Rule evaluation
+│   │   ├── cache.ts          # KV caching utilities
+│   │   ├── registry.ts       # FLAG_REGISTRY, isFlagEnabled() for components
+│   │   └── *.test.ts         # Unit tests
+│   │
+│   ├── pricing/              # PricingGraft (user-facing: "Pricing UI Graft")
+│   │   ├── index.ts
+│   │   ├── types.ts
+│   │   ├── config.ts
+│   │   ├── config.test.ts
+│   │   ├── checkout.ts
+│   │   ├── checkout.test.ts
+│   │   ├── PricingGraft.svelte
+│   │   ├── PricingTable.svelte
+│   │   ├── PricingCard.svelte
+│   │   ├── PricingToggle.svelte
+│   │   ├── PricingCTA.svelte
+│   │   └── PricingFineprint.svelte
+│   │
+│   ├── greenhouse/           # Greenhouse mode utilities
+│   ├── upgrades/             # Upgrade flow components
+│   └── uploads/              # Upload components
 │
-└── grafts/                   # UI Grafts
-    ├── index.ts              # Public exports
-    ├── types.ts              # Core graft types
-    ├── registry.ts           # Graft registry
-    ├── registry.test.ts      # Registry tests
-    ├── context.svelte.ts     # Svelte context helpers
-    └── pricing/              # PricingGraft
-        ├── index.ts
-        ├── types.ts
-        ├── config.ts
-        ├── config.test.ts
-        ├── checkout.ts
-        ├── checkout.test.ts
-        ├── PricingGraft.svelte
-        ├── PricingTable.svelte
-        ├── PricingCard.svelte
-        ├── PricingToggle.svelte
-        ├── PricingCTA.svelte
-        └── PricingFineprint.svelte
+└── auth/
+    └── login/                # Login components
 ```
 
 ---
 
 ## Implementation Checklist
 
-### Phase 1: Feature Graft Infrastructure (Complete)
+### Phase 1: Feature Flag Infrastructure (Complete)
 
 - [x] D1 schema migration
 - [x] Type definitions
@@ -1462,33 +1498,35 @@ libs/engine/src/lib/
 - [x] KV caching
 - [x] Unit tests
 
-### Phase 2: Feature Graft Integration (Complete)
+### Phase 2: Feature Flag Integration (Complete)
 
-- [x] JXL encoding graft
+- [x] JXL encoding flag
 - [x] Kill switch support
 - [x] SvelteKit hooks integration
 
 ### Phase 3: Admin UI (Planned)
 
-- [ ] Graft listing page (`/admin/grafts`)
-- [ ] Graft editor with rule builder
+- [ ] Flag listing page (`/admin/flags`)
+- [ ] Flag editor with rule builder
 - [ ] Percentage slider component
 - [ ] Tier selector component
 - [ ] Audit log viewer
 
 ### Phase 4: Analytics (Planned)
 
-- [ ] Rings integration for graft evaluations
+- [ ] Rings integration for flag evaluations
 - [ ] Cultivar experiment tracking
 - [ ] Conversion metrics per variant
 
-### Phase 5: UI Grafts Infrastructure (Complete)
+### Phase 5: Domain Component Infrastructure (Complete)
 
-- [x] Graft registry system
-- [x] Registry-to-Feature-Graft integration
-- [x] Package exports structure
+_(Previously: "UI Grafts Infrastructure")_
+
+- [x] Flag registry system (`FLAG_REGISTRY`)
+- [x] Registry-to-feature-flag integration
+- [x] Package exports structure (domain paths)
 - [x] Svelte context helpers
-- [x] Core type definitions
+- [x] Core type definitions (`FlagId`, `FlagContext`, `FlagRegistryEntry`)
 
 ### Phase 6: PricingGraft (Complete)
 
@@ -1503,12 +1541,15 @@ libs/engine/src/lib/
 - [x] Landing page migration (543 → 82 lines)
 - [x] Unit tests (74 tests)
 - [x] Accessibility improvements
+- [x] Migrated to `$lib/platform/pricing/` (The Big Refactor)
 
-### Phase 7: Future UI Grafts (Planned)
+### Phase 7: Future Domain Components (Planned)
 
-- [ ] NavGraft (consistent navigation)
-- [ ] FooterGraft (consistent footer)
-- [ ] HeroGraft (customizable hero sections)
+_(User-facing: "Future UI Grafts")_
+
+- [ ] NavGraft (`$lib/platform/nav/`)
+- [ ] FooterGraft (`$lib/platform/footer/`)
+- [ ] HeroGraft (`$lib/platform/hero/`)
 - [ ] TestimonialGraft (social proof components)
 
 ### Phase 8: Greenhouse Mode (Planned)
@@ -1516,19 +1557,21 @@ libs/engine/src/lib/
 - [ ] Database schema extension (`greenhouse_tenants` table)
 - [ ] `greenhouse_only` column on `feature_flags` table
 - [ ] `isInGreenhouse()` API function
-- [ ] Greenhouse context in feature evaluation
+- [ ] Greenhouse context in flag evaluation
 - [ ] Greenhouse rule type support
 - [ ] Wayfinder UI for enrolling tenants in greenhouse mode
 - [ ] Transplant workflow (greenhouse → production)
 
-### Phase 9: Self-Serve Graft Controls (Planned)
+### Phase 9: Self-Serve Flag Controls (Planned)
 
-- [ ] Graft control panel in tenant dashboard (greenhouse-only visibility)
-- [ ] Toggle UI for feature grafts
-- [ ] Parameter adjustment UI for configurable grafts
-- [ ] "Active grafts" overview showing what's enabled
+_(User-facing: "Self-Serve Graft Controls")_
+
+- [ ] Flag control panel in tenant dashboard (greenhouse-only visibility)
+- [ ] Toggle UI for feature flags
+- [ ] Parameter adjustment UI for configurable flags
+- [ ] "Active flags" overview showing what's enabled (user-facing: "Active grafts")
 - [ ] Reset to defaults functionality
-- [ ] Graft discovery UI (browse available grafts to enable)
+- [ ] Flag discovery UI (browse available flags to enable)
 - [ ] Experimental features badge/indicator
 
 ---
@@ -1536,9 +1579,9 @@ libs/engine/src/lib/
 ## Related Documents
 
 - [Feature Flags Planning Spec](../plans/planning/feature-flags-spec.md) — Original technical spec
-- [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for Feature Grafts
+- [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for feature flags
 - [Loom Pattern](../patterns/loom-durable-objects-pattern.md) — DO coordination
-- [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses Feature Grafts for configuration)
+- [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses feature flags for configuration)
 
 ---
 
@@ -1547,13 +1590,13 @@ libs/engine/src/lib/
 > **For future inclusion in The Grafts Exhibit, Wing 5: The Personalization Wing**
 > _See [docs/museum/MUSEUM.md](/docs/museum/MUSEUM.md) for museum structure_
 
-When The Grafts Exhibit is created, include this origin story for Dave Mode:
+When The Grafts Exhibit is created (note: the exhibit retains the "Grafts" user-facing name), include this origin story for Dave Mode:
 
 > **On "Dave Mode"**: When Grafts needed a third mode for internal testing, the obvious choice emerged from Grove's history. The very first test tenant created during early development was named "Dave"—chosen as the most wonderfully mundane, generic example name imaginable. When it came time to name the internal testing mode, "Dave mode" felt perfect: unpretentious, memorable, and a small tribute to Grove's earliest days. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode. Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized.
 
 **Exhibit placement suggestions:**
 
-- Display alongside the Graft Lexicon interactive
+- Display alongside the Graft Lexicon interactive (user-facing exhibit element)
 - Include in the "Names That Found Us" subsection of the Naming Wing (Wing 7) cross-reference
 - Consider a "Dave's Corner" Easter egg that reveals this story when visitors click on a hidden greenhouse icon
 

@@ -8,7 +8,7 @@ category: infra
 
 ## Context
 
-Phase 1 built the Threshold SDK at `libs/engine/src/lib/threshold/`. Phase 2 migrates all **29 engine-internal files** that import from the old `$lib/server/rate-limits/` system to use the new Threshold SDK instead. The old `rate-limits/` directory stays as a deprecated re-export shim until Phase 5 cleanup.
+Phase 1 built the Threshold SDK at `libs/engine/src/lib/platform/threshold/`. Phase 2 migrates all **29 engine-internal files** that import from the old `$lib/server/rate-limits/` system to use the new Threshold SDK instead. The old `rate-limits/` directory stays as a deprecated re-export shim until Phase 5 cleanup.
 
 **What changes:** Every engine route that does `checkRateLimit({ kv, key, ... })` switches to `createThreshold(env) → thresholdCheck(threshold, { key, ... })`. Same behavior, same headers, same status codes.
 
@@ -79,8 +79,8 @@ if (kv) {
 }
 
 // AFTER
-import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
 const threshold = createThreshold(platform?.env);
 if (threshold) {
   const denied = await thresholdCheck(threshold, {
@@ -118,12 +118,12 @@ rateLimitResult = result;
 return json(data, { headers: rateLimitHeaders(rateLimitResult, limit) });
 
 // AFTER
-import { createThreshold } from "$lib/threshold/factory.js";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
 import {
   thresholdCheckWithResult,
   thresholdHeaders,
-} from "$lib/threshold/adapters/sveltekit.js";
-import type { ThresholdResult } from "$lib/threshold/types.js";
+} from "$lib/platform/threshold/adapters/sveltekit.js";
+import type { ThresholdResult } from "$lib/platform/threshold/types.js";
 let rateLimitResult: ThresholdResult;
 const { result, response } = await thresholdCheckWithResult(threshold, {
   key,
@@ -142,8 +142,8 @@ Add `failMode: "closed"`. Import `getClientIP` from `threshold/adapters/worker.j
 
 ```typescript
 // AFTER
-import { getClientIP } from "$lib/threshold/adapters/worker.js";
-import { getEndpointLimitByKey } from "$lib/threshold/config.js";
+import { getClientIP } from "$lib/platform/threshold/adapters/worker.js";
+import { getEndpointLimitByKey } from "$lib/platform/threshold/config.js";
 const denied = await thresholdCheck(threshold, {
   key: `auth/callback:${getClientIP(request)}`,
   ...getEndpointLimitByKey("auth/callback"),
@@ -159,9 +159,9 @@ const { checkRateLimit, getClientIP, buildRateLimitKey } =
   await import("$lib/server/rate-limits/middleware.js");
 
 // AFTER
-const { createThreshold } = await import("$lib/threshold/factory.js");
-const { thresholdCheck } = await import("$lib/threshold/adapters/sveltekit.js");
-const { getClientIP } = await import("$lib/threshold/adapters/worker.js");
+const { createThreshold } = await import("$lib/platform/threshold/factory.js");
+const { thresholdCheck } = await import("$lib/platform/threshold/adapters/sveltekit.js");
+const { getClientIP } = await import("$lib/platform/threshold/adapters/worker.js");
 ```
 
 ### Pattern E — Direct cache.ts rateLimit (oembed, 1 file)
@@ -308,9 +308,9 @@ npx svelte-check --tsconfig ./tsconfig.json # Type check
 
 | File                                       | Role                              |
 | ------------------------------------------ | --------------------------------- |
-| `src/lib/threshold/adapters/sveltekit.ts`  | Add `thresholdCheckWithResult()`  |
-| `src/lib/threshold/factory.ts`             | NEW — `createThreshold()` factory |
-| `src/lib/threshold/index.ts`               | Re-export factory                 |
+| `src/lib/platform/threshold/adapters/sveltekit.ts`  | Add `thresholdCheckWithResult()`  |
+| `src/lib/platform/threshold/factory.ts`             | NEW — `createThreshold()` factory |
+| `src/lib/platform/threshold/index.ts`               | Re-export factory                 |
 | `src/lib/server/rate-limits/index.ts`      | Convert to shim                   |
 | `src/lib/server/rate-limits/middleware.ts` | Convert to shim                   |
 | `src/routes/api/billing/+server.ts`        | Most complex Pattern B route      |
