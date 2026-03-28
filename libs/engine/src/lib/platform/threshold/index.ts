@@ -2,10 +2,10 @@
  * Threshold — Unified Rate Limiting SDK
  *
  * Core barrel export. Adapters have separate export paths for tree-shaking:
- * - @autumnsgrove/lattice/threshold         (this file)
- * - @autumnsgrove/lattice/threshold/sveltekit
- * - @autumnsgrove/lattice/threshold/hono
- * - @autumnsgrove/lattice/threshold/worker
+ * - @autumnsgrove/lattice/platform/threshold         (this file)
+ * - @autumnsgrove/lattice/platform/threshold/sveltekit
+ * - @autumnsgrove/lattice/platform/threshold/hono
+ * - @autumnsgrove/lattice/platform/threshold/worker
  */
 
 // Core types

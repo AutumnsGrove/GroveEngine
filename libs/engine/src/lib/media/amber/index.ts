@@ -8,7 +8,7 @@
  *
  * @example
  * ```typescript
- * import { createAmberClient } from "@autumnsgrove/lattice/amber";
+ * import { createAmberClient } from "@autumnsgrove/lattice/media/amber";
  * import { createDb } from "@autumnsgrove/lattice/db";
  *
  * const amber = createAmberClient({
@@ -36,7 +36,7 @@
  * });
  * ```
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { AmberClientConfig } from "./types.js";

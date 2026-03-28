@@ -10,13 +10,13 @@
  *
  * @example
  * ```typescript
- * import { setTenantGraftOverride, getTenantControllableGrafts } from '$lib/feature-flags/tenant-grafts';
+ * import { setTenantFlagOverride, getTenantControllableFlags } from '$lib/platform/feature-flags/tenant-flags';
  *
- * // Get grafts a tenant can control
- * const grafts = await getTenantControllableGrafts(tenantId, env);
+ * // Get flags a tenant can control
+ * const grafts = await getTenantControllableFlags(tenantId, env);
  *
  * // Tenant toggles Fireside off for themselves
- * await setTenantGraftOverride('fireside_mode', tenantId, false, env);
+ * await setTenantFlagOverride('fireside_mode', tenantId, false, env);
  * ```
  */
 

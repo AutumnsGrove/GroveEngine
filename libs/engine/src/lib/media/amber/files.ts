@@ -6,7 +6,7 @@
  *
  * Uses Drizzle ORM for all database operations.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { GroveStorage } from "@autumnsgrove/infra";

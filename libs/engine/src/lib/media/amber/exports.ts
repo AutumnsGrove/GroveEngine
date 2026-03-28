@@ -4,7 +4,7 @@
  * Handles export job creation, status polling, and download URL generation.
  * Exports are long-running operations backed by the ExportJobV2 Durable Object.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/infra";

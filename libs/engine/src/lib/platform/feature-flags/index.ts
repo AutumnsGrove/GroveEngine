@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { isFeatureEnabled, getFeatureValue, getVariant } from '$lib/feature-flags';
+ * import { isFeatureEnabled, getFeatureValue, getVariant } from '$lib/platform/feature-flags';
  *
  * // Simple boolean check
  * const useJxl = await isFeatureEnabled('jxl_encoding', { tenantId }, env);

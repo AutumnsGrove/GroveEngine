@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createWardenClient } from '@autumnsgrove/lattice/warden';
+ * import { createWardenClient } from '@autumnsgrove/lattice/auth/warden';
  *
  * // In a SvelteKit server route:
  * export const POST: RequestHandler = async ({ platform }) => {

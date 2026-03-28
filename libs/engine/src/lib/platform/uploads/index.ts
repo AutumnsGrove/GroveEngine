@@ -6,7 +6,7 @@
  * @example
  * ```svelte
  * <script>
- *   import { UploadManagementPanel } from '@autumnsgrove/lattice/grafts/uploads';
+ *   import { UploadManagementPanel } from '@autumnsgrove/lattice/platform/uploads';
  * </script>
  *
  * <UploadManagementPanel

@@ -11,7 +11,7 @@
  *
  * @example
  * ```typescript
- * import { createLumenClientAuto } from '@autumnsgrove/lattice/lumen';
+ * import { createLumenClientAuto } from '@autumnsgrove/lattice/ai/lumen';
  *
  * // SvelteKit callers pass platform.env.*; standalone workers pass env.*
  * const lumen = createLumenClientAuto(platform.env);

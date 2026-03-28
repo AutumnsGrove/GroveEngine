@@ -2,7 +2,7 @@
  * Vista Observability — Main Barrel Export
  *
  * Exports the collector factory, all types, and query functions for the API endpoints.
- * Import from '@autumnsgrove/lattice/server/observability'
+ * Import from '@autumnsgrove/lattice/monitoring/observability'
  *
  * @module server/observability
  */

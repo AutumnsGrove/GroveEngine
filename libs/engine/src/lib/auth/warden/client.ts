@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createWardenClient } from '@autumnsgrove/lattice/warden';
+ * import { createWardenClient } from '@autumnsgrove/lattice/auth/warden';
  *
  * const warden = createWardenClient(platform.env);
  * const result = await warden.request({

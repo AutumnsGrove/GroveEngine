@@ -8,7 +8,7 @@
   @example
   ```svelte
   <script>
-    import { GreenhouseAdminPanel } from '$lib/grafts/greenhouse';
+    import { GreenhouseAdminPanel } from '$lib/platform/greenhouse';
     let { data } = $props();
   </script>
 

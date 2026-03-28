@@ -87,7 +87,7 @@ async function isRateLimited(
  * @example
  * ```typescript
  * // In routes/auth/callback/+server.ts
- * import { createCallbackHandler } from '@autumnsgrove/lattice/grafts/login/server';
+ * import { createCallbackHandler } from '@autumnsgrove/lattice/auth/login/server';
  *
  * export const GET = createCallbackHandler({
  *   defaultReturnTo: '/dashboard'

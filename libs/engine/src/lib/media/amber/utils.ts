@@ -4,7 +4,7 @@
  * R2 key generation, MIME type detection, byte formatting,
  * and ID generation used across all manager classes.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { AmberProduct } from "./types.js";

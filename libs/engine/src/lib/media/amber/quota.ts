@@ -4,7 +4,7 @@
  * Handles storage quota checks, status retrieval, and usage breakdown.
  * Quota is calculated from tier allocation + purchased add-ons.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { EngineDb } from "../../server/db/client.js";

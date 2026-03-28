@@ -36,7 +36,7 @@ export function createThresholdForUser(
  * @example
  * ```typescript
  * // In +server.ts
- * import { thresholdCheck } from "@autumnsgrove/lattice/threshold/sveltekit";
+ * import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
  *
  * export const POST: RequestHandler = async ({ platform, locals }) => {
  *   const denied = await thresholdCheck(threshold, {

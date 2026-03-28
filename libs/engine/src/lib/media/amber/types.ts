@@ -8,7 +8,7 @@
  * Built on Drizzle ORM (Aquifer) for typed queries and Server SDK
  * interfaces (GroveStorage, GroveServiceBus) for R2 and service bus access.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { EngineDb } from "../../server/db/client.js";

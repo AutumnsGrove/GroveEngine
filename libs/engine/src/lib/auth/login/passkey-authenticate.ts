@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { authenticateWithPasskey } from '@autumnsgrove/lattice/grafts/login';
+ * import { authenticateWithPasskey } from '@autumnsgrove/lattice/auth/login';
  *
  * const result = await authenticateWithPasskey({ returnTo: '/dashboard' });
  * if (result.success) {

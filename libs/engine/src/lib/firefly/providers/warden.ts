@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createWardenClient } from '@autumnsgrove/lattice/warden';
+ * import { createWardenClient } from '@autumnsgrove/lattice/auth/warden';
  * import { createWardenProvider } from '@autumnsgrove/lattice/firefly';
  *
  * const warden = createWardenClient(env);

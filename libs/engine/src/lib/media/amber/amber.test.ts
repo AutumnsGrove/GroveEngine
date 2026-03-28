@@ -4,7 +4,7 @@
  * Tests the unified storage management SDK:
  * utils, errors, quota, files, exports, addons, and client composition.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

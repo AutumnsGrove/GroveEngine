@@ -4,7 +4,7 @@
  * The main client class that composes all manager classes.
  * Created via createAmberClient() factory function.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { AmberClientConfig } from "./types.js";

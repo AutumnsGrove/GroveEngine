@@ -5,8 +5,8 @@
  *
  * @example
  * ```typescript
- * import { CurrentStageBadge, GardenStatus } from '@autumnsgrove/lattice/grafts/upgrades';
- * import type { FlourishState, GrowthStatus } from '@autumnsgrove/lattice/grafts/upgrades';
+ * import { CurrentStageBadge, GardenStatus } from '@autumnsgrove/lattice/platform/upgrades';
+ * import type { FlourishState, GrowthStatus } from '@autumnsgrove/lattice/platform/upgrades';
  * ```
  */
 

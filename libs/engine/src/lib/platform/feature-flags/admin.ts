@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { getFeatureFlags, setFlagEnabled } from '$lib/feature-flags/admin';
+ * import { getFeatureFlags, setFlagEnabled } from '$lib/platform/feature-flags/admin';
  *
  * // Get all flags for display
  * const flags = await getFeatureFlags(env);

@@ -4,7 +4,7 @@
  * Handles storage add-on listing, user add-ons, and total storage calculation.
  * Add-ons extend a user's base tier storage with purchased GB packages.
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { EngineDb } from "../../server/db/client.js";

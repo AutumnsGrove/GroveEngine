@@ -10,7 +10,7 @@
  *   040-059  Business logic (validation, quota, exports)
  *   080-099  Internal errors (orphans, sync failures)
  *
- * @module @autumnsgrove/lattice/amber
+ * @module @autumnsgrove/lattice/media/amber
  */
 
 import type { GroveErrorDef } from "../../errors/types.js";
