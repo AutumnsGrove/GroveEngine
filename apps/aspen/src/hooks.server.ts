@@ -715,7 +715,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Fails open if neither backend is available.
 	if (event.url.pathname.startsWith("/api/")) {
 		const [{ createThreshold }, { thresholdCheck }, { getClientIP }] = await Promise.all([
-			import("@autumnsgrove/lattice/threshold/factory"),
+			import("@autumnsgrove/lattice/platform/threshold/factory"),
 			import("@autumnsgrove/lattice/platform/threshold/sveltekit"),
 			import("@autumnsgrove/lattice/platform/threshold/worker"),
 		]);
