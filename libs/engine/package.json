@@ -130,11 +130,6 @@
 			"svelte": "./dist/components/admin/*.svelte",
 			"default": "./dist/components/admin/*.svelte"
 		},
-		"./components/chrome/*.svelte": {
-			"types": "./dist/components/chrome/*.svelte.d.ts",
-			"svelte": "./dist/components/chrome/*.svelte",
-			"default": "./dist/components/chrome/*.svelte"
-		},
 		"./components/custom/*.svelte": {
 			"types": "./dist/components/custom/*.svelte.d.ts",
 			"svelte": "./dist/components/custom/*.svelte",

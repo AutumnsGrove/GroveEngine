@@ -12,7 +12,7 @@
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
 	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
-	import Header from "@autumnsgrove/lattice/components/chrome/Header.svelte";
+	import Header from "@autumnsgrove/lattice/ui/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "@autumnsgrove/lattice/ui/components/chrome/tenant-nav";
 	import Lantern from "@autumnsgrove/lattice/ui/components/chrome/lantern/Lantern.svelte";
 	import FriendsLoader from "@autumnsgrove/lattice/ui/components/chrome/FriendsLoader.svelte";
