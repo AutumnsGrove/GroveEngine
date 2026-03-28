@@ -70,15 +70,15 @@ vi.mock("$lib/auth/session", () => ({
 	getVerifiedTenantId: vi.fn(),
 }));
 
-vi.mock("$lib/threshold/factory.js", () => ({
+vi.mock("$lib/platform/threshold/factory.js", () => ({
 	createThreshold: vi.fn(),
 }));
 
-vi.mock("$lib/threshold/adapters/sveltekit.js", () => ({
+vi.mock("$lib/platform/threshold/adapters/sveltekit.js", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
-vi.mock("$lib/config/billing", () => ({
+vi.mock("$lib/platform/config/billing", () => ({
 	buildCheckoutUrl: vi
 		.fn()
 		.mockReturnValue("https://billing.grove.place?action=checkout&tier=seedling"),
@@ -97,9 +97,9 @@ vi.mock("$lib/server/billing", () => ({
 // Import mocked modules
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
-import { buildCheckoutUrl, buildPortalUrl } from "$lib/config/billing";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
+import { buildCheckoutUrl, buildPortalUrl } from "$lib/platform/config/billing";
 import { logBillingAudit, isCompedAccount } from "$lib/server/billing";
 
 // Import after mocking

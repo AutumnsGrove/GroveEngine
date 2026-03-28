@@ -13,7 +13,7 @@
 	import {
 		CANOPY_CATEGORIES,
 		CANOPY_CATEGORY_LABELS,
-	} from "@autumnsgrove/lattice/config/canopy-categories";
+	} from "@autumnsgrove/lattice/platform/config/canopy-categories";
 
 	let { data } = $props();
 

@@ -4,7 +4,7 @@
  * Growth stages, cultivation requests, and garden status.
  */
 
-import type { TierKey } from "$lib/config/tiers";
+import type { TierKey } from "$lib/platform/config/tiers";
 
 // ============================================================================
 // Growth Stages

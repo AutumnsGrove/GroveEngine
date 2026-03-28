@@ -5,7 +5,7 @@
  */
 
 import type { Snippet } from "svelte";
-import type { TierKey } from "$lib/config/tiers";
+import type { TierKey } from "$lib/platform/config/tiers";
 import type { FlourishState } from "../types.js";
 import type { BaseGraftProps } from "../../types.js";
 

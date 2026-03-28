@@ -7,10 +7,10 @@
  * Includes content:encoded for Meadow poller consumption.
  * Supports conditional requests via ETag header.
  */
-import { getAllPosts, getSiteConfig } from "@autumnsgrove/lattice/utils/markdown";
+import { getAllPosts, getSiteConfig } from "@autumnsgrove/lattice/content/markdown/markdown";
 import type { RequestHandler } from "./$types.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import {
 	classifyFeedClient,
 	checkRSSRateLimit,
@@ -18,7 +18,7 @@ import {
 	buildBlockedResponse,
 	buildRateLimitedResponse,
 	rssRateLimitHeaders,
-} from "@autumnsgrove/lattice/threshold/rss";
+} from "@autumnsgrove/lattice/platform/threshold/rss";
 import { logGroveError } from "@autumnsgrove/lattice/errors/helpers";
 import { API_ERRORS } from "@autumnsgrove/lattice/errors/api-errors";
 

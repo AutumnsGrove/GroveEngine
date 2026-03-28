@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UploadManagementPanel } from "@autumnsgrove/lattice/grafts/uploads";
+	import { UploadManagementPanel } from "@autumnsgrove/lattice/platform/uploads";
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
 	import type { PageData, ActionData } from "./$types";

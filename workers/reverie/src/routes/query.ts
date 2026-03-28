@@ -7,8 +7,8 @@
  */
 
 import { Hono } from "hono";
-import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/reverie";
-import type { DomainId } from "@autumnsgrove/lattice/reverie";
+import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId } from "@autumnsgrove/lattice/ai/reverie";
 import type { Env, ReverieVariables, ReverieResponse } from "../types";
 import { QueryRequestSchema } from "../types";
 import { REVERIE_ERRORS, buildReverieError } from "../errors";

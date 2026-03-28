@@ -11,9 +11,9 @@ import type { TendRequest, TendResponse } from "../../types";
 import { createUpgradeConfig } from "../../config";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
-import { buildPortalUrl } from "$lib/config/billing";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
+import { buildPortalUrl } from "$lib/platform/config/billing";
 import { logBillingAudit } from "$lib/server/billing";
 
 const TEND_RATE_LIMIT = { limit: 20, windowSeconds: 3600 }; // 20 per hour

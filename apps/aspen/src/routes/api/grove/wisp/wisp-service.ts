@@ -4,9 +4,9 @@
  * Grammar, tone, and readability analysis business logic.
  */
 
-import { PROMPT_MODES, getMaxTokens } from "@autumnsgrove/lattice/config/wisp";
+import { PROMPT_MODES, getMaxTokens } from "@autumnsgrove/lattice/platform/config/wisp";
 import { secureUserContent } from "@autumnsgrove/lattice/server/inference-client";
-import type { LumenClient } from "@autumnsgrove/lattice/lumen";
+import type { LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { execute, queryOne } from "@autumnsgrove/lattice/server/services/database";
 
 // ============================================================================

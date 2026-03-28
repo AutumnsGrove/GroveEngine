@@ -2,7 +2,7 @@
  * Type definitions for Account page components.
  */
 
-import type { TierStatus } from "@autumnsgrove/lattice/config/tiers";
+import type { TierStatus } from "@autumnsgrove/lattice/platform/config/tiers";
 
 export interface BillingData {
 	plan: string;
@@ -57,4 +57,4 @@ export interface AccountPageData {
 }
 
 // Re-export Passkey type for use in Account page components
-export type { Passkey } from "@autumnsgrove/lattice/heartwood";
+export type { Passkey } from "@autumnsgrove/lattice/auth";

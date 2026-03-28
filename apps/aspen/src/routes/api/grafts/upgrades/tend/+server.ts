@@ -4,4 +4,4 @@
  * Open the garden shed for self-service billing management.
  */
 
-export { POST } from "@autumnsgrove/lattice/grafts/upgrades/server/api/tend";
+export { POST } from "@autumnsgrove/lattice/platform/upgrades/server/api/tend";

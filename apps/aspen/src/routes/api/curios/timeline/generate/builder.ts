@@ -17,7 +17,7 @@ import {
 	type CustomVoiceConfig,
 	type PromptContextInput,
 } from "@autumnsgrove/lattice/curios/timeline";
-import type { LumenClient } from "@autumnsgrove/lattice/lumen";
+import type { LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 
 // ============================================================================
 // Types

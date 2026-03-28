@@ -11,7 +11,7 @@ import {
 	isAllowedImageType,
 	validateFileSignature,
 	type AllowedImageType,
-} from "@autumnsgrove/lattice/utils/upload-validation";
+} from "@autumnsgrove/lattice/media/validation/upload-validation";
 import { scanImage, type PetalEnv } from "@autumnsgrove/lattice/server/petal";
 import { API_ERRORS, buildErrorJson, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";

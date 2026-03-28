@@ -7,8 +7,8 @@
 
 	import { stateIcons, natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import type { GardenModalProps } from "./types.js";
-	import type { TierKey } from "$lib/config/tiers";
-	import { transformAllTiers, type PricingTier, type BillingPeriod } from "$lib/grafts/pricing";
+	import type { TierKey } from "$lib/platform/config/tiers";
+	import { transformAllTiers, type PricingTier, type BillingPeriod } from "$lib/platform/pricing";
 	import GrowthCard from "./GrowthCard.svelte";
 	import PricingToggle from "../../pricing/PricingToggle.svelte";
 

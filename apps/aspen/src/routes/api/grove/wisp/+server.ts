@@ -8,12 +8,16 @@
 
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { API_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
-import { MAX_CONTENT_LENGTH, RATE_LIMIT, COST_CAP } from "@autumnsgrove/lattice/config/wisp";
+import {
+	MAX_CONTENT_LENGTH,
+	RATE_LIMIT,
+	COST_CAP,
+} from "@autumnsgrove/lattice/platform/config/wisp";
 import { stripMarkdown, smartTruncate } from "@autumnsgrove/lattice/server/inference-client";
-import { createLumenClient } from "@autumnsgrove/lattice/lumen";
+import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { calculateReadability } from "@autumnsgrove/lattice/utils/readability";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing";
 import { analyzeGrammar, analyzeTone, logWispUsage, getWispUsageStats } from "./wisp-service";
 

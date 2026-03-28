@@ -2,7 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { stateIcons, featureIcons, metricIcons } from "@autumnsgrove/prism/icons";
-	import { formatStorage, formatLimit } from "@autumnsgrove/lattice/config/tiers";
+	import { formatStorage, formatLimit } from "@autumnsgrove/lattice/platform/config/tiers";
 	import type { UsageData } from "./types";
 	import { USAGE_WARNING_THRESHOLD } from "./utils";
 

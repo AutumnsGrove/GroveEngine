@@ -17,7 +17,7 @@
  * transcription, local moderation) — no Warden needed for CF-native services.
  */
 
-import { createLumenClient } from "@autumnsgrove/lattice/lumen";
+import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import type { Env } from "../types";
 import { resolveWardenCredential } from "./warden-client";
 

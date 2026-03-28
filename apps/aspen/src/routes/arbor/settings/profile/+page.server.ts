@@ -16,9 +16,9 @@ import {
 	removeFromGreenhouse,
 	toggleGreenhouseStatus,
 	setFlagEnabled,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 import { isWayfinder } from "@autumnsgrove/lattice/config/wayfinder";
-import { isValidTier, type TierKey } from "@autumnsgrove/lattice/config/tiers";
+import { isValidTier, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	validateUsernameAvailability,
 	canChangeUsername,

@@ -3,7 +3,7 @@ import {
 	isFeatureEnabled,
 	getFeatureValue,
 	type FeatureFlagsEnv,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 /**
  * Server-side data for the admin images page.

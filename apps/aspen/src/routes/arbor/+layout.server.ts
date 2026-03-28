@@ -3,7 +3,7 @@ import {
 	getEnabledFlags,
 	isInGreenhouse,
 	type FlagsRecord,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 import { emailsMatch, normalizeEmail } from "@autumnsgrove/lattice/utils/user";
 import { loadChannelMessages } from "@autumnsgrove/lattice/server/services/messages";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";

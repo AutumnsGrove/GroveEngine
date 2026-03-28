@@ -25,14 +25,10 @@
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
-import { FAILOVER_CONFIG, PHOTODNA_CONFIG } from "$lib/config/petal.js";
+import { FAILOVER_CONFIG, PHOTODNA_CONFIG } from "$lib/platform/config/petal.js";
 import { PetalError, type CSAMResult } from "./types.js";
 import { classifyImage } from "./vision-client.js";
-import {
-  scanWithPhotoDNA,
-  isPhotoDNAAvailable,
-  type PhotoDNAResult,
-} from "./photodna-client.js";
+import { scanWithPhotoDNA, isPhotoDNAAvailable, type PhotoDNAResult } from "./photodna-client.js";
 import { logSecurityEvent } from "./logging.js";
 
 // ============================================================================
@@ -52,154 +48,138 @@ import { logSecurityEvent } from "./logging.js";
  * If both fail, the upload is blocked for safety.
  */
 export async function scanForCSAM(
-  image: string | Uint8Array,
-  mimeType: string,
-  contentHash: string,
-  options: {
-    ai?: Ai;
-    togetherApiKey?: string;
-    photodnaSubscriptionKey?: string;
-  },
+	image: string | Uint8Array,
+	mimeType: string,
+	contentHash: string,
+	options: {
+		ai?: Ai;
+		togetherApiKey?: string;
+		photodnaSubscriptionKey?: string;
+	},
 ): Promise<CSAMResult> {
-  const { photodnaSubscriptionKey, ...visionOptions } = options;
+	const { photodnaSubscriptionKey, ...visionOptions } = options;
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PRIMARY: PhotoDNA hash-based detection
-  // ──────────────────────────────────────────────────────────────────────────
-  if (
-    PHOTODNA_CONFIG.isPrimary &&
-    isPhotoDNAAvailable(photodnaSubscriptionKey)
-  ) {
-    try {
-      const imageData =
-        typeof image === "string"
-          ? Uint8Array.from(atob(image), (c) => c.charCodeAt(0))
-          : image;
+	// ──────────────────────────────────────────────────────────────────────────
+	// PRIMARY: PhotoDNA hash-based detection
+	// ──────────────────────────────────────────────────────────────────────────
+	if (PHOTODNA_CONFIG.isPrimary && isPhotoDNAAvailable(photodnaSubscriptionKey)) {
+		try {
+			const imageData =
+				typeof image === "string" ? Uint8Array.from(atob(image), (c) => c.charCodeAt(0)) : image;
 
-      const photodnaResult = await scanWithPhotoDNA(imageData, mimeType, {
-        subscriptionKey: photodnaSubscriptionKey!,
-      });
+			const photodnaResult = await scanWithPhotoDNA(imageData, mimeType, {
+				subscriptionKey: photodnaSubscriptionKey!,
+			});
 
-      if (photodnaResult.matched) {
-        // PhotoDNA match = definite CSAM detection
-        return {
-          safe: false,
-          reason: "CSAM_DETECTED",
-          mustReport: true,
-          hash: contentHash,
-          provider: "photodna",
-          photodnaTrackingId: photodnaResult.trackingId,
-          photodnaConfidence: photodnaResult.confidence,
-        };
-      }
+			if (photodnaResult.matched) {
+				// PhotoDNA match = definite CSAM detection
+				return {
+					safe: false,
+					reason: "CSAM_DETECTED",
+					mustReport: true,
+					hash: contentHash,
+					provider: "photodna",
+					photodnaTrackingId: photodnaResult.trackingId,
+					photodnaConfidence: photodnaResult.confidence,
+				};
+			}
 
-      // PhotoDNA clear - image passed hash check
-      // Continue to vision fallback for additional safety (optional)
-      if (!PHOTODNA_CONFIG.fallbackToVision) {
-        return {
-          safe: true,
-          hash: contentHash,
-          provider: "photodna",
-          photodnaTrackingId: photodnaResult.trackingId,
-        };
-      }
+			// PhotoDNA clear - image passed hash check
+			// Continue to vision fallback for additional safety (optional)
+			if (!PHOTODNA_CONFIG.fallbackToVision) {
+				return {
+					safe: true,
+					hash: contentHash,
+					provider: "photodna",
+					photodnaTrackingId: photodnaResult.trackingId,
+				};
+			}
 
-      // PhotoDNA passed, but also run vision as secondary check
-      // This catches novel content that isn't in the hash database yet
-      try {
-        const visionResult = await scanWithVision(
-          image,
-          mimeType,
-          contentHash,
-          visionOptions,
-        );
-        if (!visionResult.safe) {
-          return visionResult;
-        }
-      } catch {
-        // Vision failed but PhotoDNA passed - allow the image
-        // PhotoDNA is authoritative for known content
-      }
+			// PhotoDNA passed, but also run vision as secondary check
+			// This catches novel content that isn't in the hash database yet
+			try {
+				const visionResult = await scanWithVision(image, mimeType, contentHash, visionOptions);
+				if (!visionResult.safe) {
+					return visionResult;
+				}
+			} catch {
+				// Vision failed but PhotoDNA passed - allow the image
+				// PhotoDNA is authoritative for known content
+			}
 
-      return {
-        safe: true,
-        hash: contentHash,
-        provider: "photodna",
-        photodnaTrackingId: photodnaResult.trackingId,
-      };
-    } catch (err) {
-      // PhotoDNA failed - fall back to vision if configured
-      console.warn(
-        "[Petal] PhotoDNA scan failed, falling back to vision:",
-        err,
-      );
+			return {
+				safe: true,
+				hash: contentHash,
+				provider: "photodna",
+				photodnaTrackingId: photodnaResult.trackingId,
+			};
+		} catch (err) {
+			// PhotoDNA failed - fall back to vision if configured
+			console.warn("[Petal] PhotoDNA scan failed, falling back to vision:", err);
 
-      if (!PHOTODNA_CONFIG.fallbackToVision) {
-        // No fallback configured - block for safety
-        throw new PetalError(
-          "CSAM scanning unavailable - upload blocked for safety",
-          "CSAM_SCAN_FAILED",
-          "layer1",
-          "photodna",
-          err,
-        );
-      }
-      // Continue to vision fallback
-    }
-  }
+			if (!PHOTODNA_CONFIG.fallbackToVision) {
+				// No fallback configured - block for safety
+				throw new PetalError(
+					"CSAM scanning unavailable - upload blocked for safety",
+					"CSAM_SCAN_FAILED",
+					"layer1",
+					"photodna",
+					err,
+				);
+			}
+			// Continue to vision fallback
+		}
+	}
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // FALLBACK: Vision model classification
-  // ──────────────────────────────────────────────────────────────────────────
-  return scanWithVision(image, mimeType, contentHash, visionOptions);
+	// ──────────────────────────────────────────────────────────────────────────
+	// FALLBACK: Vision model classification
+	// ──────────────────────────────────────────────────────────────────────────
+	return scanWithVision(image, mimeType, contentHash, visionOptions);
 }
 
 /**
  * Scan image using vision model classification (fallback method)
  */
 async function scanWithVision(
-  image: string | Uint8Array,
-  mimeType: string,
-  contentHash: string,
-  options: {
-    ai?: Ai;
-    togetherApiKey?: string;
-  },
+	image: string | Uint8Array,
+	mimeType: string,
+	contentHash: string,
+	options: {
+		ai?: Ai;
+		togetherApiKey?: string;
+	},
 ): Promise<CSAMResult> {
-  try {
-    const classification = await classifyImage(image, mimeType, options);
+	try {
+		const classification = await classifyImage(image, mimeType, options);
 
-    // Check for CSAM indicators
-    // minor_present in sexual/nudity context is treated as potential CSAM
-    if (
-      classification.category === "minor_present" &&
-      classification.confidence >= 0.7
-    ) {
-      return {
-        safe: false,
-        reason: "CSAM_DETECTED",
-        mustReport: true,
-        hash: contentHash,
-        provider: classification.provider,
-      };
-    }
+		// Check for CSAM indicators
+		// minor_present in sexual/nudity context is treated as potential CSAM
+		if (classification.category === "minor_present" && classification.confidence >= 0.7) {
+			return {
+				safe: false,
+				reason: "CSAM_DETECTED",
+				mustReport: true,
+				hash: contentHash,
+				provider: classification.provider,
+			};
+		}
 
-    return {
-      safe: true,
-      hash: contentHash,
-      provider: classification.provider,
-    };
-  } catch (err) {
-    // CRITICAL: If CSAM scanning fails, we MUST block the upload
-    // We cannot process images without CSAM scanning
-    throw new PetalError(
-      "CSAM scanning unavailable - upload blocked for safety",
-      "CSAM_SCAN_FAILED",
-      "layer1",
-      undefined,
-      err,
-    );
-  }
+		return {
+			safe: true,
+			hash: contentHash,
+			provider: classification.provider,
+		};
+	} catch (err) {
+		// CRITICAL: If CSAM scanning fails, we MUST block the upload
+		// We cannot process images without CSAM scanning
+		throw new PetalError(
+			"CSAM scanning unavailable - upload blocked for safety",
+			"CSAM_SCAN_FAILED",
+			"layer1",
+			undefined,
+			err,
+		);
+	}
 }
 
 // ============================================================================
@@ -213,83 +193,80 @@ async function scanWithVision(
  * CSAM detection = instant upload block + NCMEC report required.
  */
 export async function flagAccountForCSAM(
-  db: D1Database,
-  userId: string,
-  contentHash: string,
+	db: D1Database,
+	userId: string,
+	contentHash: string,
 ): Promise<void> {
-  const id = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
+	const id = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // CRITICAL OPERATION: Flag the account
-  // This MUST succeed - if it fails, we log loudly but don't throw
-  // (the upload is already blocked at this point)
-  // ─────────────────────────────────────────────────────────────────────────────
-  try {
-    await db
-      .prepare(
-        `INSERT INTO petal_account_flags (
+	// ─────────────────────────────────────────────────────────────────────────────
+	// CRITICAL OPERATION: Flag the account
+	// This MUST succeed - if it fails, we log loudly but don't throw
+	// (the upload is already blocked at this point)
+	// ─────────────────────────────────────────────────────────────────────────────
+	try {
+		await db
+			.prepare(
+				`INSERT INTO petal_account_flags (
           id, user_id, flag_type, block_uploads, requires_manual_review, review_status
         ) VALUES (?, ?, 'csam_detection', 1, 1, 'pending')
         ON CONFLICT(user_id, flag_type) DO UPDATE SET
           block_uploads = 1,
           requires_manual_review = 1,
           review_status = 'pending'`,
-      )
-      .bind(id, userId)
-      .run();
-  } catch (err) {
-    // CRITICAL: Account flagging failed - log loudly
-    // The upload is still blocked, but we failed to persist the flag
-    console.error("[Petal] CRITICAL: Failed to flag account for CSAM:", err);
-    // Don't throw - upload is already blocked, but this needs monitoring/alerting
-    return; // Exit early - don't attempt logging if flagging failed
-  }
+			)
+			.bind(id, userId)
+			.run();
+	} catch (err) {
+		// CRITICAL: Account flagging failed - log loudly
+		// The upload is still blocked, but we failed to persist the flag
+		console.error("[Petal] CRITICAL: Failed to flag account for CSAM:", err);
+		// Don't throw - upload is already blocked, but this needs monitoring/alerting
+		return; // Exit early - don't attempt logging if flagging failed
+	}
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // NON-CRITICAL: Log the security event
-  // Best-effort - failure here doesn't affect the block
-  // ─────────────────────────────────────────────────────────────────────────────
-  try {
-    await logSecurityEvent(db, {
-      timestamp: new Date().toISOString(),
-      layer: "layer1",
-      result: "block",
-      category: "csam_detected",
-      contentHash,
-      feature: "upload",
-      userId,
-    });
-  } catch (err) {
-    // Non-critical: Logging failed, but account is already flagged
-    console.error("[Petal] Failed to log CSAM flagging event:", err);
-  }
+	// ─────────────────────────────────────────────────────────────────────────────
+	// NON-CRITICAL: Log the security event
+	// Best-effort - failure here doesn't affect the block
+	// ─────────────────────────────────────────────────────────────────────────────
+	try {
+		await logSecurityEvent(db, {
+			timestamp: new Date().toISOString(),
+			layer: "layer1",
+			result: "block",
+			category: "csam_detected",
+			contentHash,
+			feature: "upload",
+			userId,
+		});
+	} catch (err) {
+		// Non-critical: Logging failed, but account is already flagged
+		console.error("[Petal] Failed to log CSAM flagging event:", err);
+	}
 }
 
 /**
  * Check if user has active CSAM flag (blocked from uploads)
  */
-export async function hasActiveCSAMFlag(
-  db: D1Database,
-  userId: string,
-): Promise<boolean> {
-  try {
-    const flag = await db
-      .prepare(
-        `SELECT id FROM petal_account_flags
+export async function hasActiveCSAMFlag(db: D1Database, userId: string): Promise<boolean> {
+	try {
+		const flag = await db
+			.prepare(
+				`SELECT id FROM petal_account_flags
          WHERE user_id = ?
          AND flag_type = 'csam_detection'
          AND block_uploads = 1
          AND review_status IN ('pending', 'confirmed')`,
-      )
-      .bind(userId)
-      .first();
+			)
+			.bind(userId)
+			.first();
 
-    return flag !== null;
-  } catch (err) {
-    // If check fails, assume not blocked (fail-open for legitimate users)
-    console.error("[Petal] Failed to check CSAM flag:", err);
-    return false;
-  }
+		return flag !== null;
+	} catch (err) {
+		// If check fails, assume not blocked (fail-open for legitimate users)
+		console.error("[Petal] Failed to check CSAM flag:", err);
+		return false;
+	}
 }
 
 // ============================================================================
@@ -327,48 +304,48 @@ export async function hasActiveCSAMFlag(
  * @see https://www.missingkids.org/gethelpnow/cybertipline
  */
 export async function queueNCMECReport(
-  db: D1Database,
-  data: {
-    contentHash: string;
-    timestamp: string;
-    userId: string;
-    tenantId?: string;
-    photodnaTrackingId?: string;
-  },
+	db: D1Database,
+	data: {
+		contentHash: string;
+		timestamp: string;
+		userId: string;
+		tenantId?: string;
+		photodnaTrackingId?: string;
+	},
 ): Promise<void> {
-  // Log the report requirement
-  console.error("[PETAL CRITICAL] NCMEC Report Required:", {
-    hash: data.contentHash,
-    timestamp: data.timestamp,
-    photodnaTrackingId: data.photodnaTrackingId,
-    // Never log user-identifying info to console
-    reported: false,
-    deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  });
+	// Log the report requirement
+	console.error("[PETAL CRITICAL] NCMEC Report Required:", {
+		hash: data.contentHash,
+		timestamp: data.timestamp,
+		photodnaTrackingId: data.photodnaTrackingId,
+		// Never log user-identifying info to console
+		reported: false,
+		deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+	});
 
-  // Store in database for manual processing
-  try {
-    const id = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
-    await db
-      .prepare(
-        `INSERT INTO petal_ncmec_queue (
+	// Store in database for manual processing
+	try {
+		const id = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
+		await db
+			.prepare(
+				`INSERT INTO petal_ncmec_queue (
           id, content_hash, detected_at, user_id, tenant_id, reported, report_deadline
         ) VALUES (?, ?, ?, ?, ?, 0, datetime(?, '+24 hours'))`,
-      )
-      .bind(
-        id,
-        data.contentHash,
-        data.timestamp,
-        data.userId,
-        data.tenantId || null,
-        data.timestamp,
-      )
-      .run();
-  } catch (err) {
-    // CRITICAL: If we can't queue the report, log loudly
-    console.error("[PETAL CRITICAL] Failed to queue NCMEC report:", err);
-    // In production, this should trigger an alert
-  }
+			)
+			.bind(
+				id,
+				data.contentHash,
+				data.timestamp,
+				data.userId,
+				data.tenantId || null,
+				data.timestamp,
+			)
+			.run();
+	} catch (err) {
+		// CRITICAL: If we can't queue the report, log loudly
+		console.error("[PETAL CRITICAL] Failed to queue NCMEC report:", err);
+		// In production, this should trigger an alert
+	}
 }
 
 // ============================================================================
@@ -381,78 +358,74 @@ export async function queueNCMECReport(
  * Uses PhotoDNA as primary detection method with vision model fallback.
  */
 export async function runLayer1(
-  image: string | Uint8Array,
-  mimeType: string,
-  contentHash: string,
-  options: {
-    ai?: Ai;
-    togetherApiKey?: string;
-    photodnaSubscriptionKey?: string;
-    db?: D1Database;
-    userId?: string;
-    tenantId?: string;
-  },
+	image: string | Uint8Array,
+	mimeType: string,
+	contentHash: string,
+	options: {
+		ai?: Ai;
+		togetherApiKey?: string;
+		photodnaSubscriptionKey?: string;
+		db?: D1Database;
+		userId?: string;
+		tenantId?: string;
+	},
 ): Promise<CSAMResult> {
-  const { db, userId, tenantId, ...scanOptions } = options;
+	const { db, userId, tenantId, ...scanOptions } = options;
 
-  // Check if user is already blocked
-  if (db && userId) {
-    const isBlocked = await hasActiveCSAMFlag(db, userId);
-    if (isBlocked) {
-      throw new PetalError(
-        "Unable to process uploads at this time.",
-        "ACCOUNT_BLOCKED",
-        "layer1",
-      );
-    }
-  }
+	// Check if user is already blocked
+	if (db && userId) {
+		const isBlocked = await hasActiveCSAMFlag(db, userId);
+		if (isBlocked) {
+			throw new PetalError("Unable to process uploads at this time.", "ACCOUNT_BLOCKED", "layer1");
+		}
+	}
 
-  // Run CSAM scan (PhotoDNA primary, vision fallback)
-  const result = await scanForCSAM(image, mimeType, contentHash, scanOptions);
+	// Run CSAM scan (PhotoDNA primary, vision fallback)
+	const result = await scanForCSAM(image, mimeType, contentHash, scanOptions);
 
-  // Handle CSAM detection
-  if (!result.safe && result.mustReport) {
-    // Flag account
-    if (db && userId) {
-      await flagAccountForCSAM(db, userId, contentHash);
-    }
+	// Handle CSAM detection
+	if (!result.safe && result.mustReport) {
+		// Flag account
+		if (db && userId) {
+			await flagAccountForCSAM(db, userId, contentHash);
+		}
 
-    // Queue NCMEC report
-    if (db && userId) {
-      await queueNCMECReport(db, {
-        contentHash,
-        timestamp: new Date().toISOString(),
-        userId,
-        tenantId,
-        photodnaTrackingId: result.photodnaTrackingId,
-      });
-    }
+		// Queue NCMEC report
+		if (db && userId) {
+			await queueNCMECReport(db, {
+				contentHash,
+				timestamp: new Date().toISOString(),
+				userId,
+				tenantId,
+				photodnaTrackingId: result.photodnaTrackingId,
+			});
+		}
 
-    // Log security event
-    if (db) {
-      await logSecurityEvent(db, {
-        timestamp: new Date().toISOString(),
-        layer: "layer1",
-        result: "block",
-        category: "csam_detected",
-        contentHash,
-        feature: "upload",
-        userId,
-        tenantId,
-      });
-    }
-  } else if (db) {
-    // Log pass
-    await logSecurityEvent(db, {
-      timestamp: new Date().toISOString(),
-      layer: "layer1",
-      result: "pass",
-      contentHash,
-      feature: "upload",
-      userId,
-      tenantId,
-    });
-  }
+		// Log security event
+		if (db) {
+			await logSecurityEvent(db, {
+				timestamp: new Date().toISOString(),
+				layer: "layer1",
+				result: "block",
+				category: "csam_detected",
+				contentHash,
+				feature: "upload",
+				userId,
+				tenantId,
+			});
+		}
+	} else if (db) {
+		// Log pass
+		await logSecurityEvent(db, {
+			timestamp: new Date().toISOString(),
+			layer: "layer1",
+			result: "pass",
+			contentHash,
+			feature: "upload",
+			userId,
+			tenantId,
+		});
+	}
 
-  return result;
+	return result;
 }

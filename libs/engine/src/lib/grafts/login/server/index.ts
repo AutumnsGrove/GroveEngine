@@ -1,8 +1,0 @@
-/**
- * Login Graft Server — DEPRECATED re-export shim
- *
- * This module has moved to auth/login/server/.
- * This shim exists for backward compatibility and will be removed in a future release.
- */
-
-export * from "../../../auth/login/server/index.js";

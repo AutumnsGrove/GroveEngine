@@ -15,9 +15,9 @@ import {
 	getOrCreateConversation,
 } from "@autumnsgrove/lattice/server/services/chat";
 import { areMutualFriends } from "@autumnsgrove/lattice/server/services/friends";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 /**
  * Check if the chirp_enabled graft is enabled for this tenant.

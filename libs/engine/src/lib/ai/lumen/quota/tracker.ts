@@ -7,7 +7,7 @@
  * Schema: migrations/034_lumen_usage.sql
  */
 
-import type { TierKey } from "$lib/config/tiers.js";
+import type { TierKey } from "$lib/platform/config/tiers.js";
 import { QuotaExceededError } from "../errors.js";
 import type { LumenProviderName, LumenTask, LumenUsage } from "../types.js";
 import { createUsageLog, type UsageLogEntry } from "../pipeline/postprocessor.js";

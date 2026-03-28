@@ -11,8 +11,8 @@
  * @see docs/specs/petal-spec.md
  */
 
-import type { LumenClient } from "$lib/lumen/index.js";
-import { CLASSIFICATION_PROMPT } from "$lib/config/petal.js";
+import type { LumenClient } from "$lib/ai/lumen/index.js";
+import { CLASSIFICATION_PROMPT } from "$lib/platform/config/petal.js";
 import type { ClassificationResult, PetalCategory } from "./types.js";
 import { safeParseJson } from "../../utils/json.js";
 

@@ -11,7 +11,7 @@ import type {
 	UsageBreakdown,
 	QuotaStatus,
 } from "$types";
-import { TIER_STORAGE_GB } from "@autumnsgrove/lattice/config";
+import { TIER_STORAGE_GB } from "@autumnsgrove/lattice/platform/config";
 import { formatBytes } from "@autumnsgrove/lattice/utils/format";
 
 // Re-export for backwards compatibility

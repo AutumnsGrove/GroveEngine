@@ -15,7 +15,7 @@ export default defineConfig({
 			"@autumnsgrove/lattice/loom": path.resolve(engineLib, "loom/index.ts"),
 			"@autumnsgrove/lattice/errors": path.resolve(engineLib, "errors/index.ts"),
 			// Stub heavy dependencies that DOs import but tests don't need
-			"@autumnsgrove/lattice/lumen": path.resolve(__dirname, "src/test-stubs/lumen.ts"),
+			"@autumnsgrove/lattice/ai/lumen": path.resolve(__dirname, "src/test-stubs/lumen.ts"),
 		},
 	},
 });

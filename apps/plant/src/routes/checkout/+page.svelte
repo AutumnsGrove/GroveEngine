@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { stateIcons, navIcons, featureIcons, authIcons } from '@autumnsgrove/prism/icons';
-	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/lattice/config';
+	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/lattice/platform/config';
 
 	let { data } = $props();
 

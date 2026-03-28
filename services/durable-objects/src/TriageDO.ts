@@ -20,7 +20,7 @@ import {
 	type LoomRequestContext,
 	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
-import { createLumenClient, type LumenClient } from "@autumnsgrove/lattice/lumen";
+import { createLumenClient, type LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { DO_ERRORS } from "./errors.js";
 import { evaluateFilters } from "./triage/filters.js";
 import { classifyEmail, type EmailEnvelope } from "./triage/classifier.js";

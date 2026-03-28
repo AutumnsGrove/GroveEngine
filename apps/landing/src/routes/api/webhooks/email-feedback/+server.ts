@@ -1,7 +1,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { generateId } from "@autumnsgrove/lattice/services";
-import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/platform/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 
@@ -18,12 +18,12 @@ import { Resend } from "resend";
  */
 
 interface CloudflareEmailPayload {
-  from: string;
-  to: string;
-  subject?: string;
-  text?: string;
-  html?: string;
-  headers?: Record<string, string>;
+	from: string;
+	to: string;
+	subject?: string;
+	text?: string;
+	html?: string;
+	headers?: Record<string, string>;
 }
 
 /**
@@ -33,89 +33,88 @@ interface CloudflareEmailPayload {
  *   "john@example.com" → { name: null, email: "john@example.com" }
  */
 function parseFromField(from: string): { name: string | null; email: string } {
-  const match = from.match(/^(.+?)\s*<(.+?)>$/);
-  if (match) {
-    return {
-      name: match[1].trim(),
-      email: match[2].trim(),
-    };
-  }
-  return {
-    name: null,
-    email: from.trim(),
-  };
+	const match = from.match(/^(.+?)\s*<(.+?)>$/);
+	if (match) {
+		return {
+			name: match[1].trim(),
+			email: match[2].trim(),
+		};
+	}
+	return {
+		name: null,
+		email: from.trim(),
+	};
 }
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-  if (!platform?.env?.DB) {
-    console.error("Database not available");
-    return json({ error: "Database not available" }, { status: 500 });
-  }
+	if (!platform?.env?.DB) {
+		console.error("Database not available");
+		return json({ error: "Database not available" }, { status: 500 });
+	}
 
-  let payload: CloudflareEmailPayload;
+	let payload: CloudflareEmailPayload;
 
-  try {
-    payload = await request.json();
-  } catch (err) {
-    console.error("Failed to parse email payload:", err);
-    return json({ error: "Invalid payload" }, { status: 400 });
-  }
+	try {
+		payload = await request.json();
+	} catch (err) {
+		console.error("Failed to parse email payload:", err);
+		return json({ error: "Invalid payload" }, { status: 400 });
+	}
 
-  // Parse sender info
-  const { name, email } = parseFromField(payload.from);
+	// Parse sender info
+	const { name, email } = parseFromField(payload.from);
 
-  // Extract message (prefer plain text, fallback to HTML)
-  const message = payload.text || payload.html || "";
+	// Extract message (prefer plain text, fallback to HTML)
+	const message = payload.text || payload.html || "";
 
-  if (!message) {
-    console.error("Email has no content");
-    return json({ error: "Email has no content" }, { status: 400 });
-  }
+	if (!message) {
+		console.error("Email has no content");
+		return json({ error: "Email has no content" }, { status: 400 });
+	}
 
-  // Truncate message if too long (2000 char limit)
-  const truncatedMessage =
-    message.length > 2000 ? message.substring(0, 2000) : message;
+	// Truncate message if too long (2000 char limit)
+	const truncatedMessage = message.length > 2000 ? message.substring(0, 2000) : message;
 
-  // Generate ID and timestamps
-  const id = generateId();
-  const now = Math.floor(Date.now() / 1000);
+	// Generate ID and timestamps
+	const id = generateId();
+	const now = Math.floor(Date.now() / 1000);
 
-  // Insert feedback into D1
-  try {
-    await platform.env.DB.prepare(
-      `INSERT INTO feedback (id, source, name, email, subject, message, sentiment, ip_address, user_agent, status, created_at, updated_at)
+	// Insert feedback into D1
+	try {
+		await platform.env.DB.prepare(
+			`INSERT INTO feedback (id, source, name, email, subject, message, sentiment, ip_address, user_agent, status, created_at, updated_at)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-      .bind(
-        id,
-        "email",
-        name,
-        email,
-        payload.subject || null,
-        truncatedMessage,
-        null, // sentiment not available from email
-        null, // IP not available from email
-        null, // user agent not available from email
-        "new",
-        now,
-        now,
-      )
-      .run();
-  } catch (err) {
-    console.error("Failed to save email feedback:", err);
-    return json({ error: "Failed to save feedback" }, { status: 500 });
-  }
+		)
+			.bind(
+				id,
+				"email",
+				name,
+				email,
+				payload.subject || null,
+				truncatedMessage,
+				null, // sentiment not available from email
+				null, // IP not available from email
+				null, // user agent not available from email
+				"new",
+				now,
+				now,
+			)
+			.run();
+	} catch (err) {
+		console.error("Failed to save email feedback:", err);
+		return json({ error: "Failed to save feedback" }, { status: 500 });
+	}
 
-  // Forward to autumn@grove.place via Resend
-  if (platform.env.RESEND_API_KEY) {
-    try {
-      const resend = new Resend(platform.env.RESEND_API_KEY);
+	// Forward to autumn@grove.place via Resend
+	if (platform.env.RESEND_API_KEY) {
+		try {
+			const resend = new Resend(platform.env.RESEND_API_KEY);
 
-      const emailSubject = payload.subject
-        ? `Grove Feedback (Email): ${payload.subject}`
-        : "Grove Feedback (Email): New feedback";
+			const emailSubject = payload.subject
+				? `Grove Feedback (Email): ${payload.subject}`
+				: "Grove Feedback (Email): New feedback";
 
-      const emailText = `From: ${name || "Unknown"}
+			const emailText = `From: ${name || "Unknown"}
 Email: ${email}
 Source: Email (feedback@grove.place)
 
@@ -127,7 +126,7 @@ ${truncatedMessage}
 View in Arbor: https://grove.place/arbor/feedback
 Feedback ID: ${id}`;
 
-      const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
+			const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
 <p><strong>From:</strong> ${escapeHtml(name) || "Unknown"}<br>
 <strong>Email:</strong> ${escapeHtml(email)}<br>
 <strong>Source:</strong> Email (feedback@grove.place)</p>
@@ -144,18 +143,18 @@ Feedback ID: ${id}
 </p>
 </div>`;
 
-      await resend.emails.send({
-        from: GROVE_EMAILS.support.from,
-        to: GROVE_EMAILS.autumn.address,
-        subject: emailSubject,
-        text: emailText,
-        html: emailHtml,
-      });
-    } catch (err) {
-      console.error("Failed to forward feedback email:", err);
-      // Don't fail the request - feedback is already saved
-    }
-  }
+			await resend.emails.send({
+				from: GROVE_EMAILS.support.from,
+				to: GROVE_EMAILS.autumn.address,
+				subject: emailSubject,
+				text: emailText,
+				html: emailHtml,
+			});
+		} catch (err) {
+			console.error("Failed to forward feedback email:", err);
+			// Don't fail the request - feedback is already saved
+		}
+	}
 
-  return json({ received: true, id });
+	return json({ received: true, id });
 };

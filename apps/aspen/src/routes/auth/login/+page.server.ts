@@ -15,7 +15,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
-import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login/config";
+import { buildLoginUrl } from "@autumnsgrove/lattice/auth/login/config";
 import { getRealOrigin } from "@autumnsgrove/lattice/server/origin";
 
 export const load: PageServerLoad = async ({ url, request }) => {

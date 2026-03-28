@@ -1,11 +1,8 @@
 import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import {
-  verifyTurnstileToken,
-  generateId,
-} from "@autumnsgrove/lattice/services";
+import { verifyTurnstileToken, generateId } from "@autumnsgrove/lattice/services";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/platform/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -27,204 +24,188 @@ import { z } from "zod";
  * Why not use D1 auto-increment? We want human-readable, year-prefixed numbers
  * (PORCH-2026-00001) that reset each year, not raw integer IDs.
  */
-async function generateVisitNumber(
-  db: D1Database,
-  kv?: KVNamespace,
-): Promise<string> {
-  const year = new Date().getFullYear();
-  const kvKey = `porch:visit_sequence:${year}`;
+async function generateVisitNumber(db: D1Database, kv?: KVNamespace): Promise<string> {
+	const year = new Date().getFullYear();
+	const kvKey = `porch:visit_sequence:${year}`;
 
-  let sequence = 1;
+	let sequence = 1;
 
-  if (kv) {
-    try {
-      // KV path: read-increment-write (fast, globally distributed)
-      const existing = await kv.get(kvKey);
-      sequence = existing ? parseInt(existing, 10) + 1 : 1;
-      await kv.put(kvKey, sequence.toString());
-    } catch {
-      // KV failed - fall back to DB count
-      const result = await db
-        .prepare(
-          `SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`,
-        )
-        .bind(`PORCH-${year}-%`)
-        .first<{ count: number }>();
-      sequence = (result?.count || 0) + 1;
-    }
-  } else {
-    // No KV available (local dev) - count from DB
-    const result = await db
-      .prepare(
-        `SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`,
-      )
-      .bind(`PORCH-${year}-%`)
-      .first<{ count: number }>();
-    sequence = (result?.count || 0) + 1;
-  }
+	if (kv) {
+		try {
+			// KV path: read-increment-write (fast, globally distributed)
+			const existing = await kv.get(kvKey);
+			sequence = existing ? parseInt(existing, 10) + 1 : 1;
+			await kv.put(kvKey, sequence.toString());
+		} catch {
+			// KV failed - fall back to DB count
+			const result = await db
+				.prepare(`SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`)
+				.bind(`PORCH-${year}-%`)
+				.first<{ count: number }>();
+			sequence = (result?.count || 0) + 1;
+		}
+	} else {
+		// No KV available (local dev) - count from DB
+		const result = await db
+			.prepare(`SELECT COUNT(*) as count FROM porch_visits WHERE visit_number LIKE ?`)
+			.bind(`PORCH-${year}-%`)
+			.first<{ count: number }>();
+		sequence = (result?.count || 0) + 1;
+	}
 
-  return `PORCH-${year}-${sequence.toString().padStart(5, "0")}`;
+	return `PORCH-${year}-${sequence.toString().padStart(5, "0")}`;
 }
 
-const VALID_CATEGORIES = [
-  "billing",
-  "technical",
-  "account",
-  "hello",
-  "other",
-] as const;
+const VALID_CATEGORIES = ["billing", "technical", "account", "hello", "other"] as const;
 
 const PorchSubmitSchema = z.object({
-  name: z.string().trim().optional().default(""),
-  email: z.string().trim().min(1, "Email is required so I can get back to you."),
-  subject: z.string().trim().min(3, "Please provide a subject."),
-  message: z
-    .string()
-    .trim()
-    .min(10, "Please enter a message between 10 and 5000 characters.")
-    .max(5000, "Please enter a message between 10 and 5000 characters."),
-  category: z.string().trim().optional().default("other"),
-  "cf-turnstile-response": z.string().optional().default(""),
+	name: z.string().trim().optional().default(""),
+	email: z.string().trim().min(1, "Email is required so I can get back to you."),
+	subject: z.string().trim().min(3, "Please provide a subject."),
+	message: z
+		.string()
+		.trim()
+		.min(10, "Please enter a message between 10 and 5000 characters.")
+		.max(5000, "Please enter a message between 10 and 5000 characters."),
+	category: z.string().trim().optional().default("other"),
+	"cf-turnstile-response": z.string().optional().default(""),
 });
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
-  return {
-    user: locals.user || null,
-    turnstileKey: platform?.env?.TURNSTILE_SITE_KEY || "",
-  };
+	return {
+		user: locals.user || null,
+		turnstileKey: platform?.env?.TURNSTILE_SITE_KEY || "",
+	};
 };
 
 export const actions: Actions = {
-  submit: async ({ request, platform, locals, getClientAddress }) => {
-    if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
-    }
+	submit: async ({ request, platform, locals, getClientAddress }) => {
+		if (!platform?.env?.DB) {
+			return fail(500, { error: "Database not available" });
+		}
 
-    const formData = await request.formData();
-    const result = parseFormData(formData, PorchSubmitSchema);
-    if (!result.success) {
-      const firstError = Object.values(result.errors).flat()[0];
-      return fail(400, { error: firstError || "Invalid form data" });
-    }
-    const { email, subject, message } = result.data;
-    const name = result.data.name || null;
-    const turnstileToken = result.data["cf-turnstile-response"];
+		const formData = await request.formData();
+		const result = parseFormData(formData, PorchSubmitSchema);
+		if (!result.success) {
+			const firstError = Object.values(result.errors).flat()[0];
+			return fail(400, { error: firstError || "Invalid form data" });
+		}
+		const { email, subject, message } = result.data;
+		const name = result.data.name || null;
+		const turnstileToken = result.data["cf-turnstile-response"];
 
-    // Validate category
-    const category = VALID_CATEGORIES.includes(
-      result.data.category as (typeof VALID_CATEGORIES)[number],
-    )
-      ? result.data.category
-      : "other";
+		// Validate category
+		const category = VALID_CATEGORIES.includes(
+			result.data.category as (typeof VALID_CATEGORIES)[number],
+		)
+			? result.data.category
+			: "other";
 
-    // Turnstile verification for guests
-    if (!locals.user) {
-      if (!turnstileToken) {
-        return fail(400, {
-          error: "Please complete the verification challenge.",
-        });
-      }
+		// Turnstile verification for guests
+		if (!locals.user) {
+			if (!turnstileToken) {
+				return fail(400, {
+					error: "Please complete the verification challenge.",
+				});
+			}
 
-      const turnstileResult = await verifyTurnstileToken({
-        token: turnstileToken,
-        secretKey: platform.env.TURNSTILE_SECRET_KEY || "",
-        remoteip: getClientAddress(),
-      });
+			const turnstileResult = await verifyTurnstileToken({
+				token: turnstileToken,
+				secretKey: platform.env.TURNSTILE_SECRET_KEY || "",
+				remoteip: getClientAddress(),
+			});
 
-      if (!turnstileResult.success) {
-        return fail(403, {
-          error: "Human verification failed. Please try again.",
-        });
-      }
-    }
+			if (!turnstileResult.success) {
+				return fail(403, {
+					error: "Human verification failed. Please try again.",
+				});
+			}
+		}
 
-    // Rate limiting for guests: 5 visits per day per IP
-    if (!locals.user) {
-      const ip = getClientAddress();
-      const rateLimitKey = `porch:ip:${ip}`;
+		// Rate limiting for guests: 5 visits per day per IP
+		if (!locals.user) {
+			const ip = getClientAddress();
+			const rateLimitKey = `porch:ip:${ip}`;
 
-      try {
-        if (platform.env.CACHE) {
-          const existing = await platform.env.CACHE.get(rateLimitKey);
-          const count = existing ? parseInt(existing, 10) : 0;
+			try {
+				if (platform.env.CACHE) {
+					const existing = await platform.env.CACHE.get(rateLimitKey);
+					const count = existing ? parseInt(existing, 10) : 0;
 
-          if (count >= 5) {
-            return fail(429, {
-              error:
-                "You've started several visits today. Please try again tomorrow, or email porch@grove.place directly.",
-            });
-          }
+					if (count >= 5) {
+						return fail(429, {
+							error:
+								"You've started several visits today. Please try again tomorrow, or email porch@grove.place directly.",
+						});
+					}
 
-          await platform.env.CACHE.put(rateLimitKey, (count + 1).toString(), {
-            expirationTtl: 60 * 60 * 24,
-          });
-        }
-      } catch (err) {
-        console.error("Rate limit check failed:", err);
-      }
-    }
+					await platform.env.CACHE.put(rateLimitKey, (count + 1).toString(), {
+						expirationTtl: 60 * 60 * 24,
+					});
+				}
+			} catch (err) {
+				console.error("Rate limit check failed:", err);
+			}
+		}
 
-    // Generate IDs and visit number
-    const visitId = generateId();
-    const messageId = generateId();
-    const visitNumber = await generateVisitNumber(
-      platform.env.DB,
-      platform.env.CACHE,
-    );
-    const now = Math.floor(Date.now() / 1000);
+		// Generate IDs and visit number
+		const visitId = generateId();
+		const messageId = generateId();
+		const visitNumber = await generateVisitNumber(platform.env.DB, platform.env.CACHE);
+		const now = Math.floor(Date.now() / 1000);
 
-    // Insert visit and first message
-    try {
-      // Create the visit
-      await platform.env.DB.prepare(
-        `INSERT INTO porch_visits (id, visit_number, user_id, guest_email, guest_name, category, subject, status, priority, created_at, updated_at)
+		// Insert visit and first message
+		try {
+			// Create the visit
+			await platform.env.DB.prepare(
+				`INSERT INTO porch_visits (id, visit_number, user_id, guest_email, guest_name, category, subject, status, priority, created_at, updated_at)
 				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-        .bind(
-          visitId,
-          visitNumber,
-          locals.user?.id || null,
-          locals.user ? null : email, // Store email as guest_email only for guests
-          name,
-          category,
-          subject,
-          "open",
-          "normal",
-          now,
-          now,
-        )
-        .run();
+			)
+				.bind(
+					visitId,
+					visitNumber,
+					locals.user?.id || null,
+					locals.user ? null : email, // Store email as guest_email only for guests
+					name,
+					category,
+					subject,
+					"open",
+					"normal",
+					now,
+					now,
+				)
+				.run();
 
-      // Create the first message
-      await platform.env.DB.prepare(
-        `INSERT INTO porch_messages (id, visit_id, sender_type, sender_name, content, created_at)
+			// Create the first message
+			await platform.env.DB.prepare(
+				`INSERT INTO porch_messages (id, visit_id, sender_type, sender_name, content, created_at)
 				 VALUES (?, ?, ?, ?, ?, ?)`,
-      )
-        .bind(messageId, visitId, "visitor", name || "Wanderer", message, now)
-        .run();
-    } catch (err) {
-      console.error("Failed to save visit:", err);
-      return fail(500, {
-        error: "Failed to start your visit. Please try again.",
-      });
-    }
+			)
+				.bind(messageId, visitId, "visitor", name || "Wanderer", message, now)
+				.run();
+		} catch (err) {
+			console.error("Failed to save visit:", err);
+			return fail(500, {
+				error: "Failed to start your visit. Please try again.",
+			});
+		}
 
-    // Send notification email to Autumn
-    if (platform.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(platform.env.RESEND_API_KEY);
+		// Send notification email to Autumn
+		if (platform.env.RESEND_API_KEY) {
+			try {
+				const resend = new Resend(platform.env.RESEND_API_KEY);
 
-        const categoryLabels: Record<string, string> = {
-          billing: "Billing",
-          technical: "Technical",
-          account: "Account",
-          hello: "Just saying hi",
-          other: "Other",
-        };
+				const categoryLabels: Record<string, string> = {
+					billing: "Billing",
+					technical: "Technical",
+					account: "Account",
+					hello: "Just saying hi",
+					other: "Other",
+				};
 
-        const emailSubject = `[Porch ${visitNumber}] ${subject}`;
+				const emailSubject = `[Porch ${visitNumber}] ${subject}`;
 
-        const emailText = `New Porch visit from ${name || "A Wanderer"}
+				const emailText = `New Porch visit from ${name || "A Wanderer"}
 
 Visit: ${visitNumber}
 Category: ${categoryLabels[category] || category}
@@ -239,7 +220,7 @@ ${message}
 ---
 Reply in Arbor: https://grove.place/arbor/porch/${visitId}`;
 
-        const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
+				const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
 <h2 style="color: #166534; margin-bottom: 0.5rem;">New Porch Visit</h2>
 <p style="color: #666; margin-top: 0;">
 <strong>${escapeHtml(visitNumber)}</strong> &middot; ${categoryLabels[category] || category}
@@ -261,28 +242,28 @@ ${locals.user ? `<strong>User:</strong> ${escapeHtml(locals.user.id)}<br>` : "<e
 </p>
 </div>`;
 
-        await resend.emails.send({
-          from: GROVE_EMAILS.porch.fromSystem,
-          to: GROVE_EMAILS.autumn.address,
-          replyTo: email,
-          subject: emailSubject,
-          text: emailText,
-          html: emailHtml,
-        });
-      } catch (err) {
-        console.error("Failed to send notification email:", err);
-        // Don't fail - visit is saved
-      }
-    }
+				await resend.emails.send({
+					from: GROVE_EMAILS.porch.fromSystem,
+					to: GROVE_EMAILS.autumn.address,
+					replyTo: email,
+					subject: emailSubject,
+					text: emailText,
+					html: emailHtml,
+				});
+			} catch (err) {
+				console.error("Failed to send notification email:", err);
+				// Don't fail - visit is saved
+			}
+		}
 
-    // Send confirmation email to visitor
-    if (platform.env.RESEND_API_KEY && email) {
-      try {
-        const resend = new Resend(platform.env.RESEND_API_KEY);
+		// Send confirmation email to visitor
+		if (platform.env.RESEND_API_KEY && email) {
+			try {
+				const resend = new Resend(platform.env.RESEND_API_KEY);
 
-        const confirmSubject = `Your Porch visit: ${visitNumber}`;
+				const confirmSubject = `Your Porch visit: ${visitNumber}`;
 
-        const confirmText = `Hi ${name || "there"},
+				const confirmText = `Hi ${name || "there"},
 
 Thanks for reaching out! I've received your message and I'll get back to you as soon as I can.
 
@@ -301,7 +282,7 @@ I typically respond within a day, often much sooner. You'll get an email when I 
 —Autumn
 Grove`;
 
-        const confirmHtml = `<div style="font-family: sans-serif; line-height: 1.6; max-width: 600px;">
+				const confirmHtml = `<div style="font-family: sans-serif; line-height: 1.6; max-width: 600px;">
 <p>Hi ${escapeHtml(name) || "there"},</p>
 
 <p>Thanks for reaching out! I've received your message and I'll get back to you as soon as I can.</p>
@@ -318,19 +299,19 @@ Grove`;
 <p style="margin-top: 24px;">—Autumn<br><a href="https://grove.place" style="color: #166534;">Grove</a></p>
 </div>`;
 
-        await resend.emails.send({
-          from: GROVE_EMAILS.porch.fromAutumn,
-          to: email,
-          subject: confirmSubject,
-          text: confirmText,
-          html: confirmHtml,
-        });
-      } catch (err) {
-        console.error("Failed to send confirmation email:", err);
-        // Don't fail - visit is saved
-      }
-    }
+				await resend.emails.send({
+					from: GROVE_EMAILS.porch.fromAutumn,
+					to: email,
+					subject: confirmSubject,
+					text: confirmText,
+					html: confirmHtml,
+				});
+			} catch (err) {
+				console.error("Failed to send confirmation email:", err);
+				// Don't fail - visit is saved
+			}
+		}
 
-    return { success: true, visitNumber };
-  },
+		return { success: true, visitNumber };
+	},
 };

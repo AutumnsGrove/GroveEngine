@@ -12,7 +12,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mock the feature-flags module
-vi.mock("@autumnsgrove/lattice/feature-flags", () => ({
+vi.mock("@autumnsgrove/lattice/platform/feature-flags", () => ({
 	getGreenhouseTenant: vi.fn(),
 	getTenantControllableGrafts: vi.fn(),
 	setTenantGraftOverride: vi.fn(),
@@ -30,7 +30,7 @@ import {
 	removeFromGreenhouse,
 	toggleGreenhouseStatus,
 	setFlagEnabled,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Import the actions module
 // Note: We test the action logic patterns, not the actual SvelteKit actions

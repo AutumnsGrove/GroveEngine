@@ -16,7 +16,7 @@
 	import type { Component } from "svelte";
 	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
 	import type { GardenStatusProps } from "./types.js";
-	import type { TierKey } from "$lib/config/tiers";
+	import type { TierKey } from "$lib/platform/config/tiers";
 	import type { FlourishState } from "../types.js";
 
 	let {

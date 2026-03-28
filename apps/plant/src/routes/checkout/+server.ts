@@ -1,6 +1,6 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { buildCheckoutUrl } from "@autumnsgrove/lattice/config";
+import { buildCheckoutUrl } from "@autumnsgrove/lattice/platform/config";
 
 interface CompedInvite {
 	id: string;

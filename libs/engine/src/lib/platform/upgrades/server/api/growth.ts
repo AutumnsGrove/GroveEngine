@@ -9,8 +9,8 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { GrowthStatus, FlourishState } from "../../types";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { createThreshold } from "$lib/threshold/factory.js";
-import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { createThreshold } from "$lib/platform/threshold/factory.js";
+import { thresholdCheck } from "$lib/platform/threshold/adapters/sveltekit.js";
 import { isCompedAccount } from "$lib/server/billing";
 
 const GROWTH_RATE_LIMIT = { limit: 100, windowSeconds: 3600 }; // 100 per hour

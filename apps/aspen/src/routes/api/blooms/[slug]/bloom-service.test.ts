@@ -30,7 +30,7 @@ vi.mock("@autumnsgrove/lattice/server/services/cache", () => ({
 	del: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/utils/markdown", () => ({
+vi.mock("@autumnsgrove/lattice/content/markdown/markdown", () => ({
 	getPostBySlug: vi.fn(),
 	renderMarkdown: vi.fn((md: string) => `<p>${md}</p>`),
 }));
@@ -94,7 +94,7 @@ vi.mock("@sveltejs/kit", () => ({
 
 import { getTenantDb, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
-import { getPostBySlug } from "@autumnsgrove/lattice/utils/markdown";
+import { getPostBySlug } from "@autumnsgrove/lattice/content/markdown/markdown";
 import { getPost, updatePost, deletePost, invalidatePostCaches } from "./bloom-service";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

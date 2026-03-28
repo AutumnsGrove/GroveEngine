@@ -8,7 +8,7 @@
 	import { natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import {
 		GLOBAL_BLAZE_DEFAULTS,
 		VALID_BLAZE_ICONS,
@@ -17,7 +17,7 @@
 		BLAZE_COLOR_HEX,
 		resolveLucideIcon,
 		isValidBlazeHexColor,
-	} from "@autumnsgrove/lattice/blazes";
+	} from "@autumnsgrove/lattice/social/blazes";
 
 	const Plus = actionIcons.plus;
 	const RotateCcw = actionIcons.rotateCcw;

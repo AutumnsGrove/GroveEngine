@@ -5,8 +5,8 @@
  * Higher tiers can modify more domains per request.
  */
 
-import { getSchemas } from "@autumnsgrove/lattice/reverie";
-import type { DomainId, DomainSchema } from "@autumnsgrove/lattice/reverie";
+import { getSchemas } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId, DomainSchema } from "@autumnsgrove/lattice/ai/reverie";
 
 // =============================================================================
 // Tier Limits

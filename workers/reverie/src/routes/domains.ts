@@ -11,7 +11,7 @@ import {
 	SCHEMA_REGISTRY,
 	IMPLEMENTED_COUNT,
 	IMPLEMENTED_FIELD_COUNT,
-} from "@autumnsgrove/lattice/reverie";
+} from "@autumnsgrove/lattice/ai/reverie";
 import type { Env, ReverieVariables, ReverieResponse } from "../types";
 
 const domains = new Hono<{ Bindings: Env; Variables: ReverieVariables }>();

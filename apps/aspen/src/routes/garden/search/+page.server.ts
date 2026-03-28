@@ -1,4 +1,4 @@
-import { getAllPosts } from "@autumnsgrove/lattice/utils/markdown";
+import { getAllPosts } from "@autumnsgrove/lattice/content/markdown/markdown";
 import type { PageServerLoad } from "./$types.js";
 
 export const prerender = false;

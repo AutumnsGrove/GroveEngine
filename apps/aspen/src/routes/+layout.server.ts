@@ -1,10 +1,10 @@
 import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
-import { TIERS, isValidTier } from "@autumnsgrove/lattice/config/tiers";
+import { TIERS, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
-import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
+import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/platform/feature-flags";
 import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";

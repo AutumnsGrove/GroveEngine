@@ -7,7 +7,7 @@
 
 import { natureIcons } from "@autumnsgrove/prism/icons";
 import type { Component } from "svelte";
-import type { TierIcon } from "@autumnsgrove/lattice/config";
+import type { TierIcon } from "@autumnsgrove/lattice/platform/config";
 
 /**
  * Map tier icon identifiers to icon components.

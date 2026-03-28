@@ -5,9 +5,9 @@
  * Limits are defined centrally in the Threshold config (lumen/* endpoint keys).
  */
 
-import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
-import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
-import { ENDPOINT_RATE_LIMITS } from "@autumnsgrove/lattice/threshold";
+import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/platform/threshold";
+import { thresholdMiddleware } from "@autumnsgrove/lattice/platform/threshold/hono";
+import { ENDPOINT_RATE_LIMITS } from "@autumnsgrove/lattice/platform/threshold";
 import type { Env } from "../types";
 
 /**

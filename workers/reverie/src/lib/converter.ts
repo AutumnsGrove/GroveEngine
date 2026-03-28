@@ -16,8 +16,8 @@
  *   json    → { type: "object" }
  */
 
-import type { DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/reverie";
-import type { LumenToolDefinition } from "@autumnsgrove/lattice/lumen";
+import type { DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/ai/reverie";
+import type { LumenToolDefinition } from "@autumnsgrove/lattice/ai/lumen";
 
 // =============================================================================
 // Converter

@@ -18,8 +18,14 @@ export default defineConfig({
 	// package.json "exports" for workspace packages in the worker pool).
 	resolve: {
 		alias: {
-			"@autumnsgrove/lattice/threshold/hono": path.join(engineSrc, "threshold/hono.ts"),
-			"@autumnsgrove/lattice/threshold": path.join(engineSrc, "threshold/index.ts"),
+			"@autumnsgrove/lattice/platform/threshold/hono": path.join(
+				engineSrc,
+				"platform/threshold/adapters/hono.ts",
+			),
+			"@autumnsgrove/lattice/platform/threshold": path.join(
+				engineSrc,
+				"platform/threshold/index.ts",
+			),
 		},
 	},
 	test: {

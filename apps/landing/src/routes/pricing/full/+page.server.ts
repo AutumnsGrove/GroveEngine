@@ -5,20 +5,20 @@
  * Main /pricing page shows simplified view with Wanderer and Seedling.
  */
 
-import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
+import { transformAllTiers } from "@autumnsgrove/lattice/platform/pricing";
 
 export function load() {
-  // All tiers, no filters
-  const tiers = transformAllTiers({
-    highlightTier: "wanderer",
-    badges: {
-      wanderer: "Free",
-      seedling: "$8/mo",
-      sapling: "$12/mo",
-      oak: "$25/mo",
-      evergreen: "$35/mo",
-    },
-  });
+	// All tiers, no filters
+	const tiers = transformAllTiers({
+		highlightTier: "wanderer",
+		badges: {
+			wanderer: "Free",
+			seedling: "$8/mo",
+			sapling: "$12/mo",
+			oak: "$25/mo",
+			evergreen: "$35/mo",
+		},
+	});
 
-  return { tiers };
+	return { tiers };
 }

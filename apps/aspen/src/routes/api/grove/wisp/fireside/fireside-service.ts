@@ -6,7 +6,7 @@
 
 import { json } from "@sveltejs/kit";
 import { secureUserContent } from "@autumnsgrove/lattice/server/inference-client";
-import type { LumenClient } from "@autumnsgrove/lattice/lumen";
+import type { LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { execute } from "@autumnsgrove/lattice/server/services/database";
 
 import {

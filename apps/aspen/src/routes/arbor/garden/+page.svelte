@@ -8,8 +8,8 @@
 	import { api } from "@autumnsgrove/lattice/utils";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 	import { actionIcons, phaseIcons } from "@autumnsgrove/prism/icons";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { resolveBlaze } from "@autumnsgrove/lattice/social/blazes";
 
 	let { data } = $props();
 

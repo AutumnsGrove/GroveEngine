@@ -1,18 +1,18 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import {
 	thresholdCheckWithResult,
 	thresholdHeaders,
-} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+} from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { validateEnv } from "@autumnsgrove/lattice/server/env-validation";
 import {
 	isAllowedImageType,
 	validateFileSignature,
 	MIME_TO_EXTENSIONS,
 	type AllowedImageType,
-} from "@autumnsgrove/lattice/utils/upload-validation";
+} from "@autumnsgrove/lattice/media/validation/upload-validation";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import { scanImage } from "@autumnsgrove/lattice/server/petal";
 import type { PetalEnv } from "@autumnsgrove/lattice/server/petal/types";

@@ -9,7 +9,7 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { isWayfinder } from "@autumnsgrove/lattice/config";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 import {
 	VALID_TIERS,
 	VALID_INVITE_TYPES,

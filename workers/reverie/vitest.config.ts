@@ -23,10 +23,16 @@ export default defineConfig({
 	// package.json "exports" for workspace packages in the worker pool).
 	resolve: {
 		alias: {
-			"@autumnsgrove/lattice/reverie": path.join(engineSrc, "reverie/index.ts"),
-			"@autumnsgrove/lattice/lumen": path.join(engineSrc, "lumen/index.ts"),
-			"@autumnsgrove/lattice/threshold/hono": path.join(engineSrc, "threshold/hono.ts"),
-			"@autumnsgrove/lattice/threshold": path.join(engineSrc, "threshold/index.ts"),
+			"@autumnsgrove/lattice/ai/reverie": path.join(engineSrc, "ai/reverie/index.ts"),
+			"@autumnsgrove/lattice/ai/lumen": path.join(engineSrc, "ai/lumen/index.ts"),
+			"@autumnsgrove/lattice/platform/threshold/hono": path.join(
+				engineSrc,
+				"platform/threshold/adapters/hono.ts",
+			),
+			"@autumnsgrove/lattice/platform/threshold": path.join(
+				engineSrc,
+				"platform/threshold/index.ts",
+			),
 		},
 	},
 	test: {

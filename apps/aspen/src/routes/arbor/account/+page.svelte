@@ -6,7 +6,7 @@
 		buildCancelUrl,
 		buildResumeUrl,
 		buildCheckoutUrl,
-	} from "@autumnsgrove/lattice/config/billing";
+	} from "@autumnsgrove/lattice/platform/config/billing";
 	import { page } from "$app/stores";
 
 	// Import extracted components
@@ -18,12 +18,12 @@
 	import FeaturesCard from "./FeaturesCard.svelte";
 
 	// Import UpgradesGraft components for garden status
-	import { GardenStatus } from "@autumnsgrove/lattice/grafts/upgrades";
-	import type { FlourishState } from "@autumnsgrove/lattice/grafts/upgrades";
+	import { GardenStatus } from "@autumnsgrove/lattice/platform/upgrades";
+	import type { FlourishState } from "@autumnsgrove/lattice/platform/upgrades";
 
 	// Import types and utils
 	import { authIcons } from "@autumnsgrove/prism/icons";
-	import type { TierKey } from "@autumnsgrove/lattice/config/tiers";
+	import type { TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 
 	let { data } = $props();
 

@@ -10,13 +10,13 @@ import {
 	getTenantControllableGrafts,
 	getGreenhouseTenants,
 	getFeatureFlags,
-} from "@autumnsgrove/lattice/feature-flags";
+} from "@autumnsgrove/lattice/platform/feature-flags";
 import { queryMany, queryOne } from "@autumnsgrove/lattice/server/services/database";
-import type { TenantGraftInfo } from "@autumnsgrove/lattice/feature-flags/tenant-grafts";
-import type { GreenhouseTenant } from "@autumnsgrove/lattice/feature-flags/types";
-import type { FeatureFlagSummary } from "@autumnsgrove/lattice/feature-flags/admin";
+import type { TenantGraftInfo } from "@autumnsgrove/lattice/platform/feature-flags/tenant-grafts";
+import type { GreenhouseTenant } from "@autumnsgrove/lattice/platform/feature-flags/types";
+import type { FeatureFlagSummary } from "@autumnsgrove/lattice/platform/feature-flags/admin";
 import { isWayfinder } from "@autumnsgrove/lattice/config/wayfinder";
-import { isValidTier, type TierKey } from "@autumnsgrove/lattice/config/tiers";
+import { isValidTier, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	canChangeUsername,
 	getUsernameHistory,

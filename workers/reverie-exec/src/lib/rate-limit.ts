@@ -6,7 +6,7 @@
  * Fails open — a DO outage should not block execution.
  */
 
-import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/threshold";
+import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/platform/threshold";
 import type { Env } from "../types";
 
 /** Rate limit: 20 requests per 60 seconds per tenant */

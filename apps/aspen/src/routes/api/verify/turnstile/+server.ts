@@ -15,8 +15,8 @@ import {
 	TURNSTILE_COOKIE_NAME,
 	TURNSTILE_COOKIE_MAX_AGE,
 } from "@autumnsgrove/lattice/server/services/turnstile";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

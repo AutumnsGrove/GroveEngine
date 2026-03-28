@@ -10,8 +10,8 @@ import type { Env, ReverieVariables, ReverieResponse } from "../types";
 import { ExecuteRequestSchema } from "../types";
 import { REVERIE_ERRORS, buildReverieError } from "../errors";
 import { executeChanges } from "../lib/executor";
-import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/reverie";
-import type { DomainId } from "@autumnsgrove/lattice/reverie";
+import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId } from "@autumnsgrove/lattice/ai/reverie";
 
 const execute = new Hono<{ Bindings: Env; Variables: ReverieVariables }>();
 

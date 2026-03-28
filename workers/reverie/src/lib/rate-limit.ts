@@ -6,9 +6,9 @@
  * Fails open — a DO outage should not block configuration.
  */
 
-import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/threshold";
-import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
-import { ENDPOINT_RATE_LIMITS } from "@autumnsgrove/lattice/threshold";
+import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/platform/threshold";
+import { thresholdMiddleware } from "@autumnsgrove/lattice/platform/threshold/hono";
+import { ENDPOINT_RATE_LIMITS } from "@autumnsgrove/lattice/platform/threshold";
 import type { Env, ReverieVariables } from "../types";
 
 type ReverieEndpointKey = "reverie/configure" | "reverie/execute" | "reverie/query";

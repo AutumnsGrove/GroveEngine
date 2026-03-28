@@ -1,16 +1,16 @@
 import { json, isHttpError } from "@sveltejs/kit";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
-import { renderMarkdown } from "@autumnsgrove/lattice/utils/markdown";
+import { renderMarkdown } from "@autumnsgrove/lattice/content/markdown/markdown";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/config/tiers";
+import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 
 interface PostRecord {
 	id?: string;

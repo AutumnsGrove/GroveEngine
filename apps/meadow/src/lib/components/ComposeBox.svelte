@@ -8,8 +8,8 @@
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post";
 	import { NoteEditor } from "@autumnsgrove/lattice/ui/editor";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
 	import { uploadNoteImage } from "$lib/utils/note-upload";
 
 	interface Props {

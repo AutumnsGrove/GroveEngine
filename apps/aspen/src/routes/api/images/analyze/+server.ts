@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing";

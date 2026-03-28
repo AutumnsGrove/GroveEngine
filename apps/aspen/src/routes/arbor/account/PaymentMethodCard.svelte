@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import { metricIcons, navIcons, blazeIcons } from "@autumnsgrove/prism/icons";
-	import { buildPortalUrl } from "@autumnsgrove/lattice/config/billing";
+	import { buildPortalUrl } from "@autumnsgrove/lattice/platform/config/billing";
 	import { page } from "$app/stores";
 	import type { BillingData } from "./types";
 

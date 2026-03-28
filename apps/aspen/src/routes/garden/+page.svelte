@@ -4,8 +4,8 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { resolveBlaze } from "@autumnsgrove/lattice/social/blazes";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 
 	let { data } = $props();

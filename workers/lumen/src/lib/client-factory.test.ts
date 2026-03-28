@@ -23,7 +23,7 @@ const mockCreateLumenClient = vi.hoisted(() =>
 
 const mockResolveWardenCredential = vi.hoisted(() => vi.fn());
 
-vi.mock("@autumnsgrove/lattice/lumen", () => ({
+vi.mock("@autumnsgrove/lattice/ai/lumen", () => ({
 	createLumenClient: mockCreateLumenClient,
 }));
 

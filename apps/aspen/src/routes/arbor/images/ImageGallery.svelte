@@ -13,7 +13,7 @@
 	} from "@autumnsgrove/lattice/utils";
 	import {
 		ALLOWED_EXTENSIONS,
-	} from "@autumnsgrove/lattice/utils/upload-validation";
+	} from "@autumnsgrove/lattice/media/validation/upload-validation";
 
 	interface GalleryImage {
 		key: string;

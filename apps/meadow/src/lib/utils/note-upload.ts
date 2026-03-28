@@ -7,11 +7,11 @@
 
 import { apiRequest } from "@autumnsgrove/lattice/utils/api";
 import {
-  normalizeFileForUpload,
-  isConvertibleFormat,
-  getActionableUploadError,
-} from "@autumnsgrove/lattice/utils/upload-validation";
-import { convertHeicToJpeg } from "@autumnsgrove/lattice/utils/imageProcessor";
+	normalizeFileForUpload,
+	isConvertibleFormat,
+	getActionableUploadError,
+} from "@autumnsgrove/lattice/media/validation/upload-validation";
+import { convertHeicToJpeg } from "@autumnsgrove/lattice/media/processing/imageProcessor";
 import { MEADOW_ERRORS } from "$lib/errors";
 
 /**
@@ -19,32 +19,34 @@ import { MEADOW_ERRORS } from "$lib/errors";
  * Returns the public URL on success, throws on failure.
  */
 export async function uploadNoteImage(file: File): Promise<string> {
-  // Normalize: detect actual format, fix MIME/extension mismatches
-  const normalized = await normalizeFileForUpload(file);
-  let processedFile = normalized.file;
+	// Normalize: detect actual format, fix MIME/extension mismatches
+	const normalized = await normalizeFileForUpload(file);
+	let processedFile = normalized.file;
 
-  // Convert HEIC/HEIF to JPEG if needed
-  if (normalized.needsHeicConversion || isConvertibleFormat(processedFile)) {
-    processedFile = await convertHeicToJpeg(processedFile);
-  }
+	// Convert HEIC/HEIF to JPEG if needed
+	if (normalized.needsHeicConversion || isConvertibleFormat(processedFile)) {
+		processedFile = await convertHeicToJpeg(processedFile);
+	}
 
-  const formData = new FormData();
-  formData.append("file", processedFile);
-  formData.append("folder", "notes");
+	const formData = new FormData();
+	formData.append("file", processedFile);
+	formData.append("folder", "notes");
 
-  try {
-    const result = await apiRequest<{ url: string }>("/api/images/upload", {
-      method: "POST",
-      body: formData,
-    });
+	try {
+		const result = await apiRequest<{ url: string }>("/api/images/upload", {
+			method: "POST",
+			body: formData,
+		});
 
-    if (!result?.url) {
-      throw new Error(`${MEADOW_ERRORS.UPLOAD_NO_URL.code}: ${MEADOW_ERRORS.UPLOAD_NO_URL.adminMessage}`);
-    }
+		if (!result?.url) {
+			throw new Error(
+				`${MEADOW_ERRORS.UPLOAD_NO_URL.code}: ${MEADOW_ERRORS.UPLOAD_NO_URL.adminMessage}`,
+			);
+		}
 
-    return result.url;
-  } catch (err) {
-    const rawMessage = err instanceof Error ? err.message : String(err);
-    throw new Error(`${MEADOW_ERRORS.UPLOAD_FAILED.code}: ${getActionableUploadError(rawMessage)}`);
-  }
+		return result.url;
+	} catch (err) {
+		const rawMessage = err instanceof Error ? err.message : String(err);
+		throw new Error(`${MEADOW_ERRORS.UPLOAD_FAILED.code}: ${getActionableUploadError(rawMessage)}`);
+	}
 }

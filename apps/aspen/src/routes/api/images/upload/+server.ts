@@ -8,8 +8,8 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheckWithResult } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheckWithResult } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { validateEnv } from "@autumnsgrove/lattice/server/env-validation";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import {

@@ -11,9 +11,9 @@ import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
 } from "@autumnsgrove/lattice/curios/timeline/secrets.server";
-import { createLumenClient } from "@autumnsgrove/lattice/lumen";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { fetchGitHubCommits, fetchCommitStats } from "./github-fetcher";
 import { generateSummary, type ConfigRow } from "./builder";

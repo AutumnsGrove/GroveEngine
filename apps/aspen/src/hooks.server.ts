@@ -12,7 +12,7 @@ import {
 	validateVerificationCookie,
 } from "@autumnsgrove/lattice/server/services/turnstile";
 import type { TenantConfig } from "@autumnsgrove/lattice/durable-objects/TenantDO";
-import { TIERS, type TierKey } from "@autumnsgrove/lattice/config/tiers";
+import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 
 /**
  * Parse a specific cookie by name from the cookie header

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CultivateFlagTable } from "@autumnsgrove/lattice/grafts/greenhouse";
+	import { CultivateFlagTable } from "@autumnsgrove/lattice/platform/greenhouse";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
@@ -11,7 +11,7 @@
 	const Leaf = natureIcons.leaf;
 	const ArrowRight = navIcons.arrowRight;
 	const AlertTriangle = stateIcons.warning;
-	import type { FlagMaturity } from "@autumnsgrove/lattice/feature-flags";
+	import type { FlagMaturity } from "@autumnsgrove/lattice/platform/feature-flags";
 	import type { PageData, ActionData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

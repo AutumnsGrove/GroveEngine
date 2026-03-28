@@ -11,7 +11,7 @@ import type { Env } from "../types";
 // Mock the engine's Threshold SDK modules
 const mockCheck = vi.fn();
 
-vi.mock("@autumnsgrove/lattice/threshold", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold", () => ({
 	Threshold: vi.fn().mockImplementation(() => ({
 		check: mockCheck,
 	})),
@@ -24,7 +24,7 @@ vi.mock("@autumnsgrove/lattice/threshold", () => ({
 	},
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/hono", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold/hono", () => ({
 	thresholdMiddleware: vi.fn((opts) => {
 		// Return a middleware that calls Threshold.check directly
 		return async (

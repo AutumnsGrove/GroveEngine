@@ -15,7 +15,7 @@ import {
 	calculateUsagePercent,
 	wouldExceedQuota,
 } from "./limits.js";
-import type { TierKey } from "$lib/config/tiers.js";
+import type { TierKey } from "$lib/platform/config/tiers.js";
 import type { LumenTask } from "../types.js";
 
 // =============================================================================

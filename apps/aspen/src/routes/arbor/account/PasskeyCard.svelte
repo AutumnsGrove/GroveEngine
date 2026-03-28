@@ -3,7 +3,7 @@
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import { authIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
-	import type { Passkey } from "@autumnsgrove/lattice/heartwood";
+	import type { Passkey } from "@autumnsgrove/lattice/auth";
 	import { formatDateShort } from "@autumnsgrove/lattice/utils/date";
 
 	interface Props {

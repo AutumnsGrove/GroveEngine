@@ -5,9 +5,9 @@
  * receives structured tool calls, and returns them for validation.
  */
 
-import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen";
-import type { LumenToolDefinition, LumenToolCall } from "@autumnsgrove/lattice/lumen";
-import type { AtmosphereEntry } from "@autumnsgrove/lattice/reverie";
+import { RemoteLumenClient } from "@autumnsgrove/lattice/ai/lumen";
+import type { LumenToolDefinition, LumenToolCall } from "@autumnsgrove/lattice/ai/lumen";
+import type { AtmosphereEntry } from "@autumnsgrove/lattice/ai/reverie";
 import type { Env } from "../types";
 import { REVERIE_SYSTEM_PROMPT, REVERIE_COMPOSE_SYSTEM_PROMPT, buildUserPrompt } from "./prompts";
 

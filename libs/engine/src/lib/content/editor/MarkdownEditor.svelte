@@ -4,8 +4,8 @@
 
 	// Local instance for admin editor preview
 	const editorMd = new MarkdownIt({ html: false, linkify: true });
-	import { extractHeaders } from "$lib/utils/markdown";
-	import { groveDirectivePlugin } from "$lib/utils/markdown-directives";
+	import { extractHeaders } from "$lib/content/markdown/markdown";
+	import { groveDirectivePlugin } from "$lib/content/markdown/markdown-directives";
 	editorMd.use(groveDirectivePlugin);
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";
@@ -14,8 +14,8 @@
 		getActionableUploadError,
 		isConvertibleFormat,
 		normalizeFileForUpload,
-	} from "$lib/utils/upload-validation";
-	import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
+	} from "$lib/media/upload-validation";
+	import { convertHeicToJpeg } from "$lib/media/imageProcessor";
 	import FiresideChat from "../../components/admin/FiresideChat.svelte";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
 	import { browser } from "$app/environment";

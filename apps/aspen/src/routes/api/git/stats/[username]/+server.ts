@@ -27,13 +27,13 @@ import {
 	type GitUser,
 	type GitContributions,
 } from "@autumnsgrove/lattice/git";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import {
 	thresholdCheckWithResult,
 	thresholdHeaders,
-} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
-import type { ThresholdResult } from "@autumnsgrove/lattice/threshold/types";
+} from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
+import type { ThresholdResult } from "@autumnsgrove/lattice/platform/threshold/types";
 import { safeDecryptToken } from "@autumnsgrove/lattice/server/encryption";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

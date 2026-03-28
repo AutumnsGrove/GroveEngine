@@ -25,7 +25,7 @@
 		getUploadStrategy,
 		getActionableUploadError,
 		normalizeFileForUpload,
-	} from "@autumnsgrove/lattice/utils/upload-validation";
+	} from "@autumnsgrove/lattice/media/validation/upload-validation";
 
 	interface UploadItem {
 		id: number;

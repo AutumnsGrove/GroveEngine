@@ -25,7 +25,7 @@
  * ```
  */
 
-import type { TierKey } from "$lib/config/tiers.js";
+import type { TierKey } from "$lib/platform/config/tiers.js";
 import { safeDecryptToken, isEncryptedToken } from "$lib/server/encryption.js";
 
 import { getTaskConfig } from "./config.js";

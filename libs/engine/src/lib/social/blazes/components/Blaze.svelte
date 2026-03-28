@@ -14,7 +14,7 @@
 		BLAZE_COLORS,
 		resolveLucideIcon,
 		isValidBlazeHexColor,
-	} from "$lib/blazes/index.js";
+	} from "$lib/social/blazes/index.js";
 
 	interface AutoProps {
 		/** Auto blaze: pass the post type */

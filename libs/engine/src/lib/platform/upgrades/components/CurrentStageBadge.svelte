@@ -9,7 +9,7 @@
 	import { navIcons, natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import type { Component } from "svelte";
 	import type { CurrentStageBadgeProps } from "./types.js";
-	import type { TierKey } from "$lib/config/tiers";
+	import type { TierKey } from "$lib/platform/config/tiers";
 
 	let {
 		currentStage = "wanderer",

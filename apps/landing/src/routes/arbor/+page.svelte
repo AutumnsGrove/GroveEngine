@@ -23,7 +23,7 @@
 	const Trees = natureIcons.trees;
 	const Kanban = featureIcons.layoutList;
 	const Eye = stateIcons.eye;
-	import { WAYFINDER_LINKS } from '@autumnsgrove/lattice/config';
+	import { WAYFINDER_LINKS } from '@autumnsgrove/lattice/platform/config';
 
 	let { data }: { data: PageData } = $props();
 

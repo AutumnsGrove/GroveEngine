@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+	import { TERRARIUM_CONFIG } from '$lib/platform/config/terrarium';
 	import type { AssetCategory } from './types';
 	import PaletteItem from './PaletteItem.svelte';
 	import type { Component } from 'svelte';

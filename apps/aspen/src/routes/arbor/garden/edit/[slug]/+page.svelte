@@ -13,9 +13,9 @@
 	import { clickOutside } from "@autumnsgrove/lattice/actions/clickOutside";
 	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
-	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
-	import type { GutterItem } from "@autumnsgrove/lattice/utils/markdown";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
+	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
+	import type { GutterItem } from "@autumnsgrove/lattice/content/markdown/markdown";
 
 	let { data } = $props();
 

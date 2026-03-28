@@ -10,7 +10,7 @@
  * 3. Test with getTierQuota() to verify
  */
 
-import type { TierKey } from "$lib/config/tiers.js";
+import type { TierKey } from "$lib/platform/config/tiers.js";
 import type { LumenTask } from "../types.js";
 
 // =============================================================================

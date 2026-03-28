@@ -8,8 +8,8 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getObservabilityOverview } from "@autumnsgrove/lattice/server/observability";
-import { isWayfinder } from "@autumnsgrove/lattice/config";
+import { getObservabilityOverview } from "@autumnsgrove/lattice/monitoring/observability";
+import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.OBS_DB;

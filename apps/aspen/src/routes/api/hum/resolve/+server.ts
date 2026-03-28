@@ -18,12 +18,12 @@ import {
 	logGroveError,
 	buildErrorJson,
 } from "@autumnsgrove/lattice/errors";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import {
 	thresholdCheckWithResult,
 	thresholdHeaders,
-} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+} from "@autumnsgrove/lattice/platform/threshold/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
 import {
 	detectProvider,

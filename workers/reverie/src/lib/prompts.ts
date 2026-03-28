@@ -6,7 +6,7 @@
  * - reverie-compose: Multi-domain atmosphere composition
  */
 
-import type { AtmosphereEntry } from "@autumnsgrove/lattice/reverie";
+import type { AtmosphereEntry } from "@autumnsgrove/lattice/ai/reverie";
 
 /**
  * System prompt for the "reverie" task.

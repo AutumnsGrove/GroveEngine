@@ -14,7 +14,7 @@ import {
 	FAILOVER_CONFIG,
 	CLASSIFICATION_PROMPT,
 	SANITY_CHECK_PROMPT,
-} from "$lib/config/petal.js";
+} from "$lib/platform/config/petal.js";
 import {
 	PetalError,
 	type PetalProviderConfig,

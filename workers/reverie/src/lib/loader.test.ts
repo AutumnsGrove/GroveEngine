@@ -6,8 +6,8 @@
 
 import { describe, it, expect } from "vitest";
 import { loadSchemas } from "./loader";
-import { getImplementedDomains } from "@autumnsgrove/lattice/reverie";
-import type { DomainId } from "@autumnsgrove/lattice/reverie";
+import { getImplementedDomains } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainId } from "@autumnsgrove/lattice/ai/reverie";
 
 describe("loadSchemas", () => {
 	const allDomains = getImplementedDomains();

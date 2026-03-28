@@ -4,7 +4,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
-  import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
+  import { buildLoginUrl } from '@autumnsgrove/lattice/auth/login';
   import { actionIcons } from '@autumnsgrove/prism/icons';
   import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 

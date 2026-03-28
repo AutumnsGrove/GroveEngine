@@ -7,8 +7,8 @@
 
 import { describe, it, expect } from "vitest";
 import { schemaToTool, schemasToTools } from "./converter";
-import { SCHEMA_REGISTRY, getSchemas } from "@autumnsgrove/lattice/reverie";
-import type { DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/reverie";
+import { SCHEMA_REGISTRY, getSchemas } from "@autumnsgrove/lattice/ai/reverie";
+import type { DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/ai/reverie";
 
 /** Build a minimal test schema */
 function testSchema(

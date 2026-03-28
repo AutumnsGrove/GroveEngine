@@ -2,7 +2,7 @@ import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { verifyTurnstileToken, generateId } from "@autumnsgrove/lattice/services";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/platform/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 import { z } from "zod";

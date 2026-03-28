@@ -10,7 +10,7 @@
   Uses Svelte 5 runes and engine components (GlassCard, Badge).
 -->
 <script lang="ts" module>
-	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
 
 	/** Slug→definition map for O(1) lookup — built once per module, shared across all PostCard instances */
 	const BLAZE_SLUG_MAP: Record<string, { label: string; icon: string; color: string }> =
@@ -20,7 +20,7 @@
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post.js";
 	import { formatRelativeTime } from "$lib/utils/time.js";
-	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
+	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 
 	interface Props {
 		post: MeadowPost;
