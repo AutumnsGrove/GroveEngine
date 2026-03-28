@@ -20,6 +20,7 @@
 		"db:migrate": "wrangler d1 execute amber --file=./worker/migrations/schema.sql --config worker/wrangler.toml"
 	},
 	"devDependencies": {
+		"@autumnsgrove/infra": "workspace:*",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",

@@ -1,19 +1,13 @@
-import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vite";
+import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 
-export default defineConfig({
-	plugins: [sveltekit()],
+export default createGroveViteConfig({
 	optimizeDeps: {
-		exclude: ["@jsquash/jxl", "gray-matter"],
+		exclude: ["gray-matter"],
 	},
 	build: {
 		rollupOptions: {
-			external: ["@jsquash/jxl", "gray-matter"],
+			// gray-matter is excluded from dependency pre-bundling and externalized
+			external: ["gray-matter"],
 		},
-	},
-	ssr: {
-		// @lucide/svelte ships .svelte files that Node's ESM loader can't handle.
-		// Tell Vite to process them through its own pipeline during SSR.
-		noExternal: ["@lucide/svelte"],
 	},
 });

@@ -1,5 +1,5 @@
-import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vitest/config";
+import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -7,15 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-	plugins: [sveltekit()],
-	optimizeDeps: {
-		exclude: ["@jsquash/jxl"],
-	},
-	build: {
-		rollupOptions: {
-			external: ["@jsquash/jxl"],
-		},
-	},
+	...createGroveViteConfig(),
 	test: {
 		include: ["tests/**/*.{test,spec}.{js,ts}"],
 		alias: {

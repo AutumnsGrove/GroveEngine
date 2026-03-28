@@ -5,6 +5,7 @@
 import { Hono } from "hono";
 import type { Env, AppVariables } from "../types";
 import { initializeSchema } from "../lib/schema";
+import type { GroveSuccessResponse, GroveErrorResponse } from "@autumnsgrove/infra/response";
 
 export const configRoute = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
@@ -16,7 +17,7 @@ configRoute.get("/ssh-key", async (c) => {
 		"SELECT value FROM loft_config WHERE key = 'ssh_public_key'",
 	).first<{ value: string }>();
 
-	return c.json({
+	return c.json<GroveSuccessResponse<{ sshKey: string | null }>>({
 		success: true,
 		data: { sshKey: row?.value ?? null },
 	});
@@ -30,7 +31,7 @@ configRoute.put("/ssh-key", async (c) => {
 	const sshKey = body.ssh_key as string | undefined;
 
 	if (!sshKey || typeof sshKey !== "string") {
-		return c.json(
+		return c.json<GroveErrorResponse>(
 			{
 				success: false,
 				error: { code: "INVALID_KEY", message: "ssh_key field is required (string)" },
@@ -41,7 +42,7 @@ configRoute.put("/ssh-key", async (c) => {
 
 	// Basic SSH key format validation
 	if (!sshKey.startsWith("ssh-") && !sshKey.startsWith("ecdsa-")) {
-		return c.json(
+		return c.json<GroveErrorResponse>(
 			{
 				success: false,
 				error: {
@@ -59,7 +60,7 @@ configRoute.put("/ssh-key", async (c) => {
 		.bind(sshKey, Date.now())
 		.run();
 
-	return c.json({
+	return c.json<GroveSuccessResponse<{ stored: boolean }>>({
 		success: true,
 		data: { stored: true },
 	});

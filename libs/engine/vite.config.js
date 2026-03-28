@@ -1,28 +1,29 @@
-import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vitest/config";
+import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 
 export default defineConfig({
-	plugins: [sveltekit()],
-	build: {
-		// Disable source maps in production to prevent source code exposure
-		sourcemap: false,
-		rollupOptions: {
-			// @jsquash/jxl requires special WASM handling, loaded via CDN/importmap
-			external: ["@jsquash/jxl"],
+	...createGroveViteConfig({
+		build: {
+			// Disable source maps in production to prevent source code exposure
+			sourcemap: false,
+			rollupOptions: {
+				// workers-og requires special Web Worker handling; @jsquash/jxl covered by base regex
+				external: ["workers-og"],
+			},
 		},
-	},
-	optimizeDeps: {
-		// Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
-		// Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
-		exclude: ["workers-og", "@jsquash/jxl"],
-	},
-	assetsInclude: ["**/*.wasm"],
-	server: {
-		fs: {
-			// Allow serving files from project root directories (dev only)
-			allow: [".."],
+		optimizeDeps: {
+			// Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
+			// Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
+			exclude: ["workers-og"],
 		},
-	},
+		assetsInclude: ["**/*.wasm"],
+		server: {
+			fs: {
+				// Allow serving files from project root directories (dev only)
+				allow: [".."],
+			},
+		},
+	}),
 	test: {
 		include: ["src/**/*.{test,spec}.{js,ts}"],
 		// Use jsdom for component tests, node for server tests
