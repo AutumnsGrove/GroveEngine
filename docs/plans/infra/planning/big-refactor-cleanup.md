@@ -1,9 +1,9 @@
 ---
 title: "The Big Refactor — Engine Reorganization & Codebase Cleanup"
 description: "Aggressive cleanup of the 600K+ line monorepo: domain-based engine reorganization, dead code removal, data externalization, file decomposition, and concept simplification"
-status: planning
+status: complete
 category: infra
-lastUpdated: "2026-03-27"
+lastUpdated: "2026-03-28"
 tags:
   - refactor
   - engine
@@ -14,7 +14,7 @@ tags:
 
 # The Big Refactor
 
-> **Status:** Planning
+> **Status:** Complete (PR #1535, merged 2026-03-28)
 > **Created:** 2026-03-27
 > **Scope:** Reorganize libs/engine internally by domain, remove dead code and legacy systems, externalize hardcoded data, break down oversized files, simplify the grafts concept, and deduplicate utilities across the monorepo.
 > **Priority:** Discoverability and scoped files above all else.
