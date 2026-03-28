@@ -772,22 +772,4 @@
 		background: var(--color-grove-600);
 	}
 
-	/* Text Input */
-	.text-input {
-		padding: var(--space-2) var(--space-3);
-		background: var(--color-bg-tertiary);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		color: var(--color-text-primary);
-		font-size: var(--text-sm);
-	}
-
-	.text-input:focus {
-		outline: none;
-		border-color: var(--color-primary);
-	}
-
-	.text-input::placeholder {
-		color: var(--color-text-tertiary);
-	}
 </style>
