@@ -224,7 +224,7 @@ export function createAuthMiddleware<
 		// Step 4: Extract optional context headers
 		for (const [varName, hdrName] of Object.entries(optionalContextHeaders)) {
 			const value = c.req.header(hdrName);
-			if (value !== undefined) {
+			if (value != null) {
 				c.set(varName as never, value as never);
 			}
 		}

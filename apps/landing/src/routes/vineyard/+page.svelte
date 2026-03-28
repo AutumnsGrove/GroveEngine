@@ -832,7 +832,8 @@
 													<input
 														id="prop-{prop}"
 														type="color"
-														value={propValues[prop] ?? "#16a34a"} // accent-ok
+														// accent-ok: color picker default
+														value={propValues[prop] ?? "#16a34a"}
 														oninput={(e) => (propValues[prop] = e.currentTarget.value)}
 														class="w-10 h-10 rounded cursor-pointer border border-[var(--color-border)]"
 													/>
@@ -840,7 +841,8 @@
 														type="text"
 														value={pendingColorValues[prop] ?? propValues[prop] ?? ""}
 														oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
-														placeholder="#16a34a" // accent-ok
+														// accent-ok
+													placeholder="#16a34a"
 														class="vine-input flex-1 font-mono text-sm {colorError
 															? 'border-error'
 															: ''}"
