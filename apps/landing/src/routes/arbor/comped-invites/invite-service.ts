@@ -51,7 +51,7 @@ interface EmailEnv {
 	ZEPHYR_API_KEY?: string;
 	RESEND_API_KEY?: string;
 	ZEPHYR_URL?: string;
-	ZEPHYR?: unknown;
+	ZEPHYR?: Fetcher;
 }
 
 // ============================================================================
@@ -228,7 +228,7 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 		const emailResult = await sendInviteEmailWrapped({
 			email,
 			tier,
-			inviteType,
+			inviteType: inviteType as "comped" | "beta",
 			customMessage,
 			inviteToken,
 			invitedBy: actorEmail,
@@ -305,7 +305,7 @@ export async function resendInvite(
 		const emailResult = await sendInviteEmail({
 			email: invite.email,
 			tier: invite.tier,
-			inviteType: invite.invite_type,
+			inviteType: invite.invite_type as "comped" | "beta",
 			customMessage: invite.custom_message,
 			inviteToken: invite.invite_token,
 			invitedBy: invite.invited_by,
@@ -667,7 +667,7 @@ export async function bulkPromoteSubscribers(
 async function sendInviteEmailWrapped(opts: {
 	email: string;
 	tier: string;
-	inviteType: string;
+	inviteType: "comped" | "beta";
 	customMessage: string | null;
 	inviteToken: string;
 	invitedBy: string;

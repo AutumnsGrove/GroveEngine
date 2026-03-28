@@ -771,5 +771,4 @@
 	.storage-dot.attachments {
 		background: var(--color-grove-600);
 	}
-
 </style>
