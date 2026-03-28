@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import MarkdownEditor from "@autumnsgrove/lattice/components/admin/MarkdownEditor.svelte";
+	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import Input from "@autumnsgrove/lattice/ui/components/ui/Input.svelte";
 	import Textarea from "@autumnsgrove/lattice/ui/components/ui/Textarea.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";

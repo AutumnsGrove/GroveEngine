@@ -3,7 +3,7 @@
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
-	import GutterManager from "@autumnsgrove/lattice/components/admin/GutterManager.svelte";
+	import GutterManager from "@autumnsgrove/lattice/content/editor/GutterManager.svelte";
 	import Glass from "@autumnsgrove/lattice/ui/components/ui/Glass.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
