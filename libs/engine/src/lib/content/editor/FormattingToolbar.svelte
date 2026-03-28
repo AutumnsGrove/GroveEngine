@@ -354,6 +354,8 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.4rem;
+		min-width: 44px;
+		min-height: 44px;
 		background: transparent;
 		border: none;
 		border-radius: 4px;

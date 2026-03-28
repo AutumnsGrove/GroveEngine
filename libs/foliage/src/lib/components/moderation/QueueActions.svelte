@@ -2,6 +2,7 @@
 	// QueueActions.svelte // accent-ok — theme moderation component uses color palette definitions
 	// Preview modal and status change confirmation dialog
 
+	import { tick } from "svelte";
 	import type { CommunityTheme, CommunityThemeStatus } from "../../types.js";
 	import ThemePreview from "../ThemePreview.svelte";
 
@@ -30,6 +31,64 @@
 		onConfirmStatusChange,
 		onReasonChange,
 	}: Props = $props();
+
+	let previewDialogEl: HTMLDivElement | undefined = $state();
+	let statusDialogEl: HTMLDivElement | undefined = $state();
+	let previousFocus: HTMLElement | null = null;
+
+	function getFocusable(el: HTMLElement): HTMLElement[] {
+		return Array.from(
+			el.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+			),
+		);
+	}
+
+	function trapFocus(e: KeyboardEvent, dialogEl: HTMLElement, onClose: () => void) {
+		if (e.key === "Escape") {
+			onClose();
+			return;
+		}
+		if (e.key === "Tab") {
+			const focusable = getFocusable(dialogEl);
+			if (focusable.length === 0) return;
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+	}
+
+	$effect(() => {
+		if (showPreviewModal && previewTheme) {
+			previousFocus = document.activeElement as HTMLElement;
+			tick().then(() => {
+				const focusable = previewDialogEl ? getFocusable(previewDialogEl) : [];
+				(focusable[0] ?? previewDialogEl)?.focus();
+			});
+		} else if (!showPreviewModal && previousFocus) {
+			previousFocus.focus();
+			previousFocus = null;
+		}
+	});
+
+	$effect(() => {
+		if (statusChangeTheme && statusChangeAction) {
+			previousFocus = document.activeElement as HTMLElement;
+			tick().then(() => {
+				const focusable = statusDialogEl ? getFocusable(statusDialogEl) : [];
+				(focusable[0] ?? statusDialogEl)?.focus();
+			});
+		} else if (!statusChangeTheme && previousFocus) {
+			previousFocus.focus();
+			previousFocus = null;
+		}
+	});
 
 	function handleModalKeydown(event: KeyboardEvent) {
 		if (event.key === "Escape") {
@@ -76,13 +135,17 @@
 		role="presentation"
 	>
 		<div
+			bind:this={previewDialogEl}
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			tabindex="-1"
 			aria-modal="true"
 			aria-labelledby="preview-title"
-			onkeydown={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				e.stopPropagation();
+				if (previewDialogEl) trapFocus(e, previewDialogEl, onClosePreview);
+			}}
 		>
 			<div class="modal-header">
 				<h2 id="preview-title">Preview: {previewTheme.name}</h2>
@@ -129,13 +192,17 @@
 		role="presentation"
 	>
 		<div
+			bind:this={statusDialogEl}
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			tabindex="-1"
 			aria-modal="true"
 			aria-labelledby="status-change-title"
-			onkeydown={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				e.stopPropagation();
+				if (statusDialogEl) trapFocus(e, statusDialogEl, onCloseStatusChange);
+			}}
 		>
 			<div class="modal-header">
 				<h2 id="status-change-title">

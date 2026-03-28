@@ -317,7 +317,7 @@
 					disabled={isParsingVibe || vibeWordCount < 5 || isFormDisabled}
 				>
 					{#if isParsingVibe}
-						<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+						<svg class="w-5 h-5 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none">
 							<circle
 								class="opacity-25"
 								cx="12"
@@ -427,11 +427,8 @@
 						</div>
 
 						<!-- TLD Preferences -->
-						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="block text-xs font-sans text-foreground-muted mb-1"
-								>TLD Preferences</label
-							>
+						<fieldset class="block">
+							<legend class="text-xs font-sans text-foreground-muted mb-1">TLD Preferences</legend>
 							<div class="flex flex-wrap gap-1.5">
 								{#each ["com", "co", "io", "dev", "app", "net", "org", "ai", "studio", "design", "place"] as tld}
 									<button
@@ -461,7 +458,7 @@
 									</button>
 								{/each}
 							</div>
-						</div>
+						</fieldset>
 					</div>
 
 					<!-- AI Provider Info (locked) -->
@@ -483,7 +480,7 @@
 						disabled={isSubmitting || !parsedVibe.business_name.trim()}
 					>
 						{#if isSubmitting}
-							<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+							<svg class="w-5 h-5 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none">
 								<circle
 									class="opacity-25"
 									cx="12"
@@ -579,11 +576,10 @@
 			</div>
 
 			<!-- TLD Preferences - Grouped -->
-			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2">
+			<fieldset>
+				<legend class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2">
 					Preferred TLDs
-				</label>
+				</legend>
 				<div class="space-y-2 border border-grove-200 rounded-lg overflow-hidden">
 					{#each tldGroups as group}
 						{@const isExpanded = expandedGroups.has(group.id)}
@@ -698,7 +694,7 @@
 						></span>
 					</button>
 				</div>
-			</div>
+			</fieldset>
 
 			<!-- Keywords -->
 			<div>
@@ -742,7 +738,7 @@
 				disabled={isSubmitting || !businessName.trim() || currentJobStatus === "running"}
 			>
 				{#if isSubmitting}
-					<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+					<svg class="w-5 h-5 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none">
 						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 						></circle>
 						<path
@@ -753,7 +749,7 @@
 					</svg>
 					Starting Search...
 				{:else if currentJobStatus === "running"}
-					<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+					<svg class="w-5 h-5 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none">
 						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 						></circle>
 						<path

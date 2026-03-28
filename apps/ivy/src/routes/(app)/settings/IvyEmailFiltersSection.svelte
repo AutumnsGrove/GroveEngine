@@ -57,6 +57,7 @@
 					class="select-input"
 					value={newFilterType}
 					onchange={(e) => onNewFilterTypeChange(e.currentTarget.value as "blocklist" | "allowlist")}
+					aria-label="Filter type"
 				>
 					<option value="blocklist">Block</option>
 					<option value="allowlist">Allow</option>
@@ -66,6 +67,7 @@
 					value={newFilterMatchType}
 					onchange={(e) =>
 						onNewFilterMatchTypeChange(e.currentTarget.value as "exact" | "domain" | "contains")}
+					aria-label="Match type"
 				>
 					<option value="domain">Domain</option>
 					<option value="exact">Exact</option>
@@ -78,6 +80,7 @@
 					value={newFilterPattern}
 					oninput={(e) => onNewFilterPatternChange(e.currentTarget.value)}
 					onkeydown={(e) => e.key === "Enter" && onAddFilter()}
+					aria-label="Filter pattern"
 				/>
 				<button
 					class="btn-outline"
@@ -117,6 +120,7 @@
 								class="filter-remove"
 								onclick={() => onRemoveFilter(filter.id)}
 								title="Remove filter"
+							aria-label={`Remove filter for ${filter.pattern}`}
 							>
 								<Icon name="x" size={14} />
 							</button>

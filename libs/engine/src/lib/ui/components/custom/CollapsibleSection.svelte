@@ -3,6 +3,11 @@
 
 	let { title = "", expanded = $bindable(false), children } = $props();
 
+	let prefersReducedMotion = $state(false);
+	if (typeof window !== "undefined") {
+		prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	}
+
 	function toggle() {
 		expanded = !expanded;
 	}
@@ -15,7 +20,7 @@
 	</button>
 
 	{#if expanded}
-		<div class="collapsible-content" transition:slide={{ duration: 200 }}>
+		<div class="collapsible-content" transition:slide={{ duration: prefersReducedMotion ? 0 : 200 }}>
 			{@render children()}
 		</div>
 	{/if}

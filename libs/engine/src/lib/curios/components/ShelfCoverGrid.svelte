@@ -11,7 +11,7 @@
 
 <div class="display-cover-grid">
 	{#each items as item (item.id)}
-		<a href={item.url} target="_blank" rel="noopener noreferrer" class="cover-card" title={item.title}>
+		<a href={item.url} target="_blank" rel="noopener noreferrer" class="cover-card" title={item.title} aria-label={item.title}>
 			{#if item.coverUrl}
 				<img src={item.coverUrl} alt="" class="cover-image" loading="lazy" />
 			{:else if item.thumbnailUrl}

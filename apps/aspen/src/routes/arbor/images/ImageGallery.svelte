@@ -325,7 +325,7 @@
 			<span class="section-subtitle">All images in your Grove</span>
 		</div>
 		<div class="gallery-controls">
-			<select bind:value={gallerySortBy} onchange={changeSortOrder}>
+			<select bind:value={gallerySortBy} onchange={changeSortOrder} aria-label="Sort gallery images">
 				<option value="date-desc">Newest</option>
 				<option value="date-asc">Oldest</option>
 				<option value="name-asc">A-Z</option>
@@ -339,10 +339,11 @@
 					placeholder="Filter by path..."
 					bind:value={galleryFilter}
 					onkeydown={(e) => e.key === "Enter" && filterGallery()}
+					aria-label="Filter images by path"
 				/>
 				<Button variant="secondary" size="sm" onclick={filterGallery}>Filter</Button>
 			</div>
-			<Button variant="secondary" size="sm" onclick={() => loadGallery()}>
+			<Button variant="secondary" size="sm" onclick={() => loadGallery()} aria-label="Refresh gallery">
 				<svg
 					viewBox="0 0 24 24"
 					fill="none"
@@ -470,6 +471,7 @@
 								class="action-btn copy"
 								onclick={() => copyToClipboard(getCopyTextForGallery(image), image.key)}
 								title="Copy {copyFormat.toUpperCase()}"
+								aria-label="Copy image URL"
 							>
 								{#if copiedItem === image.key}
 									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -486,6 +488,7 @@
 								class="action-btn delete"
 								onclick={() => confirmDelete(image)}
 								title="Delete"
+								aria-label="Delete image"
 							>
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 									<path
@@ -707,6 +710,12 @@
 	@keyframes spin {
 		to {
 			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.spinner {
+			animation: none;
 		}
 	}
 

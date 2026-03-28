@@ -163,7 +163,7 @@
 </script>
 
 <div class="note-editor" class:opacity-50={disabled} class:pointer-events-none={disabled}>
-	<div bind:this={element}></div>
+	<div bind:this={element} aria-label={placeholder}></div>
 	{#if uploading}
 		<div class="mt-1 text-xs text-foreground-muted animate-pulse">Uploading image...</div>
 	{/if}

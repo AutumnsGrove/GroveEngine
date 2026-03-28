@@ -148,6 +148,8 @@
 		border: none;
 		border-radius: 3px;
 		padding: 0.25rem 0.5rem;
+		min-height: 44px;
+		min-width: 44px;
 		color: white;
 		cursor: pointer;
 		font-size: 0.65rem;

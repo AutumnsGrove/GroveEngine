@@ -216,14 +216,17 @@
 			<div class="space-y-4">
 				{#each followupQuiz.questions as question}
 					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2">
+						<label
+							for="followup-{question.id}"
+							class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+						>
 							{question.prompt}
 							{#if question.required}<span class="text-error">*</span>{/if}
 						</label>
 
 						{#if question.type === "text"}
 							<input
+								id="followup-{question.id}"
 								type="text"
 								class="input-field"
 								placeholder={question.placeholder}
@@ -232,6 +235,7 @@
 							/>
 						{:else if question.type === "single_select" && question.options}
 							<select
+								id="followup-{question.id}"
 								class="input-field"
 								value={followupAnswers[question.id] ?? ""}
 								onchange={(e) => onFollowupAnswerChange(question.id, e.currentTarget.value)}

@@ -36,9 +36,9 @@
 			<span class="empty-hint">New entries will appear here when visitors sign your guestbook</span>
 		</div>
 	{:else}
-		<div class="pending-list">
+		<ul role="list" class="pending-list">
 			{#each pendingEntries as entry}
-				<div class="pending-entry">
+				<li class="pending-entry">
 					<div class="entry-header">
 						<span class="entry-name">
 							{#if entry.emoji}<span class="entry-emoji">{entry.emoji}</span>{/if}
@@ -67,9 +67,9 @@
 							Delete
 						</button>
 					</div>
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	{/if}
 </GlassCard>
 

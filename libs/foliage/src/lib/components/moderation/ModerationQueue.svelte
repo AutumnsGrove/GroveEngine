@@ -219,6 +219,14 @@
 		bulkRejectReason = "";
 	}
 
+	// Focus the bulk confirm dialog when it opens
+	let bulkConfirmDialogEl = $state<HTMLDivElement | null>(null);
+	$effect(() => {
+		if (bulkConfirmAction && bulkConfirmDialogEl) {
+			bulkConfirmDialogEl.focus();
+		}
+	});
+
 	// Keyboard navigation
 	function handleGlobalKeydown(event: KeyboardEvent) {
 		if (
@@ -330,6 +338,7 @@
 				aria-modal="true"
 				aria-labelledby="bulk-confirm-title"
 				onkeydown={(e) => e.stopPropagation()}
+			bind:this={bulkConfirmDialogEl}
 			>
 				<div class="modal-header">
 					<h2 id="bulk-confirm-title">

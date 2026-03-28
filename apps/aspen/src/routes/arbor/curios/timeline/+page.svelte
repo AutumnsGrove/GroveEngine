@@ -1031,6 +1031,12 @@
 		}
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		:global(.spinning) {
+			animation: none;
+		}
+	}
+
 	/* Generate Section */
 	:global(.generate-section) {
 		margin-top: 1.5rem;

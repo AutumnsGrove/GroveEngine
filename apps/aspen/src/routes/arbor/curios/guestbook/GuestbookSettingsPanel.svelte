@@ -169,7 +169,7 @@
 					{/each}
 					<div class="palette-add">
 						<input type="color" bind:value={newColorInput} class="color-input" aria-label="Pick a new color" />
-						<button type="button" class="add-color-btn" onclick={addColor}>
+						<button type="button" class="add-color-btn" onclick={addColor} aria-label="Add color to palette">
 							<actionIcons.plus class="w-3.5 h-3.5" />
 						</button>
 					</div>
@@ -282,7 +282,16 @@
 	.style-option { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem; border: 2px solid var(--color-border, #e5e7eb); border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; }
 	.style-option:hover { border-color: var(--color-primary); background: var(--grove-overlay-4, rgba(0,0,0,0.04)); }
 	.style-option.selected { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, transparent); }
-	.style-option input[type="radio"] { display: none; }
+	.style-option input[type="radio"] {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		border: 0;
+	}
 	.style-name { font-weight: 600; font-size: 0.95rem; color: var(--color-text); }
 	.style-desc { font-size: 0.8rem; color: var(--color-text-muted); }
 	.input-group { margin-bottom: 1rem; }
