@@ -1,172 +1,49 @@
+/**
+ * Profile Settings - Route Handler
+ *
+ * Thin routing layer — delegates data loading to profile-service.ts.
+ * Username change, graft toggles, greenhouse enrollment, flag mutations.
+ */
+
 import { fail } from "@sveltejs/kit";
 import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import {
 	getGreenhouseTenant,
-	getTenantControllableGrafts,
 	setTenantGraftOverride,
 	resetTenantGraftOverrides,
-	// Wayfinder-only imports
-	getGreenhouseTenants,
 	enrollInGreenhouse,
 	removeFromGreenhouse,
 	toggleGreenhouseStatus,
-	getFeatureFlags,
 	setFlagEnabled,
 } from "@autumnsgrove/lattice/feature-flags";
-import type { TenantGraftInfo } from "@autumnsgrove/lattice/feature-flags/tenant-grafts";
-import type { GreenhouseTenant } from "@autumnsgrove/lattice/feature-flags/types";
-import type { FeatureFlagSummary } from "@autumnsgrove/lattice/feature-flags/admin";
 import { isWayfinder } from "@autumnsgrove/lattice/config/wayfinder";
 import { isValidTier, type TierKey } from "@autumnsgrove/lattice/config/tiers";
 import {
 	validateUsernameAvailability,
 	canChangeUsername,
 	changeUsername,
-	getUsernameHistory,
-	type UsernameChangeHistoryEntry,
 } from "@autumnsgrove/lattice/server/services/username";
+import { loadProfileData, migrateTenantDODrafts } from "./profile-service";
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
 	const env = platform?.env;
 
-	// Check greenhouse status for this tenant
-	let greenhouseStatus: {
-		inGreenhouse: boolean;
-		enrolledAt?: Date;
-		notes?: string;
-	} = { inGreenhouse: false };
-
-	// Tenant-controllable grafts (only for greenhouse members)
-	let tenantGrafts: TenantGraftInfo[] = [];
-
-	// Wayfinder-only data for greenhouse admin
-	let greenhouseTenants: GreenhouseTenant[] = [];
-	const tenantNames: Record<string, string> = {};
-	const availableTenants: Record<string, string> = {};
-	let featureFlags: FeatureFlagSummary[] = [];
-
-	const userIsWayfinder = isWayfinder(locals.user?.email);
-
-	// Username change data
-	let currentSubdomain = "";
-	let tenantPlan = "seedling";
-	let usernameChangeAllowed = false;
-	let usernameChangeNextAllowedAt: number | undefined;
-	let usernameChangeReason: string | undefined;
-	let usernameHistory: UsernameChangeHistoryEntry[] = [];
-
-	// Load greenhouse and username data in parallel (independent blocks)
-	if (env?.DB && locals.tenantId) {
-		const loadGreenhouse = async () => {
-			if (!env.CACHE_KV) return;
-			try {
-				const tenant = await getGreenhouseTenant(locals.tenantId!, {
-					DB: env.DB!,
-					FLAGS_KV: env.CACHE_KV,
-				});
-
-				if (tenant && tenant.enabled) {
-					greenhouseStatus = {
-						inGreenhouse: true,
-						enrolledAt: tenant.enrolledAt,
-						notes: tenant.notes,
-					};
-
-					tenantGrafts = await getTenantControllableGrafts(locals.tenantId!, {
-						DB: env.DB!,
-						FLAGS_KV: env.CACHE_KV,
-					});
-				}
-
-				if (userIsWayfinder) {
-					const flagsEnv = { DB: env.DB!, FLAGS_KV: env.CACHE_KV };
-
-					const [ghTenants, flags] = await Promise.all([
-						getGreenhouseTenants(flagsEnv),
-						getFeatureFlags(flagsEnv),
-					]);
-
-					greenhouseTenants = ghTenants;
-					featureFlags = flags;
-
-					const enrolledIds = new Set(ghTenants.map((t) => t.tenantId));
-
-					interface TenantRow {
-						id: string;
-						username: string;
-						display_name: string | null;
-					}
-
-					try {
-						const result = await env
-							.DB!.prepare("SELECT id, username, display_name FROM tenants ORDER BY username")
-							.all<TenantRow>();
-
-						for (const t of result.results ?? []) {
-							const displayName = t.display_name || t.username || t.id;
-							tenantNames[t.id] = displayName;
-
-							if (!enrolledIds.has(t.id)) {
-								availableTenants[t.id] = displayName;
-							}
-						}
-					} catch (error) {
-						console.error("Failed to load tenants for Wayfinder:", error);
-					}
-				}
-			} catch (error) {
-				console.error("Failed to check greenhouse status:", error);
-			}
-		};
-
-		const loadUsername = async () => {
-			try {
-				const tenantRow = await env
-					.DB!.prepare("SELECT subdomain, plan FROM tenants WHERE id = ?")
-					.bind(locals.tenantId!)
-					.first<{ subdomain: string; plan: string | null }>();
-
-				if (tenantRow) {
-					currentSubdomain = tenantRow.subdomain;
-					tenantPlan = tenantRow.plan || "seedling";
-				}
-
-				const tier: TierKey = isValidTier(tenantPlan) ? (tenantPlan as TierKey) : "seedling";
-				const [rateResult, history] = await Promise.all([
-					canChangeUsername(env.DB!, locals.tenantId!, tier),
-					getUsernameHistory(env.DB!, locals.tenantId!),
-				]);
-				usernameChangeAllowed = rateResult.allowed;
-				usernameChangeNextAllowedAt = rateResult.nextAllowedAt;
-				usernameChangeReason = rateResult.reason;
-				usernameHistory = history;
-			} catch (error) {
-				console.error("Failed to load username change data:", error);
-			}
-		};
-
-		await Promise.all([loadGreenhouse(), loadUsername()]);
+	if (!env?.DB || !locals.tenantId) {
+		return loadProfileData(
+			{ DB: null as unknown as D1Database },
+			"",
+			locals.user?.email,
+			locals.user?.picture ?? null,
+		);
 	}
 
-	return {
-		isWayfinder: userIsWayfinder,
-		greenhouseStatus,
-		tenantGrafts,
-		oauthAvatarUrl: locals.user?.picture ?? null,
-		// Username change data
-		currentSubdomain,
-		tenantPlan,
-		usernameChangeAllowed,
-		usernameChangeNextAllowedAt,
-		usernameChangeReason,
-		usernameHistory,
-		// Wayfinder-only data
-		greenhouseTenants,
-		tenantNames,
-		availableTenants,
-		featureFlags,
-	};
+	return loadProfileData(
+		{ DB: env.DB, CACHE_KV: env.CACHE_KV },
+		locals.tenantId,
+		locals.user?.email,
+		locals.user?.picture ?? null,
+	);
 };
 
 export const actions: Actions = {
@@ -261,69 +138,7 @@ export const actions: Actions = {
 		// Migrate drafts from old TenantDO to new TenantDO (best-effort)
 		const tenantsDO = env.TENANTS as DurableObjectNamespace | undefined;
 		if (tenantsDO) {
-			try {
-				const oldDoId = tenantsDO.idFromName(`tenant:${currentSubdomain}`);
-				const oldStub = tenantsDO.get(oldDoId);
-				const draftsResponse = await oldStub.fetch("https://tenant.internal/drafts");
-
-				if (draftsResponse.ok) {
-					const drafts = (await draftsResponse.json()) as Array<{
-						slug: string;
-						metadata: Record<string, unknown>;
-						lastSaved: number;
-						deviceId: string;
-					}>;
-
-					const draftsToMigrate = drafts.slice(0, 20);
-
-					if (draftsToMigrate.length > 0) {
-						const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
-						const newStub = tenantsDO.get(newDoId);
-
-						for (let i = 0; i < draftsToMigrate.length; i += 5) {
-							const batch = draftsToMigrate.slice(i, i + 5);
-							await Promise.all(
-								batch.map(async (draft) => {
-									const fullDraftRes = await oldStub.fetch(
-										`https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-									);
-									if (fullDraftRes.ok) {
-										const fullDraft = await fullDraftRes.json();
-										await newStub.fetch(
-											`https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-											{
-												method: "PUT",
-												headers: { "Content-Type": "application/json" },
-												body: JSON.stringify(fullDraft),
-											},
-										);
-									}
-								}),
-							);
-						}
-					}
-				}
-			} catch (draftErr) {
-				console.warn("[Username] Draft migration failed (non-blocking):", draftErr);
-			}
-
-			// Push config to new TenantDO so first request is warm
-			try {
-				const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
-				const newStub = tenantsDO.get(newDoId);
-				await newStub.fetch("https://tenant.internal/config", {
-					method: "PUT",
-					headers: {
-						"X-Tenant-Subdomain": newUsername,
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						subdomain: newUsername,
-					}),
-				});
-			} catch (cacheErr) {
-				console.warn("[Username] TenantDO cache push failed (non-blocking):", cacheErr);
-			}
+			await migrateTenantDODrafts(tenantsDO, currentSubdomain, newUsername);
 		}
 
 		return {
