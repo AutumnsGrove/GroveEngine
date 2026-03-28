@@ -1,4 +1,12 @@
 import type { Component } from "svelte";
+import {
+	greens,
+	earth,
+	natural,
+	bark,
+	pinks,
+	autumn,
+} from "@autumnsgrove/lattice/ui/components/nature/palette";
 
 export type AssetInfo = {
 	component: Component<Record<string, unknown>>;

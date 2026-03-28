@@ -29,9 +29,9 @@ export function createGroveViteConfig(overrides = {}) {
 }
 
 /**
- * @param {Record<string, unknown>} base
- * @param {Record<string, unknown>} overrides
- * @returns {Record<string, unknown>}
+ * @param {Record<string, any>} base
+ * @param {Record<string, any>} overrides
+ * @returns {Record<string, any>}
  */
 function deepMergeConfig(base, overrides) {
 	const result = { ...base };

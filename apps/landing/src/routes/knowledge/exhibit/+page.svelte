@@ -96,7 +96,7 @@
 	<CategoryNav
 		sections={navSections}
 		items={navItems}
-		getItemHref={(item) => `/knowledge/exhibit/${item.id}`}
+		getItemHref={(item: any) => `/knowledge/exhibit/${item.id}`}
 		color="violet"
 		ariaLabel="Wing navigation"
 	/>

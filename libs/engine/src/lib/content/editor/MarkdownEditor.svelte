@@ -5,7 +5,7 @@
 	// Local instance for admin editor preview
 	const editorMd = new MarkdownIt({ html: false, linkify: true });
 	import { extractHeaders } from "$lib/content/markdown/markdown";
-	import { groveDirectivePlugin } from "$lib/content/markdown/markdown-directives";
+	import { groveDirectivePlugin } from "$lib/content/markdown/directives";
 	editorMd.use(groveDirectivePlugin);
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";

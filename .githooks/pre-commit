@@ -474,7 +474,7 @@ echo ""
 #   - Brand assets (Logo*, nature/, vine-pattern, TerrariumGlobe)
 #   - Test files, email templates
 #   - heartwood/colors.ts (semantic success/status)
-#   - Lines with // accent-ok or /* accent-ok */
+#   - Lines with // accent-ok, /* accent-ok */, or <!-- accent-ok --> (within 5 lines above)
 #
 # Fix: Use Prism accent tokens instead:
 #   var(--grove-accent)      — solid accent color
@@ -505,9 +505,13 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
-            # Also check the line above for accent-ok
-            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
-            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
+            # Check up to 5 lines above for accent-ok (covers HTML comments before elements)
+            _found_ok=false
+            for _offset in 1 2 3 4 5; do
+                _check_line=$(echo "$staged_content" | sed -n "$((line_num - _offset))p" 2>/dev/null || true)
+                if echo "$_check_line" | grep -q 'accent-ok'; then _found_ok=true; break; fi
+            done
+            if $_found_ok; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -in '#\(22c55e\|4ade80\|16a34a\|86efac\|15803d\|10b981\|059669\|166534\|14532d\|dcfce7\|bbf7d0\|f0fdf4\)' 2>/dev/null || true)
@@ -516,8 +520,12 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
-            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
-            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
+            _found_ok=false
+            for _offset in 1 2 3 4 5; do
+                _check_line=$(echo "$staged_content" | sed -n "$((line_num - _offset))p" 2>/dev/null || true)
+                if echo "$_check_line" | grep -q 'accent-ok'; then _found_ok=true; break; fi
+            done
+            if $_found_ok; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -n 'rgba\s*(\s*\(34,\s*197,\s*94\|74,\s*222,\s*128\|22,\s*163,\s*74\|74,\s*124,\s*89\)' 2>/dev/null || true)
@@ -526,8 +534,12 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
-            prev_line=$(echo "$staged_content" | sed -n "$((line_num - 1))p" 2>/dev/null || true)
-            if echo "$prev_line" | grep -q 'accent-ok'; then continue; fi
+            _found_ok=false
+            for _offset in 1 2 3 4 5; do
+                _check_line=$(echo "$staged_content" | sed -n "$((line_num - _offset))p" 2>/dev/null || true)
+                if echo "$_check_line" | grep -q 'accent-ok'; then _found_ok=true; break; fi
+            done
+            if $_found_ok; then continue; fi
             accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
 "
         done < <(echo "$staged_content" | grep -n 'var(--grove-[3-7]00' 2>/dev/null || true)
@@ -550,7 +562,7 @@ if [ -n "$staged_accent_files" ]; then
         echo ""
         echo -e "${YELLOW}Available stops: 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50, 70, 80${NC}"
         echo ""
-        echo -e "${YELLOW}To suppress (brand assets, palette defs): add ${BLUE}// accent-ok${YELLOW}${NC}"
+        echo -e "${YELLOW}To suppress (brand assets, palette defs): add ${BLUE}// accent-ok${YELLOW} or ${BLUE}<!-- accent-ok -->${YELLOW} (within 5 lines above)${NC}"
         echo ""
         checks_failed=1
     else

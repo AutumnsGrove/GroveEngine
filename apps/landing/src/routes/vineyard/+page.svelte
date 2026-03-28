@@ -829,20 +829,20 @@
 											{@const colorError = getColorInputError(prop)}
 											<div class="space-y-2">
 												<div class="flex gap-2 items-center">
+													<!-- accent-ok -->
 													<input
 														id="prop-{prop}"
 														type="color"
-														// accent-ok: color picker default
 														value={propValues[prop] ?? "#16a34a"}
 														oninput={(e) => (propValues[prop] = e.currentTarget.value)}
 														class="w-10 h-10 rounded cursor-pointer border border-[var(--color-border)]"
 													/>
+													<!-- accent-ok -->
 													<input
 														type="text"
 														value={pendingColorValues[prop] ?? propValues[prop] ?? ""}
 														oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
-														// accent-ok
-													placeholder="#16a34a"
+														placeholder="#16a34a"
 														class="vine-input flex-1 font-mono text-sm {colorError
 															? 'border-error'
 															: ''}"

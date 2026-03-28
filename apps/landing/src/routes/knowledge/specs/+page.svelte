@@ -112,7 +112,7 @@
 	<CategoryNav
 		sections={navSections}
 		items={navItems}
-		getItemHref={(item) => `/knowledge/specs/${item.id}`}
+		getItemHref={(item: any) => `/knowledge/specs/${item.id}`}
 		color="violet"
 		ariaLabel="Category navigation"
 	/>

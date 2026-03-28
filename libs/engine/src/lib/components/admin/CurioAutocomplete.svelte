@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CURIO_METADATA } from "$lib/content/markdown/markdown-directives";
+	import { CURIO_METADATA } from "$lib/content/markdown/directives";
 	import { tick } from "svelte";
 
 	interface CurioStatusItem {

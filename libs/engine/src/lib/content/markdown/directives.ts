@@ -316,7 +316,7 @@ function directiveBlockRule(
  * markdown-it plugin that transforms ::name[content]:: directives into HTML.
  *
  * Usage:
- *   import { groveDirectivePlugin } from "$lib/utils/markdown-directives";
+ *   import { groveDirectivePlugin } from "$lib/content/markdown/directives";
  *   md.use(groveDirectivePlugin);
  */
 export function groveDirectivePlugin(md: MarkdownIt): void {

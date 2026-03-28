@@ -74,6 +74,7 @@ export type DatabaseErrorCode =
 // ============================================================================
 
 // Re-export from SSOT for backwards compatibility
+import { generateId } from "../../utils/id.js";
 export { generateId } from "../../utils/id.js";
 
 /**
