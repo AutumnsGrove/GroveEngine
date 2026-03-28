@@ -34,8 +34,7 @@
 			"default": "./src/middleware/auth.ts"
 		},
 		"./vite": {
-			"types": "./src/vite/grove-vite-config.ts",
-			"default": "./src/vite/grove-vite-config.ts"
+			"default": "./src/vite/grove-vite-config.js"
 		}
 	},
 	"files": [
