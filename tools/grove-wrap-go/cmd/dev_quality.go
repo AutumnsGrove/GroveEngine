@@ -354,13 +354,22 @@ var ciCmd = &cobra.Command{
 	Short: "Run full CI pipeline",
 	Long: `Run full CI pipeline: lint → check → test → build.
 
-Supports --affected to only run CI for packages with uncommitted changes.
-Supports --skip-* flags to skip individual steps.
-Supports --diagnose for structured error output.`,
+Matches the GitHub Actions CI pipeline as closely as possible:
+- Detects affected packages from both committed and uncommitted changes
+- Resolves transitive dependencies (engine change → all consumer apps)
+- Rebuilds library dist/ when needed (foliage, gossamer, engine)
+
+Flags:
+  --affected   Only run CI for packages affected by changes since origin/main
+  --full       Run CI for ALL packages regardless of changes
+  --skip-*     Skip individual steps (lint, check, test, build)
+  --fail-fast  Stop on first failure
+  --diagnose   Show structured error diagnostics`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		pkg, _ := cmd.Flags().GetString("package")
 		affected, _ := cmd.Flags().GetBool("affected")
+		full, _ := cmd.Flags().GetBool("full")
 		skipLint, _ := cmd.Flags().GetBool("skip-lint")
 		skipCheck, _ := cmd.Flags().GetBool("skip-check")
 		skipTest, _ := cmd.Flags().GetBool("skip-test")
@@ -373,28 +382,61 @@ Supports --diagnose for structured error output.`,
 		// Determine scope
 		var scope string
 		var filterArgs []string
+		runAll := full // --full forces all packages
+		var affectedFullPaths []string // track "libs/engine" etc. for rebuild logic
+
 		if pkg != "" {
 			scope = pkg
 			filterArgs = []string{"--filter", pkg}
-		} else if affected {
-			affectedPkgs := detectAffectedCIPackages(root)
-			if len(affectedPkgs) == 0 {
-				if cfg.JSONMode {
-					data, _ := json.Marshal(map[string]interface{}{
-						"passed": true, "steps": []ciStep{}, "affected_packages": []string{},
-					})
-					fmt.Println(string(data))
-				} else {
-					ui.Success("No affected packages — nothing to check")
-				}
-				return nil
+		} else if affected || full {
+			if full {
+				runAll = true
 			}
-			scope = strings.Join(affectedPkgs, ", ")
-			for _, p := range affectedPkgs {
-				filterArgs = append(filterArgs, "--filter", p)
+			if !runAll {
+				affectedPkgs, allChanged := detectAffectedCIPackages(root)
+				if allChanged {
+					runAll = true
+				}
+				if len(affectedPkgs) == 0 && !runAll {
+					if cfg.JSONMode {
+						data, _ := json.Marshal(map[string]interface{}{
+							"passed": true, "steps": []ciStep{}, "affected_packages": []string{},
+						})
+						fmt.Println(string(data))
+					} else {
+						ui.Success("No affected packages — nothing to check")
+					}
+					return nil
+				}
+				if !runAll {
+					scope = strings.Join(affectedPkgs, ", ")
+					for _, p := range affectedPkgs {
+						filterArgs = append(filterArgs, "--filter", p)
+					}
+					// Reconstruct full paths for rebuild detection
+					affectedFullPaths = reconstructFullPaths(root, affectedPkgs)
+				}
+			}
+			if runAll {
+				scope = "all"
 			}
 		} else {
 			scope = "all"
+		}
+
+		// --- Library rebuild step (matches grove-setup action) ---
+		// If affected libs need their dist/ rebuilt before consumers can type-check
+		needsRebuild := runAll || containsAny(affectedFullPaths,
+			"libs/foliage", "libs/gossamer", "libs/engine",
+			"libs/prism", "libs/infra")
+
+		if needsRebuild {
+			if err := rebuildLibraries(cfg, root, affectedFullPaths, runAll, dryRun); err != nil {
+				if !cfg.JSONMode {
+					ui.Error("Library rebuild failed — downstream checks would be unreliable")
+				}
+				return err
+			}
 		}
 
 		// Define pipeline steps
@@ -510,35 +552,138 @@ Supports --diagnose for structured error output.`,
 	},
 }
 
-// detectAffectedCIPackages returns package names affected by uncommitted changes.
-func detectAffectedCIPackages(root string) []string {
-	result, err := exec.Git("status", "--porcelain")
-	if err != nil || !result.OK() {
-		return nil
-	}
+// dependents maps a library to the packages that depend on it.
+// Mirrors .github/scripts/affected-packages.mjs DEPENDENTS.
+var dependents = map[string][]string{
+	"libs/foliage":  {"libs/engine"},
+	"libs/gossamer": {"libs/engine"},
+	"libs/prism":    {"libs/foliage", "libs/engine"},
+	"libs/infra":    {"libs/engine"},
+	"libs/engine": {
+		"apps/amber",
+		"apps/clearing",
+		"apps/domains",
+		"apps/ivy",
+		"apps/landing",
+		"apps/login",
+		"apps/meadow",
+		"apps/plant",
+		"apps/terrarium",
+		"services/amber",
+		"services/durable-objects",
+		"services/forage",
+		"services/heartwood",
+		"workers/vista-collector",
+		"workers/warden",
+	},
+}
 
-	affected := map[string]bool{}
-	for _, line := range result.Lines() {
-		if len(line) < 4 {
-			continue
+// rootLevelFiles trigger a full CI run when changed.
+var rootLevelFiles = []string{
+	"package.json",
+	"pnpm-lock.yaml",
+	"tsconfig.json",
+}
+
+// fileToPackagePath maps a file path to its monorepo package path (e.g. "libs/engine").
+// Returns empty string if the file is not inside a known package directory.
+func fileToPackagePath(file string) string {
+	for _, prefix := range []string{"apps/", "services/", "workers/", "libs/", "packages/"} {
+		if strings.HasPrefix(file, prefix) {
+			rest := strings.TrimPrefix(file, prefix)
+			parts := strings.SplitN(rest, "/", 2)
+			if len(parts) > 0 && parts[0] != "" {
+				return strings.TrimSuffix(prefix, "/") + "/" + parts[0]
+			}
 		}
-		file := strings.TrimSpace(line[3:])
-		// Map file path to package
-		for _, prefix := range []string{"packages/", "apps/", "services/", "workers/", "libs/"} {
-			if strings.HasPrefix(file, prefix) {
-				parts := strings.SplitN(strings.TrimPrefix(file, prefix), "/", 2)
-				if len(parts) > 0 {
-					affected[parts[0]] = true
+	}
+	return ""
+}
+
+// resolveTransitiveDependents expands a set of directly-changed packages to
+// include all transitive dependents via the dependents graph.
+func resolveTransitiveDependents(direct map[string]bool) map[string]bool {
+	affected := make(map[string]bool)
+	for k := range direct {
+		affected[k] = true
+	}
+	changed := true
+	for changed {
+		changed = false
+		for pkg := range affected {
+			for _, dep := range dependents[pkg] {
+				if !affected[dep] {
+					affected[dep] = true
+					changed = true
 				}
 			}
 		}
 	}
+	return affected
+}
+
+// detectAffectedCIPackages returns package paths affected by changes since main.
+// Uses git diff origin/main...HEAD for committed changes AND git status for
+// uncommitted changes — matching the detection strategy of GitHub Actions CI.
+func detectAffectedCIPackages(root string) ([]string, bool) {
+	directlyChanged := map[string]bool{}
+	runAll := false
+
+	// 1. Committed-but-not-pushed changes: git diff origin/main...HEAD
+	diffResult, err := exec.Git("diff", "--name-only", "origin/main...HEAD")
+	if err == nil && diffResult.OK() {
+		for _, file := range diffResult.Lines() {
+			file = strings.TrimSpace(file)
+			if file == "" {
+				continue
+			}
+			// Check for root-level changes
+			for _, root := range rootLevelFiles {
+				if file == root || strings.HasPrefix(file, "scripts/") {
+					runAll = true
+				}
+			}
+			if pkg := fileToPackagePath(file); pkg != "" {
+				directlyChanged[pkg] = true
+			}
+		}
+	}
+
+	// 2. Uncommitted changes: git status --porcelain
+	statusResult, err := exec.Git("status", "--porcelain")
+	if err == nil && statusResult.OK() {
+		for _, line := range statusResult.Lines() {
+			if len(line) < 4 {
+				continue
+			}
+			file := strings.TrimSpace(line[3:])
+			for _, rf := range rootLevelFiles {
+				if file == rf || strings.HasPrefix(file, "scripts/") {
+					runAll = true
+				}
+			}
+			if pkg := fileToPackagePath(file); pkg != "" {
+				directlyChanged[pkg] = true
+			}
+		}
+	}
+
+	if len(directlyChanged) == 0 && !runAll {
+		return nil, false
+	}
+
+	// Resolve transitive dependents
+	affected := resolveTransitiveDependents(directlyChanged)
 
 	var pkgs []string
 	for pkg := range affected {
-		pkgs = append(pkgs, pkg)
+		// Convert "libs/engine" → "engine" for pnpm --filter
+		parts := strings.SplitN(pkg, "/", 2)
+		if len(parts) == 2 {
+			pkgs = append(pkgs, parts[1])
+		}
 	}
-	return pkgs
+	return pkgs, runAll
 }
 
 // runInPackage runs a command in a specific package directory.
@@ -629,6 +774,144 @@ func printDryRun(cfg *config.Config, pkg string, cmdArgs []string) error {
 	return nil
 }
 
+// containsAny returns true if the slice contains any of the given values.
+func containsAny(slice []string, values ...string) bool {
+	set := make(map[string]bool, len(slice))
+	for _, s := range slice {
+		set[s] = true
+	}
+	for _, v := range values {
+		if set[v] {
+			return true
+		}
+	}
+	return false
+}
+
+// reconstructFullPaths converts short package names (e.g. "engine") back to
+// full monorepo paths (e.g. "libs/engine") by checking which directory exists.
+func reconstructFullPaths(root string, shortNames []string) []string {
+	var paths []string
+	for _, name := range shortNames {
+		for _, prefix := range []string{"libs", "apps", "services", "workers", "packages"} {
+			dir := filepath.Join(root, prefix, name)
+			if info, err := os.Stat(dir); err == nil && info.IsDir() {
+				paths = append(paths, prefix+"/"+name)
+				break
+			}
+		}
+	}
+	return paths
+}
+
+// rebuildLibraries runs build/package commands for affected libraries,
+// matching the grove-setup GitHub Action's build steps.
+// Order matters: prism → foliage → gossamer → engine (dependency chain).
+func rebuildLibraries(cfg *config.Config, root string, affectedPaths []string, runAll, dryRun bool) error {
+	type libBuild struct {
+		path    string // e.g. "libs/foliage"
+		command []string
+		label   string
+	}
+
+	// Ordered by dependency chain (upstream first)
+	libs := []libBuild{
+		{"libs/foliage", []string{"pnpm", "run", "build"}, "Building foliage"},
+		{"libs/gossamer", []string{"pnpm", "run", "build"}, "Building gossamer"},
+		{"libs/engine", []string{"pnpm", "run", "package"}, "Packaging engine"},
+	}
+
+	affected := make(map[string]bool, len(affectedPaths))
+	for _, p := range affectedPaths {
+		affected[p] = true
+	}
+
+	// Determine which libs need rebuilding: the lib itself changed,
+	// OR one of its upstream deps changed (prism/infra → engine chain)
+	needsBuild := make(map[string]bool)
+	if runAll {
+		for _, lib := range libs {
+			needsBuild[lib.path] = true
+		}
+	} else {
+		// If prism or infra changed, foliage and engine need rebuild
+		if affected["libs/prism"] {
+			needsBuild["libs/foliage"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/infra"] {
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/foliage"] {
+			needsBuild["libs/foliage"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/gossamer"] {
+			needsBuild["libs/gossamer"] = true
+			needsBuild["libs/engine"] = true
+		}
+		if affected["libs/engine"] {
+			needsBuild["libs/engine"] = true
+		}
+		// Also rebuild if any engine dependent is affected (they need fresh dist/)
+		engineDeps := dependents["libs/engine"]
+		for _, dep := range engineDeps {
+			if affected[dep] {
+				needsBuild["libs/engine"] = true
+				break
+			}
+		}
+	}
+
+	if len(needsBuild) == 0 {
+		return nil
+	}
+
+	if !cfg.JSONMode && !dryRun {
+		fmt.Println("  > Rebuilding libraries...")
+	}
+
+	for _, lib := range libs {
+		if !needsBuild[lib.path] {
+			continue
+		}
+		dir := filepath.Join(root, lib.path)
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			continue
+		}
+
+		if dryRun {
+			if !cfg.JSONMode {
+				ui.Step(true, fmt.Sprintf("[dry-run] %s", lib.label))
+			}
+			continue
+		}
+
+		if !cfg.JSONMode {
+			fmt.Printf("    %s...\n", lib.label)
+		}
+
+		result, err := exec.RunInDirWithTimeout(5*time.Minute, dir, lib.command[0], lib.command[1:]...)
+		if err != nil {
+			return fmt.Errorf("%s failed: %w", lib.label, err)
+		}
+		if !result.OK() {
+			if !cfg.JSONMode {
+				ui.Step(false, lib.label)
+				if result.Stderr != "" {
+					fmt.Println(result.Stderr)
+				}
+			}
+			return fmt.Errorf("%s failed with exit code %d", lib.label, result.ExitCode)
+		}
+		if !cfg.JSONMode {
+			ui.Step(true, lib.label)
+		}
+	}
+
+	return nil
+}
+
 // capitalizeFirst capitalizes the first letter of a string.
 func capitalizeFirst(s string) string {
 	if s == "" {
@@ -689,6 +972,7 @@ func init() {
 	// ci flags
 	ciCmd.Flags().StringP("package", "p", "", "Run CI for specific package")
 	ciCmd.Flags().Bool("affected", false, "Only run CI for affected packages")
+	ciCmd.Flags().Bool("full", false, "Run CI for ALL packages regardless of changes")
 	ciCmd.Flags().Bool("skip-lint", false, "Skip linting step")
 	ciCmd.Flags().Bool("skip-check", false, "Skip type checking step")
 	ciCmd.Flags().Bool("skip-test", false, "Skip testing step")
