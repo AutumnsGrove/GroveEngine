@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-	...createGroveViteConfig(),
+	...(createGroveViteConfig() as any),
 	test: {
 		include: ["tests/**/*.{test,spec}.{js,ts}"],
 		alias: {

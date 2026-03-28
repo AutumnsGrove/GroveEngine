@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import { createGroveViteConfig } from "@autumnsgrove/infra/vite";
 
 export default defineConfig({
-	...createGroveViteConfig({
+	...(createGroveViteConfig({
 		server: {
 			hmr: {
 				overlay: false,
@@ -11,7 +11,7 @@ export default defineConfig({
 		resolve: {
 			conditions: ["browser"],
 		},
-	}),
+	}) as any),
 	test: {
 		include: ["src/**/*.{test,spec}.{js,ts}"],
 		globals: true,
