@@ -75,7 +75,7 @@ vi.mock("@autumnsgrove/lattice/errors", () => ({
 	}),
 }));
 
-vi.mock("@autumnsgrove/lattice/config/tiers", () => ({
+vi.mock("@autumnsgrove/lattice/platform/config/tiers", () => ({
 	TIERS: {
 		wanderer: { limits: { posts: 25 } },
 		seedling: { limits: { posts: 100 } },

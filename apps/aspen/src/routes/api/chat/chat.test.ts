@@ -33,11 +33,11 @@ vi.mock("@autumnsgrove/lattice/server/services/users", () => ({
 	getUserHomeGrove: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/factory", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold/factory", () => ({
 	createThreshold: vi.fn(() => null),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold/sveltekit", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
@@ -63,7 +63,7 @@ vi.mock("@autumnsgrove/lattice/loom/sveltekit", () => ({
 	})),
 }));
 
-vi.mock("@autumnsgrove/lattice/feature-flags", () => ({
+vi.mock("@autumnsgrove/lattice/platform/feature-flags", () => ({
 	isInGreenhouse: vi.fn().mockResolvedValue(true),
 	isFeatureEnabled: vi.fn().mockResolvedValue(true),
 }));

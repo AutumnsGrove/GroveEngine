@@ -18,11 +18,11 @@ vi.mock("@autumnsgrove/lattice/server/services/users", () => ({
 	getUserHomeGrove: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/factory", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold/factory", () => ({
 	createThreshold: vi.fn(() => null),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit", () => ({
+vi.mock("@autumnsgrove/lattice/platform/threshold/sveltekit", () => ({
 	thresholdCheck: vi.fn(),
 }));
 

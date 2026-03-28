@@ -5,7 +5,7 @@ import { assertLoaded, assertActionResult } from "../../../test-utils";
 // MOCKS
 // ============================================================================
 
-vi.mock("@autumnsgrove/lattice/feature-flags", () => ({
+vi.mock("@autumnsgrove/lattice/platform/feature-flags", () => ({
 	getGreenhouseTenant: vi.fn(async () => null),
 	getTenantControllableGrafts: vi.fn(async () => []),
 	setTenantGraftOverride: vi.fn(async () => true),
@@ -18,11 +18,11 @@ vi.mock("@autumnsgrove/lattice/feature-flags", () => ({
 	setFlagEnabled: vi.fn(async () => true),
 }));
 
-vi.mock("@autumnsgrove/lattice/config/wayfinder", () => ({
+vi.mock("@autumnsgrove/lattice/platform/config/wayfinder", () => ({
 	isWayfinder: vi.fn(() => false),
 }));
 
-vi.mock("@autumnsgrove/lattice/config/tiers", () => ({
+vi.mock("@autumnsgrove/lattice/platform/config/tiers", () => ({
 	isValidTier: vi.fn((tier: string) => ["seedling", "sapling"].includes(tier)),
 	TierKey: {},
 }));
@@ -238,7 +238,7 @@ describe("Arbor Settings Page", () => {
 		it("should return greenhouse status when tenant is enrolled", async () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			const enrolledAt = new Date("2025-01-15");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
@@ -261,7 +261,7 @@ describe("Arbor Settings Page", () => {
 		it("should return empty greenhouse when tenant not found", async () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce(null);
 			const event = createLoadEvent({});
 
@@ -278,7 +278,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, getTenantControllableGrafts } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -302,7 +302,7 @@ describe("Arbor Settings Page", () => {
 		it("should not return grafts for non-greenhouse members", async () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: false, // Not enrolled
@@ -320,9 +320,9 @@ describe("Arbor Settings Page", () => {
 		it("should wayfinder see greenhouse tenants, available tenants, feature flags", async () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			const { getGreenhouseTenant, getGreenhouseTenants, getFeatureFlags } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
@@ -351,7 +351,7 @@ describe("Arbor Settings Page", () => {
 		it("should non-Wayfinder doesn't see admin data", async () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createLoadEvent({});
 
@@ -705,7 +705,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-greenhouse members → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: false,
@@ -724,7 +724,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject missing graftId → fail(400)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -744,7 +744,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, setTenantGraftOverride } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -766,7 +766,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, setTenantGraftOverride } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -787,7 +787,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, setTenantGraftOverride } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -814,7 +814,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, resetTenantGraftOverrides } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -836,7 +836,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, resetTenantGraftOverrides } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -857,7 +857,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const { getGreenhouseTenant, resetTenantGraftOverrides } =
-				await import("@autumnsgrove/lattice/feature-flags");
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -877,7 +877,7 @@ describe("Arbor Settings Page", () => {
 		it("should require greenhouse membership", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: false,
@@ -902,7 +902,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-Wayfinder → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" } });
 
@@ -918,7 +918,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject missing tenantId → fail(400)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			const event = createActionEvent({ formData: { tenantId: "" } });
 
@@ -934,8 +934,8 @@ describe("Arbor Settings Page", () => {
 		it("should enroll tenant with notes", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(enrollInGreenhouse).mockResolvedValueOnce(true);
 			const event = createActionEvent({
@@ -955,8 +955,8 @@ describe("Arbor Settings Page", () => {
 		it("should fall back to wayfinder for actor email", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(enrollInGreenhouse).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" }, user: null });
@@ -973,8 +973,8 @@ describe("Arbor Settings Page", () => {
 		it("should return fail on service failure", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { enrollInGreenhouse } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(enrollInGreenhouse).mockResolvedValueOnce(false);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" } });
@@ -993,7 +993,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-Wayfinder → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" } });
 
@@ -1008,8 +1008,8 @@ describe("Arbor Settings Page", () => {
 		it("should remove tenant from greenhouse", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { removeFromGreenhouse } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { removeFromGreenhouse } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(removeFromGreenhouse).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" } });
@@ -1026,8 +1026,8 @@ describe("Arbor Settings Page", () => {
 		it("should return fail on service failure", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { removeFromGreenhouse } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { removeFromGreenhouse } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(removeFromGreenhouse).mockResolvedValueOnce(false);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123" } });
@@ -1045,7 +1045,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-Wayfinder → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123", enabled: "true" } });
 
@@ -1060,8 +1060,9 @@ describe("Arbor Settings Page", () => {
 		it("should return enabled message on toggle true", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { toggleGreenhouseStatus } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { toggleGreenhouseStatus } =
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(toggleGreenhouseStatus).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123", enabled: "true" } });
@@ -1078,8 +1079,9 @@ describe("Arbor Settings Page", () => {
 		it("should return disabled message on toggle false", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { toggleGreenhouseStatus } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { toggleGreenhouseStatus } =
+				await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(toggleGreenhouseStatus).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { tenantId: "tenant-123", enabled: "false" } });
@@ -1102,7 +1104,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-Wayfinder → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createActionEvent({ formData: { flagId: "flag-1" } });
 
@@ -1117,8 +1119,8 @@ describe("Arbor Settings Page", () => {
 		it("should enable flag → cultivated message", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { setFlagEnabled } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { setFlagEnabled } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(setFlagEnabled).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { flagId: "flag-1" } });
@@ -1136,7 +1138,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject missing flagId → fail(400)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			const event = createActionEvent({ formData: { flagId: "" } });
 
@@ -1153,7 +1155,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject non-Wayfinder → fail(403)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(false);
 			const event = createActionEvent({ formData: { flagId: "flag-1" } });
 
@@ -1168,8 +1170,8 @@ describe("Arbor Settings Page", () => {
 		it("should disable flag → pruned message", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
-			const { setFlagEnabled } = await import("@autumnsgrove/lattice/feature-flags");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
+			const { setFlagEnabled } = await import("@autumnsgrove/lattice/platform/feature-flags");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			vi.mocked(setFlagEnabled).mockResolvedValueOnce(true);
 			const event = createActionEvent({ formData: { flagId: "flag-1" } });
@@ -1187,7 +1189,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject missing flagId → fail(400)", async () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
-			const { isWayfinder } = await import("@autumnsgrove/lattice/config/wayfinder");
+			const { isWayfinder } = await import("@autumnsgrove/lattice/platform/config/wayfinder");
 			vi.mocked(isWayfinder).mockReturnValue(true);
 			const event = createActionEvent({ formData: { flagId: "" } });
 
