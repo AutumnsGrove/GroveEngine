@@ -43,3 +43,4 @@ coverage/
 
 # Cloudflare
 .dev.vars
+src/index.ts

@@ -71,7 +71,7 @@ describe("journey.ts", () => {
 
 		it("should handle very large sizes", () => {
 			expect(formatBytes(1024 * 1024 * 100)).toBe("100 MB");
-			expect(formatBytes(1024 * 1024 * 1024)).toBe("1024 MB");
+			expect(formatBytes(1024 * 1024 * 1024)).toBe("1 GB");
 		});
 	});
 
