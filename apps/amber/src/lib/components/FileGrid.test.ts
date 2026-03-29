@@ -22,7 +22,7 @@ describe("FileGrid", () => {
 			r2_key: "user_123/blog/images/document.pdf",
 			filename: "document.pdf",
 			mime_type: "application/pdf",
-			size_bytes: 2048000,
+			size_bytes: 2097152,
 			product: "blog",
 			category: "documents",
 			created_at: "2025-01-02T00:00:00Z",
