@@ -37,10 +37,10 @@
 			const mountRes = await fetch(
 				`/api/showroom/mount?component=${encodeURIComponent(componentPath)}`,
 			);
-			const mountData = await mountRes.json();
+			const mountData = (await mountRes.json()) as Record<string, unknown>;
 
 			if (!mountRes.ok) {
-				error = mountData.error || `Failed to mount: ${mountRes.status}`;
+				error = (mountData.error as string) || `Failed to mount: ${mountRes.status}`;
 				return;
 			}
 
