@@ -1,8 +1,7 @@
 /**
- * Claude Code live session streaming via Server-Sent Events.
+ * Live session streaming via Server-Sent Events.
  *
- * Provides:
- * - Active session detection (via ~/.claude/sessions/ PID files)
+ * - Active session detection via ~/.claude/sessions/ PID files
  * - SSE endpoint that tails JSONL files every 2 seconds
  * - Pre-rendered HTML fragments pushed to the client
  */
@@ -10,13 +9,11 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
-import type { ClaudeSession, ClaudeActiveSession } from "../types.ts";
-import { parseClaudeJsonlIncremental } from "./claude-parse.ts";
-import { renderClaudeMessage } from "./claude-render.ts";
+import type { SessionMeta } from "./types.ts";
+import { parseClaudeJsonlIncremental } from "./parse.ts";
+import { renderClaudeMessage } from "./render.ts";
 
-// ─── Active Session Detection ────────────────────────────────────────────────
-
-// Cache active session IDs for 5 seconds to avoid excessive process checks
+// Cache active session IDs for 5 seconds
 let _activeCache: { ids: Set<string>; at: number } | null = null;
 const CACHE_TTL = 5000;
 
@@ -31,10 +28,7 @@ interface SessionPidEntry {
 
 /**
  * Read ~/.claude/sessions/*.json to find which session IDs have a live
- * Claude Code process. Each file is named {pid}.json and contains
- * { pid, sessionId, cwd, startedAt }.
- *
- * We verify the PID is still alive with kill(pid, 0).
+ * Claude Code process. Verifies PID is alive with kill(pid, 0).
  */
 function readLiveSessionIds(): Set<string> {
 	const ids = new Set<string>();
@@ -44,31 +38,25 @@ function readLiveSessionIds(): Set<string> {
 			try {
 				const raw = readFileSync(join(SESSIONS_DIR, file), "utf8");
 				const entry = JSON.parse(raw) as SessionPidEntry;
-				// kill(pid, 0) throws if process doesn't exist — no signal is sent
 				process.kill(entry.pid, 0);
 				ids.add(entry.sessionId);
 			} catch {
-				// Stale PID file or process gone — skip
+				// Stale PID file or process gone
 			}
 		}
 	} catch {
-		// Sessions dir doesn't exist — no active sessions
+		// Sessions dir doesn't exist
 	}
 	return ids;
 }
 
-/**
- * Check which sessions are currently active (have a running Claude process).
- */
-export async function getActiveSessionIds(sessions: ClaudeSession[]): Promise<Set<string>> {
+export function getActiveSessionIds(sessions: SessionMeta[]): Set<string> {
 	const now = Date.now();
 	if (_activeCache && now - _activeCache.at < CACHE_TTL) {
 		return _activeCache.ids;
 	}
 
 	const liveIds = readLiveSessionIds();
-
-	// Intersect with known sessions so we only return IDs Cairn knows about
 	const activeIds = new Set<string>();
 	for (const session of sessions) {
 		if (liveIds.has(session.sessionId)) {
@@ -80,27 +68,16 @@ export async function getActiveSessionIds(sessions: ClaudeSession[]): Promise<Se
 	return activeIds;
 }
 
-/**
- * Check if a single session is currently active.
- */
-export async function isSessionActive(filePath: string): Promise<boolean> {
-	// Extract session ID from file path (filename without .jsonl)
+export function isSessionActive(filePath: string): boolean {
 	const sessionId = filePath.split("/").pop()?.replace(".jsonl", "") ?? "";
 	const liveIds = readLiveSessionIds();
 	return liveIds.has(sessionId);
 }
 
-// ─── SSE Live Stream ─────────────────────────────────────────────────────────
-
-/**
- * Create a Server-Sent Events response that tails a JSONL file.
- * Polls every 2 seconds for new lines and sends pre-rendered HTML.
- */
 export function createLiveStream(filePath: string, githubRepo: string | null): Response {
 	let byteOffset: number;
 	let cancelled = false;
 
-	// Get initial file size as starting offset (client already has existing messages)
 	try {
 		const raw = readFileSync(filePath, "utf8");
 		byteOffset = Buffer.byteLength(raw, "utf8");
@@ -111,11 +88,8 @@ export function createLiveStream(filePath: string, githubRepo: string | null): R
 	const stream = new ReadableStream({
 		start(controller) {
 			const encoder = new TextEncoder();
-
-			// Send keepalive comment so client knows connection is alive
 			controller.enqueue(encoder.encode(": connected\n\n"));
 
-			// Poll every 2 seconds
 			const interval = setInterval(() => {
 				if (cancelled) {
 					clearInterval(interval);
@@ -127,8 +101,6 @@ export function createLiveStream(filePath: string, githubRepo: string | null): R
 
 					if (messages.length > 0) {
 						byteOffset = newOffset;
-
-						// Render new messages to HTML
 						const html = messages
 							.map((msg) => renderClaudeMessage(msg, githubRepo))
 							.filter(Boolean)
@@ -142,17 +114,15 @@ export function createLiveStream(filePath: string, githubRepo: string | null): R
 						byteOffset = newOffset;
 					}
 				} catch {
-					// File may be gone or truncated — ignore
+					// File may be gone or truncated
 				}
 			}, 2000);
 
-			// Clean up on disconnect
 			const cleanup = () => {
 				cancelled = true;
 				clearInterval(interval);
 			};
 
-			// Bun calls cancel() when the client disconnects
 			(controller as unknown as { signal?: AbortSignal }).signal?.addEventListener(
 				"abort",
 				cleanup,
@@ -169,7 +139,7 @@ export function createLiveStream(filePath: string, githubRepo: string | null): R
 			"Content-Type": "text/event-stream",
 			"Cache-Control": "no-cache",
 			Connection: "keep-alive",
-			"X-Accel-Buffering": "no", // Disable nginx buffering if proxied
+			"X-Accel-Buffering": "no",
 		},
 	});
 }
