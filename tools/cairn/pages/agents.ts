@@ -3,6 +3,9 @@ import type { CairnIndex } from "../index.ts";
 import { loadCrushMessages } from "../index.ts";
 import { escHtml, formatDate, emptyState } from "./layout.ts";
 import type { CrushMessage } from "../types.ts";
+import { parseClaudeJsonl } from "./claude-parse.ts";
+import { renderClaudeMessage, CLAUDE_VIEWER_JS } from "./claude-render.ts";
+import { getActiveSessionIds } from "./claude-live.ts";
 
 // ─── Agent Dashboard ──────────────────────────────────────────────────────────
 
@@ -251,12 +254,18 @@ function renderCrushMessage(m: CrushMessage): string {
 
 // ─── Claude Session List ──────────────────────────────────────────────────────
 
-export function claudeSessionsPage(idx: CairnIndex): string {
+export async function claudeSessionsPage(idx: CairnIndex): Promise<string> {
 	const { claudeSessions } = idx;
 
 	if (claudeSessions.length === 0) {
 		return emptyState("📜", "No Claude Code sessions found.");
 	}
+
+	// Detect active sessions
+	const activeIds = await getActiveSessionIds(claudeSessions);
+
+	const activeSessions = claudeSessions.filter((s) => activeIds.has(s.sessionId));
+	const pastSessions = claudeSessions.filter((s) => !activeIds.has(s.sessionId));
 
 	// Count sessions per project for the subtitle
 	const projectCounts = new Map<string, number>();
@@ -268,120 +277,153 @@ export function claudeSessionsPage(idx: CairnIndex): string {
 		.map(([p, n]) => `${escHtml(p)} (${n})`)
 		.join(" · ");
 
-	const rows = claudeSessions
-		.map(
-			(s) => `
-		<a href="/agents/claude/${escHtml(s.sessionId)}" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:1rem;align-items:center;padding:0.65rem 1rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;text-decoration:none;margin-bottom:0.4rem;transition:border-color 0.15s;">
+	function renderSessionRow(s: typeof claudeSessions[0], isActive: boolean): string {
+		const badge = isActive
+			? `<span class="claude-live-badge"><span class="claude-live-dot"></span> LIVE</span>`
+			: "";
+		return `
+		<a href="/agents/claude/${escHtml(s.sessionId)}" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:1rem;align-items:center;padding:0.65rem 1rem;background:var(--glass-bg);border:1px solid ${isActive ? "rgba(122, 184, 140, 0.3)" : "var(--glass-border)"};border-radius:6px;text-decoration:none;margin-bottom:0.4rem;transition:border-color 0.15s;">
 			<div>
-				<div class="session-title">${escHtml(s.slug ?? s.sessionId.slice(0, 8) + "…")}</div>
+				<div class="session-title" style="display:flex;align-items:center;gap:0.5rem;">${escHtml(s.slug ?? s.sessionId.slice(0, 8) + "…")} ${badge}</div>
 				<div class="session-meta" style="font-family:var(--font-mono);font-size:0.68rem;">${escHtml(s.sessionId.slice(0, 12))}… ${s.gitBranch ? "· " + escHtml(s.gitBranch) : ""}</div>
 			</div>
 			<span class="tag" style="white-space:nowrap;">${escHtml(s.project)}</span>
 			${s.createdAt ? `<span class="session-meta">${formatDate(s.createdAt)}</span>` : "<span></span>"}
 			<span class="session-msgs">${s.messageCount} msgs</span>
 			<span class="session-msgs" style="color:var(--accent-blue);">${s.toolCallCount} tools</span>
-		</a>`,
-		)
-		.join("");
+		</a>`;
+	}
+
+	const activeSection = activeSessions.length > 0
+		? `<div class="claude-sessions-section">
+			<div class="claude-sessions-section-title"><span class="claude-live-dot" style="width:8px;height:8px;border-radius:50%;background:#81c784;display:inline-block;"></span> Active Sessions (${activeSessions.length})</div>
+			${activeSessions.map((s) => renderSessionRow(s, true)).join("")}
+		</div>`
+		: "";
+
+	const pastSection = pastSessions.length > 0
+		? `<div class="claude-sessions-section">
+			<div class="claude-sessions-section-title">Past Sessions (${pastSessions.length})</div>
+			${pastSessions.map((s) => renderSessionRow(s, false)).join("")}
+		</div>`
+		: "";
 
 	return `
 <div class="page-header">
 	<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
 		<div>
 			<h1 class="page-title">Claude Sessions</h1>
-			<p class="page-subtitle">${claudeSessions.length} sessions across all projects · ${projectSummary}</p>
+			<p class="page-subtitle">${claudeSessions.length} sessions across all projects · ${projectSummary}${activeSessions.length > 0 ? ` · <span style="color:#81c784;">${activeSessions.length} active</span>` : ""}</p>
 		</div>
 		<a href="/agents" style="font-size:0.78rem;color:var(--text-secondary);">← Agents</a>
 	</div>
 </div>
 
-${rows}
+${activeSection}
+${pastSection}
 `;
 }
 
 // ─── Claude Session Detail ────────────────────────────────────────────────────
 
-export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): string | null {
+export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string, isActive = false): string | null {
 	const session = idx.claudeSessions.find((s) => s.sessionId === sessionId);
 	if (!session) return null;
 
-	// Read the JSONL file using the stored path
-	const filePath = session.filePath;
-	const messages: { role: string; text: string; ts?: string; tools?: string[] }[] = [];
-
+	// Parse the full JSONL with rich content blocks
+	let parsed;
 	try {
-		const raw = readFileSync(filePath, "utf8");
-		const lines = raw.split("\n").filter(Boolean);
-		for (const line of lines) {
-			try {
-				const obj = JSON.parse(line) as Record<string, unknown>;
-				if (obj.type === "user" || obj.type === "assistant") {
-					const role = obj.type as string;
-					const msg = obj.message as Record<string, unknown> | undefined;
-					let text = "";
-					const tools: string[] = [];
-
-					const content = msg?.content ?? obj.content;
-					if (Array.isArray(content)) {
-						for (const c of content) {
-							if (c && typeof c === "object") {
-								const part = c as Record<string, unknown>;
-								if (part.type === "text" && typeof part.text === "string") {
-									text += part.text;
-								} else if (part.type === "tool_use" && typeof part.name === "string") {
-									tools.push(part.name);
-								} else if (part.type === "tool_result") {
-									// skip
-								}
-							}
-						}
-					} else if (typeof content === "string") {
-						text = content;
-					}
-
-					if (text || tools.length > 0) {
-						messages.push({ role, text, tools });
-					}
-				}
-			} catch {
-				// skip
-			}
-		}
+		parsed = parseClaudeJsonl(session.filePath);
 	} catch {
 		return null;
 	}
 
-	// Limit to first 100 messages for performance
-	const displayMessages = messages.slice(0, 100);
-	const truncated = messages.length > 100;
+	const { messages, githubRepo } = parsed;
 
-	const toolOnlyCount = displayMessages.filter(
-		(m) => !m.text.trim() && (m.tools?.length ?? 0) > 0,
-	).length;
-
-	const msgsHtml = displayMessages
-		.map((m) => {
-			const isUser = m.role === "user";
-			const isToolOnly = !m.text.trim() && (m.tools?.length ?? 0) > 0;
-			const bg = isUser ? "rgba(122, 158, 196, 0.08)" : "rgba(255, 255, 255, 0.03)";
-			const border = isUser ? "rgba(122, 158, 196, 0.2)" : "var(--glass-border)";
-			const roleColor = isUser ? "var(--accent-blue)" : "var(--accent-warm)";
-
-			const preview = m.text.trim().slice(0, 1500);
-			const toolsHtml = (m.tools ?? [])
-				.map((t) => `<span class="tag tag-warm" style="margin-right:0.25rem;">${escHtml(t)}</span>`)
-				.join("");
-
-			return `
-		<div ${isToolOnly ? 'data-tool-only="true"' : ""} style="background:${bg};border:1px solid ${border};border-radius:8px;padding:0.85rem 1rem;">
-			<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:${preview || toolsHtml ? "0.4rem" : "0"};">
-				<span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${roleColor};">${m.role}</span>
-				${toolsHtml}
-			</div>
-			${preview ? `<div style="font-size:0.8rem;color:var(--text-secondary);white-space:pre-wrap;line-height:1.55;">${escHtml(preview)}${m.text.length > 1500 ? "\n[…]" : ""}</div>` : ""}
-		</div>`;
-		})
+	// Render all messages with full tool rendering
+	const msgsHtml = messages
+		.map((msg) => renderClaudeMessage(msg, githubRepo))
+		.filter(Boolean)
 		.join("");
+
+	// Count tool-only messages for filter
+	const toolOnlyCount = messages.filter((m) => m.isToolResultOnly).length;
+
+	const liveIndicator = isActive
+		? `<span class="claude-live-badge"><span class="claude-live-dot"></span> LIVE</span>`
+		: "";
+
+	const liveBar = isActive
+		? `<div class="claude-live-bar">
+		<div class="claude-live-bar-left">
+			<div class="claude-live-status">
+				<span class="claude-live-status-dot connected" id="live-status-dot"></span>
+				<span id="live-status-text">Connected</span>
+			</div>
+			<span class="claude-live-badge"><span class="claude-live-dot"></span> LIVE</span>
+		</div>
+		<div>
+			<button class="claude-follow-btn active" id="follow-toggle" onclick="toggleFollow()">Following</button>
+			<button class="claude-scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">↓ Bottom</button>
+		</div>
+	</div>`
+		: "";
+
+	const liveScript = isActive
+		? `
+<script>
+var following = true;
+var source = new EventSource('/agents/claude/${escHtml(sessionId)}/live');
+
+source.onmessage = function(e) {
+	var data = JSON.parse(e.data);
+	var container = document.getElementById('claude-messages');
+	if (data.type === 'append' && data.html) {
+		container.insertAdjacentHTML('beforeend', data.html);
+		// Re-init truncation and timestamps on new content
+		initTruncation(container);
+		formatTimestamps(container);
+		if (following) {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+		}
+	}
+};
+
+source.onerror = function() {
+	var dot = document.getElementById('live-status-dot');
+	var text = document.getElementById('live-status-text');
+	if (dot) { dot.classList.remove('connected'); dot.classList.add('disconnected'); }
+	if (text) { text.textContent = 'Reconnecting…'; }
+};
+
+source.onopen = function() {
+	var dot = document.getElementById('live-status-dot');
+	var text = document.getElementById('live-status-text');
+	if (dot) { dot.classList.remove('disconnected'); dot.classList.add('connected'); }
+	if (text) { text.textContent = 'Connected'; }
+};
+
+window.addEventListener('scroll', function() {
+	var atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 100;
+	following = atBottom;
+	var btn = document.getElementById('follow-toggle');
+	if (btn) {
+		btn.classList.toggle('active', following);
+		btn.textContent = following ? 'Following' : 'Follow';
+	}
+});
+
+function toggleFollow() {
+	following = !following;
+	var btn = document.getElementById('follow-toggle');
+	btn.classList.toggle('active', following);
+	btn.textContent = following ? 'Following' : 'Follow';
+	if (following) {
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+	}
+}
+</script>`
+		: "";
 
 	return `
 <div class="breadcrumb">
@@ -394,9 +436,11 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 <div style="display:grid;grid-template-columns:1fr 220px;gap:2rem;align-items:start;">
 	<div>
 		<div class="doc-frontmatter" style="margin-bottom:1.5rem;">
-			<div class="doc-frontmatter-title">📜 ${escHtml(session.slug ?? sessionId)}</div>
+			<div class="doc-frontmatter-title" style="display:flex;align-items:center;gap:0.75rem;">
+				📜 ${escHtml(session.slug ?? sessionId)} ${liveIndicator}
+			</div>
 			<div class="doc-frontmatter-meta">
-				<span class="tag">${session.messageCount} messages</span>
+				<span class="tag">${messages.length} messages</span>
 				<span class="tag tag-blue">${session.toolCallCount} tool calls</span>
 				${session.gitBranch ? `<span class="tag">${escHtml(session.gitBranch)}</span>` : ""}
 				${session.version ? `<span class="tag tag-warm">v${escHtml(session.version)}</span>` : ""}
@@ -407,18 +451,14 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 		<div id="message-thread">
 			${
 				toolOnlyCount > 0
-					? `<div class="filter-toolbar">
-				<button class="filter-btn" id="filter-toggle" onclick="toggleToolOnly(this)">
-					<i data-lucide="filter" style="width:12px;height:12px;"></i>
-					<span id="filter-label">Hide tool-only</span>
-				</button>
+					? `<div class="claude-filter-toolbar">
+				<button class="claude-filter-btn" id="filter-toggle" onclick="toggleToolOnly(this)">Hide tool-only</button>
 				<span>${toolOnlyCount} tool-only message${toolOnlyCount !== 1 ? "s" : ""}</span>
 			</div>`
 					: ""
 			}
-			<div id="messages" style="display:flex;flex-direction:column;gap:0.6rem;">
+			<div id="claude-messages" style="display:flex;flex-direction:column;gap:0.5rem;">
 			${msgsHtml}
-			${truncated ? `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:1rem;font-style:italic;">Showing first 100 messages of ${messages.length}</div>` : ""}
 			</div>
 		</div>
 	</div>
@@ -444,23 +484,37 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 			</div>
 			<div style="font-size:0.75rem;">
 				<div style="color:var(--text-muted);font-size:0.68rem;margin-bottom:0.1rem;">Messages</div>
-				<div>${session.messageCount}</div>
+				<div>${messages.length}</div>
 			</div>
 			<div style="font-size:0.75rem;">
 				<div style="color:var(--text-muted);font-size:0.68rem;margin-bottom:0.1rem;">Tool Calls</div>
 				<div>${session.toolCallCount}</div>
 			</div>
+			${githubRepo ? `<div style="font-size:0.75rem;">
+				<div style="color:var(--text-muted);font-size:0.68rem;margin-bottom:0.1rem;">Repository</div>
+				<div><a href="https://github.com/${escHtml(githubRepo)}" target="_blank" rel="noopener" style="font-size:0.72rem;">${escHtml(githubRepo)}</a></div>
+			</div>` : ""}
 		</div>
 	</div>
 </div>
 
+${liveBar}
+
 <script>
+${CLAUDE_VIEWER_JS}
+
 function toggleToolOnly(btn) {
-	const msgs = document.getElementById('messages');
-	const isHiding = msgs.classList.toggle('hide-tool-only');
-	btn.classList.toggle('active', isHiding);
-	document.getElementById('filter-label').textContent = isHiding ? 'Show tool-only' : 'Hide tool-only';
+	var msgs = document.getElementById('claude-messages');
+	var hiding = msgs.classList.toggle('hide-tool-only');
+	btn.classList.toggle('active', hiding);
+	btn.textContent = hiding ? 'Show tool-only' : 'Hide tool-only';
 }
+
+// Hide tool-only messages when class is applied
+var style = document.createElement('style');
+style.textContent = '.hide-tool-only .claude-msg-tool-reply { display: none; }';
+document.head.appendChild(style);
 </script>
+${liveScript}
 `;
 }

@@ -164,8 +164,8 @@ describe("page rendering", () => {
 		expect(typeof html).toBe("string");
 	});
 
-	test("claude sessions page renders", () => {
-		const html = claudeSessionsPage(idx);
+	test("claude sessions page renders", async () => {
+		const html = await claudeSessionsPage(idx);
 		expect(typeof html).toBe("string");
 	});
 

@@ -14,6 +14,8 @@ import {
 	claudeSessionDetailPage,
 } from "./pages/agents.ts";
 import { timelinePage } from "./pages/timeline.ts";
+import { createLiveStream, isSessionActive } from "./pages/claude-live.ts";
+import { parseClaudeJsonl } from "./pages/claude-parse.ts";
 
 const PORT = 4321;
 
@@ -157,7 +159,17 @@ try {
 				}
 
 				if (path === "/agents/claude") {
-					return html(claudeSessionsPage(idx), "Claude Sessions", "/agents/claude");
+					const content = await claudeSessionsPage(idx);
+					return html(content, "Claude Sessions", "/agents/claude");
+				}
+
+				// SSE live stream for active sessions (must match before detail route)
+				if (path.match(/^\/agents\/claude\/[a-zA-Z0-9-]+\/live$/)) {
+					const sessionId = path.split("/")[3];
+					const session = idx.claudeSessions.find((s) => s.sessionId === sessionId);
+					if (!session) return notFound("Session not found");
+					const parsed = parseClaudeJsonl(session.filePath);
+					return createLiveStream(session.filePath, parsed.githubRepo);
 				}
 
 				if (path.startsWith("/agents/claude/")) {
@@ -166,7 +178,10 @@ try {
 						"",
 					);
 					if (!sessionId) return notFound("Invalid session ID.");
-					const content = claudeSessionDetailPage(idx, sessionId);
+					const active = await isSessionActive(
+						idx.claudeSessions.find((s) => s.sessionId === sessionId)?.filePath ?? "",
+					);
+					const content = claudeSessionDetailPage(idx, sessionId, active);
 					if (!content) return notFound(`Claude session not found: ${sessionId}`);
 					return html(content, `Session: ${sessionId.slice(0, 8)}…`, path);
 				}
