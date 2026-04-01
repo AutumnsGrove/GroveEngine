@@ -376,7 +376,9 @@ function renderToolResult(
 // ─── Image Block ─────────────────────────────────────────────────────────────
 
 function renderImageBlock(mediaType: string, data: string): string {
-	return `<div class="claude-image-block"><img src="data:${escapeHtml(mediaType)};base64,${data}" style="max-width:100%;border-radius:6px;" loading="lazy"></div>`;
+	// Validate base64 data contains only safe characters to prevent attribute injection
+	const safeData = data.replace(/[^A-Za-z0-9+/=\n\r]/g, "");
+	return `<div class="claude-image-block"><img src="data:${escapeHtml(mediaType)};base64,${safeData}" style="max-width:100%;border-radius:6px;" loading="lazy"></div>`;
 }
 
 // ─── Commit Card ─────────────────────────────────────────────────────────────
@@ -424,9 +426,12 @@ formatTimestamps();
 
 // ── JSON syntax coloring ──
 document.querySelectorAll('pre.claude-json').forEach(function(el) {
+	// Re-escape textContent before inserting as innerHTML to prevent XSS
+	// (textContent decodes entities, so raw <, >, & in values would be unescaped)
 	var text = el.textContent;
-	text = text.replace(/"([^"]+)":/g, '<span style="color:#ce93d8">"$1"</span>:');
-	text = text.replace(/: "([^"]*)"/g, ': <span style="color:#81d4fa">"$1"</span>');
+	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	text = text.replace(/&quot;([^&]*?)&quot;:/g, '<span style="color:#ce93d8">&quot;$1&quot;</span>:');
+	text = text.replace(/: &quot;([^&]*?)&quot;/g, ': <span style="color:#81d4fa">&quot;$1&quot;</span>');
 	text = text.replace(/: (\\d+)/g, ': <span style="color:#ffcc80">$1</span>');
 	text = text.replace(/: (true|false|null)/g, ': <span style="color:#f48fb1">$1</span>');
 	el.innerHTML = text;
