@@ -69,7 +69,7 @@ Questions? Just reply.
 | `{{next_payment_date}}` | Next billing date | `February 15, 2025` |
 | `{{invoice_id}}` | Stripe invoice ID | `in_1abc123...` |
 | `{{blog_url}}` | Their blog URL | `https://jordan.grove.place` |
-| `{{manage_subscription_url}}` | Billing management link | `https://plant.grove.place/billing` |
+| `{{manage_subscription_url}}` | Billing management link | `https://billing.grove.place/portal` |
 
 ## Design Notes
 

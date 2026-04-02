@@ -43,10 +43,7 @@ export type SubscriptionStatus = "active" | "past_due" | "paused" | "cancelled" 
 /** Paid tiers that require Stripe */
 export const PAID_TIERS: PlanTier[] = ["seedling", "sapling", "oak", "evergreen"];
 
-/**
- * Stripe Price IDs — hardcoded, not secrets.
- * Copied from apps/plant/src/lib/server/stripe.ts (single source of truth during migration).
- */
+/** Stripe Price IDs — hardcoded, not secrets. This is the single source of truth. */
 export const STRIPE_PRICES: Record<string, Record<BillingCycle, string>> = {
 	seedling: {
 		monthly: "price_1ShXzXRpJ6WVdxl3dwuzZX90",

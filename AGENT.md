@@ -78,7 +78,7 @@ bun x tsc --noEmit        # Type check
 
 ### Stripe Configuration
 
-Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in `apps/plant/src/lib/server/stripe.ts`. Set 2 secrets in Cloudflare: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Full instructions: `docs/setup/stripe-setup.md`
+Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in `services/billing-api/src/types.ts`. Billing flows through the BillingHub (`billing.grove.place`) — a two-worker hub pattern mirroring the login hub. Set secrets via `gw secret apply` on `grove-billing-api` and `grove-billing`. Full instructions: `docs/setup/stripe-setup.md`
 
 ### Production Deployment
 

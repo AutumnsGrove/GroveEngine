@@ -348,7 +348,7 @@ const body = new URLSearchParams({
 });
 ```
 
-**Price IDs:** Hardcoded in `apps/plant/src/lib/server/stripe.ts` (not secrets — visible in Stripe URLs). One ID per plan per billing cycle (8 total for 4 paid tiers × monthly/yearly).
+**Price IDs:** Hardcoded in `services/billing-api/src/types.ts` (not secrets — visible in Stripe URLs). One ID per plan per billing cycle (8 total for 4 paid tiers × monthly/yearly). All Stripe logic now lives in the BillingHub (`billing.grove.place`); Plant only redirects via `buildCheckoutUrl()`.
 
 ### Webhook Handler
 
@@ -736,8 +736,9 @@ apps/plant/
 
 **Core Implementation:**
 - `apps/plant/src/routes/auth/callback/+server.ts` — OAuth callback (407 lines)
-- `apps/plant/src/routes/api/webhooks/stripe/+server.ts` — Webhook handler (548 lines)
-- `apps/plant/src/lib/server/stripe.ts` — Stripe API client (497 lines)
+- `apps/plant/src/routes/checkout/+server.ts` — BillingHub redirect via `buildCheckoutUrl()`
+- ~~`apps/plant/src/lib/server/stripe.ts`~~ — Moved to `services/billing-api/src/stripe/client.ts`
+- ~~`apps/plant/src/routes/api/webhooks/stripe/`~~ — Moved to `apps/billing/src/routes/api/webhooks/stripe/`
 - `apps/plant/src/lib/server/tenant.ts` — Tenant provisioning (186 lines)
 - `apps/plant/src/lib/server/email-verification.ts` — Code verification (389 lines)
 - `apps/plant/src/lib/errors.ts` — Error catalog (295 lines)

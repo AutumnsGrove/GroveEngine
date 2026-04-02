@@ -63,9 +63,9 @@ No hard feelings. Your content is always exportable.
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `{{name}}` | User's display name | `Jordan` |
-| `{{update_payment_url}}` | Direct link to update card | `https://plant.grove.place/billing/update` |
+| `{{update_payment_url}}` | Direct link to update card | `https://billing.grove.place/portal` |
 | `{{grace_period_days}}` | Days before suspension | `7` |
-| `{{manage_subscription_url}}` | Billing management link | `https://plant.grove.place/billing` |
+| `{{manage_subscription_url}}` | Billing management link | `https://billing.grove.place/portal` |
 
 ## Design Notes
 

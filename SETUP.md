@@ -157,11 +157,13 @@ pnpm build
 
 ## Stripe
 
-Payments are processed through Stripe. Products and prices are managed in the Stripe Dashboard.
+Payments are processed through Stripe via the BillingHub (`billing.grove.place`) — a two-worker hub pattern mirroring the login hub.
 
 1. Products exist in the [Stripe Dashboard](https://dashboard.stripe.com/products)
-2. Price IDs are configured in `apps/plant/src/lib/server/stripe.ts`
-3. Required secrets (set in Cloudflare Dashboard): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+2. Price IDs are hardcoded in `services/billing-api/src/types.ts`
+3. Required secrets (applied via `gw secret apply`):
+   - `STRIPE_SECRET_KEY` → `grove-billing-api`
+   - `STRIPE_WEBHOOK_SECRET` → `grove-billing-api` and `grove-billing`
 
 Full setup instructions: [`docs/setup/stripe-setup.md`](docs/setup/stripe-setup.md)
 
