@@ -9,32 +9,31 @@
 	} from "@autumnsgrove/lattice/platform/config/billing";
 	import { page } from "$app/stores";
 
-	// Import extracted components
-	import SubscriptionCard from "./SubscriptionCard.svelte";
-	import UsageStatsCard from "./UsageStatsCard.svelte";
-	import PaymentMethodCard from "./PaymentMethodCard.svelte";
-	import ChangePlanCard from "./ChangePlanCard.svelte";
-	import DataExportCard from "./DataExportCard.svelte";
-	import FeaturesCard from "./FeaturesCard.svelte";
-
-	// Import UpgradesGraft components for garden status
+	// Garden status hero
 	import { GardenStatus } from "@autumnsgrove/lattice/platform/upgrades";
 	import type { FlourishState } from "@autumnsgrove/lattice/platform/upgrades";
 
-	// Import types and utils
-	import { authIcons } from "@autumnsgrove/prism/icons";
+	// Tier utilities
 	import type { TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
+	import {
+		getTier,
+		getNextTier,
+		formatStorage,
+		formatLimit,
+	} from "@autumnsgrove/lattice/platform/config/tiers";
+
+	// Icons (direct imports — no barrels)
+	import { metricIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
-
-	// Action states (retained for spinner UX during redirect)
-	let changingPlan = $state(false);
-	let selectedPlan = $state("");
 
 	// Current page URL for redirect-back after billing hub actions
 	const currentUrl = $derived($page.url.href);
 
-	// Derive flourish state from billing status
+	// Tier pricing lookup
+	const tierPricing = $derived(getTier(data.currentPlan as TierKey).pricing);
+
+	// ── Flourish state derivation ───────────────────────────────────────────
 	function getFlourishState(): FlourishState {
 		if (!data.billing) return "active";
 		const status = data.billing.status;
@@ -47,7 +46,7 @@
 
 	let flourishState = $derived<FlourishState>(getFlourishState());
 
-	// Get current period end as timestamp for GardenStatus
+	// Get current period end as unix timestamp for GardenStatus
 	function getPeriodEnd(): number | null {
 		if (!data.billing?.currentPeriodEnd) return null;
 		return new Date(data.billing.currentPeriodEnd).getTime() / 1000;
@@ -55,51 +54,44 @@
 
 	let currentPeriodEnd = $derived(getPeriodEnd());
 
-	// Handle nurture - open plan selection for upgrades
-	function handleNurture(): void {
-		// Scroll to change plan section
-		const changePlanSection = document.getElementById("change-plan-section");
-		changePlanSection?.scrollIntoView({ behavior: "smooth" });
-	}
+	// ── Action handlers ─────────────────────────────────────────────────────
 
-	// Handle tend - redirect to BillingHub portal
+	/** Redirect to BillingHub portal (manage payment, invoices) */
 	function handleTend(): void {
 		window.location.href = buildPortalUrl(currentUrl);
 	}
 
-	// Cancel subscription - redirect to BillingHub cancel page (has its own confirmation)
+	/** Redirect to BillingHub checkout for the next tier up */
+	function handleNurture(): void {
+		const next = getNextTier(data.currentPlan as TierKey);
+		if (!next) return;
+
+		window.location.href = buildCheckoutUrl({
+			tenantId: data.tenantId,
+			tier: next,
+			billingCycle: "monthly",
+			redirect: currentUrl,
+		});
+	}
+
+	/** Redirect to BillingHub cancel flow */
 	function handleCancelClick(): void {
 		window.location.href = buildCancelUrl(currentUrl);
 	}
 
-	// Resume cancelled subscription - redirect to BillingHub resume page (has its own confirmation)
+	/** Redirect to BillingHub resume flow */
 	function handleResume(): void {
 		window.location.href = buildResumeUrl(currentUrl);
-	}
-
-	// Change plan - redirect to BillingHub checkout for the new tier
-	function handleChangePlan(newPlan: string): void {
-		if (newPlan === data.currentPlan) return;
-
-		changingPlan = true;
-		selectedPlan = newPlan;
-
-		window.location.href = buildCheckoutUrl({
-			tenantId: data.tenantId,
-			tier: newPlan,
-			billingCycle: "monthly",
-			redirect: currentUrl,
-		});
 	}
 </script>
 
 <div class="account-page">
 	<header class="page-header">
-		<h1>Account & Subscription</h1>
-		<p class="subtitle">Manage your subscription, billing, and data</p>
+		<h1>Account</h1>
+		<p class="subtitle">Your membership, at a glance.</p>
 	</header>
 
-	<!-- Garden Status Overview -->
+	<!-- Garden Status Hero — full width -->
 	<GardenStatus
 		currentStage={data.currentPlan as TierKey}
 		{flourishState}
@@ -110,75 +102,140 @@
 		showDetails={true}
 		onTend={handleTend}
 		onNurture={handleNurture}
+		onCancel={handleCancelClick}
+		onResume={handleResume}
 		class="mb-6"
 	/>
 
-	<!-- Current Plan Overview -->
-	<SubscriptionCard
-		billing={data.billing}
-		billingError={data.billingError}
-		tierConfig={data.tierConfig}
-		onCancel={handleCancelClick}
-		onResume={handleResume}
-	/>
+	<!-- Summary cards grid -->
+	<div class="account-grid">
+		<!-- ── Payment ────────────────────────────────────────────────────── -->
+		<GlassCard variant="frosted" hoverable flush>
+			<div class="card-body">
+				<div class="card-header">
+					<metricIcons.creditCard class="card-icon" />
+					<h2 class="card-title">Payment</h2>
+				</div>
+				<div class="card-content">
+					{#if data.isComped}
+						<p class="card-line">Complimentary account</p>
+					{:else if data.billing?.paymentMethod}
+						<p class="card-line">
+							<span class="card-value">
+								{data.billing.paymentMethod.brand ?? "Card"}
+							</span>
+							&ensp;&bull;&bull;&bull;&bull; {data.billing.paymentMethod.last4}
+						</p>
+					{:else}
+						<p class="card-line muted">Payment on file with Stripe</p>
+					{/if}
+				</div>
+				{#if !data.isComped}
+					<button class="card-action" onclick={handleTend}>
+						Manage &rarr;
+					</button>
+				{/if}
+			</div>
+		</GlassCard>
 
-	<!-- Usage Stats -->
-	<UsageStatsCard usage={data.usage} usageError={data.usageError} />
+		<!-- ── Your Plan ──────────────────────────────────────────────────── -->
+		<GlassCard variant="frosted" hoverable flush>
+			<div class="card-body">
+				<div class="card-header">
+					<featureIcons.package class="card-icon" />
+					<h2 class="card-title">Your Plan</h2>
+				</div>
+				<div class="card-content">
+					<p class="card-line">
+						<span class="card-value">{data.tierConfig?.name ?? "Unknown"}</span>
+					</p>
+					<p class="card-line muted">
+						{#if data.isComped}
+							complimentary
+						{:else if tierPricing.monthlyPrice === 0}
+							free
+						{:else}
+							${tierPricing.monthlyPrice} /month
+						{/if}
+					</p>
+				</div>
+				{#if !data.isComped && data.billing?.hasSubscription}
+					<button class="card-action" onclick={handleNurture}>
+						Change plan &rarr;
+					</button>
+				{/if}
+			</div>
+		</GlassCard>
 
-	<!-- Features Overview -->
-	<FeaturesCard curiosCount={data.curiosCount} />
+		<!-- ── Usage ──────────────────────────────────────────────────────── -->
+		<GlassCard variant="frosted" hoverable flush>
+			<div class="card-body">
+				<div class="card-header">
+					<featureIcons.hardDrive class="card-icon" />
+					<h2 class="card-title">Usage</h2>
+				</div>
+				<div class="card-content">
+					{#if data.usageError}
+						<p class="card-line muted">Unable to load usage data</p>
+					{:else if data.usage}
+						<p class="card-line">
+							{formatStorage(data.usage.storageUsed)} / {formatStorage(data.usage.storageLimit)}
+						</p>
+						<p class="card-line muted">
+							{data.usage.postCount} / {data.usage.postLimit ? formatLimit(data.usage.postLimit) : "Unlimited"} blooms
+						</p>
+					{:else}
+						<p class="card-line muted">No usage data available</p>
+					{/if}
+				</div>
+			</div>
+		</GlassCard>
 
-	<!-- Payment Method -->
-	<PaymentMethodCard billing={data.billing} isComped={data.isComped} />
+		<!-- ── Your Data ──────────────────────────────────────────────────── -->
+		<GlassCard variant="frosted" hoverable flush>
+			<div class="card-body">
+				<div class="card-header">
+					<featureIcons.archive class="card-icon" />
+					<h2 class="card-title">Your Data</h2>
+				</div>
+				<div class="card-content">
+					<p class="card-line">You own everything you create.</p>
+					<p class="card-line muted">
+						{data.exportCounts.posts} posts, {data.exportCounts.pages} pages, {data.exportCounts.media} media files
+					</p>
+				</div>
+				<a href="/arbor/export" class="card-action">
+					Go to Full Export &rarr;
+				</a>
+			</div>
+		</GlassCard>
 
-	<!-- Passkeys — moved to Security settings -->
-	<GlassCard variant="default" class="mb-6">
-		<h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem 0;">
-			<authIcons.key
-				style="width: 1.25rem; height: 1.25rem; color: var(--color-primary);"
-				aria-hidden="true"
-			/>
-			Passkeys
-		</h2>
-		<p style="margin: 0 0 1rem 0; color: var(--color-text-muted); font-size: 0.9rem;">
-			Passkeys have moved to your security settings.
-		</p>
-		<a href="/arbor/settings/security" class="passkey-manage-link"> Security Settings &rarr; </a>
-	</GlassCard>
-
-	<!-- Change Plan -->
-	<div id="change-plan-section">
-		<ChangePlanCard
-			availableTiers={data.availableTiers}
-			{changingPlan}
-			{selectedPlan}
-			hasSubscription={data.billing?.hasSubscription ?? false}
-			onChangePlan={handleChangePlan}
-		/>
+		<!-- ── Closing Your Grove ─────────────────────────────────────────── -->
+		<div class="closing-wrapper">
+			<GlassCard variant="default" flush>
+				<div class="card-body closing-card">
+					<h2 class="card-title">Closing Your Grove</h2>
+					<p class="card-line">
+						If you'd like to move on, we'll help you export your data first.
+						Contact us at
+						<a href="mailto:{CONTACT.supportEmail}" class="contact-link">
+							{CONTACT.supportEmailDisplay}
+						</a>
+					</p>
+					<p class="card-line refund-note">
+						Full refund within 14 days of signup. After that, pro-rated for
+						unused time in your current billing period.
+					</p>
+				</div>
+			</GlassCard>
+		</div>
 	</div>
-
-	<!-- Data Export -->
-	<DataExportCard exportCounts={data.exportCounts} />
-
-	<!-- Danger Zone -->
-	<GlassCard variant="accent" class="danger-zone">
-		<h2>Danger Zone</h2>
-		<p class="section-description">
-			Need to delete your account? Contact us at
-			<a href="mailto:{CONTACT.supportEmail}">{CONTACT.supportEmailDisplay}</a>. We'll help you
-			export your data first and process the deletion within 30 days.
-		</p>
-
-		<p class="refund-info">
-			<strong>Refund Policy:</strong> Full refund within 14 days of signup. After 14 days, pro-rated refund
-			for unused time in your current billing period.
-		</p>
-	</GlassCard>
 </div>
 
 <style>
+	/* ── Page layout ──────────────────────────────────────────────────────── */
 	.account-page {
-		max-width: 800px;
+		max-width: 900px;
 	}
 
 	.page-header {
@@ -196,65 +253,130 @@
 		color: var(--color-text-muted);
 	}
 
-	:global(.account-page .glass-card) {
-		padding: 1.5rem;
+	/* ── Grid ─────────────────────────────────────────────────────────────── */
+	.account-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 1.5rem;
+		margin-top: 1.5rem;
 	}
 
-	:global(.account-page h2) {
-		margin: 0 0 1rem 0;
-		font-size: 1.25rem;
+	/* ── Card internals ───────────────────────────────────────────────────── */
+	.card-body {
+		display: flex;
+		flex-direction: column;
+		padding: 1rem 1.5rem;
+		height: 100%;
+	}
+
+	.card-header {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin-bottom: 1rem;
+	}
+
+	:global(.card-icon) {
+		width: 1.25rem;
+		height: 1.25rem;
+		color: var(--user-accent, var(--color-primary));
+		flex-shrink: 0;
+	}
+
+	.card-title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 600;
 		color: var(--color-text);
 	}
 
-	.section-description {
-		margin: 0 0 1rem 0;
-		color: var(--color-text-muted);
+	.card-content {
+		flex: 1;
+	}
+
+	.card-line {
+		margin: 0 0 0.25rem 0;
 		font-size: 0.9rem;
+		color: var(--color-text);
 		line-height: 1.5;
 	}
 
-	/* Danger Zone - uses :global() because class is passed to child component */
-	:global(.danger-zone) {
-		border-color: rgba(239, 68, 68, 0.3) !important;
-		background: rgba(239, 68, 68, 0.05) !important;
+	.card-line.muted {
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
 	}
 
-	:global(.dark .danger-zone) {
-		background: rgba(239, 68, 68, 0.1) !important;
+	.card-value {
+		font-weight: 600;
 	}
 
-	:global(.danger-zone h2) {
-		color: #dc2626;
-	}
-
-	:global(.danger-zone a) {
-		color: var(--color-primary);
-	}
-
-	.refund-info {
-		margin: 1rem 0 0 0;
-		padding: 0.75rem 1rem;
-		background: rgba(239, 68, 68, 0.1);
-		border-radius: var(--border-radius-small);
-		font-size: 0.9rem;
-	}
-
-	:global(.passkey-manage-link) {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.625rem 1.25rem;
-		background: var(--color-primary);
-		color: var(--color-primary-foreground);
-		border-radius: var(--border-radius-small);
-		font-size: 0.9rem;
+	/* ── Card action (button or link) ─────────────────────────────────────── */
+	.card-action {
+		display: inline-block;
+		margin-top: auto;
+		padding-top: 1rem;
+		font-size: 0.85rem;
 		font-weight: 500;
+		color: var(--user-accent, var(--color-primary));
+		background: none;
+		border: none;
+		cursor: pointer;
+		text-align: left;
 		text-decoration: none;
-		transition: background 0.15s ease;
+		padding-left: 0;
+		padding-right: 0;
+		padding-bottom: 0;
 	}
 
-	:global(.passkey-manage-link:hover) {
-		background: var(--color-primary-hover, var(--color-primary));
-		opacity: 0.9;
+	.card-action:hover {
+		opacity: 0.8;
+	}
+
+	a.card-action {
+		display: inline-block;
+	}
+
+	/* ── Closing Your Grove ───────────────────────────────────────────────── */
+	.closing-wrapper {
+		grid-column: 1 / -1;
+	}
+
+	.closing-wrapper :global(.glass-card) {
+		border-style: dashed;
+		border-color: color-mix(in srgb, var(--color-text-muted) 20%, transparent);
+	}
+
+	.closing-card {
+		max-width: 560px;
+	}
+
+	.closing-card .card-title {
+		font-size: 1rem;
+		color: var(--color-text-muted);
+		margin-bottom: 0.75rem;
+	}
+
+	.contact-link {
+		color: var(--user-accent, var(--color-primary));
+		text-decoration: none;
+	}
+
+	.contact-link:hover {
+		text-decoration: underline;
+	}
+
+	.refund-note {
+		margin-top: 0.75rem;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		opacity: 0.7;
+		line-height: 1.5;
+	}
+
+	/* ── Responsive ───────────────────────────────────────────────────────── */
+	@media (max-width: 700px) {
+		.account-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

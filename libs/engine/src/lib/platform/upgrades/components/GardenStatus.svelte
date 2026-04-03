@@ -29,6 +29,8 @@
 		showDetails = true,
 		onTend,
 		onNurture,
+		onCancel,
+		onResume,
 		class: className = "",
 	}: GardenStatusProps = $props();
 
@@ -184,6 +186,34 @@
 							to unlock more features.
 						{/if}
 					</p>
+				</div>
+			{/if}
+
+			<!-- Membership actions (cancel/resume) -->
+			{#if onCancel && flourishState === "active"}
+				<div class="mt-3 flex items-center gap-3">
+					<button
+						type="button"
+						class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-error transition-colors"
+						onclick={() => onCancel?.()}
+						aria-label="Cancel membership"
+					>
+						<stateIcons.x class="w-3.5 h-3.5" />
+						Cancel Membership
+					</button>
+				</div>
+			{/if}
+			{#if onResume && flourishState === "resting"}
+				<div class="mt-3 flex items-center gap-3">
+					<button
+						type="button"
+						class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-grove-100 dark:bg-grove-800 text-accent hover:bg-grove-200 dark:hover:bg-grove-700 transition-colors"
+						onclick={() => onResume?.()}
+						aria-label="Resume membership"
+					>
+						<actionIcons.refresh class="w-3.5 h-3.5" />
+						Resume Membership
+					</button>
 				</div>
 			{/if}
 		</div>

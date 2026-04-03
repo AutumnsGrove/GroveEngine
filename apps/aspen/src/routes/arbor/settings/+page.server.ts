@@ -12,34 +12,59 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 	let meadowOptIn = false;
 	let customBlazeCount = 0;
+	let curiosCount = 0;
 
 	if (env?.DB && locals.tenantId) {
 		// Per-query error handling — one failing doesn't break the other
-		const [meadowResult, blazeResult] = await Promise.all([
-			env.DB.prepare("SELECT meadow_opt_in FROM tenants WHERE id = ?")
-				.bind(locals.tenantId)
-				.first<{ meadow_opt_in: number | null }>()
-				.catch((err) => {
-					console.warn("[Settings Hub] meadow query failed:", err);
-					return null;
-				}),
-			env.DB.prepare(
-				"SELECT COUNT(*) as count FROM blazes WHERE tenant_id = ? AND scope = 'tenant'",
-			)
-				.bind(locals.tenantId)
-				.first<{ count: number }>()
-				.catch((err) => {
-					console.warn("[Settings Hub] blaze count query failed:", err);
-					return null;
-				}),
-		]);
+		const [meadowResult, blazeResult, timelineCurio, galleryCurio, journeyCurio, pulseCurio] =
+			await Promise.all([
+				env.DB.prepare("SELECT meadow_opt_in FROM tenants WHERE id = ?")
+					.bind(locals.tenantId)
+					.first<{ meadow_opt_in: number | null }>()
+					.catch((err) => {
+						console.warn("[Settings Hub] meadow query failed:", err);
+						return null;
+					}),
+				env.DB.prepare(
+					"SELECT COUNT(*) as count FROM blazes WHERE tenant_id = ? AND scope = 'tenant'",
+				)
+					.bind(locals.tenantId)
+					.first<{ count: number }>()
+					.catch((err) => {
+						console.warn("[Settings Hub] blaze count query failed:", err);
+						return null;
+					}),
+				// Curio config queries for Features card
+				env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
+					.bind(locals.tenantId)
+					.first<{ enabled: number }>()
+					.catch(() => null),
+				env.DB.prepare("SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?")
+					.bind(locals.tenantId)
+					.first<{ enabled: number }>()
+					.catch(() => null),
+				env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
+					.bind(locals.tenantId)
+					.first<{ enabled: number }>()
+					.catch(() => null),
+				env.DB.prepare("SELECT enabled FROM pulse_curio_config WHERE tenant_id = ?")
+					.bind(locals.tenantId)
+					.first<{ enabled: number }>()
+					.catch(() => null),
+			]);
 
 		meadowOptIn = meadowResult?.meadow_opt_in === 1;
 		customBlazeCount = blazeResult?.count ?? 0;
+		curiosCount =
+			(timelineCurio?.enabled === 1 ? 1 : 0) +
+			(galleryCurio?.enabled === 1 ? 1 : 0) +
+			(journeyCurio?.enabled === 1 ? 1 : 0) +
+			(pulseCurio?.enabled === 1 ? 1 : 0);
 	}
 
 	return {
 		meadowOptIn,
 		customBlazeCount,
+		curiosCount,
 	};
 };

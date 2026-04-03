@@ -3,7 +3,13 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
 	import GroveIcon from "@autumnsgrove/lattice/ui/components/ui/groveicon/GroveIcon.svelte";
-	import { authIcons, chromeIcons, featureIcons, natureIcons } from "@autumnsgrove/prism/icons";
+	import {
+		authIcons,
+		chromeIcons,
+		featureIcons,
+		natureIcons,
+		phaseIcons,
+	} from "@autumnsgrove/prism/icons";
 	import { FONT_PRESETS } from "@autumnsgrove/lattice/platform/config/presets";
 	import { SEASON_LABELS, type Season } from "@autumnsgrove/lattice/ui/types/season";
 	import { getSeasonFavicons, SEASON_THEME_COLORS } from "@autumnsgrove/lattice/ui/season-meta";
@@ -24,6 +30,7 @@
 	const preferredSeason = $derived(settings.preferred_season || "");
 	const canopyVisible = $derived(settings.canopy_visible === "true");
 	const humanJsonEnabled = $derived(settings.human_json_enabled === "true");
+	const curiosCount = $derived(data.curiosCount ?? 0);
 
 	// Session count loaded client-side (real-time from SessionDO)
 	let sessionCount = $state<number | null>(null);
@@ -232,6 +239,43 @@
 						<span class="status-line subtle">Passkeys managed on login hub</span>
 					</div>
 					<span class="card-action">Review &rarr;</span>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Features Card -->
+		<a href="/arbor/settings/features" class="card-link">
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<phaseIcons.sparkles class="card-icon" />
+						<h2 class="card-title">Features</h2>
+					</div>
+					<div class="card-status">
+						<span class="status-line">Rings &middot; Trail &middot; Reeds</span>
+						<span class="status-line">Curios &middot; Reverie</span>
+						{#if curiosCount > 0}
+							<span class="status-line subtle">{curiosCount} curio{curiosCount === 1 ? "" : "s"} active</span>
+						{/if}
+					</div>
+					<span class="card-action">Explore &rarr;</span>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Your Data Card -->
+		<a href="/arbor/export" class="card-link">
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<featureIcons.archive class="card-icon" />
+						<h2 class="card-title">Your Data</h2>
+					</div>
+					<div class="card-status">
+						<span class="status-line">You own everything you create</span>
+						<span class="status-line subtle">Export anytime &mdash; no lock-in</span>
+					</div>
+					<span class="card-action">Export &rarr;</span>
 				</div>
 			</GlassCard>
 		</a>

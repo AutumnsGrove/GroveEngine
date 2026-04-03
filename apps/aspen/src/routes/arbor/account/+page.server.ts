@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad, Actions } from "./$types";
-import { TIERS, type TierKey, getTier } from "@autumnsgrove/lattice/platform/config/tiers";
+import { type TierKey, getTier } from "@autumnsgrove/lattice/platform/config/tiers";
 
 /**
  * Account & Subscription Management Page
@@ -101,19 +101,9 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 	const MAX_EXPORT_ITEMS = 5000;
 	let exportCounts = { posts: 0, pages: 0, media: 0 };
 	let exportTooLarge = false;
-	let curiosCount = 0;
 	let storageUsedBytes = 0;
 	try {
-		const [
-			postResult,
-			pageResult,
-			mediaResult,
-			storageResult,
-			timelineCurio,
-			galleryCurio,
-			journeyCurio,
-			pulseCurio,
-		] = await Promise.all([
+		const [postResult, pageResult, mediaResult, storageResult] = await Promise.all([
 			platform.env.DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
 				.bind(locals.tenantId)
 				.first<{ count: number }>()
@@ -146,23 +136,6 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 					console.error("[Account] Failed to load storage size:", e);
 					return null;
 				}),
-			// Curio config queries
-			platform.env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
-			platform.env.DB.prepare("SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
-			platform.env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
-			platform.env.DB.prepare("SELECT enabled FROM pulse_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
 		]);
 		storageUsedBytes = storageResult?.total_bytes ?? 0;
 		exportCounts = {
@@ -171,12 +144,6 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 			media: mediaResult?.count ?? 0,
 		};
 		exportTooLarge = Object.values(exportCounts).some((count) => count > MAX_EXPORT_ITEMS);
-		// Count enabled curios
-		curiosCount =
-			(timelineCurio?.enabled === 1 ? 1 : 0) +
-			(galleryCurio?.enabled === 1 ? 1 : 0) +
-			(journeyCurio?.enabled === 1 ? 1 : 0) +
-			(pulseCurio?.enabled === 1 ? 1 : 0);
 	} catch (e) {
 		console.error("[Account] Failed to load export counts:", e);
 		// Non-critical - continue without counts
@@ -186,21 +153,6 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 	// Prioritize billing.plan (source of truth from Stripe) using nullish coalescing
 	const currentPlan = (billing?.plan ?? tenant?.plan ?? "seedling") as TierKey;
 	const tierConfig = getTier(currentPlan);
-
-	// Get available tiers for plan changes
-	const availableTiers = Object.entries(TIERS)
-		.filter(([key, config]) => config.status === "available" || config.status === "coming_soon")
-		.map(([key, config]) => ({
-			id: key,
-			name: config.display.name,
-			tagline: config.display.tagline,
-			monthlyPrice: config.pricing.monthlyPrice,
-			yearlyPrice: config.pricing.yearlyPrice,
-			features: config.display.featureStrings,
-			status: config.status,
-			isCurrent: key === currentPlan,
-			isUpgrade: config.order > (TIERS[currentPlan]?.order ?? 0),
-		}));
 
 	// Build billing data - handle comped accounts (oak/evergreen without billing record)
 	const isCompedPremium = !billing && ["oak", "evergreen"].includes(currentPlan);
@@ -270,7 +222,5 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 			features: tierConfig.display.featureStrings,
 			support: tierConfig.support.displayString,
 		},
-		availableTiers,
-		curiosCount,
 	};
 };

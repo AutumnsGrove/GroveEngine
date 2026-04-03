@@ -165,4 +165,10 @@ export interface GardenStatusProps extends BaseGraftProps {
 
 	/** Called when nurture (upgrade) is requested */
 	onNurture?: () => void;
+
+	/** Called when cancel membership is requested (shown when active) */
+	onCancel?: () => void;
+
+	/** Called when resume membership is requested (shown when resting/scheduled end) */
+	onResume?: () => void;
 }

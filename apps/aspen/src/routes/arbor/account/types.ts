@@ -2,8 +2,6 @@
  * Type definitions for Account page components.
  */
 
-import type { TierStatus } from "@autumnsgrove/lattice/platform/config/tiers";
-
 export interface BillingData {
 	plan: string;
 	status: string;
@@ -34,18 +32,6 @@ export interface TierConfig {
 	support: string;
 }
 
-export interface AvailableTier {
-	id: string;
-	name: string;
-	tagline: string;
-	monthlyPrice: number;
-	yearlyPrice: number;
-	features: string[];
-	status: TierStatus;
-	isCurrent: boolean;
-	isUpgrade: boolean;
-}
-
 export interface AccountPageData {
 	billing: BillingData | null;
 	billingError: boolean;
@@ -53,8 +39,4 @@ export interface AccountPageData {
 	usageError: boolean;
 	currentPlan: string;
 	tierConfig: TierConfig | null;
-	availableTiers: AvailableTier[];
 }
-
-// Re-export Passkey type for use in Account page components
-export type { Passkey } from "@autumnsgrove/lattice/auth";
