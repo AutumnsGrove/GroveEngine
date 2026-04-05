@@ -12,6 +12,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
 	}
 
 	// Fetch past exports, content counts, and storage size in parallel
+	// Each query has its own error handler — one failing doesn't crash the page
 	const [exportsResult, postCount, pageCount, mediaCount, storageResult] = await Promise.all([
 		platform.env.DB.prepare(
 			`SELECT id, status, progress, include_images, delivery_method, file_size_bytes, item_counts, error_message, created_at, completed_at, expires_at
@@ -31,16 +32,32 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
 				created_at: number;
 				completed_at: number | null;
 				expires_at: number | null;
-			}>(),
+			}>()
+			.catch((e) => {
+				console.error("[Export] Failed to load past exports:", e);
+				return { results: [] as never[] };
+			}),
 		platform.env.DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
 			.bind(locals.tenantId)
-			.first<{ count: number }>(),
+			.first<{ count: number }>()
+			.catch((e) => {
+				console.error("[Export] Failed to load post count:", e);
+				return null;
+			}),
 		platform.env.DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
 			.bind(locals.tenantId)
-			.first<{ count: number }>(),
+			.first<{ count: number }>()
+			.catch((e) => {
+				console.error("[Export] Failed to load page count:", e);
+				return null;
+			}),
 		platform.env.DB.prepare("SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?")
 			.bind(locals.tenantId)
-			.first<{ count: number }>(),
+			.first<{ count: number }>()
+			.catch((e) => {
+				console.error("[Export] Failed to load media count:", e);
+				return null;
+			}),
 		platform.env.DB.prepare(
 			"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as total_bytes FROM gallery_images WHERE tenant_id = ?",
 		)
