@@ -100,8 +100,8 @@
 		paymentBrand={data.billing?.paymentMethod?.brand ?? ""}
 		paymentLast4={data.billing?.paymentMethod?.last4 ?? ""}
 		showDetails={true}
-		onTend={data.isComped ? undefined : handleTend}
-		onNurture={data.isComped ? undefined : handleNurture}
+		onTend={handleTend}
+		onNurture={handleNurture}
 		onCancel={data.isComped ? undefined : handleCancelClick}
 		onResume={data.isComped ? undefined : handleResume}
 		class="mb-6"
