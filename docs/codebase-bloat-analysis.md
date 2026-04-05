@@ -4,6 +4,9 @@
 > engine behind D1) ships at ~120k lines. This codebase is 528k lines across 39
 > deployment targets. This document maps where the code lives, identifies bloat,
 > and proposes a phased simplification plan.
+>
+> **Status**: Phase 1 audit complete. All findings below are backed by automated
+> import tracing, file-level analysis, and manual review across 6 parallel audits.
 
 ---
 
@@ -40,14 +43,14 @@
 | Subsystem | Lines | Notes |
 |-----------|------:|-------|
 | ui/components | 40,699 | Largest single chunk. "nature" (8.9k), "ui" (11.5k), "chrome" (3.3k) |
-| curios | 28,007 | 22 widget types. Really an Aspen concern, not shared. |
+| curios | 28,007 | 22 widget types. Only consumed by Aspen. |
 | server/services | 28,688 | Database, storage, billing, petal, rate-limits |
 | platform | 21,686 | Feature flags (7.3k!), config, greenhouse, pricing, threshold |
-| ai/lumen | 15,041 | AI gateway — shared by design |
-| monitoring | 11,622 | Sentinel + observability |
-| utils | 10,953 | General utilities |
-| content | 8,384 | Markdown editor, GutterManager |
-| auth | 8,286 | Auth client/helpers |
+| ai/lumen | 15,041 | AI gateway — shared by 5 consumers |
+| monitoring | 11,622 | Sentinel + observability — 3 consumers |
+| utils | 10,953 | General utilities — 15 consumers (ubiquitous) |
+| content | 8,384 | Markdown editor, GutterManager — Aspen only |
+| auth | 8,286 | Auth client/helpers — 6 consumers |
 | media | 8,022 | Upload validation, amber client |
 | everything else | ~41,000 | Firefly, loom, thorn, errors, email, git, etc. |
 
@@ -63,58 +66,209 @@
 
 ---
 
-## 2. Where the Fat Is
+## 2. Audit Findings
 
-### Problem 1: Engine is a monolith (222k lines, 42% of codebase)
+### Audit A: Engine Consumer Map
 
-The engine contains code that is shared across apps AND code that only one app
-uses. The "engine-first" philosophy is sound — single source of truth, avoid
-drift — but the boundary has drifted. Code goes into engine by default rather
-than by need.
+Every engine subsystem was traced to identify which apps, services, and workers
+actually import from it. Key finding: **7 subsystems are single-consumer, 5 are
+completely unused.**
 
-**Specific violations of "shared only":**
-- **Curios (28k)**: Only consumed by Aspen. No other app uses shrines, guestbooks, or mood rings.
-- **Monitoring/Sentinel (11.6k)**: Likely only consumed by 1-2 apps.
-- **Firefly (2.8k)**: Internal journaling SDK — may only be used by personal tools.
+#### Single-Consumer Subsystems (move out of engine)
 
-### Problem 2: Tests are large but low-signal (145k lines)
+| Subsystem | Lines | Only Consumer | Action |
+|-----------|------:|---------------|--------|
+| **curios** | 28,007 | Aspen | Move to `libs/curios` or into Aspen |
+| **content** | 8,384 | Aspen | Move to Aspen |
+| **components** | 8,278 | Aspen | Move to Aspen |
+| **durable-objects** | 999 | Aspen | Move to Aspen |
+| **git** | 903 | Aspen | Move to Aspen |
+| **actions** | 27 | Aspen | Move to Aspen |
+| **firefly** | 2,760 | Loft (personal) | Move with Loft or delete |
+| **Total** | **49,358** | | |
 
-- 8,000+ tests, 145k lines
-- Heavy Cloudflare mocking infrastructure that "always passes because the mocks were made in the same pass"
-- Tests rarely catch real bugs — mostly confirm implementation details
-- Test infrastructure itself adds significant code volume
+#### Unused Subsystems (delete)
 
-### Problem 3: Too many deployment targets (39 wrangler configs)
+| Subsystem | Notes |
+|-----------|-------|
+| **data** | Zero imports found anywhere |
+| **db** | Zero imports found anywhere |
+| **scribe** | Zero imports found anywhere |
+| **styles** | Zero imports found anywhere |
+| **types** | Zero imports found anywhere |
 
-While each worker/service has a purpose, the cognitive overhead of 39 deployable
-units is severe. When one change breaks CI across multiple targets, it's nearly
-impossible to triage quickly.
+#### Truly Shared Subsystems (keep in engine)
 
-- 11 apps
-- 10 services
-- 13 workers
-- + libs with wrangler configs
+| Subsystem | Consumers | Status |
+|-----------|----------:|--------|
+| ui | 10 apps | Core — stays |
+| errors | 17 consumers | Ubiquitous — stays |
+| utils | 15 consumers | Ubiquitous — stays |
+| platform | 8 consumers | Shared config — stays |
+| auth | 6 consumers | Shared auth — stays |
+| ai/lumen | 5 consumers | Shared AI gateway — stays |
+| zephyr | 5 consumers | Shared email — stays |
+| loom | 4 consumers | Shared — stays |
+| monitoring | 3 consumers | Shared observability — stays |
+| media | 2 consumers | Shared — stays |
+| thorn | 2 consumers | Shared — stays |
+| email | 2 consumers | Shared — stays |
+| social | 2 consumers | Shared — stays |
+| server | 3 consumers | Shared — stays |
 
-### Problem 4: Personal code mixed with product code
+---
 
-Workers like `loft` and tools like `cairn` are personal projects built on
-internal SDKs (e.g., Firefly). They add to line counts, CI surface, and
-cognitive load. Their tight coupling to internal libs makes extraction non-trivial.
+### Audit B: Test Quality
 
-### Problem 5: Large Svelte components
+433 test files analyzed. 145k lines across 8,000+ test cases.
 
-Several components exceed 1,000 lines — effectively "god components":
-- `GutterManager.svelte` — 1,644 lines
-- `vineyard/+page.svelte` — 1,353 lines (landing) / 1,299 lines (aspen)
-- `garden/edit/[slug]/+page.svelte` — 1,346 lines
-- `ImageUploadForm.svelte` — 1,245 lines
-- `MarkdownEditor.svelte` — 1,153 lines
-- `curios/timeline/+page.svelte` — 1,161 lines
+#### Key Findings
 
-### Problem 6: Feature flags system is 7,280 lines
+1. **Duplicated Cloudflare mock infrastructure**: 1,829 lines across 5+ locations.
+   D1, KV, R2, and Durable Object mocking reimplemented independently in:
+   - `services/durable-objects/src/test-helpers.ts` (411 lines)
+   - `libs/engine/tests/utils/setup.ts` (518 lines)
+   - `services/heartwood/src/test-helpers.ts` (242 lines)
+   - `workers/warden/src/test-helpers.ts` (210 lines)
+   - `libs/infra/src/testing/mock-*.ts` (426 lines combined)
+   - `apps/domains/src/lib/server/test-helpers.ts` (116 lines)
+   - `apps/meadow/src/lib/server/test-helpers.ts` (118 lines)
 
-That's a substantial subsystem for feature management. Worth reviewing whether
-this complexity is proportional to the number of flags actually in use.
+2. **Duplicate test file**: `upload-validation.test.ts` exists identically in two
+   locations (1,321 lines each):
+   - `libs/engine/src/lib/media/upload-validation.test.ts`
+   - `libs/engine/src/lib/media/validation/upload-validation.test.ts`
+
+3. **Worst mock-heavy offenders** (tests that validate mocks, not behavior):
+   - `server/billing.test.ts` — 1,350 lines, 328 `vi.fn()` calls
+   - `lumen/providers/openrouter.test.ts` — 1,529 lines, 151 mock refs
+   - `media/amber/amber.test.ts` — 1,468 lines, 139 mock refs
+   - `loft/scheduled/scheduled.test.ts` — 792 lines, 206 mock refs, only 21 tests
+
+4. **Trivial tests** (type guards, constant checks, CSS class assertions):
+   - `components/custom/types.test.ts` — tests `isValidIcon(null) === false`
+   - `components/custom/MobileTOC.test.ts` — tests aria attributes exist
+   - `auth/limits.test.ts` — tests `RATE_LIMIT_PER_HOUR === 100`
+   - `auth/palette.test.ts` — tests color constants exist
+
+#### Recommended Actions
+
+| Action | Lines Saved | Effort |
+|--------|----------:|--------|
+| Delete duplicate upload-validation.test.ts | 1,321 | Trivial |
+| Consolidate mock infrastructure to shared package | ~1,200 | 1 week |
+| Delete trivial test files (type guards, constants) | ~900 | 1 day |
+| Prune mock-heavy billing/openrouter/amber tests | ~3,000 | 1 week |
+| **Total immediate test savings** | **~6,400** | |
+
+**Longer-term**: Update `/beaver-build` skill to produce fewer, higher-quality
+tests. Stop testing implementation details; focus on behavior at boundaries.
+
+---
+
+### Audit C: Personal vs Product Code
+
+#### Personal Code Identified
+
+| Item | Type | Lines | Extractable? |
+|------|------|------:|-------------|
+| **tools/cairn/** | Claude session viewer | 3,994 | Yes — zero product deps |
+| **workers/loft/** | Ephemeral dev envs on Fly.io | 3,016 | Yes — only dep is Firefly SDK |
+| **tools/looking-glass/** | Alternate session viewer | 1,795 | Yes — zero product deps |
+| **tools/index-viz/** | Vector index visualization (Python) | 412 | Yes — zero product deps |
+| **Total** | | **9,217** | |
+
+#### Borderline / Future Product Items
+
+| Item | Lines | Assessment |
+|------|------:|-----------|
+| tools/glimpse/ | 8,643 | Internal agent auditing companion (Python) — product infra, needs work |
+| apps/terrarium/ | 160 | Planned future project — keep, will grow |
+| tools/showroom/ | 952 | Product showcase — uses lattice/gossamer/prism |
+| scripts/journey/ | ~200 | Data migration — internal tooling |
+| scripts/generate/generate-business-cards.mjs | ~100 | Personal asset generation |
+
+#### Product Code Confirmed
+
+All 10 remaining apps, all 12 remaining workers, all libs, all services, and
+core scripts are product code. Notably:
+- **apps/ivy/** — Zero-knowledge email client (product, not personal)
+- **apps/meadow/** — Social feed (product)
+- **libs/grove-agent/** — Agent framework (product, used by onboarding)
+
+---
+
+### Audit D: App & Service Consolidation
+
+#### Consolidation Candidates
+
+| Target | Lines | Recommendation | Effort |
+|--------|------:|---------------|--------|
+| **services/email-render** | 235 | Merge into Zephyr (stateless template renderer) | 1-2 hours |
+| **apps/terrarium** | 160 | Absorb into Aspen or delete (single component wrapper) | 1 hour |
+
+#### Keep Separate (Architectural Reasons)
+
+| Target | Lines | Why |
+|--------|------:|-----|
+| apps/login | 2,310 | Must be at `login.grove.place` for auth redirects |
+| apps/billing | 2,290 | Payment isolation, Stripe/PCI compliance |
+| apps/clearing | 5,130 | Status page must work when main app is down; has crons |
+| services/grove-router | 1,434 | Entry point for ALL traffic — critical path |
+| services/pulse | 1,692 | Webhook receiver, cron aggregation |
+| services/amber | 2,173 | Own DB, Durable Objects, R2 — backend for amber app |
+| services/og-worker | 2,372 | Expensive image generation, separate scaling |
+
+---
+
+### Audit E: Worker Consolidation
+
+#### Remove or Merge
+
+| Worker | Lines | Action |
+|--------|------:|--------|
+| **post-migrator** | 673 | **DELETE** — disabled, has known timestamp bug, not needed |
+| **vista-collector** | 67 | **MERGE** → new `grove-maintenance` worker |
+| **webhook-cleanup** | 206 | **MERGE** → new `grove-maintenance` worker |
+| **email-catchup** | 384 | **MERGE** → onboarding (extend DO to handle retries) |
+
+#### Keep Separate
+
+| Worker | Lines | Why |
+|--------|------:|-----|
+| loft | 3,016 | Personal but self-contained |
+| lumen | 2,561 | Core AI service, used by multiple consumers |
+| meadow-poller | 1,272 | RSS aggregator, focused purpose |
+| onboarding | 709 | Email sequence agent (absorbs email-catchup) |
+| patina | 4,586 | Critical backup system for 14 databases |
+| reverie | 2,737 | AI config planner — intentional split from exec |
+| reverie-exec | 1,786 | Execution sidecar — intentional split from reverie |
+| timeline-sync | 6,786 | Nightly summary generation |
+| warden | 5,235 | Critical credential gateway |
+
+**Result: 13 workers → 9** (delete 1, merge 3 into 1 new + 1 existing)
+
+---
+
+### Audit F: Code Duplication
+
+#### Significant Duplication
+
+| Pattern | Scope | Duplicate Lines | Fix |
+|---------|-------|---------------:|-----|
+| **API route boilerplate** | 252 `+server.ts` files | 4,800-6,000 | Create shared auth guard + error middleware |
+| **Cloudflare test mocks** | 5+ locations | 1,829 | Consolidate to `@lattice/test-utils` |
+| **Auth hooks boilerplate** | 8 `hooks.server.ts` files | 320-480 | Extract `getCookie()`, `validateSession()` to engine |
+| **Error type definitions** | `billing-api` vs engine | ~100 | Migrate to shared `GroveErrorDef` |
+| **PostMeta/PostContent types** | engine + services/durable-objects | ~16 | Consolidate to engine, re-export |
+
+#### Not Actually Duplicated
+
+| Pattern | Assessment |
+|---------|-----------|
+| Rate limiting (7 files) | Different storage backends (memory, D1, KV, DO) — justified |
+| Vineyard pages (aspen + landing) | Different purpose (internal catalog vs marketing) — justified |
+| Vitest/Vite configs | Already using `createGroveViteConfig()` factory — well-managed |
 
 ---
 
@@ -122,110 +276,114 @@ this complexity is proportional to the number of flags actually in use.
 
 Some things look large but are justified:
 
-- **UI components (40k)**: A design system for a platform this ambitious needs
-  breadth. The components are shared across 11 apps.
-- **Heartwood (36k)**: Auth is inherently complex. OAuth, PKCE, session
-  management, templates, CDN.
-- **Curios as a concept**: The curio system is core to Grove's identity. The
-  issue is location (engine vs aspen), not existence.
+- **UI components (40k)**: Shared design system across 10 apps. Core to the platform.
+- **Heartwood (36k)**: Auth is inherently complex. OAuth, PKCE, session management, templates.
+- **Curios as a concept**: Core to Grove's identity. The issue is location, not existence.
 - **Worker architecture**: Cloudflare-native, each worker is small and focused.
-  The architecture is sound.
-- **Admin panel depth**: Arbor at 42k lines is proportional to the features it
-  manages.
+- **Admin panel depth**: Arbor at 42k lines is proportional to its features.
+- **Rate limiting variety**: Different storage backends serve different needs.
+- **Config system**: `createGroveViteConfig()` factory is already well-designed.
 
 ---
 
-## 4. Recommended Simplification Plan
+## 4. Simplification Roadmap
 
-### Phase 1: Audit & Inventory (Low effort, high clarity)
+### Tier 1: Quick Wins (1-2 days each, zero risk)
 
-Before cutting anything, build a clear map:
+| # | Action | Lines Saved | Deployments Saved |
+|---|--------|----------:|------------------:|
+| 1.1 | Delete unused engine subsystems (data, db, scribe, styles, types) | ~500 | 0 |
+| 1.2 | Delete duplicate `upload-validation.test.ts` | 1,321 | 0 |
+| 1.3 | Delete `workers/post-migrator` (disabled, buggy) | 673 | 1 |
+| 1.4 | Delete trivial test files (type guards, constant assertions) | ~900 | 0 |
+| 1.5 | Merge `services/email-render` into Zephyr | 235 | 1 |
+| | **Tier 1 Total** | **~3,629** | **2** |
 
-1. **Audit engine exports**: For each engine subsystem, determine which apps
-   actually import from it. Identify code that's "shared" in theory but consumed
-   by exactly one app.
-2. **Audit tests**: Identify tests that are pure mock-validation (mock returns X,
-   assert X was returned). Flag tests where the mock setup is longer than the
-   test assertions.
-3. **Audit personal code**: Catalog workers, tools, and scripts that are personal
-   projects vs product code. Map their internal dependencies.
-4. **Audit deployment targets**: For each wrangler.toml, note last deploy date,
-   traffic/usage, and whether it could be merged with another target.
+### Tier 2: Engine Extraction (1-2 weeks, medium effort)
 
-### Phase 2: Extract Curios from Engine (Medium effort, high impact)
+| # | Action | Lines Moved Out | Impact |
+|---|--------|---------------:|--------|
+| 2.1 | Move curios (28k) to `libs/curios` or Aspen | 28,007 | Engine -13% |
+| 2.2 | Move content (8.4k) to Aspen | 8,384 | Engine -4% |
+| 2.3 | Move components (8.3k) to Aspen | 8,278 | Engine -4% |
+| 2.4 | Move durable-objects, git, actions to Aspen | 1,929 | Engine -1% |
+| 2.5 | Move firefly to personal or delete | 2,760 | Engine -1% |
+| | **Tier 2 Total** | **49,358 from engine** | **Engine: 222k → 173k** |
 
-Move `libs/engine/src/lib/curios/` (28k lines) into Aspen or a dedicated
-`libs/curios` package. This is the clearest win:
-- Only Aspen uses curios
-- Removes 28k lines from engine
-- Makes engine's purpose cleaner
-- Curios can evolve independently without engine release cycles
+### Tier 3: Test & Infrastructure Cleanup (2-3 weeks)
 
-### Phase 3: Test Pruning (Medium effort, medium impact)
+| # | Action | Lines Saved |
+|---|--------|----------:|
+| 3.1 | Consolidate Cloudflare mock infrastructure | ~1,200 |
+| 3.2 | Prune mock-heavy test files (billing, openrouter, amber, loft) | ~3,000 |
+| 3.3 | Create shared API route middleware (auth guard, error wrapper) | ~2,500 |
+| 3.4 | Extract auth hook utilities to engine | ~350 |
+| 3.5 | Update `/beaver-build` skill to produce fewer, better tests | Future savings |
+| | **Tier 3 Total** | **~7,050** |
 
-Target: Reduce test code by ~40% (~58k lines).
+### Tier 4: Worker & Personal Code Consolidation (1-2 weeks)
 
-Strategy:
-- **Delete mock-heavy "pass-through" tests** where setup mirrors assertions
-- **Consolidate integration tests** that test the same flow from different angles
-- **Remove tests on trivial functions** (simple getters, type guards, formatters)
-- **Keep**: Boundary tests (API routes, DB queries), complex logic tests, regression tests
-- **Update /beaver-build skill** to produce fewer, higher-quality tests going forward
-
-### Phase 4: Evaluate Consolidation Opportunities
-
-After the audit, evaluate:
-- Can `apps/terrarium` (331 lines) be absorbed into Aspen or landing?
-- Can `apps/billing` (2.7k) and `apps/login` (2.7k) be routes within landing?
-- Can any workers be merged? (e.g., `webhook-cleanup` + `warden` if they share concerns)
-- Can `email-render` (235 lines!) be a function within another service?
-
-### Phase 5: Engine Internal Boundaries
-
-Even without splitting packages, enforce clearer boundaries within engine:
-- Define explicit public APIs per subsystem via barrel exports
-- Document which apps may import from which engine subsystems
-- Consider a lint rule or import map that flags "curios imported outside Aspen"
-
-### Phase 6: Personal Code Separation
-
-Options (to be decided after audit):
-- **Soft separation**: Move to `personal/` directory, exclude from main CI
-- **Hard separation**: Extract to separate repo with engine as a dependency
-- **Hybrid**: Keep in monorepo but use workspace filtering to exclude from builds
+| # | Action | Lines Saved/Moved | Deployments Saved |
+|---|--------|-----------------:|------------------:|
+| 4.1 | Create `grove-maintenance` worker (vista-collector + webhook-cleanup) | 0 (consolidation) | 1 |
+| 4.2 | Merge email-catchup into onboarding | ~384 | 1 |
+| 4.3 | Move personal tools to `personal/` directory, exclude from CI | 9,217 | 0 |
+| | **Tier 4 Total** | **~9,601** | **2** |
 
 ---
 
 ## 5. Expected Impact
 
-| Action | Lines Removed | Cognitive Load Reduction |
-|--------|-------------:|--------------------------|
-| Move curios to Aspen/libs | ~28k from engine | Engine becomes "shared framework" again |
-| Prune tests (40%) | ~58k | Faster CI, less noise, clearer signal |
-| Consolidate tiny apps | ~5-10k | Fewer deployment targets |
-| Personal code separation | ~5-15k | Clearer product boundary |
-| **Total potential** | **~96-111k lines** | **~18-21% reduction** |
+### Lines
 
-This would bring the codebase from ~528k to ~420-430k lines, with the remaining
-code better organized and more clearly purposeful.
+| Metric | Before | After | Change |
+|--------|-------:|------:|-------:|
+| Total source | 528,000 | ~461,000 | -67,000 (-13%) |
+| Engine | 222,256 | ~173,000 | -49,000 (-22%) |
+| Tests | 145,000 | ~139,000 | -6,000 (-4%) |
+| Personal code in product tree | 9,217 | 0 | -9,217 |
+
+### Deployment Targets
+
+| Metric | Before | After |
+|--------|-------:|------:|
+| Workers | 13 | 9 |
+| Apps | 11 | 11 |
+| Services | 10 | 9 |
+| **Total** | **34** | **29** |
+
+### Cognitive Load
+
+| Improvement | Mechanism |
+|-------------|-----------|
+| Engine becomes "shared code only" | Single-consumer code moves to its actual consumer |
+| Fewer deployment targets | 34 → 28 (6 fewer things to break) |
+| Cleaner test signal | Fewer mock-heavy pass-throughs, consolidated infrastructure |
+| Personal/product boundary | Personal tools in `personal/`, excluded from CI |
+| Less API boilerplate | Shared middleware for auth, errors, config checks |
 
 ---
 
 ## 6. Non-Negotiables (Per Owner)
 
 These stay, even if they add complexity:
-- **Curios system** — core to Grove identity (just needs to move)
+- **Curios system** — core to Grove identity (moves location, not deleted)
 - **Worker architecture** — Cloudflare-native, correct pattern
 - **Admin panel depth** — Arbor richness matters for the product
 
 ---
 
-## 7. Next Steps
+## 7. Execution Order
 
-1. Start with Phase 1 (Audit) — this is pure research, zero risk
-2. Use findings to prioritize Phase 2-6 ordering
-3. Each phase should be a standalone PR with clear before/after metrics
-4. Re-measure after each phase to track progress
+```
+Week 1:  Tier 1 (quick wins) — delete dead code, merge tiny services
+Week 2-3: Tier 2 (engine extraction) — move single-consumer code out
+Week 4-5: Tier 3 (test & infra cleanup) — consolidate mocks, add middleware
+Week 6:  Tier 4 (worker & personal consolidation) — maintenance worker, personal dir
+```
+
+Each tier is a standalone set of PRs. Measure total lines and deployment count
+after each tier. Stop whenever the maintenance burden feels manageable.
 
 The goal isn't "smallest possible codebase" — it's **code that one developer can
 confidently navigate, modify, and maintain** without fear of invisible breakage.
