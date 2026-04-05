@@ -227,10 +227,23 @@ gw gh issue close --write 123
 
 **Title guidelines:**
 
+- **Plain language first** — write for the project owner scanning a board, not for the implementer
 - Imperative mood: "Add X" not "Adding X"
-- Specific: "Add glass overlay to Forest page" not "Forest improvements"
+- Format: `Service: what happens in plain english` (e.g., "Plant: fix broken image on pricing page")
 - Under 60 characters when possible
-- No prefixes (labels handle categorization)
+- No prefixes like `[FEATURE]` or `[BUG]` (labels handle categorization)
+- **No jargon or acronyms** that aren't Grove service names — no HMR, PKCE, DO, SSR, CSRF, etc. in titles. Spell it out or rephrase in plain language. (Technical detail belongs in the body.)
+- **Self-check before depositing:** Read each title back and ask: _"If I saw this on a board with 100 other issues, would I immediately understand what this is about and why it matters — without clicking into it?"_ If not, rewrite it.
+
+**Good vs. bad titles:**
+
+| Bad (jargon-heavy) | Good (plain language) |
+|---------------------|-----------------------|
+| `Hybrid dev mode: HMR + service binding fidelity` | `Dev mode: support live reload alongside real service bindings` |
+| `Thorn behavioral: finish remaining wiring` | `Thorn: connect remaining rate-limit and label checks` |
+| `Graduate Reeds (comments) out of greenhouse` | `Reeds: make comments a full production feature` |
+| `Implement Queen coordinator Durable Object` | `Queen: build the coordinator that manages background workers` |
+| `Prism Multi-Pack Resolver — split adapter into registries + resolver` | `Prism: let sites use multiple icon packs at once` |
 
 **Output:** New issues created with full context
 

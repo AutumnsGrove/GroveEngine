@@ -118,9 +118,9 @@ Use this template for every issue:
 ```
 
 **Writing guidelines:**
-- Summary should answer "what" and "why" in plain language
+- Summary should answer "what" and "why" in plain language — a non-engineer should understand the first sentence
 - Acceptance criteria should be checkbox items that can be verified as done/not-done
-- Context is optional but helpful for implementation details
+- Context is optional but helpful — this is where technical detail (file paths, patterns, acronyms) belongs
 - Keep the whole body under 20 lines. Concise beats comprehensive.
 - Don't pad with boilerplate. If there's no useful context, skip that section.
 
@@ -144,10 +144,22 @@ EOF
 ```
 
 **Title guidelines:**
+- **Plain language first** — write for the project owner scanning a board, not for the implementer
 - Imperative mood: "Add X" not "Adding X" or "X should be added"
-- Specific: "Add glass overlay to Forest page sections" not "Forest page improvements"
-- No `[FEATURE]` or `[BUG]` prefixes (labels handle categorization)
+- Format: `Service: what happens in plain english` (e.g., "Plant: fix broken image on pricing page")
 - Under 60 characters when possible
+- No `[FEATURE]` or `[BUG]` prefixes (labels handle categorization)
+- **No jargon or acronyms** that aren't Grove service names — no HMR, PKCE, DO, SSR, CSRF, etc. in titles. Spell it out or rephrase in plain language. (Technical detail belongs in the body.)
+- **Self-check:** Read each title and ask: _"Would I immediately understand this on a board with 100 other issues, without clicking into it?"_ If not, rewrite it.
+
+**Good vs. bad titles:**
+
+| Bad (jargon-heavy) | Good (plain language) |
+|---------------------|-----------------------|
+| `Hybrid dev mode: HMR + service binding fidelity` | `Dev mode: support live reload alongside real service bindings` |
+| `Thorn behavioral: finish remaining wiring` | `Thorn: connect remaining rate-limit and label checks` |
+| `Graduate Reeds (comments) out of greenhouse` | `Reeds: make comments a full production feature` |
+| `Implement Queen coordinator Durable Object` | `Queen: build the coordinator that manages background workers` |
 
 ### Step 6: Report Back
 
