@@ -1,13 +1,15 @@
 ---
+title: "BillingHub Spec"
+description: "Centralized payment hub for Grove — billing.grove.place architecture and Stripe integration."
+category: specs
+specCategory: infrastructure
+lastUpdated: "2026-03-12"
 aliases: [BillingHub, billing-hub, grove-billing]
-date created: Thursday, March 12th 2026
-date modified: Thursday, March 12th 2026
 tags:
   - billing
   - stripe
   - payments
   - infrastructure
-type: tech-spec
 ---
 
 ```

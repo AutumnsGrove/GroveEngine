@@ -3,7 +3,7 @@ title: Writing Your First Post
 description: Learn how to write and publish your first blog post on Grove
 category: help
 section: getting-started
-lastUpdated: '2025-12-13'
+lastUpdated: '2026-04-06'
 keywords:
   - first post
   - writing

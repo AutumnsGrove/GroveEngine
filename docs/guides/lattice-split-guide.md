@@ -1,3 +1,16 @@
+---
+title: "The Lattice Split"
+description: "How and why the engine was split into a library (libs/engine) and an app (apps/aspen)."
+category: guides
+guideCategory: infrastructure
+lastUpdated: "2026-03-24"
+aliases: []
+tags:
+  - lattice
+  - architecture
+  - aspen
+---
+
 # The Lattice Split — Developer Guide
 
 The engine used to be two things at once: a library and a deployed app. Routes, hooks, and deployment config lived inside `libs/engine/` alongside the UI components, error framework, and database services. A library shouldn't have `src/routes/`.
