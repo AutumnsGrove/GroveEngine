@@ -88,6 +88,14 @@ jobs:
               [ -z "$file" ] && continue
               FILENAME=$(basename "$file")
 
+              # Skip files marked as "status: planned" — these are future features
+              # that haven't been implemented yet, so freshness and field checks don't apply.
+              STATUS=$(grep -m1 "^status:" "$file" 2>/dev/null | sed "s/status: *['\"]*//" | sed "s/['\"].*$//" || echo "")
+              if [ "$STATUS" = "planned" ]; then
+                echo "  Planned (skipping checks): $FILENAME"
+                continue
+              fi
+
               # Check required frontmatter fields
               MISSING=""
               for field in $REQUIRED_FIELDS; do

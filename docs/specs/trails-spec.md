@@ -4,6 +4,7 @@ description: Build in public with beautiful project roadmaps
 category: specs
 specCategory: content-community
 icon: mapplus
+status: planned
 lastUpdated: '2025-12-29'
 aliases: []
 tags:

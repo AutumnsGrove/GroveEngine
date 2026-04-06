@@ -4,6 +4,7 @@ description: Model Context Protocol server for Grove ecosystem
 category: specs
 specCategory: operations
 icon: circuitboard
+status: planned
 lastUpdated: "2025-12-30"
 aliases: []
 tags:

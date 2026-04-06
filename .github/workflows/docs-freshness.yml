@@ -101,10 +101,18 @@ jobs:
             while IFS= read -r file; do
               [ -z "$file" ] && continue
 
+              FILENAME=$(basename "$file")
+
+              # Skip files marked as "status: planned" — these are future features
+              # that haven't been implemented yet, so freshness doesn't apply.
+              STATUS=$(grep -m1 "^status:" "$file" 2>/dev/null | sed "s/status: *['\"]*//" | sed "s/['\"].*$//" || echo "")
+              if [ "$STATUS" = "planned" ]; then
+                echo "  📋 Planned (skipping freshness): $FILENAME"
+                continue
+              fi
+
               # Extract lastUpdated from frontmatter (handles both quoted and unquoted dates)
               LAST_UPDATED=$(grep -m1 "^lastUpdated:" "$file" 2>/dev/null | sed "s/lastUpdated: *['\"]*//" | sed "s/['\"].*$//" || echo "")
-
-              FILENAME=$(basename "$file")
 
               if [ -z "$LAST_UPDATED" ]; then
                 echo "  ⚠️  Missing lastUpdated: $FILENAME"

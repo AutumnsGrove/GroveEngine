@@ -4,6 +4,7 @@ description: 100-year domain preservation for long-term Grove members
 category: specs
 specCategory: platform-services
 icon: squares-exclude
+status: planned
 lastUpdated: '2026-01-04'
 aliases: []
 tags:
