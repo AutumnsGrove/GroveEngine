@@ -4,7 +4,7 @@ description: Layered defense against AI crawlers and scrapers
 category: specs
 specCategory: operations
 icon: blinds
-lastUpdated: '2025-12-26'
+lastUpdated: '2026-04-06'
 aliases: []
 tags:
   - ai-protection
@@ -766,6 +766,8 @@ For the HTTP header, add to your Cloudflare Worker or use Transform Rules:
 - Location: Rules → Transform Rules → Modify Response Headers
 - Add header: `X-Robots-Tag` with value `noai, noimageai`
 - Apply to: All requests (or specific paths)
+
+**Grove's actual implementation:** The `X-Robots-Tag: noai, noimageai` header is set directly in `apps/aspen/src/hooks.server.ts` as part of the security headers block on every response (alongside CSP, HSTS, etc.). The HTML `<meta>` tag approach is not currently used — the HTTP header covers the same ground for crawlers that parse responses, and the hooks approach keeps all security headers in one place. The `/verify` page is the only page with a `<meta name="robots">` tag, where it carries `noindex, nofollow` to prevent the verification interstitial from appearing in search results.
 
 ---
 

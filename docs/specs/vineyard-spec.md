@@ -4,7 +4,7 @@ description: Consistent documentation and demo pattern for Grove tools
 category: specs
 specCategory: reference
 icon: grape
-lastUpdated: "2025-12-30"
+lastUpdated: "2026-04-06"
 aliases: []
 tags:
   - documentation
@@ -161,7 +161,7 @@ Use consistent status indicators across all Vineyards:
 
 ## Shared Components
 
-These components should live in Lattice (`@autumnsgrove/lattice`) for reuse across all Vineyards:
+These components live in the `@autumnsgrove/vineyard` standalone package for reuse across all Vineyards:
 
 ### VineyardLayout
 
@@ -219,6 +219,8 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 </TierGate>
 ```
 
+Uses `GroveTier`: `"seedling" | "sapling" | "oak" | "grove"` (all four user account tiers, ascending). This is the full user tier type — not the theme tier, which is only `"seedling" | "sapling"`.
+
 ### RoadmapSection
 
 ```svelte
@@ -228,6 +230,48 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 	planned={["Bulk delete", "Storage alerts"]}
 />
 ```
+
+### AuthButton
+
+```svelte
+<AuthButton provider="google" />
+```
+
+Shows "Sign In" when unauthenticated and "Sign Out" when a session is active.
+
+### UserMenu
+
+```svelte
+<UserMenu session={currentSession} />
+```
+
+Displays the authenticated user's avatar and name with a dropdown for account actions.
+
+---
+
+## Authentication
+
+Vineyard has first-class Better Auth support via `@autumnsgrove/vineyard`. Components and utilities integrate Grove's cookie-based session authentication.
+
+### Components
+
+- **`AuthButton`** — Sign in / sign out button. Accepts a `provider` prop (e.g., `"google"`). Reads session state and toggles label automatically.
+- **`UserMenu`** — Authenticated user avatar and name with an account action dropdown. Accepts a `session` prop (`BetterAuthSessionResponse`).
+
+### Utilities
+
+Importable from `@autumnsgrove/vineyard/vineyard` (re-exported alongside components):
+
+```typescript
+import { signIn, signOut, getSession, isAuthenticated } from "@autumnsgrove/vineyard/vineyard";
+```
+
+- `signIn(provider)` — Initiates OAuth flow for the given provider
+- `signOut()` — Clears the current session
+- `getSession()` — Returns the current `BetterAuthSessionResponse` or `null`
+- `isAuthenticated()` — Boolean helper derived from `getSession()`
+
+Full integration guide: `libs/vineyard/docs/better-auth-integration.md`
 
 ---
 
@@ -315,10 +359,10 @@ src/routes/vineyard/
 
 ### Shared Components Package
 
-Add to Lattice:
+Components live in the standalone `@autumnsgrove/vineyard` package:
 
 ```
-libs/engine/src/lib/ui/components/vineyard/
+libs/vineyard/src/lib/components/vineyard/
 ├── VineyardLayout.svelte
 ├── FeatureCard.svelte
 ├── StatusBadge.svelte
@@ -326,13 +370,15 @@ libs/engine/src/lib/ui/components/vineyard/
 ├── CodeExample.svelte
 ├── TierGate.svelte
 ├── RoadmapSection.svelte
+├── AuthButton.svelte
+├── UserMenu.svelte
 └── index.ts
 ```
 
-Export from `@autumnsgrove/lattice/vineyard`:
+Import via the package's subpath export `@autumnsgrove/vineyard/vineyard`:
 
 ```typescript
-export {
+import {
 	VineyardLayout,
 	FeatureCard,
 	StatusBadge,
@@ -340,8 +386,12 @@ export {
 	CodeExample,
 	TierGate,
 	RoadmapSection,
-} from "./components/vineyard";
+	AuthButton,
+	UserMenu,
+} from "@autumnsgrove/vineyard/vineyard";
 ```
+
+> Note: If the engine re-exports this package, `@autumnsgrove/lattice/vineyard` may also resolve correctly in Lattice-dependent apps. The canonical source package is `@autumnsgrove/vineyard`.
 
 ---
 
@@ -437,5 +487,5 @@ Roadmap:
 
 ---
 
-_Last updated: December 2025_
+_Last updated: April 2026_
 _Author: Claude (with Autumn)_

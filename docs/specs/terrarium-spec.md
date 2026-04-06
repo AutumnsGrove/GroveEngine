@@ -4,7 +4,7 @@ description: Visual scene composition tool for blog decorations
 category: specs
 specCategory: platform-services
 icon: pencilruler
-lastUpdated: "2026-01-05"
+lastUpdated: "2026-04-06"
 aliases: []
 tags: []
 ---
@@ -38,6 +38,16 @@ tags: []
 A terrarium is a contained miniature ecosystem you design, arrange, and nurture. Moss, stones, tiny plants—all placed with intention.
 
 Terrarium is Grove's creative canvas. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.
+
+---
+
+> **Implementation Status** (as of 2026-04-06)
+>
+> **Phase 1 — COMPLETE.** Core canvas, palette, placed-asset rendering, PNG export, and toolbar are all live in `libs/engine/src/lib/ui/components/terrarium/`. The `/terrarium` route exists in both `apps/terrarium` and `apps/aspen`.
+>
+> **Phase 2 — NOT YET IMPLEMENTED.** GridOverlay, PropsPanel, SearchFilter, SceneManager, TemplatesPicker, and the auto-generated asset registry script are all planned but not yet built.
+>
+> **Phase 3 — NOT YET IMPLEMENTED.** DecorationRenderer, ExportAsDecoration, ZonePreview, DecorationPanel, and the `/api/terrarium/` endpoints do not exist yet.
 
 ---
 
@@ -355,7 +365,9 @@ Here's what a typical session looks like:
 
 Categorized sidebar with 60+ nature components.
 
-**Search & Filter:**
+> **Current state:** The palette is implemented with ~57 assets hardcoded directly in `AssetPalette.svelte` across 8 categories (trees, creatures, botanical, ground, sky, structural, water, weather). The auto-generated registry (`assetRegistry.generated.ts`) and build script (`scripts/generate-asset-registry.ts`) described in the Asset Registry section do not exist yet — they are planned for Phase 2.
+
+**Search & Filter** _(planned — Phase 2):_
 
 - Search box at top filters assets by name
 - Category tabs filter by category
@@ -390,7 +402,7 @@ Categorized sidebar with 60+ nature components.
 - **Delete** - Delete key or button
 - **Duplicate** - Cmd/Ctrl+D
 
-### 4. Props Panel (Vineyard-Style)
+### 4. Props Panel (Vineyard-Style) _(planned — Phase 2)_
 
 When asset selected, show configurable props:
 
@@ -418,10 +430,12 @@ When asset selected, show configurable props:
 
 ### 6. Scene Management
 
-- **Save** - localStorage (v1), PlaygroundDO (v2)
-- **Load** - Scene picker
-- **Export** - PNG (required), SVG (stretch)
-- **Export as Decoration** - For Foliage integration
+> **Current state:** No persistence layer exists. The canvas holds a single in-memory scene that resets on page load. Save/load/list UI and IndexedDB storage are planned for Phase 2. Export as Decoration is planned for Phase 3.
+
+- **Save** - localStorage (v1), PlaygroundDO (v2) _(planned — Phase 2)_
+- **Load** - Scene picker _(planned — Phase 2)_
+- **Export** - PNG (implemented), SVG (stretch)
+- **Export as Decoration** - For Foliage integration _(planned — Phase 3)_
 
 ---
 
@@ -749,7 +763,9 @@ export function getRemainingBudget(assets: PlacedAsset[]): {
 
 ## Asset Registry
 
-### Explicit Metadata Exports
+> **Current state — NOT YET IMPLEMENTED.** The build-time registry generation script and `assetRegistry.generated.ts` described below do not exist yet. Currently, `AssetPalette.svelte` hardcodes ~57 component names in inline arrays per category. The explicit `meta` exports on nature components, the `generate-asset-registry.ts` script, and dynamic loading via `assetRegistry` are all planned for Phase 2.
+
+### Explicit Metadata Exports _(planned — Phase 2)_
 
 Instead of fragile Svelte parsing, each nature component exports its metadata explicitly.
 
@@ -976,6 +992,8 @@ function sanitizeFilename(name: string): string {
 ---
 
 ## Foliage Integration
+
+> **NOT YET IMPLEMENTED (Phase 3).** None of the Foliage integration exists yet — no `DecorationRenderer.svelte`, no `ExportAsDecoration.svelte`, no `ZonePreview.svelte`, no `DecorationPanel.svelte`, and no `/api/terrarium/` API endpoints. Everything in this section describes planned work.
 
 ### Decoration Zones
 
@@ -1436,9 +1454,13 @@ function validateScene(scene: unknown): scene is TerrariumScene {
 
 ## Implementation Phases
 
-### Phase 1: Playable Demo
+### Phase 1: Playable Demo — COMPLETE
 
 **Goal:** Something you can use and show people
+
+**Status:** Implemented. All core files exist in `libs/engine/src/lib/ui/components/terrarium/`. The `/terrarium` route is live in `apps/terrarium` and `apps/aspen`.
+
+> Note: The palette shipped with ~57 hardcoded assets across 8 categories rather than the 10 starter assets originally scoped. Zoom was also added in Phase 1.
 
 **Deliverables:**
 
@@ -1471,9 +1493,11 @@ libs/engine/src/routes/terrarium/
 └── +layout.svelte
 ```
 
-### Phase 2: Full Creative Tool
+### Phase 2: Full Creative Tool — NOT YET IMPLEMENTED
 
 **Goal:** Production-ready terrarium
+
+**Status:** Planned. None of the additional components or the asset registry build script exist yet.
 
 **Deliverables:**
 
@@ -1516,9 +1540,11 @@ scripts/
 └── generate-asset-registry.ts
 ```
 
-### Phase 3: Foliage Integration
+### Phase 3: Foliage Integration — NOT YET IMPLEMENTED
 
 **Goal:** Scenes become blog decorations
+
+**Status:** Planned. No Phase 3 files exist yet — no DecorationRenderer, no API routes, no Foliage panel.
 
 **Deliverables:**
 
@@ -2178,6 +2204,8 @@ The curios themselves (rendering, interactivity, data storage) are handled by th
 ---
 
 ## Auto-Save Behavior
+
+> **NOT YET IMPLEMENTED (Phase 2).** No persistence layer exists. `TERRARIUM_CONFIG.autoSave` defines the intended settings (2s debounce, 30s max interval), but neither `autoSave.svelte.ts` nor `terrarium-db.ts` have been created. Scene state currently lives in memory only and is lost on page reload.
 
 ### Save Triggers
 

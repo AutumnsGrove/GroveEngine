@@ -4,7 +4,7 @@ description: Public-facing status page for platform health and incident communic
 category: specs
 specCategory: platform-services
 icon: activity
-lastUpdated: "2025-12-24"
+lastUpdated: "2026-04-06"
 aliases: []
 tags:
   - status-page
@@ -73,7 +73,6 @@ The Grove Status page provides transparent, real-time communication about platfo
 
 ### Non-Goals
 
-- Automated monitoring integration (v1 is manual updates)
 - Public incident reporting/submission
 - Complex SLA tracking or uptime percentages
 
@@ -120,8 +119,8 @@ Modeled after Anthropic's Claude status page—clean, informative, focused on wh
                                   │ writes to
                                   │
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    GroveAuth Admin Panel                            │
-│                   (Autumn's admin interface)                        │
+│             Arbor Admin Panel (apps/landing)                        │
+│             /arbor/status/ — Autumn's admin interface               │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────────┐│
 │  │                  Status Management Section                      ││
@@ -130,6 +129,16 @@ Modeled after Anthropic's Claude status page—clean, informative, focused on wh
 │  │  - Post incident updates                                        ││
 │  │  - Set component status                                         ││
 │  │  - Resolve incidents                                            ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │                  Automated Monitoring                           ││
+│  │                                                                 ││
+│  │  - 5-minute cron health checks (worker-entry.ts scheduled)      ││
+│  │  - Daily history aggregation (midnight UTC)                     ││
+│  │  - Incident auto-creation on health check failures              ││
+│  │  - Sentinel API (/api/sentinel) — stress-test result ingestion  ││
+│  │  - Email alerts via Zephyr                                      ││
 │  └─────────────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -155,9 +164,10 @@ Grove's platform is divided into trackable components. Each component has its ow
 | **Blog Engine**    | Core blog functionality—publishing, reading, editing | All blog operations          |
 | **CDN**            | Image and media delivery via R2/Cloudflare           | Media loading, image uploads |
 | **Authentication** | Heartwood login and session management               | Sign-in, admin access        |
-| **Meadow**         | Community feed, reactions, voting                    | Social features              |
-| **Payments**       | Stripe integration for subscriptions                 | Plan upgrades, billing       |
+| **Payments**       | BillingHub — centralized payment processing via Stripe | Plan upgrades, billing     |
 | **API**            | Backend API endpoints                                | All platform operations      |
+
+> **Note:** The Meadow component (`comp_meadow`) was seeded in migration 0001 but removed in migration 0008. Meadow is a not-yet-live feature (Phase 5: Grove Social) and does not appear on the active component list.
 
 ### Component Statuses
 
@@ -286,10 +296,11 @@ INSERT INTO status_components (id, name, slug, description, display_order) VALUE
 ('comp_blog', 'Blog Engine', 'blog-engine', 'Core blogging functionality', 1),
 ('comp_cdn', 'CDN', 'cdn', 'Image and media delivery', 2),
 ('comp_auth', 'Authentication', 'authentication', 'Login and session management', 3),
-('comp_meadow', 'Meadow', 'meadow', 'Community feed and social features', 4),
-('comp_payments', 'Payments', 'payments', 'Subscription and billing', 5),
-('comp_api', 'API', 'api', 'Backend API endpoints', 6);
+('comp_payments', 'Payments', 'payments', 'BillingHub — centralized payment processing via Stripe', 4),
+('comp_api', 'API', 'api', 'Backend API endpoints', 5);
 ```
+
+> **Note:** `comp_meadow` was in the original seed data but removed via migration 0008. It is not present in the live database.
 
 ---
 
@@ -297,7 +308,7 @@ INSERT INTO status_components (id, name, slug, description, display_order) VALUE
 
 ### Location
 
-Status management lives in the GroveAuth admin panel under a new **Status** section in the sidebar.
+Status management is **live** at `/arbor/status/` in the landing app (`apps/landing`). It is accessible via the Arbor admin sidebar under **Service Status**. The earlier plan to implement this in GroveAuth has been superseded — the landing app's Arbor panel is the canonical admin interface.
 
 ### Admin Sections
 
@@ -377,7 +388,6 @@ Shows at a glance:
 │  │ Blog Engine      [🟢 Operational  ▼]                           │ │
 │  │ CDN              [🟢 Operational  ▼]                           │ │
 │  │ Authentication   [🟢 Operational  ▼]                           │ │
-│  │ Meadow           [🟢 Operational  ▼]                           │ │
 │  │ Payments         [🟢 Operational  ▼]                           │ │
 │  │ API              [🟢 Operational  ▼]                           │ │
 │  └────────────────────────────────────────────────────────────────┘ │
@@ -444,7 +454,6 @@ Shows at a glance:
 │  Blog Engine         🟢 Operational                                 │
 │  CDN                 🟢 Operational                                 │
 │  Authentication      🟢 Operational                                 │
-│  Meadow              🟢 Operational                                 │
 │  Payments            🟢 Operational                                 │
 │  API                 🟢 Operational                                 │
 │                                                                     │
@@ -510,6 +519,8 @@ When clicking an incident:
 ## User Notifications
 
 ### Messages Panel (User Admin Panels)
+
+> **Status: Partial.** The `GroveMessages` component exists and is wired into the ArborPanel admin sidebar (landing app) and into the plant onboarding/checkout app and meadow app layouts. It is **not yet wired** into the primary user blog dashboard (`apps/aspen`).
 
 Users see platform status in a **Messages** panel in their Grove admin dashboard.
 
@@ -748,53 +759,43 @@ Schedule maintenance.
 
 ## Implementation Notes
 
-### Phase 1 (MVP)
+### Phase 1 (MVP) — Live
 
-- [ ] Database schema setup
-- [ ] Public status page (read-only)
-- [ ] Component status display
-- [ ] Incident history (30 days)
-- [ ] RSS feed
+- [x] Database schema setup
+- [x] Public status page (read-only)
+- [x] Component status display
+- [x] Incident history (30 days)
+- [x] RSS feed (`/feed` — live and tested)
+- [x] Automated health monitoring — 5-minute cron checks via `worker-entry.ts` scheduled handler; incident auto-creation on failures; daily history aggregation at midnight UTC
+- [x] Sentinel API integration (`/api/sentinel`) — accepts stress-test results from the Sentinel system, updates component statuses, and optionally creates incidents based on error rate thresholds
+- [x] Email alerts via Zephyr (`ZEPHYR_URL` / `ZEPHYR_API_KEY` bindings on the worker)
 
-### Phase 2
+### Phase 2 — Live
 
-- [ ] Admin interface in GroveAuth
-- [ ] Create/update incidents
-- [ ] Post incident updates
-- [ ] Manual component status override
+- [x] Admin dashboard at `/arbor/status/` in landing app (not GroveAuth as originally planned)
+- [x] Create/update incidents (`/arbor/status/incidents/new`, `/arbor/status/incidents/[id]`)
+- [x] Post incident updates
+- [x] Manual component status override (inline dropdowns on the status dashboard)
 
 ### Phase 3
 
-- [ ] Messages panel in user admin
-- [ ] Scheduled maintenance
-- [ ] Email notifications (optional)
+- [ ] Scheduled maintenance management
+- [x] Messages panel — partial; `GroveMessages` is live in ArborPanel and plant/meadow apps, but not yet wired into the primary user blog dashboard (`apps/aspen`)
+- [ ] Email notifications to users (optional)
 
-### Handoff Prompt for GroveAuth Agent
+### Admin Implementation Notes
 
-When implementation is ready, use this prompt for the GroveAuth agent:
+The admin interface is **live** at `apps/landing/src/routes/arbor/status/`. Key files:
 
-```
-Implement the Status Management feature in the GroveAuth admin panel.
+- `+page.svelte` / `+page.server.ts` — dashboard with component status overrides and active incident list
+- `incidents/new/` — create incident form
+- `incidents/[id]/` — update incident, post timeline updates, resolve
 
-Reference: /docs/specs/clearing-spec.md in the Lattice repository
-
-Key tasks:
-1. Add "Status" section to admin sidebar
-2. Create incident management UI (create, update, resolve)
-3. Add component status override controls
-4. Implement scheduled maintenance scheduling
-5. Connect to D1 database tables (status_components, status_incidents, status_updates)
-
-The admin panel already exists at apps/login/. Follow existing patterns for:
-- Sidebar navigation (see +layout.svelte)
-- Form components and validation
-- API integration patterns
-
-Status data is written to the shared D1 database and read by status.grove.place.
-```
+Remaining work: scheduled maintenance management UI (Phase 3).
 
 ---
 
-_Spec Version: 1.0_
+_Spec Version: 1.1_
 _Created: 2025-12-24_
+_Updated: 2026-04-06 — reflected live implementation (automated monitoring, admin dashboard, RSS, BillingHub, Meadow removal)_
 _Author: Claude (with guidance from Autumn)_

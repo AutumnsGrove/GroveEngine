@@ -4,7 +4,7 @@ description: Ethical AI writing tool that polishes without replacing
 category: specs
 specCategory: content-community
 icon: wind
-lastUpdated: "2025-12-30"
+lastUpdated: "2026-04-06"
 aliases: []
 tags:
   - writing-assistant
@@ -42,7 +42,7 @@ An ethical AI writing tool that helps users polish their voice without replacing
 **Public Name:** Wisp
 **Internal Name:** GroveWisp
 **Target:** Lattice integration
-**Last Updated:** December 2025
+**Last Updated:** April 2026
 
 Like a will-o'-the-wisp in the forest: light, airy, ephemeral. Wisp appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice. A wisp of help. Nothing more, nothing less.
 
@@ -82,6 +82,8 @@ This specification unifies:
 - Transparent about data flow and privacy
 - Easy to disable at any time
 - User's voice is sacred - we polish, never replace
+- **Monthly cost cap: $5.00/user** — usage is automatically halted when the cap is reached (warning shown at 80%)
+- **Hourly rate limit: 10 requests/hour** — burst protection separate from the monthly cap
 
 ### Privacy First
 
@@ -92,6 +94,8 @@ Following Grove's Content Moderation privacy model:
 - Immediate deletion after review completes
 - No human surveillance of user content
 - Outcome-only retention (scores, not content)
+
+Usage metadata (action, mode, model, token counts, cost) is logged to the `wisp_requests` table for cost tracking and rate-limit enforcement. Content itself is never stored.
 
 ---
 
@@ -124,18 +128,16 @@ All providers must meet:
 If DeepSeek V3.2 unavailable:
 
 1. Kimi K2-0905
-2. Llama 3.1 70B
-3. Llama 3.3 70B
-4. GPT-OSS-120B (Cerebras/Groq only)
+2. Llama 3.3 70B (`meta-llama/llama-3.3-70b-instruct`)
 
 ### Prompt Modes (Not Model Swap)
 
 Instead of switching models, users select analysis depth:
 
-| Mode         | Description                             | Token Budget  | Use Case       |
-| ------------ | --------------------------------------- | ------------- | -------------- |
-| **Quick**    | Lightweight prompt, essential checks    | ~1,000 output | Fast iteration |
-| **Thorough** | Detailed prompt, comprehensive analysis | ~2,500 output | Final polish   |
+| Mode         | Description                             | Token Budget  | Temperature | Use Case       |
+| ------------ | --------------------------------------- | ------------- | ----------- | -------------- |
+| **Quick**    | Lightweight prompt, essential checks    | ~1,000 output | 0.1         | Fast iteration |
+| **Thorough** | Detailed prompt, comprehensive analysis | ~2,500 output | 0.2         | Final polish   |
 
 Same model, different prompt complexity.
 
@@ -183,7 +185,7 @@ interface ToneRequest {
 	content: string;
 	context?: {
 		title?: string;
-		audience?: "technical" | "casual" | "professional" | string;
+		audience?: string; // Free-form; common values: "technical", "casual", "professional"
 	};
 }
 ```
