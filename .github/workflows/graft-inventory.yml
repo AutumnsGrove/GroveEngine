@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -184,7 +184,7 @@ jobs:
 
       - name: Comment on PR (if grafts changed)
         if: github.event_name == 'pull_request' && (steps.count-grafts.outputs.has_changes == 'true' || steps.check-maturity.outputs.has_maturity_issues == 'true' || steps.check-article.outputs.article_status != 'fresh')
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           EXPECTED: ${{ steps.count-grafts.outputs.expected }}
           ACTUAL: ${{ steps.count-grafts.outputs.actual }}
@@ -277,7 +277,7 @@ jobs:
 
       - name: Create issue for inventory drift (scheduled run only)
         if: github.event_name == 'schedule' && steps.count-grafts.outputs.has_changes == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           EXPECTED: ${{ steps.count-grafts.outputs.expected }}
           ACTUAL: ${{ steps.count-grafts.outputs.actual }}

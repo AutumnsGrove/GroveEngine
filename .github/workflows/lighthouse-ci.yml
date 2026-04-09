@@ -28,13 +28,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -87,7 +87,7 @@ jobs:
       - name: Format Lighthouse Results
         id: results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           LH_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LH_LINKS: ${{ steps.lighthouse.outputs.links }}
@@ -143,7 +143,7 @@ jobs:
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.results.outputs.comment != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           COMMENT_BODY: ${{ steps.results.outputs.comment }}
         with:
