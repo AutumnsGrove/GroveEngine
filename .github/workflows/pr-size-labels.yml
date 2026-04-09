@@ -15,8 +15,8 @@ jobs:
 
     steps:
       - name: Assign size label
-        # Pinned to v0.5.5 commit SHA — tags are mutable, SHAs are not
-        uses: pascalgn/size-label-action@f8edde36b3be04b4f65dcfead05dc8691b374348 # v0.5.5
+        # Pinned to v0.5.7 commit SHA — tags are mutable, SHAs are not
+        uses: pascalgn/size-label-action@56b489b027932ec0cf60438a1a5f1a19c8fc71ff # v0.5.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Grove-themed size labels:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Warn on very large PRs
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({

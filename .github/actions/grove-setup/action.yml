@@ -31,20 +31,20 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       if: inputs.checkout-ref == ''
 
     - name: Checkout (specific ref)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       if: inputs.checkout-ref != ''
       with:
         ref: ${{ inputs.checkout-ref }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v5
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: "pnpm"

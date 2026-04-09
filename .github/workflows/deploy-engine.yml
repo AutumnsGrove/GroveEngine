@@ -25,7 +25,7 @@ jobs:
       # Aspen (apps/aspen) handles the tenant app deploy via deploy-aspen.yml.
       # This workflow builds, tests, type-checks, and runs D1 migrations.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup workspace
         uses: ./.github/actions/grove-setup

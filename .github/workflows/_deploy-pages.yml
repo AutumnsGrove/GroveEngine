@@ -82,19 +82,19 @@ jobs:
       # ── Inline grove-setup (can't use composite action in reusable workflow) ──
       - name: Checkout
         if: inputs.checkout-ref == ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout (specific ref)
         if: inputs.checkout-ref != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.checkout-ref }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
