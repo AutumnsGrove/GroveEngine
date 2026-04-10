@@ -181,12 +181,15 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 					homeGrove = groveResult;
 
 					// Lantern navigation panel — only for logged-in users.
-					// This is the one remaining sequential await: lantern's feature flag
-					// evaluation needs the greenhouse result as context.
-					if (locals.user && flagsEnv) {
+					// Lantern is a visitor-side feature: the flag must be evaluated against
+					// the visitor's HOME grove, not the grove being visited (#1546).
+					if (locals.user && flagsEnv && homeGrove?.tenantId) {
+						const homeGreenhouse = await isInGreenhouse(homeGrove.tenantId, flagsEnv).catch(
+							() => false,
+						);
 						lanternEnabled = await isFeatureEnabled(
 							"lantern_enabled",
-							{ tenantId, inGreenhouse: greenhouseResult },
+							{ tenantId: homeGrove.tenantId, inGreenhouse: homeGreenhouse },
 							flagsEnv,
 						).catch(() => false);
 					}
