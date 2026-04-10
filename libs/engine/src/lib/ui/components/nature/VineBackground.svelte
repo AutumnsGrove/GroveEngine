@@ -3,16 +3,15 @@
   Copyright (c) 2026 Autumn Brown
   Licensed under AGPL-3.0
 
-  VineBackground — Reactive vine pattern background using the user's accent color.
+  VineBackground — Reactive vine pattern background in grove green.
 
-  Replaces the static CSS `.leaf-pattern` class (vine-pattern.css) with a Svelte
-  component that generates the 450x450 tiling SVG dynamically. The SVG string is
-  rebuilt reactively when the accent color, dark mode, or opacity changes, then
+  Generates a 450x450 tiling SVG dynamically. The SVG string is rebuilt
+  reactively when the vine color, dark mode, or opacity changes, then
   applied as a `background-image` data URI on an absolutely-positioned div.
 
-  The accent color is read from the `--grove-accent` CSS custom property on
-  `document.documentElement`. A MutationObserver watches for style attribute
-  changes so the vine color updates live when the user picks a new accent.
+  Vine color is read from `--grove-vine-color` on `:root` (set when the
+  grove owner explicitly picks a vine color). When unset, vines default
+  to grove green (#22c55e) — NOT derived from the accent color.
 
   Usage:
     <div class="relative">
@@ -42,9 +41,10 @@
 	const isDark = $derived(themeStore.resolvedTheme === "dark");
 
 	// ── Vine color from CSS custom property ───────────────────────────
-	// Priority: --grove-vine-color (independent vine setting)
-	//         → --grove-accent (accent color)
-	//         → #22c55e (grove green fallback)
+	// Priority: --grove-vine-color (explicit vine setting)
+	//         → #22c55e (grove green default)
+	// Vines are always grove green unless the owner explicitly sets a vine color.
+	// Accent color is NOT used as a fallback — purple accent shouldn't mean purple vines.
 	let vineColor = $state("#22c55e");
 
 	$effect(() => {
@@ -52,10 +52,8 @@
 
 		function readVineColor() {
 			const style = getComputedStyle(document.documentElement);
-			// Prefer independent vine color, fall back to accent
 			const vine = style.getPropertyValue("--grove-vine-color").trim();
-			const accent = style.getPropertyValue("--grove-accent").trim();
-			vineColor = vine || accent || "#22c55e";
+			vineColor = vine || "#22c55e";
 		}
 
 		readVineColor();
