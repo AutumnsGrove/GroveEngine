@@ -1,0 +1,208 @@
+{
+  "models": {
+    "DEEPSEEK_V3": {
+      "id": "deepseek/deepseek-v3.2",
+      "name": "DeepSeek V3.2",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.26, "output": 0.38 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "KIMI_K2_5": {
+      "id": "moonshotai/kimi-k2.5",
+      "name": "Kimi K2.5",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.39, "output": 1.90 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "LLAMA_70B": {
+      "id": "meta-llama/llama-3.3-70b-instruct",
+      "name": "Llama 3.3 70B",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.10, "output": 0.32 },
+      "quality": "high",
+      "speed": "medium"
+    },
+    "CLAUDE_HAIKU": {
+      "id": "anthropic/claude-haiku-4.5",
+      "name": "Claude Haiku 4.5",
+      "category": "vision",
+      "provider": "openrouter",
+      "cost": { "input": 1.00, "output": 5.00 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "GEMINI_FLASH": {
+      "id": "google/gemini-3-flash-preview",
+      "name": "Gemini 3 Flash",
+      "category": "vision",
+      "provider": "openrouter",
+      "cost": { "input": 0.15, "output": 0.60 },
+      "quality": "high",
+      "speed": "fastest"
+    },
+    "GPT_OSS_SAFEGUARD": {
+      "id": "openai/gpt-oss-safeguard-20b",
+      "name": "GPT-oss Safeguard 20B",
+      "category": "moderation",
+      "provider": "openrouter",
+      "cost": { "input": 0.075, "output": 0.30 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "LLAMAGUARD_4": {
+      "id": "meta-llama/llama-guard-4-12b",
+      "name": "LlamaGuard 4 12B",
+      "category": "moderation",
+      "provider": "openrouter",
+      "cost": { "input": 0.18, "output": 0.18 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "BGE_M3": {
+      "id": "baai/bge-m3",
+      "name": "BGE-M3",
+      "category": "embedding",
+      "provider": "openrouter",
+      "cost": { "input": 0.02, "output": 0 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "QWEN3_EMBED": {
+      "id": "qwen/qwen3-embedding-8b",
+      "name": "Qwen3 Embedding 8B",
+      "category": "embedding",
+      "provider": "openrouter",
+      "cost": { "input": 0.01, "output": 0 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "TRINITY": {
+      "id": "arcee-ai/trinity-large-thinking",
+      "name": "Arcee Trinity Large",
+      "category": "tool-calling",
+      "provider": "openrouter",
+      "cost": { "input": 0.22, "output": 0.85 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "MINIMAX_M2_7": {
+      "id": "minimax/minimax-m2.7",
+      "name": "MiniMax M2.7",
+      "category": "tool-calling",
+      "provider": "openrouter",
+      "cost": { "input": 0.30, "output": 1.20 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "GPT_OSS_120B": {
+      "id": "openai/gpt-oss-120b",
+      "name": "GPT-OSS 120B",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.04, "output": 0.19 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "QWEN3_235B": {
+      "id": "qwen/qwen3-235b-a22b-2507",
+      "name": "Qwen3 235B",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.07, "output": 0.46 },
+      "quality": "high",
+      "speed": "medium"
+    },
+    "GLM_5_1": {
+      "id": "z-ai/glm-5.1",
+      "name": "GLM 5.1",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.40, "output": 1.50 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "LLAMA_4_MAVERICK": {
+      "id": "meta-llama/llama-4-maverick",
+      "name": "Llama 4 Maverick",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.15, "output": 0.60 },
+      "quality": "high",
+      "speed": "medium"
+    },
+    "CF_SHIELDGEMMA": {
+      "id": "@hf/google/shieldgemma-2b",
+      "name": "ShieldGemma 2B",
+      "category": "moderation",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "good",
+      "speed": "fastest"
+    },
+    "CF_BGE_BASE": {
+      "id": "@cf/baai/bge-base-en-v1.5",
+      "name": "BGE Base EN",
+      "category": "embedding",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "good",
+      "speed": "fastest"
+    },
+    "CF_LLAMAGUARD_3": {
+      "id": "@cf/meta/llama-guard-3-8b",
+      "name": "LlamaGuard 3 8B",
+      "category": "moderation",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "good",
+      "speed": "fastest"
+    },
+    "CF_LLAMA4_SCOUT": {
+      "id": "@cf/meta/llama-4-scout-17b-16e-instruct",
+      "name": "Llama 4 Scout",
+      "category": "vision",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "good",
+      "speed": "fast"
+    },
+    "CF_WHISPER_TURBO": {
+      "id": "@cf/openai/whisper-large-v3-turbo",
+      "name": "Whisper Large V3 Turbo",
+      "category": "transcription",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "CF_WHISPER": {
+      "id": "@cf/openai/whisper",
+      "name": "Whisper Large V3",
+      "category": "transcription",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "highest",
+      "speed": "medium"
+    },
+    "CF_WHISPER_TINY": {
+      "id": "@cf/openai/whisper-tiny-en",
+      "name": "Whisper Tiny EN",
+      "category": "transcription",
+      "provider": "cloudflare-ai",
+      "cost": { "input": 0, "output": 0 },
+      "quality": "good",
+      "speed": "fastest"
+    }
+  },
+  "defaults": {
+    "generation": "DEEPSEEK_V3",
+    "timeline": "DEEPSEEK_V3",
+    "forage": "DEEPSEEK_V3",
+    "reverie": "TRINITY"
+  }
+}

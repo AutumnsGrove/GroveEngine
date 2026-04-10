@@ -43,10 +43,11 @@ export function getProvider(name: ProviderName, env: Env, model?: string): AIPro
 /**
  * Default models per provider
  * OpenRouter is primary (ZDR compliant), DeepSeek is fallback
+ * Model IDs should match lumen-models.json in libs/engine/src/lib/data/
  */
 export const PROVIDER_DEFAULTS: Record<ProviderName, string> = {
 	deepseek: "deepseek-chat", // Fallback only
-	openrouter: "deepseek/deepseek-v3.2", // Primary - ZDR compliant
+	openrouter: "deepseek/deepseek-v3.2", // Primary — matches lumen-models.json DEEPSEEK_V3
 };
 
 /**

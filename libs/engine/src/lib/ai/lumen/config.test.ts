@@ -62,6 +62,10 @@ describe("Model Definitions", () => {
 		// Embeddings
 		expect(MODELS.BGE_M3).toContain("bge");
 		expect(MODELS.QWEN3_EMBED).toContain("qwen");
+
+		// Tool Calling (Reverie)
+		expect(MODELS.TRINITY).toContain("trinity");
+		expect(MODELS.MINIMAX_M2_7).toContain("minimax");
 	});
 
 	it("should have Cloudflare fallback models", () => {
@@ -93,6 +97,9 @@ describe("Task Registry", () => {
 		"chat",
 		"image",
 		"code",
+		"transcription",
+		"reverie",
+		"reverie-compose",
 	];
 
 	it("should have configuration for all tasks", () => {
@@ -119,8 +126,12 @@ describe("Task Registry", () => {
 			(task) => TASK_REGISTRY[task].primaryProvider === "openrouter",
 		);
 
-		// All tasks should use OpenRouter as primary
-		expect(openRouterPrimary.length).toBe(allTasks.length);
+		// All tasks except transcription use OpenRouter as primary
+		const cfTasks = allTasks.filter(
+			(task) => TASK_REGISTRY[task].primaryProvider === "cloudflare-ai",
+		);
+		expect(openRouterPrimary.length + cfTasks.length).toBe(allTasks.length);
+		expect(cfTasks).toEqual(["transcription"]);
 	});
 
 	it("should have fallback chains for reliability", () => {
@@ -257,7 +268,7 @@ describe("Model Costs", () => {
 describe("getModelCost", () => {
 	it("should return costs for known models", () => {
 		const cost = getModelCost(MODELS.DEEPSEEK_V3);
-		expect(cost.input).toBe(0.25);
+		expect(cost.input).toBe(0.26);
 		expect(cost.output).toBe(0.38);
 	});
 
@@ -270,17 +281,17 @@ describe("getModelCost", () => {
 
 describe("calculateCost", () => {
 	it("should calculate cost correctly", () => {
-		// DeepSeek: $0.25/M input, $0.38/M output
+		// DeepSeek: $0.26/M input, $0.38/M output
 		const cost = calculateCost(MODELS.DEEPSEEK_V3, 1_000_000, 1_000_000);
 
-		expect(cost).toBeCloseTo(0.25 + 0.38, 5);
+		expect(cost).toBeCloseTo(0.26 + 0.38, 5);
 	});
 
 	it("should handle small token counts", () => {
 		// 1000 tokens = 0.001M tokens
 		const cost = calculateCost(MODELS.DEEPSEEK_V3, 1000, 1000);
 
-		expect(cost).toBeCloseTo((0.25 + 0.38) / 1000, 8);
+		expect(cost).toBeCloseTo((0.26 + 0.38) / 1000, 8);
 	});
 
 	it("should return 0 for Cloudflare models", () => {
