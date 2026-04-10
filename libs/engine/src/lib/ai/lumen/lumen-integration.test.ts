@@ -186,9 +186,9 @@ describe("Integration: Wisp Generation Path", () => {
 			input: "Test",
 		});
 
-		// DeepSeek v3: $0.25/M input, $0.38/M output
-		// Cost = (1000/1M * 0.25) + (500/1M * 0.38) = 0.00025 + 0.00019 = 0.00044
-		expect(response.usage.cost).toBeCloseTo(0.00044, 5);
+		// DeepSeek v3: $0.26/M input, $0.38/M output
+		// Cost = (1000/1M * 0.26) + (500/1M * 0.38) = 0.00026 + 0.00019 = 0.00045
+		expect(response.usage.cost).toBeCloseTo(0.00045, 5);
 	});
 });
 
