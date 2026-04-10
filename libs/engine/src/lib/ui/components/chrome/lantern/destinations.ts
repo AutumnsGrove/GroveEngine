@@ -3,7 +3,7 @@
  *
  * Provides the navigation links shown in the Lantern panel's two tabs:
  * - Destinations: core grove pages (Home, Dashboard, Feed, etc.)
- * - Services: platform tools (Email, Storage, AI Config, etc.)
+ * - Services: platform tools (Email, Storage, Admin, etc.)
  */
 
 import { featureIcons } from "@autumnsgrove/prism/icons";
@@ -15,7 +15,6 @@ const meadowIcon = resolveIcon(defaultSuite.meadow.icon);
 const forestsIcon = resolveIcon(defaultSuite.forests.icon);
 const ivyIcon = resolveIcon(defaultSuite.ivy.icon);
 const amberIcon = resolveIcon(defaultSuite.amber.icon);
-const reverieIcon = resolveIcon(defaultSuite.reverie.icon);
 const arborIcon = resolveIcon(defaultSuite.arbor.icon);
 
 /**
@@ -77,14 +76,6 @@ export const services: LanternDestination[] = [
 		icon: amberIcon,
 		external: true,
 		termSlug: "amber",
-	},
-	{
-		href: "/arbor/reverie",
-		label: "AI Config",
-		groveLabel: "Reverie",
-		icon: reverieIcon,
-		external: false,
-		termSlug: "reverie",
 	},
 	{
 		href: "/arbor",

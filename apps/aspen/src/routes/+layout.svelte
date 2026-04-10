@@ -19,6 +19,7 @@
 	import { themeStore } from "@autumnsgrove/lattice/ui/stores/theme.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores/season.svelte";
+	import { wandererStore } from "@autumnsgrove/lattice/ui/stores/wanderer.svelte";
 	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
 	import type { AppContext } from "../app.d.ts";
 
@@ -85,6 +86,13 @@
 			groveModeStore.hydrateFromServer(prefs.groveMode);
 			seasonStore.hydrateFromServer(prefs.season);
 		}
+
+		// Hydrate wanderer context: who am I and where am I?
+		// homeGrove comes from the user's DB record, currentGrove from the URL's tenant
+		wandererStore.hydrate(
+			data.lanternData?.homeGrove || "",
+			data.context?.type === "tenant" ? data.context.tenant.subdomain : "",
+		);
 	});
 
 	let { children, data }: { children: import("svelte").Snippet; data: LayoutData } = $props();

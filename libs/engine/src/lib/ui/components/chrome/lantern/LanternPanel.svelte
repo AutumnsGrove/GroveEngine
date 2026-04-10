@@ -2,6 +2,7 @@
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
+	import { wandererStore } from "$lib/ui/stores/wanderer.svelte";
 	import { getDestinations, services } from "./destinations";
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
@@ -22,8 +23,11 @@
 	const activeItems = $derived(lanternStore.activeTab === "destinations" ? destinations : services);
 	const homeLabel = $derived(groveModeStore.current ? "Return to Your Grove" : "Back to My Site");
 
-	/** The grove the user is visiting (not their own), if any */
-	const visiting = $derived(data.visitingGrove);
+	/** The grove the user is visiting (not their own), if any.
+	 *  Uses wandererStore for reliable home-vs-visiting detection (#1524). */
+	const visiting = $derived(
+		wandererStore.isVisiting ? data.visitingGrove : null,
+	);
 	/** Whether the user already follows the visited grove */
 	const alreadyFollowing = $derived(
 		visiting ? friendsStore.isFriend(visiting.tenantId) : false,
