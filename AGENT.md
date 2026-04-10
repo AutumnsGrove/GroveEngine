@@ -4,6 +4,74 @@
 
 ---
 
+## Behavioral Guidelines
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+### 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+### 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+### 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+### 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
 ## Project Naming
 
 |                       |                       |
@@ -84,187 +152,17 @@ Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in 
 
 Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.
 
+---
+
 ## Design Standards
 
-### Typography
+**See `DESIGN.md`** for the complete design reference: typography, color tokens, dual CSS variable system, Prism SSOT, and the Grove accent scale.
 
-- **Default Font:** Lexend — used across all Grove properties
-- **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
-- **Available Fonts:** See `libs/engine/static/fonts/` for the full collection
-
-### CRITICAL: Verify Colors Exist Before Using Them
-
-**Before using ANY Tailwind color class, verify it exists in the Grove design system.** LLMs frequently hallucinate class names that look right but aren't defined.
-
-**Valid Grove color families** (defined in `tailwind.preset.js`):
-
-| Token         | Variants                              | Example classes                         |
-| ------------- | ------------------------------------- | --------------------------------------- |
-| `grove`       | 50–950                                | `bg-grove-500`, `text-grove-700`        |
-| `cream`       | DEFAULT, 50–500                       | `bg-cream-200`, `border-cream-300`      |
-| `bark`        | DEFAULT, 50–950                       | `text-bark-900`, `bg-bark-50`           |
-| `primary`     | DEFAULT, foreground                   | `bg-primary`, `text-primary-foreground` |
-| `secondary`   | DEFAULT, foreground                   | `bg-secondary`                          |
-| `background`  | —                                     | `bg-background`                         |
-| `foreground`  | DEFAULT, muted, subtle, faint         | `text-foreground-muted`                 |
-| `muted`       | DEFAULT, foreground                   | `bg-muted`, `text-muted-foreground`     |
-| `accent`      | DEFAULT, foreground, muted, subtle    | `bg-accent-subtle`                      |
-| `surface`     | DEFAULT, hover, elevated, subtle, alt | `bg-surface-subtle`                     |
-| `card`        | DEFAULT, foreground                   | `bg-card`, `text-card-foreground`       |
-| `popover`     | DEFAULT, foreground                   | `bg-popover`                            |
-| `destructive` | DEFAULT, foreground                   | `bg-destructive`                        |
-| `error`       | DEFAULT, foreground, bg               | `text-error`, `bg-error-bg`             |
-| `warning`     | DEFAULT, foreground, bg, muted        | `text-warning`, `bg-warning-bg`         |
-| `success`     | DEFAULT, foreground, bg, muted        | `text-success`, `bg-success-bg`         |
-| `info`        | DEFAULT, foreground, bg, muted        | `text-info`, `bg-info-bg`               |
-| `divider`     | —                                     | `border-divider`                        |
-| `default`     | —                                     | `border-default`                        |
-| `subtle`      | —                                     | `bg-subtle`                             |
-| `border`      | —                                     | `border-border`                         |
-| `input`       | —                                     | `border-input`                          |
-| `ring`        | —                                     | `ring-ring`                             |
-
-**DO NOT use** standard Tailwind colors (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `red-*`, `blue-*`, `green-*`, `amber-*`, `purple-*`, `pink-*`, `emerald-*`, `indigo-*`, `teal-*`). These are not in the Grove palette and will render as transparent/invisible.
-
-**When unsure**, check the preset: `libs/prism/src/lib/tailwind/preset.js`
-
-### Dual Token System (CSS Custom Properties)
-
-The engine has **two parallel CSS variable systems** loaded in order by `+layout.svelte`:
-
-1. **`app.css`** (via Tailwind directives) — shadcn-style HSL system (`--primary`, `--foreground`, `--border`). Values are bare HSL channels, used as `hsl(var(--primary))`.
-2. **`tokens.css`** (`libs/engine/src/lib/styles/tokens.css`) — Grove's full semantic token system (`--color-text`, `--color-border`, `--glass-bg`, `--grove-overlay-*`, etc.). Values are complete color expressions.
-
-**tokens.css loads after app.css**, so it wins the cascade for any shared names. Do NOT add aliases to `app.css` for variables that `tokens.css` already defines — they'll be overridden silently.
-
-**When using CSS variables in scoped `<style>` blocks**, always verify the variable exists in one of these two files. Invented variable names fail silently (render as transparent).
-
-### CRITICAL: Prism is the Design SSOT
-
-**`@autumnsgrove/prism`** is the single source of truth for ALL design tokens and icons:
-
-- **Colors/tokens:** `@autumnsgrove/prism` (TS tokens), `@autumnsgrove/prism/css` (CSS custom properties), `@autumnsgrove/prism/tailwind` (Tailwind preset)
-- **Icons:** `@autumnsgrove/prism/icons` (408 icons across 12 semantic groups)
-
-**All 8 apps + engine import the Tailwind preset from `@autumnsgrove/prism/tailwind`:**
-
-```javascript
-import grovePreset from "@autumnsgrove/prism/tailwind";
-
-export default {
-	presets: [grovePreset],
-	content: [
-		"./src/**/*.{html,js,svelte,ts}",
-		"../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
-	],
-};
-```
-
-> **Note:** Engine has a deprecated re-export stub at `src/lib/ui/tailwind.preset.js` for backward compat. New code should import from Prism directly.
-
-### CRITICAL: Accent Colors — The Grove Accent Scale
-
-**NEVER hardcode green hex values (`#22c55e`, `#4ade80`, `#16a34a`, etc.) or `rgba(34, 197, 94, ...)` in CSS.** This is enforced by pre-commit hook. Users choose their accent color (purple, blue, red, etc.) and hardcoded green breaks their customization.
-
-**Use `--grove-accent-*` tokens from Prism instead:**
-
-| Token                    | What it is            | Use for                          |
-| ------------------------ | --------------------- | -------------------------------- |
-| `var(--grove-accent)`    | Solid accent color    | Buttons, links, active text      |
-| `var(--grove-accent-5)`  | 5% opacity tint       | Very subtle backgrounds          |
-| `var(--grove-accent-10)` | 10% opacity tint      | Subtle borders, hover bg         |
-| `var(--grove-accent-15)` | 15% opacity tint      | Light backgrounds, selected bg   |
-| `var(--grove-accent-20)` | 20% opacity tint      | Borders, focus rings             |
-| `var(--grove-accent-30)` | 30% opacity tint      | Strong borders, box shadows      |
-| `var(--grove-accent-40)` | 40% opacity tint      | Active borders                   |
-| `var(--grove-accent-50)` | 50% opacity tint      | Medium intensity                 |
-| `var(--grove-accent-70)` | 70% opacity tint      | High intensity overlays          |
-| `var(--grove-accent-80)` | 80% opacity tint      | Near-solid overlays              |
-| `var(--grove-accent-dark)`  | Darkened (80% + black) | Hover states on accent bg     |
-| `var(--grove-accent-light)` | Lightened (80% + white) | Light accent variant         |
-
-**Full scale:** 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50, 70, 80 + dark/light
-
-**Examples:**
-
-```svelte
-<style>
-  /* ✅ CORRECT — uses accent tokens */
-  .btn { background: var(--grove-accent); }
-  .btn:hover { background: var(--grove-accent-dark); }
-  .subtle-bg { background: var(--grove-accent-10); }
-  .border { border: 1px solid var(--grove-accent-20); }
-  .glow { box-shadow: 0 0 8px var(--grove-accent-30); }
-
-  /* ❌ WRONG — hardcoded green, breaks non-green accents */
-  .btn { background: #22c55e; }
-  .subtle-bg { background: rgba(34, 197, 94, 0.1); }
-  .border { border: 1px solid var(--grove-500, #22c55e); }
-</style>
-```
-
-**When green IS correct:** Brand assets (Grove logo, nature SVGs), seasonal decorations, and semantic success/status colors (`--success`, `text-success`) are intentionally green. Mark these with `// accent-ok` to suppress the pre-commit hook.
-
-**Defined in:** `libs/prism/src/lib/css/grove-tokens.css` (SSOT) and `libs/engine/src/lib/styles/tokens.css` (engine duplicate)
+---
 
 ## Architecture Notes
 
-- Multi-tenant architecture with subdomain routing
-- Cloudflare-first infrastructure (Workers, D1, KV, R2)
-- Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
-
-### D1 Database Architecture (3 databases)
-
-| Database                 | Binding    | Tables | Purpose                                              |
-| ------------------------ | ---------- | ------ | ---------------------------------------------------- |
-| `grove-engine-db`        | `DB`       | ~78    | Core: auth, tenants, pages, billing, platform config |
-| `grove-curios-db`        | `CURIO_DB` | 45     | Curio widgets: timeline, gallery, guestbook, etc.    |
-| `grove-observability-db` | `OBS_DB`   | 16     | Observability: sentinel monitoring, vista analytics  |
-
-**Binding rules:**
-
-- **Curio routes** (`/api/curios/*`, `/arbor/curios/*`, `/(site)/timeline|gallery|guestbook|pulse`) → use `platform?.env?.CURIO_DB`
-- **Observability routes** (`/api/sentinel/*`, `/api/vista/*`) → use `platform?.env?.OBS_DB`
-- **Everything else** (auth, tenants, pages, billing) → use `platform?.env?.DB`
-- **Cross-DB routes** (e.g., timeline generate/backfill/save-token) need **both** `DB` and `CURIO_DB` — `DB` for SecretsManager, `CURIO_DB` for curio tables
-
-### Warden (Credential Gateway)
-
-**Warden** (`workers/warden/`) is Grove's centralized API credential gateway. No other worker should hold raw API keys — they resolve credentials through Warden via service binding.
-
-**Credential flow:** Worker receives request → calls Warden `/resolve` with its agent API key → Warden authenticates, checks scopes, decrypts credential from `tenant_secrets` → returns key → worker uses it for the external API call. Raw keys never leave Warden except over internal service bindings (same colo, in-process).
-
-**Agent enrollment:** Each worker that needs credentials must be registered as a Warden agent with scoped permissions:
-
-```bash
-gw warden agent enroll --write --name <worker-name> --owner system \
-  --scopes "openrouter:*" --rpm 600 --daily 50000 --apply-to <worker-name>
-```
-
-This registers the agent, generates a unique API key, saves it to the vault, and deploys it to the worker.
-
-**Key `gw warden` commands:**
-
-| Command                                  | Tier   | Description                        |
-| ---------------------------------------- | ------ | ---------------------------------- |
-| `gw warden status`                       | Read   | Check Warden health                |
-| `gw warden agent list`                   | Read   | List registered agents             |
-| `gw warden logs [--service] [--agent]`   | Read   | Fetch audit logs                   |
-| `gw warden agent enroll --write [flags]` | Write  | Register agent + save key to vault |
-| `gw warden agent revoke --write --force` | Danger | Disable an agent (irreversible)    |
-
-**Alias fallback:** Warden checks multiple key names per service (e.g., `openrouter_api_key` then `timeline_openrouter_key`) so credentials saved under legacy names are still discoverable.
-
-### Key Architecture Documents
-
-| Document                                                            | Purpose                                                                           |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `docs/plans/infra/completed/database-consolidation-architecture.md` | 3-phase database extraction plan (completed Feb 2026)                             |
-| `docs/patterns/loom-durable-objects-pattern.md`                     | Loom DO coordination layer for auth, tenant coordination, D1 batching             |
-| `docs/specs/rings-spec.md`                                          | Rings analytics system with privacy-first design and DO integration               |
-| `docs/grove-ai-gateway-integration.md`                              | Cloudflare AI Gateway integration for per-tenant AI quotas and observability      |
-| `docs/specs/server-sdk-spec.md`                                     | Infra SDK infrastructure abstraction layer (Ports & Adapters)                     |
-| `docs/specs/drizzle-integration-spec.md`                            | Drizzle ORM integration (The Aquifer): typed D1 queries, scopedDb, migration plan |
+**See `ARCHITECTURE.md`** for the complete architecture reference: D1 database layout (3 databases), Warden credential gateway, and key architecture documents.
 
 ---
 
@@ -292,174 +190,20 @@ Run `gw --help` for full commands. See `AgentUsage/git_guide.md` for details.
 - ALWAYS prefer editing existing files to creating new ones
 - NEVER proactively create documentation files (\*.md) or README files unless explicitly requested
 
-### MANDATORY: Agent Self-Verification Protocol
+### Verification
 
-**After making ANY code changes, you MUST verify your work before committing.** Do not commit broken code.
+**See `VERIFICATION.md`** for the complete verification reference: self-verification protocol, Glimpse visual testing, Showroom component auditing, and data profiles.
 
-```bash
-# Step 1: Ensure dependencies are in sync
-pnpm install
-
-# Step 2: Run affected-only CI
-gw dev ci --affected --fail-fast --diagnose
-```
-
-**When verification fails:** Read diagnostics, fix errors, re-run, repeat until clean, THEN commit.
-
-**When to run:** After completing code changes (before commit), after PR review feedback (before push), after multi-file refactoring.
-
-**When to skip:** Documentation-only changes (.md files only), configuration-only changes.
-
-**This is non-negotiable.** Every workflow must end with verification before commit.
-
-### Glimpse — Visual Verification (UI Work)
-
-**When you build, modify, or review UI, you MUST look at the result.** CI passing is not the same as looking correct. Glimpse is Grove's Playwright-based screenshot tool — it lets you see what you built.
-
-#### Quick Start (3 steps from cold start)
+**Quick reference:**
 
 ```bash
-# 1. Seed the local database with test data
-uv run --project tools/glimpse glimpse seed --yes
+# Verify code changes before committing
+pnpm install && gw dev ci --affected --fail-fast --diagnose
 
-# 2. Capture a page (--auto starts the dev server if not running)
+# Verify UI changes visually
 uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
   --season autumn --theme dark --logs --auto
-
-# 3. Read the screenshot to verify (Claude can view PNGs)
-# The output path is printed in the capture output
 ```
-
-That's it. `glimpse seed` sets up the database, `--auto` starts the dev server, and `?subdomain=` routes to the test tenant locally.
-
-#### Local Routing
-
-Locally, subdomains are simulated via query parameter:
-
-- `http://localhost:5173/?subdomain=midnight-bloom` — Home page
-- `http://localhost:5173/garden?subdomain=midnight-bloom` — Blog listing
-- `http://localhost:5173/garden/some-post?subdomain=midnight-bloom` — Blog post
-- `http://localhost:5173/about?subdomain=midnight-bloom` — About page
-
-#### Data Profiles
-
-Glimpse seeds local D1 databases with test content. Choose the right profile for what you're testing:
-
-```bash
-# Full curated blog (3 posts, 5 pages) — default, good for consistent verification
-uv run --project tools/glimpse glimpse seed --profile blog --yes
-
-# Empty tenant — test what new users see (no posts, no custom pages)
-uv run --project tools/glimpse glimpse seed --profile empty --yes
-
-# Random content via @faker-js/faker — proves UI works with any data, not just golden-path
-uv run --project tools/glimpse glimpse seed --profile fake --fake-posts 5 --yes
-
-# Migrations only, no seed data — clean slate
-uv run --project tools/glimpse glimpse seed --profile fresh --yes
-```
-
-| Profile | Subdomain           | Use Case                                                    |
-| ------- | ------------------- | ----------------------------------------------------------- |
-| `blog`  | `midnight-bloom`    | Default. Curated tea shop blog with known content           |
-| `empty` | `empty-grove`       | Empty state testing — what does a blank site look like?     |
-| `fake`  | _(random each run)_ | Random content — proves rendering works with arbitrary data |
-| `fresh` | _(none)_            | Migrations only — no tenant data at all                     |
-
-**Use `fake` when you want to prove your UI handles real-world variation, not just the one test dataset you designed around.**
-
-#### Capture Commands
-
-```bash
-# Single page capture with theme injection
-uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
-  --season autumn --theme dark --logs --auto
-
-# All season × theme combinations at once
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/?subdomain=midnight-bloom --auto
-
-# Interactive browsing — click around, fill forms, verify flows
-uv run --project tools/glimpse glimpse browse http://localhost:5173/?subdomain=midnight-bloom \
-  --do "click Posts, then scroll down" --screenshot-each --logs --auto
-
-# Check readiness (browser, server, database)
-uv run --project tools/glimpse glimpse status
-```
-
-#### Dev Server Details
-
-The `--auto` flag handles server startup automatically. If you need to manage it manually:
-
-```bash
-# Start dev server (from repo root — runs in libs/engine via wrangler)
-cd libs/engine && pnpm dev:wrangler
-
-# Stop auto-started server
-uv run --project tools/glimpse glimpse stop
-```
-
-Default port is 5173. The server runs via wrangler for local D1/KV/R2 bindings.
-
-#### When to use Glimpse vs Showroom
-
-- **Showroom first** — After building or modifying any individual UI component, run `glimpse showroom` to audit it in isolation (design tokens, spacing, focus styles, visual baselines)
-- **Glimpse second** — After components pass Showroom, capture full pages with `glimpse capture`/`glimpse matrix` to verify integration
-- During design skill workflows (chameleon-adapt, gathering-ui, grove-ui-design) — both gates are required
-- When verifying accessibility (deer-sense) — Showroom for component a11y, Glimpse for page-level a11y
-- Before declaring UI work complete — Showroom → Glimpse → review → iterate
-- When reviewing someone else's UI changes
-
-**The iterate loop:** Capture → look at screenshot → fix issues → capture again. Don't ship UI you haven't seen.
-
-**Output modes:** `--agent` for CI-style output, `--json` for structured data, default for rich terminal display. Use `--logs` to surface console errors alongside screenshots.
-
-**Full spec:** `docs/specs/glimpse-spec.md`
-
-#### Showroom — Component-Level Visual Auditing
-
-**When you build, modify, or review individual UI components, you MUST audit them in isolation.** Glimpse captures full pages; Showroom isolates single `.svelte` components, renders them with controlled props and scenarios, runs design compliance checks (color tokens, spacing grid, typography, focus styles), and diffs against visual baselines.
-
-**This is a required gate for component work.** You cannot declare a component "done" without a passing Showroom audit. Page-level Glimpse captures are not a substitute — they don't catch component-level issues like missing focus rings, off-grid spacing, or hardcoded colors hidden behind page context.
-
-```bash
-# Audit a component (auto-starts the Showroom server)
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/primitives/button/button.svelte
-
-# Scaffold a fixture file for a new component (generates .showroom.ts)
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/ui/MyNewComponent.svelte --scaffold
-
-# Audit with specific scenario/theme
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/primitives/button/button.svelte \
-  --scenario destructive --theme dark
-
-# Update visual baselines after intentional design changes
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/primitives/button/button.svelte \
-  --update-baselines
-```
-
-**What the audit checks:**
-- **Color tokens** — Flags hardcoded hex/rgb values not using CSS custom properties
-- **Spacing grid** — Verifies all spacing aligns to 4px increments
-- **Typography scale** — Ensures font sizes follow the design scale
-- **Focus styles** — Checks interactive elements have visible focus indicators
-- **Heading hierarchy** — Validates heading levels don't skip
-- **Image alt text** — Ensures images have alt attributes
-- **Visual diff** — Compares screenshots against baselines to catch regressions
-
-**Output:** An audit bundle in `.glimpse/showroom/` containing screenshots (light + dark), compliance results, and visual diffs.
-
-**When to use Showroom vs Glimpse:**
-
-| Tool | Scope | Use When |
-|------|-------|----------|
-| **Showroom** | Single component in isolation | Building/modifying a component, reviewing component PRs, verifying design token compliance |
-| **Glimpse** | Full page with real data | Verifying page layouts, user flows, seasonal themes, integration testing |
-
-**The component gate:** After building or modifying any UI component → `glimpse showroom <component>` → review audit → fix violations → re-audit → THEN use Glimpse for full-page verification. Both gates must pass before shipping.
 
 ### Naming Conventions
 
@@ -508,92 +252,9 @@ Use conventional commits format for PR titles. Write a brief description of what
 
 ---
 
-## Engine-First Pattern (CRITICAL)
+## Code Standards
 
-> **The engine exists to prevent duplication. USE IT.**
-
-**Before implementing ANY utility, component, or pattern in an app:**
-
-```
-1. CHECK: Does the engine already have this?
-   └── YES → Import from @autumnsgrove/lattice
-   └── NO  → Continue to step 2
-
-2. IMPLEMENT: Add it to the engine FIRST
-   └── libs/engine/src/lib/...
-
-3. IMPORT: Then use it from the engine in your app
-   └── import { thing } from '@autumnsgrove/lattice/...'
-```
-
-### What the Engine Provides
-
-| Category              | Import Path                           | Examples                     |
-| --------------------- | ------------------------------------- | ---------------------------- |
-| **UI Components**     | `@autumnsgrove/lattice/ui/chrome`     | Header, Footer, Logo         |
-| **UI Utilities**      | `@autumnsgrove/lattice/ui/utils`      | `cn()` (with tailwind-merge) |
-| **Stores**            | `@autumnsgrove/lattice/ui/stores`     | `seasonStore`, `themeStore`  |
-| **Nature Components** | `@autumnsgrove/lattice/ui/nature`     | Trees, creatures, palette    |
-| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton       |
-| **General Utils**     | `@autumnsgrove/lattice/utils`         | csrf, sanitize, markdown     |
-| **Content**           | `@autumnsgrove/lattice/ui/content`    | ContentWithGutter, TOC       |
-| **Forms**             | `@autumnsgrove/lattice/ui/forms`      | Form components              |
-| **Gallery**           | `@autumnsgrove/lattice/ui/gallery`    | Image galleries              |
-| **Charts**            | `@autumnsgrove/lattice/ui/charts`     | Data visualization           |
-| **Icons**             | `@autumnsgrove/prism/icons`           | Icon gateway (ALL icons)     |
-| **Typography**        | `@autumnsgrove/lattice/ui/typography` | Text components              |
-| **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
-| **Errors**            | `@autumnsgrove/lattice/errors`        | Signpost error codes         |
-| **Type Safety**       | `@autumnsgrove/lattice/server`        | Rootwork boundary utilities  |
-| **Infrastructure**    | `@autumnsgrove/lattice/infra`         | Infra SDK (DB, Storage, KV)  |
-
-### Common Violations (Don't Do These)
-
-```typescript
-// ❌ BAD - Creating local utilities
-export function cn(...classes) {
-	return classes.filter(Boolean).join(" ");
-}
-
-// ✅ GOOD - Import from engine
-import { cn } from "@autumnsgrove/lattice/ui/utils";
-```
-
-### Icons — Prism Gateway (CRITICAL)
-
-**ALL icons go through `@autumnsgrove/prism/icons`.** This is enforced by pre-commit hook.
-
-```svelte
-<!-- ✅ CORRECT — Prism dotted access -->
-<script>
-  import { stateIcons, navIcons, natureIcons } from '@autumnsgrove/prism/icons';
-</script>
-<stateIcons.check class="w-5 h-5" />
-<navIcons.arrowRight class="w-4 h-4" />
-
-<!-- ❌ WRONG — bare Lucide import (blocked by pre-commit) -->
-import { Check } from '@lucide/svelte';
-
-<!-- ❌ WRONG — individual named imports from engine barrel -->
-import { Check, ArrowRight } from '@autumnsgrove/lattice/ui/icons';
-
-<!-- ❌ WRONG — svelte:component (Svelte 4 pattern) -->
-<svelte:component this={stateIcons.check} />
-```
-
-**12 semantic groups:** `navIcons`, `stateIcons`, `natureIcons`, `seasonIcons`, `actionIcons`, `featureIcons`, `authIcons`, `metricIcons`, `phaseIcons`, `toolIcons`, `blazeIcons`, `chromeIcons`
-
-**Lookup utilities:** `resolveAnyIcon(name, fallback)` — resolves by alias OR Lucide name (case-insensitive)
-
-**Manifest:** `libs/prism/src/lib/icons/manifest.ts` — the SSOT for all icon identity. To add an icon: one line here.
-
-**Adapter:** `libs/prism/src/lib/icons/adapters/lucide.ts` — the ONE file importing from `@lucide/svelte`. Swapping icon packs = changing this file.
-
-### Quick Engine Export Check
-
-```bash
-cat libs/engine/package.json | grep -A2 '"\./'
-```
+**See `CODE-STANDARDS.md`** for the complete code standards reference: engine-first pattern, Prism icon gateway, Signpost error handling, Rootwork type safety, database query patterns, and CSRF configuration.
 
 ---
 
@@ -616,7 +277,7 @@ Grove has layered security animals — use the right one for the scope of work:
 | `hawk-survey`        | Formal audit + remediation | Full STRIDE threat model across 14 domains           |
 | `gathering-security` | End-to-end pipeline        | Spider → Raccoon → Turtle in coordinated sequence    |
 
-**Credential security:** All API keys route through Warden (see [Warden section](#warden-credential-gateway)). Use `gw warden agent enroll` to register workers, `gw secret` to manage the vault.
+**Credential security:** All API keys route through Warden (see `ARCHITECTURE.md`). Use `gw warden agent enroll` to register workers, `gw secret` to manage the vault.
 
 ### Gathering Chains (Multi-Animal Workflows)
 
@@ -630,178 +291,6 @@ When a task spans multiple specialties, gatherings orchestrate the right animals
 | `gathering-security`     | Spider → Raccoon → Turtle                     | Auth + audit + hardening                 |
 | `gathering-migration`    | Bloodhound → Bear                             | Scout territory → migrate data           |
 | `gathering-planning`     | Bee → Badger                                  | Idea capture → board organization        |
-
----
-
-## Code Style
-
-### Function & Variable Naming
-
-- Use meaningful, descriptive names
-- Keep functions small and focused on single responsibilities
-
-### Error Handling (Signpost Standard)
-
-**MANDATORY: Every error MUST use a Signpost error code.** Bare `throw new Error()` is not acceptable.
-
-**Import:**
-
-```typescript
-import {
-	API_ERRORS,
-	ARBOR_ERRORS,
-	SITE_ERRORS,
-	throwGroveError,
-	logGroveError,
-	buildErrorJson,
-	buildErrorUrl,
-} from "@autumnsgrove/lattice/errors";
-```
-
-**Which Helper Where:**
-
-| Context                        | Helper              | Example                                                                    |
-| ------------------------------ | ------------------- | -------------------------------------------------------------------------- |
-| API routes (`+server.ts`)      | `buildErrorJson()`  | `return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 })`    |
-| Page loads (`+page.server.ts`) | `throwGroveError()` | `throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, 'Engine')`               |
-| Auth redirects                 | `buildErrorUrl()`   | `redirect(302, buildErrorUrl(AUTH_ERRORS.SESSION_EXPIRED, '/login'))`      |
-| Any server context             | `logGroveError()`   | `logGroveError('Engine', API_ERRORS.INTERNAL_ERROR, { path, cause: err })` |
-
-**Error Catalogs:**
-
-| Catalog        | Prefix            | Import                            |
-| -------------- | ----------------- | --------------------------------- |
-| `API_ERRORS`   | `GROVE-API-XXX`   | `@autumnsgrove/lattice/errors`    |
-| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/lattice/errors`    |
-| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/lattice/errors`    |
-| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood` |
-| `SRV_ERRORS`   | `SRV-XXX`         | `@autumnsgrove/infra`             |
-| `PLANT_ERRORS` | `PLANT-XXX`       | `apps/plant/src/lib/errors.ts`    |
-
-**Client-Side Feedback (Toast):**
-
-```typescript
-import { toast } from "@autumnsgrove/lattice/ui";
-
-toast.success("Post published!");
-toast.error(err instanceof Error ? err.message : "Something went wrong");
-toast.promise(apiRequest("/api/export", { method: "POST" }), {
-	loading: "Exporting...",
-	success: "Export complete!",
-	error: "Export failed.",
-});
-```
-
-**When NOT to use toast:** form validation errors (use `fail()` + inline), page load failures (`+error.svelte`), persistent notices (use GroveMessages)
-
-See `AgentUsage/error_handling.md` for the full reference.
-
-### Type Safety at Boundaries (Rootwork)
-
-**MANDATORY: No `as` casts at trust boundaries.** Use Rootwork utilities for form data, KV reads, caught exceptions, and webhook payloads.
-
-```typescript
-import {
-	parseFormData,
-	safeJsonParse,
-	isRedirect,
-	isHttpError,
-} from "@autumnsgrove/lattice/server";
-```
-
-| Boundary               | Utility                                |
-| ---------------------- | -------------------------------------- |
-| `request.formData()`   | `parseFormData(formData, ZodSchema)`   |
-| KV / JSON strings      | `safeJsonParse(raw, ZodSchema)`        |
-| SvelteKit catch blocks | `isRedirect(err)` / `isHttpError(err)` |
-
-See `AgentUsage/rootwork_type_safety.md` for patterns, decision guide, and checklist.
-
-### File Organization
-
-- Group related functionality into modules
-- Import ordering: standard library → third-party → local imports
-- Keep configuration separate from logic
-
-### Database Query Patterns (Multi-DB)
-
-**Choose the right binding** — see [D1 Database Architecture](#d1-database-architecture-3-databases) above.
-
-```typescript
-// Standard curio route — single binding
-const db = platform?.env?.CURIO_DB;
-if (!db) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-
-// Cross-DB route (e.g., timeline generate) — dual binding
-const db = platform?.env?.DB; // Core: SecretsManager, tenants
-const curioDb = platform?.env?.CURIO_DB; // Curios: timeline_*, gallery_*, etc.
-if (!db || !curioDb) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-```
-
-**Isolate independent queries** — never put multiple in the same try/catch:
-
-```typescript
-// ❌ BAD - one failure blocks all
-try {
-	const settings = await db.prepare("SELECT * FROM settings").all();
-	const pages = await db.prepare("SELECT * FROM pages").all();
-} catch (error) {}
-
-// ✅ GOOD - isolated with individual fallbacks
-const [settings, pages] = await Promise.all([
-	db
-		.prepare("SELECT * FROM settings")
-		.all()
-		.catch(() => null),
-	db
-		.prepare("SELECT * FROM pages")
-		.all()
-		.catch(() => null),
-]);
-```
-
-**Use typed query builders** from `libs/engine/src/lib/server/services/database.ts` instead of raw SQL.
-
-**Drizzle ORM (preferred for new code)** — typed queries with compile-time safety:
-
-```typescript
-import { createDb, scopedDb } from "@autumnsgrove/lattice/db";
-import type { Post } from "@autumnsgrove/lattice/db";
-
-// Create client from D1 binding
-const db = createDb(platform.env.DB);
-
-// Tenant-scoped queries (automatic WHERE tenant_id = ?)
-const tenant = scopedDb(db, locals.tenantId);
-const post = await tenant.posts.findBySlug("hello-world");
-const published = await tenant.posts.listPublished();
-
-// Direct Drizzle queries (for platform-wide operations)
-import { posts } from "@autumnsgrove/lattice/db/schema";
-import { eq, desc } from "@autumnsgrove/lattice/db";
-const allPosts = await db
-	.select()
-	.from(posts)
-	.where(eq(posts.status, "published"))
-	.orderBy(desc(posts.publishedAt));
-```
-
-Drizzle and raw D1 coexist. Both patterns work in the same file. New code should prefer Drizzle; existing raw D1 queries migrate incrementally. See `docs/specs/drizzle-integration-spec.md` for the full migration plan.
-
-**Schema files** live at `libs/engine/src/lib/server/db/schema/` (engine.ts, curios.ts, observability.ts). When a column changes in the schema, types update everywhere automatically.
-
-### Multi-Tenant CSRF
-
-SvelteKit's built-in CSRF fails behind `grove-router` proxy. Configure `csrf.trustedOrigins` in `svelte.config.js`:
-
-```javascript
-kit: {
-  csrf: {
-    checkOrigin: true,
-    trustedOrigins: ["https://grove.place", "https://*.grove.place", "http://localhost:5173"],
-  },
-}
-```
 
 ---
 
@@ -823,11 +312,15 @@ Full reference: `AgentUsage/house_agents.md`
 
 ## Additional Resources
 
+- **Design standards:** `DESIGN.md` — colors, tokens, Prism, accent scale
+- **Architecture:** `ARCHITECTURE.md` — D1 databases, Warden, infrastructure
+- **Verification:** `VERIFICATION.md` — CI checks, Glimpse, Showroom
+- **Code standards:** `CODE-STANDARDS.md` — engine-first, errors, types, queries
 - **Skills:** `.claude/skills/` — primary mechanism for specialized workflows
 - **Extended docs:** `AgentUsage/README.md` — master index of detailed documentation
 - **Design context:** `AgentUsage/design_context.md` — brand, aesthetic, principles
 
 ---
 
-_Last updated: 2026-02-23_
+_Last updated: 2026-04-10_
 _Model: Claude Opus 4.6_
