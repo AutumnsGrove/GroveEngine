@@ -4,7 +4,7 @@ import { building } from "$app/environment";
 import { TIERS, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
-import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/platform/feature-flags";
+import { isInGreenhouse } from "@autumnsgrove/lattice/platform/feature-flags";
 import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
@@ -180,19 +180,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 					// Process logged-in user results (greenhouse + home grove ran in the batch above)
 					homeGrove = groveResult;
 
-					// Lantern navigation panel — only for logged-in users.
-					// Lantern is a visitor-side feature: the flag must be evaluated against
-					// the visitor's HOME grove, not the grove being visited (#1546).
-					if (locals.user && flagsEnv && homeGrove?.tenantId) {
-						const homeGreenhouse = await isInGreenhouse(homeGrove.tenantId, flagsEnv).catch(
-							() => false,
-						);
-						lanternEnabled = await isFeatureEnabled(
-							"lantern_enabled",
-							{ tenantId: homeGrove.tenantId, inGreenhouse: homeGreenhouse },
-							flagsEnv,
-						).catch(() => false);
-					}
+					// Lantern navigation panel — available to ALL logged-in users (#1519).
+					// Wanderers without groves need discovery tools most — no flag gate.
+					lanternEnabled = !!locals.user;
 
 					// Calculate enabled curios count for the pages admin UI
 					// This count is used to show accurate "slots used" (nav pages + curios share the same limit)
