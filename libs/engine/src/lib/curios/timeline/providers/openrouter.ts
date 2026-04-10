@@ -107,7 +107,8 @@ export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = Object.fromEnt
 	}),
 );
 
-export const DEFAULT_OPENROUTER_MODEL = modelData.models[modelData.defaults.timeline].id;
+export const DEFAULT_OPENROUTER_MODEL =
+	modelData.models[modelData.defaults.timeline as keyof typeof modelData.models].id;
 
 // =============================================================================
 // UI Utilities (kept for model picker and key validation)
