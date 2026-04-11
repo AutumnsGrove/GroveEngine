@@ -119,22 +119,22 @@ Every night, Patina runs automated backups of all Grove D1 databases to R2 cold 
            ▼                   ▼                   ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │   D1 Databases  │  │  grove-patina   │  │  grove-patina   │
-│   (14 total)    │  │     (R2)        │  │     -db (D1)    │
+│   (7 total)     │  │     (R2)        │  │     -db (D1)    │
 │                 │  │                 │  │                 │
 │ • groveauth     │  │ Backup Storage  │  │ Backup metadata │
-│ • scout-db      │  │                 │  │ Job history     │
-│ • grove-engine  │  │ /daily/         │  │ Alert config    │
-│ • autumnsgrove- │  │   YYYY-MM-DD/   │  │                 │
-│     posts       │  │   db-name.sql   │  │                 │
-│ • autumnsgrove- │  │                 │  │                 │
-│     git-stats   │  │ /weekly/        │  │                 │
-│ • grove-domain  │  │   YYYY-Www.tar  │  │                 │
-│ • and 8 more    │  │                 │  │                 │
+│ • grove-engine  │  │                 │  │ Job history     │
+│ • grove-curios  │  │ /daily/         │  │ Alert config    │
+│ • grove-domain- │  │   YYYY-MM-DD/   │  │                 │
+│     jobs        │  │   db-name.sql   │  │                 │
+│ • amber         │  │                 │  │                 │
+│ • ivy-db        │  │ /weekly/        │  │                 │
+│ • grove-observ- │  │   YYYY-Www.tar  │  │                 │
+│     ability     │  │                 │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
 
 Backup Flow (Nightly):
 1. Cron triggers at 3 AM UTC every night
-2. Worker iterates through all 14 databases
+2. Worker iterates through all 7 databases
 3. For each DB: export schema + data to SQL
 4. Upload to R2: /daily/YYYY-MM-DD/db-name.sql
 5. Log results to grove-patina-db
@@ -290,38 +290,25 @@ export const DATABASES: DatabaseConfig[] = [
     description: "Authentication, users, sessions, OAuth (Heartwood)",
     priority: "critical",
     estimatedSize: "212 KB",
-  },
-  {
-    name: "scout-db",
-    id: "6a289378-c662-4c6a-9f1b-fa5296e03fa2",
-    binding: "SCOUT_DB",
-    description: "GroveScout searches, credits, referrals",
-    priority: "critical",
-    estimatedSize: "364 KB",
+    dailyBackup: true,
   },
   {
     name: "grove-engine-db",
     id: "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68",
     binding: "GROVE_ENGINE_DB",
     description: "Core platform: tenants, content, multi-tenant data (Lattice)",
-    priority: "critical",
-    estimatedSize: "180 KB",
-  },
-  {
-    name: "autumnsgrove-posts",
-    id: "510badf3-457a-4892-bf2a-45d4bfd7a7bb",
-    binding: "AUTUMNSGROVE_POSTS_DB",
-    description: "AutumnsGrove blog posts",
     priority: "high",
-    estimatedSize: "118 KB",
+    estimatedSize: "180 KB",
+    dailyBackup: true,
   },
   {
-    name: "autumnsgrove-git-stats",
-    id: "0ca4036f-93f7-4c8a-98a5-5353263acd44",
-    binding: "AUTUMNSGROVE_GIT_STATS_DB",
-    description: "Git statistics for AutumnsGrove",
-    priority: "normal",
-    estimatedSize: "335 KB",
+    name: "grove-curios-db",
+    id: "b03756ad-30d7-427a-9a1b-ec2f6478fcbd",
+    binding: "GROVE_CURIOS_DB",
+    description: "Curio widgets: timeline, gallery, guestbook, polls, mood ring, shrines, etc.",
+    priority: "high",
+    estimatedSize: "~50 KB",
+    dailyBackup: true,
   },
   {
     name: "grove-domain-jobs",
@@ -332,13 +319,20 @@ export const DATABASES: DatabaseConfig[] = [
     estimatedSize: "45 KB",
   },
   {
-    name: "grove-curios-db",
-    id: "b03756ad-30d7-427a-9a1b-ec2f6478fcbd",
-    binding: "GROVE_CURIOS_DB",
-    description: "Curio widgets: timeline, gallery, guestbook, polls, mood ring, shrines, etc.",
-    priority: "high",
-    estimatedSize: "~50 KB",
-    dailyBackup: true,
+    name: "amber",
+    id: "f688021b-a986-495a-94bb-352354768a22",
+    binding: "AMBER_DB",
+    description: "Amber application data",
+    priority: "normal",
+    estimatedSize: "86 KB",
+  },
+  {
+    name: "ivy-db",
+    id: "57738720-bc43-4a7f-ad5b-ceb86b3c0542",
+    binding: "IVY_DB",
+    description: "Ivy application data",
+    priority: "normal",
+    estimatedSize: "147 KB",
   },
   {
     name: "grove-observability-db",
@@ -713,8 +707,8 @@ Manually trigger a backup.
 ```typescript
 // Request body (optional)
 {
-  "databases": ["groveauth", "scout-db"], // Specific DBs, or omit for all
-  "reason": "Pre-deployment backup"       // Optional note
+  "databases": ["groveauth", "amber"], // Specific DBs, or omit for all
+  "reason": "Pre-deployment backup"    // Optional note
 }
 
 // Response
@@ -886,14 +880,14 @@ Get restore instructions for a specific database.
   "status": "partial_failure",
   "timestamp": "2024-12-08T03:01:30Z",
   "summary": {
-    "successful": 7,
+    "successful": 5,
     "failed": 2,
-    "totalSize": "1.8 MB",
-    "duration": "52s"
+    "totalSize": "0.9 MB",
+    "duration": "42s"
   },
   "failures": [
-    { "database": "scout-db", "error": "Timeout after 30s" },
-    { "database": "grovemusic-db", "error": "Connection refused" }
+    { "database": "amber", "error": "Timeout after 30s" },
+    { "database": "ivy-db", "error": "Connection refused" }
   ]
 }
 ```
@@ -1098,7 +1092,7 @@ crons = [
 ]
 
 # ============================================
-# Source D1 Databases (14 Grove databases)
+# Source D1 Databases (7 Grove databases)
 # ============================================
 
 [[d1_databases]]
@@ -1107,29 +1101,24 @@ database_name = "groveauth"
 database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
 [[d1_databases]]
-binding = "SCOUT_DB"
-database_name = "scout-db"
-database_id = "6a289378-c662-4c6a-9f1b-fa5296e03fa2"
-
-[[d1_databases]]
 binding = "GROVE_ENGINE_DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 [[d1_databases]]
-binding = "AUTUMNSGROVE_POSTS_DB"
-database_name = "autumnsgrove-posts"
-database_id = "510badf3-457a-4892-bf2a-45d4bfd7a7bb"
-
-[[d1_databases]]
-binding = "AUTUMNSGROVE_GIT_STATS_DB"
-database_name = "autumnsgrove-git-stats"
-database_id = "0ca4036f-93f7-4c8a-98a5-5353263acd44"
-
-[[d1_databases]]
 binding = "GROVE_DOMAIN_JOBS_DB"
 database_name = "grove-domain-jobs"
 database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
+
+[[d1_databases]]
+binding = "AMBER_DB"
+database_name = "amber"
+database_id = "f688021b-a986-495a-94bb-352354768a22"
+
+[[d1_databases]]
+binding = "IVY_DB"
+database_name = "ivy-db"
+database_id = "57738720-bc43-4a7f-ad5b-ceb86b3c0542"
 
 [[d1_databases]]
 binding = "GROVE_CURIOS_DB"
@@ -1336,7 +1325,7 @@ Before beginning recovery, ensure you have:
 
 ```bash
 # Check which databases are affected
-for db in groveauth scout-db grove-engine-db grovemusic-db library-enhancer-db autumnsgrove-posts autumnsgrove-git-stats grove-domain-jobs your-site-posts amber mycelium-oauth ivy-db grove-curios-db grove-observability-db; do
+for db in groveauth grove-engine-db grove-domain-jobs amber ivy-db grove-curios-db grove-observability-db; do
   echo "Checking $db..."
   wrangler d1 execute $db --command="SELECT COUNT(*) FROM sqlite_master" 2>&1
 done
@@ -1356,22 +1345,15 @@ wrangler r2 object list grove-patina --prefix="daily/"
 
 ⚠️ **CRITICAL: Restore databases in this exact order** (dependencies matter):
 
-| Order | Database                 | Priority | Reason                          |
-| ----- | ------------------------ | -------- | ------------------------------- |
-| 1     | `groveauth`              | Critical | All auth depends on this        |
-| 2     | `grove-engine-db`        | Critical | Core platform, references auth  |
-| 3     | `scout-db`               | Critical | References users from groveauth |
-| 4     | `autumnsgrove-posts`     | High     | Blog content                    |
-| 5     | `grove-curios-db`        | High     | Curio widgets                   |
-| 6     | `grovemusic-db`          | High     | Music library data              |
-| 7     | `library-enhancer-db`    | High     | Library enhancement features    |
-| 8     | `autumnsgrove-git-stats` | Normal   | Can be regenerated              |
-| 9     | `grove-domain-jobs`      | Normal   | Transient job data              |
-| 10    | `your-site-posts`        | Normal   | Blog posts                      |
-| 11    | `amber`                  | Normal   | Supporting data                 |
-| 12    | `mycelium-oauth`         | Normal   | OAuth integration data          |
-| 13    | `ivy-db`                 | Normal   | IVY framework data              |
-| 14    | `grove-observability-db` | Normal   | Monitoring/telemetry data       |
+| Order | Database                 | Priority | Reason                         |
+| ----- | ------------------------ | -------- | ------------------------------ |
+| 1     | `groveauth`              | Critical | All auth depends on this       |
+| 2     | `grove-engine-db`        | High     | Core platform, references auth |
+| 3     | `grove-curios-db`        | High     | Curio widgets                  |
+| 4     | `grove-domain-jobs`      | Normal   | Transient job data             |
+| 5     | `amber`                  | Normal   | Amber application data         |
+| 6     | `ivy-db`                 | Normal   | Ivy application data           |
+| 7     | `grove-observability-db` | Normal   | Monitoring/telemetry data      |
 
 ```bash
 # Restore groveauth FIRST
@@ -1386,7 +1368,7 @@ wrangler d1 execute groveauth --file=groveauth-restore.sql
 # Verify restoration
 wrangler d1 execute groveauth --command="SELECT COUNT(*) FROM users"
 
-# Continue with grove-engine-db, then scout-db, etc.
+# Continue with grove-engine-db, then grove-curios-db, etc.
 ```
 
 **Step 4: Verify system functionality**
@@ -1568,7 +1550,7 @@ Before deploying Patina to production, verify:
 ## 📝 Notes for Claude Code
 
 1. **Start with the exporter** — it's the core logic
-2. **Test with one database first** (e.g., `your-site-posts` - smallest)
+2. **Test with one database first** (e.g., `grove-domain-jobs` - smallest)
 3. **Use batch processing** for large tables to avoid memory issues
 4. **The metadata DB is optional initially** — can log to console first
 5. **Discord alerting can be Phase 2** — get backups working first

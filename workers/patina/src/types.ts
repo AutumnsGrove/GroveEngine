@@ -9,18 +9,11 @@
 // ============================================
 
 export interface Env {
-	// Source D1 Databases (14 total)
+	// Source D1 Databases (7 total)
 	GROVEAUTH_DB: D1Database;
-	SCOUT_DB: D1Database;
 	GROVE_ENGINE_DB: D1Database;
-	GROVEMUSIC_DB: D1Database;
-	LIBRARY_ENHANCER_DB: D1Database;
-	AUTUMNSGROVE_POSTS_DB: D1Database;
-	AUTUMNSGROVE_GIT_STATS_DB: D1Database;
 	GROVE_DOMAIN_JOBS_DB: D1Database;
-	YOUR_SITE_POSTS_DB: D1Database;
 	AMBER_DB: D1Database;
-	MYCELIUM_OAUTH_DB: D1Database;
 	IVY_DB: D1Database;
 	GROVE_CURIOS_DB: D1Database;
 	GROVE_OBSERVABILITY_DB: D1Database;
@@ -55,16 +48,9 @@ export interface DatabaseConfig {
 	binding: keyof Pick<
 		Env,
 		| "GROVEAUTH_DB"
-		| "SCOUT_DB"
 		| "GROVE_ENGINE_DB"
-		| "GROVEMUSIC_DB"
-		| "LIBRARY_ENHANCER_DB"
-		| "AUTUMNSGROVE_POSTS_DB"
-		| "AUTUMNSGROVE_GIT_STATS_DB"
 		| "GROVE_DOMAIN_JOBS_DB"
-		| "YOUR_SITE_POSTS_DB"
 		| "AMBER_DB"
-		| "MYCELIUM_OAUTH_DB"
 		| "IVY_DB"
 		| "GROVE_CURIOS_DB"
 		| "GROVE_OBSERVABILITY_DB"

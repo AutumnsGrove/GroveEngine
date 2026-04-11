@@ -5,8 +5,39 @@
 > deployment targets. This document maps where the code lives, identifies bloat,
 > and proposes a phased simplification plan.
 >
-> **Status**: Phase 1 audit complete. All findings below are backed by automated
-> import tracing, file-level analysis, and manual review across 6 parallel audits.
+> **Status**: Phase 1 audit complete + Tier 1 quick wins partially executed.
+> Findings below are backed by automated import tracing, file-level analysis,
+> and manual review across 6 parallel audits.
+
+---
+
+## 0. Progress So Far
+
+### ✅ Completed (branch `claude/analyze-codebase-bloat-GqdSB`)
+
+| # | Action | Lines | Notes |
+|---|--------|------:|-------|
+| 0.1 | Delete `libs/engine/src/lib/media/upload-validation.test.ts` duplicate | 1,321 | Confirmed byte-identical duplicate |
+| 0.2 | Delete `workers/post-migrator/` entirely | 1,545 | Plus workflow shim + affected-packages + grove-census |
+| 0.3 | Delete `libs/engine/src/lib/db/schema.sql` (standalone legacy schema) | 238 | Migrated into `grove-curios-db`'s `timeline_*` tables |
+| 0.4 | Prune 7 defunct D1 databases from Patina backup worker | ~50 | See §Audit G — scout-db, grovemusic-db, library-enhancer-db, autumnsgrove-posts, autumnsgrove-git-stats, your-site-posts, mycelium-oauth |
+| | **Running total** | **~3,154** | 2 deploy targets removed (post-migrator, plus 7 D1 backups pruned) |
+
+### 🔧 Re-audit correction (important!)
+
+The original **Audit A** claimed 5 "unused" engine subsystems. A re-audit proved
+**4 of those 5 were false positives** — the original grep missed relative
+imports, ambient `.d.ts` declarations, and package.json `./exports` paths.
+
+| Subsystem | Original verdict | Actual verdict | Consumers |
+|-----------|------------------|----------------|-----------|
+| `data/` | Unused | **Used** | 15+ consumers (JSON files imported via relative paths) |
+| `db/` | Unused | **Unused** ✓ | Only `schema.sql` existed — now deleted |
+| `scribe/` | Unused | **Used** | 1 consumer (VoiceInput.svelte) — **owner wants kept as future feature** |
+| `styles/` | Unused | **Used** | 8+ consumers via package.json `./styles/*` exports |
+| `types/` | Unused | **Used** | 10+ consumers (including ambient `.d.ts` files) |
+
+The corrected "unused subsystems" count is **1, not 5** — and it's already deleted.
 
 ---
 
@@ -71,8 +102,9 @@
 ### Audit A: Engine Consumer Map
 
 Every engine subsystem was traced to identify which apps, services, and workers
-actually import from it. Key finding: **7 subsystems are single-consumer, 5 are
-completely unused.**
+actually import from it. Key finding: **7 subsystems are single-consumer. The
+original audit also flagged 5 as unused, but a re-audit showed only 1 of those
+was actually unused** (see §0 re-audit correction).
 
 #### Single-Consumer Subsystems (move out of engine)
 
@@ -87,15 +119,15 @@ completely unused.**
 | **firefly** | 2,760 | Loft (personal) | Move with Loft or delete |
 | **Total** | **49,358** | | |
 
-#### Unused Subsystems (delete)
+#### ~~Unused Subsystems~~ (re-audit: only 1 real, now deleted)
 
-| Subsystem | Notes |
-|-----------|-------|
-| **data** | Zero imports found anywhere |
-| **db** | Zero imports found anywhere |
-| **scribe** | Zero imports found anywhere |
-| **styles** | Zero imports found anywhere |
-| **types** | Zero imports found anywhere |
+| Subsystem | Original verdict | Re-audit | Final action |
+|-----------|------------------|----------|--------------|
+| ~~data~~ | Unused | 15+ consumers (relative imports of JSON) | **Keep** |
+| **db** | Unused | **Truly unused** — only held `schema.sql` | **✅ Deleted** |
+| ~~scribe~~ | Unused | 1 consumer (VoiceInput.svelte) | **Keep** (future feature per owner) |
+| ~~styles~~ | Unused | 8+ consumers via `./styles/*` package exports | **Keep** |
+| ~~types~~ | Unused | 10+ consumers (ambient `.d.ts`) | **Keep** |
 
 #### Truly Shared Subsystems (keep in engine)
 
@@ -240,7 +272,7 @@ core scripts are product code. Notably:
 | lumen | 2,561 | Core AI service, used by multiple consumers |
 | meadow-poller | 1,272 | RSS aggregator, focused purpose |
 | onboarding | 709 | Email sequence agent (absorbs email-catchup) |
-| patina | 4,586 | Critical backup system for 14 databases |
+| patina | 4,586 | Critical backup system for 7 live Grove databases |
 | reverie | 2,737 | AI config planner — intentional split from exec |
 | reverie-exec | 1,786 | Execution sidecar — intentional split from reverie |
 | timeline-sync | 6,786 | Nightly summary generation |
@@ -272,6 +304,45 @@ core scripts are product code. Notably:
 
 ---
 
+### Audit G: Patina Backup Targets
+
+Patina (`workers/patina/`) is Grove's nightly database backup worker. While
+investigating whether `libs/engine/src/lib/db/schema.sql` was still in use, we
+discovered Patina was still backing up the defunct `autumnsgrove-git-stats` D1
+database — and on closer inspection, **7 of Patina's 14 backup targets had
+zero binding in any `wrangler.toml` outside of Patina itself.**
+
+#### Defunct databases removed from Patina
+
+| # | Database | Est. Size | Why defunct |
+|---|----------|----------:|-------------|
+| 1 | `autumnsgrove-git-stats` | 335 KB | Migrated into `grove-curios-db` as `timeline_*` tables |
+| 2 | `autumnsgrove-posts` | 118 KB | Legacy personal-site blog; fully migrated into `grove-engine-db` multi-tenant posts (autumn-primary tenant) |
+| 3 | `your-site-posts` | 12 KB | Legacy stub — only referenced in setup-comment placeholders |
+| 4 | `scout-db` | 364 KB | GroveScout test data — feature not currently live, data is disposable |
+| 5 | `library-enhancer-db` | 679 KB | Library enhancer test data — feature not currently live, data is disposable |
+| 6 | `grovemusic-db` | 98 KB | GroveMusic test data — routes via grove-router but no live DB binding |
+| 7 | `mycelium-oauth` | 28 KB | Legacy OAuth subsystem — superseded by Heartwood |
+| | **Total** | **~1.6 MB** | |
+
+#### Patina's new backup roster (7 databases)
+
+| Database | Priority | Bound by |
+|----------|----------|----------|
+| `groveauth` | critical | `services/heartwood` + many auth consumers |
+| `grove-engine-db` | high | `libs/engine`, `apps/aspen`, `apps/landing`, +9 workers |
+| `grove-curios-db` | high | `libs/engine`, `apps/aspen`, `workers/timeline-sync`, `workers/reverie` |
+| `grove-domain-jobs` | normal | `services/forage` |
+| `amber` | normal | `services/amber` |
+| `ivy-db` | normal | `apps/ivy`, `services/durable-objects` |
+| `grove-observability-db` | normal | `workers/vista-collector`, `apps/landing` |
+
+**Savings:** 7 fewer nightly D1 exports, ~1.6 MB/day of cold storage writes
+avoided, cleaner restore-order documentation, no more drift between real
+infrastructure and Patina's internal type definitions.
+
+---
+
 ## 3. What's NOT Bloat
 
 Some things look large but are justified:
@@ -290,14 +361,15 @@ Some things look large but are justified:
 
 ### Tier 1: Quick Wins (1-2 days each, zero risk)
 
-| # | Action | Lines Saved | Deployments Saved |
-|---|--------|----------:|------------------:|
-| 1.1 | Delete unused engine subsystems (data, db, scribe, styles, types) | ~500 | 0 |
-| 1.2 | Delete duplicate `upload-validation.test.ts` | 1,321 | 0 |
-| 1.3 | Delete `workers/post-migrator` (disabled, buggy) | 673 | 1 |
-| 1.4 | Delete trivial test files (type guards, constant assertions) | ~900 | 0 |
-| 1.5 | Merge `services/email-render` into Zephyr | 235 | 1 |
-| | **Tier 1 Total** | **~3,629** | **2** |
+| # | Action | Lines Saved | Deployments Saved | Status |
+|---|--------|----------:|------------------:|--------|
+| 1.1 | ~~Delete unused engine subsystems~~ → only `db/schema.sql` was truly unused | 238 | 0 | ✅ Done |
+| 1.2 | Delete duplicate `upload-validation.test.ts` | 1,321 | 0 | ✅ Done |
+| 1.3 | Delete `workers/post-migrator` (disabled, buggy) | 1,545 | 1 | ✅ Done |
+| 1.4 | Prune Patina of 7 defunct D1 backup targets | ~50 | 0 (7 backups) | ✅ Done |
+| 1.5 | Delete trivial test files (type guards, constant assertions) | ~900 | 0 | ⏳ Pending |
+| 1.6 | Merge `services/email-render` into Zephyr | 235 | 1 | ⏳ Pending |
+| | **Tier 1 Total** | **~4,289** | **2** | |
 
 ### Tier 2: Engine Extraction (1-2 weeks, medium effort)
 

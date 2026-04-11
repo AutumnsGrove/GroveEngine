@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { DATABASES, DAILY_DATABASES, CRON_DAILY, CRON_WEEKLY, BACKUP_CONFIG } from "./databases";
 
 describe("DATABASES", () => {
-	it("contains 14 databases", () => {
-		expect(DATABASES).toHaveLength(14);
+	it("contains 7 databases", () => {
+		expect(DATABASES).toHaveLength(7);
 	});
 
 	it("each database has required fields", () => {
@@ -74,7 +74,6 @@ describe("DATABASES", () => {
 		expect(criticalDbs.length).toBeGreaterThan(0);
 		const criticalNames = criticalDbs.map((db) => db.name);
 		expect(criticalNames).toContain("groveauth");
-		expect(criticalNames).toContain("scout-db");
 	});
 
 	it("has expected high priority databases", () => {
@@ -90,13 +89,6 @@ describe("DATABASES", () => {
 		expect(groveauth).toBeDefined();
 		expect(groveauth?.binding).toBe("GROVEAUTH_DB");
 		expect(groveauth?.priority).toBe("critical");
-	});
-
-	it("contains scout-db database", () => {
-		const scout = DATABASES.find((db) => db.name === "scout-db");
-		expect(scout).toBeDefined();
-		expect(scout?.binding).toBe("SCOUT_DB");
-		expect(scout?.priority).toBe("critical");
 	});
 
 	it("contains grove-engine-db database", () => {
@@ -142,9 +134,9 @@ describe("DAILY_DATABASES", () => {
 
 	it("excludes databases without dailyBackup flag", () => {
 		const names = DAILY_DATABASES.map((db) => db.name);
-		expect(names).not.toContain("scout-db");
-		expect(names).not.toContain("grovemusic-db");
-		expect(names).not.toContain("library-enhancer-db");
+		expect(names).not.toContain("amber");
+		expect(names).not.toContain("ivy-db");
+		expect(names).not.toContain("grove-observability-db");
 	});
 
 	it("is a filtered subset of DATABASES", () => {

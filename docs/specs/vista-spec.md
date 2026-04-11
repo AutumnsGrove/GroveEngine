@@ -536,19 +536,17 @@ CREATE INDEX idx_daily_date ON daily_aggregates(date DESC);
 
 **Action Required:** Add `/health` endpoint to `autumnsgrove` worker before Vista implementation.
 
-### D1 Databases (9)
+### D1 Databases (7)
 
 | Database | ID |
 |----------|-----|
 | groveauth | 45eae4c7-8ae7-4078-9218-8e1677a4360f |
-| scout-db | 6a289378-c662-4c6a-9f1b-fa5296e03fa2 |
 | grove-engine-db | a6394da2-b7a6-48ce-b7fe-b1eb3e730e68 |
-| grovemusic-db | e1e31ed2-3b1f-4dbd-9435-c9105dadcfa2 |
-| library-enhancer-db | afd1ce4c-618a-430a-bf0f-0a57647a388d |
-| autumnsgrove-posts | 510badf3-457a-4892-bf2a-45d4bfd7a7bb |
-| autumnsgrove-git-stats | 0ca4036f-93f7-4c8a-98a5-5353263acd44 |
+| grove-curios-db | b03756ad-30d7-427a-9a1b-ec2f6478fcbd |
 | grove-domain-jobs | cd493112-a901-4f6d-aadf-a5ca78929557 |
-| your-site-posts | 86342742-7d34-486f-97f0-928136555e1a |
+| amber | f688021b-a986-495a-94bb-352354768a22 |
+| ivy-db | 57738720-bc43-4a7f-ad5b-ceb86b3c0542 |
+| grove-observability-db | 59e70f9e-8f9c-4021-96e5-1e130e753766 |
 
 ### R2 Buckets (6)
 
