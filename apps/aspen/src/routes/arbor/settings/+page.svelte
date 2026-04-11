@@ -255,10 +255,29 @@
 						<span class="status-line">Rings &middot; Trail &middot; Reeds</span>
 						<span class="status-line">Curios &middot; Reverie</span>
 						{#if curiosCount > 0}
-							<span class="status-line subtle">{curiosCount} curio{curiosCount === 1 ? "" : "s"} active</span>
+							<span class="status-line subtle"
+								>{curiosCount} curio{curiosCount === 1 ? "" : "s"} active</span
+							>
 						{/if}
 					</div>
 					<span class="card-action">Explore &rarr;</span>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Subscriptions Card -->
+		<a href="/arbor/subscriptions" class="card-link">
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<featureIcons.mail class="card-icon" />
+						<h2 class="card-title">Subscriptions</h2>
+					</div>
+					<div class="card-status">
+						<span class="status-line">Email updates from groves you follow</span>
+						<span class="status-line subtle">Timezone &middot; schedule &middot; preferences</span>
+					</div>
+					<span class="card-action">Manage &rarr;</span>
 				</div>
 			</GlassCard>
 		</a>
