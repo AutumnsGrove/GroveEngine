@@ -55,6 +55,11 @@ class_name = "ThresholdDO"
 name = "CHAT"
 class_name = "ChatDO"
 
+# FeedDO: Per-user social feed aggregation + saved items (Loom pattern)
+[[durable_objects.bindings]]
+name = "FEED"
+class_name = "FeedDO"
+
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
 # =============================================================================
@@ -85,6 +90,10 @@ new_sqlite_classes = ["ThresholdDO"]
 [[migrations]]
 tag = "v7"
 new_sqlite_classes = ["ChatDO"]
+
+[[migrations]]
+tag = "v8"
+new_sqlite_classes = ["FeedDO"]
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
@@ -142,3 +151,15 @@ bucket_name = "grove-media"
 [[r2_buckets]]
 binding = "EXPORTS_BUCKET"
 bucket_name = "grove-exports"
+
+# =============================================================================
+# Queue - Feed events (post.published fan-out to subscriber FeedDOs)
+# =============================================================================
+[[queues.producers]]
+queue = "grove-feed-events"
+binding = "FEED_QUEUE"
+
+[[queues.consumers]]
+queue = "grove-feed-events"
+max_batch_size = 10
+max_retries = 3
