@@ -30,7 +30,7 @@ describe("FeedDO", () => {
 					postSlug: "hello-world",
 					postTitle: "Hello World",
 					postExcerpt: "A first post",
-					publishedAt: 1700000000000,
+					publishedAt: 1700000000,
 				}),
 			);
 			const body = (await res.json()) as { success: boolean; id: string };
@@ -73,8 +73,8 @@ describe("FeedDO", () => {
 					post_title: "Post 1",
 					post_excerpt: null,
 					post_image: null,
-					published_at: 1700000000000,
-					ingested_at: 1700000001000,
+					published_at: 1700000000,
+					ingested_at: 1700000001,
 				},
 			];
 			sql._pushResults(items);
@@ -103,8 +103,8 @@ describe("FeedDO", () => {
 				post_title: `Post ${i}`,
 				post_excerpt: null,
 				post_image: null,
-				published_at: 1700000000000 - i * 1000,
-				ingested_at: 1700000000000,
+				published_at: 1700000000 - i,
+				ingested_at: 1700000000,
 			}));
 			sql._pushResults(items);
 
@@ -117,7 +117,7 @@ describe("FeedDO", () => {
 
 			expect(body.items).toHaveLength(2);
 			expect(body.hasMore).toBe(true);
-			expect(body.nextCursor).toBe(1700000000000 - 1000);
+			expect(body.nextCursor).toBe(1700000000 - 1);
 		});
 
 		it("should return empty feed", async () => {
@@ -213,7 +213,7 @@ describe("FeedDO", () => {
 					tenant_subdomain: "autumn",
 					post_slug: "saved-post",
 					post_title: "Saved Post",
-					saved_at: 1700000000000,
+					saved_at: 1700000000,
 				},
 			];
 			sql._pushResults(items);

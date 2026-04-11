@@ -151,9 +151,15 @@ async function handleFeedQueue(
 			});
 
 			const delivered = await fanOutToFollowers(batch_followers, ingestPayload, env);
+			const failed = batch_followers.length - delivered;
 
-			// If more followers remain, re-enqueue with offset for next batch
-			if (hasMore && env.FEED_QUEUE) {
+			// If more followers remain, re-enqueue with offset for next batch.
+			// Throw on send failure so the message retries instead of silently
+			// truncating the fan-out for remaining followers.
+			if (hasMore) {
+				if (!env.FEED_QUEUE) {
+					throw new Error("[FeedQueue] FEED_QUEUE binding missing — cannot send continuation");
+				}
 				await env.FEED_QUEUE.send({
 					type: "post.published",
 					payload: { ...payload, _offset: offset + FAN_OUT_BATCH_SIZE },
@@ -161,11 +167,19 @@ async function handleFeedQueue(
 				});
 			}
 
-			message.ack();
-
-			console.log(
-				`[FeedQueue] Delivered "${payload.title}" from ${tenant.subdomain} to ${delivered}/${batch_followers.length} followers (offset=${offset}${hasMore ? ", continuation queued" : ""})`,
-			);
+			// Retry the entire message if any deliveries failed.
+			// INSERT OR IGNORE dedup makes retries safe for already-delivered followers.
+			if (failed > 0) {
+				console.warn(
+					`[FeedQueue] ${failed}/${batch_followers.length} deliveries failed for "${payload.title}" from ${tenant.subdomain} (offset=${offset}) — retrying`,
+				);
+				message.retry();
+			} else {
+				message.ack();
+				console.log(
+					`[FeedQueue] Delivered "${payload.title}" from ${tenant.subdomain} to ${delivered} followers (offset=${offset}${hasMore ? ", continuation queued" : ""})`,
+				);
+			}
 		} catch (err) {
 			console.error("[FeedQueue] Error processing message:", err);
 			message.retry();

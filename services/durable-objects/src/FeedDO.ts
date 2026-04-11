@@ -207,38 +207,44 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	 * Query params: ?cursor={published_at}&limit={number}
 	 */
 	private async handleGetFeed(ctx: LoomRequestContext): Promise<Response> {
-		const cursor = parseInt(ctx.query.get("cursor") || "0", 10) || 0;
+		const cursorTime = parseInt(ctx.query.get("cursor") || "0", 10) || 0;
+		const cursorId = ctx.query.get("cursor_id") || "";
 		const limit = Math.min(
 			parseInt(ctx.query.get("limit") || String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE,
 			MAX_PAGE_SIZE,
 		);
 
+		// Compound cursor: (published_at DESC, id DESC) for stable pagination
+		// when multiple items share the same published_at timestamp
 		const items =
-			cursor > 0
+			cursorTime > 0
 				? this.sql.queryAll<Record<string, unknown>>(
 						`SELECT id, tenant_id, tenant_name, tenant_subdomain, post_slug, post_title, post_excerpt, post_image, published_at, ingested_at
 					 FROM feed_items
-					 WHERE published_at < ?
-					 ORDER BY published_at DESC
+					 WHERE (published_at < ?) OR (published_at = ? AND id < ?)
+					 ORDER BY published_at DESC, id DESC
 					 LIMIT ?`,
-						cursor,
+						cursorTime,
+						cursorTime,
+						cursorId,
 						limit + 1,
 					)
 				: this.sql.queryAll<Record<string, unknown>>(
 						`SELECT id, tenant_id, tenant_name, tenant_subdomain, post_slug, post_title, post_excerpt, post_image, published_at, ingested_at
 					 FROM feed_items
-					 ORDER BY published_at DESC
+					 ORDER BY published_at DESC, id DESC
 					 LIMIT ?`,
 						limit + 1,
 					);
 
 		const hasMore = items.length > limit;
 		const page = hasMore ? items.slice(0, limit) : items;
-		const nextCursor = hasMore ? (page[page.length - 1].published_at as number) : null;
+		const lastItem = page.length > 0 ? page[page.length - 1] : null;
 
 		return Response.json({
 			items: page,
-			nextCursor,
+			nextCursor: hasMore && lastItem ? (lastItem.published_at as number) : null,
+			nextCursorId: hasMore && lastItem ? (lastItem.id as string) : null,
 			hasMore,
 		});
 	}
@@ -264,7 +270,7 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	 * POST /feed/mark-read — Update last-read cursor to now.
 	 */
 	private handleMarkRead(): Response {
-		const now = Date.now();
+		const now = Math.floor(Date.now() / 1000);
 
 		if (!this.state_data) {
 			this.state_data = { userId: this.state.id.toString(), lastReadAt: now };
@@ -323,7 +329,17 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	private handleUnsave(ctx: LoomRequestContext): Response {
 		const { id } = ctx.params;
 
-		this.sql.exec("DELETE FROM saved_items WHERE id = ?", id);
+		try {
+			this.sql.exec("DELETE FROM saved_items WHERE id = ?", id);
+		} catch (err) {
+			this.log.errorWithCause("Unsave failed", err);
+			return LoomResponse.error({
+				code: "GROVE-LOOM-080",
+				category: "bug",
+				userMessage: "Failed to remove saved item.",
+				adminMessage: "Unsave DELETE failed in FeedDO.",
+			});
+		}
 
 		return Response.json({ success: true });
 	}
@@ -333,38 +349,42 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	 * Query params: ?cursor={saved_at}&limit={number}
 	 */
 	private handleGetSaved(ctx: LoomRequestContext): Response {
-		const cursor = parseInt(ctx.query.get("cursor") || "0", 10) || 0;
+		const cursorTime = parseInt(ctx.query.get("cursor") || "0", 10) || 0;
+		const cursorId = ctx.query.get("cursor_id") || "";
 		const limit = Math.min(
 			parseInt(ctx.query.get("limit") || String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE,
 			MAX_PAGE_SIZE,
 		);
 
 		const items =
-			cursor > 0
+			cursorTime > 0
 				? this.sql.queryAll<Record<string, unknown>>(
 						`SELECT id, item_type, tenant_id, tenant_subdomain, post_slug, post_title, saved_at
 					 FROM saved_items
-					 WHERE saved_at < ?
-					 ORDER BY saved_at DESC
+					 WHERE (saved_at < ?) OR (saved_at = ? AND id < ?)
+					 ORDER BY saved_at DESC, id DESC
 					 LIMIT ?`,
-						cursor,
+						cursorTime,
+						cursorTime,
+						cursorId,
 						limit + 1,
 					)
 				: this.sql.queryAll<Record<string, unknown>>(
 						`SELECT id, item_type, tenant_id, tenant_subdomain, post_slug, post_title, saved_at
 					 FROM saved_items
-					 ORDER BY saved_at DESC
+					 ORDER BY saved_at DESC, id DESC
 					 LIMIT ?`,
 						limit + 1,
 					);
 
 		const hasMore = items.length > limit;
 		const page = hasMore ? items.slice(0, limit) : items;
-		const nextCursor = hasMore ? (page[page.length - 1].saved_at as number) : null;
+		const lastItem = page.length > 0 ? page[page.length - 1] : null;
 
 		return Response.json({
 			items: page,
-			nextCursor,
+			nextCursor: hasMore && lastItem ? (lastItem.saved_at as number) : null,
+			nextCursorId: hasMore && lastItem ? (lastItem.id as string) : null,
 			hasMore,
 		});
 	}
@@ -373,10 +393,28 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	 * DELETE /tenant/:tenantId — Remove all feed items from an unfollowed tenant.
 	 * Called when a user unfollows a grove.
 	 */
+	/**
+	 * DELETE /tenant/:tenantId — Remove all feed items from an unfollowed tenant.
+	 * Called when a user unfollows a grove.
+	 *
+	 * AUTH NOTE: FeedDO is only addressable via service bindings from the DO worker.
+	 * The FeedDO namespace is never exposed to client-addressable code paths.
+	 * Security relies on the DO addressing invariant (feed:{userId}).
+	 */
 	private handleRemoveTenant(ctx: LoomRequestContext): Response {
 		const { tenantId } = ctx.params;
 
-		this.sql.exec("DELETE FROM feed_items WHERE tenant_id = ?", tenantId);
+		try {
+			this.sql.exec("DELETE FROM feed_items WHERE tenant_id = ?", tenantId);
+		} catch (err) {
+			this.log.errorWithCause("Remove tenant failed", err);
+			return LoomResponse.error({
+				code: "GROVE-LOOM-080",
+				category: "bug",
+				userMessage: "Failed to remove tenant items.",
+				adminMessage: "Remove tenant DELETE failed in FeedDO.",
+			});
+		}
 
 		return Response.json({ success: true });
 	}
