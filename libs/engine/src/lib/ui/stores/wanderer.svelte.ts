@@ -89,3 +89,33 @@ export const wandererStore = {
 		}
 	},
 };
+
+/**
+ * Compute the correct arbor (admin panel) URL for the current user.
+ *
+ * When a logged-in Wanderer is viewing someone else's grove, a relative
+ * `/arbor` link would send them into the wrong grove's admin panel —
+ * they'd land on the grove owner's Arbor and (rightly) get rejected or,
+ * worse, see unfamiliar tenant data. This helper returns an absolute URL
+ * back to the user's own home grove in that case, and the short form
+ * when they're already on their own grove.
+ *
+ * Pure function so it works from both server-rendered code and client
+ * reactive code. Both +layout.svelte (for the header user menu) and
+ * LanternPanel.svelte (for the settings cog + Admin service link) share
+ * this single rule.
+ *
+ * @param homeGrove  The user's own subdomain (from lanternData.homeGrove)
+ * @param currentGrove The subdomain of the grove currently being viewed
+ * @returns "/arbor" when at home or when we can't determine, or
+ *          "https://<home>.grove.place/arbor" when visiting elsewhere
+ */
+export function getArborHref(
+	homeGrove: string | null | undefined,
+	currentGrove: string | null | undefined,
+): string {
+	if (homeGrove && currentGrove && homeGrove !== currentGrove) {
+		return `https://${homeGrove}.grove.place/arbor`;
+	}
+	return "/arbor";
+}

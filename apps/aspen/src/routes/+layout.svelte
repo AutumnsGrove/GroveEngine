@@ -19,7 +19,7 @@
 	import { themeStore } from "@autumnsgrove/lattice/ui/stores/theme.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores/season.svelte";
-	import { wandererStore } from "@autumnsgrove/lattice/ui/stores/wanderer.svelte";
+	import { wandererStore, getArborHref } from "@autumnsgrove/lattice/ui/stores/wanderer.svelte";
 	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
 	import type { AppContext } from "../app.d.ts";
 
@@ -111,6 +111,18 @@
 			: context?.type === "app"
 				? `Grove ${context.app.charAt(0).toUpperCase() + context.app.slice(1)}`
 				: "The Grove",
+	);
+
+	// "Your Grove" link in the header user menu: resolve to the user's
+	// own admin panel even when they're visiting someone else's grove.
+	// Computed from server data so SSR produces the correct absolute URL
+	// — no hydration flash between a wrong relative /arbor and the right
+	// absolute URL.
+	const arborHref = $derived(
+		getArborHref(
+			data.lanternData?.homeGrove,
+			context?.type === "tenant" ? context.tenant.subdomain : "",
+		),
 	);
 
 	// Track if optional fonts CSS has been loaded
@@ -237,6 +249,7 @@
 			maxWidth="wide"
 			showSidebarToggle={isAdminPage}
 			user={headerUser}
+			userHref={arborHref}
 			signInHref="/auth/login"
 		/>
 
