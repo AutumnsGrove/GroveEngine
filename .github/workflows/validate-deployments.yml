@@ -47,7 +47,12 @@ jobs:
           BASE="${{ github.event.pull_request.base.sha }}"
           if [ -z "$BASE" ]; then BASE="HEAD~1"; fi
           MATRIX=$(node scripts/pre-push/deploy-manifest.mjs --matrix --affected "$BASE")
-          COUNT=$(echo "$MATRIX" | node -e "const m=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(m.include.length)")
+          # Default to 0 on any parse failure so the downstream gate
+          # `needs.detect.outputs.count != '0'` correctly skips the validate
+          # job rather than firing it with an empty matrix (which GitHub
+          # Actions treats as a hard error).
+          COUNT=$(echo "$MATRIX" | node -e "try{const m=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(m.include.length)}catch{console.log(0)}" || echo 0)
+          if [ -z "$COUNT" ]; then COUNT=0; fi
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "count=$COUNT" >> $GITHUB_OUTPUT
           echo "### Affected Deploys ($COUNT)" >> $GITHUB_STEP_SUMMARY

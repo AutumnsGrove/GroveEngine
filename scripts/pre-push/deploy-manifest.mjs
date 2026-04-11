@@ -35,7 +35,13 @@ export function parseShim(content, filePath) {
 		name: null,
 		kind: "custom", // "pages" | "worker" | "custom"
 		template: null,
-		triggers: { push: false, pullRequest: false, workflowDispatch: false, workflowRun: false, paths: [] },
+		triggers: {
+			push: false,
+			pullRequest: false,
+			workflowDispatch: false,
+			workflowRun: false,
+			paths: [],
+		},
 		with: {},
 	};
 
@@ -54,46 +60,75 @@ export function parseShim(content, filePath) {
 			continue;
 		}
 
-		if (/^on:\s*$/.test(line)) { section = "on"; inPaths = false; continue; }
-		if (/^jobs:\s*$/.test(line)) { section = "jobs"; inPaths = false; continue; }
+		if (/^on:\s*$/.test(line)) {
+			section = "on";
+			inPaths = false;
+			continue;
+		}
+		if (/^jobs:\s*$/.test(line)) {
+			section = "jobs";
+			inPaths = false;
+			continue;
+		}
 
 		if (section === "on" || section === "on.push") {
-			if (/^  push:/.test(line)) { section = "on.push"; continue; }
-			if (/^  pull_request:/.test(line)) { result.triggers.pullRequest = true; continue; }
-			if (/^  workflow_dispatch:/.test(line)) { result.triggers.workflowDispatch = true; continue; }
-			if (/^  workflow_run:/.test(line)) { result.triggers.workflowRun = true; continue; }
+			if (/^ {2}push:/.test(line)) {
+				section = "on.push";
+				continue;
+			}
+			if (/^ {2}pull_request:/.test(line)) {
+				result.triggers.pullRequest = true;
+				continue;
+			}
+			if (/^ {2}workflow_dispatch:/.test(line)) {
+				result.triggers.workflowDispatch = true;
+				continue;
+			}
+			if (/^ {2}workflow_run:/.test(line)) {
+				result.triggers.workflowRun = true;
+				continue;
+			}
 
 			if (section === "on.push") {
 				result.triggers.push = true;
-				if (/^    paths:/.test(line)) { inPaths = true; continue; }
+				if (/^ {4}paths:/.test(line)) {
+					inPaths = true;
+					continue;
+				}
 				if (inPaths) {
 					const m = line.match(/^\s+-\s+["']?([^"']+)["']?$/);
-					if (m) { result.triggers.paths.push(m[1]); continue; }
+					if (m) {
+						result.triggers.paths.push(m[1]);
+						continue;
+					}
 					// Dedent: back out of paths block
-					if (/^    \w/.test(line) || /^  \w/.test(line)) inPaths = false;
+					if (/^ {4}\w/.test(line) || /^ {2}\w/.test(line)) inPaths = false;
 				}
 			}
 		}
 
 		if (section === "jobs" || section === "jobs.deploy" || section === "with") {
 			// First sub-key of jobs: (e.g. `  deploy:` or `  build-and-migrate:`)
-			if (/^  [\w-]+:\s*$/.test(line) && section === "jobs") {
+			if (/^ {2}[\w-]+:\s*$/.test(line) && section === "jobs") {
 				section = "jobs.deploy";
 				continue;
 			}
 
 			if (section === "jobs.deploy" || section === "with") {
-				const usesMatch = line.match(/^    uses:\s*(\S+)$/);
+				const usesMatch = line.match(/^ {4}uses:\s*(\S+)$/);
 				if (usesMatch) {
 					result.template = usesMatch[1];
 					if (usesMatch[1].includes("_deploy-pages.yml")) result.kind = "pages";
 					else if (usesMatch[1].includes("_deploy-worker.yml")) result.kind = "worker";
 					continue;
 				}
-				if (/^    with:\s*$/.test(line)) { section = "with"; continue; }
+				if (/^ {4}with:\s*$/.test(line)) {
+					section = "with";
+					continue;
+				}
 
 				if (section === "with") {
-					const kv = line.match(/^      ([\w-]+):\s*(.*)$/);
+					const kv = line.match(/^ {6}([\w-]+):\s*(.*)$/);
 					if (kv) {
 						const key = kv[1];
 						let value = kv[2].trim();
@@ -104,17 +139,22 @@ export function parseShim(content, filePath) {
 						continue;
 					}
 					// Exited with: block (e.g. "    secrets: inherit")
-					if (/^    \w/.test(line)) section = "jobs.deploy";
+					if (/^ {4}\w/.test(line)) section = "jobs.deploy";
 				}
 			}
 		}
 	}
 
 	// Derived fields
-	result.service = basename(filePath).replace(/^deploy-/, "").replace(/\.yml$/, "");
-	result.path = result.kind === "pages" ? result.with["app-dir"] || null
-		: result.kind === "worker" ? result.with["worker-dir"] || null
-		: null;
+	result.service = basename(filePath)
+		.replace(/^deploy-/, "")
+		.replace(/\.yml$/, "");
+	result.path =
+		result.kind === "pages"
+			? result.with["app-dir"] || null
+			: result.kind === "worker"
+				? result.with["worker-dir"] || null
+				: null;
 	// Custom workflows (non-shims) infer path from their first monorepo trigger path.
 	// Keeps drift detection accurate while deploy-engine.yml remains custom.
 	if (!result.path && result.kind === "custom") {
@@ -125,7 +165,9 @@ export function parseShim(content, filePath) {
 	}
 	result.destructive = {
 		migrations: result.with["run-migrations"] === true,
-		preDeploy: typeof result.with["pre-deploy-command"] === "string" && result.with["pre-deploy-command"] !== "",
+		preDeploy:
+			typeof result.with["pre-deploy-command"] === "string" &&
+			result.with["pre-deploy-command"] !== "",
 	};
 
 	return result;
@@ -137,7 +179,9 @@ export function parseAllShims(workflowsDir = WORKFLOWS_DIR) {
 	const files = readdirSync(workflowsDir)
 		.filter((f) => /^deploy-.*\.yml$/.test(f) && !/^_deploy-/.test(f))
 		.sort();
-	return files.map((f) => parseShim(readFileSync(join(workflowsDir, f), "utf8"), join(workflowsDir, f)));
+	return files.map((f) =>
+		parseShim(readFileSync(join(workflowsDir, f), "utf8"), join(workflowsDir, f)),
+	);
 }
 
 export function findWranglerConfigs(repoRoot = REPO_ROOT) {
@@ -149,12 +193,18 @@ export function findWranglerConfigs(repoRoot = REPO_ROOT) {
 			const subAbs = join(abs, sub);
 			try {
 				if (!statSync(subAbs).isDirectory()) continue;
-			} catch { continue; }
+			} catch {
+				continue;
+			}
 			const wranglerPath = join(subAbs, "wrangler.toml");
 			if (!existsSync(wranglerPath)) continue;
 			const content = readFileSync(wranglerPath, "utf8");
 			const nameMatch = content.match(/^name\s*=\s*["']([^"']+)["']/m);
-			configs.push({ dir: `${topDir}/${sub}`, path: `${topDir}/${sub}/wrangler.toml`, name: nameMatch ? nameMatch[1] : null });
+			configs.push({
+				dir: `${topDir}/${sub}`,
+				path: `${topDir}/${sub}/wrangler.toml`,
+				name: nameMatch ? nameMatch[1] : null,
+			});
 		}
 	}
 	return configs;
@@ -183,11 +233,20 @@ function getChangedFiles(baseRef) {
 	try {
 		const out = execSync(`git diff --name-only ${baseRef}...HEAD`, { encoding: "utf8" }).trim();
 		return out ? out.split("\n") : [];
-	} catch { return []; }
+	} catch {
+		return [];
+	}
 }
 
 function matchGlob(pattern, file) {
-	// Handles "apps/foo/**", "libs/engine/**", "package.json". Good enough for Lattice shims.
+	// Handles "apps/foo/**", "libs/engine/**", "package.json". Good enough for
+	// Lattice shims — ALL existing path triggers are either exact files or
+	// trailing-/** globs.
+	//
+	// ⚠ Limitation: does NOT handle mid-path wildcards like "apps/*/src/**".
+	// Those would reduce to "apps//src/" and match nothing, causing affected
+	// detection to silently miss a shim. If a shim ever adds such a pattern,
+	// either expand this or use a real glob library.
 	const p = pattern.replace(/\/\*\*$/, "/").replace(/\*/g, "");
 	return file === p || file === pattern || file.startsWith(p);
 }
@@ -271,17 +330,24 @@ function main() {
 			}
 			hasIssues = true;
 		}
-		if (!hasIssues) console.log(`✓ No drift — ${shims.length} shims matched against ${wranglers.length} wrangler.toml files`);
+		if (!hasIssues)
+			console.log(
+				`✓ No drift — ${shims.length} shims matched against ${wranglers.length} wrangler.toml files`,
+			);
 		process.exit(hasIssues ? 1 : 0);
 	}
 
 	if (flags.json) {
-		console.log(JSON.stringify({ shims: filtered, wranglers, drift: detectDrift(shims, wranglers) }, null, 2));
+		console.log(
+			JSON.stringify({ shims: filtered, wranglers, drift: detectDrift(shims, wranglers) }, null, 2),
+		);
 		return;
 	}
 
 	// Default human summary
-	console.log(`${filtered.length}/${shims.length} deploy shims${affected ? ` affected since ${affected}` : ""}:\n`);
+	console.log(
+		`${filtered.length}/${shims.length} deploy shims${affected ? ` affected since ${affected}` : ""}:\n`,
+	);
 	for (const s of filtered) {
 		const dx = s.destructive.migrations ? " [D1]" : s.destructive.preDeploy ? " [pre-deploy]" : "";
 		console.log(`  ${s.service.padEnd(22)} ${s.kind.padEnd(7)} ${s.path || "(custom)"}${dx}`);

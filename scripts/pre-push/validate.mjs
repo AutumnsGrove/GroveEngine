@@ -46,7 +46,10 @@ let failures = 0;
 
 const header = (t) => console.log(`\n${BLUE}━━ ${t} ━━${RESET}`);
 const ok = (t) => console.log(`  ${GREEN}✓${RESET} ${t}`);
-const bad = (t) => { console.log(`  ${RED}✗${RESET} ${t}`); failures++; };
+const bad = (t) => {
+	console.log(`  ${RED}✗${RESET} ${t}`);
+	failures++;
+};
 const skip = (t) => console.log(`  ${DIM}⊘ ${t}${RESET}`);
 const note = (t) => console.log(`  ${DIM}${t}${RESET}`);
 
@@ -87,7 +90,8 @@ if (drift.missingWrangler.length === 0 && drift.orphanedWrangler.length === 0) {
 	ok(`${shims.length} shims match ${wranglers.length} wrangler.toml files`);
 } else {
 	for (const m of drift.missingWrangler) bad(`${m.shim} → expects ${m.expected}`);
-	for (const o of drift.orphanedWrangler) bad(`${o.wrangler} (${o.name || "unnamed"}) has no deploy-*.yml shim`);
+	for (const o of drift.orphanedWrangler)
+		bad(`${o.wrangler} (${o.name || "unnamed"}) has no deploy-*.yml shim`);
 }
 
 // ─── 3. Affected shims — typecheck ────────────────────────────────
@@ -104,9 +108,56 @@ if (affected.length === 0) {
 	skip(`No deploy shims affected since ${base}`);
 } else {
 	note(`${affected.length} affected: ${affected.map((s) => s.service).join(", ")}`);
+
+	// ── Build lib deps once (not per-shim) ─────────────────────────
+	// validate-deployments.yml does this per matrix entry; locally we
+	// only need to do it once because the affected shims share the repo
+	// state. Mirrors the build order in _deploy-worker.yml.
+	const anyNeedsFoliage = affected.some((s) => s.with["needs-foliage"] === true);
+	const anyNeedsEngine = affected.some((s) => s.with["needs-engine"] === true);
+	const anyNeedsVineyard = affected.some((s) => s.with["needs-vineyard"] === true);
+
+	const buildLib = (name, dir, label, cmd = "pnpm run package") => {
+		process.stdout.write(`  ${DIM}build ${label.padEnd(18)}...${RESET}`);
+		const r = run(cmd, resolve(REPO_ROOT, dir));
+		if (r.ok) console.log(` ${GREEN}✓${RESET}`);
+		else {
+			console.log(` ${RED}✗${RESET}`);
+			failures++;
+			dumpTail(r.stderr || r.stdout, 20);
+		}
+		return r.ok;
+	};
+
+	if (anyNeedsFoliage) buildLib("foliage", "libs/foliage", "libs/foliage", "pnpm run build");
+	if (anyNeedsEngine) {
+		buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
+		buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
+	}
+	if (anyNeedsVineyard) buildLib("vineyard", "libs/vineyard", "libs/vineyard", "pnpm run package");
+
+	// ── SvelteKit sync for any affected SvelteKit app/worker ───────
+	// Pages shims and worker shims with run-build need .svelte-kit/tsconfig.json
+	// to exist before `pnpm check` can resolve its references.
+	const svelteKitShims = affected.filter(
+		(s) => s.kind === "pages" || s.with["run-build"] === true || s.path?.startsWith("apps/"),
+	);
+	for (const shim of svelteKitShims) {
+		if (!shim.path) continue;
+		process.stdout.write(`  ${DIM}sync ${shim.service.padEnd(18)}...${RESET}`);
+		const r = run("pnpm exec svelte-kit sync", resolve(REPO_ROOT, shim.path));
+		if (r.ok) console.log(` ${GREEN}✓${RESET}`);
+		else console.log(` ${DIM}⊘ (not a SvelteKit target)${RESET}`);
+	}
+
+	console.log();
+
 	for (const shim of affected) {
 		if (shim.kind === "custom" || !shim.path) continue;
-		if (shim.with["run-typecheck"] === false) { skip(`${shim.service} typecheck (run-typecheck: false)`); continue; }
+		if (shim.with["run-typecheck"] === false) {
+			skip(`${shim.service} typecheck (run-typecheck: false)`);
+			continue;
+		}
 		const cmd = shim.with["typecheck-command"] || "pnpm exec tsc --noEmit";
 		process.stdout.write(`  ${DIM}${shim.service.padEnd(20)} typecheck ...${RESET}`);
 		const r = run(cmd, resolve(REPO_ROOT, shim.path));
@@ -125,7 +176,11 @@ if (affected.length === 0) {
 		skip("wrangler dry-run (CLOUDFLARE_API_TOKEN/ACCOUNT_ID not set — CI will still run it)");
 	} else {
 		for (const shim of affected) {
-			if (shim.kind !== "worker" || !shim.path) continue;
+			// Skip kind!=worker and library-only shims (run-deploy: false),
+			// mirrors the `matrix.kind == 'worker' && matrix.run-deploy` gate
+			// in validate-deployments.yml. libs/engine is the only shim that
+			// currently sets run-deploy: false.
+			if (shim.kind !== "worker" || !shim.path || shim.with["run-deploy"] === false) continue;
 			process.stdout.write(`  ${DIM}${shim.service.padEnd(20)} wrangler dry-run ...${RESET}`);
 			const r = run("pnpm exec wrangler deploy --dry-run", resolve(REPO_ROOT, shim.path));
 			if (r.ok) console.log(` ${GREEN}✓${RESET}`);
