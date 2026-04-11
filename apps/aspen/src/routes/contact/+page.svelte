@@ -4,7 +4,9 @@
 
 <svelte:head>
 	<title
-		>{data.title}{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title
+		>{data.title}{data.context?.type === "tenant"
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
+			: ""}</title
 	>
 	<meta name="description" content={data.description} />
 </svelte:head>

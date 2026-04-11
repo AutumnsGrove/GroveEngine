@@ -109,7 +109,9 @@
 
 <svelte:head>
 	<title
-		>Search Garden{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title
+		>Search Garden{data.context?.type === "tenant"
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
+			: ""}</title
 	>
 	<meta name="description" content="Search the garden by keyword or filter by tags." />
 </svelte:head>
