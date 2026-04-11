@@ -2,9 +2,18 @@
 
 ## Lattice Note
 
-> **Lattice does NOT use traditional git hooks.** Pre-commit enforcement is handled via Claude Code hooks instead:
-> - `PreToolUse enforce-gw.py` — Blocks raw git/gh/wrangler write commands
-> - `PostToolUse auto-format.py` — Auto-runs Prettier after Edit/Write operations
+> **Lattice uses its own git hooks in `.githooks/`** — not the generic BaseProject hooks described below. Install with:
+> ```bash
+> git config core.hooksPath .githooks
+> ```
+>
+> Active Lattice hooks (all in `.githooks/`):
+> - `pre-commit` — Prettier, ESLint, tsc, Prism icon gateway, barrel-cascade guard, accent-token check
+> - `pre-push` — Lockfile sync, affected typecheck, affected wrangler dry-run
+> - `commit-msg` — Conventional Commits format
+> - `post-checkout` — Branch context helpers
+>
+> Claude Code hooks in `.claude/settings.json` cover editor-side concerns (auto-format, accent-color warnings).
 >
 > The guide below is generic BaseProject reference and does not apply to the Lattice monorepo.
 
