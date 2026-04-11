@@ -1,5 +1,18 @@
 /* Ivy Design System - Grove Theme */
 
+/*
+ * Lexend is the canonical Grove typeface across every app. Ivy used
+ * to fall back to Inter here — that was a holdover from an earlier
+ * template and is now corrected.
+ */
+@font-face {
+	font-family: "Lexend";
+	src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 :root {
 	/* Grove Color Palette - Dark Theme (Default) */
 	--color-bg-primary: #0d1210;
@@ -59,7 +72,7 @@
 	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
 
 	/* Typography */
-	--font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--font-sans: "Lexend", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	--font-mono: "JetBrains Mono", "Fira Code", monospace;
 
 	--text-xs: 0.75rem;

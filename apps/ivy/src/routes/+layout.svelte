@@ -7,11 +7,20 @@
 
 <svelte:head>
 	<title>Ivy Mail</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<!--
+		Preconnect + preload Lexend (Grove's default typeface) from the
+		canonical Grove CDN. Ivy used to pull Inter from Google Fonts
+		here, but Grove's convention is Lexend everywhere — theme.css
+		now declares the face and references it via `--font-sans`.
+	-->
+	<link rel="preconnect" href="https://cdn.grove.place" crossorigin />
+	<link rel="dns-prefetch" href="https://cdn.grove.place" />
 	<link
-		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-		rel="stylesheet"
+		rel="preload"
+		href="https://cdn.grove.place/fonts/Lexend-Regular.ttf"
+		as="font"
+		type="font/ttf"
+		crossorigin
 	/>
 </svelte:head>
 

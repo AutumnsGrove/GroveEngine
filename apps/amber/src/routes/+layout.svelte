@@ -8,12 +8,14 @@
 <svelte:head>
 	<title>Amber - Storage Management</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-		rel="stylesheet"
-	/>
+	<!--
+		Preconnect + preload Lexend (Grove's default typeface) from the
+		locally-served font file declared in $lib/styles/theme.css. Amber
+		used to pull Inter from Google Fonts here, which was dead code —
+		theme.css already loads Lexend from /fonts/Lexend-Regular.ttf, and
+		Grove's convention is Lexend everywhere.
+	-->
+	<link rel="preload" href="/fonts/Lexend-Regular.ttf" as="font" type="font/ttf" crossorigin />
 </svelte:head>
 
 <!--
