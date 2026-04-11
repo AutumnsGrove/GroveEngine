@@ -1,0 +1,35 @@
+# Subscription Digest Worker
+#
+# Hourly cron that sends timezone-aware email digests to subscribers
+# when groves they follow publish new posts.
+#
+# Deploy: wrangler deploy
+# Logs: wrangler tail
+# Test manually: wrangler dev --test-scheduled
+
+name = "grove-subscription-digest"
+main = "src/worker.ts"
+compatibility_date = "2025-12-01"
+
+# Hourly — checks which subscribers' local time matches their preferred hour
+[triggers]
+crons = ["0 * * * *"]
+
+# D1 Database binding (same as engine)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Service binding for Zephyr email gateway
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# Environment variables
+[vars]
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+UNSUBSCRIBE_BASE_URL = "https://grove.place/unsubscribe/grove"
+
+# Secrets (set via wrangler secret put)
+# - ZEPHYR_API_KEY: API key for authenticating with Zephyr

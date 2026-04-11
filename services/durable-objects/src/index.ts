@@ -120,8 +120,35 @@ async function handleFeedQueue(
 				continue;
 			}
 
-			// Find followers in bounded batches
+			// Record pending notification for email digest (INSERT OR IGNORE for dedup).
+			// Only on the first batch (offset=0) to avoid duplicate inserts on continuation.
 			const offset = (payload as { _offset?: number })._offset || 0;
+			if (offset === 0) {
+				try {
+					await env.DB.prepare(
+						`INSERT OR IGNORE INTO pending_notifications
+						 (id, target_tenant_id, tenant_name, tenant_subdomain, post_slug, post_title, post_excerpt, post_image, published_at)
+						 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+					)
+						.bind(
+							crypto.randomUUID(),
+							tenant.id,
+							tenant.display_name || tenant.subdomain,
+							tenant.subdomain,
+							payload.slug,
+							payload.title,
+							payload.excerpt || null,
+							payload.image || null,
+							payload.publishedAt,
+						)
+						.run();
+				} catch (err) {
+					// Non-fatal — digest will just miss this post
+					console.warn("[FeedQueue] Failed to record pending notification:", err);
+				}
+			}
+
+			// Find followers in bounded batches
 			const followers = await env.DB.prepare(
 				"SELECT user_id FROM friends WHERE friend_tenant_id = ? LIMIT ? OFFSET ?",
 			)
