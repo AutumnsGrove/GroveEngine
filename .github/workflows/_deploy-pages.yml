@@ -70,6 +70,11 @@ on:
         required: false
         type: string
         default: ""
+      run-deploy:
+        description: "Run `wrangler pages deploy` at the end. Set false for library-only targets that only need build verification. Currently unused by any pages shim but present for symmetry with _deploy-worker.yml."
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   deploy:
@@ -145,6 +150,7 @@ jobs:
           packageManager: pnpm
 
       - name: Deploy to Cloudflare Pages
+        if: inputs.run-deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -202,7 +208,7 @@ jobs:
             }
 
       - name: Close failure issue on recovery
-        if: success() && github.event_name == 'push'
+        if: success() && inputs.run-deploy && github.event_name == 'push'
         uses: actions/github-script@v8
         with:
           script: |
