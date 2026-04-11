@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Canonical Grove design tokens. Provides:
+ *  - RGB channel tokens (--grove-*, --cream-*, --bark-*)
+ *  - Legacy semantic colors (--color-surface, --color-foreground, …)
+ *  - HSL semantic tokens (--surface, --foreground-faint, --default, …)
+ *    which is what the Prism Tailwind preset reads for utilities like
+ *    `bg-surface/95` on the chrome Header. Without this import, those
+ *    utilities fell back to "0 0% 100%" and painted cream on the
+ *    sticky top bar even in dark mode.
+ * Loaded BEFORE the local token blocks below so anything meadow
+ * explicitly redeclares still wins via the cascade.
+ */
+@import '@autumnsgrove/prism/css';
+
 /* ═══════════════════════════════════════════════════════════════
    GROVE DESIGN SYSTEM - CSS Custom Properties
    All colors use CSS variables for live theme switching
