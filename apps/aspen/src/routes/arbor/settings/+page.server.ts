@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 	if (env?.DB && locals.tenantId) {
 		// Per-query error handling — one failing doesn't break the other
-		const [meadowResult, blazeResult, timelineCurio, galleryCurio, journeyCurio, pulseCurio] =
+		const [meadowResult, blazeResult, timelineCurio, galleryCurio, journeyCurio] =
 			await Promise.all([
 				env.DB.prepare("SELECT meadow_opt_in FROM tenants WHERE id = ?")
 					.bind(locals.tenantId)
@@ -47,10 +47,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 					.bind(locals.tenantId)
 					.first<{ enabled: number }>()
 					.catch(() => null),
-				env.DB.prepare("SELECT enabled FROM pulse_curio_config WHERE tenant_id = ?")
-					.bind(locals.tenantId)
-					.first<{ enabled: number }>()
-					.catch(() => null),
 			]);
 
 		meadowOptIn = meadowResult?.meadow_opt_in === 1;
@@ -58,8 +54,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 		curiosCount =
 			(timelineCurio?.enabled === 1 ? 1 : 0) +
 			(galleryCurio?.enabled === 1 ? 1 : 0) +
-			(journeyCurio?.enabled === 1 ? 1 : 0) +
-			(pulseCurio?.enabled === 1 ? 1 : 0);
+			(journeyCurio?.enabled === 1 ? 1 : 0);
 	}
 
 	return {

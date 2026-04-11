@@ -228,7 +228,6 @@ Lattice/
 │   ├── forage/            # Domain search service
 │   ├── grove-router/      # Subdomain routing Worker
 │   ├── heartwood/         # Authentication service
-│   ├── pulse/             # Analytics service
 │   ├── zephyr/            # Email gateway
 ├── workers/               # Scheduled/utility workers
 ├── docs/                  # Specs, patterns, guides

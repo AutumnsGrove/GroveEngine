@@ -66,7 +66,6 @@ export async function loadCurioStatus(
 		timelineResult,
 		galleryResult,
 		journeyResult,
-		pulseResult,
 		guestbookResult,
 		ambientResult,
 		// Curios with existence-based detection
@@ -88,7 +87,6 @@ export async function loadCurioStatus(
 		queryEnabled(db, "timeline_curio_config", tenantId),
 		queryEnabled(db, "gallery_curio_config", tenantId),
 		queryEnabled(db, "journey_curio_config", tenantId),
-		queryEnabled(db, "pulse_curio_config", tenantId),
 		queryEnabled(db, "guestbook_config", tenantId),
 		queryEnabled(db, "ambient_config", tenantId),
 
@@ -126,12 +124,6 @@ export async function loadCurioStatus(
 			name: "Journey",
 			enabled: journeyResult?.enabled === 1,
 			configUrl: "/arbor/curios/journey",
-		},
-		{
-			slug: "pulse",
-			name: "Pulse",
-			enabled: pulseResult?.enabled === 1,
-			configUrl: "/arbor/curios/pulse",
 		},
 		{
 			slug: "guestbook",

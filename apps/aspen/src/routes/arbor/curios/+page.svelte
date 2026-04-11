@@ -282,20 +282,6 @@
 			href: "/arbor/curios/journey",
 			features: ["Version milestones", "Code composition", "Growth timeline", "AI release notes"],
 		},
-		{
-			id: "pulse",
-			name: "Pulse",
-			description: "Live development heartbeat — real-time activity from your GitHub repos",
-			icon: metricIcons.activity,
-			status: "building",
-			href: "/arbor/curios/pulse",
-			features: [
-				"Real-time webhooks",
-				"Activity heatmap",
-				"Event feed with filters",
-				"Trend sparklines",
-			],
-		},
 	];
 </script>
 

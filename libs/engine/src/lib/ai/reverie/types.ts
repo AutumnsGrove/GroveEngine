@@ -46,7 +46,6 @@ export type DomainId =
 	| "curios.nowplaying"
 	| "curios.timeline"
 	| "curios.journey"
-	| "curios.pulse"
 	| "curios.hitcounter"
 	| "curios.linkgarden"
 	| "curios.polls"

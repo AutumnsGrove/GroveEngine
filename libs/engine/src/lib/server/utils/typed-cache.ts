@@ -18,20 +18,19 @@ import { type ZodSchema } from "zod";
  *
  * @example
  * ```typescript
- * const PulseActiveSchema = z.object({
+ * const TimelineActiveSchema = z.object({
  *   isActive: z.boolean(),
- *   lastCommit: z.number(),
- *   author: z.string(),
- *   message: z.string(),
+ *   lastRun: z.number(),
+ *   summary: z.string(),
  * });
  *
  * const typedCache = createTypedCacheReader(cache);
  * const active = await typedCache.get(
- *   "pulse:active", tenantId,
- *   PulseActiveSchema,
- *   { isActive: false, lastCommit: 0, author: "", message: "" }
+ *   "timeline:active", tenantId,
+ *   TimelineActiveSchema,
+ *   { isActive: false, lastRun: 0, summary: "" }
  * );
- * // active is PulseActive — guaranteed by the schema, with safe fallback
+ * // active is TimelineActive — guaranteed by the schema, with safe fallback
  * ```
  */
 export function createTypedCacheReader(cache: {

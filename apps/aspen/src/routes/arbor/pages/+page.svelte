@@ -23,7 +23,6 @@
 		timeline: metricIcons.calendar,
 		gallery: featureIcons.image,
 		journey: navIcons.map,
-		pulse: metricIcons.activity,
 		guestbook: featureIcons.bookOpen,
 		ambient: natureIcons.wind,
 		hitcounter: featureIcons.hash,

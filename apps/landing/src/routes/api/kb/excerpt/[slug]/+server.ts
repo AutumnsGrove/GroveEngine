@@ -111,7 +111,6 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"what-are-passkeys", // Used in login page Waystone ("What's a passkey?")
 	"image-upload-failures", // Used in Arbor image upload error state
 	"what-is-hum", // Hum music link previews
-	"what-is-pulse", // Pulse GitHub activity curio
 	"using-curios-in-content", // Curio directives cheatsheet for editors
 	"what-are-blazes", // Blazes content markers — used in arbor/settings
 	"what-are-reeds", // Reeds comments — used in arbor/account features

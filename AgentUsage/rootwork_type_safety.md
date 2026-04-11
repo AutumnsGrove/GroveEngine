@@ -43,9 +43,6 @@ import {
 	createTypedCacheReader,
 } from "@autumnsgrove/lattice/server";
 
-// Pulse worker — event data accessor
-import { asPushData } from "./types";
-
 // Zod — always needed for schemas
 import { z } from "zod";
 ```
@@ -111,7 +108,7 @@ const TodayStatsSchema = z.object({
 ### Read with validation
 
 ```typescript
-const raw = await kv.get(`pulse:${tenantId}:today`);
+const raw = await kv.get(`timeline:${tenantId}:today`);
 const today = safeJsonParse(raw, TodayStatsSchema) ?? {
 	commits: 0,
 	prsMerged: 0,
@@ -136,13 +133,10 @@ Wraps a cache service with per-read schema validation. Useful when you have a sh
 ```typescript
 const typedCache = createTypedCacheReader(cache);
 
-const active = await typedCache.get("pulse:active", tenantId, PulseActiveSchema, {
+const active = await typedCache.get("widget:active", tenantId, WidgetActiveSchema, {
 	isActive: false,
-	lastCommit: 0,
-	author: "",
-	message: "",
 });
-// active is guaranteed to match PulseActiveSchema
+// active is guaranteed to match WidgetActiveSchema
 ```
 
 ### When to use which
@@ -227,7 +221,7 @@ Each field is individually type-checked. Missing or wrong-typed fields become `u
 | `kv.get()` or any JSON string        | `safeJsonParse()`                | `@autumnsgrove/lattice/server` |
 | A cache service with `.get()`        | `createTypedCacheReader()`       | `@autumnsgrove/lattice/server` |
 | A `catch` block in a SvelteKit route | `isRedirect()` / `isHttpError()` | `@autumnsgrove/lattice/server` |
-| `NormalizedEvent.data` in Pulse      | `asPushData()` (or new accessor) | `./types`                      |
+| Webhook event data                   | `asPushData()` (or new accessor) | `./types`                      |
 
 ---
 
@@ -267,7 +261,6 @@ Each field is individually type-checked. Missing or wrong-typed fields become `u
 - **Type guards:** `libs/engine/src/lib/server/utils/type-guards.ts`
 - **Form data:** `libs/engine/src/lib/server/utils/form-data.ts`
 - **Typed cache:** `libs/engine/src/lib/server/utils/typed-cache.ts`
-- **Pulse accessors:** `services/pulse/src/types.ts`
 - **Barrel export:** `libs/engine/src/lib/server/utils/index.ts`
 - **Public API:** `@autumnsgrove/lattice/server`
 - **Spec:** `docs/specs/grove-types-spec.md`

@@ -132,11 +132,6 @@ const PACKAGES = {
 		hasTests: true,
 		isSvelteKit: false,
 	},
-	"services/pulse": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
 	"services/og-worker": {
 		typecheck: null,
 		hasTests: false,

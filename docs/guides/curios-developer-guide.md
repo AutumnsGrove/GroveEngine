@@ -203,14 +203,12 @@ Curio components render on the public site through two paths:
 
 **Simple curios** (hit counter, status badge, mood ring) render inline. The admin page stores config in D1, and the public page loads it and renders a Svelte component.
 
-**Complex curios** (timeline, pulse) export their own Svelte components from the module barrel. The timeline module exports `Timeline` and `Heatmap` components directly:
+**Complex curios** (timeline) export their own Svelte components from the module barrel. The timeline module exports `Timeline` and `Heatmap` components directly:
 
 ```typescript
 export { default as Timeline } from "./Timeline.svelte";
 export { default as Heatmap } from "./Heatmap.svelte";
 ```
-
-The pulse module exports six components (Pulse, PulseCompact, PulseIndicator, PulseStats, PulseHeatmap, PulseFeed, PulseTrends) as named re-exports from its barrel.
 
 All curio components use Foliage theme CSS variables (`--color-primary`, `--color-text`, `--color-text-muted`, `--grove-overlay-8`, etc.) so they adapt to any theme.
 
@@ -393,7 +391,7 @@ import { encryptToken } from "$lib/curios/timeline/secrets.server";
 // Wrong: re-exporting through the barrel would leak server code to clients
 ```
 
-Components exported from curio modules (Timeline, Pulse, etc.) should be imported directly when used in Svelte files to avoid barrel cascade issues:
+Components exported from curio modules (Timeline, etc.) should be imported directly when used in Svelte files to avoid barrel cascade issues:
 
 ```typescript
 // Prefer direct import

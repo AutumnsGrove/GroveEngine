@@ -270,7 +270,6 @@ const DOMAIN_KEYWORDS: Record<string, DomainId[]> = {
   'mood':        ['curios.moodring'],
   'gallery':     ['curios.gallery'],
   'timeline':    ['curios.timeline'],
-  'pulse':       ['curios.pulse'],
   'counter':     ['curios.hitcounter'],
   'ambient':     ['curios.ambient'],
   'sound':       ['curios.ambient'],
@@ -551,7 +550,6 @@ Each schema is 30-50 lines of JSON. The full catalog of 32 schemas totals ~1,200
 | `curios.nowplaying` | Now Playing | curios | Medium | 6 |
 | `curios.timeline` | Timeline | curios | Deep | 10 |
 | `curios.journey` | Journey | curios | Medium | 7 |
-| `curios.pulse` | Pulse | curios | Medium | 9 |
 | `curios.hitcounter` | Hit Counter | curios | Simple | 6 |
 | `curios.linkgarden` | Link Garden | curios | Medium | 3 + CRUD |
 | `curios.polls` | Polls | curios | Medium | 6 + CRUD |
@@ -933,7 +931,7 @@ Add content management and the social layer.
 Add all remaining curio domains.
 
 - [ ] Write schemas: `curios.moodring`, `curios.nowplaying`, `curios.gallery`
-- [ ] Write schemas: `curios.timeline`, `curios.journey`, `curios.pulse`
+- [ ] Write schemas: `curios.timeline`, `curios.journey`
 - [ ] Write schemas: `curios.hitcounter`, `curios.linkgarden`, `curios.polls`
 - [ ] Write schemas: `curios.bookmarks`, `curios.badges`
 - [ ] Write schemas: `identity.activitystatus`

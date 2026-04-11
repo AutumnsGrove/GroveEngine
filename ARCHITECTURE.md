@@ -18,7 +18,7 @@
 
 **Binding rules:**
 
-- **Curio routes** (`/api/curios/*`, `/arbor/curios/*`, `/(site)/timeline|gallery|guestbook|pulse`) → use `platform?.env?.CURIO_DB`
+- **Curio routes** (`/api/curios/*`, `/arbor/curios/*`, `/(site)/timeline|gallery|guestbook`) → use `platform?.env?.CURIO_DB`
 - **Observability routes** (`/api/sentinel/*`, `/api/vista/*`) → use `platform?.env?.OBS_DB`
 - **Everything else** (auth, tenants, pages, billing) → use `platform?.env?.DB`
 - **Cross-DB routes** (e.g., timeline generate/backfill/save-token) need **both** `DB` and `CURIO_DB` — `DB` for SecretsManager, `CURIO_DB` for curio tables

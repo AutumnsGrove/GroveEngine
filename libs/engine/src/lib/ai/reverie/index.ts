@@ -75,7 +75,6 @@ import { nowplayingSchema } from "./schemas/curios/nowplaying";
 import { gallerySchema } from "./schemas/curios/gallery";
 import { timelineSchema } from "./schemas/curios/timeline";
 import { journeySchema } from "./schemas/curios/journey";
-import { pulseSchema } from "./schemas/curios/pulse";
 import { hitcounterSchema } from "./schemas/curios/hitcounter";
 import { linkgardenSchema } from "./schemas/curios/linkgarden";
 import { pollsSchema } from "./schemas/curios/polls";
@@ -134,7 +133,6 @@ export const SCHEMA_REGISTRY: Partial<Record<DomainId, DomainSchema>> = {
 	"curios.gallery": gallerySchema,
 	"curios.timeline": timelineSchema,
 	"curios.journey": journeySchema,
-	"curios.pulse": pulseSchema,
 	"curios.hitcounter": hitcounterSchema,
 	"curios.linkgarden": linkgardenSchema,
 	"curios.polls": pollsSchema,
@@ -310,7 +308,6 @@ export const DOMAIN_CATALOG: readonly CatalogEntry[] = [
 		phase: 4,
 		file: "curios/journey.ts",
 	},
-	{ id: "curios.pulse", status: "implemented", fieldCount: 9, phase: 4, file: "curios/pulse.ts" },
 	{
 		id: "curios.hitcounter",
 		status: "implemented",

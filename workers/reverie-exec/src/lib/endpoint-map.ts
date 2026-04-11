@@ -305,22 +305,6 @@ export const ENDPOINT_MAP: Record<string, DomainEndpoint> = {
 			isPinned: { apiKey: "isPinned" },
 		},
 	},
-	"curios.pulse": {
-		path: "/api/curios/pulse/config",
-		method: "PUT",
-		style: "object-merge",
-		fields: {
-			enabled: { apiKey: "enabled" },
-			showHeatmap: { apiKey: "showHeatmap" },
-			showFeed: { apiKey: "showFeed" },
-			showStats: { apiKey: "showStats" },
-			showTrends: { apiKey: "showTrends" },
-			showCi: { apiKey: "showCi" },
-			reposInclude: { apiKey: "reposInclude" },
-			reposExclude: { apiKey: "reposExclude" },
-			feedMaxItems: { apiKey: "feedMaxItems" },
-		},
-	},
 	"curios.timeline": {
 		path: "/api/curios/timeline/config",
 		method: "PUT",

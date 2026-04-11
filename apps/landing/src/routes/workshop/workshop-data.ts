@@ -497,12 +497,6 @@ export const categories: Category[] = [
 						description: "Personal dedications",
 					},
 					{ name: "Artifacts", icon: "shell", description: "Interactive oddities" },
-					{
-						name: "Pulse",
-						icon: "activity",
-						description: "GitHub activity heartbeat",
-						href: "/knowledge/help/what-is-pulse",
-					},
 				],
 			},
 			{

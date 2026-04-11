@@ -128,17 +128,6 @@ export const WRITE_ALLOWLIST: Record<string, ReadonlySet<string>> = {
 		"resultsVisibility",
 		"isPinned",
 	]),
-	"curios.pulse": new Set([
-		"enabled",
-		"showHeatmap",
-		"showFeed",
-		"showStats",
-		"showTrends",
-		"showCi",
-		"reposInclude",
-		"reposExclude",
-		"feedMaxItems",
-	]),
 	"curios.timeline": new Set([
 		"enabled",
 		"githubUsername",

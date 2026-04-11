@@ -100,8 +100,7 @@ services/
 ├── zephyr/          ← Service app
 ├── grove-router/    ← Router service
 ├── og-worker/       ← OG image generation
-├── email-render/    ← Email rendering
-└── pulse/           ← Analytics service
+└── email-render/    ← Email rendering
 ```
 
 Consumer packages each have their own Cloudflare resources (D1, KV, R2) and deploy as independent Workers or Pages projects.
@@ -871,7 +870,6 @@ libs/engine/src/lib/
 ├── curios/
 │   ├── timeline/       ← logic, AI integration, voice presets
 │   ├── journey/        ← logic, GitHub repo analysis
-│   ├── pulse/          ← logic + Svelte components
 │   ├── gallery/        ← logic
 │   ├── guestbook/      ← types, validation
 │   ├── hitcounter/     ← types, display styles
@@ -912,22 +910,6 @@ import {
 
 // Build a voiced prompt for the AI
 const prompt = buildVoicedPrompt(activity, getVoice("poetic"));
-```
-
-**Pulse**
-
-Live development heartbeat from GitHub webhooks. Svelte components included:
-
-```typescript
-import {
-	Pulse,
-	PulseCompact,
-	PulseIndicator,
-	PulseStats,
-	PulseHeatmap,
-	PulseFeed,
-	PulseTrends,
-} from "@autumnsgrove/lattice/curios";
 ```
 
 **Journey**
@@ -1306,7 +1288,7 @@ A snapshot of where each subsystem stands.
 | **Feature Flags**    | Live          | 6 rule types, Greenhouse management               |
 | **Grafts (Platform UI)** | Live      | Named grafts (feature flags), `KnownFlagId` union |
 | **Zephyr**           | In progress   | Email sending live; social broadcast building     |
-| **Curios (dev)**     | Live          | Timeline, Pulse, Journey, Gallery                 |
+| **Curios (dev)**     | Live          | Timeline, Journey, Gallery                        |
 | **Curios (visitor)** | In progress   | Types/logic ready; UI components in progress      |
 | **UI System**        | Live          | Full component library, 7 categories              |
 | **Email**            | Live          | React Email, sequences, render pipeline, Resend   |

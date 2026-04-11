@@ -151,9 +151,6 @@ declare global {
 				/** Demo mode secret for arbor panel screenshots (set via wrangler secret put) */
 				DEMO_MODE_SECRET?: string;
 
-				/** Tenant ID for the landing site's own Pulse page (dogfooding) */
-				PULSE_LANDING_TENANT_ID?: string;
-
 				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
 				INTERNAL_SERVICE_KEY?: string;
 
