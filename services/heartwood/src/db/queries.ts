@@ -27,6 +27,7 @@ import type {
 	DeviceCode,
 } from "../types.js";
 import { TIER_POST_LIMITS, isWayfinder } from "../types.js";
+import { type Subdomain, validateSubdomain } from "../types/branded.js";
 import { generateUUID } from "../utils/crypto.js";
 
 // ==================== Wildcard Redirect URI Configuration ====================
@@ -52,26 +53,40 @@ const WILDCARD_CLIENTS: Record<string, { pattern: RegExp; baseDomain: string }> 
 /**
  * Extract subdomain from redirect URI matching a wildcard pattern.
  * Returns null if the client doesn't support wildcards or URI doesn't match pattern.
+ *
+ * The returned value is a `Subdomain` branded type — format-validated against
+ * DNS label rules. It has NOT been confirmed against the tenants table; pair
+ * with `isActiveTenant()` for existence checks.
  */
 export function extractSubdomainFromRedirectUri(
 	clientId: string,
 	redirectUri: string,
-): string | null {
+): Subdomain | null {
 	const config = WILDCARD_CLIENTS[clientId];
 	if (!config) return null;
 
 	const match = redirectUri.match(config.pattern);
-	return match ? match[1].toLowerCase() : null;
+	if (!match) return null;
+
+	// Route through validateSubdomain so the brand invariant is enforced in
+	// one place. The regex above already guarantees format, but funneling
+	// through the validator keeps the "only way to make a Subdomain" rule
+	// ironclad.
+	return validateSubdomain(match[1]);
 }
 
 /**
  * Check if a subdomain exists as an active tenant in Lattice.
  * This prevents redirect hijacking to non-existent or suspended tenants.
+ *
+ * Accepts a branded `Subdomain` — callers must pre-validate format via
+ * `validateSubdomain()` or `extractSubdomainFromRedirectUri()`. This makes
+ * format-validation failures a compile error instead of a silent DB miss.
  */
-export async function isActiveTenant(engineDb: D1Database, subdomain: string): Promise<boolean> {
+export async function isActiveTenant(engineDb: D1Database, subdomain: Subdomain): Promise<boolean> {
 	const result = await engineDb
 		.prepare("SELECT 1 FROM tenants WHERE subdomain = ? AND active = 1")
-		.bind(subdomain.toLowerCase())
+		.bind(subdomain)
 		.first<{ 1: number }>();
 	return result !== null;
 }
