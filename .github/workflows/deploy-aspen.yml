@@ -26,7 +26,6 @@ jobs:
     with:
       worker-dir: apps/aspen
       needs-engine: true
-      run-typecheck: false
       run-tests: true
       run-build: true
     secrets: inherit
