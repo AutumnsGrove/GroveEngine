@@ -1,119 +1,77 @@
 name: Validate Deployments
 
-# Catch Wrangler deployment issues BEFORE merging
-# Runs dry-run deployments for Workers and build validation for Pages
+# Catch Wrangler deployment issues BEFORE merging.
+# The matrix is generated at runtime from .github/workflows/deploy-*.yml
+# shims via scripts/pre-push/deploy-manifest.mjs — adding a new shim
+# auto-includes it here, no hand-maintained path list.
 
 on:
   workflow_dispatch:
-
   pull_request:
     branches: [main]
-    paths:
-      # Workers
-      - "services/grove-router/**"
-      - "services/durable-objects/**"
-      - "workers/post-migrator/**"
-      - "services/heartwood/**"
-      - "services/email-render/**"
-      - "services/og-worker/**"
-      - "workers/**"
-      - "apps/landing/**"
-      - "apps/clearing/**"
-      - "apps/plant/**"
-      - "apps/ivy/**"
-      # Pages
-      - "apps/domains/**"
-      - "apps/terrarium/**"
-      - "apps/meadow/**"
-      # Shared workspace libs — any of these affects nearly every
-      # target in the matrix, so we revalidate the whole fleet on change.
-      - "libs/engine/**"
-      - "libs/gossamer/**"
-      - "libs/foliage/**"
-      - "libs/infra/**"
-      - "libs/prism/**"
-      # Root config changes affect all
-      - "package.json"
-      - "pnpm-lock.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ============================================
-  # WORKERS - Full dry-run validation
-  # ============================================
-  validate-workers:
-    name: Validate Workers
+  # ── Drift check: every wrangler.toml has a deploy-*.yml shim ─────────
+  drift-check:
+    name: Deploy Manifest Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Check for deploy manifest drift
+        run: node scripts/pre-push/deploy-manifest.mjs --drift
+
+  # ── Generate matrix from shims, filtered to affected by this PR ─────
+  detect:
+    name: Detect Affected Deploys
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+      count: ${{ steps.gen.outputs.count }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - id: gen
+        name: Generate affected matrix
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$BASE" ]; then BASE="HEAD~1"; fi
+          MATRIX=$(node scripts/pre-push/deploy-manifest.mjs --matrix --affected "$BASE")
+          COUNT=$(echo "$MATRIX" | node -e "const m=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(m.include.length)")
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "### Affected Deploys ($COUNT)" >> $GITHUB_STEP_SUMMARY
+          if [ "$COUNT" = "0" ]; then
+            echo "_No deploy shims affected by this PR — validation skipped._" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "$MATRIX" | node -e "const m=JSON.parse(require('fs').readFileSync(0,'utf8'));m.include.forEach(s=>console.log('- \`'+s.name+'\` ('+s.kind+') — '+s.path))" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ── Unified validation: Workers (wrangler dry-run) + Pages (build) ──
+  validate:
+    name: "Validate: ${{ matrix.name }}"
+    needs: detect
+    if: needs.detect.outputs.count != '0'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - name: grove-router
-            path: services/grove-router
-            needs-engine: false
-          - name: durable-objects
-            path: services/durable-objects
-            needs-engine: true
-          - name: post-migrator
-            path: workers/post-migrator
-            needs-engine: false
-          - name: heartwood
-            path: services/heartwood
-            needs-engine: true
-          - name: webhook-cleanup
-            path: workers/webhook-cleanup
-            needs-engine: true
-          - name: email-render
-            path: services/email-render
-            needs-engine: false
-            typecheck-command: "node scripts/sync-templates.mjs && pnpm exec tsc --noEmit"
-          - name: og-worker
-            path: services/og-worker
-            needs-engine: true
-          - name: lumen
-            path: workers/lumen
-            needs-engine: true
-          - name: warden
-            path: workers/warden
-            needs-engine: true
-          - name: reverie
-            path: workers/reverie
-            needs-engine: true
-          - name: reverie-exec
-            path: workers/reverie-exec
-            needs-engine: true
-          - name: landing
-            path: apps/landing
-            needs-engine: true
-            build-first: true
-            typecheck-command: pnpm check
-          - name: clearing
-            path: apps/clearing
-            needs-engine: true
-            build-first: true
-          - name: plant
-            path: apps/plant
-            needs-engine: true
-            build-first: true
-            typecheck-command: pnpm check
-          - name: ivy
-            path: apps/ivy
-            needs-engine: true
-            needs-foliage: true
-            build-first: true
-
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -132,21 +90,34 @@ jobs:
         run: pnpm run build
         working-directory: libs/gossamer
 
-      - name: Build engine package (dependency)
+      - name: Build engine package
         if: matrix.needs-engine
         run: pnpm run package
         working-directory: libs/engine
 
+      - name: Build vineyard
+        if: matrix.needs-vineyard
+        run: pnpm run package
+        working-directory: libs/vineyard
+
+      - name: SvelteKit sync
+        if: matrix.run-build
+        run: pnpm exec svelte-kit sync
+        working-directory: ${{ matrix.path }}
+
       - name: Build (SvelteKit)
-        if: matrix.build-first
+        if: matrix.run-build || matrix.kind == 'pages'
         run: pnpm run build
         working-directory: ${{ matrix.path }}
 
       - name: Type check
+        if: matrix.run-typecheck
         run: ${{ matrix.typecheck-command || 'pnpm exec tsc --noEmit' }}
         working-directory: ${{ matrix.path }}
 
-      - name: Validate deployment (dry-run)
+      # ── Workers: wrangler deploy --dry-run (destructive steps skipped) ─
+      - name: Validate Worker (wrangler dry-run)
+        if: matrix.kind == 'worker'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -155,102 +126,39 @@ jobs:
           workingDirectory: ${{ matrix.path }}
           packageManager: pnpm
 
-  # ============================================
-  # PAGES - Build validation
-  # Since Pages doesn't support --dry-run, we validate by:
-  # 1. Building the SvelteKit app
-  # 2. Running wrangler pages functions build on the output
-  # ============================================
-  validate-pages:
-    name: Validate Pages
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: engine
-            path: libs/engine
-            project: grove-lattice
-            needs-engine: true
-          - name: domains
-            path: apps/domains
-            project: forage
-            needs-engine: true
-          - name: terrarium
-            path: apps/terrarium
-            project: grove-terrarium
-            needs-engine: true
-          - name: meadow
-            path: apps/meadow
-            project: grove-meadow
-            needs-engine: true
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build gossamer
-        if: matrix.needs-engine
-        run: pnpm run build
-        working-directory: libs/gossamer
-
-      - name: Build engine package (dependency)
-        if: matrix.needs-engine
-        run: pnpm run package
-        working-directory: libs/engine
-
-      - name: Build ${{ matrix.name }}
-        run: pnpm run build
-        working-directory: ${{ matrix.path }}
-
-      - name: Type check
-        run: pnpm check
-        working-directory: ${{ matrix.path }}
-
-      # Validate SvelteKit Cloudflare build output
-      # SvelteKit adapter-cloudflare generates _worker.js, not traditional Pages Functions
-      - name: Validate Cloudflare Worker Output
+      # ── Pages: SvelteKit adapter-cloudflare output sanity check ────────
+      - name: Validate Pages Worker Output
+        if: matrix.kind == 'pages'
         run: |
           WORKER_PATH="${{ matrix.path }}/.svelte-kit/cloudflare/_worker.js"
           if [ -f "$WORKER_PATH" ]; then
-            echo "✅ _worker.js exists ($(wc -c < "$WORKER_PATH" | tr -d ' ') bytes)"
-            # Basic syntax validation
-            node --check "$WORKER_PATH" 2>/dev/null || echo "⚠️ Syntax check skipped (ES modules)"
+            echo "✓ _worker.js exists ($(wc -c < "$WORKER_PATH" | tr -d ' ') bytes)"
+            node --check "$WORKER_PATH" 2>/dev/null || echo "⚠ Syntax check skipped (ES modules)"
           else
-            echo "❌ _worker.js not found at $WORKER_PATH"
+            echo "✗ _worker.js not found at $WORKER_PATH"
             ls -la "${{ matrix.path }}/.svelte-kit/cloudflare/" || true
             exit 1
           fi
 
-  # ============================================
-  # Summary job for branch protection
-  # ============================================
+  # ── Summary gate for branch protection ─────────────────────────────
   deployment-validation-complete:
     name: Deployment Validation
     runs-on: ubuntu-latest
-    needs: [validate-workers, validate-pages]
+    needs: [drift-check, detect, validate]
     if: always()
     steps:
       - name: Check validation results
         run: |
-          if [[ "${{ needs.validate-workers.result }}" == "failure" ]] || [[ "${{ needs.validate-pages.result }}" == "failure" ]]; then
-            echo "❌ Deployment validation failed!"
-            echo ""
-            echo "One or more packages failed Wrangler validation."
-            echo "Check the failed jobs above for details."
+          DRIFT="${{ needs.drift-check.result }}"
+          DETECT="${{ needs.detect.result }}"
+          VALIDATE="${{ needs.validate.result }}"
+          echo "drift-check: $DRIFT / detect: $DETECT / validate: $VALIDATE"
+          if [[ "$DRIFT" == "failure" || "$DETECT" == "failure" || "$VALIDATE" == "failure" ]]; then
+            echo "❌ Deployment validation failed"
             exit 1
           fi
-          echo "✅ All deployment validations passed!"
+          if [[ "$VALIDATE" == "skipped" ]]; then
+            echo "✓ No affected deploys — validation skipped"
+            exit 0
+          fi
+          echo "✓ All deployment validations passed"
