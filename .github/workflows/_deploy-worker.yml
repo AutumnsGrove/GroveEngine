@@ -97,6 +97,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
+      issues: write   # post-deploy steps open/close rolling failure issues
 
     steps:
       # ── Inline grove-setup (can't use composite action in reusable workflow) ──
@@ -191,3 +192,73 @@ jobs:
           command: deploy
           workingDirectory: ${{ inputs.worker-dir }}
           packageManager: pnpm
+
+      # ── Rolling failure issue: open/comment on fail, close on recovery ─
+      # Runs only on push-to-main. Maintains one GitHub Issue per service
+      # with label `deploy-failed` + title `Deploy failing: <service>`.
+      # New failure → reopen (if closed) + append comment. Next green run
+      # → auto-close with recovery note.
+      - name: Open or update failure issue
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workerDir = '${{ inputs.worker-dir }}';
+            const service = workerDir.split('/').pop();
+            const title = `Deploy failing: ${service}`;
+            const { owner, repo } = context.repo;
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const sha = context.sha.slice(0, 7);
+            const msg = (context.payload.head_commit?.message || '').split('\n')[0] || '(no message)';
+
+            const body = [
+              `❌ Deploy to \`${service}\` failed at commit \`${sha}\`.`,
+              '',
+              `- **Run:** [${context.runId}](${runUrl})`,
+              `- **Commit:** \`${sha}\` — ${msg}`,
+              `- **Triggered by:** @${context.actor}`,
+              '',
+              '_This issue was auto-opened by `_deploy-worker.yml`. It will close automatically on the next successful deploy._',
+            ].join('\n');
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'all', labels: 'deploy-failed', per_page: 100,
+            });
+            const match = existing.find((i) => i.title === title);
+
+            if (match) {
+              if (match.state === 'closed') {
+                await github.rest.issues.update({ owner, repo, issue_number: match.number, state: 'open' });
+              }
+              await github.rest.issues.createComment({ owner, repo, issue_number: match.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner, repo, title, body,
+                labels: ['deploy-failed', `deploy-failed/${service}`],
+              });
+            }
+
+      - name: Close failure issue on recovery
+        if: success() && inputs.run-deploy && github.event_name == 'push'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workerDir = '${{ inputs.worker-dir }}';
+            const service = workerDir.split('/').pop();
+            const title = `Deploy failing: ${service}`;
+            const { owner, repo } = context.repo;
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: 'deploy-failed', per_page: 100,
+            });
+            const match = existing.find((i) => i.title === title);
+            if (!match) return;
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: match.number,
+              body: `✅ Deploy to \`${service}\` recovered. [Run ${context.runId}](${runUrl}).`,
+            });
+            await github.rest.issues.update({
+              owner, repo, issue_number: match.number, state: 'closed',
+            });
