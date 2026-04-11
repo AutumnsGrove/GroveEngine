@@ -74,6 +74,7 @@
 		clearDraft(): void;
 		flushDraft(): void;
 		getAvailableAnchors?(): string[];
+		getAvailableParagraphs?(): { index: number; preview: string }[];
 		insertAnchor?(name: string): void;
 	}
 	let editorRef = $state<EditorRef | null>(null);

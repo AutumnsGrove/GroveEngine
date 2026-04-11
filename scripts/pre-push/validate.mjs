@@ -109,14 +109,11 @@ if (affected.length === 0) {
 } else {
 	note(`${affected.length} affected: ${affected.map((s) => s.service).join(", ")}`);
 
-	// ── Build lib deps once (not per-shim) ─────────────────────────
-	// validate-deployments.yml does this per matrix entry; locally we
-	// only need to do it once because the affected shims share the repo
-	// state. Mirrors the build order in _deploy-worker.yml.
-	const anyNeedsFoliage = affected.some((s) => s.with["needs-foliage"] === true);
-	const anyNeedsEngine = affected.some((s) => s.with["needs-engine"] === true);
-	const anyNeedsVineyard = affected.some((s) => s.with["needs-vineyard"] === true);
-
+	// ── Build lib deps first (always) ──────────────────────────────
+	// Build all shared libs before typechecking, regardless of which
+	// specific shims declare them. Prevents "cannot find module" errors
+	// in fresh environments and guards against shims that forget to
+	// declare needs-engine/foliage/vineyard.
 	const buildLib = (name, dir, label, cmd = "pnpm run package") => {
 		process.stdout.write(`  ${DIM}build ${label.padEnd(18)}...${RESET}`);
 		const r = run(cmd, resolve(REPO_ROOT, dir));
@@ -129,20 +126,16 @@ if (affected.length === 0) {
 		return r.ok;
 	};
 
-	if (anyNeedsFoliage) buildLib("foliage", "libs/foliage", "libs/foliage", "pnpm run build");
-	if (anyNeedsEngine) {
-		buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
-		buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
-	}
-	if (anyNeedsVineyard) buildLib("vineyard", "libs/vineyard", "libs/vineyard", "pnpm run package");
+	buildLib("foliage", "libs/foliage", "libs/foliage", "pnpm run build");
+	buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
+	buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
+	buildLib("vineyard", "libs/vineyard", "libs/vineyard", "pnpm run package");
 
-	// ── SvelteKit sync for any affected SvelteKit app/worker ───────
-	// Pages shims and worker shims with run-build need .svelte-kit/tsconfig.json
-	// to exist before `pnpm check` can resolve its references.
-	const svelteKitShims = affected.filter(
-		(s) => s.kind === "pages" || s.with["run-build"] === true || s.path?.startsWith("apps/"),
-	);
-	for (const shim of svelteKitShims) {
+	// ── SvelteKit sync for all affected shims ──────────────────────
+	// Attempt sync for every shim — non-SvelteKit packages exit non-zero
+	// and are logged as ⊘. Covers apps/, workers/ that use SvelteKit,
+	// and libs/* like engine that extend .svelte-kit/tsconfig.json.
+	for (const shim of affected) {
 		if (!shim.path) continue;
 		process.stdout.write(`  ${DIM}sync ${shim.service.padEnd(18)}...${RESET}`);
 		const r = run("pnpm exec svelte-kit sync", resolve(REPO_ROOT, shim.path));
