@@ -41,14 +41,20 @@
 </script>
 
 <svelte:head>
-	<title>Garden{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title>
+	<title
+		>Garden{data.context?.type === "tenant"
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
+			: ""}</title
+	>
 	<meta
 		name="description"
 		content="Explore my collection of posts - thoughts, ideas, and explorations."
 	/>
 	<meta
 		property="og:title"
-		content="Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}"
+		content="Garden{data.context?.type === 'tenant'
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
+			: ''}"
 	/>
 	<meta
 		property="og:description"

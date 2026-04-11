@@ -4,6 +4,7 @@ import { sanitizeMarkdown } from "../../utils/sanitize.js";
 import { humPlugin } from "./hum.js";
 import { groveDirectivePlugin } from "./directives.js";
 import { mentionsPlugin } from "./mentions.js";
+import { suppressHeadingPlugin, SUPPRESS_MARKER } from "./suppress.js";
 import { escapeHtml as escapeHtmlForAttr } from "../../utils/escape-html.js";
 
 // ============================================================================
@@ -220,6 +221,9 @@ md.use(humPlugin);
 // Grove directives: ::name[content]:: fenced blocks (gallery, etc.)
 md.use(groveDirectivePlugin);
 
+// ::suppress:: marker: render a heading visually but skip it from the TOC
+md.use(suppressHeadingPlugin);
+
 // Mentions: @username → linked grove mention with passage animation
 md.use(mentionsPlugin);
 
@@ -309,7 +313,13 @@ function isValidUrl(urlString: string): boolean {
 }
 
 /**
- * Extract headers from markdown content for table of contents
+ * Extract headers from markdown content for table of contents.
+ *
+ * Headings tagged with the `::suppress::` marker (in any placement —
+ * `### ::suppress:: text`, `### text ::suppress::`, or the prefix form
+ * `::suppress:: ### text`) are intentionally omitted so authors can
+ * use heading syntax purely for visual weight without cluttering the
+ * TOC. See suppress.ts for the rendering side.
  */
 export function extractHeaders(markdown: string): Header[] {
 	const headers: Header[] = [];
@@ -323,7 +333,15 @@ export function extractHeaders(markdown: string): Header[] {
 	let match;
 	while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
 		const level = match[1].length;
-		const text = match[2].trim();
+		const rawText = match[2].trim();
+
+		// Skip headings the author opted out of the TOC. The prefix form
+		// `::suppress:: ### text` never reaches this branch because the
+		// line doesn't start with `#`, so we only need to guard the
+		// inline / suffix placements here.
+		if (rawText.includes(SUPPRESS_MARKER)) continue;
+
+		const text = rawText;
 		// Use shared helper to generate ID - ensures consistency with heading renderers
 		const id = generateHeadingId(text);
 

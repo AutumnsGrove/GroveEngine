@@ -40,7 +40,7 @@
 <svelte:head>
 	<title
 		>{data.post.title}{data.context?.type === "tenant"
-			? ` - ${data.context.tenant.name}`
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
 			: ""}</title
 	>
 	<meta name="description" content={data.post.description || data.post.title} />

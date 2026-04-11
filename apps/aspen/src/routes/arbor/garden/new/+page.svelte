@@ -499,6 +499,7 @@
 						<GutterManager
 							bind:gutterItems
 							availableAnchors={editorRef?.getAvailableAnchors?.() || []}
+							availableParagraphs={editorRef?.getAvailableParagraphs?.() || []}
 							onInsertAnchor={(name: string) => editorRef?.insertAnchor?.(name)}
 						/>
 					</aside>

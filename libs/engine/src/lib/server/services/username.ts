@@ -330,11 +330,34 @@ export async function canChangeUsername(
  *
  * This function:
  * 1. Updates the tenants table subdomain
- * 2. Inserts a username_history record
- * 3. Updates user_onboarding if a record exists
- * 4. Updates meadow_posts author_subdomain if applicable
+ * 2. Syncs `tenants.display_name` iff it still equals the old subdomain
+ * 3. Inserts a username_history record
+ * 4. Updates user_onboarding if a record exists
+ * 5. Updates meadow_posts author_subdomain if applicable
  *
  * All statements run in a single D1 batch (atomic).
+ *
+ * On the display_name sync (step 2):
+ *
+ *   Tenants have both a `subdomain` (URL slug, lowercase, unique) and a
+ *   `display_name` (the friendly label shown in headers, tab titles, og
+ *   metadata, friends lists, the arbor sidebar, etc.). They're
+ *   intentionally independent — a tenant can choose "Autumn's Blog" as
+ *   their display name while their URL is just "autumn". But in practice
+ *   many Wanderers type the same thing into both fields at signup, then
+ *   later rename their subdomain and are surprised to find the OLD
+ *   username still leaking through everywhere that reads display_name
+ *   (tab titles, og:title, etc.). A real user caught this exact bug.
+ *
+ *   The conservative fix: only sync display_name when it still LITERALLY
+ *   equals the old subdomain. That covers the "I never customized it"
+ *   case without ever clobbering a user who deliberately set a different
+ *   display name. The WHERE clause is `AND display_name = ?`, so a NULL
+ *   display_name (shouldn't happen — the column is NOT NULL — but
+ *   defensive just in case) or any customized value silently skips the
+ *   update. A non-matching update is a harmless no-op at the batch
+ *   level; the main subdomain update in step 1 is what gates overall
+ *   success.
  */
 export async function changeUsername(
 	db: D1Database,
@@ -355,7 +378,12 @@ export async function changeUsername(
 				)
 				.bind(normalized, tenantId, currentSubdomain),
 
-			// 2. Insert username history record
+			// 2. Sync display_name iff it was never customized — see docblock above.
+			db
+				.prepare("UPDATE tenants SET display_name = ? WHERE id = ? AND display_name = ?")
+				.bind(normalized, tenantId, currentSubdomain),
+
+			// 3. Insert username history record
 			db
 				.prepare(
 					`INSERT INTO username_history (id, tenant_id, old_subdomain, new_subdomain, changed_at, hold_expires_at, released, actor_email)
@@ -363,14 +391,14 @@ export async function changeUsername(
 				)
 				.bind(historyId, tenantId, currentSubdomain, normalized, now, holdExpiresAt, actorEmail),
 
-			// 3. Update user_onboarding username (if record exists)
+			// 4. Update user_onboarding username (if record exists)
 			db
 				.prepare(
 					"UPDATE user_onboarding SET username = ?, updated_at = unixepoch() WHERE tenant_id = ?",
 				)
 				.bind(normalized, tenantId),
 
-			// 4. Update meadow_posts author_subdomain (if any exist)
+			// 5. Update meadow_posts author_subdomain (if any exist)
 			db
 				.prepare("UPDATE meadow_posts SET author_subdomain = ? WHERE tenant_id = ?")
 				.bind(normalized, tenantId),

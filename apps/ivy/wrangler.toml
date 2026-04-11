@@ -1,19 +1,26 @@
-# Ivy - Cloudflare Workers Configuration
-# https://developers.cloudflare.com/workers/wrangler/configuration/
+# Grove Ivy — Zero-knowledge email client
+# Deployed to: ivy.grove.place
+#
+# SvelteKit Worker with adapter-cloudflare output. Build command is
+# handled by the CI workflow (_deploy-worker.yml with run-build: true),
+# so there is no [build] section here.
 
-name = "ivy"
-main = "src/index.ts"
+name = "grove-ivy"
+main = ".svelte-kit/cloudflare/_worker.js"
 compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Static assets for SvelteKit adapter-cloudflare
+# Static assets served alongside the Worker
 [assets]
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
-# Build settings for SvelteKit
-[build]
-command = "pnpm build"
+# Route — directs ivy.grove.place to this Worker
+# More specific than grove-router's *.grove.place wildcard, so this
+# takes precedence automatically.
+[[routes]]
+pattern = "ivy.grove.place/*"
+zone_name = "grove.place"
 
 # Local development — port assignment to avoid collisions with other apps
 [dev]
@@ -55,6 +62,14 @@ service = "grove-zephyr"
 # Workers AI binding (for Lumen classification)
 [ai]
 binding = "AI"
+
+# Observability — structured logs in Cloudflare dashboard
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
 
 # Environment variables (use secrets for sensitive values)
 [vars]

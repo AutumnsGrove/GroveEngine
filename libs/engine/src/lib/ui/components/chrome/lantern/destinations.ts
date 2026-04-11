@@ -8,6 +8,7 @@
 
 import { featureIcons } from "@autumnsgrove/prism/icons";
 import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
+import { getArborHref } from "$lib/ui/stores/wanderer.svelte";
 import type { LanternDestination } from "./types";
 
 // Resolve service icons from the canonical manifest
@@ -59,30 +60,43 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 	];
 }
 
-/** Platform services shown in the Services tab. */
-export const services: LanternDestination[] = [
-	{
-		href: "https://ivy.grove.place",
-		label: "Email",
-		groveLabel: "Ivy",
-		icon: ivyIcon,
-		external: true,
-		termSlug: "ivy",
-	},
-	{
-		href: "https://amber.grove.place",
-		label: "Storage",
-		groveLabel: "Amber",
-		icon: amberIcon,
-		external: true,
-		termSlug: "amber",
-	},
-	{
-		href: "/arbor",
-		label: "Admin",
-		groveLabel: "Arbor",
-		icon: arborIcon,
-		external: false,
-		termSlug: "arbor",
-	},
-];
+/**
+ * Build the platform services list shown in the Services tab.
+ *
+ * The Admin entry routes back to the user's OWN arbor when they're
+ * visiting someone else's grove — otherwise a relative `/arbor` would
+ * push them into the visited grove's admin panel. See getArborHref.
+ */
+export function getServices(
+	homeGrove: string,
+	currentGrove: string,
+): LanternDestination[] {
+	const arborHref = getArborHref(homeGrove, currentGrove);
+	const arborExternal = arborHref.startsWith("http");
+	return [
+		{
+			href: "https://ivy.grove.place",
+			label: "Email",
+			groveLabel: "Ivy",
+			icon: ivyIcon,
+			external: true,
+			termSlug: "ivy",
+		},
+		{
+			href: "https://amber.grove.place",
+			label: "Storage",
+			groveLabel: "Amber",
+			icon: amberIcon,
+			external: true,
+			termSlug: "amber",
+		},
+		{
+			href: arborHref,
+			label: "Admin",
+			groveLabel: "Arbor",
+			icon: arborIcon,
+			external: arborExternal,
+			termSlug: "arbor",
+		},
+	];
+}

@@ -2,8 +2,8 @@
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
-	import { wandererStore } from "$lib/ui/stores/wanderer.svelte";
-	import { getDestinations, services } from "./destinations";
+	import { wandererStore, getArborHref } from "$lib/ui/stores/wanderer.svelte";
+	import { getDestinations, getServices } from "./destinations";
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
 	import LanternVisitingCard from "./LanternVisitingCard.svelte";
@@ -20,6 +20,14 @@
 
 	const panelTitle = $derived(groveModeStore.current ? "Lantern" : "Compass");
 	const destinations = $derived(getDestinations(data.homeGrove));
+	// Services list is home-aware: when the user is visiting someone else's
+	// grove, the Admin link resolves to their own arbor instead of the
+	// visited grove's admin panel.
+	const services = $derived(getServices(data.homeGrove, wandererStore.currentGrove));
+	// Settings cog at the top of the panel uses the same rule.
+	const settingsHref = $derived(
+		getArborHref(data.homeGrove, wandererStore.currentGrove),
+	);
 	const activeItems = $derived(lanternStore.activeTab === "destinations" ? destinations : services);
 	const homeLabel = $derived(groveModeStore.current ? "Return to Your Grove" : "Back to My Site");
 
@@ -77,7 +85,7 @@
 					{/if}
 				</div>
 				<a
-					href="/arbor"
+					href={settingsHref}
 					class="flex items-center justify-center min-w-[36px] min-h-[36px] -m-1 rounded-md text-foreground-muted transition-colors hover:text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 					aria-label="Open settings"
 				>

@@ -159,16 +159,21 @@
 					onclick={() => selectItem(item)}
 					onmouseenter={() => (activeIndex = i)}
 				>
-					<span class="curio-name">{item.name}</span>
-					<span class="curio-id">::{item.id}::</span>
-					{#if status.configured}
-						<span class="curio-status configured" title="Configured">
-							<span class="status-dot"></span>
-						</span>
-					{:else}
-						<span class="curio-status" title="Not configured">
-							<span class="status-dot unconfigured"></span>
-						</span>
+					<div class="curio-row">
+						<span class="curio-name">{item.name}</span>
+						<span class="curio-id">{item.requiresArg ? `::${item.id}[]::` : `::${item.id}::`}</span>
+						{#if status.configured}
+							<span class="curio-status configured" title="Configured">
+								<span class="status-dot"></span>
+							</span>
+						{:else}
+							<span class="curio-status" title="Not configured">
+								<span class="status-dot unconfigured"></span>
+							</span>
+						{/if}
+					</div>
+					{#if "description" in item && item.description}
+						<div class="curio-description">{item.description}</div>
 					{/if}
 				</button>
 			{/each}
@@ -189,11 +194,16 @@
 					onclick={() => selectItem(item)}
 					onmouseenter={() => (activeIndex = globalIndex)}
 				>
-					<span class="curio-name">{item.name}</span>
-					<span class="curio-id">::{item.id}[]::</span>
-					<span class="curio-status configured">
-						<span class="status-dot system"></span>
-					</span>
+					<div class="curio-row">
+						<span class="curio-name">{item.name}</span>
+						<span class="curio-id">{item.requiresArg ? `::${item.id}[]::` : `::${item.id}::`}</span>
+						<span class="curio-status configured">
+							<span class="status-dot system"></span>
+						</span>
+					</div>
+					{#if "description" in item && item.description}
+						<div class="curio-description">{item.description}</div>
+					{/if}
 				</button>
 			{/each}
 		{/if}
@@ -243,8 +253,9 @@
 
 	.curio-item {
 		display: flex;
-		align-items: center;
-		gap: 8px;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 2px;
 		width: 100%;
 		padding: 6px 8px;
 		background: transparent;
@@ -256,6 +267,21 @@
 		font-family: inherit;
 		font-size: inherit;
 		transition: background 0.1s ease;
+	}
+
+	.curio-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.curio-description {
+		font-family:
+			-apple-system, BlinkMacSystemFont, "Segoe UI", "Lexend", system-ui, sans-serif;
+		font-size: 0.7rem;
+		line-height: 1.3;
+		color: var(--color-foreground-subtle);
+		padding-left: 2px;
 	}
 
 	.curio-item:hover,

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MarkdownIt from "markdown-it";
+	import { suppressHeadingPlugin, SUPPRESS_MARKER } from "$lib/content/markdown/suppress";
 	import { tick, untrack } from "svelte";
 
 	// Local instance for admin editor preview
@@ -7,6 +8,7 @@
 	import { extractHeaders } from "$lib/content/markdown/markdown";
 	import { groveDirectivePlugin } from "$lib/content/markdown/directives";
 	editorMd.use(groveDirectivePlugin);
+	editorMd.use(suppressHeadingPlugin);
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { apiRequest } from "$lib/utils/api";
@@ -197,6 +199,11 @@
 		const headingRegex = /^(#{1,6})\s+(.+)$/gm;
 		let match;
 		while ((match = headingRegex.exec(content)) !== null) {
+			// Skip headings the author marked with ::suppress::. They still
+			// render as visual headings but intentionally don't appear in
+			// the TOC, and it would be confusing to offer them as anchor
+			// targets in the vine picker either.
+			if (match[0].includes(SUPPRESS_MARKER)) continue;
 			anchors.push(match[0].trim());
 		}
 		const anchorRegex = /<!--\s*anchor:([\w-]+)\s*-->/g;
@@ -206,9 +213,27 @@
 		return anchors;
 	});
 
+	// Extract top-level paragraph previews for the gutter anchor picker.
+	// Uses the rendered preview so counting matches findAnchorElement's
+	// runtime rule (`:scope > p` — direct child paragraphs only, 1-indexed).
+	// Paragraphs inside blockquotes, lists, etc. are excluded on both sides.
+	let availableParagraphs = $derived.by(() => {
+		if (typeof DOMParser === "undefined" || !previewHtml) return [];
+		const doc = new DOMParser().parseFromString(previewHtml, "text/html");
+		const paragraphs = doc.body.querySelectorAll(":scope > p");
+		return Array.from(paragraphs).map((p, i) => ({
+			index: i + 1,
+			preview: (p.textContent || "").trim().replace(/\s+/g, " ").slice(0, 60),
+		}));
+	});
+
 	// Public exports (API must not change)
 	export function getAvailableAnchors() {
 		return availableAnchors;
+	}
+
+	export function getAvailableParagraphs() {
+		return availableParagraphs;
 	}
 
 	export function insertAnchor(name: string) {

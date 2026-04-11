@@ -81,8 +81,12 @@
 	let densityMultiplier = $state(1);
 	let treeSizeMultiplier = $state(1);
 
-	// Performance budget: max animated elements to prevent jank on lower-end devices
-	const MAX_ANIMATED_ELEMENTS = 150;
+	// Performance budget: max animated elements to prevent jank on lower-end devices.
+	// Previously 150 — halved after real users reported /forest stalling during
+	// initial paint. Up to ~100 SVG trees + hills + 80–100 falling leaves/petals
+	// + clouds + birds is already the top of what feels smooth on mid-range GPUs
+	// once backdrop-filter layers are in the mix.
+	const MAX_ANIMATED_ELEMENTS = 100;
 
 	// Calculate density based on viewport width
 	function calculateDensity(): { density: number; treeSize: number } {
@@ -578,7 +582,15 @@
 <main class="min-h-screen flex flex-col transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-indigo-950' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-surface-subtle dark:via-surface-elevated dark:to-card' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-surface-subtle dark:via-surface-elevated dark:to-surface-alt' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-surface-subtle dark:via-surface-elevated dark:to-surface-alt' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-surface-subtle dark:via-surface-elevated dark:to-surface-alt'}">
 	<Header user={data.user} />
 
-	<article class="flex-1 relative overflow-hidden">
+	<!--
+		`isolation: isolate` bounds every stacking-context and backdrop-filter
+		interaction inside the forest scene. Without it, the title Glass card's
+		`backdrop-filter: blur()` has to composite the entire page tree every
+		frame — including the section below with its own glass cards. Combined
+		with `contain: layout paint`, this lets the browser treat the article
+		as a single compositor layer and reuse the raster between frames.
+	-->
+	<article class="flex-1 relative overflow-hidden forest-scene">
 		<!-- Season Toggle - Bottom right corner -->
 		<div class="absolute bottom-6 right-6 z-grove-fab">
 			<button
@@ -842,10 +854,24 @@
 		</div>
 	</article>
 
-	<!-- Forest content sections - glass-treated explanations of the Forests feature -->
+	<!--
+		Forest content sections - glass-treated explanations of the Forests feature.
+
+		These sit BELOW the animated forest scene with only a 3rem overlap, so
+		the static page background is what sits behind most of their area.
+		That means backdrop-blur doesn't actually reveal anything interesting
+		here — but it was forcing the browser to rasterize and re-blur the
+		entire viewport on every animation frame, which was a major contributor
+		to the page stalling on first paint. The cards drop backdrop-blur
+		(`backdrop-blur-none` overrides the baked-in `backdrop-blur-md` via
+		tailwind-merge in cn()) while keeping their translucent background
+		colors — they still look like glass, just without the now-redundant
+		compositor work. Glass components use `intensity="none"` for the same
+		reason.
+	-->
 	<section class="relative z-10 -mt-12 px-6 pb-16 space-y-10 max-w-4xl mx-auto">
 		<!-- Community Intro -->
-		<Glass variant="tint" intensity="medium" class="p-8 rounded-2xl text-center">
+		<Glass variant="tint" intensity="none" class="p-8 rounded-2xl text-center">
 			<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-4">
 				Find your people, not an algorithm
 			</h2>
@@ -857,28 +883,28 @@
 
 		<!-- Feature Callout Grid -->
 		<div class="grid sm:grid-cols-2 gap-6">
-			<GlassCard>
+			<GlassCard class="backdrop-blur-none">
 				<h3 class="text-lg font-serif text-accent-muted mb-2">Themed Neighborhoods</h3>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					From The Prism to The Terminal, The Kitchen to The Observatory — each forest is a gathering place for people who share a passion.
 				</p>
 			</GlassCard>
 
-			<GlassCard>
+			<GlassCard class="backdrop-blur-none">
 				<h3 class="text-lg font-serif text-accent-muted mb-2">Stroll, Don't Scroll</h3>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					Go for a stroll through a forest and discover someone new. No algorithms deciding who you see — just serendipity.
 				</p>
 			</GlassCard>
 
-			<GlassCard>
+			<GlassCard class="backdrop-blur-none">
 				<h3 class="text-lg font-serif text-accent-muted mb-2">Your Roots, Your Choice</h3>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					Join as many forests as you like. Show up in the directory or stay hidden. Leave anytime. No penalties, no pressure.
 				</p>
 			</GlassCard>
 
-			<GlassCard>
+			<GlassCard class="backdrop-blur-none">
 				<h3 class="text-lg font-serif text-accent-muted mb-2">Community, Not Competition</h3>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					No follower counts. No viral mechanics. No engagement scores. Just people sharing what matters to them.
@@ -887,7 +913,7 @@
 		</div>
 
 		<!-- Coming Soon CTA -->
-		<Glass variant="accent" intensity="medium" class="p-8 rounded-2xl text-center">
+		<Glass variant="accent" intensity="none" class="p-8 rounded-2xl text-center">
 			<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-4">
 				The Forest is growing
 			</h2>
@@ -908,3 +934,21 @@
 		<Footer />
 	</div>
 </main>
+
+<style>
+	/*
+	 * Isolate the forest scene from the rest of the page for compositor
+	 * performance. The title glass overlay inside this article uses
+	 * `backdrop-filter: blur()`, which is O(viewport) without isolation
+	 * because the browser has to raster the entire ancestor chain to
+	 * compute the blurred backdrop. `contain: layout paint` bounds layout
+	 * and paint work to this subtree, and `isolation: isolate` opens a new
+	 * stacking context so the filter only reads from inside the article.
+	 * Real users were reporting `/forest` stalling during first paint —
+	 * this is the minimal fix that got it smooth on mid-range hardware.
+	 */
+	.forest-scene {
+		isolation: isolate;
+		contain: layout paint;
+	}
+</style>
