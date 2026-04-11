@@ -21,7 +21,8 @@
 | 0.2 | Delete `workers/post-migrator/` entirely | 1,545 | Plus workflow shim + affected-packages + grove-census |
 | 0.3 | Delete `libs/engine/src/lib/db/schema.sql` (standalone legacy schema) | 238 | Migrated into `grove-curios-db`'s `timeline_*` tables |
 | 0.4 | Prune 7 defunct D1 databases from Patina backup worker | ~50 | See §Audit G — scout-db, grovemusic-db, library-enhancer-db, autumnsgrove-posts, autumnsgrove-git-stats, your-site-posts, mycelium-oauth |
-| | **Running total** | **~3,154** | 2 deploy targets removed (post-migrator, plus 7 D1 backups pruned) |
+| 0.5 | Delete `ui/components/custom/types.test.ts` (only truly-trivial test found) | 56 | See §Audit B re-audit below — the other ~900 lines flagged were false positives |
+| | **Running total** | **~3,210** | 2 deploy targets removed (post-migrator, plus 7 D1 backups pruned) |
 
 ### 🔧 Re-audit correction (important!)
 
@@ -178,10 +179,13 @@ was actually unused** (see §0 re-audit correction).
    - `loft/scheduled/scheduled.test.ts` — 792 lines, 206 mock refs, only 21 tests
 
 4. **Trivial tests** (type guards, constant checks, CSS class assertions):
-   - `components/custom/types.test.ts` — tests `isValidIcon(null) === false`
-   - `components/custom/MobileTOC.test.ts` — tests aria attributes exist
-   - `auth/limits.test.ts` — tests `RATE_LIMIT_PER_HOUR === 100`
-   - `auth/palette.test.ts` — tests color constants exist
+   - `components/custom/types.test.ts` — tests `isValidIcon(null) === false` → **confirmed trivial, DELETED (56 lines)**
+   - ~~`components/custom/MobileTOC.test.ts`~~ — **false positive**: 267 lines of real component tests (render, click, menu toggle, aria-expanded, level classes, icon handling). **KEPT.**
+   - ~~`auth/limits.test.ts`~~ — **false positive**: 426 lines of real business-logic tests (quota descriptions, urgency levels, upgrade recommendations, pre-submit checks). **KEPT.**
+   - ~~`auth/palette.test.ts`~~ — **wrong path**; the two real palette tests are `ui/components/nature/palette.test.ts` (556 lines — seasonal logic, Math.random mocking, dark mode) and `social/blazes/palette.test.ts` (135 lines — mostly constant checks but `resolveLucideIcon` has real fallback logic). **BOTH KEPT.**
+   - ~~`curios/ambient/index.test.ts`~~ (121 lines), ~~`curios/cursors/index.test.ts`~~ (124 lines), ~~`curios/clipart/index.test.ts`~~ (165 lines) — **false positives**: contain `isValidUrl`/`isValidCursorUrl` tests that **reject `javascript:alert(1)` URLs (XSS guard)**, plus real transform functions and boundary checks. **KEPT — deleting would regress a security boundary.**
+
+   **Re-audit verdict**: Of the ~900 lines originally flagged as "trivial tests", only **56 lines** (`types.test.ts`) were actually trivial. The rest either test real behavior, real transforms, or serve as security regression guards. The automated grep for short `expect(X).toBe(...)` patterns over-matched — constant assertions can coexist with real tests in the same file, and cheap-looking boundary tests can be guarding real invariants.
 
 #### Recommended Actions
 
@@ -189,9 +193,9 @@ was actually unused** (see §0 re-audit correction).
 |--------|----------:|--------|
 | Delete duplicate upload-validation.test.ts | 1,321 | Trivial |
 | Consolidate mock infrastructure to shared package | ~1,200 | 1 week |
-| Delete trivial test files (type guards, constants) | ~900 | 1 day |
+| ~~Delete trivial test files (type guards, constants)~~ → re-audited: only 56 lines were truly trivial | 56 | Trivial |
 | Prune mock-heavy billing/openrouter/amber tests | ~3,000 | 1 week |
-| **Total immediate test savings** | **~6,400** | |
+| **Total immediate test savings** | **~5,577** | |
 
 **Longer-term**: Update `/beaver-build` skill to produce fewer, higher-quality
 tests. Stop testing implementation details; focus on behavior at boundaries.
@@ -236,8 +240,24 @@ core scripts are product code. Notably:
 
 | Target | Lines | Recommendation | Effort |
 |--------|------:|---------------|--------|
-| **services/email-render** | 235 | Merge into Zephyr (stateless template renderer) | 1-2 hours |
+| ~~**services/email-render**~~ | 235 | **REJECTED** after re-audit — see note below | — |
 | **apps/terrarium** | 160 | Absorb into Aspen or delete (single component wrapper) | 1 hour |
+
+**email-render re-audit** (rejected): The original recommendation missed that
+`email-render` has **two** consumers (both `services/zephyr` AND
+`workers/email-catchup`), not one. A full merge into Zephyr would require:
+(a) adding `react` + `@react-email/render` + `@react-email/components` as
+Zephyr runtime deps, (b) adding `nodejs_compat` to Zephyr's wrangler.toml,
+(c) porting the `sync-templates.mjs` prebuild step into Zephyr, (d) inlining
+React SSR into Zephyr's request path (roughly doubling its bundle size), and
+(e) updating email-catchup's service binding and render call sites. Net
+result: 1 deployment saved, but Zephyr becomes a heavyweight React-bundling
+worker instead of a lean Hono gateway. **The existing split is legitimate
+separation of concerns** — Zephyr is a fast stateless gateway, email-render
+is a CPU-bound renderer shared by two consumers, and they scale
+independently. Worker-to-worker service bindings are free (no network hop,
+no cold start). The "1 deployment saved" framing undercounted the cost.
+**Keep email-render separate.**
 
 #### Keep Separate (Architectural Reasons)
 
@@ -367,9 +387,9 @@ Some things look large but are justified:
 | 1.2 | Delete duplicate `upload-validation.test.ts` | 1,321 | 0 | ✅ Done |
 | 1.3 | Delete `workers/post-migrator` (disabled, buggy) | 1,545 | 1 | ✅ Done |
 | 1.4 | Prune Patina of 7 defunct D1 backup targets | ~50 | 0 (7 backups) | ✅ Done |
-| 1.5 | Delete trivial test files (type guards, constant assertions) | ~900 | 0 | ⏳ Pending |
-| 1.6 | Merge `services/email-render` into Zephyr | 235 | 1 | ⏳ Pending |
-| | **Tier 1 Total** | **~4,289** | **2** | |
+| 1.5 | ~~Delete trivial test files~~ → re-audited; only `types.test.ts` was truly trivial | 56 | 0 | ✅ Done (corrected) |
+| 1.6 | ~~Merge `services/email-render` into Zephyr~~ → **rejected** after re-audit (2 consumers, React bundle bloat, good architectural split) | 0 | 0 | ❌ Rejected |
+| | **Tier 1 Total** | **~3,210** | **1** | |
 
 ### Tier 2: Engine Extraction (1-2 weeks, medium effort)
 
@@ -421,8 +441,8 @@ Some things look large but are justified:
 |--------|-------:|------:|
 | Workers | 13 | 9 |
 | Apps | 11 | 11 |
-| Services | 10 | 9 |
-| **Total** | **34** | **29** |
+| Services | 10 | 10 (email-render merge rejected — see Audit D re-audit) |
+| **Total** | **34** | **30** |
 
 ### Cognitive Load
 
