@@ -1,5 +1,9 @@
 name: Build & Migrate Engine
 
+# Engine is a library — it no longer deploys a frontend.
+# Aspen (apps/aspen) handles the tenant app deploy via deploy-aspen.yml.
+# This workflow builds, tests, type-checks, and runs D1 migrations.
+
 on:
   push:
     branches: [main]
@@ -12,45 +16,21 @@ on:
       - "scripts/generate/grove-term-manifest.ts"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   build-and-migrate:
-    runs-on: ubuntu-latest
-    name: Build, test & run migrations
-    permissions:
-      contents: read
-      deployments: write
-
-    steps:
-      # Engine is a library — it no longer deploys a frontend.
-      # Aspen (apps/aspen) handles the tenant app deploy via deploy-aspen.yml.
-      # This workflow builds, tests, type-checks, and runs D1 migrations.
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup workspace
-        uses: ./.github/actions/grove-setup
-        with:
-          build-engine: true
-          build-foliage: true
-          build-gossamer: true
-
-      - name: Run tests
-        run: pnpm test:run
-        working-directory: libs/engine
-
-      - name: Build vineyard
-        run: pnpm package
-        working-directory: libs/vineyard
-
-      - name: Type check
-        run: pnpm check
-        working-directory: libs/engine
-
-      - name: Run database migrations
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: d1 migrations apply grove-engine-db --remote
-          workingDirectory: libs/engine
-          packageManager: pnpm
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: libs/engine
+      needs-engine: true
+      needs-foliage: true
+      needs-vineyard: true
+      run-tests: true
+      typecheck-command: pnpm check
+      run-migrations: true
+      migration-db: grove-engine-db
+      run-deploy: false
+    secrets: inherit

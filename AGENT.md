@@ -170,7 +170,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 ### Grove Wrap (gw) — Required CLI
 
-All git, GitHub, and Cloudflare operations go through `gw`. Write operations require `--write`. The `enforce-gw` hook blocks raw commands automatically.
+All git, GitHub, and Cloudflare operations go through `gw`. Write operations require `--write`.
 
 ```bash
 gw context                              # Start every session here
@@ -241,10 +241,12 @@ See `AgentUsage/git_guide.md` for complete reference.
 
 ### Claude Code Hooks
 
-Two hooks are registered in `~/.claude/settings.json`:
+Hooks registered in `.claude/settings.json`:
 
-- **PreToolUse `enforce-gw.py`** — Blocks raw git/gh/wrangler write commands, redirects to gw equivalents
+- **PreToolUse `check-colors.py`** — Flags hardcoded accent colors that bypass the Prism token gateway
 - **PostToolUse `auto-format.py`** — Auto-runs Prettier after every Edit/Write on supported file types
+
+Local git enforcement lives in `.githooks/` (pre-commit, pre-push, commit-msg). Install with `git config core.hooksPath .githooks`.
 
 ### Pull Requests
 

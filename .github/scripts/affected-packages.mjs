@@ -23,28 +23,47 @@ const baseRef = process.argv[2] || "main";
 // If package A changes, which packages need to rebuild?
 // This is the REVERSE dependency map (what depends on me).
 
+// Reverse dependency graph: if package A changes, which packages need to rebuild?
+// Shared workspace libs (engine/foliage/gossamer/infra/prism) cascade to nearly
+// every deployable, so they all share the same consumer list — a change to any
+// of them should revalidate the fleet.
+const ENGINE_CONSUMERS = [
+	"apps/amber",
+	"apps/aspen",
+	"apps/billing",
+	"apps/clearing",
+	"apps/domains",
+	"apps/ivy",
+	"apps/landing",
+	"apps/login",
+	"apps/meadow",
+	"apps/plant",
+	"apps/terrarium",
+	"services/amber",
+	"services/billing-api",
+	"services/durable-objects",
+	"services/forage",
+	"services/heartwood",
+	"services/zephyr",
+	"workers/loft",
+	"workers/onboarding",
+	"workers/patina",
+	"workers/reverie",
+	"workers/reverie-exec",
+	"workers/subscription-digest",
+	"workers/vista-collector",
+	"workers/warden",
+];
+
 const DEPENDENTS = {
 	"libs/foliage": ["libs/engine"],
 	"libs/gossamer": ["libs/engine"],
-	"libs/engine": [
-		"apps/amber",
-		"apps/clearing",
-		"apps/domains",
-		"apps/ivy",
-		"apps/landing",
-		"apps/login",
-		"apps/meadow",
-		"apps/plant",
-		"apps/terrarium",
-		"services/amber",
-		"services/durable-objects",
-		"services/forage",
-		"services/heartwood",
-		"workers/vista-collector",
-		"workers/warden",
-	],
-	"libs/vineyard": [],
+	"libs/engine": ENGINE_CONSUMERS,
+	"libs/infra": ENGINE_CONSUMERS, // shared Vite config — affects every SvelteKit target
+	"libs/prism": ENGINE_CONSUMERS, // design tokens + icon gateway
+	"libs/vineyard": ["libs/engine"], // engine builds vineyard as a package dep
 	"libs/shutter": [],
+	"libs/grove-agent": ["workers/onboarding"], // sole consumer
 };
 
 // Package metadata: what type check command + whether it has tests
@@ -67,7 +86,20 @@ const PACKAGES = {
 		hasTests: true,
 		isSvelteKit: true,
 	},
+	"libs/prism": { typecheck: "pnpm check", hasTests: false, isSvelteKit: false },
+	"libs/infra": { typecheck: "pnpm exec tsc --noEmit", hasTests: false, isSvelteKit: false },
+	"libs/grove-agent": { typecheck: "pnpm exec tsc --noEmit", hasTests: true, isSvelteKit: false },
 	"apps/amber": {
+		typecheck: "pnpm check",
+		hasTests: false,
+		isSvelteKit: true,
+	},
+	"apps/aspen": {
+		typecheck: "pnpm check",
+		hasTests: false,
+		isSvelteKit: true,
+	},
+	"apps/billing": {
 		typecheck: "pnpm check",
 		hasTests: false,
 		isSvelteKit: true,
@@ -103,6 +135,11 @@ const PACKAGES = {
 		isSvelteKit: true,
 	},
 	"services/amber": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"services/billing-api": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,
 		isSvelteKit: false,
@@ -179,6 +216,36 @@ const PACKAGES = {
 	},
 	"workers/webhook-cleanup": {
 		typecheck: null,
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"workers/loft": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"workers/onboarding": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"workers/patina": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"workers/reverie": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: true,
+		isSvelteKit: false,
+	},
+	"workers/reverie-exec": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: false,
+		isSvelteKit: false,
+	},
+	"workers/subscription-digest": {
+		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,
 		isSvelteKit: false,
 	},
