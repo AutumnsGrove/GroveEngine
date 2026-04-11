@@ -1,10 +1,10 @@
-name: Deploy Meadow Poller
+name: Deploy Webhook Cleanup
 
 on:
   push:
     branches: [main]
     paths:
-      - "workers/meadow-poller/**"
+      - "workers/webhook-cleanup/**"
       - "libs/engine/**"
       - "libs/gossamer/**"
       - "libs/infra/**"
@@ -19,8 +19,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/_deploy-worker.yml
     with:
-      worker-dir: workers/meadow-poller
+      worker-dir: workers/webhook-cleanup
       needs-engine: true
       run-tests: true
-      test-command: "pnpm test"
     secrets: inherit

@@ -1,10 +1,10 @@
-name: Deploy Meadow Poller
+name: Deploy Vista Collector
 
 on:
   push:
     branches: [main]
     paths:
-      - "workers/meadow-poller/**"
+      - "workers/vista-collector/**"
       - "libs/engine/**"
       - "libs/gossamer/**"
       - "libs/infra/**"
@@ -19,8 +19,6 @@ jobs:
   deploy:
     uses: ./.github/workflows/_deploy-worker.yml
     with:
-      worker-dir: workers/meadow-poller
+      worker-dir: workers/vista-collector
       needs-engine: true
-      run-tests: true
-      test-command: "pnpm test"
     secrets: inherit
