@@ -15,7 +15,13 @@
 		theme.css already loads Lexend from /fonts/Lexend-Regular.ttf, and
 		Grove's convention is Lexend everywhere.
 	-->
-	<link rel="preload" href="/fonts/Lexend-Regular.ttf" as="font" type="font/ttf" crossorigin />
+	<link
+		rel="preload"
+		href="/fonts/Lexend-Regular.ttf"
+		as="font"
+		type="font/ttf"
+		crossorigin="anonymous"
+	/>
 </svelte:head>
 
 <!--

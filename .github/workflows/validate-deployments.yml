@@ -22,10 +22,16 @@ on:
       - "apps/plant/**"
       - "apps/ivy/**"
       # Pages
-      - "libs/engine/**"
       - "apps/domains/**"
       - "apps/terrarium/**"
       - "apps/meadow/**"
+      # Shared workspace libs — any of these affects nearly every
+      # target in the matrix, so we revalidate the whole fleet on change.
+      - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/foliage/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
       # Root config changes affect all
       - "package.json"
       - "pnpm-lock.yaml"

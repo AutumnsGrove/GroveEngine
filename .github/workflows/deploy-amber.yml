@@ -5,7 +5,13 @@ on:
     branches: [main]
     paths:
       - "apps/amber/**"
+      # Amber imports from lattice (engine), prism (icons), and infra
+      # (shared Vite config). Changes to any of those should redeploy
+      # Amber — otherwise UI/util updates never reach production.
       - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
   workflow_dispatch:
 
 permissions:
@@ -18,6 +24,8 @@ jobs:
     with:
       app-dir: apps/amber
       project-name: amber
+      # Amber doesn't import from @autumnsgrove/foliage, so needs-foliage
+      # was a no-op that slowed every deploy by a minute. Engine still
+      # needs building because Amber consumes lattice + prism icons.
       needs-engine: true
-      needs-foliage: true
     secrets: inherit

@@ -5,6 +5,13 @@ on:
     branches: [main]
     paths:
       - "services/zephyr/**"
+      # Zephyr imports from @autumnsgrove/lattice/errors, so rebuild on
+      # engine (and its workspace deps) changes too — otherwise a fresh
+      # typecheck against a stale engine dist/ will fail.
+      - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
   workflow_dispatch:
 
 permissions:
@@ -16,6 +23,9 @@ jobs:
     uses: ./.github/workflows/_deploy-worker.yml
     with:
       worker-dir: services/zephyr
+      # needs-engine rebuilds libs/engine (and gossamer) so that
+      # `@autumnsgrove/lattice/errors` resolves during typecheck.
+      needs-engine: true
       typecheck-command: "pnpm run typecheck"
       run-tests: true
     secrets: inherit
