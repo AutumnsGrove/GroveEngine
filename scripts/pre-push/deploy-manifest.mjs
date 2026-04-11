@@ -224,6 +224,9 @@ export function buildMatrix(shims) {
 			"needs-vineyard": s.with["needs-vineyard"] === true,
 			"run-build": s.with["run-build"] === true,
 			"run-typecheck": s.with["run-typecheck"] !== false,
+			// Default run-deploy is true (matches _deploy-worker.yml default).
+			// Only engine currently sets this to false — library-only target.
+			"run-deploy": s.with["run-deploy"] !== false,
 			"typecheck-command": s.with["typecheck-command"] || "",
 			"project-name": s.with["project-name"] || "",
 			// Destructive flags — validator MUST skip these in dry-run

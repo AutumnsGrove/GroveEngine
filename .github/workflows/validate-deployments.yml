@@ -115,9 +115,13 @@ jobs:
         run: ${{ matrix.typecheck-command || 'pnpm exec tsc --noEmit' }}
         working-directory: ${{ matrix.path }}
 
-      # ── Workers: wrangler deploy --dry-run (destructive steps skipped) ─
+      # ── Workers: wrangler deploy --dry-run (skip library-only shims) ──
+      # `run-deploy: false` means the real deploy workflow skips `wrangler
+      # deploy` entirely (e.g. libs/engine, which only runs D1 migrations
+      # and whose wrangler.toml is a Pages config, not a worker config).
+      # Validating those with dry-run would fail on config shape alone.
       - name: Validate Worker (wrangler dry-run)
-        if: matrix.kind == 'worker'
+        if: matrix.kind == 'worker' && matrix.run-deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
