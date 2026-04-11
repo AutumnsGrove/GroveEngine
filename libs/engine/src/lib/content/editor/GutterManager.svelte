@@ -42,10 +42,21 @@
 		headingLevel: number;
 		/** Whether this is a custom anchor tag */
 		isAnchorTag: boolean;
+		/** Whether this is a positional paragraph anchor (paragraph:N) */
+		isParagraph: boolean;
+		/** 1-indexed paragraph number (only set when isParagraph) */
+		paragraphIndex: number;
 		/** Human-readable display text */
 		displayText: string;
 		/** Anchor type for accessibility labels */
 		type: string;
+	}
+
+	interface ParagraphAnchor {
+		/** 1-indexed paragraph position (matches findAnchorElement's `:scope > p`) */
+		index: number;
+		/** Truncated preview of the paragraph text */
+		preview: string;
 	}
 
 	interface ImageCacheEntry {
@@ -76,6 +87,7 @@
 		gutterItems = $bindable<GutterItem[]>([]),
 		onInsertAnchor = (_anchorName: string) => {},
 		availableAnchors = [] as string[],
+		availableParagraphs = [] as ParagraphAnchor[],
 	} = $props();
 
 	/**
@@ -96,14 +108,32 @@
 		const isHeading = anchor.startsWith("#");
 		const headingLevel = getHeadingLevel(anchor);
 		const isAnchorTag = anchor.startsWith("anchor:");
-		const displayText = isHeading ? anchor.replace(/^#+\s*/, "") : anchor.replace("anchor:", "");
+		const paragraphMatch = anchor.match(/^paragraph:(\d+)$/);
+		const isParagraph = paragraphMatch !== null;
+		const paragraphIndex = isParagraph ? parseInt(paragraphMatch[1], 10) : 0;
+		const displayText = isHeading
+			? anchor.replace(/^#+\s*/, "")
+			: isAnchorTag
+				? anchor.replace("anchor:", "")
+				: isParagraph
+					? `Paragraph ${paragraphIndex}`
+					: anchor;
 		const type = isHeading
 			? `heading level ${headingLevel}`
 			: isAnchorTag
 				? "anchor tag"
 				: "paragraph";
 
-		return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
+		return {
+			raw: anchor,
+			isHeading,
+			headingLevel,
+			isAnchorTag,
+			isParagraph,
+			paragraphIndex,
+			displayText,
+			type,
+		};
 	}
 
 	/** Preprocess anchors into structured data with Map for O(1) lookup */
@@ -113,6 +143,22 @@
 			const processed = createProcessedAnchor(anchor);
 			map.set(anchor, processed);
 		}
+		// Merge in top-level paragraphs from the editor so the picker can show
+		// them with a preview of the first ~60 characters. Uses the same
+		// `paragraph:N` format that findAnchorElement resolves at runtime.
+		for (const p of availableParagraphs) {
+			const raw = `paragraph:${p.index}`;
+			map.set(raw, {
+				raw,
+				isHeading: false,
+				headingLevel: 0,
+				isAnchorTag: false,
+				isParagraph: true,
+				paragraphIndex: p.index,
+				displayText: p.preview ? `P${p.index} · ${p.preview}` : `Paragraph ${p.index}`,
+				type: "paragraph",
+			});
+		}
 		return map;
 	});
 
@@ -120,11 +166,13 @@
 	let processedAnchors = $derived(Array.from(processedAnchorsMap.values()));
 
 	/** Default empty anchor for fallback */
-	const emptyAnchor = {
+	const emptyAnchor: ProcessedAnchor = {
 		raw: "",
 		isHeading: false,
 		headingLevel: 0,
 		isAnchorTag: false,
+		isParagraph: false,
+		paragraphIndex: 0,
 		displayText: "",
 		type: "paragraph",
 	};

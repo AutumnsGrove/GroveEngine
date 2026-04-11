@@ -206,9 +206,27 @@
 		return anchors;
 	});
 
+	// Extract top-level paragraph previews for the gutter anchor picker.
+	// Uses the rendered preview so counting matches findAnchorElement's
+	// runtime rule (`:scope > p` — direct child paragraphs only, 1-indexed).
+	// Paragraphs inside blockquotes, lists, etc. are excluded on both sides.
+	let availableParagraphs = $derived.by(() => {
+		if (typeof DOMParser === "undefined" || !previewHtml) return [];
+		const doc = new DOMParser().parseFromString(previewHtml, "text/html");
+		const paragraphs = doc.body.querySelectorAll(":scope > p");
+		return Array.from(paragraphs).map((p, i) => ({
+			index: i + 1,
+			preview: (p.textContent || "").trim().replace(/\s+/g, " ").slice(0, 60),
+		}));
+	});
+
 	// Public exports (API must not change)
 	export function getAvailableAnchors() {
 		return availableAnchors;
+	}
+
+	export function getAvailableParagraphs() {
+		return availableParagraphs;
 	}
 
 	export function insertAnchor(name: string) {
