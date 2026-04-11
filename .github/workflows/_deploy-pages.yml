@@ -203,7 +203,7 @@ jobs:
             } else {
               await github.rest.issues.create({
                 owner, repo, title, body,
-                labels: ['deploy-failed', `deploy-failed/${service}`],
+                labels: ['deploy-failed'],
               });
             }
 
