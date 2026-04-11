@@ -32,3 +32,10 @@ export { Day14Email, type Day14EmailProps } from "./Day14Email";
 
 // Day 30 - One month check-in (waitlist only)
 export { Day30Email, type Day30EmailProps } from "./Day30Email";
+
+// Data-driven: subscription digest (hourly cron, one per grove per window)
+export {
+	SubscriptionDigestEmail,
+	type SubscriptionDigestEmailProps,
+	type SubscriptionDigestPost,
+} from "./SubscriptionDigestEmail";

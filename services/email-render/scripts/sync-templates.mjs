@@ -56,6 +56,7 @@ const sequenceFiles = [
 	"Day14Email.tsx",
 	"Day30Email.tsx",
 	"BetaInviteEmail.tsx",
+	"SubscriptionDigestEmail.tsx",
 ];
 
 for (const file of sequenceFiles) {

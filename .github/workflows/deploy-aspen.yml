@@ -5,7 +5,15 @@ on:
     branches: [main]
     paths:
       - "apps/aspen/**"
+      # Aspen imports from every Grove workspace package (engine, prism
+      # tokens + icons, infra's shared Vite config, gossamer via engine).
+      # Without these path triggers a change to any of them quietly fails
+      # to redeploy Aspen, which is how "things weren't landing."
       - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
+      - "libs/foliage/**"
   workflow_dispatch:
 
 permissions:
