@@ -1,0 +1,19 @@
+{
+	"name": "@autumnsgrove/subscription-digest",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev --test-scheduled",
+		"deploy": "wrangler deploy"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"date-fns": "^4.1.0",
+		"@date-fns/tz": "^1.2.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250327.0",
+		"wrangler": "^4.14.1"
+	}
+}

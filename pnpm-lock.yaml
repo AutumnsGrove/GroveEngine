@@ -1746,6 +1746,25 @@ importers:
         specifier: ^4.76.0
         version: 4.76.0(@cloudflare/workers-types@4.20260317.1)
 
+  workers/subscription-digest:
+    dependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
+      '@date-fns/tz':
+        specifier: ^1.2.0
+        version: 1.4.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20250327.0
+        version: 4.20260317.1
+      wrangler:
+        specifier: ^4.14.1
+        version: 4.76.0(@cloudflare/workers-types@4.20260317.1)
+
   workers/timeline-sync:
     dependencies:
       '@autumnsgrove/infra':
@@ -2088,6 +2107,9 @@ packages:
   '@csstools/css-tokenizer@4.0.0':
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
+
+  '@date-fns/tz@1.4.1':
+    resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -4400,6 +4422,9 @@ packages:
   data-urls@6.0.1:
     resolution: {integrity: sha512-euIQENZg6x8mj3fO6o9+fOW8MimUI4PpD/fZBhJfeioZVy9TUpM4UY7KjQNVZFlqwJ0UdzRDzkycB997HEq1BQ==}
     engines: {node: '>=20'}
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
@@ -7370,6 +7395,8 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
+  '@date-fns/tz@1.4.1': {}
+
   '@drizzle-team/brocli@0.10.2': {}
 
   '@emnapi/runtime@1.8.1':
@@ -9669,6 +9696,8 @@ snapshots:
     dependencies:
       whatwg-mimetype: 5.0.0
       whatwg-url: 15.1.0
+
+  date-fns@4.1.0: {}
 
   de-indent@1.0.2: {}
 

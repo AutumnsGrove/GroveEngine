@@ -4,11 +4,12 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import FollowButton from "@autumnsgrove/lattice/ui/components/chrome/FollowButton.svelte";
+	import SubscribeButton from "@autumnsgrove/lattice/ui/components/chrome/SubscribeButton.svelte";
 	import ShareButton from "@autumnsgrove/lattice/ui/components/chrome/ShareButton.svelte";
 
 	let { data } = $props();
 
-	// Show follow button when a logged-in visitor is on someone else's grove
+	// Show follow/subscribe buttons when a logged-in visitor is on someone else's grove
 	const showFollow = $derived(data.user && !data.isOwner && data.context?.type === "tenant");
 	// Show share button for the grove owner
 	const showShare = $derived(data.isOwner);
@@ -71,6 +72,7 @@
 							subdomain={data.context.tenant.subdomain}
 							name={data.context.tenant.name}
 						/>
+						<SubscribeButton tenantId={data.context.tenant.id} name={data.context.tenant.name} />
 					{/if}
 					{#if showShare && data.context?.type === "tenant"}
 						<ShareButton title={data.context.tenant.name} />
