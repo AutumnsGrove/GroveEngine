@@ -68,14 +68,25 @@ export interface SaveItemPayload {
 /** Daily alarm for pruning old feed items. */
 const ALARM_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-/** Feed items older than this are pruned. */
-const RETENTION_MS = 365 * 24 * 60 * 60 * 1000;
+/** Feed items older than this are pruned (seconds). */
+const RETENTION_SECONDS = 365 * 24 * 60 * 60;
 
 /** Default page size for feed and saved list queries. */
 const DEFAULT_PAGE_SIZE = 25;
 
 /** Maximum page size to prevent abuse. */
 const MAX_PAGE_SIZE = 100;
+
+/** Maximum string length for text fields to prevent storage abuse. */
+const MAX_TITLE_LENGTH = 500;
+const MAX_SLUG_LENGTH = 200;
+const MAX_EXCERPT_LENGTH = 1000;
+const MAX_NAME_LENGTH = 100;
+
+/** Truncate a string to a max length. */
+function truncate(value: string, max: number): string {
+	return value.length > max ? value.slice(0, max) : value;
+}
 
 // ============================================================================
 // FeedDO Class
@@ -157,7 +168,7 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 		}
 
 		const id = crypto.randomUUID();
-		const now = Date.now();
+		const now = Math.floor(Date.now() / 1000);
 
 		try {
 			this.sql.exec(
@@ -166,11 +177,11 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				id,
 				data.tenantId,
-				data.tenantName || "",
-				data.tenantSubdomain || "",
-				data.postSlug,
-				data.postTitle,
-				data.postExcerpt || null,
+				truncate(data.tenantName || "", MAX_NAME_LENGTH),
+				truncate(data.tenantSubdomain || "", MAX_NAME_LENGTH),
+				truncate(data.postSlug, MAX_SLUG_LENGTH),
+				truncate(data.postTitle, MAX_TITLE_LENGTH),
+				data.postExcerpt ? truncate(data.postExcerpt, MAX_EXCERPT_LENGTH) : null,
 				data.postImage || null,
 				data.publishedAt || now,
 				now,
@@ -278,20 +289,30 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 		}
 
 		const id = crypto.randomUUID();
-		const now = Date.now();
+		const now = Math.floor(Date.now() / 1000);
 
-		this.sql.exec(
-			`INSERT OR IGNORE INTO saved_items
-			 (id, item_type, tenant_id, tenant_subdomain, post_slug, post_title, saved_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-			id,
-			data.itemType || "bloom",
-			data.tenantId,
-			data.tenantSubdomain || "",
-			data.postSlug,
-			data.postTitle,
-			now,
-		);
+		try {
+			this.sql.exec(
+				`INSERT OR IGNORE INTO saved_items
+				 (id, item_type, tenant_id, tenant_subdomain, post_slug, post_title, saved_at)
+				 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				id,
+				data.itemType || "bloom",
+				data.tenantId,
+				truncate(data.tenantSubdomain || "", MAX_NAME_LENGTH),
+				truncate(data.postSlug, MAX_SLUG_LENGTH),
+				truncate(data.postTitle, MAX_TITLE_LENGTH),
+				now,
+			);
+		} catch (err) {
+			this.log.errorWithCause("Save item failed", err);
+			return LoomResponse.error({
+				code: "GROVE-LOOM-080",
+				category: "bug",
+				userMessage: "Failed to save item.",
+				adminMessage: "Save item INSERT failed in FeedDO.",
+			});
+		}
 
 		return Response.json({ success: true, id }, { status: 201 });
 	}
@@ -384,7 +405,7 @@ export class FeedDO extends LoomDO<FeedState, FeedEnv> {
 	// ════════════════════════════════════════════════════════════════════
 
 	protected async onAlarm(): Promise<void> {
-		const cutoff = Date.now() - RETENTION_MS;
+		const cutoff = Math.floor(Date.now() / 1000) - RETENTION_SECONDS;
 
 		this.sql.exec("DELETE FROM feed_items WHERE published_at < ?", cutoff);
 		this.log.info("Pruned feed items", { cutoff });

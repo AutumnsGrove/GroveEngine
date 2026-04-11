@@ -32,6 +32,7 @@ interface FeedQueueMessage {
 		excerpt?: string | null;
 		image?: string | null;
 		publishedAt: number;
+		_offset?: number;
 	};
 	timestamp: string;
 }
@@ -39,11 +40,59 @@ interface FeedQueueMessage {
 interface QueueEnv {
 	DB: D1Database;
 	FEED: DurableObjectNamespace;
+	FEED_QUEUE?: Queue;
 }
 
 // ============================================================================
 // Queue Consumer — Fan-out published posts to subscriber FeedDOs
 // ============================================================================
+
+/**
+ * Maximum followers to fan out per queue message.
+ * CF Workers have a 1000 subrequest limit; we stay well under with batched
+ * concurrency. If a tenant has more followers than this, the remaining are
+ * processed via a continuation message.
+ */
+const FAN_OUT_BATCH_SIZE = 200;
+
+/** Concurrent DO fetches per batch — prevents subrequest burst. */
+const FAN_OUT_CONCURRENCY = 50;
+
+/**
+ * Fan out to a slice of followers with bounded concurrency.
+ * Returns the number of successful deliveries.
+ */
+async function fanOutToFollowers(
+	followers: { user_id: string }[],
+	ingestPayload: string,
+	env: QueueEnv,
+): Promise<number> {
+	let delivered = 0;
+
+	for (let i = 0; i < followers.length; i += FAN_OUT_CONCURRENCY) {
+		const chunk = followers.slice(i, i + FAN_OUT_CONCURRENCY);
+		const results = await Promise.allSettled(
+			chunk.map(async (follower) => {
+				const feedId = env.FEED.idFromName(`feed:${follower.user_id}`);
+				const feedDO = env.FEED.get(feedId);
+				const res = await feedDO.fetch(
+					new Request("http://do/ingest", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: ingestPayload,
+					}),
+				);
+				if (!res.ok) {
+					console.warn(`[FeedQueue] Ingest failed for user ${follower.user_id}: ${res.status}`);
+				}
+				return res.ok;
+			}),
+		);
+		delivered += results.filter((r) => r.status === "fulfilled" && r.value).length;
+	}
+
+	return delivered;
+}
 
 async function handleFeedQueue(
 	batch: MessageBatch<FeedQueueMessage>,
@@ -71,11 +120,12 @@ async function handleFeedQueue(
 				continue;
 			}
 
-			// Find all users following this tenant
+			// Find followers in bounded batches
+			const offset = (payload as { _offset?: number })._offset || 0;
 			const followers = await env.DB.prepare(
-				"SELECT user_id FROM friends WHERE friend_tenant_id = ?",
+				"SELECT user_id FROM friends WHERE friend_tenant_id = ? LIMIT ? OFFSET ?",
 			)
-				.bind(payload.tenantId)
+				.bind(payload.tenantId, FAN_OUT_BATCH_SIZE + 1, offset)
 				.all<{ user_id: string }>();
 
 			if (!followers.results.length) {
@@ -83,7 +133,12 @@ async function handleFeedQueue(
 				continue;
 			}
 
-			// Fan out to each follower's FeedDO
+			// Check if there are more followers beyond this batch
+			const hasMore = followers.results.length > FAN_OUT_BATCH_SIZE;
+			const batch_followers = hasMore
+				? followers.results.slice(0, FAN_OUT_BATCH_SIZE)
+				: followers.results;
+
 			const ingestPayload = JSON.stringify({
 				tenantId: tenant.id,
 				tenantName: tenant.display_name || tenant.subdomain,
@@ -95,26 +150,21 @@ async function handleFeedQueue(
 				publishedAt: payload.publishedAt,
 			});
 
-			const fanOutPromises = followers.results.map(async (follower) => {
-				const feedId = env.FEED.idFromName(`feed:${follower.user_id}`);
-				const feedDO = env.FEED.get(feedId);
-				const res = await feedDO.fetch(
-					new Request("http://do/ingest", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: ingestPayload,
-					}),
-				);
-				if (!res.ok) {
-					console.warn(`[FeedQueue] Ingest failed for user ${follower.user_id}: ${res.status}`);
-				}
-			});
+			const delivered = await fanOutToFollowers(batch_followers, ingestPayload, env);
 
-			await Promise.allSettled(fanOutPromises);
+			// If more followers remain, re-enqueue with offset for next batch
+			if (hasMore && env.FEED_QUEUE) {
+				await env.FEED_QUEUE.send({
+					type: "post.published",
+					payload: { ...payload, _offset: offset + FAN_OUT_BATCH_SIZE },
+					timestamp: new Date().toISOString(),
+				});
+			}
+
 			message.ack();
 
 			console.log(
-				`[FeedQueue] Fanned out "${payload.title}" from ${tenant.subdomain} to ${followers.results.length} followers`,
+				`[FeedQueue] Delivered "${payload.title}" from ${tenant.subdomain} to ${delivered}/${batch_followers.length} followers (offset=${offset}${hasMore ? ", continuation queued" : ""})`,
 			);
 		} catch (err) {
 			console.error("[FeedQueue] Error processing message:", err);
