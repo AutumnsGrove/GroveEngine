@@ -7,6 +7,22 @@
  * Tokens are generated for one-click, no-login unsubscribe (RFC 8058).
  */
 
+/** Maximum age (in seconds) for unsubscribe tokens. 30 days. */
+const TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
+
+/**
+ * Validate an IANA timezone string.
+ * Returns the timezone if valid, null otherwise.
+ */
+function validateTimezone(tz: string): string | null {
+	try {
+		Intl.DateTimeFormat("en-US", { timeZone: tz });
+		return tz;
+	} catch {
+		return null;
+	}
+}
+
 export interface Subscription {
 	id: string;
 	userId: string;
@@ -42,7 +58,7 @@ export async function subscribe(
 	timezone?: string,
 ): Promise<{ created: boolean }> {
 	const id = crypto.randomUUID();
-	const tz = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "America/New_York";
+	const tz = (timezone && validateTimezone(timezone)) ?? "America/New_York";
 
 	const result = await db
 		.prepare(
@@ -72,8 +88,38 @@ export async function unsubscribe(
 }
 
 /**
- * Unsubscribe via a signed token (no login required).
+ * Read-only lookup of an unsubscribe token.
+ * Returns grove info if valid and not expired, null otherwise.
+ * Used by the GET handler to show a confirmation page without mutating.
+ */
+export async function lookupUnsubscribeToken(
+	db: D1Database,
+	token: string,
+): Promise<{ groveName: string } | null> {
+	const row = await db
+		.prepare(
+			`SELECT ut.created_at as token_created, t.display_name as grove_name
+			 FROM subscription_unsubscribe_tokens ut
+			 JOIN subscriptions s ON s.id = ut.subscription_id
+			 LEFT JOIN tenants t ON t.id = s.target_tenant_id
+			 WHERE ut.token = ?`,
+		)
+		.bind(token)
+		.first<{ token_created: number; grove_name: string }>();
+
+	if (!row) return null;
+
+	// Check TTL — reject expired tokens
+	const age = Math.floor(Date.now() / 1000) - row.token_created;
+	if (age > TOKEN_TTL_SECONDS) return null;
+
+	return { groveName: row.grove_name ?? "this grove" };
+}
+
+/**
+ * Unsubscribe via a token (no login required).
  * Deletes the subscription and all associated tokens.
+ * Checks TTL before proceeding.
  */
 export async function unsubscribeByToken(
 	db: D1Database,
@@ -81,16 +127,20 @@ export async function unsubscribeByToken(
 ): Promise<{ success: boolean; groveName?: string }> {
 	const row = await db
 		.prepare(
-			`SELECT s.id, s.target_tenant_id, t.display_name as grove_name
+			`SELECT s.id, ut.created_at as token_created, t.display_name as grove_name
 			 FROM subscription_unsubscribe_tokens ut
 			 JOIN subscriptions s ON s.id = ut.subscription_id
 			 LEFT JOIN tenants t ON t.id = s.target_tenant_id
 			 WHERE ut.token = ?`,
 		)
 		.bind(token)
-		.first<{ id: string; target_tenant_id: string; grove_name: string }>();
+		.first<{ id: string; token_created: number; grove_name: string }>();
 
 	if (!row) return { success: false };
+
+	// Check TTL — reject expired tokens
+	const age = Math.floor(Date.now() / 1000) - row.token_created;
+	if (age > TOKEN_TTL_SECONDS) return { success: false };
 
 	await db.prepare(`DELETE FROM subscriptions WHERE id = ?`).bind(row.id).run();
 
@@ -206,8 +256,10 @@ export async function updatePreferences(
 	}
 
 	if (prefs.timezone !== undefined) {
+		const validTz = validateTimezone(prefs.timezone);
+		if (!validTz) return false;
 		sets.push("timezone = ?");
-		values.push(prefs.timezone);
+		values.push(validTz);
 	}
 
 	if (sets.length === 0) return false;

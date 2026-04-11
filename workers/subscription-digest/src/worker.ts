@@ -154,7 +154,10 @@ async function sendDigestEmail(
 
 		return result.success;
 	} catch (err) {
-		console.error(`[Digest] Failed to send to ${subscriber.email} for ${groveSubdomain}:`, err);
+		console.error(
+			`[Digest] Failed to send digest for user ${subscriber.user_id} / ${groveSubdomain}:`,
+			err,
+		);
 		return false;
 	}
 }

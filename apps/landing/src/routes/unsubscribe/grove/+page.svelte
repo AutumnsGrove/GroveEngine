@@ -5,10 +5,12 @@
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
 	import { stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import { enhance } from "$app/forms";
 	const Check = stateIcons.check;
 	const MailX = featureIcons.mailX;
 
-	let { data } = $props();
+	let { data, form } = $props();
+	let submitting = $state(false);
 </script>
 
 <SEO
@@ -28,7 +30,7 @@
 		</div>
 
 		<div class="glass-card rounded-2xl p-8 text-center">
-			{#if data.status === "success"}
+			{#if form?.success}
 				<div
 					class="w-16 h-16 mx-auto mb-6 rounded-full bg-accent-subtle/20 flex items-center justify-center"
 				>
@@ -36,7 +38,7 @@
 				</div>
 				<h1 class="text-xl font-serif text-foreground mb-3">You're unsubscribed</h1>
 				<p class="text-foreground-muted font-sans mb-6">
-					You won't receive email updates from {data.groveName} anymore.
+					You won't receive email updates from {form.groveName} anymore.
 				</p>
 				<a
 					href="/"
@@ -44,6 +46,35 @@
 				>
 					Back to Grove
 				</a>
+			{:else if data.status === "confirm"}
+				<div
+					class="w-16 h-16 mx-auto mb-6 rounded-full bg-accent-subtle/20 flex items-center justify-center"
+				>
+					<MailX class="w-8 h-8 text-accent-muted" />
+				</div>
+				<h1 class="text-xl font-serif text-foreground mb-3">Unsubscribe from {data.groveName}?</h1>
+				<p class="text-foreground-muted font-sans mb-6">
+					You'll stop receiving email updates when they publish new posts.
+				</p>
+				<form
+					method="POST"
+					use:enhance={() => {
+						submitting = true;
+						return async ({ update }) => {
+							await update();
+							submitting = false;
+						};
+					}}
+				>
+					<input type="hidden" name="token" value={data.token} />
+					<button
+						type="submit"
+						disabled={submitting}
+						class="inline-block px-6 py-3 bg-accent text-white rounded-lg font-sans font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+					>
+						{submitting ? "Unsubscribing..." : "Unsubscribe"}
+					</button>
+				</form>
 			{:else if data.status === "already"}
 				<div
 					class="w-16 h-16 mx-auto mb-6 rounded-full bg-accent-subtle/20 flex items-center justify-center"
