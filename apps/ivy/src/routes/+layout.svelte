@@ -13,14 +13,14 @@
 		here, but Grove's convention is Lexend everywhere — theme.css
 		now declares the face and references it via `--font-sans`.
 	-->
-	<link rel="preconnect" href="https://cdn.grove.place" crossorigin />
+	<link rel="preconnect" href="https://cdn.grove.place" crossorigin="anonymous" />
 	<link rel="dns-prefetch" href="https://cdn.grove.place" />
 	<link
 		rel="preload"
 		href="https://cdn.grove.place/fonts/Lexend-Regular.ttf"
 		as="font"
 		type="font/ttf"
-		crossorigin
+		crossorigin="anonymous"
 	/>
 </svelte:head>
 
@@ -51,13 +51,13 @@
 		gap: 0.625rem;
 		margin: 0;
 		padding: 0.625rem 1.25rem;
-		background: rgba(34, 197, 94, 0.12);
-		border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+		background: var(--grove-accent-12);
+		border-bottom: 1px solid var(--grove-accent-30);
 		backdrop-filter: blur(10px);
 		-webkit-backdrop-filter: blur(10px);
 		font-size: 0.8125rem;
 		line-height: 1.4;
-		color: #bbf7d0;
+		color: var(--grove-accent-light);
 		text-align: center;
 	}
 
@@ -67,7 +67,7 @@
 
 	.demo-banner strong {
 		font-weight: 600;
-		color: #dcfce7;
+		color: var(--grove-accent-light);
 	}
 
 	.demo-dot {
@@ -75,18 +75,18 @@
 		width: 0.5rem;
 		height: 0.5rem;
 		border-radius: 999px;
-		background: #22c55e;
-		box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+		background: var(--grove-accent);
+		box-shadow: 0 0 0 0 var(--grove-accent-50);
 		animation: demo-pulse 2.2s ease-in-out infinite;
 	}
 
 	@keyframes demo-pulse {
 		0%,
 		100% {
-			box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+			box-shadow: 0 0 0 0 var(--grove-accent-50);
 		}
 		50% {
-			box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+			box-shadow: 0 0 0 6px transparent;
 		}
 	}
 
