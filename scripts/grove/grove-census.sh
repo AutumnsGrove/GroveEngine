@@ -292,7 +292,6 @@ remap_package() {
         heartwood)        echo "services/heartwood" ;;
         pulse)            echo "services/pulse" ;;
         # Workers
-        post-migrator)    echo "workers/post-migrator" ;;
         workers)          echo "workers" ;;  # umbrella
         # Skip archived/meta packages
         _archived|_deprecated|archives)
