@@ -29,6 +29,7 @@ import {
 	getPageByFilename,
 	getSiteConfigFromModule,
 	createContentLoader,
+	renderMarkdown,
 	type Header,
 	type ParsedContent,
 	type PostMeta,
@@ -175,6 +176,74 @@ describe("markdown.ts - Comprehensive Tests", () => {
 			const markdown = "```\n# Ignored\n```";
 			const headers = extractHeaders(markdown);
 			expect(headers).toHaveLength(0);
+		});
+
+		// ::suppress:: marker — opts a heading out of the TOC while still
+		// rendering as a visual heading. See suppress.ts.
+		it("skips headings tagged with ::suppress:: (suffix form)", () => {
+			const markdown = "# Real Heading\n## Styled Text ::suppress::\n### Another Real";
+			const headers = extractHeaders(markdown);
+			expect(headers).toHaveLength(2);
+			expect(headers.map((h) => h.text)).toEqual(["Real Heading", "Another Real"]);
+		});
+
+		it("skips headings tagged with ::suppress:: (inline form)", () => {
+			const markdown = "# Real\n### ::suppress:: Big Text Only\n## Other";
+			const headers = extractHeaders(markdown);
+			expect(headers).toHaveLength(2);
+			expect(headers.map((h) => h.text)).toEqual(["Real", "Other"]);
+		});
+
+		it("skips headings tagged with ::suppress:: (prefix form)", () => {
+			// The prefix placement `::suppress:: ### text` doesn't match the
+			// ATX heading regex at all, so it's naturally omitted from the
+			// TOC without needing a substring check.
+			const markdown = "# Real\n::suppress:: ### Big Text Only\n## Other";
+			const headers = extractHeaders(markdown);
+			expect(headers).toHaveLength(2);
+			expect(headers.map((h) => h.text)).toEqual(["Real", "Other"]);
+		});
+	});
+
+	// ==========================================================================
+	// 2b. renderMarkdown / suppress marker
+	// ==========================================================================
+
+	describe("renderMarkdown() with ::suppress::", () => {
+		it("still renders a suppressed heading as an <h>", () => {
+			const html = renderMarkdown("### ::suppress:: feeling good about this");
+			expect(html).toMatch(/<h3[^>]*>\s*feeling good about this\s*<\/h3>/);
+		});
+
+		it("strips the marker from the visible heading text", () => {
+			const html = renderMarkdown("### ::suppress:: feeling good about this");
+			expect(html).not.toContain("::suppress::");
+		});
+
+		it("handles the prefix form by rewriting before block parsing", () => {
+			const html = renderMarkdown("::suppress:: ### feeling good about this");
+			expect(html).toMatch(/<h3[^>]*>\s*feeling good about this\s*<\/h3>/);
+			expect(html).not.toContain("::suppress::");
+		});
+
+		it("handles the suffix form", () => {
+			const html = renderMarkdown("### feeling good about this ::suppress::");
+			expect(html).toMatch(/<h3[^>]*>\s*feeling good about this\s*<\/h3>/);
+			expect(html).not.toContain("::suppress::");
+		});
+
+		it("generates the heading id from the cleaned text", () => {
+			const html = renderMarkdown("### ::suppress:: feeling good");
+			// Without stripping, the id would include "suppress" — verify it doesn't.
+			expect(html).toMatch(/id="feeling-good"/);
+			expect(html).not.toMatch(/id="[^"]*suppress[^"]*"/);
+		});
+
+		it("leaves non-heading ::suppress:: text alone", () => {
+			// Inside a paragraph the marker is just text (user mistake).
+			// We intentionally don't strip it so the author notices.
+			const html = renderMarkdown("This is a paragraph with ::suppress:: in it.");
+			expect(html).toContain("::suppress::");
 		});
 	});
 

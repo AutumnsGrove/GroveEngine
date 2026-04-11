@@ -238,24 +238,109 @@ directiveHandlers["linkgarden"] = (content) => handleCurio("shelves", content);
  * - `requiresArg: true` → inserts `::name[]::` with cursor between brackets
  * - `requiresArg: false` → inserts `::name::` with cursor after
  * - `system: true` → not a curio, but uses the same directive syntax (e.g., gallery)
+ * - `description` → one-line hint shown in the editor command palette
  */
 export const CURIO_METADATA = [
-	{ id: "guestbook", name: "Guestbook", requiresArg: false },
-	{ id: "hitcounter", name: "Hit Counter", requiresArg: false },
-	{ id: "poll", name: "Poll", requiresArg: true },
-	{ id: "nowplaying", name: "Now Playing", requiresArg: false },
-	{ id: "moodring", name: "Mood Ring", requiresArg: false },
-	{ id: "badges", name: "Badges", requiresArg: false },
-	{ id: "blogroll", name: "Blogroll", requiresArg: false },
-	{ id: "webring", name: "Web Ring", requiresArg: false },
-	{ id: "shelves", name: "Shelves", requiresArg: true },
-	{ id: "activitystatus", name: "Activity Status", requiresArg: false },
-	{ id: "statusbadges", name: "Status Badge", requiresArg: false },
-	{ id: "artifacts", name: "Artifacts", requiresArg: false },
-	{ id: "shrines", name: "Shrines", requiresArg: false },
+	{
+		id: "guestbook",
+		name: "Guestbook",
+		requiresArg: false,
+		description: "Let visitors leave a signed note on this page",
+	},
+	{
+		id: "hitcounter",
+		name: "Hit Counter",
+		requiresArg: false,
+		description: "Retro visit counter that ticks up as people read",
+	},
+	{
+		id: "poll",
+		name: "Poll",
+		requiresArg: true,
+		description: "Embed a Strawpoll-style poll by ID",
+	},
+	{
+		id: "nowplaying",
+		name: "Now Playing",
+		requiresArg: false,
+		description: "Show the song you're listening to right now",
+	},
+	{
+		id: "moodring",
+		name: "Mood Ring",
+		requiresArg: false,
+		description: "Display your current mood as a colored ring",
+	},
+	{
+		id: "badges",
+		name: "Badges",
+		requiresArg: false,
+		description: "Collectible 88×31 web badges from your profile",
+	},
+	{
+		id: "blogroll",
+		name: "Blogroll",
+		requiresArg: false,
+		description: "Links to friends' blogs — the classic indie web list",
+	},
+	{
+		id: "webring",
+		name: "Web Ring",
+		requiresArg: false,
+		description: "Join a web ring with prev / next navigation",
+	},
+	{
+		id: "shelves",
+		name: "Shelves",
+		requiresArg: true,
+		description: "Curated links grouped by shelf name",
+	},
+	{
+		id: "activitystatus",
+		name: "Activity Status",
+		requiresArg: false,
+		description: "Live status (online / away / idle) from your grove",
+	},
+	{
+		id: "statusbadges",
+		name: "Status Badge",
+		requiresArg: false,
+		description: "Compact status pill with your current activity",
+	},
+	{
+		id: "artifacts",
+		name: "Artifacts",
+		requiresArg: false,
+		description: "Small collectibles and treasures from your shelf",
+	},
+	{
+		id: "shrines",
+		name: "Shrines",
+		requiresArg: false,
+		description: "A shrine to the things you love",
+	},
 	// System directives (not curios, but use same syntax)
-	{ id: "gallery", name: "Gallery", requiresArg: true, system: true },
-	{ id: "image", name: "Image", requiresArg: true, system: true },
+	{
+		id: "gallery",
+		name: "Gallery",
+		requiresArg: true,
+		system: true,
+		description: "Comma-separated image URLs rendered as a grid",
+	},
+	{
+		id: "image",
+		name: "Image",
+		requiresArg: true,
+		system: true,
+		description: "Single image with size / align / caption options",
+	},
+	{
+		id: "suppress",
+		name: "Hide from TOC",
+		requiresArg: false,
+		system: true,
+		description: "Place inside a heading line to keep it out of the table of contents",
+	},
 ] as const;
 
 /** Exported for testing — the list of recognized curio directive names */
