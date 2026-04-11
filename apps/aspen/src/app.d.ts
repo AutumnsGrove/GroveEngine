@@ -164,6 +164,9 @@ declare global {
 
 				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
 				DEV_AUTH_ENABLED?: string;
+
+				/** Feed event queue (post.published → subscriber FeedDOs) */
+				FEED_QUEUE?: Queue;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

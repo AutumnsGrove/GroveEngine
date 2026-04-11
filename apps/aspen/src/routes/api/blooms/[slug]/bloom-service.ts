@@ -149,6 +149,7 @@ export async function updatePost(
 		AI?: Ai;
 		OPENROUTER_API_KEY?: string;
 		CACHE_KV?: KVNamespace;
+		FEED_QUEUE?: Queue;
 	},
 	waitUntil?: (promise: Promise<unknown>) => void,
 ): Promise<{ slug: string }> {
@@ -325,6 +326,27 @@ export async function updatePost(
 				contentType: "blog_post",
 				hookPoint: "on_edit",
 				contentRef: newSlug || slug,
+			}),
+		);
+	}
+
+	// Feed: notify subscribers when a post is first published
+	// publishedAt uses unix seconds to match the bloom's published_at column
+	if (isFirstPublish && platformEnv.FEED_QUEUE && waitUntil) {
+		waitUntil(
+			platformEnv.FEED_QUEUE.send({
+				type: "post.published",
+				payload: {
+					tenantId,
+					slug: newSlug || slug,
+					title,
+					excerpt: data.description || null,
+					image: data.featured_image || null,
+					publishedAt: published_at ?? unixNow,
+				},
+				timestamp: new Date().toISOString(),
+			}).catch((err) => {
+				console.error("[Blooms] Feed queue send failed:", err);
 			}),
 		);
 	}

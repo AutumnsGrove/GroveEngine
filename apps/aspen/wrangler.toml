@@ -157,6 +157,13 @@ class_name = "ChatDO"
 script_name = "grove-durable-objects"
 
 # =============================================================================
+# Queue - Feed events (post.published → subscriber FeedDOs)
+# =============================================================================
+[[queues.producers]]
+queue = "grove-feed-events"
+binding = "FEED_QUEUE"
+
+# =============================================================================
 # Environment Variables (non-sensitive)
 # =============================================================================
 [vars]
