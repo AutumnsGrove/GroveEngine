@@ -11,6 +11,7 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {

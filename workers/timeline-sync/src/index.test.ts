@@ -50,6 +50,7 @@ function createMockEnv(): Env {
 		DB: {} as D1Database,
 		CURIO_DB: {} as D1Database,
 		GROVE_KEK: "a".repeat(64),
+		LUMEN_API_KEY: "test-lumen-api-key",
 		LUMEN: {
 			fetch: vi.fn().mockResolvedValue(new Response("ok")),
 		},

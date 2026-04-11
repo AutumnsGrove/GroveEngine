@@ -221,7 +221,7 @@ async function handleWebhook(request: Request, env: Env, url: URL): Promise<Resp
 	}
 
 	// Parse payload
-	const payload = safeParseJson<Record<string, any>>(body, null);
+	const payload = safeParseJson<Record<string, any> | null>(body, null);
 	if (!payload) {
 		return Response.json({ error: "Invalid JSON body" }, { status: 400 });
 	}
@@ -229,13 +229,13 @@ async function handleWebhook(request: Request, env: Env, url: URL): Promise<Resp
 	// Repo filtering (with safe JSON parsing of stored config)
 	const repoName = payload.repository?.name;
 	if (repoName && config.repos_include) {
-		const include = safeParseJson(config.repos_include, []);
+		const include = safeParseJson<string[]>(config.repos_include, []);
 		if (include.length > 0 && !include.includes(repoName)) {
 			return Response.json({ message: "Repo filtered out (include list)" });
 		}
 	}
 	if (repoName && config.repos_exclude) {
-		const exclude = safeParseJson(config.repos_exclude, []);
+		const exclude = safeParseJson<string[]>(config.repos_exclude, []);
 		if (exclude.includes(repoName)) {
 			return Response.json({ message: "Repo filtered out (exclude list)" });
 		}

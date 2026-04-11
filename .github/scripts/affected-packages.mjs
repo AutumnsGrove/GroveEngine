@@ -54,7 +54,7 @@ const PACKAGES = {
 		hasTests: true,
 		isSvelteKit: true,
 	},
-	"libs/foliage": { typecheck: "pnpm check", hasTests: true, isSvelteKit: false },
+	"libs/foliage": { typecheck: "pnpm check", hasTests: true, isSvelteKit: true },
 	"libs/gossamer": { typecheck: null, hasTests: false, isSvelteKit: false },
 	"libs/vineyard": { typecheck: "pnpm check", hasTests: true, isSvelteKit: false },
 	"apps/landing": {
