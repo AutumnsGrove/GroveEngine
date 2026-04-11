@@ -52,7 +52,9 @@
 	/>
 	<meta
 		property="og:title"
-		content="Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}"
+		content="Garden{data.context?.type === 'tenant'
+			? ` - ${data.siteSettings?.grove_title || data.context.tenant.name}`
+			: ''}"
 	/>
 	<meta
 		property="og:description"
