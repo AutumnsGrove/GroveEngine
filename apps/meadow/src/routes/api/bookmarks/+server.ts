@@ -5,53 +5,40 @@
  */
 
 import { json } from "@sveltejs/kit";
+import { guardAuth } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import type { PostRow } from "$lib/server/types";
 import { rowToPost } from "$lib/server/types";
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
-  if (!locals.user) {
-    return json(
-      {
-        error: "GROVE-API-020",
-        error_code: "UNAUTHORIZED",
-        error_description: "Please sign in to continue.",
-      },
-      { status: 401 },
-    );
-  }
+	const authGuard = guardAuth(locals.user);
+	if (authGuard) return authGuard;
 
-  const db = platform?.env?.DB;
-  if (!db) {
-    return json({ error: "Service unavailable" }, { status: 503 });
-  }
+	const db = platform?.env?.DB;
+	if (!db) {
+		return json({ error: "Service unavailable" }, { status: 503 });
+	}
 
-  const limit = Math.min(
-    Math.max(1, parseInt(url.searchParams.get("limit") ?? "20") || 20),
-    50,
-  );
-  const offset = Math.max(
-    0,
-    parseInt(url.searchParams.get("offset") ?? "0") || 0,
-  );
+	const limit = Math.min(Math.max(1, parseInt(url.searchParams.get("limit") ?? "20") || 20), 50);
+	const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0") || 0);
 
-  const userId = locals.user.id;
+	const userId = locals.user.id;
 
-  const [countResult, postsResult] = await Promise.all([
-    db
-      .prepare(
-        `SELECT COUNT(*) as total
+	const [countResult, postsResult] = await Promise.all([
+		db
+			.prepare(
+				`SELECT COUNT(*) as total
          FROM meadow_bookmarks bm
          JOIN meadow_posts p ON p.id = bm.post_id
          WHERE bm.user_id = ? AND p.visible = 1`,
-      )
-      .bind(userId)
-      .first<{ total: number }>()
-      .catch(() => ({ total: 0 })),
+			)
+			.bind(userId)
+			.first<{ total: number }>()
+			.catch(() => ({ total: 0 })),
 
-    db
-      .prepare(
-        `SELECT
+		db
+			.prepare(
+				`SELECT
           p.id, p.tenant_id, p.guid, p.title, p.description, p.content_html,
           p.link, p.author_name, p.author_subdomain, p.tags, p.featured_image,
           p.published_at, p.score, p.reaction_counts,
@@ -69,22 +56,22 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
         WHERE bm.user_id = ? AND p.visible = 1
         ORDER BY bm.created_at DESC
         LIMIT ? OFFSET ?`,
-      )
-      .bind(userId, userId, userId, limit, offset)
-      .all<PostRow>()
-      .catch(() => ({ results: [] as PostRow[] })),
-  ]);
+			)
+			.bind(userId, userId, userId, limit, offset)
+			.all<PostRow>()
+			.catch(() => ({ results: [] as PostRow[] })),
+	]);
 
-  const total = countResult?.total ?? 0;
-  const posts = postsResult.results.map(rowToPost);
+	const total = countResult?.total ?? 0;
+	const posts = postsResult.results.map(rowToPost);
 
-  return json({
-    posts,
-    pagination: {
-      total,
-      limit,
-      offset,
-      hasMore: offset + posts.length < total,
-    },
-  });
+	return json({
+		posts,
+		pagination: {
+			total,
+			limit,
+			offset,
+			hasMore: offset + posts.length < total,
+		},
+	});
 };

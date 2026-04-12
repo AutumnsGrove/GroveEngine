@@ -6,6 +6,7 @@
  */
 
 import { json } from "@sveltejs/kit";
+import { guardAuth } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import { followBlog, unfollowBlog } from "$lib/server/follows";
 import { validateUUID } from "@autumnsgrove/lattice/utils/validation";
@@ -13,16 +14,8 @@ import { createThreshold } from "@autumnsgrove/lattice/platform/threshold";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 
 export const POST: RequestHandler = async ({ params, platform, locals }) => {
-	if (!locals.user) {
-		return json(
-			{
-				error: "GROVE-API-020",
-				error_code: "UNAUTHORIZED",
-				error_description: "Please sign in to continue.",
-			},
-			{ status: 401 },
-		);
-	}
+	const authGuard = guardAuth(locals.user);
+	if (authGuard) return authGuard;
 
 	if (!validateUUID(params.tenantId)) {
 		return json(
@@ -59,16 +52,8 @@ export const POST: RequestHandler = async ({ params, platform, locals }) => {
 };
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
-	if (!locals.user) {
-		return json(
-			{
-				error: "GROVE-API-020",
-				error_code: "UNAUTHORIZED",
-				error_description: "Please sign in to continue.",
-			},
-			{ status: 401 },
-		);
-	}
+	const authGuard = guardAuth(locals.user);
+	if (authGuard) return authGuard;
 
 	if (!validateUUID(params.tenantId)) {
 		return json(

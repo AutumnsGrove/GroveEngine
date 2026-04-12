@@ -5,6 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
+import { guardAuth } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import { createNote } from "$lib/server/notes";
 import { sanitizeNoteHtml } from "$lib/server/sanitize";
@@ -16,16 +17,8 @@ const MAX_TAGS = 5;
 const MAX_TAG_LENGTH = 30;
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-	if (!locals.user) {
-		return json(
-			{
-				error: "GROVE-API-020",
-				error_code: "UNAUTHORIZED",
-				error_description: "Please sign in to continue.",
-			},
-			{ status: 401 },
-		);
-	}
+	const authGuard = guardAuth(locals.user);
+	if (authGuard) return authGuard;
 
 	const db = platform?.env?.DB;
 	if (!db) {
