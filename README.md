@@ -53,7 +53,6 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 
 | Name                                       | Path            | What it is                      |
 | ------------------------------------------ | --------------- | ------------------------------- |
-| [Post Migrator](workers/post-migrator)     | Background cron | Hot/warm/cold storage tiering   |
 | [Timeline Sync](workers/timeline-sync)     | Background cron | Meadow timeline synchronization |
 | [Webhook Cleanup](workers/webhook-cleanup) | Background cron | Expired webhook purge           |
 | [Meadow Poller](workers/meadow-poller)     | Background cron | Community feed polling          |

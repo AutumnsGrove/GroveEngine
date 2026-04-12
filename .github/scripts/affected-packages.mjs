@@ -45,7 +45,6 @@ const ENGINE_CONSUMERS = [
 	"services/forage",
 	"services/heartwood",
 	"services/zephyr",
-	"workers/loft",
 	"workers/onboarding",
 	"workers/patina",
 	"workers/reverie",
@@ -211,11 +210,6 @@ const PACKAGES = {
 	},
 	"workers/webhook-cleanup": {
 		typecheck: null,
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/loft": {
-		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,
 		isSvelteKit: false,
 	},
