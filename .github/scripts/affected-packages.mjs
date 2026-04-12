@@ -179,11 +179,6 @@ const PACKAGES = {
 		hasTests: false,
 		isSvelteKit: false,
 	},
-	"workers/post-migrator": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
 	"workers/meadow-poller": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: true,

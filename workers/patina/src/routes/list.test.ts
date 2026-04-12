@@ -95,9 +95,9 @@ describe("listHandler", () => {
 	it("filters by date query param", async () => {
 		const backups = [
 			{
-				database_name: "scout-db",
+				database_name: "amber",
 				backup_date: "2026-03-01",
-				r2_key: "2026-03-01/scout-db.sql",
+				r2_key: "2026-03-01/amber.sql",
 				size_bytes: 2048,
 				table_count: 3,
 				created_at: 1710000000,
@@ -149,9 +149,9 @@ describe("listHandler", () => {
 				deleted_at: null,
 			},
 			{
-				database_name: "scout-db",
+				database_name: "amber",
 				backup_date: "2026-03-02",
-				r2_key: "2026-03-02/scout-db.sql",
+				r2_key: "2026-03-02/amber.sql",
 				size_bytes: 2048,
 				table_count: 3,
 				created_at: 1710086400,

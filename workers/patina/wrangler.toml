@@ -10,7 +10,7 @@ compatibility_flags = ["nodejs_compat"]
 crons = ["0 3 * * *", "0 4 * * SUN"]
 
 # ============================================
-# Source D1 Databases (14 Grove databases)
+# Source D1 Databases (7 Grove databases)
 # ============================================
 
 [[d1_databases]]
@@ -19,34 +19,9 @@ database_name = "groveauth"
 database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
 [[d1_databases]]
-binding = "SCOUT_DB"
-database_name = "scout-db"
-database_id = "6a289378-c662-4c6a-9f1b-fa5296e03fa2"
-
-[[d1_databases]]
 binding = "GROVE_ENGINE_DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
-
-[[d1_databases]]
-binding = "GROVEMUSIC_DB"
-database_name = "grovemusic-db"
-database_id = "e1e31ed2-3b1f-4dbd-9435-c9105dadcfa2"
-
-[[d1_databases]]
-binding = "LIBRARY_ENHANCER_DB"
-database_name = "library-enhancer-db"
-database_id = "afd1ce4c-618a-430a-bf0f-0a57647a388d"
-
-[[d1_databases]]
-binding = "AUTUMNSGROVE_POSTS_DB"
-database_name = "autumnsgrove-posts"
-database_id = "510badf3-457a-4892-bf2a-45d4bfd7a7bb"
-
-[[d1_databases]]
-binding = "AUTUMNSGROVE_GIT_STATS_DB"
-database_name = "autumnsgrove-git-stats"
-database_id = "0ca4036f-93f7-4c8a-98a5-5353263acd44"
 
 [[d1_databases]]
 binding = "GROVE_DOMAIN_JOBS_DB"
@@ -54,19 +29,9 @@ database_name = "grove-domain-jobs"
 database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
 
 [[d1_databases]]
-binding = "YOUR_SITE_POSTS_DB"
-database_name = "your-site-posts"
-database_id = "86342742-7d34-486f-97f0-928136555e1a"
-
-[[d1_databases]]
 binding = "AMBER_DB"
 database_name = "amber"
 database_id = "f688021b-a986-495a-94bb-352354768a22"
-
-[[d1_databases]]
-binding = "MYCELIUM_OAUTH_DB"
-database_name = "mycelium-oauth"
-database_id = "fc477b40-3691-4a01-85b8-bb4e00b17606"
 
 [[d1_databases]]
 binding = "IVY_DB"
