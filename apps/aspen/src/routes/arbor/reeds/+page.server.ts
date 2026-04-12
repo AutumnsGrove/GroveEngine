@@ -16,7 +16,6 @@ import {
 	type CommentSettingsRecord,
 	type BlockedCommenterRecord,
 } from "@autumnsgrove/lattice/server/services/reeds";
-import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types.js";
 
 interface PostLookup {
@@ -26,11 +25,7 @@ interface PostLookup {
 }
 
 export const load: PageServerLoad = async ({ platform, locals, parent }) => {
-	// Gate: reeds_comments flag (cascaded from arbor layout)
-	const parentData = await parent();
-	if (!parentData.flags?.reeds_comments) {
-		throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
-	}
+	await parent();
 
 	if (!locals.tenantId || !platform?.env?.DB) {
 		return {

@@ -11,7 +11,6 @@ import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltek
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { isPaidTier } from "@autumnsgrove/lattice/platform/config/tiers";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import {
 	getApprovedComments,
 	getCommentSettings,
@@ -22,24 +21,6 @@ import {
 	checkCommentRateLimit,
 } from "@autumnsgrove/lattice/server/services/reeds";
 import type { RequestHandler } from "./$types.js";
-
-/**
- * Check if the reeds_comments graft is enabled for this tenant.
- * Returns false (feature disabled) if any check fails.
- */
-async function isReedsEnabled(
-	db: D1Database,
-	kv: KVNamespace | undefined,
-	tenantId: string,
-): Promise<boolean> {
-	if (!kv) return false;
-	const flagsEnv = { DB: db, FLAGS_KV: kv };
-	const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
-	if (!inGreenhouse) return false;
-	return isFeatureEnabled("reeds_comments", { tenantId, inGreenhouse: true }, flagsEnv).catch(
-		() => false,
-	);
-}
 
 // ============================================================================
 // Validation Constants
@@ -59,11 +40,6 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
 	if (!locals.tenantId) {
 		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
-	// Gate: reeds_comments graft
-	if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
-		throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
 	}
 
 	const { slug } = params;
@@ -135,11 +111,6 @@ export const POST: RequestHandler = async ({ params, request, platform, locals }
 
 	if (!locals.tenantId) {
 		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
-	// Gate: reeds_comments graft
-	if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
-		throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
 	}
 
 	const { slug } = params;

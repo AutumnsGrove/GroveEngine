@@ -24,7 +24,6 @@
 			icon: reedsIcon,
 			termSlug: "reeds",
 			badge: data.pendingCommentCount ?? 0,
-			visible: !!data.flags?.reeds_comments,
 		},
 		{
 			href: "/arbor/chat",

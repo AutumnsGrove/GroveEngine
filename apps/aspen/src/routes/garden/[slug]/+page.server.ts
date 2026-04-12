@@ -15,7 +15,6 @@ import {
 	getCommentSettings,
 	buildCommentTree,
 } from "@autumnsgrove/lattice/server/services/reeds";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -115,12 +114,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 				});
 
 				// Load comments (not cached — always fresh from D1)
-				const { comments, commentTotal, commentSettings } = await loadComments(
-					db,
-					tenantId,
-					slug,
-					kv,
-				);
+				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
 				return {
 					post: cachedPost,
 					isOwner: isOwner || false,
@@ -213,29 +207,10 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 /**
  * Load Reeds comments for a blog post.
  * Fails gracefully — comments are non-critical for page rendering.
- * Returns empty data when the reeds_comments graft is disabled.
+ * Per-post toggle (commentSettings.comments_enabled) controls visibility.
  */
-async function loadComments(db: D1Database, tenantId: string, slug: string, kv?: KVNamespace) {
+async function loadComments(db: D1Database, tenantId: string, slug: string) {
 	try {
-		// Gate: reeds_comments graft — skip loading if feature is off
-		// When KV is unavailable, default to disabled (can't verify graft)
-		if (!kv) {
-			return { comments: [], commentTotal: 0, commentSettings: null };
-		}
-		const flagsEnv = { DB: db, FLAGS_KV: kv };
-		const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
-		if (!inGreenhouse) {
-			return { comments: [], commentTotal: 0, commentSettings: null };
-		}
-		const reedsEnabled = await isFeatureEnabled(
-			"reeds_comments",
-			{ tenantId, inGreenhouse: true },
-			flagsEnv,
-		).catch(() => false);
-		if (!reedsEnabled) {
-			return { comments: [], commentTotal: 0, commentSettings: null };
-		}
-
 		const tenantDb = getTenantDb(db, { tenantId });
 
 		// Get the post ID from slug

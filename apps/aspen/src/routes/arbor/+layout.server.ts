@@ -186,9 +186,9 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) 
 	const isBeta = !!betaResult;
 	const messages = messagesResult;
 
-	// Phase 2: Pending comment count depends on flags result
+	// Phase 2: Pending comment count (always loaded — Reeds is available to all grove owners)
 	let pendingCommentCount = 0;
-	if (flags.reeds_comments && db && tenantId) {
+	if (db && tenantId) {
 		try {
 			const tenantDb = getTenantDb(db, { tenantId });
 			pendingCommentCount = await getPendingCount(tenantDb);

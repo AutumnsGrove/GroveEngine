@@ -47,7 +47,6 @@ export type KnownFlagId =
 	| "image_uploads"
 	| "uploads_suspended"
 	| "photo_gallery"
-	| "reeds_comments"
 	| "thorn_moderation"
 	| "chirp_enabled"
 	| "lantern_enabled"
