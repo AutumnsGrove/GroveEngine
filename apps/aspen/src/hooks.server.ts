@@ -13,17 +13,7 @@ import {
 } from "@autumnsgrove/lattice/server/services/turnstile";
 import type { TenantConfig } from "@autumnsgrove/lattice/durable-objects/TenantDO";
 import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
-
-/**
- * Parse a specific cookie by name from the cookie header
- */
-function getCookie(cookieHeader: string | null, name: string): string | null {
-	if (!cookieHeader) return null;
-	// Use word boundary ((?:^|;\s*)) to prevent matching substrings
-	// e.g. "session=" must not match inside "grove_session="
-	const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-	return match ? match[1] : null;
-}
+import { getCookie, extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -399,11 +389,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// PERFORMANCE: Auth only needs cookies, not tenant context. Starting the
 	// SessionDO fetch here lets it run concurrently with the tenant lookup in
 	// subdomain routing, saving ~100-300ms on tenant page loads.
-	const groveSession = getCookie(cookieHeader, "grove_session");
-	const betterAuthSession =
-		getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
-		getCookie(cookieHeader, "better-auth.session_token");
-	const sessionCookie = groveSession || betterAuthSession;
+	const sessionCookie = extractSessionCookie(cookieHeader);
 
 	const sessionAuthPromise =
 		sessionCookie && event.platform?.env?.AUTH
@@ -850,12 +836,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		response.headers.append("Set-Cookie", cookieParts.join("; "));
 	}
 
-	// Security headers
-	response.headers.set("X-Frame-Options", "DENY");
-	response.headers.set("X-Content-Type-Options", "nosniff");
-	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-	response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-	response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+	setSecurityHeaders(response);
 
 	// Shade Layer 5: AI/TDM opt-out headers
 	response.headers.set("X-Robots-Tag", "noai, noimageai");

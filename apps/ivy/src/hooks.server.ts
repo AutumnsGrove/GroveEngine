@@ -7,21 +7,13 @@
 
 import type { Handle } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
+import { extractSessionCookie } from "@autumnsgrove/lattice/server";
 
 // Routes that skip session validation entirely
 const PUBLIC_ROUTES = ["/auth/callback", "/auth/logout"];
 
 // Routes with their own auth (HMAC signature verification)
 const WEBHOOK_ROUTES = ["/api/webhook/"];
-
-/**
- * Parse a specific cookie by name from the cookie header
- */
-function getCookie(cookieHeader: string | null, name: string): string | null {
-	if (!cookieHeader) return null;
-	const match = cookieHeader.match(new RegExp(`${name}=([^;]+)`));
-	return match ? match[1] : null;
-}
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const pathname = event.url.pathname;
@@ -43,11 +35,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// Check session with Heartwood via AUTH service binding
 	const cookieHeader = event.request.headers.get("cookie");
-	const groveSession = getCookie(cookieHeader, "grove_session");
-	const betterAuthSession =
-		getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
-		getCookie(cookieHeader, "better-auth.session_token");
-	const sessionCookie = groveSession || betterAuthSession;
+	const sessionCookie = extractSessionCookie(cookieHeader);
 
 	if (sessionCookie && event.platform?.env?.AUTH) {
 		try {

@@ -1,5 +1,6 @@
 import type { Handle } from "@sveltejs/kit";
 import { isGreenhouseMode, GREENHOUSE_AUTH } from "$lib/greenhouse";
+import { isGroveOrigin, isLocalOrigin, setSecurityHeaders } from "@autumnsgrove/lattice/server";
 
 /**
  * Server hooks for the Billing app
@@ -17,26 +18,6 @@ import { isGreenhouseMode, GREENHOUSE_AUTH } from "$lib/greenhouse";
  *
  * Lightweight — no DB binding. Session data comes from Heartwood.
  */
-
-/**
- * Check if an origin is a valid HTTPS *.grove.place subdomain.
- * Strict regex: single-level subdomains only (e.g., autumn.grove.place).
- */
-const GROVE_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.grove\.place$/;
-
-function isGroveOrigin(origin: string): boolean {
-	return GROVE_ORIGIN_RE.test(origin);
-}
-
-/** Also allow localhost for local development */
-function isLocalOrigin(origin: string): boolean {
-	try {
-		const url = new URL(origin);
-		return url.hostname === "localhost" || url.hostname === "127.0.0.1";
-	} catch {
-		return false;
-	}
-}
 
 /** Check if a request path is an API route that needs CORS */
 function isApiRoute(path: string): boolean {
@@ -134,11 +115,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// Security headers (CSP is handled by SvelteKit's kit.csp config with nonces)
-	response.headers.set("X-Frame-Options", "DENY");
-	response.headers.set("X-Content-Type-Options", "nosniff");
-	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-	response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-	response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+	setSecurityHeaders(response);
 
 	return response;
 };

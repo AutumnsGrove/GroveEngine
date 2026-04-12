@@ -7,15 +7,7 @@
 
 import type { Handle } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
-
-/**
- * Parse a specific cookie by name from the cookie header
- */
-function getCookie(cookieHeader: string | null, name: string): string | null {
-	if (!cookieHeader) return null;
-	const match = cookieHeader.match(new RegExp(`${name}=([^;]+)`));
-	return match ? match[1] : null;
-}
+import { extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Initialize user as null
@@ -40,11 +32,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// AUTHENTICATION (Heartwood SessionDO)
 	// =========================================================================
-	const groveSession = getCookie(cookieHeader, "grove_session");
-	const betterAuthSession =
-		getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
-		getCookie(cookieHeader, "better-auth.session_token");
-	const sessionCookie = groveSession || betterAuthSession;
+	const sessionCookie = extractSessionCookie(cookieHeader);
 
 	if (sessionCookie && !event.platform?.env?.AUTH) {
 		console.error("[Meadow Auth] AUTH service binding not available");
@@ -95,12 +83,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const response = await resolve(event);
 
-	// Security headers
-	response.headers.set("X-Frame-Options", "DENY");
-	response.headers.set("X-Content-Type-Options", "nosniff");
-	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-	response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-	response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+	setSecurityHeaders(response);
 
 	return response;
 };
