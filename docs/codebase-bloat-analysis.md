@@ -566,8 +566,8 @@ subsystem for the barrel migration.
 |---|--------|----------:|--------|
 | 3.1 | ~~Consolidate Cloudflare mock infrastructure~~ → only apps-layer helpers are truly duplicated | ~200 | Rescoped |
 | 3.2 | ~~Prune mock-heavy test files~~ | 0 | ❌ **Rejected** — tests are legitimate; see §Audit B |
-| 3.3 | Create shared API route middleware (auth guard, error wrapper) for 250 `+server.ts` files | ~2,500 | ⏳ Open |
-| 3.4 | Extract auth hook utilities to engine (8 `hooks.server.ts` files) | ~350 | ⏳ Open |
+| 3.3 | Create shared API route middleware (auth guard, error wrapper) for 250 `+server.ts` files | ~2,500 | ✅ **Helpers done** — `guardAuth`, `guardDb`, `parseJsonBody` added to `@autumnsgrove/lattice/server`; 9 meadow files migrated (~180 lines). Remaining ~250 files adopt on next touch. |
+| 3.4 | Extract auth hook utilities to engine (8 `hooks.server.ts` files) | ~248 | ✅ Done — `getCookie`, `extractSessionCookie`, `setSecurityHeaders`, `isGroveOrigin`, `isLocalOrigin` added to `libs/engine/src/lib/server/hooks.ts`; all 8 `hooks.server.ts` files updated |
 | 3.5 | Update `/beaver-build` skill to **use accurate `vi.fn()` counts** when sizing work | Future | ⏳ Open |
 | | **Tier 3 Total (revised)** | **~3,050** | Down from the original ~7,050 |
 
@@ -577,8 +577,8 @@ subsystem for the barrel migration.
 |---|--------|-----------------:|------------------:|--------|
 | 4.1 | ~~Create `grove-maintenance` worker~~ | 0 | 1 | ❌ **Rejected** — orthogonal concerns (§Audit E) |
 | 4.2 | ~~Merge email-catchup into onboarding~~ | 0 | 1 | ❌ **Rejected** — risky DO/cron mixing (§Audit E) |
-| 4.3 | Move personal tools (cairn, looking-glass, index-viz) to `personal/` | 7,918 | 0 | ⏳ Open — zero monorepo deps, safe to relocate |
-| 4.4 | Delete or extract `workers/loft` **and** `libs/engine/src/lib/firefly` | ~5,784 | 1 | ⏳ Open — owner intent, but has warden/middleware ties |
+| 4.3 | Move personal tools (cairn, looking-glass, index-viz) to `personal/` | 7,918 | 0 | ✅ Done — relocated to `personal/`; root `cairn` script updated |
+| 4.4 | Delete or extract `workers/loft` **and** `libs/engine/src/lib/firefly` | ~3,024 | 1 | ✅ Done — `workers/loft` deleted + deploy workflow removed; `firefly` kept (won't stay loft-only forever) |
 | | **Tier 4 Total (revised)** | **~13,702** | **1** | Personal extraction + loft removal |
 
 ---
@@ -607,9 +607,9 @@ lines of savings come from row 0.1 (upload-validation duplicate), row 0.5
 | Metric | Current | After | Notes |
 |--------|-------:|------:|-------|
 | Apps | 12 | 12 | No app removed (terrarium kept per §Audit D) |
-| Workers | 13 | 11 | post-migrator ✅ deleted, loft -1 if removed |
+| Workers | 13 | **11** ✅ | post-migrator ✅ deleted, loft ✅ deleted |
 | Services | 9 | 9 | email-render merge **rejected** (§Audit D) |
-| **Total** | **34** | **32** | Down from 34 — more honest than the original "30" target |
+| **Total** | **34** | **32** ✅ | Target reached |
 
 ### Cognitive Load
 
@@ -618,8 +618,8 @@ lines of savings come from row 0.1 (upload-validation duplicate), row 0.5
 | Engine becomes "shared code only" | Single-consumer code (curios, content, components) moves to its actual consumer |
 | Fewer deployment targets | 34 → 32 (2 fewer; down from the over-promised "6 fewer") |
 | Accurate test signal | Raw `vi.fn()` counts replaced with per-file audits in future cleanup work |
-| Personal/product boundary | cairn/looking-glass/index-viz relocated; loft + firefly either deleted or externalized |
-| Less API boilerplate | Shared middleware for auth, errors, config checks across 250 `+server.ts` files |
+| Personal/product boundary ✅ | cairn/looking-glass/index-viz → `personal/`; loft deleted; firefly kept |
+| Less API boilerplate ✅ (partial) | `guardAuth`, `guardDb`, `parseJsonBody` in engine; 9 meadow files migrated; hooks boilerplate extracted across all 8 apps |
 
 ---
 
@@ -635,12 +635,15 @@ These stay, even if they add complexity:
 ## 7. Execution Order (revised)
 
 ```
-Stage 1:  Tier 1 quick wins — mostly done (3,210 lines + 1 deployment removed)
-Stage 2:  Tier 4.3/4.4 — relocate cairn/looking-glass/index-viz; decide loft
-Stage 3:  Tier 3 — API middleware + auth hook extraction (~3k lines)
-Stage 4:  Tier 2 barrel cleanup — prerequisite for engine extraction
-Stage 5:  Tier 2 — move curios, content, components, durable-objects, firefly
-          out of engine (~48k lines relocated, not deleted)
+Stage 1:  ✅ Tier 1 quick wins — done (3,210 lines + 1 deployment removed)
+Stage 2:  ✅ Tier 4.3/4.4 — cairn/looking-glass/index-viz → personal/; loft deleted
+              (10,942 lines relocated/deleted + 1 deployment removed)
+Stage 3:  ✅ Tier 3 — auth hook extraction (Tier 3.4, ~248 lines across 8 files) +
+              route guard helpers (Tier 3.3, helpers shipped; meadow migrated ~180 lines;
+              remaining ~250 +server.ts files adopt on next touch)
+Stage 4:  ⏳ Tier 2 barrel cleanup — prerequisite for engine extraction
+Stage 5:  ⏳ Tier 2 — move curios, content, components, durable-objects, firefly
+              out of engine (~48k lines relocated, not deleted)
 ```
 
 Each stage is a standalone set of PRs. Measure total lines and deployment count
