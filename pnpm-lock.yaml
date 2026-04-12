@@ -1519,31 +1519,6 @@ importers:
         specifier: ^4.76.0
         version: 4.76.0(@cloudflare/workers-types@4.20260317.1)
 
-  workers/loft:
-    dependencies:
-      '@autumnsgrove/infra':
-        specifier: workspace:*
-        version: link:../../libs/infra
-      '@autumnsgrove/lattice':
-        specifier: workspace:*
-        version: link:../../libs/engine
-      hono:
-        specifier: ^4.11.9
-        version: 4.11.9
-    devDependencies:
-      '@cloudflare/workers-types':
-        specifier: ^4.20260317.1
-        version: 4.20260317.1
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vitest:
-        specifier: ^4.1.0
-        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.2.3)(@vitest/ui@4.1.0)(happy-dom@20.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1)(canvas@3.2.1))(vite@7.3.1(@types/node@25.2.3)(jiti@2.4.2)(tsx@4.21.0))
-      wrangler:
-        specifier: ^4.76.0
-        version: 4.76.0(@cloudflare/workers-types@4.20260317.1)
-
   workers/lumen:
     dependencies:
       '@autumnsgrove/infra':
@@ -1724,6 +1699,9 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20250327.0
         version: 4.20260317.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       wrangler:
         specifier: ^4.14.1
         version: 4.76.0(@cloudflare/workers-types@4.20260317.1)

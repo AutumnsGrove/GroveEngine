@@ -5,7 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { guardAuth } from "@autumnsgrove/lattice/server";
+import { unauthorizedResponse } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import { createNote } from "$lib/server/notes";
 import { sanitizeNoteHtml } from "$lib/server/sanitize";
@@ -17,8 +17,7 @@ const MAX_TAGS = 5;
 const MAX_TAG_LENGTH = 30;
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-	const authGuard = guardAuth(locals.user);
-	if (authGuard) return authGuard;
+	if (!locals.user) return unauthorizedResponse();
 
 	const db = platform?.env?.DB;
 	if (!db) {

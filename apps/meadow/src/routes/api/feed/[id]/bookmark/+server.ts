@@ -5,7 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { guardAuth } from "@autumnsgrove/lattice/server";
+import { unauthorizedResponse } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import { toggleBookmark } from "$lib/server/bookmarks";
 import { validateUUID } from "@autumnsgrove/lattice/utils/validation";
@@ -13,8 +13,7 @@ import { createThreshold } from "@autumnsgrove/lattice/platform/threshold";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 
 export const POST: RequestHandler = async ({ params, platform, locals }) => {
-	const authGuard = guardAuth(locals.user);
-	if (authGuard) return authGuard;
+	if (!locals.user) return unauthorizedResponse();
 
 	if (!validateUUID(params.id)) {
 		return json(

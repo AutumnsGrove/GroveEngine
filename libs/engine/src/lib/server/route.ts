@@ -8,25 +8,38 @@
 import { json } from "@sveltejs/kit";
 
 /**
+ * Build a standard 401 Unauthorized response.
+ *
+ * Use with an explicit `if (!user) return unauthorizedResponse()` check
+ * so TypeScript control flow can narrow the user type after the guard.
+ *
+ * Usage:
+ *   if (!locals.user) return unauthorizedResponse();
+ */
+export function unauthorizedResponse(): Response {
+	return json(
+		{
+			error: "GROVE-API-020",
+			error_code: "UNAUTHORIZED",
+			error_description: "Please sign in to continue.",
+		},
+		{ status: 401 },
+	);
+}
+
+/**
  * Guard: require an authenticated user.
  *
  * Returns a 401 Response if the user is falsy; returns null if authenticated.
+ * Note: TypeScript cannot narrow the caller's variable from this return value.
+ * For narrowing, use `if (!user) return unauthorizedResponse()` instead.
  *
  * Usage:
  *   const guard = guardAuth(locals.user);
  *   if (guard) return guard;
  */
 export function guardAuth(user: unknown): Response | null {
-	if (!user) {
-		return json(
-			{
-				error: "GROVE-API-020",
-				error_code: "UNAUTHORIZED",
-				error_description: "Please sign in to continue.",
-			},
-			{ status: 401 },
-		);
-	}
+	if (!user) return unauthorizedResponse();
 	return null;
 }
 

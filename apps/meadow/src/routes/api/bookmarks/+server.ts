@@ -5,14 +5,13 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { guardAuth } from "@autumnsgrove/lattice/server";
+import { unauthorizedResponse } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 import type { PostRow } from "$lib/server/types";
 import { rowToPost } from "$lib/server/types";
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
-	const authGuard = guardAuth(locals.user);
-	if (authGuard) return authGuard;
+	if (!locals.user) return unauthorizedResponse();
 
 	const db = platform?.env?.DB;
 	if (!db) {
