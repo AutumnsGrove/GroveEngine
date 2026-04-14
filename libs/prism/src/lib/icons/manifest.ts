@@ -259,6 +259,7 @@ export const ICON_MANIFEST: IconManifest = {
 		pin: "Pin",
 		anchor: "Anchor",
 		pilcrow: "Pilcrow",
+		superscript: "Superscript",
 		imageIcon: "ImageIcon",
 		settings2: "Settings2",
 		target: "Target",

@@ -31,6 +31,7 @@
 		voiceError: string | null;
 		onWrapSelection: (before: string, after: string) => void;
 		onInsertLink: () => void;
+		onInsertFootnote: () => void;
 		onInsertHeading: (level: number) => void;
 		onShowPhotoPicker: () => void;
 		onSetEditorMode: (mode: "write" | "split" | "preview") => void;
@@ -69,6 +70,7 @@
 		voiceError,
 		onWrapSelection,
 		onInsertLink,
+		onInsertFootnote,
 		onInsertHeading,
 		onShowPhotoPicker,
 		onSetEditorMode,
@@ -131,6 +133,16 @@
 						aria-label="Link"
 					>
 						<actionIcons.link class="toolbar-icon" />
+					</button>
+					<button
+						type="button"
+						class="toolbar-icon-btn fmt-btn"
+						onclick={() => onInsertFootnote()}
+						disabled={readonly}
+						title="Insert footnote reference"
+						aria-label="Footnote"
+					>
+						<actionIcons.superscript class="toolbar-icon" />
 					</button>
 				</div>
 

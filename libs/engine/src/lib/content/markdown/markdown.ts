@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import footnotePlugin from "markdown-it-footnote";
 import matter from "@11ty/gray-matter";
 import { sanitizeMarkdown } from "../../utils/sanitize.js";
 import { humPlugin } from "./hum.js";
@@ -214,6 +215,9 @@ export interface ContentLoaderConfig {
 // must pass through rendering for processAnchorTags() to work.
 // Security is handled by sanitizeMarkdown() which strips dangerous elements.
 const md = new MarkdownIt({ html: true, linkify: true, breaks: false });
+
+// Footnotes: [^1] inline references with [^1]: definitions at the end
+md.use(footnotePlugin);
 
 // Hum: Transform music URLs into preview card placeholders
 md.use(humPlugin);

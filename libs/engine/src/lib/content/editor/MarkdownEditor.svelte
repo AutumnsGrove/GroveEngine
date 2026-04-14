@@ -609,6 +609,20 @@
 		wrapSelection("[", "](url)");
 	}
 
+	function insertFootnote() {
+		// Count existing footnotes to auto-increment the number
+		const footnoteMatches = content.match(/\[\^(\d+)\]/g) || [];
+		const existingNumbers = footnoteMatches.map((m) => parseInt(m.match(/\d+/)?.[0] || "0"));
+		const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+
+		// Insert the reference at cursor
+		insertAtCursor(`[^${nextNumber}]`);
+
+		// Append the definition at the end of the document
+		const definition = `\n\n[^${nextNumber}]: `;
+		content = content + definition;
+	}
+
 	function handlePhotoInsert(urls: string[]) {
 		showPhotoPicker = false;
 		if (urls.length === 0) return;
@@ -896,6 +910,7 @@
 		{voiceError}
 		onWrapSelection={wrapSelection}
 		onInsertLink={insertLink}
+		onInsertFootnote={insertFootnote}
 		onInsertHeading={insertHeading}
 		onShowPhotoPicker={() => (showPhotoPicker = true)}
 		onSetEditorMode={setEditorMode}

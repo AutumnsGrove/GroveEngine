@@ -248,6 +248,32 @@ describe("markdown.ts - Comprehensive Tests", () => {
 	});
 
 	// ==========================================================================
+	// 2c. renderMarkdown / footnotes
+	// ==========================================================================
+
+	describe("renderMarkdown() with footnotes", () => {
+		it("renders footnote references as superscript links", () => {
+			const html = renderMarkdown("Here is some text[^1].\n\n[^1]: This is the footnote.");
+			expect(html).toContain("fnref");
+			expect(html).toContain("footnote");
+		});
+
+		it("renders footnote definitions at the end", () => {
+			const html = renderMarkdown("Text with a note[^note].\n\n[^note]: The note content.");
+			expect(html).toContain("footnote");
+			expect(html).toContain("The note content");
+		});
+
+		it("handles multiple footnotes", () => {
+			const html = renderMarkdown(
+				"First[^1] and second[^2].\n\n[^1]: First note.\n[^2]: Second note.",
+			);
+			expect(html).toContain("First note");
+			expect(html).toContain("Second note");
+		});
+	});
+
+	// ==========================================================================
 	// 3. processAnchorTags Tests
 	// ==========================================================================
 
