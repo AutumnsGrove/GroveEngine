@@ -108,13 +108,13 @@ jobs:
 
       - name: Setup pnpm
         if: steps.snapshot.outcome == 'success'
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
         if: steps.snapshot.outcome == 'success'
         uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "25"
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
 
