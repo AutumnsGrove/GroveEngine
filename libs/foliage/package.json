@@ -61,7 +61,6 @@
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"@typescript-eslint/parser": "^8.0.0",
-		"eslint": "^9.0.0",
 		"eslint-plugin-svelte": "^2.0.0",
 		"globals": "^16.5.0",
 		"prettier": "^3.0.0",

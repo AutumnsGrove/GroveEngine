@@ -26,27 +26,24 @@
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@testing-library/jest-dom": "^6.4.0",
 		"@testing-library/svelte": "^5.0.0",
-		"@types/node": "^20.0.0",
 		"@vitest/coverage-v8": "^4.1.0",
 		"@vitest/ui": "^4.1.0",
-		"eslint": "^9.0.0",
 		"jsdom": "^27.4.0",
 		"prettier": "^3.0.0",
 		"prettier-plugin-svelte": "^3.0.0",
 		"svelte": "^5.50.1",
 		"svelte-check": "^4.3.6",
+		"tailwindcss": "^3.4.19",
 		"tslib": "^2.6.0",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "^4.1.0",
-		"tailwindcss": "^3.4.19",
 		"wrangler": "^4.76.0"
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
-		"@lucide/svelte": "^0.562.0",
-		"bits-ui": "^2.14.4"
+		"@lucide/svelte": "^0.562.0"
 	}
 }
