@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
-          node-version: "25"
+          node-version: "24"
       - name: Check for deploy manifest drift
         run: node scripts/pre-push/deploy-manifest.mjs --drift
 
@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
-          node-version: "25"
+          node-version: "24"
       - id: gen
         name: Generate affected matrix
         run: |
@@ -78,7 +78,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: "25"
+          node-version: "24"
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
 

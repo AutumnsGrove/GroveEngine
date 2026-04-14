@@ -17,6 +17,7 @@ on:
 permissions:
   contents: read
   deployments: write
+  issues: write
 
 jobs:
   deploy:
