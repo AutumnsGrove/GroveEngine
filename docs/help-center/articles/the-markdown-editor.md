@@ -1,11 +1,11 @@
 ---
 title: The Markdown Editor
 description: >-
-  A guide to Grove's writing environment with preview, ambient sounds, and zen
+  A guide to Grove's writing environment with preview, voice input, and zen
   mode
 category: help
 section: writing-publishing
-lastUpdated: '2026-01-03'
+lastUpdated: '2026-04-13'
 keywords:
   - editor
   - markdown
@@ -15,6 +15,9 @@ keywords:
   - preview
   - zen mode
   - keyboard shortcuts
+  - scribe
+  - voice
+  - footnotes
 order: 2
 ---
 
@@ -24,13 +27,43 @@ Grove's editor is where you'll spend most of your time. It's designed to get out
 
 ## The basics
 
-The editor uses Markdown, but you don't need to memorize syntax. Select any text and a floating toolbar appears with formatting options: bold, italic, headings, links, quotes, code, and lists.
+The editor uses Markdown, but you don't need to memorize syntax. The toolbar at the top provides quick access to common formatting.
 
-If you prefer keyboard shortcuts:
-- **⌘/Ctrl + B** — Bold
-- **⌘/Ctrl + I** — Italic
-- **⌘/Ctrl + S** — Save
-- **Tab** — Indent
+### The toolbar
+
+From left to right, the toolbar offers:
+
+**Formatting group:**
+- **Bold** (⌘/Ctrl + B) — Wrap text in `**bold**`
+- **Italic** (⌘/Ctrl + I) — Wrap text in `*italic*`
+- **Code** — Wrap text in `` `backticks` ``
+
+**Links group:**
+- **Link** — Insert a `[text](url)` link
+- **Footnote** — Insert a numbered reference like `[^1]` with its definition
+
+**Images:**
+- **Photo** — Open your image gallery to insert photos from [[amber|Amber]]
+
+**Headings:**
+- **H1, H2, H3** — Insert header markers
+
+**Voice input (when enabled):**
+- **Scribe** (⌘/Ctrl + Shift + U) — Hold to speak, release to transcribe
+
+**View modes:**
+- **Source** (⌘/Ctrl + 1) — Raw Markdown editing
+- **Split** (⌘/Ctrl + 2) — Editor and preview side by side
+- **Preview** (⌘/Ctrl + 3) — Preview only
+
+**Focus tools:**
+- **Full Preview** — See your post with theme styling applied
+- **Zen Mode** (⌘/Ctrl + Shift + Enter) — Distraction-free fullscreen
+
+### Other shortcuts
+
+- **⌘/Ctrl + S** — Save to server
+- **Tab** — Indent selected text
 
 ## Editor modes
 
@@ -75,6 +108,16 @@ Three ways to add images:
 3. **Manual** — Type the Markdown syntax: `![alt text](image-url)`
 
 When you drag or paste, Grove uploads the image automatically and inserts the Markdown for you. You'll see a brief upload indicator, then the image appears in your preview.
+
+## Voice input with Scribe
+
+If you have [[scribe|Scribe]] enabled, a microphone button appears in the toolbar. Hold it down (or press **⌘/Ctrl + Shift + U**) to record your voice, then release to transcribe.
+
+Scribe offers two modes:
+- **Raw** — Exact transcription of what you said
+- **Draft** — Lightly polished into cleaner prose
+
+Voice input works well for brainstorming, capturing thoughts quickly, or when typing isn't practical.
 
 ## Zen mode
 

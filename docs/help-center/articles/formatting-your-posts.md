@@ -3,7 +3,7 @@ title: Formatting Your Posts
 description: Markdown syntax and formatting options for your writing
 category: help
 section: customization
-lastUpdated: '2025-12-24'
+lastUpdated: '2026-04-13'
 keywords:
   - markdown
   - formatting
@@ -14,6 +14,7 @@ keywords:
   - headers
   - code
   - blockquotes
+  - footnotes
 order: 2
 ---
 
@@ -188,7 +189,9 @@ Here's a sentence with a footnote.[^1]
 [^1]: This is the footnote content.
 ```
 
-Footnotes appear at the bottom of your post, linked from where you reference them.
+Footnotes appear at the bottom of your post as a numbered list. Each reference becomes a clickable superscript that jumps to the footnote, with a back-arrow to return.
+
+**Tip:** Click the footnote button in the toolbar (the superscript icon next to the link button) to insert a footnote automatically. It numbers references for you and adds the definition at the end of your document.
 
 ## Images
 
@@ -219,6 +222,7 @@ And honestly? For most posts, you only need:
 - `## Headers`
 - `[links](url)`
 - `-` for lists
+- `[^1]` for footnotes (or use the toolbar button)
 
 Everything else is there when you need it.
 

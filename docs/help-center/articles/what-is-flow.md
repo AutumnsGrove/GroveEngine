@@ -3,7 +3,7 @@ title: What is Flow?
 description: Grove's immersive Markdown editor where your words take shape
 category: help
 section: how-it-works
-lastUpdated: '2026-01-28'
+lastUpdated: '2026-04-13'
 keywords:
   - flow
   - editor
@@ -12,6 +12,9 @@ keywords:
   - zen mode
   - fireside
   - drafts
+  - scribe
+  - voice
+  - footnotes
 order: 12
 ---
 
@@ -25,7 +28,7 @@ When you click "New Post" in [[arbor|Arbor]], you enter Flow. It's more than a t
 
 Most online editors fight for your attention. Toolbars demanding clicks. Sidebars showing unrelated information. Formatting menus that require a manual to understand.
 
-Flow goes the other direction. Complexity hides until you need it. The toolbar appears only when you select text. Stats show in a quiet status bar. And when you want to disappear entirely into your writing, Zen mode removes everything but your words.
+Flow goes the other direction. Complexity stays quiet until you need it. A compact toolbar holds the essentials—formatting, links, footnotes, images, headings—without overwhelming. Stats live in a subtle status bar. And when you want to disappear entirely into your writing, Zen mode removes everything but your words.
 
 ## How it works
 
@@ -56,6 +59,24 @@ Some people freeze at a blank page. If that's you, Fireside might help.
 Press `Cmd/Ctrl + Shift + F` and instead of facing an empty editor, you have a conversation. [[wisp|Wisp]] ([[your-grove|Grove]]'s writing assistant) asks what you're thinking about. You respond naturally. After a few exchanges, your words get organized into a draft you can edit.
 
 Fireside doesn't write for you—it helps you find your words when they're stuck. Every post created this way includes a small marker so readers know you started with a conversation.
+
+### Scribe Mode
+
+Sometimes typing isn't the right medium. Press the microphone button (or `Cmd/Ctrl + Shift + U`) to speak your thoughts aloud. [[scribe|Scribe]] transcribes your voice into text, ready to edit.
+
+Scribe works in two modes: **raw** (exact transcription) or **draft** (lightly polished into prose). You can switch between them based on whether you want word-for-word capture or a smoother starting point.
+
+### The Toolbar
+
+Flow's toolbar puts common actions at your fingertips:
+
+- **Bold, Italic, Code** — Format selected text instantly
+- **Link** — Wrap text in a Markdown link
+- **Footnote** — Insert a numbered reference[^1] and its definition
+- **Photo** — Open your image gallery to insert photos
+- **Headings** — Insert H1, H2, or H3 headers
+
+The toolbar also shows your current mode (Source, Split, or Preview), a full-preview button for seeing your post with your theme applied, and the Zen mode toggle.
 
 ## What this means for you
 
