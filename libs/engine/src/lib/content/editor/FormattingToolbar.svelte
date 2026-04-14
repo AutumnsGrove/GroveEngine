@@ -80,6 +80,26 @@
 		onTranscription,
 		onVoiceError,
 	}: Props = $props();
+
+	const formatGroups = [
+		[
+			{ icon: actionIcons.bold,        label: "Bold",     title: "Bold (⌘B)",                 action: () => onWrapSelection("**", "**") },
+			{ icon: actionIcons.italic,      label: "Italic",   title: "Italic (⌘I)",               action: () => onWrapSelection("_", "_") },
+			{ icon: featureIcons.code,       label: "Code",     title: "Inline code",                action: () => onWrapSelection("`", "`") },
+		],
+		[
+			{ icon: actionIcons.link,        label: "Link",     title: "Insert link",                action: () => onInsertLink() },
+			{ icon: actionIcons.superscript, label: "Footnote", title: "Insert footnote reference",  action: () => onInsertFootnote() },
+		],
+		[
+			{ icon: featureIcons.images, label: "Insert photo from gallery", title: "Insert photo from gallery", action: () => onShowPhotoPicker() },
+		],
+		[
+			{ icon: actionIcons.heading1, label: "Heading 1", title: "Heading 1", action: () => onInsertHeading(1) },
+			{ icon: actionIcons.heading2, label: "Heading 2", title: "Heading 2", action: () => onInsertHeading(2) },
+			{ icon: actionIcons.heading3, label: "Heading 3", title: "Heading 3", action: () => onInsertHeading(3) },
+		],
+	];
 </script>
 
 <!-- Mode-based Toolbar (hidden in Fireside mode) -->
@@ -87,114 +107,23 @@
 	<div class="toolbar">
 		<div class="toolbar-left">
 			{#if editorMode !== "preview"}
-				<!-- Formatting buttons -->
-				<div class="toolbar-group formatting-group">
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onWrapSelection("**", "**")}
-						disabled={readonly}
-						title="Bold (⌘B)"
-						aria-label="Bold"
-					>
-						<actionIcons.bold class="toolbar-icon" />
-					</button>
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onWrapSelection("_", "_")}
-						disabled={readonly}
-						title="Italic (⌘I)"
-						aria-label="Italic"
-					>
-						<actionIcons.italic class="toolbar-icon" />
-					</button>
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onWrapSelection("`", "`")}
-						disabled={readonly}
-						title="Inline code"
-						aria-label="Code"
-					>
-						<featureIcons.code class="toolbar-icon" />
-					</button>
-				</div>
-
-				<div class="toolbar-divider-line"></div>
-
-				<div class="toolbar-group formatting-group">
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onInsertLink()}
-						disabled={readonly}
-						title="Insert link"
-						aria-label="Link"
-					>
-						<actionIcons.link class="toolbar-icon" />
-					</button>
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onInsertFootnote()}
-						disabled={readonly}
-						title="Insert footnote reference"
-						aria-label="Footnote"
-					>
-						<actionIcons.superscript class="toolbar-icon" />
-					</button>
-				</div>
-
-				<div class="toolbar-divider-line"></div>
-				<div class="toolbar-group formatting-group">
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onShowPhotoPicker()}
-						disabled={readonly}
-						title="Insert photo from gallery"
-						aria-label="Insert photo from gallery"
-					>
-						<featureIcons.images class="toolbar-icon" />
-					</button>
-				</div>
-
-				<div class="toolbar-divider-line"></div>
-
-				<div class="toolbar-group formatting-group">
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onInsertHeading(1)}
-						disabled={readonly}
-						title="Heading 1"
-						aria-label="Heading 1"
-					>
-						<actionIcons.heading1 class="toolbar-icon" />
-					</button>
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onInsertHeading(2)}
-						disabled={readonly}
-						title="Heading 2"
-						aria-label="Heading 2"
-					>
-						<actionIcons.heading2 class="toolbar-icon" />
-					</button>
-					<button
-						type="button"
-						class="toolbar-icon-btn fmt-btn"
-						onclick={() => onInsertHeading(3)}
-						disabled={readonly}
-						title="Heading 3"
-						aria-label="Heading 3"
-					>
-						<actionIcons.heading3 class="toolbar-icon" />
-					</button>
-				</div>
-
+				{#each formatGroups as group, i}
+					{#if i > 0}<div class="toolbar-divider-line"></div>{/if}
+					<div class="toolbar-group formatting-group">
+						{#each group as btn}
+							<button
+								type="button"
+								class="toolbar-icon-btn fmt-btn"
+								onclick={btn.action}
+								disabled={readonly}
+								title={btn.title}
+								aria-label={btn.label}
+							>
+								<svelte:component this={btn.icon} class="toolbar-icon" />
+							</button>
+						{/each}
+					</div>
+				{/each}
 				<div class="toolbar-divider-line"></div>
 			{/if}
 
@@ -233,67 +162,67 @@
 			{/if}
 		</div>
 
-		<div class="toolbar-spacer"></div>
+		<div class="toolbar-right">
+			<div class="toolbar-group mode-group">
+				<button
+					type="button"
+					class="toolbar-icon-btn mode-btn"
+					class:active={editorMode === "write"}
+					onclick={() => onSetEditorMode("write")}
+					title="Source Mode (⌘1)"
+					aria-label="Source mode - editor only"
+				>
+					<actionIcons.penLine class="toolbar-icon" />
+				</button>
+				<button
+					type="button"
+					class="toolbar-icon-btn mode-btn"
+					class:active={editorMode === "split"}
+					onclick={() => onSetEditorMode("split")}
+					title="Split Mode (⌘2)"
+					aria-label="Split mode - editor and preview"
+				>
+					<actionIcons.columns class="toolbar-icon" />
+				</button>
+				<button
+					type="button"
+					class="toolbar-icon-btn mode-btn"
+					class:active={editorMode === "preview"}
+					onclick={() => onSetEditorMode("preview")}
+					title="Preview Mode (⌘3)"
+					aria-label="Preview mode - preview only"
+				>
+					<featureIcons.bookOpen class="toolbar-icon" />
+				</button>
+			</div>
 
-		<div class="toolbar-group mode-group">
-			<button
-				type="button"
-				class="toolbar-icon-btn mode-btn"
-				class:active={editorMode === "write"}
-				onclick={() => onSetEditorMode("write")}
-				title="Source Mode (⌘1)"
-				aria-label="Source mode - editor only"
-			>
-				<actionIcons.penLine class="toolbar-icon" />
-			</button>
-			<button
-				type="button"
-				class="toolbar-icon-btn mode-btn"
-				class:active={editorMode === "split"}
-				onclick={() => onSetEditorMode("split")}
-				title="Split Mode (⌘2)"
-				aria-label="Split mode - editor and preview"
-			>
-				<actionIcons.columns class="toolbar-icon" />
-			</button>
-			<button
-				type="button"
-				class="toolbar-icon-btn mode-btn"
-				class:active={editorMode === "preview"}
-				onclick={() => onSetEditorMode("preview")}
-				title="Preview Mode (⌘3)"
-				aria-label="Preview mode - preview only"
-			>
-				<featureIcons.bookOpen class="toolbar-icon" />
-			</button>
-		</div>
+			<div class="toolbar-divider-line"></div>
 
-		<div class="toolbar-divider-line"></div>
-
-		<div class="toolbar-group">
-			<button
-				type="button"
-				class="toolbar-icon-btn full-btn"
-				onclick={() => onShowFullPreview()}
-				title="Full Preview with Styling"
-				aria-label="Open full preview with blog styling"
-			>
-				<actionIcons.maximize class="toolbar-icon" />
-			</button>
-			<button
-				type="button"
-				class="toolbar-icon-btn zen-btn"
-				class:active={isZenMode}
-				onclick={onToggleZenMode}
-				title={isZenMode ? "Exit Zen Mode (Esc)" : "Zen Mode (⌘⇧↵)"}
-				aria-label={isZenMode ? "Exit zen mode" : "Enter zen mode for focused writing"}
-			>
-				{#if isZenMode}
-					<actionIcons.minimize class="toolbar-icon" />
-				{:else}
-					<actionIcons.focus class="toolbar-icon" />
-				{/if}
-			</button>
+			<div class="toolbar-group">
+				<button
+					type="button"
+					class="toolbar-icon-btn full-btn"
+					onclick={() => onShowFullPreview()}
+					title="Full Preview with Styling"
+					aria-label="Open full preview with blog styling"
+				>
+					<actionIcons.maximize class="toolbar-icon" />
+				</button>
+				<button
+					type="button"
+					class="toolbar-icon-btn zen-btn"
+					class:active={isZenMode}
+					onclick={onToggleZenMode}
+					title={isZenMode ? "Exit Zen Mode (Esc)" : "Zen Mode (⌘⇧↵)"}
+					aria-label={isZenMode ? "Exit zen mode" : "Enter zen mode for focused writing"}
+				>
+					{#if isZenMode}
+						<actionIcons.minimize class="toolbar-icon" />
+					{:else}
+						<actionIcons.focus class="toolbar-icon" />
+					{/if}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -353,7 +282,7 @@
 		padding: 0.4rem 0.75rem;
 		background: var(--editor-bg-tertiary, var(--light-bg-primary));
 		border-bottom: 1px solid var(--editor-border, var(--light-border-primary));
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		font-family: "JetBrains Mono", "Fira Code", monospace;
 		transition: opacity 0.3s ease;
 	}
@@ -365,9 +294,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.4rem;
-		min-width: 44px;
-		min-height: 44px;
+		padding: 0.25rem;
+		min-width: 32px;
+		min-height: 32px;
 		background: transparent;
 		border: none;
 		border-radius: 4px;
@@ -448,12 +377,24 @@
 		font-size: 0.75rem;
 		white-space: nowrap;
 	}
-	.toolbar-spacer {
-		flex: 1;
-	}
 	.toolbar-left {
 		display: flex;
 		align-items: center;
+		flex: 1;
+		min-width: 0;
+		overflow-x: auto;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+	.toolbar-left::-webkit-scrollbar {
+		display: none;
+	}
+	.toolbar-right {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		gap: 0.15rem;
 	}
 	.toolbar-hint {
 		color: var(--editor-text-dim, #5a5a5a);
@@ -578,14 +519,14 @@
 	}
 	@media (max-width: 600px) {
 		.toolbar {
-			padding: 0.35rem 0.5rem;
+			padding: 0.25rem 0.4rem;
 			gap: 0.1rem;
 		}
 		.toolbar-divider-line {
-			margin: 0 0.25rem;
+			margin: 0 0.2rem;
 		}
 		.toolbar-icon-btn {
-			padding: 0.35rem;
+			padding: 0.2rem;
 		}
 		.formatting-group {
 			padding: 1px;
