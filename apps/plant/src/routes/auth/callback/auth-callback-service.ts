@@ -236,7 +236,11 @@ export async function upsertOnboarding(
 ): Promise<{ onboardingId: string; isNewUser: boolean; tenantSubdomain: string | null }> {
 	if (existingOnboarding) {
 		const onboardingId = existingOnboarding.id;
-		const emailVerified = user.emailVerified === true;
+		// All paths to this function (OAuth, magic link) inherently verify
+		// email ownership. Don't gate on Better Auth's emailVerified field
+		// which may arrive as true, 1, or undefined depending on provider
+		// and D1/Drizzle serialization path.
+		const emailVerified = true;
 
 		try {
 			if (emailVerified) {
@@ -281,7 +285,8 @@ export async function upsertOnboarding(
 		// New user
 		const onboardingId = crypto.randomUUID();
 		const displayName = user.name || user.email.split("@")[0];
-		const emailVerified = user.emailVerified === true;
+		// See comment above — all auth paths verify email ownership
+		const emailVerified = true;
 
 		try {
 			if (emailVerified) {

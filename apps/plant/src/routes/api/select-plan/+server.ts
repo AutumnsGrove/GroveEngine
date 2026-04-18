@@ -90,13 +90,14 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 	try {
 		const onboarding = await db
 			.prepare(
-				`SELECT profile_completed_at, email_verified
+				`SELECT profile_completed_at, email_verified, auth_completed_at
          FROM user_onboarding WHERE id = ?`,
 			)
 			.bind(onboardingId)
 			.first<{
 				profile_completed_at: number | null;
 				email_verified: number | null;
+				auth_completed_at: number | null;
 			}>();
 
 		if (!onboarding) {
@@ -113,7 +114,9 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 			);
 		}
 
-		if (!onboarding.email_verified) {
+		// Email is verified if the flag is set OR if the user completed auth
+		// (OAuth/magic-link both inherently verify email ownership)
+		if (!onboarding.email_verified && !onboarding.auth_completed_at) {
 			return json({ error: "Please verify your email before selecting a plan." }, { status: 400 });
 		}
 	} catch (err) {
@@ -187,15 +190,24 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 			await logFreeAccountCreation(db, clientIP).catch(() => {});
 		}
 
-		await db
-			.prepare(
-				`UPDATE user_onboarding
-         SET payment_completed_at = unixepoch(),
-             updated_at = unixepoch()
-         WHERE id = ?`,
-			)
-			.bind(onboardingId)
-			.run();
+		try {
+			await db
+				.prepare(
+					`UPDATE user_onboarding
+           SET payment_completed_at = unixepoch(),
+               updated_at = unixepoch()
+           WHERE id = ?`,
+				)
+				.bind(onboardingId)
+				.run();
+		} catch (err) {
+			logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
+				path: "/api/select-plan",
+				detail: `UPDATE payment_completed_at for id=${onboardingId}`,
+				cause: err,
+			});
+			return json({ error: "Unable to complete signup. Please try again." }, { status: 500 });
+		}
 
 		try {
 			// Check for existing tenant (idempotency)
