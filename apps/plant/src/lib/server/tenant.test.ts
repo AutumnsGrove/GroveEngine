@@ -158,10 +158,12 @@ describe("createTenant", () => {
 		expect(aboutCall).toBeDefined();
 	});
 
-	it("makes exactly 9 database calls", async () => {
+	it("makes exactly 10 database calls", async () => {
 		const { db, calls } = createMockD1();
 		await createTenant(db, makeInput());
-		expect(calls).toHaveLength(9);
+		// 1 tenant + 1 billing + 4 settings + 1 onboarding link + 1 users upsert query + 1 users upsert + 2 pages = 10
+		// (users upsert: SELECT groveauth_id + INSERT/ON CONFLICT)
+		expect(calls).toHaveLength(10);
 	});
 
 	it("re-throws error when tenants INSERT fails", async () => {
