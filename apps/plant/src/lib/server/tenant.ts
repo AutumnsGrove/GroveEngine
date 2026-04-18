@@ -55,81 +55,109 @@ export async function createTenant(
 	}
 
 	// 2. Create platform_billing record (for all tiers, even free)
-	const billingId = crypto.randomUUID();
-	await db
-		.prepare(
-			`INSERT INTO platform_billing (id, tenant_id, plan, status, provider_customer_id, provider_subscription_id, created_at, updated_at)
-			 VALUES (?, ?, ?, 'active', ?, ?, unixepoch(), unixepoch())`,
-		)
-		.bind(
-			billingId,
-			tenantId,
-			input.plan,
-			input.providerCustomerId || null,
-			input.providerSubscriptionId || null,
-		)
-		.run();
-
-	// 3. Create default site_settings (used by Arbor admin panel)
-	const defaultSettings = [
-		["site_title", input.displayName],
-		["site_description", `${input.displayName}'s blog on Grove`],
-		["accent_color", input.favoriteColor || "#16a34a"],
-		["font_family", "lexend"],
-	];
-
-	for (const [key, value] of defaultSettings) {
+	try {
+		const billingId = crypto.randomUUID();
 		await db
 			.prepare(
-				`INSERT INTO site_settings (tenant_id, setting_key, setting_value, updated_at)
-				 VALUES (?, ?, ?, unixepoch())`,
+				`INSERT INTO platform_billing (id, tenant_id, plan, status, provider_customer_id, provider_subscription_id, created_at, updated_at)
+				 VALUES (?, ?, ?, 'active', ?, ?, unixepoch(), unixepoch())`,
 			)
-			.bind(tenantId, key, value)
+			.bind(
+				billingId,
+				tenantId,
+				input.plan,
+				input.providerCustomerId || null,
+				input.providerSubscriptionId || null,
+			)
 			.run();
+		console.log("[Tenant] Platform billing record created");
+	} catch (err) {
+		console.error("[Tenant] Step 2 FAILED - platform_billing INSERT:", err);
+		throw err;
+	}
+
+	// 3. Create default site_settings (used by Arbor admin panel)
+	try {
+		const defaultSettings = [
+			["site_title", input.displayName],
+			["site_description", `${input.displayName}'s blog on Grove`],
+			["accent_color", input.favoriteColor || "#16a34a"],
+			["font_family", "lexend"],
+		];
+
+		for (const [key, value] of defaultSettings) {
+			await db
+				.prepare(
+					`INSERT INTO site_settings (tenant_id, setting_key, setting_value, updated_at)
+					 VALUES (?, ?, ?, unixepoch())`,
+				)
+				.bind(tenantId, key, value)
+				.run();
+		}
+		console.log("[Tenant] Site settings created (4 rows)");
+	} catch (err) {
+		console.error("[Tenant] Step 3 FAILED - site_settings INSERT:", err);
+		throw err;
 	}
 
 	// 4. Link onboarding record to tenant
-	await db
-		.prepare(
-			`UPDATE user_onboarding
-			 SET tenant_id = ?, tenant_created_at = unixepoch(), updated_at = unixepoch()
-			 WHERE id = ?`,
-		)
-		.bind(tenantId, input.onboardingId)
-		.run();
+	try {
+		await db
+			.prepare(
+				`UPDATE user_onboarding
+				 SET tenant_id = ?, tenant_created_at = unixepoch(), updated_at = unixepoch()
+				 WHERE id = ?`,
+			)
+			.bind(tenantId, input.onboardingId)
+			.run();
+		console.log("[Tenant] Onboarding record linked to tenant");
+	} catch (err) {
+		console.error("[Tenant] Step 4 FAILED - user_onboarding UPDATE:", err);
+		throw err;
+	}
 
 	// 4b. Upsert users table (SSOT for identity → tenant mapping)
 	// Reads groveauth_id from user_onboarding since it's not in CreateTenantInput
-	const onboardingRow = await db
-		.prepare("SELECT groveauth_id FROM user_onboarding WHERE id = ?")
-		.bind(input.onboardingId)
-		.first<{ groveauth_id: string }>();
+	try {
+		const onboardingRow = await db
+			.prepare("SELECT groveauth_id FROM user_onboarding WHERE id = ?")
+			.bind(input.onboardingId)
+			.first<{ groveauth_id: string }>();
 
-	if (onboardingRow?.groveauth_id) {
-		await db
-			.prepare(
-				`INSERT INTO users (id, groveauth_id, email, display_name, tenant_id, is_active, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
-         ON CONFLICT(email) DO UPDATE SET
-           groveauth_id = COALESCE(excluded.groveauth_id, users.groveauth_id),
-           display_name = excluded.display_name,
-           tenant_id = excluded.tenant_id,
-           updated_at = datetime('now')`,
-			)
-			.bind(
-				crypto.randomUUID(),
-				onboardingRow.groveauth_id,
-				input.email,
-				input.displayName,
-				tenantId,
-			)
-			.run();
-		console.log("[Tenant] Users table synced");
+		console.log("[Tenant] Step 4b - groveauth_id lookup:", onboardingRow?.groveauth_id ?? "NULL");
+
+		if (onboardingRow?.groveauth_id) {
+			await db
+				.prepare(
+					`INSERT INTO users (id, groveauth_id, email, display_name, tenant_id, is_active, created_at, updated_at)
+					 VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+					 ON CONFLICT(email) DO UPDATE SET
+					   groveauth_id = COALESCE(excluded.groveauth_id, users.groveauth_id),
+					   display_name = excluded.display_name,
+					   tenant_id = excluded.tenant_id,
+					   updated_at = datetime('now')`,
+				)
+				.bind(
+					crypto.randomUUID(),
+					onboardingRow.groveauth_id,
+					input.email,
+					input.displayName,
+					tenantId,
+				)
+				.run();
+			console.log("[Tenant] Users table synced");
+		} else {
+			console.warn("[Tenant] Step 4b - No groveauth_id found, skipping users upsert");
+		}
+	} catch (err) {
+		console.error("[Tenant] Step 4b FAILED - users SELECT/UPSERT:", err);
+		throw err;
 	}
 
 	// 5. Create default home page
-	const homePageId = crypto.randomUUID();
-	const homeContent = `# Welcome to ${input.displayName}
+	try {
+		const homePageId = crypto.randomUUID();
+		const homeContent = `# Welcome to ${input.displayName}
 
 Thanks for visiting! This is my blog on Grove.
 
@@ -139,48 +167,55 @@ I'm just getting started here. Check back soon for new posts!
 
 *Powered by [Grove](https://grove.place) — the cozy blogging platform.*`;
 
-	await db
-		.prepare(
-			`INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
-       VALUES (?, ?, 'home', 'Home', 'Your home page', 'home', ?, ?, ?, '[]', 'default', unixepoch(), unixepoch())`,
-		)
-		.bind(
-			homePageId,
-			tenantId,
-			homeContent,
-			`<h1>Welcome to ${input.displayName}</h1><p>Thanks for visiting! This is my blog on Grove.</p><h2>About This Site</h2><p>I'm just getting started here. Check back soon for new posts!</p><p><em>Powered by <a href="https://grove.place">Grove</a> — the cozy blogging platform.</em></p>`,
-			JSON.stringify({
-				title: input.displayName,
-				subtitle: "Welcome to my corner of the internet",
-				cta: { text: "Read the Blog", link: "/blog" },
-			}),
-		)
-		.run();
-
-	console.log("[Tenant] Default home page created");
+		await db
+			.prepare(
+				`INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
+				 VALUES (?, ?, 'home', 'Home', 'Your home page', 'home', ?, ?, ?, '[]', 'default', unixepoch(), unixepoch())`,
+			)
+			.bind(
+				homePageId,
+				tenantId,
+				homeContent,
+				`<h1>Welcome to ${input.displayName}</h1><p>Thanks for visiting! This is my blog on Grove.</p><h2>About This Site</h2><p>I'm just getting started here. Check back soon for new posts!</p><p><em>Powered by <a href="https://grove.place">Grove</a> — the cozy blogging platform.</em></p>`,
+				JSON.stringify({
+					title: input.displayName,
+					subtitle: "Welcome to my corner of the internet",
+					cta: { text: "Read the Blog", link: "/blog" },
+				}),
+			)
+			.run();
+		console.log("[Tenant] Step 5 - Home page created");
+	} catch (err) {
+		console.error("[Tenant] Step 5 FAILED - pages INSERT (home):", err);
+		throw err;
+	}
 
 	// 6. Create default about page
-	const aboutPageId = crypto.randomUUID();
-	const aboutMarkdown = `# About
+	try {
+		const aboutPageId = crypto.randomUUID();
+		const aboutMarkdown = `# About
 
 Welcome! This page is waiting for your story.
 
 *Edit this page from your [admin panel](/arbor/pages/edit/about).*`;
 
-	await db
-		.prepare(
-			`INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, gutter_content, font, show_in_nav, nav_order, created_at, updated_at)
-       VALUES (?, ?, 'about', 'About', 'A little about this site', 'about', ?, ?, '[]', 'default', 0, 0, unixepoch(), unixepoch())`,
-		)
-		.bind(
-			aboutPageId,
-			tenantId,
-			aboutMarkdown,
-			'<h1>About</h1><p>Welcome! This page is waiting for your story.</p><p><em>Edit this page from your <a href="/arbor/pages/edit/about">admin panel</a>.</em></p>',
-		)
-		.run();
-
-	console.log("[Tenant] Default about page created");
+		await db
+			.prepare(
+				`INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, gutter_content, font, show_in_nav, nav_order, created_at, updated_at)
+				 VALUES (?, ?, 'about', 'About', 'A little about this site', 'about', ?, ?, '[]', 'default', 0, 0, unixepoch(), unixepoch())`,
+			)
+			.bind(
+				aboutPageId,
+				tenantId,
+				aboutMarkdown,
+				'<h1>About</h1><p>Welcome! This page is waiting for your story.</p><p><em>Edit this page from your <a href="/arbor/pages/edit/about">admin panel</a>.</em></p>',
+			)
+			.run();
+		console.log("[Tenant] Step 6 - About page created");
+	} catch (err) {
+		console.error("[Tenant] Step 6 FAILED - pages INSERT (about):", err);
+		throw err;
+	}
 
 	return {
 		tenantId,
