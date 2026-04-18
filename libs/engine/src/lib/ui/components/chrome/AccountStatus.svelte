@@ -98,7 +98,9 @@
 						>{resolveDisplayName(user)}</span
 					>
 				{/if}
-				<navIcons.chevronDown class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
+				<navIcons.chevronDown
+					class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}"
+				/>
 			</button>
 
 			<!-- Dropdown menu -->
@@ -160,7 +162,6 @@
 								type="submit"
 								class="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-foreground-subtle hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 								role="menuitem"
-								onclick={closeDropdown}
 							>
 								<authIcons.logout class="w-4 h-4" />
 								<span>{signOutLabel}</span>

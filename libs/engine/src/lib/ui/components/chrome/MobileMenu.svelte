@@ -220,7 +220,6 @@
 				<form method="POST" action={signOutHref} class="mt-2">
 					<button
 						type="submit"
-						onclick={handleClose}
 						class="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors"
 					>
 						<authIcons.logout class="w-5 h-5 text-accent-muted" />
