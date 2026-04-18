@@ -207,6 +207,7 @@
 						This becomes your blog URL: <strong>yourname.grove.place</strong>
 					</p>
 				{/if}
+				<p class="text-xs text-foreground-faint mt-0.5">You can change this later in Arbor.</p>
 
 				<!-- Username suggestions -->
 				{#if usernameSuggestions.length > 0}
