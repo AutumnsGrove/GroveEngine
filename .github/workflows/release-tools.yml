@@ -1,9 +1,10 @@
+---
 name: Release Grove Tools
 
 # Build and release gw/gf binaries.
 # Triggered by:
-#   1. Tag push (gw/v*, gf/v*) — manual releases via `make release TAG=v2.0.0`
-#   2. workflow_call — automatic releases from auto-release-tools.yml
+#   1. Tag push (gw/v*, gf/v*) — manual via `make release TAG=v2.0.0`
+#   2. workflow_call — automatic from auto-release-tools.yml
 
 on:
   push:
@@ -103,7 +104,8 @@ jobs:
   # BUILD - Cross-compile for all platforms
   # ============================================
   build:
-    name: Build ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
+    name: >-
+      Build ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
     runs-on: ubuntu-latest
     needs: [prepare, test]
 
@@ -148,7 +150,8 @@ jobs:
           cd "$DIR"
           go build \
             -ldflags="-s -w -X ${MODULE}/cmd.Version=${VERSION}" \
-            -o "$BINARY" .
+            -o "$BINARY" \
+            .
 
           ls -lh "$BINARY"
 
@@ -156,7 +159,8 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
-          path: ${{ needs.prepare.outputs.directory }}/${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}${{ matrix.ext }}
+          path: >-
+            ${{ needs.prepare.outputs.directory }}/${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}${{ matrix.ext }}
           retention-days: 1
 
   # ============================================
@@ -202,7 +206,8 @@ jobs:
             DIR="grove-find-go"
           fi
 
-          # Extract changelog from annotated tag body (populated by gw publish)
+          # Extract changelog from annotated tag body
+          # (populated by gw publish)
           CHANGELOG=$(git tag -l --format='%(contents:body)' "$TAG" | sed '/^$/d')
 
           # Build release notes with optional changelog section
@@ -230,7 +235,7 @@ jobs:
           - \`${TOOL}-linux-x86_64\` — Linux x86_64
           - \`${TOOL}-linux-arm64\` — Linux ARM64
           - \`${TOOL}-darwin-arm64\` — macOS Apple Silicon
-          - \`${TOOL}-windows-x86_64.exe\` — Windows x86_64"
+          - \`${TOOL}-windows-x86_64.exe\` — Windows"
 
           gh release create "$TAG" release/* \
             --title "${TOOL_NAME} ${VERSION}" \

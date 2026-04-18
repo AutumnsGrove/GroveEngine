@@ -1,3 +1,4 @@
+---
 name: Auto-tag on Version Bump
 
 on:
@@ -9,14 +10,16 @@ on:
   workflow_dispatch:
     inputs:
       force_snapshot:
-        description: "Force snapshot generation even without version change"
+        description: >
+          Force snapshot generation even without version change
         required: false
-        default: "false"
+        default: false
         type: boolean
       backfill_summaries:
-        description: "Backfill AI summaries for all historical versions"
+        description: >
+          Backfill AI summaries for all historical versions
         required: false
-        default: "false"
+        default: false
         type: boolean
 
 permissions:
@@ -25,13 +28,14 @@ permissions:
 
 jobs:
   tag-and-snapshot:
-    if: github.event.inputs.backfill_summaries != 'true'
+    if: github.event.inputs.backfill_summaries != true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # Full history for accurate commit count
+          # Full history for accurate commit count
+          fetch-depth: 0
 
       - name: Check for version change
         id: version
@@ -41,7 +45,9 @@ jobs:
           echo "current=$CURRENT" >> $GITHUB_OUTPUT
 
           # Get previous version
-          git show HEAD~1:libs/engine/package.json > /tmp/prev-package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
+          git show HEAD~1:libs/engine/package.json \
+            > /tmp/prev-package.json 2>/dev/null \
+            || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
           PREVIOUS=$(jq -r '.version' /tmp/prev-package.json)
           echo "previous=$PREVIOUS" >> $GITHUB_OUTPUT
 
@@ -56,7 +62,7 @@ jobs:
 
       - name: Check if tag exists
         id: tag_exists
-        if: steps.version.outputs.changed == 'true'
+        if: steps.version.outputs.changed == true
         run: |
           TAG="v${{ steps.version.outputs.current }}"
           if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
@@ -69,11 +75,14 @@ jobs:
 
       - name: Create and push tag
         id: create_tag
-        if: steps.version.outputs.changed == 'true' && steps.tag_exists.outputs.exists == 'false'
+        if: >
+          steps.version.outputs.changed == true &&
+          steps.tag_exists.outputs.exists == false
         run: |
           TAG="v${{ steps.version.outputs.current }}"
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
@@ -81,7 +90,9 @@ jobs:
 
       - name: Generate repository snapshot
         id: snapshot
-        if: steps.version.outputs.changed == 'true' || github.event.inputs.force_snapshot == 'true'
+        if: >
+          steps.version.outputs.changed == true ||
+          github.event.inputs.force_snapshot == true
         run: |
           TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
           echo "Generating snapshot for: $TAG"
@@ -104,7 +115,8 @@ jobs:
           chmod +x ./scripts/generate/generate-release-summary.sh
 
           # Generate summary (will use previous tag automatically)
-          ./scripts/generate/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
+          ./scripts/generate/generate-release-summary.sh "$TAG" \
+            || echo "Warning: Summary generation failed, continuing..."
 
       - name: Setup pnpm
         if: steps.snapshot.outcome == 'success'
@@ -126,7 +138,8 @@ jobs:
           TAG="${{ steps.snapshot.outputs.tag_name }}"
           echo "Calculating package size for: $TAG"
 
-          # Sanitize TAG to prevent injection (allow only valid semver chars)
+          # Sanitize TAG to prevent injection
+          # (allow only valid semver chars)
           TAG_SAFE=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]//g')
           if [[ "$TAG" != "$TAG_SAFE" ]]; then
             echo "Error: TAG contains invalid characters"
@@ -135,11 +148,13 @@ jobs:
 
           # Install dependencies and build the package
           echo "Installing dependencies..."
-          pnpm install || { echo "Failed to install dependencies"; exit 1; }
+          pnpm install \
+            || { echo "Failed to install dependencies"; exit 1; }
 
           cd libs/engine
           echo "Building package..."
-          pnpm run package || { echo "Failed to build package"; exit 1; }
+          pnpm run package \
+            || { echo "Failed to build package"; exit 1; }
 
           # Create tarball and measure its size
           echo "Creating tarball..."
@@ -149,8 +164,12 @@ jobs:
             exit 1
           fi
 
-          # Get tarball size (cross-platform: try GNU stat, then BSD stat)
-          TARBALL_SIZE=$(stat -c%s "$TARBALL" 2>/dev/null || stat -f%z "$TARBALL" 2>/dev/null)
+          # Get tarball size
+          # (cross-platform: try GNU stat, then BSD stat)
+          TARBALL_SIZE=$(
+            stat -c%s "$TARBALL" 2>/dev/null ||
+            stat -f%z "$TARBALL" 2>/dev/null
+          )
           if [[ -z "$TARBALL_SIZE" ]]; then
             echo "Error: Failed to get tarball size"
             exit 1
@@ -160,10 +179,15 @@ jobs:
           mkdir -p /tmp/pkg-measure
           tar -xzf "$TARBALL" -C /tmp/pkg-measure
 
-          # Cross-platform size measurement (GNU du -sb, or BSD du -sk * 1024)
-          if UNPACKED_SIZE=$(du -sb /tmp/pkg-measure/package 2>/dev/null | cut -f1); then
+          # Cross-platform size measurement
+          # (GNU du -sb, or BSD du -sk * 1024)
+          if UNPACKED_SIZE=$(
+            du -sb /tmp/pkg-measure/package 2>/dev/null | cut -f1
+          ); then
             :  # GNU du worked
-          elif UNPACKED_SIZE_KB=$(du -sk /tmp/pkg-measure/package 2>/dev/null | cut -f1); then
+          elif UNPACKED_SIZE_KB=$(
+            du -sk /tmp/pkg-measure/package 2>/dev/null | cut -f1
+          ); then
             UNPACKED_SIZE=$((UNPACKED_SIZE_KB * 1024))
           else
             echo "Error: Failed to measure unpacked size"
@@ -171,18 +195,27 @@ jobs:
           fi
 
           echo "Tarball: $TARBALL"
-          echo "Compressed size: $TARBALL_SIZE bytes ($(numfmt --to=iec "$TARBALL_SIZE" 2>/dev/null || echo "$TARBALL_SIZE"))"
-          echo "Unpacked size: $UNPACKED_SIZE bytes ($(numfmt --to=iec "$UNPACKED_SIZE" 2>/dev/null || echo "$UNPACKED_SIZE"))"
+          echo "Compressed size: $TARBALL_SIZE bytes ($(
+            numfmt --to=iec "$TARBALL_SIZE" 2>/dev/null ||
+            echo "$TARBALL_SIZE"
+          ))"
+          echo "Unpacked size: $UNPACKED_SIZE bytes ($(
+            numfmt --to=iec "$UNPACKED_SIZE" 2>/dev/null ||
+            echo "$UNPACKED_SIZE"
+          ))"
 
           # Update history.csv with the package size for this version
-          # NOTE: This workflow calculates package size at tag time (pre-publish verification)
-          # The backfill-npm-sizes.ts script fetches published versions (historical data recovery)
+          # NOTE: This workflow calculates package size at tag time
+          #       (pre-publish verification)
+          # The backfill-npm-sizes.ts script fetches published versions
+          # (historical data recovery)
           cd ../..
           CSV_FILE="snapshots/history.csv"
 
           # Check if npm_unpacked_size column exists, add if not
-          # IMPORTANT: New columns MUST be added at the end to maintain backward compatibility
-          # with hardcoded column indexes in the CSV parsing code
+          # IMPORTANT: New columns MUST be added at the end
+          #            to maintain backward compatibility
+          #            with hardcoded column indexes in CSV parsing
           HEADER=$(head -1 "$CSV_FILE")
           if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
             echo "Adding npm_unpacked_size column to CSV..."
@@ -193,23 +226,32 @@ jobs:
           fi
 
           # Find the column index for npm_unpacked_size from header
-          # This makes the script resilient to column additions before npm_unpacked_size
-          SIZE_COL=$(head -1 "$CSV_FILE" | tr ',' '\n' | grep -n "npm_unpacked_size" | cut -d: -f1)
+          # This makes the script resilient to column additions
+          # before npm_unpacked_size
+          SIZE_COL=$(
+            head -1 "$CSV_FILE" | tr ',' '\n' |
+            grep -n "npm_unpacked_size" | cut -d: -f1
+          )
           if [[ -z "$SIZE_COL" ]]; then
-            echo "Error: npm_unpacked_size column not found in CSV header"
+            echo "Error: npm_unpacked_size column not found in header"
             exit 1
           fi
           echo "Found npm_unpacked_size at column $SIZE_COL"
 
           # Update the size for this specific version using awk
-          # Matches on column 2 (label/tag) and updates the size column by index
-          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" -v col="$SIZE_COL" \
-            'BEGIN {OFS=","} NR==1 {print; next} $2==tag {$col=size} {print}' \
-            "$CSV_FILE" > "$CSV_FILE.tmp" && mv "$CSV_FILE.tmp" "$CSV_FILE"
+          # Matches on column 2 (label/tag)
+          # and updates the size column by index
+          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" \
+            -v col="$SIZE_COL" \
+            'BEGIN {OFS=","} NR==1 {print; next} \
+             $2==tag {$col=size} {print}' \
+            "$CSV_FILE" > "$CSV_FILE.tmp" \
+            && mv "$CSV_FILE.tmp" "$CSV_FILE"
 
           # Verify the update
           echo "Verifying update..."
-          grep "$TAG" "$CSV_FILE" || { echo "Warning: Could not verify update"; }
+          grep "$TAG" "$CSV_FILE" \
+            || { echo "Warning: Could not verify update"; }
           echo "Package size updated in $CSV_FILE"
 
           # Cleanup
@@ -223,7 +265,8 @@ jobs:
           echo "Analyzing documentation keywords for: $TAG"
 
           # Run keyword analysis script
-          pnpm exec tsx scripts/generate/analyze-doc-keywords.ts "$TAG" || echo "Warning: Keyword analysis failed, continuing..."
+          pnpm exec tsx scripts/generate/analyze-doc-keywords.ts "$TAG" \
+            || echo "Warning: Keyword analysis failed, continuing..."
 
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
@@ -231,26 +274,35 @@ jobs:
           # Ensure landing data directory exists
           mkdir -p apps/landing/static/data
 
-          # Copy the history CSV so the /journey page can display it
-          cp snapshots/history.csv apps/landing/static/data/history.csv
+          # Copy the history CSV
+          # so the /journey page can display it
+          cp snapshots/history.csv \
+            apps/landing/static/data/history.csv
 
-          # Copy release summaries so the /roadmap page can display them
+          # Copy release summaries
+          # so the /roadmap page can display them
           if [ -d snapshots/summaries ]; then
             mkdir -p apps/landing/static/data/summaries
-            cp -r snapshots/summaries/* apps/landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
+            cp -r snapshots/summaries/* \
+              apps/landing/static/data/summaries/ 2>/dev/null \
+              || echo "No summaries to copy"
           fi
 
-          # Copy word frequencies so the /journey page can display them
+          # Copy word frequencies
+          # so the /journey page can display them
           if [ -d snapshots/word-frequencies ]; then
             mkdir -p apps/landing/static/data/word-frequencies
-            cp -r snapshots/word-frequencies/* apps/landing/static/data/word-frequencies/ 2>/dev/null || echo "No word frequencies to copy"
+            cp -r snapshots/word-frequencies/* \
+              apps/landing/static/data/word-frequencies/ 2>/dev/null \
+              || echo "No word frequencies to copy"
           fi
 
       - name: Commit and push snapshot
         if: steps.snapshot.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "github-actions[bot]@users.noreply.github.com"
 
           # Add snapshot files, summaries, and landing data
           git add snapshots/ apps/landing/static/data/
@@ -261,43 +313,59 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: add repository snapshot and release summary for ${{ steps.snapshot.outputs.tag_name }}"
+          git commit -m \
+            "docs: add snapshot and summary for \
+${{ steps.snapshot.outputs.tag_name }}"
           git push origin main
 
       - name: Check if release exists
         id: release_exists
-        if: steps.version.outputs.changed == 'true'
+        if: steps.version.outputs.changed == true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ steps.version.outputs.current }}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Release $TAG already exists (created by gw publish lattice)"
+            echo "Release $TAG exists (gw publish lattice)"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create GitHub Release
-        if: steps.version.outputs.changed == 'true' && steps.release_exists.outputs.exists != 'true'
+        if: >
+          steps.version.outputs.changed == true &&
+          steps.release_exists.outputs.exists != true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
+          TAG="${{
+            steps.create_tag.outputs.tag_name ||
+            format('v{0}', steps.version.outputs.current)
+          }}"
           VERSION="${{ steps.version.outputs.current }}"
           SUMMARY_FILE="snapshots/summaries/${TAG}.json"
 
           # Build release body from AI-generated summary
           if [ -f "$SUMMARY_FILE" ]; then
             SUMMARY=$(jq -r '.summary' "$SUMMARY_FILE")
-            TOTAL_COMMITS=$(jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE")
+            TOTAL_COMMITS=$(
+              jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE"
+            )
 
             # Extract scopes (areas of work)
-            SCOPES=$(jq -r '.scopes[]? // empty' "$SUMMARY_FILE" | head -8 | sed 's/^/`/;s/$/`/' | paste -sd ', ' -)
+            SCOPES=$(
+              jq -r '.scopes[]? // empty' "$SUMMARY_FILE" | head -8 |
+              sed 's/^/`/;s/$/`/' | paste -sd ', ' -
+            )
 
-            # Read each category. Architecture (significant chore: commits) goes first
-            # so structural/infra work isn't buried under features and fixes.
-            ARCH=$(jq -r '.highlights.architecture[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            # Read each category.
+            # Architecture (significant chore: commits) goes first
+            # so structural/infra work isn't buried under features.
+            ARCH=$(
+              jq -r '.highlights.architecture[]? // empty' \
+                "$SUMMARY_FILE" | sed 's/^/- /'
+            )
             FEAT=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
             FIXS=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
             REFR=$(jq -r '.highlights.refactoring[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
@@ -306,11 +374,15 @@ jobs:
             TSTS=$(jq -r '.highlights.tests[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
 
             # Build HIGHLIGHTS by appending each non-empty section.
-            # $'\n\n' is added OUTSIDE $() so bash's trailing-newline stripping
-            # doesn't eat the blank line that separates sections in GitHub markdown.
+            # $'\n\n' is added OUTSIDE $() so bash's
+            # trailing-newline stripping doesn't eat the blank line
+            # that separates sections in GitHub markdown.
             NL=$'\n\n'
             HIGHLIGHTS=""
-            [ -n "$ARCH" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Architecture & Infrastructure' "$ARCH")${NL}"
+            [ -n "$ARCH" ] && HIGHLIGHTS="${HIGHLIGHTS}$(
+              printf '**%s**\n%s' 'Architecture & Infrastructure' \
+                "$ARCH"
+            )${NL}"
             [ -n "$FEAT" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Features' "$FEAT")${NL}"
             [ -n "$FIXS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Fixes' "$FIXS")${NL}"
             [ -n "$REFR" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Refactoring' "$REFR")${NL}"
@@ -323,15 +395,24 @@ jobs:
               SCOPE_LINE="Areas: ${SCOPES} | "
             fi
 
-            FOOTER="${SCOPE_LINE}*${TOTAL_COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [journey](https://grove.place/journey)"
+            FOOTER="${SCOPE_LINE}*${TOTAL_COMMITS} total commits* \
+| [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) \
+| [journey](https://grove.place/journey)"
 
             if [ -n "$HIGHLIGHTS" ]; then
-              BODY=$(printf '%s\n\n### Highlights\n\n%s\n---\n%s' "$SUMMARY" "$HIGHLIGHTS" "$FOOTER")
+              BODY=$(
+                printf '%s\n\n### Highlights\n\n%s\n---\n%s' \
+                  "$SUMMARY" "$HIGHLIGHTS" "$FOOTER"
+              )
             else
               BODY=$(printf '%s\n\n---\n%s' "$SUMMARY" "$FOOTER")
             fi
           else
-            BODY=$(printf '## @autumnsgrove/lattice v%s\n\nSee the [journey](https://grove.place/journey) for details.' "$VERSION")
+            BODY=$(
+              printf '## @autumnsgrove/lattice v%s\n\n%s' \
+                "$VERSION" \
+                'See the [journey](https://grove.place/journey) for details.'
+            )
           fi
 
           gh release create "$TAG" \
@@ -341,13 +422,15 @@ jobs:
           echo "Created GitHub Release: $TAG"
 
       - name: Publish to GitHub Package Registry
-        if: steps.version.outputs.changed == 'true'
+        if: steps.version.outputs.changed == true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Configure npm for GitHub Package Registry
-          echo "@autumnsgrove:registry=https://npm.pkg.github.com" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          echo "@autumnsgrove:registry=https://npm.pkg.github.com" \
+            >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" \
+            >> .npmrc
 
           cd libs/engine
 
@@ -355,13 +438,15 @@ jobs:
           pnpm run package
 
           # Publish
-          pnpm publish --no-git-checks || echo "Warning: Publish failed (version may already exist)"
+          pnpm publish --no-git-checks \
+            || echo "Warning: Publish failed (may already exist)"
 
-          echo "Published @autumnsgrove/lattice v${{ steps.version.outputs.current }}"
+          echo "Published @autumnsgrove/lattice \
+v${{ steps.version.outputs.current }}"
 
   # Separate job for backfilling historical summaries
   backfill:
-    if: github.event.inputs.backfill_summaries == 'true'
+    if: github.event.inputs.backfill_summaries == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -372,10 +457,12 @@ jobs:
       - name: Show versions to process
         run: |
           echo "📋 Versions in history.csv:"
-          tail -n +2 snapshots/history.csv | cut -d',' -f2 | grep '^v' | sort -V
+          tail -n +2 snapshots/history.csv | cut -d',' -f2 | \
+            grep '^v' | sort -V
           echo ""
           echo "📦 Existing summaries:"
-          ls -1 snapshots/summaries/ 2>/dev/null || echo "  (none)"
+          ls -1 snapshots/summaries/ 2>/dev/null \
+            || echo "  (none)"
 
       - name: Run backfill script
         env:
@@ -388,22 +475,30 @@ jobs:
       - name: Sync to landing page
         run: |
           mkdir -p apps/landing/static/data/summaries
-          cp -r snapshots/summaries/* apps/landing/static/data/summaries/
-          echo "📦 Synced summaries to apps/landing/static/data/summaries/"
+          cp -r snapshots/summaries/* \
+            apps/landing/static/data/summaries/
+          echo "📦 Synced summaries to \
+apps/landing/static/data/summaries/"
           ls -1 apps/landing/static/data/summaries/
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add snapshots/summaries/ apps/landing/static/data/summaries/
+          git config user.email \
+            "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/summaries/ \
+            apps/landing/static/data/summaries/
 
           if git diff --staged --quiet; then
             echo "No new summaries generated"
             exit 0
           fi
 
-          NEW_COUNT=$(git diff --staged --name-only | grep -c '\.json$' || echo "0")
-          git commit -m "docs: backfill $NEW_COUNT historical release summaries"
+          NEW_COUNT=$(
+            git diff --staged --name-only | grep -c '\.json$' \
+              || echo "0"
+          )
+          git commit -m \
+            "docs: backfill $NEW_COUNT historical release summaries"
           git push origin main
           echo "Pushed $NEW_COUNT new summaries to main"

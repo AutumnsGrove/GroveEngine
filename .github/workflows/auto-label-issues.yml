@@ -1,6 +1,7 @@
+---
 name: Auto-Label Issues
 
-on:
+"on":
   issues:
     types: [opened, edited]
 
@@ -23,43 +24,111 @@ jobs:
             // --- Component Labels ---
             // Two strategies based on name uniqueness:
             //
-            // UNIQUE names (heartwood, lattice, foliage, mycelium, lumen, patina,
-            //   curio, arbor, petal): Safe to match anywhere (title or body) since
-            //   these words don't appear in normal English.
+            // UNIQUE names (heartwood, lattice, foliage, mycelium, lumen,
+            //   patina, curio, arbor, petal): Safe to match anywhere
+            //   (title or body) since these words don't appear in normal
+            //   English.
             //
-            // AMBIGUOUS names (clearing, shade, plant, amber, vine, ivy, meadow,
-            //   forests, graft): Only match the bare product name in the TITLE.
-            //   In the body, require specific compound phrases that clearly refer
-            //   to the Grove product, not the common English word.
+            // AMBIGUOUS names (clearing, shade, plant, amber, vine, ivy,
+            //   meadow, forests, graft): Only match the bare product name
+            //   in the TITLE. In the body, require specific compound
+            //   phrases that clearly refer to the Grove product, not the
+            //   common English word.
 
-            // Unique product names — safe to match anywhere
+            // Unique product names - safe to match anywhere
             const uniqueComponents = [
-              { label: 'heartwood', proper: /\bheartwood\b/, titleFallback: /\b(oauth|passkey|session.?do|pkce)\b/ },
-              { label: 'lattice',   proper: /\blattice\b/,   titleFallback: /\b(lattice|monorepo|multi.?tenant)\b/ },
-              { label: 'foliage',   proper: /\bfoliage\b/,   titleFallback: /\b(theme engine|design tokens|per.tenant theming)\b/ },
-              { label: 'mycelium',  proper: /\bmycelium\b/,  titleFallback: /\b(mcp server|mcp tool|model context protocol)\b/ },
-              { label: 'lumen',     proper: /\blumen\b/,     titleFallback: /\b(ai gateway|llm routing|ai pipeline)\b/ },
-              { label: 'patina',    proper: /\bpatina\b/,    titleFallback: /\b(automated backup|cold storage backup)\b/ },
-              { label: 'curio',     proper: /\bcurios?\b/,   titleFallback: /\b(museum exhibit|cabinet of wonders|guestbook)\b/ },
-              { label: 'arbor',     proper: /\barbor\b/,     titleFallback: /\b(admin panel|admin dashboard|admin interface)\b/ },
-              { label: 'petal',     proper: /\bpetal\b/,     titleFallback: /\b(content moderation|csam|photodna|image moderation)\b/ },
-              { label: 'landing',   proper: /\blanding site\b/, titleFallback: /\b(grove\.place marketing|knowledge base|forest page)\b/ },
+              {
+                label: 'heartwood',
+                proper: /\bheartwood\b/,
+                titleFallback: /\b(oauth|passkey|session.?do|pkce)\b/
+              },
+              {
+                label: 'lattice',
+                proper: /\blattice\b/,
+                titleFallback: /\b(lattice|monorepo|multi.?tenant)\b/
+              },
+              {
+                label: 'foliage',
+                proper: /\bfoliage\b/,
+                titleFallback: /\b(theme engine|design tokens|per.tenant theming)\b/
+              },
+              {
+                label: 'mycelium',
+                proper: /\bmycelium\b/,
+                titleFallback: /\b(mcp server|mcp tool|model context protocol)\b/
+              },
+              {
+                label: 'lumen',
+                proper: /\blumen\b/,
+                titleFallback: /\b(ai gateway|llm routing|ai pipeline)\b/
+              },
+              {
+                label: 'patina',
+                proper: /\bpatina\b/,
+                titleFallback: /\b(automated backup|cold storage backup)\b/
+              },
+              {
+                label: 'curio',
+                proper: /\bcurios?\b/,
+                titleFallback: /\b(museum exhibit|cabinet of wonders|guestbook)\b/
+              },
+              {
+                label: 'arbor',
+                proper: /\barbor\b/,
+                titleFallback: /\b(admin panel|admin dashboard|admin interface)\b/
+              },
+              {
+                label: 'petal',
+                proper: /\bpetal\b/,
+                titleFallback: /\b(content moderation|csam|photodna|image moderation)\b/
+              },
+              {
+                label: 'landing',
+                proper: /\blanding site\b/,
+                titleFallback: /\b(grove\.place marketing|knowledge base|forest page)\b/
+              },
             ];
 
             // --- Pattern Labels ---
-            // Patterns are reusable architectural solutions. Match pattern names
-            // anywhere (title or body) since they're unique Grove terminology.
-            // Note: Uses github-script JavaScript API (safe), not shell interpolation.
+            // Patterns are reusable architectural solutions. Match pattern
+            // names anywhere (title or body) since they're unique Grove
+            // terminology. Note: Uses github-script JavaScript API (safe),
+            // not shell interpolation.
             const patterns = [
-              { label: 'pattern:firefly',   pattern: /\bfirefly\b/,   fallback: /\b(ephemeral server|ignite.*fade|on.demand.*server)\b/ },
-              { label: 'pattern:loom',      pattern: /\bloom\b/,      fallback: /\b(durable object|session.?do|tenant.?do|post.?do)\b/ },
-              { label: 'pattern:prism',     pattern: /\bprism\b/,     fallback: /\b(glassmorphism|seasonal theme|design system layer)\b/ },
-              { label: 'pattern:sentinel',  pattern: /\bsentinel\b/,  fallback: /\b(load test|scale validation|ramp.up test)\b/ },
-              { label: 'pattern:songbird',  pattern: /\bsongbird\b/,  fallback: /\b(prompt injection|canary.*kestrel|three.layer defense)\b/ },
-              { label: 'pattern:threshold', pattern: /\bthreshold\b/, fallback: /\b(rate limit|abuse prevention|graduated response)\b/ },
+              {
+                label: 'pattern:firefly',
+                pattern: /\bfirefly\b/,
+                fallback: /\b(ephemeral server|ignite.*fade|on.demand.*server)\b/
+              },
+              {
+                label: 'pattern:loom',
+                pattern: /\bloom\b/,
+                fallback: /\b(durable object|session.?do|tenant.?do|post.?do)\b/
+              },
+              {
+                label: 'pattern:prism',
+                pattern: /\bprism\b/,
+                fallback: /\b(glassmorphism|seasonal theme|design system layer)\b/
+              },
+              {
+                label: 'pattern:sentinel',
+                pattern: /\bsentinel\b/,
+                fallback: /\b(load test|scale validation|ramp.up test)\b/
+              },
+              {
+                label: 'pattern:songbird',
+                pattern: /\bsongbird\b/,
+                fallback: /\b(prompt injection|canary.*kestrel|three.layer defense)\b/
+              },
+              {
+                label: 'pattern:threshold',
+                pattern: /\bthreshold\b/,
+                fallback: /\b(rate limit|abuse prevention|graduated response)\b/
+              },
             ];
 
-            // Ambiguous product names — bare name only in title, specific phrases in body
+            // Ambiguous product names - bare name only in title, specific
+            // phrases in body
             const ambiguousComponents = [
               {
                 label: 'shade',
@@ -118,26 +187,52 @@ jobs:
             ];
 
             // --- Type Labels (pick ONE, highest specificity wins) ---
-            // Only matches against the title to avoid false positives from body text.
+            // Only matches against the title to avoid false positives from
+            // body text.
             const typesByPriority = [
-              { label: 'security',      pattern: /\b(security|vulnerabilit|xss|csrf)\b/ },
-              { label: 'bug',           pattern: /\[bug\]|\bbug\b/ },
-              { label: 'feature',       pattern: /\[feat(ure)?\]|\bimplement\b/ },
-              { label: 'enhancement',   pattern: /\b(enhance|improve|optimize|refactor)\b/ },
-              { label: 'documentation', pattern: /\b(docs?|documentation|guide)\b/ },
+              {
+                label: 'security',
+                pattern: /\b(security|vulnerabilit|xss|csrf)\b/
+              },
+              {
+                label: 'bug',
+                pattern: /\[bug\]|\bbug\b/
+              },
+              {
+                label: 'feature',
+                pattern: /\[feat(ure)?\]|\bimplement\b/
+              },
+              {
+                label: 'enhancement',
+                pattern: /\b(enhance|improve|optimize|refactor)\b/
+              },
+              {
+                label: 'documentation',
+                pattern: /\b(docs?|documentation|guide)\b/
+              },
             ];
 
             // --- Priority Labels (pick ONE, highest wins) ---
             // Only matches against the title.
             const prioritiesByRank = [
-              { label: 'priority-critical', pattern: /\b(critical|urgent|blocker)\b/ },
-              { label: 'priority-high',     pattern: /\b(high.?priority|important)\b/ },
-              { label: 'priority-low',      pattern: /\b(low.?priority|nice.to.have|eventually|post.launch)\b/ },
+              {
+                label: 'priority-critical',
+                pattern: /\b(critical|urgent|blocker)\b/
+              },
+              {
+                label: 'priority-high',
+                pattern: /\b(high.?priority|important)\b/
+              },
+              {
+                label: 'priority-low',
+                pattern: /\b(low.?priority|nice.to.have|eventually|post.launch)\b/
+              },
             ];
 
             const labelsToAdd = new Set();
 
-            // Check unique components: proper nouns safe to match in title+body
+            // Check unique components: proper nouns safe to match in
+            // title+body
             for (const { label, proper, titleFallback } of uniqueComponents) {
               if (proper.test(title) || proper.test(body)) {
                 labelsToAdd.add(label);
@@ -146,7 +241,8 @@ jobs:
               }
             }
 
-            // Check patterns: match pattern name or fallback phrases anywhere
+            // Check patterns: match pattern name or fallback phrases
+            // anywhere
             for (const { label, pattern, fallback } of patterns) {
               if (pattern.test(title) || pattern.test(body)) {
                 labelsToAdd.add(label);
@@ -155,7 +251,8 @@ jobs:
               }
             }
 
-            // Check ambiguous components: bare name title-only, compound phrases in body
+            // Check ambiguous components: bare name title-only, compound
+            // phrases in body
             for (const { label, titleMatch, bodyMatch, titleFallback } of ambiguousComponents) {
               if (titleMatch.test(title)) {
                 labelsToAdd.add(label);
@@ -183,7 +280,8 @@ jobs:
               }
             }
 
-            // Check types: pick the first (highest priority) match in title only
+            // Check types: pick the first (highest priority) match in
+            // title only
             for (const { label, pattern } of typesByPriority) {
               if (pattern.test(title)) {
                 labelsToAdd.add(label);
@@ -191,7 +289,8 @@ jobs:
               }
             }
 
-            // Check priorities: pick the first (highest rank) match in title only
+            // Check priorities: pick the first (highest rank) match in
+            // title only
             for (const { label, pattern } of prioritiesByRank) {
               if (pattern.test(title)) {
                 labelsToAdd.add(label);

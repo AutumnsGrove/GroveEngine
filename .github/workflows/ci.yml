@@ -1,3 +1,4 @@
+---
 name: CI
 
 on:
@@ -11,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Detect which packages are affected by the changes ────────────
+  # Detect which packages are affected by the changes
   detect:
     name: Detect Affected
     runs-on: ubuntu-latest
@@ -47,8 +48,10 @@ jobs:
           TC_MATRIX=$(echo "$RESULT" | jq -c '.typecheckMatrix')
           NEEDS_ENGINE=$(echo "$RESULT" | jq -r '.needsEngine')
           RUN_ALL=$(echo "$RESULT" | jq -r '.runAll')
-          HAS_TESTS=$(echo "$RESULT" | jq -r '.testMatrix | length > 0')
-          HAS_TC=$(echo "$RESULT" | jq -r '.typecheckMatrix | length > 0')
+          HAS_TESTS=$(echo "$RESULT" | \
+            jq -r '.testMatrix | length > 0')
+          HAS_TC=$(echo "$RESULT" | \
+            jq -r '.typecheckMatrix | length > 0')
 
           echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
           echo "test_matrix=$TEST_MATRIX" >> $GITHUB_OUTPUT
@@ -60,15 +63,18 @@ jobs:
 
           # Summary for the Actions UI
           echo "### Affected Packages" >> $GITHUB_STEP_SUMMARY
-          echo "$RESULT" | jq -r '.affectedPackages[]' | while read pkg; do
+          echo "$RESULT" | jq -r '.affectedPackages[]' | \
+            while read pkg; do
             echo "- \`$pkg\`" >> $GITHUB_STEP_SUMMARY
           done
           CHANGED=$(echo "$RESULT" | jq -r '.changedFiles')
-          AFFECTED=$(echo "$RESULT" | jq -r '.affectedPackages | length')
+          AFFECTED=$(echo "$RESULT" | \
+            jq -r '.affectedPackages | length')
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**$CHANGED files changed → $AFFECTED packages affected**" >> $GITHUB_STEP_SUMMARY
+          echo "**$CHANGED files changed → $AFFECTED affected**" \
+            >> $GITHUB_STEP_SUMMARY
 
-  # ── Run tests only for affected packages ─────────────────────────
+  # Run tests only for affected packages
   test:
     name: "Test: ${{ matrix.name }}"
     needs: detect
@@ -97,7 +103,7 @@ jobs:
         run: pnpm test:run
         working-directory: ${{ matrix.package }}
 
-  # ── Type check only affected packages ────────────────────────────
+  # Type check only affected packages
   typecheck:
     name: "Check: ${{ matrix.name }}"
     needs: detect
@@ -128,7 +134,7 @@ jobs:
         run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}
 
-  # ── Barrel export verification (fast, always runs) ───────────────
+  # Barrel export verification (fast, always runs)
   barrel-exports:
     name: Engine Barrel Exports
     runs-on: ubuntu-latest
@@ -139,7 +145,7 @@ jobs:
       - name: Verify engine barrel exports
         run: ./tools/verify-engine-exports.sh
 
-  # ── Lint (always runs, fast) ─────────────────────────────────────
+  # Lint (always runs, fast)
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -160,35 +166,46 @@ jobs:
         continue-on-error: true
 
       - name: Comment on PR with lint errors
-        if: steps.lint.outcome == 'failure' && github.event_name == 'pull_request'
+        if: >-
+          steps.lint.outcome == 'failure' &&
+          github.event_name == 'pull_request'
         uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
             const raw = fs.readFileSync('/tmp/lint-output.txt', 'utf8');
 
-            // Extract only the error/warning lines (skip the oxlint noise)
+            // Extract only the error/warning lines (skip noise)
             const lines = raw.split('\n');
             const errorLines = lines.filter(l =>
-              /\d+:\d+\s+(error|warning)/.test(l) || /^\s+✖/.test(l) || /^\/home/.test(l) || /Found \d+ warnings/.test(l)
+              /\d+:\d+\s+(error|warning)/.test(l) ||
+              /^\s+✖/.test(l) ||
+              /^\/home/.test(l) ||
+              /Found \d+ warnings/.test(l)
             );
 
             // Build a focused summary
             let body = '## 🔴 Lint Failed\n\n';
-            body += 'The lint check found errors that must be fixed before merging.\n\n';
+            body += 'The lint check found errors that must be ';
+            body += 'fixed before merging.\n\n';
             body += '```\n' + errorLines.join('\n') + '\n```\n\n';
             body += '**Full output** is in the [Lint job logs]';
-            body += `(${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}).\n`;
+            const runUrl = process.env.GITHUB_SERVER_URL + '/' +
+              process.env.GITHUB_REPOSITORY + '/actions/runs/' +
+              process.env.GITHUB_RUN_ID;
+            body += `(${runUrl}).\n`;
 
             // Find and update existing comment, or create new one
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
+            const { data: comments } =
+              await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
 
             const existing = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('Lint Failed')
+              c.user.type === 'Bot' &&
+              c.body.includes('Lint Failed')
             );
 
             if (existing) {
@@ -211,11 +228,11 @@ jobs:
         if: steps.lint.outcome == 'failure'
         run: exit 1
 
-      # TODO: Enable after running `pnpm format` across the full codebase
+      # TODO: Enable after running `pnpm format` on full codebase
       # - name: Check formatting
       #   run: pnpm format:check
 
-  # ── Summary gate — blocks merge if any job fails ─────────────────
+  # Summary gate - blocks merge if any job fails
   ci-pass:
     name: CI Pass
     if: always()
@@ -255,13 +272,18 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const failed = '${{ steps.check.outputs.failed_jobs }}'.trim().split(/\s+/);
-            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const failed = '${{ steps.check.outputs.failed_jobs }}'
+              .trim().split(/\s+/);
+            const runUrl = process.env.GITHUB_SERVER_URL + '/' +
+              process.env.GITHUB_REPOSITORY + '/actions/runs/' +
+              process.env.GITHUB_RUN_ID;
 
             let body = '## 🔴 CI Failed\n\n';
             body += '| Job | Status |\n|-----|--------|\n';
 
-            const jobs = ['detect', 'test', 'typecheck', 'barrel-exports', 'lint'];
+            const jobs = [
+              'detect', 'test', 'typecheck', 'barrel-exports', 'lint'
+            ];
             const results = {
               detect: '${{ needs.detect.result }}',
               test: '${{ needs.test.result }}',
@@ -272,20 +294,24 @@ jobs:
 
             for (const job of jobs) {
               const r = results[job];
-              const icon = r === 'success' ? '✅' : r === 'failure' ? '❌' : r === 'skipped' ? '⏭️' : '⚪';
+              const icon = r === 'success' ? '✅' :
+                r === 'failure' ? '❌' :
+                r === 'skipped' ? '⏭️' : '⚪';
               body += `| ${job} | ${icon} ${r} |\n`;
             }
 
             body += `\n[View full run](${runUrl})\n`;
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
+            const { data: comments } =
+              await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
 
             const existing = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('CI Failed')
+              c.user.type === 'Bot' &&
+              c.body.includes('CI Failed')
             );
 
             if (existing) {

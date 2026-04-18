@@ -11,7 +11,7 @@ jobs:
       issues: write
       pull-requests: write
       contents: read
-    
+
     steps:
       - name: Extract issue number and update status
         uses: actions/github-script@v8
@@ -21,9 +21,13 @@ jobs:
             const prBody = pr.body || '';
             const prTitle = pr.title || '';
             
-            // Extract issue numbers from PR body/title (supports #123, fixes #123, closes #123, etc.)
+            // Extract issue numbers from PR body/title
+            // (supports #123, fixes #123, closes #123, etc.)
             const issueRegex = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*#(\d+)|#(\d+)/gi;
-            const matches = [...prBody.matchAll(issueRegex), ...prTitle.matchAll(issueRegex)];
+            const matches = [
+              ...prBody.matchAll(issueRegex),
+              ...prTitle.matchAll(issueRegex)
+            ];
             const issueNumbers = [...new Set(matches.map(m => m[1] || m[2]))];
             
             console.log(`Found linked issues: ${issueNumbers.join(', ')}`);
@@ -118,11 +122,14 @@ jobs:
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: parseInt(issueNumber),
-                    body: `⏸️ PR #${pr.number} was closed without merging. Issue returned to ready state.`
+                    body: `⏸️ PR #${pr.number} was closed without merging. ` +
+                          `Issue returned to ready state.`
                   });
                 }
                 
               } catch (error) {
-                console.error(`Error processing issue #${issueNumber}: ${error.message}`);
+                console.error(
+                  `Error processing issue #${issueNumber}: ${error.message}`
+                );
               }
             }

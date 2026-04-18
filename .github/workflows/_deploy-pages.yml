@@ -1,8 +1,9 @@
+---
 # Reusable workflow for deploying Cloudflare Pages apps.
 #
-# Each Pages app (amber, domains, meadow, terrarium, etc.) calls this with its own
-# parameters. The calling workflow still appears as its own entry in the
-# Actions tab with full step-level logs — zero observability loss.
+# Each Pages app (amber, domains, meadow, terrarium, etc.) calls this with
+# its own parameters. The calling workflow still appears as its own entry in
+# the Actions tab with full step-level logs — zero observability loss.
 #
 # NOTE: Reusable workflows cannot use local composite actions (like
 # grove-setup) because GitHub pre-validates action references before
@@ -23,11 +24,13 @@ on:
   workflow_call:
     inputs:
       app-dir:
-        description: "App directory relative to repo root (e.g. apps/landing)"
+        description: >
+          App directory relative to repo root (e.g. apps/landing)
         required: true
         type: string
       project-name:
-        description: "Cloudflare Pages project name (e.g. grove-landing)"
+        description: >
+          Cloudflare Pages project name (e.g. grove-landing)
         required: true
         type: string
       needs-engine:
@@ -51,12 +54,14 @@ on:
         type: boolean
         default: false
       test-command:
-        description: "Test command to run (default: pnpm test:run)"
+        description: >
+          Test command to run (default: pnpm test:run)
         required: false
         type: string
         default: "pnpm test:run"
       run-migrations:
-        description: "Run D1 database migrations before deploying"
+        description: >
+          Run D1 database migrations before deploying
         required: false
         type: boolean
         default: false
@@ -66,12 +71,17 @@ on:
         type: string
         default: ""
       checkout-ref:
-        description: "Git ref to checkout (default: triggering ref)"
+        description: >
+          Git ref to checkout (default: triggering ref)
         required: false
         type: string
         default: ""
       run-deploy:
-        description: "Run `wrangler pages deploy` at the end. Set false for library-only targets that only need build verification. Currently unused by any pages shim but present for symmetry with _deploy-worker.yml."
+        description: >
+          Run `wrangler pages deploy` at the end. Set false for
+          library-only targets that only need build verification.
+          Currently unused by any pages shim but present for symmetry
+          with _deploy-worker.yml.
         required: false
         type: boolean
         default: true
@@ -82,10 +92,11 @@ jobs:
     permissions:
       contents: read
       deployments: write
-      issues: write   # post-deploy steps open/close rolling failure issues
+      # post-deploy steps open/close rolling failure issues
+      issues: write
 
     steps:
-      # ── Inline grove-setup (can't use composite action in reusable workflow) ──
+      # Inline grove-setup (can't use composite action in reusable workflow)
       - name: Checkout
         if: inputs.checkout-ref == ''
         uses: actions/checkout@v5
@@ -124,7 +135,7 @@ jobs:
         run: pnpm run package
         working-directory: libs/engine
 
-      # ── App build & deploy ──────────────────────────────────────────────
+      # App build & deploy
       - name: Type check
         if: inputs.run-typecheck
         run: pnpm check
@@ -145,7 +156,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: d1 migrations apply ${{ inputs.migration-db }} --remote
+          command: >
+            d1 migrations apply ${{ inputs.migration-db }} --remote
           workingDirectory: ${{ inputs.app-dir }}
           packageManager: pnpm
 
@@ -155,11 +167,13 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=${{ inputs.project-name }}
+          command: >
+            pages deploy .svelte-kit/cloudflare
+            --project-name=${{ inputs.project-name }}
           workingDirectory: ${{ inputs.app-dir }}
           packageManager: pnpm
 
-      # ── Rolling failure issue: open/comment on fail, close on recovery ─
+      # Rolling failure issue: open/comment on fail, close on recovery
       # Mirrors the logic in _deploy-worker.yml. One GitHub Issue per
       # service with label `deploy-failed`. New failure reopens + appends;
       # next successful deploy auto-closes with a recovery note.
@@ -172,37 +186,61 @@ jobs:
             const service = appDir.split('/').pop();
             const title = `Deploy failing: ${service}`;
             const { owner, repo } = context.repo;
-            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const serverUrl = process.env.GITHUB_SERVER_URL;
+            const runUrl =
+              `${serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             const sha = context.sha.slice(0, 7);
-            const msg = (context.payload.head_commit?.message || '').split('\n')[0] || '(no message)';
+            const headMsg = context.payload.head_commit?.message || '';
+            const msg = headMsg.split('\n')[0] || '(no message)';
 
             // Commit message and actor login are wrapped in code spans/quotes
-            // so odd markdown (backticks, HTML) doesn't disrupt issue rendering.
+            // so odd markdown (backticks, HTML) doesn't disrupt rendering.
             const body = [
-              `❌ Deploy to \`${service}\` failed at commit \`${sha}\`.`,
+              `❌ Deploy to \`${service}\` failed at \`${sha}\`.`,
               '',
               `- **Run:** [${context.runId}](${runUrl})`,
-              '- **Commit:** `' + sha + '` — `' + msg.replace(/`/g, "'") + '`',
+              '- **Commit:** `' + sha + '` — `' +
+                msg.replace(/`/g, "'") + '`',
               `- **Triggered by:** \`${context.actor}\``,
               '',
-              '_This issue was auto-opened by `_deploy-pages.yml`. It will close automatically on the next successful deploy._',
+              '_Auto-opened by `_deploy-pages.yml`. Closes on recovery._',
             ].join('\n');
 
-            // Paginate so we find matching issues even if the deploy-failed
-            // label accumulates >100 historical entries across services.
-            const existing = await github.paginate(github.rest.issues.listForRepo, {
-              owner, repo, state: 'all', labels: 'deploy-failed', per_page: 100,
-            });
+            // Paginate so we find matching issues even if deploy-failed
+            // label accumulates >100 historical entries.
+            const existing = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner,
+                repo,
+                state: 'all',
+                labels: 'deploy-failed',
+                per_page: 100,
+              }
+            );
             const match = existing.find((i) => i.title === title);
 
             if (match) {
               if (match.state === 'closed') {
-                await github.rest.issues.update({ owner, repo, issue_number: match.number, state: 'open' });
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: match.number,
+                  state: 'open',
+                });
               }
-              await github.rest.issues.createComment({ owner, repo, issue_number: match.number, body });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: match.number,
+                body,
+              });
             } else {
               await github.rest.issues.create({
-                owner, repo, title, body,
+                owner,
+                repo,
+                title,
+                body,
                 labels: ['deploy-failed'],
               });
             }
@@ -216,18 +254,35 @@ jobs:
             const service = appDir.split('/').pop();
             const title = `Deploy failing: ${service}`;
             const { owner, repo } = context.repo;
-            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const serverUrl = process.env.GITHUB_SERVER_URL;
+            const runUrl =
+              `${serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
-            const existing = await github.paginate(github.rest.issues.listForRepo, {
-              owner, repo, state: 'open', labels: 'deploy-failed', per_page: 100,
-            });
+            const existing = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner,
+                repo,
+                state: 'open',
+                labels: 'deploy-failed',
+                per_page: 100,
+              }
+            );
             const match = existing.find((i) => i.title === title);
             if (!match) return;
 
+            const recoveryMsg =
+              `✅ Deploy to \`${service}\` recovered. ` +
+              `[Run ${context.runId}](${runUrl}).`;
             await github.rest.issues.createComment({
-              owner, repo, issue_number: match.number,
-              body: `✅ Deploy to \`${service}\` recovered. [Run ${context.runId}](${runUrl}).`,
+              owner,
+              repo,
+              issue_number: match.number,
+              body: recoveryMsg,
             });
             await github.rest.issues.update({
-              owner, repo, issue_number: match.number, state: 'closed',
+              owner,
+              repo,
+              issue_number: match.number,
+              state: 'closed',
             });

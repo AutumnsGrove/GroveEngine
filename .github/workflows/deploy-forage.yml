@@ -20,3 +20,4 @@ jobs:
       worker-dir: services/forage
       needs-engine: true
     secrets: inherit
+

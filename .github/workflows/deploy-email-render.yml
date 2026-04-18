@@ -1,3 +1,4 @@
+---
 name: Deploy Email Render
 
 on:
@@ -22,5 +23,5 @@ jobs:
     with:
       worker-dir: services/email-render
       needs-engine: true
-      typecheck-command: "node scripts/sync-templates.mjs && pnpm exec tsc --noEmit"
+      typecheck-command: node scripts/sync-templates.mjs && pnpm exec tsc --noEmit
     secrets: inherit

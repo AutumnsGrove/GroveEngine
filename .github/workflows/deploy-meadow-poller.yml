@@ -23,5 +23,4 @@ jobs:
       worker-dir: workers/meadow-poller
       needs-engine: true
       run-tests: true
-      test-command: "pnpm test"
     secrets: inherit

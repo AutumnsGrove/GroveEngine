@@ -20,3 +20,4 @@ jobs:
       worker-dir: workers/reverie-exec
       needs-engine: true
     secrets: inherit
+

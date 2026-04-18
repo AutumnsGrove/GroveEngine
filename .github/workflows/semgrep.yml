@@ -31,9 +31,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      # Exit code 7 = findings detected (success with results, not an error)
+      # Use || true because GitHub Actions' set -e exits before we can check $?
       - name: Run Semgrep (SARIF output)
-        # Exit code 7 = findings detected (success with results, not an error)
-        # Use || true because GitHub Actions' set -e exits before we can check $?
         run: |
           semgrep scan \
             --config=p/security-audit \
@@ -52,9 +52,9 @@ jobs:
             --max-memory 0 \
             --sarif --output=semgrep-results.sarif || true
 
+      # Exit code 7 = findings detected (success with results, not an error)
+      # Use || true because GitHub Actions' set -e exits before we can check $?
       - name: Run Semgrep (JSON output)
-        # Exit code 7 = findings detected (success with results, not an error)
-        # Use || true because GitHub Actions' set -e exits before we can check $?
         run: |
           semgrep scan \
             --config=p/security-audit \
@@ -74,12 +74,13 @@ jobs:
             --json --output=semgrep-results.json || true
 
       - name: Upload SARIF to GitHub Security
+        if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: semgrep-results.sarif
-        if: always()
 
       - name: Upload JSON results
+        if: always()
         uses: actions/upload-artifact@v5
         with:
           name: semgrep-results
@@ -87,7 +88,6 @@ jobs:
             semgrep-results.json
             semgrep-results.sarif
           retention-days: 7
-        if: always()
 
       - name: Parse and report findings
         run: |
@@ -96,13 +96,24 @@ jobs:
             cat semgrep-results.json | jq -r '
               def severity_order: ("ERROR", "WARNING", "INFO");
               [.results[] |
-               {severity: .extra.severity, message: .extra.message, path: .path, line: .start.line}] |
+               {
+                 severity: .extra.severity,
+                 message: .extra.message,
+                 path: .path,
+                 line: .start.line
+               }] |
               sort_by(severity_order | index(.severity)) |
               group_by(.severity) |
               .[] | "\(.[0].severity): \(length) findings"'
 
-            ERROR_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "ERROR")] | length')
-            WARNING_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "WARNING")] | length')
+            ERROR_COUNT=$(
+              cat semgrep-results.json | \
+              jq '[.results[] | select(.extra.severity == "ERROR")] | length'
+            )
+            WARNING_COUNT=$(
+              cat semgrep-results.json | \
+              jq '[.results[] | select(.extra.severity == "WARNING")] | length'
+            )
 
             echo ""
             echo "Total: $((ERROR_COUNT + WARNING_COUNT)) findings"

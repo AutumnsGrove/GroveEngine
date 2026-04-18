@@ -23,3 +23,4 @@ jobs:
       worker-dir: workers/vista-collector
       needs-engine: true
     secrets: inherit
+...

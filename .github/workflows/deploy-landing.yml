@@ -1,3 +1,4 @@
+---
 name: Deploy Landing
 
 on:
@@ -27,7 +28,9 @@ permissions:
 jobs:
   deploy:
     # Skip if triggered by failed workflow_run
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      ${{ github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/_deploy-worker.yml
     with:
       worker-dir: apps/landing

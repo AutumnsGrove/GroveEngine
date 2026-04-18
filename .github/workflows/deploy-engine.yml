@@ -1,3 +1,4 @@
+---
 name: Build & Migrate Engine
 
 # Engine is a library — it no longer deploys a frontend.
@@ -35,3 +36,4 @@ jobs:
       migration-db: grove-engine-db
       run-deploy: false
     secrets: inherit
+

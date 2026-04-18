@@ -1,3 +1,4 @@
+---
 name: Deploy Amber
 
 on:
@@ -7,7 +8,7 @@ on:
       - "apps/amber/**"
       # Amber imports from lattice (engine), prism (icons), and infra
       # (shared Vite config). Changes to any of those should redeploy
-      # Amber — otherwise UI/util updates never reach production.
+      # Amber - otherwise UI/util updates never reach production.
       - "libs/engine/**"
       - "libs/gossamer/**"
       - "libs/infra/**"
@@ -25,8 +26,9 @@ jobs:
     with:
       app-dir: apps/amber
       project-name: amber
-      # Amber doesn't import from @autumnsgrove/foliage, so needs-foliage
-      # was a no-op that slowed every deploy by a minute. Engine still
-      # needs building because Amber consumes lattice + prism icons.
+      # Amber doesn't import from @autumnsgrove/foliage, so
+      # needs-foliage was a no-op that slowed every deploy by a minute.
+      # Engine still needs building because Amber consumes lattice +
+      # prism icons.
       needs-engine: true
     secrets: inherit

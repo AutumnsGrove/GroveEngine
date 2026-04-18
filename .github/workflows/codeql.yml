@@ -1,6 +1,7 @@
+---
 name: CodeQL Security Analysis
 
-on:
+'on':
   push:
     branches: [main, develop]
     paths:
@@ -31,7 +32,7 @@ jobs:
       matrix:
         include:
           - language: javascript-typescript
-            build-mode: none
+            build-mode: 'none'
 
     steps:
       - name: Checkout repository
@@ -57,7 +58,7 @@ jobs:
         with:
           category: "/language:${{ matrix.language }}"
           output: codeql-results
-          upload: always
+          upload: 'always'
 
       - name: Upload CodeQL results
         uses: actions/upload-artifact@v5
