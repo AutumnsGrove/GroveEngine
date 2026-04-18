@@ -56,12 +56,11 @@ const GALLERY_DEFAULTS = {
 };
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const curioDb = platform?.env?.CURIO_DB;
 	const db = platform?.env?.DB;
 	const kv = platform?.env?.CACHE_KV;
 	const tenantId = locals.tenantId;
 
-	if (!curioDb) {
+	if (!db) {
 		throwGroveError(503, SITE_ERRORS.DB_NOT_CONFIGURED, "Site");
 	}
 
@@ -88,7 +87,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	let title = "Gallery";
 	let description: string | null = null;
 	try {
-		const configRow = await curioDb
+		const configRow = await db
 			.prepare(
 				`SELECT gallery_title, gallery_description FROM gallery_curio_config WHERE tenant_id = ?`,
 			)
@@ -108,7 +107,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 	// Run images and image-tags queries in parallel
 	const [imagesResult, imageTagsResult] = await Promise.all([
-		curioDb
+		db
 			.prepare(
 				`SELECT
           id, r2_key, parsed_date, parsed_category, parsed_slug,
@@ -132,7 +131,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 				return { results: [] as ImageRow[] };
 			}),
 
-		curioDb
+		db
 			.prepare(
 				`SELECT git.image_id, gt.id as tag_id, gt.name as tag_name,
                 gt.slug as tag_slug, gt.color as tag_color
