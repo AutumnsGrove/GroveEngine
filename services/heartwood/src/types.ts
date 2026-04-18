@@ -84,12 +84,6 @@ export interface User {
 	season: string | null;
 }
 
-export interface AllowedEmail {
-	email: string;
-	added_at: string;
-	added_by: string | null;
-}
-
 export interface AuthCode {
 	code: string;
 	client_id: string;

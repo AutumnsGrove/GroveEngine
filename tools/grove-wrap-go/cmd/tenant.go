@@ -562,7 +562,7 @@ var tenantDeleteCmd = &cobra.Command{
 					formatD1Value(impact["sessions"]),
 				))
 			}
-			ui.Muted("Cleaned: user_onboarding, legacy users table")
+			ui.Muted("Cleaned: user_onboarding, users")
 			if heartwoodCleaned {
 				ui.Muted("Cleaned: Heartwood auth records (ba_user, ba_account, ba_session)")
 			} else if tenantEmail != "" {

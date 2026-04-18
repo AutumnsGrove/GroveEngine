@@ -17,7 +17,6 @@ vi.mock("../db/queries.js", () => ({
 	denyDeviceCode: vi.fn(),
 	isUserCodeUnique: vi.fn(),
 	createAuditLog: vi.fn(),
-	isEmailAllowed: vi.fn(),
 	getUserById: vi.fn(),
 	cleanupExpiredDeviceCodes: vi.fn(),
 }));
@@ -52,7 +51,6 @@ import {
 	denyDeviceCode,
 	isUserCodeUnique,
 	createAuditLog,
-	isEmailAllowed,
 	getUserById,
 } from "../db/queries.js";
 import { checkRouteRateLimit } from "../middleware/rateLimit.js";
@@ -494,7 +492,6 @@ describe("POST /auth/device/authorize", () => {
 			json: () => Promise.resolve({ user: { id: TEST_USER.id } }),
 		});
 		(getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(TEST_USER);
-		(isEmailAllowed as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 	}
 
 	describe("authentication", () => {
@@ -530,22 +527,6 @@ describe("POST /auth/device/authorize", () => {
 			expect(res.status).toBe(400);
 			const json = (await res.json()) as ErrorResponse;
 			expect(json.error).toBe("invalid_grant");
-		});
-
-		it("returns 403 if user not in allowlist", async () => {
-			(getDeviceCodeByUserCode as ReturnType<typeof vi.fn>).mockResolvedValue({
-				id: "dc-1",
-				client_id: "grove-cli",
-				user_code: "ABCD-1234",
-				status: "pending",
-				expires_at: Math.floor(Date.now() / 1000) + 900,
-			});
-			(isEmailAllowed as ReturnType<typeof vi.fn>).mockResolvedValue(false);
-
-			const res = await makeAuthorizeRequest({ user_code: "ABCD-1234", action: "approve" }, true);
-			expect(res.status).toBe(403);
-			const json = (await res.json()) as ErrorResponse;
-			expect(json.error).toBe("access_denied");
 		});
 	});
 

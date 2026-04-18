@@ -177,52 +177,8 @@ export async function resolveOnboarding(
 	return existing;
 }
 
-// ============================================================================
-// Step 3b: Check for Pre-Plant Users
-// ============================================================================
-
-export async function checkPrePlantUser(db: D1Database, userEmail: string): Promise<void> {
-	try {
-		const existingUser = await queryOne<{ tenant_id: string }>(
-			db,
-			"SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL",
-			[userEmail.toLowerCase()],
-		);
-
-		if (existingUser) {
-			const tenant = await queryOne<{ subdomain: string }>(
-				db,
-				"SELECT subdomain FROM tenants WHERE id = ? AND active = 1",
-				[existingUser.tenant_id],
-			);
-
-			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-				console.log(
-					`[Auth Callback] Pre-Plant user detected, redirecting to ${tenant.subdomain}.grove.place/arbor`,
-				);
-				redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
-			}
-		}
-
-		if (!existingUser) {
-			const tenant = await queryOne<{ subdomain: string }>(
-				db,
-				"SELECT subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1",
-				[userEmail.toLowerCase()],
-			);
-
-			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-				console.log(
-					`[Auth Callback] Tenant found by email, redirecting to ${tenant.subdomain}.grove.place/arbor`,
-				);
-				redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
-			}
-		}
-	} catch (err) {
-		if (isRedirect(err)) throw err;
-		console.warn("[Auth Callback] Tenant fallback lookup failed:", err);
-	}
-}
+// Step 3b (checkPrePlantUser) removed — migration 107 backfills users.tenant_id
+// from user_onboarding, so resolveOnboarding() handles all cases.
 
 // ============================================================================
 // Step 4: Upsert Onboarding Record
@@ -322,77 +278,32 @@ async function resolveTenantSubdomain(
 	db: D1Database,
 	existingOnboarding: OnboardingRecord,
 	user: { id: string; email: string },
-	onboardingId: string,
+	_onboardingId: string,
 	path: string,
 ): Promise<string | null> {
-	let tenantSubdomain: string | null = null;
-
-	if (existingOnboarding.tenant_id) {
-		try {
-			const tenant = await queryOne<{ subdomain: string }>(
-				db,
-				"SELECT subdomain FROM tenants WHERE id = ?",
-				[existingOnboarding.tenant_id],
-			);
-
-			if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-				tenantSubdomain = tenant.subdomain;
-			}
-		} catch (err) {
-			if (isRedirect(err)) throw err;
-			errorRedirect(PLANT_ERRORS.TENANT_QUERY_FAILED, {
-				path,
-				userId: user.id,
-				detail: `SELECT tenants for id=${existingOnboarding.tenant_id}`,
-				cause: err,
-			});
-		}
-	} else {
-		// Cross-reference users/tenants tables
-		try {
-			const existingUser = await queryOne<{ tenant_id: string }>(
-				db,
-				"SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL",
-				[user.email.toLowerCase()],
-			);
-
-			if (existingUser) {
-				const tenant = await queryOne<{ id: string; subdomain: string }>(
-					db,
-					"SELECT id, subdomain FROM tenants WHERE id = ? AND active = 1",
-					[existingUser.tenant_id],
-				);
-
-				if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-					await execute(
-						db,
-						"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
-						[tenant.id, onboardingId],
-					);
-					tenantSubdomain = tenant.subdomain;
-				}
-			}
-
-			if (!tenantSubdomain) {
-				const tenant = await queryOne<{ id: string; subdomain: string }>(
-					db,
-					"SELECT id, subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1",
-					[user.email.toLowerCase()],
-				);
-
-				if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
-					await execute(
-						db,
-						"UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch() WHERE id = ?",
-						[tenant.id, onboardingId],
-					);
-					tenantSubdomain = tenant.subdomain;
-				}
-			}
-		} catch (err) {
-			console.warn("[Auth Callback] Cross-reference tenant lookup failed:", err);
-		}
+	if (!existingOnboarding.tenant_id) {
+		return null;
 	}
 
-	return tenantSubdomain;
+	try {
+		const tenant = await queryOne<{ subdomain: string }>(
+			db,
+			"SELECT subdomain FROM tenants WHERE id = ?",
+			[existingOnboarding.tenant_id],
+		);
+
+		if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
+			return tenant.subdomain;
+		}
+	} catch (err) {
+		if (isRedirect(err)) throw err;
+		errorRedirect(PLANT_ERRORS.TENANT_QUERY_FAILED, {
+			path,
+			userId: user.id,
+			detail: `SELECT tenants for id=${existingOnboarding.tenant_id}`,
+			cause: err,
+		});
+	}
+
+	return null;
 }

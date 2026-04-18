@@ -20,7 +20,6 @@ import {
 	denyDeviceCode,
 	isUserCodeUnique,
 	createAuditLog,
-	isEmailAllowed,
 	cleanupExpiredDeviceCodes,
 	getUserById,
 } from "../db/queries.js";
@@ -383,19 +382,6 @@ device.post("/device/authorize", async (c) => {
 				error_description: `Code already ${deviceCode.status}`,
 			},
 			400,
-		);
-	}
-
-	// Check if user's email is allowed (for allowlist enforcement)
-	const publicSignupEnabled = c.env.PUBLIC_SIGNUP_ENABLED === "true";
-	const allowed = await isEmailAllowed(db, user.email, publicSignupEnabled);
-	if (!allowed) {
-		return c.json(
-			{
-				error: "access_denied",
-				error_description: "Your account is not authorized for this action",
-			},
-			403,
 		);
 	}
 
