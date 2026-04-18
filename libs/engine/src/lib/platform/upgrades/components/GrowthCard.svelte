@@ -72,7 +72,7 @@
     relative flex flex-col h-full p-5 rounded-lg
     bg-white/60 dark:bg-grove-950/20 backdrop-blur-sm
     border transition-all duration-200
-    {isCurrent ? 'border-accent/50 bg-accent/5' : 'border-white/30 dark:border-grove-800/20'}
+    {isCurrent ? 'border-accent/50 bg-accent/5' : 'border-border/40'}
     {isNext ? 'ring-2 ring-accent/30 scale-[1.02]' : ''}
     {className}
   "

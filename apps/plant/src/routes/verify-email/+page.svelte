@@ -202,7 +202,7 @@
 							placeholder="000000"
 							aria-label="Six digit verification code"
 							aria-describedby="code-help"
-							class="w-full px-4 py-4 text-center text-3xl font-mono tracking-[0.5em] rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint/40 transition-all focus:outline-none focus:border-primary focus:bg-white/80 dark:focus:bg-bark-800/70 focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+							class="w-full px-4 py-4 text-center text-3xl font-mono tracking-[0.5em] rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-border/50 text-foreground placeholder:text-foreground-faint/40 transition-all focus:outline-none focus:border-primary focus:bg-white/80 dark:focus:bg-bark-800/70 focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
 						/>
 						{#if isVerifying}
 							<div class="absolute right-4 top-1/2 -translate-y-1/2" aria-hidden="true">
@@ -242,7 +242,7 @@
 				</button>
 
 				<!-- Resend Section -->
-				<div class="pt-4 border-t border-white/20 dark:border-bark-700/20">
+				<div class="pt-4 border-t border-border/40">
 					<p class="text-sm text-foreground-muted text-center mb-3">Didn't receive the code?</p>
 
 					{#if canResend}

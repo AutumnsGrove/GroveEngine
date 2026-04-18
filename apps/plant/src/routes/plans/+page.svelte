@@ -258,7 +258,7 @@
 					? getYearlySavingsAmount(selectedTier)
 					: 0}
 			<div
-				class="p-4 rounded-lg bg-surface-subtle/50 dark:bg-surface-subtle/30 border border-border dark:border-border"
+				class="p-4 rounded-lg bg-surface-subtle/50 dark:bg-surface-subtle/30 border border-border/50"
 			>
 				<div class="flex items-center justify-between">
 					<div>
