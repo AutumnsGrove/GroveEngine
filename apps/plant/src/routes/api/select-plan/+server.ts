@@ -190,8 +190,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		await db
 			.prepare(
 				`UPDATE user_onboarding
-         SET payment_completed = 1,
-             payment_completed_at = unixepoch(),
+         SET payment_completed_at = unixepoch(),
              updated_at = unixepoch()
          WHERE id = ?`,
 			)
