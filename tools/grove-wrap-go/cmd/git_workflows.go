@@ -121,12 +121,23 @@ var gitShipCmd = &cobra.Command{
 			return fmt.Errorf("commit failed: %s", commitErr)
 		}
 
-		// Step 7: Push
-		result, err = gwexec.Git("push", "-u", "origin", branch)
-		pushOK := err == nil && result.OK()
+		// Step 7: Push (generous timeout for pre-push hooks)
+		pushOK := false
 		pushErr := ""
-		if !pushOK && result != nil {
-			pushErr = strings.TrimSpace(result.Stderr)
+		if cfg.AgentMode || cfg.JSONMode {
+			// Agent/JSON mode: buffer output with generous timeout
+			result, err = gwexec.GitWithTimeout(5*time.Minute, "push", "-u", "origin", branch)
+			pushOK = err == nil && result.OK()
+			if !pushOK && result != nil {
+				pushErr = strings.TrimSpace(result.Stderr)
+			}
+		} else {
+			// Interactive mode: stream output so pre-push hook progress is visible
+			exitCode, streamErr := gwexec.GitStreaming("push", "-u", "origin", branch)
+			pushOK = streamErr == nil && exitCode == 0
+			if !pushOK {
+				pushErr = fmt.Sprintf("push failed (exit %d)", exitCode)
+			}
 		}
 		steps = append(steps, shipStep{"push", pushOK, pushErr})
 

@@ -236,27 +236,40 @@ var gitPushCmd = &cobra.Command{
 		}
 		gitArgs = append(gitArgs, remote, pushBranch)
 
-		result, err := gwexec.Git(gitArgs...)
+		if cfg.AgentMode || cfg.JSONMode {
+			// Agent/JSON mode: buffer output with generous timeout for pre-push hooks
+			result, err := gwexec.GitWithTimeout(5*time.Minute, gitArgs...)
+			if err != nil {
+				return err
+			}
+			if !result.OK() {
+				stderr := strings.TrimSpace(result.Stderr)
+				if strings.Contains(stderr, "non-fast-forward") {
+					return fmt.Errorf("push rejected: remote has changes. Run: gw git sync --write")
+				}
+				return fmt.Errorf("git push: %s", stderr)
+			}
+			if cfg.JSONMode {
+				return printJSON(map[string]any{
+					"pushed": true,
+					"remote": remote,
+					"branch": pushBranch,
+					"forced": gitPushForce,
+				})
+			}
+			ui.Action("Pushed", fmt.Sprintf("%s → %s/%s", pushBranch, remote, pushBranch))
+			return nil
+		}
+
+		// Interactive mode: stream output so pre-push hook progress is visible
+		ui.Action("Pushing", fmt.Sprintf("%s → %s/%s", pushBranch, remote, pushBranch))
+		exitCode, err := gwexec.GitStreaming(gitArgs...)
 		if err != nil {
 			return err
 		}
-		if !result.OK() {
-			stderr := strings.TrimSpace(result.Stderr)
-			if strings.Contains(stderr, "non-fast-forward") {
-				return fmt.Errorf("push rejected: remote has changes. Run: gw git sync --write")
-			}
-			return fmt.Errorf("git push: %s", stderr)
+		if exitCode != 0 {
+			return fmt.Errorf("push failed (exit %d)", exitCode)
 		}
-
-		if cfg.JSONMode {
-			return printJSON(map[string]any{
-				"pushed":  true,
-				"remote":  remote,
-				"branch":  pushBranch,
-				"forced":  gitPushForce,
-			})
-		}
-
 		ui.Action("Pushed", fmt.Sprintf("%s → %s/%s", pushBranch, remote, pushBranch))
 		return nil
 	},

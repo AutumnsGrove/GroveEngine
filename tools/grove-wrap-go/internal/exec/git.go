@@ -1,10 +1,27 @@
 package exec
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Git runs a git command and returns the result.
 func Git(args ...string) (*Result, error) {
 	return Run("git", args...)
+}
+
+// GitWithTimeout runs a git command with a custom timeout and returns the result.
+// Use this for commands with hooks that may take significantly longer than the
+// default 30s (e.g., git push with pre-push hooks that build/typecheck).
+func GitWithTimeout(timeout time.Duration, args ...string) (*Result, error) {
+	return RunWithTimeout(timeout, "git", args...)
+}
+
+// GitStreaming runs a git command with stdout/stderr connected directly to
+// the terminal. Use this for long-running git commands (e.g., push with
+// pre-push hooks) where the user needs real-time feedback.
+func GitStreaming(args ...string) (int, error) {
+	return RunStreaming("git", args...)
 }
 
 // GitOutput runs a git command and returns stdout, or an error.
