@@ -24,4 +24,3 @@ jobs:
       worker-dir: workers/subscription-digest
       needs-engine: true
     secrets: inherit
-

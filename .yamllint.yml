@@ -1,0 +1,48 @@
+---
+# yamllint configuration for Grove monorepo
+# Enforces consistent YAML formatting across GitHub Actions workflows
+# and other YAML files. Tuned for GitHub Actions idioms.
+
+extends: default
+
+rules:
+  # Line length: 100 chars (matches Black formatter convention)
+  line-length:
+    max: 100
+    level: error
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+
+  # Allow bare `on:` — required by GitHub Actions trigger syntax
+  truthy:
+    allowed-values: ["true", "false", "on"]
+    check-keys: false
+
+  # Require document start marker (---)
+  document-start:
+    present: true
+
+  # Allow at most one consecutive blank line
+  empty-lines:
+    max: 1
+
+  # Standard 2-space indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+
+  # Require a single trailing newline
+  new-line-at-end-of-file: enable
+
+  # No trailing whitespace
+  trailing-spaces: enable
+
+  # Comments: require a space after #, allow inline comments
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+
+  # Don't enforce comment indentation — GitHub Actions workflows
+  # use comments at varying indentation levels
+  comments-indentation: disable

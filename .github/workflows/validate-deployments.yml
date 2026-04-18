@@ -1,3 +1,4 @@
+---
 name: Validate Deployments
 
 # Catch Wrangler deployment issues BEFORE merging.
@@ -43,6 +44,7 @@ jobs:
           node-version: "24"
       - id: gen
         name: Generate affected matrix
+        # yamllint disable rule:line-length
         run: |
           BASE="${{ github.event.pull_request.base.sha }}"
           if [ -z "$BASE" ]; then BASE="HEAD~1"; fi
@@ -51,16 +53,18 @@ jobs:
           # `needs.detect.outputs.count != '0'` correctly skips the validate
           # job rather than firing it with an empty matrix (which GitHub
           # Actions treats as a hard error).
-          COUNT=$(echo "$MATRIX" | node -e "try{const m=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(m.include.length)}catch{console.log(0)}" || echo 0)  # yamllint disable-line rule:line-length
+          COUNT=$(echo "$MATRIX" | node -e "try{const m=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(m.include.length)}catch{console.log(0)}" || echo 0)
           if [ -z "$COUNT" ]; then COUNT=0; fi
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "count=$COUNT" >> $GITHUB_OUTPUT
           echo "### Affected Deploys ($COUNT)" >> $GITHUB_STEP_SUMMARY
           if [ "$COUNT" = "0" ]; then
-            echo "_No deploy shims affected by this PR — validation skipped._" >> $GITHUB_STEP_SUMMARY
+            MSG="_No deploy shims affected by this PR — validation skipped._"
+            echo "$MSG" >> $GITHUB_STEP_SUMMARY
           else
-            echo "$MATRIX" | node -e "const m=JSON.parse(require('fs').readFileSync(0,'utf8'));m.include.forEach(s=>console.log('- \`'+s.name+'\` ('+s.kind+') — '+s.path))" >> $GITHUB_STEP_SUMMARY  # yamllint disable-line rule:line-length
+            echo "$MATRIX" | node -e "const m=JSON.parse(require('fs').readFileSync(0,'utf8'));m.include.forEach(s=>console.log('- \`'+s.name+'\` ('+s.kind+') — '+s.path))" >> $GITHUB_STEP_SUMMARY
           fi
+        # yamllint enable rule:line-length
 
   # ── Unified validation: Workers (wrangler dry-run) + Pages (build) ──
   validate:
@@ -163,17 +167,18 @@ jobs:
       - name: Post sticky comment
         uses: actions/github-script@v8
         with:
+          # yamllint disable rule:line-length
           script: |
             const runId = context.runId;
             const { owner, repo } = context.repo;
             const prNumber = context.payload.pull_request.number;
-            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${runId}`;  // yamllint disable-line rule:line-length
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${runId}`;
             const marker = '<!-- deploy-validation-comment -->';
 
             const driftResult = '${{ needs.drift-check.result }}';
             const detectResult = '${{ needs.detect.result }}';
             const validateResult = '${{ needs.validate.result }}';
-            const affectedCount = parseInt('${{ needs.detect.outputs.count }}' || '0', 10);  // yamllint disable-line rule:line-length
+            const affectedCount = parseInt('${{ needs.detect.outputs.count }}' || '0', 10);
 
             // Happy path: nothing affected
             if (affectedCount === 0 && driftResult === 'success') {
@@ -185,10 +190,10 @@ jobs:
             }
 
             // List all jobs in this workflow run
-            const jobsResp = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {  // yamllint disable-line rule:line-length
+            const jobsResp = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
               owner, repo, run_id: runId, per_page: 100,
             });
-            const validateJobs = jobsResp.filter(j => j.name.startsWith('Validate: '));  // yamllint disable-line rule:line-length
+            const validateJobs = jobsResp.filter(j => j.name.startsWith('Validate: '));
 
             const rows = validateJobs.map(j => ({
               name: j.name.replace(/^Validate:\s*/, ''),
@@ -203,10 +208,10 @@ jobs:
 
             if (failed.length === 0 && !driftFailed) {
               body += '## ✅ Deploy Validation Passed\n\n';
-              body += `All ${rows.length} affected deploys validated successfully.\n\n`;  // yamllint disable-line rule:line-length
+              body += `All ${rows.length} affected deploys validated successfully.\n\n`;
               if (rows.length > 0) {
                 body += '| Service | Kind | Status |\n|---------|------|--------|\n';
-                for (const r of rows) body += `| \`${r.name}\` | — | ✅ passed |\n`;  // yamllint disable-line rule:line-length
+                for (const r of rows) body += `| \`${r.name}\` | — | ✅ passed |\n`;
                 body += '\n';
               }
               body += `[View run](${runUrl})\n`;
@@ -216,30 +221,30 @@ jobs:
 
             body += '## 🔴 Deploy Validation Failed\n\n';
             if (driftFailed) {
-              body += '⚠️ **Deploy manifest drift detected.** A `wrangler.toml` exists without a matching `deploy-*.yml` shim (or vice versa). See the [drift-check job](' + runUrl + ') for details.\n\n';  // yamllint disable-line rule:line-length
+              body += '⚠️ **Deploy manifest drift detected.** A `wrangler.toml` exists without a matching `deploy-*.yml` shim (or vice versa). See the [drift-check job](' + runUrl + ') for details.\n\n';
             }
             if (failed.length > 0) {
-              body += `**${failed.length} of ${rows.length}** affected deploys failed validation.\n\n`;  // yamllint disable-line rule:line-length
+              body += `**${failed.length} of ${rows.length}** affected deploys failed validation.\n\n`;
               body += '| Service | Status | Logs |\n|---------|--------|------|\n';
               for (const r of rows) {
                 const icon = r.conclusion === 'success' ? '✅'
                   : r.conclusion === 'failure' ? '❌'
                   : r.conclusion === 'skipped' ? '⏭️' : '⚪';
-                body += `| \`${r.name}\` | ${icon} ${r.conclusion || 'pending'} | [view](${r.htmlUrl}) |\n`;  // yamllint disable-line rule:line-length
+                body += `| \`${r.name}\` | ${icon} ${r.conclusion || 'pending'} | [view](${r.htmlUrl}) |\n`;
               }
               body += '\n### Failure details\n\n';
 
               for (const fail of failed) {
-                body += `<details><summary>❌ <code>${fail.name}</code></summary>\n\n`;  // yamllint disable-line rule:line-length
+                body += `<details><summary>❌ <code>${fail.name}</code></summary>\n\n`;
                 try {
-                  const logResp = await github.rest.actions.downloadJobLogsForWorkflowRun({  // yamllint disable-line rule:line-length
+                  const logResp = await github.rest.actions.downloadJobLogsForWorkflowRun({
                     owner, repo, job_id: fail.id,
                   });
                   const rawLog = typeof logResp.data === 'string'
                     ? logResp.data
                     : Buffer.from(logResp.data).toString('utf8');
-                  const lines = rawLog.split('\n').map(l => l.replace(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z\s?/, ''));  // yamllint disable-line rule:line-length
-                  const errorIdx = lines.findIndex(l => /##\[error\]|^\s*Error:|\bError:\b/.test(l));  // yamllint disable-line rule:line-length
+                  const lines = rawLog.split('\n').map(l => l.replace(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z\s?/, ''));
+                  const errorIdx = lines.findIndex(l => /##\[error\]|^\s*Error:|\bError:\b/.test(l));
                   let excerpt;
                   if (errorIdx >= 0) {
                     const start = Math.max(0, errorIdx - 5);
@@ -252,7 +257,7 @@ jobs:
                   body += '```\n' + excerpt + '\n```\n\n';
                   body += `[Full log](${fail.htmlUrl})\n`;
                 } catch (e) {
-                  body += `_Could not fetch log excerpt: ${e.message}_\n\n[Full log](${fail.htmlUrl})\n`;  // yamllint disable-line rule:line-length
+                  body += `_Could not fetch log excerpt: ${e.message}_\n\n[Full log](${fail.htmlUrl})\n`;
                 }
                 body += '\n</details>\n\n';
               }
@@ -264,16 +269,17 @@ jobs:
               // Paginate so the marker comment is found even on very active
               // PRs with >100 comments; otherwise listComments would page
               // past the sticky and we'd post a fresh comment every run.
-              const comments = await github.paginate(github.rest.issues.listComments, {  // yamllint disable-line rule:line-length
+              const comments = await github.paginate(github.rest.issues.listComments, {
                 owner, repo, issue_number: prNumber, per_page: 100,
               });
               const existing = comments.find(c => c.body?.includes(marker));
               if (existing) {
-                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });  // yamllint disable-line rule:line-length
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
               } else {
-                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });  // yamllint disable-line rule:line-length
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
               }
             }
+          # yamllint enable rule:line-length
 
   # ── Summary gate for branch protection ─────────────────────────────
   deployment-validation-complete:
@@ -283,12 +289,13 @@ jobs:
     if: always()
     steps:
       - name: Check validation results
+        # yamllint disable rule:line-length
         run: |
           DRIFT="${{ needs.drift-check.result }}"
           DETECT="${{ needs.detect.result }}"
           VALIDATE="${{ needs.validate.result }}"
           echo "drift-check: $DRIFT / detect: $DETECT / validate: $VALIDATE"
-          if [[ "$DRIFT" == "failure" || "$DETECT" == "failure" || "$VALIDATE" == "failure" ]]; then  # yamllint disable-line rule:line-length
+          if [[ "$DRIFT" == "failure" || "$DETECT" == "failure" || "$VALIDATE" == "failure" ]]; then
             echo "❌ Deployment validation failed"
             exit 1
           fi
@@ -297,3 +304,4 @@ jobs:
             exit 0
           fi
           echo "✓ All deployment validations passed"
+        # yamllint enable rule:line-length

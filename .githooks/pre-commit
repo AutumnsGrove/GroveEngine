@@ -23,25 +23,61 @@ if command -v bun &> /dev/null; then
     USE_BUN=true
 fi
 
+# Track if any checks fail
+checks_failed=0
+
 # Get staged JavaScript/TypeScript files
 js_ts_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(js\|jsx\|ts\|tsx\|mjs\|cjs\)$' || true)
 
-# Skip if no JS/TS files are staged
-if [ -z "$js_ts_files" ]; then
-    echo -e "${GREEN}✓ No JavaScript/TypeScript files to check${NC}"
-    exit 0
+# Get staged YAML files
+yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(yml\|yaml\)$' || true)
+
+# ============================================================================
+# YAMLLINT CHECK
+# ============================================================================
+# Lints staged YAML files using yamllint with the project's .yamllint.yml config.
+# Catches formatting issues (line length, trailing spaces, missing document
+# start markers) before they land in the repo.
+
+if [ -n "$yaml_files" ]; then
+    echo -e "${YELLOW}Running yamllint check...${NC}"
+
+    if command -v yamllint &> /dev/null; then
+        yamllint_failed=""
+        for f in $yaml_files; do
+            if ! yamllint -c .yamllint.yml "$f" 2>&1; then
+                yamllint_failed="true"
+            fi
+        done
+
+        if [ -n "$yamllint_failed" ]; then
+            echo -e "${RED}✗ yamllint failed${NC}"
+            echo -e "${YELLOW}Fix the YAML formatting issues above.${NC}"
+            echo -e "${YELLOW}Config: .yamllint.yml (max line length: 100)${NC}"
+            echo ""
+            checks_failed=1
+        else
+            echo -e "${GREEN}✓ yamllint passed${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠ yamllint is not installed (brew install yamllint)${NC}"
+    fi
+    echo ""
+else
+    echo -e "${GREEN}✓ yamllint skipped (no YAML files staged)${NC}"
+    echo ""
 fi
+
+# ============================================================================
+# JS/TS CHECKS (Prettier, ESLint, TypeScript)
+# ============================================================================
+if [ -n "$js_ts_files" ]; then
 
 echo -e "${YELLOW}Checking staged JavaScript/TypeScript files:${NC}"
 echo "$js_ts_files"
 echo ""
 
-# Track if any checks fail
-checks_failed=0
-
-# ============================================================================
-# PRETTIER FORMATTER CHECK
-# ============================================================================
+# --- Prettier ---
 if [ "$USE_BUN" = true ]; then
     echo -e "${YELLOW}Running Prettier formatter check ${BLUE}(bun)${YELLOW}...${NC}"
 else
@@ -194,6 +230,11 @@ if [ -n "$ts_files" ]; then
         echo ""
     fi
 fi
+
+else
+    echo -e "${GREEN}✓ No JavaScript/TypeScript files to check${NC}"
+    echo ""
+fi # end JS/TS checks
 
 # ============================================================================
 # BARE FETCH() CHECK (CSRF protection)

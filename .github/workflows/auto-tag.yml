@@ -94,7 +94,9 @@ jobs:
           steps.version.outputs.changed == true ||
           github.event.inputs.force_snapshot == true
         run: |
-          TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
+          TAG_FROM_CREATE="${{ steps.create_tag.outputs.tag_name }}"
+          TAG_FROM_VERSION="v${{ steps.version.outputs.current }}"
+          TAG="${TAG_FROM_CREATE:-$TAG_FROM_VERSION}"
           echo "Generating snapshot for: $TAG"
 
           chmod +x ./scripts/repo/repo-snapshot.sh
@@ -313,9 +315,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m \
-            "docs: add snapshot and summary for \
-${{ steps.snapshot.outputs.tag_name }}"
+          git commit -m "docs: add snapshot and summary for ${{ steps.snapshot.outputs.tag_name }}"
           git push origin main
 
       - name: Check if release exists
@@ -339,10 +339,9 @@ ${{ steps.snapshot.outputs.tag_name }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{
-            steps.create_tag.outputs.tag_name ||
-            format('v{0}', steps.version.outputs.current)
-          }}"
+          TAG_FROM_CREATE="${{ steps.create_tag.outputs.tag_name }}"
+          TAG_FROM_VERSION="v${{ steps.version.outputs.current }}"
+          TAG="${TAG_FROM_CREATE:-$TAG_FROM_VERSION}"
           VERSION="${{ steps.version.outputs.current }}"
           SUMMARY_FILE="snapshots/summaries/${TAG}.json"
 
@@ -383,10 +382,13 @@ ${{ steps.snapshot.outputs.tag_name }}"
               printf '**%s**\n%s' 'Architecture & Infrastructure' \
                 "$ARCH"
             )${NL}"
-            [ -n "$FEAT" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Features' "$FEAT")${NL}"
+            [ -n "$FEAT" ] && HIGHLIGHTS="${HIGHLIGHTS}$(
+              printf '**%s**\n%s' 'Features' "$FEAT")${NL}"
             [ -n "$FIXS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Fixes' "$FIXS")${NL}"
-            [ -n "$REFR" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Refactoring' "$REFR")${NL}"
-            [ -n "$PERF" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Performance' "$PERF")${NL}"
+            [ -n "$REFR" ] && HIGHLIGHTS="${HIGHLIGHTS}$(
+              printf '**%s**\n%s' 'Refactoring' "$REFR")${NL}"
+            [ -n "$PERF" ] && HIGHLIGHTS="${HIGHLIGHTS}$(
+              printf '**%s**\n%s' 'Performance' "$PERF")${NL}"
             [ -n "$DOCS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Docs' "$DOCS")${NL}"
             [ -n "$TSTS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Tests' "$TSTS")${NL}"
 
@@ -395,9 +397,9 @@ ${{ steps.snapshot.outputs.tag_name }}"
               SCOPE_LINE="Areas: ${SCOPES} | "
             fi
 
-            FOOTER="${SCOPE_LINE}*${TOTAL_COMMITS} total commits* \
-| [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) \
-| [journey](https://grove.place/journey)"
+            FOOTER="${SCOPE_LINE}*${TOTAL_COMMITS} total commits*"
+            FOOTER="${FOOTER} | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice)"
+            FOOTER="${FOOTER} | [journey](https://grove.place/journey)"
 
             if [ -n "$HIGHLIGHTS" ]; then
               BODY=$(
@@ -441,8 +443,7 @@ ${{ steps.snapshot.outputs.tag_name }}"
           pnpm publish --no-git-checks \
             || echo "Warning: Publish failed (may already exist)"
 
-          echo "Published @autumnsgrove/lattice \
-v${{ steps.version.outputs.current }}"
+          echo "Published @autumnsgrove/lattice v${{ steps.version.outputs.current }}"
 
   # Separate job for backfilling historical summaries
   backfill:
@@ -477,8 +478,7 @@ v${{ steps.version.outputs.current }}"
           mkdir -p apps/landing/static/data/summaries
           cp -r snapshots/summaries/* \
             apps/landing/static/data/summaries/
-          echo "📦 Synced summaries to \
-apps/landing/static/data/summaries/"
+          echo "📦 Synced summaries to apps/landing/static/data/summaries/"
           ls -1 apps/landing/static/data/summaries/
 
       - name: Commit and push

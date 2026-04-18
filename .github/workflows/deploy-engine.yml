@@ -36,4 +36,3 @@ jobs:
       migration-db: grove-engine-db
       run-deploy: false
     secrets: inherit
-

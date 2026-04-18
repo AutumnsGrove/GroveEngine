@@ -129,59 +129,95 @@ jobs:
 
             // Ambiguous product names - bare name only in title, specific
             // phrases in body
+
+            // Pre-declare long body-match patterns for line-length compliance
+            const shadeBody = new RegExp(
+              '\\b(shade layer|shade protection|shade defense|ai crawler' +
+              '|scraper protection|content protection|data harvesting' +
+              '|bot defense|seven.layer defense)\\b'
+            );
+            const clearingBody = new RegExp(
+              '\\b(clearing.monitor|clearing.phase|status page' +
+              '|uptime monitor|health.check endpoint' +
+              '|incident management|platform health)\\b'
+            );
+            const plantBody = new RegExp(
+              '\\b(plant onboarding|plant signup|plant deployment' +
+              '|signup flow|onboarding flow|lemonsqueezy|lemon.?squeezy' +
+              '|store verification|tenant onboarding)\\b'
+            );
+            const amberBody = new RegExp(
+              '\\b(amber storage|amber cdn|amber zip|r2 storage' +
+              '|image storage|cdn storage|jxl|jpeg.?xl|image.?pipeline)\\b'
+            );
+            const ivyBody = new RegExp(
+              '\\b(ivy mail|ivy email|grove\\.place email|email client' +
+              '|resend broadcast|email notification|privacy.first email)\\b'
+            );
+            const meadowBody =
+              /\b(meadow social|meadow feed|social feed|community feed|opt.in community)\b/;
+            const forestsBody =
+              /\b(forest page|community grove|themed communit|the prism|the terminal)\b/;
+            const vineBody = new RegExp(
+              '\\b(vine connection|margin note|gutter content' +
+              '|curator.s? note|content relationship)\\b'
+            );
+            const graftBody =
+              /\b(feature flag|graft control|per.tenant feature|grafts? admin|graft.* ui)\b/;
+
             const ambiguousComponents = [
               {
                 label: 'shade',
                 titleMatch: /\bshade\b/,
-                bodyMatch: /\b(shade layer|shade protection|shade defense|ai crawler|scraper protection|content protection|data harvesting|bot defense|seven.layer defense)\b/,
+                bodyMatch: shadeBody,
                 titleFallback: /\b(ai crawler protection|scraper defense|content harvesting)\b/
               },
               {
                 label: 'clearing',
                 titleMatch: /\bclearing\b(?!\s+(up|out|away|the|things?))/,
-                bodyMatch: /\b(clearing.monitor|clearing.phase|status page|uptime monitor|health.check endpoint|incident management|platform health)\b/,
+                bodyMatch: clearingBody,
                 titleFallback: /\b(status page|uptime monitor|platform health)\b/
               },
               {
                 label: 'plant',
                 titleMatch: /\bplant\b(?!\s+(a|the|some|more|trees?|based))/,
-                bodyMatch: /\b(plant onboarding|plant signup|plant deployment|signup flow|onboarding flow|lemonsqueezy|lemon.?squeezy|store verification|tenant onboarding)\b/,
+                bodyMatch: plantBody,
                 titleFallback: /\b(signup flow|onboarding flow|tenant onboarding|lemonsqueezy)\b/
               },
               {
                 label: 'amber',
                 titleMatch: /\bamber\b/,
-                bodyMatch: /\b(amber storage|amber cdn|amber zip|r2 storage|image storage|cdn storage|jxl|jpeg.?xl|image.?pipeline)\b/,
+                bodyMatch: amberBody,
                 titleFallback: /\b(r2 storage|cdn storage|image pipeline|jxl|jpeg.?xl)\b/
               },
               {
                 label: 'ivy',
                 titleMatch: /\bivy\b/,
-                bodyMatch: /\b(ivy mail|ivy email|grove\.place email|email client|resend broadcast|email notification|privacy.first email)\b/,
+                bodyMatch: ivyBody,
                 titleFallback: /\b(email client|email notification|resend broadcast)\b/
               },
               {
                 label: 'meadow',
                 titleMatch: /\bmeadow\b/,
-                bodyMatch: /\b(meadow social|meadow feed|social feed|community feed|opt.in community)\b/,
+                bodyMatch: meadowBody,
                 titleFallback: /\b(social feed|community feed)\b/
               },
               {
                 label: 'forests',
                 titleMatch: /\bforests?\b(?!\s+page)/,
-                bodyMatch: /\b(forest page|community grove|themed communit|the prism|the terminal)\b/,
+                bodyMatch: forestsBody,
                 titleFallback: /\b(forest page|community grove)\b/
               },
               {
                 label: 'vine',
                 titleMatch: /\bvines?\b/,
-                bodyMatch: /\b(vine connection|margin note|gutter content|curator.s? note|content relationship)\b/,
+                bodyMatch: vineBody,
                 titleFallback: /\b(margin note|curator.s? note|content relationship)\b/
               },
               {
                 label: 'graft',
                 titleMatch: /\bgrafts?\b/,
-                bodyMatch: /\b(feature flag|graft control|per.tenant feature|grafts? admin|graft.* ui)\b/,
+                bodyMatch: graftBody,
                 titleFallback: /\b(feature flag|per.tenant feature)\b/
               },
             ];

@@ -1,3 +1,4 @@
+---
 name: Link PR to Issue
 
 on:
@@ -20,7 +21,7 @@ jobs:
             const pr = context.payload.pull_request;
             const prBody = pr.body || '';
             const prTitle = pr.title || '';
-            
+
             // Extract issue numbers from PR body/title
             // (supports #123, fixes #123, closes #123, etc.)
             const issueRegex = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*#(\d+)|#(\d+)/gi;
@@ -29,9 +30,9 @@ jobs:
               ...prTitle.matchAll(issueRegex)
             ];
             const issueNumbers = [...new Set(matches.map(m => m[1] || m[2]))];
-            
+
             console.log(`Found linked issues: ${issueNumbers.join(', ')}`);
-            
+
             for (const issueNumber of issueNumbers) {
               try {
                 // Get current issue to check labels
@@ -40,7 +41,7 @@ jobs:
                   repo: context.repo.repo,
                   issue_number: parseInt(issueNumber)
                 });
-                
+
                 if (pr.state === 'open') {
                   // PR opened/reopened - add in-progress label
                   await github.rest.issues.addLabels({
@@ -49,7 +50,7 @@ jobs:
                     issue_number: parseInt(issueNumber),
                     labels: ['in-progress']
                   });
-                  
+
                   // Remove 'ready' label if present
                   try {
                     await github.rest.issues.removeLabel({
@@ -61,7 +62,7 @@ jobs:
                   } catch (e) {
                     // Label might not exist, that's fine
                   }
-                  
+
                   // Comment on issue
                   await github.rest.issues.createComment({
                     owner: context.repo.owner,
@@ -69,7 +70,7 @@ jobs:
                     issue_number: parseInt(issueNumber),
                     body: `🚧 Work in progress: #${pr.number}`
                   });
-                  
+
                 } else if (pr.merged) {
                   // PR merged - add completed label and comment
                   await github.rest.issues.addLabels({
@@ -78,7 +79,7 @@ jobs:
                     issue_number: parseInt(issueNumber),
                     labels: ['completed']
                   });
-                  
+
                   // Remove in-progress label
                   try {
                     await github.rest.issues.removeLabel({
@@ -90,14 +91,14 @@ jobs:
                   } catch (e) {
                     // Label might not exist
                   }
-                  
+
                   await github.rest.issues.createComment({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: parseInt(issueNumber),
                     body: `✅ Completed in #${pr.number}`
                   });
-                  
+
                 } else if (pr.state === 'closed' && !pr.merged) {
                   // PR closed without merging - remove in-progress, add back ready
                   try {
@@ -110,14 +111,14 @@ jobs:
                   } catch (e) {
                     // Label might not exist
                   }
-                  
+
                   await github.rest.issues.addLabels({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: parseInt(issueNumber),
                     labels: ['ready']
                   });
-                  
+
                   await github.rest.issues.createComment({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -126,7 +127,7 @@ jobs:
                           `Issue returned to ready state.`
                   });
                 }
-                
+
               } catch (error) {
                 console.error(
                   `Error processing issue #${issueNumber}: ${error.message}`

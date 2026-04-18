@@ -159,8 +159,10 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
+          # yamllint disable rule:line-length
           path: >-
             ${{ needs.prepare.outputs.directory }}/${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}${{ matrix.ext }}
+          # yamllint enable rule:line-length
           retention-days: 1
 
   # ============================================
