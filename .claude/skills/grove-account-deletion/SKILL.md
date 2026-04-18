@@ -100,14 +100,32 @@ npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM user_onb
 npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM email_verification_codes WHERE user_id IN (SELECT id FROM user_onboarding WHERE username = 'USERNAME');"
 ```
 
-If the user signed up via Heartwood and has no other tenants:
+Clean up the legacy users table:
 
 ```bash
-# Check if user has other tenants
+npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM users WHERE LOWER(email) = LOWER('USER_EMAIL') AND tenant_id = 'TENANT_ID';"
+```
+
+### Step 5b: Clean Heartwood Auth Records
+
+**Critical:** Without this, the user will see "welcome back" messages when re-signing up because the Heartwood `ba_user` record still exists.
+
+```bash
+# Check if user has other tenants first
 npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain FROM tenants WHERE email = 'USER_EMAIL';"
 
-# If no other tenants exist, clean orphaned user record (if applicable)
-# NOTE: The 'users' table may or may not exist depending on auth approach used
+# If no other tenants exist, clean Heartwood auth records:
+# Delete sessions
+npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_session WHERE user_id IN (SELECT id FROM ba_user WHERE email = 'USER_EMAIL');"
+
+# Delete OAuth account linkages (Google, etc.)
+npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_account WHERE user_id IN (SELECT id FROM ba_user WHERE email = 'USER_EMAIL');"
+
+# Delete verification records
+npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_verification WHERE identifier = 'USER_EMAIL';"
+
+# Delete the auth user record
+npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_user WHERE email = 'USER_EMAIL';"
 ```
 
 ### Step 6: Purge R2 Media (If Media Existed)

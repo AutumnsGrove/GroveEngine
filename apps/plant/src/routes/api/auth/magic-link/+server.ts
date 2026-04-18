@@ -41,6 +41,12 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
 	const env = platform?.env as Record<string, string> | undefined;
 	const authBaseUrl = env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
+	// Require AUTH service binding — direct worker-to-worker, no public internet hop
+	if (!platform?.env?.AUTH) {
+		console.error("[Magic Link] AUTH service binding not available");
+		throw error(503, "Authentication service temporarily unavailable");
+	}
+
 	// Determine the callback URL - where users land after clicking the magic link
 	const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
 	const appBaseUrl = isProduction
@@ -56,7 +62,8 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
 	const callbackURL = `${appBaseUrl}/auth/magic-link/callback${callbackParams.toString() ? `?${callbackParams}` : ""}`;
 
 	try {
-		const response = await fetch(`${authBaseUrl}/api/auth/sign-in/magic-link`, {
+		// Use service binding for worker-to-worker routing (no public internet hop)
+		const response = await platform.env.AUTH.fetch(`${authBaseUrl}/api/auth/sign-in/magic-link`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

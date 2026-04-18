@@ -462,24 +462,93 @@ var tenantDeleteCmd = &cobra.Command{
 						formatD1Value(impact["sessions"]),
 					)
 				}
+				msg += "\n\nAlso cleans: user_onboarding, legacy users, Heartwood auth records"
 				msg += "\n\nRe-run without --dry-run and with --write --force to execute."
 				fmt.Print(ui.RenderWarningPanel("Tenant Delete (dry-run)", msg))
 			}
 			return nil
 		}
 
+		// Look up email for cross-DB cleanup before deleting the tenant.
+		emailSQL := fmt.Sprintf("SELECT email FROM tenants WHERE id = '%s' LIMIT 1", escapedID)
+		emailOutput, emailErr := exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", emailSQL)
+		var tenantEmail string
+		if emailErr == nil {
+			emailRows := parseD1Results(emailOutput)
+			if len(emailRows) > 0 {
+				tenantEmail = fmt.Sprintf("%v", emailRows[0]["email"])
+			}
+		}
+
+		// Step 1: Delete tenant (CASCADE handles 29 child tables)
 		deleteSQL := fmt.Sprintf("DELETE FROM tenants WHERE id = '%s'", escapedID)
 		_, err = exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", deleteSQL)
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
 
+		// Step 2: Clean up orphaned records in grove-engine-db
+		// user_onboarding and users are not FK'd to tenants, so they survive CASCADE.
+		onboardingSQL := fmt.Sprintf("DELETE FROM user_onboarding WHERE username = '%s'", escapedSubdomain)
+		exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", onboardingSQL)
+
+		if tenantEmail != "" {
+			escapedEmail := strings.ReplaceAll(tenantEmail, "'", "''")
+			// Also clean by email in case username doesn't match
+			onboardingEmailSQL := fmt.Sprintf(
+				"DELETE FROM user_onboarding WHERE LOWER(email) = LOWER('%s') AND tenant_id = '%s'",
+				escapedEmail, escapedID,
+			)
+			exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", onboardingEmailSQL)
+
+			// Clean legacy users table
+			usersSQL := fmt.Sprintf(
+				"DELETE FROM users WHERE LOWER(email) = LOWER('%s') AND tenant_id = '%s'",
+				escapedEmail, escapedID,
+			)
+			exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", usersSQL)
+		}
+
+		// Step 3: Clean up Heartwood auth records (ba_user, ba_account, ba_session)
+		heartwoodDB := "groveauth"
+		heartwoodCleaned := false
+		if tenantEmail != "" {
+			escapedEmail := strings.ReplaceAll(tenantEmail, "'", "''")
+
+			// Delete sessions for this user
+			baSessionSQL := fmt.Sprintf(
+				"DELETE FROM ba_session WHERE user_id IN (SELECT id FROM ba_user WHERE email = '%s')",
+				escapedEmail,
+			)
+			exec.WranglerOutput("d1", "execute", heartwoodDB, "--remote", "--json", "--command", baSessionSQL)
+
+			// Delete OAuth account linkages
+			baAccountSQL := fmt.Sprintf(
+				"DELETE FROM ba_account WHERE user_id IN (SELECT id FROM ba_user WHERE email = '%s')",
+				escapedEmail,
+			)
+			exec.WranglerOutput("d1", "execute", heartwoodDB, "--remote", "--json", "--command", baAccountSQL)
+
+			// Delete verification records
+			baVerificationSQL := fmt.Sprintf(
+				"DELETE FROM ba_verification WHERE identifier = '%s'",
+				escapedEmail,
+			)
+			exec.WranglerOutput("d1", "execute", heartwoodDB, "--remote", "--json", "--command", baVerificationSQL)
+
+			// Delete the auth user record
+			baUserSQL := fmt.Sprintf("DELETE FROM ba_user WHERE email = '%s'", escapedEmail)
+			_, baErr := exec.WranglerOutput("d1", "execute", heartwoodDB, "--remote", "--json", "--command", baUserSQL)
+			heartwoodCleaned = baErr == nil
+		}
+
 		if cfg.JSONMode {
 			data, _ := json.Marshal(map[string]interface{}{
-				"subdomain": subdomain,
-				"tenant_id": tenantID,
-				"deleted":   true,
-				"impact":    impact,
+				"subdomain":          subdomain,
+				"tenant_id":          tenantID,
+				"deleted":            true,
+				"impact":             impact,
+				"heartwood_cleaned":  heartwoodCleaned,
 			})
 			fmt.Println(string(data))
 		} else {
@@ -492,6 +561,12 @@ var tenantDeleteCmd = &cobra.Command{
 					formatD1Value(impact["gallery_images"]),
 					formatD1Value(impact["sessions"]),
 				))
+			}
+			ui.Muted("Cleaned: user_onboarding, legacy users table")
+			if heartwoodCleaned {
+				ui.Muted("Cleaned: Heartwood auth records (ba_user, ba_account, ba_session)")
+			} else if tenantEmail != "" {
+				ui.Warning("Could not clean Heartwood auth records — may need manual cleanup")
 			}
 		}
 		return nil

@@ -55,15 +55,19 @@ interface OnboardingRecord {
 // ============================================================================
 
 export function getSessionToken(
-	cookies: { get: (name: string) => string | undefined },
+	cookies: { get: (name: string) => string | undefined; getAll: () => Array<{ name: string }> },
 	path: string,
 ): string {
 	const sessionToken = cookies.get(BETTER_AUTH_COOKIE_SECURE) || cookies.get(BETTER_AUTH_COOKIE);
 
 	if (!sessionToken) {
+		// Log available cookies to diagnose why the session cookie is missing
+		const availableCookies = cookies.getAll().map((c) => c.name);
+		console.error("[Auth Callback] Missing session cookie. Available cookies:", availableCookies);
+
 		errorRedirect(PLANT_ERRORS.NO_SESSION_COOKIE, {
 			path,
-			detail: "No Better Auth session cookie found after OAuth callback",
+			detail: `No Better Auth session cookie found. Available: [${availableCookies.join(", ")}]`,
 		});
 	}
 

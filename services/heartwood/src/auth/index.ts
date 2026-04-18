@@ -20,8 +20,6 @@ import { drizzle } from "drizzle-orm/d1";
 import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
-import { isEmailAllowed } from "../db/queries.js";
-import { createDbSession } from "../db/session.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
 
@@ -112,7 +110,6 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 
 	// Create Drizzle instance for D1 with schema
 	const db = drizzle(env.DB, { schema });
-	const groveDb = createDbSession(env);
 	if (!env.ZEPHYR_API_KEY) {
 		console.warn(HW_SVC_ERRORS.MISSING_ZEPHYR_KEY.adminMessage);
 	}
@@ -380,43 +377,11 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 		// Hooks for Grove-specific logic
 		databaseHooks: {
 			user: {
-				// Enforce email allowlist before creating user (unless public signup is enabled)
 				create: {
 					before: async (user) => {
-						// Check feature flag first - if public signup is enabled, skip allowlist
-						if (env.PUBLIC_SIGNUP_ENABLED === "true") {
-							console.log("[Auth] Public signup enabled - creating new user");
-							return { data: user };
-						}
-
-						// Check primary allowlist in groveauth DB
-						const allowed = await isEmailAllowed(groveDb, user.email);
-						if (allowed) {
-							console.log("[Auth] User in allowlist - creating");
-							return { data: user };
-						}
-
-						// Fallback: check comped/beta invites in Lattice DB
-						// Comped invites grant authentication access (unused invites only)
-						if (env.ENGINE_DB) {
-							try {
-								const comped = await env.ENGINE_DB.prepare(
-									"SELECT email FROM comped_invites WHERE email = ? AND used_at IS NULL",
-								)
-									.bind(user.email.toLowerCase())
-									.first();
-								if (comped) {
-									console.log("[Auth] User has comped/beta invite - creating");
-									return { data: user };
-								}
-							} catch (err) {
-								console.error("[Auth] Failed to check comped_invites:", err);
-								// Don't block auth if ENGINE_DB query fails - fall through to reject
-							}
-						}
-
-						console.log("[Auth] Signup blocked - email not in allowlist or comped invites");
-						throw new Error(HW_SVC_ERRORS.ACCOUNT_CREATION_FAILED.userMessage);
+						// Public signup — all users welcome
+						console.log("[Auth] Creating new user:", user.email);
+						return { data: user };
 					},
 				},
 			},

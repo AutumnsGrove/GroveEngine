@@ -12,26 +12,26 @@ The theme running through all of this work is **reliability**. The signup flow i
 
 ## 1. Dante's Gallery Shows No Photos
 
-**Status:** Unstarted  
+**Status:** Deferred (handle later)  
 **Reporter:** Autumn (noticed by friend Dante)
 
 ### Symptoms
 - Dante signed up and has been actively posting photos — uploads work fine
-- He has enabled the gallery feature
+- He has enabled the gallery feature (all flags confirmed enabled)
 - He has 12+ photos uploaded
 - His gallery page shows **nothing** — completely empty
 
 ### What to investigate
 - How gallery queries photos (does it filter by something Dante's account doesn't satisfy?)
 - Whether gallery reads from a different data path than post uploads
-- Whether the gallery feature flag is wired up correctly for his account
 - Whether there's a missing join or wrong tenant scope in the gallery query
+- `uploads_suspended` flag ruled out — Dante has everything enabled
 
 ---
 
 ## 2. Signup Flow Failures + Incomplete Tenant Deletion
 
-**Status:** Unstarted  
+**Status:** Fixed (pending deploy + test)  
 **Trigger:** Dante referred a friend to sign up → Autumn tested the flow, it failed 3 times
 
 ### Real-world impact
@@ -47,18 +47,44 @@ The theme running through all of this work is **reliability**. The signup flow i
 | `palmer.brown38@gmail.com` | Google OAuth | Said "welcome back, Dead" — account still exists |
 | Dante's friend (unknown) | Unknown (likely email or Google) | Failed to create session |
 
-> **Note:** Autumn had previously deleted the tenants for all three test accounts, but the deletion did not fully complete — system still recognizes them and greets them by their old names. Dante's friend is a fresh account with no prior history, so the session creation failure is independent of the deletion issue.
+### Root causes found
 
-### What to fix
-1. **Magic link session creation** — clicking the email link fails to create a session for `autumn@grove.place`
-2. **Tenant deletion is incomplete** — investigate what the deletion flow actually removes vs. what it leaves behind (Heartwood user record? OAuth linkage? Tenant row?)
-3. **Clean up the three stuck accounts** — manually ensure `autumn@grove.place`, `wrathofthestormzero@gmail.com`, and `palmer.brown38@gmail.com` are fully purged so re-signup works correctly
+**Bug 1: Silent error swallowing in magic link callback**
+- `apps/plant/src/routes/auth/magic-link/callback/+server.ts:44` — the `error` param from Heartwood was ONLY handled when `inviteToken` was present
+- For normal signups (no invite), if magic link verify failed (token expired, D1 error, etc.), the error was **silently ignored**
+- Code then tried to fetch a session that was never created → user saw cryptic "session wasn't found" instead of the real error
+- **Fixed:** Error param now handled for all cases, not just invite flow
+
+**Bug 2: Incomplete tenant deletion (`gw tenant delete`)**
+- `gw tenant delete` only ran `DELETE FROM tenants WHERE id = ?` — CASCADE removed 29 child tables
+- But left behind: `user_onboarding` (display name → "welcome back, Wrath"), `users` (legacy table), and ALL Heartwood records (`ba_user`, `ba_account`, `ba_session`)
+- **Fixed:** `gw tenant delete` now cleans up all 5 orphaned record types across both DBs
+
+**Bug 3: Magic link API using public internet instead of service binding**
+- `apps/plant/src/routes/api/auth/magic-link/+server.ts` used raw `fetch()` to `login.grove.place` instead of `platform.env.AUTH.fetch()` (service binding)
+- Unnecessary internet hop, added latency and potential failure point
+- **Fixed:** Now uses AUTH service binding for worker-to-worker routing
+
+**Improvement: Email allowlist removed**
+- Heartwood `databaseHooks.user.create.before` had allowlist + comped_invites checks
+- `PUBLIC_SIGNUP_ENABLED = "true"` was already bypassing it, but the dead code added confusion
+- **Removed:** Hook now simply logs and allows all signups
+
+**Improvement: Diagnostic logging added**
+- Both callbacks now log which cookies arrive (names only, not values)
+- Session fetch failures now include whether the BA cookie was present
+- OAuth callback logs available cookies when session cookie is missing
+
+### Remaining work
+1. **Deploy and test** — all changes need deployment to verify in production
+2. **Clean up 3 stuck accounts** — run `gw tenant delete` for the test accounts (now with full cleanup)
+3. **Monitor logs** — the new diagnostic logging will reveal if the session cookie is actually reaching Plant or getting lost in the redirect chain
 
 ---
 
 ## 3. Plant Signup — Username Field UX
 
-**Status:** Unstarted
+**Status:** Pending
 
 ### Request
 In the Plant signup flow, users need to know they can change their username later. Add helper text beneath the username input field, something like:

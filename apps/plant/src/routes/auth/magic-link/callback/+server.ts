@@ -37,22 +37,31 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	const db = platform?.env?.DB;
 	const path = url.pathname;
 
-	// ─── Invite token threaded through for expired-link recovery ───────────
+	// ─── Handle errors from Heartwood (token expired, verification failed, etc.) ─
 	const inviteToken = url.searchParams.get("inviteToken");
 	const errorParam = url.searchParams.get("error");
 
-	if (errorParam && inviteToken) {
+	if (errorParam) {
 		logPlantError(PLANT_ERRORS.MAGIC_LINK_ERROR, {
 			path,
 			detail: `Error from Heartwood: ${errorParam}`,
 		});
 
-		const errorParams = new URLSearchParams({
-			token: inviteToken,
-			expired: "true",
-			errorCode: errorParam,
+		// Invite flow: redirect back to invite page with recovery UI
+		if (inviteToken) {
+			const errorParams = new URLSearchParams({
+				token: inviteToken,
+				expired: "true",
+				errorCode: errorParam,
+			});
+			redirect(302, `/invited?${errorParams.toString()}`);
+		}
+
+		// Normal signup: redirect to home with error display
+		errorRedirect(PLANT_ERRORS.MAGIC_LINK_ERROR, {
+			path,
+			detail: `Error from Heartwood: ${errorParam}`,
 		});
-		redirect(302, `/invited?${errorParams.toString()}`);
 	}
 
 	// ─── Pre-flight checks ────────────────────────────────────────────────
@@ -67,6 +76,13 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	// ─── Step 1: Get session from Better Auth ─────────────────────────────
 	const allCookies = cookies.getAll();
 	const cookieHeader = allCookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
+	// Diagnostic: log which cookies arrived (names only, not values)
+	const cookieNames = allCookies.map((c) => c.name);
+	const hasBACookie =
+		cookieNames.includes("better-auth.session_token") ||
+		cookieNames.includes("__Secure-better-auth.session_token");
+	console.log("[Magic Link Callback] Cookies present:", cookieNames, "| BA cookie:", hasBACookie);
 
 	let sessionData: {
 		session?: {
@@ -92,7 +108,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 		if (!sessionResponse.ok) {
 			errorRedirect(PLANT_ERRORS.SESSION_FETCH_FAILED, {
 				path,
-				detail: `Status ${sessionResponse.status}`,
+				detail: `Status ${sessionResponse.status} | BA cookie present: ${hasBACookie}`,
 			});
 		}
 
@@ -111,7 +127,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	if (!sessionData!.session || !sessionData!.user) {
 		errorRedirect(PLANT_ERRORS.NO_SESSION_DATA, {
 			path,
-			detail: "Session response was 200 but missing session/user fields",
+			detail: `Session response 200 but empty. BA cookie present: ${hasBACookie} | Cookies: [${cookieNames.join(", ")}]`,
 		});
 	}
 
