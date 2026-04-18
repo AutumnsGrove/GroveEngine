@@ -159,15 +159,6 @@ export const baTwoFactor = sqliteTable("ba_two_factor", {
 // =============================================================================
 
 /**
- * Allowed emails - Email allowlist for admin-only access
- */
-export const allowedEmails = sqliteTable("allowed_emails", {
-	email: text("email").primaryKey(),
-	addedAt: text("added_at").default("CURRENT_TIMESTAMP"),
-	addedBy: text("added_by"),
-});
-
-/**
  * Clients - Registered OAuth client applications
  */
 export const clients = sqliteTable("clients", {
@@ -249,7 +240,6 @@ export const schema = {
 	passkey: baPasskey,
 	twoFactor: baTwoFactor,
 	// Grove-specific tables
-	allowedEmails,
 	clients,
 	auditLog,
 	userSubscriptions,

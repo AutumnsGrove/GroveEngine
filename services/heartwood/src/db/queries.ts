@@ -7,7 +7,6 @@ import { HW_SVC_ERRORS } from "../errors.js";
 import type {
 	Client,
 	User,
-	AllowedEmail,
 	AuthCode,
 	RefreshToken,
 	MagicCode,
@@ -306,34 +305,6 @@ export async function getOrCreateUser(
 	}
 
 	return createUser(db, data);
-}
-
-// ==================== Allowed Emails ====================
-
-/**
- * Check if an email is allowed to sign up/login.
- *
- * @param db - Database connection
- * @param email - Email to check
- * @param publicSignupEnabled - If true, bypasses allowlist check (all emails allowed)
- * @returns true if email is allowed, false otherwise
- */
-export async function isEmailAllowed(
-	db: D1DatabaseOrSession,
-	email: string,
-	publicSignupEnabled?: boolean,
-): Promise<boolean> {
-	// If public signup is enabled, all emails are allowed
-	if (publicSignupEnabled) {
-		return true;
-	}
-
-	// Check against allowlist
-	const result = await db
-		.prepare("SELECT email FROM allowed_emails WHERE email = ?")
-		.bind(email.toLowerCase())
-		.first<AllowedEmail>();
-	return result !== null;
 }
 
 // ==================== Auth Codes ====================

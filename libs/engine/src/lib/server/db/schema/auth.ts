@@ -69,24 +69,12 @@ export const userOnboarding = sqliteTable("user_onboarding", {
 	tourCompletedAt: integer("tour_completed_at"),
 	tourSkipped: integer("tour_skipped").default(0),
 
-	// Checklist
-	checklistDismissed: integer("checklist_dismissed").default(0),
-	firstPostAt: integer("first_post_at"),
-	firstVineAt: integer("first_vine_at"),
-	themeCustomizedAt: integer("theme_customized_at"),
-
-	// Email tracking
-	welcomeEmailSent: integer("welcome_email_sent").default(0),
-	day1EmailSent: integer("day1_email_sent").default(0),
-	day3EmailSent: integer("day3_email_sent").default(0),
-	day7EmailSent: integer("day7_email_sent").default(0),
-	day30EmailSent: integer("day30_email_sent").default(0),
-	checkinEmailsUnsubscribed: integer("checkin_emails_unsubscribed").default(0),
-
-	// Stripe
+	// Billing (actively written by billing webhook)
 	stripeCustomerId: text("stripe_customer_id"),
 	stripeSubscriptionId: text("stripe_subscription_id"),
-	stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+
+	// Email preferences
+	checkinEmailsUnsubscribed: integer("checkin_emails_unsubscribed").default(0),
 
 	// Email verification (028)
 	emailVerified: integer("email_verified").default(0),

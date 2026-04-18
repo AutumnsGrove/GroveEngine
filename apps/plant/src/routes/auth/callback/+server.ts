@@ -13,7 +13,6 @@ import {
 	getSessionToken,
 	fetchSessionData,
 	resolveOnboarding,
-	checkPrePlantUser,
 	upsertOnboarding,
 } from "./auth-callback-service";
 
@@ -69,11 +68,6 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
 	// Step 3: Check existing onboarding record
 	const existingOnboarding = await resolveOnboarding(db, user.id, user.email, path);
-
-	// Fallback: check for pre-Plant users
-	if (!existingOnboarding) {
-		await checkPrePlantUser(db, user.email);
-	}
 
 	// Step 4: Create or update onboarding record
 	const { onboardingId, isNewUser, tenantSubdomain } = await upsertOnboarding(
