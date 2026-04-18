@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -14,6 +15,20 @@ import (
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
+
+// pushTimeout is the time budget for git push commands.
+// Pre-push hooks may build libraries and run typecheck (~60-90s).
+const pushTimeout = 5 * time.Minute
+
+// pushOutput returns the most informative output from a failed push.
+// Pre-push hooks typically write to stdout (console.log), but git
+// errors go to stderr. Falls back to stdout when stderr is empty.
+func pushOutput(r *gwexec.Result) string {
+	if s := strings.TrimSpace(r.Stderr); s != "" {
+		return s
+	}
+	return strings.TrimSpace(r.Stdout)
+}
 
 // slugify converts a title to a URL-safe branch-name component.
 // Lowercase, non-alphanumeric → dash, collapsed runs, trimmed.
@@ -467,19 +482,19 @@ When omitted, operates on the current working directory (existing behavior).`,
 			}
 		}
 
-		// Push branch
-		pushResult, err := gwexec.RunInDir(cwd, "git", "push", "-u", "origin", branch)
+		// Push branch (use longer timeout — pre-push hook builds libs + runs typecheck)
+		pushResult, err := gwexec.RunInDirWithTimeout(pushTimeout, cwd, "git", "push", "-u", "origin", branch)
 		if err != nil {
 			return fmt.Errorf("git push failed: %w", err)
 		}
 		if !pushResult.OK() {
 			// Force push may be needed after rebase rewrote history
-			pushResult, err = gwexec.RunInDir(cwd, "git", "push", "--force-with-lease", "-u", "origin", branch)
+			pushResult, err = gwexec.RunInDirWithTimeout(pushTimeout, cwd, "git", "push", "--force-with-lease", "-u", "origin", branch)
 			if err != nil {
 				return fmt.Errorf("git push failed: %w", err)
 			}
 			if !pushResult.OK() {
-				return fmt.Errorf("git push: %s", strings.TrimSpace(pushResult.Stderr))
+				return fmt.Errorf("git push: %s", pushOutput(pushResult))
 			}
 		}
 
@@ -503,13 +518,13 @@ When omitted, operates on the current working directory (existing behavior).`,
 				return fmt.Errorf("merge into %s failed: %s\nResolve manually in %s", mainBranch, strings.TrimSpace(mergeResult.Stderr), mainPath)
 			}
 
-			// Push main
-			pushMainResult, pushMainErr := gwexec.RunInDir(mainPath, "git", "push")
+			// Push main (use longer timeout — pre-push hook builds libs + runs typecheck)
+			pushMainResult, pushMainErr := gwexec.RunInDirWithTimeout(pushTimeout, mainPath, "git", "push")
 			if pushMainErr != nil {
 				return fmt.Errorf("push %s failed: %w", mainBranch, pushMainErr)
 			}
 			if !pushMainResult.OK() {
-				return fmt.Errorf("push %s failed: %s", mainBranch, strings.TrimSpace(pushMainResult.Stderr))
+				return fmt.Errorf("push %s failed:\n%s", mainBranch, pushOutput(pushMainResult))
 			}
 			merged = true
 		}
