@@ -243,7 +243,7 @@
 
 					{#if twoFactorSecret}
 						<div
-							class="p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
+							class="p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-border/40"
 						>
 							<p class="text-xs text-foreground-subtle mb-1">Or enter this code manually:</p>
 							<code class="text-sm font-mono text-foreground">{twoFactorSecret}</code>
@@ -263,7 +263,7 @@
 							maxlength="6"
 							pattern="[0-9]{6}"
 							required
-							class="w-full px-4 py-3 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint text-center text-xl tracking-widest font-mono transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+							class="w-full px-4 py-3 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-border/50 text-foreground placeholder:text-foreground-faint text-center text-xl tracking-widest font-mono transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
 						<div class="flex gap-2">
 							<button type="submit" class="btn-primary flex-1"> Verify & Enable </button>
@@ -362,11 +362,11 @@
 					{#each data.linkedAccounts as account}
 						{@const info = providerInfo[account.provider] || {
 							name: account.provider,
-							color: "#666",
+							color: "#5d4037",
 							icon: "?",
 						}}
 						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
+							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-border/40"
 						>
 							<div class="flex items-center gap-3">
 								<div
@@ -393,7 +393,7 @@
 			{/if}
 
 			<!-- Link new account buttons -->
-			<div class="mt-4 pt-4 border-t border-white/20 dark:border-bark-700/20">
+			<div class="mt-4 pt-4 border-t border-border/40">
 				<p class="text-sm text-foreground-muted mb-3">Link another account:</p>
 				<div class="flex gap-2 flex-wrap">
 					{#each Object.entries(providerInfo) as [provider, info]}

@@ -51,7 +51,7 @@
 			mode = "sent";
 		} catch (err) {
 			mode = "error";
-			errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+			errorMessage = err instanceof Error ? err.message : "We stumbled — mind trying once more?";
 		}
 	}
 </script>
@@ -116,7 +116,7 @@
 
 			{#if data.customMessage}
 				<div
-					class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20 mb-4"
+					class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-border/40 mb-4"
 				>
 					<p class="text-foreground-muted italic">
 						"{data.customMessage}"
@@ -131,7 +131,7 @@
 		</div>
 
 		<!-- Magic link form -->
-		<div class="border-t border-white/20 dark:border-bark-700/20 pt-6">
+		<div class="border-t border-border/40 pt-6">
 			{#if mode === "ready" || mode === "error"}
 				<div class="space-y-4">
 					<div>
