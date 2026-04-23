@@ -19,7 +19,6 @@ import {
 	throwGroveError,
 } from "@autumnsgrove/lattice/errors";
 import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
-import { getTierSafe } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	ImageUploadMetadataSchema,
 	validateFile,
@@ -154,42 +153,44 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// Validate image dimensions
 		await validateImageDimensions(file, buffer);
 
-		// Storage quota check — runs after basic file validation so invalid files
-		// don't trigger DB queries. Fails open: if tier can't be determined, upload proceeds.
-		// TOCTOU note: concurrent uploads can each read the same used_bytes snapshot and
-		// collectively exceed the limit. Resolving this atomically requires a per-tenant
-		// Durable Object tracking storage in real time — a larger change. This quota is
-		// intentionally advisory/soft: minor overage from parallel uploads is acceptable.
-		const [tenantRow, storageRow] = await Promise.all([
-			db
-				.prepare("SELECT plan FROM tenants WHERE id = ?")
-				.bind(tenantId)
-				.first<{ plan: string }>()
-				.catch(() => null),
-			db
-				.prepare(
-					"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as used_bytes FROM gallery_images WHERE tenant_id = ?",
-				)
-				.bind(tenantId)
-				.first<{ used_bytes: number }>()
-				.catch(() => null),
-		]);
+		// Storage quota check via TenantDO.
+		// The DO's single-writer guarantee serializes concurrent uploads from the same
+		// tenant, closing the TOCTOU race that exists with direct parallel D1 reads.
+		// Fails open: if the DO is unavailable, the upload proceeds rather than blocking.
+		if (platform?.env?.TENANTS && locals.context?.type === "tenant") {
+			try {
+				const doId = platform.env.TENANTS.idFromName(
+					`tenant:${locals.context.tenant.subdomain}`,
+				);
+				const stub = platform.env.TENANTS.get(doId);
+				const storageRes = await stub.fetch("https://tenant.internal/storage/check", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-Tenant-Subdomain": locals.context.tenant.subdomain,
+					},
+					body: JSON.stringify({ bytes: file.size }),
+				});
 
-		if (tenantRow && storageRow !== null) {
-			const tierConfig = getTierSafe(tenantRow.plan);
-			if (tierConfig) {
-				const usedBytes = storageRow.used_bytes;
-				const storageLimit = tierConfig.limits.storage;
-				if (usedBytes + file.size > storageLimit) {
-					const usedMB = Math.round(usedBytes / (1024 * 1024));
-					return json(
-						{
-							error: "storage_limit_exceeded",
-							message: `You've used ${usedMB} MB of your ${tierConfig.limits.storageDisplay} storage limit. Delete some images or upgrade to upload more.`,
-						},
-						{ status: 413 },
-					);
+				if (storageRes.ok) {
+					const { allowed, usedBytes, storageDisplay } = (await storageRes.json()) as {
+						allowed: boolean;
+						usedBytes: number;
+						storageDisplay: string;
+					};
+					if (!allowed) {
+						const usedMB = Math.round(usedBytes / (1024 * 1024));
+						return json(
+							{
+								error: "storage_limit_exceeded",
+								message: `You've used ${usedMB} MB of your ${storageDisplay} storage limit. Delete some images or upgrade to upload more.`,
+							},
+							{ status: 413 },
+						);
+					}
 				}
+			} catch {
+				// Non-critical — fail open if TenantDO is unavailable
 			}
 		}
 

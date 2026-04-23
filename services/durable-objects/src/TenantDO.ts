@@ -57,6 +57,7 @@ export interface TenantConfig {
 export interface TierLimits {
 	postsPerMonth: number;
 	storageBytes: number;
+	storageDisplay: string;
 	customDomains: number;
 }
 
@@ -173,6 +174,12 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 				method: "POST",
 				path: "/analytics",
 				handler: (ctx) => this.handleRecordEvent(ctx),
+			},
+			// Storage quota check — serialized per-tenant by the DO's single-writer guarantee
+			{
+				method: "POST",
+				path: "/storage/check",
+				handler: (ctx) => this.handleStorageCheck(ctx),
 			},
 		];
 	}
@@ -347,6 +354,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			// Convert Infinity to -1 for JSON serialization (Infinity isn't valid JSON)
 			postsPerMonth: tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
 			storageBytes: tierConfig.limits.storage,
+			storageDisplay: tierConfig.limits.storageDisplay,
 			customDomains: tierConfig.features.customDomain
 				? tier === "evergreen"
 					? 10
@@ -432,6 +440,50 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		const { slug } = ctx.params;
 		this.sql.exec("DELETE FROM drafts WHERE slug = ?", slug);
 		return Response.json({ success: true });
+	}
+
+	// ============================================================================
+	// Storage Methods
+	// ============================================================================
+
+	/**
+	 * Check whether a tenant can upload a file of the given size.
+	 *
+	 * Queries D1 for live storage usage and checks it against the tier limit.
+	 * Because the DO serializes requests per tenant, concurrent uploads from the
+	 * same tenant go through this check one at a time — eliminating the TOCTOU
+	 * race that exists when workers query D1 directly in parallel.
+	 *
+	 * Input:  { bytes: number }  — size of the file being uploaded
+	 * Output: { allowed, usedBytes, limitBytes, storageDisplay }
+	 */
+	private async handleStorageCheck(ctx: LoomRequestContext): Promise<Response> {
+		const { bytes } = (await ctx.request.json()) as { bytes: number };
+
+		if (!this.state_data) {
+			await this.locks.withLock("refresh", () => this.refreshConfig());
+		}
+
+		if (!this.state_data) {
+			return new Response("Tenant not found", { status: 404 });
+		}
+
+		const { storageBytes, storageDisplay } = this.state_data.limits;
+
+		const row = await this.env.DB.prepare(
+			"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as used_bytes FROM gallery_images WHERE tenant_id = ?",
+		)
+			.bind(this.state_data.id)
+			.first<{ used_bytes: number }>();
+
+		const usedBytes = row?.used_bytes ?? 0;
+
+		return Response.json({
+			allowed: usedBytes + bytes <= storageBytes,
+			usedBytes,
+			limitBytes: storageBytes,
+			storageDisplay,
+		});
 	}
 
 	// ============================================================================
