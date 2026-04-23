@@ -188,6 +188,12 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 				path: "/storage/check",
 				handler: (ctx) => this.handleStorageCheck(ctx),
 			},
+			// Storage reservation release — called after upload commits to D1
+			{
+				method: "POST",
+				path: "/storage/release",
+				handler: (ctx) => this.handleStorageRelease(ctx),
+			},
 		];
 	}
 
@@ -500,11 +506,13 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		const usedBytes = row?.used_bytes ?? 0;
 		const allowed = usedBytes + pendingBytes + bytes <= storageBytes;
 
+		let reservationId: string | undefined;
 		if (allowed) {
 			// Reserve these bytes until the upload commits to D1 or the TTL expires.
 			// Concurrent uploads within this DO instance will see this reservation
 			// and factor it into their own quota calculations.
-			this.pendingUploads.set(crypto.randomUUID(), {
+			reservationId = crypto.randomUUID();
+			this.pendingUploads.set(reservationId, {
 				bytes,
 				expiresAt: now + TenantDO.RESERVATION_TTL_MS,
 			});
@@ -515,7 +523,21 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			usedBytes,
 			limitBytes: storageBytes,
 			storageDisplay,
+			reservationId,
 		});
+	}
+
+	/**
+	 * Release a storage reservation after an upload successfully commits to D1.
+	 * Prevents reservations from double-counting against the quota for up to the TTL.
+	 *
+	 * Input:  { reservationId: string }
+	 * Output: { released: boolean }
+	 */
+	private async handleStorageRelease(ctx: LoomRequestContext): Promise<Response> {
+		const { reservationId } = (await ctx.request.json()) as { reservationId: string };
+		const released = this.pendingUploads.delete(reservationId);
+		return Response.json({ released });
 	}
 
 	// ============================================================================

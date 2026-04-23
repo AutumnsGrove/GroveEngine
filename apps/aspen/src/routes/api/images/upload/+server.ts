@@ -113,7 +113,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	// threshold.check() always increments, so we use a separate KV flag that gets
 	// written only when the Petal rejection counter actually exceeds its limit.
 	// This short-circuits before file parsing, DB queries, and Petal API calls.
-	const uploadRestricted = await kv.get(`upload/restricted:${locals.user.id}`).catch(() => null);
+	const uploadRestricted = kv
+		? await kv.get(`upload/restricted:${locals.user.id}`).catch(() => null)
+		: null;
 	if (uploadRestricted !== null) {
 		return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
 	}
@@ -159,11 +161,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// guarantee means concurrent uploads see each other's reservations — closing
 		// the TOCTOU race that exists with direct D1 reads from parallel workers.
 		// Fails open: if the DO is unavailable, the upload proceeds rather than blocking.
+		let storageReservationId: string | null = null;
+		let tenantStub: DurableObjectStub | null = null;
 		if (platform?.env?.TENANTS && locals.context?.type === "tenant") {
 			try {
 				const doId = platform.env.TENANTS.idFromName(`tenant:${locals.context.tenant.subdomain}`);
-				const stub = platform.env.TENANTS.get(doId);
-				const storageRes = await stub.fetch("https://tenant.internal/storage/check", {
+				tenantStub = platform.env.TENANTS.get(doId);
+				const storageRes = await tenantStub.fetch("https://tenant.internal/storage/check", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -173,11 +177,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				});
 
 				if (storageRes.ok) {
-					const { allowed, usedBytes, storageDisplay } = (await storageRes.json()) as {
-						allowed: boolean;
-						usedBytes: number;
-						storageDisplay: string;
-					};
+					const { allowed, usedBytes, storageDisplay, reservationId } =
+						(await storageRes.json()) as {
+							allowed: boolean;
+							usedBytes: number;
+							storageDisplay: string;
+							reservationId?: string;
+						};
 					if (!allowed) {
 						const usedMB = Math.round(usedBytes / (1024 * 1024));
 						return json(
@@ -188,6 +194,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 							{ status: 413 },
 						);
 					}
+					storageReservationId = reservationId ?? null;
 				}
 			} catch {
 				// Non-critical — fail open if TenantDO is unavailable
@@ -285,6 +292,18 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			parsedHeight: meta.imageHeight ? parseInt(meta.imageHeight, 10) : null,
 			cdnBaseUrl,
 		});
+
+		// Release the storage reservation now that the upload has committed to D1.
+		// Fire-and-forget: don't let a DO failure block the success response.
+		if (storageReservationId && tenantStub) {
+			tenantStub
+				.fetch("https://tenant.internal/storage/release", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ reservationId: storageReservationId }),
+				})
+				.catch(() => {});
+		}
 
 		return json({ success: true, ...result }, { headers: { "Cache-Control": "no-store" } });
 	} catch (err) {
