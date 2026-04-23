@@ -154,14 +154,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		await validateImageDimensions(file, buffer);
 
 		// Storage quota check via TenantDO.
-		// The DO's single-writer guarantee serializes concurrent uploads from the same
-		// tenant, closing the TOCTOU race that exists with direct parallel D1 reads.
+		// The DO tracks both committed bytes (from D1) and in-flight reservations for
+		// uploads that have been approved but not yet written. Its single-writer
+		// guarantee means concurrent uploads see each other's reservations — closing
+		// the TOCTOU race that exists with direct D1 reads from parallel workers.
 		// Fails open: if the DO is unavailable, the upload proceeds rather than blocking.
 		if (platform?.env?.TENANTS && locals.context?.type === "tenant") {
 			try {
-				const doId = platform.env.TENANTS.idFromName(
-					`tenant:${locals.context.tenant.subdomain}`,
-				);
+				const doId = platform.env.TENANTS.idFromName(`tenant:${locals.context.tenant.subdomain}`);
 				const stub = platform.env.TENANTS.get(doId);
 				const storageRes = await stub.fetch("https://tenant.internal/storage/check", {
 					method: "POST",

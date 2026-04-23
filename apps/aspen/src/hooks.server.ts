@@ -261,6 +261,7 @@ function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
 	return {
 		postsPerMonth: tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
 		storageBytes: tierConfig.limits.storage,
+		storageDisplay: tierConfig.limits.storageDisplay,
 		customDomains: tierConfig.features.customDomain ? (tier === "evergreen" ? 10 : 1) : 0,
 	};
 }
