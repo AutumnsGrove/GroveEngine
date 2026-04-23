@@ -19,6 +19,7 @@ import {
 	throwGroveError,
 } from "@autumnsgrove/lattice/errors";
 import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
+import { getTierSafe } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
 	ImageUploadMetadataSchema,
 	validateFile,
@@ -63,14 +64,50 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const kv = platform!.env!.CACHE_KV;
 	const threshold = createThreshold(platform?.env, { identifier: locals.user?.id });
 
-	// Rate limit uploads
+	// Two-layer rate limiting: burst + hourly.
+	// Burst (20/5min) catches scripted rapid-fire uploads.
+	// Hourly (200/hr) catches sustained volume abuse.
+	// A normal user uploading photos for a blog post never approaches either limit.
 	if (threshold) {
-		const { response } = await thresholdCheckWithResult(threshold, {
+		const burstCheck = await thresholdCheckWithResult(threshold, {
+			key: `upload/burst:${locals.user.id}`,
+			limit: 20,
+			windowSeconds: 300,
+		});
+		if (burstCheck.response) {
+			const retryAfter = burstCheck.result.retryAfter ?? 300;
+			const retrySecs = Math.ceil(retryAfter);
+			const retryText =
+				retrySecs < 60
+					? `${retrySecs} second${retrySecs !== 1 ? "s" : ""}`
+					: `${Math.ceil(retrySecs / 60)} minute${Math.ceil(retrySecs / 60) !== 1 ? "s" : ""}`;
+			return json(
+				{
+					error: "rate_limited",
+					message: `You're uploading too fast — try again in ${retryText}.`,
+					retryAfter,
+				},
+				{ status: 429 },
+			);
+		}
+
+		const hourlyCheck = await thresholdCheckWithResult(threshold, {
 			key: `upload/image:${locals.user.id}`,
-			limit: 50,
+			limit: 200,
 			windowSeconds: 3600,
 		});
-		if (response) return response;
+		if (hourlyCheck.response) {
+			const retryAfter = hourlyCheck.result.retryAfter ?? 3600;
+			const retryMins = Math.ceil(retryAfter / 60);
+			return json(
+				{
+					error: "rate_limited",
+					message: `Upload limit reached — try again in ${retryMins} minute${retryMins !== 1 ? "s" : ""}.`,
+					retryAfter,
+				},
+				{ status: 429 },
+			);
+		}
 	}
 
 	try {
@@ -108,16 +145,38 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// Validate image dimensions
 		await validateImageDimensions(file, buffer);
 
-		// Pre-scan abuse detection
-		const rejectedKey = `upload/rejected:${locals.user.id}`;
-		if (threshold) {
-			const rejectedCheck = await thresholdCheckWithResult(threshold, {
-				key: rejectedKey,
-				limit: 5,
-				windowSeconds: 3600,
-			});
-			if (rejectedCheck.response) {
-				return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
+		// Storage quota check — runs after basic file validation so invalid files
+		// don't trigger DB queries. Fails open: if tier can't be determined, upload proceeds.
+		const [tenantRow, storageRow] = await Promise.all([
+			db
+				.prepare("SELECT plan FROM tenants WHERE id = ?")
+				.bind(tenantId)
+				.first<{ plan: string }>()
+				.catch(() => null),
+			db
+				.prepare(
+					"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as used_bytes FROM gallery_images WHERE tenant_id = ?",
+				)
+				.bind(tenantId)
+				.first<{ used_bytes: number }>()
+				.catch(() => null),
+		]);
+
+		if (tenantRow && storageRow !== null) {
+			const tierConfig = getTierSafe(tenantRow.plan);
+			if (tierConfig) {
+				const usedBytes = storageRow.used_bytes;
+				const storageLimit = tierConfig.limits.storage;
+				if (usedBytes + file.size > storageLimit) {
+					const usedMB = Math.round(usedBytes / (1024 * 1024));
+					return json(
+						{
+							error: "storage_limit_exceeded",
+							message: `You've used ${usedMB} MB of your ${tierConfig.limits.storageDisplay} storage limit. Delete some images or upgrade to upload more.`,
+						},
+						{ status: 413 },
+					);
+				}
 			}
 		}
 
@@ -140,12 +199,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			);
 
 			if (!petalResult.allowed) {
-				// Increment rejected counter
+				// Count this rejection. After 15 Petal rejections in an hour, restrict uploads.
+				// Limit is set high enough to survive Petal false positives on legitimate content.
 				if (threshold) {
 					try {
-						await threshold.check({ key: rejectedKey, limit: 5, windowSeconds: 3600 });
+						const rejectedResult = await threshold.check({
+							key: `upload/rejected:${locals.user.id}`,
+							limit: 15,
+							windowSeconds: 3600,
+						});
+						if (!rejectedResult.allowed) {
+							return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
+						}
 					} catch {
-						// Non-critical
+						// Non-critical — don't block on counter failure
 					}
 				}
 

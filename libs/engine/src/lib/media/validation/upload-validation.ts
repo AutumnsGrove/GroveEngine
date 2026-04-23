@@ -408,9 +408,20 @@ export function getActionableUploadError(serverMessage: string): string {
 		return "Image uploads aren't available yet. This feature is being rolled out gradually.";
 	}
 
-	// Rate limiting
-	if (msg.includes("rate_limited") || msg.includes("rate limit") || msg.includes("too many")) {
-		return "You're uploading too quickly. Wait a moment and try again.";
+	// Rate limiting — server messages now include specific retry times, pass them through
+	if (
+		msg.includes("rate_limited") ||
+		msg.includes("uploading too fast") ||
+		msg.includes("upload limit reached") ||
+		msg.includes("rate limit") ||
+		msg.includes("too many")
+	) {
+		return serverMessage;
+	}
+
+	// Storage quota exceeded — server message includes current usage and limit
+	if (msg.includes("storage_limit_exceeded") || msg.includes("storage limit")) {
+		return serverMessage;
 	}
 
 	// Content moderation (Petal)
