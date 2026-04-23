@@ -110,6 +110,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 	}
 
+	// Pre-scan restriction gate — truly read-only KV lookup, no counter increment.
+	// threshold.check() always increments, so we use a separate KV flag that gets
+	// written only when the Petal rejection counter actually exceeds its limit.
+	// This short-circuits before file parsing, DB queries, and Petal API calls.
+	const uploadRestricted = await kv.get(`upload/restricted:${locals.user.id}`).catch(() => null);
+	if (uploadRestricted !== null) {
+		return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
+	}
+
 	try {
 		const tenantId = await getVerifiedTenantId(db, locals.tenantId, locals.user);
 		const formData = await request.formData();
@@ -147,6 +156,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 		// Storage quota check — runs after basic file validation so invalid files
 		// don't trigger DB queries. Fails open: if tier can't be determined, upload proceeds.
+		// TOCTOU note: concurrent uploads can each read the same used_bytes snapshot and
+		// collectively exceed the limit. Resolving this atomically requires a per-tenant
+		// Durable Object tracking storage in real time — a larger change. This quota is
+		// intentionally advisory/soft: minor overage from parallel uploads is acceptable.
 		const [tenantRow, storageRow] = await Promise.all([
 			db
 				.prepare("SELECT plan FROM tenants WHERE id = ?")
@@ -209,6 +222,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 							windowSeconds: 3600,
 						});
 						if (!rejectedResult.allowed) {
+							// Write a KV flag so future uploads are short-circuited at the
+							// pre-scan gate without incrementing the counter further or burning
+							// Petal quota. TTL matches the rejection counter window.
+							await kv
+								.put(`upload/restricted:${locals.user.id}`, "1", { expirationTtl: 3600 })
+								.catch(() => {});
 							return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
 						}
 					} catch {
