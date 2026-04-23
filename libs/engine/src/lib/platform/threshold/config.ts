@@ -65,7 +65,7 @@ export const ENDPOINT_RATE_LIMITS = {
 	"comments/create": { limit: 20, windowSeconds: 300 },
 
 	// Upload endpoints
-	"upload/image": { limit: 20, windowSeconds: 3600 },
+	"upload/image": { limit: 200, windowSeconds: 3600 },
 	"upload/media": { limit: 10, windowSeconds: 3600 },
 
 	// AI endpoints (expensive — app-level)
@@ -133,7 +133,7 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"PATCH:/api/posts": "posts/update",
 	"POST:/api/comments": "comments/create",
 	"POST:/api/upload": "upload/image",
-	"POST:/api/images": "upload/image",
+	"POST:/api/images/upload": "upload/image",
 	"POST:/api/grove/wisp": "ai/wisp",
 	"POST:/api/ai/wisp": "ai/wisp",
 	"POST:/api/ai/fireside": "ai/fireside",

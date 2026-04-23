@@ -57,6 +57,7 @@ export interface TenantConfig {
 export interface TierLimits {
 	postsPerMonth: number;
 	storageBytes: number;
+	storageDisplay: string;
 	customDomains: number;
 }
 
@@ -95,6 +96,13 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 
 	// Subdomain extracted from DO name (set on first request)
 	private subdomain: string | null = null;
+
+	// Pending upload reservations: bytes approved but not yet committed to D1.
+	// Tracked in-memory so concurrent uploads within the same DO instance see
+	// each other's reserved bytes and can't collectively exceed the quota.
+	// Entries expire after 2 minutes — well beyond any realistic upload duration.
+	private pendingUploads = new Map<string, { bytes: number; expiresAt: number }>();
+	private static readonly RESERVATION_TTL_MS = 120_000;
 
 	config(): LoomConfig {
 		return { name: "TenantDO" };
@@ -173,6 +181,18 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 				method: "POST",
 				path: "/analytics",
 				handler: (ctx) => this.handleRecordEvent(ctx),
+			},
+			// Storage quota check — serialized per-tenant by the DO's single-writer guarantee
+			{
+				method: "POST",
+				path: "/storage/check",
+				handler: (ctx) => this.handleStorageCheck(ctx),
+			},
+			// Storage reservation release — called after upload commits to D1
+			{
+				method: "POST",
+				path: "/storage/release",
+				handler: (ctx) => this.handleStorageRelease(ctx),
 			},
 		];
 	}
@@ -347,6 +367,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			// Convert Infinity to -1 for JSON serialization (Infinity isn't valid JSON)
 			postsPerMonth: tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
 			storageBytes: tierConfig.limits.storage,
+			storageDisplay: tierConfig.limits.storageDisplay,
 			customDomains: tierConfig.features.customDomain
 				? tier === "evergreen"
 					? 10
@@ -432,6 +453,91 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		const { slug } = ctx.params;
 		this.sql.exec("DELETE FROM drafts WHERE slug = ?", slug);
 		return Response.json({ success: true });
+	}
+
+	// ============================================================================
+	// Storage Methods
+	// ============================================================================
+
+	/**
+	 * Check whether a tenant can upload a file of the given size.
+	 *
+	 * Queries D1 for committed bytes and adds any in-flight reservations before
+	 * checking against the tier limit. If allowed, registers a reservation so
+	 * subsequent concurrent checks see the bytes as "spoken for" until the upload
+	 * commits to D1 or the reservation TTL expires (2 minutes).
+	 *
+	 * The DO's single-writer guarantee means only one check runs at a time per
+	 * tenant, so the committed+pending sum is always consistent — no TOCTOU race.
+	 *
+	 * Input:  { bytes: number }  — size of the file being uploaded
+	 * Output: { allowed, usedBytes, limitBytes, storageDisplay }
+	 */
+	private async handleStorageCheck(ctx: LoomRequestContext): Promise<Response> {
+		const { bytes } = (await ctx.request.json()) as { bytes: number };
+
+		if (!this.state_data) {
+			await this.locks.withLock("refresh", () => this.refreshConfig());
+		}
+
+		if (!this.state_data) {
+			return new Response("Tenant not found", { status: 404 });
+		}
+
+		const { storageBytes, storageDisplay } = this.state_data.limits;
+
+		// Sweep expired reservations and sum the active pending bytes.
+		const now = Date.now();
+		let pendingBytes = 0;
+		for (const [id, res] of this.pendingUploads) {
+			if (res.expiresAt <= now) {
+				this.pendingUploads.delete(id);
+			} else {
+				pendingBytes += res.bytes;
+			}
+		}
+
+		const row = await this.env.DB.prepare(
+			"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as used_bytes FROM gallery_images WHERE tenant_id = ?",
+		)
+			.bind(this.state_data.id)
+			.first<{ used_bytes: number }>();
+
+		const usedBytes = row?.used_bytes ?? 0;
+		const allowed = usedBytes + pendingBytes + bytes <= storageBytes;
+
+		let reservationId: string | undefined;
+		if (allowed) {
+			// Reserve these bytes until the upload commits to D1 or the TTL expires.
+			// Concurrent uploads within this DO instance will see this reservation
+			// and factor it into their own quota calculations.
+			reservationId = crypto.randomUUID();
+			this.pendingUploads.set(reservationId, {
+				bytes,
+				expiresAt: now + TenantDO.RESERVATION_TTL_MS,
+			});
+		}
+
+		return Response.json({
+			allowed,
+			usedBytes,
+			limitBytes: storageBytes,
+			storageDisplay,
+			reservationId,
+		});
+	}
+
+	/**
+	 * Release a storage reservation after an upload successfully commits to D1.
+	 * Prevents reservations from double-counting against the quota for up to the TTL.
+	 *
+	 * Input:  { reservationId: string }
+	 * Output: { released: boolean }
+	 */
+	private async handleStorageRelease(ctx: LoomRequestContext): Promise<Response> {
+		const { reservationId } = (await ctx.request.json()) as { reservationId: string };
+		const released = this.pendingUploads.delete(reservationId);
+		return Response.json({ released });
 	}
 
 	// ============================================================================

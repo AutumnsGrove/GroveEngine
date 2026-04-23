@@ -63,14 +63,61 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const kv = platform!.env!.CACHE_KV;
 	const threshold = createThreshold(platform?.env, { identifier: locals.user?.id });
 
-	// Rate limit uploads
+	// Two-layer rate limiting: burst + hourly.
+	// Burst (20/5min) catches scripted rapid-fire uploads.
+	// Hourly (200/hr) catches sustained volume abuse.
+	// A normal user uploading photos for a blog post never approaches either limit.
 	if (threshold) {
-		const { response } = await thresholdCheckWithResult(threshold, {
+		const burstCheck = await thresholdCheckWithResult(threshold, {
+			key: `upload/burst:${locals.user.id}`,
+			limit: 20,
+			windowSeconds: 300,
+		});
+		if (burstCheck.response) {
+			const retryAfter = burstCheck.result.retryAfter ?? 300;
+			const retrySecs = Math.ceil(retryAfter);
+			const retryText =
+				retrySecs < 60
+					? `${retrySecs} second${retrySecs !== 1 ? "s" : ""}`
+					: `${Math.ceil(retrySecs / 60)} minute${Math.ceil(retrySecs / 60) !== 1 ? "s" : ""}`;
+			return json(
+				{
+					error: "rate_limited",
+					message: `You're uploading too fast — try again in ${retryText}.`,
+					retryAfter,
+				},
+				{ status: 429 },
+			);
+		}
+
+		const hourlyCheck = await thresholdCheckWithResult(threshold, {
 			key: `upload/image:${locals.user.id}`,
-			limit: 50,
+			limit: 200,
 			windowSeconds: 3600,
 		});
-		if (response) return response;
+		if (hourlyCheck.response) {
+			const retryAfter = hourlyCheck.result.retryAfter ?? 3600;
+			const retryMins = Math.ceil(retryAfter / 60);
+			return json(
+				{
+					error: "rate_limited",
+					message: `Upload limit reached — try again in ${retryMins} minute${retryMins !== 1 ? "s" : ""}.`,
+					retryAfter,
+				},
+				{ status: 429 },
+			);
+		}
+	}
+
+	// Pre-scan restriction gate — truly read-only KV lookup, no counter increment.
+	// threshold.check() always increments, so we use a separate KV flag that gets
+	// written only when the Petal rejection counter actually exceeds its limit.
+	// This short-circuits before file parsing, DB queries, and Petal API calls.
+	const uploadRestricted = kv
+		? await kv.get(`upload/restricted:${locals.user.id}`).catch(() => null)
+		: null;
+	if (uploadRestricted !== null) {
+		return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
 	}
 
 	try {
@@ -108,16 +155,49 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// Validate image dimensions
 		await validateImageDimensions(file, buffer);
 
-		// Pre-scan abuse detection
-		const rejectedKey = `upload/rejected:${locals.user.id}`;
-		if (threshold) {
-			const rejectedCheck = await thresholdCheckWithResult(threshold, {
-				key: rejectedKey,
-				limit: 5,
-				windowSeconds: 3600,
-			});
-			if (rejectedCheck.response) {
-				return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
+		// Storage quota check via TenantDO.
+		// The DO tracks both committed bytes (from D1) and in-flight reservations for
+		// uploads that have been approved but not yet written. Its single-writer
+		// guarantee means concurrent uploads see each other's reservations — closing
+		// the TOCTOU race that exists with direct D1 reads from parallel workers.
+		// Fails open: if the DO is unavailable, the upload proceeds rather than blocking.
+		let storageReservationId: string | null = null;
+		let tenantStub: DurableObjectStub | null = null;
+		if (platform?.env?.TENANTS && locals.context?.type === "tenant") {
+			try {
+				const doId = platform.env.TENANTS.idFromName(`tenant:${locals.context.tenant.subdomain}`);
+				tenantStub = platform.env.TENANTS.get(doId);
+				const storageRes = await tenantStub.fetch("https://tenant.internal/storage/check", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-Tenant-Subdomain": locals.context.tenant.subdomain,
+					},
+					body: JSON.stringify({ bytes: file.size }),
+				});
+
+				if (storageRes.ok) {
+					const { allowed, usedBytes, storageDisplay, reservationId } =
+						(await storageRes.json()) as {
+							allowed: boolean;
+							usedBytes: number;
+							storageDisplay: string;
+							reservationId?: string;
+						};
+					if (!allowed) {
+						const usedMB = Math.round(usedBytes / (1024 * 1024));
+						return json(
+							{
+								error: "storage_limit_exceeded",
+								message: `You've used ${usedMB} MB of your ${storageDisplay} storage limit. Delete some images or upgrade to upload more.`,
+							},
+							{ status: 413 },
+						);
+					}
+					storageReservationId = reservationId ?? null;
+				}
+			} catch {
+				// Non-critical — fail open if TenantDO is unavailable
 			}
 		}
 
@@ -140,12 +220,26 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			);
 
 			if (!petalResult.allowed) {
-				// Increment rejected counter
+				// Count this rejection. After 15 Petal rejections in an hour, restrict uploads.
+				// Limit is set high enough to survive Petal false positives on legitimate content.
 				if (threshold) {
 					try {
-						await threshold.check({ key: rejectedKey, limit: 5, windowSeconds: 3600 });
+						const rejectedResult = await threshold.check({
+							key: `upload/rejected:${locals.user.id}`,
+							limit: 15,
+							windowSeconds: 3600,
+						});
+						if (!rejectedResult.allowed) {
+							// Write a KV flag so future uploads are short-circuited at the
+							// pre-scan gate without incrementing the counter further or burning
+							// Petal quota. TTL matches the rejection counter window.
+							await kv
+								.put(`upload/restricted:${locals.user.id}`, "1", { expirationTtl: 3600 })
+								.catch(() => {});
+							return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), { status: 429 });
+						}
 					} catch {
-						// Non-critical
+						// Non-critical — don't block on counter failure
 					}
 				}
 
@@ -198,6 +292,18 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			parsedHeight: meta.imageHeight ? parseInt(meta.imageHeight, 10) : null,
 			cdnBaseUrl,
 		});
+
+		// Release the storage reservation now that the upload has committed to D1.
+		// Fire-and-forget: don't let a DO failure block the success response.
+		if (storageReservationId && tenantStub) {
+			tenantStub
+				.fetch("https://tenant.internal/storage/release", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ reservationId: storageReservationId }),
+				})
+				.catch(() => {});
+		}
 
 		return json({ success: true, ...result }, { headers: { "Cache-Control": "no-store" } });
 	} catch (err) {

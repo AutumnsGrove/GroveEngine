@@ -448,14 +448,18 @@ function getPopularThreshold(tier: string | undefined): number {
 function getTierLimits(tier: string): {
 	postsPerMonth: number;
 	storageBytes: number;
+	storageDisplay: string;
 } {
 	const GB = 1024 * 1024 * 1024;
-	const limits: Record<string, { postsPerMonth: number; storageBytes: number }> = {
-		free: { postsPerMonth: 10, storageBytes: 100 * 1024 * 1024 }, // 100 MB
-		seedling: { postsPerMonth: 50, storageBytes: 1 * GB }, // 1 GB
-		sapling: { postsPerMonth: 100, storageBytes: 5 * GB }, // 5 GB
-		oak: { postsPerMonth: 500, storageBytes: 25 * GB }, // 25 GB
-		evergreen: { postsPerMonth: -1, storageBytes: 100 * GB }, // Unlimited posts, 100 GB
+	const limits: Record<
+		string,
+		{ postsPerMonth: number; storageBytes: number; storageDisplay: string }
+	> = {
+		free: { postsPerMonth: 10, storageBytes: 100 * 1024 * 1024, storageDisplay: "100 MB" },
+		seedling: { postsPerMonth: 50, storageBytes: 1 * GB, storageDisplay: "1 GB" },
+		sapling: { postsPerMonth: 100, storageBytes: 5 * GB, storageDisplay: "5 GB" },
+		oak: { postsPerMonth: 500, storageBytes: 25 * GB, storageDisplay: "25 GB" },
+		evergreen: { postsPerMonth: -1, storageBytes: 100 * GB, storageDisplay: "100 GB" },
 	};
 	return limits[tier] ?? limits.seedling;
 }

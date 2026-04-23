@@ -30,6 +30,7 @@ export interface TenantConfig {
 export interface TierLimits {
 	postsPerMonth: number;
 	storageBytes: number;
+	storageDisplay: string;
 	customDomains: number;
 }
 
