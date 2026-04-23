@@ -570,6 +570,8 @@
 	}
 	main {
 		padding: 2.5rem 2rem 0;
+		position: relative;
+		z-index: 1;
 	}
 	/* Mobile-specific layout adjustments */
 	@media (max-width: 768px) {
