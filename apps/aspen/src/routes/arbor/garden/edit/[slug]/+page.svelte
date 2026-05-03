@@ -340,6 +340,35 @@
 		}
 	}
 
+	async function handleRefreshLiveVersion() {
+		showMoreMenu = false;
+		saving = true;
+
+		try {
+			const response = await api.post(`/api/blooms/${originalSlug}/refresh`, {});
+			const result = response as {
+				success: boolean;
+				kvCacheCleared: boolean;
+				cdnCachePurged: boolean;
+				message: string;
+			};
+
+			if (result.success) {
+				toast.success("Live version refreshed!", {
+					description: result.message,
+				});
+			} else {
+				toast.error("Failed to refresh live version");
+			}
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Failed to refresh live version",
+			);
+		} finally {
+			saving = false;
+		}
+	}
+
 	// Flush draft and warn about unsaved changes on page unload
 	function handleBeforeUnload(e: BeforeUnloadEvent) {
 		// Always flush the draft to localStorage so content survives session expiry
@@ -427,6 +456,15 @@
 							>
 								<actionIcons.refresh size={14} />
 								Re-publish (bump in feeds)
+							</button>
+							<button
+								class="menu-item"
+								role="menuitem"
+								onclick={handleRefreshLiveVersion}
+								disabled={saving}
+							>
+								<actionIcons.refresh size={14} />
+								Refresh live version
 							</button>
 						{/if}
 						<button

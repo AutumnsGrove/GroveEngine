@@ -79,6 +79,8 @@ Published posts:
 - Show up in your RSS feed
 - Can appear in [[meadow|Meadow]] (if you've enabled sharing)
 
+**Editing published posts:** Changes are saved immediately, but might take up to an hour to appear on your live site due to caching. If you need edits to show up right away, use the **Refresh live version** button in the More menu. See [[refreshing-live-posts|Refreshing Your Live Posts]] for details.
+
 ## Scheduling posts
 
 Grove doesn't currently support scheduling posts for future publication. Posts go live when you click **Publish**.
