@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
 	import Card from "@autumnsgrove/lattice/ui/components/ui/Card.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
@@ -22,22 +21,6 @@
 		if (accentColor) params.set("accent", accentColor.replace("#", ""));
 		return `https://og.grove.place/?${params.toString()}`;
 	});
-
-	function handleCardClick(event: MouseEvent, slug: string) {
-		// Don't navigate if clicking on a tag link or badge
-		const target = event.target as HTMLElement;
-		if (target.closest("a")) {
-			return;
-		}
-		goto(`/garden/${slug}`);
-	}
-
-	function handleCardKeydown(event: KeyboardEvent, slug: string) {
-		if (event.key === "Enter" || event.key === " ") {
-			event.preventDefault();
-			goto(`/garden/${slug}`);
-		}
-	}
 </script>
 
 <svelte:head>
@@ -146,16 +129,10 @@
 {:else}
 	<div class="grid gap-8 max-w-3xl mx-auto">
 		{#each data.posts as post (post.slug)}
-			<Card
-				hoverable
-				onclick={(e: MouseEvent) => handleCardClick(e, post.slug)}
-				onkeydown={(e: KeyboardEvent) => handleCardKeydown(e, post.slug)}
-				role="button"
-				tabindex="0"
-			>
+			<Card hoverable class="post-card">
 				{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
 				<h2 class="text-xl font-semibold mb-4 text-success transition-colors">
-					{post.title}
+					<a href="/garden/{post.slug}" class="post-link">{post.title}</a>
 				</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">
 					<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
@@ -239,9 +216,28 @@
 		transition: color 0.3s ease;
 	}
 
-	/* Tag link styling */
+	/* Stretched link: title link covers the whole card for click/middle-click */
+	.post-card {
+		position: relative;
+	}
+
+	.post-link {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.post-link::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+	}
+
+	/* Tag links sit above the stretched link */
 	.tag-link {
 		text-decoration: none;
+		position: relative;
+		z-index: 1;
 	}
 
 	/* Apply accent color to tags when set via CSS custom property */
