@@ -72,6 +72,76 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## Primary Design Principles
+
+These two principles govern how code is structured across the entire Grove ecosystem. They sit above any individual SDK rule or pattern — every other convention in this project derives from them.
+
+### Data Primacy
+
+> **Code translates data. It never defines it.**
+
+If a value could live in a config module, a named constant, a data file, or a design token — it must. No hardcoded strings scattered across logic. No parallel data structures that duplicate what a config already defines. One source of truth, imported everywhere.
+
+TypeScript-as-config is valid — compile-time validation is an advantage over raw YAML. But the value still needs ONE home. If the same string, number, or structure appears in two files, one instance is a bug.
+
+**Concrete rules:**
+
+- Tier names, limits, and pricing only in `platform/config/tiers.ts` — never bare tier strings or magic limits in route handlers
+- Model names and metadata only in `lumen-models.json` + `lumen/config.ts` — never a bare model string in application code
+- Error codes and messages only in Signpost catalogs (`errors/*.ts`) — never ad-hoc error strings duplicated across endpoints
+- Design tokens only in Prism (`libs/prism/`) — never hardcoded hex colors, and never the same color value in two files
+- Rate limit definitions only in Threshold/Thorn config — never hand-rolled limit constants in route handlers
+- Feature flag names defined once as constants — not re-typed as string literals in multiple checks
+- If the same string appears twice, one instance is a bug
+
+**The test:** "Is this value defined in exactly one place, and do all consumers read from that place?"
+
+### SDK Boundaries
+
+> **Every capability is accessed through its owning SDK. If no SDK exists, build the shared function so the next consumer doesn't reinvent it.**
+
+This is the behavioral sibling of Data Primacy. Where Data Primacy says *values live in config, not code*, this principle says *behavior lives in owning packages, not consumers*. Together: **code translates data through SDK boundaries. It never defines data, and it never reimplements behavior.**
+
+**The resolution order — always try from the top:**
+
+```
+1. SDK exists?        → Use it. (Infra, Amber, Lumen, Threshold, Signpost, Prism, etc.)
+2. Engine has it?     → Import from @autumnsgrove/lattice/...
+3. Neither exists?    → Build it in the engine first, THEN import it in your app.
+4. Truly app-specific → Local code is fine, but be honest about whether it's really unique.
+```
+
+**The test:** *"If I needed to change how this works, how many files would I touch?"* 1 package = correct. >1 = the capability has leaked.
+
+**Capability ownership map:**
+
+| Capability | Owner | Consumers call | They do NOT |
+|---|---|---|---|
+| Database queries | `@autumnsgrove/infra` | `GroveDatabase`, `createDb()`, `scopedDb()` | Use raw `env.DB.prepare()` or `platform.env.DB` directly |
+| File storage | `@autumnsgrove/lattice/amber` | `FileManager`, `ExportManager`, `QuotaManager` | Use raw `env.BUCKET.put()` or `R2Bucket` operations |
+| KV storage | `@autumnsgrove/infra` | `GroveKV` via `GroveContext` | Use raw `env.KV.get()` / `env.KV.put()` |
+| AI inference | `@autumnsgrove/lattice/ai/lumen` | `createLumenClient()`, `RemoteLumenClient` | Construct `new OpenAI()` or raw fetch to model APIs |
+| Rate limiting | `@autumnsgrove/lattice/platform/threshold` | `createThreshold()`, `thresholdMiddleware()` | Write ad-hoc KV read-modify-write rate limiters |
+| Content moderation | `@autumnsgrove/lattice/thorn` | `moderatePublishedContent()` | Build custom profanity/spam filters |
+| Error handling | `@autumnsgrove/lattice/errors` | `throwGroveError()`, `logGroveError()`, `buildErrorJson()` | Use bare `throw new Error()` or `console.error()` |
+| Email | `@autumnsgrove/lattice/zephyr` | `createZephyrClient()`, `zephyr.send()` | Use raw `new Resend()` or direct email API calls |
+| Credentials | Warden (service binding) | `createWardenClient()` | Store raw API keys in worker env or code |
+| Icons | `@autumnsgrove/prism/icons` | Semantic groups (`stateIcons`, `navIcons`, etc.) | Import from `@lucide/svelte` directly |
+| Design tokens | `@autumnsgrove/prism` | CSS vars (`var(--grove-*)`) + Tailwind preset | Hardcode hex values or duplicate token definitions |
+| Type-safe boundaries | `@autumnsgrove/lattice/server` | `parseFormData()`, `safeJsonParse()`, `isRedirect()` | Cast with `as any` or `as SomeType` on external data |
+| Client-side fetch | `$lib/utils/api` | `apiRequest()` (auto-injects CSRF) | Use raw `fetch()` for internal API calls |
+
+**Acceptable escape hatches:**
+
+- SDK library code itself (`libs/infra/`, `libs/engine/src/lib/threshold/`) wraps raw bindings by design
+- Durable Objects with dual-binding strategy (e.g., Warden's `TENANT_DB`) may access secondary bindings directly
+- Migration scripts and CLI tools may use lower-level access when the SDK doesn't cover the operation
+- Test mocks may reference raw types for typing
+
+**These principles are working if:** changing how a capability works requires editing one package, new features reuse existing SDKs instead of reimplementing, and the same value never appears in two files.
+
+---
+
 ## Project Naming
 
 |                       |                       |

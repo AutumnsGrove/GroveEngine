@@ -47,34 +47,88 @@ If the diff output is very large (>500 lines), focus compliance and quality chec
 
 ---
 
-## Phase 2: COMPLIANCE — Grove SDK & Pattern Checks
+## Phase 2: COMPLIANCE — Design Principles & Pattern Checks
 
-Load the full compliance checklist:
+**C0 and C0b are the most important categories.** Everything else is secondary. These two principles govern the project's architectural integrity — violations here are structural debt that compounds.
+
+### C0: Data Primacy (Single Source of Truth)
+
+> **Code translates data. It never defines it.**
+
+Check every changed file for values that should live in a config module, constant, or data file but are instead hardcoded in logic.
+
+- No string literals hardcoded in logic that belong in a config module or named constant — if a value could change independently of the code, it must live outside the code
+- No duplicate values — if the same string, number, or structure appears in two places, one must derive from the other or both must derive from a shared source
+- No parallel data structures that shadow an existing config — if `platform/config/tiers.ts` already defines tier data, code must not define a second list of tier limits
+- No behavior baked into code that should be driven by configuration — thresholds, model names, endpoint URLs, retry counts, error messages all belong in their owning config module
+- Repeated string literals that are semantically the same value must be extracted to a named constant or config key
+
+**Specific patterns to flag:**
+
+- The same model name string appearing in more than one file (should be in `lumen/config.ts` only)
+- Tier names or limits duplicated in route handlers instead of reading from `platform/config/tiers.ts`
+- Inline error message strings instead of Signpost error catalog references
+- Magic threshold values (token counts, rate limits, timeouts) as bare literals instead of named constants
+- Hardcoded hex colors instead of Prism CSS variables (enforced by pre-commit hook, but verify in diffs)
+- Rate limit windows or counts as magic numbers (3600, 86400) instead of named constants
+
+### C0b: SDK Boundaries
+
+> **Every capability is accessed through its owning SDK. If no SDK exists, build the shared function.**
+
+Check that changed code uses the established SDK for each capability rather than reimplementing behavior or accessing raw bindings directly.
+
+**The test:** *"If I needed to change how this works, how many files would I touch?"* 1 (the owning SDK/package) = PASS. >1 = FAIL.
+
+**The resolution order (consumers must follow this):**
+
+1. **SDK exists** → Use it (Infra, Amber, Lumen, Threshold, Signpost, Prism, etc.)
+2. **Engine has it** → Import from `@autumnsgrove/lattice/...`
+3. **Neither exists** → Build it in the engine first, then import
+4. **Truly app-specific** → Local code is acceptable, but scrutinize whether it's really unique
+
+**Specific patterns to flag:**
+
+| Capability | FAIL pattern | PASS pattern |
+|---|---|---|
+| Database | `env.DB.prepare()`, `platform.env.DB` | `GroveDatabase`, `createDb()`, `scopedDb()` |
+| Storage | `env.BUCKET.put()`, raw `R2Bucket` | `FileManager` from Amber, `GroveStorage` from Infra |
+| KV | `env.KV.get()` / `.put()` | `GroveKV` via `GroveContext` |
+| AI inference | `new OpenAI()`, raw fetch to model APIs | `createLumenClient()`, `RemoteLumenClient` |
+| Rate limiting | Ad-hoc KV read-modify-write counters | `createThreshold()`, `thresholdMiddleware()` |
+| Error handling | `throw new Error("...")`, `console.error()` | `throwGroveError()`, `logGroveError()` |
+| Email | `new Resend()`, raw email API calls | `createZephyrClient()`, `zephyr.send()` |
+| Icons | `from '@lucide/svelte'` | `from '@autumnsgrove/prism/icons'` with semantic groups |
+| Client fetch | Raw `fetch()` to internal APIs | `apiRequest()` from `$lib/utils/api` |
+| Type boundaries | `as any` / `as SomeType` on external data | `parseFormData()`, `safeJsonParse()` from Rootwork |
+
+**Acceptable escape hatches (mark PASS with note):**
+
+- SDK library files themselves (`libs/infra/`, `libs/engine/src/lib/threshold/`) wrap raw bindings by design
+- Durable Objects with dual-binding strategy may use raw bindings for secondary bindings
+- Migration scripts, CLI tools, and test mocks may use lower-level access
+- `// barrel-ok` comments suppress barrel import findings
+
+### C1–C9: Pattern Checks
+
+Load the full compliance checklist for detailed rules:
 
 ```
 .claude/skills/crane-audit/references/compliance-checks.md
 ```
 
-Apply all 9 categories from that file against the diff. For each category, assign: **PASS**, **WARN**, or **FAIL** with specific `file:line` references for any non-passing items.
+Apply these categories against the diff. For each, assign **PASS**, **WARN**, or **FAIL** with `file:line` references:
 
-Categories to check:
+1. Icon Gateway Compliance (all icons via `@autumnsgrove/prism/icons`)
+2. Fetch Safety & CSRF
+3. Barrel Import Safety
+4. Svelte 5 Patterns
+5. Tailwind & Design Token Validity
+6. Rootwork Type Safety (parseFormData, safeJsonParse, isRedirect/isHttpError)
+7. Security Anti-Patterns (prototype pollution, timing-safe comparisons, crypto randomness)
+8. Test Coverage (new `.ts` files in `src/lib/` should have corresponding `.test.ts`)
 
-1. Grove SDK Compliance (GroveDatabase, Amber, GroveKV, Lumen, Zephyr, Warden, Threshold, Thorn, Signpost)
-2. Icon Gateway Compliance (all icons via `@autumnsgrove/prism/icons`)
-3. Fetch Safety & CSRF
-4. Barrel Import Safety
-5. Svelte 5 Patterns
-6. Tailwind & Design Token Validity
-7. Rootwork Type Safety (parseFormData, safeJsonParse, isRedirect/isHttpError)
-8. Security Anti-Patterns (prototype pollution, timing-safe comparisons, crypto randomness)
-9. Test Coverage (new `.ts` files in `src/lib/` should have corresponding `.test.ts`)
-
-**Exceptions to know:**
-
-- Durable Objects with dual-binding strategy may use raw bindings — mark PASS with note
-- SDK library files themselves (`libs/infra/`, `libs/engine/src/lib/threshold/`) wrap raw bindings by design
-- `// barrel-ok` comments suppress barrel import findings
-- Test files: no bundle impact, lower severity for barrel imports and type casts
+**Note:** C0b already covers most of what was previously "Grove SDK Compliance" — the C1–C9 categories cover the remaining pattern-specific checks. Don't double-count findings between C0b and C1–C9.
 
 ---
 
@@ -175,12 +229,21 @@ Changed: {N} files | Packages: {list}
 Type: {feature / bugfix / refactor / config / test}
 
 ────────────────────────────────────────────────
-COMPLIANCE (Grove SDK & Pattern Checks)
+DESIGN PRINCIPLES (highest priority)
 ────────────────────────────────────────────────
 ┌──────────────────────────────┬────────┬─────────────────────────────────┐
 │ Category                     │ Status │ Summary                         │
 ├──────────────────────────────┼────────┼─────────────────────────────────┤
-│ Grove SDK Compliance         │        │                                 │
+│ C0: Data Primacy / SSOT      │        │                                 │
+│ C0b: SDK Boundaries          │        │                                 │
+└──────────────────────────────┴────────┴─────────────────────────────────┘
+
+────────────────────────────────────────────────
+COMPLIANCE (Pattern Checks C1–C9)
+────────────────────────────────────────────────
+┌──────────────────────────────┬────────┬─────────────────────────────────┐
+│ Category                     │ Status │ Summary                         │
+├──────────────────────────────┼────────┼─────────────────────────────────┤
 │ Icon Gateway                 │        │                                 │
 │ Fetch Safety & CSRF          │        │                                 │
 │ Barrel Import Safety         │        │                                 │

@@ -2,11 +2,93 @@
 
 The crane's checklist. Every category has: what to look for, what passes, what fails, and how to fix it.
 
+**C0 and C0b are the most important categories.** They govern the project's architectural integrity — violations here are structural debt that compounds. All other categories derive from these two principles.
+
+---
+
+## Category 0: Data Primacy (Single Source of Truth)
+
+> **Code translates data. It never defines it.**
+
+This is the most important category. Everything else is secondary.
+
+- No string literals hardcoded in logic that belong in a config module, manifest, or named constant — if a value could change independently of the code, it must live outside the code
+- No duplicate values — if the same string, number, or structure appears in two places, one must derive from the other or both must derive from a shared source
+- No parallel data structures that shadow an existing config — if a config module already defines a set of things, code must not define a second list of the same things
+- No switch/if-else chains dispatching on string literals where a map or table-driven approach would eliminate the duplication
+- No behavior baked into code that should be driven by configuration — thresholds, model names, endpoint URLs, retry counts belong in config modules
+- Repeated string literals that are semantically the same value must be extracted to a named constant or config key
+
+**Sources of truth in Lattice:**
+
+| Data | Source of Truth | Import |
+|------|----------------|--------|
+| Tier definitions (names, limits, pricing) | `platform/config/tiers.ts` | `@autumnsgrove/lattice/platform/config` |
+| AI model names and metadata | `lumen-models.json` + `lumen/config.ts` | `@autumnsgrove/lattice/ai/lumen` |
+| Error codes and messages | Signpost catalogs (`errors/*.ts`) | `@autumnsgrove/lattice/errors` |
+| Design tokens and colors | Prism (`libs/prism/`) | `@autumnsgrove/prism` |
+| Rate limit definitions | Threshold/Thorn config | `@autumnsgrove/lattice/platform/threshold` |
+| Billing URLs | `platform/config/billing.ts` | `@autumnsgrove/lattice/platform/config` |
+| Icon identity | `libs/prism/src/lib/icons/manifest.ts` | `@autumnsgrove/prism/icons` |
+
+**Specific patterns to flag:**
+
+- The same model name string appearing in more than one file
+- Tier names or numeric limits duplicated in route handlers instead of reading from `tiers.ts`
+- Inline error message strings instead of Signpost catalog references
+- Magic threshold values (token counts, rate limits, timeouts) as bare literals instead of named constants
+- Hardcoded hex colors instead of Prism CSS variables
+- Rate limit windows as magic numbers (3600, 86400) instead of named constants
+
+---
+
+## Category 0b: SDK Boundaries
+
+> **Every capability is accessed through its owning SDK. If no SDK exists, build the shared function so the next consumer doesn't reinvent it.**
+
+This is the behavioral sibling of C0. Where C0 governs *values*, C0b governs *behavior*. Together: code translates data through SDK boundaries — it never defines data, and it never reimplements behavior.
+
+**The test:** *"If I needed to change how this works, how many files would I touch?"* 1 (the owning SDK/package) = PASS. >1 = FAIL.
+
+**The resolution order (consumers must follow):**
+
+1. **SDK exists** → Use it (Infra, Amber, Lumen, Threshold, Signpost, Prism, etc.)
+2. **Engine has it** → Import from `@autumnsgrove/lattice/...`
+3. **Neither exists** → Build it in the engine first, then import
+4. **Truly app-specific** → Local code is acceptable, but scrutinize whether it's really unique
+
+**Capability ownership map:**
+
+| Capability | Owner | Consumers call | They do NOT |
+|---|---|---|---|
+| Database queries | `@autumnsgrove/infra` | `GroveDatabase`, `createDb()`, `scopedDb()` | Use raw `env.DB.prepare()` or `platform.env.DB` |
+| File storage | `@autumnsgrove/lattice/amber` | `FileManager`, `ExportManager`, `QuotaManager` | Use raw `env.BUCKET.put()` or `R2Bucket` ops |
+| KV storage | `@autumnsgrove/infra` | `GroveKV` via `GroveContext` | Use raw `env.KV.get()` / `env.KV.put()` |
+| AI inference | `@autumnsgrove/lattice/ai/lumen` | `createLumenClient()`, `RemoteLumenClient` | Construct `new OpenAI()` or raw fetch to model APIs |
+| Rate limiting | `@autumnsgrove/lattice/platform/threshold` | `createThreshold()`, `thresholdMiddleware()` | Write ad-hoc KV read-modify-write rate limiters |
+| Content moderation | `@autumnsgrove/lattice/thorn` | `moderatePublishedContent()` | Build custom profanity/spam filters |
+| Error handling | `@autumnsgrove/lattice/errors` | `throwGroveError()`, `logGroveError()`, `buildErrorJson()` | Use bare `throw new Error()` or `console.error()` |
+| Email | `@autumnsgrove/lattice/zephyr` | `createZephyrClient()`, `zephyr.send()` | Use raw `new Resend()` or direct email API calls |
+| Credentials | Warden (service binding) | `createWardenClient()` | Store raw API keys in worker env or code |
+| Icons | `@autumnsgrove/prism/icons` | Semantic groups (`stateIcons`, `navIcons`) | Import from `@lucide/svelte` directly |
+| Design tokens | `@autumnsgrove/prism` | CSS vars + Tailwind preset | Hardcode hex values or duplicate token defs |
+| Type-safe boundaries | `@autumnsgrove/lattice/server` | `parseFormData()`, `safeJsonParse()` | Cast with `as any` on external data |
+| Client-side fetch | `$lib/utils/api` | `apiRequest()` (auto-injects CSRF) | Use raw `fetch()` for internal API calls |
+
+**Acceptable escape hatches (mark PASS with note):**
+
+- SDK library files themselves (`libs/infra/`, `libs/engine/src/lib/threshold/`) wrap raw bindings by design
+- Durable Objects with dual-binding strategy (e.g., Warden's `TENANT_DB`)
+- Migration scripts, CLI tools, and test mocks
+- Lines with `// boundary-ok` are intentional exceptions
+
 ---
 
 ## Category 1: Grove SDK Compliance
 
 The grove has purpose-built SDKs for every platform primitive. Raw bindings are never acceptable in application code.
+
+**Note:** This category provides the detailed pass/fail patterns for C0b. If you've already checked C0b thoroughly, use this for specific pattern verification rather than re-auditing the same findings.
 
 ### Database — `GroveDatabase` from `@autumnsgrove/infra`
 
