@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		throwGroveError(400, SITE_ERRORS.TENANT_CONTEXT_REQUIRED, "Site");
 	}
 
-	// Gate: image_uploads + uploads_suspended
+	// Gate: image_uploads + uploads_suspended + curio config toggle
 	// feature_flags table lives in the main engine DB, not CURIO_DB
 	if (!kv || !db) {
 		throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
@@ -76,8 +76,16 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 	const flagsEnv = { DB: db, FLAGS_KV: kv };
 
-	const uploadGate = await canUploadImages(tenantId, undefined, flagsEnv);
-	if (!uploadGate.allowed) {
+	const [uploadGate, curioConfig] = await Promise.all([
+		canUploadImages(tenantId, undefined, flagsEnv),
+		db
+			.prepare(`SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`)
+			.bind(tenantId)
+			.first<{ enabled: number }>()
+			.catch(() => null),
+	]);
+
+	if (!uploadGate.allowed || !curioConfig?.enabled) {
 		throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
 	}
 

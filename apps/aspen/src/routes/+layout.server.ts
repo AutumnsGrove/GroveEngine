@@ -106,12 +106,21 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 							.first<{ enabled: number }>()
 							.catch(() => null), // Timeline table might not exist - that's OK
 
-						// Gallery: check upload gate (image_uploads + uploads_suspended)
-						flagsEnv
-							? canUploadImages(tenantId, undefined, flagsEnv)
-									.then((gate) => gate.allowed)
-									.catch(() => false)
-							: Promise.resolve(false),
+						// Gallery: check both upload gate AND curio config toggle
+						Promise.all([
+							flagsEnv
+								? canUploadImages(tenantId, undefined, flagsEnv)
+										.then((gate) => gate.allowed)
+										.catch(() => false)
+								: Promise.resolve(false),
+							db
+								.prepare(
+									`SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`,
+								)
+								.bind(tenantId)
+								.first<{ enabled: number }>()
+								.catch(() => null),
+						]).then(([gateAllowed, curioConfig]) => gateAllowed && !!curioConfig?.enabled),
 
 						// Journey curio config query (table lives in CURIO_DB since Phase 3)
 						(platform?.env?.CURIO_DB ?? db)
