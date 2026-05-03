@@ -114,7 +114,8 @@
 				return null;
 			}
 			case "paragraph": {
-				const paragraphs = contentEl.querySelectorAll("p");
+				// :scope > p to avoid counting paragraphs inside blockquotes, lists, etc.
+				const paragraphs = contentEl.querySelectorAll(":scope > p");
 				if (typeof parsed.value !== "number") return null;
 				const index = parsed.value - 1; // Convert to 0-based index
 				if (index >= 0 && index < paragraphs.length) {
