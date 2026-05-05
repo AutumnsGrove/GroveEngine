@@ -217,7 +217,9 @@
 	}
 
 	/* Stretched link: title link covers the whole card for click/middle-click */
-	.post-card {
+	/* :global needed — .post-card is on a Svelte component (Card), so scoped CSS
+	   wouldn't reach its root DOM element */
+	:global(.post-card) {
 		position: relative;
 	}
 
