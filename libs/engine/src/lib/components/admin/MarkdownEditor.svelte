@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import MarkdownEditor from "../../content/editor/MarkdownEditor.svelte";
-	let { content = $bindable(""), previewTitle = $bindable(""), firesideAssisted = $bindable(false), ...rest } = $props<any>();
+	let { content = $bindable(""), previewTitle = $bindable(""), ...rest } = $props<any>();
 </script>
 
-<MarkdownEditor bind:content bind:previewTitle bind:firesideAssisted {...rest} />
+<MarkdownEditor bind:content bind:previewTitle {...rest} />

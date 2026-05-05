@@ -103,13 +103,6 @@ binding = "ZEPHYR"
 service = "grove-zephyr"
 
 # =============================================================================
-# Reverie Service Binding (AI configuration pipeline)
-# =============================================================================
-[[services]]
-binding = "REVERIE"
-service = "grove-reverie"
-
-# =============================================================================
 # Durable Objects - Loom Pattern (Grove's coordination layer)
 # =============================================================================
 # DOs are hosted in the grove-durable-objects worker and referenced here.
@@ -148,12 +141,6 @@ script_name = "grove-durable-objects"
 [[durable_objects.bindings]]
 name = "THRESHOLD"
 class_name = "ThresholdDO"
-script_name = "grove-durable-objects"
-
-# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
-[[durable_objects.bindings]]
-name = "CHAT"
-class_name = "ChatDO"
 script_name = "grove-durable-objects"
 
 # =============================================================================

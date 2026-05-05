@@ -3,19 +3,12 @@
 		stateIcons,
 		actionIcons,
 		featureIcons,
-		natureIcons,
 	} from "@autumnsgrove/prism/icons";
-	import VoiceInput from "../../components/admin/VoiceInput.svelte";
 
 	interface Props {
 		editorMode: "write" | "split" | "preview";
 		readonly: boolean;
 		isZenMode: boolean;
-		isFiresideMode: boolean;
-		wispEnabled: boolean;
-		firesideEnabled: boolean;
-		scribeEnabled: boolean;
-		hasContent: boolean;
 		saving: boolean;
 		draftKey: string | null;
 		draftSaveStatus: string;
@@ -27,8 +20,6 @@
 		lineCount: number;
 		wordCount: number;
 		readingTime: string;
-		voiceMode: "raw" | "draft";
-		voiceError: string | null;
 		onWrapSelection: (before: string, after: string) => void;
 		onInsertLink: () => void;
 		onInsertFootnote: () => void;
@@ -37,24 +28,12 @@
 		onSetEditorMode: (mode: "write" | "split" | "preview") => void;
 		onShowFullPreview: () => void;
 		onToggleZenMode: () => void;
-		onToggleFiresideMode: () => void;
-		onTranscription: (result: {
-			text: string;
-			gutterContent?: Array<{ type: string; content: string; anchor?: string }>;
-			rawTranscript?: string;
-		}) => void;
-		onVoiceError: (error: { message: string }) => void;
 	}
 
 	let {
 		editorMode,
 		readonly,
 		isZenMode,
-		isFiresideMode,
-		wispEnabled,
-		firesideEnabled,
-		scribeEnabled,
-		hasContent,
 		saving,
 		draftKey,
 		draftSaveStatus,
@@ -66,8 +45,6 @@
 		lineCount,
 		wordCount,
 		readingTime,
-		voiceMode,
-		voiceError,
 		onWrapSelection,
 		onInsertLink,
 		onInsertFootnote,
@@ -76,9 +53,6 @@
 		onSetEditorMode,
 		onShowFullPreview,
 		onToggleZenMode,
-		onToggleFiresideMode,
-		onTranscription,
-		onVoiceError,
 	}: Props = $props();
 
 	const formatGroups = [
@@ -102,9 +76,8 @@
 	];
 </script>
 
-<!-- Mode-based Toolbar (hidden in Fireside mode) -->
-{#if !isFiresideMode}
-	<div class="toolbar">
+<!-- Mode-based Toolbar -->
+<div class="toolbar">
 		<div class="toolbar-left">
 			{#if editorMode !== "preview"}
 				{#each formatGroups as group, i}
@@ -128,36 +101,6 @@
 				<div class="toolbar-divider-line"></div>
 			{/if}
 
-			{#if wispEnabled && firesideEnabled && !hasContent}
-				<button
-					type="button"
-					class="fireside-btn"
-					onclick={onToggleFiresideMode}
-					title="Fireside Mode (⌘⇧F) - Start with a conversation"
-					aria-label="Enter Fireside mode for conversational writing"
-				>
-					<natureIcons.flame class="toolbar-icon fireside-icon" />
-					<span>Fireside</span>
-				</button>
-				<span class="toolbar-divider">|</span>
-			{/if}
-			<!-- Voice Input (Scribe) - gated by scribe_mode graft -->
-			{#if wispEnabled && scribeEnabled && editorMode !== "preview"}
-				<div
-					class="voice-wrapper"
-					title="Voice Input (⌘⇧U) - Hold to record, release to transcribe"
-				>
-					<VoiceInput
-						mode={voiceMode}
-						onTranscription={onTranscription}
-						onError={onVoiceError}
-						disabled={readonly}
-					/>
-					{#if voiceError}
-						<span class="voice-error">{voiceError}</span>
-					{/if}
-				</div>
-			{/if}
 			{#if editorMode === "preview"}
 				<span class="toolbar-hint">Preview mode (read-only)</span>
 			{/if}
@@ -226,11 +169,9 @@
 			</div>
 		</div>
 	</div>
-{/if}
 
-<!-- Status Bar (hidden in Fireside mode) -->
-{#if !isFiresideMode}
-	<div class="status-bar">
+<!-- Status Bar -->
+<div class="status-bar">
 		<div class="status-left">
 			<span class="status-item">Ln {cursorLine}, Col {cursorCol}</span>
 			<span class="status-divider">|</span>
@@ -273,7 +214,6 @@
 			{/if}
 		</div>
 	</div>
-{/if}
 
 <style>
 	.toolbar {
@@ -337,46 +277,6 @@
 	:global(.toolbar-icon) {
 		width: 1rem;
 		height: 1rem;
-	}
-	.fireside-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.3rem 0.6rem;
-		background: linear-gradient(135deg, rgba(255, 140, 50, 0.15) 0%, rgba(255, 100, 30, 0.1) 100%);
-		border: 1px solid rgba(255, 140, 50, 0.3);
-		border-radius: 6px;
-		color: #ff9d5c;
-		font-family: inherit;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.15s ease;
-	}
-	.fireside-btn:hover {
-		background: linear-gradient(135deg, rgba(255, 140, 50, 0.25) 0%, rgba(255, 100, 30, 0.2) 100%);
-		border-color: rgba(255, 140, 50, 0.5);
-		color: #ffb88c;
-	}
-	:global(.fireside-icon) {
-		width: 0.875rem;
-		height: 0.875rem;
-		color: #ff8c32;
-	}
-	/* svelte-ignore css-unused-selector */
-	.toolbar-divider {
-		color: var(--color-border);
-		margin: 0 0.25rem;
-		font-size: 0.8rem;
-	}
-	.voice-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-	.voice-error {
-		color: hsl(var(--destructive));
-		font-size: 0.75rem;
-		white-space: nowrap;
 	}
 	.toolbar-left {
 		display: flex;

@@ -30,7 +30,7 @@ checks_failed=0
 js_ts_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(js\|jsx\|ts\|tsx\|mjs\|cjs\)$' || true)
 
 # Get staged YAML files
-yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(yml\|yaml\)$' || true)
+yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(yml\|yaml\)$' | grep -v 'pnpm-lock\.yaml' || true)
 
 # ============================================================================
 # YAMLLINT CHECK

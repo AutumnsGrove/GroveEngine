@@ -1,15 +1,18 @@
 /**
  * Integration tests for minecraft routes
  * Tests admin auth enforcement and proxy behavior
+ *
+ * JUNK DRAWER — moved here as part of the Great Grove Refactor.
+ * Corresponds to _junk/minecraft.ts.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
-import type { Env } from "../types.js";
-import { createMockEnv } from "../test-helpers.js";
+import type { Env } from "../../types.js";
+import { createMockEnv } from "../../test-helpers.js";
 
 // Mock cookie auth middleware
-vi.mock("../middleware/cookieAuth.js", () => ({
+vi.mock("../../middleware/cookieAuth.js", () => ({
 	adminCookieAuth: vi.fn().mockReturnValue(async (c: any, next: () => Promise<void>) => {
 		// Simulate setting accessToken like the real middleware does
 		c.set("accessToken", "mock-admin-token");

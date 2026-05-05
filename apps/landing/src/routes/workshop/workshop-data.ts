@@ -369,7 +369,7 @@ export const categories: Category[] = [
 				tagline: "Composition Layer",
 				description:
 					"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
-				status: "building",
+				status: "planned",
 				icon: "reverie",
 				domain: "reverie.grove.place",
 				integration: "AI composition layer, accessible through Arbor and Lantern",
@@ -505,7 +505,7 @@ export const categories: Category[] = [
 				tagline: "Creative Canvas",
 				description:
 					"A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your [[foliage|foliage]].",
-				status: "greenhouse",
+				status: "planned",
 				icon: "terrarium",
 				domain: "terrarium.grove.place",
 				integration: "Creative tool for building blog decorations",
@@ -523,7 +523,7 @@ export const categories: Category[] = [
 				tagline: "Writing Assistant",
 				description:
 					"A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.",
-				status: "greenhouse",
+				status: "planned",
 				icon: "wisp",
 				integration: "Integrated into the Grove editor, off by default",
 				spec: "/knowledge/specs/wisp-spec",
@@ -556,7 +556,7 @@ export const categories: Category[] = [
 				tagline: "Voice Transcription",
 				description:
 					"Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you're thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.",
-				status: "greenhouse",
+				status: "planned",
 				icon: "scribe",
 				integration: "Built into Flow mode in Arbor",
 				spec: "/knowledge/specs/scribe-voice-transcription-spec",
@@ -590,7 +590,7 @@ export const categories: Category[] = [
 				tagline: "ASCII Visual Effects",
 				description:
 					"Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.",
-				status: "building",
+				status: "planned",
 				icon: "gossamer",
 				integration: "Open-source NPM package for any web project",
 				github: "https://github.com/AutumnsGrove/Gossamer",
@@ -599,23 +599,6 @@ export const categories: Category[] = [
 					{ name: "Clouds", icon: "cloud", description: "Ambient ASCII backgrounds" },
 					{ name: "Patterns", icon: "waves", description: "Pattern generators" },
 					{ name: "Canvas", icon: "frame", description: "2D rendering" },
-				],
-			},
-			{
-				name: "Weave",
-				termSlug: "weave",
-				tagline: "Visual Composition Studio",
-				description:
-					"Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.",
-				status: "planned",
-				icon: "weave",
-				integration: "Animation and diagram creation within Terrarium",
-				spec: "/knowledge/specs/weave-spec",
-				whatIsLink: "/knowledge/help/what-is-weave",
-				subComponents: [
-					{ name: "Breeze", icon: "send-to-back", description: "Animation mode" },
-					{ name: "Map", icon: "waypoints", description: "Diagram mode" },
-					{ name: "Thread", icon: "route", description: "Connections" },
 				],
 			},
 		],
@@ -740,7 +723,7 @@ export const categories: Category[] = [
 				tagline: "Social Feed",
 				description:
 					"Where voices gather. [[meadow|Meadow]] is Grove's opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.",
-				status: "greenhouse",
+				status: "planned",
 				icon: "meadow",
 				domain: "meadow.grove.place",
 				integration: "Optional social layer for Grove blogs",
@@ -775,7 +758,7 @@ export const categories: Category[] = [
 				tagline: "Direct Messages",
 				description:
 					"Two robins on a branch. [[chirp|Chirp]] is Grove's private 1:1 messaging — quick, real-time conversations with a friend. Send text, share images, see when they're typing. Each chirp is a small, bright call from one robin to another.",
-				status: "building",
+				status: "planned",
 				icon: "chirp",
 				integration: "Real-time messaging via Durable Objects, accessible from Arbor",
 				whatIsLink: "/knowledge/help/what-are-chirps",
@@ -873,7 +856,7 @@ export const categories: Category[] = [
 				tagline: "On-Demand Minecraft",
 				description:
 					"A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that's there when you need it.",
-				status: "live",
+				status: "planned",
 				icon: "telescope",
 				domain: "mc.grove.place",
 				integration: "For Wanderers in the Grove",
@@ -900,7 +883,7 @@ export const categories: Category[] = [
 				tagline: "Privacy-First Email",
 				description:
 					"A zero-knowledge email client for your @grove.place address. Client-side encryption means we can't read your mail. It's yours alone. Threaded conversations, rich text, attachments, and integration with your blog's contact forms.",
-				status: "building",
+				status: "planned",
 				icon: "ivy",
 				domain: "ivy.grove.place",
 				integration: "Included with Oak and Evergreen tiers",
@@ -920,34 +903,6 @@ export const categories: Category[] = [
 				],
 			},
 			{
-				name: "Verge",
-				termSlug: "verge",
-				tagline: "Remote AI Coding",
-				description:
-					"Send code through the Verge—into ephemeral compute spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes and your code returns more beautiful than you expected. Brief, brilliant, gone.",
-				status: "building",
-				icon: "zap",
-				domain: "verge.grove.place",
-				integration: "Personal serverless development infrastructure",
-				github: "https://github.com/AutumnsGrove/GroveVerge",
-				spec: "/knowledge/specs/verge-spec",
-				whatIsLink: "/knowledge/help/what-is-verge",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{
-						name: "Firefly",
-						icon: "webhook",
-						description: "Ephemeral server pattern",
-						href: "/knowledge/help/what-is-firefly",
-					},
-				],
-			},
-			{
 				name: "Nook",
 				tagline: "Private Video Sharing",
 				description:
@@ -959,24 +914,6 @@ export const categories: Category[] = [
 				spec: "/knowledge/specs/nook-spec",
 				subComponents: [
 					{ name: "Private", icon: "badgecheck", description: "Private access only" },
-				],
-			},
-			{
-				name: "Etch",
-				termSlug: "etch",
-				tagline: "Link Saving & Highlights",
-				description:
-					"Your externalized memory. Save any link, highlight any text, carve out what counts. Anything can go in, but you decide what it means. Tag it, plate it, score the passages that matter. Patient, permanent, yours.",
-				status: "planned",
-				icon: "etch",
-				domain: "etch.grove.place",
-				integration: "Available as a standalone tool for all Wanderers",
-				spec: "/knowledge/specs/etch-spec",
-				subComponents: [
-					{ name: "Plates", icon: "layers", description: "Collections" },
-					{ name: "Grooves", icon: "tag", description: "Tags" },
-					{ name: "Scoring", icon: "highlighter", description: "Text highlights" },
-					{ name: "Proofs", icon: "share2", description: "Public collections" },
 				],
 			},
 		],
@@ -1194,30 +1131,13 @@ export const categories: Category[] = [
 				termSlug: "mycelium",
 				tagline: "MCP Server",
 				description:
-					"Grove's Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, start Verge sessions, manage files in Amber, and tap into every Grove service.",
+					"Grove's Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, manage files in Amber, and tap into every Grove service.",
 				status: "building",
 				icon: "circuitboard",
 				domain: "mycelium.grove.place",
 				integration: "MCP server for AI agent integration",
 				github: "https://github.com/AutumnsGrove/GroveMCP",
 				spec: "/knowledge/specs/mycelium-spec",
-			},
-			{
-				name: "Moss",
-				termSlug: "moss",
-				tagline: "AI Memory",
-				description:
-					"Moss grows on the surfaces the forest touches most. It accumulates, layer by layer, until the forest floor is softened by what came before. Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents, Moss stores structured facts, preferences, and context that carry across sessions. Entirely exportable. No vendor lock-in.",
-				status: "planned",
-				icon: "moss",
-				integration: "Module inside Lumen, available to all AI services",
-				spec: "/knowledge/specs/moss-spec",
-				subComponents: [
-					{ name: "Warm", icon: "layers", description: "Always-on context cache" },
-					{ name: "Recall", icon: "searchcode", description: "Semantic memory search" },
-					{ name: "Extract", icon: "database", description: "Async fact extraction" },
-					{ name: "Export", icon: "download", description: "Portable memory artifact" },
-				],
 			},
 		],
 	},
@@ -1274,7 +1194,7 @@ export const categories: Category[] = [
 				tagline: "Ephemeral Server Pattern",
 				description:
 					"A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.",
-				status: "greenhouse",
+				status: "planned",
 				icon: "firefly",
 				integration: "Powers Verge and Outpost infrastructure",
 				spec: "/knowledge/patterns/firefly-pattern",

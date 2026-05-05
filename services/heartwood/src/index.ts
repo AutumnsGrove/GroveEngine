@@ -18,7 +18,6 @@ import health from "./routes/health.js";
 import subscription from "./routes/subscription.js";
 import admin from "./routes/admin.js";
 import session from "./routes/session.js";
-import minecraft from "./routes/minecraft.js";
 import cdn from "./routes/cdn.js";
 import betterAuth from "./routes/betterAuth.js";
 import settings from "./routes/settings.js";
@@ -80,7 +79,6 @@ app.route("/health", health);
 app.route("/subscription", subscription);
 app.route("/admin", admin);
 app.route("/session", session);
-app.route("/minecraft", minecraft);
 app.route("/cdn", cdn);
 app.route("/settings", settings);
 app.route("/status", status);
@@ -151,15 +149,6 @@ app.get("/", (c) => {
 				list: "GET /session/list",
 				revokeById: "DELETE /session/:sessionId",
 				check: "GET /session/check (legacy)",
-			},
-			minecraft: {
-				status: "GET /minecraft/status",
-				start: "POST /minecraft/start",
-				stop: "POST /minecraft/stop",
-				whitelist: "GET/POST /minecraft/whitelist",
-				command: "POST /minecraft/command",
-				sync: "POST /minecraft/sync",
-				history: "GET /minecraft/history",
 			},
 			cdn: {
 				upload: "POST /cdn/upload",

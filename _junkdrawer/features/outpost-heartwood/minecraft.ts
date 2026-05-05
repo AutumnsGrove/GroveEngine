@@ -1,12 +1,16 @@
 /**
  * Minecraft Routes - Proxy to mc-control worker
  * All routes require admin access
+ *
+ * JUNK DRAWER — removed from active routing as part of the Great Grove Refactor.
+ * mc-control worker no longer exists. Retained here for reference.
+ * Originally mounted at: app.route("/minecraft", minecraft) in index.ts
  */
 
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import type { Env } from "../types.js";
-import { adminCookieAuth } from "../middleware/cookieAuth.js";
+import type { Env } from "../../types.js";
+import { adminCookieAuth } from "../../middleware/cookieAuth.js";
 
 // Use custom domain to avoid Cloudflare error 1042 (worker-to-worker fetch restriction)
 const MC_CONTROL_URL = "https://mc-control.grove.place";

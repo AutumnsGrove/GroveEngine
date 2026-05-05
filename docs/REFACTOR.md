@@ -788,7 +788,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-05 (Session 1 - Planning complete)
+**Last updated:** 2026-05-05 (Session 2 - Phase 1 complete)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -808,23 +808,23 @@ tracker in this document after each completed step.
 | Confirm Lantern + Reeds STAY | ✅ DONE | Essential features, promote from greenhouse |
 | User approval on final list | ✅ DONE | 21 keep, 19+ junk drawer, 6 remove |
 
-#### Phase 1: The Great Junk Drawer
+#### Phase 1: The Great Junk Drawer ✅ COMPLETE
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Create _junkdrawer/ structure | ⬜ TODO | `mkdir -p _junkdrawer/{features,workers,curios,apps}` |
-| 2. Move workers (5) | ⬜ TODO | reverie, reverie-exec, loft, meadow-poller, timeline-sync |
-| 3. Move apps (3) | ⬜ TODO | ivy, terrarium, meadow |
-| 4. Move engine features (3) | ⬜ TODO | firefly, reverie-schemas, VoiceInput delete |
-| 5. Delete curio directories (16) | ⬜ TODO | Engine + Aspen admin + Aspen API |
-| 6. Delete Aspen junk drawer routes | ⬜ TODO | reverie, chat, wisp, meadow opt-in |
-| 7. Delete Landing junk drawer routes | ⬜ TODO | minecraft, firefly vista, meadow vista |
-| 8. Update service bindings | ⬜ TODO | Remove REVERIE, CHAT, MC_CONTROL |
-| 9. Update engine barrels | ⬜ TODO | curios/index, directives, components, curio-status |
-| 10. Disable feature flags | ⬜ TODO | wisp, fireside, scribe, chirp, reverie |
-| 11. Promote Lantern/Reeds/Timeline | ⬜ TODO | Remove greenhouse_only, enable for all |
-| 12. Update Workshop data | ⬜ TODO | Reduce visible services |
-| 13. Complete removal (6 features) | ⬜ TODO | Verge, Moss, Weave, Etch refs |
-| 14. Validation (build + test) | ⬜ TODO | Must pass before proceeding |
+| 1. Create _junkdrawer/ structure | ✅ DONE | `_junkdrawer/{features,workers,curios,apps}` |
+| 2. Move workers (5) | ✅ DONE | reverie, reverie-exec, loft, meadow-poller, timeline-sync |
+| 3. Move apps (3) | ✅ DONE | ivy, terrarium, meadow |
+| 4. Move engine features | ✅ DONE | firefly, reverie-schemas, VoiceInput, FiresideChat |
+| 5. Move curio directories (16+) | ✅ DONE | Engine + Aspen admin/API + components + (site) routes |
+| 6. Move Aspen junk drawer routes | ✅ DONE | reverie, chat, wisp, meadow opt-in |
+| 7. Move Landing junk drawer routes | ✅ DONE | minecraft, firefly vista, meadow vista |
+| 8. Update service bindings | ✅ DONE | REVERIE, CHAT, MC_CONTROL removed + minecraft route |
+| 9. Update engine barrels | ✅ DONE | curios, directives, components, curio-status, observability, package.json |
+| 10. Disable feature flags | ✅ DONE | KnownFlagId cleaned + migration 113 |
+| 11. Promote Lantern/Reeds/Timeline | ✅ DONE | Migration 113: greenhouse_only = 0 |
+| 12. Update Workshop data | ✅ DONE | 4 deleted, 12 marked "planned" |
+| 13. Complete removal | ✅ DONE | Verge/Moss/Weave/Etch removed from workshop |
+| 14. Validation (build + lint) | ✅ DONE | All packages build + lint clean (0 errors) |
 
 #### Phase 2: Auth Simplification
 | Step | Status | Notes |
@@ -876,3 +876,16 @@ tracker in this document after each completed step.
 - Found timeline-sync is orphaned (timeline works without it)
 - Created full REFACTOR.md plan document
 - **Next session:** Begin Phase 1, Step 1 (create _junkdrawer/ and start moving)
+
+**Session 2 (2026-05-05):**
+- Completed full Phase 1 execution (14 steps)
+- 499 files changed: moves, barrel updates, binding removals, UI cleanup
+- Moved 5 workers, 3 apps, 16+ curio dirs, firefly, reverie-schemas
+- Severed service bindings: REVERIE, CHAT, MC_CONTROL
+- Cleaned FormattingToolbar, MarkdownEditor, garden new/edit pages (Wisp/Fireside/Meadow)
+- Updated curio dashboard (19 entries → 4)
+- Updated Workshop data (4 deleted, 12 marked "planned")
+- Created migration 113 (promote Lantern/Reeds, disable junk flags)
+- Gossamer stays in libs/ (actively used by Glass/GlassCard — deviation from plan)
+- Full build + lint passes: 0 errors across all 17 packages
+- **Next session:** Phase 2 (auth simplification — Google OAuth only)

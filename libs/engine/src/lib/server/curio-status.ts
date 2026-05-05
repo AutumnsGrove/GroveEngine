@@ -51,59 +51,18 @@ function queryExists(
 }
 
 /**
- * Load configuration status for all curios.
- *
- * Runs ~20 lightweight queries in parallel — each is a single-row SELECT
- * so the total wall-clock time is roughly the slowest single query.
+ * Load configuration status for kept curios (4 total).
  */
 export async function loadCurioStatus(
 	db: D1Database | undefined,
 	tenantId: string | undefined,
 ): Promise<CurioStatus[]> {
 	if (!db) return [];
-	const [
-		// Curios with `enabled` column
-		timelineResult,
-		galleryResult,
-		journeyResult,
-		guestbookResult,
-		ambientResult,
-		// Curios with existence-based detection
-		hitcounterResult,
-		nowplayingResult,
-		pollsResult,
-		moodringResult,
-		badgesResult,
-		blogrollResult,
-		webringResult,
-		shelvesResult,
-		activitystatusResult,
-		statusbadgeResult,
-		artifactsResult,
-		shrinesResult,
-		cursorsResult,
-	] = await Promise.all([
-		// --- enabled column curios ---
+	const [timelineResult, galleryResult, guestbookResult, pollsResult] = await Promise.all([
 		queryEnabled(db, "timeline_curio_config", tenantId),
 		queryEnabled(db, "gallery_curio_config", tenantId),
-		queryEnabled(db, "journey_curio_config", tenantId),
 		queryEnabled(db, "guestbook_config", tenantId),
-		queryEnabled(db, "ambient_config", tenantId),
-
-		// --- existence-based curios ---
-		queryExists(db, "hit_counters", tenantId),
-		queryExists(db, "nowplaying_config", tenantId),
 		queryExists(db, "polls", tenantId),
-		queryExists(db, "mood_ring_config", tenantId),
-		queryExists(db, "tenant_badges", tenantId),
-		queryExists(db, "blogroll_items", tenantId),
-		queryExists(db, "webring_memberships", tenantId),
-		queryExists(db, "bookmark_shelves", tenantId),
-		queryExists(db, "activity_status", tenantId),
-		queryExists(db, "status_badges", tenantId),
-		queryExists(db, "artifacts", tenantId),
-		queryExists(db, "shrines", tenantId),
-		queryExists(db, "cursor_config", tenantId),
 	]);
 
 	return [
@@ -120,100 +79,16 @@ export async function loadCurioStatus(
 			configUrl: "/arbor/curios/gallery",
 		},
 		{
-			slug: "journey",
-			name: "Journey",
-			enabled: journeyResult?.enabled === 1,
-			configUrl: "/arbor/curios/journey",
-		},
-		{
 			slug: "guestbook",
 			name: "Guestbook",
 			enabled: guestbookResult?.enabled === 1,
 			configUrl: "/arbor/curios/guestbook",
 		},
 		{
-			slug: "ambient",
-			name: "Ambient",
-			enabled: ambientResult?.enabled === 1,
-			configUrl: "/arbor/curios/ambient",
-		},
-		{
-			slug: "hitcounter",
-			name: "Hit Counter",
-			enabled: hitcounterResult !== null,
-			configUrl: "/arbor/curios/hitcounter",
-		},
-		{
-			slug: "nowplaying",
-			name: "Now Playing",
-			enabled: nowplayingResult !== null,
-			configUrl: "/arbor/curios/nowplaying",
-		},
-		{
 			slug: "polls",
 			name: "Polls",
 			enabled: pollsResult !== null,
 			configUrl: "/arbor/curios/polls",
-		},
-		{
-			slug: "moodring",
-			name: "Mood Ring",
-			enabled: moodringResult !== null,
-			configUrl: "/arbor/curios/moodring",
-		},
-		{
-			slug: "badges",
-			name: "Badges",
-			enabled: badgesResult !== null,
-			configUrl: "/arbor/curios/badges",
-		},
-		{
-			slug: "blogroll",
-			name: "Blogroll",
-			enabled: blogrollResult !== null,
-			configUrl: "/arbor/curios/blogroll",
-		},
-		{
-			slug: "webring",
-			name: "Web Ring",
-			enabled: webringResult !== null,
-			configUrl: "/arbor/curios/webring",
-		},
-		{
-			slug: "shelves",
-			name: "Shelves",
-			enabled: shelvesResult !== null,
-			configUrl: "/arbor/curios/shelves",
-		},
-		{
-			slug: "activitystatus",
-			name: "Activity Status",
-			enabled: activitystatusResult !== null,
-			configUrl: "/arbor/curios/activitystatus",
-		},
-		{
-			slug: "statusbadge",
-			name: "Status Badge",
-			enabled: statusbadgeResult !== null,
-			configUrl: "/arbor/curios/statusbadge",
-		},
-		{
-			slug: "artifacts",
-			name: "Artifacts",
-			enabled: artifactsResult !== null,
-			configUrl: "/arbor/curios/artifacts",
-		},
-		{
-			slug: "shrines",
-			name: "Shrines",
-			enabled: shrinesResult !== null,
-			configUrl: "/arbor/curios/shrines",
-		},
-		{
-			slug: "cursors",
-			name: "Cursors",
-			enabled: cursorsResult !== null,
-			configUrl: "/arbor/curios/cursors",
 		},
 	];
 }

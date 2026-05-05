@@ -48,7 +48,7 @@ declare global {
 			/** Origin for CSRF validation */
 			origin?: string;
 
-			/** True when request is from an internal service binding (e.g., reverie-exec) */
+			/** True when request is from an internal service binding */
 			isInternalService?: boolean;
 		}
 
@@ -98,9 +98,6 @@ declare global {
 
 				/** ThresholdDO - Per-identifier rate limiting (Loom pattern) */
 				THRESHOLD?: DurableObjectNamespace;
-
-				/** ChatDO - Per-conversation real-time messaging (Chirp DMs) */
-				CHAT?: DurableObjectNamespace;
 
 				// Secrets
 				GITHUB_TOKEN?: string;
@@ -159,13 +156,8 @@ declare global {
 				/** Demo mode secret for arbor panel screenshots (set via wrangler secret put) */
 				DEMO_MODE_SECRET?: string;
 
-				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
+				/** Internal service key for worker-to-worker auth */
 				INTERNAL_SERVICE_KEY?: string;
-
-				/** Reverie Worker service binding (AI configuration pipeline) */
-				REVERIE?: Fetcher;
-				/** API key for authenticating to the Reverie worker */
-				REVERIE_API_KEY?: string;
 
 				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
 				DEV_AUTH_ENABLED?: string;

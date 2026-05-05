@@ -318,10 +318,6 @@
 			"types": "./dist/platform/feature-flags/*.d.ts",
 			"default": "./dist/platform/feature-flags/*.js"
 		},
-		"./firefly": {
-			"types": "./dist/firefly/index.d.ts",
-			"default": "./dist/firefly/index.js"
-		},
 		"./git": {
 			"types": "./dist/git/index.d.ts",
 			"default": "./dist/git/index.js"
@@ -381,10 +377,6 @@
 		"./payments/*": {
 			"types": "./dist/payments/*.d.ts",
 			"default": "./dist/payments/*.js"
-		},
-		"./ai/reverie": {
-			"types": "./dist/ai/reverie/index.d.ts",
-			"default": "./dist/ai/reverie/index.js"
 		},
 		"./monitoring/sentinel": {
 			"types": "./dist/monitoring/sentinel/index.d.ts",

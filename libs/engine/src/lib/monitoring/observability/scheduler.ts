@@ -24,8 +24,6 @@ import { aggregateThorn } from "./aggregators/thorn-aggregator.js";
 import { aggregateSentinel } from "./aggregators/sentinel-aggregator.js";
 import { aggregateClearing } from "./aggregators/clearing-aggregator.js";
 import { aggregateWarden } from "./aggregators/warden-aggregator.js";
-import { aggregateMeadow } from "./aggregators/meadow-aggregator.js";
-import { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
 
 export interface ObservabilityEnv {
 	DB: D1Database;
@@ -142,8 +140,6 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 				aggregateSentinel(env.DB),
 				aggregateClearing(env.DB),
 				aggregateWarden(env.DB),
-				aggregateMeadow(env.DB),
-				aggregateFirefly(env.DB),
 			]);
 
 			for (const result of aggregatorResults) {

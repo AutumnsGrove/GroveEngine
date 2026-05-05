@@ -29,7 +29,6 @@
 	let gutterItems = $state<GutterItem[]>([]);
 	let status = $state("draft");
 	let featuredImage = $state("");
-	let shareToMeadow = $state(true);
 	let originalSlug = $state("");
 	let slugError = $state("");
 	let selectedBlaze = $state<string | null>(null);
@@ -65,7 +64,6 @@
 		gutterItems = data.post.gutter_content ? JSON.parse(data.post.gutter_content as string) : [];
 		status = ((data.post as Record<string, unknown>).status as string) || "draft";
 		featuredImage = ((data.post as Record<string, unknown>).featured_image as string) || "";
-		shareToMeadow = (data.post as Record<string, unknown>).meadow_exclude !== 1;
 		selectedBlaze = ((data.post as Record<string, unknown>).blaze as string) || null;
 	});
 
@@ -178,7 +176,7 @@
 				gutter_content: JSON.stringify(gutterItems),
 				status,
 				featured_image: featuredImage.trim() || null,
-				meadow_exclude: shareToMeadow ? 0 : 1,
+				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
 			});
@@ -237,7 +235,7 @@
 				gutter_content: JSON.stringify(gutterItems),
 				status: newStatus,
 				featured_image: featuredImage.trim() || null,
-				meadow_exclude: shareToMeadow ? 0 : 1,
+				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
 			});
@@ -318,7 +316,7 @@
 				gutter_content: JSON.stringify(gutterItems),
 				status,
 				featured_image: featuredImage.trim() || null,
-				meadow_exclude: shareToMeadow ? 0 : 1,
+				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
 				republish: true,
@@ -653,18 +651,6 @@
 							</optgroup>
 						</select>
 						<span class="form-hint">Choose a font for this bloom's content</span>
-					</div>
-
-					<div class="form-group field-full">
-						<label class="meadow-toggle">
-							<input type="checkbox" bind:checked={shareToMeadow} />
-							<span class="meadow-toggle-text">
-								<span class="meadow-toggle-title">Share to Meadow</span>
-								<span class="meadow-toggle-hint"
-									>This post will appear in the community feed when published.</span
-								>
-							</span>
-						</label>
 					</div>
 
 					<div class="form-group field-full">
@@ -1208,35 +1194,6 @@
 		font-family: monospace;
 		font-size: 0.75rem;
 		transition: color 0.3s;
-	}
-
-	/* Meadow toggle */
-	.meadow-toggle {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.5rem;
-		cursor: pointer;
-	}
-	.meadow-toggle input[type="checkbox"] {
-		width: 18px;
-		height: 18px;
-		accent-color: var(--color-primary);
-		margin-top: 2px;
-		flex-shrink: 0;
-	}
-	.meadow-toggle-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-	.meadow-toggle-title {
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: var(--color-text);
-	}
-	.meadow-toggle-hint {
-		font-size: 0.75rem;
-		color: var(--color-text-subtle);
 	}
 
 	/* Editor Main */
