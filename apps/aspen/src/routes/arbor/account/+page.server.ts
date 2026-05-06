@@ -52,10 +52,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 		throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
 	}
 
-	// ISOLATED QUERIES: D1 queries and external API calls are separated
-	// D1 queries (billing, tenant) are fast (~50ms) and critical for page render
-	// Passkey fetch is an external API call that can be slower and is non-critical
-	// This prevents a slow GroveAuth response from blocking billing/tenant display
+	// ISOLATED QUERIES: D1 queries are fast (~50ms) and critical for page render
 	let billing: BillingRecord | null = null;
 	let billingError = false;
 	let tenant: TenantRecord | null = null;

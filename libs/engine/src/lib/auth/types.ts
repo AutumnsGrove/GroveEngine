@@ -58,55 +58,6 @@ export interface UserInfo {
 export type OAuthProvider = "google";
 
 // =============================================================================
-// PASSKEY TYPES
-// =============================================================================
-
-export interface Passkey {
-	id: string;
-	credentialId: string;
-	name: string;
-	createdAt: string;
-	lastUsedAt: string | null;
-}
-
-export interface PasskeyRegisterOptions {
-	challenge: string;
-	rp: {
-		name: string;
-		id: string;
-	};
-	user: {
-		id: string;
-		name: string;
-		displayName: string;
-	};
-	pubKeyCredParams: Array<{
-		type: "public-key";
-		alg: number;
-	}>;
-	authenticatorSelection: {
-		authenticatorAttachment?: "platform" | "cross-platform";
-		requireResidentKey?: boolean;
-		residentKey?: "discouraged" | "preferred" | "required";
-		userVerification?: "required" | "preferred" | "discouraged";
-	};
-	timeout: number;
-	attestation: "none" | "indirect" | "direct" | "enterprise";
-}
-
-export interface PasskeyAuthOptions {
-	challenge: string;
-	rpId: string;
-	allowCredentials?: Array<{
-		type: "public-key";
-		id: string;
-		transports?: Array<"usb" | "ble" | "nfc" | "internal" | "hybrid">;
-	}>;
-	userVerification?: "required" | "preferred" | "discouraged";
-	timeout: number;
-}
-
-// =============================================================================
 // TWO-FACTOR AUTHENTICATION TYPES
 // =============================================================================
 

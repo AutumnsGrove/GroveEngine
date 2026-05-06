@@ -2,7 +2,7 @@
  * Better Auth Configuration for Heartwood
  *
  * This configuration integrates Better Auth with Cloudflare's D1 and KV,
- * providing OAuth (Google), magic link, and passkey authentication.
+ * providing Google OAuth authentication.
  *
  * Grove-specific features:
  * - Email allowlist enforcement (admin-only access)
@@ -14,79 +14,12 @@
 import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
-import { magicLink, twoFactor } from "better-auth/plugins";
-import { passkey } from "@better-auth/passkey";
+import { twoFactor } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
-import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
-
-// Magic link email template — Grove-branded, warm style
-// Uses hosted PNG logo (cdn.grove.place/email/logo.png) matching all newer templates
-const MAGIC_LINK_EMAIL_HTML = (url: string) =>
-	`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grove</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #fefdfb; font-family: 'Lexend', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-    <tr>
-      <td align="center" style="padding-bottom: 30px;">
-        <img src="https://cdn.grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
-        <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
-          Sign in to Grove
-        </h1>
-        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-          Click the button below to sign in. This link expires in 10 minutes.
-        </p>
-        <div style="text-align: center; margin: 0 0 24px;">
-          <a href="${url}" style="display: inline-block; background-color: #16a34a; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
-            Sign In
-          </a>
-        </div>
-        <p style="margin: 0 0 8px 0; font-size: 14px; color: rgba(245, 242, 234, 0.5);">
-          If you didn't request this, you can safely ignore this email.
-        </p>
-        <p style="margin: 0; font-size: 12px; color: rgba(245, 242, 234, 0.35); line-height: 1.5; word-break: break-all;">
-          Or copy this link: ${url}
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 30px;">
-        <p style="margin: 0; font-size: 12px; color: rgba(61, 41, 20, 0.4);">
-          grove.place
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`.trim();
-
-const MAGIC_LINK_EMAIL_TEXT = (url: string) =>
-	`
-Sign in to Grove
-
-Click the link below to sign in:
-${url}
-
-This link expires in 10 minutes.
-
-If you didn't request this, you can safely ignore this email.
-
-— Grove
-`.trim();
 
 /**
  * Create a Better Auth instance configured for Cloudflare
@@ -97,8 +30,6 @@ If you didn't request this, you can safely ignore this email.
  */
 export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	// Validate critical env vars early — fail loudly instead of crashing mid-flow.
-	// These are set via wrangler.toml [vars] or `wrangler secret put`.
-	// If missing after a migration, the error message here tells ops exactly what to fix.
 	if (!env.DB) throw new Error(HW_SVC_ERRORS.MISSING_DB_BINDING.adminMessage);
 	if (!env.AUTH_BASE_URL) throw new Error(HW_SVC_ERRORS.MISSING_AUTH_BASE_URL.adminMessage);
 	if (!env.SESSION_SECRET) throw new Error(HW_SVC_ERRORS.MISSING_SESSION_SECRET.adminMessage);
@@ -110,41 +41,27 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 
 	// Create Drizzle instance for D1 with schema
 	const db = drizzle(env.DB, { schema });
-	if (!env.ZEPHYR_API_KEY) {
-		console.warn(HW_SVC_ERRORS.MISSING_ZEPHYR_KEY.adminMessage);
-	}
-	const zephyr = new ZephyrClient({
-		baseUrl: env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev",
-		apiKey: env.ZEPHYR_API_KEY || "",
-		fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
-	});
 
 	// Extract withCloudflare config so we can deep-merge session/advanced
 	// instead of letting Heartwood's keys silently replace them.
-	// withCloudflare sets: session.storeSessionInDatabase, advanced.ipAddress.ipAddressHeaders
-	// Note: withCloudflare generates session/advanced at runtime but its types
-	// don't reflect this (WithCloudflareAuth only adds `plugins`). Cast to access them.
 	const cfConfig = withCloudflare(
 		{
 			autoDetectIpAddress: true,
 			geolocationTracking: true,
-			cf: cf || {}, // Cloudflare request context for geolocation
+			cf: cf || {},
 			d1: {
 				db: db as any, // Bridge drizzle-orm version mismatch (0.45 vs 0.44)
 				options: {
 					usePlural: false, // ba_user, ba_session, etc. (not plural)
-					debugLogs: true, // Enable debug logging to see errors
+					debugLogs: true,
 				},
 			},
-			// kv: env.SESSION_KV,  // Disabled: KV session bug (PR #7583) - sessions lack ID field
 		},
 		{
 			// Better Auth's built-in rate limiting — catch-all safety net.
 			// Grove's Hono middleware rate limiters (rateLimit.ts) provide tight
-			// per-endpoint controls on sensitive routes (magic link, passkey, admin).
-			// This layer catches everything else (OAuth, sign-up, etc.).
+			// per-endpoint controls on sensitive routes.
 			// See HAWK-001 in docs/security/hawk-report-2026-02-10-login-auth-hub.md
-			// Uses customStorage to reuse the existing rate_limits D1 table.
 			rateLimit: {
 				enabled: true,
 				window: 60,
@@ -197,42 +114,23 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	) as Record<string, any>;
 
 	return betterAuth({
-		// Base URL for auth endpoints
 		baseURL: env.AUTH_BASE_URL,
-
-		// Secret for signing tokens and cookies
 		secret: env.SESSION_SECRET,
-
-		// Trusted origins for callback URLs and redirects
-		// Wildcard covers all tenant subdomains (Better Auth uses internal wildcardMatch())
 		trustedOrigins: ["https://autumnsgrove.com", "https://*.grove.place"],
-
-		// Database, plugins, rate limiting from withCloudflare
 		...cfConfig,
 
-		// Session configuration — deep-merged with withCloudflare's session config
-		// (preserves storeSessionInDatabase from geolocation tracking)
 		session: {
 			...cfConfig.session,
-			modelName: "ba_session", // Map to our ba_session table
-			// 30 days session expiry
+			modelName: "ba_session",
 			expiresIn: 30 * 24 * 60 * 60,
-			// Refresh session if within 1 day of expiry
 			updateAge: 24 * 60 * 60,
-			// Disable "fresh session" check for passkey registration.
-			// BA's freshSessionMiddleware rejects sessions where updatedAt is older
-			// than freshAge. Passkey registration is already protected by the
-			// browser's biometric prompt — the fresh check adds friction, not security.
 			freshAge: 0,
-			// Cross-subdomain cookie for .grove.place
 			cookieCache: {
 				enabled: true,
-				maxAge: 5 * 60, // 5 minute cache
+				maxAge: 5 * 60,
 			},
 		},
 
-		// Cookie configuration — deep-merged with withCloudflare's advanced config
-		// (preserves ipAddress.ipAddressHeaders for Cloudflare IP detection)
 		advanced: {
 			...cfConfig.advanced,
 			crossSubDomainCookies: {
@@ -242,16 +140,14 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			defaultCookieAttributes: {
 				httpOnly: true,
 				secure: true,
-				sameSite: "lax", // Must be 'lax' for OAuth redirects to work
+				sameSite: "lax",
 				path: "/",
 			},
-			// OAuth state cookie — SameSite=None retained for compatibility.
-			// Auth flows now go through login.grove.place (same-origin), so Lax would work.
 			cookies: {
 				oauth_state: {
 					name: "better-auth.oauth_state",
 					attributes: {
-						sameSite: "none", // Required for cross-origin POST responses
+						sameSite: "none",
 						secure: true,
 						httpOnly: true,
 						path: "/",
@@ -260,44 +156,37 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			},
 		},
 
-		// Extended user schema (Grove-specific fields)
 		user: {
-			modelName: "ba_user", // Map to our ba_user table
+			modelName: "ba_user",
 			additionalFields: {
-				// Multi-tenant association
 				tenantId: {
 					type: "string",
 					required: false,
 					input: false,
 				},
-				// Administrative access flag
 				isAdmin: {
 					type: "boolean",
 					required: false,
 					defaultValue: false,
 					input: false,
 				},
-				// Track login frequency
 				loginCount: {
 					type: "number",
 					required: false,
 					defaultValue: 0,
 					input: false,
 				},
-				// Moderation: is user banned?
 				banned: {
 					type: "boolean",
 					required: false,
 					defaultValue: false,
 					input: false,
 				},
-				// Moderation: reason for ban
 				banReason: {
 					type: "string",
 					required: false,
 					input: false,
 				},
-				// Moderation: when ban expires (null = permanent)
 				banExpires: {
 					type: "date",
 					required: false,
@@ -306,7 +195,6 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			},
 		},
 
-		// OAuth providers (Passkeys handled via plugin, Google as fallback)
 		socialProviders: {
 			google: {
 				clientId: env.GOOGLE_CLIENT_ID,
@@ -315,51 +203,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			},
 		},
 
-		// Plugins
 		plugins: [
-			// Magic link authentication
-			magicLink({
-				// Link expires in 10 minutes
-				expiresIn: 10 * 60,
-
-				// Disable signup via magic link (allowlist only)
-				disableSignUp: false,
-
-				// Send magic link email via Zephyr (unified email gateway)
-				sendMagicLink: async ({ email, url }) => {
-					const result = await zephyr.sendRaw({
-						to: email,
-						subject: "Sign in to Grove",
-						html: MAGIC_LINK_EMAIL_HTML(url),
-						text: MAGIC_LINK_EMAIL_TEXT(url),
-						from: "auth@grove.place",
-						fromName: "Grove",
-						type: "verification",
-						tenant: "heartwood",
-						// Use the magic link token as idempotency key — stable per request,
-						// so retries deduplicate correctly rather than sending duplicate emails.
-						idempotencyKey: `magic-link-${new URL(url).searchParams.get("token") ?? email}`,
-					});
-
-					if (!result.success) {
-						console.error("[MagicLink] Zephyr send failed:", result.errorCode, result.errorMessage);
-						throw new Error(HW_SVC_ERRORS.ACCOUNT_CREATION_FAILED.adminMessage);
-					}
-
-					console.log("[MagicLink] Sent magic link via Zephyr");
-				},
-			}),
-
-			// Passkey (WebAuthn) authentication
-			// origin supports comma-separated values for multi-origin (e.g. "https://login.grove.place,http://localhost:5173")
-			passkey({
-				rpID: env.PASSKEY_RP_ID || "grove.place",
-				rpName: "Grove",
-				origin: (env.PASSKEY_ORIGIN || "https://login.grove.place")
-					.split(",")
-					.map((o: string) => o.trim()),
-			}),
-
 			// Two-factor authentication (TOTP)
 			twoFactor({
 				issuer: "Heartwood",
@@ -374,38 +218,31 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			}),
 		],
 
-		// Hooks for Grove-specific logic
 		databaseHooks: {
 			user: {
 				create: {
 					before: async (user) => {
-						// Public signup — all users welcome
 						console.log("[Auth] Creating new user:", user.email);
 						return { data: user };
 					},
 				},
 			},
 
-			// Bridge Better Auth sessions to SessionDO for unified session management
 			session: {
 				create: {
 					after: async (session, context) => {
-						// Get the request from context (Better Auth passes it through)
 						const request = context?.request;
 						if (!request) {
 							console.warn("[SessionBridge] No request in context, skipping bridge");
 							return;
 						}
 
-						// Check if this request was registered for bridging
 						const reqContext = getRequestContext(request);
 						if (!reqContext) {
 							console.warn("[SessionBridge] Request not registered, skipping bridge");
 							return;
 						}
 
-						// Bridge the BA session to SessionDO
-						// This creates a parallel session in our Durable Object system
 						await bridgeSessionToSessionDO(
 							request,
 							{
@@ -422,21 +259,18 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			},
 		},
 
-		// Account linking - allow multiple providers per user
 		account: {
-			modelName: "ba_account", // Map to our ba_account table
+			modelName: "ba_account",
 			accountLinking: {
 				enabled: true,
 				trustedProviders: ["google"],
 			},
 		},
 
-		// Verification table for magic links
 		verification: {
-			modelName: "ba_verification", // Map to our ba_verification table
+			modelName: "ba_verification",
 		},
 	});
 }
 
-// Type export for use in routes
 export type Auth = ReturnType<typeof createAuth>;

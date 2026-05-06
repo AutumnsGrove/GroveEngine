@@ -171,7 +171,7 @@ export const TEST_USER = {
 	email: "test@grove.place",
 	name: "Test User",
 	avatar_url: null,
-	provider: "magic_code" as const,
+	provider: "google" as const,
 	provider_id: null,
 	is_admin: 0,
 	created_at: "2025-01-01T00:00:00.000Z",

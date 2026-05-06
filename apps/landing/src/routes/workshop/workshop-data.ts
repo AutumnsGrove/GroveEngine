@@ -145,7 +145,7 @@ export const categories: Category[] = [
 				termSlug: "heartwood",
 				tagline: "Centralized Authentication",
 				description:
-					"One identity, verified and protected, that works across every Grove property. Passkeys are the primary method—secure, passwordless, and built into your device. Google OAuth available as a fallback when needed. The authentic core of the ecosystem.",
+					"One identity, verified and protected, that works across every Grove property. Sign in with Google—simple, secure, and passwordless. The authentic core of the ecosystem.",
 				status: "live",
 				icon: "heartwood",
 				domain: "heartwood.grove.place",
@@ -154,15 +154,9 @@ export const categories: Category[] = [
 				spec: "/knowledge/specs/heartwood-spec",
 				whatIsLink: "/knowledge/help/what-is-heartwood",
 				subComponents: [
-					{
-						name: "Passkeys",
-						icon: "fingerprint",
-						description: "Passwordless login",
-						href: "/knowledge/help/what-are-passkeys",
-					},
 					{ name: "Google", icon: "chrome", description: "Google OAuth" },
-					{ name: "Magic", icon: "wand2", description: "Email magic links" },
 					{ name: "Identity", icon: "idcard", description: "Verified identity" },
+					{ name: "2FA", icon: "shield", description: "Two-factor auth (TOTP)" },
 				],
 			},
 			{

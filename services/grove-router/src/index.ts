@@ -208,7 +208,7 @@ export default {
 				redirectUrl.hostname = "login.grove.place";
 				return Response.redirect(redirectUrl.toString(), 301);
 			}
-			// API requests continue to Heartwood via service binding (backward compat for in-flight magic links)
+			// API requests continue to Heartwood via service binding (backward compat for in-flight API calls)
 		}
 
 		// Handle R2 CDN - serve directly from R2 bucket

@@ -3,56 +3,25 @@
 	 * Beta Invite Landing Page
 	 *
 	 * Where invitees land after clicking the link in their invite email.
-	 * Shows a warm welcome, the invite details, and a pre-filled
-	 * sign-in form so they can get started with one click.
+	 * Shows a warm welcome, the invite details, and a Google sign-in
+	 * button so they can get started with one click.
 	 */
 
+	import { browser } from "$app/environment";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { stateIcons, featureIcons, phaseIcons, natureIcons } from "@autumnsgrove/prism/icons";
+	import { phaseIcons, natureIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import { LOGIN_URL } from "@autumnsgrove/lattice/auth/login";
 
 	let { data } = $props();
 
-	// UI state: 'ready' | 'sending' | 'sent' | 'error'
-	let mode = $state<"ready" | "sending" | "sent" | "error">("ready");
-	let errorMessage = $state<string | null>(null);
-
-	// Show expired notification if redirected back from an expired magic link
-	// svelte-ignore state_referenced_locally
-	let showExpiredNotice = $state(data.expired ?? false);
-
-	/**
-	 * Capitalize a tier name for display
-	 */
 	function displayTier(tier: string): string {
 		return tier.charAt(0).toUpperCase() + tier.slice(1);
 	}
 
-	/**
-	 * Send the magic link to the invitee's email
-	 */
-	async function sendMagicLink() {
-		mode = "sending";
-		errorMessage = null;
-		showExpiredNotice = false;
-
-		try {
-			const response = await fetch("/api/auth/magic-link", {
-				// csrf-ok: unauthenticated invite flow
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email: data.inviteEmail, inviteToken: data.token }),
-			});
-
-			if (!response.ok) {
-				const result = (await response.json().catch(() => ({}))) as { message?: string };
-				throw new Error(result.message || "Failed to send magic link");
-			}
-
-			mode = "sent";
-		} catch (err) {
-			mode = "error";
-			errorMessage = err instanceof Error ? err.message : "We stumbled — mind trying once more?";
-		}
+	function signInWithGoogle() {
+		if (!browser) return;
+		const returnTo = `/auth/callback?inviteToken=${encodeURIComponent(data.token)}`;
+		window.location.href = `${LOGIN_URL}?redirect=${encodeURIComponent(`${window.location.origin}${returnTo}`)}`;
 	}
 </script>
 
@@ -79,23 +48,6 @@
 			</p>
 		{/if}
 	</section>
-
-	<!-- Expired/error magic link notice -->
-	{#if showExpiredNotice}
-		<div
-			class="max-w-md mx-auto p-4 rounded-xl bg-warning-bg/80 dark:bg-warning-bg/20 border border-warning/50 dark:border-warning/30 backdrop-blur-sm"
-			role="alert"
-		>
-			<p class="text-sm text-warning dark:text-warning text-center">
-				Your sign-in link didn't work — no worries! Click below to get a fresh one.
-			</p>
-			{#if data.errorCode}
-				<p class="text-xs text-warning/70 dark:text-warning/50 text-center mt-2 font-mono">
-					Error: {data.errorCode}
-				</p>
-			{/if}
-		</div>
-	{/if}
 
 	<!-- Invite details card -->
 	<GlassCard variant="frosted" class="max-w-md mx-auto">
@@ -130,79 +82,38 @@
 			</p>
 		</div>
 
-		<!-- Magic link form -->
+		<!-- Sign in -->
 		<div class="border-t border-border/40 pt-6">
-			{#if mode === "ready" || mode === "error"}
-				<div class="space-y-4">
-					<div>
-						<p class="block text-sm font-medium text-foreground mb-2">Your email</p>
-						<div
-							class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-border/50 dark:border-bark-700/40"
-						>
-							<featureIcons.mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
-							<span class="text-foreground">{data.inviteEmail}</span>
-						</div>
-					</div>
-
-					{#if errorMessage}
-						<p class="text-sm text-error" role="alert">
-							{errorMessage}
-						</p>
-					{/if}
-
-					<button
-						type="button"
-						onclick={sendMagicLink}
-						class="btn-primary w-full justify-center text-base py-3 min-h-[44px]"
-						aria-label="Send a sign-in link to {data.inviteEmail}"
-					>
-						<featureIcons.mail size={18} aria-hidden="true" />
-						Send me a sign-in link
-					</button>
-
-					<p class="text-xs text-foreground-subtle text-center">
-						We'll send a magic link to this email. Click it to sign in — no password needed.
-					</p>
-				</div>
-			{:else if mode === "sending"}
-				<div class="text-center py-4 space-y-3" role="status" aria-live="polite">
-					<stateIcons.loader size={24} class="animate-spin mx-auto text-primary" aria-hidden="true" />
-					<p class="text-foreground-muted">Sending your sign-in link...</p>
-				</div>
-			{:else if mode === "sent"}
-				<div class="text-center py-4 space-y-4" role="status" aria-live="polite">
+			<div class="space-y-4">
+				<div>
+					<p class="block text-sm font-medium text-foreground mb-2">Your email</p>
 					<div
-						class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success-bg/50 dark:bg-success-bg/30"
+						class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-border/50 dark:border-bark-700/40"
 					>
-						<stateIcons.check size={28} class="text-success" aria-hidden="true" />
+						<featureIcons.mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
+						<span class="text-foreground">{data.inviteEmail}</span>
 					</div>
-
-					<div>
-						<p class="font-medium text-foreground">Check your email!</p>
-						<p class="text-sm text-foreground-muted mt-1">
-							We sent a sign-in link to <span class="font-medium text-foreground"
-								>{data.inviteEmail}</span
-							>
-						</p>
-					</div>
-
-					<p class="text-xs text-foreground-subtle">
-						Click the link in the email to continue setting up your blog.
-					</p>
-
-					<button
-						type="button"
-						onclick={() => {
-							mode = "ready";
-							errorMessage = null;
-						}}
-						class="text-sm text-primary hover:underline min-h-[44px] px-4 inline-flex items-center"
-						aria-label="Send the sign-in link again"
-					>
-						Didn't get it? Send again
-					</button>
 				</div>
-			{/if}
+
+				<button
+					type="button"
+					onclick={signInWithGoogle}
+					class="btn-primary w-full justify-center text-base py-3 min-h-[44px]"
+					aria-label="Sign in with Google to claim your invite"
+				>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+						<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+						<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+						<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+					</svg>
+					Continue with Google
+				</button>
+
+				<p class="text-xs text-foreground-subtle text-center">
+					Sign in with the Google account for <span class="font-medium">{data.inviteEmail}</span> to claim your invite.
+				</p>
+			</div>
 		</div>
 	</GlassCard>
 

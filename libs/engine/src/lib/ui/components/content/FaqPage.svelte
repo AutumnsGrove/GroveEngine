@@ -102,8 +102,7 @@
 							href="https://grove.place"
 							class="text-grove-700 dark:text-grove-400 underline underline-offset-2">grove.place</a
 						>
-						and sign in with your Google account, a magic link sent to your email, or a passkey like Face
-						ID or Touch ID -- no lengthy forms, no passwords to remember. Once you're in, you can pick
+						and sign in with your Google account -- no lengthy forms, no passwords to remember. Once you're in, you can pick
 						a username and start setting up your <GroveTerm interactive term="your-garden">garden</GroveTerm>.
 					{:else if item.value === "what-is-a-wanderer"}
 						Everyone who enters <GroveTerm interactive term="your-grove">the Grove</GroveTerm> is a <GroveTerm interactive
@@ -270,8 +269,7 @@
 						without surveilling them -- simple, wellness-focused insights rather than anxious dashboards.
 					{:else if item.value === "authentication"}
 						We built our own sign-in system called <GroveTerm interactive term="heartwood">Heartwood</GroveTerm
-						>. You can sign in with Google, a magic link sent to your email, or a passkey like Face
-						ID or Touch ID -- <GroveTerm interactive term="your-grove">Grove</GroveTerm> never sees or stores a password.
+						>. You sign in with Google -- <GroveTerm interactive term="your-grove">Grove</GroveTerm> never sees or stores a password.
 						Your sessions are encrypted, and there are no passwords anywhere in the chain.
 					{:else if item.value === "delete-account"}
 						Yes, completely. Start from the Danger Zone in your account settings -- your <GroveTerm

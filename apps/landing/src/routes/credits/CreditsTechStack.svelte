@@ -174,7 +174,7 @@
 							<h3 class="text-lg font-serif text-foreground mb-1">Better Auth</h3>
 							<p class="text-foreground-muted font-sans text-sm">
 								Authentication framework powering <GroveTerm interactive term="heartwood">Heartwood</GroveTerm>.
-								Handles OAuth, magic links, passkeys, and session management with KV-cached sessions
+								Handles OAuth and session management with KV-cached sessions
 								for sub-100ms validation.
 							</p>
 							<a
@@ -222,8 +222,7 @@
 						<div class="card p-5">
 							<h3 class="text-lg font-serif text-foreground mb-1">Resend</h3>
 							<p class="text-foreground-muted font-sans text-sm">
-								Email delivery service. Powers transactional emails, magic link authentication, and
-								notifications.
+								Email delivery service. Powers transactional emails and notifications.
 							</p>
 							<a
 								href="https://resend.com"

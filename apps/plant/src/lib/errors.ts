@@ -75,13 +75,6 @@ export const PLANT_ERRORS = {
 		adminMessage: "get-session returned 200 but response has no session or user data.",
 	},
 
-	MAGIC_LINK_ERROR: {
-		code: "PLANT-022",
-		category: "user" as const,
-		userMessage: "Your magic link didn't work. Please request a new one.",
-		adminMessage: "Magic link callback received an error parameter from Heartwood.",
-	},
-
 	OAUTH_ACCESS_DENIED: {
 		code: "PLANT-023",
 		category: "user" as const,

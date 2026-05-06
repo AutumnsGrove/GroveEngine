@@ -482,7 +482,6 @@ export const ICON_MANIFEST: IconManifest = {
 		zephyr: "Cable",
 		patina: "Database",
 		// Identity & auth
-		passkeys: "Fingerprint",
 		// Integrations
 		mycelium: "CircuitBoard",
 		songbird: "Bird",

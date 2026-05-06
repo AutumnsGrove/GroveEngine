@@ -1,13 +1,11 @@
 /**
  * Login Page — Server Actions
  *
- * Handles Google OAuth and magic link auth entirely server-side.
- * Passkeys remain client-side (WebAuthn requires browser APIs — navigator.credentials
- * is a browser-only API that cannot be called from a Worker).
+ * Handles Google OAuth entirely server-side.
  *
- * By running these as SvelteKit form actions:
- * - No JavaScript required for Google or email sign-in
- * - The redirect cookie is now HttpOnly (no document.cookie workaround needed)
+ * By running this as a SvelteKit form action:
+ * - No JavaScript required for sign-in
+ * - The redirect cookie is HttpOnly
  * - All auth logic runs in the Cloudflare Worker isolate alongside everything else
  */
 
@@ -192,92 +190,5 @@ export const actions: Actions = {
 			provider: "google" as const,
 			error: userError,
 		});
-	},
-
-	/**
-	 * Magic link — sends the sign-in email via Heartwood entirely server-side.
-	 *
-	 * Returns { emailSent, email } on success so the UI can show the confirmation.
-	 * Returns fail() with provider + error on failure so the form can display it.
-	 */
-	email: async ({ request, platform, url }) => {
-		const formData = await request.formData();
-		const email = formData.get("email")?.toString().trim() ?? "";
-		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString());
-
-		if (!email) {
-			return fail(400, {
-				provider: "email" as const,
-				error: "Email address is required.",
-				email,
-			});
-		}
-
-		if (!platform?.env?.AUTH) {
-			return fail(503, {
-				provider: "email" as const,
-				error: "Auth service unavailable. Please try again shortly.",
-				email,
-			});
-		}
-
-		const callbackURL = `/callback?redirect=${encodeURIComponent(redirectTo)}`;
-		const authBaseUrl = platform.env.GROVEAUTH_URL ?? DEFAULT_AUTH_URL;
-
-		let response: Response;
-		try {
-			response = await platform.env.AUTH.fetch(`${authBaseUrl}/api/auth/sign-in/magic-link`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Origin: url.origin,
-				},
-				body: JSON.stringify({ email, callbackURL }),
-			});
-		} catch (fetchErr) {
-			console.error("[Magic Link] Service binding fetch error:", fetchErr);
-			return fail(503, {
-				provider: "email" as const,
-				error: "Could not reach auth service. Please try again.",
-				email,
-			});
-		}
-
-		if (!response.ok) {
-			// Log the raw response for debugging
-			console.error("[Magic Link] Heartwood error:", response.status);
-
-			let message: string;
-			if (response.status >= 500) {
-				// 5xx — auth service error; don't leak internals
-				try {
-					const body = await response.text();
-					console.error("[Magic Link] Response body:", body.slice(0, 500));
-				} catch {
-					/* ignore */
-				}
-				message =
-					"Magic link could not be sent — the auth service returned an error. Please try again shortly.";
-			} else if (response.status === 429) {
-				message = "Too many attempts. Please wait a moment before requesting another link.";
-			} else {
-				// 4xx — surface Heartwood's message (client errors the user can act on)
-				message = "Failed to send magic link. Please try again.";
-				try {
-					const body = (await response.json()) as { message?: string };
-					if (body.message) message = body.message;
-				} catch {
-					// Use default message if response isn't JSON
-				}
-			}
-			const status = response.status >= 400 && response.status < 600 ? response.status : 500;
-			return fail(status, {
-				provider: "email" as const,
-				error: message,
-				email,
-			});
-		}
-
-		return { emailSent: true as const, email };
 	},
 };

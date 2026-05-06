@@ -418,7 +418,7 @@ describe("Grove Router", () => {
 		});
 
 		it("proxies requests with no Accept header (defaults to API behavior)", async () => {
-			const request = createRequest("auth-api", "/api/magic-link", {
+			const request = createRequest("auth-api", "/api/token", {
 				method: "POST",
 			});
 			await router.fetch(request, env);

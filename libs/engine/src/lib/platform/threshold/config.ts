@@ -31,13 +31,7 @@ export const ENDPOINT_RATE_LIMITS = {
 	"auth/callback": { limit: 10, windowSeconds: 300 },
 	"auth/token": { limit: 20, windowSeconds: 60 },
 	"auth/password-reset": { limit: 3, windowSeconds: 3600 },
-	"auth/magic-link": { limit: 5, windowSeconds: 900 },
 	"auth/verify": { limit: 100, windowSeconds: 60 },
-
-	// Passkey endpoints
-	"auth/passkey-register": { limit: 5, windowSeconds: 3600 },
-	"auth/passkey-delete": { limit: 10, windowSeconds: 3600 },
-	"auth/passkey-auth": { limit: 20, windowSeconds: 60 },
 
 	// Session endpoints
 	"session/validate": { limit: 30, windowSeconds: 60 },
@@ -124,7 +118,6 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"POST:/api/auth/login": "auth/login",
 	"POST:/api/auth/token": "auth/token",
 	"POST:/api/auth/password-reset": "auth/password-reset",
-	"POST:/api/auth/magic-link": "auth/magic-link",
 	"POST:/api/blooms": "posts/create",
 	"PUT:/api/blooms": "posts/update",
 	"PATCH:/api/blooms": "posts/update",

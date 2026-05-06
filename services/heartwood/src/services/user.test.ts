@@ -43,7 +43,7 @@ describe("authenticateUser", () => {
 				email: "user@example.com",
 				name: "Test User",
 				avatar_url: null,
-				provider: "magic_code",
+				provider: "google",
 				provider_id: null,
 			},
 			{ client_id: "test-app" },
@@ -62,7 +62,7 @@ describe("authenticateUser", () => {
 				email: "user@example.com",
 				name: "User",
 				avatar_url: null,
-				provider: "magic_code",
+				provider: "google",
 				provider_id: null,
 			},
 			{ client_id: "test-app" },
@@ -75,7 +75,7 @@ describe("authenticateUser", () => {
 				user_id: TEST_USER.id,
 				client_id: "test-app",
 				details: expect.objectContaining({
-					provider: "magic_code",
+					provider: "google",
 				}),
 			}),
 		);

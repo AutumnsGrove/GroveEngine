@@ -113,9 +113,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	cookies.delete("auth_state", { path: "/" });
 	cookies.delete("auth_code_verifier", { path: "/" });
 
-	if (isNewUser) {
-		redirect(302, "/auth/setup-passkey");
-	} else if (!hasCompletedProfile) {
+	if (!hasCompletedProfile) {
 		redirect(302, "/profile");
 	} else {
 		redirect(302, "/plans");

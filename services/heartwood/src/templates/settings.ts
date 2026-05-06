@@ -1,6 +1,6 @@
 /**
  * Heartwood Settings Page Template
- * Account settings including passkey management
+ * Account settings including two-factor authentication
  */
 
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
@@ -187,68 +187,6 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       border: 1px solid var(--color-success);
     }
 
-    .passkey-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .passkey-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--color-bg);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--color-border);
-    }
-
-    .passkey-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .passkey-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .passkey-icon svg {
-      width: 20px;
-      height: 20px;
-      color: var(--color-text-muted);
-    }
-
-    .passkey-details h3 {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .passkey-details p {
-      font-size: 12px;
-      color: var(--color-text-muted);
-    }
-
-    .passkey-empty {
-      text-align: center;
-      padding: 32px;
-      color: var(--color-text-muted);
-    }
-
-    .passkey-empty svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-    }
-
     .btn {
       display: inline-flex;
       align-items: center;
@@ -310,13 +248,6 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
     .loading {
       opacity: 0.7;
       pointer-events: none;
-    }
-
-    #passkey-loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      color: var(--color-text-muted);
     }
 
     .modal-overlay {
@@ -434,40 +365,6 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       </div>
     </div>
 
-    <!-- Passkeys Card -->
-    <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 11c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/>
-          <path d="M19 10c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
-          <path d="M19 14v4"/>
-          <path d="M17 18h4"/>
-          <path d="M1 18c0-3.31 2.69-6 6-6h2"/>
-        </svg>
-        Passkeys
-      </div>
-
-      <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 16px;">
-        Passkeys let you sign in securely using your fingerprint, face, or device PIN. No password needed.
-      </p>
-
-      <div id="passkey-loading">Loading passkeys...</div>
-
-      <div id="passkey-list" class="passkey-list">
-        <!-- Passkeys will be loaded here -->
-      </div>
-
-      <div class="actions">
-        <button id="add-passkey" class="btn btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add Passkey
-        </button>
-      </div>
-    </div>
-
     <!-- Two-Factor Authentication Card -->
     <div class="card">
       <div class="card-title">
@@ -532,36 +429,6 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
     </div>
     `
 		}
-  </div>
-
-  <!-- Add Passkey Modal -->
-  <div id="add-passkey-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>Add a Passkey</h3>
-      <p>Give this passkey a name to help you identify it later.</p>
-      <form id="add-passkey-form">
-        <div class="form-group">
-          <label for="passkey-name">Passkey Name</label>
-          <input type="text" id="passkey-name" placeholder="e.g., MacBook Pro, iPhone" required>
-        </div>
-        <div class="modal-actions">
-          <button type="button" id="cancel-add-passkey" class="btn">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Passkey</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Delete Passkey Modal -->
-  <div id="delete-passkey-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>Delete Passkey</h3>
-      <p>Are you sure you want to delete this passkey? You won't be able to use it to sign in anymore.</p>
-      <div class="modal-actions">
-        <button type="button" id="cancel-delete-passkey" class="btn">Cancel</button>
-        <button type="button" id="confirm-delete-passkey" class="btn btn-danger">Delete</button>
-      </div>
-    </div>
   </div>
 
   <!-- 2FA Setup Modal -->
@@ -640,209 +507,9 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
 			? `
   <script>
     const API_BASE = '${authBaseUrl}';
-    let deletePasskeyId = null;
 
     // DOM elements
-    const passkeyList = document.getElementById('passkey-list');
-    const passkeyLoading = document.getElementById('passkey-loading');
-    const addPasskeyBtn = document.getElementById('add-passkey');
-    const addPasskeyModal = document.getElementById('add-passkey-modal');
-    const addPasskeyForm = document.getElementById('add-passkey-form');
-    const cancelAddPasskey = document.getElementById('cancel-add-passkey');
-    const deletePasskeyModal = document.getElementById('delete-passkey-modal');
-    const cancelDeletePasskey = document.getElementById('cancel-delete-passkey');
-    const confirmDeletePasskey = document.getElementById('confirm-delete-passkey');
     const signOutBtn = document.getElementById('sign-out');
-
-    // Load passkeys
-    async function loadPasskeys() {
-      passkeyLoading.style.display = 'block';
-      passkeyList.innerHTML = '';
-
-      try {
-        const response = await fetch(API_BASE + '/api/auth/passkey/list-user-passkeys', {
-          credentials: 'include',
-        });
-
-        if (!response.ok) throw new Error('Failed to load passkeys');
-
-        const data = await response.json();
-        const passkeys = data.passkeys || [];
-
-        passkeyLoading.style.display = 'none';
-
-        if (passkeys.length === 0) {
-          passkeyList.innerHTML = \`
-            <div class="passkey-empty">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 11c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/>
-                <path d="M19 10c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
-                <path d="M19 14v4"/>
-                <path d="M17 18h4"/>
-                <path d="M1 18c0-3.31 2.69-6 6-6h2"/>
-              </svg>
-              <p>No passkeys registered yet</p>
-            </div>
-          \`;
-          return;
-        }
-
-        passkeys.forEach(passkey => {
-          const createdAt = new Date(passkey.createdAt).toLocaleDateString();
-          const deviceIcon = passkey.deviceType === 'multiDevice' ? 'cloud' : 'device';
-
-          passkeyList.innerHTML += \`
-            <div class="passkey-item" data-id="\${passkey.id}">
-              <div class="passkey-info">
-                <div class="passkey-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    \${deviceIcon === 'cloud' ?
-                      '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>' :
-                      '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/>'
-                    }
-                  </svg>
-                </div>
-                <div class="passkey-details">
-                  <h3>\${escapeHtml(passkey.name || 'Unnamed Passkey')}</h3>
-                  <p>Added \${createdAt}\${passkey.backedUp ? ' · Synced' : ''}</p>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-danger delete-passkey" data-id="\${passkey.id}">
-                Delete
-              </button>
-            </div>
-          \`;
-        });
-
-        // Attach delete handlers
-        document.querySelectorAll('.delete-passkey').forEach(btn => {
-          btn.addEventListener('click', () => {
-            deletePasskeyId = btn.dataset.id;
-            deletePasskeyModal.classList.add('active');
-          });
-        });
-      } catch (err) {
-        passkeyLoading.style.display = 'none';
-        passkeyList.innerHTML = '<p style="color: var(--color-error); text-align: center;">Failed to load passkeys</p>';
-        console.error('Error loading passkeys:', err);
-      }
-    }
-
-    // Add passkey
-    addPasskeyBtn.addEventListener('click', () => {
-      addPasskeyModal.classList.add('active');
-      document.getElementById('passkey-name').focus();
-    });
-
-    cancelAddPasskey.addEventListener('click', () => {
-      addPasskeyModal.classList.remove('active');
-      addPasskeyForm.reset();
-    });
-
-    addPasskeyForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('passkey-name').value;
-      const submitBtn = addPasskeyForm.querySelector('button[type="submit"]');
-      submitBtn.classList.add('loading');
-      submitBtn.textContent = 'Creating...';
-
-      try {
-        // Step 1: Get registration options
-        const optionsResponse = await fetch(API_BASE + '/api/auth/passkey/generate-register-options', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ name }),
-        });
-
-        if (!optionsResponse.ok) throw new Error('Failed to get registration options');
-
-        const optionsData = await optionsResponse.json();
-
-        // Step 2: Create credential
-        const credential = await navigator.credentials.create({
-          publicKey: {
-            ...optionsData.options,
-            challenge: base64ToArrayBuffer(optionsData.options.challenge),
-            user: {
-              ...optionsData.options.user,
-              id: base64ToArrayBuffer(optionsData.options.user.id),
-            },
-            excludeCredentials: optionsData.options.excludeCredentials?.map(cred => ({
-              ...cred,
-              id: base64ToArrayBuffer(cred.id),
-            })),
-          },
-        });
-
-        // Step 3: Verify registration
-        const verifyResponse = await fetch(API_BASE + '/api/auth/passkey/verify-registration', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            name,
-            credential: {
-              id: credential.id,
-              rawId: arrayBufferToBase64(credential.rawId),
-              type: credential.type,
-              response: {
-                clientDataJSON: arrayBufferToBase64(credential.response.clientDataJSON),
-                attestationObject: arrayBufferToBase64(credential.response.attestationObject),
-                transports: credential.response.getTransports?.() || [],
-              },
-            },
-          }),
-        });
-
-        if (!verifyResponse.ok) throw new Error('Failed to verify registration');
-
-        addPasskeyModal.classList.remove('active');
-        addPasskeyForm.reset();
-        loadPasskeys();
-      } catch (err) {
-        console.error('Error adding passkey:', err);
-        alert(err.name === 'NotAllowedError' ? 'Passkey creation was cancelled.' :
-              err.message || 'Failed to add passkey');
-      } finally {
-        submitBtn.classList.remove('loading');
-        submitBtn.textContent = 'Create Passkey';
-      }
-    });
-
-    // Delete passkey
-    cancelDeletePasskey.addEventListener('click', () => {
-      deletePasskeyModal.classList.remove('active');
-      deletePasskeyId = null;
-    });
-
-    confirmDeletePasskey.addEventListener('click', async () => {
-      if (!deletePasskeyId) return;
-
-      confirmDeletePasskey.classList.add('loading');
-      confirmDeletePasskey.textContent = 'Deleting...';
-
-      try {
-        const response = await fetch(API_BASE + '/api/auth/passkey/delete-passkey', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ id: deletePasskeyId }),
-        });
-
-        if (!response.ok) throw new Error('Failed to delete passkey');
-
-        deletePasskeyModal.classList.remove('active');
-        deletePasskeyId = null;
-        loadPasskeys();
-      } catch (err) {
-        console.error('Error deleting passkey:', err);
-        alert('Failed to delete passkey');
-      } finally {
-        confirmDeletePasskey.classList.remove('loading');
-        confirmDeletePasskey.textContent = 'Delete';
-      }
-    });
 
     // Sign out
     signOutBtn.addEventListener('click', async () => {
@@ -859,31 +526,6 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         alert('Sign out failed. Please try again or clear your cookies.');
       }
     });
-
-    // Base64 utilities
-    function base64ToArrayBuffer(base64) {
-      const binaryString = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      return bytes.buffer;
-    }
-
-    function arrayBufferToBase64(buffer) {
-      const bytes = new Uint8Array(buffer);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=/g, '');
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
 
     // ==========================================================================
     // TWO-FACTOR AUTHENTICATION
@@ -1175,8 +817,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       });
     });
 
-    // Load passkeys and 2FA status on page load
-    loadPasskeys();
+    // Load 2FA status on page load
     load2faStatus();
   </script>
   `

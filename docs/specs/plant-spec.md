@@ -229,8 +229,6 @@ The flow is a 6-step linear journey. Each step is a separate route. The layout s
 | `/success/check` | GET | Poll tenant creation status |
 | `/auth` | GET | OAuth initiation |
 | `/auth/callback` | GET | OAuth callback, session creation, onboarding record |
-| `/auth/magic-link/callback` | GET | Magic link verification callback |
-
 ---
 
 ## Authentication
@@ -239,7 +237,7 @@ Plant uses GroveAuth (Heartwood) via Better Auth for authentication. The flow:
 
 1. User clicks "Get Started" on the landing page
 2. `LoginRedirectButton` sends them to GroveAuth's OAuth consent screen
-3. GroveAuth handles Google OAuth or magic link
+3. GroveAuth handles Google OAuth
 4. Callback at `/auth/callback` receives the session
 5. Plant verifies the Better Auth session cookie via service binding
 6. Creates or finds the `user_onboarding` record in D1
@@ -250,8 +248,6 @@ Plant uses GroveAuth (Heartwood) via Better Auth for authentication. The flow:
 - Primary: lookup by `groveauth_id` in `user_onboarding`
 - Fallback 1: lookup by email (handles Better Auth ID changes)
 - Fallback 2: check `users`/`tenants` tables (pre-Plant users → redirect to Arbor)
-
-**Post-OAuth for new users:** Redirects to `/auth/setup-passkey` for optional passkey enrollment before profile setup.
 
 ---
 

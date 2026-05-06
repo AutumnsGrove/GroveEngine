@@ -115,7 +115,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		}
 
 		// Email is verified if the flag is set OR if the user completed auth
-		// (OAuth/magic-link both inherently verify email ownership)
+		// (OAuth inherently verifies email ownership)
 		if (!onboarding.email_verified && !onboarding.auth_completed_at) {
 			return json({ error: "Please verify your email before selecting a plan." }, { status: 400 });
 		}

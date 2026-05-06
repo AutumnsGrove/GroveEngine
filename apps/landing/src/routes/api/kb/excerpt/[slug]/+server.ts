@@ -108,7 +108,6 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"what-are-vines",
 	"account-deletion",
 	"sessions-and-cookies",
-	"what-are-passkeys", // Used in login page Waystone ("What's a passkey?")
 	"image-upload-failures", // Used in Arbor image upload error state
 	"what-is-hum", // Hum music link previews
 	"using-curios-in-content", // Curio directives cheatsheet for editors

@@ -52,7 +52,7 @@ Each issue gets up to 3 labels:
 | Label | When to Apply |
 |-------|---------------|
 | `lattice` | Framework, monorepo, shared infrastructure, engine package |
-| `heartwood` | Auth, sessions, passkeys, OAuth, identity |
+| `heartwood` | Auth, sessions, OAuth, identity |
 | `arbor` | Admin panel, backend API, admin dashboard |
 | `amber` | Images, CDN, R2 storage, JXL, media pipeline |
 | `clearing` | Status page, health monitoring, uptime |

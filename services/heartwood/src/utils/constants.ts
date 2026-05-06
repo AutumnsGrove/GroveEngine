@@ -6,7 +6,6 @@
 export const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour in seconds
 export const REFRESH_TOKEN_EXPIRY = 30 * 24 * 60 * 60; // 30 days in seconds
 export const AUTH_CODE_EXPIRY = 5 * 60; // 5 minutes in seconds
-export const MAGIC_CODE_EXPIRY = 10 * 60; // 10 minutes in seconds
 
 // Rate limiting
 export const RATE_LIMIT_TOKEN_PER_CLIENT = 20; // per minute
@@ -25,16 +24,6 @@ export const RATE_LIMIT_SESSION_SERVICE = 100; // per minute for internal servic
 
 // Admin rate limiting
 export const RATE_LIMIT_ADMIN_PER_IP = 30; // per minute
-
-// Magic link rate limiting (prevents email flooding via Better Auth endpoint)
-export const RATE_LIMIT_MAGIC_LINK = 5; // per 15 minutes per IP
-export const RATE_LIMIT_MAGIC_LINK_WINDOW = 900; // 15 minutes in seconds
-
-// Passkey rate limiting (defense-in-depth alongside Better Auth's internal limits)
-export const RATE_LIMIT_PASSKEY_REGISTER = 5; // per hour per user
-export const RATE_LIMIT_PASSKEY_DELETE = 10; // per hour per user
-export const RATE_LIMIT_PASSKEY_AUTH = 20; // per minute per IP (auth attempts)
-export const RATE_LIMIT_PASSKEY_WINDOW = 3600; // 1 hour in seconds
 
 // Subscription rate limiting
 export const RATE_LIMIT_SUBSCRIPTION_READ = 30; // per minute (GET endpoints)
@@ -68,8 +57,7 @@ export const SECURITY_HEADERS = {
 		"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'",
 };
 
-// Stricter CSP for security-sensitive pages (passkey management, settings)
-// - Allows 'wasm-unsafe-eval' for WebAuthn CBOR parsing in some browsers
+// Stricter CSP for security-sensitive pages (settings)
 // - Explicitly denies frame-ancestors to prevent clickjacking on security pages
 // - Adds upgrade-insecure-requests for mixed content protection
 export const SECURITY_PAGE_CSP =

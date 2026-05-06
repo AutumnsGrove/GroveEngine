@@ -236,7 +236,7 @@
 									: "Sessions unavailable"}
 							</span>
 						{/if}
-						<span class="status-line subtle">Passkeys managed on login hub</span>
+						<span class="status-line subtle">2FA managed on login hub</span>
 					</div>
 					<span class="card-action">Review &rarr;</span>
 				</div>

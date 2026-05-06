@@ -192,7 +192,7 @@ export async function upsertOnboarding(
 ): Promise<{ onboardingId: string; isNewUser: boolean; tenantSubdomain: string | null }> {
 	if (existingOnboarding) {
 		const onboardingId = existingOnboarding.id;
-		// All paths to this function (OAuth, magic link) inherently verify
+		// All paths to this function (OAuth) inherently verify
 		// email ownership. Don't gate on Better Auth's emailVerified field
 		// which may arrive as true, 1, or undefined depending on provider
 		// and D1/Drizzle serialization path.

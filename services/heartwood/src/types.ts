@@ -31,10 +31,6 @@ export interface Env {
 	// Feature flags
 	PUBLIC_SIGNUP_ENABLED?: string; // 'true' to allow public signup (bypass allowlist)
 
-	// Passkey configuration
-	PASSKEY_RP_ID?: string; // defaults to 'grove.place'
-	PASSKEY_ORIGIN?: string; // comma-separated allowed origins, defaults to 'https://login.grove.place'
-
 	// Service-to-service authentication (optional — defense-in-depth for validate-service)
 	SERVICE_SECRET?: string;
 
@@ -158,7 +154,7 @@ export interface AuditLog {
 }
 
 // Enums
-export type AuthProvider = "google" | "magic_code";
+export type AuthProvider = "google";
 
 export type AuditEventType =
 	| "login"
@@ -167,16 +163,10 @@ export type AuditEventType =
 	| "token_exchange"
 	| "token_refresh"
 	| "token_revoke"
-	| "magic_code_sent"
-	| "magic_code_verified"
 	| "device_code_created"
 	| "device_code_authorized"
 	| "device_code_denied"
-	| "device_code_polled"
-	| "passkey_registered"
-	| "passkey_deleted"
-	| "passkey_auth_success"
-	| "passkey_auth_failed";
+	| "device_code_polled";
 
 // API Request/Response Types
 export interface TokenRequest {

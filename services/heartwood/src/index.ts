@@ -99,14 +99,8 @@ app.get("/", (c) => {
 			// Better Auth (new, recommended)
 			betterAuth: {
 				signInSocial: "POST /api/auth/sign-in/social",
-				signInMagicLink: "POST /api/auth/sign-in/magic-link",
-				signInPasskey: "POST /api/auth/sign-in/passkey",
 				signOut: "POST /api/auth/sign-out",
 				session: "GET /api/auth/session",
-				passkeyRegister: "POST /api/auth/passkey/generate-register-options",
-				passkeyVerify: "POST /api/auth/passkey/verify-registration",
-				passkeyList: "GET /api/auth/passkey/list-user-passkeys",
-				passkeyDelete: "POST /api/auth/passkey/delete-passkey",
 				twoFactorEnable: "POST /api/auth/two-factor/enable",
 				twoFactorVerify: "POST /api/auth/two-factor/verify-totp",
 				twoFactorDisable: "POST /api/auth/two-factor/disable",

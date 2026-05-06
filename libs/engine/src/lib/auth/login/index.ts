@@ -31,8 +31,6 @@ export type {
 	LoginGraftProps,
 	ProviderIconProps,
 	ProviderConfig,
-	PasskeyAuthResult,
-	PasskeyButtonProps,
 } from "./types.js";
 
 // Config & utilities
@@ -50,21 +48,9 @@ export {
 	AUTH_COOKIE_OPTIONS,
 	LOGIN_URL,
 	buildLoginUrl,
-	buildPasskeyUrl,
 } from "./config.js";
 
 // Components
 export { default as LoginGraft } from "./LoginGraft.svelte";
 export { default as LoginRedirectButton } from "./LoginRedirectButton.svelte";
 export { default as ProviderIcon } from "./ProviderIcon.svelte";
-export { default as PasskeyButton } from "./PasskeyButton.svelte";
-export { default as EmailButton } from "./EmailButton.svelte";
-
-// Passkey utilities
-export {
-	authenticateWithPasskey,
-	isWebAuthnSupported,
-	hasPasskeysAvailable,
-	isConditionalMediationSupported,
-} from "./passkey-authenticate.js";
-export type { AuthenticateOptions } from "./passkey-authenticate.js";

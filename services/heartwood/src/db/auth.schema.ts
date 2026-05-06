@@ -102,10 +102,11 @@ export const baAccount = sqliteTable("ba_account", {
 });
 
 /**
- * ba_verification - Magic links and email verification tokens
+ * ba_verification - Verification tokens (general-purpose)
  *
- * Stores temporary tokens for magic link authentication.
- * Tokens are deleted upon use (not marked as used).
+ * @deprecated Magic link auth removed (Great Grove Refactor Phase 2).
+ * Table retained — Better Auth core may still use it for internal verifications.
+ * Safe to DROP after confirming no 2FA/email-change flows depend on it.
  */
 export const baVerification = sqliteTable("ba_verification", {
 	id: text("id").primaryKey(),
@@ -119,7 +120,8 @@ export const baVerification = sqliteTable("ba_verification", {
 /**
  * ba_passkey - WebAuthn credentials
  *
- * Stores passkey (WebAuthn) credentials for passwordless authentication.
+ * @deprecated Passkey auth removed (Great Grove Refactor Phase 2).
+ * Table retained for 30-day data retention window. DROP scheduled ~2026-06-06.
  */
 export const baPasskey = sqliteTable("ba_passkey", {
 	id: text("id").primaryKey(),
@@ -232,12 +234,10 @@ export const schema = {
 	ba_user: baUser,
 	ba_session: baSession,
 	ba_account: baAccount,
-	ba_verification: baVerification,
-	ba_passkey: baPasskey,
+	ba_verification: baVerification, // @deprecated — retained for safety, see migration 0014
+	ba_passkey: baPasskey, // @deprecated — passkey plugin removed, table retained for data retention
 	ba_two_factor: baTwoFactor,
-	// Aliases: passkey plugin looks up "passkey" and "twoFactor" without prefix,
-	// unlike user/session/account/verification which accept modelName overrides.
-	passkey: baPasskey,
+	// Aliases: twoFactor plugin looks up "twoFactor" without prefix
 	twoFactor: baTwoFactor,
 	// Grove-specific tables
 	clients,

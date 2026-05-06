@@ -754,46 +754,7 @@ Authorization: Bearer {access_token}
 
 ### Magic Code Flow
 
-```
-┌──────────┐                              ┌───────────┐                              ┌──────────┐
-│  Client  │                              │ GroveAuth │                              │  Resend  │
-│  Site    │                              │           │                              │  (Email) │
-└────┬─────┘                              └─────┬─────┘                              └────┬─────┘
-     │                                          │                                         │
-     │ 1. Redirect to /login                    │                                         │
-     │─────────────────────────────────────────▶│                                         │
-     │                                          │                                         │
-     │                    2. User selects       │                                         │
-     │                       "Sign in with      │                                         │
-     │                        Email"            │                                         │
-     │                       Enters email       │                                         │
-     │                                          │                                         │
-     │                                          │ 3. POST /magic/send                     │
-     │                                          │    Check allowlist                      │
-     │                                          │    Generate 6-digit code                │
-     │                                          │    Store in DB                          │
-     │                                          │                                         │
-     │                                          │ 4. Send email with code                 │
-     │                                          │────────────────────────────────────────▶│
-     │                                          │                                         │
-     │                    5. User receives      │                                         │
-     │                       email, enters      │                                         │
-     │                       code               │                                         │
-     │                                          │                                         │
-     │                                          │ 6. POST /magic/verify                   │
-     │                                          │    Validate code                        │
-     │                                          │    Check not expired                    │
-     │                                          │    Check not used                       │
-     │                                          │    Mark as used                         │
-     │                                          │    Create auth code                     │
-     │                                          │                                         │
-     │ 7. Redirect with auth code               │                                         │
-     │◀─────────────────────────────────────────│                                         │
-     │                                          │                                         │
-     │ 8. Exchange code for tokens              │                                         │
-     │   (same as OAuth flow step 10-12)        │                                         │
-     │                                          │                                         │
-```
+> **DEPRECATED (Great Grove Refactor Phase 2, May 2026):** Magic code auth has been removed. Grove now uses Google OAuth exclusively. This diagram is retained for historical reference.
 
 ---
 

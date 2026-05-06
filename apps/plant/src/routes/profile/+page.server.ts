@@ -142,7 +142,7 @@ export const actions: Actions = {
 		}
 
 		// ─── Verify email status before redirecting ──────────────────────
-		// (diagnostic: confirm magic link set email_verified correctly)
+		// (diagnostic: confirm OAuth set email_verified correctly)
 		try {
 			const record = await db
 				.prepare("SELECT email_verified FROM user_onboarding WHERE id = ?")
