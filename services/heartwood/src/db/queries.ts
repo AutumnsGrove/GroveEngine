@@ -465,6 +465,7 @@ export async function createMagicCode(
 		.run();
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2. Table dropped in migration 0010. */
 export async function getMagicCode(
 	db: D1DatabaseOrSession,
 	email: string,
@@ -480,10 +481,12 @@ export async function getMagicCode(
 	return result;
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2 */
 export async function markMagicCodeUsed(db: D1DatabaseOrSession, id: string): Promise<void> {
 	await db.prepare("UPDATE magic_codes SET used = 1 WHERE id = ?").bind(id).run();
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2 */
 export async function cleanupExpiredMagicCodes(db: D1DatabaseOrSession): Promise<void> {
 	const now = new Date().toISOString();
 	await db.prepare("DELETE FROM magic_codes WHERE expires_at < ? OR used = 1").bind(now).run();

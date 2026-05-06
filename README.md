@@ -40,7 +40,7 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 
 | Name                                   | Path                                     | What it is                                      |
 | -------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
-| [Heartwood](services/heartwood)        | Auth provider                            | OAuth 2.0 + PKCE, magic links, passkeys         |
+| [Heartwood](services/heartwood)        | Auth provider                            | Google OAuth, 2FA, cross-subdomain sessions      |
 | [Passage](services/grove-router)  | Subdomain routing                        | Routes `*.grove.place` to the right app         |
 | [Loom](services/durable-objects)       | Coordination layer                       | Durable Objects for caching and real-time state |
 | [Amber](services/amber)                | Storage API                              | Media upload, processing, and CDN delivery      |

@@ -1,6 +1,6 @@
 /**
  * Integration tests for Better Auth routes
- * Tests request routing, passkey security, and audit logging
+ * Tests request routing and error handling
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

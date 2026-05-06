@@ -48,7 +48,7 @@ export interface UserInfo {
 	email: string;
 	name: string | null;
 	picture: string | null;
-	provider: "google" | "magic_code";
+	provider: "google";
 }
 
 // =============================================================================

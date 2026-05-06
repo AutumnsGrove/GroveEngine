@@ -40,7 +40,7 @@ jobs:
               {
                 label: 'heartwood',
                 proper: /\bheartwood\b/,
-                titleFallback: /\b(oauth|passkey|session.?do|pkce)\b/
+                titleFallback: /\b(oauth|session.?do|pkce|2fa)\b/
               },
               {
                 label: 'lattice',

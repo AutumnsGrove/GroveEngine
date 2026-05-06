@@ -87,7 +87,7 @@ describe("GET /admin/stats", () => {
 	it("returns dashboard statistics", async () => {
 		const mockStats = {
 			total_users: 42,
-			users_by_provider: { google: 30, magic_code: 12 },
+			users_by_provider: { google: 42 },
 			users_by_tier: { seedling: 20, sapling: 15, evergreen: 7 },
 			recent_logins: [],
 			total_clients: 3,

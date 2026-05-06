@@ -164,7 +164,7 @@ AI_CACHE_TTL_SECONDS = "21600"
 cd libs/engine
 
 # Run each migration in order
-npx wrangler d1 execute yoursite-posts --file=migrations/001_magic_codes.sql
+npx wrangler d1 execute yoursite-posts --file=migrations/001_initial_schema.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/002_auth_security.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/003_site_settings.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/004_pages_table.sql
@@ -316,7 +316,6 @@ await db
 
 **Database Schema:**
 
-- `magic_codes` - Email verification codes
 - `posts` - Blog posts (title, slug, content, date, published)
 - `pages` - Static pages (title, slug, content)
 - `site_settings` - Key-value settings (font_family, site_name, etc.)
@@ -627,7 +626,7 @@ export async function load({ locals }) {
 
 ```bash
 # Run all migrations
-npx wrangler d1 execute yoursite-posts --file=migrations/001_magic_codes.sql
+npx wrangler d1 execute yoursite-posts --file=migrations/001_initial_schema.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/002_auth_security.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/003_site_settings.sql
 npx wrangler d1 execute yoursite-posts --file=migrations/004_pages_table.sql

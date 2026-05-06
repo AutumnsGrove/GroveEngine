@@ -19,9 +19,6 @@ AUTH_BASE_URL = "https://login.grove.place"
 ENVIRONMENT = "production"
 CDN_URL = "https://cdn.grove.place"
 
-# Passkey (WebAuthn) allowed origins — comma-separated for multi-origin support
-PASSKEY_ORIGIN = "https://login.grove.place"
-
 # Zephyr email gateway
 ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 
@@ -87,6 +84,6 @@ crons = ["* * * * *", "0 0 * * *"]
 # - GOOGLE_CLIENT_ID: Google OAuth client ID
 # - GOOGLE_CLIENT_SECRET: Google OAuth client secret
 # - ZEPHYR_API_KEY: Shared secret for authenticating with Zephyr email worker
-# - RESEND_API_KEY: (deprecated — magic links now route through Zephyr)
+# - RESEND_API_KEY: (deprecated — removed in Great Grove Refactor Phase 2)
 # - SESSION_SECRET: Secret for signing session cookies (32+ bytes)
 # - BETTER_AUTH_SECRET: Secret for Better Auth (can reuse SESSION_SECRET)
