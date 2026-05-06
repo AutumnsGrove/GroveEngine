@@ -197,11 +197,7 @@ export class Threshold {
  * Used by checkTenant() to auto-categorize.
  */
 export function categorizeRequest(method: string, pathname: string): keyof TierRateLimits {
-	if (
-		pathname.startsWith("/api/ai/") ||
-		pathname.startsWith("/api/wisp") ||
-		pathname.startsWith("/api/grove/wisp")
-	) {
+	if (pathname.startsWith("/api/ai/")) {
 		return "ai";
 	}
 	if (

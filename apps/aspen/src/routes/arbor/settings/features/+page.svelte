@@ -104,25 +104,6 @@
 			</GlassCard>
 		</a>
 
-		<!-- Reverie (AI Configuration) -->
-		<a href="/arbor/reverie" class="feature-link">
-			<GlassCard variant="frosted" hoverable flush>
-				<div class="feature-body">
-					<div class="feature-icon">
-						<phaseIcons.sparkles class="icon" />
-					</div>
-					<div class="feature-content">
-						<div class="feature-title">
-							<GroveTerm interactive term="reverie">Reverie</GroveTerm>
-							<Waystone slug="what-is-reverie" label="Learn about Reverie" />
-						</div>
-						<p class="feature-description">
-							Describe a vibe and let AI configure your Grove — "make my site cozy" just works.
-						</p>
-					</div>
-				</div>
-			</GlassCard>
-		</a>
 	</div>
 </ArborSection>
 

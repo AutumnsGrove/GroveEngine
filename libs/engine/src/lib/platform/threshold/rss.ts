@@ -59,9 +59,6 @@ const KNOWN_FEED_READERS: FeedReaderPattern[] = [
 	{ pattern: /ReadKit/i, name: "ReadKit" },
 	{ pattern: /Thunderbird/i, name: "Thunderbird" },
 	{ pattern: /Liferea/i, name: "Liferea" },
-
-	// Grove's own poller
-	{ pattern: /Grove-Meadow-Poller/i, name: "Meadow" },
 ];
 
 // ============================================================================

@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { DATABASES, DAILY_DATABASES, CRON_DAILY, CRON_WEEKLY, BACKUP_CONFIG } from "./databases";
 
 describe("DATABASES", () => {
-	it("contains 7 databases", () => {
-		expect(DATABASES).toHaveLength(7);
+	it("contains 6 databases", () => {
+		expect(DATABASES).toHaveLength(6);
 	});
 
 	it("each database has required fields", () => {
@@ -135,7 +135,6 @@ describe("DAILY_DATABASES", () => {
 	it("excludes databases without dailyBackup flag", () => {
 		const names = DAILY_DATABASES.map((db) => db.name);
 		expect(names).not.toContain("amber");
-		expect(names).not.toContain("ivy-db");
 		expect(names).not.toContain("grove-observability-db");
 	});
 

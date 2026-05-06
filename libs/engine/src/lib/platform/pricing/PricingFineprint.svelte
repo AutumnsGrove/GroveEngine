@@ -20,14 +20,14 @@
 		reading: {
 			title: "Reading Blogs",
 			content:
-				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. [[meadow!|Meadow]] (the community feed) requires a free account to browse. Only [[rooted!|Rooted]] [[evergreen!|Evergreens]] can choose to make their blog require login to view.",
+				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. Only [[rooted!|Rooted]] [[evergreen!|Evergreens]] can choose to make their blog require login to view.",
 			detail:
 				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
 		},
 		wanderer: {
 			title: "Wanderer Accounts",
 			content:
-				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. [[meadow!|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling!|Seedling]].",
+				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. No credit card needed. When you're ready for more room, cultivate to [[seedling!|Seedling]].",
 		},
 		// TODO(foliage): update content when themes launch
 		themes: {

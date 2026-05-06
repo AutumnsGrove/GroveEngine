@@ -30,7 +30,7 @@ import type { LumenTask } from "../types.js";
  * - code: Low-medium (Claude is expensive but important for devs)
  */
 export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
-	// Wanderer tier: Meadow only, very limited AI access
+	// Wanderer tier: very limited AI access
 	wanderer: {
 		moderation: 100, // Safety is important
 		generation: 10,
@@ -40,8 +40,6 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 0, // No image analysis
 		code: 0, // No code help
 		transcription: 10, // Basic voice capture
-		reverie: 0, // No Reverie access
-		"reverie-compose": 0,
 	},
 
 	// Seedling ($8/mo): Entry tier with basic AI
@@ -54,8 +52,6 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 10,
 		code: 10,
 		transcription: 100,
-		reverie: 20,
-		"reverie-compose": 5,
 	},
 
 	// Sapling ($12/mo): Growing tier with more AI
@@ -68,8 +64,6 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 50,
 		code: 50,
 		transcription: 500,
-		reverie: 100,
-		"reverie-compose": 25,
 	},
 
 	// Oak ($25/mo): Full tier with generous AI
@@ -82,8 +76,6 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 200,
 		code: 200,
 		transcription: 2000,
-		reverie: 500,
-		"reverie-compose": 100,
 	},
 
 	// Evergreen ($35/mo): Premium tier with abundant AI
@@ -96,8 +88,6 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 1000,
 		code: 1000,
 		transcription: 10000,
-		reverie: 2000,
-		"reverie-compose": 500,
 	},
 };
 

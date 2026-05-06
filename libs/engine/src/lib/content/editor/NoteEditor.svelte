@@ -1,5 +1,5 @@
 <!--
-  NoteEditor — Live rich text editor for Meadow Notes.
+  NoteEditor — Live rich text editor for short-form notes.
 
   A TipTap-based WYSIWYG editor where formatting renders inline:
   **bold** becomes bold, _italic_ becomes italic, # Heading renders immediately.

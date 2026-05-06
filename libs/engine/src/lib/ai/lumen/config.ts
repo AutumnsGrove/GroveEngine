@@ -69,10 +69,6 @@ export const MODELS = {
 	BGE_M3: m("BGE_M3"),
 	QWEN3_EMBED: m("QWEN3_EMBED"),
 
-	// OpenRouter — Reverie (Tool Calling)
-	TRINITY: m("TRINITY"),
-	MINIMAX_M2_7: m("MINIMAX_M2_7"),
-
 	// Cloudflare Workers AI (last-resort fallbacks)
 	CF_SHIELDGEMMA: m("CF_SHIELDGEMMA"),
 	CF_BGE_BASE: m("CF_BGE_BASE"),
@@ -240,26 +236,6 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		defaultMaxTokens: 0,
 		defaultTemperature: 0,
 		description: "Voice-to-text transcription",
-	},
-
-	// Reverie — Natural Language Config (Trinity → MiniMax M2.7)
-	reverie: {
-		primaryModel: MODELS.TRINITY,
-		primaryProvider: "openrouter",
-		fallbackChain: [{ provider: "openrouter", model: MODELS.MINIMAX_M2_7 }],
-		defaultMaxTokens: 1024,
-		defaultTemperature: 0.1,
-		description: "Reverie natural language configuration",
-	},
-
-	// Reverie Compose — Multi-Domain Composition (Trinity → MiniMax M2.7)
-	"reverie-compose": {
-		primaryModel: MODELS.TRINITY,
-		primaryProvider: "openrouter",
-		fallbackChain: [{ provider: "openrouter", model: MODELS.MINIMAX_M2_7 }],
-		defaultMaxTokens: 2048,
-		defaultTemperature: 0.3,
-		description: "Reverie multi-domain composition",
 	},
 };
 

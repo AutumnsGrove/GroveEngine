@@ -829,11 +829,13 @@ tracker in this document after each completed step.
 #### Phase 2: Auth Simplification
 | Step | Status | Notes |
 |------|--------|-------|
-| Remove passkey code (~1,100 LOC) | ⬜ TODO | 8 deletion tasks |
-| Remove magic link code (~400 LOC) | ⬜ TODO | 5 deletion tasks |
-| Simplify Plant signup | ⬜ TODO | OAuth only flow |
-| Mark deprecated DB tables | ⬜ TODO | ba_passkey, ba_verification |
-| Validation (OAuth e2e) | ⬜ TODO | Login + signup work |
+| Remove passkey code (~1,100 LOC) | ✅ DONE | 28 files moved, 45+ files edited across 5 apps |
+| Remove magic link code (~400 LOC) | ✅ DONE | 4 route dirs moved, email templates removed |
+| Simplify Plant signup | ✅ DONE | Invite page → Google OAuth, setup-passkey step removed |
+| Mark deprecated DB tables | ✅ DONE | ba_passkey, ba_verification (migration 0014), magic_codes |
+| Remove dead deps | ✅ DONE | @better-auth/passkey, @simplewebauthn/browser from login+heartwood |
+| Phase 1 deep sweep | ✅ DONE | 75+ more files: Lumen reverie tasks, threshold configs, FeedDO/ChatDO/TriageDO, Arbor UI, Lantern destinations, Router rules, Prism icons, pricing text, terrarium components |
+| Validation (build + typecheck) | ✅ DONE | All packages build + typecheck clean |
 
 #### Phase 3: Local Dev Setup
 | Step | Status | Notes |
@@ -889,3 +891,23 @@ tracker in this document after each completed step.
 - Gossamer stays in libs/ (actively used by Glass/GlassCard — deviation from plan)
 - Full build + lint passes: 0 errors across all 17 packages
 - **Next session:** Phase 2 (auth simplification — Google OAuth only)
+
+**Session 3 (2026-05-06):**
+- Phase 2: Auth Simplification — COMPLETE
+  - Removed passkeys (~1,100 LOC) and magic links (~400 LOC) from entire auth stack
+  - 90 files in main commit + 17 files in stragglers cleanup
+  - Removed @better-auth/passkey and @simplewebauthn/browser dependencies
+  - Converted invite page from magic link to Google OAuth
+  - Created Heartwood migration 0014 (deprecate ba_passkey, ba_verification)
+  - Updated help center, specs, FAQ, credits, workshop, skills, auto-label workflow
+  - Two rounds of aggressive searching caught passkey/magic-link in 100+ files
+- Phase 1 Deep Sweep — cross-cutting cleanup the blitz missed
+  - Moved: WispPanel, WispButton, Terrarium components, FeedDO, ChatDO, TriageDO
+  - Cleaned: Lumen reverie/reverie-compose tasks, threshold rate limiters, observability types
+  - Cleaned: Arbor sidebar nav, settings pages, Lantern destinations, grove-router rules
+  - Cleaned: Prism icons, pricing text, tier configs, DB schema deprecations
+  - Removed FEED_QUEUE from Aspen bloom-service publish flow
+  - Removed TriageDO/ChatDO/FeedDO from DO worker index + wrangler.toml
+  - ~8,700 additional lines deleted across 75+ files
+- All packages build + typecheck clean (0 errors)
+- **Next session:** Phase 3 (local dev setup — full stack runnable locally)

@@ -24,10 +24,6 @@ export { default as LumenAnalytics } from "./components/admin/LumenAnalytics.sve
 export { default as SafetyMonitoring } from "./components/admin/SafetyMonitoring.svelte";
 export { default as ZephyrAnalytics } from "./components/admin/ZephyrAnalytics.svelte";
 
-// Wisp - Writing Assistant
-export { default as WispPanel } from "./components/WispPanel.svelte";
-export { default as WispButton } from "./components/WispButton.svelte";
-
 // Quota components
 export { QuotaWidget, QuotaWarning, UpgradePrompt } from "./components/quota/index";
 

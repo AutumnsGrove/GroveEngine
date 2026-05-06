@@ -9,7 +9,7 @@
  *   auth.ts       — users, sessions, onboarding, verification (10 tables)
  *   content.ts    — posts, pages, blazes, themes (7 tables)
  *   billing.ts    — subscriptions, webhooks, comped invites (4 tables)
- *   social.ts     — meadow, reeds (comments), feedback (11 tables)
+ *   social.ts     — meadow (deprecated), reeds (comments), feedback (11 tables)
  *   media.ts      — uploads, images, storage, amber (9 tables)
  *   monitoring.ts — thorn, petal, sentinel (11 tables)
  *

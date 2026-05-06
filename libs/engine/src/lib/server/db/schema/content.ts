@@ -36,7 +36,7 @@ export const posts = sqliteTable(
 		r2Key: text("r2_key"),
 		font: text("font").default("default"),
 
-		// Meadow exclusion (079)
+		// Meadow exclusion (079) — @deprecated Meadow removed; column retained for prod compat
 		meadowExclude: integer("meadow_exclude").default(0),
 
 		// Blazes (088)

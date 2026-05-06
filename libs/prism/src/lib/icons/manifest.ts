@@ -433,22 +433,15 @@ export const ICON_MANIFEST: IconManifest = {
 		garden: "Flower",
 		blooms: "NotebookText",
 		curios: "Amphora",
-		terrarium: "Frame",
 		weave: "SplinePointer",
 		flow: "DraftingCompass",
-		scribe: "Mic",
 		// Communication
-		ivy: "Mailbox",
-		chirp: "MessageCircle",
 		reeds: "MessageSquareDot",
-		meadow: "Users",
 		forests: "Trees",
 		porch: "RockingChair",
 		// AI & intelligence
-		reverie: "Eclipse",
 		lumen: "LampCeiling",
 		moss: "Leaf",
-		wisp: "Wind",
 		gossamer: "Sparkles",
 		// Storage & media
 		amber: "HardDrive",
@@ -462,7 +455,6 @@ export const ICON_MANIFEST: IconManifest = {
 		// Discovery & navigation
 		forage: "SearchCode",
 		lantern: "Lamp",
-		wander: "Earth",
 		passage: "Kayak",
 		burrow: "Network",
 		scout: "ShoppingBasket",
@@ -486,7 +478,6 @@ export const ICON_MANIFEST: IconManifest = {
 		mycelium: "CircuitBoard",
 		songbird: "Bird",
 		bloom: "Zap",
-		outpost: "Telescope",
 		pantry: "Store",
 		trace: "Footprints",
 		etch: "Highlighter",
@@ -500,8 +491,6 @@ export const ICON_MANIFEST: IconManifest = {
 		graftsCultivars: "Gamepad",
 		// Verge
 		verge: "Zap",
-		// Nook
-		nook: "BadgeCheck",
 	},
 
 	// -----------------------------------------------------------------------

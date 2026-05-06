@@ -38,7 +38,6 @@ export interface TierLimits {
 
 export interface TierFeatures {
 	blog: boolean;
-	meadow: boolean;
 	emailForwarding: boolean;
 	fullEmail: boolean;
 	customDomain: boolean;
@@ -124,7 +123,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		},
 		features: {
 			blog: true,
-			meadow: true,
 			emailForwarding: false,
 			fullEmail: false,
 			customDomain: false,
@@ -189,7 +187,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		},
 		features: {
 			blog: true,
-			meadow: true,
 			emailForwarding: false,
 			fullEmail: false,
 			customDomain: false,
@@ -225,7 +222,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				// TODO(foliage): uncomment when themes launch
 				// "3 curated themes",
 				"Unlimited comments",
-				"Meadow access",
 				"No ads, no tracking",
 			],
 			standardName: "Starter",
@@ -235,7 +231,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				// TODO(foliage): uncomment when themes launch
 				// "3 curated themes",
 				"Unlimited comments",
-				"Community feed access",
 				"No ads, no tracking",
 			],
 		},
@@ -258,7 +253,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		},
 		features: {
 			blog: true,
-			meadow: true,
 			emailForwarding: true,
 			fullEmail: false,
 			customDomain: false,
@@ -329,7 +323,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		},
 		features: {
 			blog: true,
-			meadow: true,
 			emailForwarding: true,
 			fullEmail: true,
 			customDomain: true,
@@ -400,7 +393,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		},
 		features: {
 			blog: true,
-			meadow: true,
 			emailForwarding: true,
 			fullEmail: true,
 			customDomain: true,

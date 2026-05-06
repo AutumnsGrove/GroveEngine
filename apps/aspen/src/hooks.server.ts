@@ -619,9 +619,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// INTERNAL SERVICE AUTH (worker-to-worker)
 	// =========================================================================
-	// Allows trusted internal services (e.g., reverie-exec) to call API
-	// endpoints via service binding without a Heartwood session. The service
-	// must provide a valid X-Internal-Service-Key and X-Tenant-Id header.
+	// Allows trusted internal services to call API endpoints via service binding
+	// without a Heartwood session. The service must provide a valid
+	// X-Internal-Service-Key and X-Tenant-Id header.
 	if (!event.locals.user) {
 		const internalKey = event.request.headers.get("X-Internal-Service-Key");
 		const internalTenant = event.request.headers.get("X-Tenant-Id");
@@ -651,9 +651,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 				if (diff === 0) {
 					event.locals.user = {
-						id: "system:reverie-exec",
+						id: "system:internal-service",
 						email: "system@grove.internal",
-						name: "Reverie Executor",
+						name: "Internal Service",
 						picture: "",
 					};
 					event.locals.tenantId = internalTenant;

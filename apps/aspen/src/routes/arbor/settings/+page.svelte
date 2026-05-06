@@ -2,7 +2,6 @@
 	import { onMount } from "svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
-	import GroveIcon from "@autumnsgrove/lattice/ui/components/ui/groveicon/GroveIcon.svelte";
 	import {
 		authIcons,
 		chromeIcons,
@@ -20,7 +19,7 @@
 	// ── Parent layout data ──────────────────────────────────────────────────
 	// Root layout provides: data.siteSettings, data.context, data.user
 	// Arbor layout provides: data.tenant (id, subdomain, displayName)
-	// Page server load provides: data.meadowOptIn, data.customBlazeCount
+	// Page server load provides: data.customBlazeCount
 	const settings = $derived(data.siteSettings || {});
 	const subdomain = $derived(data.tenant?.subdomain || "");
 	const groveTitle = $derived(settings.grove_title || "");
@@ -28,8 +27,6 @@
 	const fontFamily = $derived(settings.font_family || "");
 	const accentColor = $derived(settings.accent_color || "");
 	const preferredSeason = $derived(settings.preferred_season || "");
-	const canopyVisible = $derived(settings.canopy_visible === "true");
-	const humanJsonEnabled = $derived(settings.human_json_enabled === "true");
 	const curiosCount = $derived(data.curiosCount ?? 0);
 
 	// Session count loaded client-side (real-time from SessionDO)
@@ -149,52 +146,6 @@
 			</GlassCard>
 		</a>
 
-		<!-- Community Card -->
-		<a href="/arbor/settings/community" class="card-link">
-			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
-				<div class="card-body">
-					<div class="card-header">
-						<natureIcons.trees class="card-icon" />
-						<h2 class="card-title">Community</h2>
-					</div>
-					<div class="community-preview">
-						<div class="community-row">
-							<GroveIcon
-								service="grove"
-								size={16}
-								color="var(--user-accent, var(--color-primary))"
-							/>
-							<span class="community-label">Canopy</span>
-							<span class="status-dot" class:active={canopyVisible}></span>
-							<span class="community-state">
-								{canopyVisible ? "visible" : "hidden"}
-							</span>
-						</div>
-						<div class="community-row">
-							<GroveIcon
-								service="meadow"
-								size={16}
-								color="var(--user-accent, var(--color-primary))"
-							/>
-							<span class="community-label">Meadow</span>
-							<span class="status-dot" class:active={data.meadowOptIn ?? false}></span>
-							<span class="community-state">
-								{(data.meadowOptIn ?? false) ? "sharing" : "quiet"}
-							</span>
-						</div>
-						<div class="community-row">
-							<span class="community-label" style:margin-left="20px">human.json</span>
-							<span class="status-dot" class:active={humanJsonEnabled}></span>
-							<span class="community-state">
-								{humanJsonEnabled ? "published" : "off"}
-							</span>
-						</div>
-					</div>
-					<span class="card-action">Connect &rarr;</span>
-				</div>
-			</GlassCard>
-		</a>
-
 		<!-- Content Card -->
 		<a href="/arbor/settings/content" class="card-link">
 			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
@@ -253,7 +204,7 @@
 					</div>
 					<div class="card-status">
 						<span class="status-line">Rings &middot; Trail &middot; Reeds</span>
-						<span class="status-line">Curios &middot; Reverie</span>
+						<span class="status-line">Curios</span>
 						{#if curiosCount > 0}
 							<span class="status-line subtle"
 								>{curiosCount} curio{curiosCount === 1 ? "" : "s"} active</span
@@ -502,47 +453,6 @@
 	.season-icon-sm {
 		image-rendering: pixelated;
 		flex-shrink: 0;
-	}
-
-	/* ── Community card ───────────────────────────────────────────────────── */
-	.community-preview {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.community-row {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		font-size: 0.85rem;
-	}
-
-	.community-label {
-		color: var(--color-text);
-		font-weight: 500;
-		min-width: 4.5rem;
-	}
-
-	.status-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: var(--color-text-muted);
-		opacity: 0.35;
-		flex-shrink: 0;
-		transition: all 0.15s ease;
-	}
-
-	.status-dot.active {
-		background: var(--color-success, #16a34a); /* accent-ok — active state indicator */
-		opacity: 1;
-		box-shadow: 0 0 6px color-mix(in srgb, var(--color-success, #16a34a) 50%, transparent); /* accent-ok */
-	}
-
-	.community-state {
-		font-size: 0.8rem;
-		color: var(--color-text-muted);
 	}
 
 	/* ── Generic status lines (Content, Security) ─────────────────────────── */

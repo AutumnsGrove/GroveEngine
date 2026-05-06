@@ -64,7 +64,6 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 				AI: platform.env.AI,
 				OPENROUTER_API_KEY: platform.env.OPENROUTER_API_KEY,
 				CACHE_KV: platform.env.CACHE_KV,
-				FEED_QUEUE: platform.env.FEED_QUEUE,
 			},
 			platform.context?.waitUntil.bind(platform.context),
 		);

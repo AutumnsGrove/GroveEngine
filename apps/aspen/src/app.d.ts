@@ -102,7 +102,7 @@ declare global {
 				// Secrets
 				GITHUB_TOKEN?: string;
 				ANTHROPIC_API_KEY?: string;
-				SESSION_SECRET?: string; // Deprecated: was used for magic code auth
+				SESSION_SECRET?: string; // @deprecated — legacy auth, no longer used
 				RESEND_API_KEY?: string; // @deprecated - use ZEPHYR_API_KEY
 				/** Zephyr email gateway API key */
 				ZEPHYR_API_KEY?: string;
@@ -161,9 +161,6 @@ declare global {
 
 				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
 				DEV_AUTH_ENABLED?: string;
-
-				/** Feed event queue (post.published → subscriber FeedDOs) */
-				FEED_QUEUE?: Queue;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

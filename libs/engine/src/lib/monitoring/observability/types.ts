@@ -313,32 +313,6 @@ export interface WardenAggregateResult {
 	collectedAt: number;
 }
 
-export interface MeadowAggregateResult {
-	available: boolean;
-	postCreationRate24h: number;
-	totalPosts: number;
-	engagement24h: {
-		votes: number;
-		reactions: number;
-	};
-	reportQueueDepth: number;
-	rateLimitHits24h: number;
-	collectedAt: number;
-}
-
-export interface FireflyAggregateResult {
-	available: boolean;
-	/** Active (running) server count */
-	activeRunners: number;
-	/** Queued jobs waiting for a runner */
-	queuedJobs: number;
-	/** Total jobs completed in last 24h */
-	completedJobs24h: number;
-	/** Average session duration in seconds */
-	avgSessionDurationSec: number | null;
-	collectedAt: number;
-}
-
 // =============================================================================
 // Service Registry
 // =============================================================================

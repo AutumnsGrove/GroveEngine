@@ -51,8 +51,6 @@ export const LumenTaskSchema = z.enum([
 	"moderation",
 	"embedding",
 	"transcription",
-	"reverie",
-	"reverie-compose",
 ]);
 
 /** Message format — supports text and multimodal */
