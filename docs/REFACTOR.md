@@ -212,31 +212,54 @@ Google OAuth is **completely self-contained**:
 **Current State:**
 - 75% functional, 25% blocked
 - Individual apps/workers work fine with `pnpm dev`
-- Robust mocking infrastructure already exists (D1, KV, R2, DOs all mocked)
+- Robust mocking infrastructure exists (D1, KV, R2, DOs all mocked) — but we want real code
 - Only 3 workers use `@cloudflare/vitest-pool-workers` (lumen, durable-objects, billing-api)
+- Wrangler 4.82 installed (supports multi-config dev)
 
-**The Blockers:**
-1. **Service bindings** - workers calling other workers require manual start-in-order
-2. **Durable Objects** - DOs in separate worker unreachable from apps
+**The Blockers (Original):**
+1. ~~**Service bindings** - workers calling other workers require manual start-in-order~~
+2. ~~**Durable Objects** - DOs in separate worker unreachable from apps~~
 3. **Secrets management** - no `.dev.vars` propagation to all services
 4. **Stripe** - needs test key + secret in local environment
+5. **Data seeding** - empty local D1 databases need schema + test data
 
-**The Fix (2-3 hours):**
-1. Create orchestration script (start services in dependency order)
-2. Add `.dev.vars.example` templates to all services
-3. Document startup sequence and port assignments
-4. Create "minimal dev" mode (heartwood → zephyr → durable-objects → aspen)
+**Key Discovery (May 2026 research):**
+- **Wrangler multi-config dev** (`wrangler dev -c a.toml -c b.toml`) runs all workers in a single miniflare instance with automatic service binding resolution and cross-script Durable Objects. This eliminates blockers #1 and #2 entirely.
+- **Google OAuth works on localhost** — `http://localhost:8787/api/auth/callback/google` is valid. No tunnel needed for basic auth testing.
+- **DOs are "just SQLite runners"** — Loom SDK wraps `DurableObjectState.storage.sql` with helpers. Miniflare provides real SQLite locally, preserving single-writer guarantees.
+- **Existing mock SDK** (`libs/infra/src/testing/`) remains valuable for unit tests but is NOT needed for local dev integration.
+
+**The Fix (Revised — Real Code, No Mocks):**
+1. Use `wrangler dev -c` multi-config to run all workers in one process
+2. SvelteKit apps (`vite dev`) connect to multi-worker instance via service bindings
+3. Add `.dev.vars.example` templates for remaining services
+4. Create `scripts/dev-stack.sh` orchestration (start wrangler + vite apps + optional tunnel)
+5. Seed local D1 with migrations + test tenant data
+6. Document everything in `docs/LOCAL_DEV.md`
 
 **Service dependency chain:**
 ```
-billing-api (no deps)
-heartwood (no deps)
-zephyr → email-render
-durable-objects (no deps)
-lumen → warden
-aspen → auth, zephyr, durable-objects, lumen
-landing → auth, zephyr, vista-collector, onboarding
+Multi-config wrangler dev (single miniflare instance, port 8787):
+├── groveauth (Heartwood)     — auth API
+├── grove-zephyr              — email gateway
+├── grove-email-render        — email templates
+├── grove-durable-objects     — 6 DO classes (real SQLite)
+├── grove-lumen               — AI gateway
+├── grove-warden              — credential gateway
+├── grove-billing-api         — Stripe integration
+├── grove-vista-collector     — observability
+└── grove-onboarding          — email sequences
+
+SvelteKit apps (separate vite dev processes):
+├── aspen (5173)  → service bindings resolve to wrangler instance
+├── landing (5174) → service bindings resolve to wrangler instance
+└── plant (5175)   → service bindings resolve to wrangler instance
 ```
+
+**Auth strategy:**
+- **Day-to-day:** localhost OAuth (zero setup, Google exempts localhost from HTTPS)
+- **Cookie testing:** `dev.grove.place` tunnel (production-identical `.grove.place` cookies)
+- **Both documented**, user chooses based on what they're testing
 
 ---
 
@@ -504,40 +527,171 @@ All must pass before PR is created.
 
 ---
 
-### **Phase 3: Local Dev Setup (Day 4 - Thu Morning)**
+### **Phase 3: Local Dev Setup (Day 4 - Thu)**
 
-**Goal:** Enable full stack local development (2-3 hours)
+**Goal:** Run the real Grove stack locally — real workers, real DOs, real D1/KV/R2, no mocks.
 
-#### **Step 1: Create Orchestration Script**
-Add to `tools/` or integrate with `gw dev`:
+**Key discovery:** Wrangler 4.82 supports multi-config dev (`wrangler dev -c a.toml -c b.toml ...`), running all workers in a single miniflare instance with automatic service binding resolution, cross-script Durable Objects with real SQLite, and local D1/KV/R2. This eliminates the need for mocks, separate process orchestration, or dev-registry polling.
+
+**Auth discovery:** Google OAuth allows `http://localhost` redirect URIs (explicit exemption from HTTPS requirement). No tunnel needed for day-to-day dev. The existing `dev.grove.place` tunnel (`scripts/dev-tunnel.sh`) is available for production-parity cookie testing when needed.
+
+---
+
+#### **Step 1: Design Multi-Config Dev Architecture**
+
+Wrangler multi-config runs one **primary worker** (exposed over HTTP) and N **auxiliary workers** (reachable only via service bindings). Two modes:
+
+**Full stack mode** (all workers):
 ```bash
-# Startup order (based on service dependency graph):
-# Tier 0 (no deps): billing-api, heartwood, zephyr, durable-objects, warden
-# Tier 1 (deps on Tier 0): lumen (→ warden)
-# Tier 2 (deps on Tier 0+1): aspen (→ auth, zephyr, DOs, lumen)
+# Primary: grove-router (gateway, catches all requests)
+# Auxiliary: groveauth, grove-zephyr, grove-email-render,
+#            grove-durable-objects, grove-lumen, grove-warden,
+#            grove-billing-api, grove-vista-collector, grove-onboarding
+wrangler dev \
+  -c services/grove-router/wrangler.toml \
+  -c services/heartwood/wrangler.toml \
+  -c services/zephyr/wrangler.toml \
+  -c services/durable-objects/wrangler.toml \
+  -c workers/lumen/wrangler.toml \
+  -c workers/warden/wrangler.toml \
+  -c services/billing-api/wrangler.toml \
+  # ... etc
 ```
 
-#### **Step 2: Add .dev.vars Templates**
-Create `.dev.vars.example` for each service with required local secrets:
-- `/services/billing-api/.dev.vars.example` - STRIPE_SECRET_KEY (test mode)
-- `/services/heartwood/.dev.vars.example` - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-- `/services/durable-objects/.dev.vars.example` - Basic config
-- `/workers/lumen/.dev.vars.example` - AI API keys
-- `/services/zephyr/.dev.vars.example` - RESEND_API_KEY
+**Minimal mode** (core platform only):
+```bash
+# Primary: groveauth (port 8787, handles auth directly)
+# Auxiliary: grove-zephyr, grove-durable-objects
+wrangler dev \
+  -c services/heartwood/wrangler.toml \
+  -c services/zephyr/wrangler.toml \
+  -c services/durable-objects/wrangler.toml
+```
 
-#### **Step 3: Document in `docs/LOCAL_DEV.md`**
-- Port assignments (5173-5180 range)
-- Service dependency graph (visual)
-- Required environment variables per service
-- "Minimal dev" mode: just heartwood + zephyr + aspen
-- Troubleshooting common issues
+**SvelteKit apps** (aspen, landing, plant) run as separate `vite dev` processes on their own ports (5173, 5174, 5175). Their service bindings (`AUTH`, `ZEPHYR`, etc.) need to resolve to the wrangler multi-worker instance — this may require dev-overlay wrangler configs or `wrangler pages dev` integration.
 
-#### **Step 4: Verify the Flow**
-- [ ] Can start full stack with one command
-- [ ] Signup flow works locally (Google OAuth + Stripe test mode)
-- [ ] Content creation works (write post, publish, view)
-- [ ] Comments work (Reeds)
-- [ ] Lantern renders (even if friends list is empty)
+**Key constraint:** The multi-config `-c` flag is experimental (wrangler 4.x). If it doesn't work for our setup, fall back to separate `wrangler dev` processes with the file-based dev registry (`--x-registry`).
+
+#### **Step 2: Create Dev Wrangler Overlays**
+
+Production `wrangler.toml` files reference remote D1 database IDs, KV namespace IDs, etc. For local dev, miniflare creates local equivalents automatically — but we may need dev-specific configs that:
+
+- Remove or stub `routes` declarations (no custom domains locally)
+- Remove `[env.production]` sections
+- Set explicit `[dev]` port assignments (avoid all defaulting to 8787)
+- Use local-only D1/KV/R2 names (miniflare creates them as empty local stores)
+
+Options:
+- **Dev overlay files** (`wrangler.dev.toml`) — cleanest, but wrangler doesn't natively merge configs
+- **Environment sections** (`[env.local]`) — use `wrangler dev --env local`
+- **Symlinks / script generation** — orchestration script generates dev configs at startup
+
+Decide which approach based on proof-of-concept results.
+
+#### **Step 3: Port Assignments**
+
+| Service | Port | Type |
+|---------|------|------|
+| grove-aspen | 5173 | SvelteKit (vite dev) |
+| grove-landing | 5174 | SvelteKit (vite dev) |
+| grove-plant | 5175 | SvelteKit (vite dev) |
+| Multi-worker instance | 8787 | wrangler dev (primary worker) |
+| showroom | 5188 | SvelteKit (vite dev) |
+
+SvelteKit apps connect to the multi-worker instance at 8787 for service bindings.
+
+#### **Step 4: Auth — Localhost Google OAuth**
+
+**Simple path (no tunnel):**
+1. Register `http://localhost:8787/api/auth/callback/google` in Google Cloud Console
+2. Configure Heartwood for dev mode:
+   - `trustedOrigins: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "localhost:*"]`
+   - `advanced.defaultCookieAttributes.secure: false` (required for `http://`)
+   - `advanced.defaultCookieAttributes.sameSite: "lax"`
+3. Set `BETTER_AUTH_URL=http://localhost:8787` in heartwood `.dev.vars`
+
+**Production-parity path (tunnel):**
+- Use existing `scripts/dev-tunnel.sh` for `dev.grove.place` → localhost
+- Already wired: Heartwood trusts `*.grove.place`, cookies on `.grove.place` domain
+- Use when testing cookie behavior, CORS, or cross-subdomain flows
+
+#### **Step 5: Add .dev.vars Templates**
+
+Create `.dev.vars.example` for services missing them:
+
+| Service | File | Required Vars |
+|---------|------|---------------|
+| billing-api | `services/billing-api/.dev.vars.example` | STRIPE_SECRET_KEY (test mode), STRIPE_WEBHOOK_SECRET |
+| durable-objects | `services/durable-objects/.dev.vars.example` | (none required — bindings are local) |
+| zephyr | `services/zephyr/.dev.vars.example` | RESEND_API_KEY (or stub for local) |
+| lumen | `workers/lumen/.dev.vars.example` | OPENROUTER_API_KEY, ANTHROPIC_API_KEY |
+| warden | `workers/warden/.dev.vars.example` | WARDEN_ADMIN_KEY |
+
+Already exist: aspen, landing, plant, heartwood, engine.
+
+#### **Step 6: Create Orchestration Script**
+
+`scripts/dev-stack.sh` (or integrate as `gw dev`):
+
+```bash
+#!/usr/bin/env bash
+# Usage:
+#   ./scripts/dev-stack.sh              Full stack (all workers + aspen)
+#   ./scripts/dev-stack.sh minimal      Core only (auth + email + DOs + aspen)
+#   ./scripts/dev-stack.sh workers      Workers only (no SvelteKit apps)
+#
+# Starts:
+#   1. Multi-config wrangler dev (all workers in one miniflare instance)
+#   2. SvelteKit app(s) via vite dev
+#   3. Optional: dev tunnel for auth testing
+```
+
+Script responsibilities:
+- Check `.dev.vars` files exist (warn if missing, link to setup docs)
+- Start wrangler multi-config in background
+- Wait for wrangler to be healthy (poll `/health` or port check)
+- Start SvelteKit apps
+- Trap SIGINT to clean shutdown all processes
+- Print URLs and status on startup
+
+#### **Step 7: Seed Local Data**
+
+Empty local D1 databases need schema + seed data to be useful:
+- Run engine migrations against local D1 (`wrangler d1 migrations apply DB --local`)
+- Run heartwood migrations against local heartwood D1
+- Create seed script for a test tenant (user, tenant, sample posts)
+- Consider: `scripts/dev-seed.sh` that populates a working local grove
+
+#### **Step 8: Document in `docs/LOCAL_DEV.md`**
+
+Sections:
+- **Quick start** (3 commands to running stack)
+- **Prerequisites** (cloudflared optional, Google Console setup for OAuth)
+- **Architecture** (diagram of what runs where)
+- **Port assignments** (table)
+- **Modes** (full vs minimal vs workers-only)
+- **Seeding data** (how to get a working local tenant)
+- **Auth testing** (localhost vs tunnel)
+- **Troubleshooting** (common issues)
+- **What's NOT local** (Workers AI, Stripe webhooks in full mode)
+
+#### **Step 9: Proof of Concept & Validation**
+
+Before building the full orchestration:
+1. PoC: Run 3 workers via `wrangler dev -c` and verify service bindings resolve
+2. PoC: Verify cross-script DOs work (aspen calling TenantDO in grove-durable-objects)
+3. PoC: Verify local D1 migrations work with multi-config
+4. If multi-config doesn't work → fall back to dev-registry approach
+
+**Validation gates:**
+- [ ] `./scripts/dev-stack.sh` starts all services with one command
+- [ ] Google OAuth login works end-to-end on localhost
+- [ ] Can create a post in local Aspen (content creation flow)
+- [ ] Durable Objects respond (TenantDO config, PostMetaDO reactions)
+- [ ] D1 queries work (local database with seeded data)
+- [ ] `Ctrl+C` cleanly shuts down everything
+- [ ] Comments work (Reeds, if data is seeded)
+- [ ] Lantern renders (even with empty friends list)
 
 ---
 
@@ -837,13 +991,18 @@ tracker in this document after each completed step.
 | Phase 1 deep sweep | ✅ DONE | 75+ more files: Lumen reverie tasks, threshold configs, FeedDO/ChatDO/TriageDO, Arbor UI, Lantern destinations, Router rules, Prism icons, pricing text, terrarium components |
 | Validation (build + typecheck) | ✅ DONE | All packages build + typecheck clean |
 
-#### Phase 3: Local Dev Setup
+#### Phase 3: Local Dev Setup (Revised — Real Code, No Mocks)
 | Step | Status | Notes |
 |------|--------|-------|
-| Create orchestration script | ⬜ TODO | Service startup ordering |
-| Add .dev.vars templates | ⬜ TODO | 5 services need templates |
-| Document in LOCAL_DEV.md | ⬜ TODO | Ports, deps, minimal mode |
-| Verify full flow locally | ⬜ TODO | Signup + content creation + comments |
+| 1. Design multi-config architecture | ⬜ TODO | `wrangler dev -c` with primary + auxiliary workers |
+| 2. Create dev wrangler overlays | ⬜ TODO | Local D1/KV/R2, dev ports, no remote IDs |
+| 3. Assign ports | ⬜ TODO | Apps: 5173-5175, workers: 8787 (multi-config) |
+| 4. Auth — localhost Google OAuth | ⬜ TODO | Register localhost callback, Heartwood dev mode |
+| 5. Add .dev.vars templates | ⬜ TODO | billing-api, zephyr, lumen, warden (4 missing) |
+| 6. Create orchestration script | ⬜ TODO | `scripts/dev-stack.sh` or `gw dev` |
+| 7. Seed local data | ⬜ TODO | D1 migrations + test tenant + sample posts |
+| 8. Document in LOCAL_DEV.md | ⬜ TODO | Quick start, architecture, troubleshooting |
+| 9. PoC & validation | ⬜ TODO | Multi-config service bindings + cross-script DOs |
 
 #### Phase 4: Observability
 | Step | Status | Notes |
