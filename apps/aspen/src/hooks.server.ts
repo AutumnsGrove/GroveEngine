@@ -66,6 +66,9 @@ function extractSubdomain(host: string, request: Request, url: URL): string | nu
 		if (paramSubdomain && isValidSubdomain(paramSubdomain)) {
 			return paramSubdomain;
 		}
+
+		// Option 3: Default tenant for local dev (no header or param needed)
+		return "midnight-bloom";
 	}
 
 	return null;
