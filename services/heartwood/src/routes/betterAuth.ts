@@ -129,10 +129,15 @@ betterAuthRoutes.all("/*", async (c) => {
 		if (isGetNavigation && isOAuthCallback) {
 			const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
 			const callbackURL = new URL(c.req.url).searchParams.get("callbackURL");
-			// Redirect to Heartwood frontend error page, or Plant if callbackURL hints at it
-			const errorBase = callbackURL?.includes("plant.grove.place")
-				? "https://plant.grove.place"
-				: "https://heartwood.grove.place";
+			const isLocalDev = c.env.AUTH_BASE_URL?.startsWith("http://localhost");
+			let errorBase: string;
+			if (isLocalDev) {
+				errorBase = c.env.AUTH_BASE_URL;
+			} else if (callbackURL?.includes("plant.grove.place")) {
+				errorBase = "https://plant.grove.place";
+			} else {
+				errorBase = "https://heartwood.grove.place";
+			}
 			const errorUrl = new URL("/login", errorBase);
 			errorUrl.searchParams.set("error", errorMessage);
 			return c.redirect(errorUrl.toString());

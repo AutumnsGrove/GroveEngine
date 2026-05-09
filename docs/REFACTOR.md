@@ -1185,13 +1185,13 @@ tracker in this document after each completed step.
 | 0a. Fix LoomDO for local dev | ✅ DONE | `implements DurableObject` → `extends DurableObject` (cloudflare:workers import) |
 | 0b. Fix DO migrations | ✅ DONE | Added `deleted_classes` v9 migration for TriageDO/ChatDO/FeedDO |
 | 0c. Verify prod safety | ✅ DONE | dry-run deploy clean, tsc clean, svelte-check clean |
-| 1. Design multi-config architecture | ✅ DONE | `wrangler dev -c` confirmed working (wrangler 4.82.2) |
-| 2. Create dev wrangler overlays | ⬜ TODO | Not needed for PoC — prod wrangler.toml works locally as-is (miniflare ignores remote IDs) |
-| 3. Assign ports | ✅ DONE | Aspen:5173, multi-worker:8787 (confirmed via PoC) |
-| 4. Auth — localhost Google OAuth | ⬜ TODO | Register localhost callback, Heartwood dev mode |
-| 5. Add .dev.vars templates | ⬜ TODO | billing-api, zephyr, lumen, warden (4 missing) |
-| 6. Create orchestration script | ⬜ TODO | `scripts/dev-stack.sh` or `gw dev` |
-| 7. Seed local data | ⬜ TODO | D1 migrations + test tenant + sample posts |
+| 1. Design multi-config architecture | ✅ DONE | Heartwood runs separately (route leak bug); rest in multi-config. Dev registry auto-connects service bindings. |
+| 2. Create dev wrangler overlays | ✅ SKIP | Not needed — prod wrangler.toml works locally as-is (miniflare ignores remote IDs) |
+| 3. Assign ports | ✅ DONE | Aspen:5173, Heartwood:8787 |
+| 4. Auth — localhost Google OAuth | 🔨 IN PROGRESS | Register localhost callback, Heartwood dev mode |
+| 5. Add .dev.vars templates | ✅ DONE | durable-objects, zephyr, lumen, warden |
+| 6. Create orchestration script | ✅ DONE | `scripts/dev-stack.sh` — seed, reset, full stack modes |
+| 7. Seed local data | ✅ DONE | Midnight Bloom tenant rendering at localhost:5173 |
 | 8. Document in LOCAL_DEV.md | ⬜ TODO | Quick start, architecture, troubleshooting |
 | 9. Full validation | ⬜ TODO | End-to-end: OAuth login → create post → view post |
 

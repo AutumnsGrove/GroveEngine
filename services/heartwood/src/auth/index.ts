@@ -29,7 +29,6 @@ import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridg
  * @returns Configured Better Auth instance
  */
 export function createAuth(env: Env, cf?: CloudflareGeolocation) {
-	// Validate critical env vars early — fail loudly instead of crashing mid-flow.
 	if (!env.DB) throw new Error(HW_SVC_ERRORS.MISSING_DB_BINDING.adminMessage);
 	if (!env.AUTH_BASE_URL) throw new Error(HW_SVC_ERRORS.MISSING_AUTH_BASE_URL.adminMessage);
 	if (!env.SESSION_SECRET) throw new Error(HW_SVC_ERRORS.MISSING_SESSION_SECRET.adminMessage);
@@ -38,6 +37,8 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			"[createAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET — Google OAuth will fail",
 		);
 	}
+
+	const isLocalDev = env.AUTH_BASE_URL.startsWith("http://localhost");
 
 	// Create Drizzle instance for D1 with schema
 	const db = drizzle(env.DB, { schema });
@@ -116,7 +117,18 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	return betterAuth({
 		baseURL: env.AUTH_BASE_URL,
 		secret: env.SESSION_SECRET,
-		trustedOrigins: ["https://autumnsgrove.com", "https://*.grove.place"],
+		trustedOrigins: [
+			"https://autumnsgrove.com",
+			"https://*.grove.place",
+			...(isLocalDev
+				? [
+						"http://localhost:5173",
+						"http://localhost:5174",
+						"http://localhost:5175",
+						"http://localhost:8787",
+					]
+				: []),
+		],
 		...cfConfig,
 
 		session: {
@@ -133,13 +145,12 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 
 		advanced: {
 			...cfConfig.advanced,
-			crossSubDomainCookies: {
-				enabled: true,
-				domain: ".grove.place",
-			},
+			crossSubDomainCookies: isLocalDev
+				? { enabled: false }
+				: { enabled: true, domain: ".grove.place" },
 			defaultCookieAttributes: {
 				httpOnly: true,
-				secure: true,
+				secure: !isLocalDev,
 				sameSite: "lax",
 				path: "/",
 			},
@@ -147,8 +158,8 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				oauth_state: {
 					name: "better-auth.oauth_state",
 					attributes: {
-						sameSite: "none",
-						secure: true,
+						sameSite: isLocalDev ? "lax" : "none",
+						secure: !isLocalDev,
 						httpOnly: true,
 						path: "/",
 					},
