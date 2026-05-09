@@ -379,8 +379,12 @@ export async function changeUsername(
 				.bind(normalized, tenantId, currentSubdomain),
 
 			// 2. Sync display_name iff it was never customized — see docblock above.
+			// Case-insensitive match: display_name may have mixed case from signup
+			// while subdomains are always lowercase.
 			db
-				.prepare("UPDATE tenants SET display_name = ? WHERE id = ? AND display_name = ?")
+				.prepare(
+					"UPDATE tenants SET display_name = ? WHERE id = ? AND LOWER(display_name) = LOWER(?)",
+				)
 				.bind(normalized, tenantId, currentSubdomain),
 
 			// 3. Insert username history record

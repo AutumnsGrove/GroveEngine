@@ -108,7 +108,7 @@ describe("changeUsername() — batch composition", () => {
 
 		const displayNameStmt = statements[1];
 		expect(displayNameStmt.sql).toContain(
-			"UPDATE tenants SET display_name = ? WHERE id = ? AND display_name = ?",
+			"UPDATE tenants SET display_name = ? WHERE id = ? AND LOWER(display_name) = LOWER(?)",
 		);
 		expect(displayNameStmt.bindings).toEqual([
 			"art-blog", // new subdomain (the value being written)

@@ -148,6 +148,66 @@ export const actions: Actions = {
 		};
 	},
 
+	changeDisplayName: async ({ request, locals, platform }) => {
+		const env = platform?.env;
+		if (!env?.DB) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		if (!locals.user || !locals.tenantId) {
+			return fail(403, {
+				error: ARBOR_ERRORS.UNAUTHORIZED.userMessage,
+				error_code: ARBOR_ERRORS.UNAUTHORIZED.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const displayName = formData.get("displayName")?.toString()?.trim();
+
+		if (!displayName) {
+			return fail(400, {
+				error: "Display name is required.",
+				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+			});
+		}
+
+		if (displayName.length > 50) {
+			return fail(400, {
+				error: "Display name must be 50 characters or fewer.",
+				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+			});
+		}
+
+		try {
+			const result = await env.DB.prepare(
+				"UPDATE tenants SET display_name = ?, updated_at = unixepoch() WHERE id = ?",
+			)
+				.bind(displayName, locals.tenantId)
+				.run();
+
+			if (!result.meta.changes) {
+				return fail(500, {
+					error: "Couldn't update display name.",
+					error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+				});
+			}
+
+			return { success: true, message: "Display name updated." };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, {
+				tenantId: locals.tenantId,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			return fail(500, {
+				error: "Something went wrong updating your display name.",
+				error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+			});
+		}
+	},
+
 	toggleGraft: async ({ request, locals, platform }) => {
 		const env = platform?.env;
 		if (!env?.DB || !env?.CACHE_KV) {

@@ -61,6 +61,10 @@
 	let toggleGraftId = $state("");
 	let toggleGraftEnabled = $state("");
 
+	// Display name state
+	let displayName = $state(data.context?.type === "tenant" ? data.context.tenant.name : "");
+	let savingDisplayName = $state(false);
+
 	// Username change state
 	let showUsernameChange = $state(false);
 	let newUsername = $state("");
@@ -436,6 +440,59 @@
 				</ul>
 			</details>
 		{/if}
+	</GlassCard>
+
+	<!-- Display Name -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Display Name</h2>
+		</div>
+		<p class="section-description">
+			The name shown as the author on your posts and in the <GroveTerm interactive term="canopy"
+				>Canopy</GroveTerm
+			> directory.
+		</p>
+
+		<form
+			method="POST"
+			action="?/changeDisplayName"
+			use:enhance={() => {
+				savingDisplayName = true;
+				return async ({ result, update }) => {
+					savingDisplayName = false;
+					if (result.type === "success") {
+						toast.success("Display name updated.");
+						await invalidateAll();
+					} else if (result.type === "failure") {
+						toast.error(String(result.data?.error || "Couldn't update display name"));
+					}
+					await update({ reset: false });
+				};
+			}}
+		>
+			<div class="canopy-field">
+				<label for="display-name" class="field-label">Name</label>
+				<input
+					type="text"
+					id="display-name"
+					name="displayName"
+					bind:value={displayName}
+					placeholder={data.currentSubdomain || "Your name"}
+					maxlength="50"
+					class="canopy-input"
+				/>
+				<p class="field-help">
+					This is separate from your grove address and header title.
+					<span class="char-count">{displayName.length}/50</span>
+				</p>
+			</div>
+
+			<div class="button-row">
+				<Button type="submit" variant="primary" disabled={savingDisplayName || !displayName.trim()}>
+					{savingDisplayName ? "Saving..." : "Save Display Name"}
+				</Button>
+			</div>
+		</form>
 	</GlassCard>
 
 	<!-- Header Branding -->

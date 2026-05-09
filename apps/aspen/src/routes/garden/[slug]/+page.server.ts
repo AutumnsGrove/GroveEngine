@@ -106,12 +106,15 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 			});
 
 			if (cachedPost) {
-				// Set Cache-Control headers for edge caching (published posts only)
-				setHeaders({
-					"Cache-Control": "public, max-age=300, s-maxage=300",
-					"CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400",
-					Vary: "Cookie",
-				});
+				if (isOwner) {
+					setHeaders({ "Cache-Control": "private, max-age=300" });
+				} else {
+					setHeaders({
+						"Cache-Control": "public, max-age=300, s-maxage=300",
+						"CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400",
+						Vary: "Cookie",
+					});
+				}
 
 				// Load comments (not cached — always fresh from D1)
 				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
