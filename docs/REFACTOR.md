@@ -857,23 +857,210 @@ JUNK DRAWER (sever all connections)
 
 ---
 
+### **Phase 6: Dev Tooling Triage (GW + Git Hooks)**
+
+**Goal:** Strip gw back to its useful core, fix broken git hooks, clean up Claude Code hooks.
+
+**Context:** gw has grown to 76 Go files / 27,738 lines wrapping git, gh, wrangler, pnpm, and more. Most commands are thin passthrough that's _harder_ to use than the raw CLI because flags are missing. The pre-push git hook references stale `packages/` paths (should be `apps/` and `libs/`), so it type-checks zero packages. Claude Code hooks had a ghost (`buddi-hook.py`) firing on every event.
+
+**Safari journal:** `docs/safaris/gw-triage-safari.md`
+
+#### **Step 1: Claude Code Hook Cleanup** ✅ DONE (Session 4)
+- Removed buddi-hook.py from user-level settings (was on 10 event types, file didn't exist)
+- Removed block-bad-commands.py, block-npm.py (never wired in settings)
+- Removed check-colors.py (duplicated pre-commit hook, never worked reliably)
+- Removed auto-format.py (self-labeled "RETIRED"), langfuse.py (not working)
+- Both `~/.claude/settings.json` and `.claude/settings.json` hooks now `{}`
+
+#### **Step 2: Fix Pre-Push Git Hook**
+- [ ] Fix stale `packages/$pkg` paths → should be `apps/` and `libs/` with correct names
+- [ ] The hook checks 6 packages by name (`engine`, `landing`, `meadow`, `plant`, `clearing`, `terrarium`) — `meadow` and `terrarium` are junk-drawered, `clearing` may have moved
+- [ ] Consider: is this hook even useful? It runs `pnpm check` per package sequentially, which is slow. The pre-commit hook already runs prettier + eslint + tsc on staged files.
+
+#### **Step 3: GW Triage — Kill Dead Commands**
+Remove ~16,000 lines (58% of gw) — commands that are harder than raw CLI:
+- [ ] Kill all `gw git` except `worktree finish` (5,160 lines → ~100 lines)
+- [ ] Kill `gw gh` except `issue` subcommand (4,500+ lines → ~782 lines)
+- [ ] Kill `gw d1`, `gw kv`, `gw r2`, `gw deploy`, `gw flag`, `gw backup` (wrangler is easier)
+- [ ] Kill `gw tui settings`, `gw loft`, `gw lattice`, `gw status`, `gw doctor`
+- [ ] Kill `gw context`, `gw packages`, `gw monorepo-size`, `gw env-audit`, `gw config-validate`
+- [ ] Kill `gw cache`, `gw history`, `gw metrics`, `gw health`, `gw onboarding`
+- [ ] Kill `gw email`, `gw release`, `gw export`, `gw bindings`, `gw glimpse`, `gw logs`
+- [ ] Kill `gw tenant`, `gw auth`, `gw login`
+
+#### **Step 4: GW — Keep & Simplify**
+What survives (~5,600 lines, 10 command groups):
+- **KEEP:** `secret`, `publish`, `warden`, `social`, `todo`, `gh issue`, `update`
+- **KEEP:** `git worktree finish` (the ONE git shortcut used)
+- **SIMPLIFY:** `dev` (gut `dev_quality.go`, rebuild for Phase 3 local dev)
+- **SIMPLIFY:** Safety tiers → only on commands that actually benefit
+
+#### **Step 5: Update AGENT.md & Settings**
+- [ ] Stop telling agents to use `gw git` — tell them to use raw `git`
+- [ ] Remove `Bash(gw git:*)` from `.claude/settings.json` permissions
+- [ ] Update `gw --help` to show ~10 things, not ~40
+- [ ] Rebuild from the surviving cmd/ files (don't delete one by one — fork and keep)
+
+---
+
+### **Phase 7: Engine Decoupling**
+
+**Goal:** Break the engine ↔ infra dependency cycle, decouple gossamer, establish a clean dependency DAG.
+
+**Context (from dependency audit, Session 4):**
+
+**The cycle:**
+```
+engine (@autumnsgrove/lattice)
+  ├─ depends on: @autumnsgrove/infra     ←──┐
+  └─ exports: ./errors                       │
+                                             │
+infra (@autumnsgrove/infra)                  │
+  ├─ depends on: @autumnsgrove/lattice ──────┘  CYCLE
+  └─ imports: logGroveError, GroveErrorDef from @autumnsgrove/lattice/errors (8 files)
+```
+
+**The gossamer coupling:**
+- Only 2 files in the entire engine import gossamer: `Glass.svelte` and `GlassCard.svelte`
+- Both import `GossamerClouds` from `@autumnsgrove/gossamer/svelte`
+- Engine declares `@autumnsgrove/gossamer: workspace:*` as a dependency for 2 imports
+
+**Foliage coupling:**
+- NONE. Engine does not import foliage at all. Already decoupled.
+
+#### **Step 1: Extract `grove-errors` Package**
+- [ ] Create `libs/grove-errors/` — tiny package with `GroveErrorDef`, `logGroveError`, error catalog
+- [ ] Move `libs/engine/src/lib/errors/` content into new package
+- [ ] Update engine to depend on `@autumnsgrove/grove-errors` instead of self-referencing
+- [ ] Update infra to depend on `@autumnsgrove/grove-errors` instead of `@autumnsgrove/lattice/errors`
+- [ ] Remove infra's dependency on `@autumnsgrove/lattice` — **cycle broken**
+
+#### **Step 2: Decouple Gossamer from Engine**
+- [ ] Make gossamer a `peerDependency` or `optionalDependency` in engine
+- [ ] OR: Move `GossamerClouds` import to a lazy/dynamic import in Glass.svelte and GlassCard.svelte
+- [ ] OR: Move Glass/GlassCard out of engine into a UI package that depends on both engine + gossamer
+- [ ] Remove `@autumnsgrove/gossamer: workspace:*` from engine's direct dependencies
+
+#### **Step 3: Verify Clean DAG**
+Target dependency graph:
+```
+prism (design tokens, zero deps)
+grove-errors (error types + logging, zero deps)
+  ↑
+infra (depends on grove-errors, prism)
+  ↑
+engine (depends on infra, prism, grove-errors — NOT gossamer, NOT foliage)
+  ↑
+foliage (depends on prism)
+gossamer (standalone, zero workspace deps)
+grove-agent (depends on engine)
+apps, services, workers
+```
+
+- [ ] `pnpm install` shows no cyclic workspace dependency warning
+- [ ] Each lib builds independently in any order
+- [ ] No lib depends on something "above" it in the graph
+
+---
+
+### **Phase 8: Engine Decomposition**
+
+**Goal:** Break the monolithic engine (969 files, 24 subdirectories, 541 exports, 15 levels deep) into focused, independently-buildable packages.
+
+**Context (from nesting audit, Session 4):**
+
+The engine is a mega-package that re-exports everything through one `package.json` with 541 subpath exports. Finding anything requires navigating 10+ directory levels:
+
+```
+libs/engine/src/lib/ui/components/ui/waystone/Waystone.svelte  ← 10 dirs deep
+```
+
+**Current engine internals (24 subdirectories):**
+| Directory | Files | What it is |
+|-----------|-------|-----------|
+| `ui/` | 369 | Components, stores, tokens, chat, vineyard |
+| `platform/` | 108 | Config, pricing, greenhouse, threshold, upgrades |
+| `server/` | 97 | API helpers, services, middleware |
+| `utils/` | 41 | Shared utilities |
+| `auth/` | 37 | Auth integration, login, warden client |
+| `components/` | 35 | Admin, custom, reeds, terminology |
+| `email/` | 34 | Email templates and rendering |
+| `ai/` | 34 | Lumen inference, providers |
+| `monitoring/` | 30 | Observability, sentinel |
+| `curios/` | 27 | Gallery, guestbook, polls, timeline |
+| `content/` | 22 | Editor, markdown |
+| `loom/` | 18 | Durable Objects SDK |
+| `media/` | 15 | Amber media processing |
+| `thorn/` | 14 | Content moderation |
+| Everything else | ~88 | errors, social, data, types, styles, etc. |
+
+**The Go-like approach:** Each concern becomes its own workspace package with flat structure:
+- `@autumnsgrove/thorn` instead of `@autumnsgrove/lattice/thorn`
+- `@autumnsgrove/loom` instead of `@autumnsgrove/lattice/loom`
+- etc.
+
+#### **Step 1: Identify Extraction Order**
+Extract in dependency order (leaves first, roots last):
+1. **Already extracted:** `grove-errors` (from Phase 7)
+2. **Standalone subsystems:** `thorn`, `loom`, `scribe`, `zephyr` (few deps on engine internals)
+3. **Data layer:** `content`, `curios`, `media/amber`
+4. **Platform:** `platform` (config, pricing, greenhouse, threshold)
+5. **Server:** `server` (API helpers, middleware)
+6. **UI last:** `ui/` is the biggest and most interconnected — extract after everything else stabilizes
+
+#### **Step 2: Define Package Template**
+Each extracted package follows the same structure:
+```
+libs/<name>/
+├── src/
+│   ├── index.ts          (barrel export)
+│   └── <flat files>.ts   (no deep nesting)
+├── package.json          (workspace:* deps on what it needs)
+├── tsconfig.json
+└── vite.config.ts or svelte-package config
+```
+
+Max nesting: 3 levels from package root (`src/subfolder/file.ts`). No `src/lib/` wrapper unless SvelteKit requires it.
+
+#### **Step 3: Extract Pilot — Thorn**
+- [ ] Create `libs/thorn/` with thorn's 14 files
+- [ ] Update all imports from `@autumnsgrove/lattice/thorn` → `@autumnsgrove/thorn`
+- [ ] Remove thorn from engine's `src/lib/` and `package.json` exports
+- [ ] Verify: thorn builds independently, consumers still work
+
+#### **Step 4: Extract Pilot — Loom**
+- [ ] Create `libs/loom/` with loom's 18 files
+- [ ] Update all imports from `@autumnsgrove/lattice/loom` → `@autumnsgrove/loom`
+- [ ] Remove loom from engine
+- [ ] Verify: DOs still work with new import paths
+
+#### **Step 5: Extraction Wave 2+**
+Continue extracting based on Step 1 order. Each extraction follows the same pattern:
+1. Create package, move files
+2. Update imports across consumers
+3. Remove from engine exports
+4. Build + test
+
+#### **Step 6: Engine Residual**
+After extraction, the engine becomes a thin orchestration layer:
+- Re-exports from extracted packages for backward compat (temporary)
+- Contains only what's genuinely cross-cutting
+- `package.json` exports shrink from 541 to ~50
+- Eventually: engine disappears entirely, replaced by direct imports
+
+---
+
 ## Post-Refactor: What's Next?
 
-**After this week (not part of this refactor):**
+**After the phases above:**
 
 1. **Increase test coverage** - Target 40% overall (currently 11.5%)
 2. **Fix Lantern reliability** - Friends system flaky, follows don't work
 3. **Fix Reeds reliability** - Ensure comments work consistently
-4. **Fix remaining engine issues** - 101 fix commits in 6 months
-5. **Evaluate junk drawer items** - Based on usage data from observability
-6. **Selective rebuild** - Bring back features that have:
-   - Clear user demand (data-driven from observability)
-   - >40% test coverage
-   - Integration tests for critical paths
-   - Don't break core loop
-
-7. **Foliage completion** - Theming needs work but separate effort
-8. **Billing testing** - Add Stripe test mode to local dev, add integration tests
+4. **Evaluate junk drawer items** - Based on usage data from observability
+5. **Selective rebuild** - Bring back features with clear demand, >40% test coverage, integration tests
+6. **Foliage completion** - Theming needs work but separate effort
+7. **Billing testing** - Add Stripe test mode to local dev, add integration tests
 
 ---
 
@@ -942,7 +1129,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-05 (Session 2 - Phase 1 complete)
+**Last updated:** 2026-05-09 (Session 4 - Phases 6-8 planned, hook cleanup done)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1020,6 +1207,32 @@ tracker in this document after each completed step.
 | Plant integration tests | ⬜ TODO | OAuth flow coverage |
 | Color token final sweep | ⬜ TODO | Verify enforcement |
 
+#### Phase 6: Dev Tooling Triage
+| Step | Status | Notes |
+|------|--------|-------|
+| 1. Claude Code hook cleanup | ✅ DONE | Removed buddi, block-*, check-colors, auto-format, langfuse |
+| 2. Fix pre-push git hook | ⬜ TODO | Stale `packages/` paths → should be `apps/` + `libs/` |
+| 3. GW triage — kill dead commands | ⬜ TODO | ~16,000 lines (58%) to remove. Safari: `docs/safaris/gw-triage-safari.md` |
+| 4. GW — keep & simplify | ⬜ TODO | 10 surviving command groups (~5,600 lines) |
+| 5. Update AGENT.md & settings | ⬜ TODO | Stop telling agents to use `gw git`, remove permissions |
+
+#### Phase 7: Engine Decoupling
+| Step | Status | Notes |
+|------|--------|-------|
+| 1. Extract grove-errors package | ⬜ TODO | Breaks engine ↔ infra cycle (8 files import lattice/errors from infra) |
+| 2. Decouple gossamer from engine | ⬜ TODO | Only 2 files use it (Glass.svelte, GlassCard.svelte) |
+| 3. Verify clean DAG | ⬜ TODO | No cycles, each lib builds independently |
+
+#### Phase 8: Engine Decomposition
+| Step | Status | Notes |
+|------|--------|-------|
+| 1. Identify extraction order | ⬜ TODO | Leaves first: thorn, loom, scribe, zephyr |
+| 2. Define package template | ⬜ TODO | Flat structure, max 3 levels, no `src/lib/` wrapper |
+| 3. Extract pilot — thorn | ⬜ TODO | 14 files → `libs/thorn/` |
+| 4. Extract pilot — loom | ⬜ TODO | 18 files → `libs/loom/` |
+| 5. Extraction wave 2+ | ⬜ TODO | content, curios, media, platform, server |
+| 6. Engine residual | ⬜ TODO | 541 exports → ~50, thin orchestration layer |
+
 ---
 
 ### Session Log
@@ -1070,3 +1283,27 @@ tracker in this document after each completed step.
   - ~8,700 additional lines deleted across 75+ files
 - All packages build + typecheck clean (0 errors)
 - **Next session:** Phase 3 (local dev setup — full stack runnable locally)
+
+**Session 4 (2026-05-09):**
+- Rebased onto main (1 commit: edit button caching fix)
+- Claude Code Hook Cleanup (Phase 6, Step 1) — COMPLETE
+  - Removed `buddi-hook.py` from user-level settings (was on 10 event types, file missing)
+  - Removed `block-bad-commands.py`, `block-npm.py` (never wired), `check-colors.py` (dead)
+  - Removed `auto-format.py` (retired), `langfuse.py` (not working)
+  - Both user-level and project-level hook configs now clean (`"hooks": {}`)
+- GW Safari Triage — COMPLETE (docs/safaris/gw-triage-safari.md)
+  - Audited all 76 Go files / 27,738 lines across 15 command groups
+  - Verdict: KILL 58% (~16,000 lines), KEEP 20% (~5,600 lines), SIMPLIFY rest
+  - Survivors: secret, publish, warden, social, todo, gh issue, update, git worktree finish, dev (skeleton)
+  - Core insight: gw wraps CLIs that don't need wrapping. Every `gw git log` is `git log` with fewer flags.
+- Engine Dependency Audit — COMPLETE
+  - Engine → infra cycle caused by `logGroveError` / `GroveErrorDef` (8 imports in infra from engine/errors)
+  - Gossamer coupling: only 2 files (Glass.svelte, GlassCard.svelte)
+  - Foliage coupling: NONE (already decoupled)
+  - Fix: extract `grove-errors` as independent package → cycle broken
+- Engine Nesting Audit — COMPLETE
+  - 969 files, 24 subdirectories, 541 subpath exports, max depth 15 (10 actual dirs)
+  - `ui/` alone: 369 files, 17 component subdirectories, 46 files in `components/ui/`
+  - Go-like restructuring: each subdirectory becomes its own workspace package
+- Added Phases 6 (Dev Tooling Triage), 7 (Engine Decoupling), 8 (Engine Decomposition) to plan
+- **Next session:** Phase 3 execution (local dev PoC) or Phase 6 Step 2-3 (git hooks + gw kill)

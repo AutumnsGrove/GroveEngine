@@ -128,18 +128,7 @@
       "Bash(gw secret reveal)"
     ]
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/check-colors.py"
-          }
-        ]
-      }
-    ]
-  },
+  "hooks": {},
   "spinnerVerbs": {
     "mode": "append",
     "verbs": [
