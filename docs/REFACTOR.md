@@ -1129,7 +1129,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-09 (Session 4 - Phases 6-8 planned, hook cleanup done)
+**Last updated:** 2026-05-09 (Session 5 - Phase 3 PoC complete, LoomDO + DO migrations fixed)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1181,15 +1181,19 @@ tracker in this document after each completed step.
 #### Phase 3: Local Dev Setup (Revised — Real Code, No Mocks)
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Design multi-config architecture | ⬜ TODO | `wrangler dev -c` with primary + auxiliary workers |
-| 2. Create dev wrangler overlays | ⬜ TODO | Local D1/KV/R2, dev ports, no remote IDs |
-| 3. Assign ports | ⬜ TODO | Apps: 5173-5175, workers: 8787 (multi-config) |
+| 0. PoC — multi-config works | ✅ DONE | Aspen + DOs + Zephyr running in single miniflare instance |
+| 0a. Fix LoomDO for local dev | ✅ DONE | `implements DurableObject` → `extends DurableObject` (cloudflare:workers import) |
+| 0b. Fix DO migrations | ✅ DONE | Added `deleted_classes` v9 migration for TriageDO/ChatDO/FeedDO |
+| 0c. Verify prod safety | ✅ DONE | dry-run deploy clean, tsc clean, svelte-check clean |
+| 1. Design multi-config architecture | ✅ DONE | `wrangler dev -c` confirmed working (wrangler 4.82.2) |
+| 2. Create dev wrangler overlays | ⬜ TODO | Not needed for PoC — prod wrangler.toml works locally as-is (miniflare ignores remote IDs) |
+| 3. Assign ports | ✅ DONE | Aspen:5173, multi-worker:8787 (confirmed via PoC) |
 | 4. Auth — localhost Google OAuth | ⬜ TODO | Register localhost callback, Heartwood dev mode |
 | 5. Add .dev.vars templates | ⬜ TODO | billing-api, zephyr, lumen, warden (4 missing) |
 | 6. Create orchestration script | ⬜ TODO | `scripts/dev-stack.sh` or `gw dev` |
 | 7. Seed local data | ⬜ TODO | D1 migrations + test tenant + sample posts |
 | 8. Document in LOCAL_DEV.md | ⬜ TODO | Quick start, architecture, troubleshooting |
-| 9. PoC & validation | ⬜ TODO | Multi-config service bindings + cross-script DOs |
+| 9. Full validation | ⬜ TODO | End-to-end: OAuth login → create post → view post |
 
 #### Phase 4: Observability
 | Step | Status | Notes |
@@ -1307,3 +1311,16 @@ tracker in this document after each completed step.
   - Go-like restructuring: each subdirectory becomes its own workspace package
 - Added Phases 6 (Dev Tooling Triage), 7 (Engine Decoupling), 8 (Engine Decomposition) to plan
 - **Next session:** Phase 3 execution (local dev PoC) or Phase 6 Step 2-3 (git hooks + gw kill)
+
+**Session 5 (2026-05-09):**
+- Phase 3 PoC — COMPLETE (multi-config local dev WORKS)
+  - Confirmed `wrangler dev -c` runs multiple workers in single miniflare instance
+  - Aspen + DOs + Zephyr all running, static assets serving, D1/KV/R2 local
+  - Fixed LoomDO: `implements DurableObject` → `extends DurableObject` with `import { DurableObject } from "cloudflare:workers"`
+  - Root cause of DO crash: orphaned migration declarations for TriageDO/ChatDO/FeedDO (removed in Phase 1 but still in wrangler.toml migrations). Added v9 migration with `deleted_classes`.
+  - Added `nodejs_compat` flag to DO wrangler.toml
+  - Prod safety verified: dry-run deploy clean, tsc clean, svelte-check 0 errors
+  - Key discovery: prod wrangler.toml files work locally as-is — miniflare ignores remote D1/KV/R2 IDs and creates local equivalents. No dev overlay configs needed.
+  - Aspen returns GROVE-SITE-045 (empty D1) — correct behavior, needs data seeding (Phase 3 Step 7)
+- Engine rebuild: `svelte-package` now emits `extends DurableObject` in dist/loom/base.js
+- **Next:** Phase 3 Steps 4-9 (auth, .dev.vars, orchestration script, data seeding, docs)
