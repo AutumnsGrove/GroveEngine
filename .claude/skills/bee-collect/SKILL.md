@@ -74,8 +74,8 @@ gf --agent usage "ComponentName" # Where is this used?
 gf --agent func "functionName"   # Find function definitions
 
 # Fallback tools (use Grep/Glob/Read tools, or gw git)
-gw git log --oneline
-gw git diff
+git log --oneline
+git diff
 ```
 
 **Understand the Territory:**
@@ -181,7 +181,7 @@ Create properly structured issues:
 
 ```bash
 # Single issue creation
-gw gh issue create --write \
+gh issue create \
   --title "Title in imperative mood" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -218,11 +218,11 @@ gw gh issue batch --write --file /tmp/bee-issues.json --dry-run
 gw gh issue batch --write --file /tmp/bee-issues.json
 ```
 
-**For 1-2 issues:** Use separate `gw gh issue create --write` calls.
+**For 1-2 issues:** Use separate `gh issue create` calls.
 
 **Closing issues:**
 ```bash
-gw gh issue close --write 123
+gh issue close 123
 ```
 
 **Title guidelines:**

@@ -144,7 +144,7 @@ gw ci --affected --fail-fast --diagnose
 **Only when verification passes**, commit and push — one motion, one breath:
 
 ```bash
-gw git ship --write -a -m "fix(component): brief description of fix — Fixes #{number}"
+git add -A && git commit -m "fix(component): brief description of fix — Fixes #{number}"
 ```
 
 The "Hunted by" trailer lets you trace the panther's path through your git history. The forest remembers nothing but the echo of the kill and the fading warmth of fresh tracks in the mud.

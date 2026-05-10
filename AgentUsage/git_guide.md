@@ -1,32 +1,33 @@
 # Git Guide - Unified Workflow and Commit Standards
 
-## Lattice: Use `gw` (Grove Wrap)
+## Lattice: Use raw git + gw worktrees
 
-> **IMPORTANT:** In the Lattice monorepo, use `gw` for all git operations. It wraps git with safety checks, conventional commit validation, and monorepo-aware workflows.
+Use raw `git` and `gh` directly for all version control. `gw` provides only issue-driven worktree management and infrastructure commands (see `gw --help`).
 
-### Essential `gw` Commands
+### Worktree workflow (via gw)
 
 ```bash
-# Daily workflow
-gw git status              # Status with monorepo context
-gw git ship                # Stage, commit, push in one safe flow
-gw git pr-prep             # Prepare branch for pull request
-
-# CI and checks
-gw ci                      # Run full CI pipeline locally
-gw ci --quick              # Quick lint + type check
-
-# GitHub integration
-gw git pr-prep             # Summarize changes for PR description
+gw git worktree create 1234 --write    # Create worktree for issue #1234
+# ... work in worktree ...
+gw git worktree finish --write         # Commit, push, merge, cleanup
 ```
 
-Run `gw --help` and `gw git --help` for the full command list.
+### Daily git workflow
 
----
+```bash
+git status && git diff                 # Check changes
+git add . && git commit -m "feat: msg" # Commit
+git push                               # Push
+gh pr create                           # Create PR
+```
 
-## Generic Git Reference
+### CI checks (local)
 
-The rest of this guide covers standard git workflows and Conventional Commits format. In the Lattice monorepo, prefer `gw` commands above — they handle safety checks and formatting automatically.
+```bash
+pnpm -r run build                      # Build all packages
+pnpm -r run check                      # svelte-check
+pnpm -r run test:run                   # Run tests
+```
 
 ---
 

@@ -8,8 +8,8 @@ Component API migrations, prop changes, import rewrites, and framework upgrade p
 
 ```bash
 # Always branch before a component migration
-gw git branch bear/migrate-component-name
-gw git checkout bear/migrate-component-name
+git branch bear/migrate-component-name
+git checkout bear/migrate-component-name
 
 # Snapshot current type-check and test state
 cd libs/engine && bun svelte-check 2>&1 | tail -5

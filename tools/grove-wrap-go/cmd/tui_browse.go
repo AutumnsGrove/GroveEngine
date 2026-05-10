@@ -64,7 +64,6 @@ type browseModel struct {
 	showHelp     bool
 	helpOffset   int
 	showSettings bool
-	settings     *tuiSettings
 	width        int
 	height       int
 	err          error
@@ -160,11 +159,8 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		// Settings overlay — delegate to settings handler
 		if m.showSettings {
-			if m.settings.handleKey(msg.String()) {
-				m.showSettings = false
-			}
+			m.showSettings = false
 			return m, nil
 		}
 
@@ -267,10 +263,8 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.showHelp = true
 
 		case ",":
-			m.showSettings = true
-			if m.settings == nil {
-				m.settings = newTUISettings()
-			}
+			// settings overlay removed during gw triage
+			_ = m.showSettings
 
 		case "esc":
 			if m.filter != "" {
@@ -363,9 +357,6 @@ func (m browseModel) View() string {
 
 	if m.showHelp {
 		return m.renderHelp()
-	}
-	if m.showSettings && m.settings != nil {
-		return m.settings.render()
 	}
 	if m.detailIdx >= 0 {
 		return m.renderDetail()

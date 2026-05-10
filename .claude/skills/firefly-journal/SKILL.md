@@ -42,13 +42,13 @@ Float through recent git activity and understand what happened:
 
 ```bash
 # What changed recently? (default: 7 days, adjust as needed)
-gw git log --oneline --since="7 days ago"
+git log --oneline --since="7 days ago"
 
 # More detail on what files were touched
-gw git log --stat --since="7 days ago"
+git log --stat --since="7 days ago"
 
 # If looking at a specific range
-gw git log --oneline main..HEAD
+git log --oneline main..HEAD
 ```
 
 **What to notice:**

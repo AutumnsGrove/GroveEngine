@@ -8,8 +8,8 @@ Icon migrations, asset swaps, document format changes, and file-based content tr
 
 ```bash
 # Branch before content migrations
-gw git branch bear/migrate-content-description
-gw git checkout bear/migrate-content-description
+git branch bear/migrate-content-description
+git checkout bear/migrate-content-description
 
 # For large binary assets, verify git LFS status first
 git lfs ls-files

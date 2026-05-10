@@ -238,20 +238,28 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 ## Essential Instructions (Always Follow)
 
-### Grove Wrap (gw) — Required CLI
+### Grove Wrap (gw) — Infrastructure CLI
 
-All git, GitHub, and Cloudflare operations go through `gw`. Write operations require `--write`.
+`gw` handles operations that raw CLIs can't: encrypted vaults, issue-driven worktrees, npm publishing, Warden management, and Todoist integration. **For git, gh, and wrangler — use them directly.**
 
 ```bash
-gw context                              # Start every session here
-gw git ship --write -a -m "feat: msg"   # Auto-stage + format + check + commit + push
-gw dev ci --affected --fail-fast --diagnose # Verify before committing
-gw git pr-prep                          # PR readiness report
+gw --help                               # See available commands
+gw secret list                          # Encrypted vault
+gw gh issue list                        # Issue management
+gw git worktree create <issue-num>      # Create worktree for an issue
+gw git worktree finish --write          # Commit, push, merge, cleanup
 ```
 
-Run `gw --help` for full commands. See `AgentUsage/git_guide.md` for details.
+**For git/GitHub/Cloudflare — use raw CLIs:**
+```bash
+git status && git diff                  # Check changes
+git add . && git commit -m "feat: msg"  # Commit
+git push                                # Push
+gh pr create                            # Create PR
+wrangler d1 execute ...                 # Database operations
+```
 
-**Note:** `--write` is auto-implied for interactive terminal sessions but required for agents/CI/MCP. DANGEROUS-tier operations (`--write --force`) are never auto-implied.
+Run `gw --help` for the full (small) command list. Write operations require `--write`.
 
 ### Core Behavior
 
@@ -268,7 +276,7 @@ Run `gw --help` for full commands. See `AgentUsage/git_guide.md` for details.
 
 ```bash
 # Verify code changes before committing
-pnpm install && gw dev ci --affected --fail-fast --diagnose
+pnpm install && pnpm -r run build && pnpm -r run check
 
 # Verify UI changes visually
 uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
@@ -290,9 +298,9 @@ uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=
 
 ### Git Workflow
 
-> **Use `gw git` commands, not raw git.** See gw section above.
+Use raw `git` and `gh` directly. Use `gw git worktree` for issue-driven worktree lifecycle.
 
-**Conventional Commits Format (enforced by gw):**
+**Conventional Commits Format:**
 
 ```bash
 <type>(<scope>): <brief description>
@@ -302,19 +310,15 @@ uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=
 **Daily workflow:**
 
 ```bash
-gw context                                    # Start here
-gw git ship --write -a -m "feat(auth): msg"   # Commit + push
-gw git pr-prep                                # Before creating PRs
+git status && git diff                        # Check changes
+git add . && git commit -m "feat(auth): msg"  # Commit
+git push                                      # Push
+gh pr create --title "feat: ..." --body "..." # Create PR
 ```
 
 See `AgentUsage/git_guide.md` for complete reference.
 
-### Claude Code Hooks
-
-Hooks registered in `.claude/settings.json`:
-
-- **PreToolUse `check-colors.py`** — Flags hardcoded accent colors that bypass the Prism token gateway
-- **PostToolUse `auto-format.py`** — Auto-runs Prettier after every Edit/Write on supported file types
+### Git Hooks
 
 Local git enforcement lives in `.githooks/` (pre-commit, pre-push, commit-msg). Install with `git config core.hooksPath .githooks`.
 

@@ -1,44 +1,22 @@
 ---
 name: git-workflows
-description: Execute git and GitHub operations through Grove Wrap (gw) with safety-tiered commands, Conventional Commits, and agent-safe defaults. Use when making commits, managing branches, working with PRs/issues, or performing any version control operations.
+description: Execute git and GitHub operations with Conventional Commits and agent-safe defaults. Use raw git/gh directly. Use gw only for worktree lifecycle (create/finish). Use when making commits, managing branches, working with PRs/issues, or performing any version control operations.
 ---
 
-# Git & GitHub Workflows (via Grove Wrap)
+# Git & GitHub Workflows
 
-**All git and GitHub operations go through `gw`** — never use raw `git` or `gh` commands directly.
-Grove Wrap adds safety tiers, Conventional Commits enforcement, protected branch guards, and agent-safe defaults.
+Use raw `git` and `gh` commands directly. `gw` only handles issue-driven worktrees (`gw git worktree create/finish`).
 
 ## When to Activate
 
-Activate this skill when:
-
-- Making git commits, pushing, pulling, branching, or stashing
-- Creating, reviewing, or merging pull requests
-- Creating, viewing, or closing GitHub issues
-- Checking CI/workflow run status
+- Making git commits, pushing, pulling, branching
+- Creating or reviewing pull requests
+- Working with GitHub issues
 - Reviewing git history, diffs, or blame
 - Resolving merge conflicts
-- Any version control operation
-
-## Safety System
-
-gw enforces a three-tier safety model:
-
-| Tier          | Flag Required     | Examples                                                         |
-| ------------- | ----------------- | ---------------------------------------------------------------- |
-| **READ**      | None              | `gw git status`, `gw git log`, `gw gh pr list`                   |
-| **WRITE**     | `--write`         | `gw git commit`, `gw git push`, `gw git pull`, `gw gh pr create` |
-| **DANGEROUS** | `--write --force` | `gw git reset`, `gw git force-push`, `gw git rebase`             |
-
-**Protected branches** (`main`, `master`, `production`, `staging`) can NEVER be force-pushed, even with `--force`.
-
-**Agent mode** (auto-detected for Claude Code): stricter row limits, force operations blocked, all operations audit-logged.
-
-**Dry run** any command with `--dry-run` to preview what would happen.
+- Managing worktrees for issue work
 
 ## Conventional Commits Format
-
-gw validates commit messages against Conventional Commits automatically. Format:
 
 ```
 <type>(<optional scope>): <brief description>
@@ -48,401 +26,161 @@ gw validates commit messages against Conventional Commits automatically. Format:
 <optional footer>
 ```
 
-### Commit Types
+### Types
 
-| Type       | Purpose          | Example                             |
-| ---------- | ---------------- | ----------------------------------- |
-| `feat`     | New feature      | `feat: add user authentication`     |
-| `fix`      | Bug fix          | `fix: correct validation error`     |
-| `docs`     | Documentation    | `docs: update README`               |
-| `style`    | Code formatting  | `style: format with prettier`       |
-| `refactor` | Code restructure | `refactor: extract helper function` |
-| `test`     | Add/modify tests | `test: add auth tests`              |
-| `chore`    | Maintenance      | `chore: update dependencies`        |
-| `perf`     | Performance      | `perf: optimize query speed`        |
-| `ci`       | CI/CD changes    | `ci: fix deploy workflow`           |
+| Type | Purpose | Example |
+|------|---------|---------|
+| `feat` | New feature | `feat(auth): add OAuth refresh` |
+| `fix` | Bug fix | `fix(landing): correct hero sizing` |
+| `docs` | Documentation | `docs: update API reference` |
+| `refactor` | Code restructure | `refactor(engine): extract validation` |
+| `test` | Tests | `test(billing): add webhook tests` |
+| `chore` | Maintenance | `chore: update dependencies` |
+| `perf` | Performance | `perf(queries): add index for lookups` |
 
-**Breaking changes**: Add an exclamation mark after the type, e.g. **feat!: replace XML config with YAML**
+### Scopes
 
-## Git Commands — Reading (Always Safe)
+Use package names: `engine`, `landing`, `plant`, `aspen`, `heartwood`, `prism`, `foliage`, `lumen`, `billing`
 
-```bash
-gw git status                  # Enhanced git status
-gw git log                     # Formatted commit history
-gw git log --limit 20          # Last 20 commits
-gw git diff                    # Show changes
-gw git diff --staged           # Show staged changes
-gw git blame file.ts           # Blame with context
-gw git show abc123             # Show commit details
-```
-
-## Git Commands — Writing (Needs `--write`)
+## Daily Workflow
 
 ```bash
-gw git add --write .                              # Stage files
-gw git add --write src/lib/thing.ts               # Stage specific file
-gw git commit --write -m "feat: add new feature"  # Commit (validates conventional commits!)
-gw git push --write                               # Push to remote
-gw git pull --write                               # Pull from remote
-gw git pull --write --rebase                      # Pull with rebase strategy
-gw git branch --write feature/new-thing           # Create branch
-gw git switch --write feature/new-thing           # Switch branches
-gw git stash --write                              # Stash changes
-gw git stash --write pop                          # Pop stash
-gw git unstage --write file.ts                    # Unstage files
+# Check state
+git status
+git diff --stat
+
+# Stage and commit
+git add .
+git commit -m "feat(engine): add GlassCard hover animation"
+
+# Push
+git push
+
+# Create PR
+gh pr create --title "feat(engine): add GlassCard hover animation" --body "..."
 ```
 
-## Git Commands — Dangerous (Needs `--write --force`)
+## Read Operations
 
 ```bash
-gw git push --write --force          # Force push (blocked to protected branches!)
-gw git reset --write --force HEAD~1  # Hard reset
-gw git rebase --write --force main   # Rebase onto main
-gw git merge --write --force feature # Merge branches
+git status                       # Working tree status
+git diff                         # Unstaged changes
+git diff --staged                # Staged changes
+git diff main...HEAD             # Changes on this branch vs main
+git log --oneline -20            # Recent commits
+git log --stat -5                # Commits with file stats
+git blame src/lib/file.ts        # Line-by-line authorship
+git show abc123                  # Show commit details
 ```
 
-## Grove Shortcuts
-
-These combine common multi-step operations into single commands:
+## Write Operations
 
 ```bash
-# Quick save: stage all + WIP commit
-gw git save --write
-
-# Quick sync: fetch + rebase + push
-gw git sync --write
-
-# WIP commit that skips hooks
-gw git wip --write
-
-# Undo last commit (keeps changes staged)
-gw git undo --write
-
-# Amend last commit message
-gw git amend --write -m "better message"
-
-# FAST MODE: skip ALL hooks, commit + push in one shot
-gw git fast --write -m "fix: emergency hotfix"
+git add .                                    # Stage all
+git add src/lib/specific-file.ts             # Stage specific file
+git commit -m "feat: add new feature"        # Commit
+git push                                     # Push to remote
+git push -u origin feature/new-thing         # Push new branch
+git pull --rebase                            # Pull with rebase
+git branch feature/new-thing                 # Create branch
+git switch feature/new-thing                 # Switch branches
+git stash                                    # Stash changes
+git stash pop                                # Pop stash
+git restore --staged file.ts                 # Unstage files
 ```
 
-## Branching Strategy
+## Worktrees (via gw)
 
-### Branch Naming
-
-```
-feature/feature-name    # New features
-fix/bug-description     # Bug fixes
-experiment/new-idea     # Experiments
-release/v1.0.0          # Releases
-```
-
-### Feature Branch Workflow
+Issue-driven worktrees are the ONE thing gw adds over raw git:
 
 ```bash
-# Create and switch to feature branch
-gw git branch --write feature/user-auth
-gw git switch --write feature/user-auth
+# Create worktree for an issue (fetches title, generates branch name)
+gw git worktree create 1234 --write
 
-# Work and commit
-gw git add --write .
-gw git commit --write -m "feat: add JWT authentication"
+# Finish: commit, push, merge into main, remove worktree
+gw git worktree finish --write
 
-# Push and create PR
-gw git push --write
-gw gh pr create --write --title "feat: add JWT authentication"
+# Finish with custom message
+gw git worktree finish --write -m "feat: implement dark mode"
+
+# Finish without merging (just commit + push + remove)
+gw git worktree finish --write --no-merge
+
+# List worktrees (raw git)
+git worktree list
 ```
 
-## GitHub — Pull Requests
+## GitHub Operations
 
 ```bash
-# Reading (always safe)
-gw gh pr list                   # List open PRs
-gw gh pr view 123               # View PR details
-gw gh pr status                 # PR status (CI, reviews, etc.)
+# Issues (via gw for browse TUI, or raw gh)
+gw gh issue list                             # TUI browse with skills
+gh issue create --title "..." --body "..."   # Create issue
+gh issue close 123                           # Close issue
 
-# Writing (needs --write)
-gw gh pr create --write --title "feat: new thing" --body "Description"
-gw gh pr comment --write 123 "LGTM!"
-gw gh pr merge --write 123      # Merge PR (prompts for confirmation)
+# Pull Requests
+gh pr create --title "feat: ..." --body "..."
+gh pr list
+gh pr view 123
+gh pr merge 123
+
+# CI/Workflow runs
+gh run list
+gh run view 12345
 ```
 
-## GitHub — Issues
+## Branching
 
 ```bash
-# Reading (always safe)
-gw gh issue list                # List open issues
-gw gh issue view 456            # View issue details
+# Feature branch workflow
+git switch -c feature/user-auth
+# ... work ...
+git add . && git commit -m "feat(auth): implement JWT"
+git push -u origin feature/user-auth
+gh pr create
 
-# Writing (needs --write)
-gw gh issue create --write --title "Bug: thing broke"
-gw gh issue close --write 456
-```
-
-## GitHub — Workflow Runs (CI)
-
-```bash
-# Reading (always safe)
-gw gh run list                  # List recent runs
-gw gh run view 12345678         # View run details
-gw gh run watch 12345678        # Watch a running workflow
-
-# Writing (needs --write)
-gw gh run rerun --write 12345678 --failed  # Rerun failed jobs
-gw gh run cancel --write 12345678          # Cancel a run
-```
-
-## GitHub — API & Rate Limits
-
-```bash
-# GET requests (always safe)
-gw gh api repos/AutumnsGrove/Lattice
-
-# POST/PATCH (needs --write)
-gw gh api --write repos/{owner}/{repo}/labels -X POST -f name="bug"
-
-# DELETE (needs --write --force)
-gw gh api --write --force repos/{owner}/{repo}/labels/old -X DELETE
-
-# Check rate limit status
-gw gh rate-limit
-```
-
-## GitHub — Project Boards
-
-```bash
-gw gh project list              # List project boards
-gw gh project view              # View current project
-```
-
-## Commit Examples
-
-### Feature
-
-```bash
-gw git commit --write -m "feat: add dark mode toggle
-
-- Implement theme switching logic
-- Add localStorage persistence
-- Update CSS variables"
-```
-
-### Bug Fix with Issue Link
-
-```bash
-gw git commit --write -m "fix: correct timezone handling bug
-
-Fixes off-by-one error in date calculations.
-
-Closes #123"
-```
-
-### Breaking Change
-
-```bash
-gw git commit --write -m "feat!: replace XML config with YAML
-
-BREAKING CHANGE: XML configuration no longer supported.
-See docs/migration.md for upgrade instructions."
-```
-
-## Agent-Optimized Commands (NEW)
-
-These commands are specifically designed for agentic workflows:
-
-### Session Start (Always run this first!)
-
-```bash
-gw context                      # One-shot session snapshot (rich output)
-gw --json context               # JSON snapshot (branch, changes, packages, issues)
-```
-
-### Ship with Auto-Stage
-
-```bash
-# Stage all + format + check + commit + push in ONE command
-gw git ship --write -a -m "feat: implement feature"
-
-# Equivalent to: gw git add --write . && gw git ship --write -m "..."
-```
-
-### PR Preparation
-
-```bash
-gw git pr-prep                  # Full PR readiness report
-gw --json git pr-prep           # JSON: commits, files, packages, suggested title
-```
-
-### Targeted CI
-
-```bash
-gw ci --affected               # Only check packages with changes
-gw ci --affected --fail-fast   # Fast feedback: stop on first failure
-gw ci --diagnose               # Structured error output when steps fail
-gw --json ci --affected        # JSON with parsed error details
-```
-
-### Batch Issue Creation
-
-```bash
-# Create multiple issues from JSON
-gw gh issue batch --write --from-json issues.json
-echo '[{"title":"Bug: thing","labels":["bug"]}]' | gw gh issue batch --write --from-json -
-```
-
-### Impact Analysis (via gf)
-
-```bash
-gf impact src/lib/auth.ts       # Who imports this? What tests? Which routes?
-gf test-for src/lib/auth.ts     # Find tests covering this file
-gf diff-summary                 # Structured diff with per-file stats
-gf --json impact src/lib/auth.ts  # All of the above as parseable JSON
-```
-
-## Common Workflows
-
-### Start a new feature
-
-```bash
-gw context                      # Orient: what branch, what's changed?
-gw git branch --write feature/my-feature
-gw git switch --write feature/my-feature
-# ... make changes ...
-gw git ship --write -a -m "feat: implement my feature"
-gw git pr-prep                  # Check readiness
-gw gh pr create --write --title "feat: implement my feature"
-```
-
-### Quick fix and ship
-
-```bash
-gw git fast --write -m "fix: correct typo in header"
-```
-
-### Ship with full checks
-
-```bash
-gw git ship --write -a -m "feat: add auth refresh"
-# This does: auto-stage all → format → type-check → commit → push
-```
-
-### Check CI before merging
-
-```bash
-gw ci --affected --fail-fast    # Quick: only changed packages
-gw gh pr status                 # See CI status on current PR
-gw gh run list                  # See recent workflow runs
-gw gh run watch 12345678        # Watch the current run
-```
-
-### Pull latest changes
-
-```bash
-gw git pull --write             # Pull from remote (merge strategy)
-gw git pull --write --rebase    # Pull with rebase (cleaner history)
-gw git pull --write origin main # Pull specific remote/branch
-```
-
-### Sync branch with main
-
-```bash
-gw git sync --write             # Fetch + rebase + push
-```
-
-### Save work in progress
-
-```bash
-gw git save --write             # Stage all + WIP commit
-# or
-gw git stash --write            # Stash without committing
+# Branch naming
+feature/feature-name     # New features
+fix/bug-description      # Bug fixes
+refactor/what-changed    # Refactors
 ```
 
 ## Merge Conflicts
 
-When conflicts occur during sync/rebase/merge:
-
 ```bash
-gw git status                   # See conflicted files
+# Identify conflicts
+git status                    # Shows conflicted files
 
-# Edit files to resolve conflicts:
-# <<<<<<< HEAD
-# Your changes
-# =======
-# Incoming changes
-# >>>>>>> feature-branch
+# Resolve manually, then:
+git add resolved-file.ts
+git commit -m "fix: resolve merge conflicts"
 
-# After resolving:
-gw git add --write resolved-file.ts
-gw git commit --write -m "fix: resolve merge conflicts"
+# Or accept one side
+git checkout --ours file.ts   # Keep current branch version
+git checkout --theirs file.ts # Keep incoming version
 ```
 
-## Worktrees
-
-Work on multiple branches simultaneously without stashing:
+## Undoing
 
 ```bash
-gw git worktree add --write ../grove-hotfix fix/urgent
-gw git worktree list
-gw git worktree remove --write ../grove-hotfix
+git restore file.ts                  # Discard working changes
+git restore --staged file.ts         # Unstage
+git reset --soft HEAD~1              # Undo commit, keep changes staged
+git reset HEAD~1                     # Undo commit, keep changes unstaged
+git revert abc123                    # Create new commit undoing a change
 ```
 
 ## Best Practices
 
-### DO
-
-- Start every session with `gw context` (or `gw --json context` for structured data)
-- Use `gw` for all git/GitHub operations (never raw `git` or `gh`)
-- Use `gf` for all codebase search (never raw `grep` or `rg`)
-- Use Conventional Commits format (gw enforces this)
-- Use `gw git ship --write -a -m "..."` for the fastest commit+push workflow
-- Use `gw ci --affected` instead of full CI when possible
-- Use `gw git pr-prep` before creating PRs
-- Use `gf impact` before making changes to understand blast radius
+**DO:**
 - One logical change per commit
-- Keep subject under 50 characters
+- Descriptive subject line under 50 chars
 - Use imperative mood ("Add" not "Added")
-- Use `--dry-run` to preview destructive operations
+- Reference issues in footer (`Fixes #123`)
+- Use worktrees for parallel issue work
 
-### DON'T
-
-- Use raw `git` or `gh` commands directly
-- Force-push to protected branches
-- Use vague messages ("Update files", "Fix stuff")
-- Combine multiple unrelated changes in one commit
-- Skip the `--write` flag (even if it seems tedious — it's a safety net)
-
-## Troubleshooting
-
-### "Protected branch"
-
-You tried to force-push to `main`. Create a PR instead:
-
-```bash
-gw gh pr create --write --title "My changes"
-```
-
-### "Rate limit exhausted"
-
-```bash
-gw gh rate-limit               # Check when it resets
-```
-
-### Committed to wrong branch
-
-```bash
-gw git log --limit 1            # Note the commit hash
-gw git switch --write correct-branch
-# Cherry-pick the commit, then remove from wrong branch
-```
-
-### Need to undo last commit
-
-```bash
-gw git undo --write             # Keeps changes staged
-```
-
-## Related Resources
-
-- **gw source**: `tools/grove-wrap-go/` — Go source code and Makefile
-- **gw spec**: `docs/specs/gw-cli-spec.md` — Technical specification
-- **Git guide**: `AgentUsage/git_guide.md` — Extended documentation
-- **MCP integration**: `gw mcp serve` exposes all commands as MCP tools for Claude Code
+**DON'T:**
+- Don't force-push to main/master
+- Don't commit secrets, .env files, or API keys
+- Don't combine unrelated changes in one commit
+- Don't use vague messages ("fix stuff", "update")

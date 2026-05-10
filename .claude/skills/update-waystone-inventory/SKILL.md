@@ -128,7 +128,7 @@ Edit `.github/waystone-inventory.json`:
 ### 5. Commit Changes
 
 ```bash
-gw git commit --write -m "docs: update waystone inventory
+git commit -m "docs: update waystone inventory
 
 - Add <slug> waystone to <package>
 - Update total: X -> Y

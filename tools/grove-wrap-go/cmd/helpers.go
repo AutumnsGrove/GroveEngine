@@ -3,23 +3,54 @@ package cmd
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+
+	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 )
 
-// sanitizeSQL escapes single quotes in SQL string literals.
-// This is a basic defense — D1 queries run via wrangler CLI, not direct DB access.
-func sanitizeSQL(s string) string {
-	return strings.ReplaceAll(s, "'", "''")
+func lipglossStyle(color lipgloss.Color) lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(color)
 }
 
-// firstOrNil returns the first row or nil for JSON output.
-func firstOrNil(rows []map[string]interface{}) interface{} {
-	if len(rows) > 0 {
-		return rows[0]
+func printJSON(data any) error {
+	b, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	return nil
+}
+
+func requireCFSafety(operation string) error {
+	cfg := config.Get()
+	effectiveWrite := cfg.WriteFlag || (cfg.IsInteractive() && !cfg.AgentMode)
+	if !effectiveWrite {
+		return fmt.Errorf("operation '%s' requires --write flag", operation)
 	}
 	return nil
 }
+
+func validateCFName(name, label string) error {
+	if len(name) == 0 {
+		return fmt.Errorf("%s must not be empty", label)
+	}
+	if len(name) > 128 {
+		return fmt.Errorf("%s too long (max 128 chars)", label)
+	}
+	for _, ch := range name {
+		if ch < 0x20 || ch == 0x7f || ch == '|' || ch == ';' || ch == '&' || ch == '$' ||
+			ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '<' || ch == '>' ||
+			ch == '`' || ch == '\'' || ch == '"' || ch == '\\' || ch == '\n' || ch == '\r' {
+			return fmt.Errorf("%s contains invalid character: %q", label, ch)
+		}
+	}
+	return nil
+}
+
 
 // generateToken generates a URL-safe random token of the given byte length.
 func generateToken(n int) (string, error) {
