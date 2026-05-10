@@ -216,10 +216,31 @@ function handleCurio(curioName: string, content: string): string {
 	return `<div class="grove-curio" data-grove-curio="${safeName}"${argAttr}>\n  <span class="grove-curio-loading">Loading ${safeName}\u2026</span>\n</div>\n`;
 }
 
+// ============================================================================
+// Anchor Directive
+// ============================================================================
+
+/**
+ * Anchor directive: renders an invisible anchor point for vine (gutter annotation) positioning.
+ *
+ * Input:  ::anchor[tagname]::
+ * Output: <span data-anchor="tagname" class="grove-anchor"></span>
+ *
+ * The vine system in ContentWithGutter.svelte looks for [data-anchor="tagname"]
+ * elements when an anchor string like "anchor:tagname" is used for gutter items.
+ */
+function handleAnchor(content: string): string | null {
+	const name = content.trim();
+	if (!name || !/^[\w-]+$/.test(name)) return null;
+	const safeName = escapeHtml(name);
+	return `<span data-anchor="${safeName}" class="grove-anchor"></span>\n`;
+}
+
 /** Map of directive names to their handlers */
 const directiveHandlers: Record<string, DirectiveHandler> = {
 	gallery: handleGallery,
 	image: handleImage,
+	anchor: handleAnchor,
 };
 
 // Register all curio directives
@@ -340,6 +361,13 @@ export const CURIO_METADATA = [
 		requiresArg: false,
 		system: true,
 		description: "Place inside a heading line to keep it out of the table of contents",
+	},
+	{
+		id: "anchor",
+		name: "Anchor",
+		requiresArg: true,
+		system: true,
+		description: "Invisible anchor point for vine positioning",
 	},
 ] as const;
 

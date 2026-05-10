@@ -111,6 +111,7 @@
 					{#if i > 0}<div class="toolbar-divider-line"></div>{/if}
 					<div class="toolbar-group formatting-group">
 						{#each group as btn}
+							{@const Icon = btn.icon}
 							<button
 								type="button"
 								class="toolbar-icon-btn fmt-btn"
@@ -119,7 +120,7 @@
 								title={btn.title}
 								aria-label={btn.label}
 							>
-								<svelte:component this={btn.icon} class="toolbar-icon" />
+								<Icon class="toolbar-icon" />
 							</button>
 						{/each}
 					</div>

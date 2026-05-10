@@ -328,7 +328,8 @@
 				const targetEl = findAnchorElement(anchor, contentEl as HTMLElement, headers);
 
 				if (targetEl) {
-					targetEl.insertAdjacentElement("beforebegin", mobileGutterEl);
+					const isHeading = /^H[1-6]$/.test(targetEl.tagName);
+					targetEl.insertAdjacentElement(isHeading ? "afterend" : "beforebegin", mobileGutterEl);
 					movedElements.push({ element: mobileGutterEl, originalParent, originalNextSibling });
 				} else {
 					// Fallback: anchor not found - log warning and position after first heading or at end
