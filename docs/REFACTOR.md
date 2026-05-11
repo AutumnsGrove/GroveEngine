@@ -1215,7 +1215,7 @@ tracker in this document after each completed step.
 | Step | Status | Notes |
 |------|--------|-------|
 | 1. Claude Code hook cleanup | ✅ DONE | Removed buddi, block-*, check-colors, auto-format, langfuse |
-| 2. Fix pre-push git hook | ⬜ TODO | Stale `packages/` paths → should be `apps/` + `libs/` |
+| 2. Fix pre-push git hook | ✅ DONE | Already fixed — deploy-manifest system replaced hardcoded paths. No `packages/` refs remain in .githooks/ or scripts/pre-push/ |
 | 3. GW triage — kill dead commands | ✅ DONE | 58 cmd/ files + 5 internal/ packages → `_junkdrawer/tools/`. 27,738→7,460 lines (73% cut) |
 | 4. GW — keep & simplify | ✅ DONE | 10 command groups survive: secret, publish, warden, social, todo, gh issue, git worktree create/finish, update, dev (skeleton) |
 | 5. Update AGENT.md & settings | ✅ DONE | Rewrote AGENT.md, CLAUDE.md, git_guide.md, settings.json permissions, grove-git agent, 11 skill files, git-workflows skill |
