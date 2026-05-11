@@ -53,6 +53,19 @@ const bad = (t) => {
 const skip = (t) => console.log(`  ${DIM}⊘ ${t}${RESET}`);
 const note = (t) => console.log(`  ${DIM}${t}${RESET}`);
 
+// Diff against the remote tracking branch when it exists (only checks
+// commits not yet on the remote). Falls back to origin/main for new
+// branches or detached HEAD.
+function detectBase() {
+	const r = spawnSync("git", ["rev-parse", "--abbrev-ref", "@{push}"], {
+		cwd: REPO_ROOT,
+		encoding: "utf8",
+		stdio: "pipe",
+	});
+	if (r.status === 0 && r.stdout.trim()) return r.stdout.trim();
+	return "origin/main";
+}
+
 function run(cmd, cwd) {
 	const r = spawnSync("sh", ["-c", cmd], {
 		cwd: cwd || REPO_ROOT,
@@ -96,7 +109,7 @@ if (drift.missingWrangler.length === 0 && drift.orphanedWrangler.length === 0) {
 
 // ─── 3. Affected shims — typecheck ────────────────────────────────
 header("Affected deploys");
-const base = process.env.PRE_PUSH_BASE || "origin/main";
+const base = process.env.PRE_PUSH_BASE || detectBase();
 let affected = [];
 try {
 	affected = filterAffected(shims, base);
