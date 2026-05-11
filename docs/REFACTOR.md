@@ -1129,7 +1129,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-09 (Session 5 - Phase 3 PoC complete, LoomDO + DO migrations fixed)
+**Last updated:** 2026-05-11 (Session 6 - Phase 6 Steps 3-5 complete, gw triaged from 27K→7.5K lines)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1216,9 +1216,9 @@ tracker in this document after each completed step.
 |------|--------|-------|
 | 1. Claude Code hook cleanup | ✅ DONE | Removed buddi, block-*, check-colors, auto-format, langfuse |
 | 2. Fix pre-push git hook | ⬜ TODO | Stale `packages/` paths → should be `apps/` + `libs/` |
-| 3. GW triage — kill dead commands | ⬜ TODO | ~16,000 lines (58%) to remove. Safari: `docs/safaris/gw-triage-safari.md` |
-| 4. GW — keep & simplify | ⬜ TODO | 10 surviving command groups (~5,600 lines) |
-| 5. Update AGENT.md & settings | ⬜ TODO | Stop telling agents to use `gw git`, remove permissions |
+| 3. GW triage — kill dead commands | ✅ DONE | 58 cmd/ files + 5 internal/ packages → `_junkdrawer/tools/`. 27,738→7,460 lines (73% cut) |
+| 4. GW — keep & simplify | ✅ DONE | 10 command groups survive: secret, publish, warden, social, todo, gh issue, git worktree create/finish, update, dev (skeleton) |
+| 5. Update AGENT.md & settings | ✅ DONE | Rewrote AGENT.md, CLAUDE.md, git_guide.md, settings.json permissions, grove-git agent, 11 skill files, git-workflows skill |
 
 #### Phase 7: Engine Decoupling
 | Step | Status | Notes |
@@ -1324,3 +1324,24 @@ tracker in this document after each completed step.
   - Aspen returns GROVE-SITE-045 (empty D1) — correct behavior, needs data seeding (Phase 3 Step 7)
 - Engine rebuild: `svelte-package` now emits `extends DurableObject` in dist/loom/base.js
 - **Next:** Phase 3 Steps 4-9 (auth, .dev.vars, orchestration script, data seeding, docs)
+
+**Session 6 (2026-05-11):**
+- Phase 6 Steps 3-5: GW Triage — COMPLETE
+  - Moved 58 cmd/ files + 5 internal/ packages to `_junkdrawer/tools/grove-wrap-go/`
+  - cmd/ lines: 27,738 → 7,460 (73% reduction), total Go: 34,108 → 11,130 (67% cut)
+  - Survivors: secret, publish, warden, social, todo, gh issue, git worktree create/finish, update, dev (skeleton), version
+  - Killed: all git/gh/wrangler passthrough — every command that was "just the raw CLI with fewer flags"
+  - Inlined safety checks for surviving commands (todo, worktree) — removed full safety/ package dependency
+  - Rewrote help.go: ~40 commands → 10 focused groups
+  - Added `worktree create` back (used by issue browser skill workflow)
+  - Simplified `findPackagePath` in publish.go to avoid `discoverPackages` dependency
+  - `go build`, `go vet`, `go test` all pass clean
+- Updated documentation and agent instructions:
+  - AGENT.md: "use raw git/gh, gw is for worktrees and infrastructure only"
+  - CLAUDE.md: updated gw description
+  - AgentUsage/git_guide.md: rewrote top section for raw git workflow
+  - .claude/settings.json: replaced 18 dead gw permissions with raw git/gh permissions
+  - .claude/agents/grove-git.md: updated from `gw git` to raw `git` commands
+  - 11 skill files: bulk-replaced `gw git` → `git`, rewrote git-workflows/SKILL.md entirely
+- 103 files changed in commit, all pre-push checks passed (22 deploys typechecked)
+- **Next:** Phase 6 Step 2 (fix pre-push git hook), then Phase 3 Steps 4-9 (local dev completion)
