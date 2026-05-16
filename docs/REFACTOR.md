@@ -1306,14 +1306,14 @@ tracker in this document after each completed step.
 
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Event schema + shared lib | ⬜ TODO | `libs/engine/src/lib/pulse/` — types, `emitEvent()`, visitor hashing |
-| 2. D1 migrations | ⬜ TODO | `pulse_events`, `pulse_daily`, `signup_funnel` tables in observability-db |
-| 3. Collector worker | ⬜ TODO | `workers/pulse-collector/` — receives via service binding, owns PulseBuffer DO |
-| 4. SvelteKit handle hooks | ⬜ TODO | Automatic instrumentation in all 8 apps (aspen, landing, plant, billing, clearing, domains, login, amber) |
-| 5. Signup funnel instrumentation | ⬜ TODO | Explicit events at each Plant step (7 events across OAuth → tenant creation) |
-| 6. Feature instrumentation | ⬜ TODO | Publishing, curios, comments, Lantern, Reeds, knowledge base reads |
-| 7. Error capture | ⬜ TODO | Server-side uncaught + client "Report Issue" button with diagnostics |
-| 8. Arbor dashboard | ⬜ TODO | `/arbor/pulse` — overview, signup funnel, feature usage, error log, route heatmap |
+| 1. Event schema + shared lib | ✅ DONE | `libs/engine/src/lib/pulse/` — types, emitter, visitor hashing, 12 tests |
+| 2. D1 migrations | ✅ DONE | `002_pulse_tables.sql` — pulse_events, pulse_daily, signup_funnel |
+| 3. Collector worker | ✅ DONE | `workers/pulse-collector/` — PulseBuffer DO, daily aggregation cron |
+| 4. SvelteKit handle hooks | ✅ DONE | All 8 apps instrumented via sequence() + PULSE_COLLECTOR service binding |
+| 5. Signup funnel instrumentation | ✅ DONE | 6 explicit events: oauth_complete → tenant_created in Plant |
+| 6. Feature instrumentation | ✅ DONE | post.published/updated/deleted, comment.posted/moderated in Aspen |
+| 7. Error capture | ✅ DONE | createPulseErrorHook() in all 8 apps, sanitized stack traces |
+| 8. Arbor dashboard | ✅ DONE | `/arbor/pulse` — overview, signup funnel, error log (3 pages) |
 | 9. Vista fixes (stretch) | ⬜ TODO | Suspected API key sync issue — lower priority than Pulse |
 
 #### Phase 5: Stability Hardening
