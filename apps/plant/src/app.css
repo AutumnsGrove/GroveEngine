@@ -35,8 +35,8 @@
 	--color-foreground-subtle: rgba(61, 41, 20, 0.5);
 	--color-foreground-faint: rgba(61, 41, 20, 0.4);
 
-	--color-primary: rgb(var(--grove-600));
-	--color-primary-hover: rgb(var(--grove-700));
+	--color-primary: var(--grove-accent);
+	--color-primary-hover: var(--grove-accent-dark);
 	--color-primary-foreground: #ffffff;
 
 	--color-border: rgb(var(--grove-200));
@@ -50,18 +50,18 @@
 	--color-accent-border: rgb(var(--grove-200));
 	--color-accent-text: rgb(var(--grove-800));
 	--color-accent-subtle: rgb(var(--grove-100));
-	--color-accent-muted: rgb(var(--grove-600));
+	--color-accent-muted: var(--grove-accent);
 	--color-divider: rgb(var(--grove-200));
 
 	--color-error: #dc2626;
 	--color-error-bg: #fee2e2;
-	--color-success: #16a34a;
-	--color-success-bg: #dcfce7;
+	--color-success: #16a34a; /* accent-ok — semantic status green */
+	--color-success-bg: #dcfce7; /* accent-ok */
 
 	--shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
 	--shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
 	--shadow-lg: 0 10px 15px -3px rgb(61 41 20 / 0.1);
-	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px rgb(var(--grove-500));
+	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px var(--grove-accent);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -97,8 +97,8 @@
 
 	--color-error: #f87171;
 	--color-error-bg: rgba(220, 38, 38, 0.15);
-	--color-success: #4ade80;
-	--color-success-bg: rgba(22, 163, 74, 0.15);
+	--color-success: #4ade80; /* accent-ok — semantic status green */
+	--color-success-bg: rgba(22, 163, 74, 0.15); /* accent-ok */
 
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
 	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);

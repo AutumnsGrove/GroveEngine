@@ -297,7 +297,7 @@
   .input-field:focus-visible {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+    box-shadow: 0 0 0 3px var(--grove-accent-15);
   }
 
   .card {

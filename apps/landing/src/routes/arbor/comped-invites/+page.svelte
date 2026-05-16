@@ -798,7 +798,7 @@
 
 							<!-- Content area with soft green background -->
 							<div
-								class="bg-[#f0fdf4] px-5 py-4 space-y-3"
+								class="bg-[var(--grove-accent-5)] px-5 py-4 space-y-3"
 								style="font-family: Georgia, Cambria, 'Times New Roman', serif;"
 							>
 								<p class="text-sm text-[#3d2914]">Hey,</p>

@@ -250,7 +250,7 @@
 	}
 
 	:global(.dark) .tab-active {
-		color: var(--grove-200, #bbf7d0);
+		color: var(--grove-accent-light);
 		background: rgba(255, 255, 255, 0.1);
 	}
 
