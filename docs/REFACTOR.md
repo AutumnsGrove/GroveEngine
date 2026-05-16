@@ -695,31 +695,66 @@ Before building the full orchestration:
 
 ---
 
-### **Phase 4: Observability Foundation (Day 4 - Thu Afternoon)**
+### **Phase 4: Observability Foundation — "Grove Pulse"**
 
-**Goal:** Stop flying blind - know what's working and what's breaking
+**Goal:** Full product observability — know what's working, what's breaking, what's being used
 
-#### **1. Signup Completion Tracking**
-- Add event logging at each Plant signup step
-- Track funnel: started → authenticated → profile → plan → payment → tenant created
-- Store in D1 table: `signup_funnel` (user_id, step, timestamp, metadata)
+**System: Grove Pulse** — a two-layer event pipeline (automatic + explicit) flowing through a
+dedicated collector worker with DO-buffered D1 writes. Zero added latency to user requests
+(fire-and-forget via service binding). Privacy-preserving (Rings model: daily-rotating visitor hash).
 
-#### **2. Feature Usage Stats**
-- Track curio deployments (which tenant enabled which curio)
-- Track Lantern usage (navigation events)
-- Track Reeds engagement (comments posted, moderated)
-- Simple counts queryable from Arbor admin
+#### **1. Event Schema + Shared Library** (`libs/engine/src/lib/pulse/`)
+- `PulseEvent` type: `{ event, category, route?, tenant_id?, visitor_hash?, metadata?, timestamp }`
+- `emitEvent()` — fire-and-forget to pulse-collector via service binding
+- `hashVisitor(ip, ua, dailySalt)` — privacy-preserving visitor identification
+- Categories: `page`, `signup`, `publish`, `social`, `curio`, `error`, `feature`
 
-#### **3. Error Reporting**
-- "Report Issue" button in footer of all apps
-- Captures: screenshot + URL + user agent + tenant ID + timestamp
-- Stores in Porch (support conversations) or dedicated R2 bucket
+#### **2. D1 Migrations** (in `grove-observability-db`)
+- `pulse_events` — raw events, 90-day retention (daily cleanup via cron)
+- `pulse_daily` — aggregated daily counts per route/event, 1-year retention
+- `signup_funnel` — dedicated table: user_id, step, timestamp, metadata, duration_from_start
 
-#### **4. Vista Fixes**
-- Investigate why Vista doesn't work (suspected: API key sync issue)
-- Fix the blocker
-- Verify metrics flowing from vista-collector
-- Set up basic alerts (signup failures, error rate spikes)
+#### **3. Collector Worker** (`workers/pulse-collector/`)
+- Receives events via service binding (POST) from all 8 apps
+- Routes to `PulseBuffer` Durable Object (one per day partition)
+- DO buffers events in memory, flushes to D1 on interval (10s) or threshold (100 events)
+- Health endpoint + manual trigger for testing
+- Daily cron: aggregate `pulse_events` → `pulse_daily`, prune >90-day raw events
+
+#### **4. Automatic Instrumentation** (SvelteKit handle hooks)
+- Add `pulseHook` to all 8 apps: aspen, landing, plant, billing, clearing, domains, login, amber
+- Every request logged: route, method, status, duration_ms, tenant_id, visitor_hash
+- Negligible overhead — async service binding call after response sent
+
+#### **5. Signup Funnel Instrumentation** (Plant app)
+- 7 explicit events across OAuth → tenant creation flow
+- `signup.started` → `signup.oauth_complete` → `signup.profile_done` →
+  `signup.email_verified` → `signup.plan_selected` → `signup.checkout_complete` →
+  `signup.tenant_created`
+- Each event includes: user_id, duration_from_start, step metadata
+
+#### **6. Feature Instrumentation** (all apps)
+- Publishing: `post.published`, `post.updated`, `post.deleted`
+- Curios: `curio.deployed`, `curio.removed`
+- Social: `comment.posted`, `comment.moderated`
+- Navigation: `lantern.navigated`, `reeds.engaged`
+- Content: `page.viewed` with section tag (knowledge_base, garden, settings, etc.)
+
+#### **7. Error Capture**
+- Server: automatic capture of uncaught errors in handle hook (`error.server`)
+- Client: "Report Issue" button — captures URL + user agent + tenant + screenshot + stack
+- Stored as pulse events with `error` category, queryable in dashboard
+
+#### **8. Arbor Dashboard** (`/arbor/pulse`)
+- Overview: today's requests, unique visitors, top routes, error rate
+- Signup funnel: conversion rates between steps, drop-off visualization
+- Feature usage: which features get used, by how many tenants
+- Error log: recent errors with context, grouped by route
+- Route heatmap: all routes ranked by traffic
+
+#### **9. Vista Fixes (Stretch Goal)**
+- Investigate API key sync issue blocking infra metrics
+- Lower priority than Pulse — Pulse answers the questions that matter now
 
 ---
 
@@ -1195,13 +1230,91 @@ tracker in this document after each completed step.
 | 8. Document in LOCAL_DEV.md | ⬜ TODO | Quick start, architecture, troubleshooting |
 | 9. Full validation | ⬜ TODO | End-to-end: OAuth login → create post → view post |
 
-#### Phase 4: Observability
+#### Phase 4: Observability — "Grove Pulse"
+
+**Goal:** Full product observability — know what's working, what's breaking, what's being used.
+
+**Architecture:**
+```
+┌─────────────────────────────────────────────────────┐
+│  AUTOMATIC LAYER (every request)                     │
+│  SvelteKit handle hook in each app                   │
+│  → route, method, status, duration, tenant, visitor  │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+              ┌────────────────┐
+              │  grove-pulse   │  ← shared event API
+              │  (engine lib)  │     libs/engine/src/lib/pulse/
+              └───────┬────────┘
+                      │
+┌─────────────────────┼──────────────────────────────┐
+│  EXPLICIT LAYER     │  (business events)            │
+│  signup.started     │  signup.profile_completed     │
+│  post.published     │  curio.deployed               │
+│  comment.posted     │  error.client_reported        │
+│  page.knowledge_base_read                           │
+└─────────────────────┼──────────────────────────────┘
+                      │
+                      ▼ (service binding, fire-and-forget)
+         ┌────────────────────────┐
+         │  pulse-collector       │  ← new worker
+         │  (Cloudflare Worker)   │     workers/pulse-collector/
+         └───────────┬────────────┘
+                     │
+                     ▼ (buffered writes)
+         ┌────────────────────────┐
+         │  PulseBuffer DO        │  ← batches events
+         │  flush every 10s or    │     reduces D1 write pressure
+         │  when buffer hits 100  │
+         └───────────┬────────────┘
+                     │
+                     ▼
+         ┌────────────────────────┐
+         │  grove-observability-db │  ← already exists
+         │  (D1)                   │
+         │  pulse_events (90-day)  │
+         │  pulse_daily (1-year)   │
+         │  signup_funnel          │
+         └────────────────────────┘
+                     │
+                     ▼
+         ┌────────────────────────┐
+         │  Arbor Dashboard        │
+         │  /arbor/pulse           │
+         └────────────────────────┘
+```
+
+**Design decisions:**
+- New worker (not extending vista-collector) — different concerns, different access patterns
+- DO buffer — D1 can't handle a write per request at scale; batch 100 events → 1 INSERT
+- Reuse `grove-observability-db` — already exists, already bound. No new DB needed
+- Inherit Rings privacy model — daily-rotating visitor hash (IP+UA), no PII stored
+- Service binding (fire-and-forget) — zero added latency to user requests
+
+**Automatic instrumentation (handle hook, all 8 apps):**
+- Every page load and API call: route, method, status, duration_ms, tenant_id, visitor_hash
+
+**Explicit business events:**
+- Signup: `signup.started`, `signup.oauth_complete`, `signup.profile_done`, `signup.email_verified`, `signup.plan_selected`, `signup.checkout_complete`, `signup.tenant_created`
+- Publishing: `post.published`, `post.updated`, `post.deleted`
+- Curios: `curio.deployed`, `curio.removed`
+- Social: `comment.posted`, `comment.moderated`
+- Navigation: `page.viewed` (with section: knowledge_base, garden, settings, etc.)
+- Errors: `error.server` (uncaught), `error.client` (reported via button)
+- Features: `lantern.navigated`, `reeds.engaged`
+
 | Step | Status | Notes |
 |------|--------|-------|
-| Signup funnel tracking | ⬜ TODO | D1 table + event logging |
-| Feature usage stats | ⬜ TODO | Curio deployment counts |
-| Error reporting button | ⬜ TODO | Screenshot + diagnostic capture |
-| Vista fixes | ⬜ TODO | Suspected API key sync |
+| 1. Event schema + shared lib | ⬜ TODO | `libs/engine/src/lib/pulse/` — types, `emitEvent()`, visitor hashing |
+| 2. D1 migrations | ⬜ TODO | `pulse_events`, `pulse_daily`, `signup_funnel` tables in observability-db |
+| 3. Collector worker | ⬜ TODO | `workers/pulse-collector/` — receives via service binding, owns PulseBuffer DO |
+| 4. SvelteKit handle hooks | ⬜ TODO | Automatic instrumentation in all 8 apps (aspen, landing, plant, billing, clearing, domains, login, amber) |
+| 5. Signup funnel instrumentation | ⬜ TODO | Explicit events at each Plant step (7 events across OAuth → tenant creation) |
+| 6. Feature instrumentation | ⬜ TODO | Publishing, curios, comments, Lantern, Reeds, knowledge base reads |
+| 7. Error capture | ⬜ TODO | Server-side uncaught + client "Report Issue" button with diagnostics |
+| 8. Arbor dashboard | ⬜ TODO | `/arbor/pulse` — overview, signup funnel, feature usage, error log, route heatmap |
+| 9. Vista fixes (stretch) | ⬜ TODO | Suspected API key sync issue — lower priority than Pulse |
 
 #### Phase 5: Stability Hardening
 | Step | Status | Notes |
