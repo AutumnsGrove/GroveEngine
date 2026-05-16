@@ -1315,6 +1315,13 @@ tracker in this document after each completed step.
 | 7. Error capture | ✅ DONE | createPulseErrorHook() in all 8 apps, sanitized stack traces |
 | 8. Arbor dashboard | ✅ DONE | `/arbor/pulse` — overview, signup funnel, error log (3 pages) |
 | 9. Vista fixes (stretch) | ⬜ TODO | Suspected API key sync issue — lower priority than Pulse |
+| 10. Deploy: PULSE_VISITOR_SECRET | ⬜ TODO | Required for brute-force-resistant visitor hashes. `gw secret apply` to all 8 apps + collector |
+
+**Audit notes (grove-audit quick, 2026-05-16):**
+- Passed 6/10 lanes CLEAN (barrel, CSRF, signpost, SDK boundaries, icon, accent)
+- Fixed: visitorSecret scoping bug (HIGH), JSON.parse crash risk (MEDIUM×2)
+- Accepted risk: collector has no auth beyond service-binding isolation, no rate limiting
+- Deferred: 3 test coverage gaps (secret param, sanitizeStack regex, secret forwarding)
 
 #### Phase 5: Stability Hardening
 | Step | Status | Notes |
