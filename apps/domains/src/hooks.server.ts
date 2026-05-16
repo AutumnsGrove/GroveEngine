@@ -5,8 +5,10 @@
  */
 
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import { getUserById, getSession, updateSessionTokens } from "$lib/server/db";
 import { extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import { pulseHandle } from "@autumnsgrove/lattice/pulse";
 
 /**
  * Environment variables required for core functionality.
@@ -58,7 +60,7 @@ function isTokenExpiringSoon(expiresAt: string | null): boolean {
 	return Date.now() >= expiresTime - TOKEN_REFRESH_BUFFER_MS;
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const domainsHandle: Handle = async ({ event, resolve }) => {
 	// Validate environment on first request
 	if (event.platform?.env) {
 		try {
@@ -235,3 +237,5 @@ function addSecurityHeaders(response: Response): Response {
 
 	return response;
 }
+
+export const handle = sequence(pulseHandle({ app: "domains" }), domainsHandle);

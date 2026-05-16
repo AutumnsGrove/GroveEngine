@@ -102,6 +102,11 @@ service = "groveauth"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
 # =============================================================================
 # Durable Objects - Loom Pattern (Grove's coordination layer)
 # =============================================================================

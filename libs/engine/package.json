@@ -398,6 +398,14 @@
 			"types": "./dist/monitoring/observability/index.d.ts",
 			"default": "./dist/monitoring/observability/index.js"
 		},
+		"./pulse": {
+			"types": "./dist/pulse/index.d.ts",
+			"default": "./dist/pulse/index.js"
+		},
+		"./pulse/*": {
+			"types": "./dist/pulse/*.d.ts",
+			"default": "./dist/pulse/*.js"
+		},
 		"./server/petal": {
 			"types": "./dist/server/petal/index.d.ts",
 			"default": "./dist/server/petal/index.js"

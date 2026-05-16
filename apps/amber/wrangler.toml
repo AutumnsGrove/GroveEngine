@@ -7,3 +7,8 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [[services]]
 binding = "AUTH"
 service = "groveauth"
+
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"

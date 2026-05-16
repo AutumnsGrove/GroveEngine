@@ -1,4 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import {
 	generateCSRFToken,
 	generateSessionCSRFToken,
@@ -7,6 +8,7 @@ import {
 } from "@autumnsgrove/lattice/utils/csrf";
 import { error, redirect } from "@sveltejs/kit";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
+import { pulseHandle } from "@autumnsgrove/lattice/pulse";
 import {
 	TURNSTILE_COOKIE_NAME,
 	validateVerificationCookie,
@@ -313,7 +315,7 @@ function needsUnsafeEval(pathname: string): boolean {
 	);
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const aspenHandle: Handle = async ({ event, resolve }) => {
 	// Initialize context and user
 	event.locals.user = null;
 	event.locals.context = { type: "landing" };
@@ -868,3 +870,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(pulseHandle({ app: "aspen" }), aspenHandle);

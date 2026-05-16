@@ -38,5 +38,10 @@ service = "grove-billing-api"
 binding = "AUTH"
 service = "groveauth"
 
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
 # Secrets (deploy via `gw secret apply --write --worker grove-billing`):
 # - STRIPE_WEBHOOK_SECRET = whsec_...

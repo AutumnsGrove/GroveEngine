@@ -1396,6 +1396,18 @@ importers:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
 
+  workers/pulse-collector:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      wrangler:
+        specifier: ^4.76.0
+        version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
+
   workers/subscription-digest:
     dependencies:
       '@autumnsgrove/lattice':
