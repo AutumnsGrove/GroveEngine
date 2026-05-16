@@ -35,6 +35,10 @@ interface Env {
 const FLUSH_THRESHOLD = 100;
 const ALARM_INTERVAL_MS = 10_000;
 
+// Hard cap on in-memory buffer — prevents unbounded memory growth if the DO
+// receives traffic faster than it can flush (e.g. D1 outage).
+const MAX_BUFFER_SIZE = 10_000;
+
 export class PulseBuffer extends DurableObject<Env> {
 	private buffer: PulseEventRow[] = [];
 	private alarmSet = false;
@@ -45,12 +49,67 @@ export class PulseBuffer extends DurableObject<Env> {
 		}
 
 		try {
-			const body = await request.json<{ events?: PulseEventRow[] }>();
+			const body = await request.json<{ events?: unknown[] }>();
 			if (!body.events) {
 				return Response.json({ error: "No events" }, { status: 400 });
 			}
 
-			this.buffer.push(...body.events);
+			// Validate each event — only accept objects with required string fields.
+			// The collector already validates upstream; this is a defense-in-depth layer.
+			const validEvents: PulseEventRow[] = body.events.filter(
+				(e): e is PulseEventRow =>
+					typeof e === "object" &&
+					e !== null &&
+					!Array.isArray(e) &&
+					typeof (e as Record<string, unknown>).event === "string" &&
+					typeof (e as Record<string, unknown>).category === "string",
+			) as PulseEventRow[];
+
+			const dropped = body.events.length - validEvents.length;
+			if (dropped > 0) {
+				console.warn(
+					JSON.stringify({
+						source: "pulse-buffer",
+						warning: "Dropped invalid events before buffering",
+						context: { dropped },
+					}),
+				);
+			}
+
+			// Cap the buffer — if adding validEvents would overflow, truncate to fit.
+			const available = MAX_BUFFER_SIZE - this.buffer.length;
+			if (available <= 0) {
+				console.warn(
+					JSON.stringify({
+						source: "pulse-buffer",
+						warning: "Buffer at capacity — all incoming events dropped",
+						context: { bufferSize: this.buffer.length, droppedNow: validEvents.length },
+					}),
+				);
+				return Response.json(
+					{ error: "Buffer at capacity", dropped: validEvents.length },
+					{ status: 429 },
+				);
+			}
+
+			const toAdd = validEvents.length > available ? validEvents.slice(0, available) : validEvents;
+			const overflowDropped = validEvents.length - toAdd.length;
+
+			if (overflowDropped > 0) {
+				console.warn(
+					JSON.stringify({
+						source: "pulse-buffer",
+						warning: "Buffer near capacity — truncated incoming batch",
+						context: {
+							bufferSize: this.buffer.length,
+							accepted: toAdd.length,
+							dropped: overflowDropped,
+						},
+					}),
+				);
+			}
+
+			this.buffer.push(...toAdd);
 
 			if (!this.alarmSet) {
 				await this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
@@ -61,7 +120,10 @@ export class PulseBuffer extends DurableObject<Env> {
 				await this.flush();
 			}
 
-			return Response.json({ buffered: this.buffer.length, accepted: body.events.length });
+			return Response.json({
+				buffered: this.buffer.length,
+				accepted: toAdd.length,
+			});
 		} catch {
 			return Response.json({ error: "Failed to buffer events" }, { status: 500 });
 		}
@@ -103,7 +165,16 @@ export class PulseBuffer extends DurableObject<Env> {
 			await this.env.OBS_DB.batch(stmts);
 			console.log(`[PulseBuffer] Flushed ${batch.length} events to D1`);
 		} catch (err) {
-			console.error(`[PulseBuffer] Flush failed, ${batch.length} events lost:`, err);
+			console.error(
+				JSON.stringify({
+					source: "pulse-buffer",
+					error: "Flush failed — events lost",
+					context: {
+						eventsLost: batch.length,
+						message: err instanceof Error ? err.message : String(err),
+					},
+				}),
+			);
 		}
 
 		if (this.buffer.length > 0) {

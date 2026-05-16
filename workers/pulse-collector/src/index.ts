@@ -9,11 +9,103 @@
  * prune events older than 90 days.
  */
 
+// Pipeline thresholds (see also: emitter.ts FLUSH_THRESHOLD = 50)
+// PulseBuffer DO flushes at FLUSH_THRESHOLD = 100 events or ALARM_INTERVAL_MS = 10s
+
 export { PulseBuffer } from "./pulse-buffer.js";
+
+// Batch size cap — reject requests that exceed this
+const MAX_BATCH_SIZE = 500;
+
+// Retention + time constants
+const RETENTION_DAYS = 90;
+const DAY_S = 86_400;
+const DAY_MS = 86_400_000;
+
+// Field length caps
+const MAX_EVENT_LEN = 100;
+const MAX_ROUTE_LEN = 500;
+const MAX_METADATA_JSON_BYTES = 4_096;
 
 interface Env {
 	OBS_DB: D1Database;
 	PULSE_BUFFER: DurableObjectNamespace;
+}
+
+interface RawEvent {
+	event: unknown;
+	category: unknown;
+	route?: unknown;
+	method?: unknown;
+	status?: unknown;
+	duration_ms?: unknown;
+	tenant_id?: unknown;
+	visitor_hash?: unknown;
+	app?: unknown;
+	metadata?: unknown;
+	timestamp?: unknown;
+}
+
+interface ValidatedEvent {
+	event: string;
+	category: string;
+	route?: string;
+	method?: string;
+	status?: number;
+	duration_ms?: number;
+	tenant_id?: string;
+	visitor_hash?: string;
+	app?: string;
+	metadata?: Record<string, unknown>;
+	timestamp?: number;
+}
+
+/** Filter and sanitize a raw unknown event. Returns null if the event is invalid. */
+function validateEvent(raw: unknown): ValidatedEvent | null {
+	if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
+	const e = raw as RawEvent;
+
+	if (typeof e.event !== "string" || typeof e.category !== "string") return null;
+
+	const event = e.event.slice(0, MAX_EVENT_LEN);
+	const category = e.category;
+
+	const route = typeof e.route === "string" ? e.route.slice(0, MAX_ROUTE_LEN) : undefined;
+	const method = typeof e.method === "string" ? e.method : undefined;
+	const status = typeof e.status === "number" ? e.status : undefined;
+	const duration_ms = typeof e.duration_ms === "number" ? e.duration_ms : undefined;
+	const tenant_id = typeof e.tenant_id === "string" ? e.tenant_id : undefined;
+	const visitor_hash = typeof e.visitor_hash === "string" ? e.visitor_hash : undefined;
+	const app = typeof e.app === "string" ? e.app : undefined;
+	const timestamp = typeof e.timestamp === "number" ? e.timestamp : undefined;
+
+	let metadata: Record<string, unknown> | undefined;
+	if (
+		e.metadata !== undefined &&
+		typeof e.metadata === "object" &&
+		e.metadata !== null &&
+		!Array.isArray(e.metadata)
+	) {
+		const json = JSON.stringify(e.metadata);
+		// Drop metadata if it exceeds the byte cap
+		if (new TextEncoder().encode(json).length <= MAX_METADATA_JSON_BYTES) {
+			metadata = e.metadata as Record<string, unknown>;
+		}
+	}
+
+	return {
+		event,
+		category,
+		route,
+		method,
+		status,
+		duration_ms,
+		tenant_id,
+		visitor_hash,
+		app,
+		metadata,
+		timestamp,
+	};
 }
 
 export default {
@@ -32,6 +124,28 @@ export default {
 				return Response.json({ error: "No events provided" }, { status: 400 });
 			}
 
+			if (body.events.length > MAX_BATCH_SIZE) {
+				return Response.json(
+					{ error: `Batch too large — max ${MAX_BATCH_SIZE} events per request` },
+					{ status: 400 },
+				);
+			}
+
+			// Validate and sanitize each event; drop invalids rather than rejecting the batch
+			const validEvents: ValidatedEvent[] = [];
+			for (const raw of body.events) {
+				const validated = validateEvent(raw);
+				if (validated !== null) {
+					validEvents.push(validated);
+				}
+			}
+
+			if (validEvents.length === 0) {
+				return Response.json({ error: "No valid events in batch" }, { status: 400 });
+			}
+
+			const droppedCount = body.events.length - validEvents.length;
+
 			const bufferId = env.PULSE_BUFFER.idFromName(todayPartition());
 			const buffer = env.PULSE_BUFFER.get(bufferId);
 
@@ -39,15 +153,26 @@ export default {
 				new Request("https://pulse-buffer.internal/ingest", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(body),
+					body: JSON.stringify({ events: validEvents }),
 				}),
 			);
 
 			return Response.json(
-				{ accepted: body.events.length, buffered: true },
+				{
+					accepted: validEvents.length,
+					dropped: droppedCount,
+					buffered: true,
+				},
 				{ status: resp.ok ? 202 : 500 },
 			);
-		} catch {
+		} catch (err) {
+			console.error(
+				JSON.stringify({
+					source: "pulse-collector",
+					error: "Failed to process events",
+					context: { message: err instanceof Error ? err.message : String(err) },
+				}),
+			);
 			return Response.json({ error: "Failed to process events" }, { status: 500 });
 		}
 	},
@@ -63,33 +188,40 @@ function todayPartition(): string {
 }
 
 async function runDailyAggregation(db: D1Database): Promise<void> {
-	const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
-	const cutoff = Math.floor(Date.now() / 1000) - 90 * 86_400;
+	const yesterday = new Date(Date.now() - DAY_MS).toISOString().split("T")[0];
+	const cutoff = Math.floor(Date.now() / 1000) - RETENTION_DAYS * DAY_S;
 
 	try {
 		await db
 			.prepare(
-				`INSERT OR REPLACE INTO pulse_daily (date, event, category, route, app, count, unique_visitors, avg_duration_ms, error_count)
+				`INSERT OR REPLACE INTO pulse_daily (date, event, category, route, app, tenant_id, count, unique_visitors, avg_duration_ms, error_count)
 			 SELECT
 			   ? as date,
 			   event,
 			   category,
 			   route,
 			   app,
+			   tenant_id,
 			   COUNT(*) as count,
 			   COUNT(DISTINCT visitor_hash) as unique_visitors,
 			   AVG(duration_ms) as avg_duration_ms,
 			   SUM(CASE WHEN status >= 400 THEN 1 ELSE 0 END) as error_count
 			 FROM pulse_events
 			 WHERE recorded_at >= ? AND recorded_at < ?
-			 GROUP BY event, category, route, app`,
+			 GROUP BY event, category, route, app, tenant_id`,
 			)
-			.bind(yesterday, dateToEpoch(yesterday), dateToEpoch(yesterday) + 86_400)
+			.bind(yesterday, dateToEpoch(yesterday), dateToEpoch(yesterday) + DAY_S)
 			.run();
 
 		console.log(`[Pulse] Aggregated events for ${yesterday}`);
 	} catch (err) {
-		console.error("[Pulse] Aggregation failed:", err);
+		console.error(
+			JSON.stringify({
+				source: "pulse-collector",
+				error: "Aggregation failed",
+				context: { date: yesterday, message: err instanceof Error ? err.message : String(err) },
+			}),
+		);
 	}
 
 	try {
@@ -97,9 +229,15 @@ async function runDailyAggregation(db: D1Database): Promise<void> {
 			.prepare("DELETE FROM pulse_events WHERE recorded_at < ?")
 			.bind(cutoff)
 			.run();
-		console.log(`[Pulse] Pruned ${result.meta.changes} events older than 90 days`);
+		console.log(`[Pulse] Pruned ${result.meta.changes} events older than ${RETENTION_DAYS} days`);
 	} catch (err) {
-		console.error("[Pulse] Retention cleanup failed:", err);
+		console.error(
+			JSON.stringify({
+				source: "pulse-collector",
+				error: "Retention cleanup failed",
+				context: { cutoff, message: err instanceof Error ? err.message : String(err) },
+			}),
+		);
 	}
 }
 

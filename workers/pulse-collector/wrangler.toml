@@ -9,6 +9,7 @@ name = "grove-pulse-collector"
 main = "src/index.ts"
 compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = false  # Only reachable via service binding — not public
 
 [triggers]
 crons = [
