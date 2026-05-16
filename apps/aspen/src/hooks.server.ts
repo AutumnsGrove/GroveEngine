@@ -8,7 +8,7 @@ import {
 } from "@autumnsgrove/lattice/utils/csrf";
 import { error, redirect } from "@sveltejs/kit";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { pulseHandle } from "@autumnsgrove/lattice/pulse";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 import {
 	TURNSTILE_COOKIE_NAME,
 	validateVerificationCookie,
@@ -872,3 +872,4 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handle = sequence(pulseHandle({ app: "aspen" }), aspenHandle);
+export const handleError = createPulseErrorHook({ app: "aspen" });

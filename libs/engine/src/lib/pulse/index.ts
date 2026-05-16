@@ -20,6 +20,10 @@ export { hashVisitor } from "./visitor.js";
 export { pulseHandle, createPulseFlushHook } from "./hook.js";
 export type { PulseHandleOptions } from "./hook.js";
 
+// SvelteKit handleError hook
+export { createPulseErrorHook } from "./error-hook.js";
+export type { PulseErrorHookOptions } from "./error-hook.js";
+
 // Types
 export type {
 	PulseCategory,

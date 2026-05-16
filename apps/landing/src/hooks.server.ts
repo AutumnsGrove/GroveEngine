@@ -10,7 +10,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
 import { getCookie, extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
-import { pulseHandle } from "@autumnsgrove/lattice/pulse";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 
 interface SessionRow {
 	id: string;
@@ -165,3 +165,4 @@ const landingHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handle = sequence(pulseHandle({ app: "landing" }), landingHandle);
+export const handleError = createPulseErrorHook({ app: "landing" });

@@ -2,7 +2,7 @@ import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { isGreenhouseMode, GREENHOUSE_AUTH } from "$lib/greenhouse";
 import { isGroveOrigin, isLocalOrigin, setSecurityHeaders } from "@autumnsgrove/lattice/server";
-import { pulseHandle } from "@autumnsgrove/lattice/pulse";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 
 /**
  * Server hooks for the Billing app
@@ -123,3 +123,4 @@ const billingHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handle = sequence(pulseHandle({ app: "billing" }), billingHandle);
+export const handleError = createPulseErrorHook({ app: "billing" });
