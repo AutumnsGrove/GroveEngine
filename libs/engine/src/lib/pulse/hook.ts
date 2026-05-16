@@ -30,6 +30,7 @@ export interface PulseHandleOptions {
 export function pulseHandle(options: PulseHandleOptions): Handle {
 	const { app, skip = ["/_app", "/favicon", "/__data"] } = options;
 	let initialized = false;
+	let visitorSecret: string | undefined;
 
 	return async ({ event, resolve }) => {
 		const pathname = event.url.pathname;
@@ -37,8 +38,6 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 		if (skip.some((prefix) => pathname.startsWith(prefix))) {
 			return resolve(event);
 		}
-
-		let visitorSecret: string | undefined;
 
 		if (!initialized) {
 			const env = event.platform?.env as Record<string, unknown> | undefined;
@@ -51,9 +50,6 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 				initPulse(collector);
 				initialized = true;
 			}
-			// Extract visitor secret once alongside collector init.
-			// Missing secret degrades gracefully — hash still works, just without
-			// the extra brute-force protection (see visitor.ts security note).
 			const maybeSecret = env?.PULSE_VISITOR_SECRET;
 			if (typeof maybeSecret === "string" && maybeSecret.length > 0) {
 				visitorSecret = maybeSecret;

@@ -54,15 +54,20 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
 	const total = countResult.status === "fulfilled" ? (countResult.value?.count ?? 0) : 0;
 
 	const errors: PulseError[] = rawErrors.map((e) => {
-		const meta = e.metadata ? (JSON.parse(e.metadata) as Record<string, unknown>) : {};
+		let meta: Record<string, unknown> = {};
+		try {
+			if (e.metadata) meta = JSON.parse(e.metadata) as Record<string, unknown>;
+		} catch {
+			// Corrupted metadata row — degrade gracefully
+		}
 		return {
 			event: e.event,
 			route: e.route,
 			app: e.app,
 			method: e.method,
 			status: e.status,
-			message: (meta.message as string) ?? null,
-			stack: (meta.stack as string) ?? null,
+			message: typeof meta.message === "string" ? meta.message : null,
+			stack: typeof meta.stack === "string" ? meta.stack : null,
 			recorded_at: e.recorded_at,
 		};
 	});

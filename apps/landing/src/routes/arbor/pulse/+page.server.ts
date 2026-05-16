@@ -101,13 +101,18 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 			? (recentErrorsResult.value.results ?? [])
 			: []
 		).map((e) => {
-			const meta = e.metadata ? (JSON.parse(e.metadata) as Record<string, unknown>) : {};
+			let meta: Record<string, unknown> = {};
+			try {
+				if (e.metadata) meta = JSON.parse(e.metadata) as Record<string, unknown>;
+			} catch {
+				// Corrupted metadata row — degrade gracefully
+			}
 			return {
 				event: e.event,
 				route: e.route,
 				app: e.app,
 				status: e.status,
-				message: (meta.message as string) ?? null,
+				message: typeof meta.message === "string" ? meta.message : null,
 				recorded_at: e.recorded_at,
 			};
 		}),
