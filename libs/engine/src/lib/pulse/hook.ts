@@ -38,8 +38,11 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 			return resolve(event);
 		}
 
+		let visitorSecret: string | undefined;
+
 		if (!initialized) {
-			const raw = (event.platform?.env as Record<string, unknown>)?.PULSE_COLLECTOR;
+			const env = event.platform?.env as Record<string, unknown> | undefined;
+			const raw = env?.PULSE_COLLECTOR;
 			const collector =
 				raw && typeof (raw as { fetch?: unknown }).fetch === "function"
 					? (raw as PulseCollector)
@@ -47,6 +50,13 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 			if (collector) {
 				initPulse(collector);
 				initialized = true;
+			}
+			// Extract visitor secret once alongside collector init.
+			// Missing secret degrades gracefully — hash still works, just without
+			// the extra brute-force protection (see visitor.ts security note).
+			const maybeSecret = env?.PULSE_VISITOR_SECRET;
+			if (typeof maybeSecret === "string" && maybeSecret.length > 0) {
+				visitorSecret = maybeSecret;
 			}
 		}
 
@@ -57,7 +67,7 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 		if (initialized) {
 			const ip = event.request.headers.get("cf-connecting-ip") ?? "unknown";
 			const ua = event.request.headers.get("user-agent") ?? "unknown";
-			const visitor_hash = await hashVisitor(ip, ua);
+			const visitor_hash = await hashVisitor(ip, ua, undefined, visitorSecret);
 
 			const tenant_id = extractTenantId(event);
 

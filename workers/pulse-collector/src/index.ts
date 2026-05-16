@@ -118,6 +118,13 @@ export default {
 			return Response.json({ error: "Method not allowed" }, { status: 405 });
 		}
 
+		// X-Pulse-Source identifies the sending app by name. It isn't trusted for
+		// authorization — the app field inside each event is the authoritative value —
+		// but it lets us confirm which service actually sent a batch and aids debugging
+		// when the claimed app field is missing or mismatched. Requests without the
+		// header are accepted normally; provenance is logged as "unknown".
+		const source = request.headers.get("X-Pulse-Source") ?? "unknown";
+
 		try {
 			const body = await request.json<{ events?: unknown[] }>();
 			if (!body.events || !Array.isArray(body.events) || body.events.length === 0) {
@@ -162,6 +169,7 @@ export default {
 					accepted: validEvents.length,
 					dropped: droppedCount,
 					buffered: true,
+					source,
 				},
 				{ status: resp.ok ? 202 : 500 },
 			);

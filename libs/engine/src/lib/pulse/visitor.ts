@@ -10,9 +10,26 @@
 
 const HASH_PREFIX = "grove-pulse";
 
-export async function hashVisitor(ip: string, userAgent: string, date?: string): Promise<string> {
+/**
+ * Privacy-preserving visitor hash.
+ *
+ * @param ip - Connecting IP address (or "unknown")
+ * @param userAgent - User-Agent header value (or "unknown")
+ * @param date - ISO date string override (defaults to today, UTC)
+ * @param secret - Optional server-side secret mixed into the salt.
+ *   When provided, the salt becomes `${HASH_PREFIX}-${day}-${secret}`,
+ *   making brute-force deanonymization infeasible even with DB read access.
+ *   When omitted, behavior is unchanged (backward compatible).
+ *   Supply via the `PULSE_VISITOR_SECRET` environment variable.
+ */
+export async function hashVisitor(
+	ip: string,
+	userAgent: string,
+	date?: string,
+	secret?: string,
+): Promise<string> {
 	const day = date ?? new Date().toISOString().split("T")[0];
-	const salt = `${HASH_PREFIX}-${day}`;
+	const salt = secret ? `${HASH_PREFIX}-${day}-${secret}` : `${HASH_PREFIX}-${day}`;
 	const payload = `${salt}:${ip}:${userAgent}`;
 
 	const encoded = new TextEncoder().encode(payload);
