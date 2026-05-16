@@ -5,7 +5,7 @@
  * Uses D1 for code storage and KV for rate limiting.
  */
 
-import { PLANT_ERRORS } from "$lib/errors";
+import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { sendEmail } from "./send-email";
 import { getVerificationEmail } from "./verification-email-template";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
@@ -163,7 +163,16 @@ export async function createVerificationCode(
 			.bind(userId)
 			.run();
 	} catch (err) {
-		console.error("[Email Verification] Failed to invalidate old codes:", err);
+		logPlantError(
+			{
+				code: "PLANT-056",
+				category: "bug",
+				userMessage: "Something went wrong preparing your verification. Please try again.",
+				adminMessage:
+					"Failed to invalidate existing email_verifications rows for user. Old codes will expire naturally.",
+			},
+			{ cause: err, userId },
+		);
 		// Continue anyway - old codes will expire naturally
 	}
 
@@ -183,7 +192,16 @@ export async function createVerificationCode(
 			.bind(id, userId, normalizedEmail, code, now, expiresAt)
 			.run();
 	} catch (err) {
-		console.error("[Email Verification] Failed to store code:", err);
+		logPlantError(
+			{
+				code: "PLANT-057",
+				category: "bug",
+				userMessage: "Failed to create verification code. Please try again.",
+				adminMessage:
+					"INSERT into email_verifications failed. Possible schema mismatch or DB write error.",
+			},
+			{ cause: err, userId },
+		);
 		return {
 			success: false,
 			error: "Failed to create verification code. Please try again.",
@@ -211,7 +229,17 @@ export async function createVerificationCode(
 	});
 
 	if (!emailResult.success) {
-		console.error("[Email Verification] Failed to send email:", emailResult.error);
+		logPlantError(
+			{
+				code: "PLANT-058",
+				category: "bug",
+				userMessage:
+					"Your verification code was created but the email couldn't be sent. Please request a resend.",
+				adminMessage:
+					"Zephyr email send failed during createVerificationCode. Code was stored; user can request resend.",
+			},
+			{ cause: emailResult.error, userId },
+		);
 		// Don't fail the whole operation - code is created, user can request resend
 	}
 
