@@ -23,7 +23,7 @@ import { storageFiles, userStorage } from "../../server/db/schema/engine.js";
 import { eq, and, sql, isNull, isNotNull, asc, desc } from "drizzle-orm";
 import { AMB_ERRORS, AmberError } from "./errors.js";
 import { generateR2Key, getExtension, generateFileId } from "./utils.js";
-import { logGroveError } from "../../errors/helpers.js";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { safeJsonParse } from "../../server/utils/typed-cache.js";
 import { z } from "zod";
 import type { QuotaManager } from "./quota.js";
@@ -128,12 +128,16 @@ export class FileManager {
 				parentId: null,
 				metadata: metadata ? JSON.stringify(metadata) : null,
 			});
-		} catch {
+		} catch (dbErr) {
 			// D1 failed after R2 succeeded — clean up orphan
 			try {
 				await this.storage.delete(r2Key);
-			} catch {
-				// Orphan cleanup itself failed — log but don't mask original error
+			} catch (cleanupErr) {
+				logGroveError("amber", AMB_ERRORS.STORAGE_NOT_AVAILABLE, {
+					detail: "R2 orphan cleanup failed after D1 insert failure",
+					path: r2Key,
+					cause: cleanupErr,
+				});
 			}
 			throw new AmberError(AMB_ERRORS.ORPHAN_CLEANUP_FAILED);
 		}

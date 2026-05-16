@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CloudflareConfig } from "../../src/cloudflare/config.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 

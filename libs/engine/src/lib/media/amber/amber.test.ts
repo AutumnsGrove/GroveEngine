@@ -221,7 +221,7 @@ describe("amber/errors", () => {
 			expect(err.code).toBe("AMB-041");
 			expect(err.category).toBe("user");
 			expect(err.userMessage).toContain("storage limit");
-			expect(err.message).toBe(AMB_ERRORS.QUOTA_EXCEEDED.adminMessage);
+			expect(err.message).toBe(AMB_ERRORS.QUOTA_EXCEEDED.userMessage);
 			expect(err.name).toBe("AmberError");
 		});
 

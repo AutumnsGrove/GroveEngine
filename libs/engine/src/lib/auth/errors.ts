@@ -15,8 +15,8 @@
  * @see https://github.com/AutumnsGrove/Lattice/issues/668
  */
 
-import type { ErrorCategory, GroveErrorDef } from "../errors/types.js";
-import { logGroveError } from "../errors/helpers.js";
+import type { ErrorCategory, GroveErrorDef } from "@autumnsgrove/grove-errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 
 // =============================================================================
 // BACKWARD-COMPATIBLE TYPE ALIASES

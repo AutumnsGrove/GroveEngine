@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CloudflareServiceBus } from "../../src/cloudflare/service-bus.js";
 import { createMockFetcher, type MockFetcher } from "./helpers.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 

@@ -5,7 +5,7 @@
  * to the GroveStorage interface.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveStorage,

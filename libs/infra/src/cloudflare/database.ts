@@ -5,7 +5,7 @@
  * the adapter simply delegates to D1's native API.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveDatabase,

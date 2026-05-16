@@ -22,7 +22,7 @@ import {
 	createMockFetcher,
 } from "./helpers.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 

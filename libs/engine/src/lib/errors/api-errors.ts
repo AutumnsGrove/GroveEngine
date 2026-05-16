@@ -14,7 +14,7 @@
  *   080-099  Internal / catch-all
  */
 
-import type { GroveErrorDef } from "./types.js";
+import type { GroveErrorDef } from "@autumnsgrove/grove-errors";
 
 export const API_ERRORS = {
 	// ─────────────────────────────────────────────────────────────────────────

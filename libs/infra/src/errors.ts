@@ -2,7 +2,7 @@
  * Grove Infra SDK — Error Catalog
  *
  * Structured error codes for all infrastructure operations.
- * Uses the shared GroveErrorDef pattern from @autumnsgrove/lattice/errors.
+ * Uses the shared GroveErrorDef pattern from @autumnsgrove/grove-errors.
  *
  * Format: SRV-XXX
  * Ranges:
@@ -13,7 +13,7 @@
  *   080-099  Internal / catch-all
  */
 
-import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
+import type { GroveErrorDef } from "@autumnsgrove/grove-errors";
 
 export const SRV_ERRORS = {
 	// ─────────────────────────────────────────────────────────────────────────

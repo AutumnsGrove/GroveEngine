@@ -5,7 +5,7 @@
  * RPC calls. Falls back gracefully if a binding is missing.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveServiceBus,
@@ -153,6 +153,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			// Any response (even 404) means the binding is alive.
 			return ok;
 		} catch {
+			// error-ok — ping failure is a boolean result, not an error state
 			const durationMs = performance.now() - start;
 			this.observer?.({
 				service: "services",

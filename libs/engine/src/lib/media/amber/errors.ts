@@ -13,7 +13,7 @@
  * @module @autumnsgrove/lattice/media/amber
  */
 
-import type { GroveErrorDef } from "../../errors/types.js";
+import type { GroveErrorDef } from "@autumnsgrove/grove-errors";
 
 export const AMB_ERRORS = {
 	// ─── Infrastructure (001-019) ─────────────────────────────────
@@ -145,7 +145,7 @@ export class AmberError extends Error {
 		userMessage: string;
 		adminMessage: string;
 	}) {
-		super(errorDef.adminMessage);
+		super(errorDef.userMessage);
 		this.name = "AmberError";
 		this.code = errorDef.code;
 		this.category = errorDef.category;

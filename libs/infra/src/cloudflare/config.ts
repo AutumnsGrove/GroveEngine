@@ -5,7 +5,7 @@
  * from the Workers `env` binding object.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type { GroveConfig, ConfigInfo } from "../types.js";
 

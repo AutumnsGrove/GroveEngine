@@ -10,7 +10,7 @@ import { CloudflareDatabase } from "../../src/cloudflare/database.js";
 import { createMockD1, createMockD1Statement, type MockD1Database } from "./helpers.js";
 
 // Mock logGroveError to verify error logging
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 
@@ -83,7 +83,7 @@ describe("CloudflareDatabase", () => {
 
 			await expect(db.execute("SELECT * FROM bad")).rejects.toThrow("D1_ERROR");
 
-			const { logGroveError } = await import("@autumnsgrove/lattice/errors");
+			const { logGroveError } = await import("@autumnsgrove/grove-errors");
 			expect(logGroveError).toHaveBeenCalled();
 		});
 
