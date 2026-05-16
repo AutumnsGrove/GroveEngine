@@ -12,6 +12,7 @@ import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { isHttpError } from "@sveltejs/kit";
@@ -329,6 +330,13 @@ export async function updatePost(
 		);
 	}
 
+	emitPulseEvent("post.updated", {
+		app: "aspen",
+		route: `/api/blooms/${slug}`,
+		tenant_id: tenantId,
+		metadata: { slug: newSlug || slug },
+	});
+
 	return { slug: newSlug || slug };
 }
 
@@ -351,4 +359,11 @@ export async function deletePost(
 
 	await tenantDb.delete("posts", "slug = ?", [slug]);
 	await invalidatePostCaches(kv, tenantId, slug);
+
+	emitPulseEvent("post.deleted", {
+		app: "aspen",
+		route: `/api/blooms/${slug}`,
+		tenant_id: tenantId,
+		metadata: { slug },
+	});
 }

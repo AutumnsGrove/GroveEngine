@@ -9,6 +9,7 @@ import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { isPaidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import {
@@ -255,6 +256,13 @@ export const POST: RequestHandler = async ({ params, request, platform, locals }
 				}),
 			);
 		}
+
+		emitPulseEvent("comment.posted", {
+			app: "aspen",
+			route: `/api/reeds/${params.slug}`,
+			tenant_id: locals.tenantId,
+			metadata: { comment_id: commentId, is_public: isPublic },
+		});
 
 		const statusMessage = isPublic
 			? "Comment submitted! It will appear after the author reviews it."

@@ -8,6 +8,7 @@ import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltek
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
 import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
@@ -407,6 +408,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				}),
 			);
 		}
+
+		emitPulseEvent("post.published", {
+			app: "aspen",
+			route: "/api/blooms",
+			tenant_id: tenantId,
+			metadata: { slug, status: data.status },
+		});
 
 		return json({
 			success: true,
