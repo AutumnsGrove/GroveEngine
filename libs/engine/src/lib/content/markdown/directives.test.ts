@@ -44,22 +44,17 @@ describe("groveDirectivePlugin - gallery", () => {
 describe("groveDirectivePlugin - curio directives", () => {
 	const md = createMd();
 
-	it("renders a hitcounter placeholder", () => {
-		const result = md.render("::hitcounter[]::");
+	it("renders a guestbook placeholder", () => {
+		const result = md.render("::guestbook[]::");
 		expect(result).toContain('class="grove-curio"');
-		expect(result).toContain('data-grove-curio="hitcounter"');
-		expect(result).toContain("Loading hitcounter");
+		expect(result).toContain('data-grove-curio="guestbook"');
+		expect(result).toContain("Loading guestbook");
 		expect(result).not.toContain("data-curio-arg");
 	});
 
-	it("renders a nowplaying placeholder", () => {
-		const result = md.render("::nowplaying[]::");
-		expect(result).toContain('data-grove-curio="nowplaying"');
-	});
-
-	it("renders a badges placeholder", () => {
-		const result = md.render("::badges[]::");
-		expect(result).toContain('data-grove-curio="badges"');
+	it("renders a poll placeholder", () => {
+		const result = md.render("::poll[]::");
+		expect(result).toContain('data-grove-curio="poll"');
 	});
 
 	it("passes content as data-curio-arg for poll directive", () => {
@@ -68,17 +63,7 @@ describe("groveDirectivePlugin - curio directives", () => {
 		expect(result).toContain('data-curio-arg="my-favorite-color"');
 	});
 
-	it("passes content as data-curio-arg for webring", () => {
-		const result = md.render("::webring[indieweb-ring]::");
-		expect(result).toContain('data-curio-arg="indieweb-ring"');
-	});
-
-	it("passes content as data-curio-arg for shelves directive", () => {
-		const result = md.render("::shelves[Link Garden]::");
-		expect(result).toContain('data-curio-arg="Link Garden"');
-	});
-
-	it("supports all 13 curio directives", () => {
+	it("supports all curio directives", () => {
 		for (const name of CURIO_DIRECTIVES) {
 			const result = md.render(`::${name}[]::`);
 			expect(result).toContain(`data-grove-curio="${name}"`);
@@ -112,7 +97,7 @@ describe("groveDirectivePlugin - security", () => {
 	it("escapes HTML entities in curio name attribute", () => {
 		// The directive name comes from \w+ regex, so it can't contain <>"
 		// But the content (arg) is user-controlled
-		const result = md.render("::hitcounter[<img onerror=alert(1)>]::");
+		const result = md.render("::guestbook[<img onerror=alert(1)>]::");
 		expect(result).not.toContain("<img");
 		expect(result).toContain("&lt;img");
 	});
@@ -143,10 +128,9 @@ describe("groveDirectivePlugin - edge cases", () => {
 	});
 
 	it("handles multiple curios in sequence", () => {
-		const result = md.render("::hitcounter[]::\n\n::nowplaying[]::\n\n::badges[]::");
-		expect(result).toContain('data-grove-curio="hitcounter"');
-		expect(result).toContain('data-grove-curio="nowplaying"');
-		expect(result).toContain('data-grove-curio="badges"');
+		const result = md.render("::guestbook[]::\n\n::poll[my-poll]::");
+		expect(result).toContain('data-grove-curio="guestbook"');
+		expect(result).toContain('data-grove-curio="poll"');
 	});
 
 	it("handles whitespace in arg content", () => {
@@ -155,14 +139,14 @@ describe("groveDirectivePlugin - edge cases", () => {
 	});
 
 	it("directive names are case-insensitive", () => {
-		const result = md.render("::HitCounter[]::");
-		expect(result).toContain('data-grove-curio="hitcounter"');
+		const result = md.render("::Guestbook[]::");
+		expect(result).toContain('data-grove-curio="guestbook"');
 	});
 
 	it("supports shorthand without brackets: ::name::", () => {
-		const result = md.render("::hitcounter::");
+		const result = md.render("::guestbook::");
 		expect(result).toContain('class="grove-curio"');
-		expect(result).toContain('data-grove-curio="hitcounter"');
+		expect(result).toContain('data-grove-curio="guestbook"');
 		expect(result).not.toContain("data-curio-arg");
 	});
 
