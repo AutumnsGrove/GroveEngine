@@ -4,6 +4,8 @@
  * Creates a new tenant in D1 after successful payment.
  */
 
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
+
 export interface CreateTenantInput {
 	onboardingId: string;
 	username: string;
@@ -111,6 +113,17 @@ export async function createTenant(
 			.bind(tenantId, input.onboardingId)
 			.run();
 		console.log("[Tenant] Onboarding record linked to tenant");
+
+		emitPulseEvent("signup.tenant_created", {
+			app: "plant",
+			route: "/api/select-plan",
+			metadata: {
+				tenant_id: tenantId,
+				subdomain: input.username,
+				plan: input.plan,
+				onboarding_id: input.onboardingId,
+			},
+		});
 	} catch (err) {
 		console.error("[Tenant] Step 4 FAILED - user_onboarding UPDATE:", err);
 		throw err;

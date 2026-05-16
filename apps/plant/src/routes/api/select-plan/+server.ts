@@ -12,6 +12,7 @@ import type { RequestHandler } from "./$types";
 import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/platform/pricing";
 import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import { checkFreeAccountIPLimit, logFreeAccountCreation } from "$lib/server/free-account-limits";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
@@ -153,6 +154,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		return json({ error: "Unable to save selection. Please try again." }, { status: 500 });
 	}
 
+	emitPulseEvent("signup.plan_selected", {
+		app: "plant",
+		route: "/api/select-plan",
+		metadata: { onboarding_id: onboardingId, plan, billing_cycle: billingCycle },
+	});
+
 	console.log(
 		`[Select Plan API] Saved plan=${plan} cycle=${billingCycle} for ${onboardingId.slice(0, 8)}...`,
 	);
@@ -250,6 +257,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 			});
 			return json({ error: "Unable to complete signup. Please try again." }, { status: 500 });
 		}
+
+		emitPulseEvent("signup.checkout_complete", {
+			app: "plant",
+			route: "/api/select-plan",
+			metadata: { onboarding_id: onboardingId, plan: "wanderer", free: true },
+		});
 
 		return json({ success: true, redirect: "/success" });
 	}

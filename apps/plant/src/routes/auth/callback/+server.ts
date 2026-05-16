@@ -9,6 +9,7 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
 import { AUTH_HUB_URL } from "@autumnsgrove/lattice/platform/config";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import {
 	getSessionToken,
 	fetchSessionData,
@@ -65,6 +66,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	);
 
 	console.log(`[Auth Callback] Session verified for user ${user.id.slice(0, 8)}...`);
+
+	emitPulseEvent("signup.oauth_complete", {
+		app: "plant",
+		route: "/auth/callback",
+		metadata: { user_id: user.id, is_new: !user.name },
+	});
 
 	// Step 3: Check existing onboarding record
 	const existingOnboarding = await resolveOnboarding(db, user.id, user.email, path);
