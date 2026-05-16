@@ -39,9 +39,11 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 		}
 
 		if (!initialized) {
-			const collector = (event.platform?.env as Record<string, unknown>)?.PULSE_COLLECTOR as
-				| PulseCollector
-				| undefined;
+			const raw = (event.platform?.env as Record<string, unknown>)?.PULSE_COLLECTOR;
+			const collector =
+				raw && typeof (raw as { fetch?: unknown }).fetch === "function"
+					? (raw as PulseCollector)
+					: undefined;
 			if (collector) {
 				initPulse(collector);
 				initialized = true;

@@ -17,6 +17,8 @@ import type {
 	PulseBatchPayload,
 } from "./types.js";
 
+// Derived from PulseEventName prefixes in types.ts. When adding new event
+// types, ensure this map is updated — unknown prefixes fall through to "page".
 const CATEGORY_MAP: Record<string, PulseCategory> = {
 	page: "page",
 	signup: "signup",
@@ -38,6 +40,7 @@ let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let currentCollector: PulseCollector | null = null;
 
 const FLUSH_INTERVAL_MS = 5_000;
+/** Client-side buffer flush threshold. See also: PulseBuffer DO (FLUSH_THRESHOLD = 100) */
 const FLUSH_THRESHOLD = 50;
 
 function scheduleFlush(): void {

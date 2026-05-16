@@ -19,7 +19,8 @@ export interface PulseErrorHookOptions {
 
 export function createPulseErrorHook(options: PulseErrorHookOptions): HandleServerError {
 	return ({ error, event, status, message }) => {
-		const err = error as Error | undefined;
+		const err = error instanceof Error ? error : undefined;
+		const MAX_STACK_LINES = 5;
 
 		emitPulseEvent("error.server", {
 			app: options.app,
@@ -28,7 +29,7 @@ export function createPulseErrorHook(options: PulseErrorHookOptions): HandleServ
 			status,
 			metadata: {
 				message: err?.message ?? message,
-				stack: err?.stack?.split("\n").slice(0, 5).join("\n"),
+				stack: err?.stack?.split("\n").slice(0, MAX_STACK_LINES).join("\n"),
 			},
 		});
 
