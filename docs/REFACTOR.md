@@ -1164,7 +1164,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-11 (Session 6 - Phase 6 Steps 3-5 complete, gw triaged from 27K→7.5K lines)
+**Last updated:** 2026-05-16 (Session 7 - Phase 5 COMPLETE: svelte-check hook, workspace propagation, Plant GroveDB migration, color CI, 62 integration tests)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1326,10 +1326,12 @@ tracker in this document after each completed step.
 #### Phase 5: Stability Hardening
 | Step | Status | Notes |
 |------|--------|-------|
-| Add svelte-check to pre-push | ⬜ TODO | Closes biggest hook gap |
-| Add workspace typecheck | ⬜ TODO | Prevents cross-package errors |
-| Plant integration tests | ⬜ TODO | OAuth flow coverage |
-| Color token final sweep | ⬜ TODO | Verify enforcement |
+| Add svelte-check to pre-push | ✅ DONE | Step 4 in validate.mjs — 12 packages checked, caught 29 hidden errors |
+| Add workspace typecheck | ✅ DONE | Propagates to downstream consumers when libs change (via shim trigger paths) |
+| Fix pulse hook type error | ✅ DONE | `extractTenantId` widened to accept SvelteKit `Locals` |
+| Migrate Plant to GroveDatabase | ✅ DONE | 6 routes wrapped raw D1/KV with CloudflareDatabase/CloudflareKV |
+| Color token final sweep | ✅ DONE | Script + CI job (`accent-colors`), 2 annotations added, 0 real violations |
+| Plant integration tests | ✅ DONE | 62 new tests: auth callback service (35) + signup flow integration (27). Fixed barrel import + vitest aliases. |
 
 #### Phase 6: Dev Tooling Triage
 | Step | Status | Notes |
@@ -1465,3 +1467,20 @@ tracker in this document after each completed step.
   - 11 skill files: bulk-replaced `gw git` → `git`, rewrote git-workflows/SKILL.md entirely
 - 103 files changed in commit, all pre-push checks passed (22 deploys typechecked)
 - **Next:** Phase 6 Step 2 (fix pre-push git hook), then Phase 3 Steps 4-9 (local dev completion)
+
+**Session 7 (2026-05-16):**
+- Phase 5: Stability Hardening — COMPLETE
+  - Added svelte-check as step 4 in pre-push validate.mjs (12 packages checked)
+  - Workspace propagation: when libs change, downstream consumers auto-checked via deploy shim trigger paths
+  - Fixed pulse hook type error (`extractTenantId` widened for SvelteKit `Locals`)
+  - Migrated Plant to GroveDatabase/GroveKV: 6 routes wrapped raw D1/KV with CloudflareDatabase/CloudflareKV
+  - Color token enforcement: created `tools/check-accent-colors.sh`, added CI job `accent-colors` to ci.yml
+  - 2 accent-ok annotations for legitimate uses (domains gradient, foliage tier badge)
+  - Wrote 62 Plant integration tests across 2 new files:
+    - `auth-callback-service.test.ts` (35 tests): session token, identity resolution, onboarding upsert
+    - `signup-flow.integration.test.ts` (27 tests): happy path, idempotency, rate limiting, prerequisites, DB failures
+  - Fixed Plant barrel import: `@autumnsgrove/lattice` → `@autumnsgrove/lattice/platform/config` (avoids Svelte component cascade in tests)
+  - Fixed Plant vitest.config.ts: array-format aliases, dist path for platform/config
+  - Pre-push hook now runs 5 checks: lockfile, deploy drift, typecheck, svelte-check, wrangler dry-run
+  - All 27 shims typecheck clean, all 12 svelte-check targets pass, 158 Plant tests pass
+- **Next:** Phase 7 (Engine Decoupling) or Phase 3 completion (local dev auth + docs)

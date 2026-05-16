@@ -313,6 +313,7 @@
 		flex-shrink: 0;
 	}
 
+	/* accent-ok — semantic tier badge, not accent */
 	.tier-badge[data-tier="seedling"] {
 		background: #dcfce7;
 		color: #166534;

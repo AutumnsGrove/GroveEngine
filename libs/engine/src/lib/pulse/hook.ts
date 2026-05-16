@@ -96,7 +96,7 @@ export function createPulseFlushHook(): Handle {
 
 function extractTenantId(event: {
 	url: URL;
-	locals?: Record<string, unknown>;
+	locals?: Record<string, unknown> | object;
 }): string | undefined {
 	const locals = event.locals as Record<string, unknown> | undefined;
 	if (locals?.tenantId && typeof locals.tenantId === "string") {

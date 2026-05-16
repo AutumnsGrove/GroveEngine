@@ -9,116 +9,119 @@ import { throwGroveError } from "@autumnsgrove/lattice/errors";
 import { PLANT_ERRORS } from "$lib/errors";
 import type { PageServerLoad } from "./$types";
 import {
-  createVerificationCode,
-  isEmailVerified,
-  getRateLimitStatus,
+	createVerificationCode,
+	isEmailVerified,
+	getRateLimitStatus,
 } from "$lib/server/email-verification";
+import { CloudflareDatabase, CloudflareKV } from "@autumnsgrove/infra/cloudflare";
 
 export const load: PageServerLoad = async ({ cookies, platform }) => {
-  const onboardingId = cookies.get("onboarding_id");
-  const accessToken = cookies.get("access_token");
+	const onboardingId = cookies.get("onboarding_id");
+	const accessToken = cookies.get("access_token");
 
-  // Must be authenticated
-  if (!onboardingId || !accessToken) {
-    redirect(302, "/");
-  }
+	// Must be authenticated
+	if (!onboardingId || !accessToken) {
+		redirect(302, "/");
+	}
 
-  const db = platform?.env?.DB;
-  const kv = platform?.env?.KV;
-  const env = platform?.env as Record<string, string> | undefined;
+	const rawDb = platform?.env?.DB;
+	const db = rawDb ? new CloudflareDatabase(rawDb) : null;
+	const rawKv = platform?.env?.KV;
+	const kv = rawKv ? new CloudflareKV(rawKv) : null;
+	const env = platform?.env as Record<string, string> | undefined;
 
-  if (!db) {
-    throwGroveError(503, PLANT_ERRORS.DB_UNAVAILABLE, "Plant", {
-      path: "/verify-email",
-    });
-  }
+	if (!db) {
+		throwGroveError(503, PLANT_ERRORS.DB_UNAVAILABLE, "Plant", {
+			path: "/verify-email",
+		});
+	}
 
-  if (!kv) {
-    throwGroveError(503, PLANT_ERRORS.KV_BINDING_MISSING, "Plant", {
-      path: "/verify-email",
-    });
-  }
+	if (!kv) {
+		throwGroveError(503, PLANT_ERRORS.KV_BINDING_MISSING, "Plant", {
+			path: "/verify-email",
+		});
+	}
 
-  // Get user info
-  const user = await db
-    .prepare(
-      `SELECT id, email, display_name, email_verified, profile_completed_at
+	// Get user info
+	const user = await db
+		.prepare(
+			`SELECT id, email, display_name, email_verified, profile_completed_at
        FROM user_onboarding
        WHERE id = ?`,
-    )
-    .bind(onboardingId)
-    .first();
+		)
+		.bind(onboardingId)
+		.first();
 
-  if (!user) {
-    // Invalid session
-    cookies.delete("onboarding_id", { path: "/" });
-    redirect(302, "/");
-  }
+	if (!user) {
+		// Invalid session
+		cookies.delete("onboarding_id", { path: "/" });
+		redirect(302, "/");
+	}
 
-  // If already verified, redirect to plans
-  if (user.email_verified === 1) {
-    redirect(302, "/plans");
-  }
+	// If already verified, redirect to plans
+	if (user.email_verified === 1) {
+		redirect(302, "/plans");
+	}
 
-  // If profile not completed, redirect there first
-  if (!user.profile_completed_at) {
-    redirect(302, "/profile");
-  }
+	// If profile not completed, redirect there first
+	if (!user.profile_completed_at) {
+		redirect(302, "/profile");
+	}
 
-  // Get rate limit status (isolated query - fallback to allowing resend on KV errors)
-  let rateLimit: Awaited<ReturnType<typeof getRateLimitStatus>>;
-  try {
-    rateLimit = await getRateLimitStatus(kv, onboardingId);
-  } catch (err) {
-    console.error("[Verify Email] Failed to check rate limit status:", err);
-    // Fallback: allow resend attempts (security trade-off: better UX vs potential abuse)
-    rateLimit = { canResend: true, remainingResends: 3 };
-  }
+	// Get rate limit status (isolated query - fallback to allowing resend on KV errors)
+	let rateLimit: Awaited<ReturnType<typeof getRateLimitStatus>>;
+	try {
+		rateLimit = await getRateLimitStatus(kv, onboardingId);
+	} catch (err) {
+		console.error("[Verify Email] Failed to check rate limit status:", err);
+		// Fallback: allow resend attempts (security trade-off: better UX vs potential abuse)
+		rateLimit = { canResend: true, remainingResends: 3 };
+	}
 
-  // Check if there's an existing unexpired code
-  const existingCode = await db
-    .prepare(
-      `SELECT id FROM email_verifications
+	// Check if there's an existing unexpired code
+	const existingCode = await db
+		.prepare(
+			`SELECT id FROM email_verifications
        WHERE user_id = ?
          AND verified_at IS NULL
          AND expires_at > unixepoch()
        ORDER BY created_at DESC
        LIMIT 1`,
-    )
-    .bind(onboardingId)
-    .first();
+		)
+		.bind(onboardingId)
+		.first();
 
-  // If no existing code and can send, create one automatically
-  let codeSent = !!existingCode;
-  if (!existingCode && rateLimit.canResend) {
-    const zephyrApiKey = env?.ZEPHYR_API_KEY;
-    if (zephyrApiKey) {
-      const result = await createVerificationCode(
-        db,
-        kv,
-        onboardingId,
-        user.email as string,
-        user.display_name as string | null,
-        zephyrApiKey,
-        env?.ZEPHYR_URL,
-      );
-      codeSent = result.success;
+	// If no existing code and can send, create one automatically
+	let codeSent = !!existingCode;
+	if (!existingCode && rateLimit.canResend) {
+		const zephyrApiKey = env?.ZEPHYR_API_KEY;
+		if (zephyrApiKey) {
+			const result = await createVerificationCode(
+				db,
+				kv,
+				onboardingId,
+				user.email as string,
+				user.display_name as string | null,
+				zephyrApiKey,
+				env?.ZEPHYR_URL,
+			);
+			codeSent = result.success;
 
-      // Refresh rate limit after sending
-      const newRateLimit = await getRateLimitStatus(kv, onboardingId);
-      return {
-        email: user.email as string,
-        displayName: user.display_name as string | null,
-        codeSent,
-        rateLimit: newRateLimit,
-      };
-    }
-  }
+			// Refresh rate limit after sending
+			const newRateLimit = await getRateLimitStatus(kv, onboardingId);
+			return {
+				email: user.email as string,
+				displayName: user.display_name as string | null,
+				codeSent,
+				rateLimit: newRateLimit,
+			};
+		}
+	}
 
-  return {
-    email: user.email as string,
-    displayName: user.display_name as string | null,
-    codeSent,
-    rateLimit,
-  };
+	return {
+		email: user.email as string,
+		displayName: user.display_name as string | null,
+		codeSent,
+		rateLimit,
+	};
 };

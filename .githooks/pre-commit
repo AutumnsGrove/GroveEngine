@@ -546,6 +546,11 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            # CSS variable fallbacks are correct (var(--color-accent, #hex) uses the variable primarily)
+            if echo "$line_content" | grep -q 'var(--color-accent'; then continue; fi
+            if echo "$line_content" | grep -q 'var(--color-primary'; then continue; fi
+            # Semantic status colors (green = success/good is universal UX, not accent)
+            if echo "$line_content" | grep -qi 'color-success\|status-operational\|--status-ready'; then continue; fi
             # Check up to 5 lines above for accent-ok (covers HTML comments before elements)
             _found_ok=false
             for _offset in 1 2 3 4 5; do
@@ -561,6 +566,8 @@ if [ -n "$staged_accent_files" ]; then
         while IFS=: read -r line_num line_content; do
             [ -z "$line_num" ] && continue
             if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            if echo "$line_content" | grep -q 'var(--color-accent'; then continue; fi
+            if echo "$line_content" | grep -q 'var(--color-primary'; then continue; fi
             _found_ok=false
             for _offset in 1 2 3 4 5; do
                 _check_line=$(echo "$staged_content" | sed -n "$((line_num - _offset))p" 2>/dev/null || true)

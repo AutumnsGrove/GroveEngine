@@ -7,107 +7,96 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import {
-  createVerificationCode,
-  getRateLimitStatus,
-} from "$lib/server/email-verification";
+import { createVerificationCode, getRateLimitStatus } from "$lib/server/email-verification";
+import { CloudflareDatabase, CloudflareKV } from "@autumnsgrove/infra/cloudflare";
 
 export const POST: RequestHandler = async ({ cookies, platform }) => {
-  const onboardingId = cookies.get("onboarding_id");
+	const onboardingId = cookies.get("onboarding_id");
 
-  if (!onboardingId) {
-    return json(
-      { success: false, error: "Not authenticated" },
-      { status: 401 },
-    );
-  }
+	if (!onboardingId) {
+		return json({ success: false, error: "Not authenticated" }, { status: 401 });
+	}
 
-  const db = platform?.env?.DB;
-  const kv = platform?.env?.KV;
-  const env = platform?.env as Record<string, string> | undefined;
-  const zephyrApiKey = env?.ZEPHYR_API_KEY;
+	const rawDb = platform?.env?.DB;
+	const db = rawDb ? new CloudflareDatabase(rawDb) : null;
+	const rawKv = platform?.env?.KV;
+	const kv = rawKv ? new CloudflareKV(rawKv) : null;
+	const env = platform?.env as Record<string, string> | undefined;
+	const zephyrApiKey = env?.ZEPHYR_API_KEY;
 
-  if (!db || !kv) {
-    return json(
-      { success: false, error: "Service unavailable" },
-      { status: 503 },
-    );
-  }
+	if (!db || !kv) {
+		return json({ success: false, error: "Service unavailable" }, { status: 503 });
+	}
 
-  if (!zephyrApiKey) {
-    console.error("[Resend Code] ZEPHYR_API_KEY not configured");
-    return json(
-      { success: false, error: "Email service unavailable" },
-      { status: 503 },
-    );
-  }
+	if (!zephyrApiKey) {
+		console.error("[Resend Code] ZEPHYR_API_KEY not configured");
+		return json({ success: false, error: "Email service unavailable" }, { status: 503 });
+	}
 
-  // Get user info
-  const user = await db
-    .prepare(
-      `SELECT email, display_name, email_verified
+	// Get user info
+	const user = await db
+		.prepare(
+			`SELECT email, display_name, email_verified
        FROM user_onboarding
        WHERE id = ?`,
-    )
-    .bind(onboardingId)
-    .first();
+		)
+		.bind(onboardingId)
+		.first();
 
-  if (!user) {
-    return json({ success: false, error: "User not found" }, { status: 404 });
-  }
+	if (!user) {
+		return json({ success: false, error: "User not found" }, { status: 404 });
+	}
 
-  // Check if already verified
-  if (user.email_verified === 1) {
-    return json(
-      { success: false, error: "Email already verified" },
-      { status: 400 },
-    );
-  }
+	// Check if already verified
+	if (user.email_verified === 1) {
+		return json({ success: false, error: "Email already verified" }, { status: 400 });
+	}
 
-  // Create and send new code
-  const result = await createVerificationCode(
-    db,
-    kv,
-    onboardingId,
-    user.email as string,
-    user.display_name as string | null,
-    zephyrApiKey,
-    env?.ZEPHYR_URL,
-  );
+	// Create and send new code
+	const result = await createVerificationCode(
+		db,
+		kv,
+		onboardingId,
+		user.email as string,
+		user.display_name as string | null,
+		zephyrApiKey,
+		env?.ZEPHYR_URL,
+	);
 
-  if (!result.success) {
-    const status = result.errorCode === "rate_limited" ? 429 : 500;
-    return json(
-      {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-        retryAfterSeconds: result.retryAfterSeconds,
-      },
-      { status },
-    );
-  }
+	if (!result.success) {
+		const status = result.errorCode === "rate_limited" ? 429 : 500;
+		return json(
+			{
+				success: false,
+				error: result.error,
+				errorCode: result.errorCode,
+				retryAfterSeconds: result.retryAfterSeconds,
+			},
+			{ status },
+		);
+	}
 
-  return json({ success: true });
+	return json({ success: true });
 };
 
 /**
  * GET: Check rate limit status
  */
 export const GET: RequestHandler = async ({ cookies, platform }) => {
-  const onboardingId = cookies.get("onboarding_id");
+	const onboardingId = cookies.get("onboarding_id");
 
-  if (!onboardingId) {
-    return json({ error: "Not authenticated" }, { status: 401 });
-  }
+	if (!onboardingId) {
+		return json({ error: "Not authenticated" }, { status: 401 });
+	}
 
-  const kv = platform?.env?.KV;
+	const rawKv = platform?.env?.KV;
+	const kv = rawKv ? new CloudflareKV(rawKv) : null;
 
-  if (!kv) {
-    return json({ error: "Service unavailable" }, { status: 503 });
-  }
+	if (!kv) {
+		return json({ error: "Service unavailable" }, { status: 503 });
+	}
 
-  const status = await getRateLimitStatus(kv, onboardingId);
+	const status = await getRateLimitStatus(kv, onboardingId);
 
-  return json(status);
+	return json(status);
 };

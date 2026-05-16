@@ -5,7 +5,7 @@
  */
 
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
-import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice";
+import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice/platform/config";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { PLANT_ERRORS } from "$lib/errors";
 import type { GroveDatabase } from "@autumnsgrove/infra";
