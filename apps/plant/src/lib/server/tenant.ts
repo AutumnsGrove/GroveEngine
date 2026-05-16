@@ -8,6 +8,7 @@ import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { PLANT_ERRORS } from "$lib/errors";
+import type { GroveDatabase } from "@autumnsgrove/infra";
 
 export interface CreateTenantInput {
 	onboardingId: string;
@@ -26,7 +27,7 @@ export interface CreateTenantInput {
  * Create a new tenant in the database
  */
 export async function createTenant(
-	db: D1Database,
+	db: GroveDatabase,
 	input: CreateTenantInput,
 ): Promise<{ tenantId: string; subdomain: string }> {
 	const tenantId = crypto.randomUUID();
@@ -307,7 +308,7 @@ Welcome! This page is waiting for your story.
  * Check if a tenant already exists for an onboarding record
  */
 export async function getTenantForOnboarding(
-	db: D1Database,
+	db: GroveDatabase,
 	onboardingId: string,
 ): Promise<{ tenantId: string; subdomain: string } | null> {
 	const result = await db

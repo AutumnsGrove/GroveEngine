@@ -7,6 +7,8 @@
  * Uses the `free_account_creation_log` table from migration 053.
  */
 
+import type { GroveDatabase } from "@autumnsgrove/infra";
+
 /** Maximum free accounts allowed per IP within the rolling window */
 const MAX_FREE_ACCOUNTS_PER_IP = 3;
 
@@ -22,8 +24,8 @@ const IPV4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
 const IPV6_RE = /^[0-9a-fA-F:]+$/;
 
 function isValidIPAddress(ip: string): boolean {
-  if (!ip || ip.length > 45) return false;
-  return IPV4_RE.test(ip) || IPV6_RE.test(ip);
+	if (!ip || ip.length > 45) return false;
+	return IPV4_RE.test(ip) || IPV6_RE.test(ip);
 }
 
 /**
@@ -34,24 +36,24 @@ function isValidIPAddress(ip: string): boolean {
  * @returns true if allowed, false if limit reached
  */
 export async function checkFreeAccountIPLimit(
-  db: D1Database,
-  ipAddress: string,
+	db: GroveDatabase,
+	ipAddress: string,
 ): Promise<boolean> {
-  if (!isValidIPAddress(ipAddress)) {
-    return true; // Allow — don't block on invalid IP, just skip the check
-  }
-  const cutoff = Math.floor(Date.now() / 1000) - WINDOW_SECONDS;
+	if (!isValidIPAddress(ipAddress)) {
+		return true; // Allow — don't block on invalid IP, just skip the check
+	}
+	const cutoff = Math.floor(Date.now() / 1000) - WINDOW_SECONDS;
 
-  const result = await db
-    .prepare(
-      `SELECT COUNT(*) as count
+	const result = await db
+		.prepare(
+			`SELECT COUNT(*) as count
        FROM free_account_creation_log
        WHERE ip_address = ? AND created_at > ?`,
-    )
-    .bind(ipAddress, cutoff)
-    .first<{ count: number }>();
+		)
+		.bind(ipAddress, cutoff)
+		.first<{ count: number }>();
 
-  return !result || result.count < MAX_FREE_ACCOUNTS_PER_IP;
+	return !result || result.count < MAX_FREE_ACCOUNTS_PER_IP;
 }
 
 /**
@@ -60,18 +62,15 @@ export async function checkFreeAccountIPLimit(
  * @param db - D1 database binding
  * @param ipAddress - The client IP address
  */
-export async function logFreeAccountCreation(
-  db: D1Database,
-  ipAddress: string,
-): Promise<void> {
-  if (!isValidIPAddress(ipAddress)) {
-    return; // Skip logging invalid IPs
-  }
-  await db
-    .prepare(
-      `INSERT INTO free_account_creation_log (id, ip_address, created_at)
+export async function logFreeAccountCreation(db: GroveDatabase, ipAddress: string): Promise<void> {
+	if (!isValidIPAddress(ipAddress)) {
+		return; // Skip logging invalid IPs
+	}
+	await db
+		.prepare(
+			`INSERT INTO free_account_creation_log (id, ip_address, created_at)
        VALUES (?, ?, unixepoch())`,
-    )
-    .bind(crypto.randomUUID(), ipAddress)
-    .run();
+		)
+		.bind(crypto.randomUUID(), ipAddress)
+		.run();
 }

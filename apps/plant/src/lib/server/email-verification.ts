@@ -9,6 +9,7 @@ import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { sendEmail } from "./send-email";
 import { getVerificationEmail } from "./verification-email-template";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
+import type { GroveDatabase, GroveKV } from "@autumnsgrove/infra";
 
 // Constants
 const CODE_LENGTH = 6;
@@ -70,7 +71,7 @@ export function normalizeEmail(email: string): string {
  * Check if user can request another verification code (rate limit)
  */
 async function canResendCode(
-	kv: KVNamespace,
+	kv: GroveKV,
 	userId: string,
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
 	const key = `email_verify_resend:${userId}`;
@@ -102,7 +103,7 @@ async function canResendCode(
 /**
  * Increment resend counter for rate limiting
  */
-async function incrementResendCounter(kv: KVNamespace, userId: string): Promise<void> {
+async function incrementResendCounter(kv: GroveKV, userId: string): Promise<void> {
 	const key = `email_verify_resend:${userId}`;
 	const data = await kv.get(key);
 	const now = Math.floor(Date.now() / 1000);
@@ -131,8 +132,8 @@ async function incrementResendCounter(kv: KVNamespace, userId: string): Promise<
  * Create and send a new verification code
  */
 export async function createVerificationCode(
-	db: D1Database,
-	kv: KVNamespace,
+	db: GroveDatabase,
+	kv: GroveKV,
 	userId: string,
 	email: string,
 	displayName: string | null,
@@ -250,7 +251,7 @@ export async function createVerificationCode(
  * Verify a code submitted by the user
  */
 export async function verifyCode(
-	db: D1Database,
+	db: GroveDatabase,
 	userId: string,
 	submittedCode: string,
 ): Promise<VerificationResult> {
@@ -350,7 +351,7 @@ export async function verifyCode(
 /**
  * Mark a user as verified via OAuth (trusted provider)
  */
-export async function markVerifiedViaOAuth(db: D1Database, userId: string): Promise<void> {
+export async function markVerifiedViaOAuth(db: GroveDatabase, userId: string): Promise<void> {
 	const now = Math.floor(Date.now() / 1000);
 
 	await db
@@ -369,7 +370,7 @@ export async function markVerifiedViaOAuth(db: D1Database, userId: string): Prom
 /**
  * Check if user's email is verified
  */
-export async function isEmailVerified(db: D1Database, userId: string): Promise<boolean> {
+export async function isEmailVerified(db: GroveDatabase, userId: string): Promise<boolean> {
 	const result = await db
 		.prepare(`SELECT email_verified FROM user_onboarding WHERE id = ?`)
 		.bind(userId)
@@ -382,7 +383,7 @@ export async function isEmailVerified(db: D1Database, userId: string): Promise<b
  * Get rate limit status for display
  */
 export async function getRateLimitStatus(
-	kv: KVNamespace,
+	kv: GroveKV,
 	userId: string,
 ): Promise<{
 	canResend: boolean;

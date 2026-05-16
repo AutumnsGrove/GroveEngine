@@ -7,7 +7,7 @@
 
 import { redirect, isRedirect } from "@sveltejs/kit";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
-import { queryOne, execute } from "@autumnsgrove/lattice/server/services/database";
+import type { GroveDatabase } from "@autumnsgrove/infra";
 
 /** Better Auth session cookie names */
 const BETTER_AUTH_COOKIE = "better-auth.session_token";
@@ -127,7 +127,7 @@ export async function fetchSessionData(
 // ============================================================================
 
 export async function resolveOnboarding(
-	db: D1Database,
+	db: GroveDatabase,
 	userId: string,
 	userEmail: string,
 	path: string,
@@ -136,11 +136,12 @@ export async function resolveOnboarding(
 	let existing: OnboardingRecord | null = null;
 
 	try {
-		existing = await queryOne<OnboardingRecord>(
-			db,
-			"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
-			[userId],
-		);
+		existing = await db
+			.prepare(
+				"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE groveauth_id = ?",
+			)
+			.bind(userId)
+			.first<OnboardingRecord>();
 	} catch (err) {
 		errorRedirect(PLANT_ERRORS.ONBOARDING_QUERY_FAILED, {
 			path,
@@ -153,21 +154,23 @@ export async function resolveOnboarding(
 	// Fallback: look up by email
 	if (!existing) {
 		try {
-			existing = await queryOne<OnboardingRecord>(
-				db,
-				"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
-				[userEmail.toLowerCase()],
-			);
+			existing = await db
+				.prepare(
+					"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
+				)
+				.bind(userEmail.toLowerCase())
+				.first<OnboardingRecord>();
 
 			if (existing) {
 				console.log(
 					`[Auth Callback] Found onboarding by email, updating groveauth_id for ${userId.slice(0, 8)}...`,
 				);
-				await execute(
-					db,
-					"UPDATE user_onboarding SET groveauth_id = ?, updated_at = unixepoch() WHERE id = ?",
-					[userId, existing.id],
-				);
+				await db
+					.prepare(
+						"UPDATE user_onboarding SET groveauth_id = ?, updated_at = unixepoch() WHERE id = ?",
+					)
+					.bind(userId, existing.id)
+					.run();
 			}
 		} catch (err) {
 			console.warn("[Auth Callback] Email fallback query failed:", err);
@@ -185,7 +188,7 @@ export async function resolveOnboarding(
 // ============================================================================
 
 export async function upsertOnboarding(
-	db: D1Database,
+	db: GroveDatabase,
 	existingOnboarding: OnboardingRecord | null,
 	user: { id: string; email: string; name?: string; emailVerified?: boolean },
 	path: string,
@@ -200,23 +203,25 @@ export async function upsertOnboarding(
 
 		try {
 			if (emailVerified) {
-				await execute(
-					db,
-					`UPDATE user_onboarding
+				await db
+					.prepare(
+						`UPDATE user_onboarding
              SET auth_completed_at = unixepoch(),
                  email_verified = CASE WHEN email_verified = 0 THEN 1 ELSE email_verified END,
                  email_verified_at = CASE WHEN email_verified = 0 THEN unixepoch() ELSE email_verified_at END,
                  email_verified_via = CASE WHEN email_verified = 0 THEN 'oauth' ELSE email_verified_via END,
                  updated_at = unixepoch()
              WHERE id = ?`,
-					[onboardingId],
-				);
+					)
+					.bind(onboardingId)
+					.run();
 			} else {
-				await execute(
-					db,
-					"UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
-					[onboardingId],
-				);
+				await db
+					.prepare(
+						"UPDATE user_onboarding SET auth_completed_at = unixepoch(), updated_at = unixepoch() WHERE id = ?",
+					)
+					.bind(onboardingId)
+					.run();
 			}
 		} catch (err) {
 			errorRedirect(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
@@ -246,19 +251,21 @@ export async function upsertOnboarding(
 
 		try {
 			if (emailVerified) {
-				await execute(
-					db,
-					`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
+				await db
+					.prepare(
+						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
-					[onboardingId, user.id, user.email, displayName],
-				);
+					)
+					.bind(onboardingId, user.id, user.email, displayName)
+					.run();
 			} else {
-				await execute(
-					db,
-					`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
+				await db
+					.prepare(
+						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
-					[onboardingId, user.id, user.email, displayName],
-				);
+					)
+					.bind(onboardingId, user.id, user.email, displayName)
+					.run();
 			}
 
 			console.log("[Auth Callback] Created onboarding record:", onboardingId);
@@ -280,7 +287,7 @@ export async function upsertOnboarding(
 // ============================================================================
 
 async function resolveTenantSubdomain(
-	db: D1Database,
+	db: GroveDatabase,
 	existingOnboarding: OnboardingRecord,
 	user: { id: string; email: string },
 	_onboardingId: string,
@@ -291,11 +298,10 @@ async function resolveTenantSubdomain(
 	}
 
 	try {
-		const tenant = await queryOne<{ subdomain: string }>(
-			db,
-			"SELECT subdomain FROM tenants WHERE id = ?",
-			[existingOnboarding.tenant_id],
-		);
+		const tenant = await db
+			.prepare("SELECT subdomain FROM tenants WHERE id = ?")
+			.bind(existingOnboarding.tenant_id)
+			.first<{ subdomain: string }>();
 
 		if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
 			return tenant.subdomain;

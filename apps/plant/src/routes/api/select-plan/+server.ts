@@ -16,6 +16,7 @@ import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import { checkFreeAccountIPLimit, logFreeAccountCreation } from "$lib/server/free-account-limits";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
+import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 // Valid billing cycles for database storage
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
@@ -81,11 +82,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		return json({ error: "Session expired. Please sign in again." }, { status: 401 });
 	}
 
-	const db = platform?.env?.DB;
-	if (!db) {
+	const rawDb = platform?.env?.DB;
+	if (!rawDb) {
 		logPlantError(PLANT_ERRORS.DB_UNAVAILABLE, { path: "/api/select-plan" });
 		return json({ error: "Service temporarily unavailable" }, { status: 503 });
 	}
+	const db = new CloudflareDatabase(rawDb);
 
 	// Validate onboarding steps are complete before allowing plan selection
 	try {

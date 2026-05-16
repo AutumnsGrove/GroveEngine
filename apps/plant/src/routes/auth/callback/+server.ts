@@ -16,6 +16,7 @@ import {
 	resolveOnboarding,
 	upsertOnboarding,
 } from "./auth-callback-service";
+import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 function errorRedirect(
 	error: (typeof PLANT_ERRORS)[keyof typeof PLANT_ERRORS],
@@ -29,7 +30,8 @@ function errorRedirect(
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	const env = platform?.env as Record<string, string> | undefined;
 	const authBaseUrl = env?.GROVEAUTH_URL || AUTH_HUB_URL;
-	const db = platform?.env?.DB;
+	const rawDb = platform?.env?.DB;
+	const db = rawDb ? new CloudflareDatabase(rawDb) : null;
 	const path = url.pathname;
 
 	// Check for error from OAuth provider
