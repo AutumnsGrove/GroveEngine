@@ -11,7 +11,7 @@
 import type { PageServerLoad } from "./$types";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
-import { type GalleryTagRecord } from "@autumnsgrove/lattice/curios/gallery";
+import { type GalleryTagRecord } from "@autumnsgrove/curios/gallery";
 
 interface ImageRow {
 	id: string;

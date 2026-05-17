@@ -13,7 +13,7 @@
 	 * - Respects prefers-reduced-motion
 	 */
 
-	import type { PollOption } from "$lib/curios/polls";
+	import type { PollOption } from "../polls";
 
 	let { arg = "" }: { arg?: string } = $props();
 

@@ -4,7 +4,7 @@
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import GuestbookPreview from "@autumnsgrove/lattice/curios/guestbook/GuestbookPreview.svelte";
+	import GuestbookPreview from "@autumnsgrove/curios/guestbook/GuestbookPreview.svelte";
 	import "@autumnsgrove/lattice/styles/fonts-optional.css";
 	import { featureIcons, stateIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import {
@@ -15,7 +15,7 @@
 		type GuestbookInlineMode,
 		VALID_SIGNING_STYLES,
 		DEFAULT_COLOR_PALETTE,
-	} from "@autumnsgrove/lattice/curios/guestbook";
+	} from "@autumnsgrove/curios/guestbook";
 	import GuestbookSettingsPanel from "./GuestbookSettingsPanel.svelte";
 	import GuestbookModerationTab from "./GuestbookModerationTab.svelte";
 

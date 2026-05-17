@@ -457,5 +457,5 @@ export function isSpam(message: string): boolean {
 	return false;
 }
 
-// Re-export from shared date utils (engine-first)
-export { formatRelativeTime } from "$lib/utils/date";
+// Re-export from shared date utils
+export { formatRelativeTime } from "../utils/date";

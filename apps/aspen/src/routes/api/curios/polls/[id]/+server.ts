@@ -15,7 +15,7 @@ import {
 	parseSelectedOptions,
 	calculateResults,
 	isPollClosed,
-} from "@autumnsgrove/lattice/curios/polls";
+} from "@autumnsgrove/curios/polls";
 
 interface PollRow {
 	id: string;

@@ -15,11 +15,11 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import type { Commit } from "@autumnsgrove/lattice/curios/timeline";
+import type { Commit } from "@autumnsgrove/curios/timeline";
 import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
-} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+} from "@autumnsgrove/curios/timeline/secrets.server";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";

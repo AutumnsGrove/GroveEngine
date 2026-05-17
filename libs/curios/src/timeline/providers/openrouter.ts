@@ -4,12 +4,8 @@
  * Universal AI gateway supporting 100+ models through a single API.
  * Users bring their own API key and pick their preferred model.
  *
- * Model data sourced from centralized lumen-models.json.
- *
  * @see https://openrouter.ai/docs
  */
-
-import modelData from "../../../data/lumen-models.json";
 
 // =============================================================================
 // Types
@@ -67,48 +63,23 @@ interface OpenRouterKeyResponse {
 }
 
 // =============================================================================
-// Model Definitions — sourced from lumen-models.json
+// Model Definitions — curated subset for Timeline
 // =============================================================================
 
-/** Keys from lumen-models.json to expose in the Timeline model picker */
-const TIMELINE_MODEL_KEYS = [
-	"DEEPSEEK_V3",
-	"KIMI_K2_5",
-	"TRINITY",
-	"MINIMAX_M2_7",
-	"CLAUDE_HAIKU",
-	"GPT_OSS_120B",
-	"QWEN3_235B",
-	"LLAMA_70B",
-	"GLM_5_1",
-	"LLAMA_4_MAVERICK",
-] as const;
+export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = {
+	"deepseek/deepseek-v3.2": { name: "DeepSeek V3.2", quality: "highest", speed: "fast", inputCostPer1M: 0.26, outputCostPer1M: 0.38 },
+	"moonshotai/kimi-k2.5": { name: "Kimi K2.5", quality: "highest", speed: "fast", inputCostPer1M: 0.39, outputCostPer1M: 1.90 },
+	"arcee-ai/trinity-large-thinking": { name: "Arcee Trinity Large", quality: "highest", speed: "fast", inputCostPer1M: 0.22, outputCostPer1M: 0.85 },
+	"minimax/minimax-m2.7": { name: "MiniMax M2.7", quality: "high", speed: "fast", inputCostPer1M: 0.30, outputCostPer1M: 1.20 },
+	"anthropic/claude-haiku-4.5": { name: "Claude Haiku 4.5", quality: "highest", speed: "fast", inputCostPer1M: 1.00, outputCostPer1M: 5.00 },
+	"openai/gpt-oss-120b": { name: "GPT-OSS 120B", quality: "high", speed: "fast", inputCostPer1M: 0.04, outputCostPer1M: 0.19 },
+	"qwen/qwen3-235b-a22b-2507": { name: "Qwen3 235B", quality: "high", speed: "medium", inputCostPer1M: 0.07, outputCostPer1M: 0.46 },
+	"meta-llama/llama-3.3-70b-instruct": { name: "Llama 3.3 70B", quality: "high", speed: "medium", inputCostPer1M: 0.10, outputCostPer1M: 0.32 },
+	"z-ai/glm-5.1": { name: "GLM 5.1", quality: "high", speed: "fast", inputCostPer1M: 0.40, outputCostPer1M: 1.50 },
+	"meta-llama/llama-4-maverick": { name: "Llama 4 Maverick", quality: "high", speed: "medium", inputCostPer1M: 0.15, outputCostPer1M: 0.60 },
+};
 
-type ModelEntry = (typeof modelData.models)[keyof typeof modelData.models];
-
-/**
- * Popular models available through OpenRouter for Timeline generation.
- * Users can use ANY OpenRouter model, but these are recommended defaults.
- * All data sourced from lumen-models.json.
- */
-export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = Object.fromEntries(
-	TIMELINE_MODEL_KEYS.map((key) => {
-		const entry = modelData.models[key] as ModelEntry;
-		return [
-			entry.id,
-			{
-				name: entry.name,
-				quality: entry.quality as OpenRouterModel["quality"],
-				speed: entry.speed as OpenRouterModel["speed"],
-				inputCostPer1M: entry.cost.input,
-				outputCostPer1M: entry.cost.output,
-			},
-		];
-	}),
-);
-
-export const DEFAULT_OPENROUTER_MODEL =
-	modelData.models[modelData.defaults.timeline as keyof typeof modelData.models].id;
+export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v3.2";
 
 // =============================================================================
 // UI Utilities (kept for model picker and key validation)

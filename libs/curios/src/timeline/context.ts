@@ -12,7 +12,7 @@
  */
 
 import type { Commit, GutterComment } from "./voices/types";
-import { safeParseJson } from "../../utils/json.js";
+import { safeParseJson } from "../utils/json";
 
 // =============================================================================
 // Types

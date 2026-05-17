@@ -18,7 +18,7 @@
 
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { isSupportedImage } from "@autumnsgrove/lattice/curios/gallery";
+import { isSupportedImage } from "@autumnsgrove/curios/gallery";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 const TENANT_ID = "autumn-primary";

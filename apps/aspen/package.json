@@ -35,6 +35,7 @@
 	},
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
+		"@autumnsgrove/curios": "workspace:*",
 		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*",

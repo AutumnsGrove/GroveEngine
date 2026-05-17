@@ -13,7 +13,7 @@
 		getDeterministicStyle,
 		type GuestbookSigningStyle,
 		type GuestbookInlineMode,
-	} from "$lib/curios/guestbook";
+	} from "../guestbook";
 
 	let { arg = "" }: { arg?: string } = $props();
 

@@ -8,13 +8,13 @@ import {
 	getOpenRouterModels,
 	DEFAULT_TIMELINE_CONFIG,
 	CLEAR_TOKEN_VALUE,
-} from "@autumnsgrove/lattice/curios/timeline";
+} from "@autumnsgrove/curios/timeline";
 import {
 	setTimelineToken,
 	deleteTimelineToken,
 	hasTimelineToken,
 	TIMELINE_SECRET_KEYS,
-} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+} from "@autumnsgrove/curios/timeline/secrets.server";
 
 interface TimelineConfigRow {
 	enabled: number | null;

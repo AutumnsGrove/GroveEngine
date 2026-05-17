@@ -12,7 +12,7 @@ import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
 	maybeCreateSecretsManager,
-} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+} from "@autumnsgrove/curios/timeline/secrets.server";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 /** Warden's canonical key names — dual-write ensures Warden can find these directly */

@@ -1164,7 +1164,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-16 (Session 8 - Phase 8 Steps 1-4 DONE: loom + thorn extracted)
+**Last updated:** 2026-05-17 (Session 9 - Phase 8 Steps 5a-5b DONE: grove-crypto + curios extracted)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1356,8 +1356,11 @@ tracker in this document after each completed step.
 | 2. Define package template | ✅ DONE | src/ flat, max 3 levels, workspace:* deps, vitest |
 | 3. Extract pilot — loom | ✅ DONE | 18 files → `libs/loom/`. Zero external deps (only grove-errors). 42 tests pass. Added cloudflare:workers vitest stubs. |
 | 4. Extract pilot — thorn | ✅ DONE | 14 files → `libs/thorn/`. Peer dep on @autumnsgrove/lattice (threshold, lumen). 70 tests pass. Audit: CLEAN. |
-| 5. Extraction wave 2+ | ⬜ TODO | content-markdown, email, curios — all have UI entanglement, need careful separation |
+| 5a. Extract grove-crypto | ✅ DONE | 3 files → `libs/grove-crypto/`. Zero deps (Web Crypto only). Envelope encryption + SecretsManager. Engine stubs re-export for compat. |
+| 5b. Extract curios | ✅ DONE | 22+ files → `libs/curios/`. 4 curios (gallery, guestbook, polls, timeline). 191 tests pass. Peer deps: lattice, prism, svelte, markdown-it. Static loader map in ContentWithGutter. |
+| 5c. Extraction wave 2 (remaining) | ⬜ TODO | content-markdown, email — still have UI entanglement |
 | 6. Engine residual | ⬜ TODO | 541 exports → shrinking, thin orchestration layer |
+| 7. Gallery decoupling (future) | ⬜ TODO | Gallery is a full image mgmt system, not a widget. Needs own package or Amber integration. Pragmatically in curios for now. |
 
 ---
 
@@ -1484,3 +1487,19 @@ tracker in this document after each completed step.
   - Pre-push hook now runs 5 checks: lockfile, deploy drift, typecheck, svelte-check, wrangler dry-run
   - All 27 shims typecheck clean, all 12 svelte-check targets pass, 158 Plant tests pass
 - **Next:** Phase 7 (Engine Decoupling) or Phase 3 completion (local dev auth + docs)
+
+**Session 9 (2026-05-17):**
+- Phase 8 Steps 5a-5b: grove-crypto + curios extraction — COMPLETE
+  - Created `libs/grove-crypto/` (3 files, ~400 lines): `encryptToken`, `decryptToken`, `SecretsManager`, `createSecretsManager`
+  - Zero runtime deps (Web Crypto API only), engine re-export stubs for backward compat
+  - Created `libs/curios/` (22+ files, 191 tests): gallery, guestbook, polls, timeline
+  - Deps: grove-crypto, grove-errors. Peers: lattice, prism, svelte, markdown-it
+  - Fixed 16 `$lib/` imports → relative or package paths
+  - Created local `utils/date.ts` (formatRelativeTime) and `utils/json.ts` (safeParseJson)
+  - Hardcoded 10 OpenRouter models in timeline (decoupled from lumen-models.json)
+  - Replaced ContentWithGutter dynamic template import with static `CURIO_LOADERS` map (bundler-safe, eliminates VALID_CURIOS junk-drawer set)
+  - Updated ~35 Aspen import sites, 2 engine re-export barrels
+  - Removed ~15 curio exports from engine package.json, deleted `curios/`, `utils/gallery.ts`, `server/curio-status.ts`
+  - Engine: 0 errors, Aspen: 0 errors, Curios: 191 tests pass
+  - Key finding: Gallery is a full image management system (6 DB tables, uploads, tags, collections), not a widget. Placed pragmatically in curios for now; flagged for future decoupling.
+- **Next:** grove-audit on Phase 8 work, then content-markdown or email extraction

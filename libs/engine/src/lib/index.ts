@@ -62,17 +62,14 @@ export {
 export type { CanopyCategory } from "./platform/config/canopy-categories.js";
 
 // =============================================================================
-// Curios - Developer Tools & Fun Website Features
+// Curios — re-exported from @autumnsgrove/curios for backward compat
 // =============================================================================
 
-// Timeline Curio - AI-powered daily summaries
 export {
-	// OpenRouter provider (model list + key validation for UI)
 	getOpenRouterModels,
 	validateOpenRouterKey,
 	OPENROUTER_MODELS,
 	DEFAULT_OPENROUTER_MODEL,
-	// Voice presets
 	buildVoicedPrompt,
 	getAllVoices,
 	getVoice,
@@ -84,25 +81,21 @@ export {
 	casual,
 	poetic,
 	minimal,
-	// Utilities
 	parseAIResponse,
 	DEFAULT_TIMELINE_CONFIG,
-} from "./curios/timeline";
+} from "@autumnsgrove/curios/timeline";
 
 export type {
-	// OpenRouter types
 	OpenRouterModel,
 	OpenRouterResponse,
 	OpenRouterOptions,
 	OpenRouterKeyValidation,
-	// Voice types
 	VoicePreset,
 	VoicePromptResult,
 	CustomVoiceConfig,
 	Commit,
 	GutterComment,
-	// Timeline types
 	TimelineCurioConfig,
 	TimelineSummary,
 	TimelineActivity,
-} from "./curios/timeline";
+} from "@autumnsgrove/curios/timeline";

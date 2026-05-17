@@ -11,15 +11,15 @@
 	 */
 
 	import MarkdownIt from "markdown-it";
-	import { sanitizeMarkdown } from "$lib/utils";
-	import { escapeHtml } from "$lib/utils/escape-html.js";
+	import { sanitizeMarkdown } from "@autumnsgrove/lattice/utils";
+	import { escapeHtml } from "@autumnsgrove/lattice/utils/escape-html";
 
 	// Local instance with breaks: true for timeline rendering
 	const timelineMd = new MarkdownIt({ breaks: true, linkify: true });
 	import { metricIcons, actionIcons, navIcons, featureIcons, stateIcons, natureIcons } from "@autumnsgrove/prism/icons";
-	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
-	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
+	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import Heatmap from "./Heatmap.svelte";
 
 	interface GutterItem {

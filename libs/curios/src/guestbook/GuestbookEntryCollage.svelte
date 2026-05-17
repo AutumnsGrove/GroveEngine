@@ -8,7 +8,7 @@
 		type GuestbookStyle,
 		type GuestbookWallBacking,
 		type GuestbookSigningStyle,
-	} from "$lib/curios/guestbook";
+	} from "./index";
 
 	let {
 		entries,

@@ -16,7 +16,7 @@ import {
 	type Commit,
 	type CustomVoiceConfig,
 	type PromptContextInput,
-} from "@autumnsgrove/lattice/curios/timeline";
+} from "@autumnsgrove/curios/timeline";
 import type { LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 
 // ============================================================================

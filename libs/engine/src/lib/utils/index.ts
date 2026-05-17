@@ -14,7 +14,7 @@ export * from "./schedule";
 export * from "./shuffle";
 export * from "./slugify";
 
-// Gallery - explicit exports to avoid ambiguity
+// Gallery — now in @autumnsgrove/curios/gallery
 export {
 	parseImageFilename,
 	getImageTitle,
@@ -28,7 +28,7 @@ export {
 	type GalleryImage,
 	type ImageTag,
 	type ParsedImageMetadata,
-} from "./gallery";
+} from "@autumnsgrove/curios/gallery";
 
 // Gutter - explicit exports to avoid ambiguity
 export {

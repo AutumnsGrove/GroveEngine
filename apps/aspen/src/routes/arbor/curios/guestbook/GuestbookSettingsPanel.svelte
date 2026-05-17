@@ -9,8 +9,8 @@
 		GuestbookSigningStyle,
 		GuestbookCtaStyle,
 		GuestbookInlineMode,
-	} from "@autumnsgrove/lattice/curios/guestbook";
-	import { isValidHexColor } from "@autumnsgrove/lattice/curios/guestbook";
+	} from "@autumnsgrove/curios/guestbook";
+	import { isValidHexColor } from "@autumnsgrove/curios/guestbook";
 
 	interface Props {
 		enabled: boolean;

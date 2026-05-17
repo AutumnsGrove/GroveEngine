@@ -145,6 +145,9 @@ importers:
       '@11ty/gray-matter':
         specifier: ^2.0.1
         version: 2.0.1
+      '@autumnsgrove/curios':
+        specifier: workspace:*
+        version: link:../../libs/curios
       '@autumnsgrove/foliage':
         specifier: workspace:*
         version: link:../../libs/foliage
@@ -588,11 +591,51 @@ importers:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
 
+  libs/curios:
+    dependencies:
+      '@autumnsgrove/grove-crypto':
+        specifier: workspace:*
+        version: link:../grove-crypto
+      '@autumnsgrove/grove-errors':
+        specifier: workspace:*
+        version: link:../grove-errors
+    devDependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../engine
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../prism
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
+      markdown-it:
+        specifier: ^14.1.0
+        version: 14.1.1
+      svelte:
+        specifier: ^5.0.0
+        version: 5.55.3(@typescript-eslint/types@8.58.2)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+
   libs/engine:
     dependencies:
       '@11ty/gray-matter':
         specifier: ^2.0.1
         version: 2.0.1
+      '@autumnsgrove/curios':
+        specifier: workspace:*
+        version: link:../curios
+      '@autumnsgrove/grove-crypto':
+        specifier: workspace:*
+        version: link:../grove-crypto
       '@autumnsgrove/grove-errors':
         specifier: workspace:*
         version: link:../grove-errors
@@ -919,6 +962,18 @@ importers:
       agents:
         specifier: ^0.6.0
         version: 0.6.0(@ai-sdk/react@3.0.161(react@19.2.5)(zod@4.3.6))(@cloudflare/ai-chat@0.1.9)(@cloudflare/workers-types@4.20260414.1)(ai@6.0.159(zod@4.3.6))(react@19.2.5)(zod@4.3.6)
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+
+  libs/grove-crypto:
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1

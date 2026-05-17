@@ -7,7 +7,7 @@
 		type GuestbookDisplayEntry,
 		VALID_SIGNING_STYLES,
 		DEFAULT_COLOR_PALETTE,
-	} from "$lib/curios/guestbook";
+	} from "./index";
 
 	let {
 		style,

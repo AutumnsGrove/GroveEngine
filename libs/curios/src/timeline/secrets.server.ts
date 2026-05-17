@@ -10,8 +10,10 @@
  * 3. Auto-migrate legacy tokens to SecretsManager on successful read
  */
 
-import { createSecretsManager, type SecretsManager } from "$lib/server/secrets";
-import { safeDecryptToken } from "$lib/server/encryption";
+import { createSecretsManager, type SecretsManager } from "@autumnsgrove/grove-crypto/secrets";
+import { safeDecryptToken, encryptToken } from "@autumnsgrove/grove-crypto/encryption";
+import { logGroveError } from "@autumnsgrove/grove-errors";
+import { CURIO_ERRORS } from "../errors";
 
 /** Secret key names for Timeline tokens in SecretsManager */
 export const TIMELINE_SECRET_KEYS = {
@@ -108,10 +110,10 @@ export async function getTimelineToken(
         return { token, source: "secrets_manager", migrated: false };
       }
     } catch (error) {
-      console.error(
-        `${TAG} SecretsManager.get FAILED for ${keyName}: ${errorDetail(error)}. ` +
-          `Env: ${envDiagnostic(env)}. Falling back to legacy.`,
-      );
+      logGroveError("TimelineSecrets", CURIO_ERRORS.SECRETS_MANAGER_FAILED, {
+        detail: `${keyName}: ${errorDetail(error)}. Env: ${envDiagnostic(env)}`,
+        cause: error,
+      });
       // Continue to legacy fallback
     }
   } else {
@@ -165,12 +167,9 @@ export async function getTimelineToken(
     }
 
     // v1: encrypted token but no decryption key — permanently unreadable
-    console.error(
-      `${TAG} UNREADABLE TOKEN: Found v1: encrypted ${keyName} but TOKEN_ENCRYPTION_KEY is missing. ` +
-        `This token was encrypted with a key that is no longer available. ` +
-        `The user must re-save a new token value to overwrite it. ` +
-        `Env: ${envDiagnostic(env)}`,
-    );
+    logGroveError("TimelineSecrets", CURIO_ERRORS.TOKEN_UNREADABLE, {
+      detail: `${keyName} — user must re-save. Env: ${envDiagnostic(env)}`,
+    });
   }
 
   return { token: null, source: "none", migrated: false };
@@ -247,7 +246,6 @@ async function setTimelineTokenLegacy(
   fallbackReason: string;
 }> {
   if (env.TOKEN_ENCRYPTION_KEY) {
-    const { encryptToken } = await import("$lib/server/encryption");
     const encrypted = await encryptToken(plainToken, env.TOKEN_ENCRYPTION_KEY);
     console.warn(
       `${TAG} Token ${keyName} saved via legacy encryption (TOKEN_ENCRYPTION_KEY). ` +

@@ -2,6 +2,8 @@
 	"author": "AutumnsGrove",
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
+		"@autumnsgrove/curios": "workspace:*",
+		"@autumnsgrove/grove-crypto": "workspace:*",
 		"@autumnsgrove/grove-errors": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/loom": "workspace:*",
@@ -191,62 +193,6 @@
 		"./platform/config/*": {
 			"types": "./dist/platform/config/*.d.ts",
 			"default": "./dist/platform/config/*.js"
-		},
-		"./curios": {
-			"types": "./dist/curios/index.d.ts",
-			"default": "./dist/curios/index.js"
-		},
-		"./curios/*": {
-			"types": "./dist/curios/*/index.d.ts",
-			"default": "./dist/curios/*/index.js"
-		},
-		"./curios/components/*": {
-			"types": "./dist/curios/components/*/index.d.ts",
-			"svelte": "./dist/curios/components/*/index.js",
-			"default": "./dist/curios/components/*/index.js"
-		},
-		"./curios/components/artifacts/*.svelte": {
-			"types": "./dist/curios/components/artifacts/*.svelte.d.ts",
-			"svelte": "./dist/curios/components/artifacts/*.svelte",
-			"default": "./dist/curios/components/artifacts/*.svelte"
-		},
-		"./curios/gallery": {
-			"types": "./dist/curios/gallery/index.d.ts",
-			"default": "./dist/curios/gallery/index.js"
-		},
-		"./curios/guestbook": {
-			"types": "./dist/curios/guestbook/index.d.ts",
-			"default": "./dist/curios/guestbook/index.js"
-		},
-		"./curios/guestbook/*.svelte": {
-			"types": "./dist/curios/guestbook/*.svelte.d.ts",
-			"svelte": "./dist/curios/guestbook/*.svelte",
-			"default": "./dist/curios/guestbook/*.svelte"
-		},
-		"./curios/sanitize": {
-			"types": "./dist/curios/sanitize.d.ts",
-			"default": "./dist/curios/sanitize.js"
-		},
-		"./curios/shrines": {
-			"types": "./dist/curios/shrines/index.d.ts",
-			"default": "./dist/curios/shrines/index.js"
-		},
-		"./curios/shrines/*.svelte": {
-			"types": "./dist/curios/shrines/*.svelte.d.ts",
-			"svelte": "./dist/curios/shrines/*.svelte",
-			"default": "./dist/curios/shrines/*.svelte"
-		},
-		"./curios/timeline": {
-			"types": "./dist/curios/timeline/index.d.ts",
-			"default": "./dist/curios/timeline/index.js"
-		},
-		"./curios/timeline/secrets.server": {
-			"types": "./dist/curios/timeline/secrets.server.d.ts",
-			"default": "./dist/curios/timeline/secrets.server.js"
-		},
-		"./curios/timeline/voices": {
-			"types": "./dist/curios/timeline/voices/index.d.ts",
-			"default": "./dist/curios/timeline/voices/index.js"
 		},
 		"./db": {
 			"types": "./dist/server/db/index.d.ts",
@@ -626,11 +572,6 @@
 			"types": "./dist/ui/components/content/index.d.ts",
 			"svelte": "./dist/ui/components/content/index.js",
 			"default": "./dist/ui/components/content/index.js"
-		},
-		"./ui/content/curios": {
-			"types": "./dist/curios/components/index.d.ts",
-			"svelte": "./dist/curios/components/index.js",
-			"default": "./dist/curios/components/index.js"
 		},
 		"./ui/content/hum": {
 			"types": "./dist/ui/components/content/hum/index.d.ts",

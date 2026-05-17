@@ -7,7 +7,7 @@
 	 */
 
 	import { metricIcons } from "@autumnsgrove/prism/icons";
-	import { Timeline } from "@autumnsgrove/lattice/curios/timeline";
+	import { Timeline } from "@autumnsgrove/curios/timeline";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 
 	interface PageData {

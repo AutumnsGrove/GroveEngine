@@ -108,7 +108,7 @@ export {
 // =============================================================================
 // Secrets Management (Envelope Encryption)
 // =============================================================================
-// Server-only module: import from "$lib/curios/timeline/secrets.server" directly
+// Server-only module: import from "@autumnsgrove/curios/timeline/secrets.server" directly
 // This keeps server secrets out of client bundles.
 
 // =============================================================================

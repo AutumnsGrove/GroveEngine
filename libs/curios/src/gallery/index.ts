@@ -13,7 +13,7 @@
  */
 
 // =============================================================================
-// Re-export utilities from $lib/utils/gallery
+// Re-export utilities from ./utils
 // =============================================================================
 
 export {
@@ -29,7 +29,7 @@ export {
   type ParsedImageMetadata,
   type ImageTag,
   type GalleryImage,
-} from "$lib/utils/gallery";
+} from "./utils";
 
 // =============================================================================
 // Types
