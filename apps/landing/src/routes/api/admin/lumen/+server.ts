@@ -7,7 +7,7 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getStats, getFlaggedContent, getRecentEvents } from "@autumnsgrove/lattice/thorn";
+import { getStats, getFlaggedContent, getRecentEvents } from "@autumnsgrove/thorn";
 import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 
 interface LumenUsageRow {

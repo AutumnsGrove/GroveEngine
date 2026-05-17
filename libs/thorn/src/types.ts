@@ -59,7 +59,7 @@ export interface ThornResult {
  */
 export interface ThornOptions {
 	/** The Lumen client instance */
-	lumen: import("../ai/lumen/index.js").LumenClient;
+	lumen: import("@autumnsgrove/lattice/ai/lumen").LumenClient;
 	/** Tenant ID for quota tracking */
 	tenant: string;
 	/** Content type determines which thresholds apply */

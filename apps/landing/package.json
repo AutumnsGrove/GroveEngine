@@ -40,6 +40,7 @@
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/thorn": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@lucide/lab": "^0.1.2",
 		"@lucide/svelte": "^0.577.0",

@@ -157,6 +157,9 @@ importers:
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
+      '@autumnsgrove/thorn':
+        specifier: workspace:*
+        version: link:../../libs/thorn
       '@lucide/svelte':
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
@@ -395,6 +398,9 @@ importers:
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../../libs/prism
+      '@autumnsgrove/thorn':
+        specifier: workspace:*
+        version: link:../../libs/thorn
       '@lucide/lab':
         specifier: ^0.1.2
         version: 0.1.2
@@ -1004,6 +1010,25 @@ importers:
       wrangler:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
+
+  libs/thorn:
+    dependencies:
+      '@autumnsgrove/grove-errors':
+        specifier: workspace:*
+        version: link:../grove-errors
+    devDependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../engine
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   libs/vineyard:
     dependencies:

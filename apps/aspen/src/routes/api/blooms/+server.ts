@@ -6,7 +6,7 @@ import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
-import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
+import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import type { RequestHandler } from "./$types.js";

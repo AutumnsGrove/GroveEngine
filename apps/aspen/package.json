@@ -38,6 +38,7 @@
 		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/thorn": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@lucide/svelte": "^0.577.0",
 		"zod": "^4.3.6"

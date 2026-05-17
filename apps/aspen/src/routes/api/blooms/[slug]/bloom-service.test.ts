@@ -43,7 +43,7 @@ vi.mock("@autumnsgrove/lattice/auth/session", () => ({
 	getVerifiedTenantId: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/thorn/hooks", () => ({
+vi.mock("@autumnsgrove/thorn/hooks", () => ({
 	moderatePublishedContent: vi.fn(),
 }));
 

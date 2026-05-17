@@ -428,14 +428,6 @@
 		"./styles/fonts-optional.css": "./dist/styles/fonts-optional.css",
 		"./styles/tokens.css": "./dist/styles/tokens.css",
 		"./styles/vine-pattern.css": "./dist/styles/vine-pattern.css",
-		"./thorn": {
-			"types": "./dist/thorn/index.d.ts",
-			"default": "./dist/thorn/index.js"
-		},
-		"./thorn/*": {
-			"types": "./dist/thorn/*.d.ts",
-			"default": "./dist/thorn/*.js"
-		},
 		"./platform/threshold": {
 			"types": "./dist/platform/threshold/index.d.ts",
 			"default": "./dist/platform/threshold/index.js"

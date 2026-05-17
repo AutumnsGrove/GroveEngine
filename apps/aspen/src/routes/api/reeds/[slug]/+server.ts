@@ -8,7 +8,7 @@ import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";
-import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
+import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { isPaidTier } from "@autumnsgrove/lattice/platform/config/tiers";

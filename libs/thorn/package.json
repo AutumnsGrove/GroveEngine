@@ -1,0 +1,54 @@
+{
+	"name": "@autumnsgrove/thorn",
+	"version": "0.1.0",
+	"description": "Thorn — content moderation SDK for Grove. AI-powered moderation, behavioral analysis, and rate-limit bridging.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/thorn"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./src/*.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/grove-errors": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"@autumnsgrove/lattice": "workspace:*",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
+	},
+	"peerDependencies": {
+		"@autumnsgrove/lattice": "workspace:*"
+	},
+	"peerDependenciesMeta": {
+		"@autumnsgrove/lattice": {
+			"optional": false
+		}
+	},
+	"keywords": [
+		"grove",
+		"thorn",
+		"moderation",
+		"content-safety"
+	]
+}

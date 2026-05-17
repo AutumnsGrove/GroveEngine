@@ -7,7 +7,7 @@
  * @see docs/specs/thorn-spec.md
  */
 
-import type { LumenClient } from "../ai/lumen/index.js";
+import type { LumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { determineAction } from "./config.js";
 import type { ThornResult, ThornOptions } from "./types.js";
 

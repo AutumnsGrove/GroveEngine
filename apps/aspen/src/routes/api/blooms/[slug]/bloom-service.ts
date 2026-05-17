@@ -10,7 +10,7 @@ import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
-import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
+import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
