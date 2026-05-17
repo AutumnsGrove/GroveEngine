@@ -1164,7 +1164,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-16 (Session 8 - Phase 7 verified COMPLETE, starting Phase 8 engine decomposition)
+**Last updated:** 2026-05-16 (Session 8 - Phase 8 Steps 1-4 DONE: loom + thorn extracted)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1352,12 +1352,12 @@ tracker in this document after each completed step.
 #### Phase 8: Engine Decomposition
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Identify extraction order | ⬜ TODO | Leaves first: thorn, loom, scribe, zephyr |
-| 2. Define package template | ⬜ TODO | Flat structure, max 3 levels, no `src/lib/` wrapper |
-| 3. Extract pilot — thorn | ⬜ TODO | 14 files → `libs/thorn/` |
-| 4. Extract pilot — loom | ⬜ TODO | 18 files → `libs/loom/` |
-| 5. Extraction wave 2+ | ⬜ TODO | content, curios, media, platform, server |
-| 6. Engine residual | ⬜ TODO | 541 exports → ~50, thin orchestration layer |
+| 1. Identify extraction order | ✅ DONE | Audit: loom (cleanest), thorn (peer deps), content-markdown, email, curios |
+| 2. Define package template | ✅ DONE | src/ flat, max 3 levels, workspace:* deps, vitest |
+| 3. Extract pilot — loom | ✅ DONE | 18 files → `libs/loom/`. Zero external deps (only grove-errors). 42 tests pass. Added cloudflare:workers vitest stubs. |
+| 4. Extract pilot — thorn | ✅ DONE | 14 files → `libs/thorn/`. Peer dep on @autumnsgrove/lattice (threshold, lumen). 70 tests pass. Audit: CLEAN. |
+| 5. Extraction wave 2+ | ⬜ TODO | content-markdown, email, curios — all have UI entanglement, need careful separation |
+| 6. Engine residual | ⬜ TODO | 541 exports → shrinking, thin orchestration layer |
 
 ---
 
