@@ -13,6 +13,8 @@
  * ```
  */
 
+import { LOOM_ERRORS, logLoomError } from "./errors.js";
+
 /**
  * Get a DO stub by string ID.
  * Creates a deterministic ID from the string using `idFromName`.
@@ -73,6 +75,7 @@ export async function loomFetchJson<T>(
   const response = await loomFetch(stub, path, method, body);
   if (!response.ok) {
     const error = await response.text();
+    logLoomError(LOOM_ERRORS.HANDLER_ERROR, { path, method, status: response.status, error });
     throw new Error(`Loom fetch failed (${response.status}): ${error}`);
   }
   return response.json() as Promise<T>;

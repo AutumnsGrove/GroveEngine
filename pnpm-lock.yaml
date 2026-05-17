@@ -593,6 +593,9 @@ importers:
       '@autumnsgrove/infra':
         specifier: workspace:*
         version: link:../infra
+      '@autumnsgrove/loom':
+        specifier: workspace:*
+        version: link:../loom
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../prism
@@ -955,6 +958,22 @@ importers:
         specifier: ^4.1.0
         version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
+  libs/loom:
+    dependencies:
+      '@autumnsgrove/grove-errors':
+        specifier: workspace:*
+        version: link:../grove-errors
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+
   libs/prism:
     dependencies:
       '@lucide/svelte':
@@ -1046,6 +1065,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/loom':
+        specifier: workspace:*
+        version: link:../../libs/loom
       fflate:
         specifier: ^0.8.1
         version: 0.8.2
@@ -1087,6 +1109,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/loom':
+        specifier: workspace:*
+        version: link:../../libs/loom
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -1134,6 +1159,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/loom':
+        specifier: workspace:*
+        version: link:../../libs/loom
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
@@ -8734,7 +8762,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/expect@4.1.4':
     dependencies:
@@ -8788,7 +8816,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/utils@4.1.4':
     dependencies:

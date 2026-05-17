@@ -11,8 +11,8 @@
  * - State survives DO hibernation and restarts
  */
 
-import { LoomDO } from "@autumnsgrove/lattice/loom";
-import type { LoomRoute, LoomRequestContext } from "@autumnsgrove/lattice/loom";
+import { LoomDO } from "@autumnsgrove/loom";
+import type { LoomRoute, LoomRequestContext } from "@autumnsgrove/loom";
 import { ZipStreamer, createManifest, createReadme, ZIP_CONFIG } from "./zipStream";
 import type { Env } from "../index";
 

@@ -21,7 +21,7 @@ import {
 	type LoomConfig,
 	type LoomRequestContext,
 	safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
 
 // ============================================================================

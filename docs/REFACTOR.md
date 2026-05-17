@@ -1164,7 +1164,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-16 (Session 7 - Phase 5 COMPLETE: svelte-check hook, workspace propagation, Plant GroveDB migration, color CI, 62 integration tests)
+**Last updated:** 2026-05-16 (Session 8 - Phase 7 verified COMPLETE, starting Phase 8 engine decomposition)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1342,12 +1342,12 @@ tracker in this document after each completed step.
 | 4. GW — keep & simplify | ✅ DONE | 10 command groups survive: secret, publish, warden, social, todo, gh issue, git worktree create/finish, update, dev (skeleton) |
 | 5. Update AGENT.md & settings | ✅ DONE | Rewrote AGENT.md, CLAUDE.md, git_guide.md, settings.json permissions, grove-git agent, 11 skill files, git-workflows skill |
 
-#### Phase 7: Engine Decoupling
+#### Phase 7: Engine Decoupling ✅ COMPLETE
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Extract grove-errors package | ⬜ TODO | Breaks engine ↔ infra cycle (8 files import lattice/errors from infra) |
-| 2. Decouple gossamer from engine | ⬜ TODO | Only 2 files use it (Glass.svelte, GlassCard.svelte) |
-| 3. Verify clean DAG | ⬜ TODO | No cycles, each lib builds independently |
+| 1. Extract grove-errors package | ✅ DONE | `libs/grove-errors/` — infra imports from grove-errors, zero imports from lattice. Cycle broken. |
+| 2. Decouple gossamer from engine | ✅ DONE | Optional peerDependency + devDep for local builds. Gossamer has zero workspace deps. |
+| 3. Verify clean DAG | ✅ DONE | No cycle warnings from pnpm. prism→grove-errors→infra→engine, gossamer standalone. |
 
 #### Phase 8: Engine Decomposition
 | Step | Status | Notes |

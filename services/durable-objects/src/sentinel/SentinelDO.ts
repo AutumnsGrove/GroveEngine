@@ -18,7 +18,7 @@ import {
 	type LoomConfig,
 	type LoomRequestContext,
 	safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 import type { LoadProfile, RunResults, SentinelMetric, SentinelCheckpoint } from "./types.js";
 import { getOpsPerSecondAt, selectWeightedSystem } from "./profiles.js";
 import { executeOperation } from "./operations.js";

@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/loom": "workspace:*",
 		"fflate": "^0.8.2"
 	},
 	"devDependencies": {

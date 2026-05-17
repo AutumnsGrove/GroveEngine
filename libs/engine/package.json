@@ -4,6 +4,7 @@
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/grove-errors": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
+		"@autumnsgrove/loom": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@jsquash/jxl": "^1.3.0",
 		"@react-email/components": "^1.0.10",
@@ -346,22 +347,6 @@
 			"types": "./dist/platform/uploads/index.d.ts",
 			"svelte": "./dist/platform/uploads/index.js",
 			"default": "./dist/platform/uploads/index.js"
-		},
-		"./loom": {
-			"types": "./dist/loom/index.d.ts",
-			"default": "./dist/loom/index.js"
-		},
-		"./loom/sveltekit": {
-			"types": "./dist/loom/adapters/sveltekit.d.ts",
-			"default": "./dist/loom/adapters/sveltekit.js"
-		},
-		"./loom/testing": {
-			"types": "./dist/loom/test-utils.d.ts",
-			"default": "./dist/loom/test-utils.js"
-		},
-		"./loom/worker": {
-			"types": "./dist/loom/adapters/worker.d.ts",
-			"default": "./dist/loom/adapters/worker.js"
 		},
 		"./ai/lumen": {
 			"types": "./dist/ai/lumen/index.d.ts",

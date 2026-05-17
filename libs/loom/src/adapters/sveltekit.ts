@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { getLoomDO } from '@autumnsgrove/lattice/loom/sveltekit';
+ * import { getLoomDO } from '@autumnsgrove/loom/sveltekit';
  *
  * // In a +page.server.ts load function:
  * const contentDO = getLoomDO(platform, "POST_CONTENT", `content:${tenantId}:${slug}`);
@@ -15,6 +15,12 @@
  */
 
 import { getLoomStub, loomFetch, loomFetchJson } from "../factory.js";
+import { LOOM_ERRORS, logLoomError } from "../errors.js";
+
+/** Minimal SvelteKit platform shape — avoids depending on App.Platform global */
+interface LoomPlatform {
+  env?: Record<string, unknown>;
+}
 
 /**
  * Get a DO stub from SvelteKit's platform.env.
@@ -24,11 +30,12 @@ import { getLoomStub, loomFetch, loomFetchJson } from "../factory.js";
  * @param name - The DO instance name (used with idFromName)
  */
 export function getLoomDO<T extends Rpc.DurableObjectBranded>(
-  platform: App.Platform | undefined,
+  platform: LoomPlatform | undefined,
   bindingName: string,
   name: string,
 ): DurableObjectStub<T> {
   if (!platform?.env) {
+    logLoomError(LOOM_ERRORS.INIT_FAILED, { bindingName, name });
     throw new Error(
       `[Loom] platform.env not available — are you in a server-side context?`,
     );
@@ -39,6 +46,7 @@ export function getLoomDO<T extends Rpc.DurableObjectBranded>(
     | undefined;
 
   if (!namespace) {
+    logLoomError(LOOM_ERRORS.INIT_FAILED, { bindingName, name });
     throw new Error(
       `[Loom] DO binding "${bindingName}" not found in platform.env. Check wrangler.toml.`,
     );
@@ -52,7 +60,7 @@ export function getLoomDO<T extends Rpc.DurableObjectBranded>(
  * Combines getLoomDO + loomFetchJson in one call.
  */
 export async function fetchLoomJson<T>(
-  platform: App.Platform | undefined,
+  platform: LoomPlatform | undefined,
   bindingName: string,
   name: string,
   path: string,

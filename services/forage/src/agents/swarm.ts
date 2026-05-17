@@ -6,7 +6,7 @@
  * Supports tool calling with fallback to JSON prompts.
  */
 
-import { safeJsonParse } from "@autumnsgrove/lattice/loom";
+import { safeJsonParse } from "@autumnsgrove/loom";
 import { SWARM_SYSTEM_PROMPT, formatSwarmPrompt } from "../prompts";
 import type { AIProvider, ProviderResponse } from "../providers/types";
 import { SWARM_TOOL } from "../providers/tools";

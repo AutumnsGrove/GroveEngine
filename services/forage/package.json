@@ -11,7 +11,8 @@
 		"test:run": "vitest run"
 	},
 	"dependencies": {
-		"@autumnsgrove/lattice": "workspace:*"
+		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/loom": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",

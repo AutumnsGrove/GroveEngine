@@ -23,7 +23,7 @@ import {
 	type LoomConfig,
 	type LoomRequestContext,
 	safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 import { DO_ERRORS } from "./errors.js";
 
 // ============================================================================

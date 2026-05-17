@@ -10,8 +10,8 @@
  * Migrated to LoomDO base class — see libs/engine/src/lib/loom/
  */
 
-import { LoomDO, safeJsonParse } from "../loom/index.js";
-import type { LoomRoute, LoomConfig, LoomRequestContext } from "../loom/types.js";
+import { LoomDO, safeJsonParse } from "@autumnsgrove/loom";
+import type { LoomRoute, LoomConfig, LoomRequestContext } from "@autumnsgrove/loom";
 
 // ============================================================================
 // Types

@@ -18,7 +18,7 @@ import {
 	type LoomConfig,
 	type LoomRequestContext,
 	safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 import { zipSync, strToU8 } from "fflate";
 import { DO_ERRORS } from "./errors.js";
 
