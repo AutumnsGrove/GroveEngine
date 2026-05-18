@@ -186,7 +186,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 				500,
 				{
 					code: "GIT-001",
-					status: 500,
+					category: "admin",
 					userMessage: "Unable to save token",
 					adminMessage: "TOKEN_ENCRYPTION_KEY not configured — refusing to store plaintext token",
 				},
