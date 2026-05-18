@@ -9,7 +9,7 @@
 	const AlertTriangle = stateIcons.warning;
 	const ExternalLink = navIcons.external;
 	const RefreshCw = actionIcons.refresh;
-	import { ZephyrAnalytics } from '@autumnsgrove/lattice';
+	import ZephyrAnalytics from '@autumnsgrove/lattice/components/admin/ZephyrAnalytics.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 

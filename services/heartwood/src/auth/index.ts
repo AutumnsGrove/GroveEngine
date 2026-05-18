@@ -16,6 +16,7 @@ import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
 import { twoFactor } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
@@ -29,9 +30,18 @@ import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridg
  * @returns Configured Better Auth instance
  */
 export function createAuth(env: Env, cf?: CloudflareGeolocation) {
-	if (!env.DB) throw new Error(HW_SVC_ERRORS.MISSING_DB_BINDING.adminMessage);
-	if (!env.AUTH_BASE_URL) throw new Error(HW_SVC_ERRORS.MISSING_AUTH_BASE_URL.adminMessage);
-	if (!env.SESSION_SECRET) throw new Error(HW_SVC_ERRORS.MISSING_SESSION_SECRET.adminMessage);
+	if (!env.DB) {
+		logGroveError("Heartwood", HW_SVC_ERRORS.MISSING_DB_BINDING);
+		throw new Error(HW_SVC_ERRORS.MISSING_DB_BINDING.userMessage);
+	}
+	if (!env.AUTH_BASE_URL) {
+		logGroveError("Heartwood", HW_SVC_ERRORS.MISSING_AUTH_BASE_URL);
+		throw new Error(HW_SVC_ERRORS.MISSING_AUTH_BASE_URL.userMessage);
+	}
+	if (!env.SESSION_SECRET) {
+		logGroveError("Heartwood", HW_SVC_ERRORS.MISSING_SESSION_SECRET);
+		throw new Error(HW_SVC_ERRORS.MISSING_SESSION_SECRET.userMessage);
+	}
 	if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
 		console.warn(
 			"[createAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET — Google OAuth will fail",

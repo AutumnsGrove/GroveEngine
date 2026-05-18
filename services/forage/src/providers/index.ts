@@ -6,7 +6,7 @@ import type { Env } from "../types";
 import type { AIProvider, ProviderName } from "./types";
 import { DeepSeekProvider } from "./deepseek";
 import { OpenRouterProvider } from "./openrouter";
-import { FORAGE_ERRORS } from "../errors";
+import { FORAGE_ERRORS, logForageError } from "../errors";
 
 // Re-export types
 export type {
@@ -36,7 +36,8 @@ export function getProvider(name: ProviderName, env: Env, model?: string): AIPro
 		case "openrouter":
 			return new OpenRouterProvider(env, model);
 		default:
-			throw new Error(FORAGE_ERRORS.UNKNOWN_PROVIDER.adminMessage);
+			logForageError(FORAGE_ERRORS.UNKNOWN_PROVIDER, { detail: `unrecognized provider: ${name}` });
+			throw new Error(FORAGE_ERRORS.UNKNOWN_PROVIDER.userMessage);
 	}
 }
 

@@ -147,7 +147,7 @@ export class CloudflareDatabase implements GroveDatabase {
 		logGroveError("InfraSDK", SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED, {
 			detail: "Use batch() for atomic operations or Loom DOs for interactive transactions.",
 		});
-		throw new Error(SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.adminMessage);
+		throw new Error(SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.userMessage);
 	}
 
 	info(): DatabaseInfo {

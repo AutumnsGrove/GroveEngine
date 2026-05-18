@@ -146,7 +146,7 @@
 		pollingInterval = setInterval(async () => {
 			if (!job) return;
 			try {
-				const response = await fetch(`/api/search/status?job_id=${job.id}`);
+				const response = await fetch(`/api/search/status?job_id=${job.id}`); // csrf-ok
 				if (response.ok) {
 					const result = (await response.json()) as { job?: typeof job };
 					if (result.job) {
@@ -200,7 +200,7 @@
 	async function fetchFullResults() {
 		if (!job) return;
 		try {
-			const response = await fetch(`/api/search/results?job_id=${job.id}`);
+			const response = await fetch(`/api/search/results?job_id=${job.id}`); // csrf-ok
 			if (response.ok) {
 				const data = (await response.json()) as { domains?: unknown };
 				if (Array.isArray(data.domains)) {
@@ -312,7 +312,7 @@
 
 		try {
 			console.log(`[History Page] Making followup request for job_id: ${job.id}`);
-			const response = await fetch(`/api/search/followup?job_id=${job.id}`, {
+			const response = await fetch(`/api/search/followup?job_id=${job.id}`, { // csrf-ok
 				signal: controller.signal,
 			});
 
@@ -416,6 +416,7 @@
 
 		try {
 			const response = await fetch(`/api/search/resume?job_id=${job.id}`, {
+				// csrf-ok
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ followup_responses: followupAnswers }),

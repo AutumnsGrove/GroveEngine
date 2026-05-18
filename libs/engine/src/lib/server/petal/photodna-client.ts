@@ -12,8 +12,10 @@
  * @see docs/specs/petal-spec.md Section 3
  */
 
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { PHOTODNA_CONFIG } from "$lib/platform/config/petal.js";
 import { PetalError } from "./types.js";
+import { PETAL_ERRORS } from "./errors.js";
 
 // ============================================================================
 // Types
@@ -113,9 +115,9 @@ export async function scanWithPhotoDNA(
 		if (!response.ok) {
 			// Log error details server-side
 			const errorText = await response.text().catch(() => "Unknown error");
-			console.error("[Petal] PhotoDNA API error:", {
+			logGroveError("Petal", PETAL_ERRORS.PHOTODNA_API_ERROR, {
 				status: response.status,
-				error: errorText.substring(0, 500),
+				detail: errorText.substring(0, 500),
 			});
 
 			throw new PetalError(
@@ -155,7 +157,7 @@ export async function scanWithPhotoDNA(
 		}
 
 		// Log unexpected errors server-side
-		console.error("[Petal] PhotoDNA unexpected error:", err);
+		logGroveError("Petal", PETAL_ERRORS.PHOTODNA_UNEXPECTED, { cause: err });
 		throw new PetalError("PhotoDNA scan failed", "PHOTODNA_ERROR", "layer1", "photodna", err);
 	} finally {
 		clearTimeout(timeoutId);

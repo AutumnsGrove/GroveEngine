@@ -13,7 +13,7 @@
 
 import { GroveAgent, callable } from "@autumnsgrove/grove-agent";
 import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
-import { ONBOARDING_ERRORS } from "./errors.js";
+import { ONBOARDING_ERRORS, logOnboardingError } from "./errors.js";
 import {
 	INITIAL_STATE,
 	SEQUENCES,
@@ -102,7 +102,10 @@ export class OnboardingAgent extends GroveAgent<Env, OnboardingState> {
 		// Validate inputs
 		if (!isValidEmail(email)) {
 			this.log.warn("Invalid email", { code: ONBOARDING_ERRORS.INVALID_EMAIL.code });
-			throw new Error(ONBOARDING_ERRORS.INVALID_EMAIL.adminMessage);
+			logOnboardingError(ONBOARDING_ERRORS.INVALID_EMAIL, {
+				detail: "startSequence() received invalid email",
+			});
+			throw new Error(ONBOARDING_ERRORS.INVALID_EMAIL.userMessage);
 		}
 
 		if (!isValidAudience(audience)) {
@@ -110,7 +113,10 @@ export class OnboardingAgent extends GroveAgent<Env, OnboardingState> {
 				code: ONBOARDING_ERRORS.INVALID_AUDIENCE.code,
 				audience,
 			});
-			throw new Error(ONBOARDING_ERRORS.INVALID_AUDIENCE.adminMessage);
+			logOnboardingError(ONBOARDING_ERRORS.INVALID_AUDIENCE, {
+				detail: `unrecognized audience: ${audience}`,
+			});
+			throw new Error(ONBOARDING_ERRORS.INVALID_AUDIENCE.userMessage);
 		}
 
 		const normalizedEmail = email.toLowerCase().trim();

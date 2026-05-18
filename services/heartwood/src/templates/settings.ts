@@ -508,6 +508,21 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
   <script>
     const API_BASE = '${authBaseUrl}';
 
+    // Inline notification helper — replaces alert() with a dismissible banner
+    function showNotification(message, type) {
+      const existing = document.getElementById('inline-notification');
+      if (existing) existing.remove();
+
+      const el = document.createElement('div');
+      el.id = 'inline-notification';
+      el.className = 'message message-' + (type || 'error');
+      el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;min-width:280px;max-width:480px;text-align:center;cursor:pointer;';
+      el.textContent = message;
+      el.addEventListener('click', () => el.remove());
+      document.body.appendChild(el);
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 5000);
+    }
+
     // DOM elements
     const signOutBtn = document.getElementById('sign-out');
 
@@ -523,7 +538,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       } catch (err) {
         console.error('Error signing out:', err);
         signOutBtn.classList.remove('loading');
-        alert('Sign out failed. Please try again or clear your cookies.');
+        showNotification('Sign out failed. Please try again or clear your cookies.', 'error');
       }
     });
 
@@ -625,7 +640,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         document.getElementById('2fa-code').focus();
       } catch (err) {
         console.error('Error enabling 2FA:', err);
-        alert('Failed to set up 2FA. Please try again.');
+        showNotification('Failed to set up 2FA. Please try again.', 'error');
       } finally {
         enable2faBtn.classList.remove('loading');
         enable2faBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Enable 2FA';
@@ -667,7 +682,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         setupStep2.style.display = 'block';
       } catch (err) {
         console.error('Error verifying 2FA:', err);
-        alert('Invalid code. Please try again.');
+        showNotification('Invalid code. Please try again.', 'error');
         document.getElementById('2fa-code').value = '';
         document.getElementById('2fa-code').focus();
       } finally {
@@ -719,7 +734,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         load2faStatus();
       } catch (err) {
         console.error('Error disabling 2FA:', err);
-        alert('Invalid code. Please try again.');
+        showNotification('Invalid code. Please try again.', 'error');
         document.getElementById('2fa-disable-code').value = '';
         document.getElementById('2fa-disable-code').focus();
       } finally {
@@ -803,7 +818,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         }
       } catch (err) {
         console.error('Error regenerating backup codes:', err);
-        alert('Failed to regenerate backup codes.');
+        showNotification('Failed to regenerate backup codes.', 'error');
       } finally {
         regenerateCodesBtn.classList.remove('loading');
         regenerateCodesBtn.textContent = 'Regenerate Codes';

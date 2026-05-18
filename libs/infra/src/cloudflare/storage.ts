@@ -314,7 +314,7 @@ export class CloudflareStorage implements GroveStorage {
 			detail:
 				"R2 presigned URLs require S3-compatible API credentials, not available through Worker bindings.",
 		});
-		throw new Error(SRV_ERRORS.PRESIGNED_URL_FAILED.adminMessage);
+		throw new Error(SRV_ERRORS.PRESIGNED_URL_FAILED.userMessage);
 	}
 
 	info(): StorageInfo {

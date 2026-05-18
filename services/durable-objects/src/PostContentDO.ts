@@ -24,7 +24,7 @@ import {
 	type LoomRequestContext,
 	safeJsonParse,
 } from "@autumnsgrove/loom";
-import { DO_ERRORS } from "./errors.js";
+import { DO_ERRORS, logDoError } from "./errors.js";
 
 // ============================================================================
 // Types
@@ -249,7 +249,10 @@ export class PostContentDO extends LoomDO<PostContent, ContentEnv> {
 
 				const verification = await r2.head(data.r2Key);
 				if (!verification) {
-					throw new Error(DO_ERRORS.STORAGE_READ_FAILED.adminMessage);
+					logDoError(DO_ERRORS.STORAGE_READ_FAILED, {
+						detail: `r2.head returned null for key: ${data.r2Key}`,
+					});
+					throw new Error(DO_ERRORS.STORAGE_READ_FAILED.userMessage);
 				}
 
 				// Atomic: prepare → persist to SQL → update memory

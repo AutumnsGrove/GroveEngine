@@ -3,6 +3,7 @@
  */
 
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type {
 	Client,
@@ -657,7 +658,10 @@ export async function cleanupOldAuditLogs(
 ): Promise<number> {
 	// Validate minimum retention to prevent accidental mass deletion
 	if (retentionDays < MIN_AUDIT_RETENTION_DAYS) {
-		throw new Error(HW_SVC_ERRORS.INVALID_AUDIT_RETENTION.adminMessage);
+		logGroveError("Heartwood", HW_SVC_ERRORS.INVALID_AUDIT_RETENTION, {
+			detail: `retentionDays=${retentionDays}, minimum=${MIN_AUDIT_RETENTION_DAYS}`,
+		});
+		throw new Error(HW_SVC_ERRORS.INVALID_AUDIT_RETENTION.userMessage);
 	}
 
 	const cutoffDate = new Date();

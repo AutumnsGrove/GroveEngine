@@ -54,7 +54,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
 				detail: `Service: ${service}`,
 			});
-			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage);
+			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.userMessage);
 		}
 
 		const start = performance.now();
@@ -87,7 +87,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned ${response.status}: ${text.slice(0, 200)}`,
 					});
-					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.userMessage);
 				}
 				// Try parsing as JSON even without Content-Type header
 				try {
@@ -96,7 +96,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned non-JSON body (${response.status})`,
 					});
-					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.userMessage);
 				}
 			}
 

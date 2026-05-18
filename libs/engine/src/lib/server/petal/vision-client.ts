@@ -15,6 +15,7 @@ import {
 	CLASSIFICATION_PROMPT,
 	SANITY_CHECK_PROMPT,
 } from "$lib/platform/config/petal.js";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import {
 	PetalError,
 	type PetalProviderConfig,
@@ -23,6 +24,7 @@ import {
 	type PetalCategory,
 } from "./types.js";
 import { safeParseJson } from "../../utils/json.js";
+import { PETAL_ERRORS } from "./errors.js";
 
 // ============================================================================
 // Types
@@ -203,7 +205,7 @@ async function callWorkersAI(
 			throw new PetalError("Vision provider request timed out", "TIMEOUT", undefined, "workers_ai");
 		}
 		// Log full error server-side for debugging
-		console.error("[Petal] Workers AI error:", err);
+		logGroveError("Petal", PETAL_ERRORS.WORKERS_AI_ERROR, { model, cause: err });
 		throw new PetalError(
 			"Vision provider temporarily unavailable",
 			"PROVIDER_ERROR",
@@ -263,9 +265,10 @@ async function callTogetherAI(
 			// Log full error server-side for debugging, but don't include in thrown error
 			// to prevent information disclosure
 			const errorText = await response.text().catch(() => "Unknown error");
-			console.error("[Petal] Together.ai API error:", {
+			logGroveError("Petal", PETAL_ERRORS.TOGETHER_API_ERROR, {
 				status: response.status,
-				error: errorText.substring(0, 500),
+				detail: errorText.substring(0, 500),
+				model,
 			});
 			throw new PetalError(
 				"Vision provider temporarily unavailable",
@@ -298,7 +301,7 @@ async function callTogetherAI(
 		}
 		if (err instanceof PetalError) throw err;
 		// Log full error server-side, but don't include in thrown error
-		console.error("[Petal] Together.ai unexpected error:", err);
+		logGroveError("Petal", PETAL_ERRORS.TOGETHER_UNEXPECTED, { model, cause: err });
 		throw new PetalError(
 			"Together.ai provider error",
 			"PROVIDER_ERROR",
@@ -464,7 +467,11 @@ export async function classifyImage(
 		};
 	} catch (parseError) {
 		// If parsing fails, assume appropriate (fail-open for classification)
-		console.warn("[Petal] Failed to parse classification response:", response.content);
+		logGroveError("Petal", PETAL_ERRORS.CLASSIFICATION_PARSE_FAILED, {
+			detail: response.content.substring(0, 200),
+			model: response.model,
+			provider: response.provider,
+		});
 		return {
 			category: "appropriate",
 			confidence: 0.5,
@@ -528,7 +535,11 @@ export async function runSanityCheck(
 		};
 	} catch (parseError) {
 		// If parsing fails, return default values (fail-open for sanity)
-		console.warn("[Petal] Failed to parse sanity check response:", response.content);
+		logGroveError("Petal", PETAL_ERRORS.SANITY_PARSE_FAILED, {
+			detail: response.content.substring(0, 200),
+			model: response.model,
+			provider: response.provider,
+		});
 		return {
 			faceCount: 1,
 			isScreenshot: false,

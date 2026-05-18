@@ -7,7 +7,7 @@
   import {
     CANOPY_CATEGORY_LABELS,
     type CanopyCategory,
-  } from '@autumnsgrove/lattice';
+  } from '@autumnsgrove/lattice/platform/config';
 
   // Types derived from engine - defined locally for Svelte 5 runes compatibility
   interface CanopyWanderer {
