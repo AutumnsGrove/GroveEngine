@@ -44,7 +44,6 @@ export const defaultSuite: GroveIconSuite = {
 	reverie: { icon: "Eclipse", label: "Reverie" },
 	lantern: { icon: "Lamp", label: "Lantern" },
 	moss: { icon: "Leaf", label: "Moss" },
-	wisp: { icon: "Wind", label: "Wisp" },
 
 	// ── Communication ──────────────────────────────────────────────
 	ivy: { icon: "Mail", label: "Ivy" },
