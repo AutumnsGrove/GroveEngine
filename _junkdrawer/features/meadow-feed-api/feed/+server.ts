@@ -7,7 +7,7 @@
  * Includes content:encoded for Meadow poller consumption.
  * Supports conditional requests via ETag header.
  */
-import { getAllPosts, getSiteConfig } from "@autumnsgrove/lattice/content/markdown/markdown";
+import { getAllPosts, getSiteConfig } from "@autumnsgrove/grove-markdown";
 import type { RequestHandler } from "./$types.js";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { getClientIP } from "@autumnsgrove/lattice/platform/threshold/worker";

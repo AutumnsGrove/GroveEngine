@@ -1164,7 +1164,7 @@ tracker in this document after each completed step.
 
 ### Progress Tracker
 
-**Last updated:** 2026-05-17 (Session 9 - Phase 8 Steps 5a-5b DONE: grove-crypto + curios extracted)
+**Last updated:** 2026-05-18 (Session 10 - Phase 8 Step 5c DONE: grove-markdown extracted)
 
 #### Phase 0: Research & Audit
 | Step | Status | Notes |
@@ -1358,7 +1358,8 @@ tracker in this document after each completed step.
 | 4. Extract pilot — thorn | ✅ DONE | 14 files → `libs/thorn/`. Peer dep on @autumnsgrove/lattice (threshold, lumen). 70 tests pass. Audit: CLEAN. |
 | 5a. Extract grove-crypto | ✅ DONE | 3 files → `libs/grove-crypto/`. Zero deps (Web Crypto only). Envelope encryption + SecretsManager. Engine stubs re-export for compat. |
 | 5b. Extract curios | ✅ DONE | 22+ files → `libs/curios/`. 4 curios (gallery, guestbook, polls, timeline). 191 tests pass. Peer deps: lattice, prism, svelte, markdown-it. Static loader map in ContentWithGutter. |
-| 5c. Extraction wave 2 (remaining) | ⬜ TODO | content-markdown, email — still have UI entanglement |
+| 5c. Extract grove-markdown | ✅ DONE | 15 files → `libs/grove-markdown/`. Markdown pipeline + hum providers (data-primacy). 195 tests pass. Zero monorepo deps. |
+| 5d. Extraction wave 2 (remaining) | ⬜ TODO | email — still has UI entanglement |
 | 6. Engine residual | ⬜ TODO | 541 exports → shrinking, thin orchestration layer |
 | 7. Gallery decoupling (future) | ⬜ TODO | Gallery is a full image mgmt system, not a widget. Needs own package or Amber integration. Pragmatically in curios for now. |
 
@@ -1503,3 +1504,15 @@ tracker in this document after each completed step.
   - Engine: 0 errors, Aspen: 0 errors, Curios: 191 tests pass
   - Key finding: Gallery is a full image management system (6 DB tables, uploads, tags, collections), not a widget. Placed pragmatically in curios for now; flagged for future decoupling.
 - **Next:** grove-audit on Phase 8 work, then content-markdown or email extraction
+
+**Session 10 (2026-05-18):**
+- Phase 8 Step 5c: grove-markdown extraction — COMPLETE
+  - Created `libs/grove-markdown/` (15 source files, 195 tests): renderMarkdown, createContentLoader, directives, hum embeds, @mentions, suppress
+  - Zero monorepo deps — only npm packages (markdown-it, sanitize-html, dompurify, gray-matter, esm-env)
+  - Hum providers restructured with data primacy: 8 provider files (one per service), separate detect logic, aggregated registry
+  - Extracted sanitizeMarkdown (~200 lines) from engine's 575-line sanitize.ts — markdown-specific sanitizer with all data-* attribute allowlists
+  - Copied self-contained utils: escape-html (29 lines), grove-url (85 lines)
+  - Engine stubs: content/markdown/index.ts re-exports from grove-markdown, hum providers/types re-export stubs
+  - Updated 17 Aspen consumer imports + 1 engine consumer (reeds.ts)
+  - Engine: 0 type errors, Aspen: 0 type errors, grove-markdown: 195 tests pass
+- **Next:** grove-audit on Phase 8 work, then email extraction

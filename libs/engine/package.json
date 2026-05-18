@@ -5,6 +5,7 @@
 		"@autumnsgrove/curios": "workspace:*",
 		"@autumnsgrove/grove-crypto": "workspace:*",
 		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/loom": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",

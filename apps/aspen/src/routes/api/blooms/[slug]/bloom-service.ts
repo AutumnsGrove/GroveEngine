@@ -5,7 +5,7 @@
  * and content moderation.
  */
 
-import { getPostBySlug, renderMarkdown } from "@autumnsgrove/lattice/content/markdown/markdown";
+import { getPostBySlug, renderMarkdown } from "@autumnsgrove/grove-markdown";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";

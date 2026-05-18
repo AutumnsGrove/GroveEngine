@@ -14,7 +14,7 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
-	import type { GutterItem } from "@autumnsgrove/lattice/content/markdown/markdown";
+	import type { GutterItem } from "@autumnsgrove/grove-markdown";
 
 	// Page data from admin layout (includes grafts cascade)
 	let { data } = $props();

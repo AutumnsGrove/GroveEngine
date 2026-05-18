@@ -4,7 +4,7 @@ import {
 	extractHeaders,
 	renderMarkdown,
 	type GutterItem,
-} from "@autumnsgrove/lattice/content/markdown/markdown";
+} from "@autumnsgrove/grove-markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
