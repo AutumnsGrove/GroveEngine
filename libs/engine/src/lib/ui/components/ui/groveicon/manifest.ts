@@ -41,7 +41,6 @@ export const defaultSuite: GroveIconSuite = {
 
 	// ── AI & Intelligence ──────────────────────────────────────────
 	lumen: { icon: "LampCeiling", label: "Lumen" },
-	reverie: { icon: "Eclipse", label: "Reverie" },
 	lantern: { icon: "Lamp", label: "Lantern" },
 	moss: { icon: "Leaf", label: "Moss" },
 

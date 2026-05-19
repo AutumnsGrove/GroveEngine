@@ -39,20 +39,27 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 			return resolve(event);
 		}
 
+		// adapter-cloudflare proxies platform.env and throws on property
+		// access during prerender — wrap the entire env block in try/catch
 		if (!initialized) {
-			const env = event.platform?.env as Record<string, unknown> | undefined;
-			const raw = env?.PULSE_COLLECTOR;
-			const collector =
-				raw && typeof (raw as { fetch?: unknown }).fetch === "function"
-					? (raw as PulseCollector)
-					: undefined;
-			if (collector) {
-				initPulse(collector);
-				initialized = true;
-			}
-			const maybeSecret = env?.PULSE_VISITOR_SECRET;
-			if (typeof maybeSecret === "string" && maybeSecret.length > 0) {
-				visitorSecret = maybeSecret;
+			try {
+				const env = event.platform?.env as Record<string, unknown> | undefined;
+				const raw = env?.PULSE_COLLECTOR;
+				const collector =
+					raw && typeof (raw as { fetch?: unknown }).fetch === "function"
+						? (raw as PulseCollector)
+						: undefined;
+				if (collector) {
+					initPulse(collector);
+					initialized = true;
+				}
+				const maybeSecret = env?.PULSE_VISITOR_SECRET;
+				if (typeof maybeSecret === "string" && maybeSecret.length > 0) {
+					visitorSecret = maybeSecret;
+				}
+			} catch {
+				// prerender or missing bindings — skip Pulse for this request
+				return resolve(event);
 			}
 		}
 
