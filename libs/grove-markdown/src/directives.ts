@@ -146,7 +146,12 @@ function parseImageOptions(content: string): {
 function handleImage(content: string): string | null {
 	const opts = parseImageOptions(content);
 	if (!opts.src) return null;
-	if (opts.src.startsWith("javascript:") || opts.src.startsWith("data:")) return null;
+	if (
+		opts.src.startsWith("javascript:") ||
+		opts.src.startsWith("data:") ||
+		opts.src.startsWith("vbscript:")
+	)
+		return null;
 
 	const safeSrc = escapeHtml(opts.src);
 	const safeCaption = opts.caption ? escapeHtml(opts.caption) : "";
