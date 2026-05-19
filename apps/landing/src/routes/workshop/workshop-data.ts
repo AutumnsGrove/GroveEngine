@@ -357,31 +357,6 @@ export const categories: Category[] = [
 				spec: "/knowledge/specs/amber-spec",
 				whatIsLink: "/knowledge/help/what-is-amber",
 			},
-			{
-				name: "Reverie",
-				termSlug: "reverie",
-				tagline: "Composition Layer",
-				description:
-					"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
-				status: "planned",
-				icon: "reverie",
-				domain: "reverie.grove.place",
-				integration: "AI composition layer, accessible through Arbor and Lantern",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{
-						name: "ZDR",
-						icon: "shredder",
-						description: "Zero data retention",
-						href: "/knowledge/help/what-is-zdr",
-					},
-				],
-			},
 			// TEMPORARILY HIDDEN: Pantry removed from public Workshop
 			// Shop concept deferred indefinitely (see TODOS.md for context)
 			// {
@@ -485,97 +460,9 @@ export const categories: Category[] = [
 				whatIsLink: "/knowledge/help/what-are-curios",
 				subComponents: [
 					{ name: "Guestbook", icon: "notebook-pen", description: "Visitor signatures" },
-					{
-						name: "Shrines",
-						icon: "gallery-horizontal-end",
-						description: "Personal dedications",
-					},
-					{ name: "Artifacts", icon: "shell", description: "Interactive oddities" },
-				],
-			},
-			{
-				name: "Terrarium",
-				termSlug: "terrarium",
-				tagline: "Creative Canvas",
-				description:
-					"A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your [[foliage|foliage]].",
-				status: "planned",
-				icon: "terrarium",
-				domain: "terrarium.grove.place",
-				integration: "Creative tool for building blog decorations",
-				spec: "/knowledge/specs/terrarium-spec",
-				whatIsLink: "/knowledge/help/what-is-terrarium",
-				subComponents: [
-					{ name: "Canvas", icon: "frame", description: "Design space" },
-					{ name: "Assets", icon: "shapes", description: "Nature components" },
-					{ name: "Export", icon: "imageup", description: "Publish to blog" },
-				],
-			},
-			{
-				name: "Wisp",
-				termSlug: "wisp",
-				tagline: "Writing Assistant",
-				description:
-					"A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.",
-				status: "planned",
-				icon: "wisp",
-				integration: "Integrated into the Grove editor, off by default",
-				spec: "/knowledge/specs/wisp-spec",
-				whatIsLink: "/knowledge/help/what-is-wisp",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{
-						name: "Fireside",
-						icon: "flamekindling",
-						description: "Conversational drafting",
-						href: "/knowledge/help/what-is-fireside",
-					},
-					{ name: "Privacy", icon: "globelock", description: "No data retention" },
-					{
-						name: "ZDR",
-						icon: "shredder",
-						description: "Zero data retention",
-						href: "/knowledge/help/what-is-zdr",
-					},
-				],
-			},
-			{
-				name: "Scribe",
-				termSlug: "scribe",
-				tagline: "Voice Transcription",
-				description:
-					"Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you're thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.",
-				status: "planned",
-				icon: "scribe",
-				integration: "Built into Flow mode in Arbor",
-				spec: "/knowledge/specs/scribe-voice-transcription-spec",
-				whatIsLink: "/knowledge/help/what-is-scribe",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{ name: "Raw", icon: "zap", description: "1:1 transcription" },
-					{ name: "Draft", icon: "sparkles", description: "AI-structured output" },
-					{
-						name: "Vines",
-						icon: "layoutlist",
-						description: "Auto-generated margin notes",
-						href: "/knowledge/help/what-are-vines",
-					},
-					{
-						name: "ZDR",
-						icon: "shredder",
-						description: "Zero data retention",
-						href: "/knowledge/help/what-is-zdr",
-					},
+					{ name: "Gallery", icon: "image", description: "Image grids" },
+					{ name: "Polls", icon: "vote", description: "Interactive polls" },
+					{ name: "Timeline", icon: "calendar-range", description: "Life events" },
 				],
 			},
 			{
@@ -584,7 +471,7 @@ export const categories: Category[] = [
 				tagline: "ASCII Visual Effects",
 				description:
 					"Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.",
-				status: "planned",
+				status: "live",
 				icon: "gossamer",
 				integration: "Open-source NPM package for any web project",
 				github: "https://github.com/AutumnsGrove/Gossamer",
@@ -711,99 +598,6 @@ export const categories: Category[] = [
 				spec: "/knowledge/specs/trails-spec",
 				whatIsLink: "/knowledge/help/what-is-trails",
 			},
-			{
-				name: "Meadow",
-				termSlug: "meadow",
-				tagline: "Social Feed",
-				description:
-					"Where voices gather. [[meadow|Meadow]] is Grove's opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.",
-				status: "planned",
-				icon: "meadow",
-				domain: "meadow.grove.place",
-				integration: "Optional social layer for Grove blogs",
-				spec: "/knowledge/specs/meadow-spec",
-				whatIsLink: "/knowledge/help/what-is-meadow",
-				subComponents: [
-					{
-						name: "Notes",
-						icon: "penline",
-						description: "Short-form posts",
-						href: "/knowledge/help/what-are-notes",
-					},
-					{
-						name: "Blooms",
-						icon: "notebook-text",
-						description: "RSS syndicated posts",
-						href: "/knowledge/help/what-are-blooms",
-					},
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{ name: "RSS", icon: "rss", description: "Feed syndication" },
-					{ name: "Opt-In", icon: "squareasterisk", description: "Consent-first sharing" },
-				],
-			},
-			{
-				name: "Chirp",
-				termSlug: "chirp",
-				tagline: "Direct Messages",
-				description:
-					"Two robins on a branch. [[chirp|Chirp]] is Grove's private 1:1 messaging — quick, real-time conversations with a friend. Send text, share images, see when they're typing. Each chirp is a small, bright call from one robin to another.",
-				status: "planned",
-				icon: "chirp",
-				integration: "Real-time messaging via Durable Objects, accessible from Arbor",
-				whatIsLink: "/knowledge/help/what-are-chirps",
-				subComponents: [
-					{ name: "Messages", icon: "messagecircle", description: "Real-time text & images" },
-					{ name: "Typing", icon: "loader", description: "Live typing indicators" },
-					{ name: "Read", icon: "eye", description: "Read receipts" },
-				],
-			},
-			{
-				name: "Forests",
-				termSlug: "forests",
-				tagline: "Community Groves",
-				description:
-					'Many trees, one grove. Forests are themed community aggregators—places where like-minded folks gather. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Take a stroll and discover kindred spirits among the trees.',
-				status: "planned",
-				icon: "forests",
-				domain: "{forest}.grove.place",
-				integration: "Community discovery for all Wanderers",
-				spec: "/knowledge/specs/forests-spec",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{ name: "Directory", icon: "book-user", description: "Wanderer listings" },
-					{ name: "Stroll", icon: "git-branch", description: "Random discovery" },
-				],
-			},
-			{
-				name: "Wander",
-				termSlug: "wander",
-				tagline: "Immersive Discovery",
-				description:
-					"Step into the forest. A first-person walking experience through the Grove where other people's groves float among the trees as living terrariums. Complete with time of day, seasons, weather, and an immersive soundscape. Discovery through presence, not browsing.",
-				status: "planned",
-				icon: "wander",
-				domain: "wander.grove.place",
-				integration: "Immersive exploration mode for Forests",
-				spec: "/knowledge/specs/wander-spec",
-				subComponents: [
-					{
-						name: "Active",
-						icon: "chevrons-left-right-ellipsis",
-						description: "WASD exploration",
-					},
-					{ name: "Drift", icon: "line-squiggle", description: "Passive wandering" },
-				],
-			},
 		],
 	},
 	{
@@ -842,72 +636,6 @@ export const categories: Category[] = [
 						description: "Agentic swarm",
 						href: "/knowledge/help/what-is-swarm",
 					},
-				],
-			},
-			{
-				name: "Outpost",
-				termSlug: "outpost",
-				tagline: "On-Demand Minecraft",
-				description:
-					"A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that's there when you need it.",
-				status: "planned",
-				icon: "telescope",
-				domain: "mc.grove.place",
-				integration: "For Wanderers in the Grove",
-				github: "https://github.com/AutumnsGrove/GroveMC",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{
-						name: "Firefly",
-						icon: "webhook",
-						description: "Ephemeral server pattern",
-						href: "/knowledge/help/what-is-firefly",
-					},
-					{ name: "Private", icon: "badgecheck", description: "Private access only" },
-				],
-			},
-			{
-				name: "Ivy",
-				termSlug: "ivy",
-				tagline: "Privacy-First Email",
-				description:
-					"A zero-knowledge email client for your @grove.place address. Client-side encryption means we can't read your mail. It's yours alone. Threaded conversations, rich text, attachments, and integration with your blog's contact forms.",
-				status: "planned",
-				icon: "ivy",
-				domain: "ivy.grove.place",
-				integration: "Included with Oak and Evergreen tiers",
-				github: "https://github.com/AutumnsGrove/Ivy",
-				spec: "/knowledge/specs/ivy-mail-spec",
-				whatIsLink: "/knowledge/help/what-is-ivy",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-					{ name: "Compose", icon: "component", description: "Write emails" },
-					{ name: "Encrypt", icon: "lock", description: "Zero-knowledge" },
-					{ name: "Contacts", icon: "contact", description: "Address book" },
-				],
-			},
-			{
-				name: "Nook",
-				tagline: "Private Video Sharing",
-				description:
-					"Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you've been meaning to share for over a year.",
-				status: "planned",
-				icon: "projector",
-				integration: "Intimate video sharing for close connections",
-				github: "https://github.com/AutumnsGrove/Nook",
-				spec: "/knowledge/specs/nook-spec",
-				subComponents: [
-					{ name: "Private", icon: "badgecheck", description: "Private access only" },
 				],
 			},
 		],
@@ -1190,7 +918,7 @@ export const categories: Category[] = [
 					"A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.",
 				status: "planned",
 				icon: "firefly",
-				integration: "Powers Verge and Outpost infrastructure",
+				integration: "Ephemeral server infrastructure pattern",
 				spec: "/knowledge/patterns/firefly-pattern",
 				whatIsLink: "/knowledge/help/what-is-firefly",
 				subComponents: [
