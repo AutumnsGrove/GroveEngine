@@ -160,7 +160,7 @@ _The elephant raises its trunk in triumph, the build complete..._
 Ship and document.
 
 ```bash
-gw git ship --write -a -m "feat(component): brief description of feature"
+git add -A && git commit -m "feat(component): brief description of feature"
 ```
 
 Write the completion summary: files created, files modified, config changes, tests added, verification status.

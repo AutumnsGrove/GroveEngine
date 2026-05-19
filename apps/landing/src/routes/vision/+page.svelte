@@ -3,7 +3,7 @@
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
-	import { MobileTOC } from "@autumnsgrove/lattice";
+	import MobileTOC from "@autumnsgrove/lattice/ui/components/custom/MobileTOC.svelte";
 	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();

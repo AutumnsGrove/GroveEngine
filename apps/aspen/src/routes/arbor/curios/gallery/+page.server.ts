@@ -7,7 +7,7 @@ import {
 	SORT_ORDER_OPTIONS,
 	THUMBNAIL_SIZE_OPTIONS,
 	sanitizeCustomCss,
-} from "@autumnsgrove/lattice/curios/gallery";
+} from "@autumnsgrove/curios/gallery";
 import { z } from "zod";
 import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
 

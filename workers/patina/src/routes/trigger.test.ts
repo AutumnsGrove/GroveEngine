@@ -47,8 +47,8 @@ describe("triggerHandler", () => {
 		expect(response.status).toBe(200);
 		expect(body.jobId).toBeDefined();
 		expect(body.status).toBe("started");
-		expect(body.databases).toBe(7); // Total number of databases
-		expect(body.message).toContain("7 database");
+		expect(body.databases).toBe(6); // Total number of databases
+		expect(body.message).toContain("6 database");
 	});
 
 	it("returns 400 when specified databases don't match any valid names", async () => {
@@ -128,7 +128,7 @@ describe("triggerHandler", () => {
 
 		expect(response.status).toBe(200);
 		expect(body.status).toBe("started");
-		expect(body.databases).toBe(7); // All databases due to parsing error
+		expect(body.databases).toBe(6); // All databases due to parsing error
 	});
 
 	it("returns jobId in response", async () => {

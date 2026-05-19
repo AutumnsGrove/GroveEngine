@@ -34,7 +34,7 @@ export const tenants = sqliteTable("tenants", {
 	// Status
 	active: integer("active").default(1),
 
-	// Meadow (076)
+	// Meadow (076) — @deprecated Meadow removed; column retained for prod compat
 	meadowOptIn: integer("meadow_opt_in").default(0),
 
 	// Wanderer tier (053)
@@ -242,6 +242,7 @@ export const freeAccountCreationLog = sqliteTable("free_account_creation_log", {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI: Lumen & Wisp Usage Tracking
+// NOTE: wispRequests is deprecated — Wisp has been removed from the platform.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const lumenUsage = sqliteTable("lumen_usage", {
@@ -258,6 +259,9 @@ export const lumenUsage = sqliteTable("lumen_usage", {
 	createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+/**
+ * @deprecated Wisp has been removed. Table retained for prod data integrity.
+ */
 export const wispRequests = sqliteTable("wisp_requests", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	userId: text("user_id").notNull(),

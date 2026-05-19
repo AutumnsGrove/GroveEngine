@@ -199,7 +199,7 @@ Choose the appropriate type for your email:
 | --------------- | ------------------------------ | ------------------- |
 | `transactional` | Password resets, confirmations | 60/min, 1000/day    |
 | `notification`  | Activity alerts, replies       | 60/min, 1000/day    |
-| `verification`  | Auth codes, magic links        | 10/min, 100/day     |
+| `verification`  | Auth codes, email verification | 10/min, 100/day     |
 | `sequence`      | Onboarding drips               | 100/min, 5000/day   |
 | `lifecycle`     | Payment, renewal events        | 60/min, 500/day     |
 | `broadcast`     | Newsletters, marketing         | 1000/min, 10000/day |

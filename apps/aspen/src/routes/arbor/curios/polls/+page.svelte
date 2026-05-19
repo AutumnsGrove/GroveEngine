@@ -9,7 +9,7 @@
 		RESULTS_VISIBILITY_OPTIONS,
 		CONTAINER_STYLE_OPTIONS,
 		isPollClosed,
-	} from "@autumnsgrove/lattice/curios/polls";
+	} from "@autumnsgrove/curios/polls";
 
 	let { data, form } = $props();
 

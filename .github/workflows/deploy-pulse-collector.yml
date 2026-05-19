@@ -1,0 +1,23 @@
+---
+name: Deploy Pulse Collector
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/pulse-collector/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  issues: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: workers/pulse-collector
+      needs-engine: false
+    secrets: inherit
+...

@@ -56,6 +56,15 @@ function isGroveSubdomain(origin: string): boolean {
 	}
 }
 
+function isLocalhost(origin: string): boolean {
+	try {
+		const url = new URL(origin);
+		return url.hostname === "localhost" || url.hostname === "127.0.0.1";
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Get CORS headers for a given origin
  * Validates against an explicit list of allowed origins
@@ -70,7 +79,8 @@ function getCorsHeaders(origin: string | undefined): Record<string, string> {
 	if (
 		origin &&
 		(ALLOWED_ORIGINS.includes(origin as (typeof ALLOWED_ORIGINS)[number]) ||
-			isGroveSubdomain(origin))
+			isGroveSubdomain(origin) ||
+			isLocalhost(origin))
 	) {
 		headers["Access-Control-Allow-Origin"] = origin;
 		headers["Access-Control-Allow-Credentials"] = "true";

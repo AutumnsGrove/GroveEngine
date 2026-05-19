@@ -11,8 +11,9 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			// Map @autumnsgrove/lattice subpath exports to engine source
-			"@autumnsgrove/lattice/loom": path.resolve(engineLib, "loom/index.ts"),
+			"cloudflare:workers": path.resolve(__dirname, "src/test-stubs/cloudflare-workers.ts"),
+			"@autumnsgrove/loom": path.resolve(__dirname, "../../libs/loom/src/index.ts"),
+			"@autumnsgrove/grove-errors": path.resolve(__dirname, "../../libs/grove-errors/src/index.ts"),
 			"@autumnsgrove/lattice/errors": path.resolve(engineLib, "errors/index.ts"),
 		},
 	},

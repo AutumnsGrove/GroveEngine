@@ -18,7 +18,6 @@
 		normalizeFileForUpload,
 	} from "$lib/media/validation/upload-validation";
 	import { convertHeicToJpeg } from "$lib/media/processing/imageProcessor";
-	import FiresideChat from "../../components/admin/FiresideChat.svelte";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
 	import { browser } from "$app/environment";
 
@@ -32,9 +31,6 @@
 
 	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
 
-	/** Feature flags for this tenant - component reads what it needs.
-	 * Known flags: fireside_mode (AI-assisted prompts), scribe_mode (voice-to-text)
-	 */
 	type FlagsRecord = Record<string, boolean>;
 
 	interface Props {
@@ -48,7 +44,6 @@
 		previewDate?: string;
 		previewTags?: string[];
 		gutterItems?: GutterItemProp[];
-		firesideAssisted?: boolean;
 		/** All flags for this tenant - component reads what it needs */
 		flags?: FlagsRecord;
 		/** Curio configuration status for autocomplete — loaded server-side */
@@ -69,16 +64,12 @@
 		previewDate = "",
 		previewTags = [],
 		gutterItems = [],
-		firesideAssisted = $bindable(false),
 		flags = {},
 		configuredCurios = [],
 		serverDraftSlug = null,
 	}: Props = $props();
 
 	// Derived flags
-	const wispEnabled = $derived(flags?.wisp_enabled ?? false);
-	const firesideEnabled = $derived(flags?.fireside_mode ?? false);
-	const scribeEnabled = $derived(flags?.scribe_mode ?? false);
 	const uploadsEnabled = $derived(flags?.image_uploads ?? true);
 
 	// Core refs and state
@@ -134,13 +125,6 @@
 
 	// Zen mode
 	let isZenMode = $state(false);
-
-	// Fireside mode
-	let isFiresideMode = $state(false);
-
-	// Voice mode
-	let voiceMode: "raw" | "draft" = $state("raw");
-	let voiceError: string | null = $state(null);
 
 	// Initialize composables
 	const editorTheme = useEditorTheme();
@@ -424,11 +408,6 @@
 			e.preventDefault();
 			cycleEditorMode();
 		}
-
-		if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey && wispEnabled && firesideEnabled) {
-			e.preventDefault();
-			toggleFiresideMode();
-		}
 	}
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
@@ -440,11 +419,6 @@
 			}
 			if (showPhotoPicker) {
 				showPhotoPicker = false;
-				e.preventDefault();
-				return;
-			}
-			if (isFiresideMode) {
-				isFiresideMode = false;
 				e.preventDefault();
 				return;
 			}
@@ -466,66 +440,6 @@
 		if (isZenMode) {
 			editorSettings.typewriterMode = true;
 		}
-	}
-
-	// Fireside mode toggle
-	function toggleFiresideMode() {
-		if (!isFiresideMode && content.trim()) {
-			return;
-		}
-		isFiresideMode = !isFiresideMode;
-	}
-
-	function handleFiresideDraft(draft: { title: string; content: string; marker: string }) {
-		content = draft.content + "\n\n" + draft.marker;
-		if (draft.title) {
-			previewTitle = draft.title;
-		}
-		firesideAssisted = true;
-		isFiresideMode = false;
-		tick().then(() => {
-			textareaRef?.focus();
-		});
-	}
-
-	function handleFiresideClose() {
-		isFiresideMode = false;
-	}
-
-	function handleTranscription(result: {
-		text: string;
-		gutterContent?: Array<{ type: string; content: string; anchor?: string }>;
-		rawTranscript?: string;
-	}) {
-		voiceError = null;
-		if (!textareaRef) return;
-
-		const { text } = result;
-		const start = textareaRef.selectionStart;
-		const end = textareaRef.selectionEnd;
-		const before = content.substring(0, start);
-		const after = content.substring(end);
-
-		const needsSpaceBefore = before.length > 0 && !/\s$/.test(before);
-		const needsSpaceAfter = after.length > 0 && !/^\s/.test(after);
-		const insertText = (needsSpaceBefore ? " " : "") + text + (needsSpaceAfter ? " " : "");
-
-		content = before + insertText + after;
-
-		tick().then(() => {
-			if (textareaRef) {
-				const newPos = start + insertText.length;
-				textareaRef.setSelectionRange(newPos, newPos);
-				textareaRef.focus();
-			}
-		});
-	}
-
-	function handleVoiceError(error: { message: string }) {
-		voiceError = error.message;
-		setTimeout(() => {
-			voiceError = null;
-		}, 5000);
 	}
 
 	// Editor mode switching
@@ -890,11 +804,6 @@
 		{editorMode}
 		{readonly}
 		{isZenMode}
-		{isFiresideMode}
-		{wispEnabled}
-		{firesideEnabled}
-		{scribeEnabled}
-		hasContent={!!content.trim()}
 		{saving}
 		{draftKey}
 		draftSaveStatus={draftManager.saveStatus}
@@ -906,8 +815,6 @@
 		{lineCount}
 		{wordCount}
 		{readingTime}
-		{voiceMode}
-		{voiceError}
 		onWrapSelection={wrapSelection}
 		onInsertLink={insertLink}
 		onInsertFootnote={insertFootnote}
@@ -916,49 +823,39 @@
 		onSetEditorMode={setEditorMode}
 		onShowFullPreview={() => (showFullPreview = true)}
 		onToggleZenMode={toggleZenMode}
-		onToggleFiresideMode={toggleFiresideMode}
-		onTranscription={handleTranscription}
-		onVoiceError={handleVoiceError}
 	/>
 
-	<!-- Fireside Mode (replaces editor) -->
-	{#if isFiresideMode}
-		<div class="fireside-area">
-			<FiresideChat onDraft={handleFiresideDraft} onClose={handleFiresideClose} />
-		</div>
-	{:else}
-		<!-- Editor Core (textarea, line numbers, preview panels, curio autocomplete) -->
-		<EditorCore
-			bind:content
-			{editorMode}
-			{readonly}
-			{previewHtml}
-			{lineNumbers}
-			{cursorLine}
-			{configuredCurios}
-			bind:textareaRef
-			bind:previewRef
-			bind:lineNumbersRef
-			bind:curioAutocompleteRef
-			onInput={() => {
-				updateCursorPosition();
-				checkCurioTrigger();
-			}}
-			onClick={() => {
-				updateCursorPosition();
-				if (showCurioAutocomplete) checkCurioTrigger();
-			}}
-			onKeyup={updateCursorPosition}
-			onKeydown={handleKeydown}
-			onScroll={handleScroll}
-			onPaste={handlePaste}
-			{showCurioAutocomplete}
-			{curioQuery}
-			{curioAutocompletePos}
-			onCurioSelect={handleCurioSelect}
-			onCurioClose={closeCurioAutocomplete}
-		/>
-	{/if}
+	<!-- Editor Core (textarea, line numbers, preview panels, curio autocomplete) -->
+	<EditorCore
+		bind:content
+		{editorMode}
+		{readonly}
+		{previewHtml}
+		{lineNumbers}
+		{cursorLine}
+		{configuredCurios}
+		bind:textareaRef
+		bind:previewRef
+		bind:lineNumbersRef
+		bind:curioAutocompleteRef
+		onInput={() => {
+			updateCursorPosition();
+			checkCurioTrigger();
+		}}
+		onClick={() => {
+			updateCursorPosition();
+			if (showCurioAutocomplete) checkCurioTrigger();
+		}}
+		onKeyup={updateCursorPosition}
+		onKeydown={handleKeydown}
+		onScroll={handleScroll}
+		onPaste={handlePaste}
+		{showCurioAutocomplete}
+		{curioQuery}
+		{curioAutocompletePos}
+		onCurioSelect={handleCurioSelect}
+		onCurioClose={closeCurioAutocomplete}
+	/>
 </div>
 
 <!-- Photo Picker -->
@@ -1160,12 +1057,6 @@
 		color: var(--editor-accent, #8bc48b);
 		font-weight: bold;
 		text-decoration: underline;
-	}
-	.fireside-area {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		min-height: 0;
 	}
 	.editor-container.zen-mode {
 		position: fixed;

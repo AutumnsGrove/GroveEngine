@@ -138,21 +138,8 @@ name = "THRESHOLD"
 class_name = "ThresholdDO"
 script_name = "grove-durable-objects"
 
-# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
-[[durable_objects.bindings]]
-name = "CHAT"
-class_name = "ChatDO"
-script_name = "grove-durable-objects"
-
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.
 # Pages projects reference external DOs via script_name.
-
-# =============================================================================
-# Reverie Service Binding (AI configuration pipeline)
-# =============================================================================
-[[services]]
-binding = "REVERIE"
-service = "grove-reverie"
 
 # =============================================================================
 # Environment Variables (non-sensitive)
@@ -181,15 +168,10 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 #
 #   # Apply to all services that need it:
 #   gw secret apply GROVE_KEK --worker grove-lattice
-#   gw secret apply GROVE_KEK --worker grove-timeline-sync
 #
 # Manual alternative:
 #   # Generate KEK: openssl rand -hex 32
 #   wrangler secret put GROVE_KEK
-#
-# IMPORTANT: Both grove-lattice and grove-timeline-sync share the same D1
-# database, so they MUST use the exact same KEK value. Mismatched KEKs
-# means one service can't decrypt secrets encrypted by the other.
 #
 # NOTE: GROVE_KEK is set as a regular Cloudflare secret because Pages
 # doesn't support secrets_store_secrets bindings (only Workers do).

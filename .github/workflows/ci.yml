@@ -145,6 +145,24 @@ jobs:
       - name: Verify engine barrel exports
         run: ./tools/verify-engine-exports.sh
 
+  # Accent color enforcement (fast, always runs)
+  accent-colors:
+    name: Accent Color Tokens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for hardcoded accent colors
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            ./tools/check-accent-colors.sh --pr "${{ github.event.pull_request.base.sha }}"
+          else
+            ./tools/check-accent-colors.sh
+          fi
+
   # Lint (always runs, fast)
   lint:
     name: Lint
@@ -236,7 +254,7 @@ jobs:
   ci-pass:
     name: CI Pass
     if: always()
-    needs: [detect, test, typecheck, barrel-exports, lint]
+    needs: [detect, test, typecheck, barrel-exports, accent-colors, lint]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -245,12 +263,13 @@ jobs:
         id: check
         run: |
           FAILED=""
-          for job in detect test typecheck barrel-exports lint; do
+          for job in detect test typecheck barrel-exports accent-colors lint; do
             case "$job" in
               detect)        RESULT="${{ needs.detect.result }}" ;;
               test)          RESULT="${{ needs.test.result }}" ;;
               typecheck)     RESULT="${{ needs.typecheck.result }}" ;;
               barrel-exports) RESULT="${{ needs.barrel-exports.result }}" ;;
+              accent-colors) RESULT="${{ needs.accent-colors.result }}" ;;
               lint)          RESULT="${{ needs.lint.result }}" ;;
             esac
             echo "$job: $RESULT"
@@ -282,13 +301,14 @@ jobs:
             body += '| Job | Status |\n|-----|--------|\n';
 
             const jobs = [
-              'detect', 'test', 'typecheck', 'barrel-exports', 'lint'
+              'detect', 'test', 'typecheck', 'barrel-exports', 'accent-colors', 'lint'
             ];
             const results = {
               detect: '${{ needs.detect.result }}',
               test: '${{ needs.test.result }}',
               typecheck: '${{ needs.typecheck.result }}',
               'barrel-exports': '${{ needs.barrel-exports.result }}',
+              'accent-colors': '${{ needs.accent-colors.result }}',
               lint: '${{ needs.lint.result }}',
             };
 

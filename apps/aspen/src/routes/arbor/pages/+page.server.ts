@@ -1,4 +1,4 @@
-import { loadCurioStatus, type CurioStatus } from "@autumnsgrove/lattice/server/curio-status";
+import { loadCurioStatus, type CurioStatus } from "@autumnsgrove/curios/status";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {

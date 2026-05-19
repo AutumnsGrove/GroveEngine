@@ -16,7 +16,7 @@ Comprehensive reference for the Better Auth framework. Covers configuration, sec
 - Auditing auth security (pair with `raccoon-audit`, `turtle-harden`)
 - Adding or configuring rate limiting
 - Setting up session management, cookie caching, or secondary storage
-- Adding plugins (2FA, organizations, passkeys, etc.)
+- Adding plugins (2FA, organizations, etc.)
 - Troubleshooting auth issues on Heartwood or any Better Auth deployment
 - Reviewing security posture before production deploy
 

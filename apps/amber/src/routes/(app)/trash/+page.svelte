@@ -5,6 +5,7 @@
 	import * as api from "$lib/api";
 	import type { StorageFile } from "$types";
 	import { formatBytes } from "@autumnsgrove/lattice/utils/format";
+	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 
 	// State
 	let loading = $state(true);
@@ -33,7 +34,7 @@
 	async function handleRestore(file: StorageFile) {
 		const res = await api.restoreFile(file.id);
 		if (res.error) {
-			alert(res.error);
+			toast.error(res.error);
 			return;
 		}
 		await loadData();
@@ -44,7 +45,7 @@
 
 		const res = await api.permanentlyDeleteFile(file.id);
 		if (res.error) {
-			alert(res.error);
+			toast.error(res.error);
 			return;
 		}
 		await loadData();
@@ -55,7 +56,7 @@
 
 		const res = await api.emptyTrash();
 		if (res.error) {
-			alert(res.error);
+			toast.error(res.error);
 			return;
 		}
 		await loadData();

@@ -28,10 +28,6 @@ export type {
 	AuthError,
 	// OAuth types
 	OAuthProvider,
-	// Passkey types
-	Passkey,
-	PasskeyRegisterOptions,
-	PasskeyAuthOptions,
 	// 2FA types
 	TwoFactorStatus,
 	TwoFactorEnableResponse,
@@ -70,13 +66,10 @@ export { RateLimiter, RateLimitError, withRateLimit, DEFAULT_RATE_LIMITS } from 
 // Validation utilities
 export {
 	isValidTotpCode,
-	isValidCredential,
 	getRequiredEnv,
 	TOTP_CODE_LENGTH,
 	TOTP_CODE_REGEX,
 } from "./validation.js";
-
-export type { PasskeyCredential } from "./validation.js";
 
 // Auth error system
 export {

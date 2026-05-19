@@ -10,7 +10,8 @@
  *   1. Lockfile sync      (pnpm install --frozen-lockfile)
  *   2. Deploy drift       (deploy-manifest --drift)
  *   3. Affected typecheck (tsc --noEmit or custom typecheck-command per shim)
- *   4. Affected dry-run   (wrangler deploy --dry-run — only if CF token present)
+ *   4. Svelte-check       (affected + downstream consumers of changed libs)
+ *   5. Affected dry-run   (wrangler deploy --dry-run — only if CF token present)
  *
  * Time budget: ~30-60s for a typical single-service change. Affected-only
  * scoping is the key — a PR that touches libs/engine won't take forever.
@@ -23,6 +24,7 @@
  */
 
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -52,6 +54,19 @@ const bad = (t) => {
 };
 const skip = (t) => console.log(`  ${DIM}⊘ ${t}${RESET}`);
 const note = (t) => console.log(`  ${DIM}${t}${RESET}`);
+
+// Diff against the remote tracking branch when it exists (only checks
+// commits not yet on the remote). Falls back to origin/main for new
+// branches or detached HEAD.
+function detectBase() {
+	const r = spawnSync("git", ["rev-parse", "--abbrev-ref", "@{push}"], {
+		cwd: REPO_ROOT,
+		encoding: "utf8",
+		stdio: "pipe",
+	});
+	if (r.status === 0 && r.stdout.trim()) return r.stdout.trim();
+	return "origin/main";
+}
 
 function run(cmd, cwd) {
 	const r = spawnSync("sh", ["-c", cmd], {
@@ -96,7 +111,7 @@ if (drift.missingWrangler.length === 0 && drift.orphanedWrangler.length === 0) {
 
 // ─── 3. Affected shims — typecheck ────────────────────────────────
 header("Affected deploys");
-const base = process.env.PRE_PUSH_BASE || "origin/main";
+const base = process.env.PRE_PUSH_BASE || detectBase();
 let affected = [];
 try {
 	affected = filterAffected(shims, base);
@@ -162,7 +177,71 @@ if (affected.length === 0) {
 		}
 	}
 
-	// ─── 4. Affected shims — wrangler dry-run ───────────────────────
+	// ─── 4. Svelte-check (affected + downstream consumers) ─────────
+	header("Svelte-check");
+
+	// Collect all shims that need svelte-check: affected ones, plus
+	// downstream consumers of any changed libs (workspace propagation).
+	const svelteCheckTargets = new Set(affected.map((s) => s.service));
+
+	// Workspace propagation: if a lib changed, also check its consumers.
+	// We detect this from shim trigger paths — if a shim lists "libs/X/**"
+	// in its paths, it's a consumer of lib X.
+	const changedLibs = affected
+		.filter((s) => s.path && s.path.startsWith("libs/"))
+		.map((s) => s.path);
+
+	if (changedLibs.length > 0) {
+		for (const shim of shims) {
+			if (svelteCheckTargets.has(shim.service)) continue;
+			const consumesChangedLib = shim.triggers.paths.some((p) =>
+				changedLibs.some((lib) => p.startsWith(lib)),
+			);
+			if (consumesChangedLib) svelteCheckTargets.add(shim.service);
+		}
+	}
+
+	const svelteShims = shims.filter((s) => svelteCheckTargets.has(s.service) && s.path);
+
+	if (svelteShims.length === 0) {
+		skip("No svelte-check targets affected");
+	} else {
+		const downstreamCount = svelteShims.length - affected.length;
+		if (downstreamCount > 0) {
+			note(
+				`+${downstreamCount} downstream consumer${downstreamCount === 1 ? "" : "s"} of changed libs`,
+			);
+		}
+
+		for (const shim of svelteShims) {
+			// Only run svelte-check on packages that have a "check" script
+			const pkgPath = resolve(REPO_ROOT, shim.path, "package.json");
+			let hasCheckScript = false;
+			try {
+				const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+				hasCheckScript = Boolean(pkg.scripts && pkg.scripts.check);
+			} catch {
+				// No package.json or unreadable — skip
+			}
+
+			if (!hasCheckScript) continue;
+			if (shim.with["run-svelte-check"] === false) {
+				skip(`${shim.service} svelte-check (run-svelte-check: false)`);
+				continue;
+			}
+
+			process.stdout.write(`  ${DIM}${shim.service.padEnd(20)} svelte-check ...${RESET}`);
+			const r = run("pnpm run check", resolve(REPO_ROOT, shim.path));
+			if (r.ok) console.log(` ${GREEN}✓${RESET}`);
+			else {
+				console.log(` ${RED}✗${RESET}`);
+				failures++;
+				dumpTail(r.stderr || r.stdout, 25);
+			}
+		}
+	}
+
+	// ─── 5. Affected shims — wrangler dry-run ───────────────────────
 	const hasToken = Boolean(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID);
 	console.log();
 	if (!hasToken) {

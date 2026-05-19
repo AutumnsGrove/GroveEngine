@@ -12,7 +12,7 @@
 	import { GlassConfirmDialog } from "@autumnsgrove/lattice/ui";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { featureIcons, metricIcons, phaseIcons, authIcons, natureIcons, blazeIcons, navIcons } from "@autumnsgrove/prism/icons";
+	import { featureIcons, metricIcons, phaseIcons, authIcons, blazeIcons, navIcons } from "@autumnsgrove/prism/icons";
 	const LayoutDashboard = featureIcons.layoutDashboard;
 	const Server = featureIcons.server;
 	const Database = featureIcons.database;
@@ -22,8 +22,6 @@
 	const Brain = phaseIcons.brain;
 	const Shield = authIcons.shield;
 	const Lock = authIcons.lock;
-	const Flower2 = natureIcons.flower2;
-	const Flame = natureIcons.flame;
 	const Bell = blazeIcons.bell;
 	const ArrowLeft = navIcons.arrowLeft;
 	import type { ArborNavEntry } from "@autumnsgrove/lattice/ui/arbor";
@@ -67,8 +65,6 @@
 		{ href: "/arbor/vista/ai", label: "AI Usage", icon: Brain },
 		{ href: "/arbor/vista/moderation", label: "Moderation", icon: Shield },
 		{ href: "/arbor/vista/warden", label: "Warden", icon: Lock },
-		{ href: "/arbor/vista/meadow", label: "Meadow", icon: Flower2 },
-		{ href: "/arbor/vista/firefly", label: "Firefly", icon: Flame },
 		{ kind: "divider", style: "line" },
 		{ href: "/arbor/vista/alerts", label: "Alerts", icon: Bell },
 	];

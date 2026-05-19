@@ -162,7 +162,7 @@ async function getFont(env: Env): Promise<ArrayBuffer> {
 	}
 
 	log("error", "font", OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
-	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
+	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.userMessage);
 }
 
 /**
@@ -250,7 +250,7 @@ async function getBoldFont(env: Env): Promise<ArrayBuffer> {
 	}
 
 	log("error", "font", OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
-	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.adminMessage);
+	throw new Error(OG_ERRORS.FONT_LOAD_FAILED.userMessage);
 }
 
 // =============================================================================
@@ -491,7 +491,7 @@ async function handleOGFetch(
 	try {
 		parsedUrl = new URL(targetUrl);
 		if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-			throw new Error(OG_ERRORS.INVALID_URL.adminMessage);
+			throw new Error(OG_ERRORS.INVALID_URL.userMessage);
 		}
 	} catch {
 		return new Response(
@@ -616,7 +616,8 @@ async function handleOGFetch(
 	try {
 		const reader = response.body?.getReader();
 		if (!reader) {
-			throw new Error(OG_ERRORS.READ_FAILED.adminMessage);
+			log("error", "og-fetch", OG_ERRORS.READ_FAILED.adminMessage);
+			throw new Error(OG_ERRORS.READ_FAILED.userMessage);
 		}
 
 		const chunks: Uint8Array[] = [];

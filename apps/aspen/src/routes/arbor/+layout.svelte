@@ -10,7 +10,6 @@
 	const gardenIcon = resolveIcon(defaultSuite.garden.icon);
 	const reedsIcon = resolveIcon(defaultSuite.reeds.icon);
 	const curioIcon = resolveIcon(defaultSuite.curio.icon);
-	const reverieIcon = resolveIcon(defaultSuite.reverie.icon);
 
 	// Build nav items from tenant grafts and data
 	let navItems = $derived([
@@ -25,19 +24,7 @@
 			termSlug: "reeds",
 			badge: data.pendingCommentCount ?? 0,
 		},
-		{
-			href: "/arbor/chat",
-			label: "Messages",
-			icon: featureIcons.messageCircle,
-			visible: !!data.flags?.chirp_enabled,
-		},
 		{ href: "/arbor/curios", label: "Curios", icon: curioIcon, termSlug: "curio" },
-		{
-			href: "/arbor/reverie",
-			label: "Reverie",
-			icon: reverieIcon,
-			visible: !!data.flags?.reverie_enabled,
-		},
 		{ href: "/arbor/account", label: "Account", icon: metricIcons.creditCard },
 		{ href: "/arbor/settings", label: "Settings", icon: actionIcons.settings },
 	]);

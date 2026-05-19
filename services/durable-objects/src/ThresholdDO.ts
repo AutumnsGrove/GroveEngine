@@ -24,7 +24,7 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 
 // =============================================================================
 // TYPES

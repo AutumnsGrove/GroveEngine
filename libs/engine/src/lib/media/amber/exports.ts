@@ -13,7 +13,7 @@ import { amberExports } from "../../server/db/schema/engine.js";
 import { eq, and, desc } from "drizzle-orm";
 import type { AmberExport, AmberExportCreateOptions, AmberExportType } from "./types.js";
 import { AMB_ERRORS, AmberError } from "./errors.js";
-import { logGroveError } from "../../errors/helpers.js";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { generateFileId } from "./utils.js";
 import { safeJsonParse } from "../../server/utils/typed-cache.js";
 import { z } from "zod";

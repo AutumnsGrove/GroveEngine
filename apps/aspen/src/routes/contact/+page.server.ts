@@ -1,4 +1,4 @@
-import { getContactPage } from "@autumnsgrove/lattice/content/markdown/markdown";
+import { getContactPage } from "@autumnsgrove/grove-markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types.js";
 

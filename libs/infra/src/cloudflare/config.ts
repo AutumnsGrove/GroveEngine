@@ -5,7 +5,7 @@
  * from the Workers `env` binding object.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type { GroveConfig, ConfigInfo } from "../types.js";
 
@@ -24,7 +24,7 @@ export class CloudflareConfig implements GroveConfig {
 			logGroveError("InfraSDK", SRV_ERRORS.CONFIG_MISSING, {
 				detail: `Key: ${key}`,
 			});
-			throw new Error(SRV_ERRORS.CONFIG_MISSING.adminMessage);
+			throw new Error(SRV_ERRORS.CONFIG_MISSING.userMessage);
 		}
 		return String(value);
 	}

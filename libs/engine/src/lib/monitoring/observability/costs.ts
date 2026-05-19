@@ -103,32 +103,6 @@ export const CLOUDFLARE_PRICING = {
 	},
 } as const;
 
-/**
- * External provider costs for Queen Firefly ephemeral servers.
- * All prices are per hour in USD.
- */
-export const FIREFLY_PROVIDER_PRICING = {
-	hetzner: {
-		cx22: 0.008, // 2 vCPU, 4GB RAM
-		cx32: 0.016, // 4 vCPU, 8GB RAM
-		cx42: 0.032, // 8 vCPU, 16GB RAM
-	},
-	flyio: {
-		"shared-cpu-1x": 0.0101, // 256MB RAM shared CPU
-		"performance-1x": 0.02, // 256MB RAM dedicated CPU
-		"performance-2x": 0.04, // 512MB RAM dedicated CPU
-	},
-	railway: {
-		starter: 0.015, // ~0.5 vCPU, 512MB RAM (estimated)
-		pro: 0.03, // ~1 vCPU, 1GB RAM (estimated)
-	},
-	digitalocean: {
-		"s-1vcpu-1gb": 0.009, // 1 vCPU, 1GB RAM
-		"s-1vcpu-2gb": 0.018, // 1 vCPU, 2GB RAM
-		"s-2vcpu-2gb": 0.027, // 2 vCPU, 2GB RAM
-	},
-} as const;
-
 // =============================================================================
 // Cost Calculation Functions
 // =============================================================================
@@ -308,19 +282,4 @@ export function projectMonthly(dailyCost: CostBreakdown): CostBreakdown {
 		periodLabel: month,
 		pricingVersion: PRICING_LAST_VERIFIED,
 	};
-}
-
-/**
- * Calculate Firefly session cost for a given provider, instance type, and duration.
- */
-export function calculateFireflySessionCost(
-	provider: keyof typeof FIREFLY_PROVIDER_PRICING,
-	instanceType: string,
-	durationSeconds: number,
-): number {
-	const providerPricing = FIREFLY_PROVIDER_PRICING[provider] as Record<string, number>;
-	const hourlyRate = providerPricing[instanceType];
-	if (!hourlyRate) return 0;
-	const durationHours = durationSeconds / 3600;
-	return hourlyRate * durationHours;
 }

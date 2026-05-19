@@ -17,9 +17,9 @@
  *   import { createAIChatController } from '$lib/ui/components/ui/glasschat';
  *
  *   const chat = createAIChatController({
- *     aiRole: 'wisp',
+ *     aiRole: 'assistant',
  *     onSend: async (message) => {
- *       const data = await api.post('/api/wisp', { message });
+ *       const data = await api.post('/api/ai/infer', { message });
  *       return { content: data.reply };
  *     },
  *   });

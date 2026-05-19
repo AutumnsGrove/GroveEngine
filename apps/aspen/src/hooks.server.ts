@@ -1,4 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import {
 	generateCSRFToken,
 	generateSessionCSRFToken,
@@ -7,6 +8,7 @@ import {
 } from "@autumnsgrove/lattice/utils/csrf";
 import { error, redirect } from "@sveltejs/kit";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 import {
 	TURNSTILE_COOKIE_NAME,
 	validateVerificationCookie,
@@ -66,6 +68,9 @@ function extractSubdomain(host: string, request: Request, url: URL): string | nu
 		if (paramSubdomain && isValidSubdomain(paramSubdomain)) {
 			return paramSubdomain;
 		}
+
+		// Option 3: Default tenant for local dev (no header or param needed)
+		return "midnight-bloom";
 	}
 
 	return null;
@@ -310,7 +315,7 @@ function needsUnsafeEval(pathname: string): boolean {
 	);
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const aspenHandle: Handle = async ({ event, resolve }) => {
 	// Initialize context and user
 	event.locals.user = null;
 	event.locals.context = { type: "landing" };
@@ -619,9 +624,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// INTERNAL SERVICE AUTH (worker-to-worker)
 	// =========================================================================
-	// Allows trusted internal services (e.g., reverie-exec) to call API
-	// endpoints via service binding without a Heartwood session. The service
-	// must provide a valid X-Internal-Service-Key and X-Tenant-Id header.
+	// Allows trusted internal services to call API endpoints via service binding
+	// without a Heartwood session. The service must provide a valid
+	// X-Internal-Service-Key and X-Tenant-Id header.
 	if (!event.locals.user) {
 		const internalKey = event.request.headers.get("X-Internal-Service-Key");
 		const internalTenant = event.request.headers.get("X-Tenant-Id");
@@ -651,9 +656,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 				if (diff === 0) {
 					event.locals.user = {
-						id: "system:reverie-exec",
+						id: "system:internal-service",
 						email: "system@grove.internal",
-						name: "Reverie Executor",
+						name: "Internal Service",
 						picture: "",
 					};
 					event.locals.tenantId = internalTenant;
@@ -750,8 +755,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";
 		// Admin API endpoints use their own auth gate (isAdmin check) — origin validation suffices
 		const isAdminApi = event.url.pathname.startsWith("/api/admin/");
-		// Passkey endpoints do their own origin validation and require session auth
-		const isPasskeyApi = event.url.pathname.startsWith("/api/passkey/");
 		// SvelteKit form actions have built-in CSRF protection via origin validation
 		// Detect via: x-sveltekit-action header OR ?/ URL pattern
 		const isSvelteKitAction = event.request.headers.get("x-sveltekit-action") === "true";
@@ -767,7 +770,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// SvelteKit's built-in CSRF is disabled because it doesn't understand
 		// our grove-router proxy setup (compares Origin against internal Host).
 		// SECURITY: When Origin is absent, falls back to CSRF token validation
-		if (isFormAction || isAuthEndpoint || isTurnstileEndpoint || isAdminApi || isPasskeyApi) {
+		if (isFormAction || isAuthEndpoint || isTurnstileEndpoint || isAdminApi) {
 			if (
 				!validateCSRF(event.request, false, {
 					csrfToken: requestCsrfToken,
@@ -867,3 +870,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(pulseHandle({ app: "aspen" }), aspenHandle);
+export const handleError = createPulseErrorHook({ app: "aspen" });

@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
-import { renderMarkdown } from "@autumnsgrove/lattice/content/markdown/markdown";
+import { renderMarkdown } from "@autumnsgrove/grove-markdown";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";

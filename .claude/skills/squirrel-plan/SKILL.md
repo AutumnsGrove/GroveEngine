@@ -41,7 +41,7 @@ Gather all the raw material for the calendar:
 **From recent work:**
 ```bash
 # What's been shipped recently?
-gw git log --oneline --since="14 days ago"
+git log --oneline --since="14 days ago"
 
 # What's in progress? (upcoming acorns)
 gw gh issue list --label "in-progress"
@@ -183,7 +183,7 @@ Present the calendar to the user for review and refinement:
 **GitHub Projects integration (optional):**
 ```bash
 # Create content items as issues with dates
-gw gh issue create --write \
+gh issue create \
   --title "Content: [topic]" \
   --body "$(cat <<'EOF'
 ## Content Plan

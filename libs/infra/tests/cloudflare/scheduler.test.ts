@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CloudflareScheduler } from "../../src/cloudflare/scheduler.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 
@@ -93,7 +93,7 @@ describe("CloudflareScheduler", () => {
 		it("should log warning when no handler matches", async () => {
 			await scheduler.dispatch("*/15 * * * *", new Date());
 
-			const { logGroveError } = await import("@autumnsgrove/lattice/errors");
+			const { logGroveError } = await import("@autumnsgrove/grove-errors");
 			expect(logGroveError).toHaveBeenCalled();
 		});
 

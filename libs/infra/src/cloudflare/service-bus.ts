@@ -5,7 +5,7 @@
  * RPC calls. Falls back gracefully if a binding is missing.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveServiceBus,
@@ -54,7 +54,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
 				detail: `Service: ${service}`,
 			});
-			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage);
+			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.userMessage);
 		}
 
 		const start = performance.now();
@@ -87,7 +87,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned ${response.status}: ${text.slice(0, 200)}`,
 					});
-					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.userMessage);
 				}
 				// Try parsing as JSON even without Content-Type header
 				try {
@@ -96,7 +96,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned non-JSON body (${response.status})`,
 					});
-					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.userMessage);
 				}
 			}
 
@@ -153,6 +153,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			// Any response (even 404) means the binding is alive.
 			return ok;
 		} catch {
+			// error-ok — ping failure is a boolean result, not an error state
 			const durationMs = performance.now() - start;
 			this.observer?.({
 				service: "services",

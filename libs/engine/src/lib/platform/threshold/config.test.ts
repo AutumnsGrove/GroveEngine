@@ -23,10 +23,8 @@ describe("config", () => {
 		});
 
 		it("includes Heartwood-originated endpoints", () => {
-			expect(ENDPOINT_RATE_LIMITS["auth/magic-link"]).toBeDefined();
 			expect(ENDPOINT_RATE_LIMITS["session/validate"]).toBeDefined();
 			expect(ENDPOINT_RATE_LIMITS["device/init"]).toBeDefined();
-			expect(ENDPOINT_RATE_LIMITS["auth/passkey-register"]).toBeDefined();
 			expect(ENDPOINT_RATE_LIMITS["check/username"]).toBeDefined();
 			expect(ENDPOINT_RATE_LIMITS["og/generate"]).toBeDefined();
 		});

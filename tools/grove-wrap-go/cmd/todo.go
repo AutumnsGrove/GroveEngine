@@ -10,18 +10,40 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
-	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/safety"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/todoist"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/vault"
 )
 
-// requireTodoSafety checks Todoist operation safety.
+var todoistDangerousOps = map[string]bool{
+	"todoist_delete_task":   true,
+	"todoist_clear_section": true,
+}
+
+var todoistWriteOps = map[string]bool{
+	"todoist_create_task":    true,
+	"todoist_create_section": true,
+	"todoist_batch":          true,
+	"todoist_update_task":    true,
+	"todoist_complete_task":  true,
+}
+
 func requireTodoSafety(operation string) error {
 	cfg := config.Get()
-	return safety.CheckTodoistSafety(
-		operation, cfg.WriteFlag, cfg.ForceFlag, cfg.AgentMode, cfg.IsInteractive(),
-	)
+	if todoistDangerousOps[operation] {
+		if cfg.AgentMode {
+			return fmt.Errorf("operation '%s' is blocked in agent mode", operation)
+		}
+		if !cfg.WriteFlag || !cfg.ForceFlag {
+			return fmt.Errorf("operation '%s' requires --write --force", operation)
+		}
+	} else if todoistWriteOps[operation] {
+		effectiveWrite := cfg.WriteFlag || (cfg.IsInteractive() && !cfg.AgentMode)
+		if !effectiveWrite {
+			return fmt.Errorf("operation '%s' requires --write flag", operation)
+		}
+	}
+	return nil
 }
 
 // resolveTodoistToken resolves the Todoist API token with a 3-tier fallback:

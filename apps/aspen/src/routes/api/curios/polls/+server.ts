@@ -8,7 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { stripHtml } from "@autumnsgrove/lattice/curios/sanitize";
+import { stripHtml } from "@autumnsgrove/curios/sanitize";
 import {
 	generatePollId,
 	generateOptionId,
@@ -24,7 +24,7 @@ import {
 	MAX_DESCRIPTION_LENGTH,
 	MAX_POLLS_PER_TENANT,
 	type PollOption,
-} from "@autumnsgrove/lattice/curios/polls";
+} from "@autumnsgrove/curios/polls";
 
 interface PollRow {
 	id: string;

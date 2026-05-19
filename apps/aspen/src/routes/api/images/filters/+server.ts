@@ -1,5 +1,5 @@
 import { json, error } from "@sveltejs/kit";
-import { parseImageFilename } from "@autumnsgrove/lattice/utils/gallery";
+import { parseImageFilename } from "@autumnsgrove/curios/gallery";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
 

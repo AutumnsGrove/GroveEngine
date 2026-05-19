@@ -79,10 +79,8 @@ describe("defaultSuite", () => {
 		"prism",
 		// AI
 		"lumen",
-		"reverie",
 		"lantern",
 		"moss",
-		"wisp",
 		// Communication
 		"ivy",
 		"zephyr",

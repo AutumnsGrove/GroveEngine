@@ -4,6 +4,7 @@ import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { z } from "zod";
 import { parseFormData } from "@autumnsgrove/lattice/server";
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 
 // ─── Zod schema for profile form validation (Rootwork Phase 3) ──────
 const ProfileSchema = z.object({
@@ -132,6 +133,12 @@ export const actions: Actions = {
 				)
 				.bind(displayName, username, favoriteColor, JSON.stringify(interests), onboardingId)
 				.run();
+
+			emitPulseEvent("signup.profile_done", {
+				app: "plant",
+				route: "/profile",
+				metadata: { onboarding_id: onboardingId, username },
+			});
 		} catch (err) {
 			logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
 				path: "/profile",
@@ -142,7 +149,7 @@ export const actions: Actions = {
 		}
 
 		// ─── Verify email status before redirecting ──────────────────────
-		// (diagnostic: confirm magic link set email_verified correctly)
+		// (diagnostic: confirm OAuth set email_verified correctly)
 		try {
 			const record = await db
 				.prepare("SELECT email_verified FROM user_onboarding WHERE id = ?")

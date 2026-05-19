@@ -46,7 +46,7 @@
 		"test:run": "vitest run"
 	},
 	"dependencies": {
-		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/grove-errors": "workspace:*",
 		"hono": "^4.11.9"
 	},
 	"devDependencies": {

@@ -27,7 +27,8 @@ export class DeepSeekProvider implements AIProvider {
 	constructor(env: Env, model?: string) {
 		const apiKey = env.DEEPSEEK_API_KEY;
 		if (!apiKey) {
-			throw new Error(FORAGE_ERRORS.API_KEY_NOT_CONFIGURED.adminMessage);
+			logForageError(FORAGE_ERRORS.API_KEY_NOT_CONFIGURED, { detail: "DEEPSEEK_API_KEY not set" });
+			throw new Error(FORAGE_ERRORS.API_KEY_NOT_CONFIGURED.userMessage);
 		}
 		this.apiKey = apiKey;
 		this.model = model || this.defaultModel;

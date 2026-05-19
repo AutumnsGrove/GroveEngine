@@ -1,0 +1,31 @@
+# Grove Pulse Collector
+# Product observability event pipeline — receives events from all apps,
+# buffers in a Durable Object, flushes to D1.
+#
+# Cron schedule:
+# - Daily at 1 AM UTC: aggregate pulse_events → pulse_daily, prune >90-day raw events
+
+name = "grove-pulse-collector"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false  # Only reachable via service binding — not public
+
+[triggers]
+crons = [
+  "0 1 * * *"   # Daily 1 AM UTC: aggregation + retention cleanup
+]
+
+[[d1_databases]]
+binding = "OBS_DB"
+database_name = "grove-observability-db"
+database_id = "59e70f9e-8f9c-4021-96e5-1e130e753766"
+
+[durable_objects]
+bindings = [
+  { name = "PULSE_BUFFER", class_name = "PulseBuffer" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PulseBuffer"]

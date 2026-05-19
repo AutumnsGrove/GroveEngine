@@ -15,8 +15,8 @@
  * // Get flags a tenant can control
  * const grafts = await getTenantControllableFlags(tenantId, env);
  *
- * // Tenant toggles Fireside off for themselves
- * await setTenantFlagOverride('fireside_mode', tenantId, false, env);
+ * // Tenant disables JXL encoding for themselves
+ * await setTenantFlagOverride('jxl_encoding', tenantId, false, env);
  * ```
  */
 

@@ -10,7 +10,7 @@ import type { RequestHandler } from "./$types";
 import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
-} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+} from "@autumnsgrove/curios/timeline/secrets.server";
 import { createLumenClient } from "@autumnsgrove/lattice/ai/lumen";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/platform/threshold/sveltekit";

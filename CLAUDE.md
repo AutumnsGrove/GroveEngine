@@ -16,10 +16,11 @@ gf --help && gw --help
 
 ```bash
 bash tools/grove-find-go/install.sh   # gf — codebase search (Go binary, ~40ms)
-bash tools/grove-wrap-go/install.sh   # gw — infrastructure CLI (Go binary, ~17ms)
+bash tools/grove-wrap-go/install.sh   # gw — infrastructure CLI (secrets, worktrees, warden, publishing)
 ```
 
-Run `gf --help` and `gw --help` for full command lists.
+`gw` handles things raw CLIs can't (encrypted vaults, issue-driven worktrees, npm publishing, Warden).
+For git, gh, and wrangler — use them directly.
 
 ---
 

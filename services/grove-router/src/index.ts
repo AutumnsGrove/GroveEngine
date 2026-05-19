@@ -51,19 +51,14 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 
 	// Grove internal Pages projects
 	amber: "amber-4x2.pages.dev", // Amber storage
-	ivy: "ivy-3uv.pages.dev", // Ivy mail client
 	// autumn subdomain now routes to lattice (tenant in D1) — legacy autumn-website.pages.dev removed
 	plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
-	terrarium: "grove-terrarium.pages.dev", // Terrarium visual composer
 	vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
 	cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
 	// Domain management
 	domains: "grove-domains.pages.dev",
 	forage: "grove-domains.pages.dev",
-
-	// Social feed
-	meadow: "grove-meadow.pages.dev",
 
 	// Music
 	music: "grovemusic.pages.dev",
@@ -97,7 +92,6 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	search: "grove-landing.m7jv4v7npb.workers.dev", // Search (coming soon)
 	porch: "grove-landing.m7jv4v7npb.workers.dev", // Porch conversations (coming soon)
 	canopy: "grove-landing.m7jv4v7npb.workers.dev", // Canopy directory (route-based at grove.place/canopy)
-	chirp: "grove-landing.m7jv4v7npb.workers.dev", // Chirp DMs (coming soon)
 
 	// Special handling
 	www: "REDIRECT", // Redirect to root
@@ -208,7 +202,7 @@ export default {
 				redirectUrl.hostname = "login.grove.place";
 				return Response.redirect(redirectUrl.toString(), 301);
 			}
-			// API requests continue to Heartwood via service binding (backward compat for in-flight magic links)
+			// API requests continue to Heartwood via service binding (backward compat for in-flight API calls)
 		}
 
 		// Handle R2 CDN - serve directly from R2 bucket

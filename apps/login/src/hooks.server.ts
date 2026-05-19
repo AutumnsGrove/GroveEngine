@@ -1,5 +1,7 @@
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import { isGroveOrigin, isLocalOrigin, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 
 /**
  * Server hooks for the Login app
@@ -39,7 +41,7 @@ function getCorsHeaders(origin: string): Record<string, string> {
 	};
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const loginHandle: Handle = async ({ event, resolve }) => {
 	const { request, url } = event;
 	const origin = request.headers.get("Origin");
 	const isApi = isApiRoute(url.pathname);
@@ -71,3 +73,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(pulseHandle({ app: "login" }), loginHandle);
+export const handleError = createPulseErrorHook({ app: "login" });

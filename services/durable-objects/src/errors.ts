@@ -2,7 +2,7 @@
  * Durable Objects Error System
  *
  * Structured error codes for Durable Object operations across all 7 objects:
- * ExportDO, PostContentDO, PostMetaDO, TenantDO, ThresholdDO, TriageDO, SentinelDO.
+ * ExportDO, PostContentDO, PostMetaDO, TenantDO, ThresholdDO, SentinelDO.
  * Follows the Grove error system pattern (GroveErrorDef shape) but lives
  * in-worker since Durable Objects are embedded in the engine worker.
  *

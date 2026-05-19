@@ -214,8 +214,7 @@ describe("Threshold", () => {
 describe("categorizeRequest()", () => {
 	it("categorizes AI endpoints", () => {
 		expect(categorizeRequest("POST", "/api/ai/wisp")).toBe("ai");
-		expect(categorizeRequest("POST", "/api/wisp")).toBe("ai");
-		expect(categorizeRequest("POST", "/api/grove/wisp")).toBe("ai");
+		expect(categorizeRequest("POST", "/api/ai/draft")).toBe("ai");
 	});
 
 	it("categorizes upload endpoints", () => {

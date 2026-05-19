@@ -1,0 +1,112 @@
+{
+	"name": "@autumnsgrove/curios",
+	"version": "0.1.0",
+	"description": "Grove Curios — gallery, guestbook, polls, timeline interactive widgets.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/curios"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./gallery": {
+			"types": "./src/gallery/index.ts",
+			"default": "./src/gallery/index.ts"
+		},
+		"./guestbook": {
+			"types": "./src/guestbook/index.ts",
+			"default": "./src/guestbook/index.ts"
+		},
+		"./guestbook/GuestbookPreview.svelte": {
+			"svelte": "./src/guestbook/GuestbookPreview.svelte",
+			"default": "./src/guestbook/GuestbookPreview.svelte"
+		},
+		"./guestbook/GuestbookEntryCollage.svelte": {
+			"svelte": "./src/guestbook/GuestbookEntryCollage.svelte",
+			"default": "./src/guestbook/GuestbookEntryCollage.svelte"
+		},
+		"./polls": {
+			"types": "./src/polls/index.ts",
+			"default": "./src/polls/index.ts"
+		},
+		"./timeline": {
+			"types": "./src/timeline/index.ts",
+			"default": "./src/timeline/index.ts"
+		},
+		"./timeline/secrets.server": {
+			"types": "./src/timeline/secrets.server.ts",
+			"default": "./src/timeline/secrets.server.ts"
+		},
+		"./timeline/voices": {
+			"types": "./src/timeline/voices/index.ts",
+			"default": "./src/timeline/voices/index.ts"
+		},
+		"./sanitize": {
+			"types": "./src/sanitize.ts",
+			"default": "./src/sanitize.ts"
+		},
+		"./status": {
+			"types": "./src/status.ts",
+			"default": "./src/status.ts"
+		},
+		"./components": {
+			"types": "./src/components/index.ts",
+			"default": "./src/components/index.ts"
+		},
+		"./components/CurioGuestbook.svelte": {
+			"svelte": "./src/components/CurioGuestbook.svelte",
+			"default": "./src/components/CurioGuestbook.svelte"
+		},
+		"./components/CurioPoll.svelte": {
+			"svelte": "./src/components/CurioPoll.svelte",
+			"default": "./src/components/CurioPoll.svelte"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/grove-crypto": "workspace:*",
+		"@autumnsgrove/grove-errors": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/prism": "workspace:*",
+		"markdown-it": "^14.1.0",
+		"@types/markdown-it": "^14.1.2",
+		"svelte": "^5.0.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
+	},
+	"peerDependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/prism": "workspace:*",
+		"svelte": "^5.0.0",
+		"markdown-it": ">=14.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@autumnsgrove/lattice": {
+			"optional": false
+		}
+	},
+	"keywords": [
+		"grove",
+		"curios",
+		"gallery",
+		"guestbook",
+		"polls",
+		"timeline"
+	]
+}

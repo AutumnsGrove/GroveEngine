@@ -8,8 +8,8 @@ Patterns for migrating configurations, conventions, naming schemes, environment 
 
 ```bash
 # Branch is always the baseline backup
-gw git branch bear/migrate-description
-gw git checkout bear/migrate-description
+git branch bear/migrate-description
+git checkout bear/migrate-description
 
 # For config migrations, snapshot current working state
 gw ci  # verify everything passes BEFORE touching anything

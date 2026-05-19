@@ -8,6 +8,7 @@ import { json } from "@sveltejs/kit";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import {
 	getCommentById,
@@ -76,6 +77,13 @@ export const POST: RequestHandler = async ({ params, request, platform, locals }
 			locals.user.id,
 			note,
 		);
+
+		emitPulseEvent("comment.moderated", {
+			app: "aspen",
+			route: `/api/reeds/${params.slug}/${params.commentId}/moderate`,
+			tenant_id: tenantId,
+			metadata: { comment_id: commentId, action: data.action },
+		});
 
 		const messages: Record<string, string> = {
 			approve: "Comment approved and now visible.",

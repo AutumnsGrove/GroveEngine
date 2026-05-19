@@ -124,6 +124,7 @@
 }
 
 /* Subtle gradient background for domain pages */
+/* accent-ok — decorative surface gradient, not accent branding */
 .domain-gradient {
 	background: linear-gradient(135deg, #f5f3ff 0%, #fefdfb 50%, #f0fdf4 100%);
 }

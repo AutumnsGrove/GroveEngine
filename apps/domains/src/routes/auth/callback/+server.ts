@@ -16,6 +16,7 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createSession, getOrCreateUser } from "$lib/server/db";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
 
 // =============================================================================
 // Constants
@@ -62,8 +63,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 		throw redirect(302, `/arbor/login?error=${encodeURIComponent(friendlyMessage)}`);
 	}
 
-	// Get return URL from query params (set by LoginGraft) or default to /arbor
-	const returnTo = url.searchParams.get("returnTo") || "/arbor";
+	// Get return URL from query params (set by LoginGraft), sanitized to prevent open redirects
+	const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
 
 	// Verify Better Auth session cookie was set
 	// Check both prefixed (production HTTPS) and unprefixed (development) variants

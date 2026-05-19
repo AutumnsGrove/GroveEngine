@@ -66,6 +66,11 @@ service = "groveauth"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
 # KV Namespace - For rate limiting (email verification, etc.)
 # Create with: npx wrangler kv:namespace create KV
 # Then add the ID below

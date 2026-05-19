@@ -2,8 +2,12 @@
 	"author": "AutumnsGrove",
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
-		"@autumnsgrove/gossamer": "workspace:*",
+		"@autumnsgrove/curios": "workspace:*",
+		"@autumnsgrove/grove-crypto": "workspace:*",
+		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
+		"@autumnsgrove/loom": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@jsquash/jxl": "^1.3.0",
 		"@react-email/components": "^1.0.10",
@@ -33,6 +37,7 @@
 	},
 	"description": "The shared framework powering Grove — blogging platform, glassmorphism UI components, Loom Durable Objects SDK, Lumen AI routing, auth utilities, feature flags, and email infrastructure for SvelteKit on Cloudflare Workers.",
 	"devDependencies": {
+		"@autumnsgrove/gossamer": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"@lucide/svelte": "^0.577.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
@@ -190,62 +195,6 @@
 			"types": "./dist/platform/config/*.d.ts",
 			"default": "./dist/platform/config/*.js"
 		},
-		"./curios": {
-			"types": "./dist/curios/index.d.ts",
-			"default": "./dist/curios/index.js"
-		},
-		"./curios/*": {
-			"types": "./dist/curios/*/index.d.ts",
-			"default": "./dist/curios/*/index.js"
-		},
-		"./curios/components/*": {
-			"types": "./dist/curios/components/*/index.d.ts",
-			"svelte": "./dist/curios/components/*/index.js",
-			"default": "./dist/curios/components/*/index.js"
-		},
-		"./curios/components/artifacts/*.svelte": {
-			"types": "./dist/curios/components/artifacts/*.svelte.d.ts",
-			"svelte": "./dist/curios/components/artifacts/*.svelte",
-			"default": "./dist/curios/components/artifacts/*.svelte"
-		},
-		"./curios/gallery": {
-			"types": "./dist/curios/gallery/index.d.ts",
-			"default": "./dist/curios/gallery/index.js"
-		},
-		"./curios/guestbook": {
-			"types": "./dist/curios/guestbook/index.d.ts",
-			"default": "./dist/curios/guestbook/index.js"
-		},
-		"./curios/guestbook/*.svelte": {
-			"types": "./dist/curios/guestbook/*.svelte.d.ts",
-			"svelte": "./dist/curios/guestbook/*.svelte",
-			"default": "./dist/curios/guestbook/*.svelte"
-		},
-		"./curios/sanitize": {
-			"types": "./dist/curios/sanitize.d.ts",
-			"default": "./dist/curios/sanitize.js"
-		},
-		"./curios/shrines": {
-			"types": "./dist/curios/shrines/index.d.ts",
-			"default": "./dist/curios/shrines/index.js"
-		},
-		"./curios/shrines/*.svelte": {
-			"types": "./dist/curios/shrines/*.svelte.d.ts",
-			"svelte": "./dist/curios/shrines/*.svelte",
-			"default": "./dist/curios/shrines/*.svelte"
-		},
-		"./curios/timeline": {
-			"types": "./dist/curios/timeline/index.d.ts",
-			"default": "./dist/curios/timeline/index.js"
-		},
-		"./curios/timeline/secrets.server": {
-			"types": "./dist/curios/timeline/secrets.server.d.ts",
-			"default": "./dist/curios/timeline/secrets.server.js"
-		},
-		"./curios/timeline/voices": {
-			"types": "./dist/curios/timeline/voices/index.d.ts",
-			"default": "./dist/curios/timeline/voices/index.js"
-		},
 		"./db": {
 			"types": "./dist/server/db/index.d.ts",
 			"default": "./dist/server/db/index.js"
@@ -318,10 +267,6 @@
 			"types": "./dist/platform/feature-flags/*.d.ts",
 			"default": "./dist/platform/feature-flags/*.js"
 		},
-		"./firefly": {
-			"types": "./dist/firefly/index.d.ts",
-			"default": "./dist/firefly/index.js"
-		},
 		"./git": {
 			"types": "./dist/git/index.d.ts",
 			"default": "./dist/git/index.js"
@@ -350,22 +295,6 @@
 			"svelte": "./dist/platform/uploads/index.js",
 			"default": "./dist/platform/uploads/index.js"
 		},
-		"./loom": {
-			"types": "./dist/loom/index.d.ts",
-			"default": "./dist/loom/index.js"
-		},
-		"./loom/sveltekit": {
-			"types": "./dist/loom/adapters/sveltekit.d.ts",
-			"default": "./dist/loom/adapters/sveltekit.js"
-		},
-		"./loom/testing": {
-			"types": "./dist/loom/test-utils.d.ts",
-			"default": "./dist/loom/test-utils.js"
-		},
-		"./loom/worker": {
-			"types": "./dist/loom/adapters/worker.d.ts",
-			"default": "./dist/loom/adapters/worker.js"
-		},
 		"./ai/lumen": {
 			"types": "./dist/ai/lumen/index.d.ts",
 			"default": "./dist/ai/lumen/index.js"
@@ -381,10 +310,6 @@
 		"./payments/*": {
 			"types": "./dist/payments/*.d.ts",
 			"default": "./dist/payments/*.js"
-		},
-		"./ai/reverie": {
-			"types": "./dist/ai/reverie/index.d.ts",
-			"default": "./dist/ai/reverie/index.js"
 		},
 		"./monitoring/sentinel": {
 			"types": "./dist/monitoring/sentinel/index.d.ts",
@@ -405,6 +330,14 @@
 		"./monitoring/observability": {
 			"types": "./dist/monitoring/observability/index.d.ts",
 			"default": "./dist/monitoring/observability/index.js"
+		},
+		"./pulse": {
+			"types": "./dist/pulse/index.d.ts",
+			"default": "./dist/pulse/index.js"
+		},
+		"./pulse/*": {
+			"types": "./dist/pulse/*.d.ts",
+			"default": "./dist/pulse/*.js"
 		},
 		"./server/petal": {
 			"types": "./dist/server/petal/index.d.ts",
@@ -442,14 +375,6 @@
 		"./styles/fonts-optional.css": "./dist/styles/fonts-optional.css",
 		"./styles/tokens.css": "./dist/styles/tokens.css",
 		"./styles/vine-pattern.css": "./dist/styles/vine-pattern.css",
-		"./thorn": {
-			"types": "./dist/thorn/index.d.ts",
-			"default": "./dist/thorn/index.js"
-		},
-		"./thorn/*": {
-			"types": "./dist/thorn/*.d.ts",
-			"default": "./dist/thorn/*.js"
-		},
 		"./platform/threshold": {
 			"types": "./dist/platform/threshold/index.d.ts",
 			"default": "./dist/platform/threshold/index.js"
@@ -649,11 +574,6 @@
 			"svelte": "./dist/ui/components/content/index.js",
 			"default": "./dist/ui/components/content/index.js"
 		},
-		"./ui/content/curios": {
-			"types": "./dist/curios/components/index.d.ts",
-			"svelte": "./dist/curios/components/index.js",
-			"default": "./dist/curios/components/index.js"
-		},
 		"./ui/content/hum": {
 			"types": "./dist/ui/components/content/hum/index.d.ts",
 			"svelte": "./dist/ui/components/content/hum/index.js",
@@ -803,9 +723,15 @@
 	"license": "AGPL-3.0-only",
 	"name": "@autumnsgrove/lattice",
 	"peerDependencies": {
+		"@autumnsgrove/gossamer": "workspace:*",
 		"@sveltejs/kit": "^2.50.2",
 		"svelte": "^5.50.1",
 		"tailwindcss": "^3.4.0"
+	},
+	"peerDependenciesMeta": {
+		"@autumnsgrove/gossamer": {
+			"optional": true
+		}
 	},
 	"publishConfig": {
 		"access": "public",

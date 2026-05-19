@@ -2,7 +2,7 @@
  * Login Graft Configuration
  *
  * Provider registry and default configuration for the LoginGraft.
- * Includes all three fully implemented providers: Google OAuth, Passkeys, and Email magic links.
+ * Google OAuth is the sole authentication method.
  */
 
 import type { AuthProvider, ProviderConfig } from "./types.js";
@@ -27,18 +27,6 @@ export const PROVIDERS: Record<AuthProvider, ProviderConfig> = {
 		name: "GitHub",
 		available: false, // Not yet implemented
 		description: "Sign in with your GitHub account",
-	},
-	email: {
-		id: "email",
-		name: "Email",
-		available: true,
-		description: "Sign in with email magic link",
-	},
-	passkey: {
-		id: "passkey",
-		name: "Passkey",
-		available: true,
-		description: "Sign in with Face ID, Touch ID, or Windows Hello",
 	},
 };
 
@@ -76,9 +64,8 @@ export function getAvailableProviders(): AuthProvider[] {
 
 /**
  * Default providers to show if none specified.
- * Includes all fully implemented providers: Google OAuth, Passkeys, and Email magic links.
  */
-export const DEFAULT_PROVIDERS: AuthProvider[] = ["google", "passkey", "email"];
+export const DEFAULT_PROVIDERS: AuthProvider[] = ["google"];
 
 /**
  * Default return URL after successful auth.
@@ -107,8 +94,6 @@ export const GROVEAUTH_URLS = {
 	api: AUTH_API_BASE,
 	/** Better Auth social sign-in endpoint (direct redirect) */
 	socialSignIn: `${AUTH_API_BASE}/api/auth/sign-in/social`,
-	/** Better Auth magic link sign-in endpoint */
-	magicLink: `${AUTH_API_BASE}/api/auth/sign-in/magic-link`,
 } as const;
 
 /**
@@ -119,7 +104,7 @@ export const DEFAULT_LOGIN_URL = "/auth/login";
 
 /**
  * Unified login hub URL.
- * All auth flows (sign-in, passkey creation) go through this origin.
+ * All auth flows go through this origin.
  * Overridable via VITE_LOGIN_URL for local development.
  */
 export const LOGIN_URL = import.meta.env.VITE_LOGIN_URL ?? "https://login.grove.place";
@@ -130,13 +115,6 @@ export const LOGIN_URL = import.meta.env.VITE_LOGIN_URL ?? "https://login.grove.
  */
 export function buildLoginUrl(redirectTo: string): string {
 	return `${LOGIN_URL}?redirect=${encodeURIComponent(redirectTo)}`;
-}
-
-/**
- * Build a URL to the passkey registration page on the login hub.
- */
-export function buildPasskeyUrl(redirectTo: string): string {
-	return `${LOGIN_URL}/passkey?redirect=${encodeURIComponent(redirectTo)}`;
 }
 
 /**
@@ -162,8 +140,6 @@ export const AUTH_COOKIE_NAMES = {
  * It is set dynamically by the handlers based on `isProduction(url)` to allow:
  * - localhost development (HTTP) → secure: false
  * - production (HTTPS) → secure: true
- *
- * This prevents breaking local development while maintaining security in production.
  */
 export const AUTH_COOKIE_OPTIONS = {
 	/** Options for temporary auth flow cookies (state, verifier, returnTo) */
@@ -172,7 +148,6 @@ export const AUTH_COOKIE_OPTIONS = {
 		httpOnly: true,
 		sameSite: "lax" as const,
 		maxAge: 60 * 10, // 10 minutes
-		// secure: set dynamically by handler
 	},
 	/** Options for session cookies */
 	session: {
@@ -180,6 +155,5 @@ export const AUTH_COOKIE_OPTIONS = {
 		httpOnly: true,
 		sameSite: "lax" as const,
 		maxAge: 60 * 60 * 24 * 30, // 30 days
-		// secure: set dynamically by handler
 	},
 } as const;

@@ -1082,41 +1082,37 @@ func removeNpmrc(path string) {
 	}
 }
 
-// findPackagePath locates a monorepo package by name using discoverPackages.
+// findPackagePath locates a monorepo package by name, scanning standard dirs.
 func findPackagePath(root, name string) (string, error) {
-	pkgs := discoverPackages(root)
-	if len(pkgs) == 0 {
-		return "", fmt.Errorf("no packages found in monorepo")
-	}
-
-	// Try exact match on package.json "name" field first
-	for _, p := range pkgs {
-		pkgJSON := filepath.Join(p.Path, "package.json")
-		data, err := os.ReadFile(pkgJSON)
+	dirs := []string{"apps", "libs", "services", "workers"}
+	for _, dir := range dirs {
+		base := filepath.Join(root, dir)
+		entries, err := os.ReadDir(base)
 		if err != nil {
 			continue
 		}
-		var pkg struct {
-			Name string `json:"name"`
-		}
-		if json.Unmarshal(data, &pkg) == nil && pkg.Name == name {
-			return p.Path, nil
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			pkgPath := filepath.Join(base, entry.Name())
+			pkgJSON := filepath.Join(pkgPath, "package.json")
+			data, err := os.ReadFile(pkgJSON)
+			if err != nil {
+				continue
+			}
+			var pkg struct {
+				Name string `json:"name"`
+			}
+			if json.Unmarshal(data, &pkg) == nil && pkg.Name == name {
+				return pkgPath, nil
+			}
+			if dir+"/"+entry.Name() == name {
+				return pkgPath, nil
+			}
 		}
 	}
-
-	// Fallback: match on directory-based name
-	for _, p := range pkgs {
-		if p.Name == name {
-			return p.Path, nil
-		}
-	}
-
-	// Build available list for error message
-	available := make([]string, 0, len(pkgs))
-	for _, p := range pkgs {
-		available = append(available, p.Name)
-	}
-	return "", fmt.Errorf("package not found: %s\n  Available: %s", name, strings.Join(available, ", "))
+	return "", fmt.Errorf("package not found: %s", name)
 }
 
 func init() {

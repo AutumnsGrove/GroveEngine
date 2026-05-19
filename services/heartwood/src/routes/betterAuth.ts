@@ -6,33 +6,15 @@
  *
  * Endpoints handled by Better Auth:
  * - POST /api/auth/sign-in/social - OAuth sign-in (Google, GitHub)
- * - POST /api/auth/sign-in/magic-link - Magic link sign-in
- * - POST /api/auth/sign-in/passkey - Passkey sign-in
  * - GET /api/auth/callback/:provider - OAuth callbacks
- * - POST /api/auth/passkey/register - Register new passkey
  * - GET /api/auth/session - Get current session
  * - POST /api/auth/sign-out - Sign out
  * - And more...
- *
- * Security enhancements:
- * - Passkey-specific rate limiting (defense-in-depth)
- * - Audit logging for passkey registration/deletion/auth events
- * - Stricter CSP headers for passkey operations
  */
 
 import { Hono } from "hono";
 import type { Env } from "../types.js";
 import { createAuth } from "../auth/index.js";
-import { createAuditLog } from "../db/queries.js";
-import { createDbSession } from "../db/session.js";
-import { getClientIP, getUserAgent } from "../middleware/security.js";
-import {
-	passkeyRegisterRateLimiter,
-	passkeyDeleteRateLimiter,
-	passkeyAuthRateLimiter,
-	magicLinkRateLimiter,
-} from "../middleware/rateLimit.js";
-import { SECURITY_PAGE_CSP } from "../utils/constants.js";
 import {
 	registerRequestForBridge,
 	getSessionBridgeResult,
@@ -43,43 +25,14 @@ import { createSessionCookieHeader } from "../lib/session.js";
 const betterAuthRoutes = new Hono<{ Bindings: Env }>();
 
 /**
- * Apply stricter CSP headers for passkey-related routes
- */
-betterAuthRoutes.use("/passkey/*", async (c, next) => {
-	await next();
-	c.res.headers.set("Content-Security-Policy", SECURITY_PAGE_CSP);
-});
-
-/**
- * Rate limiting for magic link sign-in (prevents email flooding)
- */
-betterAuthRoutes.post("/sign-in/magic-link", magicLinkRateLimiter);
-
-/**
- * Rate limiting for passkey registration
- */
-betterAuthRoutes.post("/passkey/verify-registration", passkeyRegisterRateLimiter);
-
-/**
- * Rate limiting for passkey deletion
- */
-betterAuthRoutes.post("/passkey/delete-passkey", passkeyDeleteRateLimiter);
-
-/**
- * Rate limiting for passkey authentication
- */
-betterAuthRoutes.post("/passkey/verify-authentication", passkeyAuthRateLimiter);
-
-/**
  * Catch-all handler for Better Auth endpoints
  *
  * Better Auth provides its own request handler that processes
  * all authentication-related requests under the /api/auth/* path.
  *
  * SessionDO Bridge:
- * When BA creates a session (OAuth, magic link, passkey), the database hook
- * bridges it to SessionDO. We then append the grove_session cookie to the
- * response so users get both cookies.
+ * When BA creates a session (OAuth), the database hook bridges it to SessionDO.
+ * We then append the grove_session cookie to the response so users get both cookies.
  */
 betterAuthRoutes.all("/*", async (c) => {
 	try {
@@ -99,30 +52,6 @@ betterAuthRoutes.all("/*", async (c) => {
 			: undefined;
 
 		console.log("[BetterAuth] Request:", c.req.method, c.req.path);
-		console.log("[BetterAuth] Full URL:", c.req.url);
-		console.log("[BetterAuth] Query params:", Object.fromEntries(new URL(c.req.url).searchParams));
-
-		// [Passkey Debug] Enhanced logging for passkey routes
-		const isPasskeyDebug = c.req.path.includes("/passkey/");
-		if (isPasskeyDebug) {
-			const cookieHeader = c.req.header("cookie") || "";
-			const cookieNames = cookieHeader
-				.split(";")
-				.map((c) => c.trim().split("=")[0])
-				.filter(Boolean);
-			console.log("[Passkey Debug] Heartwood incoming:", {
-				method: c.req.method,
-				path: c.req.path,
-				cookieNames,
-				hasSessionCookie: cookieNames.some(
-					(n) => n === "better-auth.session_token" || n === "__Secure-better-auth.session_token",
-				),
-				hasChallengeCookie: cookieNames.some(
-					(n) => n === "better-auth-passkey" || n.includes("passkey"),
-				),
-				contentType: c.req.header("content-type"),
-			});
-		}
 
 		// Register this request for SessionDO bridging
 		// The session hook will use this to create a SessionDO session
@@ -133,34 +62,6 @@ betterAuthRoutes.all("/*", async (c) => {
 
 		// Better Auth handler expects a standard Request and returns a Response
 		let response = await auth.handler(c.req.raw);
-
-		// [Passkey Debug] Log response details for passkey routes
-		if (isPasskeyDebug) {
-			const setCookieNames: string[] = [];
-			response.headers.forEach((value, key) => {
-				if (key.toLowerCase() === "set-cookie") {
-					const name = value.split("=")[0];
-					setCookieNames.push(name);
-				}
-			});
-
-			console.log("[Passkey Debug] Heartwood response:", {
-				status: response.status,
-				setCookieNames,
-				contentType: response.headers.get("content-type"),
-			});
-
-			// Log full response body on errors
-			if (response.status >= 400) {
-				try {
-					const cloned = response.clone();
-					const errorBody = await cloned.text();
-					console.error("[Passkey Debug] Heartwood error body:", errorBody);
-				} catch {
-					console.error("[Passkey Debug] Could not read error response body");
-				}
-			}
-		}
 
 		// Check if a SessionDO session was created by the hook
 		// If so, append the grove_session cookie to the response
@@ -200,155 +101,6 @@ betterAuthRoutes.all("/*", async (c) => {
 		// Log response status for debugging
 		console.log("[BetterAuth] Response status:", response.status);
 
-		// Fix: Better Auth can return JSON instead of HTTP redirects for browser-navigated
-		// endpoints (magic link verify, OAuth callbacks). When a user clicks a link in their
-		// email, the browser does a direct GET — if Better Auth returns JSON, the browser
-		// downloads it as a file (e.g., "verify"). Convert JSON responses to proper redirects.
-		const isBrowserNavigation = c.req.method === "GET";
-		const isMagicVerify =
-			c.req.path.includes("magic-link/verify") || c.req.path.includes("magiclink/verify");
-		const isRedirectResponse = response.status >= 300 && response.status < 400;
-
-		// Diagnostic logging for magic link verify
-		if (isBrowserNavigation && isMagicVerify) {
-			console.log("[MagicLink-Diag] Verify response:", {
-				status: response.status,
-				isRedirect: isRedirectResponse,
-				location: response.headers.get("Location"),
-			});
-			if (isRedirectResponse) {
-				console.log(
-					"[MagicLink-Diag] BA redirect →",
-					(response.headers.get("Location") || "").slice(0, 200),
-				);
-			}
-		}
-
-		if (isBrowserNavigation && isMagicVerify && !isRedirectResponse) {
-			const reqUrl = new URL(c.req.url);
-			const callbackURL = reqUrl.searchParams.get("callbackURL") || "/";
-
-			try {
-				const cloned = response.clone();
-				const body = (await cloned.json()) as Record<string, unknown>;
-
-				// Diagnostic: log full BA response body
-				console.log("[MagicLink-Diag] BA JSON body:", {
-					status: response.status,
-					error: body.error,
-					code: body.code,
-					message: body.message,
-					hasSession: !!body.session,
-					hasUser: !!body.user,
-				});
-
-				// Preserve Set-Cookie headers from Better Auth (session cookies)
-				const setCookies: string[] = [];
-				response.headers.forEach((value, key) => {
-					if (key.toLowerCase() === "set-cookie") {
-						setCookies.push(value);
-					}
-				});
-
-				// Build redirect URL
-				let redirectTarget: string;
-				if (body.redirect && typeof body.redirect === "string") {
-					// Better Auth returned { redirect: "..." }
-					redirectTarget = body.redirect;
-				} else if (body.error || body.code === "INVALID_TOKEN" || body.code === "TOKEN_EXPIRED") {
-					// Error — redirect to callbackURL with error param
-					const errorUrl = new URL(callbackURL, reqUrl.origin);
-					const errorMsg =
-						typeof body.message === "string"
-							? body.message
-							: typeof body.error === "string"
-								? body.error
-								: "Magic link expired or is invalid";
-					errorUrl.searchParams.set("error", errorMsg);
-					redirectTarget = errorUrl.toString();
-				} else {
-					// Success with session data — redirect to callbackURL
-					redirectTarget = callbackURL;
-				}
-
-				// Build redirect response with preserved cookies
-				const redirectHeaders = new Headers({ Location: redirectTarget });
-				for (const cookie of setCookies) {
-					redirectHeaders.append("Set-Cookie", cookie);
-				}
-
-				console.log(
-					"[BetterAuth] Converted JSON response to redirect for magic link verify →",
-					redirectTarget.slice(0, 80),
-				);
-
-				return new Response(null, {
-					status: 302,
-					headers: redirectHeaders,
-				});
-			} catch {
-				// JSON parse failed — redirect to callbackURL with generic error
-				const errorUrl = new URL(callbackURL, reqUrl.origin);
-				errorUrl.searchParams.set("error", "Verification failed");
-				console.error(
-					"[BetterAuth] Failed to parse magic link verify response, redirecting with error",
-				);
-				return c.redirect(errorUrl.toString());
-			}
-		}
-
-		// Audit logging for passkey operations (non-blocking, fire-and-forget)
-		const path = c.req.path;
-		const isPasskeyOp = path.includes("/passkey/");
-		if (isPasskeyOp) {
-			const db = createDbSession(c.env);
-			const ipAddress = getClientIP(c.req.raw);
-			const userAgent = getUserAgent(c.req.raw);
-
-			// Determine event type and success based on path and response status
-			const isSuccess = response.status >= 200 && response.status < 300;
-
-			// Fire-and-forget audit logging (don't await to avoid blocking response)
-			(async () => {
-				try {
-					// Extract user info from response if available (for registration/deletion)
-					let userId: string | undefined;
-					const details: Record<string, unknown> = {
-						statusCode: response.status,
-					};
-
-					if (path.includes("/verify-registration")) {
-						await createAuditLog(db, {
-							event_type: isSuccess ? "passkey_registered" : "passkey_auth_failed",
-							user_id: userId,
-							ip_address: ipAddress,
-							user_agent: userAgent,
-							details: { ...details, operation: "register" },
-						});
-					} else if (path.includes("/delete-passkey")) {
-						await createAuditLog(db, {
-							event_type: isSuccess ? "passkey_deleted" : "passkey_auth_failed",
-							user_id: userId,
-							ip_address: ipAddress,
-							user_agent: userAgent,
-							details: { ...details, operation: "delete" },
-						});
-					} else if (path.includes("/verify-authentication")) {
-						await createAuditLog(db, {
-							event_type: isSuccess ? "passkey_auth_success" : "passkey_auth_failed",
-							user_id: userId,
-							ip_address: ipAddress,
-							user_agent: userAgent,
-							details: { ...details, operation: "authenticate" },
-						});
-					}
-				} catch (auditError) {
-					// Log but don't fail the request if audit logging fails
-					console.error("[BetterAuth] Audit logging failed:", auditError);
-				}
-			})();
-		}
-
 		// If it's a 500 error, try to get more details
 		if (response.status >= 500) {
 			const clonedResponse = response.clone();
@@ -367,21 +119,25 @@ betterAuthRoutes.all("/*", async (c) => {
 		console.error("[BetterAuth] Error stack:", error instanceof Error ? error.stack : "No stack");
 		console.error("[BetterAuth] Request path:", c.req.path);
 
-		// For browser-navigated endpoints (magic link verify, OAuth callbacks),
+		// For browser-navigated OAuth callbacks,
 		// redirect to an error page instead of returning JSON (which triggers download)
 		const isGetNavigation = c.req.method === "GET";
-		const isMagicLinkVerify = c.req.path.includes("/magic-link/verify");
 		const isOAuthCallback = c.req.path.includes("/callback/");
 
-		if (isGetNavigation && (isMagicLinkVerify || isOAuthCallback)) {
-			const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+		if (isGetNavigation && isOAuthCallback) {
 			const callbackURL = new URL(c.req.url).searchParams.get("callbackURL");
-			// Redirect to Heartwood frontend error page, or Plant if callbackURL hints at it
-			const errorBase = callbackURL?.includes("plant.grove.place")
-				? "https://plant.grove.place"
-				: "https://heartwood.grove.place";
+			const isLocalDev = c.env.AUTH_BASE_URL?.startsWith("http://localhost");
+			let errorBase: string;
+			if (isLocalDev) {
+				errorBase = c.env.AUTH_BASE_URL;
+			} else if (callbackURL?.includes("plant.grove.place")) {
+				errorBase = "https://plant.grove.place";
+			} else {
+				errorBase = "https://heartwood.grove.place";
+			}
 			const errorUrl = new URL("/login", errorBase);
-			errorUrl.searchParams.set("error", errorMessage);
+			// SECURITY: Never leak raw error messages — use a safe generic code
+			errorUrl.searchParams.set("error", "auth_failed");
 			return c.redirect(errorUrl.toString());
 		}
 

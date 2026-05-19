@@ -84,13 +84,6 @@
 			getValue: (tier) => tier.limits.navPages,
 		},
 		{
-			type: "feature",
-			label: "Meadow",
-			standardLabel: "Community Feed",
-			icon: natureIcons.flower2,
-			getValue: (tier) => tier.features.meadow,
-		},
-		{
 			type: "limit",
 			label: "Public Comments",
 			icon: featureIcons.messageCircle,

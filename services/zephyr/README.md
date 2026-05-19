@@ -310,7 +310,7 @@ Zephyr categorizes emails by type for appropriate handling:
 | --------------- | ---------- | ------- | -------------------------------- | ----- |
 | `transactional` | 60         | 1,000   | Password resets, confirmations   | 3×    |
 | `notification`  | 60         | 1,000   | Activity notifications, replies  | 3×    |
-| `verification`  | 10         | 100     | Email verifications, magic links | 3×    |
+| `verification`  | 10         | 100     | Email verifications              | 3×    |
 | `sequence`      | 100        | 5,000   | Onboarding drip emails           | 3×    |
 | `lifecycle`     | 60         | 500     | Payment, renewal, trial events   | 3×    |
 | `broadcast`     | 1,000      | 10,000  | Newsletters, announcements       | 1×    |

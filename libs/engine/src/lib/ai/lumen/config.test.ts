@@ -62,10 +62,6 @@ describe("Model Definitions", () => {
 		// Embeddings
 		expect(MODELS.BGE_M3).toContain("bge");
 		expect(MODELS.QWEN3_EMBED).toContain("qwen");
-
-		// Tool Calling (Reverie)
-		expect(MODELS.TRINITY).toContain("trinity");
-		expect(MODELS.MINIMAX_M2_7).toContain("minimax");
 	});
 
 	it("should have Cloudflare fallback models", () => {
@@ -98,8 +94,6 @@ describe("Task Registry", () => {
 		"image",
 		"code",
 		"transcription",
-		"reverie",
-		"reverie-compose",
 	];
 
 	it("should have configuration for all tasks", () => {

@@ -1,0 +1,13 @@
+# Local development environment variables for Lumen (AI inference worker)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# API key callers must present to use this worker
+# Should match the key configured in any service that calls Lumen (Engine, Reverie, etc.)
+# Generate with: openssl rand -hex 32
+LUMEN_API_KEY=your_lumen_api_key_here
+
+# Lumen's own key for authenticating with Warden's /resolve endpoint
+# Should match LUMEN_API_KEY configured in Warden's agent registry
+# Generate with: openssl rand -hex 32
+WARDEN_API_KEY=your_warden_api_key_here

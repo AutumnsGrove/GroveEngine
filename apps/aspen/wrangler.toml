@@ -102,12 +102,10 @@ service = "groveauth"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
-# =============================================================================
-# Reverie Service Binding (AI configuration pipeline)
-# =============================================================================
+# Pulse Collector Service Binding (product observability)
 [[services]]
-binding = "REVERIE"
-service = "grove-reverie"
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
 
 # =============================================================================
 # Durable Objects - Loom Pattern (Grove's coordination layer)
@@ -149,19 +147,6 @@ script_name = "grove-durable-objects"
 name = "THRESHOLD"
 class_name = "ThresholdDO"
 script_name = "grove-durable-objects"
-
-# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
-[[durable_objects.bindings]]
-name = "CHAT"
-class_name = "ChatDO"
-script_name = "grove-durable-objects"
-
-# =============================================================================
-# Queue - Feed events (post.published → subscriber FeedDOs)
-# =============================================================================
-[[queues.producers]]
-queue = "grove-feed-events"
-binding = "FEED_QUEUE"
 
 # =============================================================================
 # Environment Variables (non-sensitive)

@@ -5,7 +5,7 @@
  * with concurrent batching and two-tier repo discovery.
  */
 
-import type { Commit } from "@autumnsgrove/lattice/curios/timeline";
+import type { Commit } from "@autumnsgrove/curios/timeline";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */
 const CONCURRENCY_LIMIT = 5;

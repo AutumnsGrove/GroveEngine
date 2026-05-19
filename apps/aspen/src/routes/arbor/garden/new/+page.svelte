@@ -14,7 +14,7 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
-	import type { GutterItem } from "@autumnsgrove/lattice/content/markdown/markdown";
+	import type { GutterItem } from "@autumnsgrove/grove-markdown";
 
 	// Page data from admin layout (includes grafts cascade)
 	let { data } = $props();
@@ -28,9 +28,7 @@
 	let font = $state("default");
 	let content = $state("");
 	let gutterItems = $state<GutterItem[]>([]);
-	let firesideAssisted = $state(false);
 	let featuredImage = $state("");
-	let shareToMeadow = $state(true);
 	let selectedBlaze = $state<string | null>(null);
 
 	// Blaze picker — fetched from API to include tenant custom blazes
@@ -140,10 +138,10 @@
 				font,
 				markdown_content: content,
 				gutter_content: JSON.stringify(gutterItems),
-				fireside_assisted: firesideAssisted ? 1 : 0,
+				fireside_assisted: 0,
 				status: "draft",
 				featured_image: featuredImage.trim() || null,
-				meadow_exclude: shareToMeadow ? 0 : 1,
+				meadow_exclude: 0,
 				blaze: selectedBlaze,
 			});
 
@@ -217,10 +215,10 @@
 				font,
 				markdown_content: content,
 				gutter_content: JSON.stringify(gutterItems),
-				fireside_assisted: firesideAssisted ? 1 : 0,
+				fireside_assisted: 0,
 				status: "published",
 				featured_image: featuredImage.trim() || null,
-				meadow_exclude: shareToMeadow ? 0 : 1,
+				meadow_exclude: 0,
 				blaze: selectedBlaze,
 			});
 
@@ -437,18 +435,6 @@
 					</div>
 
 					<div class="form-group field-full">
-						<label class="meadow-toggle">
-							<input type="checkbox" bind:checked={shareToMeadow} />
-							<span class="meadow-toggle-text">
-								<span class="meadow-toggle-title">Share to Meadow</span>
-								<span class="meadow-toggle-hint"
-									>This post will appear in the community feed when published.</span
-								>
-							</span>
-						</label>
-					</div>
-
-					<div class="form-group field-full">
 						<span id="blaze-label" class="label">Blaze</span>
 						<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
 							>A small marker that tells readers what this post is about.</span
@@ -483,7 +469,6 @@
 					<MarkdownEditor
 						bind:this={editorRef}
 						bind:content
-						bind:firesideAssisted
 						{saving}
 						onSave={handleSave}
 						draftKey="new-bloom"
@@ -874,36 +859,8 @@
 		border-color: hsl(var(--success) / 0.35);
 	}
 
-	/* Meadow toggle */
 	.field-full {
 		grid-column: 1 / -1;
-	}
-	.meadow-toggle {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.5rem;
-		cursor: pointer;
-	}
-	.meadow-toggle input[type="checkbox"] {
-		width: 18px;
-		height: 18px;
-		accent-color: var(--color-primary);
-		margin-top: 2px;
-		flex-shrink: 0;
-	}
-	.meadow-toggle-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-	.meadow-toggle-title {
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: var(--color-text);
-	}
-	.meadow-toggle-hint {
-		font-size: 0.75rem;
-		color: var(--color-text-subtle);
 	}
 
 	/* Blaze picker */

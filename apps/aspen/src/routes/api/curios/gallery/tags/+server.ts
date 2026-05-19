@@ -11,7 +11,7 @@ import {
 	generateSlug,
 	DEFAULT_TAG_COLOR,
 	MAX_GALLERY_TAGS_PER_TENANT,
-} from "@autumnsgrove/lattice/curios/gallery";
+} from "@autumnsgrove/curios/gallery";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface TagRow {

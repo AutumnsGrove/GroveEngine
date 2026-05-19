@@ -9,7 +9,7 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "@autumnsgrove/lattice/curios/timeline";
+import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "@autumnsgrove/curios/timeline";
 import { encryptToken } from "@autumnsgrove/lattice/server/encryption";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 

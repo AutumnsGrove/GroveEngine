@@ -183,20 +183,7 @@ function handleImage(content: string): string | null {
  * All embeddable curio types that can be used via ::name[content]:: syntax.
  * Each produces a placeholder <div> that the CurioHydrator mounts at runtime.
  */
-const CURIO_DIRECTIVES = [
-	"guestbook",
-	"hitcounter",
-	"poll",
-	"nowplaying",
-	"moodring",
-	"badges",
-	"blogroll",
-	"webring",
-	"shelves",
-	"activitystatus",
-	"statusbadges",
-	"artifacts",
-] as const;
+const CURIO_DIRECTIVES = ["guestbook", "poll"] as const;
 
 /**
  * Curio directive handler: emits a placeholder div for client-side hydration.
@@ -248,10 +235,6 @@ for (const name of CURIO_DIRECTIVES) {
 	directiveHandlers[name] = (content) => handleCurio(name, content);
 }
 
-// Backward-compatibility aliases (old directive names → shelves)
-directiveHandlers["bookmarkshelf"] = (content) => handleCurio("shelves", content);
-directiveHandlers["linkgarden"] = (content) => handleCurio("shelves", content);
-
 /**
  * Metadata for all embeddable curios — used by the editor autocomplete.
  * Single source of truth for directive names, display names, and argument requirements.
@@ -269,76 +252,10 @@ export const CURIO_METADATA = [
 		description: "Let visitors leave a signed note on this page",
 	},
 	{
-		id: "hitcounter",
-		name: "Hit Counter",
-		requiresArg: false,
-		description: "Retro visit counter that ticks up as people read",
-	},
-	{
 		id: "poll",
 		name: "Poll",
 		requiresArg: true,
 		description: "Embed a Strawpoll-style poll by ID",
-	},
-	{
-		id: "nowplaying",
-		name: "Now Playing",
-		requiresArg: false,
-		description: "Show the song you're listening to right now",
-	},
-	{
-		id: "moodring",
-		name: "Mood Ring",
-		requiresArg: false,
-		description: "Display your current mood as a colored ring",
-	},
-	{
-		id: "badges",
-		name: "Badges",
-		requiresArg: false,
-		description: "Collectible 88×31 web badges from your profile",
-	},
-	{
-		id: "blogroll",
-		name: "Blogroll",
-		requiresArg: false,
-		description: "Links to friends' blogs — the classic indie web list",
-	},
-	{
-		id: "webring",
-		name: "Web Ring",
-		requiresArg: false,
-		description: "Join a web ring with prev / next navigation",
-	},
-	{
-		id: "shelves",
-		name: "Shelves",
-		requiresArg: true,
-		description: "Curated links grouped by shelf name",
-	},
-	{
-		id: "activitystatus",
-		name: "Activity Status",
-		requiresArg: false,
-		description: "Live status (online / away / idle) from your grove",
-	},
-	{
-		id: "statusbadges",
-		name: "Status Badge",
-		requiresArg: false,
-		description: "Compact status pill with your current activity",
-	},
-	{
-		id: "artifacts",
-		name: "Artifacts",
-		requiresArg: false,
-		description: "Small collectibles and treasures from your shelf",
-	},
-	{
-		id: "shrines",
-		name: "Shrines",
-		requiresArg: false,
-		description: "A shrine to the things you love",
 	},
 	// System directives (not curios, but use same syntax)
 	{

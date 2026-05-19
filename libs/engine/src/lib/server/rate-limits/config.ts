@@ -65,8 +65,6 @@ export const ENDPOINT_RATE_LIMITS = {
 	"upload/media": { limit: 10, windowSeconds: 3600 },
 
 	// AI endpoints (expensive)
-	"ai/wisp": { limit: 50, windowSeconds: 86400 },
-	"ai/fireside": { limit: 50, windowSeconds: 86400 },
 	"ai/draft": { limit: 20, windowSeconds: 86400 },
 
 	// Data operations (prevents abuse of expensive operations)
@@ -102,9 +100,6 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"POST:/api/comments": "comments/create",
 	"POST:/api/upload": "upload/image",
 	"POST:/api/images": "upload/image",
-	"POST:/api/grove/wisp": "ai/wisp",
-	"POST:/api/ai/wisp": "ai/wisp",
-	"POST:/api/ai/fireside": "ai/fireside",
 	"POST:/api/ai/draft": "ai/draft",
 	"POST:/api/export": "export/data",
 	"POST:/api/export/start": "export/zip-start",

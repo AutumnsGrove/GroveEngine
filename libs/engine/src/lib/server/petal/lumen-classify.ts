@@ -11,10 +11,12 @@
  * @see docs/specs/petal-spec.md
  */
 
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import type { LumenClient } from "$lib/ai/lumen/index.js";
 import { CLASSIFICATION_PROMPT } from "$lib/platform/config/petal.js";
 import type { ClassificationResult, PetalCategory } from "./types.js";
 import { safeParseJson } from "../../utils/json.js";
+import { PETAL_ERRORS } from "./errors.js";
 
 // =============================================================================
 // CONSTANTS
@@ -110,10 +112,11 @@ export async function classifyWithLumen(
 		};
 	} catch {
 		// If parsing fails, assume appropriate (fail-open for classification)
-		console.warn(
-			"[Petal/Lumen] Failed to parse classification response:",
-			response.content.substring(0, 200),
-		);
+		logGroveError("Petal", PETAL_ERRORS.LUMEN_CLASSIFY_PARSE_FAILED, {
+			detail: response.content.substring(0, 200),
+			model: response.model,
+			provider: response.provider,
+		});
 		return {
 			category: "appropriate",
 			confidence: 0.5,

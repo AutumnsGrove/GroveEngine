@@ -1,6 +1,6 @@
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
-import { loadCurioStatus } from "@autumnsgrove/lattice/server/curio-status";
+import { loadCurioStatus } from "@autumnsgrove/curios/status";
 import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
 

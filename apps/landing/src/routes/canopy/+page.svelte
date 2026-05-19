@@ -7,7 +7,7 @@
   import {
     CANOPY_CATEGORY_LABELS,
     type CanopyCategory,
-  } from '@autumnsgrove/lattice';
+  } from '@autumnsgrove/lattice/platform/config';
 
   // Types derived from engine - defined locally for Svelte 5 runes compatibility
   interface CanopyWanderer {
@@ -244,13 +244,13 @@
   }
 
   .category-pill:hover {
-    border-color: rgb(var(--grove-600) / 1);
-    background: rgb(var(--grove-600) / 0.05);
+    border-color: var(--grove-accent);
+    background: var(--grove-accent-5);
   }
 
   .category-pill.active {
-    border-color: rgb(var(--grove-600) / 1);
-    background: rgb(var(--grove-600) / 1);
+    border-color: var(--grove-accent);
+    background: var(--grove-accent);
     color: white;
   }
 

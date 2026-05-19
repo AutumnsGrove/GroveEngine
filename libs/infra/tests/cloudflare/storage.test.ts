@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CloudflareStorage } from "../../src/cloudflare/storage.js";
 import { createMockR2, createMockR2Object, type MockR2Bucket } from "./helpers.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 

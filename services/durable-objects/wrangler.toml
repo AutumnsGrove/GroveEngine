@@ -10,6 +10,7 @@
 name = "grove-durable-objects"
 main = "src/index.ts"
 compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
 
 # =============================================================================
 # Durable Objects - Loom Pattern (Grove's coordination layer)
@@ -40,25 +41,10 @@ class_name = "SentinelDO"
 name = "EXPORTS"
 class_name = "ExportDO"
 
-# TriageDO: Email triage processing + digest scheduling (alarm-based)
-[[durable_objects.bindings]]
-name = "TRIAGE"
-class_name = "TriageDO"
-
 # ThresholdDO: Per-identifier rate limiting (Loom pattern)
 [[durable_objects.bindings]]
 name = "THRESHOLD"
 class_name = "ThresholdDO"
-
-# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
-[[durable_objects.bindings]]
-name = "CHAT"
-class_name = "ChatDO"
-
-# FeedDO: Per-user social feed aggregation + saved items (Loom pattern)
-[[durable_objects.bindings]]
-name = "FEED"
-class_name = "FeedDO"
 
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
@@ -95,33 +81,17 @@ new_sqlite_classes = ["ChatDO"]
 tag = "v8"
 new_sqlite_classes = ["FeedDO"]
 
+# v9: Remove DOs deleted in Great Grove Refactor Phase 1
+[[migrations]]
+tag = "v9"
+deleted_classes = ["TriageDO", "ChatDO", "FeedDO"]
+
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
 # =============================================================================
 [[services]]
 binding = "ZEPHYR"
 service = "grove-zephyr"
-
-# =============================================================================
-# Ivy D1 Database - For TriageDO email queries
-# =============================================================================
-[[d1_databases]]
-binding = "IVY_DB"
-database_name = "ivy-db"
-database_id = "57738720-bc43-4a7f-ad5b-ceb86b3c0542"
-
-# =============================================================================
-# Ivy R2 Bucket - For TriageDO email body storage
-# =============================================================================
-[[r2_buckets]]
-binding = "IVY_R2"
-bucket_name = "ivy-storage"
-
-# =============================================================================
-# Workers AI - For Lumen classification in TriageDO
-# =============================================================================
-[ai]
-binding = "AI"
 
 # =============================================================================
 # KV Namespace - For caching and rate limiting (used by SentinelDO)
@@ -151,15 +121,3 @@ bucket_name = "grove-media"
 [[r2_buckets]]
 binding = "EXPORTS_BUCKET"
 bucket_name = "grove-exports"
-
-# =============================================================================
-# Queue - Feed events (post.published fan-out to subscriber FeedDOs)
-# =============================================================================
-[[queues.producers]]
-queue = "grove-feed-events"
-binding = "FEED_QUEUE"
-
-[[queues.consumers]]
-queue = "grove-feed-events"
-max_batch_size = 10
-max_retries = 3

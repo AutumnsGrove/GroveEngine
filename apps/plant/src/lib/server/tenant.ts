@@ -4,6 +4,12 @@
  * Creates a new tenant in D1 after successful payment.
  */
 
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
+import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice/platform/config";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { PLANT_ERRORS } from "$lib/errors";
+import type { GroveDatabase } from "@autumnsgrove/infra";
+
 export interface CreateTenantInput {
 	onboardingId: string;
 	username: string;
@@ -21,7 +27,7 @@ export interface CreateTenantInput {
  * Create a new tenant in the database
  */
 export async function createTenant(
-	db: D1Database,
+	db: GroveDatabase,
 	input: CreateTenantInput,
 ): Promise<{ tenantId: string; subdomain: string }> {
 	const tenantId = crypto.randomUUID();
@@ -45,12 +51,22 @@ export async function createTenant(
 				input.displayName,
 				input.email,
 				input.plan,
-				input.favoriteColor || "#16a34a",
+				input.favoriteColor || DEFAULT_ACCENT_COLOR,
 			)
 			.run();
 		console.log("[Tenant] Tenants table insert successful");
 	} catch (err) {
-		console.error("[Tenant] Failed to insert into tenants table:", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-050",
+				category: "bug",
+				userMessage: "Something went wrong creating your account. Please try again.",
+				adminMessage:
+					"Step 1 FAILED — INSERT into tenants table. Possible constraint violation or schema mismatch.",
+			},
+			{ cause: err, tenantId, username: input.username },
+		);
 		throw err;
 	}
 
@@ -72,7 +88,17 @@ export async function createTenant(
 			.run();
 		console.log("[Tenant] Platform billing record created");
 	} catch (err) {
-		console.error("[Tenant] Step 2 FAILED - platform_billing INSERT:", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-051",
+				category: "bug",
+				userMessage: "Something went wrong setting up your account. Please try again.",
+				adminMessage:
+					"Step 2 FAILED — INSERT into platform_billing. Possible constraint violation or missing column.",
+			},
+			{ cause: err, tenantId, plan: input.plan },
+		);
 		throw err;
 	}
 
@@ -81,8 +107,8 @@ export async function createTenant(
 		const defaultSettings = [
 			["site_title", input.displayName],
 			["site_description", `${input.displayName}'s blog on Grove`],
-			["accent_color", input.favoriteColor || "#16a34a"],
-			["font_family", "lexend"],
+			["accent_color", input.favoriteColor || DEFAULT_ACCENT_COLOR],
+			["font_family", DEFAULT_FONT],
 		];
 
 		for (const [key, value] of defaultSettings) {
@@ -96,7 +122,17 @@ export async function createTenant(
 		}
 		console.log("[Tenant] Site settings created (4 rows)");
 	} catch (err) {
-		console.error("[Tenant] Step 3 FAILED - site_settings INSERT:", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-052",
+				category: "bug",
+				userMessage: "Something went wrong configuring your site. Please try again.",
+				adminMessage:
+					"Step 3 FAILED — INSERT into site_settings. Possible schema mismatch or missing table.",
+			},
+			{ cause: err, tenantId },
+		);
 		throw err;
 	}
 
@@ -111,8 +147,24 @@ export async function createTenant(
 			.bind(tenantId, input.onboardingId)
 			.run();
 		console.log("[Tenant] Onboarding record linked to tenant");
+
+		emitPulseEvent("signup.tenant_created", {
+			app: "plant",
+			route: "/api/select-plan",
+			metadata: {
+				tenant_id: tenantId,
+				subdomain: input.username,
+				plan: input.plan,
+				onboarding_id: input.onboardingId,
+			},
+		});
 	} catch (err) {
-		console.error("[Tenant] Step 4 FAILED - user_onboarding UPDATE:", err);
+		logGroveError("Plant/Tenant", PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
+			cause: err,
+			detail: "Step 4 — UPDATE user_onboarding to link tenant_id",
+			tenantId,
+			onboardingId: input.onboardingId,
+		});
 		throw err;
 	}
 
@@ -150,7 +202,16 @@ export async function createTenant(
 			console.warn("[Tenant] Step 4b - No groveauth_id found, skipping users upsert");
 		}
 	} catch (err) {
-		console.error("[Tenant] Step 4b FAILED - users SELECT/UPSERT:", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-053",
+				category: "bug",
+				userMessage: "Something went wrong syncing your account. Please try again.",
+				adminMessage: "Step 4b FAILED — SELECT from user_onboarding or UPSERT into users table.",
+			},
+			{ cause: err, tenantId, onboardingId: input.onboardingId },
+		);
 		throw err;
 	}
 
@@ -186,7 +247,17 @@ I'm just getting started here. Check back soon for new posts!
 			.run();
 		console.log("[Tenant] Step 5 - Home page created");
 	} catch (err) {
-		console.error("[Tenant] Step 5 FAILED - pages INSERT (home):", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-054",
+				category: "bug",
+				userMessage: "Something went wrong creating your home page. Please try again.",
+				adminMessage:
+					"Step 5 FAILED — INSERT into pages (slug: home). Possible schema mismatch or missing table.",
+			},
+			{ cause: err, tenantId },
+		);
 		throw err;
 	}
 
@@ -213,7 +284,17 @@ Welcome! This page is waiting for your story.
 			.run();
 		console.log("[Tenant] Step 6 - About page created");
 	} catch (err) {
-		console.error("[Tenant] Step 6 FAILED - pages INSERT (about):", err);
+		logGroveError(
+			"Plant/Tenant",
+			{
+				code: "PLANT-055",
+				category: "bug",
+				userMessage: "Something went wrong creating your about page. Please try again.",
+				adminMessage:
+					"Step 6 FAILED — INSERT into pages (slug: about). Possible schema mismatch or missing table.",
+			},
+			{ cause: err, tenantId },
+		);
 		throw err;
 	}
 
@@ -227,7 +308,7 @@ Welcome! This page is waiting for your story.
  * Check if a tenant already exists for an onboarding record
  */
 export async function getTenantForOnboarding(
-	db: D1Database,
+	db: GroveDatabase,
 	onboardingId: string,
 ): Promise<{ tenantId: string; subdomain: string } | null> {
 	const result = await db

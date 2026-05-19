@@ -75,6 +75,11 @@ service = "grove-vista-collector"
 binding = "ONBOARDING"
 service = "grove-onboarding"
 
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
 # R2 Storage binding
 [[r2_buckets]]
 binding = "CDN_BUCKET"

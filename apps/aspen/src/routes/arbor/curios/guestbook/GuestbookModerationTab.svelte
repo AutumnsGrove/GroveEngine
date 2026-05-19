@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import { stateIcons, actionIcons, metricIcons, authIcons } from "@autumnsgrove/prism/icons";
-	import { formatRelativeTime } from "@autumnsgrove/lattice/curios/guestbook";
+	import { formatRelativeTime } from "@autumnsgrove/curios/guestbook";
 
 	interface PendingEntry {
 		id: string;

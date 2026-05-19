@@ -89,9 +89,11 @@ export const userOnboarding = sqliteTable("user_onboarding", {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AUTH: Magic Codes, Rate Limits, Failed Attempts
+// AUTH: Rate Limits, Failed Attempts
+// (magic_codes table still exists in prod DB — schema kept for migration compat)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** @deprecated Magic code auth removed in Great Grove Refactor Phase 2. Table retained for migration compat. */
 export const magicCodes = sqliteTable("magic_codes", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	email: text("email").notNull(),

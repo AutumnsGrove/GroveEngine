@@ -2,7 +2,6 @@
  * Account Settings Page - Server-side logic
  *
  * Handles loading and managing account security settings:
- * - Passkeys
  * - Two-Factor Authentication
  * - Linked OAuth Accounts
  */

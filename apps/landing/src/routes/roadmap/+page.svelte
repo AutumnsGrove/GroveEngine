@@ -3,7 +3,7 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import { FeatureStar } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
-	import { MobileTOC } from "@autumnsgrove/lattice";
+	import MobileTOC from "@autumnsgrove/lattice/ui/components/custom/MobileTOC.svelte";
 	import RoadmapFeatureItem from "$lib/components/RoadmapFeatureItem.svelte";
 
 	// Icon registry (only phase/state icons needed directly in template)

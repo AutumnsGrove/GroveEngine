@@ -19,12 +19,12 @@
 import type { GroveDatabase, GroveStorage, GroveKV } from "../types.js";
 import { SRV_ERRORS } from "../errors.js";
 
-function rejected(errorDef: { code: string; adminMessage: string }): Promise<never> {
-	return Promise.reject(new Error(`[${errorDef.code}] ${errorDef.adminMessage}`));
+function rejected(errorDef: { code: string; userMessage: string }): Promise<never> {
+	return Promise.reject(new Error(`[${errorDef.code}] ${errorDef.userMessage}`));
 }
 
-function thrown(errorDef: { code: string; adminMessage: string }): never {
-	throw new Error(`[${errorDef.code}] ${errorDef.adminMessage}`);
+function thrown(errorDef: { code: string; userMessage: string }): never {
+	throw new Error(`[${errorDef.code}] ${errorDef.userMessage}`);
 }
 
 /** Database proxy that rejects SRV-001 on any data operation. info() returns safely. */

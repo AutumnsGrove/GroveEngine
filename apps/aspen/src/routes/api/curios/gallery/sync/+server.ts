@@ -11,7 +11,7 @@ import {
 	parseImageFilename,
 	isSupportedImage,
 	generateGalleryId,
-} from "@autumnsgrove/lattice/curios/gallery";
+} from "@autumnsgrove/curios/gallery";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface ConfigRow {

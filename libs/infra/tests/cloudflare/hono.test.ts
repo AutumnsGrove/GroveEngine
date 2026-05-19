@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 import { groveInfraMiddleware } from "../../src/cloudflare/hono.js";
 import { createMockD1, createMockR2, createMockKVNamespace } from "./helpers.js";
 
-vi.mock("@autumnsgrove/lattice/errors", () => ({
+vi.mock("@autumnsgrove/grove-errors", () => ({
 	logGroveError: vi.fn(),
 }));
 

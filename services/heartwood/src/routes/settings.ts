@@ -1,5 +1,5 @@
 /**
- * Settings Routes - Account settings and passkey management
+ * Settings Routes - Account settings and 2FA management
  */
 
 import { Hono } from "hono";
@@ -13,34 +13,34 @@ const settings = new Hono<{ Bindings: Env }>();
  * GET /settings - Display account settings page
  */
 settings.get("/", async (c) => {
-  const auth = createAuth(c.env);
+	const auth = createAuth(c.env);
 
-  // Get current session
-  const session = await auth.api.getSession({
-    headers: c.req.raw.headers,
-  });
+	// Get current session
+	const session = await auth.api.getSession({
+		headers: c.req.raw.headers,
+	});
 
-  if (!session?.user) {
-    // Not authenticated - show login prompt
-    return c.html(
-      getSettingsPageHTML({
-        authBaseUrl: c.env.AUTH_BASE_URL,
-      }),
-    );
-  }
+	if (!session?.user) {
+		// Not authenticated - show login prompt
+		return c.html(
+			getSettingsPageHTML({
+				authBaseUrl: c.env.AUTH_BASE_URL,
+			}),
+		);
+	}
 
-  // Render settings page with user info
-  return c.html(
-    getSettingsPageHTML({
-      authBaseUrl: c.env.AUTH_BASE_URL,
-      user: {
-        id: session.user.id,
-        name: session.user.name ?? null,
-        email: session.user.email,
-        image: session.user.image ?? null,
-      },
-    }),
-  );
+	// Render settings page with user info
+	return c.html(
+		getSettingsPageHTML({
+			authBaseUrl: c.env.AUTH_BASE_URL,
+			user: {
+				id: session.user.id,
+				name: session.user.name ?? null,
+				email: session.user.email,
+				image: session.user.image ?? null,
+			},
+		}),
+	);
 });
 
 export default settings;

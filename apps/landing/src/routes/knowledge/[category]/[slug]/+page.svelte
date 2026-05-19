@@ -6,7 +6,8 @@
 	import { Trace } from "@autumnsgrove/lattice/ui/feedback";
 	import { GroveTerm } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
-	import { TableOfContents, MobileTOC } from "@autumnsgrove/lattice";
+	import TableOfContents from "@autumnsgrove/lattice/ui/components/custom/TableOfContents.svelte";
+	import MobileTOC from "@autumnsgrove/lattice/ui/components/custom/MobileTOC.svelte";
 	import RelatedArticles from "$lib/components/RelatedArticles.svelte";
 	import { kbCategoryColors, categoryLabels } from "$lib/utils/kb-colors";
 	import type { DocCategory } from "$lib/types/docs";

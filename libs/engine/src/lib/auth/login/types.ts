@@ -2,7 +2,7 @@
  * Login Graft Type Definitions
  *
  * Types for the LoginGraft component system.
- * Provides unified login UI across all Grove properties with PKCE OAuth support.
+ * Provides unified login UI across all Grove properties with Google OAuth.
  */
 
 import type { Snippet } from "svelte";
@@ -14,9 +14,9 @@ import type { BaseGraftProps } from "../../platform/types.js";
 
 /**
  * Supported authentication providers.
- * Currently Google OAuth, Passkeys, and Email magic links are fully implemented.
+ * Currently Google OAuth is the only fully implemented provider.
  */
-export type AuthProvider = "google" | "github" | "email" | "passkey";
+export type AuthProvider = "google" | "github";
 
 /**
  * Configuration for a single auth provider.
@@ -54,7 +54,7 @@ export type LoginVariant = "default" | "compact" | "fullpage";
 export interface LoginGraftProps extends BaseGraftProps {
 	/**
 	 * Which providers to show (order matters for display).
-	 * Defaults to ['google', 'passkey', 'email'] for all fully supported providers.
+	 * Defaults to ['google'].
 	 */
 	providers?: AuthProvider[];
 
@@ -111,41 +111,6 @@ export interface ProviderIconProps {
 
 	/** Additional CSS classes */
 	class?: string;
-}
-
-// =============================================================================
-// PASSKEY TYPES
-// =============================================================================
-
-/**
- * Result of a successful passkey authentication.
- */
-export interface PasskeyAuthResult {
-	/** Whether authentication was successful */
-	success: boolean;
-
-	/** URL to redirect to after successful auth */
-	redirectTo?: string;
-
-	/** Error message if authentication failed */
-	error?: string;
-}
-
-/**
- * Props for PasskeyButton component.
- */
-export interface PasskeyButtonProps extends BaseGraftProps {
-	/** URL to redirect after successful authentication */
-	returnTo?: string;
-
-	/** Callback fired on successful authentication */
-	onSuccess?: (result: PasskeyAuthResult) => void;
-
-	/** Callback fired on authentication error */
-	onError?: (error: string) => void;
-
-	/** Button size variant */
-	size?: "sm" | "md" | "lg";
 }
 
 // =============================================================================

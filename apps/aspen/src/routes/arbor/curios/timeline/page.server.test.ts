@@ -14,7 +14,7 @@ import { encryptToken, isEncryptedToken } from "@autumnsgrove/lattice/server/enc
 // Valid 256-bit test key
 const TEST_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
-// Sentinel value for clearing tokens (matches @autumnsgrove/lattice/curios/timeline)
+// Sentinel value for clearing tokens (matches @autumnsgrove/curios/timeline)
 const CLEAR_TOKEN_VALUE = "__CLEAR__";
 
 /**

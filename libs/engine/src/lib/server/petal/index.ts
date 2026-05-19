@@ -18,6 +18,7 @@ import {
 	PETAL_RATE_LIMITS,
 	getRejectionMessage,
 } from "$lib/platform/config/petal.js";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import {
 	PetalError,
 	type PetalResult,
@@ -25,6 +26,7 @@ import {
 	type PetalContext,
 	type PetalEnv,
 } from "./types.js";
+import { PETAL_ERRORS } from "./errors.js";
 import { runLayer1, hasActiveCSAMFlag } from "./layer1-csam.js";
 import { runLayer2 } from "./layer2-classify.js";
 import { runLayer3, quickDimensionCheck, quickFileSizeCheck } from "./layer3-sanity.js";
@@ -197,7 +199,7 @@ export async function scanImage(input: PetalScanInput, env: PetalEnv): Promise<P
 		}
 
 		// Unknown error - log and block safely
-		console.error("[Petal] Unexpected error during scan:", err);
+		logGroveError("Petal", PETAL_ERRORS.SCAN_UNEXPECTED_ERROR, { cause: err });
 		return {
 			allowed: false,
 			decision: "block",
@@ -314,6 +316,9 @@ export async function verifyOutput(
 
 // Types
 export * from "./types.js";
+
+// Error catalog
+export { PETAL_ERRORS, type PetalErrorKey } from "./errors.js";
 
 // Layer functions (for advanced usage)
 export { runLayer1, hasActiveCSAMFlag, flagAccountForCSAM } from "./layer1-csam.js";

@@ -1,0 +1,10 @@
+# Local development environment variables for Durable Objects service
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# Durable Objects primarily use service bindings and D1/KV/R2 configured in wrangler.toml.
+# Very few secrets are needed for local dev — service bindings bypass auth automatically.
+
+# Zephyr API key (used by ExportDO when calling Zephyr for email delivery)
+# Optional for local dev — service bindings skip the auth header check
+# ZEPHYR_API_KEY=your_zephyr_api_key_here

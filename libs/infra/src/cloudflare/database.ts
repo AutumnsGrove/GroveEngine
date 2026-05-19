@@ -5,7 +5,7 @@
  * the adapter simply delegates to D1's native API.
  */
 
-import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveDatabase,
@@ -147,7 +147,7 @@ export class CloudflareDatabase implements GroveDatabase {
 		logGroveError("InfraSDK", SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED, {
 			detail: "Use batch() for atomic operations or Loom DOs for interactive transactions.",
 		});
-		throw new Error(SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.adminMessage);
+		throw new Error(SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.userMessage);
 	}
 
 	info(): DatabaseInfo {

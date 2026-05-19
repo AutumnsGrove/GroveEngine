@@ -1,0 +1,24 @@
+# Local development environment variables for Warden (auth/key management worker)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# HMAC key for challenge-response authentication
+# Generate with: openssl rand -hex 32
+WARDEN_SIGNING_KEY=your_64_character_hex_key_here
+
+# Key encryption key for envelope decryption
+# Must be 64 hex characters (32 bytes)
+# Generate with: openssl rand -hex 32
+GROVE_KEK=your_64_character_hex_key_here
+
+# Admin API key for agent management endpoints
+# Generate with: openssl rand -hex 32
+WARDEN_ADMIN_KEY=your_warden_admin_key_here
+
+# Optional global fallbacks — Warden can proxy or resolve these on behalf of agents.
+# Only needed locally if you're testing the resolution paths that use them.
+# GITHUB_TOKEN=ghp_your_github_token_here
+# OPENROUTER_API_KEY=sk-or-your_openrouter_key_here
+# CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
+# RESEND_API_KEY=re_your_resend_key_here
+# STRIPE_SECRET_KEY=sk_test_your_stripe_key_here

@@ -1,0 +1,17 @@
+# Local development environment variables for Zephyr (email gateway)
+# Copy to .dev.vars and fill in actual values
+# .dev.vars is gitignored — never commit it
+
+# Resend API key for sending emails
+# Use a test/sandbox key for local dev — real keys will send real emails
+# Get from: https://resend.com/api-keys
+RESEND_API_KEY=re_your_resend_key_here
+
+# API key callers must present to authenticate with this service
+# Should match ZEPHYR_API_KEY set in Heartwood and any other consumers
+# Generate with: openssl rand -hex 32
+ZEPHYR_API_KEY=your_zephyr_api_key_here
+
+# Bluesky social broadcasting (optional — skip for local dev)
+# BLUESKY_HANDLE=yourhandle.bsky.social
+# BLUESKY_APP_PASSWORD=your_bluesky_app_password_here

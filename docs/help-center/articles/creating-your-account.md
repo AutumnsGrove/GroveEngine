@@ -1,17 +1,15 @@
 ---
 title: Creating Your Account
-description: How to sign up for Grove using Google, magic links, or passkeys
+description: How to sign up for Grove using Google
 category: help
 section: account-billing
-lastUpdated: '2026-02-22'
+lastUpdated: '2026-05-06'
 keywords:
   - account
   - sign up
   - register
   - create account
   - google
-  - magic link
-  - passkey
   - login
   - authentication
 order: 1
@@ -23,43 +21,22 @@ Getting started with Grove takes about a minute. Here's what to expect.
 
 ## How sign-up works
 
-Grove offers three ways to sign in — pick whichever feels most comfortable:
-
-1. **Google** — The quickest option. Sign in with your existing Google account, no new password needed.
-2. **Magic link** — Enter your email, click the link we send you. No password, no third-party account required.
-3. **Passkey** — Use your device's biometrics (fingerprint, face) or hardware key. The most secure option, no passwords or emails involved.
+Grove uses Google sign-in — no new passwords to create or remember.
 
 ![The Plant onboarding flow — creating your Grove account in minutes](https://cdn.grove.place/docs/help/plant-onboarding.png)
 
-### Signing up with Google
+### Signing up
 
 1. Go to [grove.place](https://grove.place) and click **Get Started**
 2. Click **Continue with Google**
 3. Select your Google account (or sign in to Google if you aren't already)
 4. You're in
 
-### Signing up with a magic link
-
-1. Go to [grove.place](https://grove.place) and click **Get Started**
-2. Click **Sign in with Email**
-3. Enter your email address
-4. Check your inbox for a sign-in link (arrives within seconds)
-5. Click the link — you're in
-
-### Signing up with a passkey
-
-1. Go to [grove.place](https://grove.place) and click **Get Started**
-2. Click **Sign in with Passkey**
-3. Your browser prompts you to use a fingerprint, face scan, or hardware key
-4. Authenticate — you're in
-
-> **Note:** Passkey support is still being refined. If you run into trouble, try Google or magic link instead.
-
 ## Why no passwords?
 
-**No passwords to forget.** Every sign-in method avoids traditional passwords entirely. One less thing to manage.
+**No passwords to forget.** Sign-in uses your existing Google account. One less thing to manage.
 
-**Better security.** Whether it's Google's two-factor authentication, a one-time magic link, or cryptographic passkeys — each method is more secure than a password you'd reuse across sites.
+**Better security.** Google's two-factor authentication protects your account — more secure than a password you'd reuse across sites.
 
 **Faster setup.** No "create a password, confirm the password, check your email to verify" dance. You're signed in immediately.
 
@@ -71,11 +48,7 @@ When you sign in with Google, Google shares:
 - Your name (as it appears on your Google account)
 - Your profile picture (if you have one)
 
-When you sign in with a magic link, Grove only gets your email address.
-
-When you sign in with a passkey, Grove only gets a cryptographic identifier — no personal information at all.
-
-In every case, Grove only receives the minimum information needed to identify you. We can't see your emails, files, contacts, or anything else.
+Grove only receives the minimum information needed to identify you. We can't see your emails, files, contacts, or anything else.
 
 ## Choosing your blog address
 
@@ -101,17 +74,13 @@ From there, you can customize your blog's appearance, write your first post, or 
 
 ## Signing in later
 
-Coming back? Same process — use whichever method you signed up with:
+Coming back? Same process:
 
 1. Go to your blog's admin URL or grove.place
 2. Click **Sign In**
-3. Choose Google, magic link, or passkey
+3. Continue with Google
 
 Grove remembers you for about 30 days. After that, you'll need to sign in again.
-
-## Multiple sign-in methods
-
-Your Grove account is tied to the email address or passkey you used to create it. If you signed up with Google, you can also add a passkey later from your account settings for a backup sign-in method.
 
 ---
 

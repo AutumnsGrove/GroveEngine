@@ -24,94 +24,79 @@ import type { SessionDO } from "../durables/SessionDO.js";
  * Both paths verify admin access before proceeding.
  */
 export function adminCookieAuth() {
-  return async (
-    c: Context<{ Bindings: Env; Variables: Record<string, unknown> }>,
-    next: Next,
-  ) => {
-    // Path 1: Bearer token (existing behavior)
-    const token = extractBearerToken(c.req.header("Authorization"));
-    if (token) {
-      const payload = await verifyAccessToken(c.env, token);
+	return async (c: Context<{ Bindings: Env; Variables: Record<string, unknown> }>, next: Next) => {
+		// Path 1: Bearer token (existing behavior)
+		const token = extractBearerToken(c.req.header("Authorization"));
+		if (token) {
+			const payload = await verifyAccessToken(c.env, token);
 
-      if (!payload) {
-        return c.json(
-          {
-            error: "invalid_token",
-            error_description: "Token is invalid or expired",
-          },
-          401,
-        );
-      }
+			if (!payload) {
+				return c.json(
+					{
+						error: "invalid_token",
+						error_description: "Token is invalid or expired",
+					},
+					401,
+				);
+			}
 
-      const db = createDbSession(c.env);
-      const isAdmin = await isUserAdmin(db, payload.sub);
-      if (!isAdmin) {
-        return c.json(
-          { error: "forbidden", error_description: "Admin access required" },
-          403,
-        );
-      }
+			const db = createDbSession(c.env);
+			const isAdmin = await isUserAdmin(db, payload.sub);
+			if (!isAdmin) {
+				return c.json({ error: "forbidden", error_description: "Admin access required" }, 403);
+			}
 
-      // Store token for proxying (minecraft uses this)
-      c.set("accessToken", token);
-      return next();
-    }
+			// Store token for downstream proxying
+			c.set("accessToken", token);
+			return next();
+		}
 
-    // Path 2: Cookie-based auth (grove_session → SessionDO)
-    const parsedSession = await getSessionFromRequest(
-      c.req.raw,
-      c.env.SESSION_SECRET,
-    );
+		// Path 2: Cookie-based auth (grove_session → SessionDO)
+		const parsedSession = await getSessionFromRequest(c.req.raw, c.env.SESSION_SECRET);
 
-    if (parsedSession) {
-      const sessionDO = c.env.SESSIONS.get(
-        c.env.SESSIONS.idFromName(`session:${parsedSession.userId}`),
-      ) as DurableObjectStub<SessionDO>;
+		if (parsedSession) {
+			const sessionDO = c.env.SESSIONS.get(
+				c.env.SESSIONS.idFromName(`session:${parsedSession.userId}`),
+			) as DurableObjectStub<SessionDO>;
 
-      const result = await sessionDO.validateSession(parsedSession.sessionId);
+			const result = await sessionDO.validateSession(parsedSession.sessionId);
 
-      if (result.valid) {
-        const db = createDbSession(c.env);
-        const user = await getUserById(db, parsedSession.userId);
+			if (result.valid) {
+				const db = createDbSession(c.env);
+				const user = await getUserById(db, parsedSession.userId);
 
-        if (user && (user.is_admin === 1 || isEmailAdmin(user.email))) {
-          return next();
-        }
+				if (user && (user.is_admin === 1 || isEmailAdmin(user.email))) {
+					return next();
+				}
 
-        return c.json(
-          { error: "forbidden", error_description: "Admin access required" },
-          403,
-        );
-      }
-    }
+				return c.json({ error: "forbidden", error_description: "Admin access required" }, 403);
+			}
+		}
 
-    // Path 3: Fallback to access_token cookie (JWT)
-    const cookieHeader = c.req.header("Cookie") || "";
-    const accessTokenMatch = cookieHeader.match(/access_token=([^;]+)/);
+		// Path 3: Fallback to access_token cookie (JWT)
+		const cookieHeader = c.req.header("Cookie") || "";
+		const accessTokenMatch = cookieHeader.match(/access_token=([^;]+)/);
 
-    if (accessTokenMatch) {
-      const payload = await verifyAccessToken(c.env, accessTokenMatch[1]);
+		if (accessTokenMatch) {
+			const payload = await verifyAccessToken(c.env, accessTokenMatch[1]);
 
-      if (payload?.sub) {
-        const db = createDbSession(c.env);
-        const isAdmin = await isUserAdmin(db, payload.sub);
-        if (isAdmin) {
-          return next();
-        }
+			if (payload?.sub) {
+				const db = createDbSession(c.env);
+				const isAdmin = await isUserAdmin(db, payload.sub);
+				if (isAdmin) {
+					return next();
+				}
 
-        return c.json(
-          { error: "forbidden", error_description: "Admin access required" },
-          403,
-        );
-      }
-    }
+				return c.json({ error: "forbidden", error_description: "Admin access required" }, 403);
+			}
+		}
 
-    return c.json(
-      {
-        error: "unauthorized",
-        error_description: "Missing or invalid credentials",
-      },
-      401,
-    );
-  };
+		return c.json(
+			{
+				error: "unauthorized",
+				error_description: "Missing or invalid credentials",
+			},
+			401,
+		);
+	};
 }

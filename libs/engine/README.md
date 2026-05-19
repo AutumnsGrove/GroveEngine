@@ -86,7 +86,7 @@ RESEND_API_KEY=re_xxxxx
 3. **Run migrations**
 
    ```bash
-   npx wrangler d1 execute your-site-db --local --file=migrations/001_magic_codes.sql
+   npx wrangler d1 execute your-site-db --local --file=migrations/001_initial_schema.sql
    npx wrangler d1 execute your-site-db --local --file=migrations/002_auth_security.sql
    npx wrangler d1 execute your-site-db --local --file=migrations/003_site_settings.sql
    npx wrangler d1 execute your-site-db --local --file=migrations/004_pages_table.sql

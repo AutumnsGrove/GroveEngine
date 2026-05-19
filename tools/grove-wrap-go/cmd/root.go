@@ -35,10 +35,10 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "gw",
 	Short: "Grove Wrap — tend the grove with safety and warmth",
-	Long: `gw is the CLI that tends the grove. It wraps git, GitHub, Wrangler,
-and the dev toolchain behind a safety-tiered interface.
+	Long: `gw is the CLI for things raw CLIs can't do: encrypted vaults,
+issue-driven worktrees, npm publishing workflows, and Warden management.
 
-Every tool in the grove was shaped by fire and patience.`,
+For git, gh, and wrangler — use them directly.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cmdStartTime = time.Now()
 		config.Init(flagWrite, flagForce, flagJSON, flagAgent, flagVerbose, flagNoCloud, flagInteractive)
@@ -82,7 +82,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagInteractive, "interactive", "i", true, "Interactive TUI mode (auto-disabled for --agent/--json)")
 
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(doctorCmd)
 
 	setupCozyHelp()
 }

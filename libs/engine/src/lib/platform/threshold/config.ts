@@ -31,13 +31,7 @@ export const ENDPOINT_RATE_LIMITS = {
 	"auth/callback": { limit: 10, windowSeconds: 300 },
 	"auth/token": { limit: 20, windowSeconds: 60 },
 	"auth/password-reset": { limit: 3, windowSeconds: 3600 },
-	"auth/magic-link": { limit: 5, windowSeconds: 900 },
 	"auth/verify": { limit: 100, windowSeconds: 60 },
-
-	// Passkey endpoints
-	"auth/passkey-register": { limit: 5, windowSeconds: 3600 },
-	"auth/passkey-delete": { limit: 10, windowSeconds: 3600 },
-	"auth/passkey-auth": { limit: 20, windowSeconds: 60 },
 
 	// Session endpoints
 	"session/validate": { limit: 30, windowSeconds: 60 },
@@ -69,8 +63,6 @@ export const ENDPOINT_RATE_LIMITS = {
 	"upload/media": { limit: 10, windowSeconds: 3600 },
 
 	// AI endpoints (expensive — app-level)
-	"ai/wisp": { limit: 50, windowSeconds: 86400 },
-	"ai/fireside": { limit: 50, windowSeconds: 86400 },
 	"ai/draft": { limit: 20, windowSeconds: 86400 },
 
 	// AI endpoints (Lumen gateway — per-caller)
@@ -78,14 +70,6 @@ export const ENDPOINT_RATE_LIMITS = {
 	"lumen/embed": { limit: 120, windowSeconds: 60 },
 	"lumen/moderate": { limit: 120, windowSeconds: 60 },
 	"lumen/transcribe": { limit: 30, windowSeconds: 60 },
-
-	// Reverie endpoints (AI-powered — expensive, per-tenant)
-	"reverie/configure": { limit: 20, windowSeconds: 60 },
-	"reverie/execute": { limit: 20, windowSeconds: 60 },
-	"reverie/query": { limit: 30, windowSeconds: 60 },
-
-	// Reverie Exec endpoints (write operations, per-tenant)
-	"reverie-exec/execute": { limit: 20, windowSeconds: 60 },
 
 	// Data operations
 	"export/data": { limit: 10, windowSeconds: 3600 },
@@ -124,7 +108,6 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"POST:/api/auth/login": "auth/login",
 	"POST:/api/auth/token": "auth/token",
 	"POST:/api/auth/password-reset": "auth/password-reset",
-	"POST:/api/auth/magic-link": "auth/magic-link",
 	"POST:/api/blooms": "posts/create",
 	"PUT:/api/blooms": "posts/update",
 	"PATCH:/api/blooms": "posts/update",
@@ -134,9 +117,6 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"POST:/api/comments": "comments/create",
 	"POST:/api/upload": "upload/image",
 	"POST:/api/images/upload": "upload/image",
-	"POST:/api/grove/wisp": "ai/wisp",
-	"POST:/api/ai/wisp": "ai/wisp",
-	"POST:/api/ai/fireside": "ai/fireside",
 	"POST:/api/ai/draft": "ai/draft",
 	"POST:/api/export": "export/data",
 	"POST:/api/export/start": "export/zip-start",

@@ -32,8 +32,6 @@ export type {
 	SentinelAggregateResult,
 	ClearingAggregateResult,
 	WardenAggregateResult,
-	MeadowAggregateResult,
-	FireflyAggregateResult,
 	WorkerRegistryEntry,
 	D1RegistryEntry,
 	R2RegistryEntry,
@@ -46,11 +44,9 @@ export { SERVICE_REGISTRY } from "./types.js";
 // Cost calculations
 export {
 	CLOUDFLARE_PRICING,
-	FIREFLY_PROVIDER_PRICING,
 	PRICING_LAST_VERIFIED,
 	calculateDailyCosts,
 	projectMonthly,
-	calculateFireflySessionCost,
 } from "./costs.js";
 
 // Individual collectors (for direct use when needed)
@@ -70,8 +66,6 @@ export type { ThornAggregateResult } from "./aggregators/thorn-aggregator.js";
 export { aggregateSentinel } from "./aggregators/sentinel-aggregator.js";
 export { aggregateClearing } from "./aggregators/clearing-aggregator.js";
 export { aggregateWarden } from "./aggregators/warden-aggregator.js";
-export { aggregateMeadow } from "./aggregators/meadow-aggregator.js";
-export { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
 
 // =============================================================================
 // Query Functions — read from observability tables for API endpoints

@@ -146,28 +146,6 @@ describe("Grove Router", () => {
 	// ==========================================================================
 
 	describe("Pages project routing", () => {
-		it("routes ivy subdomain to ivy Pages", async () => {
-			const request = createRequest("ivy", "/inbox");
-			await router.fetch(request, env);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: expect.stringContaining("ivy-3uv.pages.dev/inbox"),
-				}),
-			);
-		});
-
-		it("routes meadow subdomain to grove-meadow", async () => {
-			const request = createRequest("meadow", "/feed");
-			await router.fetch(request, env);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: expect.stringContaining("grove-meadow.pages.dev/feed"),
-				}),
-			);
-		});
-
 		it("routes amber subdomain to amber Pages", async () => {
 			const request = createRequest("amber", "/files");
 			await router.fetch(request, env);
@@ -186,17 +164,6 @@ describe("Grove Router", () => {
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.objectContaining({
 					url: expect.stringContaining("grove-plant.pages.dev/onboard"),
-				}),
-			);
-		});
-
-		it("routes terrarium subdomain to terrarium Pages", async () => {
-			const request = createRequest("terrarium", "/editor");
-			await router.fetch(request, env);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: expect.stringContaining("grove-terrarium.pages.dev/editor"),
 				}),
 			);
 		});
@@ -418,7 +385,7 @@ describe("Grove Router", () => {
 		});
 
 		it("proxies requests with no Accept header (defaults to API behavior)", async () => {
-			const request = createRequest("auth-api", "/api/magic-link", {
+			const request = createRequest("auth-api", "/api/token", {
 				method: "POST",
 			});
 			await router.fetch(request, env);
@@ -444,7 +411,6 @@ describe("Grove Router", () => {
 			"search",
 			"porch",
 			"canopy",
-			"chirp",
 		];
 
 		for (const sub of reservedSubdomains) {

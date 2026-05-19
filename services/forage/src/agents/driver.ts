@@ -6,7 +6,7 @@
  * Supports tool calling with fallback to JSON prompts.
  */
 
-import { safeJsonParse } from "@autumnsgrove/lattice/loom";
+import { safeJsonParse } from "@autumnsgrove/loom";
 import { DRIVER_SYSTEM_PROMPT, formatDriverPrompt, type PreviousResults } from "../prompts";
 import type { AIProvider, ProviderResponse } from "../providers/types";
 import { DRIVER_TOOL } from "../providers/tools";

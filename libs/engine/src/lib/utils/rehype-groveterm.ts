@@ -242,7 +242,7 @@ export const rehypeGroveTerm: Plugin<[RehypeGroveTermOptions], Root> = function 
 ) {
 	if (!options || !options.manifest) {
 		const err = GROVETERM_ERRORS.MANIFEST_REQUIRED;
-		throw new Error(`[${err.code}] ${err.adminMessage}`);
+		throw new Error(`[${err.code}] ${err.userMessage}`);
 	}
 	return (tree: Root) => {
 		// Collect replacements first, then apply them
@@ -302,7 +302,7 @@ export const rehypeGroveTerm: Plugin<[RehypeGroveTermOptions], Root> = function 
 export function processGroveTerms(text: string, options: RehypeGroveTermOptions): string {
 	if (!options || !options.manifest) {
 		const err = GROVETERM_ERRORS.MANIFEST_REQUIRED;
-		throw new Error(`[${err.code}] ${err.adminMessage}`);
+		throw new Error(`[${err.code}] ${err.userMessage}`);
 	}
 	const m = options.manifest;
 	const warnOnUnknown = options.warnOnUnknown ?? true;

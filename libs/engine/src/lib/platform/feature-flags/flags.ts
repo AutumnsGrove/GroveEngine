@@ -18,7 +18,7 @@
  * return { ...parentData, flags };
  *
  * // In any child page (+page.svelte)
- * <MarkdownEditor firesideEnabled={data.flags.fireside_mode ?? false} />
+ * <Gallery enabled={data.flags.photo_gallery ?? false} />
  * ```
  *
  * @see docs/adr/20260131-dynamic-grafts-cascade.md
@@ -37,10 +37,6 @@ import type { EvaluationContext, FeatureFlagsEnv } from "./types.js";
  * Unknown IDs still work — this is just for DX.
  */
 export type KnownFlagId =
-	| "fireside_mode"
-	| "scribe_mode"
-	| "wisp_enabled"
-	| "meadow_access"
 	| "jxl_encoding"
 	| "jxl_kill_switch"
 	| "image_uploads_enabled"
@@ -48,9 +44,7 @@ export type KnownFlagId =
 	| "uploads_suspended"
 	| "photo_gallery"
 	| "thorn_moderation"
-	| "chirp_enabled"
-	| "lantern_enabled"
-	| "reverie_enabled";
+	| "lantern_enabled";
 
 /**
  * Record of flag ID to enabled status.

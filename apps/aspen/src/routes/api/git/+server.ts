@@ -181,14 +181,22 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		githubTokenForDb = "";
 	} else if (githubToken?.trim()) {
 		// New token value - encrypt it
+		if (!encryptionKey) {
+			throwGroveError(
+				500,
+				{
+					code: "GIT-001",
+					category: "admin",
+					userMessage: "Unable to save token",
+					adminMessage: "TOKEN_ENCRYPTION_KEY not configured — refusing to store plaintext token",
+				},
+				"git-api",
+			);
+		}
 		const rawToken = githubToken.trim();
-		githubTokenForDb = encryptionKey ? await encryptToken(rawToken, encryptionKey) : rawToken;
+		githubTokenForDb = await encryptToken(rawToken, encryptionKey);
 	}
 	// else: null/undefined = preserve existing (COALESCE handles this)
-
-	if (!encryptionKey && githubToken?.trim()) {
-		console.warn("TOKEN_ENCRYPTION_KEY not set - GitHub token will be stored unencrypted");
-	}
 
 	try {
 		await execute(

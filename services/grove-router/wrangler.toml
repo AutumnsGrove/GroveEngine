@@ -41,10 +41,6 @@ binding = "AUTH_API"
 service = "groveauth"
 
 [[services]]
-binding = "MC_CONTROL"
-service = "mc-control"
-
-[[services]]
 binding = "MYCELIUM"
 service = "mycelium"
 

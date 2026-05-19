@@ -6,6 +6,7 @@
 	import Icon from "$lib/components/Icons.svelte";
 	import * as api from "$lib/api";
 	import type { QuotaStatus, UsageBreakdown as UsageBreakdownType, StorageFile } from "$types";
+	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 
 	// State
 	let loading = $state(true);
@@ -52,7 +53,7 @@
 	async function handlePurchaseAddon(addonType: string) {
 		const res = await api.purchaseAddon(addonType);
 		if (res.error) {
-			alert(res.error);
+			toast.error(res.error);
 			return;
 		}
 		if (res.data?.redirect_url) {

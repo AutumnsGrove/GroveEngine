@@ -18,7 +18,6 @@ import health from "./routes/health.js";
 import subscription from "./routes/subscription.js";
 import admin from "./routes/admin.js";
 import session from "./routes/session.js";
-import minecraft from "./routes/minecraft.js";
 import cdn from "./routes/cdn.js";
 import betterAuth from "./routes/betterAuth.js";
 import settings from "./routes/settings.js";
@@ -80,7 +79,6 @@ app.route("/health", health);
 app.route("/subscription", subscription);
 app.route("/admin", admin);
 app.route("/session", session);
-app.route("/minecraft", minecraft);
 app.route("/cdn", cdn);
 app.route("/settings", settings);
 app.route("/status", status);
@@ -101,14 +99,8 @@ app.get("/", (c) => {
 			// Better Auth (new, recommended)
 			betterAuth: {
 				signInSocial: "POST /api/auth/sign-in/social",
-				signInMagicLink: "POST /api/auth/sign-in/magic-link",
-				signInPasskey: "POST /api/auth/sign-in/passkey",
 				signOut: "POST /api/auth/sign-out",
 				session: "GET /api/auth/session",
-				passkeyRegister: "POST /api/auth/passkey/generate-register-options",
-				passkeyVerify: "POST /api/auth/passkey/verify-registration",
-				passkeyList: "GET /api/auth/passkey/list-user-passkeys",
-				passkeyDelete: "POST /api/auth/passkey/delete-passkey",
 				twoFactorEnable: "POST /api/auth/two-factor/enable",
 				twoFactorVerify: "POST /api/auth/two-factor/verify-totp",
 				twoFactorDisable: "POST /api/auth/two-factor/disable",
@@ -151,15 +143,6 @@ app.get("/", (c) => {
 				list: "GET /session/list",
 				revokeById: "DELETE /session/:sessionId",
 				check: "GET /session/check (legacy)",
-			},
-			minecraft: {
-				status: "GET /minecraft/status",
-				start: "POST /minecraft/start",
-				stop: "POST /minecraft/stop",
-				whitelist: "GET/POST /minecraft/whitelist",
-				command: "POST /minecraft/command",
-				sync: "POST /minecraft/sync",
-				history: "GET /minecraft/history",
 			},
 			cdn: {
 				upload: "POST /cdn/upload",

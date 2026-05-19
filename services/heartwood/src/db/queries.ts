@@ -3,6 +3,7 @@
  */
 
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type {
 	Client,
@@ -465,6 +466,7 @@ export async function createMagicCode(
 		.run();
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2. Table dropped in migration 0010. */
 export async function getMagicCode(
 	db: D1DatabaseOrSession,
 	email: string,
@@ -480,10 +482,12 @@ export async function getMagicCode(
 	return result;
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2 */
 export async function markMagicCodeUsed(db: D1DatabaseOrSession, id: string): Promise<void> {
 	await db.prepare("UPDATE magic_codes SET used = 1 WHERE id = ?").bind(id).run();
 }
 
+/** @deprecated Magic code auth removed — Great Grove Refactor Phase 2 */
 export async function cleanupExpiredMagicCodes(db: D1DatabaseOrSession): Promise<void> {
 	const now = new Date().toISOString();
 	await db.prepare("DELETE FROM magic_codes WHERE expires_at < ? OR used = 1").bind(now).run();
@@ -654,7 +658,10 @@ export async function cleanupOldAuditLogs(
 ): Promise<number> {
 	// Validate minimum retention to prevent accidental mass deletion
 	if (retentionDays < MIN_AUDIT_RETENTION_DAYS) {
-		throw new Error(HW_SVC_ERRORS.INVALID_AUDIT_RETENTION.adminMessage);
+		logGroveError("Heartwood", HW_SVC_ERRORS.INVALID_AUDIT_RETENTION, {
+			detail: `retentionDays=${retentionDays}, minimum=${MIN_AUDIT_RETENTION_DAYS}`,
+		});
+		throw new Error(HW_SVC_ERRORS.INVALID_AUDIT_RETENTION.userMessage);
 	}
 
 	const cutoffDate = new Date();

@@ -8,48 +8,38 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	//   Arbor layout → data.tenant (subdomain, displayName)
 	//   Arbor layout → data.user (picture for OAuth avatar)
 	//
-	// Only meadow_opt_in (tenants table) and blaze count need separate queries.
+	// Only blaze count and curio counts need separate queries.
 
-	let meadowOptIn = false;
 	let customBlazeCount = 0;
 	let curiosCount = 0;
 
 	if (env?.DB && locals.tenantId) {
 		// Per-query error handling — one failing doesn't break the other
-		const [meadowResult, blazeResult, timelineCurio, galleryCurio, journeyCurio] =
-			await Promise.all([
-				env.DB.prepare("SELECT meadow_opt_in FROM tenants WHERE id = ?")
-					.bind(locals.tenantId)
-					.first<{ meadow_opt_in: number | null }>()
-					.catch((err) => {
-						console.warn("[Settings Hub] meadow query failed:", err);
-						return null;
-					}),
-				env.DB.prepare(
-					"SELECT COUNT(*) as count FROM blazes WHERE tenant_id = ? AND scope = 'tenant'",
-				)
-					.bind(locals.tenantId)
-					.first<{ count: number }>()
-					.catch((err) => {
-						console.warn("[Settings Hub] blaze count query failed:", err);
-						return null;
-					}),
-				// Curio config queries for Features card
-				env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
-					.bind(locals.tenantId)
-					.first<{ enabled: number }>()
-					.catch(() => null),
-				env.DB.prepare("SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?")
-					.bind(locals.tenantId)
-					.first<{ enabled: number }>()
-					.catch(() => null),
-				env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
-					.bind(locals.tenantId)
-					.first<{ enabled: number }>()
-					.catch(() => null),
-			]);
+		const [blazeResult, timelineCurio, galleryCurio, journeyCurio] = await Promise.all([
+			env.DB.prepare(
+				"SELECT COUNT(*) as count FROM blazes WHERE tenant_id = ? AND scope = 'tenant'",
+			)
+				.bind(locals.tenantId)
+				.first<{ count: number }>()
+				.catch((err) => {
+					console.warn("[Settings Hub] blaze count query failed:", err);
+					return null;
+				}),
+			// Curio config queries for Features card
+			env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
+				.bind(locals.tenantId)
+				.first<{ enabled: number }>()
+				.catch(() => null),
+			env.DB.prepare("SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?")
+				.bind(locals.tenantId)
+				.first<{ enabled: number }>()
+				.catch(() => null),
+			env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
+				.bind(locals.tenantId)
+				.first<{ enabled: number }>()
+				.catch(() => null),
+		]);
 
-		meadowOptIn = meadowResult?.meadow_opt_in === 1;
 		customBlazeCount = blazeResult?.count ?? 0;
 		curiosCount =
 			(timelineCurio?.enabled === 1 ? 1 : 0) +
@@ -58,7 +48,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	}
 
 	return {
-		meadowOptIn,
 		customBlazeCount,
 		curiosCount,
 	};

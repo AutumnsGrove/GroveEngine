@@ -191,13 +191,6 @@ describe("Tier Configuration", () => {
 				expect(domainTiers).toContain("oak");
 				expect(domainTiers).toContain("evergreen");
 			});
-
-			it("returns tiers with meadow feature (all tiers)", () => {
-				const meadowTiers = getTiersWithFeature("meadow");
-				expect(meadowTiers).toContain("wanderer");
-				expect(meadowTiers).toContain("seedling");
-				expect(meadowTiers).toContain("evergreen");
-			});
 		});
 
 		describe("getAvailableTiers", () => {
@@ -224,9 +217,8 @@ describe("Tier Configuration", () => {
 				expect(tierHasFeature("wanderer", "analytics")).toBe(false);
 			});
 
-			it("wanderer tier has blog and meadow", () => {
+			it("wanderer tier has blog", () => {
 				expect(tierHasFeature("wanderer", "blog")).toBe(true);
-				expect(tierHasFeature("wanderer", "meadow")).toBe(true);
 			});
 		});
 

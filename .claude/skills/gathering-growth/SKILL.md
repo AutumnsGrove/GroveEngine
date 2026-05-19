@@ -51,7 +51,7 @@ scope    finds opps  review  builds   review  drafts    review    SEO     & next
 The conductor receives the growth request and prepares:
 
 - What's the time horizon? (this week? this month?)
-- What has been shipped recently? (quick `gw git log --oneline --since="14 days ago"`)
+- What has been shipped recently? (quick `git log --oneline --since="14 days ago"`)
 - Any specific features or launches to highlight?
 - Any previous growth experiments to check on?
 - Confirm the gathering with the human
@@ -128,7 +128,7 @@ Present the Squirrel's calendar and ask:
 
 **Optionally push to GitHub Projects:**
 ```bash
-gw gh issue create --write \
+gh issue create \
   --title "Content: [topic]" \
   --body "[calendar item details]" \
   --label "content"

@@ -1,0 +1,62 @@
+{
+	"name": "@autumnsgrove/loom",
+	"version": "0.1.0",
+	"description": "Loom — Durable Object framework for Grove. Structured routing, storage, alarms, WebSockets, and logging for Cloudflare Durable Objects.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/loom"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./sveltekit": {
+			"types": "./src/adapters/sveltekit.ts",
+			"default": "./src/adapters/sveltekit.ts"
+		},
+		"./worker": {
+			"types": "./src/adapters/worker.ts",
+			"default": "./src/adapters/worker.ts"
+		},
+		"./testing": {
+			"types": "./src/test-utils.ts",
+			"default": "./src/test-utils.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/grove-errors": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
+	},
+	"peerDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1"
+	},
+	"peerDependenciesMeta": {
+		"@cloudflare/workers-types": {
+			"optional": true
+		}
+	},
+	"keywords": [
+		"grove",
+		"loom",
+		"durable-objects",
+		"cloudflare",
+		"sdk"
+	]
+}

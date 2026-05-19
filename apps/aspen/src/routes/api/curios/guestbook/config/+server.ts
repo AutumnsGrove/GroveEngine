@@ -19,7 +19,7 @@ import {
 	type GuestbookCtaStyle,
 	type GuestbookInlineMode,
 	type GuestbookSigningStyle,
-} from "@autumnsgrove/lattice/curios/guestbook";
+} from "@autumnsgrove/curios/guestbook";
 
 interface ConfigRow {
 	enabled: number;

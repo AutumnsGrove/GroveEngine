@@ -1,16 +1,18 @@
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
 import { setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 
 /**
  * Server hooks for the Plant app
  *
  * Handles CSRF origin checking for all state-changing requests.
- * Uses the shared validateCSRF() from the engine for proxy-aware origin validation.
+ * Pulse observability instrumentation on all requests.
  */
 
-export const handle: Handle = async ({ event, resolve }) => {
+const plantHandle: Handle = async ({ event, resolve }) => {
 	// CSRF validation for all state-changing methods (not just POST)
 	if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
 		if (!validateCSRF(event.request, true)) {
@@ -46,3 +48,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(pulseHandle({ app: "plant" }), plantHandle);
+export const handleError = createPulseErrorHook({ app: "plant" });

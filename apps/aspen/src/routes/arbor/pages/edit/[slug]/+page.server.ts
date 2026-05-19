@@ -1,5 +1,5 @@
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { loadCurioStatus } from "@autumnsgrove/lattice/server/curio-status";
+import { loadCurioStatus } from "@autumnsgrove/curios/status";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {

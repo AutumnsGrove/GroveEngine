@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
-import { stripHtml } from "@autumnsgrove/lattice/curios/sanitize";
+import { stripHtml } from "@autumnsgrove/curios/sanitize";
 import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
 import {
 	generatePollId,
@@ -22,7 +22,7 @@ import {
 	MAX_OPTIONS,
 	MAX_DESCRIPTION_LENGTH,
 	type PollOption,
-} from "@autumnsgrove/lattice/curios/polls";
+} from "@autumnsgrove/curios/polls";
 
 interface PollRow {
 	id: string;

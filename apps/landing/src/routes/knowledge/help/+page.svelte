@@ -2,7 +2,7 @@
 	import SEO from "$lib/components/SEO.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { CategoryNav } from "@autumnsgrove/lattice";
+	import CategoryNav from "@autumnsgrove/lattice/ui/components/custom/CategoryNav.svelte";
 	import { resolveAnyIcon, stateIcons } from "@autumnsgrove/prism/icons";
 
 	function getToolIcon(iconKey: string) {

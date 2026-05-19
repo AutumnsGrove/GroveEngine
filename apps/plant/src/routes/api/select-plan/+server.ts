@@ -12,9 +12,11 @@ import type { RequestHandler } from "./$types";
 import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/platform/pricing";
 import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import { checkFreeAccountIPLimit, logFreeAccountCreation } from "$lib/server/free-account-limits";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
+import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 // Valid billing cycles for database storage
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
@@ -80,11 +82,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		return json({ error: "Session expired. Please sign in again." }, { status: 401 });
 	}
 
-	const db = platform?.env?.DB;
-	if (!db) {
+	const rawDb = platform?.env?.DB;
+	if (!rawDb) {
 		logPlantError(PLANT_ERRORS.DB_UNAVAILABLE, { path: "/api/select-plan" });
 		return json({ error: "Service temporarily unavailable" }, { status: 503 });
 	}
+	const db = new CloudflareDatabase(rawDb);
 
 	// Validate onboarding steps are complete before allowing plan selection
 	try {
@@ -115,7 +118,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		}
 
 		// Email is verified if the flag is set OR if the user completed auth
-		// (OAuth/magic-link both inherently verify email ownership)
+		// (OAuth inherently verifies email ownership)
 		if (!onboarding.email_verified && !onboarding.auth_completed_at) {
 			return json({ error: "Please verify your email before selecting a plan." }, { status: 400 });
 		}
@@ -152,6 +155,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 		});
 		return json({ error: "Unable to save selection. Please try again." }, { status: 500 });
 	}
+
+	emitPulseEvent("signup.plan_selected", {
+		app: "plant",
+		route: "/api/select-plan",
+		metadata: { onboarding_id: onboardingId, plan, billing_cycle: billingCycle },
+	});
 
 	console.log(
 		`[Select Plan API] Saved plan=${plan} cycle=${billingCycle} for ${onboardingId.slice(0, 8)}...`,
@@ -250,6 +259,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 			});
 			return json({ error: "Unable to complete signup. Please try again." }, { status: 500 });
 		}
+
+		emitPulseEvent("signup.checkout_complete", {
+			app: "plant",
+			route: "/api/select-plan",
+			metadata: { onboarding_id: onboardingId, plan: "wanderer", free: true },
+		});
 
 		return json({ success: true, redirect: "/success" });
 	}

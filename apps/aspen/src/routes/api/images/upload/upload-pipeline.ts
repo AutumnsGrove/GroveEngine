@@ -15,7 +15,7 @@ import {
 import { scanImage, type PetalEnv } from "@autumnsgrove/lattice/server/petal";
 import { API_ERRORS, buildErrorJson, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
-import { generateGalleryId, parseImageFilename } from "@autumnsgrove/lattice/curios/gallery";
+import { generateGalleryId, parseImageFilename } from "@autumnsgrove/curios/gallery";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;

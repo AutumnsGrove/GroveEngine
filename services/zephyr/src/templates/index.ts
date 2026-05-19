@@ -5,7 +5,7 @@
  * Supports both named templates and "raw" for pre-rendered content.
  */
 
-import { ZEPHYR_ERRORS } from "../errors";
+import { ZEPHYR_ERRORS, logZephyrError } from "../errors";
 import type { TemplateRenderFn } from "../types";
 
 /**
@@ -22,10 +22,12 @@ export const TEMPLATES: Record<string, TemplateRenderFn> = {
 		const subject = data.subject as string;
 
 		if (!html && !text) {
-			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+			logZephyrError(ZEPHYR_ERRORS.INVALID_TEMPLATE, { detail: "raw template missing html/text" });
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.userMessage);
 		}
 		if (!subject) {
-			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+			logZephyrError(ZEPHYR_ERRORS.INVALID_TEMPLATE, { detail: "raw template missing subject" });
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.userMessage);
 		}
 
 		return {
@@ -55,10 +57,14 @@ export async function renderTemplate(
 	// Handle raw template
 	if (templateName === "raw") {
 		if (!rawHtml && !rawText) {
-			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+			logZephyrError(ZEPHYR_ERRORS.INVALID_TEMPLATE, {
+				detail: "renderTemplate: missing html/text",
+			});
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.userMessage);
 		}
 		if (!rawSubject) {
-			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+			logZephyrError(ZEPHYR_ERRORS.INVALID_TEMPLATE, { detail: "renderTemplate: missing subject" });
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.userMessage);
 		}
 
 		return {
@@ -98,10 +104,11 @@ export async function renderTemplate(
 		clearTimeout(timeoutId);
 
 		if (!response.ok) {
-			const error = await response.text();
-			throw new Error(
-				`${ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.adminMessage} (${response.status}: ${error})`,
-			);
+			const errorText = await response.text();
+			logZephyrError(ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED, {
+				detail: `HTTP ${response.status}: ${errorText}`,
+			});
+			throw new Error(ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.userMessage);
 		}
 
 		const result = (await response.json()) as {
@@ -119,8 +126,16 @@ export async function renderTemplate(
 			subject,
 		};
 	} catch (error) {
+		// Re-throw if already a safe grove error (already logged above)
+		if (
+			error instanceof Error &&
+			error.message === ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.userMessage
+		) {
+			throw error;
+		}
 		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`${ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.adminMessage}: ${message}`);
+		logZephyrError(ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED, { cause: error, detail: message });
+		throw new Error(ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.userMessage);
 	}
 }
 

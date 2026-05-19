@@ -10,7 +10,6 @@ import { describe, it, expect } from "vitest";
 import {
 	calculateDailyCosts,
 	projectMonthly,
-	calculateFireflySessionCost,
 	CLOUDFLARE_PRICING,
 	PRICING_LAST_VERIFIED,
 } from "../costs.js";
@@ -402,74 +401,5 @@ describe("projectMonthly", () => {
 		const monthly = projectMonthly(daily);
 		// If it were 30.44 this would be different
 		expect(monthly.total).toBeCloseTo(daily.total * 30, 10);
-	});
-});
-
-// =============================================================================
-// calculateFireflySessionCost
-// =============================================================================
-
-describe("calculateFireflySessionCost", () => {
-	it("calculates correct cost for hetzner cx22 for 1 hour", () => {
-		// cx22 = $0.008/hour * 1 hour = $0.008
-		const cost = calculateFireflySessionCost("hetzner", "cx22", 3600);
-		expect(cost).toBeCloseTo(0.008, 6);
-	});
-
-	it("calculates correct cost for hetzner cx32 for 2 hours", () => {
-		// cx32 = $0.016/hour * 2 = $0.032
-		const cost = calculateFireflySessionCost("hetzner", "cx32", 7200);
-		expect(cost).toBeCloseTo(0.032, 6);
-	});
-
-	it("calculates correct cost for flyio shared-cpu-1x for 30 minutes", () => {
-		// shared-cpu-1x = $0.0101/hour * 0.5h = $0.00505
-		const cost = calculateFireflySessionCost("flyio", "shared-cpu-1x", 1800);
-		expect(cost).toBeCloseTo(0.00505, 6);
-	});
-
-	it("calculates correct cost for railway starter for 24 hours", () => {
-		// starter = $0.015/hour * 24 = $0.36
-		const cost = calculateFireflySessionCost("railway", "starter", 86400);
-		expect(cost).toBeCloseTo(0.36, 6);
-	});
-
-	it("calculates correct cost for digitalocean s-1vcpu-1gb for 1 hour", () => {
-		// s-1vcpu-1gb = $0.009/hour
-		const cost = calculateFireflySessionCost("digitalocean", "s-1vcpu-1gb", 3600);
-		expect(cost).toBeCloseTo(0.009, 6);
-	});
-
-	it("returns 0 for unknown instance type", () => {
-		const cost = calculateFireflySessionCost("hetzner", "nonexistent-type", 3600);
-		expect(cost).toBe(0);
-	});
-
-	it("returns 0 for 0-second duration", () => {
-		const cost = calculateFireflySessionCost("hetzner", "cx22", 0);
-		expect(cost).toBe(0);
-	});
-
-	it("cost is proportional to duration", () => {
-		const oneHour = calculateFireflySessionCost("hetzner", "cx42", 3600);
-		const twoHours = calculateFireflySessionCost("hetzner", "cx42", 7200);
-		expect(twoHours).toBeCloseTo(oneHour * 2, 10);
-	});
-
-	it("cost for 3600 seconds equals hourly rate", () => {
-		const providers = ["hetzner", "flyio", "railway", "digitalocean"] as const;
-		const instances = {
-			hetzner: "cx22",
-			flyio: "shared-cpu-1x",
-			railway: "starter",
-			digitalocean: "s-1vcpu-1gb",
-		} as const;
-
-		for (const provider of providers) {
-			const instance = instances[provider];
-			const cost = calculateFireflySessionCost(provider, instance, 3600);
-			expect(cost).toBeGreaterThan(0);
-			expect(Number.isFinite(cost)).toBe(true);
-		}
 	});
 });

@@ -4,24 +4,33 @@
   },
   "permissions": {
     "allow": [
-      "Bash(gw context:*)",
-      "Bash(gw context)",
-      "Bash(gw doctor:*)",
-      "Bash(gw doctor)",
-      "Bash(gw whoami:*)",
-      "Bash(gw whoami)",
-      "Bash(gw packages:*)",
-      "Bash(gw bindings:*)",
       "Bash(gw --help:*)",
       "Bash(gw --help)",
-      "Bash(gw git:*)",
-      "Bash(gw gh:*)",
-      "Bash(gw d1:*)",
-      "Bash(gw ci:*)",
-      "Bash(gw dev:*)",
-      "Bash(gw fmt:*)",
-      "Bash(gw lint:*)",
+      "Bash(gw gh issue:*)",
+      "Bash(gw git worktree:*)",
+      "Bash(gw secret list:*)",
+      "Bash(gw secret list)",
+      "Bash(gw todo:*)",
       "Bash(gw social:*)",
+      "Bash(gw warden:*)",
+      "Bash(gw publish:*)",
+      "Bash(gw dev:*)",
+      "Bash(gw update:*)",
+      "Bash(gw version)",
+      "Bash(git status:*)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git blame:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)",
+      "Bash(git branch)",
+      "Bash(git rev-parse:*)",
+      "Bash(git merge-base:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh run:*)",
       "Bash(gf:*)",
       "Bash(gf-py:*)",
       "Bash(pnpm run:*)",
@@ -128,18 +137,7 @@
       "Bash(gw secret reveal)"
     ]
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/check-colors.py"
-          }
-        ]
-      }
-    ]
-  },
+  "hooks": {},
   "spinnerVerbs": {
     "mode": "append",
     "verbs": [

@@ -23,9 +23,7 @@ export type LumenTask =
 	| "chat" // Conversational → DeepSeek (OpenRouter)
 	| "image" // Image analysis → Claude via OpenRouter
 	| "code" // Code tasks → Claude via OpenRouter
-	| "transcription" // Voice-to-text → Whisper (CF Workers AI)
-	| "reverie" // Reverie natural language config → Liquid LFM2
-	| "reverie-compose"; // Reverie multi-domain composition → MiniMax M2.5
+	| "transcription"; // Voice-to-text → Whisper (CF Workers AI)
 
 // =============================================================================
 // MESSAGE TYPES

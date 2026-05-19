@@ -2,12 +2,15 @@
  * Landing App Server Hooks
  *
  * Authentication via Heartwood SessionDO with D1 session fallback for legacy users.
+ * Pulse observability instrumentation on all requests.
  */
 
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
 import { getCookie, extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
 
 interface SessionRow {
 	id: string;
@@ -21,7 +24,7 @@ interface UserRow {
 	is_admin: number;
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
+const landingHandle: Handle = async ({ event, resolve }) => {
 	// Initialize user as null
 	event.locals.user = null;
 
@@ -160,3 +163,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+export const handle = sequence(pulseHandle({ app: "landing" }), landingHandle);
+export const handleError = createPulseErrorHook({ app: "landing" });

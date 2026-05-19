@@ -1,0 +1,44 @@
+{
+	"name": "@autumnsgrove/grove-crypto",
+	"version": "0.1.0",
+	"description": "Grove envelope encryption — AES-256-GCM tokens and per-tenant SecretsManager.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/grove-crypto"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./src/*.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
+	},
+	"keywords": [
+		"grove",
+		"crypto",
+		"encryption",
+		"envelope-encryption",
+		"secrets"
+	]
+}

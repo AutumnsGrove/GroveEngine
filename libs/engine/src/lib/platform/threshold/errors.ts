@@ -14,8 +14,8 @@
  *   080-099  Internal / catch-all
  */
 
-import type { GroveErrorDef } from "../../errors/types.js";
-import { logGroveError } from "../../errors/helpers.js";
+import type { GroveErrorDef } from "@autumnsgrove/grove-errors";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 
 // ============================================================================
 // Error Catalog

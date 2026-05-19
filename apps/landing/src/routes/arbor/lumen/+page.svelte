@@ -7,7 +7,8 @@
 	const Loader2 = stateIcons.loader;
 	const AlertTriangle = stateIcons.warning;
 	const RefreshCw = actionIcons.refresh;
-	import { LumenAnalytics, SafetyMonitoring } from '@autumnsgrove/lattice';
+	import LumenAnalytics from '@autumnsgrove/lattice/components/admin/LumenAnalytics.svelte';
+	import SafetyMonitoring from '@autumnsgrove/lattice/components/admin/SafetyMonitoring.svelte';
 
 	interface LumenData {
 		today: Array<{
@@ -250,7 +251,7 @@
 	}
 
 	:global(.dark) .tab-active {
-		color: var(--grove-200, #bbf7d0);
+		color: var(--grove-accent-light);
 		background: rgba(255, 255, 255, 0.1);
 	}
 

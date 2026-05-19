@@ -26,10 +26,12 @@
 
 import type { D1Database } from "@cloudflare/workers-types";
 import { FAILOVER_CONFIG, PHOTODNA_CONFIG } from "$lib/platform/config/petal.js";
+import { logGroveError } from "@autumnsgrove/grove-errors";
 import { PetalError, type CSAMResult } from "./types.js";
 import { classifyImage } from "./vision-client.js";
 import { scanWithPhotoDNA, isPhotoDNAAvailable, type PhotoDNAResult } from "./photodna-client.js";
 import { logSecurityEvent } from "./logging.js";
+import { PETAL_ERRORS } from "./errors.js";
 
 // ============================================================================
 // CSAM Detection
@@ -115,7 +117,7 @@ export async function scanForCSAM(
 			};
 		} catch (err) {
 			// PhotoDNA failed - fall back to vision if configured
-			console.warn("[Petal] PhotoDNA scan failed, falling back to vision:", err);
+			logGroveError("Petal", PETAL_ERRORS.PHOTODNA_FALLBACK, { cause: err });
 
 			if (!PHOTODNA_CONFIG.fallbackToVision) {
 				// No fallback configured - block for safety
@@ -218,9 +220,9 @@ export async function flagAccountForCSAM(
 			.bind(id, userId)
 			.run();
 	} catch (err) {
-		// CRITICAL: Account flagging failed - log loudly
+		// CRITICAL: Account flagging failed
 		// The upload is still blocked, but we failed to persist the flag
-		console.error("[Petal] CRITICAL: Failed to flag account for CSAM:", err);
+		logGroveError("Petal", PETAL_ERRORS.CSAM_FLAG_FAILED, { userId, contentHash, cause: err });
 		// Don't throw - upload is already blocked, but this needs monitoring/alerting
 		return; // Exit early - don't attempt logging if flagging failed
 	}
@@ -241,7 +243,7 @@ export async function flagAccountForCSAM(
 		});
 	} catch (err) {
 		// Non-critical: Logging failed, but account is already flagged
-		console.error("[Petal] Failed to log CSAM flagging event:", err);
+		logGroveError("Petal", PETAL_ERRORS.CSAM_FLAG_LOG_FAILED, { userId, contentHash, cause: err });
 	}
 }
 
@@ -263,9 +265,11 @@ export async function hasActiveCSAMFlag(db: D1Database, userId: string): Promise
 
 		return flag !== null;
 	} catch (err) {
-		// If check fails, assume not blocked (fail-open for legitimate users)
-		console.error("[Petal] Failed to check CSAM flag:", err);
-		return false;
+		// SAFETY: Fail closed — block uploads when flag check is uncertain.
+		// Accepting UX cost of blocking legitimate users during DB outages
+		// in exchange for the safety guarantee (18 U.S.C. § 2258A).
+		logGroveError("Petal", PETAL_ERRORS.CSAM_FLAG_CHECK_FAILED, { userId, cause: err });
+		return true;
 	}
 }
 
@@ -313,14 +317,15 @@ export async function queueNCMECReport(
 		photodnaTrackingId?: string;
 	},
 ): Promise<void> {
-	// Log the report requirement
-	console.error("[PETAL CRITICAL] NCMEC Report Required:", {
-		hash: data.contentHash,
+	// Log the report requirement — structured and queryable
+	logGroveError("Petal", PETAL_ERRORS.NCMEC_REPORT_REQUIRED, {
+		contentHash: data.contentHash,
 		timestamp: data.timestamp,
 		photodnaTrackingId: data.photodnaTrackingId,
-		// Never log user-identifying info to console
+		tenantId: data.tenantId,
 		reported: false,
 		deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+		// Never log user-identifying info beyond userId
 	});
 
 	// Store in database for manual processing
@@ -342,9 +347,13 @@ export async function queueNCMECReport(
 			)
 			.run();
 	} catch (err) {
-		// CRITICAL: If we can't queue the report, log loudly
-		console.error("[PETAL CRITICAL] Failed to queue NCMEC report:", err);
-		// In production, this should trigger an alert
+		// CRITICAL: If we can't queue the report, this needs immediate investigation
+		logGroveError("Petal", PETAL_ERRORS.NCMEC_QUEUE_FAILED, {
+			contentHash: data.contentHash,
+			userId: data.userId,
+			tenantId: data.tenantId,
+			cause: err,
+		});
 	}
 }
 

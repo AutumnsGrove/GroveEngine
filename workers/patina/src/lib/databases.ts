@@ -44,14 +44,6 @@ export const DATABASES: DatabaseConfig[] = [
 		estimatedSize: "86 KB",
 	},
 	{
-		name: "ivy-db",
-		id: "57738720-bc43-4a7f-ad5b-ceb86b3c0542",
-		binding: "IVY_DB",
-		description: "Ivy application data",
-		priority: "normal",
-		estimatedSize: "147 KB",
-	},
-	{
 		name: "grove-curios-db",
 		id: "b03756ad-30d7-427a-9a1b-ec2f6478fcbd",
 		binding: "GROVE_CURIOS_DB",

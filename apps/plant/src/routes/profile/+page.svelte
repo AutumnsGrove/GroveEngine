@@ -7,7 +7,7 @@
 		blazeIcons,
 	} from "@autumnsgrove/prism/icons";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { COLOR_PRESETS } from "@autumnsgrove/lattice";
+	import { COLOR_PRESETS } from "@autumnsgrove/lattice/platform/config";
 	import { submitFormAndGo } from "$lib/submit-form";
 
 	let { data } = $props();

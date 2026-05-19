@@ -99,34 +99,6 @@
 	</div>
 
 	<div class="space-y-6">
-		<!-- Passkeys Section — managed on login hub -->
-		<GlassCard variant="frosted">
-			<div class="flex items-center gap-3 mb-4">
-				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
-					<authIcons.fingerprint class="w-5 h-5 text-success" />
-				</div>
-				<div>
-					<h2 class="font-medium text-foreground">Passkeys</h2>
-					<p class="text-sm text-foreground-muted">
-						Sign in securely with your fingerprint, face, or device PIN
-					</p>
-				</div>
-			</div>
-
-			<p class="text-sm text-foreground-muted mb-4">
-				Manage your passkeys on the Grove login hub for secure, passwordless sign-in.
-			</p>
-			<a
-				href="https://login.grove.place/passkey?redirect={encodeURIComponent(
-					'https://plant.grove.place/account',
-				)}"
-				class="btn-primary inline-flex items-center gap-2 text-sm"
-			>
-				<authIcons.fingerprint class="w-4 h-4" />
-				Manage Passkeys
-			</a>
-		</GlassCard>
-
 		<!-- Two-Factor Authentication Section -->
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">

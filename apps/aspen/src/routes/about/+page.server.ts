@@ -1,8 +1,4 @@
-import {
-	getAboutPage,
-	type GutterItem,
-	renderMarkdown,
-} from "@autumnsgrove/lattice/content/markdown/markdown";
+import { getAboutPage, type GutterItem, renderMarkdown } from "@autumnsgrove/grove-markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types.js";
 

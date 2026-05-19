@@ -6,8 +6,8 @@
  * Implements alarm-based batch chaining for long-running searches.
  */
 
-import { LoomDO, safeJsonParse } from "@autumnsgrove/lattice/loom";
-import type { LoomRoute, LoomConfig, LoomRequestContext } from "@autumnsgrove/lattice/loom";
+import { LoomDO, safeJsonParse } from "@autumnsgrove/loom";
+import type { LoomRoute, LoomConfig, LoomRequestContext } from "@autumnsgrove/loom";
 import type {
 	Env,
 	SearchJob,

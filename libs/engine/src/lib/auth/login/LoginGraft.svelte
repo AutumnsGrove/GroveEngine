@@ -5,10 +5,9 @@
 	 * IMPORTANT: This component is intended for use ON login.grove.place only,
 	 * where auth API calls are same-origin. Engine tenant sites (*.grove.place)
 	 * should NOT render this component — they should redirect to login.grove.place
-	 * via buildLoginUrl() instead. The engine's /auth/login route does this
-	 * automatically with a server-side redirect in +page.server.ts.
+	 * via buildLoginUrl() instead.
 	 *
-	 * Uses Better Auth for OAuth, passkeys, and magic link flows.
+	 * Uses Better Auth for Google OAuth.
 	 * POSTs JSON to /api/auth/sign-in/social (same-origin on login.grove.place).
 	 *
 	 * Supports three variants:
@@ -27,8 +26,6 @@
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
-	import PasskeyButton from "./PasskeyButton.svelte";
-	import EmailButton from "./EmailButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 
@@ -43,26 +40,16 @@
 		class: className = "",
 	}: LoginGraftProps = $props();
 
-	// Filter to only available providers
 	const availableProviders = $derived(providers.filter((p) => isProviderAvailable(p)));
 
-	// Loading state for buttons
 	let loadingProvider = $state<AuthProvider | null>(null);
 	let error = $state<string | null>(null);
 
-	/**
-	 * Get the callback URL for OAuth redirects.
-	 * This URL is where Better Auth will redirect after OAuth completes.
-	 */
 	function getCallbackUrl(): string {
 		const origin = browser ? window.location.origin : "";
 		return `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
 	}
 
-	/**
-	 * Initiate social sign-in via Better Auth.
-	 * Makes a JSON POST request and redirects to the OAuth provider.
-	 */
 	async function signInWithProvider(provider: AuthProvider) {
 		if (!browser || loadingProvider) return;
 
@@ -70,8 +57,6 @@
 		error = null;
 
 		try {
-			// Same-origin fetch on login.grove.place. Do NOT use this component
-			// cross-origin from tenant sites — redirect to login.grove.place instead.
 			const response = await fetch(GROVEAUTH_URLS.socialSignIn, {
 				method: "POST",
 				credentials: "include",
@@ -91,7 +76,6 @@
 
 			const data = (await response.json()) as { url?: string };
 
-			// Better Auth returns { url: "https://accounts.google.com/..." }
 			if (data.url) {
 				window.location.href = data.url;
 			} else {
@@ -103,53 +87,41 @@
 		}
 	}
 
-	// For compact variant, use first available provider
 	const primaryProvider = $derived(availableProviders[0]);
 </script>
 
 {#if variant === "compact"}
 	<!-- Compact: Single button only -->
 	{#if primaryProvider}
-		{#if primaryProvider === "passkey"}
-			<!-- Passkey uses its own button with WebAuthn ceremony -->
-			<PasskeyButton {returnTo} size="md" class={className} />
-		{:else if primaryProvider === "email"}
-			<!-- Email uses its own button with magic link form -->
-			<EmailButton {returnTo} size="md" class={className} />
-		{:else}
-			<GlassButton
-				variant="default"
-				size="md"
-				type="button"
-				class={className}
-				disabled={loadingProvider !== null}
-				onclick={() => signInWithProvider(primaryProvider)}
-			>
-				<ProviderIcon provider={primaryProvider} size={18} />
-				<span>
-					{#if loadingProvider === primaryProvider}
-						Redirecting...
-					{:else}
-						Sign in with {getProviderName(primaryProvider)}
-					{/if}
-				</span>
-			</GlassButton>
-		{/if}
+		<GlassButton
+			variant="default"
+			size="md"
+			type="button"
+			class={className}
+			disabled={loadingProvider !== null}
+			onclick={() => signInWithProvider(primaryProvider)}
+		>
+			<ProviderIcon provider={primaryProvider} size={18} />
+			<span>
+				{#if loadingProvider === primaryProvider}
+					Redirecting...
+				{:else}
+					Sign in with {getProviderName(primaryProvider)}
+				{/if}
+			</span>
+		</GlassButton>
 	{/if}
 {:else if variant === "fullpage"}
 	<!-- Fullpage: Centered layout with logo and branding -->
 	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 {className}">
-		<!-- Logo area -->
 		{#if logo}
 			<div class="mb-8">
 				{@render logo()}
 			</div>
 		{/if}
 
-		<!-- Login card -->
 		<GlassCard variant="default" class="w-full max-w-sm">
 			{#snippet children()}
-				<!-- Header slot or default -->
 				<div class="mb-6 text-center">
 					{#if header}
 						{@render header()}
@@ -161,88 +133,15 @@
 					{/if}
 				</div>
 
-				<!-- Error message -->
 				{#if error}
 					<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
 						{error}
 					</div>
 				{/if}
 
-				<!-- Provider buttons -->
 				{#if availableProviders.length > 0}
 					<div class="space-y-3">
 						{#each availableProviders as provider}
-							{#if provider === "passkey"}
-								<!-- Passkey uses its own button with WebAuthn ceremony -->
-								<PasskeyButton {returnTo} />
-							{:else if provider === "email"}
-								<!-- Email uses its own button with magic link form -->
-								<EmailButton {returnTo} />
-							{:else}
-								<GlassButton
-									variant="default"
-									size="lg"
-									type="button"
-									class="w-full justify-start gap-3"
-									disabled={loadingProvider !== null}
-									onclick={() => signInWithProvider(provider)}
-								>
-									<ProviderIcon {provider} size={20} />
-									<span>
-										{#if loadingProvider === provider}
-											Redirecting...
-										{:else}
-											Continue with {getProviderName(provider)}
-										{/if}
-									</span>
-								</GlassButton>
-							{/if}
-						{/each}
-					</div>
-				{:else}
-					<p class="text-center text-muted-foreground">No login providers available</p>
-				{/if}
-
-				<!-- Footer slot or default -->
-				<div class="mt-6 text-center text-sm text-muted-foreground">
-					{#if footer}
-						{@render footer()}
-					{:else}
-						<p>Grove • Better Auth</p>
-					{/if}
-				</div>
-			{/snippet}
-		</GlassCard>
-	</div>
-{:else}
-	<!-- Default: Card with providers -->
-	<GlassCard variant="default" class="max-w-sm mx-auto {className}">
-		{#snippet children()}
-			<!-- Header slot -->
-			{#if header}
-				<div class="mb-6 text-center">
-					{@render header()}
-				</div>
-			{/if}
-
-			<!-- Error message -->
-			{#if error}
-				<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
-					{error}
-				</div>
-			{/if}
-
-			<!-- Provider buttons -->
-			{#if availableProviders.length > 0}
-				<div class="space-y-3">
-					{#each availableProviders as provider}
-						{#if provider === "passkey"}
-							<!-- Passkey uses its own button with WebAuthn ceremony -->
-							<PasskeyButton {returnTo} />
-						{:else if provider === "email"}
-							<!-- Email uses its own button with magic link form -->
-							<EmailButton {returnTo} />
-						{:else}
 							<GlassButton
 								variant="default"
 								size="lg"
@@ -260,14 +159,64 @@
 									{/if}
 								</span>
 							</GlassButton>
-						{/if}
+						{/each}
+					</div>
+				{:else}
+					<p class="text-center text-muted-foreground">No login providers available</p>
+				{/if}
+
+				<div class="mt-6 text-center text-sm text-muted-foreground">
+					{#if footer}
+						{@render footer()}
+					{:else}
+						<p>Grove &bull; Better Auth</p>
+					{/if}
+				</div>
+			{/snippet}
+		</GlassCard>
+	</div>
+{:else}
+	<!-- Default: Card with providers -->
+	<GlassCard variant="default" class="max-w-sm mx-auto {className}">
+		{#snippet children()}
+			{#if header}
+				<div class="mb-6 text-center">
+					{@render header()}
+				</div>
+			{/if}
+
+			{#if error}
+				<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+					{error}
+				</div>
+			{/if}
+
+			{#if availableProviders.length > 0}
+				<div class="space-y-3">
+					{#each availableProviders as provider}
+						<GlassButton
+							variant="default"
+							size="lg"
+							type="button"
+							class="w-full justify-start gap-3"
+							disabled={loadingProvider !== null}
+							onclick={() => signInWithProvider(provider)}
+						>
+							<ProviderIcon {provider} size={20} />
+							<span>
+								{#if loadingProvider === provider}
+									Redirecting...
+								{:else}
+									Continue with {getProviderName(provider)}
+								{/if}
+							</span>
+						</GlassButton>
 					{/each}
 				</div>
 			{:else}
 				<p class="text-center text-muted-foreground">No login providers available</p>
 			{/if}
 
-			<!-- Footer slot -->
 			{#if footer}
 				<div class="mt-6 text-center text-sm text-muted-foreground">
 					{@render footer()}

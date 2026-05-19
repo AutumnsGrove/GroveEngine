@@ -1,13 +1,13 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
-	import GuestbookEntryCollage from "@autumnsgrove/lattice/curios/guestbook/GuestbookEntryCollage.svelte";
+	import GuestbookEntryCollage from "@autumnsgrove/curios/guestbook/GuestbookEntryCollage.svelte";
 	import { actionIcons, featureIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import {
 		DEFAULT_COLOR_PALETTE,
 		GUESTBOOK_SIGNING_STYLES,
 		type GuestbookSigningStyle,
-	} from "@autumnsgrove/lattice/curios/guestbook";
+	} from "@autumnsgrove/curios/guestbook";
 
 	let { data } = $props();
 

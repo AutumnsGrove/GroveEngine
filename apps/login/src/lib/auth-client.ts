@@ -6,15 +6,11 @@
  *
  * This means:
  * - authClient.signIn.social() → POST /api/auth/sign-in/social → proxied to Heartwood
- * - authClient.signIn.passkey() → POST /api/auth/passkey/... → proxied to Heartwood
- * - All cookies (challenge, session) are same-origin → no CORS, no SameSite issues
+ * - All cookies (session) are same-origin → no CORS, no SameSite issues
  */
 
 import { createAuthClient } from "better-auth/client";
-import { magicLinkClient } from "better-auth/client/plugins";
-import { passkeyClient } from "@better-auth/passkey/client";
 
 export const authClient = createAuthClient({
-  baseURL: "", // same-origin — all requests go to /api/auth/* proxy
-  plugins: [magicLinkClient(), passkeyClient()],
+	baseURL: "", // same-origin — all requests go to /api/auth/* proxy
 });

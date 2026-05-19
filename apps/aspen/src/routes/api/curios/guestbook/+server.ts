@@ -21,7 +21,7 @@ import {
 	VALID_SIGNING_STYLES,
 	type GuestbookDisplayEntry,
 	type GuestbookSigningStyle,
-} from "@autumnsgrove/lattice/curios/guestbook";
+} from "@autumnsgrove/curios/guestbook";
 
 interface ConfigRow {
 	enabled: number;

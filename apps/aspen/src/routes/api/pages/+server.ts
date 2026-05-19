@@ -1,6 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
-import { renderMarkdown } from "@autumnsgrove/lattice/content/markdown/markdown";
+import { renderMarkdown } from "@autumnsgrove/grove-markdown";
 import { getTenantDb, now } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { createThreshold } from "@autumnsgrove/lattice/platform/threshold/factory";

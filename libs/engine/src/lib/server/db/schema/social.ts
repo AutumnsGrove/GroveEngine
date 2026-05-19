@@ -1,7 +1,10 @@
 /**
- * Social Domain Schema — Meadow, Reeds (Comments), Feedback
+ * Social Domain Schema — Reeds (Comments), Feedback
  *
- * Community interaction tables: feed, comments, reactions, follows.
+ * Community interaction tables: comments, reactions, follows.
+ *
+ * NOTE: Meadow (meadow_*) tables are deprecated — Meadow has been removed
+ * from the platform. Tables are retained for prod data integrity only.
  */
 
 import { sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core";
@@ -10,9 +13,14 @@ import { tenants } from "./platform.js";
 import { posts } from "./content.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SOCIAL: Meadow (Community Feed)
+// SOCIAL: Meadow (Community Feed) — DEPRECATED
+// Meadow has been removed from the platform. These tables remain in prod
+// and must not be deleted. Do not reference in new code.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowPosts = sqliteTable(
 	"meadow_posts",
 	{
@@ -49,6 +57,9 @@ export const meadowPosts = sqliteTable(
 	(table) => [uniqueIndex("idx_meadow_posts_tenant_guid").on(table.tenantId, table.guid)],
 );
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowVotes = sqliteTable(
 	"meadow_votes",
 	{
@@ -62,6 +73,9 @@ export const meadowVotes = sqliteTable(
 	(table) => [uniqueIndex("idx_meadow_votes_user_post").on(table.userId, table.postId)],
 );
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowReactions = sqliteTable(
 	"meadow_reactions",
 	{
@@ -78,6 +92,9 @@ export const meadowReactions = sqliteTable(
 	],
 );
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowBookmarks = sqliteTable(
 	"meadow_bookmarks",
 	{
@@ -91,6 +108,9 @@ export const meadowBookmarks = sqliteTable(
 	(table) => [uniqueIndex("idx_meadow_bookmarks_user_post").on(table.userId, table.postId)],
 );
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowFollows = sqliteTable(
 	"meadow_follows",
 	{
@@ -106,6 +126,9 @@ export const meadowFollows = sqliteTable(
 	],
 );
 
+/**
+ * @deprecated Meadow has been removed. Table retained for prod data integrity.
+ */
 export const meadowReports = sqliteTable("meadow_reports", {
 	id: text("id").primaryKey(),
 	userId: text("user_id").notNull(),

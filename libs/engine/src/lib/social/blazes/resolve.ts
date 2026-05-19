@@ -6,7 +6,7 @@
  *   2. Global defaults map
  *   3. Humanized slug fallback (grey HelpCircle)
  *
- * Used by garden pages, arbor table, and meadow post detail.
+ * Used by garden pages and arbor table.
  */
 
 import { GLOBAL_BLAZE_DEFAULTS } from "./palette.js";

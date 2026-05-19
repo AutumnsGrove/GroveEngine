@@ -246,8 +246,6 @@ wrangler secret put HEARTWOOD_CLIENT_SECRET
 | Method | Endpoint                       | Purpose             |
 | ------ | ------------------------------ | ------------------- |
 | POST   | `/api/auth/sign-in/social`     | OAuth sign-in       |
-| POST   | `/api/auth/sign-in/magic-link` | Magic link sign-in  |
-| POST   | `/api/auth/sign-in/passkey`    | Passkey sign-in     |
 | GET    | `/api/auth/session`            | Get current session |
 | POST   | `/api/auth/sign-out`           | Sign out            |
 

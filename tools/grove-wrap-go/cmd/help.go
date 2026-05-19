@@ -11,11 +11,12 @@ import (
 // rootHelpCategories defines the top-level command categories for gw --help.
 var rootHelpCategories = []ui.HelpCategory{
 	{
-		Title: "Git",
-		Icon:  "📖",
-		Style: ui.SafeReadStyle,
+		Title: "Worktree",
+		Icon:  "🌿",
+		Style: ui.SafeWriteStyle,
 		Commands: []ui.HelpCommand{
-			{Name: "git", Desc: "Git operations with safety tiers"},
+			{Name: "git worktree create", Desc: "Create a worktree for an issue"},
+			{Name: "git worktree finish", Desc: "Commit, push, merge, and remove worktree"},
 		},
 	},
 	{
@@ -23,39 +24,7 @@ var rootHelpCategories = []ui.HelpCategory{
 		Icon:  "🐙",
 		Style: ui.SafeReadStyle,
 		Commands: []ui.HelpCommand{
-			{Name: "gh", Desc: "GitHub CLI operations (PRs, issues, runs)"},
-		},
-	},
-	{
-		Title: "Dev Tools",
-		Icon:  "🔧",
-		Style: ui.SafeWriteStyle,
-		Commands: []ui.HelpCommand{
-			{Name: "dev", Desc: "Development server, testing, building"},
-		},
-	},
-	{
-		Title: "Social",
-		Icon:  "\U0001f4e3",
-		Style: ui.SafeWriteStyle,
-		Commands: []ui.HelpCommand{
-			{Name: "social", Desc: "Social broadcasting via Zephyr"},
-		},
-	},
-	{
-		Title: "Tasks",
-		Icon:  "\U0001FABF",
-		Style: ui.SafeWriteStyle,
-		Commands: []ui.HelpCommand{
-			{Name: "todo", Desc: "Todoist task management (goose-migrate)"},
-		},
-	},
-	{
-		Title: "Publishing",
-		Icon:  "\U0001f4e6",
-		Style: ui.SafeWriteStyle,
-		Commands: []ui.HelpCommand{
-			{Name: "publish", Desc: "Package publishing to npm"},
+			{Name: "gh issue", Desc: "List, view, create, and browse issues"},
 		},
 	},
 	{
@@ -63,59 +32,28 @@ var rootHelpCategories = []ui.HelpCategory{
 		Icon:  "☁️",
 		Style: ui.SafeWriteStyle,
 		Commands: []ui.HelpCommand{
-			{Name: "d1", Desc: "D1 database operations"},
-			{Name: "kv", Desc: "KV storage operations"},
-			{Name: "r2", Desc: "R2 object storage"},
-			{Name: "deploy", Desc: "Cloudflare deployment"},
-			{Name: "logs", Desc: "Worker log streaming"},
-			{Name: "flag", Desc: "Feature flag management"},
-			{Name: "backup", Desc: "D1 database backups"},
-			{Name: "do", Desc: "Durable Object operations"},
-			{Name: "email", Desc: "Email routing operations"},
 			{Name: "secret", Desc: "Encrypted secrets vault"},
-			{Name: "cache", Desc: "Cache management and CDN purge"},
-			{Name: "bindings", Desc: "Scan wrangler.toml bindings"},
-			{Name: "export", Desc: "Storage export management"},
-			{Name: "warden", Desc: "Grove Warden service"},
+			{Name: "warden", Desc: "Grove Warden agent/credential management"},
+			{Name: "publish", Desc: "npm/GitHub package publishing"},
 		},
 	},
 	{
-		Title: "Grove",
-		Icon:  "🌿",
+		Title: "Integrations",
+		Icon:  "\U0001f4e3",
 		Style: ui.SafeWriteStyle,
 		Commands: []ui.HelpCommand{
-			{Name: "login", Desc: "Authenticate with Grove via Heartwood"},
-			{Name: "logout", Desc: "Log out and revoke session"},
-			{Name: "lattice", Desc: "Blog post management (CRUD)"},
-			{Name: "config", Desc: "Grove configuration (tenant, URLs)"},
+			{Name: "social", Desc: "Broadcast via Zephyr"},
+			{Name: "todo", Desc: "Todoist task management"},
 		},
 	},
 	{
-		Title: "Status & Info",
-		Icon:  "ℹ️",
-		Style: ui.SafeReadStyle,
+		Title: "Dev",
+		Icon:  "🔧",
+		Style: ui.SafeWriteStyle,
 		Commands: []ui.HelpCommand{
-			{Name: "status", Desc: "Config and account status"},
-			{Name: "health", Desc: "Health checks"},
-			{Name: "doctor", Desc: "Check dependencies and environment"},
-			{Name: "whoami", Desc: "Current context display"},
-			{Name: "context", Desc: "Session context"},
-			{Name: "packages", Desc: "Monorepo package detection"},
+			{Name: "dev", Desc: "Local development stack"},
+			{Name: "update", Desc: "Self-update from local source"},
 			{Name: "version", Desc: "Print version"},
-			{Name: "history", Desc: "Command history tracking"},
-			{Name: "metrics", Desc: "Performance diagnostics"},
-			{Name: "config-validate", Desc: "Validate gw.toml config"},
-			{Name: "env-audit", Desc: "Check environment variables"},
-			{Name: "monorepo-size", Desc: "Monorepo filesystem stats"},
-		},
-	},
-	{
-		Title: "Platform Admin",
-		Icon:  "👑",
-		Style: ui.DangerStyle,
-		Commands: []ui.HelpCommand{
-			{Name: "auth", Desc: "Authentication & OAuth clients"},
-			{Name: "tenant", Desc: "Tenant management"},
 		},
 	},
 }

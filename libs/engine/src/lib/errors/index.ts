@@ -1,26 +1,7 @@
-/**
- * Grove Error System
- *
- * Shared types and helpers for structured error codes across all Grove packages.
- * Every error tells you where to look.
- *
- * @example
- * ```typescript
- * import {
- *   type GroveErrorDef,
- *   type ErrorCategory,
- *   logGroveError,
- *   buildErrorUrl,
- *   buildErrorJson,
- *   throwGroveError,
- * } from '@autumnsgrove/lattice/errors';
- * ```
- */
-
-// Types
+// Types (from grove-errors)
 export type { ErrorCategory, GroveErrorDef } from "./types.js";
 
-// Helpers
+// Helpers (logGroveError, buildErrorUrl, buildErrorJson from grove-errors + throwGroveError local)
 export { logGroveError, buildErrorUrl, buildErrorJson, throwGroveError } from "./helpers.js";
 
 // Engine Error Catalogs

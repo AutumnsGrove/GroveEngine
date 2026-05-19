@@ -6,6 +6,7 @@
 	import * as api from "$lib/api";
 	import type { StorageFile } from "$types";
 	import { searchQuery } from "$lib/stores";
+	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 
 	// State
 	let loading = $state(true);
@@ -49,7 +50,7 @@
 	async function handleDelete(file: StorageFile) {
 		const res = await api.deleteFile(file.id);
 		if (res.error) {
-			alert(res.error);
+			toast.error(res.error);
 			return;
 		}
 		await loadData();

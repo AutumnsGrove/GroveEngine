@@ -64,3 +64,33 @@ export const ONBOARDING_ERRORS = {
 } as const satisfies Record<string, GroveErrorDef>;
 
 export type OnboardingErrorKey = keyof typeof ONBOARDING_ERRORS;
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+/**
+ * Log an onboarding error with structured context.
+ * Mirrors logGroveError() from the engine.
+ */
+export function logOnboardingError(
+	error: GroveErrorDef,
+	context: {
+		detail?: string;
+		cause?: unknown;
+		[key: string]: unknown;
+	} = {},
+): void {
+	const { cause, ...rest } = context;
+	const causeMessage = cause instanceof Error ? cause.message : cause ? String(cause) : undefined;
+
+	console.error(
+		`[Onboarding] ${error.code}: ${error.adminMessage}`,
+		JSON.stringify({
+			code: error.code,
+			category: error.category,
+			...rest,
+			...(causeMessage ? { cause: causeMessage } : {}),
+		}),
+	);
+}

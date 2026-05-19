@@ -9,12 +9,14 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
 import { AUTH_HUB_URL } from "@autumnsgrove/lattice/platform/config";
+import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import {
 	getSessionToken,
 	fetchSessionData,
 	resolveOnboarding,
 	upsertOnboarding,
 } from "./auth-callback-service";
+import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 function errorRedirect(
 	error: (typeof PLANT_ERRORS)[keyof typeof PLANT_ERRORS],
@@ -28,7 +30,8 @@ function errorRedirect(
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	const env = platform?.env as Record<string, string> | undefined;
 	const authBaseUrl = env?.GROVEAUTH_URL || AUTH_HUB_URL;
-	const db = platform?.env?.DB;
+	const rawDb = platform?.env?.DB;
+	const db = rawDb ? new CloudflareDatabase(rawDb) : null;
 	const path = url.pathname;
 
 	// Check for error from OAuth provider
@@ -65,6 +68,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	);
 
 	console.log(`[Auth Callback] Session verified for user ${user.id.slice(0, 8)}...`);
+
+	emitPulseEvent("signup.oauth_complete", {
+		app: "plant",
+		route: "/auth/callback",
+		metadata: { user_id: user.id, is_new: !user.name },
+	});
 
 	// Step 3: Check existing onboarding record
 	const existingOnboarding = await resolveOnboarding(db, user.id, user.email, path);
@@ -113,9 +122,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	cookies.delete("auth_state", { path: "/" });
 	cookies.delete("auth_code_verifier", { path: "/" });
 
-	if (isNewUser) {
-		redirect(302, "/auth/setup-passkey");
-	} else if (!hasCompletedProfile) {
+	if (!hasCompletedProfile) {
 		redirect(302, "/profile");
 	} else {
 		redirect(302, "/plans");

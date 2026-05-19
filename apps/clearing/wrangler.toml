@@ -50,6 +50,11 @@ database_id = "4ad25abc-f972-4159-ac81-578806709275"
 binding = "MONITOR_KV"
 id = "82d6537525d345f1981924bfd082248f"
 
+# Pulse Collector Service Binding (product observability)
+[[services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
 # Secrets (configured via wrangler secret put):
 # - SENTINEL_API_KEY: API key for Sentinel status updates
 # - ZEPHYR_API_KEY: API key for Zephyr email gateway (incident alerts)

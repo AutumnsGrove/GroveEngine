@@ -18,9 +18,9 @@ import {
 	type LoomConfig,
 	type LoomRequestContext,
 	safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+} from "@autumnsgrove/loom";
 import { zipSync, strToU8 } from "fflate";
-import { DO_ERRORS } from "./errors.js";
+import { DO_ERRORS, logDoError } from "./errors.js";
 
 // =============================================================================
 // TYPES
@@ -469,7 +469,10 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 
 		const zipData = await this.state.storage.get<Uint8Array>("zipData");
 		if (!zipData) {
-			throw new Error(DO_ERRORS.STORAGE_READ_FAILED.adminMessage);
+			logDoError(DO_ERRORS.STORAGE_READ_FAILED, {
+				detail: "zipData missing from DO storage in phaseUploading",
+			});
+			throw new Error(DO_ERRORS.STORAGE_READ_FAILED.userMessage);
 		}
 
 		// Generate R2 key and filename
@@ -582,9 +585,10 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 		});
 
 		if (!response.ok) {
-			throw new Error(
-				`${DO_ERRORS.EXPORT_PROCESSING_FAILED.adminMessage}: ${response.status} ${response.statusText}`,
-			);
+			logDoError(DO_ERRORS.EXPORT_PROCESSING_FAILED, {
+				detail: `Zephyr responded ${response.status} ${response.statusText}`,
+			});
+			throw new Error(DO_ERRORS.EXPORT_PROCESSING_FAILED.userMessage);
 		}
 
 		// Update D1

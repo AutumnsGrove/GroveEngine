@@ -12,8 +12,8 @@
 export type GroveTermCategory =
 	| "foundational" // grove, garden, bloom, wanderer, rooted, pathfinder, wayfinder
 	| "platform" // heartwood, arbor, plant, amber, foliage, etc.
-	| "content" // wisp, reeds, meadow, forests, etc.
-	| "tools" // ivy, verge, forage, trove, etc.
+	| "content" // reeds, forests, etc.
+	| "tools" // forage, trove, etc.
 	| "operations"; // lumen, zephyr, vista, patina, etc.
 
 /**
