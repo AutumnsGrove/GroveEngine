@@ -466,17 +466,17 @@ export async function classifyImage(
 			provider: response.provider,
 		};
 	} catch (parseError) {
-		// If parsing fails, assume appropriate (fail-open for classification)
+		// If parsing fails, escalate to review rather than silently allowing
 		logGroveError("Petal", PETAL_ERRORS.CLASSIFICATION_PARSE_FAILED, {
 			detail: response.content.substring(0, 200),
 			model: response.model,
 			provider: response.provider,
 		});
 		return {
-			category: "inappropriate",
-			confidence: 0.5,
+			category: "appropriate",
+			confidence: 0,
 			decision: "review",
-			reason: "Classification parse error - defaulting to review",
+			reason: "Classification parse error - escalating to review",
 			model: response.model,
 			provider: response.provider,
 		};
