@@ -69,11 +69,13 @@ Full local flow test:
 5. Confirm Pulse events are being captured
 
 ### Auth Recovery Path
-Passkeys and magic links were removed. Users with passkey-only accounts need to:
-- Use Google OAuth with the same email address
-- Heartwood matches by email, links the account
-
-Verify this recovery path works in production. Consider a one-time email to affected users if any exist.
+Passkeys and magic links were removed. As of 2026-05-19:
+- **4 users** signed up via magic link only (no Google OAuth linked) — all inactive, no posts
+- **1 admin account** (hello@grove.place) also magic-link-only
+- **3 of 4** are Gmail addresses — will auto-link when they sign in with Google (same email)
+- **1 of 4** is a Yahoo address — would need a Google account to sign in
+- **No action required** — all are inactive accounts with no content at risk
+- Better Auth's `accountLinking.enabled: true` handles re-linking automatically by email match
 
 ---
 
