@@ -14,6 +14,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
 
 // =============================================================================
 // Constants
@@ -52,8 +53,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		throw redirect(302, `/arbor/login?error=${encodeURIComponent(friendlyMessage)}`);
 	}
 
-	// Get return URL from query params (set by LoginGraft) or default to /arbor
-	const returnTo = url.searchParams.get("returnTo") || "/arbor";
+	// Get return URL from query params (set by LoginGraft), sanitized to prevent open redirects
+	const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
 
 	// Verify Better Auth session cookie was set
 	// Better Auth sets this cookie during the OAuth callback at GroveAuth
