@@ -225,18 +225,6 @@
 				>
 			</a>
 			<a
-				href="https://grove.place/meadow"
-				class="action-card glass-action"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="Browse the Meadow feed (opens in new tab)"
-			>
-				<authIcons.users class="w-7 h-7 text-accent-muted" />
-				<span class="font-medium text-center text-sm"
-					><GroveTerm interactive term="meadow">Meadow</GroveTerm></span
-				>
-			</a>
-			<a
 				href="https://grove.place/canopy"
 				class="action-card glass-action"
 				target="_blank"

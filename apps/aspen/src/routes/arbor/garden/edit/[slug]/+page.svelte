@@ -777,8 +777,7 @@
 <!-- Re-publish Confirmation Dialog -->
 <Dialog bind:open={showRepublishDialog} title={`Re-publish ${resolveTermString("Bloom", "Post")}`}>
 	<p>
-		This will update the publish date to right now, bumping "{title}" to the top of RSS feeds and
-		the Meadow.
+		This will update the publish date to right now, bumping "{title}" to the top of RSS feeds.
 	</p>
 	{#snippet footer()}
 		<Button variant="outline" onclick={() => (showRepublishDialog = false)}>Cancel</Button>
