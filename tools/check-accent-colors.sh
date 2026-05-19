@@ -43,7 +43,7 @@ while IFS= read -r f; do
 
     # Exempt paths (superset of pre-commit hook exemptions)
     case "$f" in
-        */_junkdrawer/*) continue ;;
+        _junkdrawer/*|*/_junkdrawer/*) continue ;;
         libs/prism/*) continue ;;
         libs/foliage/src/lib/themes/*) continue ;;
         libs/foliage/src/lib/components/AccentColorPicker*) continue ;;
