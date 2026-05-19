@@ -1,7 +1,7 @@
 /**
  * Tests for Settings Hub Page Server Load
  *
- * The hub page fetches only meadow_opt_in and blaze count from DB.
+ * The hub page fetches blaze count and curio config counts from DB.
  * All other settings come from parent layout data (siteSettings, tenant).
  */
 
@@ -24,11 +24,10 @@ interface MockStatement {
 
 function createMockDB(
 	options: {
-		meadowOptIn?: number | null;
 		blazeCount?: number;
 	} = {},
 ) {
-	const { meadowOptIn = 0, blazeCount = 0 } = options;
+	const { blazeCount = 0 } = options;
 
 	const mockStatement: MockStatement = {
 		_sql: "",
@@ -41,8 +40,13 @@ function createMockDB(
 			if (this._sql.includes("COUNT(*)")) {
 				return { count: blazeCount } as T;
 			}
-			if (this._sql.includes("meadow_opt_in")) {
-				return { meadow_opt_in: meadowOptIn } as T;
+			// curio config tables — return null (not enabled) by default
+			if (
+				this._sql.includes("timeline_curio_config") ||
+				this._sql.includes("gallery_curio_config") ||
+				this._sql.includes("journey_curio_config")
+			) {
+				return null;
 			}
 			return null;
 		},
@@ -100,32 +104,8 @@ describe("Settings Hub — load()", () => {
 		const result = await load(event as any);
 		assertLoaded(result);
 
-		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
-	});
-
-	it("should return meadow opt-in as true when opted in", async () => {
-		const { load } = await import("./+page.server.js");
-		const event = createLoadEvent({
-			db: createMockDB({ meadowOptIn: 1 }),
-		});
-
-		const result = await load(event as any);
-		assertLoaded(result);
-
-		expect(result.meadowOptIn).toBe(true);
-	});
-
-	it("should return meadow opt-in as false when not opted in", async () => {
-		const { load } = await import("./+page.server.js");
-		const event = createLoadEvent({
-			db: createMockDB({ meadowOptIn: 0 }),
-		});
-
-		const result = await load(event as any);
-		assertLoaded(result);
-
-		expect(result.meadowOptIn).toBe(false);
+		expect(result.curiosCount).toBe(0);
 	});
 
 	it("should return custom blaze count", async () => {
@@ -163,8 +143,8 @@ describe("Settings Hub — load()", () => {
 		const result = await load(event as any);
 		assertLoaded(result);
 
-		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
+		expect(result.curiosCount).toBe(0);
 	});
 
 	it("should return defaults when no tenant ID", async () => {
@@ -175,7 +155,39 @@ describe("Settings Hub — load()", () => {
 		const result = await load(event as any);
 		assertLoaded(result);
 
-		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
+		expect(result.curiosCount).toBe(0);
+	});
+
+	it("should count enabled curios", async () => {
+		const { load } = await import("./+page.server.js");
+
+		// Mock DB that returns enabled for timeline and gallery, null for journey
+		const db = {
+			prepare(sql: string) {
+				return {
+					_sql: sql,
+					bind(..._values: unknown[]) {
+						return this;
+					},
+					async first<T>(): Promise<T | null> {
+						if (sql.includes("COUNT(*)")) return { count: 0 } as T;
+						if (sql.includes("timeline_curio_config")) return { enabled: 1 } as T;
+						if (sql.includes("gallery_curio_config")) return { enabled: 1 } as T;
+						if (sql.includes("journey_curio_config")) return null;
+						return null;
+					},
+					async all<T>(): Promise<{ results: T[] }> {
+						return { results: [] };
+					},
+				};
+			},
+		};
+
+		const event = createLoadEvent({ db: db as any });
+		const result = await load(event as any);
+		assertLoaded(result);
+
+		expect(result.curiosCount).toBe(2);
 	});
 });
