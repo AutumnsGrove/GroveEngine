@@ -113,24 +113,9 @@ const PACKAGES = {
 		hasTests: false,
 		isSvelteKit: true,
 	},
-	"apps/ivy": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
 	"apps/login": {
 		typecheck: "pnpm check",
 		hasTests: true,
-		isSvelteKit: true,
-	},
-	"apps/meadow": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
-	"apps/terrarium": {
-		typecheck: "pnpm check",
-		hasTests: false,
 		isSvelteKit: true,
 	},
 	"services/amber": {
@@ -178,19 +163,9 @@ const PACKAGES = {
 		hasTests: false,
 		isSvelteKit: false,
 	},
-	"workers/meadow-poller": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
 	"workers/lumen": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: true,
-		isSvelteKit: false,
-	},
-	"workers/timeline-sync": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
 		isSvelteKit: false,
 	},
 	"workers/warden": {
@@ -223,17 +198,12 @@ const PACKAGES = {
 		hasTests: false,
 		isSvelteKit: false,
 	},
-	"workers/reverie": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"workers/reverie-exec": {
+	"workers/subscription-digest": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,
 		isSvelteKit: false,
 	},
-	"workers/subscription-digest": {
+	"workers/pulse-collector": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,
 		isSvelteKit: false,

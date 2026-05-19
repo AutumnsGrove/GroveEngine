@@ -265,9 +265,11 @@ export async function hasActiveCSAMFlag(db: D1Database, userId: string): Promise
 
 		return flag !== null;
 	} catch (err) {
-		// If check fails, assume not blocked (fail-open for legitimate users)
+		// SAFETY: Fail closed — block uploads when flag check is uncertain.
+		// Accepting UX cost of blocking legitimate users during DB outages
+		// in exchange for the safety guarantee (18 U.S.C. § 2258A).
 		logGroveError("Petal", PETAL_ERRORS.CSAM_FLAG_CHECK_FAILED, { userId, cause: err });
-		return false;
+		return true;
 	}
 }
 

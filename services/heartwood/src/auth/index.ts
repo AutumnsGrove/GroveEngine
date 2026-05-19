@@ -146,7 +146,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			modelName: "ba_session",
 			expiresIn: 30 * 24 * 60 * 60,
 			updateAge: 24 * 60 * 60,
-			freshAge: 0,
+			freshAge: 5 * 60, // 5 minutes — require recent auth for sensitive operations
 			cookieCache: {
 				enabled: true,
 				maxAge: 5 * 60,
@@ -243,7 +243,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			user: {
 				create: {
 					before: async (user) => {
-						console.log("[Auth] Creating new user:", user.email);
+						console.log("[Auth] Creating new user");
 						return { data: user };
 					},
 				},

@@ -473,10 +473,10 @@ export async function classifyImage(
 			provider: response.provider,
 		});
 		return {
-			category: "appropriate",
+			category: "inappropriate",
 			confidence: 0.5,
-			decision: "allow",
-			reason: "Classification parse error - defaulting to allow",
+			decision: "review",
+			reason: "Classification parse error - defaulting to review",
 			model: response.model,
 			provider: response.provider,
 		};

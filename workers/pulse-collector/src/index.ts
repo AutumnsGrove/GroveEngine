@@ -25,7 +25,29 @@ const DAY_MS = 86_400_000;
 // Field length caps
 const MAX_EVENT_LEN = 100;
 const MAX_ROUTE_LEN = 500;
+const MAX_APP_LEN = 50;
 const MAX_METADATA_JSON_BYTES = 4_096;
+
+// Allowlists — reject events with unknown categories
+const VALID_CATEGORIES = new Set([
+	"page",
+	"signup",
+	"publish",
+	"social",
+	"curio",
+	"feature",
+	"error",
+]);
+const VALID_APPS = new Set([
+	"amber",
+	"aspen",
+	"billing",
+	"clearing",
+	"domains",
+	"landing",
+	"login",
+	"plant",
+]);
 
 interface Env {
 	OBS_DB: D1Database;
@@ -68,7 +90,7 @@ function validateEvent(raw: unknown): ValidatedEvent | null {
 	if (typeof e.event !== "string" || typeof e.category !== "string") return null;
 
 	const event = e.event.slice(0, MAX_EVENT_LEN);
-	const category = e.category;
+	const category = VALID_CATEGORIES.has(e.category) ? e.category : "unknown";
 
 	const route = typeof e.route === "string" ? e.route.slice(0, MAX_ROUTE_LEN) : undefined;
 	const method = typeof e.method === "string" ? e.method : undefined;
@@ -76,7 +98,12 @@ function validateEvent(raw: unknown): ValidatedEvent | null {
 	const duration_ms = typeof e.duration_ms === "number" ? e.duration_ms : undefined;
 	const tenant_id = typeof e.tenant_id === "string" ? e.tenant_id : undefined;
 	const visitor_hash = typeof e.visitor_hash === "string" ? e.visitor_hash : undefined;
-	const app = typeof e.app === "string" ? e.app : undefined;
+	const app =
+		typeof e.app === "string"
+			? VALID_APPS.has(e.app)
+				? e.app.slice(0, MAX_APP_LEN)
+				: "unknown"
+			: undefined;
 	const timestamp = typeof e.timestamp === "number" ? e.timestamp : undefined;
 
 	let metadata: Record<string, unknown> | undefined;

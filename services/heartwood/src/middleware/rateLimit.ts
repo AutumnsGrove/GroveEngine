@@ -32,7 +32,18 @@ export function createRateLimiter(config: RateLimitConfig): MiddlewareHandler<{ 
 
 		const keyPart = config.getKey(c);
 		if (!keyPart) {
-			// Can't identify the key, skip rate limiting
+			// Can't identify the key — fail closed with a fallback key
+			// rather than skipping rate limiting entirely
+			const fallbackKey = `${config.keyPrefix}:anonymous`;
+			const { allowed } = await checkRateLimit(
+				c.env.DB,
+				fallbackKey,
+				config.limit,
+				config.windowSeconds,
+			);
+			if (!allowed) {
+				return c.json({ error: "Rate limit exceeded" }, 429);
+			}
 			return next();
 		}
 

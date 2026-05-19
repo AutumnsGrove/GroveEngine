@@ -52,8 +52,6 @@ betterAuthRoutes.all("/*", async (c) => {
 			: undefined;
 
 		console.log("[BetterAuth] Request:", c.req.method, c.req.path);
-		console.log("[BetterAuth] Full URL:", c.req.url);
-		console.log("[BetterAuth] Query params:", Object.fromEntries(new URL(c.req.url).searchParams));
 
 		// Register this request for SessionDO bridging
 		// The session hook will use this to create a SessionDO session
@@ -127,7 +125,6 @@ betterAuthRoutes.all("/*", async (c) => {
 		const isOAuthCallback = c.req.path.includes("/callback/");
 
 		if (isGetNavigation && isOAuthCallback) {
-			const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
 			const callbackURL = new URL(c.req.url).searchParams.get("callbackURL");
 			const isLocalDev = c.env.AUTH_BASE_URL?.startsWith("http://localhost");
 			let errorBase: string;
@@ -139,7 +136,8 @@ betterAuthRoutes.all("/*", async (c) => {
 				errorBase = "https://heartwood.grove.place";
 			}
 			const errorUrl = new URL("/login", errorBase);
-			errorUrl.searchParams.set("error", errorMessage);
+			// SECURITY: Never leak raw error messages — use a safe generic code
+			errorUrl.searchParams.set("error", "auth_failed");
 			return c.redirect(errorUrl.toString());
 		}
 

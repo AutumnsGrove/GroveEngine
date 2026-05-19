@@ -28,4 +28,4 @@ bindings = [
 
 [[migrations]]
 tag = "v1"
-new_classes = ["PulseBuffer"]
+new_sqlite_classes = ["PulseBuffer"]

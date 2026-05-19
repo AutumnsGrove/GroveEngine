@@ -142,7 +142,12 @@ export interface MagicCode {
 /** @deprecated Magic code auth removed — Great Grove Refactor Phase 2. All auth via Google OAuth. */
 export async function createMagicCode(db: D1DatabaseOrSession, email: string): Promise<MagicCode> {
 	const id = generateId();
-	const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char code
+	const bytes = new Uint8Array(4);
+	crypto.getRandomValues(bytes);
+	const code = Array.from(bytes, (b) => b.toString(36))
+		.join("")
+		.substring(0, 6)
+		.toUpperCase();
 	const timestamp = now();
 	const expiresAt = futureTimestamp(MAGIC_CODE_EXPIRY_MS);
 
