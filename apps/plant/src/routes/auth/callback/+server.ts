@@ -72,7 +72,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	emitPulseEvent("signup.oauth_complete", {
 		app: "plant",
 		route: "/auth/callback",
-		metadata: { user_id: user.id, is_new: !user.name },
+		metadata: { is_new: !user.name },
 	});
 
 	// Step 3: Check existing onboarding record

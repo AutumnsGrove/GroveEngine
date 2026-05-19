@@ -234,16 +234,16 @@ async function runDailyAggregation(db: D1Database): Promise<void> {
 			   ? as date,
 			   event,
 			   category,
-			   route,
-			   app,
-			   tenant_id,
+			   COALESCE(route, '') as route,
+			   COALESCE(app, '') as app,
+			   COALESCE(tenant_id, '') as tenant_id,
 			   COUNT(*) as count,
 			   COUNT(DISTINCT visitor_hash) as unique_visitors,
 			   AVG(duration_ms) as avg_duration_ms,
 			   SUM(CASE WHEN status >= 400 THEN 1 ELSE 0 END) as error_count
 			 FROM pulse_events
 			 WHERE recorded_at >= ? AND recorded_at < ?
-			 GROUP BY event, category, route, app, tenant_id`,
+			 GROUP BY event, category, COALESCE(route, ''), COALESCE(app, ''), COALESCE(tenant_id, '')`,
 			)
 			.bind(yesterday, dateToEpoch(yesterday), dateToEpoch(yesterday) + DAY_S)
 			.run();

@@ -22,8 +22,6 @@ import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
 // Constants
 // =============================================================================
 
-const GROVEAUTH_API_URL = "https://login.grove.place";
-
 /** Better Auth session cookie names (production uses __Secure- prefix) */
 const BETTER_AUTH_COOKIE = "better-auth.session_token";
 const BETTER_AUTH_COOKIE_SECURE = "__Secure-better-auth.session_token";
@@ -49,8 +47,8 @@ function getFriendlyErrorMessage(errorCode: string): string {
 // =============================================================================
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-	if (!platform?.env?.DB) {
-		throw error(500, "Database not available");
+	if (!platform?.env?.DB || !platform?.env?.AUTH) {
+		throw error(500, "Database or auth service not available");
 	}
 
 	// Check for error from OAuth provider
@@ -78,14 +76,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 		);
 	}
 
-	// Fetch user info from Better Auth's session endpoint
-	// This validates the session and gives us the user's email
+	// Fetch user info from Better Auth's session endpoint via service binding
+	// Forward whichever cookie name the token was actually read from
+	const cookieName = cookies.get(BETTER_AUTH_COOKIE_SECURE)
+		? BETTER_AUTH_COOKIE_SECURE
+		: BETTER_AUTH_COOKIE;
 	try {
-		const sessionResponse = await fetch(`${GROVEAUTH_API_URL}/api/auth/session`, {
-			headers: {
-				Cookie: `${BETTER_AUTH_COOKIE}=${sessionToken}`,
+		const sessionResponse = await platform.env.AUTH.fetch(
+			"https://login.grove.place/api/auth/session",
+			{
+				headers: {
+					Cookie: `${cookieName}=${sessionToken}`,
+				},
 			},
-		});
+		);
 
 		if (!sessionResponse.ok) {
 			console.error("[Auth Callback] Failed to get session:", sessionResponse.status);
