@@ -68,7 +68,6 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 | [Foliage](libs/foliage)   | `@autumnsgrove/lattice/foliage` | Theme system — personal expression with guardrails          |
 | [Gossamer](libs/gossamer) | `@autumnsgrove/gossamer`        | Shared utilities across the monorepo                        |
 | [Shutter](libs/shutter)   | `@autumnsgrove/shutter`         | Image processing and optimization                           |
-| [Vineyard](libs/vineyard) | `@autumnsgrove/vineyard`        | Component showcase for every Grove property                 |
 
 ---
 

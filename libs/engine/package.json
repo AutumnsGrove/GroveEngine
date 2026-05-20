@@ -675,15 +675,6 @@
 			"types": "./dist/ui/utils/*.d.ts",
 			"default": "./dist/ui/utils/*.js"
 		},
-		"./ui/vineyard": {
-			"types": "./dist/ui/vineyard/index.d.ts",
-			"svelte": "./dist/ui/vineyard/index.js",
-			"default": "./dist/ui/vineyard/index.js"
-		},
-		"./ui/vineyard/types": {
-			"types": "./dist/ui/vineyard/types.d.ts",
-			"default": "./dist/ui/vineyard/types.js"
-		},
 		"./utils": {
 			"types": "./dist/utils/index.d.ts",
 			"default": "./dist/utils/index.js"
@@ -691,11 +682,6 @@
 		"./utils/*": {
 			"types": "./dist/utils/*.d.ts",
 			"default": "./dist/utils/*.js"
-		},
-		"./vineyard": {
-			"types": "./dist/ui/vineyard/index.d.ts",
-			"svelte": "./dist/ui/vineyard/index.js",
-			"default": "./dist/ui/vineyard/index.js"
 		},
 		"./zephyr": {
 			"types": "./dist/zephyr/index.d.ts",

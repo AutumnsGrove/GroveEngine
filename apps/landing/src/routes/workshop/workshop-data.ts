@@ -962,16 +962,6 @@ export const categories: Category[] = [
 				spec: "/knowledge/patterns/sentinel-pattern",
 				whatIsLink: "/knowledge/help/what-is-sentinel",
 			},
-			{
-				name: "Vineyard",
-				tagline: "Tool Showcase Pattern",
-				description:
-					"Every vine starts somewhere. Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed.",
-				status: "building",
-				icon: "grape",
-				integration: "Documentation pattern implemented by all Grove tools",
-				spec: "/knowledge/patterns/vineyard-spec",
-			},
 		],
 	},
 ];

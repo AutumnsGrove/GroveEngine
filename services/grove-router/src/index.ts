@@ -53,7 +53,6 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	amber: "amber-4x2.pages.dev", // Amber storage
 	// autumn subdomain now routes to lattice (tenant in D1) — legacy autumn-website.pages.dev removed
 	plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
-	vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
 	cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
 	// Domain management

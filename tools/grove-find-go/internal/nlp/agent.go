@@ -46,7 +46,7 @@ STRATEGY:
 CODEBASE MAP:
 - apps/ = web pages. workers/ = background jobs. services/ = APIs.
 - libs/engine/src/lib/ = most business logic (subdirs listed below)
-- Other libs: foliage=themes, prism=colors, gossamer=ascii-effects, vineyard=UI-components
+- Other libs: foliage=themes, prism=colors, gossamer=ascii-effects
 
 OUTPUT: File paths and one-line descriptions only. Do not guess paths.
 

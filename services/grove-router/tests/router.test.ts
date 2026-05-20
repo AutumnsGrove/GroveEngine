@@ -168,17 +168,6 @@ describe("Grove Router", () => {
 			);
 		});
 
-		it("routes vineyard subdomain to vineyard Pages", async () => {
-			const request = createRequest("vineyard", "/showcase");
-			await router.fetch(request, env);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: expect.stringContaining("vineyard-grove-place.pages.dev/showcase"),
-				}),
-			);
-		});
-
 		it("routes domains subdomain to grove-domains Pages", async () => {
 			const request = createRequest("domains", "/manage");
 			await router.fetch(request, env);

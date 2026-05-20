@@ -56,7 +56,6 @@ const ISLAND_POSITIONS: Record<string, { x: number; y: number; zIndex: number }>
 	"libs/gossamer": { x: 62, y: 52, zIndex: 3 },
 	"libs/infra": { x: 48, y: 58, zIndex: 4 },
 	"libs/shutter": { x: 75, y: 42, zIndex: 3 },
-	"libs/vineyard": { x: 30, y: 42, zIndex: 3 },
 	workers: { x: 50, y: 62, zIndex: 4 },
 	services: { x: 35, y: 65, zIndex: 4 },
 	docs: { x: 20, y: 68, zIndex: 4 },

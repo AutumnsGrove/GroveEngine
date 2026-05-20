@@ -37,7 +37,6 @@ Grove patterns are reusable solutions to common problems in multi-tenant blog pl
 |---------|---------|--------|-------------|
 | **[Sentinel](sentinel-pattern.md)** | Realistic load testing & scale validation | **Planned (~1 month)** | Vista, D1, DO coordination |
 | **[Songbird](songbird-pattern.md)** | Structured logging & audit trails | Active | Loom DO, D1 logging |
-| **[Vineyard](vineyard-spec.md)** | Vista LoadTest package specification | **New** | Sentinel, Vista monitoring |
 
 ### 🏗️ Architecture & Coordination
 
@@ -108,7 +107,6 @@ graph LR
 
 **Related Guides:**
 - [Load Testing Guide](../guides/load-testing-guide.md) - Step-by-step implementation
-- [Vineyard Spec](vineyard-spec.md) - Vista LoadTest package
 - [Vista Spec](../specs/vista-spec.md) - Monitoring system
 
 ---
@@ -152,8 +150,7 @@ graph TB
 
 ### Phase 2: Observability (Next Month)
 1. **Sentinel Pattern** - Load testing framework
-2. **Vineyard Package** - Vista LoadTest integration
-3. **Songbird enhancements** - Advanced logging
+2. **Songbird enhancements** - Advanced logging
 
 ### Phase 3: Scale & Performance (Q1 2026)
 1. **Loom optimizations** - D1 batching improvements

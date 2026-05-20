@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 	const db = platform?.env?.DB;
 
 	// Reserved slugs that have their own routes
-	const reservedSlugs = ["blog", "admin", "auth", "verify", "vineyard"];
+	const reservedSlugs = ["blog", "admin", "auth", "verify"];
 	if (reservedSlugs.includes(slug)) {
 		throwGroveError(404, SITE_ERRORS.RESERVED_SLUG, "Site");
 	}
