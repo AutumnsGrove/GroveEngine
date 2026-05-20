@@ -280,7 +280,6 @@ export function buildMatrix(shims) {
 			kind: s.kind,
 			"needs-engine": s.with["needs-engine"] === true,
 			"needs-foliage": s.with["needs-foliage"] === true,
-			"needs-vineyard": s.with["needs-vineyard"] === true,
 			"run-build": s.with["run-build"] === true,
 			"run-typecheck": s.with["run-typecheck"] !== false,
 			// Default run-deploy is true (matches _deploy-worker.yml default).

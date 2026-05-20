@@ -128,7 +128,7 @@ if (affected.length === 0) {
 	// Build all shared libs before typechecking, regardless of which
 	// specific shims declare them. Prevents "cannot find module" errors
 	// in fresh environments and guards against shims that forget to
-	// declare needs-engine/foliage/vineyard.
+	// declare needs-engine/foliage.
 	const buildLib = (name, dir, label, cmd = "pnpm run package") => {
 		process.stdout.write(`  ${DIM}build ${label.padEnd(18)}...${RESET}`);
 		const r = run(cmd, resolve(REPO_ROOT, dir));
@@ -144,7 +144,6 @@ if (affected.length === 0) {
 	buildLib("foliage", "libs/foliage", "libs/foliage", "pnpm run build");
 	buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
 	buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
-	buildLib("vineyard", "libs/vineyard", "libs/vineyard", "pnpm run package");
 
 	// ── SvelteKit sync for all affected shims ──────────────────────
 	// Attempt sync for every shim — non-SvelteKit packages exit non-zero
