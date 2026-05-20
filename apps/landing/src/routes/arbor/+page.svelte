@@ -11,6 +11,7 @@
 	const Home = navIcons.home;
 	const Gift = blazeIcons.gift;
 	const Activity = metricIcons.activity;
+	const HeartPulse = natureIcons.heartPulse;
 	const Users = authIcons.users;
 	const Github = chromeIcons.github;
 	const Cloud = featureIcons.cloud;
@@ -139,6 +140,23 @@
 						<h2 class="text-lg font-serif text-foreground mb-1">Comped Invites</h2>
 						<p class="text-sm text-foreground-muted font-sans">
 							Invite beta testers and friends to Grove with free accounts.
+						</p>
+					</div>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Pulse Card (Wayfinder only) -->
+		<a href="/arbor/pulse" class="block">
+			<GlassCard hoverable class="p-6 h-full">
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+						<HeartPulse class="w-6 h-6 text-accent" />
+					</div>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-serif text-foreground mb-1">Pulse</h2>
+						<p class="text-sm text-foreground-muted font-sans">
+							Product observability — what's happening across Grove.
 						</p>
 					</div>
 				</div>

@@ -31,6 +31,7 @@
 	const Sparkles = phaseIcons.sparkles;
 	const ImagePlus = featureIcons.imageUp;
 	const Eye = stateIcons.eye;
+	const HeartPulse = natureIcons.heartPulse;
 	import type { ArborNavEntry } from "@autumnsgrove/lattice/ui/arbor";
 	import type { LayoutData } from "./$types";
 	import type { Snippet } from "svelte";
@@ -84,6 +85,7 @@
 		{ href: "/arbor/porch", label: "Porch", icon: MessageSquare },
 		{ href: "/arbor/greenhouse", label: "Greenhouse", icon: Sprout },
 		{ href: "/arbor/comped-invites", label: "Invites", icon: Gift },
+		{ href: "/arbor/pulse", label: "Pulse", icon: HeartPulse },
 		{ href: "/arbor/status", label: "Status", icon: Activity },
 		{ href: "/arbor/tenants", label: "Tenants", icon: Users },
 		{ href: "/arbor/uploads", label: "Uploads", icon: ImagePlus },
