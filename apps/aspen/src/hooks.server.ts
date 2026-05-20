@@ -8,7 +8,11 @@ import {
 } from "@autumnsgrove/lattice/utils/csrf";
 import { error, redirect } from "@sveltejs/kit";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
+import {
+	pulseHandle,
+	createPulseFlushHook,
+	createPulseErrorHook,
+} from "@autumnsgrove/lattice/pulse";
 import {
 	TURNSTILE_COOKIE_NAME,
 	validateVerificationCookie,
@@ -871,5 +875,5 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
-export const handle = sequence(pulseHandle({ app: "aspen" }), aspenHandle);
+export const handle = sequence(pulseHandle({ app: "aspen" }), aspenHandle, createPulseFlushHook());
 export const handleError = createPulseErrorHook({ app: "aspen" });

@@ -3,7 +3,11 @@ import { sequence } from "@sveltejs/kit/hooks";
 import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
 import { setSecurityHeaders } from "@autumnsgrove/lattice/server";
-import { pulseHandle, createPulseErrorHook } from "@autumnsgrove/lattice/pulse";
+import {
+	pulseHandle,
+	createPulseFlushHook,
+	createPulseErrorHook,
+} from "@autumnsgrove/lattice/pulse";
 
 /**
  * Server hooks for the Plant app
@@ -49,5 +53,5 @@ const plantHandle: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
-export const handle = sequence(pulseHandle({ app: "plant" }), plantHandle);
+export const handle = sequence(pulseHandle({ app: "plant" }), plantHandle, createPulseFlushHook());
 export const handleError = createPulseErrorHook({ app: "plant" });
