@@ -1,41 +1,66 @@
--- Migration 107: Fix users table schema
+-- Migration 107: Ensure users table has full schema + backfill
 -- Database: D1 (SQLite) - grove-engine-db
 --
--- Migration 014 defined an 11-column users table, but used CREATE TABLE IF NOT EXISTS.
--- The table already existed with 5 columns (id, email, is_admin, created_at, updated_at)
--- from an earlier migration, so 014 was a silent no-op. This left 9 functions in
--- users.ts querying columns that don't exist in production — including getUserHomeGrove()
--- which is called from 10+ Aspen endpoints.
+-- Migration 014 defines the full users table via CREATE TABLE IF NOT EXISTS.
+-- On fresh databases, 014 creates the complete schema — this just backfills.
+-- On production, 014 was a no-op (5-col table pre-existed), so this migration
+-- uses rename-and-recreate to bring the schema to canonical shape safely.
 --
--- This migration adds the 6 missing columns and backfills from user_onboarding.
+-- Uses rename-and-recreate pattern (same as migration 108) to avoid
+-- ALTER TABLE ADD COLUMN failures on columns that may already exist.
+
+PRAGMA foreign_keys = OFF;
 
 -- =============================================================================
--- STEP 1: Add missing columns
+-- STEP 1: Recreate users table with canonical schema
 -- =============================================================================
+-- Rename existing table (works regardless of its column count).
+-- Create new table matching migration 014's intent + is_admin for compat.
 
-ALTER TABLE users ADD COLUMN groveauth_id TEXT;
-ALTER TABLE users ADD COLUMN display_name TEXT;
-ALTER TABLE users ADD COLUMN avatar_url TEXT;
-ALTER TABLE users ADD COLUMN tenant_id TEXT REFERENCES tenants(id) ON DELETE SET NULL;
-ALTER TABLE users ADD COLUMN last_login_at INTEGER;
-ALTER TABLE users ADD COLUMN login_count INTEGER DEFAULT 0;
-ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1;
+ALTER TABLE users RENAME TO _users_107_backup;
+
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  groveauth_id TEXT,
+  email TEXT NOT NULL,
+  display_name TEXT,
+  avatar_url TEXT,
+  tenant_id TEXT REFERENCES tenants(id) ON DELETE SET NULL,
+  last_login_at INTEGER,
+  login_count INTEGER DEFAULT 0,
+  is_active INTEGER DEFAULT 1,
+  is_admin INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
 
 -- =============================================================================
--- STEP 2: Create indexes (from migration 014, never applied)
+-- STEP 2: Copy data — only universally-present columns
+-- =============================================================================
+-- The backup may have 5 columns (production) or 12 (fresh DB from 014).
+-- Only id, email, created_at, updated_at are guaranteed in both schemas.
+-- Missing columns get their DEFAULT values; step 4 backfills the rest.
+
+INSERT INTO users (id, email, created_at, updated_at)
+SELECT id, email, created_at, updated_at
+FROM _users_107_backup;
+
+DROP TABLE _users_107_backup;
+
+-- =============================================================================
+-- STEP 3: Recreate indexes
 -- =============================================================================
 
 CREATE INDEX IF NOT EXISTS idx_users_groveauth ON users(groveauth_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id) WHERE tenant_id IS NOT NULL;
-
--- Make groveauth_id unique (matches migration 014 intent)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_groveauth_unique ON users(groveauth_id) WHERE groveauth_id IS NOT NULL;
 
+PRAGMA foreign_keys = ON;
+
 -- =============================================================================
--- STEP 3: Backfill from user_onboarding for existing users
+-- STEP 4: Backfill from user_onboarding for existing users
 -- =============================================================================
--- user_onboarding has groveauth_id, tenant_id, and display_name that we need.
--- Match by email (case-insensitive) since that's the shared key.
 
 UPDATE users SET
   groveauth_id = (
@@ -55,18 +80,15 @@ UPDATE users SET
     LIMIT 1
   ),
   is_active = 1
-WHERE EXISTS (
-  SELECT 1 FROM user_onboarding
-  WHERE LOWER(user_onboarding.email) = LOWER(users.email)
-);
+WHERE groveauth_id IS NULL
+  AND EXISTS (
+    SELECT 1 FROM user_onboarding
+    WHERE LOWER(user_onboarding.email) = LOWER(users.email)
+  );
 
 -- =============================================================================
--- STEP 4: Create users records for anyone only in user_onboarding
+-- STEP 5: Create users records for anyone only in user_onboarding
 -- =============================================================================
--- Some users completed Plant onboarding but never hit the Landing/Domains flow
--- that creates a users record. Ensure they exist in the SSOT.
---
--- Note: users.created_at is TEXT (ISO format) in production, not INTEGER.
 
 INSERT OR IGNORE INTO users (
   id, groveauth_id, email, display_name, tenant_id,

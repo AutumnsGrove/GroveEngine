@@ -15,7 +15,7 @@ compatibility_date = "2025-12-01"
 
 # Weekly on Sunday at 10:00 AM UTC
 [triggers]
-crons = ["0 10 * * 0"]
+crons = ["0 10 * * SUN"]
 
 # D1 Database binding
 [[d1_databases]]
