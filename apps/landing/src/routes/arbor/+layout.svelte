@@ -26,7 +26,6 @@
 	const Gift = blazeIcons.gift;
 	const Activity = metricIcons.activity;
 	const Users = authIcons.users;
-	const Gamepad2 = toolIcons.graftsCultivars;
 	const Megaphone = blazeIcons.megaphone;
 	const Wind = natureIcons.wind;
 	const Sparkles = phaseIcons.sparkles;
@@ -87,7 +86,6 @@
 		{ href: "/arbor/comped-invites", label: "Invites", icon: Gift },
 		{ href: "/arbor/status", label: "Status", icon: Activity },
 		{ href: "/arbor/tenants", label: "Tenants", icon: Users },
-		{ href: "/arbor/minecraft", label: "Minecraft", icon: Gamepad2 },
 		{ href: "/arbor/uploads", label: "Uploads", icon: ImagePlus },
 		{ href: "/arbor/zephyr", label: "Zephyr", icon: Wind },
 		{ href: "/arbor/lumen", label: "Lumen", icon: Sparkles },

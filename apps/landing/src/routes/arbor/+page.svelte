@@ -12,7 +12,6 @@
 	const Gift = blazeIcons.gift;
 	const Activity = metricIcons.activity;
 	const Users = authIcons.users;
-	const Gamepad2 = toolIcons.graftsCultivars;
 	const Github = chromeIcons.github;
 	const Cloud = featureIcons.cloud;
 	const Bot = toolIcons.shade; // shade uses Bot in manifest
@@ -180,22 +179,6 @@
 			</GlassCard>
 		</a>
 
-		<!-- Minecraft Card (Wayfinder only) -->
-		<a href="/arbor/minecraft" class="block">
-			<GlassCard hoverable class="p-6 h-full">
-				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-success-bg rounded-lg flex items-center justify-center flex-shrink-0">
-						<Gamepad2 class="w-6 h-6 text-success" />
-					</div>
-					<div class="flex-1 min-w-0">
-						<h2 class="text-lg font-serif text-foreground mb-1">Minecraft</h2>
-						<p class="text-sm text-foreground-muted font-sans">
-							Manage the Grove Minecraft server and player settings.
-						</p>
-					</div>
-				</div>
-			</GlassCard>
-		</a>
 	{/if}
 </section>
 
