@@ -44,7 +44,6 @@ export interface TierFeatures {
 	byod: boolean; // Bring Your Own Domain
 	themeCustomizer: boolean;
 	customFonts: boolean; // Upload custom font files (WOFF2). All tiers get the 10 built-in fonts.
-	centennial: boolean;
 	shop: boolean;
 	ai: boolean;
 	analytics: boolean;
@@ -129,7 +128,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			byod: false,
 			themeCustomizer: false,
 			customFonts: false,
-			centennial: false,
 			shop: false,
 			ai: false,
 			analytics: false,
@@ -193,7 +191,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			byod: false,
 			themeCustomizer: false,
 			customFonts: false,
-			centennial: false,
 			shop: false,
 			ai: true,
 			analytics: false,
@@ -259,7 +256,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			byod: false,
 			themeCustomizer: false,
 			customFonts: false,
-			centennial: true,
 			shop: true,
 			ai: true,
 			analytics: false,
@@ -329,7 +325,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			byod: true,
 			themeCustomizer: true,
 			customFonts: false,
-			centennial: true,
 			shop: true,
 			ai: true,
 			analytics: true,
@@ -399,7 +394,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			byod: false, // Domain included
 			themeCustomizer: true,
 			customFonts: true,
-			centennial: true,
 			shop: true,
 			ai: true,
 			analytics: true,

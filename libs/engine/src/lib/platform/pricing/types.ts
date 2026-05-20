@@ -249,7 +249,6 @@ export type FineprintSection =
 	| "domains"
 	| "email"
 	| "support"
-	| "centennial"
 	| "included"
 	| "ownership"
 	| "ai"

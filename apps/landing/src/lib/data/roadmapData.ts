@@ -284,15 +284,6 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				articleSlug: "what-is-porch",
 				termSlug: "porch",
 			},
-			{
-				name: "Centennial",
-				description: "100-year preservation — your words outlive you",
-				done: false,
-				icon: "centennial",
-				major: true,
-				articleSlug: "what-is-centennial",
-				termSlug: "centennial",
-			},
 		],
 	},
 	"full-bloom": {
@@ -558,7 +549,6 @@ export const featureColorMaps: Partial<Record<PhaseKey, Record<string, string>>>
 		forests: "text-success",
 		porch: "text-warning",
 		terminal: "text-success",
-		centennial: "text-accent",
 	},
 	"full-bloom": {
 		meadow: "text-success",
@@ -603,7 +593,6 @@ export const featureBorderMaps: Partial<Record<PhaseKey, Record<string, string>>
 		forests: "border-l-4 border-success",
 		porch: "border-l-4 border-warning",
 		terminal: "border-l-4 border-success",
-		centennial: "border-l-4 border-accent",
 	},
 };
 

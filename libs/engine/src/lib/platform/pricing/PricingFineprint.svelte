@@ -62,13 +62,6 @@
 			content:
 				"[[evergreen!|Evergreen]] includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
 		},
-		centennial: {
-			title: "Centennial (Sapling+)",
-			content:
-				"Your grove can outlive you. After 12 cumulative months on [[sapling!|Sapling]] or above, your site earns [[centennial!|Centennial]] status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
-			detail:
-				"A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.",
-		},
 		included: {
 			title: "What's Included in Every Paid Tier",
 			content:

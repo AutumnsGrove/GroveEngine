@@ -351,12 +351,9 @@
 							the company decided to pivot, or shut down, or get acquired.
 						</p>
 						<p class="text-lg md:text-xl text-accent-foreground font-serif leading-relaxed">
-							Here, if you grow with Grove long enough, your grove earns
-							<span class="text-warning/90">Centennial status</span>—your site stays online
-							for a hundred years. Even after you're gone, if you want it to.
-						</p>
-						<p class="text-base md:text-lg text-foreground-subtle font-serif leading-relaxed italic mt-4">
-							A hundred years is roughly how long an oak tree lives.
+							Here, your words are yours. Your data is always exportable,
+							your content always portable. We build on infrastructure
+							that doesn't have a single point of failure.
 						</p>
 					</section>
 

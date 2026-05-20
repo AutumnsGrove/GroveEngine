@@ -105,7 +105,7 @@ See [SETUP.md](SETUP.md) for the full development guide. See [CONTRIBUTING.md](C
 - Your words stay yours. Not a dataset. Not a statistic. Exportable in standard markdown, always.
 - AI sanctuary. Every crawler blocked at the gate. What you write here is read by humans.
 - Solarpunk-aligned, no VC. Built slowly, with care, without investor pressure to enshittify.
-- Built to last. Grow with Grove long enough, and your site earns Centennial status. A hundred years online.
+- Built to last. Your data is always exportable, your content always portable.
 
 ---
 

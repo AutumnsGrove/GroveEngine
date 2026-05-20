@@ -16,7 +16,6 @@
 		HeroRefuge,
 		HeroOwnership,
 		HeroShade,
-		HeroCentennial,
 		HeroCommunity,
 	} from "$lib/components/hero";
 	import { EditorDemo } from "$lib/components/demos";
@@ -77,7 +76,7 @@
 			id: "shutdown",
 			question: "What if Grove shuts down?",
 			answer:
-				"After 12 months on a paid plan, your blog earns [[centennial!|Centennial]] status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform.",
+				"Your data is always exportable — you can download everything anytime. Grove is built on Cloudflare's infrastructure with no single point of failure. Your words are yours, and we'll always give you a way to take them with you.",
 		},
 		{
 			id: "pricing",
@@ -261,10 +260,8 @@
 				{:else if index === 1}
 					<HeroShade season={seasonStore.current} active={true} {index} />
 				{:else if index === 2}
-					<HeroCentennial season={seasonStore.current} active={true} {index} />
-				{:else if index === 3}
 					<HeroRefuge season={seasonStore.current} active={true} {index} />
-				{:else if index === 4}
+				{:else if index === 3}
 					<HeroCommunity season={seasonStore.current} active={true} {index} />
 				{/if}
 			{/snippet}

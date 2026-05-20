@@ -110,13 +110,6 @@
 			},
 		},
 		{
-			type: "feature",
-			label: "Centennial",
-			standardLabel: "100-Year Preservation",
-			icon: metricIcons.clock,
-			getValue: (tier) => tier.features.centennial,
-		},
-		{
 			type: "support",
 			label: "Support",
 			icon: chromeIcons.lifebuoy,

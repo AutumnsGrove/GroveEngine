@@ -469,7 +469,6 @@ export const ICON_MANIFEST: IconManifest = {
 		prism: "Palette",
 		// Domain & infrastructure
 		loam: "Funnel",
-		centennial: "SquaresExclude",
 		greenhouse: "Warehouse",
 		zephyr: "Cable",
 		patina: "Database",

@@ -231,27 +231,6 @@ export const categories: Category[] = [
 					},
 				],
 			},
-			{
-				name: "Centennial",
-				termSlug: "centennial",
-				tagline: "Domain Preservation",
-				description:
-					"Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you're gone. Your words can have the longevity of an oak.",
-				status: "building",
-				icon: "squares-exclude",
-				integration: "Automatic unlock after 12 months of Sapling+ membership",
-				spec: "/knowledge/specs/centennial-spec",
-				howLink: "/knowledge/philosophy/grove-sustainability",
-				whatIsLink: "/knowledge/help/what-is-centennial",
-				subComponents: [
-					{
-						name: "Solarpunk",
-						icon: "solarpanel",
-						description: "Solarpunk aligned",
-						href: "/knowledge/help/what-is-solarpunk",
-					},
-				],
-			},
 		],
 	},
 	{
