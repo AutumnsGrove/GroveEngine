@@ -8,7 +8,7 @@ import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
 
 interface Tenant {
 	id: string;
-	username: string;
+	subdomain: string;
 	display_name: string | null;
 }
 
@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 	// Load suspension status and tenant names in parallel
 	const [suspensionStatus, allTenantsResult] = await Promise.all([
 		getUploadSuspensionStatus(flagsEnv),
-		env.DB.prepare("SELECT id, username, display_name FROM tenants ORDER BY username")
+		env.DB.prepare("SELECT id, subdomain, display_name FROM tenants ORDER BY subdomain")
 			.all<Tenant>()
 			.catch((err: unknown) => {
 				console.error("[Uploads] Failed to load tenants:", err);
@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 	const allTenants = allTenantsResult.results ?? [];
 	const tenantNames: Record<string, string> = {};
 	for (const tenant of allTenants) {
-		tenantNames[tenant.id] = tenant.display_name || tenant.username || tenant.id;
+		tenantNames[tenant.id] = tenant.display_name || tenant.subdomain || tenant.id;
 	}
 
 	// Map suspension status to the component format

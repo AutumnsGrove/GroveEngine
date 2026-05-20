@@ -61,7 +61,7 @@ export async function getUploadSuspensionStatus(
         AND fr.enabled = 1
         AND json_extract(fr.rule_value, '$.tenantIds') LIKE '%' || t.id || '%'
       )
-      ORDER BY t.username`,
+      ORDER BY t.subdomain`,
 		)
 			.bind(UPLOADS_SUSPENDED_FLAG)
 			.all<{
