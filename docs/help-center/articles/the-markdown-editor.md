@@ -15,8 +15,6 @@ keywords:
   - preview
   - zen mode
   - keyboard shortcuts
-  - scribe
-  - voice
   - footnotes
 order: 2
 ---
@@ -47,9 +45,6 @@ From left to right, the toolbar offers:
 
 **Headings:**
 - **H1, H2, H3** — Insert header markers
-
-**Voice input (when enabled):**
-- **Scribe** (⌘/Ctrl + Shift + U) — Hold to speak, release to transcribe
 
 **View modes:**
 - **Source** (⌘/Ctrl + 1) — Raw Markdown editing
@@ -108,16 +103,6 @@ Three ways to add images:
 3. **Manual** — Type the Markdown syntax: `![alt text](image-url)`
 
 When you drag or paste, Grove uploads the image automatically and inserts the Markdown for you. You'll see a brief upload indicator, then the image appears in your preview.
-
-## Voice input with Scribe
-
-If you have [[scribe|Scribe]] enabled, a microphone button appears in the toolbar. Hold it down (or press **⌘/Ctrl + Shift + U**) to record your voice, then release to transcribe.
-
-Scribe offers two modes:
-- **Raw** — Exact transcription of what you said
-- **Draft** — Lightly polished into cleaner prose
-
-Voice input works well for brainstorming, capturing thoughts quickly, or when typing isn't practical.
 
 ## Zen mode
 

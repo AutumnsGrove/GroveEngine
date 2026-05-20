@@ -11,13 +11,11 @@ keywords:
   - zero data retention
   - privacy
   - ai
-  - wisp
   - scribe
   - flow
   - thorn
   - petal
   - forage
-  - fireside
   - lumen
   - inference
   - data protection
@@ -42,9 +40,9 @@ Your words go in. The result comes out. Everything in between vanishes.
 
 All AI features in Grove route through **[[lumen|Lumen]]**, our unified AI gateway. Lumen scrubs sensitive data before requests leave Grove, enforces rate limits, and ensures every provider we use meets our ZDR requirements. Here's what that powers:
 
-**[[wisp|Wisp]]** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
+**Wisp** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
 
-**[[fireside|Fireside]]** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
+**Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
 
 **[[scribe|Scribe]]** (voice transcription) lets you speak your posts into existence. Your voice is recorded in your browser, sent to Cloudflare's Whisper models for transcription, and the audio is immediately discarded—only the text comes back. In Draft mode, an additional AI step structures your rambling into a clean draft with auto-generated Vines. PII (emails, phone numbers) is automatically scrubbed from the output. We never store your voice recordings.
 
@@ -64,7 +62,7 @@ In each case: processing happens, results return, content vanishes.
 
 All AI requests flow through Lumen, Grove's AI gateway. Lumen strips personally identifiable information before content leaves our servers and routes requests only to providers that guarantee zero retention.
 
-**For text processing (Wisp, Fireside, Flow, Thorn, Forage):** OpenRouter, which enforces ZDR across all models we access through it.
+**For text processing (Flow, Thorn, Forage, and writing assistant features):** OpenRouter, which enforces ZDR across all models we access through it.
 
 **For voice transcription (Scribe):** Cloudflare Workers AI Whisper models, processed at the edge with no audio retention.
 
@@ -107,7 +105,6 @@ Grove's AI features help you write and keep the community safe. They don't extra
 For technically-minded users: you can verify our ZDR policies in these specs:
 
 - [Lumen spec](/knowledge/specs/lumen-spec) (Section: Security Considerations—the AI gateway all features use)
-- [Wisp spec](/knowledge/specs/wisp-spec) (Section: Privacy First, Model Strategy, Fireside Data Handling)
 - [Scribe spec](/knowledge/specs/scribe-voice-transcription-spec) (Section: Privacy, PII Scrubbing)
 - [Flow spec](/knowledge/specs/flow-spec) (Section: Fireside Mode)
 - [Thorn spec](/knowledge/specs/thorn-spec) (Section: Inference Provider Requirements)

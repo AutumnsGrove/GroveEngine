@@ -57,7 +57,6 @@ Prism defines several core elements:
 ## Related
 
 - [[foliage]] — Theme customization
-- [[terrarium]] — Custom decorations
 - [[midnight-mode]] — The fifth season
 - [Prism Pattern](/knowledge/patterns/prism-pattern)
 - [Grove Workshop → Prism](/workshop#tool-prism)

@@ -70,10 +70,6 @@ You can also upload images directly when writing posts by dragging and dropping.
 
 View your blog's performance metrics and visitor statistics. Available on Oak and Evergreen plans.
 
-### [[trails|Trails]]
-
-[[trails|Trails]] are your creative timeline and activity feed. Track your writing journey over time.
-
 ### Account
 
 Manage your subscription, billing, and account settings:

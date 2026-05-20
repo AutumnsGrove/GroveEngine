@@ -8,7 +8,7 @@ lastUpdated: "2026-01-22"
 slug: groves-manifesto
 order: 2
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
-related: [groves-vision, what-is-grove, what-is-solarpunk, centennial-status, why-i-built-the-grove, why-grove-is-different]
+related: [groves-vision, what-is-grove, what-is-solarpunk, why-i-built-the-grove, why-grove-is-different]
 last_verified: 2026-01-17
 verified_by: claude
 ---
@@ -55,9 +55,9 @@ Safe digital spaces, especially when physical ones feel hostile. Somewhere inten
 
 ### The long view
 
-Your words could outlive you. With [[centennial|Centennial]] status, your grove stays online for a hundred years—even after you're gone, if you want it to.
+Your words could outlive you. Grove is built for the long haul—durable infrastructure, portable formats, and no incentive to vanish overnight. What you plant here is meant to grow for years.
 
-*A hundred years is roughly how long an oak tree lives.*
+*An oak doesn't rush. Neither do we.*
 
 ### Building slowly
 

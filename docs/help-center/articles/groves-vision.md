@@ -44,7 +44,7 @@ Write in Markdown. Upload images. Publish. That's it. No plugin ecosystems, no e
 
 ### Community can exist without competition
 
-[[meadow|Meadow]] (our optional community feed) doesn't display follower counts. Reactions are private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
+Meadow (our optional community feed) doesn't display follower counts. Reactions are private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
 
 ## What we're building against
 

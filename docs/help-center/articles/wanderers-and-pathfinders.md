@@ -24,7 +24,7 @@ Grove doesn't call you a "user" or a "member." Those words feel transactional. I
 
 ## You're a Wanderer
 
-Everyone who enters Grove is a [[wanderer|Wanderer]]. Reading a blog, browsing the [[meadow|Meadow]], exploring what's here. No account required, no commitment expected.
+Everyone who enters Grove is a [[wanderer|Wanderer]]. Reading a blog, browsing Meadow, exploring what's here. No account required, no commitment expected.
 
 Wandering is a disposition, not a status. Even after you plant your blog and become part of the community, you're still a wanderer at heart. You still explore. You still discover new voices. The paths wind on.
 
@@ -42,7 +42,7 @@ Some people walk the grove long enough to know every path. They help newcomers f
 
 These are **[[pathfinder|Pathfinders]]**. It's not a role you apply for or earn through tenure. The [[wayfinder|Wayfinder]] (Autumn, who built this place) appoints Pathfinders based on trust and contribution.
 
-If you see someone with a Pathfinder badge in the [[meadow|Meadow]], they're a good person to ask if you're lost.
+If you see someone with a Pathfinder badge in Meadow, they're a good person to ask if you're lost.
 
 ## The Wayfinder
 

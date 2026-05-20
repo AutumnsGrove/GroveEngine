@@ -43,7 +43,7 @@ The aesthetic often involves greenery growing through architecture, solar panels
 
 **Sustainable technology.** We use Cloudflare's global network, which runs on renewable energy. Our ephemeral infrastructure pattern ([[flow|Flow]]) spins servers down when not in use. We think about energy costs, not just dollar costs.
 
-**Building to last.** Our [[centennial|Centennial]] program promises to keep sites online for 100 years. That's [[solarpunk|solarpunk]] thinking: create things that persist beyond quarterly earnings cycles.
+**Building to last.** We design for durability — portable data formats, infrastructure that doesn't lock you in, and a commitment to keeping your words accessible for the long haul. That's [[solarpunk|solarpunk]] thinking: create things that persist beyond quarterly earnings cycles.
 
 **Privacy as default.** We don't track you across the web. We don't sell your data. Our analytics ([[rings|Rings]]) are privacy-first. Our AI features use zero data retention. Your words stay yours.
 

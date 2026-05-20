@@ -35,7 +35,7 @@ Modern websites often feel anonymous. Templates that could belong to anyone. Smo
 
 Curios is the opposite of that. It's the weird stuff. The personal touches. The little details that make visitors pause and smile. It's not trying to look professional—it's trying to feel _lived in_.
 
-This isn't your theme (that's Foliage). This isn't the editor (that's Flow). This isn't custom decorations you design (that's Terrarium). Curios is the _stuff_. The tchotchkes on the shelf. The wind chimes by the door.
+This isn't your theme (that's Foliage). This isn't the editor (that's Flow). Curios is the _stuff_. The tchotchkes on the shelf. The wind chimes by the door.
 
 ## How it works
 
@@ -107,7 +107,6 @@ The directive turns into a live, interactive widget when visitors see your page.
 ## Related
 
 - [[foliage|What is Foliage?]] — For themes, not decorations
-- [[terrarium|What is Terrarium?]] — For custom-designed scenes
 - [Curios Specification](/knowledge/specs/curios-spec)
 - [Grove Workshop → Curios](/workshop#tool-curios)
 

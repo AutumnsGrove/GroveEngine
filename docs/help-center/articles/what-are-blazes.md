@@ -65,7 +65,6 @@ Blazes show up in:
 
 - Your [[your-garden|garden]] listing — next to the date on each post card
 - Individual [[blooms|bloom]] pages — in the metadata bar below the title
-- The [[what-is-meadow|Meadow]] feed — on every post card and detail view
 - Your [[arbor|Arbor]] post table — inline with tags
 - RSS feeds — as structured data that other services can read
 

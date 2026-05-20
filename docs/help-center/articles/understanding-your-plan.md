@@ -32,7 +32,6 @@ Here's what each Grove plan includes—and what happens when you approach your l
 | **Themes**        |    —     | 3 curated |   All 10   | All 10 + customizer |   All 10 + customizer   |
 | **Custom domain** |    —     |     —     |     —      |        BYOD         |        Included         |
 | **Email**         |    —     |     —     | Forwarding |    Full mailbox     |      Full mailbox       |
-| **Centennial**    |    —     |     —     |     ✓      |          ✓          |            ✓            |
 
 ## What counts toward limits
 
@@ -82,7 +81,6 @@ Whether you're on Wanderer or Evergreen, every Grove blog includes:
 - **Markdown editor** with live preview and drag-drop images
 - **Autosave** so you never lose drafts
 - **RSS feed** for your blog
-- **[[meadow]] access** (opt-in community features)
 - **Unlimited comments** on your posts
 - **SSL/HTTPS** (secure connection)
 - **Cloudflare CDN** (fast loading worldwide)
@@ -101,7 +99,6 @@ Your first steps:
 - Your own grove.place address
 - Markdown editor with live preview and autosave
 - RSS feed
-- Meadow access for browsing and reacting
 - No credit card needed
 
 Good for: The curious, first-time bloggers, seeing if Grove is home.
@@ -126,8 +123,6 @@ Room to grow:
 - All 10 curated themes (coming soon)
 - Email forwarding to `you@grove.place`
 - Email support
-- Centennial eligible
-
 Good for: Regular bloggers, building an archive, hobbyist writers.
 
 ### Oak ($25/month) — coming soon
@@ -141,8 +136,6 @@ Full control:
 - Full @grove.place email (send and receive)
 - Analytics
 - Priority support
-- Centennial eligible
-
 Good for: Serious bloggers, professionals, anyone who wants a custom domain.
 
 ### Evergreen ($35/month) — coming soon
@@ -155,8 +148,6 @@ Everything:
 - Domain registration included (we find and register it for you)
 - 8 hours/month dedicated support time
 - Analytics
-- Centennial eligible
-
 Good for: Professional presence, high-volume media, businesses.
 
 ## What happens if you exceed limits
@@ -166,16 +157,6 @@ Good for: Professional presence, high-volume media, businesses.
 **Same with storage.** Over the limit? Existing files stay. You just can't upload more.
 
 Grove doesn't delete your content because you downgraded. We want you to stay because you want to, not because you're trapped.
-
-## Centennial status (Sapling+)
-
-After 12 cumulative months on Sapling, Oak, or Evergreen, your grove earns **Centennial status**. This means your site stays online for 100 years from the day you planted it.
-
-- **Automatic:** No application needed. After 12 months, you're in.
-- **Preserved even if you leave:** If you stop paying after earning Centennial, your site becomes a read-only archive. Your words stay online.
-- **Opt-out available:** If you'd rather your site disappear when you leave, you can disable preservation in Settings.
-
-A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.
 
 ---
 

@@ -71,10 +71,8 @@ Sapling includes everything in Seedling, plus:
 - 5 GB storage
 - Full theming options
 - Email forwarding to your `@grove.place` address
-- Read-only [[ivy]] access
 - [[rings]] analytics
 - [[trails]] personal roadmaps
-- [[centennial]] eligibility after 12 months
 
 Most hobbyist bloggers live comfortably here.
 
@@ -133,7 +131,6 @@ The full-service option for people who value their time.
 
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
 - [Upgrading or downgrading](/knowledge/help/upgrading-or-downgrading)
-- [[centennial|What is Centennial?]] — The 100-year preservation promise
 
 ---
 

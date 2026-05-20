@@ -49,7 +49,7 @@ Tags show up in a few places:
 
 - **On your post**: Displayed with the post metadata so readers can see the topic
 - **In your RSS feed**: Subscribers' feed readers can filter by tag
-- **In [[meadow|Meadow]]**: If you share posts to the community feed, you can filter which tags go to [[meadow|Meadow]]
+- **In Meadow**: If you share posts to the community feed, you can filter which tags go to Meadow
 
 ## Organizing with intention
 

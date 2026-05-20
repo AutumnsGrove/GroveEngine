@@ -10,10 +10,7 @@ keywords:
   - markdown
   - writing
   - zen mode
-  - fireside
   - drafts
-  - scribe
-  - voice
   - footnotes
 order: 12
 ---
@@ -52,20 +49,6 @@ Zen mode enables typewriter scrolling—your cursor stays centered in the viewpo
 
 Flow saves to your browser automatically as you type. Close the tab by accident, lose your internet connection, whatever happens—your words wait for you when you return.
 
-### Fireside Mode
-
-Some people freeze at a blank page. If that's you, Fireside might help.
-
-Press `Cmd/Ctrl + Shift + F` and instead of facing an empty editor, you have a conversation. [[wisp|Wisp]] ([[your-grove|Grove]]'s writing assistant) asks what you're thinking about. You respond naturally. After a few exchanges, your words get organized into a draft you can edit.
-
-Fireside doesn't write for you—it helps you find your words when they're stuck. Every post created this way includes a small marker so readers know you started with a conversation.
-
-### Scribe Mode
-
-Sometimes typing isn't the right medium. Press the microphone button (or `Cmd/Ctrl + Shift + U`) to speak your thoughts aloud. [[scribe|Scribe]] transcribes your voice into text, ready to edit.
-
-Scribe works in two modes: **raw** (exact transcription) or **draft** (lightly polished into prose). You can switch between them based on whether you want word-for-word capture or a smoother starting point.
-
 ### The Toolbar
 
 Flow's toolbar puts common actions at your fingertips:
@@ -91,7 +74,6 @@ The toolbar also shows your current mode (Source, Split, or Preview), a full-pre
 ## Related
 
 - [Writing your first post](/knowledge/help/writing-your-first-post)
-- [What is Wisp?](/knowledge/help/what-is-wisp) — The assistant behind Fireside
 - [What are Vines?](/knowledge/help/what-are-vines) — Margin notes in your posts
 - [Flow Specification](/knowledge/specs/flow-spec)
 - [Grove Workshop → Flow](/workshop#tool-flow)
