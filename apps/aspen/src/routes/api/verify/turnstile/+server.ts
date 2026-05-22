@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		"HttpOnly",
 		"Secure",
 		"SameSite=Lax",
-		"Domain=grove.place", // No leading dot - modern browsers handle this correctly
+		"Domain=.grove.place",
 	].join("; ");
 
 	return new Response(

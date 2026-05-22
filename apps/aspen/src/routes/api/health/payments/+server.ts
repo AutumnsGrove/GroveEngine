@@ -4,26 +4,22 @@ import type { RequestHandler } from "./$types.js";
 /**
  * GET /api/health/payments - Payment subsystem health check (REDIRECT)
  *
- * NOTE: The authoritative payments health check is now in Plant, which
- * handles all payment processing and has the Stripe secrets configured.
- *
- * This endpoint exists for backwards compatibility and returns a redirect
- * hint. The Clearing Monitor has been updated to check Plant directly.
- *
- * @see packages/plant/src/routes/api/health/payments/+server.ts
+ * The authoritative payments health check is now at BillingHub
+ * (billing.grove.place/api/health). The Clearing Monitor checks
+ * billing directly — this endpoint exists only as a compatibility shim.
  */
 export const GET: RequestHandler = async () => {
 	return json(
 		{
 			status: "healthy",
 			service: "grove-payments",
-			reason: "Payments health check moved to Plant (plant.grove.place/api/health/payments)",
-			redirect: "https://plant.grove.place/api/health/payments",
+			reason: "Payments health check moved to BillingHub (billing.grove.place/api/health)",
+			redirect: "https://billing.grove.place/api/health",
 			checks: [
 				{
 					name: "redirect_notice",
 					status: "pass",
-					error: "This endpoint is deprecated — check Plant instead",
+					error: "This endpoint is deprecated — check BillingHub instead",
 				},
 			],
 			timestamp: new Date().toISOString(),
