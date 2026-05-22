@@ -1,0 +1,17 @@
+# Grove Paused — Placeholder for retired features
+#
+# Deploy this worker under different names to replace stale deployments:
+#   wrangler deploy --name grove-ivy
+#   wrangler deploy --name grove-loft
+#   wrangler deploy --name daily-clearing
+#   wrangler deploy --name grove-post-migrator
+#
+# For Pages projects, deploy directly to the Pages project:
+#   wrangler pages deploy public/ --project-name grove-terrarium
+#   wrangler pages deploy public/ --project-name grovemusic
+#   wrangler pages deploy public/ --project-name vineyard-grove-place
+#   wrangler pages deploy public/ --project-name grove-meadow
+
+name = "grove-paused"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
