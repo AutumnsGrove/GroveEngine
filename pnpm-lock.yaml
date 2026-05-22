@@ -87,19 +87,19 @@ importers:
         version: link:../../libs/infra
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
-        version: 7.2.8(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(wrangler@4.82.2(@cloudflare/workers-types@4.20260414.1))
+        version: 7.2.8(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(wrangler@4.82.2(@cloudflare/workers-types@4.20260414.1))
       '@sveltejs/kit':
         specifier: ^2.50.2
-        version: 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+        version: 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.2.4
-        version: 6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+        version: 6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
       '@testing-library/jest-dom':
         specifier: ^6.4.0
         version: 6.9.1
       '@testing-library/svelte':
         specifier: ^5.0.0
-        version: 5.3.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))(vitest@4.1.4)
+        version: 5.3.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))(vitest@4.1.4)
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.4(vitest@4.1.4)
@@ -132,10 +132,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^7.3.1
-        version: 7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)
+        version: 7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)
       vitest:
         specifier: ^4.1.0
-        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
       wrangler:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
@@ -239,13 +239,13 @@ importers:
         version: 4.20260414.1
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
-        version: 7.2.8(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(wrangler@4.82.2(@cloudflare/workers-types@4.20260414.1))
+        version: 7.2.8(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(wrangler@4.82.2(@cloudflare/workers-types@4.20260414.1))
       '@sveltejs/kit':
         specifier: ^2.50.2
-        version: 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+        version: 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.2.4
-        version: 6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+        version: 6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
       autoprefixer:
         specifier: ^10.4.24
         version: 10.5.0(postcss@8.5.9)
@@ -266,10 +266,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^7.3.1
-        version: 7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)
       vitest:
         specifier: ^4.1.0
-        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
       wrangler:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
@@ -1128,61 +1128,6 @@ importers:
         specifier: ^4.1.0
         version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
-  libs/vineyard:
-    dependencies:
-      '@autumnsgrove/prism':
-        specifier: workspace:*
-        version: link:../prism
-      '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
-    devDependencies:
-      '@sveltejs/adapter-auto':
-        specifier: ^3.3.1
-        version: 3.3.1(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))
-      '@sveltejs/kit':
-        specifier: ^2.50.2
-        version: 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
-      '@sveltejs/package':
-        specifier: ^2.5.7
-        version: 2.5.7(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)
-      '@sveltejs/vite-plugin-svelte':
-        specifier: ^6.2.4
-        version: 6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
-      '@testing-library/svelte':
-        specifier: ^5.3.1
-        version: 5.3.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))(vitest@4.1.4)
-      '@vitest/ui':
-        specifier: ^4.1.0
-        version: 4.1.4(vitest@4.1.4)
-      jsdom:
-        specifier: ^27.4.0
-        version: 27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3)
-      prettier:
-        specifier: ^3.8.1
-        version: 3.8.2
-      prettier-plugin-svelte:
-        specifier: ^3.4.1
-        version: 3.5.1(prettier@3.8.2)(svelte@5.55.3(@typescript-eslint/types@8.58.2))
-      publint:
-        specifier: ^0.2.12
-        version: 0.2.12
-      svelte:
-        specifier: ^5.50.1
-        version: 5.55.3(@typescript-eslint/types@8.58.2)
-      svelte-check:
-        specifier: ^4.3.6
-        version: 4.4.6(picomatch@4.0.4)(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)
-      vitest:
-        specifier: ^4.1.0
-        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
-
   services/amber:
     dependencies:
       '@autumnsgrove/lattice':
@@ -1555,6 +1500,15 @@ importers:
       vitest:
         specifier: ^4.1.0
         version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+      wrangler:
+        specifier: ^4.76.0
+        version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
+
+  workers/paused:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
       wrangler:
         specifier: ^4.76.0
         version: 4.82.2(@cloudflare/workers-types@4.20260414.1)
@@ -3065,96 +3019,112 @@ packages:
   '@react-email/body@0.3.0':
     resolution: {integrity: sha512-uGo0BOOzjbMUo3lu+BIDWayvn5o6Xyfmnlla5VGf05n8gHMvO1ll7U4FtzWe3hxMLwt53pmc4iE0M+B5slG+Ug==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/button@0.2.1':
     resolution: {integrity: sha512-qXyj7RZLE7POy9BMKSoqQ00tOXThjOZSUnI2Yu9i29IHngPlmrNayIWBoVKtElES7OWwypUcpiajwi1mUWx6/A==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/code-block@0.2.1':
     resolution: {integrity: sha512-M3B7JpVH4ytgn83/ujRR1k1DQHvTeABiDM61OvAbjLRPhC/5KLHU5KkzIbbuGIrjWwxAbL1kSQzU8MhLEtSxyw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/code-inline@0.0.6':
     resolution: {integrity: sha512-jfhebvv3dVsp3OdPgKXnk8+e2pBiDVZejDOBFzBa/IblrAJ9cQDkN6rBD5IyEg8hTOxwbw3iaI/yZFmDmIguIA==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/column@0.0.14':
     resolution: {integrity: sha512-f+W+Bk2AjNO77zynE33rHuQhyqVICx4RYtGX9NKsGUg0wWjdGP0qAuIkhx9Rnmk4/hFMo1fUrtYNqca9fwJdHg==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/components@1.0.12':
     resolution: {integrity: sha512-tH18JhPDWgE+3jnYkzyB6ZrZdfNnEsFe4PwmuXmlOw4NGIysP8wPY5aXZg++pTG9qUabXg1nzX/FGHGkObH8xQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/container@0.0.16':
     resolution: {integrity: sha512-QWBB56RkkU0AJ9h+qy33gfT5iuZknPC7Un/IjZv9B0QmMIK+WWacc0cH6y2SV5Cv/b99hU94fjEMOOO4enpkbQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/font@0.0.10':
     resolution: {integrity: sha512-0urVSgCmQIfx5r7Xc586miBnQUVnGp3OTYUm8m5pwtQRdTRO5XrTtEfNJ3JhYhSOruV0nD8fd+dXtKXobum6tA==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/head@0.0.13':
     resolution: {integrity: sha512-AJg6le/08Gz4tm+6MtKXqtNNyKHzmooOCdmtqmWxD7FxoAdU1eVcizhtQ0gcnVaY6ethEyE/hnEzQxt1zu5Kog==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/heading@0.0.16':
     resolution: {integrity: sha512-jmsKnQm1ykpBzw4hCYHwBkt5pW2jScXffPeEH5ZRF5tZeF5b1pvlFTO9han7C0pCkZYo1kEvWiRtx69yfCIwuw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/hr@0.0.12':
     resolution: {integrity: sha512-TwmOmBDibavUQpXBxpmZYi2Iks/yeZOzFYh+di9EltMSnEabH8dMZXrl+pxNXzCgZ2XE8HY7VmUL65Lenfu5PA==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/html@0.0.12':
     resolution: {integrity: sha512-KTShZesan+UsreU7PDUV90afrZwU5TLwYlALuCSU0OT+/U8lULNNbAUekg+tGwCnOfIKYtpDPKkAMRdYlqUznw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/img@0.0.12':
     resolution: {integrity: sha512-sRCpEARNVTf3FQhZOC+JTvu5r6ubiYWkT0ucYXg8ctkyi4G8QG+jgYPiNUqVeTLA2STOfmPM/nrk1nb84y6CPQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/link@0.0.13':
     resolution: {integrity: sha512-lkWc/NjOcefRZMkQoSDDbuKBEBDES9aXnFEOuPH845wD3TxPwh+QTf0fStuzjoRLUZWpHnio4z7qGGRYusn/sw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/markdown@0.0.18':
     resolution: {integrity: sha512-gSuYK5fsMbGk87jDebqQ6fa2fKcWlkf2Dkva8kMONqLgGCq8/0d+ZQYMEJsdidIeBo3kmsnHZPrwdFB4HgjUXg==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/preview@0.0.14':
     resolution: {integrity: sha512-aYK8q0IPkBXyMsbpMXgxazwHxYJxTrXrV95GFuu2HbEiIToMwSyUgb8HDFYwPqqfV03/jbwqlsXmFxsOd+VNaw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
@@ -3175,18 +3145,21 @@ packages:
   '@react-email/row@0.0.13':
     resolution: {integrity: sha512-bYnOac40vIKCId7IkwuLAAsa3fKfSfqCvv6epJKmPE0JBuu5qI4FHFCl9o9dVpIIS08s/ub+Y/txoMt0dYziGw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/section@0.0.17':
     resolution: {integrity: sha512-qNl65ye3W0Rd5udhdORzTV9ezjb+GFqQQSae03NDzXtmJq6sqVXNWNiVolAjvJNypim+zGXmv6J9TcV5aNtE/w==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-email/tailwind@2.0.7':
     resolution: {integrity: sha512-kGw80weVFXikcnCXbigTGXGWQ0MRCSYNCudcdkWxebkWYd0FG6/NPoN3V1p/u68/4+NxZwYPVi2fhnp0x23HdA==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       '@react-email/body': '>=0'
       '@react-email/button': '>=0'
@@ -3225,6 +3198,7 @@ packages:
   '@react-email/text@0.1.6':
     resolution: {integrity: sha512-TYqkioRS45wTR5il3dYk/SbUjjEdhSwh9BtRNB99qNH1pXAwA45H7rAuxehiu8iJQJH0IyIr+6n62gBz9ezmsw==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
@@ -3416,11 +3390,6 @@ packages:
     resolution: {integrity: sha512-lVJX6qEgs/4DOcRTpo56tmKzVPtoWAaVbL4hfO7t7NVwl9AAXzQR6cihesW1BmNMPl+bK6dreu2sOKBP2Q9CIA==}
     peerDependencies:
       acorn: ^8.9.0
-
-  '@sveltejs/adapter-auto@3.3.1':
-    resolution: {integrity: sha512-5Sc7WAxYdL6q9j/+D0jJKjGREGlfIevDyHSQ2eNETHcB1TKlQWHcAo8AS8H1QdjNvSXpvOwNjykDUHPEAyGgdQ==}
-    peerDependencies:
-      '@sveltejs/kit': ^2.0.0
 
   '@sveltejs/adapter-auto@7.0.1':
     resolution: {integrity: sha512-dvuPm1E7M9NI/+canIQ6KKQDU2AkEefEZ2Dp7cY6uKoPq9Z/PhOXABe526UdW2mN986gjVkuSLkOYIBnS/M2LQ==}
@@ -3811,6 +3780,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@vercel/oidc@3.1.0':
     resolution: {integrity: sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==}
@@ -4933,9 +4903,6 @@ packages:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
     engines: {node: '>=6 <7 || >=8'}
 
-  fs.realpath@1.0.0:
-    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -4985,11 +4952,6 @@ packages:
   glob@13.0.6:
     resolution: {integrity: sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==}
     engines: {node: 18 || 20 || >=22}
-
-  glob@8.1.0:
-    resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
-    engines: {node: '>=12'}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
@@ -5104,10 +5066,6 @@ packages:
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
-  ignore-walk@5.0.1:
-    resolution: {integrity: sha512-yemi4pMf51WKT7khInJqAvsIGzoqYXblnsz0ql8tM+yi1EKYTY1evX4NAbJrLL/Aanr2HyZeluqU+Oi7MGHokw==}
-    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
-
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
@@ -5124,9 +5082,6 @@ packages:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
     engines: {node: '>=8'}
 
-  import-meta-resolve@4.2.0:
-    resolution: {integrity: sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg==}
-
   imurmurhash@0.1.4:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
@@ -5134,10 +5089,6 @@ packages:
   indent-string@4.0.0:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
     engines: {node: '>=8'}
-
-  inflight@1.0.6:
-    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -5585,10 +5536,6 @@ packages:
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
-  minimatch@5.1.9:
-    resolution: {integrity: sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw==}
-    engines: {node: '>=10'}
-
   minimatch@9.0.9:
     resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -5664,19 +5611,6 @@ packages:
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
-
-  npm-bundled@2.0.1:
-    resolution: {integrity: sha512-gZLxXdjEzE/+mOstGDqR6b0EkhJ+kM6fxM6vUuckuctuVPh80Q6pw/rSZj9s4Gex9GxWtIicO1pc8DB9KZWudw==}
-    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
-
-  npm-normalize-package-bin@2.0.0:
-    resolution: {integrity: sha512-awzfKUO7v0FscrSpRoogyNm0sajikhBWpU0QMrW09AMi9n1PoKU6WaIqUzuJSQnpciZZmJ/jMZ2Egfmb/9LiWQ==}
-    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
-
-  npm-packlist@5.1.3:
-    resolution: {integrity: sha512-263/0NGrn32YFYi4J533qzrQ/krmmrWwhKkzwTuM4f/07ug51odoaNjUexxO4vxlzURHcmYMH1QjvHjsNDKLVg==}
-    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
-    hasBin: true
 
   nypm@0.6.2:
     resolution: {integrity: sha512-7eM+hpOtrKrBDCh7Ypu2lJ9Z7PNZBdi/8AT3AX8xoCj43BBVHD0hPSTEvMtkMpfs8FCqBGhxB+uToIQimA111g==}
@@ -6035,11 +5969,6 @@ packages:
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
-
-  publint@0.2.12:
-    resolution: {integrity: sha512-YNeUtCVeM4j9nDiTT2OPczmlyzOkIXNtdDZnSuajAxS/nZ6j3t7Vs9SUB4euQNddiltIwu7Tdd3s+hr08fAsMw==}
-    engines: {node: '>=16'}
-    hasBin: true
 
   pump@3.0.4:
     resolution: {integrity: sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==}
@@ -8360,11 +8289,6 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))':
-    dependencies:
-      '@sveltejs/kit': 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
-      import-meta-resolve: 4.2.0
-
   '@sveltejs/adapter-auto@7.0.1(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))':
     dependencies:
       '@sveltejs/kit': 2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
@@ -8513,6 +8437,15 @@ snapshots:
   '@testing-library/svelte-core@1.0.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))':
     dependencies:
       svelte: 5.55.3(@typescript-eslint/types@8.58.2)
+
+  '@testing-library/svelte@5.3.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))(vitest@4.1.4)':
+    dependencies:
+      '@testing-library/dom': 10.4.1
+      '@testing-library/svelte-core': 1.0.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+      svelte: 5.55.3(@typescript-eslint/types@8.58.2)
+    optionalDependencies:
+      vite: 7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0)
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
 
   '@testing-library/svelte@5.3.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))(vitest@4.1.4)':
     dependencies:
@@ -8876,7 +8809,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/expect@4.1.4':
     dependencies:
@@ -8930,7 +8863,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/utils@4.1.4':
     dependencies:
@@ -10025,8 +9958,6 @@ snapshots:
       jsonfile: 4.0.0
       universalify: 0.1.2
 
-  fs.realpath@1.0.0: {}
-
   fsevents@2.3.2:
     optional: true
 
@@ -10078,14 +10009,6 @@ snapshots:
       minimatch: 10.2.5
       minipass: 7.1.3
       path-scurry: 2.0.2
-
-  glob@8.1.0:
-    dependencies:
-      fs.realpath: 1.0.0
-      inflight: 1.0.6
-      inherits: 2.0.4
-      minimatch: 5.1.9
-      once: 1.4.0
 
   globals@11.12.0: {}
 
@@ -10258,10 +10181,6 @@ snapshots:
 
   ieee754@1.2.1: {}
 
-  ignore-walk@5.0.1:
-    dependencies:
-      minimatch: 5.1.9
-
   ignore@5.3.2: {}
 
   ignore@7.0.5: {}
@@ -10273,16 +10192,9 @@ snapshots:
 
   import-lazy@4.0.0: {}
 
-  import-meta-resolve@4.2.0: {}
-
   imurmurhash@0.1.4: {}
 
   indent-string@4.0.0: {}
-
-  inflight@1.0.6:
-    dependencies:
-      once: 1.4.0
-      wrappy: 1.0.2
 
   inherits@2.0.4: {}
 
@@ -10784,10 +10696,6 @@ snapshots:
     dependencies:
       brace-expansion: 1.1.14
 
-  minimatch@5.1.9:
-    dependencies:
-      brace-expansion: 2.1.0
-
   minimatch@9.0.9:
     dependencies:
       brace-expansion: 2.1.0
@@ -10837,19 +10745,6 @@ snapshots:
   node-releases@2.0.37: {}
 
   normalize-path@3.0.0: {}
-
-  npm-bundled@2.0.1:
-    dependencies:
-      npm-normalize-package-bin: 2.0.0
-
-  npm-normalize-package-bin@2.0.0: {}
-
-  npm-packlist@5.1.3:
-    dependencies:
-      glob: 8.1.0
-      ignore-walk: 5.0.1
-      npm-bundled: 2.0.1
-      npm-normalize-package-bin: 2.0.0
 
   nypm@0.6.2:
     dependencies:
@@ -11239,12 +11134,6 @@ snapshots:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
-
-  publint@0.2.12:
-    dependencies:
-      npm-packlist: 5.1.3
-      picocolors: 1.1.1
-      sade: 1.8.1
 
   pump@3.0.4:
     dependencies:

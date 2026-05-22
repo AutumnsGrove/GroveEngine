@@ -1,0 +1,24 @@
+---
+name: Deploy Paused Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/paused/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  issues: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: workers/paused
+      needs-engine: false
+      run-typecheck: false
+    secrets: inherit
+...
