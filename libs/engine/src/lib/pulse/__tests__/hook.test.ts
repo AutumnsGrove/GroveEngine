@@ -3,7 +3,7 @@ import { pulseHandle, createPulseFlushHook } from "../hook.js";
 
 vi.mock("../emitter.js", () => ({
 	initPulse: vi.fn(),
-	emitRequestEvent: vi.fn(),
+	emitPulseEvent: vi.fn(),
 	flushPulse: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -11,7 +11,7 @@ vi.mock("../visitor.js", () => ({
 	hashVisitor: vi.fn().mockResolvedValue("deadbeef01234567"),
 }));
 
-import { initPulse, emitRequestEvent, flushPulse } from "../emitter.js";
+import { initPulse, emitPulseEvent, flushPulse } from "../emitter.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -51,6 +51,11 @@ function makeResolve(status = 200) {
 	return vi.fn().mockResolvedValue(new Response("body", { status }));
 }
 
+/** Extract the options object from the most recent emitPulseEvent call */
+function lastEmitOptions() {
+	return vi.mocked(emitPulseEvent).mock.calls[0][1]!;
+}
+
 // ---------------------------------------------------------------------------
 // pulseHandle — skip logic
 // ---------------------------------------------------------------------------
@@ -71,7 +76,7 @@ describe("pulseHandle — skip logic", () => {
 
 			expect(resolve).toHaveBeenCalledWith(event);
 			expect(initPulse).not.toHaveBeenCalled();
-			expect(emitRequestEvent).not.toHaveBeenCalled();
+			expect(emitPulseEvent).not.toHaveBeenCalled();
 		},
 	);
 
@@ -82,7 +87,7 @@ describe("pulseHandle — skip logic", () => {
 
 		await handle({ event: event as never, resolve });
 
-		expect(emitRequestEvent).toHaveBeenCalled();
+		expect(emitPulseEvent).toHaveBeenCalled();
 	});
 });
 
@@ -113,7 +118,7 @@ describe("pulseHandle — initialization", () => {
 		await handle({ event: event as never, resolve });
 
 		expect(initPulse).not.toHaveBeenCalled();
-		expect(emitRequestEvent).not.toHaveBeenCalled();
+		expect(emitPulseEvent).not.toHaveBeenCalled();
 	});
 
 	it("only initializes once across multiple requests", async () => {
@@ -129,29 +134,32 @@ describe("pulseHandle — initialization", () => {
 });
 
 // ---------------------------------------------------------------------------
-// pulseHandle — emitRequestEvent shape
+// pulseHandle — emitPulseEvent shape
 // ---------------------------------------------------------------------------
 
-describe("pulseHandle — emitRequestEvent", () => {
+describe("pulseHandle — emitPulseEvent", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("emits a request event with correct route, method, status, duration, and app", async () => {
+	it("emits a page.viewed event with correct route, method, status, duration, app, and user-agent", async () => {
 		const handle = pulseHandle({ app: "aspen" });
 		const event = makeEvent("/garden/post", { routeId: "/garden/[slug]" });
 		const resolve = makeResolve(200);
 
 		await handle({ event: event as never, resolve });
 
-		expect(emitRequestEvent).toHaveBeenCalledOnce();
-		const call = vi.mocked(emitRequestEvent).mock.calls[0][0];
-		expect(call.route).toBe("/garden/[slug]");
-		expect(call.method).toBe("GET");
-		expect(call.status).toBe(200);
-		expect(call.duration_ms).toBeGreaterThanOrEqual(0);
-		expect(call.app).toBe("aspen");
-		expect(call.visitor_hash).toBe("deadbeef01234567");
+		expect(emitPulseEvent).toHaveBeenCalledOnce();
+		expect(vi.mocked(emitPulseEvent).mock.calls[0][0]).toBe("page.viewed");
+
+		const opts = lastEmitOptions();
+		expect(opts.route).toBe("/garden/[slug]");
+		expect(opts.method).toBe("GET");
+		expect(opts.status).toBe(200);
+		expect(opts.duration_ms).toBeGreaterThanOrEqual(0);
+		expect(opts.app).toBe("aspen");
+		expect(opts.visitor_hash).toBe("deadbeef01234567");
+		expect(opts.metadata).toEqual({ ua: "TestAgent/1.0" });
 	});
 
 	it("falls back to pathname when route.id is null", async () => {
@@ -161,9 +169,9 @@ describe("pulseHandle — emitRequestEvent", () => {
 
 		await handle({ event: event as never, resolve });
 
-		const call = vi.mocked(emitRequestEvent).mock.calls[0][0];
-		expect(call.route).toBe("/some/path");
-		expect(call.status).toBe(404);
+		const opts = lastEmitOptions();
+		expect(opts.route).toBe("/some/path");
+		expect(opts.status).toBe(404);
 	});
 });
 
@@ -182,8 +190,8 @@ describe("pulseHandle — tenant_id extraction", () => {
 
 		await handle({ event: event as never, resolve: makeResolve() });
 
-		const call = vi.mocked(emitRequestEvent).mock.calls[0][0];
-		expect(call.tenant_id).toBe("t_direct");
+		const opts = lastEmitOptions();
+		expect(opts.tenant_id).toBe("t_direct");
 	});
 
 	it("extracts tenant_id from locals.tenant.id", async () => {
@@ -194,8 +202,8 @@ describe("pulseHandle — tenant_id extraction", () => {
 
 		await handle({ event: event as never, resolve: makeResolve() });
 
-		const call = vi.mocked(emitRequestEvent).mock.calls[0][0];
-		expect(call.tenant_id).toBe("t_nested");
+		const opts = lastEmitOptions();
+		expect(opts.tenant_id).toBe("t_nested");
 	});
 
 	it("leaves tenant_id undefined when no tenant info in locals", async () => {
@@ -204,8 +212,8 @@ describe("pulseHandle — tenant_id extraction", () => {
 
 		await handle({ event: event as never, resolve: makeResolve() });
 
-		const call = vi.mocked(emitRequestEvent).mock.calls[0][0];
-		expect(call.tenant_id).toBeUndefined();
+		const opts = lastEmitOptions();
+		expect(opts.tenant_id).toBeUndefined();
 	});
 });
 

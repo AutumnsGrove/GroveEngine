@@ -13,7 +13,7 @@
  */
 
 import type { Handle } from "@sveltejs/kit";
-import { initPulse, emitRequestEvent, flushPulse } from "./emitter.js";
+import { initPulse, emitPulseEvent, flushPulse } from "./emitter.js";
 import { hashVisitor } from "./visitor.js";
 import type { PulseCollector } from "./types.js";
 
@@ -74,7 +74,7 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 
 			const tenant_id = extractTenantId(event);
 
-			emitRequestEvent({
+			emitPulseEvent("page.viewed", {
 				route: event.route?.id ?? pathname,
 				method: event.request.method,
 				status: response.status,
@@ -82,6 +82,7 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 				tenant_id,
 				visitor_hash,
 				app,
+				metadata: { ua: ua.slice(0, 200) },
 			});
 		}
 
