@@ -245,7 +245,7 @@
 	<!-- Hero Carousel Section -->
 	<section class="w-full max-w-4xl mb-16" aria-label="Grove feature highlights">
 		<GlassCarousel
-			itemCount={5}
+			itemCount={4}
 			showDots={true}
 			showArrows={true}
 			autoplay={false}
