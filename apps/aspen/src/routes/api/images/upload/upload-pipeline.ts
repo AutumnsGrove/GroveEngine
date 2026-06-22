@@ -131,7 +131,7 @@ export function validateFile(file: File, buffer: Uint8Array): { ext: string } {
 
 export interface PetalScanResult {
 	allowed: boolean;
-	response?: { message: string; processingTimeMs?: number };
+	response?: { message: string; processingTimeMs?: number; code?: string };
 }
 
 export async function runPetalScan(
@@ -165,6 +165,7 @@ export async function runPetalScan(
 			response: {
 				message: petalResult.message,
 				processingTimeMs: petalResult.processingTimeMs,
+				code: petalResult.code,
 			},
 		};
 	}
