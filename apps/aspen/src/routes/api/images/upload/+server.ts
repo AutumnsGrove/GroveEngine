@@ -220,9 +220,18 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			);
 
 			if (!petalResult.allowed) {
+				// Infrastructure/temporary errors use UPLOAD_SERVICE_UNAVAILABLE
+				const isInfraError = ["SCAN_ERROR", "CSAM_SCAN_FAILED"].includes(
+					petalResult.response?.code || "",
+				);
+				const apiError = isInfraError
+					? API_ERRORS.UPLOAD_SERVICE_UNAVAILABLE
+					: API_ERRORS.INVALID_FILE;
+
 				// Count this rejection. After 15 Petal rejections in an hour, restrict uploads.
 				// Limit is set high enough to survive Petal false positives on legitimate content.
-				if (threshold) {
+				// (Skip counting for infrastructure errors to avoid false positives)
+				if (threshold && !isInfraError) {
 					try {
 						const rejectedResult = await threshold.check({
 							key: `upload/rejected:${locals.user.id}`,
@@ -245,11 +254,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 				return json(
 					{
-						...buildErrorJson(API_ERRORS.INVALID_FILE),
+						...buildErrorJson(apiError),
 						error_description: petalResult.response?.message,
 						processingTimeMs: petalResult.response?.processingTimeMs,
 					},
-					{ status: 400 },
+					{ status: isInfraError ? 503 : 400 },
 				);
 			}
 		}
