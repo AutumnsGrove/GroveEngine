@@ -441,15 +441,33 @@ export async function classifyImage(
 	// Parse JSON response
 	try {
 		// Extract JSON from response (may have surrounding text)
-		const jsonMatch = response.content.match(/\{[^}]+\}/);
-		if (!jsonMatch) {
+		// Use a more robust approach: find opening { and parse from there
+		const jsonStart = response.content.indexOf("{");
+		if (jsonStart === -1) {
 			throw new Error("No JSON found in response");
 		}
 
+		// Try to parse from the first { onwards, handling nested objects
+		let depth = 0;
+		let jsonEnd = jsonStart;
+		for (let i = jsonStart; i < response.content.length; i++) {
+			if (response.content[i] === "{") depth++;
+			if (response.content[i] === "}") depth--;
+			if (depth === 0) {
+				jsonEnd = i + 1;
+				break;
+			}
+		}
+
+		if (depth !== 0) {
+			throw new Error("Malformed JSON: unbalanced braces");
+		}
+
+		const jsonStr = response.content.substring(jsonStart, jsonEnd);
 		const parsed = safeParseJson<{
 			category: string;
 			confidence: number;
-		} | null>(jsonMatch[0], null);
+		} | null>(jsonStr, null);
 
 		if (!parsed) {
 			throw new Error("Failed to parse JSON");
@@ -509,18 +527,37 @@ export async function runSanityCheck(
 
 	// Parse JSON response
 	try {
-		const jsonMatch = response.content.match(/\{[^}]+\}/);
-		if (!jsonMatch) {
+		// Extract JSON from response (may have surrounding text)
+		// Use a more robust approach: find opening { and parse from there
+		const jsonStart = response.content.indexOf("{");
+		if (jsonStart === -1) {
 			throw new Error("No JSON found in response");
 		}
 
+		// Try to parse from the first { onwards, handling nested objects
+		let depth = 0;
+		let jsonEnd = jsonStart;
+		for (let i = jsonStart; i < response.content.length; i++) {
+			if (response.content[i] === "{") depth++;
+			if (response.content[i] === "}") depth--;
+			if (depth === 0) {
+				jsonEnd = i + 1;
+				break;
+			}
+		}
+
+		if (depth !== 0) {
+			throw new Error("Malformed JSON: unbalanced braces");
+		}
+
+		const jsonStr = response.content.substring(jsonStart, jsonEnd);
 		const parsed = safeParseJson<{
 			faceCount?: number;
 			isScreenshot?: boolean;
 			isMeme?: boolean;
 			isDrawing?: boolean;
 			quality?: number;
-		} | null>(jsonMatch[0], null);
+		} | null>(jsonStr, null);
 
 		if (!parsed) {
 			throw new Error("Failed to parse JSON");
