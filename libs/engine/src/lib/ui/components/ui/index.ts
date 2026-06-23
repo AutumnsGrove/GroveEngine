@@ -1,15 +1,17 @@
-// GroveUI - Basic UI Components
+// GroveUI - Component Barrel
 //
-// This module exports all basic UI components:
-// Button, Card, Input, Dialog, Select, Tabs, Accordion, Badge, etc.
+// All `export *` wildcards replaced with explicit named exports
+// to prevent hidden re-export cascades that break tree-shaking.
 //
-// Usage:
-//   import { Button, Card } from '@lattice/ui/ui';
+// Prefer direct imports for Svelte files:
+//   import Button from "$lib/ui/components/ui/Button.svelte"
+// over barrel imports:
+//   import { Button } from "$lib/ui/components/ui"
 
-// Types
-export * from "./types";
+// --- Types ---
+export type { GlassVariant } from "./types";
 
-// Wrapper components
+// --- Core Components ---
 export { default as Button } from "./Button.svelte";
 export { default as Card } from "./Card.svelte";
 export { default as Badge } from "./Badge.svelte";
@@ -30,11 +32,11 @@ export { default as Logo } from "./Logo.svelte";
 export { default as LogoLoader } from "./LogoLoader.svelte";
 export { default as LogoArchive } from "./LogoArchive.svelte";
 
-// Beta program components
+// --- Beta ---
 export { default as BetaBadge } from "./BetaBadge.svelte";
 export { default as BetaWelcomeDialog } from "./BetaWelcomeDialog.svelte";
 
-// Glass suite - glassmorphism components
+// --- Glass Suite ---
 export { default as Glass } from "./Glass.svelte";
 export { default as GlassButton } from "./GlassButton.svelte";
 export { default as GlassCard } from "./GlassCard.svelte";
@@ -49,12 +51,19 @@ export { default as GlassLegend } from "./GlassLegend.svelte";
 export { default as GlassStatusWidget } from "./GlassStatusWidget.svelte";
 export { default as GlassComparisonTable } from "./GlassComparisonTable.svelte";
 
-// GlassChat - reusable chat interface
+// --- GlassChat ---
 export { default as GlassChat } from "./glasschat/GlassChat.svelte";
 export { default as ChatMessage } from "./glasschat/ChatMessage.svelte";
 export { default as ChatInput } from "./glasschat/ChatInput.svelte";
 export { default as ChatTypingIndicator } from "./glasschat/ChatTypingIndicator.svelte";
-export * from "./glasschat/types";
+export type {
+	ChatMessageStatus,
+	ChatSender,
+	ChatMessageData,
+	ChatRoleConfig,
+	ChatRoleMap,
+} from "./glasschat/types";
+export { DEFAULT_ROLE_CONFIG } from "./glasschat/types";
 export {
 	createChatMessage,
 	createChatController,
@@ -70,16 +79,17 @@ export type {
 	ConversationalChatControllerOptions,
 } from "./glasschat/controller.svelte";
 
+// --- Waystone ---
 export { default as Waystone } from "./Waystone.svelte";
 export { default as WaystonePopup } from "./waystone/WaystonePopup.svelte";
-export * from "./waystone/types";
+export type { WaystoneExcerpt, WaystoneManifest, WaystoneCache } from "./waystone/types";
+export { createWaystoneCache } from "./waystone/types";
 
-// GroveMessages - cross-app communication system
+// --- Grove Messages ---
 export { default as GroveMessages } from "./grove-messages/GroveMessages.svelte";
-export * from "./grove-messages/types";
-export type { GroveMessageChannel } from "./grove-messages/types";
+export type { GroveMessage, GroveMessageType, GroveMessageChannel } from "./grove-messages/types";
 
-// GroveIcon - manifest-driven service icon swap
+// --- Grove Icon ---
 export { default as GroveIcon } from "./groveicon/GroveIcon.svelte";
 export { defaultSuite, groveIconManifest, getSuite } from "./groveicon/manifest";
 export { resolveIcon, hasIcon } from "./groveicon/resolver";
@@ -91,7 +101,7 @@ export type {
 	ResolvedIcon,
 } from "./groveicon/types";
 
-// Table sub-components (from primitives)
+// --- Table Primitives ---
 export {
 	TableHeader,
 	TableBody,
@@ -102,7 +112,7 @@ export {
 	TableCaption,
 } from "$lib/ui/components/primitives/table";
 
-// Toast utility
-export * from "./toast.js";
+// --- Toast Utility ---
+export { toast } from "./toast.js";
 
 export const UI_VERSION = "0.3.0";
