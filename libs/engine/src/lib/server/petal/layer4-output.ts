@@ -30,6 +30,7 @@ export async function runLayer4(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
 		tenantId?: string;
@@ -118,6 +119,7 @@ export async function generateWithRetry<T extends string | Uint8Array>(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
 		tenantId?: string;
@@ -170,6 +172,7 @@ export async function verifyOutfitMatch(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 	},
 ): Promise<{ matches: boolean; score: number; reason?: string }> {
 	// Placeholder - in future, would use vision model to compare

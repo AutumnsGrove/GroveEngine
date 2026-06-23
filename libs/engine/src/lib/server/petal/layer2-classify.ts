@@ -101,6 +101,7 @@ export async function runLayer2(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
 		tenantId?: string;
@@ -156,6 +157,7 @@ export async function checkFashionContext(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 	},
 ): Promise<{ appropriate: boolean; reason?: string }> {
 	// For now, swimwear/underwear is not appropriate for try-on
@@ -192,6 +194,7 @@ export async function classifyImageBatch(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
 		tenantId?: string;

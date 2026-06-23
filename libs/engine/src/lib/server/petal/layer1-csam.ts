@@ -56,6 +56,7 @@ export async function scanForCSAM(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		photodnaSubscriptionKey?: string;
 	},
 ): Promise<CSAMResult> {
@@ -149,6 +150,7 @@ async function scanWithVision(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 	},
 ): Promise<CSAMResult> {
 	try {
@@ -373,6 +375,7 @@ export async function runLayer1(
 	options: {
 		ai?: Ai;
 		togetherApiKey?: string;
+		openRouterApiKey?: string;
 		photodnaSubscriptionKey?: string;
 		db?: D1Database;
 		userId?: string;

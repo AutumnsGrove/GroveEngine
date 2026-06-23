@@ -93,6 +93,18 @@ export const PETAL_ERRORS = {
 		userMessage: "Image processing is temporarily unavailable.",
 		adminMessage: "Together.ai client threw an unexpected error.",
 	},
+	OPENROUTER_API_ERROR: {
+		code: "PETAL-027",
+		category: "admin" as const,
+		userMessage: "Image processing is temporarily unavailable.",
+		adminMessage: "OpenRouter API returned non-OK response.",
+	},
+	OPENROUTER_UNEXPECTED: {
+		code: "PETAL-028",
+		category: "bug" as const,
+		userMessage: "Image processing is temporarily unavailable.",
+		adminMessage: "OpenRouter client threw an unexpected error.",
+	},
 	SCAN_UNEXPECTED_ERROR: {
 		code: "PETAL-026",
 		category: "bug" as const,

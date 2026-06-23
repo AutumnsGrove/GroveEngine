@@ -219,6 +219,86 @@ async function callWorkersAI(
 }
 
 // ============================================================================
+// External API Provider (OpenRouter)
+// ============================================================================
+
+/**
+ * Call OpenRouter API for vision
+ */
+async function callOpenRouter(
+	apiKey: string,
+	model: string,
+	request: VisionRequest,
+	timeoutMs: number,
+): Promise<VisionResponse> {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+	try {
+		const imageDataUri = getImageDataUri(request.image, request.mimeType);
+
+		const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${apiKey}`,
+			},
+			body: JSON.stringify({
+				model,
+				messages: [
+					{
+						role: "user",
+						content: [
+							{ type: "text", text: request.prompt },
+							{ type: "image_url", image_url: { url: imageDataUri } },
+						],
+					},
+				],
+				max_tokens: request.maxTokens || 256,
+				temperature: 0.1,
+			}),
+			signal: controller.signal,
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => "Unknown error");
+			logGroveError("Petal", PETAL_ERRORS.OPENROUTER_API_ERROR, {
+				status: response.status,
+				detail: errorText.substring(0, 500),
+				model,
+			});
+			throw new PetalError(
+				"Vision provider temporarily unavailable",
+				"PROVIDER_ERROR",
+				undefined,
+				"openrouter",
+			);
+		}
+
+		const data = (await response.json()) as {
+			choices?: Array<{ message?: { content?: string } }>;
+		};
+
+		const content = data.choices?.[0]?.message?.content || "";
+
+		return {
+			content,
+			model,
+			provider: "openrouter",
+		};
+	} catch (err) {
+		if (err instanceof Error && err.name === "AbortError") {
+			throw new PetalError("Vision provider request timed out", "TIMEOUT", undefined, "openrouter");
+		}
+		if (err instanceof PetalError) throw err;
+		logGroveError("Petal", PETAL_ERRORS.OPENROUTER_UNEXPECTED, { model, cause: err });
+		throw new PetalError("OpenRouter provider error", "PROVIDER_ERROR", undefined, "openrouter");
+	} finally {
+		clearTimeout(timeoutId);
+	}
+}
+
+// ============================================================================
 // External API Provider (Together.ai)
 // ============================================================================
 
@@ -321,7 +401,9 @@ async function callTogetherAI(
 interface VisionClientOptions {
 	/** Workers AI binding (primary) */
 	ai?: Ai;
-	/** Together.ai API key (fallback) */
+	/** OpenRouter API key (fallback) */
+	openRouterApiKey?: string;
+	/** Together.ai API key (dead-last fallback) */
 	togetherApiKey?: string;
 }
 
@@ -363,6 +445,16 @@ export async function callVisionModel(
 					continue; // Workers AI not available
 				}
 				response = await callWorkersAI(options.ai, config.model, request, config.timeoutMs);
+			} else if (config.type === "external_api" && providerKey === "openrouter") {
+				if (!options.openRouterApiKey) {
+					continue; // API key not available
+				}
+				response = await callOpenRouter(
+					options.openRouterApiKey,
+					config.model,
+					request,
+					config.timeoutMs,
+				);
 			} else if (config.type === "external_api" && providerKey === "together_ai") {
 				if (!options.togetherApiKey) {
 					continue; // API key not available
@@ -442,7 +534,12 @@ export async function classifyImage(
 	try {
 		// Extract JSON from response (may have surrounding text)
 		// Use a more robust approach: find opening { and parse from there
-		const jsonStart = response.content.indexOf("{");
+		let content = response.content;
+		// Some models return JSON without opening brace — fix up before parsing
+		if (content.indexOf("{") === -1 && content.indexOf("}") !== -1) {
+			content = "{" + content;
+		}
+		const jsonStart = content.indexOf("{");
 		if (jsonStart === -1) {
 			throw new Error("No JSON found in response");
 		}
@@ -450,9 +547,9 @@ export async function classifyImage(
 		// Try to parse from the first { onwards, handling nested objects
 		let depth = 0;
 		let jsonEnd = jsonStart;
-		for (let i = jsonStart; i < response.content.length; i++) {
-			if (response.content[i] === "{") depth++;
-			if (response.content[i] === "}") depth--;
+		for (let i = jsonStart; i < content.length; i++) {
+			if (content[i] === "{") depth++;
+			if (content[i] === "}") depth--;
 			if (depth === 0) {
 				jsonEnd = i + 1;
 				break;
@@ -463,7 +560,7 @@ export async function classifyImage(
 			throw new Error("Malformed JSON: unbalanced braces");
 		}
 
-		const jsonStr = response.content.substring(jsonStart, jsonEnd);
+		const jsonStr = content.substring(jsonStart, jsonEnd);
 		const parsed = safeParseJson<{
 			category: string;
 			confidence: number;
@@ -529,7 +626,12 @@ export async function runSanityCheck(
 	try {
 		// Extract JSON from response (may have surrounding text)
 		// Use a more robust approach: find opening { and parse from there
-		const jsonStart = response.content.indexOf("{");
+		let content = response.content;
+		// Some models return JSON without opening brace — fix up before parsing
+		if (content.indexOf("{") === -1 && content.indexOf("}") !== -1) {
+			content = "{" + content;
+		}
+		const jsonStart = content.indexOf("{");
 		if (jsonStart === -1) {
 			throw new Error("No JSON found in response");
 		}
@@ -537,9 +639,9 @@ export async function runSanityCheck(
 		// Try to parse from the first { onwards, handling nested objects
 		let depth = 0;
 		let jsonEnd = jsonStart;
-		for (let i = jsonStart; i < response.content.length; i++) {
-			if (response.content[i] === "{") depth++;
-			if (response.content[i] === "}") depth--;
+		for (let i = jsonStart; i < content.length; i++) {
+			if (content[i] === "{") depth++;
+			if (content[i] === "}") depth--;
 			if (depth === 0) {
 				jsonEnd = i + 1;
 				break;
@@ -550,7 +652,7 @@ export async function runSanityCheck(
 			throw new Error("Malformed JSON: unbalanced braces");
 		}
 
-		const jsonStr = response.content.substring(jsonStart, jsonEnd);
+		const jsonStr = content.substring(jsonStart, jsonEnd);
 		const parsed = safeParseJson<{
 			faceCount?: number;
 			isScreenshot?: boolean;

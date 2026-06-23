@@ -429,11 +429,21 @@ export function getActionableUploadError(serverMessage: string): string {
 		return serverMessage;
 	}
 
+	// Petal infrastructure errors — safety check itself failed, not the image
+	if (
+		msg.includes("safety check") ||
+		msg.includes("no providers responded") ||
+		msg.includes("grove-api-011")
+	) {
+		return "Image safety check is temporarily down — your image wasn't rejected. Please try again in a few minutes.";
+	}
+
 	// Content moderation (Petal)
 	if (
 		msg.includes("content_rejected") ||
 		msg.includes("moderation") ||
-		msg.includes("inappropriate")
+		msg.includes("inappropriate") ||
+		msg.includes("flagged")
 	) {
 		return "This image was flagged by our content safety system. Please try a different image.";
 	}

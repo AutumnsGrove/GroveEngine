@@ -54,6 +54,7 @@ export async function scanImage(input: PetalScanInput, env: PetalEnv): Promise<P
 	const options = {
 		ai: env.AI,
 		togetherApiKey: env.TOGETHER_API_KEY,
+		openRouterApiKey: env.OPENROUTER_API_KEY,
 		photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
 		db: env.DB,
 		userId,
@@ -189,7 +190,7 @@ export async function scanImage(input: PetalScanInput, env: PetalEnv): Promise<P
 				blockedAt: err.layer,
 				message:
 					err.code === "CSAM_SCAN_FAILED"
-						? "We're experiencing technical difficulties. Please try again in a few minutes."
+						? "Image safety check unavailable — no providers responded. Please try again shortly."
 						: GENERIC_REJECTION_MESSAGE,
 				code: err.code,
 				contentHash,
@@ -203,7 +204,7 @@ export async function scanImage(input: PetalScanInput, env: PetalEnv): Promise<P
 		return {
 			allowed: false,
 			decision: "block",
-			message: "We're experiencing technical difficulties. Please try again.",
+			message: "Image safety check encountered an unexpected error. Please try again.",
 			code: "SCAN_ERROR",
 			contentHash,
 			layers: {},
@@ -278,6 +279,7 @@ export async function verifyOutput(
 	const options = {
 		ai: env.AI,
 		togetherApiKey: env.TOGETHER_API_KEY,
+		openRouterApiKey: env.OPENROUTER_API_KEY,
 		photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
 		db: env.DB,
 		userId,

@@ -16,7 +16,8 @@ import type { PetalCategory, PetalProviderConfig } from "$lib/types/petal";
 /**
  * Vision providers with automatic fallback cascade
  * Primary: Cloudflare Workers AI (same infrastructure, ZDR inherent)
- * Fallback: Together.ai (external API)
+ * Fallback: OpenRouter (external API)
+ * Tertiary: Together.ai (external API, dead-last fallback)
  */
 export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 	workers_ai_llama4: {
@@ -37,6 +38,15 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 		model: "@cf/meta/llama-3.2-11b-vision-instruct",
 		timeoutMs: 10000,
 	},
+	openrouter: {
+		name: "OpenRouter - Llama 4 Scout",
+		type: "external_api",
+		role: "fallback",
+		zdr: false,
+		csamScan: false,
+		model: "meta-llama/llama-4-scout-17b-16e-instruct",
+		timeoutMs: 20000,
+	},
 	together_ai: {
 		name: "Together.ai",
 		type: "external_api",
@@ -54,6 +64,7 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 export const PETAL_PROVIDER_CASCADE = [
 	"workers_ai_llama4",
 	"workers_ai_llama3",
+	"openrouter",
 	"together_ai",
 ] as const;
 

@@ -259,6 +259,7 @@ export interface PetalEnv {
 	PHOTODNA_SUBSCRIPTION_KEY?: string;
 	/** External provider API keys (optional fallbacks) */
 	TOGETHER_API_KEY?: string;
+	OPENROUTER_API_KEY?: string;
 	FAL_API_KEY?: string;
 }
 

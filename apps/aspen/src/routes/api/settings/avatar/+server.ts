@@ -109,7 +109,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// ========================================================================
 		// Content Moderation via Petal (4-layer pipeline)
 		// ========================================================================
-		const hasPetalProvider = platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
+		const hasPetalProvider =
+			platform?.env?.AI || platform?.env?.TOGETHER_API_KEY || platform?.env?.OPENROUTER_API_KEY;
 
 		if (hasPetalProvider) {
 			const petalEnv: PetalEnv = {
@@ -117,6 +118,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				DB: db,
 				CACHE_KV: platform!.env!.CACHE_KV,
 				TOGETHER_API_KEY: platform?.env?.TOGETHER_API_KEY as string | undefined,
+				OPENROUTER_API_KEY: platform?.env?.OPENROUTER_API_KEY as string | undefined,
 			};
 
 			const petalResult = await scanImage(

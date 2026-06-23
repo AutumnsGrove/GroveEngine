@@ -94,8 +94,10 @@ export const API_ERRORS = {
 	UPLOAD_SERVICE_UNAVAILABLE: {
 		code: "GROVE-API-011",
 		category: "bug" as const,
-		userMessage: "Upload service is temporarily unavailable. Please try again.",
-		adminMessage: "R2 upload service unavailable (binding or config issue).",
+		userMessage:
+			"Image safety check is temporarily unavailable. Your image wasn't rejected — please try again in a few minutes.",
+		adminMessage:
+			"Petal vision provider cascade exhausted or infrastructure error. Check Workers AI model availability and OpenRouter API key.",
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
