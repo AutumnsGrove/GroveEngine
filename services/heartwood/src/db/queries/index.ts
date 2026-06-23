@@ -1,21 +1,5 @@
-/**
- * Database Queries — Re-export Barrel
- *
- * This file re-exports from the queries/ module for backward compatibility.
- * Prefer importing directly from the focused modules:
- *   - queries/clients.ts       — client lookups, redirect URI validation
- *   - queries/users.ts         — user CRUD & preferences
- *   - queries/auth-flow.ts     — auth codes, magic codes, OAuth state
- *   - queries/sessions.ts      — user sessions, refresh tokens, client prefs
- *   - queries/rate-limiting.ts — rate limits, failed attempts, lockouts
- *   - queries/audit.ts         — audit log, subscription audit
- *   - queries/subscriptions.ts — subscription lifecycle & status
- *   - queries/admin.ts         — admin queries & stats
- *   - queries/device-codes.ts  — RFC 8628 device authorization flow
- */
-
+// Clients & Redirect URI Validation
 export {
-	// Clients
 	extractSubdomainFromRedirectUri,
 	isActiveTenant,
 	getTenantByEmail,
@@ -25,7 +9,10 @@ export {
 	validateClientOrigin,
 	getClientByDomain,
 	getAllClients,
-	// Users
+} from "./clients.js";
+
+// Users
+export {
 	getUserById,
 	getUserByEmail,
 	createUser,
@@ -33,7 +20,10 @@ export {
 	updateUserAvatar,
 	updateUserPreferences,
 	getOrCreateUser,
-	// Auth Flow
+} from "./users.js";
+
+// Auth Codes, Magic Codes, OAuth State
+export {
 	createAuthCode,
 	getAuthCode,
 	markAuthCodeUsed,
@@ -47,7 +37,10 @@ export {
 	getOAuthState,
 	deleteOAuthState,
 	cleanupExpiredOAuthStates,
-	// Sessions & Tokens
+} from "./auth-flow.js";
+
+// Sessions, Refresh Tokens, Client Preferences
+export {
 	createRefreshToken,
 	getRefreshTokenByHash,
 	revokeRefreshToken,
@@ -60,16 +53,21 @@ export {
 	revokeAllUserSessions,
 	getUserClientPreference,
 	updateLastUsedClient,
-	// Rate Limiting
+} from "./sessions.js";
+
+// Rate Limiting & Failed Attempts
+export {
 	checkRateLimit,
 	recordFailedAttempt,
 	clearFailedAttempts,
 	isAccountLocked,
-	// Audit
-	createAuditLog,
-	cleanupOldAuditLogs,
-	createSubscriptionAuditLog,
-	// Subscriptions
+} from "./rate-limiting.js";
+
+// Audit Logging
+export { createAuditLog, cleanupOldAuditLogs, createSubscriptionAuditLog } from "./audit.js";
+
+// Subscriptions
+export {
 	getUserSubscription,
 	createUserSubscription,
 	getOrCreateUserSubscription,
@@ -79,13 +77,13 @@ export {
 	updateSubscriptionTier,
 	getSubscriptionStatus,
 	canUserCreatePost,
-	// Admin
-	isEmailAdmin,
-	isUserAdmin,
-	getAdminStats,
-	getAllUsers,
-	getAuditLogs,
-	// Device Codes
+} from "./subscriptions.js";
+
+// Admin
+export { isEmailAdmin, isUserAdmin, getAdminStats, getAllUsers, getAuditLogs } from "./admin.js";
+
+// Device Codes (RFC 8628)
+export {
 	createDeviceCode,
 	getDeviceCodeByUserCode,
 	getDeviceCodeByHash,
@@ -97,4 +95,4 @@ export {
 	isUserCodeUnique,
 	cleanupExpiredDeviceCodes,
 	deleteDeviceCode,
-} from "./queries/index.js";
+} from "./device-codes.js";
