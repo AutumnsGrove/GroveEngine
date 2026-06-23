@@ -1,20 +1,120 @@
-// Utils barrel export
-// Re-exports all utility functions from the utils module
+// Utils barrel — explicit named exports (no export * wildcards)
+//
+// Prefer importing from the specific util file directly:
+//   import { formatRelativeTime } from "$lib/utils/date"
 
-export * from "./api";
-export * from "./cn";
-export * from "./csrf";
-export * from "./date";
-export * from "./debounce";
-export * from "./errors";
-export * from "./escape-html";
-export * from "./format";
-export * from "./id";
-export * from "./schedule";
-export * from "./shuffle";
-export * from "./slugify";
+// --- API ---
+export { getCSRFToken, apiRequest, api } from "./api";
 
-// Gallery — now in @autumnsgrove/curios/gallery
+// --- Classnames ---
+export { cn } from "./cn";
+
+// --- CSRF ---
+export {
+	generateCSRFToken,
+	generateSessionCSRFToken,
+	validateSessionCSRFToken,
+	timingSafeEqual,
+	validateCSRFToken,
+	validateCSRF,
+} from "./csrf";
+
+// --- Date ---
+export type { DateInput } from "./date";
+export {
+	formatRelativeTime,
+	formatDateFull,
+	formatDateShort,
+	formatDateTime,
+	formatDateISO,
+	formatSmartDate,
+	formatDuration,
+} from "./date";
+
+// --- Debounce ---
+export { debounce } from "./debounce";
+
+// --- Errors ---
+export { sanitizeErrorMessage } from "./errors";
+
+// --- Escape HTML ---
+export { escapeHtml } from "./escape-html";
+
+// --- Format ---
+export { formatBytes } from "./format";
+
+// --- ID ---
+export { generateId } from "./id";
+
+// --- Schedule ---
+export { scheduleIdle, cancelIdle } from "./schedule";
+
+// --- Shuffle ---
+export { seededShuffle } from "./shuffle";
+
+// --- Slugify ---
+export type { SlugifyOptions } from "./slugify";
+export { slugify } from "./slugify";
+
+// --- JSON ---
+export type { SafeParseJsonOptions, JsonParseResult } from "./json";
+export { safeParseJson, tryJsonParse } from "./json";
+
+// --- Readability ---
+export type { ReadabilityResult } from "./readability";
+export {
+	calculateReadability,
+	stripMarkdownForAnalysis,
+	countSyllables,
+	getGradeDescription,
+} from "./readability";
+
+// --- Sanitize ---
+export { sanitizeHTML, sanitizeSVG, sanitizeMarkdown, sanitizeURL } from "./sanitize";
+
+// --- User ---
+export type { UserLike } from "./user";
+export { getUserDisplayName, hasPersonalizedName, normalizeEmail, emailsMatch } from "./user";
+
+// --- Trace Path ---
+export { buildTracePath, validateTracePath } from "./trace-path";
+
+// --- Validation ---
+export {
+	validateFileSignature,
+	sanitizeObject,
+	sanitizeFilename,
+	validatePath,
+	validateEmail,
+	validateURL,
+	validateSlug,
+	validateUUID,
+} from "./validation";
+
+// --- Webhook Sanitizer ---
+export type {
+	SanitizedWebhookPayload,
+	SanitizedAttributes,
+	SanitizedStripePayload,
+} from "./webhook-sanitizer";
+export {
+	sanitizeWebhookPayload,
+	sanitizeStripeWebhookPayload,
+	detectPiiFields,
+	calculateWebhookExpiry,
+} from "./webhook-sanitizer";
+
+// --- Grove URL ---
+export {
+	GROVE_DOMAIN,
+	buildGroveUrl,
+	buildGroveAdminUrl,
+	parseGroveUrl,
+	isGroveUrl,
+	sanitizeReturnTo,
+} from "./grove-url";
+
+// --- Gallery (from @autumnsgrove/curios) ---
 export {
 	parseImageFilename,
 	getImageTitle,
@@ -30,7 +130,7 @@ export {
 	type ParsedImageMetadata,
 } from "@autumnsgrove/curios/gallery";
 
-// Gutter - explicit exports to avoid ambiguity
+// --- Gutter ---
 export {
 	parseAnchor,
 	getAnchorKey,
@@ -45,21 +145,71 @@ export {
 	type GutterItem,
 } from "./gutter";
 
-export * from "../media/processing/imageProcessor";
-export * from "./json";
-export * from "../content/markdown/markdown";
-export * from "./readability";
-export * from "./sanitize";
-export * from "./user";
-export * from "./trace-path";
-export * from "./validation";
-export * from "./webhook-sanitizer";
-export * from "./grove-url";
+// --- Image Processing (cross-module, backward compat) ---
+export {
+	supportsJxlEncoding,
+	isHeicFile,
+	isHeifByMagicBytes,
+	convertHeicToJpeg,
+	calculateFileHash,
+	type ImageFormat,
+	type ProcessedImageResult,
+	type ProcessImageOptions,
+	processImage,
+	type ThumbnailOptions,
+	generateDatePath,
+	sanitizeImageFilename,
+	compressionRatio,
+	formatName,
+} from "../media/processing/imageProcessor";
 
-// Mentions - @username grove links
+// --- Markdown (cross-module, backward compat) ---
+export {
+	type Header as MarkdownHeader,
+	type Frontmatter,
+	type ParsedContent,
+	type GalleryImage as MarkdownGalleryImage,
+	type GutterItemBase,
+	type GutterItem as MarkdownGutterItem,
+	type GutterManifest,
+	type PostMeta,
+	type Post,
+	type Page,
+	type SiteConfig,
+	type ModuleMap,
+	type GutterModules,
+	type GetItemOptions,
+	type GetPageOptions,
+	type ContentLoader,
+	type ContentLoaderConfig,
+	generateHeadingId,
+	renderMarkdown,
+	extractHeaders,
+	processAnchorTags,
+	parseMarkdownContent,
+	parseMarkdownContentSanitized,
+	processGutterContent,
+	processMarkdownModules,
+	getItemBySlug,
+	getPageByFilename,
+	getSiteConfigFromModule,
+	createContentLoader,
+	registerContentLoader,
+	getAllPosts,
+	getSiteConfig,
+	getLatestPost,
+	getHomePage,
+	getPostBySlug,
+	getAboutPage,
+	getContactPage,
+	getAllRecipes,
+	getRecipeBySlug,
+} from "../content/markdown/markdown";
+
+// --- Mentions ---
 export { mentionsPlugin, processMentions } from "../content/markdown/mentions";
 
-// Rehype GroveTerm plugin - explicit exports
+// --- Rehype GroveTerm ---
 export {
 	rehypeGroveTerm,
 	processGroveTerms,
