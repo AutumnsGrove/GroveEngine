@@ -11,46 +11,16 @@
 	editorMd.use(suppressHeadingPlugin);
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { apiRequest } from "$lib/utils/api";
-	import {
-		getActionableUploadError,
-		isConvertibleFormat,
-		normalizeFileForUpload,
-	} from "$lib/media/validation/upload-validation";
-	import { convertHeicToJpeg } from "$lib/media/processing/imageProcessor";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
 	import { browser } from "$app/environment";
-
-	// Import composables
 	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
-
-	// Import sub-components
 	import FormattingToolbar from "./FormattingToolbar.svelte";
 	import EditorCore from "./EditorCore.svelte";
 	import FullPreviewModal from "./FullPreviewModal.svelte";
+	import type { MarkdownEditorProps } from "./markdown-editor.types.js";
+	import { useImageUpload } from "./useImageUpload.svelte.js";
 
-	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
-
-	type FlagsRecord = Record<string, boolean>;
-
-	interface Props {
-		content?: string;
-		onSave?: () => void;
-		saving?: boolean;
-		readonly?: boolean;
-		draftKey?: string | null;
-		onDraftRestored?: (draft: StoredDraft) => void;
-		previewTitle?: string;
-		previewDate?: string;
-		previewTags?: string[];
-		gutterItems?: GutterItemProp[];
-		/** All flags for this tenant - component reads what it needs */
-		flags?: FlagsRecord;
-		/** Curio configuration status for autocomplete — loaded server-side */
-		configuredCurios?: { slug: string; name: string; enabled: boolean }[];
-		/** Server-side draft slug for cross-device sync (null disables server sync) */
-		serverDraftSlug?: string | null;
-	}
+	interface Props extends MarkdownEditorProps {}
 
 	// Props
 	let {
@@ -94,13 +64,6 @@
 	let cursorCol = $state(1);
 	let isUpdating = $state(false);
 	let isProgrammaticUpdate = $state(false);
-
-	// Image upload state
-	let isDragging = $state(false);
-	let isUploading = $state(false);
-	let uploadProgress = $state("");
-	let uploadError: string | null = $state(null);
-	let lastFailedFile: File | null = $state(null);
 
 	// Full preview mode
 	let showFullPreview = $state(false);
@@ -537,6 +500,13 @@
 		content = content + definition;
 	}
 
+	// Image upload composable
+	const imageUpload = useImageUpload({
+		uploadsEnabled: () => uploadsEnabled,
+		readonly: () => readonly,
+		insertAtCursor,
+	});
+
 	function handlePhotoInsert(urls: string[]) {
 		showPhotoPicker = false;
 		if (urls.length === 0) return;
@@ -572,136 +542,6 @@
 		}
 	});
 
-	// Drag and drop handlers
-	function handleDragEnter(e: DragEvent) {
-		e.preventDefault();
-		if (readonly) return;
-		if (e.dataTransfer?.types?.includes("Files")) {
-			isDragging = true;
-		}
-	}
-
-	function handleDragOver(e: DragEvent) {
-		e.preventDefault();
-		if (readonly) return;
-		if (e.dataTransfer?.types?.includes("Files")) {
-			e.dataTransfer.dropEffect = "copy";
-			isDragging = true;
-		}
-	}
-
-	function handleDragLeave(e: DragEvent) {
-		e.preventDefault();
-		const target = e.currentTarget as HTMLElement;
-		if (!target.contains(e.relatedTarget as Node | null)) {
-			isDragging = false;
-		}
-	}
-
-	async function handleDrop(e: DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-		if (readonly) return;
-
-		const files = Array.from(e.dataTransfer?.files || []);
-		const imageFiles = files.filter((f) => f.type.startsWith("image/"));
-
-		if (imageFiles.length === 0) {
-			uploadError = "No image files detected";
-			setTimeout(() => (uploadError = null), 3000);
-			return;
-		}
-
-		for (const file of imageFiles) {
-			await uploadImage(file);
-		}
-	}
-
-	async function uploadImage(file: File) {
-		if (!uploadsEnabled) {
-			toast.warning(
-				"Your grove needs a little time to sprout before photo uploads are available. You can paste external image URLs using the link button instead!",
-			);
-			return;
-		}
-
-		isUploading = true;
-		uploadProgress = `Uploading ${file.name}...`;
-		uploadError = null;
-		lastFailedFile = null;
-
-		try {
-			const normalized = await normalizeFileForUpload(file);
-			file = normalized.file;
-
-			if (normalized.needsHeicConversion || isConvertibleFormat(file)) {
-				uploadProgress = `Converting ${file.name}...`;
-				file = await convertHeicToJpeg(file);
-			}
-
-			const formData = new FormData();
-			formData.append("file", file);
-			formData.append("folder", "blog");
-
-			const result = await apiRequest<{ url: string }>("/api/images/upload", {
-				method: "POST",
-				body: formData,
-			});
-
-			if (!result) throw new Error("Upload failed: no response from server");
-
-			const altText =
-				file.name
-					.replace(/\.[^/.]+$/, "")
-					.replace(/[-_]/g, " ")
-					.replace(/\s+/g, " ")
-					.trim() || "Image";
-			const imageMarkdown = `![${altText}](${result.url})\n`;
-			insertAtCursor(imageMarkdown);
-
-			toast.success(`Uploaded ${file.name}`);
-			uploadProgress = "";
-		} catch (err) {
-			const rawMessage = err instanceof Error ? err.message : String(err);
-			uploadError = getActionableUploadError(rawMessage);
-			lastFailedFile = file;
-			toast.error(uploadError);
-			setTimeout(() => (uploadError = null), 8000);
-		} finally {
-			isUploading = false;
-			uploadProgress = "";
-		}
-	}
-
-	function retryUpload() {
-		if (lastFailedFile) {
-			const file = lastFailedFile;
-			lastFailedFile = null;
-			uploadError = null;
-			uploadImage(file);
-		}
-	}
-
-	function handlePaste(e: ClipboardEvent) {
-		if (readonly) return;
-
-		const items = Array.from(e.clipboardData?.items || []);
-		const imageItem = items.find((item) => item.type.startsWith("image/"));
-
-		if (imageItem) {
-			e.preventDefault();
-			const file = imageItem.getAsFile();
-			if (file) {
-				const timestamp = Date.now();
-				const extension = file.type.split("/")[1] || "png";
-				const renamedFile = new File([file], `pasted-${timestamp}.${extension}`, {
-					type: file.type,
-				});
-				uploadImage(renamedFile);
-			}
-		}
-	}
-
 	// Draft lifecycle
 	function handleBeforeUnload() {
 		draftManager.flushSave();
@@ -733,17 +573,17 @@
 
 <div
 	class="editor-container"
-	class:dragging={isDragging}
+	class:dragging={imageUpload.isDragging}
 	class:zen-mode={isZenMode}
 	aria-label="Markdown editor with live preview"
 	role="application"
-	ondragenter={handleDragEnter}
-	ondragover={handleDragOver}
-	ondragleave={handleDragLeave}
-	ondrop={handleDrop}
+	ondragenter={imageUpload.handleDragEnter}
+	ondragover={imageUpload.handleDragOver}
+	ondragleave={imageUpload.handleDragLeave}
+	ondrop={imageUpload.handleDrop}
 >
 	<!-- Drag overlay -->
-	{#if isDragging}
+	{#if imageUpload.isDragging}
 		<div class="drag-overlay">
 			<div class="drag-overlay-content">
 				<span class="drag-icon">+</span>
@@ -753,16 +593,16 @@
 	{/if}
 
 	<!-- Upload status -->
-	{#if isUploading || uploadError}
-		<div class="upload-status" class:error={uploadError}>
-			{#if isUploading}
+	{#if imageUpload.isUploading || imageUpload.uploadError}
+		<div class="upload-status" class:error={imageUpload.uploadError}>
+			{#if imageUpload.isUploading}
 				<span class="upload-spinner"></span>
-				<span>{uploadProgress}</span>
-			{:else if uploadError}
+				<span>{imageUpload.uploadProgress}</span>
+			{:else if imageUpload.uploadError}
 				<span class="upload-error-icon">!</span>
-				<span>{uploadError}</span>
-				{#if lastFailedFile}
-					<button type="button" class="retry-btn" onclick={retryUpload}>[retry]</button>
+				<span>{imageUpload.uploadError}</span>
+				{#if imageUpload.lastFailedFile}
+					<button type="button" class="retry-btn" onclick={imageUpload.retryUpload}>[retry]</button>
 				{/if}
 			{/if}
 		</div>
@@ -849,7 +689,7 @@
 		onKeyup={updateCursorPosition}
 		onKeydown={handleKeydown}
 		onScroll={handleScroll}
-		onPaste={handlePaste}
+		onPaste={imageUpload.handlePaste}
 		{showCurioAutocomplete}
 		{curioQuery}
 		{curioAutocompletePos}

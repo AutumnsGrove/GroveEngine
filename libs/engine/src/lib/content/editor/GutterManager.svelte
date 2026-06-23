@@ -6,81 +6,21 @@
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { featureIcons, actionIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import { debounce } from "$lib/utils/debounce";
-
-	interface GutterItem {
-		type: string;
-		anchor?: string;
-		content?: string;
-		url?: string;
-		file?: string;
-		caption?: string;
-		images?: GalleryImage[];
-		embedUrl?: string;
-		embedProvider?: string;
-		embedHtml?: string;
-		embedTitle?: string;
-		embedThumbnail?: string;
-	}
-
-	interface GalleryImage {
-		url: string;
-		alt?: string;
-		caption?: string;
-	}
-
-	interface CdnImage {
-		key: string;
-		url: string;
-	}
-
-	interface ProcessedAnchor {
-		/** Original anchor string */
-		raw: string;
-		/** Whether this is a heading anchor */
-		isHeading: boolean;
-		/** Heading level (1-6) or 0 if not a heading */
-		headingLevel: number;
-		/** Whether this is a custom anchor tag */
-		isAnchorTag: boolean;
-		/** Whether this is a positional paragraph anchor (paragraph:N) */
-		isParagraph: boolean;
-		/** 1-indexed paragraph number (only set when isParagraph) */
-		paragraphIndex: number;
-		/** Human-readable display text */
-		displayText: string;
-		/** Anchor type for accessibility labels */
-		type: string;
-	}
-
-	interface ParagraphAnchor {
-		/** 1-indexed paragraph position (matches findAnchorElement's `:scope > p`) */
-		index: number;
-		/** Truncated preview of the paragraph text */
-		preview: string;
-	}
-
-	interface ImageCacheEntry {
-		url: string;
-		timestamp: number;
-	}
-
-	// Image Cache with TTL - prevents redundant CDN requests on repeated opens
-	const imageCache = new Map<string, ImageCacheEntry>();
-	const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-	/** Get cached image URL if still valid */
-	function getCachedImage(key: string): string | null {
-		const cached = imageCache.get(key);
-		if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-			return cached.url;
-		}
-		return null;
-	}
-
-	/** Store image URL in cache with timestamp */
-	function setCachedImage(key: string, url: string): void {
-		imageCache.set(key, { url, timestamp: Date.now() });
-	}
+	import type {
+		GutterItem,
+		GalleryImage,
+		CdnImage,
+		ProcessedAnchor,
+		ParagraphAnchor,
+	} from "./gutter-manager.types.js";
+	import {
+		EMPTY_ANCHOR,
+		createProcessedAnchor,
+		generateAnchorName,
+		getItemPreview,
+		getCachedImage,
+		setCachedImage,
+	} from "./gutter-manager-utils.js";
 
 	// Props
 	let {
@@ -90,62 +30,12 @@
 		availableParagraphs = [] as ParagraphAnchor[],
 	} = $props();
 
-	/**
-	 * Extract heading level from an anchor string (capped at 1-6)
-	 * Returns heading level 1-6, or 0 if not a heading
-	 */
-	function getHeadingLevel(anchor: string | undefined): number {
-		if (!anchor) return 0;
-		// Only match valid heading levels (1-6 hash marks)
-		const match = anchor.match(/^#{1,6}/);
-		return match ? Math.min(match[0].length, 6) : 0;
-	}
-
-	/**
-	 * Process a raw anchor string into structured data
-	 */
-	function createProcessedAnchor(anchor: string): ProcessedAnchor {
-		const isHeading = anchor.startsWith("#");
-		const headingLevel = getHeadingLevel(anchor);
-		const isAnchorTag = anchor.startsWith("anchor:");
-		const paragraphMatch = anchor.match(/^paragraph:(\d+)$/);
-		const isParagraph = paragraphMatch !== null;
-		const paragraphIndex = isParagraph ? parseInt(paragraphMatch[1], 10) : 0;
-		const displayText = isHeading
-			? anchor.replace(/^#+\s*/, "")
-			: isAnchorTag
-				? anchor.replace("anchor:", "")
-				: isParagraph
-					? `Paragraph ${paragraphIndex}`
-					: anchor;
-		const type = isHeading
-			? `heading level ${headingLevel}`
-			: isAnchorTag
-				? "anchor tag"
-				: "paragraph";
-
-		return {
-			raw: anchor,
-			isHeading,
-			headingLevel,
-			isAnchorTag,
-			isParagraph,
-			paragraphIndex,
-			displayText,
-			type,
-		};
-	}
-
-	/** Preprocess anchors into structured data with Map for O(1) lookup */
 	let processedAnchorsMap = $derived.by(() => {
 		const map = new Map<string, ProcessedAnchor>();
 		for (const anchor of availableAnchors) {
 			const processed = createProcessedAnchor(anchor);
 			map.set(anchor, processed);
 		}
-		// Merge in top-level paragraphs from the editor so the picker can show
-		// them with a preview of the first ~60 characters. Uses the same
-		// `paragraph:N` format that findAnchorElement resolves at runtime.
 		for (const p of availableParagraphs) {
 			const raw = `paragraph:${p.index}`;
 			map.set(raw, {
@@ -162,28 +52,12 @@
 		return map;
 	});
 
-	/** Array version for rendering the anchor selection list */
 	let processedAnchors = $derived(Array.from(processedAnchorsMap.values()));
 
-	/** Default empty anchor for fallback */
-	const emptyAnchor: ProcessedAnchor = {
-		raw: "",
-		isHeading: false,
-		headingLevel: 0,
-		isAnchorTag: false,
-		isParagraph: false,
-		paragraphIndex: 0,
-		displayText: "",
-		type: "paragraph",
-	};
-
-	/** Get processed anchor data for display (O(1) Map lookup) */
 	function getProcessedAnchor(anchor: string | undefined): ProcessedAnchor {
-		if (!anchor) return emptyAnchor;
-		// O(1) lookup in Map instead of O(n) find on array
+		if (!anchor) return EMPTY_ANCHOR;
 		const cached = processedAnchorsMap.get(anchor);
 		if (cached) return cached;
-		// Fallback to computing for anchors not in availableAnchors
 		return createProcessedAnchor(anchor);
 	}
 
@@ -356,16 +230,6 @@
 		gutterItems = items;
 	}
 
-	// Generate anchor name from text
-	function generateAnchorName(text: string) {
-		return text
-			.toLowerCase()
-			.replace(/[^a-z0-9\s-]/g, "")
-			.replace(/\s+/g, "-")
-			.substring(0, 30);
-	}
-
-	// Insert anchor at cursor in editor
 	function handleInsertAnchor() {
 		const name = prompt("Enter anchor name (e.g., my-note):");
 		if (name) {
@@ -485,24 +349,6 @@
 
 	// Debounced embed resolution
 	const debouncedResolveEmbed = debounce(resolveEmbedUrl, 600);
-
-	// Get preview of item content
-	function getItemPreview(item: GutterItem) {
-		if (item.type === "comment" && item.content) {
-			return item.content.substring(0, 50) + (item.content.length > 50 ? "..." : "");
-		}
-		if (item.type === "photo") {
-			return item.caption || item.url || "Photo";
-		}
-		if (item.type === "gallery") {
-			return `${item.images?.length || 0} images`;
-		}
-		if (item.type === "embed") {
-			const label = item.embedProvider ? `[${item.embedProvider}] ` : "";
-			return label + (item.embedTitle || item.embedUrl || "Embed");
-		}
-		return "";
-	}
 </script>
 
 <div class="vines-manager">
