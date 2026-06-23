@@ -1,5 +1,6 @@
 import type { StorageFile, UploadOptions, GetFileResult, FileMetadata } from "./types.js";
 import { StorageError } from "./types.js";
+import type { D1DatabaseOrSession } from "../db/types.js";
 import {
 	validateFile,
 	generateUniqueFilename,
@@ -9,8 +10,6 @@ import {
 	generateId,
 	now,
 } from "./config.js";
-
-type D1DatabaseOrSession = D1Database | D1DatabaseSession;
 
 export async function uploadFile(
 	bucket: R2Bucket,

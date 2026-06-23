@@ -1,8 +1,7 @@
 import type { StorageFile } from "./types.js";
 import { StorageError } from "./types.js";
+import type { D1DatabaseOrSession } from "../db/types.js";
 import { normalizeFolder } from "./config.js";
-
-type D1DatabaseOrSession = D1Database | D1DatabaseSession;
 
 interface CdnFileRow {
 	id: string;

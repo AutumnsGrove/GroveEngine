@@ -1,7 +1,6 @@
 import type { SyncResult, SyncOptions } from "./types.js";
+import type { D1DatabaseOrSession } from "../db/types.js";
 import { generateId, now, normalizeFolder } from "./config.js";
-
-type D1DatabaseOrSession = D1Database | D1DatabaseSession;
 
 function guessContentType(key: string): string {
 	const ext = key.split(".").pop()?.toLowerCase();
