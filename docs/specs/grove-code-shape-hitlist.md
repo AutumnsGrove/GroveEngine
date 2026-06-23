@@ -233,9 +233,9 @@ When you sit down to refactor one of these files, follow this checklist:
 | 5 | GutterManager.svelte | ⬜ pending | — |
 | 6 | MarkdownEditor.svelte | ⬜ pending | — |
 | 7 | content/markdown.ts | ✅ done → 8 files (max 162 lines) | 2026-06-23 |
-| 8 | services/reeds.ts | ⬜ pending | — |
+| 8 | services/reeds.ts | ✅ done → 5 files (max 130 lines) | 2026-06-23 |
 | 9 | services/storage.ts | ✅ done → 6 files (max 165 lines) | 2026-06-23 |
-| 10 | sentinel/operations.ts | ⬜ pending | — |
+| 10 | sentinel/operations.ts | ✅ done → 6 files (max 190 lines) | 2026-06-23 |
 | 11 | ui/components/ui barrel | ⬜ pending | — |
 | 12 | engine root barrel | ⬜ pending | — |
 | 13 | utils barrel | ⬜ pending | — |
