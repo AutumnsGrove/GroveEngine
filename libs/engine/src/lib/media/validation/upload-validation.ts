@@ -435,7 +435,8 @@ export function getActionableUploadError(serverMessage: string): string {
 		msg.includes("no providers responded") ||
 		msg.includes("grove-api-011")
 	) {
-		return "Image safety check is temporarily down — your image wasn't rejected. Please try again in a few minutes.";
+		const code = serverMessage.match(/\(GROVE-[A-Z]+-\d+\)/)?.[0] || "";
+		return `Image safety check is temporarily down — your image wasn't rejected. Please try again in a few minutes.${code ? ` ${code}` : ""}`;
 	}
 
 	// Content moderation (Petal)

@@ -15,8 +15,8 @@ import type { PetalCategory, PetalProviderConfig } from "$lib/types/petal";
 
 /**
  * Vision providers with automatic fallback cascade
- * Primary: Cloudflare Workers AI (same infrastructure, ZDR inherent)
- * Fallback: OpenRouter (external API)
+ * Primary: OpenRouter (external API, reliable)
+ * Fallback: Cloudflare Workers AI (same infrastructure, ZDR inherent)
  * Tertiary: Together.ai (external API, dead-last fallback)
  */
 export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
@@ -29,19 +29,12 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 		model: "@cf/meta/llama-4-scout-17b-16e-instruct",
 		timeoutMs: 15000,
 	},
-	workers_ai_llama3: {
-		name: "Cloudflare Workers AI - Llama 3.2 Vision",
-		type: "workers_ai",
-		role: "fallback",
-		zdr: true,
-		csamScan: true,
-		model: "@cf/meta/llama-3.2-11b-vision-instruct",
-		timeoutMs: 10000,
-	},
+	// Llama 3.2 Vision removed — CF requires model agreement acceptance
+	// which throws a 403 in the Worker runtime (AiError code 5016).
 	openrouter: {
 		name: "OpenRouter - Llama 4 Scout",
 		type: "external_api",
-		role: "fallback",
+		role: "primary",
 		zdr: false,
 		csamScan: false,
 		model: "meta-llama/llama-4-scout-17b-16e-instruct",
@@ -61,12 +54,7 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 /**
  * Provider fallback cascade for content classification
  */
-export const PETAL_PROVIDER_CASCADE = [
-	"workers_ai_llama4",
-	"workers_ai_llama3",
-	"openrouter",
-	"together_ai",
-] as const;
+export const PETAL_PROVIDER_CASCADE = ["openrouter", "workers_ai_llama4", "together_ai"] as const;
 
 // ============================================================================
 // Content Categories
