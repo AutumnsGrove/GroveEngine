@@ -236,11 +236,11 @@ When you sit down to refactor one of these files, follow this checklist:
 | 8 | services/reeds.ts | ✅ done → 5 files (max 130 lines) | 2026-06-23 |
 | 9 | services/storage.ts | ✅ done → 6 files (max 165 lines) | 2026-06-23 |
 | 10 | sentinel/operations.ts | ✅ done → 6 files (max 190 lines) | 2026-06-23 |
-| 11 | ui/components/ui barrel | ⬜ pending | — |
-| 12 | engine root barrel | ⬜ pending | — |
+| 11 | ui/components/ui barrel | ✅ done — export * → named exports | 2026-06-23 |
+| 12 | engine root barrel | ⬜ pending (has export * from ui/index) | — |
 | 13 | utils barrel | ⬜ pending | — |
-| 14 | services barrel | ⬜ pending | — |
-| 15 | empty packages | ⬜ pending | — |
+| 14 | services barrel | ✅ done (auto-shrunk from file splits) | 2026-06-23 |
+| 15 | empty packages | ⬜ deferred (CI scripts reference them) | — |
 
 ---
 
