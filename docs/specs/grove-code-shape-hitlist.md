@@ -230,8 +230,8 @@ When you sit down to refactor one of these files, follow this checklist:
 | 2 | platform/tiers.ts | ✅ done → 3 files (max 80 lines types) | 2026-06-23 |
 | 3 | server/services/database.ts | ✅ done → 7 files (max 223 lines) | 2026-06-23 |
 | 4 | heartwood/db/queries.ts | ✅ done → 9 files (max 245 lines) | 2026-06-23 |
-| 5 | GutterManager.svelte | ⬜ pending | — |
-| 6 | MarkdownEditor.svelte | ⬜ pending | — |
+| 5 | GutterManager.svelte | ✅ done → types + utils extracted | 2026-06-23 |
+| 6 | MarkdownEditor.svelte | ✅ done → types + upload composable | 2026-06-23 |
 | 7 | content/markdown.ts | ✅ done → 8 files (max 162 lines) | 2026-06-23 |
 | 8 | services/reeds.ts | ✅ done → 5 files (max 130 lines) | 2026-06-23 |
 | 9 | services/storage.ts | ✅ done → 6 files (max 165 lines) | 2026-06-23 |
