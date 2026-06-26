@@ -31,7 +31,7 @@
 		{ id: "documentation", text: "Documentation" },
 		{ id: "doc-insights", text: "Doc Insights" },
 		{ id: "milestones", text: "Milestones" },
-		{ id: "package-size", text: "Package Size" },
+		{ id: "package-size", text: "Ecosystem Size" },
 	];
 
 	function scrollToSection(id: string) {
@@ -674,32 +674,29 @@
 					</section>
 				{/if}
 
-				<!-- Package Size -->
+				<!-- Ecosystem Size -->
 				<section id="package-size" class="mb-16 scroll-mt-24">
 					<div class="card p-8 text-center bg-accent border-accent">
 						<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">
-							NPM Package Size
+							Total Ecosystem Size
 						</div>
 						<div class="text-4xl md:text-5xl font-serif text-accent-muted mb-2">
 							{formatBytes(data.latest.npmUnpackedSize)}
 						</div>
 						{#if data.latest.npmUnpackedSize > 0}
-							<div class="text-foreground-muted font-sans">unpacked size</div>
+							<div class="text-foreground-muted font-sans">all packages &amp; tools combined</div>
 							<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-								That's what you get when you <code
-									class="bg-background/50 px-1.5 py-0.5 rounded text-xs"
-									>npm install @autumnsgrove/lattice</code
-								>
-								— components, utilities, and everything you need to build with <GroveTerm
-									interactive
-									term="lattice">Lattice</GroveTerm
-								>.
+								Every library, component, utility, and tool that makes up the
+								<GroveTerm interactive term="lattice">Grove</GroveTerm> ecosystem
+								— from <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs"
+									>@autumnsgrove/lattice</code
+								> to the CLI tools.
 							</p>
 						{:else}
 							<div class="text-foreground-muted font-sans">package data unavailable</div>
 							<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-								This version's package size data isn't available yet. Check back after it's
-								published to NPM.
+								This version's ecosystem size data isn't available yet. Check back after it's
+								published.
 							</p>
 						{/if}
 					</div>

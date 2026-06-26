@@ -132,104 +132,116 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
 
-      - name: Calculate package size
+      - name: Calculate total ecosystem size
         if: steps.snapshot.outcome == 'success'
         run: |
-          set -e  # Exit on any error
+          set -e
 
           TAG="${{ steps.snapshot.outputs.tag_name }}"
-          echo "Calculating package size for: $TAG"
+          echo "Calculating total ecosystem size for: $TAG"
 
-          # Sanitize TAG to prevent injection
-          # (allow only valid semver chars)
           TAG_SAFE=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]//g')
           if [[ "$TAG" != "$TAG_SAFE" ]]; then
             echo "Error: TAG contains invalid characters"
             exit 1
           fi
 
-          # Install dependencies and build the package
           echo "Installing dependencies..."
           pnpm install \
             || { echo "Failed to install dependencies"; exit 1; }
 
-          cd libs/engine
-          echo "Building package..."
-          pnpm run package \
-            || { echo "Failed to build package"; exit 1; }
+          TOTAL_SIZE=0
+          MEASURE_DIR="/tmp/pkg-measure"
 
-          # Create tarball and measure its size
-          echo "Creating tarball..."
-          TARBALL=$(pnpm pack 2>/dev/null | tail -1)
-          if [[ -z "$TARBALL" || ! -f "$TARBALL" ]]; then
-            echo "Error: Failed to create tarball"
-            exit 1
-          fi
+          measure_unpacked() {
+            local dir="$1"
+            if SIZE=$(du -sb "$dir" 2>/dev/null | cut -f1); then
+              echo "$SIZE"
+            elif SIZE_KB=$(du -sk "$dir" 2>/dev/null | cut -f1); then
+              echo "$((SIZE_KB * 1024))"
+            else
+              echo "0"
+            fi
+          }
 
-          # Get tarball size
-          # (cross-platform: try GNU stat, then BSD stat)
-          TARBALL_SIZE=$(
-            stat -c%s "$TARBALL" 2>/dev/null ||
-            stat -f%z "$TARBALL" 2>/dev/null
-          )
-          if [[ -z "$TARBALL_SIZE" ]]; then
-            echo "Error: Failed to get tarball size"
-            exit 1
-          fi
+          fmt_bytes() {
+            numfmt --to=iec "$1" 2>/dev/null || echo "$1"
+          }
 
-          # Get unpacked size by extracting and measuring
-          mkdir -p /tmp/pkg-measure
-          tar -xzf "$TARBALL" -C /tmp/pkg-measure
+          # --- Measure all npm packages in libs/ ---
+          for LIB_DIR in libs/*/; do
+            [ -f "$LIB_DIR/package.json" ] || continue
+            LIB_NAME=$(basename "$LIB_DIR")
+            echo ""
+            echo "=== libs/$LIB_NAME ==="
 
-          # Cross-platform size measurement
-          # (GNU du -sb, or BSD du -sk * 1024)
-          if UNPACKED_SIZE=$(
-            du -sb /tmp/pkg-measure/package 2>/dev/null | cut -f1
-          ); then
-            :  # GNU du worked
-          elif UNPACKED_SIZE_KB=$(
-            du -sk /tmp/pkg-measure/package 2>/dev/null | cut -f1
-          ); then
-            UNPACKED_SIZE=$((UNPACKED_SIZE_KB * 1024))
-          else
-            echo "Error: Failed to measure unpacked size"
-            exit 1
-          fi
+            cd "$LIB_DIR"
 
-          echo "Tarball: $TARBALL"
-          echo "Compressed size: $TARBALL_SIZE bytes ($(
-            numfmt --to=iec "$TARBALL_SIZE" 2>/dev/null ||
-            echo "$TARBALL_SIZE"
-          ))"
-          echo "Unpacked size: $UNPACKED_SIZE bytes ($(
-            numfmt --to=iec "$UNPACKED_SIZE" 2>/dev/null ||
-            echo "$UNPACKED_SIZE"
-          ))"
+            if jq -e '.scripts.package' package.json >/dev/null 2>&1; then
+              echo "  Running pnpm run package..."
+              pnpm run package 2>&1 | tail -3 || true
+            elif jq -e '.scripts.build' package.json >/dev/null 2>&1; then
+              echo "  Running pnpm run build..."
+              pnpm run build 2>&1 | tail -3 || true
+            fi
 
-          # Update history.csv with the package size for this version
-          # NOTE: This workflow calculates package size at tag time
-          #       (pre-publish verification)
-          # The backfill-npm-sizes.ts script fetches published versions
-          # (historical data recovery)
-          cd ../..
+            TARBALL=$(pnpm pack 2>/dev/null | tail -1)
+            if [[ -n "$TARBALL" && -f "$TARBALL" ]]; then
+              rm -rf "$MEASURE_DIR"
+              mkdir -p "$MEASURE_DIR"
+              tar -xzf "$TARBALL" -C "$MEASURE_DIR"
+              PKG_SIZE=$(measure_unpacked "$MEASURE_DIR/package")
+              TOTAL_SIZE=$((TOTAL_SIZE + PKG_SIZE))
+              echo "  Unpacked: $PKG_SIZE bytes ($(fmt_bytes "$PKG_SIZE"))"
+              rm -f "$TARBALL"
+              rm -rf "$MEASURE_DIR"
+            else
+              echo "  Skipped (no tarball produced)"
+            fi
+
+            cd "$GITHUB_WORKSPACE"
+          done
+
+          # --- Measure Go tool source trees ---
+          for TOOL_DIR in tools/grove-find-go tools/grove-wrap-go; do
+            [ -d "$TOOL_DIR" ] || continue
+            TOOL_NAME=$(basename "$TOOL_DIR")
+            echo ""
+            echo "=== tools/$TOOL_NAME ==="
+            TOOL_SIZE=$(measure_unpacked "$TOOL_DIR")
+            TOTAL_SIZE=$((TOTAL_SIZE + TOOL_SIZE))
+            echo "  Source: $TOOL_SIZE bytes ($(fmt_bytes "$TOOL_SIZE"))"
+          done
+
+          # --- Measure other tool directories with package manifests ---
+          for TOOL_DIR in tools/*/; do
+            TOOL_NAME=$(basename "$TOOL_DIR")
+            [[ "$TOOL_NAME" == "grove-find-go" || "$TOOL_NAME" == "grove-wrap-go" ]] && continue
+            if [ -f "$TOOL_DIR/pyproject.toml" ] || [ -f "$TOOL_DIR/package.json" ]; then
+              echo ""
+              echo "=== tools/$TOOL_NAME ==="
+              TOOL_SIZE=$(measure_unpacked "$TOOL_DIR")
+              TOTAL_SIZE=$((TOTAL_SIZE + TOOL_SIZE))
+              echo "  Source: $TOOL_SIZE bytes ($(fmt_bytes "$TOOL_SIZE"))"
+            fi
+          done
+
+          echo ""
+          echo "========================================"
+          TOTAL_FMT=$(fmt_bytes "$TOTAL_SIZE")
+          echo "Total ecosystem size: $TOTAL_SIZE bytes ($TOTAL_FMT)"
+          echo "========================================"
+
+          # --- Update history.csv ---
           CSV_FILE="snapshots/history.csv"
 
-          # Check if npm_unpacked_size column exists, add if not
-          # IMPORTANT: New columns MUST be added at the end
-          #            to maintain backward compatibility
-          #            with hardcoded column indexes in CSV parsing
           HEADER=$(head -1 "$CSV_FILE")
           if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
             echo "Adding npm_unpacked_size column to CSV..."
-            # Add column header (MUST be added as the last column)
             sed -i "1s/$/,npm_unpacked_size/" "$CSV_FILE"
-            # Add 0 to all existing rows
             sed -i "2,\$s/$/,0/" "$CSV_FILE"
           fi
 
-          # Find the column index for npm_unpacked_size from header
-          # This makes the script resilient to column additions
-          # before npm_unpacked_size
           SIZE_COL=$(
             head -1 "$CSV_FILE" | tr ',' '\n' |
             grep -n "npm_unpacked_size" | cut -d: -f1
@@ -240,25 +252,17 @@ jobs:
           fi
           echo "Found npm_unpacked_size at column $SIZE_COL"
 
-          # Update the size for this specific version using awk
-          # Matches on column 2 (label/tag)
-          # and updates the size column by index
-          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" \
+          awk -F, -v tag="$TAG" -v size="$TOTAL_SIZE" \
             -v col="$SIZE_COL" \
             'BEGIN {OFS=","} NR==1 {print; next} \
              $2==tag {$col=size} {print}' \
             "$CSV_FILE" > "$CSV_FILE.tmp" \
             && mv "$CSV_FILE.tmp" "$CSV_FILE"
 
-          # Verify the update
           echo "Verifying update..."
           grep "$TAG" "$CSV_FILE" \
             || { echo "Warning: Could not verify update"; }
-          echo "Package size updated in $CSV_FILE"
-
-          # Cleanup
-          rm -f "$TARBALL"
-          rm -rf /tmp/pkg-measure
+          echo "Ecosystem size updated in $CSV_FILE"
 
       - name: Analyze documentation keywords
         if: steps.snapshot.outcome == 'success'

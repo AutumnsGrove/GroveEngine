@@ -65,11 +65,11 @@ publish_pkg "curios"
 # Tier 3: The engine (depends on everything above)
 echo "── Tier 3: Engine ──"
 
-# Engine needs building before publish (prepublishOnly runs `pnpm run package`)
-echo "📦 Building @autumnsgrove/lattice..."
+# Engine needs pnpm publish (not npm) to convert workspace:* to real versions
+echo "📦 Building & publishing @autumnsgrove/lattice..."
 cd "$ROOT/libs/engine"
 pnpm run package
-npm publish --access public --registry "$REGISTRY" $DRY_RUN
+pnpm publish --access public --registry "$REGISTRY" --no-git-checks $DRY_RUN
 echo "✅ @autumnsgrove/lattice published"
 
 echo ""
