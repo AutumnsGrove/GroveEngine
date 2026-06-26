@@ -1,0 +1,115 @@
+{
+  "version": "v1.2.2",
+  "date": "2026-06-26 14:23:28 -0400",
+  "commitHash": "5d50c7c8",
+  "summary": "Grove got the big refactor I've been planning for months — 63 features condensed down to 21, which cleans up the codebase and lays a better foundation. Comments are now a core feature out of the greenhouse, and the markdown editor has footnote support. There are also a lot of fixes under the hood, like consolidating database tables and making sure sign-ups work smoothly for the free plan.\n",
+  "stats": {
+    "totalCommits": 255,
+    "features": 30,
+    "fixes": 117,
+    "refactoring": 21,
+    "docs": 22,
+    "tests": 3,
+    "performance": 2
+  },
+  "scopes": [
+  "engine",
+  "ci",
+  "deps",
+  "aspen",
+  "gw",
+  "plant",
+  "glass",
+  "prism",
+  "lumen",
+  "lantern"
+],
+  "highlights": {
+    "features": [
+  "add lang.* color tokens for data visualization",
+  "surface architectural chore commits in release summaries",
+  "add `gw release regenerate` command",
+  "brief demo showroom for foliage, needs work",
+  "align Glass component variants with ThemeGlass interface",
+  "unified accent color token system (#1501)",
+  "replace hardcoded greens with accent tokens (#1502)",
+  "componentize vine background pattern (#1504)",
+  "wire Tailwind accent classes to grove accent scale",
+  "persist user preferences cross-domain via session",
+  "add goose-migrate skill for GitHub→Todoist task translation",
+  "add `gw todo` subcommand for Todoist integration",
+  "add vine color settings UI with match-accent mode",
+  "rich Claude Code transcript viewer with live session following (#1539)",
+  "redesign Account page with hub-and-spoke layout"
+],
+    "fixes": [
+  "correct journey language colors and release body template",
+  "replace bip39 with @scure/bip39 to resolve CF Workers build",
+  "fix SSRF pattern and add vitest config",
+  "route domain to Worker and fix dark mode header",
+  "address code review findings",
+  "use brightness filter for theme hover",
+  "reactivity bug, overlay text, and design review",
+  "dark mode accent overrides use token system (#1503)",
+  "unify compatibility_date to 2025-12-01 across all workers",
+  "resolve CI failures across engine, forage, and warden",
+  "handle missing columns in migration 101 tenants rebuild",
+  "replace hardcoded green glass with neutral bark + accent tokens",
+  "disable FK constraints during migration 101 table rebuild",
+  "sweep remaining hardcoded greens to accent tokens",
+  "remove table rebuilds from migration 101"
+],
+    "refactoring": [
+  "Phase 1 — dead code removal and utility deduplication",
+  "Phase 2+3 — engine domain reorganization and grafts rename",
+  "Phase 4 — data externalization and D1 sync pipeline",
+  "decompose ModerationQueue and Searcher",
+  "Phase 5 — split schema god file + decompose Images and MarkdownEditor",
+  "Phase 5 — decompose 12 Svelte monoliths + fix accent colors",
+  "extract 9 server routes into service modules",
+  "Phase 6 — config and pattern consolidation",
+  "bulk import rewrite — remove all re-export shims",
+  "extract shared hooks utilities to engine"
+],
+    "docs": [
+  "add repository snapshot and release summary for v1.1.2",
+  "backfill 2 historical release summaries",
+  "add The Big Refactor planning document (#1534)",
+  "mark The Big Refactor as complete",
+  "update all documentation for Big Refactor terminology and paths",
+  "update JSDoc @example blocks and @module tags to new domain paths",
+  "update billing references from Plant-era to BillingHub",
+  "fix freshness frontmatter for three docs",
+  "refresh six stale specs after parallel audit",
+  "restructure AGENT.md with Karpathy behavioral guidelines + split into focused files"
+],
+    "performance": [
+  "parallelize service module queries and batch data sync",
+  "parallelize CI steps — lint+check+test run concurrently"
+],
+    "tests": [
+  "add 116 tests for new infra utilities and service modules",
+  "try pnpm@v5 with Node 25 to isolate startup_failure",
+  "revert to Node 20 to isolate issue"
+],
+    "chores": [
+  "1.1.2 json summary",
+  "clear v1.1.2 summary for regeneration",
+  "remove stale grove-plant2 comments",
+  "sync pnpm-lock.yaml with vitest dependencies",
+  "add local dev infrastructure — port assignments, secret templates, dev scripts",
+  "ignore local SQLite/db files in gitignore",
+  "update GitHub Actions to Node 24 runtime (#1544)",
+  "archive 13 unused workflows and remove orphaned config (#1545)",
+  "remove broken enforce-gw.py PreToolUse hook (#1554)",
+  "relocate personal tools (cairn, looking-glass, index-viz) to personal/"
+],
+    "architecture": [
+  "clear v1.1.2 summary for regeneration",
+  "update GitHub Actions to Node 24 runtime (#1544)",
+  "archive 13 unused workflows and remove orphaned config (#1545)",
+  "standardize workflow YAML formatting across all workflows",
+  "add yamllint config and enforce in pre-commit hook"
+]
+  }
+}
