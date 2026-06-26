@@ -63,5 +63,9 @@
 		"cloudflare",
 		"abstraction",
 		"adapters"
-	]
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	}
 }

@@ -721,7 +721,7 @@
 	},
 	"publishConfig": {
 		"access": "public",
-		"registry": "https://npm.pkg.github.com"
+		"registry": "https://registry.npmjs.org"
 	},
 	"repository": {
 		"directory": "libs/engine",
@@ -755,5 +755,5 @@
 	"svelte": "./dist/index.js",
 	"type": "module",
 	"types": "./dist/index.d.ts",
-	"version": "1.1.2"
+	"version": "1.2.0"
 }

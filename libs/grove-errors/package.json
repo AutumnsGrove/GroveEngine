@@ -35,5 +35,9 @@
 		"errors",
 		"structured-errors",
 		"error-codes"
-	]
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	}
 }

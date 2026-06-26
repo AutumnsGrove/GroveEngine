@@ -209,6 +209,32 @@
     ],
     "standardTerm": "Feedback"
   },
+  "centennial": {
+    "slug": "centennial",
+    "term": "Centennial",
+    "category": "platform",
+    "tagline": "100-Year Preservation",
+    "definition": "After 12 months of paid membership, your grove.place URL stays online for 100 years — even if you stop paying.",
+    "seeAlso": [
+      "plant",
+      "shade",
+      "sapling",
+      "oak"
+    ],
+    "standardTerm": "100-Year Preservation"
+  },
+  "vineyard": {
+    "slug": "vineyard",
+    "term": "Vineyard",
+    "category": "platform",
+    "tagline": "Component Showcase",
+    "definition": "Grove's component showcase — a live gallery of every UI piece, nature asset, and design tool available in the platform.",
+    "seeAlso": [
+      "lattice",
+      "vines"
+    ],
+    "standardTerm": "Showcase"
+  },
   "flow": {
     "slug": "flow",
     "term": "Flow",
@@ -731,8 +757,9 @@
     "term": "Sapling",
     "category": "foundational",
     "tagline": "Growth Tier",
-    "definition": "Grove's mid-tier plan ($12/month) — more storage, more themes, and email forwarding.",
+    "definition": "Grove's mid-tier plan ($12/month) — more storage, more themes, email forwarding, and Centennial eligibility.",
     "seeAlso": [
+      "centennial",
       "etch"
     ],
     "standardTerm": "Growth"
