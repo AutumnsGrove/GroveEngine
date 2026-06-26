@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   tag-and-snapshot:
-    if: github.event.inputs.backfill_summaries != true
+    if: github.event.inputs.backfill_summaries != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,7 +62,7 @@ jobs:
 
       - name: Check if tag exists
         id: tag_exists
-        if: steps.version.outputs.changed == true
+        if: steps.version.outputs.changed == 'true'
         run: |
           TAG="v${{ steps.version.outputs.current }}"
           if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
@@ -76,8 +76,8 @@ jobs:
       - name: Create and push tag
         id: create_tag
         if: >
-          steps.version.outputs.changed == true &&
-          steps.tag_exists.outputs.exists == false
+          steps.version.outputs.changed == 'true' &&
+          steps.tag_exists.outputs.exists == 'false'
         run: |
           TAG="v${{ steps.version.outputs.current }}"
           git config user.name "github-actions[bot]"
@@ -91,8 +91,8 @@ jobs:
       - name: Generate repository snapshot
         id: snapshot
         if: >
-          steps.version.outputs.changed == true ||
-          github.event.inputs.force_snapshot == true
+          steps.version.outputs.changed == 'true' ||
+          github.event.inputs.force_snapshot == 'true'
         run: |
           TAG_FROM_CREATE="${{ steps.create_tag.outputs.tag_name }}"
           TAG_FROM_VERSION="v${{ steps.version.outputs.current }}"
@@ -324,7 +324,7 @@ jobs:
 
       - name: Check if release exists
         id: release_exists
-        if: steps.version.outputs.changed == true
+        if: steps.version.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -338,8 +338,8 @@ jobs:
 
       - name: Create GitHub Release
         if: >
-          steps.version.outputs.changed == true &&
-          steps.release_exists.outputs.exists != true
+          steps.version.outputs.changed == 'true' &&
+          steps.release_exists.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -428,7 +428,7 @@ jobs:
           echo "Created GitHub Release: $TAG"
 
       - name: Publish to GitHub Package Registry
-        if: steps.version.outputs.changed == true
+        if: steps.version.outputs.changed == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -451,7 +451,7 @@ jobs:
 
   # Separate job for backfilling historical summaries
   backfill:
-    if: github.event.inputs.backfill_summaries == true
+    if: github.event.inputs.backfill_summaries == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
