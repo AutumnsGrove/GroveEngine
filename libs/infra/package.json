@@ -1,6 +1,6 @@
 {
 	"name": "@autumnsgrove/infra",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Infrastructure abstraction layer for Grove — the roots run deep, the tree stands anywhere",
 	"author": "AutumnsGrove",
 	"license": "AGPL-3.0-only",

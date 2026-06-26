@@ -38,7 +38,7 @@ publish_pkg() {
 
   echo "📦 Publishing $full_name@$version..."
   cd "$dir"
-  npm publish --access public --registry "$REGISTRY" $DRY_RUN
+  pnpm publish --access public --registry "$REGISTRY" --no-git-checks $DRY_RUN
   echo "✅ $full_name@$version published"
   echo ""
 }
