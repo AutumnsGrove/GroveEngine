@@ -49,11 +49,12 @@ class_name = "ThresholdDO"
 # =============================================================================
 # DO Migrations
 # =============================================================================
-# All existing classes (TenantDO, PostMetaDO, PostContentDO, SentinelDO,
-# ExportDO, ThresholdDO) are already created in Cloudflare. Migration history
-# was reset during dashboard binding cleanup (2026-06-27). Classes are declared
-# via [[durable_objects.bindings]] above — no migrations needed for existing state.
-# Add new migrations here when creating/deleting/renaming DO classes.
+# Migration state was reset during dashboard binding cleanup (2026-06-27).
+# Existing classes are declared via [[durable_objects.bindings]] above.
+# This migration removes orphaned classes that no longer have bindings or exports.
+[[migrations]]
+tag = "v1"
+deleted_classes = ["TriageDO", "ChatDO", "FeedDO"]
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
