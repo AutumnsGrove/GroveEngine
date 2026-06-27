@@ -103,10 +103,33 @@ const TURNSTILE_EXCLUDED_PATHS = [
 ];
 
 /**
- * Check if a path should skip Turnstile verification
+ * Social/embed crawlers that need to read meta tags for rich previews.
+ * These bots can't solve Turnstile challenges and only read HTML.
  */
-function shouldSkipTurnstile(pathname: string): boolean {
-	return TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
+const EMBED_CRAWLER_PATTERNS = [
+	"Discordbot",
+	"Twitterbot",
+	"facebookexternalhit",
+	"LinkedInBot",
+	"Slackbot",
+	"TelegramBot",
+	"WhatsApp",
+	"Googlebot",
+	"bingbot",
+];
+
+function isEmbedCrawler(userAgent: string | null): boolean {
+	if (!userAgent) return false;
+	return EMBED_CRAWLER_PATTERNS.some((bot) => userAgent.includes(bot));
+}
+
+/**
+ * Check if a request should skip Turnstile verification
+ */
+function shouldSkipTurnstile(pathname: string, userAgent: string | null): boolean {
+	if (TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix))) return true;
+	if (isEmbedCrawler(userAgent)) return true;
+	return false;
 }
 
 /**
@@ -373,8 +396,8 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// TURNSTILE VERIFICATION (Shade)
 	// =========================================================================
-	// Skip verification for excluded paths
-	if (!shouldSkipTurnstile(event.url.pathname)) {
+	// Skip verification for excluded paths and embed crawlers
+	if (!shouldSkipTurnstile(event.url.pathname, event.request.headers.get("user-agent"))) {
 		const verificationCookie = getCookie(cookieHeader, TURNSTILE_COOKIE_NAME);
 		const secretKey = event.platform?.env?.TURNSTILE_SECRET_KEY;
 
