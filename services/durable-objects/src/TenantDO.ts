@@ -34,8 +34,11 @@ import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
  */
 const MAX_ANALYTICS_BUFFER = 1000;
 
-/** Config staleness threshold: 5 minutes */
+/** In-memory config staleness threshold: 5 minutes */
 const STALE_THRESHOLD_MS = 5 * 60 * 1000;
+
+/** SQLite config staleness threshold: 1 hour — forces a D1 refresh to pick up external changes */
+const SQLITE_STALE_THRESHOLD_MS = 60 * 60 * 1000;
 
 /** Analytics flush alarm delay: 1 minute */
 const ANALYTICS_ALARM_MS = 60_000;
@@ -155,6 +158,11 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 				path: "/config",
 				handler: (ctx) => this.handleUpdateConfig(ctx),
 			},
+			{
+				method: "POST",
+				path: "/config/flush",
+				handler: () => this.handleFlushConfig(),
+			},
 			// Draft endpoints
 			{
 				method: "GET",
@@ -240,25 +248,30 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 	 * in hooks.server.ts. The ID is stored alongside other config data.
 	 */
 	private async refreshConfig(): Promise<void> {
-		// Try DO storage first (fastest)
-		const rows = this.sql.queryAll<{ value: string }>(
-			"SELECT value FROM config WHERE key = 'tenant_config'",
+		// Try DO storage first (fastest), but respect staleness TTL
+		const rows = this.sql.queryAll<{ value: string; updated_at: number }>(
+			"SELECT value, updated_at FROM config WHERE key = 'tenant_config'",
 		);
 
 		if (rows.length > 0 && rows[0].value) {
-			const parsed = safeJsonParse<TenantConfig | null>(rows[0].value, null);
-			if (parsed) {
-				this.state_data = parsed;
-				// Also set subdomain from cached config if we don't have it
-				if (this.state_data?.subdomain && !this.subdomain) {
-					this.subdomain = this.state_data.subdomain;
+			const age = Date.now() - (rows[0].updated_at || 0);
+			const isSqliteStale = age > SQLITE_STALE_THRESHOLD_MS;
+
+			if (!isSqliteStale) {
+				const parsed = safeJsonParse<TenantConfig | null>(rows[0].value, null);
+				if (parsed) {
+					this.state_data = parsed;
+					if (this.state_data?.subdomain && !this.subdomain) {
+						this.subdomain = this.state_data.subdomain;
+					}
+					this.configLoadedAt = Date.now();
+					return;
+				} else {
+					this.log.warn("Failed to parse cached config, clearing");
+					this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
 				}
-				this.configLoadedAt = Date.now();
-				return;
 			} else {
-				// Corrupted cache - clear it and fall through to D1
-				this.log.warn("Failed to parse cached config, clearing");
-				this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
+				this.log.info(`SQLite config stale (${Math.round(age / 60000)}m), refreshing from D1`);
 			}
 		}
 
@@ -307,6 +320,25 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 
 			this.configLoadedAt = Date.now();
 		}
+	}
+
+	/**
+	 * Flush cached config — clears DO SQLite and forces a D1 refresh on next request.
+	 */
+	private async handleFlushConfig(): Promise<Response> {
+		this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
+		this.state_data = null;
+		this.configLoadedAt = 0;
+		this.log.info("Config cache flushed");
+
+		// Immediately re-fetch from D1 so the response contains the fresh config
+		await this.refreshConfig();
+
+		return Response.json({
+			success: true,
+			flushed: true,
+			config: this.state_data,
+		});
 	}
 
 	/**
