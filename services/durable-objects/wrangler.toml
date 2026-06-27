@@ -47,27 +47,13 @@ name = "THRESHOLD"
 class_name = "ThresholdDO"
 
 # =============================================================================
-# DO Migrations - Declare new SQLite-backed classes
+# DO Migrations
 # =============================================================================
-[[migrations]]
-tag = "v1"
-new_sqlite_classes = ["TenantDO"]
-
-[[migrations]]
-tag = "v2"
-new_sqlite_classes = ["PostMetaDO", "PostContentDO"]
-
-[[migrations]]
-tag = "v3"
-new_sqlite_classes = ["SentinelDO"]
-
-[[migrations]]
-tag = "v4"
-new_sqlite_classes = ["ExportDO"]
-
-[[migrations]]
-tag = "v5"
-new_sqlite_classes = ["ThresholdDO"]
+# All existing classes (TenantDO, PostMetaDO, PostContentDO, SentinelDO,
+# ExportDO, ThresholdDO) are already created in Cloudflare. Migration history
+# was reset during dashboard binding cleanup (2026-06-27). Classes are declared
+# via [[durable_objects.bindings]] above — no migrations needed for existing state.
+# Add new migrations here when creating/deleting/renaming DO classes.
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
