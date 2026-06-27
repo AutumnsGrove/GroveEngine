@@ -67,24 +67,7 @@ new_sqlite_classes = ["ExportDO"]
 
 [[migrations]]
 tag = "v5"
-new_sqlite_classes = ["TriageDO"]
-
-[[migrations]]
-tag = "v6"
 new_sqlite_classes = ["ThresholdDO"]
-
-[[migrations]]
-tag = "v7"
-new_sqlite_classes = ["ChatDO"]
-
-[[migrations]]
-tag = "v8"
-new_sqlite_classes = ["FeedDO"]
-
-# v9: Remove DOs deleted in Great Grove Refactor Phase 1
-[[migrations]]
-tag = "v9"
-deleted_classes = ["TriageDO", "ChatDO", "FeedDO"]
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
