@@ -40,6 +40,9 @@ export class FeedDO {
 // ============================================================================
 
 export default {
+	async queue(_batch: MessageBatch<unknown>): Promise<void> {
+		// Stub — queue consumer configured via CF dashboard
+	},
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
 
