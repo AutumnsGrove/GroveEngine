@@ -16,6 +16,13 @@ export { SentinelDO } from "./sentinel/SentinelDO.js";
 export { ExportDO } from "./ExportDO.js";
 export { ThresholdDO } from "./ThresholdDO.js";
 
+// Stub exports for orphaned DO classes that Cloudflare still tracks internally.
+// These have no bindings, no data, and no consumers — they exist solely to
+// satisfy Cloudflare's class export requirement until CF clears its state.
+export class TriageDO extends DurableObject {}
+export class ChatDO extends DurableObject {}
+export class FeedDO extends DurableObject {}
+
 // ============================================================================
 // Worker Export
 // ============================================================================

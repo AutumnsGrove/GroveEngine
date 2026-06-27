@@ -50,11 +50,10 @@ class_name = "ThresholdDO"
 # DO Migrations
 # =============================================================================
 # Migration state was reset during dashboard binding cleanup (2026-06-27).
-# Existing classes are declared via [[durable_objects.bindings]] above.
-# This migration removes orphaned classes that no longer have bindings or exports.
-[[migrations]]
-tag = "v1"
-deleted_classes = ["TriageDO", "ChatDO", "FeedDO"]
+# Active classes are declared via [[durable_objects.bindings]] above.
+# Orphaned classes (TriageDO, ChatDO, FeedDO) have stub exports in index.ts
+# to satisfy Cloudflare until their internal state clears.
+# Add new migrations here for future class creation/deletion.
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)
