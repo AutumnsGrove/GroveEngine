@@ -19,9 +19,21 @@ export { ThresholdDO } from "./ThresholdDO.js";
 // Stub exports for orphaned DO classes that Cloudflare still tracks internally.
 // These have no bindings, no data, and no consumers — they exist solely to
 // satisfy Cloudflare's class export requirement until CF clears its state.
-export class TriageDO extends DurableObject {}
-export class ChatDO extends DurableObject {}
-export class FeedDO extends DurableObject {}
+export class TriageDO {
+	fetch() {
+		return new Response("gone", { status: 410 });
+	}
+}
+export class ChatDO {
+	fetch() {
+		return new Response("gone", { status: 410 });
+	}
+}
+export class FeedDO {
+	fetch() {
+		return new Response("gone", { status: 410 });
+	}
+}
 
 // ============================================================================
 // Worker Export
