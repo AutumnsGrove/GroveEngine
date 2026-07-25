@@ -1,7 +1,13 @@
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { isGreenhouseMode, GREENHOUSE_AUTH } from "$lib/greenhouse";
-import { isGroveOrigin, isLocalOrigin, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import {
+	isGroveOrigin,
+	isLocalOrigin,
+	setSecurityHeaders,
+	extractSessionCookie,
+	validateGroveSession,
+} from "@autumnsgrove/lattice/server";
 import {
 	pulseHandle,
 	createPulseFlushHook,
@@ -49,17 +55,25 @@ function getCorsHeaders(origin: string): Record<string, string> {
  */
 async function validateSession(
 	auth: Fetcher,
+	request: Request,
 	cookieHeader: string | null,
+	waitUntil?: (promise: Promise<unknown>) => void,
 ): Promise<{ tenantId: string; userId: string } | undefined> {
 	if (!cookieHeader) return undefined;
 
-	try {
-		const response = await auth.fetch("https://login.grove.place/session/validate", {
-			method: "POST",
-			headers: { Cookie: cookieHeader },
-		});
+	const sessionCookie = extractSessionCookie(cookieHeader);
+	if (!sessionCookie) return undefined;
 
-		if (!response.ok) return undefined;
+	try {
+		const response = await validateGroveSession(
+			auth,
+			request,
+			sessionCookie,
+			cookieHeader,
+			waitUntil,
+		);
+
+		if (!response?.ok) return undefined;
 
 		const data = (await response.json()) as {
 			valid?: boolean;
@@ -96,7 +110,12 @@ const billingHandle: Handle = async ({ event, resolve }) => {
 	// Validate session for non-API, non-webhook routes
 	if (!isApi && platform?.env?.AUTH) {
 		const cookieHeader = request.headers.get("Cookie");
-		const session = await validateSession(platform.env.AUTH, cookieHeader);
+		const session = await validateSession(
+			platform.env.AUTH,
+			request,
+			cookieHeader,
+			platform?.context?.waitUntil?.bind(platform.context),
+		);
 		if (session) {
 			event.locals.tenantId = session.tenantId;
 			event.locals.userId = session.userId;
