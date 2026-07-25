@@ -9,7 +9,12 @@ import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { error } from "@sveltejs/kit";
 import { validateCSRF } from "@autumnsgrove/lattice/utils";
-import { getCookie, extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import {
+	getCookie,
+	extractSessionCookie,
+	setSecurityHeaders,
+	validateGroveSession,
+} from "@autumnsgrove/lattice/server";
 import {
 	pulseHandle,
 	createPulseFlushHook,
@@ -66,15 +71,15 @@ const landingHandle: Handle = async ({ event, resolve }) => {
 	if (sessionCookie && event.platform?.env?.AUTH) {
 		try {
 			// Pass full cookie header so GroveAuth can find whichever session cookie exists
-			const response = await event.platform.env.AUTH.fetch(
-				"https://login.grove.place/session/validate",
-				{
-					method: "POST",
-					headers: { Cookie: cookieHeader || "" },
-				},
+			const response = await validateGroveSession(
+				event.platform.env.AUTH,
+				event.request,
+				sessionCookie,
+				cookieHeader || "",
+				event.platform?.context?.waitUntil?.bind(event.platform.context),
 			);
 
-			if (response.ok) {
+			if (response?.ok) {
 				const data = (await response.json()) as {
 					valid: boolean;
 					user?: {

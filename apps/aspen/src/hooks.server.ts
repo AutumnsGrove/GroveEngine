@@ -19,7 +19,12 @@ import {
 } from "@autumnsgrove/lattice/server/services/turnstile";
 import type { TenantConfig } from "@autumnsgrove/lattice/durable-objects/TenantDO";
 import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
-import { getCookie, extractSessionCookie, setSecurityHeaders } from "@autumnsgrove/lattice/server";
+import {
+	getCookie,
+	extractSessionCookie,
+	setSecurityHeaders,
+	validateGroveSession,
+} from "@autumnsgrove/lattice/server";
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -426,13 +431,13 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 
 	const sessionAuthPromise =
 		sessionCookie && event.platform?.env?.AUTH
-			? event.platform.env.AUTH.fetch("https://login.grove.place/session/validate", {
-					method: "POST",
-					headers: { Cookie: cookieHeader || "" },
-				}).catch((err: unknown) => {
-					console.error("[Auth] SessionDO validation error:", err);
-					return null as Response | null;
-				})
+			? validateGroveSession(
+					event.platform.env.AUTH,
+					event.request,
+					sessionCookie,
+					cookieHeader || "",
+					event.platform?.context?.waitUntil?.bind(event.platform.context),
+				)
 			: Promise.resolve(null as Response | null);
 
 	// =========================================================================
