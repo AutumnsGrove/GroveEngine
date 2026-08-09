@@ -125,10 +125,14 @@
 		return tier.status === "available";
 	}
 
-	function handleSelectPlan(tier: PricingTier): void {
-		if (canSelect(tier)) {
-			selectedPlan = tier.key;
-		}
+	// Card CTA ("Cultivate"/"Nurture") selects the tier and immediately proceeds —
+	// the button's label implies action, so it must actually advance the flow
+	// rather than only highlighting a card and leaving the Wanderer to find the
+	// separate "Continue" button further down the page.
+	function cultivatePlan(tier: PricingTier): void {
+		if (!canSelect(tier)) return;
+		selectedPlan = tier.key;
+		selectPlanForOnboarding(tier.key as TierKey);
 	}
 
 	// Get icon name for GrowthCard
@@ -227,7 +231,7 @@
 					annualPrice={tier.key === "wanderer" ? 0 : Number(yearlyPrice)}
 					features={displayFeatures}
 					variant={isSelected ? "primary" : "secondary"}
-					onCultivate={() => handleSelectPlan(tier)}
+					onCultivate={() => cultivatePlan(tier)}
 				/>
 			</div>
 		{/each}

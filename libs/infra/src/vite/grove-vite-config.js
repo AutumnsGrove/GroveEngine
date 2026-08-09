@@ -21,7 +21,7 @@ export function createGroveViteConfig(overrides = {}) {
 			},
 		},
 		ssr: {
-			noExternal: ["@lucide/svelte"],
+			noExternal: ["@lucide/svelte", /^@autumnsgrove\//],
 		},
 	};
 
