@@ -29,7 +29,11 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 	return [
 		{
 			href: "https://grove.place/canopy",
-			label: "Dashboard",
+			// Standard-mode label must match canopy.standardTerm in
+			// grove-term-manifest.json ("Directory") — this previously said
+			// "Dashboard" (Arbor's standard term, copy-pasted onto the wrong
+			// entry), which read as Canopy being entirely absent in standard mode.
+			label: "Directory",
 			groveLabel: "Canopy",
 			icon: featureIcons.bookUser,
 			external: true,
