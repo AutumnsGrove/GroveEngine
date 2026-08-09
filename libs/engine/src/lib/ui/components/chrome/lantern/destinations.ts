@@ -12,7 +12,6 @@ import { getArborHref } from "$lib/ui/stores/wanderer.svelte";
 import type { LanternDestination } from "./types";
 
 // Resolve service icons from the canonical manifest
-const forestsIcon = resolveIcon(defaultSuite.forests.icon);
 const amberIcon = resolveIcon(defaultSuite.amber.icon);
 const arborIcon = resolveIcon(defaultSuite.arbor.icon);
 
@@ -21,24 +20,24 @@ const arborIcon = resolveIcon(defaultSuite.arbor.icon);
  *
  * Note: "Return to Your Grove" is NOT in this list — it's the prominent
  * button rendered separately above the tabs in LanternPanel.
+ *
+ * Forests/Communities was removed here — grove.place/forest is a static
+ * vision page, not a working community-browsing feature, and linking to it
+ * from here promised functionality that isn't there yet.
  */
 export function getDestinations(_homeGrove: string): LanternDestination[] {
 	return [
 		{
 			href: "https://grove.place/canopy",
-			label: "Dashboard",
+			// Standard-mode label must match canopy.standardTerm in
+			// grove-term-manifest.json ("Directory") — this previously said
+			// "Dashboard" (Arbor's standard term, copy-pasted onto the wrong
+			// entry), which read as Canopy being entirely absent in standard mode.
+			label: "Directory",
 			groveLabel: "Canopy",
 			icon: featureIcons.bookUser,
 			external: true,
 			termSlug: "canopy",
-		},
-		{
-			href: "https://grove.place/forest",
-			label: "Communities",
-			groveLabel: "Forests",
-			icon: forestsIcon,
-			external: true,
-			termSlug: "forests",
 		},
 		{
 			href: "https://grove.place/knowledge",

@@ -166,11 +166,14 @@
 	// Map server user data to HeaderUser shape (picture → avatarUrl)
 	// Only use custom avatar from site_settings when the logged-in user is the site owner.
 	// Visitors get their own OAuth picture (or default) — not the owner's avatar.
+	// Name prefers the Wanderer's own Grove display name (same value shown in the
+	// Lantern panel) over the raw OAuth `name` claim — Google accounts return the
+	// signer's full legal name, which isn't what should show in Grove chrome.
 	const headerUser = $derived(
 		data.user
 			? {
 					id: data.user.id,
-					name: data.user.name,
+					name: data.lanternData?.displayName || data.user.name,
 					email: data.user.email,
 					avatarUrl: data.isOwner
 						? data.siteSettings?.avatar_url || data.user.picture

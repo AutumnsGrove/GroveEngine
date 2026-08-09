@@ -144,14 +144,5 @@
 		>
 			Meadow
 		</a>
-		<span class="text-foreground-muted text-[0.75rem]" aria-hidden="true">&middot;</span>
-		<a
-			href="https://grove.place/forest"
-			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			Forests
-		</a>
 	</div>
 </div>
