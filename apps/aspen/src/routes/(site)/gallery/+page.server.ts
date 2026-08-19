@@ -2,7 +2,9 @@
  * Gallery Public Route - Server
  *
  * Loads gallery images for the public gallery page.
- * Gated by the `photo_gallery` graft (greenhouse-only).
+ * Upload access gated by the `image_uploads`/`uploads_suspended` flags
+ * (see @autumnsgrove/lattice/server/upload-gate). The `photo_gallery` flag
+ * was retired by migration 055 and no longer gates anything.
  *
  * Images are loaded from R2 via D1 metadata. Display settings
  * use sensible defaults, optionally overridden by gallery_curio_config.

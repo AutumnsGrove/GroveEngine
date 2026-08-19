@@ -6,17 +6,25 @@
 -- On production, 014 was a no-op (5-col table pre-existed), so this migration
 -- uses rename-and-recreate to bring the schema to canonical shape safely.
 --
--- Uses rename-and-recreate pattern (same as migration 108) to avoid
--- ALTER TABLE ADD COLUMN failures on columns that may already exist.
+-- IMPORTANT — D1-safe rename-and-recreate pattern:
+-- Renaming `users` auto-rewrites any OTHER table's foreign key clause that
+-- references it (SQLite renames FK targets on ALTER TABLE RENAME). That
+-- silently repoints `sessions.user_id` and `cdn_files.uploaded_by` at the
+-- backup table's name — so `DROP TABLE _users_107_backup` later fails with
+-- SQLITE_CONSTRAINT_FOREIGNKEY, because those tables still hold live FKs
+-- into it. `PRAGMA foreign_keys = OFF` does NOT prevent this — verified
+-- against a disposable scratch D1 database (2026-08-19) that the DROP fails
+-- regardless of the pragma. The fix: rebuild every dependent table too,
+-- re-pointing its FK at the final `users` table, BEFORE dropping the backup.
+--
+-- Verified against production (2026-08-19): schema and backfill already
+-- match target (someone applied this by hand previously, outside tracked
+-- migration history) — this run should affect 0 rows. Written to also be
+-- correct on a genuinely fresh database.
 
 PRAGMA foreign_keys = OFF;
 
--- =============================================================================
 -- STEP 1: Recreate users table with canonical schema
--- =============================================================================
--- Rename existing table (works regardless of its column count).
--- Create new table matching migration 014's intent + is_admin for compat.
-
 ALTER TABLE users RENAME TO _users_107_backup;
 
 CREATE TABLE users (
@@ -34,34 +42,60 @@ CREATE TABLE users (
   updated_at TEXT DEFAULT (datetime('now'))
 );
 
--- =============================================================================
--- STEP 2: Copy data — only universally-present columns
--- =============================================================================
+-- STEP 2: Copy data — only universally-present columns.
 -- The backup may have 5 columns (production) or 12 (fresh DB from 014).
 -- Only id, email, created_at, updated_at are guaranteed in both schemas.
--- Missing columns get their DEFAULT values; step 4 backfills the rest.
-
+-- Missing columns get their DEFAULT values; step 5 backfills the rest.
 INSERT INTO users (id, email, created_at, updated_at)
 SELECT id, email, created_at, updated_at
 FROM _users_107_backup;
 
+-- STEP 3: Rebuild every table with a live FK into `users`, re-pointing it
+-- at the new table (SQLite auto-repointed these at `_users_107_backup`
+-- when it was renamed in step 1 — they must be rebuilt before that backup
+-- can be dropped).
+CREATE TABLE sessions_new (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL, access_token TEXT, refresh_token TEXT, token_expires_at TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+INSERT INTO sessions_new SELECT * FROM sessions;
+DROP TABLE sessions;
+ALTER TABLE sessions_new RENAME TO sessions;
+
+CREATE TABLE cdn_files_new (
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    original_filename TEXT NOT NULL,
+    key TEXT NOT NULL UNIQUE,
+    content_type TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    folder TEXT DEFAULT '/',
+    alt_text TEXT,
+    uploaded_by TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id)
+);
+INSERT INTO cdn_files_new SELECT * FROM cdn_files;
+DROP TABLE cdn_files;
+ALTER TABLE cdn_files_new RENAME TO cdn_files;
+
+-- STEP 4: Now safe to drop — nothing references it anymore.
 DROP TABLE _users_107_backup;
 
--- =============================================================================
--- STEP 3: Recreate indexes
--- =============================================================================
-
+-- STEP 5: Recreate indexes
 CREATE INDEX IF NOT EXISTS idx_users_groveauth ON users(groveauth_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id) WHERE tenant_id IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_groveauth_unique ON users(groveauth_id) WHERE groveauth_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_cdn_files_uploaded_by ON cdn_files(uploaded_by);
 
 PRAGMA foreign_keys = ON;
 
--- =============================================================================
--- STEP 4: Backfill from user_onboarding for existing users
--- =============================================================================
-
+-- STEP 6: Backfill from user_onboarding for existing users
 UPDATE users SET
   groveauth_id = (
     SELECT groveauth_id FROM user_onboarding
@@ -86,10 +120,7 @@ WHERE groveauth_id IS NULL
     WHERE LOWER(user_onboarding.email) = LOWER(users.email)
   );
 
--- =============================================================================
--- STEP 5: Create users records for anyone only in user_onboarding
--- =============================================================================
-
+-- STEP 7: Create users records for anyone only in user_onboarding
 INSERT OR IGNORE INTO users (
   id, groveauth_id, email, display_name, tenant_id,
   is_active, created_at, updated_at

@@ -4,42 +4,25 @@
 --   with SQLITE_CONSTRAINT_CHECK at step 1 of createTenant().
 -- Date: 2026-04-18
 --
--- Context: plan IN ('free', 'seedling', 'sapling', 'oak', 'evergreen') blocked inserts
---   with plan='wanderer'. SQLite requires a table rebuild to change a CHECK constraint.
+-- STATUS AS OF 2026-08-19: never applied through this migration file. The
+-- rename-and-recreate approach here is unsafe under D1: `PRAGMA foreign_keys
+-- = OFF` is a no-op once a transaction is already open, and D1 wraps a
+-- migration file's statements in one implicit transaction, so the pragma
+-- never took effect. `tenants` has 27 dependent tables holding live foreign
+-- keys into it (posts, pages, media, comments, platform_billing, and more) —
+-- by far the worst table in the schema to attempt this pattern against.
+--
+-- Verified against production (2026-08-19): the CHECK constraint already
+-- reads `plan IN ('free', 'wanderer', 'seedling', 'sapling', 'oak',
+-- 'evergreen')` — someone applied the fix by hand, directly against
+-- production, outside the tracked migration history. This file is now a
+-- documented no-op so `d1_migrations` can mark it applied and the tracked
+-- history matches reality.
+--
+-- NOTE: a fresh database bootstrapped from migration history alone would
+-- still need this fix, since the destructive rebuild above was never
+-- proven safe. If that path matters (e.g. local dev seeding from scratch),
+-- revisit with a corrected, D1-transaction-safe approach rather than
+-- reintroducing the rename-and-recreate pattern against a 27-dependent table.
 
-PRAGMA foreign_keys = OFF;
-
--- 1. Create new tenants table with updated CHECK constraint (adds 'wanderer')
-CREATE TABLE tenants_new (
-  id TEXT PRIMARY KEY,
-  subdomain TEXT UNIQUE NOT NULL,
-  display_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'wanderer', 'seedling', 'sapling', 'oak', 'evergreen')),
-  storage_used INTEGER DEFAULT 0,
-  post_count INTEGER DEFAULT 0,
-  custom_domain TEXT,
-  theme TEXT DEFAULT 'default',
-  accent_color TEXT,
-  active INTEGER DEFAULT 1,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  encrypted_dek TEXT,
-  meadow_opt_in INTEGER DEFAULT 0
-);
-
--- 2. Copy all existing rows
-INSERT INTO tenants_new SELECT * FROM tenants;
-
--- 3. Swap tables
-DROP TABLE tenants;
-ALTER TABLE tenants_new RENAME TO tenants;
-
--- 4. Recreate indexes (dropped with the old table)
-CREATE INDEX idx_tenants_subdomain ON tenants(subdomain);
-CREATE INDEX idx_tenants_subdomain_active ON tenants(subdomain) WHERE active = 1;
-CREATE INDEX idx_tenants_custom_domain ON tenants(custom_domain) WHERE custom_domain IS NOT NULL;
-CREATE INDEX idx_tenants_email ON tenants(email);
-CREATE INDEX idx_tenants_plan ON tenants(plan);
-
-PRAGMA foreign_keys = ON;
+SELECT 1;

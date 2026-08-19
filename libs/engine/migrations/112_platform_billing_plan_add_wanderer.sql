@@ -4,38 +4,17 @@
 --   to fail with SQLITE_CONSTRAINT_CHECK for every free signup attempt.
 -- Date: 2026-04-18
 --
--- Context: plan IN ('free', 'seedling', 'sapling', 'oak', 'evergreen') blocked inserts
---   with plan='wanderer'. Requires table rebuild since SQLite can't ALTER CHECK constraints.
---   platform_billing has a FK to tenants(id) ON DELETE CASCADE — preserved in new table.
+-- STATUS AS OF 2026-08-19: never applied through this migration file.
+--
+-- Verified against production (2026-08-19): the CHECK constraint already
+-- reads `plan IN ('free', 'wanderer', 'seedling', 'sapling', 'oak',
+-- 'evergreen')` — someone applied the fix by hand, directly against
+-- production, outside the tracked migration history (same pattern as
+-- migration 111). This file is now a documented no-op so `d1_migrations`
+-- can mark it applied and the tracked history matches reality.
+--
+-- Unlike 111, `platform_billing` has zero dependent tables, so the original
+-- rename-and-recreate approach above would likely have worked fine even
+-- under D1's transaction-wrapped migration execution — it just never ran.
 
-PRAGMA foreign_keys = OFF;
-
--- 1. Create new platform_billing table with updated CHECK constraint (adds 'wanderer')
-CREATE TABLE platform_billing_new (
-  id TEXT PRIMARY KEY,
-  tenant_id TEXT NOT NULL UNIQUE,
-  plan TEXT NOT NULL DEFAULT 'free'
-    CHECK (plan IN ('free', 'wanderer', 'seedling', 'sapling', 'oak', 'evergreen')),
-  status TEXT NOT NULL DEFAULT 'active'
-    CHECK (status IN ('trialing', 'active', 'past_due', 'paused', 'canceled', 'unpaid')),
-  provider_customer_id TEXT,
-  provider_subscription_id TEXT,
-  current_period_start INTEGER,
-  current_period_end INTEGER,
-  cancel_at_period_end INTEGER DEFAULT 0,
-  trial_end INTEGER,
-  payment_method_last4 TEXT,
-  payment_method_brand TEXT,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
-);
-
--- 2. Copy all existing rows
-INSERT INTO platform_billing_new SELECT * FROM platform_billing;
-
--- 3. Swap tables
-DROP TABLE platform_billing;
-ALTER TABLE platform_billing_new RENAME TO platform_billing;
-
-PRAGMA foreign_keys = ON;
+SELECT 1;
