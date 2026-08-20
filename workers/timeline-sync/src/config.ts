@@ -15,6 +15,8 @@ export interface Env {
 	CURIO_DB: D1Database;
 	/** Key Encryption Key from Cloudflare Secrets Store (hex string) */
 	GROVE_KEK: string;
+	/** Legacy per-column encryption key — fallback when tenant_secrets is empty */
+	TOKEN_ENCRYPTION_KEY?: string;
 	/** Service binding to the Lumen AI Gateway worker */
 	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** API key for authenticating with the Lumen worker */
@@ -40,6 +42,8 @@ export interface TenantConfigRow {
 	repos_exclude: string | null;
 	timezone: string;
 	owner_name: string | null;
+	github_token_encrypted: string | null;
+	openrouter_key_encrypted: string | null;
 }
 
 /** Parsed tenant configuration */
@@ -55,6 +59,9 @@ export interface TenantConfig {
 	reposExclude: string[] | null;
 	timezone: string;
 	ownerName: string | null;
+	/** Legacy encrypted token columns — fallback source when tenant_secrets is empty */
+	githubTokenEncrypted: string | null;
+	openrouterKeyEncrypted: string | null;
 }
 
 /** Historical context row from database */

@@ -117,6 +117,26 @@ export class SecretsManager {
 			return null;
 		}
 	}
+
+	/**
+	 * Encrypt and store a secret under the tenant's DEK.
+	 * Used to auto-migrate tokens recovered from legacy storage.
+	 */
+	async setSecret(tenantId: string, keyName: string, value: string): Promise<void> {
+		const dekHex = await this.getTenantDEK(tenantId);
+		const encrypted = await encryptToken(value, dekHex);
+
+		await this.db
+			.prepare(
+				`INSERT INTO tenant_secrets (tenant_id, key_name, encrypted_value, updated_at)
+         VALUES (?, ?, ?, datetime('now'))
+         ON CONFLICT(tenant_id, key_name) DO UPDATE SET
+           encrypted_value = excluded.encrypted_value,
+           updated_at = excluded.updated_at`,
+			)
+			.bind(tenantId, keyName, encrypted)
+			.run();
+	}
 }
 
 /**
