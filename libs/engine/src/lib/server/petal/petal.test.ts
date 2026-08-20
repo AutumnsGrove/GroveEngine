@@ -282,7 +282,7 @@ describe("Provider Resilience", () => {
 
 		expect(result.allowed).toBe(false);
 		expect(result.code).toBe("CSAM_SCAN_FAILED");
-		expect(result.message).toContain("technical difficulties");
+		expect(result.message).toContain("Image safety check unavailable");
 	});
 
 	it("should include processing time in result", async () => {
@@ -484,7 +484,7 @@ describe("Error Handling", () => {
 
 		expect(result.allowed).toBe(false);
 		expect(result.code).toBe("CSAM_SCAN_FAILED");
-		expect(result.message).toContain("technical difficulties");
+		expect(result.message).toContain("Image safety check unavailable");
 	});
 
 	it("should block upload when all vision providers fail", async () => {
@@ -506,7 +506,7 @@ describe("Error Handling", () => {
 
 		expect(result.allowed).toBe(false);
 		expect(result.code).toBe("CSAM_SCAN_FAILED");
-		expect(result.message).toContain("technical difficulties");
+		expect(result.message).toContain("Image safety check unavailable");
 	});
 
 	it("should fail-closed when primary provider fails and no fallback available", async () => {
