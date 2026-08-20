@@ -17,7 +17,7 @@ func TestRunAllowedBinary(t *testing.T) {
 }
 
 func TestRunBlocksUnknownBinary(t *testing.T) {
-	_, err := Run("curl", "https://example.com")
+	_, err := Run("rm", "-rf", "/")
 	if err == nil {
 		t.Error("non-allowlisted binary should be rejected")
 	}
