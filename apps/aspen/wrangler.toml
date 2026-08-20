@@ -165,10 +165,98 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 # D1/KV/R2 as production. Reachable at beta.<tenant>.grove.place via
 # grove-router's ASPEN_BETA service binding. See
 # docs/plans/planned/beta-environment-architecture.md
+#
+# NOTE: wrangler environments do NOT inherit top-level bindings (vars,
+# durable_objects, kv_namespaces, r2_buckets, d1_databases, services, ai) —
+# each one must be redeclared here, identical to the top-level block above,
+# so beta reads/writes the exact same D1/KV/R2/DOs as production.
 # =============================================================================
 [env.beta]
 name = "grove-aspen-beta"
 # no routes block — grove-router dispatches via service binding
+
+[[env.beta.kv_namespaces]]
+binding = "CACHE_KV"
+id = "514e91e81cc44d128a82ec6f668303e4"
+
+[[env.beta.kv_namespaces]]
+binding = "FLAGS_KV"
+id = "65a600876aa14e9cbec8f8acd7d53b5f"
+
+[[env.beta.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "grove-media"
+
+[[env.beta.r2_buckets]]
+binding = "IMAGES_SOURCE"
+bucket_name = "autumnsgrove-images"
+
+[[env.beta.r2_buckets]]
+binding = "EXPORTS_BUCKET"
+bucket_name = "grove-exports"
+
+[[env.beta.d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+migrations_dir = "../../libs/engine/migrations"
+
+[[env.beta.d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
+[env.beta.ai]
+binding = "AI"
+
+[[env.beta.services]]
+binding = "AUTH"
+service = "groveauth"
+
+[[env.beta.services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+[[env.beta.services]]
+binding = "PULSE_COLLECTOR"
+service = "grove-pulse-collector"
+
+[[env.beta.durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+script_name = "grove-durable-objects"
+
+[[env.beta.durable_objects.bindings]]
+name = "POST_META"
+class_name = "PostMetaDO"
+script_name = "grove-durable-objects"
+
+[[env.beta.durable_objects.bindings]]
+name = "POST_CONTENT"
+class_name = "PostContentDO"
+script_name = "grove-durable-objects"
+
+[[env.beta.durable_objects.bindings]]
+name = "SENTINEL"
+class_name = "SentinelDO"
+script_name = "grove-durable-objects"
+
+[[env.beta.durable_objects.bindings]]
+name = "EXPORTS"
+class_name = "ExportDO"
+script_name = "grove-durable-objects"
+
+[[env.beta.durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"
+
+[env.beta.vars]
+CACHE_TTL_SECONDS = "3600"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+GROVEAUTH_URL = "https://auth.grove.place"
+CLEARING_API_URL = "https://status.grove.place"
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
 # Secrets (set via `gw secret apply --worker grove-aspen`)
