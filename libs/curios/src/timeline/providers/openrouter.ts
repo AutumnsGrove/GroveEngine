@@ -67,19 +67,58 @@ interface OpenRouterKeyResponse {
 // =============================================================================
 
 export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = {
-	"deepseek/deepseek-v3.2": { name: "DeepSeek V3.2", quality: "highest", speed: "fast", inputCostPer1M: 0.26, outputCostPer1M: 0.38 },
-	"moonshotai/kimi-k2.5": { name: "Kimi K2.5", quality: "highest", speed: "fast", inputCostPer1M: 0.39, outputCostPer1M: 1.90 },
-	"arcee-ai/trinity-large-thinking": { name: "Arcee Trinity Large", quality: "highest", speed: "fast", inputCostPer1M: 0.22, outputCostPer1M: 0.85 },
-	"minimax/minimax-m2.7": { name: "MiniMax M2.7", quality: "high", speed: "fast", inputCostPer1M: 0.30, outputCostPer1M: 1.20 },
-	"anthropic/claude-haiku-4.5": { name: "Claude Haiku 4.5", quality: "highest", speed: "fast", inputCostPer1M: 1.00, outputCostPer1M: 5.00 },
-	"openai/gpt-oss-120b": { name: "GPT-OSS 120B", quality: "high", speed: "fast", inputCostPer1M: 0.04, outputCostPer1M: 0.19 },
-	"qwen/qwen3-235b-a22b-2507": { name: "Qwen3 235B", quality: "high", speed: "medium", inputCostPer1M: 0.07, outputCostPer1M: 0.46 },
-	"meta-llama/llama-3.3-70b-instruct": { name: "Llama 3.3 70B", quality: "high", speed: "medium", inputCostPer1M: 0.10, outputCostPer1M: 0.32 },
-	"z-ai/glm-5.1": { name: "GLM 5.1", quality: "high", speed: "fast", inputCostPer1M: 0.40, outputCostPer1M: 1.50 },
-	"meta-llama/llama-4-maverick": { name: "Llama 4 Maverick", quality: "high", speed: "medium", inputCostPer1M: 0.15, outputCostPer1M: 0.60 },
+	"deepseek/deepseek-v4-flash-0731": {
+		name: "DeepSeek V4 Flash",
+		quality: "high",
+		speed: "fast",
+		inputCostPer1M: 0.065,
+		outputCostPer1M: 0.14,
+	},
+	"deepseek/deepseek-v4-pro-0813": {
+		name: "DeepSeek V4 Pro",
+		quality: "highest",
+		speed: "medium",
+		inputCostPer1M: 0.6026,
+		outputCostPer1M: 1.808,
+	},
+	"xiaomi/mimo-v2.5": {
+		name: "MiMo V2.5",
+		quality: "high",
+		speed: "fast",
+		inputCostPer1M: 0.119,
+		outputCostPer1M: 0.238,
+	},
+	"xiaomi/mimo-v2.5-pro": {
+		name: "MiMo V2.5 Pro",
+		quality: "highest",
+		speed: "medium",
+		inputCostPer1M: 0.3045,
+		outputCostPer1M: 0.609,
+	},
+	"minimax/minimax-m3": {
+		name: "MiniMax M3",
+		quality: "highest",
+		speed: "fast",
+		inputCostPer1M: 0.23,
+		outputCostPer1M: 0.96,
+	},
+	"anthropic/claude-haiku-4.5": {
+		name: "Claude Haiku 4.5",
+		quality: "highest",
+		speed: "fast",
+		inputCostPer1M: 1.0,
+		outputCostPer1M: 5.0,
+	},
+	"openai/gpt-oss-120b": {
+		name: "GPT-OSS 120B",
+		quality: "high",
+		speed: "fast",
+		inputCostPer1M: 0.04,
+		outputCostPer1M: 0.19,
+	},
 };
 
-export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v3.2";
+export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v4-flash-0731";
 
 // =============================================================================
 // UI Utilities (kept for model picker and key validation)

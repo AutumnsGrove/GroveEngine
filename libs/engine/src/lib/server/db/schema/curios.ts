@@ -24,7 +24,7 @@ export const timelineCurioConfig = sqliteTable("timeline_curio_config", {
 	githubUsername: text("github_username"),
 	githubTokenEncrypted: text("github_token_encrypted"),
 	openrouterKeyEncrypted: text("openrouter_key_encrypted"),
-	openrouterModel: text("openrouter_model").default("deepseek/deepseek-v3.2"),
+	openrouterModel: text("openrouter_model").default("deepseek/deepseek-v4-flash-0731"),
 	voicePreset: text("voice_preset").default("professional"),
 	customSystemPrompt: text("custom_system_prompt"),
 	customSummaryInstructions: text("custom_summary_instructions"),

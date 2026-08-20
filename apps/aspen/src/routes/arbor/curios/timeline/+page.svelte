@@ -42,7 +42,7 @@
 	let githubUsername = $state("");
 	let githubToken = $state("");
 	let openrouterKey = $state("");
-	let openrouterModel = $state("deepseek/deepseek-v3.2");
+	let openrouterModel = $state("deepseek/deepseek-v4-flash-0731");
 	let voicePreset = $state("professional");
 	let customSystemPrompt = $state("");
 	let customSummaryInstructions = $state("");
@@ -57,7 +57,7 @@
 		if (data.config) {
 			enabled = data.config.enabled ?? false;
 			githubUsername = data.config.githubUsername ?? "";
-			openrouterModel = data.config.openrouterModel ?? "deepseek/deepseek-v3.2";
+			openrouterModel = data.config.openrouterModel ?? "deepseek/deepseek-v4-flash-0731";
 			voicePreset = data.config.voicePreset ?? "professional";
 			customSystemPrompt = data.config.customSystemPrompt ?? "";
 			customSummaryInstructions = data.config.customSummaryInstructions ?? "";
