@@ -222,6 +222,29 @@ Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in 
 
 Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.
 
+### Beta Deployment (Aspen only)
+
+Aspen has a second live deployment for testing real changes against real Cloudflare infrastructure before every Wanderer sees them — **not** an isolated staging environment. `grove-aspen-beta` shares the exact same `grove-engine-db` D1, KV, and R2 as production `grove-aspen`. A post written in beta is a row in the same table the public site reads. Full design: `docs/plans/planned/beta-environment-architecture.md`.
+
+**URL shape:** `<tenant>-beta.grove.place` (e.g. `autumn-beta.grove.place`) — single-label, **not** `beta.<tenant>.grove.place`. This zone's Cloudflare edge cert only covers `*.grove.place` (one level); a two-level host fails the TLS handshake before any request reaches grove-router. Don't "fix" this back to the dot form without provisioning Cloudflare Advanced Certificate Manager (paid) first.
+
+**How a change reaches beta:**
+
+1. Land the change on `main` as normal.
+2. `git checkout beta && git merge main --ff-only && git push origin beta` — beta is always a fast-forward of main, never diverges with its own commits.
+3. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
+4. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
+
+**Routing:** `services/grove-router` holds an `ASPEN_BETA` service binding alongside `ASPEN`. It checks the subdomain (`parts[0]`) for a trailing `-beta` suffix and dispatches there instead of the default `ASPEN` target, forwarding `X-Forwarded-Host` unchanged. Aspen's own `hooks.server.ts` strips the `-beta` suffix to recover the real tenant and sets `locals.isBeta`, which `+layout.svelte` uses to show a `BetaBadge` next to the site title in the header.
+
+**Bindings:** `apps/aspen/wrangler.toml`'s `[env.beta]` block must redeclare every top-level binding (`vars`, `kv_namespaces`, `r2_buckets`, `d1_databases`, `services`, `ai`, `durable_objects`) — wrangler environments do **not** inherit them. `wrangler deploy --env beta --dry-run` will show only `ASSETS` bound if this drifts; always dry-run after touching this block.
+
+**Secrets:** kept in parity with prod manually — `gw secret apply <name...> -w grove-aspen-beta --write`, mirroring whatever `wrangler secret list` shows on `grove-aspen`. No automatic sync.
+
+**Reserved:** the `-beta` suffix is blocked at signup via `RESERVED_INFRA_SUFFIXES` in `libs/engine/src/lib/platform/config/domain-blocklist.ts` (Loam) — no tenant can register a subdomain ending in `-beta`.
+
+**Scope:** Aspen only for now (covers Arbor's admin routes too, since those live under `apps/aspen/src/routes/arbor/`). No other app has this yet — prove the pattern once before repeating it.
+
 ---
 
 ## Design Standards
