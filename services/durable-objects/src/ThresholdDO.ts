@@ -36,6 +36,10 @@ interface ThresholdCheckRequest {
 	windowSeconds: number;
 }
 
+interface ThresholdResetRequest {
+	key: string;
+}
+
 interface ThresholdResult {
 	allowed: boolean;
 	remaining: number;
@@ -74,6 +78,11 @@ export class ThresholdDO extends LoomDO<null, Record<string, unknown>> {
 				method: "POST",
 				path: "/check",
 				handler: (ctx) => this.handleCheck(ctx),
+			},
+			{
+				method: "POST",
+				path: "/reset",
+				handler: (ctx) => this.handleReset(ctx),
 			},
 			{ method: "GET", path: "/health", handler: () => this.handleHealth() },
 		];
@@ -146,6 +155,22 @@ export class ThresholdDO extends LoomDO<null, Record<string, unknown>> {
 					};
 
 		return Response.json(result);
+	}
+
+	// =========================================================================
+	// POST /reset — Clear a Rate Limit Window
+	// =========================================================================
+
+	private async handleReset(ctx: LoomRequestContext): Promise<Response> {
+		const body = (await ctx.request.json()) as ThresholdResetRequest;
+
+		if (!body.key) {
+			return Response.json({ error: "bad_request", message: "Missing key" }, { status: 400 });
+		}
+
+		const cursor = this.sql.exec(`DELETE FROM rate_limits WHERE key = ?`, body.key);
+
+		return Response.json({ reset: true, key: body.key, rowsDeleted: cursor.rowsWritten });
 	}
 
 	// =========================================================================
