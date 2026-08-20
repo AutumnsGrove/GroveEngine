@@ -54,6 +54,26 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const body = (await request.json()) as { date?: string };
 	const targetDate = body.date ?? new Date().toISOString().split("T")[0];
 
+	// Skip if already generated — makes re-running a backfill over the same
+	// range cheap and safe instead of re-spending rate-limit budget and money
+	// re-generating days that already succeeded.
+	const existing = await curioDb
+		.prepare(
+			`SELECT 1 FROM timeline_summaries
+       WHERE tenant_id = ? AND summary_date = ? AND commit_count > 0`,
+		)
+		.bind(tenantId, targetDate)
+		.first();
+
+	if (existing) {
+		return json({
+			success: true,
+			message: `Summary already exists for ${targetDate}`,
+			summary: null,
+			alreadyExists: true,
+		});
+	}
+
 	// Fetch config
 	const config = await curioDb
 		.prepare(
