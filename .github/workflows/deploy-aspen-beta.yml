@@ -1,0 +1,37 @@
+---
+name: Deploy Aspen (Beta)
+
+# Deploys the same apps/aspen source tree as deploy-aspen.yml, but to the
+# separate grove-aspen-beta Worker (wrangler.toml's [env.beta]) reachable at
+# beta.<tenant>.grove.place. Shares grove-engine-db/KV/R2 with production —
+# see docs/plans/planned/beta-environment-architecture.md
+
+on:
+  push:
+    branches: [beta]
+    paths:
+      - "apps/aspen/**"
+      # Same path triggers as deploy-aspen.yml — see that file's comment.
+      - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
+      - "libs/foliage/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  issues: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: apps/aspen
+      needs-engine: true
+      run-tests: true
+      run-build: true
+      deploy-env: beta
+      service-name-override: aspen-beta
+    secrets: inherit

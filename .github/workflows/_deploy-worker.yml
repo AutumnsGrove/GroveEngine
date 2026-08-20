@@ -100,6 +100,22 @@ on:
         required: false
         type: string
         default: ""
+      deploy-env:
+        description: >
+          Wrangler environment name to deploy (e.g. "beta"), passed as
+          `--env <value>`. Empty deploys the default (production) environment.
+        required: false
+        type: string
+        default: ""
+      service-name-override:
+        description: >
+          Override the service name used in failure-tracking issue titles
+          (default: worker-dir basename). Needed when multiple environments
+          of the same worker-dir (e.g. prod + beta) would otherwise collide
+          on the same tracking issue.
+        required: false
+        type: string
+        default: ""
 
 jobs:
   deploy:
@@ -201,7 +217,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          command: >-
+            ${{ inputs.deploy-env != '' && format('deploy --env {0}', inputs.deploy-env)
+            || 'deploy' }}
           workingDirectory: ${{ inputs.worker-dir }}
           packageManager: pnpm
 
@@ -216,7 +234,8 @@ jobs:
         with:
           script: |
             const workerDir = '${{ inputs.worker-dir }}';
-            const service = workerDir.split('/').pop();
+            const serviceOverride = '${{ inputs.service-name-override }}';
+            const service = serviceOverride || workerDir.split('/').pop();
             const title = `Deploy failing: ${service}`;
             const { owner, repo } = context.repo;
             const serverUrl = process.env.GITHUB_SERVER_URL;
@@ -269,7 +288,8 @@ jobs:
         with:
           script: |
             const workerDir = '${{ inputs.worker-dir }}';
-            const service = workerDir.split('/').pop();
+            const serviceOverride = '${{ inputs.service-name-override }}';
+            const service = serviceOverride || workerDir.split('/').pop();
             const title = `Deploy failing: ${service}`;
             const { owner, repo } = context.repo;
             const serverUrl = process.env.GITHUB_SERVER_URL;

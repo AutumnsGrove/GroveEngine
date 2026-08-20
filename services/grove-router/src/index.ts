@@ -21,6 +21,7 @@ export interface Env {
 	WARDEN?: Fetcher;
 	BILLING?: Fetcher;
 	ASPEN?: Fetcher;
+	ASPEN_BETA?: Fetcher;
 }
 
 /**
@@ -176,6 +177,11 @@ export default {
 
 		const subdomain = parts[0];
 
+		// beta.<tenant>.grove.place routes to a second Aspen deployment sharing
+		// the same D1/KV/R2 as production. "beta.grove.place" alone (no tenant
+		// label) has nothing to dispatch to, so it's excluded here.
+		const isBetaHost = subdomain === "beta" && parts.length > 3;
+
 		// Check if this subdomain has special routing
 		const routeTarget = SUBDOMAIN_ROUTES[subdomain];
 
@@ -255,8 +261,17 @@ export default {
 			origin: "grove-aspen.m7jv4v7npb.workers.dev",
 			binding: "ASPEN",
 		};
-		const target =
-			typeof routeTarget === "object" ? routeTarget : !routeTarget ? DEFAULT_TARGET : null;
+		const BETA_TARGET: RouteTarget = {
+			origin: "grove-aspen-beta.m7jv4v7npb.workers.dev",
+			binding: "ASPEN_BETA",
+		};
+		const target = isBetaHost
+			? BETA_TARGET
+			: typeof routeTarget === "object"
+				? routeTarget
+				: !routeTarget
+					? DEFAULT_TARGET
+					: null;
 		const targetHostname =
 			(typeof routeTarget === "string" ? routeTarget : target?.origin) || DEFAULT_TARGET.origin;
 

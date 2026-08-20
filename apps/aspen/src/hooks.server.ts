@@ -39,7 +39,6 @@ const RESERVED_SUBDOMAINS: Record<string, string | null> = {
 	domains: "/(apps)/domains", // Forage - Domain discovery tool
 	monitor: "/(apps)/monitor", // GroveMonitor
 	cdn: null, // Handled by R2 directly
-	staging: null, // Staging environment flag
 };
 
 /**
@@ -47,6 +46,19 @@ const RESERVED_SUBDOMAINS: Record<string, string | null> = {
  * These should not be routed by this hook.
  */
 const EXTERNAL_WORKERS = ["scout", "music", "search"];
+
+/**
+ * Strip a leading "beta" label from a *.grove.place hostname.
+ * beta.autumn.grove.place -> { host: "autumn.grove.place", isBeta: true }
+ * Everything else is passed through unchanged.
+ */
+function stripBetaLabel(host: string): { host: string; isBeta: boolean } {
+	const parts = host.split(".");
+	if (host.includes("grove.place") && parts[0] === "beta" && parts.length > 3) {
+		return { host: parts.slice(1).join("."), isBeta: true };
+	}
+	return { host, isBeta: false };
+}
 
 /**
  * Extract subdomain from hostname.
@@ -445,8 +457,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// Check X-Forwarded-Host first (set by grove-router Worker proxy)
 	// Fall back to host header for direct requests
-	const host =
+	const rawHost =
 		event.request.headers.get("x-forwarded-host") || event.request.headers.get("host") || "";
+	const { host, isBeta } = stripBetaLabel(rawHost);
+	event.locals.isBeta = isBeta;
 	const subdomain = extractSubdomain(host, event.request, event.url);
 
 	// No subdomain = landing page (grove.place)

@@ -50,6 +50,9 @@ declare global {
 
 			/** True when request is from an internal service binding */
 			isInternalService?: boolean;
+
+			/** True when the request came in via the beta.<tenant>.grove.place prefix */
+			isBeta?: boolean;
 		}
 
 		// interface PageData {}

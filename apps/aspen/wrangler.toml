@@ -161,6 +161,16 @@ CLEARING_API_URL = "https://status.grove.place"
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
+# Beta Environment - second deployment of this same Worker, sharing the same
+# D1/KV/R2 as production. Reachable at beta.<tenant>.grove.place via
+# grove-router's ASPEN_BETA service binding. See
+# docs/plans/planned/beta-environment-architecture.md
+# =============================================================================
+[env.beta]
+name = "grove-aspen-beta"
+# no routes block — grove-router dispatches via service binding
+
+# =============================================================================
 # Secrets (set via `gw secret apply --worker grove-aspen`)
 # =============================================================================
 # SESSION_SECRET        - Secret for signing JWT tokens (32+ random chars)
