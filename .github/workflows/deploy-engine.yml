@@ -29,7 +29,6 @@ jobs:
       worker-dir: libs/engine
       needs-engine: true
       needs-foliage: true
-      needs-vineyard: true
       run-tests: true
       typecheck-command: pnpm check
       run-migrations: true
