@@ -3,7 +3,7 @@ name: Deploy Aspen (Beta)
 
 # Deploys the same apps/aspen source tree as deploy-aspen.yml, but to the
 # separate grove-aspen-beta Worker (wrangler.toml's [env.beta]) reachable at
-# beta.<tenant>.grove.place. Shares grove-engine-db/KV/R2 with production —
+# <tenant>-beta.grove.place. Shares grove-engine-db/KV/R2 with production —
 # see docs/plans/planned/beta-environment-architecture.md
 
 on:

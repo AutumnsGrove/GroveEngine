@@ -17,16 +17,18 @@ This isn't a new problem. An SST migration plan from December 2025 (`_archived/d
 
 ## The model
 
-Rather than isolating data, this design isolates **code and deployment only**. Beta is a second deployment of the same Aspen Worker, reachable at `beta.<tenant>.grove.place`, sharing the exact same `grove-engine-db` D1 database, KV namespaces, and R2 buckets as production.
+Rather than isolating data, this design isolates **code and deployment only**. Beta is a second deployment of the same Aspen Worker, reachable at `<tenant>-beta.grove.place`, sharing the exact same `grove-engine-db` D1 database, KV namespaces, and R2 buckets as production.
 
 ```
 main branch  → grove-aspen        → autumn.grove.place
-beta branch  → grove-aspen-beta   → beta.autumn.grove.place
+beta branch  → grove-aspen-beta   → autumn-beta.grove.place
                        │                      │
                        └──────────┬───────────┘
                                   ▼
                     same grove-engine-db / KV / R2
 ```
+
+**Correction (verified during first live test):** an earlier draft of this doc proposed `beta.<tenant>.grove.place` and claimed no new DNS/Cloudflare config was needed. That's true at the DNS layer (Cloudflare's wildcard does match two-level hosts) but false at the TLS layer — the zone's edge certificate SAN is `grove.place, *.grove.place` only (confirmed via `openssl s_client`), a single-level wildcard. `beta.autumn.grove.place` fails the TLS handshake before any request reaches grove-router. Adding a multi-level wildcard requires Cloudflare's Advanced Certificate Manager (paid, per-cert). To avoid that cost, the URL shape moved to single-label (`<tenant>-beta.grove.place`), which the existing free Universal SSL cert already covers.
 
 A post written in beta is a row in the same table the public site reads. No sync, no mirroring, no replication lag, no drift — because there's nothing to keep in sync. If beta breaks, `git revert` and redeploy; daily D1 backups (via Clearing) are the last-resort undo.
 
@@ -36,10 +38,10 @@ Grafts (`docs/specs/grafts-spec.md`) answer *"should this tenant see this featur
 
 ## Routing
 
-Confirmed by reading the current config: Cloudflare's existing wildcard route (`*.grove.place/*` in `services/grove-router/wrangler.toml`) already catches multi-label hosts like `beta.autumn.grove.place` — DNS/Cloudflare wildcards match all descendant labels below the owner name, not just one level, as long as no more specific record exists (tenants aren't individually registered in DNS; lookup happens in D1). **No new DNS record or Cloudflare route is needed.** Two application-level changes are required:
+Confirmed by reading the current config: Cloudflare's existing wildcard route (`*.grove.place/*` in `services/grove-router/wrangler.toml`) already catches single-label hosts like `autumn-beta.grove.place`, and the free Universal SSL cert (`grove.place, *.grove.place`) already covers them at the TLS layer too — no new DNS record or Cloudflare route needed, as long as beta stays single-label (see correction above). Two application-level changes were required:
 
-- **`services/grove-router/src/index.ts`** — add a second service binding (`ASPEN_BETA` → new `grove-aspen-beta` Worker) alongside the existing `ASPEN` binding (`services/grove-router/wrangler.toml`, the `[[services]]` block around line 59). Detect a leading `beta.` label on the hostname and dispatch there instead of the current `DEFAULT_TARGET`, forwarding the *rest* of the host (e.g. `autumn.grove.place`) via `X-Forwarded-Host` unchanged. Also add `"beta"` to the reserved-subdomain set so no tenant can ever register it — the same treatment `www`/`admin`/`arbor` already get.
-- **`apps/aspen/src/hooks.server.ts`** — `extractSubdomain()` currently reads only `parts[0]` of the hostname. It needs to detect a leading `beta` label, strip it, treat the next label as the real tenant, and set a beta-mode flag on `locals` for the rest of the request. This is the real implementation of the `staging: null` placeholder that's been sitting unused in `RESERVED_SUBDOMAINS`.
+- **`services/grove-router/src/index.ts`** — a second service binding (`ASPEN_BETA` → `grove-aspen-beta` Worker) alongside the existing `ASPEN` binding (`services/grove-router/wrangler.toml`, the `[[services]]` block). The subdomain (`parts[0]`) is checked for a trailing `-beta` suffix; if present, the request routes to `ASPEN_BETA` instead of `DEFAULT_TARGET`, forwarding `X-Forwarded-Host` unchanged. `-beta` as a registrable-username suffix is blocked via Loam's `RESERVED_INFRA_SUFFIXES` (`libs/engine/src/lib/platform/config/domain-blocklist.ts`) so no tenant can ever collide with it.
+- **`apps/aspen/src/hooks.server.ts`** — `extractSubdomain()` reads `parts[0]` of the hostname. A `stripBetaLabel()` helper runs first: strips a trailing `-beta` suffix from that label, recovers the real tenant, and sets `locals.isBeta` for the rest of the request. This is the real implementation of the `staging: null` placeholder that used to sit unused in `RESERVED_SUBDOMAINS` (now removed — superseded by this).
 
 ## Deployment
 

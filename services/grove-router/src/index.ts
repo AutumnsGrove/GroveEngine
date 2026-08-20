@@ -25,6 +25,13 @@ export interface Env {
 }
 
 /**
+ * Single-label marker for the beta environment: <tenant>-beta.grove.place.
+ * Must stay single-label — this zone's edge cert only covers *.grove.place,
+ * not *.*.grove.place, so beta.<tenant>.grove.place fails TLS.
+ */
+const BETA_SUFFIX = "-beta";
+
+/**
  * Route target configuration.
  * - `origin`: Public hostname (used as fallback for local dev where bindings aren't available)
  * - `binding`: Optional key into Env for a Service Binding Fetcher
@@ -177,10 +184,12 @@ export default {
 
 		const subdomain = parts[0];
 
-		// beta.<tenant>.grove.place routes to a second Aspen deployment sharing
-		// the same D1/KV/R2 as production. "beta.grove.place" alone (no tenant
-		// label) has nothing to dispatch to, so it's excluded here.
-		const isBetaHost = subdomain === "beta" && parts.length > 3;
+		// <tenant>-beta.grove.place routes to a second Aspen deployment sharing
+		// the same D1/KV/R2 as production. Single-label (not beta.<tenant>.grove.place)
+		// because Cloudflare's edge cert for this zone only covers *.grove.place,
+		// not *.*.grove.place — a two-level host would fail the TLS handshake.
+		// "-beta" alone (no tenant) has nothing to dispatch to, so it's excluded.
+		const isBetaHost = subdomain.endsWith(BETA_SUFFIX) && subdomain.length > BETA_SUFFIX.length;
 
 		// Check if this subdomain has special routing
 		const routeTarget = SUBDOMAIN_ROUTES[subdomain];

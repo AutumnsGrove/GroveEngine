@@ -105,6 +105,13 @@ const BLOCKED_PREFIXES = ["grove-", "admin-", "official-", "verified-"];
 const BLOCKED_SUFFIXES = ["-official", "-verified", "-admin", "-support"];
 
 /**
+ * Suffixes reserved for Grove infrastructure (not impersonation, just claimed).
+ * "-beta" is grove-router's single-label beta environment marker
+ * (<tenant>-beta.grove.place) — see docs/plans/planned/beta-environment-architecture.md
+ */
+const RESERVED_INFRA_SUFFIXES = ["-beta"];
+
+/**
  * Check if a username is blocked
  * @param username - The username to check (will be lowercased)
  * @returns The blocking reason if blocked, null if allowed
@@ -133,6 +140,13 @@ export function isUsernameBlocked(username: string): BlocklistReason | null {
 	for (const suffix of BLOCKED_SUFFIXES) {
 		if (normalized.endsWith(suffix)) {
 			return "impersonation";
+		}
+	}
+
+	// Check if ends with a Grove-infrastructure-reserved suffix
+	for (const suffix of RESERVED_INFRA_SUFFIXES) {
+		if (normalized.endsWith(suffix)) {
+			return "system";
 		}
 	}
 

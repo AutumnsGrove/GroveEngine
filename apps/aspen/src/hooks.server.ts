@@ -48,14 +48,27 @@ const RESERVED_SUBDOMAINS: Record<string, string | null> = {
 const EXTERNAL_WORKERS = ["scout", "music", "search"];
 
 /**
- * Strip a leading "beta" label from a *.grove.place hostname.
- * beta.autumn.grove.place -> { host: "autumn.grove.place", isBeta: true }
+ * Beta environment suffix on the first label: <tenant>-beta.grove.place.
+ * Single-label (not beta.<tenant>.grove.place) because this zone's edge
+ * cert only covers *.grove.place, not *.*.grove.place.
+ */
+const BETA_SUFFIX = "-beta";
+
+/**
+ * Strip a trailing "-beta" suffix from a *.grove.place hostname's first label.
+ * autumn-beta.grove.place -> { host: "autumn.grove.place", isBeta: true }
  * Everything else is passed through unchanged.
  */
 function stripBetaLabel(host: string): { host: string; isBeta: boolean } {
 	const parts = host.split(".");
-	if (host.includes("grove.place") && parts[0] === "beta" && parts.length > 3) {
-		return { host: parts.slice(1).join("."), isBeta: true };
+	const [first, ...rest] = parts;
+	if (
+		host.includes("grove.place") &&
+		first.endsWith(BETA_SUFFIX) &&
+		first.length > BETA_SUFFIX.length
+	) {
+		const tenant = first.slice(0, -BETA_SUFFIX.length);
+		return { host: [tenant, ...rest].join("."), isBeta: true };
 	}
 	return { host, isBeta: false };
 }

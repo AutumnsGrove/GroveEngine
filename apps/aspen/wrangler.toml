@@ -162,7 +162,7 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
 # Beta Environment - second deployment of this same Worker, sharing the same
-# D1/KV/R2 as production. Reachable at beta.<tenant>.grove.place via
+# D1/KV/R2 as production. Reachable at <tenant>-beta.grove.place via
 # grove-router's ASPEN_BETA service binding. See
 # docs/plans/planned/beta-environment-architecture.md
 #
