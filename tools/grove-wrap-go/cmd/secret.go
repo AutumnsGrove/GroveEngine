@@ -361,6 +361,72 @@ var secretRevealCmd = &cobra.Command{
 	},
 }
 
+// --- secret exec ---
+
+var secretExecCmd = &cobra.Command{
+	Use:   "exec <name> [name...] -- <command> [args...]",
+	Short: "Run a command with secrets injected into its environment (values never printed)",
+	Long: `Decrypts one or more vault secrets and injects them as environment
+variables into a subprocess — the plaintext value is never written to gw's
+own stdout, logs, or the command's argument list. Use this instead of
+'reveal' whenever a secret's only purpose is to be handed to another tool
+(curl, a script, wrangler) rather than looked at by a human.
+
+Each secret is exposed to the child process as an env var named after the
+secret itself. Everything after '--' is run as-is.
+
+Example:
+  gw secret exec OPS_ADMIN_KEY --write -- \
+    curl -X POST https://example.workers.dev/reset \
+    -H "Authorization: Bearer $OPS_ADMIN_KEY"`,
+	Args:               cobra.MinimumNArgs(2),
+	DisableFlagParsing: false,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := requireCFSafety("secret_exec"); err != nil {
+			return err
+		}
+
+		dashAt := cmd.ArgsLenAtDash()
+		if dashAt < 1 {
+			return fmt.Errorf("usage: gw secret exec <name> [name...] -- <command> [args...]")
+		}
+
+		names := args[:dashAt]
+		commandArgs := args[dashAt:]
+		if len(commandArgs) == 0 {
+			return fmt.Errorf("no command given after --")
+		}
+
+		password, err := vault.GetVaultPassword()
+		if err != nil {
+			return err
+		}
+
+		v, err := vault.Unlock(password)
+		if err != nil {
+			return err
+		}
+
+		extraEnv := make([]string, 0, len(names))
+		for _, name := range names {
+			value, ok := v.Get(name)
+			if !ok {
+				return fmt.Errorf("secret '%s' not found in vault", name)
+			}
+			extraEnv = append(extraEnv, fmt.Sprintf("%s=%s", name, value))
+		}
+
+		exitCode, err := exec.RunStreamingWithEnv(extraEnv, commandArgs[0], commandArgs[1:]...)
+		if err != nil {
+			return err
+		}
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
+		return nil
+	},
+}
+
 // --- secret delete ---
 
 var secretDeleteCmd = &cobra.Command{
@@ -753,6 +819,14 @@ var secretHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Compose (--write)",
+		Icon:  "🔗",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "exec", Desc: "Run a command with secrets in its env (value never printed)"},
+		},
+	},
+	{
 		Title: "Dangerous (--write --force)",
 		Icon:  "🔥",
 		Style: ui.DangerStyle,
@@ -789,6 +863,7 @@ func init() {
 	secretCmd.AddCommand(secretExistsCmd)
 	secretCmd.AddCommand(secretRevealCmd)
 	secretCmd.AddCommand(secretDeleteCmd)
+	secretCmd.AddCommand(secretExecCmd)
 
 	// generate
 	secretGenerateCmd.Flags().IntP("length", "l", 32, "Length of generated secret in bytes")

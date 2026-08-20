@@ -36,6 +36,7 @@ var allowedBinaries = map[string]bool{
 	"claude":   true,
 	"bash":     true,
 	"uv":       true,
+	"curl":     true,
 }
 
 // Result holds the output of a completed command.
@@ -160,6 +161,36 @@ func RunStreamingInDir(dir string, name string, args ...string) (int, error) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
+
+	err := cmd.Run()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return exitErr.ExitCode(), nil
+		}
+		return 1, fmt.Errorf("failed to execute %s: %w", name, err)
+	}
+	return 0, nil
+}
+
+// RunStreamingWithEnv executes an allowlisted command with stdout/stderr/stdin
+// connected directly to the terminal, with extraEnv appended to the process's
+// environment (in addition to the inherited environment). Use this to hand a
+// decrypted secret to a subprocess as an env var without it ever passing
+// through gw's own stdout, logs, or command-line arguments — the value only
+// ever exists in the child process's memory.
+func RunStreamingWithEnv(extraEnv []string, name string, args ...string) (int, error) {
+	if !allowedBinaries[name] {
+		return 1, fmt.Errorf("binary %q is not in the gw allowlist", name)
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return 1, fmt.Errorf("binary name must not contain path separators: %q", name)
+	}
+
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Env = append(os.Environ(), extraEnv...)
 
 	err := cmd.Run()
 	if err != nil {
