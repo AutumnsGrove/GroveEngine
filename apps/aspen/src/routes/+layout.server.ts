@@ -228,6 +228,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	return {
 		user: locals.user || null,
 		context: locals.context as AppContext,
+		isBeta: locals.isBeta ?? false,
 		isOwner,
 		siteSettings,
 		navPages,

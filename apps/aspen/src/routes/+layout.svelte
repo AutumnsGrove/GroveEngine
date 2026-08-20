@@ -39,6 +39,7 @@
 			};
 		} | null;
 		context: AppContext;
+		isBeta: boolean;
 		isOwner: boolean;
 		siteSettings: {
 			font_family: string;
@@ -242,6 +243,7 @@
 		<Header
 			navItems={tenantNavItems}
 			brandTitle={siteName}
+			isBeta={data.isBeta}
 			searchEnabled={!isAdminPage}
 			searchPlaceholder="Search posts..."
 			onSearch={handleSearch}

@@ -10,6 +10,7 @@
 	import { isActivePath } from "$lib/ui/components/chrome/types";
 	import { DEFAULT_NAV_ITEMS } from "$lib/ui/components/chrome/defaults";
 	import AccountStatus from "$lib/ui/components/chrome/AccountStatus.svelte";
+	import BetaBadge from "$lib/ui/components/ui/BetaBadge.svelte";
 	import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { resolveNavLabel } from "$lib/ui/components/chrome/types";
@@ -25,6 +26,8 @@
 		maxWidth?: MaxWidth;
 		brandTitle?: string;
 		season?: Season;
+		/** Show a beta-environment badge next to the brand title */
+		isBeta?: boolean;
 
 		// Search support for tenant sites
 		/** Enable search input in header */
@@ -68,6 +71,7 @@
 		maxWidth = "default",
 		brandTitle,
 		season,
+		isBeta = false,
 		// Search props
 		searchEnabled = false,
 		searchPlaceholder = "Search...",
@@ -192,6 +196,12 @@
 				>
 					Grove
 				</a>
+			{/if}
+
+			{#if isBeta}
+				<BetaBadge
+					title="You're on the beta deployment — same live data as your real site, testing new code before it ships"
+				/>
 			{/if}
 		</div>
 
