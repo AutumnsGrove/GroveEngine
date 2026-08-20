@@ -229,7 +229,7 @@ export function detectDrift(shims, wranglers) {
 
 // ─── Affected filtering ─────────────────────────────────────────────
 
-function getChangedFiles(baseRef) {
+export function getChangedFiles(baseRef) {
 	try {
 		const out = execSync(`git diff --name-only ${baseRef}...HEAD`, { encoding: "utf8" }).trim();
 		return out ? out.split("\n") : [];

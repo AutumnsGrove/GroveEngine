@@ -9,12 +9,19 @@
  * Checks (in order):
  *   1. Lockfile sync      (pnpm install --frozen-lockfile)
  *   2. Deploy drift       (deploy-manifest --drift)
- *   3. Affected typecheck (tsc --noEmit or custom typecheck-command per shim)
- *   4. Svelte-check       (affected + downstream consumers of changed libs)
- *   5. Affected dry-run   (wrangler deploy --dry-run — only if CF token present)
+ *   3. Direct typecheck   (tsc --noEmit or custom typecheck-command — shims whose
+ *                          OWN directory changed, not shims that merely declare a
+ *                          changed shared lib as a path trigger)
+ *   4. Svelte-check       (same direct-only scope as #3)
+ *   5. Direct dry-run     (wrangler deploy --dry-run — only if CF token present)
  *
- * Time budget: ~30-60s for a typical single-service change. Affected-only
- * scoping is the key — a PR that touches libs/engine won't take forever.
+ * Time budget: ~30-60s for a typical single-service change. Scoping to
+ * directly-changed shims (not their lib-triggered downstream consumers) is
+ * the key — editing one file in libs/gossamer shouldn't locally typecheck
+ * and svelte-check every unrelated worker that happens to import
+ * libs/engine (which itself depends on gossamer). CI still runs the full
+ * fan-out remotely via each deploy-*.yml's own path triggers — this script
+ * only trims what runs on your machine, blocking your terminal.
  *
  * Environment:
  *   PRE_PUSH_BASE              Git ref to diff against (default: origin/main)
@@ -32,6 +39,7 @@ import {
 	filterAffected,
 	detectDrift,
 	findWranglerConfigs,
+	getChangedFiles,
 } from "./deploy-manifest.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -119,10 +127,26 @@ try {
 	note(`could not diff against ${base}: ${e.message}`);
 }
 
+// Split "affected" into shims whose OWN directory changed ("direct") vs
+// shims matched only because they declare a changed shared lib as a path
+// trigger ("lib-only"). Local checks run against `direct` only — CI still
+// covers the full fan-out remotely via the same deploy-*.yml path triggers.
+const changedFiles = affected.length > 0 ? getChangedFiles(base) : [];
+const direct = affected.filter(
+	(s) => s.path && changedFiles.some((f) => f.startsWith(s.path + "/")),
+);
+const libOnly = affected.filter((s) => !direct.includes(s));
+
 if (affected.length === 0) {
 	skip(`No deploy shims affected since ${base}`);
 } else {
-	note(`${affected.length} affected: ${affected.map((s) => s.service).join(", ")}`);
+	note(`${direct.length} direct: ${direct.map((s) => s.service).join(", ") || "(none)"}`);
+	if (libOnly.length > 0) {
+		note(
+			`${libOnly.length} lib-triggered (skipped locally, CI covers these): ` +
+				libOnly.map((s) => s.service).join(", "),
+		);
+	}
 
 	// ── Build lib deps first (always) ──────────────────────────────
 	// Build all shared libs before typechecking, regardless of which
@@ -145,11 +169,11 @@ if (affected.length === 0) {
 	buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
 	buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
 
-	// ── SvelteKit sync for all affected shims ──────────────────────
-	// Attempt sync for every shim — non-SvelteKit packages exit non-zero
-	// and are logged as ⊘. Covers apps/, workers/ that use SvelteKit,
-	// and libs/* like engine that extend .svelte-kit/tsconfig.json.
-	for (const shim of affected) {
+	// ── SvelteKit sync for directly-changed shims ───────────────────
+	// Attempt sync for every direct shim — non-SvelteKit packages exit
+	// non-zero and are logged as ⊘. Covers apps/, workers/ that use
+	// SvelteKit, and libs/* like engine that extend .svelte-kit/tsconfig.json.
+	for (const shim of direct) {
 		if (!shim.path) continue;
 		process.stdout.write(`  ${DIM}sync ${shim.service.padEnd(18)}...${RESET}`);
 		const r = run("pnpm exec svelte-kit sync", resolve(REPO_ROOT, shim.path));
@@ -159,7 +183,7 @@ if (affected.length === 0) {
 
 	console.log();
 
-	for (const shim of affected) {
+	for (const shim of direct) {
 		if (shim.kind === "custom" || !shim.path) continue;
 		if (shim.with["run-typecheck"] === false) {
 			skip(`${shim.service} typecheck (run-typecheck: false)`);
@@ -176,42 +200,17 @@ if (affected.length === 0) {
 		}
 	}
 
-	// ─── 4. Svelte-check (affected + downstream consumers) ─────────
+	// ─── 4. Svelte-check (directly-changed shims only) ──────────────
+	// Downstream consumers of a changed shared lib are NOT checked here —
+	// they're still covered by CI via each deploy-*.yml's own path triggers,
+	// which run on remote runners and don't cost local wall-clock time.
 	header("Svelte-check");
 
-	// Collect all shims that need svelte-check: affected ones, plus
-	// downstream consumers of any changed libs (workspace propagation).
-	const svelteCheckTargets = new Set(affected.map((s) => s.service));
-
-	// Workspace propagation: if a lib changed, also check its consumers.
-	// We detect this from shim trigger paths — if a shim lists "libs/X/**"
-	// in its paths, it's a consumer of lib X.
-	const changedLibs = affected
-		.filter((s) => s.path && s.path.startsWith("libs/"))
-		.map((s) => s.path);
-
-	if (changedLibs.length > 0) {
-		for (const shim of shims) {
-			if (svelteCheckTargets.has(shim.service)) continue;
-			const consumesChangedLib = shim.triggers.paths.some((p) =>
-				changedLibs.some((lib) => p.startsWith(lib)),
-			);
-			if (consumesChangedLib) svelteCheckTargets.add(shim.service);
-		}
-	}
-
-	const svelteShims = shims.filter((s) => svelteCheckTargets.has(s.service) && s.path);
+	const svelteShims = direct.filter((s) => s.path);
 
 	if (svelteShims.length === 0) {
 		skip("No svelte-check targets affected");
 	} else {
-		const downstreamCount = svelteShims.length - affected.length;
-		if (downstreamCount > 0) {
-			note(
-				`+${downstreamCount} downstream consumer${downstreamCount === 1 ? "" : "s"} of changed libs`,
-			);
-		}
-
 		for (const shim of svelteShims) {
 			// Only run svelte-check on packages that have a "check" script
 			const pkgPath = resolve(REPO_ROOT, shim.path, "package.json");
@@ -240,13 +239,13 @@ if (affected.length === 0) {
 		}
 	}
 
-	// ─── 5. Affected shims — wrangler dry-run ───────────────────────
+	// ─── 5. Direct shims — wrangler dry-run ─────────────────────────
 	const hasToken = Boolean(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID);
 	console.log();
 	if (!hasToken) {
 		skip("wrangler dry-run (CLOUDFLARE_API_TOKEN/ACCOUNT_ID not set — CI will still run it)");
 	} else {
-		for (const shim of affected) {
+		for (const shim of direct) {
 			// Skip kind!=worker and library-only shims (run-deploy: false),
 			// mirrors the `matrix.kind == 'worker' && matrix.run-deploy` gate
 			// in validate-deployments.yml. libs/engine is the only shim that
