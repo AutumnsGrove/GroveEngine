@@ -36,27 +36,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
-	// Rate limit generation
-	const threshold = createThreshold(platform?.env, {
-		identifier: locals.user?.id,
-	});
-	if (threshold) {
-		const denied = await thresholdCheck(threshold, {
-			key: `ai/timeline-generate:${user.id}`,
-			limit: 100,
-			windowSeconds: 86400,
-			failMode: "closed",
-		});
-		if (denied) return denied;
-	}
-
 	// Parse request body
 	const body = (await request.json()) as { date?: string };
 	const targetDate = body.date ?? new Date().toISOString().split("T")[0];
 
-	// Skip if already generated — makes re-running a backfill over the same
-	// range cheap and safe instead of re-spending rate-limit budget and money
-	// re-generating days that already succeeded.
+	// Skip if already generated — checked BEFORE the rate limit so re-running
+	// a backfill over an overlapping range doesn't burn quota on free skips.
 	const existing = await curioDb
 		.prepare(
 			`SELECT 1 FROM timeline_summaries
@@ -72,6 +57,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			summary: null,
 			alreadyExists: true,
 		});
+	}
+
+	// Rate limit generation
+	const threshold = createThreshold(platform?.env, {
+		identifier: locals.user?.id,
+	});
+	if (threshold) {
+		const denied = await thresholdCheck(threshold, {
+			key: `ai/timeline-generate:${user.id}`,
+			limit: 500,
+			windowSeconds: 86400,
+			failMode: "closed",
+		});
+		if (denied) return denied;
 	}
 
 	// Fetch config
