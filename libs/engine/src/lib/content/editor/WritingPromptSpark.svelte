@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { featureIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	import { WRITING_PROMPTS } from "./writing-prompts.js";
 
 	// Icon components must be aliased to a capitalized local before use as a
 	// tag — a bare dotted member expression like <featureIcons.pencilSparkles />
@@ -9,55 +10,20 @@
 	const RefreshIcon = actionIcons.refresh;
 	const DismissIcon = stateIcons.x;
 
-	interface WritingPrompt {
-		text: string;
-		mood: string;
-		length: "short" | "medium" | "long";
-	}
-
 	interface Props {
 		onDismiss?: () => void;
 	}
 
 	let { onDismiss }: Props = $props();
 
-	// Sample bank — placeholder data for placement/layout review.
-	// Real v1 bank (~100-300 prompts, tagged mood/length/genre) is a follow-up.
-	const SAMPLE_PROMPTS: WritingPrompt[] = [
-		{ text: "Write about a door you've never opened.", mood: "curious", length: "short" },
-		{
-			text: "What does your morning routine say about who you're becoming?",
-			mood: "reflective",
-			length: "medium",
-		},
-		{
-			text: "Describe the last place that felt like home, even briefly.",
-			mood: "nostalgic",
-			length: "medium",
-		},
-		{ text: "A list of things you're done apologizing for.", mood: "bold", length: "short" },
-		{
-			text: "Write the letter you'd send to yourself a year from now.",
-			mood: "reflective",
-			length: "long",
-		},
-		{ text: "What's a small thing that saved a bad day recently?", mood: "warm", length: "short" },
-		{
-			text: "Describe a skill you're proud of that no one ever asks about.",
-			mood: "quiet",
-			length: "medium",
-		},
-		{ text: "Write about starting over — literally or otherwise.", mood: "bold", length: "medium" },
-	];
-
-	let currentIndex = $state(Math.floor(Math.random() * SAMPLE_PROMPTS.length));
-	let current = $derived(SAMPLE_PROMPTS[currentIndex]);
+	let currentIndex = $state(Math.floor(Math.random() * WRITING_PROMPTS.length));
+	let current = $derived(WRITING_PROMPTS[currentIndex]);
 
 	function anotherSpark() {
-		if (SAMPLE_PROMPTS.length <= 1) return;
+		if (WRITING_PROMPTS.length <= 1) return;
 		let next = currentIndex;
 		while (next === currentIndex) {
-			next = Math.floor(Math.random() * SAMPLE_PROMPTS.length);
+			next = Math.floor(Math.random() * WRITING_PROMPTS.length);
 		}
 		currentIndex = next;
 	}
