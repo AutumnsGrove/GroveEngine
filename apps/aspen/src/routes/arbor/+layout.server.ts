@@ -27,11 +27,20 @@ interface DemoTenant {
 	displayName: string;
 }
 
+// Must match DEMO_MODE_COOKIE_NAME in hooks.server.ts — that hook sets this
+// cookie on the first `?demo=` request so navigating around Arbor afterward
+// stays in demo mode without the secret needing to be on every URL.
+const DEMO_MODE_COOKIE_NAME = "grove_demo_mode";
+
 // Check if request is in demo mode (off by default unless DEMO_MODE_SECRET is set)
-function isDemoRequest(url: URL, envSecret?: string): boolean {
+function isDemoRequest(
+	url: URL,
+	envSecret: string | undefined,
+	cookieValue: string | undefined,
+): boolean {
 	if (!envSecret) return false;
-	const demoKey = url.searchParams.get("demo");
-	return demoKey === envSecret;
+	if (url.searchParams.get("demo") === envSecret) return true;
+	return cookieValue === envSecret;
 }
 
 // Get demo user for screenshots and exploration
@@ -71,12 +80,16 @@ interface TenantRow {
 	email: string;
 }
 
-export const load: LayoutServerLoad = async ({ locals, url, platform, parent }) => {
+export const load: LayoutServerLoad = async ({ locals, url, platform, parent, cookies }) => {
 	// Get parent layout data (includes navPages, siteSettings, context)
 	const parentData = await parent();
 
 	// Check for demo mode (for screenshots and development)
-	const isDemoMode = isDemoRequest(url, platform?.env?.DEMO_MODE_SECRET);
+	const isDemoMode = isDemoRequest(
+		url,
+		platform?.env?.DEMO_MODE_SECRET,
+		cookies.get(DEMO_MODE_COOKIE_NAME),
+	);
 
 	// SECURITY: Example tenant bypass removed for launch (tracked in #1120)
 	// const isExampleTenant = locals.tenantId === "example-tenant-001";

@@ -163,6 +163,32 @@ function shouldSkipTurnstile(pathname: string, userAgent: string | null): boolea
 }
 
 /**
+ * Cookie that keeps demo mode active across navigation. The `?demo=` query
+ * param only proves the secret once, on the request that carries it — every
+ * link clicked afterward would drop it and re-trigger Turnstile/auth. This
+ * mirrors that one proof into a cookie so the rest of the session stays in
+ * demo mode. Must match the constant of the same name in
+ * arbor/+layout.server.ts, which reads it for the auth-bypass check.
+ */
+const DEMO_MODE_COOKIE_NAME = "grove_demo_mode";
+
+/**
+ * Demo mode bypasses the human-verification gate too — it's off by default
+ * unless DEMO_MODE_SECRET is set (never in production), and a request that
+ * already proved it knows the secret (via the query param or the cookie set
+ * below) has no need to also solve Turnstile.
+ */
+function isDemoModeRequest(
+	url: URL,
+	demoModeSecret: string | undefined,
+	cookieHeader: string | null,
+): boolean {
+	if (!demoModeSecret) return false;
+	if (url.searchParams.get("demo") === demoModeSecret) return true;
+	return getCookie(cookieHeader, DEMO_MODE_COOKIE_NAME) === demoModeSecret;
+}
+
+/**
  * Extended tenant info including the tenant UUID
  */
 interface TenantLookupResult extends TenantConfig {
@@ -426,8 +452,14 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	// TURNSTILE VERIFICATION (Shade)
 	// =========================================================================
-	// Skip verification for excluded paths and embed crawlers
-	if (!shouldSkipTurnstile(event.url.pathname, event.request.headers.get("user-agent"))) {
+	const demoModeSecret = event.platform?.env?.DEMO_MODE_SECRET;
+	const isDemoModeActive = isDemoModeRequest(event.url, demoModeSecret, cookieHeader);
+
+	// Skip verification for excluded paths, embed crawlers, and demo mode
+	if (
+		!shouldSkipTurnstile(event.url.pathname, event.request.headers.get("user-agent")) &&
+		!isDemoModeActive
+	) {
 		const verificationCookie = getCookie(cookieHeader, TURNSTILE_COOKIE_NAME);
 		const secretKey = event.platform?.env?.TURNSTILE_SECRET_KEY;
 
@@ -897,6 +929,22 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 		}
 
 		response.headers.append("Set-Cookie", cookieParts.join("; "));
+	}
+
+	// Refresh the demo-mode cookie on every demo-mode request (sliding expiry) —
+	// this is what lets clicking around Arbor stay in demo mode after the
+	// initial `?demo=` link, without the secret needing to be on every URL.
+	if (isDemoModeActive && demoModeSecret) {
+		const isProduction = event.url.hostname !== "localhost" && event.url.hostname !== "127.0.0.1";
+		const demoCookieParts = [
+			`${DEMO_MODE_COOKIE_NAME}=${demoModeSecret}`,
+			"Path=/",
+			"Max-Age=86400",
+			"SameSite=Lax",
+			"HttpOnly",
+		];
+		if (isProduction) demoCookieParts.push("Secure");
+		response.headers.append("Set-Cookie", demoCookieParts.join("; "));
 	}
 
 	setSecurityHeaders(response);
