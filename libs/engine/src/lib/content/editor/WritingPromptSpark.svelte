@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { featureIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
+	// Icon components must be aliased to a capitalized local before use as a
+	// tag — a bare dotted member expression like <featureIcons.pencilSparkles />
+	// doesn't resolve as a Svelte component (matches the {@const Icon = ...}
+	// pattern used in FormattingToolbar.svelte).
+	const SparklesIcon = featureIcons.pencilSparkles;
+	const RefreshIcon = actionIcons.refresh;
+	const DismissIcon = stateIcons.x;
+
 	interface WritingPrompt {
 		text: string;
 		mood: string;
@@ -57,7 +65,7 @@
 
 <div class="spark-card">
 	<div class="spark-icon">
-		<featureIcons.sparkles class="w-4 h-4" />
+		<SparklesIcon class="w-4 h-4" />
 	</div>
 
 	<div class="spark-body">
@@ -67,12 +75,12 @@
 
 	<div class="spark-actions">
 		<button type="button" class="spark-btn spark-btn-ghost" onclick={anotherSpark} title="Get another prompt">
-			<actionIcons.refresh class="w-3.5 h-3.5" />
+			<RefreshIcon class="w-3.5 h-3.5" />
 			Another spark
 		</button>
 		{#if onDismiss}
 			<button type="button" class="spark-btn spark-btn-dismiss" onclick={onDismiss} title="Dismiss">
-				<stateIcons.x class="w-3.5 h-3.5" />
+				<DismissIcon class="w-3.5 h-3.5" />
 			</button>
 		{/if}
 	</div>

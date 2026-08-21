@@ -319,6 +319,7 @@ export const ICON_MANIFEST: IconManifest = {
 		bookOpenCheck: "BookOpenCheck",
 		notebookText: "NotebookText",
 		notebookPen: "NotebookPen",
+		pencilSparkles: "PencilSparkles",
 		messageCircle: "MessageCircle",
 		messageSquare: "MessageSquare",
 		messageSquareText: "MessageSquareText",

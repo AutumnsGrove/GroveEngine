@@ -79,8 +79,8 @@ importers:
         specifier: ^4.20260317.1
         version: 4.20260414.1
       '@lucide/svelte':
-        specifier: ^0.562.0
-        version: 0.562.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
     devDependencies:
       '@autumnsgrove/infra':
         specifier: workspace:*
@@ -167,8 +167,8 @@ importers:
         specifier: workspace:*
         version: link:../../libs/thorn
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -280,8 +280,8 @@ importers:
         specifier: workspace:*
         version: link:../../libs/engine
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
     devDependencies:
       '@autumnsgrove/infra':
         specifier: workspace:*
@@ -341,8 +341,8 @@ importers:
         specifier: workspace:*
         version: link:../../libs/engine
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
       resend:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -411,8 +411,8 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
       '@tabler/icons-svelte':
         specifier: ^3.36.1
         version: 3.41.1(svelte@5.55.3(@typescript-eslint/types@8.58.2))
@@ -542,8 +542,8 @@ importers:
         specifier: workspace:*
         version: link:../../libs/engine
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -737,8 +737,8 @@ importers:
         specifier: ^4.20260317.1
         version: 4.20260414.1
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
         version: 7.2.8(@sveltejs/kit@2.57.1(@opentelemetry/api@1.9.1)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.3(@typescript-eslint/types@8.58.2))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(svelte@5.55.3(@typescript-eslint/types@8.58.2))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)))(wrangler@4.82.2(@cloudflare/workers-types@4.20260414.1))
@@ -1081,8 +1081,8 @@ importers:
   libs/prism:
     dependencies:
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
     devDependencies:
       svelte:
         specifier: ^5.50.1
@@ -1364,8 +1364,8 @@ importers:
         specifier: workspace:*
         version: link:../../libs/engine
       '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
+        specifier: ^1.33.0
+        version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
     devDependencies:
       '@autumnsgrove/infra':
         specifier: workspace:*
@@ -2842,13 +2842,8 @@ packages:
   '@lucide/lab@0.1.2':
     resolution: {integrity: sha512-VprF2BJa7ZuTGOhUd5cf8tHJXyL63wdxcGieAiVVoR9hO0YmPsnZO0AGqDiX2/br+/MC6n8BoJcmPilltOXIJA==}
 
-  '@lucide/svelte@0.562.0':
-    resolution: {integrity: sha512-wDMULwtTFN2Sc/TFBm6gfuVCNb4Y5P9LDrwxNnUbV52+IEU7NXZmvxwXoz+vrrpad6Xupq+Hw5eUlqIHEGhouw==}
-    peerDependencies:
-      svelte: ^5
-
-  '@lucide/svelte@0.577.0':
-    resolution: {integrity: sha512-0P6mkySd2MapIEgq08tADPmcN4DHndC/02PWwaLkOerXlx5Sv9aT4BxyXLIY+eccr0g/nEyCYiJesqS61YdBZQ==}
+  '@lucide/svelte@1.33.0':
+    resolution: {integrity: sha512-b+osTYG2V4dge5Lr7tnaTaahhy/4vH7Xb8zcqVjmctjwgkpXS0NNOJPkGzHHZoxtw/OO+2YAU28omeMfYCaawg==}
     peerDependencies:
       svelte: ^5
 
@@ -7874,11 +7869,7 @@ snapshots:
 
   '@lucide/lab@0.1.2': {}
 
-  '@lucide/svelte@0.562.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))':
-    dependencies:
-      svelte: 5.55.3(@typescript-eslint/types@8.58.2)
-
-  '@lucide/svelte@0.577.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))':
+  '@lucide/svelte@1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))':
     dependencies:
       svelte: 5.55.3(@typescript-eslint/types@8.58.2)
 
@@ -8831,7 +8822,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/expect@4.1.4':
     dependencies:
@@ -8885,7 +8876,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@1.21.7)(tsx@4.21.0))
+      vitest: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
 
   '@vitest/utils@4.1.4':
     dependencies:
