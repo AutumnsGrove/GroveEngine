@@ -32,6 +32,7 @@
 	let originalSlug = $state("");
 	let slugError = $state("");
 	let selectedBlaze = $state<string | null>(null);
+	let sparkPrompt = $state<string | null>(null);
 
 	// Blaze picker — fetched from API to include tenant custom blazes
 	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
@@ -65,6 +66,7 @@
 		status = ((data.post as Record<string, unknown>).status as string) || "draft";
 		featuredImage = ((data.post as Record<string, unknown>).featured_image as string) || "";
 		selectedBlaze = ((data.post as Record<string, unknown>).blaze as string) || null;
+		sparkPrompt = ((data.post as Record<string, unknown>).spark_prompt as string) || null;
 	});
 
 	// Editor reference for anchor insertion
@@ -179,6 +181,7 @@
 				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
+				spark_prompt: sparkPrompt,
 			});
 
 			editorRef?.clearDraft();
@@ -238,6 +241,7 @@
 				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
+				spark_prompt: sparkPrompt,
 			});
 
 			editorRef?.clearDraft();
@@ -319,6 +323,7 @@
 				meadow_exclude: 0,
 				slug: slug !== originalSlug ? slug : undefined,
 				blaze: selectedBlaze,
+				spark_prompt: sparkPrompt,
 				republish: true,
 			});
 
@@ -499,6 +504,13 @@
 	</header>
 
 	<div class="editor-layout">
+		{#if sparkPrompt}
+			<div class="spark-attribution">
+				<span class="spark-attribution-label">Started with a spark</span>
+				<span class="spark-attribution-text">"{sparkPrompt}"</span>
+			</div>
+		{/if}
+
 		<!-- Inline title -->
 		<input
 			type="text"
@@ -952,6 +964,24 @@
 		flex-direction: column;
 		flex: 1;
 		min-height: 0;
+	}
+
+	/* Spark attribution — quiet record of the prompt that started this draft */
+	.spark-attribution {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin: 0.5rem 0 1rem;
+		font-size: 0.8rem;
+	}
+	.spark-attribution-label {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+	.spark-attribution-text {
+		color: var(--color-text-subtle);
+		font-style: italic;
 	}
 
 	/* Inline title — big, clean, heading-style */

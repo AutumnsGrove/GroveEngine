@@ -42,6 +42,9 @@ export const posts = sqliteTable(
 		// Blazes (088)
 		blaze: text("blaze"),
 
+		// Spark prompts (114) — the writing-prompt text (if any) a draft started from
+		sparkPrompt: text("spark_prompt"),
+
 		// Timestamps
 		publishedAt: integer("published_at"),
 		createdAt: integer("created_at")

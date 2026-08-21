@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { featureIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
-	import { WRITING_PROMPTS } from "./writing-prompts.js";
+	import { WRITING_PROMPTS, type WritingPrompt } from "./writing-prompts.js";
 
 	// Icon components must be aliased to a capitalized local before use as a
 	// tag — a bare dotted member expression like <featureIcons.pencilSparkles />
@@ -12,12 +12,23 @@
 
 	interface Props {
 		onDismiss?: () => void;
+		/**
+		 * Fires whenever the displayed prompt changes (mount + each "another
+		 * spark"). Lets the parent page know which prompt was showing if the
+		 * writer starts typing — that's how "Started with a spark" gets
+		 * attributed without a separate "use this" button.
+		 */
+		onPromptChange?: (prompt: WritingPrompt) => void;
 	}
 
-	let { onDismiss }: Props = $props();
+	let { onDismiss, onPromptChange }: Props = $props();
 
 	let currentIndex = $state(Math.floor(Math.random() * WRITING_PROMPTS.length));
 	let current = $derived(WRITING_PROMPTS[currentIndex]);
+
+	$effect(() => {
+		onPromptChange?.(current);
+	});
 
 	function anotherSpark() {
 		if (WRITING_PROMPTS.length <= 1) return;

@@ -5,6 +5,7 @@
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import GutterManager from "@autumnsgrove/lattice/content/editor/GutterManager.svelte";
 	import WritingPromptSpark from "@autumnsgrove/lattice/content/editor/WritingPromptSpark.svelte";
+	import type { WritingPrompt } from "@autumnsgrove/lattice/content/editor/writing-prompts";
 	import Glass from "@autumnsgrove/lattice/ui/components/ui/Glass.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
@@ -32,10 +33,22 @@
 	let featuredImage = $state("");
 	let selectedBlaze = $state<string | null>(null);
 	let sparkDismissed = $state(false);
+	let activeSparkPrompt = $state<WritingPrompt | null>(null);
+	let startedWithSpark = $state<string | null>(null);
 
 	// Empty-state only: shows while the draft is blank, hides once you start
 	// writing, so it never competes with the toolbar or a real draft in progress.
-	let showSpark = $derived(!sparkDismissed && !title.trim() && !content.trim());
+	let draftIsBlank = $derived(!title.trim() && !content.trim());
+	let showSpark = $derived(!sparkDismissed && draftIsBlank);
+
+	// The moment the draft stops being blank, whatever prompt was showing
+	// gets credited as "started with" — but only if it wasn't dismissed
+	// first. No separate "use this" button; typing IS the signal.
+	$effect(() => {
+		if (!draftIsBlank && !sparkDismissed && !startedWithSpark && activeSparkPrompt) {
+			startedWithSpark = activeSparkPrompt.text;
+		}
+	});
 
 	// Blaze picker — fetched from API to include tenant custom blazes
 	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
@@ -149,6 +162,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: 0,
 				blaze: selectedBlaze,
+				spark_prompt: startedWithSpark,
 			});
 
 			editorRef?.clearDraft();
@@ -226,6 +240,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: 0,
 				blaze: selectedBlaze,
+				spark_prompt: startedWithSpark,
 			});
 
 			editorRef?.clearDraft();
@@ -291,7 +306,15 @@
 
 	<div class="editor-layout">
 		{#if showSpark}
-			<WritingPromptSpark onDismiss={() => (sparkDismissed = true)} />
+			<WritingPromptSpark
+				onDismiss={() => (sparkDismissed = true)}
+				onPromptChange={(p) => (activeSparkPrompt = p)}
+			/>
+		{:else if startedWithSpark}
+			<div class="spark-attribution">
+				<span class="spark-attribution-label">Started with a spark</span>
+				<span class="spark-attribution-text">"{startedWithSpark}"</span>
+			</div>
 		{/if}
 
 		<!-- Inline title -->
@@ -608,6 +631,24 @@
 		flex-direction: column;
 		flex: 1;
 		min-height: 0;
+	}
+
+	/* Spark attribution — quiet record of the prompt that started this draft */
+	.spark-attribution {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin: 0.5rem 0 1rem;
+		font-size: 0.8rem;
+	}
+	.spark-attribution-label {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+	.spark-attribution-text {
+		color: var(--color-text-subtle);
+		font-style: italic;
 	}
 
 	/* Inline title — big, clean, heading-style */
