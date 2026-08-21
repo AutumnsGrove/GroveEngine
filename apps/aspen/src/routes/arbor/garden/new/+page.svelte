@@ -4,6 +4,7 @@
 	import { onMount } from "svelte";
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import GutterManager from "@autumnsgrove/lattice/content/editor/GutterManager.svelte";
+	import WritingPromptSpark from "@autumnsgrove/lattice/content/editor/WritingPromptSpark.svelte";
 	import Glass from "@autumnsgrove/lattice/ui/components/ui/Glass.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
@@ -30,6 +31,11 @@
 	let gutterItems = $state<GutterItem[]>([]);
 	let featuredImage = $state("");
 	let selectedBlaze = $state<string | null>(null);
+	let sparkDismissed = $state(false);
+
+	// Empty-state only: shows while the draft is blank, hides once you start
+	// writing, so it never competes with the toolbar or a real draft in progress.
+	let showSpark = $derived(!sparkDismissed && !title.trim() && !content.trim());
 
 	// Blaze picker — fetched from API to include tenant custom blazes
 	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
@@ -284,6 +290,10 @@
 	{/if}
 
 	<div class="editor-layout">
+		{#if showSpark}
+			<WritingPromptSpark onDismiss={() => (sparkDismissed = true)} />
+		{/if}
+
 		<!-- Inline title -->
 		<input
 			type="text"
