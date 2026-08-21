@@ -49,6 +49,7 @@ interface PostInput {
 	meadow_exclude?: number;
 	republish?: boolean;
 	blaze?: string | null;
+	spark_prompt?: string | null;
 }
 
 // ============================================================================
@@ -292,6 +293,7 @@ export async function updatePost(
 	if (data.meadow_exclude !== undefined) updateData.meadow_exclude = data.meadow_exclude;
 	if (newSlug) updateData.slug = newSlug;
 	if (published_at !== undefined) updateData.published_at = published_at;
+	if (data.spark_prompt !== undefined) updateData.spark_prompt = data.spark_prompt;
 
 	// Update with blaze column fallback
 	try {

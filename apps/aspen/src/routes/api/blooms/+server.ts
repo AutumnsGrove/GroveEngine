@@ -38,6 +38,7 @@ interface PostInput {
 	featured_image?: string;
 	meadow_exclude?: number;
 	blaze?: string;
+	spark_prompt?: string | null;
 }
 
 /**
@@ -361,6 +362,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			featured_image: data.featured_image || null,
 			meadow_exclude: data.meadow_exclude ?? 0,
 			blaze: blazeSlug,
+			spark_prompt: data.spark_prompt || null,
 			// Set published_at on direct publish (skipping draft stage) so RSS and
 			// meadow poller see the correct timestamp instead of NULL.
 			...(data.status === "published" ? { published_at: Math.floor(Date.now() / 1000) } : {}),

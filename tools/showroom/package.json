@@ -27,6 +27,6 @@
   "dependencies": {
     "@autumnsgrove/gossamer": "workspace:*",
     "@autumnsgrove/lattice": "workspace:*",
-    "@lucide/svelte": "^0.577.0"
+    "@lucide/svelte": "^1.33.0"
   }
 }

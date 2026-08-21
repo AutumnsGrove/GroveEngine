@@ -39,7 +39,7 @@
 	"devDependencies": {
 		"@autumnsgrove/gossamer": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
-		"@lucide/svelte": "^0.577.0",
+		"@lucide/svelte": "^1.33.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/package": "^2.5.7",

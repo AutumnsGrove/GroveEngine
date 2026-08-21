@@ -38,7 +38,7 @@
 		"test:run": "vitest run"
 	},
 	"dependencies": {
-		"@lucide/svelte": "^0.577.0"
+		"@lucide/svelte": "^1.33.0"
 	},
 	"devDependencies": {
 		"svelte": "^5.50.1",
