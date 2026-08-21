@@ -197,6 +197,13 @@
 						</a>
 					{/if}
 				</div>
+
+				{#if data.post.spark_prompt}
+					<p class="spark-attribution">
+						<span class="spark-attribution-label">Started with a spark</span>
+						<span class="spark-attribution-text">"{data.post.spark_prompt}"</span>
+					</p>
+				{/if}
 			</header>
 		{/snippet}
 	</ContentWithGutter>
@@ -253,6 +260,21 @@
 	/* Override content-header h1 to add margin for post meta */
 	.content-header h1 {
 		margin: 0 0 1rem 0;
+	}
+
+	/* Spark attribution — quiet public record of the prompt that started this post */
+	.spark-attribution {
+		margin: 0 0 1.5rem 0;
+		font-size: 0.85rem;
+	}
+	.spark-attribution-label {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+	.spark-attribution-text {
+		color: var(--color-text-subtle);
+		font-style: italic;
+		margin-left: 0.4rem;
 	}
 
 	/* Glassmorphism container for post metadata */

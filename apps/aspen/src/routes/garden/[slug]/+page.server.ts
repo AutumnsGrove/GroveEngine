@@ -43,6 +43,7 @@ interface PostRecord {
 	storage_location?: string;
 	r2_key?: string;
 	blaze?: string;
+	spark_prompt?: string | null;
 }
 
 /** Resolved blaze definition (label, icon, color) */
@@ -69,6 +70,7 @@ interface CachedPost {
 	updated_at?: string;
 	blaze?: string | null;
 	blazeDefinition?: BlazeDefinition | null;
+	spark_prompt?: string | null;
 }
 
 /** Cache configuration */
@@ -365,5 +367,6 @@ async function fetchAndProcessPost(
 		updated_at: safeDate(post.updated_at),
 		blaze: (post.blaze as string) || null,
 		blazeDefinition,
+		spark_prompt: post.spark_prompt || null,
 	};
 }
