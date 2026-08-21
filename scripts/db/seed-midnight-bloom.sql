@@ -378,6 +378,41 @@ So this is a small, late invitation, from someone whose job is to protect quiet 
 );
 
 -- ============================================
+-- VINES (gutter marginalia) — matches each post's <!-- anchor:name --> markers
+-- ============================================
+-- Every seeded post had anchor markers in its markdown but no matching
+-- gutter_content, so Vines never had anything to render. These are short,
+-- in-voice asides — the same "comment" type Flow's gutter uses for margin
+-- notes.
+
+UPDATE posts SET gutter_content = '[
+  {"type": "comment", "anchor": "speed-note", "content": "We used to have a French press. We don''t anymore — turns out ''fast tea'' was a contradiction we were forcing."},
+  {"type": "comment", "anchor": "kettle-note", "content": "Three kettles means three different whistles. Regulars can tell which tea''s coming just by the pitch."},
+  {"type": "comment", "anchor": "philosophy", "content": "Elena''s exact words, verbatim, the first time someone asked for ''the quick version.''"}
+]' WHERE id = 'example-post-brewing';
+
+UPDATE posts SET gutter_content = '[
+  {"type": "comment", "anchor": "nurses", "content": "Sarah''s chamomile is always waiting by the time her shoes hit the doorway sensor."},
+  {"type": "comment", "anchor": "novelist", "content": "We did once catch a glimpse of the cover page. All it said was ''Draft 14.''"},
+  {"type": "comment", "anchor": "stargazer", "content": "He left his card once, ''in case anyone ever wants to borrow the telescope.'' Nobody has yet. We think that''s the point."},
+  {"type": "comment", "anchor": "community", "content": "This is the paragraph we rewrite every time we update the site — it never quite captures it, but we keep trying."}
+]' WHERE id = 'example-post-regulars';
+
+UPDATE posts SET gutter_content = '[
+  {"type": "comment", "anchor": "sound-note", "content": "The playlist question comes up so often we considered a sign. We didn''t, on principle."},
+  {"type": "comment", "anchor": "silence", "content": "Try it for one visit. You''ll start hearing the kettle differently."},
+  {"type": "comment", "anchor": "headphones", "content": "The earplug basket has needed refilling exactly twice in three years."},
+  {"type": "comment", "anchor": "sacred", "content": "This is Elena''s favorite hour to work the counter, even though she''ll deny having a favorite."}
+]' WHERE id = 'example-post-music';
+
+UPDATE posts SET gutter_content = '[
+  {"type": "comment", "anchor": "the-prompt", "content": "The receipt is still on the corkboard by the register, if you want to see the actual handwriting."},
+  {"type": "comment", "anchor": "quiet-vs-still", "content": "This is the line half the staff has quoted back at each other since."},
+  {"type": "comment", "anchor": "ten-minutes", "content": "We''ve started leaving the last candle lit an extra ten minutes at close, just in case anyone else needs them."},
+  {"type": "comment", "anchor": "why-tell-you", "content": "If this sounds like you, table six is usually free after midnight."}
+]' WHERE id = 'example-post-sat-still';
+
+-- ============================================
 -- UPDATE TENANT POST COUNT
 -- ============================================
 UPDATE tenants SET post_count = 4 WHERE id = 'example-tenant-001';
