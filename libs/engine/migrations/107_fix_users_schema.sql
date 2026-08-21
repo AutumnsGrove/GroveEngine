@@ -61,11 +61,38 @@ CREATE TABLE sessions_new (
     created_at TEXT NOT NULL, access_token TEXT, refresh_token TEXT, token_expires_at TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-INSERT INTO sessions_new SELECT * FROM sessions;
+-- `SELECT *` here assumed `sessions` already had this migration's 7-column
+-- shape — true on production (hand-migrated out of band, see note below),
+-- but false on a genuinely fresh database, which only ever gets the
+-- 5-column shape from migration 005 (id, tenant_id, user_email, expires_at,
+-- created_at). No tracked migration between 005 and this one ever bridges
+-- that gap, so `SELECT *` against a fresh DB fails at prepare time with a
+-- column-count mismatch — verified against a scratch fresh D1 (2026-08-21).
+--
+-- Fix: derive user_id via the users table (already populated by STEP 2,
+-- keyed by email) instead of assuming `sessions.user_id` already exists.
+-- Sessions with no matching user are dropped — they're expired auth tokens
+-- from the old scheme, not durable data; losing them just means a
+-- re-login, the normal consequence of any session-table migration.
+--
+-- Production is unaffected: this migration is already recorded as applied
+-- there (verified via d1_migrations, 2026-08-21) and will never re-run.
+INSERT INTO sessions_new (id, user_id, expires_at, created_at)
+SELECT s.id, u.id, s.expires_at, s.created_at
+FROM sessions s
+JOIN users u ON LOWER(u.email) = LOWER(s.user_email);
 DROP TABLE sessions;
 ALTER TABLE sessions_new RENAME TO sessions;
 
-CREATE TABLE cdn_files_new (
+-- `cdn_files` has the identical problem `sessions` had: no tracked
+-- migration ever creates it, so on a fresh database it doesn't exist at
+-- all yet — the rename-and-copy dance below was designed for production,
+-- where it already existed with data. Since production already has this
+-- migration recorded as applied (verified via d1_migrations, 2026-08-21)
+-- and will never re-run it, this only needs to handle "table doesn't
+-- exist yet" going forward — so just create it directly, no data to
+-- preserve.
+CREATE TABLE IF NOT EXISTS cdn_files (
     id TEXT PRIMARY KEY,
     filename TEXT NOT NULL,
     original_filename TEXT NOT NULL,
@@ -78,9 +105,6 @@ CREATE TABLE cdn_files_new (
     created_at TEXT NOT NULL,
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
-INSERT INTO cdn_files_new SELECT * FROM cdn_files;
-DROP TABLE cdn_files;
-ALTER TABLE cdn_files_new RENAME TO cdn_files;
 
 -- STEP 4: Now safe to drop — nothing references it anymore.
 DROP TABLE _users_107_backup;
