@@ -4,6 +4,9 @@
 // for information about these interfaces
 
 declare global {
+	/** Git branch at build time — see vite.config.ts. Local dev only; do not use for anything security-sensitive. */
+	const __GIT_BRANCH__: string;
+
 	namespace App {
 		interface Error {
 			message: string;
@@ -53,6 +56,9 @@ declare global {
 
 			/** True when the request came in via the beta.<tenant>.grove.place prefix */
 			isBeta?: boolean;
+
+			/** True when the request proved the DEMO_MODE_SECRET (query param or cookie) — off by default, never true in production */
+			isDemoMode?: boolean;
 		}
 
 		// interface PageData {}

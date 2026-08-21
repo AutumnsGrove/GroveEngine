@@ -40,6 +40,7 @@
 		} | null;
 		context: AppContext;
 		isBeta: boolean;
+		isDemo: boolean;
 		isOwner: boolean;
 		siteSettings: {
 			font_family: string;
@@ -244,6 +245,7 @@
 			navItems={tenantNavItems}
 			brandTitle={siteName}
 			isBeta={data.isBeta}
+			isDemo={data.isDemo}
 			searchEnabled={!isAdminPage}
 			searchPlaceholder="Search posts..."
 			onSearch={handleSearch}

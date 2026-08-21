@@ -111,8 +111,6 @@ export interface ArborPanelProps {
 		pinned: boolean;
 		created_at: string;
 	}>;
-	/** Shows the floating "Demo Mode" banner */
-	isDemoMode?: boolean;
 	/** Whether to apply the leaf-pattern background (default: true) */
 	showLeafPattern?: boolean;
 	/** Custom snippet for sidebar header (replaces default logo + title) */

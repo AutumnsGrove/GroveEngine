@@ -454,6 +454,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// =========================================================================
 	const demoModeSecret = event.platform?.env?.DEMO_MODE_SECRET;
 	const isDemoModeActive = isDemoModeRequest(event.url, demoModeSecret, cookieHeader);
+	event.locals.isDemoMode = isDemoModeActive;
 
 	// Skip verification for excluded paths, embed crawlers, and demo mode
 	if (

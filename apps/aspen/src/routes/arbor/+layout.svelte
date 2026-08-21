@@ -45,7 +45,6 @@
 	user={data.user}
 	logoutHref="/auth/logout"
 	messages={data.messages}
-	isDemoMode={data.isDemoMode}
 >
 	{@render children()}
 </ArborPanel>

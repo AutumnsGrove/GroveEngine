@@ -33,7 +33,6 @@
 		logoutHref,
 		onLogout,
 		messages,
-		isDemoMode = false,
 		showLeafPattern = true,
 		sidebarHeader,
 		sidebarFooter,
@@ -66,14 +65,6 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
-
-{#if isDemoMode}
-	<div class="arbor-demo-banner" class:visible={isDemoMode}>
-		<span class="arbor-demo-icon">📸</span>
-		<span class="arbor-demo-text">Demo Mode</span>
-		<span class="arbor-demo-tip">Screenshots enabled — use ?demo=true on any admin page</span>
-	</div>
-{/if}
 
 <div class="arbor-layout">
 	<VineBackground visible={showLeafPattern} />
@@ -244,49 +235,6 @@
 		margin-bottom: 1.5rem;
 	}
 
-	/* Demo mode banner */
-	.arbor-demo-banner {
-		position: fixed;
-		top: 76px;
-		left: 50%;
-		transform: translateX(-50%) translateY(-100%);
-		background: var(--grove-100, #ecfccb);
-		color: var(--grove-800, #3f6212);
-		padding: 0.5rem 1rem;
-		border-radius: 0 0 var(--border-radius-standard) var(--border-radius-standard);
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.8rem;
-		font-weight: 500;
-		z-index: 1000;
-		box-shadow: var(--shadow-md);
-		opacity: 0;
-		transition:
-			transform 0.3s ease,
-			opacity 0.3s ease;
-	}
-
-	.arbor-demo-banner.visible {
-		transform: translateX(-50%) translateY(0);
-		opacity: 1;
-	}
-
-	:global(.dark) .arbor-demo-banner {
-		background: var(--grove-accent-dark);
-		color: var(--grove-accent-light);
-	}
-
-	.arbor-demo-icon {
-		font-size: 1rem;
-	}
-
-	.arbor-demo-tip {
-		opacity: 0.7;
-		font-weight: 400;
-		margin-left: 0.5rem;
-	}
-
 	/* Mobile styles */
 	@media (max-width: 768px) {
 		.arbor-sidebar {
@@ -353,10 +301,6 @@
 		}
 
 		.arbor-content {
-			transition: none;
-		}
-
-		.arbor-demo-banner {
 			transition: none;
 		}
 

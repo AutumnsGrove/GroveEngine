@@ -25,7 +25,7 @@ interface NavPage {
 	title: string;
 }
 
-export const load: LayoutServerLoad = async ({ locals, platform }) => {
+export const load: LayoutServerLoad = async ({ locals, platform, url }) => {
 	// Default site settings
 	const siteSettings: SiteSettings = { font_family: "lexend" };
 	// Navigation pages (pages with show_in_nav enabled)
@@ -225,10 +225,19 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		context.type === "tenant" &&
 		emailsMatch(context.tenant.ownerId, locals.user.email);
 
+	// Locally, there's no real "-beta.grove.place" hostname to check — but the
+	// git branch checked out IS what's actually running, so on localhost we
+	// treat being on the beta branch as equivalent to the real beta chip.
+	// __GIT_BRANCH__ is baked in at build time (see vite.config.ts); gating on
+	// "localhost" keeps this from ever mattering on a real deployment, where
+	// CI checks out main or beta same as any branch build would.
+	const isLocalBetaBranch = url.hostname === "localhost" && __GIT_BRANCH__ === "beta";
+
 	return {
 		user: locals.user || null,
 		context: locals.context as AppContext,
-		isBeta: locals.isBeta ?? false,
+		isBeta: (locals.isBeta ?? false) || isLocalBetaBranch,
+		isDemo: locals.isDemoMode ?? false,
 		isOwner,
 		siteSettings,
 		navPages,
