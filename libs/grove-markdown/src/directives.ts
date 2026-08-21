@@ -194,6 +194,33 @@ function handleImage(content: string): string | null {
  */
 const CURIO_DIRECTIVES = ["guestbook", "poll"] as const;
 
+// ============================================================================
+// Anchor Directive
+// ============================================================================
+
+/**
+ * Anchor directive: renders an invisible anchor point for vine (gutter
+ * annotation) positioning.
+ *
+ * Input:  ::anchor[tagname]::
+ * Output: <span data-anchor="tagname" class="grove-anchor"></span>
+ *
+ * The vine system in ContentWithGutter.svelte looks for [data-anchor="tagname"]
+ * elements when a gutter item's anchor string is "anchor:tagname".
+ *
+ * This directive existed only in a since-orphaned copy of this module
+ * (libs/engine/src/lib/content/markdown/directives.ts, predating this
+ * package's extraction) — the live rendering pipeline never had it, so
+ * every ::anchor[...]:: directive in a real post rendered as literal
+ * visible text instead of an invisible marker. Fixed 2026-08-21.
+ */
+function handleAnchor(content: string): string | null {
+	const name = content.trim();
+	if (!name || !/^[\w-]+$/.test(name)) return null;
+	const safeName = escapeHtml(name);
+	return `<span data-anchor="${safeName}" class="grove-anchor"></span>\n`;
+}
+
 /**
  * Curio directive handler: emits a placeholder div for client-side hydration.
  *
@@ -216,6 +243,7 @@ function handleCurio(curioName: string, content: string): string {
 const directiveHandlers: Record<string, DirectiveHandler> = {
 	gallery: handleGallery,
 	image: handleImage,
+	anchor: handleAnchor,
 };
 
 // Register all curio directives
@@ -259,6 +287,13 @@ export const CURIO_METADATA = [
 		requiresArg: true,
 		system: true,
 		description: "Single image with size / align / caption options",
+	},
+	{
+		id: "anchor",
+		name: "Vine Anchor",
+		requiresArg: true,
+		system: true,
+		description: "Invisible marker a Vine (gutter note) can pin itself to",
 	},
 	{
 		id: "suppress",

@@ -270,3 +270,42 @@ describe("groveDirectivePlugin - image", () => {
 		expect(result).toContain("grove-image-align-center");
 	});
 });
+
+// ============================================================================
+// Anchor Directive (Vine positioning marker)
+// ============================================================================
+// Regression coverage: this directive was defined in an orphaned copy of
+// this module and never actually wired into the live directiveHandlers
+// map, so ::anchor[...]:: rendered as literal visible text on real posts
+// instead of an invisible marker — fixed 2026-08-21.
+
+describe("groveDirectivePlugin - anchor", () => {
+	const md = createMd();
+
+	it("renders an invisible data-anchor marker", () => {
+		const result = md.render("::anchor[sound-note]::");
+		expect(result).toContain('data-anchor="sound-note"');
+		expect(result).toContain('class="grove-anchor"');
+		expect(result).not.toContain("::anchor");
+	});
+
+	it("rejects a script tag as the anchor name (fails validation, no marker emitted)", () => {
+		// XSS protection for this directive comes from strict name validation
+		// (/^[\w-]+$/), not escaping — a name this shape never reaches
+		// escapeHtml because handleAnchor() returns null first. Full HTML
+		// sanitization of the raw passthrough happens downstream in
+		// sanitizeMarkdown(), same as elsewhere in this package.
+		const result = md.render("::anchor[<script>alert(1)</script>]::");
+		expect(result).not.toContain("data-anchor");
+	});
+
+	it("rejects names with disallowed characters and falls back to literal text", () => {
+		const result = md.render("::anchor[has space]::");
+		expect(result).not.toContain("data-anchor");
+	});
+
+	it("rejects an empty anchor name", () => {
+		const result = md.render("::anchor[]::");
+		expect(result).not.toContain("data-anchor");
+	});
+});
