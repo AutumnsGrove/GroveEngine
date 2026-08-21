@@ -116,11 +116,11 @@ Both methods are security-gated: they only work on localhost and are ignored in 
 
 ## Seeding Data
 
-The `blog` profile (default) seeds the **Midnight Bloom** tea shop tenant with 3 posts and 4 pages — enough to have something to look at without being overwhelming.
+The `blog` profile (default) seeds the **Midnight Bloom** tea shop tenant with 4 posts and 4 pages — enough to have something to look at without being overwhelming.
 
 | Profile | What you get |
 |---------|-------------|
-| `blog` | Midnight Bloom tea shop, 3 posts, 4 pages |
+| `blog` | Midnight Bloom tea shop, 4 posts, 4 pages |
 | `empty` | One tenant, no content |
 | `fresh` | Migrations only, no tenant data |
 

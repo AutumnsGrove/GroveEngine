@@ -121,7 +121,7 @@ seed_data() {
 
     case "$profile" in
         blog)
-            dim "  → Midnight Bloom tenant (3 posts, 5 pages)"
+            dim "  → Midnight Bloom tenant (4 posts, 5 pages)"
             npx wrangler d1 execute grove-engine-db \
                 --local \
                 -c apps/aspen/wrangler.toml \
