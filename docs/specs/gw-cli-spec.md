@@ -318,6 +318,23 @@ gw secret sync --worker grove-lattice
 # > ✓ STRIPE_SECRET_KEY
 # > ✓ RESEND_API_KEY
 # > ...
+
+# Use a secret in a command without ever revealing it — decrypts and
+# injects into the CHILD PROCESS'S environment only. Never printed to
+# gw's own stdout, logs, or the command's argument list.
+gw secret exec OPS_ADMIN_KEY --write -- curl -X POST https://example.workers.dev/reset \
+  -H "Authorization: Bearer $OPS_ADMIN_KEY"
+# > {"reset":true,...}
+#
+# Note: $OPS_ADMIN_KEY must be expanded by a shell that actually has it
+# injected — i.e. one gw spawns directly. If the outer shell expands it
+# first (before gw even runs), you'll send an empty value. Route through
+# bash -c when the command needs shell features like variable expansion:
+gw secret exec OPS_ADMIN_KEY --write -- bash -c \
+  'curl -H "Authorization: Bearer $OPS_ADMIN_KEY" https://example.workers.dev/reset'
+
+# Multiple secrets in one call — each injected under its own name
+gw secret exec STRIPE_SECRET_KEY WEBHOOK_SECRET --write -- bash -c '...'
 ```
 
 **Security Model:**
@@ -327,6 +344,11 @@ gw secret sync --worker grove-lattice
 - Agent commands NEVER return secret values in output
 - Even `gw secret list` only shows names, not values
 - Audit log tracks all secret applications
+- `gw secret exec` is the agent-safe alternative to `reveal` — use it whenever
+  a secret's only purpose is to be handed to another tool (curl, a script)
+  rather than looked at by a human. `reveal` prints plaintext and should stay
+  human-only; `exec` never prints anything, so it's safe for scripted/agent
+  use even though it still requires `--write`.
 
 ### Deployment Helpers (`gw deploy`)
 
