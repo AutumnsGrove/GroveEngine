@@ -157,6 +157,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 						updated_at: undefined,
 						blaze: null as string | null,
 						blazeDefinition: null as BlazeDefinition | null,
+						spark_prompt: null as string | null,
 					},
 					isOwner: isOwner || false,
 					comments: [],
