@@ -88,9 +88,11 @@ export const VINE_COLOR_PRESETS: ColorPreset[] = [
  */
 export {
 	fontPresets as FONT_PRESETS,
+	fontCategoryLabels as FONT_CATEGORY_LABELS,
 	DEFAULT_FONT,
 	fontMap,
 	validFontIds,
 	getFontStack as getFontFamily,
 	type FontPreset,
+	type FontCategory,
 } from "$lib/ui/tokens/fonts";

@@ -27,50 +27,42 @@ import {
 
 ## Available Fonts
 
-### Display & Special (3)
+This is the complete catalog — the canonical source is `libs/engine/src/lib/ui/tokens/fonts.ts`; every font picker in the app (post/page editors, site appearance settings) reads from it, so this list is always in sync with what's actually loaded.
 
-| Component   | Font      | Use Case                            |
-| ----------- | --------- | ----------------------------------- |
-| `Alagard`   | Alagard   | Fantasy, gaming, medieval themes    |
-| `Calistoga` | Calistoga | Friendly headlines, warm branding   |
-| `Caveat`    | Caveat    | Handwritten notes, personal touches |
+### Default (1)
 
-### Serif (6)
+| Component | Font   | Use Case                    |
+| --------- | ------ | ---------------------------- |
+| `Lexend` | Lexend | Default, highly readable UI |
 
-| Component      | Font         | Use Case                          |
-| -------------- | ------------ | --------------------------------- |
-| `Cormorant`    | Cormorant    | Elegant headers, editorial        |
-| `BodoniModa`   | Bodoni Moda  | High fashion, sophisticated       |
-| `Lora`         | Lora         | Body text, readable articles      |
-| `EBGaramond`   | EB Garamond  | Book typography, classic feel     |
-| `Merriweather` | Merriweather | Screen reading, long-form content |
-| `Fraunces`     | Fraunces     | Warm personality, soft serif      |
+### Accessibility (2)
 
-### Sans-Serif (6)
+| Component      | Font                  | Use Case            |
+| -------------- | --------------------- | -------------------- |
+| `Atkinson`     | Atkinson Hyperlegible | Low vision readers   |
+| `OpenDyslexic` | OpenDyslexic          | Dyslexic readers     |
 
-| Component         | Font              | Use Case                          |
-| ----------------- | ----------------- | --------------------------------- |
-| `Lexend`          | Lexend            | Default, highly readable UI       |
-| `Nunito`          | Nunito            | Friendly, approachable interfaces |
-| `Quicksand`       | Quicksand         | Light, modern, geometric          |
-| `Manrope`         | Manrope           | Professional, clean interfaces    |
-| `InstrumentSans`  | Instrument Sans   | Elegant simplicity                |
-| `PlusJakartaSans` | Plus Jakarta Sans | Balanced, versatile               |
+### Sans-Serif (2)
+
+| Component         | Font              | Use Case               |
+| ----------------- | ----------------- | ----------------------- |
+| `Quicksand`       | Quicksand         | Light, modern, geometric |
+| `PlusJakartaSans` | Plus Jakarta Sans | Balanced, versatile      |
 
 ### Monospace (2)
 
 | Component     | Font          | Use Case                        |
-| ------------- | ------------- | ------------------------------- |
-| `IBMPlexMono` | IBM Plex Mono | Code blocks, technical content  |
-| `Cozette`     | Cozette       | Retro terminal, pixel aesthetic |
+| ------------- | ------------- | -------------------------------- |
+| `IBMPlexMono` | IBM Plex Mono | Code blocks, technical content   |
+| `Cozette`     | Cozette       | Retro terminal, pixel aesthetic  |
 
-### Accessibility (3)
+### Display & Special (3)
 
-| Component      | Font                  | Use Case                  |
-| -------------- | --------------------- | ------------------------- |
-| `Atkinson`     | Atkinson Hyperlegible | Low vision readers        |
-| `OpenDyslexic` | OpenDyslexic          | Dyslexic readers          |
-| `Luciole`      | Luciole               | Visually impaired readers |
+| Component   | Font      | Use Case                            |
+| ----------- | --------- | ------------------------------------ |
+| `Alagard`   | Alagard   | Fantasy, gaming, medieval themes     |
+| `Calistoga` | Calistoga | Friendly headlines, warm branding    |
+| `Caveat`    | Caveat    | Handwritten notes, personal touches  |
 
 ## Props
 
@@ -89,7 +81,7 @@ Use `FontProvider` when you need to select fonts programmatically:
 ```svelte
 <script>
   import { FontProvider } from '@autumnsgrove/lattice/ui/typography';
-  let selectedFont = 'cormorant';
+  let selectedFont = 'quicksand';
 </script>
 
 <FontProvider font={selectedFont} as="article">
@@ -106,21 +98,20 @@ Use `FontProvider` when you need to select fonts programmatically:
 
 ## Accessibility Recommendations
 
-| Situation             | Recommended Font                                 |
-| --------------------- | ------------------------------------------------ |
-| Low vision users      | `Atkinson` (maximum character distinction)       |
-| Dyslexic readers      | `OpenDyslexic` (weighted letter bottoms)         |
-| General accessibility | `Lexend` (designed for reading fluency)          |
-| Long-form reading     | `Merriweather` or `Lora` (optimized for screens) |
+| Situation             | Recommended Font                           |
+| ---------------------- | ------------------------------------------- |
+| Low vision users       | `Atkinson` (maximum character distinction)  |
+| Dyslexic readers       | `OpenDyslexic` (weighted letter bottoms)    |
+| General accessibility  | `Lexend` (designed for reading fluency)     |
 
 ## Examples
 
 ### Blog Post Header
 
 ```svelte
-<Fraunces as="h1" class="text-4xl font-bold text-bark-900">
+<Calistoga as="h1" class="text-4xl font-bold text-bark-900">
   A Warm Welcome to the Grove
-</Fraunces>
+</Calistoga>
 ```
 
 ### Code Documentation
@@ -146,9 +137,9 @@ Use `FontProvider` when you need to select fonts programmatically:
 ```svelte
 <article>
   <Alagard as="h1" class="text-3xl mb-4">Quest Log</Alagard>
-  <Lora as="div" class="prose">
+  <Quicksand as="div" class="prose">
     <p>Your journey begins in the misty forests...</p>
-  </Lora>
+  </Quicksand>
 </article>
 ```
 

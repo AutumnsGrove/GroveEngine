@@ -16,7 +16,14 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
+	import { FONT_PRESETS, FONT_CATEGORY_LABELS } from "@autumnsgrove/lattice/platform/config/presets";
 	import type { GutterItem } from "@autumnsgrove/grove-markdown";
+
+	// Canonical font list — single source of truth, keeps this select in sync
+	// with the fonts actually loaded on the site (libs/engine/.../tokens/fonts.ts)
+	const fontCategories = Object.keys(FONT_CATEGORY_LABELS) as Array<
+		keyof typeof FONT_CATEGORY_LABELS
+	>;
 
 	// Page data from admin layout (includes grafts cascade)
 	let { data } = $props();
@@ -480,36 +487,13 @@
 						<label for="font">Font</label>
 						<select id="font" bind:value={font} class="form-input">
 							<option value="default">Default (Site Setting)</option>
-							<optgroup label="Accessibility">
-								<option value="lexend">Lexend (Default)</option>
-								<option value="atkinson">Atkinson Hyperlegible</option>
-								<option value="opendyslexic">OpenDyslexic</option>
-								<option value="luciole">Luciole</option>
-								<option value="nunito">Nunito</option>
-							</optgroup>
-							<optgroup label="Modern Sans">
-								<option value="quicksand">Quicksand</option>
-								<option value="manrope">Manrope</option>
-								<option value="instrument-sans">Instrument Sans</option>
-								<option value="plus-jakarta-sans">Plus Jakarta Sans</option>
-							</optgroup>
-							<optgroup label="Serifs">
-								<option value="cormorant">Cormorant</option>
-								<option value="bodoni-moda">Bodoni Moda</option>
-								<option value="lora">Lora</option>
-								<option value="eb-garamond">EB Garamond</option>
-								<option value="merriweather">Merriweather</option>
-								<option value="fraunces">Fraunces</option>
-							</optgroup>
-							<optgroup label="Monospace">
-								<option value="ibm-plex-mono">IBM Plex Mono</option>
-								<option value="cozette">Cozette</option>
-							</optgroup>
-							<optgroup label="Display & Special">
-								<option value="alagard">Alagard</option>
-								<option value="calistoga">Calistoga</option>
-								<option value="caveat">Caveat</option>
-							</optgroup>
+							{#each fontCategories as category (category)}
+								<optgroup label={FONT_CATEGORY_LABELS[category]}>
+									{#each FONT_PRESETS.filter((f) => f.category === category) as preset (preset.id)}
+										<option value={preset.id}>{preset.name}</option>
+									{/each}
+								</optgroup>
+							{/each}
 						</select>
 						<span class="form-hint">Choose a font for this bloom's content</span>
 					</div>
