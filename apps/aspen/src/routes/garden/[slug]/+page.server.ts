@@ -108,7 +108,11 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 			});
 
 			if (cachedPost) {
-				if (isOwner) {
+				// Demo mode also personalizes the rendered header (demo chip),
+				// same as owner status — must skip public caching too, or a
+				// demo-authenticated visit gets served to every other visitor
+				// for up to a day (stale-while-revalidate) regardless of cookies.
+				if (isOwner || locals.isDemoMode) {
 					setHeaders({ "Cache-Control": "private, max-age=300" });
 				} else {
 					setHeaders({
