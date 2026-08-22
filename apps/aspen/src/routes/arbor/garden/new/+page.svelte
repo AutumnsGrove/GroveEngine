@@ -12,7 +12,7 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	import { navIcons, stateIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
@@ -32,23 +32,41 @@
 	let gutterItems = $state<GutterItem[]>([]);
 	let featuredImage = $state("");
 	let selectedBlaze = $state<string | null>(null);
-	let sparkDismissed = $state(false);
-	let activeSparkPrompt = $state<WritingPrompt | null>(null);
-	let startedWithSpark = $state<string | null>(null);
 
-	// Empty-state only: shows while the draft is blank, hides once you start
-	// writing, so it never competes with the toolbar or a real draft in progress.
+	// Icon components must be aliased to a capitalized local before use as a
+	// tag — see WritingPromptSpark.svelte for why.
+	const SparkIcon = featureIcons.pencilSparkles;
+	const PinIcon = actionIcons.pin;
+	const MinimizeIcon = actionIcons.minimize;
+	const DismissIcon = stateIcons.x;
+
+	// Spark (writing prompt) state — see docs/plans/features/planned/writing-prompts-curio.md
+	// for the full design. Attribution is an explicit choice (Pin), never
+	// inferred from typing: a writer can type unrelated content past a
+	// showing prompt without silently crediting it.
+	let sparkDismissed = $state(false); // "not now" — hidden for the rest of this draft
+	let sparkMinimized = $state(false); // collapsed to a small pill, reference kept
+	let pinnedPrompt = $state<string | null>(null); // committed text -> spark_prompt on save
+	let activeSparkPrompt = $state<WritingPrompt | null>(null); // whichever prompt is on screen/last referenced
+
+	// The chooser card only makes sense before anything's been pinned —
+	// once pinned it collapses to the reference strip even if the draft is
+	// still blank, so pinning always reads as a completed decision.
 	let draftIsBlank = $derived(!title.trim() && !content.trim());
-	let showSpark = $derived(!sparkDismissed && draftIsBlank);
+	let showSparkChooser = $derived(
+		!sparkDismissed && !sparkMinimized && !pinnedPrompt && draftIsBlank,
+	);
+	let showSparkReference = $derived(
+		!sparkDismissed && !sparkMinimized && !showSparkChooser && !!activeSparkPrompt,
+	);
+	let showSparkPill = $derived(!sparkDismissed && sparkMinimized && !!activeSparkPrompt);
 
-	// The moment the draft stops being blank, whatever prompt was showing
-	// gets credited as "started with" — but only if it wasn't dismissed
-	// first. No separate "use this" button; typing IS the signal.
-	$effect(() => {
-		if (!draftIsBlank && !sparkDismissed && !startedWithSpark && activeSparkPrompt) {
-			startedWithSpark = activeSparkPrompt.text;
-		}
-	});
+	function pinSparkPrompt() {
+		if (activeSparkPrompt) pinnedPrompt = activeSparkPrompt.text;
+	}
+	function unpinSparkPrompt() {
+		pinnedPrompt = null;
+	}
 
 	// Blaze picker — fetched from API to include tenant custom blazes
 	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
@@ -162,7 +180,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: 0,
 				blaze: selectedBlaze,
-				spark_prompt: startedWithSpark,
+				spark_prompt: pinnedPrompt,
 			});
 
 			editorRef?.clearDraft();
@@ -240,7 +258,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: 0,
 				blaze: selectedBlaze,
-				spark_prompt: startedWithSpark,
+				spark_prompt: pinnedPrompt,
 			});
 
 			editorRef?.clearDraft();
@@ -305,16 +323,62 @@
 	{/if}
 
 	<div class="editor-layout">
-		{#if showSpark}
+		{#if showSparkChooser}
 			<WritingPromptSpark
 				onDismiss={() => (sparkDismissed = true)}
+				onPin={pinSparkPrompt}
 				onPromptChange={(p) => (activeSparkPrompt = p)}
 			/>
-		{:else if startedWithSpark}
-			<div class="spark-attribution">
-				<span class="spark-attribution-label">Started with a spark</span>
-				<span class="spark-attribution-text">"{startedWithSpark}"</span>
+		{:else if showSparkReference && activeSparkPrompt}
+			<div class="spark-reference">
+				<SparkIcon class="w-3.5 h-3.5 spark-reference-icon" />
+				<div class="spark-reference-body">
+					{#if pinnedPrompt}
+						<span class="spark-reference-label">Started with a spark</span>
+					{/if}
+					<span class="spark-reference-text">"{activeSparkPrompt.text}"</span>
+				</div>
+				<div class="spark-reference-actions">
+					{#if pinnedPrompt}
+						<button type="button" class="spark-ref-btn" onclick={unpinSparkPrompt}>
+							Unpin
+						</button>
+					{:else}
+						<button type="button" class="spark-ref-btn spark-ref-btn-accent" onclick={pinSparkPrompt}>
+							<PinIcon class="w-3 h-3" />
+							Pin this
+						</button>
+					{/if}
+					<button
+						type="button"
+						class="spark-ref-btn spark-ref-btn-icon"
+						onclick={() => (sparkMinimized = true)}
+						title="Minimize"
+					>
+						<MinimizeIcon class="w-3.5 h-3.5" />
+					</button>
+					{#if !pinnedPrompt}
+						<button
+							type="button"
+							class="spark-ref-btn spark-ref-btn-icon"
+							onclick={() => (sparkDismissed = true)}
+							title="Dismiss"
+						>
+							<DismissIcon class="w-3.5 h-3.5" />
+						</button>
+					{/if}
+				</div>
 			</div>
+		{:else if showSparkPill}
+			<button
+				type="button"
+				class="spark-pill"
+				onclick={() => (sparkMinimized = false)}
+				title="Show writing prompt"
+			>
+				<SparkIcon class="w-3.5 h-3.5" />
+				Spark
+			</button>
 		{/if}
 
 		<!-- Inline title -->
@@ -633,22 +697,99 @@
 		min-height: 0;
 	}
 
-	/* Spark attribution — quiet record of the prompt that started this draft */
-	.spark-attribution {
+	/* Spark reference strip — persistent while typing, pinned or not */
+	.spark-reference {
 		display: flex;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.4rem;
+		align-items: flex-start;
+		gap: 0.6rem;
 		margin: 0.5rem 0 1rem;
+		padding: 0.5rem 0.75rem;
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);
+		border-radius: var(--border-radius-small, 6px);
 		font-size: 0.8rem;
 	}
-	.spark-attribution-label {
+	:global(.spark-reference-icon) {
+		flex-shrink: 0;
+		margin-top: 0.15rem;
+		color: var(--color-primary);
+	}
+	.spark-reference-body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.4rem;
+	}
+	.spark-reference-label {
 		color: var(--color-primary);
 		font-weight: 600;
 	}
-	.spark-attribution-text {
+	.spark-reference-text {
 		color: var(--color-text-subtle);
 		font-style: italic;
+	}
+	.spark-reference-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+	.spark-ref-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.3rem 0.5rem;
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: var(--border-radius-small, 6px);
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-text-subtle);
+		cursor: pointer;
+		white-space: nowrap;
+		transition:
+			background-color 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+	.spark-ref-btn:hover {
+		background: var(--color-bg-secondary);
+		color: var(--color-text);
+	}
+	.spark-ref-btn-accent {
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+		border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+	}
+	.spark-ref-btn-accent:hover {
+		background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+		color: var(--color-primary);
+	}
+	.spark-ref-btn-icon {
+		padding: 0.3rem;
+	}
+
+	/* Spark pill — minimized state, click to bring the reference back */
+	.spark-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		align-self: flex-start;
+		margin: 0.5rem 0 1rem;
+		padding: 0.3rem 0.65rem;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-primary);
+		cursor: pointer;
+		transition: background-color 0.15s ease;
+	}
+	.spark-pill:hover {
+		background: color-mix(in srgb, var(--color-primary) 18%, transparent);
 	}
 
 	/* Inline title — big, clean, heading-style */

@@ -8,20 +8,22 @@
 	// pattern used in FormattingToolbar.svelte).
 	const SparklesIcon = featureIcons.pencilSparkles;
 	const RefreshIcon = actionIcons.refresh;
+	const PinIcon = actionIcons.pin;
 	const DismissIcon = stateIcons.x;
 
 	interface Props {
 		onDismiss?: () => void;
+		/** Explicit "yes, I want to write from this one" commit action. */
+		onPin?: () => void;
 		/**
 		 * Fires whenever the displayed prompt changes (mount + each "another
-		 * spark"). Lets the parent page know which prompt was showing if the
-		 * writer starts typing — that's how "Started with a spark" gets
-		 * attributed without a separate "use this" button.
+		 * spark"). Lets the parent page track which prompt is currently on
+		 * screen so it can be referenced or pinned later.
 		 */
 		onPromptChange?: (prompt: WritingPrompt) => void;
 	}
 
-	let { onDismiss, onPromptChange }: Props = $props();
+	let { onDismiss, onPin, onPromptChange }: Props = $props();
 
 	let currentIndex = $state(Math.floor(Math.random() * WRITING_PROMPTS.length));
 	let current = $derived(WRITING_PROMPTS[currentIndex]);
@@ -55,6 +57,12 @@
 			<RefreshIcon class="w-3.5 h-3.5" />
 			Another spark
 		</button>
+		{#if onPin}
+			<button type="button" class="spark-btn spark-btn-pin" onclick={onPin} title="Write from this prompt">
+				<PinIcon class="w-3.5 h-3.5" />
+				Use this
+			</button>
+		{/if}
 		{#if onDismiss}
 			<button type="button" class="spark-btn spark-btn-dismiss" onclick={onDismiss} title="Dismiss">
 				<DismissIcon class="w-3.5 h-3.5" />
@@ -135,6 +143,16 @@
 	.spark-btn-ghost:hover {
 		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 		border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+	}
+
+	.spark-btn-pin {
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+		border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+	}
+
+	.spark-btn-pin:hover {
+		background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+		border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
 	}
 
 	.spark-btn-dismiss {
