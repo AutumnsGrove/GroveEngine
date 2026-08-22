@@ -11,6 +11,7 @@
 	import { DEFAULT_NAV_ITEMS } from "$lib/ui/components/chrome/defaults";
 	import AccountStatus from "$lib/ui/components/chrome/AccountStatus.svelte";
 	import BetaBadge from "$lib/ui/components/ui/BetaBadge.svelte";
+	import DemoBadge from "$lib/ui/components/ui/DemoBadge.svelte";
 	import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { resolveNavLabel } from "$lib/ui/components/chrome/types";
@@ -28,6 +29,8 @@
 		season?: Season;
 		/** Show a beta-environment badge next to the brand title */
 		isBeta?: boolean;
+		/** Show a demo-mode badge next to the brand title */
+		isDemo?: boolean;
 
 		// Search support for tenant sites
 		/** Enable search input in header */
@@ -72,6 +75,7 @@
 		brandTitle,
 		season,
 		isBeta = false,
+		isDemo = false,
 		// Search props
 		searchEnabled = false,
 		searchPlaceholder = "Search...",
@@ -202,6 +206,9 @@
 				<BetaBadge
 					title="You're on the beta deployment — same live data as your real site, testing new code before it ships"
 				/>
+			{/if}
+			{#if isDemo}
+				<DemoBadge />
 			{/if}
 		</div>
 
