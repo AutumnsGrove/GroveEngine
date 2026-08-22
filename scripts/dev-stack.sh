@@ -175,6 +175,26 @@ reset_databases() {
     seed_data "blog"
 }
 
+# ── Demo mode ─────────────────────────────────────────────────────────
+# Reads DEMO_MODE_SECRET from apps/aspen/.dev.vars and prints the exact
+# URL that trades it for the grove_demo_mode cookie, so nobody has to
+# manually dig the secret out of .dev.vars and hand-build the URL
+# every time (see project_local_dev_login memory for the full flow).
+demo_login_url() {
+    local dev_vars="apps/aspen/.dev.vars"
+    if [ ! -f "$dev_vars" ]; then
+        return 1
+    fi
+
+    local secret
+    secret=$(grep -E "^DEMO_MODE_SECRET=" "$dev_vars" | head -1 | cut -d= -f2-)
+    if [ -z "$secret" ]; then
+        return 1
+    fi
+
+    echo "http://localhost:5173/arbor?demo=$secret"
+}
+
 # ── Workers ───────────────────────────────────────────────────────────
 wait_for_port() {
     local port=$1
@@ -256,6 +276,12 @@ main() {
             seed_data "blog"
             start_workers
             echo ""
+            local demo_url
+            if demo_url=$(demo_login_url); then
+                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
+                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
+                echo ""
+            fi
             log "Workers running. Press Ctrl+C to stop."
             wait
             ;;
@@ -269,6 +295,14 @@ main() {
             echo -e "  ${CYAN}Heartwood:${RESET} http://localhost:8787 (auth API)"
             echo -e "  ${CYAN}DOs:${RESET}       via service binding (grove-durable-objects)"
             echo -e "  ${CYAN}Email:${RESET}     via service binding (grove-zephyr)"
+            echo ""
+            local demo_url
+            if demo_url=$(demo_login_url); then
+                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
+                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
+            else
+                warn "DEMO_MODE_SECRET not found in apps/aspen/.dev.vars — demo login unavailable"
+            fi
             echo ""
             log "Press Ctrl+C to stop all services."
             wait
