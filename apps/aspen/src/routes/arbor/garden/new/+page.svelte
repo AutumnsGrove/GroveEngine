@@ -38,13 +38,15 @@
 	const SparkIcon = featureIcons.pencilSparkles;
 	const PinIcon = actionIcons.pin;
 	const MinimizeIcon = actionIcons.minimize;
-	const DismissIcon = stateIcons.x;
 
 	// Spark (writing prompt) state — see docs/plans/features/planned/writing-prompts-curio.md
 	// for the full design. Attribution is an explicit choice (Pin), never
 	// inferred from typing: a writer can type unrelated content past a
 	// showing prompt without silently crediting it.
-	let sparkDismissed = $state(false); // "not now" — hidden for the rest of this draft
+	//
+	// There's no "gone forever" state — every hide action (dismiss or
+	// minimize) collapses to the small pill rather than removing Spark
+	// outright, so it's never a dead end with no way back.
 	let sparkMinimized = $state(false); // collapsed to a small pill, reference kept
 	let pinnedPrompt = $state<string | null>(null); // committed text -> spark_prompt on save
 	let activeSparkPrompt = $state<WritingPrompt | null>(null); // whichever prompt is on screen/last referenced
@@ -53,13 +55,9 @@
 	// once pinned it collapses to the reference strip even if the draft is
 	// still blank, so pinning always reads as a completed decision.
 	let draftIsBlank = $derived(!title.trim() && !content.trim());
-	let showSparkChooser = $derived(
-		!sparkDismissed && !sparkMinimized && !pinnedPrompt && draftIsBlank,
-	);
-	let showSparkReference = $derived(
-		!sparkDismissed && !sparkMinimized && !showSparkChooser && !!activeSparkPrompt,
-	);
-	let showSparkPill = $derived(!sparkDismissed && sparkMinimized && !!activeSparkPrompt);
+	let showSparkChooser = $derived(!sparkMinimized && !pinnedPrompt && draftIsBlank);
+	let showSparkReference = $derived(!sparkMinimized && !showSparkChooser && !!activeSparkPrompt);
+	let showSparkPill = $derived(sparkMinimized && !!activeSparkPrompt);
 
 	function pinSparkPrompt() {
 		if (activeSparkPrompt) pinnedPrompt = activeSparkPrompt.text;
@@ -325,7 +323,7 @@
 	<div class="editor-layout">
 		{#if showSparkChooser}
 			<WritingPromptSpark
-				onDismiss={() => (sparkDismissed = true)}
+				onDismiss={() => (sparkMinimized = true)}
 				onPin={pinSparkPrompt}
 				onPromptChange={(p) => (activeSparkPrompt = p)}
 			/>
@@ -353,20 +351,10 @@
 						type="button"
 						class="spark-ref-btn spark-ref-btn-icon"
 						onclick={() => (sparkMinimized = true)}
-						title="Minimize"
+						title="Minimize (find it again via the Spark pill)"
 					>
 						<MinimizeIcon class="w-3.5 h-3.5" />
 					</button>
-					{#if !pinnedPrompt}
-						<button
-							type="button"
-							class="spark-ref-btn spark-ref-btn-icon"
-							onclick={() => (sparkDismissed = true)}
-							title="Dismiss"
-						>
-							<DismissIcon class="w-3.5 h-3.5" />
-						</button>
-					{/if}
 				</div>
 			</div>
 		{:else if showSparkPill}

@@ -64,7 +64,12 @@
 			</button>
 		{/if}
 		{#if onDismiss}
-			<button type="button" class="spark-btn spark-btn-dismiss" onclick={onDismiss} title="Dismiss">
+			<button
+				type="button"
+				class="spark-btn spark-btn-dismiss"
+				onclick={onDismiss}
+				title="Minimize (find it again via the Spark pill)"
+			>
 				<DismissIcon class="w-3.5 h-3.5" />
 			</button>
 		{/if}
