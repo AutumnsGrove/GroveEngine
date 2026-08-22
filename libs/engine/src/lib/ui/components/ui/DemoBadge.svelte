@@ -50,11 +50,7 @@
 
 <style>
 	.demo-badge {
-		background: rgba(34, 197, 94, 0.15);
-		color: var(--grove-700, #15803d);
-	}
-
-	:global(.dark) .demo-badge {
-		color: var(--grove-400, #4ade80);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 </style>

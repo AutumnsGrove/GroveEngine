@@ -36,6 +36,9 @@ export { default as LogoArchive } from "./LogoArchive.svelte";
 export { default as BetaBadge } from "./BetaBadge.svelte";
 export { default as BetaWelcomeDialog } from "./BetaWelcomeDialog.svelte";
 
+// --- Demo ---
+export { default as DemoBadge } from "./DemoBadge.svelte";
+
 // --- Glass Suite ---
 export { default as Glass } from "./Glass.svelte";
 export { default as GlassButton } from "./GlassButton.svelte";
