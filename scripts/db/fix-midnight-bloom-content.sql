@@ -236,6 +236,72 @@ But you might find something you didn''t know you were looking for: the rare lux
 );
 
 -- ============================================
+-- POST 4: The Night I Finally Sat Still
+-- ============================================
+-- Seeded to demonstrate the Writing Prompts curio (issue #1575) — this
+-- post's spark_prompt column is populated, same as a real bloom started
+-- from Flow's Spark button would be. Added here (not just in
+-- seed-midnight-bloom.sql) because this script DELETEs every post for
+-- the tenant above and only re-inserts what's listed below — without
+-- this block, post 4 was created and then immediately deleted every
+-- time the blog seed profile ran.
+INSERT INTO posts (id, tenant_id, slug, title, description, markdown_content, tags, status, spark_prompt, gutter_content, published_at, created_at, updated_at)
+VALUES (
+  'example-post-sat-still',
+  'example-tenant-001',
+  'the-night-i-finally-sat-still',
+  'The Night I Finally Sat Still',
+  'A closing-shift confession about the difference between quiet and stillness',
+  'I almost didn''t write this one down. It started as a note to myself, scribbled on the back of a receipt during a slow closing shift, and it stayed folded in my apron pocket for two weeks before I let myself admit it was worth saying out loud.
+
+## The Prompt I Couldn''t Shake
+
+
+I''d been staring at a blank page for a while — the kind of blank that isn''t really about not having anything to say, it''s about not knowing where to start. So I did the thing I tell our regulars to do when they''re stuck: I let something small choose for me. A prompt, not a plan. *Describe the last time you sat in silence on purpose.*
+
+I laughed a little, sitting there at table six after close, kettle steam curling up past the candlelight. Of all the prompts to land on, in a cafe built entirely around silence. But that was exactly why it stopped me.
+
+## Quiet Isn''t the Same as Still
+
+We talk a lot here about not playing music, about protecting the hush of the room. What I hadn''t admitted, even to myself, was that I''d gotten so good at *offering* quiet to other people that I''d forgotten how to actually sit in it.
+
+
+Most nights, even in the silence, my mind is doing inventory. Restocking the lapsang souchong. Wondering if table three needs a refill. Running the math on whether we have enough chamomile for the weekend. The room was quiet. I was not.
+
+So that night, after the last regular left and the door was locked, I didn''t start closing checklist. I just sat. No phone, no notebook, not even tea at first — just the chair, the dark windows, and whatever was left of the candle.
+
+## What Ten Minutes Actually Feels Like
+
+
+Ten minutes doesn''t sound like much. It felt enormous. The first few were restless — my hands wanted a task, my eyes kept drifting to the things that needed wiping down. Somewhere around minute four, I noticed the specific sound the building makes when no one''s talking in it: a settle, a creak, the fridge compressor cycling on and off like slow breathing.
+
+By minute eight, I wasn''t thinking about the shop at all. I was just here. Twelve empty chairs, a hundred cups washed and stacked, and me, finally matching the room instead of managing it.
+
+## Why I''m Telling You This
+
+
+Because I think a lot of us — night people especially — are experts at *making* space for stillness without ever stepping into it ourselves. We set the table. We dim the lights. We hand someone their tea and disappear so they can have their moment. And somewhere in all that hosting, we forget we''re allowed a moment too.
+
+So this is a small, late invitation, from someone whose job is to protect quiet for a living: sit in it yourself sometimes. Not to serve anyone. Not to accomplish anything. Just to find out what you sound like when nothing''s asking anything of you.
+
+*The kettle can wait ten more minutes. It always has.*
+
+— Elena',
+  '["reflection", "closing-shift", "stillness"]',
+  'published',
+  'Describe the last time you sat in silence on purpose.',
+  '[
+  {"type": "comment", "anchor": "paragraph:2", "content": "The receipt is still on the corkboard by the register, if you want to see the actual handwriting."},
+  {"type": "comment", "anchor": "paragraph:5", "content": "This is the line half the staff has quoted back at each other since."},
+  {"type": "comment", "anchor": "paragraph:7", "content": "We''ve started leaving the last candle lit an extra ten minutes at close, just in case anyone else needs them."},
+  {"type": "comment", "anchor": "paragraph:9", "content": "If this sounds like you, table six is usually free after midnight."}
+]',
+  unixepoch() - 86400 * 12,
+  unixepoch() - 86400 * 12,
+  unixepoch()
+);
+
+-- ============================================
 -- UPDATE TENANT POST COUNT
 -- ============================================
-UPDATE tenants SET post_count = 3 WHERE id = 'example-tenant-001';
+UPDATE tenants SET post_count = 4 WHERE id = 'example-tenant-001';
