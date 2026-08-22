@@ -275,7 +275,11 @@ export const load: PageServerLoad = async ({ platform, locals, setHeaders }) => 
 	// PERFORMANCE: Cache tenant home pages at the edge for anonymous visitors only.
 	// Logged-in users always get fresh SSR (layout includes owner UI like admin gear).
 	// Cloudflare ignores Vary: Cookie for HTML, so we gate on auth state instead.
-	if (tenantId && !locals.user) {
+	// Demo mode is also cookie-driven personalization (adds the Demo chip to the
+	// header) even though it doesn't set locals.user — must be excluded too, or a
+	// single demo-authenticated visit gets cached and served to every other visitor,
+	// cookies or not, until the edge cache entry expires.
+	if (tenantId && !locals.user && !locals.isDemoMode) {
 		setHeaders({
 			"Cache-Control": "public, max-age=60, s-maxage=120",
 			"CDN-Cache-Control": "max-age=300, stale-while-revalidate=3600",

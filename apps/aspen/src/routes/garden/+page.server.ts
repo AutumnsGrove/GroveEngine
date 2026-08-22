@@ -106,8 +106,12 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 			}
 		}
 
-		// Set Cache-Control headers for edge caching
-		if (posts.length > 0) {
+		// Set Cache-Control headers for edge caching — anonymous, non-demo visitors
+		// only. This page renders owner-only UI (the "New post" button) and the
+		// demo chip; caching it publicly for anyone else would leak that owner UI
+		// or a stale demo chip to visitors who shouldn't see either. Cloudflare
+		// ignores Vary: Cookie for HTML, so we gate on request state instead.
+		if (posts.length > 0 && !locals.user && !locals.isDemoMode) {
 			setHeaders({
 				"Cache-Control": "public, max-age=300, s-maxage=600",
 				"CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
