@@ -761,6 +761,26 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
+	// DEMO MODE: simulate being the tenant owner
+	// =========================================================================
+	// Demo mode already bypasses Turnstile/login so visitors can browse Arbor
+	// without a real Heartwood session — but it never set locals.user, so
+	// every write action (saving/publishing a bloom, anything gated on
+	// isOwner) still demanded a real login. Only runs when demo mode proved
+	// itself for this request and a tenant is actually resolved; the email
+	// must equal the tenant's ownerId exactly since isOwner checks elsewhere
+	// use emailsMatch(tenant.ownerId, user.email).
+	if (!event.locals.user && isDemoModeActive && event.locals.context.type === "tenant") {
+		event.locals.user = {
+			id: "demo-owner",
+			email: event.locals.context.tenant.ownerId,
+			name: `${event.locals.context.tenant.name} (Demo)`,
+			picture: "",
+			isAdmin: false,
+		};
+	}
+
+	// =========================================================================
 	// REQUEST BODY SIZE VALIDATION (HAWK-008)
 	// =========================================================================
 	// Reject oversized request bodies before processing.
