@@ -6,10 +6,11 @@
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { featureIcons, actionIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import { debounce } from "$lib/utils/debounce";
+	import { clickOutside } from "$lib/actions/clickOutside";
+	import CdnImagePicker from "./CdnImagePicker.svelte";
 	import type {
 		GutterItem,
 		GalleryImage,
-		CdnImage,
 		ProcessedAnchor,
 		ParagraphAnchor,
 	} from "./gutter-manager.types.js";
@@ -18,8 +19,6 @@
 		createProcessedAnchor,
 		generateAnchorName,
 		getItemPreview,
-		getCachedImage,
-		setCachedImage,
 	} from "./gutter-manager-utils.js";
 
 	// Props
@@ -64,8 +63,10 @@
 	// State
 	let showAddModal = $state(false);
 	let editingIndex: number | null = $state(null);
-	let showImagePicker = $state(false);
-	let imagePickerCallback: ((url: string) => void) | null = $state(null);
+
+	// CDN image picker — one dialog, two callers (photo field, gallery list)
+	let cdnPickerOpen = $state(false);
+	let cdnPickerTarget: "photo" | "gallery" = $state("photo");
 
 	// Form state for add/edit
 	let itemType = $state("comment");
@@ -84,56 +85,6 @@
 	let embedThumbnail = $state("");
 	let embedLoading = $state(false);
 	let embedError = $state("");
-
-	// Image picker state
-	let cdnImages: CdnImage[] = $state([]);
-	let cdnLoading = $state(false);
-	let cdnFilter = $state("");
-
-	// Debounced CDN filter to avoid excessive API calls
-	const debouncedFilterRequest = debounce(async (query: unknown) => {
-		cdnLoading = true;
-		try {
-			const queryStr = query ? String(query) : "";
-			const cacheKey = queryStr ? `cdn_${queryStr}` : "cdn_root";
-
-			// Check cache first
-			const cachedResult = getCachedImage(cacheKey);
-			if (cachedResult) {
-				try {
-					cdnImages = JSON.parse(cachedResult);
-					cdnLoading = false;
-					return;
-				} catch {
-					// If cache parsing fails, continue to API call
-				}
-			}
-
-			const params = new URLSearchParams();
-			if (queryStr) params.set("prefix", queryStr);
-			params.set("limit", "50");
-
-			const response = await fetch(`/api/images/list?${params}`); // csrf-ok
-			const data = (await response.json()) as { images: CdnImage[] };
-
-			if (response.ok) {
-				const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-				const filtered = data.images.filter((img: CdnImage) => {
-					const key = img.key.toLowerCase();
-					return imageExtensions.some((ext) => key.endsWith(ext));
-				});
-				cdnImages = filtered;
-				// Cache the result
-				setCachedImage(cacheKey, JSON.stringify(filtered));
-			}
-		} catch (err) {
-			toast.error("Failed to load CDN images");
-			console.error("Failed to load CDN images:", err);
-			cdnImages = [];
-		} finally {
-			cdnLoading = false;
-		}
-	}, 300);
 
 	function resetForm() {
 		itemType = "comment";
@@ -240,35 +191,25 @@
 		}
 	}
 
-	// CDN Image Picker - now uses debounced filter request
-	function loadCdnImages() {
-		debouncedFilterRequest(cdnFilter);
+	// CDN image picker — the shared CdnImagePicker owns fetching and caching,
+	// we only remember which form field asked for the image.
+	function openPhotoPicker() {
+		cdnPickerTarget = "photo";
+		cdnPickerOpen = true;
 	}
 
-	function openImagePicker(callback: (url: string) => void) {
-		imagePickerCallback = callback;
-		showImagePicker = true;
-		loadCdnImages();
-	}
-
-	function selectImage(image: CdnImage) {
-		if (imagePickerCallback) {
-			imagePickerCallback(image.url);
+	function handleCdnSelect(url: string) {
+		if (cdnPickerTarget === "gallery") {
+			galleryImages = [...galleryImages, { url, alt: "", caption: "" }];
+		} else {
+			itemUrl = url;
 		}
-		showImagePicker = false;
-		imagePickerCallback = null;
-	}
-
-	function closeImagePicker() {
-		showImagePicker = false;
-		imagePickerCallback = null;
 	}
 
 	// Gallery helpers
 	function addGalleryImage() {
-		openImagePicker((url) => {
-			galleryImages = [...galleryImages, { url, alt: "", caption: "" }];
-		});
+		cdnPickerTarget = "gallery";
+		cdnPickerOpen = true;
 	}
 
 	function removeGalleryImage(index: number) {
@@ -349,7 +290,200 @@
 
 	// Debounced embed resolution
 	const debouncedResolveEmbed = debounce(resolveEmbedUrl, 600);
+
+	// ------------------------------------------------------------------
+	// The living vine
+	//
+	// Vines are drawn as leaves growing off a stem instead of a flat list.
+	// Node placement is index-proportional, not pixel-synced to the editor
+	// scroll position — the panel has no way to know where a paragraph
+	// actually sits on screen, so we space leaves evenly and let the anchor
+	// label in the popover carry the precise meaning.
+	// ------------------------------------------------------------------
+
+	interface VineNode {
+		item: GutterItem;
+		index: number;
+		top: number;
+		left: number;
+	}
+
+	const TYPE_LABELS: Record<string, string> = {
+		comment: "Comment",
+		photo: "Photo",
+		gallery: "Gallery",
+		embed: "Embed",
+	};
+
+	function typeLabel(type: string): string {
+		return TYPE_LABELS[type] ?? "Vine";
+	}
+
+	/**
+	 * Horizontal position of the stem at vertical position t (0..1), in the
+	 * SVG's 0-100 user units. Leaves are placed with this same function so
+	 * every node sits exactly on the drawn path.
+	 *
+	 * The stem rides far right so a popover opening leftward still fits
+	 * inside the panel.
+	 */
+	function stemX(t: number): number {
+		return 82 + 3 * Math.sin(t * Math.PI * 3);
+	}
+
+	const stemPath = (() => {
+		const points: string[] = [];
+		for (let i = 0; i <= 48; i += 1) {
+			const t = i / 48;
+			points.push(`${stemX(t).toFixed(2)},${(t * 100).toFixed(2)}`);
+		}
+		return `M${points.join(" L")}`;
+	})();
+
+	const rootedNodes = $derived.by<VineNode[]>(() => {
+		const rooted = gutterItems
+			.map((item: GutterItem, index: number) => ({ item, index }))
+			.filter((entry: { item: GutterItem }) => Boolean(entry.item.anchor));
+		const span = Math.max(rooted.length - 1, 1);
+		return rooted.map((entry: { item: GutterItem; index: number }, position: number) => {
+			const t = rooted.length === 1 ? 0.5 : 0.07 + (position / span) * 0.86;
+			return { item: entry.item, index: entry.index, top: t * 100, left: stemX(t) };
+		});
+	});
+
+	const unrootedNodes = $derived(
+		gutterItems
+			.map((item: GutterItem, index: number) => ({ item, index }))
+			.filter((entry: { item: GutterItem }) => !entry.item.anchor),
+	);
+
+	const vineCanvasHeight = $derived(Math.max(180, rootedNodes.length * 64 + 48));
+
+	let openPopover: number | null = $state(null);
+
+	function togglePopover(index: number) {
+		openPopover = openPopover === index ? null : index;
+	}
+
+	function closePopover() {
+		openPopover = null;
+	}
+
+	function handleVineKeydown(event: KeyboardEvent) {
+		if (event.key === "Escape" && openPopover !== null) {
+			openPopover = null;
+		}
+	}
+
+	// The popover holds live indices, so any action that reshuffles or
+	// shortens gutterItems has to dismiss it first.
+	function popoverEdit(index: number) {
+		closePopover();
+		openEditModal(index);
+	}
+
+	function popoverDelete(index: number) {
+		closePopover();
+		deleteItem(index);
+	}
+
+	function popoverMove(index: number, direction: number) {
+		closePopover();
+		moveItem(index, direction);
+	}
 </script>
+
+<svelte:window onkeydown={handleVineKeydown} />
+
+<!-- The glyph shown inside a leaf, and again in its popover header -->
+{#snippet typeGlyph(type: string)}
+	{#if type === "comment"}
+		<featureIcons.messageSquare class="type-icon" />
+	{:else if type === "photo"}
+		<actionIcons.imageIcon class="type-icon" />
+	{:else if type === "gallery"}
+		<featureIcons.images class="type-icon" />
+	{:else if type === "embed"}
+		<actionIcons.link2 class="type-icon" />
+	{:else}
+		<actionIcons.pin class="type-icon" />
+	{/if}
+{/snippet}
+
+{#snippet anchorBadge(anchor: ProcessedAnchor)}
+	{#if anchor.isHeading}
+		<span class="anchor-badge heading-badge" aria-hidden="true">H{anchor.headingLevel}</span>
+	{:else if anchor.isAnchorTag}
+		<span class="anchor-badge tag-badge" aria-hidden="true"><actionIcons.anchor size={12} /></span>
+	{:else}
+		<span class="anchor-badge para-badge" aria-hidden="true"><actionIcons.pilcrow size={12} /></span
+		>
+	{/if}
+{/snippet}
+
+<!-- Shared popover body for both rooted leaves and the unrooted tray -->
+{#snippet popoverBody(item: GutterItem, index: number)}
+	{@const anchor = getProcessedAnchor(item.anchor)}
+	<div class="popover-head">
+		<span class="popover-type">
+			<span class="popover-type-icon" aria-hidden="true">{@render typeGlyph(item.type)}</span>
+			<span>{typeLabel(item.type)}</span>
+		</span>
+		<button class="action-btn" onclick={closePopover} title="Close" aria-label="Close vine details">
+			<stateIcons.x class="action-icon" />
+		</button>
+	</div>
+
+	<div class="popover-anchor">
+		{#if item.anchor}
+			{@render anchorBadge(anchor)}
+			<span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
+			<span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>
+		{:else}
+			<span class="no-anchor-warning" role="alert">⚠ No anchor set</span>
+		{/if}
+	</div>
+
+	<p class="popover-preview">{getItemPreview(item)}</p>
+
+	<div class="popover-actions">
+		<button
+			class="action-btn"
+			onclick={() => popoverMove(index, -1)}
+			disabled={index === 0}
+			title="Move up"
+			aria-label="Move item up"
+		>
+			<navIcons.chevronUp class="action-icon" />
+		</button>
+		<button
+			class="action-btn"
+			onclick={() => popoverMove(index, 1)}
+			disabled={index === gutterItems.length - 1}
+			title="Move down"
+			aria-label="Move item down"
+		>
+			<navIcons.chevronDown class="action-icon" />
+		</button>
+		<span class="popover-actions-gap"></span>
+		<button
+			class="action-btn"
+			onclick={() => popoverEdit(index)}
+			title="Edit"
+			aria-label="Edit item"
+		>
+			<actionIcons.edit class="action-icon" />
+		</button>
+		<button
+			class="action-btn delete"
+			onclick={() => popoverDelete(index)}
+			title="Delete"
+			aria-label="Delete item"
+		>
+			<stateIcons.x class="action-icon" />
+		</button>
+	</div>
+{/snippet}
 
 <div class="vines-manager">
 	<div class="vines-header">
@@ -366,85 +500,109 @@
 			<p class="hint">Add comments, images, or galleries that appear alongside your content.</p>
 		</div>
 	{:else}
-		<div class="vines-list" role="list" aria-label="Vine items">
-			{#each gutterItems as item, index (index)}
-				{@const anchor = getProcessedAnchor(item.anchor)}
-				<div class="vine-item" role="listitem">
-					<div class="item-header">
-						<span class="item-type" aria-hidden="true">
-							{#if item.type === "comment"}
-								<featureIcons.messageSquare class="type-icon" />
-							{:else if item.type === "photo"}
-								<actionIcons.imageIcon class="type-icon" />
-							{:else if item.type === "gallery"}
-								<featureIcons.images class="type-icon" />
-							{:else if item.type === "embed"}
-								<actionIcons.link2 class="type-icon" />
-							{:else}
-								<actionIcons.pin class="type-icon" />
-							{/if}
-						</span>
-						<div class="item-anchor-display">
-							{#if item.anchor}
-								{#if anchor.isHeading}
-									<span class="anchor-badge heading-badge" aria-hidden="true"
-										>H{anchor.headingLevel}</span
-									>
-								{:else if anchor.isAnchorTag}
-									<span class="anchor-badge tag-badge" aria-hidden="true"
-										><actionIcons.anchor size={12} /></span
-									>
-								{:else}
-									<span class="anchor-badge para-badge" aria-hidden="true"
-										><actionIcons.pilcrow size={12} /></span
-									>
-								{/if}
-								<span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
-								<span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>
-							{:else}
-								<span class="no-anchor-warning" role="alert">⚠ No anchor set</span>
+		<div class="vines-growth">
+			{#if rootedNodes.length > 0}
+				<div class="vine-canvas" style="height: {vineCanvasHeight}px">
+					<svg
+						class="vine-svg"
+						viewBox="0 0 100 100"
+						preserveAspectRatio="none"
+						aria-hidden="true"
+						focusable="false"
+					>
+						<path class="vine-stem" d={stemPath} fill="none" />
+						<g class="vine-sprigs">
+							<path
+								class="sprig"
+								d="M0,0 q7,-3 9,4 q-7,3 -9,-4 Z"
+								transform="translate(74 14) rotate(200)"
+							/>
+							<path
+								class="sprig"
+								d="M0,0 q7,-3 9,4 q-7,3 -9,-4 Z"
+								transform="translate(87 40) rotate(-20)"
+							/>
+							<path
+								class="sprig"
+								d="M0,0 q7,-3 9,4 q-7,3 -9,-4 Z"
+								transform="translate(74 66) rotate(190)"
+							/>
+							<path
+								class="sprig"
+								d="M0,0 q7,-3 9,4 q-7,3 -9,-4 Z"
+								transform="translate(86 90) rotate(-15)"
+							/>
+						</g>
+					</svg>
+
+					{#each rootedNodes as node, order (node.index)}
+						{@const anchor = getProcessedAnchor(node.item.anchor)}
+						<div
+							class="vine-node"
+							style="--node-top: {node.top}%; --node-left: {node.left}%; --leaf-order: {order}"
+						>
+							<button
+								class="leaf-btn"
+								class:active={openPopover === node.index}
+								type="button"
+								aria-expanded={openPopover === node.index}
+								aria-label="{typeLabel(node.item.type)} vine at {anchor.displayText}"
+								title={anchor.displayText}
+								onclick={() => togglePopover(node.index)}
+							>
+								<span class="leaf-glyph">{@render typeGlyph(node.item.type)}</span>
+							</button>
+
+							{#if openPopover === node.index}
+								<div
+									class="vine-popover"
+									role="dialog"
+									aria-label="Vine details"
+									use:clickOutside={() => {
+										if (openPopover === node.index) openPopover = null;
+									}}
+								>
+									{@render popoverBody(node.item, node.index)}
+								</div>
 							{/if}
 						</div>
-						<div class="item-actions">
-							<button
-								class="action-btn"
-								onclick={() => moveItem(index, -1)}
-								disabled={index === 0}
-								title="Move up"
-								aria-label="Move item up"
-							>
-								<navIcons.chevronUp class="action-icon" />
-							</button>
-							<button
-								class="action-btn"
-								onclick={() => moveItem(index, 1)}
-								disabled={index === gutterItems.length - 1}
-								title="Move down"
-								aria-label="Move item down"
-							>
-								<navIcons.chevronDown class="action-icon" />
-							</button>
-							<button
-								class="action-btn"
-								onclick={() => openEditModal(index)}
-								title="Edit"
-								aria-label="Edit item"
-							>
-								<actionIcons.edit class="action-icon" />
-							</button>
-							<button
-								class="action-btn delete"
-								onclick={() => deleteItem(index)}
-								title="Delete"
-								aria-label="Delete item"
-							>
-								<stateIcons.x class="action-icon" />
-							</button>
-						</div>
-					</div>
-					<div class="item-preview">{getItemPreview(item)}</div>
+					{/each}
 				</div>
-			{/each}
+			{/if}
+
+			{#if unrootedNodes.length > 0}
+				<div class="unrooted">
+					<p class="unrooted-title">
+						<span aria-hidden="true">⚠</span> Not rooted yet
+					</p>
+					<p class="unrooted-hint">
+						These have no anchor, so readers will not see them beside anything.
+					</p>
+					<div class="unrooted-row">
+						{#each unrootedNodes as node (node.index)}
+							<button
+								class="leaf-btn leaf-unrooted"
+								class:active={openPopover === node.index}
+								type="button"
+								aria-expanded={openPopover === node.index}
+								aria-label="{typeLabel(node.item.type)} vine, no anchor set"
+								title="{typeLabel(node.item.type)}, no anchor set"
+								onclick={() => togglePopover(node.index)}
+							>
+								<span class="leaf-glyph">{@render typeGlyph(node.item.type)}</span>
+							</button>
+						{/each}
+					</div>
+
+					{#each unrootedNodes as node (node.index)}
+						{#if openPopover === node.index}
+							<div class="vine-popover popover-inline" role="dialog" aria-label="Vine details">
+								{@render popoverBody(node.item, node.index)}
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -556,9 +714,7 @@
 						bind:value={itemUrl}
 						placeholder="https://cdn.grove.place/..."
 					/>
-					<Button variant="outline" onclick={() => openImagePicker((url) => (itemUrl = url))}>
-						Browse Images
-					</Button>
+					<Button variant="outline" onclick={openPhotoPicker}>Browse Images</Button>
 				</div>
 			</div>
 
@@ -687,36 +843,8 @@
 	{/snippet}
 </Dialog>
 
-<!-- Image Picker Modal -->
-<Dialog bind:open={showImagePicker} title="Select Image">
-	{#snippet children()}
-		<div class="picker-controls">
-			<Input type="text" bind:value={cdnFilter} placeholder="Filter by folder (e.g., blog/)" />
-			<Button onclick={loadCdnImages} disabled={cdnLoading}>
-				{cdnLoading ? "Loading..." : "Filter"}
-			</Button>
-		</div>
-
-		<div class="image-grid">
-			{#if cdnLoading}
-				<div class="loading">Loading images...</div>
-			{:else if cdnImages.length === 0}
-				<div class="no-images">No images found</div>
-			{:else}
-				{#each cdnImages as image (image.key)}
-					<button class="image-option" onclick={() => selectImage(image)}>
-						<img src={image.url} alt={image.key} />
-						<span class="image-name">{image.key.split("/").pop()}</span>
-					</button>
-				{/each}
-			{/if}
-		</div>
-	{/snippet}
-
-	{#snippet footer()}
-		<Button variant="outline" onclick={closeImagePicker}>Cancel</Button>
-	{/snippet}
-</Dialog>
+<!-- Shared CDN image picker (photo field + gallery "Add Image") -->
+<CdnImagePicker bind:open={cdnPickerOpen} onSelect={handleCdnSelect} />
 
 <style>
 	.vines-manager {
@@ -724,7 +852,14 @@
 		backdrop-filter: blur(12px);
 		border: 1px solid var(--grove-overlay-15);
 		border-radius: 12px;
-		overflow: hidden;
+		/*
+		 * Visible, not hidden: leaf popovers open leftward out of the vine
+		 * canvas and must not be clipped by the panel's own bounding box.
+		 * The header carries its own top radius now that nothing clips it.
+		 */
+		overflow: visible;
+		/* Lets the popover narrow itself when the panel is narrow. */
+		container-type: inline-size;
 	}
 
 	.vines-header {
@@ -734,6 +869,7 @@
 		padding: 0.875rem 1rem;
 		background: var(--grove-overlay-5);
 		border-bottom: 1px solid var(--grove-border-subtle);
+		border-radius: 11px 11px 0 0;
 	}
 
 	.vines-header h3 {
@@ -799,55 +935,280 @@
 		color: var(--grove-text-subtle);
 	}
 
-	.vines-list {
-		padding: 0.5rem;
-	}
-
-	.vine-item {
-		background: var(--glass-bg-medium);
-		border: 1px solid var(--grove-border-subtle);
-		border-radius: 8px;
-		padding: 0.625rem 0.875rem;
-		margin-bottom: 0.5rem;
-		transition: border-color 0.15s ease;
-	}
-
-	.vine-item:hover {
-		border-color: var(--grove-overlay-25);
-	}
-
-	:global(.dark) .vine-item:hover {
-		border-color: var(--grove-overlay-30);
-	}
-
-	.item-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.item-type {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--color-primary);
-	}
-
-	:global(.dark) .item-type {
-		color: var(--grove-accent);
-	}
-
 	:global(.type-icon) {
 		width: 1rem;
 		height: 1rem;
 	}
 
-	.item-anchor-display {
-		flex: 1;
+	/* ---------- the living vine ---------- */
+
+	.vines-growth {
+		padding: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.vine-canvas {
+		position: relative;
+		/* Popovers escape this box on purpose. */
+		overflow: visible;
+	}
+
+	.vine-svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		pointer-events: none;
+	}
+
+	.vine-stem {
+		stroke: var(--color-primary);
+		stroke-width: 2.5;
+		stroke-linecap: round;
+		vector-effect: non-scaling-stroke;
+		opacity: 0.35;
+	}
+
+	:global(.dark) .vine-stem {
+		stroke: var(--grove-accent);
+		opacity: 0.45;
+	}
+
+	.sprig {
+		fill: var(--color-primary);
+		opacity: 0.2;
+	}
+
+	:global(.dark) .sprig {
+		fill: var(--grove-accent);
+		opacity: 0.25;
+	}
+
+	.vine-node {
+		position: absolute;
+		top: var(--node-top);
+		left: var(--node-left);
+		transform: translate(-50%, -50%);
+	}
+
+	.leaf-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 34px;
+		height: 34px;
+		padding: 0;
+		border: 1.5px solid var(--grove-border-strong);
+		/* leaf silhouette: pointed at two opposite corners */
+		border-radius: 54% 8% 54% 8%;
+		background: var(--glass-bg-medium);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		color: var(--color-primary);
+		cursor: pointer;
+		transform: rotate(-6deg);
+		animation: leaf-unfurl 0.35s ease both;
+		animation-delay: calc(var(--leaf-order, 0) * 45ms);
+		transition:
+			transform 0.15s ease,
+			background-color 0.15s ease,
+			border-color 0.15s ease;
+	}
+
+	:global(.dark) .leaf-btn {
+		color: var(--grove-accent);
+		background: rgba(33, 28, 23, 0.45);
+	}
+
+	.leaf-glyph {
+		display: flex;
+		transform: rotate(6deg);
+	}
+
+	.leaf-btn:hover {
+		transform: rotate(-6deg) scale(1.1);
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-40);
+	}
+
+	.leaf-btn.active {
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-40);
+	}
+
+	.leaf-btn:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	@keyframes leaf-unfurl {
+		from {
+			opacity: 0;
+			transform: rotate(-6deg) scale(0.6);
+		}
+		to {
+			opacity: 1;
+			transform: rotate(-6deg) scale(1);
+		}
+	}
+
+	/*
+	 * Popover placement — the load-bearing fix.
+	 *
+	 * This panel docks to the right edge of the editor, so a popover opening
+	 * rightward runs straight off the viewport. Everything anchors leftward
+	 * from its leaf instead, and the stem is drawn far enough right that the
+	 * popover still lands inside the panel.
+	 */
+	.vine-popover {
+		position: absolute;
+		top: 50%;
+		right: calc(100% + 10px);
+		left: auto;
+		transform: translateY(-50%);
+		/* Leaves sit around x:79-85% of the panel (see stemX()) — the popover
+		   has to fit in that leftward gap without spilling past the panel's
+		   own edge into the editor, so this stays modest even though the
+		   panel itself is 340px wide. */
+		width: 200px;
+		max-width: min(200px, calc(100vw - 3rem));
+		z-index: 40;
+		padding: 0.75rem 0.85rem;
+		background: var(--glass-bg);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border: 1px solid var(--grove-border);
+		border-radius: 10px;
+		box-shadow: 0 10px 28px var(--grove-overlay-15);
+	}
+
+	/* Narrow panels get a narrower popover so it still clears the left edge. */
+	@container (max-width: 290px) {
+		.vine-popover {
+			width: 170px;
+			max-width: 170px;
+		}
+	}
+
+	@container (max-width: 240px) {
+		.vine-popover {
+			width: 145px;
+			max-width: 145px;
+		}
+	}
+
+	/* Unrooted popovers sit in normal flow inside the tray — nothing to clip. */
+	.vine-popover.popover-inline {
+		position: static;
+		transform: none;
+		width: auto;
+		max-width: none;
+		margin-top: 0.6rem;
+	}
+
+	.popover-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.35rem;
+	}
+
+	.popover-type {
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
 		min-width: 0;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--color-primary);
+	}
+
+	:global(.dark) .popover-type {
+		color: var(--grove-accent);
+	}
+
+	.popover-type-icon {
+		display: flex;
+	}
+
+	.popover-anchor {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-width: 0;
+		margin-top: 0.4rem;
+	}
+
+	.popover-preview {
+		margin: 0.35rem 0 0.55rem;
+		font-size: 0.78rem;
+		line-height: 1.45;
+		color: var(--color-text-subtle);
+		overflow-wrap: anywhere;
+	}
+
+	:global(.dark) .popover-preview {
+		color: var(--grove-text-subtle);
+	}
+
+	.popover-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.125rem;
+	}
+
+	.popover-actions-gap {
+		flex: 1;
+	}
+
+	/* ---------- unrooted tray ---------- */
+
+	.unrooted {
+		padding: 0.7rem 0.8rem;
+		background: var(--grove-overlay-5);
+		border: 1px dashed var(--grove-border);
+		border-radius: 10px;
+	}
+
+	.unrooted-title {
+		margin: 0 0 0.2rem;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: hsl(var(--warning));
+	}
+
+	:global(.dark) .unrooted-title {
+		color: hsl(var(--warning-muted));
+	}
+
+	.unrooted-hint {
+		margin: 0 0 0.6rem;
+		font-size: 0.72rem;
+		line-height: 1.45;
+		color: var(--color-text-subtle);
+	}
+
+	:global(.dark) .unrooted-hint {
+		color: var(--grove-text-subtle);
+	}
+
+	.unrooted-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.leaf-unrooted {
+		border-style: dashed;
+		border-color: hsl(var(--warning));
+	}
+
+	.leaf-unrooted:hover,
+	.leaf-unrooted.active {
+		border-color: hsl(var(--warning));
 	}
 
 	.anchor-badge {
@@ -912,11 +1273,6 @@
 		color: hsl(var(--warning-muted));
 	}
 
-	.item-actions {
-		display: flex;
-		gap: 0.125rem;
-	}
-
 	.action-btn {
 		display: flex;
 		align-items: center;
@@ -962,19 +1318,6 @@
 	:global(.dark) .action-btn.delete:hover {
 		background: var(--color-error-bg);
 		color: var(--color-error);
-	}
-
-	.item-preview {
-		margin-top: 0.35rem;
-		font-size: 0.8rem;
-		color: var(--color-text-subtle);
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	:global(.dark) .item-preview {
-		color: var(--grove-text-subtle);
 	}
 
 	/* Form Styles - These appear in the Dialog component */
@@ -1262,72 +1605,6 @@
 		color: var(--grove-accent);
 	}
 
-	/* Image Picker */
-	.picker-controls {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.picker-controls .form-input {
-		flex: 1;
-	}
-
-	.image-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-		gap: 0.5rem;
-		max-height: 400px;
-		overflow-y: auto;
-		padding: 0.5rem;
-		background: var(--color-bg-secondary);
-		border-radius: 8px;
-		border: 1px solid var(--color-border);
-	}
-
-	.loading,
-	.no-images {
-		grid-column: 1 / -1;
-		text-align: center;
-		padding: 2rem;
-		color: var(--color-text-muted);
-	}
-
-	.image-option {
-		display: flex;
-		flex-direction: column;
-		background: var(--color-bg-secondary);
-		border: 2px solid transparent;
-		border-radius: 6px;
-		padding: 0.25rem;
-		cursor: pointer;
-		transition: border-color 0.15s ease;
-	}
-
-	.image-option:hover {
-		border-color: var(--color-primary);
-	}
-
-	:global(.dark) .image-option:hover {
-		border-color: var(--grove-accent);
-	}
-
-	.image-option img {
-		width: 100%;
-		aspect-ratio: 1;
-		object-fit: cover;
-		border-radius: 4px;
-	}
-
-	.image-name {
-		font-size: 0.65rem;
-		color: var(--color-text-subtle);
-		margin-top: 0.25rem;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
 	/* Embed form styles */
 	.embed-resolving {
 		display: flex;
@@ -1488,24 +1765,6 @@
 		border-color: var(--grove-accent-15);
 	}
 
-	:global(.dark) .image-grid {
-		background: rgba(15, 23, 42, 0.6);
-		border-color: var(--grove-accent-15);
-	}
-
-	:global(.dark) .loading,
-	:global(.dark) .no-images {
-		color: var(--color-foreground-muted);
-	}
-
-	:global(.dark) .image-option {
-		background: rgba(15, 23, 42, 0.4);
-	}
-
-	:global(.dark) .image-name {
-		color: var(--color-foreground-muted);
-	}
-
 	:global(.dark) .embed-resolving {
 		background: rgba(15, 23, 42, 0.4);
 		color: var(--color-foreground);
@@ -1522,6 +1781,17 @@
 	:global(.dark) .add-image-btn {
 		color: var(--color-foreground-muted);
 		border-color: var(--grove-accent-15);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.leaf-btn {
+			animation: none;
+			transition: none;
+		}
+
+		.leaf-btn:hover {
+			transform: rotate(-6deg);
+		}
 	}
 
 	/* Screen reader only utility */

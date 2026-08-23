@@ -4,6 +4,8 @@
 	import { onMount } from "svelte";
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
 	import GutterManager from "@autumnsgrove/lattice/content/editor/GutterManager.svelte";
+	import EditorRail from "@autumnsgrove/lattice/content/editor/EditorRail.svelte";
+	import CdnImagePicker from "@autumnsgrove/lattice/content/editor/CdnImagePicker.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import Dialog from "@autumnsgrove/lattice/ui/components/ui/Dialog.svelte";
@@ -89,41 +91,39 @@
 	// UI state
 	let saving = $state(false);
 	let hasUnsavedChanges = $state(false);
-	let showGutter = $state(
-		browser ? localStorage.getItem("editor-gutter-visible") === "true" : false,
-	);
 	let showDeleteDialog = $state(false);
 	let showRepublishDialog = $state(false);
 	let showMoreMenu = $state(false);
-	let detailsExpanded = $state(
-		browser ? localStorage.getItem("editor-details-collapsed") === "false" : false,
-	);
+	let coverPickerOpen = $state(false);
 
-	// Details summary — shows populated metadata at a glance when collapsed
-	let detailsSummary = $derived.by(() => {
-		const parts: string[] = [];
-		if (featuredImage) parts.push("cover image");
-		if (description.trim()) parts.push("description");
-		const tagCount = parseTags(tagsInput).length;
-		if (tagCount > 0) parts.push(`${tagCount} tag${tagCount > 1 ? "s" : ""}`);
-		if (font && font !== "default") parts.push(font);
-		if (selectedBlaze) parts.push("blaze");
-		return parts.join(" \u00b7 ");
+	// Rail — replaces the old details-accordion + toggle-below-editor Vines
+	// button with a single docked panel (see docs/plans/features/planned/
+	// flow-editor-progressive-details.md for the pattern this supersedes).
+	let activeTab = $state<"details" | "vines" | null>(
+		browser ? (localStorage.getItem("editor-rail-tab") as "details" | "vines" | null) : null,
+	);
+	$effect(() => {
+		if (!browser) return;
+		if (activeTab) {
+			localStorage.setItem("editor-rail-tab", activeTab);
+		} else {
+			localStorage.removeItem("editor-rail-tab");
+		}
 	});
 
-	function toggleDetails() {
-		detailsExpanded = !detailsExpanded;
-		if (browser) {
-			localStorage.setItem("editor-details-collapsed", String(!detailsExpanded));
-		}
-	}
+	// Details badge — count of filled-in fields, shown on the rail without
+	// opening the panel
+	let detailsHasContent = $derived.by(() => {
+		let n = 0;
+		if (featuredImage) n++;
+		if (description.trim()) n++;
+		if (parseTags(tagsInput).length > 0) n++;
+		if (font && font !== "default") n++;
+		if (selectedBlaze) n++;
+		return n > 0;
+	});
 
-	function toggleGutter() {
-		showGutter = !showGutter;
-		if (browser) {
-			localStorage.setItem("editor-gutter-visible", String(showGutter));
-		}
-	}
+	let vinesWarning = $derived(gutterItems.some((item) => !item.anchor));
 
 	// Track changes
 	$effect(() => {
@@ -221,7 +221,7 @@
 		// Validation before publish
 		if (newStatus === "published") {
 			if (!title.trim()) {
-				if (!detailsExpanded) detailsExpanded = true;
+				if (activeTab !== "details") activeTab = "details";
 				toast.error("Title is required before publishing");
 				return;
 			}
@@ -527,200 +527,6 @@
 			aria-label="Post title"
 		/>
 
-		<!-- Add details strip -->
-		<div class="details-strip">
-			<button class="details-toggle" onclick={toggleDetails}>
-				<navIcons.chevronRight
-					size={16}
-					class="details-chevron {detailsExpanded ? 'rotated' : ''}"
-				/>
-				<span class="details-label">Add details</span>
-				{#if !detailsExpanded && detailsSummary}
-					<span class="details-summary">{detailsSummary}</span>
-				{/if}
-			</button>
-
-			{#if detailsExpanded}
-				<div class="details-fields">
-					<div class="form-group field-description">
-						<label for="description">
-							Description
-							<span
-								class="char-count"
-								class:warning={description.length > 160}
-								class:good={description.length >= 120 && description.length <= 160}
-							>
-								{description.length}/160
-							</span>
-						</label>
-						<textarea
-							id="description"
-							bind:value={description}
-							placeholder="A brief summary of your bloom (120-160 chars for SEO)..."
-							rows="3"
-							class="form-input form-textarea"
-							class:char-warning={description.length > 160}
-						></textarea>
-						{#if description.length > 160}
-							<span class="form-warning">Description exceeds recommended SEO length</span>
-						{:else if description.length > 0 && description.length < 120}
-							<span class="form-hint"
-								>Add {120 - description.length} more chars for optimal SEO</span
-							>
-						{/if}
-					</div>
-
-					<div class="form-group field-cover">
-						<label for="featured-image">Cover Image</label>
-						<input
-							type="url"
-							id="featured-image"
-							bind:value={featuredImage}
-							placeholder="https://..."
-							class="form-input"
-						/>
-						<span class="form-hint">
-							URL to a cover image. <a href="/arbor/images" target="_blank"
-								>Upload one first <navIcons.arrowRight size={12} class="inline-block" /></a
-							>
-						</span>
-						{#if featuredImage}
-							<div class="cover-preview">
-								<img src={featuredImage} alt="Cover preview" loading="lazy" decoding="async" />
-							</div>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="tags">Tags</label>
-						<input
-							type="text"
-							id="tags"
-							bind:value={tagsInput}
-							placeholder="tag1, tag2, tag3"
-							class="form-input"
-						/>
-						<span class="form-hint">Separate tags with commas</span>
-						{#if tagsInput}
-							<div class="tags-preview">
-								{#each parseTags(tagsInput) as tag}
-									<span class="tag-preview">{tag}</span>
-								{/each}
-							</div>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="slug">Slug</label>
-						<div class="slug-input-wrapper">
-							<span class="slug-prefix">/garden/</span>
-							<input
-								id="slug"
-								type="text"
-								bind:value={slug}
-								oninput={() => validateSlug(slug)}
-								class="slug-input"
-								placeholder="my-post-slug"
-							/>
-						</div>
-						{#if slugError}
-							<span class="form-hint form-error">{slugError}</span>
-						{:else if slug !== originalSlug}
-							<span class="form-hint slug-changed"
-								>URL will change from <code>/{originalSlug}</code> to <code>/{slug}</code></span
-							>
-						{:else}
-							<span class="form-hint">Lowercase letters, numbers, and hyphens only</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="font">Font</label>
-						<select id="font" bind:value={font} class="form-input">
-							<option value="default">Default (Site Setting)</option>
-							{#each fontCategories as category (category)}
-								<optgroup label={FONT_CATEGORY_LABELS[category]}>
-									{#each FONT_PRESETS.filter((f) => f.category === category) as preset (preset.id)}
-										<option value={preset.id}>{preset.name}</option>
-									{/each}
-								</optgroup>
-							{/each}
-						</select>
-						<span class="form-hint">Choose a font for this bloom's content</span>
-					</div>
-
-					<div class="form-group field-full">
-						<span id="blaze-label" class="label">Blaze</span>
-						<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
-							>A small marker that tells readers what this post is about.</span
-						>
-						<div class="blaze-picker" role="group" aria-labelledby="blaze-label">
-							{#each availableBlazes as blazeDef}
-								<button
-									type="button"
-									class="blaze-option"
-									class:selected={selectedBlaze === blazeDef.slug}
-									aria-label="{blazeDef.label} blaze{selectedBlaze === blazeDef.slug
-										? ' (selected)'
-										: ''}"
-									aria-pressed={selectedBlaze === blazeDef.slug}
-									onclick={() => {
-										selectedBlaze = selectedBlaze === blazeDef.slug ? null : blazeDef.slug;
-									}}
-								>
-									<Blaze definition={blazeDef} />
-								</button>
-							{/each}
-						</div>
-					</div>
-
-					<!-- Lifecycle metadata -->
-					<div class="metadata-info field-full">
-						{#if "created_at" in data.post && data.post.created_at}
-							<p class="info-item">
-								<span class="info-label">Created:</span>
-								<span class="info-value">
-									{formatTimestamp(
-										(data.post as Record<string, unknown>).created_at as number | string | null,
-									)}
-								</span>
-							</p>
-						{/if}
-						{#if "published_at" in data.post && data.post.published_at}
-							<p class="info-item">
-								<span class="info-label">Published:</span>
-								<span class="info-value">
-									{formatTimestamp(
-										(data.post as Record<string, unknown>).published_at as number | string | null,
-									)}
-								</span>
-							</p>
-						{/if}
-						{#if "updated_at" in data.post && data.post.updated_at}
-							<p class="info-item">
-								<span class="info-label">Last updated:</span>
-								<span class="info-value">
-									{formatTimestamp(
-										(data.post as Record<string, unknown>).updated_at as number | string | null,
-									)}
-								</span>
-							</p>
-						{/if}
-						{#if "last_synced" in data.post && data.post.last_synced}
-							<p class="info-item">
-								<span class="info-label">Last synced:</span>
-								<span class="info-value">
-									{new Date(
-										(data.post as Record<string, unknown>).last_synced as string | number,
-									).toLocaleString()}
-								</span>
-							</p>
-						{/if}
-					</div>
-				</div>
-			{/if}
-		</div>
-
 		<!-- Editor -->
 		<main class="editor-main">
 			<div class="editor-with-gutter">
@@ -739,24 +545,212 @@
 						configuredCurios={data?.curios ?? []}
 					/>
 				</div>
-				{#if showGutter}
-					<aside class="gutter-section">
+
+				<EditorRail
+					bind:activeTab
+					detailsBadge={detailsHasContent}
+					vinesCount={gutterItems.length}
+					{vinesWarning}
+				>
+					{#snippet detailsPanel()}
+						<div class="details-fields">
+							<div class="form-group field-description">
+								<label for="description">
+									Description
+									<span
+										class="char-count"
+										class:warning={description.length > 160}
+										class:good={description.length >= 120 && description.length <= 160}
+									>
+										{description.length}/160
+									</span>
+								</label>
+								<textarea
+									id="description"
+									bind:value={description}
+									placeholder="A brief summary of your bloom (120-160 chars for SEO)..."
+									rows="3"
+									class="form-input form-textarea"
+									class:char-warning={description.length > 160}
+								></textarea>
+								{#if description.length > 160}
+									<span class="form-warning">Description exceeds recommended SEO length</span>
+								{:else if description.length > 0 && description.length < 120}
+									<span class="form-hint"
+										>Add {120 - description.length} more chars for optimal SEO</span
+									>
+								{/if}
+							</div>
+
+							<div class="form-group field-cover">
+								<span id="featured-image-label" class="label">Cover Image</span>
+								{#if featuredImage}
+									<button
+										type="button"
+										class="cover-thumb"
+										onclick={() => (coverPickerOpen = true)}
+										aria-labelledby="featured-image-label"
+									>
+										<img src={featuredImage} alt="Cover preview" loading="lazy" decoding="async" />
+										<span class="cover-thumb-overlay">Change</span>
+									</button>
+								{:else}
+									<button
+										type="button"
+										class="cover-empty"
+										onclick={() => (coverPickerOpen = true)}
+										aria-labelledby="featured-image-label"
+									>
+										<actionIcons.imageIcon size={20} />
+										<span>Choose a cover image</span>
+									</button>
+								{/if}
+								<span class="form-hint">
+									<a href="/arbor/images" target="_blank"
+										>Upload more in Images <navIcons.arrowRight size={12} class="inline-block" /></a
+									>
+								</span>
+							</div>
+
+							<div class="form-group">
+								<label for="tags">Tags</label>
+								<input
+									type="text"
+									id="tags"
+									bind:value={tagsInput}
+									placeholder="tag1, tag2, tag3"
+									class="form-input"
+								/>
+								<span class="form-hint">Separate tags with commas</span>
+								{#if tagsInput}
+									<div class="tags-preview">
+										{#each parseTags(tagsInput) as tag}
+											<span class="tag-preview">{tag}</span>
+										{/each}
+									</div>
+								{/if}
+							</div>
+
+							<div class="form-group">
+								<label for="slug">Slug</label>
+								<div class="slug-input-wrapper">
+									<span class="slug-prefix">/garden/</span>
+									<input
+										id="slug"
+										type="text"
+										bind:value={slug}
+										oninput={() => validateSlug(slug)}
+										class="slug-input"
+										placeholder="my-post-slug"
+									/>
+								</div>
+								{#if slugError}
+									<span class="form-hint form-error">{slugError}</span>
+								{:else if slug !== originalSlug}
+									<span class="form-hint slug-changed"
+										>URL will change from <code>/{originalSlug}</code> to <code>/{slug}</code></span
+									>
+								{:else}
+									<span class="form-hint">Lowercase letters, numbers, and hyphens only</span>
+								{/if}
+							</div>
+
+							<div class="form-group">
+								<label for="font">Font</label>
+								<select id="font" bind:value={font} class="form-input">
+									<option value="default">Default (Site Setting)</option>
+									{#each fontCategories as category (category)}
+										<optgroup label={FONT_CATEGORY_LABELS[category]}>
+											{#each FONT_PRESETS.filter((f) => f.category === category) as preset (preset.id)}
+												<option value={preset.id}>{preset.name}</option>
+											{/each}
+										</optgroup>
+									{/each}
+								</select>
+								<span class="form-hint">Choose a font for this bloom's content</span>
+							</div>
+
+							<div class="form-group field-full">
+								<span id="blaze-label" class="label">Blaze</span>
+								<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
+									>A small marker that tells readers what this post is about.</span
+								>
+								<div class="blaze-picker" role="group" aria-labelledby="blaze-label">
+									{#each availableBlazes as blazeDef}
+										<button
+											type="button"
+											class="blaze-option"
+											class:selected={selectedBlaze === blazeDef.slug}
+											aria-label="{blazeDef.label} blaze{selectedBlaze === blazeDef.slug
+												? ' (selected)'
+												: ''}"
+											aria-pressed={selectedBlaze === blazeDef.slug}
+											onclick={() => {
+												selectedBlaze = selectedBlaze === blazeDef.slug ? null : blazeDef.slug;
+											}}
+										>
+											<Blaze definition={blazeDef} />
+										</button>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Lifecycle metadata -->
+							<div class="metadata-info field-full">
+								{#if "created_at" in data.post && data.post.created_at}
+									<p class="info-item">
+										<span class="info-label">Created:</span>
+										<span class="info-value">
+											{formatTimestamp(
+												(data.post as Record<string, unknown>).created_at as number | string | null,
+											)}
+										</span>
+									</p>
+								{/if}
+								{#if "published_at" in data.post && data.post.published_at}
+									<p class="info-item">
+										<span class="info-label">Published:</span>
+										<span class="info-value">
+											{formatTimestamp(
+												(data.post as Record<string, unknown>).published_at as number | string | null,
+											)}
+										</span>
+									</p>
+								{/if}
+								{#if "updated_at" in data.post && data.post.updated_at}
+									<p class="info-item">
+										<span class="info-label">Last updated:</span>
+										<span class="info-value">
+											{formatTimestamp(
+												(data.post as Record<string, unknown>).updated_at as number | string | null,
+											)}
+										</span>
+									</p>
+								{/if}
+								{#if "last_synced" in data.post && data.post.last_synced}
+									<p class="info-item">
+										<span class="info-label">Last synced:</span>
+										<span class="info-value">
+											{new Date(
+												(data.post as Record<string, unknown>).last_synced as string | number,
+											).toLocaleString()}
+										</span>
+									</p>
+								{/if}
+							</div>
+						</div>
+					{/snippet}
+
+					{#snippet vinesPanel()}
 						<GutterManager
 							bind:gutterItems
 							availableAnchors={editorRef?.getAvailableAnchors?.() || []}
 							availableParagraphs={editorRef?.getAvailableParagraphs?.() || []}
 							onInsertAnchor={(name: string) => editorRef?.insertAnchor?.(name)}
 						/>
-					</aside>
-				{/if}
+					{/snippet}
+				</EditorRail>
 			</div>
-			<button
-				class="toggle-vines-btn"
-				onclick={toggleGutter}
-				title={showGutter ? "Hide Vines panel" : "Show Vines panel"}
-			>
-				{showGutter ? "Hide Vines" : "Show Vines"}
-			</button>
 		</main>
 	</div>
 </div>
@@ -780,6 +774,13 @@
 		<Button onclick={handleRepublish}>Re-publish</Button>
 	{/snippet}
 </Dialog>
+
+<!-- Cover image picker -->
+<CdnImagePicker
+	bind:open={coverPickerOpen}
+	onSelect={(url) => (featuredImage = url)}
+	title="Select cover image"
+/>
 
 <style>
 	.edit-post-page {
@@ -989,64 +990,65 @@
 		border-bottom: 2px solid var(--color-primary);
 	}
 
-	/* Details strip */
-	.details-strip {
-		margin: 0.5rem 0 1rem;
-	}
-	.details-toggle {
+	/* Details panel fields — single column, lives inside EditorRail's ~340px panel */
+	.details-fields {
 		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		font-weight: 500;
-		transition: color 0.15s ease;
-		width: 100%;
-		text-align: left;
-	}
-	.details-toggle:hover {
-		color: var(--color-primary);
-	}
-	:global(.details-chevron) {
-		transition: transform 0.2s ease;
-		flex-shrink: 0;
-	}
-	:global(.details-chevron.rotated) {
-		transform: rotate(90deg);
-	}
-	.details-label {
-		flex-shrink: 0;
-	}
-	.details-summary {
-		color: var(--color-text-subtle);
-		font-size: 0.8rem;
-		font-weight: 400;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		flex-direction: column;
+		gap: 1.1rem;
 	}
 
-	/* Details fields — responsive grid */
-	.details-fields {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-		padding: 0.75rem 0;
-		border-top: 1px solid var(--color-border);
-		transition: border-color 0.3s ease;
+	.cover-thumb,
+	.cover-empty {
+		position: relative;
+		width: 100%;
+		border-radius: var(--border-radius-small);
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		cursor: pointer;
+		padding: 0;
+		overflow: hidden;
+		transition: border-color 0.15s ease;
 	}
-	.field-description {
-		grid-column: 1 / -1;
+	.cover-thumb:hover,
+	.cover-empty:hover {
+		border-color: var(--color-primary);
 	}
-	.field-cover {
-		grid-column: 1 / -1;
+	.cover-thumb {
+		height: 120px;
 	}
-	.field-full {
-		grid-column: 1 / -1;
+	.cover-thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+	.cover-thumb-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.45);
+		color: #fff;
+		font-size: 0.85rem;
+		font-weight: 500;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+	.cover-thumb:hover .cover-thumb-overlay,
+	.cover-thumb:focus-visible .cover-thumb-overlay {
+		opacity: 1;
+	}
+	.cover-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		height: 100px;
+		color: var(--color-text-subtle);
+		font-size: 0.85rem;
+		border-style: dashed;
 	}
 
 	/* Form fields (shared) */
@@ -1173,19 +1175,6 @@
 		font-weight: 500;
 		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
-	.cover-preview {
-		margin-top: 0.75rem;
-		border-radius: var(--border-radius-small);
-		overflow: hidden;
-		border: 1px solid var(--color-border);
-	}
-	.cover-preview img {
-		width: 100%;
-		height: auto;
-		max-height: 150px;
-		object-fit: cover;
-		display: block;
-	}
 	.metadata-info {
 		padding-top: 0.75rem;
 		border-top: 1px solid var(--color-border);
@@ -1218,9 +1207,10 @@
 	}
 	.editor-with-gutter {
 		display: flex;
-		gap: 1rem;
+		gap: 0.75rem;
 		flex: 1;
 		min-height: 0;
+		align-items: stretch;
 	}
 	.editor-section {
 		flex: 1;
@@ -1228,49 +1218,8 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.gutter-section {
-		width: 300px;
-		flex-shrink: 0;
-		overflow-y: auto;
-	}
-	.toggle-vines-btn {
-		margin-top: 0.75rem;
-		padding: 0.5rem 1rem;
-		background: var(--grove-accent-10);
-		border: 1px solid var(--grove-accent-20);
-		border-radius: var(--border-radius-button);
-		color: var(--color-primary);
-		font-size: 0.85rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s ease;
-		align-self: flex-end;
-	}
-	.toggle-vines-btn:hover {
-		background: var(--grove-accent-20);
-		border-color: var(--grove-accent-35);
-	}
-	:global(.dark) .toggle-vines-btn {
-		background: var(--grove-accent-12);
-		border-color: var(--grove-accent-20);
-		color: var(--grove-accent);
-	}
-	:global(.dark) .toggle-vines-btn:hover {
-		background: var(--grove-accent-20);
-		border-color: var(--grove-accent-35);
-	}
 
 	/* Responsive */
-	@media (max-width: 1200px) {
-		.gutter-section {
-			width: 250px;
-		}
-	}
-	@media (max-width: 768px) {
-		.details-fields {
-			grid-template-columns: 1fr;
-		}
-	}
 	@media (max-width: 900px) {
 		.edit-post-page {
 			height: auto;
@@ -1281,13 +1230,6 @@
 		}
 		.editor-main {
 			min-height: 500px;
-		}
-		.editor-with-gutter {
-			flex-direction: column;
-		}
-		.gutter-section {
-			width: 100%;
-			max-height: 300px;
 		}
 		.header-actions {
 			width: 100%;

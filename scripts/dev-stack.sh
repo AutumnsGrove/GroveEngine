@@ -66,10 +66,15 @@ preflight() {
         missing=1
     fi
 
-    if [ ! -f "libs/engine/dist/loom/base.js" ]; then
-        warn "Engine dist not built. Building..."
-        (cd libs/engine && pnpm run package)
-    fi
+    # Always rebuild — apps/aspen and the workers import engine via its
+    # published dist/, not source, so a stale dist silently serves old
+    # component code even after source edits. Missing-file check alone
+    # isn't enough (that only catches a dist that was never built).
+    log "Building engine dist (apps/aspen and workers import from dist, not source)..."
+    (cd libs/engine && pnpm run package) || {
+        err "Engine package build failed — see output above"
+        exit 1
+    }
 
     # Check for .dev.vars files (warn but don't block)
     local services=("apps/aspen" "services/heartwood" "services/zephyr" "services/durable-objects")
@@ -234,6 +239,15 @@ start_workers() {
         exit 1
     fi
     log "Heartwood ready."
+
+    # wrangler dev serves apps/aspen's built .svelte-kit/output — it does NOT
+    # watch source files the way `vite dev` does. Always rebuild here so
+    # edits made before this run are actually reflected, not a stale bundle.
+    log "Building aspen (wrangler dev serves the build output, not source)..."
+    (cd apps/aspen && pnpm run build) || {
+        err "Aspen build failed — see output above"
+        exit 1
+    }
 
     # Start main multi-config (aspen + DOs + zephyr)
     npx wrangler dev \

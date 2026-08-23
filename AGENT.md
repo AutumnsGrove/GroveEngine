@@ -214,6 +214,23 @@ bun x tsc --noEmit        # Type check
 
 **Avoid:** `bun install` or `bun add` — these update bun.lock instead of pnpm-lock.yaml, causing drift.
 
+### Full Dev Stack (real workers, real DOs, real D1/KV/R2)
+
+`./scripts/dev-stack.sh` runs the real Grove stack locally via a single miniflare instance (wrangler multi-config) — no mocks. This is the fastest way to click through a real change in Arbor/Aspen or any worker, not just typecheck it.
+
+```bash
+pnpm install                 # workspace deps, once
+
+./scripts/dev-stack.sh        # full stack: workers + Aspen
+./scripts/dev-stack.sh workers # workers only, no SvelteKit apps
+./scripts/dev-stack.sh seed    # apply migrations + seed data only
+./scripts/dev-stack.sh reset   # nuke local DBs and re-seed
+```
+
+`dev-stack.sh` rebuilds `libs/engine`'s dist and `apps/aspen`'s `.svelte-kit/output` itself on every run before starting `wrangler dev` — both are consumed as built output, not live source, so a stale build silently serves old component code with no error. No manual `pnpm run package`/`pnpm run build` step needed before launching; just re-run the script after editing engine or Aspen source and it rebuilds automatically.
+
+**Logging in locally:** use Demo Mode, not Google OAuth — `dev-stack.sh` reads `DEMO_MODE_SECRET` from `apps/aspen/.dev.vars` and prints the exact `?demo=<secret>` URL to visit once the stack is up. If you don't see it, the secret or `.dev.vars` file is missing (script warns instead of failing). Full details: `docs/LOCAL_DEV.md`.
+
 ### Stripe Configuration
 
 Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in `services/billing-api/src/types.ts`. Billing flows through the BillingHub (`billing.grove.place`) — a two-worker hub pattern mirroring the login hub. Set secrets via `gw secret apply` on `grove-billing-api` and `grove-billing`. Full instructions: `docs/setup/stripe-setup.md`
@@ -228,12 +245,19 @@ Aspen has a second live deployment for testing real changes against real Cloudfl
 
 **URL shape:** `<tenant>-beta.grove.place` (e.g. `autumn-beta.grove.place`) — single-label, **not** `beta.<tenant>.grove.place`. This zone's Cloudflare edge cert only covers `*.grove.place` (one level); a two-level host fails the TLS handshake before any request reaches grove-router. Don't "fix" this back to the dot form without provisioning Cloudflare Advanced Certificate Manager (paid) first.
 
+**Beta carries its own commits — it is not a fast-forward mirror of main.** Beta is the live trial ground for features not yet ready for every Wanderer (see the Spark writing-prompt history: `feat(curios): prototype Spark writing-prompt CTA on New Post (beta)` and its follow-ups all shipped straight to beta, well before touching main). Expect `git log main..beta` to show real beta-exclusive feature work, and `git log beta..main` to show fixes that landed on main first and haven't been backported yet.
+
+**Two ways work moves between the branches:**
+
+- **New beta-only work:** commit directly on `beta`, push `beta`. It ships to `grove-aspen-beta` on the next deploy and stays beta-exclusive until someone decides it's ready to graduate.
+- **Resyncing beta with main:** periodically merge `main` into `beta` (a real merge, not `--ff-only` — history has diverged) so beta picks up fixes that landed on main first. `git checkout beta && git merge main && git push origin beta`. Conflicts are normal here, not a sign something's wrong — existing history has commits like `chore: merge anchor directive fix from main into beta` documenting exactly this.
+- **Graduating a beta feature to main:** cherry-pick (or merge) the specific beta commits over once the feature's proven out — don't merge all of beta into main, that would drag in everything still mid-trial.
+
 **How a change reaches beta:**
 
-1. Land the change on `main` as normal.
-2. `git checkout beta && git merge main --ff-only && git push origin beta` — beta is always a fast-forward of main, never diverges with its own commits.
-3. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
-4. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
+1. Commit and push to `beta` directly (or merge `main` into `beta` first if you're resyncing rather than adding new beta-only work).
+2. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
+3. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
 
 **Routing:** `services/grove-router` holds an `ASPEN_BETA` service binding alongside `ASPEN`. It checks the subdomain (`parts[0]`) for a trailing `-beta` suffix and dispatches there instead of the default `ASPEN` target, forwarding `X-Forwarded-Host` unchanged. Aspen's own `hooks.server.ts` strips the `-beta` suffix to recover the real tenant and sets `locals.isBeta`, which `+layout.svelte` uses to show a `BetaBadge` next to the site title in the header.
 
