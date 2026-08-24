@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
-	import { GroveMessages } from '@autumnsgrove/lattice/ui';
+	import { GroveMessages, DemoBadge } from '@autumnsgrove/lattice/ui';
 	import { navIcons, metricIcons, natureIcons, featureIcons } from '@autumnsgrove/prism/icons';
 	import VineBackground from '@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte';
 	import type { NavItem, FooterLink } from '@autumnsgrove/lattice/ui/chrome';
@@ -96,6 +96,10 @@
 				>
 					Grove
 				</a>
+
+				{#if data?.isDemoMode}
+					<DemoBadge title="Demo mode is active — this signup is bypassing Google sign-in with a placeholder email" />
+				{/if}
 			</div>
 
 			<!-- Desktop navigation + step indicator -->

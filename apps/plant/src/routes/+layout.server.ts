@@ -4,6 +4,11 @@ import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import { PLANT_ERRORS } from "$lib/errors";
 
 export const load: LayoutServerLoad = async ({ cookies, platform }) => {
+	// Mirrors Aspen's grove_demo_mode cookie check — set by /auth/demo,
+	// drives the DemoBadge chip in +layout.svelte across the whole flow.
+	const demoSecret = platform?.env?.DEMO_MODE_SECRET;
+	const isDemoMode = !!demoSecret && cookies.get("grove_demo_mode") === demoSecret;
+
 	// Fail-fast: Check if database binding is configured
 	if (!platform?.env?.DB) {
 		console.error(
@@ -15,6 +20,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
 			messages: [],
 			bindingError: "database",
 			errorDetails: PLANT_ERRORS.DB_UNAVAILABLE,
+			isDemoMode,
 		};
 	}
 
@@ -29,6 +35,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
 			user: null,
 			onboarding: null,
 			messages,
+			isDemoMode,
 		};
 	}
 
@@ -72,6 +79,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
 				user: null,
 				onboarding: null,
 				messages,
+				isDemoMode,
 			};
 		}
 
@@ -117,6 +125,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
 				interests: safeParseJson<string[]>(result.interests as string | null, []),
 			},
 			messages,
+			isDemoMode,
 		};
 	} catch (error) {
 		console.error("[Layout] Error loading onboarding state:", error);
@@ -125,6 +134,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
 			onboarding: null,
 			messages: [],
 			loadError: true,
+			isDemoMode,
 		};
 	}
 };

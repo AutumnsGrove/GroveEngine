@@ -47,6 +47,8 @@ declare global {
 				ZEPHYR_URL?: string;
 				/** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
 				PUBLIC_APP_URL?: string;
+				/** Local-dev-only Google sign-in bypass secret — unset (and inert) in production. See src/routes/auth/demo/+server.ts */
+				DEMO_MODE_SECRET?: string;
 			};
 			context?: {
 				waitUntil(promise: Promise<unknown>): void;
