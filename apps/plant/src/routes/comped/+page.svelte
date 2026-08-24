@@ -10,6 +10,7 @@
 	import { stateIcons, navIcons, phaseIcons, natureIcons } from '@autumnsgrove/prism/icons';
 	import { TIERS } from '@autumnsgrove/lattice/platform/config';
 	import { submitForm } from '$lib/submit-form';
+	import { buildAdminUrl } from '$lib/tenant-url';
 
 	let { data } = $props();
 
@@ -36,7 +37,11 @@
 			claimedSubdomain = result.subdomain as string;
 			// Small delay for celebration, then redirect
 			setTimeout(() => {
-				window.location.href = `https://${claimedSubdomain}.grove.place/admin?welcome=true`;
+				window.location.href = buildAdminUrl(
+					claimedSubdomain as string,
+					new URL(window.location.href),
+					'welcome=true',
+				);
 			}, 2000);
 		} else {
 			claimError = (result.error as string) || 'We stumbled — mind trying once more?';
