@@ -26,6 +26,10 @@
 	// Shared icon mapping
 	import { tierIcons } from "$lib/ui/tier-icons";
 
+	import type { PageData } from "./$types";
+
+	let { data }: { data: PageData } = $props();
+
 	// Seasonal awareness
 	const season = $derived(seasonStore.current);
 	const isSpring = $derived(season === "spring");
@@ -372,6 +376,18 @@
 					size="lg"
 					class="w-full"
 				/>
+
+				{#if data.demoModeUrl}
+					<a
+						href={data.demoModeUrl}
+						class="inline-flex items-center gap-2 text-xs text-foreground-subtle hover:text-foreground-muted
+							border border-dashed border-foreground-subtle/40 hover:border-foreground-subtle/70
+							rounded-full px-3 py-1.5 transition-colors"
+					>
+						<stateIcons.warning class="w-3 h-3" />
+						Skip sign-in (Dev Mode) — fills a placeholder email
+					</a>
+				{/if}
 
 				<p class="text-xs text-foreground-subtle">
 					By continuing, you agree to our
