@@ -7,6 +7,7 @@
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice/platform/config";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { normalizeEmail } from "@autumnsgrove/lattice/utils/user";
 import { PLANT_ERRORS } from "$lib/errors";
 import type { GroveDatabase } from "@autumnsgrove/infra";
 
@@ -192,7 +193,10 @@ export async function createTenant(
 				.bind(
 					crypto.randomUUID(),
 					onboardingRow.groveauth_id,
-					input.email,
+					// Normalized so the case-insensitive uniqueness on users.email
+					// (idx_users_email_unique_ci, #1580) can't be violated by a
+					// provider sending different case than a prior sign-in did.
+					normalizeEmail(input.email) ?? input.email,
 					input.displayName,
 					tenantId,
 				)

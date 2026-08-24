@@ -558,6 +558,18 @@ describe("upsertOnboarding (new user)", () => {
 		expect(insertBind!.some((a) => a === "tree")).toBe(true);
 	});
 
+	it("normalizes email case before the INSERT (#1580)", async () => {
+		const mock = createMockDb();
+		const user = { id: "uid-3", email: "MiXedCase@Example.COM", name: "Mixed Case" };
+		await upsertOnboarding(mock as unknown as GroveDatabase, null, user, "/");
+
+		const bindCalls = mock._bound.bind.mock.calls as unknown[][];
+		const insertBind = bindCalls.find((args) => args.some((a) => a === user.id));
+		expect(insertBind).toBeDefined();
+		expect(insertBind).toContain("mixedcase@example.com");
+		expect(insertBind).not.toContain(user.email);
+	});
+
 	it("uses user.name as display name when present", async () => {
 		const mock = createMockDb();
 		await upsertOnboarding(mock as unknown as GroveDatabase, null, TEST_USER, "/");

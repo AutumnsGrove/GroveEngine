@@ -18,6 +18,10 @@ export default defineConfig({
 				replacement: resolve(__dirname, "../../libs/engine/src/lib/config/index.ts"),
 			},
 			{
+				find: "@autumnsgrove/lattice/utils/user",
+				replacement: resolve(__dirname, "../../libs/engine/src/lib/utils/user.ts"),
+			},
+			{
 				find: "@autumnsgrove/lattice/utils",
 				replacement: resolve(__dirname, "../../libs/engine/src/lib/utils.ts"),
 			},

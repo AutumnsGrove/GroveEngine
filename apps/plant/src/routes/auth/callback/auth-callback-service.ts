@@ -7,6 +7,7 @@
 
 import { redirect, isRedirect } from "@sveltejs/kit";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
+import { normalizeEmail } from "@autumnsgrove/lattice/utils/user";
 import type { GroveDatabase } from "@autumnsgrove/infra";
 
 /** Better Auth session cookie names */
@@ -158,7 +159,7 @@ export async function resolveOnboarding(
 				.prepare(
 					"SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
 				)
-				.bind(userEmail.toLowerCase())
+				.bind(normalizeEmail(userEmail) ?? userEmail.toLowerCase())
 				.first<OnboardingRecord>();
 
 			if (existing) {
@@ -248,6 +249,10 @@ export async function upsertOnboarding(
 		const displayName = user.name || user.email.split("@")[0];
 		// See comment above — all auth paths verify email ownership
 		const emailVerified = true;
+		// Normalized so a later sign-in with different-case email from the
+		// provider resolves to the same onboarding/user row instead of a
+		// case-drift duplicate (#1580 follow-up).
+		const normalizedEmail = normalizeEmail(user.email) ?? user.email;
 
 		try {
 			if (emailVerified) {
@@ -256,7 +261,7 @@ export async function upsertOnboarding(
 						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, email_verified, email_verified_at, email_verified_via, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), 1, unixepoch(), 'oauth', unixepoch(), unixepoch())`,
 					)
-					.bind(onboardingId, user.id, user.email, displayName)
+					.bind(onboardingId, user.id, normalizedEmail, displayName)
 					.run();
 			} else {
 				await db
@@ -264,7 +269,7 @@ export async function upsertOnboarding(
 						`INSERT INTO user_onboarding (id, groveauth_id, email, display_name, auth_completed_at, created_at, updated_at)
              VALUES (?, ?, ?, ?, unixepoch(), unixepoch(), unixepoch())`,
 					)
-					.bind(onboardingId, user.id, user.email, displayName)
+					.bind(onboardingId, user.id, normalizedEmail, displayName)
 					.run();
 			}
 
