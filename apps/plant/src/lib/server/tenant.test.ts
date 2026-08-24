@@ -166,6 +166,24 @@ describe("createTenant", () => {
 		expect(calls).toHaveLength(10);
 	});
 
+	it("normalizes email case before the users upsert (#1580)", async () => {
+		const { db, calls } = createMockD1();
+		// The users upsert only runs when the onboarding row already has a
+		// groveauth_id — make the SELECT that checks for it return one.
+		db._boundStatement.first.mockImplementation(async () => {
+			const lastSql = calls[calls.length - 1]?.sql ?? "";
+			return lastSql.includes("SELECT groveauth_id FROM user_onboarding")
+				? { groveauth_id: "grove-auth-xyz" }
+				: null;
+		});
+
+		await createTenant(db, makeInput({ email: "MiXedCase@Example.COM" }));
+
+		const usersInsertCall = calls.find((c) => c.sql.includes("INSERT INTO users"));
+		expect(usersInsertCall).toBeDefined();
+		expect(usersInsertCall!.bindings[2]).toBe("mixedcase@example.com");
+	});
+
 	it("re-throws error when tenants INSERT fails", async () => {
 		const { db } = createMockD1();
 		db._boundStatement.run.mockRejectedValueOnce(new Error("UNIQUE constraint"));
