@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { page } from "$app/state";
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
 	import { stateIcons, navIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	import { buildBlogUrl, buildAdminUrl } from "$lib/tenant-url";
 
 	let { data } = $props();
 
 	let status = $state<"verifying" | "creating" | "ready" | "error">("verifying");
 	let errorMessage = $state<string | null>(null);
 	let tenant = $state<{ subdomain: string } | null>(null);
+
+	const blogUrl = $derived(tenant ? buildBlogUrl(tenant.subdomain, page.url) : "");
+	const adminUrl = $derived(tenant ? buildAdminUrl(tenant.subdomain, page.url, "welcome=true") : "");
 
 	$effect(() => {
 		let interval: ReturnType<typeof setInterval> | null = null;
@@ -206,7 +211,7 @@
 						<navIcons.arrowRight size={18} />
 					</a>
 					<a
-						href="https://{tenant.subdomain}.grove.place"
+						href={blogUrl}
 						class="btn-secondary flex-1 justify-center"
 						target="_blank"
 						rel="noopener noreferrer"
@@ -216,7 +221,7 @@
 					</a>
 				</div>
 				<a
-					href="https://{tenant.subdomain}.grove.place/admin?welcome=true"
+					href={adminUrl}
 					class="text-sm text-foreground-muted hover:text-foreground transition-colors text-center"
 				>
 					Or go directly to your admin dashboard →

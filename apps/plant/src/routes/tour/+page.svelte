@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { stateIcons, navIcons, natureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
+	import { buildAdminUrl } from '$lib/tenant-url';
 
 	let { data } = $props();
 
@@ -142,12 +143,22 @@
 
 	function confirmSkip() {
 		// Mark tour as skipped and redirect
-		window.location.href = `https://${data.user?.username || 'example'}.grove.place/admin?welcome=true&tour=skipped`;
+		const subdomain = data.user?.username || 'example';
+		window.location.href = buildAdminUrl(
+			subdomain,
+			new URL(window.location.href),
+			'welcome=true&tour=skipped',
+		);
 	}
 
 	function completeTour() {
 		// Mark tour as complete and redirect
-		window.location.href = `https://${data.user?.username || 'example'}.grove.place/admin?welcome=true&tour=complete`;
+		const subdomain = data.user?.username || 'example';
+		window.location.href = buildAdminUrl(
+			subdomain,
+			new URL(window.location.href),
+			'welcome=true&tour=complete',
+		);
 	}
 
 	// Open external links in new tab

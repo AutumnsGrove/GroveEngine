@@ -61,8 +61,8 @@ trap cleanup EXIT INT TERM
 preflight() {
     local missing=0
 
-    if ! command -v npx &>/dev/null; then
-        err "npx not found. Install Node.js."
+    if ! command -v wrangler &>/dev/null; then
+        err "wrangler not found on PATH. Install it globally: npm i -g wrangler"
         missing=1
     fi
 
@@ -95,7 +95,7 @@ apply_migrations() {
 
     # Engine DB (118 migrations)
     dim "  → engine (grove-engine-db)"
-    npx wrangler d1 migrations apply grove-engine-db \
+    wrangler d1 migrations apply grove-engine-db \
         --local \
         -c apps/aspen/wrangler.toml \
         2>&1 | grep -E "applied|Already|Migrations" || true
@@ -103,7 +103,7 @@ apply_migrations() {
     # Curios DB
     if [ -d "libs/engine/migrations/curios" ]; then
         dim "  → curios (grove-curios-db)"
-        npx wrangler d1 migrations apply grove-curios-db \
+        wrangler d1 migrations apply grove-curios-db \
             --local \
             -c apps/aspen/wrangler.toml \
             2>&1 | grep -E "applied|Already|Migrations" || true
@@ -111,7 +111,7 @@ apply_migrations() {
 
     # Heartwood DB
     dim "  → heartwood (groveauth)"
-    npx wrangler d1 migrations apply groveauth \
+    wrangler d1 migrations apply groveauth \
         --local \
         -c services/heartwood/wrangler.toml \
         2>&1 | grep -E "applied|Already|Migrations" || true
@@ -127,14 +127,14 @@ seed_data() {
     case "$profile" in
         blog)
             dim "  → Midnight Bloom tenant (4 posts, 5 pages)"
-            npx wrangler d1 execute grove-engine-db \
+            wrangler d1 execute grove-engine-db \
                 --local \
                 -c apps/aspen/wrangler.toml \
                 --file scripts/db/seed-midnight-bloom.sql \
                 -y 2>&1 | tail -3
 
             if [ -f "scripts/db/add-midnight-bloom-pages.sql" ]; then
-                npx wrangler d1 execute grove-engine-db \
+                wrangler d1 execute grove-engine-db \
                     --local \
                     -c apps/aspen/wrangler.toml \
                     --file scripts/db/add-midnight-bloom-pages.sql \
@@ -142,7 +142,7 @@ seed_data() {
             fi
 
             if [ -f "scripts/db/fix-midnight-bloom-content.sql" ]; then
-                npx wrangler d1 execute grove-engine-db \
+                wrangler d1 execute grove-engine-db \
                     --local \
                     -c apps/aspen/wrangler.toml \
                     --file scripts/db/fix-midnight-bloom-content.sql \
@@ -151,7 +151,7 @@ seed_data() {
             ;;
         empty)
             dim "  → Empty tenant (defaults only)"
-            npx wrangler d1 execute grove-engine-db \
+            wrangler d1 execute grove-engine-db \
                 --local \
                 -c apps/aspen/wrangler.toml \
                 --file scripts/db/seed-empty-grove.sql \
@@ -261,8 +261,9 @@ start_workers() {
     # Runs independently so its [[routes]] custom_domain doesn't
     # pollute the primary worker's Host header in multi-config.
     # Service bindings discover it via wrangler's dev registry.
-    npx wrangler dev \
+    wrangler dev \
         -c services/heartwood/wrangler.toml \
+        --inspector-port 9229 \
         2>&1 | sed "s/^/  ${DIM}[heartwood]${RESET} /" &
     HEARTWOOD_PID=$!
     PIDS+=("$HEARTWOOD_PID")
@@ -302,10 +303,15 @@ start_workers() {
 
     # Start main multi-config (aspen + auxiliary DOs/zephyr, which are
     # service-binding-only and don't need their own port).
-    npx wrangler dev \
+    # Explicit --inspector-port per process — each `wrangler dev` process
+    # independently tries to claim the default inspector port and doesn't
+    # reliably auto-increment past a collision when several start close
+    # together, so a bare default risks one process failing to bind.
+    wrangler dev \
         -c apps/aspen/wrangler.toml \
         -c services/durable-objects/wrangler.toml \
         -c services/zephyr/wrangler.toml \
+        --inspector-port 9230 \
         2>&1 &
     WRANGLER_PID=$!
     PIDS+=("$WRANGLER_PID")
@@ -318,9 +324,20 @@ start_workers() {
 
     # Plant — separate process, explicitly shares aspen's local D1/KV so the
     # onboarding flow sees the same seeded tenant data.
-    npx wrangler dev \
+    #
+    # --local-upstream localhost: without this, wrangler dev simulates the
+    # production route (plant.grove.place/* from wrangler.toml) by rewriting
+    # the Host/Origin the app sees to "plant.grove.place" over plain HTTP.
+    # Plant's hooks.server.ts CSRF check (validateCSRF) correctly requires
+    # HTTPS for any non-localhost origin, so EVERY state-changing POST
+    # (profile save, plan selection, etc.) gets rejected with a generic
+    # "Cross-site request blocked" 403 unless this is set. Found while
+    # debugging the profile-save step throwing "Something went wrong."
+    wrangler dev \
         -c apps/plant/wrangler.toml \
         --persist-to "$shared_state" \
+        --local-upstream localhost \
+        --inspector-port 9231 \
         2>&1 | sed "s/^/  ${DIM}[plant]${RESET} /" &
     PLANT_PID=$!
     PIDS+=("$PLANT_PID")
@@ -332,9 +349,14 @@ start_workers() {
     fi
 
     if [ "$landing_ready" -eq 1 ]; then
-        npx wrangler dev \
+        # Same --local-upstream reasoning as plant above — landing has its
+        # own production route pattern (grove.place/*) that would otherwise
+        # get faked into the Host/Origin headers locally.
+        wrangler dev \
             -c apps/landing/wrangler.toml \
             --persist-to "$shared_state" \
+            --local-upstream localhost \
+            --inspector-port 9232 \
             2>&1 | sed "s/^/  ${DIM}[landing]${RESET} /" &
         LANDING_PID=$!
         PIDS+=("$LANDING_PID")
