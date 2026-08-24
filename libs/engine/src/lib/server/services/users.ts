@@ -18,6 +18,7 @@
 
 import { queryOne, update } from "./database.js";
 import { AUTH_HUB_URL } from "../../platform/config/auth.js";
+import { normalizeEmail } from "../../utils/user.js";
 
 // ============================================================================
 // Types
@@ -80,10 +81,14 @@ export async function getUserById(db: D1Database, id: string): Promise<User | nu
 }
 
 /**
- * Get a user by email address
+ * Get a user by email address.
+ *
+ * Case-insensitive: `users.email` isn't guaranteed to be stored lowercase
+ * (GroveAuth/Google claims land in whatever case the provider sends), so
+ * this compares against `LOWER(email)` rather than an exact match (#1580).
  */
 export async function getUserByEmail(db: D1Database, email: string): Promise<User | null> {
-	return queryOne<User>(db, "SELECT * FROM users WHERE email = ?", [email]);
+	return queryOne<User>(db, "SELECT * FROM users WHERE LOWER(email) = ?", [normalizeEmail(email)]);
 }
 
 /**
@@ -210,6 +215,11 @@ export interface HomeGrove {
  * they own, returning subdomain and display name. Returns null if the
  * user has no linked tenant (e.g., hasn't created a grove yet).
  *
+ * Case-insensitive for the same reason as {@link getUserByEmail} — the
+ * session email and the stored `users.email` aren't guaranteed to share
+ * case, and an exact-match miss here silently falls back to a broken
+ * relative `/arbor` link when visiting another tenant's grove (#1580).
+ *
  * @example
  * ```typescript
  * const home = await getUserHomeGrove(db, locals.user.email);
@@ -227,8 +237,8 @@ export async function getUserHomeGrove(
 		`SELECT t.id AS tenantId, t.subdomain, t.display_name AS name
      FROM users u
      JOIN tenants t ON t.id = u.tenant_id
-     WHERE u.email = ? AND u.is_active = 1 AND t.active = 1`,
-		[userEmail],
+     WHERE LOWER(u.email) = ? AND u.is_active = 1 AND t.active = 1`,
+		[normalizeEmail(userEmail)],
 	);
 }
 

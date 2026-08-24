@@ -254,7 +254,9 @@ export const load: LayoutServerLoad = async ({ locals, platform, url }) => {
 		lanternData: locals.user
 			? {
 					homeGrove: homeGrove?.subdomain ?? "",
-					displayName: siteSettings.grove_title || homeGrove?.name || "",
+					// grove_title is scoped to the *viewed* tenant's site_settings — only trust it
+					// as the visitor's own display name when they actually own that tenant (#1580).
+					displayName: (isOwner ? siteSettings.grove_title : "") || homeGrove?.name || "",
 					enabled: lanternEnabled,
 					visitingGrove:
 						context.type === "tenant" && context.tenant.id !== homeGrove?.tenantId && !isOwner
