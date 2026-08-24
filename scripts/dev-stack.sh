@@ -258,6 +258,7 @@ start_workers() {
     # Service bindings discover it via wrangler's dev registry.
     wrangler dev \
         -c services/heartwood/wrangler.toml \
+        --inspector-port 9229 \
         2>&1 | sed "s/^/  ${DIM}[heartwood]${RESET} /" &
     HEARTWOOD_PID=$!
     PIDS+=("$HEARTWOOD_PID")
@@ -297,10 +298,15 @@ start_workers() {
 
     # Start main multi-config (aspen + auxiliary DOs/zephyr, which are
     # service-binding-only and don't need their own port).
+    # Explicit --inspector-port per process — each `wrangler dev` process
+    # independently tries to claim the default inspector port and doesn't
+    # reliably auto-increment past a collision when several start close
+    # together, so a bare default risks one process failing to bind.
     wrangler dev \
         -c apps/aspen/wrangler.toml \
         -c services/durable-objects/wrangler.toml \
         -c services/zephyr/wrangler.toml \
+        --inspector-port 9230 \
         2>&1 &
     WRANGLER_PID=$!
     PIDS+=("$WRANGLER_PID")
@@ -313,9 +319,20 @@ start_workers() {
 
     # Plant — separate process, explicitly shares aspen's local D1/KV so the
     # onboarding flow sees the same seeded tenant data.
+    #
+    # --local-upstream localhost: without this, wrangler dev simulates the
+    # production route (plant.grove.place/* from wrangler.toml) by rewriting
+    # the Host/Origin the app sees to "plant.grove.place" over plain HTTP.
+    # Plant's hooks.server.ts CSRF check (validateCSRF) correctly requires
+    # HTTPS for any non-localhost origin, so EVERY state-changing POST
+    # (profile save, plan selection, etc.) gets rejected with a generic
+    # "Cross-site request blocked" 403 unless this is set. Found while
+    # debugging the profile-save step throwing "Something went wrong."
     wrangler dev \
         -c apps/plant/wrangler.toml \
         --persist-to "$shared_state" \
+        --local-upstream localhost \
+        --inspector-port 9231 \
         2>&1 | sed "s/^/  ${DIM}[plant]${RESET} /" &
     PLANT_PID=$!
     PIDS+=("$PLANT_PID")
@@ -327,9 +344,14 @@ start_workers() {
     fi
 
     if [ "$landing_ready" -eq 1 ]; then
+        # Same --local-upstream reasoning as plant above — landing has its
+        # own production route pattern (grove.place/*) that would otherwise
+        # get faked into the Host/Origin headers locally.
         wrangler dev \
             -c apps/landing/wrangler.toml \
             --persist-to "$shared_state" \
+            --local-upstream localhost \
+            --inspector-port 9232 \
             2>&1 | sed "s/^/  ${DIM}[landing]${RESET} /" &
         LANDING_PID=$!
         PIDS+=("$LANDING_PID")
