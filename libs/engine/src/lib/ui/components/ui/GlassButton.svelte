@@ -87,12 +87,12 @@
 			.replace(/\s+/g, " "),
 
 		accent: `
-			bg-accent/70 dark:bg-accent/75
-			border border-accent/40 dark:border-accent/30
-			text-accent-foreground dark:text-white
-			hover:bg-accent/85 dark:hover:bg-accent/90
-			hover:border-accent/60 dark:hover:border-accent/50
-			shadow-sm hover:shadow-md shadow-accent/20
+			bg-primary dark:bg-primary
+			border border-primary/60 dark:border-primary/50
+			text-primary-foreground
+			hover:brightness-95
+			hover:border-primary/80 dark:hover:border-primary/70
+			shadow-sm hover:shadow-md shadow-primary/20
 		`
 			.trim()
 			.replace(/\s+/g, " "),
