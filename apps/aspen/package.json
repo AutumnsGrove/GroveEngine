@@ -16,6 +16,7 @@
 		"test:coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
+		"@cloudflare/vite-plugin": "^1.54.0",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
@@ -31,17 +32,17 @@
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "^4.1.0",
-		"wrangler": "^4.76.0"
+		"wrangler": "^4.126.0"
 	},
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/curios": "workspace:*",
-		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/foliage": "workspace:*",
+		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*",
-		"@autumnsgrove/thorn": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
+		"@autumnsgrove/thorn": "workspace:*",
 		"@lucide/svelte": "^1.33.0",
 		"zod": "^4.3.6"
 	}

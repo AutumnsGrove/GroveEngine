@@ -19,12 +19,12 @@
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260317.1",
-		"esbuild": "^0.25.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/typography": "^0.5.19",
 		"autoprefixer": "^10.4.24",
+		"esbuild": "^0.25.0",
 		"postcss": "^8.5.6",
 		"svelte": "^5.50.1",
 		"svelte-check": "^4.3.6",
@@ -32,7 +32,7 @@
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "^4.1.0",
-		"wrangler": "^4.76.0"
+		"wrangler": "^4.126.0"
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
