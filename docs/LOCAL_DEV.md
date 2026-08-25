@@ -116,11 +116,11 @@ Both methods are security-gated: they only work on localhost and are ignored in 
 
 ## Seeding Data
 
-The `blog` profile (default) seeds the **Midnight Bloom** tea shop tenant with 4 posts and 4 pages — enough to have something to look at without being overwhelming.
+The `blog` profile (default) seeds three tenants — enough to have something to look at, and enough to test cross-account features (Lantern friends, Reeds comments) between distinct accounts.
 
 | Profile | What you get |
 |---------|-------------|
-| `blog` | Midnight Bloom tea shop, 4 posts, 4 pages |
+| `blog` | Midnight Bloom tea shop + Driftwood & Ink bookshop + The Quiet Orchard, 3-4 posts and 2-4 pages each |
 | `empty` | One tenant, no content |
 | `fresh` | Migrations only, no tenant data |
 
@@ -132,7 +132,20 @@ Run a specific profile:
 ./scripts/dev-stack.sh seed fresh
 ```
 
-Seed scripts live in `scripts/db/`. Local D1 data lives in `.wrangler/state/v3/d1/` — that directory is gitignored, so it's yours to mess with.
+Seed scripts live in `scripts/db/`. Local D1 data lives in `.wrangler/state/v3/d1/` — that directory is gitignored, so it's yours to mess with. `seed-tenant-002.sql` and `seed-tenant-003.sql` are local-only (unlike Midnight Bloom's tenant row, which also lives in a real migration) — they never touch production.
+
+### The Three Seeded Accounts
+
+| Tenant | Subdomain | Vibe |
+|--------|-----------|------|
+| The Midnight Bloom | `midnight-bloom` | Late-night tea café |
+| Driftwood & Ink | `driftwood-ink` | Secondhand bookshop + letterpress |
+| The Quiet Orchard | `quiet-orchard` | Small orchard journal |
+
+`./scripts/dev-stack.sh` prints a demo login URL for each on startup. There are two different ways to "switch accounts" locally, for two different purposes:
+
+- **Switch which grove you're viewing** — visit a tenant's demo login URL (`?demo=<secret>&subdomain=<x>`), or use `?subdomain=` / the `X-Subdomain` header from [Tenant Resolution](#tenant-resolution). This changes the page you're looking at, and by default also changes who you're logged in as (demo mode simulates the *viewed* tenant's owner).
+- **Switch who you're logged in as, independent of the page you're viewing** — open Lantern (the floating nav panel) while in demo mode and use the "Demo Identity" column. This is what you need for cross-account testing: e.g. view Midnight Bloom's post while logged in as Driftwood & Ink's owner, so you can leave a Reeds comment or send a Lantern friend request that's genuinely from a different account.
 
 ---
 

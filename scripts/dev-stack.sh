@@ -10,6 +10,7 @@
 #   ./scripts/dev-stack.sh workers        Workers only (no SvelteKit apps)
 #   ./scripts/dev-stack.sh seed           Apply migrations + seed data only
 #   ./scripts/dev-stack.sh reset          Nuke local DBs and re-seed
+#   ./scripts/dev-stack.sh stop           Kill any running processes, free ports
 #
 # Prerequisites:
 #   pnpm install                          (workspace deps)
@@ -56,6 +57,37 @@ cleanup() {
     log "All processes stopped."
 }
 trap cleanup EXIT INT TERM
+
+# ── Stop (clean up behind us) ────────────────────────────────────────────
+# `cleanup()` above only runs when THIS script's own process exits — it's
+# useless if the stack was launched backgrounded (`&`) and the launching
+# shell/session is long gone by the time you want it stopped. Kills by
+# matching the actual `wrangler dev`/`workerd serve` processes and taking
+# their PIDs directly, not `pkill -f` pattern matching, which has
+# previously missed zombies and left the next run to silently collide with
+# a stale process still squatting a port (see docs/LOCAL_DEV.md).
+stop_stack() {
+    # Pattern must match the CLI parent (which respawns a fresh `workerd
+    # serve` child the instant the old one dies) as well as the child
+    # itself — the parent's real command line is
+    # `.../wrangler-dist/cli.js dev -c ...`, where "wrangler" and "dev"
+    # aren't adjacent, so a literal "wrangler dev" match misses it and
+    # only ever kills the disposable child, which just comes back.
+    local pids
+    pids=$(ps aux | grep -E "wrangler.*dev -c|workerd serve" | grep -v grep | awk '{print $2}')
+
+    if [ -z "$pids" ]; then
+        log "Nothing running — dev stack already stopped."
+        return 0
+    fi
+
+    local count
+    count=$(echo "$pids" | wc -w | tr -d ' ')
+    warn "Stopping dev stack ($count process(es))..."
+    echo "$pids" | xargs kill -9 2>/dev/null
+    sleep 1
+    log "Dev stack stopped. Ports are free for the next run."
+}
 
 # ── Preflight checks ─────────────────────────────────────────────────
 preflight() {
@@ -148,6 +180,23 @@ seed_data() {
                     --file scripts/db/fix-midnight-bloom-content.sql \
                     -y 2>&1 | tail -3
             fi
+
+            # Two more tenants for cross-account testing (Lantern friends,
+            # Reeds comments) — see #1581. Local-only, unlike Midnight
+            # Bloom's tenants row (migration 010, also applied to prod).
+            dim "  → Driftwood & Ink tenant (3 posts, 2 pages)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-tenant-002.sql \
+                -y 2>&1 | tail -3
+
+            dim "  → The Quiet Orchard tenant (3 posts, 2 pages)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-tenant-003.sql \
+                -y 2>&1 | tail -3
             ;;
         empty)
             dim "  → Empty tenant (defaults only)"
@@ -188,6 +237,10 @@ reset_databases() {
 # manually dig the secret out of .dev.vars and hand-build the URL
 # every time (see project_local_dev_login memory for the full flow).
 demo_login_url() {
+    # Optional: a seeded tenant's subdomain (e.g. "driftwood-ink") to log
+    # into directly, instead of relying on the sticky grove_local_subdomain
+    # cookie / hardcoded "midnight-bloom" default in hooks.server.ts.
+    local subdomain="${1:-}"
     local dev_vars="apps/aspen/.dev.vars"
     if [ ! -f "$dev_vars" ]; then
         return 1
@@ -199,7 +252,28 @@ demo_login_url() {
         return 1
     fi
 
-    echo "http://localhost:5173/arbor?demo=$secret"
+    if [ -n "$subdomain" ]; then
+        echo "http://localhost:5173/arbor?demo=$secret&subdomain=$subdomain"
+    else
+        echo "http://localhost:5173/arbor?demo=$secret"
+    fi
+}
+
+# Prints one demo login URL per seeded tenant (#1581) so switching between
+# the three accounts locally doesn't require manual DB lookups. Once logged
+# into any of them, Lantern's "Demo Identity" column can switch which
+# tenant's owner the session acts as without changing the URL/subdomain.
+print_demo_tenant_urls() {
+    if ! demo_login_url >/dev/null; then
+        warn "DEMO_MODE_SECRET not found in apps/aspen/.dev.vars — demo login unavailable"
+        return 1
+    fi
+
+    echo -e "  ${CYAN}Demo logins (3 seeded tenants):${RESET}"
+    echo -e "    Midnight Bloom:  $(demo_login_url midnight-bloom)"
+    echo -e "    Driftwood & Ink: $(demo_login_url driftwood-ink)"
+    echo -e "    Quiet Orchard:   $(demo_login_url quiet-orchard)"
+    echo -e "  ${DIM}(first visit sets grove_demo_mode + grove_local_subdomain cookies)${RESET}"
 }
 
 # Same idea as demo_login_url() above, but for Plant's onboarding bypass —
@@ -380,6 +454,14 @@ main() {
     echo -e "${DIM}────────────────────────────────${RESET}"
     echo ""
 
+    # stop doesn't need wrangler/.dev.vars/engine-dist preflight checks —
+    # it's just killing processes, and should work even if the stack is in
+    # a broken state that would make preflight itself fail.
+    if [ "$mode" = "stop" ]; then
+        stop_stack
+        return 0
+    fi
+
     preflight
 
     case "$mode" in
@@ -395,11 +477,8 @@ main() {
             seed_data "blog"
             start_workers
             echo ""
-            local demo_url plant_url
-            if demo_url=$(demo_login_url); then
-                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
-                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
-            fi
+            local plant_url
+            print_demo_tenant_urls
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"
@@ -423,13 +502,8 @@ main() {
             echo -e "  ${CYAN}DOs:${RESET}       via service binding (grove-durable-objects)"
             echo -e "  ${CYAN}Email:${RESET}     via service binding (grove-zephyr)"
             echo ""
-            local demo_url plant_url
-            if demo_url=$(demo_login_url); then
-                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
-                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
-            else
-                warn "DEMO_MODE_SECRET not found in apps/aspen/.dev.vars — demo login unavailable"
-            fi
+            local plant_url
+            print_demo_tenant_urls
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"
@@ -441,11 +515,12 @@ main() {
             wait
             ;;
         *)
-            echo "Usage: ./scripts/dev-stack.sh [full|workers|seed|reset]"
+            echo "Usage: ./scripts/dev-stack.sh [full|workers|seed|reset|stop]"
             echo ""
             echo "Modes:"
             echo "  full      Start everything (default)"
             echo "  workers   Start workers only (no SvelteKit dev server)"
+            echo "  stop      Kill any running dev-stack processes and free their ports"
             echo "  seed      Apply migrations + seed data, then exit"
             echo "  reset     Nuke local DBs, re-migrate, re-seed"
             exit 1

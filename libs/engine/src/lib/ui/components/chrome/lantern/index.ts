@@ -18,4 +18,6 @@ export type {
 	LanternTab,
 	LanternView,
 	VisitingGrove,
+	DemoIdentityOption,
+	DemoIdentitiesData,
 } from "./types";

@@ -16,7 +16,7 @@
  * ```
  */
 
-import { queryOne, update } from "./database.js";
+import { queryOne, queryMany, update } from "./database.js";
 import { AUTH_HUB_URL } from "../../platform/config/auth.js";
 import { normalizeEmail } from "../../utils/user.js";
 
@@ -280,4 +280,35 @@ export async function deactivateUser(db: D1Database, userId: string): Promise<nu
  */
 export async function reactivateUser(db: D1Database, userId: string): Promise<number> {
 	return update(db, "users", { is_active: 1 }, "id = ?", [userId]);
+}
+
+// ============================================================================
+// Demo Identity Switching (local dev only)
+// ============================================================================
+
+/** A seeded tenant that can be switched to as a local demo-mode identity. */
+export interface DemoIdentityOption {
+	tenantId: string;
+	subdomain: string;
+	displayName: string;
+}
+
+/**
+ * List tenants seeded for local demo-mode identity switching.
+ *
+ * Uses the `example-tenant-*` id convention already shared by Midnight
+ * Bloom's seed data — the same marker that means "this is example content" —
+ * rather than a new table or column just for this local dev feature.
+ */
+export async function listDemoIdentities(db: D1Database): Promise<DemoIdentityOption[]> {
+	const rows = await queryMany<{ id: string; subdomain: string; display_name: string }>(
+		db,
+		`SELECT id, subdomain, display_name FROM tenants WHERE id LIKE 'example-tenant-%' ORDER BY id`,
+	);
+
+	return rows.map((row) => ({
+		tenantId: row.id,
+		subdomain: row.subdomain,
+		displayName: row.display_name,
+	}));
 }

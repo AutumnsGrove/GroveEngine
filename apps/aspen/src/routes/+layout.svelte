@@ -69,6 +69,10 @@
 				subdomain: string;
 				name: string;
 			} | null;
+			demoIdentities: {
+				current: string;
+				options: { tenantId: string; subdomain: string; displayName: string }[];
+			} | null;
 		} | null;
 	}
 
