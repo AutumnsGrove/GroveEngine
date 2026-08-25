@@ -21,6 +21,7 @@
 		monthlyPrice = 0,
 		annualPrice = 0,
 		features = [],
+		showAllFeatures = false,
 		variant = "secondary",
 		onCultivate,
 		class: className = "",
@@ -47,8 +48,8 @@
 	let buttonText = $derived.by(() => {
 		if (isCurrent) return "Current Stage";
 		if (!available) return "Coming Soon";
-		if (isNext) return "Nurture";
-		return "Cultivate";
+		if (isNext) return "Continue";
+		return "Select";
 	});
 
 	// Button disabled state
@@ -125,13 +126,13 @@
 	<!-- Features preview -->
 	{#if features.length > 0}
 		<ul class="flex-1 space-y-1.5 mb-4 text-sm">
-			{#each features.slice(0, 4) as feature}
+			{#each showAllFeatures ? features : features.slice(0, 4) as feature}
 				<li class="flex items-center gap-1.5 text-foreground-muted">
 					<stateIcons.check class="w-3.5 h-3.5 text-accent flex-shrink-0" />
-					<span class="truncate">{feature}</span>
+					<span class={showAllFeatures ? "" : "truncate"}>{feature}</span>
 				</li>
 			{/each}
-			{#if features.length > 4}
+			{#if !showAllFeatures && features.length > 4}
 				<li class="text-xs text-foreground-faint italic">
 					+{features.length - 4} more features
 				</li>

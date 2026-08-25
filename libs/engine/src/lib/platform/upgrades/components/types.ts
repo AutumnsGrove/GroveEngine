@@ -76,6 +76,9 @@ export interface GrowthCardProps extends BaseGraftProps {
 	/** Features list */
 	features?: string[];
 
+	/** Show every feature instead of truncating to 4 with a "+N more" line */
+	showAllFeatures?: boolean;
+
 	/** CTA variant */
 	variant?: "primary" | "secondary" | "outline";
 
