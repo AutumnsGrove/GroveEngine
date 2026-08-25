@@ -21,6 +21,31 @@ import { browser } from "$app/environment";
 
 const STORAGE_KEY = "grove-wanderer-home";
 
+/**
+ * True on localhost/127.0.0.1 — local dev has no DNS entry for seeded
+ * subdomains, so cross-grove links there must route through ?subdomain=
+ * instead of a real https://<sub>.grove.place hostname. See buildGroveHref.
+ */
+function isLocalDev(): boolean {
+	return browser && (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+}
+
+/**
+ * Build a URL to a specific grove's subdomain — a real
+ * `https://<sub>.grove.place<path>` in production, or a local
+ * `<path>?subdomain=<sub>` URL when running locally.
+ *
+ * Shared by every cross-grove link in Lantern (home link, friend cards,
+ * getArborHref below) so local dev and production only differ here.
+ */
+export function buildGroveHref(subdomain: string, path = "/"): string {
+	if (isLocalDev()) {
+		const separator = path.includes("?") ? "&" : "?";
+		return `${path}${separator}subdomain=${subdomain}`;
+	}
+	return `https://${subdomain}.grove.place${path === "/" ? "" : path}`;
+}
+
 /** The subdomain of the user's own grove (e.g., "autumn") */
 let homeGrove = $state<string>(getStoredHome());
 
@@ -108,14 +133,14 @@ export const wandererStore = {
  * @param homeGrove  The user's own subdomain (from lanternData.homeGrove)
  * @param currentGrove The subdomain of the grove currently being viewed
  * @returns "/arbor" when at home or when we can't determine, or
- *          "https://<home>.grove.place/arbor" when visiting elsewhere
+ *          buildGroveHref(homeGrove, "/arbor") when visiting elsewhere
  */
 export function getArborHref(
 	homeGrove: string | null | undefined,
 	currentGrove: string | null | undefined,
 ): string {
 	if (homeGrove && currentGrove && homeGrove !== currentGrove) {
-		return `https://${homeGrove}.grove.place/arbor`;
+		return buildGroveHref(homeGrove, "/arbor");
 	}
 	return "/arbor";
 }

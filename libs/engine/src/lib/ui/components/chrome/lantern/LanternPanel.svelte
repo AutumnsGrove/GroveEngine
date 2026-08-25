@@ -2,7 +2,7 @@
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
-	import { wandererStore, getArborHref } from "$lib/ui/stores/wanderer.svelte";
+	import { wandererStore, getArborHref, buildGroveHref } from "$lib/ui/stores/wanderer.svelte";
 	import { getDestinations, getServices } from "./destinations";
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
@@ -113,7 +113,7 @@
 			<!-- Home link — always first and prominent (hidden if no home grove resolved) -->
 			{#if data.homeGrove}
 				<a
-					href="https://{data.homeGrove}.grove.place"
+					href={buildGroveHref(data.homeGrove)}
 					class="home-link block py-2.5 px-3 rounded-[10px] bg-accent text-accent-foreground text-sm font-medium no-underline text-center transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 				>
 					{homeLabel}

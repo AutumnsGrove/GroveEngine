@@ -2,6 +2,7 @@
 	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import type { Friend } from "$lib/types/friend";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
+	import { buildGroveHref } from "$lib/ui/stores/wanderer.svelte";
 	import { api } from "$lib/utils/api";
 
 	interface Props {
@@ -33,7 +34,7 @@
 	class:visiting
 >
 	<a
-		href="https://{friend.subdomain}.grove.place"
+		href={buildGroveHref(friend.subdomain)}
 		class="flex-1 min-w-0 flex flex-col gap-0.5 no-underline text-inherit focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 rounded"
 		target="_blank"
 		rel="noopener noreferrer"
