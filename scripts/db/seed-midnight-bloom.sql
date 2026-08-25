@@ -33,7 +33,7 @@ Our selection spans the globe: delicate white teas from Fujian, robust pu-erhs f
 We''re tucked away on Twilight Lane, easy to miss if you''re not looking. A small wooden sign, a door with a brass moon handle, and the warm glow of candlelight in the window. You''ll know it when you find it.
 
 *The Midnight Bloom: where every night holds the possibility of something beautiful.*',
-  '{"title": "The Midnight Bloom", "subtitle": "Open when the stars come out", "cta": {"text": "View Our Menu", "link": "/menu"}}',
+  '{"title": "The Midnight Bloom", "subtitle": "Open when the stars come out", "cta": {"text": "Read the Blog", "link": "/garden"}}',
   unixepoch(),
   unixepoch()
 )
