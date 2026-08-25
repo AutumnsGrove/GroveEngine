@@ -39,8 +39,9 @@
 	--color-primary-hover: var(--grove-accent-dark);
 	--color-primary-foreground: #ffffff;
 
-	--color-border: rgb(var(--grove-200));
-	--color-border-subtle: rgb(var(--grove-100));
+	/* Neutral grey, not accent-tinted — matches Aspen's --border / Prism's neutral.default */
+	--color-border: hsl(0 0% 88%);
+	--color-border-subtle: hsl(0 0% 92%);
 
 	--color-surface: rgba(255, 255, 255, 0.5);
 	--color-surface-elevated: #ffffff;
@@ -81,8 +82,9 @@
 	--color-foreground-subtle: rgba(245, 242, 234, 0.5);
 	--color-foreground-faint: rgba(245, 242, 234, 0.4);
 
-	--color-border: #363c44;
-	--color-border-subtle: #282d33;
+	/* Neutral grey, not accent-tinted — matches Aspen's --border / Prism's neutral.default */
+	--color-border: hsl(0 0% 20%);
+	--color-border-subtle: hsl(0 0% 16%);
 
 	--color-surface: rgba(37, 35, 32, 0.5);
 	--color-surface-elevated: #1e2227;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '@autumnsgrove/lattice/styles/tokens.css';
 	import '../app.css';
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
@@ -75,8 +76,8 @@
 <div class="min-h-screen bg-page flex flex-col relative">
 	<VineBackground />
 	<!-- Unified Header -->
-	<header class="sticky top-0 z-40 py-4 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
-		<div class="max-w-2xl mx-auto flex items-center justify-between">
+	<header class="sticky top-0 z-grove-sticky py-4 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
+		<div class="max-w-4xl mx-auto flex items-center justify-between">
 			<!-- Logo area -->
 			<div class="flex items-center gap-3">
 				<!-- Logo icon - clickable to toggle dark/light mode -->
