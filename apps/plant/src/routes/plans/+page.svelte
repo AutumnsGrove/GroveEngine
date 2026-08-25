@@ -37,9 +37,9 @@
 	// ============================================================================
 
 	let billingPeriod = $state<BillingPeriod>("monthly");
-	// Auto-select first available paid tier (skip wanderer so users see it as an explicit choice)
+	// Auto-select the free Wanderer tier — the lowest-friction default for new signups
 	let selectedPlan = $state<string | null>(
-		plans.find((p: PricingTier) => p.status === "available" && p.key !== "wanderer")?.key ?? null,
+		plans.find((p: PricingTier) => p.key === "wanderer")?.key ?? plans[0]?.key ?? null,
 	);
 
 	// Submission state
@@ -190,9 +190,6 @@
 				? tier.featureStrings
 				: tier.standardFeatureStrings || tier.featureStrings}
 			{@const monthlyPrice = getMonthlyEquivalentPrice(tier, billingPeriod)}
-			{@const yearlyPrice =
-				billingPeriod === "annual" ? getMonthlyEquivalentPrice(tier, "annual") : 0}
-			{@const savings = billingPeriod === "annual" ? getYearlySavingsAmount(tier) : 0}
 
 			<div class="relative">
 				<!-- Status badge positioned above card for unavailable tiers -->
@@ -228,8 +225,8 @@
 					isNext={isSelected}
 					available={isAvailable}
 					monthlyPrice={tier.key === "wanderer" ? 0 : Number(monthlyPrice)}
-					annualPrice={tier.key === "wanderer" ? 0 : Number(yearlyPrice)}
 					features={displayFeatures}
+					showAllFeatures
 					variant={isSelected ? "primary" : "secondary"}
 					onCultivate={() => cultivatePlan(tier)}
 				/>
