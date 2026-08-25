@@ -18,7 +18,7 @@ export { default as SubscribeButton } from "./SubscribeButton.svelte";
 export { default as ShareButton } from "./ShareButton.svelte";
 export { default as FriendsLoader } from "./FriendsLoader.svelte";
 export { default as Lantern } from "./lantern/Lantern.svelte";
-export type { LanternLayoutData } from "./lantern/types";
+export type { LanternLayoutData, DemoIdentitiesData } from "./lantern/types";
 
 export * from "./types";
 export * from "./defaults";

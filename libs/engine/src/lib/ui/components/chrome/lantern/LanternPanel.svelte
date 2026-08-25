@@ -9,6 +9,7 @@
 	import LanternVisitingCard from "./LanternVisitingCard.svelte";
 	import type { LanternLayoutData } from "./types";
 	import { authIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import { api } from "$lib/utils/api";
 
 	interface Props {
 		data: LanternLayoutData;
@@ -41,6 +42,21 @@
 		visiting ? friendsStore.isFriend(visiting.tenantId) : false,
 	);
 
+	// Local dev only — switch which seeded tenant's owner the demo session
+	// acts as (independent of which grove is being viewed). See
+	// apps/aspen/src/routes/api/dev/demo-identity/+server.ts.
+	let switchingIdentity = $state(false);
+	async function switchIdentity(tenantId: string) {
+		if (switchingIdentity || tenantId === data.demoIdentities?.current) return;
+		switchingIdentity = true;
+		try {
+			await api.post("/api/dev/demo-identity", { tenantId });
+			location.reload();
+		} catch {
+			switchingIdentity = false;
+		}
+	}
+
 	// Focus trap: cycle Tab/Shift+Tab within the panel
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === "Tab" && panelRef) {
@@ -65,6 +81,7 @@
 	bind:this={panelRef}
 	class="lantern-panel z-grove-overlay bg-surface/90 backdrop-blur-xl border border-default shadow-lg"
 	class:has-friends={friendsStore.hasFriends}
+	class:has-demo-identities={!!data.demoIdentities}
 	role="dialog"
 	aria-modal="true"
 	tabindex="-1"
@@ -188,6 +205,33 @@
 						</div>
 					</div>
 				{/if}
+
+				<!-- Local dev only: switch which seeded tenant's owner the demo
+				     session acts as, independent of which grove is being viewed. -->
+				{#if data.demoIdentities}
+					<div class="identity-column border-l border-default pl-3">
+						<h3 class="text-[0.8125rem] font-semibold text-foreground m-0">Demo Identity</h3>
+						<div class="identity-list flex flex-col gap-0.5">
+							{#each data.demoIdentities.options as identity (identity.tenantId)}
+								<button
+									type="button"
+									class="identity-btn flex flex-col items-start gap-0.5 py-2 px-2.5 rounded-lg border-none bg-transparent text-left cursor-pointer transition-colors hover:bg-surface-hover disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
+									class:active={identity.tenantId === data.demoIdentities.current}
+									disabled={switchingIdentity}
+									onclick={() => switchIdentity(identity.tenantId)}
+									aria-pressed={identity.tenantId === data.demoIdentities.current}
+								>
+									<span class="text-sm font-medium text-foreground truncate w-full"
+										>{identity.displayName}</span
+									>
+									<span class="text-xs text-foreground-muted truncate w-full"
+										>{identity.subdomain}</span
+									>
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Visiting grove prompt when no friends yet -->
@@ -236,6 +280,14 @@
 		width: 520px;
 	}
 
+	.lantern-panel.has-demo-identities {
+		width: 480px;
+	}
+
+	.lantern-panel.has-friends.has-demo-identities {
+		width: 680px;
+	}
+
 	.lantern-panel[inert] {
 		display: none;
 	}
@@ -281,6 +333,32 @@
 		animation: column-slide-in 300ms ease-in-out both;
 	}
 
+	.identity-column {
+		width: 140px;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		animation: column-slide-in 300ms ease-in-out both;
+	}
+
+	.identity-btn.active {
+		background: var(--grove-accent-8);
+		border: 1px solid var(--grove-accent-20);
+		position: relative;
+	}
+
+	.identity-btn.active::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 25%;
+		bottom: 25%;
+		width: 3px;
+		border-radius: 0 2px 2px 0;
+		background: var(--grove-accent);
+	}
+
 	@keyframes column-slide-in {
 		from {
 			opacity: 0;
@@ -305,7 +383,9 @@
 	/* Responsive: collapse to single column on narrow screens */
 	@media (max-width: 560px) {
 		.lantern-panel,
-		.lantern-panel.has-friends {
+		.lantern-panel.has-friends,
+		.lantern-panel.has-demo-identities,
+		.lantern-panel.has-friends.has-demo-identities {
 			width: calc(100vw - 2rem);
 			max-width: 400px;
 		}
@@ -314,7 +394,8 @@
 			flex-direction: column;
 		}
 
-		.friends-column {
+		.friends-column,
+		.identity-column {
 			width: 100%;
 			border-left: none;
 			border-top: 1px solid hsl(var(--border));

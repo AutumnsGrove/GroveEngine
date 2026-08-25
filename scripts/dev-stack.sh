@@ -143,6 +143,23 @@ seed_data() {
                     --file scripts/db/fix-midnight-bloom-content.sql \
                     -y 2>&1 | tail -3
             fi
+
+            # Two more tenants for cross-account testing (Lantern friends,
+            # Reeds comments) — see #1581. Local-only, unlike Midnight
+            # Bloom's tenants row (migration 010, also applied to prod).
+            dim "  → Driftwood & Ink tenant (3 posts, 2 pages)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-tenant-002.sql \
+                -y 2>&1 | tail -3
+
+            dim "  → The Quiet Orchard tenant (3 posts, 2 pages)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-tenant-003.sql \
+                -y 2>&1 | tail -3
             ;;
         empty)
             dim "  → Empty tenant (defaults only)"
@@ -183,6 +200,10 @@ reset_databases() {
 # manually dig the secret out of .dev.vars and hand-build the URL
 # every time (see project_local_dev_login memory for the full flow).
 demo_login_url() {
+    # Optional: a seeded tenant's subdomain (e.g. "driftwood-ink") to log
+    # into directly, instead of relying on the sticky grove_local_subdomain
+    # cookie / hardcoded "midnight-bloom" default in hooks.server.ts.
+    local subdomain="${1:-}"
     local dev_vars="apps/aspen/.dev.vars"
     if [ ! -f "$dev_vars" ]; then
         return 1
@@ -194,7 +215,28 @@ demo_login_url() {
         return 1
     fi
 
-    echo "http://localhost:5173/arbor?demo=$secret"
+    if [ -n "$subdomain" ]; then
+        echo "http://localhost:5173/arbor?demo=$secret&subdomain=$subdomain"
+    else
+        echo "http://localhost:5173/arbor?demo=$secret"
+    fi
+}
+
+# Prints one demo login URL per seeded tenant (#1581) so switching between
+# the three accounts locally doesn't require manual DB lookups. Once logged
+# into any of them, Lantern's "Demo Identity" column can switch which
+# tenant's owner the session acts as without changing the URL/subdomain.
+print_demo_tenant_urls() {
+    if ! demo_login_url >/dev/null; then
+        warn "DEMO_MODE_SECRET not found in apps/aspen/.dev.vars — demo login unavailable"
+        return 1
+    fi
+
+    echo -e "  ${CYAN}Demo logins (3 seeded tenants):${RESET}"
+    echo -e "    Midnight Bloom:  $(demo_login_url midnight-bloom)"
+    echo -e "    Driftwood & Ink: $(demo_login_url driftwood-ink)"
+    echo -e "    Quiet Orchard:   $(demo_login_url quiet-orchard)"
+    echo -e "  ${DIM}(first visit sets grove_demo_mode + grove_local_subdomain cookies)${RESET}"
 }
 
 # Same idea as demo_login_url() above, but for Plant's onboarding bypass —
@@ -390,11 +432,8 @@ main() {
             seed_data "blog"
             start_workers
             echo ""
-            local demo_url plant_url
-            if demo_url=$(demo_login_url); then
-                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
-                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
-            fi
+            local plant_url
+            print_demo_tenant_urls
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"
@@ -418,13 +457,8 @@ main() {
             echo -e "  ${CYAN}DOs:${RESET}       via service binding (grove-durable-objects)"
             echo -e "  ${CYAN}Email:${RESET}     via service binding (grove-zephyr)"
             echo ""
-            local demo_url plant_url
-            if demo_url=$(demo_login_url); then
-                echo -e "  ${CYAN}Demo login:${RESET} $demo_url"
-                echo -e "  ${DIM}(visit once — sets the grove_demo_mode cookie, bypasses Turnstile/login)${RESET}"
-            else
-                warn "DEMO_MODE_SECRET not found in apps/aspen/.dev.vars — demo login unavailable"
-            fi
+            local plant_url
+            print_demo_tenant_urls
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"

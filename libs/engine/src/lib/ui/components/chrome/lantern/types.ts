@@ -18,6 +18,21 @@ export interface LanternLayoutData {
 	enabled: boolean;
 	/** The grove the user is currently visiting (null if on their own or non-tenant page) */
 	visitingGrove: VisitingGrove | null;
+	/** Local dev only — seeded identities the demo session can switch between (null outside demo mode) */
+	demoIdentities: DemoIdentitiesData | null;
+}
+
+/** A seeded tenant the local demo session can act as. */
+export interface DemoIdentityOption {
+	tenantId: string;
+	subdomain: string;
+	displayName: string;
+}
+
+/** Local dev demo-identity switcher data — see LanternLayoutData.demoIdentities. */
+export interface DemoIdentitiesData {
+	current: string;
+	options: DemoIdentityOption[];
 }
 
 /** Info about a grove the user is currently visiting (not their own). */

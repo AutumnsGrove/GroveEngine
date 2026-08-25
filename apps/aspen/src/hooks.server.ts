@@ -25,6 +25,7 @@ import {
 	setSecurityHeaders,
 	validateGroveSession,
 } from "@autumnsgrove/lattice/server";
+import { getUserByTenantId } from "@autumnsgrove/lattice/server/services/users";
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -190,6 +191,17 @@ const DEMO_MODE_COOKIE_NAME = "grove_demo_mode";
  * Never set/read outside localhost/127.0.0.1 — see isLocalhost gating below.
  */
 const LOCAL_SUBDOMAIN_COOKIE_NAME = "grove_local_subdomain";
+
+/**
+ * Demo identity override. Lets a demo session act as a DIFFERENT seeded
+ * tenant's owner than the one currently being viewed (set/cleared via
+ * apps/aspen/src/routes/api/dev/demo-identity/+server.ts) — needed to test
+ * cross-account features (Lantern friends, Reeds comments) where you must
+ * view Tenant A's page while logged in as Tenant B's owner. Only ever read
+ * inside the isDemoModeActive branch below, so it's inert without
+ * DEMO_MODE_SECRET (never set in production).
+ */
+const DEMO_IDENTITY_COOKIE_NAME = "grove_demo_identity";
 
 /**
  * Demo mode bypasses the human-verification gate too — it's off by default
@@ -787,41 +799,67 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// without a real Heartwood session — but it never set locals.user, so
 	// every write action (saving/publishing a bloom, anything gated on
 	// isOwner) still demanded a real login. Only runs when demo mode proved
-	// itself for this request and a tenant is actually resolved; the email
-	// must equal the tenant's ownerId exactly since isOwner checks elsewhere
-	// use emailsMatch(tenant.ownerId, user.email).
-	if (!event.locals.user && isDemoModeActive && event.locals.context.type === "tenant") {
-		const tenant = event.locals.context.tenant;
-		// Look up the real users row Plant's demo signup created for this
-		// tenant (libs/.../tenant.ts createTenant step 4b). Every demo tenant
-		// used to collapse onto the literal id "demo-owner" here, so no matter
-		// which tenant you were simulating, per-user state (drafts, prefs,
-		// anything keyed on user id) all pointed at the same identity. Falls
-		// back to a still-per-tenant-unique id for older seed-only tenants
-		// that never went through Plant and have no users row.
-		let ownerUserId = `demo-owner:${tenant.id}`;
+	// itself for this request; the email must equal the tenant's ownerId
+	// exactly since isOwner checks elsewhere use emailsMatch(tenant.ownerId,
+	// user.email).
+	//
+	// Identity defaults to whichever tenant is being VIEWED, but a
+	// grove_demo_identity cookie can override it to a DIFFERENT tenant —
+	// letting a demo session view Tenant A's page while logged in as Tenant
+	// B's owner. That's required for testing cross-account features (Lantern
+	// friends, Reeds comments) where viewing and acting-as can't be the same
+	// tenant. See apps/aspen/src/routes/api/dev/demo-identity/+server.ts.
+	if (!event.locals.user && isDemoModeActive) {
 		const db = event.platform?.env?.DB;
-		if (db) {
+		let identityTenant: { id: string; name: string; ownerId: string } | null = null;
+
+		const identityTenantId = getCookie(cookieHeader, DEMO_IDENTITY_COOKIE_NAME);
+		if (identityTenantId && db) {
 			try {
-				const ownerRow = await db
-					.prepare("SELECT id FROM users WHERE tenant_id = ? LIMIT 1")
-					.bind(tenant.id)
-					.first<{ id: string }>();
-				if (ownerRow?.id) {
-					ownerUserId = ownerRow.id;
-				}
+				const row = await db
+					.prepare(
+						"SELECT id, display_name AS name, email AS ownerId FROM tenants WHERE id = ? AND active = 1",
+					)
+					.bind(identityTenantId)
+					.first<{ id: string; name: string; ownerId: string }>();
+				identityTenant = row ?? null;
 			} catch (err) {
-				console.error("[Hooks] Demo-mode owner user lookup failed:", err);
+				console.error("[Hooks] Demo identity tenant lookup failed:", err);
 			}
 		}
 
-		event.locals.user = {
-			id: ownerUserId,
-			email: tenant.ownerId,
-			name: `${tenant.name} (Demo)`,
-			picture: "",
-			isAdmin: false,
-		};
+		const tenant =
+			identityTenant ??
+			(event.locals.context.type === "tenant" ? event.locals.context.tenant : null);
+
+		if (tenant) {
+			// Look up the real users row Plant's demo signup created for this
+			// tenant (libs/.../tenant.ts createTenant step 4b). Every demo tenant
+			// used to collapse onto the literal id "demo-owner" here, so no matter
+			// which tenant you were simulating, per-user state (drafts, prefs,
+			// anything keyed on user id) all pointed at the same identity. Falls
+			// back to a still-per-tenant-unique id for older seed-only tenants
+			// that never went through Plant and have no users row.
+			let ownerUserId = `demo-owner:${tenant.id}`;
+			if (db) {
+				try {
+					const ownerUser = await getUserByTenantId(db, tenant.id);
+					if (ownerUser) {
+						ownerUserId = ownerUser.id;
+					}
+				} catch (err) {
+					console.error("[Hooks] Demo-mode owner user lookup failed:", err);
+				}
+			}
+
+			event.locals.user = {
+				id: ownerUserId,
+				email: tenant.ownerId,
+				name: `${tenant.name} (Demo)`,
+				picture: "",
+				isAdmin: false,
+			};
+		}
 	}
 
 	// =========================================================================

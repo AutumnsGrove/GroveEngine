@@ -180,6 +180,9 @@ export {
 	updateUserDisplayName,
 	deactivateUser,
 	reactivateUser,
+	// Demo Identity Switching (local dev only)
+	type DemoIdentityOption,
+	listDemoIdentities,
 } from "./users.js";
 
 // ============================================================================

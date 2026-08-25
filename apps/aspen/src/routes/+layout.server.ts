@@ -5,8 +5,9 @@ import { TIERS, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers"
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
 import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
 import { isInGreenhouse } from "@autumnsgrove/lattice/platform/feature-flags";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import { getUserHomeGrove, listDemoIdentities } from "@autumnsgrove/lattice/server/services/users";
 import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import type { DemoIdentitiesData } from "@autumnsgrove/lattice/ui/components/chrome";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
 
 /** Default accent color — grove green 600. Matches @autumnsgrove/lattice/config/presets */
@@ -25,7 +26,7 @@ interface NavPage {
 	title: string;
 }
 
-export const load: LayoutServerLoad = async ({ locals, platform, url }) => {
+export const load: LayoutServerLoad = async ({ locals, platform, url, cookies }) => {
 	// Default site settings
 	const siteSettings: SiteSettings = { font_family: "lexend" };
 	// Navigation pages (pages with show_in_nav enabled)
@@ -211,6 +212,24 @@ export const load: LayoutServerLoad = async ({ locals, platform, url }) => {
 		}
 	}
 
+	// Local dev demo-identity switcher data — feeds Lantern's third column.
+	// Independent of tenantId (identity can be switched even off a tenant
+	// page), so it's fetched outside the tenant-scoped block above.
+	let demoIdentities: DemoIdentitiesData | null = null;
+	if (!building && locals.isDemoMode) {
+		const db = platform?.env?.DB;
+		if (db) {
+			try {
+				const options = await listDemoIdentities(db);
+				const current =
+					cookies.get("grove_demo_identity") ?? tenantId ?? options[0]?.tenantId ?? "";
+				demoIdentities = { current, options };
+			} catch (error) {
+				console.error("[Layout] Failed to load demo identities:", error);
+			}
+		}
+	}
+
 	// Get nav page limit for the current tier (for UI display)
 	const context = locals.context;
 	const plan = context.type === "tenant" ? context.tenant.plan : "seedling";
@@ -266,6 +285,7 @@ export const load: LayoutServerLoad = async ({ locals, platform, url }) => {
 									name: context.tenant.name,
 								}
 							: null,
+					demoIdentities,
 				}
 			: null,
 	};
