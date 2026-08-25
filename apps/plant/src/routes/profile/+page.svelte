@@ -7,7 +7,8 @@
 		blazeIcons,
 	} from "@autumnsgrove/prism/icons";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { COLOR_PRESETS } from "@autumnsgrove/lattice/platform/config";
+	import { COLOR_PRESETS, DEFAULT_ACCENT_COLOR } from "@autumnsgrove/lattice/platform/config";
+	import { suggestReadableColor } from "@autumnsgrove/prism";
 	import { submitFormAndGo } from "$lib/submit-form";
 
 	let { data } = $props();
@@ -17,6 +18,12 @@
 	let displayName = $state(data.user?.displayName || "");
 	let username = $state("");
 	let favoriteColor = $state<string | null>(null);
+
+	// Favorite Color legend chip previews the chosen accent live, falling back
+	// to the picker's own default swatch (not a themed UI accent) until one is chosen.
+	// accent-ok
+	const legendChipColor = $derived(favoriteColor ?? DEFAULT_ACCENT_COLOR);
+	const legendChipTextColor = $derived(suggestReadableColor(legendChipColor));
 	let selectedInterests = $state<string[]>([]);
 
 	// Submission state
@@ -230,10 +237,16 @@
 
 			<!-- Favorite Color (Optional) -->
 			<fieldset
-				class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-border/40"
+				class="relative p-4 pt-5 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-border/40"
 			>
-				<legend class="block text-sm font-medium text-foreground mb-1.5">
-					Favorite Color <span class="text-foreground-subtle">(optional)</span>
+				<!-- Native <legend> straddles the fieldset border with no background of its own,
+				     making it unreadable — position it as a solid chip instead, matching the
+				     plan-status badges on the plans page (absolute -top-3, solid bg, rounded-full). -->
+				<legend
+					class="absolute -top-3 left-4 z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-lg transition-colors duration-300"
+					style="background-color: {legendChipColor}; color: {legendChipTextColor};"
+				>
+					Favorite Color <span class="opacity-80">(optional)</span>
 				</legend>
 				<p class="text-xs text-foreground-subtle mb-3">
 					This will be your blog's accent color. You can change it later.
