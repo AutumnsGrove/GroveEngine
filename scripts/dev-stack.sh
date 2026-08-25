@@ -10,6 +10,7 @@
 #   ./scripts/dev-stack.sh workers        Workers only (no SvelteKit apps)
 #   ./scripts/dev-stack.sh seed           Apply migrations + seed data only
 #   ./scripts/dev-stack.sh reset          Nuke local DBs and re-seed
+#   ./scripts/dev-stack.sh stop           Kill any running processes, free ports
 #
 # Prerequisites:
 #   pnpm install                          (workspace deps)
@@ -56,6 +57,37 @@ cleanup() {
     log "All processes stopped."
 }
 trap cleanup EXIT INT TERM
+
+# ── Stop (clean up behind us) ────────────────────────────────────────────
+# `cleanup()` above only runs when THIS script's own process exits — it's
+# useless if the stack was launched backgrounded (`&`) and the launching
+# shell/session is long gone by the time you want it stopped. Kills by
+# matching the actual `wrangler dev`/`workerd serve` processes and taking
+# their PIDs directly, not `pkill -f` pattern matching, which has
+# previously missed zombies and left the next run to silently collide with
+# a stale process still squatting a port (see docs/LOCAL_DEV.md).
+stop_stack() {
+    # Pattern must match the CLI parent (which respawns a fresh `workerd
+    # serve` child the instant the old one dies) as well as the child
+    # itself — the parent's real command line is
+    # `.../wrangler-dist/cli.js dev -c ...`, where "wrangler" and "dev"
+    # aren't adjacent, so a literal "wrangler dev" match misses it and
+    # only ever kills the disposable child, which just comes back.
+    local pids
+    pids=$(ps aux | grep -E "wrangler.*dev -c|workerd serve" | grep -v grep | awk '{print $2}')
+
+    if [ -z "$pids" ]; then
+        log "Nothing running — dev stack already stopped."
+        return 0
+    fi
+
+    local count
+    count=$(echo "$pids" | wc -w | tr -d ' ')
+    warn "Stopping dev stack ($count process(es))..."
+    echo "$pids" | xargs kill -9 2>/dev/null
+    sleep 1
+    log "Dev stack stopped. Ports are free for the next run."
+}
 
 # ── Preflight checks ─────────────────────────────────────────────────
 preflight() {
@@ -417,6 +449,14 @@ main() {
     echo -e "${DIM}────────────────────────────────${RESET}"
     echo ""
 
+    # stop doesn't need wrangler/.dev.vars/engine-dist preflight checks —
+    # it's just killing processes, and should work even if the stack is in
+    # a broken state that would make preflight itself fail.
+    if [ "$mode" = "stop" ]; then
+        stop_stack
+        return 0
+    fi
+
     preflight
 
     case "$mode" in
@@ -470,11 +510,12 @@ main() {
             wait
             ;;
         *)
-            echo "Usage: ./scripts/dev-stack.sh [full|workers|seed|reset]"
+            echo "Usage: ./scripts/dev-stack.sh [full|workers|seed|reset|stop]"
             echo ""
             echo "Modes:"
             echo "  full      Start everything (default)"
             echo "  workers   Start workers only (no SvelteKit dev server)"
+            echo "  stop      Kill any running dev-stack processes and free their ports"
             echo "  seed      Apply migrations + seed data, then exit"
             echo "  reset     Nuke local DBs, re-migrate, re-seed"
             exit 1
