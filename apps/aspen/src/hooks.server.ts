@@ -103,7 +103,17 @@ function extractSubdomain(host: string, request: Request, url: URL): string | nu
 			return paramSubdomain;
 		}
 
-		// Option 3: Default tenant for local dev (no header or param needed)
+		// Option 3: sticky cookie from a previous ?subdomain= request (see
+		// LOCAL_SUBDOMAIN_COOKIE_NAME below). Production doesn't need this —
+		// the Host header IS the tenant on every request. Locally, internal
+		// links/refreshes don't carry ?subdomain= forward, so without this
+		// the very next click falls through to the hardcoded default below.
+		const cookieSubdomain = getCookie(request.headers.get("cookie"), LOCAL_SUBDOMAIN_COOKIE_NAME);
+		if (cookieSubdomain && isValidSubdomain(cookieSubdomain)) {
+			return cookieSubdomain;
+		}
+
+		// Option 4: Default tenant for local dev (no header, param, or cookie needed)
 		return "midnight-bloom";
 	}
 
@@ -171,6 +181,15 @@ function shouldSkipTurnstile(pathname: string, userAgent: string | null): boolea
  * arbor/+layout.server.ts, which reads it for the auth-bypass check.
  */
 const DEMO_MODE_COOKIE_NAME = "grove_demo_mode";
+
+/**
+ * Sticky local tenant simulation. Set whenever a localhost request carries
+ * ?subdomain=, read back by extractSubdomain() so the next request without
+ * the param (a refresh, a relative link, a redirect from Plant) keeps
+ * simulating the same tenant instead of falling back to "midnight-bloom".
+ * Never set/read outside localhost/127.0.0.1 — see isLocalhost gating below.
+ */
+const LOCAL_SUBDOMAIN_COOKIE_NAME = "grove_local_subdomain";
 
 /**
  * Demo mode bypasses the human-verification gate too — it's off by default
@@ -507,6 +526,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 		event.request.headers.get("x-forwarded-host") || event.request.headers.get("host") || "";
 	const { host, isBeta } = stripBetaLabel(rawHost);
 	event.locals.isBeta = isBeta;
+	const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
 	const subdomain = extractSubdomain(host, event.request, event.url);
 
 	// No subdomain = landing page (grove.place)
@@ -771,10 +791,34 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// must equal the tenant's ownerId exactly since isOwner checks elsewhere
 	// use emailsMatch(tenant.ownerId, user.email).
 	if (!event.locals.user && isDemoModeActive && event.locals.context.type === "tenant") {
+		const tenant = event.locals.context.tenant;
+		// Look up the real users row Plant's demo signup created for this
+		// tenant (libs/.../tenant.ts createTenant step 4b). Every demo tenant
+		// used to collapse onto the literal id "demo-owner" here, so no matter
+		// which tenant you were simulating, per-user state (drafts, prefs,
+		// anything keyed on user id) all pointed at the same identity. Falls
+		// back to a still-per-tenant-unique id for older seed-only tenants
+		// that never went through Plant and have no users row.
+		let ownerUserId = `demo-owner:${tenant.id}`;
+		const db = event.platform?.env?.DB;
+		if (db) {
+			try {
+				const ownerRow = await db
+					.prepare("SELECT id FROM users WHERE tenant_id = ? LIMIT 1")
+					.bind(tenant.id)
+					.first<{ id: string }>();
+				if (ownerRow?.id) {
+					ownerUserId = ownerRow.id;
+				}
+			} catch (err) {
+				console.error("[Hooks] Demo-mode owner user lookup failed:", err);
+			}
+		}
+
 		event.locals.user = {
-			id: "demo-owner",
-			email: event.locals.context.tenant.ownerId,
-			name: `${event.locals.context.tenant.name} (Demo)`,
+			id: ownerUserId,
+			email: tenant.ownerId,
+			name: `${tenant.name} (Demo)`,
 			picture: "",
 			isAdmin: false,
 		};
@@ -966,6 +1010,21 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 		];
 		if (isProduction) demoCookieParts.push("Secure");
 		response.headers.append("Set-Cookie", demoCookieParts.join("; "));
+	}
+
+	// Refresh the sticky local-tenant cookie whenever this request explicitly
+	// named a tenant via ?subdomain= — so the next request (refresh, relative
+	// link, Plant's post-signup redirect) keeps simulating it. Never touches
+	// production: gated on isLocalhost, and extractSubdomain() only reads
+	// this cookie inside its own localhost branch.
+	if (isLocalhost) {
+		const paramSubdomain = event.url.searchParams.get("subdomain");
+		if (paramSubdomain && isValidSubdomain(paramSubdomain)) {
+			response.headers.append(
+				"Set-Cookie",
+				`${LOCAL_SUBDOMAIN_COOKIE_NAME}=${paramSubdomain}; Path=/; Max-Age=86400; SameSite=Lax`,
+			);
+		}
 	}
 
 	setSecurityHeaders(response);
