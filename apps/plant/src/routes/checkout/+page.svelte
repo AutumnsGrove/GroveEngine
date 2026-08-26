@@ -5,9 +5,9 @@
 
 	let { data } = $props();
 
-	let isLoading = $state(true);
+	let isLoading = $state(false);
 	let error = $state<string | null>(null);
-	let checkoutInitialized = false;
+	let confirmed = $state(false);
 
 	// Plan info derived from unified tier config
 	const planNames: Record<string, string> = Object.fromEntries(
@@ -38,10 +38,13 @@
 			: 0
 	);
 
-	// Create checkout session and redirect (runs once on mount)
-	$effect(() => {
-		if (checkoutInitialized) return;
-		checkoutInitialized = true;
+	// Create checkout session and redirect — only runs once the user explicitly
+	// confirms below. Plan selection on /plans is a separate act from paying;
+	// this is the actual "I want to pay" moment.
+	async function goToCheckout() {
+		if (confirmed) return;
+		confirmed = true;
+		isLoading = true;
 
 		// Safety net: if redirect hasn't happened in 15s, stop the spinner
 		const timeout = setTimeout(() => {
@@ -51,46 +54,47 @@
 			}
 		}, 15000);
 
-		(async () => {
-			try {
-				const res = await fetch('/checkout', { // csrf-ok
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' }
-				});
+		try {
+			const res = await fetch('/checkout', { // csrf-ok
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
 
-				const result = (await res.json()) as {
-					url?: string;
-					error?: string;
-					comped?: boolean;
-					redirectUrl?: string;
-				};
+			const result = (await res.json()) as {
+				url?: string;
+				error?: string;
+				comped?: boolean;
+				redirectUrl?: string;
+			};
 
-				if (result.comped && result.redirectUrl) {
-					// User has a comped invite - redirect to comped welcome page
-					window.location.href = result.redirectUrl;
-				} else if (result.url) {
-					// Redirect to Stripe Checkout
-					window.location.href = result.url;
-				} else if (result.error) {
-					error = result.error;
-					isLoading = false;
-				} else {
-					error = "Checkout couldn't be initialized. Please go back and try again.";
-					isLoading = false;
-				}
-			} catch (err) {
-				error = 'Unable to initialize checkout. Please try again.';
+			if (result.comped && result.redirectUrl) {
+				// User has a comped invite - redirect to comped welcome page
+				window.location.href = result.redirectUrl;
+			} else if (result.url) {
+				// Redirect to Stripe Checkout
+				window.location.href = result.url;
+			} else if (result.error) {
+				error = result.error;
 				isLoading = false;
-			} finally {
-				clearTimeout(timeout);
+				confirmed = false;
+			} else {
+				error = "Checkout couldn't be initialized. Please go back and try again.";
+				isLoading = false;
+				confirmed = false;
 			}
-		})();
-	});
+		} catch (err) {
+			error = 'Unable to initialize checkout. Please try again.';
+			isLoading = false;
+			confirmed = false;
+		} finally {
+			clearTimeout(timeout);
+		}
+	}
 </script>
 
 <div class="animate-fade-in">
-	<!-- Back navigation (only show while loading or on error) -->
-	{#if isLoading || error}
+	<!-- Back navigation (hidden only mid-redirect, once payment is actually underway) -->
+	{#if !isLoading || error}
 		<div class="flex items-center gap-2 mb-6">
 			<a
 				href="/plans"
@@ -137,13 +141,19 @@
 		</p>
 	</GlassCard>
 
-	<!-- Loading state / Error -->
+	<!-- Confirm / Loading / Error -->
 	{#if isLoading}
 		<div class="text-center">
 			<GlassCard variant="default" class="inline-flex items-center gap-3">
 				<stateIcons.loader size={24} class="animate-spin text-primary" />
 				<span class="text-foreground">Taking you to secure checkout...</span>
 			</GlassCard>
+		</div>
+	{:else if !error}
+		<div class="max-w-md mx-auto">
+			<button onclick={goToCheckout} class="btn-primary w-full">
+				Continue to secure payment
+			</button>
 		</div>
 	{:else if error}
 		<div class="max-w-md mx-auto">
