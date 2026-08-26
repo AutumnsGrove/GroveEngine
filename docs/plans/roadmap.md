@@ -2,14 +2,14 @@
 title: "Grove Platform: Development Roadmap"
 status: planned
 category: general
-lastUpdated: "2026-02-20"
+lastUpdated: "2026-08-26"
 ---
 
 # Grove Platform: Development Roadmap
 
 > **Internal Technical Roadmap**
 >
-> This document tracks development through Grove's seasonal phases. Each phase has both a public-facing narrative and detailed technical implementation tasks.
+> This document tracks development through Grove's seasonal phases. Phase names are a sequence, not a calendar — nothing here is tied to a real-world date or deadline. Each phase has both a public-facing narrative and detailed technical implementation tasks.
 >
 > For the public roadmap, see: https://grove.place/roadmap
 
@@ -17,8 +17,18 @@ lastUpdated: "2026-02-20"
 
 ## Current Phase: Thaw
 
-**Status:** Active Development (January 2025)
-**Progress:** ~33%
+**Status:** Active Development
+
+---
+
+## Always Happening (Not a Phase)
+
+Some work never "completes" — it's ongoing at every stage, revisited as the grove grows rather than checked off once.
+
+- [ ] **Accessibility:** WCAG AA audits, keyboard navigation, screen reader support
+- [ ] **Performance:** Fast everywhere, always
+- [ ] **Mobile Experience:** Beautiful on every screen
+- [ ] **Edge Cases:** The small things that matter
 
 ---
 
@@ -46,7 +56,7 @@ The groundwork laid in stillness. Foundations built when no one was watching.
 - [x] **Landing Site:** grove.place welcomes visitors
   - Seasonal theme system
   - Randomized forest generation
-  - Email waitlist (59 subscribers at launch)
+  - Email waitlist
   - Vision, pricing, roadmap pages
 
 - [x] **Infrastructure:** Cloudflare
@@ -62,7 +72,7 @@ The groundwork laid in stillness. Foundations built when no one was watching.
   - Vista (GroveMonitor): Infrastructure observability dashboard
   - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, `docs/specs/vista-spec.md`, and `docs/grove-mcp-guide.md`
 
-- [ ] **Petal:** Image content moderation
+- [x] **Petal:** Image content moderation
   - Privacy-first four-layer protection
   - CSAM detection (Layer 1)
   - Content classification (Layer 2)
@@ -79,7 +89,7 @@ _"The ice begins to crack"_
 
 Grove opens its doors. The first trees take root.
 
-### Active Work
+### Completed
 
 - [x] **Sign Up Flow:** plant.grove.place
   - Google, email auth options
@@ -123,6 +133,22 @@ Grove opens its doors. The first trees take root.
   - SQLite FTS5 search
   - 10 knowledge categories
 
+- [x] **Reeds:** Comments — replies and thoughtful discussions
+  - Full service layer, DB migrations, admin panels (inbox, moderated, blocked, settings)
+  - See `docs/specs/reeds-spec.md`
+
+- [x] **Thorn:** Content moderation — keeping the grove safe
+  - Behavioral + AI layers, moderation log, entity labels
+  - See `docs/specs/thorn-spec.md`, `docs/specs/thorn-behavioral-spec.md`
+
+- [x] **Porch:** Support conversations — come sit and talk
+  - Completed alongside the rest of Thaw
+  - See `docs/specs/porch-spec.md`
+
+- [x] **Curios — Phase 1 (Foundation):** Guestbook, Gallery, Timeline, Polls
+  - The first four curios live in production
+  - See `docs/specs/curios-spec.md`, `docs/plans/features/active/curio-enhancement-roadmap.md`
+
 ### Remaining for Thaw
 
 - [ ] **Launch Signups:** Open plant.grove.place to public
@@ -137,19 +163,13 @@ Grove opens its doors. The first trees take root.
 ### Technical Tasks
 
 - [ ] **🛡️ Patina:** Automated nightly backups
-  - Nightly SQL dumps of all 6 D1 databases to R2
+  - Nightly SQL dumps of all D1 databases to R2
   - Weekly meta-backups (compress 7 days into archive)
   - 12-week retention for disaster recovery
   - See `docs/specs/patina-spec.md`
 
 - [ ] **🛡️ Security Remediation:** Fix P0/P1 issues before launch
-  - See `docs/plans/planned/1.0-critical-high-remediation.md`
   - XSS sanitization, tenant isolation, PII removal
-
-- [ ] Debug Edit button on blog list (navigation issue)
-- [ ] Set GROVEAUTH secrets for OAuth flow
-- [ ] Complete Shade WAF rules (3 of 5 slots)
-- [ ] Deploy robots.txt and meta tags
 
 ---
 
@@ -161,50 +181,34 @@ New growth appears. The grove finds its voice.
 
 ### Planned Features
 
-- [ ] **Ivy:** Email at @grove.place
-  - Forward emails to personal inbox
-  - Custom @username.grove.place addresses
-  - Spam filtering via Cloudflare Email Routing
-
-- [ ] **Amber:** Storage dashboard
-  - See usage across posts and media
-  - Visual breakdown by file type
-  - Upgrade prompts near limits
-
-- [ ] **Trails:** Personal roadmaps
-  - Share your journey publicly
-  - Seasonal theming integration
-  - Embed in blog posts
-  - See `docs/specs/trails-spec.md`
-
 - [ ] **Sapling Tier:** $12/month growth tier
   - 250 posts, 5 GB storage
   - 10 themes
-  - Email forwarding included
   - Priority support
 
-- [ ] **More Themes:** Foliage expansion
+- [ ] **Foliage:** Theme library — more color for your corner
   - Minimal, Night Garden, Zine
   - Moodboard, Typewriter, Solarpunk
-  - See `@autumnsgrove/foliage`
+  - See `docs/specs/foliage-project-spec.md`
 
-- [ ] **Gossamer:** ASCII visual effects (Open Source)
-  - NPM: `gossamer` (core) + `@gossamer/svelte`
-  - Repository: github.com/AutumnsGrove/Gossamer
-  - 2D Canvas-based ASCII patterns
-  - Ambient backgrounds, floating textures
-  - Image → ASCII transformations
-  - Framework adapters (Svelte, React, Vue)
-  - Seasonal presets (grove-mist, winter-snow, etc.)
-  - See `docs/specs/gossamer-spec.md`
+- [ ] **Fireside Mode:** Conversational drafting
+  - Have a conversation, get your words organized into a draft
+  - The fire doesn't tell the story — it just creates the space where stories emerge
+  - Stands alone (decoupled from the cut Wisp editor tooling)
+  - See `docs/specs/ai-writing-assistant-spec.md` for the conversational-drafting portion
+
+- [ ] **Scribe:** Voice transcription
+  - Lands alongside Fireside — both lean on AI underneath
+  - See `docs/specs/scribe-voice-transcription-spec.md`
+
+- [ ] **Curios — Phase 2:** Mood Ring, Badges, Shelves, Cursors, Hit Counter
+  - See `docs/plans/features/active/curio-enhancement-roadmap.md`
 
 ### Technical Implementation
 
-- [ ] Integrate Cloudflare Email Routing API
-- [ ] Build storage metrics aggregation
-- [ ] Implement Trails database schema
-- [ ] Connect Foliage theme package to engine
-- [ ] Run Foliage migrations
+- [ ] Connect Foliage theme package to engine, run Foliage migrations
+- [ ] Fireside chat endpoint + session state management
+- [ ] Scribe transcription pipeline (currently an early attempt, not near complete)
 
 ---
 
@@ -216,35 +220,18 @@ The grove becomes a community. Roots intertwine.
 
 ### Planned Features
 
-- [ ] **Shutter:** Web content distillation
-  - Token-efficient web fetching for LLM agents
-  - Built-in prompt injection defense (Canary pattern)
-  - Shared offenders list via D1
-  - Python package (`grove-shutter`) and Cloudflare Worker
-  - See `docs/specs/shutter-spec.md`
+- [ ] **Forests:** Community groves — find your people
+  - Essentially subreddits for Grove — shared spaces around topics/interests
+  - Needs substantial infrastructure changes before this can be reliably promised
+  - Pushed here rather than First Buds because the underlying platform work isn't ready
 
-- [ ] **Meadow:** The social layer
-  - Optional community feed
-  - Follow favorite blogs
-  - No algorithms, just chronological
-  - Connection without competition
-  - See `docs/specs/social-spec.md`
+- [ ] **Amber:** Storage dashboard — see and manage your files
+  - See usage across posts and media, visual breakdown by file type
+  - Pushed further out; not an immediate priority
 
-- [ ] **Comments:** Dual-mode system
-  - Reply = private message to author
-  - Comment = public, requires approval
-  - Rate limits: Free 20/week, Paid unlimited
-  - See `docs/specs/reeds-spec.md`
-
-- [ ] **Private Reactions:** Encouragement only author sees
-  - Emoji reactions
-  - No public counts
-  - No engagement metrics
-
-- [ ] **Rings:** Private analytics
-  - Your growth, reflected
-  - Privacy-first design
-  - Daily visitor counts, not identities
+- [ ] **Rings:** Private analytics — your growth, reflected
+  - Lands ahead of the AI feature cluster (Fireside/Scribe)
+  - Privacy-first design, daily visitor counts, not identities
   - See `docs/specs/rings-spec.md`
 
 - [ ] **Oak & Evergreen Tiers:** Full control
@@ -252,20 +239,22 @@ The grove becomes a community. Roots intertwine.
   - Theme customizer
   - Custom fonts (Evergreen)
   - Domain search & registration (Evergreen)
+  - **Note:** tier structure itself is under re-evaluation now that the feature set has changed substantially — Oak and Evergreen may not survive in their current form. Track that discussion separately from this roadmap pass.
 
-- [ ] **Content Moderation:** Keeping the grove safe
-  - AI-assisted review with human escalation
-  - Zero data retention on external APIs
-  - See `docs/specs/thorn-spec.md`
+- [ ] **Foliage:** Theme customizer — make it truly yours
+  - See `docs/specs/foliage-project-spec.md`
+
+- [ ] **Community Themes:** Share what you create
+
+- [ ] **Curios — Phase 3:** Webring, Status Badge, Activity Status, Now Playing, Blogroll
+  - See `docs/plans/features/active/curio-enhancement-roadmap.md`
 
 ### Technical Implementation
 
-- [ ] Create meadow.grove.place SvelteKit app
-- [ ] Implement Meadow feed aggregation
-- [ ] Build comment database schema
-- [ ] Integrate content moderation service
+- [ ] Build storage metrics aggregation (Amber)
 - [ ] Set up Cloudflare for SaaS (custom domains)
-- [ ] Implement Rings analytics with DOs
+- [ ] Implement Rings analytics with Durable Objects
+- [ ] Forests: schema design, moderation model, discovery UX (early — infra work, not feature work, comes first)
 
 ---
 
@@ -273,15 +262,9 @@ The grove becomes a community. Roots intertwine.
 
 _"Warm light through the canopy"_
 
-The grove settles into itself. A time for refinement.
+The grove settles into itself. A time for refinement — the AI-assisted layer and remaining polish-adjacent features that aren't part of the "always happening" bucket.
 
 ### Planned Features
-
-- [ ] **Polish:** Attention to every detail
-  - Accessibility audit (WCAG AA)
-  - Performance optimization
-  - Mobile experience refinement
-  - Edge case handling
 
 - [ ] **Import Tools:** Bring your words home
   - WordPress import
@@ -300,21 +283,54 @@ The grove settles into itself. A time for refinement.
   - Preview before installing
   - Revenue sharing for creators
 
+- [ ] **Curios — Phase 4:** Ambient, Clip Art, Custom Uploads
+  - See `docs/plans/features/active/curio-enhancement-roadmap.md`
+
 ### Technical Implementation
 
-- [ ] Lighthouse CI integration
-- [ ] Automated accessibility testing
 - [ ] Import tool parsers for each platform
 - [ ] Newsletter subscription database
 - [ ] Theme marketplace moderation queue
 
 ---
 
-## Phase 6: Midnight Bloom
+## Phase 6: Deep Roots
+
+_"What the grove becomes once it's had time to grow"_
+
+These features need the platform itself to mature first — more infrastructure, more trust, more time — before they can be built and promised responsibly. Not cut. Not soon. Real, and worth the wait.
+
+### Planned Features
+
+- [ ] **Wander:** Immersive discovery — walk through the forest
+  - Much further out than the rest of the roadmap
+  - See `docs/specs/wander-spec.md`
+
+- [ ] **Meadow:** Social feed — connection without competition
+  - Chronological feed, private reactions, no algorithms
+  - A comeback, not a cut — just further out than previously planned
+  - See `docs/specs/meadow-spec.md`
+
+- [ ] **Chirp:** 1:1 direct messaging
+  - Lands together with Meadow's return, as part of the same social push
+  - See `docs/specs/chirp-spec.md`
+
+- [ ] **Centennial:** The 100-year promise
+  - 100-year domain preservation and read-only archival after 12 cumulative months on Sapling+
+  - Grove isn't ready to make this promise yet — needs The Reserve, succession planning, and financial infrastructure to actually be keepable
+  - See prior draft: `_junkdrawer/features/centennial/centennial-status.md`
+
+- [ ] **Curios — Phase 5:** Shrines, Artifacts
+  - The most ambitious curios — Shrines needs a spatial canvas editor, Artifacts needs 21 individual mini-components
+  - See `docs/plans/features/active/curio-enhancement-roadmap.md`
+
+---
+
+## Phase 7: Midnight Bloom
 
 _"The far horizon: a dream taking shape"_
 
-Where digital roots meet physical ground. The vision that pulls everything forward.
+Where digital roots meet physical ground. The vision that pulls everything forward — but this phase is **only** about the physical tea shop. No grove.place features live here anymore; Wander, Meadow, and Chirp moved to Deep Roots because they're still part of the platform, just further out. Midnight Bloom is the dream beyond the platform entirely.
 
 ### The Dream
 
@@ -331,6 +347,8 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
   - QR codes linking to online versions
   - Monthly featured writers
 
+- [ ] **Local Zines:** Grove blogs printed and shared
+
 - [ ] **A Third Place:** That becomes a first home
   - Workshop events
   - Writing groups
@@ -343,6 +361,19 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 - QR code generation for posts
 - Event management system
 - Community moderation at scale
+
+---
+
+## Cut
+
+These were on the roadmap and are no longer happening. Listed here so the decision doesn't get re-litigated by accident — not out of embarrassment, just so we remember we already thought about it.
+
+- **Wisp** (base grammar/tone/readability editor tool) — the underlying idea (conversational drafting) survives as **Fireside Mode**, which now stands alone rather than as a sub-phase of Wisp. The grammar-checking/editing-assistant layer itself is cut.
+- **Ivy** (email at @grove.place, forwarding + custom addresses) — frivolous scope creep, cut entirely.
+- **Trails** (personal roadmaps)
+- **Terrarium** (creative canvas / visual scene composer)
+- **Weave** (visual composition, animations and diagrams)
+- **Outpost** (community Minecraft server)
 
 ---
 
@@ -384,10 +415,12 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 ### Hybrid Routing Strategy
 
 | User Type        | Domain          | Routing             | Cost           |
-| ---------------- | --------------- | ------------------- | -------------- |
+| ----------------- | --------------- | -------------------- | --------------- |
 | Seedling/Sapling | `*.grove.place` | Worker wildcards    | Free           |
 | Oak (BYOD)       | `custom.com`    | Cloudflare for SaaS | $0.10/hostname |
 | Evergreen        | `custom.com`    | Cloudflare for SaaS | $0.10/hostname |
+
+> **Note:** Oak/Evergreen tier structure is under re-evaluation — see the "Note" under Full Bloom's tier section above.
 
 ---
 
@@ -406,126 +439,6 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 - [ ] < 10 hours support per client/month
 - [ ] < 5% monthly churn rate
 - [ ] Net Promoter Score > 50
-
----
-
-## Full Bloom: Wisp - Writing Assistant
-
-> _A helper, not a writer—and sometimes, a good listener_
-
-**Status:** Implementation complete, pending deployment
-
-Wisp is Grove's ethical AI writing assistant. It helps polish your voice without replacing it—grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming.
-
-**Fireside Mode** extends Wisp for writers who freeze at the blank page. Have a conversation with Wisp, and your words get organized into a draft. The fire doesn't tell the story—it just creates the space where stories emerge. See `docs/specs/ai-writing-assistant-spec.md` for full specification.
-
-### Core Implementation Complete
-
-- [x] Model configuration (DeepSeek V3.2 via Fireworks AI)
-- [x] Inference client with provider fallback cascade
-- [x] Local readability calculations (Flesch-Kincaid)
-- [x] API endpoint (`/api/grove/wisp`)
-- [x] Rate limiting (20 req/hour, $5/month cap)
-- [x] WispPanel UI component with ASCII vibes
-- [x] WispButton toolbar integration
-- [x] Database migration (`014_wisp.sql`)
-- [x] Migration prompt for AutumnsGrove
-
-### Fireside Mode (Planned)
-
-**Phase F1: Core Conversation**
-
-- [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
-- [ ] Session state management (sessionStorage + optional KV recovery)
-- [ ] Starter prompt rotation (12 prompts, pseudorandom algorithm)
-- [ ] Error response handling
-
-**Phase F2: Draft Generation**
-
-- [ ] Conversation → draft prompt (voice-preserving, minimal transitions)
-- [ ] Draft preview UI
-- [ ] Transparency marker injection (server-side enforced)
-- [ ] Database migration (`015_wisp_fireside.sql`)
-
-**Phase F3: Guardrails**
-
-- [ ] Two-layer detection: client-side keywords + server-side inference
-- [ ] `canDraft` logic (3+ messages, 150+ tokens)
-- [ ] "Write for me" redirect responses
-
-**Phase F4: Polish**
-
-- [ ] ASCII fire art (with mobile emoji fallback)
-- [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
-- [ ] Screen reader support (aria-live announcements)
-- [ ] "Start with a conversation" button in editor
-
-**Phase F5: Testing**
-
-- [ ] Unit tests, integration tests, privacy audit, accessibility audit
-
-### Deployment Tasks (Pre-Launch)
-
-- [ ] Run database migration: `wrangler d1 execute <db> --file=libs/engine/migrations/014_wisp.sql`
-- [ ] Set Fireworks AI API key: `wrangler secret put FIREWORKS_API_KEY`
-- [ ] (Optional) Set backup provider keys: `CEREBRAS_API_KEY`, `GROQ_API_KEY`
-- [ ] Add default settings to D1: `wisp_enabled=false`, `wisp_mode=quick`
-- [ ] Deploy updated Lattice package to npm
-- [ ] Run AutumnsGrove migration (see `docs/specs/wisp-migration-prompt.md`)
-
-### AutumnsGrove Migration Tasks
-
-- [ ] Update component imports to use `WispPanel` from lattice
-- [ ] Update settings page to Wisp branding
-- [ ] Change API endpoint from `/api/ai/writing-assist` to `/api/grove/wisp`
-- [ ] Update setting keys: `ai_assistant_enabled` → `wisp_enabled`
-- [ ] Remove old files: `AIWritingPanel.svelte`, `ai-models.js`, `api/ai/writing-assist/`
-
-### Testing Checklist
-
-- [ ] Settings page loads, toggle works
-- [ ] Usage stats display correctly
-- [ ] Grammar analysis returns suggestions
-- [ ] Tone analysis returns traits
-- [ ] Readability calculates locally (no API call)
-- [ ] Apply fix functionality works
-- [ ] Rate limiting enforces correctly
-- [ ] Cost cap warning appears at 80%
-
-### Documentation
-
-- [x] Unified spec: `docs/specs/writing-assistant-unified-spec.md`
-- [x] Migration guide: `docs/specs/wisp-migration-prompt.md`
-- [x] Grove naming: Added to `docs/grove-naming.md`
-- [ ] User guide for settings panel
-
-### Key Files
-
-```
-libs/engine/
-├── src/lib/config/wisp.js           # Model config, pricing
-├── src/lib/server/inference-client.js # Shared inference client
-├── src/lib/utils/readability.js      # Local calculations
-├── src/lib/components/WispPanel.svelte
-├── src/lib/components/WispButton.svelte
-├── src/routes/api/grove/wisp/+server.js
-└── migrations/014_wisp.sql
-
-scripts/
-└── wisp-setup.sh                     # Deployment helper script
-```
-
-### Privacy & Philosophy
-
-- All features OFF by default (opt-in only)
-- Zero Data Retention (ZDR) from all inference providers
-- Content analyzed, never stored
-- Outcome-only retention (scores, not content)
-- User's voice is sacred: we polish, never replace
-
-_Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing._
-
----
 
 ---
 
@@ -550,12 +463,13 @@ _Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing._
 ## Decision Log
 
 | Date       | Decision                                            |
-| ---------- | --------------------------------------------------- |
+| ---------- | ---------------------------------------------------- |
 | 2025-11-21 | Split into 3 projects (Engine, Website, Social)     |
 | 2025-11-21 | Raised pricing significantly ($8-35/month vs $5-10) |
 | 2025-11-21 | Changed post limits to soft archival (no deletion)  |
-| 2025-12-24 | Sent first launch emails to 59 waitlist subscribers |
+| 2025-12-24 | Sent first launch emails to waitlist subscribers    |
 | 2025-12-29 | Redesigned plant.grove.place signup page            |
+| 2026-08-26 | Full roadmap overhaul: cut Wisp/Ivy/Trails/Terrarium/Weave/Outpost, decoupled Fireside from Wisp, added Deep Roots phase, redefined Midnight Bloom as tea-shop-only, split polish into an ongoing cross-cutting section, phased Curios across 5 sub-phases, marked Reeds/Thorn/Porch/Petal as shipped |
 
 ---
 
@@ -565,8 +479,9 @@ _Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing._
 - Will non-technical users be able to use admin panel?
 - How many clients can one person support before hiring help?
 - Will social features drive retention or just add complexity?
+- Does the Oak/Evergreen tier structure survive the changed feature set? (separate follow-up conversation, not resolved in this pass)
 
 ---
 
-_Last Updated: January 2026_
-_Next Review: After first 5 clients are onboarded_
+_Last Updated: August 2026_
+_Next Review: After tier re-evaluation session_

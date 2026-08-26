@@ -17,10 +17,12 @@
 		phaseStyles,
 		featureColorMaps,
 		featureBorderMaps,
+		ongoingFeatures,
 		tocHeaders,
 		getFeatureIconColor,
 		getFeatureBorderClass,
 		type PhaseKey,
+		type PhaseStyle,
 	} from "$lib/data/roadmapData";
 
 	let { data } = $props();
@@ -35,6 +37,18 @@
 	const MoonIcon = phaseIcons.moon;
 	const Star = phaseIcons.star;
 	const Sprout = natureIcons.sprout;
+	const Anchor = phaseIcons.anchor;
+
+	// Style for the "Always Growing" ongoing-work banner — not tied to a phase
+	const ongoingStyle: PhaseStyle = {
+		li: "bg-white/70 dark:bg-cream-50/20 backdrop-blur-sm shadow-sm",
+		iconColor: "text-foreground-muted",
+		nameColor: "text-foreground",
+		descColor: "text-foreground-muted",
+		featureStar: "default",
+		useCheckIcon: false,
+		showInternalBadge: false,
+	};
 
 	// Import nature assets from engine package
 	import {
@@ -102,6 +116,7 @@
 		"first-buds": { min: 3, max: 5 }, // Spring awakening
 		"full-bloom": { min: 5, max: 8 }, // Peak growth!
 		"golden-hour": { min: 8, max: 14 }, // Magical forest
+		"deep-roots": { min: 4, max: 6 }, // Fewer, older, sturdier — quieter than golden hour
 		"midnight-bloom": { min: 6, max: 10 }, // Silhouetted grove
 	};
 
@@ -112,6 +127,7 @@
 		"first-buds": { min: 100, max: 140 }, // Spring vigor
 		"full-bloom": { min: 110, max: 160 }, // Full maturity
 		"golden-hour": { min: 120, max: 180 }, // Majestic forest
+		"deep-roots": { min: 130, max: 190 }, // Oldest, deepest-rooted trees in the grove
 		"midnight-bloom": { min: 100, max: 150 }, // Silhouettes (slightly smaller for mystery)
 	};
 
@@ -122,6 +138,7 @@
 		"first-buds": ["logo", "pine", "cherry", "birch"],
 		"full-bloom": ["logo", "pine", "cherry", "birch", "aspen"],
 		"golden-hour": ["logo", "pine", "cherry", "birch", "aspen"],
+		"deep-roots": ["logo", "pine", "birch", "aspen"],
 		"midnight-bloom": ["logo", "pine", "cherry", "birch", "aspen"],
 	};
 
@@ -130,6 +147,7 @@
 	let firstBudsTrees = $state<GeneratedTree[]>([]);
 	let fullBloomTrees = $state<GeneratedTree[]>([]);
 	let goldenHourRandomTrees = $state<GeneratedTree[]>([]);
+	let deepRootsTrees = $state<GeneratedTree[]>([]);
 	let midnightBloomTrees = $state<GeneratedTree[]>([]);
 
 	/**
@@ -201,6 +219,7 @@
 		firstBudsTrees = generateSectionTrees("first-buds");
 		fullBloomTrees = generateSectionTrees("full-bloom");
 		goldenHourRandomTrees = generateSectionTrees("golden-hour");
+		deepRootsTrees = generateSectionTrees("deep-roots");
 		midnightBloomTrees = generateSectionTrees("midnight-bloom");
 	}
 
@@ -281,6 +300,22 @@
 			{/each}
 		</div>
 	</nav>
+
+	<!-- Always Growing — ongoing work, not tied to any single phase -->
+	<div class="py-10 px-6 bg-surface-subtle border-b border-divider">
+		<div class="max-w-3xl mx-auto text-center mb-6">
+			<h2 class="text-xl font-serif text-foreground mb-1">Always Growing</h2>
+			<p class="text-sm text-foreground-muted">
+				Some work never finishes once — it's revisited at every stage, not checked off on a
+				timeline.
+			</p>
+		</div>
+		<ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+			{#each ongoingFeatures as feature}
+				<RoadmapFeatureItem {feature} style={ongoingStyle} />
+			{/each}
+		</ul>
+	</div>
 
 	<!-- Phase Sections -->
 	<div class="flex-1">
@@ -708,6 +743,86 @@
 							{feature}
 							style={phaseStyles["golden-hour"]}
 							iconColor={getFeatureIconColor("golden-hour", feature.icon)}
+						/>
+					{/each}
+				</ul>
+			</div>
+		</section>
+
+		<!-- DEEP ROOTS - QUIETER, PATIENT, WAITING FOR THE GROVE TO MATURE -->
+		<section
+			id="deep-roots"
+			class="relative py-20 px-6 overflow-hidden
+				bg-gradient-to-b from-cream-200 via-bark-100 to-surface/60
+				dark:from-cream-200/20 dark:via-bark-900/15 dark:to-surface/80"
+		>
+			<!-- A single dim lantern - patience, not spectacle -->
+			<div
+				class="absolute bottom-10 left-1/2 -translate-x-1/2 w-6 h-10 opacity-40"
+				aria-hidden="true"
+			>
+				<Lantern class="w-full h-full" variant="post" lit animate />
+			</div>
+
+			<!-- A couple of quiet fireflies, dimmer than Full Bloom's -->
+			<div class="absolute top-1/3 left-[20%] opacity-30" aria-hidden="true">
+				<Firefly class="w-3 h-3" />
+			</div>
+			<div class="absolute top-1/2 right-[22%] opacity-25" aria-hidden="true">
+				<Firefly class="w-2 h-2" />
+			</div>
+
+			<!-- Fewer, older, deeper-rooted trees — no falling leaves, no spectacle -->
+			{#each deepRootsTrees as tree (tree.id)}
+				<div
+					class="absolute bottom-0"
+					style="
+						left: {tree.x}%;
+						width: {tree.size}px;
+						height: {tree.size * tree.aspectRatio}px;
+						opacity: {tree.opacity * 0.85};
+						z-index: {tree.zIndex};
+						transform: translateX(-50%);
+					"
+					aria-hidden="true"
+				>
+					{#if tree.treeType === "logo"}
+						<Logo class="w-full h-full" season="autumn" rotation={0} background={false} />
+					{:else if tree.treeType === "pine"}
+						<TreePine class="w-full h-full" season="autumn" color={bark.darkBark} />
+					{:else if tree.treeType === "birch"}
+						<TreeBirch class="w-full h-full" season="autumn" color={bark.darkBark} />
+					{:else if tree.treeType === "aspen"}
+						<TreeAspen class="w-full h-full" season="autumn" color={bark.darkBark} />
+					{/if}
+				</div>
+			{/each}
+
+			<div class="max-w-3xl mx-auto relative z-10">
+				<div class="text-center mb-12">
+					{#if phaseStatus["deep-roots"] === "future"}
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-bark-200 text-bark-700 text-sm font-medium mb-4 shadow-sm"
+						>
+							<Anchor class="w-3.5 h-3.5" />
+							Taking Root
+						</span>
+					{/if}
+					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
+						{phases["deep-roots"].title}
+					</h2>
+					<p class="text-foreground-muted italic">{phases["deep-roots"].subtitle}</p>
+					<p class="mt-4 text-foreground-subtle max-w-lg mx-auto">
+						{phases["deep-roots"].description}
+					</p>
+				</div>
+
+				<ul class="space-y-4 max-w-md mx-auto">
+					{#each phases["deep-roots"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["deep-roots"]}
+							iconColor={getFeatureIconColor("deep-roots", feature.icon)}
 						/>
 					{/each}
 				</ul>

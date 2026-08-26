@@ -414,6 +414,7 @@ export const ICON_MANIFEST: IconManifest = {
 		brain: "Brain",
 		flaskConical: "FlaskConical",
 		diamond: "Diamond",
+		anchor: "Anchor",
 	},
 
 	// -----------------------------------------------------------------------
@@ -440,10 +441,14 @@ export const ICON_MANIFEST: IconManifest = {
 		reeds: "MessageSquareDot",
 		forests: "Trees",
 		porch: "RockingChair",
+		chirp: "MessageCircle",
+		meadow: "Users",
 		// AI & intelligence
 		lumen: "LampCeiling",
 		moss: "Leaf",
 		gossamer: "Sparkles",
+		fireside: "Flame",
+		scribe: "Mic",
 		// Storage & media
 		amber: "HardDrive",
 		shutter: "Aperture",
@@ -460,6 +465,7 @@ export const ICON_MANIFEST: IconManifest = {
 		burrow: "Network",
 		scout: "ShoppingBasket",
 		trove: "ScanQrCode",
+		wander: "Compass",
 		// Monitoring & operations
 		clearing: "Activity",
 		sentinel: "Radar",
@@ -473,6 +479,7 @@ export const ICON_MANIFEST: IconManifest = {
 		greenhouse: "Warehouse",
 		zephyr: "Cable",
 		patina: "Database",
+		centennial: "Hourglass",
 		// Identity & auth
 		// Integrations
 		mycelium: "CircuitBoard",
