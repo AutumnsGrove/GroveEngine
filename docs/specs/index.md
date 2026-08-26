@@ -74,8 +74,8 @@ Core  Tools  Docs
 | Specification | Purpose | Status |
 |---------------|---------|--------|
 | **[Foliage](foliage-project-spec.md)** | Theme system and visual customization | Active |
-| **[Terrarium](terrarium-spec.md)** | Creative canvas for scene composition | Active |
-| **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | Active |
+| **[Terrarium](terrarium-spec.md)** | Creative canvas for scene composition | Cut (2026-08-26) |
+| **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | Cut (2026-08-26) |
 | **[Curios](curios-spec.md)** | Cabinet of wonders and personal touches | Active |
 | **[Reverie](reverie-spec.md)** | AI-powered composition layer | Planned |
 | **[Gossamer](gossamer-spec.md)** | ASCII visual effects for Glass UI | Active |
@@ -136,7 +136,7 @@ Core  Tools  Docs
 |---------------|---------|--------|
 | **[Zephyr](zephyr-spec.md)** | Unified email gateway | Planned |
 | **[Zephyr Social](zephyr-social-spec.md)** | Cross-platform social broadcasting | Planned |
-| **[Ivy](ivy-mail-spec.md)** | Grove mail client for @grove.place | Planned |
+| **[Ivy](ivy-mail-spec.md)** | Grove mail client for @grove.place | Cut (2026-08-26) |
 
 ### Discovery & Domains
 
@@ -192,7 +192,7 @@ Core  Tools  Docs
 |---------------|---------|--------|
 | **[Lumen](lumen-spec.md)** | Unified AI routing layer with task-based provider selection | Active |
 | **[AI Gateway](../developer/integration/grove-ai-gateway-integration.md)** | Central AI observability and per-tenant quota management | Active |
-| **[Wisp](wisp-spec.md)** | Ethical writing assistant | Planned |
+| **[Wisp](wisp-spec.md)** | Ethical writing assistant | Cut (2026-08-26) — Fireside Mode survives as its own standalone feature |
 | **[Scribe](scribe-voice-transcription-spec.md)** | Voice-to-text transcription via Lumen | Active |
 | **[Shutter](shutter-spec.md)** | Web content distillation with prompt injection defense | Active |
 | **[Release Summaries](release-summaries-spec.md)** | Automated LLM release note generation | Active |

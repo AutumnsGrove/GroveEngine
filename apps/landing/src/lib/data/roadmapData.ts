@@ -22,6 +22,7 @@ export type PhaseKey =
 	| "first-buds"
 	| "full-bloom"
 	| "golden-hour"
+	| "deep-roots"
 	| "midnight-bloom";
 
 export type Feature = {
@@ -75,6 +76,7 @@ export const PHASE_ORDER = [
 	"first-buds",
 	"full-bloom",
 	"golden-hour",
+	"deep-roots",
 	"midnight-bloom",
 ] as const;
 
@@ -131,7 +133,7 @@ export const phases: Record<PhaseKey, PhaseData> = {
 			{
 				name: "Petal",
 				description: "Image moderation — protection without surveillance",
-				done: false,
+				done: true,
 				icon: "petal",
 				major: true,
 				articleSlug: "what-is-petal",
@@ -145,12 +147,12 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				articleSlug: "what-is-forage",
 				termSlug: "forage",
 			},
-			{ name: "Email Waitlist", description: "67 seeds, waiting to sprout", done: true },
+			{ name: "Email Waitlist", description: "Seeds, waiting to sprout", done: true },
 		],
 	},
 	thaw: {
 		title: "Thaw",
-		subtitle: "February 2026 — The ice begins to crack",
+		subtitle: "The ice begins to crack",
 		season: "winter" as Season,
 		description: "Grove opens its doors. The first trees take root.",
 		features: [
@@ -209,11 +211,44 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				articleSlug: "what-is-shade",
 				termSlug: "shade",
 			},
+			{
+				name: "Reeds",
+				description: "Comments — replies and thoughtful discussions",
+				done: true,
+				icon: "reeds",
+				major: true,
+				articleSlug: "what-is-reeds",
+				termSlug: "reeds",
+			},
+			{
+				name: "Thorn",
+				description: "Content moderation — keeping the grove safe",
+				done: true,
+				icon: "thorn",
+				major: true,
+				articleSlug: "what-is-thorn",
+				termSlug: "thorn",
+			},
+			{
+				name: "Porch",
+				description: "Support conversations — come sit and talk",
+				done: true,
+				icon: "porch",
+				articleSlug: "what-is-porch",
+				termSlug: "porch",
+			},
+			{
+				name: "Curios — Phase 1",
+				description: "Guestbook, gallery, timeline, polls — the cabinet opens",
+				done: true,
+				icon: "curios",
+				termSlug: "curios",
+			},
 		],
 	},
 	"first-buds": {
 		title: "First Buds",
-		subtitle: "Early Spring — Green emerging through snow",
+		subtitle: "Green emerging through snow",
 		season: "spring" as Season,
 		description: "New growth appears. The grove finds its voice.",
 		features: [
@@ -226,23 +261,6 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				termSlug: "sapling",
 			},
 			{
-				name: "Forests",
-				description: "Community groves — find your people",
-				done: false,
-				icon: "forests",
-				major: true,
-				termSlug: "forests",
-			},
-			{
-				name: "Wisp",
-				description: "Writing assistant — a helper, not a writer",
-				done: false,
-				icon: "wisp",
-				major: true,
-				articleSlug: "what-is-wisp",
-				termSlug: "wisp",
-			},
-			{
 				name: "Foliage",
 				description: "Theme library — more color for your corner",
 				done: false,
@@ -252,73 +270,50 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				termSlug: "foliage",
 			},
 			{
-				name: "Amber",
-				description: "Storage dashboard — see and manage your files",
+				name: "Fireside Mode",
+				description: "Conversational drafting — have a chat, get a draft",
 				done: false,
-				icon: "amber",
+				icon: "fireside",
 				major: true,
-				articleSlug: "what-is-amber",
-				termSlug: "amber",
+				termSlug: "fireside",
 			},
 			{
-				name: "Ivy",
-				description: "Email at @grove.place — your words, your inbox",
+				name: "Scribe",
+				description: "Voice transcription — speak it, we'll write it",
 				done: false,
-				icon: "ivy",
-				articleSlug: "what-is-ivy",
-				termSlug: "ivy",
+				icon: "scribe",
+				termSlug: "scribe",
 			},
 			{
-				name: "Trails",
-				description: "Personal roadmaps — share your journey",
+				name: "Curios — Phase 2",
+				description: "Mood Ring, Badges, Shelves, Cursors, Hit Counter",
 				done: false,
-				icon: "trails",
-				articleSlug: "what-is-trails",
-				termSlug: "trails",
-			},
-			{
-				name: "Porch",
-				description: "Support conversations — come sit and talk",
-				done: false,
-				icon: "porch",
-				articleSlug: "what-is-porch",
-				termSlug: "porch",
+				icon: "curios",
+				termSlug: "curios",
 			},
 		],
 	},
 	"full-bloom": {
 		title: "Full Bloom",
-		subtitle: "Spring into Summer — Petals everywhere",
+		subtitle: "Petals everywhere",
 		season: "summer" as Season,
 		description: "The grove becomes a community. Roots intertwine.",
 		features: [
 			{
-				name: "Meadow",
-				description: "Social feed — connection without competition",
+				name: "Forests",
+				description: "Community groves — find your people",
 				done: false,
+				icon: "forests",
 				major: true,
-				icon: "meadow",
-				articleSlug: "what-is-meadow",
-				termSlug: "meadow",
+				termSlug: "forests",
 			},
 			{
-				name: "Chronological Feed",
-				description: "No algorithms, just friends",
+				name: "Amber",
+				description: "Storage dashboard — see and manage your files",
 				done: false,
-				icon: "clock",
-			},
-			{
-				name: "Private Reactions",
-				description: "Encouragement only the author sees",
-				done: false,
-				icon: "heart",
-			},
-			{
-				name: "Reeds",
-				description: "Comments — replies and thoughtful discussions",
-				done: false,
-				icon: "message",
-				termSlug: "reeds",
+				icon: "amber",
+				articleSlug: "what-is-amber",
+				termSlug: "amber",
 			},
 			{
 				name: "Rings",
@@ -327,14 +322,6 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				icon: "trending",
 				articleSlug: "what-is-rings",
 				termSlug: "rings",
-			},
-			{
-				name: "Thorn",
-				description: "Content moderation — keeping the grove safe",
-				done: false,
-				icon: "shield",
-				articleSlug: "what-is-thorn",
-				termSlug: "thorn",
 			},
 			{
 				name: "Oak & Evergreen Tiers",
@@ -358,44 +345,53 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				icon: "users",
 			},
 			{
-				name: "Terrarium",
-				description: "Creative canvas — compose scenes for your blog",
-				done: false,
-				major: true,
-				icon: "terrarium",
-				articleSlug: "what-is-terrarium",
-				termSlug: "terrarium",
-			},
-			{
-				name: "Curios",
-				description: "Cabinet of wonders — guestbooks, shrines, old-web magic",
+				name: "Curios — Phase 3",
+				description: "Webring, Status Badge, Activity Status, Now Playing, Blogroll",
 				done: false,
 				icon: "curios",
-				major: true,
 				termSlug: "curios",
-			},
-			{
-				name: "Weave",
-				description: "Visual composition — animations and diagrams",
-				done: false,
-				icon: "weave",
-				articleSlug: "what-is-weave",
-				termSlug: "weave",
-			},
-			{
-				name: "Outpost",
-				description: "Community Minecraft — a server that waits for you",
-				done: false,
-				icon: "outpost",
-				termSlug: "outpost",
 			},
 		],
 	},
 	"golden-hour": {
 		title: "Golden Hour",
-		subtitle: "Autumn — Warm light through the canopy",
+		subtitle: "Warm light through the canopy",
 		season: "autumn" as Season,
 		description: "The grove settles into itself. A time for refinement.",
+		features: [
+			{
+				name: "Import Tools",
+				description: "Bring your words home — WordPress, Medium, Substack, Ghost, RSS",
+				done: false,
+				icon: "download",
+			},
+			{
+				name: "Newsletter Integration",
+				description: "Email your readers, straight from your grove",
+				done: false,
+				icon: "mail",
+			},
+			{
+				name: "Theme Marketplace",
+				description: "Community creations, shared and shown off",
+				done: false,
+				icon: "swatchbook",
+			},
+			{
+				name: "Curios — Phase 4",
+				description: "Ambient, Clip Art, Custom Uploads",
+				done: false,
+				icon: "curios",
+				termSlug: "curios",
+			},
+		],
+	},
+	"deep-roots": {
+		title: "Deep Roots",
+		subtitle: "What the grove becomes, given time",
+		season: "autumn" as Season,
+		description:
+			"These need the platform itself to mature first — more infrastructure, more trust, more time. Not cut. Not soon. Real, and worth the wait.",
 		features: [
 			{
 				name: "Wander",
@@ -406,38 +402,44 @@ export const phases: Record<PhaseKey, PhaseData> = {
 				termSlug: "wander",
 			},
 			{
-				name: "Polish",
-				description: "Attention to every detail",
+				name: "Meadow",
+				description: "Social feed — connection without competition",
 				done: false,
-				icon: "gem",
 				major: true,
-			},
-			{ name: "Performance", description: "Fast everywhere, always", done: false, icon: "zap" },
-			{
-				name: "Accessibility",
-				description: "Grove for everyone",
-				done: false,
-				icon: "accessibility",
+				icon: "meadow",
+				articleSlug: "what-is-meadow",
+				termSlug: "meadow",
 			},
 			{
-				name: "Mobile Experience",
-				description: "Beautiful on every screen",
+				name: "Chirp",
+				description: "Direct messages — a quiet word between two people",
 				done: false,
-				icon: "smartphone",
+				icon: "chirp",
+				termSlug: "chirp",
 			},
 			{
-				name: "Edge Cases",
-				description: "The small things that matter",
+				name: "Centennial",
+				description: "The 100-year promise — your grove, preserved",
 				done: false,
-				icon: "puzzle",
+				major: true,
+				icon: "centennial",
+				termSlug: "centennial",
+			},
+			{
+				name: "Curios — Phase 5",
+				description: "Shrines, Artifacts — the most ambitious curios",
+				done: false,
+				icon: "curios",
+				termSlug: "curios",
 			},
 		],
 	},
 	"midnight-bloom": {
 		title: "Midnight Bloom",
-		subtitle: "The far horizon — A dream taking shape",
+		subtitle: "The far horizon — a dream taking shape",
 		season: "winter" as Season,
-		description: "Where digital roots meet physical ground.",
+		description:
+			"Where digital roots meet physical ground. A late-night tea shop, and nothing else.",
 		features: [
 			{
 				name: "The Café",
@@ -471,6 +473,27 @@ export const phases: Record<PhaseKey, PhaseData> = {
 		],
 	},
 };
+
+// =============================================================================
+// ONGOING WORK (not a phase — always happening, never "done")
+// =============================================================================
+
+/**
+ * Work that never completes on a single phase's timeline — revisited at every
+ * stage rather than checked off once. Rendered separately from the seasonal
+ * phase sequence; not part of PHASE_ORDER.
+ */
+export const ongoingFeatures: Feature[] = [
+	{ name: "Accessibility", description: "Grove for everyone", icon: "accessibility", done: false },
+	{ name: "Performance", description: "Fast everywhere, always", icon: "zap", done: false },
+	{
+		name: "Mobile Experience",
+		description: "Beautiful on every screen",
+		icon: "smartphone",
+		done: false,
+	},
+	{ name: "Edge Cases", description: "The small things that matter", icon: "puzzle", done: false },
+];
 
 // =============================================================================
 // PHASE STYLES
@@ -522,6 +545,15 @@ export const phaseStyles: Record<PhaseKey, PhaseStyle> = {
 		useCheckIcon: false,
 		showInternalBadge: false,
 	},
+	"deep-roots": {
+		li: "bg-white/60 dark:bg-cream-50/20 backdrop-blur-sm shadow-sm border-l-4 border-bark-400",
+		iconColor: "text-bark-500",
+		nameColor: "text-foreground",
+		descColor: "text-foreground-muted",
+		featureStar: "default",
+		useCheckIcon: false,
+		showInternalBadge: false,
+	},
 	"midnight-bloom": {
 		li: "bg-surface-subtle backdrop-blur-sm border border-border",
 		iconColor: "text-warning",
@@ -540,38 +572,33 @@ export const phaseStyles: Record<PhaseKey, PhaseStyle> = {
 /** Per-feature icon color overrides for phases that need them */
 export const featureColorMaps: Partial<Record<PhaseKey, Record<string, string>>> = {
 	"first-buds": {
-		ivy: "text-success",
-		amber: "text-warning",
-		trails: "text-accent",
 		tree: "text-success",
 		swatchbook: "text-accent-subtle",
-		wisp: "text-info",
-		forests: "text-success",
-		porch: "text-warning",
-		terminal: "text-success",
+		fireside: "text-warning",
+		scribe: "text-info",
+		curios: "text-warning",
 	},
 	"full-bloom": {
-		meadow: "text-success",
-		clock: "text-info",
-		message: "text-info",
-		heart: "text-accent-subtle",
+		forests: "text-success",
+		amber: "text-warning",
 		trending: "text-success",
 		crown: "text-warning",
 		paintbrush: "text-accent-subtle",
 		users: "text-accent",
-		shield: "text-foreground-muted",
 		curios: "text-warning",
-		terrarium: "text-success",
-		weave: "text-info",
-		outpost: "text-accent",
 	},
 	"golden-hour": {
-		gem: "text-warning",
-		zap: "text-warning",
-		accessibility: "text-info",
-		smartphone: "text-foreground-muted",
-		puzzle: "text-accent",
+		download: "text-info",
+		mail: "text-accent",
+		swatchbook: "text-warning",
+		curios: "text-warning",
+	},
+	"deep-roots": {
 		wander: "text-accent",
+		meadow: "text-success",
+		chirp: "text-info",
+		centennial: "text-warning",
+		curios: "text-warning",
 	},
 	"midnight-bloom": {
 		coffee: "text-warning",
@@ -584,15 +611,11 @@ export const featureColorMaps: Partial<Record<PhaseKey, Record<string, string>>>
 /** Per-feature border overrides (only First Buds uses per-feature borders) */
 export const featureBorderMaps: Partial<Record<PhaseKey, Record<string, string>>> = {
 	"first-buds": {
-		ivy: "border-l-4 border-success",
-		amber: "border-l-4 border-warning",
-		trails: "border-l-4 border-accent",
 		tree: "border-l-4 border-success",
 		swatchbook: "border-l-4 border-accent-subtle",
-		wisp: "border-l-4 border-info",
-		forests: "border-l-4 border-success",
-		porch: "border-l-4 border-warning",
-		terminal: "border-l-4 border-success",
+		fireside: "border-l-4 border-warning",
+		scribe: "border-l-4 border-info",
+		curios: "border-l-4 border-warning",
 	},
 };
 
@@ -617,6 +640,7 @@ export const phaseStatus: Record<PhaseKey, "past" | "current" | "future"> = {
 	"first-buds": getPhaseStatus("first-buds"),
 	"full-bloom": getPhaseStatus("full-bloom"),
 	"golden-hour": getPhaseStatus("golden-hour"),
+	"deep-roots": getPhaseStatus("deep-roots"),
 	"midnight-bloom": getPhaseStatus("midnight-bloom"),
 };
 
