@@ -47,6 +47,7 @@ function formatThemes(config: TierConfig): string {
 	if (themes === Infinity && hasCustomFonts) return "All + Customizer + Fonts";
 	if (themes === Infinity && hasCustomizer) return "All + Customizer";
 	if (themes === Infinity) return "All themes";
+	if (themes === 1) return "1 theme";
 	return `${themes} themes`;
 }
 
@@ -61,6 +62,7 @@ function formatLimits(config: TierConfig): PricingTierLimits {
 		posts: formatLimit(config.limits.posts),
 		storage: formatStorage(config.limits.storage),
 		themes: formatThemes(config),
+		curioTypes: formatLimit(config.limits.curioTypes),
 		navPages: formatLimit(config.limits.navPages),
 		commentsPerWeek:
 			config.limits.commentsPerWeek === Infinity

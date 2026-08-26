@@ -30,6 +30,8 @@ export interface TierLimits {
 	storage: number; // bytes (0 = none)
 	storageDisplay: string; // Human-readable storage (e.g., "1 GB")
 	themes: number;
+	/** How many curio types a grove can enable at once. Infinity = unlimited. */
+	curioTypes: number;
 	navPages: number;
 	commentsPerWeek: number; // Infinity = unlimited
 	aiWordsPerMonth: number; // 0 = no AI, Infinity = unlimited
@@ -38,8 +40,6 @@ export interface TierLimits {
 export interface TierFeatures {
 	blog: boolean;
 	meadow: boolean;
-	emailForwarding: boolean;
-	fullEmail: boolean;
 	customDomain: boolean;
 	byod: boolean; // Bring Your Own Domain
 	themeCustomizer: boolean;
@@ -115,6 +115,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 100 * 1024 * 1024, // 100 MB
 			storageDisplay: "100 MB",
 			themes: 1,
+			curioTypes: 5,
 			navPages: 1,
 			commentsPerWeek: 20,
 			aiWordsPerMonth: 0,
@@ -122,8 +123,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		features: {
 			blog: true,
 			meadow: true,
-			emailForwarding: false,
-			fullEmail: false,
 			customDomain: false,
 			byod: false,
 			themeCustomizer: false,
@@ -169,7 +168,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			posts: 100,
 			storage: 1 * 1024 * 1024 * 1024, // 1 GB
 			storageDisplay: "1 GB",
-			themes: 3,
+			themes: 1,
+			curioTypes: Infinity,
 			navPages: 3,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 750, // ~25/day * 30 days
@@ -177,8 +177,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		features: {
 			blog: true,
 			meadow: true,
-			emailForwarding: false,
-			fullEmail: false,
 			customDomain: false,
 			byod: false,
 			themeCustomizer: false,
@@ -220,12 +218,13 @@ export const TIERS: Record<TierKey, TierConfig> = {
 	sapling: {
 		id: "sapling",
 		order: 2,
-		status: "coming_soon",
+		status: "available",
 		limits: {
 			posts: Infinity,
 			storage: 5 * 1024 * 1024 * 1024, // 5 GB
 			storageDisplay: "5 GB",
-			themes: 10,
+			themes: 1,
+			curioTypes: Infinity,
 			navPages: 5,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 3000, // ~100/day * 30 days
@@ -233,8 +232,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		features: {
 			blog: true,
 			meadow: true,
-			emailForwarding: true,
-			fullEmail: false,
 			customDomain: false,
 			byod: false,
 			themeCustomizer: false,
@@ -264,9 +261,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			featureStrings: [
 				"Unlimited blooms",
 				"5 GB storage",
-				"10 themes",
 				"5 nav pages",
-				"Email forwarding",
+				"Unlimited curios",
 				"Everything in Seedling",
 			],
 		},
@@ -281,7 +277,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			posts: Infinity,
 			storage: 20 * 1024 * 1024 * 1024, // 20 GB
 			storageDisplay: "20 GB",
-			themes: Infinity,
+			themes: 1,
+			curioTypes: Infinity,
 			navPages: 10,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 15000, // ~500/day * 30 days
@@ -289,8 +286,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		features: {
 			blog: true,
 			meadow: true,
-			emailForwarding: true,
-			fullEmail: true,
 			customDomain: true,
 			byod: true,
 			themeCustomizer: true,
@@ -338,7 +333,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			posts: Infinity,
 			storage: 100 * 1024 * 1024 * 1024, // 100 GB
 			storageDisplay: "100 GB",
-			themes: Infinity,
+			themes: 1,
+			curioTypes: Infinity,
 			navPages: 20,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 75000, // ~2500/day * 30 days
@@ -346,8 +342,6 @@ export const TIERS: Record<TierKey, TierConfig> = {
 		features: {
 			blog: true,
 			meadow: true,
-			emailForwarding: true,
-			fullEmail: true,
 			customDomain: true,
 			byod: false, // Domain included
 			themeCustomizer: true,

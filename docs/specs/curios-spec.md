@@ -91,10 +91,7 @@ type CursorPreset =
   | 'snowflake' | 'pumpkin' | 'blossom' | 'falling-leaf';
 ```
 
-**Tier Access:**
-- **Seedling:** 5 nature presets
-- **Sapling:** All presets
-- **Oak+:** All presets + 1 custom upload
+**Tier Access:** Any tier where Cursors is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -159,10 +156,7 @@ interface GuestbookEntry {
 - **Pixel** — Retro pixel art aesthetic
 - **Cozy** — Warm, journaly feel
 
-**Tier Access:**
-- **Seedling:** 1 guestbook, 50 entries max, Classic style only
-- **Sapling:** 1 guestbook, 500 entries, all styles
-- **Oak+:** Multiple guestbooks, unlimited entries, all styles
+**Tier Access:** Any tier where Guestbook is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -242,10 +236,7 @@ interface HitCounter {
 - No IP logging
 - Purely decorative/nostalgic
 
-**Tier Access:**
-- **Seedling:** 1 counter, Classic style
-- **Sapling:** 1 counter, all styles
-- **Oak+:** Multiple counters (per page), custom colors
+**Tier Access:** Any tier where Hit Counter is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -336,10 +327,7 @@ interface ShrineContent {
 }
 ```
 
-**Tier Access:**
-- **Seedling:** No shrines
-- **Sapling:** 3 shrines, small/medium only
-- **Oak+:** Unlimited shrines, all sizes, all frames
+**Tier Access:** Any tier where Shrines is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -435,10 +423,7 @@ interface GardenLink {
 - **Buttons** — 88x31 button style (classic web!)
 - **Marquee** — Scrolling links (the chaos option)
 
-**Tier Access:**
-- **Seedling:** 1 garden, 10 links, list style
-- **Sapling:** 3 gardens, 50 links each, all styles
-- **Oak+:** Unlimited gardens/links, all styles, custom 88x31 buttons
+**Tier Access:** Any tier where Link Gardens is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -520,10 +505,7 @@ Templated decorations you can drop anywhere.
 - Wind chimes
 - Bird houses
 
-**Tier Access:**
-- **Seedling:** 5 items per page
-- **Sapling:** 25 items per page
-- **Oak+:** Unlimited
+**Tier Access:** Any tier where Clip Art is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -586,10 +568,7 @@ interface Magic8BallArtifact extends Artifact {
 }
 ```
 
-**Tier Access:**
-- **Seedling:** 2 artifacts (non-interactive only)
-- **Sapling:** 5 artifacts, all types
-- **Oak+:** Unlimited artifacts
+**Tier Access:** Any tier where Artifacts is one of your 5 enabled curio types (Wanderer) or unlocked entirely (Seedling+) — see [Curio Type Access](#curio-type-access).
 
 ---
 
@@ -845,19 +824,14 @@ CREATE INDEX idx_uploads_tenant ON custom_uploads(tenant_id);
 
 ---
 
-## Tier Access Summary
+## Curio Type Access
 
-| Curio | Seedling | Sapling | Oak+ |
-|-------|----------|---------|------|
-| **Cursors** | 5 presets | All presets | All + custom |
-| **Guestbook** | 1, 50 entries | 1, 500 entries | Multiple, unlimited |
-| **Hit Counter** | 1, classic | 1, all styles | Multiple, custom |
-| **Shrines** | — | 3, small/medium | Unlimited, all |
-| **Link Gardens** | 1, 10 links | 3, 50 links | Unlimited |
-| **Status Badges** | ✅ All | ✅ All | ✅ All |
-| **Clip Art** | 5/page | 25/page | Unlimited |
-| **Artifacts** | 2 (non-interactive) | 5 | Unlimited |
-| **Custom Uploads** | 10, 50MB | 25, 500MB | Unlimited, 5GB |
+No more graduated per-curio-type caps (entry counts, style locks, upload quotas by tier) — that was a lot of bookkeeping for differentiation Grove doesn't actually need yet. The model is simple:
+
+- **Wanderer (free):** pick any 5 curio types to enable on your grove.
+- **Seedling and every paid tier above it:** every curio type, unlimited, no per-type caps.
+
+Within a curio, ordinary sane limits still apply where they exist for abuse/spam prevention (guestbook message length, upload file size, etc.) — those aren't tier-gated, they're just reasonable defaults for everyone.
 
 ---
 

@@ -44,8 +44,8 @@ describe("TIERS constant", () => {
 		expect(TIERS.seedling.status).toBe("available");
 	});
 
-	it("should have sapling as coming_soon", () => {
-		expect(TIERS.sapling.status).toBe("coming_soon");
+	it("should have sapling as available", () => {
+		expect(TIERS.sapling.status).toBe("available");
 	});
 
 	it("should have oak and evergreen as future", () => {

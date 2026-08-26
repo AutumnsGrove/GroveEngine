@@ -72,16 +72,16 @@
 		},
 		{
 			type: "limit",
-			label: "Themes",
-			icon: featureIcons.palette,
-			getValue: (tier) => tier.limits.themes,
+			label: "Custom Pages",
+			icon: featureIcons.layout,
+			getValue: (tier) => tier.limits.navPages,
 		},
 		{
 			type: "limit",
 			label: "Curios",
-			standardLabel: "Custom Pages",
+			standardLabel: "Site Widgets",
 			icon: toolIcons.curios,
-			getValue: (tier) => tier.limits.navPages,
+			getValue: (tier) => tier.limits.curioTypes,
 		},
 		{
 			type: "limit",
@@ -97,16 +97,6 @@
 				if (!tier.features.customDomain) return "—";
 				if (tier.features.byod) return "BYOD";
 				return true;
-			},
-		},
-		{
-			type: "custom",
-			label: "@grove.place Email",
-			icon: featureIcons.mail,
-			getValue: (tier) => {
-				if (tier.features.fullEmail) return "Full";
-				if (tier.features.emailForwarding) return "Forward";
-				return "—";
 			},
 		},
 		{

@@ -525,24 +525,8 @@ describe("Billing Module", () => {
 			expect(result.allowed).toBe(true);
 		});
 
-		it("returns allowed=true when tier meets requirement for email_forwarding", async () => {
-			const db = createMockDb();
-			const prepareChain = {
-				bind: vi.fn().mockReturnThis(),
-				first: vi.fn().mockResolvedValueOnce({ plan: "sapling", active: 1 }).mockResolvedValueOnce({
-					status: "active",
-					current_period_end: 1000,
-				}),
-			};
-			(db.prepare as any).mockReturnValue(prepareChain);
-
-			const result = await checkFeatureAccess(db, "tenant-1", "email_forwarding");
-
-			expect(result.allowed).toBe(true);
-		});
-
 		it("returns allowed=true for evergreen tier on all features", async () => {
-			const features = ["ai", "shop", "custom_domain", "analytics", "email_forwarding"] as const;
+			const features = ["ai", "shop", "custom_domain", "analytics"] as const;
 
 			for (const feature of features) {
 				const db = createMockDb();
@@ -565,7 +549,7 @@ describe("Billing Module", () => {
 		});
 
 		it("returns allowed=false for wanderer tier on all premium features", async () => {
-			const features = ["ai", "shop", "custom_domain", "analytics", "email_forwarding"] as const;
+			const features = ["ai", "shop", "custom_domain", "analytics"] as const;
 
 			for (const feature of features) {
 				const db = createMockDb();
@@ -815,7 +799,7 @@ describe("Billing Module", () => {
 			expect(result.allowed).toBe(false);
 		});
 
-		it("all functions work with sapling tier for email_forwarding", async () => {
+		it("all functions work with sapling tier for shop", async () => {
 			// getTenantSubscription
 			let db = createMockDb();
 			let prepareChain: any = {
@@ -842,7 +826,7 @@ describe("Billing Module", () => {
 			};
 			(db.prepare as any).mockReturnValue(prepareChain);
 
-			const access = await checkFeatureAccess(db, "tenant-1", "email_forwarding");
+			const access = await checkFeatureAccess(db, "tenant-1", "shop");
 			expect(access.allowed).toBe(true);
 
 			// requireActiveSubscription (fresh db)

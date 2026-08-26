@@ -75,8 +75,8 @@
 					: "text-success",
 	);
 
-	// Available tiers: Wanderer and Seedling ($8/mo)
-	const allTiers = transformAllTiers({ includeTiers: ["wanderer", "seedling"] });
+	// Available tiers: Wanderer, Seedling ($8/mo), and Sapling ($12/mo)
+	const allTiers = transformAllTiers({ includeTiers: ["wanderer", "seedling", "sapling"] });
 	const planPreviews = allTiers.map((tier) => ({
 		key: tier.key,
 		name: tier.name,

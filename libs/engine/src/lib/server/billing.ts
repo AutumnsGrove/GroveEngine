@@ -62,7 +62,6 @@ const FEATURE_REQUIREMENTS: Record<string, PlanTier[]> = {
 	shop: getTiersWithFeature("shop"),
 	custom_domain: getTiersWithFeature("customDomain"),
 	analytics: getTiersWithFeature("analytics"),
-	email_forwarding: getTiersWithFeature("emailForwarding"),
 };
 
 /**
@@ -108,7 +107,7 @@ export async function getTenantSubscription(
 export async function checkFeatureAccess(
 	db: D1Database,
 	tenantId: string,
-	feature: "ai" | "shop" | "custom_domain" | "analytics" | "email_forwarding",
+	feature: "ai" | "shop" | "custom_domain" | "analytics",
 ): Promise<{ allowed: boolean; reason?: string }> {
 	const subscription = await getTenantSubscription(db, tenantId);
 
