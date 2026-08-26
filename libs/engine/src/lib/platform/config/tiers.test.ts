@@ -212,7 +212,6 @@ describe("Tier Configuration", () => {
 				expect(tierHasFeature("wanderer", "ai")).toBe(false);
 				expect(tierHasFeature("wanderer", "customDomain")).toBe(false);
 				expect(tierHasFeature("wanderer", "themeCustomizer")).toBe(false);
-				expect(tierHasFeature("wanderer", "emailForwarding")).toBe(false);
 				expect(tierHasFeature("wanderer", "shop")).toBe(false);
 				expect(tierHasFeature("wanderer", "analytics")).toBe(false);
 			});
@@ -253,6 +252,7 @@ describe("Tier Configuration", () => {
 			expect(TIERS.wanderer.limits.drafts).toBe(100);
 			expect(TIERS.wanderer.limits.storage).toBe(100 * 1024 * 1024);
 			expect(TIERS.wanderer.limits.themes).toBe(1);
+			expect(TIERS.wanderer.limits.curioTypes).toBe(5);
 		});
 
 		it("has correct display strings", () => {
@@ -273,7 +273,6 @@ describe("Tier Configuration", () => {
 			expect(TIERS.wanderer.features.ai).toBe(false);
 			expect(TIERS.wanderer.features.customDomain).toBe(false);
 			expect(TIERS.wanderer.features.themeCustomizer).toBe(false);
-			expect(TIERS.wanderer.features.emailForwarding).toBe(false);
 			expect(TIERS.wanderer.features.shop).toBe(false);
 			expect(TIERS.wanderer.features.analytics).toBe(false);
 		});

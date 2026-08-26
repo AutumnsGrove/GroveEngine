@@ -7,11 +7,13 @@ import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
 type BillingCycle = (typeof VALID_BILLING_CYCLES)[number];
 
-// Only Wanderer (free) and Seedling ("Starter") are offered during signup right now.
-// Sapling/Oak/Evergreen ("Growth"/"Pro"/"Ultra") are paused while pricing gets
-// reworked — their tier definitions stay intact in config/tiers/definitions.ts,
-// just excluded from this list. Re-add here once they're ready again.
-const tiers = transformAllTiers({ includeTiers: ["wanderer", "seedling"] });
+// Wanderer (free), Seedling ("Starter"), and Sapling ("Growth") are offered
+// during signup. Oak/Evergreen ("Pro"/"Ultra") stay paused — their qualitative
+// differentiators (custom domains, theme customizer, custom fonts, analytics)
+// aren't built yet, so there's nothing to sell above Sapling right now. Their
+// tier definitions stay intact in config/tiers/definitions.ts, just excluded
+// from this list. Re-add here once the underlying features actually exist.
+const tiers = transformAllTiers({ includeTiers: ["wanderer", "seedling", "sapling"] });
 
 // Helper functions for validation
 function isValidPlanId(id: string): id is TierKey {

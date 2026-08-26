@@ -9,6 +9,8 @@ export interface TierLimits {
 	storage: number;
 	storageDisplay: string;
 	themes: number;
+	/** How many curio types a grove can enable at once. Infinity = unlimited. */
+	curioTypes: number;
 	navPages: number;
 	commentsPerWeek: number;
 	aiWordsPerMonth: number;
@@ -16,8 +18,6 @@ export interface TierLimits {
 
 export interface TierFeatures {
 	blog: boolean;
-	emailForwarding: boolean;
-	fullEmail: boolean;
 	customDomain: boolean;
 	byod: boolean;
 	themeCustomizer: boolean;

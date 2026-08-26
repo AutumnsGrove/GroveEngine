@@ -92,6 +92,7 @@ export interface PricingTierLimits {
 	posts: string;
 	storage: string;
 	themes: string;
+	curioTypes: string;
 	navPages: string;
 	commentsPerWeek: string;
 }
