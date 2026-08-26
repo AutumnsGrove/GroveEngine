@@ -55,7 +55,25 @@ CREATE TABLE tenants_new (
   encrypted_dek TEXT, last_activity_at INTEGER DEFAULT 0, reclamation_status TEXT, meadow_opt_in INTEGER DEFAULT 0
 );
 
-INSERT INTO tenants_new SELECT * FROM tenants;
+-- Explicit column list, NOT `SELECT *`: production was hand-patched outside
+-- migration history back on 2026-04-18 (see above), and that hand-patch
+-- predates last_activity_at/reclamation_status (053_wanderer_tier.sql) —
+-- confirmed via `PRAGMA table_info(tenants)` against the live remote DB,
+-- which has 15 columns, not the 17 a from-scratch migration history implies.
+-- Naming every source column keeps this correct on any tenants table that
+-- has ever received these two columns (fresh bootstrap) and any that
+-- hasn't (current prod) — the two new columns just take their declared
+-- defaults (0 and NULL) for existing rows either way.
+INSERT INTO tenants_new (
+  id, subdomain, display_name, email, plan, storage_used, post_count,
+  custom_domain, theme, accent_color, active, created_at, updated_at,
+  encrypted_dek, meadow_opt_in
+)
+SELECT
+  id, subdomain, display_name, email, plan, storage_used, post_count,
+  custom_domain, theme, accent_color, active, created_at, updated_at,
+  encrypted_dek, meadow_opt_in
+FROM tenants;
 
 DROP TABLE tenants;
 
