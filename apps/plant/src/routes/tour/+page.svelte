@@ -283,7 +283,7 @@
 		<!-- Screenshots: a plain image for a single shot, a carousel when a stop needs more than one -->
 		{#if currentTourStop.images.length > 1}
 			<div class="mb-6">
-				<GlassCarousel images={currentTourStop.images} aspectRatio="4/3" variant="minimal" />
+				<GlassCarousel images={[...currentTourStop.images]} aspectRatio="4/3" variant="minimal" />
 			</div>
 		{:else if currentTourStop.images.length === 1}
 			<div class="aspect-[4/3] rounded-lg overflow-hidden mb-6 border border-border/40">
