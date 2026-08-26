@@ -7,8 +7,11 @@ import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
 type BillingCycle = (typeof VALID_BILLING_CYCLES)[number];
 
-// Transform all tiers including free (Wanderer) for onboarding
-const tiers = transformAllTiers();
+// Only Wanderer (free) and Seedling ("Starter") are offered during signup right now.
+// Sapling/Oak/Evergreen ("Growth"/"Pro"/"Ultra") are paused while pricing gets
+// reworked — their tier definitions stay intact in config/tiers/definitions.ts,
+// just excluded from this list. Re-add here once they're ready again.
+const tiers = transformAllTiers({ includeTiers: ["wanderer", "seedling"] });
 
 // Helper functions for validation
 function isValidPlanId(id: string): id is TierKey {

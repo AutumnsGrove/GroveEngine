@@ -308,28 +308,26 @@
 	// Border colors per variant - subtle, warm borders
 	// Dark mode: cream-300 = 67 64 58 (medium warm gray), cream-400 = 87 83 76
 	const borderClasses: Record<ResolvedVariant, string> = {
-		surface: "border-border",
-		tint: "border-white/30 dark:border-border",
-		card: "border-white/40 dark:border-border",
-		frosted: "border-white/50 dark:border-border",
-		accent: "border-accent/30 dark:border-border",
+		surface: "border-default",
+		tint: "border-default",
+		card: "border-default",
+		frosted: "border-default",
+		accent: "border-accent/30 dark:border-default",
 		overlay: "border-white/10",
-		muted: "border-white/20 dark:border-border",
-		dark: "border-bark-700/30 dark:border-border",
+		muted: "border-default",
+		dark: "border-bark-700/30 dark:border-default",
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<ResolvedVariant, string> = {
-		surface: "hover:bg-white/100 dark:hover:bg-cream-200/95 hover:shadow-md hover:border-border",
-		tint: "hover:bg-white/70 dark:hover:bg-cream-200/55 hover:shadow-md hover:border-white/40 dark:hover:border-cream-400/40",
-		card: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-cream-400/50",
-		frosted:
-			"hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-cream-400/50",
+		surface: "hover:bg-white/100 dark:hover:bg-cream-200/95 hover:shadow-md hover:border-default",
+		tint: "hover:bg-white/70 dark:hover:bg-cream-200/55 hover:shadow-md hover:border-foreground-subtle/30",
+		card: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-foreground-subtle/30",
+		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-foreground-subtle/30",
 		accent:
 			"hover:bg-accent/30 dark:hover:bg-cream-200/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
 		overlay: "hover:bg-black/60 dark:hover:bg-black/70 hover:shadow-2xl",
-		muted:
-			"hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-cream-400/40",
+		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-foreground-subtle/30",
 		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
 	};
 

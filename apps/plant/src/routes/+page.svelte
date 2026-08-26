@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { GlassCard, Glass, Logo, GroveTerm, RoadmapPreview } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, Glass, Logo, GroveTerm } from "@autumnsgrove/lattice/ui";
 	import { LoginRedirectButton } from "@autumnsgrove/lattice/auth/login";
 	import {
 		TreePine,
@@ -531,21 +531,5 @@
 				<navIcons.arrowRight class="w-4 h-4" />
 			</a>
 		</div>
-	</section>
-
-	<!-- ═══════════════════════════════════════════════════════════════
-	     Section 6: The Path — The journey ahead
-	     ═══════════════════════════════════════════════════════════════ -->
-	<section class="relative z-10">
-		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">The journey ahead</h2>
-
-		<RoadmapPreview
-			phase="Thaw"
-			subtitle="The ice begins to crack"
-			description="Grove opens its doors. The first trees take root. We're growing carefully, building something meant to last."
-			progress={33}
-			href="https://grove.place/roadmap"
-			class="max-w-md mx-auto"
-		/>
 	</section>
 </div>
