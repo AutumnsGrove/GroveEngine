@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GlassCarousel } from '@autumnsgrove/lattice/ui';
 	import { stateIcons, navIcons, natureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
 	import { buildAdminUrl } from '$lib/tenant-url';
 
@@ -46,7 +46,8 @@
 		touchEndX = 0;
 	}
 
-	// Tour stops configuration
+	// Tour stops configuration — `images` is empty for text-only stops (welcome/complete),
+	// a single entry for a plain screenshot, or multiple entries to render as a GlassCarousel.
 	const tourStops = [
 		{
 			id: 'welcome',
@@ -54,7 +55,7 @@
 			description: "Let's explore what Grove can do for you. We'll show you around using example blogs so you can see the possibilities.",
 			location: 'intro',
 			url: null,
-			image: null
+			images: []
 		},
 		{
 			id: 'homepage',
@@ -62,23 +63,34 @@
 			description: "This is what visitors see when they arrive. Clean, focused, and beautiful by default — here's an example blog.",
 			location: 'example.grove.place',
 			url: 'https://example.grove.place?tour=1',
-			image: '/tour/homepage.png'
+			images: [{ url: '/tour/homepage.webp', alt: 'Blog homepage' }]
+		},
+		{
+			id: 'blog-listing',
+			title: 'The Blog Page',
+			description: "Every post you've published, all in one place — titles, dates, tags, and a short preview of each.",
+			location: 'example.grove.place/garden',
+			url: 'https://example.grove.place/garden?tour=1',
+			images: [{ url: '/tour/blog-listing.webp', alt: 'Blog listing page' }]
 		},
 		{
 			id: 'post',
 			title: 'Blog Posts',
-			description: "Your posts are the heart of your blog. Write in markdown, add images, and link related content with margin notes.",
+			description: "Your posts are the heart of your blog. Write in markdown, add images, and link related thoughts with margin notes.",
 			location: 'example.grove.place/post/...',
 			url: 'https://example.grove.place?tour=2',
-			image: '/tour/post.png'
-		},
-		{
-			id: 'vines',
-			title: 'Margin Notes',
-			description: "Add annotations, links, and thoughts alongside your writing. They live in the margins — like notes a friend might leave in a shared book.",
-			location: 'Sidebar annotations',
-			url: 'https://example.grove.place?tour=3',
-			image: '/tour/vines.png'
+			images: [
+				{
+					url: '/tour/post-1.webp',
+					alt: 'A published blog post with a table of contents',
+					caption: 'The full post — headings, pull quotes, and a table of contents for longer pieces.'
+				},
+				{
+					url: '/tour/post-2.webp',
+					alt: 'A margin note attached to a paragraph',
+					caption: 'Margin notes ("Vines") add an aside without breaking the flow of the writing.'
+				}
+			]
 		},
 		{
 			id: 'admin',
@@ -86,7 +98,18 @@
 			description: "The admin panel is where you manage everything - write posts, upload media, and customize your blog.",
 			location: 'your-blog.grove.place/admin',
 			url: null,
-			image: '/tour/admin.png'
+			images: [
+				{
+					url: '/tour/admin-1.webp',
+					alt: 'Opening the account menu to reach the dashboard',
+					caption: 'Getting there: your account menu → Your Grove.'
+				},
+				{
+					url: '/tour/admin-2.webp',
+					alt: 'The Arbor dashboard',
+					caption: 'Your dashboard — posts, tags, and quick actions in one place.'
+				}
+			]
 		},
 		{
 			id: 'editor',
@@ -94,15 +117,42 @@
 			description: "Write in markdown with live preview. Add images by dragging them in. It's simple but powerful.",
 			location: 'Admin → New Post',
 			url: null,
-			image: '/tour/editor.png'
+			images: [
+				{
+					url: '/tour/editor-1.webp',
+					alt: 'The markdown editor',
+					caption: 'A clean writing surface — markdown in, formatted post out.'
+				},
+				{
+					url: '/tour/editor-2.webp',
+					alt: 'Post details panel with description, cover image, and tags',
+					caption: 'Add a description, cover image, and tags without leaving the editor.'
+				},
+				{
+					url: '/tour/editor-3.webp',
+					alt: 'Vines panel open in the editor',
+					caption: 'Vines (margin notes) attach right from the editor too.'
+				}
+			]
 		},
 		{
-			id: 'real-example',
-			title: 'See It In Action',
-			description: "Here's a real Grove blog - AutumnsGrove.com. Built by Grove's creator as a personal writing space.",
-			location: 'autumnsgrove.com',
-			url: 'https://autumnsgrove.com?tour=1',
-			image: '/tour/autumnsgrove.png'
+			id: 'lantern',
+			title: 'Stay Connected',
+			description: 'Add your friends on the blog page and view them from the Lantern.',
+			location: 'The compass button, bottom-right',
+			url: null,
+			images: [
+				{
+					url: '/tour/lantern-1.webp',
+					alt: 'Opening the Lantern from the compass button',
+					caption: 'Open the Lantern from the compass button in the corner.'
+				},
+				{
+					url: '/tour/lantern-2.webp',
+					alt: 'The Lantern friends panel',
+					caption: 'Add friends and jump straight to their blogs.'
+				}
+			]
 		},
 		{
 			id: 'complete',
@@ -110,7 +160,7 @@
 			description: 'placeholder', // Will be computed reactively
 			location: 'Your blog',
 			url: null,
-			image: null
+			images: []
 		}
 	] as const;
 
@@ -159,13 +209,6 @@
 			new URL(window.location.href),
 			'welcome=true&tour=complete',
 		);
-	}
-
-	// Open external links in new tab
-	function visitDemo() {
-		if (currentTourStop.url) {
-			window.open(currentTourStop.url, '_blank');
-		}
 	}
 
 	// Keyboard navigation
@@ -237,17 +280,19 @@
 			{currentTourStop.description}
 		</p>
 
-		<!-- Image placeholder (would show actual screenshots) -->
-		{#if currentTourStop.image}
-			<div class="aspect-video bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-border/40">
-				<div class="text-center text-foreground-subtle">
-					<p class="text-sm">Screenshot coming soon — {currentTourStop.location}</p>
-					{#if currentTourStop.url}
-						<button onclick={visitDemo} class="text-primary hover:underline text-sm mt-2">
-							Open in new tab →
-						</button>
-					{/if}
-				</div>
+		<!-- Screenshots: a plain image for a single shot, a carousel when a stop needs more than one -->
+		{#if currentTourStop.images.length > 1}
+			<div class="mb-6">
+				<GlassCarousel images={currentTourStop.images} aspectRatio="4/3" variant="minimal" />
+			</div>
+		{:else if currentTourStop.images.length === 1}
+			<div class="aspect-[4/3] rounded-lg overflow-hidden mb-6 border border-border/40">
+				<img
+					src={currentTourStop.images[0].url}
+					alt={currentTourStop.images[0].alt}
+					class="w-full h-full object-cover"
+					loading="lazy"
+				/>
 			</div>
 		{:else if currentStep === 0}
 			<!-- Welcome illustration -->
