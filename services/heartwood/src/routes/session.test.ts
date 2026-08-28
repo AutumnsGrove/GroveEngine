@@ -18,6 +18,10 @@ vi.mock("../db/queries.js", () => ({
 	getTenantByEmail: vi.fn().mockResolvedValue(null),
 	isEmailAdmin: vi.fn().mockReturnValue(false),
 	checkRateLimit: vi.fn(),
+	revokeRefreshToken: vi.fn().mockResolvedValue(undefined),
+	revokeAllUserTokens: vi.fn().mockResolvedValue(undefined),
+	revokeSession: vi.fn().mockResolvedValue(undefined),
+	revokeAllUserSessions: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock db session
@@ -39,16 +43,18 @@ vi.mock("../services/jwt.js", () => ({
 	verifyAccessToken: vi.fn(),
 }));
 
-// Mock session helpers
-vi.mock("../lib/session.js", () => ({
-	getSessionFromRequest: vi.fn(),
-	clearSessionCookieHeader: vi
-		.fn()
-		.mockReturnValue(
-			"grove_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0",
-		),
-	parseSessionCookie: vi.fn(),
-}));
+// Mock only the session-identity functions; keep parseCookieHeader,
+// clearAllAuthCookies, and buildClearAuthCookiesHeaders real so cookie
+// handling in tests exercises the actual RFC-7230-safe implementation
+// instead of a hand-rolled stand-in.
+vi.mock("../lib/session.js", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../lib/session.js")>();
+	return {
+		...actual,
+		getSessionFromRequest: vi.fn(),
+		parseSessionCookie: vi.fn(),
+	};
+});
 
 // Mock Better Auth session functions
 vi.mock("../lib/server/session.js", () => ({
@@ -64,7 +70,14 @@ vi.mock("../utils/crypto.js", () => ({
 }));
 
 import sessionRoutes from "./session.js";
-import { getUserById } from "../db/queries.js";
+import {
+	getUserById,
+	getSessionByTokenHash,
+	revokeRefreshToken,
+	revokeAllUserTokens,
+	revokeSession as revokeDbSession,
+	revokeAllUserSessions as revokeAllDbSessions,
+} from "../db/queries.js";
 import { verifyAccessToken } from "../services/jwt.js";
 import { getSessionFromRequest, parseSessionCookie } from "../lib/session.js";
 import {
@@ -273,6 +286,38 @@ describe("POST /session/validate", () => {
 			remaining: 10,
 		});
 	});
+
+	it("falls back to the legacy D1 session cookie", async () => {
+		// This whole authentication fallback previously had zero coverage.
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(verifyAccessToken).mockResolvedValue(null);
+		vi.mocked(getSessionByTokenHash).mockResolvedValue({
+			id: "legacy-sess-1",
+			user_id: "user-test-123",
+			client_id: "client-1",
+			session_token_hash: "mock-hash",
+			last_used_at: "2026-01-01T00:00:00Z",
+			expires_at: "2027-01-01T00:00:00Z",
+			is_active: 1,
+		});
+		vi.mocked(getUserById).mockResolvedValue(TEST_USER as any);
+		vi.mocked(validateBetterAuthSession).mockResolvedValue(null);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request(
+			"/session/validate",
+			{ method: "POST", headers: { Cookie: "session=raw-legacy-token" } },
+			env,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.valid).toBe(true);
+		expect(json.user.id).toBe("user-test-123");
+		expect(json.session).toBeNull();
+	});
 });
 
 // =============================================================================
@@ -311,10 +356,34 @@ describe("POST /session/revoke", () => {
 		expect(json.success).toBe(true);
 		expect(sessionDO.revokeSession).toHaveBeenCalledWith("sess-1");
 
-		// Check cookies are cleared
-		const setCookie = res.headers.get("Set-Cookie");
-		expect(setCookie).toContain("grove_session=");
-		expect(setCookie).toContain("Max-Age=0");
+		// Each cleared cookie must be its own Set-Cookie header — Set-Cookie
+		// can't be comma-joined (RFC 7230 excludes it from list-folding), so
+		// getSetCookie() (not a single .get("Set-Cookie")) is the only way to
+		// actually verify all five auth cookies were cleared, not just the first.
+		const setCookies: string[] = (
+			res.headers as unknown as { getSetCookie(): string[] }
+		).getSetCookie();
+		expect(setCookies).toHaveLength(5);
+		expect(
+			setCookies.some((c: string) => c.startsWith("grove_session=") && c.includes("Max-Age=0")),
+		).toBe(true);
+		expect(
+			setCookies.some((c: string) => c.startsWith("access_token=") && c.includes("Max-Age=0")),
+		).toBe(true);
+		expect(
+			setCookies.some((c: string) => c.startsWith("refresh_token=") && c.includes("Max-Age=0")),
+		).toBe(true);
+		expect(
+			setCookies.some(
+				(c: string) => c.startsWith("better-auth.session_token=") && c.includes("Max-Age=0"),
+			),
+		).toBe(true);
+		expect(
+			setCookies.some(
+				(c: string) =>
+					c.startsWith("__Secure-better-auth.session_token=") && c.includes("Max-Age=0"),
+			),
+		).toBe(true);
 	});
 
 	it("also revokes Better Auth session if present", async () => {
@@ -340,6 +409,66 @@ describe("POST /session/revoke", () => {
 			"token123",
 			expect.anything(),
 		);
+	});
+
+	it("revokes the refresh token cookie if present, so it can't renew a stolen access token", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request(
+			"/session/revoke",
+			{
+				method: "POST",
+				headers: { Cookie: "refresh_token=raw-refresh-token" },
+			},
+			env,
+		);
+
+		expect(res.status).toBe(200);
+		expect(vi.mocked(revokeRefreshToken)).toHaveBeenCalledWith(expect.anything(), "mock-hash");
+	});
+
+	it("revokes the legacy D1 session if the legacy session cookie is present", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(getSessionByTokenHash).mockResolvedValue({
+			id: "legacy-sess-1",
+			user_id: "user-test-123",
+			client_id: "client-1",
+			session_token_hash: "mock-hash",
+			last_used_at: "2026-01-01T00:00:00Z",
+			expires_at: "2027-01-01T00:00:00Z",
+			is_active: 1,
+		});
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request(
+			"/session/revoke",
+			{
+				method: "POST",
+				headers: { Cookie: "session=raw-legacy-token" },
+			},
+			env,
+		);
+
+		expect(res.status).toBe(200);
+		expect(vi.mocked(revokeDbSession)).toHaveBeenCalledWith(expect.anything(), "legacy-sess-1");
+	});
+
+	it("does not revoke or clear cookies when no auth cookie of any kind is present", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request("/session/revoke", { method: "POST" }, env);
+
+		expect(res.status).toBe(401);
+		expect(vi.mocked(revokeRefreshToken)).not.toHaveBeenCalled();
+		expect(vi.mocked(revokeDbSession)).not.toHaveBeenCalled();
 	});
 });
 
@@ -388,6 +517,10 @@ describe("POST /session/revoke-all", () => {
 		expect(json.revokedCount).toBe(3);
 		// Called without keepCurrent since keepCurrent=false
 		expect(sessionDO.revokeAllSessions).toHaveBeenCalledWith(undefined);
+		// "Revoke everywhere" must also close refresh tokens and legacy D1
+		// sessions, not just SessionDO/Better Auth.
+		expect(vi.mocked(revokeAllUserTokens)).toHaveBeenCalledWith(expect.anything(), "user-test-123");
+		expect(vi.mocked(revokeAllDbSessions)).toHaveBeenCalledWith(expect.anything(), "user-test-123");
 	});
 
 	it("respects keepCurrent option", async () => {
@@ -441,6 +574,40 @@ describe("POST /session/revoke-all", () => {
 		const json: any = (await res.json()) as any;
 		expect(json.betterAuthRevoked).toBe(true);
 	});
+
+	it("surfaces betterAuthKeepCurrentIgnored when keepCurrent is requested but a Better Auth session was also revoked", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(validateBetterAuthSession).mockResolvedValue({
+			id: "ba-user-1",
+			email: "test@grove.place",
+			name: "Test",
+			image: null,
+			isAdmin: false,
+			emailVerified: true,
+			tenantId: null,
+			loginCount: 1,
+			banned: false,
+			banReason: null,
+			banExpires: null,
+		});
+		vi.mocked(invalidateAllBetterAuthSessions).mockResolvedValue(true);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request(
+			"/session/revoke-all",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ keepCurrent: true }),
+			},
+			env,
+		);
+
+		const json: any = (await res.json()) as any;
+		expect(json.betterAuthKeepCurrentIgnored).toBe(true);
+	});
 });
 
 // =============================================================================
@@ -480,6 +647,29 @@ describe("GET /session/list", () => {
 		const other = json.sessions.find((s: any) => s.id === "sess-2");
 		expect(current.isCurrent).toBe(true);
 		expect(other.isCurrent).toBe(false);
+	});
+
+	it("returns 401 when the cookie decrypts but the session is revoked/expired", async () => {
+		// A cookie that decrypts is not proof the session is still active —
+		// this is the gate that stops a revoked cookie from still listing
+		// every device's IP/user-agent for the account.
+		vi.mocked(getSessionFromRequest).mockResolvedValue({
+			sessionId: "sess-revoked",
+			userId: "user-test-123",
+			signature: "sig",
+		});
+
+		const sessionDO = createMockSessionDO({
+			validateSession: vi.fn().mockResolvedValue({ valid: false }),
+		});
+		const app = createApp();
+		const env = createMockEnvWithSessions(sessionDO);
+
+		const res = await app.request("/session/list", { method: "GET" }, env);
+
+		expect(res.status).toBe(401);
+		const json: any = (await res.json()) as any;
+		expect(json.sessions).toEqual([]);
 	});
 });
 
@@ -534,6 +724,27 @@ describe("DELETE /session/:sessionId", () => {
 		const json: any = (await res.json()) as any;
 		expect(json.success).toBe(true);
 		expect(sessionDO.revokeSession).toHaveBeenCalledWith("sess-2");
+	});
+
+	it("returns 401 when the acting cookie decrypts but its own session is revoked/expired", async () => {
+		// Without this gate, a revoked cookie could still be used to log the
+		// account out of every other device.
+		vi.mocked(getSessionFromRequest).mockResolvedValue({
+			sessionId: "sess-revoked",
+			userId: "user-test-123",
+			signature: "sig",
+		});
+
+		const sessionDO = createMockSessionDO({
+			validateSession: vi.fn().mockResolvedValue({ valid: false }),
+		});
+		const app = createApp();
+		const env = createMockEnvWithSessions(sessionDO);
+
+		const res = await app.request("/session/sess-2", { method: "DELETE" }, env);
+
+		expect(res.status).toBe(401);
+		expect(sessionDO.revokeSession).not.toHaveBeenCalled();
 	});
 });
 
@@ -666,7 +877,75 @@ describe("POST /session/validate-service", () => {
 		expect(json.user.email).toBe("test@grove.place");
 	});
 
-	it("works without SERVICE_SECRET (defense-in-depth skipped)", async () => {
+	it("returns 401 when the session is expired or revoked", async () => {
+		vi.mocked(timingSafeEqual).mockReturnValue(true);
+		vi.mocked(parseSessionCookie).mockResolvedValue({
+			sessionId: "sess-1",
+			userId: "user-test-123",
+			signature: "sig",
+		});
+
+		const sessionDO = createMockSessionDO({
+			validateSession: vi.fn().mockResolvedValue({ valid: false }),
+		});
+		const app = createApp();
+		const env = createMockEnvWithSessions(sessionDO);
+		env.SERVICE_SECRET = "my-secret";
+
+		const res = await app.request(
+			"/session/validate-service",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer my-secret",
+				},
+				body: JSON.stringify({ session_token: "valid-signed-token" }),
+			},
+			env,
+		);
+
+		expect(res.status).toBe(401);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toContain("expired or revoked");
+	});
+
+	it("returns 401 when the session is valid but the user no longer exists", async () => {
+		vi.mocked(timingSafeEqual).mockReturnValue(true);
+		vi.mocked(parseSessionCookie).mockResolvedValue({
+			sessionId: "sess-1",
+			userId: "user-test-123",
+			signature: "sig",
+		});
+		vi.mocked(getUserById).mockResolvedValue(null);
+
+		const sessionDO = createMockSessionDO();
+		const app = createApp();
+		const env = createMockEnvWithSessions(sessionDO);
+		env.SERVICE_SECRET = "my-secret";
+
+		const res = await app.request(
+			"/session/validate-service",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer my-secret",
+				},
+				body: JSON.stringify({ session_token: "valid-signed-token" }),
+			},
+			env,
+		);
+
+		expect(res.status).toBe(401);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toContain("User not found");
+	});
+
+	it("fails closed — rejects every request when SERVICE_SECRET is unset", async () => {
+		// A missing SERVICE_SECRET must not silently disable auth on an
+		// endpoint that returns full user PII for any submitted token —
+		// that would turn a misconfigured deploy into a public PII oracle.
 		vi.mocked(parseSessionCookie).mockResolvedValue({
 			sessionId: "sess-1",
 			userId: "user-test-123",
@@ -677,7 +956,7 @@ describe("POST /session/validate-service", () => {
 		const sessionDO = createMockSessionDO();
 		const app = createApp();
 		const env = createMockEnvWithSessions(sessionDO);
-		// No SERVICE_SECRET set — endpoint should still work
+		// No SERVICE_SECRET set
 
 		const res = await app.request(
 			"/session/validate-service",
@@ -689,9 +968,30 @@ describe("POST /session/validate-service", () => {
 			env,
 		);
 
-		expect(res.status).toBe(200);
+		expect(res.status).toBe(401);
 		const json: any = (await res.json()) as any;
-		expect(json.valid).toBe(true);
+		expect(json.valid).toBe(false);
+	});
+
+	it("fails closed even when SERVICE_SECRET is an empty string", async () => {
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+		env.SERVICE_SECRET = "";
+
+		const res = await app.request(
+			"/session/validate-service",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer ",
+				},
+				body: JSON.stringify({ session_token: "some-token" }),
+			},
+			env,
+		);
+
+		expect(res.status).toBe(401);
 	});
 });
 
@@ -725,6 +1025,35 @@ describe("GET /session/check", () => {
 		const env = createMockEnvWithSessions();
 
 		const res = await app.request("/session/check", { method: "GET" }, env);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.authenticated).toBe(true);
+		expect(json.user.id).toBe("user-test-123");
+	});
+
+	it("falls back to the legacy D1 session cookie", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(verifyAccessToken).mockResolvedValue(null);
+		vi.mocked(getSessionByTokenHash).mockResolvedValue({
+			id: "legacy-sess-1",
+			user_id: "user-test-123",
+			client_id: "client-1",
+			session_token_hash: "mock-hash",
+			last_used_at: "2026-01-01T00:00:00Z",
+			expires_at: "2027-01-01T00:00:00Z",
+			is_active: 1,
+		});
+		vi.mocked(getUserById).mockResolvedValue(TEST_USER as any);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+
+		const res = await app.request(
+			"/session/check",
+			{ method: "GET", headers: { Cookie: "session=raw-legacy-token" } },
+			env,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;

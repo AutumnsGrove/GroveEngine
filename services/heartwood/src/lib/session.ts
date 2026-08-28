@@ -22,36 +22,36 @@ const SALT_SIZE = 16;
 const IV_SIZE = 12;
 
 export interface ParsedSessionCookie {
-  sessionId: string;
-  userId: string;
-  signature: string; // Kept for backward compatibility, now represents the auth tag
+	sessionId: string;
+	userId: string;
+	signature: string; // Kept for backward compatibility, now represents the auth tag
 }
 
 /**
  * Base64 URL encode (no padding, URL-safe characters)
  */
 function base64UrlEncode(data: Uint8Array): string {
-  let binary = "";
-  for (let i = 0; i < data.length; i++) {
-    binary += String.fromCharCode(data[i]);
-  }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+	let binary = "";
+	for (let i = 0; i < data.length; i++) {
+		binary += String.fromCharCode(data[i]);
+	}
+	return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 /**
  * Base64 URL decode
  */
 function base64UrlDecode(str: string): Uint8Array {
-  // Restore standard base64 characters
-  const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
-  // Add padding if needed
-  const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
+	// Restore standard base64 characters
+	const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+	// Add padding if needed
+	const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+	const binary = atob(padded);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i++) {
+		bytes[i] = binary.charCodeAt(i);
+	}
+	return bytes;
 }
 
 /**
@@ -66,27 +66,23 @@ function base64UrlDecode(str: string): Uint8Array {
  * @param salt - Per-cookie random salt (16 bytes)
  */
 async function getAesKey(secret: string, salt: Uint8Array): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    "HKDF",
-    false,
-    ["deriveKey"],
-  );
+	const encoder = new TextEncoder();
+	const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "HKDF", false, [
+		"deriveKey",
+	]);
 
-  return crypto.subtle.deriveKey(
-    {
-      name: "HKDF",
-      hash: "SHA-256",
-      salt: salt, // Per-cookie random salt
-      info: encoder.encode("grove-session-v2"), // Version bump for new format
-    },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"],
-  );
+	return crypto.subtle.deriveKey(
+		{
+			name: "HKDF",
+			hash: "SHA-256",
+			salt: salt, // Per-cookie random salt
+			info: encoder.encode("grove-session-v2"), // Version bump for new format
+		},
+		keyMaterial,
+		{ name: "AES-GCM", length: 256 },
+		false,
+		["encrypt", "decrypt"],
+	);
 }
 
 /**
@@ -94,27 +90,23 @@ async function getAesKey(secret: string, salt: Uint8Array): Promise<CryptoKey> {
  * @deprecated Used only for backward compatibility during migration
  */
 async function getAesKeyLegacy(secret: string): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    "HKDF",
-    false,
-    ["deriveKey"],
-  );
+	const encoder = new TextEncoder();
+	const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "HKDF", false, [
+		"deriveKey",
+	]);
 
-  return crypto.subtle.deriveKey(
-    {
-      name: "HKDF",
-      hash: "SHA-256",
-      salt: encoder.encode("grove-session-v1"), // Fixed salt (legacy)
-      info: encoder.encode("session-cookie"),
-    },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"],
-  );
+	return crypto.subtle.deriveKey(
+		{
+			name: "HKDF",
+			hash: "SHA-256",
+			salt: encoder.encode("grove-session-v1"), // Fixed salt (legacy)
+			info: encoder.encode("session-cookie"),
+		},
+		keyMaterial,
+		{ name: "AES-GCM", length: 256 },
+		false,
+		["encrypt", "decrypt"],
+	);
 }
 
 /**
@@ -122,16 +114,13 @@ async function getAesKeyLegacy(secret: string): Promise<CryptoKey> {
  * Used for device fingerprinting
  */
 async function getHmacKey(secret: string): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
+	const encoder = new TextEncoder();
+	const keyData = encoder.encode(secret);
 
-  return crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"],
-  );
+	return crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, [
+		"sign",
+		"verify",
+	]);
 }
 
 /**
@@ -139,13 +128,13 @@ async function getHmacKey(secret: string): Promise<CryptoKey> {
  * Used for device fingerprinting
  */
 async function hmacSign(data: string, secret: string): Promise<string> {
-  const key = await getHmacKey(secret);
-  const encoder = new TextEncoder();
-  const dataBuffer = encoder.encode(data);
+	const key = await getHmacKey(secret);
+	const encoder = new TextEncoder();
+	const dataBuffer = encoder.encode(data);
 
-  const signature = await crypto.subtle.sign("HMAC", key, dataBuffer);
+	const signature = await crypto.subtle.sign("HMAC", key, dataBuffer);
 
-  return base64UrlEncode(new Uint8Array(signature));
+	return base64UrlEncode(new Uint8Array(signature));
 }
 
 /**
@@ -153,12 +142,12 @@ async function hmacSign(data: string, secret: string): Promise<string> {
  * Avoids early returns that could leak length information
  */
 function timingSafeEqual(a: string, b: string): boolean {
-  const maxLength = Math.max(a.length, b.length);
-  let result = a.length ^ b.length; // Accumulate length difference
-  for (let i = 0; i < maxLength; i++) {
-    result |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-  }
-  return result === 0;
+	const maxLength = Math.max(a.length, b.length);
+	let result = a.length ^ b.length; // Accumulate length difference
+	for (let i = 0; i < maxLength; i++) {
+		result |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+	}
+	return result === 0;
 }
 
 /**
@@ -171,34 +160,34 @@ function timingSafeEqual(a: string, b: string): boolean {
  * - AES-GCM provides authenticated encryption (tamper detection)
  */
 export async function createSessionCookie(
-  sessionId: string,
-  userId: string,
-  secret: string,
+	sessionId: string,
+	userId: string,
+	secret: string,
 ): Promise<string> {
-  const encoder = new TextEncoder();
+	const encoder = new TextEncoder();
 
-  // Generate random salt and IV
-  const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
-  const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
+	// Generate random salt and IV
+	const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
+	const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
-  // Derive key using per-cookie salt
-  const key = await getAesKey(secret, salt);
+	// Derive key using per-cookie salt
+	const key = await getAesKey(secret, salt);
 
-  // Encrypt the payload
-  const payload = `${sessionId}:${userId}`;
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    encoder.encode(payload),
-  );
+	// Encrypt the payload
+	const payload = `${sessionId}:${userId}`;
+	const ciphertext = await crypto.subtle.encrypt(
+		{ name: "AES-GCM", iv },
+		key,
+		encoder.encode(payload),
+	);
 
-  // Combine salt + iv for the first part of the cookie
-  const saltIv = new Uint8Array(SALT_SIZE + IV_SIZE);
-  saltIv.set(salt, 0);
-  saltIv.set(iv, SALT_SIZE);
+	// Combine salt + iv for the first part of the cookie
+	const saltIv = new Uint8Array(SALT_SIZE + IV_SIZE);
+	saltIv.set(salt, 0);
+	saltIv.set(iv, SALT_SIZE);
 
-  // Format: {salt+iv}:{ciphertext}
-  return `${base64UrlEncode(saltIv)}:${base64UrlEncode(new Uint8Array(ciphertext))}`;
+	// Format: {salt+iv}:{ciphertext}
+	return `${base64UrlEncode(saltIv)}:${base64UrlEncode(new Uint8Array(ciphertext))}`;
 }
 
 /**
@@ -217,118 +206,125 @@ export async function createSessionCookie(
  * created after this PR will use v2 encrypted format.
  */
 export async function parseSessionCookie(
-  cookie: string,
-  secret: string,
+	cookie: string,
+	secret: string,
 ): Promise<ParsedSessionCookie | null> {
-  try {
-    const parts = cookie.split(":");
+	try {
+		const parts = cookie.split(":");
 
-    // Encrypted formats: {salt+iv}:{ciphertext} or {iv}:{ciphertext}
-    if (parts.length === 2) {
-      const [saltIvStr, ciphertextStr] = parts;
-      const saltIvBytes = base64UrlDecode(saltIvStr);
-      const ciphertext = base64UrlDecode(ciphertextStr);
+		// Encrypted formats: {salt+iv}:{ciphertext} or {iv}:{ciphertext}
+		if (parts.length === 2) {
+			const [saltIvStr, ciphertextStr] = parts;
+			const saltIvBytes = base64UrlDecode(saltIvStr);
+			const ciphertext = base64UrlDecode(ciphertextStr);
 
-      let key: CryptoKey;
-      let iv: Uint8Array;
+			let key: CryptoKey;
+			let iv: Uint8Array;
 
-      // Detect format by first-part length
-      // v2: 28 bytes (16 salt + 12 iv) = ~38 chars base64
-      // v1: 12 bytes (iv only) = ~16 chars base64
-      if (saltIvBytes.length === SALT_SIZE + IV_SIZE) {
-        // v2 format: extract salt and iv
-        const salt = saltIvBytes.slice(0, SALT_SIZE);
-        iv = saltIvBytes.slice(SALT_SIZE);
-        key = await getAesKey(secret, salt);
-      } else if (saltIvBytes.length === IV_SIZE) {
-        // v1 format: iv only, use fixed salt
-        iv = saltIvBytes;
-        key = await getAesKeyLegacy(secret);
-      } else {
-        // Invalid length - do work anyway to prevent timing attack
-        const dummySalt = new Uint8Array(SALT_SIZE);
-        await getAesKey(secret, dummySalt);
-        console.log("[Session] Invalid cookie header length");
-        return null;
-      }
+			// Detect format by first-part length
+			// v2: 28 bytes (16 salt + 12 iv) = ~38 chars base64
+			// v1: 12 bytes (iv only) = ~16 chars base64
+			if (saltIvBytes.length === SALT_SIZE + IV_SIZE) {
+				// v2 format: extract salt and iv
+				const salt = saltIvBytes.slice(0, SALT_SIZE);
+				iv = saltIvBytes.slice(SALT_SIZE);
+				key = await getAesKey(secret, salt);
+			} else if (saltIvBytes.length === IV_SIZE) {
+				// v1 format: iv only, use fixed salt
+				iv = saltIvBytes;
+				key = await getAesKeyLegacy(secret);
+			} else {
+				// Invalid length - do work anyway to prevent timing attack
+				const dummySalt = new Uint8Array(SALT_SIZE);
+				await getAesKey(secret, dummySalt);
+				console.log("[Session] Invalid cookie header length");
+				return null;
+			}
 
-      // Decrypt (will throw if tampered - AES-GCM is authenticated)
-      const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv },
-        key,
-        ciphertext,
-      );
+			// Decrypt (will throw if tampered - AES-GCM is authenticated)
+			const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
 
-      const decoder = new TextDecoder();
-      const payload = decoder.decode(plaintext);
-      const payloadParts = payload.split(":");
+			const decoder = new TextDecoder();
+			const payload = decoder.decode(plaintext);
+			const payloadParts = payload.split(":");
 
-      if (payloadParts.length !== 2) {
-        console.log("[Session] Invalid decrypted payload format");
-        return null;
-      }
+			if (payloadParts.length !== 2) {
+				console.log("[Session] Invalid decrypted payload format");
+				return null;
+			}
 
-      const [sessionId, userId] = payloadParts;
-      return { sessionId, userId, signature: "aes-gcm-v2" };
-    }
+			const [sessionId, userId] = payloadParts;
+			return { sessionId, userId, signature: "aes-gcm-v2" };
+		}
 
-    // Legacy HMAC format: {sessionId}:{userId}:{signature}
-    // @deprecated Remove after 2026-03-01
-    if (parts.length === 3) {
-      const [sessionId, userId, providedSignature] = parts;
+		// Legacy HMAC format: {sessionId}:{userId}:{signature}
+		// @deprecated Remove after 2026-03-01
+		if (parts.length === 3) {
+			const [sessionId, userId, providedSignature] = parts;
 
-      // Always compute expected signature (timing-safe: no early return)
-      const legacyPayload = `${sessionId}:${userId}`;
-      const expectedSignature = await hmacSign(legacyPayload, secret);
+			// Always compute expected signature (timing-safe: no early return)
+			const legacyPayload = `${sessionId}:${userId}`;
+			const expectedSignature = await hmacSign(legacyPayload, secret);
 
-      // Constant-time comparison
-      const isValid = timingSafeEqual(providedSignature, expectedSignature);
+			// Constant-time comparison
+			const isValid = timingSafeEqual(providedSignature, expectedSignature);
 
-      if (!isValid) {
-        console.log("[Session] Invalid legacy cookie signature");
-        return null;
-      }
+			if (!isValid) {
+				console.log("[Session] Invalid legacy cookie signature");
+				return null;
+			}
 
-      // Log deprecation warning (rate-limited in production)
-      console.log(
-        "[Session] Legacy HMAC cookie used - will be deprecated 2026-03-01",
-      );
-      return { sessionId, userId, signature: providedSignature };
-    }
+			// Log deprecation warning (rate-limited in production)
+			console.log("[Session] Legacy HMAC cookie used - will be deprecated 2026-03-01");
+			return { sessionId, userId, signature: providedSignature };
+		}
 
-    // Invalid format - do cryptographic work to prevent timing attack
-    const dummySalt = new Uint8Array(SALT_SIZE);
-    await getAesKey(secret, dummySalt);
-    console.log("[Session] Invalid cookie format");
-    return null;
-  } catch (error) {
-    // AES-GCM throws on decryption failure (tampered cookie)
-    console.log("[Session] Cookie verification failed");
-    return null;
-  }
+		// Invalid format - do cryptographic work to prevent timing attack
+		const dummySalt = new Uint8Array(SALT_SIZE);
+		await getAesKey(secret, dummySalt);
+		console.log("[Session] Invalid cookie format");
+		return null;
+	} catch (error) {
+		// AES-GCM throws on decryption failure (tampered cookie) — but also on
+		// operational failures (e.g. a bad key derivation), which look identical
+		// without the underlying error. Log it so those two cases are at least
+		// distinguishable after the fact.
+		console.error("[Session] Cookie verification failed:", error);
+		return null;
+	}
+}
+
+/**
+ * Parse a raw Cookie header into a name -> value map.
+ *
+ * Used instead of ad-hoc regexes (e.g. /access_token=([^;]+)/) elsewhere —
+ * an unanchored regex matches as a substring of any cookie name that happens
+ * to contain the target name (e.g. "x-access_token=" or
+ * "not-better-auth.session_token="), which on a shared .grove.place cookie
+ * domain any subdomain can set. Exact key lookup on a parsed map can't do that.
+ */
+export function parseCookieHeader(cookieHeader: string | null): Record<string, string> {
+	if (!cookieHeader) return {};
+	return Object.fromEntries(
+		cookieHeader.split(";").map((c) => {
+			const [key, ...value] = c.trim().split("=");
+			return [key, value.join("=")];
+		}),
+	);
 }
 
 /**
  * Get session cookie from request
  */
 export async function getSessionFromRequest(
-  request: Request,
-  secret: string,
+	request: Request,
+	secret: string,
 ): Promise<ParsedSessionCookie | null> {
-  const cookieHeader = request.headers.get("Cookie");
-  if (!cookieHeader) return null;
+	const cookies = parseCookieHeader(request.headers.get("Cookie"));
+	const sessionCookie = cookies["grove_session"];
+	if (!sessionCookie) return null;
 
-  const cookies = Object.fromEntries(
-    cookieHeader.split(";").map((c) => {
-      const [key, ...value] = c.trim().split("=");
-      return [key, value.join("=")];
-    }),
-  );
-
-  const sessionCookie = cookies["grove_session"];
-  if (!sessionCookie) return null;
-
-  return parseSessionCookie(sessionCookie, secret);
+	return parseSessionCookie(sessionCookie, secret);
 }
 
 /**
@@ -336,21 +332,53 @@ export async function getSessionFromRequest(
  * Domain: .grove.place for cross-subdomain auth
  */
 export async function createSessionCookieHeader(
-  sessionId: string,
-  userId: string,
-  secret: string,
-  maxAgeSeconds: number = 30 * 24 * 60 * 60, // 30 days
+	sessionId: string,
+	userId: string,
+	secret: string,
+	maxAgeSeconds: number = 30 * 24 * 60 * 60, // 30 days
 ): Promise<string> {
-  const value = await createSessionCookie(sessionId, userId, secret);
-  // SameSite=Lax required for OAuth redirects (Google → our callback → device page)
-  return `grove_session=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=${maxAgeSeconds}`;
+	const value = await createSessionCookie(sessionId, userId, secret);
+	// SameSite=Lax required for OAuth redirects (Google → our callback → device page)
+	return `grove_session=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=${maxAgeSeconds}`;
 }
 
 /**
  * Generate cookie header to clear the session
+ * SameSite=Lax matches createSessionCookieHeader — deletion matches on
+ * name/domain/path regardless of SameSite, but keeping them aligned avoids
+ * the two drifting for unrelated reasons later.
  */
 export function clearSessionCookieHeader(): string {
-  return "grove_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0";
+	return "grove_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=0";
+}
+
+/**
+ * Generate the full set of Set-Cookie values needed to log a user out of
+ * every auth mechanism Heartwood issues cookies for (SessionDO, JWT, legacy
+ * D1, Better Auth). Callers must append each value as its own "Set-Cookie"
+ * header — joining them with ", " produces a single malformed cookie, since
+ * Set-Cookie is the one HTTP header RFC 7230 excludes from list-folding.
+ */
+export function clearAllAuthCookies(): string[] {
+	return [
+		clearSessionCookieHeader(),
+		"access_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0",
+		"refresh_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0",
+		"better-auth.session_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=0",
+		"__Secure-better-auth.session_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=0",
+	];
+}
+
+/**
+ * Build a Headers object with one "Set-Cookie" entry per cookie in
+ * clearAllAuthCookies() — safe to pass directly into a Response.
+ */
+export function buildClearAuthCookiesHeaders(extra?: Record<string, string>): Headers {
+	const headers = new Headers(extra);
+	for (const cookie of clearAllAuthCookies()) {
+		headers.append("Set-Cookie", cookie);
+	}
+	return headers;
 }
 
 /**
@@ -370,79 +398,71 @@ export function clearSessionCookieHeader(): string {
  *
  * IP is stored separately in session metadata for security auditing.
  */
-export async function getDeviceId(
-  request: Request,
-  secret: string,
-): Promise<string> {
-  const components = [
-    request.headers.get("user-agent") || "",
-    request.headers.get("accept-language") || "",
-    // Sec-CH-UA client hints provide stable device identification
-    request.headers.get("sec-ch-ua") || "",
-    request.headers.get("sec-ch-ua-platform") || "",
-    request.headers.get("sec-ch-ua-mobile") || "",
-  ];
+export async function getDeviceId(request: Request, secret: string): Promise<string> {
+	const components = [
+		request.headers.get("user-agent") || "",
+		request.headers.get("accept-language") || "",
+		// Sec-CH-UA client hints provide stable device identification
+		request.headers.get("sec-ch-ua") || "",
+		request.headers.get("sec-ch-ua-platform") || "",
+		request.headers.get("sec-ch-ua-mobile") || "",
+	];
 
-  const hash = await hmacSign(components.join("|"), secret);
-  return hash.substring(0, 16);
+	const hash = await hmacSign(components.join("|"), secret);
+	return hash.substring(0, 16);
 }
 
 /**
  * Parse user agent into friendly device name
  */
 export function parseDeviceName(userAgent: string | null): string {
-  if (!userAgent) return "Unknown Device";
+	if (!userAgent) return "Unknown Device";
 
-  // Mobile devices
-  if (userAgent.includes("iPhone")) return "iPhone";
-  if (userAgent.includes("iPad")) return "iPad";
-  if (userAgent.includes("Android")) {
-    if (userAgent.includes("Mobile")) return "Android Phone";
-    return "Android Tablet";
-  }
+	// Mobile devices
+	if (userAgent.includes("iPhone")) return "iPhone";
+	if (userAgent.includes("iPad")) return "iPad";
+	if (userAgent.includes("Android")) {
+		if (userAgent.includes("Mobile")) return "Android Phone";
+		return "Android Tablet";
+	}
 
-  // Desktop browsers
-  if (userAgent.includes("Mac OS")) {
-    if (userAgent.includes("Chrome")) return "Chrome on Mac";
-    if (userAgent.includes("Safari") && !userAgent.includes("Chrome"))
-      return "Safari on Mac";
-    if (userAgent.includes("Firefox")) return "Firefox on Mac";
-    if (userAgent.includes("Arc")) return "Arc on Mac";
-    return "Mac";
-  }
+	// Desktop browsers
+	if (userAgent.includes("Mac OS")) {
+		if (userAgent.includes("Chrome")) return "Chrome on Mac";
+		if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) return "Safari on Mac";
+		if (userAgent.includes("Firefox")) return "Firefox on Mac";
+		if (userAgent.includes("Arc")) return "Arc on Mac";
+		return "Mac";
+	}
 
-  if (userAgent.includes("Windows")) {
-    if (userAgent.includes("Edg/")) return "Edge on Windows";
-    if (userAgent.includes("Chrome")) return "Chrome on Windows";
-    if (userAgent.includes("Firefox")) return "Firefox on Windows";
-    return "Windows PC";
-  }
+	if (userAgent.includes("Windows")) {
+		if (userAgent.includes("Edg/")) return "Edge on Windows";
+		if (userAgent.includes("Chrome")) return "Chrome on Windows";
+		if (userAgent.includes("Firefox")) return "Firefox on Windows";
+		return "Windows PC";
+	}
 
-  if (userAgent.includes("Linux")) {
-    if (userAgent.includes("Chrome")) return "Chrome on Linux";
-    if (userAgent.includes("Firefox")) return "Firefox on Linux";
-    return "Linux";
-  }
+	if (userAgent.includes("Linux")) {
+		if (userAgent.includes("Chrome")) return "Chrome on Linux";
+		if (userAgent.includes("Firefox")) return "Firefox on Linux";
+		return "Linux";
+	}
 
-  if (userAgent.includes("CrOS")) return "Chromebook";
+	if (userAgent.includes("CrOS")) return "Chromebook";
 
-  return "Unknown Device";
+	return "Unknown Device";
 }
 
 /**
  * Get client IP address from request
  */
 export function getClientIP(request: Request): string | null {
-  return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-forwarded-for") ||
-    null
-  );
+	return request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || null;
 }
 
 /**
  * Get user agent from request
  */
 export function getUserAgent(request: Request): string | null {
-  return request.headers.get("user-agent");
+	return request.headers.get("user-agent");
 }
