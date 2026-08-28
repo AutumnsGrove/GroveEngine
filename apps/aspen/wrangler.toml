@@ -6,6 +6,11 @@ name = "grove-aspen"
 compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Reached only via grove-router's service binding, never the public *.workers.dev URL —
+# that URL bypasses the router's subdomain routing entirely, so anyone hitting it directly
+# with a forged X-Forwarded-Host could impersonate any tenant.
+workers_dev = false
+
 # Worker entry point (SvelteKit adapter-cloudflare output)
 main = ".svelte-kit/cloudflare/_worker.js"
 
@@ -174,6 +179,7 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 [env.beta]
 name = "grove-aspen-beta"
 # no routes block — grove-router dispatches via service binding
+workers_dev = false # same reasoning as the main env — no public bypass of the router
 
 [[env.beta.kv_namespaces]]
 binding = "CACHE_KV"

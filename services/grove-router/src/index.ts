@@ -163,6 +163,7 @@ function shouldForceDownload(contentType: string): boolean {
 		"application/xhtml+xml",
 		"text/xml",
 		"application/xml",
+		"image/svg+xml", // SVGs can carry <script> — executes if served inline
 	];
 	return dangerousTypes.some((type) => contentType.includes(type));
 }
