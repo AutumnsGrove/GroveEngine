@@ -10,8 +10,8 @@
  * - POST /auth/device/authorize - User approves/denies (from UI)
  */
 
-import { Hono } from "hono";
-import type { Env, DeviceCodeResponse } from "../types.js";
+import { Hono, type Context } from "hono";
+import type { Env, DeviceCodeResponse, User } from "../types.js";
 import {
 	getClientByClientId,
 	createDeviceCode,
@@ -24,20 +24,84 @@ import {
 	getUserById,
 } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
-import { generateDeviceCode, generateUserCode, hashSecret } from "../utils/crypto.js";
+import {
+	generateDeviceCode,
+	generateUserCode,
+	hashSecret,
+	timingSafeEqual,
+	base64UrlEncode,
+} from "../utils/crypto.js";
 import { deviceCodeInitSchema, deviceAuthorizeSchema } from "../utils/validation.js";
 import { getClientIP, getUserAgent } from "../middleware/security.js";
 import { checkRouteRateLimit } from "../middleware/rateLimit.js";
+import { parseCookieHeader } from "../lib/session.js";
 import {
 	DEVICE_CODE_EXPIRY,
 	DEVICE_CODE_POLL_INTERVAL,
 	DEVICE_CODE_CHARS,
 	USER_CODE_LENGTH,
 	RATE_LIMIT_DEVICE_INIT,
+	RATE_LIMIT_DEVICE_AUTHORIZE,
+	RATE_LIMIT_WINDOW,
 } from "../utils/constants.js";
 import { getDeviceAuthorizationPageHTML } from "../templates/device.js";
 
 const device = new Hono<{ Bindings: Env }>();
+
+const DEVICE_CODE_COOKIE = "device_code_pending";
+
+/**
+ * Resolve the current user via a Better Auth session, verified against the
+ * Cookie header on this request. Shared by GET /device and POST
+ * /device/authorize so session-verification logic lives in exactly one
+ * place.
+ */
+async function getBetterAuthUser(
+	c: Context<{ Bindings: Env }>,
+	db: ReturnType<typeof createDbSession>,
+): Promise<User | null> {
+	try {
+		const sessionResponse = await fetch(`${c.env.AUTH_BASE_URL}/api/auth/session`, {
+			headers: {
+				Cookie: c.req.header("Cookie") || "",
+			},
+		});
+		if (sessionResponse.ok) {
+			const sessionData = (await sessionResponse.json()) as {
+				user?: { id: string };
+			};
+			if (sessionData?.user?.id) {
+				return await getUserById(db, sessionData.user.id);
+			}
+		}
+	} catch (error) {
+		console.error("[Device] Better Auth session check failed:", error);
+	}
+	return null;
+}
+
+/**
+ * Sign a consent token binding a specific user to a specific device
+ * user_code. Rendered as a hidden field on the approve/deny form and
+ * verified on submit — defense-in-depth against CSRF beyond Origin/Referer
+ * checks, since an attacker's page can't derive this value without
+ * SESSION_SECRET.
+ */
+async function signConsentToken(secret: string, userId: string, userCode: string): Promise<string> {
+	const key = await crypto.subtle.importKey(
+		"raw",
+		new TextEncoder().encode(secret),
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const signature = await crypto.subtle.sign(
+		"HMAC",
+		key,
+		new TextEncoder().encode(`${userId}:${userCode}`),
+	);
+	return base64UrlEncode(signature);
+}
 
 /**
  * POST /auth/device-code - Device Authorization Request
@@ -48,21 +112,9 @@ const device = new Hono<{ Bindings: Env }>();
 device.post("/device-code", async (c) => {
 	const db = createDbSession(c.env);
 
-	// Rate limit by IP
-	const clientIP = getClientIP(c.req.raw) || "unknown";
-	const rateLimit = await checkRouteRateLimit(db, "device_init", clientIP, RATE_LIMIT_DEVICE_INIT);
-	if (!rateLimit.allowed) {
-		return c.json(
-			{
-				error: "slow_down",
-				error_description: "Too many requests",
-				retry_after: rateLimit.retryAfter,
-			},
-			429,
-		);
-	}
-
-	// Parse and validate request body
+	// Parse and validate request body BEFORE rate limiting, so a malformed
+	// request doesn't consume the IP's quota — but still before any DB
+	// lookup, so a well-formed spam request does.
 	let body: { client_id: string; scope?: string };
 	try {
 		const contentType = c.req.header("content-type") || "";
@@ -94,6 +146,25 @@ device.post("/device-code", async (c) => {
 
 	const { client_id, scope } = parsed.data;
 
+	// Rate limit by IP + client_id, before any DB lookup.
+	const clientIP = getClientIP(c.req.raw);
+	const rateLimit = await checkRouteRateLimit(
+		db,
+		"device_init",
+		`${clientIP}:${client_id}`,
+		RATE_LIMIT_DEVICE_INIT,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "slow_down",
+				error_description: "Too many requests",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
+
 	// Validate client exists
 	const client = await getClientByClientId(db, client_id);
 	if (!client) {
@@ -101,15 +172,17 @@ device.post("/device-code", async (c) => {
 	}
 
 	// Generate unique user code (retry if collision)
-	let userCode: string;
+	let userCode = "";
+	let unique = false;
 	let attempts = 0;
 	const maxAttempts = 5;
-	do {
+	while (!unique && attempts < maxAttempts) {
 		userCode = generateUserCode(DEVICE_CODE_CHARS, USER_CODE_LENGTH);
+		unique = await isUserCodeUnique(db, userCode);
 		attempts++;
-	} while (!(await isUserCodeUnique(db, userCode)) && attempts < maxAttempts);
+	}
 
-	if (attempts >= maxAttempts) {
+	if (!unique) {
 		return c.json(
 			{
 				error: "server_error",
@@ -126,23 +199,36 @@ device.post("/device-code", async (c) => {
 	// Calculate expiration
 	const expiresAt = Math.floor(Date.now() / 1000) + DEVICE_CODE_EXPIRY;
 
-	// Store device code
-	await createDeviceCode(db, {
-		device_code_hash: deviceCodeHash,
-		user_code: userCode,
-		client_id,
-		scope,
-		expires_at: expiresAt,
-		interval: DEVICE_CODE_POLL_INTERVAL,
-	});
+	// Store device code. isUserCodeUnique above is check-then-insert with an
+	// await gap — a genuinely rare concurrent collision on the UNIQUE
+	// user_code column would otherwise surface as a raw, unhandled D1
+	// exception instead of a clean error response.
+	try {
+		await createDeviceCode(db, {
+			device_code_hash: deviceCodeHash,
+			user_code: userCode,
+			client_id,
+			scope,
+			expires_at: expiresAt,
+			interval: DEVICE_CODE_POLL_INTERVAL,
+		});
+	} catch (error) {
+		console.error("[Device] Failed to create device code:", error);
+		return c.json(
+			{ error: "server_error", error_description: "Failed to create device code" },
+			500,
+		);
+	}
 
-	// Log creation
+	// Log creation. The user_code itself is a live credential for the
+	// ~15-minute life of this code — deliberately not stored in the audit
+	// log, since anyone with audit-log read access could otherwise approve
+	// it. Correlate by device_codes.id / client_id instead.
 	await createAuditLog(db, {
 		event_type: "device_code_created",
 		client_id,
 		ip_address: clientIP,
 		user_agent: getUserAgent(c.req.raw),
-		details: { user_code: userCode },
 	});
 
 	// Cleanup expired codes opportunistically
@@ -173,11 +259,32 @@ device.post("/device-code", async (c) => {
 device.get("/device", async (c) => {
 	const db = createDbSession(c.env);
 
-	// Get user_code from query params or from state (after OAuth redirect)
+	// Rate limit by IP — this page performs a DB lookup keyed on
+	// user-suppliable user_code, and is otherwise unthrottled.
+	const clientIP = getClientIP(c.req.raw);
+	const rateLimit = await checkRouteRateLimit(
+		db,
+		"device_authorize_page",
+		clientIP,
+		RATE_LIMIT_DEVICE_AUTHORIZE,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "slow_down",
+				error_description: "Too many requests",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
+
+	// Get user_code from query params, from state (after OAuth redirect), or
+	// from the pending-code cookie (set below when we redirect to login).
 	let userCodeParam = c.req.query("user_code");
 	const stateParam = c.req.query("state");
 
-	// After OAuth redirect, user_code might be encoded in state
 	if (!userCodeParam && stateParam) {
 		try {
 			const stateUrl = new URL(decodeURIComponent(stateParam));
@@ -187,42 +294,36 @@ device.get("/device", async (c) => {
 		}
 	}
 
-	// Build return URL for redirects
-	const returnUrl = userCodeParam
-		? `${c.env.AUTH_BASE_URL}/auth/device?user_code=${encodeURIComponent(userCodeParam)}`
-		: `${c.env.AUTH_BASE_URL}/auth/device`;
-
-	// Try Better Auth session first (new system)
-	// Better Auth session is checked via internal API call
-	let user = null;
-	try {
-		const sessionResponse = await fetch(`${c.env.AUTH_BASE_URL}/api/auth/session`, {
-			headers: {
-				Cookie: c.req.header("Cookie") || "",
-			},
-		});
-		if (sessionResponse.ok) {
-			const sessionData = (await sessionResponse.json()) as {
-				user?: { id: string };
-			};
-			if (sessionData?.user?.id) {
-				user = await getUserById(db, sessionData.user.id);
-			}
-		}
-	} catch {
-		// Better Auth session check failed
+	const cookies = parseCookieHeader(c.req.header("Cookie") || null);
+	if (!userCodeParam) {
+		userCodeParam = cookies[DEVICE_CODE_COOKIE] || undefined;
 	}
 
+	// Try Better Auth session first (new system)
+	const user = await getBetterAuthUser(c, db);
+
 	if (!user) {
-		// Not logged in - redirect to Heartwood login page
-		// After signing in, Better Auth will set a session cookie on .grove.place
-		// which we can verify when the user returns to this page
+		// Not logged in - redirect to Heartwood login page. Carry the
+		// user_code via an HttpOnly cookie rather than the returnTo URL, so
+		// it doesn't sit in CF request logs / browser history / analytics for
+		// the length of the login round-trip — this is a live credential for
+		// the code's ~15-minute lifetime.
+		const returnUrl = `${c.env.AUTH_BASE_URL}/auth/device`;
 		const signInUrl = `${c.env.AUTH_BASE_URL}/login?returnTo=${encodeURIComponent(returnUrl)}`;
-		return c.redirect(signInUrl);
+		const response = c.redirect(signInUrl);
+		if (userCodeParam) {
+			response.headers.append(
+				"Set-Cookie",
+				`${DEVICE_CODE_COOKIE}=${encodeURIComponent(userCodeParam)}; Path=/auth/device; HttpOnly; Secure; SameSite=Lax; Max-Age=${DEVICE_CODE_EXPIRY}`,
+			);
+		}
+		return response;
 	}
 
 	// Check for success state from redirect
-	const successParam = c.req.query("success") as "approved" | "denied" | null;
+	const successRaw = c.req.query("success");
+	const successParam: "approved" | "denied" | null =
+		successRaw === "approved" || successRaw === "denied" ? successRaw : null;
 	let deviceCode = null;
 	let error = null;
 
@@ -251,6 +352,10 @@ device.get("/device", async (c) => {
 		}
 	}
 
+	const consentToken = deviceCode
+		? await signConsentToken(c.env.SESSION_SECRET, user.id, userCodeParam || "")
+		: undefined;
+
 	const html = getDeviceAuthorizationPageHTML({
 		userCode: userCodeParam || "",
 		clientName,
@@ -259,9 +364,21 @@ device.get("/device", async (c) => {
 		showForm: !!deviceCode,
 		authBaseUrl: c.env.AUTH_BASE_URL,
 		success: successParam,
+		scope: deviceCode?.scope,
+		consentToken,
 	});
 
-	return c.html(html);
+	// Once the code has been read and rendered into the page (or the cookie
+	// turned out stale/invalid), clear the carrier cookie — it's served its
+	// purpose and there's no reason to let it linger for the full 15 minutes.
+	const htmlResponse = c.html(html);
+	if (cookies[DEVICE_CODE_COOKIE]) {
+		htmlResponse.headers.append(
+			"Set-Cookie",
+			`${DEVICE_CODE_COOKIE}=; Path=/auth/device; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+		);
+	}
+	return htmlResponse;
 });
 
 /**
@@ -286,10 +403,17 @@ device.post("/device/authorize", async (c) => {
 		// Origin header missing — check Referer as fallback
 		const referer = c.req.header("Referer");
 		if (referer) {
-			// Extract origin from Referer URL for exact comparison.
-			// startsWith would allow "https://auth.grove.place.evil.com" to bypass.
 			const authOrigin = new URL(c.env.AUTH_BASE_URL).origin;
-			const refererOrigin = new URL(referer).origin;
+			// Extract origin from Referer URL for exact comparison.
+			// startsWith would allow "https://auth.grove.place.evil.com" to
+			// bypass. A malformed Referer must fail closed, not throw a raw
+			// 500 that skips the CSRF check entirely.
+			let refererOrigin: string | null = null;
+			try {
+				refererOrigin = new URL(referer).origin;
+			} catch {
+				refererOrigin = null;
+			}
 			if (refererOrigin !== authOrigin) {
 				return c.json({ error: "invalid_request", error_description: "Invalid origin" }, 403);
 			}
@@ -307,32 +431,38 @@ device.post("/device/authorize", async (c) => {
 		}
 	}
 
-	// Try Better Auth session first (new system)
-	let user = null;
-	try {
-		const sessionResponse = await fetch(`${c.env.AUTH_BASE_URL}/api/auth/session`, {
-			headers: {
-				Cookie: c.req.header("Cookie") || "",
+	// Rate limit by IP, before the Better Auth session fetch or any DB
+	// lookup — this endpoint doubles as an oracle for guessing live
+	// user_codes (see the collapsed error responses below), so it needs the
+	// same protection RFC 8628 §5.2 calls for on code entry generally.
+	const clientIP = getClientIP(c.req.raw);
+	const rateLimit = await checkRouteRateLimit(
+		db,
+		"device_authorize",
+		clientIP,
+		RATE_LIMIT_DEVICE_AUTHORIZE,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "slow_down",
+				error_description: "Too many requests",
+				retry_after: rateLimit.retryAfter,
 			},
-		});
-		if (sessionResponse.ok) {
-			const sessionData = (await sessionResponse.json()) as {
-				user?: { id: string };
-			};
-			if (sessionData?.user?.id) {
-				user = await getUserById(db, sessionData.user.id);
-			}
-		}
-	} catch {
-		// Better Auth session check failed
+			429,
+		);
 	}
+
+	// Try Better Auth session first (new system)
+	const user = await getBetterAuthUser(c, db);
 
 	if (!user) {
 		return c.json({ error: "unauthorized", error_description: "Authentication required" }, 401);
 	}
 
 	// Parse request body
-	let body: { user_code: string; action: "approve" | "deny" };
+	let body: { user_code: string; action: "approve" | "deny"; consent_token: string };
 	try {
 		const contentType = c.req.header("content-type") || "";
 		if (contentType.includes("application/json")) {
@@ -343,6 +473,7 @@ device.post("/device/authorize", async (c) => {
 			body = {
 				user_code: params.get("user_code") || "",
 				action: (params.get("action") as "approve" | "deny") || "deny",
+				consent_token: params.get("consent_token") || "",
 			};
 		}
 	} catch {
@@ -360,37 +491,40 @@ device.post("/device/authorize", async (c) => {
 		);
 	}
 
-	const { user_code, action } = parsed.data;
+	const { user_code, action, consent_token } = parsed.data;
 
-	// Get device code
+	// Verify the consent token is bound to this exact user + user_code —
+	// closes the gap where Origin/Referer checks alone leave a one-click
+	// approval reachable from any same-origin content-injection primitive.
+	const expectedToken = await signConsentToken(c.env.SESSION_SECRET, user.id, user_code);
+	if (!timingSafeEqual(consent_token, expectedToken)) {
+		return c.json({ error: "invalid_request", error_description: "Invalid consent token" }, 403);
+	}
+
+	// Get device code. Failure cases below (not found / expired / already
+	// resolved) are collapsed into one generic response — a distinguishable
+	// "already authorized" vs "not found" response would let an
+	// authenticated caller enumerate live codes with no other throttle
+	// beyond the rate limit above.
 	const deviceCode = await getDeviceCodeByUserCode(db, user_code);
-	if (!deviceCode) {
+	const now = Math.floor(Date.now() / 1000);
+	const isPending = !!deviceCode && deviceCode.expires_at >= now && deviceCode.status === "pending";
+
+	if (!isPending || !deviceCode) {
 		return c.json({ error: "invalid_grant", error_description: "Invalid or expired code" }, 400);
 	}
 
-	// Check expiration
-	const now = Math.floor(Date.now() / 1000);
-	if (deviceCode.expires_at < now) {
-		return c.json({ error: "expired_token", error_description: "Code has expired" }, 400);
-	}
-
-	// Check status
-	if (deviceCode.status !== "pending") {
-		return c.json(
-			{
-				error: "invalid_grant",
-				error_description: `Code already ${deviceCode.status}`,
-			},
-			400,
-		);
-	}
-
-	const clientIP = getClientIP(c.req.raw);
 	const userAgent = getUserAgent(c.req.raw);
 
 	if (action === "approve") {
-		// Authorize the device code
-		await authorizeDeviceCode(db, deviceCode.id, user.id);
+		// Atomically transition pending -> authorized. Returns null if lost
+		// a race with a concurrent request (e.g. a duplicate/replayed POST)
+		// that already resolved this code — treated the same as any other
+		// already-resolved code.
+		const authorized = await authorizeDeviceCode(db, deviceCode.id, user.id);
+		if (!authorized) {
+			return c.json({ error: "invalid_grant", error_description: "Invalid or expired code" }, 400);
+		}
 
 		await createAuditLog(db, {
 			event_type: "device_code_authorized",
@@ -398,7 +532,6 @@ device.post("/device/authorize", async (c) => {
 			client_id: deviceCode.client_id,
 			ip_address: clientIP,
 			user_agent: userAgent,
-			details: { user_code },
 		});
 
 		// For HTML form submission, redirect to success page
@@ -409,8 +542,10 @@ device.post("/device/authorize", async (c) => {
 
 		return c.json({ success: true, message: "Device authorized successfully" });
 	} else {
-		// Deny the device code
-		await denyDeviceCode(db, deviceCode.id);
+		const denied = await denyDeviceCode(db, deviceCode.id);
+		if (!denied) {
+			return c.json({ error: "invalid_grant", error_description: "Invalid or expired code" }, 400);
+		}
 
 		await createAuditLog(db, {
 			event_type: "device_code_denied",
@@ -418,7 +553,6 @@ device.post("/device/authorize", async (c) => {
 			client_id: deviceCode.client_id,
 			ip_address: clientIP,
 			user_agent: userAgent,
-			details: { user_code },
 		});
 
 		// For HTML form submission, redirect to denied page

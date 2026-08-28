@@ -13,6 +13,8 @@ interface DeviceAuthorizationPageOptions {
 	showForm: boolean;
 	authBaseUrl: string;
 	success?: "approved" | "denied" | null;
+	scope?: string | null;
+	consentToken?: string;
 }
 
 export function getDeviceAuthorizationPageHTML(options: DeviceAuthorizationPageOptions): string {
@@ -364,7 +366,8 @@ export function getDeviceAuthorizationPageHTML(options: DeviceAuthorizationPageO
 }
 
 function renderContent(options: DeviceAuthorizationPageOptions): string {
-	const { userCode, clientName, error, showForm, authBaseUrl, success } = options;
+	const { userCode, clientName, error, showForm, authBaseUrl, success, scope, consentToken } =
+		options;
 
 	// Handle success states from redirect
 	if (success === "approved") {
@@ -386,7 +389,7 @@ function renderContent(options: DeviceAuthorizationPageOptions): string {
 
 	// Show authorization form if device code is valid
 	if (showForm && userCode) {
-		return renderAuthorizationForm(userCode, clientName, authBaseUrl);
+		return renderAuthorizationForm(userCode, clientName, authBaseUrl, scope, consentToken || "");
 	}
 
 	// Default: show code entry form
@@ -426,10 +429,35 @@ function renderCodeEntry(authBaseUrl: string): string {
   `;
 }
 
+// Friendly labels for known scope tokens — unrecognized tokens fall back to
+// their raw form rather than being hidden, so a request for an unexpected
+// scope is still visible to the person approving it.
+const SCOPE_LABELS: Record<string, string> = {
+	openid: "Confirm your identity",
+	email: "View your email address",
+	profile: "View your basic profile info",
+};
+
+function renderScopeList(scope?: string | null): string {
+	const tokens = (scope || "openid email profile").split(/\s+/).filter(Boolean);
+	if (tokens.length === 0) return "";
+
+	const items = tokens.map((t) => `<li>${escapeHtml(SCOPE_LABELS[t] || t)}</li>`).join("");
+
+	return `
+    <div class="warning-text" style="text-align: left;">
+      <strong>This will let the app:</strong>
+      <ul style="margin: 8px 0 0 20px; padding: 0;">${items}</ul>
+    </div>
+  `;
+}
+
 function renderAuthorizationForm(
 	userCode: string,
 	clientName: string,
 	authBaseUrl: string,
+	scope: string | null | undefined,
+	consentToken: string,
 ): string {
 	return `
     <p class="subtitle">
@@ -441,8 +469,11 @@ function renderAuthorizationForm(
       <div class="code-value">${escapeHtml(userCode)}</div>
     </div>
 
+    ${renderScopeList(scope)}
+
     <form action="${authBaseUrl}/auth/device/authorize" method="POST">
       <input type="hidden" name="user_code" value="${escapeHtml(userCode)}" />
+      <input type="hidden" name="consent_token" value="${escapeHtml(consentToken)}" />
       <div class="button-group">
         <button type="submit" name="action" value="deny" class="btn btn-danger">
           Deny

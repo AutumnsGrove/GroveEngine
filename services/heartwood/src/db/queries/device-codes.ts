@@ -66,19 +66,46 @@ export async function getDeviceCodeByHash(
 	return result;
 }
 
+/**
+ * Atomically transition a device code from `pending` to `authorized`.
+ * The WHERE status = 'pending' guard closes a TOCTOU window: without it,
+ * a concurrent approve+deny on the same code (or a replayed/duplicated
+ * request) could transition an already-denied or already-expired row back
+ * to authorized, which consumeDeviceCode would then happily mint tokens
+ * from. Returns null if the row wasn't pending (already resolved by
+ * another request) — the caller treats that as "already resolved."
+ */
 export async function authorizeDeviceCode(
 	db: D1DatabaseOrSession,
 	id: string,
 	userId: string,
-): Promise<void> {
-	await db
-		.prepare(`UPDATE device_codes SET status = 'authorized', user_id = ? WHERE id = ?`)
+): Promise<DeviceCode | null> {
+	return db
+		.prepare(
+			`UPDATE device_codes SET status = 'authorized', user_id = ?
+       WHERE id = ? AND status = 'pending'
+       RETURNING *`,
+		)
 		.bind(userId, id)
-		.run();
+		.first<DeviceCode>();
 }
 
-export async function denyDeviceCode(db: D1DatabaseOrSession, id: string): Promise<void> {
-	await db.prepare(`UPDATE device_codes SET status = 'denied' WHERE id = ?`).bind(id).run();
+/**
+ * Atomically transition a device code from `pending` to `denied`.
+ * Same TOCTOU concern as authorizeDeviceCode.
+ */
+export async function denyDeviceCode(
+	db: D1DatabaseOrSession,
+	id: string,
+): Promise<DeviceCode | null> {
+	return db
+		.prepare(
+			`UPDATE device_codes SET status = 'denied'
+       WHERE id = ? AND status = 'pending'
+       RETURNING *`,
+		)
+		.bind(id)
+		.first<DeviceCode>();
 }
 
 export async function updateDevicePollCount(

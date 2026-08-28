@@ -84,3 +84,4 @@ export const DEVICE_CODE_CHARS = "BCDFGHJKLMNPQRSTVWXZ23456789";
 export const USER_CODE_LENGTH = 8; // Format: XXXX-XXXX (displayed with hyphen)
 export const RATE_LIMIT_DEVICE_INIT = 10; // Per minute per IP
 export const RATE_LIMIT_DEVICE_POLL = 12; // Per minute per device_code
+export const RATE_LIMIT_DEVICE_AUTHORIZE = 10; // Per minute per IP — the user_code entry endpoint
