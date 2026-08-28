@@ -130,3 +130,22 @@ export async function cleanupExpiredDeviceCodes(db: D1DatabaseOrSession): Promis
 export async function deleteDeviceCode(db: D1DatabaseOrSession, id: string): Promise<void> {
 	await db.prepare("DELETE FROM device_codes WHERE id = ?").bind(id).run();
 }
+
+/**
+ * Atomically consume an authorized device code in one statement: only
+ * succeeds if the row is still `authorized`, and deletes it as part of the
+ * same query. A separate read-then-delete (the previous shape) left a
+ * window where two concurrent polls could both observe `authorized` and
+ * both go on to mint a full token pair before either delete landed.
+ * Returns null if the code was already consumed (or was never authorized),
+ * which the caller treats as "someone already claimed this code."
+ */
+export async function consumeDeviceCode(
+	db: D1DatabaseOrSession,
+	id: string,
+): Promise<DeviceCode | null> {
+	return db
+		.prepare(`DELETE FROM device_codes WHERE id = ? AND status = 'authorized' RETURNING *`)
+		.bind(id)
+		.first<DeviceCode>();
+}

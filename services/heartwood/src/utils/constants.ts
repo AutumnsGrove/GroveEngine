@@ -7,6 +7,10 @@ export const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour in seconds
 export const REFRESH_TOKEN_EXPIRY = 30 * 24 * 60 * 60; // 30 days in seconds
 export const AUTH_CODE_EXPIRY = 5 * 60; // 5 minutes in seconds
 
+// Default OAuth scope granted by every grant type — single source so the
+// three token.ts handlers can't drift from each other.
+export const DEFAULT_SCOPE = "openid email profile";
+
 // Rate limiting
 export const RATE_LIMIT_TOKEN_PER_CLIENT = 20; // per minute
 export const RATE_LIMIT_VERIFY_PER_CLIENT = 100; // per minute
@@ -74,6 +78,7 @@ export const JWT_ISSUER = "https://auth.grove.place";
 export const DEVICE_CODE_EXPIRY = 900; // 15 minutes in seconds
 export const DEVICE_CODE_POLL_INTERVAL = 5; // Minimum seconds between polls
 export const DEVICE_CODE_SLOW_DOWN_INCREMENT = 5; // Seconds added when slow_down triggered
+export const DEVICE_CODE_MAX_POLL_INTERVAL = 60; // Ceiling for the slow_down ratchet, in seconds
 // Character set: No vowels (avoid profanity), no confusables (0/O, 1/I/L)
 export const DEVICE_CODE_CHARS = "BCDFGHJKLMNPQRSTVWXZ23456789";
 export const USER_CODE_LENGTH = 8; // Format: XXXX-XXXX (displayed with hyphen)

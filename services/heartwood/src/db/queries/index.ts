@@ -51,6 +51,8 @@ export {
 	updateSessionLastUsed,
 	revokeSession,
 	revokeAllUserSessions,
+	consumeRefreshToken,
+	getRefreshTokenByHashAnyStatus,
 	getUserClientPreference,
 	updateLastUsedClient,
 } from "./sessions.js";
@@ -95,4 +97,5 @@ export {
 	isUserCodeUnique,
 	cleanupExpiredDeviceCodes,
 	deleteDeviceCode,
+	consumeDeviceCode,
 } from "./device-codes.js";

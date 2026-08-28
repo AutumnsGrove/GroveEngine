@@ -7,7 +7,6 @@ import type { Env, D1DatabaseOrSession } from "../types.js";
 import { checkRateLimit } from "../db/queries.js";
 import { getClientIP } from "./security.js";
 import {
-	RATE_LIMIT_TOKEN_PER_CLIENT,
 	RATE_LIMIT_VERIFY_PER_CLIENT,
 	RATE_LIMIT_ADMIN_PER_IP,
 	RATE_LIMIT_WINDOW,
@@ -78,24 +77,6 @@ export function createRateLimiter(config: RateLimitConfig): MiddlewareHandler<{ 
 		return next();
 	};
 }
-
-/**
- * Rate limiter for token endpoint (by client, falls back to IP)
- *
- * OAuth clients typically send client_id in the POST body, not query params.
- * Since reading the body is async and consumes the stream, we check query
- * params first and fall back to IP-based rate limiting. This ensures the
- * token endpoint is always rate-limited regardless of how client_id is sent.
- */
-export const tokenRateLimiter = createRateLimiter({
-	keyPrefix: "token",
-	limit: RATE_LIMIT_TOKEN_PER_CLIENT,
-	windowSeconds: RATE_LIMIT_WINDOW,
-	getKey: (c) => {
-		const url = new URL(c.req.url);
-		return url.searchParams.get("client_id") || getClientIP(c.req.raw);
-	},
-});
 
 /**
  * Rate limiter for verify endpoint (by client/token)

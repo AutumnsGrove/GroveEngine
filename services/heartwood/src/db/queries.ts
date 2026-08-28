@@ -58,6 +58,8 @@ export {
 	updateSessionLastUsed,
 	revokeSession,
 	revokeAllUserSessions,
+	consumeRefreshToken,
+	getRefreshTokenByHashAnyStatus,
 	getUserClientPreference,
 	updateLastUsedClient,
 	// Rate Limiting
@@ -97,4 +99,5 @@ export {
 	isUserCodeUnique,
 	cleanupExpiredDeviceCodes,
 	deleteDeviceCode,
+	consumeDeviceCode,
 } from "./queries/index.js";
