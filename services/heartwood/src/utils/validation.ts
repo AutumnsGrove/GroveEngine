@@ -3,6 +3,8 @@
  */
 
 import { z } from "zod";
+import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "../types.js";
+import { SUBSCRIPTION_POST_COUNT_MAX } from "./constants.js";
 
 // Token request validation
 export const tokenRequestSchema = z
@@ -74,3 +76,23 @@ export const deviceAuthorizeSchema = z.object({
 	// defense-in-depth against CSRF beyond Origin/Referer checks.
 	consent_token: z.string().min(1, "consent_token is required"),
 });
+
+// Subscription tier update (internal-service only — see subscription.ts)
+export const subscriptionTierUpdateSchema = z.object({
+	tier: z.enum(SUBSCRIPTION_TIERS as [SubscriptionTier, ...SubscriptionTier[]]),
+});
+
+// Subscription post-count update (internal-service only — see subscription.ts)
+// count must be a non-negative, finite integer within a sane ceiling — a
+// bare `typeof === "number"` check previously let through 1.5, -5, and
+// 1e308, all of which reached the database unvalidated.
+export const subscriptionPostCountUpdateSchema = z.union([
+	z.object({ action: z.enum(["increment", "decrement"]) }),
+	z.object({
+		count: z
+			.number()
+			.int("count must be an integer")
+			.min(0, "count must not be negative")
+			.max(SUBSCRIPTION_POST_COUNT_MAX, "count is unreasonably large"),
+	}),
+]);

@@ -31,7 +31,13 @@ export const RATE_LIMIT_ADMIN_PER_IP = 30; // per minute
 
 // Subscription rate limiting
 export const RATE_LIMIT_SUBSCRIPTION_READ = 30; // per minute (GET endpoints)
-export const RATE_LIMIT_SUBSCRIPTION_WRITE = 10; // per minute (POST/PUT endpoints)
+export const RATE_LIMIT_SUBSCRIPTION_WRITE = 10; // per minute (POST/PUT endpoints, internal-service only)
+
+// Subscription grace period
+export const GRACE_PERIOD_DAYS = 14;
+// Sanity ceiling for a caller-supplied post_count — well above any
+// realistic post volume, just enough to reject garbage input (1e308, etc).
+export const SUBSCRIPTION_POST_COUNT_MAX = 1_000_000;
 
 // Pagination limits
 export const ADMIN_PAGINATION_MAX_LIMIT = 100;

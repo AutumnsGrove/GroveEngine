@@ -283,6 +283,11 @@ export interface AuthError {
 
 export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
 
+// Single source of truth for tier ordering — used for both request
+// validation and upgrade/downgrade comparison, so a new tier only needs to
+// be added here rather than in every place that previously duplicated it.
+export const SUBSCRIPTION_TIERS: SubscriptionTier[] = ["seedling", "sapling", "oak", "evergreen"];
+
 export interface UserSubscription {
 	id: string;
 	user_id: string;
@@ -317,6 +322,7 @@ export type SubscriptionAuditEventType =
 	| "grace_period_started"
 	| "grace_period_ended"
 	| "post_limit_reached"
+	| "post_count_updated"
 	| "post_archived"
 	| "custom_domain_added"
 	| "custom_domain_verified"
