@@ -37,6 +37,15 @@ export const RATE_LIMIT_SUBSCRIPTION_WRITE = 10; // per minute (POST/PUT endpoin
 export const ADMIN_PAGINATION_MAX_LIMIT = 100;
 export const ADMIN_PAGINATION_DEFAULT_LIMIT = 50;
 
+// CDN management (admin-only, cdn.grove.place)
+export const CDN_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const RATE_LIMIT_CDN_UPLOAD = 20; // per minute per admin user
+export const RATE_LIMIT_CDN_MIGRATE = 3; // per hour per admin user — batch operation
+export const RATE_LIMIT_CDN_MIGRATE_WINDOW = 3600; // 1 hour in seconds
+// R2 list() returns at most 1000 objects per call; cap pagination loops so a
+// pathological bucket can't turn an admin request into an unbounded fetch.
+export const CDN_R2_LIST_MAX_PAGES = 100;
+
 // Lockout settings
 export const MAX_FAILED_ATTEMPTS = 5;
 export const LOCKOUT_DURATION = 15 * 60; // 15 minutes in seconds

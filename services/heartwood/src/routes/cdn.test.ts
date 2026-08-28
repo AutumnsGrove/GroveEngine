@@ -12,7 +12,8 @@ import { createMockEnv, createMockDb, createSequentialMockDb } from "../test-hel
 // Mock database queries
 vi.mock("../db/queries.js", () => ({
 	isUserAdmin: vi.fn(),
-	checkRateLimit: vi.fn(),
+	checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 10, resetAt: new Date() }),
+	createAuditLog: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock db session
@@ -31,7 +32,7 @@ vi.mock("../middleware/bearerAuth.js", () => ({
 }));
 
 import cdnRoutes from "./cdn.js";
-import { isUserAdmin } from "../db/queries.js";
+import { isUserAdmin, checkRateLimit, createAuditLog } from "../db/queries.js";
 import { verifyAccessToken } from "../services/jwt.js";
 import { extractBearerToken } from "../middleware/bearerAuth.js";
 import { createDbSession } from "../db/session.js";
@@ -1018,5 +1019,387 @@ describe("POST /cdn/migrate", () => {
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
 		expect(json.errors).toBeDefined();
+	});
+});
+
+// =============================================================================
+// Hardening fixes (review issue #1583)
+// =============================================================================
+
+function setupAdminAuth() {
+	vi.mocked(extractBearerToken).mockReturnValue("valid-token");
+	vi.mocked(verifyAccessToken).mockResolvedValue({
+		sub: "admin-user-123",
+		client_id: "test",
+		iss: "https://auth.grove.place",
+		iat: 1000000000,
+		exp: 1000003600,
+	});
+	vi.mocked(isUserAdmin).mockResolvedValue(true);
+}
+
+function mockUploadDb() {
+	const mockRun = vi.fn().mockResolvedValue({ success: true });
+	const mockDb = {
+		prepare: vi.fn().mockReturnValue({
+			bind: vi.fn().mockReturnValue({ run: mockRun }),
+		}),
+	};
+	vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+	return { mockDb, mockRun };
+}
+
+describe("extension / content-type validation (P1)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("rejects a filename whose extension doesn't match the declared content type", async () => {
+		mockUploadDb();
+		const formData = new FormData();
+		// .png extension on a file declaring image/jpeg — not in image/jpeg's allowed extension list
+		formData.append("file", new File(["test"], "test.png", { type: "image/jpeg" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(400);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("invalid_filename");
+	});
+
+	it("rejects an extensionless filename", async () => {
+		mockUploadDb();
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "README", { type: "image/png" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(400);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("invalid_filename");
+	});
+
+	it("does not extract an extension from a dotfile like .htaccess", async () => {
+		mockUploadDb();
+		const formData = new FormData();
+		formData.append("file", new File(["test"], ".htaccess", { type: "text/css" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		// .htaccess has no recognized extension under the "no leading dot" rule
+		// (lastDot === 0), so it's rejected the same as any extensionless name.
+		expect(res.status).toBe(400);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("invalid_filename");
+	});
+
+	it("accepts a matching extension/content-type pair with a case-insensitive extension", async () => {
+		mockUploadDb();
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "photo.JPG", { type: "image/jpeg" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(200);
+	});
+});
+
+describe("stored XSS defense-in-depth (U1)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("forces download for SVG uploads even though SVG is an allowed type", async () => {
+		mockUploadDb();
+		const mockR2Put = vi.fn().mockResolvedValue(undefined);
+		mockEnv.CDN_BUCKET = {
+			put: mockR2Put,
+			delete: vi.fn(),
+			list: vi.fn(),
+			head: vi.fn(),
+		} as unknown as R2Bucket;
+
+		const formData = new FormData();
+		formData.append(
+			"file",
+			new File(["<svg><script>alert(1)</script></svg>"], "icon.svg", {
+				type: "image/svg+xml",
+			}),
+		);
+		formData.append("folder", "images");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(200);
+		expect(mockR2Put).toHaveBeenCalled();
+		const putOpts = mockR2Put.mock.calls[0][2];
+		expect(putOpts.httpMetadata.contentDisposition).toBe("attachment");
+	});
+
+	it("does not force download for ordinary image types", async () => {
+		mockUploadDb();
+		const mockR2Put = vi.fn().mockResolvedValue(undefined);
+		mockEnv.CDN_BUCKET = {
+			put: mockR2Put,
+			delete: vi.fn(),
+			list: vi.fn(),
+			head: vi.fn(),
+		} as unknown as R2Bucket;
+
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "test.png", { type: "image/png" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		const putOpts = mockR2Put.mock.calls[0][2];
+		expect(putOpts.httpMetadata.contentDisposition).toBeUndefined();
+	});
+});
+
+describe("audit logging on mutating operations (A1)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("logs cdn_file_uploaded on successful upload", async () => {
+		mockUploadDb();
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "test.png", { type: "image/png" }));
+		formData.append("folder", "images");
+
+		const app = createApp();
+		await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(vi.mocked(createAuditLog)).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ event_type: "cdn_file_uploaded", user_id: "admin-user-123" }),
+		);
+	});
+
+	it("logs cdn_file_deleted on successful delete", async () => {
+		const mockDb = {
+			prepare: vi.fn().mockReturnValue({
+				bind: vi
+					.fn()
+					.mockReturnValueOnce({
+						first: vi.fn().mockResolvedValue({ id: "file-1", key: "images/test.png" }),
+					})
+					.mockReturnValueOnce({ run: vi.fn().mockResolvedValue({ success: true }) }),
+			}),
+		};
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+		mockEnv.CDN_BUCKET = { delete: vi.fn().mockResolvedValue(undefined) } as unknown as R2Bucket;
+
+		const app = createApp();
+		await app.request("/cdn/files/file-1", { method: "DELETE" }, mockEnv);
+
+		expect(vi.mocked(createAuditLog)).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ event_type: "cdn_file_deleted", user_id: "admin-user-123" }),
+		);
+	});
+
+	it("logs cdn_files_migrated after a migration run", async () => {
+		const mockDb = createSequentialMockDb([{ all: { results: [] } }, { run: { success: true } }]);
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+		mockEnv.CDN_BUCKET = {
+			list: vi.fn().mockResolvedValue({
+				objects: [{ key: "images/test.png", size: 1024, uploaded: new Date() }],
+			}),
+			head: vi.fn().mockResolvedValue({ httpMetadata: { contentType: "image/png" } }),
+		} as unknown as R2Bucket;
+
+		const app = createApp();
+		await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
+
+		expect(vi.mocked(createAuditLog)).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ event_type: "cdn_files_migrated" }),
+		);
+	});
+});
+
+describe("rate limiting (U3)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("returns 429 when upload rate limit is exceeded", async () => {
+		vi.mocked(checkRateLimit).mockResolvedValueOnce({
+			allowed: false,
+			remaining: 0,
+			resetAt: new Date(Date.now() + 60_000),
+		});
+
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "test.png", { type: "image/png" }));
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(429);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("rate_limit");
+	});
+
+	it("returns 429 when migrate rate limit is exceeded", async () => {
+		vi.mocked(checkRateLimit).mockResolvedValueOnce({
+			allowed: false,
+			remaining: 0,
+			resetAt: new Date(Date.now() + 3600_000),
+		});
+
+		const app = createApp();
+		const res = await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
+
+		expect(res.status).toBe(429);
+	});
+});
+
+describe("pagination clamping (B3)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("falls back to the default limit for a non-numeric limit query param", async () => {
+		const mockDb = createSequentialMockDb([{ all: { results: [] } }, { first: { total: 0 } }]);
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+
+		const app = createApp();
+		const res = await app.request("/cdn/files?limit=abc", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.limit).toBe(50);
+	});
+
+	it("clamps an oversized limit to ADMIN_PAGINATION_MAX_LIMIT", async () => {
+		const mockDb = createSequentialMockDb([{ all: { results: [] } }, { first: { total: 0 } }]);
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+
+		const app = createApp();
+		const res = await app.request("/cdn/files?limit=999999999", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.limit).toBe(100);
+	});
+
+	it("falls back to offset 0 for a negative offset", async () => {
+		const mockDb = createSequentialMockDb([{ all: { results: [] } }, { first: { total: 0 } }]);
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+
+		const app = createApp();
+		const res = await app.request("/cdn/files?offset=-5", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.offset).toBe(0);
+	});
+});
+
+describe("R2 list pagination (B2)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("follows the cursor across multiple pages and reports truncated: false when complete", async () => {
+		const mockDb = {
+			prepare: vi.fn().mockReturnValue({
+				all: vi.fn().mockResolvedValue({ results: [] }),
+			}),
+		};
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+
+		const mockR2List = vi
+			.fn()
+			.mockResolvedValueOnce({
+				objects: [{ key: "a.png", size: 1, uploaded: new Date() }],
+				truncated: true,
+				cursor: "page-2",
+			})
+			.mockResolvedValueOnce({
+				objects: [{ key: "b.png", size: 1, uploaded: new Date() }],
+				truncated: false,
+			});
+		mockEnv.CDN_BUCKET = { list: mockR2List } as unknown as R2Bucket;
+
+		const app = createApp();
+		const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.summary.total_r2_objects).toBe(2);
+		expect(json.truncated).toBe(false);
+		expect(mockR2List).toHaveBeenCalledTimes(2);
+		expect(mockR2List).toHaveBeenNthCalledWith(2, { cursor: "page-2" });
+	});
+
+	it("reports truncated: true when the page cap is hit", async () => {
+		const mockDb = {
+			prepare: vi.fn().mockReturnValue({
+				all: vi.fn().mockResolvedValue({ results: [] }),
+			}),
+		};
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+
+		// Always truncated — listAllR2Objects must stop at CDN_R2_LIST_MAX_PAGES
+		// rather than looping forever.
+		const mockR2List = vi.fn().mockResolvedValue({
+			objects: [{ key: "x.png", size: 1, uploaded: new Date() }],
+			truncated: true,
+			cursor: "same-cursor",
+		});
+		mockEnv.CDN_BUCKET = { list: mockR2List } as unknown as R2Bucket;
+
+		const app = createApp();
+		const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.truncated).toBe(true);
+		expect(mockR2List.mock.calls.length).toBeLessThanOrEqual(100);
+	});
+});
+
+describe("folder storage consistency (B1)", () => {
+	beforeEach(setupAdminAuth);
+
+	it("stores the normalized folder (no leading/trailing slash) on upload, matching the R2 key prefix", async () => {
+		const { mockRun, mockDb } = mockUploadDb();
+		const formData = new FormData();
+		formData.append("file", new File(["test"], "test.png", { type: "image/png" }));
+		formData.append("folder", "/images/");
+
+		const app = createApp();
+		const res = await app.request("/cdn/upload", { method: "POST", body: formData }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.file.folder).toBe("images");
+		expect(json.file.key.startsWith("images/")).toBe(true);
+
+		const bindCall = (mockDb.prepare().bind as ReturnType<typeof vi.fn>).mock.calls[0];
+		// folder column (8th bound param, 0-indexed 6)
+		expect(bindCall[6]).toBe("images");
+		expect(mockRun).toHaveBeenCalled();
+	});
+
+	it("stores root-level migrated files with an empty folder, matching upload's convention", async () => {
+		const mockDb = createSequentialMockDb([{ all: { results: [] } }, { run: { success: true } }]);
+		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
+		mockEnv.CDN_BUCKET = {
+			list: vi.fn().mockResolvedValue({
+				objects: [{ key: "root-file.png", size: 1, uploaded: new Date() }],
+			}),
+			head: vi.fn().mockResolvedValue({ httpMetadata: { contentType: "image/png" } }),
+		} as unknown as R2Bucket;
+
+		const app = createApp();
+		const res = await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
+
+		expect(res.status).toBe(200);
+		const insertBindCall = (mockDb.prepare.mock.results[1].value.bind as ReturnType<typeof vi.fn>)
+			.mock.calls[0];
+		expect(insertBindCall[6]).toBe("");
 	});
 });

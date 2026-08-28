@@ -167,7 +167,10 @@ export type AuditEventType =
 	| "device_code_authorized"
 	| "device_code_denied"
 	| "device_code_polled"
-	| "refresh_token_reuse_detected";
+	| "refresh_token_reuse_detected"
+	| "cdn_file_uploaded"
+	| "cdn_file_deleted"
+	| "cdn_files_migrated";
 
 // API Request/Response Types
 export interface TokenRequest {
